@@ -1,0 +1,177 @@
+<?php
+
+/**
+ * @file
+ * McNeese State University Filters module.
+ */
+
+/**
+ * @defgroup mcneese_content McNeese Filters
+ * @{
+ * Provides filter functionality to drupal 7.
+ */
+
+/**
+ * Implements hook_filter_info().
+ */
+function mcneese_filters_filter_info() {
+  $data = array();
+
+  $data['mcneese_filters_denied_tags'] = array();
+  $data['mcneese_filters_denied_tags']['title'] = t("McNeese Filters - Denied Tags");
+  $data['mcneese_filters_denied_tags']['description'] = t("Provides standard McNeese functionality that only prevent specific HTML markup from being used.");
+  $data['mcneese_filters_denied_tags']['process callback'] = 'mcneese_filters_denied_tags_process';
+  $data['mcneese_filters_denied_tags']['settings callback'] = 'mcneese_filters_denied_tags_settings';
+  $data['mcneese_filters_denied_tags']['default settings'] = array(
+    'mcneese_filters_denied_tags' => 'script noscript',
+  );
+  $data['mcneese_filters_denied_tags']['weight'] = -20;
+
+  $data['mcneese_filters_replace_redirect'] = array();
+  $data['mcneese_filters_replace_redirect']['title'] = t("McNeese Filters - Replace Redirects");
+  $data['mcneese_filters_replace_redirect']['description'] = t("Replaces old URLs that are internally redirected to new paths. This is only performed on a tags and img tags. This requires the redirect module to function.");
+  $data['mcneese_filters_replace_redirect']['process callback'] = 'mcneese_filters_replace_redirects_process';
+  $data['mcneese_filters_replace_redirect']['weight'] = -20;
+  #$data['mcneese_filters_replace_redirect']['cache'] = FALSE;
+
+  return $data;
+}
+
+/**
+ * Settings callback, used by mcneese_filters_filter_info().
+ */
+function mcneese_filters_denied_tags_settings($form, &$form_state, $filter, $format, $defaults) {
+  $settings = array();
+
+  $settings['mcneese_filters_denied_tags'] = array(
+    '#type' => 'textfield',
+    '#title' => t("Denied HTML Tags"),
+    '#maxlength' => 4096,
+    '#default_value' => isset($defaults['mcneese_filters_denied_tags']) ? $defaults['mcneese_filters_denied_tags'] : '',
+    '#description' => t("A list of HTML tag names that can be used."),
+  );
+
+  return $settings;
+}
+
+/**
+ * Process callback, used by mcneese_filters_filter_info().
+ *
+ * @param string $text
+ *    Text to purify
+ * @param object $filter
+ *   The filter object containing settings for the given format.
+ * @param object $format
+ *    The format object of the text to be filtered.
+ * @param string $langcode
+ *    The language code of the text to be filtered.
+ * @param boolean $cache
+ *    Whether or not to check the cache.
+ */
+function mcneese_filters_denied_tags_process($text, $filter, $format, $langcode, $cache) {
+  if (empty($text)) return $text;
+
+  $dom = new cf_dom(TRUE, TRUE, TRUE, $text);
+  $body = $dom->get_body();
+  if (is_null($body)) {
+    return $text;
+  }
+
+  $denied_tags_string = $filter->settings['mcneese_filters_denied_tags'];
+  $denied_tags = explode(' ', $denied_tags_string);
+
+  $all_tags = $body->getElementsByTagName('*');
+  foreach ($all_tags as $tag) {
+    if (in_array($tag->tagName, $denied_tags)) {
+      watchdog('mcneese_filters', 'The tag :tag is not allowed and has been removed.', array(':tag' => $tag->tagName), WATCHDOG_WARNING);
+      $dom->remove_element($tag);
+    }
+  }
+
+  $text = $dom->get_markup();
+  return $text;
+}
+
+/**
+ * Process callback, used by mcneese_filters_filter_info().
+ *
+ * @param string $text
+ *    Text to purify
+ * @param object $filter
+ *   The filter object containing settings for the given format.
+ * @param object $format
+ *    The format object of the text to be filtered.
+ * @param string $langcode
+ *    The language code of the text to be filtered.
+ * @param boolean $cache
+ *    Whether or not to check the cache.
+ */
+function mcneese_filters_replace_redirects_process($text, $filter, $format, $langcode, $cache) {
+  if (empty($text)) return $text;
+
+  // if the redirect module is not installed and enabled, then nothing can be done.
+  if (!function_exists('redirect_load_by_source')) {
+    return $text;
+  }
+
+  $dom = new cf_dom(TRUE, TRUE, TRUE, $text);
+  $body = $dom->get_body();
+  if (is_null($body)) {
+    return $text;
+  }
+
+  global $base_path, $user;
+  $redirect_paths = &drupal_static('mcneese_filters_replace_redirects_paths', array());
+
+  $a_tags = $body->getElementsByTagName('a');
+  $img_tags = $body->getElementsByTagName('img');
+
+  foreach ($a_tags as $tag) {
+    if (!$tag->hasAttribute('href')) continue;
+
+    $url = $tag->getAttribute('href');
+    $adjusted_url = preg_replace('@^' . $base_path . '@i', '', $url);
+    $adjusted_url = rawurldecode($adjusted_url);
+
+    if (isset($redirect_paths[$adjusted_url])) {
+      $redirect = $redirect_paths[$adjusted_url];
+    }
+    else {
+      $redirect = db_query('SELECT redirect FROM {redirect} WHERE source = :source', array(':source' => $adjusted_url))->fetchField();
+      $redirect_paths[$adjusted_url] = $redirect;
+    }
+
+    if (empty($redirect)) continue;
+
+    $redirect = $base_path . $redirect;
+    $tag->setAttribute('href', $redirect);
+  }
+
+  foreach ($img_tags as $tag) {
+    if (!$tag->hasAttribute('src')) continue;
+
+    $url = $tag->getAttribute('src');
+    $adjusted_url = preg_replace('@^' . $base_path . '@i', '', $url);
+    $adjusted_url = rawurldecode($adjusted_url);
+
+    if (isset($redirect_paths[$adjusted_url])) {
+      $redirect = $redirect_paths[$adjusted_url];
+    }
+    else {
+      $redirect = db_query('SELECT redirect FROM {redirect} WHERE source = :source', array(':source' => $adjusted_url))->fetchField();
+      $redirect_paths[$adjusted_url] = $redirect;
+    }
+
+    if (empty($redirect)) continue;
+
+    $redirect = $base_path . $redirect;
+    $tag->setAttribute('src', $redirect);
+  }
+
+  $text = $dom->get_markup();
+  return $text;
+}
+
+/**
+ * @} End of '@defgroup mcneese_filters McNeese Filters'.
+ */

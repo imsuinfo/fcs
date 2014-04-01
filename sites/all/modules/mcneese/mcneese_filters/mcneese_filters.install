@@ -1,0 +1,26 @@
+<?php
+
+/**
+ * @file
+ * Install file for mcneese_filters module.
+ */
+
+/**
+ * @addtogroup mcneese_filters
+ * @{
+ */
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function mcneese_filters_uninstall() {
+  $registered = cf_settings_get_registered(array('module_name' => 'mcneese_filters'), 'id');
+
+  foreach ($registered as &$r) {
+    cf_settings_unregister($r->variable_name, $r->variable_type, $r->module);
+  }
+}
+
+/**
+ * @} End of '@addtogroup mcneese_filters'.
+ */

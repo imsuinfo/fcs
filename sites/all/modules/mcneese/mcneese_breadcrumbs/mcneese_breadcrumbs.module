@@ -1,0 +1,34 @@
+<?php
+
+/**
+ * @file
+ * McNeese State University Content module.
+ */
+
+/**
+ * @defgroup mcneese_breadcrumbs McNeese Breadcrumbs
+ * @{
+ * Provides content functionality and changes to drupal 7.
+ */
+
+/**
+ * Implements hook_menu_breadcrumb_alter().
+ */
+function mcneese_breadcrumbs_menu_breadcrumb_alter(&$active_trail, $item) {
+  // make sure each breadcrumb has a tooltip (html title attribute).
+  if (!is_array($active_trail)) return;
+
+  foreach ($active_trail as $key => &$trail) {
+    if (!isset($trail['localized_options']) || !is_array($trail['localized_options'])) {
+      $trail['localized_options'] = array();
+    }
+
+    if (!isset($trail['localized_options']['attributes']['title'])) {
+      $trail['localized_options']['attributes']['title'] = $trail['title'];
+    }
+  }
+}
+
+/**
+ * @} End of '@defgroup mcneese_breadcrumbs McNeese Breadcrumbs'.
+ */

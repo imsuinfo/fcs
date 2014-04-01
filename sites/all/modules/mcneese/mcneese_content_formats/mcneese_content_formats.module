@@ -1,0 +1,865 @@
+<?php
+
+/**
+ * @file
+ * McNeese State University Content Formats module.
+ */
+
+/**
+ * @defgroup mcneese_content McNeese Content Formats
+ * @{
+ * Provides content formatting functionality and changes to drupal 7.
+ */
+
+/**
+ * Implements hook_mcneese_content_permission_alter().
+ */
+function mcneese_content_formats_mcneese_content_permission_alter(&$permissions) {
+  if (!is_array($permissions)) $permissions = array();
+
+  $permissions['bypass deny abused codes'] = array(
+    'title' => t("Bypass Deny Abused Codes"),
+    'description' => t("Grants permissions to bypass the removal of abused codes for text formats in which the deny abused codes filter is enabled."),
+  );
+
+  $permissions['bypass denied tags'] = array(
+    'title' => t("Bypass Denied Tags"),
+    'description' => t("Grants permissions to bypass the restriction of saving content with unauthorized tags."),
+  );
+}
+
+/**
+ * Implements hook_mcneese_content_node_type_form_alter().
+ */
+function mcneese_content_formats_mcneese_content_node_type_form_alter(&$form, &$form_state, &$form_id) {
+  if (empty($form_id)) return;
+
+  $deny_abused_codes_default = variable_get('mcneese_content_formats_deny_abused_codes_' . $form['#node_type']->type, FALSE);
+  $denied_tags_default = variable_get('mcneese_content_formats_denied_tags_' . $form['#node_type']->type, 'script noscript');
+  $fix_links_default = variable_get('mcneese_content_formats_fix_links_' . $form['#node_type']->type, FALSE);
+  $fix_markup_default = variable_get('mcneese_content_formats_fix_markup_' . $form['#node_type']->type, FALSE);
+
+  $form['mcneese_content']['deny_abused_codes'] = array(
+    '#type' => 'checkbox',
+    '#title' => t("Deny Abused Codes"),
+    '#default_value' => $deny_abused_codes_default,
+    '#description' => t("This enables the denial of certain html codes that have been identified as commonly abused or mis-used by end-user."),
+  );
+
+  $form['mcneese_content']['denied_tags'] = array(
+    '#type' => 'textfield',
+    '#title' => t("Denied Tags"),
+    '#maxlength' => 4096,
+    '#default_value' => $denied_tags_default,
+    '#description' => t("This prevents saving content with tags that are in this list. Set this to nothing to allow all tags."),
+  );
+
+  $form['mcneese_content']['fix_links'] = array(
+    '#type' => 'checkbox',
+    '#title' => t("Fix Links"),
+    '#default_value' => $fix_links_default,
+    '#description' => t("This enables the correction of the mis-use of url links. This also updates older and no longer valid links to use the newer method. This currently only fixes a and img links."),
+  );
+
+  $form['mcneese_content']['fix_markup'] = array(
+    '#type' => 'checkbox',
+    '#title' => t("Fix Markup (declobber)"),
+    '#default_value' => $fix_markup_default,
+    '#description' => t("This enables the correction of the mis-use or non-proper HTML. In general, this partially cleans up some of the mess that comes from a copy and pasted word document (or similar)."),
+  );
+}
+
+/**
+ * Implements hook_mcneese_content_node_type_form_submit_alter().
+ */
+function mcneese_content_formats_mcneese_content_node_type_form_submit_alter($form, &$form_state) {
+  if (!isset($form['#node_type']) && !is_object($form['#node_type'])) return;
+
+  cf_settings_register('mcneese_content_formats_deny_abused_codes_' . $form['#node_type']->type, 'drupal_variables', 'mcneese_content_formats', TRUE);
+  cf_settings_register('mcneese_content_formats_denied_tags_' . $form['#node_type']->type, 'drupal_variables', 'mcneese_content_formats', TRUE);
+  cf_settings_register('mcneese_content_formats_fix_links_' . $form['#node_type']->type, 'drupal_variables', 'mcneese_content_formats', TRUE);
+  cf_settings_register('mcneese_content_formats_fix_markup_' . $form['#node_type']->type, 'drupal_variables', 'mcneese_content_formats', TRUE);
+
+  if (isset($form_state['values']['mcneese_content']['deny_abused_codes']) && $form_state['values']['mcneese_content']['deny_abused_codes']) {
+    variable_set('mcneese_content_formats_deny_abused_codes_' . $form['#node_type']->type, TRUE);
+  }
+  else {
+    variable_set('mcneese_content_formats_deny_abused_codes_' . $form['#node_type']->type, FALSE);
+  }
+
+  if (isset($form_state['values']['mcneese_content']['denied_tags'])) {
+    variable_set('mcneese_content_formats_denied_tags_' . $form['#node_type']->type, $form_state['values']['mcneese_content']['denied_tags']);
+  }
+  else {
+    variable_set('mcneese_content_formats_denied_tags_' . $form['#node_type']->type, '');
+  }
+
+  if (isset($form_state['values']['mcneese_content']['fix_links']) && $form_state['values']['mcneese_content']['fix_links']) {
+    variable_set('fix_links_' . $form['#node_type']->type, TRUE);
+  }
+  else {
+    variable_set('mcneese_content_formats_fix_links_' . $form['#node_type']->type, FALSE);
+  }
+
+  if (isset($form_state['values']['mcneese_content']['fix_markup']) && $form_state['values']['mcneese_content']['fix_markup']) {
+    variable_set('fix_markup_' . $form['#node_type']->type, TRUE);
+  }
+  else {
+    variable_set('mcneese_content_formats_fix_markup_' . $form['#node_type']->type, FALSE);
+  }
+}
+
+/**
+ * Implements hook_node_presave().
+ */
+function mcneese_content_formats_node_presave($node) {
+  $deny_abused_codes_value = variable_get('mcneese_content_formats_deny_abused_codes_' . $node->type, FALSE);
+
+  $denied_tags_string = variable_get('mcneese_content_formats_denied_tags_' . $node->type, 'script noscript');
+  $denied_tags = explode(' ', $denied_tags_string);
+
+  #if (user_access('bypass denied tags')) {
+  #  $denied_tags = array();
+  #}
+
+  $operations = array();
+  $operations['deny_abused_codes'] = $deny_abused_codes_value && !user_access('bypass deny abused codes');
+  $operations['fix_links'] = variable_get('mcneese_content_formats_fix_links_' . $node->type, FALSE);
+  $operations['fix_markup'] = variable_get('mcneese_content_formats_fix_markup_' . $node->type, FALSE);
+  $operations['denied_tags'] = $denied_tags;
+
+  $abused_codes = array();
+  $abused_codes['&#34;'] = '"';
+  $abused_codes['&#38;'] = '&amp;';
+  $abused_codes['&#39;'] = '\'';
+  $abused_codes['&#60;'] = '&lt;';
+  $abused_codes['&#62;'] = '&gt;';
+  $abused_codes['&quot;'] = '"';
+  $abused_codes['&ndash;'] = '-';
+  $abused_codes['&mdash;'] = '-';
+  $abused_codes['&lsquo;'] = '\'';
+  $abused_codes['&rsquo;'] = '\'';
+  $abused_codes['&ldquo;'] = '"';
+  $abused_codes['&rdquo;'] = '"';
+
+
+  $node_variables = array_keys(get_object_vars($node));
+
+  // at this time 'deny abused codes' is only applied to the body field (and its summary).
+  // this does not pay attention to text formats.
+  // if such flexibility is needed, then it will be added on a per-text-field basis.
+  if (property_exists($node, 'body') && is_array($node->body)) {
+    foreach ($node->body as $language => &$language_value) {
+      foreach ($language_value as $index => &$index_value) {
+        // do not process this filter for php_code format because this will alter the php_code closing tag.
+        // @todo: find a way to still do this without breaking the php code.
+        if (isset($index_value['format']) && $index_value['format'] == 'php_code') {
+          continue;
+        }
+
+        if (!empty($index_value['summary'])) {
+          if ($operations['deny_abused_codes']) mcneese_content_formats_deny_abused_codes($abused_codes, $index_value['summary']);
+          mcneese_content_formats_alter_dom($index_value['summary'], $operations);
+        }
+
+        if (!empty($index_value['value'])) {
+          if ($operations['deny_abused_codes']) mcneese_content_formats_deny_abused_codes($abused_codes, $index_value['value']);
+          mcneese_content_formats_alter_dom($index_value['value'], $operations);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_webform_component_presave().
+ */
+function mcneese_content_formats_webform_component_presave(&$component) {
+  $deny_abused_codes_value = FALSE;
+  $denied_tags_string = 'script noscript';
+  $denied_tags = explode(' ', $denied_tags_string);
+
+  if (!empty($component['nid'])) {
+    $node = node_load($component['nid']);
+
+    if (is_object($node)) {
+      $deny_abused_codes_value = variable_get('mcneese_content_formats_deny_abused_codes_' . $node->type, FALSE);
+
+      $denied_tags_string = variable_get('mcneese_content_formats_denied_tags_' . $node->type, 'script noscript');
+      $denied_tags = explode(' ', $denied_tags_string);
+    }
+  }
+
+  #if (user_access('bypass denied tags')) {
+  #  $denied_tags = array();
+  #}
+
+  $operations = array();
+  $operations['deny_abused_codes'] = $deny_abused_codes_value && !user_access('bypass deny abused codes');
+  $operations['fix_links'] = variable_get('mcneese_content_formats_fix_links_' . $node->type, FALSE);
+  $operations['fix_markup'] = variable_get('mcneese_content_formats_fix_markup_' . $node->type, FALSE);
+  $operations['denied_tags'] = $denied_tags;
+
+  $abused_codes = array();
+  $abused_codes['&#34;'] = '"';
+  $abused_codes['&#38;'] = '&amp;';
+  $abused_codes['&#39;'] = '\'';
+  $abused_codes['&#60;'] = '&lt;';
+  $abused_codes['&#62;'] = '&gt;';
+  $abused_codes['&quot;'] = '"';
+  $abused_codes['&ndash;'] = '-';
+  $abused_codes['&mdash;'] = '-';
+  $abused_codes['&lsquo;'] = '\'';
+  $abused_codes['&rsquo;'] = '\'';
+  $abused_codes['&ldquo;'] = '"';
+  $abused_codes['&rdquo;'] = '"';
+
+
+  $node_variables = array_keys(get_object_vars($node));
+
+  if (isset($component['type']) && $component['type'] == 'markup') {
+
+    if (!isset($component['extra']['format']) || $component['extra']['format'] != 'php_code') {
+
+      if ($operations['deny_abused_codes']) mcneese_content_formats_deny_abused_codes($abused_codes, $component['value']);
+      mcneese_content_formats_alter_dom($component['value'], $operations);
+    }
+  }
+
+  if (isset($component['name_html'])) {
+    mcneese_content_formats_alter_dom($component['name_html'], $operations);
+  }
+}
+
+/**
+ * Strip out used code from index.
+ *
+ * @param array $abused_code
+ *   An array of codes and their replacements.
+ * @param string $value
+ *   The text to alter.
+ */
+function mcneese_content_formats_deny_abused_codes($abused_codes, &$value) {
+  foreach ($abused_codes as $code => $replacement) {
+    $replaced = preg_replace('|' . $code . '|i', $replacement, $value);
+
+    if ($replaced !== FALSE) {
+      $value = $replaced;
+    }
+  }
+}
+
+/**
+ * Make changes to markup using cf_dom.
+ *
+ * @param string $text
+ *   The text to alter.
+ * @param array $operations
+ *   A collection of operations designating what to do and not to do.
+ */
+function mcneese_content_formats_alter_dom(&$text, $operations) {
+  if (empty($text)) return '';
+
+  $dom = new cf_dom(TRUE, TRUE, TRUE, $text);
+
+  $prefix = 'mt_';
+  $body = $dom->get_body();
+  if (is_null($body)) {
+    return $text;
+  }
+
+  $unsupported_tags = array();
+  $unsupported_tags[] = 'font';
+  $unsupported_tags[] = 'basefont';
+  $unsupported_tags[] = 'big';
+  $unsupported_tags[] = 'center';
+  $unsupported_tags[] = 'dir';
+  $unsupported_tags[] = 'frame';
+  $unsupported_tags[] = 'noframes';
+  $unsupported_tags[] = 'tt';
+
+  $unsupported_attributes = array();
+  $unsupported_attributes[] = 'lang';
+  $unsupported_attributes[] = 'align';
+  $unsupported_attributes[] = 'valign';
+  $unsupported_attributes[] = 'abbr';
+  $unsupported_attributes[] = 'axis';
+  $unsupported_attributes[] = 'bgcolor';
+  $unsupported_attributes[] = 'char';
+  $unsupported_attributes[] = 'charoff';
+  $unsupported_attributes[] = 'nowrap';
+  $unsupported_attributes[] = 'charset';
+  $unsupported_attributes[] = 'onafterprint';
+  $unsupported_attributes[] = 'onbeforeprint';
+  $unsupported_attributes[] = 'onbeforeunload';
+  $unsupported_attributes[] = 'onerror';
+  $unsupported_attributes[] = 'onhaschange';
+  $unsupported_attributes[] = 'onload';
+  $unsupported_attributes[] = 'onmessage';
+  $unsupported_attributes[] = 'onoffline';
+  $unsupported_attributes[] = 'ononline';
+  $unsupported_attributes[] = 'onpagehide';
+  $unsupported_attributes[] = 'onpageshow';
+  $unsupported_attributes[] = 'onpopstate';
+  $unsupported_attributes[] = 'onredo';
+  $unsupported_attributes[] = 'onresize';
+  $unsupported_attributes[] = 'onstorage';
+  $unsupported_attributes[] = 'onundo';
+  $unsupported_attributes[] = 'onunload';
+  $unsupported_attributes[] = 'onblur';
+  $unsupported_attributes[] = 'onchange';
+  $unsupported_attributes[] = 'oncontextmenu';
+  $unsupported_attributes[] = 'onfocus';
+  $unsupported_attributes[] = 'onformchange';
+  $unsupported_attributes[] = 'onforminput';
+  $unsupported_attributes[] = 'oninput';
+  $unsupported_attributes[] = 'oninvalid';
+  $unsupported_attributes[] = 'onreset';
+  $unsupported_attributes[] = 'onselect';
+  $unsupported_attributes[] = 'onsubmit';
+  $unsupported_attributes[] = 'onkeydown';
+  $unsupported_attributes[] = 'onkeypress';
+  $unsupported_attributes[] = 'onkeyup';
+  $unsupported_attributes[] = 'onclick';
+  $unsupported_attributes[] = 'ondblclick';
+  $unsupported_attributes[] = 'ondrag';
+  $unsupported_attributes[] = 'ondragend';
+  $unsupported_attributes[] = 'ondragenter';
+  $unsupported_attributes[] = 'ondragleave';
+  $unsupported_attributes[] = 'ondragover';
+  $unsupported_attributes[] = 'ondragstart';
+  $unsupported_attributes[] = 'ondrop';
+  $unsupported_attributes[] = 'onmousedown';
+  $unsupported_attributes[] = 'onmousemove';
+  $unsupported_attributes[] = 'onmouseout';
+  $unsupported_attributes[] = 'onmouseover';
+  $unsupported_attributes[] = 'onmouseup';
+  $unsupported_attributes[] = 'onmousewheel';
+  $unsupported_attributes[] = 'onscroll';
+  $unsupported_attributes[] = 'onabort';
+  $unsupported_attributes[] = 'oncanplay';
+  $unsupported_attributes[] = 'oncanplaythrough';
+  $unsupported_attributes[] = 'ondurationchange';
+  $unsupported_attributes[] = 'onemptied';
+  $unsupported_attributes[] = 'onended';
+  $unsupported_attributes[] = 'onerror';
+  $unsupported_attributes[] = 'onloadeddata';
+  $unsupported_attributes[] = 'onloadedmetadata';
+  $unsupported_attributes[] = 'onloadstart';
+  $unsupported_attributes[] = 'onpause';
+  $unsupported_attributes[] = 'onplay';
+  $unsupported_attributes[] = 'onplaying';
+  $unsupported_attributes[] = 'onprogress';
+  $unsupported_attributes[] = 'onratechange';
+  $unsupported_attributes[] = 'onreadystatechange';
+  $unsupported_attributes[] = 'onseeked';
+  $unsupported_attributes[] = 'onseeking';
+  $unsupported_attributes[] = 'onstalled';
+  $unsupported_attributes[] = 'onsuspend';
+  $unsupported_attributes[] = 'ontimeupdate';
+  $unsupported_attributes[] = 'onvolumechange';
+  $unsupported_attributes[] = 'onwaiting';
+
+  $unsupported_td_attr = array();
+  $unsupported_td_attr[] = 'height';
+  $unsupported_td_attr[] = 'scope';
+  $unsupported_td_attr[] = 'width';
+
+  $supported_name_fields = array();
+  $supported_name_fields[] = 'map';
+  $supported_name_fields[] = 'meta';
+  $supported_name_fields[] = 'param';
+  $supported_name_fields[] = 'form';
+  $supported_name_fields[] = 'input';
+  $supported_name_fields[] = 'textarea';
+  $supported_name_fields[] = 'button';
+  $supported_name_fields[] = 'select';
+  $supported_name_fields[] = 'option';
+  $supported_name_fields[] = 'optgroup';
+  $supported_name_fields[] = 'fieldset';
+  $supported_name_fields[] = 'label';
+
+  $altered = FALSE;
+  $all_tags = $body->getElementsByTagName('*');
+
+  $remove_tags = array();
+  $remove_tags_all = array(); // remove tag and all child tags.
+  $remove_tags_parent = array(); // remove tags and if the parent has no children, then remove the children.
+
+  $change_tags = array();
+
+
+  // remove top-level comments
+  if ($body->hasChildNodes()) {
+    foreach ($body->childNodes as $child) {
+      if ($child instanceOf DOMComment) {
+        $remove_tags_all[] = $child;
+      }
+    }
+  }
+
+
+  foreach ($all_tags as $tag) {
+    if (in_array($tag->tagName, $operations['denied_tags'])) {
+      $remove_tags_all[] = $tag;
+      continue;
+    }
+
+    if ($operations['fix_links']) {
+      if ($tag->tagName == 'a') {
+        if ($tag->hasAttribute('href')) {
+          $processed = mcneese_content_formats_get_correct_links($tag->getAttribute('href'));
+
+          if ($processed !== FALSE) {
+            $tag->setAttribute('href', $processed);
+            $altered = TRUE;
+          }
+        }
+      }
+      elseif ($tag->tagName == 'img') {
+        if ($tag->hasAttribute('src')) {
+          $processed = mcneese_content_formats_get_correct_links($tag->getAttribute('src'));
+
+          if ($processed !== FALSE) {
+            $tag->setAttribute('src', $processed);
+            $altered = TRUE;
+          }
+        }
+      }
+    }
+
+    if ($operations['fix_markup']) {
+      // replace b tags with strong
+      if ($tag->tagName == 'b') {
+        $change_tags[] = array('tag' => $tag, 'type' => 'strong');
+      }
+      // replace i tags with em
+      elseif ($tag->tagName == 'i') {
+        $change_tags[] = array('tag' => $tag, 'type' => 'em');
+      }
+      // using embedded/inline images is not supported, in this case completely strip out the tag.
+      elseif ($tag->tagName == 'img') {
+        if ($tag->hasAttribute('src')) {
+          $image_source = $tag->getAttribute('src');
+
+          if (preg_match('/^data:/i', $image_source) > 0) {
+            $remove_tags[] = $tag;
+          }
+        }
+      }
+      // replace strike tags with del
+      elseif ($tag->tagName == 'strike') {
+        $change_tags[] = array('tag' => $tag, 'type' => 'del');
+      }
+      // remove all unsupported tags, but preserve their content.
+      elseif (in_array($tag->tagName, $unsupported_tags)) {
+        $remove_tags[] = $tag;
+        continue;
+      }
+      // remove span tags with lang=".." attribute, but preserve their content.
+      elseif ($tag->tagName == 'span') {
+        if ($tag->hasAttribute('lang')) {
+          $remove_tags[] = $tag;
+          continue;
+        }
+
+        // remove spans that have no attributes.
+        if (!$tag->hasAttributes()) {
+          $remove_tags[] = $tag;
+          continue;
+        }
+      }
+      // problems with paragraphs.
+      elseif ($tag->tagName == 'p') {
+        if ($tag->hasAttribute('style')) {
+          $tag->removeAttribute('style');
+          $altered = TRUE;
+        }
+
+        // replace empty tags that are generally created to implement a line break
+        if ($tag->hasChildNodes()) {
+          // change all p tags that contain only spaces into line break.
+          $tag_markup = $dom->get_dom()->saveHTML($tag);
+          $tag_text = drupal_html_to_text($tag_markup, array());
+          if (preg_match('@\s*&(nbsp|nbsp;)\s*$@i', $tag_text)) {
+            $change_tags[] = array('tag' => $tag, 'type' => 'br');
+          }
+          unset($tag_markup);
+          unset($tag_text);
+        }
+        else {
+          $change_tags[] = array('tag' => $tag, 'type' => 'br');
+        }
+      }
+      // strip out attributes no longer supported in html 5 for specific tags.
+      elseif ($tag->tagName == 'td') {
+        foreach ($unsupported_td_attr as $attr_name) {
+          if ($tag->hasAttribute($attr_name)) {
+            $tag->removeAttribute($attr_name);
+            $altered = TRUE;
+          }
+        }
+      }
+      elseif ($tag->tagName == 'h1' || $tag->tagName == 'h2' || $tag->tagName == 'h3' || $tag->tagName == 'h4' || $tag->tagName == 'h5' || $tag->tagName == 'h6') {
+        // replace empty tags that are generally created to implement a line break
+        if (!$tag->hasChildNodes()) {
+          $change_tags[] = array('tag' => $tag, 'type' => 'br');
+          $altered = TRUE;
+        }
+      }
+      elseif ($tag->tagName == 'table') {
+        // table may not be empty
+        if ($tag->hasChildNodes()) {
+          // apply appropriate limitations on tags
+          $limited_tags = array();
+          $limited_tags['caption'] = NULL;
+          $limited_tags['thead'] = NULL;
+          $limited_tags['tbody'] = NULL;
+          $limited_tags['thead_tr'] = NULL;
+          $limited_tags['tbody_first_tr'] = NULL;
+
+          // generate random bytes to ensure that all tables have a unique tag id.
+          if ($tag->hasAttribute('id')) {
+            $table_id = $tag->getAttribute('id');
+          }
+          else {
+            $table_id = 'table-' . drupal_random_key(9);
+            $tag->setAttribute('id', $table_id);
+            $altered = TRUE;
+          }
+
+          // apply appropriate fixes to badly placed/formed tags
+          $fix_tags_set = array();
+          $fix_tags_set['extra_head'] = array();
+
+          foreach ($tag->childNodes as $child_tag_0) {
+            if ($child_tag_0 instanceOf DOMText) continue;
+
+            if ($child_tag_0->tagName == 'caption') {
+              if (is_null($limited_tags['caption'])) {
+                $limited_tags['caption'] = $child_tag_0;
+              }
+              else {
+                $remove_tags_children[] = $child_tag_0;
+              }
+
+              continue;
+            }
+            elseif ($child_tag_0->tagName == 'thead') {
+              if (is_null($limited_tags['thead'])) {
+                $limited_tags['thead'] = $child_tag_0;
+              }
+              else {
+                $remove_tags_children[] = $child_tag_0;
+                continue;
+              }
+            }
+            elseif ($child_tag_0->tagName == 'tbody') {
+              if (is_null($limited_tags['tbody'])) {
+                $limited_tags['tbody'] = $child_tag_0;
+              }
+              else {
+                $remove_tags_children[] = $child_tag_0;
+                continue;
+              }
+            }
+            else {
+              // do not allow unsupported tags within the table.
+              $remove_tags_children[] = $child_tag_0;
+              continue;
+            }
+
+            if ($child_tag_0->hasChildNodes()) {
+              // thead must be treated differently
+              if ($child_tag_0->tagName == 'thead') {
+                foreach ($child_tag_0->childNodes as $child_tag_1) {
+                  if ($child_tag_1 instanceOf DOMText) continue;
+
+                  if ($child_tag_1->tagName == 'tr' && is_null($limited_tags['thead_tr'])) {
+                    $limited_tags['thead_tr'] = $child_tag_1;
+                  }
+                  else {
+                    $fix_tags_set['extra_head'][] = $child_tag_1;
+                  }
+                }
+              }
+              else {
+                $first_has_children = FALSE;
+                foreach ($child_tag_0->childNodes as $child_tag_1) {
+                  if ($child_tag_1 instanceOf DOMText) continue;
+
+                  if ($child_tag_1->tagName == 'tr' && is_null($limited_tags['tbody_first_tr'])) {
+                    $limited_tags['tbody_first_tr'] = $child_tag_1;
+                  }
+
+                  if ($child_tag_1->tagName == 'tr' && $child_tag_1->hasChildNodes()) {
+                    // if all of the row cells are empty of tags or text, then remove the entire row.
+                    $found_content = FALSE;
+                    foreach ($child_tag_1->childNodes as $child_tag_2) {
+                      if ($child_tag_2 instanceOf DOMText) continue;
+
+                      if ($child_tag_2->tagName == 'td' || $child_tag_2->tagName == 'th') {
+                        if ($child_tag_2->hasChildNodes()) {
+                          $found_content = TRUE;
+
+                          if (!$first_has_children && $limited_tags['tbody_first_tr'] === $child_tag_1) {
+                            $first_has_children = TRUE;
+                          }
+
+                          continue;
+                        }
+                      }
+                    }
+
+                    if ($found_content) {
+                      if (!$first_has_children) {
+                        $remove_tags_children[] = $limited_tags['tbody_first_tr'];
+                        $limited_tags['tbody_first_tr'] = $child_tag_1;
+                        $first_has_children = TRUE;
+                      }
+                    }
+                    else {
+                      if ($limited_tags['tbody_first_tr'] !== $child_tag_1) {
+                        $remove_tags_children[] = $child_tag_1;
+                      }
+                    }
+                  }
+                  else {
+                    if ($limited_tags['tbody_first_tr'] !== $child_tag_1) {
+                      $remove_tags_children[] = $child_tag_1;
+                    }
+                  }
+                }
+              }
+            }
+          }
+
+          // make sure a body tag always exists.
+          if (is_null($limited_tags['tbody'])) {
+            $limited_tags['tbody'] = $dom->get_dom()->createElement('tbody');
+            $tag->appendChild($limited_tags['tbody']);
+            $altered = TRUE;
+          }
+
+          // force extra header rows to be normal body rows.
+          while (!empty($fix_tags_set['extra_head'])) {
+            $fix_tag = array_pop($fix_tags_set['extra_head']);
+
+            $removed_tag = $dom->remove_element($fix_tag, FALSE);
+            if ($removed_tag) {
+              if ($removed_tag->hasChildNodes()) {
+                foreach ($removed_tag->childNodes as $child_tag) {
+                  if ($child_tag instanceOf DOMText) continue;
+
+                  if ($child_tag->hasAttribute('scope')) {
+                    $child_tag->removeAttribute('scope');
+                  }
+
+                  $change_tags[] = array('tag' => $child_tag, 'type' => 'td');
+                }
+              }
+
+              if ($limited_tags['tbody']->hasChildNodes()) {
+                $first_child = $limited_tags['tbody']->childNodes->item(0);
+                $limited_tags['tbody']->insertBefore($removed_tag, $first_child);
+              }
+              else {
+                $limited_tags['tbody']->appendChild($removed_tag);
+              }
+            }
+
+            $altered = TRUE;
+          }
+
+          if (!$tag->hasChildNodes()) {
+            $remove_tags[] = $tag;
+            continue;
+          }
+        }
+        else {
+          $remove_tags[] = $tag;
+          continue;
+        }
+      }
+
+
+      // replace name with id for all unsupported tags.
+      if ($tag->hasAttribute('name') && !in_array($tag->tagName, $supported_name_fields)) {
+        $name_value = $tag->getAttribute('name');
+        $tag->removeAttribute('name');
+        $tag->setAttribute('id', $name_value);
+        $altered = TRUE;
+      }
+
+
+      // strip out unsupported attributes.
+      foreach ($unsupported_attributes as $attr_name) {
+        if ($tag->hasAttribute($attr_name)) {
+          $tag->removeAttribute($attr_name);
+          $altered = TRUE;
+        }
+      }
+    }
+
+    // remove all comments from this tag
+    if ($tag->hasChildNodes()) {
+      foreach ($tag->childNodes as $child) {
+        if ($child instanceOf DOMComment) {
+          $remove_tags_all[] = $child;
+        }
+      }
+    }
+  }
+
+  // tags should only be removed after processing to avoid DOM bugs.
+  while (!empty($remove_tags)) {
+    $remove_tag = array_pop($remove_tags);
+    $dom->remove_element($remove_tag);
+    $altered = TRUE;
+  }
+
+  while (!empty($remove_tags_all)) {
+    $remove_tag = array_pop($remove_tags_all);
+    $parent_tag = $remove_tag->parentNode;
+    $parent_tag->removeChild($remove_tag);
+    $altered = TRUE;
+  }
+
+  while (!empty($remove_tags_children)) {
+    $remove_tag = array_pop($remove_tags_children);
+    $dom->remove_element($remove_tag, FALSE);
+    $altered = TRUE;
+  }
+
+  while (!empty($remove_tags_parent)) {
+    $remove_tag = array_pop($remove_tags_parent);
+
+    $parent = $remove_tag->parentNode;
+    $dom->remove_element($remove_tag, FALSE);
+
+    if (is_object($parent) && !$parent->hasChildNodes()) {
+      $dom->remove_element($remove_tag, FALSE);
+    }
+
+    $altered = TRUE;
+  }
+
+  foreach ($change_tags as $change_tag) {
+    $dom->change_element($change_tag['tag'], $change_tag['type']);
+    $altered = TRUE;
+  }
+
+  if ($altered) {
+    $text = $dom->get_markup();
+  }
+}
+
+/**
+ * Interprets link and tries to replace it with proper link if applicable.
+ *
+ * @param string $url
+ *   The url link to process.
+ *
+ * @return string|bool
+ *   The updated url link or FALSE otherwise.
+ */
+function mcneese_content_formats_get_correct_links($url) {
+  global $base_path;
+  global $base_root;
+  global $base_url;
+
+  $default_redirect = variable_get('redirect_default_status_code', 301);
+  $base = parse_url($base_url);
+  $parsed = parse_url($url);
+  $altered = FALSE;
+
+  // only process known schemes
+  if (!empty($parsed['scheme']) && !in_array($parsed['scheme'], array('http', 'https'))) {
+    return FALSE;
+  }
+
+  // if either host or scheme is defined, then both must be defined.
+  if (!empty($parsed['scheme']) && empty($parsed['host']) || empty($parsed['scheme']) && !empty($parsed['host'])) {
+    return FALSE;
+  }
+
+  // if path is empty, then there is nothing to do.
+  if (empty($parsed['host']) && empty($parsed['path'])) {
+    return FALSE;
+  }
+
+  // fix local paths that use absolute links.
+  if (!empty($parsed['host']) && $base['host'] == $parsed['host']) {
+    if (empty($parsed['path'])) {
+      unset($parsed['scheme']);
+      unset($parsed['host']);
+      $parsed['path'] = $base_path;
+      $altered = TRUE;
+    }
+    elseif (preg_match('@^' . $base_path . '@i', $parsed['path'])) {
+      unset($parsed['scheme']);
+      unset($parsed['host']);
+      $altered = TRUE;
+    }
+  }
+
+  if (empty($parsed['scheme'])) {
+    if (preg_match('/@.*\./i', $parsed['path']) > 0 && preg_match('/^mailto:/i', $parsed['path']) == 0) {
+      // fix invalid mailto addresses.
+      $parsed['path'] = 'mailto:' . $parsed['path'];
+      $altered = TRUE;
+    }
+    else if (preg_match('@^www\.@i', $parsed['path']) > 0 || preg_match('@\.(biz|com|info|net|org|edu|gov|mil|us)$@i', $parsed['path']) > 0) {
+      // fix external paths that are missing the scheme, but only for the most common extensions for practicality reasons.
+      $parsed['path'] = 'http://' . $parsed['path'];
+      $altered = TRUE;
+    }
+    else if (preg_match('@^' . $base_path . '@i', $parsed['path'])) {
+      $path = rawurldecode(preg_replace('@^' . $base_path . '@i', '', $parsed['path']));
+
+      // check to see if a url redirection exists for the given path.
+      if (function_exists('redirect_url')) {
+        $redirect = redirect_load_by_source($path);
+
+        if (is_object($redirect)) {
+          // only operate on 'found' and 'permanent' redirects.
+          if ((empty($redirect->status_code) && ($default_redirect == 301 || $default_redirect == 302)) || $redirect->status_code == 301 || $redirect->status_code == 302) {
+            $path = $redirect->redirect;
+            $altered = TRUE;
+          }
+        }
+      }
+
+      // check to see what drupal returns for the given path.
+      $source = drupal_lookup_path('source', $path);
+
+      if (!empty($source)) {
+        $path = $source;
+        $altered = TRUE;
+      }
+
+      $parsed['path'] = $base_path . $path;
+    }
+  }
+
+  // recombine url
+  if ($altered) {
+    $new_url = $parsed['path'];
+
+    if (isset($parsed['query'])) {
+      $new_url .= $parsed['query'];
+    }
+
+    if (isset($parsed['fragment'])) {
+      $new_url .= $parsed['fragment'];
+    }
+
+    return $new_url;
+  }
+
+  return FALSE;
+}
+
+/**
+ * @} End of '@defgroup mcneese_content_formats McNeese Content Formats'.
+ */

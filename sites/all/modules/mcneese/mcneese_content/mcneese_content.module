@@ -1,0 +1,214 @@
+<?php
+
+/**
+ * @file
+ * McNeese State University Content module.
+ */
+
+/**
+ * @defgroup mcneese_content McNeese Content
+ * @{
+ * Provides content functionality and changes to drupal 7.
+ */
+
+define('MCNEESE_CONTENT_SITEMAP_NODE_MAX', 5000);
+define('MCNEESE_CONTENT_SITEMAP_MEDIA_MAX', 5000);
+
+/**
+ * Implements hook_init().
+ */
+function mcneese_content_init() {
+  global $is_https;
+
+  if (!$is_https && basename($_SERVER['PHP_SELF']) == 'index.php' && php_sapi_name() != 'cli') {
+    mcneese_content_secure_pages();
+  }
+}
+
+/**
+ * Implements hook_permission().
+ */
+function mcneese_content_permission() {
+  $permissions = array();
+
+  drupal_alter('mcneese_content_permission', $permissions);
+
+  return $permissions;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function mcneese_content_menu() {
+  $items = array();
+
+  $items['sitemap'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => '',
+    'description' => "View the XML site map.",
+    'page callback' => 'mcneese_content_sitemap_page',
+    'file' => 'mcneese_content_sitemap.inc',
+    'file path' => drupal_get_path('module', 'mcneese_content') . '/pages',
+    'access callback' => 'user_access',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['sitemap/%/%'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => '',
+    'description' => "View the XML site map.",
+    'page callback' => 'mcneese_content_sitemap_page',
+    'page arguments' => array(1, 2),
+    'file' => 'mcneese_content_sitemap.inc',
+    'file path' => drupal_get_path('module', 'mcneese_content') . '/pages',
+    'access callback' => 'user_access',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_node_view().
+ */
+function mcneese_content_node_view($node, $view_mode, $langcode){
+  $current_path = current_path();
+  $request_path = request_path();
+  $shortlink = 'node/' . check_plain($node->nid);
+
+  // only alter http headers if the current path is the node being viewed.
+  if ($shortlink != $current_path) return;
+
+  global $base_path;
+
+  $link = '<' . $base_path . $shortlink . '>; rel="shortlink"';
+  $link .= ', <' . $base_path . $request_path . '>; rel="canonical";';
+
+  drupal_add_http_header('Link', $link);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for the node type form.
+ */
+function mcneese_content_form_node_type_form_alter(&$form, &$form_state, $form_id) {
+  $form['mcneese_content'] = array(
+    '#type' => 'fieldset',
+    '#title' => t("McNeese"),
+    '#description' => t("Provides McNeese content-type-specific settings, if any such functionality is available."),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#tree' => TRUE,
+    '#group' => 'additional_settings',
+  );
+
+  $form['#submit'][] = 'mcneese_content_node_type_form_submit';
+
+  drupal_alter('mcneese_content_node_type_form', $form, $form_state, $form_id);
+
+  return $form;
+}
+
+/**
+ * Handles submitting the McNeese specific node type settings.
+ *
+ * @param array $form
+ *   A form array
+ * @param array $form_state
+ *   A form state
+ */
+function mcneese_content_node_type_form_submit($form, &$form_state) {
+  drupal_alter('mcneese_content_node_type_form_submit', $form, $form_state);
+}
+
+/**
+ * Performs a redirect for certain pages at insecure paths to secure paths.
+ *
+ * This is based on the securepages drupal module.
+ */
+function mcneese_content_secure_pages() {
+  global $base_url, $base_path, $is_https;
+
+  if (drupal_is_front_page()) return;
+
+  $path = isset($_GET['q']) ? $_GET['q'] : '';
+  $normal = drupal_get_normal_path($path);
+
+  $secure_path_regex = array();
+  $secure_path_regex[] = '^(admin|login|user)($|/.*$|\?.*$)';
+  $secure_path_regex[] = '^node/\d+/(edit|draft|webform|webform-\w+\b|accessibility|moderation|revisions|delete|undelete|devel)';
+
+  foreach ($secure_path_regex as $regex) {
+    $matched = preg_match('@' . $regex . '@i', $normal);
+
+    if ($matched) break;
+  }
+
+  if (!$matched) {
+    $matches = array();
+    $matched = preg_match('@^node/(\d+)$@i', $normal, $matches);
+
+    if ($matched && is_numeric($matches[1])) {
+      $type = db_query('SELECT type from {node} where nid = :nid', array(':nid' => $matches[1]))->fetchField();
+
+      if ($type == 'webform') {
+        $matched = TRUE;
+      }
+      else {
+        $matched = FALSE;
+      }
+    }
+  }
+
+  if ($matched) {
+    $fixed_base_url = preg_replace('@^http://@i', 'https://', $base_url);
+    $new_uri = $fixed_base_url . $base_path . $normal;
+    if (!headers_sent()) header('Location: ' . $new_uri, TRUE, 301);
+    drupal_exit($new_uri);
+  }
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter().
+ *
+ * This is based on the webform_ssl drupal module.
+ */
+function mcneese_content_form_webform_client_form_alter(&$form, &$form_state) {
+  global $base_url, $base_path, $is_https;
+
+  if ($is_https) {
+    // make sure webform links go to https pages
+    $form['#https'] = TRUE;
+    $form['#submit'][] = 'mcneese_content_webform_client_form_submit';
+  }
+}
+
+/**
+ * Custom form submit handler for the webform client form.
+ *
+ * This is based on the webform_ssl drupal module.
+ *
+ * @see mcneese_content_form_webform_client_form_alter()
+ */
+function mcneese_content_webform_client_form_submit($form, &$form_state) {
+  // If we're staying on the current page, there's no need to modify anything.
+  if (!isset($form_state['redirect'])) {
+    return;
+  }
+
+  if (!is_array($form_state['redirect'])) {
+    $form_state['redirect'] = array($form_state['redirect']);
+  }
+
+  // After the form is submitted, make sure the page we redirect to is secure.
+  // This is necessary so that any confirmation messages that are intended to
+  // be displayed to the user via drupal_set_message() are stored in the same
+  // session and actually displayed to the user when they are supposed to be.
+  $form_state['redirect'][1]['https'] = TRUE;
+}
+
+
+
+/**
+ * @} End of '@defgroup mcneese_content McNeese Content'.
+ */

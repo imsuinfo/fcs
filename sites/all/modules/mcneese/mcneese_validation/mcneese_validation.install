@@ -1,0 +1,26 @@
+<?php
+
+/**
+ * @file
+ * Install file for mcneese_validation module.
+ */
+
+/**
+ * @addtogroup mcneese_validation
+ * @{
+ */
+
+/**
+ * Implementation of hook_schema().
+ */
+function mcneese_validation_schema() {
+  $schema = array();
+
+  $t = get_t();
+
+  return $schema;
+}
+
+/**
+ * @} End of '@addtogroup mcneese_validation'.
+ */

@@ -1,0 +1,26 @@
+<?php
+
+/**
+ * @file
+ * Install file for mcneese_content_formats module.
+ */
+
+/**
+ * @addtogroup mcneese_content_formats
+ * @{
+ */
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function mcneese_content_formats_uninstall() {
+  $registered = cf_settings_get_registered(array('module_name' => 'mcneese_content_formats'), 'id');
+
+  foreach ($registered as &$r) {
+    cf_settings_unregister($r->variable_name, $r->variable_type, $r->module);
+  }
+}
+
+/**
+ * @} End of '@addtogroup mcneese_content_formats'.
+ */

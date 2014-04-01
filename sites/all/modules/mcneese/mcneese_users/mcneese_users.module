@@ -1,0 +1,408 @@
+<?php
+
+/**
+ * @file
+ * McNeese State University Users module.
+ */
+
+/**
+ * @defgroup mcneese_users McNeese Users
+ * @{
+ * Provides user functionality and changes to drupal 7.
+ */
+
+/**
+ * Implements hook_form_FORM_ID_alter() for user_profile_form.
+ */
+function mcneese_users_form_user_profile_form_alter(&$form, &$form_state) {
+  if ($form['#user_category'] == 'account') {
+    $account = $form['#user'];
+
+    $enable_options = array();
+    $enable_options['always'] = "Enabled (always)";
+    $enable_options['on'] = "Enabled (auto)";
+    $enable_options['off'] = "Disabled (auto)";
+    $enable_options['never'] = "Disabled (always)";
+
+    if (!isset($form['additional_settings']['#type'])) {
+      $form['additional_settings'] = array(
+        '#type' => 'vertical_tabs',
+        '#weight' => 99,
+        '#theme_wrappers' => array('vertical_tabs'),
+        '#prefix' => '<div class="field-group-vertical_tabs-wrapper">',
+        '#suffix' => '</div>',
+      );
+      $form['#attached']['js'][] = 'misc/form.js';
+      $form['#attached']['js'][] = 'misc/collapse.js';
+    }
+
+    $form['mcneese_settings'] = array(
+      '#type' => 'fieldset',
+      '#title' => t("McNeese Settings"),
+      '#weight' => 4,
+      '#collapsible' => TRUE,
+      '#tree' => TRUE,
+      '#group' => 'additional_settings',
+    );
+
+
+    // navigations
+    $form['mcneese_settings']['navigation'] = array(
+      '#type' => 'fieldset',
+      '#title' => t("Navigation Settings"),
+      '#weight' => 4,
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#tree' => TRUE,
+    );
+
+
+    // toolbar
+    $form['mcneese_settings']['navigation']['toolbar'] = array(
+      '#type' => 'fieldset',
+      '#title' => t("Toolbar Settings"),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#tree' => TRUE,
+    );
+
+    $form['mcneese_settings']['navigation']['toolbar']['autohide'] = array(
+      '#type' => 'checkbox',
+      '#title' => t("Auto-hide toolbar"),
+      '#description' => t("Normally the toolbar is always visible on the page, enable this to hide most of the toolbar when it is not active."),
+      '#default_value' => isset($account->data['mcneese_settings']['navigation']['toolbar']['autohide']) ? $account->data['mcneese_settings']['navigation']['toolbar']['autohide'] : FALSE,
+    );
+
+    $form['mcneese_settings']['navigation']['toolbar']['sticky'] = array(
+      '#type' => 'checkbox',
+      '#title' => t("Enable a sticky toolbar"),
+      '#description' => t("Normally the toolbar will float above the page, enable this to make the toolbar stick (embed) on page."),
+      '#default_value' => isset($account->data['mcneese_settings']['navigation']['toolbar']['sticky']) ? $account->data['mcneese_settings']['navigation']['toolbar']['sticky'] : FALSE,
+    );
+
+    $form['mcneese_settings']['navigation']['toolbar']['shortcuts'] = array(
+      '#type' => 'checkbox',
+      '#title' => t("Show the shorcut bar"),
+      '#description' => t("The shortcut bar is an additional menu below the toolbar that under normal circumstances a user may edit."),
+      '#default_value' => !_toolbar_is_collapsed(),
+    );
+
+
+    // menu tabs
+    $form['mcneese_settings']['navigation']['menu_tabs'] = array(
+      '#type' => 'fieldset',
+      '#title' => t("Menu Tabs Settings"),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#tree' => TRUE,
+    );
+
+    $default_value = 'on';
+
+    if (isset($account->data['mcneese_settings']['navigation']['menu_tabs']['sticky'])) {
+      $sticky = & $account->data['mcneese_settings']['navigation']['menu_tabs']['sticky'];
+      if ($sticky) {
+        if ($sticky == 'on' || $sticky == 'off' || $sticky == 'always' || $sticky == 'never') {
+          $default_value = $sticky;
+        }
+      }
+      else {
+        $default_value = 'off';
+      }
+    }
+
+    $form['mcneese_settings']['navigation']['menu_tabs']['sticky'] = array(
+      '#type' => 'select',
+      '#title' => t("Enable a sticky menu tabs"),
+      '#description' => t("Normally the menu tabs will float on the left side of the page, enable this to make the menu tabs stick (embed) on the page just above the breadcrumbs. (Non-HTML5 compliant browsers will always be sticky.)"),
+      '#default_value' => $default_value,
+      '#options' => $enable_options,
+    );
+
+
+    // breadcrumb
+    $form['mcneese_settings']['navigation']['breadcrumb'] = array(
+      '#type' => 'fieldset',
+      '#title' => t("Breadcrumb Settings"),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#tree' => TRUE,
+    );
+
+    $default_value = 'on';
+
+    if (isset($account->data['mcneese_settings']['navigation']['breadcrumb']['sticky'])) {
+      $sticky = & $account->data['mcneese_settings']['navigation']['breadcrumb']['sticky'];
+      if ($sticky) {
+        if ($sticky == 'on' || $sticky == 'off' || $sticky == 'always' || $sticky == 'never') {
+          $default_value = $sticky;
+        }
+      }
+      else {
+        $default_value = 'off';
+      }
+    }
+
+    $form['mcneese_settings']['navigation']['breadcrumb']['sticky'] = array(
+      '#type' => 'select',
+      '#title' => t("Enable a sticky breadcrumb"),
+      '#description' => t("Normally the breadcrumb will float on the left side of the page, enable this to make the menu tabs stick (embed) on the page just below the page title. (Non-HTML5 compliant browsers will always be sticky.)"),
+      '#default_value' => $default_value,
+      '#options' => $enable_options,
+    );
+
+
+    // action links
+    $form['mcneese_settings']['navigation']['action_links'] = array(
+      '#type' => 'fieldset',
+      '#title' => t("Action Link Settings"),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#tree' => TRUE,
+    );
+
+    $default_value = 'on';
+
+    if (isset($account->data['mcneese_settings']['navigation']['action_links']['sticky'])) {
+      $sticky = & $account->data['mcneese_settings']['navigation']['action_links']['sticky'];
+      if ($sticky) {
+        if ($sticky == 'on' || $sticky == 'off' || $sticky == 'always' || $sticky == 'never') {
+          $default_value = $sticky;
+        }
+      }
+      else {
+        $default_value = 'off';
+      }
+    }
+
+    $form['mcneese_settings']['navigation']['action_links']['sticky'] = array(
+      '#type' => 'select',
+      '#title' => t("Enable a sticky action links"),
+      '#description' => t("Normally the action links will float on the right side of the page, enable this to make the action links stick (embed) on the page just below the breadcrumbs. (Non-HTML5 compliant browsers will always be sticky.)"),
+      '#default_value' => $default_value,
+      '#options' => $enable_options,
+    );
+
+
+    // regions
+    $form['mcneese_settings']['region'] = array(
+      '#type' => 'fieldset',
+      '#title' => t("Region Settings"),
+      '#weight' => 4,
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#tree' => TRUE,
+    );
+
+
+    // help
+    $form['mcneese_settings']['region']['help'] = array(
+      '#type' => 'fieldset',
+      '#title' => t("Help Settings"),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#tree' => TRUE,
+    );
+
+    $default_value = 'on';
+
+    if (isset($account->data['mcneese_settings']['region']['help']['sticky'])) {
+      $sticky = & $account->data['mcneese_settings']['region']['help']['sticky'];
+      if ($sticky) {
+        if ($sticky == 'on' || $sticky == 'off' || $sticky == 'always' || $sticky == 'never') {
+          $default_value = $sticky;
+        }
+      }
+      else {
+        $default_value = 'off';
+      }
+    }
+
+    $form['mcneese_settings']['region']['help']['sticky'] = array(
+      '#type' => 'select',
+      '#title' => t("Enable a sticky help region"),
+      '#description' => t("Normally the help will float on the right side of the page, enable this to make the help stick (embed) on the page, above the page title. (Non-HTML5 compliant browsers will always be sticky.)"),
+      '#default_value' => isset($account->data['mcneese_settings']['region']['help']['sticky']) ? $account->data['mcneese_settings']['region']['help']['sticky'] : TRUE,
+      '#default_value' => $default_value,
+      '#options' => $enable_options,
+    );
+
+
+    // messages
+    $form['mcneese_settings']['region']['messages'] = array(
+      '#type' => 'fieldset',
+      '#title' => t("Messages Settings"),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#tree' => TRUE,
+    );
+
+    $default_value = 'on';
+
+    if (isset($account->data['mcneese_settings']['region']['messages']['sticky'])) {
+      $sticky = & $account->data['mcneese_settings']['region']['messages']['sticky'];
+      if ($sticky) {
+        if ($sticky == 'on' || $sticky == 'off' || $sticky == 'always' || $sticky == 'never') {
+          $default_value = $sticky;
+        }
+      }
+      else {
+        $default_value = 'off';
+      }
+    }
+
+    $form['mcneese_settings']['region']['messages']['sticky'] = array(
+      '#type' => 'select',
+      '#title' => t("Enable a sticky messages region"),
+      '#description' => t("Normally the messages will float on the right side of the page, enable this to make the messages stick (embed) on the page, above the page title. (Non-HTML5 compliant browsers will always be sticky.)"),
+      '#default_value' => $default_value,
+      '#options' => $enable_options,
+    );
+
+
+    // information
+    $form['mcneese_settings']['region']['information'] = array(
+      '#type' => 'fieldset',
+      '#title' => t("Information Settings"),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#tree' => TRUE,
+    );
+
+    $default_value = 'on';
+
+    if (isset($account->data['mcneese_settings']['region']['information']['sticky'])) {
+      $sticky = & $account->data['mcneese_settings']['region']['information']['sticky'];
+      if ($sticky) {
+        if ($sticky == 'on' || $sticky == 'off' || $sticky == 'always' || $sticky == 'never') {
+          $default_value = $sticky;
+        }
+      }
+      else {
+        $default_value = 'off';
+      }
+    }
+
+    $form['mcneese_settings']['region']['information']['sticky'] = array(
+      '#type' => 'select',
+      '#title' => t("Enable a sticky information region"),
+      '#description' => t("Normally the information region will float on the right side of the page, enable this to make the information region stick (embed) on the page, above the page title. (Non-HTML5 compliant browsers will always be sticky.)"),
+      '#default_value' => $default_value,
+      '#options' => $enable_options,
+    );
+
+
+    // side
+    $form['mcneese_settings']['region']['side'] = array(
+      '#type' => 'fieldset',
+      '#title' => t("Side Settings"),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#tree' => TRUE,
+    );
+
+    $default_value = 'on';
+
+    if (isset($account->data['mcneese_settings']['region']['side']['sticky'])) {
+      $sticky = & $account->data['mcneese_settings']['region']['side']['sticky'];
+      if ($sticky) {
+        if ($sticky == 'on' || $sticky == 'off' || $sticky == 'always' || $sticky == 'never') {
+          $default_value = $sticky;
+        }
+      }
+      else {
+        $default_value = 'off';
+      }
+    }
+
+    $form['mcneese_settings']['region']['side']['sticky'] = array(
+      '#type' => 'select',
+      '#title' => t("Enable a sticky side region"),
+      '#description' => t("Normally the side region is on the left side of the page, disable this to make the side region float on the left side of the page, freeing up room for the main content. (Non-HTML5 compliant browsers will always be sticky.)"),
+      '#default_value' => $default_value,
+      '#options' => $enable_options,
+    );
+
+
+    // style
+    $form['mcneese_settings']['style'] = array(
+      '#type' => 'fieldset',
+      '#title' => t("Style Settings"),
+      '#weight' => 4,
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#tree' => TRUE,
+    );
+
+
+    // subtle information
+    $form['mcneese_settings']['style']['subtle_information'] = array(
+      '#type' => 'fieldset',
+      '#title' => t("Subtle Information Settings"),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#tree' => TRUE,
+    );
+
+
+    // background_colors
+    $form['mcneese_settings']['style']['subtle_information']['background_colors'] = array(
+      '#type' => 'checkbox',
+      '#title' => t("Enable background color status hints"),
+      '#description' => t("Changes the background color of a page to further emphasize or hint states of a page, such as draft or unpublished."),
+      '#default_value' => isset($account->data['mcneese_settings']['style']['subtle_information']['background_colors']) ? $account->data['mcneese_settings']['style']['subtle_information']['background_colors'] : TRUE,
+    );
+
+
+    // watermarks
+    $form['mcneese_settings']['style']['subtle_information']['watermarks'] = array(
+      '#type' => 'checkbox',
+      '#title' => t("Show status watermarks"),
+      '#description' => t("Adds a watermark to the margins of a page to mark the status of a page, such as draft or unpublished."),
+      '#default_value' => isset($account->data['mcneese_settings']['style']['subtle_information']['watermarks']) ? $account->data['mcneese_settings']['style']['subtle_information']['watermarks'] : TRUE,
+    );
+
+
+    // work area information
+    $form['mcneese_settings']['style']['work_area'] = array(
+      '#type' => 'fieldset',
+      '#title' => t("Work Area Settings"),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#tree' => TRUE,
+    );
+
+    // page_width
+    $form['mcneese_settings']['style']['work_area']['page_width'] = array(
+      '#type' => 'checkbox',
+      '#title' => t("Expand the page width to fit the screen"),
+      '#description' => t("Alters the page width to expand based on your browsers size. When off, this will force a fixed/preset width exactly as public user see."),
+      '#default_value' => isset($account->data['mcneese_settings']['style']['work_area']['page_width']) ? $account->data['mcneese_settings']['style']['work_area']['page_width'] : TRUE,
+    );
+
+    // page_width-toggle
+    $form['mcneese_settings']['style']['work_area']['page_width-toggle'] = array(
+      '#type' => 'checkbox',
+      '#title' => t("Show page width toggle icon"),
+      '#description' => t("When enabled, an icon appears that allows for temporarilly toggling the page width settings for the current page.."),
+      '#default_value' => isset($account->data['mcneese_settings']['style']['work_area']['page_width-toggle']) ? $account->data['mcneese_settings']['style']['work_area']['page_width-toggle'] : TRUE,
+    );
+  }
+}
+
+/**
+ * Implements hook_user_presave().
+ */
+function mcneese_users_user_presave(&$edit, $account, $category) {
+  global $base_path;
+
+  if (isset($edit['mcneese_settings'])) {
+    $edit['data']['mcneese_settings'] = $edit['mcneese_settings'];
+
+    setcookie('Drupal.toolbar.collapsed', !$edit['mcneese_settings']['navigation']['toolbar']['shortcuts'], NULL, $base_path);
+  }
+}
+
+/**
+ * @} End of '@defgroup mcneese_user McNeese Users'.
+ */

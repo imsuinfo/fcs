@@ -1,0 +1,87 @@
+<?php
+
+/**
+ * @file
+ * McNeese State University Content module.
+ */
+
+/**
+ * @defgroup mcneese_statistics McNeese Statistics
+ * @{
+ * Provides content functionality and changes to drupal 7.
+ */
+
+/**
+ * Implements hook_permission().
+ */
+function mcneese_statistics_permission() {
+  $permissions = array();
+
+  $permissions['mcneese statistics'] = array(
+    'title' => t("Manage McNeese Statistics"),
+    'description' => t("Grants permissions to access the McNeese Statistics management page."),
+  );
+
+  $permissions['mcneese statistics broken links'] = array(
+    'title' => t("Access all McNeese Broken Links"),
+    'description' => t("Grants permissions to view McNeese broken link statistics"),
+  );
+
+  $permissions['mcneese statistics tracking'] = array(
+    'title' => t("Access all McNeese Tracking"),
+    'description' => t("Grants permissions to view McNeese tracking statistics"),
+  );
+
+
+  return $permissions;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function mcneese_statistics_menu() {
+  $items = array();
+
+  $items['admin/content/management/statistics'] = array(
+    'title' => "Emergency",
+    'description' => "View statistical information for this website.",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mcneese_statistics_main_page'),
+    'file' => 'mcneese_statistics_main_page.inc',
+    'file path' => drupal_get_path('module', 'mcneese_statistics') . '/pages',
+    'access callback' => 'user_access',
+    'access arguments' => array('mcneese statistics'),
+    'tab_parent' => 'admin/content/management',
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  $items['admin/content/management/statitics/broken_links'] = array(
+    'title' => "Broken Links",
+    'description' => "View and manage broken links.",
+    'page callback' => 'mcneese_statistics_broken_links_page',
+    'file' => 'mcneese_statistics_broken_links_page.inc',
+    'file path' => drupal_get_path('module', 'mcneese_statistics') . '/pages',
+    'access callback' => 'user_access',
+    'access arguments' => array('mcneese statistics broken links'),
+    'tab_parent' => 'admin/content/management',
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  $items['admin/content/management/statitics/tracking'] = array(
+    'title' => "Tracking",
+    'description' => "View and manage tracking information.",
+    'page callback' => 'mcneese_statistics_tracking_page',
+    'file' => 'mcneese_statistics_tracking_page.inc',
+    'file path' => drupal_get_path('module', 'mcneese_statistics') . '/pages',
+    'access callback' => 'user_access',
+    'access arguments' => array('mcneese statistics tracking'),
+    'tab_parent' => 'admin/content/management',
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  return $items;
+}
+
+/**
+ * @} End of '@defgroup mcneese_statistics McNeese Statistics'.
+ */

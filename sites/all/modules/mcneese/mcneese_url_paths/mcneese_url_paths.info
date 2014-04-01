@@ -1,0 +1,19 @@
+name = McNeese - Url Path
+description = "Provides url path handling for McNeese State University"
+core = 7.x
+php = 5.3
+package = McNeese
+
+# project is not hosted on drupal.org, so manual versioning is needed.
+version = "7.x-1.0"
+
+dependencies[] = cf (7.x-2.x)
+dependencies[] = cf_error (7.x-2.x)
+dependencies[] = workbench_access
+dependencies[] = workbench_moderation
+dependencies[] = workbench_menu
+dependencies[] = rules
+
+files[] = mcneese_url_paths.module
+files[] = mcneese_url_paths.rules.inc
+files[] = classes/mcneese_url_paths_handler.php

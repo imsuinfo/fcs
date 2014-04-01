@@ -1,0 +1,130 @@
+<?php
+
+/**
+ * @file
+ * Installation file for mcneese_statistics module.
+ */
+
+/**
+ * Implementation of hook_schema().
+ */
+function mcneese_statistics_schema() {
+  $schema = array();
+
+  $t = get_t();
+
+  $schema['mcneese_statistics_broken_links'] = array(
+    'description' => $t("Links defined in the mcneese_statistics module."),
+    'fields' => array(
+      'id' => array(
+        'description' => $t("The primary key used to represent a link."),
+        'type' => 'serial',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'scheme' => array(
+        'description' => 'URL Scheme.',
+        'type' => 'varchar',
+        'size' => 31,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'host' => array(
+        'description' => 'URL Host.',
+        'type' => 'varchar',
+        'size' => 127,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'port' => array(
+        'description' => 'URL Port Number.',
+        'type' => 'int',
+        'size' => 'normal',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'path' => array(
+        'description' => 'URL path.',
+        'type' => 'varchar',
+        'size' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'query' => array(
+        'description' => 'URL Query.',
+        'type' => 'varchar',
+        'size' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'fragment' => array(
+        'description' => 'URL fragment.',
+        'type' => 'varchar',
+        'size' => 63,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+  );
+
+  $schema['mcneese_statistics_broken_links_node'] = array(
+    'description' => $t("A list of nodes a given link is associated with."),
+    'fields' => array(
+      'link_id' => array(
+        'description' => $t("The primary key used to represent a link."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'nid' => array(
+        'description' => 'The current node identifier.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+        'default' => NULL,
+      ),
+    ),
+    'foreign keys' => array(
+      'link_id' => array(
+        'table' => 'mcneese_statistics_broken_links',
+        'columns' => array('link_id' => 'id'),
+      ),
+      'node' => array(
+        'table' => 'node',
+        'columns' => array('nid' => 'nid'),
+      ),
+    ),
+  );
+
+  $schema['mcneese_statistics_broken_links_block'] = array(
+    'description' => $t("A list of blocks a given link is associated with (for custom blocks only)."),
+    'fields' => array(
+      'link_id' => array(
+        'description' => $t("The primary key used to represent a link."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'bid' => array(
+        'description' => 'The current node identifier.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+        'default' => NULL,
+      ),
+    ),
+    'foreign keys' => array(
+      'link_id' => array(
+        'table' => 'mcneese_statistics_broken_links',
+        'columns' => array('link_id' => 'id'),
+      ),
+      'bid' => array(
+        'table' => 'block_custom',
+        'columns' => array('bid' => 'bid'),
+      ),
+    ),
+  );
+}

@@ -1,0 +1,111 @@
+<?php
+
+/**
+ * @file
+ * McNeese State University Initialization module.
+ *
+ * This is based on the globalredirect module.
+ * Code from the globalredirect module has been used.
+ */
+
+/**
+ * @defgroup mcneese_init McNeese Initialization
+ * @{
+ * Provides block functionality and changes to drupal 7.
+ */
+
+/**
+ * Implements hook_init().
+ */
+function mcneese_init_init() {
+  mcneese_init_rewrite_url();
+
+  drupal_add_js(drupal_get_path('module', 'mcneese_init') . '/js/jquery_ui.js', array('type' => 'file', 'group' => JS_DEFAULT, 'preprocess' => TRUE));
+}
+
+/**
+ * Rewrites the URL to more user-friendly names.
+ *
+ * This is heavily based on the globalredirect module.
+ * Code from the globalredirect module has been used.
+ */
+function mcneese_init_rewrite_url() {
+  global $language;
+
+  // We need to do a test to make sure we only clean up URL's for the main
+  // request. This stops modules such as the Ad Module which had its own script
+  // in its folder doing a bootstrap which invoked hook_init() and caused some
+  // banners to get "cleaned up"
+  // @see http://drupal.org/node/205810
+  // @see http://drupal.org/node/278615
+  if ($_SERVER['SCRIPT_NAME'] != $GLOBALS['base_path'] . 'index.php') return;
+
+  // If this is a command line request (Drush, etc), skip processing.
+  if (drupal_is_cli()) return;
+
+  // If the site is in offline mode there is little point doing any of this as
+  // you might end up redirecting to a 503.
+  if (variable_get('site_offline', 0) == 1) return;
+
+  // If there is something posted, do nothing.
+  if (!empty($_POST)) return;
+
+  // do nothing for the frontpage
+  if (drupal_is_front_page()) return;
+
+  // Under certain conditions Apache's RewriteRule directive prepends the value
+  // assigned to $_GET['q'] with a slash. Moreover we can always have a trailing
+  // slash in place, hence we need to normalize $_GET['q'].
+  $request_path = ltrim(request_path(), '/');
+  $current_path = current_path();
+
+  // Get the query string parameters. If none set, set to NULL
+  $query_string = drupal_get_query_parameters();
+  if (empty($query_string)) {
+    $query_string = NULL;
+  }
+
+  // Establish the language prefix that should be used, ie. the one that
+  // drupal_goto() would use
+  $options = array(
+    'fragment' => '',
+    'query' => $query_string,
+    'absolute' => FALSE,
+    'alias' => FALSE,
+    'prefix' => '',
+    'external' => FALSE,
+  );
+
+  // Allow Drupal to rewrite the URL
+  // Most commonly this will be used to invoke locale_language_url_rewrite_url().
+  // Via the locale_url_outbound_alter() implementation of hook_url_outbound_alter().
+  // NOTE: We use $request_path here as current_path() is $_GET['q'] which gets
+  //       altered by core, whereas $request_path is untouched
+  drupal_alter('url_outbound', $request_path, $options, $request_path);
+
+  // Extract the prefix from the options.
+  $prefix = rtrim($options['prefix'], '/');
+
+  // Find an alias (if any) for the request
+  $langcode = isset($options['language']->language) ? $options['language']->language : '';
+  $alias = drupal_get_path_alias($current_path, $langcode);
+
+  // if there is no alias, then there is nothing to do.
+  if (empty($alias)) return;
+  
+  // Modules may alter outbound links by reference
+  drupal_alter('url_outbound', $alias, $options, $current_path);
+
+  if ($prefix) {
+    $prefix .= '/';
+  }
+
+  // do not redirect for the same path
+  if (strcmp($alias, $request_path) == 0) return;
+
+  drupal_goto($alias, $options, 302);
+}
+
+/**
+ * @} End of '@defgroup mcneese_init McNeese Initialization'.
+ */

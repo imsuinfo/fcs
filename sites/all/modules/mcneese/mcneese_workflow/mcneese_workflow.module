@@ -1,0 +1,85 @@
+<?php
+
+/**
+ * @file
+ * McNeese State University Workflow module.
+ */
+
+/**
+ * @defgroup mcneese_workflow McNeese Workflow
+ * @{
+ * Provides Workflow functionality and changes to drupal 7.
+ */
+
+/**
+ * Allows modules to respond to state transitions.
+ *
+ * The standard mcneese workflow states are:
+ * - draft
+ * - needs_review
+ * - needs_work
+ * - needs_accessibility_validation
+ * - published
+ *
+ * @param $node
+ *  The node that is being transitioned.
+ *
+ * @param $previous_state
+ *  The state of the revision before the transition occurred.
+ *
+ * @param $new_state
+ *  The new state of the revision.
+ */
+function mcneese_workflow_workbench_moderation_transition($node, $previous_state, $new_state) {
+  if (!is_object($node)) {
+    cf_error::invalid_object('node');
+    return;
+  }
+
+  $details = 'For details visit ' . l("Node Revision Accessibility Information", 'node/' . $node->nid . '/accessibility/' . $node->vid . '/revision');
+
+  if ($new_state == 'needs_accessibility_validation') {
+    if (node_accessibility_is_enabled($node->type)) {
+      $no_major = TRUE;
+      $no_minor = TRUE;
+      $no_suggestions = TRUE;
+
+      $validation_results = actions_do('node_accessibility_validate_action', $node);
+
+      // major accessibility problems
+      if (isset($validation_results['node_accessibility_validate_action'][1]['total'])) {
+        $no_major = $validation_results['node_accessibility_validate_action'][1]['total'] == 0;
+      }
+
+      // minor accessibility problems
+      if (isset($validation_results['node_accessibility_validate_action'][2]['total'])){
+        $no_minor = $validation_results['node_accessibility_validate_action'][2]['total'] == 0;
+      }
+
+      // accessibility suggestions
+      /*
+      if (isset($validation_results['node_accessibility_validate_action'][3]['total'])){
+        $no_suggestions = $validation_results['node_accessibility_validate_action'][3]['total'] == 0;
+      }
+      */
+
+      if ($no_major) {
+        actions_do('workbench_moderation_set_state_action', $node, array('state' => 'published', 'force_transition' => TRUE));
+      }
+      else {
+        $message = '<strong>%title</strong> (node %nid, revision %vid) has failed accessibility validation and contains major accessibility issues.<br>';
+        actions_do('workbench_moderation_set_state_action', $node, array('state' => 'needs_work', 'force_transition' => TRUE));
+        drupal_set_message(t($message . $details, array('%title' => $node->title, '%nid' => $node->nid, '%vid' => $node->vid)), 'error');
+      }
+
+      if (!$no_minor) {
+        $message = '<strong>%title</strong> (node %nid, revision %vid) contains minor accessibility issues.<br>';
+        drupal_set_message(t($message . $details, array('%title' => $node->title, '%nid' => $node->nid, '%vid' => $node->vid)), 'warning');
+      }
+    }
+  }
+}
+
+/**
+ * @} End of '@defgroup mcneese_workflow McNeese Workflow'.
+ */

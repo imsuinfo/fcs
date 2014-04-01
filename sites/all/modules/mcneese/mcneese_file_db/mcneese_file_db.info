@@ -1,0 +1,19 @@
+name = McNeese File Database
+description = "Provides stream wrappers that stores the files in a database."
+core = 7.x
+php = 5.3
+package = McNeese
+
+# project is not hosted on drupal.org, so manual versioning is needed.
+version = "7.x-1.0"
+
+dependencies[] = cf (7.x-2.x)
+dependencies[] = cf_settings (7.x-2.x)
+dependencies[] = file_entity
+
+files[] = classes/mcneese_file_db_stream_wrapper.inc
+files[] = classes/mcneese_file_db_unrestricted_stream_wrapper.inc
+files[] = classes/mcneese_file_db_restricted_stream_wrapper.inc
+files[] = pages/mcneese_file_db.image.inc
+files[] = mcneese_file_db.module
+files[] = mcneese_file_db.install

@@ -1,0 +1,878 @@
+<?php
+
+/**
+ * @file
+ * McNeese State University Functions module.
+ */
+
+/**
+ * @defgroup mcneese_front_page McNeese Front Page
+ * @{
+ * Provides content functionality and changes to drupal 7.
+ */
+
+/**
+ * Generates and returns the front page featured.
+ *
+ * This responds to the emergency mode level 2.
+ *
+ * This depends on:
+ * - cycle2 javascrupt library.
+ *
+ * @return array
+ *   An array containing the HTML markup for the featured region.
+ *   The markup is stored in 'markup'.
+ *   Additional fields are provided as needed.
+ */
+function mcneese_front_page_embed_featured() {
+  // Process the emergency settings to see if the front page slider should be presented or not.
+  if (function_exists('mcneese_management_get_emergency_node')) {
+    $emergency = mcneese_management_get_emergency_mode(2);
+
+    // in an emergency, present the emergency node.
+    if ($emergency) {
+      $nid = mcneese_management_get_emergency_node(2);
+
+      if ($nid == 0) return array('markup' => NULL);
+
+      $node = node_load($nid);
+
+      if (isset($node->body['und'][0]['value']) && !empty($node->body['und'][0]['format'])) {
+        return check_markup($node->body['und'][0]['value'], $node->body['und'][0]['format']);
+      }
+
+      return array('markup' => NULL);
+    }
+  }
+
+  $cycle2 = libraries_load('cycle2');
+  if (empty($cycle2['loaded'])) {
+    if (class_exists('cf_error')) {
+      cf_error::failed_to_load('cycle2');
+    }
+  }
+
+  drupal_add_js(drupal_get_path('module', 'mcneese_front_page') . '/js/mcneese_front_page-featured.js', array('type' => 'file', 'group' => JS_DEFAULT, 'weight' => 20, 'preprocess' => TRUE));
+
+  $cache_id = __function__;
+  $cache_expire = '+1 week';
+  $return_array = &drupal_static($cache_id, array('markup' => NULL));
+  if (isset($return_array['markup']) && !is_null($return_array['markup'])) {
+    return $return_array;
+  }
+  else {
+    if ($cache = cache_get($cache_id, 'cache_page')){
+      return $cache->data;
+    }
+  }
+
+  // load all images
+  $results = array();
+  try {
+    $query = db_select('workbench_moderation_node_history', 'wmnh');
+
+    $query->innerJoin('field_revision_field_order_date', 'frfod', '(wmnh.published = 1 AND wmnh.nid = frfod.entity_id AND wmnh.vid = frfod.revision_id)');
+    $query->innerJoin('field_revision_field_featured', 'frff', '(wmnh.published = 1 AND frff.field_featured_value = 1 AND wmnh.nid = frff.entity_id AND wmnh.vid = frff.revision_id)');
+    $query->innerJoin('field_revision_field_featured_image', 'frffi', '(wmnh.published = 1 AND wmnh.nid = frffi.entity_id AND wmnh.vid = frffi.revision_id)');
+    $query->innerJoin('field_revision_field_headline', 'frfh', '(wmnh.published = 1 AND wmnh.nid = frfh.entity_id AND wmnh.vid = frfh.revision_id)');
+
+    $query->leftJoin('field_revision_field_featured_thumbnail', 'frfft', '(wmnh.published = 1 AND wmnh.nid = frfft.entity_id AND wmnh.vid = frfft.revision_id)');
+    $query->leftJoin('node_revision', 'nr', '(wmnh.published = 1 AND wmnh.nid = nr.nid AND wmnh.vid = nr.vid)');
+    $query->leftJoin('killfile_nodes', 'kn', '(wmnh.published = 1 AND wmnh.nid = kn.nid)');
+
+    $query->fields('wmnh', array('nid', 'vid'));
+    $query->fields('nr', array('title'));
+    $query->fields('frfod', array('field_order_date_value'));
+    $query->fields('frfh', array('field_headline_value', 'field_headline_format'));
+    $query->fields('frffi', array('field_featured_image_fid', 'field_featured_image_alt'));
+    $query->fields('frfft', array('field_featured_thumbnail_fid', 'field_featured_thumbnail_alt'));
+
+    $query->condition('wmnh.published', 1);
+    $query->condition('frff.field_featured_value', 1);
+    $query->isNull('kn.nid');
+
+    $query->range(0, 6);
+    $query->orderBy('frfod.field_order_date_value', 'DESC');
+
+    $executed = $query->execute();
+    $results = (array) $executed->fetchAll();
+  }
+  catch (Exception $e) {
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
+    }
+  }
+
+  $return_array = array();
+  $base_path = base_path();
+
+
+  // build the html
+  $attributes = array();
+  $attributes['class'] = array();
+  $attributes['class'][] = 'mcneese-front_page-featured-image';
+  $attributes['class'][] = 'cycle-slideshow';
+  $attributes['class'][] = 'noscript';
+
+  $attributes['data-cycle-pause-on-hover'] = 'true';
+  $attributes['data-cycle-speed'] = '400';
+  $attributes['data-cycle-timeout'] = '12000';
+  $attributes['data-cycle-pause-on-hover'] = 'true';
+
+  $attributes['data-cycle-overlay-template'] = '<div class="mcneese-front_page-featured-image-overlay-title">{{title}}</div><div class="mcneese-front_page-featured-image-overlay-description">{{desc}}</div>';
+
+  $attributes['data-cycle-next'] = '#mcneese-front_page-featured-image-next';
+  $attributes['data-cycle-prev'] = '#mcneese-front_page-featured-image-previous';
+
+  $return_array['markup'] = '<div id="mcneese-front_page-featured">';
+  $return_array['markup'] .= '  <div' . drupal_attributes($attributes) .'>';
+
+  $count = 0;
+  $image_thumbnails = array();
+  foreach ($results as &$result) {
+    if (empty($result->field_featured_image_fid)) {
+      continue;
+    }
+
+    $fids = array();
+    $fids['image'] = '';
+    if (property_exists($result, 'field_featured_image_fid')) {
+      $fids['image'] = $result->field_featured_image_fid;
+    }
+
+    if (empty($result->field_featured_thumbnail_fid)) {
+      $fids['thumbnail'] = $fids['image'];
+    }
+    else {
+      $fids['thumbnail'] = $result->field_featured_thumbnail_fid;
+    }
+
+    try {
+      $query = db_select('file_managed', 'fm');
+      $query->fields('fm', array('fid', 'uri'));
+      $query->condition('fm.fid', $fids, 'IN');
+      $query->distinct();
+
+      $executed = $query->execute();
+      $urls = $executed->fetchAllKeyed();
+    }
+    catch (Exception $e) {
+      if (class_exists('cf_error')) {
+        cf_error::on_query_execution($e);
+      }
+
+      continue;
+    }
+
+    $image_attributes = array();
+    $image_attributes['src'] = image_style_url('featured', $urls[$fids['image']]);
+    $image_attributes['alt'] = '';
+    $image_attributes['data-cycle-title'] = '<a href="' . $base_path . 'node/' . $result->nid . '">' . check_plain($result->title) . '</a>';
+    $image_attributes['data-cycle-desc'] = check_markup($result->field_headline_value, $result->field_headline_format);
+    $image_attributes['width'] = 690;
+    $image_attributes['height'] = 379;
+
+    if (property_exists($result, 'field_featured_image_alt')) {
+      $image_attributes['alt'] = check_plain($result->field_featured_image_alt);
+    }
+
+    $thumbnail_attributes = array();
+    if ($fids['image'] == $fids['thumbnail']) {
+      $thumbnail_attributes['src'] = image_style_url('featured-thumbnail-alt', $urls[$fids['image']]);
+      $thumbnail_attributes['alt'] = $result->field_featured_image_alt;
+    }
+    else {
+      $thumbnail_attributes['src'] = image_style_url('featured-thumbnail', $urls[$fids['thumbnail']]);
+      $thumbnail_attributes['alt'] = $result->field_featured_thumbnail_alt;
+    }
+    $thumbnail_attributes['width'] = 130;
+    $thumbnail_attributes['height'] = 123;
+    $thumbnail_attributes['class'] = array();
+    $thumbnail_attributes['class'][] = 'mcneese-front_page-featured-thumbnail';
+
+    $image_thumbnails[] = $thumbnail_attributes;
+
+    $return_array['markup'] .= '  <img ' . drupal_attributes($image_attributes) . '>';
+
+    if ($count == 0) {
+      $return_array['markup'] .= '    <div class="mcneese-front_page-featured-image-overlay cycle-overlay">' ;
+      $return_array['markup'] .= '<div class="mcneese-front_page-featured-image-overlay-title">' . $image_attributes['data-cycle-title'] . '</div>';
+      $return_array['markup'] .= '<div class="mcneese-front_page-featured-image-overlay-description">' . $image_attributes['data-cycle-desc'] . '</div>';
+      $return_array['markup'] .= '</div>';
+
+      $return_array['markup'] .= '    <div id="mcneese-front_page-featured-image-previous" class="mcneese-front_page-featured-image-prevnext noscript" style="display: none;">Previous</div>';
+      $return_array['markup'] .= '    <div id="mcneese-front_page-featured-image-next" class="mcneese-front_page-featured-image-prevnext noscript" style="display: none;">Next</div>';
+    }
+
+    $count++;
+  }
+
+  $return_array['markup'] .= '</div>';
+
+  $count = 0;
+  $total = count($image_thumbnails);
+  $half = floor($total / 2);
+  $return_array['markup'] .= '  <div class="mcneese-front_page-featured-thumbnails">';
+  foreach ($image_thumbnails as &$thumbnail_attributes) {
+    $thumbnail_attributes['data-cycle-cmd'] = 'goto';
+    $thumbnail_attributes['data-cycle-arg'] = $count;
+
+    $thumbnail_attributes['class'][] = 'mcneese-front_page-featured-thumbnail-item_' . $count;
+
+    if ($count % 2 == 0) {
+      $thumbnail_attributes['class'][] = 'mcneese-front_page-featured-thumbnail-item_even';
+    }
+    else {
+      $thumbnail_attributes['class'][] = 'mcneese-front_page-featured-thumbnail-item_odd';
+    }
+
+    if ($count < $half) {
+      $thumbnail_attributes['class'][] = 'mcneese-front_page-featured-thumbnail-column_0';
+    }
+    else {
+      $thumbnail_attributes['class'][] = 'mcneese-front_page-featured-thumbnail-column_1';
+    }
+
+    $return_array['markup'] .= '  <img ' . drupal_attributes($thumbnail_attributes) . '>';
+    $count++;
+  }
+
+  $return_array['markup'] .= '  </div>';
+  $return_array['markup'] .= '</div>';
+
+  $reset_cache_interval = new DateTime($cache_expire);
+  cache_set($cache_id, $return_array, 'cache_page', $reset_cache_interval->getTimestamp());
+
+  return $return_array;
+}
+
+/**
+ * Generates and returns the front page highlight.
+ *
+ * This responds to the emergency mode level 1.
+ *
+ * @return array
+ *   The HTML markup for the highlight region.
+ *   The markup is stored in 'markup'.
+ *   Additional fields are provided as needed.
+ */
+function mcneese_front_page_embed_highlight() {
+  // Process the emergency settings to see if the front page slider should be presented or not.
+  $return_array = array();
+  $return_array['markup'] = NULL;
+  $return_array['event'] = NULL;
+
+  $return_array['emergency'] = FALSE;
+  if (function_exists('mcneese_management_get_emergency_node')) {
+    $emergency = mcneese_management_get_emergency_mode(1);
+
+    // in an emergency, present the emergency node.
+    if ($emergency) {
+      $nid = mcneese_management_get_emergency_node(1);
+
+      if ($nid == 0) return $return_array;
+
+      $return_array['emergency'] = TRUE;
+      $node = node_load($nid);
+
+      // contruct result to mimic the expected results query structure.
+      $result = new stdClass();
+      $result->nid = $node->nid;
+      $result->vid = $node->vid;
+      $result->title = $node->title;
+      $node->field_title_short = '';
+      $node->body_value = '';
+      $node->body_format = '';
+      $node->body_summary = '';
+      $node->field_event_datetime_value = NULL;
+      $node->field_event_datetime_value2 = NULL;
+      $node->field_event_datetime_value = NULL;
+      $node->field_order_date_value = NULL;
+      $node->field_hightlight_image_fid = NULL;
+      $node->field_hightlight_image_alt = NULL;
+      $node->field_hightlight_image_title = NULL;
+
+      if (isset($node->field_title_short['und'][0]['value'])) {
+        $result->field_title_short_value = $node->field_title_short['und'][0]['value'];
+      }
+
+      if (isset($node->body['und'][0]['value'])) {
+        $result->body_value = $node->body['und'][0]['value'];
+      }
+
+      if (isset($node->body['und'][0]['format'])) {
+        $result->body_format = $node->body['und'][0]['format'];
+      }
+
+      if (isset($node->body['und'][0]['summary'])) {
+        $result->body_summary = $node->body['und'][0]['summary'];
+      }
+
+      if (isset($node->field_order_date['und'][0]['value'])) {
+        $result->field_order_date_value = $node->field_order_date['und'][0]['value'];
+      }
+
+      if (isset($node->field_hightlight_image['und'][0]['fid'])) {
+        $result->field_hightlight_image_fid = $node->field_hightlight_image['und'][0]['fid'];
+      }
+
+      if (isset($node->field_hightlight_image['und'][0]['field_file_image_alt_text']['und'][0]['value'])) {
+        $result->field_hightlight_image_alt = $node->field_hightlight_image['und'][0]['field_file_image_alt_text']['und'][0]['value'];
+      }
+
+      if (isset($node->field_hightlight_image['und'][0]['field_file_image_title_text']['und'][0]['value'])) {
+        $result->field_hightlight_image_title = $node->field_hightlight_image['und'][0]['field_file_image_title_text']['und'][0]['value'];
+      }
+    }
+  }
+
+  if (!$return_array['emergency']) {
+    $cache_id = __function__;
+    $cache_expire = '+1 week';
+    $return_array = &drupal_static($cache_id, $return_array);
+    if (isset($return_array['markup']) && !is_null($return_array['markup'])) {
+      return $return_array;
+    }
+    else {
+      if ($cache = cache_get($cache_id, 'cache_page')){
+        return $cache->data;
+      }
+    }
+
+    // load all images
+    $results = array();
+    try {
+      $query = db_select('workbench_moderation_node_history', 'wmnh');
+
+      $query->innerJoin('field_revision_field_order_date', 'frfod', '(wmnh.published = 1 AND wmnh.nid = frfod.entity_id AND wmnh.vid = frfod.revision_id)');
+
+      $query->leftJoin('field_revision_field_highlight', 'frfh', '(wmnh.published = 1 AND frfh.field_highlight_value = 1 AND wmnh.nid = frfh.entity_id AND wmnh.vid = frfh.revision_id)');
+      $query->leftJoin('field_revision_field_hightlight_image', 'frfhi', '(wmnh.published = 1 AND wmnh.nid = frfhi.entity_id AND wmnh.vid = frfhi.revision_id)');
+      $query->leftJoin('field_revision_field_title_short', 'frfts', '(wmnh.published = 1 AND wmnh.nid = frfts.entity_id AND wmnh.vid = frfts.revision_id)');
+      $query->leftJoin('field_revision_body', 'frb', '(wmnh.published = 1 AND wmnh.nid = frb.entity_id AND wmnh.vid = frb.revision_id)');
+      //$query->leftJoin('field_revision_field_event_datetime', 'frfed', '(wmnh.published = 1 AND wmnh.nid = frfed.entity_id AND wmnh.vid = frfed.revision_id)');
+
+      $query->leftJoin('node_revision', 'nr', '(wmnh.published = 1 AND wmnh.nid = nr.nid AND wmnh.vid = nr.vid)');
+      $query->leftJoin('killfile_nodes', 'kn', '(wmnh.published = 1 AND wmnh.nid = kn.nid)');
+
+      $query->fields('wmnh', array('nid', 'vid'));
+      $query->fields('nr', array('title'));
+      $query->fields('frfts', array('field_title_short_value'));
+      $query->fields('frb', array('body_value', 'body_format', 'body_summary'));
+      //$query->fields('frfed', array('field_event_datetime_value', 'field_event_datetime_value2', 'field_event_datetime_rrule'));
+      $query->fields('frfod', array('field_order_date_value'));
+      $query->fields('frfhi', array('field_hightlight_image_fid', 'field_hightlight_image_alt', 'field_hightlight_image_title'));
+
+      $query->condition('wmnh.published', 1);
+      $query->condition('frfh.field_highlight_value', 1);
+      $query->isNull('kn.nid');
+
+      $query->range(0, 1);
+      $query->orderBy('frfod.field_order_date_value', 'DESC');
+
+      $executed = $query->execute();
+      $result = $executed->fetchObject();
+    }
+    catch (Exception $e) {
+      if (class_exists('cf_error')) {
+        cf_error::on_query_execution($e);
+      }
+    }
+  }
+
+  $base_path = base_path();
+
+
+  // build the html
+  $attributes = array();
+  $attributes['class'] = array();
+  $attributes['class'][] = 'mcneese-front_page-highlight';
+
+  if (is_object($result)) {
+    $image = file_load((int)$result->field_hightlight_image_fid);
+
+    $link_attributes = array();
+    $link_attributes['href'] = $base_path . 'node/' . (int) $result->nid;
+    $link_attributes['class'] = array();
+    $link_attributes['class'][] = 'mcneese-front_page-highlight-link';
+
+    $image_attributes = array();
+    $image_attributes['src'] = image_style_url('highlight', $image->uri);
+    $image_attributes['class'] = array();
+    $image_attributes['class'][] = 'mcneese-front_page-highlight-image';
+    $image_attributes['width'] = 585;
+    $image_attributes['height'] = 200;
+
+    if (property_exists($result, 'field_hightlight_image_alt')) {
+      $image_attributes['alt'] = $result->field_hightlight_image_alt;
+    }
+
+    if (empty($image_attributes['alt'])) {
+      $image_attributes['alt'] = check_plain($image->alt);
+    }
+
+    $image_attributes['title'] = check_plain($result->title);
+    if (empty($image_attributes['title'])) {
+      $image_attributes['title'] = check_plain($result->field_hightlight_image_title);
+    }
+
+    $return_array['markup'] = '<div ' . drupal_attributes($attributes) . '>';
+    $return_array['markup'] .= '  <a ' . drupal_attributes($link_attributes) . '>';
+    $return_array['markup'] .= '    <img ' . drupal_attributes($image_attributes) . '>';
+    $return_array['markup'] .= '  </a>';
+    $return_array['markup'] .= '</div>';
+
+    $return_array['event'] = $result;
+  }
+
+  if (!$return_array['emergency']) {
+    $reset_cache_interval = new DateTime($cache_expire);
+    cache_set($cache_id, $return_array, 'cache_page', $reset_cache_interval->getTimestamp());
+  }
+
+  return $return_array;
+}
+
+/**
+ * Generates and returns the front page news and events.
+ *
+ * This responds to the emergency mode level 1.
+ *
+ * @param array $highlight
+ *   The highlight results as returned by
+ *   mcneese_front_page_embed_highlight()
+ *
+ * @return array
+ *   The HTML markup for the highlight region.
+ *   The markup is stored in 'markup'.
+ *   Additional fields are provided as needed.
+ *
+ * @see: mcneese_front_page_embed_highlight().
+ */
+function mcneese_front_page_embed_events($highlight) {
+  if (!array_key_exists('emergency', $highlight) || !$highlight['emergency']) {
+    $cache_id = __function__;
+    $cache_expire = '+1 week';
+    $return_array = &drupal_static($cache_id, array('markup' => NULL));
+    if (isset($return_array['markup']) && !is_null($return_array['markup'])) {
+      return $return_array;
+    }
+    else {
+      if ($cache = cache_get($cache_id, 'cache_page')){
+        return $cache->data;
+      }
+    }
+  }
+
+  // load all images
+  $results = array();
+  try {
+    $query = db_select('workbench_moderation_node_history', 'wmnh');
+
+    $query->innerJoin('field_revision_field_order_date', 'frfod', '(wmnh.published = 1 AND wmnh.nid = frfod.entity_id AND wmnh.vid = frfod.revision_id)');
+
+    $query->leftJoin('field_revision_field_event', 'frfe', '(wmnh.published = 1 AND frfe.field_event_value = 1 AND wmnh.nid = frfe.entity_id AND wmnh.vid = frfe.revision_id)');
+    $query->leftJoin('field_revision_field_event_image', 'frfei', '(wmnh.published = 1 AND wmnh.nid = frfei.entity_id AND wmnh.vid = frfei.revision_id)');
+    $query->leftJoin('field_revision_field_title_short', 'frfts', '(wmnh.published = 1 AND wmnh.nid = frfts.entity_id AND wmnh.vid = frfts.revision_id)');
+    $query->leftJoin('field_revision_body', 'frb', '(wmnh.published = 1 AND wmnh.nid = frb.entity_id AND wmnh.vid = frb.revision_id)');
+    //$query->leftJoin('field_revision_field_event_datetime', 'frfed', '(wmnh.published = 1 AND wmnh.nid = frfed.entity_id AND wmnh.vid = frfed.revision_id)');
+
+
+    $query->leftJoin('node_revision', 'nr', '(wmnh.published = 1 AND wmnh.nid = nr.nid AND wmnh.vid = nr.vid)');
+    $query->leftJoin('killfile_nodes', 'kn', '(wmnh.published = 1 AND wmnh.nid = kn.nid)');
+
+    $query->fields('wmnh', array('nid', 'vid'));
+    $query->fields('nr', array('title'));
+    $query->fields('frfts', array('field_title_short_value'));
+    $query->fields('frb', array('body_value', 'body_format', 'body_summary'));
+    //$query->fields('frfed', array('field_event_datetime_value', 'field_event_datetime_value2', 'field_event_datetime_rrule'));
+    $query->fields('frfod', array('field_order_date_value'));
+    $query->fields('frfei', array('field_event_image_fid', 'field_event_image_alt'));
+
+    $query->condition('wmnh.published', 1);
+    $query->condition('frfe.field_event_value', 1);
+    $query->isNull('kn.nid');
+
+    if (isset($highlight['event']) && property_exists($highlight['event'], 'nid')) {
+      $query->condition('wmnh.nid', $highlight['event']->nid, '<>');
+    }
+
+    $query->range(0, 2);
+    $query->orderBy('frfod.field_order_date_value', 'DESC');
+
+    $executed = $query->execute();
+    $results = (array) $executed->fetchAll();
+  }
+  catch (Exception $e) {
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
+    }
+  }
+
+  $base_path = base_path();
+
+
+  // build the html
+  if (isset($highlight['event']) && is_object($highlight['event'])) {
+    array_unshift($results, $highlight['event']);
+  }
+
+  $count = 0;
+  $total = count($results);
+
+  foreach ($results as &$result) {
+    if (!is_object($result)) {
+      continue;
+    }
+
+    if ($count == 0) {
+      $label = 'events';
+      $image_style = 'event';
+      $image_width = 209;
+      $image_height = 199;
+
+      $return_array['markup'] = '<div id="mcneese-front_page-events">';
+      $return_array['markup'] .=  '<div class="mcneese-front_page-events-event-highlight_placeholder"></div>';
+      $return_array['markup'] .= '<h3 class="mcneese-front_page-events-event-header"><a href="' . $base_path . 'news" title="Read More News &amp; Events">News &amp; Events</a></h3>';
+    }
+    elseif ($count == 2) {
+      $label = 'lagniappe';
+      $image_style = 'lagniappe';
+      $image_width = 179;
+      $image_height = 170;
+
+      $return_array['markup'] .= '<div id="mcneese-front_page-lagniappe">';
+      $return_array['markup'] .= '<h3 class="mcneese-front_page-lagniappe-event-header">Lagniappe</h3>';
+    }
+
+    $attributes = array();
+    $attributes['class'] = array();
+    $attributes['class'][] = 'mcneese-front_page-' . $label . '-event';
+    $attributes['class'][] = 'mcneese-front_page-' . $label . '-event-' . $count;
+
+    if ($count % 2 == 0) {
+      $attributes['class'][] = 'mcneese-front_page-' . $label . '-event-even';
+    }
+    else {
+      $attributes['class'][] = 'mcneese-front_page-' . $label . '-event-odd';
+    }
+
+    $title = NULL;
+    $date = NULL;
+    $image = NULL;
+    $body = NULL;
+    $nid = NULL;
+
+    if (empty($result->field_title_short)) {
+      $title = check_plain($result->title);
+    }
+    else {
+      $title = check_plain($result->field_title_short);
+    }
+
+    if (!empty($result->field_event_datetime_value)) {
+      $timestamp = strtotime($result->field_event_datetime_value);
+      $date = format_date($timestamp, 'custom_formatters_node_event_date');
+    }
+
+    $nid = (int) $result->nid;
+
+    if (empty($result->body_summary)) {
+      $body = text_summary($result->body_value, 'custom_formatters_text_only');
+    }
+    else {
+      $body = check_markup($result->body_summary, 'full_html');
+    }
+
+    if ($count > 0 && property_exists($result, 'field_event_image_fid')) {
+      $image = file_load((int)$result->field_event_image_fid);
+    }
+
+    if (is_object($image)) {
+      $link_attributes = array();
+      $link_attributes['href'] = $base_path . 'node/' . $nid;
+      $link_attributes['class'] = array();
+      $link_attributes['class'][] = 'mcneese-front_page-' . $label . '-event-image_link';
+
+      $image_attributes = array();
+      $image_attributes['src'] = image_style_url($image_style, $image->uri);
+      $image_attributes['class'] = array();
+      $image_attributes['class'][] = 'mcneese-front_page-' . $label . '-event-image';
+      $image_attributes['width'] = $image_width;
+      $image_attributes['height'] = $image_height;
+
+      if (property_exists($result, 'field_event_image_alt')) {
+        $image_attributes['alt'] = $result->field_event_image_alt;
+      }
+
+      if (empty($image_attributes['alt'])) {
+        $image_attributes['alt'] = check_plain($image->alt);
+      }
+
+      $image_attributes['title'] = $title;
+    }
+    else {
+      $image = NULL;
+    }
+
+    if (empty($date)) {
+      $attributes['class'][] = 'mcneese-front_page-' . $label . '-event-no_date';
+    }
+    else {
+      $attributes['class'][] = 'mcneese-front_page-' . $label . '-event-has_date';
+    }
+
+    if (empty($image)) {
+      $attributes['class'][] = 'mcneese-front_page-' . $label . '-event-no_image';
+    }
+    else {
+      $attributes['class'][] = 'mcneese-front_page-' . $label . '-event-has_image';
+    }
+
+    $return_array['markup'] .= '<div' . drupal_attributes($attributes) .'>';
+
+    if (!is_null($image)) {
+      $return_array['markup'] .= '  <a ' . drupal_attributes($link_attributes) . '>';
+      $return_array['markup'] .= '    <img ' . drupal_attributes($image_attributes) . '>';
+      $return_array['markup'] .= '  </a>';
+    }
+
+    $return_array['markup'] .= '  <div class="mcneese-front_page-' . $label . '-event-body_wrapper">';
+    $return_array['markup'] .= '    <h4 class="mcneese-front_page-' . $label . '-event-title"><a href="' . $base_path . 'node/' . $nid . '">' . $title . '</h4>';
+
+    if (!is_null($date)) {
+      $return_array['markup'] .= '  <div class="mcneese-front_page-' . $label . '-event-date">' . $date . '</div>';
+    }
+
+    $return_array['markup'] .= '    <div class="mcneese-front_page-' . $label . '-event-body">';
+
+    if (is_null($image)) {
+      $return_array['markup'] .= $body;
+    }
+    else {
+      $return_array['markup'] .= '      <span class="mcneese-front_page-' . $label . '-event-body-text">' . $body . '</span>';
+    }
+
+    $return_array['markup'] .= '      <a class="mcneese-front_page-' . $label . '-event-body-more" href="' . $base_path . 'node/' . $nid . '" title="Read More on: ' . $title . '">...more</a>';
+    $return_array['markup'] .= '    </div>';
+    $return_array['markup'] .= '  </div>';
+    $return_array['markup'] .= '</div>';
+
+    if ($count == 1) {
+      $return_array['markup'] .= '</div>';
+    }
+    elseif ($count == 2) {
+      $return_array['markup'] .= '</div>';
+      break;
+    }
+
+    $count++;
+  }
+
+  if (!array_key_exists('emergency', $highlight) || !$highlight['emergency']) {
+    $reset_cache_interval = new DateTime($cache_expire);
+    cache_set($cache_id, $return_array, 'cache_page', $reset_cache_interval->getTimestamp());
+  }
+
+  return $return_array;
+}
+
+/**
+ * Generates and returns the front page spotlight.
+ *
+ * @return array
+ *   The HTML markup for the spotlight region.
+ *   The markup is stored in 'markup'.
+ *   Additional fields are provided as needed.
+ */
+function mcneese_front_page_embed_spotlight() {
+  $cache_id = __function__;
+  $cache_expire = '+1 week';
+  $return_array = &drupal_static($cache_id, array('markup' => NULL));
+  if (isset($return_array['markup']) && !is_null($return_array['markup'])) {
+    return $return_array;
+  }
+  else {
+    if ($cache = cache_get($cache_id, 'cache_page')){
+      return $cache->data;
+    }
+  }
+
+  // load all images
+  $results = array();
+  try {
+    $query = db_select('workbench_moderation_node_history', 'wmnh');
+
+    $query->innerJoin('field_revision_field_order_date', 'frfod', '(wmnh.published = 1 AND wmnh.nid = frfod.entity_id AND wmnh.vid = frfod.revision_id)');
+
+    $query->leftJoin('field_revision_field_spotlight', 'frfs', '(wmnh.published = 1 AND frfs.field_spotlight_value = 1 AND wmnh.nid = frfs.entity_id AND wmnh.vid = frfs.revision_id)');
+    $query->leftJoin('field_revision_field_spotlight_image', 'frfsi', '(wmnh.published = 1 AND wmnh.nid = frfsi.entity_id AND wmnh.vid = frfsi.revision_id)');
+    $query->leftJoin('field_revision_field_title_short', 'frfts', '(wmnh.published = 1 AND wmnh.nid = frfts.entity_id AND wmnh.vid = frfts.revision_id)');
+    $query->leftJoin('field_revision_body', 'frb', '(wmnh.published = 1 AND wmnh.nid = frb.entity_id AND wmnh.vid = frb.revision_id)');
+    //$query->leftJoin('field_revision_field_event_datetime', 'frfed', '(wmnh.published = 1 AND wmnh.nid = frfed.entity_id AND wmnh.vid = frfed.revision_id)');
+
+    $query->leftJoin('node_revision', 'nr', '(wmnh.published = 1 AND wmnh.nid = nr.nid AND wmnh.vid = nr.vid)');
+    $query->leftJoin('killfile_nodes', 'kn', '(wmnh.published = 1 AND wmnh.nid = kn.nid)');
+
+    $query->fields('wmnh', array('nid', 'vid'));
+    $query->fields('nr', array('title'));
+    $query->fields('frb', array('body_value', 'body_format', 'body_summary'));
+    //$query->fields('frfed', array('field_event_datetime_value', 'field_event_datetime_value2', 'field_event_datetime_rrule'));
+    $query->fields('frfod', array('field_order_date_value'));
+    $query->fields('frfsi', array('field_spotlight_image_fid', 'field_spotlight_image_alt'));
+
+    $query->condition('wmnh.published', 1);
+    $query->condition('frfs.field_spotlight_value', 1);
+    $query->isNull('kn.nid');
+
+    $query->range(0, 3);
+    $query->orderBy('frfod.field_order_date_value', 'DESC');
+
+    $executed = $query->execute();
+    $results = (array) $executed->fetchAll();
+  }
+  catch (Exception $e) {
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
+    }
+  }
+
+  $base_path = base_path();
+
+
+  // build the html
+  if (isset($highlight['event']) && is_object($highlight['event'])) {
+    array_unshift($results, $highlight['event']);
+  }
+
+  $count = 0;
+  $total = count($results);
+
+  $return_array['markup'] = '<div id="mcneese-front_page-spotlight">';
+  $return_array['markup'] .= '<h3 class="mcneese-front_page-spotlight-event-header"><a href="' . $base_path . 'news/spotlight" title="Read More on Spotlight">Spotlight</a></h3>';
+
+  foreach ($results as &$result) {
+    if (!is_object($result)) {
+      continue;
+    }
+
+    $attributes = array();
+    $attributes['class'] = array();
+    $attributes['class'][] = 'mcneese-front_page-spotlight-event';
+    $attributes['class'][] = 'mcneese-front_page-spotlight-event-' . $count;
+
+    if ($count % 2 == 0) {
+      $attributes['class'][] = 'mcneese-front_page-spotlight-event-even';
+    }
+    else {
+      $attributes['class'][] = 'mcneese-front_page-spotlight-event-odd';
+    }
+
+    $title = NULL;
+    $date = NULL;
+    $image = NULL;
+    $body = NULL;
+    $nid = NULL;
+
+    if (empty($result->field_title_short)) {
+      $title = check_plain($result->title);
+    }
+    else {
+      $title = check_plain($result->field_title_short);
+    }
+
+    if (!empty($result->field_event_datetime_value)) {
+      $timestamp = strtotime($result->field_event_datetime_value);
+      $date = format_date($timestamp, 'custom_formatters_node_event_date');
+    }
+
+    $nid = (int) $result->nid;
+
+    if (empty($result->body_summary)) {
+      $body = text_summary($result->body_value, 'custom_formatters_text_only');
+    }
+    else {
+      $body = check_markup($result->body_summary, 'full_html');
+    }
+
+    if (property_exists($result, 'field_spotlight_image_fid')) {
+      $image = file_load((int)$result->field_spotlight_image_fid);
+    }
+
+    if (is_object($image)) {
+      $link_attributes = array();
+      $link_attributes['href'] = $base_path . 'node/' . $nid;
+      $link_attributes['class'] = array();
+      $link_attributes['class'][] = 'mcneese-front_page-spotlight-event-image_link';
+
+      $image_attributes = array();
+      $image_attributes['src'] = image_style_url('spotlight', $image->uri);
+      $image_attributes['class'] = array();
+      $image_attributes['class'][] = 'mcneese-front_page-spotlight-event-image';
+      $image_attributes['width'] = 182;
+      $image_attributes['height'] = 153;
+
+      if (property_exists($result, 'field_spotlight_image_alt')) {
+        $image_attributes['alt'] = $result->field_spotlight_image_alt;
+      }
+
+      if (empty($image_attributes['alt'])) {
+        $image_attributes['alt'] = check_plain($image->alt);
+      }
+
+      $image_attributes['title'] = $title;
+    }
+    else {
+      $image = NULL;
+    }
+
+    if (empty($date)) {
+      $attributes['class'][] = 'mcneese-front_page-spotlight-event-no_date';
+    }
+    else {
+      $attributes['class'][] = 'mcneese-front_page-spotlight-event-has_date';
+    }
+
+    if (empty($image)) {
+      $attributes['class'][] = 'mcneese-front_page-spotlight-event-no_image';
+    }
+    else {
+      $attributes['class'][] = 'mcneese-front_page-spotlight-event-has_image';
+    }
+
+    $return_array['markup'] .= '<div' . drupal_attributes($attributes) .'>';
+
+    if (!is_null($image)) {
+      $return_array['markup'] .= '  <a ' . drupal_attributes($link_attributes) . '>';
+      $return_array['markup'] .= '    <img ' . drupal_attributes($image_attributes) . '>';
+      $return_array['markup'] .= '  </a>';
+    }
+
+    $return_array['markup'] .= '  <div class="mcneese-front_page-spotlight-event-body_wrapper">';
+    $return_array['markup'] .= '    <h4 class="mcneese-front_page-spotlight-event-title"><a href="' . $base_path . 'node/' . $nid . '">' . $title . '</h4>';
+
+    if (!is_null($date)) {
+      $return_array['markup'] .= '  <div class="mcneese-front_page-spotlight-event-date">' . $date . '</div>';
+    }
+
+    $return_array['markup'] .= '    <div class="mcneese-front_page-spotlight-event-body">';
+    $return_array['markup'] .= '      <span class="mcneese-front_page-spotlight-event-body-text">' . $body . '</span>';
+    $return_array['markup'] .= '      <a class="mcneese-front_page-spotlight-event-body-more" href="' . $base_path . 'node/' . $nid . '" title="Read More on: ' . $title . '">...more</a>';
+    $return_array['markup'] .= '    </div>';
+    $return_array['markup'] .= '  </div>';
+    $return_array['markup'] .= '</div>';
+
+    $count++;
+  }
+
+  $return_array['markup'] .= '</div>';
+
+  $reset_cache_interval = new DateTime($cache_expire);
+  cache_set($cache_id, $return_array, 'cache_page', $reset_cache_interval->getTimestamp());
+
+  return $return_array;
+}
+
+/**
+ * @} End of '@defgroup mcneese_front_page McNeese Front Page'.
+ */

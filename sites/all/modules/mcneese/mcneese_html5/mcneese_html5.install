@@ -1,0 +1,507 @@
+<?php
+
+/**
+ * @file
+ * Install file for mcneese_html5 module.
+ */
+
+/**
+ * @addtogroup mcneese_html5
+ * @{
+ */
+
+/**
+ * Implementation of hook_schema().
+ */
+function mcneese_html5_schema() {
+  $schema = array();
+  $t = get_t();
+  $types = array('semantic', 'media', 'canvas', 'form');
+
+  foreach ($types as $type) {
+    cf_db_options_create_options_schema('mcneese_html5', $type, $schema);
+    $name = cf_db_options_get_options_name('mcneese_html5', $type);
+
+    if ($name === FALSE) continue;
+
+    $schema[$name]['fields']['fallback'] = array(
+      'description' => $t("A pre-html5 fallback tag name."),
+      'type' => 'varchar',
+      'length' => 16,
+      'not null' => TRUE,
+    );
+  }
+
+  return $schema;
+}
+
+/**
+ * Implementation of hook_install().
+ */
+function mcneese_html5_install() {
+  $t = get_t();
+
+  $semantic = array();
+
+  $semantic[] = array(
+    'machine_name' => 'abbr',
+    'human_name' => $t("Abbreviation"),
+    'description' => $t("Defines an abbreviation."),
+    'fallback' => 'abbr',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'address',
+    'human_name' => $t("Address"),
+    'description' => $t("Defines an address."),
+    'fallback' => 'address',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'article',
+    'human_name' => $t("Article"),
+    'description' => $t("Defines an Article."),
+    'fallback' => 'div',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'aside',
+    'human_name' => $t("Aside"),
+    'description' => $t("Defines content aside from the page content."),
+    'fallback' => 'div',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'bdi',
+    'human_name' => $t("BDI"),
+    'description' => $t("Isolates a part of text that might be formatted in a different direction from other text outside it."),
+    'fallback' => 'span',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'blockquote',
+    'human_name' => $t("Block Quote"),
+    'description' => $t("Defines a long quotation."),
+    'fallback' => 'blockquote',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'cite',
+    'human_name' => $t("Cite"),
+    'description' => $t("Defines a citation."),
+    'fallback' => 'cite',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'command',
+    'human_name' => $t("Command"),
+    'description' => $t("Defines a command button that a user can invoke."),
+    'fallback' => 'button',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'code',
+    'human_name' => $t("Code"),
+    'description' => $t("Defines a block of computer code."),
+    'fallback' => 'code',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'del',
+    'human_name' => $t("Deleted"),
+    'description' => $t("Defines deleted text."),
+    'fallback' => 'del',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'details',
+    'human_name' => $t("Details"),
+    'description' => $t("Defines additional details that the user can view or hide."),
+    'fallback' => 'div',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'dfn',
+    'human_name' => $t("Definition"),
+    'description' => $t("Defines a definition term."),
+    'fallback' => 'div',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'div',
+    'human_name' => $t("Divider"),
+    'description' => $t("Defines a generic block."),
+    'fallback' => 'div',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'em',
+    'human_name' => $t("Emphasis"),
+    'description' => $t("Defines emphasized text."),
+    'fallback' => 'em',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'figure',
+    'human_name' => $t("Figure"),
+    'description' => $t("Specifies self-contained content, like illustrations, diagrams, photos, code listings, etc."),
+    'fallback' => 'div',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'figcaption',
+    'human_name' => $t("Figure Caption"),
+    'description' => $t("Defines a caption for a <figure> element."),
+    'fallback' => 'div',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'footer',
+    'human_name' => $t("Footer"),
+    'description' => $t("Defines a footer for a document or section."),
+    'fallback' => 'div',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'ins',
+    'human_name' => $t("Inserted"),
+    'description' => $t("Defines a inserted text."),
+    'fallback' => 'ins',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'kbd',
+    'human_name' => $t("Keyboard"),
+    'description' => $t("Defines keyboard input."),
+    'fallback' => 'kbd',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'header',
+    'human_name' => $t("Header"),
+    'description' => $t("Defines a header for a document or section."),
+    'fallback' => 'div',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'hgroup',
+    'human_name' => $t("Header Group"),
+    'description' => $t("Groups a set of <h1> to <h6> elements when a heading has multiple levels."),
+    'fallback' => 'div',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'menu',
+    'human_name' => $t("Menu"),
+    'description' => $t("Defines a list/menu of commands."),
+    'fallback' => 'mark',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'mark',
+    'human_name' => $t("Mark"),
+    'description' => $t("Defines marked/highlighted text."),
+    'fallback' => 'mark',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'meter',
+    'human_name' => $t("Meter"),
+    'description' => $t("Defines a scalar measurement within a known range (a gauge)."),
+    'fallback' => '',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'nav',
+    'human_name' => $t("Navigation"),
+    'description' => $t("Defines navigation links."),
+    'fallback' => 'div',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'ol',
+    'human_name' => $t("Ordered List"),
+    'description' => $t("Defines an ordered list."),
+    'fallback' => 'ol',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'p',
+    'human_name' => $t("Paragraph"),
+    'description' => $t("Defines a paragraph."),
+    'fallback' => 'p',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'pre',
+    'human_name' => $t("Preformatted"),
+    'description' => $t("Defines preformatted text."),
+    'fallback' => 'pre',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'progress',
+    'human_name' => $t("Progress"),
+    'description' => $t("Represents the progress of a task."),
+    'fallback' => '',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'q',
+    'human_name' => $t("Quote"),
+    'description' => $t("Defines a short quotation."),
+    'fallback' => 'q',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'ruby',
+    'human_name' => $t("Ruby"),
+    'description' => $t("Defines a ruby annotation (for East Asian typography)."),
+    'fallback' => 'span',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'rt',
+    'human_name' => $t("RT"),
+    'description' => $t("Defines an explanation/pronunciation of characters (for East Asian typography)."),
+    'fallback' => 'span',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'rp',
+    'human_name' => $t("RP"),
+    'description' => $t("Defines what to show in browsers that do not support ruby annotations."),
+    'fallback' => 'span',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'samp',
+    'human_name' => $t("Sample"),
+    'description' => $t("Defines sample computer output."),
+    'fallback' => 'samp',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'section',
+    'human_name' => $t("Section"),
+    'description' => $t("Defines a section in a document."),
+    'fallback' => 'div',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'span',
+    'human_name' => $t("Span"),
+    'description' => $t("Defines a generic inline structure."),
+    'fallback' => 'span',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'strong',
+    'human_name' => $t("Strong"),
+    'description' => $t("Defines strong text."),
+    'fallback' => 'strong',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'sub',
+    'human_name' => $t("Subscript"),
+    'description' => $t("Defines a subscript."),
+    'fallback' => 'sub',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'sup',
+    'human_name' => $t("Superscript"),
+    'description' => $t("Defines a superscript."),
+    'fallback' => 'sup',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'summary',
+    'human_name' => $t("Summary"),
+    'description' => $t("Defines a visible heading for a <details> element."),
+    'fallback' => 'div',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'time',
+    'human_name' => $t("Time"),
+    'description' => $t("Defines a date/time."),
+    'fallback' => '',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'ul',
+    'human_name' => $t("Unordered List"),
+    'description' => $t("Defines an unordered list."),
+    'fallback' => 'ul',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'var',
+    'human_name' => $t("Variable"),
+    'description' => $t("Defines a computer variable."),
+    'fallback' => 'var',
+  );
+
+  $semantic[] = array(
+    'machine_name' => 'wbr',
+    'human_name' => $t("Word Break"),
+    'description' => $t("Defines a possible line-break."),
+    'fallback' => '',
+  );
+
+  cf_db_options_add_options('mcneese_html5', 'semantic', $semantic);
+
+
+  $media = array();
+
+  $media[] = array(
+    'machine_name' => 'audio',
+    'human_name' => $t("Audio"),
+    'description' => $t("Defines sound content."),
+    'fallback' => '',
+  );
+
+  $media[] = array(
+    'machine_name' => 'Video',
+    'human_name' => $t("Video"),
+    'description' => $t("Defines a video or movie."),
+    'fallback' => '',
+  );
+
+  $media[] = array(
+    'machine_name' => 'source',
+    'human_name' => $t("Source"),
+    'description' => $t("Defines multiple media resources for <video> and <audio>."),
+    'fallback' => '',
+  );
+
+  $media[] = array(
+    'machine_name' => 'embed',
+    'human_name' => $t("Embed"),
+    'description' => $t("Defines a container for an external application or interactive content (a plug-in)."),
+    'fallback' => '',
+  );
+
+  $media[] = array(
+    'machine_name' => 'track',
+    'human_name' => $t("Track"),
+    'description' => $t("Defines text tracks for <video> and <audio>."),
+    'fallback' => '',
+  );
+
+  cf_db_options_add_options('mcneese_html5', 'media', $media);
+
+
+  $canvas = array();
+
+  $canvas[] = array(
+    'machine_name' => 'canvas',
+    'human_name' => $t("Canvas"),
+    'description' => $t("Used to draw graphics, on the fly, via scripting (usually JavaScript)."),
+    'fallback' => '',
+  );
+
+  cf_db_options_add_options('mcneese_html5', 'canvas', $canvas);
+
+
+  $form = array();
+
+  $form[] = array(
+    'machine_name' => 'button',
+    'human_name' => $t("Button"),
+    'description' => $t("Defines a clickable button."),
+    'fallback' => 'button',
+  );
+
+  $form[] = array(
+    'machine_name' => 'datalist',
+    'human_name' => $t("Data List"),
+    'description' => $t("Specifies a list of pre-defined options for input controls."),
+    'fallback' => '',
+  );
+
+  $form[] = array(
+    'machine_name' => 'fieldset',
+    'human_name' => $t("Fieldset"),
+    'description' => $t("Defines a collection of fields."),
+    'fallback' => 'fieldset',
+  );
+
+  $form[] = array(
+    'machine_name' => 'form',
+    'human_name' => $t("Form"),
+    'description' => $t("Defines a form."),
+    'fallback' => 'form',
+  );
+
+  $form[] = array(
+    'machine_name' => 'input',
+    'human_name' => $t("Input"),
+    'description' => $t("Defines an input field."),
+    'fallback' => 'input',
+  );
+
+  $form[] = array(
+    'machine_name' => 'keygen',
+    'human_name' => $t("Key Generator"),
+    'description' => $t("Defines a key-pair generator field (for forms)."),
+    'fallback' => '',
+  );
+
+  $form[] = array(
+    'machine_name' => 'label',
+    'human_name' => $t("Label"),
+    'description' => $t("Defines a label for an input element."),
+    'fallback' => 'label',
+  );
+
+  $form[] = array(
+    'machine_name' => 'legend',
+    'human_name' => $t("Legend"),
+    'description' => $t("Defines a caption for a fieldset element."),
+    'fallback' => 'legend',
+  );
+
+  $form[] = array(
+    'machine_name' => 'select',
+    'human_name' => $t("Select"),
+    'description' => $t("Defines a select list."),
+    'fallback' => 'select',
+  );
+
+  $form[] = array(
+    'machine_name' => 'textarea',
+    'human_name' => $t("Text Area"),
+    'description' => $t("Defines a multi-line text input box."),
+    'fallback' => 'textarea',
+  );
+
+  $form[] = array(
+    'machine_name' => 'optgroup',
+    'human_name' => $t("Option Group"),
+    'description' => $t("Defines a select list option group."),
+    'fallback' => 'optgroup',
+  );
+
+  $form[] = array(
+    'machine_name' => 'option',
+    'human_name' => $t("Option"),
+    'description' => $t("Defines a select list option."),
+    'fallback' => 'option',
+  );
+
+  $form[] = array(
+    'machine_name' => 'output',
+    'human_name' => $t("Output"),
+    'description' => $t("Defines the result of a calculation."),
+    'fallback' => '',
+  );
+
+  cf_db_options_add_options('mcneese_html5', 'form', $form);
+}
+
+/**
+ * @} End of '@addtogroup mcneese_html5'.
+ */

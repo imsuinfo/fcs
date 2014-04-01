@@ -1,0 +1,241 @@
+<?php
+
+/**
+ * @file
+ * McNeese State University Ckeditor module.
+ */
+
+/**
+ * @defgroup mcneese_ckeditor McNeese Ckeditor
+ * @{
+ * Provides changes to the ckeditor library for drupal 7.
+ */
+
+function mcneese_ckeditor_wysiwyg_editor_settings_alter(&$settings, $context) {
+  if (isset($context['profile']) && is_object($context['profile']) && $context['profile']->editor == 'ckeditor') {
+    global $base_theme_info;
+    global $theme_info;
+    global $base_path;
+
+
+    // toolbar
+    $full_toolbar = array();
+    $full_toolbar[] = array('Source', 'Maximize',  'ShowBlocks');
+    $full_toolbar[] = array('Templates', 'Preview', 'drupal_accessibility');
+    $full_toolbar[] = '/';
+    $full_toolbar[] = array('Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord');
+    $full_toolbar[] = array('Undo', 'Redo', 'Find', 'Replace', '-', 'SelectAll', 'RemoveFormat');
+    $full_toolbar[] = array('media', 'Image', 'Table', 'HorizontalRule', 'SpecialChar', 'CreateDiv');
+    $full_toolbar[] = array('Iframe');
+    $full_toolbar[] = '/';
+    $full_toolbar[] = array('Bold', 'Italic', 'Underline', 'Strike', '-', 'Subscript', 'Superscript');
+    $full_toolbar[] = array('NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', 'Blockquote');
+    $full_toolbar[] = array('JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', '-', 'BidiRtl', 'BidiLtr');
+    $full_toolbar[] = array('linkit', 'Unlink');
+    $full_toolbar[] = '/';
+    $full_toolbar[] = array('Format', 'Font', 'FontSize', 'Styles');
+    $full_toolbar[] = array('TextColor', 'BGColor');
+
+    $settings['toolbar'] = $full_toolbar;
+
+    $current_path = current_path();
+    $node_type = '';
+    $html_css = array();
+    $body_css = array();
+
+    $matches = array();
+    $matched = preg_match('@^node/add/(\w*)($|/$|\?.*)@', $current_path, $matches);
+
+    if ($matched > 0){
+      $node_type = check_plain($matches[1]);
+    }
+    else {
+      $matches = array();
+      $matched = preg_match('@^node/(\d+)(/.*|$|\?.*|#.*)@', $current_path, $matches);
+
+      if ($matched > 0 && !empty($matches[1])){
+        $node = node_load($matches[1]);
+
+        if (is_object($node)){
+          $node_type = check_plain($node->type);
+
+          $html_css[] = 'is-node node-type-' . $node_type;
+          $body_css[] = 'node node-type-' . $node_type;
+
+          $custom_tag = $node_type . '_type-default';
+          $custom_property = 'field_' . $node_type . '_theme';
+
+          if (property_exists($node, $custom_property)) {
+            $custom_prop = & $node->$custom_property;
+            if (!empty($custom_prop['und'][0]['tid'])) {
+              $custom_tag = 'node-theme-' . $node_type . '-' . $custom_prop['und'][0]['tid'];
+            }
+          }
+
+          $html_css[] = $custom_tag;
+        }
+      }
+    }
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.contentsCss
+    $settings['contentsCss'] = array();
+
+    foreach ((array) $base_theme_info as $bti_key => $bti) {
+      foreach ((array) $bti->stylesheets as $media => $css_array) {
+        // for now process only the media type 'all' and 'screen'.
+        if (preg_match('/\ball\b/', $media) > 0 || preg_match('/\bscreen\b/', $media) > 0) {
+          if (empty($css_array)) continue;
+
+          foreach ($css_array as $key => $css) {
+            if (empty($css)) continue;
+            $settings['contentsCss'][] = $base_path . $css;
+          }
+        }
+      }
+    }
+
+    foreach ((array) $theme_info->stylesheets as $media => $css_array) {
+      // for now process only the media type 'all' and 'screen'.
+      if (preg_match('/\ball\b/', $media) > 0 || preg_match('/\bscreen\b/', $media) > 0) {
+        if (empty($css_array)) continue;
+
+        foreach ($css_array as $key => $css) {
+          if (empty($css)) continue;
+          $settings['contentsCss'][] = $base_path . $css;
+        }
+      }
+    }
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.resize_minWidth
+    $settings['resize_minWidth'] = 580;
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.enterMode
+    $settings['enterMode'] = 2;
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.shiftEnterMode
+    $settings['shiftEnterMode'] = 2;
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.fillEmptyBlocks
+    $settings['fillEmptyBlocks'] = FALSE;
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.font_names
+    //$settings['font_names'] = 'Arial/Arial, Helvetica, sans-serif;
+    //$settings['font_names'] .= ' Times New Roman/Times New Roman, Times, serif;';
+    //$settings['font_names'] .= ' Verdana;';
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.font_style
+    //$settings['font_style'] = array('element' => '', 'styles' => '', 'overrides' => '');
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.fontSize_sizes
+    //$settings['fontSize_sizes'] = '';
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.fontSize_style
+    //$settings['fontSize_style'] = '';
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.format_div
+    //$settings['format_div'] = '';
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.format_h1
+    //$settings['format_h1'] = '';
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.format_h2
+    //$settings['format_h2'] = '';
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.format_h3
+    //$settings['format_h3'] = '';
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.format_h4
+    //$settings['format_h4'] = '';
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.format_h5
+    //$settings['format_h5'] = '';
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.format_h6
+    //$settings['format_h6'] = '';
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.format_p
+    //$settings['format_p'] = array('element' => 'p');
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.format_pre
+    //$settings['format_pre'] = '';
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.format_tags
+    //$settings['format_tags'] = 'p;h1;h2;h3;h4;h5;h6;pre;address;div';
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.ignoreEmptyParagraph
+    //$settings['ignoreEmptyParagraph'] = TRUE;
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.skin
+    //$settings['skin'] = 'v2';
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.stylesSet
+    //$settings['stylesSet'] = '';
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.format_address
+    //$settings['format_address'] = '';
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.format_div
+    //$settings['format_div'] = '';
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.format_h1
+    //$settings['format_h1'] = '';
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.format_h2
+    //$settings['format_h2'] = '';
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.format_h3
+    //$settings['format_h3'] = '';
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.format_h4
+    //$settings['format_h4'] = '';
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.format_h5
+    //$settings['format_h5'] = '';
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.format_h6
+    //$settings['format_h6'] = '';
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.format_p
+    //$settings['format_p'] = '';
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.format_pre
+    //$settings['format_pre'] = '';
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.bodyId
+    //$settings['bodyId'] = '';
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.bodyClass
+    $settings['bodyClass'] = 'mcneese-content-main';
+
+    $settings['htmlClass'] = 'wysiwyg wysiwyg-ckeditor mcneese mcneese-ckeditor mcneese-content';
+
+    if (!empty($html_css)) {
+      $settings['htmlClass'] .= ' ' . implode(' ', $html_css);
+    }
+
+    if (!empty($body_css)) {
+      $settings['bodyClass'] .= ' ' . implode(' ', $body_css);
+    }
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.baseHref
+    //$settings['baseHref'] = $base_url . $base_path;
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.autoParagraph
+    $settings['autoParagraph'] = FALSE;
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.colorButton_enableMore
+    $settings['colorButton_enableMore'] = FALSE;
+
+    // http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html#.docType
+    $settings['docType'] = '<!DOCTYPE html>';
+
+
+    // http://docs.cksource.com/CKEditor_3.x/Developers_Guide/Templates
+    // http://docs.cksource.com/CKEditor_3.x/Users_Guide/Document/Templates
+    // Add templates here
+  }
+}
+
+/**
+ * @} End of '@defgroup mcneese_ckeditor McNeese Ckeditor'.
+ */

@@ -1,0 +1,17 @@
+name = McNeese Module - Front Page
+description = "Provides Content specific module functionality for the front page."
+core = 7.x
+php = 5.3
+package = McNeese
+
+# project is not hosted on drupal.org, so manual versioning is needed.
+version = "7.x-1.0"
+
+dependencies[] = cf (7.x-2.x)
+dependencies[] = cf_error (7.x-2.x)
+dependencies[] = cf_http (7.x-2.x)
+dependencies[] = libraries (7.x-2.x)
+dependencies[] = mcneese_libraries
+
+files[] = mcneese_front_page.module
+files[] = js/mcneese_front_page-featured.js

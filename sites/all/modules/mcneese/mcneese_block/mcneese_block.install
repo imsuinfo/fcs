@@ -1,0 +1,73 @@
+<?php
+
+/**
+ * @file
+ * Install file for mcneese_block module.
+ */
+
+/**
+ * @addtogroup mcneese_block
+ * @{
+ */
+
+/**
+ * Implementation of hook_schema().
+ */
+function mcneese_block_schema() {
+  $schema = array();
+
+  $t = get_t();
+
+  $schema['mcneese_block'] = array(
+    'description' => $t("Provides a registry for custom variables defined by a module."),
+    'fields' => array(
+      'module' => array(
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => $t("The module from which the block originates; for example, 'user' for the Who's Online block, and 'block' for any custom blocks."),
+      ),
+      'delta' => array(
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '0',
+        'description' => $t("Unique ID for block within a module."),
+      ),
+      'semantic' => array(
+        'type' => 'int',
+        'size' => 'normal',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => $t("The semantic/structure that this block represents."),
+      ),
+      'heading' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => $t("An integer representing the default heading tag to use, such as 1 for <h1> (The value 0 means disable)."),
+      ),
+    ),
+    'primary key' => array('module', 'delta'),
+    'foreign keys' => array (
+      'block' => array (
+        'table' => 'block',
+        'columns' => array('delta' => 'delta', 'module' => 'module'),
+      ),
+      'mcneese_html5_options_semantic' => array (
+        'table' => 'mcneese_html5_options_semantic',
+        'columns' => array('semantic' => 'id'),
+      ),
+    ),
+  );
+
+  return $schema;
+}
+
+/**
+ * @} End of '@addtogroup mcneese_block'.
+ */

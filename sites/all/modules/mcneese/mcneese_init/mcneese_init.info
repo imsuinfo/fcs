@@ -1,0 +1,12 @@
+name = McNeese Module - Init
+description = "Provides initializion specific module functionality."
+core = 7.x
+php = 5.3
+package = McNeese
+
+# project is not hosted on drupal.org, so manual versioning is needed.
+version = "7.x-1.0"
+
+files[] = mcneese_init.module
+
+scripts[] = js/jquery_ui.js

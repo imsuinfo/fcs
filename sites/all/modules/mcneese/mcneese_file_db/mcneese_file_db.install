@@ -1,0 +1,88 @@
+<?php
+
+/**
+ * @file
+ * Install file for mcneese_file_db module.
+ */
+
+/**
+ * Implementation of hook_install().
+ */
+function mcneese_file_db_install() {
+  db_query('UPDATE {system} SET weight = -5 WHERE name = \'mcneese_file_db\'');
+
+  /*
+  // This is how the database tables were created under postgresql
+  //CREATEDB dbname ...
+  //ALTER DATABASE dbname SET bytea_output='hex';
+
+  CREATE TABLE mcneese_file_db_servers (
+    id smallserial PRIMARY KEY,
+    machine_name varchar(63) NOT NULL UNIQUE DEFAULT '',
+    human_name varchar(255) NOT NULL DEFAULT ''
+  );
+
+  CREATE TABLE mcneese_file_db_files (
+    id bigserial PRIMARY KEY,
+    filename varchar(255),
+    extension varchar(63),
+    mimetype varchar(255),
+    checksum varchar(64) UNIQUE,
+    size bigint,
+    timestamp timestamp NOT NULL DEFAULT now()
+  );
+
+  CREATE TABLE mcneese_file_db_file_data (
+    file_id bigint REFERENCES mcneese_file_db_files (id) ON DELETE CASCADE,
+    block int NOT NULL DEFAULT 0,
+    data bytea NOT NULL,
+    PRIMARY KEY (file_id, block)
+  );
+
+  // disable compression on DATA
+  ALTER TABLE mcneese_file_db_file_data ALTER COLUMN data SET storage external;
+
+  CREATE TABLE mcneese_file_db_unrestricted (
+    file_id bigint REFERENCES mcneese_file_db_files (id) ON DELETE CASCADE,
+    server_id smallint REFERENCES mcneese_file_db_servers (id) ON DELETE CASCADE,
+    PRIMARY KEY (file_id, server_id)
+  );
+
+  CREATE TABLE mcneese_file_db_restricted (
+    file_id bigint REFERENCES mcneese_file_db_files (id) ON DELETE CASCADE,
+    server_id smallint REFERENCES mcneese_file_db_servers (id) ON DELETE CASCADE,
+    PRIMARY KEY (file_id, server_id)
+  );
+
+  CREATE TABLE mcneese_file_db_users (
+    file_id bigint REFERENCES mcneese_file_db_files (id) ON DELETE CASCADE,
+    server_id smallint REFERENCES mcneese_file_db_servers (id) ON DELETE CASCADE,
+    user_id integer NOT NULL,
+    mode smallint NOT NULL DEFAULT 2,
+    PRIMARY KEY (file_id, server_id, user_id)
+  );
+
+  // setup permissions for each appropriate additional user (and for each table and sequence)
+  GRANT ALL PRIVILEGES ON DATABASE web_files TO web_files_user ;
+  GRANT ALL PRIVILEGES ON mcneese_file_db_servers TO web_files_user ;
+  GRANT ALL PRIVILEGES ON mcneese_file_db_unrestricted TO web_files_user ;
+  GRANT ALL PRIVILEGES ON mcneese_file_db_restricted TO web_files_user ;
+  GRANT ALL PRIVILEGES ON mcneese_file_db_file_data TO web_files_user ;
+  GRANT ALL PRIVILEGES ON mcneese_file_db_files TO web_files_user ;
+  GRANT ALL PRIVILEGES ON mcneese_file_db_servers TO web_files_user ;
+  GRANT ALL PRIVILEGES ON mcneese_file_db_users TO web_files_user ;
+  GRANT ALL PRIVILEGES ON mcneese_file_db_files_id_seq TO web_files_user ;
+  GRANT ALL PRIVILEGES ON mcneese_file_db_servers_id_seq TO web_files_user ;
+  //*/
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function mcneese_file_db_uninstall() {
+  $registered = cf_settings_get_registered(array('module_name' => 'mcneese_file_db'), 'id');
+
+  foreach ($registered as &$r) {
+    cf_settings_unregister($r->variable_name, $r->variable_type, $r->module);
+  }
+}

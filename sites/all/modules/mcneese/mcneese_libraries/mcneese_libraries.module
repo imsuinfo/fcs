@@ -1,0 +1,51 @@
+<?php
+
+/**
+ * @file
+ * McNeese State University Libraries module.
+ */
+
+/**
+ * @defgroup mcneese_libraries McNeese Libraries
+ * @{
+ * Provides custom 3rd-party libraries to drupal 7.
+ */
+
+/**
+ * Implements hook_libraries_info().
+ */
+function mcneese_libraries_libraries_info() {
+  $libraries = array();
+
+  $libraries['cycle2'] = array();
+  $libraries['cycle2']['name'] = "Cycle 2";
+  $libraries['cycle2']['vendor url '] = 'http://jquery.malsup.com/cycle2/';
+  $libraries['cycle2']['download url'] = 'http://jquery.malsup.com/cycle2/download/';
+
+  $libraries['cycle2']['version arguments'] = array(
+    'file' => 'version.txt',
+    'pattern' => '/^Version\s+(\d+\.\d+\.\d+)$/i',
+    'lines' => 1,
+  );
+
+  $libraries['cycle2']['files'] = array();
+  $libraries['cycle2']['files']['js'] = array(
+    'jquery.cycle2.js',
+    'jquery.cycle2.caption2.js',
+    'jquery.cycle2.carousel.js',
+    'jquery.cycle2.center.js',
+    'jquery.cycle2.flip.js',
+    'jquery.cycle2.ie-fade.js',
+    'jquery.cycle2.scrollVert.js',
+    'jquery.cycle2.shuffle.js',
+    'jquery.cycle2.swipe.js',
+    'jquery.cycle2.tile.js',
+    'jquery.cycle2.video.js',
+  );
+
+  return $libraries;
+}
+
+/**
+ * @} End of '@defgroup mcneese_libraries McNeese Libraries'.
+ */

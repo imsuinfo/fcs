@@ -1,0 +1,69 @@
+<?php
+
+/**
+ * @file
+ * McNeese State University Url Paths.
+ */
+
+/**
+ * Define a short title length.
+ **/
+define('MCNEESE_URL_PATHS_SHORT_STRING_LENGTH', 48);
+
+/**
+ * @defgroup mcneese_url_paths McNeese Url Paths
+ * @{
+ * Provides url path functionality and changes to drupal 7.
+ */
+
+/**
+ * Delete all node aliases associated with a given node id.
+ *
+ * $param numeric $node_id
+ *   The unique id representing the node.
+ */
+function mcneese_url_paths_delete_all_node_aliases($node_id) {
+  if (!is_numeric($node_id)) {
+    cf_error::invalid_numeric('node_id', $node_id);
+    return;
+  }
+
+  $transaction = db_transaction();
+
+  try {
+    $query = db_delete('url_alias');
+
+    $or = db_or();
+    $or->condition('source', 'node/' . $node_id);
+    $or->condition('source', 'node/' . $node_id . '/%', 'like');
+
+    $query->condition($or);
+    $query->execute();
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+    cf_error::on_query_execution($e);
+  }
+}
+
+/**
+ * Creates a short string from a long string.
+ *
+ * If the long string is sufficiently short, then there will be no change.
+ *
+ * @param string $long_string
+ *   A string to be shortened.
+ *   
+ */
+function mcneese_url_paths_create_short_string($long_string) {
+  if (!is_string($long_string)) {
+    cf_error::invalid_numeric('long_string', $long_string);
+    return '';
+  }
+
+  return substr($long_string, 0, MCNEESE_URL_PATHS_SHORT_STRING_LENGTH);
+}
+
+/**
+ * @} End of '@defgroup mcneese_url_paths McNeese Url Paths'.
+ */

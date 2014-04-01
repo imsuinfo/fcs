@@ -1,0 +1,997 @@
+<?php
+
+/**
+ * @file
+ * McNeese State University File Database module.
+ */
+
+/**
+ * @defgroup mcneese_file_db McNeese File Database
+ * @{
+ * @todo: write this documentation.
+ */
+
+
+define('MCNEESE_FILE_DB_TARGET', 'default');
+define('MCNEESE_FILE_DB_KEY', 'file_db');
+define('MCNEESE_FILE_DB_CONF_SERVER_ID', 'file_db_server_id');
+define('MCNEESE_FILE_DB_SHORT_SUM_SIZE', 8);
+define('MCNEESE_FILE_DB_BLOCK_SIZE', 131072);
+
+define('MCNEESE_FILE_DB_FILE_PATH', 'f');
+define('MCNEESE_FILE_DB_STYLES', 'styles');
+define('MCNEESE_FILE_DB_PATH_BY_HASH', 'c');
+define('MCNEESE_FILE_DB_PATH_BY_HASH_SUM', 's');
+define('MCNEESE_FILE_DB_PATH_BY_HASH_SUM_EXTENSION', 'sha256sum');
+define('MCNEESE_FILE_DB_PATH_BY_HASH_ALGORITHM', 'sha256');
+define('MCNEESE_FILE_DB_PATH_BY_ID', 'i');
+define('MCNEESE_FILE_DB_PATH_BY_FID', 'f');
+
+
+/**
+ * Implements hook_stream_wrappers().
+ */
+function mcneese_file_db_stream_wrappers() {
+  $wrappers = array();
+  $path = drupal_get_path('module', 'mcneese_file_db');
+
+  require_once DRUPAL_ROOT . '/' . $path . '/classes/mcneese_file_db_unrestricted_stream_wrapper.inc';
+  require_once DRUPAL_ROOT . '/' . $path . '/classes/mcneese_file_db_restricted_stream_wrapper.inc';
+
+  $wrappers[mcneese_file_db_unrestricted_stream_wrapper::SCHEME] = array (
+    'name' => t("Unrestricted File Database"),
+    'class' => 'mcneese_file_db_unrestricted_stream_wrapper',
+    'description' => t("Unrestricted files stored in a dedicated file database and shared between multiple servers."),
+    'type' => STREAM_WRAPPERS_NORMAL | STREAM_WRAPPERS_REMOTE,
+    'dynamic' => TRUE,
+    'remote' => TRUE,
+  );
+
+  $wrappers[mcneese_file_db_restricted_stream_wrapper::SCHEME] = array (
+    'name' => t("Restricted File Database"),
+    'class' => 'mcneese_file_db_restricted_stream_wrapper',
+    'description' => t("Restricted files stored in a dedicated file database and shared between multiple servers."),
+    'type' => STREAM_WRAPPERS_NORMAL | STREAM_WRAPPERS_REMOTE,
+    'dynamic' => TRUE,
+    'remote' => TRUE,
+  );
+
+  return $wrappers;
+}
+
+/**
+ * Access callback for files.
+ *
+ * @param string $uri
+ *   The uri string as found in the core {file_managed} table.
+ *   If the uri is not present, FALSE is always returned.
+ * @param object $user
+ *   (optional) user to perform access check against.
+ * @param string $op
+ *   (optional) file operation to perform. This must be one of the operations
+ *   supported by file_entity_access().
+ */
+function mcneese_file_db_uri_access($uri, $user = NULL, $op = 'download') {
+  if (empty($uri) || !is_string($uri)) {
+    return FALSE;
+  }
+
+  // @todo: this check was added for the upgrade process, but should eventually be removed.
+  if (!function_exists('file_entity_access')) {
+    return FALSE;
+  }
+
+  $file = file_uri_to_object($uri);
+
+  return file_entity_access($op, $file, $user);
+}
+
+/**
+ * Builds and returns a file_db query object.
+ *
+ * @return object|FALSE
+ *   A file_db query object.
+ *   FALSE is returned on error.
+ */
+function mcneese_file_db_prepare_connection() {
+  try {
+    $file_db = Database::getConnection(MCNEESE_FILE_DB_TARGET, MCNEESE_FILE_DB_KEY);
+  }
+  catch (exception $ex) {
+    // do not allow exceptions to stop the functioning of the website.
+    if (class_exists('cf_error')) {
+      cf_error::on_exception($ex);
+    }
+
+    return FALSE;
+  }
+
+  return $file_db;
+}
+
+/**
+ * Builds and returns a query options array.
+ *
+ * @return array
+ *   A query options array.
+ */
+function mcneese_file_db_prepare_options() {
+  $options = array();
+  $options['target'] = MCNEESE_FILE_DB_TARGET;
+
+  return $options;
+}
+
+/**
+ * Loads the server id from the database.
+ *
+ * This function will cache the result to avoid repeated SQL queries.
+ *
+ * @return null|integer
+ *   Returns a number representing this server or NULL on failure.
+ */
+function mcneese_file_db_get_server_id() {
+  global $conf;
+
+  if (empty($conf[MCNEESE_FILE_DB_CONF_SERVER_ID])) {
+    return null;
+  }
+
+  return $conf[MCNEESE_FILE_DB_CONF_SERVER_ID];
+}
+
+/**
+ * Loads the available files.
+ *
+ * @param array $conditions
+ *   (optional) An array of conditions to apply to the database query.
+ *    The following are supported:
+ *    - range: an array of:
+ *      - from: start range.
+ *      - count: max number of rows to select.
+ *    - filename: Perform a like test against the files filename.
+ *    - extension: Perform a like test against the filesextension.
+ *    - mimetype: Perform a like test against the filesmimetype.
+ *    - checksum: Perform a like test against the checksum.
+ *    - timestamp: An array of:
+ *      - operation: one of '>', '>=', '<', '<=', '<>', '=='.
+ *      - stamp: timestamp to compare against.
+ *    - association: The name of the association table to use.
+ *      The default behavior is to load files that have unrestricted
+ *      associations.
+ *
+ * @return array|bool
+ *   An array of loaded files.
+ *   FALSE is returned on error.
+ */
+function mcneese_file_db_load_available_files($conditions = array()) {
+  global $conf;
+
+  if (empty($conf[MCNEESE_FILE_DB_CONF_SERVER_ID])) {
+    return FALSE;
+  }
+
+  try {
+    $file_db = mcneese_file_db_prepare_connection();
+    $options = mcneese_file_db_prepare_options();
+
+    if ($file_db === FALSE) {
+      return FALSE;
+    }
+
+    if (empty($conditions['association'])) {
+      $association = 'mcneese_file_db_unrestricted';
+    }
+    else {
+      $association = check_plain($conditions['association']);
+    }
+
+    $query = 'SELECT mfdf.* FROM {mcneese_file_db_files} mfdf';
+    $query .= ' INNER JOIN {' . $association . '} mfda ON (mfdf.id = mfda.file_id AND mfda.server_id = :server_id)';
+
+    $arguments = array(':server_id' => $conf[MCNEESE_FILE_DB_CONF_SERVER_ID]);
+
+    if (!empty($conditions)) {
+      $and = null;
+
+      if (!empty($conditions['filename'])) {
+        if (is_null($and)) {
+          $and = '';
+        }
+        else {
+          $and .= ' AND';
+        }
+
+        $and .= ' mfdf.filename LIKE :filename';
+        $arguments[':filename'] = $conditions['filename'];
+      }
+
+      if (!empty($conditions['extension'])) {
+        if (is_null($and)) {
+          $and = '';
+        }
+        else {
+          $and .= ' AND';
+        }
+
+        $and .= ' mfdf.extension LIKE :extension';
+        $arguments[':extension'] = $conditions['extension'];
+      }
+
+      if (!empty($conditions['mimetype'])) {
+        if (is_null($and)) {
+          $and = '';
+        }
+        else {
+          $and .= ' AND';
+        }
+
+        $and .= ' mfdf.mimetype LIKE :mimetype';
+        $arguments[':mimetype'] = $conditions['mimetype'];
+      }
+
+      if (!empty($conditions['checksum'])) {
+        if (is_null($and)) {
+          $and = '';
+        }
+        else {
+          $and .= ' AND';
+        }
+
+        if (strlen($conditions['checksum']) == MCNEESE_FILE_DB_SHORT_SUM_SIZE) {
+          $and .= ' mfdf.checksum LIKE :checksum';
+          $arguments[':checksum'] = $file_db->escapeLike($conditions['checksum']) . '%';
+        }
+        else {
+          $and .= ' mfdf.checksum = :checksum';
+          $arguments[':checksum'] = $conditions['checksum'];
+        }
+      }
+
+      if (!empty($conditions['id'])) {
+        if (is_null($and)) {
+          $and = '';
+        }
+        else {
+          $and .= ' AND';
+        }
+
+        $and .= ' mfdf.id = :id';
+        $arguments[':id'] = $conditions['id'];
+      }
+
+      if (isset($conditions['timestamp']['operation']) && isset($conditions['timestamp']['stamp'])) {
+        if (in_array($conditions['timestamp']['operation'], array('>', '>=', '<', '<=', '<>', '=='))) {
+          if (is_null($and)) {
+            $and = '';
+          }
+          else {
+            $and .= ' AND';
+          }
+
+          $and .= ' mfdf.timestamp ' . $conditions['timestamp']['operation'] . ' :timestamp';
+          $arguments[':timestamp'] = $conditions['timestamp'];
+        }
+      }
+
+      if (!is_null($and)) {
+        $query .= ' WHERE ' . $and;
+      }
+    }
+
+    if (isset($conditions['range']['from']) && isset($conditions['range']['count'])) {
+      $results = $file_db->queryRange($query, $conditions['range']['from'], $conditions['range']['count'], $arguments, $options);
+    }
+    else {
+      $results = $file_db->query($query, $arguments, $options);
+    }
+
+    return $results->fetchAll();
+  }
+  catch (Exception $e) {
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
+    }
+
+    throw $e;
+  }
+
+  return FALSE;
+}
+
+/**
+ * Build a select query for the file table.
+ *
+ * @param string $checksum
+ *   The checksum to compare against.
+ *
+ * @param bool $associated
+ *   (optional) If TRUE, then limit query to associated files.
+ *   If FALSE, then do not limit query to associated files.
+ *
+ * @return array|bool
+ *   An array of:
+ *   - query: The query string.
+ *   - arguments: An array of query arguments.
+ *
+ *   If there is an error, the FALSE is returned.
+ */
+function mcneese_file_db_build_query_by_checksum($checksum, $associated = TRUE) {
+  global $conf;
+
+  if (empty($conf[MCNEESE_FILE_DB_CONF_SERVER_ID])) {
+    return FALSE;
+  }
+
+  $built = array();
+  $built['query'] = '';
+  $built['arguments'] = array();
+
+  $built['query'] = 'SELECT mfdf.* FROM {mcneese_file_db_files} mfdf';
+
+  if ($associated) {
+    $built['arguments'][':server_id'] = $conf[MCNEESE_FILE_DB_CONF_SERVER_ID];
+    $built['query'] .= ' INNER JOIN {mcneese_file_db_associations} mfda ON (mfdf.id = mfda.file_id AND mfda.server_id = :server_id)';
+  }
+
+  if (count($checksum) == MCNEESE_FILE_DB_SHORT_SUM_SIZE) {
+    $built['query'] .= ' WHERE mfdf.checksum LIKE :checksum';
+    $built['arguments'][':checksum'] = db_like($checksum);
+  }
+  else {
+    $built['query'] .= ' WHERE mfdf.checksum = :checksum';
+    $built['arguments'][':checksum'] = $checksum;
+  }
+
+  return $built;
+}
+
+/**
+ * Loads the specified file.
+ *
+ * @param string $by
+ *   (optional) Short string that defines what the arg1->arg3 are.
+ * @param string $arg1
+ *   (optional) A conditional argument.
+ * @param string $arg2
+ *   (optional) A conditional argument.
+ * @param string $arg3
+ *   (optional) A conditional argument.
+ * @param null|string $association
+ *   (optional) When not NULL, this represents the specific association to
+ *   use for loading. When NULL, both associations are used.
+ *
+ * @return bool
+ *   TRUE on access denied, FALSE on file not found.
+ */
+function mcneese_file_db_load_file($by = '', $arg1 = '', $arg2 = '', $arg3 = '', $association = NULL) {
+  $filepath = '';
+  $file_meta = FALSE;
+  $not_modified = FALSE;
+  $request_range = FALSE;
+  $request_range_begin = 0;
+  $request_range_end = 0;
+  $request_range_length = 0;
+  $restricted = FALSE;
+
+  // if headers were already sent, then this function should simply exit because it requires sending headers itself.
+  if (headers_sent()) {
+    watchdog('File DB', "Headers were already sent when calling mcneese_file_db_load_file('%by', '%arg1', '%arg2', '%arg3', '%association').", array('%by' => $by, '%arg1' => $arg1, '%arg2' => $arg2, '%arg3' => $arg3, '%association' => $association), WATCHDOG_ERROR);
+    return FALSE;
+  }
+
+  // load based on any association or a specific association.
+  $associations = array();
+  $associations[0] = array(
+    'association' => mcneese_file_db_unrestricted_stream_wrapper::ASSOCIATION,
+    'scheme' => mcneese_file_db_unrestricted_stream_wrapper::SCHEME,
+    'restricted' => FALSE,
+  );
+  $associations[1] = array(
+    'association' => mcneese_file_db_restricted_stream_wrapper::ASSOCIATION,
+    'scheme' => mcneese_file_db_restricted_stream_wrapper::SCHEME,
+    'restricted' => TRUE,
+  );
+
+  if (mcneese_file_db_unrestricted_stream_wrapper::ASSOCIATION == $association) {
+    unset($associations[1]);
+  }
+  elseif (mcneese_file_db_restricted_stream_wrapper::ASSOCIATION == $association) {
+    unset($associations[0]);
+  }
+
+  // load the file based on the arguments
+  if ($by == MCNEESE_FILE_DB_PATH_BY_HASH || $by == MCNEESE_FILE_DB_PATH_BY_HASH_SUM) {
+    // $arg1 = checksum
+    // $arg2 = custom filename
+
+    $if_none_match = '';
+
+    if (isset($_SERVER['HTTP_IF_NONE_MATCH'])) {
+      $if_none_match = substr($_SERVER['HTTP_IF_NONE_MATCH'], 1);
+      $if_none_match = substr($if_none_match, 0, -1);
+    }
+
+    if (isset($_SERVER['HTTP_RANGE'])) {
+      $matches = array();
+      $matched = preg_match('/^bytes=(\d+)-(\d+)$/i', $_SERVER['HTTP_RANGE'], $matches);
+
+      if ($matched) {
+        $request_range_begin = $matches[1];
+        $request_range_end = $matches[2];
+        $request_range_length = ($request_range_end - $request_range_begin) + 1;
+        //$request_range = TRUE; // @todo
+      }
+    }
+
+    if (!empty($arg1)) {
+      foreach ($associations as $a) {
+        $filepath = $a['scheme'] . '://';
+
+        if (!strncmp($arg1, $if_none_match, MCNEESE_FILE_DB_SHORT_SUM_SIZE)) {
+          $filepath .= MCNEESE_FILE_DB_PATH_BY_HASH . '/' . $if_none_match;
+          $files = (array) mcneese_file_db_load_available_files(array('checksum' => $if_none_match, 'association' => $a['association']));
+          $not_modified = TRUE;
+        }
+        else {
+          $filepath .= MCNEESE_FILE_DB_PATH_BY_HASH . '/' . $arg1;
+          $files = (array) mcneese_file_db_load_available_files(array('checksum' => $arg1, 'association' => $a['association']));
+        }
+
+        if (!empty($files)) {
+          $restricted = $a['restricted'];
+          $file_meta = array_pop($files);
+          unset($files);
+          break;
+        }
+      }
+    }
+  }
+
+  if ($by == MCNEESE_FILE_DB_PATH_BY_FID) {
+    // $arg1 = drupal file id
+    // $arg2 = custom filename
+    if (!is_numeric($arg1)) return FALSE;
+
+    $query = db_select('file_managed', 'fm');
+    $query->fields('fm');
+    $query->condition('fm.fid', $arg1);
+
+    $found = (array) $query->execute()->fetchAssoc();
+    if (!empty($found['uri'])) {
+      $outer_parts = explode('://', $found['uri'], 2);
+
+      $matched = FALSE;
+      foreach ($associations as $a) {
+        if ($outer_parts[0] == $a['scheme']) {
+          $filepath = $found['uri'];
+          $inner_parts = explode('/', $outer_parts[1]);
+
+          if (isset($inner_parts[0]) && $inner_parts[0] == MCNEESE_FILE_DB_PATH_BY_HASH) {
+            $inner_by = $inner_parts[0];
+            $inner_arg1 = isset($inner_parts[1]) ? $inner_parts[1] : NULL;
+            $inner_arg2 = isset($inner_parts[2]) ? $inner_parts[2] : NULL;
+            $inner_arg3 = isset($inner_parts[3]) ? $inner_parts[3] : NULL;
+
+            $status = mcneese_file_db_load_file($inner_by, $inner_arg1, $inner_arg2, $inner_arg3, $a['association']);
+
+            // this point is only reached if the file was not found.
+            drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+
+            if ($status) {
+              drupal_access_denied();
+            }
+            else {
+              drupal_not_found();
+            }
+
+            drupal_exit();
+          }
+
+          $matched = TRUE;
+          break;
+        }
+      }
+
+      if (!$matched) {
+        drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+
+        $url = file_create_url($found['uri']);
+
+        if (!empty($url)) {
+          header('Location: ' . $url, TRUE, 302);
+          drupal_exit($url);
+        }
+
+        drupal_not_found();
+        drupal_exit();
+      }
+    }
+
+    unset($matched);
+  }
+
+
+  if ($by == MCNEESE_FILE_DB_PATH_BY_ID) {
+    // $arg1 = id
+    // $arg2 = custom filename
+
+    $if_none_match = '';
+
+    if (isset($_SERVER['HTTP_IF_NONE_MATCH'])) {
+      $if_none_match = substr($_SERVER['HTTP_IF_NONE_MATCH'], 1);
+      $if_none_match = substr($if_none_match, 0, -1);
+    }
+
+    if (!empty($arg1)) {
+      foreach ($associations as $a) {
+        $filepath = $a['scheme'] . '://';
+
+        if ($arg1 == $if_none_match) {
+          if (!is_numeric($if_none_match)) return FALSE;
+          $filepath .= MCNEESE_FILE_DB_PATH_BY_ID . '/' . $if_none_match;
+          $files = (array) mcneese_file_db_load_available_files(array('id' => $if_none_match, 'association' => $a['association']));
+          $not_modified = TRUE;
+        }
+        else {
+          if (!is_numeric($arg1)) return FALSE;
+          $filepath .= MCNEESE_FILE_DB_PATH_BY_ID . '/' . $arg1;
+          $files = (array) mcneese_file_db_load_available_files(array('id' => $arg1, 'association' => $a['association']));
+        }
+
+        if (!empty($files)) {
+          $restricted = $a['restricted'];
+          $file_meta = array_pop($files);
+          unset($files);
+          break;
+        }
+      }
+    }
+  }
+
+  if (!empty($file_meta) && !empty($filepath)) {
+    if ($restricted) {
+      if (!mcneese_file_db_uri_access($filepath)) {
+        drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+
+        drupal_access_denied();
+        drupal_exit();
+      }
+    }
+
+    // prevent devel_shutdown from being called.
+    $GLOBALS['devel_shutdown'] = FALSE;
+
+    $mimetype =$file_meta->mimetype;
+
+    if (empty($arg2)) {
+      $filename = $file_meta->filename;
+
+      if (!empty($file_meta->extension)) {
+        $filename .= '.' . $file_meta->extension;
+      }
+    }
+    else {
+      $filename = rawurldecode($arg2);
+    }
+
+    $filesize = $file_meta->size;
+
+    // failsafes
+    if (empty($filename)) {
+      $filename = 'download.txt';
+    }
+
+    if (empty($mimetype)) {
+      $mimetype = 'text/plain';
+    }
+
+    if (empty($filesize)) {
+      $filesize = 0;
+    }
+
+    if ($by == MCNEESE_FILE_DB_PATH_BY_HASH || $by == MCNEESE_FILE_DB_PATH_BY_ID) {
+      // make sure to perform output buffer (if possible) to reduce chances of "headers already sent" issues.
+      $ob_level = ob_get_level();
+      for ($i = 0; $i < $ob_level; $i++) {
+        ob_clean();
+      }
+      ob_start();
+
+      $short_location = '/' . MCNEESE_FILE_DB_FILE_PATH . '/' . MCNEESE_FILE_DB_PATH_BY_HASH;
+      $short_location .= '/' . substr($file_meta->checksum, 0, MCNEESE_FILE_DB_SHORT_SUM_SIZE);
+
+      $content_location = $short_location . '/';
+      $content_location .= $file_meta->filename . '.' . $file_meta->extension;
+
+      if ($not_modified) {
+        header('HTTP/1.1 304 Not Modified', TRUE, 304);
+      }
+      elseif ($request_range) {
+        if ($request_range_end >= $filesize) {
+          header('HTTP/1.1 416 Requested Range Not Satisfiable', TRUE, 416);
+          header('Content-Length: ' . $filesize);
+          header("Content-Range: bytes " . $filesize);
+
+          // flush buffer after headers have been processed (to hopefully avoid "headers already sent" issues).
+          ob_end_flush();
+
+          exit();
+        }
+
+        header('HTTP/1.1 206 Partial Content', TRUE, 206);
+        header('Content-Length: ' . $request_range_length);
+        header("Content-Range: bytes " . $request_range_begin . "-" . $request_range_end . "/" . $filesize);
+      }
+      else {
+        header('HTTP/1.1 200 OK', TRUE, 200);
+        header('Content-Length: ' . $filesize);
+      }
+
+      header('Content-Type: ' . $mimetype);
+      header('Content-Location: ' . $content_location);
+      header('Content-Transfer-Encoding: binary');
+      header('Content-Disposition: inline; filename="' . $filename . '"');
+      header('Content-Description: File Transfer');
+      header('ETag: "' . MCNEESE_FILE_DB_PATH_BY_HASH_ALGORITHM . '://' . $file_meta->checksum . '"');
+      header('Accept-Ranges: bytes');
+      header('Last-Modified: ' . date('r', strtotime($file_meta->timestamp)));
+      header('Date: ' . date('r', REQUEST_TIME));
+
+      // flush buffer after headers have been processed (to hopefully avoid "headers already sent" issues).
+      ob_end_flush();
+
+      // ETag cache optimization and other http header responses.
+      if ($not_modified) {
+        exit();
+      }
+
+      // Set a massive timelimit of 3 days as a failsafe to prevent scripts from executing indefinitely.
+      @set_time_limit(259200);
+
+      $in = fopen($filepath, 'rb');
+
+      stream_set_read_buffer($in, MCNEESE_FILE_DB_BLOCK_SIZE);
+
+      // from php-5.4, this sets the actual read_bvuffer_size, unlike phps stream_set_read_buffer.
+      if (function_exists('stream_set_chunk_size')) {
+        stream_set_chunk_size($in, MCNEESE_FILE_DB_BLOCK_SIZE);
+      }
+
+      if ($request_range) {
+        // @todo
+      }
+      else {
+        while (!feof($in)) {
+          fpassthru($in);
+        }
+      }
+
+      fclose($in);
+      exit();
+    }
+    else if ($by == MCNEESE_FILE_DB_PATH_BY_HASH_SUM) {
+      // make sure to perform output buffer (if possible) to reduce chances of "headers already sent" issues.
+      $ob_level = ob_get_level();
+      for ($i = 0; $i < $ob_level; $i++) {
+        ob_clean();
+      }
+      ob_start();
+
+      $short_location = '/' . MCNEESE_FILE_DB_FILE_PATH . '/' . MCNEESE_FILE_DB_PATH_BY_HASH_SUM;
+      $short_location .= '/' . substr($file_meta->checksum, 0, MCNEESE_FILE_DB_SHORT_SUM_SIZE);
+
+      $content_location = $short_location . '/';
+      $content_location .= $file_meta->filename . '.' . $file_meta->extension;
+      $content_location .= '.' . MCNEESE_FILE_DB_PATH_BY_HASH_SUM_EXTENSION;
+
+      $data = $file_meta->checksum . '  ' . $filename;
+
+      header('HTTP/1.1 200 OK', TRUE, 200);
+      header('Content-Type: text/plain');
+      header('Content-Length: ' . strlen($data));
+      header('Content-Transfer-Encoding: binary');
+      header('Content-Disposition: inline; filename="' . $filename . '.' . MCNEESE_FILE_DB_PATH_BY_HASH_SUM_EXTENSION . '"');
+      header('Content-Description: File Transfer');
+      header('Content-Location: ' . $content_location);
+      header('Last-Modified: ' . date('r', strtotime($file_meta->timestamp)));
+      header('Date: ' . date('r', REQUEST_TIME));
+
+      // flush buffer after headers have been processed (to hopefully avoid "headers already sent" issues).
+      ob_end_flush();
+
+      print($data);
+    }
+
+    exit();
+  }
+
+  return FALSE;
+}
+
+/**
+ * Manually register known stream wrappers.
+ */
+function mcneese_file_db_register_stream_wrappers() {
+  stream_wrapper_register('public', 'DrupalPublicStreamWrapper');
+  stream_wrapper_register('temporary', 'DrupalTemporaryStreamWrapper');
+
+  if (variable_get('file_private_path', FALSE)) {
+    stream_wrapper_register('private', 'DrupalPrivateStreamWrapper');
+  }
+
+  stream_wrapper_register(mcneese_file_db_unrestricted_stream_wrapper::SCHEME, 'mcneese_file_db_unrestricted_stream_wrapper');
+  //stream_wrapper_register(mcneese_file_db_restricted_stream_wrapper::SCHEME, 'mcneese_file_db_restricted_stream_wrapper');
+}
+
+/**
+ * Manually process and return a binary file.
+ *
+ * This _must_ be called from index.php before DRUPAL_BOOTSTRAP_FULL.
+ * This will hand-off to drupal on access denied or file not found.
+ *
+ * @param array $arguments
+ *   An array of url arguments used to load a given page.
+ */
+function mcneese_file_db_return_file($arguments) {
+  $by = '';
+  $arg1 = '';
+  $arg2 = '';
+  $arg3 = '';
+
+  if (isset($arguments[1])) {
+    $by = $arguments[1];
+  }
+  if (isset($arguments[2])) {
+    $arg1 = $arguments[2];
+  }
+  if (isset($arguments[3])) {
+    $arg2 = $arguments[3];
+  }
+  if (isset($arguments[4])) {
+    $arg3 = $arguments[4];
+  }
+
+
+  mcneese_file_db_register_stream_wrappers();
+
+  $status = mcneese_file_db_load_file($by, $arg1, $arg2, $arg3);
+
+  // this point is only reached if the file was not found.
+  drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+
+  if ($status) {
+    drupal_access_denied();
+  }
+  else {
+    drupal_not_found();
+  }
+
+  drupal_exit();
+}
+
+/**
+ * Creates the appropriate image file and prints it.
+ *
+ * @param array $arguments
+ *   An array of the url arguments for this request.
+ */
+function mcneese_file_db_generate_image_style($arguments) {
+  if ($arguments[3] == mcneese_file_db_unrestricted_stream_wrapper::SCHEME) {
+    $wrapper = new mcneese_file_db_unrestricted_stream_wrapper();
+  }
+  // @fixme: currently not implemented.
+  //else if ($arguments[3] == mcneese_file_db_restricted_stream_wrapper::SCHEME) {
+  //  $wrapper = new mcneese_file_db_restricted_stream_wrapper();
+  //}
+  else {
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  array_shift($arguments);
+  $image_source_uri = $arguments[2] . '://' . implode('/', $arguments);
+
+  $file_uri = $wrapper->getTarget($image_source_uri);
+
+  if (!file_exists($file_uri)) {
+    $wrapper->create_image_style($image_source_uri);
+  }
+
+  mcneese_file_db_print_image_style($file_uri);
+}
+
+/**
+ * Prunts the appropriate image style file.
+ *
+ * @param string $file_uri
+ *   The image uri of the image to print.
+ */
+function mcneese_file_db_print_image_style($file_uri) {
+  if (file_exists($file_uri)) {
+    if (ob_get_level()) {
+      ob_end_clean();
+      ob_end_flush();
+    }
+
+    $filename = basename($file_uri);
+    $filesize = filesize($file_uri);
+    $modified = filemtime($file_uri);
+    $checksum = hash_file(MCNEESE_FILE_DB_PATH_BY_HASH_ALGORITHM, $file_uri);
+
+    include_once DRUPAL_ROOT . '/includes/file.mimetypes.inc';
+    $mapping = file_mimetype_mapping();
+    $mimetype = file_get_mimetype($file_uri, $mapping);
+
+
+    // prevent devel_shutdown from being called.
+    $GLOBALS['devel_shutdown'] = FALSE;
+
+    header('HTTP/1.1 200 OK', TRUE, 200);
+    header('Content-Length: ' . $filesize);
+    header('Content-Type: ' . $mimetype);
+    header('Content-Transfer-Encoding: binary');
+    header('Content-Disposition: inline; filename="' . $filename . '"');
+    header('Content-Description: File Transfer');
+    header('ETag: "' . MCNEESE_FILE_DB_PATH_BY_HASH_ALGORITHM . '://' . $checksum . '"');
+    header('Accept-Ranges: bytes');
+    header('Last-Modified: ' . date('r', $modified));
+    header('Expires: ' . date('r', strtotime('+14 days', REQUEST_TIME)));
+    header('Date: ' . date('r', REQUEST_TIME));
+
+
+    readfile($file_uri);
+    exit();
+  }
+
+  drupal_not_found();
+  drupal_exit();
+}
+
+/**
+ * Implements hook_file_validate().
+ */
+function mcneese_file_db_file_validate($file) {
+  $errors = array();
+
+  if (!file_exists($file->uri)) {
+    $errors[] = t("The file was not found at: '%uri'", array('%uri' => $file->uri));
+    return $errors;
+  }
+
+  $association = mcneese_file_db_unrestricted_stream_wrapper::ASSOCIATION;
+  $outer_parts = explode('://', $file->destination, 2);
+  $scheme = $outer_parts[0];
+
+  $checksum = hash_file(MCNEESE_FILE_DB_PATH_BY_HASH_ALGORITHM, $file->uri);
+  $shortsum = substr($checksum, 0, MCNEESE_FILE_DB_SHORT_SUM_SIZE);
+
+  if ($file->status == 1 && $scheme == 'temporary') {
+    $inner_parts = explode('/', $outer_parts[1]);
+
+    if (empty($inner_parts)) return array();
+
+    if ($inner_parts[0] != $shortsum) {
+      return array();
+    }
+
+    unset($inner_parts);
+  }
+  elseif ($scheme != mcneese_file_db_unrestricted_stream_wrapper::SCHEME) {
+    if ($scheme == mcneese_file_db_restricted_stream_wrapper::SCHEME) {
+      $association = mcneese_file_db_restricted_stream_wrapper::ASSOCIATION;
+    }
+    else {
+      return array();
+    }
+  }
+
+  unset($outer_parts);
+
+
+  // do not save temporary uploads to the file_db.
+  if ($file->status == 0) {
+    $destination = MCNEESE_FILE_DB_PATH_BY_HASH . '/' . $shortsum;
+    $file->destination = 'temporary://' . $destination;
+
+    $file->destination = 'temporary://' . $destination;
+
+    if (empty($file->filename)) {
+      $filename = 'file';
+    }
+    else {
+      $filename = $file->filename;
+    }
+
+    $file->destination .= '/' . $filename . '/';
+    file_prepare_directory($file->destination, FILE_CREATE_DIRECTORY);
+
+    $wrapper = file_stream_wrapper_get_instance_by_scheme('temporary');
+    $tempname = basename(tempnam($wrapper->getDirectoryPath() . '/' . $destination . '/' . $filename, 'file_'));
+    $file->destination .= $tempname;
+
+    unset($tempname);
+    unset($destination);
+    unset($wrapper);
+
+    if (empty($file->destination)) {
+      $errors[] = t("Failed to prepare the files temporary upload destination.");
+      return $errors;
+    }
+  }
+  else {
+    $file->destination = $scheme . '://' . MCNEESE_FILE_DB_PATH_BY_HASH . '/' . $shortsum;
+
+    if (empty($file->filename)) {
+      $file->destination .= '/file';
+    }
+    else {
+      $file->destination .= '/' . $file->filename;
+    }
+  }
+
+  $loaded = (array) mcneese_file_db_load_available_files(array('checksum' => $checksum, 'association' => $association));
+
+  if (empty($loaded)) return array();
+
+
+  // If the file is not in the file_managed database table, then it must be added.
+  $look_for = $scheme . '://' . MCNEESE_FILE_DB_PATH_BY_HASH . '/' . $shortsum;
+
+  $query = db_select('file_managed', 'fm');
+  $query->fields('fm');
+  $query->condition('fm.uri', db_like($look_for) . '%', 'LIKE');
+
+  $found = (array) $query->execute()->fetchAll();
+
+  if (empty($found)) return array();
+
+  $existing_file = '<a href="' . file_create_url($found[0]->uri) . '" class="file_db-file_exists">' . check_plain($found[0]->filename) . '</a>';
+
+  $error_message = "The file already exists: !filename.";
+  $error_variables = array('!filename' => $existing_file);
+
+  if (function_exists('workbench_menu') && function_exists('media_menu')) {
+    global $base_path;
+    $error_message .= ' Try visiting the !media_browser.';
+    $error_variables['!media_browser'] = '<a href="' . $base_path . 'admin/workbench/media?uri=' . check_plain($shortsum) . '" class="file_db-file_exists">Media Browser</a>';
+  }
+
+  $errors[] = t($error_message, $error_variables);
+  return $errors;
+}
+
+/**
+ * Implements hook_file_presave().
+ */
+function mcneese_file_db_file_presave($file) {
+  // don't do anything for temporary files.
+  if ($file->status == 0) {
+    return;
+  }
+
+  $parts = explode('/', $file->uri);
+
+  if (count($parts) < 3) {
+    return;
+  }
+
+  if ($parts[0] != mcneese_file_db_unrestricted_stream_wrapper::SCHEME . ':') {
+    if ($parts[0] != mcneese_file_db_restricted_stream_wrapper::SCHEME . ':') {
+      return;
+    }
+  }
+
+  // when uploading a file, do not use its temporary name, use its permanent name.
+  if ($parts[2] == MCNEESE_FILE_DB_PATH_BY_HASH) {
+    while (count($parts) > 5) {
+      array_pop($parts);
+      $file->uri = implode('/', $parts);
+      $file->filename = end($parts);
+    }
+  }
+}
+
+/**
+ * @} End of '@defgroup mcneese_file_db McNeese File Database'.
+ */

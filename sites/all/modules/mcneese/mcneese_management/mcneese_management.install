@@ -1,0 +1,351 @@
+<?php
+
+/**
+ * @file
+ * Install file for mcneese_management module.
+ */
+
+/**
+ * @addtogroup mcneese_management
+ * @{
+ */
+
+/**
+ * Implementation of hook_schema().
+ */
+function mcneese_management_schema() {
+  $schema = array();
+
+  $t = get_t();
+
+  $schema['mcneese_management_redirects'] = array(
+    'description' => $t("A collection of special case redirects."),
+    'fields' => array(
+      'id' => array(
+        'description' => $t("The primary key used to represent a menu."),
+        'type' => 'serial',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'source' => array(
+        'description' => $t("The url path to redirect from."),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'destination' => array(
+        'description' => $t("The url path to redirect to."),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'status' => array(
+        'description' => $t("Determines the status, whether disabled, enabled, in maintenance, or in alert modes."),
+        'type' => 'int',
+        'size' => 'small',
+        'not null' => TRUE,
+        'default' => TRUE,
+      ),
+      'logged_in' => array(
+        'description' => $t("Determines the whether or logged in users should be redirected."),
+        'type' => 'int',
+        'size' => 'small',
+        'not null' => TRUE,
+        'default' => TRUE,
+      ),
+      'maintenance_message' => array(
+        'description' => $t("A message to display at the url for when the redirect is in maintenance mode."),
+        'type' => 'text',
+        'size' => 'big',
+        'serialize' => TRUE,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'alert_message' => array(
+        'description' => $t("A message to display at the url for when the redirect is in alert mode."),
+        'type' => 'text',
+        'serialize' => TRUE,
+        'size' => 'big',
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'failsafe_message' => array(
+        'description' => $t("A message to display when an HTTP redirect cannot be performed."),
+        'type' => 'text',
+        'size' => 'big',
+        'serialize' => TRUE,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('id'),
+    'unique keys' => array(
+      'source' => array('source'),
+    ),
+  );
+
+  $schema['mcneese_management_template'] = array(
+    'description' => $t("A collection of templates."),
+    'fields' => array(
+      'id' => array(
+        'description' => $t("The primary key used to represent a template."),
+        'type' => 'serial',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'machine_name' => array(
+        'description' => $t("This is the machine-friendly name used to represent the template."),
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'human_name' => array(
+        'description' => $t("This is the human-friendly name used to represent the template."),
+        'type' => 'text',
+        'size' => 'normal',
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'data' => array(
+        'description' => $t("Additional properties associated with this field."),
+        'type' => 'text',
+        'size' => 'big',
+        'serialize' => TRUE,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('id'),
+    'unique keys' => array(
+      'source' => array('machine_name'),
+    ),
+  );
+
+  $schema['mcneese_management_template_user'] = array(
+    'description' => $t("A collection of users allowed access to a given template."),
+    'fields' => array(
+      'template_id' => array(
+        'description' => $t("The id of the associated template."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'user_id' => array(
+        'description' => $t("The id of the associated user."),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('template_id', 'user_id'),
+    'foreign keys' => array(
+      'template_id' => array(
+        'table' => 'mcneese_management_template',
+        'columns' => array('template_id' => 'id'),
+      ),
+      'user_id' => array(
+        'table' => 'users',
+        'columns' => array('user_id' => 'uid'),
+      ),
+    ),
+  );
+
+  $schema['mcneese_management_template_node'] = array(
+    'description' => $t("A collection of users allowed access to a given template."),
+    'fields' => array(
+      'template_id' => array(
+        'description' => $t("The id of the associated template."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'node_id' => array(
+        'description' => $t("The id of a node built using this template."),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'data' => array(
+        'description' => $t("Hidden/Internal form values not stored on the node, often related to the template."),
+        'type' => 'text',
+        'size' => 'big',
+        'serialize' => TRUE,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('template_id', 'node_id'),
+    'foreign keys' => array(
+      'template_id' => array(
+        'table' => 'mcneese_management_template',
+        'columns' => array('template_id' => 'id'),
+      ),
+      'node_id' => array(
+        'table' => 'node',
+        'columns' => array('mode_id' => 'nid'),
+      ),
+    ),
+  );
+
+  // workaround mysql's violation of the SQL standard in a way that does not break standards-compliant databases.
+  // @see https://dev.mysql.com/doc/refman/5.6/en/data-type-defaults.html
+  // @see https://bugs.mysql.com/bug.php?id=25520
+  // @see https://drupal.org/node/1401782
+  // @see https://drupal.org/node/143881
+  if (db_driver() == 'mysql') {
+    unset($schema['mcneese_management_template']['fields']['data']['default']);
+  }
+
+
+  return $schema;
+}
+
+/**
+ * Implementation of hook_install().
+ */
+function mcneese_management_install() {
+  cf_settings_register('emergency_mode', 'drupal_variables', 'mcneese_management', FALSE);
+  cf_settings_register('emergency_node', 'drupal_variables', 'mcneese_management', 0);
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function mcneese_management_uninstall() {
+  $registered = cf_settings_get_registered(array('module_name' => 'mcneese_management'), 'id');
+
+  foreach ($registered as &$r) {
+    cf_settings_unregister($r->variable_name, $r->variable_type, $r->module);
+  }
+}
+
+/**
+ * Install the mcneese_management_redirects database table.
+ */
+function mcneese_management_update_7100() {
+  $schema = drupal_get_schema('mcneese_management_redirects', TRUE);
+  db_create_table('mcneese_management_redirects', $schema);
+}
+
+/**
+ * Create the new mcneese_management_redirect tables.
+ */
+function mcneese_management_update_7101() {
+  $schema = array();
+
+  $t = get_t();
+
+  $schema['mcneese_management_template'] = array(
+    'description' => $t("A collection of templates."),
+    'fields' => array(
+      'id' => array(
+        'description' => $t("The primary key used to represent a template."),
+        'type' => 'serial',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'machine_name' => array(
+        'description' => $t("This is the machine-friendly name used to represent the template."),
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'human_name' => array(
+        'description' => $t("This is the human-friendly name used to represent the template."),
+        'type' => 'text',
+        'size' => 'normal',
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'data' => array(
+        'description' => $t("Additional properties associated with this field."),
+        'type' => 'text',
+        'size' => 'big',
+        'serialize' => TRUE,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('id'),
+    'unique keys' => array(
+      'source' => array('machine_name'),
+    ),
+  );
+
+  $schema['mcneese_management_template_user'] = array(
+    'description' => $t("A collection of users allowed access to a given template."),
+    'fields' => array(
+      'template_id' => array(
+        'description' => $t("The id of the associated template."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'user_id' => array(
+        'description' => $t("The id of the associated user."),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('template_id', 'user_id'),
+    'foreign keys' => array(
+      'template_id' => array(
+        'table' => 'mcneese_management_template',
+        'columns' => array('template_id' => 'id'),
+      ),
+      'user_id' => array(
+        'table' => 'users',
+        'columns' => array('user_id' => 'uid'),
+      ),
+    ),
+  );
+
+  $schema['mcneese_management_template_node'] = array(
+    'description' => $t("A collection of users allowed access to a given template."),
+    'fields' => array(
+      'template_id' => array(
+        'description' => $t("The id of the associated template."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'node_id' => array(
+        'description' => $t("The id of a node built using this template."),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('template_id', 'node_id'),
+    'foreign keys' => array(
+      'template_id' => array(
+        'table' => 'mcneese_management_template',
+        'columns' => array('template_id' => 'id'),
+      ),
+      'node_id' => array(
+        'table' => 'node',
+        'columns' => array('mode_id' => 'nid'),
+      ),
+    ),
+  );
+
+  db_create_table('mcneese_management_template', $schema['mcneese_management_template']);
+  db_create_table('mcneese_management_template_user', $schema['mcneese_management_template_user']);
+  db_create_table('mcneese_management_template_node', $schema['mcneese_management_template_node']);
+}
+
+/**
+ * @} End of '@addtogroup mcneese_management'.
+ */

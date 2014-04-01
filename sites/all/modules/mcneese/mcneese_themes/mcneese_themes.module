@@ -1,0 +1,343 @@
+<?php
+
+/**
+ * @file
+ * McNeese State University Themes module.
+ */
+
+/**
+ * @defgroup mcneese_themes McNeese Themes
+ * @{
+ * Provides drupal theme hook functionality and changes to drupal 7.
+ */
+
+/**
+ * Implements hook_init().
+ */
+function mcneese_themes_init() {
+  // always enable jquery ui and all of its parts
+  $jquery_ui_names = array(
+    'ui.accordion', 'ui.autocomplete', 'ui.button', 'ui.datepicker',
+    'ui.dialog', 'ui.draggable', 'ui.droppable', 'ui.mouse', 'ui.position',
+    'ui.progressbar', 'ui.resizable', 'ui.selectable', 'ui.slider',
+    'ui.sortable', 'ui.tabs', 'ui.widget', 'effects.blind', 'effects.bounce',
+    'effects.clip', 'effects.drop', 'effects.explode', 'effects.fade',
+    'effects.fold', 'effects.highlight', 'effects.pulsate', 'effects.scale',
+    'effects.shake', 'effects.slide', 'effects.transfer',
+  );
+
+  foreach ($jquery_ui_names as $name) {
+    drupal_add_library('system', $name);
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function mcneese_themes_theme($existing, $type, $theme, $path) {
+  $themes = array();
+
+  $themes['items_list'] = array(
+    'variables' => array('items' => array(), 'mark' => 'both', 'start' => 'odd'),
+  );
+
+  $themes['list_item'] = array(
+    'variables' => array('markup' => '', 'attributes' => array()),
+  );
+
+  return $themes;
+}
+
+/**
+ * Implements hook_theme_registry_alter().
+ */
+function mcneese_themes_theme_registry_alter(&$theme_registry) {
+
+  // replace the default drupal table theme with a custom version.
+  $theme_registry['table']['theme path'] = drupal_get_path('module', 'mcneese_themes');
+  $theme_registry['table']['function'] =  'mcneese_themes_table';
+
+  // replace the default drupal form theme with a custom version.
+  $theme_registry['form']['theme path'] = drupal_get_path('module', 'mcneese_themes');
+  $theme_registry['form']['function'] =  'mcneese_themes_form';
+}
+
+/**
+ * Generate an unwrapped items list.
+ *
+ * This allows for the caller to handle the items wrapper type as they see fit.
+ * Does not process nested lists.
+ *
+ * @param array $vars
+ *   An array with the following structure:
+ *   - items: an array of items with the following structure:
+ *     - markup: the html markup.
+ *     - attributes: tag attributes array.
+ *   - mark: one of: 'first', 'last', 'both', or 'none'
+ *   - start: one of 'even': 'odd'
+ */
+function theme_items_list($vars) {
+  if (!is_array($vars['items'])) {
+    cf_error::invalid_array('vars[items]');
+
+    return '';
+  }
+
+  $markup = '';
+
+  if (!empty($vars['items'])) {
+    $total = count($vars['items']);
+    $even = $vars['start'] == 'even' ? TRUE : FALSE;
+    $count = 1;
+
+    foreach ($vars['items'] as $key => &$item) {
+      if (!isset($item['attributes']) || !is_array($item['attributes'])) {
+        $item['attributes'] = array();
+        $item['attributes']['class'] = array();
+      }
+      elseif (!array_key_exists('class', $item['attributes']) || !is_array($item['attributes']['class'])) {
+        $item['attributes']['class'] = array();
+      }
+
+      if ($vars['mark'] == 'both' || $vars['mark'] == 'first') {
+        if ($count == 1 && !in_array('first', $item['attributes']['class'])) {
+          $item['attributes']['class'][] = 'first';
+        }
+      }
+
+      if ($vars['mark'] == 'both' || $vars['mark'] == 'last') {
+        if ($count == $total && !in_array('last', $item['attributes']['class'])) {
+          $item['attributes']['class'][] = 'last';
+        }
+      }
+
+      if ($even) {
+        $item['attributes']['class'][] = 'even';
+      }
+      else {
+        $item['attributes']['class'][] = 'odd';
+      }
+
+      $markup .= theme('list_item', array('markup' =>  $item['markup'], 'attributes' => $item['attributes']));
+
+      $count++;
+      $even = !$even;
+    }
+  }
+
+  return $markup;
+}
+
+/**
+ * Generate a single list item.
+ *
+ * This allows for the caller to handle the list wrapper type as they see fit.
+ * Does not process nested lists.
+ *
+ * @param array $vars
+ *   An array with the following structure:
+ *   - markup: the html markup.
+ *   - attributes: tag attributes array.
+ */
+function theme_list_item($vars) {
+  return '<li' . drupal_attributes($vars['attributes']) . '>' . $vars['markup'] . '</li>' . "\n";
+}
+
+/**
+ * A custom version of the drupal table theme.
+ *
+ * The default drupal theme creates two tables instead of one.
+ * The first table is just a table containing headers (for the purpose of
+ * sticky tables).
+ * The second table has the headers (again) and the content.
+ * This is not accessible.
+ *
+ * This function does not produce two separate tables.
+ * This function enforces the existence of thead and tbody tags.
+ */
+function mcneese_themes_table($variables) {
+  if (!isset($variables['attributes']['class']) || !is_array($variables['attributes']['class'])) {
+    $variables['attributes']['class'] = array();
+  }
+
+  $variables['attributes']['class'][] = 'noscript';
+
+  // Add sticky headers, if applicable.
+  if (count($variables['header']) && $variables['sticky']) {
+    $variables['attributes']['class'][] = 'sticky-enabled';
+  }
+
+  $output = '<table' . drupal_attributes($variables['attributes']) . '>' . "\n";
+
+  if (isset($variables['caption'])) {
+    $output .= '<caption>' . $variables['caption'] . '</caption>' . "\n";
+  }
+
+  // Format the table columns:
+  if (count($variables['colgroups'])) {
+    foreach ($variables['colgroups'] as $number => $colgroup) {
+      $variables['attributes'] = array();
+
+      // Check if we're dealing with a simple or complex column
+      if (isset($colgroup['data'])) {
+        foreach ($colgroup as $key => $value) {
+          if ($key == 'data') {
+            $cols = $value;
+          }
+          else {
+            $variables['attributes'][$key] = $value;
+          }
+        }
+      }
+      else {
+        $cols = $colgroup;
+      }
+
+      // Build colgroup
+      if (is_array($cols) && count($cols)) {
+        $output .= ' <colgroup' . drupal_attributes($variables['attributes']) . '>';
+        $i = 0;
+        foreach ($cols as $col) {
+          $output .= ' <col' . drupal_attributes($col) . '>';
+        }
+        $output .= ' </colgroup>' . "\n";
+      }
+      else {
+        $output .= ' <colgroup' . drupal_attributes($variables['attributes']) . '>' . "\n";
+      }
+    }
+  }
+
+  // Add the 'empty' row message if available.
+  if (!count($variables['rows']) && $variables['empty']) {
+    $header_count = 0;
+    foreach ($variables['header'] as $header_cell) {
+      if (is_array($header_cell)) {
+        $header_count += isset($header_cell['colspan']) ? $header_cell['colspan'] : 1;
+      }
+      else {
+        $header_count++;
+      }
+    }
+
+    $variables['rows'][] = array(array(
+      'data' => $variables['empty'],
+      'colspan' => $header_count,
+      'class' => array('empty', 'message'),
+    ));
+  }
+
+  // Format the table header:
+  if (count($variables['header'])) {
+    $ts = tablesort_init($variables['header']);
+
+    // HTML requires that the thead tag has tr tags in it followed by tbody
+    // tags. Using ternary operator to check and see if we have any rows.
+    $output .= (count($variables['rows']) ? ' <thead><tr>' : ' <tr>');
+    foreach ($variables['header'] as $cell) {
+      $cell = tablesort_header($cell, $variables['header'], $ts);
+      $output .= _theme_table_cell($cell, TRUE);
+    }
+    // Using ternary operator to close the tags based on whether or not there are rows
+    $output .= (count($variables['rows']) ? '</tr></thead>' : '</tr>')  . "\n";
+  }
+  else {
+    $ts = array();
+  }
+
+  // Format the table rows:
+  if (count($variables['rows'])) {
+    $output .= '<tbody>' . "\n";
+    $flip = array(
+      'even' => 'odd',
+      'odd' => 'even',
+    );
+
+    $class = 'even';
+    foreach ($variables['rows'] as $number => $row) {
+      $variables['attributes'] = array();
+
+      // Check if we're dealing with a simple or complex row
+      if (isset($row['data'])) {
+        foreach ($row as $key => $value) {
+          if ($key == 'data') {
+            $cells = $value;
+          }
+          else {
+            $variables['attributes'][$key] = $value;
+          }
+        }
+      }
+      else {
+        $cells = $row;
+      }
+
+      if (count($cells)) {
+        // Add odd/even class
+        if (empty($row['no_striping'])) {
+          $class = $flip[$class];
+          $variables['attributes']['class'][] = $class;
+        }
+
+        // Build row
+        $output .= '<tr' . drupal_attributes($variables['attributes']) . '>';
+        $i = 0;
+        foreach ($cells as $cell) {
+          $cell = tablesort_cell($cell, $variables['header'], $ts, $i++);
+          $output .= _theme_table_cell($cell);
+        }
+        $output .= '</tr>' . "\n";
+      }
+    }
+
+    $output .= '</tbody>' . "\n";
+  }
+
+  $output .= '</table>' . "\n";
+  return $output;
+}
+
+
+/**
+ * A custom version of the drupal form theme.
+ *
+ * This improves accessibility of the theme form.
+ */
+function mcneese_themes_form($variables) {
+  $element = $variables['element'];
+
+  if (isset($element['#action'])) {
+    $element['#attributes']['action'] = drupal_strip_dangerous_protocols($element['#action']);
+  }
+
+  element_set_attributes($element, array('method', 'id'));
+
+  if (empty($element['#attributes']['accept-charset'])) {
+    $element['#attributes']['accept-charset'] = "UTF-8";
+  }
+
+  // accessibility improvements
+  $element['#attributes']['role'] = 'form';
+
+
+  // alter tags to provide more css controls
+  if (!empty($element['#form_id'])) {
+    $sanitized = preg_replace('/(\W)+/i', '_', $element['#form_id']);
+  } else {
+    $sanitized = preg_replace('/(\W)+/i', '_', $element['#attributes']['id']);
+  }
+
+  if (!isset($element['#attributes']['class']) || !is_array($element['#attributes']['class'])) {
+    $element['#attributes']['class'] = array();
+  }
+
+  $element['#attributes']['class'][] = $sanitized;
+
+
+  // Anonymous DIV to satisfy XHTML compliance.
+  return '<form' . drupal_attributes($element['#attributes']) . '><div class="form-wrapper-inner">' . $element['#children'] . '</div></form>';
+}
+
+/**
+ * @} End of '@defgroup mcneese_themes McNeese Themes'.
+ */

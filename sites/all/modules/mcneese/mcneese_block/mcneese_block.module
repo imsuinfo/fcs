@@ -1,0 +1,274 @@
+<?php
+
+/**
+ * @file
+ * McNeese State University Block module.
+ */
+
+/**
+ * @defgroup mcneese_block McNeese Block
+ * @{
+ * Provides block functionality and changes to drupal 7.
+ */
+
+/**
+ * Implements hook_block_view_alter().
+ */
+function mcneese_block_block_view_alter(&$data, $block) {
+  try {
+    $query = db_select('mcneese_html5_options_semantic', 'mhos');
+
+    $query->innerjoin('mcneese_block',  'mb', 'mb.semantic = mhos.id');
+    $query->addField('mhos', 'machine_name', 'semantic');
+    $query->fields('mb', array('heading'));
+    $query->condition('module', $block->module);
+    $query->condition('delta', $block->delta);
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
+
+    return;
+  }
+
+  try {
+    $result = $query->execute()->fetchObject();
+
+    if (is_object($result)) {
+      $data['semantic'] = $result->semantic;
+      $data['heading'] = $result->heading;
+    }
+    else {
+      $query = db_select('mcneese_block', 'mb');
+      $query->fields('mb', array('heading'));
+      $query->condition('module', $block->module);
+      $query->condition('delta', $block->delta);
+
+      $result = $query->execute()->fetchObject();
+
+      if (is_object($result)) {
+        $data['semantic'] = 'none';
+        $data['heading'] = $result->heading;
+      }
+      else {
+        $data['semantic'] = 'ignore';
+        $data['heading'] = 2;
+      }
+    }
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
+
+    return;
+  }
+}
+
+/**
+ * Implements hook_form_FORMID_alter().
+ *
+ * @see mcneese_block_form_block_admin_configure_alter()
+ */
+function mcneese_block_form_block_add_block_form_alter(&$form, &$form_state) {
+  mcneese_block_form_block_admin_configure_alter($form, $form_state);
+}
+
+/**
+ * Implements hook_form_FORMID_alter().
+ */
+function mcneese_block_form_block_admin_configure_alter(&$form, &$form_state) {
+  $semantic_list = array_merge(array('ignore' => t("<Ignore>"), 'none' => t("<None>")), cf_db_options_get_options_list('mcneese_html5', 'semantic'));
+  $default_semantic = 'ignore';
+  $default_unwrapped = FALSE;
+  $default_heading = 2;
+
+  if (!empty($form['delta']['#value'])) {
+    try {
+      $query = db_select('mcneese_html5_options_semantic', 'mhos');
+
+      $query->innerjoin('mcneese_block',  'mb', 'mb.semantic = mhos.id');
+      $query->addField('mhos', 'machine_name', 'semantic');
+      $query->fields('mb', array('heading'));
+      $query->condition('module', $form['module']['#value']);
+      $query->condition('delta', $form['delta']['#value']);
+    }
+    catch (Exception $e) {
+      cf_error::on_exception($e);
+
+      return FALSE;
+    }
+
+    try {
+      $result = $query->execute()->fetchObject();
+
+      if (is_object($result)) {
+        $default_semantic = $result->semantic;
+        $default_heading = $result->heading;
+      }
+      else {
+        $query = db_select('mcneese_block', 'mb');
+        $query->fields('mb', array('heading'));
+        $query->condition('module', $form['module']['#value']);
+        $query->condition('delta', $form['delta']['#value']);
+
+        $result = $query->execute()->fetchObject();
+
+        if (is_object($result)) {
+          $default_semantic = 'none';
+          $default_heading = $result->heading;
+        }
+      }
+    }
+    catch (Exception $e) {
+      cf_error::on_query_execution($e);
+
+      return FALSE;
+    }
+  }
+
+  $form['mcneese'] = array(
+    '#type' => 'fieldset',
+    '#tree' => TRUE,
+    '#title' => t("McNeese"),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#weight' => 10,
+    '#description' => t("Provides custom McNeese State University functionality. Many of these options require a theme that is aware of this added functionality."),
+  );
+
+  $form['mcneese']['semantic'] = array(
+    '#type' => 'select',
+    '#title' => t("Show this block as specific HTML semantic markup."),
+    '#default_value' => $default_semantic,
+    '#options' => $semantic_list,
+    '#description' => t("When specified, this block will be treated and presented as the specified HTML semantic markup tag instead of the usual div. If set to <none>, then the outer wrapping markup will not be used. If set to <ignore>, then the block will be left alone."),
+    '#required' => TRUE,
+  );
+
+  $form['mcneese']['heading'] = array(
+    '#type' => 'textfield',
+    '#title' => t("Specify the heading number."),
+    '#default_value' => $default_heading,
+    '#description' => t("Specify the heading type to associate with this block. This is usually 2 and under most circumstance, namely for accessibility reasons, should remain as such. A value of 0 will prevent a header from being used."),
+    '#required' => TRUE,
+    '#size' => 1,
+    '#maxlength' => 1,
+  );
+
+  // Ensure that the vertical tab is always below the fieldsets.
+  $form['visibility']['#weight'] = 100;
+
+  $form['#validate'][] = 'mcneese_block_form_block_admin_configure_validate';
+  $form['#submit'][] = 'mcneese_block_form_block_admin_configure_submit';
+}
+/**
+ * Form validate handler for block configuration form.
+ */
+function mcneese_block_form_block_admin_configure_validate($form, &$form_state) {
+  if (!cf_is_integer($form_state['values']['mcneese']['heading']) || $form_state['values']['mcneese']['heading'] < 0 || $form_state['values']['mcneese']['heading'] > 6) {
+    form_set_error('mcneese][heading', t("The heading number may only be an integer, inclusively from 0 to 6."));
+  }
+}
+
+/**
+ * Form submit handler for block configuration form.
+ *
+ * @param array $form
+ *
+ * @param array $form_state
+ */
+function mcneese_block_form_block_admin_configure_submit($form, &$form_state) {
+  if (!empty($form['delta']['#value'])) {
+    try {
+      $query = db_delete('mcneese_block');
+
+      $query->condition('module', $form['module']['#value']);
+      $query->condition('delta', $form['delta']['#value']);
+      $query->execute();
+    }
+    catch (Exception $e) {
+      cf_error::on_query_execution($e);
+
+      throw $e;
+    }
+  }
+
+  if ($form_state['values']['mcneese']['semantic'] != 'ignore') {
+    $values = array();
+    $values['module'] = $form['module']['#value'];
+    $values['delta'] = empty($form['delta']['#value']) ? $form_state['values']['delta'] : $form['delta']['#value'];
+    $values['heading'] = $form_state['values']['mcneese']['heading'];
+
+    if ($form_state['values']['mcneese']['semantic'] == 'none') {
+      $values['semantic'] = 0;
+    }
+    else {
+      $values['semantic'] = cf_db_options_machine_name_to_id('mcneese_html5', 'semantic', $form_state['values']['mcneese']['semantic']);
+
+      if ($values['semantic'] === FALSE) {
+        throw new Exception("Failed to convert the machine_name '" . $form_state['values']['mcneese']['semantic'] . "' to it's numeric id.");
+      }
+    }
+
+    $query = db_insert('mcneese_block');
+    $query->fields(array_keys($values));
+    $query->values($values);
+
+    try {
+      $query->execute();
+    }
+    catch (Exception $e) {
+      cf_error::on_query_execution($e);
+
+      throw $e;
+    }
+  }
+}
+
+/**
+ * Implements hook_module_uninstall().
+ */
+function mcneese_block_module_uninstall($module_list) {
+  foreach ($module_list as $module => $weight) {
+    try {
+      $query = db_delete('mcneese_block');
+
+      $query->condition('module', $module);
+      $query->execute();
+    }
+    catch (Exception $e) {
+      cf_error::on_query_execution($e);
+
+      throw $e;
+    }
+  }
+}
+
+/**
+ * Implements hook_form_FORMID_alter().
+ *
+* @see mcneese_block_form_block_custom_block_delete_submit()
+ */
+function mcneese_block_form_block_custom_block_delete_alter(&$form, &$form_state) {
+  $form['#submit'][] = 'mcneese_block_form_block_custom_block_delete_submit';
+}
+
+/**
+ * Form submit handler for custom block delete form.
+ */
+function mcneese_block_form_block_custom_block_delete_submit($form, &$form_state) {
+  try {
+    $query = db_delete('mcneese_block');
+
+    $query->condition('module', 'block');
+    $query->condition('delta', $form_state['values']['delta']);
+    $query->execute();
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
+
+    throw $e;
+  }
+}
+
+/**
+ * @} End of '@defgroup mcneese_block McNeese Block'.
+ */

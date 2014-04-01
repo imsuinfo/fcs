@@ -1,0 +1,127 @@
+<?php
+
+/**
+ * @file
+ * McNeese State University Webform module.
+ */
+
+/**
+ * @defgroup mcneese_webform Webform
+ * @{
+ * Provides mcneese-specific webform functionality for drupal 7.
+ */
+
+
+/**
+ * Implements hook_webform_component_info().
+ */
+function mcneese_webform_webform_component_info() {
+  $components = array();
+
+  $components['banner_id'] = array(
+    'label' => t("Banner ID"),
+    'description' => t("The 9-digit McNeese Banner ID."),
+    'features' => array(
+      'csv' => TRUE,
+      'email' => TRUE,
+      'required' => TRUE,
+      'title_display' => TRUE,
+      'title_inline' => TRUE,
+      'conditional' => TRUE,
+      'default_value' => TRUE,
+    ),
+    'file' => 'components/banner_id.inc',
+  );
+
+  $components['print_break'] = array(
+    'label' => t("Print Break"),
+    'description' => t("Add an explicit page-break for when printing."),
+    'features' => array(
+      'title_display' => FALSE,
+      'analysis' => FALSE,
+      'csv' => FALSE,
+      'default_value' => FALSE,
+      'description' => FALSE,
+      'email' => FALSE,
+      'required' => FALSE,
+      'conditional' => FALSE,
+      'title_display' => FALSE,
+      'private' => FALSE,
+      'wrapper_classes' => FALSE,
+      'css_classes' => FALSE,
+      'label_classes' => FALSE,
+    ),
+    'file' => 'components/print_break.inc',
+  );
+
+  $components['input_list'] = array(
+    'label' => t("Input List"),
+    'description' => t("This is a structuring component designed to present options in a list format."),
+    'features' => array(
+      'title_display' => FALSE,
+      'analysis' => FALSE,
+      'csv' => FALSE,
+      'default_value' => FALSE,
+      'description' => FALSE,
+      'email' => FALSE,
+      'required' => FALSE,
+      'conditional' => FALSE,
+      'title_display' => FALSE,
+      'private' => FALSE,
+      'wrapper_classes' => TRUE,
+      'css_classes' => TRUE,
+      'label_classes' => FALSE,
+      'group' => TRUE,
+    ),
+    'file' => 'components/input_list.inc',
+  );
+
+  return $components;
+}
+
+/**
+ * Validate an element value is unique with no duplicates in the database.
+ *
+ * @param array $element
+ *   Array containing the form element.
+ * @param array $form_state
+ *   Array containing the form state.
+ */
+function mcneese_webform_validate_banner_id($element, &$form_state) {
+  if (!empty($form_state['webform']['component_tree']['children'])) {
+    foreach ($form_state['webform']['component_tree']['children'] as &$component) {
+      if ($component['type'] == 'banner_id') {
+        if (cf_is_integer($form_state['values']['submitted'][$component['name']]) === FALSE) {
+          form_error($element, t("The %title can only be a number (specifically only an integer), the value of '%value' is invalid.", array('%title' => $element['#title'], '%value' => $form_state['values']['submitted'][$component['name']])));
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Validate an element value is unique with no duplicates in the database.
+ *
+ * @param object $node
+ *   Node containing the webform.
+ * @param object $submission
+ *   Submission results of the webform.
+ */
+function mcneese_webform_webform_submission_presave($node, &$submission) {
+  $user = cf_current_user();
+
+  foreach ($node->webform['components'] as $cid => &$component) {
+    if ($component['type'] == 'banner_id') {
+      if ($component['extra']['autofill'] === TRUE) {
+        if (property_exists($user, 'field_user_banner_id') && isset($user->field_user_banner_id['und'][0]['value'])) {
+          $submission->data[$cid] = array($user->field_user_banner_id['und'][0]['value']);
+        }
+      }
+    }
+  }
+}
+
+
+/**
+ * @} End of '@defgroup mcneese_webform Webform.
+ */

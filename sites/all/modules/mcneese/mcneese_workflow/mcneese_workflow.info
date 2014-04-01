@@ -1,0 +1,12 @@
+name = McNeese Module - Workflow
+description = "Provides Workflow specific module functionality."
+core = 7.x
+php = 5.3
+package = McNeese
+
+dependencies[] = cf (7.x-2.x)
+dependencies[] = cf_error (7.x-2.x)
+dependencies[] = workbench_moderation
+dependencies[] = node_accessibility
+
+files[] = mcneese_workflow.module
