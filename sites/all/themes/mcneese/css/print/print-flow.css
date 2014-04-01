@@ -1,0 +1,32 @@
+
+
+
+/*** Common ***/
+.mcneese .no-print {
+  display: none;
+}
+
+.html_tag-nav {
+  display: none;
+}
+
+
+
+/*** Headers ***/
+.mcneese #mcneese-header {
+  display: none;
+}
+
+
+
+/*** Search Form ***/
+.mcneese #search-form {
+  display: none;
+}
+
+
+
+/*** Side Area ***/
+.mcneese #mcneese-page-side {
+  display: none;
+}
