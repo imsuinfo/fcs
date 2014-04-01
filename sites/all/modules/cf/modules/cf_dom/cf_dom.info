@@ -1,0 +1,10 @@
+name = CF DOM
+description = "Provides php dom manipulation functionality for processing and altering markup."
+core = 7.x
+php = 5.3
+package = Common Functionality
+
+dependencies[] = cf
+
+files[] = classes/cf_dom.php
+files[] = cf_dom.module
