@@ -24,6 +24,13 @@ function html5_tools_element_info_alter(&$type) {
   if (module_exists('link') && !empty($type['link_field'])) {
     $type['link_field']['#process'][] = '_html5_tools_link_field_process';
   }
+
+  if (function_exists('ctools_dependent_pre_render')) {
+    $form_elements = array('numberfield', 'rangewidget', 'telwidget', 'urlwidget', 'emailwidget');
+    foreach ($form_elements as $element) {
+      $type[$element]['#pre_render'][] = 'ctools_dependent_pre_render';
+    }
+  }
 }
 
 /**
