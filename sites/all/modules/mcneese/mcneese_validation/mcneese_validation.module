@@ -8,7 +8,7 @@
 /**
  * @defgroup mcneese_validation McNeese Validation
  * @{
- * Provides block functionality and changes to drupal 7.
+ * Provides validation functionality and changes to drupal 7.
  */
 
 

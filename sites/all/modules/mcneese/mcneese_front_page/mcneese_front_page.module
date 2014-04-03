@@ -2,13 +2,13 @@
 
 /**
  * @file
- * McNeese State University Functions module.
+ * McNeese State University Front Page module.
  */
 
 /**
  * @defgroup mcneese_front_page McNeese Front Page
  * @{
- * Provides content functionality and changes to drupal 7.
+ * Provides front page functionality and changes to drupal 7.
  */
 
 /**

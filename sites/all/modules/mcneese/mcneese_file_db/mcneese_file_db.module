@@ -305,9 +305,11 @@ function mcneese_file_db_load_available_files($conditions = array()) {
  * @param string $checksum
  *   The checksum to compare against.
  *
- * @param bool $associated
+ * @param bool|string $associated
  *   (optional) If TRUE, then limit query to associated files.
- *   If FALSE, then do not limit query to associated files.
+ *   If 'unrestricted', then limit to association with unrestricted files.
+ *   If 'restricted', then limit to association with restricted files.
+ *   Otherwise do not limit query to associated files.
  *
  * @return array|bool
  *   An array of:
@@ -329,9 +331,18 @@ function mcneese_file_db_build_query_by_checksum($checksum, $associated = TRUE) 
 
   $built['query'] = 'SELECT mfdf.* FROM {mcneese_file_db_files} mfdf';
 
-  if ($associated) {
+  if ($associated === TRUE) {
     $built['arguments'][':server_id'] = $conf[MCNEESE_FILE_DB_CONF_SERVER_ID];
-    $built['query'] .= ' INNER JOIN {mcneese_file_db_associations} mfda ON (mfdf.id = mfda.file_id AND mfda.server_id = :server_id)';
+    $built['query'] .= ' LEFT JOIN {mcneese_file_db_unrestricted} mfdu ON (mfdf.id = mfdu.file_id AND mfdu.server_id = :server_id)';
+    $built['query'] .= ' LEFT JOIN {mcneese_file_db_restricted} mfdr ON (mfdf.id = mfdr.file_id AND mfdr.server_id = :server_id)';
+  }
+  elseif ($associated === 'public') {
+    $built['arguments'][':server_id'] = $conf[MCNEESE_FILE_DB_CONF_SERVER_ID];
+    $built['query'] .= ' INNER JOIN {mcneese_file_db_unrestricted} mfda ON (mfdf.id = mfda.file_id AND mfda.server_id = :server_id)';
+  }
+  elseif ($associated === 'private') {
+    $built['arguments'][':server_id'] = $conf[MCNEESE_FILE_DB_CONF_SERVER_ID];
+    $built['query'] .= ' INNER JOIN {mcneese_file_db_restricted} mfda ON (mfdf.id = mfda.file_id AND mfda.server_id = :server_id)';
   }
 
   if (count($checksum) == MCNEESE_FILE_DB_SHORT_SUM_SIZE) {

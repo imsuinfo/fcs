@@ -133,7 +133,7 @@ class mcneese_file_db_restricted_stream_wrapper extends mcneese_file_db_stream_w
         $this->tmp_checksum = $fields['checksum'];
 
         // if the checksum already exists in the database, then delete the current newly created file.
-        if ($this->checksum_exists($this->tmp_checksum)) {
+        if ($this->checksum_exists($this->tmp_checksum, 'restricted')) {
           $transaction = db_transaction();
 
           try {

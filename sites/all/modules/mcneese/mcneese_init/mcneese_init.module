@@ -3,15 +3,12 @@
 /**
  * @file
  * McNeese State University Initialization module.
- *
- * This is based on the globalredirect module.
- * Code from the globalredirect module has been used.
  */
 
 /**
  * @defgroup mcneese_init McNeese Initialization
  * @{
- * Provides block functionality and changes to drupal 7.
+ * Provides system initialization functionality and changes to drupal 7.
  */
 
 /**

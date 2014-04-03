@@ -646,9 +646,11 @@ abstract class mcneese_file_db_stream_wrapper implements DrupalStreamWrapperInte
    * @param string $checksum
    *   Checksum to validate against
    *
-   * @param bool $associated
-   *   (optional) If TRUE, existance check is against associated files only.
-   *   If FALSE, existence check is against all files in the database.
+   * @param bool|string $associated
+   *   (optional) If TRUE, then limit query to associated files.
+   *   If 'unrestricted', then limit to association with unrestricted files.
+   *   If 'restricted', then limit to association with restricted files.
+   *   Otherwise do not limit query to associated files.
    *
    * @return bool
    *   TRUE if file exists, FALSE otherwise.
@@ -682,9 +684,11 @@ abstract class mcneese_file_db_stream_wrapper implements DrupalStreamWrapperInte
    * @param string $checksum
    *   Checksum to validate against
    *
-   * @param bool $associated
-   *   (optional) If TRUE, existance check is against associated files only.
-   *   If FALSE, existence check is against all files in the database.
+   * @param bool|string $associated
+   *   (optional) If TRUE, then limit query to associated files.
+   *   If 'unrestricted', then limit to association with unrestricted files.
+   *   If 'restricted', then limit to association with restricted files.
+   *   Otherwise do not limit query to associated files.
    *
    * @return int|bool
    *   File ID if it exists, FALSE otherwise.

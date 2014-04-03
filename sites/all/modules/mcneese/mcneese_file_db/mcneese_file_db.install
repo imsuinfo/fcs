@@ -62,17 +62,26 @@ function mcneese_file_db_install() {
     PRIMARY KEY (file_id, server_id, user_id)
   );
 
-  // setup permissions for each appropriate additional user (and for each table and sequence)
+  // setup permissions for each appropriate additional power user (and for each table and sequence)
   GRANT ALL PRIVILEGES ON DATABASE web_files TO web_files_user ;
   GRANT ALL PRIVILEGES ON mcneese_file_db_servers TO web_files_user ;
   GRANT ALL PRIVILEGES ON mcneese_file_db_unrestricted TO web_files_user ;
   GRANT ALL PRIVILEGES ON mcneese_file_db_restricted TO web_files_user ;
   GRANT ALL PRIVILEGES ON mcneese_file_db_file_data TO web_files_user ;
   GRANT ALL PRIVILEGES ON mcneese_file_db_files TO web_files_user ;
-  GRANT ALL PRIVILEGES ON mcneese_file_db_servers TO web_files_user ;
   GRANT ALL PRIVILEGES ON mcneese_file_db_users TO web_files_user ;
   GRANT ALL PRIVILEGES ON mcneese_file_db_files_id_seq TO web_files_user ;
   GRANT ALL PRIVILEGES ON mcneese_file_db_servers_id_seq TO web_files_user ;
+
+  // setup permissions for each appropriate additional normal user (and for each table and sequence)
+  GRANT CONNECT ON DATABASE web_files TO web_files_user ;
+  GRANT SELECT ON mcneese_file_db_servers TO web_files_user ;
+  GRANT SELECT, INSERT ON mcneese_file_db_unrestricted TO web_files_user ;
+  GRANT SELECT, INSERT ON mcneese_file_db_restricted TO web_files_user ;
+  GRANT SELECT, INSERT ON mcneese_file_db_file_data TO web_files_user ;
+  GRANT SELECT, INSERT ON mcneese_file_db_files TO web_files_user ;
+  GRANT SELECT, INSERT ON mcneese_file_db_users TO web_files_user ;
+  GRANT USAGE, SELECT, UPDATE ON mcneese_file_db_files_id_seq TO web_files_user ;
   //*/
 }
 
