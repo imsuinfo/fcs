@@ -213,9 +213,23 @@
 include_once DRUPAL_ROOT . '/sites/default/passwords.php';
 
 $databases = array (
-  'event_workflow' => 
+  'file_db' =>
   array (
-    'default' => 
+    'default' =>
+    array (
+      'database' => 'web_files',
+      'username' => 'event_workflow_user',
+      'password' => $dbp['event_workflow_user'],
+      'host' => '192.251.101.224',
+      'port' => '5092',
+      'driver' => 'pgsql',
+      'prefix' => '',
+      'transactions' => TRUE,
+    ),
+  ),
+  'event_workflow' =>
+  array (
+    'default' =>
     array (
       'database' => 'event_workflow',
       'username' => 'event_workflow_user',
@@ -225,6 +239,33 @@ $databases = array (
       'driver' => 'pgsql',
       'prefix' => '',
       'transactions' => TRUE
+    ),
+  ),
+  'oracle' =>
+  array (
+    'default' =>
+    array (
+      'database' => 'PROD8',
+      'host' => '192.251.101.232',
+      'username' => 'MSU_EVENT',
+      'password' => $dbp['msu_event'],
+      'port' => '1521',
+      'driver' => 'oracle',
+      'prefix' => '',
+      'transactions' => TRUE,
+      'use_tns' => TRUE,
+    ),
+    'test' =>
+    array (
+      'database' => 'TEST',
+      'host' => '192.251.101.136',
+      'username' => 'MSU_EVENT',
+      'password' => $dbp['msu_event'],
+      'port' => '1521',
+      'driver' => 'oracle',
+      'prefix' => '',
+      'transactions' => TRUE,
+      'use_tns' => TRUE,
     ),
   ),
 );
