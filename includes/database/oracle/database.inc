@@ -94,11 +94,18 @@ class DatabaseConnection_oracle extends DatabaseConnection
     $oracle_user= $connection_options['username'];
 
     // Use database as TNSNAME
-    if ($connection_options['host'] == 'USETNS') 
-      $dsn = 'oci:dbname='.$connection_options['database'] .';charset=AL32UTF8';
-    else  // Use host/port/database
-      $dsn = 'oci:dbname=//'.$connection_options['host'].':'.$connection_options['port'].'/' . $connection_options['database'].';charset=AL32UTF8';
-        
+    $charset = ';charset=AL32UTF8';
+    if ($connection_options['use_tns'] === TRUE) {
+      $dsn = "oci:dbname=(DESCRIPTION =\n    (ADDRESS_LIST =\n      (ADDRESS = (PROTOCOL = TCP)(HOST = " . $connection_options['host'] . ")(PORT = " . $connection_options['port'] ."))\n    )\n";
+      $dsn .= "    (CONNECT_DATA =\n      (SID = " . $connection_options['database']  . ")\n      (SERVER = DEDICATED)\n    )\n  )";
+    }
+    elseif ($connection_options['host'] == 'USETNS') {
+      $dsn = 'oci:dbname='.$connection_options['database'] . $charset;
+    }
+    else { // Use host/port/database
+      $dsn = 'oci:dbname=//'.$connection_options['host'].':'.$connection_options['port'].'/' . $connection_options['database'] . $charset;
+    }
+
     parent::__construct($dsn, $connection_options['username'], $connection_options['password'], array(
 
       // Convert numeric values to strings when fetching.
