@@ -31,9 +31,9 @@ function _webform_defaults_banner_id() {
       'description' => '',
       'attributes' => array(),
       'private' => TRUE,
-      'readonly' => TRUE,
+      'readonly' => FALSE,
       'disabled' => FALSE,
-      'autofill' => TRUE,
+      'autofill' => FALSE,
     ),
   );
 }
