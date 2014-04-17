@@ -1,0 +1,25 @@
+/*!
+ * jQuery UI Accordion 1.10.2
+ * http://jqueryui.com
+ *
+ * Copyright 2013 jQuery Foundation and other contributors
+ * Released under the MIT license.
+ * http://jquery.org/license
+ *
+ * http://docs.jquery.com/UI/Accordion#theming
+ */
+.ui-accordion .ui-accordion-header {
+	cursor: pointer;
+	position: relative;
+	padding: 3px;
+	min-height: 0; /* support: IE7 */
+	margin-bottom: 0px;
+}
+.ui-accordion .ui-accordion-header .ui-accordion-header-icon {
+	display: inline-block;
+}
+.ui-accordion .ui-accordion-content {
+	border-top: 0;
+	padding: 3px;
+	overflow: auto;
+}
