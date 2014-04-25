@@ -425,6 +425,7 @@ function field_group_format_settings_form(&$group) {
     '#weight' => -5,
     '#element_validate' => array('field_group_format_settings_label_validate'),
   );
+
   $addition = module_invoke_all('field_group_format_settings', $group);
   $form += $addition;
   // Give fieldgroup implementations the chance to alter the description.

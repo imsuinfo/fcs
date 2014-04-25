@@ -445,6 +445,43 @@ function field_group_field_group_format_settings($group) {
   $mode = $group->mode == 'form' ? 'form' : 'display';
   $formatter = $field_group_types[$mode][$group->format_type];
 
+  $alternate_labels = array();
+  $alternate_labels[] = 'fieldset';
+  $alternate_labels[] = 'div';
+  $alternate_labels[] = 'htabs';
+  $alternate_labels[] = 'htab';
+  $alternate_labels[] = 'multipage';
+  $alternate_labels[] = 'tabs';
+  $alternate_labels[] = 'tab';
+
+  if (in_array($group->format_type, $alternate_labels)) {
+    $form['instance_settings']['alternate_label_fieldset'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Alternate Label Settings'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#tree' => TRUE,
+      '#weight' => -10,
+    );
+
+    $form['instance_settings']['alternate_label_fieldset']['alternate_label'] = array(
+      '#type' => 'text_format',
+      '#title' => t('Alternate Label'),
+      '#default_value' => NULL,
+      '#rows' => 10,
+      '#resizable' => TRUE,
+      '#wysiwyg' => TRUE,
+    );
+
+    if (isset($group->format_settings['instance_settings']['alternate_label_fieldset']['alternate_label']['value'])) {
+      $form['instance_settings']['alternate_label_fieldset']['alternate_label']['#default_value'] = $group->format_settings['instance_settings']['alternate_label_fieldset']['alternate_label']['value'];
+    }
+
+    if (isset($group->format_settings['instance_settings']['alternate_label_fieldset']['alternate_label'])) {
+      $form['instance_settings']['alternate_label_fieldset']['alternate_label']['#format'] = $group->format_settings['instance_settings']['alternate_label_fieldset']['alternate_label']['format'];
+    }
+  }
+
   // Add the required formatter type selector.
   if (isset($formatter['format_types'])) {
     $form['formatter'] = array(
@@ -517,14 +554,14 @@ function field_group_field_group_format_settings($group) {
       $form['instance_settings']['show_label'] = array(
         '#title' => t('Show label'),
         '#type' => 'select',
-        '#options' => array(0 => t('No'), 1 => t('Yes')),
+        '#options' => array(0 => t('No'), 1 => t('Yes'), 2 => t('Alternate')),
         '#default_value' => isset($group->format_settings['instance_settings']['show_label']) ? $group->format_settings['instance_settings']['show_label'] : $formatter['instance_settings']['show_label'],
         '#weight' => 2,
       );
       $form['instance_settings']['label_element'] = array(
         '#title' => t('Label element'),
         '#type' => 'select',
-        '#options' => array('h2' => t('Header 2'), 'h3' => t('Header 3')),
+        '#options' => array('h1' => t('Header 1'), 'h2' => t('Header 2'), 'h3' => t('Header 3'), 'h4' => t('Header 4'), 'h5' => t('Header 5'), 'h6' => t('Header 6'), 'div' => t('Divider'), 'span' => t('Span'), '' => t('None')),
         '#default_value' => isset($group->format_settings['instance_settings']['label_element']) ? $group->format_settings['instance_settings']['label_element'] : $formatter['instance_settings']['label_element'],
         '#weight' => 2,
       );
@@ -553,6 +590,13 @@ function field_group_field_group_format_settings($group) {
       break;
     case 'fieldset':
       $form['label']['#description'] = t('Please enter a label for collapsible elements');
+      $form['instance_settings']['show_label'] = array(
+        '#title' => t('Show label'),
+        '#type' => 'select',
+        '#options' => array(1 => t('Normal'), 2 => t('Alternate')),
+        '#default_value' => isset($group->format_settings['instance_settings']['show_label']) ? $group->format_settings['instance_settings']['show_label'] : 1,
+        '#weight' => 2,
+      );
       break;
     case 'multipage-group':
       $form['instance_settings']['page_header'] = array(
@@ -584,7 +628,17 @@ function field_group_field_group_format_settings($group) {
         '#weight' => 4,
       );
     case 'tabs':
+    case 'tab':
     case 'htabs':
+    case 'htab':
+    case 'multipage':
+      $form['instance_settings']['show_label'] = array(
+        '#title' => t('Show label'),
+        '#type' => 'select',
+        '#options' => array(1 => t('Normal'), 2 => t('Alternate')),
+        '#default_value' => isset($group->format_settings['instance_settings']['show_label']) ? $group->format_settings['instance_settings']['show_label'] : 1,
+        '#weight' => 2,
+      );
       break;
     case 'accordion':
       $form['instance_settings']['effect'] = array(
@@ -595,10 +649,6 @@ function field_group_field_group_format_settings($group) {
         '#weight' => 2,
       );
       break;
-    case 'multipage':
-      break;
-    case 'tab':
-    case 'htab':
     case 'accordion-item':
     default:
   }
@@ -665,10 +715,22 @@ function field_group_field_group_pre_render(& $element, &$group, & $form) {
  * @param $form The root element or form.
  */
 function field_group_pre_render_fieldset(&$element, $group, &$form) {
+  $show_label = isset($group->format_settings['instance_settings']['show_label']) ? $group->format_settings['instance_settings']['show_label'] : 1;
+  $label = t(check_plain($group->label));
+  if ($show_label == 2) {
+    if (!empty($alternate_label['value'])) {
+      if (empty($alternate_label['format'])) {
+        $label = check_plain($alternate_label['value']);
+      }
+      else {
+        $label = check_markup($alternate_label['value'], $alternate_label['format']);
+      }
+    }
+  }
 
   $element += array(
     '#type' => 'fieldset',
-    '#title' => check_plain(t($group->label)),
+    '#title' => $label,
     '#collapsible' => $group->collapsible,
     '#collapsed' => $group->collapsed,
     '#pre_render' => array(),
@@ -731,12 +793,32 @@ function field_group_pre_render_div(&$element, $group, &$form) {
   $show_label = isset($group->format_settings['instance_settings']['show_label']) ? $group->format_settings['instance_settings']['show_label'] : 0;
   $label_element = isset($group->format_settings['instance_settings']['label_element']) ? $group->format_settings['instance_settings']['label_element'] : 'h2';
   $effect = isset($group->format_settings['instance_settings']['effect']) ? $group->format_settings['instance_settings']['effect'] : 'none';
+  $alternate_label = isset($group->format_settings['instance_settings']['alternate_label_fieldset']['alternate_label']) ? $group->format_settings['instance_settings']['alternate_label_fieldset']['alternate_label'] : NULL;
+
+  $label = t(check_plain($group->label));
+  if ($show_label == 2) {
+    if (!empty($alternate_label['value'])) {
+      if (empty($alternate_label['format'])) {
+        $label = check_plain($alternate_label['value']);
+      }
+      else {
+        $label = check_markup($alternate_label['value'], $alternate_label['format']);
+      }
+    }
+  }
+
+  $label_element_open = '';
+  $label_element_close = '';
+  if (!empty($label_element)) {
+    $label_element_open = '<' . $label_element . '>';
+    $label_element_close = '</' . $label_element . '>';
+  }
 
   $element['#type'] = 'markup';
   if ($group->format_settings['formatter'] != 'open') {
-    $element['#prefix'] = '<div id="' . $element['#id'] . '" class="' . $group->classes . '">
-      <' . $label_element . '><span class="field-group-format-toggler">' . check_plain(t($group->label)) . '</span></' . $label_element . '>
-      <div class="field-group-format-wrapper" style="display: ' . (!empty($group->collapsed) ? 'none' : 'block') . ';">';
+    $element['#prefix'] = '<div id="' . $element['#id'] . '" class="' . $group->classes . '">' .
+      $label_element_open . '<span class="field-group-format-toggler">' . $label . '</span>' . $label_element_close .
+      '<div class="field-group-format-wrapper" style="display: ' . (!empty($group->collapsed) ? 'none' : 'block') . ';">';
     $element['#suffix'] = '</div></div>';
   }
   else {
@@ -746,7 +828,7 @@ function field_group_pre_render_div(&$element, $group, &$form) {
     }
     $element['#prefix'] = '<div id="' . $element['#id'] . '"' . $class_attribute . '>';
     if ($show_label) {
-      $element['#prefix'] .= '<' . $label_element . '><span>' . check_plain(t($group->label)) . '</span></' . $label_element . '>';
+      $element['#prefix'] .= $label_element_open . '<span>' . $label . '</span>' . $label_element_close;
     }
     $element['#suffix'] = '</div>';
   }
@@ -828,19 +910,26 @@ function field_group_pre_render_accordion_item(&$element, $group, &$form) {
  * @param $form The root element or form.
  */
 function field_group_pre_render_htabs(&$element, $group, &$form) {
+  $show_label = isset($group->format_settings['instance_settings']['show_label']) ? $group->format_settings['instance_settings']['show_label'] : 1;
+  $label = t(check_plain($group->label));
+  if ($show_label == 2) {
+    if (!empty($alternate_label['value'])) {
+      if (empty($alternate_label['format'])) {
+        $label = check_plain($alternate_label['value']);
+      }
+      else {
+        $label = check_markup($alternate_label['value'], $alternate_label['format']);
+      }
+    }
+  }
 
   $element += array(
     '#type' => 'horizontal_tabs',
-    '#title' => check_plain(t($group->label)),
+    '#title' => $label,
     '#theme_wrappers' => array('horizontal_tabs'),
     '#prefix' => '<div class="field-group-' . $group->format_type . '-wrapper ' . $group->classes . '">',
     '#suffix' => '</div>',
   );
-
-  // By default vertical_tabs don't have titles but you can override it in the theme.
-  if (!empty($group->label)) {
-    $element['#title'] = check_plain($group->label);
-  }
 
   // Only add form.js on forms.
   if (!empty($form['#type']) && $form['#type'] == 'form') {
@@ -859,10 +948,22 @@ function field_group_pre_render_htabs(&$element, $group, &$form) {
  * @param $form The root element or form.
  */
 function field_group_pre_render_htab(&$element, $group, &$form) {
+  $show_label = isset($group->format_settings['instance_settings']['show_label']) ? $group->format_settings['instance_settings']['show_label'] : 1;
+  $label = t(check_plain($group->label));
+  if ($show_label == 2) {
+    if (!empty($alternate_label['value'])) {
+      if (empty($alternate_label['format'])) {
+        $label = check_plain($alternate_label['value']);
+      }
+      else {
+        $label = check_markup($alternate_label['value'], $alternate_label['format']);
+      }
+    }
+  }
 
   $element += array(
     '#type' => 'fieldset',
-    '#title' => check_plain(t($group->label)),
+    '#title' => $label,
     '#collapsible' => $group->collapsible,
     '#collapsed' => $group->collapsed,
     '#attributes' => array('class' => explode(" ", $group->classes)),
@@ -914,11 +1015,23 @@ function field_group_pre_render_multipage_group(&$element, &$group, &$form) {
  * @param $form The root element or form.
  */
 function field_group_pre_render_multipage(&$element, $group, &$form) {
+  $show_label = isset($group->format_settings['instance_settings']['show_label']) ? $group->format_settings['instance_settings']['show_label'] : 1;
+  $label = t(check_plain($group->label));
+  if ($show_label == 2) {
+    if (!empty($alternate_label['value'])) {
+      if (empty($alternate_label['format'])) {
+        $label = check_plain($alternate_label['value']);
+      }
+      else {
+        $label = check_markup($alternate_label['value'], $alternate_label['format']);
+      }
+    }
+  }
 
   $group->classes .= $group->format_settings['formatter'] == 'start' ? ' multipage-open' : ' multipage-closed';
   $element += array(
     '#type' => 'multipage_pane',
-    '#title' => check_plain(t($group->label)),
+    '#title' => $label,
     '#collapsible' => $group->collapsible,
     '#collapsed' => $group->collapsed,
     '#attributes' => array('class' => explode(" ", $group->classes)),
@@ -942,6 +1055,18 @@ function field_group_pre_render_multipage(&$element, $group, &$form) {
  * @param $form The root element or form.
  */
 function field_group_pre_render_tabs(&$element, $group, &$form) {
+  $show_label = isset($group->format_settings['instance_settings']['show_label']) ? $group->format_settings['instance_settings']['show_label'] : 1;
+  $label = t(check_plain($group->label));
+  if ($show_label == 2) {
+    if (!empty($alternate_label['value'])) {
+      if (empty($alternate_label['format'])) {
+        $label = check_plain($alternate_label['value']);
+      }
+      else {
+        $label = check_markup($alternate_label['value'], $alternate_label['format']);
+      }
+    }
+  }
 
   $element += array(
     '#type' => 'vertical_tabs',
@@ -951,8 +1076,8 @@ function field_group_pre_render_tabs(&$element, $group, &$form) {
   );
 
   // By default vertical_tabs don't have titles but you can override it in the theme.
-  if (!empty($group->label)) {
-    $element['#title'] = check_plain($group->label);
+  if (!empty($label)) {
+    $element['#title'] = $label;
   }
 
   $element[$group->group_name . '__active_tab'] = array(
@@ -973,6 +1098,18 @@ function field_group_pre_render_tabs(&$element, $group, &$form) {
  * @param $form The root element or form.
  */
 function field_group_pre_render_tab(&$element, $group, &$form) {
+  $show_label = isset($group->format_settings['instance_settings']['show_label']) ? $group->format_settings['instance_settings']['show_label'] : 1;
+  $label = t(check_plain($group->label));
+  if ($show_label == 2) {
+    if (!empty($alternate_label['value'])) {
+      if (empty($alternate_label['format'])) {
+        $label = check_plain($alternate_label['value']);
+      }
+      else {
+        $label = check_markup($alternate_label['value'], $alternate_label['format']);
+      }
+    }
+  }
 
   $view_mode = isset($form['#view_mode']) ? $form['#view_mode'] : 'form';
 
@@ -985,7 +1122,7 @@ function field_group_pre_render_tab(&$element, $group, &$form) {
   $add = array(
     '#type' => 'fieldset',
     '#id' => 'edit-' . $group->group_name,
-    '#title' => check_plain(t($group->label)),
+    '#title' => $label,
     '#collapsible' => $group->collapsible,
     '#collapsed' => $group->collapsed,
     '#attributes' => array('class' => explode(" ", $group->classes)),
@@ -1195,6 +1332,9 @@ function field_group_field_group_format_summary($group) {
     $output .= '<br />';
     foreach ($group->format_settings['instance_settings'] as $key => $value) {
       if (empty($value)) {
+        continue;
+      }
+      if ($key == 'alternate_label_fieldset') {
         continue;
       }
 
@@ -1638,7 +1778,6 @@ function field_group_read_groups($conditions = array(), $enabled = TRUE) {
  * Utility function to recreate identifiers.
  */
 function _field_group_recreate_identifiers() {
-
   // Migrate the field groups so they have a unique identifier.
   $result = db_select('field_group', 'fg')
     ->fields('fg')
