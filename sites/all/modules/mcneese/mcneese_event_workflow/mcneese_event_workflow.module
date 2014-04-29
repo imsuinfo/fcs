@@ -1,0 +1,476 @@
+<?php
+
+/**
+ * @file
+ * McNeese State University Event Workflow module.
+ */
+
+/**
+ * @defgroup mcneese_event_workflow McNeese Event Workflow
+ * @{
+ * Provides Workflow specific module functionality for the Events Workflow
+ * System.
+ */
+
+/**
+ * Implements hook_permission().
+ */
+function mcneese_event_workflow_permission() {
+  $permissions = array();
+
+  $permissions['mcneese event workflow manage'] = array(
+    'title' => t("Manage Event Workflow"),
+    'description' => t("Grants permissions to manage event workflow information."),
+  );
+
+  $permissions['mcneese event workflow administer'] = array(
+    'title' => t("Administer Event Workflow"),
+    'description' => t("Grants permissions to administer event workflow information."),
+  );
+
+  $permissions['mcneese event workflow use'] = array(
+    'title' => t("Use Event Workflow"),
+    'description' => t("Grants permissions to create/use workflow event requests."),
+  );
+
+  $permissions['mcneese event workflow review'] = array(
+    'title' => t("Review Event Workflow"),
+    'description' => t("Grants permissions to review information."),
+  );
+
+  return $permissions;
+}
+/**
+ * Implements hook_node_access().
+ *
+function mcneese_event_node_access($node, $op, $account) {
+  $type = is_string($node) ? $node : $node->type;
+
+  return NODE_ACCESS_IGNORE;
+}//*/
+
+/**
+ * Implements hook_menu().
+ */
+function mcneese_event_workflow_menu() {
+  $items = array();
+
+  $items['admin/content/event_workflow'] = array(
+    'title' => "Manage Workflow Events",
+    'description' => "View workflow events.",
+    'page callback' => 'mcneese_event_workflow_use_page',
+    'file' => 'mcneese_event_workflow_use_page.inc',
+    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
+    'access callback' => 'mcneese_event_workflow_use_page_access',
+    'tab_parent' => 'admin/content',
+  );
+
+  $items['admin/content/management/event_workflow'] = array(
+    'title' => "Manage Workflow Events",
+    'description' => "Manage workflow events.",
+    'page callback' => 'mcneese_event_workflow_management_page',
+    'file' => 'mcneese_event_workflow_management_page.inc',
+    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
+    'access callback' => 'mcneese_event_workflow_management_page_access',
+    'tab_parent' => 'admin/content/management',
+  );
+
+  return $items;
+}
+
+/**
+ * Access callback for event workflow management page.
+ *
+ * @param bool
+ *   TRUE on access granted, FALSE otherwise.
+ */
+function mcneese_event_workflow_use_page_access() {
+  if (user_access('mcneese event workflow administer') || user_access('mcneese event workflow use') || user_access('mcneese event workflow review')) {
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
+/**
+ * Access callback for event workflow management page.
+ *
+ * @param bool
+ *   TRUE on access granted, FALSE otherwise.
+ */
+function mcneese_event_workflow_management_page_access() {
+  if (user_access('mcneese event workflow administer') || user_access('mcneese event workflow manage')) {
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
+/**
+ * Performs a select query.
+ *
+ * @param string $query
+ *   A query string to process.
+ * @param array $arguments
+ *   (optional) An array of arguments
+ *
+ * @return array|bool
+ *   An array containing the query results.
+ *   FALSE is returned on error.
+ */
+function mcneese_event_workflow_oracle_select($query, $arguments = array()) {
+  if (!is_string($query)) {
+    cf_error::invalid_string('query');
+
+    return FALSE;
+  }
+
+  if (!is_array($arguments)) {
+    cf_error::invalid_array('arguments');
+
+    return FALSE;
+  }
+
+  $results = array();
+
+  try {
+    $conn = Database::getConnection('default', 'oracle');
+
+    $results = (array) $conn->oracleQuery($query, $arguments)->fetchAll();
+  } catch (Exception $ex) {
+    cf_error::on_exception($ex);
+
+    return FALSE;
+  }
+
+  return $results;
+}
+
+/**
+ * Returns a list of columns defined in the venue list table.
+ *
+ * @return array|bool
+ *   An array containing the column names.
+ *   FALSE is returned on error.
+ */
+function mcneese_event_workflow_load_venue_detail_columns() {
+  $cache_id = __function__;
+  $columns = &drupal_static($cache_id, NULL);
+  if (is_array($columns)) {
+    return $columns;
+  }
+
+  if ($cache = cache_get($cache_id)){
+    return $cache->data;
+  }
+
+  $columns = array();
+  $rows = mcneese_event_workflow_oracle_select('select * from ucs.msu_venue_detail where rownum = 1');
+
+  // determine columns names by selecting the first
+  if (!empty($rows)) {
+    $row = array_pop($rows);
+    foreach ($row as $key => &$value) {
+      // oracle returns duplicate/redundant data in numeric rows.
+      if (is_numeric($key)) continue;
+
+      if (!array_key_exists($key, $columns)) {
+        $columns[] = $key;
+      }
+    }
+  }
+
+  if (empty($columns)) return FALSE;
+
+  cache_set($cache_id, $columns, 'cache', CACHE_PERMANENT);
+
+  return $columns;
+}
+
+/**
+ * Returns a list of columns defined in the venue list table.
+ *
+ * @return array|bool
+ *   An array containing the column names.
+ *   FALSE is returned on error.
+ */
+function mcneese_event_workflow_load_venue_list_columns() {
+  $cache_id = __function__;
+  $columns = &drupal_static($cache_id, NULL);
+  if (is_array($columns)) {
+    return $columns;
+  }
+
+  if ($cache = cache_get($cache_id)){
+    return $cache->data;
+  }
+
+  $columns = array();
+  $rows = mcneese_event_workflow_oracle_select('select * from ucs.msu_venue_list where rownum = 1');
+
+  // determine columns names by selecting the first row.
+  if (!empty($rows)) {
+    $row = array_pop($rows);
+    foreach ($row as $key => &$value) {
+      // oracle returns duplicate/redundant data in numeric rows.
+      if (is_numeric($key)) continue;
+
+      if (!array_key_exists($key, $columns)) {
+        $columns[] = $key;
+      }
+    }
+  }
+
+  if (empty($columns)) return FALSE;
+
+  cache_set($cache_id, $columns, 'cache', CACHE_PERMANENT);
+
+  return $columns;
+}
+
+/**
+ * Returns a list of buildings available.
+ *
+ * @return array|bool
+ *   An array containing the basic building information.
+ *   FALSE is returned on error.
+ */
+function mcneese_event_workflow_load_buildings_list() {
+  $cache_id = __function__;
+  $cache_expire = '+1 day';
+
+  $items = &drupal_static($cache_id, NULL);
+  if (is_array($items)) {
+    return $items;
+  }
+
+  if ($cache = cache_get($cache_id)){
+    return $cache->data;
+  }
+
+  $items = array();
+  $rows = mcneese_event_workflow_oracle_select('select * from ucs.msu_venue_list');
+
+  // strip out redundant rows provided by oracle.
+  foreach ($rows as &$row) {
+    $item = array();
+
+    foreach ($row as $key => &$value) {
+      // oracle returns duplicate/redundant data in numeric rows.
+      if (is_numeric($key)) continue;
+
+      $item[$key] = $value;
+    }
+
+    $items[] = $item;
+  }
+
+  if (empty($items)) return FALSE;
+
+  $reset_cache_interval = new DateTime($cache_expire);
+  cache_set($cache_id, $items, 'cache', $reset_cache_interval->getTimestamp());
+
+  return $items;
+}
+
+/**
+ * Returns a list of user roles available.
+ *
+ * @return array|bool
+ *   An array containing the roles.
+ *   FALSE is returned on error.
+ */
+function mcneese_event_workflow_load_event_user_roles() {
+  $cache_id = __function__;
+  $roles = &drupal_static($cache_id, NULL);
+  if (is_array($roles)) {
+    return $roles;
+  }
+
+  if ($cache = cache_get($cache_id)){
+    return $cache->data;
+  }
+
+  $columns = array();
+  $rows = mcneese_event_workflow_oracle_select('select distinct role from ucs.msu_event_role');
+
+  // strip out redundant rows provided by oracle.
+  foreach ($rows as &$row) {
+    foreach ($row as $key => &$value) {
+      // oracle returns duplicate/redundant data in numeric rows.
+      if (is_numeric($key)) continue;
+
+      $roles[] = $value;
+    }
+  }
+
+  if (empty($roles)) return FALSE;
+
+  cache_set($cache_id, $roles, 'cache', CACHE_PERMANENT);
+
+  return $roles;
+}
+
+/**
+ * Returns an array containg mapping information for oracle.
+ *
+ * Use this to map drupal event role taxonomy terms with the oracle roles.
+ *
+ * @return array|bool
+ *   An array containing the mapping information.
+ *   FALSE is returned on error.
+ */
+function mcneese_event_workflow_load_event_user_role_mapping() {
+  $cache_id = __function__;
+  $terms = &drupal_static($cache_id, array());
+  if (!empty($terms)) {
+    return $terms;
+  }
+
+  try {
+    $query = db_select('taxonomy_term_data', 'ttd');
+    $query->innerJoin('taxonomy_vocabulary', 'tv', 'tv.vid = ttd.vid');
+    $query->fields('ttd', array('tid'));
+    $query->condition('tv.machine_name', 'user_roles');
+
+    $executed = $query->execute();
+    foreach ($executed as $row) {
+      $term = taxonomy_term_load($row->tid);
+      $name = $term->field_role_oracle_name['und'][0]['value'];
+
+      $terms[$name] = array('tid' => FALSE, 'role' => FALSE, 'rid' => FALSE, 'name' => FALSE);
+
+
+      if (!empty($term->field_role_oracle_name['und'][0]['value'])) {
+        $terms[$name]['tid'] = $row->tid;
+      }
+
+      if (!empty($term->field_role_system_name['und'][0]['value'])) {
+        $role = user_role_load_by_name($term->field_role_system_name['und'][0]['value']);
+
+        if (is_object($role)) {
+          $terms[$name]['role'] = $role->name;
+          $terms[$name]['rid'] = $role->rid;
+        }
+
+        unset($role);
+      }
+
+      if (!empty($term->name)) {
+        $terms[$name]['name'] = $term->name;
+      }
+    }
+  } catch (Exception $ex) {
+    cf_error::on_exception($ex);
+
+    return FALSE;
+  }
+
+  return $terms;
+}
+
+/**
+ * Returns user's information.
+ *
+ * @param string $banner_id
+ *   The numeric banner id string uniquely representing some user.
+ *
+ * @return array|bool
+ *   An array containing the user information.
+ *   FALSE is returned on error.
+ */
+function mcneese_event_workflow_load_event_user($banner_id) {
+  $cache_id = __function__;
+  $user = &drupal_static($cache_id, NULL);
+  if (is_array($user)) {
+    return $user;
+  }
+
+  if (!is_string($banner_id)) {
+    cf_error::invalid_string('banner_id');
+
+    return FALSE;
+  }
+
+  $user = array();
+  $rows = mcneese_event_workflow_oracle_select('select * from ucs.msu_event_role where id = :banner_id', array('banner_id' => $banner_id));
+
+  // strip out redundant rows provided by oracle.
+  foreach ($rows as &$row) {
+    foreach ($row as $key => &$value) {
+      // oracle returns duplicate/redundant data in numeric rows.
+      if (is_numeric($key)) continue;
+
+      if ($key == 'role') {
+        if (!array_key_exists('role', $user)) {
+          $user['role'] = array();
+        }
+
+        $user['role'][] = $value;
+      }
+      else {
+        $user[$key] = $value;
+      }
+    }
+  }
+
+  if (empty($user)) return FALSE;
+
+  return $user;
+}
+
+/**
+ * Synchronizes the user settings with the oracle settings.
+ *
+ * @param object|null $user
+ *   (optional) The user object to synchronize.
+ *   If not specified, then the current user is synchronized.
+ *
+ * @return bool
+ *   TRUE on success, FALSE otherwise.
+ */
+function mcneese_event_workflow_synchronize_user_settings($user = NULL) {
+  if (is_null($user)) {
+    $user = cf_current_user();
+  }
+
+  if (!is_object($user)) {
+    cf_error::invalid_object('user');
+    return FALSE;
+  }
+
+
+  $mappings = mcneese_event_workflow_load_event_user_role_mapping();
+
+  // unset all system role information associated with oracle.
+  $system_roles = (array) $user->roles;
+  foreach ($mappings as $mapping) {
+    if (array_key_exists($mapping['rid'], $system_roles)) {
+      unset($system_roles[$mapping['rid']]);
+    }
+  }
+
+  if (isset($user->field_user_banner_id['und'][0]['value'])) {
+    $u = mcneese_event_workflow_load_event_user($user->field_user_banner_id['und'][0]['value']);
+
+    $event_roles = array();
+    if (!empty($u['role'])) {
+      foreach ($u['role'] as $role) {
+        if (isset($mappings[$role]['tid'])) {
+          $event_roles[] = array('tid' => $mappings[$role]['tid']);
+          $system_roles[$mappings[$role]['rid']] = $mappings[$role]['role'];
+        }
+      }
+    }
+
+    $edit = array('field_user_event_roles' => array('und' => $event_roles), 'roles' => $system_roles);
+
+    if (user_save($user, $edit)) return TRUE;
+  }
+
+  return FALSE;
+}
+
+/**
+ * @} End of '@defgroup mcneese_event_workflow McNeese Event Workflow'.
+ */

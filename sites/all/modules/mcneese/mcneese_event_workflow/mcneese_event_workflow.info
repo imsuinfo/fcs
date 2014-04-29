@@ -1,0 +1,13 @@
+name = McNeese Module - Event Workflow
+description = "Provides Workflow specific module functionality for the Events Workflow System."
+core = 7.x
+php = 5.3
+package = McNeese
+
+dependencies[] = cf (7.x-2.x)
+dependencies[] = cf_error (7.x-2.x)
+dependencies[] = mcneese_management
+
+files[] = mcneese_event_workflow.module
+files[] = pages/mcneese_event_workflow_management_page.inc
+files[] = pages/mcneese_event_workflow_use_page.inc
