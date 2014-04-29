@@ -19,9 +19,9 @@ function print_pdf_mpdf_pdf_tool_info() {
       'ttfontdata',
       'tmp',
     ),
-    'tool_dirs' => array(
-      'graph_cache',
-    ),
+    #'tool_dirs' => array(
+    #  'graph_cache',
+    #),
   );
 }
 
