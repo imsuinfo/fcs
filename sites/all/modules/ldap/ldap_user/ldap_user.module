@@ -528,6 +528,7 @@ function ldap_user_form_user_register_form_alter(&$form, $form_state) {
   }
   $ldap_user_conf = ldap_user_conf();
   if ($ldap_user_conf->disableAdminPasswordField == TRUE) {
+    $form['account']['pass']['#type'] = 'value';
     $form['account']['pass']['#required'] = FALSE;
     $form['account']['pass']['#disabled'] = TRUE;
     $form['account']['pass']['#value'] = user_password(20);
