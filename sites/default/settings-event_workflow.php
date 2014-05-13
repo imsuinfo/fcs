@@ -408,7 +408,7 @@ ini_set('session.cookie_lifetime', 432000);
  * Remove the leading hash signs to enable.
  */
 $conf['site_name'] = 'Event Workflow';
-$conf['theme_default'] = 'mcneese';
+$conf['theme_default'] = 'mcneese_event_workflow';
 # $conf['anonymous'] = 'Visitor';
 
 /**
@@ -419,7 +419,7 @@ $conf['theme_default'] = 'mcneese';
  * theme. It is located inside 'modules/system/maintenance-page.tpl.php'.
  * Note: This setting does not apply to installation and update pages.
  */
-$conf['maintenance_theme'] = 'mcneese';
+$conf['maintenance_theme'] = 'mcneese_event_workflow';
 
 /**
  * Reverse Proxy Configuration:
