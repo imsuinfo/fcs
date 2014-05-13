@@ -101,7 +101,7 @@ function mcneese_validation_node_delete($node) {
     return;
   }
 
-  mcneese_validation_delete_node_data($node->nid, NULL);
+  #mcneese_validation_delete_node_data($node->nid, NULL);
 }
 
 /**
