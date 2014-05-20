@@ -8,6 +8,15 @@ dependencies[] = cf (7.x-2.x)
 dependencies[] = cf_error (7.x-2.x)
 dependencies[] = mcneese_management
 
+files[] = mcneese_event_workflow.install
 files[] = mcneese_event_workflow.module
+files[] = includes/mcneese_event_workflow_event_structure.inc
+files[] = includes/mcneese_event_workflow_event_validation.inc
 files[] = pages/mcneese_event_workflow_management_page.inc
-files[] = pages/mcneese_event_workflow_use_page.inc
+files[] = pages/mcneese_event_workflow_event_create_page.inc
+files[] = pages/mcneese_event_workflow_event_delete_page.inc
+files[] = pages/mcneese_event_workflow_event_edit_page.inc
+files[] = pages/mcneese_event_workflow_event_manage_page.inc
+files[] = pages/mcneese_event_workflow_event_list_page.inc
+files[] = pages/mcneese_event_workflow_event_view_page.inc
+files[] = pages/mcneese_event_workflow_event_search_page.inc
