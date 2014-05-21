@@ -142,10 +142,10 @@ class UltimateCronQueueSettings extends UltimateCronTaggedSettings {
         ), WATCHDOG_ERROR);
       }
     }
-    watchdog($job->hook['module'], 'Processed @items items from queue @queue', array(
-      '@items' => $items,
-      '@queue' => $settings['queue']['name'],
-    ), WATCHDOG_INFO);
+   # watchdog($job->hook['module'], 'Processed @items items from queue @queue', array(
+   #   '@items' => $items,
+   #   '@queue' => $settings['queue']['name'],
+   # ), WATCHDOG_INFO);
 
     // Re-throttle.
     $job->getPlugin('settings', 'queue')->throttle($job);
