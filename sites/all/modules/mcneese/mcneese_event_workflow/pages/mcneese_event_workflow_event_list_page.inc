@@ -69,14 +69,14 @@ function mcneese_event_workflow_event_list_0_page($page_number = 0) {
     $query->innerjoin('mew_current_top', 'mct', 'mer.id = mct.event_id');
     $query->innerjoin('mew_current_coordinator', 'mcc', 'mer.id = mcc.event_id AND mct.event_id = mcc.event_id');
 
-    $query->innerjoin('mew_field_top_category', 'mftc', 'mct.event_id = mftc.event_id AND mcc.event_id = mftc.event_id AND mct.category = mftc.revision AND mftc.delta = 0');
+    $query->innerjoin('mew_field_top_location', 'mftc', 'mct.event_id = mftc.event_id AND mcc.event_id = mftc.event_id AND mct.location = mftc.revision AND mftc.delta = 0');
     $query->innerjoin('mew_field_top_building', 'mftb', 'mct.event_id = mftb.event_id AND mcc.event_id = mftb.event_id AND mct.building = mftb.revision AND mftb.delta = 0');
     $query->innerjoin('mew_field_top_room', 'mftr', 'mct.event_id = mftr.event_id AND mcc.event_id = mftr.event_id AND mct.room = mftr.revision AND mftr.delta = 0');
 
     $query->innerjoin('mew_field_coordinator_classification', 'mfcc', 'mct.event_id = mfcc.event_id AND mcc.event_id = mftc.event_id AND mcc.classification = mfcc.revision AND mfcc.delta = 0');
     $query->innerjoin('mew_field_coordinator_name', 'mfcn', 'mct.event_id = mfcn.event_id AND mcc.event_id = mfcn.event_id AND mcc.name = mfcn.revision AND mfcn.delta = 0');
 
-    $query->addField('mftc', 'value', 'top_category');
+    $query->addField('mftc', 'value', 'top_location');
     $query->addField('mftb', 'value', 'top_building');
     $query->addField('mftr', 'value', 'top_room');
 
@@ -96,7 +96,7 @@ function mcneese_event_workflow_event_list_0_page($page_number = 0) {
       elseif ($order == 'coordinator') {
         $query->orderBy('coordinator_name', is_null($sort) ? 'ASC' : $sort);
       }
-      elseif ($order == 'category') {
+      elseif ($order == 'location') {
         $query->orderBy('coordinator_classification', is_null($sort) ? 'ASC' : $sort);
       }
       elseif ($order == 'classification') {
@@ -124,8 +124,10 @@ function mcneese_event_workflow_event_list_0_page($page_number = 0) {
       // @fixme: until the settings are added for individual reviewers, just make all available.
     }
     elseif ($requester) {
-      // load all events created by the current user.
-      $query->condition('mer.user_id', $user->uid);
+      // load all events created by the requestor who is neither an admin nor a manager.
+      if (!$administer && !$manager) {
+        $query->condition('mer.user_id', $user->uid);
+      }
     }
     else {
       // failsafe, should never happen.
@@ -146,7 +148,7 @@ function mcneese_event_workflow_event_list_0_page($page_number = 0) {
       $row['id'] = '<a href="' . $base_path . 'events/view-0/' . $id . '">' . $id . '</a>';
 
       $row['coordinator_name'] = check_plain($result->coordinator_name);
-      $row['category'] = check_plain($result->top_category);
+      $row['location'] = check_plain($result->top_location);
       $row['building'] = check_plain($result->top_building);
       $row['room'] = check_plain($result->top_room);
 
@@ -193,7 +195,7 @@ function mcneese_event_workflow_event_list_0_page($page_number = 0) {
   $table['header'] = array(
     'id' => array('field' => 'id', 'data' => "ID", 'sort' => 'asc', 'align' => 'center'),
     'coordinator' => array('field' => 'coordinator', 'data' => "Coordinator", 'sort' => 'asc', 'align' => 'center'),
-    'category' => array('field' => 'category', 'data' => "Category", 'sort' => 'asc', 'align' => 'center'),
+    'location' => array('field' => 'location', 'data' => "Location", 'sort' => 'asc', 'align' => 'center'),
     'building' => array('field' => 'building', 'data' => "Building", 'sort' => 'asc', 'align' => 'center'),
     'room' => array('field' => 'room', 'data' => "Room", 'sort' => 'asc', 'align' => 'center'),
     'classification' => array('field' => 'classification', 'data' => "Classification", 'sort' => 'asc', 'align' => 'center'),

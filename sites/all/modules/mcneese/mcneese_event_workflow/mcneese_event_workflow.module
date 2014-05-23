@@ -108,12 +108,37 @@ function mcneese_event_workflow_menu() {
     'title' => "Edit Facilities Use and Special Event Request Form",
     'description' => "Make changes to an existing facilities and special event request form.",
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mcneese_event_workflow_event_edit_0_page', 2),
+    'page arguments' => array('mcneese_event_workflow_event_edit_0_form', 2),
     'file' => 'mcneese_event_workflow_event_edit_page.inc',
     'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
     'access callback' => 'mcneese_event_workflow_management_page_event_access',
     'access arguments' => array('edit', 2),
     'tab_parent' => 'events',
+  );
+
+  $items['events/edit-0/%/%'] = array(
+    'title' => "Edit Facilities Use and Special Event Request Form",
+    'description' => "Make changes to an existing facilities and special event request form.",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mcneese_event_workflow_event_edit_0_form', 2, 3),
+    'file' => 'mcneese_event_workflow_event_edit_page.inc',
+    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
+    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'access arguments' => array('edit', 2),
+    'tab_parent' => 'events',
+  );
+
+  $items['events/edit-0/ctools/%/%'] = array(
+    'title' => "Edit Facilities Use and Special Event Request Form",
+    'description' => "Make changes to an existing facilities and special event request form.",
+    'page callback' => 'mcneese_event_workflow_event_edit_0_form_ctools',
+    'page arguments' => array(3, 4),
+    'file' => 'mcneese_event_workflow_event_edit_page.inc',
+    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
+    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'access arguments' => array('edit', 3),
+    'tab_parent' => 'events',
+    'type' => MENU_CALLBACK,
   );
 
   $items['events/manage-0/%'] = array(
@@ -197,7 +222,8 @@ function mcneese_event_workflow_menu() {
     'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
     'access callback' => 'mcneese_event_workflow_management_page_event_access',
     'access arguments' => array('view', 2),
-    'tab_parent' => 'events',
+    'tab_parent' => 'events/list-0',
+    'tab_root' => 'events/list-0',
   );
 
   $items['events/view-0/%/%'] = array(
@@ -209,7 +235,8 @@ function mcneese_event_workflow_menu() {
     'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
     'access callback' => 'mcneese_event_workflow_management_page_event_access',
     'access arguments' => array('view', 2),
-    'tab_parent' => 'events',
+    'tab_parent' => 'events/list-0',
+    'tab_root' => 'events/list-0',
   );
 
   $items['events/pdf-0/%/%'] = array(
@@ -221,7 +248,8 @@ function mcneese_event_workflow_menu() {
     'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
     'access callback' => 'mcneese_event_workflow_management_page_event_access',
     'access arguments' => array('view', 2),
-    'tab_parent' => 'events',
+    'tab_parent' => 'events/list-0',
+    'tab_root' => 'events/list-0',
     'type' => MENU_CALLBACK,
   );
 
@@ -258,6 +286,26 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
     }
     elseif (user_access('mcneese event workflow request')) {
       if (is_null($id)) return FALSE;
+
+      try {
+        $query = db_select('mew_event_requests', 'mew');
+        $query->fields('mew', array('id'));
+        $query->condition('mew.id', $id);
+        $query->condition('mew.user_id', $user->uid);
+        $query->countQuery();
+
+        $executed = $query->execute();
+        $result = $executed->fetchField();
+
+        if ($result > 0) return TRUE;
+
+        return FALSE;
+      }
+      catch (Exception $ex) {
+        cf_error::on_exception($ex);
+
+        return FALSE;
+      }
     }
   }
   elseif ($operation == 'view') {
@@ -487,6 +535,8 @@ function mcneese_event_workflow_load_venue_list_columns() {
  *
  * @param string|null $column
  *   (optional) when specified, only load a single, specific, column.
+ *   Note: ucs.msu_venue_list calls the building location 'category', so use
+ *  'category' for the 'location' column.
  * @param bool $column
  *   (optional) When specified, only load distinct results.
  *
@@ -582,8 +632,10 @@ function mcneese_event_workflow_load_buildings_list($column = NULL, $distinct = 
  /**
  * Returns a list of buildings available.
  *
- * @param string|null $category
- *   (optional) when specified, load all buildings associated with a category.
+ * Note: ucs.msu_venue_list calls the building location 'category'.
+ *
+ * @param string|null $location
+ *   (optional) when specified, load all buildings associated with a location.
  * @param string|null $building_code
  *   (optional) when specified, load all buildings associated with a building_code.
  * @param string|null $room_number
@@ -597,17 +649,17 @@ function mcneese_event_workflow_load_buildings_list($column = NULL, $distinct = 
  * @see: mcneese_event_workflow_load_venue_list_columns()
  * @see: mcneese_event_workflow_oracle_select()
  */
-function mcneese_event_workflow_load_buildings($category = NULL, $building_code = NULL, $room_number = NULL) {
-  if (!is_null($category) && !is_string($category)) {
-    cf_error::invalid_string('category');
+function mcneese_event_workflow_load_buildings($location = NULL, $building_code = NULL, $room_number = NULL) {
+  if (!is_null($location) && !is_string($location)) {
+    cf_error::invalid_string('location');
     return FALSE;
   }
 
   $cache_id = __function__;
   $cache_expire = '+1 day';
 
-  if (!empty($category)) {
-    $cache_id .= '_' . $category;
+  if (!empty($location)) {
+    $cache_id .= '_' . $location;
   }
 
   if (!empty($building_code)) {
@@ -628,11 +680,11 @@ function mcneese_event_workflow_load_buildings($category = NULL, $building_code 
   }
 
   $where = '';
-  if (!empty($category)) {
+  if (!empty($location)) {
     // sanitize string by only allowing 'word' characters.
-    $sanitized_category = preg_replace('/\W*/i', '', $category);
+    $sanitized_location = preg_replace('/\W*/i', '', $location);
 
-    $where .= ' where category = \'' . $sanitized_category . '\'';
+    $where .= ' where category = \'' . $sanitized_location . '\'';
   }
 
   if (!empty($building_code)) {
@@ -660,7 +712,11 @@ function mcneese_event_workflow_load_buildings($category = NULL, $building_code 
   }
 
   $items = array();
-  $rows = (array) mcneese_event_workflow_oracle_select('select * from ucs.msu_venue_list' . $where);
+  $rows = mcneese_event_workflow_oracle_select('select * from ucs.msu_venue_list' . $where);
+
+  if ($rows === FALSE) {
+    return FALSE;
+  }
 
   if (empty($column)) {
     foreach ($rows as &$row) {
@@ -978,17 +1034,17 @@ function mcneese_event_workflow_force_cache($save = TRUE) {
       mcneese_event_workflow_load_buildings_list($column, TRUE);
     }
 
-    $building_categories = mcneese_event_workflow_load_buildings_list('category', TRUE);
+    $building_locations = mcneese_event_workflow_load_buildings_list('category', TRUE);
 
-    if ($building_categories == FALSE) {
+    if ($building_locations == FALSE) {
       // @todo: throw watchdog error?
-      $building_categories = array();
+      $building_location = array();
     }
 
     mcneese_event_workflow_load_buildings();
 
-    foreach ($building_categories as $category) {
-      mcneese_event_workflow_load_buildings($category);
+    foreach ($building_locations as $location) {
+      mcneese_event_workflow_load_buildings($location);
     }
   }
 }
@@ -1008,152 +1064,253 @@ function mcneese_event_workflow_oracle_recache_cron() {
 /**
  * Returns a list of secondary tables and their structure.
  *
- * @param int|null $option
- *   (optional) If not NULL, returns a list of tables that require special
- *   handling.
- *   1: Load table structures that use one or more non-standard column names
- *   instead of the standard 'value' column.
- *   2: Load table structures of all tables that require modifying the data
- *   before it gets inserted to or loaded from the database.
- *   3: Load table structure as with NULL, but use database field names.
- *
  * @return array
  *  A list of secondary tables and their structure.
- *  If $special is not NULL, then a list of tables based on the special rule.
  */
-function mcneese_event_workflow_secondary_table_structure($option = NULL) {
-  if (!is_null($option)) {
-    if (!cf_is_integer($option)) {
-      cf_error::invalid_integer('option');
-      return array();
-    }
-
-    $structure = array();
-
-    // return a list of tables that use non-standard column names.
-    if ($option == 1) {
-      $structure['presentation'] = array(
-        'technical_equipment_details' => event_workflow_get_technical_equipment_details_list_options('column_name'),
-        'publicity_details' => event_workflow_get_publicity_details_list_options('column_name'),
-        'designing_material' => event_workflow_get_designing_material_list_options('column_name'),
-      );
-
-      $structure['registration'] = array(
-        'revenue_generated' => event_workflow_get_technical_equipment_details_list_options('column_name'),
-      );
-    }
-    elseif ($option == 2) {
-      $structure['top'] = array(
-        'room_list' => 'ignore',
-      );
-
-      $structure['dates'] = array(
-        'date' => array('timestamp' => 'Y/m/d'),
-        'time_start' => array('timestamp' => 'h:ia'),
-        'time_stop' => array('timestamp' => 'h:ia'),
-      );
-    }
-    elseif ($option == 3) {
-      $structure = mcneese_event_workflow_secondary_table_structure();
-
-      unset($structure['top']['room_list']);
-      $structure['top']['building'] = 'event][room_list';
-      $structure['top']['room'] = 'event][room_list';
-    }
-
-    return $structure;
-  }
-
+function mcneese_event_workflow_secondary_table_structure() {
   $structure = array();
   $structure['top'] = array(
-    'category' => 'event][category',
-    'room_list' => 'event][room_list',
-    'additional' => 'event][additional',
+    'location' => array(
+      'path' => 'event][location',
+    ),
+    'room_list' => array(
+      'path' => 'event][room_list',
+      'storage' => 'alternate',
+      'alternate' => array(
+        'building' => array(
+          'path' => 'event][room_list',
+          'key' => 1,
+        ),
+        'room' => array(
+          'path' => 'event][room_list',
+          'key' => 2,
+        ),
+      ),
+      'alternate_exception' => array(
+        'location' => array(
+          'exception_path' => 'top][location',
+          'path' => 'event][location',
+          'key' => 0,
+        ),
+      ),
+      'alternate_method' => array(
+        'explode' => array('_', 3),
+      ),
+    ),
+    'additional' => array(
+      'path' => 'event][additional',
+    ),
   );
 
   $structure['dates'] = array(
-    'category' => 'event][dates][category',
-    'date' => 'event][dates][date',
-    'time_start' => 'event][dates][time_start',
-    'time_stop' => 'event][dates][time_stop',
+    'date' => array(
+      'path' => 'event][dates][date',
+      'storage' => array('date_popup' => 'Y/m/d'),
+    ),
+    'time_start' => array(
+      'path' => 'event][dates][time_start',
+      'storage' => array('timestamp' => 'h:ia'),
+    ),
+    'time_stop' => array(
+      'path' => 'event][dates][time_stop',
+      'storage' => array('timestamp' => 'h:ia'),
+    ),
   );
 
   $structure['coordinator'] = array(
-    'name' => 'event][coordinator][name',
-    'phone' => 'event][coordinator][phone',
-    'email' => 'event][coordinator][email',
-    'classification' => 'event][coordinator][classification',
+    'name' => array(
+      'path' => 'event][coordinator][name',
+    ),
+    'phone' => array(
+      'path' => 'event][coordinator][phone',
+    ),
+    'email' => array(
+      'path' => 'event][coordinator][email',
+    ),
+    'classification' => array(
+      'path' => 'event][coordinator][classification',
+    ),
   );
 
   $structure['information'] = array(
-    'title' => 'event][information][title',
-    'attendance' => 'event][information][attendance',
-    'type' => 'event][information][type',
+    'title' => array(
+      'path' => 'event][information][title',
+    ),
+    'attendance' => array(
+      'path' => 'event][information][attendance',
+    ),
+    'type' => array(
+      'path' => 'event][information][type',
+    ),
   );
 
   $structure['plans'] = array(
-    'audience' => 'event][plans][audience',
-    'description' => 'event][plans][description',
-    'activities' => 'event][plans][activities',
-    'dates' => 'event][plans][dates',
+    'audience' => array(
+      'path' => 'event][plans][audience',
+    ),
+    'description' => array(
+      'path' => 'event][plans][description',
+    ),
+    'activities' => array(
+      'path' => 'event][plans][activities',
+    ),
+    'dates' => array(
+      'path' => 'event][plans][dates',
+    ),
   );
 
   $structure['registration'] = array(
-    'require' => 'event][registration][require',
-    'website' => 'event][registration][website',
-    'phone' => 'event][registration][phone',
-    'ticket_price' => 'event][registration][ticket_price',
-    'ticket_dates' => 'event][registration][ticket_dates',
-    'ticket_website' => 'event][registration][ticket_website',
-    'ticket_phone' => 'event][registration][ticket_phone',
-    'generate_revenue' => 'event][registration][generate_revenue',
-    'revenue_generated' => 'event][registration][revenue_generated',
+    'require' => array(
+      'path' => 'event][registration][require',
+    ),
+    'website' => array(
+      'path' => 'event][registration][website',
+    ),
+    'phone' => array(
+      'path' => 'event][registration][phone',
+    ),
+    'ticket_price' => array(
+      'path' => 'event][registration][ticket_price',
+    ),
+    'ticket_dates' => array(
+      'path' => 'event][registration][ticket_dates',
+    ),
+    'ticket_website' => array(
+      'path' => 'event][registration][ticket_website',
+    ),
+    'ticket_phone' => array(
+      'path' => 'event][registration][ticket_phone',
+    ),
+    'generate_revenue' => array(
+      'path' => 'event][registration][generate_revenue',
+    ),
+    'revenue_generated' => array(
+      'path' => 'event][registration][revenue_generated',
+      'columns' => event_workflow_get_revenue_generated_list_options('column_name'),
+    ),
   );
 
   $structure['setup'] = array(
-    'rectangular_tables_8ft' => 'event][setup][rectangular_tables_8ft',
-    'round_tables_8ft' => 'event][setup][round_tables_8ft',
-    'other_tables' => 'event][setup][other_tables',
-    'standard_blue_chairs' => 'event][setup][standard_blue_chairs',
-    'podium' => 'event][setup][podium',
-    'portable_stage' => 'event][setup][portable_stage',
-    'portable_stage_configuration' => 'event][setup][portable_stage_configuration',
-    'security' => 'event][setup][security',
-    'parking_assistance' => 'event][setup][parking_assistance',
-    'parking_assistance_area' => 'event][setup][parking_assistance_area',
-    'road_closures' => 'event][setup][road_closures',
-    'road_closures_details' => 'event][setup][road_closures_details',
-    'special_requests' => 'event][setup][special_requests',
-    'special_requests_details' => 'event][setup][special_requests_details',
+    'rectangular_tables_8ft' => array(
+      'path' => 'event][setup][rectangular_tables_8ft',
+    ),
+    'round_tables_8ft' => array(
+      'path' => 'event][setup][round_tables_8ft',
+    ),
+    'other_tables' => array(
+      'path' => 'event][setup][other_tables',
+    ),
+    'standard_blue_chairs' => array(
+      'path' => 'event][setup][standard_blue_chairs',
+    ),
+    'podium' => array(
+      'path' => 'event][setup][podium',
+    ),
+    'portable_stage' => array(
+      'path' => 'event][setup][portable_stage',
+    ),
+    'portable_stage_configuration' => array(
+      'path' => 'event][setup][portable_stage_configuration',
+    ),
+    'security' => array(
+      'path' => 'event][setup][security',
+    ),
+    'parking_assistance' => array(
+      'path' => 'event][setup][parking_assistance',
+    ),
+    'parking_assistance_area' => array(
+      'path' => 'event][setup][parking_assistance_area',
+    ),
+    'road_closures' => array(
+      'path' => 'event][setup][road_closures',
+    ),
+    'road_closures_details' => array(
+      'path' => 'event][setup][road_closures_details',
+    ),
+    'special_requests' => array(
+      'path' => 'event][setup][special_requests',
+    ),
+    'special_requests_details' => array(
+      'path' => 'event][setup][special_requests_details',
+    ),
   );
 
   $structure['presentation'] = array(
-    'technical_equipment' => 'event][presentation][technical_equipment',
-    'technical_equipment_details' => 'event][presentation][technical_equipment_details',
-    'technical_equipment_microphone' => 'event][presentation][technical_equipment_microphone',
-    'external_audio_person' => 'event][presentation][external_audio_person',
-    'external_audio_person_name' => 'event][presentation][external_audio_person][name',
-    'external_audio_person_email' => 'event][presentation][external_audio_person][email',
-    'external_audio_person_phone' => 'event][presentation][external_audio_person][phone',
-    'publicity' => 'event][presentation][publicity',
-    'publicity_details' => 'event][presentation][publicity_details',
-    'production' => 'event][presentation][production',
-    'production_name' => 'event][presentation][production_name',
-    'production_email' => 'event][presentation][production_email',
-    'production_phone' => 'event][presentation][production_phone',
-    'printed_material' => 'event][presentation][printed_material',
-    'university_logo' => 'event][presentation][university_logo',
-    'designing_material' => 'event][presentation][designing_material',
-    'designing_material_name' => 'event][presentation][designing_material_name',
-    'designing_material_email' => 'event][presentation][designing_material_email',
-    'designing_material_phone' => 'event][presentation][designing_material_phone',
+    'technical_equipment' => array(
+      'path' => 'event][presentation][technical_equipment',
+    ),
+    'technical_equipment_details' => array(
+      'path' => 'event][presentation][technical_equipment_details',
+      'columns' => event_workflow_get_technical_equipment_details_list_options('column_name'),
+    ),
+    'technical_equipment_microphone' => array(
+      'path' => 'event][presentation][technical_equipment_microphone',
+    ),
+    'external_audio_person' => array(
+      'path' => 'event][presentation][external_audio_person',
+    ),
+    'external_audio_person_name' => array(
+      'path' => 'event][presentation][external_audio_person_name',
+    ),
+    'external_audio_person_email' => array(
+      'path' => 'event][presentation][external_audio_person_email',
+    ),
+    'external_audio_person_phone' =>  array(
+      'path' =>'event][presentation][external_audio_person_phone',
+    ),
+    'publicity' => array(
+      'path' => 'event][presentation][publicity',
+    ),
+    'publicity_details' => array(
+      'path' => 'event][presentation][publicity_details',
+      'columns' => event_workflow_get_publicity_details_list_options('column_name'),
+    ),
+    'production' => array(
+      'path' => 'event][presentation][production',
+    ),
+    'production_name' => array(
+      'path' => 'event][presentation][production_name',
+    ),
+    'production_email' => array(
+      'path' => 'event][presentation][production_email',
+    ),
+    'production_phone' => array(
+      'path' => 'event][presentation][production_phone',
+    ),
+    'printed_material' => array(
+      'path' => 'event][presentation][printed_material',
+    ),
+    'university_logo' => array(
+      'path' => 'event][presentation][university_logo',
+    ),
+    'designing_material' => array(
+      'path' => 'event][presentation][designing_material',
+      'columns' => event_workflow_get_designing_material_list_options('column_name'),
+    ),
+    'designing_material_name' => array(
+      'path' => 'event][presentation][designing_material_name',
+    ),
+    'designing_material_email' => array(
+      'path' => 'event][presentation][designing_material_email',
+    ),
+    'designing_material_phone' => array(
+      'path' => 'event][presentation][designing_material_phone',
+    ),
   );
 
   $structure['services'] = array(
-    'food_served' => 'event][services][food_served',
-    'food_caterer' => 'event][services][food_caterer',
-    'alcohol' => 'event][services][alcohol',
-    'open_flames' => 'event][services][open_flames',
+    'food_served' => array(
+      'path' => 'event][services][food_served',
+    ),
+    'food_caterer' => array(
+      'path' => 'event][services][food_caterer',
+    ),
+    'alcohol' => array(
+      'path' => 'event][services][alcohol',
+    ),
+    'open_flames' => array(
+      'path' => 'event][services][open_flames',
+    ),
   );
 
   return $structure;
@@ -1174,59 +1331,64 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
   $presentation = array();
 
   if (!is_null($option)) {
-    $presentation['dates'] = array(
-      'weight' => 1,
-      'group' => 1,
-      'label' => "Date Settings",
-    );
+    if ($option == 1) {
+      $presentation['dates'] = array(
+        'weight' => 1,
+        'group' => 1,
+        'label' => "Date Settings",
+      );
 
-    $presentation['coordinator'] = array(
-      'weight' => 1,
-      'group' => 0,
-      'label' => "Coordinator Settings",
-    );
+      $presentation['coordinator'] = array(
+        'weight' => 1,
+        'group' => 0,
+        'label' => "Coordinator Settings",
+      );
 
-    $presentation['information'] = array(
-      'weight' => 0,
-      'group' => 0,
-      'label' => "Event Information",
-    );
+      $presentation['information'] = array(
+        'weight' => 0,
+        'group' => 0,
+        'label' => "Event Information",
+      );
 
-    $presentation['plans'] = array(
-      'weight' => 1,
-      'group' => 1,
-      'label' => "Event Plans",
-    );
+      $presentation['plans'] = array(
+        'weight' => 1,
+        'group' => 1,
+        'label' => "Event Plans",
+      );
 
-    $presentation['registration'] = array(
-      'weight' => 0,
-      'group' => 2,
-      'label' => "Event Registration",
-    );
+      $presentation['registration'] = array(
+        'weight' => 0,
+        'group' => 2,
+        'label' => "Event Registration",
+        'event_type' => array(
+          'hide_link' => array(57),
+        ),
+      );
 
-    $presentation['setup'] = array(
-      'weight' => 1,
-      'group' => 2,
-      'label' => "Event Setup",
-    );
+      $presentation['setup'] = array(
+        'weight' => 1,
+        'group' => 2,
+        'label' => "Event Setup",
+      );
 
-    $presentation['presentation'] = array(
-      'weight' => 0,
-      'group' => 3,
-      'label' => "Event Presentation",
-    );
+      $presentation['presentation'] = array(
+        'weight' => 0,
+        'group' => 3,
+        'label' => "Event Presentation",
+      );
 
-    $presentation['services'] = array(
-      'weight' => 1,
-      'group' => 3,
-      'label' => "Event Services",
-    );
+      $presentation['services'] = array(
+        'weight' => 1,
+        'group' => 3,
+        'label' => "Event Services",
+      );
 
-    $presentation['top'] = array(
-      'weight' => 0,
-      'group' => 4,
-      'label' => "Miscellaneous",
-    );
+      $presentation['top'] = array(
+        'weight' => 0,
+        'group' => 4,
+        'label' => "Miscellaneous",
+      );
+    }
 
     return $presentation;
   }
@@ -1236,6 +1398,10 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
       'label' => 'Request ID',
       'group' => 'information',
       'weight' => 0,
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
     ),
     'created' => array(
       'label' => 'Created On',
@@ -1246,6 +1412,10 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
       ),
       'display' => array(
         'value' => 'Y/m/d h:ia',
+      ),
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
       ),
     ),
     'user_id' => array(
@@ -1258,6 +1428,10 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
       'display' => array(
         'value' => 'account_name',
       ),
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
     ),
     'updated' => array(
       'label' => 'Updated On',
@@ -1269,38 +1443,52 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
       'display' => array(
         'value' => 'Y/m/d h:ia',
       ),
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
     ),
   );
 
   $presentation['top'] = array(
-    'category' => array(
-      'label' => 'Event Category',
+    'location' => array(
+      'label' => 'Event Location',
       'group' => 'information',
       'weight' => 3,
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
     ),
     'building' => array(
       'label' => 'Event Building',
       'group' => 'information',
       'weight' => 4,
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
     ),
     'room' => array(
       'label' => 'Event Room',
       'group' => 'information',
       'weight' => 5,
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
     ),
     'additional' => array(
       'label' => 'Additional Information or Questions to Campus Officials',
       'size' => 'large',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
     ),
   );
 
   $presentation['dates'] = array(
-    'category' => array(
-      'label' => 'Category',
-      'type' => array(
-        'value' => 'taxonomy',
-      ),
-    ),
     'date' => array(
       'label' => 'Date',
       'type' => array(
@@ -1308,6 +1496,10 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
       ),
       'display' => array(
         'value' => 'Y/m/d',
+      ),
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
       ),
     ),
     'time_start' => array(
@@ -1318,6 +1510,10 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
       'display' => array(
         'value' => 'h:ia',
       ),
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
     ),
     'time_stop' => array(
       'label' => 'Stop Time',
@@ -1327,23 +1523,43 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
       'display' => array(
         'value' => 'h:ia',
       ),
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
     ),
   );
 
   $presentation['coordinator'] = array(
     'name' => array(
       'label' => 'Coordinator Name',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
     ),
     'phone' => array(
       'label' => 'Coordinator Phone',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
     ),
     'email' => array(
       'label' => 'Coordinator E-Mail',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
     ),
     'classification' => array(
       'label' => 'Coordinator Classification',
       'type' => array(
         'value' => 'taxonomy',
+      ),
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
       ),
     ),
   );
@@ -1352,16 +1568,28 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
     'title' => array(
       'label' => 'Request Title',
       'weight' => 1,
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
     ),
     'attendance' => array(
       'label' => 'Expected Attendance',
       'weight' => 6,
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
     ),
     'type' => array(
       'label' => 'Request Type',
       'weight' => 2,
       'type' => array(
         'value' => 'taxonomy',
+      ),
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
       ),
     ),
   );
@@ -1372,45 +1600,93 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
       'type' => array(
         'value' => 'taxonomy',
       ),
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
     ),
     'description' => array(
       'label' => 'Event Description/Purpose',
       'size' => 'large',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
     'activities' => array(
       'label' => 'Planned Activities',
       'size' => 'large',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
     'dates' => array(
       'label' => 'Dates and Times',
       'size' => 'large',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
   );
 
   $presentation['registration'] = array(
     'require' => array(
       'label' => 'Registration or Ticket Purchase is Required',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
     'website' => array(
       'label' => 'Registration Website',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
     'phone' => array(
       'label' => 'Registration Phone',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
     'ticket_price' => array(
       'label' => 'Ticket Price',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
     'ticket_dates' => array(
       'label' => 'Ticket Dates',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
     'ticket_website' => array(
       'label' => 'Ticket Website',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
     'ticket_phone' => array(
       'label' => 'Ticket Phone',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
     'generate_revenue' => array(
       'label' => 'Revenue is Generated',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
     'revenue_generated' => array(
       'label' => 'How Revenue is Generated',
@@ -1424,62 +1700,126 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
         'merchandise' => 'taxonomy',
         'concession' => 'taxonomy',
       ),
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
   );
 
   $presentation['setup'] = array(
     'rectangular_tables_8ft' => array(
       'label' => 'Quantity of 8ft Rectangular Tables',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
     ),
     'round_tables_8ft' => array(
       'label' => 'Quantity of 8ft Round Tables',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
     ),
     'other_tables' => array(
       'label' => 'Description and Quantity of Other Tables',
       'size' => 'large',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
     'standard_blue_chairs' => array(
       'label' => 'Quantity of Blue Chairs',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
     ),
     'podium' => array(
       'label' => 'Podium is Required',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
     ),
     'portable_stage' => array(
       'label' => 'Portable Stage is Required',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
     'portable_stage_configuration' => array(
       'label' => 'Portable Stage Configuration',
       'size' => 'large',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
     'security' => array(
       'label' => 'Security is Required',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
     'parking_assistance' => array(
       'label' => 'Parking Assistance or Restrictions are Required',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
     'parking_assistance_area' => array(
       'label' => 'Parking Assistance or Restriction Explanation',
       'size' => 'large',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
     'road_closures' => array(
       'label' => 'Road Closures or Barricades are Required',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
     'road_closures_details' => array(
       'label' => 'Road Closures or Barricades Explanation',
       'size' => 'large',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
     'special_requests' => array(
       'label' => 'Special Requests are Required',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
     'special_requests_details' => array(
       'label' => 'Special Requests Explanation',
       'size' => 'large',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
   );
 
   $presentation['presentation'] = array(
     'technical_equipment' => array(
       'label' => 'Technical Equipment is Required',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
     ),
     'technical_equipment_details' => array(
       'label' => 'Technical Equipment Explanation',
@@ -1495,24 +1835,52 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
         'computer' => 'taxonomy',
         'sound' => 'taxonomy',
       ),
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
     ),
     'technical_equipment_microphone' => array(
       'label' => 'Quantity of Microphones',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
     ),
     'external_audio_person' => array(
       'label' => 'External Audio/Video Person/Company is Required',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
     'external_audio_person_name' => array(
       'label' => 'Name of Person/Company',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
     'external_audio_person_email' => array(
       'label' => 'E-mail of Person/Company',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
     'external_audio_person_phone' => array(
       'label' => 'Phone of Person/Company',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
     'publicity' => array(
       'label' => 'Publicity is Required',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
     ),
     'publicity_details' => array(
       'label' => 'Publicity Methods',
@@ -1532,27 +1900,59 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
         'axis_tv' => 'taxonomy',
         'press_release' => 'taxonomy',
        ),
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
     ),
     'production' => array(
       'label' => 'Production Company or Professional Promoter is Required',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
     'production_name' => array(
       'label' => 'Production Company or Professional Promoter Name',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
     'production_email' => array(
       'label' => 'Production Company or Professional Promoter E-mail',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
     'production_phone' => array(
       'label' => 'Production Company or Professional Promoter Phone',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
     'printed_material' => array(
       'label' => 'Printed Material is Required',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
     'university_logo' => array(
       'label' => 'Printed Material Uses University Logo',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
     'designing_material' => array(
       'label' => 'Printed Material Designer',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
     'designing_material_name' => array(
       'label' => 'Name of Printer Material Designer',
@@ -1566,27 +1966,55 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
         'marketing' => 'taxonomy',
         'other' => 'taxonomy',
       ),
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
     'designing_material_email' => array(
       'label' => 'E-mail of Printed Material Designer',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
     'designing_material_phone' => array(
       'label' => 'Phone of Printed Material Designer',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
   );
 
   $presentation['services'] = array(
     'food_served' => array(
       'label' => 'Food or Drink is Being Served',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
     ),
     'food_caterer' => array(
       'label' => 'Name of the Caterer/Business',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
     ),
     'alcohol' => array(
       'label' => 'Alcohol is Being Served',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
     ),
     'open_flames' => array(
       'label' => 'Open Flames are Being Used',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => array(57),
+      ),
     ),
   );
 
@@ -1608,8 +2036,10 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
  * @param array $presentation
  *   A collection of variables to tweak how this value is presented.
  *
- * @return array|bool
- *   The built array of FALSE on failure.
+ * @return array|bool|null
+ *   The built array.
+ *   NULL is returned when there should be no array to build.
+ *   FALSE is returned on failure.
  */
 function mcneese_event_workflow_build_event_request_item_structure($request_id, $field_group, $field_name, $field_array, $presentation) {
   if (!cf_is_integer($request_id)) {
@@ -1706,16 +2136,26 @@ function mcneese_event_workflow_build_event_request_item_structure($request_id, 
     '#weight' => 0,
   );
 
+  $no_values = TRUE;
   foreach ($field_array as $delta => &$value) {
     $generated = mcneese_event_workflow_build_event_request_value_structure($request_id, $field_group, $field_name, $delta, $value, $presentation);
 
-    if ($generated !== FALSE) {
+    if ($generated !== FALSE && !isset($generated['no_values'])) {
+      $no_values = FALSE;
       foreach ($generated as $generated_key => &$generated_value) {
         $output['item']['values'][$generated_key] = $generated_value;
       }
     }
 
     unset($generated);
+  }
+
+  if ($no_values) {
+    // this is added in case later on it is decided that $output should be returned.
+    // the item class needs to communicate that this group has no values.
+    $output['item']['#attributes']['class'][] = 'field-event-item-no_values';
+
+    return NULL;
   }
 
   return $output;
@@ -1739,7 +2179,8 @@ function mcneese_event_workflow_build_event_request_item_structure($request_id, 
  *   A collection of variables to tweak how this value is presented.
  *
  * @return array|bool
- *   The built array of FALSE on failure.
+ *   The built array.
+ *   FALSE is returend on failure.
  */
 function mcneese_event_workflow_build_event_request_value_structure($request_id, $field_group, $field_name, $delta, $value, $presentation) {
   if (!cf_is_integer($request_id)) {
@@ -1880,6 +2321,7 @@ function mcneese_event_workflow_build_event_request_value_structure($request_id,
     }
     else {
       $output['value'][$value_name]['#attributes']['class'][] = 'no_value';
+      $output['no_values'] = TRUE;
     }
   }
 
@@ -1889,13 +2331,15 @@ function mcneese_event_workflow_build_event_request_value_structure($request_id,
 /**
  * Returns an array of event category options for populating lists.
  *
+ * Note: ucs.msu_venue_list calls the building location 'category'.
+ *
  * @param string $option
  *   A string designating how the list will be populated.
  *
  * @return array
  *   An array of options available.
  */
-function event_workflow_get_category_list_options($option = 'select') {
+function event_workflow_get_location_list_options($option = 'select') {
   $options = array();
 
   if ($option == 'select') {
@@ -2084,22 +2528,22 @@ function event_workflow_get_publicity_details_list_options($option = 'select') {
 /**
  * Returns an array of event room list for populating lists.
  *
- * @param string|null $category
- *   (optional) When not NULL, select options based on provided category.
+ * @param string|null $location
+ *   (optional) When not NULL, select options based on provided location.
  * @param string $option
  *   A string designating how the list will be populated.
  *
  * @return array
  *   An array of options available.
  */
-function event_workflow_get_room_list_options($category = NULL, $option = 'select') {
+function event_workflow_get_room_list_options($location = NULL, $option = 'select') {
   $options = array();
 
-  $buildings = mcneese_event_workflow_load_buildings($category);
+  $buildings = mcneese_event_workflow_load_buildings($location);
 
   if ($option == 'special') {
     foreach ($buildings as &$building) {
-      if (empty($category)) {
+      if (empty($location)) {
         $id = 'undecided_';
       }
       else {
@@ -2210,17 +2654,20 @@ function event_workflow_get_technical_equipment_details_list_options($option = '
  *
  * @param string $value
  *   The date or time string to convert.
-* @param string $name
+* @param string $method
  *   The method to use for converting.
- * @param string $option
+ * @param string|array $option
  *   Additional options to pass to the method for conversion.
  *
  * @return
  *   The appropriate datatype suitable for storing into the database.
  *   FALSE is returned on error.
  */
-function event_workflow_convert_value_to_database_format($value, $name, $option) {
-  if ($name == 'timestamp') {
+function event_workflow_convert_value_to_database_format($value, $method, $option) {
+  if ($method == 'timestamp') {
+    return strtotime($value);
+  }
+  elseif ($method == 'date_popup') {
     return strtotime($value);
   }
 
@@ -2232,18 +2679,25 @@ function event_workflow_convert_value_to_database_format($value, $name, $option)
  *
  * @param string $value
  *   The date or time string to convert.
-* @param string $name
+* @param string $method
  *   The method to use for converting.
- * @param string $option
+ * @param string|array $option
  *   Additional options to pass to the method for conversion.
  *
  * @return
  *   The appropriate datatype suitable for storing into the database.
  *   FALSE is returned on error.
  */
-function event_workflow_convert_value_from_database_format($value, $name, $option) {
-  if ($name == 'timestamp') {
-    return date($value, $option);
+function event_workflow_convert_value_from_database_format($value, $method, $option) {
+  if ($method == 'timestamp') {
+    if (empty($value)) return NULL;
+
+    return date($option, $value);
+  }
+  elseif ($method == 'date_popup') {
+    if (empty($value)) return NULL;
+
+    return date('Y-m-d', $value);
   }
 
   return FALSE;
@@ -2267,8 +2721,7 @@ function event_workflow_load_event_by_id($id) {
   }
 
   $event = array();
-  $structure = mcneese_event_workflow_secondary_table_structure(3);
-  $structure_special = mcneese_event_workflow_secondary_table_structure(1);
+  $structure = mcneese_event_workflow_secondary_table_structure();
 
   try {
     $query = db_select('mew_event_requests', 'mer');
@@ -2328,21 +2781,43 @@ function event_workflow_load_event_by_id($id) {
       #}
 
       foreach ($fields as $field_name => &$field_values) {
-        $field_table_name = 'mew_field_' . $table_name . '_' . $field_name;
+        if (isset($structure[$table_name][$field_name]['storage']) && $structure[$table_name][$field_name]['storage'] == 'alternate' && array_key_exists('alternate', $structure[$table_name][$field_name])) {
+          foreach ($structure[$table_name][$field_name]['alternate'] as $alternate_name => &$alternate_data) {
+            $field_table_name = 'mew_field_' . $table_name . '_' . $alternate_name;
 
-        $query = db_select($field_table_name, 'mftf');
-        $query->condition('mftf.event_id', $id);
-        $query->condition('mftf.revision', $current->$field_name); // @todo: handle case where ->$field_name does not exist.
-        $query->fields('mftf');
+            $query = db_select($field_table_name, 'mftf');
+            $query->condition('mftf.event_id', $id);
+            $query->condition('mftf.revision', $current->$alternate_name); // @todo: handle case where ->$alternate_name does not exist.
+            $query->fields('mftf');
 
-        $executed = $query->execute();
-        $results = $executed->fetchAll();
+            $executed = $query->execute();
+            $results = $executed->fetchAll();
 
-        if (empty($results)) {
-          $event[$table_name][$field_name] = array();
+            if (empty($results)) {
+              $event[$table_name][$alternate_name] = array();
+            }
+            else {
+              $event[$table_name][$alternate_name] = $results;
+            }
+          }
         }
         else {
-          $event[$table_name][$field_name] = $results;
+          $field_table_name = 'mew_field_' . $table_name . '_' . $field_name;
+
+          $query = db_select($field_table_name, 'mftf');
+          $query->condition('mftf.event_id', $id);
+          $query->condition('mftf.revision', $current->$field_name); // @todo: handle case where ->$field_name does not exist.
+          $query->fields('mftf');
+
+          $executed = $query->execute();
+          $results = $executed->fetchAll();
+
+          if (empty($results)) {
+            $event[$table_name][$field_name] = array();
+          }
+          else {
+            $event[$table_name][$field_name] = $results;
+          }
         }
 
         unset($results);
@@ -2362,6 +2837,144 @@ function event_workflow_load_event_by_id($id) {
   }
 
   return $event;
+}
+
+/**
+ * Build the table structure for saving new or existing information.
+ *
+ * @param array $structure
+ *   Describes how the secondary tables are populated and processed.
+ * @param array $structure_tables
+ *   A collection of 'current' tables to create or update.
+ * @param array $structure_field_tables
+ *   A collection of 'field' tables to create or update.
+ * @param string $table_name
+ *   Name of the current table being processed.
+ * @param string $field_name
+ *   Name of the current field being processed.
+ * @param string $db_table
+ *   The name of the 'current' table as defined the SQL database.
+ * @param string $db_table_field
+ *   The name of the 'field' table as defined the SQL database.
+ * @param array $user_data
+ *   An array of user related information:
+ *   - 'user_id': The users ID.
+ *   - 'banner_id: The users Banner ID.
+ * @param int $delta
+ *   (optional) A number representing the particular instance of a given value.
+ *   For multiple fields of the same type, there can be multiple instances.
+ *   Such as multiple date associated with a single field.
+ *   For non-multiple values, this defaults to 0.
+ * @param array|null $event
+ *   (optional) When NULL, this created tables are new tables.
+ *   When an array, the created tables are updates to existing values.
+ *   The array should be populated by event_workflow_load_event_by_id().
+ *
+ * @see mcneese_event_workflow_secondary_table_structure()
+ * @see event_workflow_load_event_by_id()
+ */
+function mcneese_event_workflow_build_table_structure($structure, &$structure_tables, &$structure_field_tables, $table_name, $field_name, $db_table, $db_table_field, $user_data, $values, $delta = 0, $event = NULL) {
+  $structure_field_tables[$db_table_field] = array();
+  $structure_field_tables[$db_table_field]['user_id'] = $user_data['user_id'];
+  $structure_field_tables[$db_table_field]['banner_id'] = $user_data['banner_id'];
+  $structure_field_tables[$db_table_field]['date'] = REQUEST_TIME;
+  $structure_field_tables[$db_table_field]['delta'] = $delta;
+
+  if (!is_null($event)) {
+    $event_id = $event['mer']['id'][0]->value;
+    $structure_tables[$db_table]['event_id'] = $event_id;
+    $structure_field_tables[$db_table_field]['event_id'] = $event_id;
+  }
+  else {
+    $event_id = NULL;
+  }
+
+  $process_revision = TRUE;
+
+  if (isset($structure[$table_name][$field_name]['columns'])) {
+    foreach ($structure[$table_name][$field_name]['columns'] as $special_field_id => &$special_field_name) {
+      if (isset($values[$special_field_id]) && $values[$special_field_id] > 0) {
+        $structure_field_tables[$db_table_field][$special_field_name] = $special_field_id;
+      }
+    }
+  }
+  elseif (!is_null($values)) {
+    if (array_key_exists('storage', $structure[$table_name][$field_name])) {
+      if (is_array($structure[$table_name][$field_name]['storage'])) {
+        $storage_names = array_keys($structure[$table_name][$field_name]['storage']);
+        $storage_name = reset($storage_names);
+
+        $storage_values = event_workflow_convert_value_to_database_format($values, $storage_name, $structure[$table_name][$field_name]['storage'][$storage_name]);
+
+        if ($storage_values !== FALSE) {
+          $structure_field_tables[$db_table_field]['value'] = $storage_values;
+        }
+
+        unset($storage_values);
+        unset($storage_name);
+        unset($storage_names);
+      }
+      else {
+        // alternate is used for handling fields that are stored in multiple separate tables.
+        if ($structure[$table_name][$field_name]['storage'] == 'alternate' && array_key_exists('alternate', $structure[$table_name][$field_name])) {
+          $process_revision = FALSE;
+
+          unset($structure_tables[$db_table][$field_name]);
+          unset($structure_field_tables[$db_table_field]);
+
+          $alternate_values = array();
+          if (!empty($structure[$table_name][$field_name]['alternate_method'])) {
+            foreach ($structure[$table_name][$field_name]['alternate_method'] as $method_name => $method_values) {
+              if ($method_name == 'explode') {
+                $alternate_values = explode($method_values[0], $values, $method_values[1]);
+              }
+              break;
+            }
+          }
+
+          foreach ($structure[$table_name][$field_name]['alternate'] as $alternate_name => &$alternate_data) {
+            if (!array_key_exists('key', $alternate_data)) continue;
+
+            $db_table_field = 'mew_field_' . $table_name . '_' . $alternate_name;
+
+            $structure_field_tables[$db_table_field] = array();
+            $structure_field_tables[$db_table_field]['user_id'] = $user_data['user_id'];
+            $structure_field_tables[$db_table_field]['banner_id'] = $user_data['banner_id'];
+            $structure_field_tables[$db_table_field]['date'] = REQUEST_TIME;
+            $structure_field_tables[$db_table_field]['value'] = isset($alternate_values[$alternate_data['key']]) ? $alternate_values[$alternate_data['key']] : NULL;
+            $structure_field_tables[$db_table_field]['delta'] = $delta;
+
+            if (is_null($event_id)) {
+              $revision = 0;
+            }
+            else {
+              $revision = $event[$table_name][$alternate_name][$delta]->revision +1;
+              $structure_field_tables[$db_table_field]['event_id'] = $event_id;
+            }
+
+            $structure_tables[$db_table][$alternate_name] = $revision;
+
+            $structure_field_tables[$db_table_field]['revision'] = $revision;
+          }
+        }
+      }
+    }
+    else {
+      $structure_field_tables[$db_table_field]['value'] = $values;
+    }
+  }
+
+  if ($process_revision) {
+    if (is_null($event)) {
+      $revision = 0;
+    }
+    else {
+      $revision = $event[$table_name][$field_name][$delta]->revision +1;
+    }
+
+    $structure_field_tables[$db_table_field]['revision'] = $revision;
+    $structure_tables[$db_table][$field_name] = $revision;
+  }
 }
 
 /**

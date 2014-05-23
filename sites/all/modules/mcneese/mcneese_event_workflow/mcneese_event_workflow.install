@@ -14,14 +14,13 @@
 function mcneese_event_workflow_secondary_table_install_structure() {
   $structure = array();
   $structure['top'] = array(
-    'category' => 'varchar',
+    'location' => 'varchar',
     'building' => 'varchar',
     'room' => 'varchar',
     'additional' => 'text',
   );
 
   $structure['dates'] = array(
-    'category' => 'varchar',
     'date' => 'timestamp',
     'time_start' => 'time',
     'time_stop' => 'time',

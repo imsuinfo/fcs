@@ -7,6 +7,7 @@ package = McNeese
 dependencies[] = cf (7.x-2.x)
 dependencies[] = cf_error (7.x-2.x)
 dependencies[] = mcneese_management
+dependencies[] = ctools
 
 files[] = mcneese_event_workflow.install
 files[] = mcneese_event_workflow.module

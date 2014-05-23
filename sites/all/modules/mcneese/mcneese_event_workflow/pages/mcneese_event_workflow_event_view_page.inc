@@ -29,7 +29,7 @@
  */
 function mcneese_event_workflow_event_view_0_page($form, &$form_state, $id, $mode = 0) {
   if (!cf_is_integer($id)) {
-    drupal_access_denied();
+    drupal_not_found();
     drupal_exit();
     return array();
   }
@@ -54,6 +54,17 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $id, $mod
     // @todo: disable other items once they exist.
   }
 
+  $can_edit = (bool) mcneese_event_workflow_management_page_event_access('edit', $id);
+
+  if ($can_edit) {
+    // Include the CTools tools that we need.
+    ctools_include('ajax');
+    ctools_include('modal');
+
+    // Add CTools' javascript to the page.
+    ctools_modal_add_js();
+
+  }
 
   $page_title = "Event Request";
   if (!empty($event['information']['title'][0]->value)) {
@@ -85,6 +96,17 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $id, $mod
     '#value' => &$event,
   );
 
+  if (!isset($event['information']['type'][0]->value) || !cf_is_integer($event['information']['type'][0]->value)) {
+    cf_error::invalid_integer('event[information][type][0]->value');
+    $form['message'] = array(
+      '#markup' => "Error: Unable to load event (ID = " . check_plain($id) . ") due to missing event type value.",
+    );
+
+    return $form;
+  }
+
+  $event_type = $event['information']['type'][0]->value;
+
   if ($show_display) {
     $form['display'] = array(
       '#id' => 'mcneese-event-workflow-event-' . $id . '-section-display',
@@ -109,13 +131,37 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $id, $mod
       '#tree' => TRUE,
     );
 
+    $fields_count = array('top' => 0, 'group' => array());
+
     $presentation = mcneese_event_workflow_secondary_table_presentation();
     $presentation_tables = mcneese_event_workflow_secondary_table_presentation(1);
 
     foreach ($event as $field_group => &$event_array) {
+      if (isset($presentation_tables[$field_group]['event_type']) && is_array($presentation_tables[$field_group]['event_type']) && array_key_exists('hide', $presentation_tables[$field_group]['event_type'])) {
+        if ($presentation_tables[$field_group]['event_type']['hide'] === TRUE) {
+          if (array_key_exists('show', $presentation_tables[$field_group]['event_type'])) {
+            if ($presentation_tables[$field_group]['event_type']['show'] === TRUE) {
+              // do nothing
+            }
+            elseif ($presentation_tables[$field_group]['event_type']['show'] === FALSE) {
+              continue;
+            }
+            elseif (is_array($presentation_tables[$field_group]['event_type']['show']) && !in_array($event_type, $presentation_tables[$field_group]['event_type']['show'])) {
+              continue;
+            }
+          }
+        }
+        elseif ($presentation_tables[$field_group]['event_type']['hide'] === FALSE) {
+          // do nothing
+        }
+        elseif (is_array($presentation_tables[$field_group]['event_type']['hide']) && in_array($event_type, $presentation_tables[$field_group]['event_type']['hide'])) {
+          continue;
+        }
+      }
+
       $row = NULL;
       if (isset($presentation_tables[$field_group])) {
-        $row = mcneese_event_workflow_event_view_0_page_setup_group_path($form, $id, $field_group, $presentation_tables);
+        $row = mcneese_event_workflow_event_view_0_page_setup_group_path($form, $id, $field_group, $presentation_tables, $can_edit, $event);
       }
 
       if (!array_key_exists($field_group, $form['groups'])) {
@@ -131,19 +177,53 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $id, $mod
           continue;
         }
 
+        if (empty($field_array)) {
+          continue;
+        }
+
+        if (isset($field_presentation['event_type']) && is_array($field_presentation['event_type']) && array_key_exists('hide', $field_presentation['event_type'])) {
+          if ($field_presentation['event_type']['hide'] === TRUE) {
+            if (array_key_exists('show', $field_presentation['event_type'])) {
+              if ($field_presentation['event_type']['show'] === TRUE) {
+                // do nothing
+              }
+              elseif ($field_presentation['event_type']['show'] === FALSE) {
+                continue;
+              }
+              elseif (is_array($field_presentation['event_type']['show']) && !in_array($event_type, $field_presentation['event_type']['show'])) {
+                continue;
+              }
+            }
+          }
+          elseif ($field_presentation['event_type']['hide'] === FALSE) {
+            // do nothing
+          }
+          elseif (is_array($field_presentation['event_type']['hide']) && in_array($event_type, $field_presentation['event_type']['hide'])) {
+            continue;
+          }
+        }
+
         if (isset($field_presentation['group'])) {
           $group = $field_presentation['group'];
 
           $custom_row = NULL;
           if (isset($presentation_tables[$group])) {
-            $custom_row = mcneese_event_workflow_event_view_0_page_setup_group_path($form, $id, $group, $presentation_tables);
+            $custom_row = mcneese_event_workflow_event_view_0_page_setup_group_path($form, $id, $group, $presentation_tables, $can_edit, $event);
           }
 
           if (is_null($custom_row)) {
             $group_path = &$form['display']['groups'];
+
+            $group_fields_count = &$fields_count['top'];
           }
           else {
             $group_path = &$form['display']['groups'][$custom_row];
+
+            if (!isset($fields_count['group'][$custom_row] )) {
+              $fields_count['group'][$custom_row] = 0;
+            }
+
+            $group_fields_count = &$fields_count['group'][$custom_row];
           }
 
           unset($custom_row);
@@ -153,10 +233,22 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $id, $mod
 
           if (is_null($row)) {
             $group_path = &$form['display']['groups'];
+
+            $group_fields_count = &$fields_count['top'];
           }
           else {
             $group_path = &$form['display']['groups'][$row];
+
+            if (!isset($fields_count['group'][$row])) {
+              $fields_count['group'][$row] = 0;
+            }
+
+            $group_fields_count = &$fields_count['group'][$row];
           }
+        }
+
+        if (!array_key_exists('#group_fields_count', $group_path)) {
+          $group_path['#group_fields_count'] = 0;
         }
 
         $weight = 0;
@@ -170,16 +262,12 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $id, $mod
 
         $group_path[$group][$weight][$field_name] = mcneese_event_workflow_build_event_request_item_structure($id, $group, $field_name, $field_array, $field_presentation);
 
-        // This can be FALSE on error, so remove the field entirely.
-        if ($group_path[$group][$weight][$field_name] === FALSE) {
+        // This can be FALSE on error or NULL when the ROW should not be displayed, so remove the field entirely.
+        if ($group_path[$group][$weight][$field_name] === FALSE || is_null($group_path[$group][$weight][$field_name])) {
           unset($group_path[$group][$weight][$field_name]);
         }
-
-        foreach ($field_array as $delta => &$value) {
-          $form['groups'][$field_group][$delta] = array(
-            '#type' => 'value',
-            '#value' => $value,
-          );
+        else {
+          $group_fields_count++;
         }
       }
 
@@ -189,11 +277,50 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $id, $mod
 
     // post-process the structure for operations that may only be performed once the structure is completed.
     foreach ($form['display']['groups'] as $display_key => &$display_value) {
+      if (!empty($display_value['#attributes'])) {
+        $display_value['#prefix'] = '<div';
+        $display_value['#suffix'] = '</div>';
 
-      // build the row stripes.
+        foreach ($display_value['#attributes'] as $attribute => $attribute_values) {
+          if (is_array($attribute_values)) {
+            $display_value['#prefix'] .= ' ' . $attribute . '="' . implode(' ', $attribute_values) . '"';
+          }
+          else {
+            $display_value['#prefix'] .= ' ' . $attribute . '="' . $attribute_values . '"';
+          }
+        }
+
+        $display_value['#prefix'] .= '>';
+
+        if (isset($display_value['#extra_prefix'])) {
+          $display_value['#prefix'] .= $display_value['#extra_prefix'];
+        }
+      }
+
+      // create the group prefix and suffix and build the row stripes.
       if (is_numeric($display_key)) {
         foreach (array_keys($display_value) as $group_name) {
           if (preg_match('/^#/', $group_name)) continue;
+
+          if (!empty($display_value[$group_name]['#attributes'])) {
+            $display_value[$group_name]['#prefix'] = '<div';
+            $display_value[$group_name]['#suffix'] = '</div>';
+
+            foreach ($display_value[$group_name]['#attributes'] as $attribute => $attribute_values) {
+              if (is_array($attribute_values)) {
+                $display_value[$group_name]['#prefix'] .= ' ' . $attribute . '="' . implode(' ', $attribute_values) . '"';
+              }
+              else {
+                $display_value[$group_name]['#prefix'] .= ' ' . $attribute . '="' . $attribute_values . '"';
+              }
+            }
+
+            $display_value[$group_name]['#prefix'] .= '>';
+
+            if (isset($display_value[$group_name]['#extra_prefix'])) {
+              $display_value[$group_name]['#prefix'] .= $display_value[$group_name]['#extra_prefix'];
+            }
+          }
 
           $by_weight = array();
           foreach ($display_value[$group_name] as $weight => &$group_values) {
@@ -287,33 +414,58 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $id, $mod
 /**
  * Create the group path presentation structure.
  *
+ * The appropraite ctools_include() and ctools_modal_add_js() must be called
+ * before using this function when $show_edit is TRUE.
+ *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param int $id
  *   The event request id.
  * @param string $group
  *   The group name.
- * @param array $$presentation_tables
+ * @param array $presentation_tables
  *   An array of tables defining how the presentation is to be built.
+ * @param bool $show_edit
+ *   When TRUE, the edit link will be shown in the group header.
+ * @param array $event
+ *   The event settings array.
  *
  * @return int|null
  *   The row number or NULL when there is no valid row.
  *   FALSE is returned for in
  *
  * @see: mcneese_event_workflow_event_view_0_page()
+ * @see: ctools_include()
+ * @see: ctools_modal_add_js()
  */
-function mcneese_event_workflow_event_view_0_page_setup_group_path(&$form, &$id, &$group, &$presentation_tables) {
+function mcneese_event_workflow_event_view_0_page_setup_group_path(&$form, &$id, &$group, &$presentation_tables, $show_edit, $event) {
   $row = NULL;
   $group_path = &$form['display']['groups'];
+  $event_type = $event['information']['type'][0]->value;
+
+  $show_link = TRUE;
+  if (isset($presentation_tables[$group]['event_type']['hide_link']) && is_array($presentation_tables[$group]['event_type']['hide_link'])) {
+    if (in_array($event_type, $presentation_tables[$group]['event_type']['hide_link'])) {
+      $show_link = FALSE;
+    }
+  }
 
   if (array_key_exists('group', $presentation_tables[$group])) {
     $row = (int) $presentation_tables[$group]['group'];
 
     if (!array_key_exists($row, $group_path)) {
       $form['display']['groups'][$row] = array(
-        '#prefix' => '<div id="section-event-' . $id . '-group-' . $row . '" class="group group-' . $row . '">',
-        '#suffix' => '</div>',
+        '#prefix' => '',
+        '#suffix' => '',
         '#weight' => $row,
+        '#attributes' => array(
+          'id' => 'section-event-' . $id . '-group-' . $row,
+          'class' => array(
+            'group',
+            'group-' . $row,
+          ),
+        ),
+        '#extra_prefix' => '',
       );
     }
 
@@ -322,15 +474,37 @@ function mcneese_event_workflow_event_view_0_page_setup_group_path(&$form, &$id,
 
   if (!array_key_exists($group, $group_path)) {
     $group_path[$group] = array(
-      '#prefix' => '<div id="section-event-' . $id . '-' . $group . '" class="section-event section-event-' . $group . '">',
-      '#suffix' => '</div>',
+      '#prefix' => '',
+      '#suffix' => '',
       '#weight' => 0,
+      '#attributes' => array(
+        'id' => 'section-event-' . $id . '-' . $group,
+        'class' => array(
+          'section-event',
+          'section-event-' . $group,
+        ),
+      ),
+      '#extra_prefix' => '',
     );
 
     if (isset($presentation_tables[$group]['label'])) {
-      $group_path[$group]['#prefix'] .= '<h2 id="section-event-' . $id . '-' . $group . '-label" class="section-event-label section-event-' . $group . '-label">';
-      $group_path[$group]['#prefix'] .= $presentation_tables[$group]['label'];
-      $group_path[$group]['#prefix'] .= '</h2>';
+      $group_path[$group]['#extra_prefix'] .= '<div class="section-event-' . $id . '-' . $group . '-label-wrapper section-event-label-wrapper">';
+
+      if ($show_link) {
+        #if ($show_edit && function_exists('ctools_modal_text_button')) {
+        #  $group_path[$group]['#extra_prefix'] .= ctools_modal_text_button(t("Edit"), 'events/edit-0/ctools/' . $id . '/' . $group, t("Edit " . $presentation_tables[$group]['label']), 'section-event-' . $id . '-' . $group . '-edit section-event-edit no-print');
+        #}
+
+        if ($show_edit) {
+          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'events/edit-0/' . $id . '/' . $group . '" class="section-event-' . $id . '-' . $group . '-edit section-event-edit no-print" title="'. t("Edit " . $presentation_tables[$group]['label']) . '">Edit</a>';
+        }
+      }
+
+      $group_path[$group]['#extra_prefix'] .= '<h2 id="section-event-' . $id . '-' . $group . '-label" class="section-event-label section-event-' . $group . '-label">';
+      $group_path[$group]['#extra_prefix'] .= $presentation_tables[$group]['label'];
+      $group_path[$group]['#extra_prefix'] .= '</h2>';
+
+      $group_path[$group]['#extra_prefix'] .= '</div>';
     }
 
     if (isset($presentation_tables[$group]['weight'])) {
@@ -440,19 +614,19 @@ function mcneese_event_workflow_event_pdf_0_page($id, $mode) {
   drupal_set_title($page_title);
 
   if (!cf_is_integer($id)) {
-    drupal_access_denied();
+    drupal_not_found();
     drupal_exit();
     return array();
   }
 
   if (!cf_is_integer($mode)) {
-    drupal_access_denied();
+    drupal_not_found();
     drupal_exit();
     return array();
   }
 
   if (!function_exists('pdf_using_mpdf_library_exist')) {
-    drupal_access_denied();
+    drupal_not_found();
     drupal_exit();
     return array();
   }

@@ -25,6 +25,9 @@
 function mcneese_event_workflow_event_create_0_form($form, &$form_state, $classification = NULL, $room = NULL) {
   $form = array();
 
+  $module_path = drupal_get_path('module', 'mcneese_event_workflow');
+  require_once($module_path . '/includes/mcneese_event_workflow_event_structure.inc');
+
   if (empty($form_state['values']['form']['step'])) {
     $step = 'agreement';
   }
@@ -44,13 +47,18 @@ function mcneese_event_workflow_event_create_0_form($form, &$form_state, $classi
     '#tree' => TRUE,
   );
 
+  $form['form']['sections'] = array(
+    '#type' => 'value',
+    '#value' => mcneese_event_workflow_get_event_section_information(),
+  );
+
   $form_state['conditionally_required'] = array('#tree' => FALSE, '#type' => 'value');
   $form_state['conditionally_required'][0] = array();
 
   $form['form']['step'] = array(
     '#id' => 'field-form-step',
     '#type' => 'value',
-    '#value' => &$step,
+    '#value' => $step,
   );
 
   $form['form']['paramater_1'] = array(
@@ -63,6 +71,27 @@ function mcneese_event_workflow_event_create_0_form($form, &$form_state, $classi
     '#id' => 'field-form-paramater_2',
     '#type' => 'value',
     '#value' => $room,
+  );
+
+  $form['form']['existing'] = array(
+    '#id' => 'field-form-existing',
+    '#type' => 'value',
+    '#value' => array(),
+  );
+
+  $form['form']['user'] = array(
+    '#id' => 'field-form-user',
+    '#type' => 'value',
+    '#value' => cf_current_user(),
+  );
+
+  $form['form']['parents'] = array(
+    '#id' => 'field-form-parents',
+    '#type' => 'value',
+    '#value' => array(
+      'structure' => array('event'),
+      'path' => 'event[',
+    ),
   );
 
   $statement_markup = 'McNeese State University is happy to provide facilities and resources to our Students, Employees, and the Community to further educational, cultural, and recreational initiatives through events held on campus.<br>';
@@ -94,14 +123,11 @@ function mcneese_event_workflow_event_create_0_form($form, &$form_state, $classi
     );
   }
   else {
-    $module_path = drupal_get_path('module', 'mcneese_event_workflow');
-    require_once($module_path . '/includes/mcneese_event_workflow_event_structure.inc');
-
-    $form['event'] = mcneese_event_workflow_get_event_fields($form, $form_state, $step);
+    $form['event'] = mcneese_event_workflow_get_event_fields($form, $form_state);
     $form['event']['#id'] = 'section-event';
     $form['event']['#tree'] = TRUE;
 
-    if ($step != 'category') {
+    if ($step != 'location') {
       $form['event']['prev'] = array(
         '#id' => 'submit-event-prev',
         '#type' => 'submit',
@@ -129,14 +155,14 @@ function mcneese_event_workflow_event_create_0_form($form, &$form_state, $classi
 }
 
 /**
- * Pre-Validation for mcneese_event_workflow_event_create_form().
+ * Pre-Validation for mcneese_event_workflow_event_create_0_form().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mcneese_event_workflow_event_create_form()
+ * @see: mcneese_event_workflow_event_create_0_form()
  */
 function mcneese_event_workflow_event_create_0_form_pre_validate(&$form, &$form_state) {
   $clicked_id = '';
@@ -158,7 +184,7 @@ function mcneese_event_workflow_event_create_0_form_pre_validate(&$form, &$form_
           $location = &$form['event'];
           while (!empty($parts)) {
             $part = array_shift($parts);
-            if (!isset($location[$part])) {
+            if (!is_array($location) || !array_key_exists($part, $location)) {
               $found = FALSE;
               break;
             }
@@ -166,7 +192,7 @@ function mcneese_event_workflow_event_create_0_form_pre_validate(&$form, &$form_
             $location = &$location[$part];
           }
 
-          if ($found && $location['#required']) {
+          if ($found && array_key_exists('#required', $location)) {
             if (isset($location['#options'])) {
               $location['#options'][''] = '';
             }
@@ -175,18 +201,20 @@ function mcneese_event_workflow_event_create_0_form_pre_validate(&$form, &$form_
         }
       }
     }
+
+    // @todo: handle conditionally_required[1] fields, which are required only when their dependant fields make them visible based on the '#state' field settings.
   }
 }
 
 /**
- * Validation for mcneese_event_workflow_event_create_form().
+ * Validation for mcneese_event_workflow_event_create_0_form().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mcneese_event_workflow_event_create_form()
+ * @see: mcneese_event_workflow_event_create_0_form()
  */
 function mcneese_event_workflow_event_create_0_form_validate($form, &$form_state) {
   $no_problems = TRUE;
@@ -201,21 +229,32 @@ function mcneese_event_workflow_event_create_0_form_validate($form, &$form_state
     form_set_error('form][step', "An internal error occured. Form Step is not defined. Please contact the System Administer.");
   }
 
+  // perform validation when not going backwards.
+  if ($clicked_id != 'submit-event-prev') {
+    $module_path = drupal_get_path('module', 'mcneese_event_workflow');
+    require_once($module_path . '/includes/mcneese_event_workflow_event_validation.inc');
+
+    $no_problems = mcneese_event_workflow_validate_event_fields($form, $form_state);
+    if (is_null($no_problems)) {
+      $no_problems = TRUE;
+    }
+  }
+
   if ($no_problems) {
     if ($form_state['values']['form']['step'] == 'agreement') {
       if ($form_state['values']['agreement']['agree']) {
-        $form_state['values']['form']['step'] = 'category';
+        $form_state['values']['form']['step'] = 'location';
       }
       else {
         form_set_error('agreement][agree', "You must agree to the terms to continue.");
       }
     }
-    elseif ($form_state['values']['form']['step'] == 'category') {
+    elseif ($form_state['values']['form']['step'] == 'location') {
       $form_state['values']['form']['step'] = 'rooms';
     }
     elseif ($form_state['values']['form']['step'] == 'rooms') {
       if ($clicked_id == 'submit-event-prev') {
-        $form_state['values']['form']['step'] = 'category';
+        $form_state['values']['form']['step'] = 'location';
       }
       else {
         $form_state['values']['form']['step'] = 'standard';
@@ -253,8 +292,6 @@ function mcneese_event_workflow_event_create_0_form_validate($form, &$form_state
         $form_state['values']['form']['step'] = 'standard';
       }
       elseif ($clicked_id == 'submit-event-submit') {
-        // if there is any validation that must be manually performed prior to submit, do it now.
-        #form_set_error('event][submit', "TODO: the submit functionality is not yet implemented.");
         $form_state['rebuild'] = FALSE;
 
       }
@@ -263,34 +300,38 @@ function mcneese_event_workflow_event_create_0_form_validate($form, &$form_state
 }
 
 /**
- * Submit process for mcneese_event_workflow_event_create_form().
+ * Submit process for mcneese_event_workflow_event_create_0_form().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mcneese_event_workflow_event_create_form()
+ * @see: mcneese_event_workflow_event_create_0_form()
  */
 function mcneese_event_workflow_event_create_0_form_submit($form, &$form_state) {
   $user = cf_current_user();
 
+  $user_data = array();
+  $user_data['user_id'] = $user->uid;
+  $user_data['banner_id'] = NULL;
+
+  if (!empty($user->field_user_banner_id['und'][0]['value'])) {
+    $user_data['banner_id'] = (int) $user->field_user_banner_id['und'][0]['value'];
+  }
+
   $mew_event_requests = array();
-  $mew_event_requests['user_id'] = $user->uid;
-  $mew_event_requests['banner_id'] = NULL;
+  $mew_event_requests['user_id'] = (int) $user_data['user_id'];
+  $mew_event_requests['banner_id'] = (int) $user_data['banner_id'];
   $mew_event_requests['created'] = REQUEST_TIME;
   $mew_event_requests['updated'] = REQUEST_TIME;
   $mew_event_requests['status'] = MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_NORMAL;
   $mew_event_requests['state'] = 0;
 
-  if (!empty($user->field_user_banner_id['und'][0]['value'])) {
-    $mew_event_requests['banner_id'] = (int) $user->field_user_banner_id['und'][0]['value'];
-  }
-
   $mew_event_states = array();
-  $mew_event_states['user_id'] = $mew_event_requests['user_id'];
-  $mew_event_states['banner_id'] = $mew_event_requests['banner_id'];
-  $mew_event_states['date'] = $mew_event_requests['created'];
+  $mew_event_states['user_id'] = $user_data['user_id'];
+  $mew_event_states['banner_id'] = $user_data['banner_id'];
+  $mew_event_states['date'] = REQUEST_TIME;
   $mew_event_states['revision'] = 0;
   $mew_event_states['delta'] = 0;
   $mew_event_states['state'] = 0;
@@ -304,29 +345,24 @@ function mcneese_event_workflow_event_create_0_form_submit($form, &$form_state) 
   }
 
   $structure = mcneese_event_workflow_secondary_table_structure();
-  $structure_special = mcneese_event_workflow_secondary_table_structure(1);
-  $structure_storage = mcneese_event_workflow_secondary_table_structure(2);
   $structure_tables = array();
   $structure_field_tables = array();
 
   foreach ($structure as $table_name => &$fields) {
-    $name = 'mew_current_' . $table_name;
-    $structure_tables[$name] = array();
+    $db_table = 'mew_current_' . $table_name;
+    $structure_tables[$db_table] = array();
 
     foreach ($fields as $field_name => &$field_values) {
-      $structure_tables[$name][$field_name] = 0;
+      // @todo: add support for using multiple values instead of using only delta = 0.
+      $delta = 0;
+
+      $structure_tables[$db_table][$field_name] = 0;
 
       // store the values for each individual mew_field_* table.
-      $field_table_name = 'mew_field_' . $table_name . '_' . $field_name;
-
-      $structure_field_tables[$field_table_name] = array();
-      $structure_field_tables[$field_table_name]['user_id'] = $mew_event_requests['user_id'];
-      $structure_field_tables[$field_table_name]['banner_id'] = $mew_event_requests['banner_id'];
-      $structure_field_tables[$field_table_name]['date'] = $mew_event_requests['created'];
-      $structure_field_tables[$field_table_name]['revision'] = 0;
+      $db_table_field = 'mew_field_' . $table_name . '_' . $field_name;
 
       $current = &$form_state['values'];
-      $parts = explode('][', $field_values);
+      $parts = explode('][', $field_values['path']);
       if (empty($parts)) {
         unset($current);
         $current = NULL;
@@ -341,70 +377,15 @@ function mcneese_event_workflow_event_create_0_form_submit($form, &$form_state) 
             }
           }
           else {
-            // @todo: handle error case when $part is not defined.
+            watchdog('mew', "Failed to process '@part' for '@field_name' in '@table_name' during form submit. Invalid array or missing array key (new).", array('@part' => $part, '@field_name' => $field_name, '@table_name' => $table_name), WATCHDOG_ERROR);
             unset($current);
             $current = NULL;
-            break;
+            continue 2;
           }
         }
       }
 
-      if (isset($structure_special[$table_name][$field_name])) {
-        foreach ($structure_special[$table_name][$field_name] as $special_field_id => &$special_field_name) {
-          if (isset($current[$special_field_id]) && $current[$special_field_id] > 0) {
-            $structure_field_tables[$field_table_name][$special_field_name] = $special_field_id;
-          }
-        }
-      }
-      elseif (!is_null($current)) {
-        if (empty($structure_storage[$table_name][$field_name])) {
-          $structure_field_tables[$field_table_name]['value'] = $current;
-        }
-        else{
-          // room list is stored in multiple separate fields in the database.
-          if ($field_name == 'room_list') {
-            unset($structure_tables[$name][$field_name]);
-            unset($structure_field_tables[$field_table_name]);
-
-            $structure_tables[$name]['building'] = 0;
-            $structure_tables[$name]['room'] = 0;
-
-            $room_list_parts = explode('_', $current, 3);
-
-            $field_table_name = 'mew_field_' . $table_name . '_building';
-
-            $structure_field_tables[$field_table_name] = array();
-            $structure_field_tables[$field_table_name]['user_id'] = $mew_event_requests['user_id'];
-            $structure_field_tables[$field_table_name]['banner_id'] = $mew_event_requests['banner_id'];
-            $structure_field_tables[$field_table_name]['date'] = $mew_event_requests['created'];
-            $structure_field_tables[$field_table_name]['revision'] = 0;
-            $structure_field_tables[$field_table_name]['value'] = $room_list_parts[1];
-
-            $field_table_name = 'mew_field_' . $table_name . '_room';
-
-            $structure_field_tables[$field_table_name] = array();
-            $structure_field_tables[$field_table_name]['user_id'] = $mew_event_requests['user_id'];
-            $structure_field_tables[$field_table_name]['banner_id'] = $mew_event_requests['banner_id'];
-            $structure_field_tables[$field_table_name]['date'] = $mew_event_requests['created'];
-            $structure_field_tables[$field_table_name]['revision'] = 0;
-            $structure_field_tables[$field_table_name]['value'] = $room_list_parts[2];
-          }
-          else {
-            $storage_names = array_keys($structure_storage[$table_name][$field_name]);
-            $storage_name = reset($storage_names);
-
-            $storage_value = event_workflow_convert_value_to_database_format($current, $storage_name, $structure_storage[$table_name][$field_name][$storage_name]);
-
-            if ($storage_value !== FALSE) {
-              $structure_field_tables[$field_table_name]['value'] = $storage_value;
-            }
-
-            unset($storage_value);
-            unset($storage_name);
-            unset($storage_names);
-          }
-        }
-      }
+      mcneese_event_workflow_build_table_structure($structure, $structure_tables, $structure_field_tables, $table_name, $field_name, $db_table, $db_table_field, $user_data, $current, $delta);
     }
   }
 
