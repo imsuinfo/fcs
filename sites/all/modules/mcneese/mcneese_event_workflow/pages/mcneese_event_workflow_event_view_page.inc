@@ -23,11 +23,13 @@
  *   Specifies the mode that alters how the form is rendered.
  *   0: No restrictions.
  *   1: Render only the display part.
+ * @param bool $pdf
+ *   (optional) Enable special handling for PDF generation.
  *
  * @return string
  *   The HTML output representing the page.
  */
-function mcneese_event_workflow_event_view_0_page($form, &$form_state, $id, $mode = 0) {
+function mcneese_event_workflow_event_view_0_page($form, &$form_state, $id, $mode = 0, $pdf = FALSE) {
   if (!cf_is_integer($id)) {
     drupal_not_found();
     drupal_exit();
@@ -49,12 +51,21 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $id, $mod
     $mode = (int) $mode;
   }
 
+  if (!is_bool($pdf)) {
+    $pdf = FALSE;
+  }
+
   $show_display = TRUE;
   if ($mode == 1) {
     // @todo: disable other items once they exist.
   }
 
-  $can_edit = (bool) mcneese_event_workflow_management_page_event_access('edit', $id);
+  if ($pdf) {
+    $can_edit = FALSE;
+  }
+  else {
+    $can_edit = (bool) mcneese_event_workflow_management_page_event_access('edit', $id);
+  }
 
   if ($can_edit) {
     // Include the CTools tools that we need.
@@ -120,6 +131,12 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $id, $mod
         ),
       ),
     );
+
+    if ($pdf) {
+      unset($form['display']['#type']);
+      unset($form['display']['#collapsible']);
+      unset($form['display']['#collapsed']);
+    }
 
     $form['display']['groups'] = array(
       '#prefix' => '<div id="event-' . $id . '-field_groups" class="event-field_groups">',
@@ -368,33 +385,33 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $id, $mod
       }
     }
 
-    $form['display']['submit'] = array(
-      '#id' => 'event-display-submit',
-      '#type' => 'container',
-      '#tree' => TRUE,
-      '#attributes' => array(
-        'class' => array(
-          'no-print',
-          'event-display-submit',
+    if (!$pdf) {
+      $form['display']['submit'] = array(
+        '#id' => 'event-display-submit',
+        '#type' => 'container',
+        '#tree' => TRUE,
+        '#attributes' => array(
+          'class' => array(
+            'no-print',
+            'event-display-submit',
+          ),
         ),
-      ),
-      '#weight' => 1000,
-    );
+        '#weight' => 1000,
+      );
 
-    $form['display']['submit']['print'] = array(
-      '#id' => 'event-display-submit-print',
-      '#type' => 'submit',
-      '#value' => t("Print"),
-      '#attributes' => array(
-        'class' => array(
-          'no-print',
-          'event-display-submit-print',
+      $form['display']['submit']['print'] = array(
+        '#id' => 'event-display-submit-print',
+        '#type' => 'submit',
+        '#value' => t("Print"),
+        '#attributes' => array(
+          'class' => array(
+            'no-print',
+            'event-display-submit-print',
+          ),
+          'onclick' => 'window.print(); return false;',
         ),
-        'onclick' => 'window.print(); return false;',
-      ),
-    );
+      );
 
-    if (function_exists('pdf_using_mpdf_library_exist') && pdf_using_mpdf_library_exist()) {
       $form['display']['submit']['download'] = array(
         '#id' => 'event-display-submit-download',
         '#type' => 'submit',
@@ -618,18 +635,7 @@ function mcneese_event_workflow_event_pdf_0_page($id, $mode) {
   drupal_set_title($page_title);
 
   if (!cf_is_integer($id)) {
-    drupal_not_found();
-    drupal_exit();
-    return array();
-  }
-
-  if (!cf_is_integer($mode)) {
-    drupal_not_found();
-    drupal_exit();
-    return array();
-  }
-
-  if (!function_exists('pdf_using_mpdf_library_exist')) {
+    cf_error::invalid_integer('id');
     drupal_not_found();
     drupal_exit();
     return array();
@@ -647,25 +653,6 @@ function mcneese_event_workflow_event_pdf_0_page($id, $mode) {
     $page_title = "Event Request: " . $event['information']['title'][0]->value;
     drupal_set_title($page_title);
   }
-
-  $author = '';
-  if (isset($event['mer']['user_id'][0]->value)) {
-    $user = user_load($event['mer']['user_id'][0]->value);
-
-    if (isset($user->field_user_first_name['und'][0]['safe_value'])) {
-      $author = $user->field_user_first_name['und'][0]['safe_value'];
-
-      if (isset($user->field_user_last_name['und'][0]['safe_value'])) {
-        $author .= ' ' . $user->field_user_last_name['und'][0]['safe_value'];
-      }
-    }
-    else {
-      $author = $user->name;
-    }
-  }
-
-  global $base_root;
-  global $base_path;
 
   $form = array();
   $form_state = array();
@@ -685,37 +672,62 @@ function mcneese_event_workflow_event_pdf_0_page($id, $mode) {
   $GLOBALS['devel_shutdown'] = FALSE;
 
   ob_start();
-  $page['html']['content'] = array(mcneese_event_workflow_event_view_0_page($form, $form_state, $id, $mode));
+  $page['html']['content'] = array(mcneese_event_workflow_event_view_0_page($form, $form_state, $id, $mode, TRUE));
   $renderred = drupal_render($page);
   print(drupal_render_page($renderred));
   $html = ob_get_contents();
   ob_end_clean();
 
-  // The html output is not in the proper format and the PDF generator runs into an infinite loop (until out of memory).
-  // The drupal @import styles are also not supported by the PDF generator.
-  // Therefore, the page must be manually reconstructed with a minimal set of information.
+  mcneese_event_workflow_event_pdf_0_page_using_wkhtmltopdf($id, $mode, $event, $html);
+}
+
+/**
+ * Renders a PDF of a given event request using the wkhtmltopdf library.
+ *
+ * @param int $id
+ *   The unique identifier for an event request.
+ * @param int|null $mode
+ *   Specifies the mode that alters how the form is rendered.
+ *   1: Render only the display part.
+ */
+function mcneese_event_workflow_event_pdf_0_page_using_wkhtmltopdf($id, $mode, $event, $html) {
+  if (!cf_is_integer($id)) {
+    cf_error::invalid_integer('id');
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  if (!cf_is_integer($mode)) {
+    cf_error::invalid_integer('mode');
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  if (!is_array($event)) {
+    cf_error::invalid_array('event');
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  if (!is_string($html)) {
+    cf_error::invalid_string('html');
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  $library = libraries_load('phpwkhtmltopdf');
+  if ($library === FALSE || empty($library['loaded'])) {
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  // Reconstruct the HTML output.
   $cf_dom = new cf_dom(TRUE, TRUE, TRUE, $html);
-
-  // remove all tags with no-print
-  // this is a workaround for mPDF.
-  $all_tags = $cf_dom->get_dom()->getElementsByTagName('*');
-  $remove_tags = array();
-  foreach ($all_tags as $tag) {
-    if (!$tag->hasAttribute('class')) continue;
-
-    $class = $tag->getAttribute('class');
-
-    if (preg_match('/no-print/i', $class)) {
-      $remove_tags[] = $tag;
-    }
-  }
-
-  while (!empty($remove_tags)) {
-    $remove_tag = array_pop($remove_tags);
-    $parent_tag = $remove_tag->parentNode;
-    $parent_tag->removeChild($remove_tag);
-    unset($remove_tag);
-  }
 
   $meta_tags = $cf_dom->get_body()->getElementsByTagName('meta');
   $style_tags = $cf_dom->get_body()->getElementsByTagName('style');
@@ -752,14 +764,21 @@ function mcneese_event_workflow_event_pdf_0_page($id, $mode) {
         $match = array_pop($matched);
 
         foreach ($match as $m) {
-          // skip past css includes that are not needed and may cause problems and will increase renderring time
+          // skip past css uneeded css
           if ($media == 'all') {
             $parts = explode('/', $m);
+            if (!isset($parts[4])) {
+              continue;
+            }
+            if ($parts[3] == 'system') {
+            }
+
             if (isset($parts[5])) {
-              if ($parts[5] == 'jquery_update') {
-                continue;
+              if ($parts[5] == 'mcneese') {
               }
-              if (isset($parts[5]) && $parts[5] == 'ldap') {
+              elseif ($parts[5] == 'mcneese_event_workflow') {
+              }
+              else {
                 continue;
               }
             }
@@ -785,20 +804,12 @@ function mcneese_event_workflow_event_pdf_0_page($id, $mode) {
       }
     }
     else {
-      # the custom css crashes the PDF generator! (infinite loop, out of memory..)
-      #$head_markup .= $cf_dom->get_dom()->saveHTML($tag) . "\n";
+      $head_markup .= $cf_dom->get_dom()->saveHTML($tag) . "\n";
     }
   }
 
-  // load the pdf workaround css.
-  // The mPDF library does not properly support CSS.
-  // The workaround includes alternate forms of CSS that are, while problematic, are sufficient for printing the PDF.
-  // This require the mcneese_event_workflow theme.
-  $mcneese_event_workflow_theme_path = drupal_get_path('theme', 'mcneese_event_workflow');
-  $workaround_css = DRUPAL_ROOT . '/' . $mcneese_event_workflow_theme_path . '/css/workaround/workaround-pdf-event_form.css';
-  $content = drupal_load_stylesheet($workaround_css);
-  if (!empty($content)) {
-    $css_markup .= $content;
+  if (!empty($css_markup)) {
+    $head_markup .= '<style>' . $css_markup . '</style>';
   }
 
   // link tags
@@ -807,10 +818,7 @@ function mcneese_event_workflow_event_pdf_0_page($id, $mode) {
   }
 
   // title tags
-  foreach ($title_tags as $tag) {
-    $head_markup .= $cf_dom->get_dom()->saveHTML($tag) . "\n";
-  }
-
+  $head_markup .= '<title>Event Request #' . $id . ': ' . $event['information']['title'][0]->value . '</title>';
 
   $body_markup .= $cf_dom->get_dom()->saveHTML($main_tag) . "\n";
 
@@ -820,12 +828,9 @@ function mcneese_event_workflow_event_pdf_0_page($id, $mode) {
     $body_class .= $cf['markup_css']['body']['class'];
   }
 
-  # for debugging styles
-  #$head_markup .= '<style>' . $css_markup . '</style>';
-
   $html = '';
   $html = '<!DOCTYPE html>' . "\n";
-  $html .= '<html lang="en" dir="ltr" class="js">' . "\n";
+  $html .= '<html lang="en" dir="ltr">' . "\n";
 
   $html .= '<head>' . $head_markup . '</head>';
   $html .= '<body class="' . $body_class . '">';
@@ -843,53 +848,32 @@ function mcneese_event_workflow_event_pdf_0_page($id, $mode) {
   $html .= '</html>' . "\n";
 
 
-  #print($html);
-  #exit();
+  $wkpdf = new WkHtmlToPdf();
 
-  // Creating Instance of mPDF Class Library.
-  $mpdf = new mPDF('utf-8', 'A4');
+  // setup the default options
+  $wkpdf->setOptions(array(
+    'ignoreWarnings' => TRUE, // when not ignored, the PDF does not get generated.
+  ));
 
-  // enable PDF/A1-b compliance
-  $mpdf->PDFA = TRUE;
-  $mpdf->PDFAauto = TRUE;
+  $wkpdf->addPage($html);
 
-  // Enabling header option if available.
-  #$mpdf->SetHTMLHeader($header);
+  $fixed_title = preg_replace('/\W/i', '_', $event['information']['title'][0]->value);
+  $filename = sprintf("%'010s", $id) . '-event_request-' . $fixed_title . '.pdf';
 
-  // Enabling Footer option if available.
-  #$mpdf->SetHTMLFooter($footer);
+  // save the file, locally.
+  #$wkpdf->saveAs('/tmp/' . $filename);
 
-  // Setting Title to PDF.
-  $mpdf->SetTitle($page_title);
+  // send to the browser
+  #$result = $wkpdf->send($filename, TRUE);
 
-  // Setting Author to PDF.
-  $mpdf->SetAuthor($author);
+  // send as a download
+  $result = $wkpdf->send($filename, FALSE);
 
-  // Setting Subject to PDF.
-  $mpdf->SetSubject("Facilities Use and Special Event Request Form");
+  if (!$result) {
+    watchdog('mew', "Error occured while generating the PDF of event @id: @error", array('@id' => $id, '@error' => $wkpdf->getError()), WATCHDOG_ERROR);
+  }
 
-  // Setting creator to PDF.
-  $mpdf->SetCreator("McNeese State University");
-
-  // Setting Password to PDF.
-  #$mpdf->SetProtection(array('print', 'copy'), $password, $password);
-
-  // show a progress bar
-  #$mpdf->StartProgressBarOutput(2);
-
-  // write the CSS stylesheets
-  $mpdf->WriteHTML($css_markup, 1);
-
-  // Writing html content for pdf buffer.
-  $mpdf->WriteHTML($html, 2);
-
-  // Generating PDF File.
-  // Open in same browser.
-  #$mpdf->Output($filename . '.pdf', 'I');
-  // Dialog box for Download as PDF.
-  $mpdf->Output($page_title . '.pdf', 'D');
-
-  drupal_exit();
+  exit();
 }
 
 /**
