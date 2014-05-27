@@ -818,6 +818,7 @@ function mcneese_event_workflow_event_pdf_0_page_using_wkhtmltopdf($id, $mode, $
   }
 
   // title tags
+  $page_title = "Event Request: " . $event['information']['title'][0]->value;
   $head_markup .= '<title>Event Request #' . $id . ': ' . $event['information']['title'][0]->value . '</title>';
 
   $body_markup .= $cf_dom->get_dom()->saveHTML($main_tag) . "\n";
