@@ -1,0 +1,21 @@
+<?php
+
+function phpwkhtmltopdf_libraries_info() {
+  return array(
+    'phpwkhtmltopdf' => array(
+      'name' => 'PHPWkHtmlToPdf',
+      'vendor url' => 'https://github.com/mikehaertl/phpwkhtmltopdf',
+      'download url' => 'https://github.com/mikehaertl/phpwkhtmltopdf/archive/1.2.1.tar.gz',
+      'version callback' => 'phpwkhtmltopdf_get_installed_version',
+      'files' => array(
+        'php' => array(
+          'WkHtmlToPdf.php'
+        ),
+      ),
+    )
+  );
+}
+
+function phpwkhtmltopdf_get_installed_version ($library) {
+  return '1.2.1';
+}
