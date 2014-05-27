@@ -136,7 +136,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $id, $mod
     $presentation = mcneese_event_workflow_secondary_table_presentation();
     $presentation_tables = mcneese_event_workflow_secondary_table_presentation(1);
 
-    foreach ($event as $field_group => &$event_array) {
+    foreach ($event as $field_group => $event_array) {
       if (isset($presentation_tables[$field_group]['event_type']) && is_array($presentation_tables[$field_group]['event_type']) && array_key_exists('hide', $presentation_tables[$field_group]['event_type'])) {
         if ($presentation_tables[$field_group]['event_type']['hide'] === TRUE) {
           if (array_key_exists('show', $presentation_tables[$field_group]['event_type'])) {
@@ -170,14 +170,18 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $id, $mod
         );
       }
 
-      foreach ($event_array as $field_name => &$field_array) {
-        $field_presentation = &$presentation[$field_group][$field_name];
+      foreach ($event_array as $field_name => $values) {
+        if (!isset($presentation[$field_group][$field_name])) {
+          continue;
+        }
+
+        $field_presentation = $presentation[$field_group][$field_name];
 
         if (!isset($field_presentation['label'])) {
           continue;
         }
 
-        if (empty($field_array)) {
+        if (empty($values)) {
           continue;
         }
 
@@ -260,7 +264,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $id, $mod
           $group_path[$group][$weight] = array();
         }
 
-        $group_path[$group][$weight][$field_name] = mcneese_event_workflow_build_event_request_item_structure($id, $group, $field_name, $field_array, $field_presentation);
+        $group_path[$group][$weight][$field_name] = mcneese_event_workflow_build_event_request_item_structure($id, $group, $field_name, $values, $field_presentation);
 
         // This can be FALSE on error or NULL when the ROW should not be displayed, so remove the field entirely.
         if ($group_path[$group][$weight][$field_name] === FALSE || is_null($group_path[$group][$weight][$field_name])) {
@@ -530,7 +534,7 @@ function mcneese_event_workflow_event_view_0_page_validate($form, &$form_state) 
 
   $clicked_id = '';
   if (isset($form_state['clicked_button']['#id'])) {
-    $clicked_id = &$form_state['clicked_button']['#id'];
+    $clicked_id = $form_state['clicked_button']['#id'];
   }
 
   if ($clicked_id == 'event-display-submit-print') {
@@ -556,7 +560,7 @@ function mcneese_event_workflow_event_view_0_page_submit($form, &$form_state) {
 
   $clicked_id = '';
   if (isset($form_state['clicked_button']['#id'])) {
-    $clicked_id = &$form_state['clicked_button']['#id'];
+    $clicked_id = $form_state['clicked_button']['#id'];
   }
 }
 
@@ -577,7 +581,7 @@ function mcneese_event_workflow_event_view_0_page_submit_pdf($form, &$form_state
 
   $clicked_id = '';
   if (isset($form_state['clicked_button']['#id'])) {
-    $clicked_id = &$form_state['clicked_button']['#id'];
+    $clicked_id = $form_state['clicked_button']['#id'];
   }
 
   $event_id = (int) $form['id']['#value'];

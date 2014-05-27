@@ -56,68 +56,98 @@ function mcneese_event_workflow_validate_event_fields($form, &$form_state) {
 
   $passed = TRUE;
   if ($form_state['values']['form']['step'] == 'standard') {
-    $start_timestamp = FALSE;
-    $stop_timestamp = FALSE;
+    $start_timestamp = array(0 => FALSE);
+    $stop_timestamp = array(0 => FALSE);
 
     if (!empty($location_state['dates']['date'])) {
-      $date_timestamp = strtotime($location_state['dates']['date']);
+      foreach ($location_state['dates']['date'] as $key => &$value) {
+        if (!array_key_exists($key, $start_timestamp)) {
+          $start_timestamp[$key] = FALSE;
+        }
 
-      if ($date_timestamp < REQUEST_TIME) {
-        form_set_error($ps_p . '][dates][date][date', t("The date '@date' is in the past and cannot be used.", array('@date' => $location_state['dates']['date'])));
-      }
-      elseif ($date_timestamp == REQUEST_TIME) {
-        form_set_error($ps_p . '][dates][date][date', t("The date '@date' is too soon, the event request process takes time.", array('@date' => $location_state['dates']['date'])));
+        if (!array_key_exists($key, $stop_timestamp)) {
+          $stop_timestamp[$key] = FALSE;
+        }
+
+        if (!empty($value) && is_string($value)) {
+          $date_timestamp = strtotime($value);
+
+          // request time and date time may have same day, but different times, so only compare day.
+          $date_string = date("Y/m/d", $date_timestamp);
+          $request_string = date("Y/m/d", REQUEST_TIME);
+
+          if ($date_string == $request_string) {
+            form_set_error($ps_p . '][dates][date][' . $key . '][date', t("The date '@date' is too soon, the event request process takes time.", array('@date' => $value)));
+          }
+          elseif ($date_timestamp < REQUEST_TIME) {
+            form_set_error($ps_p . '][dates][date][' . $key . '][date', t("The date '@date' is in the past and cannot be used.", array('@date' => $value)));
+          }
+        }
       }
     }
 
-    if (!empty($location_state['dates']['time_start']) && !empty($location_form['dates']['time_start']['#expected_format']['date'])) {
-      if (is_string($location_state['dates']['time_start'])) {
-        $start_timestamp = strtotime($location_state['dates']['time_start']);
+    if (!empty($location_state['dates']['time_start'])) {
+      foreach ($location_state['dates']['time_start'] as $key => &$value) {
+        if (!empty($value) && !empty($location_form['dates']['time_start'][$key]['#expected_format']['date'])) {
+          if (is_string($value)) {
+            $start_timestamp[$key] = strtotime($value);
 
-        if ($start_timestamp === FALSE) {
-          form_set_error($ps_p . '][dates][time_start', t("'@value' is not a valid start time.", array('@value' => $location_state['dates']['time_start'])));
+            if ($start_timestamp[$key] === FALSE) {
+              form_set_error($ps_p . '][dates][time_start][' . $key, t("'@value' is not a valid start time.", array('@value' => $value)));
+              $passed = FALSE;
+            }
+            else {
+              $value = date($location_form['dates']['time_start'][$key]['#expected_format']['date'], $start_timestamp[$key]);
+            }
+          }
+        }
+      }
+    }
+
+    if (!empty($location_state['dates']['time_stop'])) {
+      foreach ($location_state['dates']['time_stop'] as $key => &$value) {
+        if (!empty($value) && !empty($location_form['dates']['time_stop'][$key]['#expected_format']['date'])) {
+          if (is_string($value)) {
+            $stop_timestamp[$key] = strtotime($value);
+
+            if ($stop_timestamp[$key] === FALSE) {
+              form_set_error($ps_p . '][dates][time_stop][' . $key, t("'@value' is not a valid start time.", array('@value' => $value)));
+              $passed = FALSE;
+            }
+            else {
+              $value = date($location_form['dates']['time_stop'][$key]['#expected_format']['date'], $stop_timestamp[$key]);
+            }
+          }
+        }
+      }
+    }
+
+    if (!empty($start_timestamp)) {
+      foreach ($start_timestamp as $key => &$value) {
+        if ($start_timestamp[$key] !== FALSE && $stop_timestamp[$key] !== FALSE) {
+          if ($stop_timestamp[$key] < $start_timestamp[$key]) {
+            form_set_error($ps_p . '][dates][time_stop][' . $key, "The stop time cannot be before the start time.");
+            $passed = FALSE;
+          }
+          elseif ($stop_timestamp[$key] == $start_timestamp[$key]) {
+            form_set_error($ps_p . '][dates][time_stop][' . $key, "The stop time cannot be the same as the start time.");
+            $passed = FALSE;
+          }
+        }
+      }
+    }
+
+    if (!empty($location_state['dates']['time_start'])) {
+      foreach ($location_state['dates']['time_start'] as $key => &$value) {
+        if (empty($value) && !empty($location_state['dates']['time_stop'][$key])) {
+          form_set_error($ps_p . '][dates][time_start][' . $key, "If you specify a stop time, then you must specify a start time.");
           $passed = FALSE;
         }
-        else {
-          $location_state['dates']['time_start'] = date($location_form['dates']['time_start']['#expected_format']['date'], $start_timestamp);
-        }
-      }
-    }
-
-    if (!empty($location_state['dates']['time_stop']) && !empty($location_form['dates']['time_stop']['#expected_format']['date'])) {
-      if (is_string($location_state['dates']['time_stop'])) {
-        $stop_timestamp = strtotime($location_state['dates']['time_stop']);
-
-        if ($stop_timestamp === FALSE) {
-          form_set_error($ps_p . '][dates][time_stop', t("'@value' is not a valid start time.", array('@value' => $location_state['dates']['time_stop'])));
+        elseif (empty($location_state['dates']['time_stop'][$key]) && !empty($value)) {
+          form_set_error($ps_p . '][dates][time_stop][' . $key, "If you specify a start time, then you must specify a stop time.");
           $passed = FALSE;
         }
-        else {
-          $location_state['dates']['time_stop'] = date($location_form['dates']['time_stop']['#expected_format']['date'], $stop_timestamp);
-        }
       }
-    }
-
-    if ($start_timestamp !== FALSE && $stop_timestamp !== FALSE) {
-      if ($stop_timestamp < $start_timestamp) {
-        form_set_error($ps_p . '][dates][time_stop', "The stop time cannot be before the start time.");
-        $passed = FALSE;
-      }
-      elseif ($stop_timestamp == $start_timestamp) {
-        form_set_error($ps_p . '][dates][time_stop', "The stop time cannot be the same as the start time.");
-        $passed = FALSE;
-      }
-    }
-
-    if (empty($location_state['dates']['time_start']) && !empty($location_state['dates']['time_stop'])) {
-      if (!empty($location_state['dates']['time_stop'])) {
-        form_set_error($ps_p . '][dates][time_start', "If you specify a stop time, then you must specify a start time.");
-        $passed = FALSE;
-      }
-    }
-    elseif (empty($location_state['dates']['time_stop']) && !empty($location_state['dates']['time_start'])) {
-      form_set_error($ps_p . '][dates][time_stop', "If you specify a start time, then you must specify a stop time.");
-      $passed = FALSE;
     }
   }
 

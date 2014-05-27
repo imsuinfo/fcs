@@ -2031,7 +2031,7 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
  *   The name of the group the values are associated with.
  * @param string $field_name
  *   The name of the field the values are associated with.
- * @param array $field_array
+ * @param array $values
  *   An array of values associated with this field.
  * @param array $presentation
  *   A collection of variables to tweak how this value is presented.
@@ -2041,7 +2041,7 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
  *   NULL is returned when there should be no array to build.
  *   FALSE is returned on failure.
  */
-function mcneese_event_workflow_build_event_request_item_structure($request_id, $field_group, $field_name, $field_array, $presentation) {
+function mcneese_event_workflow_build_event_request_item_structure($request_id, $field_group, $field_name, $values, $presentation) {
   if (!cf_is_integer($request_id)) {
     cf_error::invalid_integer('request_id');
     return FALSE;
@@ -2057,8 +2057,8 @@ function mcneese_event_workflow_build_event_request_item_structure($request_id, 
     return FALSE;
   }
 
-  if (!is_array($field_array)) {
-    cf_error::invalid_array('field_array');
+  if (!is_array($values)) {
+    cf_error::invalid_array('values');
     return FALSE;
   }
 
@@ -2137,13 +2137,26 @@ function mcneese_event_workflow_build_event_request_item_structure($request_id, 
   );
 
   $no_values = TRUE;
-  foreach ($field_array as $delta => &$value) {
+  foreach ($values as $delta => &$value) {
     $generated = mcneese_event_workflow_build_event_request_value_structure($request_id, $field_group, $field_name, $delta, $value, $presentation);
 
     if ($generated !== FALSE && !isset($generated['no_values'])) {
+      $output['item']['values'][$delta] = array(
+        '#type' => 'container',
+        '#attributes' => array(
+          'class' => array(
+            'field-event-item-delta',
+            'field-event-item-delta-' . $class,
+            'field-event-item-delta-' . $delta,
+            'field-event-item-delta-' . $class . '-' . $delta,
+          ),
+        ),
+        '#weight' => 0,
+      );
+
       $no_values = FALSE;
       foreach ($generated as $generated_key => &$generated_value) {
-        $output['item']['values'][$generated_key] = $generated_value;
+        $output['item']['values'][$delta][$generated_key] = $generated_value;
       }
     }
 
@@ -2860,11 +2873,6 @@ function event_workflow_load_event_by_id($id) {
  *   An array of user related information:
  *   - 'user_id': The users ID.
  *   - 'banner_id: The users Banner ID.
- * @param int $delta
- *   (optional) A number representing the particular instance of a given value.
- *   For multiple fields of the same type, there can be multiple instances.
- *   Such as multiple date associated with a single field.
- *   For non-multiple values, this defaults to 0.
  * @param array|null $event
  *   (optional) When NULL, this created tables are new tables.
  *   When an array, the created tables are updates to existing values.
@@ -2873,108 +2881,166 @@ function event_workflow_load_event_by_id($id) {
  * @see mcneese_event_workflow_secondary_table_structure()
  * @see event_workflow_load_event_by_id()
  */
-function mcneese_event_workflow_build_table_structure($structure, &$structure_tables, &$structure_field_tables, $table_name, $field_name, $db_table, $db_table_field, $user_data, $values, $delta = 0, $event = NULL) {
-  $structure_field_tables[$db_table_field] = array();
-  $structure_field_tables[$db_table_field]['user_id'] = $user_data['user_id'];
-  $structure_field_tables[$db_table_field]['banner_id'] = $user_data['banner_id'];
-  $structure_field_tables[$db_table_field]['date'] = REQUEST_TIME;
-  $structure_field_tables[$db_table_field]['delta'] = $delta;
-
-  if (!is_null($event)) {
-    $event_id = $event['mer']['id'][0]->value;
-    $structure_tables[$db_table]['event_id'] = $event_id;
-    $structure_field_tables[$db_table_field]['event_id'] = $event_id;
+function mcneese_event_workflow_build_table_structure($structure, &$structure_tables, &$structure_field_tables, $table_name, $field_name, $db_table, $db_table_field, $user_data, $values, $event = NULL) {
+  if (is_null($event)) {
+    $event_id = NULL;
+    $revision = 0;
   }
   else {
-    $event_id = NULL;
+    $event_id = $event['mer']['id'][0]->value;
+    $structure_tables[$db_table]['event_id'] = $event_id;
+
+    $revision = mcneese_event_workflow_get_largest_revision($db_table_field, $event_id) + 1;
   }
 
-  $process_revision = TRUE;
-
-  if (isset($structure[$table_name][$field_name]['columns'])) {
-    foreach ($structure[$table_name][$field_name]['columns'] as $special_field_id => &$special_field_name) {
-      if (isset($values[$special_field_id]) && $values[$special_field_id] > 0) {
-        $structure_field_tables[$db_table_field][$special_field_name] = $special_field_id;
-      }
-    }
+  if (!isset($structure_field_tables[$db_table_field])) {
+    $structure_field_tables[$db_table_field] = array();
   }
-  elseif (!is_null($values)) {
-    if (array_key_exists('storage', $structure[$table_name][$field_name])) {
-      if (is_array($structure[$table_name][$field_name]['storage'])) {
-        $storage_names = array_keys($structure[$table_name][$field_name]['storage']);
-        $storage_name = reset($storage_names);
 
-        $storage_values = event_workflow_convert_value_to_database_format($values, $storage_name, $structure[$table_name][$field_name]['storage'][$storage_name]);
+  if (array_key_exists('storage', $structure[$table_name][$field_name])) {
+    if (is_array($structure[$table_name][$field_name]['storage'])) {
+      $structure_tables[$db_table][$field_name] = $revision;
 
-        if ($storage_values !== FALSE) {
-          $structure_field_tables[$db_table_field]['value'] = $storage_values;
+      $storage_names = array_keys($structure[$table_name][$field_name]['storage']);
+      $storage_name = reset($storage_names);
+
+      foreach ($values as $delta => $value) {
+        $structure_field_tables[$db_table_field][$delta] = array();
+        $structure_field_tables[$db_table_field][$delta]['user_id'] = $user_data['user_id'];
+        $structure_field_tables[$db_table_field][$delta]['banner_id'] = $user_data['banner_id'];
+        $structure_field_tables[$db_table_field][$delta]['date'] = REQUEST_TIME;
+        $structure_field_tables[$db_table_field][$delta]['delta'] = $delta;
+        $structure_field_tables[$db_table_field][$delta]['revision'] = $revision;
+
+        if (!is_null($event)) {
+          $structure_field_tables[$db_table_field][$delta]['event_id'] = $event_id;
         }
 
-        unset($storage_values);
-        unset($storage_name);
-        unset($storage_names);
+        $storage_values = event_workflow_convert_value_to_database_format($value, $storage_name, $structure[$table_name][$field_name]['storage'][$storage_name]);
+
+        if ($storage_values !== FALSE && !is_null($storage_values)) {
+          $structure_field_tables[$db_table_field][$delta]['value'] = $storage_values;
+        }
       }
-      else {
-        // alternate is used for handling fields that are stored in multiple separate tables.
-        if ($structure[$table_name][$field_name]['storage'] == 'alternate' && array_key_exists('alternate', $structure[$table_name][$field_name])) {
-          $process_revision = FALSE;
+    }
+    else {
+      // alternate is used for handling fields that are stored in multiple separate tables.
+      if ($structure[$table_name][$field_name]['storage'] == 'alternate' && array_key_exists('alternate', $structure[$table_name][$field_name])) {
+        unset($structure_tables[$db_table][$field_name]);
+        unset($structure_field_tables[$db_table_field]);
+      }
 
-          unset($structure_tables[$db_table][$field_name]);
-          unset($structure_field_tables[$db_table_field]);
-
-          $alternate_values = array();
-          if (!empty($structure[$table_name][$field_name]['alternate_method'])) {
-            foreach ($structure[$table_name][$field_name]['alternate_method'] as $method_name => $method_values) {
-              if ($method_name == 'explode') {
-                $alternate_values = explode($method_values[0], $values, $method_values[1]);
-              }
-              break;
+      foreach ($values as $delta => $value) {
+        $alternate_values = array();
+        if (!empty($structure[$table_name][$field_name]['alternate_method'])) {
+          foreach ($structure[$table_name][$field_name]['alternate_method'] as $method_name => $method_values) {
+            if ($method_name == 'explode') {
+              $alternate_values = explode($method_values[0], $value, $method_values[1]);
             }
+            break;
           }
+        }
 
-          foreach ($structure[$table_name][$field_name]['alternate'] as $alternate_name => &$alternate_data) {
-            if (!array_key_exists('key', $alternate_data)) continue;
+        foreach ($structure[$table_name][$field_name]['alternate'] as $alternate_name => &$alternate_data) {
+          if (!array_key_exists('key', $alternate_data)) continue;
 
-            $db_table_field = 'mew_field_' . $table_name . '_' . $alternate_name;
+          $db_table_field = 'mew_field_' . $table_name . '_' . $alternate_name;
 
+          if (!isset($structure_field_tables[$db_table_field])) {
             $structure_field_tables[$db_table_field] = array();
-            $structure_field_tables[$db_table_field]['user_id'] = $user_data['user_id'];
-            $structure_field_tables[$db_table_field]['banner_id'] = $user_data['banner_id'];
-            $structure_field_tables[$db_table_field]['date'] = REQUEST_TIME;
-            $structure_field_tables[$db_table_field]['value'] = isset($alternate_values[$alternate_data['key']]) ? $alternate_values[$alternate_data['key']] : NULL;
-            $structure_field_tables[$db_table_field]['delta'] = $delta;
-
-            if (is_null($event_id)) {
-              $revision = 0;
-            }
-            else {
-              $revision = $event[$table_name][$alternate_name][$delta]->revision +1;
-              $structure_field_tables[$db_table_field]['event_id'] = $event_id;
-            }
-
-            $structure_tables[$db_table][$alternate_name] = $revision;
-
-            $structure_field_tables[$db_table_field]['revision'] = $revision;
           }
+
+          $structure_field_tables[$db_table_field][$delta] = array();
+          $structure_field_tables[$db_table_field][$delta]['user_id'] = $user_data['user_id'];
+          $structure_field_tables[$db_table_field][$delta]['banner_id'] = $user_data['banner_id'];
+          $structure_field_tables[$db_table_field][$delta]['date'] = REQUEST_TIME;
+          $structure_field_tables[$db_table_field][$delta]['delta'] = $delta;
+          $structure_field_tables[$db_table_field][$delta]['revision'] = $revision;
+
+          if (isset($alternate_values[$alternate_data['key']]) && (is_numeric($alternate_values[$alternate_data['key']]) || !empty($alternate_values[$alternate_data['key']]))) {
+            $structure_field_tables[$db_table_field][$delta]['value'] = $alternate_values[$alternate_data['key']];
+          }
+
+          if (!is_null($event_id)) {
+            $structure_field_tables[$db_table_field][$delta]['event_id'] = $event_id;
+          }
+
+          $structure_tables[$db_table][$alternate_name] = $revision;
         }
       }
     }
-    else {
-      $structure_field_tables[$db_table_field]['value'] = $values;
-    }
   }
-
-  if ($process_revision) {
-    if (is_null($event)) {
-      $revision = 0;
-    }
-    else {
-      $revision = $event[$table_name][$field_name][$delta]->revision +1;
-    }
-
-    $structure_field_tables[$db_table_field]['revision'] = $revision;
+  else {
     $structure_tables[$db_table][$field_name] = $revision;
+
+    foreach ($values as $delta => $value) {
+      $structure_field_tables[$db_table_field][$delta] = array();
+      $structure_field_tables[$db_table_field][$delta]['user_id'] = $user_data['user_id'];
+      $structure_field_tables[$db_table_field][$delta]['banner_id'] = $user_data['banner_id'];
+      $structure_field_tables[$db_table_field][$delta]['date'] = REQUEST_TIME;
+      $structure_field_tables[$db_table_field][$delta]['delta'] = $delta;
+      $structure_field_tables[$db_table_field][$delta]['revision'] = $revision;
+
+      if (!is_null($event)) {
+        $structure_field_tables[$db_table_field][$delta]['event_id'] = $event_id;
+      }
+
+      if (isset($structure[$table_name][$field_name]['columns'])) {
+        foreach ($structure[$table_name][$field_name]['columns'] as $special_field_id => &$special_field_name) {
+          if (isset($value[$special_field_id]) && $value[$special_field_id] > 0) {
+            $structure_field_tables[$db_table_field][$delta][$special_field_name] = $special_field_id;
+          }
+        }
+      }
+      elseif (is_numeric($value) || !empty($value)) {
+        $structure_field_tables[$db_table_field][$delta]['value'] = $value;
+      }
+    }
   }
+}
+
+/**
+ * Gets the largest revision number available.
+ *
+ * Revisions are on a per-event, per-field basis.
+ *
+ * @param string $table_field_name
+ *   Name of the table with the appropraite revision column.
+ * @param int $id
+ *   The unique Event ID of the event to get the revision available.
+ *
+ * @return int|FALSE
+ *   The revision number or FALSE on failure.
+ */
+function mcneese_event_workflow_get_largest_revision($table_field_name, $id) {
+  if (!is_string($table_field_name)) {
+    cf_error::invalid_string('table_field_name');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($id)) {
+    cf_error::invalid_integer('id');
+    return FALSE;
+  }
+
+  try {
+    $query = db_select($table_field_name, 'tfn');
+    $query->fields('tfn', array('revision'));
+    $query->condition('tfn.event_id', $id);
+    $query->orderBy('tfn.revision', 'DESC');
+    $query->range(0, 1);
+
+    $executed = $query->execute();
+    $result = $executed->fetchField();
+
+    return $result;
+  }
+  catch (Exception $ex) {
+    cf_error::on_exception($ex);
+    return FALSE;
+  }
+
+  return FALSE;
 }
 
 /**

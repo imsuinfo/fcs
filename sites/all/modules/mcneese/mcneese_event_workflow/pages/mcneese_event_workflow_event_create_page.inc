@@ -167,14 +167,19 @@ function mcneese_event_workflow_event_create_0_form($form, &$form_state, $classi
 function mcneese_event_workflow_event_create_0_form_pre_validate(&$form, &$form_state) {
   $clicked_id = '';
   if (isset($form_state['clicked_button']['#id'])) {
-    $clicked_id = &$form_state['clicked_button']['#id'];
+    $clicked_id = $form_state['clicked_button']['#id'];
   }
 
   if (empty($form_state['values']['form']['step'])) {
     return;
   }
 
-  if ($clicked_id == 'submit-event-prev') {
+  $dont_validate = array(
+    'submit-event-prev' => TRUE,
+    'submit-event-add-date' => TRUE,
+  );
+
+  if (array_key_exists($clicked_id, $dont_validate)) {
     if (!empty($form_state['conditionally_required'][0])) {
       foreach ($form_state['conditionally_required'][0] as $field) {
         if (is_string($field)) {
@@ -192,11 +197,17 @@ function mcneese_event_workflow_event_create_0_form_pre_validate(&$form, &$form_
             $location = &$location[$part];
           }
 
-          if ($found && array_key_exists('#required', $location)) {
-            if (isset($location['#options'])) {
-              $location['#options'][''] = '';
+          if ($found && !empty($location)) {
+            foreach ($location as $delta => &$location_field) {
+              if (!is_numeric($delta)) continue;
+
+              if (array_key_exists('#required', $location_field)) {
+                if (isset($location['#options'])) {
+                  $location_field['#options'][''] = '';
+                }
+                $location_field['#required'] = FALSE;
+              }
             }
-            $location['#required'] = FALSE;
           }
         }
       }
@@ -222,15 +233,20 @@ function mcneese_event_workflow_event_create_0_form_validate($form, &$form_state
 
   $clicked_id = '';
   if (isset($form_state['clicked_button']['#id'])) {
-    $clicked_id = &$form_state['clicked_button']['#id'];
+    $clicked_id = $form_state['clicked_button']['#id'];
   }
 
   if (empty($form_state['values']['form']['step'])) {
     form_set_error('form][step', "An internal error occured. Form Step is not defined. Please contact the System Administer.");
   }
 
-  // perform validation when not going backwards.
-  if ($clicked_id != 'submit-event-prev') {
+  // perform validation when not going backwards or adding fields.
+  $dont_validate = array(
+    'submit-event-prev' => TRUE,
+    'submit-event-add-date' => TRUE,
+  );
+
+  if (!array_key_exists($clicked_id, $dont_validate)) {
     $module_path = drupal_get_path('module', 'mcneese_event_workflow');
     require_once($module_path . '/includes/mcneese_event_workflow_event_validation.inc');
 
@@ -261,28 +277,40 @@ function mcneese_event_workflow_event_create_0_form_validate($form, &$form_state
       }
     }
     elseif ($form_state['values']['form']['step'] == 'standard') {
-      // when classification is readonly, ensure that no change happens.
-      if ($form_state['values']['event']['coordinator']['classification']) {
+      // when classification is readonly, ensure that no changes happen.
+      if ($form_state['values']['event']['coordinator']['classification'][0]) {
         if (isset($form['event']['coordinator']['classification']['#value'])) {
-          $form_state['values']['event']['coordinator']['classification'] = $form['event']['coordinator']['classification']['#value'];
+          $form_state['values']['event']['coordinator']['classification'][0] = $form['event']['coordinator']['classification'][0]['#value'];
         }
       }
 
       if ($clicked_id == 'submit-event-prev') {
         $form_state['values']['form']['step'] = 'rooms';
       }
+      elseif ($clicked_id == 'submit-event-add-date') {
+        $next_date = count($form_state['values']['event']['dates']['date']);
+        $form_state['values']['event']['dates']['date'][$next_date] = NULL;
+        $form_state['values']['event']['dates']['time_start'][$next_date] = NULL;
+        $form_state['values']['event']['dates']['time_stop'][$next_date] = NULL;
+      }
+      elseif ($clicked_id == 'submit-event-remove-date') {
+        $prev_date = count($form_state['values']['event']['dates']['date']) - 1;
+        unset($form_state['values']['event']['dates']['date'][$prev_date]);
+        unset($form_state['values']['event']['dates']['time_start'][$prev_date]);
+        unset($form_state['values']['event']['dates']['time_stop'][$prev_date]);
+      }
       else {
-        if (empty($form_state['values']['event']['information']['type'])) {
-          form_set_error('event][information][type', "The <strong>" . $form['event']['information']['type']['#title'] . "</strong> is required.");
+        if (empty($form_state['values']['event']['information']['type'][0])) {
+          form_set_error('event][information][type][0', "The <strong>" . $form['event']['information']['type'][0]['#title'] . "</strong> is required.");
         }
         else {
-          $type_term = taxonomy_term_load($form_state['values']['event']['information']['type']);
+          $type_term = taxonomy_term_load($form_state['values']['event']['information']['type'][0]);
 
           if (is_object($type_term)) {
             $form_state['values']['form']['step'] = 'details';
           }
           else {
-            form_set_error('event][information][type', "An invalid <strong>" . $form['event']['information']['type']['#title'] . "</strong> is has been selected.");
+            form_set_error('event][information][type][0', "An invalid <strong>" . $form['event']['information']['type'][0]['#title'] . "</strong> is has been selected.");
           }
         }
       }
@@ -336,6 +364,9 @@ function mcneese_event_workflow_event_create_0_form_submit($form, &$form_state) 
   $mew_event_states['delta'] = 0;
   $mew_event_states['state'] = 0;
 
+  $mew_event_revisions = array();
+  $mew_event_revisions['date'] = REQUEST_TIME;
+
   $workflow_states = event_workflow_get_workflow_states_tree();
   foreach ($workflow_states as $state_id => &$state_name) {
     if ($state_name == 'new') {
@@ -385,7 +416,7 @@ function mcneese_event_workflow_event_create_0_form_submit($form, &$form_state) 
         }
       }
 
-      mcneese_event_workflow_build_table_structure($structure, $structure_tables, $structure_field_tables, $table_name, $field_name, $db_table, $db_table_field, $user_data, $current, $delta);
+      mcneese_event_workflow_build_table_structure($structure, $structure_tables, $structure_field_tables, $table_name, $field_name, $db_table, $db_table_field, $user_data, $current);
     }
   }
 
@@ -410,15 +441,23 @@ function mcneese_event_workflow_event_create_0_form_submit($form, &$form_state) 
     $query->fields($mew_event_states);
     $query->execute();
 
-    foreach ($structure_field_tables as $table_name => &$fields) {
-      $fields['event_id'] = $event_id;
+    $mew_event_revisions['event_id'] = $event_id;
 
-      $query = db_insert($table_name);
-      $query->fields($fields);
-      $query->execute();
+    $query = db_insert('mew_event_revisions');
+    $query->fields($mew_event_revisions);
+    $query->execute();
+
+    foreach ($structure_field_tables as $table_name => $fields) {
+      foreach ($fields as $delta => $values) {
+        $values['event_id'] = $event_id;
+
+        $query = db_insert($table_name);
+        $query->fields($values);
+        $query->execute();
+      }
     }
 
-    foreach ($structure_tables as $table_name => &$fields) {
+    foreach ($structure_tables as $table_name => $fields) {
       $fields['event_id'] = $event_id;
 
       $query = db_insert($table_name);
