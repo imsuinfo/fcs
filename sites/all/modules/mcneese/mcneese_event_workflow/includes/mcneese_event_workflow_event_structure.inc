@@ -124,6 +124,8 @@ function mcneese_event_workflow_get_event_fields($form, &$form_state) {
     return array();
   }
 
+  mcneese_event_workflow_include(4);
+
   $ps = NULL;
 
   if (!isset($form_state['values']['event'])) {
@@ -157,13 +159,20 @@ function mcneese_event_workflow_get_event_fields($form, &$form_state) {
     }
   }
 
-
   if (!isset($form['form']['sections']['#value']) || !is_array($form['form']['sections']['#value'])) {
     $form['form']['sections'] = array(
       '#type' => 'value',
       '#value' => mcneese_event_workflow_get_event_section_information(),
     );
   }
+
+
+  // Fieldset: Status
+  mcneese_event_workflow_get_event_field_status($form, $form_state, $fields, $ps);
+
+
+  // Fieldset: State
+  mcneese_event_workflow_get_event_field_state($form, $form_state, $fields, $ps);
 
 
   // Fieldset: Location
@@ -530,6 +539,91 @@ function mcneese_event_workflow_get_event_fields($form, &$form_state) {
   }
 
   return $fields;
+}
+
+/**
+ * Process and build a specific form field.
+ */
+function mcneese_event_workflow_get_event_field_status($form, &$form_state, &$fields, $ps) {
+  $values = array(0 => MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_LOCKED);
+
+  if (empty($form_state['values']['event']['status'])) {
+    if (isset($form['form']['existing']['#value']['event']['status'])) {
+      $form['form']['status']['#value'] = $form['form']['existing']['#value']['event']['status'];
+    }
+  }
+  else {
+    $values = $form_state['values']['event']['status'];
+  }
+
+  $fields['status'] = array(
+    '#id' => 'field-event-status',
+    '#type' => 'container',
+    '#tree' => TRUE,
+    '#attributes' => array(
+      'class' => array(
+        'form-item-wrapper',
+      ),
+    ),
+  );
+
+  foreach ($values as $key => $value) {
+    $fields['status'][$key] = array(
+      '#id' => 'field-event-status-' . $key,
+      '#type' => 'value',
+      '#value' => $value,
+    );
+  }
+
+  return $values;
+}
+
+/**
+ * Process and build a specific form field.
+ */
+function mcneese_event_workflow_get_event_field_state($form, &$form_state, &$fields, $ps) {
+  $values = array(0 => NULL);
+
+  if (empty($form_state['values']['event']['state'])) {
+    if (isset($form['form']['existing']['#value']['event']['state'])) {
+      $form['form']['state']['#value'] = $form['form']['existing']['#value']['event']['state'];
+    }
+    else {
+      mcneese_event_workflow_include(4);
+
+      $workflow_states = event_workflow_get_workflow_states_list_options();
+      foreach ($workflow_states as $state_id => &$state_name) {
+        if ($state_name == 'new') {
+          $form['form']['state']['#value'] = array($state_id);
+          break;
+        }
+      }
+    }
+  }
+  else {
+    $values = $form_state['values']['event']['state'];
+  }
+
+  $fields['state'] = array(
+    '#id' => 'field-event-state',
+    '#type' => 'container',
+    '#tree' => TRUE,
+    '#attributes' => array(
+      'class' => array(
+        'form-item-wrapper',
+      ),
+    ),
+  );
+
+  foreach ($values as $key => $value) {
+    $fields['state'][$key] = array(
+      '#id' => 'field-event-state-' . $key,
+      '#type' => 'value',
+      '#value' => $value,
+    );
+  }
+
+  return $values;
 }
 
 /**
@@ -1224,7 +1318,7 @@ function mcneese_event_workflow_get_event_field_plans_audience($form, &$form_sta
   );
 
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('plans', $form['form']['sections']['#value'])) {
-    $audience_options = event_workflow_get_audience_list_options();
+    $audience_options = event_workflow_get_audience_list_options('select');
 
     foreach ($values as $key => $value) {
       $fields['plans']['audience'][$key] = array(
@@ -4514,7 +4608,7 @@ function mcneese_event_workflow_get_event_field_information_type($form, &$form_s
   );
 
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('information', $form['form']['sections']['#value'])) {
-    $type_options = event_workflow_get_information_type_list_options();
+    $type_options = event_workflow_get_information_type_list_options('select');
 
     foreach ($values as $key => $value) {
       $fields['information']['type'][$key] = array(
@@ -4722,14 +4816,15 @@ function event_workflow_get_event_existing_values($event) {
               if (property_exists($field_object, 'value')) {
                 $current[$field_key] = $field_object->value;
 
-                if (!empty($field_structure['storage'])) {
-                  foreach ($field_structure['storage'] as $storage_method => &$storage_options) {
-                    $converted = event_workflow_convert_value_from_database_format($current[$field_key], $storage_method, $storage_options);
+                if (array_key_exists('storage', $field_structure) && is_string($field_structure['storage']) && !empty($field_structure['storage'])) {
+                  $storage_method = $field_structure['storage'];
+
+                  if (array_key_exists($storage_method, $field_structure) && is_array($field_structure[$storage_method])) {
+                    $converted = event_workflow_convert_value_from_database_format($current[$field_key], $storage_method, $field_structure[$storage_method]);
+
                     if ($converted !== FALSE) {
                       $current[$field_key] = $converted;
                     }
-
-                    break;
                   }
                 }
               }
@@ -4746,14 +4841,15 @@ function event_workflow_get_event_existing_values($event) {
                 if (property_exists($field_object, $column_name)) {
                   $current[$field_key][$column_id] = $field_object->$column_name;
 
-                  if (!empty($field_structure['storage'])) {
-                    foreach ($field_structure['storage'] as $storage_method => &$storage_options) {
-                      $converted = event_workflow_convert_value_from_database_format($current[$field_key][$column_id], $storage_method, $storage_options);
+                  if (array_key_exists('storage', $field_structure) && is_string($field_structure['storage']) && !empty($field_structure['storage'])) {
+                    $storage_method = $field_structure['storage'];
+
+                    if (array_key_exists($storage_method, $field_structure) && is_array($field_structure[$storage_method])) {
+                      $converted = event_workflow_convert_value_from_database_format($current[$field_key][$column_id], $storage_method, $field_structure[$storage_method]);
+
                       if ($converted !== FALSE) {
                         $current[$field_key][$column_id] = $converted;
                       }
-
-                      break;
                     }
                   }
                 }

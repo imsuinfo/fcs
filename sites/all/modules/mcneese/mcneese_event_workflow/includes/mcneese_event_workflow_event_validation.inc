@@ -90,7 +90,7 @@ function mcneese_event_workflow_validate_event_fields($form, &$form_state) {
       foreach ($location_state['dates']['time_start'] as $key => &$value) {
         if (!empty($value) && !empty($location_form['dates']['time_start'][$key]['#expected_format']['date'])) {
           if (is_string($value)) {
-            $start_timestamp[$key] = strtotime($value);
+            $start_timestamp[$key] = strtotime($value, $date_timestamp);
 
             if ($start_timestamp[$key] === FALSE) {
               form_set_error($ps_p . '][dates][time_start][' . $key, t("'@value' is not a valid start time.", array('@value' => $value)));
@@ -108,7 +108,7 @@ function mcneese_event_workflow_validate_event_fields($form, &$form_state) {
       foreach ($location_state['dates']['time_stop'] as $key => &$value) {
         if (!empty($value) && !empty($location_form['dates']['time_stop'][$key]['#expected_format']['date'])) {
           if (is_string($value)) {
-            $stop_timestamp[$key] = strtotime($value);
+            $stop_timestamp[$key] = strtotime($value, $date_timestamp);
 
             if ($stop_timestamp[$key] === FALSE) {
               form_set_error($ps_p . '][dates][time_stop][' . $key, t("'@value' is not a valid start time.", array('@value' => $value)));

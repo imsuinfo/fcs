@@ -55,6 +55,23 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $id, $mod
     $pdf = FALSE;
   }
 
+  // if cancelling the event, return only the cancellation confirmation form.
+  if (isset($form_state['cancel_was_clicked'])) {
+    mcneese_event_workflow_include(5);
+
+    $cancel_form = array();
+    $cancel_form_state = array();
+    return mcneese_event_workflow_event_cancel_0_form($cancel_form, $cancel_form_state, $id);
+  }
+  // if uncancelling the event, return only the uncancellation confirmation form.
+  elseif (isset($form_state['uncancel_was_clicked'])) {
+    mcneese_event_workflow_include(5);
+
+    $cancel_form = array();
+    $cancel_form_state = array();
+    return mcneese_event_workflow_event_uncancel_0_form($cancel_form, $cancel_form_state, $id);
+  }
+
   $show_display = TRUE;
   if ($mode == 1) {
     // @todo: disable other items once they exist.
@@ -149,6 +166,8 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $id, $mod
     );
 
     $fields_count = array('top' => 0, 'group' => array());
+
+    mcneese_event_workflow_include(0);
 
     $presentation = mcneese_event_workflow_secondary_table_presentation();
     $presentation_tables = mcneese_event_workflow_secondary_table_presentation(1);
@@ -399,6 +418,33 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $id, $mod
         '#weight' => 1000,
       );
 
+      if (mcneese_event_workflow_management_page_event_access('cancel', $id)) {
+        $form['display']['submit']['cancel'] = array(
+          '#id' => 'event-display-submit-cancel',
+          '#type' => 'submit',
+          '#value' => t("Cancel"),
+          '#attributes' => array(
+            'class' => array(
+              'no-print',
+              'event-display-submit-cancel',
+            ),
+          ),
+        );
+      }
+      elseif (mcneese_event_workflow_management_page_event_access('uncancel', $id)) {
+        $form['display']['submit']['uncancel'] = array(
+          '#id' => 'event-display-submit-uncancel',
+          '#type' => 'submit',
+          '#value' => t("Uncancel"),
+          '#attributes' => array(
+            'class' => array(
+              'no-print',
+              'event-display-submit-uncancel',
+            ),
+          ),
+        );
+      }
+
       $form['display']['submit']['print'] = array(
         '#id' => 'event-display-submit-print',
         '#type' => 'submit',
@@ -560,6 +606,14 @@ function mcneese_event_workflow_event_view_0_page_validate($form, &$form_state) 
   elseif ($clicked_id == 'event-display-submit-download') {
     // nothing to be done here.
   }
+  elseif ($clicked_id == 'event-display-submit-cancel') {
+    $form_state['cancel_was_clicked'] = TRUE;
+    $form_state['rebuild'] = TRUE;
+  }
+  elseif ($clicked_id == 'event-display-submit-uncancel') {
+    $form_state['uncancel_was_clicked'] = TRUE;
+    $form_state['rebuild'] = TRUE;
+  }
 }
 
 /**
@@ -578,6 +632,17 @@ function mcneese_event_workflow_event_view_0_page_submit($form, &$form_state) {
   $clicked_id = '';
   if (isset($form_state['clicked_button']['#id'])) {
     $clicked_id = $form_state['clicked_button']['#id'];
+  }
+
+  if ($clicked_id == 'event-cancel-submit-yes') {
+    $deleted = mcneese_event_workflow_include(5);
+
+    mcneese_event_workflow_event_cancel_0_form_submit($form, $form_state);
+  }
+  elseif ($clicked_id == 'event-uncancel-submit-yes') {
+    $deleted = mcneese_event_workflow_include(5);
+
+    mcneese_event_workflow_event_uncancel_0_form_submit($form, $form_state);
   }
 }
 
@@ -648,6 +713,9 @@ function mcneese_event_workflow_event_pdf_0_page($id, $mode) {
     drupal_exit();
     return array();
   }
+
+  // @todo: check to see if the user has access to the specified event.
+  //        this is a check agains the status field.
 
   if (!empty($event['information']['title'][0]->value)) {
     $page_title = "Event Request: " . $event['information']['title'][0]->value;

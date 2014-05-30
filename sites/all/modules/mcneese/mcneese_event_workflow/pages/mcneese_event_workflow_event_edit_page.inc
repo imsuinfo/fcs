@@ -100,8 +100,14 @@ function mcneese_event_workflow_event_edit_0_form_ctools($id, $target_section) {
  * @see ctools_include()
  */
 function mcneese_event_workflow_event_edit_0_form($form, &$form_state, $id, $target_section = NULL) {
+  // force the page to load the view page when only the id is specified.
+  if (is_null($target_section)) {
+    drupal_goto('events/view-0/' . $id, array('query' => drupal_get_query_parameters()));
+    return '';
+  }
+
   if (!cf_is_integer($id)) {
-    watchdog('mew', "The ID @id is not a valid id.", array('@id' => $id), WATCHDOG_ERROR);
+    cf_error::invalid_integer('id');
 
     if (array_key_exists('mcneese_event_workflow_event_edit_0_form_ctools', $form_state)) {
       $commands[] = ctools_modal_command_dismiss();
@@ -132,8 +138,7 @@ function mcneese_event_workflow_event_edit_0_form($form, &$form_state, $id, $tar
     }
   }
 
-  $module_path = drupal_get_path('module', 'mcneese_event_workflow');
-  require_once($module_path . '/includes/mcneese_event_workflow_event_structure.inc');
+  mcneese_event_workflow_include(1);
 
   $section_information = mcneese_event_workflow_get_event_section_information();
 
@@ -398,6 +403,9 @@ function mcneese_event_workflow_event_edit_0_form_validate($form, &$form_state) 
     return;
   }
 
+  $event = $form['form']['event']['#value'];
+  $event_id = (int) $event['mer']['id'][0]->value;
+
   if ($clicked_id == 'submit-event-cancel') {
     if (isset($form_state['ajax'])) {
       // ajax method of cancelling
@@ -434,8 +442,7 @@ function mcneese_event_workflow_event_edit_0_form_validate($form, &$form_state) 
   );
 
   if (!array_key_exists($clicked_id, $dont_validate)) {
-    $module_path = drupal_get_path('module', 'mcneese_event_workflow');
-    require_once($module_path . '/includes/mcneese_event_workflow_event_validation.inc');
+    mcneese_event_workflow_include(2);
 
     $no_problems = mcneese_event_workflow_validate_event_fields($form, $form_state);
     if (is_null($no_problems)) {
@@ -480,6 +487,55 @@ function mcneese_event_workflow_event_edit_0_form_validate($form, &$form_state) 
           unset($form_state['values']['event']['dates']['time_stop'][$prev_date]);
         }
         else {
+          $room_list = explode('_', $form_state['values']['event']['room_list'][0], 3);
+          $date = $form_state['values']['event']['dates']['date'];
+          $time_start = $form_state['values']['event']['dates']['time_start'];
+          $time_stop = $form_state['values']['event']['dates']['time_stop'];
+
+          foreach ($date as $key => $d) {
+            $v = event_workflow_convert_value_to_database_format($d, 'date_popup', array('view' => 'Y/m/d'), $form_state, $key);
+
+            if ($v === FALSE) {
+              unset($date[$key]);
+              unset($time_start[$key]);
+              unset($time_stop[$key]);
+            }
+            else {
+              $date[$key] = $v;
+
+              $v = event_workflow_convert_value_to_database_format($time_start[$key], 'timestamp', array('view' => 'h:ia', 'relative_to' => 'event][dates][date'), $form_state, $key);
+              if ($v === FALSE) {
+                $time_start[$key] = NULL;
+                $time_stop[$key] = NULL;
+              }
+              else {
+                $time_start[$key] = $v;
+
+                $v = event_workflow_convert_value_to_database_format($time_stop[$key], 'timestamp', array('view' => 'h:ia', 'relative_to' => 'event][dates][date'), $form_state, $key);
+                if ($v === FALSE) {
+                  $time_start[$key] = NULL;
+                  $time_stop[$key] = NULL;
+                }
+                else {
+                  $time_stop[$key] = $v;
+                }
+              }
+            }
+
+            unset($v);
+          }
+
+          $events_using_room = mcneese_event_workflow_check_room_availability($room_list[0], $room_list[1], $room_list[2], $date, $time_start, $time_stop, $event_id);
+
+          unset($room_list);
+          unset($date);
+          unset($time_start);
+          unset($time_stop);
+
+          if (!empty($events_using_room)) {
+            mcneese_event_workflow_display_room_unavailable_message();
+          }
+
           if (empty($form_state['values']['event']['information']['type'][0])) {
             form_set_error('event][information][type][0', "The <strong>" . $form['event']['information']['type'][0]['#title'] . "</strong> is required.");
           }
@@ -565,11 +621,6 @@ function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
 
   $user_data = array();
   $user_data['user_id'] = (int) $user->uid;
-  $user_data['banner_id'] = NULL;
-
-  if (!empty($user->field_user_banner_id['und'][0]['value'])) {
-    $user_data['banner_id'] = (int) $user->field_user_banner_id['und'][0]['value'];
-  }
 
   $mew_event_requests = array();
   $mew_event_requests['updated'] = REQUEST_TIME;
@@ -577,6 +628,8 @@ function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
   $mew_event_revisions = array();
   $mew_event_revisions['event_id'] = $event_id;
   $mew_event_revisions['date'] = REQUEST_TIME;
+
+  mcneese_event_workflow_include(0);
 
   $structure = mcneese_event_workflow_secondary_table_structure();
   $structure_tables = array();
@@ -631,7 +684,7 @@ function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
 
       $db_table_field = 'mew_field_' . $table_name . '_' . $field_name;
 
-      mcneese_event_workflow_build_table_structure($structure, $structure_tables, $structure_field_tables, $table_name, $field_name, $db_table, $db_table_field, $user_data, $current_new, $event);
+      mcneese_event_workflow_build_table_structure($structure, $structure_tables, $structure_field_tables, $table_name, $field_name, $db_table, $db_table_field, $user_data, $current_new, $form_state, $event);
     }
   }
 
@@ -645,12 +698,6 @@ function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
       $query->condition('id', (int) $event_id);
       $query->fields($mew_event_requests);
       $query->execute();
-
-      if (!is_numeric($event_id) || $event_id <= 0) {
-        // the event was not properly saved, present an error here.
-        $transaction->rollback();
-        return FALSE;
-      }
 
       $query = db_insert('mew_event_revisions');
       $query->fields($mew_event_revisions);
@@ -676,17 +723,14 @@ function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
     }
     catch (Exception $e) {
       $transaction->rollback();
-
-      if (class_exists('cf_error')) {
-        cf_error::on_query_execution($e);
-      }
+      cf_error::on_query_execution($e);
 
       $failure = TRUE;
     }
 
     if ($failure) {
       form_set_error('form', "An error occurred while trying to save the event request. Please contact the support staff.");
-      watchdog('mew', "An error occured while trying to save the event request.", array(), WATCHDOG_ERROR);
+      watchdog('mew', "An error occured while trying to save the event request: @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
 
       $form_state['rebuild'] = TRUE;
       $form_state['redirect'] = FALSE;

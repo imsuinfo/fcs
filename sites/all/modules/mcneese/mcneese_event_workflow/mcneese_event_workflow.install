@@ -14,6 +14,8 @@
 function mcneese_event_workflow_secondary_table_install_structure() {
   $structure = array();
   $structure['top'] = array(
+    'status' => 'unsigned_small',
+    'state' => 'unsigned_small',
     'location' => 'varchar',
     'building' => 'varchar',
     'room' => 'varchar',
@@ -129,46 +131,23 @@ function mcneese_event_workflow_schema() {
       'user_id' => array(
         'description' => $t("This is the system id. Represents the user who created the event. This is not a foreign key and instead loosely refers to the user id."),
         'type' => 'int',
-        'size' => 'normal',
+        'size' => 'big',
         'unsigned' => TRUE,
         'not null' => TRUE,
-      ),
-      'banner_id' => array(
-        'description' => $t("This is the banner id. Represents the user who created the event."),
-        'type' => 'int',
-        'size' => 'normal',
-        'unsigned' => TRUE,
-        'not null' => FALSE,
       ),
       'created' => array(
         'description' => $t("Represents the date the event was created."),
         'type' => 'int',
-        'size' => 'normal',
+        'size' => 'big',
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
       'updated' => array(
         'description' => $t("Represents the date the event was last updated."),
         'type' => 'int',
-        'size' => 'normal',
+        'size' => 'big',
         'unsigned' => TRUE,
         'not null' => TRUE,
-      ),
-      'status' => array(
-        'description' => $t("This designates the published, unpublished, deleted, etc.. status of the event."),
-        'type' => 'int',
-        'size' => 'normal',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 1,
-      ),
-      'state' => array(
-        'description' => $t("This designates the current workflow state revision the event resides in."),
-        'type' => 'int',
-        'size' => 'normal',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 0,
       ),
     ),
     'primary key' => array('id'),
@@ -180,7 +159,7 @@ function mcneese_event_workflow_schema() {
       'event_id' => array(
         'description' => $t("Foreign key to the primary key in the {mew_event_requests} table."),
         'type' => 'int',
-        'size' => 'normal',
+        'size' => 'big',
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
@@ -194,7 +173,7 @@ function mcneese_event_workflow_schema() {
       'date' => array(
         'description' => $t("Represents the date the event associated with this revision."),
         'type' => 'int',
-        'size' => 'normal',
+        'size' => 'big',
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
@@ -203,71 +182,117 @@ function mcneese_event_workflow_schema() {
     'foreign keys' => array(
       'event_id' => array(
         'table' => 'mew_event_requests',
-        'columns' => array('event_id' => 'event_id'),
+        'columns' => array('event_id' => 'id'),
       ),
     ),
   );
 
-  $schema['mew_event_states'] = array(
-    'description' => $t("McNeese Event Workflow Event Request States table for the {mew_event_requests} table."),
+  $schema['mew_reviewers'] = array(
+    'description' => $t("McNeese Event Workflow mapping users to an event classification and a review classification."),
+    'fields' => array(
+      'id' => array(
+        'description' => $t("The primary key used to represent an reviewer."),
+        'type' => 'serial',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'event_classification' => array(
+        'description' => $t("The event classification this is associated with."),
+        'type' => 'int',
+        'size' => 'medium',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'review_step' => array(
+        'description' => $t("The review step for the specified event classification."),
+        'type' => 'int',
+        'size' => 'medium',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'reviewer_classification' => array(
+        'description' => $t("The reviewer classification."),
+        'type' => 'int',
+        'size' => 'medium',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'user_id' => array(
+        'description' => $t("This is the system id. Represents the user who created the event."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('id'),
+    'unique keys' => array(
+      'reviewer' => array('event_classification', 'review_step', 'reviewer_classification', 'user_id'),
+    ),
+    'foreign keys' => array(
+      'user_id' => array(
+        'table' => 'users',
+        'columns' => array('user_id' => 'uid'),
+      ),
+    ),
+  );
+
+  $schema['mew_event_reviews'] = array(
+    'description' => $t("McNeese Event Workflow review messages and decisions."),
     'fields' => array(
       'event_id' => array(
         'description' => $t("Foreign key to the primary key in the mew_event_requests table."),
         'type' => 'int',
-        'size' => 'normal',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'reviewer_id' => array(
+        'description' => $t("Foreign key to the primary key in the mew_reviewers table."),
+        'type' => 'int',
+        'size' => 'big',
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
       'revision' => array(
         'description' => $t("Part of the primary key for this table and represents the revision number for change tracking."),
         'type' => 'int',
-        'size' => 'normal',
+        'size' => 'big',
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
-      'delta' => array(
-        'description' => $t("Represents the row number for fields with multiple values (multiple input fields that are associated with a single logical field.)"),
+      'decision' => array(
+        'description' => $t("A boolean representing yes/no for approved/denied."),
         'type' => 'int',
-        'size' => 'normal',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-      'user_id' => array(
-        'description' => $t("This is the system id. Represents the user who created the event. This is not a foreign key and instead loosely refers to the user id."),
-        'type' => 'int',
-        'size' => 'normal',
+        'size' => 'medium',
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
-      'banner_id' => array(
-        'description' => $t("This is the banner id. Represents the user who created the event."),
-        'type' => 'int',
+      'message' => array(
+        'description' => $t("A message/comment associated with this review."),
+        'type' => 'text',
         'size' => 'normal',
-        'unsigned' => TRUE,
         'not null' => FALSE,
+        'default' => '',
       ),
       'date' => array(
         'description' => $t("This is the banner id. Represents the date the event was created."),
         'type' => 'int',
-        'size' => 'normal',
+        'size' => 'big',
         'unsigned' => TRUE,
         'not null' => TRUE,
-      ),
-      'state' => array(
-        'description' => $t("This designates the current workflow state the event resides in."),
-        'type' => 'int',
-        'size' => 'normal',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 0,
       ),
     ),
-    'primary key' => array('event_id', 'revision', 'delta'),
+    'primary key' => array('event_id', 'reviewer_id', 'revision'),
     'foreign keys' => array(
       'event_id' => array(
         'table' => 'mew_event_requests',
-        'columns' => array('event_id' => 'event_id'),
+        'columns' => array('event_id' => 'id'),
+      ),
+      'reviewer_id' => array(
+        'table' => 'mew_reviewers',
+        'columns' => array('reviewer_id' => 'id'),
       ),
     ),
   );
@@ -286,21 +311,21 @@ function mcneese_event_workflow_schema() {
           'event_id' => array(
             'description' => $t("Foreign key to the primary key in the {mew_event_requests} table."),
             'type' => 'int',
-            'size' => 'normal',
+            'size' => 'big',
             'unsigned' => TRUE,
             'not null' => TRUE,
           ),
           'revision' => array(
             'description' => $t("Part of the primary key for this table and represents the revision number for change tracking."),
             'type' => 'int',
-            'size' => 'normal',
+            'size' => 'big',
             'unsigned' => TRUE,
             'not null' => TRUE,
           ),
           'delta' => array(
             'description' => $t("Represents the row number for fields with multiple values (multiple input fields that are associated with a single logical field.)"),
             'type' => 'int',
-            'size' => 'normal',
+            'size' => 'big',
             'unsigned' => TRUE,
             'not null' => TRUE,
             'default' => 0,
@@ -308,21 +333,14 @@ function mcneese_event_workflow_schema() {
           'user_id' => array(
             'description' => $t("This is the system id. Represents the user who created the event. This is not a foreign key and instead loosely refers to the user id."),
             'type' => 'int',
-            'size' => 'normal',
+            'size' => 'big',
             'unsigned' => TRUE,
             'not null' => TRUE,
-          ),
-          'banner_id' => array(
-            'description' => $t("This is the banner id. Represents the user who created the event."),
-            'type' => 'int',
-            'size' => 'normal',
-            'unsigned' => TRUE,
-            'not null' => FALSE,
           ),
           'date' => array(
             'description' => $t("This is the banner id. Represents the date the event was created."),
             'type' => 'int',
-            'size' => 'normal',
+            'size' => 'big',
             'unsigned' => TRUE,
             'not null' => TRUE,
           ),
@@ -331,7 +349,7 @@ function mcneese_event_workflow_schema() {
         'foreign keys' => array(
           'event_id' => array(
             'table' => 'mew_event_requests',
-            'columns' => array('event_id' => 'event_id'),
+            'columns' => array('event_id' => 'id'),
           ),
         ),
       );
@@ -412,6 +430,24 @@ function mcneese_event_workflow_schema() {
             'unsigned' => TRUE,
           );
         }
+        elseif ($type == 'signed_medium') {
+          $schema[$table_name]['fields'][$name] = array(
+            'type' => 'int',
+            'size' => 'medium',
+            'not null' => FALSE,
+            'default' => 0,
+            'unsigned' => FALSE,
+          );
+        }
+        elseif ($type == 'unsigned_medium') {
+          $schema[$table_name]['fields'][$name] = array(
+            'type' => 'int',
+            'size' => 'medium',
+            'not null' => FALSE,
+            'default' => 0,
+            'unsigned' => TRUE,
+          );
+        }
         elseif ($type == 'signed_big') {
           $schema[$table_name]['fields'][$name] = array(
             'type' => 'int',
@@ -433,7 +469,7 @@ function mcneese_event_workflow_schema() {
         elseif ($type == 'timestamp') {
           $schema[$table_name]['fields'][$name] = array(
             'type' => 'int',
-            'size' => 'normal',
+            'size' => 'big',
             'not null' => FALSE,
             'unsigned' => TRUE,
           );
@@ -441,7 +477,7 @@ function mcneese_event_workflow_schema() {
         elseif ($type == 'time') {
           $schema[$table_name]['fields'][$name] = array(
             'type' => 'int',
-            'size' => 'normal',
+            'size' => 'big',
             'not null' => FALSE,
             'unsigned' => TRUE,
           );
@@ -457,7 +493,7 @@ function mcneese_event_workflow_schema() {
         'event_id' => array(
           'description' => $t("Foreign key to the primary key in the {mew_event_requests} table."),
           'type' => 'int',
-          'size' => 'normal',
+          'size' => 'big',
           'unsigned' => TRUE,
           'not null' => TRUE,
         ),
@@ -466,7 +502,7 @@ function mcneese_event_workflow_schema() {
       'foreign keys' => array(
         'event_id' => array(
           'table' => 'mew_event_requests',
-          'columns' => array('event_id' => 'event_id'),
+          'columns' => array('event_id' => 'id'),
         ),
       ),
     );
@@ -477,7 +513,7 @@ function mcneese_event_workflow_schema() {
       $schema[$table_name]['fields'][$field_name] = array(
         'description' => $t("Foreign key to the current revision in the " . $field_table_name . " table."),
         'type' => 'int',
-        'size' => 'normal',
+        'size' => 'big',
         'unsigned' => TRUE,
         'not null' => TRUE,
       );
@@ -499,25 +535,37 @@ function mcneese_event_workflow_schema() {
  */
 function mcneese_event_workflow_install() {
   // drupal does not support automatically assigning foreign key relations, so this must be manually performed.
-  $key_name = 'event_id';
-  $key_foreign = 'event_id_fkey';
-  $table_foreign = 'mew_event_requests';
-  $table_foreign_key = 'id';
+  $key1_name = 'event_id';
+  $key1_foreign = 'event_id_fkey';
+  $table1_foreign = 'mew_event_requests';
+  $table1_foreign_key = 'id';
+
+  $key2_name = 'user_id';
+  $key2_foreign = 'user_id_fkey';
+  $table2_foreign = 'users';
+  $table2_foreign_key = 'uid';
+
+  $key3_name = 'reviewer_id';
+  $key3_foreign = 'reviewer_id_fkey';
+  $table3_foreign = 'mew_reviewers';
+  $table3_foreign_key = 'id';
 
   $structure = mcneese_event_workflow_secondary_table_install_structure();
 
-  db_query('ALTER TABLE {mew_event_states} ADD CONSTRAINT ' . $key_foreign . ' FOREIGN KEY (' . $key_name . ') REFERENCES {' . $table_foreign . '}(' . $table_foreign_key . ') ON DELETE CASCADE');
-  db_query('ALTER TABLE {mew_event_revisions} ADD CONSTRAINT ' . $key_foreign . ' FOREIGN KEY (' . $key_name . ') REFERENCES {' . $table_foreign . '}(' . $table_foreign_key . ') ON DELETE CASCADE');
+  db_query('ALTER TABLE {mew_event_revisions} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '}(' . $table1_foreign_key . ') ON DELETE CASCADE');
+  db_query('ALTER TABLE {mew_reviewers} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '}(' . $table2_foreign_key . ') ON DELETE CASCADE');
+  db_query('ALTER TABLE {mew_event_reviews} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '}(' . $table1_foreign_key . ') ON DELETE CASCADE');
+  db_query('ALTER TABLE {mew_event_reviews} ADD CONSTRAINT ' . $key3_foreign . ' FOREIGN KEY (' . $key3_name . ') REFERENCES {' . $table3_foreign . '}(' . $table3_foreign_key . ') ON DELETE CASCADE');
 
   foreach ($structure as $structure_name => &$structure_array) {
-    $table_name = 'mew_current_' . $structure_name;
+    $table1_name = 'mew_current_' . $structure_name;
 
-    db_query('ALTER TABLE {' . $table_name . '} ADD CONSTRAINT ' . $key_foreign . ' FOREIGN KEY (' . $key_name . ') REFERENCES {' . $table_foreign . '}(' . $table_foreign_key . ') ON DELETE CASCADE');
+    db_query('ALTER TABLE {' . $table1_name . '} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '}(' . $table1_foreign_key . ') ON DELETE CASCADE');
 
     foreach ($structure_array as $field_name => &$field_type) {
-      $field_table_name = 'mew_field_' . $structure_name . '_' . $field_name;
+      $field_table1_name = 'mew_field_' . $structure_name . '_' . $field_name;
 
-      db_query('ALTER TABLE {' . $field_table_name . '} ADD CONSTRAINT ' . $key_foreign . ' FOREIGN KEY (' . $key_name . ') REFERENCES {' . $table_foreign . '}(' . $table_foreign_key . ') ON DELETE CASCADE');
+      db_query('ALTER TABLE {' . $field_table1_name . '} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '}(' . $table1_foreign_key . ') ON DELETE CASCADE');
     }
   }
 }
@@ -533,26 +581,26 @@ function mcneese_event_workflow_uninstall() {
   }
 
   // drupal does not pay attention to foreign key relations when dropping the database, so manually remove all manually added foreign keys.
-  $key_name = 'event_id';
-  $key_foreign = 'event_id_fkey';
-  $table_foreign = 'mew_event_requests';
-  $table_foreign_key = 'id';
+  $key1_foreign = 'event_id_fkey';
+  $key2_foreign = 'user_id_fkey';
+  $key3_foreign = 'reviewer_id_fkey';
 
   $structure = mcneese_event_workflow_secondary_table_install_structure();
 
-  db_query('ALTER TABLE {mew_event_states} DROP CONSTRAINT IF EXISTS ' . $key_foreign);
-  db_query('ALTER TABLE {mew_event_revisions} DROP CONSTRAINT IF EXISTS ' . $key_foreign);
+  db_query('ALTER TABLE {mew_event_revisions} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
+  db_query('ALTER TABLE {mew_reviewers} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
+  db_query('ALTER TABLE {mew_event_reviews} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
+  db_query('ALTER TABLE {mew_event_reviews} DROP CONSTRAINT IF EXISTS ' . $key3_foreign);
 
   foreach ($structure as $structure_name => &$structure_array) {
     $table_name = 'mew_current_' . $structure_name;
 
-    db_query('ALTER TABLE {' . $table_name . '} DROP CONSTRAINT IF EXISTS ' . $key_foreign);
+    db_query('ALTER TABLE {' . $table_name . '} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
 
     foreach ($structure_array as $field_name => &$field_type) {
       $field_table_name = 'mew_field_' . $structure_name . '_' . $field_name;
 
-      db_query('ALTER TABLE {' . $field_table_name . '} DROP CONSTRAINT IF EXISTS ' . $key_foreign);
+      db_query('ALTER TABLE {' . $field_table_name . '} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
     }
   }
-
 }

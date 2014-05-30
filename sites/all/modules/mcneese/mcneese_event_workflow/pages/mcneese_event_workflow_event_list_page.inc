@@ -69,6 +69,8 @@ function mcneese_event_workflow_event_list_0_page($page_number = 0) {
     $query->innerjoin('mew_current_top', 'mct', 'mer.id = mct.event_id');
     $query->innerjoin('mew_current_coordinator', 'mcc', 'mer.id = mcc.event_id AND mct.event_id = mcc.event_id');
 
+    $query->innerjoin('mew_field_top_status', 'mfts', 'mct.event_id = mfts.event_id AND mcc.event_id = mfts.event_id AND mct.status = mfts.revision AND mfts.delta = 0');
+    $query->innerjoin('mew_field_top_state', 'mftse', 'mct.event_id = mftse.event_id AND mcc.event_id = mftse.event_id AND mct.state = mftse.revision AND mftse.delta = 0');
     $query->innerjoin('mew_field_top_location', 'mftc', 'mct.event_id = mftc.event_id AND mcc.event_id = mftc.event_id AND mct.location = mftc.revision AND mftc.delta = 0');
     $query->innerjoin('mew_field_top_building', 'mftb', 'mct.event_id = mftb.event_id AND mcc.event_id = mftb.event_id AND mct.building = mftb.revision AND mftb.delta = 0');
     $query->innerjoin('mew_field_top_room', 'mftr', 'mct.event_id = mftr.event_id AND mcc.event_id = mftr.event_id AND mct.room = mftr.revision AND mftr.delta = 0');
@@ -85,7 +87,7 @@ function mcneese_event_workflow_event_list_0_page($page_number = 0) {
 
     $query->fields('mer');
 
-    $query->condition('mer.status', 0, '>');
+    $query->condition('mfts.value', 0, '>');
 
     $query->range($start_range, $rows_per_page);
 
@@ -97,7 +99,7 @@ function mcneese_event_workflow_event_list_0_page($page_number = 0) {
         $query->orderBy('coordinator_name', is_null($sort) ? 'ASC' : $sort);
       }
       elseif ($order == 'location') {
-        $query->orderBy('coordinator_classification', is_null($sort) ? 'ASC' : $sort);
+        $query->orderBy('top_location', is_null($sort) ? 'ASC' : $sort);
       }
       elseif ($order == 'classification') {
         $query->orderBy('coordinator_classification', is_null($sort) ? 'ASC' : $sort);
@@ -108,10 +110,10 @@ function mcneese_event_workflow_event_list_0_page($page_number = 0) {
       elseif ($order == 'room') {
         $query->orderBy('top_room', is_null($sort) ? 'ASC' : $sort);
       }
-      elseif ($order == 'submitted_by') {
+      elseif ($order == 'submitted by') {
         $query->orderBy('user_id', is_null($sort) ? 'ASC' : $sort);
       }
-      elseif ($order == 'submitted_on') {
+      elseif ($order == 'submitted on') {
         $query->orderBy('created', is_null($sort) ? 'DESC' : $sort);
       }
     }
@@ -193,21 +195,21 @@ function mcneese_event_workflow_event_list_0_page($page_number = 0) {
   $table = array();
   $table['caption'] = "Event Requests";
   $table['header'] = array(
-    'id' => array('field' => 'id', 'data' => "ID", 'sort' => 'asc', 'align' => 'center'),
-    'coordinator' => array('field' => 'coordinator', 'data' => "Coordinator", 'sort' => 'asc', 'align' => 'center'),
-    'location' => array('field' => 'location', 'data' => "Location", 'sort' => 'asc', 'align' => 'center'),
-    'building' => array('field' => 'building', 'data' => "Building", 'sort' => 'asc', 'align' => 'center'),
-    'room' => array('field' => 'room', 'data' => "Room", 'sort' => 'asc', 'align' => 'center'),
-    'classification' => array('field' => 'classification', 'data' => "Classification", 'sort' => 'asc', 'align' => 'center'),
-    'submitted_by' => array('field' => 'submitted_by', 'data' => "Submitted By", 'sort' => 'asc', 'align' => 'center'),
+    'id' => array('field' => 'id', 'data' => "ID", 'align' => 'center'),
+    'coordinator' => array('field' => 'coordinator', 'data' => "Coordinator", 'align' => 'center'),
+    'location' => array('field' => 'location', 'data' => "Location", 'align' => 'center'),
+    'building' => array('field' => 'building', 'data' => "Building", 'align' => 'center'),
+    'room' => array('field' => 'room', 'data' => "Room", 'align' => 'center'),
+    'classification' => array('field' => 'classification', 'data' => "Classification", 'align' => 'center'),
+    'submitted_by' => array('field' => 'submitted_by', 'data' => "Submitted By", 'align' => 'center'),
     'submitted_on' => array('field' => 'submitted_on', 'data' => "Submitted On", 'sort' => 'desc', 'align' => 'center'),
   );
 
   $table['attributes'] = array();
   $table['attributes']['summary'] = "A listing of event requests associated by ID.";
+
   $table['rows'] = $rows;
   $table['empty'] = "There are no event requests available for to your account.";
-  $table['sort'] = 'created';
 
   $output .= theme('table', $table);
 

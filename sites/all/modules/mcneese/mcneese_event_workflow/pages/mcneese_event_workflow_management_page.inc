@@ -11,90 +11,6 @@
  */
 
 /**
- * Loads menu paths at the specified path, gnerating a block array.
- *
- * @param string $path
- *   (optional) a url path directly under events/.
- *   For example, to get a path of 'events/mine' just specify 'mine'
- *   as this string.
- *
- * @return array
- *   An array of menu link blocks.
- */
-function mcneese_event_workflow_blocks_at_path($path = NULL) {
-  $blocks = array();
-
-  $query = db_select('menu_router', 'mr');
-  $query->innerjoin('menu_links',  'ml', 'mr.path = ml.router_path');
-
-  $query->fields('mr');
-  $query->fields('ml');
-  $query->orderBy('mr.weight', 'ASC');
-  $query->orderBy('ml.link_title', 'ASC');
-  $query->distinct();
-
-  if (!is_null($path)) {
-    $query->condition('mr.path', 'events/' . $path . '/%', 'LIKE');
-    $query->condition('mr.path', 'events/' . $path . '/%/%', 'NOT LIKE');
-  }
-  else {
-    $query->condition('mr.path', 'events/%', 'LIKE');
-    $query->condition('mr.path', 'events/%/%', 'NOT LIKE');
-  }
-
-  $query->condition('ml.plid', 0, '<>');
-
-  $executed = $query->execute();
-
-  if ($executed) {
-    $available_paths = $executed->fetchAll();
-
-    $prefix_class = "admin-list-item";
-    $path_class = drupal_clean_css_identifier($path, array(' ' => '-', '_' => '_', '/' => '-', '[' => '-', ']' => ''));
-    $class = $prefix_class . ' ' . $prefix_class . '-' . $path_class;
-
-    $compact = system_admin_compact_mode();
-
-    foreach ($available_paths as $key => $value) {
-      $block = get_object_vars($value);
-
-      _menu_link_translate($block);
-
-      // The link description, either derived from 'description' in hook_menu()
-      // or customized via menu module is used as title attribute.
-      if (!empty($block['block']['attributes']['title'])) {
-        $block['description'] = $value['localized_options']['attributes']['title'];
-        unset($block['localized_options']['attributes']['title']);
-      }
-
-      $block['title'] = l($block['link_title'], $block['router_path']);
-      $block['content'] = '';
-
-      if (isset($block['description'])) {
-        if ($compact) {
-          $class_desc = ' ' . $prefix_class . '-description-compact';
-        }
-        else {
-          $class_desc = ' ' . $prefix_class . '-description-full';
-        }
-
-        $block['content'] .= '<div class="' . $class_desc . '">' . filter_xss_admin($block['description']) . '</div>';
-      }
-
-      if (!empty($block['content'])) {
-        $block['show'] = TRUE;
-      }
-
-      // Prepare for sorting as in function _menu_tree_check_access().
-      // The weight is offset so it is always positive, with a uniform 5-digits.
-      $blocks[(50000 + $block['weight']) . ' ' . $block['title'] . ' ' . $block['mlid']] = $block;
-    }
-  }
-
- return $blocks;
-}
-
-/**
  * Provides the event workflow event manage page.
  *
  * @return string
@@ -103,43 +19,291 @@ function mcneese_event_workflow_blocks_at_path($path = NULL) {
  * @see mcneese_event_workflow_blocks_at_path()
  */
 function mcneese_event_workflow_management_page() {
-  $blocks = mcneese_event_workflow_blocks_at_path();
+  global $base_path;
+  $user = cf_current_user();
 
-  if (empty($blocks)) {
-    return t("You do not have sufficient permissions to perform access anything provided by this page.");
+  $can_create = mcneese_event_workflow_management_page_event_access('create');
+  $can_edit = mcneese_event_workflow_management_page_event_access('edit');
+  $can_view = mcneese_event_workflow_management_page_event_access('view');
+  $can_list = mcneese_event_workflow_management_page_event_access('list');
+  $can_search = mcneese_event_workflow_management_page_event_access('search');
+  $can_delete = mcneese_event_workflow_management_page_event_access('delete');
+
+  $administer = user_access('mcneese event workflow administer');
+  $manager = user_access('mcneese event workflow manage');
+  $reviewer = user_access('mcneese event workflow review');
+  $requester = user_access('mcneese event workflow request');
+
+  $items_1 = array();
+  $items_2 = array();
+  $items_3 = array();
+  $items_4 = array();
+
+  if ($can_create) {
+    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'events/create-0" class="item-link">Request Event</a></h4>';
+    $help = '<div class="item-description inline-block">Make a request to use the facilities or host special events at McNeese State University.</div>';
+    $items_1[] = array(
+      'id' => '',
+      'data' => $link . '<br>' . $help,
+      'class' => array(
+      ),
+    );
   }
 
-  // hide all blocks the user is not allowed to access.
-  foreach ($blocks as $key => $block) {
-    $access = FALSE;
-    $map = array();
-
-    // Determine access callback, which will decide whether or not the current
-    // user has access to this path.
-    $callback = empty($block['access_callback']) ? 0 : trim($block['access_callback']);
-    // Check for a TRUE or FALSE value.
-    if (is_numeric($callback)) {
-      $access = (bool) $callback;
-    }
-    else {
-      $arguments = menu_unserialize($block['access_arguments'], $map);
-      // As call_user_func_array is quite slow and user_access is a very common
-      // callback, it is worth making a special case for it.
-      if ($callback == 'user_access') {
-        $access = (count($arguments) == 1) ? user_access($arguments[0]) : user_access($arguments[0], $arguments[1]);
-      }
-      elseif (function_exists($callback)) {
-        $access = call_user_func_array($callback, $arguments);
-      }
-    }
-
-    if (!$access) {
-      unset($blocks[$key]);
-    }
+  if ($can_list) {
+    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'events/list-0" class="item-link">List Requests</a></h4>';
+    $help = '<div class="item-description inline-block">View a list of event requests available to the current user.</div>';
+    $items_1[] = array(
+      'id' => '',
+      'data' => $link . '<br>' . $help,
+      'class' => array(
+      ),
+    );
   }
 
-  ksort($blocks);
-  return theme('admin_page', array('blocks' => $blocks));
+  if ($can_search) {
+    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'events/search-0" class="item-link">Search Requests</a></h4>';
+    $help = '<div class="item-description inline-block">Use advanced search tools to help locate and find one or more event requests.</div>';
+    $items_3[] = array(
+      'id' => '',
+      'data' => $link . '<br>' . $help,
+      'class' => array(
+      ),
+    );
+  }
+
+  if ($administer || $reviewer || $manager) {
+    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'events/review-0" class="item-link">Review Requests</a></h4>';
+    $help = '<div class="item-description inline-block">Manage what users are allowed to approve/deny event requests by event type.</div>';
+    $items_2[] = array(
+      'id' => '',
+      'data' => $link . '<br>' . $help,
+      'class' => array(
+      ),
+    );
+  }
+
+  if ($administer || $manager) {
+    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'events/reviewers-0" class="item-link">Manage Reviewers</a></h4>';
+    $help = '<div class="item-description inline-block">Manage what users are allowed to approve/deny event requests by event type.</div>';
+    $items_2[] = array(
+      'id' => '',
+      'data' => $link . '<br>' . $help,
+      'class' => array(
+      ),
+    );
+  }
+
+  $item_list_1 = theme('item_list', array('items' => $items_1, 'type' => 'ul'));
+  $item_list_2 = theme('item_list', array('items' => $items_2, 'type' => 'ul'));
+  $item_list_3 = theme('item_list', array('items' => $items_3, 'type' => 'ul'));
+
+  $markup = '<div id="mcneese_event_workflow-management_page-choices" class="mcneese_event_workflow-management_page-choices">';
+  $markup .= '<h3 class="mcneese_event_workflow-management_page-choices-header">Facilities Use and Special Event Request Form</h3>';
+  $markup .= '<div class="mcneese_event_workflow-management_page-choices-list_1">' . $item_list_1 . '</div>';
+  $markup .= '<div class="mcneese_event_workflow-management_page-choices-list_2">' . $item_list_2 . '</div>';
+  $markup .= '<div class="mcneese_event_workflow-management_page-choices-list_3">' . $item_list_3 . '</div>';
+  $markup .= '</div>';
+
+
+  if ($can_list) {
+    $total_items = 5;
+
+    // load sorting information
+    $order = NULL;
+    if (isset($_GET['order'])) {
+      $order = strtolower($_GET['order']);
+    }
+
+    $sort = NULL;
+    if (isset($_GET['sort'])) {
+      $sort = strtoupper($_GET['sort']);
+
+      if ($sort != 'ASC' && $sort != 'DESC') {
+        $sort = NULL;
+      }
+    }
+
+    try {
+      $query = db_select('mew_event_requests', 'mer');
+
+      // so long as the fields being pulled here have only a single delta, this specific implementation should be fine.
+      // having multiple values will change the behavior.
+      // for now, default to only allowing delta = 0.
+      $query->innerjoin('mew_current_top', 'mct', 'mer.id = mct.event_id');
+      $query->innerjoin('mew_current_dates', 'mcd', 'mer.id = mcd.event_id AND mct.event_id = mcd.event_id');
+
+      $query->innerjoin('mew_field_top_status', 'mfts', 'mct.event_id = mfts.event_id AND mcd.event_id = mfts.event_id AND mct.status = mfts.revision AND mfts.delta = 0');
+      $query->innerjoin('mew_field_top_state', 'mftse', 'mct.event_id = mftse.event_id AND mcd.event_id = mftse.event_id AND mct.state = mftse.revision AND mftse.delta = 0');
+      $query->innerjoin('mew_field_top_location', 'mftc', 'mct.event_id = mftc.event_id AND mcd.event_id = mftc.event_id AND mct.location = mftc.revision AND mftc.delta = 0');
+      $query->innerjoin('mew_field_top_building', 'mftb', 'mct.event_id = mftb.event_id AND mcd.event_id = mftb.event_id AND mct.building = mftb.revision AND mftb.delta = 0');
+      $query->innerjoin('mew_field_top_room', 'mftr', 'mct.event_id = mftr.event_id AND mcd.event_id = mftr.event_id AND mct.room = mftr.revision AND mftr.delta = 0');
+
+      $query->innerjoin('mew_field_dates_date', 'mfdd', 'mct.event_id = mfdd.event_id AND mcd.event_id = mfdd.event_id AND mcd.date = mfdd.revision AND mfdd.delta = 0');
+      $query->innerjoin('mew_field_dates_time_start', 'mfdts', 'mct.event_id = mfdts.event_id AND mcd.event_id = mfdts.event_id AND mcd.time_start = mfdts.revision AND mfdts.delta = 0');
+      $query->innerjoin('mew_field_dates_time_stop', 'mfdtsp', 'mct.event_id = mfdtsp.event_id AND mcd.event_id = mfdtsp.event_id AND mcd.time_stop = mfdtsp.revision AND mfdtsp.delta = 0');
+
+      $query->addField('mftc', 'value', 'top_location');
+      $query->addField('mftb', 'value', 'top_building');
+      $query->addField('mftr', 'value', 'top_room');
+
+      $query->addField('mfdd', 'value', 'date');
+      $query->addField('mfdts', 'value', 'time_start');
+      $query->addField('mfdtsp', 'value', 'time_stop');
+
+      $query->fields('mer');
+
+      $query->condition('mfts.value', 0, '>');
+
+      $query->range(0, $total_items);
+
+      if (is_null($order)) {
+        $query->orderBy('created', 'DESC');
+      }
+      else {
+        if ($order == 'id') {
+          $query->orderBy('mer.id', is_null($sort) ? 'DESC' : $sort);
+        }
+        elseif ($order == 'location') {
+          $query->orderBy('top_location', is_null($sort) ? 'ASC' : $sort);
+        }
+        elseif ($order == 'building') {
+          $query->orderBy('top_building', is_null($sort) ? 'ASC' : $sort);
+        }
+        elseif ($order == 'room') {
+          $query->orderBy('top_room', is_null($sort) ? 'ASC' : $sort);
+        }
+        elseif ($order == 'date') {
+          // @todo: find a way to sort by dates (due to multiple values, one cannot simply just sort delta = 0).
+          $query->orderBy('date', is_null($sort) ? 'ASC' : $sort);
+          $query->orderBy('time_start', is_null($sort) ? 'ASC' : $sort);
+        }
+        elseif ($order == 'submitted on') {
+          $query->orderBy('created', is_null($sort) ? 'ASC' : $sort);
+        }
+      }
+
+      if ($administer || $manager) {
+        // load all available events.
+      }
+      elseif ($reviewer) {
+        // load all events for catagories the reviewer is associated with.
+        // @fixme: until the settings are added for individual reviewers, just make all available.
+      }
+      elseif ($requester) {
+        // load all events created by the requestor who is neither an admin nor a manager.
+        if (!$administer && !$manager) {
+          $query->condition('mer.user_id', $user->uid);
+        }
+      }
+      else {
+        // failsafe, should never happen.
+        drupal_access_denied();
+        drupal_exit();
+      }
+
+      $results = $query->execute()->fetchAll();
+
+
+      // @todo: make sure a sort is applied during the database call.
+      $rows = array();
+      foreach ($results as $result) {
+        $row = array();
+
+        $id = intval($result->id);
+        $row['id'] = '<a href="' . $base_path . 'events/view-0/' . $id . '">' . $id . '</a>';
+
+        $row['location'] = check_plain($result->top_location);
+        $row['building'] = check_plain($result->top_building);
+        $row['room'] = check_plain($result->top_room);
+
+
+        // fetch all available dates:
+        $sub_query = db_select('mew_current_dates', 'mcd');
+        $sub_query->innerjoin('mew_field_dates_date', 'mfdd', 'mcd.event_id = mfdd.event_id AND mcd.date = mfdd.revision');
+        $sub_query->innerjoin('mew_field_dates_time_start', 'mfdts', 'mcd.event_id = mfdts.event_id AND mcd.time_start = mfdts.revision and mfdd.event_id = mfdts.event_id and mfdd.delta = mfdts.delta');
+        $sub_query->innerjoin('mew_field_dates_time_stop', 'mfdtsp', 'mcd.event_id = mfdtsp.event_id AND mcd.time_start = mfdtsp.revision and mfdd.event_id = mfdts.event_id and mfdd.delta = mfdtsp.delta');
+
+        $sub_query->addField('mfdd', 'value', 'date');
+        $sub_query->addField('mfdd', 'delta', 'delta');
+        $sub_query->addField('mfdts', 'value', 'time_start');
+        $sub_query->addField('mfdtsp', 'value', 'time_stop');
+
+        $sub_query->condition('mfdd.event_id', $id);
+
+        $sub_query->orderBy('date', 'ASC');
+        $sub_query->orderBy('time_start', 'ASC');
+
+        $sub_executed = $sub_query->execute();
+        $sub_results = $sub_executed->fetchAll();
+
+        foreach ($sub_results as $delta => $sub_result) {
+          if (!isset($row['date'])) {
+            $row['date'] = '';
+          }
+          else {
+            $row['date'] .= '<br>';
+          }
+
+          $date_stamp = $sub_result->date;
+          $row['date'] .= check_plain(date("Y/m/d", $date_stamp));
+
+          if (!is_null($sub_result->time_start) && !is_null($sub_result->time_stop)) {
+            $time_stamp = $sub_result->time_start;
+            $row['date'] .= ' ' . check_plain(date("h:ia", $time_stamp));
+
+            $time_stamp = $sub_result->time_stop;
+            $row['date'] .= ' to ' . check_plain(date("h:ia", $time_stamp));
+          }
+        }
+
+        $date_stamp = $result->created;
+        $row['created'] = check_plain(date("Y/m/d h:ia", $date_stamp));
+
+        $row['operations'] = '';
+
+        if ($can_edit) {
+          $row['operations'] .= '<a href="' . $base_path . 'events/edit-0/' . $id . '/information" class="operation-link operation-link-edit">Edit</a>';
+        }
+
+        if ($can_delete) {
+          // @todo: implement this.
+          #$row['operations'] .= '<a href="' . $base_path . 'events/delete-0/' . $id . '" class="operation-link operation-link-delete">Delete</a>';
+        }
+
+        $rows[] = $row;
+      }
+    }
+    catch (Exception $ex) {
+      cf_error::on_exception($ex);
+
+      return $form;
+    }
+
+    $quick_list = array();
+    $quick_list['caption'] = t("Most Recent Event Requests");
+    $quick_list['header'] = array(
+      'id' => array('field' => 'id', 'data' => "ID", 'align' => 'center'),
+      'location' => array('field' => 'location', 'data' => "Location", 'align' => 'center'),
+      'building' => array('field' => 'building', 'data' => "Building", 'align' => 'center'),
+      'room' => array('field' => 'room', 'data' => "Room", 'align' => 'center'),
+      'date' => array('field' => 'date', 'data' => "Date", 'align' => 'center'),
+      'submitted_on' => array('field' => 'submitted_on', 'data' => "Submitted On", 'sort' => 'desc', 'align' => 'center'),
+      t("Operations"),
+    );
+
+    $quick_list['attributes'] = array();
+    $quick_list['attributes']['id'] = 'mcneese_event_workflow-management_page-quick_list';
+    $quick_list['attributes']['class'] = array ('mcneese_event_workflow-management_page-quick_list');
+    $quick_list['attributes']['summary'] = 'A short version of the list, limited to the ' . $total_items . ' most recent items.';
+
+    $quick_list['rows'] = $rows;
+    $quick_list['empty'] = t("There are no event requests available to your account.");
+
+    $markup .= theme('table', $quick_list);
+  }
+
+  return $markup;
 }
 
 /**
