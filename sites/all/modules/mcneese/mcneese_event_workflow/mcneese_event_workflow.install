@@ -15,11 +15,12 @@ function mcneese_event_workflow_secondary_table_install_structure() {
   $structure = array();
   $structure['top'] = array(
     'status' => 'unsigned_small',
-    'state' => 'unsigned_small',
+    'step' => 'unsigned',
     'location' => 'varchar',
     'building' => 'varchar',
     'room' => 'varchar',
     'additional' => 'text',
+    'review' => array('reviewer_id' => 'unsigned', 'decision' => 'unsigned', 'message' => 'text'),
   );
 
   $structure['dates'] = array(
@@ -225,6 +226,14 @@ function mcneese_event_workflow_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
+      'disabled' => array(
+        'description' => $t("Boolean designating that the account is disabled. This is used as a soft-delete to prevent loss of records."),
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
     ),
     'primary key' => array('id'),
     'unique keys' => array(
@@ -234,65 +243,6 @@ function mcneese_event_workflow_schema() {
       'user_id' => array(
         'table' => 'users',
         'columns' => array('user_id' => 'uid'),
-      ),
-    ),
-  );
-
-  $schema['mew_event_reviews'] = array(
-    'description' => $t("McNeese Event Workflow review messages and decisions."),
-    'fields' => array(
-      'event_id' => array(
-        'description' => $t("Foreign key to the primary key in the mew_event_requests table."),
-        'type' => 'int',
-        'size' => 'big',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-      'reviewer_id' => array(
-        'description' => $t("Foreign key to the primary key in the mew_reviewers table."),
-        'type' => 'int',
-        'size' => 'big',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-      'revision' => array(
-        'description' => $t("Part of the primary key for this table and represents the revision number for change tracking."),
-        'type' => 'int',
-        'size' => 'big',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-      'decision' => array(
-        'description' => $t("A boolean representing yes/no for approved/denied."),
-        'type' => 'int',
-        'size' => 'medium',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-      'message' => array(
-        'description' => $t("A message/comment associated with this review."),
-        'type' => 'text',
-        'size' => 'normal',
-        'not null' => FALSE,
-        'default' => '',
-      ),
-      'date' => array(
-        'description' => $t("This is the banner id. Represents the date the event was created."),
-        'type' => 'int',
-        'size' => 'big',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-    ),
-    'primary key' => array('event_id', 'reviewer_id', 'revision'),
-    'foreign keys' => array(
-      'event_id' => array(
-        'table' => 'mew_event_requests',
-        'columns' => array('event_id' => 'id'),
-      ),
-      'reviewer_id' => array(
-        'table' => 'mew_reviewers',
-        'columns' => array('reviewer_id' => 'id'),
       ),
     ),
   );
@@ -554,8 +504,6 @@ function mcneese_event_workflow_install() {
 
   db_query('ALTER TABLE {mew_event_revisions} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '}(' . $table1_foreign_key . ') ON DELETE CASCADE');
   db_query('ALTER TABLE {mew_reviewers} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '}(' . $table2_foreign_key . ') ON DELETE CASCADE');
-  db_query('ALTER TABLE {mew_event_reviews} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '}(' . $table1_foreign_key . ') ON DELETE CASCADE');
-  db_query('ALTER TABLE {mew_event_reviews} ADD CONSTRAINT ' . $key3_foreign . ' FOREIGN KEY (' . $key3_name . ') REFERENCES {' . $table3_foreign . '}(' . $table3_foreign_key . ') ON DELETE CASCADE');
 
   foreach ($structure as $structure_name => &$structure_array) {
     $table1_name = 'mew_current_' . $structure_name;
@@ -589,8 +537,6 @@ function mcneese_event_workflow_uninstall() {
 
   db_query('ALTER TABLE {mew_event_revisions} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
   db_query('ALTER TABLE {mew_reviewers} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
-  db_query('ALTER TABLE {mew_event_reviews} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
-  db_query('ALTER TABLE {mew_event_reviews} DROP CONSTRAINT IF EXISTS ' . $key3_foreign);
 
   foreach ($structure as $structure_name => &$structure_array) {
     $table_name = 'mew_current_' . $structure_name;

@@ -24,8 +24,8 @@ function mcneese_event_workflow_secondary_table_structure() {
     'status' => array(
       'path' => 'event][status',
     ),
-    'state' => array(
-      'path' => 'event][state',
+    'step' => array(
+      'path' => 'event][step',
     ),
     'location' => array(
       'path' => 'event][location',
@@ -56,6 +56,10 @@ function mcneese_event_workflow_secondary_table_structure() {
     ),
     'additional' => array(
       'path' => 'event][additional',
+    ),
+    'review' => array(
+      'path' => 'event][review',
+      'columns' => array('reviewer_id', 'decision', 'message'),
     ),
   );
 
@@ -426,6 +430,21 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
         'hide' => FALSE,
       ),
     ),
+    'step' => array(
+      'label' => 'Step',
+      'group' => 'information',
+      'weight' => 11,
+      'type' => array(
+        'value' => 'step',
+      ),
+      'display' => array(
+        'value' => NULL,
+      ),
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
+    ),
     'location' => array(
       'label' => 'Event Location',
       'group' => 'information',
@@ -476,6 +495,8 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
         'show' => TRUE,
         'hide' => FALSE,
       ),
+      'collate' => 'date',
+      'collate_order' => 0,
     ),
     'time_start' => array(
       'label' => 'Start Time',
@@ -489,6 +510,9 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
         'show' => TRUE,
         'hide' => FALSE,
       ),
+      'collate' => 'date',
+      'collate_order' => 1,
+      'prefix' => ', ',
     ),
     'time_stop' => array(
       'label' => 'Stop Time',
@@ -502,6 +526,9 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
         'show' => TRUE,
         'hide' => FALSE,
       ),
+      'collate' => 'date',
+      'collate_order' => 2,
+      'prefix' => ' to ',
     ),
   );
 
@@ -889,6 +916,7 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
     ),
     'production_name' => array(
       'label' => 'Production Company or Professional Promoter Name',
+      'size' => 'large',
       'event_type' => array(
         'show' => TRUE,
         'hide' => array(57),
@@ -896,6 +924,7 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
     ),
     'production_email' => array(
       'label' => 'Production Company or Professional Promoter E-mail',
+      'size' => 'large',
       'event_type' => array(
         'show' => TRUE,
         'hide' => array(57),
@@ -903,6 +932,7 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
     ),
     'production_phone' => array(
       'label' => 'Production Company or Professional Promoter Phone',
+      'size' => 'large',
       'event_type' => array(
         'show' => TRUE,
         'hide' => array(57),

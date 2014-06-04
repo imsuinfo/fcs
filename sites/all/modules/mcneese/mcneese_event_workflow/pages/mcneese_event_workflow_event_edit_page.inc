@@ -432,7 +432,7 @@ function mcneese_event_workflow_event_edit_0_form_validate($form, &$form_state) 
   }
 
   if (empty($form_state['values']['form']['step'])) {
-    form_set_error('form][step', "An internal error occured. Form Step is not defined. Please contact the System Administer.");
+    form_set_error('form][step', "An internal error occured. Form Step is not defined. Please contact the support staff.");
   }
 
   // perform validation when not going backwards or adding fields.
@@ -531,6 +531,10 @@ function mcneese_event_workflow_event_edit_0_form_validate($form, &$form_state) 
           unset($date);
           unset($time_start);
           unset($time_stop);
+
+          if ($events_using_room === FALSE) {
+            form_set_error('', "An internal error occurred while checking the room for availability. Please contact the support staff.");
+          }
 
           if (!empty($events_using_room)) {
             mcneese_event_workflow_display_room_unavailable_message();
@@ -695,7 +699,7 @@ function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
     try {
       // now perform the operations.
       $query = db_update('mew_event_requests');
-      $query->condition('id', (int) $event_id);
+      $query->condition('id', $event_id);
       $query->fields($mew_event_requests);
       $query->execute();
 
@@ -737,6 +741,18 @@ function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
       $form_state['submitted'] = FALSE;
 
       return;
+    }
+    else {
+      // forcefully clear the event cache so that it can reflect the changes.
+      event_workflow_load_event_by_id($event_id, TRUE);
+
+      mcneese_event_workflow_include(6);
+
+      $parameters = array();
+      $parameters['changed_by'] = $user->uid;
+      $parameters['changed_type'] = 'user';
+      $parameters['update'] = TRUE;
+      mcneese_event_workflow_send_workflow_emails($event_id, $parameters);
     }
   }
 

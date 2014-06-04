@@ -10,7 +10,7 @@
  * @{
  */
 
- /**
+/**
  * Return a list of sections and their relevant information.
  *
  * Manually updated to reflect mcneese_event_workflow_get_event_fields().
@@ -171,8 +171,8 @@ function mcneese_event_workflow_get_event_fields($form, &$form_state) {
   mcneese_event_workflow_get_event_field_status($form, $form_state, $fields, $ps);
 
 
-  // Fieldset: State
-  mcneese_event_workflow_get_event_field_state($form, $form_state, $fields, $ps);
+  // Fieldset: Step
+  mcneese_event_workflow_get_event_field_step($form, $form_state, $fields, $ps);
 
 
   // Fieldset: Location
@@ -202,6 +202,9 @@ function mcneese_event_workflow_get_event_fields($form, &$form_state) {
     }
     unset($room_information_parts);
   }
+
+  // Fieldset: Review
+  mcneese_event_workflow_get_event_field_review($form, $form_state, $fields, $ps);
 
 
   // Fieldset: Dates
@@ -545,7 +548,7 @@ function mcneese_event_workflow_get_event_fields($form, &$form_state) {
  * Process and build a specific form field.
  */
 function mcneese_event_workflow_get_event_field_status($form, &$form_state, &$fields, $ps) {
-  $values = array(0 => MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_LOCKED);
+  $values = array(0 => MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_UNLOCKED);
 
   if (empty($form_state['values']['event']['status'])) {
     if (isset($form['form']['existing']['#value']['event']['status'])) {
@@ -581,31 +584,26 @@ function mcneese_event_workflow_get_event_field_status($form, &$form_state, &$fi
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_state($form, &$form_state, &$fields, $ps) {
-  $values = array(0 => NULL);
+function mcneese_event_workflow_get_event_field_step($form, &$form_state, &$fields, $ps) {
+  $values = array(0 => 116);
 
-  if (empty($form_state['values']['event']['state'])) {
-    if (isset($form['form']['existing']['#value']['event']['state'])) {
-      $form['form']['state']['#value'] = $form['form']['existing']['#value']['event']['state'];
+  if (empty($form_state['values']['event']['step'])) {
+    if (isset($form['form']['existing']['#value']['event']['step'])) {
+      $form['form']['step']['#value'] = $form['form']['existing']['#value']['event']['step'];
     }
     else {
       mcneese_event_workflow_include(4);
 
-      $workflow_states = event_workflow_get_workflow_states_list_options();
-      foreach ($workflow_states as $state_id => &$state_name) {
-        if ($state_name == 'new') {
-          $form['form']['state']['#value'] = array($state_id);
-          break;
-        }
-      }
+      $workflow_states = event_workflow_get_workflow_steps_list_options();
+      $form['form']['state']['#value'] = array(116); // venue available
     }
   }
   else {
-    $values = $form_state['values']['event']['state'];
+    $values = $form_state['values']['event']['step'];
   }
 
-  $fields['state'] = array(
-    '#id' => 'field-event-state',
+  $fields['step'] = array(
+    '#id' => 'field-event-step',
     '#type' => 'container',
     '#tree' => TRUE,
     '#attributes' => array(
@@ -616,8 +614,8 @@ function mcneese_event_workflow_get_event_field_state($form, &$form_state, &$fie
   );
 
   foreach ($values as $key => $value) {
-    $fields['state'][$key] = array(
-      '#id' => 'field-event-state-' . $key,
+    $fields['step'][$key] = array(
+      '#id' => 'field-event-step-' . $key,
       '#type' => 'value',
       '#value' => $value,
     );
@@ -729,6 +727,43 @@ function mcneese_event_workflow_get_event_field_room_list($form, &$form_state, &
         '#value' => $value,
       );
     }
+  }
+
+  return $values;
+}
+
+/**
+ * Process and build a specific form field.
+ */
+function mcneese_event_workflow_get_event_field_review($form, &$form_state, &$fields, $ps) {
+  $values = array(0 => array('reviewer_id' => 0, 'decision' => 0, 'message' => NULL));
+
+  if (empty($form_state['values']['event']['review'])) {
+    if (isset($form['form']['existing']['#value']['event']['review'])) {
+      $form['form']['review']['#value'] = $form['form']['existing']['#value']['event']['review'];
+    }
+  }
+  else {
+    $values = $form_state['values']['event']['review'];
+  }
+
+  $fields['review'] = array(
+    '#id' => 'field-event-review',
+    '#type' => 'container',
+    '#tree' => TRUE,
+    '#attributes' => array(
+      'class' => array(
+        'form-item-wrapper',
+      ),
+    ),
+  );
+
+  foreach ($values as $key => $value) {
+    $fields['review'][$key] = array(
+      '#id' => 'field-event-review-' . $key,
+      '#type' => 'value',
+      '#value' => $value,
+    );
   }
 
   return $values;

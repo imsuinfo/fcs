@@ -28,6 +28,8 @@ function mcneese_event_workflow_management_page() {
   $can_list = mcneese_event_workflow_management_page_event_access('list');
   $can_search = mcneese_event_workflow_management_page_event_access('search');
   $can_delete = mcneese_event_workflow_management_page_event_access('delete');
+  $can_log = mcneese_event_workflow_management_page_event_access('log');
+  $can_review = mcneese_event_workflow_management_page_event_access('review');
 
   $administer = user_access('mcneese event workflow administer');
   $manager = user_access('mcneese event workflow manage');
@@ -72,7 +74,7 @@ function mcneese_event_workflow_management_page() {
     );
   }
 
-  if ($administer || $reviewer || $manager) {
+  if ($can_review) {
     $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'events/review-0" class="item-link">Review Requests</a></h4>';
     $help = '<div class="item-description inline-block">Manage what users are allowed to approve/deny event requests by event type.</div>';
     $items_2[] = array(
@@ -134,7 +136,7 @@ function mcneese_event_workflow_management_page() {
       $query->innerjoin('mew_current_dates', 'mcd', 'mer.id = mcd.event_id AND mct.event_id = mcd.event_id');
 
       $query->innerjoin('mew_field_top_status', 'mfts', 'mct.event_id = mfts.event_id AND mcd.event_id = mfts.event_id AND mct.status = mfts.revision AND mfts.delta = 0');
-      $query->innerjoin('mew_field_top_state', 'mftse', 'mct.event_id = mftse.event_id AND mcd.event_id = mftse.event_id AND mct.state = mftse.revision AND mftse.delta = 0');
+      $query->innerjoin('mew_field_top_step', 'mftsp', 'mct.event_id = mftsp.event_id AND mcd.event_id = mftsp.event_id AND mct.step = mftsp.revision AND mftsp.delta = 0');
       $query->innerjoin('mew_field_top_location', 'mftc', 'mct.event_id = mftc.event_id AND mcd.event_id = mftc.event_id AND mct.location = mftc.revision AND mftc.delta = 0');
       $query->innerjoin('mew_field_top_building', 'mftb', 'mct.event_id = mftb.event_id AND mcd.event_id = mftb.event_id AND mct.building = mftb.revision AND mftb.delta = 0');
       $query->innerjoin('mew_field_top_room', 'mftr', 'mct.event_id = mftr.event_id AND mcd.event_id = mftr.event_id AND mct.room = mftr.revision AND mftr.delta = 0');
@@ -153,7 +155,21 @@ function mcneese_event_workflow_management_page() {
 
       $query->fields('mer');
 
-      $query->condition('mfts.value', 0, '>');
+      $show_status = array(
+        MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_LOCKED,
+        MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_UNLOCKED,
+      );
+
+      $query->condition('mfts.value', $show_status, 'IN');
+
+      $show_step = array(
+        116,
+        132,
+        133,
+        117
+      );
+
+      $query->condition('mftsp.value', $show_step, 'IN');
 
       $query->range(0, $total_items);
 
@@ -191,7 +207,7 @@ function mcneese_event_workflow_management_page() {
         // @fixme: until the settings are added for individual reviewers, just make all available.
       }
       elseif ($requester) {
-        // load all events created by the requestor who is neither an admin nor a manager.
+        // load all events created by the requester who is neither an admin nor a manager.
         if (!$administer && !$manager) {
           $query->condition('mer.user_id', $user->uid);
         }
@@ -210,8 +226,13 @@ function mcneese_event_workflow_management_page() {
       foreach ($results as $result) {
         $row = array();
 
-        $id = intval($result->id);
-        $row['id'] = '<a href="' . $base_path . 'events/view-0/' . $id . '">' . $id . '</a>';
+        $event_id = intval($result->id);
+
+        $can_view = mcneese_event_workflow_management_page_event_access('view', $event_id);
+        $can_edit = mcneese_event_workflow_management_page_event_access('edit', $event_id);
+        $can_review = mcneese_event_workflow_management_page_event_access('log', $event_id);
+
+        $row['id'] = '<a href="' . $base_path . 'events/view-0/' . $event_id . '">' . $event_id . '</a>';
 
         $row['location'] = check_plain($result->top_location);
         $row['building'] = check_plain($result->top_building);
@@ -229,7 +250,7 @@ function mcneese_event_workflow_management_page() {
         $sub_query->addField('mfdts', 'value', 'time_start');
         $sub_query->addField('mfdtsp', 'value', 'time_stop');
 
-        $sub_query->condition('mfdd.event_id', $id);
+        $sub_query->condition('mfdd.event_id', $event_id);
 
         $sub_query->orderBy('date', 'ASC');
         $sub_query->orderBy('time_start', 'ASC');
@@ -262,16 +283,28 @@ function mcneese_event_workflow_management_page() {
 
         $row['operations'] = '';
 
+        if ($can_view) {
+          $row['operations'] .= '<a href="' . $base_path . 'events/view-0/' . $event_id . '" class="operation-link operation-link-view">View</a> ';
+        }
+
         if ($can_edit) {
-          $row['operations'] .= '<a href="' . $base_path . 'events/edit-0/' . $id . '/information" class="operation-link operation-link-edit">Edit</a>';
+          $row['operations'] .= '<a href="' . $base_path . 'events/edit-0/' . $event_id . '/information" class="operation-link operation-link-edit">Edit</a> ';
+        }
+
+        if ($can_review) {
+          $row['operations'] .= '<a href="' . $base_path . 'events/view-0/' . $event_id . '/3" class="operation-link operation-link-review">Review</a> ';
+        }
+
+        if ($can_log) {
+          $row['operations'] .= '<a href="' . $base_path . 'events/view-0/' . $event_id . '/2" class="operation-link operation-link-log">Log</a> ';
         }
 
         if ($can_delete) {
           // @todo: implement this.
-          #$row['operations'] .= '<a href="' . $base_path . 'events/delete-0/' . $id . '" class="operation-link operation-link-delete">Delete</a>';
+          #$row['operations'] .= '<a href="' . $base_path . 'events/delete-0/' . $event_id . '" class="operation-link operation-link-delete">Delete</a> ';
         }
 
-        $rows[] = $row;
+        $rows[$event_id] = $row;
       }
     }
     catch (Exception $ex) {

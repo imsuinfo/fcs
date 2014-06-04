@@ -19,14 +19,14 @@
  * @return array
  *   An array of options available.
  */
-function event_workflow_get_workflow_states_list_options($option = NULL) {
+function event_workflow_get_workflow_steps_list_options($option = NULL) {
   $options = array();
 
   if ($option == 'select') {
     $options[''] = "- Select -";
   }
 
-  $options_tree = taxonomy_get_tree(2, 0, NULL, TRUE);
+  $options_tree = taxonomy_get_tree(19, 0, NULL, TRUE);
   foreach ($options_tree as $branch) {
     $options[$branch->tid] = $branch->name;
   }

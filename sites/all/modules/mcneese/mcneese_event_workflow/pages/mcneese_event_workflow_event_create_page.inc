@@ -346,6 +346,10 @@ function mcneese_event_workflow_event_create_0_form_validate($form, &$form_state
         unset($time_start);
         unset($time_stop);
 
+        if ($events_using_room === FALSE) {
+          form_set_error('', "An internal error occurred while checking the room for availability. Please contact the support staff.");
+        }
+
         if (!empty($events_using_room)) {
           mcneese_event_workflow_display_room_unavailable_message();
         }
@@ -509,6 +513,15 @@ function mcneese_event_workflow_event_create_0_form_submit($form, &$form_state) 
     $form_state['submitted'] = FALSE;
 
     return;
+  }
+  else {
+    mcneese_event_workflow_include(6);
+
+    $parameters = array();
+    $parameters['changed_by'] = $user->uid;
+    $parameters['changed_type'] = 'user';
+    $parameters['new'] = TRUE;
+    mcneese_event_workflow_send_workflow_emails($event_id, $parameters);
   }
 
   // redirect after submitting.

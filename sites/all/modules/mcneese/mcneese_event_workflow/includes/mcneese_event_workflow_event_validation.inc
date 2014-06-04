@@ -61,6 +61,13 @@ function mcneese_event_workflow_validate_event_fields($form, &$form_state) {
 
     if (!empty($location_state['dates']['date'])) {
       foreach ($location_state['dates']['date'] as $key => &$value) {
+        if (isset($form['form']['existing']['#value']['event']['dates']['date'])) {
+          if (in_array($value, $form['form']['existing']['#value']['event']['dates']['date'])) {
+            // skip values already saved to allow updating events if they are sufficiently near/past the event date.
+            continue;
+          }
+        }
+
         if (!array_key_exists($key, $start_timestamp)) {
           $start_timestamp[$key] = FALSE;
         }
@@ -88,6 +95,13 @@ function mcneese_event_workflow_validate_event_fields($form, &$form_state) {
 
     if (!empty($location_state['dates']['time_start'])) {
       foreach ($location_state['dates']['time_start'] as $key => &$value) {
+        if (isset($form['form']['existing']['#value']['event']['dates']['time_start'])) {
+          if (in_array($value, $form['form']['existing']['#value']['event']['dates']['time_start'])) {
+            // skip values already saved to allow updating events if they are sufficiently near/past the event date.
+            continue;
+          }
+        }
+
         if (!empty($value) && !empty($location_form['dates']['time_start'][$key]['#expected_format']['date'])) {
           if (is_string($value)) {
             $start_timestamp[$key] = strtotime($value, $date_timestamp);
@@ -106,6 +120,13 @@ function mcneese_event_workflow_validate_event_fields($form, &$form_state) {
 
     if (!empty($location_state['dates']['time_stop'])) {
       foreach ($location_state['dates']['time_stop'] as $key => &$value) {
+        if (isset($form['form']['existing']['#value']['event']['dates']['time_stop'])) {
+          if (in_array($value, $form['form']['existing']['#value']['event']['dates']['time_stop'])) {
+            // skip values already saved to allow updating events if they are sufficiently near/past the event date.
+            continue;
+          }
+        }
+
         if (!empty($value) && !empty($location_form['dates']['time_stop'][$key]['#expected_format']['date'])) {
           if (is_string($value)) {
             $stop_timestamp[$key] = strtotime($value, $date_timestamp);
@@ -139,6 +160,13 @@ function mcneese_event_workflow_validate_event_fields($form, &$form_state) {
 
     if (!empty($location_state['dates']['time_start'])) {
       foreach ($location_state['dates']['time_start'] as $key => &$value) {
+        if (isset($form['form']['existing']['#value']['event']['dates']['time_start'])) {
+          if (in_array($value, $form['form']['existing']['#value']['event']['dates']['time_start'])) {
+            // skip values already saved to allow updating events if they are sufficiently near/past the event date.
+            continue;
+          }
+        }
+
         if (empty($value) && !empty($location_state['dates']['time_stop'][$key])) {
           form_set_error($ps_p . '][dates][time_start][' . $key, "If you specify a stop time, then you must specify a start time.");
           $passed = FALSE;

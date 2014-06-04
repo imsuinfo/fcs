@@ -70,7 +70,7 @@ function mcneese_event_workflow_event_list_0_page($page_number = 0) {
     $query->innerjoin('mew_current_coordinator', 'mcc', 'mer.id = mcc.event_id AND mct.event_id = mcc.event_id');
 
     $query->innerjoin('mew_field_top_status', 'mfts', 'mct.event_id = mfts.event_id AND mcc.event_id = mfts.event_id AND mct.status = mfts.revision AND mfts.delta = 0');
-    $query->innerjoin('mew_field_top_state', 'mftse', 'mct.event_id = mftse.event_id AND mcc.event_id = mftse.event_id AND mct.state = mftse.revision AND mftse.delta = 0');
+    $query->innerjoin('mew_field_top_step', 'mftsp', 'mct.event_id = mftsp.event_id AND mcc.event_id = mftsp.event_id AND mct.step = mftsp.revision AND mftsp.delta = 0');
     $query->innerjoin('mew_field_top_location', 'mftc', 'mct.event_id = mftc.event_id AND mcc.event_id = mftc.event_id AND mct.location = mftc.revision AND mftc.delta = 0');
     $query->innerjoin('mew_field_top_building', 'mftb', 'mct.event_id = mftb.event_id AND mcc.event_id = mftb.event_id AND mct.building = mftb.revision AND mftb.delta = 0');
     $query->innerjoin('mew_field_top_room', 'mftr', 'mct.event_id = mftr.event_id AND mcc.event_id = mftr.event_id AND mct.room = mftr.revision AND mftr.delta = 0');
@@ -126,7 +126,7 @@ function mcneese_event_workflow_event_list_0_page($page_number = 0) {
       // @fixme: until the settings are added for individual reviewers, just make all available.
     }
     elseif ($requester) {
-      // load all events created by the requestor who is neither an admin nor a manager.
+      // load all events created by the requester who is neither an admin nor a manager.
       if (!$administer && !$manager) {
         $query->condition('mer.user_id', $user->uid);
       }
