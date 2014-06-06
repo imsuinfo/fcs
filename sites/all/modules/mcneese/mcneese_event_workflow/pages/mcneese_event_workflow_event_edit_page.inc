@@ -252,8 +252,8 @@ function mcneese_event_workflow_event_edit_0_form($form, &$form_state, $id, $tar
 
 
   // $target_section determines which sections are to be made visible and which aren't.
-  if ($target_section == 'information') {
-    // in particular, the 'information' is used to load the entire form, such as during an edit process.
+  if ($target_section == 'request') {
+    // in particular, the 'request' is used to load the entire form, such as during an edit process.
   }
   elseif (array_key_exists($target_section, $form['form']['sections']['#value'])) {
     $form['form']['sections']['#value'] = array($target_section => $form['form']['sections']['#value'][$target_section]);
@@ -268,7 +268,7 @@ function mcneese_event_workflow_event_edit_0_form($form, &$form_state, $id, $tar
   $form['event']['#id'] = 'section-event';
   $form['event']['#tree'] = TRUE;
 
-  if ($target_section == 'information') {
+  if ($target_section == 'request') {
     if ($step == 'location') {
       $form['event']['cancel'] = array(
         '#id' => 'submit-event-cancel',
@@ -327,57 +327,15 @@ function mcneese_event_workflow_event_edit_0_form($form, &$form_state, $id, $tar
  * @see: mcneese_event_workflow_event_edit_0_form()
  */
 function mcneese_event_workflow_event_edit_0_form_pre_validate(&$form, &$form_state) {
-  $clicked_id = '';
-  if (isset($form_state['clicked_button']['#id'])) {
-    $clicked_id = $form_state['clicked_button']['#id'];
-  }
-
-  if (empty($form_state['values']['form']['step'])) {
-    return;
-  }
-
   $dont_validate = array(
     'submit-event-cancel' => TRUE,
     'submit-event-prev' => TRUE,
     'submit-event-add-date' => TRUE,
   );
 
-  if (array_key_exists($clicked_id, $dont_validate)) {
-    if (!empty($form_state['conditionally_required'][0])) {
-      foreach ($form_state['conditionally_required'][0] as $field) {
-        if (is_string($field)) {
-          $parts = explode('][', $field);
+  mcneese_event_workflow_include(2);
 
-          $found = TRUE;
-          $location = &$form['event'];
-          while (!empty($parts)) {
-            $part = array_shift($parts);
-            if (!is_array($location) || !array_key_exists($part, $location)) {
-              $found = FALSE;
-              break;
-            }
-
-            $location = &$location[$part];
-          }
-
-          if ($found && !empty($location)) {
-            foreach ($location as $delta => &$location_field) {
-              if (!is_numeric($delta)) continue;
-
-              if (array_key_exists('#required', $location_field)) {
-                if (isset($location['#options'])) {
-                  $location_field['#options'][''] = '';
-                }
-                $location_field['#required'] = FALSE;
-              }
-            }
-          }
-        }
-      }
-    }
-
-    // @todo: handle conditionally_required[1] fields, which are required only when their dependant fields make them visible based on the '#state' field settings.
-  }
+  mcneese_event_workflow_pre_validate_event_fields($form, $form_state, $dont_validate);
 }
 
 /**
@@ -451,7 +409,7 @@ function mcneese_event_workflow_event_edit_0_form_validate($form, &$form_state) 
   }
 
   if ($no_problems) {
-    if ($form['form']['target_section']['#value'] == 'information') {
+    if ($form['form']['target_section']['#value'] == 'request') {
       if ($form_state['values']['form']['step'] == 'location') {
         $form_state['values']['form']['step'] = 'rooms';
       }
@@ -643,6 +601,11 @@ function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
     $db_table = 'mew_current_' . $table_name;
 
     foreach ($fields as $field_name => &$field_values) {
+      // manual processing fields must not be auto-populated through the normal form submit process.
+      if (array_key_exists('manual_processing', $field_values) && $field_values['manual_processing']) {
+        continue;
+      }
+
       // load the path so that it can be checked to see if anything needs to be changed.
       $parts = explode('][', $field_values['path']);
       if (empty($parts)) {

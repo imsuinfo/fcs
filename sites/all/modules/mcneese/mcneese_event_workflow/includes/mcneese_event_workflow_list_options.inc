@@ -11,6 +11,36 @@
  */
 
 /**
+ * Returns an array of event workflow status options for populating lists.
+ *
+ * @param string|null $option
+ *   (optional) A string designating how the list will be populated.
+ *
+ * @return array
+ *   An array of options available.
+ */
+function event_workflow_get_event_status_list_options($option = NULL) {
+  $options = array();
+
+  if ($option == 'select') {
+    $options[''] = "- Select -";
+  }
+
+  $options[MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_DELETED] = "Deleted";
+  $options[MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_LOCKED] = "Queued (Locked)";
+  $options[MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_UNLOCKED] = "Queued (Unlocked)";
+  $options[MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_CLOSED_ACCEPTED] = "Accepted";
+  $options[MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_CLOSED_REJECTED] = "Rejected";
+  $options[MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_CLOSED_UNAVAILABLE] = "Room Unavailable";
+  $options[MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_CLOSED_DUE_TO_LOCK] = "Room Unavailable (due to lock)";
+  $options[MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_CANCELLED] = "Cancelled";
+
+  asort($options);
+
+  return $options;
+}
+
+/**
  * Returns an array of event workflow state options for populating lists.
  *
  * @param string|null $option
@@ -19,7 +49,7 @@
  * @return array
  *   An array of options available.
  */
-function event_workflow_get_workflow_steps_list_options($option = NULL) {
+function event_workflow_get_event_steps_list_options($option = NULL) {
   $options = array();
 
   if ($option == 'select') {
@@ -73,7 +103,7 @@ function event_workflow_get_event_classification_list_options($option = NULL) {
  * @return array
  *   An array of options available.
  */
-function event_workflow_get_location_list_options($option = NULL) {
+function event_workflow_get_event_location_list_options($option = NULL) {
   $options = array();
 
   if ($option == 'select') {
@@ -100,6 +130,86 @@ function event_workflow_get_location_list_options($option = NULL) {
 
       $options[$branch_category] = $branch->name;
     }
+  }
+
+  asort($options);
+
+  return $options;
+}
+
+/**
+ * Returns an array of event building list for populating lists.
+ *
+ * @param string|null $location
+ *   (optional) When not NULL, select options based on provided location.
+ * @param string|null $option
+ *   (optional) A string designating how the list will be populated.
+ *
+ * @return array
+ *   An array of options available.
+ */
+function event_workflow_get_event_building_list_options($location = NULL, $option = NULL) {
+  $options = array();
+
+  if ($option == 'select') {
+    $options[''] = "- Select -";
+  }
+
+  $buildings = mcneese_event_workflow_load_buildings($location);
+
+  foreach ($buildings as &$building) {
+    $options[$building['building_code']] = $building['building_desc'];
+  }
+
+  asort($options);
+
+  return $options;
+}
+
+/**
+ * Returns an array of event room list for populating lists.
+ *
+ * @param string|null $location
+ *   (optional) When not NULL, select options based on provided location.
+ * @param string|null $option
+ *   (optional) A string designating how the list will be populated.
+ *
+ * @return array
+ *   An array of options available.
+ */
+function event_workflow_get_event_room_list_options($location = NULL, $option = NULL) {
+  $options = array();
+
+  $buildings = mcneese_event_workflow_load_buildings($location);
+
+  if ($option == 'special') {
+    foreach ($buildings as &$building) {
+      if (empty($location)) {
+        $id = 'undecided_';
+      }
+      else {
+        $id = check_plain($building['category']) . '_';
+      }
+
+      $id .= check_plain($building['building_code']) . '_' . check_plain($building['room_number']);
+      $title = '<div class="building_desc">' . check_plain($building['building_desc']) . '</div>';
+      $title .= ' <div class="room_number"><span class="room_number-label">Room</span> <span class="room_number-data">' . check_plain($building['room_number']) . '</span></div>';
+
+      if (!empty($building['capacity'])) {
+        $title .= '<div class="room_capacity"><span class="capacity-label">Capacity:</span> <span class="capacity-data">' . check_plain($building['capacity']) . '</span></div>';
+      }
+
+      $room_desc = 'No information available.';
+      if (!empty($building['room_desc'])) {
+        $room_desc = check_plain($building['room_desc']);
+      }
+      $title .= '<div class="room_description"><span class="room_description-label"></span> <span class="room_description-data">' . $room_desc . '</span></div>';
+
+      $options[$id] = $title;
+    }
+  }
+  else {
+    $options[$building['room_number']] = $building['room_desc'];
   }
 
   asort($options);
@@ -251,54 +361,6 @@ function event_workflow_get_publicity_details_list_options($option = NULL) {
     }
     else {
       $options[$branch->tid] = $branch->name;
-    }
-  }
-
-  asort($options);
-
-  return $options;
-}
-
-/**
- * Returns an array of event room list for populating lists.
- *
- * @param string|null $location
- *   (optional) When not NULL, select options based on provided location.
- * @param string|null $option
- *   (optional) A string designating how the list will be populated.
- *
- * @return array
- *   An array of options available.
- */
-function event_workflow_get_room_list_options($location = NULL, $option = 'select') {
-  $options = array();
-
-  $buildings = mcneese_event_workflow_load_buildings($location);
-
-  if ($option == 'special') {
-    foreach ($buildings as &$building) {
-      if (empty($location)) {
-        $id = 'undecided_';
-      }
-      else {
-        $id = check_plain($building['category']) . '_';
-      }
-
-      $id .= check_plain($building['building_code']) . '_' . check_plain($building['room_number']);
-      $title = '<div class="building_desc">' . check_plain($building['building_desc']) . '</div>';
-      $title .= ' <div class="room_number"><span class="room_number-label">Room</span> <span class="room_number-data">' . check_plain($building['room_number']) . '</span></div>';
-
-      if (!empty($building['capacity'])) {
-        $title .= '<div class="room_capacity"><span class="capacity-label">Capacity:</span> <span class="capacity-data">' . check_plain($building['capacity']) . '</span></div>';
-      }
-
-      $room_desc = 'No information available.';
-      if (!empty($building['room_desc'])) {
-        $room_desc = check_plain($building['room_desc']);
-      }
-      $title .= '<div class="room_description"><span class="room_description-label"></span> <span class="room_description-data">' . $room_desc . '</span></div>';
-
-      $options[$id] = $title;
     }
   }
 

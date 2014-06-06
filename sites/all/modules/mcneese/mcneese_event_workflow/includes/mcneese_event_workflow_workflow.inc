@@ -49,8 +49,8 @@ function mcneese_event_workflow_workflow_set_step($event_id, $step, $user = NULL
 
   $step_options = event_workflow_get_review_step_list_options();
 
-  if (!in_array($step, $step_options)) {
-    watchdog('mew', "%status is not a valid step.", array('%step' => $step), WATCHDOG_ERROR);
+  if (!array_key_exists($step, $step_options)) {
+    watchdog('mew', "%step is not a valid step.", array('%step' => $step), WATCHDOG_ERROR);
     return FALSE;
   }
 
@@ -221,6 +221,8 @@ function mcneese_event_workflow_workflow_set_status($event_id, $status, $user = 
   // reset the cached event object
   event_workflow_load_event_by_id($event_id, TRUE);
 
+  // @todo: if it is the final step, accepted, etc..make sure to generate the PDF file and save it to the file system for remote storage.
+
   return TRUE;
 }
 
@@ -235,19 +237,20 @@ function mcneese_event_workflow_workflow_set_status($event_id, $status, $user = 
  *   The event workflow decision.
  * @param int $message
  *   The event workflow decision message.
+ * @param array $extra
+ *   (optional) Additional fields that are specific to the individual step.
  * @param object|null $user
  *   (optional) If specified, the user to log this change as.
  *
  * @return bool
  *   TRUE on success, FALSE otherwise.
  */
-function mcneese_event_workflow_workflow_step_review($event_id, $reviewer_id, $decision, $message, $user = NULL) {
+function mcneese_event_workflow_workflow_step_review($event_id, $reviewer_id, $decision, $message, $extra = array(), $user = NULL) {
   $event = event_workflow_load_event_by_id($event_id);
 
   if (empty($event)) {
-    drupal_not_found();
-    drupal_exit();
-    return array();
+    watchdog('mew', "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
+    return FALSE;
   }
 
   if (!cf_is_integer($reviewer_id)) {
@@ -265,6 +268,11 @@ function mcneese_event_workflow_workflow_step_review($event_id, $reviewer_id, $d
     return FALSE;
   }
 
+  if (!is_array($extra)) {
+    cf_error::invalid_array('extra');
+    return FALSE;
+  }
+
   if (is_null($user)) {
     $user = cf_current_user();
   }
@@ -274,6 +282,15 @@ function mcneese_event_workflow_workflow_step_review($event_id, $reviewer_id, $d
     return FALSE;
   }
 
+  $event = event_workflow_load_event_by_id($event_id);
+
+  if (empty($event)) {
+    watchdog('mew', "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
+    return FALSE;
+  }
+
+  $step = $event['top']['step'][0]->value;
+
   $reviewers = mcneese_event_workflow_get_reviewers(array('mr.id' => $reviewer_id));
 
   if (empty($reviewers)) {
@@ -282,6 +299,12 @@ function mcneese_event_workflow_workflow_step_review($event_id, $reviewer_id, $d
   }
 
   $reviewer = array_pop($reviewers);
+
+  $revision = mcneese_event_workflow_get_latest_revision($event_id, 'mew_field_review_review');
+
+  if ($revision === FALSE) {
+    $revision = 0;
+  }
 
   $user_data = array();
   $user_data['user_id'] = $user->uid;
@@ -295,40 +318,56 @@ function mcneese_event_workflow_workflow_step_review($event_id, $reviewer_id, $d
     'date' => REQUEST_TIME,
   );
 
-  $mew_field_top_review = array(
+  $mew_current_review = array(
     'event_id' => $event_id,
-    'revision' => 0,
+    'review' => $revision,
+    'facilities_use_fee' => $event['current']['review']['facilities_use_fee'],
+    'equipment_use_fee' => $event['current']['review']['equipment_use_fee'],
+  );
+
+  $mew_field_review_review = array(
+    'event_id' => $event_id,
+    'revision' => $revision,
     'delta' => 0,
     'user_id' => $reviewer->user_id,
     'date' => REQUEST_TIME,
-    'reviewer_id' => $reviewer_id,
+    'reviewer' => $reviewer_id,
     'decision' => $decision,
     'message' => $message,
   );
 
-  if (!empty($event['top']['review'])) {
-    $mew_field_top_review['delta'] = count($event['top']['review']);
-
-    // do not count the initial stub field
-    if ($mew_field_top_review['delta'] == 1 && $event['top']['review'][0]->decision == 0) {
-      $mew_field_top_review['delta'] = 0;
-    }
+  if (!empty($event['review']['review'])) {
+    $mew_field_review_review['delta'] = count($event['review']['review']);
   }
 
-  $mew_current_top = array(
-    'event_id' => $event_id,
-  );
+  if ($step == 133) {
+    $next_revision = $event['current']['review']['equipment_use_fee'] + 1;
+    $mew_current_review['equipment_use_fee'] = $next_revision;
+    $mew_field_review_equipment_use_fee = array(
+      'event_id' => $event_id,
+      'revision' => $next_revision,
+      'delta' => 0,
+      'user_id' => $reviewer->user_id,
+      'date' => REQUEST_TIME,
+      'value' => $extra['equipment_use_fee'],
+    );
+
+    $next_revision = $event['current']['review']['facilities_use_fee'] + 1;
+    $mew_current_review['facilities_use_fee'] = $next_revision;
+    $mew_field_review_facilities_use_fee = array(
+      'event_id' => $event_id,
+      'revision' => $next_revision,
+      'delta' => 0,
+      'user_id' => $reviewer->user_id,
+      'date' => REQUEST_TIME,
+      'value' => $extra['facilities_use_fee'],
+    );
+  }
 
   $failure = FALSE;
   $transaction = db_transaction();
 
   try {
-    // remove any stub reviews
-    $query = db_delete('mew_field_top_review');
-    $query->condition('decision', 0);
-    $query->execute();
-
-    // now perform the operations.
     $query = db_update('mew_event_requests');
     $query->condition('id', $event_id);
     $query->fields($mew_event_requests);
@@ -338,8 +377,23 @@ function mcneese_event_workflow_workflow_step_review($event_id, $reviewer_id, $d
     $query->fields($mew_event_revisions);
     $query->execute();
 
-    $query = db_insert('mew_field_top_review');
-    $query->fields($mew_field_top_review);
+    $query = db_insert('mew_field_review_review');
+    $query->fields($mew_field_review_review);
+    $query->execute();
+
+    if ($step == 133) {
+      $query = db_insert('mew_field_review_equipment_use_fee');
+      $query->fields($mew_field_review_equipment_use_fee);
+      $query->execute();
+
+      $query = db_insert('mew_field_review_facilities_use_fee');
+      $query->fields($mew_field_review_facilities_use_fee);
+      $query->execute();
+    }
+
+    $query = db_update('mew_current_review');
+    $query->condition('event_id', $event_id);
+    $query->fields($mew_current_review);
     $query->execute();
 
     // enforce transaction execution
@@ -354,6 +408,9 @@ function mcneese_event_workflow_workflow_step_review($event_id, $reviewer_id, $d
 
     return FALSE;
   }
+
+  // forcefully clear the event cache so that it can reflect the changes.
+  event_workflow_load_event_by_id($event_id, TRUE);
 
   // handle comments and return without altering the workflow
   if ($decision == 113) {
@@ -377,22 +434,18 @@ function mcneese_event_workflow_workflow_step_review($event_id, $reviewer_id, $d
 
   try {
     $query = db_select('mew_reviewers', 'mr');
-    $query->innerjoin('mew_field_top_review', 'mftr', 'mr.id = mftr.reviewer_id');
+    $query->innerjoin('mew_field_review_review', 'mfrr', 'mr.id = mfrr.reviewer');
 
     $query->addField('mr', 'reviewer_classification', 'reviewer_classification');
 
-    $query->condition('mftr.event_id', $event_id);
+    $query->condition('mfrr.event_id', $event_id);
+    $query->condition('mfrr.revision', $event['current']['review']['review']);
     $query->condition('mr.event_classification', $event_classification);
     $query->condition('mr.review_step', $event_step);
-    $query->condition('mftr.decision', array(114, 115), 'IN');
+    $query->condition('mfrr.decision', array(114, 115), 'IN');
 
-    $total_reviews = $query->execute()->fetchField();
-
-    drupal_set_message("DEBUG: total reviews = " . print_r($total_reviews, TRUE));
-
-    $query->countQuery();
-
-    $total_reviews = (int) $query->execute()->fetchField();
+    $reviews = $query->execute()->fetchAll();
+    $total_reviews = count($reviews);
   }
   catch (Exception $ex) {
     cf_error::on_query_execution($ex);
@@ -400,11 +453,8 @@ function mcneese_event_workflow_workflow_step_review($event_id, $reviewer_id, $d
     return FALSE;
   }
 
-  // forcefully clear the event cache so that it can reflect the changes.
-  event_workflow_load_event_by_id($event_id, TRUE);
-
   if ($total_reviews < $required_reviews) {
-    return;
+    return TRUE;
   }
 
   $new_status = NULL;
@@ -428,7 +478,7 @@ function mcneese_event_workflow_workflow_step_review($event_id, $reviewer_id, $d
       $generate_pdf = TRUE;
     }
   }
-  // Review Step 1
+  // Review Step
   elseif ($event_step == 132) {
     if ($decision == 114 || $decision == 115) {
       $changed_user = $system_user;
@@ -437,7 +487,7 @@ function mcneese_event_workflow_workflow_step_review($event_id, $reviewer_id, $d
       $new_step = 133;
     }
   }
-  // Review Step 2
+  // Usage Fees Step
   elseif ($event_step == 133) {
     if ($decision == 114 || $decision == 115) {
       $changed_user = $system_user;
@@ -446,7 +496,7 @@ function mcneese_event_workflow_workflow_step_review($event_id, $reviewer_id, $d
       $new_step = 117;
     }
   }
-  // Review Step Final
+  // Coordinator Review Step
   elseif ($event_step == 117) {
     if ($decision == 115) {
       $new_status = MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_CLOSED_ACCEPTED;
@@ -502,27 +552,24 @@ function mcneese_event_workflow_workflow_step_review($event_id, $reviewer_id, $d
  *
  * @param int $event_id
  *   The event id.
- * @param null|int $from
- *   A previous workflow step the event is coming from.
- *   If NULL, will guess the from step using the event array.
- * @param int $to
- *   The new workflow state the event is going to.
+ * @param int $status
+ *   The new workflow status the event is going to.
  * @param object|null $user
  *   (optional) If specified, the user to log this change as.
  *
  * @return bool
  *   TRUE on success, FALSE otherwise.
  */
-function mcneese_event_workflow_workflow_status_change($event_id, $to, $user = NULL) {
+function mcneese_event_workflow_workflow_status_change_alert($event_id, $status, $user = NULL) {
   $event = event_workflow_load_event_by_id($event_id);
 
-  if (!is_array($event)) {
-    cf_error::invalid_array('event');
+  if (empty($event)) {
+    watchdog('mew', "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
     return FALSE;
   }
 
-  if (!cf_is_integer($to)) {
-    cf_error::invalid_integer('to');
+  if (!cf_is_integer($status)) {
+    cf_error::invalid_integer('status');
     return FALSE;
   }
 
@@ -538,7 +585,7 @@ function mcneese_event_workflow_workflow_status_change($event_id, $to, $user = N
   $parameters = array();
   $parameters['changed_by'] = $user->uid;
   $parameters['changed_type'] = 'user';
-  $parameters['status'] = $to;
+  $parameters['status'] = $status;
 
   mcneese_event_workflow_send_workflow_emails($event_id, $parameters);
 
@@ -576,7 +623,7 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
   $event = event_workflow_load_event_by_id($event_id);
 
   if (empty($event)) {
-    cf_error::invalid_array('event');
+    watchdog('mew', "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
     return FALSE;
   }
 
@@ -599,15 +646,15 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
   $changed_by = NULL;
   $changed_by_string = NULL;
   if ($parameters['changed_type'] == 'reviewer') {
-    $reviewers = mcneese_event_workflow_get_reviewers(array('mr.id' => $parameters['changed_by']), TRUE);
+    $reviewers = mcneese_event_workflow_get_reviewers(array('mr.user_id' => $parameters['changed_by']), TRUE);
 
     if (empty($reviewers)) {
-      cf_error::invalid_integer('parameters[changed_by]');
-      return FALSE;
+      $changed_by = NULL;
     }
-
-    $reviewer = array_pop($reviewers);
-    $changed_by = user_load($reviewer->user_id);
+    else {
+      $reviewer = array_pop($reviewers);
+      $changed_by = user_load($reviewer->user_id);
+    }
   }
   elseif ($parameters['changed_type'] == 'user' && $parameters['changed_by'] != 1) {
     $changed_by = user_load($parameters['changed_by']);
@@ -651,17 +698,17 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
   $status = NULL;
   if (array_key_exists('status',  $parameters)) {
     $status = $parameters['status'];
-    if (!is_integer($status)) {
+    if (!cf_is_integer($status)) {
       cf_error::invalid_integer('parameters[status]');
       return FALSE;
     }
   }
 
-  $is_step = FALSE;
+  $step = NULL;
   if (array_key_exists('step',  $parameters)) {
-    $is_step = $parameters['step'];
-    if (!is_bool($is_step)) {
-      cf_error::invalid_bool('parameters[step]');
+    $step = $parameters['step'];
+    if (!cf_is_integer($step)) {
+      cf_error::invalid_integer('parameters[step]');
       return FALSE;
     }
   }
@@ -746,19 +793,31 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
   $email_params['event_id'] = $event_id;
   #$email_params['filename'] = array($filename); // @todo: should files be attached?
 
-  $email_from = 'no-reply@mcneese.edu';
+  $email_from = '"McNeese Event Workflow System" <no-reply@mcneese.edu>';
   $email_to = array();
 
-  $standard_content = "Event Request ID: " . $event_id . "\n";
-  $standard_content .= "Event Request Title: " . $event['information']['title'][0]->value . "\n";
-  $standard_content .= "Event Location: " . $event['top']['location'][0]->value;
-  $standard_content .= ", " . $event['top']['building'][0]->value;
+  $location_options = event_workflow_get_event_location_list_options();
+  $building_options = event_workflow_get_event_building_list_options();
 
-  if (!empty($event['top']['room'][0]->value)) {
-    $standard_content .= " Room: " . $event['top']['room'][0]->value;
+  $location = $event['top']['location'][0]->value;
+  $building = $event['top']['building'][0]->value;
+  $room = $event['top']['room'][0]->value;
+
+  if (isset($location_options[$location])) {
+    $location = $location_options[$location];
   }
 
-  $standard_content .= "Event Dates:\n";
+  if (isset($building_options[$building])) {
+    $building = $building_options[$building];
+  }
+
+  $standard_content = "\n\n";
+  $standard_content .= "Request ID:\n - " . $event_id . "\n\n";
+  $standard_content .= "Request Title:\n - " . $event['information']['title'][0]->value . "\n\n";
+  $standard_content .= "Location:\n - " . $location . "\n\n";
+  $standard_content .= "Building:\n - " . $building . "\n\n";
+  $standard_content .= "Room:\n - " . $room . "\n\n";
+  $standard_content .= "Dates:\n";
   foreach ($event['dates']['date'] as $key => $date) {
     $standard_content .= " - " . date("Y/m/d", $date->value);
 
@@ -770,49 +829,46 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
     $standard_content .= "\n";
   }
 
-  $standard_content .= "\n";
-
   $email_params['event_title'] = $event['information']['title'][0]->value;
 
   if ($is_new) {
     $email_params['title_suffix'] = "Requested";
-    $email_params['content'] = $standard_content;
-    $email_params['content'] .= "\n";
+    $email_params['content'] = "";
     $email_params['content'] .= $changed_by_string . " has created this event request.\n";
+    $email_params['content'] .= $standard_content;
 
     foreach ($venue_coordinators as $r) {
-      $email_to[$r->user_id] = $r->email;
+      $email_to[$r->email] = $r->email;
     }
   }
   elseif ($is_update) {
     $email_params['title_suffix'] = "Modified";
-    $email_params['content'] = $standard_content;
-    $email_params['content'] .= "\n";
+    $email_params['content'] = "";
     $email_params['content'] .= $changed_by_string . " has modified this event request.\n";
+    $email_params['content'] .= $standard_content;
 
     // the update message only needs to be sent during the review process.
     if ($status == MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_LOCKED || $status == MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_UNLOCKED) {
       foreach ($venue_coordinators as $r) {
-        $email_to[$r->user_id] = $r->email;
+        $email_to[$r->email] = $r->email;
       }
 
       if ($event['top']['step'][0]->value == 132) {
         foreach ($step_1_reviewers as $r) {
-          $email_to[$r->user_id] = $r->email;
+          $email_to[$r->email] = $r->email;
         }
       }
 
       if ($event['top']['step'][0]->value == 133) {
         foreach ($step_2_reviewers as $r) {
-          $email_to[$r->user_id] = $r->email;
+          $email_to[$r->email] = $r->email;
         }
       }
     }
   }
   elseif ($is_cancelled || $is_uncancelled || !is_null($status)) {
     if ($is_cancelled || $is_uncancelled || $status == MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_CANCELLED || $status == MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_DELETED) {
-      $email_params['content'] = $standard_content;
-      $email_params['content'] .= "\n";
+      $email_params['content'] = "";
 
       if ($is_cancelled || $status == MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_CANCELLED) {
         $email_params['title_suffix'] = "Cancelled";
@@ -827,103 +883,117 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
         $email_params['content'] .= $changed_by_string . " has deleted the event request.\n";
       }
 
-      $email_to[$event_requester->uid] = $event_requester->mail;
+      $email_params['content'] .= $standard_content;
+
+      $email_to[$event_requester->mail] = $event_requester->mail;
 
       foreach ($venue_coordinators as $r) {
-        $email_to[$r->user_id] = $r->email;
+        $email_to[$r->email] = $r->email;
       }
 
       // send cancellation messages to all reviewers when an event is in a review step.
       if ($event['top']['step'][0]->value == 132 || $event['top']['step'][0]->value == 133) {
         foreach ($step_1_reviewers as $r) {
-          $email_to[$r->user_id] = $r->email;
+          $email_to[$r->email] = $r->email;
         }
 
         foreach ($step_2_reviewers as $r) {
-          $email_to[$r->user_id] = $r->email;
+          $email_to[$r->email] = $r->email;
         }
       }
     }
     elseif ($status == MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_CLOSED_ACCEPTED) {
       $email_params['title_suffix'] = "Approved";
-      $email_params['content'] = $standard_content;
-      $email_params['content'] .= "\n";
+      $email_params['content'] = "";
       $email_params['content'] .= "The event request has been approved.\n";
+      $email_params['content'] .= $standard_content;
 
-      $email_to[$event_requester->uid] = $event_requester->mail;
+      $email_to[$event_requester->mail] = $event_requester->mail;
     }
     elseif ($status == MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_CLOSED_REJECTED) {
       $email_params['title_suffix'] = "Denied";
-      $email_params['content'] = $standard_content;
-      $email_params['content'] .= "\n";
+      $email_params['content'] = "";
       $email_params['content'] .= "The event request has been denied.\n";
+      $email_params['content'] .= $standard_content;
 
-      $email_to[$event_requester->uid] = $event_requester->mail;
+      $email_to[$event_requester->mail] = $event_requester->mail;
     }
-    elseif ($status == MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_CLOSED_UNAVAILABLE || $status == MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_CLOSED_DUE_TO_LOC) {
+    elseif ($status == MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_CLOSED_UNAVAILABLE || $status == MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_CLOSED_DUE_TO_LOCK) {
       $email_params['title_suffix'] = "Rejected";
-      $email_params['content'] = $standard_content;
-      $email_params['content'] .= "\n";
+      $email_params['content'] = "";
       $email_params['content'] .= "The event request has been rejected due to the requested location not being available for the requested time slots.\n";
+      $email_params['content'] .= $standard_content;
 
-      $email_to[$event_requester->uid] = $event_requester->mail;
+      $email_to[$event_requester->mail] = $event_requester->mail;
     }
   }
-  elseif ($is_step) {
+  elseif (!is_null($step)) {
     if ($event['top']['step'][0]->value == 132) {
       $email_params['title_suffix'] = "Needs Review";
-      $email_params['content'] = $standard_content;
-      $email_params['content'] .= "\n";
+      $email_params['content'] = "";
       $email_params['content'] .= $changed_by_string . " has made the event request available for review.\n";
       $email_params['content'] .= "\n";
       $email_params['content'] .= $message . "\n";
+      $email_params['content'] .= $standard_content;
 
       foreach ($step_1_reviewers as $r) {
-        $email_to[$r->user_id] = $r->email;
+        $email_to[$r->email] = $r->email;
       }
     }
     elseif ($event['top']['step'][0]->value == 132) {
       $email_params['title_suffix'] = "Needs Review";
-      $email_params['content'] = $standard_content;
-      $email_params['content'] .= "\n";
+      $email_params['content'] = "";
       $email_params['content'] .= "The event request is available for review.\n";
       $email_params['content'] .= "\n";
       $email_params['content'] .= $message . "\n";
+      $email_params['content'] .= $standard_content;
 
       foreach ($step_2_reviewers as $r) {
-        $email_to[$r->user_id] = $r->email;
+        $email_to[$r->email] = $r->email;
+      }
+    }
+    elseif ($event['top']['step'][0]->value == 133) {
+      $email_params['title_suffix'] = "Usage Fees";
+      $email_params['content'] = "";
+      $email_params['content'] .= "The event request has had its usage fees processed.\n";
+      $email_params['content'] .= "\n";
+      $email_params['content'] .= $message . "\n";
+      $email_params['content'] .= $standard_content;
+
+      foreach ($step_2_reviewers as $r) {
+        $email_to[$r->email] = $r->email;
       }
     }
     elseif ($event['top']['step'][0]->value == 117) {
       $email_params['title_suffix'] = "Reviewed";
-      $email_params['content'] = $standard_content;
-      $email_params['content'] .= "\n";
+      $email_params['content'] = "";
       $email_params['content'] .= "The event request has been reviewed and is ready for conflict resolution / decision making / final review.\n";
+      $email_params['content'] .= $standard_content;
 
       foreach ($venue_coordinators as $r) {
-        $email_to[$r->user_id] = $r->email;
+        $email_to[$r->email] = $r->email;
       }
     }
   }
   elseif ($is_comment) {
     if ($event['top']['status'][0]->value == MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_LOCKED || $event['top']['status'][0]->value == MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_UNLOCKED) {
       $email_params['title_suffix'] = "Comment";
-      $email_params['content'] = $standard_content;
-      $email_params['content'] .= "\n";
+      $email_params['content'] = "";
       $email_params['content'] .= $changed_by_string . " has made the following comment:\n";
       $email_params['content'] .= "\n";
       $email_params['content'] .= $message . "\n";
+      $email_params['content'] .= $standard_content;
 
       foreach ($venue_coordinators as $r) {
-        $email_to[$r->user_id] = $r->email;
+        $email_to[$r->email] = $r->email;
       }
 
       foreach ($step_1_reviewers as $r) {
-        $email_to[$r->user_id] = $r->email;
+        $email_to[$r->email] = $r->email;
       }
 
       foreach ($step_2_reviewers as $r) {
-        $email_to[$r->user_id] = $r->email;
+        $email_to[$r->email] = $r->email;
       }
     }
   }

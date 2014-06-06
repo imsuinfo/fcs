@@ -20,7 +20,12 @@ function mcneese_event_workflow_secondary_table_install_structure() {
     'building' => 'varchar',
     'room' => 'varchar',
     'additional' => 'text',
-    'review' => array('reviewer_id' => 'unsigned', 'decision' => 'unsigned', 'message' => 'text'),
+  );
+
+  $structure['review'] = array(
+    'review' => array('reviewer' => 'unsigned', 'decision' => 'unsigned', 'message' => 'text'),
+    'facilities_use_fee' => 'unsigned',
+    'equipment_use_fee' => 'unsigned',
   );
 
   $structure['dates'] = array(
@@ -495,11 +500,6 @@ function mcneese_event_workflow_install() {
   $table2_foreign = 'users';
   $table2_foreign_key = 'uid';
 
-  $key3_name = 'reviewer_id';
-  $key3_foreign = 'reviewer_id_fkey';
-  $table3_foreign = 'mew_reviewers';
-  $table3_foreign_key = 'id';
-
   $structure = mcneese_event_workflow_secondary_table_install_structure();
 
   db_query('ALTER TABLE {mew_event_revisions} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '}(' . $table1_foreign_key . ') ON DELETE CASCADE');
@@ -531,7 +531,6 @@ function mcneese_event_workflow_uninstall() {
   // drupal does not pay attention to foreign key relations when dropping the database, so manually remove all manually added foreign keys.
   $key1_foreign = 'event_id_fkey';
   $key2_foreign = 'user_id_fkey';
-  $key3_foreign = 'reviewer_id_fkey';
 
   $structure = mcneese_event_workflow_secondary_table_install_structure();
 

@@ -57,9 +57,21 @@ function mcneese_event_workflow_secondary_table_structure() {
     'additional' => array(
       'path' => 'event][additional',
     ),
+  );
+
+  $structure['review'] = array(
     'review' => array(
-      'path' => 'event][review',
-      'columns' => array('reviewer_id', 'decision', 'message'),
+      'path' => 'event][review][review',
+      'columns' => array('reviewer', 'decision', 'message'),
+      'manual_processing' => TRUE,
+    ),
+    'facilities_use_fee' => array(
+      'path' => 'event][review][facilities_use_fee',
+      'manual_processing' => TRUE,
+    ),
+    'equipment_use_fee' => array(
+      'path' => 'event][review][equipment_use_fee',
+      'manual_processing' => TRUE,
     ),
   );
 
@@ -296,60 +308,66 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
 
   if (!is_null($option)) {
     if ($option == 1) {
-      $presentation['dates'] = array(
-        'weight' => 1,
-        'group' => 1,
-        'label' => "Date Settings",
+      $presentation['request'] = array(
+        'weight' => 0,
+        'group' => 0,
+        'label' => "Request",
       );
 
-      $presentation['coordinator'] = array(
+      $presentation['dates'] = array(
         'weight' => 1,
         'group' => 0,
-        'label' => "Coordinator Settings",
+        'label' => "Dates",
       );
 
       $presentation['information'] = array(
         'weight' => 0,
-        'group' => 0,
-        'label' => "Event Information",
+        'group' => 1,
+        'label' => "Information",
+      );
+
+      $presentation['coordinator'] = array(
+        'weight' => 1,
+        'group' => 1,
+        'label' => "Coordinator",
       );
 
       $presentation['plans'] = array(
-        'weight' => 1,
-        'group' => 1,
-        'label' => "Event Plans",
+        'weight' => 0,
+        'group' => 2,
+        'label' => "Plans",
       );
 
       $presentation['registration'] = array(
-        'weight' => 0,
+        'weight' => 1,
         'group' => 2,
-        'label' => "Event Registration",
+        'label' => "Registration",
         'event_type' => array(
           'hide_link' => array(57),
         ),
       );
 
       $presentation['setup'] = array(
-        'weight' => 1,
-        'group' => 2,
-        'label' => "Event Setup",
+        'weight' => 0,
+        'group' => 3,
+        'label' => "Setup",
       );
 
       $presentation['presentation'] = array(
-        'weight' => 0,
+        'weight' => 1,
         'group' => 3,
-        'label' => "Event Presentation",
+        'label' => "Presentation",
       );
 
       $presentation['services'] = array(
-        'weight' => 1,
-        'group' => 3,
-        'label' => "Event Services",
+        'weight' => 0,
+        'group' => 4,
+        'label' => "Services",
       );
 
       $presentation['top'] = array(
         'weight' => 0,
-        'group' => 4,
+        'group' => 5,
         'label' => "Miscellaneous",
       );
     }
@@ -360,7 +378,7 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
   $presentation['mer'] = array(
     'id' => array(
       'label' => 'Request ID',
-      'group' => 'information',
+      'group' => 'request',
       'weight' => 0,
       'event_type' => array(
         'show' => TRUE,
@@ -369,8 +387,8 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
     ),
     'created' => array(
       'label' => 'Created On',
-      'group' => 'information',
-      'weight' => 7,
+      'group' => 'request',
+      'weight' => 8,
       'type' => array(
         'value' => 'timestamp',
       ),
@@ -384,8 +402,8 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
     ),
     'user_id' => array(
       'label' => 'Created By',
-      'group' => 'information',
-      'weight' => 8,
+      'group' => 'request',
+      'weight' => 7,
       'type' => array(
         'value' => 'user_id',
       ),
@@ -399,7 +417,7 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
     ),
     'updated' => array(
       'label' => 'Updated On',
-      'group' => 'information',
+      'group' => 'request',
       'weight' => 9,
       'type' => array(
         'value' => 'timestamp',
@@ -417,7 +435,7 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
   $presentation['top'] = array(
     'status' => array(
       'label' => 'Status',
-      'group' => 'information',
+      'group' => 'request',
       'weight' => 10,
       'type' => array(
         'value' => 'status',
@@ -432,7 +450,7 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
     ),
     'step' => array(
       'label' => 'Step',
-      'group' => 'information',
+      'group' => 'request',
       'weight' => 11,
       'type' => array(
         'value' => 'step',
@@ -446,27 +464,39 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
       ),
     ),
     'location' => array(
-      'label' => 'Event Location',
-      'group' => 'information',
-      'weight' => 3,
+      'label' => 'Location',
+      'group' => 'request',
+      'weight' => 100,
+      'type' => array(
+        'value' => 'location',
+      ),
+      'display' => array(
+        'value' => NULL,
+      ),
       'event_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
     ),
     'building' => array(
-      'label' => 'Event Building',
-      'group' => 'information',
-      'weight' => 4,
+      'label' => 'Building',
+      'group' => 'request',
+      'weight' => 101,
+      'type' => array(
+        'value' => 'building',
+      ),
+      'display' => array(
+        'value' => NULL,
+      ),
       'event_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
     ),
     'room' => array(
-      'label' => 'Event Room',
-      'group' => 'information',
-      'weight' => 5,
+      'label' => 'Room',
+      'group' => 'request',
+      'weight' => 102,
       'event_type' => array(
         'show' => TRUE,
         'hide' => FALSE,

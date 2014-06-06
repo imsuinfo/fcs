@@ -10,6 +10,110 @@
  * @{
  */
 
+ /**
+ * Perform pre-validation on a list of event form fields.
+ *
+ * @param array $form
+ *   The form array as defined by drupals form api.
+ * @param array $form_state
+ *   The form state array as defined by drupals form api
+ * @param array $dont_validate
+ *   (optional) an array of submit ids to disable/ignore validation.
+ *
+ * @return bool|NULL
+ *   TRUE on no failures, FALSE otherwise.
+ *   NULL is returned when unable to traverse the form or form state.
+ */
+function mcneese_event_workflow_pre_validate_event_fields(&$form, &$form_state, $dont_validate = array()) {
+  $location_form = &$form;
+  $location_state = &$form_state['values'];
+
+  $ps_c = $form['form']['parents']['#value']['structure'];
+  $ps_p = NULL;
+  while (!empty($ps_c)) {
+    $ps = array_pop($ps_c);
+
+    if (!array_key_exists($ps, $location_form)) {
+      watchdog('mer', "Failed to perform pre-validation, the key '@key' is missing from the form. Currently processed path is @processed", array('@key' => $ps, '@processed' => isset($ps_p) ? $ps_p : NULL), WATCHDOG_ERROR);
+      return NULL;
+    }
+
+    if (!array_key_exists($ps, $location_state)) {
+      watchdog('mer', "Failed to perform pre-validation, the key '@key' is missing from the form_state. Currently processed path is @processed", array('@key' => $ps, '@processed' => isset($ps_p) ? $ps_p : NULL), WATCHDOG_ERROR);
+      return NULL;
+    }
+
+    if (is_null($ps_p)) {
+      $ps_p = $ps;
+    }
+    else {
+      $ps_p .= '][' . $ps;
+    }
+
+    $location_form = &$location_form[$ps];
+    $location_state = &$location_state[$ps];
+  }
+  unset($ps_c);
+  unset($ps);
+
+  $passed = TRUE;
+  if (empty($form_state['values']['form']['step'])) {
+    return $passed;
+  }
+
+  $clicked_id = '';
+  if (isset($form_state['clicked_button']['#id'])) {
+    $clicked_id = $form_state['clicked_button']['#id'];
+  }
+
+  if ($form_state['values']['form']['step'] == 'location') {
+    // when location[0] is empty, then "Unsure of which venue to choose is selected.
+    // this field is considered not-selected by drupal, so it triggers a failure for the required settings.
+    if ($location_state['location'][0] == "") {
+      $location_form['location'][0]['#required'] = FALSE;
+    }
+  }
+
+  if (array_key_exists($clicked_id, $dont_validate)) {
+    if (!empty($form_state['conditionally_required'][0])) {
+      foreach ($form_state['conditionally_required'][0] as $field) {
+        if (is_string($field)) {
+          $parts = explode('][', $field);
+
+          $found = TRUE;
+          $location = &$location_form;
+          while (!empty($parts)) {
+            $part = array_shift($parts);
+            if (!is_array($location) || !array_key_exists($part, $location)) {
+              $found = FALSE;
+              break;
+            }
+
+            $location = &$location[$part];
+          }
+
+          if ($found && !empty($location)) {
+            foreach ($location as $delta => &$location_field) {
+              if (!is_numeric($delta)) continue;
+
+              if (array_key_exists('#required', $location_field)) {
+                if (isset($location['#options'])) {
+                  $location_field['#options'][''] = '';
+                }
+                $location_field['#required'] = FALSE;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // @todo: handle conditionally_required[1] fields, which are required only when their dependant fields make them visible based on the '#state' field settings.
+  }
+
+  return $passed;
+}
+
 /**
  * Perform validation on a list of event form fields.
  *

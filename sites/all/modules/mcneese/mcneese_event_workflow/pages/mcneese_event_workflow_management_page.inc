@@ -126,6 +126,8 @@ function mcneese_event_workflow_management_page() {
       }
     }
 
+    mcneese_event_workflow_include(4);
+
     try {
       $query = db_select('mew_event_requests', 'mer');
 
@@ -145,9 +147,9 @@ function mcneese_event_workflow_management_page() {
       $query->innerjoin('mew_field_dates_time_start', 'mfdts', 'mct.event_id = mfdts.event_id AND mcd.event_id = mfdts.event_id AND mcd.time_start = mfdts.revision AND mfdts.delta = 0');
       $query->innerjoin('mew_field_dates_time_stop', 'mfdtsp', 'mct.event_id = mfdtsp.event_id AND mcd.event_id = mfdtsp.event_id AND mcd.time_stop = mfdtsp.revision AND mfdtsp.delta = 0');
 
-      $query->addField('mftc', 'value', 'top_location');
-      $query->addField('mftb', 'value', 'top_building');
-      $query->addField('mftr', 'value', 'top_room');
+      $query->addField('mftc', 'value', 'location');
+      $query->addField('mftb', 'value', 'building');
+      $query->addField('mftr', 'value', 'room');
 
       $query->addField('mfdd', 'value', 'date');
       $query->addField('mfdts', 'value', 'time_start');
@@ -181,13 +183,13 @@ function mcneese_event_workflow_management_page() {
           $query->orderBy('mer.id', is_null($sort) ? 'DESC' : $sort);
         }
         elseif ($order == 'location') {
-          $query->orderBy('top_location', is_null($sort) ? 'ASC' : $sort);
+          $query->orderBy('location', is_null($sort) ? 'ASC' : $sort);
         }
         elseif ($order == 'building') {
-          $query->orderBy('top_building', is_null($sort) ? 'ASC' : $sort);
+          $query->orderBy('building', is_null($sort) ? 'ASC' : $sort);
         }
         elseif ($order == 'room') {
-          $query->orderBy('top_room', is_null($sort) ? 'ASC' : $sort);
+          $query->orderBy('room', is_null($sort) ? 'ASC' : $sort);
         }
         elseif ($order == 'date') {
           // @todo: find a way to sort by dates (due to multiple values, one cannot simply just sort delta = 0).
@@ -234,10 +236,29 @@ function mcneese_event_workflow_management_page() {
 
         $row['id'] = '<a href="' . $base_path . 'events/view-0/' . $event_id . '">' . $event_id . '</a>';
 
-        $row['location'] = check_plain($result->top_location);
-        $row['building'] = check_plain($result->top_building);
-        $row['room'] = check_plain($result->top_room);
+        $location_options = event_workflow_get_event_location_list_options();
+        $building_options = event_workflow_get_event_building_list_options($result->location);
 
+        $location = "";
+        if (empty($result->location)) {
+          $location = "Unsure";
+        }
+        else {
+          if (isset($location_options[$result->location])) {
+            $location = check_plain($location_options[$result->location]);
+          }
+        }
+
+        $building = "";
+        if (!empty($result->building)) {
+          if (isset($building_options[$result->building])) {
+            $building = check_plain($building_options[$result->building]);
+          }
+        }
+
+        $row['location'] = $location;
+        $row['building'] = $building;
+        $row['room'] = check_plain($result->room);
 
         // fetch all available dates:
         $sub_query = db_select('mew_current_dates', 'mcd');

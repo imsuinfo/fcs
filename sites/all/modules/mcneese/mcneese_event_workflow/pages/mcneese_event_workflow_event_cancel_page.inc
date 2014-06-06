@@ -149,7 +149,11 @@ function mcneese_event_workflow_event_cancel_0_form_submit($form, &$form_state) 
   $cancelled = mcneese_event_workflow_workflow_set_status($event_id, MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_CANCELLED);
 
   if ($cancelled) {
-    mcneese_event_workflow_workflow_status_change($event_id, NULL, MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_CANCELLED);
+    $parameters = array();
+    $parameters['changed_by'] = $user->uid;
+    $parameters['changed_type'] = 'user';
+    $parameters['cancelled'] = TRUE;
+    mcneese_event_workflow_send_workflow_emails($event_id, $parameters);
   }
   else {
     form_set_error('form', "An error occurred while trying to cancel the event request. Please contact the support staff.");
@@ -161,12 +165,6 @@ function mcneese_event_workflow_event_cancel_0_form_submit($form, &$form_state) 
 
     return;
   }
-
-  $parameters = array();
-  $parameters['changed_by'] = $user->uid;
-  $parameters['changed_type'] = 'user';
-  $parameters['cancelled'] = TRUE;
-  mcneese_event_workflow_send_workflow_emails($event_id, $parameters);
 
   // redirect after submitting.
   if (empty($form_state['values']['redirect_to'])) {
@@ -325,6 +323,7 @@ function mcneese_event_workflow_event_uncancel_0_form_submit($form, &$form_state
 
     $query->fields('mfts');
 
+    $query->condition('mfts.event_id', $event_id);
     $query->condition('mfts.revision', $form['form']['event']['#value']['current']['top']['status'], '<');
 
     $query->range(0, 1);
@@ -347,7 +346,11 @@ function mcneese_event_workflow_event_uncancel_0_form_submit($form, &$form_state
   }
 
   if ($uncancelled) {
-    mcneese_event_workflow_workflow_status_change($event_id, NULL, MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_UNCANCELLED);
+    $parameters = array();
+    $parameters['changed_by'] = $user->uid;
+    $parameters['changed_type'] = 'user';
+    $parameters['uncancelled'] = TRUE;
+    mcneese_event_workflow_send_workflow_emails($event_id, $parameters);
   }
   else {
     form_set_error('form', "An error occurred while trying to uncancel the event request. Please contact the support staff.");
@@ -359,12 +362,6 @@ function mcneese_event_workflow_event_uncancel_0_form_submit($form, &$form_state
 
     return;
   }
-
-  $parameters = array();
-  $parameters['changed_by'] = $user->uid;
-  $parameters['changed_type'] = 'user';
-  $parameters['uncancelled'] = TRUE;
-  mcneese_event_workflow_send_workflow_emails($event_id, $parameters);
 
   // redirect after submitting.
   if (empty($form_state['values']['redirect_to'])) {

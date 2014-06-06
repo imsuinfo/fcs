@@ -2,9 +2,12 @@
 
 
 /*** View ***/
-#mcneese-page-content > .page-title > .html_tag-hgroup > .page-title {
+#mcneese-page-content > .page-title > .html_tag-hgroup > .page-title,
+#mcneese-page-content .event-section-review-log .event-section-review-log-page_title {
   font-size: 20px;
   line-height: 24px;
+
+  font-weight: bold;
 
   margin: 0px auto;
   padding: 0px;
@@ -17,6 +20,10 @@
 }
 
 #mcneese-event-workflow-event-view-0-page .event-section-review-operations {
+  display: none;
+}
+
+#mcneese-event-workflow-event-view-0-page .event-review-log-submit {
   display: none;
 }
 
@@ -45,12 +52,14 @@
   font-weight: inherit;
 }
 
-#mcneese-event-workflow-event-view-0-page .event-section-review-log {
+#mcneese-event-workflow-event-view-0-page .event-section-review-log.mode-0 {
   page-break-before: always;
 }
 
 #mcneese-event-workflow-event-view-0-page .event-section-review-log,
 #mcneese-event-workflow-event-view-0-page .event-section-review-operations {
+  width: 960px;
+  min-width: 960px;
   max-width: 960px;
 
   margin: 0px auto;
