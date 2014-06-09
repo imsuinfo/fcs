@@ -68,10 +68,12 @@ function mcneese_event_workflow_secondary_table_structure() {
     'facilities_use_fee' => array(
       'path' => 'event][review][facilities_use_fee',
       'manual_processing' => TRUE,
+      'storage' => 'currency',
     ),
     'equipment_use_fee' => array(
       'path' => 'event][review][equipment_use_fee',
       'manual_processing' => TRUE,
+      'storage' => 'currency',
     ),
   );
 
@@ -522,6 +524,9 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
   $presentation['review'] = array(
     'facilities_use_fee' => array(
       'label' => 'Facilities Use',
+      'type' => array(
+        'value' => 'currency',
+      ),
       'group' => 'fees',
       'event_type' => array(
         'show' => TRUE,
@@ -530,6 +535,9 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
     ),
     'equipment_use_fee' => array(
       'label' => 'Equipment Use',
+      'type' => array(
+        'value' => 'currency',
+      ),
       'group' => 'fees',
       'event_type' => array(
         'show' => TRUE,

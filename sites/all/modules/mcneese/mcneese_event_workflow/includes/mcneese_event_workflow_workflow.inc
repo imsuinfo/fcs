@@ -341,6 +341,25 @@ function mcneese_event_workflow_workflow_step_review($event_id, $reviewer_id, $d
   }
 
   if ($step == 133) {
+    $facilities_use_fee = 0;
+    $equipment_use_fee = 0;
+
+    if (isset($extra['facilitiues_use_fee'])) {
+      $facilities_use_fee = event_workflow_convert_value_to_database_format($extra['facilities_use_fee'], 'currency');
+    }
+
+    if (isset($extra['equipment_use_fee'])) {
+      $equipment_use_fee = event_workflow_convert_value_to_database_format($extra['equipment_use_fee'], 'currency');
+    }
+
+    if ($facilities_use_fee === FALSE) {
+      $facilities_use_fee = 0;
+    }
+
+    if ($equipment_use_fee === FALSE) {
+      $equipment_use_fee = 0;
+    }
+
     $next_revision = $event['current']['review']['equipment_use_fee'] + 1;
     $mew_current_review['equipment_use_fee'] = $next_revision;
     $mew_field_review_equipment_use_fee = array(
@@ -349,7 +368,7 @@ function mcneese_event_workflow_workflow_step_review($event_id, $reviewer_id, $d
       'delta' => 0,
       'user_id' => $reviewer->user_id,
       'date' => REQUEST_TIME,
-      'value' => $extra['equipment_use_fee'],
+      'value' => $equipment_use_fee,
     );
 
     $next_revision = $event['current']['review']['facilities_use_fee'] + 1;
@@ -360,7 +379,7 @@ function mcneese_event_workflow_workflow_step_review($event_id, $reviewer_id, $d
       'delta' => 0,
       'user_id' => $reviewer->user_id,
       'date' => REQUEST_TIME,
-      'value' => $extra['facilities_use_fee'],
+      'value' => $facilities_use_fee,
     );
   }
 
@@ -442,7 +461,7 @@ function mcneese_event_workflow_workflow_step_review($event_id, $reviewer_id, $d
     $query->condition('mfrr.revision', $event['current']['review']['review']);
     $query->condition('mr.event_classification', $event_classification);
     $query->condition('mr.review_step', $event_step);
-    $query->condition('mfrr.decision', array(114, 115), 'IN');
+    $query->condition('mfrr.decision', array(114, 115, 135), 'IN');
 
     $reviews = $query->execute()->fetchAll();
     $total_reviews = count($reviews);
@@ -489,7 +508,7 @@ function mcneese_event_workflow_workflow_step_review($event_id, $reviewer_id, $d
   }
   // Usage Fees Step
   elseif ($event_step == 133) {
-    if ($decision == 114 || $decision == 115) {
+    if ($decision == 114 || $decision == 115 || $decision == 135) {
       $changed_user = $system_user;
       $changed_by = $system_user->uid;
       $changed_type = 'system';

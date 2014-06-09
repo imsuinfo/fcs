@@ -1769,6 +1769,17 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
           $output[$value_name]['markup']['#markup'] = $building_options[$value->$value_name];
         }
       }
+      elseif ($type[$value_name] == 'currency') {
+        $output[$value_name]['markup']['#markup'] = NULL;
+        $currency = event_workflow_convert_value_from_database_format($value->$value_name, 'currency');
+
+        if ($currency !== FALSE) {
+          $output[$value_name]['markup']['#markup'] = '$' . $currency;
+          if ($currency == floor($currency)) {
+            $output[$value_name]['markup']['#markup'] .= '.00';
+          }
+        }
+      }
 
       if (!is_numeric($output[$value_name]['markup']['#markup']) && empty($output[$value_name]['markup']['#markup'])) {
         $output[$value_name]['#attributes']['class'][] = 'empty_value';
@@ -1795,17 +1806,17 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
  * @param string $method
  *   The method to use for converting.
  * @param string|array $option
- *   Additional options to pass to the method for conversion.
+ *   (optional) Additional options to pass to the method for conversion.
  * @param array $form_state
- *   The form state array, containing all available values.
+ *   (optional) The form state array, containing all available values.
  * @param array $delta
- *   The delta location for processing data of the same delta.
+ *   (optional) The delta location for processing data of the same delta.
  *
  * @return
  *   The appropriate datatype suitable for storing into the database.
  *   FALSE is returned on error.
  */
-function event_workflow_convert_value_to_database_format($value, $method, $option, $form_state, $delta) {
+function event_workflow_convert_value_to_database_format($value, $method, $option = array(), $form_state = array(), $delta = array()) {
   if ($method == 'timestamp') {
     if (empty($value)) {
       return FALSE;
@@ -1851,6 +1862,14 @@ function event_workflow_convert_value_to_database_format($value, $method, $optio
     $date = date("Y/m/d", $date_stamp);
     return strtotime($date, 0);
   }
+  elseif ($method == 'currency') {
+    if (is_null($value)) {
+      return FALSE;
+    }
+
+    // shift decimal over to digits.
+    return floor($value * 100);
+  }
 
   return FALSE;
 }
@@ -1863,13 +1882,13 @@ function event_workflow_convert_value_to_database_format($value, $method, $optio
 * @param string $method
  *   The method to use for converting.
  * @param string|array $option
- *   Additional options to pass to the method for conversion.
+ *   (optional) Additional options to pass to the method for conversion.
  *
  * @return
  *   The appropriate datatype suitable for storing into the database.
  *   FALSE is returned on error.
  */
-function event_workflow_convert_value_from_database_format($value, $method, $option) {
+function event_workflow_convert_value_from_database_format($value, $method, $option = array()) {
   if ($method == 'timestamp') {
     if (empty($value)) return NULL;
 
@@ -1879,6 +1898,11 @@ function event_workflow_convert_value_from_database_format($value, $method, $opt
     if (empty($value)) return NULL;
 
     return date('Y-m-d', $value);
+  }
+  elseif ($method == 'currency') {
+    if (is_null($value)) return NULL;
+
+    return $value / 100;
   }
 
   return FALSE;

@@ -797,11 +797,10 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
       if ($step == 133) {
         $form['review']['operations']['equipment_use_fee'] = array(
           '#id' => 'event-review-operations-equipment_use_fee',
-          '#type' => 'numberfield',
+          '#type' => 'textfield',
           '#title' => 'Equipment Use Fee',
           '#default_value' => NULL,
           '#required' => TRUE,
-          '#min' => 0,
           '#attributes' => array(
             'class' => array(
               'no-print',
@@ -812,11 +811,10 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
 
         $form['review']['operations']['facilities_use_fee'] = array(
           '#id' => 'event-review-operations-facilities_use_fee',
-          '#type' => 'numberfield',
+          '#type' => 'textfield',
           '#title' => 'Facilities Use Fee',
           '#default_value' => NULL,
           '#required' => TRUE,
-          '#min' => 0,
           '#attributes' => array(
             'class' => array(
               'no-print',
@@ -842,6 +840,26 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
           'class' => array(
             'no-print',
             'mode-' . $mode,
+          ),
+        ),
+      );
+
+      $form['review']['operations']['presidents_approval'] = array(
+        '#id' => 'event-review-operations-presidents_approval',
+        '#type' => 'checkbox',
+        '#title' => "Approved by the President",
+        '#description' => "By selecting this checkbox you claim that the president has approved this action. This action will be logged.",
+        '#default_value' => NULL,
+        '#required' => FALSE,
+        '#attributes' => array(
+          'class' => array(
+            'no-print',
+            'mode-' . $mode,
+          ),
+        ),
+        '#states' => array(
+          'visible' => array(
+            ':input[name="review[operations][decision]"]' => array('value' => 135),
           ),
         ),
       );
@@ -1039,8 +1057,7 @@ function mcneese_event_workflow_event_view_0_page_pre_validate(&$form, &$form_st
   if ($clicked_id == 'event-review-operations-submit-submit') {
     if ($step == 133) {
       if ($form_state['values']['review']['operations']['decision'] == 135) {
-        // @todo: during the usage fees step, if 135 ('skip') is selected, present a confirmation popup declaring that this is approved by the president.
-
+        $form['review']['operations']['presidents_approval']['#required'] = TRUE;
         $form['review']['operations']['equipment_use_fee']['#required'] = FALSE;
         $form['review']['operations']['facilities_use_fee']['#required'] = FALSE;
       }
@@ -1148,6 +1165,28 @@ function mcneese_event_workflow_event_view_0_page_validate($form, &$form_state) 
       $failure = TRUE;
     }
 
+    if ($step == 133) {
+      if (!empty($form_state['values']['review']['operations']['equipment_use_fee'])) {
+        $matches = array();
+        $matched = preg_match('/^(\d+|\d+\.\d|\d+\.\d\d)$/i', $form_state['values']['review']['operations']['equipment_use_fee'], $matches);
+
+        if (!$matched) {
+          form_set_error('review][operations][equipment_use_fee', t("@equipment_use_fee is not a valid usage fee. Use only numbers and two decimal places. Do not provide a dollar sign.", array('@equipment_use_fee' => $form_state['values']['review']['operations']['equipment_use_fee'])));
+          $failure = TRUE;
+        }
+      }
+
+      if (!empty($form_state['values']['review']['operations']['facilities_use_fee'])) {
+        $matches = array();
+        $matched = preg_match('/^(\d+|\d+\.\d\d)$/i', $form_state['values']['review']['operations']['facilities_use_fee']);
+
+        if (!$matched) {
+          form_set_error('review][operations][facilities_use_fee', t("@facilities_use_fee is not a valid usage fee. Use only numbers and two decimal places. Do not provide a dollar sign.", array('@facilities_use_fee' => $form_state['values']['review']['operations']['facilities_use_fee'])));
+          $failure = TRUE;
+        }
+      }
+    }
+
     if (!$failure) {
       $form_state['rebuild'] = FALSE;
     }
@@ -1212,8 +1251,14 @@ function mcneese_event_workflow_event_view_0_page_submit($form, &$form_state) {
     $extra = array();
 
     if ($step == 133) {
-      $extra['equipment_use_fee'] = $form_state['values']['review']['operations']['equipment_use_fee'];
-      $extra['facilities_use_fee'] = $form_state['values']['review']['operations']['facilities_use_fee'];
+      if ($decision == 135) {
+        $extra['equipment_use_fee'] = 0;
+        $extra['facilities_use_fee'] = 0;
+      }
+      else {
+        $extra['equipment_use_fee'] = $form_state['values']['review']['operations']['equipment_use_fee'];
+        $extra['facilities_use_fee'] = $form_state['values']['review']['operations']['facilities_use_fee'];
+      }
     }
 
     $success = mcneese_event_workflow_workflow_step_review($event_id, $reviewer_id, $decision, $message, $extra, $user);
