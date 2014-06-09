@@ -955,7 +955,7 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
     elseif ($event['top']['step'][0]->value == 133) {
       $email_params['title_suffix'] = "Usage Fees";
       $email_params['content'] = "";
-      $email_params['content'] .= "The event request has had its usage fees processed.\n";
+      $email_params['content'] .= "The event request is ready to have its usage fees processed.\n";
       $email_params['content'] .= "\n";
       $email_params['content'] .= $message . "\n";
       $email_params['content'] .= $standard_content;

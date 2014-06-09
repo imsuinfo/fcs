@@ -292,6 +292,10 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
 
     $collate = array();
 
+    foreach ($presentation_tables as $field_group => $presentation_table) {
+      mcneese_event_workflow_event_view_0_page_setup_group_path($form, $event_id, $field_group, $presentation_tables, $can_edit, $event);
+    }
+
     foreach ($event as $field_group => $event_array) {
       if (isset($presentation_tables[$field_group]['event_type']) && is_array($presentation_tables[$field_group]['event_type']) && array_key_exists('hide', $presentation_tables[$field_group]['event_type'])) {
         if ($presentation_tables[$field_group]['event_type']['hide'] === TRUE) {
@@ -915,7 +919,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
  * @see: ctools_include()
  * @see: ctools_modal_add_js()
  */
-function mcneese_event_workflow_event_view_0_page_setup_group_path(&$form, &$event_id, &$group, &$presentation_tables, $show_edit, $event) {
+function mcneese_event_workflow_event_view_0_page_setup_group_path(&$form, $event_id, $group, $presentation_tables, $show_edit, $event) {
   $row = NULL;
   $group_path = &$form['display']['groups'];
   $event_type = $event['information']['type'][0]->value;
@@ -924,6 +928,12 @@ function mcneese_event_workflow_event_view_0_page_setup_group_path(&$form, &$eve
   if (isset($presentation_tables[$group]['event_type']['hide_link']) && is_array($presentation_tables[$group]['event_type']['hide_link'])) {
     if (in_array($event_type, $presentation_tables[$group]['event_type']['hide_link'])) {
       $show_link = FALSE;
+    }
+  }
+
+  if ($show_edit) {
+    if (array_key_exists('editable', $presentation_tables[$group])) {
+      $show_edit = $presentation_tables[$group]['editable'];
     }
   }
 
@@ -1407,6 +1417,8 @@ function mcneese_event_workflow_build_reviews_log(&$form, &$form_state, $event_i
 
   $has_log = FALSE;
   if (!empty($reviews)) {
+    $review_step_options = event_workflow_get_review_step_list_options();
+
     foreach ($reviews as $row => $review) {
       $reviewer_id = $review->reviewer;
       $decision = $review->decision;
@@ -1428,17 +1440,39 @@ function mcneese_event_workflow_build_reviews_log(&$form, &$form_state, $event_i
 
       $reviewer_name = '';
       if (is_null($reviewers[$reviewer_id])) {
-        $reviewer_name = 'Unknown';
+        // @todo: this is an error, throw a watchdog message.
+        continue;
       }
-      else {
-        $reviewer_name .= $reviewers[$reviewer_id]->first_name;
-        $reviewer_name .= ' ' . $reviewers[$reviewer_id]->last_name;
-      }
+
+      $reviewer_name .= $reviewers[$reviewer_id]->first_name;
+      $reviewer_name .= ' ' . $reviewers[$reviewer_id]->last_name;
+      $review_step = $reviewers[$reviewer_id]->review_step;
 
       $markup .= '<div class="review-item-label">';
       $markup .= '<h3 class="review-item-label-text">';
-      if ($decision == 113) {
+      if ($review_step == 116 && $decision == 115) {
+        $markup .= '<span class="review-item-label-text-row">[' . $row . ']</span> <strong>' . $reviewer_name . "</strong> has designated that the <strong>Venue is Available</strong>.";
+      }
+      elseif ($review_step == 116 && $decision == 114) {
+        $markup .= '<span class="review-item-label-text-row">[' . $row . ']</span> <strong>' . $reviewer_name . "</strong> has designated that the <strong>Venue is Unavailable</strong>.";
+      }
+      elseif ($review_step == 117 && $decision == 115) {
+        $markup .= '<span class="review-item-label-text-row">[' . $row . ']</span> <strong>' . $reviewer_name . "</strong> has <strong>Confirmed and Reserved</strong> the request.";
+      }
+      elseif ($review_step == 117 && $decision == 114) {
+        $markup .= '<span class="review-item-label-text-row">[' . $row . ']</span> <strong>' . $reviewer_name . "</strong> has <strong>Denied</strong> the request.";
+      }
+      elseif ($decision == 113) {
         $markup .= '<span class="review-item-label-text-row">[' . $row . ']</span> <strong>' . $reviewer_name . "</strong> has made a <strong>" . $decision_options[$decision] . "</strong>.";
+      }
+      elseif ($review_step == 133 && $decision == 115) {
+        $markup .= '<span class="review-item-label-text-row">[' . $row . ']</span> <strong>' . $reviewer_name . "</strong> has designated the <strong>" . $review_step_options[$review_step] . "</strong>.";
+      }
+      elseif ($review_step == 133 && $decision == 114) {
+        $markup .= '<span class="review-item-label-text-row">[' . $row . ']</span> <strong>' . $reviewer_name . "</strong> has rejected the <strong>" . $review_step_options[$review_step] . "</strong>.";
+      }
+      elseif ($review_step == 133 && $decision == 135) {
+        $markup .= '<span class="review-item-label-text-row">[' . $row . ']</span> <strong>' . $reviewer_name . "</strong> has skipped the <strong>" . $review_step_options[$review_step] . "</strong> step.";
       }
       else {
         $markup .= '<span class="review-item-label-text-row">[' . $row . ']</span> <strong>' . $reviewer_name . "</strong> chose to <strong>" . $decision_options[$decision] . "</strong> the event request.";

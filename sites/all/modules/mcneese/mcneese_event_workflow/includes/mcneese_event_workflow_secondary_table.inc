@@ -365,6 +365,13 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
         'label' => "Services",
       );
 
+      $presentation['fees'] = array(
+        'weight' => 1,
+        'group' => 4,
+        'label' => "Fees",
+        'editable' => FALSE,
+      );
+
       $presentation['top'] = array(
         'weight' => 0,
         'group' => 5,
@@ -505,6 +512,25 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
     'additional' => array(
       'label' => 'Additional Information or Questions to Campus Officials',
       'size' => 'large',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
+    ),
+  );
+
+  $presentation['review'] = array(
+    'facilities_use_fee' => array(
+      'label' => 'Facilities Use',
+      'group' => 'fees',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
+    ),
+    'equipment_use_fee' => array(
+      'label' => 'Equipment Use',
+      'group' => 'fees',
       'event_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
