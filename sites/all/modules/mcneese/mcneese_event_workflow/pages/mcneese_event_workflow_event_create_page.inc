@@ -170,6 +170,7 @@ function mcneese_event_workflow_event_create_0_form_pre_validate(&$form, &$form_
   $dont_validate = array(
     'submit-event-prev' => TRUE,
     'submit-event-add-date' => TRUE,
+    'submit-event-remove-date' => TRUE,
   );
 
   mcneese_event_workflow_include(2);

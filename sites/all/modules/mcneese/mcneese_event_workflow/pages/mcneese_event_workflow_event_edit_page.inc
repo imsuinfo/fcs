@@ -331,6 +331,7 @@ function mcneese_event_workflow_event_edit_0_form_pre_validate(&$form, &$form_st
     'submit-event-cancel' => TRUE,
     'submit-event-prev' => TRUE,
     'submit-event-add-date' => TRUE,
+    'submit-event-remove-date' => TRUE,
   );
 
   mcneese_event_workflow_include(2);
