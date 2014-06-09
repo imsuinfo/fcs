@@ -309,7 +309,7 @@ function mcneese_event_workflow_management_page() {
         }
 
         if ($can_edit) {
-          $row['operations'] .= '<a href="' . $base_path . 'events/edit-0/' . $event_id . '/information" class="operation-link operation-link-edit">Edit</a> ';
+          $row['operations'] .= '<a href="' . $base_path . 'events/edit-0/' . $event_id . '/request" class="operation-link operation-link-edit">Edit</a> ';
         }
 
         if ($can_review) {
