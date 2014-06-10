@@ -65,15 +65,47 @@ function mcneese_event_workflow_secondary_table_structure() {
       'columns' => array('reviewer', 'decision', 'message'),
       'manual_processing' => TRUE,
     ),
-    'facilities_use_fee' => array(
-      'path' => 'event][review][facilities_use_fee',
+  );
+
+  $structure['use_fees'] = array(
+    'facilities' => array(
+      'path' => 'event][use_fees][facilities',
       'manual_processing' => TRUE,
+      'columns' => array('hours', 'days', 'amount'),
       'storage' => 'currency',
     ),
-    'equipment_use_fee' => array(
-      'path' => 'event][review][equipment_use_fee',
+    'equipment' => array(
+      'path' => 'event][use_fees][equipment',
       'manual_processing' => TRUE,
+      'columns' => array('hours', 'days', 'amount'),
       'storage' => 'currency',
+    ),
+    'custodial' => array(
+      'path' => 'event][use_fees][custodial',
+      'manual_processing' => TRUE,
+      'columns' => array('hours', 'days', 'amount'),
+      'storage' => 'currency',
+    ),
+    'security' => array(
+      'path' => 'event][use_fees][security',
+      'manual_processing' => TRUE,
+      'columns' => array('hours', 'days', 'amount'),
+      'storage' => 'currency',
+    ),
+    'other' => array(
+      'path' => 'event][use_fees][other',
+      'manual_processing' => TRUE,
+    ),
+  );
+
+  $structure['insurance'] = array(
+    'contractor' => array(
+      'path' => 'event][insurance][contractor',
+      'manual_processing' => TRUE,
+    ),
+    'unaffiliated' => array(
+      'path' => 'event][insurance][unaffiliated',
+      'manual_processing' => TRUE,
     ),
   );
 
@@ -521,11 +553,55 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
     ),
   );
 
-  $presentation['review'] = array(
-    'facilities_use_fee' => array(
+  $presentation['use_fees'] = array(
+    'facilities' => array(
       'label' => 'Facilities Use',
+      'combined' => TRUE,
+      'value_names' => array(
+        'days',
+        'amount',
+      ),
       'type' => array(
-        'value' => 'currency',
+        'days' => 'use_fee_days',
+        'amount' => 'use_fee_amount',
+       ),
+      'group' => 'fees',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
+    ),
+    'equipment' => array(
+      'label' => 'Equipment Use',
+      'combined' => TRUE,
+      'value_names' => array(
+        'days',
+        'amount',
+      ),
+      'type' => array(
+        'days' => 'use_fee_days',
+        'amount' => 'use_fee_amount',
+       ),
+      'group' => 'fees',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
+    ),
+    'custodial' => array(
+      'label' => 'Custodial Use',
+      'combined' => TRUE,
+      'value_names' => array(
+        'quantity',
+        'hours',
+        'days',
+        'amount',
+      ),
+      'type' => array(
+        'quantity' => 'use_fee_personnel',
+        'hours' => 'use_fee_hours',
+        'days' => 'use_fee_days',
+        'amount' => 'use_fee_amount',
       ),
       'group' => 'fees',
       'event_type' => array(
@@ -533,10 +609,56 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
         'hide' => FALSE,
       ),
     ),
-    'equipment_use_fee' => array(
-      'label' => 'Equipment Use',
+    'security' => array(
+      'label' => 'Security Use',
+      'combined' => TRUE,
+      'value_names' => array(
+        'quantity',
+        'hours',
+        'days',
+        'amount',
+      ),
       'type' => array(
-        'value' => 'currency',
+        'quantity' => 'use_fee_personnel',
+        'hours' => 'use_fee_hours',
+        'days' => 'use_fee_days',
+        'amount' => 'use_fee_amount',
+      ),
+      'group' => 'fees',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
+    ),
+    'other' => array(
+      'label' => 'Other Use',
+      'type' => array(
+        'value' => 'boolean',
+      ),
+      'group' => 'fees',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
+    ),
+  );
+
+  $presentation['insurance'] = array(
+    'contractor' => array(
+      'label' => 'Contractor Insurance',
+      'type' => array(
+        'value' => 'boolean',
+      ),
+      'group' => 'fees',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
+    ),
+    'unaffiliated' => array(
+      'label' => 'Unaffiliated Insurance',
+      'type' => array(
+        'value' => 'boolean',
       ),
       'group' => 'fees',
       'event_type' => array(

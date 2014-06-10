@@ -375,9 +375,6 @@ function mcneese_event_workflow_event_create_0_form_submit($form, &$form_state) 
     $structure_tables[$db_table] = array();
 
     foreach ($fields as $field_name => &$field_values) {
-      // @todo: add support for using multiple values instead of using only delta = 0.
-      $delta = 0;
-
       $structure_tables[$db_table][$field_name] = 0;
 
       // manual processing fields must not be auto-populated through the normal form submit process.

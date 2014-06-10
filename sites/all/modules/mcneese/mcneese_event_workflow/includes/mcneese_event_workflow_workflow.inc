@@ -321,9 +321,50 @@ function mcneese_event_workflow_workflow_step_review($event_id, $reviewer_id, $d
   $mew_current_review = array(
     'event_id' => $event_id,
     'review' => $revision,
-    'facilities_use_fee' => $event['current']['review']['facilities_use_fee'],
-    'equipment_use_fee' => $event['current']['review']['equipment_use_fee'],
   );
+
+  $mew_current_use_fees = array(
+    'event_id' => $event_id,
+    'facilities' => NULL,
+    'equipment' => NULL,
+    'custodial' => NULL,
+    'security' => NULL,
+    'other' => NULL,
+  );
+
+  if (!empty($event['current']['use_fees']['facilities'])) {
+    $mew_current_use_fees['facilities'] = $event['current']['use_fees']['facilities'];
+  }
+
+  if (!empty($event['current']['use_fees']['equipment'])) {
+    $mew_current_use_fees['equipment'] = $event['current']['use_fees']['equipment'];
+  }
+
+  if (!empty($event['current']['use_fees']['custodial'])) {
+    $mew_current_use_fees['custodial'] = $event['current']['use_fees']['custodial'];
+  }
+
+  if (!empty($event['current']['use_fees']['security'])) {
+    $mew_current_use_fees['security'] = $event['current']['use_fees']['security'];
+  }
+
+  if (!empty($event['current']['use_fees']['other'])) {
+    $mew_current_use_fees['other'] = $event['current']['use_fees']['other'];
+  }
+
+  $mew_current_insurance = array(
+    'event_id' => $event_id,
+    'contractor' => 0,
+    'unaffiliated' => 0,
+  );
+
+  if (!empty($event['current']['insurance']['contractor'])) {
+    $mew_current_insurance['contractor'] = $event['current']['use_fees']['contractor'];
+  }
+
+  if (!empty($event['current']['insurance']['unaffiliated'])) {
+    $mew_current_insurance['unaffiliated'] = $event['current']['use_fees']['unaffiliated'];
+  }
 
   $mew_field_review_review = array(
     'event_id' => $event_id,
@@ -341,45 +382,110 @@ function mcneese_event_workflow_workflow_step_review($event_id, $reviewer_id, $d
   }
 
   if ($step == 133) {
-    $facilities_use_fee = 0;
-    $equipment_use_fee = 0;
+    $mew_field_use_fees = array();
+    foreach (array('facilities', 'equipment', 'custodial', 'security') as $use) {
+      $use_fees = array('quantity' => 0, 'hours' => 0, 'days' => 0, 'amount' => 0);
 
-    if (isset($extra['facilitiues_use_fee'])) {
-      $facilities_use_fee = event_workflow_convert_value_to_database_format($extra['facilities_use_fee'], 'currency');
+      if (!empty($extra['use_fees'][$use]['quantity'])) {
+        $use_fees['quantity'] = $extra['use_fees'][$use]['quantity'];
+      }
+
+      if (!empty($extra['use_fees'][$use]['hours'])) {
+        $use_fees['hours'] = $extra['use_fees'][$use]['hours'];
+      }
+
+      if (!empty($extra['use_fees'][$use]['days'])) {
+        $use_fees['days'] = $extra['use_fees'][$use]['days'];
+      }
+
+      if (!empty($extra['use_fees'][$use]['amount'])) {
+        $use_fees['amount'] = event_workflow_convert_value_to_database_format($extra['use_fees'][$use]['amount'], 'currency');
+      }
+
+      if ($use_fees['amount'] === FALSE) {
+        $use_fees['amount'] = 0;
+      }
+
+      if (is_null($mew_current_use_fees[$use])) {
+        $mew_current_use_fees[$use] = 0;
+      }
+      else {
+        $mew_current_use_fees[$use]++;
+      }
+      $mew_field_use_fees[$use] = array(
+        'event_id' => $event_id,
+        'revision' => $mew_current_use_fees[$use],
+        'delta' => 0,
+        'user_id' => $reviewer->user_id,
+        'date' => REQUEST_TIME,
+        'quantity' => $use_fees['quantity'],
+        'hours' => $use_fees['hours'],
+        'days' => $use_fees['days'],
+        'amount' => $use_fees['amount'],
+      );
+
+      unset($use_fees);
     }
 
-    if (isset($extra['equipment_use_fee'])) {
-      $equipment_use_fee = event_workflow_convert_value_to_database_format($extra['equipment_use_fee'], 'currency');
+    $other_use_fee = 0;
+    $contractor_insurance = 0;
+    $unaffiliated_insurance = 0;
+
+    if (isset($extra['use_fees']['other'])) {
+      $other_use_fee = $extra['use_fees']['other'];
     }
 
-    if ($facilities_use_fee === FALSE) {
-      $facilities_use_fee = 0;
+    if (isset($extra['insurance']['contractor'])) {
+      $contractor_insurance = $extra['insurance']['contractor'];
     }
 
-    if ($equipment_use_fee === FALSE) {
-      $equipment_use_fee = 0;
+    if (isset($extra['insurance']['unaffiliated'])) {
+      $unaffiliated_insurance = $extra['insurance']['unaffiliated'];
     }
 
-    $next_revision = $event['current']['review']['equipment_use_fee'] + 1;
-    $mew_current_review['equipment_use_fee'] = $next_revision;
-    $mew_field_review_equipment_use_fee = array(
+    if (is_null($mew_current_use_fees[$use])) {
+      $mew_current_use_fees['other'] = 0;
+    }
+    else {
+      $mew_current_use_fees['other']++;
+    }
+    $mew_field_use_fees['other'] = array(
       'event_id' => $event_id,
-      'revision' => $next_revision,
+      'revision' => $mew_current_use_fees['other'],
       'delta' => 0,
       'user_id' => $reviewer->user_id,
       'date' => REQUEST_TIME,
-      'value' => $equipment_use_fee,
+      'value' => $other_use_fee,
     );
 
-    $next_revision = $event['current']['review']['facilities_use_fee'] + 1;
-    $mew_current_review['facilities_use_fee'] = $next_revision;
-    $mew_field_review_facilities_use_fee = array(
+    if (is_null($mew_current_use_fees[$use])) {
+      $mew_current_insurance['contractor'] = 0;
+    }
+    else {
+      $mew_current_insurance['contractor']++;
+    }
+    $mew_field_insurance_contractor = array(
       'event_id' => $event_id,
-      'revision' => $next_revision,
+      'revision' => $mew_current_insurance['contractor'],
       'delta' => 0,
       'user_id' => $reviewer->user_id,
       'date' => REQUEST_TIME,
-      'value' => $facilities_use_fee,
+      'value' => $contractor_insurance,
+    );
+
+    if (is_null($mew_current_use_fees[$use])) {
+      $mew_current_insurance['unaffiliated'] = 0;
+    }
+    else {
+      $mew_current_insurance['unaffiliated']++;
+    }
+    $mew_field_insurance_unaffiliated = array(
+      'event_id' => $event_id,
+      'revision' => $mew_current_insurance['unaffiliated'],
+      'delta' => 0,
+      'user_id' => $reviewer->user_id,
+      'date' => REQUEST_TIME,
+      'value' => $unaffiliated_insurance,
     );
   }
 
@@ -400,20 +506,36 @@ function mcneese_event_workflow_workflow_step_review($event_id, $reviewer_id, $d
     $query->fields($mew_field_review_review);
     $query->execute();
 
-    if ($step == 133) {
-      $query = db_insert('mew_field_review_equipment_use_fee');
-      $query->fields($mew_field_review_equipment_use_fee);
-      $query->execute();
-
-      $query = db_insert('mew_field_review_facilities_use_fee');
-      $query->fields($mew_field_review_facilities_use_fee);
-      $query->execute();
-    }
-
     $query = db_update('mew_current_review');
     $query->condition('event_id', $event_id);
     $query->fields($mew_current_review);
     $query->execute();
+
+    if ($step == 133) {
+      foreach ($mew_field_use_fees as $use => $fields) {
+        $query = db_insert('mew_field_use_fees_' . $use);
+        $query->fields($fields);
+        $query->execute();
+      }
+
+      $query = db_update('mew_current_use_fees');
+      $query->condition('event_id', $event_id);
+      $query->fields($mew_current_use_fees);
+      $query->execute();
+
+      $query = db_insert('mew_field_insurance_contractor');
+      $query->fields($mew_field_insurance_contractor);
+      $query->execute();
+
+      $query = db_insert('mew_field_insurance_unaffiliated');
+      $query->fields($mew_field_insurance_unaffiliated);
+      $query->execute();
+
+      $query = db_update('mew_current_insurance');
+      $query->condition('event_id', $event_id);
+      $query->fields($mew_current_insurance);
+      $query->execute();
+    }
 
     // enforce transaction execution
     unset($transaction);

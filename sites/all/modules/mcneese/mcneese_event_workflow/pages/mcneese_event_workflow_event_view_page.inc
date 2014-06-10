@@ -795,30 +795,144 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
       }
 
       if ($step == 133) {
-        $form['review']['operations']['equipment_use_fee'] = array(
-          '#id' => 'event-review-operations-equipment_use_fee',
-          '#type' => 'textfield',
-          '#title' => 'Equipment Use Fee',
+        $form['review']['operations']['use_fees'] = array(
+          '#tree' => TRUE,
+        );
+
+        $use_fees_amount_defaults = array('custodial' => '18.50', 'security' => '30.00');
+        $uses_personnel = array('custodial', 'security');
+        $uses_hours = array('custodial', 'security');
+        foreach (array('facilities' => "Facilities", 'equipment' => "Equipment", 'custodial' => "Custodial", 'security' => "Security") as $use_name => $use_title) {
+          $form['review']['operations']['use_fees'][$use_name] = array(
+            '#type' => 'fieldset',
+            '#title' => $use_title . ' Use Fee',
+            '#collapsible' => TRUE,
+            '#collapsed' => FALSE,
+            '#tree' => TRUE,
+            '#attributes' => array(
+              'class' => array(
+                'no-print',
+                'mode-' . $mode,
+                'use_fees',
+              ),
+            ),
+          );
+
+          if (in_array($use_name, $uses_personnel)) {
+            $form['review']['operations']['use_fees'][$use_name]['quantity'] = array(
+              '#id' => 'event-review-operations-use_fees-' . $use_name . '-quantity',
+              '#type' => 'numberfield',
+              '#title' => '<span class="element-invisible">' . $use_title . ' Use Fee </span>Personnel',
+              '#default_value' => NULL,
+              '#min' => 0,
+              '#attributes' => array(
+                'class' => array(
+                  'no-print',
+                  'mode-' . $mode,
+                  'use_fee-quantity',
+                ),
+              ),
+            );
+          }
+
+          if (in_array($use_name, $uses_hours)) {
+            $form['review']['operations']['use_fees'][$use_name]['hours'] = array(
+              '#id' => 'event-review-operations-use_fees-' . $use_name . '-hours',
+              '#type' => 'numberfield',
+              '#title' => '<span class="element-invisible">' . $use_title . ' Use Fee </span>Hours',
+              '#default_value' => NULL,
+              '#min' => 0,
+              '#attributes' => array(
+                'class' => array(
+                  'no-print',
+                  'mode-' . $mode,
+                  'use_fee-hours',
+                ),
+              ),
+            );
+          }
+
+          $form['review']['operations']['use_fees'][$use_name]['days'] = array(
+            '#id' => 'event-review-operations-use_fees-' . $use_name . '-days',
+            '#type' => 'numberfield',
+            '#title' => '<span class="element-invisible">' . $use_title . ' Use Fee </span>Days',
+            '#default_value' => NULL,
+            '#min' => 0,
+            '#attributes' => array(
+              'class' => array(
+                'no-print',
+                'mode-' . $mode,
+                'use_fee-days',
+              ),
+            ),
+          );
+
+          $form['review']['operations']['use_fees'][$use_name]['amount'] = array(
+            '#id' => 'event-review-operations-use_fees-' . $use_name . '-amount',
+            '#type' => 'textfield',
+            '#title' => '<span class="element-invisible">' . $use_title . ' Use Fee </span>Amount',
+            '#default_value' => NULL,
+            '#size' => 31,
+            '#min' => 0,
+            '#attributes' => array(
+              'class' => array(
+                'no-print',
+                'mode-' . $mode,
+                'use_fee-amount',
+              ),
+            ),
+          );
+
+          if (isset($use_fees_amount_defaults[$use_name])) {
+            $form['review']['operations']['use_fees'][$use_name]['amount']['#default_value'] = $use_fees_amount_defaults[$use_name];
+          }
+        }
+
+        $form['review']['operations']['use_fees']['other'] = array(
+          '#id' => 'event-review-operations-use_fees-other',
+          '#type' => 'checkbox',
+          '#title' => 'Other Use Fees',
+          '#description' => "Other charges, unknown presently, will be billed to the presenter at a later time.",
           '#default_value' => NULL,
-          '#required' => TRUE,
           '#attributes' => array(
             'class' => array(
               'no-print',
               'mode-' . $mode,
+              'use_fee-other',
             ),
           ),
         );
 
-        $form['review']['operations']['facilities_use_fee'] = array(
-          '#id' => 'event-review-operations-facilities_use_fee',
-          '#type' => 'textfield',
-          '#title' => 'Facilities Use Fee',
+        $form['review']['operations']['insurance'] = array(
+          '#tree' => TRUE,
+        );
+
+        $form['review']['operations']['insurance']['contractor'] = array(
+          '#id' => 'event-review-operations-insurance-contractor',
+          '#type' => 'checkbox',
+          '#title' => 'Contractor Insurance',
+          '#description' => "Each technical/service industry contractor must provide proof of liability insurance in amounts and coverages specified.",
           '#default_value' => NULL,
-          '#required' => TRUE,
           '#attributes' => array(
             'class' => array(
               'no-print',
               'mode-' . $mode,
+              'insurance-contractor',
+            ),
+          ),
+        );
+
+        $form['review']['operations']['insurance']['unaffiliated'] = array(
+          '#id' => 'event-review-operations-insurance-unaffiliated',
+          '#type' => 'checkbox',
+          '#title' => 'Unaffiliated Insurance',
+          '#description' => "Non-affiliated entity (renter) must provide proof of liability insurance in amounts and coverages specified.",
+          '#default_value' => NULL,
+          '#attributes' => array(
+            'class' => array(
+              'no-print',
+              'mode-' . $mode,
+              'insurance-unaffiliated',
             ),
           ),
         );
@@ -1166,25 +1280,52 @@ function mcneese_event_workflow_event_view_0_page_validate($form, &$form_state) 
     }
 
     if ($step == 133) {
-      if (!empty($form_state['values']['review']['operations']['equipment_use_fee'])) {
+      $use_fees = array();
+      if (isset($form_state['values']['review']['operations']['use_fees'])) {
+        $use_fees = $form_state['values']['review']['operations']['use_fees'];
+      }
+
+      if (!empty($use_fees['facilities']['amount'])) {
         $matches = array();
-        $matched = preg_match('/^(\d+|\d+\.\d|\d+\.\d\d)$/i', $form_state['values']['review']['operations']['equipment_use_fee'], $matches);
+        $matched = preg_match('/^(\d+|\d+\.\d|\d+\.\d\d)$/i', $use_fees['facilities']['amount'], $matches);
 
         if (!$matched) {
-          form_set_error('review][operations][equipment_use_fee', t("@equipment_use_fee is not a valid usage fee. Use only numbers and two decimal places. Do not provide a dollar sign.", array('@equipment_use_fee' => $form_state['values']['review']['operations']['equipment_use_fee'])));
+          form_set_error('review][operations][use_fees][facilities][amount', t("@facilities_use_fee is not a valid facilities usage fee amount. Use only numbers and two decimal places. Do not provide a dollar sign.", array('@facilities' => $use_fees['facilities']['amount'])));
           $failure = TRUE;
         }
       }
 
-      if (!empty($form_state['values']['review']['operations']['facilities_use_fee'])) {
+
+      if (!empty($use_fees['facilities']['amount'])) {
         $matches = array();
-        $matched = preg_match('/^(\d+|\d+\.\d\d)$/i', $form_state['values']['review']['operations']['facilities_use_fee']);
+        $matched = preg_match('/^(\d+|\d+\.\d|\d+\.\d\d)$/i', $use_fees['equipment']['amount'], $matches);
 
         if (!$matched) {
-          form_set_error('review][operations][facilities_use_fee', t("@facilities_use_fee is not a valid usage fee. Use only numbers and two decimal places. Do not provide a dollar sign.", array('@facilities_use_fee' => $form_state['values']['review']['operations']['facilities_use_fee'])));
+          form_set_error('review][operations][use_fees][equipment][amount', t("@equipment is not a valid equipment usage fee. Use only numbers and two decimal places. Do not provide a dollar sign.", array('@equipment' => $use_fees['equipment']['amount'])));
           $failure = TRUE;
         }
       }
+      if (!empty($use_fees['custodial']['amount'])) {
+        $matches = array();
+        $matched = preg_match('/^(\d+|\d+\.\d|\d+\.\d\d)$/i', $use_fees['custodial']['amount'], $matches);
+
+        if (!$matched) {
+          form_set_error('review][operations][use_fees][custodial][amount', t("@custodial is not a valid custodial usage fee amount. Use only numbers and two decimal places. Do not provide a dollar sign.", array('@custodial' => $use_fees['custodial']['amount'])));
+          $failure = TRUE;
+        }
+      }
+
+      if (!empty($use_fees['security']['amount'])) {
+        $matches = array();
+        $matched = preg_match('/^(\d+|\d+\.\d|\d+\.\d\d)$/i', $use_fees['security']['amount'], $matches);
+
+        if (!$matched) {
+          form_set_error('review][operations][use_fees][security][amount', t("@security is not a valid security usage fee amount. Use only numbers and two decimal places. Do not provide a dollar sign.", array('@security' => $use_fees['security']['amount'])));
+          $failure = TRUE;
+        }
+      }
+
+      unset($use_fees);
     }
 
     if (!$failure) {
@@ -1252,12 +1393,22 @@ function mcneese_event_workflow_event_view_0_page_submit($form, &$form_state) {
 
     if ($step == 133) {
       if ($decision == 135) {
-        $extra['equipment_use_fee'] = 0;
-        $extra['facilities_use_fee'] = 0;
+        $extra['use_fees'] = array(
+          'facilities' => array('days' => 0, 'amount' => 0),
+          'equipment' => array('days' => 0, 'amount' => 0),
+          'custodial' => array('hours' => 0, 'days' => 0, 'amount' => 0),
+          'security' => array('hours' => 0, 'days' => 0, 'amount' => 0),
+          'other' => 0,
+        );
+
+        $extra['insurance'] = array(
+          'contractor' => 0,
+          'unaffiliated' => 0,
+        );
       }
       else {
-        $extra['equipment_use_fee'] = $form_state['values']['review']['operations']['equipment_use_fee'];
-        $extra['facilities_use_fee'] = $form_state['values']['review']['operations']['facilities_use_fee'];
+        $extra['use_fees'] = $form_state['values']['review']['operations']['use_fees'];
+        $extra['insurance'] = $form_state['values']['review']['operations']['insurance'];
       }
     }
 

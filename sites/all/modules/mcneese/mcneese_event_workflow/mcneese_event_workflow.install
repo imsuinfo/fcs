@@ -24,8 +24,19 @@ function mcneese_event_workflow_secondary_table_install_structure() {
 
   $structure['review'] = array(
     'review' => array('reviewer' => 'unsigned', 'decision' => 'unsigned', 'message' => 'text'),
-    'facilities_use_fee' => 'unsigned',
-    'equipment_use_fee' => 'unsigned',
+  );
+
+  $structure['use_fees'] = array(
+    'facilities' => array('quantity' => 'unsigned', 'hours' => 'unsigned', 'days' => 'unsigned', 'amount' => 'unsigned'),
+    'equipment' => array('quantity' => 'unsigned', 'hours' => 'unsigned', 'days' => 'unsigned', 'amount' => 'unsigned'),
+    'security' => array('quantity' => 'unsigned', 'hours' => 'unsigned', 'days' => 'unsigned', 'amount' => 'unsigned'),
+    'custodial' => array('quantity' => 'unsigned', 'hours' => 'unsigned', 'days' => 'unsigned', 'amount' => 'unsigned'),
+    'other' => 'unsigned_small',
+  );
+
+  $structure['insurance'] = array(
+    'contractor' => 'unsigned_small',
+    'unaffiliated' => 'unsigned_small',
   );
 
   $structure['dates'] = array(
@@ -248,6 +259,76 @@ function mcneese_event_workflow_schema() {
       'user_id' => array(
         'table' => 'users',
         'columns' => array('user_id' => 'uid'),
+      ),
+    ),
+  );
+
+  $schema['mew_location_images'] = array(
+    'description' => $t("McNeese Event Workflow Location Images table. For displaying an image of a given location/building/room."),
+    'fields' => array(
+      'id' => array(
+        'description' => $t("The primary key used to represent the associated between an image and the location/building/room."),
+        'type' => 'serial',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'revision' => array(
+        'description' => $t("Part of the primary key for this table and represents the revision number for change tracking."),
+        'type' => 'serial',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'user_id' => array(
+        'description' => $t("This is the system id. Represents the user who associated the image with the location/building/room. This is not a foreign key and instead loosely refers to the user id."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'file_id' => array(
+        'description' => $t("This is the system id. Represents the file. This is not a foreign key and instead loosely refers to the file id."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+      ),
+      'date' => array(
+        'description' => $t("Represents the date the image was uploaded."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'location' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'building' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'room' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('id', 'revision'),
+    'foreign keys' => array(
+      'user_id' => array(
+        'table' => 'users',
+        'columns' => array('user_id' => 'uid'),
+      ),
+      'file_id' => array(
+        'table' => 'file_managed',
+        'columns' => array('file_id' => 'fid'),
       ),
     ),
   );

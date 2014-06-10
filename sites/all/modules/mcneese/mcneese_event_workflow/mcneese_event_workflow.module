@@ -537,6 +537,14 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
       return TRUE;
     }
   }
+  elseif ($operation == 'workflow_alterations') {
+    if ($administer || $manager) {
+      // @todo: perform additional checks to only allow a specific subset of users to make these changes.
+      #return TRUE;
+    }
+
+    return FALSE;
+  }
   elseif ($operation == 'cancel') {
     if ($administer || $manager || $requester) {
       // events can only be cancelled if they are in the following status'.
@@ -1614,6 +1622,12 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
     return FALSE;
   }
 
+  // define the combined option.
+  $combined = FALSE;
+  if (!empty($presentation['combined'])) {
+    $combined = (bool) $presentation['combined'];
+  }
+
   // define the presentation type.
   $type = array('value' => 'string');
   if (!empty($presentation['type'])) {
@@ -1649,32 +1663,66 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
   $id = 'field-event-' . $event_id . '-item-' . $field_group . '-' . $field_name . '-' . $delta . '-value';
 
   $output = array();
+  $empty_value = TRUE;
+  $no_value = TRUE;
 
   foreach ($value_names as $value_name) {
-    $output[$value_name] = array(
-      '#id' => $id . '-' . $value_name,
-      '#type' => 'container',
-      '#attributes' => array(
-        'class' => array(
-          'item-value',
-          'item-value-name-' . $value_name,
-        ),
-      ),
-    );
+    if ($combined) {
+      if (!isset($output['value']['markup']['#markup'])) {
+        $output['value'] = array(
+          '#id' => $id . '-' . $value_name,
+          '#type' => 'container',
+          '#attributes' => array(
+            'class' => array(
+              'item-value',
+              'item-value-name-' . $value_name,
+            ),
+          ),
+        );
 
-    $output[$value_name]['markup'] = array(
-      '#markup' => '',
-    );
+        $output['value']['markup'] = array(
+          '#markup' => NULL,
+        );
 
-    if (!array_key_exists($value_name, $type)) {
-      $type[$value_name] = 'string';
+        if (!array_key_exists('value', $type)) {
+          $type['value'] = 'string';
+        }
+
+        $output['value']['#attributes']['class'][] = 'item-value-type-value';
+      }
+
+      $markup = &$output['value']['markup']['#markup'];
+      $output_value = &$output['value'];
     }
+    else {
+      $output[$value_name] = array(
+        '#id' => $id . '-' . $value_name,
+        '#type' => 'container',
+        '#attributes' => array(
+          'class' => array(
+            'item-value',
+            'item-value-name-' . $value_name,
+          ),
+        ),
+      );
 
-    $output[$value_name]['#attributes']['class'][] = 'item-value-type-' . $type[$value_name];
+      $output[$value_name]['markup'] = array(
+        '#markup' => NULL,
+      );
+
+      if (!array_key_exists($value_name, $type)) {
+        $type[$value_name] = 'string';
+      }
+
+      $output[$value_name]['#attributes']['class'][] = 'item-value-type-' . $type[$value_name];
+
+      $markup = &$output[$value_name]['markup']['#markup'];
+      $output_value = &$output[$value_name];
+    }
 
     if (property_exists($value, $value_name) && (is_numeric($value->$value_name) || !empty($value->$value_name))) {
       if ($type[$value_name] == 'string' || $type[$value_name] == 'text') {
-        $output[$value_name]['markup']['#markup'] = check_plain($value->$value_name);
+        $markup .= check_plain($value->$value_name);
       }
       elseif ($type[$value_name] == 'timestamp') {
         if (!array_key_exists($value_name, $display)) {
@@ -1682,17 +1730,17 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
         }
 
         if ($display[$value_name] == 'stamp') {
-          $output[$value_name]['markup']['#markup'] = check_plain($value->$value_name);
+          $markup .= check_plain($value->$value_name);
         }
         else {
-          $output[$value_name]['markup']['#markup'] = check_plain(date($display[$value_name], $value->$value_name));
+          $markup .= check_plain(date($display[$value_name], $value->$value_name));
         }
       }
       elseif ($type[$value_name] == 'taxonomy') {
         $term = taxonomy_term_load($value->$value_name);
 
         if (is_object($term)) {
-          $output[$value_name]['markup']['#markup'] = check_plain($term->name);
+          $markup .= check_plain($term->name);
         }
 
         unset($term);
@@ -1716,83 +1764,123 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
           }
 
           if ($display[$value_name] == 'account_name') {
-            $output[$value_name]['markup']['#markup'] = '<a href="' . $base_path . 'user/' . $user->uid . '">' . $user_name . '</a>';
+            $markup .= '<a href="' . $base_path . 'user/' . $user->uid . '">' . $user_name . '</a>';
           }
           elseif ($display[$value_name] != 'pass' && property_exists($user, $display)) {
-            $output[$value_name]['markup']['#markup'] = check_plain($user->$display[$value_name]);
+            $markup .= check_plain($user->$display[$value_name]);
           }
         }
 
         unset($user);
       }
       elseif ($type[$value_name] == 'status') {
-        $output[$value_name]['markup']['#markup'] = NULL;
-
         mcneese_event_workflow_include(4);
 
         $status_options = event_workflow_get_event_status_list_options();
 
         if (isset($status_options[$value->$value_name])) {
-          $output[$value_name]['markup']['#markup'] = $status_options[$value->$value_name];
+          $markup .= $status_options[$value->$value_name];
         }
       }
       elseif ($type[$value_name] == 'step') {
-        $output[$value_name]['markup']['#markup'] = NULL;
-
         mcneese_event_workflow_include(4);
 
         $step_options = event_workflow_get_event_steps_list_options();
 
         if (isset($step_options[$value->$value_name])) {
-          $output[$value_name]['markup']['#markup'] = $step_options[$value->$value_name];
+          $markup .= $step_options[$value->$value_name];
         }
       }
       elseif ($type[$value_name] == 'location') {
-        $output[$value_name]['markup']['#markup'] = NULL;
-
         mcneese_event_workflow_include(4);
 
         $location_options = event_workflow_get_event_location_list_options();
 
         if (isset($location_options[$value->$value_name])) {
-          $output[$value_name]['markup']['#markup'] = $location_options[$value->$value_name];
+          $markup .= $location_options[$value->$value_name];
         }
       }
       elseif ($type[$value_name] == 'building') {
-        $output[$value_name]['markup']['#markup'] = NULL;
-
         mcneese_event_workflow_include(4);
 
         $building_options = event_workflow_get_event_building_list_options();
 
         if (isset($building_options[$value->$value_name])) {
-          $output[$value_name]['markup']['#markup'] = $building_options[$value->$value_name];
+          $markup .= $building_options[$value->$value_name];
         }
       }
       elseif ($type[$value_name] == 'currency') {
-        $output[$value_name]['markup']['#markup'] = NULL;
         $currency = event_workflow_convert_value_from_database_format($value->$value_name, 'currency');
 
         if ($currency !== FALSE) {
-          $output[$value_name]['markup']['#markup'] = '$' . $currency;
-          if ($currency == floor($currency)) {
-            $output[$value_name]['markup']['#markup'] .= '.00';
+          $markup .= '$' . printf('%01.2f', $currency);
+        }
+      }
+      elseif ($type[$value_name] == 'boolean') {
+        $boolean = (bool) $value->$value_name;
+
+        if ($boolean) {
+          $markup .= 'yes';
+        }
+        else {
+          $markup .= 'no';
+        }
+      }
+      elseif ($type[$value_name] == 'use_fee_personnel') {
+        $markup .= ' ' . $value->$value_name . ' personnel';
+      }
+      elseif ($type[$value_name] == 'use_fee_hours') {
+        $markup .= ' ' . $value->$value_name . ' hours';
+      }
+      elseif ($type[$value_name] == 'use_fee_days') {
+        $markup .= ' ' . $value->$value_name . ' days';
+      }
+      elseif ($type[$value_name] == 'use_fee_amount') {
+        $amount = event_workflow_convert_value_from_database_format($value->$value_name, 'currency');
+
+        if ($amount !== FALSE) {
+          $markup .= ' at $' . sprintf('%01.2f', $amount);
+
+          // calculate total and append from other fields that should exist.
+          $total = $amount;
+
+          if (in_array('quantity', $value_names) && isset($value->quantity) && is_numeric($value->quantity)) {
+            $total = $total * $value->quantity;
           }
+
+          if (in_array('hours', $value_names) && isset($value->hours) && is_numeric($value->hours)) {
+            $total = $total * $value->hours;
+          }
+
+          if (in_array('days', $value_names) && isset($value->days) && is_numeric($value->days)) {
+            $total = $total * $value->days;
+          }
+
+          $markup .= ' = $' . sprintf('%01.2f', $total);
         }
       }
 
-      if (!is_numeric($output[$value_name]['markup']['#markup']) && empty($output[$value_name]['markup']['#markup'])) {
-        $output[$value_name]['#attributes']['class'][] = 'empty_value';
+      if (!is_numeric($markup) && empty($markup)) {
+        $output_value['#attributes']['class'][] = 'empty_value';
       }
       else {
-        $output[$value_name]['markup']['#markup'] = $prefix . $output[$value_name]['markup']['#markup'];
-        $output[$value_name]['markup']['#markup'] .= $suffix;
+        $empty_value = FALSE;
+
+        if (!$combined) {
+          $markup = $prefix . $markup . $suffix;
+        }
       }
+
+      $no_value = FALSE;
     }
-    else {
-      $output[$value_name]['#attributes']['class'][] = 'no_value';
-      $output['no_values'] = TRUE;
-    }
+  }
+
+  if ($no_value) {
+    $output_value['#attributes']['class'][] = 'no_value';
+    $output['no_values'] = TRUE;
+  }
+  elseif ($combined && !$empty_value) {
+    $output['value']['markup']['#markup'] = $prefix . $output['value']['markup']['#markup'] . $suffix;
   }
 
   return $output;

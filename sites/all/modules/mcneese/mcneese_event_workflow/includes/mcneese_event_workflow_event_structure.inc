@@ -92,6 +92,18 @@ function mcneese_event_workflow_get_event_section_information() {
     ),
   );
 
+  $information['review'] = array(
+    'steps' => array(
+      'review',
+    ),
+  );
+
+  $information['fees'] = array(
+    'steps' => array(
+      'fees',
+    ),
+  );
+
   return $information;
 }
 
@@ -210,21 +222,54 @@ function mcneese_event_workflow_get_event_fields($form, &$form_state) {
   }
 
   // Fieldset: Review
-  #$ps = 'review';
-  #if (!is_null($form['form']['parents']['#value']['path'])) {
-  #  $ps .= ']';
-  #}
+  if ($form['form']['step']['#value'] == 'review' && array_key_exists('review', $form['form']['sections']['#value'])) {
+    if (empty($form['form']['event']['#value']['mer']['id'][0]->value) || !mcneese_event_workflow_management_page_event_access('review', $form['form']['event']['#value']['mer']['id'][0]->value)) {
+      drupal_access_denied();
+      drupal_exit();
+      return array();
+    }
 
-  #if (!isset($event_state['review'])) {
-  #  $event_state['review'] = array();
-  #}
+    $ps = 'review';
+    if (!is_null($form['form']['parents']['#value']['path'])) {
+      $ps .= ']';
+    }
 
-  #$fields['review'] = array(
-  #  '#id' => 'section-event-review',
-  #  '#tree' => TRUE,
-  #);
+    if (!isset($event_state['review'])) {
+      $event_state['review'] = array();
+    }
 
-  #mcneese_event_workflow_get_event_field_review_review($form, $form_state, $fields, $ps);
+    $fields['review'] = array(
+      '#id' => 'section-event-review',
+      '#tree' => TRUE,
+    );
+
+    mcneese_event_workflow_get_event_field_review_review($form, $form_state, $fields, $ps);
+  }
+
+  // Fieldset: Fees
+  if ($form['form']['step']['#value'] == 'fees' && array_key_exists('fees', $form['form']['sections']['#value'])) {
+    if (empty($form['form']['event']['#value']['mer']['id'][0]->value) || !mcneese_event_workflow_management_page_event_access('fees', $form['form']['event']['#value']['mer']['id'][0]->value)) {
+      drupal_access_denied();
+      drupal_exit();
+      return array();
+    }
+
+    $ps = 'fees';
+    if (!is_null($form['form']['parents']['#value']['path'])) {
+      $ps .= ']';
+    }
+
+    if (!isset($event_state['fees'])) {
+      $event_state['fees'] = array();
+    }
+
+    $fields['fees'] = array(
+      '#id' => 'section-event-fees',
+      '#tree' => TRUE,
+    );
+
+    // @todo: implement fees in the same manner as the review.
+  }
 
 
   // Fieldset: Dates
@@ -769,6 +814,13 @@ function mcneese_event_workflow_get_event_field_room_list($form, &$form_state, &
  * Process and build a specific form field.
  */
 function mcneese_event_workflow_get_event_field_review_review($form, &$form_state, &$fields, $ps) {
+  if ($form['form']['step']['#value'] != 'standard' || !array_key_exists('review', $form['form']['sections']['#value'])) {
+    return FALSE;
+  }
+
+  // @todo: implement below to provide a custom field for altering the current review state.
+  // @todo: implement special access control to ensure that only users added to the
+  /*
   $values = array(0 => array('reviewer_id' => 0, 'decision' => 0, 'message' => NULL));
 
   if (empty($form_state['values']['event']['review']['review'])) {
@@ -800,6 +852,9 @@ function mcneese_event_workflow_get_event_field_review_review($form, &$form_stat
   }
 
   return $values;
+  */
+
+  return FALSE;
 }
 
 /**

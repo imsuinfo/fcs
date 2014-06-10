@@ -160,6 +160,7 @@ function mcneese_event_workflow_validate_event_fields($form, &$form_state) {
 
   $passed = TRUE;
   if ($form_state['values']['form']['step'] == 'standard') {
+    $date_timestamp = array(0 => NULL);
     $start_timestamp = array(0 => FALSE);
     $stop_timestamp = array(0 => FALSE);
 
@@ -180,17 +181,18 @@ function mcneese_event_workflow_validate_event_fields($form, &$form_state) {
           $stop_timestamp[$key] = FALSE;
         }
 
+        $date_timestamp[$key] = NULL;
         if (!empty($value) && is_string($value)) {
-          $date_timestamp = strtotime($value);
+          $date_timestamp[$key] = strtotime($value);
 
           // request time and date time may have same day, but different times, so only compare day.
-          $date_string = date("Y/m/d", $date_timestamp);
+          $date_string = date("Y/m/d", $date_timestamp[$key]);
           $request_string = date("Y/m/d", REQUEST_TIME);
 
           if ($date_string == $request_string) {
             form_set_error($ps_p . '][dates][date][' . $key . '][date', t("The date '@date' is too soon, the event request process takes time.", array('@date' => $value)));
           }
-          elseif ($date_timestamp < REQUEST_TIME) {
+          elseif ($date_timestamp[$key] < REQUEST_TIME) {
             form_set_error($ps_p . '][dates][date][' . $key . '][date', t("The date '@date' is in the past and cannot be used.", array('@date' => $value)));
           }
         }
@@ -199,6 +201,10 @@ function mcneese_event_workflow_validate_event_fields($form, &$form_state) {
 
     if (!empty($location_state['dates']['time_start'])) {
       foreach ($location_state['dates']['time_start'] as $key => &$value) {
+        if (!isset($date_timestamp[$key])) {
+          continue;
+        }
+
         if (isset($form['form']['existing']['#value']['event']['dates']['time_start'])) {
           if (in_array($value, $form['form']['existing']['#value']['event']['dates']['time_start'])) {
             // skip values already saved to allow updating events if they are sufficiently near/past the event date.
@@ -208,7 +214,7 @@ function mcneese_event_workflow_validate_event_fields($form, &$form_state) {
 
         if (!empty($value) && !empty($location_form['dates']['time_start'][$key]['#expected_format']['date'])) {
           if (is_string($value)) {
-            $start_timestamp[$key] = strtotime($value, $date_timestamp);
+            $start_timestamp[$key] = strtotime($value, $date_timestamp[$key]);
 
             if ($start_timestamp[$key] === FALSE) {
               form_set_error($ps_p . '][dates][time_start][' . $key, t("'@value' is not a valid start time.", array('@value' => $value)));
@@ -224,6 +230,10 @@ function mcneese_event_workflow_validate_event_fields($form, &$form_state) {
 
     if (!empty($location_state['dates']['time_stop'])) {
       foreach ($location_state['dates']['time_stop'] as $key => &$value) {
+        if (!isset($date_timestamp[$key])) {
+          continue;
+        }
+
         if (isset($form['form']['existing']['#value']['event']['dates']['time_stop'])) {
           if (in_array($value, $form['form']['existing']['#value']['event']['dates']['time_stop'])) {
             // skip values already saved to allow updating events if they are sufficiently near/past the event date.
@@ -233,7 +243,7 @@ function mcneese_event_workflow_validate_event_fields($form, &$form_state) {
 
         if (!empty($value) && !empty($location_form['dates']['time_stop'][$key]['#expected_format']['date'])) {
           if (is_string($value)) {
-            $stop_timestamp[$key] = strtotime($value, $date_timestamp);
+            $stop_timestamp[$key] = strtotime($value, $date_timestamp[$key]);
 
             if ($stop_timestamp[$key] === FALSE) {
               form_set_error($ps_p . '][dates][time_stop][' . $key, t("'@value' is not a valid start time.", array('@value' => $value)));
