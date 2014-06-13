@@ -726,10 +726,17 @@ class LdapServer {
       watchdog('ldap_server', $query, array());
     }
 
+    $anon_bind = FALSE;
+    if ($this->bind_method == LDAP_SERVERS_BIND_METHOD_ANON_USER) {
+      if (drupal_strlen($this->binddn) == 0) {
+        $anon_bind = TRUE;
+      }
+    }
+
     // When checking multiple servers, there's a chance we might not be connected yet.
     if (! $this->connection) {
       $this->connect();
-      $this->bind();
+      $this->bind(NULL, NULL, $anon_bind);
     }
 
     $ldap_query_params = array(
