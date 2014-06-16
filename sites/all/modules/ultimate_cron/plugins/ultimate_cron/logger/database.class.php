@@ -116,12 +116,12 @@ class UltimateCronDatabaseLogger extends UltimateCronLogger {
           ->execute();
       }
     } while ($lids && $max > 0);
-    if ($count) {
-      watchdog('database_logger', '@count log entries removed for job @name', array(
-        '@count' => $count,
-        '@name' => $job->name,
-      ), WATCHDOG_INFO);
-    }
+    #if ($count) {
+      #watchdog('database_logger', '@count log entries removed for job @name', array(
+      #  '@count' => $count,
+      #  '@name' => $job->name,
+      #), WATCHDOG_INFO);
+    #}
   }
 
   /**
