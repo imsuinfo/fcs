@@ -113,9 +113,7 @@ function mcneese_event_workflow_event_search_0_form($form, &$form_state, $page_n
   );
 
   // populate the search results.
-  if (is_array($form_state['simple_search_results'])) {
-    // @todo: apply sorting for all fields that are integers in the database but are displayed as strings.
-
+  if (isset($form_state['simple_search_results']) && is_array($form_state['simple_search_results'])) {
     $rows = array();
     if (!empty($form_state['simple_search_results'])) {
       foreach ($form_state['simple_search_results'] as $item) {
