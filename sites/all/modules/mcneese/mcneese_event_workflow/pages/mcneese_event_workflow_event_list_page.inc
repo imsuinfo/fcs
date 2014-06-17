@@ -77,8 +77,6 @@ function mcneese_event_workflow_event_list_0_page($page_number = 0) {
 
   $results = mcneese_event_workflow_event_load_listing(NULL, FALSE, $page_number * $rows_per_page, $rows_per_page, $sorting);
 
-  // @todo: apply sorting for all fields that are integers in the database but are displayed as strings.
-
   $rows = array();
   if (!empty($results)) {
     foreach ($results as $item) {

@@ -640,17 +640,38 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
     }
   }
   elseif ($operation == 'edit') {
+    $edit_request_status = array(
+      MEW_EVENT_STATUS_UNLOCKED,
+    );
+
     if ($administer || $manager) {
-      return TRUE;
+      try {
+        $query = db_select('mew_event_requests', 'mer');
+
+        $query->innerjoin('mew_current_top', 'mct', 'mer.id = mct.event_id');
+        $query->innerjoin('mew_field_top_status', 'mfts', 'mct.event_id = mfts.event_id AND mct.status = mfts.revision AND mfts.delta = 0');
+
+        $query->fields('mer', array('id'));
+
+        $query->condition('mer.id', $event_id);
+        $query->condition('mfts.value', $edit_request_status, 'IN');
+
+        $query->countQuery();
+
+        $result = $query->execute()->fetchField();
+
+        if ($result > 0) return TRUE;
+
+        return FALSE;
+      }
+      catch (Exception $ex) {
+        cf_error::on_exception($ex);
+
+        return FALSE;
+      }
     }
     elseif ($requester) {
       if (is_null($event_id)) return FALSE;
-
-      // events can only be edited if they are in the following status'.
-      $edit_request_status = array(
-        #MEW_EVENT_STATUS_LOCKED,
-        MEW_EVENT_STATUS_UNLOCKED,
-      );
 
       try {
         $query = db_select('mew_event_requests', 'mer');
@@ -680,8 +701,42 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
     }
   }
   elseif ($operation == 'view') {
-    if ($administer || $reviewer || $manager) {
+    if ($administer) {
       return TRUE;
+    }
+    elseif ($manager) {
+      try {
+        $query = db_select('mew_event_requests', 'mer');
+
+        $query->innerjoin('mew_current_top', 'mct', 'mer.id = mct.event_id');
+        $query->innerjoin('mew_field_top_status', 'mfts', 'mct.event_id = mfts.event_id AND mct.status = mfts.revision AND mfts.delta = 0');
+
+        $query->fields('mer', array('id'));
+
+        $query->condition('mer.id', $event_id);
+        $query->condition('mfts.value', MEW_EVENT_STATUS_DELETED, '<>');
+
+        $query->countQuery();
+
+        $result = $query->execute()->fetchField();
+
+        if ($result > 0) return TRUE;
+
+        return FALSE;
+      }
+      catch (Exception $ex) {
+        cf_error::on_exception($ex);
+
+        return FALSE;
+      }
+    }
+    elseif ($reviewer) {
+      if (is_null($event_id)) {
+        return TRUE;
+      }
+      else {
+        return mcneese_event_workflow_management_page_event_reviewer_access($user, $event_id, TRUE);
+      }
     }
     elseif ($requester) {
       if (is_null($event_id)) return FALSE;
@@ -719,7 +774,7 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
     }
   }
   elseif ($operation == 'search') {
-    if ($administer || $reviewer || $manager) {
+    if ($administer || $requester || $reviewer || $manager) {
       return TRUE;
     }
   }
@@ -748,7 +803,12 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
     }
 
     if ($reviewer) {
-      return mcneese_event_workflow_management_page_event_reviewer_access($user, $event_id);
+      if (is_null($event_id)) {
+        return TRUE;
+      }
+      else {
+        return mcneese_event_workflow_management_page_event_reviewer_access($user, $event_id);
+      }
     }
   }
   elseif ($operation == 'delete') {
@@ -756,18 +816,14 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
       return TRUE;
     }
   }
-  elseif ($operation == 'workflow_alterations') {
-    if ($administer || $manager) {
-      // @todo: perform additional checks to only allow a specific subset of users to make these changes.
-      #return TRUE;
-    }
 
-    return FALSE;
-  }
   elseif ($operation == 'cancel') {
     if ($administer || $manager || $requester) {
-      // events can only be cancelled if they are in the following status'.
-      $cancellable_status = array(
+      $cancellable_status_normal = array(
+        MEW_EVENT_STATUS_UNLOCKED,
+      );
+
+      $cancellable_status_admin = array(
         MEW_EVENT_STATUS_LOCKED,
         MEW_EVENT_STATUS_UNLOCKED,
       );
@@ -781,10 +837,13 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
         $query->fields('mer', array('id'));
 
         $query->condition('mer.id', $event_id);
-        $query->condition('mfts.value', $cancellable_status, 'IN');
 
         if ($requester && !($administer || $manager)) {
           $query->condition('mer.user_id', $user->uid);
+          $query->condition('mfts.value', $cancellable_status_normal, 'IN');
+        }
+        else {
+          $query->condition('mfts.value', $cancellable_status_admin, 'IN');
         }
 
         $query->countQuery();
@@ -795,14 +854,12 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
       }
       catch (Exception $ex) {
         cf_error::on_exception($ex);
-
         return FALSE;
       }
     }
   }
   elseif ($operation == 'uncancel') {
     if ($administer || $manager) {
-      // events can only be uncancelled if they are in the following status'.
       $uncancellable_status = array(
         MEW_EVENT_STATUS_CANCELLED,
       );
@@ -843,18 +900,27 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
  *   User to check if is a valid reviewer of the given event.
  * @param int $event_id
  *   ID of the event to check review access for.
- *
+ * @param bool $ignore_decisions
+ *   (optional) When TRUE, will not perform additional checks to see if the
+ *   current user has already reviewed the event. When FALSE, then validation
+ *   will be performed based on whether or not the reviewer has already
+ *   reviewed the event for the current step.
  * @param bool
  *   TRUE on access granted, FALSE otherwise.
  */
-function mcneese_event_workflow_management_page_event_reviewer_access($user, $event_id) {
+function mcneese_event_workflow_management_page_event_reviewer_access($user, $event_id, $ignore_decisions = FALSE) {
   if (!is_object($user)) {
     cf_error::invalid_object('user');
     return FALSE;
   }
 
   if (!cf_is_integer($event_id)) {
-    cf_error::invalid_number('event_id');
+    cf_error::invalid_integer('event_id');
+    return FALSE;
+  }
+
+  if (!is_bool($ignore_decisions)) {
+    cf_error::invalid_bool('ignore_decisions');
     return FALSE;
   }
 
@@ -864,18 +930,15 @@ function mcneese_event_workflow_management_page_event_reviewer_access($user, $ev
     return FALSE;
   }
 
-  if (!empty($event['venue_coordinator']['user_id'][0]->value)) {
-    if ($event['venue_coordinator']['user_id'][0]->value == $user->uid) {
-      if ($event['top']['step'][0]->value == MEW_REVIEW_STEP_VENUE_AVAILABLE) {
-        return TRUE;
-      }
-      elseif ($event['top']['step'][0]->value == MEW_REVIEW_STEP_MAKE_DECISIONS) {
-        return TRUE;
-      }
-    }
+  if (empty($event['venue_coordinator']['user_id'][0]->value)) {
+    return FALSE;
   }
 
   if (empty($event['event_coordinator']['classification'][0]->value)) {
+    return FALSE;
+  }
+
+  if (empty($event['top']['status'][0]->value)) {
     return FALSE;
   }
 
@@ -883,10 +946,80 @@ function mcneese_event_workflow_management_page_event_reviewer_access($user, $ev
     return FALSE;
   }
 
+  $status = $event['top']['status'][0]->value;
+  $step = $event['top']['step'][0]->value;
+
+  // venue coordinator can always access during certain steps and status.
+  if ($event['venue_coordinator']['user_id'][0]->value == $user->uid) {
+    if ($status == MEW_EVENT_STATUS_UNLOCKED) {
+      return TRUE;
+    }
+
+    if ($step == MEW_REVIEW_STEP_VENUE_AVAILABLE || $step == MEW_REVIEW_STEP_MAKE_DECISIONS || $step == MEW_REVIEW_STEP_COMPLETED) {
+      return TRUE;
+    }
+  }
+
+  if ($status == MEW_EVENT_STATUS_DELETED || $status == MEW_EVENT_STATUS_UNLOCKED) {
+    return FALSE;
+  }
+
+  $request_steps = array(
+    MEW_REVIEW_STEP_REVIEW,
+    MEW_REVIEW_STEP_USAGE_FEES,
+  );
+
+  if ($ignore_decisions) {
+    if ($step == MEW_REVIEW_STEP_COMPLETED) {
+      $conditions = array(
+        'mr.user_id' => $user->uid,
+        'mr.event_classification' => $event['event_coordinator']['classification'][0]->value,
+      );
+      $reviewers = mcneese_event_workflow_get_reviewers($conditions);
+    }
+    else {
+      if (!in_array($step, $request_steps)) {
+        return FALSE;
+      }
+
+      $conditions = array(
+        'mr.user_id' => $user->uid,
+        'mr.event_classification' => $event['event_coordinator']['classification'][0]->value,
+        'mr.review_step' => $step,
+      );
+
+      $reviewers = mcneese_event_workflow_get_reviewers($conditions);
+    }
+
+    if (empty($reviewers)) {
+      return FALSE;
+    }
+
+    return TRUE;
+  }
+
+  $request_decisions = array(
+    MEW_REVIEW_DECISION_APPROVE,
+    MEW_REVIEW_DECISION_DENY,
+  );
+
+  foreach ($event['review']['review'] as $review) {
+    if ($review->user_id != $user->uid) continue;
+    if ($review->step != $step) continue;
+
+    if (in_array($review->decision, $request_decisions)) {
+      return FALSE;
+    }
+  }
+
+  if (!in_array($step, $request_steps)) {
+    return FALSE;
+  }
+
   $conditions = array(
     'mr.user_id' => $user->uid,
     'mr.event_classification' => $event['event_coordinator']['classification'][0]->value,
-    'mr.review_step' => $event['top']['step'][0]->value,
+    'mr.review_step' => $step,
   );
 
   $reviewers = mcneese_event_workflow_get_reviewers($conditions);

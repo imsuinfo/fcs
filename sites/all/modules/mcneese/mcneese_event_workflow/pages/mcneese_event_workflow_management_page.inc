@@ -136,8 +136,6 @@ function mcneese_event_workflow_management_page() {
 
     $results = mcneese_event_workflow_event_load_listing(NULL, FALSE, 0, $total_items, $sorting, array(), 1);
 
-    // @todo: apply sorting for all fields that are integers in the database but are displayed as strings.
-
     $rows = array();
     if (!empty($results)) {
       foreach ($results as $item) {

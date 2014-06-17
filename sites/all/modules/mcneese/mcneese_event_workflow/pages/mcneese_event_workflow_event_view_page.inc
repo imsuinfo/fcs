@@ -800,30 +800,32 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
       mcneese_event_workflow_include(4);
       $reviewer_classification_options = event_workflow_get_reviewer_classification_list_options();
 
+      $reviewer_conditions = array(
+        'mr.user_id' => $user->uid,
+        'mr.event_classification' => $event_classification,
+        'mr.review_step' => $step,
+      );
+
+      $reviewers = mcneese_event_workflow_get_reviewers($reviewer_conditions, TRUE);
+      if (!is_array($reviewers)) {
+        $reviewers = array();
+      }
+
       $form['review']['operations']['as_reviewer']['#markup'] = '<div class="event-section-review-operations-as_reviewer">';
 
       $reviewer_classification = array();
-      if ($step == MEW_REVIEW_STEP_VENUE_AVAILABLE || MEW_REVIEW_STEP_MAKE_DECISIONS) {
+      if ($step == MEW_REVIEW_STEP_VENUE_AVAILABLE || $step == MEW_REVIEW_STEP_MAKE_DECISIONS) {
         if ($event['venue_coordinator']['user_id'][0]->value == $user->uid) {
           $reviewer_classification[] = $reviewer_classification_options[MEW_REVIEW_CLASSIFICATION_VENUE_COORDINATOR];
           $form['review']['operations']['as_reviewer']['#markup'] .= '';
         }
       }
       elseif ($step == MEW_REVIEW_STEP_REVIEW || $step == MEW_REVIEW_STEP_USAGE_FEES) {
-        $reviewer_conditions = array(
-          'mr.user_id' => $user->uid,
-          'mr.event_classification' => $event_classification,
-          'mr.review_step' => $step,
-        );
-
-        $reviewers = mcneese_event_workflow_get_reviewers($reviewer_conditions, TRUE);
-        if (!is_array($reviewers)) {
-          $reviewers = array();
-        }
-
-        if (!empty($reviewers[$user_id][$review_step])) {
-          foreach ($reviewers[$user_id][$review_step] as $reviewer) {
-            $reviewer_classification[] = $reviewer_classification_options[$reviewer->reviewer_classification];
+        foreach ($reviewers as $reviewer) {
+          if (isset($reviewer->review_step) && $reviewer->review_step == $step) {
+            if (isset($reviewer->reviewer_classification)) {
+              $reviewer_classification[] = $reviewer_classification_options[$reviewer->reviewer_classification];
+            }
           }
         }
       }
