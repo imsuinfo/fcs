@@ -119,8 +119,6 @@ function mcneese_event_workflow_event_search_0_form($form, &$form_state, $page_n
       foreach ($form_state['simple_search_results'] as $item) {
         $row = array();
 
-        $item->id = intval($item->id);
-
         $can_view_event = mcneese_event_workflow_management_page_event_access('view', $item->id);
         $can_edit_event = mcneese_event_workflow_management_page_event_access('edit', $item->id);
         $can_review_event = mcneese_event_workflow_management_page_event_access('review', $item->id);
