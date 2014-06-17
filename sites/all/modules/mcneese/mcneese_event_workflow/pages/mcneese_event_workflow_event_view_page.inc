@@ -793,20 +793,65 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
         $form['review']['operations']['instructions']['#markup'] .= "When you select <em>" . $decision_options[MEW_REVIEW_DECISION_DENY] . "</em>, then the event request is considered to be rejected. ";
       }
 
-      if ($step == MEW_REVIEW_STEP_REVIEW) {
-        $form['review']['operations']['use_fees'] = array(
-          '#tree' => TRUE,
-        );
+      $form['review']['operations']['as_reviewer'] = array(
+        '#markup' => '',
+      );
 
+      mcneese_event_workflow_include(4);
+      $reviewer_classification_options = event_workflow_get_reviewer_classification_list_options();
+
+      $form['review']['operations']['as_reviewer']['#markup'] = '<div class="event-section-review-operations-as_reviewer">';
+
+      $reviewer_classification = array();
+      if ($step == MEW_REVIEW_STEP_VENUE_AVAILABLE || MEW_REVIEW_STEP_MAKE_DECISIONS) {
+        if ($event['venue_coordinator']['user_id'][0]->value == $user->uid) {
+          $reviewer_classification[] = $reviewer_classification_options[MEW_REVIEW_CLASSIFICATION_VENUE_COORDINATOR];
+          $form['review']['operations']['as_reviewer']['#markup'] .= '';
+        }
+      }
+      elseif ($step == MEW_REVIEW_STEP_REVIEW || $step == MEW_REVIEW_STEP_USAGE_FEES) {
         $reviewer_conditions = array(
           'mr.user_id' => $user->uid,
           'mr.event_classification' => $event_classification,
           'mr.review_step' => $step,
         );
+
         $reviewers = mcneese_event_workflow_get_reviewers($reviewer_conditions, TRUE);
         if (!is_array($reviewers)) {
           $reviewers = array();
         }
+
+        if (!empty($reviewers[$user_id][$review_step])) {
+          foreach ($reviewers[$user_id][$review_step] as $reviewer) {
+            $reviewer_classification[] = $reviewer_classification_options[$reviewer->reviewer_classification];
+          }
+        }
+      }
+
+      if (empty($reviewer_classification)) {
+        if ($administer) {
+          $reviewer_classification[] = 'System Administer';
+        }
+      }
+
+      if (empty($reviewer_classification)) {
+        if ($manager) {
+          $reviewer_classification[] = 'Manager';
+        }
+      }
+
+      if (!empty($reviewer_classification)) {
+        $form['review']['operations']['as_reviewer']['#markup'] .= '<div class="event-section-review-operations-as_reviewer-message">You are reviewing with the following classifications:</div>';
+        $form['review']['operations']['as_reviewer']['#markup'] .= theme('item_list', array('items' => $reviewer_classification, 'type' => 'ul', 'attributes' => array('class' => array('event-section-review-operations-as_reviewer-list'))));
+      }
+
+      $form['review']['operations']['as_reviewer']['#markup'] .= '</div>';
+
+
+      if ($step == MEW_REVIEW_STEP_REVIEW) {
+        $form['review']['operations']['use_fees'] = array(
+          '#tree' => TRUE,
+        );
 
         $uses = array();
         $insurance_fee = FALSE;
@@ -1742,19 +1787,37 @@ function mcneese_event_workflow_build_reviews_log(&$form, &$form_state, $event_i
       }
 
       $reviewer_classification = NULL;
-      #$reviewer_classification = $reviewer_classification_options[MEW_REVIEW_CLASSIFICATION_VENUE_COORDINATOR];
+      if ($event['venue_coordinator']['user_id'][0]->value == $user_id) {
+        $reviewer_classification = $reviewer_classification_options[MEW_REVIEW_CLASSIFICATION_VENUE_COORDINATOR];
+      }
+
       if (!empty($reviewers[$user_id][$review_step])) {
         foreach ($reviewers[$user_id][$review_step] as $reviewer) {
           if (is_null($reviewer_classification)) {
-            $reviewer_classification = " as <strong>";
+            $reviewer_classification = '';
           }
           else {
-            $reviewer_classification .= ", ";
+            $reviewer_classification .= ', ';
           }
 
           $reviewer_classification .= $reviewer_classification_options[$reviewer->reviewer_classification];
         }
-        $reviewer_classification .= "</strong>";
+      }
+
+      if (is_null($reviewer_classification)) {
+        if (user_access('mcneese event workflow administer', $users[$user_id])) {
+          $reviewer_classification = 'System Administer';
+        }
+      }
+
+      if (is_null($reviewer_classification)) {
+        if (user_access('mcneese event workflow manage', $users[$user_id])) {
+          $reviewer_classification = 'Manager';
+        }
+      }
+
+      if (!is_null($reviewer_classification)) {
+        $reviewer_classification = ' as <strong class="review-item-label-text-row-reviewer_classification">'. $reviewer_classification . '</strong>';
       }
 
       $user_name .= $users[$user_id]->field_user_first_name['und'][0]['value'];
@@ -1763,34 +1826,34 @@ function mcneese_event_workflow_build_reviews_log(&$form, &$form_state, $event_i
       $markup .= '<div class="review-item-label">';
       $markup .= '<h3 class="review-item-label-text">';
       if ($review_step == MEW_REVIEW_STEP_VENUE_AVAILABLE && $decision == MEW_REVIEW_DECISION_APPROVE) {
-        $markup .= '<span class="review-item-label-text-row">[' . $row . ']</span> <strong>' . $user_name . "</strong> has designated that the <strong>Venue is Available</strong>.";
+        $markup .= '<span class="review-item-label-text-row">[' . $row . ']</span> <strong class="review-item-label-text-row-user">' . $user_name . '</strong> has designated that the <strong class="review-item-label-text-row-decision">Venue is Available</strong>' . $reviewer_classification . '.';
       }
       elseif ($review_step == MEW_REVIEW_STEP_VENUE_AVAILABLE && $decision == MEW_REVIEW_DECISION_DENY) {
-        $markup .= '<span class="review-item-label-text-row">[' . $row . ']</span> <strong>' . $user_name . "</strong> has designated that the <strong>Venue is Unavailable</strong>.";
+        $markup .= '<span class="review-item-label-text-row">[' . $row . ']</span> <strong class="review-item-label-text-row-user">' . $user_name . '</strong> has designated that the <strong class="review-item-label-text-row-decision">Venue is Unavailable</strong>' . $reviewer_classification . '.';
       }
       elseif ($review_step == MEW_REVIEW_STEP_MAKE_DECISIONS && $decision == MEW_REVIEW_DECISION_APPROVE) {
-        $markup .= '<span class="review-item-label-text-row">[' . $row . ']</span> <strong>' . $user_name . "</strong> has <strong>Confirmed and Reserved</strong> the request.";
+        $markup .= '<span class="review-item-label-text-row">[' . $row . ']</span> <strong class="review-item-label-text-row-user">' . $user_name . '</strong> has <strong class="review-item-label-text-row-decision">Confirmed and Reserved</strong> the request' . $reviewer_classification . "";
       }
       elseif ($review_step == MEW_REVIEW_STEP_MAKE_DECISIONS && $decision == MEW_REVIEW_DECISION_DENY) {
-        $markup .= '<span class="review-item-label-text-row">[' . $row . ']</span> <strong>' . $user_name . "</strong> has <strong>Denied</strong> the request.";
+        $markup .= '<span class="review-item-label-text-row">[' . $row . ']</span> <strong class="review-item-label-text-row-user">' . $user_name . '</strong> has <strong class="review-item-label-text-row-decision">Denied</strong> the request' . $reviewer_classification . '.';
       }
       elseif ($decision == MEW_REVIEW_DECISION_COMMENT) {
-        $markup .= '<span class="review-item-label-text-row">[' . $row . ']</span> <strong>' . $user_name . "</strong> has made a <strong>" . $decision_options[$decision] . "</strong>.";
+        $markup .= '<span class="review-item-label-text-row">[' . $row . ']</span> <strong class="review-item-label-text-row-user">' . $user_name . '</strong> has made a <strong class="review-item-label-text-row-decision">' . $decision_options[$decision] . '</strong>' . $reviewer_classification . '.';
       }
       elseif ($review_step == MEW_REVIEW_STEP_REVIEW && $decision == MEW_REVIEW_DECISION_USAGE_FEE) {
-        $markup .= '<span class="review-item-label-text-row">[' . $row . ']</span> <strong>' . $user_name . "</strong> has designated the <strong>" . $decision_options[$decision] . "</strong>" . $reviewer_classification . ".";
+        $markup .= '<span class="review-item-label-text-row">[' . $row . ']</span> <strong class="review-item-label-text-row-user">' . $user_name . '</strong> has designated the <strong class="review-item-label-text-row-decision">' . $decision_options[$decision] . '</strong>' . $reviewer_classification . '.';
       }
       elseif ($review_step == MEW_REVIEW_STEP_REVIEW && $decision == MEW_REVIEW_DECISION_WAVE) {
-        $markup .= '<span class="review-item-label-text-row">[' . $row . ']</span> <strong>' . $user_name . "</strong> has waved the <strong>" . $decision_options[$decision] . "</strong> step.";
+        $markup .= '<span class="review-item-label-text-row">[' . $row . ']</span> <strong class="review-item-label-text-row-user">' . $user_name . '</strong> has waved the <strong class="review-item-label-text-row-decision">' . $decision_options[$decision] . '</strong> step' . $reviewer_classification . '.';
       }
       elseif ($review_step == MEW_REVIEW_STEP_USAGE_FEES && $decision == MEW_REVIEW_DECISION_APPROVE) {
-        $markup .= '<span class="review-item-label-text-row">[' . $row . ']</span> <strong>' . $user_name . "</strong> has accepted the <strong>" . $review_step_options[$review_step] . "</strong>.";
+        $markup .= '<span class="review-item-label-text-row">[' . $row . ']</span> <strong class="review-item-label-text-row-user">' . $user_name . '</strong> has accepted the <strong class="review-item-label-text-row-decision">' . $review_step_options[$review_step] . '</strong>' . $reviewer_classification . '.';
       }
       elseif ($review_step == MEW_REVIEW_STEP_USAGE_FEES && $decision == MEW_REVIEW_DECISION_DENY) {
-        $markup .= '<span class="review-item-label-text-row">[' . $row . ']</span> <strong>' . $user_name . "</strong> has rejected the <strong>" . $review_step_options[$review_step] . "</strong>.";
+        $markup .= '<span class="review-item-label-text-row">[' . $row . ']</span> <strong class="review-item-label-text-row-user">' . $user_name . '</strong> has rejected the <strong class="review-item-label-text-row-decision">' . $review_step_options[$review_step] . '</strong>' . $reviewer_classification . '.';
       }
       else {
-        $markup .= '<span class="review-item-label-text-row">[' . $row . ']</span> <strong>' . $user_name . "</strong> chose to <strong>" . $decision_options[$decision] . "</strong> the event request.";
+        $markup .= '<span class="review-item-label-text-row">[' . $row . ']</span> <strong class="review-item-label-text-row-user">' . $user_name . '</strong> chose to <strong class="review-item-label-text-row-decision">' . $decision_options[$decision] . '</strong> the event request' . $reviewer_classification . '.';
       }
       $markup .= '</h3>';
       $markup .= '<div class="review-item-label-date">' . date("Y/m/d h:i:s a", $date) . "</div>";
