@@ -122,8 +122,8 @@ function mcneese_event_workflow_event_cancel_0_form_submit($form, &$form_state) 
   $user = cf_current_user();
 
   $clicked_id = '';
-  if (isset($form_state['clicked_button']['#id'])) {
-    $clicked_id = $form_state['clicked_button']['#id'];
+  if (isset($form_state['triggering_element']['#id'])) {
+    $clicked_id = $form_state['triggering_element']['#id'];
   }
 
   $event_id = (int) $form['form']['event_id']['#value'];
@@ -146,7 +146,7 @@ function mcneese_event_workflow_event_cancel_0_form_submit($form, &$form_state) 
 
   mcneese_event_workflow_include(6);
 
-  $cancelled = mcneese_event_workflow_workflow_set_status($event_id, MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_CANCELLED);
+  $cancelled = mcneese_event_workflow_workflow_set_status($event_id, MEW_EVENT_STATUS_CANCELLED);
 
   if ($cancelled) {
     $parameters = array();
@@ -292,8 +292,8 @@ function mcneese_event_workflow_event_uncancel_0_form_submit($form, &$form_state
   $user = cf_current_user();
 
   $clicked_id = '';
-  if (isset($form_state['clicked_button']['#id'])) {
-    $clicked_id = $form_state['clicked_button']['#id'];
+  if (isset($form_state['triggering_element']['#id'])) {
+    $clicked_id = $form_state['triggering_element']['#id'];
   }
 
   $event_id = (int) $form['form']['event_id']['#value'];
@@ -331,8 +331,8 @@ function mcneese_event_workflow_event_uncancel_0_form_submit($form, &$form_state
 
     $previous = $query->execute()->fetchAll();
   }
-  catch (Exception $e) {
-    cf_error::on_query_execution($e);
+  catch (Exception $ex) {
+    cf_error::on_query_execution($ex);
 
     $uncancelled = FALSE;
   }

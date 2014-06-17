@@ -27,6 +27,12 @@
  * @see ctools_build_form()
  */
 function mcneese_event_workflow_event_edit_0_form_ctools($id, $target_section) {
+  if (!function_exists('ctools_api_version')) {
+    drupal_not_found();
+    drupal_exit();
+    return '';
+  }
+
   $js = !empty($_REQUEST['js']);
 
   $commands = array();
@@ -158,10 +164,6 @@ function mcneese_event_workflow_event_edit_0_form($form, &$form_state, $id, $tar
 
   $form = array();
 
-  // @todo: load and populate event information into the form_state
-  $classification = '';
-  $room = '';
-
   if (empty($form_state['values']['form']['step'])) {
     $step = reset($section_information[$target_section]['steps']);
   }
@@ -197,22 +199,10 @@ function mcneese_event_workflow_event_edit_0_form($form, &$form_state, $id, $tar
     '#value' => $step,
   );
 
-  $form['form']['paramater_1'] = array(
-    '#id' => 'field-form-parameter_1',
-    '#type' => 'value',
-    '#value' => $classification,
-  );
-
-  $form['form']['paramater_2'] = array(
-    '#id' => 'field-form-paramater_2',
-    '#type' => 'value',
-    '#value' => $room,
-  );
-
   $form['form']['existing'] = array(
     '#id' => 'field-form-existing',
     '#type' => 'value',
-    '#value' => (array) event_workflow_get_event_existing_values($event),
+    '#value' => event_workflow_get_event_existing_values($event),
   );
 
   $form['form']['user'] = array(
@@ -258,7 +248,6 @@ function mcneese_event_workflow_event_edit_0_form($form, &$form_state, $id, $tar
   elseif (array_key_exists($target_section, $form['form']['sections']['#value'])) {
     $form['form']['sections']['#value'] = array($target_section => $form['form']['sections']['#value'][$target_section]);
   }
-
 
   $form['event'] = array(
     '#tree' => TRUE,
@@ -311,7 +300,6 @@ function mcneese_event_workflow_event_edit_0_form($form, &$form_state, $id, $tar
       '#type' => 'submit',
       '#value' => t("Submit"),
     );
-
   }
   return $form;
 }
@@ -354,8 +342,8 @@ function mcneese_event_workflow_event_edit_0_form_validate($form, &$form_state) 
   $form_state['rebuild'] = TRUE;
 
   $clicked_id = '';
-  if (isset($form_state['clicked_button']['#id'])) {
-    $clicked_id = $form_state['clicked_button']['#id'];
+  if (isset($form_state['triggering_element']['#id'])) {
+    $clicked_id = $form_state['triggering_element']['#id'];
   }
 
   if (empty($form_state['values']['form']['step'])) {
@@ -365,13 +353,26 @@ function mcneese_event_workflow_event_edit_0_form_validate($form, &$form_state) 
   $event = $form['form']['event']['#value'];
   $event_id = (int) $event['mer']['id'][0]->value;
 
+  $can_edit_event = mcneese_event_workflow_management_page_event_access('edit', $event_id);
+  $can_cancel_event = mcneese_event_workflow_management_page_event_access('cancel', $event_id);
+
+  if (!$can_edit_event) {
+    form_set_error('', "Illegal operation detected. Unauthorized access attempt.");
+    $no_problems = FALSE;
+  }
+
   if ($clicked_id == 'submit-event-cancel') {
+    if (!$can_cancel_event) {
+      form_set_error('', "Illegal operation detected. Unauthorized access attempt.");
+      $no_problems = FALSE;
+    }
+
     if (isset($form_state['ajax'])) {
-      // ajax method of cancelling
+      // ajax method of cancelling.
       $form_state['values']['form']['step'] = 'cancel';
     }
     else {
-      // non-ajax method of cancelling
+      // non-ajax method of cancelling.
       $form_state['rebuild'] = FALSE;
 
       if (empty($form_state['values']['redirect_to'])) {
@@ -423,13 +424,6 @@ function mcneese_event_workflow_event_edit_0_form_validate($form, &$form_state) 
         }
       }
       elseif ($form_state['values']['form']['step'] == 'standard') {
-        // when classification is readonly, ensure that no change happens.
-        if ($form_state['values']['event']['coordinator']['classification'][0]) {
-          if (isset($form['event']['coordinator']['classification']['#value'])) {
-            $form_state['values']['event']['coordinator']['classification'][0] = $form['event']['coordinator']['classification'][0]['#value'];
-          }
-        }
-
         if ($clicked_id == 'submit-event-prev') {
           $form_state['values']['form']['step'] = 'rooms';
         }
@@ -484,20 +478,21 @@ function mcneese_event_workflow_event_edit_0_form_validate($form, &$form_state) 
             unset($v);
           }
 
-          $events_using_room = mcneese_event_workflow_check_room_availability($room_list[0], $room_list[1], $room_list[2], $date, $time_start, $time_stop, $event_id);
+          if (!empty($date)) {
+            $events_using_room = mcneese_event_workflow_check_room_availability($room_list[0], $room_list[1], $room_list[2], $date, $time_start, $time_stop, $event_id);
+
+            if ($events_using_room === FALSE) {
+              form_set_error('', "An internal error occurred while checking the room for availability. Please contact the support staff.");
+            }
+            elseif (!empty($events_using_room)) {
+              mcneese_event_workflow_display_room_unavailable_message();
+            }
+          }
 
           unset($room_list);
           unset($date);
           unset($time_start);
           unset($time_stop);
-
-          if ($events_using_room === FALSE) {
-            form_set_error('', "An internal error occurred while checking the room for availability. Please contact the support staff.");
-          }
-
-          if (!empty($events_using_room)) {
-            mcneese_event_workflow_display_room_unavailable_message();
-          }
 
           if (empty($form_state['values']['event']['information']['type'][0])) {
             form_set_error('event][information][type][0', "The <strong>" . $form['event']['information']['type'][0]['#title'] . "</strong> is required.");
@@ -555,8 +550,8 @@ function mcneese_event_workflow_event_edit_0_form_validate($form, &$form_state) 
  */
 function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
   $clicked_id = '';
-  if (isset($form_state['clicked_button']['#id'])) {
-    $clicked_id = $form_state['clicked_button']['#id'];
+  if (isset($form_state['triggering_element']['#id'])) {
+    $clicked_id = $form_state['triggering_element']['#id'];
   }
 
   $failure = FALSE;
@@ -594,7 +589,7 @@ function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
 
   mcneese_event_workflow_include(0);
 
-  $structure = mcneese_event_workflow_secondary_table_structure();
+  $structure = mcneese_event_workflow_table_structure();
   $structure_tables = array();
   $structure_field_tables = array();
 
@@ -689,9 +684,9 @@ function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
       // enforce transaction execution
       unset($transaction);
     }
-    catch (Exception $e) {
+    catch (Exception $ex) {
       $transaction->rollback();
-      cf_error::on_query_execution($e);
+      cf_error::on_query_execution($ex);
 
       $failure = TRUE;
     }

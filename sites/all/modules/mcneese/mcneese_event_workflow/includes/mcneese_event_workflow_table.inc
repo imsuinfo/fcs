@@ -16,7 +16,7 @@
  * @return array
  *  A list of secondary tables and their structure.
  */
-function mcneese_event_workflow_secondary_table_structure() {
+function mcneese_event_workflow_table_structure() {
   mcneese_event_workflow_include(4);
 
   $structure = array();
@@ -62,7 +62,7 @@ function mcneese_event_workflow_secondary_table_structure() {
   $structure['review'] = array(
     'review' => array(
       'path' => 'event][review][review',
-      'columns' => array('reviewer', 'decision', 'message'),
+      'columns' => array('reviewer', 'step', 'decision', 'message'),
       'manual_processing' => TRUE,
     ),
   );
@@ -96,6 +96,10 @@ function mcneese_event_workflow_secondary_table_structure() {
       'path' => 'event][use_fees][other',
       'manual_processing' => TRUE,
     ),
+    'waved' => array(
+      'path' => 'event][use_fees][waved',
+      'manual_processing' => TRUE,
+    ),
   );
 
   $structure['insurance'] = array(
@@ -127,18 +131,24 @@ function mcneese_event_workflow_secondary_table_structure() {
     ),
   );
 
-  $structure['coordinator'] = array(
+  $structure['venue_coordinator'] = array(
+    'user_id' => array(
+      'path' => 'event][venue_coordinator][user_id',
+    ),
+  );
+
+  $structure['event_coordinator'] = array(
     'name' => array(
-      'path' => 'event][coordinator][name',
+      'path' => 'event][event_coordinator][name',
     ),
     'phone' => array(
-      'path' => 'event][coordinator][phone',
+      'path' => 'event][event_coordinator][phone',
     ),
     'email' => array(
-      'path' => 'event][coordinator][email',
+      'path' => 'event][event_coordinator][email',
     ),
     'classification' => array(
-      'path' => 'event][coordinator][classification',
+      'path' => 'event][event_coordinator][classification',
     ),
   );
 
@@ -337,7 +347,7 @@ function mcneese_event_workflow_secondary_table_structure() {
  * @return array
  *  A list of secondary tables and their presentation options.
  */
-function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
+function mcneese_event_workflow_table_presentation($option = NULL) {
   $presentation = array();
 
   if (!is_null($option)) {
@@ -538,6 +548,12 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
       'label' => 'Room',
       'group' => 'request',
       'weight' => 102,
+      'type' => array(
+        'value' => 'room',
+      ),
+      'display' => array(
+        'value' => NULL,
+      ),
       'event_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
@@ -641,6 +657,17 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
         'hide' => FALSE,
       ),
     ),
+    'waved' => array(
+      'label' => 'Fees Waved',
+      'type' => array(
+        'value' => 'boolean',
+      ),
+      'group' => 'fees',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
+    ),
   );
 
   $presentation['insurance'] = array(
@@ -718,30 +745,93 @@ function mcneese_event_workflow_secondary_table_presentation($option = NULL) {
     ),
   );
 
-  $presentation['coordinator'] = array(
+  $presentation['venue_coordinator'] = array(
+    'user_id' => array(
+      'split' => array(
+        'name' => 'venue_coordinator',
+        'phone' => 'venue_coordinator',
+        'email' => 'venue_coordinator',
+      ),
+    ),
     'name' => array(
-      'label' => 'Coordinator Name',
+      'label' => 'Venue Coordinator Name',
+      'group' => 'coordinator',
+      'weight' => 1,
+      'type' => array(
+        'value' => 'venue_coordinator',
+      ),
+      'display' => array(
+        'value' => 'name',
+      ),
       'event_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
     ),
     'phone' => array(
-      'label' => 'Coordinator Phone',
+      'label' => 'Venue Coordinator Phone',
+      'group' => 'coordinator',
+      'weight' => 2,
+      'type' => array(
+        'value' => 'venue_coordinator',
+      ),
+      'display' => array(
+        'value' => 'phone',
+      ),
       'event_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
     ),
     'email' => array(
-      'label' => 'Coordinator E-Mail',
+      'label' => 'Venue Coordinator E-Mail',
+      'group' => 'coordinator',
+      'weight' => 3,
+      'type' => array(
+        'value' => 'venue_coordinator',
+      ),
+      'display' => array(
+        'value' => 'email',
+      ),
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
+    ),
+  );
+
+  $presentation['event_coordinator'] = array(
+    'name' => array(
+      'label' => 'Event Coordinator Name',
+      'group' => 'coordinator',
+      'weight' => 4,
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
+    ),
+    'phone' => array(
+      'label' => 'Event Coordinator Phone',
+      'group' => 'coordinator',
+      'weight' => 5,
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
+    ),
+    'email' => array(
+      'label' => 'Event Coordinator E-Mail',
+      'group' => 'coordinator',
+      'weight' => 6,
       'event_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
     ),
     'classification' => array(
-      'label' => 'Coordinator Classification',
+      'label' => 'Event Coordinator Classification',
+      'group' => 'coordinator',
+      'weight' => 7,
       'type' => array(
         'value' => 'taxonomy',
       ),

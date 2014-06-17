@@ -17,15 +17,11 @@
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
- * @param int|null $classification
- *   (optional) Number representing the event classification.
- * @param int|null $room
- *   (optional) Number representing the event room.
  *
  * @return array $form
  *   An array containing the generated form.
  */
-function mcneese_event_workflow_event_create_0_form($form, &$form_state, $classification = NULL, $room = NULL) {
+function mcneese_event_workflow_event_create_0_form($form, &$form_state) {
   $form = array();
 
   mcneese_event_workflow_include(1);
@@ -61,18 +57,6 @@ function mcneese_event_workflow_event_create_0_form($form, &$form_state, $classi
     '#id' => 'field-form-step',
     '#type' => 'value',
     '#value' => $step,
-  );
-
-  $form['form']['paramater_1'] = array(
-    '#id' => 'field-form-parameter_1',
-    '#type' => 'value',
-    '#value' => $classification,
-  );
-
-  $form['form']['paramater_2'] = array(
-    '#id' => 'field-form-paramater_2',
-    '#type' => 'value',
-    '#value' => $room,
   );
 
   $form['form']['existing'] = array(
@@ -122,6 +106,11 @@ function mcneese_event_workflow_event_create_0_form($form, &$form_state, $classi
       '#id' => 'submit-agreement',
       '#type' => 'submit',
       '#value' => t("Continue"),
+    );
+
+    $form['event'] = array(
+      '#id' => 'section-event',
+      '#tree' => TRUE,
     );
   }
   else {
@@ -193,8 +182,8 @@ function mcneese_event_workflow_event_create_0_form_validate($form, &$form_state
   $form_state['rebuild'] = TRUE;
 
   $clicked_id = '';
-  if (isset($form_state['clicked_button']['#id'])) {
-    $clicked_id = $form_state['clicked_button']['#id'];
+  if (isset($form_state['triggering_element']['#id'])) {
+    $clicked_id = $form_state['triggering_element']['#id'];
   }
 
   if (empty($form_state['values']['form']['step'])) {
@@ -237,13 +226,6 @@ function mcneese_event_workflow_event_create_0_form_validate($form, &$form_state
       }
     }
     elseif ($form_state['values']['form']['step'] == 'standard') {
-      // when classification is readonly, ensure that no changes happen.
-      if ($form_state['values']['event']['coordinator']['classification'][0]) {
-        if (isset($form['event']['coordinator']['classification']['#value'])) {
-          $form_state['values']['event']['coordinator']['classification'][0] = $form['event']['coordinator']['classification'][0]['#value'];
-        }
-      }
-
       if ($clicked_id == 'submit-event-prev') {
         $form_state['values']['form']['step'] = 'rooms';
       }
@@ -298,20 +280,22 @@ function mcneese_event_workflow_event_create_0_form_validate($form, &$form_state
           unset($v);
         }
 
-        $events_using_room = mcneese_event_workflow_check_room_availability($room_list[0], $room_list[1], $room_list[2], $date, $time_start, $time_stop);
+        if (!empty($date)) {
+          $events_using_room = mcneese_event_workflow_check_room_availability($room_list[0], $room_list[1], $room_list[2], $date, $time_start, $time_stop);
+
+          if ($events_using_room === FALSE) {
+            form_set_error('', "An internal error occurred while checking the room for availability. Please contact the support staff.");
+          }
+          elseif (!empty($events_using_room)) {
+            mcneese_event_workflow_display_room_unavailable_message();
+          }
+        }
 
         unset($room_list);
         unset($date);
         unset($time_start);
         unset($time_stop);
 
-        if ($events_using_room === FALSE) {
-          form_set_error('', "An internal error occurred while checking the room for availability. Please contact the support staff.");
-        }
-
-        if (!empty($events_using_room)) {
-          mcneese_event_workflow_display_room_unavailable_message();
-        }
 
         if (empty($form_state['values']['event']['information']['type'][0])) {
           form_set_error('event][information][type][0', "The <strong>" . $form['event']['information']['type'][0]['#title'] . "</strong> is required.");
@@ -334,7 +318,6 @@ function mcneese_event_workflow_event_create_0_form_validate($form, &$form_state
       }
       elseif ($clicked_id == 'submit-event-submit') {
         $form_state['rebuild'] = FALSE;
-
       }
     }
   }
@@ -361,12 +344,14 @@ function mcneese_event_workflow_event_create_0_form_submit($form, &$form_state) 
   $mew_event_requests['created'] = REQUEST_TIME;
   $mew_event_requests['updated'] = REQUEST_TIME;
 
+  $processed_mew_event_revisions = &drupal_static('processed_mew_event_revisions_' . REQUEST_TIME, FALSE);
+
   $mew_event_revisions = array();
   $mew_event_revisions['date'] = REQUEST_TIME;
 
   mcneese_event_workflow_include(0);
 
-  $structure = mcneese_event_workflow_secondary_table_structure();
+  $structure = mcneese_event_workflow_table_structure();
   $structure_tables = array();
   $structure_field_tables = array();
 
@@ -428,11 +413,15 @@ function mcneese_event_workflow_event_create_0_form_submit($form, &$form_state) 
       return FALSE;
     }
 
-    $mew_event_revisions['event_id'] = $event_id;
+    if ($processed_mew_event_revisions) {
+      $mew_event_revisions['event_id'] = $event_id;
 
-    $query = db_insert('mew_event_revisions');
-    $query->fields($mew_event_revisions);
-    $query->execute();
+      $query = db_insert('mew_event_revisions');
+      $query->fields($mew_event_revisions);
+      $query->execute();
+
+      $processed_mew_event_revisions = TRUE;
+    }
 
     foreach ($structure_field_tables as $table_name => $fields) {
       foreach ($fields as $delta => $values) {
@@ -455,11 +444,11 @@ function mcneese_event_workflow_event_create_0_form_submit($form, &$form_state) 
     // enforce transaction execution
     unset($transaction);
   }
-  catch (Exception $e) {
+  catch (Exception $ex) {
     $transaction->rollback();
 
     if (class_exists('cf_error')) {
-      cf_error::on_query_execution($e);
+      cf_error::on_query_execution($ex);
     }
 
     $failure = TRUE;

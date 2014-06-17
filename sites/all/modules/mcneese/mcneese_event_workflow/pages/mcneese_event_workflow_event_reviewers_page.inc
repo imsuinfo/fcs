@@ -41,6 +41,10 @@ function mcneese_event_workflow_event_reviewers_0_page() {
         continue;
       }
 
+      // these are automatically the venue coordinator, therefore skip them.
+      if ($review_step_id == MEW_REVIEW_STEP_VENUE_AVAILABLE) continue;
+      if ($review_step_id == MEW_REVIEW_STEP_MAKE_DECISIONS) continue;
+
       $unmatched = TRUE;
       foreach ($review_step_object->field_review_event_roles['und'] as $key => $value) {
         if ($value['tid'] == $classification_id) {
@@ -101,6 +105,13 @@ function mcneese_event_workflow_event_reviewers_0_form($form, &$form_state, $cla
 
   if (!cf_is_integer($review_step)) {
     cf_error::invalid_integer('review_step');
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  // these are automatically the venue coordinator, therefore skip them.
+  if ($review_step == MEW_REVIEW_STEP_VENUE_AVAILABLE || $review_step == MEW_REVIEW_STEP_MAKE_DECISIONS) {
     drupal_not_found();
     drupal_exit();
     return array();
@@ -183,15 +194,15 @@ function mcneese_event_workflow_event_reviewers_0_form($form, &$form_state, $cla
   foreach ($reviewers as $reviewer) {
     $row = array();
 
-    $id = intval($reviewer->id);
-    $row['id'] = $id;
+    $id = $reviewer->id;
+    $row['user_id'] = $id;
     $row['reviewer_classification'] = '';
 
     if (isset($reviewer_classifications[$reviewer->reviewer_classification])) {
       $row['reviewer_classification'] = $reviewer_classifications[$reviewer->reviewer_classification];
     }
 
-    $user_id = intval($reviewer->user_id);
+    $user_id = $reviewer->user_id;
     $row['name'] = '<a href="' . $base_path . 'user/' . $user_id . '" class="user-link">' . check_plain($reviewer->name) . '</a>';
     $row['first_name'] = check_plain($reviewer->first_name);
     $row['last_name'] = check_plain($reviewer->last_name);
@@ -286,8 +297,8 @@ function mcneese_event_workflow_event_reviewers_0_form($form, &$form_state, $cla
  */
 function mcneese_event_workflow_event_edit_0_form_pre_validate(&$form, &$form_state) {
   $clicked_id = '';
-  if (isset($form_state['clicked_button']['#id'])) {
-    $clicked_id = $form_state['clicked_button']['#id'];
+  if (isset($form_state['triggering_element']['#id'])) {
+    $clicked_id = $form_state['triggering_element']['#id'];
   }
 
   if ($clicked_id == 'submit-reviewer-add') {
@@ -310,8 +321,8 @@ function mcneese_event_workflow_event_edit_0_form_pre_validate(&$form, &$form_st
  */
 function mcneese_event_workflow_event_reviewers_0_form_validate($form, &$form_state) {
   $clicked_id = '';
-  if (isset($form_state['clicked_button']['#id'])) {
-    $clicked_id = $form_state['clicked_button']['#id'];
+  if (isset($form_state['triggering_element']['#id'])) {
+    $clicked_id = $form_state['triggering_element']['#id'];
   }
 
   if ($clicked_id == 'submit-reviewer-add') {
@@ -365,8 +376,8 @@ function mcneese_event_workflow_event_reviewers_0_form_validate($form, &$form_st
           form_set_error('reviewer][reviewer_classification', "An invalid Reviewer Classification has been specified. Please select a valid Reviewer Classification.");
         }
       }
-      catch (Exception $e) {
-        cf_error::on_query_execution($e);
+      catch (Exception $ex) {
+        cf_error::on_query_execution($ex);
       }
     }
 
@@ -402,8 +413,8 @@ function mcneese_event_workflow_event_reviewers_0_form_validate($form, &$form_st
  */
 function mcneese_event_workflow_event_reviewers_0_form_submit($form, &$form_state) {
   $clicked_id = '';
-  if (isset($form_state['clicked_button']['#id'])) {
-    $clicked_id = $form_state['clicked_button']['#id'];
+  if (isset($form_state['triggering_element']['#id'])) {
+    $clicked_id = $form_state['triggering_element']['#id'];
   }
 
   if ($clicked_id == 'submit-reviewer-add') {
@@ -442,9 +453,9 @@ function mcneese_event_workflow_event_reviewers_0_form_submit($form, &$form_stat
       $query->fields($values);
       $query->execute();
     }
-    catch (Exception $e) {
+    catch (Exception $ex) {
       $transaction->rollback();
-      cf_error::on_query_execution($e);
+      cf_error::on_query_execution($ex);
 
       $failure = TRUE;
     }
@@ -594,9 +605,9 @@ function mcneese_event_workflow_event_reviewers_0_delete_form_submit($form, &$fo
     $query->condition('id', $form['form']['id']['#value']);
     $query->execute();
   }
-  catch (Exception $e) {
+  catch (Exception $ex) {
     $transaction->rollback();
-    cf_error::on_query_execution($e);
+    cf_error::on_query_execution($ex);
   }
 
   // redirect after submitting.

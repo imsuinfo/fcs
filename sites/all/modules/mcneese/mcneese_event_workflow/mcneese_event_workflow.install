@@ -11,7 +11,7 @@
  * @return array
  *  A list of secondary tables and their structure.
  */
-function mcneese_event_workflow_secondary_table_install_structure() {
+function mcneese_event_workflow_table_install_structure() {
   $structure = array();
   $structure['top'] = array(
     'status' => 'unsigned_small',
@@ -23,7 +23,7 @@ function mcneese_event_workflow_secondary_table_install_structure() {
   );
 
   $structure['review'] = array(
-    'review' => array('reviewer' => 'unsigned', 'decision' => 'unsigned', 'message' => 'text'),
+    'review' => array('user_id' => 'unsigned', 'step' => 'unsigned', 'decision' => 'unsigned', 'message' => 'text'),
   );
 
   $structure['use_fees'] = array(
@@ -31,12 +31,13 @@ function mcneese_event_workflow_secondary_table_install_structure() {
     'equipment' => array('quantity' => 'unsigned', 'hours' => 'unsigned', 'days' => 'unsigned', 'amount' => 'unsigned'),
     'security' => array('quantity' => 'unsigned', 'hours' => 'unsigned', 'days' => 'unsigned', 'amount' => 'unsigned'),
     'custodial' => array('quantity' => 'unsigned', 'hours' => 'unsigned', 'days' => 'unsigned', 'amount' => 'unsigned'),
-    'other' => 'unsigned_small',
+    'other' => 'unsigned_tiny',
+    'waved' => 'unsigned_tiny',
   );
 
   $structure['insurance'] = array(
-    'contractor' => 'unsigned_small',
-    'unaffiliated' => 'unsigned_small',
+    'contractor' => 'unsigned_tiny',
+    'unaffiliated' => 'unsigned_tiny',
   );
 
   $structure['dates'] = array(
@@ -45,11 +46,15 @@ function mcneese_event_workflow_secondary_table_install_structure() {
     'time_stop' => 'time',
   );
 
-  $structure['coordinator'] = array(
+  $structure['event_coordinator'] = array(
     'name' => 'varchar',
     'phone' => 'varchar',
     'email' => 'varchar',
     'classification' => 'varchar',
+  );
+
+  $structure['venue_coordinator'] = array(
+    'user_id' => 'unsigned',
   );
 
   $structure['information'] = array(
@@ -335,7 +340,7 @@ function mcneese_event_workflow_schema() {
 
 
   // create the secondary tables associated with the table mew_event_requests.
-  $structure = mcneese_event_workflow_secondary_table_install_structure();
+  $structure = mcneese_event_workflow_table_install_structure();
 
   foreach ($structure as $structure_name => &$structure_array) {
     foreach ($structure_array as $field_name => &$field_type) {
@@ -443,6 +448,24 @@ function mcneese_event_workflow_schema() {
           $schema[$table_name]['fields'][$name] = array(
             'type' => 'int',
             'size' => 'normal',
+            'not null' => FALSE,
+            'default' => 0,
+            'unsigned' => TRUE,
+          );
+        }
+        elseif ($type == 'signed_tiny') {
+          $schema[$table_name]['fields'][$name] = array(
+            'type' => 'int',
+            'size' => 'tiny',
+            'not null' => FALSE,
+            'default' => 0,
+            'unsigned' => FALSE,
+          );
+        }
+        elseif ($type == 'unsigned_tiny') {
+          $schema[$table_name]['fields'][$name] = array(
+            'type' => 'int',
+            'size' => 'tiny',
             'not null' => FALSE,
             'default' => 0,
             'unsigned' => TRUE,
@@ -581,7 +604,7 @@ function mcneese_event_workflow_install() {
   $table2_foreign = 'users';
   $table2_foreign_key = 'uid';
 
-  $structure = mcneese_event_workflow_secondary_table_install_structure();
+  $structure = mcneese_event_workflow_table_install_structure();
 
   db_query('ALTER TABLE {mew_event_revisions} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '}(' . $table1_foreign_key . ') ON DELETE CASCADE');
   db_query('ALTER TABLE {mew_reviewers} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '}(' . $table2_foreign_key . ') ON DELETE CASCADE');
@@ -613,7 +636,7 @@ function mcneese_event_workflow_uninstall() {
   $key1_foreign = 'event_id_fkey';
   $key2_foreign = 'user_id_fkey';
 
-  $structure = mcneese_event_workflow_secondary_table_install_structure();
+  $structure = mcneese_event_workflow_table_install_structure();
 
   db_query('ALTER TABLE {mew_event_revisions} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
   db_query('ALTER TABLE {mew_reviewers} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);

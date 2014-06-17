@@ -113,8 +113,6 @@ function mcneese_event_workflow_get_event_section_information() {
  * This requires the following fields to be defined before calling:
  * - $form['form']['sections']
  * - $form['form']['step']
- * - $form['form']['paramater_1']
- * - $form['form']['paramater_2']
  * - $form['form']['existing']
  * - $form['form']['user']
  * - $form['form']['parents']
@@ -157,26 +155,6 @@ function mcneese_event_workflow_get_event_fields($form, &$form_state) {
   $event_state = &$form_state['values']['event'];
 
   $fields = array();
-  if (isset($form['form']['paramater_1']['#value']) && isset($form['form']['paramater_2']['#value'])) {
-    if ($form['form']['step']['#value'] == 'location' && !array_key_exists('location', $event_state)) {
-      $catagory_list_options = event_workflow_get_event_location_list_options('radios');
-
-      if (array_key_exists($form['form']['paramater_1']['#value'], $catagory_list_options)) {
-        $room_list_options = event_workflow_get_event_room_list_options($event_state['location'][0], 'special');
-
-        if (array_key_exists($form['form']['paramater_2']['#value'], $room_list_options)) {
-          $event_state['location'][0] = $form['form']['paramater_1']['#value'];
-          $event_state['room_list'][0] = $form['form']['paramater_2']['#value'];
-          $form['form']['step']['#value'] = 'standard';
-        }
-      }
-      else {
-        $event_state['location'][0] = $form['form']['paramater_1']['#value'];
-        $form['form']['step']['#value'] = 'rooms';
-      }
-    }
-  }
-
   if (!isset($form['form']['sections']['#value']) || !is_array($form['form']['sections']['#value'])) {
     $form['form']['sections'] = array(
       '#type' => 'value',
@@ -322,36 +300,69 @@ function mcneese_event_workflow_get_event_fields($form, &$form_state) {
   }
 
 
-  // Fieldset: Coordinator
-  $ps = 'coordinator';
+  // Fieldset: Venue Coordinator
+  $ps = 'venue_coordinator';
   if (!is_null($form['form']['parents']['#value']['path'])) {
     $ps .= ']';
   }
 
-  if (!isset($event_state['coordinator'])) {
-    $event_state['coordinator'] = array();
+  if (!isset($event_state['venue_coordinator'])) {
+    $event_state['venue_coordinator'] = array();
   }
 
-  $fields['coordinator'] = array(
-    '#id' => 'section-event-coordinator',
+  $fields['venue_coordinator'] = array(
+    '#id' => 'section-event-venue_coordinator',
     '#tree' => TRUE,
   );
 
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('coordinator', $form['form']['sections']['#value'])) {
-    $fields['coordinator'] = array(
-      '#id' => 'section-event-coordinator',
+    $fields['venue_coordinator'] = array(
+      '#id' => 'section-event-venue_coordinator',
       '#type' => 'fieldset',
       '#tree' => TRUE,
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
-      '#title' => "Coordinator Settings",
+      '#title' => "Venue Coordinator Settings",
+      '#description' => "The venue coordinator is either the room coordinator or if there is no room coordinator, then the venue coordinator.",
     );
   }
 
-  mcneese_event_workflow_get_event_field_coordinator_name($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_coordinator_phone($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_coordinator_email($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_coordinator_classification($form, $form_state, $fields, $ps);
+  mcneese_event_workflow_get_event_field_venue_coordinator_user_id($form, $form_state, $fields, $ps);
+  //mcneese_event_workflow_get_event_field_venue_coordinator_name($form, $form_state, $fields, $ps);
+  //mcneese_event_workflow_get_event_field_venue_coordinator_phone($form, $form_state, $fields, $ps);
+  //mcneese_event_workflow_get_event_field_venue_coordinator_email($form, $form_state, $fields, $ps);
+
+
+  // Fieldset: Event Coordinator
+  $ps = 'event_coordinator';
+  if (!is_null($form['form']['parents']['#value']['path'])) {
+    $ps .= ']';
+  }
+
+  if (!isset($event_state['event_coordinator'])) {
+    $event_state['event_coordinator'] = array();
+  }
+
+  $fields['event_coordinator'] = array(
+    '#id' => 'section-event-event_coordinator',
+    '#tree' => TRUE,
+  );
+
+  if ($form['form']['step']['#value'] == 'standard' && array_key_exists('coordinator', $form['form']['sections']['#value'])) {
+    $fields['event_coordinator'] = array(
+      '#id' => 'section-event-event_coordinator',
+      '#type' => 'fieldset',
+      '#tree' => TRUE,
+      '#collapsible' => TRUE,
+      '#collapsed' => FALSE,
+      '#title' => "Event Coordinator Settings",
+    );
+  }
+
+  mcneese_event_workflow_get_event_field_event_coordinator_name($form, $form_state, $fields, $ps);
+  mcneese_event_workflow_get_event_field_event_coordinator_phone($form, $form_state, $fields, $ps);
+  mcneese_event_workflow_get_event_field_event_coordinator_email($form, $form_state, $fields, $ps);
+  mcneese_event_workflow_get_event_field_event_coordinator_classification($form, $form_state, $fields, $ps);
 
 
   // Fieldset: Information
@@ -613,7 +624,7 @@ function mcneese_event_workflow_get_event_fields($form, &$form_state) {
  * Process and build a specific form field.
  */
 function mcneese_event_workflow_get_event_field_status($form, &$form_state, &$fields, $ps) {
-  $values = array(0 => MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_UNLOCKED);
+  $values = array(0 => MEW_EVENT_STATUS_UNLOCKED);
 
   if (empty($form_state['values']['event']['status'])) {
     if (isset($form['form']['existing']['#value']['event']['status'])) {
@@ -650,7 +661,7 @@ function mcneese_event_workflow_get_event_field_status($form, &$form_state, &$fi
  * Process and build a specific form field.
  */
 function mcneese_event_workflow_get_event_field_step($form, &$form_state, &$fields, $ps) {
-  $values = array(0 => 116);
+  $values = array(0 => MEW_REVIEW_STEP_VENUE_AVAILABLE);
 
   if (empty($form_state['values']['event']['step'])) {
     if (isset($form['form']['existing']['#value']['event']['step'])) {
@@ -660,7 +671,7 @@ function mcneese_event_workflow_get_event_field_step($form, &$form_state, &$fiel
       mcneese_event_workflow_include(4);
 
       $workflow_states = event_workflow_get_event_steps_list_options();
-      $form['form']['state']['#value'] = array(116); // venue available
+      $form['form']['state']['#value'] = array(MEW_REVIEW_STEP_VENUE_AVAILABLE);
     }
   }
   else {
@@ -1027,27 +1038,81 @@ function mcneese_event_workflow_get_event_field_dates_time_stop($form, &$form_st
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_coordinator_name($form, &$form_state, &$fields, $ps) {
-  if (!array_key_exists('name', $form_state['values']['event']['coordinator'])) {
-    $form_state['values']['event']['coordinator']['name'] = array(0 => '');
+function mcneese_event_workflow_get_event_field_venue_coordinator_user_id($form, &$form_state, &$fields, $ps) {
+  $values = array(0 => NULL);
 
-    if (!empty($form['form']['user']['#value']->field_user_last_name['und'][0]['safe_value'])) {
-      $form_state['values']['event']['coordinator']['name'][0] .= $form['form']['user']['#value']->field_user_last_name['und'][0]['safe_value'];
-    }
-
-    if (!empty($form['form']['user']['#value']->field_user_first_name['und'][0]['safe_value'])) {
-      if (!empty($form_state['values']['event']['coordinator']['name'])) {
-        $form_state['values']['event']['coordinator']['name'][0] .= ', ';
+  if (empty($form_state['values']['event']['venue_coordinator']['user_id'][0])) {
+    if (empty($fields['venue_coordinator']['user_id'][0]['#value'])) {
+      if (!empty($form['form']['room_information']['#value']['room_coordinator_email'])) {
+        $coordinator_email = $form['form']['room_information']['#value']['room_coordinator_email'];
+      }
+      elseif (!empty($form['form']['room_information']['#value']['venue_coordinator_email'])) {
+        $coordinator_email = $form['form']['room_information']['#value']['venue_coordinator_email'];
       }
 
-      $form_state['values']['event']['coordinator']['name'][0] .= $form['form']['user']['#value']->field_user_first_name['und'][0]['safe_value'];
+      if (!empty($coordinator_email)) {
+        $venue_coordinator = mcneese_event_workflow_ensure_user_by_email($coordinator_email, array('reviewer'));
+
+        if (isset($venue_coordinator->uid)) {
+          $values[0] = $venue_coordinator->uid;
+        }
+      }
+    }
+    else {
+      if (!empty($fields['venue_coordinator']['user_id'][0]) && array_key_exists('#value', $fields['venue_coordinator']['user_id'][0])) {
+        $values[0] = $fields['venue_coordinator']['user_id'][0]['#value'];
+      }
+    }
+  }
+  else {
+    if (!empty($form_state['values']['event']['venue_coordinator']['user_id']) && array_key_exists(0, $form_state['values']['event']['venue_coordinator']['user_id'])) {
+      $values[0] = $form_state['values']['event']['venue_coordinator']['user_id'][0];
     }
   }
 
-  $values = $form_state['values']['event']['coordinator']['name'];
+  $fields['venue_coordinator']['user_id'] = array(
+    '#tree' => TRUE,
+  );
 
-  $fields['coordinator']['name'] = array(
-    '#id' => 'field-event-coordinator-name',
+  $fields['venue_coordinator']['user_id'][0] = array(
+    '#id' => 'field-event-venue_coordinator-user-0',
+    '#type' => 'value',
+    '#value' => $values[0],
+  );
+
+  return $values;
+}
+
+/**
+ * Process and build a specific form field.
+ */
+function mcneese_event_workflow_get_event_field_venue_coordinator_name($form, &$form_state, &$fields, $ps) {
+  $values = array(0 => '');
+
+  $venue_coordinator = NULL;
+  if (isset($fields['venue_coordinator']['user_id'][0]['#value'])) {
+    $venue_coordinator = user_load($fields['venue_coordinator']['user_id'][0]['#value']);
+  }
+
+  if (empty($form_state['values']['event']['venue_coordinator']['name'][0])) {
+    if (!empty($venue_coordinator->field_user_last_name['und'][0]['safe_value'])) {
+      $values[0] .= $venue_coordinator->field_user_last_name['und'][0]['safe_value'];
+    }
+
+    if (!empty($venue_coordinator->field_user_first_name['und'][0]['safe_value'])) {
+      if (!empty($values[0])) {
+        $values[0] .=  ', ';
+      }
+
+      $values[0] .= $venue_coordinator->field_user_first_name['und'][0]['safe_value'];
+    }
+  }
+  else {
+    $values = $form_state['values']['event']['venue_coordinator']['name'];
+  }
+
+  $fields['venue_coordinator']['name'] = array(
+    '#id' => 'field-event-venue_coordinator-name',
     '#type' => 'container',
     '#tree' => TRUE,
     '#attributes' => array(
@@ -1059,29 +1124,235 @@ function mcneese_event_workflow_get_event_field_coordinator_name($form, &$form_s
 
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('coordinator', $form['form']['sections']['#value'])) {
     foreach ($values as $key => $value) {
-      $fields['coordinator']['name'][$key] = array(
-        '#id' => 'field-event-coordinator-name-' . $key,
+      $fields['venue_coordinator']['name'][$key] = array(
+        '#id' => 'field-event-venue_coordinator-name-' . $key,
         '#type' => 'textfield',
-        '#title' => 'Coordinator Name',
+        '#title' => 'Venue Coordinator Name',
+        '#default_value' => $value,
+        '#value' => $value,
+        '#required' => TRUE,
+        '#size' => 48,
+        '#maxlength' => 255,
+        '#readonly' => TRUE,
+        '#attributes' => array(
+          'readonly' => 'readonly',
+          'class' => array(
+            'form-item-delta',
+            'form-item-delta-' . $key,
+          ),
+        ),
+      );
+    }
+    krsort($fields['venue_coordinator']['name']);
+
+    $form_state['conditionally_required'][0][] = 'venue_coordinator][name';
+  }
+  else {
+    foreach ($values as $key => $value) {
+      $fields['venue_coordinator']['name'][$key] = array(
+        '#id' => 'field-event-venue_coordinator-name-' . $key,
+        '#type' => 'value',
+        '#value' => $value,
+      );
+    }
+  }
+
+  return $values;
+}
+
+/**
+ * Process and build a specific form field.
+ */
+function mcneese_event_workflow_get_event_field_venue_coordinator_phone($form, &$form_state, &$fields, $ps) {
+  $values = array(0 => NULL);
+
+  $venue_coordinator = NULL;
+  if (isset($fields['venue_coordinator']['user_id'][0]['#value'])) {
+    $venue_coordinator = user_load($fields['venue_coordinator']['user_id'][0]['#value']);
+  }
+
+  if (empty($form_state['values']['event']['venue_coordinator']['phone'][0])) {
+    if (!empty($venue_coordinator->field_user_phone_number['und'][0]['safe_value'])) {
+      $values[0] = $venue_coordinator->field_user_phone_number['und'][0]['safe_value'];
+    }
+  }
+  else {
+    $values = $form_state['values']['event']['venue_coordinator']['phone'];
+  }
+
+  $fields['venue_coordinator']['phone'] = array(
+    '#id' => 'field-event-venue_coordinator-phone',
+    '#type' => 'container',
+    '#tree' => TRUE,
+    '#attributes' => array(
+      'class' => array(
+        'form-item-wrapper',
+      ),
+    ),
+  );
+
+  if ($form['form']['step']['#value'] == 'standard' && array_key_exists('coordinator', $form['form']['sections']['#value'])) {
+    foreach ($values as $key => $value) {
+      $fields['venue_coordinator']['phone'][$key] = array(
+        '#id' => 'field-event-venue_coordinator-phone-' . $key,
+        '#type' => 'telfield',
+        '#title' => 'Venue Coordinator Phone',
+        '#default_value' => $value,
+        '#value' => $value,
+        '#attributes' => array(
+          'readonly' => 'readonly',
+          'class' => array(
+            'form-item-delta',
+            'form-item-delta-' . $key,
+          ),
+        ),
+      );
+    }
+    krsort($fields['venue_coordinator']['phone']);
+  }
+  else {
+    foreach ($values as $key => $value) {
+      $fields['venue_coordinator']['phone'][$key] = array(
+        '#id' => 'field-event-venue_coordinator-phone-' . $key,
+        '#type' => 'value',
+        '#value' => $value,
+      );
+    }
+  }
+
+  return $values;
+}
+
+/**
+ * Process and build a specific form field.
+ */
+function mcneese_event_workflow_get_event_field_venue_coordinator_email($form, &$form_state, &$fields, $ps) {
+  $values = array(0 => '');
+
+  $venue_coordinator = NULL;
+  if (isset($fields['venue_coordinator']['user_id'][0]['#value'])) {
+    $venue_coordinator = user_load($fields['venue_coordinator']['user_id'][0]['#value']);
+  }
+
+  if (empty($form_state['values']['event']['venue_coordinator']['email'][0])) {
+    if (!empty($venue_coordinator->mail)) {
+      $values[0] = $venue_coordinator->mail;
+    }
+  }
+  else {
+    $values = $form_state['values']['event']['venue_coordinator']['email'];
+  }
+
+  $fields['venue_coordinator']['email'] = array(
+    '#id' => 'field-event-venue_coordinator-email',
+    '#type' => 'container',
+    '#tree' => TRUE,
+    '#attributes' => array(
+      'class' => array(
+        'form-item-wrapper',
+      ),
+    ),
+  );
+
+  if ($form['form']['step']['#value'] == 'standard' && array_key_exists('coordinator', $form['form']['sections']['#value'])) {
+    foreach ($values as $key => $value) {
+      $fields['venue_coordinator']['email'][$key] = array(
+        '#id' => 'field-event-venue_coordinator-email-' . $key,
+        '#type' => 'emailfield',
+        '#title' => 'Venue Coordinator E-Mail',
+        '#default_value' => $value,
+        '#value' => $value,
+        '#size' => 48,
+        '#maxlength' => 255,
+        '#required' => TRUE,
+        '#attributes' => array(
+          'readonly' => 'readonly',
+          'class' => array(
+            'form-item-delta',
+            'form-item-delta-' . $key,
+          ),
+        ),
+      );
+    }
+    krsort($fields['venue_coordinator']['email']);
+
+    $form_state['conditionally_required'][0][] = 'venue_coordinator][email';
+  }
+  else {
+    foreach ($values as $key => $value) {
+      $fields['venue_coordinator']['email'][$key] = array(
+        '#id' => 'field-event-venue_coordinator-email-' . $key,
+        '#type' => 'value',
+        '#value' => $value,
+      );
+    }
+  }
+
+  return $values;
+}
+
+/**
+ * Process and build a specific form field.
+ */
+function mcneese_event_workflow_get_event_field_event_coordinator_name($form, &$form_state, &$fields, $ps) {
+  $values = array(0 => NULL);
+
+  if (isset($form_state['values']['event']['event_coordinator']) && array_key_exists('name', $form_state['values']['event']['event_coordinator'])) {
+    $values = $form_state['values']['event']['event_coordinator']['name'];
+  }
+  else {
+    if (!empty($form['form']['user']['#value']->field_user_last_name['und'][0]['safe_value'])) {
+      $values[0] .= $form['form']['user']['#value']->field_user_last_name['und'][0]['safe_value'];
+    }
+
+    if (!empty($form['form']['user']['#value']->field_user_first_name['und'][0]['safe_value'])) {
+      if (!empty($values[0])) {
+        $values[0] .=  ', ';
+      }
+
+      $values[0] .= $form['form']['user']['#value']->field_user_first_name['und'][0]['safe_value'];
+    }
+  }
+
+  $fields['event_coordinator']['name'] = array(
+    '#id' => 'field-event-event_coordinator-name',
+    '#type' => 'container',
+    '#tree' => TRUE,
+    '#attributes' => array(
+      'class' => array(
+        'form-item-wrapper',
+      ),
+    ),
+  );
+
+  if ($form['form']['step']['#value'] == 'standard' && array_key_exists('coordinator', $form['form']['sections']['#value'])) {
+    foreach ($values as $key => $value) {
+      $fields['event_coordinator']['name'][$key] = array(
+        '#id' => 'field-event-event_coordinator-name-' . $key,
+        '#type' => 'textfield',
+        '#title' => 'Event Coordinator Name',
         '#default_value' => $value,
         '#required' => TRUE,
         '#size' => 48,
         '#maxlength' => 255,
+        '#readonly' => TRUE,
         '#attributes' => array(
           'class' => array(
             'form-item-delta',
             'form-item-delta-' . $key,
           ),
         ),
+        '#autocomplete_path' => 'events/create-0/autocomplete/event_coordinator/name',
       );
     }
+    krsort($fields['event_coordinator']['name']);
 
-    $form_state['conditionally_required'][0][] = 'coordinator][name';
+    $form_state['conditionally_required'][0][] = 'event_coordinator][name';
   }
   else {
     foreach ($values as $key => $value) {
-      $fields['coordinator']['name'][$key] = array(
-        '#id' => 'field-event-coordinator-name-' . $key,
+      $fields['event_coordinator']['name'][$key] = array(
+        '#id' => 'field-event-event_coordinator-name-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -1094,19 +1365,20 @@ function mcneese_event_workflow_get_event_field_coordinator_name($form, &$form_s
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_coordinator_phone($form, &$form_state, &$fields, $ps) {
-  $values = array(0 => '');
+function mcneese_event_workflow_get_event_field_event_coordinator_phone($form, &$form_state, &$fields, $ps) {
+  $values = array(0 => NULL);
 
-  if (!empty($form['form']['user']['#value']->field_user_phone_number['und'][0]['safe_value'])) {
-    $values[0] = $form['form']['user']['#value']->field_user_phone_number['und'][0]['safe_value'];
+  if (isset($form_state['values']['event']['event_coordinator']) && array_key_exists('phone', $form_state['values']['event']['event_coordinator'])) {
+    $values = $form_state['values']['event']['event_coordinator']['phone'];
+  }
+  else {
+    if (!empty($form['form']['user']['#value']->field_user_phone_number['und'][0]['safe_value'])) {
+      $values[0] = $form['form']['user']['#value']->field_user_phone_number['und'][0]['safe_value'];
+    }
   }
 
-  if (!empty($form_state['values']['event']['coordinator']['phone'])) {
-    $values = $form_state['values']['event']['coordinator']['phone'];
-  }
-
-  $fields['coordinator']['phone'] = array(
-    '#id' => 'field-event-coordinator-phone',
+  $fields['event_coordinator']['phone'] = array(
+    '#id' => 'field-event-event_coordinator-phone',
     '#type' => 'container',
     '#tree' => TRUE,
     '#attributes' => array(
@@ -1118,10 +1390,10 @@ function mcneese_event_workflow_get_event_field_coordinator_phone($form, &$form_
 
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('coordinator', $form['form']['sections']['#value'])) {
     foreach ($values as $key => $value) {
-      $fields['coordinator']['phone'][$key] = array(
-        '#id' => 'field-event-coordinator-phone-' . $key,
+      $fields['event_coordinator']['phone'][$key] = array(
+        '#id' => 'field-event-event_coordinator-phone-' . $key,
         '#type' => 'telfield',
-        '#title' => 'Coordinator Phone',
+        '#title' => 'Event Coordinator Phone',
         '#default_value' => $value,
         '#attributes' => array(
           'class' => array(
@@ -1129,16 +1401,17 @@ function mcneese_event_workflow_get_event_field_coordinator_phone($form, &$form_
             'form-item-delta-' . $key,
           ),
         ),
+        '#autocomplete_path' => 'events/create-0/autocomplete/event_coordinator/phone',
       );
     }
-    krsort($fields['coordinator']['phone']);
+    krsort($fields['event_coordinator']['phone']);
 
-    $values = $form_state['values']['event']['coordinator']['phone'];
+    $values = $form_state['values']['event']['event_coordinator']['phone'];
   }
   else {
     foreach ($values as $key => $value) {
-      $fields['coordinator']['phone'][$key] = array(
-        '#id' => 'field-event-coordinator-phone-' . $key,
+      $fields['event_coordinator']['phone'][$key] = array(
+        '#id' => 'field-event-event_coordinator-phone-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -1151,19 +1424,20 @@ function mcneese_event_workflow_get_event_field_coordinator_phone($form, &$form_
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_coordinator_email($form, &$form_state, &$fields, $ps) {
-  $values = array(0 => '');
+function mcneese_event_workflow_get_event_field_event_coordinator_email($form, &$form_state, &$fields, $ps) {
+  $values = array(0 => NULL);
 
-  if (!empty($form['form']['user']['#value']->mail)) {
-    $values[0] = $form['form']['user']['#value']->mail;
+  if (isset($form_state['values']['event']['event_coordinator']) && array_key_exists('email', $form_state['values']['event']['event_coordinator'])) {
+    $values = $form_state['values']['event']['event_coordinator']['email'];
+  }
+  else {
+    if (!empty($form['form']['user']['#value']->mail)) {
+      $values[0] = $form['form']['user']['#value']->mail;
+    }
   }
 
-  if (!empty($form_state['values']['event']['coordinator']['email'])) {
-    $values = $form_state['values']['event']['coordinator']['email'];
-  }
-
-  $fields['coordinator']['email'] = array(
-    '#id' => 'field-event-coordinator-email',
+  $fields['event_coordinator']['email'] = array(
+    '#id' => 'field-event-event_coordinator-email',
     '#type' => 'container',
     '#tree' => TRUE,
     '#attributes' => array(
@@ -1175,27 +1449,128 @@ function mcneese_event_workflow_get_event_field_coordinator_email($form, &$form_
 
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('coordinator', $form['form']['sections']['#value'])) {
     foreach ($values as $key => $value) {
-      $fields['coordinator']['email'][$key] = array(
-        '#id' => 'field-event-coordinator-email-' . $key,
+      $fields['event_coordinator']['email'][$key] = array(
+        '#id' => 'field-event-event_coordinator-email-' . $key,
         '#type' => 'emailfield',
-        '#title' => 'Coordinator E-Mail',
+        '#title' => 'Event Coordinator E-Mail',
         '#default_value' => $value,
         '#size' => 48,
         '#maxlength' => 255,
+        '#required' => TRUE,
         '#attributes' => array(
           'class' => array(
             'form-item-delta',
             'form-item-delta-' . $key,
           ),
         ),
+        '#autocomplete_path' => 'events/create-0/autocomplete/event_coordinator/email',
       );
     }
-    krsort($fields['coordinator']['email']);
+    krsort($fields['event_coordinator']['email']);
+
+    $form_state['conditionally_required'][0][] = 'event_coordinator][email';
   }
   else {
     foreach ($values as $key => $value) {
-      $fields['coordinator']['email'][$key] = array(
-        '#id' => 'field-event-coordinator-email-' . $key,
+      $fields['event_coordinator']['email'][$key] = array(
+        '#id' => 'field-event-event_coordinator-email-' . $key,
+        '#type' => 'value',
+        '#value' => $value,
+      );
+    }
+  }
+
+  return $values;
+}
+
+/**
+ * Process and build a specific form field.
+ */
+function mcneese_event_workflow_get_event_field_event_coordinator_classification($form, &$form_state, &$fields, $ps) {
+  $values = array(0 => NULL);
+
+  $user = NULL;
+  if (isset($form['form']['user']['#value']) && is_object($form['form']['user']['#value'])) {
+    $user = $form['form']['user']['#value'];
+  }
+
+  $state = array();
+  if (isset($form_state['values']['event']['event_coordinator']) && is_array($form_state['values']['event']['event_coordinator'])) {
+    $state = $form_state['values']['event']['event_coordinator'];
+  }
+
+  $classification = event_workflow_determine_user_classification($state, $user);
+
+  if (isset($form_state['values']['event']['event_coordinator']) && array_key_exists('classification', $form_state['values']['event']['event_coordinator'])) {
+    $values = $form_state['values']['event']['event_coordinator']['classification'];
+  }
+  else {
+    $values = array(0 => $classification['value']);
+  }
+
+  $fields['event_coordinator']['classification'] = array(
+    '#id' => 'field-event-event_coordinator-classification',
+    '#type' => 'container',
+    '#tree' => TRUE,
+    '#attributes' => array(
+      'class' => array(
+        'form-item-wrapper',
+      ),
+    ),
+  );
+
+  if ($form['form']['step']['#value'] == 'standard' && array_key_exists('coordinator', $form['form']['sections']['#value'])) {
+    // multiple classifications exists, so prompt user for desired classification.
+    if ($classification['count'] > 1) {
+      foreach ($values as $key => $value) {
+        $fields['event_coordinator']['classification'][$key] = array(
+          '#id' => 'field-event-event_coordinator-classification-' . $key,
+          '#type' => 'select',
+          '#title' => t("Event Coordinator Classification"),
+          '#description' => t("Associate this event request with a specific classification."),
+          '#options' => $classification['options'],
+          '#default_value' => $value,
+          '#required' => TRUE,
+          '#attributes' => array(
+            'class' => array(
+              'form-item-delta',
+              'form-item-delta-' . $key,
+            ),
+          ),
+        );
+      }
+      krsort($fields['event_coordinator']['classification']);
+
+      $form_state['conditionally_required'][0][] = 'event_coordinator][classification';
+    }
+    else {
+      foreach ($values as $key => $value) {
+        $fields['event_coordinator']['classification'][$key] = array(
+          '#id' => 'field-event-event_coordinator-classification-' . $key,
+          '#type' => 'select',
+          '#title' => 'Event Coordinator Classification',
+          '#options' => $classification['options'],
+          '#default_value' => $value,
+          '#value' => $value,
+          '#readonly' => TRUE,
+          '#attributes' => array('readonly' => 'readonly'),
+          '#required' => TRUE,
+          '#attributes' => array(
+            'class' => array(
+              'form-item-delta',
+              'form-item-delta-' . $key,
+            ),
+          ),
+        );
+      }
+
+      $form_state['conditionally_required'][0][] = 'event_coordinator][classification';
+    }
+  }
+  else {
+    foreach ($values as $key => $value) {
+      $fields['event_coordinator']['classification'][$key] = array(
+        '#id' => 'field-event-event_coordinator-classification-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -4516,92 +4891,6 @@ function mcneese_event_workflow_get_event_field_additional($form, &$form_state, 
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_coordinator_classification($form, &$form_state, &$fields, $ps) {
-  if (!empty($form_state['values']['event']['coordinator']['classification'])) {
-    $values = $form_state['values']['event']['coordinator']['classification'];
-  }
-  else {
-    $classification = event_workflow_determine_coordinator_classification($form_state['values']['event']['coordinator'], $form['form']['user']['#value']);
-
-    $values = array(0 => $classification['value']);
-  }
-
-  $fields['coordinator']['classification'] = array(
-    '#id' => 'field-event-coordinator-classification',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
-  if ($form['form']['step']['#value'] == 'standard' && array_key_exists('coordinator', $form['form']['sections']['#value'])) {
-    $classification = event_workflow_determine_coordinator_classification($form_state['values']['event']['coordinator'], $form['form']['user']['#value']);
-
-    // multiple classifications exists, so prompt user for desired classification.
-    if ($classification['count'] > 1) {
-      foreach ($values as $key => $value) {
-        $fields['coordinator']['classification'][$key] = array(
-          '#id' => 'field-event-coordinator-classification-' . $key,
-          '#type' => 'select',
-          '#title' => t("Classification"),
-          '#description' => t("Associate this event request with a specific classification."),
-          '#options' => $classification['options'],
-          '#default_value' => $value,
-          '#required' => TRUE,
-          '#attributes' => array(
-            'class' => array(
-              'form-item-delta',
-              'form-item-delta-' . $key,
-            ),
-          ),
-        );
-      }
-      krsort($fields['coordinator']['classification']);
-
-      $form_state['conditionally_required'][0][] = 'coordinator][classification';
-    }
-    else {
-      foreach ($values as $key => $value) {
-        $fields['coordinator']['classification'][$key] = array(
-          '#id' => 'field-event-coordinator-classification-' . $key,
-          '#type' => 'select',
-          '#title' => 'Coordinator Classification',
-          '#options' => $classification['options'],
-          '#default_value' => $value,
-          '#readonly' => TRUE,
-          '#attributes' => array('readonly' => 'readonly'),
-          '#required' => TRUE,
-          '#attributes' => array(
-            'class' => array(
-              'form-item-delta',
-              'form-item-delta-' . $key,
-            ),
-          ),
-        );
-      }
-
-      $form_state['conditionally_required'][0][] = 'coordinator][classification';
-    }
-  }
-  else {
-    foreach ($values as $key => $value) {
-      $fields['coordinator']['classification'][$key] = array(
-        '#id' => 'field-event-coordinator-classification-' . $key,
-        '#type' => 'value',
-        '#value' => $value,
-      );
-    }
-  }
-
-  return $values;
-}
-
-/**
- * Process and build a specific form field.
- */
 function mcneese_event_workflow_get_event_field_information_title($form, &$form_state, &$fields, $ps) {
   $values = array(0 => NULL);
   if (!empty($form_state['values']['event']['information']['title'])) {
@@ -4770,9 +5059,11 @@ function mcneese_event_workflow_get_event_field_information_type($form, &$form_s
  * Returns an array containing classication information.
  *
  * @param array $state
- *   The form_state array containing the 'classsification' key and value.
- * @param object $user
- *   The loaded user object for the user to load the classification for.
+ *   (optional) The form_state array containing the 'classsification' key and
+ *   value.
+ * @param object|null $user
+ *   (optional) The loaded user object for the user to load the classification
+ *   for. When NULL, returns all options available.
  *
  * @return array
  *   An array with the following keys:
@@ -4780,7 +5071,7 @@ function mcneese_event_workflow_get_event_field_information_type($form, &$form_s
  *   - options: all available select list options.
  *   - value: the default value to use.
  */
-function event_workflow_determine_coordinator_classification($state, $user) {
+function event_workflow_determine_user_classification($state = array(), $user = NULL) {
   $information = array();
   $information['count'] = 0;
   $information['options'] = array();
@@ -4791,25 +5082,13 @@ function event_workflow_determine_coordinator_classification($state, $user) {
     return $information;
   }
 
-  if (!is_object($user)) {
+  if (!is_null($user) && !is_object($user)) {
     cf_error::invalid_object('user');
 
     return $information;
   }
 
-  $classifications_tree = taxonomy_get_tree(1, 0, NULL, TRUE);
-  foreach ($classifications_tree as &$branch) {
-
-    if (isset($branch->field_role_name['und'][0]['value'])) {
-      if (in_array($branch->field_role_name['und'][0]['value'], $user->roles)) {
-        $information['options'][$branch->tid] = $branch->name;
-      }
-    }
-  }
-  unset($classifications_tree);
-
-  asort($information['options']);
-
+  $information['options'] = event_workflow_get_event_classification_list_options(NULL, $user);
   $information['count'] = count($information['options']);
 
   if ($information['count'] == 1) {
@@ -4851,7 +5130,7 @@ function event_workflow_get_event_existing_values($event) {
   }
 
   $processed = array();
-  $structure = mcneese_event_workflow_secondary_table_structure();
+  $structure = mcneese_event_workflow_table_structure();
   foreach ($structure as $structure_group => &$group_array) {
     foreach ($group_array as $field_name => &$field_structure) {
       unset($current);

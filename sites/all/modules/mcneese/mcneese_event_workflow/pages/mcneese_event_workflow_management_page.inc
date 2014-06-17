@@ -76,7 +76,7 @@ function mcneese_event_workflow_management_page() {
 
   if ($can_review) {
     $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'events/review-0" class="item-link">Review Requests</a></h4>';
-    $help = '<div class="item-description inline-block">Manage what users are allowed to approve/deny event requests by event type.</div>';
+    $help = '<div class="item-description inline-block">Manage requests the current user is allowed to review.</div>';
     $items_2[] = array(
       'id' => '',
       'data' => $link . '<br>' . $help,
@@ -112,9 +112,11 @@ function mcneese_event_workflow_management_page() {
     $total_items = 5;
 
     // load sorting information
+    $sorting = array();
     $order = NULL;
     if (isset($_GET['order'])) {
       $order = strtolower($_GET['order']);
+      $sorting['order'] = $order;
     }
 
     $sort = NULL;
@@ -124,162 +126,63 @@ function mcneese_event_workflow_management_page() {
       if ($sort != 'ASC' && $sort != 'DESC') {
         $sort = NULL;
       }
+      else {
+        $sorting['sort'] = $sort;
+      }
     }
+
 
     mcneese_event_workflow_include(4);
 
-    try {
-      $query = db_select('mew_event_requests', 'mer');
+    $results = mcneese_event_workflow_event_load_listing(NULL, FALSE, 0, $total_items, $sorting, array(), 1);
 
-      // so long as the fields being pulled here have only a single delta, this specific implementation should be fine.
-      // having multiple values will change the behavior.
-      // for now, default to only allowing delta = 0.
-      $query->innerjoin('mew_current_top', 'mct', 'mer.id = mct.event_id');
-      $query->innerjoin('mew_current_dates', 'mcd', 'mer.id = mcd.event_id AND mct.event_id = mcd.event_id');
+    // @todo: apply sorting for all fields that are integers in the database but are displayed as strings.
 
-      $query->innerjoin('mew_field_top_status', 'mfts', 'mct.event_id = mfts.event_id AND mcd.event_id = mfts.event_id AND mct.status = mfts.revision AND mfts.delta = 0');
-      $query->innerjoin('mew_field_top_step', 'mftsp', 'mct.event_id = mftsp.event_id AND mcd.event_id = mftsp.event_id AND mct.step = mftsp.revision AND mftsp.delta = 0');
-      $query->innerjoin('mew_field_top_location', 'mftc', 'mct.event_id = mftc.event_id AND mcd.event_id = mftc.event_id AND mct.location = mftc.revision AND mftc.delta = 0');
-      $query->innerjoin('mew_field_top_building', 'mftb', 'mct.event_id = mftb.event_id AND mcd.event_id = mftb.event_id AND mct.building = mftb.revision AND mftb.delta = 0');
-      $query->innerjoin('mew_field_top_room', 'mftr', 'mct.event_id = mftr.event_id AND mcd.event_id = mftr.event_id AND mct.room = mftr.revision AND mftr.delta = 0');
-
-      $query->innerjoin('mew_field_dates_date', 'mfdd', 'mct.event_id = mfdd.event_id AND mcd.event_id = mfdd.event_id AND mcd.date = mfdd.revision AND mfdd.delta = 0');
-      $query->innerjoin('mew_field_dates_time_start', 'mfdts', 'mct.event_id = mfdts.event_id AND mcd.event_id = mfdts.event_id AND mcd.time_start = mfdts.revision AND mfdts.delta = 0');
-      $query->innerjoin('mew_field_dates_time_stop', 'mfdtsp', 'mct.event_id = mfdtsp.event_id AND mcd.event_id = mfdtsp.event_id AND mcd.time_stop = mfdtsp.revision AND mfdtsp.delta = 0');
-
-      $query->addField('mftc', 'value', 'location');
-      $query->addField('mftb', 'value', 'building');
-      $query->addField('mftr', 'value', 'room');
-
-      $query->addField('mfdd', 'value', 'date');
-      $query->addField('mfdts', 'value', 'time_start');
-      $query->addField('mfdtsp', 'value', 'time_stop');
-
-      $query->fields('mer');
-
-      $show_status = array(
-        MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_LOCKED,
-        MCNEESE_EVENT_WORKFLOW_EVENT_STATUS_UNLOCKED,
-      );
-
-      $query->condition('mfts.value', $show_status, 'IN');
-
-      $show_step = array(
-        116,
-        132,
-        133,
-        117
-      );
-
-      $query->condition('mftsp.value', $show_step, 'IN');
-
-      $query->range(0, $total_items);
-
-      if (is_null($order)) {
-        $query->orderBy('created', 'DESC');
-      }
-      else {
-        if ($order == 'id') {
-          $query->orderBy('mer.id', is_null($sort) ? 'DESC' : $sort);
-        }
-        elseif ($order == 'location') {
-          $query->orderBy('location', is_null($sort) ? 'ASC' : $sort);
-        }
-        elseif ($order == 'building') {
-          $query->orderBy('building', is_null($sort) ? 'ASC' : $sort);
-        }
-        elseif ($order == 'room') {
-          $query->orderBy('room', is_null($sort) ? 'ASC' : $sort);
-        }
-        elseif ($order == 'date') {
-          // @todo: find a way to sort by dates (due to multiple values, one cannot simply just sort delta = 0).
-          $query->orderBy('date', is_null($sort) ? 'ASC' : $sort);
-          $query->orderBy('time_start', is_null($sort) ? 'ASC' : $sort);
-        }
-        elseif ($order == 'submitted on') {
-          $query->orderBy('created', is_null($sort) ? 'ASC' : $sort);
-        }
-      }
-
-      if ($administer || $manager) {
-        // load all available events.
-      }
-      elseif ($reviewer) {
-        // load all events for catagories the reviewer is associated with.
-        // @fixme: until the settings are added for individual reviewers, just make all available.
-      }
-      elseif ($requester) {
-        // load all events created by the requester who is neither an admin nor a manager.
-        if (!$administer && !$manager) {
-          $query->condition('mer.user_id', $user->uid);
-        }
-      }
-      else {
-        // failsafe, should never happen.
-        drupal_access_denied();
-        drupal_exit();
-      }
-
-      $results = $query->execute()->fetchAll();
-
-
-      // @todo: make sure a sort is applied during the database call.
-      $rows = array();
-      foreach ($results as $result) {
+    $rows = array();
+    if (!empty($results)) {
+      foreach ($results as $item) {
         $row = array();
 
-        $event_id = intval($result->id);
+        $can_view_event = mcneese_event_workflow_management_page_event_access('view', $item->id);
+        $can_edit_event = mcneese_event_workflow_management_page_event_access('edit', $item->id);
+        $can_review_event = mcneese_event_workflow_management_page_event_access('review', $item->id);
+        $can_log_event = mcneese_event_workflow_management_page_event_access('log', $item->id);
 
-        $can_view = mcneese_event_workflow_management_page_event_access('view', $event_id);
-        $can_edit = mcneese_event_workflow_management_page_event_access('edit', $event_id);
-        $can_review = mcneese_event_workflow_management_page_event_access('log', $event_id);
-
-        $row['id'] = '<a href="' . $base_path . 'events/view-0/' . $event_id . '">' . $event_id . '</a>';
+        $row['id'] = '<a href="' . $base_path . 'events/view-0/' . $item->id . '">' . $item->id . '</a>';
 
         $location_options = event_workflow_get_event_location_list_options();
-        $building_options = event_workflow_get_event_building_list_options($result->location);
+        $building_options = event_workflow_get_event_building_list_options($item->location);
+        $room_options = event_workflow_get_event_room_list_options();
 
         $location = "";
-        if (empty($result->location)) {
+        if (empty($item->location)) {
           $location = "Unsure";
         }
         else {
-          if (isset($location_options[$result->location])) {
-            $location = check_plain($location_options[$result->location]);
+          if (isset($location_options[$item->location])) {
+            $location = check_plain($location_options[$item->location]);
           }
         }
 
         $building = "";
-        if (!empty($result->building)) {
-          if (isset($building_options[$result->building])) {
-            $building = check_plain($building_options[$result->building]);
+        if (!empty($item->building)) {
+          if (isset($building_options[$item->building])) {
+            $building = check_plain($building_options[$item->building]);
+          }
+        }
+
+        $room = "";
+        if (!empty($item->room)) {
+          if (isset($room_options[$item->room])) {
+            $room = check_plain($room_options[$item->room]);
           }
         }
 
         $row['location'] = $location;
         $row['building'] = $building;
-        $row['room'] = check_plain($result->room);
+        $row['room'] = $room;
 
-        // fetch all available dates:
-        $sub_query = db_select('mew_current_dates', 'mcd');
-        $sub_query->innerjoin('mew_field_dates_date', 'mfdd', 'mcd.event_id = mfdd.event_id AND mcd.date = mfdd.revision');
-        $sub_query->innerjoin('mew_field_dates_time_start', 'mfdts', 'mcd.event_id = mfdts.event_id AND mcd.time_start = mfdts.revision and mfdd.event_id = mfdts.event_id and mfdd.delta = mfdts.delta');
-        $sub_query->innerjoin('mew_field_dates_time_stop', 'mfdtsp', 'mcd.event_id = mfdtsp.event_id AND mcd.time_start = mfdtsp.revision and mfdd.event_id = mfdts.event_id and mfdd.delta = mfdtsp.delta');
-
-        $sub_query->addField('mfdd', 'value', 'date');
-        $sub_query->addField('mfdd', 'delta', 'delta');
-        $sub_query->addField('mfdts', 'value', 'time_start');
-        $sub_query->addField('mfdtsp', 'value', 'time_stop');
-
-        $sub_query->condition('mfdd.event_id', $event_id);
-
-        $sub_query->orderBy('date', 'ASC');
-        $sub_query->orderBy('time_start', 'ASC');
-
-        $sub_executed = $sub_query->execute();
-        $sub_results = $sub_executed->fetchAll();
-
-        foreach ($sub_results as $delta => $sub_result) {
+        foreach ($item->date as $delta => $date) {
           if (!isset($row['date'])) {
             $row['date'] = '';
           }
@@ -287,51 +190,42 @@ function mcneese_event_workflow_management_page() {
             $row['date'] .= '<br>';
           }
 
-          $date_stamp = $sub_result->date;
-          $row['date'] .= check_plain(date("Y/m/d", $date_stamp));
+          $row['date'] .= check_plain(date("Y/m/d", $date));
 
-          if (!is_null($sub_result->time_start) && !is_null($sub_result->time_stop)) {
-            $time_stamp = $sub_result->time_start;
-            $row['date'] .= ' ' . check_plain(date("h:ia", $time_stamp));
-
-            $time_stamp = $sub_result->time_stop;
-            $row['date'] .= ' to ' . check_plain(date("h:ia", $time_stamp));
+          if (array_key_exists($delta, $item->time_start) && !is_null($item->time_start[$delta]) && array_key_exists($delta, $item->time_stop) && !is_null($item->time_stop[$delta])) {
+            $row['date'] .= ' ' . check_plain(date("h:ia", $item->time_start[$delta]));
+            $row['date'] .= ' to ' . check_plain(date("h:ia", $item->time_stop[$delta]));
           }
         }
 
-        $date_stamp = $result->created;
+        $date_stamp = $item->created;
         $row['created'] = check_plain(date("Y/m/d h:ia", $date_stamp));
 
         $row['operations'] = '';
 
-        if ($can_view) {
-          $row['operations'] .= '<a href="' . $base_path . 'events/view-0/' . $event_id . '" class="operation-link operation-link-view">View</a> ';
+        if ($can_view_event) {
+          $row['operations'] .= '<a href="' . $base_path . 'events/view-0/' . $item->id . '" class="operation-link operation-link-view">View</a> ';
         }
 
-        if ($can_edit) {
-          $row['operations'] .= '<a href="' . $base_path . 'events/edit-0/' . $event_id . '/request" class="operation-link operation-link-edit">Edit</a> ';
+        if ($can_edit_event) {
+          $row['operations'] .= '<a href="' . $base_path . 'events/edit-0/' . $item->id . '/request" class="operation-link operation-link-edit">Edit</a> ';
         }
 
-        if ($can_review) {
-          $row['operations'] .= '<a href="' . $base_path . 'events/view-0/' . $event_id . '/3" class="operation-link operation-link-review">Review</a> ';
+        if ($can_review_event) {
+          $row['operations'] .= '<a href="' . $base_path . 'events/view-0/' . $item->id . '/3" class="operation-link operation-link-review">Review</a> ';
         }
 
-        if ($can_log) {
-          $row['operations'] .= '<a href="' . $base_path . 'events/view-0/' . $event_id . '/2" class="operation-link operation-link-log">Log</a> ';
+        if ($can_log_event) {
+          $row['operations'] .= '<a href="' . $base_path . 'events/view-0/' . $item->id . '/2" class="operation-link operation-link-log">Log</a> ';
         }
 
         if ($can_delete) {
           // @todo: implement this.
-          #$row['operations'] .= '<a href="' . $base_path . 'events/delete-0/' . $event_id . '" class="operation-link operation-link-delete">Delete</a> ';
+          #$row['operations'] .= '<a href="' . $base_path . 'events/delete-0/' . $item->id . '" class="operation-link operation-link-delete">Delete</a> ';
         }
 
-        $rows[$event_id] = $row;
+        $rows[$item->id] = $row;
       }
-    }
-    catch (Exception $ex) {
-      cf_error::on_exception($ex);
-
-      return $form;
     }
 
     $quick_list = array();
