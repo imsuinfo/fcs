@@ -164,19 +164,19 @@ function mcneese_event_workflow_get_event_fields($form, &$form_state) {
 
 
   // Fieldset: Status
-  mcneese_event_workflow_get_event_field_status($form, $form_state, $fields, $ps);
+  mcneese_event_workflow_get_event_field_status($form, $form_state, $fields, $event_state, $ps);
 
 
   // Fieldset: Step
-  mcneese_event_workflow_get_event_field_step($form, $form_state, $fields, $ps);
+  mcneese_event_workflow_get_event_field_step($form, $form_state, $fields, $event_state, $ps);
 
 
   // Fieldset: Location
-  mcneese_event_workflow_get_event_field_location($form, $form_state, $fields, $ps);
+  mcneese_event_workflow_get_event_field_location($form, $form_state, $fields, $event_state, $ps);
 
 
   // Fieldset: Room List
-  $room = mcneese_event_workflow_get_event_field_room_list($form, $form_state, $fields, $ps);
+  $room = mcneese_event_workflow_get_event_field_room_list($form, $form_state, $fields, $event_state, $ps);
 
   $form['form']['room_information'] = array(
     '#type' => 'value',
@@ -221,7 +221,7 @@ function mcneese_event_workflow_get_event_fields($form, &$form_state) {
       '#tree' => TRUE,
     );
 
-    mcneese_event_workflow_get_event_field_review_review($form, $form_state, $fields, $ps);
+    mcneese_event_workflow_get_event_field_review_review($form, $form_state, $fields, $event_state, $ps);
   }
 
   // Fieldset: Fees
@@ -276,9 +276,9 @@ function mcneese_event_workflow_get_event_fields($form, &$form_state) {
     );
   }
 
-  mcneese_event_workflow_get_event_field_dates_date($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_dates_time_start($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_dates_time_stop($form, $form_state, $fields, $ps);
+  mcneese_event_workflow_get_event_field_dates_date($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_dates_time_start($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_dates_time_stop($form, $form_state, $fields, $event_state, $ps);
 
   // add/remove date fields
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('dates', $form['form']['sections']['#value'])) {
@@ -327,10 +327,7 @@ function mcneese_event_workflow_get_event_fields($form, &$form_state) {
     );
   }
 
-  mcneese_event_workflow_get_event_field_venue_coordinator_user_id($form, $form_state, $fields, $ps);
-  //mcneese_event_workflow_get_event_field_venue_coordinator_name($form, $form_state, $fields, $ps);
-  //mcneese_event_workflow_get_event_field_venue_coordinator_phone($form, $form_state, $fields, $ps);
-  //mcneese_event_workflow_get_event_field_venue_coordinator_email($form, $form_state, $fields, $ps);
+  mcneese_event_workflow_get_event_field_venue_coordinator_user_id($form, $form_state, $fields, $event_state, $ps);
 
 
   // Fieldset: Event Coordinator
@@ -359,10 +356,10 @@ function mcneese_event_workflow_get_event_fields($form, &$form_state) {
     );
   }
 
-  mcneese_event_workflow_get_event_field_event_coordinator_name($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_event_coordinator_phone($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_event_coordinator_email($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_event_coordinator_classification($form, $form_state, $fields, $ps);
+  mcneese_event_workflow_get_event_field_event_coordinator_name($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_event_coordinator_phone($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_event_coordinator_email($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_event_coordinator_classification($form, $form_state, $fields, $event_state, $ps);
 
 
   // Fieldset: Information
@@ -391,9 +388,9 @@ function mcneese_event_workflow_get_event_fields($form, &$form_state) {
     );
   }
 
-  $information_title = mcneese_event_workflow_get_event_field_information_title($form, $form_state, $fields, $ps);
-  $information_attendance = mcneese_event_workflow_get_event_field_information_attendance($form, $form_state, $fields, $ps);
-  $information_type = mcneese_event_workflow_get_event_field_information_type($form, $form_state, $fields, $ps);
+  $information_title = mcneese_event_workflow_get_event_field_information_title($form, $form_state, $fields, $event_state, $ps);
+  $information_attendance = mcneese_event_workflow_get_event_field_information_attendance($form, $form_state, $fields, $event_state, $ps);
+  $information_type = mcneese_event_workflow_get_event_field_information_type($form, $form_state, $fields, $event_state, $ps);
 
   $form['form']['information_type'] = array(
     '#type' => 'value',
@@ -432,11 +429,11 @@ function mcneese_event_workflow_get_event_fields($form, &$form_state) {
     );
   }
 
-  mcneese_event_workflow_get_event_field_plans_note($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_plans_description($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_plans_activities($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_plans_dates($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_plans_audience($form, $form_state, $fields, $ps);
+  mcneese_event_workflow_get_event_field_plans_note($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_plans_description($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_plans_activities($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_plans_dates($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_plans_audience($form, $form_state, $fields, $event_state, $ps);
 
 
   // Fieldset: Registration
@@ -467,15 +464,15 @@ function mcneese_event_workflow_get_event_fields($form, &$form_state) {
     }
   }
 
-  mcneese_event_workflow_get_event_field_registration_require($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_registration_website($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_registration_phone($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_registration_ticket_price($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_registration_ticket_dates($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_registration_ticket_website($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_registration_ticket_phone($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_registration_generate_revenue($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_registration_revenue_generated($form, $form_state, $fields, $ps);
+  mcneese_event_workflow_get_event_field_registration_require($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_registration_website($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_registration_phone($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_registration_ticket_price($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_registration_ticket_dates($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_registration_ticket_website($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_registration_ticket_phone($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_registration_generate_revenue($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_registration_revenue_generated($form, $form_state, $fields, $event_state, $ps);
 
 
   // Fieldset: Setup
@@ -504,20 +501,20 @@ function mcneese_event_workflow_get_event_fields($form, &$form_state) {
     );
   }
 
-  mcneese_event_workflow_get_event_field_setup_rectangular_tables_8ft($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_setup_round_tables_8ft($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_setup_other_tables($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_setup_standard_blue_chairs($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_setup_podium($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_setup_portable_stage($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_setup_portable_stage_configuration($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_setup_security($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_setup_parking_assistance($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_setup_parking_assistance_area($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_setup_road_closures($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_setup_road_closures_details($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_setup_special_requests($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_setup_special_requests_details($form, $form_state, $fields, $ps);
+  mcneese_event_workflow_get_event_field_setup_rectangular_tables_8ft($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_setup_round_tables_8ft($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_setup_other_tables($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_setup_standard_blue_chairs($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_setup_podium($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_setup_portable_stage($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_setup_portable_stage_configuration($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_setup_security($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_setup_parking_assistance($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_setup_parking_assistance_area($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_setup_road_closures($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_setup_road_closures_details($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_setup_special_requests($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_setup_special_requests_details($form, $form_state, $fields, $event_state, $ps);
 
 
   // Fieldset: Presentation
@@ -547,25 +544,25 @@ function mcneese_event_workflow_get_event_fields($form, &$form_state) {
   }
 
   // mising: external_audio_person  // if (!$meeting_event) {
-  mcneese_event_workflow_get_event_field_presentation_technical_equipment($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_presentation_technical_equipment_details($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_presentation_technical_equipment_microphone($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_presentation_external_audio_person($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_presentation_external_audio_person_name($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_presentation_external_audio_person_email($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_presentation_external_audio_person_phone($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_presentation_production($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_presentation_production_name($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_presentation_production_email($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_presentation_production_phone($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_presentation_publicity($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_presentation_publicity_details($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_presentation_printed_material($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_presentation_university_logo($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_presentation_designing_material($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_presentation_designing_material_name($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_presentation_designing_material_email($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_presentation_designing_material_phone($form, $form_state, $fields, $ps);
+  mcneese_event_workflow_get_event_field_presentation_technical_equipment($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_presentation_technical_equipment_details($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_presentation_technical_equipment_microphone($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_presentation_external_audio_person($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_presentation_external_audio_person_name($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_presentation_external_audio_person_email($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_presentation_external_audio_person_phone($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_presentation_production($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_presentation_production_name($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_presentation_production_email($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_presentation_production_phone($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_presentation_publicity($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_presentation_publicity_details($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_presentation_printed_material($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_presentation_university_logo($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_presentation_designing_material($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_presentation_designing_material_name($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_presentation_designing_material_email($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_presentation_designing_material_phone($form, $form_state, $fields, $event_state, $ps);
 
 
   // Fieldset: Services
@@ -594,15 +591,15 @@ function mcneese_event_workflow_get_event_fields($form, &$form_state) {
     );
   }
 
-  mcneese_event_workflow_get_event_field_services_food_served($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_services_food_caterer($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_services_alcohol($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_services_alcohol_note($form, $form_state, $fields, $ps);
-  mcneese_event_workflow_get_event_field_services_open_flames($form, $form_state, $fields, $ps);
+  mcneese_event_workflow_get_event_field_services_food_served($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_services_food_caterer($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_services_alcohol($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_services_alcohol_note($form, $form_state, $fields, $event_state, $ps);
+  mcneese_event_workflow_get_event_field_services_open_flames($form, $form_state, $fields, $event_state, $ps);
 
 
   // Fieldset: Additional
-  mcneese_event_workflow_get_event_field_additional($form, $form_state, $fields, $ps);
+  mcneese_event_workflow_get_event_field_additional($form, $form_state, $fields, $event_state, $ps);
 
 
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('message', $form['form']['sections']['#value'])) {
@@ -623,16 +620,16 @@ function mcneese_event_workflow_get_event_fields($form, &$form_state) {
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_status($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_status($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => MEW_EVENT_STATUS_UNLOCKED);
 
-  if (empty($form_state['values']['event']['status'])) {
+  if (empty($event_state['status'])) {
     if (isset($form['form']['existing']['#value']['event']['status'])) {
       $form['form']['status']['#value'] = $form['form']['existing']['#value']['event']['status'];
     }
   }
   else {
-    $values = $form_state['values']['event']['status'];
+    $values = $event_state['status'];
   }
 
   $fields['status'] = array(
@@ -660,10 +657,10 @@ function mcneese_event_workflow_get_event_field_status($form, &$form_state, &$fi
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_step($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_step($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => MEW_REVIEW_STEP_VENUE_AVAILABLE);
 
-  if (empty($form_state['values']['event']['step'])) {
+  if (empty($event_state['step'])) {
     if (isset($form['form']['existing']['#value']['event']['step'])) {
       $form['form']['step']['#value'] = $form['form']['existing']['#value']['event']['step'];
     }
@@ -675,7 +672,7 @@ function mcneese_event_workflow_get_event_field_step($form, &$form_state, &$fiel
     }
   }
   else {
-    $values = $form_state['values']['event']['step'];
+    $values = $event_state['step'];
   }
 
   $fields['step'] = array(
@@ -703,10 +700,10 @@ function mcneese_event_workflow_get_event_field_step($form, &$form_state, &$fiel
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_location($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_location($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['location'])) {
-    $values = $form_state['values']['event']['location'];
+  if (!empty($event_state['location'])) {
+    $values = $event_state['location'];
   }
 
   $fields['location'] = array(
@@ -757,10 +754,10 @@ function mcneese_event_workflow_get_event_field_location($form, &$form_state, &$
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_room_list($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_room_list($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['room_list'])) {
-    $values = $form_state['values']['event']['room_list'];
+  if (!empty($event_state['room_list'])) {
+    $values = $event_state['room_list'];
   }
 
   $fields['room_list'] = array(
@@ -786,9 +783,10 @@ function mcneese_event_workflow_get_event_field_room_list($form, &$form_state, &
       }
 
       $location = "";
-      if (!empty($form_state['values']['event']['location'][$key])) {
-        $location = $form_state['values']['event']['location'][$key];
+      if (!empty($event_state['location'][$key])) {
+        $location = $event_state['location'][$key];
       }
+
       $fields['room_list'][$key] = array(
         '#id' => 'field-event-room_list-' . $key,
         '#type' => 'radios',
@@ -824,7 +822,7 @@ function mcneese_event_workflow_get_event_field_room_list($form, &$form_state, &
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_review_review($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_review_review($form, &$form_state, &$fields, &$event_state, $ps) {
   if ($form['form']['step']['#value'] != 'standard' || !array_key_exists('review', $form['form']['sections']['#value'])) {
     return FALSE;
   }
@@ -834,13 +832,13 @@ function mcneese_event_workflow_get_event_field_review_review($form, &$form_stat
   /*
   $values = array(0 => array('reviewer_id' => 0, 'decision' => 0, 'message' => NULL));
 
-  if (empty($form_state['values']['event']['review']['review'])) {
+  if (empty($event_state['review']['review'])) {
     if (isset($form['form']['existing']['#value']['event']['review']['review'])) {
       $form['form']['review']['review']['#value'] = $form['form']['existing']['#value']['event']['review']['review'];
     }
   }
   else {
-    $values = $form_state['values']['event']['review']['review'];
+    $values = $event_state['review']['review'];
   }
 
   $fields['review'] = array(
@@ -871,10 +869,10 @@ function mcneese_event_workflow_get_event_field_review_review($form, &$form_stat
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_dates_date($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_dates_date($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['dates']['date'])) {
-    $values = $form_state['values']['event']['dates']['date'];
+  if (!empty($event_state['dates']['date'])) {
+    $values = $event_state['dates']['date'];
   }
 
   $fields['dates']['date'] = array(
@@ -928,10 +926,10 @@ function mcneese_event_workflow_get_event_field_dates_date($form, &$form_state, 
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_dates_time_start($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_dates_time_start($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['dates']['time_start'])) {
-    $values = $form_state['values']['event']['dates']['time_start'];
+  if (!empty($event_state['dates']['time_start'])) {
+    $values = $event_state['dates']['time_start'];
   }
 
   $fields['dates']['time_start'] = array(
@@ -983,10 +981,10 @@ function mcneese_event_workflow_get_event_field_dates_time_start($form, &$form_s
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_dates_time_stop($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_dates_time_stop($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['dates']['time_stop'])) {
-    $values = $form_state['values']['event']['dates']['time_stop'];
+  if (!empty($event_state['dates']['time_stop'])) {
+    $values = $event_state['dates']['time_stop'];
   }
 
   $fields['dates']['time_stop'] = array(
@@ -1038,35 +1036,13 @@ function mcneese_event_workflow_get_event_field_dates_time_stop($form, &$form_st
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_venue_coordinator_user_id($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_venue_coordinator_user_id($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
 
-  if (empty($form_state['values']['event']['venue_coordinator']['user_id'][0])) {
-    if (empty($fields['venue_coordinator']['user_id'][0]['#value'])) {
-      if (!empty($form['form']['room_information']['#value']['room_coordinator_email'])) {
-        $coordinator_email = $form['form']['room_information']['#value']['room_coordinator_email'];
-      }
-      elseif (!empty($form['form']['room_information']['#value']['venue_coordinator_email'])) {
-        $coordinator_email = $form['form']['room_information']['#value']['venue_coordinator_email'];
-      }
-
-      if (!empty($coordinator_email)) {
-        $venue_coordinator = mcneese_event_workflow_ensure_user_by_email($coordinator_email, array('reviewer'));
-
-        if (isset($venue_coordinator->uid)) {
-          $values[0] = $venue_coordinator->uid;
-        }
-      }
-    }
-    else {
-      if (!empty($fields['venue_coordinator']['user_id'][0]) && array_key_exists('#value', $fields['venue_coordinator']['user_id'][0])) {
-        $values[0] = $fields['venue_coordinator']['user_id'][0]['#value'];
-      }
-    }
-  }
-  else {
-    if (!empty($form_state['values']['event']['venue_coordinator']['user_id']) && array_key_exists(0, $form_state['values']['event']['venue_coordinator']['user_id'])) {
-      $values[0] = $form_state['values']['event']['venue_coordinator']['user_id'][0];
+  // never assign default here because the default is inforced only after the room is selected, not before.
+  if (!empty($event_state['venue_coordinator']['user_id'][0])) {
+    if (!empty($event_state['venue_coordinator']['user_id']) && array_key_exists(0, $event_state['venue_coordinator']['user_id'])) {
+      $values[0] = $event_state['venue_coordinator']['user_id'][0];
     }
   }
 
@@ -1086,219 +1062,11 @@ function mcneese_event_workflow_get_event_field_venue_coordinator_user_id($form,
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_venue_coordinator_name($form, &$form_state, &$fields, $ps) {
-  $values = array(0 => '');
-
-  $venue_coordinator = NULL;
-  if (isset($fields['venue_coordinator']['user_id'][0]['#value'])) {
-    $venue_coordinator = user_load($fields['venue_coordinator']['user_id'][0]['#value']);
-  }
-
-  if (empty($form_state['values']['event']['venue_coordinator']['name'][0])) {
-    if (!empty($venue_coordinator->field_user_last_name['und'][0]['safe_value'])) {
-      $values[0] .= $venue_coordinator->field_user_last_name['und'][0]['safe_value'];
-    }
-
-    if (!empty($venue_coordinator->field_user_first_name['und'][0]['safe_value'])) {
-      if (!empty($values[0])) {
-        $values[0] .=  ', ';
-      }
-
-      $values[0] .= $venue_coordinator->field_user_first_name['und'][0]['safe_value'];
-    }
-  }
-  else {
-    $values = $form_state['values']['event']['venue_coordinator']['name'];
-  }
-
-  $fields['venue_coordinator']['name'] = array(
-    '#id' => 'field-event-venue_coordinator-name',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
-  if ($form['form']['step']['#value'] == 'standard' && array_key_exists('coordinator', $form['form']['sections']['#value'])) {
-    foreach ($values as $key => $value) {
-      $fields['venue_coordinator']['name'][$key] = array(
-        '#id' => 'field-event-venue_coordinator-name-' . $key,
-        '#type' => 'textfield',
-        '#title' => 'Venue Coordinator Name',
-        '#default_value' => $value,
-        '#value' => $value,
-        '#required' => TRUE,
-        '#size' => 48,
-        '#maxlength' => 255,
-        '#readonly' => TRUE,
-        '#attributes' => array(
-          'readonly' => 'readonly',
-          'class' => array(
-            'form-item-delta',
-            'form-item-delta-' . $key,
-          ),
-        ),
-      );
-    }
-    krsort($fields['venue_coordinator']['name']);
-
-    $form_state['conditionally_required'][0][] = 'venue_coordinator][name';
-  }
-  else {
-    foreach ($values as $key => $value) {
-      $fields['venue_coordinator']['name'][$key] = array(
-        '#id' => 'field-event-venue_coordinator-name-' . $key,
-        '#type' => 'value',
-        '#value' => $value,
-      );
-    }
-  }
-
-  return $values;
-}
-
-/**
- * Process and build a specific form field.
- */
-function mcneese_event_workflow_get_event_field_venue_coordinator_phone($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_event_coordinator_name($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
 
-  $venue_coordinator = NULL;
-  if (isset($fields['venue_coordinator']['user_id'][0]['#value'])) {
-    $venue_coordinator = user_load($fields['venue_coordinator']['user_id'][0]['#value']);
-  }
-
-  if (empty($form_state['values']['event']['venue_coordinator']['phone'][0])) {
-    if (!empty($venue_coordinator->field_user_phone_number['und'][0]['safe_value'])) {
-      $values[0] = $venue_coordinator->field_user_phone_number['und'][0]['safe_value'];
-    }
-  }
-  else {
-    $values = $form_state['values']['event']['venue_coordinator']['phone'];
-  }
-
-  $fields['venue_coordinator']['phone'] = array(
-    '#id' => 'field-event-venue_coordinator-phone',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
-  if ($form['form']['step']['#value'] == 'standard' && array_key_exists('coordinator', $form['form']['sections']['#value'])) {
-    foreach ($values as $key => $value) {
-      $fields['venue_coordinator']['phone'][$key] = array(
-        '#id' => 'field-event-venue_coordinator-phone-' . $key,
-        '#type' => 'telfield',
-        '#title' => 'Venue Coordinator Phone',
-        '#default_value' => $value,
-        '#value' => $value,
-        '#attributes' => array(
-          'readonly' => 'readonly',
-          'class' => array(
-            'form-item-delta',
-            'form-item-delta-' . $key,
-          ),
-        ),
-      );
-    }
-    krsort($fields['venue_coordinator']['phone']);
-  }
-  else {
-    foreach ($values as $key => $value) {
-      $fields['venue_coordinator']['phone'][$key] = array(
-        '#id' => 'field-event-venue_coordinator-phone-' . $key,
-        '#type' => 'value',
-        '#value' => $value,
-      );
-    }
-  }
-
-  return $values;
-}
-
-/**
- * Process and build a specific form field.
- */
-function mcneese_event_workflow_get_event_field_venue_coordinator_email($form, &$form_state, &$fields, $ps) {
-  $values = array(0 => '');
-
-  $venue_coordinator = NULL;
-  if (isset($fields['venue_coordinator']['user_id'][0]['#value'])) {
-    $venue_coordinator = user_load($fields['venue_coordinator']['user_id'][0]['#value']);
-  }
-
-  if (empty($form_state['values']['event']['venue_coordinator']['email'][0])) {
-    if (!empty($venue_coordinator->mail)) {
-      $values[0] = $venue_coordinator->mail;
-    }
-  }
-  else {
-    $values = $form_state['values']['event']['venue_coordinator']['email'];
-  }
-
-  $fields['venue_coordinator']['email'] = array(
-    '#id' => 'field-event-venue_coordinator-email',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
-  if ($form['form']['step']['#value'] == 'standard' && array_key_exists('coordinator', $form['form']['sections']['#value'])) {
-    foreach ($values as $key => $value) {
-      $fields['venue_coordinator']['email'][$key] = array(
-        '#id' => 'field-event-venue_coordinator-email-' . $key,
-        '#type' => 'emailfield',
-        '#title' => 'Venue Coordinator E-Mail',
-        '#default_value' => $value,
-        '#value' => $value,
-        '#size' => 48,
-        '#maxlength' => 255,
-        '#required' => TRUE,
-        '#attributes' => array(
-          'readonly' => 'readonly',
-          'class' => array(
-            'form-item-delta',
-            'form-item-delta-' . $key,
-          ),
-        ),
-      );
-    }
-    krsort($fields['venue_coordinator']['email']);
-
-    $form_state['conditionally_required'][0][] = 'venue_coordinator][email';
-  }
-  else {
-    foreach ($values as $key => $value) {
-      $fields['venue_coordinator']['email'][$key] = array(
-        '#id' => 'field-event-venue_coordinator-email-' . $key,
-        '#type' => 'value',
-        '#value' => $value,
-      );
-    }
-  }
-
-  return $values;
-}
-
-/**
- * Process and build a specific form field.
- */
-function mcneese_event_workflow_get_event_field_event_coordinator_name($form, &$form_state, &$fields, $ps) {
-  $values = array(0 => NULL);
-
-  if (isset($form_state['values']['event']['event_coordinator']) && array_key_exists('name', $form_state['values']['event']['event_coordinator'])) {
-    $values = $form_state['values']['event']['event_coordinator']['name'];
+  if (isset($event_state['event_coordinator']) && array_key_exists('name', $event_state['event_coordinator'])) {
+    $values = $event_state['event_coordinator']['name'];
   }
   else {
     if (!empty($form['form']['user']['#value']->field_user_last_name['und'][0]['safe_value'])) {
@@ -1365,11 +1133,11 @@ function mcneese_event_workflow_get_event_field_event_coordinator_name($form, &$
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_event_coordinator_phone($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_event_coordinator_phone($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
 
-  if (isset($form_state['values']['event']['event_coordinator']) && array_key_exists('phone', $form_state['values']['event']['event_coordinator'])) {
-    $values = $form_state['values']['event']['event_coordinator']['phone'];
+  if (isset($event_state['event_coordinator']) && array_key_exists('phone', $event_state['event_coordinator'])) {
+    $values = $event_state['event_coordinator']['phone'];
   }
   else {
     if (!empty($form['form']['user']['#value']->field_user_phone_number['und'][0]['safe_value'])) {
@@ -1406,7 +1174,7 @@ function mcneese_event_workflow_get_event_field_event_coordinator_phone($form, &
     }
     krsort($fields['event_coordinator']['phone']);
 
-    $values = $form_state['values']['event']['event_coordinator']['phone'];
+    $values = $event_state['event_coordinator']['phone'];
   }
   else {
     foreach ($values as $key => $value) {
@@ -1424,11 +1192,11 @@ function mcneese_event_workflow_get_event_field_event_coordinator_phone($form, &
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_event_coordinator_email($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_event_coordinator_email($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
 
-  if (isset($form_state['values']['event']['event_coordinator']) && array_key_exists('email', $form_state['values']['event']['event_coordinator'])) {
-    $values = $form_state['values']['event']['event_coordinator']['email'];
+  if (isset($event_state['event_coordinator']) && array_key_exists('email', $event_state['event_coordinator'])) {
+    $values = $event_state['event_coordinator']['email'];
   }
   else {
     if (!empty($form['form']['user']['#value']->mail)) {
@@ -1486,7 +1254,7 @@ function mcneese_event_workflow_get_event_field_event_coordinator_email($form, &
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_event_coordinator_classification($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_event_coordinator_classification($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
 
   $user = NULL;
@@ -1495,14 +1263,14 @@ function mcneese_event_workflow_get_event_field_event_coordinator_classification
   }
 
   $state = array();
-  if (isset($form_state['values']['event']['event_coordinator']) && is_array($form_state['values']['event']['event_coordinator'])) {
-    $state = $form_state['values']['event']['event_coordinator'];
+  if (isset($event_state['event_coordinator']) && is_array($event_state['event_coordinator'])) {
+    $state = $event_state['event_coordinator'];
   }
 
   $classification = event_workflow_determine_user_classification($state, $user);
 
-  if (isset($form_state['values']['event']['event_coordinator']) && array_key_exists('classification', $form_state['values']['event']['event_coordinator'])) {
-    $values = $form_state['values']['event']['event_coordinator']['classification'];
+  if (isset($event_state['event_coordinator']) && array_key_exists('classification', $event_state['event_coordinator'])) {
+    $values = $event_state['event_coordinator']['classification'];
   }
   else {
     $values = array(0 => $classification['value']);
@@ -1583,7 +1351,7 @@ function mcneese_event_workflow_get_event_field_event_coordinator_classification
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_plans_note($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_plans_note($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
 
   $build = FALSE;
@@ -1630,10 +1398,10 @@ function mcneese_event_workflow_get_event_field_plans_note($form, &$form_state, 
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_plans_description($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_plans_description($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['plans']['description'])) {
-    $values = $form_state['values']['event']['plans']['description'];
+  if (!empty($event_state['plans']['description'])) {
+    $values = $event_state['plans']['description'];
   }
 
   $build = FALSE;
@@ -1686,10 +1454,10 @@ function mcneese_event_workflow_get_event_field_plans_description($form, &$form_
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_plans_activities($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_plans_activities($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['plans']['activities'])) {
-    $values = $form_state['values']['event']['plans']['activities'];
+  if (!empty($event_state['plans']['activities'])) {
+    $values = $event_state['plans']['activities'];
   }
 
   $build = FALSE;
@@ -1742,10 +1510,10 @@ function mcneese_event_workflow_get_event_field_plans_activities($form, &$form_s
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_plans_dates($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_plans_dates($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['plans']['dates'])) {
-    $values = $form_state['values']['event']['plans']['dates'];
+  if (!empty($event_state['plans']['dates'])) {
+    $values = $event_state['plans']['dates'];
   }
 
   $build = FALSE;
@@ -1798,10 +1566,10 @@ function mcneese_event_workflow_get_event_field_plans_dates($form, &$form_state,
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_plans_audience($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_plans_audience($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['plans']['audience'])) {
-    $values = $form_state['values']['event']['plans']['audience'];
+  if (!empty($event_state['plans']['audience'])) {
+    $values = $event_state['plans']['audience'];
   }
 
   $fields['plans']['audience'] = array(
@@ -1854,10 +1622,10 @@ function mcneese_event_workflow_get_event_field_plans_audience($form, &$form_sta
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_registration_require($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_registration_require($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => 'no');
-  if (!empty($form_state['values']['event']['registration']['require'])) {
-    $values = $form_state['values']['event']['registration']['require'];
+  if (!empty($event_state['registration']['require'])) {
+    $values = $event_state['registration']['require'];
   }
 
   $build = FALSE;
@@ -1913,10 +1681,10 @@ function mcneese_event_workflow_get_event_field_registration_require($form, &$fo
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_registration_website($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_registration_website($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['registration']['website'])) {
-    $values = $form_state['values']['event']['registration']['website'];
+  if (!empty($event_state['registration']['website'])) {
+    $values = $event_state['registration']['website'];
   }
 
   $build = FALSE;
@@ -1981,10 +1749,10 @@ function mcneese_event_workflow_get_event_field_registration_website($form, &$fo
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_registration_phone($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_registration_phone($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['registration']['phone'])) {
-    $values = $form_state['values']['event']['registration']['phone'];
+  if (!empty($event_state['registration']['phone'])) {
+    $values = $event_state['registration']['phone'];
   }
 
   $build = FALSE;
@@ -2047,10 +1815,10 @@ function mcneese_event_workflow_get_event_field_registration_phone($form, &$form
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_registration_ticket_price($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_registration_ticket_price($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['registration']['ticket_price'])) {
-    $values = $form_state['values']['event']['registration']['ticket_price'];
+  if (!empty($event_state['registration']['ticket_price'])) {
+    $values = $event_state['registration']['ticket_price'];
   }
 
   $build = FALSE;
@@ -2115,10 +1883,10 @@ function mcneese_event_workflow_get_event_field_registration_ticket_price($form,
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_registration_ticket_dates($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_registration_ticket_dates($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['registration']['ticket_dates'])) {
-    $values = $form_state['values']['event']['registration']['ticket_dates'];
+  if (!empty($event_state['registration']['ticket_dates'])) {
+    $values = $event_state['registration']['ticket_dates'];
   }
 
   $build = FALSE;
@@ -2183,10 +1951,10 @@ function mcneese_event_workflow_get_event_field_registration_ticket_dates($form,
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_registration_ticket_website($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_registration_ticket_website($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['registration']['ticket_website'])) {
-    $values = $form_state['values']['event']['registration']['ticket_website'];
+  if (!empty($event_state['registration']['ticket_website'])) {
+    $values = $event_state['registration']['ticket_website'];
   }
 
   $build = FALSE;
@@ -2251,10 +2019,10 @@ function mcneese_event_workflow_get_event_field_registration_ticket_website($for
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_registration_ticket_phone($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_registration_ticket_phone($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['registration']['ticket_phone'])) {
-    $values = $form_state['values']['event']['registration']['ticket_phone'];
+  if (!empty($event_state['registration']['ticket_phone'])) {
+    $values = $event_state['registration']['ticket_phone'];
   }
 
   $build = FALSE;
@@ -2319,10 +2087,10 @@ function mcneese_event_workflow_get_event_field_registration_ticket_phone($form,
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_registration_generate_revenue($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_registration_generate_revenue($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => 'no');
-  if (!empty($form_state['values']['event']['registration']['generate_revenue'])) {
-    $values = $form_state['values']['event']['registration']['generate_revenue'];
+  if (!empty($event_state['registration']['generate_revenue'])) {
+    $values = $event_state['registration']['generate_revenue'];
   }
 
   $build = FALSE;
@@ -2378,10 +2146,10 @@ function mcneese_event_workflow_get_event_field_registration_generate_revenue($f
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_registration_revenue_generated($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_registration_revenue_generated($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => array());
-  if (!empty($form_state['values']['event']['registration']['revenue_generated'])) {
-    $values = $form_state['values']['event']['registration']['revenue_generated'];
+  if (!empty($event_state['registration']['revenue_generated'])) {
+    $values = $event_state['registration']['revenue_generated'];
   }
 
   $build = FALSE;
@@ -2447,10 +2215,10 @@ function mcneese_event_workflow_get_event_field_registration_revenue_generated($
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_setup_rectangular_tables_8ft($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_setup_rectangular_tables_8ft($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['setup']['rectangular_tables_8ft'])) {
-    $values = $form_state['values']['event']['setup']['rectangular_tables_8ft'];
+  if (!empty($event_state['setup']['rectangular_tables_8ft'])) {
+    $values = $event_state['setup']['rectangular_tables_8ft'];
   }
 
   $fields['setup']['rectangular_tables_8ft'] = array(
@@ -2500,10 +2268,10 @@ function mcneese_event_workflow_get_event_field_setup_rectangular_tables_8ft($fo
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_setup_round_tables_8ft($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_setup_round_tables_8ft($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['setup']['round_tables_8ft'])) {
-    $values = $form_state['values']['event']['setup']['round_tables_8ft'];
+  if (!empty($event_state['setup']['round_tables_8ft'])) {
+    $values = $event_state['setup']['round_tables_8ft'];
   }
 
   $fields['setup']['round_tables_8ft'] = array(
@@ -2553,10 +2321,10 @@ function mcneese_event_workflow_get_event_field_setup_round_tables_8ft($form, &$
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_setup_other_tables($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_setup_other_tables($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['setup']['other_tables'])) {
-    $values = $form_state['values']['event']['setup']['other_tables'];
+  if (!empty($event_state['setup']['other_tables'])) {
+    $values = $event_state['setup']['other_tables'];
   }
 
   $build = FALSE;
@@ -2609,10 +2377,10 @@ function mcneese_event_workflow_get_event_field_setup_other_tables($form, &$form
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_setup_standard_blue_chairs($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_setup_standard_blue_chairs($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['setup']['standard_blue_chairs'])) {
-    $values = $form_state['values']['event']['setup']['standard_blue_chairs'];
+  if (!empty($event_state['setup']['standard_blue_chairs'])) {
+    $values = $event_state['setup']['standard_blue_chairs'];
   }
 
   $fields['setup']['standard_blue_chairs'] = array(
@@ -2662,10 +2430,10 @@ function mcneese_event_workflow_get_event_field_setup_standard_blue_chairs($form
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_setup_podium($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_setup_podium($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => 'no');
-  if (!empty($form_state['values']['event']['setup']['podium'])) {
-    $values = $form_state['values']['event']['setup']['podium'];
+  if (!empty($event_state['setup']['podium'])) {
+    $values = $event_state['setup']['podium'];
   }
 
   $fields['setup']['podium'] = array(
@@ -2716,10 +2484,10 @@ function mcneese_event_workflow_get_event_field_setup_podium($form, &$form_state
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_setup_portable_stage($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_setup_portable_stage($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => 'no');
-  if (!empty($form_state['values']['event']['setup']['portable_stage'])) {
-    $values = $form_state['values']['event']['setup']['portable_stage'];
+  if (!empty($event_state['setup']['portable_stage'])) {
+    $values = $event_state['setup']['portable_stage'];
   }
 
   $build = FALSE;
@@ -2775,10 +2543,10 @@ function mcneese_event_workflow_get_event_field_setup_portable_stage($form, &$fo
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_setup_portable_stage_configuration($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_setup_portable_stage_configuration($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['setup']['portable_stage_configuration'])) {
-    $values = $form_state['values']['event']['setup']['portable_stage_configuration'];
+  if (!empty($event_state['setup']['portable_stage_configuration'])) {
+    $values = $event_state['setup']['portable_stage_configuration'];
   }
 
   $build = FALSE;
@@ -2844,10 +2612,10 @@ function mcneese_event_workflow_get_event_field_setup_portable_stage_configurati
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_setup_security($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_setup_security($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => 'no');
-  if (!empty($form_state['values']['event']['setup']['security'])) {
-    $values = $form_state['values']['event']['setup']['security'];
+  if (!empty($event_state['setup']['security'])) {
+    $values = $event_state['setup']['security'];
   }
 
   $build = FALSE;
@@ -2903,10 +2671,10 @@ function mcneese_event_workflow_get_event_field_setup_security($form, &$form_sta
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_setup_parking_assistance($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_setup_parking_assistance($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => 'no');
-  if (!empty($form_state['values']['event']['setup']['parking_assistance'])) {
-    $values = $form_state['values']['event']['setup']['parking_assistance'];
+  if (!empty($event_state['setup']['parking_assistance'])) {
+    $values = $event_state['setup']['parking_assistance'];
   }
 
   $build = FALSE;
@@ -2962,10 +2730,10 @@ function mcneese_event_workflow_get_event_field_setup_parking_assistance($form, 
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_setup_parking_assistance_area($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_setup_parking_assistance_area($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['setup']['parking_assistance_area'])) {
-    $values = $form_state['values']['event']['setup']['parking_assistance_area'];
+  if (!empty($event_state['setup']['parking_assistance_area'])) {
+    $values = $event_state['setup']['parking_assistance_area'];
   }
 
   $build = FALSE;
@@ -3031,10 +2799,10 @@ function mcneese_event_workflow_get_event_field_setup_parking_assistance_area($f
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_setup_road_closures($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_setup_road_closures($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => 'no');
-  if (!empty($form_state['values']['event']['setup']['road_closures'])) {
-    $values = $form_state['values']['event']['setup']['road_closures'];
+  if (!empty($event_state['setup']['road_closures'])) {
+    $values = $event_state['setup']['road_closures'];
   }
 
   $build = FALSE;
@@ -3090,10 +2858,10 @@ function mcneese_event_workflow_get_event_field_setup_road_closures($form, &$for
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_setup_road_closures_details($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_setup_road_closures_details($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['setup']['road_closures_details'])) {
-    $values = $form_state['values']['event']['setup']['road_closures_details'];
+  if (!empty($event_state['setup']['road_closures_details'])) {
+    $values = $event_state['setup']['road_closures_details'];
   }
 
   $build = FALSE;
@@ -3159,10 +2927,10 @@ function mcneese_event_workflow_get_event_field_setup_road_closures_details($for
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_setup_special_requests($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_setup_special_requests($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => 'no');
-  if (!empty($form_state['values']['event']['setup']['special_requests'])) {
-    $values = $form_state['values']['event']['setup']['special_requests'];
+  if (!empty($event_state['setup']['special_requests'])) {
+    $values = $event_state['setup']['special_requests'];
   }
 
   $build = FALSE;
@@ -3218,10 +2986,10 @@ function mcneese_event_workflow_get_event_field_setup_special_requests($form, &$
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_setup_special_requests_details($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_setup_special_requests_details($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['setup']['special_requests_details'])) {
-    $values = $form_state['values']['event']['setup']['special_requests_details'];
+  if (!empty($event_state['setup']['special_requests_details'])) {
+    $values = $event_state['setup']['special_requests_details'];
   }
 
   $build = FALSE;
@@ -3287,10 +3055,10 @@ function mcneese_event_workflow_get_event_field_setup_special_requests_details($
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_presentation_technical_equipment($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_presentation_technical_equipment($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => 'no');
-  if (!empty($form_state['values']['event']['presentation']['technical_equipment'])) {
-    $values = $form_state['values']['event']['presentation']['technical_equipment'];
+  if (!empty($event_state['presentation']['technical_equipment'])) {
+    $values = $event_state['presentation']['technical_equipment'];
   }
 
   $fields['presentation']['technical_equipment'] = array(
@@ -3341,10 +3109,10 @@ function mcneese_event_workflow_get_event_field_presentation_technical_equipment
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_presentation_technical_equipment_details($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_presentation_technical_equipment_details($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => array());
-  if (!empty($form_state['values']['event']['presentation']['technical_equipment_details'])) {
-    $values = $form_state['values']['event']['presentation']['technical_equipment_details'];
+  if (!empty($event_state['presentation']['technical_equipment_details'])) {
+    $values = $event_state['presentation']['technical_equipment_details'];
   }
 
   $fields['presentation']['technical_equipment_details'] = array(
@@ -3408,10 +3176,10 @@ function mcneese_event_workflow_get_event_field_presentation_technical_equipment
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_presentation_technical_equipment_microphone($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_presentation_technical_equipment_microphone($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['presentation']['technical_equipment_microphone'])) {
-    $values = $form_state['values']['event']['presentation']['technical_equipment_microphone'];
+  if (!empty($event_state['presentation']['technical_equipment_microphone'])) {
+    $values = $event_state['presentation']['technical_equipment_microphone'];
   }
 
   $fields['presentation']['technical_equipment_microphone'] = array(
@@ -3475,10 +3243,10 @@ function mcneese_event_workflow_get_event_field_presentation_technical_equipment
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_presentation_external_audio_person($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_presentation_external_audio_person($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => 'no');
-  if (!empty($form_state['values']['event']['presentation']['external_audio_person'])) {
-    $values = $form_state['values']['event']['presentation']['external_audio_person'];
+  if (!empty($event_state['presentation']['external_audio_person'])) {
+    $values = $event_state['presentation']['external_audio_person'];
   }
 
   $build = FALSE;
@@ -3534,10 +3302,10 @@ function mcneese_event_workflow_get_event_field_presentation_external_audio_pers
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_presentation_external_audio_person_name($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_presentation_external_audio_person_name($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['presentation']['external_audio_person_name'])) {
-    $values = $form_state['values']['event']['presentation']['external_audio_person_name'];
+  if (!empty($event_state['presentation']['external_audio_person_name'])) {
+    $values = $event_state['presentation']['external_audio_person_name'];
   }
 
   $build = FALSE;
@@ -3604,10 +3372,10 @@ function mcneese_event_workflow_get_event_field_presentation_external_audio_pers
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_presentation_external_audio_person_email($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_presentation_external_audio_person_email($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['presentation']['external_audio_person_email'])) {
-    $values = $form_state['values']['event']['presentation']['external_audio_person_email'];
+  if (!empty($event_state['presentation']['external_audio_person_email'])) {
+    $values = $event_state['presentation']['external_audio_person_email'];
   }
 
   $build = FALSE;
@@ -3674,10 +3442,10 @@ function mcneese_event_workflow_get_event_field_presentation_external_audio_pers
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_presentation_external_audio_person_phone($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_presentation_external_audio_person_phone($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['presentation']['external_audio_person_phone'])) {
-    $values = $form_state['values']['event']['presentation']['external_audio_person_phone'];
+  if (!empty($event_state['presentation']['external_audio_person_phone'])) {
+    $values = $event_state['presentation']['external_audio_person_phone'];
   }
 
   $build = FALSE;
@@ -3742,10 +3510,10 @@ function mcneese_event_workflow_get_event_field_presentation_external_audio_pers
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_presentation_production($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_presentation_production($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => 'no');
-  if (!empty($form_state['values']['event']['presentation']['production'])) {
-    $values = $form_state['values']['event']['presentation']['production'];
+  if (!empty($event_state['presentation']['production'])) {
+    $values = $event_state['presentation']['production'];
   }
 
   $build = FALSE;
@@ -3801,10 +3569,10 @@ function mcneese_event_workflow_get_event_field_presentation_production($form, &
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_presentation_production_name($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_presentation_production_name($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['presentation']['production_name'])) {
-    $values = $form_state['values']['event']['presentation']['production_name'];
+  if (!empty($event_state['presentation']['production_name'])) {
+    $values = $event_state['presentation']['production_name'];
   }
 
   $build = FALSE;
@@ -3871,10 +3639,10 @@ function mcneese_event_workflow_get_event_field_presentation_production_name($fo
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_presentation_production_email($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_presentation_production_email($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['presentation']['production_email'])) {
-    $values = $form_state['values']['event']['presentation']['production_email'];
+  if (!empty($event_state['presentation']['production_email'])) {
+    $values = $event_state['presentation']['production_email'];
   }
 
   $build = FALSE;
@@ -3941,10 +3709,10 @@ function mcneese_event_workflow_get_event_field_presentation_production_email($f
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_presentation_production_phone($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_presentation_production_phone($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['presentation']['production_phone'])) {
-    $values = $form_state['values']['event']['presentation']['production_phone'];
+  if (!empty($event_state['presentation']['production_phone'])) {
+    $values = $event_state['presentation']['production_phone'];
   }
 
   $build = FALSE;
@@ -4009,10 +3777,10 @@ function mcneese_event_workflow_get_event_field_presentation_production_phone($f
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_presentation_publicity($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_presentation_publicity($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => 'no');
-  if (!empty($form_state['values']['event']['presentation']['publicity'])) {
-    $values = $form_state['values']['event']['presentation']['publicity'];
+  if (!empty($event_state['presentation']['publicity'])) {
+    $values = $event_state['presentation']['publicity'];
   }
 
   $fields['presentation']['publicity'] = array(
@@ -4063,10 +3831,10 @@ function mcneese_event_workflow_get_event_field_presentation_publicity($form, &$
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_presentation_publicity_details($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_presentation_publicity_details($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => array());
-  if (!empty($form_state['values']['event']['presentation']['publicity_details'])) {
-    $values = $form_state['values']['event']['presentation']['publicity_details'];
+  if (!empty($event_state['presentation']['publicity_details'])) {
+    $values = $event_state['presentation']['publicity_details'];
   }
 
   $fields['presentation']['publicity_details'] = array(
@@ -4129,10 +3897,10 @@ function mcneese_event_workflow_get_event_field_presentation_publicity_details($
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_presentation_printed_material($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_presentation_printed_material($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => 'no');
-  if (!empty($form_state['values']['event']['presentation']['printed_material'])) {
-    $values = $form_state['values']['event']['presentation']['printed_material'];
+  if (!empty($event_state['presentation']['printed_material'])) {
+    $values = $event_state['presentation']['printed_material'];
   }
 
   $build = FALSE;
@@ -4188,10 +3956,10 @@ function mcneese_event_workflow_get_event_field_presentation_printed_material($f
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_presentation_university_logo($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_presentation_university_logo($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => 'no');
-  if (!empty($form_state['values']['event']['presentation']['university_logo'])) {
-    $values = $form_state['values']['event']['presentation']['university_logo'];
+  if (!empty($event_state['presentation']['university_logo'])) {
+    $values = $event_state['presentation']['university_logo'];
   }
 
   $build = FALSE;
@@ -4259,10 +4027,10 @@ function mcneese_event_workflow_get_event_field_presentation_university_logo($fo
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_presentation_designing_material($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_presentation_designing_material($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => array());
-  if (!empty($form_state['values']['event']['presentation']['designing_material'])) {
-    $values = $form_state['values']['event']['presentation']['designing_material'];
+  if (!empty($event_state['presentation']['designing_material'])) {
+    $values = $event_state['presentation']['designing_material'];
   }
 
   $build = FALSE;
@@ -4333,10 +4101,10 @@ function mcneese_event_workflow_get_event_field_presentation_designing_material(
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_presentation_designing_material_name($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_presentation_designing_material_name($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['presentation']['designing_material_name'])) {
-    $values = $form_state['values']['event']['presentation']['designing_material_name'];
+  if (!empty($event_state['presentation']['designing_material_name'])) {
+    $values = $event_state['presentation']['designing_material_name'];
   }
 
   $build = FALSE;
@@ -4408,10 +4176,10 @@ function mcneese_event_workflow_get_event_field_presentation_designing_material_
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_presentation_designing_material_email($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_presentation_designing_material_email($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['presentation']['designing_material_email'])) {
-    $values = $form_state['values']['event']['presentation']['designing_material_email'];
+  if (!empty($event_state['presentation']['designing_material_email'])) {
+    $values = $event_state['presentation']['designing_material_email'];
   }
 
   $build = FALSE;
@@ -4483,10 +4251,10 @@ function mcneese_event_workflow_get_event_field_presentation_designing_material_
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_presentation_designing_material_phone($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_presentation_designing_material_phone($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['presentation']['designing_material_phone'])) {
-    $values = $form_state['values']['event']['presentation']['designing_material_phone'];
+  if (!empty($event_state['presentation']['designing_material_phone'])) {
+    $values = $event_state['presentation']['designing_material_phone'];
   }
 
   $build = FALSE;
@@ -4556,10 +4324,10 @@ function mcneese_event_workflow_get_event_field_presentation_designing_material_
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_services_food_served($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_services_food_served($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => 'no');
-  if (!empty($form_state['values']['event']['services']['food_served'])) {
-    $values = $form_state['values']['event']['services']['food_served'];
+  if (!empty($event_state['services']['food_served'])) {
+    $values = $event_state['services']['food_served'];
   }
 
   $fields['services']['food_served'] = array(
@@ -4609,10 +4377,10 @@ function mcneese_event_workflow_get_event_field_services_food_served($form, &$fo
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_services_food_caterer($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_services_food_caterer($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['services']['food_caterer'])) {
-    $values = $form_state['values']['event']['services']['food_caterer'];
+  if (!empty($event_state['services']['food_caterer'])) {
+    $values = $event_state['services']['food_caterer'];
   }
 
   $fields['services']['food_caterer'] = array(
@@ -4674,10 +4442,10 @@ function mcneese_event_workflow_get_event_field_services_food_caterer($form, &$f
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_services_alcohol($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_services_alcohol($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => 'no');
-  if (!empty($form_state['values']['event']['services']['alcohol'])) {
-    $values = $form_state['values']['event']['services']['alcohol'];
+  if (!empty($event_state['services']['alcohol'])) {
+    $values = $event_state['services']['alcohol'];
   }
 
   $fields['services']['alcohol'] = array(
@@ -4728,7 +4496,7 @@ function mcneese_event_workflow_get_event_field_services_alcohol($form, &$form_s
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_services_alcohol_note($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_services_alcohol_note($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
 
   $fields['services']['alcohol_note'] = array(
@@ -4781,10 +4549,10 @@ function mcneese_event_workflow_get_event_field_services_alcohol_note($form, &$f
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_services_open_flames($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_services_open_flames($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => 'no');
-  if (!empty($form_state['values']['event']['services']['open_flames'])) {
-    $values = $form_state['values']['event']['services']['open_flames'];
+  if (!empty($event_state['services']['open_flames'])) {
+    $values = $event_state['services']['open_flames'];
   }
 
   $build = FALSE;
@@ -4840,10 +4608,10 @@ function mcneese_event_workflow_get_event_field_services_open_flames($form, &$fo
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_additional($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_additional($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['additional'])) {
-    $values = $form_state['values']['event']['additional'];
+  if (!empty($event_state['additional'])) {
+    $values = $event_state['additional'];
   }
 
   $fields['additional'] = array(
@@ -4891,10 +4659,10 @@ function mcneese_event_workflow_get_event_field_additional($form, &$form_state, 
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_information_title($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_information_title($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['information']['title'])) {
-    $values = $form_state['values']['event']['information']['title'];
+  if (!empty($event_state['information']['title'])) {
+    $values = $event_state['information']['title'];
   }
 
   $fields['information']['title'] = array(
@@ -4946,10 +4714,10 @@ function mcneese_event_workflow_get_event_field_information_title($form, &$form_
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_information_attendance($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_information_attendance($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['information']['attendance'])) {
-    $values = $form_state['values']['event']['information']['attendance'];
+  if (!empty($event_state['information']['attendance'])) {
+    $values = $event_state['information']['attendance'];
   }
 
   $fields['information']['attendance'] = array(
@@ -4979,7 +4747,7 @@ function mcneese_event_workflow_get_event_field_information_attendance($form, &$
         ),
       );
 
-      if (!empty($form['form']['room_information'][$key]['#value']['capacity'])) {
+      if (!empty($form['form']['room_information']['#value']['capacity'])) {
         $fields['information']['attendance'][$key]['#max'] = $form['form']['room_information']['#value']['capacity'];
         $fields['information']['attendance'][$key]['#description'] = 'Current room has a max attendance of ' . check_plain($form['form']['room_information']['#value']['capacity']) . '.';
       }
@@ -5002,10 +4770,10 @@ function mcneese_event_workflow_get_event_field_information_attendance($form, &$
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_information_type($form, &$form_state, &$fields, $ps) {
+function mcneese_event_workflow_get_event_field_information_type($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($form_state['values']['event']['information']['type'])) {
-    $values = $form_state['values']['event']['information']['type'];
+  if (!empty($event_state['information']['type'])) {
+    $values = $event_state['information']['type'];
   }
 
   $fields['information']['type'] = array(

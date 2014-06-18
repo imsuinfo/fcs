@@ -73,40 +73,26 @@ function mcneese_event_workflow_pre_validate_event_fields(&$form, &$form_state, 
       $location_form['location'][0]['#required'] = FALSE;
     }
   }
-  elseif ($form_state['values']['form']['step'] == 'rooms' || $form_state['values']['form']['step'] == 'standard') {
-    if ($form_state['values']['form']['step'] == 'rooms') {
-      // always enforce the venue/room coordinator.
-      if (isset($location_state['venue_coordinator']['user_id'][0])) {
-        $location_state['venue_coordinator']['user_id'][0] = NULL;
-      }
+  elseif ($form_state['values']['form']['step'] == 'rooms') {
+    // always enforce the venue/room coordinator.
+    if (isset($location_state['venue_coordinator']['user_id'][0])) {
+      $location_state['venue_coordinator']['user_id'][0] = NULL;
+    }
 
-      if (isset($location_state['venue_coordinator']['name'][0])) {
-        $location_state['venue_coordinator']['name'][0] = NULL;
-      }
+    if (!empty($form_state['values']['event']['room_list'][0]) && empty($form['form']['room_information'])) {
+      $room_information_parts = explode('_', $form_state['values']['event']['room_list'][0], 3);
 
-      if (isset($location_state['venue_coordinator']['phone'][0])) {
-        $location_state['venue_coordinator']['phone'][0] = NULL;
-      }
+      if (count($room_information_parts) == 3) {
+        $form['form']['room_information']['#value'] = mcneese_event_workflow_load_buildings($room_information_parts[0], $room_information_parts[1], $room_information_parts[2]);
 
-      if (isset($location_state['venue_coordinator']['email'][0])) {
-        $location_state['venue_coordinator']['email'][0] = NULL;
-      }
-
-      if (!empty($form_state['values']['event']['room_list'][0]) && empty($form['form']['room_information'])) {
-        $room_information_parts = explode('_', $form_state['values']['event']['room_list'][0], 3);
-
-        if (count($room_information_parts) == 3) {
-          $form['form']['room_information']['#value'] = mcneese_event_workflow_load_buildings($room_information_parts[0], $room_information_parts[1], $room_information_parts[2]);
-
-          if (empty($form['form']['room_information']['#value'])) {
-            $form['form']['room_information']['#value'] = NULL;
-          }
-          else {
-            $form['form']['room_information']['#value'] = array_pop($form['form']['room_information']['#value']);
-          }
+        if (empty($form['form']['room_information']['#value'])) {
+          $form['form']['room_information']['#value'] = NULL;
         }
-        unset($room_information_parts);
+        else {
+          $form['form']['room_information']['#value'] = array_pop($form['form']['room_information']['#value']);
+        }
       }
+      unset($room_information_parts);
     }
 
     $coordinator_email = MEW_REVIEW_CLASSIFICATION_FAILSAFE_COORDINATOR;
@@ -117,46 +103,14 @@ function mcneese_event_workflow_pre_validate_event_fields(&$form, &$form_state, 
       $coordinator_email = $form['form']['room_information']['#value']['venue_coordinator_email'];
     }
 
-    $user = mcneese_event_workflow_ensure_user_by_email($coordinator_email, array('reviewer'));
+    $coordinator = mcneese_event_workflow_ensure_user_by_email($coordinator_email, array('reviewer'));
 
     // override field settings with the proper attributes.
-    if (is_object($user)) {
-      if (isset($location_form['venue_coordinator']['user_id'][0]) && array_key_exists('#value', $location_form['venue_coordinator']['user_id'][0])) {
-        $location_form['venue_coordinator']['user_id'][0]['#value'] = $user->uid;
-      }
-
-      if (isset($location_form['venue_coordinator']['name'][0]) && array_key_exists('#value', $location_form['venue_coordinator']['name'][0])) {
-        $location_form['venue_coordinator']['name'][0]['#value'] = $user->field_user_last_name['und'][0]['safe_value'] . ', ' . $user->field_user_first_name['und'][0]['safe_value'];
-      }
-
-      if (isset($location_form['venue_coordinator']['name'][0]) && array_key_exists('#default_value', $location_form['venue_coordinator']['name'][0])) {
-        $location_form['venue_coordinator']['name'][0]['#default_value'] = $user->field_user_last_name['und'][0]['safe_value'] . ', ' . $user->field_user_first_name['und'][0]['safe_value'];
-      }
-
-      if (isset($location_form['venue_coordinator']['phone'][0]) && array_key_exists('#value', $location_form['venue_coordinator']['phone'][0])) {
-        $location_form['venue_coordinator']['phone'][0]['#value'] = isset($user->field_user_phone_number['und'][0]['safe_value']) ? $user->field_user_phone_number['und'][0]['safe_value'] : '';
-      }
-
-      if (isset($location_form['venue_coordinator']['phone'][0]) && array_key_exists('#default_value', $location_form['venue_coordinator']['phone'][0])) {
-        $location_form['venue_coordinator']['phone'][0]['#default_value'] = isset($user->field_user_phone_number['und'][0]['safe_value']) ? $user->field_user_phone_number['und'][0]['safe_value'] : '';
-      }
-
-      if (isset($location_form['venue_coordinator']['email'][0]) && array_key_exists('#value', $location_form['venue_coordinator']['email'][0])) {
-        $location_form['venue_coordinator']['email'][0]['#value'] = $user->mail;
-      }
-
-      if (isset($location_form['venue_coordinator']['email'][0]) && array_key_exists('#default_value', $location_form['venue_coordinator']['email'][0])) {
-        $location_form['venue_coordinator']['email'][0]['#default_value'] = $user->mail;
-      }
-
-
-      $location_state['venue_coordinator']['user_id'][0] = $user->uid;
-      $location_state['venue_coordinator']['name'][0] = $user->field_user_last_name['und'][0]['safe_value'] . ', ' . $user->field_user_first_name['und'][0]['safe_value'];
-      $location_state['venue_coordinator']['phone'][0] = isset($user->field_user_phone_number['und'][0]['safe_value']) ? $user->field_user_phone_number['und'][0]['safe_value'] : '';
-      $location_state['venue_coordinator']['email'][0] = $user->mail;
+    if (is_object($coordinator)) {
+      $location_state['venue_coordinator']['user_id'][0] = $coordinator->uid;
     }
 
-    unset($user);
+    unset($coordinator);
   }
 
   if (array_key_exists($clicked_id, $dont_validate)) {
