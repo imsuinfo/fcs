@@ -100,6 +100,7 @@ function mcneese_event_workflow_event_search_0_form($form, &$form_state) {
         'search-simple-submit-search',
         'page-' . $form['form']['page_number']['#value'],
       ),
+      'name' => 'search-simple-submit-search',
     ),
   );
 
@@ -306,6 +307,7 @@ function mcneese_event_workflow_event_search_0_form($form, &$form_state) {
         'search-advanced-submit-search',
         'page-' . $form['form']['page_number']['#value'],
       ),
+      'name' => 'search-advanced-submit-search',
     ),
   );
 
