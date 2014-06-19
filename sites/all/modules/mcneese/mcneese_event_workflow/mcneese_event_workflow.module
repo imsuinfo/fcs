@@ -3872,6 +3872,17 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
   $reviewer = user_access('mcneese event workflow review');
   $requester = user_access('mcneese event workflow request');
 
+  $manager_as_administer = FALSE;
+  $manager_as_reviewer = FALSE;
+  if ($manager) {
+    if ($special == 1) {
+      $manager_as_reviewer = TRUE;
+    }
+    else {
+      $manager_as_administer = TRUE;
+    }
+  }
+
   $s = 'i';
   $like = 'ILIKE';
   if ($sensitive) {
@@ -4014,7 +4025,7 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
 
     $query->range($start, $limit);
 
-    if ($administer || $manager) {
+    if ($administer || $manager_as_administer) {
       if ($special == 1) {
         $show_status = array(
           MEW_EVENT_STATUS_LOCKED,
@@ -4032,7 +4043,7 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
         $query->condition('mftsp.value', $show_step, 'IN');
       }
     }
-    elseif ($reviewer) {
+    elseif ($reviewer || $manager_as_reviewer) {
       $query->innerjoin('mew_current_event_coordinator', 'mcec', 'mer.id = mcec.event_id');
       $query->innerjoin('mew_field_event_coordinator_classification', 'mfecc', 'mcec.event_id = mfecc.event_id AND mcec.classification = mfecc.revision AND mfecc.delta = 0');
 
