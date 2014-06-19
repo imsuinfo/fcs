@@ -602,6 +602,19 @@ function mcneese_event_workflow_menu() {
     'type' => MENU_CALLBACK,
   );
 
+  $items['events/history-0/%'] = array(
+    'title' => "Event History",
+    'description' => "Event History",
+    'page callback' => 'mcneese_event_workflow_event_history_0_page',
+    'page arguments' => array(2),
+    'file' => 'mcneese_event_workflow_event_history_page.inc',
+    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
+    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'access arguments' => array('history', 2),
+    'tab_parent' => 'events',
+    'tab_root' => 'events',
+  );
+
   return $items;
 }
 

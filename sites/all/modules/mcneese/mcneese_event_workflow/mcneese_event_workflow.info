@@ -29,3 +29,4 @@ files[] = pages/mcneese_event_workflow_event_review_page.inc
 files[] = pages/mcneese_event_workflow_event_reviewers_page.inc
 files[] = pages/mcneese_event_workflow_event_search_page.inc
 files[] = pages/mcneese_event_workflow_event_view_page.inc
+files[] = pages/mcneese_event_workflow_event_history_page.inc
