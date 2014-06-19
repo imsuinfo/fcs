@@ -1421,7 +1421,7 @@ function mcneese_event_workflow_event_view_0_page_validate($form, &$form_state) 
         }
       }
 
-      if (array_key_exists('facilities', $use_fees) && !empty($use_fees['facilities']['amount'])) {
+      if (array_key_exists('equipment', $use_fees) && !empty($use_fees['equipment']['amount'])) {
         $matches = array();
         $matched = preg_match('/^(\d+|\d+\.\d|\d+\.\d\d)$/i', $use_fees['equipment']['amount'], $matches);
 

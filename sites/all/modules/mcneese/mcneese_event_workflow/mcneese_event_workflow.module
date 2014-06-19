@@ -736,6 +736,26 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
         return TRUE;
       }
       else {
+        // do a quick test to see if the reviewer is also the requester, if so, then grant access when $ignore_decisions
+        if ($requester) {
+          $query = db_select('mew_event_requests', 'mer');
+
+          $query->innerjoin('mew_current_top', 'mct', 'mer.id = mct.event_id');
+          $query->innerjoin('mew_field_top_status', 'mfts', 'mct.event_id = mfts.event_id AND mct.status = mfts.revision AND mfts.delta = 0');
+
+          $query->fields('mer', array('id'));
+
+          $query->condition('mer.id', $event_id);
+          $query->condition('mer.user_id', $user->uid);
+          $query->condition('mfts.value', $request_status, 'IN');
+
+          $query->countQuery();
+
+          $result = $query->execute()->fetchField();
+
+          if ($result > 0) return TRUE;
+        }
+
         return mcneese_event_workflow_management_page_event_reviewer_access($user, $event_id, TRUE);
       }
     }
@@ -808,7 +828,7 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
         return TRUE;
       }
       else {
-        return mcneese_event_workflow_management_page_event_reviewer_access($user, $event_id);
+        return mcneese_event_workflow_management_page_event_reviewer_access($user, $event_id, TRUE);
       }
     }
   }
@@ -925,7 +945,6 @@ function mcneese_event_workflow_management_page_event_reviewer_access($user, $ev
     return FALSE;
   }
 
-  // mcneese_event_workflow_event_load_listing
   try {
     $query = db_select('mew_event_requests', 'mer');
 
@@ -939,7 +958,15 @@ function mcneese_event_workflow_management_page_event_reviewer_access($user, $ev
     $query->condition('mfts.value', MEW_EVENT_STATUS_DELETED, '<>');
     $query->condition('mfts.event_id', $event_id);
 
-    if ($ignore_decisions) {
+    $query->innerjoin('mew_current_event_coordinator', 'mcec', 'mer.id = mcec.event_id');
+    $query->innerjoin('mew_field_event_coordinator_classification', 'mfecc', 'mcec.event_id = mfecc.event_id AND mcec.classification = mfecc.revision AND mfecc.delta = 0');
+
+    $query->innerjoin('mew_current_venue_coordinator', 'mcvc', 'mer.id = mcvc.event_id');
+    $query->innerjoin('mew_field_venue_coordinator_user_id', 'mfvcui', 'mcec.event_id = mfvcui.event_id AND mcvc.user_id = mfvcui.revision AND mfvcui.delta = 0');
+
+    $or = db_or();
+
+    if (!$ignore_decisions) {
       $show_status = array(
         MEW_EVENT_STATUS_LOCKED,
         MEW_EVENT_STATUS_UNLOCKED,
@@ -947,119 +974,93 @@ function mcneese_event_workflow_management_page_event_reviewer_access($user, $ev
 
       $show_step = array(
         MEW_REVIEW_STEP_VENUE_AVAILABLE,
-        MEW_REVIEW_STEP_REVIEW,
-        MEW_REVIEW_STEP_USAGE_FEES,
         MEW_REVIEW_STEP_MAKE_DECISIONS
       );
 
-      $query->condition('mfts.value', $show_status, 'IN');
-      $query->condition('mftsp.value', $show_step, 'IN');
+      $show_decision = array(
+        MEW_REVIEW_DECISION_APPROVE,
+        MEW_REVIEW_DECISION_DENY
+      );
+
+      $review_query = db_select('mew_field_review_review', 'mfrr');
+      $review_query->addfield('mfrr', 'step', 'step');
+      $review_query->where('mfrr.event_id = mftsp.event_id');
+      $review_query->condition('mfrr.user_id', $user->uid);
+      $review_query->condition('mfrr.step', $show_step, 'IN');
+      $review_query->condition('mfrr.decision', $show_decision, 'IN');
+      $review_query->distinct();
+
+      $and = db_and();
+      $and->condition('mftsp.value', $show_step, 'IN');
+      $and->condition('mftsp.value', $review_query, 'NOT IN');
+      $and->condition('mfvcui.value', $user->uid);
+      $or->condition($and);
     }
     else {
-      $query->innerjoin('mew_current_event_coordinator', 'mcec', 'mer.id = mcec.event_id');
-      $query->innerjoin('mew_field_event_coordinator_classification', 'mfecc', 'mcec.event_id = mfecc.event_id AND mcec.classification = mfecc.revision AND mfecc.delta = 0');
-
-      $query->innerjoin('mew_current_venue_coordinator', 'mcvc', 'mer.id = mcvc.event_id');
-      $query->innerjoin('mew_field_venue_coordinator_user_id', 'mfvcui', 'mcec.event_id = mfvcui.event_id AND mcvc.user_id = mfvcui.revision AND mfvcui.delta = 0');
-
-      $or = db_or();
-
-      if (!$ignore_decisions) {
-        $show_status = array(
-          MEW_EVENT_STATUS_LOCKED,
-          MEW_EVENT_STATUS_UNLOCKED,
-        );
-
-        $show_step = array(
-          MEW_REVIEW_STEP_VENUE_AVAILABLE,
-          MEW_REVIEW_STEP_MAKE_DECISIONS
-        );
-
-        $show_decision = array(
-          MEW_REVIEW_DECISION_APPROVE,
-          MEW_REVIEW_DECISION_DENY
-        );
-
-        $review_query = db_select('mew_field_review_review', 'mfrr');
-        $review_query->addfield('mfrr', 'step', 'step');
-        $review_query->where('mfrr.event_id = mftsp.event_id');
-        $review_query->condition('mfrr.user_id', $user->uid);
-        $review_query->condition('mfrr.step', $show_step, 'IN');
-        $review_query->condition('mfrr.decision', $show_decision, 'IN');
-        $review_query->distinct();
-
-        $and = db_and();
-        $and->condition('mftsp.value', $show_step, 'IN');
-        $and->condition('mftsp.value', $review_query, 'NOT IN');
-        $and->condition('mfvcui.value', $user->uid);
-        $or->condition($and);
-      }
-      else {
-        $or->condition('mfvcui.value', $user->uid);
-      }
-
-      if (!$ignore_decisions) {
-        $show_status = array(
-          MEW_EVENT_STATUS_LOCKED,
-        );
-
-        $show_step = array(
-          MEW_REVIEW_STEP_REVIEW,
-          MEW_REVIEW_STEP_USAGE_FEES,
-        );
-
-        $show_decision = array(
-          MEW_REVIEW_DECISION_APPROVE,
-          MEW_REVIEW_DECISION_DENY
-        );
-
-        $reviewers_query = db_select('mew_reviewers', 'mr');
-        $reviewers_query->condition('mr.user_id', $user->uid);
-        $reviewers_query->condition('mr.review_step', $show_step, 'IN');
-        $reviewers_query->addfield('mr', 'event_classification', 'event_classification');
-        $reviewers_query->addfield('mr', 'review_step', 'review_step');
-        $reviewers_query->distinct();
-
-        $review_query = db_select('mew_field_review_review', 'mfrr');
-        $review_query->addfield('mfrr', 'step', 'step');
-        $review_query->where('mfrr.event_id = mftsp.event_id');
-        $review_query->condition('mfrr.user_id', $user->uid);
-        $review_query->condition('mfrr.step', $show_step, 'IN');
-        $review_query->condition('mfrr.decision', $show_decision, 'IN');
-        $review_query->distinct();
-
-        $reviewers_results = $reviewers_query->execute()->fetchAll();
-        if (!empty($reviewers_results)) {
-          foreach ($reviewers_results as $reviewers_result) {
-            $and = db_and();
-            $and->condition('mftsp.value', $review_query, 'NOT IN');
-            $and->condition('mfts.value', $show_status, 'IN');
-            $and->condition('mfecc.value', $reviewers_result->event_classification);
-            $and->condition('mftsp.value', $reviewers_result->review_step);
-            $or->condition($and);
-          }
-        }
-      }
-      else {
-        $reviewers_query = db_select('mew_reviewers', 'mr');
-        $reviewers_query->condition('mr.user_id', $user->uid);
-        $reviewers_query->addfield('mr', 'event_classification', 'event_classification');
-        $reviewers_query->addfield('mr', 'review_step', 'review_step');
-        $reviewers_query->distinct();
-
-        $reviewers_results = $reviewers_query->execute()->fetchAll();
-        if (!empty($reviewers_results)) {
-          foreach ($reviewers_results as $reviewers_result) {
-            $and = db_and();
-            $and->condition('mfecc.value', $reviewers_result->event_classification);
-            $and->condition('mftsp.value', $reviewers_result->review_step);
-            $or->condition($and);
-          }
-        }
-      }
-
-      $query->condition($or);
+      $or->condition('mfvcui.value', $user->uid);
     }
+
+    if (!$ignore_decisions) {
+      $show_status = array(
+        MEW_EVENT_STATUS_LOCKED,
+      );
+
+      $show_step = array(
+        MEW_REVIEW_STEP_REVIEW,
+        MEW_REVIEW_STEP_USAGE_FEES,
+      );
+
+      $show_decision = array(
+        MEW_REVIEW_DECISION_APPROVE,
+        MEW_REVIEW_DECISION_DENY
+      );
+
+      $reviewers_query = db_select('mew_reviewers', 'mr');
+      $reviewers_query->condition('mr.user_id', $user->uid);
+      $reviewers_query->condition('mr.review_step', $show_step, 'IN');
+      $reviewers_query->addfield('mr', 'event_classification', 'event_classification');
+      $reviewers_query->addfield('mr', 'review_step', 'review_step');
+      $reviewers_query->distinct();
+
+      $review_query = db_select('mew_field_review_review', 'mfrr');
+      $review_query->addfield('mfrr', 'step', 'step');
+      $review_query->where('mfrr.event_id = mftsp.event_id');
+      $review_query->condition('mfrr.user_id', $user->uid);
+      $review_query->condition('mfrr.step', $show_step, 'IN');
+      $review_query->condition('mfrr.decision', $show_decision, 'IN');
+      $review_query->distinct();
+
+      $reviewers_results = $reviewers_query->execute()->fetchAll();
+      if (!empty($reviewers_results)) {
+        foreach ($reviewers_results as $reviewers_result) {
+          $and = db_and();
+          $and->condition('mftsp.value', $review_query, 'NOT IN');
+          $and->condition('mfts.value', $show_status, 'IN');
+          $and->condition('mfecc.value', $reviewers_result->event_classification);
+          $and->condition('mftsp.value', $reviewers_result->review_step);
+          $or->condition($and);
+        }
+      }
+    }
+    else {
+      $reviewers_query = db_select('mew_reviewers', 'mr');
+      $reviewers_query->condition('mr.user_id', $user->uid);
+      $reviewers_query->addfield('mr', 'event_classification', 'event_classification');
+      $reviewers_query->addfield('mr', 'review_step', 'review_step');
+      $reviewers_query->distinct();
+
+      $reviewers_results = $reviewers_query->execute()->fetchAll();
+      if (!empty($reviewers_results)) {
+        foreach ($reviewers_results as $reviewers_result) {
+          $and = db_and();
+          $and->condition('mfecc.value', $reviewers_result->event_classification);
+          $and->condition('mftsp.value', $reviewers_result->review_step);
+          $or->condition($and);
+        }
+      }
+    }
+
+    $query->condition($or);
 
     $query->countQuery();
 
@@ -1758,7 +1759,7 @@ function mcneese_event_workflow_load_event_user($banner_id) {
  *   If not specified, then the current user is synchronized.
  * @param array $roles
  *   (optional) Additional roles to assign the user to.
- *   Providing this will override the auto-assign role as requestor.
+ *   Providing this will override the auto-assign role as requester.
  *   This is an array of role names and not role ids.
  *
  * @return bool
