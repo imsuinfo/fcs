@@ -1545,6 +1545,11 @@ function mcneese_event_workflow_event_view_0_page_submit($form, &$form_state) {
 
       return;
     }
+
+    // change to the event view page on submit for these decisions to prevent potential access denied messages following the submit process.
+    if ($decision == MEW_REVIEW_DECISION_APPROVE || $decision == MEW_REVIEW_DECISION_DENY) {
+      $form_state['values']['redirect_to'] = 'events/view-0/' .  $event_id;
+    }
   }
 
   // redirect after submitting.
