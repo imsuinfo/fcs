@@ -147,7 +147,6 @@ function mcneese_event_workflow_management_page() {
         $can_log_event = mcneese_event_workflow_management_page_event_access('log', $item->id);
 
         $row['id'] = $item->id;
-
         $row['title'] = check_plain($item->title);
 
         $location_options = event_workflow_get_event_location_list_options();
