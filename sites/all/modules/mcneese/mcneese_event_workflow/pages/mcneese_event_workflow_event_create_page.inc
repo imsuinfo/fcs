@@ -242,7 +242,7 @@ function mcneese_event_workflow_event_create_0_form_validate($form, &$form_state
         unset($form_state['values']['event']['dates']['time_stop'][$prev_date]);
       }
       else {
-        $room_list = explode('_', $form_state['values']['event']['room_list'][0], 3);
+        $room = explode('_', $form_state['values']['event']['room'][0], 3);
         $date = $form_state['values']['event']['dates']['date'];
         $time_start = $form_state['values']['event']['dates']['time_start'];
         $time_stop = $form_state['values']['event']['dates']['time_stop'];
@@ -281,7 +281,7 @@ function mcneese_event_workflow_event_create_0_form_validate($form, &$form_state
         }
 
         if (!empty($date)) {
-          $events_using_room = mcneese_event_workflow_check_room_availability($room_list[0], $room_list[1], $room_list[2], $date, $time_start, $time_stop);
+          $events_using_room = mcneese_event_workflow_check_room_availability($room[0], $room[1], $room[2], $date, $time_start, $time_stop);
 
           if ($events_using_room === FALSE) {
             form_set_error('', "An internal error occurred while checking the room for availability. Please contact the support staff.");
@@ -291,7 +291,7 @@ function mcneese_event_workflow_event_create_0_form_validate($form, &$form_state
           }
         }
 
-        unset($room_list);
+        unset($room);
         unset($date);
         unset($time_start);
         unset($time_stop);

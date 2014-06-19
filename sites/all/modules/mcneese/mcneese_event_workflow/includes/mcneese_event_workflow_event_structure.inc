@@ -756,12 +756,12 @@ function mcneese_event_workflow_get_event_field_location($form, &$form_state, &$
  */
 function mcneese_event_workflow_get_event_field_room_list($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['room_list'])) {
-    $values = $event_state['room_list'];
+  if (!empty($event_state['room'])) {
+    $values = $event_state['room'];
   }
 
-  $fields['room_list'] = array(
-    '#id' => 'field-event-room_list',
+  $fields['room'] = array(
+    '#id' => 'field-event-room',
     '#type' => 'container',
     '#tree' => TRUE,
     '#attributes' => array(
@@ -787,8 +787,8 @@ function mcneese_event_workflow_get_event_field_room_list($form, &$form_state, &
         $location = $event_state['location'][$key];
       }
 
-      $fields['room_list'][$key] = array(
-        '#id' => 'field-event-room_list-' . $key,
+      $fields['room'][$key] = array(
+        '#id' => 'field-event-room-' . $key,
         '#type' => 'radios',
         '#title' => 'Select a Room',
         '#options' => event_workflow_get_event_room_list_options($location, 'special'),
@@ -802,14 +802,14 @@ function mcneese_event_workflow_get_event_field_room_list($form, &$form_state, &
         ),
       );
     }
-    krsort($fields['room_list']);
+    krsort($fields['room']);
 
-    $form_state['conditionally_required'][0][] = 'room_list';
+    $form_state['conditionally_required'][0][] = 'room';
   }
   else {
     foreach ($values as $key => $value) {
-      $fields['room_list'][$key] = array(
-        '#id' => 'field-event-room_list-' . $key,
+      $fields['room'][$key] = array(
+        '#id' => 'field-event-room-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );

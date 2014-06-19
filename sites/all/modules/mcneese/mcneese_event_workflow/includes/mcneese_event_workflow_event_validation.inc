@@ -79,8 +79,8 @@ function mcneese_event_workflow_pre_validate_event_fields(&$form, &$form_state, 
       $location_state['venue_coordinator']['user_id'][0] = NULL;
     }
 
-    if (!empty($form_state['values']['event']['room_list'][0]) && empty($form['form']['room_information'])) {
-      $room_information_parts = explode('_', $form_state['values']['event']['room_list'][0], 3);
+    if (!empty($form_state['values']['event']['room'][0]) && empty($form['form']['room_information'])) {
+      $room_information_parts = explode('_', $form_state['values']['event']['room'][0], 3);
 
       if (count($room_information_parts) == 3) {
         $form['form']['room_information']['#value'] = mcneese_event_workflow_load_buildings($room_information_parts[0], $room_information_parts[1], $room_information_parts[2]);

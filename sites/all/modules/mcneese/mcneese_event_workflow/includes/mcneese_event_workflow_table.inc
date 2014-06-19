@@ -30,16 +30,16 @@ function mcneese_event_workflow_table_structure() {
     'location' => array(
       'path' => 'event][location',
     ),
-    'room_list' => array(
-      'path' => 'event][room_list',
+    'room' => array(
+      'path' => 'event][room',
       'storage' => 'alternate',
       'alternate' => array(
         'building' => array(
-          'path' => 'event][room_list',
+          'path' => 'event][room',
           'key' => 1,
         ),
         'room' => array(
-          'path' => 'event][room_list',
+          'path' => 'event][room',
           'key' => 2,
         ),
       ),
