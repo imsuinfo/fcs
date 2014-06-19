@@ -20,7 +20,7 @@
  * @return array
  *   An array containing the generated form.
  */
-function mcneese_event_workflow_event_list_0_page($page_number = 0) {
+function mcneese_event_workflow_event_list_0_page($form, &$form_state, $page_number = 0) {
   if (!cf_is_integer($page_number)) {
     // because this is a url argument passed as a variable, just force a 0 for invalid paths.
     $page_number = 0;
@@ -28,7 +28,7 @@ function mcneese_event_workflow_event_list_0_page($page_number = 0) {
 
   global $base_path;
 
-  $rows_per_page = 50;
+  $rows_per_page = 25;
   $start_range = $page_number * $rows_per_page;
 
   $form = array();
@@ -78,7 +78,10 @@ function mcneese_event_workflow_event_list_0_page($page_number = 0) {
   $results = mcneese_event_workflow_event_load_listing(NULL, FALSE, $page_number * $rows_per_page, $rows_per_page, $sorting);
 
   $rows = array();
+  $total_results = 0;
   if (!empty($results)) {
+    $total_results = count($results);
+
     foreach ($results as $item) {
       $row = array();
 
@@ -219,6 +222,23 @@ function mcneese_event_workflow_event_list_0_page($page_number = 0) {
   $table['empty'] = "There are no event requests available for to your account.";
 
   $output .= theme('table', $table);
+
+  $output .= '<div class="event_request-listing-page-navigator no-print">';
+  if ($page_number > 0) {
+    if ($page_number == 1) {
+      $output .= '<a href="' . $base_path . 'events/list-0" class="event_request-listing-page-choice event_request-listing-page-previous no-print" alt="Previous Page">Prev</a>';
+    }
+    else {
+      $previous_page = $page_number - 1;
+      $output .= '<a href="' . $base_path . 'events/list-0/' . $previous_page . '" class="event_request-listing-page-choice event_request-listing-page-previous no-print" alt="Previous Page">Prev</a>';
+    }
+  }
+
+  if ($total_results >= $rows_per_page) {
+    $next_page = $page_number + 1;
+    $output .= '<a href="' . $base_path . 'events/list-0/' . $next_page . '" class="event_request-listing-page-choice event_request-listing-page-next no-print" alt="Next Page">Next</a>';
+  }
+  $output .= '</div>';
 
   return $form;
 }

@@ -17,19 +17,11 @@
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api.
- * @param int $page_number
- *   (optional) When there are more than a certain number of rows,
- *   this represent the page number for a given sequence of rows.
  *
  * @return array
  *   An array containing the generated form.
  */
-function mcneese_event_workflow_event_search_0_form($form, &$form_state, $page_number = 0) {
-  if (!cf_is_integer($page_number)) {
-    // because this is a url argument passed as a variable, just force a 0 for invalid paths.
-    $page_number = 0;
-  }
-
+function mcneese_event_workflow_event_search_0_form($form, &$form_state) {
   global $base_path;
 
   $can_create = mcneese_event_workflow_management_page_event_access('create');
@@ -53,12 +45,16 @@ function mcneese_event_workflow_event_search_0_form($form, &$form_state, $page_n
 
   $form['form']['page_number'] = array(
     '#type' => 'value',
-    '#value' => $page_number,
+    '#value' => 0,
   );
+
+  if (isset($form_state['simple_search-page_number']) && cf_is_integer($form_state['simple_search-page_number'])) {
+    $form['form']['page_number']['#value'] = $form_state['simple_search-page_number'];
+  }
 
   $form['form']['per_page'] = array(
     '#type' => 'value',
-    '#value' => 20,
+    '#value' => 25,
   );
 
   $form['simple'] = array(
@@ -89,7 +85,7 @@ function mcneese_event_workflow_event_search_0_form($form, &$form_state, $page_n
       'class' => array(
         'no-print',
         'search-simple-submit',
-        'page-' . $page_number,
+        'page-' . $form['form']['page_number']['#value'],
       ),
     ),
   );
@@ -102,7 +98,7 @@ function mcneese_event_workflow_event_search_0_form($form, &$form_state, $page_n
       'class' => array(
         'no-print',
         'search-simple-submit-search',
-        'page-' . $page_number,
+        'page-' . $form['form']['page_number']['#value'],
       ),
     ),
   );
@@ -113,10 +109,12 @@ function mcneese_event_workflow_event_search_0_form($form, &$form_state, $page_n
   );
 
   // populate the search results.
-  if (isset($form_state['simple_search_results']) && is_array($form_state['simple_search_results'])) {
+  if (isset($form_state['simple_search-results']) && is_array($form_state['simple_search-results'])) {
     $rows = array();
-    if (!empty($form_state['simple_search_results'])) {
-      foreach ($form_state['simple_search_results'] as $item) {
+    $total_results = 0;
+    if (!empty($form_state['simple_search-results'])) {
+      $total_results = count($form_state['simple_search-results']);
+      foreach ($form_state['simple_search-results'] as $item) {
         $row = array();
 
         $can_view_event = mcneese_event_workflow_management_page_event_access('view', $item->id);
@@ -157,8 +155,6 @@ function mcneese_event_workflow_event_search_0_form($form, &$form_state, $page_n
         $row['location'] = $location;
         $row['building'] = $building;
         $row['room'] = $room;
-
-
 
         foreach ($item->date as $delta => $date) {
           if (!isset($row['date'])) {
@@ -229,6 +225,54 @@ function mcneese_event_workflow_event_search_0_form($form, &$form_state, $page_n
     $form['simple']['results']['table'] = array(
       '#markup' => theme('table', $simple_table),
     );
+
+    $form['simple']['results']['navigation'] = array(
+      '#id' => 'search-simple-results-navigation',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'no-print',
+          'search-simple-results-navigation',
+        ),
+      ),
+    );
+
+    $form['simple']['results']['navigation']['previous'] = array(
+      '#id' => 'search-simple-results-navigation-previous',
+      '#type' => 'submit',
+      '#value' => t("Prev Simple Search"),
+      '#attributes' => array(
+        'class' => array(
+          'no-print',
+          'search-simple-results-navigation-choice',
+          'search-simple-results-navigation-previous',
+        ),
+        'title' => "Previous Simple Search",
+      ),
+    );
+
+    $form['simple']['results']['navigation']['next'] = array(
+      '#id' => 'search-simple-results-navigation-next',
+      '#type' => 'submit',
+      '#value' => t("Next Simple Search"),
+      '#attributes' => array(
+        'class' => array(
+          'no-print',
+          'search-simple-results-navigation-choice',
+          'search-simple-results-navigation-next',
+        ),
+        'title' => "Next Simple Search",
+      ),
+    );
+
+    if ($form['form']['page_number']['#value'] < 1) {
+      unset($form['simple']['results']['navigation']['previous']);
+    }
+
+    if ($total_results < $form['form']['per_page']['#value']) {
+      unset($form['simple']['results']['navigation']['next']);
+    }
   }
 
   $form['advanced'] = array(
@@ -247,7 +291,7 @@ function mcneese_event_workflow_event_search_0_form($form, &$form_state, $page_n
       'class' => array(
         'no-print',
         'search-advanced-submit',
-        'page-' . $page_number,
+        'page-' . $form['form']['page_number']['#value'],
       ),
     ),
   );
@@ -260,7 +304,7 @@ function mcneese_event_workflow_event_search_0_form($form, &$form_state, $page_n
       'class' => array(
         'no-print',
         'search-advanced-submit-search',
-        'page-' . $page_number,
+        'page-' . $form['form']['page_number']['#value'],
       ),
     ),
   );
@@ -297,6 +341,10 @@ function mcneese_event_workflow_event_search_0_form_validate($form, &$form_state
   elseif ($clicked_id == 'search-advanced-submit-search') {
     $form_state['#rebuild'] = TRUE;
   }
+  elseif ($clicked_id == 'search-simple-results-navigation-previous') {
+  }
+  elseif ($clicked_id == 'search-simple-results-navigation-next') {
+  }
   else {
     form_set_error('', "Internal Error. An unknown submit process has been detected. Please contact the appropriate support staff.");
   }
@@ -322,9 +370,39 @@ function mcneese_event_workflow_event_search_0_form_submit($form, &$form_state) 
   if ($clicked_id == 'search-simple-submit-search') {
     $search = $form_state['values']['simple']['text'];
     $sensitive = (bool) $form_state['values']['simple']['sensitive'];
+
     $per_page = $form['form']['per_page']['#value'];
     $start = $form['form']['page_number']['#value'] * $per_page;
-    $form_state['simple_search_results'] = mcneese_event_workflow_event_load_listing($search, $sensitive, $start, $per_page);
+
+    $form_state['simple_search-results'] = mcneese_event_workflow_event_load_listing($search, $sensitive, $start, $per_page);
+    $form_state['simple_search-string'] = $search;
+    $form_state['simple_search-sensitive'] = $sensitive;
+  }
+  elseif ($clicked_id == 'search-simple-results-navigation-previous') {
+    $previous_page = $form['form']['page_number']['#value'] - 1;
+    $search = $form_state['simple_search-string'];
+    $sensitive = (bool) $form_state['simple_search-sensitive'];
+
+    $per_page = $form['form']['per_page']['#value'];
+    $start = $previous_page * $per_page;
+
+    $form_state['simple_search-results'] = mcneese_event_workflow_event_load_listing($search, $sensitive, $start, $per_page);
+    $form_state['simple_search-page_number'] = $previous_page;
+    $form_state['simple_search-string'] = $search;
+    $form_state['simple_search-sensitive'] = $sensitive;
+  }
+  elseif ($clicked_id == 'search-simple-results-navigation-next') {
+    $next_page = $form['form']['page_number']['#value'] + 1;
+    $search = $form_state['simple_search-string'];
+    $sensitive = (bool) $form_state['simple_search-sensitive'];
+
+    $per_page = $form['form']['per_page']['#value'];
+    $start = $next_page * $per_page;
+
+    $form_state['simple_search-results'] = mcneese_event_workflow_event_load_listing($search, $sensitive, $start, $per_page);
+    $form_state['simple_search-page_number'] = $next_page;
+    $form_state['simple_search-string'] = $search;
+    $form_state['simple_search-sensitive'] = $sensitive;
   }
 
   // return to the form with the search results.

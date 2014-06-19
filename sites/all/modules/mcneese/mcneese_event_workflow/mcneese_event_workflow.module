@@ -461,7 +461,21 @@ function mcneese_event_workflow_menu() {
   $items['events/review-0'] = array(
     'title' => "Review Requests",
     'description' => "Review Request",
-    'page callback' => 'mcneese_event_workflow_event_review_0_page',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mcneese_event_workflow_event_review_0_page'),
+    'file' => 'mcneese_event_workflow_event_review_page.inc',
+    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
+    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'access arguments' => array('review'),
+    'tab_parent' => 'events',
+    'tab_root' => 'events',
+  );
+
+  $items['events/review-0/%'] = array(
+    'title' => "Review Requests",
+    'description' => "Review Request",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mcneese_event_workflow_event_review_0_page', 2),
     'file' => 'mcneese_event_workflow_event_review_page.inc',
     'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
     'access callback' => 'mcneese_event_workflow_management_page_event_access',
@@ -540,19 +554,6 @@ function mcneese_event_workflow_menu() {
     'description' => "Search Requests",
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mcneese_event_workflow_event_search_0_form'),
-    'file' => 'mcneese_event_workflow_event_search_page.inc',
-    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
-    'access callback' => 'mcneese_event_workflow_management_page_event_access',
-    'access arguments' => array('search'),
-    'tab_parent' => 'events',
-    'tab_root' => 'events',
-  );
-
-  $items['events/search-0/%'] = array(
-    'title' => "Search Requests",
-    'description' => "Requests",
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('mcneese_event_workflow_event_search_0_form', 2),
     'file' => 'mcneese_event_workflow_event_search_page.inc',
     'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
     'access callback' => 'mcneese_event_workflow_management_page_event_access',
