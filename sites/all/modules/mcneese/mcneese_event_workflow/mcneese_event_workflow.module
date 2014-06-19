@@ -3980,6 +3980,11 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
     }
     unset($remove);
 
+    // don't search when there is nothing to search for.
+    if (empty($search_parts)) {
+      return array();
+    }
+
     $status = array();
     foreach ($search_parts as $search_part) {
       foreach ($status_options as $key => $option) {
