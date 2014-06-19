@@ -718,6 +718,11 @@ function mcneese_event_workflow_get_event_field_location($form, &$form_state, &$
   );
 
   if ($form['form']['step']['#value'] == 'location' && array_key_exists('information', $form['form']['sections']['#value'])) {
+    global $base_path;
+    $module_path = drupal_get_path('module', 'mcneese_event_workflow');
+
+    drupal_add_js($module_path . '/js/images-locations.js', array('type' => 'file', 'group' => JS_DEFAULT, 'preprocess' => TRUE));
+
     foreach ($values as $key => $value) {
       $fields['location'][$key] = array(
         '#id' => 'field-event-location-' . $key,
@@ -737,6 +742,16 @@ function mcneese_event_workflow_get_event_field_location($form, &$form_state, &$
     krsort($fields['location']);
 
     $form_state['conditionally_required'][0][] = 'location';
+
+    $fields['location'][0]['location-images'] = array(
+      '#tree' => TRUE,
+    );
+
+    $fields['location'][0]['location-images'][0] = array();
+    $fields['location'][0]['location-images'][1] = array();
+
+    $fields['location'][0]['location-images'][0]['#markup'] = '<img id="field-event-location-0-image-0" src="' . $base_path . $module_path . '/images/example-map.png" alt="Campus Map" class="location-image location-image-visible noscript">';
+    $fields['location'][0]['location-images'][1]['#markup'] = '<img id="field-event-location-0-image-1" src="' . $base_path . $module_path . '/images/example-seed.png" alt="Campus Map, SEED Center" class="location-image location-image-invisible noscript">';
   }
   else {
     foreach ($values as $key => $value) {
@@ -1722,12 +1737,12 @@ function mcneese_event_workflow_get_event_field_registration_website($form, &$fo
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[require]' . '[' . $key . ']'  . '"]' => array('value' => NULL),
             ),
           ),
-        '#attributes' => array(
-          'class' => array(
-            'form-item-delta',
-            'form-item-delta-' . $key,
+          '#attributes' => array(
+            'class' => array(
+              'form-item-delta',
+              'form-item-delta-' . $key,
+            ),
           ),
-        ),
         ),
       );
     }
