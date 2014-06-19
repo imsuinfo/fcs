@@ -4081,6 +4081,9 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
     $query->innerjoin('mew_field_dates_time_start', 'mfdts', 'mct.event_id = mfdts.event_id AND mcd.time_start = mfdts.revision AND mfdts.delta = 0');
     $query->innerjoin('mew_field_dates_time_stop', 'mfdtsp', 'mct.event_id = mfdtsp.event_id AND mcd.time_stop = mfdtsp.revision AND mfdtsp.delta = 0');
 
+    $query->addField('mfit', 'value', 'title');
+    $query->addField('mfit', 'value', 'type');
+
     $query->addField('mftl', 'value', 'location');
     $query->addField('mftb', 'value', 'building');
     $query->addField('mftr', 'value', 'room');
@@ -4290,6 +4293,9 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
     else {
       if ($order == 'id') {
         $query->orderBy('mer.id', is_null($sort) ? 'DESC' : $sort);
+      }
+      elseif ($order == 'title') {
+        $query->orderBy('title', is_null($sort) ? 'ASC' : $sort);
       }
       elseif ($order == 'status') {
         $query->orderBy('status', is_null($sort) ? 'ASC' : $sort);

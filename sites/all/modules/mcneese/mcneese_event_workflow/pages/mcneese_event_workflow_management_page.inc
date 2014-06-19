@@ -146,7 +146,9 @@ function mcneese_event_workflow_management_page() {
         $can_review_event = mcneese_event_workflow_management_page_event_access('review', $item->id);
         $can_log_event = mcneese_event_workflow_management_page_event_access('log', $item->id);
 
-        $row['id'] = '<a href="' . $base_path . 'events/view-0/' . $item->id . '">' . $item->id . '</a>';
+        $row['id'] = $item->id;
+
+        $row['title'] = check_plain($item->title);
 
         $location_options = event_workflow_get_event_location_list_options();
         $building_options = event_workflow_get_event_building_list_options($item->location);
@@ -230,6 +232,7 @@ function mcneese_event_workflow_management_page() {
     $quick_list['caption'] = t("Most Recent Event Requests");
     $quick_list['header'] = array(
       'id' => array('field' => 'id', 'data' => "ID", 'align' => 'center'),
+      'title' => array('field' => 'title', 'data' => "Title", 'align' => 'center'),
       'location' => array('field' => 'location', 'data' => "Location", 'align' => 'center'),
       'building' => array('field' => 'building', 'data' => "Building", 'align' => 'center'),
       'room' => array('field' => 'room', 'data' => "Room", 'align' => 'center'),
