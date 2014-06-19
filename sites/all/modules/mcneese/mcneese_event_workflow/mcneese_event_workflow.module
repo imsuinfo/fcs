@@ -3962,7 +3962,7 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
 
   // load search options
   if (!is_null($search)) {
-    $fixed_text = preg_replace('/\W/i', ' ', $search);
+    $fixed_text = preg_replace('/(\s)/i', ' ', $search);
     $fixed_text = preg_replace('/\s\s*/i', ' ', $fixed_text);
 
     $search_parts = explode(' ', $fixed_text);
@@ -3985,8 +3985,26 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
       return array();
     }
 
+    // quote all except the '*' operator, but preg_quote will change '*'.
+    $preg_parts = array();
+    foreach ($search_parts as $search_key => $search_part) {
+      $preg_part_pieces = explode('*', $search_part);
+
+      if (count($preg_part_pieces) == 1) {
+        $preg_parts[$search_key] = $search_part;
+        continue;
+      }
+
+      $preg_part_pieces_fixed = array();
+      foreach ($preg_part_pieces as $preg_part_pieces_key => $preg_part_piece) {
+        $preg_part_pieces_fixed[$preg_part_pieces_key] = preg_quote($preg_part_piece, '/');
+      }
+
+      $preg_parts[$search_key] = '\b' . implode('.*', $preg_part_pieces_fixed) . '\b';
+    }
+
     $status = array();
-    foreach ($search_parts as $search_part) {
+    foreach ($preg_parts as $search_part) {
       foreach ($status_options as $key => $option) {
         if (preg_match('/' . $search_part . '/' . $s, $option)) {
           $status[$key] = $key;
@@ -3995,7 +4013,7 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
     }
 
     $steps = array();
-    foreach ($search_parts as $search_part) {
+    foreach ($preg_parts as $search_part) {
       foreach ($step_options as $key => $option) {
         if (preg_match('/' . $search_part . '/' . $s, $option)) {
           $steps[$key] = $key;
@@ -4004,7 +4022,7 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
     }
 
     $location = array();
-    foreach ($search_parts as $search_part) {
+    foreach ($preg_parts as $search_part) {
       foreach ($location_options as $key => $option) {
         if (preg_match('/' . $search_part . '/' . $s, $option)) {
           $location[$key] = $key;
@@ -4013,7 +4031,7 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
     }
 
     $building = array();
-    foreach ($search_parts as $search_part) {
+    foreach ($preg_parts as $search_part) {
       foreach ($building_options as $key => $option) {
         if (preg_match('/' . $search_part . '/' . $s, $option)) {
           $building[$key] = $key;
@@ -4022,7 +4040,7 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
     }
 
     $room = array();
-    foreach ($search_parts as $search_part) {
+    foreach ($preg_parts as $search_part) {
       foreach ($room_options as $key => $option) {
         if (preg_match('/' . $search_part . '/' . $s, $option)) {
           $room[$key] = $key;
@@ -4031,7 +4049,7 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
     }
 
     $information_type = array();
-    foreach ($search_parts as $search_part) {
+    foreach ($preg_parts as $search_part) {
       foreach ($information_type_options as $key => $option) {
         if (preg_match('/' . $search_part . '/' . $s, $option)) {
           $information_type[$key] = $key;
@@ -4219,7 +4237,22 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
       $or = db_or();
 
       foreach ($search_parts as $search_part) {
-        $or->condition('mfit.value', '%' . db_like($search_part) . '%', $like);
+        $search_part_pieces = explode('*', $search_part);
+
+        if (count($search_part_pieces) == 1) {
+          $or->condition('mfit.value', db_like($search_part), $like);
+          $or->condition('mfit.value', '%' . db_like($search_part) . '%', $like);
+          continue;
+        }
+
+        $search_part_pieces_fixed = array();
+        foreach ($preg_part_pieces as $preg_part_pieces_key => $preg_part_piece) {
+          $search_part_pieces_fixed[$preg_part_pieces_key] = db_like($preg_part_piece);
+        }
+
+        $search_part_pieces_combined = implode('%', $search_part_pieces_fixed);
+        $or->condition('mfit.value', $search_part_pieces_combined, $like);
+        $or->condition('mfit.value', '%' . $search_part_pieces_combined . '%', $like);
       }
 
       if (!empty($status)) {
