@@ -76,7 +76,7 @@ function mcneese_event_workflow_event_review_0_page($page_number = 0) {
 
   mcneese_event_workflow_include(4);
 
-  $results = mcneese_event_workflow_event_load_listing(NULL, FALSE, $page_number * $rows_per_page, $rows_per_page, $sorting, array(), 1);
+  $results = mcneese_event_workflow_event_load_listing(NULL, FALSE, $page_number * $rows_per_page, $rows_per_page, $sorting, array(), FALSE);
 
   $rows = array();
   if (!empty($results)) {

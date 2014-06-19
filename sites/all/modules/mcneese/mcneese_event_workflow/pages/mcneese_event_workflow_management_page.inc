@@ -134,7 +134,7 @@ function mcneese_event_workflow_management_page() {
 
     mcneese_event_workflow_include(4);
 
-    $results = mcneese_event_workflow_event_load_listing(NULL, FALSE, 0, $total_items, $sorting, array(), 1);
+    $results = mcneese_event_workflow_event_load_listing(NULL, FALSE, 0, $total_items, $sorting, array(), FALSE);
 
     $rows = array();
     if (!empty($results)) {
