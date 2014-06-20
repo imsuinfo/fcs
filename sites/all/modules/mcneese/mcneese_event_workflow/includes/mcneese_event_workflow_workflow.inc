@@ -1280,7 +1280,7 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
     //        only allow reserved accounts to receive e-mails
     $debug_accounts = array();
     $debug_accounts[] = 'kday@mcneese.edu';
-    $debug_accounts[] = 'collen@mcneese.edu';
+    $debug_accounts[] = 'colleen@mcneese.edu';
     $debug_accounts[] = 'gfisher@mcneese.edu';
     $debug_accounts[] = 'stan@mcneese.edu';
     $debug_accounts[] = 'gbodin@mcneese.edu';
