@@ -1283,6 +1283,8 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
     $debug_accounts[] = 'collen@mcneese.edu';
     $debug_accounts[] = 'gfisher@mcneese.edu';
     $debug_accounts[] = 'stan@mcneese.edu';
+    $debug_accounts[] = 'gbodin@mcneese.edu';
+    $debug_accounts[] = 'shogan@mcneese.edu';
 
     foreach ($email_to as $to) {
       if (!in_array($to, $debug_accounts)) {
