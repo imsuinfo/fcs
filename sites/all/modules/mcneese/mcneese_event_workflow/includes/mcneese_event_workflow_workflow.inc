@@ -1150,8 +1150,8 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
         $email_to[$venue_coordinator->mail] = $venue_coordinator->mail;
       }
 
-      // send cancellation messages to all reviewers when an event is in a review step.
-      if ($event['top']['step'][0]->value == MEW_REVIEW_STEP_REVIEW || $event['top']['step'][0]->value == MEW_REVIEW_STEP_USAGE_FEES) {
+      if ($status != MEW_EVENT_STATUS_DELETED) {
+        // send messages to all reviewers.
         foreach ($step_1_reviewers as $r) {
           $email_to[$r->email] = $r->email;
         }
@@ -1168,6 +1168,15 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
       $email_params['content'] .= $standard_content;
 
       $email_to[$event_requester->mail] = $event_requester->mail;
+
+      // send messages to all reviewers.
+      foreach ($step_1_reviewers as $r) {
+        $email_to[$r->email] = $r->email;
+      }
+
+      foreach ($step_2_reviewers as $r) {
+        $email_to[$r->email] = $r->email;
+      }
     }
     elseif ($status == MEW_EVENT_STATUS_CLOSED_REJECTED) {
       $email_params['title_suffix'] = "Denied";
@@ -1176,6 +1185,15 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
       $email_params['content'] .= $standard_content;
 
       $email_to[$event_requester->mail] = $event_requester->mail;
+
+      // send messages to all reviewers.
+      foreach ($step_1_reviewers as $r) {
+        $email_to[$r->email] = $r->email;
+      }
+
+      foreach ($step_2_reviewers as $r) {
+        $email_to[$r->email] = $r->email;
+      }
     }
     elseif ($status == MEW_EVENT_STATUS_CLOSED_UNAVAILABLE || $status == MEW_EVENT_STATUS_CLOSED_DUE_TO_LOCK) {
       $email_params['title_suffix'] = "Rejected";
