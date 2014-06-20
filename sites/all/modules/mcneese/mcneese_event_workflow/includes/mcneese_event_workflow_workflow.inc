@@ -679,7 +679,15 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
 
   if ($event_step == MEW_REVIEW_STEP_REVIEW || $event_step == MEW_REVIEW_STEP_USAGE_FEES) {
     $reviewers = mcneese_event_workflow_get_reviewers(array('mr.event_classification' => $event_classification, 'mr.review_step' => $event_step));
-    $required_reviews = count($reviewers);
+
+    $required_reviews = 0;
+    $reviewers_steps_by_classification = array();
+    foreach ($reviewers as $reviewer) {
+      if (!array_key_exists($reviewer->reviewer_classification, $reviewers_steps_by_classification)) {
+        $reviewers_steps_by_classification[$reviewer->reviewer_classification] = TRUE;
+      }
+    }
+    $required_reviews = count($reviewers_steps_by_classification);
 
     try {
       $query = db_select('mew_field_review_review', 'mfrr');
