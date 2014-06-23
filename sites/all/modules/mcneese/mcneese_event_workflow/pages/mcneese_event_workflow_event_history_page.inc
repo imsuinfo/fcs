@@ -44,21 +44,31 @@ function mcneese_event_workflow_event_history_0_form($form, &$form_state, $event
   $requester = user_access('mcneese event workflow request');
 
   $form = array();
-  $form['history'] = array(
-    '#tree' => TRUE,
-  );
-
-  $form['navigator'] = array(
+  $form['navigator_top'] = array(
     '#type' => 'container',
     '#tree' => TRUE,
     '#attributes' => array(
       'class' => array(
         'event_request-history-page-navigator',
+        'event_request-history-page-navigator-top',
       ),
     ),
   );
 
-  $output = &$form['output']['#markup'];
+  $form['history'] = array(
+    '#tree' => TRUE,
+  );
+
+  $form['navigator_bottom'] = array(
+    '#type' => 'container',
+    '#tree' => TRUE,
+    '#attributes' => array(
+      'class' => array(
+        'event_request-history-page-navigator',
+        'event_request-history-page-navigator-bottom',
+      ),
+    ),
+  );
 
   $rows_per_page = 10;
   $start_range = $page_number * $rows_per_page;
@@ -366,11 +376,11 @@ function mcneese_event_workflow_event_history_0_form($form, &$form_state, $event
       return array();
     }
 
-    $form['navigator']['markup'] = array(
+    $form['navigator_top']['markup'] = array(
       '#markup' => '',
     );
 
-    $output = &$form['navigator']['markup']['#markup'];
+    $output = &$form['navigator_top']['markup']['#markup'];
 
     if ($page_number > 0) {
       if ($page_number == 1) {
@@ -386,6 +396,8 @@ function mcneese_event_workflow_event_history_0_form($form, &$form_state, $event
       $next_page = $page_number + 1;
       $output .= '<a href="' . $base_path . 'events/history-0/' . $event_id . '/' . $next_page . '" class="event_request-history-page-choice event_request-history-page-next" title="Next Page">Next</a>';
     }
+
+    $form['navigator_bottom']['markup'] = $form['navigator_top']['markup'];
   }
   catch (Exception $ex) {
     if (class_exists('cf_error')) {
