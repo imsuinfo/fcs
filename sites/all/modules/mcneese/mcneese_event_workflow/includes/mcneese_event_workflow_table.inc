@@ -588,7 +588,7 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
       ),
     ),
     'equipment' => array(
-      'label' => 'Equipment Use',
+      'label' => 'Additional Equipment Use',
       'combined' => TRUE,
       'value_names' => array(
         'days',
@@ -651,6 +651,9 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
       'type' => array(
         'value' => 'boolean',
       ),
+      'display' => array(
+        'value' => 'when_true',
+      ),
       'group' => 'fees',
       'event_type' => array(
         'show' => TRUE,
@@ -661,6 +664,9 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
       'label' => 'Fees Waved',
       'type' => array(
         'value' => 'boolean',
+      ),
+      'display' => array(
+        'value' => 'when_true',
       ),
       'group' => 'fees',
       'event_type' => array(
@@ -676,6 +682,9 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
       'type' => array(
         'value' => 'boolean',
       ),
+      'display' => array(
+        'value' => 'when_true',
+      ),
       'group' => 'fees',
       'event_type' => array(
         'show' => TRUE,
@@ -686,6 +695,9 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
       'label' => 'Unaffiliated Insurance',
       'type' => array(
         'value' => 'boolean',
+      ),
+      'display' => array(
+        'value' => 'when_true',
       ),
       'group' => 'fees',
       'event_type' => array(

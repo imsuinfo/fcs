@@ -20,7 +20,6 @@ function mcneese_event_workflow_event_reviewers_0_page() {
   global $base_path;
   $user = cf_current_user();
 
-  $administer = user_access('mcneese event workflow administer');
   $manager = user_access('mcneese event workflow manage');
   $reviewer = user_access('mcneese event workflow review');
   $requester = user_access('mcneese event workflow request');
@@ -122,7 +121,6 @@ function mcneese_event_workflow_event_reviewers_0_form($form, &$form_state, $cla
 
   $form = array();
 
-  $administer = user_access('mcneese event workflow administer');
   $manager = user_access('mcneese event workflow manage');
   $reviewer = user_access('mcneese event workflow review');
   $requester = user_access('mcneese event workflow request');

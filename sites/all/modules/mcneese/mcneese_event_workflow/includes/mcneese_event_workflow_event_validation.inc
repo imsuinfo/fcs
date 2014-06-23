@@ -67,11 +67,6 @@ function mcneese_event_workflow_pre_validate_event_fields(&$form, &$form_state, 
   }
 
   if ($form_state['values']['form']['step'] == 'location') {
-    // when location[0] is empty, then "Unsure of which venue to choose is selected.
-    // this field is considered not-selected by drupal, so it triggers a failure for the required settings.
-    if ($location_state['location'][0] == "") {
-      $location_form['location'][0]['#required'] = FALSE;
-    }
   }
   elseif ($form_state['values']['form']['step'] == 'rooms') {
     // always enforce the venue/room coordinator.

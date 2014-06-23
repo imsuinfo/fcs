@@ -232,7 +232,7 @@ define('MEW_EVENT_STATUS_CANCELLED', 7);
 /**
  * Taxonomy TID for the review classification venue coordinator.
  */
- define('MEW_REVIEW_CLASSIFICATION_VENUE_COORDINATOR', 112);
+ #define('MEW_REVIEW_CLASSIFICATION_VENUE_COORDINATOR', 112);
 
 /**
  * E-mail address for a failsafe venue/event coordinator.
@@ -605,8 +605,8 @@ function mcneese_event_workflow_menu() {
   $items['events/history-0/%'] = array(
     'title' => "Event History",
     'description' => "Event History",
-    'page callback' => 'mcneese_event_workflow_event_history_0_page',
-    'page arguments' => array(2),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mcneese_event_workflow_event_history_0_form', 2),
     'file' => 'mcneese_event_workflow_event_history_page.inc',
     'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
     'access callback' => 'mcneese_event_workflow_management_page_event_access',
@@ -643,13 +643,12 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
     MEW_EVENT_STATUS_CANCELLED,
   );
 
-  $administer = user_access('mcneese event workflow administer');
   $manager = user_access('mcneese event workflow manage');
   $reviewer = user_access('mcneese event workflow review');
   $requester = user_access('mcneese event workflow request');
 
   if ($operation == 'create') {
-    if ($administer || $requester) {
+    if ($requester) {
       return TRUE;
     }
   }
@@ -658,7 +657,7 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
       MEW_EVENT_STATUS_UNLOCKED,
     );
 
-    if ($administer || $manager) {
+    if ($manager) {
       try {
         $query = db_select('mew_event_requests', 'mer');
 
@@ -715,10 +714,7 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
     }
   }
   elseif ($operation == 'view') {
-    if ($administer) {
-      return TRUE;
-    }
-    elseif ($manager) {
+    if ($manager) {
       try {
         $query = db_select('mew_event_requests', 'mer');
 
@@ -803,27 +799,23 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
     }
   }
   elseif ($operation == 'list') {
-    if ($administer || $requester || $reviewer || $manager) {
+    if ($requester || $reviewer || $manager) {
       return TRUE;
     }
   }
   elseif ($operation == 'search') {
-    if ($administer || $requester || $reviewer || $manager) {
+    if ($requester || $reviewer || $manager) {
       return TRUE;
     }
   }
   elseif ($operation == 'reviewers') {
-    if ($administer || $manager) {
+    if ($manager) {
       return TRUE;
     }
   }
   elseif ($operation == 'review') {
-    if ($administer) {
-      return TRUE;
-    }
-
     if (is_null($event_id)) {
-      if ($reviewer || $manager) {
+      if ($reviewer) {
         return TRUE;
       }
     }
@@ -831,8 +823,20 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
       return mcneese_event_workflow_management_page_event_reviewer_access($user, $event_id);
     }
   }
+  elseif ($operation == 'comment') {
+    // @todo: currently disabled feature. Enable if such functionality is requested.
+    return FALSE;
+
+    if ($manager) {
+      return TRUE;
+    }
+
+    if (!is_null($event_id)) {
+      return mcneese_event_workflow_management_page_event_reviewer_access($user, $event_id, TRUE);
+    }
+  }
   elseif ($operation == 'log') {
-    if ($administer || $manager) {
+    if ($manager) {
       return TRUE;
     }
 
@@ -846,13 +850,13 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
     }
   }
   elseif ($operation == 'delete') {
-    if ($administer || $manager) {
+    if ($manager) {
       return TRUE;
     }
   }
 
   elseif ($operation == 'cancel') {
-    if ($administer || $manager || $requester) {
+    if ($manager || $requester) {
       $cancellable_status_normal = array(
         MEW_EVENT_STATUS_UNLOCKED,
       );
@@ -872,7 +876,7 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
 
         $query->condition('mer.id', $event_id);
 
-        if ($requester && !($administer || $manager)) {
+        if ($requester && !$manager) {
           $query->condition('mer.user_id', $user->uid);
           $query->condition('mfts.value', $cancellable_status_normal, 'IN');
         }
@@ -893,7 +897,7 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
     }
   }
   elseif ($operation == 'uncancel') {
-    if ($administer || $manager) {
+    if ($manager) {
       $uncancellable_status = array(
         MEW_EVENT_STATUS_CANCELLED,
       );
@@ -920,6 +924,11 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
 
         return FALSE;
       }
+    }
+  }
+  elseif ($operation == 'history') {
+    if ($manager) {
+      return TRUE;
     }
   }
 
@@ -1522,39 +1531,38 @@ function mcneese_event_workflow_load_buildings($location = NULL, $building_code 
   }
 
   $where = '';
-  if (!empty($location)) {
-    // sanitize string by only allowing 'word' characters.
-    $sanitized_location = preg_replace('/\W*/i', '', $location);
+  if ($load_details) {
+    $where .= ' where mvd.category is not NULL';
 
-    if ($load_details) {
-      $where .= ' where mvd.category = \'' . $sanitized_location . '\'';
-    }
-    else {
-      $where .= ' where mvl.category = \'' . $sanitized_location . '\'';
-    }
-  }
+    if (!empty($location)) {
+      // sanitize string by only allowing 'word' characters.
+      $sanitized_location = preg_replace('/\W*/i', '', $location);
 
-  if (!empty($building_code)) {
-    // sanitize string by only allowing 'word' characters.
-    $sanitized_building_code = preg_replace('/\W*/i', '', $building_code);
-
-    if (empty($where)) {
-      $where .= ' where mvd.building_code = \'' . $sanitized_building_code . '\'';
+      $where .= ' AND mvd.category = \'' . $sanitized_location . '\'';
     }
-    else {
+
+    if (!empty($building_code)) {
+      // sanitize string by only allowing 'word' characters.
+      $sanitized_building_code = preg_replace('/\W*/i', '', $building_code);
+
       $where .= ' AND mvd.building_code = \'' . $sanitized_building_code . '\'';
     }
-  }
 
-  if (!empty($room_number)) {
-    // sanitize string by only allowing 'word' characters.
-    $sanitized_room_number = preg_replace('/\W*/i', '', $room_number);
+    if (!empty($room_number)) {
+      // sanitize string by only allowing 'word' characters.
+      $sanitized_room_number = preg_replace('/\W*/i', '', $room_number);
 
-    if (empty($where)) {
-      $where .= ' where mvd.room_number = \'' . $sanitized_room_number . '\'';
-    }
-    else {
       $where .= ' AND mvd.room_number = \'' . $sanitized_room_number . '\'';
+    }
+  }
+  else {
+    $where .= ' where mvl.category is not NULL';
+
+    if (!empty($location)) {
+      // sanitize string by only allowing 'word' characters.
+      $sanitized_location = preg_replace('/\W*/i', '', $location);
+
+      $where .= ' AND mvl.category = \'' . $sanitized_location . '\'';
     }
   }
 
@@ -2356,7 +2364,7 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
 
   $output = array();
   $empty_value = TRUE;
-  $no_value = TRUE;
+  $no_values = TRUE;
 
   foreach ($value_names as $value_name) {
     if ($combined) {
@@ -2526,6 +2534,17 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
         else {
           $markup .= 'no';
         }
+
+        if ($display[$value_name] == 'when_true') {
+          if (!$boolean) {
+            continue;
+          }
+        }
+        elseif ($display[$value_name] == 'when_false') {
+          if ($boolean) {
+            continue;
+          }
+        }
       }
       elseif ($type[$value_name] == 'use_fee_personnel') {
         $markup .= ' ' . $value->$value_name . ' personnel';
@@ -2597,11 +2616,11 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
         }
       }
 
-      $no_value = FALSE;
+      $no_values = FALSE;
     }
   }
 
-  if ($no_value) {
+  if ($no_values) {
     $output_value['#attributes']['class'][] = 'no_value';
     $output['no_values'] = TRUE;
   }
@@ -3032,6 +3051,85 @@ function event_workflow_load_event_by_timestamp($event_id, $revision, $desired_f
   return $event;
 }
 
+/**
+ * Loads the event revision number.
+ *
+ * For event themselves,
+ * Each revision number is relative to its event id.
+ * When an event is first created, its revision number is 1.
+ * Every alteration to a given event following that is an increment on that
+ * number. If the event does not exist, then the revison number is 0.
+ *
+ * For specific table fields,
+ * The revision numbers start at 0 and whether or not that field has a revision
+ * is dependent on whether the appropriate field table has a value for that
+ * revision number.
+ *
+ * @param int $event_id
+ *   The numeric event id.
+ * @param string $table_field_name
+ *   (optional) The name of a specific table to load a revision number from.
+ *
+ * @return int|bool
+ *   For events, the event revision number, 0 for event not exist, and >= 1
+ *   for existing events.
+ *
+ *   For specific table fields, the revision number is returned.
+ *
+ *   FALSE is returned on error.
+ */
+function mcneese_event_workflow_load_event_revision_number($event_id, $table_field_name = NULL) {
+  if (!cf_is_integer($event_id)) {
+    cf_error::invalid_integer('event_id');
+    return FALSE;
+  }
+
+  if (is_null($table_field_name)) {
+    try {
+      $query = db_select('mew_event_revisions', 'merv');
+      $query->addfield('merv', 'revision', 'revision');
+      $query->condition('merv.event_id', $event_id);
+      $query->orderby('merv.revision', 'DESC');
+      $query->range(0, 1);
+
+      $field = $query->execute()->fetchfield();
+
+      if ($field === FALSE) {
+        return 0;
+      }
+
+      return (int) $field;
+    }
+    catch (Exception $ex) {
+      cf_error::on_query_execution($ex);
+    }
+
+    return FALSE;
+  }
+
+  if (!is_string($table_field_name)) {
+    cf_error::invalid_string('table_field_name');
+    return FALSE;
+  }
+
+  try {
+    $query = db_select($table_field_name, 'tfn');
+    $query->fields('tfn', array('revision'));
+    $query->condition('tfn.event_id', $event_id);
+    $query->orderBy('tfn.revision', 'DESC');
+    $query->range(0, 1);
+
+    $result = $query->execute()->fetchField();
+
+    return $result;
+  }
+  catch (Exception $ex) {
+    cf_error::on_exception($ex);
+    return FALSE;
+  }
+
+  return FALSE;
+}
 
 /**
  * Loads a system user by its Banner ID.
@@ -3133,7 +3231,7 @@ function mcneese_event_workflow_build_table_structure($structure, &$structure_ta
     $event_id = $event['mer']['id'][0]->value;
     $structure_tables[$db_table]['event_id'] = $event_id;
 
-    $revision = mcneese_event_workflow_get_latest_revision($event_id, $db_table_field) + 1;
+    $revision = mcneese_event_workflow_load_event_revision_number($event_id, $db_table_field) + 1;
   }
 
   if (!isset($structure_field_tables[$db_table_field])) {
@@ -3246,49 +3344,6 @@ function mcneese_event_workflow_build_table_structure($structure, &$structure_ta
       }
     }
   }
-}
-
-/**
- * Gets the largest revision number available.
- *
- * Revisions are on a per-event, per-field basis.
- *
- * @param int $event_id
- *   The unique Event ID of the event to get the revision available.
- * @param string $table_field_name
- *   Name of the table with the appropraite revision column.
- *
- * @return int|FALSE
- *   The revision number or FALSE on failure.
- */
-function mcneese_event_workflow_get_latest_revision($event_id, $table_field_name) {
-  if (!cf_is_integer($event_id)) {
-    cf_error::invalid_integer('event_id');
-    return FALSE;
-  }
-
-  if (!is_string($table_field_name)) {
-    cf_error::invalid_string('table_field_name');
-    return FALSE;
-  }
-
-  try {
-    $query = db_select($table_field_name, 'tfn');
-    $query->fields('tfn', array('revision'));
-    $query->condition('tfn.event_id', $event_id);
-    $query->orderBy('tfn.revision', 'DESC');
-    $query->range(0, 1);
-
-    $result = $query->execute()->fetchField();
-
-    return $result;
-  }
-  catch (Exception $ex) {
-    cf_error::on_exception($ex);
-    return FALSE;
-  }
-
-  return FALSE;
 }
 
 /**
@@ -3869,6 +3924,10 @@ function mcneese_event_workflow_build_filename($event_id, $mode = 0) {
  *
  * This can be used as a very simple and straightforward search.
  *
+ * This will load a total results of $limit +1 to communicate when a given
+ * result set has more results than the limit. This should help with
+ * implementing next and previous options.
+ *
  * @param string|null $search
  *   (optional) When not NULL, this is the string of text to search for.
  * @param bool $sensitive
@@ -3928,7 +3987,6 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
 
   $user = cf_current_user();
 
-  $administer = user_access('mcneese event workflow administer');
   $manager = user_access('mcneese event workflow manage');
   $reviewer = user_access('mcneese event workflow review');
   $requester = user_access('mcneese event workflow request');
@@ -4110,9 +4168,9 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
 
     $query->fields('mer');
 
-    $query->range($start, $limit);
+    $query->range($start, $limit + 1);
 
-    if ($administer || $manager_as_administer) {
+    if ($manager_as_administer) {
       if (!$ignore_decisions) {
         $show_status = array(
           MEW_EVENT_STATUS_LOCKED,
@@ -4237,7 +4295,7 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
     }
     elseif ($requester) {
       // load all events created by the requester who is neither an admin nor a manager.
-      if (!$administer && !$manager) {
+      if (!$manager) {
         $query->condition('mer.user_id', $user->uid);
       }
     }

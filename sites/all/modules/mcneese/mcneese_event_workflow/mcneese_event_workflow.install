@@ -187,7 +187,7 @@ function mcneese_event_workflow_schema() {
       ),
       'revision' => array(
         'description' => $t("Part of the primary key for this table and represents the revision number for change tracking."),
-        'type' => 'serial',
+        'type' => 'int',
         'size' => 'big',
         'unsigned' => TRUE,
         'not null' => TRUE,

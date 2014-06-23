@@ -47,7 +47,6 @@ function mcneese_event_workflow_event_list_0_page($form, &$form_state, $page_num
   $can_log = mcneese_event_workflow_management_page_event_access('log');
   $can_review = mcneese_event_workflow_management_page_event_access('review');
 
-  $administer = user_access('mcneese event workflow administer');
   $manager = user_access('mcneese event workflow manage');
   $reviewer = user_access('mcneese event workflow review');
   $requester = user_access('mcneese event workflow request');
@@ -81,14 +80,22 @@ function mcneese_event_workflow_event_list_0_page($form, &$form_state, $page_num
   $total_results = 0;
   if (!empty($results)) {
     $total_results = count($results);
+    $rows_count = 0;
 
     foreach ($results as $item) {
       $row = array();
+      $rows_count++;
+
+      // Rows per page + 1 is loaded so that it can be detected whether or not a 'next' link needs to be provided.
+      if ($rows_count > $total_results) {
+        break;
+      }
 
       $can_view_event = mcneese_event_workflow_management_page_event_access('view', $item->id);
       $can_edit_event = mcneese_event_workflow_management_page_event_access('edit', $item->id);
       $can_review_event = mcneese_event_workflow_management_page_event_access('review', $item->id);
       $can_log_event = mcneese_event_workflow_management_page_event_access('log', $item->id);
+      $can_history_event = mcneese_event_workflow_management_page_event_access('history', $item->id);
 
       $row['id'] = $item->id;
       $row['title'] = check_plain($item->title);
@@ -98,10 +105,7 @@ function mcneese_event_workflow_event_list_0_page($form, &$form_state, $page_num
       $room_options = event_workflow_get_event_room_list_options();
 
       $location = "";
-      if (empty($item->location)) {
-        $location = "Unsure";
-      }
-      else {
+      if (!empty($item->location)) {
         if (isset($location_options[$item->location])) {
           $location = check_plain($location_options[$item->location]);
         }
@@ -160,7 +164,7 @@ function mcneese_event_workflow_event_list_0_page($form, &$form_state, $page_num
           $name .= ' (' . $submitter->name . ')';
         }
 
-        if ($administer || $manager) {
+        if ($manager) {
           $row['submitter_name'] = '<a href="' . $base_path . 'user/' . $submitter->uid . '">' . $name . '</a>';
         }
         else {
@@ -191,6 +195,10 @@ function mcneese_event_workflow_event_list_0_page($form, &$form_state, $page_num
 
       if ($can_log_event) {
         $row['operations'] .= '<a href="' . $base_path . 'events/view-0/' . $item->id . '/2" class="operation-link operation-link-log">Log</a> ';
+      }
+
+      if ($can_history_event) {
+        $row['operations'] .= '<a href="' . $base_path . 'events/history-0/' . $item->id . '" class="operation-link operation-link-history">History</a> ';
       }
 
       if ($can_delete) {
@@ -228,17 +236,17 @@ function mcneese_event_workflow_event_list_0_page($form, &$form_state, $page_num
   $output .= '<div class="event_request-listing-page-navigator no-print">';
   if ($page_number > 0) {
     if ($page_number == 1) {
-      $output .= '<a href="' . $base_path . 'events/list-0" class="event_request-listing-page-choice event_request-listing-page-previous no-print" alt="Previous Page">Prev</a>';
+      $output .= '<a href="' . $base_path . 'events/list-0" class="event_request-listing-page-choice event_request-listing-page-previous no-print" title="Previous Page">Prev</a>';
     }
     else {
       $previous_page = $page_number - 1;
-      $output .= '<a href="' . $base_path . 'events/list-0/' . $previous_page . '" class="event_request-listing-page-choice event_request-listing-page-previous no-print" alt="Previous Page">Prev</a>';
+      $output .= '<a href="' . $base_path . 'events/list-0/' . $previous_page . '" class="event_request-listing-page-choice event_request-listing-page-previous no-print" title="Previous Page">Prev</a>';
     }
   }
 
-  if ($total_results >= $rows_per_page) {
+  if ($total_results > $rows_per_page) {
     $next_page = $page_number + 1;
-    $output .= '<a href="' . $base_path . 'events/list-0/' . $next_page . '" class="event_request-listing-page-choice event_request-listing-page-next no-print" alt="Next Page">Next</a>';
+    $output .= '<a href="' . $base_path . 'events/list-0/' . $next_page . '" class="event_request-listing-page-choice event_request-listing-page-next no-print" title="Next Page">Next</a>';
   }
   $output .= '</div>';
 

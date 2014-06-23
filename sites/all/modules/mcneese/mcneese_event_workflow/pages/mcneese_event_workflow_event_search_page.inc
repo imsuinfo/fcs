@@ -33,7 +33,6 @@ function mcneese_event_workflow_event_search_0_form($form, &$form_state) {
   $can_log = mcneese_event_workflow_management_page_event_access('log');
   $can_review = mcneese_event_workflow_management_page_event_access('review');
 
-  $administer = user_access('mcneese event workflow administer');
   $manager = user_access('mcneese event workflow manage');
   $reviewer = user_access('mcneese event workflow review');
   $requester = user_access('mcneese event workflow request');
@@ -113,15 +112,23 @@ function mcneese_event_workflow_event_search_0_form($form, &$form_state) {
   if (isset($form_state['simple_search-results']) && is_array($form_state['simple_search-results'])) {
     $rows = array();
     $total_results = 0;
+    $rows_count = 0;
     if (!empty($form_state['simple_search-results'])) {
       $total_results = count($form_state['simple_search-results']);
       foreach ($form_state['simple_search-results'] as $item) {
         $row = array();
+        $rows_count++;
+
+        // Rows per page + 1 is loaded so that it can be detected whether or not a 'next' link needs to be provided.
+        if ($rows_count > $form['form']['per_page']['#value']) {
+          break;
+        }
 
         $can_view_event = mcneese_event_workflow_management_page_event_access('view', $item->id);
         $can_edit_event = mcneese_event_workflow_management_page_event_access('edit', $item->id);
         $can_review_event = mcneese_event_workflow_management_page_event_access('review', $item->id);
         $can_log_event = mcneese_event_workflow_management_page_event_access('log', $item->id);
+        $can_history_event = mcneese_event_workflow_management_page_event_access('history', $item->id);
 
         $row['id'] = $item->id;
         $row['title'] = check_plain($item->title);
@@ -131,10 +138,7 @@ function mcneese_event_workflow_event_search_0_form($form, &$form_state) {
         $room_options = event_workflow_get_event_room_list_options();
 
         $location = "";
-        if (empty($item->location)) {
-          $location = "Unsure";
-        }
-        else {
+        if (!empty($item->location)) {
           if (isset($location_options[$item->location])) {
             $location = check_plain($location_options[$item->location]);
           }
@@ -193,6 +197,10 @@ function mcneese_event_workflow_event_search_0_form($form, &$form_state) {
 
         if ($can_log_event) {
           $row['operations'] .= '<a href="' . $base_path . 'events/view-0/' . $item->id . '/2" class="operation-link operation-link-log">Log</a> ';
+        }
+
+        if ($can_history_event) {
+          $row['operations'] .= '<a href="' . $base_path . 'events/history-0/' . $item->id . '" class="operation-link operation-link-history">History</a> ';
         }
 
         if ($can_delete) {
@@ -273,7 +281,7 @@ function mcneese_event_workflow_event_search_0_form($form, &$form_state) {
       unset($form['simple']['results']['navigation']['previous']);
     }
 
-    if ($total_results < $form['form']['per_page']['#value']) {
+    if ($total_results <= $form['form']['per_page']['#value']) {
       unset($form['simple']['results']['navigation']['next']);
     }
   }

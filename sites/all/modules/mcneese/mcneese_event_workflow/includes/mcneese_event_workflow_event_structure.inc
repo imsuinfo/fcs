@@ -737,6 +737,7 @@ function mcneese_event_workflow_get_event_field_location($form, &$form_state, &$
             'form-item-delta-' . $key,
           ),
         ),
+        '#description' => 'If you are unsure of which location to choose, then please contact the administration or your adviser.',
       );
     }
     krsort($fields['location']);

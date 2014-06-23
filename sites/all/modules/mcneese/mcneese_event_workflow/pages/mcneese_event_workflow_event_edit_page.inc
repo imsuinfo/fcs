@@ -577,15 +577,22 @@ function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
 
   $user = cf_current_user();
 
-  $user_data = array();
-  $user_data['user_id'] = (int) $user->uid;
+  $user_data = array(
+    'user_id' = $user->uid,
+  );
 
-  $mew_event_requests = array();
-  $mew_event_requests['updated'] = REQUEST_TIME;
+  $mew_event_requests = array(
+    'updated' => REQUEST_TIME,
+  );
 
-  $mew_event_revisions = array();
-  $mew_event_revisions['event_id'] = $event_id;
-  $mew_event_revisions['date'] = REQUEST_TIME;
+  $event_revision = mcneese_event_workflow_load_event_revision_number($event_id);
+  $processed_mew_event_revisions = &drupal_static('processed_mew_event_revisions_' . REQUEST_TIME, FALSE);
+
+  $mew_event_revisions = array(
+    'event_id' => $event_id,
+    'date' => REQUEST_TIME,
+    'revision' => $event_revision + 1,
+  );
 
   mcneese_event_workflow_include(0);
 
@@ -662,9 +669,13 @@ function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
       $query->fields($mew_event_requests);
       $query->execute();
 
-      $query = db_insert('mew_event_revisions');
-      $query->fields($mew_event_revisions);
-      $query->execute();
+      if ($processed_mew_event_revisions) {
+        $query = db_insert('mew_event_revisions');
+        $query->fields($mew_event_revisions);
+        $query->execute();
+
+        $processed_mew_event_revisions = TRUE;
+      }
 
       foreach ($structure_field_tables as $table_name => $fields) {
         foreach ($fields as $delta => $values) {

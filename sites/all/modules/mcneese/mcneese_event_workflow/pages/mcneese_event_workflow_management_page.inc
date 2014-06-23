@@ -31,7 +31,6 @@ function mcneese_event_workflow_management_page() {
   $can_log = mcneese_event_workflow_management_page_event_access('log');
   $can_review = mcneese_event_workflow_management_page_event_access('review');
 
-  $administer = user_access('mcneese event workflow administer');
   $manager = user_access('mcneese event workflow manage');
   $reviewer = user_access('mcneese event workflow review');
   $requester = user_access('mcneese event workflow request');
@@ -85,7 +84,7 @@ function mcneese_event_workflow_management_page() {
     );
   }
 
-  if ($administer || $manager) {
+  if ($manager) {
     $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'events/reviewers-0" class="item-link">Manage Reviewers</a></h4>';
     $help = '<div class="item-description inline-block">Manage what users are allowed to approve/deny event requests by event type.</div>';
     $items_2[] = array(
@@ -137,14 +136,22 @@ function mcneese_event_workflow_management_page() {
     $results = mcneese_event_workflow_event_load_listing(NULL, FALSE, 0, $total_items, $sorting, array());
 
     $rows = array();
+    $rows_count = 0;
     if (!empty($results)) {
       foreach ($results as $item) {
         $row = array();
+        $rows_count++;
+
+        // Rows per page + 1 is loaded so that it can be detected whether or not a 'next' link needs to be provided.
+        if ($rows_count > $total_items) {
+          break;
+        }
 
         $can_view_event = mcneese_event_workflow_management_page_event_access('view', $item->id);
         $can_edit_event = mcneese_event_workflow_management_page_event_access('edit', $item->id);
         $can_review_event = mcneese_event_workflow_management_page_event_access('review', $item->id);
         $can_log_event = mcneese_event_workflow_management_page_event_access('log', $item->id);
+        $can_history_event = mcneese_event_workflow_management_page_event_access('history', $item->id);
 
         $row['id'] = $item->id;
         $row['title'] = check_plain($item->title);
@@ -154,10 +161,7 @@ function mcneese_event_workflow_management_page() {
         $room_options = event_workflow_get_event_room_list_options();
 
         $location = "";
-        if (empty($item->location)) {
-          $location = "Unsure";
-        }
-        else {
+        if (!empty($item->location)) {
           if (isset($location_options[$item->location])) {
             $location = check_plain($location_options[$item->location]);
           }
@@ -216,6 +220,10 @@ function mcneese_event_workflow_management_page() {
 
         if ($can_log_event) {
           $row['operations'] .= '<a href="' . $base_path . 'events/view-0/' . $item->id . '/2" class="operation-link operation-link-log">Log</a> ';
+        }
+
+        if ($can_history_event) {
+          $row['operations'] .= '<a href="' . $base_path . 'events/history-0/' . $item->id . '" class="operation-link operation-link-history">History</a> ';
         }
 
         if ($can_delete) {
