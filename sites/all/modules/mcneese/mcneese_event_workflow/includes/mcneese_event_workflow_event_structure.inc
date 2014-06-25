@@ -391,6 +391,7 @@ function mcneese_event_workflow_get_event_fields($form, &$form_state) {
   $information_title = mcneese_event_workflow_get_event_field_information_title($form, $form_state, $fields, $event_state, $ps);
   $information_attendance = mcneese_event_workflow_get_event_field_information_attendance($form, $form_state, $fields, $event_state, $ps);
   $information_type = mcneese_event_workflow_get_event_field_information_type($form, $form_state, $fields, $event_state, $ps);
+  $information_organization = mcneese_event_workflow_get_event_field_information_organization($form, $form_state, $fields, $event_state, $ps);
 
   $form['form']['information_type'] = array(
     '#type' => 'value',
@@ -4830,6 +4831,61 @@ function mcneese_event_workflow_get_event_field_information_type($form, &$form_s
     foreach ($values as $key => $value) {
       $fields['information']['type'][$key] = array(
         '#id' => 'field-event-information-type-' . $key,
+        '#type' => 'value',
+        '#value' => $value,
+      );
+    }
+  }
+
+  return $values;
+}
+
+/**
+ * Process and build a specific form field.
+ */
+function mcneese_event_workflow_get_event_field_information_organization($form, &$form_state, &$fields, &$event_state, $ps) {
+  $values = array(0 => NULL);
+  if (!empty($event_state['information']['organization'])) {
+    $values = $event_state['information']['organization'];
+  }
+
+  $fields['information']['organization'] = array(
+    '#id' => 'field-event-information-organization',
+    '#type' => 'container',
+    '#tree' => TRUE,
+    '#attributes' => array(
+      'class' => array(
+        'form-item-wrapper',
+      ),
+    ),
+  );
+
+  if ($form['form']['step']['#value'] == 'standard' && array_key_exists('information', $form['form']['sections']['#value'])) {
+    foreach ($values as $key => $value) {
+      $fields['information']['organization'][$key] = array(
+        '#id' => 'field-event-information-organization-' . $key,
+        '#type' => 'textfield',
+        '#title' => 'Organization / Affiliation',
+        '#default_value' => $value,
+        '#required' => TRUE,
+        '#size' => 48,
+        '#maxlength' => 255,
+        '#attributes' => array(
+          'class' => array(
+            'form-item-delta',
+            'form-item-delta-' . $key,
+          ),
+        ),
+      );
+    }
+    krsort($fields['information']['organization']);
+
+    $form_state['conditionally_required'][0][] = 'information][organization';
+  }
+  else {
+    foreach ($values as $key => $value) {
+      $fields['information']['organization'][$key] = array(
+        '#id' => 'field-event-information-organization-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );

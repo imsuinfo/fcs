@@ -125,39 +125,37 @@ function mcneese_event_workflow_event_history_0_form($form, &$form_state, $event
           $user_id = NULL;
           if (!empty($history['mer']['user_id'])) {
             $user_id = reset($history['mer']['user_id']);
+
+            if (is_object($user_id) && !empty($user_id->value) && cf_is_integer($user_id->value)) {
+              $user_id = $user_id->value;
+            }
           }
 
-          if (is_object($user_id)) {
-            $updater_name = mcneese_event_workflow_event_history_0_form_build_updater_name($user_id->value, $processed_values);
+          if (!is_null($user_id)) {
+            $updater_name = mcneese_event_workflow_event_history_0_form_build_updater_name($user_id, $processed_values);
 
-            $values_name = 'history_item-created-values';
+            $values_name = 'history_item-created-label';
             $form['history'][$fieldset_name][$values_name] = array(
-              '#id' => 'event-' . $event_id . '-history_item-created-values',
+              '#id' => 'event-' . $event_id . '-history_item-created-label',
+              '#type' => 'container',
+              '#tree' => TRUE,
+              '#attributes' => array(
+                'class' => array(
+                  'history_item-label',
+                ),
+              ),
+            );
+
+            $form['history'][$fieldset_name][$values_name] = array(
+              '#id' => $fieldset_id . '-changes_by-' . $user_id,
               '#type' => 'container',
               '#tree' => TRUE,
               '#attributes' => array(
                 'class' => array(
                   'history_item-values',
-                  'history_item-created-values',
                 ),
               ),
-            );
-
-            $value_name = 'history_item-created-value-0';
-            $form['history'][$fieldset_name][$values_name][0] = array(
-              '#id' => 'event-' . $event_id . '-history_item-created-value-0',
-              '#type' => 'container',
-              '#tree' => TRUE,
-              '#attributes' => array(
-                'class' => array(
-                  'history_item-value',
-                  'history_item-created-value',
-                ),
-              ),
-            );
-
-            $form['history'][$fieldset_name][$values_name][$value_name]['value'] = array(
-              '#markup' => '<strong class="updater_name">' . $updater_name . '</strong> has created the event.',
+              '#prefix' => '<div class="history_item-label"><strong class="updater_name">' . $updater_name . '</strong> <span class="updater_id">[id: ' . $user_id . ']</span> has created the event.</div> ',
             );
           }
         }
@@ -322,7 +320,7 @@ function mcneese_event_workflow_event_history_0_form($form, &$form_state, $event
                   'history_item-values',
                 ),
               ),
-              '#prefix' => '<div class="history_item-label"><strong class="updater_name">' . $updater_name . '</strong> has made the following changes:</div> ',
+              '#prefix' => '<div class="history_item-label"><strong class="updater_name">' . $updater_name . '</strong> <span class="updater_id">[id: ' . $user_id . ']</span> has made the following changes:</div> ',
             );
 
             $history_items = array();

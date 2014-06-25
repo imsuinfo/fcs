@@ -61,10 +61,21 @@ function mcneese_event_workflow_workflow_set_step($event_id, $step, $user = NULL
   $event_revision = mcneese_event_workflow_load_event_revision_number($event_id);
   $processed_mew_event_revisions = &drupal_static('processed_mew_event_revisions_' . REQUEST_TIME, FALSE);
 
+  if ($event_revision === FALSE) {
+    watchdog('mew', "Failed to load revision number for event %event_id.", array('%event_id' => $event_id), WATCHDOG_ERROR);
+    return FALSE;
+  }
+  elseif (is_null($event_revision)) {
+    $event_revision_next = 0;
+  }
+  else {
+    $event_revision_next = $event_revision + 1;
+  }
+
   $mew_event_revisions = array(
     'event_id' => $event_id,
     'date' => REQUEST_TIME,
-    'revision' => $event_revision + 1,
+    'revision' => $event_revision_next,
   );
 
   $step_revision = $event['current']['top']['step'] + 1;
@@ -182,10 +193,21 @@ function mcneese_event_workflow_workflow_set_status($event_id, $status, $user = 
   $event_revision = mcneese_event_workflow_load_event_revision_number($event_id);
   $processed_mew_event_revisions = &drupal_static('processed_mew_event_revisions_' . REQUEST_TIME, FALSE);
 
+  if ($event_revision === FALSE) {
+    watchdog('mew', "Failed to load revision number for event %event_id.", array('%event_id' => $event_id), WATCHDOG_ERROR);
+    return FALSE;
+  }
+  elseif (is_null($event_revision)) {
+    $event_revision_next = 0;
+  }
+  else {
+    $event_revision_next = $event_revision + 1;
+  }
+
   $mew_event_revisions = array(
     'event_id' => $event_id,
     'date' => REQUEST_TIME,
-    'revision' => $event_revision + 1,
+    'revision' => $event_revision_next,
   );
 
   $status_revision = $event['current']['top']['status'] + 1;
@@ -316,9 +338,13 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
 
   $event_classification = $event['event_coordinator']['classification'][0]->value;
   $step = $event['top']['step'][0]->value;
+  $venue_coordinator_id = $event['venue_coordinator']['user_id'][0]->value;
+
+  // review revisions are neither used nor incremented in the same manner as other fields.
+  // the revision number will not increment when a new review is made.
   $review_revision = mcneese_event_workflow_load_event_revision_number($event_id, 'mew_field_review_review');
 
-  if ($review_revision === FALSE) {
+  if ($review_revision === FALSE || is_null($review_revision)) {
     $review_revision = 0;
   }
 
@@ -333,15 +359,21 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
   $event_revision = mcneese_event_workflow_load_event_revision_number($event_id);
   $processed_mew_event_revisions = &drupal_static('processed_mew_event_revisions_' . REQUEST_TIME, FALSE);
 
+  if ($event_revision === FALSE) {
+    watchdog('mew', "Failed to load revision number for event %event_id.", array('%event_id' => $event_id), WATCHDOG_ERROR);
+    return FALSE;
+  }
+  elseif (is_null($event_revision)) {
+    $event_revision_next = 0;
+  }
+  else {
+    $event_revision_next = $event_revision + 1;
+  }
+
   $mew_event_revisions = array(
     'event_id' => $event_id,
     'date' => REQUEST_TIME,
-    'revision' => $event_revision + 1,
-  );
-
-  $mew_current_review = array(
-    'event_id' => $event_id,
-    'review' => $review_revision,
+    'revision' => $event_revision_next,
   );
 
   $mew_current_use_fees = array(
@@ -352,6 +384,7 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
     'security' => NULL,
     'other' => NULL,
     'waved' => NULL,
+    'university' => NULL,
   );
 
   if (!empty($event['current']['use_fees'])) {
@@ -377,6 +410,10 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
 
     if (array_key_exists('waved', $event['current']['use_fees']) && !is_null($event['current']['use_fees']['waved'])) {
       $mew_current_use_fees['waved'] = $event['current']['use_fees']['waved'];
+    }
+
+    if (array_key_exists('university', $event['current']['use_fees']) && !is_null($event['current']['use_fees']['university'])) {
+      $mew_current_use_fees['university'] = $event['current']['use_fees']['university'];
     }
   }
 
@@ -407,10 +444,6 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
     'message' => $message,
   );
 
-  if (!empty($event['review']['review'])) {
-    $mew_field_review_review['delta'] = count($event['review']['review']);
-  }
-
   $mew_field_use_fees = array();
   if ($step == MEW_REVIEW_STEP_VENUE_AVAILABLE && $decision == MEW_REVIEW_DECISION_USAGE_FEE) {
     $other_use_fee = 0;
@@ -434,18 +467,27 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
     );
   }
 
+  $reviewer_conditions = array(
+    'mr.user_id' => $user->uid,
+    'mr.event_classification' => $event_classification,
+    'mr.review_step' => $step,
+  );
+
+  $reviewer_classifications = array();
+  $reviewers = mcneese_event_workflow_get_reviewers($reviewer_conditions, TRUE);
+  if (!is_array($reviewers)) {
+    $reviewers = array();
+  }
+
+  foreach ($reviewers as $reviewer) {
+    $reviewer_classifications[$reviewer->reviewer_classification] = $reviewer->reviewer_classification;
+  }
+
+  if ($venue_coordinator_id == $user->uid) {
+    $reviewer_classifications[MEW_REVIEW_CLASSIFICATION_VENUE_COORDINATOR] = MEW_REVIEW_CLASSIFICATION_VENUE_COORDINATOR;
+  }
+
   if (($step == MEW_REVIEW_STEP_VENUE_AVAILABLE || $step == MEW_REVIEW_STEP_REVIEW) && $decision == MEW_REVIEW_DECISION_USAGE_FEE) {
-    $reviewer_conditions = array(
-      'mr.user_id' => $user->uid,
-      'mr.event_classification' => $event_classification,
-      'mr.review_step' => $step,
-    );
-
-    $reviewers = mcneese_event_workflow_get_reviewers($reviewer_conditions, TRUE);
-    if (!is_array($reviewers)) {
-      $reviewers = array();
-    }
-
     $uses = array();
     $insurance_fees = FALSE;
     if ($step == MEW_REVIEW_STEP_VENUE_AVAILABLE) {
@@ -525,7 +567,7 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
         $unaffiliated_insurance = $extra['insurance']['unaffiliated'];
       }
 
-      if (is_null($mew_current_use_fees[$use])) {
+      if (is_null($mew_current_insurance['contractor'])) {
         $mew_current_insurance['contractor'] = 0;
       }
       else {
@@ -540,7 +582,7 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
         'value' => $contractor_insurance,
       );
 
-      if (is_null($mew_current_use_fees[$use])) {
+      if (is_null($mew_current_insurance['unaffiliated'])) {
         $mew_current_insurance['unaffiliated'] = 0;
       }
       else {
@@ -577,6 +619,27 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
       'date' => REQUEST_TIME,
       'value' => $fees_waved,
     );
+
+    $fees_university = 0;
+    if (isset($extra['use_fees']['university'])) {
+      $fees_waved = $extra['use_fees']['university'];
+    }
+
+    if (is_null($mew_current_use_fees['university'])) {
+      $mew_current_use_fees['university'] = 0;
+    }
+    else {
+      $mew_current_use_fees['university']++;
+    }
+
+    $mew_field_use_fees['university'] = array(
+      'event_id' => $event_id,
+      'revision' => $mew_current_use_fees['university'],
+      'delta' => 0,
+      'user_id' => $user->uid,
+      'date' => REQUEST_TIME,
+      'value' => $fees_university,
+    );
   }
 
   // replace all remaining NULL values with 0.
@@ -609,12 +672,18 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
 
     $query = db_insert('mew_field_review_review');
     $query->fields($mew_field_review_review);
-    $query->execute();
+    $review_id = $query->execute();
 
-    $query = db_update('mew_current_review');
-    $query->condition('event_id', $event_id);
-    $query->fields($mew_current_review);
-    $query->execute();
+    foreach ($reviewer_classifications as $reviewer_classification) {
+      $mew_review_classifications = array(
+        'review_id' => $review_id,
+        'classification' => $reviewer_classification,
+      );
+
+      $query = db_insert('mew_review_classifications');
+      $query->fields($mew_review_classifications);
+      $query->execute();
+    }
 
     if (($step == MEW_REVIEW_STEP_VENUE_AVAILABLE || $step == MEW_REVIEW_STEP_REVIEW) && $decision == MEW_REVIEW_DECISION_USAGE_FEE) {
       foreach ($mew_field_use_fees as $use => $fields) {
@@ -646,6 +715,10 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
     elseif (($step == MEW_REVIEW_STEP_VENUE_AVAILABLE || $step == MEW_REVIEW_STEP_REVIEW) && $decision == MEW_REVIEW_DECISION_WAVE) {
       $query = db_insert('mew_field_use_fees_waved');
       $query->fields($mew_field_use_fees['waved']);
+      $query->execute();
+
+      $query = db_insert('mew_field_use_fees_university');
+      $query->fields($mew_field_use_fees['university']);
       $query->execute();
 
       $query = db_update('mew_current_use_fees');
@@ -690,7 +763,6 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
   $event_status = $event['top']['status'][0]->value;
   $event_step = $event['top']['step'][0]->value;
   $event_classification = $event['event_coordinator']['classification'][0]->value;
-  $venue_coordinator = $event['venue_coordinator']['user_id'][0]->value;
 
   if ($event_step == MEW_REVIEW_STEP_REVIEW || $event_step == MEW_REVIEW_STEP_USAGE_FEES) {
     $reviewers = mcneese_event_workflow_get_reviewers(array('mr.event_classification' => $event_classification, 'mr.review_step' => $event_step));
@@ -699,34 +771,42 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
     $reviewers_steps_by_classification = array();
     foreach ($reviewers as $reviewer) {
       if (!array_key_exists($reviewer->reviewer_classification, $reviewers_steps_by_classification)) {
-        $reviewers_steps_by_classification[$reviewer->reviewer_classification] = TRUE;
+        if ($reviewer->reviewer_classification == MEW_REVIEW_CLASSIFICATION_VENUE_COORDINATOR) {
+          continue;
+        }
+
+        $reviewers_steps_by_classification[$reviewer->reviewer_classification] = $reviewer->reviewer_classification;
       }
     }
     $required_reviews = count($reviewers_steps_by_classification);
 
+    $desired_decisions = array(
+      MEW_REVIEW_DECISION_DENY,
+      MEW_REVIEW_DECISION_APPROVE,
+    );
+
+    $total_reviews = 0;
     try {
       $query = db_select('mew_field_review_review', 'mfrr');
-      $query->innerjoin('mew_reviewers', 'mr', 'mfrr.user_id = mr.user_id');
+      $query->innerjoin('mew_review_classifications', 'mrc', 'mfrr.id = mrc.review_id');
 
-      $query->addField('mr', 'reviewer_classification', 'reviewer_classification');
+      $query->addField('mrc', 'classification', 'classification');
 
       $query->condition('mfrr.event_id', $event_id);
-      $query->condition('mfrr.revision', $event['current']['review']['review']);
-      $query->condition('mfrr.decision', array(MEW_REVIEW_DECISION_DENY, MEW_REVIEW_DECISION_APPROVE, MEW_REVIEW_DECISION_WAVE), 'IN');
+      $query->condition('mfrr.revision', $review_revision);
+      $query->condition('mfrr.decision', $desired_decisions, 'IN');
 
-      $or = db_or();
-      $or->condition('mfrr.user_id', $venue_coordinator);
-
-      $and = db_and();
-      $and->condition('mr.event_classification', $event_classification);
-      $and->condition('mr.review_step', $event_step);
-      $or->condition($and);
-
-      $query->condition($or);
+      $query->condition('mrc.classification', $reviewers_steps_by_classification, 'IN');
+      $query->distinct();
 
       $reviews = $query->execute()->fetchAll();
-
-      $total_reviews = count($reviews);
+      if ($reviews === FALSE) {
+        watchdog('mew', "Failed to load reviewer classification count for event %event_id with classification %classification on step %step. Assuming total is 0.", array('%event_id' => $event_id, '%classification' => $event_classification, '%step' => $event_step), WATCHDOG_ERROR);
+        $total_reviews = 0;
+      }
+      else {
+        $total_reviews = count($reviews);
+      }
     }
     catch (Exception $ex) {
       cf_error::on_query_execution($ex);

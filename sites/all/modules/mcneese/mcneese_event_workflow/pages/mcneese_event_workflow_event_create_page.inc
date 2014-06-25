@@ -187,7 +187,7 @@ function mcneese_event_workflow_event_create_0_form_validate($form, &$form_state
   }
 
   if (empty($form_state['values']['form']['step'])) {
-    form_set_error('form][step', "An internal error occured. Form Step is not defined. Please contact the System Administer.");
+    form_set_error('form][step', "An internal error occured. Form Step is not defined. Please contact the System Administrator.");
   }
 
   // perform validation when not going backwards or adding fields.

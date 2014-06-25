@@ -100,6 +100,10 @@ function mcneese_event_workflow_table_structure() {
       'path' => 'event][use_fees][waved',
       'manual_processing' => TRUE,
     ),
+    'university' => array(
+      'path' => 'event][use_fees][university',
+      'manual_processing' => TRUE,
+    ),
   );
 
   $structure['insurance'] = array(
@@ -161,6 +165,9 @@ function mcneese_event_workflow_table_structure() {
     ),
     'type' => array(
       'path' => 'event][information][type',
+    ),
+    'organization' => array(
+      'path' => 'event][information][organization',
     ),
   );
 
@@ -674,6 +681,20 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
         'hide' => FALSE,
       ),
     ),
+    'university' => array(
+      'label' => 'Strictly University Business',
+      'type' => array(
+        'value' => 'boolean',
+      ),
+      'display' => array(
+        'value' => 'when_true',
+      ),
+      'group' => 'fees',
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
+    ),
   );
 
   $presentation['insurance'] = array(
@@ -865,7 +886,7 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
     ),
     'attendance' => array(
       'label' => 'Expected Attendance',
-      'weight' => 6,
+      'weight' => 3,
       'event_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
@@ -877,6 +898,14 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
       'type' => array(
         'value' => 'taxonomy',
       ),
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
+    ),
+    'organization' => array(
+      'label' => 'Organization / Affiliation',
+      'weight' => 4,
       'event_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
@@ -1204,7 +1233,6 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
     ),
     'production_name' => array(
       'label' => 'Production Company or Professional Promoter Name',
-      'size' => 'large',
       'event_type' => array(
         'show' => TRUE,
         'hide' => array(57),
@@ -1212,7 +1240,6 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
     ),
     'production_email' => array(
       'label' => 'Production Company or Professional Promoter E-mail',
-      'size' => 'large',
       'event_type' => array(
         'show' => TRUE,
         'hide' => array(57),
@@ -1220,7 +1247,6 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
     ),
     'production_phone' => array(
       'label' => 'Production Company or Professional Promoter Phone',
-      'size' => 'large',
       'event_type' => array(
         'show' => TRUE,
         'hide' => array(57),

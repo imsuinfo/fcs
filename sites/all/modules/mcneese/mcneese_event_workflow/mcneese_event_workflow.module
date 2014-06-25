@@ -232,7 +232,17 @@ define('MEW_EVENT_STATUS_CANCELLED', 7);
 /**
  * Taxonomy TID for the review classification venue coordinator.
  */
- #define('MEW_REVIEW_CLASSIFICATION_VENUE_COORDINATOR', 112);
+ define('MEW_REVIEW_CLASSIFICATION_VENUE_COORDINATOR', 112);
+
+/**
+ * Taxonomy TID for the review classification manager.
+ */
+ define('MEW_REVIEW_CLASSIFICATION_SYSTEM_ADMINISTRATOR', 1);
+
+/**
+ * Taxonomy TID for the review classification manager.
+ */
+ define('MEW_REVIEW_CLASSIFICATION_MANAGER', 2);
 
 /**
  * E-mail address for a failsafe venue/event coordinator.
@@ -2169,7 +2179,7 @@ function mcneese_event_workflow_build_event_request_item_structure($event_id, $f
   }
 
   // define when label gets placed (prepend or postpend).
-  $size = 'small';
+  $size = 'auto';
   if (!empty($presentation['size'])) {
     $size = (string) $presentation['size'];
   }
@@ -2179,6 +2189,8 @@ function mcneese_event_workflow_build_event_request_item_structure($event_id, $f
   if (isset($presentation['label'])) {
     $label = $presentation['label'];
   }
+
+  $label_length = strlen($label);
 
   // define the collate to alter how the fields are displayed.
   $collate = FALSE;
@@ -2195,6 +2207,23 @@ function mcneese_event_workflow_build_event_request_item_structure($event_id, $f
 
     if ($generated !== FALSE && !isset($generated['no_values'])) {
       $id = 'field-event-' . $event_id . '-item-' . $field_group . '-' . $field_name . '-' . $delta;
+
+      if ($size == 'auto') {
+        $size = 'small';
+
+        $value_length = 0;
+        if (!empty($generated)) {
+          foreach ($generated as $key => $generated_value) {
+            if (isset($generated_value['markup']['#length'])) {
+              $value_length += $generated_value['markup']['#length'];
+            }
+          }
+        }
+
+        if ($label_length + $value_length > 50) {
+          $size = 'large';
+        }
+      }
 
       $output[$delta] = array(
         '#id' => $id,
@@ -2389,10 +2418,13 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
         }
 
         $output['value']['#attributes']['class'][] = 'item-value-type-value';
+
+        $output['value']['markup']['#length'] = 0;
       }
 
       $markup = &$output['value']['markup']['#markup'];
       $output_value = &$output['value'];
+      $length = &$output['value']['markup']['#length'];
     }
     else {
       $output[$value_name] = array(
@@ -2415,14 +2447,18 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
       }
 
       $output[$value_name]['#attributes']['class'][] = 'item-value-type-' . $type[$value_name];
+      $output['value']['markup']['#length'] = 0;
 
       $markup = &$output[$value_name]['markup']['#markup'];
       $output_value = &$output[$value_name];
+      $length = &$output['value']['markup']['#length'];
     }
 
     if (property_exists($value, $value_name) && (is_numeric($value->$value_name) || !empty($value->$value_name))) {
       if ($type[$value_name] == 'string' || $type[$value_name] == 'text') {
         $markup .= check_plain($value->$value_name);
+
+        $length += strlen($value->$value_name);
       }
       elseif ($type[$value_name] == 'timestamp') {
         if (!array_key_exists($value_name, $display)) {
@@ -2435,12 +2471,15 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
         else {
           $markup .= check_plain(date($display[$value_name], $value->$value_name));
         }
+
+        $length += strlen($value->$value_name);
       }
       elseif ($type[$value_name] == 'taxonomy') {
         $term = taxonomy_term_load($value->$value_name);
 
         if (is_object($term)) {
           $markup .= check_plain($term->name);
+          $length += strlen($term->name);
         }
 
         unset($term);
@@ -2465,9 +2504,11 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
 
           if ($display[$value_name] == 'account_name') {
             $markup .= '<a href="' . $base_path . 'user/' . $user->uid . '">' . $user_name . '</a>';
+            $length += strlen($user_name);
           }
           elseif ($display[$value_name] != 'pass' && property_exists($user, $display)) {
             $markup .= check_plain($user->$display[$value_name]);
+            $length += strlen($user->$display[$value_name]);
           }
         }
 
@@ -2480,6 +2521,7 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
 
         if (isset($status_options[$value->$value_name])) {
           $markup .= $status_options[$value->$value_name];
+          $length += strlen($value->$value_name);
         }
       }
       elseif ($type[$value_name] == 'step') {
@@ -2489,6 +2531,7 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
 
         if (isset($step_options[$value->$value_name])) {
           $markup .= $step_options[$value->$value_name];
+          $length += strlen($step_options[$value->$value_name]);
         }
       }
       elseif ($type[$value_name] == 'location') {
@@ -2498,6 +2541,7 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
 
         if (isset($location_options[$value->$value_name])) {
           $markup .= $location_options[$value->$value_name];
+          $length += strlen($location_options[$value->$value_name]);
         }
       }
       elseif ($type[$value_name] == 'building') {
@@ -2507,6 +2551,7 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
 
         if (isset($building_options[$value->$value_name])) {
           $markup .= $building_options[$value->$value_name];
+          $length += strlen($building_options[$value->$value_name]);
         }
       }
       elseif ($type[$value_name] == 'room') {
@@ -2516,13 +2561,16 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
 
         if (isset($room_options[$value->$value_name])) {
           $markup .= $room_options[$value->$value_name];
+          $length += strlen($room_options[$value->$value_name]);
         }
       }
       elseif ($type[$value_name] == 'currency') {
         $currency = event_workflow_convert_value_from_database_format($value->$value_name, 'currency');
 
         if ($currency !== FALSE) {
-          $markup .= '$' . printf('%01.2f', $currency);
+          $processed_markup = '$' . printf('%01.2f', $currency);
+          $markup .= $processed_markup;
+          $length += strlen($processed_markup);
         }
       }
       elseif ($type[$value_name] == 'boolean') {
@@ -2530,9 +2578,11 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
 
         if ($boolean) {
           $markup .= 'yes';
+          $length += 3;
         }
         else {
           $markup .= 'no';
+          $length += 2;
         }
 
         if ($display[$value_name] == 'when_true') {
@@ -2548,18 +2598,21 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
       }
       elseif ($type[$value_name] == 'use_fee_personnel') {
         $markup .= ' ' . $value->$value_name . ' personnel';
+        $length += strlen($value->$value_name . ' personnel');
       }
       elseif ($type[$value_name] == 'use_fee_hours') {
         $markup .= ' ' . $value->$value_name . ' hours';
+        $length += strlen($value->$value_name . ' hours');
       }
       elseif ($type[$value_name] == 'use_fee_days') {
         $markup .= ' ' . $value->$value_name . ' days';
+        $length += strlen($value->$value_name . 'days');
       }
       elseif ($type[$value_name] == 'use_fee_amount') {
         $amount = event_workflow_convert_value_from_database_format($value->$value_name, 'currency');
 
         if ($amount !== FALSE) {
-          $markup .= ' at $' . sprintf('%01.2f', $amount);
+          $processed_markup = ' at $' . sprintf('%01.2f', $amount);
 
           // calculate total and append from other fields that should exist.
           $total = $amount;
@@ -2576,31 +2629,41 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
             $total = $total * $value->days;
           }
 
-          $markup .= ' = $' . sprintf('%01.2f', $total);
+          $processed_markup .= ' = $' . sprintf('%01.2f', $total);
+
+          $markup .= $processed_markup;
+          $length += strlen($processed_markup);
         }
       }
       elseif ($type[$value_name] == 'venue_coordinator') {
         if ($display[$value_name] == 'name') {
+          $processed_markup = '';
+
           $first_name = FALSE;
           if (!empty($venue_coordinator->field_user_last_name['und'][0]['safe_value'])) {
             $first_name = TRUE;
-            $markup .= $venue_coordinator->field_user_last_name['und'][0]['safe_value'];
+            $processed_markup .= $venue_coordinator->field_user_last_name['und'][0]['safe_value'];
           }
 
           if (!empty($venue_coordinator->field_user_first_name['und'][0]['safe_value'])) {
             if ($first_name) {
-              $markup .=  ', ';
+              $processed_markup .=  ', ';
             }
 
-            $markup .= $venue_coordinator->field_user_first_name['und'][0]['safe_value'];
+            $processed_markup .= $venue_coordinator->field_user_first_name['und'][0]['safe_value'];
           }
+
+          $markup .= $processed_markup;
+          $length += strlen($processed_markup);
         }
         elseif ($display[$value_name] == 'email') {
           $markup .= $venue_coordinator->mail;
+          $length += strlen($venue_coordinator->mail);
         }
         elseif ($display[$value_name] == 'phone') {
           if (!empty($venue_coordinator->field_user_phone_number['und'][0]['safe_value'])) {
             $markup .= $venue_coordinator->field_user_phone_number['und'][0]['safe_value'];
+            $length += strlen($venue_coordinator->field_user_phone_number['und'][0]['safe_value']);
           }
         }
       }
@@ -3054,29 +3117,16 @@ function event_workflow_load_event_by_timestamp($event_id, $revision, $desired_f
 /**
  * Loads the event revision number.
  *
- * For event themselves,
- * Each revision number is relative to its event id.
- * When an event is first created, its revision number is 1.
- * Every alteration to a given event following that is an increment on that
- * number. If the event does not exist, then the revison number is 0.
- *
- * For specific table fields,
- * The revision numbers start at 0 and whether or not that field has a revision
- * is dependent on whether the appropriate field table has a value for that
- * revision number.
- *
  * @param int $event_id
  *   The numeric event id.
  * @param string $table_field_name
  *   (optional) The name of a specific table to load a revision number from.
+ *   When not specified, this returns the latest revision number of a given
+ *   event.
  *
  * @return int|bool
- *   For events, the event revision number, 0 for event not exist, and >= 1
- *   for existing events.
- *
- *   For specific table fields, the revision number is returned.
- *
- *   FALSE is returned on error.
+ *  FALSE is returned on error.
+ *  NULL is returned when there is no existing revision number.
  */
 function mcneese_event_workflow_load_event_revision_number($event_id, $table_field_name = NULL) {
   if (!cf_is_integer($event_id)) {
@@ -3095,10 +3145,10 @@ function mcneese_event_workflow_load_event_revision_number($event_id, $table_fie
       $field = $query->execute()->fetchfield();
 
       if ($field === FALSE) {
-        return 0;
+        return NULL;
       }
 
-      return (int) $field;
+      return $field;
     }
     catch (Exception $ex) {
       cf_error::on_query_execution($ex);
@@ -3231,7 +3281,17 @@ function mcneese_event_workflow_build_table_structure($structure, &$structure_ta
     $event_id = $event['mer']['id'][0]->value;
     $structure_tables[$db_table]['event_id'] = $event_id;
 
-    $revision = mcneese_event_workflow_load_event_revision_number($event_id, $db_table_field) + 1;
+    $revision = mcneese_event_workflow_load_event_revision_number($event_id, $db_table_field);
+    if ($revision === FALSE) {
+      watchdog('mew', "Failed to load revision number for event %event_id while building the table structure, forcing revision number to be 0.", array('%event_id' => $event_id), WATCHDOG_ERROR);
+      $revision = 0;
+    }
+    elseif (is_null($revision)) {
+      $revision = 0;
+    }
+    else {
+      $revision++;
+    }
   }
 
   if (!isset($structure_field_tables[$db_table_field])) {

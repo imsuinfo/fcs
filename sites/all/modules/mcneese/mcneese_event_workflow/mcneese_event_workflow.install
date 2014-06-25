@@ -23,7 +23,7 @@ function mcneese_event_workflow_table_install_structure() {
   );
 
   $structure['review'] = array(
-    'review' => array('user_id' => 'unsigned', 'step' => 'unsigned', 'decision' => 'unsigned', 'message' => 'text'),
+    'review' => array('id' => 'serial_pkey', 'user_id' => 'unsigned', 'step' => 'unsigned', 'decision' => 'unsigned', 'message' => 'text'),
   );
 
   $structure['use_fees'] = array(
@@ -33,6 +33,7 @@ function mcneese_event_workflow_table_install_structure() {
     'custodial' => array('quantity' => 'unsigned', 'hours' => 'unsigned', 'days' => 'unsigned', 'amount' => 'unsigned'),
     'other' => 'unsigned_tiny',
     'waved' => 'unsigned_tiny',
+    'university' => 'unsigned_tiny',
   );
 
   $structure['insurance'] = array(
@@ -61,6 +62,7 @@ function mcneese_event_workflow_table_install_structure() {
     'title' => 'varchar',
     'attendance' => 'unsigned',
     'type' => 'unsigned',
+    'organization' => 'varchar',
   );
 
   $structure['plans'] = array(
@@ -268,6 +270,35 @@ function mcneese_event_workflow_schema() {
     ),
   );
 
+  $schema['mew_review_classifications'] = array(
+    'description' => $t("McNeese Event Workflow Events field table representing a users classifications associated with a given review."),
+    'fields' => array(
+      'review_id' => array(
+        'description' => $t("Foreign key to the primary key in the {mew_field_review_review} table."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'classification' => array(
+        'description' => $t("Specific classification for a given reviewer."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'unique keys' => array(
+      'review_classification' => array('review_id', 'classification'),
+    ),
+    'foreign keys' => array(
+      'review_id' => array(
+        'table' => 'mew_field_review_review',
+        'columns' => array('review_id' => 'id'),
+      ),
+    ),
+  );
+
   $schema['mew_location_images'] = array(
     'description' => $t("McNeese Event Workflow Location Images table. For displaying an image of a given location/building/room."),
     'fields' => array(
@@ -402,6 +433,7 @@ function mcneese_event_workflow_schema() {
         $fields = array('value' => $field_type);
       }
 
+      $altering_primary_key = FALSE;
       foreach ($fields as $name => &$type) {
         if ($type == 'varchar') {
           $schema[$table_name]['fields'][$name] = array(
@@ -541,6 +573,44 @@ function mcneese_event_workflow_schema() {
             'unsigned' => TRUE,
           );
         }
+        elseif ($type == 'serial') {
+          $schema[$table_name]['fields'][$name] = array(
+            'type' => 'serial',
+            'size' => 'big',
+            'unsigned' => TRUE,
+            'not null' => TRUE,
+          );
+        }
+        elseif ($type == 'serial_ukey') {
+          $schema[$table_name]['fields'][$name] = array(
+            'type' => 'serial',
+            'size' => 'big',
+            'unsigned' => TRUE,
+            'not null' => TRUE,
+          );
+
+          if (isset($schema[$table_name]['unique keys'])) {
+            $schema[$table_name]['unique keys'] = array();
+          }
+
+          $schema[$table_name]['unique keys'][$name . '_ukey'] = array($name);
+        }
+        elseif ($type == 'serial_pkey') {
+          $schema[$table_name]['fields'][$name] = array(
+            'type' => 'serial',
+            'size' => 'big',
+            'unsigned' => TRUE,
+            'not null' => TRUE,
+          );
+
+          if (!$altering_primary_key) {
+            $schema[$table_name]['primary key'] = array($name);
+            $altering_primary_key = TRUE;
+          }
+          else {
+            $schema[$table_name]['primary key'][] = $name;
+          }
+        }
       }
     }
 
@@ -606,20 +676,22 @@ function mcneese_event_workflow_install() {
 
   $structure = mcneese_event_workflow_table_install_structure();
 
-  db_query('ALTER TABLE {mew_event_revisions} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '}(' . $table1_foreign_key . ') ON DELETE CASCADE');
-  db_query('ALTER TABLE {mew_reviewers} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '}(' . $table2_foreign_key . ') ON DELETE CASCADE');
+  db_query('ALTER TABLE {mew_event_revisions} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
+  db_query('ALTER TABLE {mew_reviewers} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE CASCADE');
 
   foreach ($structure as $structure_name => &$structure_array) {
     $table1_name = 'mew_current_' . $structure_name;
 
-    db_query('ALTER TABLE {' . $table1_name . '} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '}(' . $table1_foreign_key . ') ON DELETE CASCADE');
+    db_query('ALTER TABLE {' . $table1_name . '} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
 
     foreach ($structure_array as $field_name => &$field_type) {
       $field_table1_name = 'mew_field_' . $structure_name . '_' . $field_name;
 
-      db_query('ALTER TABLE {' . $field_table1_name . '} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '}(' . $table1_foreign_key . ') ON DELETE CASCADE');
+      db_query('ALTER TABLE {' . $field_table1_name . '} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
     }
   }
+
+  db_query('ALTER TABLE {mew_review_classifications} ADD CONSTRAINT review_fkey FOREIGN KEY (review_id) REFERENCES {mew_field_review_review} (id) ON DELETE CASCADE');
 }
 
 /**
@@ -635,11 +707,13 @@ function mcneese_event_workflow_uninstall() {
   // drupal does not pay attention to foreign key relations when dropping the database, so manually remove all manually added foreign keys.
   $key1_foreign = 'event_id_fkey';
   $key2_foreign = 'user_id_fkey';
+  $key3_foreign = 'review_fkey';
 
   $structure = mcneese_event_workflow_table_install_structure();
 
   db_query('ALTER TABLE {mew_event_revisions} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
   db_query('ALTER TABLE {mew_reviewers} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
+  db_query('ALTER TABLE {mew_review_classifications} DROP CONSTRAINT IF EXISTS ' . $key3_foreign);
 
   foreach ($structure as $structure_name => &$structure_array) {
     $table_name = 'mew_current_' . $structure_name;

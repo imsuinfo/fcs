@@ -578,7 +578,7 @@ function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
   $user = cf_current_user();
 
   $user_data = array(
-    'user_id' = $user->uid,
+    'user_id' => $user->uid,
   );
 
   $mew_event_requests = array(
@@ -588,10 +588,26 @@ function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
   $event_revision = mcneese_event_workflow_load_event_revision_number($event_id);
   $processed_mew_event_revisions = &drupal_static('processed_mew_event_revisions_' . REQUEST_TIME, FALSE);
 
+  if ($event_revision === FALSE) {
+    form_set_error('form', "An error occurred while trying to save the event request. Please contact the support staff.");
+    watchdog('mew', "Failed to load revision number for event %event_id while trying to save the event request.", array('%event_id' => $event_id), WATCHDOG_ERROR);
+
+    $form_state['rebuild'] = TRUE;
+    $form_state['redirect'] = FALSE;
+    $form_state['submitted'] = FALSE;
+    return;
+  }
+  elseif (is_null($event_revision)) {
+    $event_revision_next = 0;
+  }
+  else {
+    $event_revision_next = $event_revision + 1;
+  }
+
   $mew_event_revisions = array(
     'event_id' => $event_id,
     'date' => REQUEST_TIME,
-    'revision' => $event_revision + 1,
+    'revision' => $event_revision_next,
   );
 
   mcneese_event_workflow_include(0);
@@ -669,7 +685,7 @@ function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
       $query->fields($mew_event_requests);
       $query->execute();
 
-      if ($processed_mew_event_revisions) {
+      if (!$processed_mew_event_revisions) {
         $query = db_insert('mew_event_revisions');
         $query->fields($mew_event_revisions);
         $query->execute();
