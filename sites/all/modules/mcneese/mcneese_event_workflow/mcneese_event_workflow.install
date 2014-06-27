@@ -51,7 +51,7 @@ function mcneese_event_workflow_table_install_structure() {
     'name' => 'varchar',
     'phone' => 'varchar',
     'email' => 'varchar',
-    'classification' => 'varchar',
+    'classification' => 'unsigned',
   );
 
   $structure['venue_coordinator'] = array(

@@ -622,7 +622,7 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
 
     $fees_university = 0;
     if (isset($extra['use_fees']['university'])) {
-      $fees_waved = $extra['use_fees']['university'];
+      $fees_university = $extra['use_fees']['university'];
     }
 
     if (is_null($mew_current_use_fees['university'])) {

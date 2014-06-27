@@ -674,12 +674,11 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
         $query->innerjoin('mew_current_top', 'mct', 'mer.id = mct.event_id');
         $query->innerjoin('mew_field_top_status', 'mfts', 'mct.event_id = mfts.event_id AND mct.status = mfts.revision AND mfts.delta = 0');
 
-        $query->fields('mer', array('id'));
+        // $query->countQuery() does not appear to be functioning as expected, so manually count.
+        $query->addExpression('count(mer.id)');
 
         $query->condition('mer.id', $event_id);
         $query->condition('mfts.value', $edit_request_status, 'IN');
-
-        $query->countQuery();
 
         $result = $query->execute()->fetchField();
 
@@ -702,13 +701,12 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
         $query->innerjoin('mew_current_top', 'mct', 'mer.id = mct.event_id');
         $query->innerjoin('mew_field_top_status', 'mfts', 'mct.event_id = mfts.event_id AND mct.status = mfts.revision AND mfts.delta = 0');
 
-        $query->fields('mer', array('id'));
+        // $query->countQuery() does not appear to be functioning as expected, so manually count.
+        $query->addExpression('count(mer.id)');
 
         $query->condition('mer.id', $event_id);
         $query->condition('mer.user_id', $user->uid);
         $query->condition('mfts.value', $edit_request_status, 'IN');
-
-        $query->countQuery();
 
         $result = $query->execute()->fetchField();
 
@@ -731,12 +729,11 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
         $query->innerjoin('mew_current_top', 'mct', 'mer.id = mct.event_id');
         $query->innerjoin('mew_field_top_status', 'mfts', 'mct.event_id = mfts.event_id AND mct.status = mfts.revision AND mfts.delta = 0');
 
-        $query->fields('mer', array('id'));
+        // $query->countQuery() does not appear to be functioning as expected, so manually count.
+        $query->addExpression('count(mer.id)');
 
         $query->condition('mer.id', $event_id);
         $query->condition('mfts.value', MEW_EVENT_STATUS_DELETED, '<>');
-
-        $query->countQuery();
 
         $result = $query->execute()->fetchField();
 
@@ -762,13 +759,12 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
           $query->innerjoin('mew_current_top', 'mct', 'mer.id = mct.event_id');
           $query->innerjoin('mew_field_top_status', 'mfts', 'mct.event_id = mfts.event_id AND mct.status = mfts.revision AND mfts.delta = 0');
 
-          $query->fields('mer', array('id'));
+          // $query->countQuery() does not appear to be functioning as expected, so manually count.
+          $query->addExpression('count(mer.id)');
 
           $query->condition('mer.id', $event_id);
           $query->condition('mer.user_id', $user->uid);
           $query->condition('mfts.value', $request_status, 'IN');
-
-          $query->countQuery();
 
           $result = $query->execute()->fetchField();
 
@@ -787,13 +783,12 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
         $query->innerjoin('mew_current_top', 'mct', 'mer.id = mct.event_id');
         $query->innerjoin('mew_field_top_status', 'mfts', 'mct.event_id = mfts.event_id AND mct.status = mfts.revision AND mfts.delta = 0');
 
-        $query->fields('mer', array('id'));
+        // $query->countQuery() does not appear to be functioning as expected, so manually count.
+        $query->addExpression('count(mer.id)');
 
         $query->condition('mer.id', $event_id);
         $query->condition('mer.user_id', $user->uid);
         $query->condition('mfts.value', $request_status, 'IN');
-
-        $query->countQuery();
 
         $result = $query->execute()->fetchField();
 
@@ -882,7 +877,8 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
         $query->innerjoin('mew_current_top', 'mct', 'mer.id = mct.event_id');
         $query->innerjoin('mew_field_top_status', 'mfts', 'mct.event_id = mfts.event_id AND mct.status = mfts.revision AND mfts.delta = 0');
 
-        $query->fields('mer', array('id'));
+        // $query->countQuery() does not appear to be functioning as expected, so manually count.
+        $query->addExpression('count(mer.id)');
 
         $query->condition('mer.id', $event_id);
 
@@ -893,8 +889,6 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
         else {
           $query->condition('mfts.value', $cancellable_status_admin, 'IN');
         }
-
-        $query->countQuery();
 
         $result = $query->execute()->fetchField();
 
@@ -918,12 +912,11 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
         $query->innerjoin('mew_current_top', 'mct', 'mer.id = mct.event_id');
         $query->innerjoin('mew_field_top_status', 'mfts', 'mct.event_id = mfts.event_id AND mct.status = mfts.revision AND mfts.delta = 0');
 
-        $query->fields('mer', array('id'));
+        // $query->countQuery() does not appear to be functioning as expected, so manually count.
+        $query->addExpression('count(mer.id)');
 
         $query->condition('mer.id', $event_id);
         $query->condition('mfts.value', $uncancellable_status, 'IN');
-
-        $query->countQuery();
 
         $result = $query->execute()->fetchField();
 
@@ -985,7 +978,8 @@ function mcneese_event_workflow_management_page_event_reviewer_access($user, $ev
     $query->innerjoin('mew_field_top_status', 'mfts', 'mct.event_id = mfts.event_id AND mct.status = mfts.revision AND mfts.delta = 0');
     $query->innerjoin('mew_field_top_step', 'mftsp', 'mct.event_id = mftsp.event_id AND mct.step = mftsp.revision AND mftsp.delta = 0');
 
-    $query->addField('mer', 'id', 'id');
+    // $query->countQuery() does not appear to be functioning as expected, so manually count.
+    $query->addExpression('count(mer.id)');
 
     $query->condition('mfts.value', MEW_EVENT_STATUS_DELETED, '<>');
     $query->condition('mfts.event_id', $event_id);
@@ -1015,7 +1009,10 @@ function mcneese_event_workflow_management_page_event_reviewer_access($user, $ev
       );
 
       $review_query = db_select('mew_field_review_review', 'mfrr');
+      $review_query->innerjoin('mew_current_review', 'mcr', 'mfrr.event_id = mcr.event_id and mfrr.revision = mcr.review');
+
       $review_query->addfield('mfrr', 'step', 'step');
+
       $review_query->where('mfrr.event_id = mftsp.event_id');
       $review_query->condition('mfrr.user_id', $user->uid);
       $review_query->condition('mfrr.step', $show_step, 'IN');
@@ -1023,6 +1020,7 @@ function mcneese_event_workflow_management_page_event_reviewer_access($user, $ev
       $review_query->distinct();
 
       $and = db_and();
+      $and->condition('mfts.value', $show_status, 'IN');
       $and->condition('mftsp.value', $show_step, 'IN');
       $and->condition('mftsp.value', $review_query, 'NOT IN');
       $and->condition('mfvcui.value', $user->uid);
@@ -1032,69 +1030,78 @@ function mcneese_event_workflow_management_page_event_reviewer_access($user, $ev
       $or->condition('mfvcui.value', $user->uid);
     }
 
+    $show_status = array(
+      MEW_EVENT_STATUS_LOCKED,
+    );
+
+    $show_step = array(
+      MEW_REVIEW_STEP_REVIEW,
+      MEW_REVIEW_STEP_USAGE_FEES,
+    );
+
     if (!$ignore_decisions) {
-      $show_status = array(
-        MEW_EVENT_STATUS_LOCKED,
-      );
-
-      $show_step = array(
-        MEW_REVIEW_STEP_REVIEW,
-        MEW_REVIEW_STEP_USAGE_FEES,
-      );
-
       $show_decision = array(
         MEW_REVIEW_DECISION_APPROVE,
         MEW_REVIEW_DECISION_DENY
       );
 
-      $reviewers_query = db_select('mew_reviewers', 'mr');
-      $reviewers_query->condition('mr.user_id', $user->uid);
-      $reviewers_query->condition('mr.review_step', $show_step, 'IN');
-      $reviewers_query->addfield('mr', 'event_classification', 'event_classification');
-      $reviewers_query->addfield('mr', 'review_step', 'review_step');
-      $reviewers_query->distinct();
+      # Get all of the existing reviews
+      $review_query = db_select('mew_field_review_review', 'r_mfrr');
+      $review_query->innerjoin('mew_review_classifications', 'r_mrc', 'r_mfrr.id = r_mrc.review_id');
+      $review_query->innerjoin('mew_current_review', 'r_mcr', 'r_mfrr.event_id = r_mcr.event_id and r_mfrr.revision = r_mcr.review');
 
-      $review_query = db_select('mew_field_review_review', 'mfrr');
-      $review_query->addfield('mfrr', 'step', 'step');
-      $review_query->where('mfrr.event_id = mftsp.event_id');
-      $review_query->condition('mfrr.user_id', $user->uid);
-      $review_query->condition('mfrr.step', $show_step, 'IN');
-      $review_query->condition('mfrr.decision', $show_decision, 'IN');
+      $review_query->addfield('r_mrc', 'classification', 'classification');
+
+      $review_query->where('r_mfrr.event_id = mer.id AND r_mfrr.step = mftsp.value');
+      $review_query->condition('r_mfrr.step', $show_step, 'IN');
+      $review_query->condition('r_mfrr.decision', $show_decision, 'IN');
       $review_query->distinct();
 
-      $reviewers_results = $reviewers_query->execute()->fetchAll();
-      if (!empty($reviewers_results)) {
-        foreach ($reviewers_results as $reviewers_result) {
-          $and = db_and();
-          $and->condition('mftsp.value', $review_query, 'NOT IN');
-          $and->condition('mfts.value', $show_status, 'IN');
-          $and->condition('mfecc.value', $reviewers_result->event_classification);
-          $and->condition('mftsp.value', $reviewers_result->review_step);
-          $or->condition($and);
-        }
-      }
+      # Get the current users reviewer classifications for a given event.
+      $classifications_query = db_select('mew_reviewers', 'c_mr');
+
+      $classifications_query->addfield('c_mr', 'reviewer_classification', 'reviewer_classification');
+
+      $classifications_query->where('c_mr.event_classification = mfecc.value AND c_mr.review_step = mftsp.value');
+      $classifications_query->condition('c_mr.user_id', $user->uid);
+      $classifications_query->condition('c_mr.reviewer_classification', $review_query, 'NOT IN');
+      $classifications_query->range(0, 1);
+
+      # Check to see if the user can review.
+      # The user does not have to be the user who reviewed for a given reviewer_classification, but he must be a valid user for the event_classification and review step.
+      $can_review_query = db_select('mew_reviewers', 'c_mr_2');
+
+      $can_review_query->addfield('c_mr_2', 'user_id', 'user_id');
+
+      $can_review_query->where('c_mr_2.event_classification = mfecc.value AND c_mr_2.review_step = mftsp.value');
+      $can_review_query->condition('c_mr_2.user_id', $user->uid);
+      $can_review_query->distinct();
+
+      $and = db_and();
+      $and->condition(1, $classifications_query, 'NOT IN');
+      $and->condition($user->uid, $can_review_query, 'IN');
+      $and->condition('mfts.value', $show_status, 'IN');
+
+      $or->condition($and);
     }
     else {
-      $reviewers_query = db_select('mew_reviewers', 'mr');
-      $reviewers_query->condition('mr.user_id', $user->uid);
-      $reviewers_query->addfield('mr', 'event_classification', 'event_classification');
-      $reviewers_query->addfield('mr', 'review_step', 'review_step');
-      $reviewers_query->distinct();
+      # Check to see if the user can review.
+      $can_review_query = db_select('mew_reviewers', 'c_mr_2');
 
-      $reviewers_results = $reviewers_query->execute()->fetchAll();
-      if (!empty($reviewers_results)) {
-        foreach ($reviewers_results as $reviewers_result) {
-          $and = db_and();
-          $and->condition('mfecc.value', $reviewers_result->event_classification);
-          $and->condition('mftsp.value', $reviewers_result->review_step);
-          $or->condition($and);
-        }
-      }
+      $can_review_query->addfield('c_mr_2', 'user_id', 'user_id');
+
+      $can_review_query->where('c_mr_2.event_classification = mfecc.value AND c_mr_2.review_step = mftsp.value');
+      $can_review_query->condition('c_mr_2.user_id', $user->uid);
+      $can_review_query->distinct();
+
+      $and = db_and();
+      $and->condition('mfts.value', $show_status, 'IN');
+      $and->condition('mftsp.value', $show_step, 'IN');
+      $and->condition($user->uid, $can_review_query, 'IN');
+      $or->condition($and);
     }
 
     $query->condition($or);
-
-    $query->countQuery();
 
     $result = $query->execute()->fetchField();
 
@@ -4274,7 +4281,10 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
         );
 
         $review_query = db_select('mew_field_review_review', 'mfrr');
+        $review_query->innerjoin('mew_current_review', 'mcr', 'mfrr.event_id = mcr.event_id and mfrr.revision = mcr.review');
+
         $review_query->addfield('mfrr', 'step', 'step');
+
         $review_query->where('mfrr.event_id = mftsp.event_id');
         $review_query->condition('mfrr.user_id', $user->uid);
         $review_query->condition('mfrr.step', $show_step, 'IN');
@@ -4306,32 +4316,44 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
           MEW_REVIEW_DECISION_DENY
         );
 
-        $reviewers_query = db_select('mew_reviewers', 'mr');
-        $reviewers_query->condition('mr.user_id', $user->uid);
-        $reviewers_query->condition('mr.review_step', $show_step, 'IN');
-        $reviewers_query->addfield('mr', 'event_classification', 'event_classification');
-        $reviewers_query->addfield('mr', 'review_step', 'review_step');
-        $reviewers_query->distinct();
+        # Get all of the existing reviews
+        $review_query = db_select('mew_field_review_review', 'r_mfrr');
+        $review_query->innerjoin('mew_review_classifications', 'r_mrc', 'r_mfrr.id = r_mrc.review_id');
+        $review_query->innerjoin('mew_current_review', 'r_mcr', 'r_mfrr.event_id = r_mcr.event_id and r_mfrr.revision = r_mcr.review');
 
-        $review_query = db_select('mew_field_review_review', 'mfrr');
-        $review_query->addfield('mfrr', 'step', 'step');
-        $review_query->where('mfrr.event_id = mftsp.event_id');
-        $review_query->condition('mfrr.user_id', $user->uid);
-        $review_query->condition('mfrr.step', $show_step, 'IN');
-        $review_query->condition('mfrr.decision', $show_decision, 'IN');
+        $review_query->addfield('r_mrc', 'classification', 'classification');
+
+        $review_query->where('r_mfrr.event_id = mer.id AND r_mfrr.step = mftsp.value');
+        $review_query->condition('r_mfrr.step', $show_step, 'IN');
+        $review_query->condition('r_mfrr.decision', $show_decision, 'IN');
         $review_query->distinct();
 
-        $reviewers_results = $reviewers_query->execute()->fetchAll();
-        if (!empty($reviewers_results)) {
-          foreach ($reviewers_results as $reviewers_result) {
-            $and = db_and();
-            $and->condition('mftsp.value', $review_query, 'NOT IN');
-            $and->condition('mfts.value', $show_status, 'IN');
-            $and->condition('mfecc.value', $reviewers_result->event_classification);
-            $and->condition('mftsp.value', $reviewers_result->review_step);
-            $or->condition($and);
-          }
-        }
+        # Get all of a reviewers classifications for a given event.
+        $classifications_query = db_select('mew_reviewers', 'c_mr');
+
+        $classifications_query->addfield('c_mr', 'reviewer_classification', 'reviewer_classification');
+
+        $classifications_query->where('c_mr.event_classification = mfecc.value AND c_mr.review_step = mftsp.value');
+        $classifications_query->condition('c_mr.user_id', $user->uid);
+        $classifications_query->condition('c_mr.reviewer_classification', $review_query, 'NOT IN');
+        $classifications_query->range(0, 1);
+
+        # Check to see if the user can review.
+        # The user does not have to be the user who reviewed for a given reviewer_classification, but he must be a valid user for the event_classification and review step.
+        $can_review_query = db_select('mew_reviewers', 'c_mr_2');
+
+        $can_review_query->addfield('c_mr_2', 'user_id', 'user_id');
+
+        $can_review_query->where('c_mr_2.event_classification = mfecc.value AND c_mr_2.review_step = mftsp.value');
+        $can_review_query->condition('c_mr_2.user_id', $user->uid);
+        $can_review_query->distinct();
+
+        $and = db_and();
+        $and->condition(1, $classifications_query, 'NOT IN');
+        $and->condition($user->uid, $can_review_query, 'IN');
+        $and->condition('mfts.value', $show_status, 'IN');
+
+        $or->condition($and);
       }
       else {
         $reviewers_query = db_select('mew_reviewers', 'mr');
