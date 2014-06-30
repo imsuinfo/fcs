@@ -4867,7 +4867,7 @@ function mcneese_event_workflow_get_event_field_information_organization($form, 
         '#type' => 'textfield',
         '#title' => 'Organization / Affiliation',
         '#default_value' => $value,
-        '#required' => TRUE,
+        '#required' => FALSE,
         '#size' => 48,
         '#maxlength' => 255,
         '#attributes' => array(
@@ -4881,6 +4881,7 @@ function mcneese_event_workflow_get_event_field_information_organization($form, 
     krsort($fields['information']['organization']);
 
     $form_state['conditionally_required'][0][] = 'information][organization';
+    $form_state['conditionally_required'][2][] = 'information][organization'; // only if student organization.
   }
   else {
     foreach ($values as $key => $value) {

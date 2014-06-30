@@ -108,41 +108,34 @@ function mcneese_event_workflow_pre_validate_event_fields(&$form, &$form_state, 
     unset($coordinator);
   }
 
+  // condition 0 is for when fields are displayed, only then are they required.
   if (array_key_exists($clicked_id, $dont_validate)) {
     if (!empty($form_state['conditionally_required'][0])) {
       foreach ($form_state['conditionally_required'][0] as $field) {
         if (is_string($field)) {
-          $parts = explode('][', $field);
-
-          $found = TRUE;
-          $location = &$location_form;
-          while (!empty($parts)) {
-            $part = array_shift($parts);
-            if (!is_array($location) || !array_key_exists($part, $location)) {
-              $found = FALSE;
-              break;
-            }
-
-            $location = &$location[$part];
-          }
-
-          if ($found && !empty($location)) {
-            foreach ($location as $delta => &$location_field) {
-              if (!is_numeric($delta)) continue;
-
-              if (array_key_exists('#required', $location_field)) {
-                if (isset($location['#options'])) {
-                  $location_field['#options'][''] = '';
-                }
-                $location_field['#required'] = FALSE;
-              }
-            }
-          }
+          mcneese_event_workflow_assign_validation_requirement($field, $location_form, FALSE);
         }
       }
     }
 
     // @todo: handle conditionally_required[1] fields, which are required only when their dependant fields make them visible based on the '#state' field settings.
+  }
+
+  // condition 2 is for student events.
+  if (!empty($form_state['conditionally_required'][2])) {
+    $is_required = FALSE;
+
+    if (isset($location_state['event_coordinator']['classification']) && array_key_exists(0, $location_state['event_coordinator']['classification'])) {
+      if ($location_state['event_coordinator']['classification'][0] == MEW_EVENT_CLASSIFICATION_STUDENT) {
+        $is_required = TRUE;
+      }
+    }
+
+    foreach ($form_state['conditionally_required'][2] as $field) {
+      if (is_string($field)) {
+        mcneese_event_workflow_assign_validation_requirement($field, $location_form, $is_required);
+      }
+    }
   }
 
   return $passed;

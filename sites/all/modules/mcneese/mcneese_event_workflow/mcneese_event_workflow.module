@@ -249,6 +249,26 @@ define('MEW_EVENT_STATUS_CANCELLED', 7);
  */
  define('MEW_REVIEW_CLASSIFICATION_FAILSAFE_COORDINATOR', 'shogan@mcneese.edu');
 
+/**
+ * Taxonomy TID for the event classification.
+ */
+ define('MEW_EVENT_CLASSIFICATION_STUDENT', 1);
+
+/**
+ * Taxonomy TID for the event classification.
+ */
+ define('MEW_EVENT_CLASSIFICATION_CAMPS', 2);
+
+/**
+ * Taxonomy TID for the event classification.
+ */
+ define('MEW_EVENT_CLASSIFICATION_FACULTY', 3);
+
+/**
+ * Taxonomy TID for the event classification.
+ */
+ define('MEW_EVENT_CLASSIFICATION_EXTERNAL', 4);
+
 
 
 /**
@@ -4632,6 +4652,76 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
   }
 
   return $found;
+}
+
+/**
+ * Changes a form field's required state.
+ *
+ * @param string $field
+ *   The array path name of the field.
+ * @param array $form
+ *   The form array where the field is stored.
+ *   This will be updated.
+ * @param bool $is_required
+ *   Whether or not to change the field to required or not required.
+ *
+ * @return bool
+ *   TRUE on successfull processing, FALSE otherwise.
+ */
+function mcneese_event_workflow_assign_validation_requirement($field, &$form, $is_required) {
+  if (!is_string($field)) {
+    cf_error::invalid_string('field');
+    return FALSE;
+  }
+
+  if (!is_array($form)) {
+    cf_error::invalid_array('form');
+    return FALSE;
+  }
+
+  if (!is_bool($is_required)) {
+    cf_error::invalid_bool('is_required');
+    return FALSE;
+  }
+
+  $parts = explode('][', $field);
+
+  $found = TRUE;
+  $location = &$form;
+  while (!empty($parts)) {
+    $part = array_shift($parts);
+    if (!is_array($location) || !array_key_exists($part, $location)) {
+      $found = FALSE;
+      break;
+    }
+
+    $location = &$location[$part];
+  }
+
+  if ($found && !empty($location)) {
+    foreach ($location as $delta => &$location_field) {
+      if (!is_numeric($delta)) continue;
+
+      if (array_key_exists('#required', $location_field)) {
+        if (isset($location['#options']) && is_array($location_field['#options'])) {
+          if ($is_required) {
+            if (array_key_exists('', $location_field['#options'])) {
+              unset($location_field['#options']['']);
+            }
+          }
+          else {
+            if (!array_key_exists('', $location_field['#options'])) {
+              $location_field['#options'][''] = '';
+            }
+          }
+        }
+
+        $location_field['#required'] = $is_required;
+      }
+    }
+  }
+
+  return TRUE;
 }
 
 /**
