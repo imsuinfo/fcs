@@ -1890,8 +1890,30 @@ function mcneese_event_workflow_synchronize_user_settings($user = NULL, $roles =
     return FALSE;
   }
 
+  // a collection of user ids who should not have their roles changed.
+  $whitelist = array();
+
   // skip special-case ldapless user.
-  if ($user->uid == 8) return TRUE;
+  $whitelist[8] = 8;
+
+  // kday
+  $whitelist[6] = 6;
+
+  // gfisher
+  $whitelist[19] = 19;
+
+  // colleen
+  $whitelist[22] = 22;
+
+  // gbodin
+  $whitelist[23] = 23;
+
+  // shogan
+  $whitelist[45] = 45;
+
+  if (array_key_exists($user->uid, $whitelist)) {
+    return TRUE;
+  }
 
   $mappings = mcneese_event_workflow_load_event_user_role_mapping();
 
