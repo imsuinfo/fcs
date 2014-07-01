@@ -30,7 +30,7 @@ function event_workflow_get_event_status_list_options($option = NULL) {
   $options[MEW_EVENT_STATUS_LOCKED] = "Queued (Locked)";
   $options[MEW_EVENT_STATUS_UNLOCKED] = "Queued (Unlocked)";
   $options[MEW_EVENT_STATUS_CLOSED_ACCEPTED] = "Accepted";
-  $options[MEW_EVENT_STATUS_CLOSED_REJECTED] = "Rejected";
+  $options[MEW_EVENT_STATUS_CLOSED_DENIED] = "Denied";
   $options[MEW_EVENT_STATUS_CLOSED_UNAVAILABLE] = "Room Unavailable";
   $options[MEW_EVENT_STATUS_CLOSED_DUE_TO_LOCK] = "Room Unavailable (due to lock)";
   $options[MEW_EVENT_STATUS_CANCELLED] = "Cancelled";
@@ -466,11 +466,18 @@ function event_workflow_get_technical_equipment_details_list_options($option = N
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
+ * @param bool $include_hidden
+ *   (optional) When TRUE, will include hidden/special case classifications
+ *   that are not normally exposed through the select list options.
  *
  * @return array
  *   An array of options available.
  */
-function event_workflow_get_reviewer_classification_list_options($option = NULL) {
+function event_workflow_get_reviewer_classification_list_options($option = NULL, $include_hidden = FALSE) {
+  if (!is_bool($include_hidden)) {
+    $include_hidden = FALSE;
+  }
+
   $options = array();
 
   if ($option == 'select') {
@@ -480,6 +487,12 @@ function event_workflow_get_reviewer_classification_list_options($option = NULL)
   $options_tree = taxonomy_get_tree(MEW_VID_EVENT_REVIEWER_CLASSIFICATION, 0, NULL, TRUE);
   foreach ($options_tree as $branch) {
     $options[$branch->tid] = $branch->name;
+  }
+
+  if ($include_hidden) {
+    $options[MEW_REVIEW_CLASSIFICATION_VENUE_COORDINATOR] = "Venue Coordinator";
+    $options[MEW_REVIEW_CLASSIFICATION_SYSTEM_ADMINISTRATOR] = "System Administrator";
+    $options[MEW_REVIEW_CLASSIFICATION_MANAGER] = "Manager";
   }
 
   asort($options);

@@ -75,6 +75,8 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
   $reviewer = user_access('mcneese event workflow review');
   $requester = user_access('mcneese event workflow request');
 
+  $venue_coordinator = ($event['venue_coordinator']['user_id'][0]->value == $user->uid);
+
   $can_log_event = mcneese_event_workflow_management_page_event_access('log', $event_id);
   $can_review_event = mcneese_event_workflow_management_page_event_access('review', $event_id);
   $can_comment_event = mcneese_event_workflow_management_page_event_access('comment', $event_id);
@@ -285,6 +287,80 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
       mcneese_event_workflow_event_view_0_page_setup_group_path($form, $event_id, $field_group, $presentation_tables, $can, $event);
     }
 
+    // pre-process special case of review decisions.
+    $decision_presentation = $presentation['reviews']['decision'];
+    unset($presentation['reviews']['decision']);
+
+    $reviews = mcneese_event_workflow_get_latest_reviews($event_id, array(MEW_REVIEW_STEP_REVIEW, MEW_REVIEW_STEP_MAKE_DECISIONS), array(MEW_REVIEW_DECISION_APPROVE, MEW_REVIEW_DECISION_DENY));
+
+    if (!empty($reviews)) {
+      mcneese_event_workflow_include(4);
+
+      $classification_options = event_workflow_get_reviewer_classification_list_options(NULL, TRUE);
+      $preprocessed_decisions = array();
+
+      $reviews_step = array();
+      if (isset($reviews[MEW_REVIEW_STEP_REVIEW])) {
+        $reviews_step = $reviews[MEW_REVIEW_STEP_REVIEW];
+      }
+
+      if (!empty($reviews_step)) {
+        foreach ($reviews_step as $reviewer_classification => $reviewer_decisions) {
+          if (!isset($classification_options[$reviewer_classification])) {
+            continue;
+          }
+
+          // the last decision made is the first item and should be the only value displayed.
+          $decision = array_shift($reviewer_decisions);
+          $preprocessed_decisions[$reviewer_classification] = array(0 => $decision);
+        }
+      }
+
+      // apply alphabetical sorting to decisions.
+      $weight = 0;
+      foreach ($classification_options as $key => $name) {
+        $key_string = 'classification-' . $key;
+        if (isset($preprocessed_decisions[$key])) {
+          $presentation['reviews'][$key_string] = $decision_presentation;
+          $presentation['reviews'][$key_string]['label'] = $name;
+          $presentation['reviews'][$key_string]['weight'] = $weight;
+
+          $event['reviews'][$key_string] = $preprocessed_decisions[$key];
+          $weight++;
+        }
+      }
+
+      // display the final decision last.
+      $decision_step = array();
+      if (isset($reviews[MEW_REVIEW_STEP_MAKE_DECISIONS])) {
+        $decision_step = $reviews[MEW_REVIEW_STEP_MAKE_DECISIONS];
+      }
+
+      if (!empty($decision_step)) {
+        foreach ($decision_step as $reviewer_classification => $reviewer_decisions) {
+          if (!isset($classification_options[$reviewer_classification])) {
+            continue;
+          }
+
+          // the last decision made is the first item and should be the only value displayed.
+          $decision = array_shift($reviewer_decisions);
+
+          $key_string = 'classification-final_decision';
+          $presentation['reviews'][$key_string] = $decision_presentation;
+          $presentation['reviews'][$key_string]['label'] = "Final Decision";
+          $presentation['reviews'][$key_string]['weight'] = $weight;
+
+          $event['reviews'][$key_string] = array(0 => $decision);
+          $weight++;
+          break;
+        }
+      }
+
+      unset($classification_options);
+    }
+    unset($reviews);
+
+    // build the presentation tables.
     foreach ($event as $field_group => $event_array) {
       if (isset($presentation_tables[$field_group]['event_type']) && is_array($presentation_tables[$field_group]['event_type']) && array_key_exists('hide', $presentation_tables[$field_group]['event_type'])) {
         if ($presentation_tables[$field_group]['event_type']['hide'] === TRUE) {
@@ -782,19 +858,19 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
       elseif ($step == MEW_REVIEW_STEP_REVIEW) {
         $form['review']['operations']['instructions']['#markup'] .= "The <em>" . $step_options[$step] . "</em> step allows for the reviewers to approve or deny the request or assign usage fees. ";
         $form['review']['operations']['instructions']['#markup'] .= "When you select <em>" . $decision_options[MEW_REVIEW_DECISION_APPROVE] . "</em>, then the event request is considered to be accapted by you. ";
-        $form['review']['operations']['instructions']['#markup'] .= "When you select <em>" . $decision_options[MEW_REVIEW_DECISION_DENY] . "</em>, then the event request is considered to be rejected by you. ";
+        $form['review']['operations']['instructions']['#markup'] .= "When you select <em>" . $decision_options[MEW_REVIEW_DECISION_DENY] . "</em>, then the event request is considered to be denied by you. ";
         $form['review']['operations']['instructions']['#markup'] .= "Once all reviewers have had their say, the event will proceed to the next step. ";
       }
       elseif ($step == MEW_REVIEW_STEP_USAGE_FEES) {
         $form['review']['operations']['instructions']['#markup'] .= "The <em>" . $step_options[$step] . "</em> step allows for the reviewers to approve or deny the usage fees. ";
         $form['review']['operations']['instructions']['#markup'] .= "When you select <em>" . $decision_options[MEW_REVIEW_DECISION_APPROVE] . "</em>, then the usage fees are considered to be accapted by you. ";
-        $form['review']['operations']['instructions']['#markup'] .= "When you select <em>" . $decision_options[MEW_REVIEW_DECISION_DENY] . "</em>, then the usage fees are considered to be rejected by you. ";
+        $form['review']['operations']['instructions']['#markup'] .= "When you select <em>" . $decision_options[MEW_REVIEW_DECISION_DENY] . "</em>, then the usage fees are considered to be denied by you. ";
         $form['review']['operations']['instructions']['#markup'] .= "When you select <em>" . $decision_options[MEW_REVIEW_DECISION_WAVE] . "</em>, then the usage fees are waved (with presidents approval). ";
       }
       elseif ($step == MEW_REVIEW_STEP_MAKE_DECISIONS) {
         $form['review']['operations']['instructions']['#markup'] .= "The <em>" . $step_options[$step] . "</em> step allows for the venue coordinator to perform the final approvel or denial. ";
         $form['review']['operations']['instructions']['#markup'] .= "When you select <em>" . $decision_options[MEW_REVIEW_DECISION_APPROVE] . "</em>, then the event request is considered to be accapted. ";
-        $form['review']['operations']['instructions']['#markup'] .= "When you select <em>" . $decision_options[MEW_REVIEW_DECISION_DENY] . "</em>, then the event request is considered to be rejected. ";
+        $form['review']['operations']['instructions']['#markup'] .= "When you select <em>" . $decision_options[MEW_REVIEW_DECISION_DENY] . "</em>, then the event request is considered to be denied. ";
       }
 
       $form['review']['operations']['as_reviewer'] = array(
@@ -819,7 +895,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
 
       $reviewer_classification = array();
       if ($step == MEW_REVIEW_STEP_VENUE_AVAILABLE || $step == MEW_REVIEW_STEP_MAKE_DECISIONS) {
-        if ($event['venue_coordinator']['user_id'][0]->value == $user->uid) {
+        if ($venue_coordinator) {
           $reviewer_classification[MEW_REVIEW_CLASSIFICATION_VENUE_COORDINATOR] = "Venue Coordinator";
         }
       }
@@ -889,7 +965,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
         $uses = array();
         $insurance_fee = FALSE;
         if ($step == MEW_REVIEW_STEP_VENUE_AVAILABLE) {
-          if ($event['venue_coordinator']['user_id'][0]->value == $user->uid) {
+          if ($venue_coordinator) {
             $uses['facilities'] = "Facilities";
             $uses['equipment'] = "Additional Equipment";
           }
@@ -1043,7 +1119,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
         }
 
         if ($step == MEW_REVIEW_STEP_VENUE_AVAILABLE) {
-          if ($event['venue_coordinator']['user_id'][0]->value == $user->uid) {
+          if ($venue_coordinator) {
             $form['review']['operations']['use_fees']['other'] = array(
               '#id' => 'event-review-operations-use_fees-other',
               '#type' => 'checkbox',
@@ -2041,7 +2117,7 @@ function mcneese_event_workflow_build_reviews_log(&$form, &$form_state, $event_i
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has accepted the <strong class="review-item-label-text-row-decision">' . $review_step_options[$review_step] . '</strong>' . $reviewer_classification . '.';
       }
       elseif ($review_step == MEW_REVIEW_STEP_USAGE_FEES && $decision == MEW_REVIEW_DECISION_DENY) {
-        $markup .= $user_name_markup . ' ' . $user_id_markup . ' has rejected the <strong class="review-item-label-text-row-decision">' . $review_step_options[$review_step] . '</strong>' . $reviewer_classification . '.';
+        $markup .= $user_name_markup . ' ' . $user_id_markup . ' has denied the <strong class="review-item-label-text-row-decision">' . $review_step_options[$review_step] . '</strong>' . $reviewer_classification . '.';
       }
       else {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' chose to <strong class="review-item-label-text-row-decision">' . $decision_options[$decision] . '</strong> the event request' . $reviewer_classification . '.';

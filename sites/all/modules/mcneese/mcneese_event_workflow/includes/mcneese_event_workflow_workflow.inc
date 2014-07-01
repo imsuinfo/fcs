@@ -175,7 +175,7 @@ function mcneese_event_workflow_workflow_set_status($event_id, $status, $user = 
     MEW_EVENT_STATUS_LOCKED,
     MEW_EVENT_STATUS_UNLOCKED,
     MEW_EVENT_STATUS_CLOSED_ACCEPTED,
-    MEW_EVENT_STATUS_CLOSED_REJECTED,
+    MEW_EVENT_STATUS_CLOSED_DENIED,
     MEW_EVENT_STATUS_CLOSED_UNAVAILABLE,
     MEW_EVENT_STATUS_CLOSED_DUE_TO_LOCK,
     MEW_EVENT_STATUS_CANCELLED,
@@ -858,17 +858,51 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
       $new_step = MEW_REVIEW_STEP_MAKE_DECISIONS;
     }
   }
-  // Coordinator Review Step
+  // Venue Coordinator (Final) Review Step
   elseif ($event_step == MEW_REVIEW_STEP_MAKE_DECISIONS) {
+    $message = '';
+
     if ($decision == MEW_REVIEW_DECISION_APPROVE) {
       $new_status = MEW_EVENT_STATUS_CLOSED_ACCEPTED;
       $new_step = MEW_REVIEW_STEP_COMPLETED;
       $generate_pdf = TRUE;
     }
     elseif ($decision == MEW_REVIEW_DECISION_DENY) {
-      $new_status = MEW_EVENT_STATUS_CLOSED_REJECTED;
+      $new_status = MEW_EVENT_STATUS_CLOSED_DENIED;
       $new_step = MEW_REVIEW_STEP_COMPLETED;
       $generate_pdf = TRUE;
+    }
+
+    $reviews = mcneese_event_workflow_get_latest_reviews($event_id, array(MEW_REVIEW_STEP_REVIEW), array(MEW_REVIEW_DECISION_APPROVE, MEW_REVIEW_DECISION_DENY));
+
+    if (!empty($reviews)) {
+      mcneese_event_workflow_include(4);
+
+      $classification_options = event_workflow_get_reviewer_classification_list_options(NULL, TRUE);
+      $preprocessed_decisions = array();
+
+      $reviews_step = array();
+      if (isset($reviews[MEW_REVIEW_STEP_REVIEW])) {
+        $reviews_step = $reviews[MEW_REVIEW_STEP_REVIEW];
+      }
+
+      if (!empty($reviews_step)) {
+        foreach ($reviews_step as $reviewer_classification => $reviewer_decisions) {
+          if (!isset($classification_options[$reviewer_classification])) {
+            continue;
+          }
+
+          $most_recent_decision = array_shift($reviewer_decisions);
+          if ($most_recent_decision->decision == MEW_REVIEW_DECISION_APPROVE) {
+            $message .= "Approved";
+          }
+          else {
+            $message .= "Denied";
+          }
+
+          $message .= " - " . $classification_options[$reviewer_classification] . "\n";
+        }
+      }
     }
   }
 
@@ -1273,7 +1307,7 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
         $email_to[$r->email] = $r->email;
       }
     }
-    elseif ($status == MEW_EVENT_STATUS_CLOSED_REJECTED) {
+    elseif ($status == MEW_EVENT_STATUS_CLOSED_DENIED) {
       $email_params['title_suffix'] = "Denied";
       $email_params['content'] = "";
       $email_params['content'] .= "The event request has been denied.\n";
@@ -1291,9 +1325,9 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
       }
     }
     elseif ($status == MEW_EVENT_STATUS_CLOSED_UNAVAILABLE || $status == MEW_EVENT_STATUS_CLOSED_DUE_TO_LOCK) {
-      $email_params['title_suffix'] = "Rejected";
+      $email_params['title_suffix'] = "Denied";
       $email_params['content'] = "";
-      $email_params['content'] .= "The event request has been rejected due to the requested location not being available for the requested time slots.\n";
+      $email_params['content'] .= "The event request has been denied due to the requested location not being available for the requested time slots.\n";
       $email_params['content'] .= $standard_content;
 
       $email_to[$event_requester->mail] = $event_requester->mail;
@@ -1340,6 +1374,8 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
       $email_params['title_suffix'] = "Reviewed";
       $email_params['content'] = "";
       $email_params['content'] .= "The event request has been reviewed and is ready for conflict resolution / decision making / final review.\n";
+      $email_params['content'] .= "\n";
+      $email_params['content'] .= $message . "\n";
       $email_params['content'] .= $standard_content;
 
       if (is_object($venue_coordinator)) {

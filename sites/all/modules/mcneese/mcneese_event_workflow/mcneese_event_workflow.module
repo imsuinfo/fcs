@@ -34,9 +34,9 @@ define('MEW_EVENT_STATUS_UNLOCKED', 2);
 define('MEW_EVENT_STATUS_CLOSED_ACCEPTED', 3);
 
 /**
- * This event has been rejected, the time slots are available.
+ * This event has been denied, the time slots are available.
  */
-define('MEW_EVENT_STATUS_CLOSED_REJECTED', 4);
+define('MEW_EVENT_STATUS_CLOSED_DENIED', 4);
 
 /**
  * This event was not available for the time slots were not available when the request was made.
@@ -667,7 +667,7 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
     MEW_EVENT_STATUS_LOCKED,
     MEW_EVENT_STATUS_UNLOCKED,
     MEW_EVENT_STATUS_CLOSED_ACCEPTED,
-    MEW_EVENT_STATUS_CLOSED_REJECTED,
+    MEW_EVENT_STATUS_CLOSED_DENIED,
     MEW_EVENT_STATUS_CLOSED_UNAVAILABLE,
     MEW_EVENT_STATUS_CLOSED_UNAVAILABLE,
     MEW_EVENT_STATUS_CANCELLED,
@@ -1060,7 +1060,7 @@ function mcneese_event_workflow_management_page_event_reviewer_access($user, $ev
     $query->innerjoin('mew_field_event_coordinator_classification', 'mfecc', 'mcec.event_id = mfecc.event_id AND mcec.classification = mfecc.revision AND mfecc.delta = 0');
 
     $query->innerjoin('mew_current_venue_coordinator', 'mcvc', 'mer.id = mcvc.event_id');
-    $query->innerjoin('mew_field_venue_coordinator_user_id', 'mfvcui', 'mcec.event_id = mfvcui.event_id AND mcvc.user_id = mfvcui.revision AND mfvcui.delta = 0');
+    $query->innerjoin('mew_field_venue_coordinator_user_id', 'mfvcui', 'mcvc.event_id = mfvcui.event_id AND mcvc.user_id = mfvcui.revision AND mfvcui.delta = 0');
 
     $or = db_or();
 
@@ -2242,6 +2242,11 @@ function mcneese_event_workflow_oracle_recache_cron() {
  *   FALSE is returned on failure.
  */
 function mcneese_event_workflow_build_event_request_item_structure($event_id, $field_group, $field_name, $values, $presentation, $event) {
+  if (!cf_is_integer($event_id)) {
+    cf_error::invalid_integer('event_id');
+    return FALSE;
+  }
+
   if (!is_string($field_group)) {
     cf_error::invalid_string('field_group');
     return FALSE;
@@ -2766,6 +2771,16 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
             $markup .= $venue_coordinator->field_user_phone_number['und'][0]['safe_value'];
             $length += strlen($venue_coordinator->field_user_phone_number['und'][0]['safe_value']);
           }
+        }
+      }
+      elseif ($type[$value_name] == 'review_decision') {
+        if ($value->$value_name == MEW_REVIEW_DECISION_APPROVE) {
+          $markup .= "Approved";
+          $length += strlen("Approved");
+        }
+        elseif ($value->$value_name == MEW_REVIEW_DECISION_DENY) {
+          $markup .= "Denied";
+          $length += strlen("Denied");
         }
       }
 
@@ -4354,7 +4369,7 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
       $query->innerjoin('mew_field_event_coordinator_classification', 'mfecc', 'mcec.event_id = mfecc.event_id AND mcec.classification = mfecc.revision AND mfecc.delta = 0');
 
       $query->innerjoin('mew_current_venue_coordinator', 'mcvc', 'mer.id = mcvc.event_id');
-      $query->innerjoin('mew_field_venue_coordinator_user_id', 'mfvcui', 'mcec.event_id = mfvcui.event_id AND mcvc.user_id = mfvcui.revision AND mfvcui.delta = 0');
+      $query->innerjoin('mew_field_venue_coordinator_user_id', 'mfvcui', 'mcvc.event_id = mfvcui.event_id AND mcvc.user_id = mfvcui.revision AND mfvcui.delta = 0');
 
       $or = db_or();
 
@@ -4744,6 +4759,89 @@ function mcneese_event_workflow_assign_validation_requirement($field, &$form, $i
   }
 
   return TRUE;
+}
+
+/**
+ * Loads the reviews by step, classification, and date.
+ *
+ * @parem int $event_id
+ *   The numeric event id representing the event request to process.
+ * @parem array $steps
+ *   (optional) Limit the results to only the provided steps.
+ * @parem array $decisions
+ *   (optional) An array of decisions to limit the results to.
+ *
+ * @return array|bool
+ *   An array of reviews by order of step, classification, and then date
+ *   (with the date descending). FALSE is returned on error.
+ */
+function mcneese_event_workflow_get_latest_reviews($event_id, $steps = array(), $decisions = array()) {
+  if (!cf_is_integer($event_id)) {
+    cf_error::invalid_integer('event_id');
+    return FALSE;
+  }
+
+  if (!is_array($steps)) {
+    cf_error::invalid_array('steps');
+    return FALSE;
+  }
+
+  if (!is_array($decisions)) {
+    cf_error::invalid_array('decisions');
+    return FALSE;
+  }
+
+  $reviews = array();
+  try {
+    $query = db_select('mew_field_review_review', 'mfrr');
+
+    $query->innerjoin('mew_review_classifications', 'mrc', 'mfrr.id = mrc.review_id');
+    $query->innerjoin('mew_current_review', 'mcr', 'mfrr.event_id = mcr.event_id and mfrr.revision = mcr.review');
+
+    $query->addField('mfrr', 'id', 'id');
+    $query->addField('mfrr', 'user_id', 'user_id');
+    $query->addField('mfrr', 'date', 'date');
+    $query->addField('mfrr', 'step', 'step');
+    $query->addField('mfrr', 'decision', 'decision');
+    $query->addfield('mrc', 'classification', 'classification');
+
+    $query->condition('mfrr.event_id', $event_id);
+
+    if (!empty($steps)) {
+      $query->condition('mfrr.step', $steps, 'IN');
+    }
+
+    if (!empty($decisions)) {
+      $query->condition('mfrr.decision', $decisions, 'IN');
+    }
+
+    $query->orderBy('mfrr.step');
+    $query->orderBy('mrc.classification');
+    $query->orderBy('mfrr.date', 'DESC');
+
+    $results = $query->execute()->fetchAll();
+    if (is_array($results)) {
+      foreach ($results as $result) {
+
+        if (!isset($reviews[$result->step])) {
+          $reviews[$result->step] = array();
+        }
+
+        if (!isset($reviews[$result->step][$result->classification])) {
+          $reviews[$result->step][$result->classification] = array();
+        }
+
+        $reviews[$result->step][$result->classification][$result->id] = $result;
+      }
+    }
+  }
+  catch (Exception $ex) {
+    cf_error::on_exception($ex);
+
+    return FALSE;
+  }
+
+  return $reviews;
 }
 
 /**

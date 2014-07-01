@@ -416,17 +416,24 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
         'label' => "Services",
       );
 
-      $presentation['fees'] = array(
+      $presentation['top'] = array(
         'weight' => 1,
         'group' => 4,
+        'label' => "Miscellaneous",
+      );
+
+      $presentation['fees'] = array(
+        'weight' => 0,
+        'group' => 5,
         'label' => "Fees",
         'editable' => FALSE,
       );
 
-      $presentation['top'] = array(
-        'weight' => 0,
+      $presentation['reviews'] = array(
+        'weight' => 1,
         'group' => 5,
-        'label' => "Miscellaneous",
+        'label' => "Reviews",
+        'editable' => FALSE,
       );
     }
 
@@ -568,7 +575,7 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
     ),
     'additional' => array(
       'label' => 'Additional Information or Questions to Campus Officials',
-      'size' => 'large',
+      'size' => 'small',
       'event_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
@@ -1333,6 +1340,22 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
       'event_type' => array(
         'show' => TRUE,
         'hide' => array(57),
+      ),
+    ),
+  );
+
+  $presentation['reviews'] = array(
+    'decision' => array(
+      'label' => 'Decision',
+      'value_names' => array(
+        'decision'
+      ),
+      'type' => array(
+        'decision' => 'review_decision',
+      ),
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
       ),
     ),
   );
