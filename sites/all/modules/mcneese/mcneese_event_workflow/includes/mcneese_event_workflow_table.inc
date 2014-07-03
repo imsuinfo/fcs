@@ -23,15 +23,23 @@ function mcneese_event_workflow_table_structure() {
   $structure['top'] = array(
     'status' => array(
       'path' => 'event][status',
+      'name' => "Event Status",
+      'type' => 'event_status',
     ),
     'step' => array(
       'path' => 'event][step',
+      'name' => "Event Step",
+      'type' => 'event_step',
     ),
     'location' => array(
       'path' => 'event][location',
+      'name' => "Event Location",
+      'type' => 'event_location',
     ),
     'room' => array(
       'path' => 'event][room',
+      'name' => "Event Room",
+      'type' => 'event_room',
       'storage' => 'alternate',
       'alternate' => array(
         'building' => array(
@@ -56,12 +64,16 @@ function mcneese_event_workflow_table_structure() {
     ),
     'additional' => array(
       'path' => 'event][additional',
+      'name' => "Additional Information",
+      'type' => 'text',
     ),
   );
 
   $structure['review'] = array(
     'review' => array(
       'path' => 'event][review][review',
+      'name' => "Review Log",
+      'type' => 'review_log',
       'columns' => array('reviewer', 'step', 'decision', 'message'),
       'manual_processing' => TRUE,
     ),
@@ -70,37 +82,51 @@ function mcneese_event_workflow_table_structure() {
   $structure['use_fees'] = array(
     'facilities' => array(
       'path' => 'event][use_fees][facilities',
+      'name' => "Facilities Use Fees",
+      'type' => 'use_fees',
       'manual_processing' => TRUE,
       'columns' => array('hours', 'days', 'amount'),
       'storage' => 'currency',
     ),
     'equipment' => array(
       'path' => 'event][use_fees][equipment',
+      'name' => "Equipment Use Fees",
+      'type' => 'use_fees',
       'manual_processing' => TRUE,
       'columns' => array('hours', 'days', 'amount'),
       'storage' => 'currency',
     ),
     'custodial' => array(
       'path' => 'event][use_fees][custodial',
+      'name' => "Custodial Use Fees",
+      'type' => 'use_fees',
       'manual_processing' => TRUE,
       'columns' => array('hours', 'days', 'amount'),
       'storage' => 'currency',
     ),
     'security' => array(
       'path' => 'event][use_fees][security',
+      'name' => "Security Use Fees",
+      'type' => 'use_fees',
       'manual_processing' => TRUE,
       'columns' => array('hours', 'days', 'amount'),
       'storage' => 'currency',
     ),
     'other' => array(
+      'name' => "Other Use Fees",
       'path' => 'event][use_fees][other',
+      'type' => 'bool',
       'manual_processing' => TRUE,
     ),
     'waved' => array(
+      'name' => "Use Fees Waved (with Presidents Approval)",
       'path' => 'event][use_fees][waved',
+      'type' => 'bool',
       'manual_processing' => TRUE,
     ),
     'university' => array(
+      'name' => "University Use Fees",
+      'type' => 'bool',
       'path' => 'event][use_fees][university',
       'manual_processing' => TRUE,
     ),
@@ -109,10 +135,14 @@ function mcneese_event_workflow_table_structure() {
   $structure['insurance'] = array(
     'contractor' => array(
       'path' => 'event][insurance][contractor',
+      'name' => "Contractor Insurance",
+      'type' => 'bool',
       'manual_processing' => TRUE,
     ),
     'unaffiliated' => array(
+      'name' => "Uniffiliated Insurance",
       'path' => 'event][insurance][unaffiliated',
+      'type' => 'bool',
       'manual_processing' => TRUE,
     ),
   );
@@ -120,223 +150,350 @@ function mcneese_event_workflow_table_structure() {
   $structure['dates'] = array(
     'date' => array(
       'path' => 'event][dates][date',
+      'name' => "Date",
+      'type' => 'date',
       'storage' => 'date_popup',
       'date_popup' => array('view' => 'Y/m/d'),
+      'multiple' => TRUE,
     ),
     'time_start' => array(
       'path' => 'event][dates][time_start',
+      'name' => "Start Time",
+      'type' => 'time',
       'storage' => 'timestamp',
       'timestamp' => array('view' => 'h:ia', 'relative_to' => 'event][dates][date'),
+      'multiple' => TRUE,
     ),
     'time_stop' => array(
       'path' => 'event][dates][time_stop',
+      'name' => "Stop Time",
+      'type' => 'time',
       'storage' => 'timestamp',
       'timestamp' => array('view' => 'h:ia', 'relative_to' => 'event][dates][date'),
+      'multiple' => TRUE,
     ),
   );
 
   $structure['venue_coordinator'] = array(
     'user_id' => array(
       'path' => 'event][venue_coordinator][user_id',
+      'name' => "Venue Coordinator",
+      'type' => 'venue_coordinator',
     ),
   );
 
   $structure['event_coordinator'] = array(
     'name' => array(
       'path' => 'event][event_coordinator][name',
+      'name' => "Event Coordinator Name",
+      'type' => 'text',
     ),
     'phone' => array(
       'path' => 'event][event_coordinator][phone',
+      'name' => "Event Coordinator Phone",
+      'type' => 'text',
     ),
     'email' => array(
       'path' => 'event][event_coordinator][email',
+      'name' => "Event Coordinator E-mail",
+      'type' => 'text',
     ),
     'classification' => array(
       'path' => 'event][event_coordinator][classification',
+      'name' => "Event Coordinator Classification",
+      'type' => 'option',
     ),
   );
 
   $structure['information'] = array(
     'title' => array(
       'path' => 'event][information][title',
+      'name' => "Event Title",
+      'type' => 'text',
     ),
     'attendance' => array(
       'path' => 'event][information][attendance',
+      'name' => "Expected Attendance",
+      'type' => 'text',
     ),
     'type' => array(
       'path' => 'event][information][type',
+      'name' => "Event Type",
+      'type' => 'options',
     ),
     'organization' => array(
       'path' => 'event][information][organization',
+      'name' => "Organization / Affiliation",
+      'type' => 'text',
     ),
   );
 
   $structure['plans'] = array(
     'audience' => array(
       'path' => 'event][plans][audience',
+      'name' => "Intended Audience",
+      'type' => 'options',
     ),
     'description' => array(
       'path' => 'event][plans][description',
+      'name' => "Description / Purpose",
+      'type' => 'text',
     ),
     'activities' => array(
       'path' => 'event][plans][activities',
+      'name' => "Planned Activities",
+      'type' => 'text',
     ),
     'dates' => array(
       'path' => 'event][plans][dates',
+      'name' => "Additional Dates and Times",
+      'type' => 'text',
     ),
   );
 
   $structure['registration'] = array(
     'require' => array(
       'path' => 'event][registration][require',
+      'name' => "Registration or Ticket Purchase",
+      'type' => 'bool',
     ),
     'website' => array(
       'path' => 'event][registration][website',
+      'name' => "Registration Website",
+      'type' => 'text',
     ),
     'phone' => array(
       'path' => 'event][registration][phone',
+      'name' => "Registration Phone",
+      'type' => 'text',
     ),
     'ticket_price' => array(
       'path' => 'event][registration][ticket_price',
+      'name' => "Ticket Prices",
+      'type' => 'text',
     ),
     'ticket_dates' => array(
       'path' => 'event][registration][ticket_dates',
+      'name' => "Ticket Dates",
+      'type' => 'text',
     ),
     'ticket_website' => array(
       'path' => 'event][registration][ticket_website',
+      'name' => "Ticket Website",
+      'type' => 'text',
     ),
     'ticket_phone' => array(
       'path' => 'event][registration][ticket_phone',
+      'name' => "Ticket Phone",
+      'type' => 'text',
     ),
     'generate_revenue' => array(
       'path' => 'event][registration][generate_revenue',
+      'name' => "Generate Revenue",
+      'type' => 'text',
     ),
     'revenue_generated' => array(
       'path' => 'event][registration][revenue_generated',
       'columns' => event_workflow_get_revenue_generated_list_options('column_name'),
+      'name' => "How Revenue is Generated",
+      'type' => 'options',
     ),
   );
 
   $structure['setup'] = array(
     'rectangular_tables_8ft' => array(
       'path' => 'event][setup][rectangular_tables_8ft',
+      'name' => "8ft Rectangular Tables",
+      'type' => 'text',
     ),
     'round_tables_8ft' => array(
       'path' => 'event][setup][round_tables_8ft',
+      'name' => "8ft Round Tables",
+      'type' => 'text',
     ),
     'other_tables' => array(
       'path' => 'event][setup][other_tables',
+      'name' => "Other Tables",
+      'type' => 'text',
     ),
     'standard_blue_chairs' => array(
       'path' => 'event][setup][standard_blue_chairs',
+      'name' => "Standard Blue Chairs",
+      'type' => 'text',
     ),
     'podium' => array(
       'path' => 'event][setup][podium',
+      'name' => "Podium Needed",
+      'type' => 'bool',
     ),
     'portable_stage' => array(
       'path' => 'event][setup][portable_stage',
+      'name' => "Portable Stage Needed",
+      'type' => 'bool',
     ),
     'portable_stage_configuration' => array(
       'path' => 'event][setup][portable_stage_configuration',
+      'name' => "Portable Stage Configuration",
+      'type' => 'text',
     ),
     'security' => array(
       'path' => 'event][setup][security',
+      'name' => "Security Needed",
+      'type' => 'bool',
     ),
     'parking_assistance' => array(
       'path' => 'event][setup][parking_assistance',
+      'name' => "Parking Assistance Needed",
+      'type' => 'bool',
     ),
     'parking_assistance_area' => array(
       'path' => 'event][setup][parking_assistance_area',
+      'name' => "Parking Assistance Area",
+      'type' => 'text',
     ),
     'road_closures' => array(
       'path' => 'event][setup][road_closures',
+      'name' => "Road Closures or Barricades",
+      'type' => 'bool',
     ),
     'road_closures_details' => array(
       'path' => 'event][setup][road_closures_details',
+      'name' => "Road Closure Details",
+      'type' => 'text',
     ),
     'special_requests' => array(
       'path' => 'event][setup][special_requests',
+      'name' => "Special Requests",
+      'type' => 'bool',
     ),
     'special_requests_details' => array(
       'path' => 'event][setup][special_requests_details',
+      'name' => "Special Request Details",
+      'type' => 'text',
     ),
   );
 
   $structure['presentation'] = array(
     'technical_equipment' => array(
       'path' => 'event][presentation][technical_equipment',
+      'name' => "Need Technical Equipment",
+      'type' => 'bool',
     ),
     'technical_equipment_details' => array(
       'path' => 'event][presentation][technical_equipment_details',
       'columns' => event_workflow_get_technical_equipment_details_list_options('column_name'),
+      'name' => "Technical Equipment Details",
+      'type' => 'options',
     ),
     'technical_equipment_microphone' => array(
       'path' => 'event][presentation][technical_equipment_microphone',
+      'name' => "Quantity of Microphones",
+      'type' => 'text',
     ),
     'external_audio_person' => array(
       'path' => 'event][presentation][external_audio_person',
+      'name' => "External Audio Person/Company",
+      'type' => 'text',
     ),
     'external_audio_person_name' => array(
       'path' => 'event][presentation][external_audio_person_name',
+      'name' => "Name of Audio Person/Company",
+      'type' => 'text',
     ),
     'external_audio_person_email' => array(
       'path' => 'event][presentation][external_audio_person_email',
+      'name' => "E-Mail of Audio Person/Company",
+      'type' => 'text',
     ),
     'external_audio_person_phone' =>  array(
       'path' =>'event][presentation][external_audio_person_phone',
+      'name' => "Phone of Audio Person/Company",
+      'type' => 'text',
     ),
     'publicity' => array(
       'path' => 'event][presentation][publicity',
+      'name' => "Need Publicity",
+      'type' => 'bool',
     ),
     'publicity_details' => array(
       'path' => 'event][presentation][publicity_details',
       'columns' => event_workflow_get_publicity_details_list_options('column_name'),
+      'name' => "Publicity Details",
+      'type' => 'text',
     ),
     'production' => array(
       'path' => 'event][presentation][production',
+      'name' => "Using Production Company/Promoter",
+      'type' => 'bool',
     ),
     'production_name' => array(
       'path' => 'event][presentation][production_name',
+      'name' => "Name of Production Company/Promoter",
+      'type' => 'text',
     ),
     'production_email' => array(
       'path' => 'event][presentation][production_email',
+      'name' => "E-Mail of Production Company/Promoter",
+      'type' => 'text',
     ),
     'production_phone' => array(
       'path' => 'event][presentation][production_phone',
+      'name' => "Phone of Production Company/Promoter",
+      'type' => 'text',
     ),
     'printed_material' => array(
       'path' => 'event][presentation][printed_material',
+      'name' => "Using Printed Material",
+      'type' => 'bool',
     ),
     'university_logo' => array(
       'path' => 'event][presentation][university_logo',
+      'name' => "Using University Logo",
+      'type' => 'bool',
     ),
     'designing_material' => array(
       'path' => 'event][presentation][designing_material',
       'columns' => event_workflow_get_designing_material_list_options('column_name'),
+      'name' => "Material Designer",
+      'type' => 'options',
     ),
     'designing_material_name' => array(
       'path' => 'event][presentation][designing_material_name',
+      'name' => "Material Designer Name",
+      'type' => 'text',
     ),
     'designing_material_email' => array(
       'path' => 'event][presentation][designing_material_email',
+      'name' => "Material Designer E-Mail",
+      'type' => 'text',
     ),
     'designing_material_phone' => array(
       'path' => 'event][presentation][designing_material_phone',
+      'name' => "Material Designer Phone",
+      'type' => 'text',
     ),
   );
 
   $structure['services'] = array(
     'food_served' => array(
       'path' => 'event][services][food_served',
+      'name' => "Food Served",
+      'type' => 'bool',
     ),
     'food_caterer' => array(
       'path' => 'event][services][food_caterer',
+      'name' => "Food Caterer",
+      'type' => 'bool',
     ),
     'alcohol' => array(
       'path' => 'event][services][alcohol',
+      'name' => "Alcohol Served",
+      'type' => 'bool',
     ),
     'open_flames' => array(
       'path' => 'event][services][open_flames',
+      'name' => "Open Flames Used",
+      'type' => 'bool',
     ),
   );
 

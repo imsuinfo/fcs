@@ -277,7 +277,7 @@ function mcneese_event_workflow_event_reviewers_0_form($form, &$form_state, $cla
   $form['reviewer']['add'] = array(
     '#id' => 'submit-reviewer-add',
     '#type' => 'submit',
-    '#value' => t("Add Reviewer"),
+    '#default_value' => t("Add Reviewer"),
   );
 
   return $form;

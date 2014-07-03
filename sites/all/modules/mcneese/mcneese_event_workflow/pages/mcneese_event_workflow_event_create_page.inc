@@ -104,8 +104,9 @@ function mcneese_event_workflow_event_create_0_form($form, &$form_state) {
 
     $form['agreement']['submit'] = array(
       '#id' => 'submit-agreement',
+      '#name' => 'submit-agreement',
       '#type' => 'submit',
-      '#value' => t("Continue"),
+      '#default_value' => t("Continue"),
     );
 
     $form['event'] = array(
@@ -121,23 +122,26 @@ function mcneese_event_workflow_event_create_0_form($form, &$form_state) {
     if ($step != 'location') {
       $form['event']['prev'] = array(
         '#id' => 'submit-event-prev',
+        '#name' => 'submit-event-prev',
         '#type' => 'submit',
-        '#value' => t("Back"),
+        '#default_value' => t("Back"),
       );
     }
 
     if ($step == 'details') {
       $form['event']['submit'] = array(
         '#id' => 'submit-event-submit',
+        '#name' => 'submit-event-submit',
         '#type' => 'submit',
-        '#value' => t("Submit"),
+        '#default_value' => t("Submit"),
       );
     }
     else {
       $form['event']['next'] = array(
         '#id' => 'submit-event-next',
+        '#name' => 'submit-event-next',
         '#type' => 'submit',
-        '#value' => t("Continue"),
+        '#default_value' => t("Continue"),
       );
     }
   }

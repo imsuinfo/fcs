@@ -290,12 +290,12 @@ function mcneese_event_workflow_get_event_fields($form, &$form_state) {
     $fields['dates']['add_remove_date_buttons']['add_date'] = array(
       '#id' => 'submit-event-add-date',
       '#type' => 'submit',
-      '#value' => t("Add Date"),
+      '#default_value' => t("Add Date"),
     );
     $fields['dates']['add_remove_date_buttons']['remove_date'] = array(
       '#id' => 'submit-event-remove-date',
       '#type' => 'submit',
-      '#value' => t("Remove Date"),
+      '#default_value' => t("Remove Date"),
     );
   }
 

@@ -82,14 +82,16 @@ function mcneese_event_workflow_event_cancel_0_form($form, &$form_state, $event_
 
   $form['display']['submit']['no'] = array(
     '#id' => 'event-cancel-submit-no',
+    '#name' => 'event-cancel-submit-no',
     '#type' => 'submit',
-    '#value' => t("No"),
+    '#default_value' => t("No"),
   );
 
   $form['display']['submit']['yes'] = array(
     '#id' => 'event-cancel-submit-yes',
+    '#name' => 'event-cancel-submit-yes',
     '#type' => 'submit',
-    '#value' => t("Yes"),
+    '#default_value' => t("Yes"),
   );
 
   return $form;
@@ -252,14 +254,16 @@ function mcneese_event_workflow_event_uncancel_0_form($form, &$form_state, $even
 
   $form['display']['submit']['no'] = array(
     '#id' => 'event-uncancel-submit-no',
+    '#name' => 'event-uncancel-submit-no',
     '#type' => 'submit',
-    '#value' => t("No"),
+    '#default_value' => t("No"),
   );
 
   $form['display']['submit']['yes'] = array(
     '#id' => 'event-uncancel-submit-yes',
+    '#name' => 'event-uncancel-submit-yes',
     '#type' => 'submit',
-    '#value' => t("Yes"),
+    '#default_value' => t("Yes"),
   );
 
   return $form;

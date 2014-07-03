@@ -35,6 +35,10 @@ function event_workflow_get_event_status_list_options($option = NULL) {
   $options[MEW_EVENT_STATUS_CLOSED_DUE_TO_LOCK] = "Room Unavailable (due to lock)";
   $options[MEW_EVENT_STATUS_CANCELLED] = "Cancelled";
 
+  if ($option == 'search') {
+    unset($options[MEW_EVENT_STATUS_DELETED]);
+  }
+
   asort($options);
 
   return $options;
@@ -59,6 +63,13 @@ function event_workflow_get_event_steps_list_options($option = NULL) {
   $options_tree = taxonomy_get_tree(MEW_VID_EVENT_STEPS, 0, NULL, TRUE);
   foreach ($options_tree as $branch) {
     $options[$branch->tid] = $branch->name;
+  }
+
+  if ($option == 'search') {
+    unset($options[121]);
+    unset($options[120]);
+    unset($options[119]);
+    unset($options[118]);
   }
 
   asort($options);

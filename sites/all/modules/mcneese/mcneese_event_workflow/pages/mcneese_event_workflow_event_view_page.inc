@@ -651,8 +651,9 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
       if (mcneese_event_workflow_management_page_event_access('cancel', $event_id)) {
         $form['display']['submit']['cancel'] = array(
           '#id' => 'event-display-submit-cancel',
+          '#name' => 'event-display-submit-cancel',
           '#type' => 'submit',
-          '#value' => t("Cancel"),
+          '#default_value' => t("Cancel"),
           '#attributes' => array(
             'class' => array(
               'no-print',
@@ -668,8 +669,9 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
       elseif (mcneese_event_workflow_management_page_event_access('uncancel', $event_id)) {
         $form['display']['submit']['uncancel'] = array(
           '#id' => 'event-display-submit-uncancel',
+          '#name' => 'event-display-submit-uncancel',
           '#type' => 'submit',
-          '#value' => t("Uncancel"),
+          '#default_value' => t("Uncancel"),
           '#attributes' => array(
             'class' => array(
               'no-print',
@@ -685,8 +687,9 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
 
       $form['display']['submit']['print'] = array(
         '#id' => 'event-display-submit-print',
+        '#name' => 'event-display-submit-print',
         '#type' => 'submit',
-        '#value' => t("Print"),
+        '#default_value' => t("Print"),
         '#attributes' => array(
           'class' => array(
             'no-print',
@@ -699,8 +702,9 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
 
       $form['display']['submit']['download'] = array(
         '#id' => 'event-display-submit-download',
+        '#name' => 'event-display-submit-download',
         '#type' => 'submit',
-        '#value' => t("Download"),
+        '#default_value' => t("Download"),
         '#attributes' => array(
           'class' => array(
             'no-print',
@@ -788,8 +792,9 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
 
       $form['review']['log']['submit']['print'] = array(
         '#id' => 'event-review-log-submit-print',
+        '#name' => 'event-review-log-submit-print',
         '#type' => 'submit',
-        '#value' => t("Print"),
+        '#default_value' => t("Print"),
         '#attributes' => array(
           'class' => array(
             'no-print',
@@ -802,8 +807,9 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
 
       $form['review']['log']['submit']['download'] = array(
         '#id' => 'event-review-log-submit-download',
+        '#name' => 'event-review-log-submit-download',
         '#type' => 'submit',
-        '#value' => t("Download"),
+        '#default_value' => t("Download"),
         '#attributes' => array(
           'class' => array(
             'no-print',
@@ -1273,8 +1279,9 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
 
       $form['review']['operations']['submit']['submit'] = array(
         '#id' => 'event-review-operations-submit-submit',
+        '#name' => 'event-review-operations-submit-submit',
         '#type' => 'submit',
-        '#value' => t("Submit"),
+        '#default_value' => t("Submit"),
         '#attributes' => array(
           'class' => array(
             'no-print',

@@ -656,12 +656,16 @@ function mcneese_event_workflow_menu() {
  * @param int $event_id
  *   (optional) When specified, performs access check based the provided id.
  *   Some operations require this to return TRUE under certain circumstances.
+ * @param object $user
+ *   (optional) The user object to obtain access for.
  *
  * @param bool
  *   TRUE on access granted, FALSE otherwise.
  */
-function mcneese_event_workflow_management_page_event_access($operation = NULL, $event_id = NULL) {
-  global $user;
+function mcneese_event_workflow_management_page_event_access($operation = NULL, $event_id = NULL, $user = NULL) {
+  if (is_null($user) || !is_object($user)) {
+    $user = cf_current_user();
+  }
 
   $request_status = array(
     MEW_EVENT_STATUS_LOCKED,
@@ -4104,8 +4108,9 @@ function mcneese_event_workflow_build_filename($event_id, $mode = 0) {
  * result set has more results than the limit. This should help with
  * implementing next and previous options.
  *
- * @param string|null $search
- *   (optional) When not NULL, this is the string of text to search for.
+ * @param string|null|array $search
+ *   (optional) When not NULL, this is either the string of text to search for.
+ *   or an array of possible
  * @param bool $sensitive
  *   (optional) TRUE for case sensitive and FALSE otherwise.
  * @param int $start
@@ -4126,9 +4131,13 @@ function mcneese_event_workflow_build_filename($event_id, $mode = 0) {
  *   An array of all items found or FALSE on error.
  */
 function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = FALSE, $start = 0, $limit = 20, $sorting = array(), $filter = array(), $ignore_decisions = TRUE) {
-  if (!is_null($search) && !is_string($search)) {
+  if (!is_null($search) && !is_string($search) && !is_array($search)) {
     cf_error::invalid_string('search');
     return FALSE;
+  }
+
+  if (is_array($search) && empty($search)) {
+    $search = NULL;
   }
 
   if (!is_bool($sensitive)) {
@@ -4210,7 +4219,10 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
   $information_type_options = event_workflow_get_information_type_list_options();
 
   // load search options
-  if (!is_null($search)) {
+  if (is_null($search)) {
+    // nothing to do
+  }
+  elseif (is_string($search)) {
     $fixed_text = preg_replace('/(\s)/i', ' ', $search);
     $fixed_text = preg_replace('/\s\s*/i', ' ', $fixed_text);
 
@@ -4307,6 +4319,11 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
     }
   }
 
+  $already_joined_count = 0;
+  $already_joined = array();
+
+  $already_added = array();
+
   $found = array();
   try {
     $query = db_select('mew_event_requests', 'mer');
@@ -4315,34 +4332,179 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
     $query->innerjoin('mew_current_information', 'mci', 'mer.id = mci.event_id');
     $query->innerjoin('mew_current_dates', 'mcd', 'mer.id = mcd.event_id');
 
+    $already_joined['mew_current_top'] = 'mct';
+    $already_joined['mew_current_information'] = 'mci';
+    $already_joined['mew_current_dates'] = 'mcd';
+
     $query->innerjoin('mew_field_top_status', 'mfts', 'mct.event_id = mfts.event_id AND mct.status = mfts.revision AND mfts.delta = 0');
     $query->innerjoin('mew_field_top_step', 'mftsp', 'mct.event_id = mftsp.event_id AND mct.step = mftsp.revision AND mftsp.delta = 0');
     $query->innerjoin('mew_field_top_location', 'mftl', 'mct.event_id = mftl.event_id AND mct.location = mftl.revision AND mftl.delta = 0');
     $query->innerjoin('mew_field_top_building', 'mftb', 'mct.event_id = mftb.event_id AND mct.building = mftb.revision AND mftb.delta = 0');
     $query->innerjoin('mew_field_top_room', 'mftr', 'mct.event_id = mftr.event_id AND mct.room = mftr.revision AND mftr.delta = 0');
 
+    $already_joined['mew_field_top_status'] = 'mfts';
+    $already_joined['mew_field_top_step'] = 'mftsp';
+    $already_joined['mew_field_top_location'] = 'mftl';
+    $already_joined['mew_field_top_building'] = 'mftb';
+    $already_joined['mew_field_top_room'] = 'mftr';
+
     $query->innerjoin('mew_field_information_title', 'mfit', 'mci.event_id = mfit.event_id AND mci.title = mfit.revision AND mfit.delta = 0');
     $query->innerjoin('mew_field_information_type', 'mfitp', 'mci.event_id = mfitp.event_id AND mci.type = mfitp.revision AND mfitp.delta = 0');
 
-    $query->innerjoin('mew_field_dates_date', 'mfdd', 'mct.event_id = mfdd.event_id AND mcd.date = mfdd.revision AND mfdd.delta = 0');
-    $query->innerjoin('mew_field_dates_time_start', 'mfdts', 'mct.event_id = mfdts.event_id AND mcd.time_start = mfdts.revision AND mfdts.delta = 0');
-    $query->innerjoin('mew_field_dates_time_stop', 'mfdtsp', 'mct.event_id = mfdtsp.event_id AND mcd.time_stop = mfdtsp.revision AND mfdtsp.delta = 0');
+    $already_joined['mew_field_information_title'] = 'mfit';
+    $already_joined['mew_field_information_type'] = 'mfitp';
+
+    $query->innerjoin('mew_field_dates_date', 'mfdd', 'mct.event_id = mfdd.event_id AND mcd.date = mfdd.revision');
+    $query->innerjoin('mew_field_dates_time_start', 'mfdts', 'mct.event_id = mfdts.event_id AND mcd.time_start = mfdts.revision');
+    $query->innerjoin('mew_field_dates_time_stop', 'mfdtsp', 'mct.event_id = mfdtsp.event_id AND mcd.time_stop = mfdtsp.revision');
+
+    $already_joined['mew_field_dates_date'] = 'mfdd';
+    $already_joined['mew_field_dates_time_start'] = 'mfdts';
+    $already_joined['mew_field_dates_time_stop'] = 'mfdtsp';
 
     $query->addField('mfit', 'value', 'title');
-    $query->addField('mfit', 'value', 'type');
+    $query->addField('mfitp', 'value', 'type');
+
+    $already_added['title'] = 'mfit.value';
+    $already_added['type'] = 'mfitp.value';
 
     $query->addField('mftl', 'value', 'location');
     $query->addField('mftb', 'value', 'building');
     $query->addField('mftr', 'value', 'room');
 
+    $already_added['location'] = 'mftl.value';
+    $already_added['building'] = 'mftb.value';
+    $already_added['room'] = 'mftr.value';
+
     $query->addField('mfts', 'value', 'status');
     $query->addField('mftsp', 'value', 'step');
+
+    $already_added['status'] = 'mfts.value';
+    $already_added['step'] = 'mftsp.value';
 
     $query->addField('mfdd', 'value', 'date');
     $query->addField('mfdts', 'value', 'time_start');
     $query->addField('mfdtsp', 'value', 'time_stop');
 
+    $already_added['date'] = 'mfdd.value';
+    $already_added['time_start'] = 'mfdts.value';
+    $already_added['time_stop'] = 'mfdtsp.value';
+
     $query->fields('mer');
+
+    if (is_array($search)) {
+      // @todo: replace this with a recursive function if and when it is requested to allow for the user to custom organize their 'or's and 'and's.
+      // At this time, it is expected that the structure of the search will have an outermost 'or', or an outermost 'and', and a single inner version.
+      foreach ($search as $search_outer_operand => $search_outer_values) {
+        $outer_operand = NULL;
+        $found_valid_outer = FALSE;
+
+        if ($search_outer_operand == 'or') {
+          $outer_operand = db_or();
+        }
+        elseif ($search_outer_operand == 'and') {
+          $outer_operand = db_and();
+        }
+        else {
+          // not valid, just skip.
+          continue;
+        }
+
+        if (empty($search_outer_values)) {
+          // not valid, just skip.
+          continue;
+        }
+
+        // process the inner fields, can be either 'field', 'or', or 'and'.
+        foreach ($search_outer_values as $search_inner_operand_or_field => $search_inner_values) {
+          $inner_operand = NULL;
+          $found_valid_inner = FALSE;
+
+          if ($search_inner_operand_or_field == 'or') {
+            $inner_operand = db_or();
+            $fields = $search_inner_values;
+          }
+          elseif ($search_inner_operand_or_field == 'and') {
+            $inner_operand = db_and();
+            $fields = $search_inner_values;
+          }
+          else {
+            if (!is_array($search_inner_values) || empty($search_inner_values)) {
+              // not valid, just skip.
+              continue;
+            }
+
+            $inner_operand = db_and();
+            $fields = array($search_inner_operand_or_field => $search_inner_values);
+          }
+
+          foreach ($fields as $field) {
+            if (empty($field['group_name'])) continue;
+            if (empty($field['field_name'])) continue;
+            if (empty($field['column'])) continue;
+
+            $found_valid_inner = TRUE;
+
+            $mew_current = 'mew_current_' . $field['group_name'];
+            $mew_field = 'mew_field_' . $field['group_name'] . '_' . $field['field_name'];
+
+            if (!array_key_exists($mew_current, $already_joined)) {
+              $already_joined[$mew_current] = 'mc_c_' . $already_joined_count;
+              $already_joined_count++;
+
+              $current_alias = $already_joined[$mew_current];
+
+              $query->innerjoin($mew_current, $current_alias, 'mer.id = ' . $current_alias . '.event_id');
+            }
+            else {
+              $current_alias = $already_joined[$mew_current];
+            }
+
+            if (!array_key_exists($mew_field, $already_joined)) {
+              $already_joined[$mew_field] = 'mfg_c_' . $already_joined_count;
+              $already_joined_count++;
+
+              $field_alias = $already_joined[$mew_field];
+
+              if (isset($field['multiple']) && $field['multiple']) {
+                $query->innerjoin($mew_field, $field_alias, $current_alias . '.event_id = ' . $field_alias . '.event_id AND ' . $current_alias . '.' . $field['field_name'] . ' = ' . $field_alias . '.revision AND ' . $field_alias);
+              }
+              else {
+                $query->innerjoin($mew_field, $field_alias, $current_alias . '.event_id = ' . $field_alias . '.event_id AND ' . $current_alias . '.' . $field['field_name'] . ' = ' . $field_alias . '.revision AND ' . $field_alias . ' AND ' . $field_alias . '.delta = 0');
+              }
+            }
+            else {
+              $field_alias = $already_joined[$mew_field];
+            }
+
+            if (!array_key_exists($field['field_name'], $already_added)) {
+              $query->addField($field_alias, $field['column'], $field['field_name']);
+            }
+
+            if ($field['type'] == 'text' && $field['search'] != "") {
+              $inner_operand->condition($field_alias . '.' . $field['column'], '%' . db_like($field['search']) . '%', $like);
+            }
+            else {
+              $inner_operand->condition($field_alias . '.' . $field['column'], $field['search']);
+            }
+          }
+
+          if ($found_valid_inner && !is_null($inner_operand)) {
+
+            $outer_operand->condition($inner_operand);
+            $found_valid_outer = TRUE;
+          }
+        }
+
+        if ($found_valid_outer && !is_null($outer_operand)) {
+          $query->condition($outer_operand);
+        }
+        else {
+          // if no valid search query was supplied, return an empty array to prevent it from search for all event requests.
+          return array();
+        }
+      }
+    }
 
     $query->range($start, $limit + 1);
 
@@ -4492,15 +4654,13 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
     }
     else {
       // failsafe, should never happen.
-      drupal_access_denied();
-      drupal_exit();
       return FALSE;
     }
 
     // do not include deleted requests.
     $query->condition('mfts.value', MEW_EVENT_STATUS_DELETED, '<>');
 
-    if (!is_null($search)) {
+    if (!is_null($search) && !is_array($search)) {
       $or = db_or();
 
       foreach ($search_parts as $search_part) {
@@ -4842,6 +5002,184 @@ function mcneese_event_workflow_get_latest_reviews($event_id, $steps = array(), 
   }
 
   return $reviews;
+}
+
+/**
+ * Builds a table listing of event requests.
+ *
+ * @param array $items
+ *   An array of items to add to the table as returned by
+ *   mcneese_event_workflow_event_load_listing().
+ * @param int $max_rows
+ *   The number of items allowed to be listed on the table at one time.
+ *
+ * @return array
+ *   A generated table array structure for passing to theme_table().
+ *   Additional keys are added to the table structure:
+ *   - 'error': TRUE on success, FALSE on error.
+ *
+ * @see: mcneese_event_workflow_event_load_listing()
+ * @see: theme_table()
+ */
+function mcneese_event_workflow_build_request_table($items, $max_rows, $columns = array('id' => "ID", 'title' => "Title", 'location' => "Location", 'building' => "Building", 'room' => "Room", 'date' => "Date", 'submitted_on' => "Submitted On", 'operations' => "Operations"), $user = NULL) {
+  $table = array();
+  foreach ($columns as $column_name => $column_title) {
+    if ($column_name == 'operations') {
+      $table['header'][] = $column_title;
+    }
+    else {
+      $table['header'][$column_name] = array(
+        'field' => $column_name,
+        'data' => $column_title,
+        'align' => 'center',
+      );
+    }
+  }
+
+  $table['attributes'] = array();
+  $table['rows'] = array();
+  $table['empty'] = t("No event requests were found.");
+
+  if (!is_array($items) && $items !== FALSE) {
+    cf_error::invalid_array('items');
+    $table['error'] = TRUE;
+    return $table;
+  }
+
+  if (is_null($user) || !is_object($user)) {
+    $user = cf_current_user();
+  }
+
+  global $base_path;
+
+  $rows = array();
+  $total_results = 0;
+  $rows_count = 0;
+
+  if (empty($items)) {
+    return $table;
+  }
+
+  $total_results = count($items);
+  foreach ($items as $item) {
+    $row = array();
+    $rows_count++;
+
+    // Rows per page + 1 is loaded so that it can be detected whether or not a 'next' link needs to be provided.
+    if ($rows_count > $max_rows) {
+      break;
+    }
+
+    $can_view_event = mcneese_event_workflow_management_page_event_access('view', $item->id, $user);
+    $can_edit_event = mcneese_event_workflow_management_page_event_access('edit', $item->id, $user);
+    $can_review_event = mcneese_event_workflow_management_page_event_access('review', $item->id, $user);
+    $can_log_event = mcneese_event_workflow_management_page_event_access('log', $item->id, $user);
+    $can_history_event = mcneese_event_workflow_management_page_event_access('history', $item->id, $user);
+    $can_delete_event = mcneese_event_workflow_management_page_event_access('delete', $item->id, $user);
+
+    if (isset($columns['id'])) {
+      $row['id'] = $item->id;
+    }
+
+    if (isset($columns['title'])) {
+      $row['title'] = check_plain($item->title);
+    }
+
+    $location_options = event_workflow_get_event_location_list_options();
+    $building_options = event_workflow_get_event_building_list_options($item->location);
+    $room_options = event_workflow_get_event_room_list_options();
+
+    if (isset($columns['location'])) {
+      $location = "";
+      if (!empty($item->location)) {
+        if (isset($location_options[$item->location])) {
+          $location = check_plain($location_options[$item->location]);
+        }
+      }
+
+      $row['location'] = $location;
+    }
+
+    if (isset($columns['building'])) {
+      $building = "";
+      if (!empty($item->building)) {
+        if (isset($building_options[$item->building])) {
+          $building = check_plain($building_options[$item->building]);
+        }
+      }
+
+      $row['building'] = $building;
+    }
+
+    if (isset($columns['room'])) {
+      $room = "";
+      if (!empty($item->room)) {
+        if (isset($room_options[$item->room])) {
+          $room = check_plain($room_options[$item->room]);
+        }
+      }
+
+      $row['room'] = $room;
+    }
+
+    if (isset($columns['date'])) {
+      foreach ($item->date as $delta => $date) {
+        if (!isset($row['date'])) {
+          $row['date'] = '';
+        }
+        else {
+          $row['date'] .= '<br>';
+        }
+
+        $row['date'] .= check_plain(date("Y/m/d", $date));
+
+        if (array_key_exists($delta, $item->time_start) && !is_null($item->time_start[$delta]) && array_key_exists($delta, $item->time_stop) && !is_null($item->time_stop[$delta])) {
+          $row['date'] .= ' ' . check_plain(date("h:ia", $item->time_start[$delta]));
+          $row['date'] .= ' to ' . check_plain(date("h:ia", $item->time_stop[$delta]));
+        }
+      }
+    }
+
+    if (isset($columns['submitted_on'])) {
+      $date_stamp = $item->created;
+      $row['submitted_on'] = check_plain(date("Y/m/d h:ia", $date_stamp));
+    }
+
+    if (isset($columns['operations'])) {
+      $row['operations'] = '';
+
+      if ($can_view_event) {
+        $row['operations'] .= '<a href="' . $base_path . 'events/view-0/' . $item->id . '" class="operation-link operation-link-view">View</a> ';
+      }
+
+      if ($can_edit_event) {
+        $row['operations'] .= '<a href="' . $base_path . 'events/edit-0/' . $item->id . '/request" class="operation-link operation-link-edit">Edit</a> ';
+      }
+
+      if ($can_review_event) {
+        $row['operations'] .= '<a href="' . $base_path . 'events/view-0/' . $item->id . '/3" class="operation-link operation-link-review">Review</a> ';
+      }
+
+      if ($can_log_event) {
+        $row['operations'] .= '<a href="' . $base_path . 'events/view-0/' . $item->id . '/2" class="operation-link operation-link-log">Log</a> ';
+      }
+
+      if ($can_history_event) {
+        $row['operations'] .= '<a href="' . $base_path . 'events/history-0/' . $item->id . '" class="operation-link operation-link-history">History</a> ';
+      }
+
+      if ($can_delete_event) {
+        $row['operations'] .= '<a href="' . $base_path . 'events/delete-0/' . $item->id . '" class="operation-link operation-link-delete">Delete</a> ';
+      }
+    }
+
+    $rows[$item->id] = $row;
+  }
+
+  $table['rows'] = $rows;
+  $table['error'] = FALSE;
+
+  return $table;
 }
 
 /**

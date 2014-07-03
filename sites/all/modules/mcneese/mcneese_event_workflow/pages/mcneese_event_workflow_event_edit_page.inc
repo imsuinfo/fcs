@@ -261,46 +261,53 @@ function mcneese_event_workflow_event_edit_0_form($form, &$form_state, $id, $tar
     if ($step == 'location') {
       $form['event']['cancel'] = array(
         '#id' => 'submit-event-cancel',
+        '#name' => 'submit-event-cancel',
         '#type' => 'submit',
-        '#value' => t("Cancel"),
+        '#default_value' => t("Cancel"),
       );
     }
     else {
       $form['event']['prev'] = array(
         '#id' => 'submit-event-prev',
+        '#name' => 'submit-event-prev',
         '#type' => 'submit',
-        '#value' => t("Back"),
+        '#default_value' => t("Back"),
       );
     }
 
     if ($step == 'details') {
       $form['event']['submit'] = array(
         '#id' => 'submit-event-submit',
+        '#name' => 'submit-event-submit',
         '#type' => 'submit',
-        '#value' => t("Submit"),
+        '#default_value' => t("Submit"),
       );
     }
     else {
       $form['event']['next'] = array(
         '#id' => 'submit-event-next',
+        '#name' => 'submit-event-next',
         '#type' => 'submit',
-        '#value' => t("Continue"),
+        '#default_value' => t("Continue"),
       );
     }
   }
   else {
     $form['event']['cancel'] = array(
       '#id' => 'submit-event-cancel',
+      '#name' => 'submit-event-cancel',
       '#type' => 'submit',
-      '#value' => t("Cancel"),
+      '#default_value' => t("Cancel"),
     );
 
     $form['event']['submit'] = array(
       '#id' => 'submit-event-submit',
+      '#name' => 'submit-event-submit',
       '#type' => 'submit',
-      '#value' => t("Submit"),
+      '#default_value' => t("Submit"),
     );
   }
+
   return $form;
 }
 
