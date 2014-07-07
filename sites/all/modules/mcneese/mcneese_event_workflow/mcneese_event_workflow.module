@@ -269,6 +269,10 @@ define('MEW_EVENT_STATUS_CANCELLED', 7);
  */
  define('MEW_EVENT_CLASSIFICATION_EXTERNAL', 4);
 
+/**
+ * Defines a recursion limit for the search and/or operations.
+ */
+ define('MEW_MAX_SEARCH_RECURSION', 3);
 
 
 /**
@@ -4393,116 +4397,11 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
     $query->fields('mer');
 
     if (is_array($search)) {
-      // @todo: replace this with a recursive function if and when it is requested to allow for the user to custom organize their 'or's and 'and's.
-      // At this time, it is expected that the structure of the search will have an outermost 'or', or an outermost 'and', and a single inner version.
-      foreach ($search as $search_outer_operand => $search_outer_values) {
-        $outer_operand = NULL;
-        $found_valid_outer = FALSE;
+      $operand = db_and();
+      $result = mcneese_event_workflow_event_process_listing_search_array($query, $operand, $already_joined, $already_joined_count, $already_added, $search, 1);
 
-        if ($search_outer_operand == 'or') {
-          $outer_operand = db_or();
-        }
-        elseif ($search_outer_operand == 'and') {
-          $outer_operand = db_and();
-        }
-        else {
-          // not valid, just skip.
-          continue;
-        }
-
-        if (empty($search_outer_values)) {
-          // not valid, just skip.
-          continue;
-        }
-
-        // process the inner fields, can be either 'field', 'or', or 'and'.
-        foreach ($search_outer_values as $search_inner_operand_or_field => $search_inner_values) {
-          $inner_operand = NULL;
-          $found_valid_inner = FALSE;
-
-          if ($search_inner_operand_or_field == 'or') {
-            $inner_operand = db_or();
-            $fields = $search_inner_values;
-          }
-          elseif ($search_inner_operand_or_field == 'and') {
-            $inner_operand = db_and();
-            $fields = $search_inner_values;
-          }
-          else {
-            if (!is_array($search_inner_values) || empty($search_inner_values)) {
-              // not valid, just skip.
-              continue;
-            }
-
-            $inner_operand = db_and();
-            $fields = array($search_inner_operand_or_field => $search_inner_values);
-          }
-
-          foreach ($fields as $field) {
-            if (empty($field['group_name'])) continue;
-            if (empty($field['field_name'])) continue;
-            if (empty($field['column'])) continue;
-
-            $found_valid_inner = TRUE;
-
-            $mew_current = 'mew_current_' . $field['group_name'];
-            $mew_field = 'mew_field_' . $field['group_name'] . '_' . $field['field_name'];
-
-            if (!array_key_exists($mew_current, $already_joined)) {
-              $already_joined[$mew_current] = 'mc_c_' . $already_joined_count;
-              $already_joined_count++;
-
-              $current_alias = $already_joined[$mew_current];
-
-              $query->innerjoin($mew_current, $current_alias, 'mer.id = ' . $current_alias . '.event_id');
-            }
-            else {
-              $current_alias = $already_joined[$mew_current];
-            }
-
-            if (!array_key_exists($mew_field, $already_joined)) {
-              $already_joined[$mew_field] = 'mfg_c_' . $already_joined_count;
-              $already_joined_count++;
-
-              $field_alias = $already_joined[$mew_field];
-
-              if (isset($field['multiple']) && $field['multiple']) {
-                $query->innerjoin($mew_field, $field_alias, $current_alias . '.event_id = ' . $field_alias . '.event_id AND ' . $current_alias . '.' . $field['field_name'] . ' = ' . $field_alias . '.revision');
-              }
-              else {
-                $query->innerjoin($mew_field, $field_alias, $current_alias . '.event_id = ' . $field_alias . '.event_id AND ' . $current_alias . '.' . $field['field_name'] . ' = ' . $field_alias . '.revision AND ' . $field_alias . '.delta = 0');
-              }
-            }
-            else {
-              $field_alias = $already_joined[$mew_field];
-            }
-
-            if (!array_key_exists($field['field_name'], $already_added)) {
-              $query->addField($field_alias, $field['column'], $field['field_name']);
-            }
-
-            if ($field['type'] == 'text' && $field['search'] != "") {
-              $inner_operand->condition($field_alias . '.' . $field['column'], '%' . db_like($field['search']) . '%', $like);
-            }
-            else {
-              $inner_operand->condition($field_alias . '.' . $field['column'], $field['search']);
-            }
-          }
-
-          if ($found_valid_inner && !is_null($inner_operand)) {
-
-            $outer_operand->condition($inner_operand);
-            $found_valid_outer = TRUE;
-          }
-        }
-
-        if ($found_valid_outer && !is_null($outer_operand)) {
-          $query->condition($outer_operand);
-        }
-        else {
-          // if no valid search query was supplied, return an empty array to prevent it from search for all event requests.
-          return array();
-        }
+      if ($result) {
+        $query->condition($operand);
       }
     }
 
@@ -4849,6 +4748,170 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
   }
 
   return $found;
+}
+
+/**
+ * Recursively append search conditions for loading a list of events.
+ *
+ * @param object $query
+ *   The query object.
+ * @param object $operand
+ *   The query operand, such as and, or or for processing the conditions.
+ * @param array $already_joined
+ *   An array of table names that have already been joined in the query object.
+ * @param int $already_joined_count
+ *   A counter for uniquely generating table alias names.
+ * @param array $already_added
+ *   An array of field names that have already been added as select parameters
+ *   for the query object.
+ *
+ * @param bool
+ *   TRUE when a valid field is found and added to the $operand and FALSE
+ *   otherwise.
+ *
+ * @see mcneese_event_workflow_event_load_listing()
+ */
+function mcneese_event_workflow_event_process_listing_search_array(&$query, &$operand, &$already_joined, &$already_joined_count, &$already_added, $search, $recurse_count) {
+  if (!is_object($query)) {
+    cf_error::invalid_object('query');
+    return FALSE;
+  }
+
+  if (!is_object($operand)) {
+    cf_error::invalid_object('operand');
+    return FALSE;
+  }
+
+  if (!is_array($search)) {
+    cf_error::invalid_array('search');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($recurse_count)) {
+    cf_error::invalid_integer('recurse_count');
+    return FALSE;
+  }
+
+  if (!is_array($already_joined)) {
+    cf_error::invalid_array('already_joined');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($already_joined_count)) {
+    cf_error::invalid_integer('already_joined_count');
+    return FALSE;
+  }
+
+  if (!is_array($already_added)) {
+    cf_error::invalid_array('already_added');
+    return FALSE;
+  }
+
+  if ($recurse_count > MEW_MAX_SEARCH_RECURSION) {
+    return FALSE;
+  }
+
+  $found_values = FALSE;
+
+  // process the inner fields, can be either a 'field_+', 'or_+', or 'and_+'.
+  foreach ($search as $search_operand_or_field => $search_values) {
+    $search_op = explode('_', $search_operand_or_field, 2);
+
+    if (count($search_op) != 2) {
+      // not valid, just skip.
+      continue;
+    }
+
+    if (!is_array($search_values) || empty($search_values)) {
+      // not valid, just skip.
+      continue;
+    }
+
+    if ($search_op[0] == 'field') {
+      if (empty($search_values['group_name'])) {
+        // not valid, just skip.
+        continue;
+      }
+
+      if (empty($search_values['field_name'])) {
+        // not valid, just skip.
+        continue;
+      }
+
+      if (empty($search_values['column'])) {
+        // not valid, just skip.
+        continue;
+      }
+
+      $mew_current = 'mew_current_' . $search_values['group_name'];
+      $mew_field = 'mew_field_' . $search_values['group_name'] . '_' . $search_values['field_name'];
+
+      if (!array_key_exists($mew_current, $already_joined)) {
+        $already_joined[$mew_current] = 'mc_c_' . $already_joined_count;
+        $already_joined_count++;
+
+        $current_alias = $already_joined[$mew_current];
+
+        $query->innerjoin($mew_current, $current_alias, 'mer.id = ' . $current_alias . '.event_id');
+      }
+      else {
+        $current_alias = $already_joined[$mew_current];
+      }
+
+      if (!array_key_exists($mew_field, $already_joined)) {
+        $already_joined[$mew_field] = 'mfg_c_' . $already_joined_count;
+        $already_joined_count++;
+
+        $field_alias = $already_joined[$mew_field];
+
+        if (isset($search_values['multiple']) && $search_values['multiple']) {
+          $query->innerjoin($mew_field, $field_alias, $current_alias . '.event_id = ' . $field_alias . '.event_id AND ' . $current_alias . '.' . $search_values['field_name'] . ' = ' . $field_alias . '.revision');
+        }
+        else {
+          $query->innerjoin($mew_field, $field_alias, $current_alias . '.event_id = ' . $field_alias . '.event_id AND ' . $current_alias . '.' . $search_values['field_name'] . ' = ' . $field_alias . '.revision AND ' . $field_alias . '.delta = 0');
+        }
+      }
+      else {
+        $field_alias = $already_joined[$mew_field];
+      }
+
+      if (!array_key_exists($search_values['field_name'], $already_added)) {
+        $query->addField($field_alias, $search_values['column'], $search_values['field_name']);
+      }
+
+      if ($search_values['type'] == 'text' && $search_values['search'] != "") {
+        $operand->condition($field_alias . '.' . $search_values['column'], '%' . db_like($search_values['search']) . '%', $like);
+      }
+      else {
+        $operand->condition($field_alias . '.' . $search_values['column'], $search_values['search']);
+      }
+
+      $found_values = TRUE;
+      continue;
+    }
+    elseif ($search_op[0] == 'or') {
+      $inner_operand = db_or();
+    }
+    elseif ($search_op[0] == 'and') {
+      $inner_operand = db_and();
+    }
+    else {
+      // not valid, just skip.
+      continue;
+    }
+
+    $next_count = $recurse_count + 1;
+    $result = mcneese_event_workflow_event_process_listing_search_array($query, $inner_operand, $already_joined, $already_joined_count, $already_added, $search_values, $next_count);
+
+    if ($result) {
+      $operand->condition($inner_operand);
+      $found_values = TRUE;
+    }
+
+    unset($next_count);
+  }
+
+  return $found_values;
 }
 
 /**

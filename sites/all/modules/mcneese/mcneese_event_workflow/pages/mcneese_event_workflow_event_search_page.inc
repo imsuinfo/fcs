@@ -669,16 +669,22 @@ function mcneese_event_workflow_event_search_0_form_submit($form, &$form_state) 
           $built = mcneese_event_workflow_event_search_0_form_build_search_target($structure, $target_name, $target_value);
 
           if (!empty($built)) {
+            $name_count = 0;
             foreach ($built as $key => $value) {
-              $or[$key] = $value;
+              if ($key == 'and' || $key == 'or') {
+                $name = $key . '_' . $name_count;
+                $name_count++;
+              }
+              else {
+                $name = 'field_' . $key;
+              }
+              $search[$name] = $value;
             }
 
             unset($built);
           }
         }
       }
-
-      $search = array('or' => $or);
 
       $form_state['advanced_search-results'] = mcneese_event_workflow_event_load_listing($search, $sensitive, $start, $per_page);
       $form_state['advanced_search-search'] = $search;
