@@ -804,21 +804,58 @@ function mcneese_event_workflow_event_search_0_form_build_target(&$form, &$form_
     $targets[$target_field][$field_delta]['search']['#type'] = 'select';
     $targets[$target_field][$field_delta]['search']['#options'] = array(1 => "Yes / True", 0 => "No / False");
   }
-  elseif ($field['type'] == 'event_status') {
+  elseif ($field['type'] == 'options') {
     $targets[$target_field][$field_delta]['search']['#type'] = 'select';
-    $targets[$target_field][$field_delta]['search']['#options'] = event_workflow_get_event_status_list_options('search');
+
+    if ($table_name == 'top') {
+      if ($field_name == 'event_status') {
+        $targets[$target_field][$field_delta]['search']['#options'] = event_workflow_get_event_status_list_options('search');
+      }
+      elseif ($field_name == 'event_step') {
+        $targets[$target_field][$field_delta]['search']['#options'] = event_workflow_get_event_steps_list_options('search');
+      }
+      elseif ($field_name == 'event_location') {
+        $targets[$target_field][$field_delta]['search']['#options'] = event_workflow_get_event_location_list_options('search');
+      }
+      elseif ($field_name == 'event_room') {
+        $targets[$target_field][$field_delta]['search']['#options'] = event_workflow_get_event_room_list_options(NULL, 'search');
+      }
+    }
+    elseif ($table_name == 'information') {
+      if ($field_name == 'type') {
+        $targets[$target_field][$field_delta]['search']['#options'] = event_workflow_get_information_type_list_options('search');
+      }
+    }
+    elseif ($table_name == 'plans') {
+      if ($field_name == 'audience') {
+        $targets[$target_field][$field_delta]['search']['#options'] = event_workflow_get_audience_list_options('search');
+      }
+    }
   }
-  elseif ($field['type'] == 'event_step') {
-    $targets[$target_field][$field_delta]['search']['#type'] = 'select';
-    $targets[$target_field][$field_delta]['search']['#options'] = event_workflow_get_event_steps_list_options('search');
-  }
-  elseif ($field['type'] == 'event_location') {
-    $targets[$target_field][$field_delta]['search']['#type'] = 'select';
-    $targets[$target_field][$field_delta]['search']['#options'] = event_workflow_get_event_location_list_options('search');
-  }
-  elseif ($field['type'] == 'event_room') {
-    $targets[$target_field][$field_delta]['search']['#type'] = 'select';
-    $targets[$target_field][$field_delta]['search']['#options'] = event_workflow_get_event_room_list_options(NULL, 'search');
+  elseif ($field['type'] == 'checkboxes') {
+    $targets[$target_field][$field_delta]['search']['#type'] = 'checkboxes';
+
+    if ($table_name == 'registration') {
+      if ($field_name == 'revenue_generated') {
+        $targets[$target_field][$field_delta]['search']['#options'] = event_workflow_get_revenue_generated_list_options('search');
+      }
+    }
+    elseif ($table_name == 'presentation') {
+      if ($field_name == 'technical_equipment_details') {
+        $targets[$target_field][$field_delta]['search']['#options'] = event_workflow_get_technical_equipment_details_list_options('search');
+      }
+      elseif ($field_name == 'publicity_details') {
+        $targets[$target_field][$field_delta]['search']['#options'] = event_workflow_get_publicity_details_list_options('search');
+      }
+      elseif ($field_name == 'designing_material') {
+        $targets[$target_field][$field_delta]['search']['#options'] = event_workflow_get_designing_material_list_options('search');
+      }
+    }
+
+    $targets[$target_field][$field_delta]['search']['#default_value'] = array();
+    foreach ($targets[$target_field][$field_delta]['search']['#options'] as $options_key => $options_value) {
+      $targets[$target_field][$field_delta]['search']['#default_value'][$options_key] = NULL;
+    }
   }
   elseif ($field['type'] == 'use_fees') {
     unset($targets[$target_field][$field_delta]['search']);
@@ -986,6 +1023,26 @@ function mcneese_event_workflow_event_search_0_form_build_search_target($structu
 
     if (!empty($and)) {
       $search['and'] = $and;
+    }
+  }
+  elseif (isset($field['columns']) && is_array($field['columns'])) {
+    if (is_array($target_values) && array_key_exists('search', $target_values)) {
+      $and = array();
+
+      foreach ($field['columns'] as $term_id => $column_name) {
+        $target_field_alt = $target_field . '-' . $column_name;
+        $and[$target_field_alt] = array();
+        $and[$target_field_alt]['group_name'] = $table_name;
+        $and[$target_field_alt]['field_name'] = $field_name;
+        $and[$target_field_alt]['column'] = $column_name;
+        $and[$target_field_alt]['type'] = $field['type'];
+        $and[$target_field_alt]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
+        $and[$target_field_alt]['search'] = $target_values['search'][$term_id];
+      }
+
+      if (!empty($and)) {
+        $search['and'] = $and;
+      }
     }
   }
   else {

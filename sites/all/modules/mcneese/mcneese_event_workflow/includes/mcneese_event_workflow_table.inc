@@ -24,22 +24,22 @@ function mcneese_event_workflow_table_structure() {
     'status' => array(
       'path' => 'event][status',
       'name' => "Event Status",
-      'type' => 'event_status',
+      'type' => 'options',
     ),
     'step' => array(
       'path' => 'event][step',
       'name' => "Event Step",
-      'type' => 'event_step',
+      'type' => 'options',
     ),
     'location' => array(
       'path' => 'event][location',
       'name' => "Event Location",
-      'type' => 'event_location',
+      'type' => 'options',
     ),
     'room' => array(
       'path' => 'event][room',
       'name' => "Event Room",
-      'type' => 'event_room',
+      'type' => 'options',
       'storage' => 'alternate',
       'alternate' => array(
         'building' => array(
@@ -296,7 +296,7 @@ function mcneese_event_workflow_table_structure() {
       'path' => 'event][registration][revenue_generated',
       'columns' => event_workflow_get_revenue_generated_list_options('column_name'),
       'name' => "How Revenue is Generated",
-      'type' => 'options',
+      'type' => 'checkboxes',
     ),
   );
 
@@ -383,7 +383,7 @@ function mcneese_event_workflow_table_structure() {
       'path' => 'event][presentation][technical_equipment_details',
       'columns' => event_workflow_get_technical_equipment_details_list_options('column_name'),
       'name' => "Technical Equipment Details",
-      'type' => 'options',
+      'type' => 'checkboxes',
     ),
     'technical_equipment_microphone' => array(
       'path' => 'event][presentation][technical_equipment_microphone',
@@ -419,7 +419,7 @@ function mcneese_event_workflow_table_structure() {
       'path' => 'event][presentation][publicity_details',
       'columns' => event_workflow_get_publicity_details_list_options('column_name'),
       'name' => "Publicity Details",
-      'type' => 'text',
+      'type' => 'checkboxes',
     ),
     'production' => array(
       'path' => 'event][presentation][production',
@@ -455,7 +455,7 @@ function mcneese_event_workflow_table_structure() {
       'path' => 'event][presentation][designing_material',
       'columns' => event_workflow_get_designing_material_list_options('column_name'),
       'name' => "Material Designer",
-      'type' => 'options',
+      'type' => 'checkboxes',
     ),
     'designing_material_name' => array(
       'path' => 'event][presentation][designing_material_name',
