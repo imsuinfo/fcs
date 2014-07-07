@@ -1668,7 +1668,7 @@ function mcneese_event_workflow_get_event_field_registration_require($form, &$fo
         '#type' => 'radios',
         '#title' => 'Does the event require registration or ticket purchase?',
         '#default_value' => $value,
-        '#options' => array('yes' => "Yes", 'no' => "No"),
+        '#options' => array(1 => "Yes", 0 => "No"),
         '#required' => TRUE,
         '#attributes' => array(
           'class' => array(
@@ -2133,7 +2133,7 @@ function mcneese_event_workflow_get_event_field_registration_generate_revenue($f
         '#type' => 'radios',
         '#title' => 'Will the Event Generate Revenue?',
         '#default_value' => $value,
-        '#options' => array('yes' => "Yes", 'no' => "No"),
+        '#options' => array(1 => "Yes", 0 => "No"),
         '#required' => TRUE,
         '#attributes' => array(
           'class' => array(
@@ -2471,7 +2471,7 @@ function mcneese_event_workflow_get_event_field_setup_podium($form, &$form_state
         '#type' => 'radios',
         '#title' => 'Will You Need a Podium?',
         '#default_value' => $value,
-        '#options' => array('yes' => "Yes", 'no' => "No"),
+        '#options' => array(1 => "Yes", 0 => "No"),
         '#required' => TRUE,
         '#attributes' => array(
           'class' => array(
@@ -2530,7 +2530,7 @@ function mcneese_event_workflow_get_event_field_setup_portable_stage($form, &$fo
         '#type' => 'radios',
         '#title' => 'Will You Require a Portable Stage?',
         '#default_value' => $value,
-        '#options' => array('yes' => "Yes", 'no' => "No"),
+        '#options' => array(1 => "Yes", 0 => "No"),
         '#required' => TRUE,
         '#attributes' => array(
           'class' => array(
@@ -2658,7 +2658,7 @@ function mcneese_event_workflow_get_event_field_setup_security($form, &$form_sta
         '#type' => 'radios',
         '#title' => 'Will the Event Require Security? <span class="title_display-note additional_fees_may_apply">(Additional Fees May Apply)</span>',
         '#default_value' => $value,
-        '#options' => array('yes' => "Yes", 'no' => "No"),
+        '#options' => array(1 => "Yes", 0 => "No"),
         '#required' => TRUE,
         '#attributes' => array(
           'class' => array(
@@ -2717,7 +2717,7 @@ function mcneese_event_workflow_get_event_field_setup_parking_assistance($form, 
         '#type' => 'radios',
         '#title' => 'Will the Event Require Parking Assistance or Restrictions?',
         '#default_value' => $value,
-        '#options' => array('yes' => "Yes", 'no' => "No"),
+        '#options' => array(1 => "Yes", 0 => "No"),
         '#required' => TRUE,
         '#attributes' => array(
           'class' => array(
@@ -2845,7 +2845,7 @@ function mcneese_event_workflow_get_event_field_setup_road_closures($form, &$for
         '#type' => 'radios',
         '#title' => 'Will the Event Require Road Closures or Barricades?',
         '#default_value' => $value,
-        '#options' => array('yes' => "Yes", 'no' => "No"),
+        '#options' => array(1 => "Yes", 0 => "No"),
         '#required' => TRUE,
         '#attributes' => array(
           'class' => array(
@@ -2973,7 +2973,7 @@ function mcneese_event_workflow_get_event_field_setup_special_requests($form, &$
         '#type' => 'radios',
         '#title' => 'Will the Event Require any Additional Special Requests for Setup?',
         '#default_value' => $value,
-        '#options' => array('yes' => "Yes", 'no' => "No"),
+        '#options' => array(1 => "Yes", 0 => "No"),
         '#required' => TRUE,
         '#attributes' => array(
           'class' => array(
@@ -3096,7 +3096,7 @@ function mcneese_event_workflow_get_event_field_presentation_technical_equipment
         '#type' => 'radios',
         '#title' => 'Will the Event Require any Technical Equipment? <span class="title_display-note additional_fees_may_apply">(Additional Fees May Apply)</span>',
         '#default_value' => $value,
-        '#options' => array('yes' => "Yes", 'no' => "No"),
+        '#options' => array(1 => "Yes", 0 => "No"),
         '#required' => TRUE,
         '#attributes' => array(
           'class' => array(
@@ -3289,7 +3289,7 @@ function mcneese_event_workflow_get_event_field_presentation_external_audio_pers
         '#type' => 'radios',
         '#title' => 'Will an External Audio/Video Person/Company be Utilized?',
         '#default_value' => $value,
-        '#options' => array('yes' => "Yes", 'no' => "No"),
+        '#options' => array(1 => "Yes", 0 => "No"),
         '#required' => TRUE,
         '#attributes' => array(
           'class' => array(
@@ -3556,7 +3556,7 @@ function mcneese_event_workflow_get_event_field_presentation_production($form, &
         '#type' => 'radios',
         '#title' => 'Is the Event Using a Production Company or Professional Promoter?',
         '#default_value' => $value,
-        '#options' => array('yes' => "Yes", 'no' => "No"),
+        '#options' => array(1 => "Yes", 0 => "No"),
         '#required' => TRUE,
         '#attributes' => array(
           'class' => array(
@@ -3818,7 +3818,7 @@ function mcneese_event_workflow_get_event_field_presentation_publicity($form, &$
         '#type' => 'radios',
         '#title' => 'Will the Event Need Publicity?',
         '#default_value' => $value,
-        '#options' => array('yes' => "Yes", 'no' => "No"),
+        '#options' => array(1 => "Yes", 0 => "No"),
         '#required' => TRUE,
         '#attributes' => array(
           'class' => array(
@@ -3943,7 +3943,7 @@ function mcneese_event_workflow_get_event_field_presentation_printed_material($f
         '#type' => 'radios',
         '#title' => 'Will the Event use Printed Material?',
         '#default_value' => $value,
-        '#options' => array('yes' => "Yes", 'no' => "No"),
+        '#options' => array(1 => "Yes", 0 => "No"),
         '#required' => TRUE,
         '#attributes' => array(
           'class' => array(
@@ -4002,7 +4002,7 @@ function mcneese_event_workflow_get_event_field_presentation_university_logo($fo
         '#type' => 'radios',
         '#title' => 'Will the Event use the University Logo?',
         '#default_value' => $value,
-        '#options' => array('yes' => "Yes", 'no' => "No"),
+        '#options' => array(1 => "Yes", 0 => "No"),
         '#states' => array(
           'visible' => array(
             ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => 'yes'),
@@ -4363,9 +4363,9 @@ function mcneese_event_workflow_get_event_field_services_food_served($form, &$fo
       $fields['services']['food_served'][$key] = array(
         '#id' => 'field-event-services-food_served-' . $key,
         '#type' => 'radios',
-        '#title' => 'Will the Food or Drink be Served? <span class="title_display-note some_venues_dont_permit">(Note some venues do not permit food and drink)</span>',
+        '#title' => 'Will Food or Drink be Served? <span class="title_display-note some_venues_dont_permit">(Note some venues do not permit food and drink)</span>',
         '#default_value' => $value,
-        '#options' => array('yes' => "Yes", 'no' => "No"),
+        '#options' => array(1 => "Yes", 0 => "No"),
         '#required' => TRUE,
         '#attributes' => array(
           'class' => array(
@@ -4483,7 +4483,7 @@ function mcneese_event_workflow_get_event_field_services_alcohol($form, &$form_s
         '#type' => 'radios',
         '#title' => 'Will Alcohol be Served?',
         '#default_value' => $value,
-        '#options' => array('yes' => "Yes", 'no' => "No"),
+        '#options' => array(1 => "Yes", 0 => "No"),
         '#required' => TRUE,
         '#attributes' => array(
           'class' => array(
@@ -4595,7 +4595,7 @@ function mcneese_event_workflow_get_event_field_services_open_flames($form, &$fo
         '#type' => 'radios',
         '#title' => 'Will Open Flames be Used? <span class="title_display-note examples">(Examples: Sternos, Grill, Candles)</span>',
         '#default_value' => $value,
-        '#options' => array('yes' => "Yes", 'no' => "No"),
+        '#options' => array(1 => "Yes", 0 => "No"),
         '#required' => TRUE,
         '#attributes' => array(
           'class' => array(

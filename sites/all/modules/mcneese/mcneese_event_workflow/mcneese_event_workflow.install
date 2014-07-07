@@ -73,14 +73,14 @@ function mcneese_event_workflow_table_install_structure() {
   );
 
   $structure['registration'] = array(
-    'require' => 'varchar',
+    'require' => 'unsigned_tiny',
     'website' => 'varchar',
     'phone' => 'varchar',
     'ticket_price' => 'varchar',
     'ticket_dates' => 'varchar',
     'ticket_website' => 'varchar',
     'ticket_phone' => 'varchar',
-    'generate_revenue' => 'varchar',
+    'generate_revenue' => 'unsigned_tiny',
     'revenue_generated' => array('ticket' => 'unsigned', 'merchandise' => 'unsigned', 'concession' => 'unsigned'),
   );
 
@@ -89,34 +89,34 @@ function mcneese_event_workflow_table_install_structure() {
     'round_tables_8ft' => 'unsigned',
     'other_tables' => 'text',
     'standard_blue_chairs' => 'unsigned',
-    'podium' => 'varchar',
-    'portable_stage' => 'varchar',
+    'podium' => 'unsigned_tiny',
+    'portable_stage' => 'unsigned_tiny',
     'portable_stage_configuration' => 'text',
-    'security' => 'varchar',
-    'parking_assistance' => 'varchar',
+    'security' => 'unsigned_tiny',
+    'parking_assistance' => 'unsigned_tiny',
     'parking_assistance_area' => 'text',
-    'road_closures' => 'varchar',
+    'road_closures' => 'unsigned_tiny',
     'road_closures_details' => 'text',
-    'special_requests' => 'varchar',
+    'special_requests' => 'unsigned_tiny',
     'special_requests_details' => 'text',
   );
 
   $structure['presentation'] = array(
-    'technical_equipment' => 'varchar',
+    'technical_equipment' => 'unsigned_tiny',
     'technical_equipment_details' => array('microphone' => 'unsigned', 'screen' => 'unsigned', 'computer' => 'unsigned', 'sound' => 'unsigned'),
     'technical_equipment_microphone' => 'unsigned',
-    'external_audio_person' => 'varchar',
+    'external_audio_person' => 'unsigned_tiny',
     'external_audio_person_name' => 'varchar',
     'external_audio_person_email' => 'varchar',
     'external_audio_person_phone' => 'varchar',
-    'publicity' => 'varchar',
+    'publicity' => 'unsigned_tiny',
     'publicity_details' => array('campus_digest' => 'unsigned', 'student_digest' => 'unsigned', 'website' => 'unsigned', 'social_media' => 'unsigned', 'axis_tv' => 'unsigned', 'press_release' => 'unsigned'),
-    'production' => 'varchar',
+    'production' => 'unsigned_tiny',
     'production_name' => 'varchar',
     'production_email' => 'varchar',
     'production_phone' => 'varchar',
-    'printed_material' => 'varchar',
-    'university_logo' => 'varchar',
+    'printed_material' => 'unsigned_tiny',
+    'university_logo' => 'unsigned_tiny',
     'designing_material' => array('public_relations' => 'unsigned', 'marketing' => 'unsigned', 'other' => 'unsigned'),
     'designing_material_name' => 'varchar',
     'designing_material_email' => 'varchar',
@@ -124,10 +124,10 @@ function mcneese_event_workflow_table_install_structure() {
   );
 
   $structure['services'] = array(
-    'food_served' => 'varchar',
+    'food_served' => 'unsigned_tiny',
     'food_caterer' => 'varchar',
-    'alcohol' => 'varchar',
-    'open_flames' => 'varchar',
+    'alcohol' => 'unsigned_tiny',
+    'open_flames' => 'unsigned_tiny',
   );
 
   return $structure;

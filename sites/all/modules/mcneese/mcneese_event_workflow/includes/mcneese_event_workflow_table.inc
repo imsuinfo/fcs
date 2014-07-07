@@ -290,7 +290,7 @@ function mcneese_event_workflow_table_structure() {
     'generate_revenue' => array(
       'path' => 'event][registration][generate_revenue',
       'name' => "Generate Revenue",
-      'type' => 'text',
+      'type' => 'bool',
     ),
     'revenue_generated' => array(
       'path' => 'event][registration][revenue_generated',
@@ -393,7 +393,7 @@ function mcneese_event_workflow_table_structure() {
     'external_audio_person' => array(
       'path' => 'event][presentation][external_audio_person',
       'name' => "External Audio Person/Company",
-      'type' => 'text',
+      'type' => 'bool',
     ),
     'external_audio_person_name' => array(
       'path' => 'event][presentation][external_audio_person_name',
@@ -483,7 +483,7 @@ function mcneese_event_workflow_table_structure() {
     'food_caterer' => array(
       'path' => 'event][services][food_caterer',
       'name' => "Food Caterer",
-      'type' => 'bool',
+      'type' => 'text',
     ),
     'alcohol' => array(
       'path' => 'event][services][alcohol',
@@ -1117,6 +1117,9 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
   $presentation['registration'] = array(
     'require' => array(
       'label' => 'Registration or Ticket Purchase is Required',
+      'type' => array(
+        'value' => 'boolean',
+      ),
       'event_type' => array(
         'show' => TRUE,
         'hide' => array(57),
@@ -1166,6 +1169,9 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
     ),
     'generate_revenue' => array(
       'label' => 'Revenue is Generated',
+      'type' => array(
+        'value' => 'boolean',
+      ),
       'event_type' => array(
         'show' => TRUE,
         'hide' => array(57),
@@ -1222,6 +1228,9 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
     ),
     'podium' => array(
       'label' => 'Podium is Required',
+      'type' => array(
+        'value' => 'boolean',
+      ),
       'event_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
@@ -1229,6 +1238,9 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
     ),
     'portable_stage' => array(
       'label' => 'Portable Stage is Required',
+      'type' => array(
+        'value' => 'boolean',
+      ),
       'event_type' => array(
         'show' => TRUE,
         'hide' => array(57),
@@ -1244,6 +1256,9 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
     ),
     'security' => array(
       'label' => 'Security is Required',
+      'type' => array(
+        'value' => 'boolean',
+      ),
       'event_type' => array(
         'show' => TRUE,
         'hide' => array(57),
@@ -1251,6 +1266,9 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
     ),
     'parking_assistance' => array(
       'label' => 'Parking Assistance or Restrictions are Required',
+      'type' => array(
+        'value' => 'boolean',
+      ),
       'event_type' => array(
         'show' => TRUE,
         'hide' => array(57),
@@ -1266,6 +1284,9 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
     ),
     'road_closures' => array(
       'label' => 'Road Closures or Barricades are Required',
+      'type' => array(
+        'value' => 'boolean',
+      ),
       'event_type' => array(
         'show' => TRUE,
         'hide' => array(57),
@@ -1281,6 +1302,9 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
     ),
     'special_requests' => array(
       'label' => 'Special Requests are Required',
+      'type' => array(
+        'value' => 'boolean',
+      ),
       'event_type' => array(
         'show' => TRUE,
         'hide' => array(57),
@@ -1299,6 +1323,9 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
   $presentation['presentation'] = array(
     'technical_equipment' => array(
       'label' => 'Technical Equipment is Required',
+      'type' => array(
+        'value' => 'boolean',
+      ),
       'event_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
@@ -1332,6 +1359,9 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
     ),
     'external_audio_person' => array(
       'label' => 'External Audio/Video Person/Company is Required',
+      'type' => array(
+        'value' => 'boolean',
+      ),
       'event_type' => array(
         'show' => TRUE,
         'hide' => array(57),
@@ -1360,6 +1390,9 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
     ),
     'publicity' => array(
       'label' => 'Publicity is Required',
+      'type' => array(
+        'value' => 'boolean',
+      ),
       'event_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
@@ -1390,6 +1423,9 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
     ),
     'production' => array(
       'label' => 'Production Company or Professional Promoter is Required',
+      'type' => array(
+        'value' => 'boolean',
+      ),
       'event_type' => array(
         'show' => TRUE,
         'hide' => array(57),
@@ -1418,6 +1454,9 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
     ),
     'printed_material' => array(
       'label' => 'Printed Material is Required',
+      'type' => array(
+        'value' => 'boolean',
+      ),
       'event_type' => array(
         'show' => TRUE,
         'hide' => array(57),
@@ -1425,6 +1464,9 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
     ),
     'university_logo' => array(
       'label' => 'Printed Material Uses University Logo',
+      'type' => array(
+        'value' => 'boolean',
+      ),
       'event_type' => array(
         'show' => TRUE,
         'hide' => array(57),
@@ -1473,6 +1515,9 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
   $presentation['services'] = array(
     'food_served' => array(
       'label' => 'Food or Drink is Being Served',
+      'type' => array(
+        'value' => 'boolean',
+      ),
       'event_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
@@ -1487,6 +1532,9 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
     ),
     'alcohol' => array(
       'label' => 'Alcohol is Being Served',
+      'type' => array(
+        'value' => 'boolean',
+      ),
       'event_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
@@ -1494,6 +1542,9 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
     ),
     'open_flames' => array(
       'label' => 'Open Flames are Being Used',
+      'type' => array(
+        'value' => 'boolean',
+      ),
       'event_type' => array(
         'show' => TRUE,
         'hide' => array(57),
