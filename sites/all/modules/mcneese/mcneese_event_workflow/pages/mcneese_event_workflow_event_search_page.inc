@@ -989,7 +989,7 @@ function mcneese_event_workflow_event_search_0_form_build_search_target($structu
     }
   }
   else {
-    if (!empty($target_values['search'])) {
+    if (is_array($target_values) && array_key_exists('search', $target_values)) {
       $search[$target_field] = array();
       $search[$target_field]['group_name'] = $table_name;
       $search[$target_field]['field_name'] = $field_name;
