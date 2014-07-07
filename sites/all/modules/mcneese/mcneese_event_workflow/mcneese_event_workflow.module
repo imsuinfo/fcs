@@ -4467,10 +4467,10 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
               $field_alias = $already_joined[$mew_field];
 
               if (isset($field['multiple']) && $field['multiple']) {
-                $query->innerjoin($mew_field, $field_alias, $current_alias . '.event_id = ' . $field_alias . '.event_id AND ' . $current_alias . '.' . $field['field_name'] . ' = ' . $field_alias . '.revision AND ' . $field_alias);
+                $query->innerjoin($mew_field, $field_alias, $current_alias . '.event_id = ' . $field_alias . '.event_id AND ' . $current_alias . '.' . $field['field_name'] . ' = ' . $field_alias . '.revision');
               }
               else {
-                $query->innerjoin($mew_field, $field_alias, $current_alias . '.event_id = ' . $field_alias . '.event_id AND ' . $current_alias . '.' . $field['field_name'] . ' = ' . $field_alias . '.revision AND ' . $field_alias . ' AND ' . $field_alias . '.delta = 0');
+                $query->innerjoin($mew_field, $field_alias, $current_alias . '.event_id = ' . $field_alias . '.event_id AND ' . $current_alias . '.' . $field['field_name'] . ' = ' . $field_alias . '.revision AND ' . $field_alias . '.delta = 0');
               }
             }
             else {
