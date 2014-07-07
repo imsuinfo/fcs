@@ -928,6 +928,9 @@ function mcneese_event_workflow_event_search_0_form_build_target(&$form, &$form_
     $targets[$target_field][$field_delta]['search']['#expected_format'] = array('date' => "h:ia");
     $targets[$target_field][$field_delta]['search']['#description'] = "E.g, 12:31pm";
   }
+  elseif ($field['type'] == 'number') {
+    $targets[$target_field][$field_delta]['search']['#type'] = 'numberfield';
+  }
 
   return TRUE;
 }
@@ -1053,6 +1056,11 @@ function mcneese_event_workflow_event_search_0_form_build_search_target($structu
       $search[$target_field]['column'] = 'value';
       $search[$target_field]['type'] = $field['type'];
       $search[$target_field]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
+
+      // force empty values for numeric types to be 0.
+      if ($field['type'] == 'number' && empty($target_values['search'])) {
+        $target_values['search'] = 0;
+      }
 
       if (!empty($field['storage'])) {
         $search[$target_field]['search'] = event_workflow_convert_value_to_database_format($target_values['search'], $field['storage']);

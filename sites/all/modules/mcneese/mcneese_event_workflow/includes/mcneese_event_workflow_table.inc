@@ -304,12 +304,12 @@ function mcneese_event_workflow_table_structure() {
     'rectangular_tables_8ft' => array(
       'path' => 'event][setup][rectangular_tables_8ft',
       'name' => "8ft Rectangular Tables",
-      'type' => 'text',
+      'type' => 'number',
     ),
     'round_tables_8ft' => array(
       'path' => 'event][setup][round_tables_8ft',
       'name' => "8ft Round Tables",
-      'type' => 'text',
+      'type' => 'number',
     ),
     'other_tables' => array(
       'path' => 'event][setup][other_tables',
@@ -319,7 +319,7 @@ function mcneese_event_workflow_table_structure() {
     'standard_blue_chairs' => array(
       'path' => 'event][setup][standard_blue_chairs',
       'name' => "Standard Blue Chairs",
-      'type' => 'text',
+      'type' => 'number',
     ),
     'podium' => array(
       'path' => 'event][setup][podium',
