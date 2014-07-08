@@ -240,7 +240,7 @@ function mcneese_event_workflow_event_search_0_form($form, &$form_state) {
   $form['advanced'] = array(
     '#id' => 'search-advanced-fieldset',
     '#type' => 'fieldset',
-    '#title' => "Search",
+    '#title' => "Advanced Search",
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
     '#tree' => TRUE,
@@ -398,7 +398,7 @@ function mcneese_event_workflow_event_search_0_form($form, &$form_state) {
     '#id' => 'search-advanced-submit-search',
     '#name' => 'search-advanced-submit-search',
     '#type' => 'submit',
-    '#default_value' => t("Advanced Search"),
+    '#default_value' => t("Search"),
     '#attributes' => array(
       'class' => array(
         'no-print',
@@ -657,32 +657,32 @@ function mcneese_event_workflow_event_search_0_form_submit($form, &$form_state) 
 
     $structure = mcneese_event_workflow_table_structure();
 
-    $or = array();
     if (empty($form_state['values']['advanced']['targets'])) {
       $form_state['advanced_search-results'] = array();
       $form_state['advanced_search-search'] = $search;
       $form_state['advanced_search-sensitive'] = $sensitive;
     }
     else {
+      $name_count = 0;
       foreach ($form_state['values']['advanced']['targets'] as $target_name => $target_values) {
         foreach ($target_values as $target_delta => $target_value) {
           $built = mcneese_event_workflow_event_search_0_form_build_search_target($structure, $target_name, $target_value);
 
           if (!empty($built)) {
-            $name_count = 0;
             foreach ($built as $key => $value) {
               if ($key == 'and' || $key == 'or') {
                 $name = $key . '_' . $name_count;
                 $name_count++;
               }
               else {
-                $name = 'field_' . $key;
+                $name = $key;
               }
+
               $search[$name] = $value;
             }
-
-            unset($built);
           }
+
+          unset($built);
         }
       }
 
@@ -1001,33 +1001,33 @@ function mcneese_event_workflow_event_search_0_form_build_search_target($structu
     $and = array();
 
     if (!empty($target_values['hours'])) {
-      $target_field_alt = $target_field . '-hours';
-      $and[$target_field_alt]['group_name'] = $table_name;
-      $and[$target_field_alt]['field_name'] = $field_name;
-      $and[$target_field_alt]['search'] = $target_values['hours'];
-      $and[$target_field_alt]['column'] = 'hours';
-      $and[$target_field_alt]['type'] = $field['type'];
-      $and[$target_field_alt]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
+      $target_field_name = 'field_' . $target_field . '-hours';
+      $and[$target_field_name]['group_name'] = $table_name;
+      $and[$target_field_name]['field_name'] = $field_name;
+      $and[$target_field_name]['search'] = $target_values['hours'];
+      $and[$target_field_name]['column'] = 'hours';
+      $and[$target_field_name]['type'] = $field['type'];
+      $and[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
     }
 
     if (!empty($target_values['days'])) {
-      $target_field_alt = $target_field . '-days';
-      $and[$target_field_alt]['group_name'] = $table_name;
-      $and[$target_field_alt]['field_name'] = $field_name;
-      $and[$target_field_alt]['search'] = $target_values['days'];
-      $and[$target_field_alt]['column'] = 'days';
-      $and[$target_field_alt]['type'] = $field['type'];
-      $and[$target_field_alt]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
+      $target_field_name = 'field_' . $target_field . '-days';
+      $and[$target_field_name]['group_name'] = $table_name;
+      $and[$target_field_name]['field_name'] = $field_name;
+      $and[$target_field_name]['search'] = $target_values['days'];
+      $and[$target_field_name]['column'] = 'days';
+      $and[$target_field_name]['type'] = $field['type'];
+      $and[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
     }
 
     if (!empty($target_values['amount'])) {
-      $target_field_alt = $target_field . '-amount';
-      $and[$target_field_alt]['group_name'] = $table_name;
-      $and[$target_field_alt]['field_name'] = $field_name;
-      $and[$target_field_alt]['search'] = event_workflow_convert_value_to_database_format($target_values['amount'], 'currency');
-      $and[$target_field_alt]['column'] = 'amount';
-      $and[$target_field_alt]['type'] = $field['type'];
-      $and[$target_field_alt]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
+      $target_field_name = 'field_' . $target_field . '-amount';
+      $and[$target_field_name]['group_name'] = $table_name;
+      $and[$target_field_name]['field_name'] = $field_name;
+      $and[$target_field_name]['search'] = event_workflow_convert_value_to_database_format($target_values['amount'], 'currency');
+      $and[$target_field_name]['column'] = 'amount';
+      $and[$target_field_name]['type'] = $field['type'];
+      $and[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
     }
 
     if (!empty($and)) {
@@ -1039,14 +1039,14 @@ function mcneese_event_workflow_event_search_0_form_build_search_target($structu
       $and = array();
 
       foreach ($field['columns'] as $term_id => $column_name) {
-        $target_field_alt = $target_field . '-' . $column_name;
-        $and[$target_field_alt] = array();
-        $and[$target_field_alt]['group_name'] = $table_name;
-        $and[$target_field_alt]['field_name'] = $field_name;
-        $and[$target_field_alt]['column'] = $column_name;
-        $and[$target_field_alt]['type'] = $field['type'];
-        $and[$target_field_alt]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
-        $and[$target_field_alt]['search'] = $target_values['search'][$term_id];
+        $target_field_name = 'field_' . $target_field . '-' . $column_name;
+        $and[$target_field_name] = array();
+        $and[$target_field_name]['group_name'] = $table_name;
+        $and[$target_field_name]['field_name'] = $field_name;
+        $and[$target_field_name]['column'] = $column_name;
+        $and[$target_field_name]['type'] = $field['type'];
+        $and[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
+        $and[$target_field_name]['search'] = $target_values['search'][$term_id];
       }
 
       if (!empty($and)) {
@@ -1056,12 +1056,13 @@ function mcneese_event_workflow_event_search_0_form_build_search_target($structu
   }
   else {
     if (is_array($target_values) && array_key_exists('search', $target_values)) {
-      $search[$target_field] = array();
-      $search[$target_field]['group_name'] = $table_name;
-      $search[$target_field]['field_name'] = $field_name;
-      $search[$target_field]['column'] = 'value';
-      $search[$target_field]['type'] = $field['type'];
-      $search[$target_field]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
+      $target_field_name = 'field_' . $target_field;
+      $search[$target_field_name] = array();
+      $search[$target_field_name]['group_name'] = $table_name;
+      $search[$target_field_name]['field_name'] = $field_name;
+      $search[$target_field_name]['column'] = 'value';
+      $search[$target_field_name]['type'] = $field['type'];
+      $search[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
 
       // force empty values for numeric types to be 0.
       if ($field['type'] == 'number' && empty($target_values['search'])) {
@@ -1069,10 +1070,10 @@ function mcneese_event_workflow_event_search_0_form_build_search_target($structu
       }
 
       if (!empty($field['storage'])) {
-        $search[$target_field]['search'] = event_workflow_convert_value_to_database_format($target_values['search'], $field['storage']);
+        $search[$target_field_name]['search'] = event_workflow_convert_value_to_database_format($target_values['search'], $field['storage']);
       }
       else {
-        $search[$target_field]['search'] = $target_values['search'];
+        $search[$target_field_name]['search'] = $target_values['search'];
       }
     }
   }

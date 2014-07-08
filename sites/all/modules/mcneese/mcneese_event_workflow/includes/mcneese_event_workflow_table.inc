@@ -418,7 +418,7 @@ function mcneese_event_workflow_table_structure() {
     'publicity_details' => array(
       'path' => 'event][presentation][publicity_details',
       'columns' => event_workflow_get_publicity_details_list_options('column_name'),
-      'name' => "Publicity Details",
+      'name' => "Publicity Methods",
       'type' => 'checkboxes',
     ),
     'production' => array(
