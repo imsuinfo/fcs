@@ -1731,11 +1731,11 @@ function mcneese_event_workflow_get_event_field_registration_website($form, &$fo
         '#maxlength' => 255,
         '#states' => array(
           'visible' => array(
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps. '[require]' . '[' . $key . ']'  . '"]' => array('value' => 'yes'),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps. '[require]' . '[' . $key . ']'  . '"]' => array('value' => 1),
           ),
           'invisible' => array(
             'or' => array(
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[require]' . '[' . $key . ']'  . '"]' => array('value' => 'no'),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[require]' . '[' . $key . ']'  . '"]' => array('value' => 0),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[require]' . '[' . $key . ']'  . '"]' => array('value' => NULL),
             ),
           ),
@@ -1797,11 +1797,11 @@ function mcneese_event_workflow_get_event_field_registration_phone($form, &$form
         '#default_value' => $value,
         '#states' => array(
           'visible' => array(
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[require]' . '[' . $key . ']'  . '"]' => array('value' => 'yes'),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[require]' . '[' . $key . ']'  . '"]' => array('value' => 1),
           ),
           'invisible' => array(
             'or' => array(
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[require]' . '[' . $key . ']'  . '"]' => array('value' => 'no'),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[require]' . '[' . $key . ']'  . '"]' => array('value' => 0),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[require]' . '[' . $key . ']'  . '"]' => array('value' => NULL),
             ),
           ),
@@ -1865,11 +1865,11 @@ function mcneese_event_workflow_get_event_field_registration_ticket_price($form,
         '#maxlength' => 255,
         '#states' => array(
           'visible' => array(
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[require]' . '[' . $key . ']'  . '"]' => array('value' => 'yes'),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[require]' . '[' . $key . ']'  . '"]' => array('value' => 1),
           ),
           'invisible' => array(
             'or' => array(
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[require]' . '[' . $key . ']'  . '"]' => array('value' => 'no'),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[require]' . '[' . $key . ']'  . '"]' => array('value' => 0),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[require]' . '[' . $key . ']'  . '"]' => array('value' => NULL),
             ),
           ),
@@ -1933,11 +1933,11 @@ function mcneese_event_workflow_get_event_field_registration_ticket_dates($form,
         '#maxlength' => 255,
         '#states' => array(
           'visible' => array(
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[require]' . '[' . $key . ']'  . '"]' => array('value' => 'yes'),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[require]' . '[' . $key . ']'  . '"]' => array('value' => 1),
           ),
           'invisible' => array(
             'or' => array(
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[require]' . '[' . $key . ']'  . '"]' => array('value' => 'no'),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[require]' . '[' . $key . ']'  . '"]' => array('value' => 0),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[require]' . '[' . $key . ']'  . '"]' => array('value' => NULL),
             ),
           ),
@@ -2001,11 +2001,11 @@ function mcneese_event_workflow_get_event_field_registration_ticket_website($for
         '#maxlength' => 255,
         '#states' => array(
           'visible' => array(
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[require]' . '[' . $key . ']'  . '"]' => array('value' => 'yes'),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[require]' . '[' . $key . ']'  . '"]' => array('value' => 1),
           ),
           'invisible' => array(
             'or' => array(
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[require]' . '[' . $key . ']'  . '"]' => array('value' => 'no'),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[require]' . '[' . $key . ']'  . '"]' => array('value' => 0),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[require]' . '[' . $key . ']'  . '"]' => array('value' => NULL),
             ),
           ),
@@ -2069,11 +2069,11 @@ function mcneese_event_workflow_get_event_field_registration_ticket_phone($form,
         '#maxlength' => 255,
         '#states' => array(
           'visible' => array(
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[require]' . '[' . $key . ']'  . '"]' => array('value' => 'yes'),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[require]' . '[' . $key . ']'  . '"]' => array('value' => 1),
           ),
           'invisible' => array(
             'or' => array(
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[require]' . '[' . $key . ']'  . '"]' => array('value' => 'no'),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[require]' . '[' . $key . ']'  . '"]' => array('value' => 0),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[require]' . '[' . $key . ']'  . '"]' => array('value' => NULL),
             ),
           ),
@@ -2196,11 +2196,11 @@ function mcneese_event_workflow_get_event_field_registration_revenue_generated($
         '#default_value' => $value,
         '#states' => array(
           'visible' => array(
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[generate_revenue]' . '[' . $key . ']'  . '"]' => array('value' => 'yes'),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[generate_revenue]' . '[' . $key . ']'  . '"]' => array('value' => 1),
           ),
           'invisible' => array(
             'or' => array(
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[generate_revenue]' . '[' . $key . ']'  . '"]' => array('value' => 'no'),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[generate_revenue]' . '[' . $key . ']'  . '"]' => array('value' => 0),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[generate_revenue]' . '[' . $key . ']'  . '"]' => array('value' => NULL),
             ),
           ),
@@ -2591,11 +2591,11 @@ function mcneese_event_workflow_get_event_field_setup_portable_stage_configurati
         '#default_value' => $value,
         '#states' => array(
           'visible' => array(
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[portable_stage]' . '[' . $key . ']'  . '"]' => array('value' => 'yes'),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[portable_stage]' . '[' . $key . ']'  . '"]' => array('value' => 1),
           ),
           'invisible' => array(
             'or' => array(
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[portable_stage]' . '[' . $key . ']'  . '"]' => array('value' => 'no'),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[portable_stage]' . '[' . $key . ']'  . '"]' => array('value' => 0),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[portable_stage]' . '[' . $key . ']'  . '"]' => array('value' => NULL),
             ),
           ),
@@ -2778,11 +2778,11 @@ function mcneese_event_workflow_get_event_field_setup_parking_assistance_area($f
         '#default_value' => $value,
         '#states' => array(
           'visible' => array(
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[parking_assistance]' . '[' . $key . ']'  . '"]' => array('value' => 'yes'),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[parking_assistance]' . '[' . $key . ']'  . '"]' => array('value' => 1),
           ),
           'invisible' => array(
             'or' => array(
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[parking_assistance]' . '[' . $key . ']'  . '"]' => array('value' => 'no'),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[parking_assistance]' . '[' . $key . ']'  . '"]' => array('value' => 0),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[parking_assistance]' . '[' . $key . ']'  . '"]' => array('value' => NULL),
             ),
           ),
@@ -2907,11 +2907,11 @@ function mcneese_event_workflow_get_event_field_setup_road_closures_details($for
         '#rows' => 2,
         '#states' => array(
           'visible' => array(
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[road_closures]' . '[' . $key . ']'  . '"]' => array('value' => 'yes'),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[road_closures]' . '[' . $key . ']'  . '"]' => array('value' => 1),
           ),
           'invisible' => array(
             'or' => array(
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[road_closures]' . '[' . $key . ']'  . '"]' => array('value' => 'no'),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[road_closures]' . '[' . $key . ']'  . '"]' => array('value' => 0),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[road_closures]' . '[' . $key . ']'  . '"]' => array('value' => NULL),
             ),
           ),
@@ -3035,11 +3035,11 @@ function mcneese_event_workflow_get_event_field_setup_special_requests_details($
         '#rows' => 2,
         '#states' => array(
           'visible' => array(
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[special_requests]' . '[' . $key . ']'  . '"]' => array('value' => 'yes'),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[special_requests]' . '[' . $key . ']'  . '"]' => array('value' => 1),
           ),
           'invisible' => array(
             'or' => array(
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[special_requests]' . '[' . $key . ']'  . '"]' => array('value' => 'no'),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[special_requests]' . '[' . $key . ']'  . '"]' => array('value' => 0),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[special_requests]' . '[' . $key . ']'  . '"]' => array('value' => NULL),
             ),
           ),
@@ -3155,11 +3155,11 @@ function mcneese_event_workflow_get_event_field_presentation_technical_equipment
         '#options' => $technical_equipment_details_options,
         '#states' => array(
           'visible' => array(
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[technical_equipment]' . '[' . $key . ']'  . '"]' => array('value' => 'yes'),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[technical_equipment]' . '[' . $key . ']'  . '"]' => array('value' => 1),
           ),
           'invisible' => array(
             'or' => array(
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[technical_equipment]' . '[' . $key . ']'  . '"]' => array('value' => 'no'),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[technical_equipment]' . '[' . $key . ']'  . '"]' => array('value' => 0),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[technical_equipment]' . '[' . $key . ']'  . '"]' => array('value' => NULL),
             ),
           ),
@@ -3220,14 +3220,14 @@ function mcneese_event_workflow_get_event_field_presentation_technical_equipment
         '#min' => 0,
         '#states' => array(
           'visible' => array(
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[technical_equipment]' . '[' . $key . ']'  . '"]' => array('value' => 'yes'),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[technical_equipment]' . '[' . $key . ']'  . '"]' => array('value' => 1),
             ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[technical_equipment_details]' . '[' . $key . ']' . '[76]' . '"]' => array('checked' => TRUE),
           ),
           'invisible' => array(
             'or' => array(
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[technical_equipment_details]' . '[' . $key . ']' . '[76]' . '"]' => array('checked' => FALSE),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[technical_equipment_details]' . '[' . $key . ']' . '[76]' . '"]' => array('value' => NULL),
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[technical_equipment]' . '[' . $key . ']' . '"]' => array('value' => 'no'),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[technical_equipment]' . '[' . $key . ']' . '"]' => array('value' => 0),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[technical_equipment]' . '[' . $key . ']' . '"]' => array('value' => NULL),
             ),
           ),
@@ -3352,11 +3352,11 @@ function mcneese_event_workflow_get_event_field_presentation_external_audio_pers
         '#maxlength' => 255,
         '#states' => array(
           'visible' => array(
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[external_audio_person]' . '[' . $key . ']' . '"]' => array('value' => 'yes'),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[external_audio_person]' . '[' . $key . ']' . '"]' => array('value' => 1),
           ),
           'invisible' => array(
             'or' => array(
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[external_audio_person]' . '[' . $key . ']' . '"]' => array('value' => 'no'),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[external_audio_person]' . '[' . $key . ']' . '"]' => array('value' => 0),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[external_audio_person]' . '[' . $key . ']' . '"]' => array('value' => NULL),
             ),
           ),
@@ -3422,11 +3422,11 @@ function mcneese_event_workflow_get_event_field_presentation_external_audio_pers
         '#maxlength' => 255,
         '#states' => array(
           'visible' => array(
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[external_audio_person]' . '[' . $key . ']' . '"]' => array('value' => 'yes'),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[external_audio_person]' . '[' . $key . ']' . '"]' => array('value' => 1),
           ),
           'invisible' => array(
             'or' => array(
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[external_audio_person]' . '[' . $key . ']' . '"]' => array('value' => 'no'),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[external_audio_person]' . '[' . $key . ']' . '"]' => array('value' => 0),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[external_audio_person]' . '[' . $key . ']' . '"]' => array('value' => NULL),
             ),
           ),
@@ -3490,11 +3490,11 @@ function mcneese_event_workflow_get_event_field_presentation_external_audio_pers
         '#default_value' => $value,
         '#states' => array(
           'visible' => array(
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[external_audio_person]' . '[' . $key . ']' . '"]' => array('value' => 'yes'),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[external_audio_person]' . '[' . $key . ']' . '"]' => array('value' => 1),
           ),
           'invisible' => array(
             'or' => array(
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[external_audio_person]' . '[' . $key . ']' . '"]' => array('value' => 'no'),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[external_audio_person]' . '[' . $key . ']' . '"]' => array('value' => 0),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[external_audio_person]' . '[' . $key . ']' . '"]' => array('value' => NULL),
             ),
           ),
@@ -3619,11 +3619,11 @@ function mcneese_event_workflow_get_event_field_presentation_production_name($fo
         '#maxlength' => 255,
         '#states' => array(
           'visible' => array(
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[production]' . '[' . $key . ']' . '"]' => array('value' => 'yes'),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[production]' . '[' . $key . ']' . '"]' => array('value' => 1),
           ),
           'invisible' => array(
             'or' => array(
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[production]' . '[' . $key . ']' . '"]' => array('value' => 'no'),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[production]' . '[' . $key . ']' . '"]' => array('value' => 0),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[production]' . '[' . $key . ']' . '"]' => array('value' => NULL),
             ),
           ),
@@ -3689,11 +3689,11 @@ function mcneese_event_workflow_get_event_field_presentation_production_email($f
         '#maxlength' => 255,
         '#states' => array(
           'visible' => array(
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[production]' . '[' . $key . ']' . '"]' => array('value' => 'yes'),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[production]' . '[' . $key . ']' . '"]' => array('value' => 1),
           ),
           'invisible' => array(
             'or' => array(
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[production]' . '[' . $key . ']' . '"]' => array('value' => 'no'),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[production]' . '[' . $key . ']' . '"]' => array('value' => 0),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[production]' . '[' . $key . ']' . '"]' => array('value' => NULL),
             ),
           ),
@@ -3757,11 +3757,11 @@ function mcneese_event_workflow_get_event_field_presentation_production_phone($f
         '#default_value' => $value,
         '#states' => array(
           'visible' => array(
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[production]' . '[' . $key . ']' . '"]' => array('value' => 'yes'),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[production]' . '[' . $key . ']' . '"]' => array('value' => 1),
           ),
           'invisible' => array(
             'or' => array(
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[production]' . '[' . $key . ']' . '"]' => array('value' => 'no'),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[production]' . '[' . $key . ']' . '"]' => array('value' => 0),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[production]' . '[' . $key . ']' . '"]' => array('value' => NULL),
             ),
           ),
@@ -3877,11 +3877,11 @@ function mcneese_event_workflow_get_event_field_presentation_publicity_details($
         '#options' => $publicity_details_options,
         '#states' => array(
           'visible' => array(
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[publicity]' . '[' . $key . ']' . '"]' => array('value' => 'yes'),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[publicity]' . '[' . $key . ']' . '"]' => array('value' => 1),
           ),
           'invisible' => array(
             'or' => array(
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[publicity]' . '[' . $key . ']' . '"]' => array('value' => 'no'),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[publicity]' . '[' . $key . ']' . '"]' => array('value' => 0),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[publicity]' . '[' . $key . ']' . '"]' => array('value' => NULL),
             ),
           ),
@@ -4005,11 +4005,11 @@ function mcneese_event_workflow_get_event_field_presentation_university_logo($fo
         '#options' => array(1 => "Yes", 0 => "No"),
         '#states' => array(
           'visible' => array(
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => 'yes'),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => 1),
           ),
           'invisible' => array(
             'or' => array(
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => 'no'),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => 0),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => NULL),
             ),
           ),
@@ -4078,14 +4078,14 @@ function mcneese_event_workflow_get_event_field_presentation_designing_material(
         '#options' => $desiging_material_options,
         '#states' => array(
           'visible' => array(
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => 'yes'),
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[university_logo]' . '[' . $key . ']' . '"]' => array('value' => 'yes'),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => 1),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[university_logo]' . '[' . $key . ']' . '"]' => array('value' => 1),
           ),
           'invisible' => array(
             'or' => array(
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => 'no'),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => 0),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => NULL),
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[university_logo]' . '[' . $key . ']' . '"]' => array('value' => 'no'),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[university_logo]' . '[' . $key . ']' . '"]' => array('value' => 0),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[university_logo]' . '[' . $key . ']' . '"]' => array('value' => NULL),
             ),
           ),
@@ -4151,16 +4151,16 @@ function mcneese_event_workflow_get_event_field_presentation_designing_material_
         '#maxlength' => 255,
         '#states' => array(
           'visible' => array(
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => 'yes'),
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[university_logo]' . '[' . $key . ']' . '"]' => array('value' => 'yes'),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => 1),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[university_logo]' . '[' . $key . ']' . '"]' => array('value' => 1),
             ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[designing_material]' . '[' . $key . ']' . '[97]' . '"]' => array('checked' => TRUE),
           ),
           'invisible' => array(
             'or' => array(
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[designing_material]' . '[' . $key . ']' . '[97]' . '"]' => array('checked' => FALSE),
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => 'no'),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => 0),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => NULL),
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[university_logo]' . '[' . $key . ']' . '"]' => array('value' => 'no'),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[university_logo]' . '[' . $key . ']' . '"]' => array('value' => 0),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[university_logo]' . '[' . $key . ']' . '"]' => array('value' => NULL),
             ),
           ),
@@ -4226,16 +4226,16 @@ function mcneese_event_workflow_get_event_field_presentation_designing_material_
         '#maxlength' => 255,
         '#states' => array(
           'visible' => array(
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => 'yes'),
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[university_logo]' . '[' . $key . ']' . '"]' => array('value' => 'yes'),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => 1),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[university_logo]' . '[' . $key . ']' . '"]' => array('value' => 1),
             ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[designing_material]' . '[' . $key . ']' . '[97]' . '"]' => array('checked' => TRUE),
           ),
           'invisible' => array(
             'or' => array(
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[designing_material]' . '[' . $key . ']' . '[97]' . '"]' => array('checked' => FALSE),
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => 'no'),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => 0),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => NULL),
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[university_logo]' . '[' . $key . ']' . '"]' => array('value' => 'no'),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[university_logo]' . '[' . $key . ']' . '"]' => array('value' => 0),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[university_logo]' . '[' . $key . ']' . '"]' => array('value' => NULL),
             ),
           ),
@@ -4299,16 +4299,16 @@ function mcneese_event_workflow_get_event_field_presentation_designing_material_
         '#default_value' => $value,
         '#states' => array(
           'visible' => array(
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => 'yes'),
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[university_logo]' . '[' . $key . ']' . '"]' => array('value' => 'yes'),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => 1),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[university_logo]' . '[' . $key . ']' . '"]' => array('value' => 1),
             ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[designing_material]' . '[' . $key . ']' . '[97]' . '"]' => array('checked' => TRUE),
           ),
           'invisible' => array(
             'or' => array(
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[designing_material]' . '[' . $key . ']' . '[97]' . '"]' => array('checked' => FALSE),
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => 'no'),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => 0),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => NULL),
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[university_logo]' . '[' . $key . ']' . '"]' => array('value' => 'no'),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[university_logo]' . '[' . $key . ']' . '"]' => array('value' => 0),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[university_logo]' . '[' . $key . ']' . '"]' => array('value' => NULL),
             ),
           ),
@@ -4422,11 +4422,11 @@ function mcneese_event_workflow_get_event_field_services_food_caterer($form, &$f
         '#maxlength' => 255,
         '#states' => array(
           'visible' => array(
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[food_served]' . '[' . $key . ']' . '"]' => array('value' => 'yes'),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[food_served]' . '[' . $key . ']' . '"]' => array('value' => 1),
           ),
           'invisible' => array(
             'or' => array(
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[food_served]' . '[' . $key . ']' . '"]' => array('value' => 'no'),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[food_served]' . '[' . $key . ']' . '"]' => array('value' => 0),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[food_served]' . '[' . $key . ']' . '"]' => array('value' => NULL),
             ),
           ),
@@ -4533,11 +4533,11 @@ function mcneese_event_workflow_get_event_field_services_alcohol_note($form, &$f
       '#type' => 'container',
       '#states' => array(
         'visible' => array(
-          ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[alcohol][0]' . '"]' => array('value' => 'yes'),
+          ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[alcohol][0]' . '"]' => array('value' => 1),
         ),
         'invisible' => array(
           'or' => array(
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[alcohol][0]' . '"]' => array('value' => 'no'),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[alcohol][0]' . '"]' => array('value' => 0),
             ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[alcohol][0]' . '"]' => array('value' => NULL),
           ),
         ),
