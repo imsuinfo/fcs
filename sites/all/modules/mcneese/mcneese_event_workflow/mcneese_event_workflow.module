@@ -4358,9 +4358,9 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
     $already_joined['mew_field_information_title'] = 'mfit';
     $already_joined['mew_field_information_type'] = 'mfitp';
 
-    $query->innerjoin('mew_field_dates_date', 'mfdd', 'mct.event_id = mfdd.event_id AND mcd.date = mfdd.revision');
-    $query->innerjoin('mew_field_dates_time_start', 'mfdts', 'mct.event_id = mfdts.event_id AND mcd.time_start = mfdts.revision');
-    $query->innerjoin('mew_field_dates_time_stop', 'mfdtsp', 'mct.event_id = mfdtsp.event_id AND mcd.time_stop = mfdtsp.revision');
+    $query->innerjoin('mew_field_dates_date', 'mfdd', 'mct.event_id = mfdd.event_id AND mcd.date = mfdd.revision AND mfdd.delta = 0');
+    $query->innerjoin('mew_field_dates_time_start', 'mfdts', 'mct.event_id = mfdts.event_id AND mcd.time_start = mfdts.revision AND mfdts.delta = 0');
+    $query->innerjoin('mew_field_dates_time_stop', 'mfdtsp', 'mct.event_id = mfdtsp.event_id AND mcd.time_stop = mfdtsp.revision AND mfdtsp.delta = 0');
 
     $already_joined['mew_field_dates_date'] = 'mfdd';
     $already_joined['mew_field_dates_time_start'] = 'mfdts';
@@ -4408,22 +4408,7 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
     $query->range($start, $limit + 1);
 
     if ($manager_as_administer) {
-      if (!$ignore_decisions) {
-        $show_status = array(
-          MEW_EVENT_STATUS_LOCKED,
-          MEW_EVENT_STATUS_UNLOCKED,
-        );
-
-        $show_step = array(
-          MEW_REVIEW_STEP_VENUE_AVAILABLE,
-          MEW_REVIEW_STEP_REVIEW,
-          MEW_REVIEW_STEP_USAGE_FEES,
-          MEW_REVIEW_STEP_MAKE_DECISIONS
-        );
-
-        $query->condition('mfts.value', $show_status, 'IN');
-        $query->condition('mftsp.value', $show_step, 'IN');
-      }
+      // add no restrictions.
     }
     elseif ($reviewer || $manager_as_reviewer) {
       $query->innerjoin('mew_current_event_coordinator', 'mcec', 'mer.id = mcec.event_id');
@@ -4433,8 +4418,15 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
       $query->innerjoin('mew_field_venue_coordinator_user_id', 'mfvcui', 'mcvc.event_id = mfvcui.event_id AND mcvc.user_id = mfvcui.revision AND mfvcui.delta = 0');
 
       $or = db_or();
-
-      if (!$ignore_decisions) {
+      if ($ignore_decisions) {
+        if ($manager_as_administer) {
+          // add no restrictions.
+        }
+        else {
+          $or->condition('mfvcui.value', $user->uid);
+        }
+      }
+      else {
         $show_status = array(
           MEW_EVENT_STATUS_LOCKED,
           MEW_EVENT_STATUS_UNLOCKED,
@@ -4467,11 +4459,32 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
         $and->condition('mfvcui.value', $user->uid);
         $or->condition($and);
       }
-      else {
-        $or->condition('mfvcui.value', $user->uid);
-      }
 
-      if (!$ignore_decisions) {
+      if ($ignore_decisions) {
+        if ($reviewer) {
+          $reviewers_query = db_select('mew_reviewers', 'mr');
+          $reviewers_query->condition('mr.user_id', $user->uid);
+          $reviewers_query->addfield('mr', 'event_classification', 'event_classification');
+          $reviewers_query->addfield('mr', 'review_step', 'review_step');
+          $reviewers_query->distinct();
+
+          $reviewers_results = $reviewers_query->execute()->fetchAll();
+          if (!empty($reviewers_results)) {
+            foreach ($reviewers_results as $reviewers_result) {
+              $and = db_and();
+              $and->condition('mfecc.value', $reviewers_result->event_classification);
+              $and->condition('mftsp.value', $reviewers_result->review_step);
+              $or->condition($and);
+            }
+          }
+
+          $or->condition('mer.user_id', $user->uid);
+        }
+        else {
+          $or->condition('mer.user_id', $user->uid);
+        }
+      }
+      else {
         $show_status = array(
           MEW_EVENT_STATUS_LOCKED,
         );
@@ -4525,31 +4538,12 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
 
         $or->condition($and);
       }
-      else {
-        $reviewers_query = db_select('mew_reviewers', 'mr');
-        $reviewers_query->condition('mr.user_id', $user->uid);
-        $reviewers_query->addfield('mr', 'event_classification', 'event_classification');
-        $reviewers_query->addfield('mr', 'review_step', 'review_step');
-        $reviewers_query->distinct();
-
-        $reviewers_results = $reviewers_query->execute()->fetchAll();
-        if (!empty($reviewers_results)) {
-          foreach ($reviewers_results as $reviewers_result) {
-            $and = db_and();
-            $and->condition('mfecc.value', $reviewers_result->event_classification);
-            $and->condition('mftsp.value', $reviewers_result->review_step);
-            $or->condition($and);
-          }
-        }
-      }
 
       $query->condition($or);
     }
     elseif ($requester) {
       // load all events created by the requester who is neither an admin nor a manager.
-      if (!$manager) {
-        $query->condition('mer.user_id', $user->uid);
-      }
+      $query->condition('mer.user_id', $user->uid);
     }
     else {
       // failsafe, should never happen.
