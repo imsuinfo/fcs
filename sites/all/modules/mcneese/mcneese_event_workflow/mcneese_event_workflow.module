@@ -4398,7 +4398,7 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
 
     if (is_array($search)) {
       $operand = db_and();
-      $result = mcneese_event_workflow_event_process_listing_search_array($query, $operand, $already_joined, $already_joined_count, $already_added, $search, 1);
+      $result = mcneese_event_workflow_event_process_listing_search_array($query, $operand, $already_joined, $already_joined_count, $already_added, $search, 1, $like);
 
       if ($result) {
         $query->condition($operand);
@@ -4677,8 +4677,7 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
       $sub_query->orderBy('date', 'ASC');
       $sub_query->orderBy('time_start', 'ASC');
 
-      $sub_executed = $sub_query->execute();
-      $sub_results = $sub_executed->fetchAll();
+      $sub_results = $sub_query->execute()->fetchAll();
 
       $found[$result->id]->date = array();
       $found[$result->id]->time_start = array();
@@ -4764,6 +4763,8 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
  * @param array $already_added
  *   An array of field names that have already been added as select parameters
  *   for the query object.
+ * @param string $like
+ *   The appropriate SQL like or ilike string for sensitive and insensitive.
  *
  * @param bool
  *   TRUE when a valid field is found and added to the $operand and FALSE
@@ -4771,7 +4772,7 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
  *
  * @see mcneese_event_workflow_event_load_listing()
  */
-function mcneese_event_workflow_event_process_listing_search_array(&$query, &$operand, &$already_joined, &$already_joined_count, &$already_added, $search, $recurse_count) {
+function mcneese_event_workflow_event_process_listing_search_array(&$query, &$operand, &$already_joined, &$already_joined_count, &$already_added, $search, $recurse_count, $like) {
   if (!is_object($query)) {
     cf_error::invalid_object('query');
     return FALSE;
@@ -4804,6 +4805,11 @@ function mcneese_event_workflow_event_process_listing_search_array(&$query, &$op
 
   if (!is_array($already_added)) {
     cf_error::invalid_array('already_added');
+    return FALSE;
+  }
+
+  if (!is_string($like)) {
+    cf_error::invalid_string('like');
     return FALSE;
   }
 
@@ -4901,7 +4907,7 @@ function mcneese_event_workflow_event_process_listing_search_array(&$query, &$op
     }
 
     $next_count = $recurse_count + 1;
-    $result = mcneese_event_workflow_event_process_listing_search_array($query, $inner_operand, $already_joined, $already_joined_count, $already_added, $search_values, $next_count);
+    $result = mcneese_event_workflow_event_process_listing_search_array($query, $inner_operand, $already_joined, $already_joined_count, $already_added, $search_values, $next_count, $like);
 
     if ($result) {
       $operand->condition($inner_operand);

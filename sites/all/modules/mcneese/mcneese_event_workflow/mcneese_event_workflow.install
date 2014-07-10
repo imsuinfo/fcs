@@ -369,6 +369,48 @@ function mcneese_event_workflow_schema() {
     ),
   );
 
+  $schema['mew_search_settings'] = array(
+    'description' => $t("McNeese Event Workflow Event Search Settings table. This represents search saved target structures for individual users."),
+    'fields' => array(
+      'id' => array(
+        'description' => $t("The primary key used to represent the search setting."),
+        'type' => 'serial',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'user_id' => array(
+        'description' => $t("This is the system id. Represents the user who created the event."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'human_name' => array(
+        'description' => $t("A user friendly name for the search setting."),
+        'type' => 'varchar',
+        'length' => '63',
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'data' => array(
+        'description' => $t("The search targets array."),
+        'type' => 'text',
+        'size' => 'big',
+        'serialize' => TRUE,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('id'),
+    'foreign keys' => array(
+      'user_id' => array(
+        'table' => 'users',
+        'columns' => array('user_id' => 'uid'),
+      ),
+    ),
+  );
+
 
   // create the secondary tables associated with the table mew_event_requests.
   $structure = mcneese_event_workflow_table_install_structure();
@@ -678,6 +720,7 @@ function mcneese_event_workflow_install() {
 
   db_query('ALTER TABLE {mew_event_revisions} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
   db_query('ALTER TABLE {mew_reviewers} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE CASCADE');
+  db_query('ALTER TABLE {mew_search_settings} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE CASCADE');
 
   foreach ($structure as $structure_name => &$structure_array) {
     $table1_name = 'mew_current_' . $structure_name;
@@ -713,6 +756,7 @@ function mcneese_event_workflow_uninstall() {
 
   db_query('ALTER TABLE {mew_event_revisions} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
   db_query('ALTER TABLE {mew_reviewers} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
+  db_query('ALTER TABLE {mew_search_settings} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
   db_query('ALTER TABLE {mew_review_classifications} DROP CONSTRAINT IF EXISTS ' . $key3_foreign);
 
   foreach ($structure as $structure_name => &$structure_array) {
