@@ -26,10 +26,7 @@ function mcneese_event_workflow_event_reviewers_0_autocomplete_user_id($string) 
   }
 
   if (!is_string($string)) {
-    if (class_exists('cf_error')) {
-      cf_error::not_string('string');
-    }
-
+    cf_error::not_string('string');
     drupal_json_output(array());
     return;
   }
@@ -97,10 +94,7 @@ function mcneese_event_workflow_event_reviewers_0_autocomplete_reviewer_classifi
   }
 
   if (!is_string($string)) {
-    if (class_exists('cf_error')) {
-      cf_error::not_string('string');
-    }
-
+    cf_error::not_string('string');
     drupal_json_output(array());
     return;
   }
@@ -158,10 +152,7 @@ function mcneese_event_workflow_event_edit_0_autocomplete_event_coordinator_name
   }
 
   if (!is_string($string)) {
-    if (class_exists('cf_error')) {
-      cf_error::not_string('string');
-    }
-
+    cf_error::not_string('string');
     drupal_json_output(array());
     return;
   }
@@ -254,10 +245,7 @@ function mcneese_event_workflow_event_edit_0_autocomplete_event_coordinator_emai
   }
 
   if (!is_string($string)) {
-    if (class_exists('cf_error')) {
-      cf_error::not_string('string');
-    }
-
+    cf_error::not_string('string');
     drupal_json_output(array());
     return;
   }
@@ -349,10 +337,7 @@ function mcneese_event_workflow_event_edit_0_autocomplete_event_coordinator_phon
   }
 
   if (!is_string($string)) {
-    if (class_exists('cf_error')) {
-      cf_error::not_string('string');
-    }
-
+    cf_error::not_string('string');
     drupal_json_output(array());
     return;
   }

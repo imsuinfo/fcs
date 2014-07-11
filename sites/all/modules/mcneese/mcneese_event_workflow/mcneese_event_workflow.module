@@ -1190,9 +1190,7 @@ function mcneese_event_workflow_management_page_event_reviewer_access($user, $ev
     return FALSE;
   }
   catch (Exception $ex) {
-    if (class_exists('cf_error')) {
-      cf_error::on_query_execution($ex);
-    }
+    cf_error::on_query_execution($ex);
 
     return FALSE;
   }
@@ -4692,9 +4690,7 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
     }
   }
   catch (Exception $ex) {
-    if (class_exists('cf_error')) {
-      cf_error::on_query_execution($ex);
-    }
+    cf_error::on_query_execution($ex);
 
     return FALSE;
   }

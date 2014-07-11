@@ -398,9 +398,7 @@ function mcneese_event_workflow_event_history_0_form($form, &$form_state, $event
     $form['navigator_bottom']['markup'] = $form['navigator_top']['markup'];
   }
   catch (Exception $ex) {
-    if (class_exists('cf_error')) {
-      cf_error::on_query_execution($ex);
-    }
+    cf_error::on_query_execution($ex);
 
     return array();
   }

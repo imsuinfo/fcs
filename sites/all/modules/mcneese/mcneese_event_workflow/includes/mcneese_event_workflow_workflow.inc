@@ -734,10 +734,7 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
   }
   catch (Exception $ex) {
     $transaction->rollback();
-
-    if (class_exists('cf_error')) {
-      cf_error::on_query_execution($ex);
-    }
+    cf_error::on_query_execution($ex);
 
     return FALSE;
   }
