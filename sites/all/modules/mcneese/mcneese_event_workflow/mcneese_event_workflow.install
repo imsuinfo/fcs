@@ -411,6 +411,150 @@ function mcneese_event_workflow_schema() {
     ),
   );
 
+  $schema['mew_banner_locations'] = array(
+    'description' => $t("McNeese Event Workflow Event Banner table. This is for providing local storage of a given banner category."),
+    'fields' => array(
+      'id' => array(
+        'description' => $t("The primary key used to represent an event request."),
+        'type' => 'serial',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'machine_name' => array(
+        'description' => $t("A machine friendly name for the location category."),
+        'type' => 'varchar',
+        'length' => '15',
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'human_name' => array(
+        'description' => $t("A user friendly name for the category."),
+        'type' => 'varchar',
+        'length' => '63',
+        'not null' => FALSE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('id'),
+    'unique keys' => array(
+      'machine_name' => array('machine_name'),
+    ),
+  );
+
+  $schema['mew_banner_buildings'] = array(
+    'description' => $t("McNeese Event Workflow Event Banner table. This is for providing local storage of a given banner category."),
+    'fields' => array(
+      'id' => array(
+        'description' => $t("The primary key used to represent an event request."),
+        'type' => 'serial',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'machine_name' => array(
+        'description' => $t("A machine friendly name for the location category."),
+        'type' => 'varchar',
+        'length' => '15',
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'human_name' => array(
+        'description' => $t("A user friendly name for the category."),
+        'type' => 'varchar',
+        'length' => '63',
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'location' => array(
+        'description' => $t("Foreign key to the {mew_banner_locations} table."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('id'),
+    'foreign keys' => array(
+      'location' => array(
+        'table' => 'mew_banner_locations',
+        'columns' => array('location' => 'id'),
+      ),
+    ),
+    'unique keys' => array(
+      'machine_name' => array('machine_name', 'location'),
+    ),
+  );
+
+  $schema['mew_banner_rooms'] = array(
+    'description' => $t("McNeese Event Workflow Event Banner table. This is for providing local storage of a given banner category."),
+    'fields' => array(
+      'id' => array(
+        'description' => $t("The primary key used to represent an event request."),
+        'type' => 'serial',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'machine_name' => array(
+        'description' => $t("A machine friendly name for the location category."),
+        'type' => 'varchar',
+        'length' => '15',
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'human_name' => array(
+        'description' => $t("A user friendly name for the category."),
+        'type' => 'varchar',
+        'length' => '63',
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'building' => array(
+        'description' => $t("Foreign key to the {mew_banner_buildings} table."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'coordinator_id' => array(
+        'description' => $t("Represents the user id of the room coordinator. This is a foreign key to the {users} table."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'capacity_normal' => array(
+        'description' => $t("Represents the date the image was uploaded."),
+        'type' => 'int',
+        'size' => 'normal',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'capacity_max' => array(
+        'description' => $t("Represents the date the image was uploaded."),
+        'type' => 'int',
+        'size' => 'normal',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('id'),
+    'foreign keys' => array(
+      'building' => array(
+        'table' => 'mew_banner_buildings',
+        'columns' => array('building' => 'id'),
+      ),
+      'coordinator_id' => array(
+        'table' => 'users',
+        'columns' => array('coordinator_id' => 'uid'),
+      ),
+    ),
+    'unique keys' => array(
+      'machine_name' => array('machine_name', 'building'),
+    ),
+  );
+
 
   // create the secondary tables associated with the table mew_event_requests.
   $structure = mcneese_event_workflow_table_install_structure();
@@ -713,14 +857,35 @@ function mcneese_event_workflow_install() {
 
   $key2_name = 'user_id';
   $key2_foreign = 'user_id_fkey';
+  $key2_name_1 = 'coordinator_id';
+  $key2_foreign_1 = 'coordinator_id_fkey';
   $table2_foreign = 'users';
   $table2_foreign_key = 'uid';
+
+  $key3_name = 'location';
+  $key3_foreign = 'location_fkey';
+  $table3_foreign = 'mew_banner_locations';
+  $table3_foreign_key = 'id';
+
+  $key4_name = 'building';
+  $key4_foreign = 'building_fkey';
+  $table4_foreign = 'mew_banner_buildings';
+  $table4_foreign_key = 'id';
+
+  $key5_name = 'room';
+  $key5_foreign = 'room_fkey';
+  $table5_foreign = 'mew_banner_rooms';
+  $table5_foreign_key = 'id';
 
   $structure = mcneese_event_workflow_table_install_structure();
 
   db_query('ALTER TABLE {mew_event_revisions} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
   db_query('ALTER TABLE {mew_reviewers} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE CASCADE');
   db_query('ALTER TABLE {mew_search_settings} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE CASCADE');
+
+  db_query('ALTER TABLE {mew_banner_buildings} ADD CONSTRAINT ' . $key3_foreign . ' FOREIGN KEY (' . $key3_name . ') REFERENCES {' . $table3_foreign . '} (' . $table3_foreign_key . ') ON DELETE CASCADE');
+  db_query('ALTER TABLE {mew_banner_rooms} ADD CONSTRAINT ' . $key4_foreign . ' FOREIGN KEY (' . $key4_name . ') REFERENCES {' . $table4_foreign . '} (' . $table4_foreign_key . ') ON DELETE CASCADE');
+  db_query('ALTER TABLE {mew_banner_rooms} ADD CONSTRAINT ' . $key2_foreign_1 . ' FOREIGN KEY (' . $key2_name_1 . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
 
   foreach ($structure as $structure_name => &$structure_array) {
     $table1_name = 'mew_current_' . $structure_name;
@@ -750,14 +915,21 @@ function mcneese_event_workflow_uninstall() {
   // drupal does not pay attention to foreign key relations when dropping the database, so manually remove all manually added foreign keys.
   $key1_foreign = 'event_id_fkey';
   $key2_foreign = 'user_id_fkey';
-  $key3_foreign = 'review_fkey';
+  $key2_foreign_1 = 'coordinator_id_fkey';
+  $key3_foreign = 'location_fkey';
+  $key4_foreign = 'building_fkey';
+  $key5_foreign = 'room_fkey';
+  $keyR_foreign = 'review_fkey';
 
   $structure = mcneese_event_workflow_table_install_structure();
 
   db_query('ALTER TABLE {mew_event_revisions} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
   db_query('ALTER TABLE {mew_reviewers} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
   db_query('ALTER TABLE {mew_search_settings} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
-  db_query('ALTER TABLE {mew_review_classifications} DROP CONSTRAINT IF EXISTS ' . $key3_foreign);
+  db_query('ALTER TABLE {mew_banner_buildings} DROP CONSTRAINT IF EXISTS ' . $key3_foreign);
+  db_query('ALTER TABLE {mew_banner_rooms} DROP CONSTRAINT IF EXISTS ' . $key4_foreign);
+  db_query('ALTER TABLE {mew_banner_rooms} DROP CONSTRAINT IF EXISTS ' . $key2_foreign_1);
+  db_query('ALTER TABLE {mew_review_classifications} DROP CONSTRAINT IF EXISTS ' . $keyR_foreign);
 
   foreach ($structure as $structure_name => &$structure_array) {
     $table_name = 'mew_current_' . $structure_name;

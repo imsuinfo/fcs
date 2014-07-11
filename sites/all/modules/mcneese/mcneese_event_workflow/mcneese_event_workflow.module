@@ -273,6 +273,10 @@ define('MEW_EVENT_STATUS_CANCELLED', 7);
  * Defines a recursion limit for the search and/or operations.
  */
  define('MEW_MAX_SEARCH_RECURSION', 3);
+/**
+ * Defines a failsafe coordinator id to use.
+ */
+ define('MEW_FAILSAFE_COORDINATOR_ID', 45);
 
 
 /**
@@ -2212,6 +2216,192 @@ function mcneese_event_workflow_force_cache($save = TRUE) {
       mcneese_event_workflow_load_buildings($location);
     }
   }
+}
+
+/**
+ * Synchronizes the local database with the banner venue information.
+ *
+ * @return bool
+ *   TRUE on success, FALSE otherwise.
+ */
+function mcneese_event_workflow_sync_banner_venue_to_local() {
+  $join = ' inner join ucs.msu_venue_list mvl on (mvl.category = mvd.category and mvl.building_code = mvd.building_code and mvl.room_number = mvd.room_number)';
+
+  $select = 'mvd.*';
+  $select .= ', mvl.building_desc as building_desc';
+  $select .= ', mvl.room_desc as room_desc';
+
+  $rows = mcneese_event_workflow_oracle_select('select ' . $select . ' from ucs.msu_venue_detail mvd' . $join);
+
+  // determine columns names by selecting the first
+  if (empty($rows)) {
+    return FALSE;
+  }
+
+  $row = array_pop($rows);
+
+  mcneese_event_workflow_include(4);
+  $event_locations = event_workflow_get_event_location_list_options();
+
+
+  try {
+    foreach ($rows as &$row) {
+      $location_item = array();
+      $building_item = array();
+      $room_item = array();
+      $coordinator_room_item = array();
+      $coordinator_venue_item = array();
+
+      if (is_array($row)) {
+        foreach ($row as $key => &$value) {
+          // oracle returns duplicate/redundant data in numeric rows.
+          if (is_numeric($key)) continue;
+
+          if ($key == 'building_code') {
+            $building_item['machine_name'] = $value;
+          }
+          elseif ($key == 'building_desc') {
+            $building_item['human_name'] = $value;
+          }
+          elseif ($key == 'room_number') {
+            $room_item['machine_name'] = $value;
+
+            // Banner stores other things inside of the room number, so if it actually is a number, store it in the human name, which contains the description.
+            if (isset($room_item['human_name']) && cf_is_integer($room_item['machine_name'])) {
+              if (empty($room_item['human_name'])) {
+                $room_item['human_name'] = "Room #"  . $room_item['machine_name'];
+              }
+              else {
+                $room_item['human_name'] .= " " . $room_item['machine_name'];
+              }
+            }
+          }
+          elseif ($key == 'room_desc') {
+            $room_item['human_name'] = $value;
+
+            // Banner stores other things inside of the room number, so if it actually is a number, store it in the human name, which contains the description.
+            if (isset($room_item['machine_name']) && cf_is_integer($room_item['machine_name'])) {
+              if (empty($room_item['human_name'])) {
+                $room_item['human_name'] = "Room";
+              }
+              $room_item['human_name'] .= " #" . $room_item['machine_name'];
+            }
+          }
+          elseif ($key == 'capacity') {
+            $room_item['capacity_normal'] = $value;
+          }
+          elseif ($key == 'max_capacity') {
+            $room_item['capacity_max'] = $value;
+          }
+          elseif ($key == 'category') {
+            $location_item['machine_name'] = $value;
+            $location_item['human_name'] = $value;
+
+            if (array_key_exists($value, $event_locations)) {
+              $location_item['human_name'] = $event_locations[$value];
+            }
+          }
+          elseif ($key == 'room_coordinator_email') {
+            $coordinator_room_item['email'] = $value;
+          }
+          elseif ($key == 'venue_coordinator_email') {
+            $coordinator_venue_item['email'] = $value;
+
+            // have the room coordinator fallback to the venue coordinator if no room coordinator is specified.
+            if (!isset($coordinator_room_item['email'])) {
+              $coordinator_room_item['email'] = $value;
+            }
+          }
+        }
+
+        // add the room and venue coordinators.
+        $room_coordinator = NULL;
+        if (!empty($coordinator_room_item['email'])) {
+          $room_coordinator = mcneese_event_workflow_ensure_user_by_email($coordinator_room_item['email'], array('reviewer'));
+        }
+
+        if (!is_object($room_coordinator) && !empty($coordinator_venue_item['email'])) {
+          $room_coordinator = mcneese_event_workflow_ensure_user_by_email($coordinator_venue_item['email'], array('reviewer'));
+        }
+
+        if (is_object($room_coordinator)) {
+          $room_item['coordinator_id'] = $room_coordinator->uid;
+        }
+        else {
+          $room_item['coordinator_id'] = MEW_FAILSAFE_COORDINATOR_ID;
+        }
+
+        // add/update the location.
+        $query = db_select('mew_banner_locations', 'mbl');
+        $query->addField('mbl', 'id', 'id');
+        $query->condition('mbl.machine_name', $location_item['machine_name']);
+
+        $location_id = $query->execute()->fetchField();
+
+        if ($location_id > 0) {
+          $query = db_update('mew_banner_locations');
+          $query->fields($location_item);
+          $query->condition('id', $location_id);
+          $query->execute();
+        }
+        else {
+          $query = db_insert('mew_banner_locations');
+          $query->fields($location_item);
+          $location_id = $query->execute();
+        }
+
+        $building_item['location'] = $location_id;
+
+        // add/update the building.
+        $query = db_select('mew_banner_buildings', 'mbb');
+        $query->addField('mbb', 'id', 'id');
+        $query->condition('mbb.machine_name', $building_item['machine_name']);
+        $query->condition('mbb.location', $location_id);
+
+        $building_id = $query->execute()->fetchField();
+
+        if ($building_id > 0) {
+          $query = db_update('mew_banner_buildings');
+          $query->fields($building_item);
+          $query->condition('id', $building_id);
+          $query->execute();
+        }
+        else {
+          $query = db_insert('mew_banner_buildings');
+          $query->fields($building_item);
+          $building_id = $query->execute();
+        }
+
+        $room_item['building'] = $building_id;
+
+        // add/update the room.
+        $query = db_select('mew_banner_rooms', 'mbr');
+        $query->addField('mbr', 'id', 'id');
+        $query->condition('mbr.machine_name', $room_item['machine_name']);
+        $query->condition('mbr.building', $building_id);
+
+        $room_id = $query->execute()->fetchField();
+
+        if ($room_id > 0) {
+          $query = db_update('mew_banner_rooms');
+          $query->fields($room_item);
+          $query->condition('id', $room_id);
+          $query->execute();
+        }
+        else {
+          $query = db_insert('mew_banner_rooms');
+          $query->fields($room_item);
+          $room_id = $query->execute();
+        }
+      }
+    }
+  } catch (Exception $ex) {
+    cf_error::on_exception($ex);
+
+    return FALSE;
+  }
+
+  return TRUE;
 }
 
 /**
