@@ -4358,15 +4358,15 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
     $already_joined['mew_field_information_title'] = 'mfit';
     $already_joined['mew_field_information_type'] = 'mfitp';
 
-    if (!is_null($search) && !is_array($search)) {
-      $query->innerjoin('mew_field_dates_date', 'mfdd', 'mct.event_id = mfdd.event_id AND mcd.date = mfdd.revision AND mfdd.delta = 0');
-      $query->innerjoin('mew_field_dates_time_start', 'mfdts', 'mct.event_id = mfdts.event_id AND mcd.time_start = mfdts.revision AND mfdts.delta = 0');
-      $query->innerjoin('mew_field_dates_time_stop', 'mfdtsp', 'mct.event_id = mfdtsp.event_id AND mcd.time_stop = mfdtsp.revision AND mfdtsp.delta = 0');
+    if (is_null($search)) {
+      $query->innerjoin('mew_field_dates_date', 'mfdd', 'mcd.event_id = mfdd.event_id AND mcd.date = mfdd.revision AND mfdd.delta = 0');
+      $query->innerjoin('mew_field_dates_time_start', 'mfdts', 'mcd.event_id = mfdts.event_id AND mcd.time_start = mfdts.revision AND mfdts.delta = 0');
+      $query->innerjoin('mew_field_dates_time_stop', 'mfdtsp', 'mcd.event_id = mfdtsp.event_id AND mcd.time_stop = mfdtsp.revision AND mfdtsp.delta = 0');
     }
     else {
-      $query->innerjoin('mew_field_dates_date', 'mfdd', 'mct.event_id = mfdd.event_id AND mcd.date = mfdd.revision');
-      $query->innerjoin('mew_field_dates_time_start', 'mfdts', 'mct.event_id = mfdts.event_id AND mcd.time_start = mfdts.revision');
-      $query->innerjoin('mew_field_dates_time_stop', 'mfdtsp', 'mct.event_id = mfdtsp.event_id AND mcd.time_stop = mfdtsp.revision');
+      $query->innerjoin('mew_field_dates_date', 'mfdd', 'mcd.event_id = mfdd.event_id AND mcd.date = mfdd.revision');
+      $query->innerjoin('mew_field_dates_time_start', 'mfdts', 'mcd.event_id = mfdts.event_id AND mcd.time_start = mfdts.revision');
+      $query->innerjoin('mew_field_dates_time_stop', 'mfdtsp', 'mcd.event_id = mfdtsp.event_id AND mcd.time_stop = mfdtsp.revision');
     }
 
     $already_joined['mew_field_dates_date'] = 'mfdd';
