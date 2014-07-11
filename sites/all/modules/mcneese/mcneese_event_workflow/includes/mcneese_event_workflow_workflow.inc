@@ -471,6 +471,7 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
     'mr.user_id' => $user->uid,
     'mr.event_classification' => $event_classification,
     'mr.review_step' => $step,
+    'mr.disabled' => 0,
   );
 
   $reviewer_classifications = array();
@@ -765,7 +766,7 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
   $event_classification = $event['event_coordinator']['classification'][0]->value;
 
   if ($event_step == MEW_REVIEW_STEP_REVIEW || $event_step == MEW_REVIEW_STEP_USAGE_FEES) {
-    $reviewers = mcneese_event_workflow_get_reviewers(array('mr.event_classification' => $event_classification, 'mr.review_step' => $event_step));
+    $reviewers = mcneese_event_workflow_get_reviewers(array('mr.event_classification' => $event_classification, 'mr.review_step' => $event_step, 'mr.disabled' => 0));
 
     $required_reviews = 0;
     $reviewers_steps_by_classification = array();
@@ -1160,7 +1161,7 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
   // load appropriate reviewers in their own categories.
   $venue_coordinator = user_load($event['venue_coordinator']['user_id'][0]->value);
 
-  $reviewers = mcneese_event_workflow_get_reviewers(array('mr.event_classification' => $event['event_coordinator']['classification'][0]->value, 'mr.review_step' => MEW_REVIEW_STEP_REVIEW), TRUE);
+  $reviewers = mcneese_event_workflow_get_reviewers(array('mr.event_classification' => $event['event_coordinator']['classification'][0]->value, 'mr.review_step' => MEW_REVIEW_STEP_REVIEW, 'mr.disabled' => 0), TRUE);
   $step_1_reviewers = array();
   if (!empty($reviewers)) {
     foreach ($reviewers as $r) {
@@ -1168,7 +1169,7 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
     }
   }
 
-  $reviewers = mcneese_event_workflow_get_reviewers(array('mr.event_classification' => $event['event_coordinator']['classification'][0]->value, 'mr.review_step' => MEW_REVIEW_STEP_USAGE_FEES), TRUE);
+  $reviewers = mcneese_event_workflow_get_reviewers(array('mr.event_classification' => $event['event_coordinator']['classification'][0]->value, 'mr.review_step' => MEW_REVIEW_STEP_USAGE_FEES, 'mr.disabled' => 0), TRUE);
   $step_2_reviewers = array();
   if (!empty($reviewers)) {
     foreach ($reviewers as $r) {

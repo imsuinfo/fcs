@@ -182,7 +182,7 @@ function mcneese_event_workflow_event_reviewers_0_form($form, &$form_state, $cla
     }
   }
 
-  $reviewers = mcneese_event_workflow_get_reviewers(array('mr.event_classification' => $classification, 'mr.review_step' => $review_step), TRUE, $sorting);
+  $reviewers = mcneese_event_workflow_get_reviewers(array('mr.event_classification' => $classification, 'mr.review_step' => $review_step, 'mr.disabled' => 0), TRUE, $sorting);
 
   if (!is_array($reviewers)) {
     $reviewers = array();
@@ -385,6 +385,7 @@ function mcneese_event_workflow_event_reviewers_0_form_validate($form, &$form_st
         'mr.review_step' => $form['form']['review_step']['#value'],
         'mr.reviewer_classification' => $reviewer_classification,
         'mr.user_id' => $user_id,
+        'mr.disabled' => 0,
       );
 
       $reviewers = mcneese_event_workflow_get_reviewers($conditions);
@@ -447,9 +448,26 @@ function mcneese_event_workflow_event_reviewers_0_form_submit($form, &$form_stat
     $failure = FALSE;
     $transaction = db_transaction();
     try {
-      $query = db_insert('mew_reviewers');
-      $query->fields($values);
-      $query->execute();
+      $query = db_select('mew_reviewers', 'mr');
+      $query->addField('mr', 'id', 'id');
+      $query->condition('mr.user_id', $values['user_id']);
+      $query->condition('mr.event_classification', $values['event_classification']);
+      $query->condition('mr.review_step', $values['review_step']);
+      $query->condition('mr.disabled', 1);
+
+      $result = $query->execute()->fetchField();
+
+      if ($result > 0) {
+        $query = db_update('mew_reviewers');
+        $query->fields(array('disabled' => 0));
+        $query->condition('id', $result);
+        $query->execute();
+      }
+      else {
+        $query = db_insert('mew_reviewers');
+        $query->fields($values);
+        $query->execute();
+      }
     }
     catch (Exception $ex) {
       $transaction->rollback();
@@ -599,7 +617,8 @@ function mcneese_event_workflow_event_reviewers_0_delete_form_submit($form, &$fo
 
   $transaction = db_transaction();
   try {
-    $query = db_delete('mew_reviewers');
+    $query = db_update('mew_reviewers');
+    $query->fields(array('disabled' => 1));
     $query->condition('id', $form['form']['id']['#value']);
     $query->execute();
   }

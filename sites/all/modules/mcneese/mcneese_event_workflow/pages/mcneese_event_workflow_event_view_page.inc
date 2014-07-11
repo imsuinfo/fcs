@@ -890,6 +890,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
         'mr.user_id' => $user->uid,
         'mr.event_classification' => $event_classification,
         'mr.review_step' => $step,
+        'mr.disabled' => 0,
       );
 
       $reviewers = mcneese_event_workflow_get_reviewers($reviewer_conditions, TRUE);
