@@ -4270,8 +4270,6 @@ function mcneese_event_workflow_build_filename($event_id, $mode = 0) {
  *   (optional) The total number of search results to load.
  * @param array $sorting
  *   (optional) Table sort options.
- * @param array $filter
- *   (optional) Filter displayed fields.
  * @param bool $ignore_decisions
  *   (optional) When TRUE, will not perform additional checks to see if the
  *   current user has already reviewed the event. When FALSE, then listing
@@ -4281,7 +4279,7 @@ function mcneese_event_workflow_build_filename($event_id, $mode = 0) {
  * @return array|FALSE
  *   An array of all items found or FALSE on error.
  */
-function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = FALSE, $start = 0, $limit = 20, $sorting = array(), $filter = array(), $ignore_decisions = TRUE) {
+function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = FALSE, $start = 0, $limit = 20, $sorting = array(), $ignore_decisions = TRUE) {
   if (!is_null($search) && !is_string($search) && !is_array($search)) {
     cf_error::invalid_string('search');
     return FALSE;
@@ -4308,11 +4306,6 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
 
   if (!is_array($sorting)) {
     cf_error::invalid_array('sorting');
-    return FALSE;
-  }
-
-  if (!is_array($filter)) {
-    cf_error::invalid_array('filter');
     return FALSE;
   }
 
@@ -4490,6 +4483,23 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
       $query->innerjoin('mew_field_dates_date', 'mfdd', 'mcd.event_id = mfdd.event_id AND mcd.date = mfdd.revision');
       $query->innerjoin('mew_field_dates_time_start', 'mfdts', 'mcd.event_id = mfdts.event_id AND mcd.time_start = mfdts.revision');
       $query->innerjoin('mew_field_dates_time_stop', 'mfdtsp', 'mcd.event_id = mfdtsp.event_id AND mcd.time_stop = mfdtsp.revision');
+
+      // when using simple search, include a few additional textarea fields.
+      if (is_string($search)) {
+        $query->innerjoin('mew_field_top_additional', 'mfta', 'mct.event_id = mfta.event_id AND mct.additional = mfta.revision AND mfta.delta = 0');
+        $query->innerjoin('mew_field_information_organization', 'mfio', 'mci.event_id = mfio.event_id AND mci.organization = mfio.revision AND mfta.delta = 0');
+
+        $already_joined['mew_field_top_additional'] = 'mfta';
+        $already_joined['mew_field_information_organization'] = 'mfio';
+
+        $query->innerjoin('mew_current_plans', 'mcp', 'mer.id = mcp.event_id');
+        $query->innerjoin('mew_field_plans_activities', 'mfpa', 'mcp.event_id = mfpa.event_id AND mcp.activities = mfpa.revision AND mfpa.delta = 0');
+        $query->innerjoin('mew_field_plans_description', 'mfpd', 'mcp.event_id = mfpd.event_id AND mcp.description = mfpd.revision AND mfpd.delta = 0');
+
+        $already_joined['mew_current_plans'] = 'mcp';
+        $already_joined['mew_field_plans_activities'] = 'mfpa';
+        $already_joined['mew_field_plans_description'] = 'mfpd';
+      }
     }
 
     $already_joined['mew_field_dates_date'] = 'mfdd';
@@ -4691,8 +4701,7 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
     // do not include deleted requests.
     $query->condition('mfts.value', MEW_EVENT_STATUS_DELETED, '<>');
 
-    // @todo: should the simple search add the additional text areas and search them as well?
-    if (!is_null($search) && !is_array($search)) {
+    if (!is_null($search) && is_string($search)) {
       $or = db_or();
 
       foreach ($search_parts as $search_part) {
@@ -4701,6 +4710,18 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
         if (count($search_part_pieces) == 1) {
           $or->condition('mfit.value', db_like($search_part), $like);
           $or->condition('mfit.value', '%' . db_like($search_part) . '%', $like);
+
+          $or->condition('mfio.value', db_like($search_part), $like);
+          $or->condition('mfio.value', '%' . db_like($search_part) . '%', $like);
+
+          $or->condition('mfta.value', db_like($search_part), $like);
+          $or->condition('mfta.value', '%' . db_like($search_part) . '%', $like);
+
+          $or->condition('mfpa.value', db_like($search_part), $like);
+          $or->condition('mfpa.value', '%' . db_like($search_part) . '%', $like);
+
+          $or->condition('mfpd.value', db_like($search_part), $like);
+          $or->condition('mfpd.value', '%' . db_like($search_part) . '%', $like);
 
           $or->condition('mbl.human_name', db_like($search_part), $like);
           $or->condition('mbl.human_name', '%' . db_like($search_part) . '%', $like);
@@ -4722,6 +4743,18 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
         $search_part_pieces_combined = implode('%', $search_part_pieces_fixed);
         $or->condition('mfit.value', $search_part_pieces_combined, $like);
         $or->condition('mfit.value', '%' . $search_part_pieces_combined . '%', $like);
+
+        $or->condition('mfio.value', $search_part_pieces_combined, $like);
+        $or->condition('mfio.value', '%' . $search_part_pieces_combined . '%', $like);
+
+        $or->condition('mfta.value', $search_part_pieces_combined, $like);
+        $or->condition('mfta.value', '%' . $search_part_pieces_combined . '%', $like);
+
+        $or->condition('mfpa.value', $search_part_pieces_combined, $like);
+        $or->condition('mfpa.value', '%' . $search_part_pieces_combined . '%', $like);
+
+        $or->condition('mfpd.value', $search_part_pieces_combined, $like);
+        $or->condition('mfpd.value', '%' . $search_part_pieces_combined . '%', $like);
 
         $or->condition('mbl.human_name', $search_part_pieces_combined, $like);
         $or->condition('mbl.human_name', '%' . $search_part_pieces_combined . '%', $like);
