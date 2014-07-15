@@ -837,6 +837,7 @@ function mcneese_event_workflow_get_event_field_room($form, &$form_state, &$fiel
         '#title' => 'Select a Room',
         '#options' => event_workflow_get_event_room_list_options($location, 'special'),
         '#default_value' => $value,
+        '#default_value_original' => $value,
         '#required' => TRUE,
         '#attributes' => array(
           'class' => array(
