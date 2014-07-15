@@ -688,7 +688,7 @@ function masquerade_block_1_submit($form, &$form_state) {
     drupal_access_denied();
   }
   else {
-    drupal_goto($_SERVER['HTTP_REFERER']);
+    drupal_goto($_GET['q']);
   }
 }
 
@@ -772,7 +772,7 @@ function masquerade_autocomplete_multiple($string, $add_anonymous = TRUE) {
  */
 function masquerade_switch_user_page($uid) {
   if (isset($_GET['token']) && drupal_valid_token($_GET['token'], 'masquerade/switch/' . $uid) && masquerade_switch_user($uid)) {
-    drupal_goto($_SERVER['HTTP_REFERER']);
+    drupal_goto($_GET['q']);
   }
   else {
     drupal_access_denied();
@@ -793,7 +793,7 @@ function masquerade_switch_user($uid) {
   if (!is_numeric($uid)) {
     drupal_set_message(t('A user id was not correctly passed to the switching function.'));
     watchdog('masquerade', 'The user id provided to switch users was not numeric.', NULL, WATCHDOG_ERROR);
-    return drupal_goto($_SERVER['HTTP_REFERER']);
+    return drupal_goto($_GET['q']);
   }
 
   $new_user = user_load($uid);
