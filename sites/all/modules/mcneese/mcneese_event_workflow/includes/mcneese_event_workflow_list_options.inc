@@ -124,40 +124,54 @@ function event_workflow_get_event_classification_list_options($option = NULL, $u
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
+ * @param bool $taxonomy
+ *   (optional) When TRUE, will load the taxonomy term data. When FALSE will
+ *   load the {mew_banner_locations} data.
  *
  * @return array
  *   An array of options available.
  */
-function event_workflow_get_event_location_list_options($option = NULL) {
+function event_workflow_get_event_location_list_options($option = NULL, $taxonomy = FALSE) {
   $options = array();
 
   if ($option == 'select') {
     $options[''] = "- Select -";
   }
 
-  $system_column_name = FALSE;
-  if ($option == 'column_name') {
-    $system_column_name = TRUE;
-  }
+  if ($taxonomy) {
+    $system_column_name = FALSE;
+    if ($option == 'column_name') {
+      $system_column_name = TRUE;
+    }
 
-  $options_tree = taxonomy_get_tree(MEW_VID_EVENT_LOCATION, 0, NULL, TRUE);
-  foreach ($options_tree as $branch) {
-    if ($system_column_name) {
-      if (!empty($branch->field_system_column_name['und'][0]['value'])) {
-        $options[$branch->tid] = $branch->field_system_column_name['und'][0]['value'];
+    $options_tree = taxonomy_get_tree(MEW_VID_EVENT_LOCATION, 0, NULL, TRUE);
+    foreach ($options_tree as $branch) {
+      if ($system_column_name) {
+        if (!empty($branch->field_system_column_name['und'][0]['value'])) {
+          $options[$branch->tid] = $branch->field_system_column_name['und'][0]['value'];
+        }
+      }
+      else {
+        $branch_category = '';
+        if (isset($branch->field_column_venue_category['und'][0]['value'])) {
+          $branch_category = $branch->field_column_venue_category['und'][0]['value'];
+        }
+
+        $options[$branch_category] = $branch->name;
       }
     }
-    else {
-      $branch_category = '';
-      if (isset($branch->field_column_venue_category['und'][0]['value'])) {
-        $branch_category = $branch->field_column_venue_category['und'][0]['value'];
-      }
 
-      $options[$branch_category] = $branch->name;
+    asort($options);
+  }
+  else {
+    $locations = mcneese_event_workflow_load_locations();
+
+    if (is_array($locations)) {
+      foreach ($locations as $location) {
+        $options[$location->location_id] = $location->location_name;
+      }
     }
   }
-
-  asort($options);
 
   return $options;
 }
@@ -183,7 +197,7 @@ function event_workflow_get_event_building_list_options($location = NULL, $optio
   $buildings = mcneese_event_workflow_load_buildings($location);
 
   foreach ($buildings as &$building) {
-    $options[$building['building_code']] = $building['building_desc'];
+    $options[$building->building_id] = $building->building_name;
   }
 
   asort($options);
@@ -205,37 +219,29 @@ function event_workflow_get_event_building_list_options($location = NULL, $optio
 function event_workflow_get_event_room_list_options($location = NULL, $option = NULL) {
   $options = array();
 
-  $buildings = mcneese_event_workflow_load_buildings($location);
+  $rooms = mcneese_event_workflow_load_rooms($location);
 
   if ($option == 'special') {
-    foreach ($buildings as &$building) {
-      if (empty($location)) {
-        $id = 'undecided_';
-      }
-      else {
-        $id = check_plain($building['category']) . '_';
-      }
+    foreach ($rooms as $room) {
+      $title = '<div class="building_desc">' . check_plain($room->building_name) . '</div>';
+      $title .= ' <div class="room_number"><span class="room_number-label">Room</span> <span class="room_number-data">' . check_plain($room->room_number) . '</span></div>';
 
-      $id .= check_plain($building['building_code']) . '_' . check_plain($building['room_number']);
-      $title = '<div class="building_desc">' . check_plain($building['building_desc']) . '</div>';
-      $title .= ' <div class="room_number"><span class="room_number-label">Room</span> <span class="room_number-data">' . check_plain($building['room_number']) . '</span></div>';
-
-      if (!empty($building['capacity'])) {
-        $title .= '<div class="room_capacity"><span class="capacity-label">Capacity:</span> <span class="capacity-data">' . check_plain($building['capacity']) . '</span></div>';
+      if (!empty($room->capacity_normal)) {
+        $title .= '<div class="room_capacity"><span class="capacity-label">Capacity:</span> <span class="capacity-data">' . check_plain($room->capacity_normal) . '</span></div>';
       }
 
-      $room_desc = 'No information available.';
-      if (!empty($building['room_desc'])) {
-        $room_desc = check_plain($building['room_desc']);
+      $room_name = 'No information available.';
+      if (!empty($room->room_name)) {
+        $room_name = check_plain($room->room_name);
       }
-      $title .= '<div class="room_description"><span class="room_description-label"></span> <span class="room_description-data">' . $room_desc . '</span></div>';
+      $title .= '<div class="room_description"><span class="room_description-label"></span> <span class="room_description-data">' . $room_name . '</span></div>';
 
-      $options[$id] = $title;
+      $options[$room->room_id] = $title;
     }
   }
   else {
-    foreach ($buildings as &$building) {
-      $options[$building['room_number']] = empty($building['room_desc']) ? $building['room_number'] : $building['room_desc'];
+    foreach ($rooms as $room) {
+      $options[$room->room_id] = empty($room->room_name) ? $room->room_number : $room->room_name;
     }
   }
 

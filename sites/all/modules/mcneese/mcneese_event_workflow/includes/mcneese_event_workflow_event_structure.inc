@@ -175,29 +175,22 @@ function mcneese_event_workflow_get_event_fields($form, &$form_state) {
   mcneese_event_workflow_get_event_field_location($form, $form_state, $fields, $event_state, $ps);
 
 
-  // Fieldset: Room List
-  $room = mcneese_event_workflow_get_event_field_room_list($form, $form_state, $fields, $event_state, $ps);
+  // Fieldset: Room
+  $room = mcneese_event_workflow_get_event_field_room($form, $form_state, $fields, $event_state, $ps);
 
   $form['form']['room_information'] = array(
     '#type' => 'value',
     '#value' => NULL,
   );
 
-  if (!empty($room)) {
-    $room_information_parts = explode('_', $room[0], 3);
-
-    if (count($room_information_parts) == 3) {
-      $form['form']['room_information']['#value'] = mcneese_event_workflow_load_buildings($room_information_parts[0], $room_information_parts[1], $room_information_parts[2]);
-
-      if (empty($form['form']['room_information']['#value'])) {
-        $form['form']['room_information']['#value'] = NULL;
-      }
-      else {
-        $form['form']['room_information']['#value'] = array_pop($form['form']['room_information']['#value']);
-      }
-    }
-    unset($room_information_parts);
+  if (isset($room[0])) {
+    $form['form']['room_information']['#value'] = mcneese_event_workflow_load_rooms(NULL, NULL, $room[0]);
   }
+
+
+  // Fieldset: Building
+  mcneese_event_workflow_get_event_field_building($form, $form_state, $fields, $event_state, $ps);
+
 
   // Fieldset: Review
   if ($form['form']['step']['#value'] == 'review' && array_key_exists('review', $form['form']['sections']['#value'])) {
@@ -771,7 +764,41 @@ function mcneese_event_workflow_get_event_field_location($form, &$form_state, &$
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_room_list($form, &$form_state, &$fields, &$event_state, $ps) {
+function mcneese_event_workflow_get_event_field_building($form, &$form_state, &$fields, &$event_state, $ps) {
+  $values = array(0 => NULL);
+  if (!empty($event_state['building'])) {
+    if (isset($form['form']['room_information']['#value']->building_id)) {
+      $values[0] = $form['form']['room_information']['#value']->building_id;
+    }
+  }
+
+  $fields['building'] = array(
+    '#id' => 'field-event-building',
+    '#type' => 'container',
+    '#tree' => TRUE,
+    '#attributes' => array(
+      'class' => array(
+        'form-item-wrapper',
+      ),
+    ),
+  );
+
+  // the building is determined by the room, therefore this is more or less a stub/placeholder.
+  foreach ($values as $key => $value) {
+    $fields['building'][$key] = array(
+      '#id' => 'field-event-building-' . $key,
+      '#type' => 'value',
+      '#value' => $value,
+    );
+  }
+
+  return $values;
+}
+
+/**
+ * Process and build a specific form field.
+ */
+function mcneese_event_workflow_get_event_field_room($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
   if (!empty($event_state['room'])) {
     $values = $event_state['room'];
@@ -4764,9 +4791,9 @@ function mcneese_event_workflow_get_event_field_information_attendance($form, &$
         ),
       );
 
-      if (!empty($form['form']['room_information']['#value']['capacity'])) {
-        $fields['information']['attendance'][$key]['#max'] = $form['form']['room_information']['#value']['capacity'];
-        $fields['information']['attendance'][$key]['#description'] = 'Current room has a max attendance of ' . check_plain($form['form']['room_information']['#value']['capacity']) . '.';
+      if (!empty($form['form']['room_information']['#value']->capacity_normal)) {
+        $fields['information']['attendance'][$key]['#max'] = (int) $form['form']['room_information']['#value']->capacity_normal;
+        $fields['information']['attendance'][$key]['#description'] = 'Current room has a max attendance of ' . $fields['information']['attendance'][$key]['#max'] . '.';
       }
     }
     krsort($fields['information']['attendance']);

@@ -1182,27 +1182,32 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
   $email_from = '"McNeese Event Workflow System" <no-reply@mcneese.edu>';
   $email_to = array();
 
-  $location_options = event_workflow_get_event_location_list_options();
-  $building_options = event_workflow_get_event_building_list_options();
+  $location = mcneese_event_workflow_load_locations($event['top']['location'][0]->value);
+  $location_text = '';
 
-  $location = $event['top']['location'][0]->value;
-  $building = $event['top']['building'][0]->value;
-  $room = $event['top']['room'][0]->value;
-
-  if (isset($location_options[$location])) {
-    $location = $location_options[$location];
+  if (is_object($location)) {
+    $location_text = $location->location_name;
   }
 
-  if (isset($building_options[$building])) {
-    $building = $building_options[$building];
+  $room = mcneese_event_workflow_load_rooms(NULL, NULL, $event['top']['room'][0]->value);
+  $room_text = '';
+
+  if (is_object($room)) {
+    $room_text = $room->room_name;
+    $building = mcneese_event_workflow_load_buildings(NULL, $room->building_id);
+    $building_text = '';
+
+    if (is_object($building)) {
+      $building_text = $building->building_name;
+    }
   }
 
   $standard_content = "\n\n";
   $standard_content .= "Request ID:\n - " . $event_id . "\n\n";
   $standard_content .= "Request Title:\n - " . $event['information']['title'][0]->value . "\n\n";
-  $standard_content .= "Location:\n - " . $location . "\n\n";
-  $standard_content .= "Building:\n - " . $building . "\n\n";
-  $standard_content .= "Room:\n - " . $room . "\n\n";
+  $standard_content .= "Location:\n - " . $location_text . "\n\n";
+  $standard_content .= "Building:\n - " . $building_text . "\n\n";
+  $standard_content .= "Room:\n - " . $room_text . "\n\n";
   $standard_content .= "Dates:\n";
   foreach ($event['dates']['date'] as $key => $date) {
     $standard_content .= " - " . date("Y/m/d", $date->value);
@@ -1409,11 +1414,11 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
     //        only allow reserved accounts to receive e-mails
     $debug_accounts = array();
     $debug_accounts[] = 'kday@mcneese.edu';
-    $debug_accounts[] = 'colleen@mcneese.edu';
-    $debug_accounts[] = 'gfisher@mcneese.edu';
-    $debug_accounts[] = 'stan@mcneese.edu';
-    $debug_accounts[] = 'gbodin@mcneese.edu';
-    $debug_accounts[] = 'shogan@mcneese.edu';
+    #$debug_accounts[] = 'colleen@mcneese.edu';
+    #$debug_accounts[] = 'gfisher@mcneese.edu';
+    #$debug_accounts[] = 'stan@mcneese.edu';
+    #$debug_accounts[] = 'gbodin@mcneese.edu';
+    #$debug_accounts[] = 'shogan@mcneese.edu';
 
     foreach ($email_to as $to) {
       if (!in_array($to, $debug_accounts)) {

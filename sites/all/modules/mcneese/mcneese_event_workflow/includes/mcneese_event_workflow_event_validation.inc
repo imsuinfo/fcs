@@ -74,31 +74,18 @@ function mcneese_event_workflow_pre_validate_event_fields(&$form, &$form_state, 
       $location_state['venue_coordinator']['user_id'][0] = NULL;
     }
 
-    if (!empty($form_state['values']['event']['room'][0]) && empty($form['form']['room_information'])) {
-      $room_information_parts = explode('_', $form_state['values']['event']['room'][0], 3);
-
-      if (count($room_information_parts) == 3) {
-        $form['form']['room_information']['#value'] = mcneese_event_workflow_load_buildings($room_information_parts[0], $room_information_parts[1], $room_information_parts[2]);
-
-        if (empty($form['form']['room_information']['#value'])) {
-          $form['form']['room_information']['#value'] = NULL;
-        }
-        else {
-          $form['form']['room_information']['#value'] = array_pop($form['form']['room_information']['#value']);
-        }
-      }
-      unset($room_information_parts);
+    if (!empty($form_state['values']['event']['room'][0]) && isset($form_state['values']['event']['room'][0])) {
+      $form['form']['room_information']['#value'] = mcneese_event_workflow_load_rooms(NULL, NULL, $form_state['values']['event']['room'][0]);
     }
 
-    $coordinator_email = MEW_REVIEW_CLASSIFICATION_FAILSAFE_COORDINATOR;
-    if (!empty($form['form']['room_information']['#value']['room_coordinator_email'])) {
-      $coordinator_email = $form['form']['room_information']['#value']['room_coordinator_email'];
-    }
-    elseif (!empty($form['form']['room_information']['#value']['venue_coordinator_email'])) {
-      $coordinator_email = $form['form']['room_information']['#value']['venue_coordinator_email'];
+    $coordinator = NULL;
+    if (isset($form['form']['room_information']['#value']->coordinator_id)) {
+      $coordinator = user_load($form['form']['room_information']['#value']->coordinator_id);
     }
 
-    $coordinator = mcneese_event_workflow_ensure_user_by_email($coordinator_email, array('reviewer'));
+    if (!is_object($coordinator)) {
+      $coordinator = user_load(MEW_REVIEW_CLASSIFICATION_FAILSAFE_COORDINATOR);
+    }
 
     // override field settings with the proper attributes.
     if (is_object($coordinator)) {

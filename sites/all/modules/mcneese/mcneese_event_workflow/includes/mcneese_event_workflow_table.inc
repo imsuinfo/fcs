@@ -36,31 +36,15 @@ function mcneese_event_workflow_table_structure() {
       'name' => "Event Location",
       'type' => 'options',
     ),
+    'building' => array(
+      'path' => 'event][building',
+      'name' => "Event Building",
+      'type' => 'options',
+    ),
     'room' => array(
       'path' => 'event][room',
       'name' => "Event Room",
       'type' => 'options',
-      'storage' => 'alternate',
-      'alternate' => array(
-        'building' => array(
-          'path' => 'event][room',
-          'key' => 1,
-        ),
-        'room' => array(
-          'path' => 'event][room',
-          'key' => 2,
-        ),
-      ),
-      'alternate_exception' => array(
-        'location' => array(
-          'exception_path' => 'top][location',
-          'path' => 'event][location',
-          'key' => 0,
-        ),
-      ),
-      'alternate_method' => array(
-        'explode' => array('_', 3),
-      ),
     ),
     'additional' => array(
       'path' => 'event][additional',

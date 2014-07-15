@@ -247,7 +247,7 @@ define('MEW_EVENT_STATUS_CANCELLED', 7);
 /**
  * E-mail address for a failsafe venue/event coordinator.
  */
- define('MEW_REVIEW_CLASSIFICATION_FAILSAFE_COORDINATOR', 'shogan@mcneese.edu');
+ define('MEW_REVIEW_CLASSIFICATION_FAILSAFE_COORDINATOR', 45);
 
 /**
  * Taxonomy TID for the event classification.
@@ -1382,345 +1382,305 @@ function mcneese_event_workflow_oracle_select($query, $arguments = array()) {
 }
 
 /**
- * Returns a list of columns defined in the venue list table.
+ * Returns a list of locations available.
  *
- * @return array|bool
- *   An array containing the column names.
+ * Note: ucs.msu_venue_list calls the building location 'category'.
+ *
+ * @param int|null $location
+ *   (optional) When specified, load the location associated with the location id.
+ * @param bool $disabled
+ *   (optional) When TRUE, will also load the disabled rooms.
+ *
+ * @return array|object|bool
+ *   An array of locations objects or a single location object.
  *   FALSE is returned on error.
- *
- * @see: mcneese_event_workflow_oracle_select()
  */
-function mcneese_event_workflow_load_venue_detail_columns() {
-  $cache_id = __function__;
-  $columns = &drupal_static($cache_id, NULL);
-  if (is_array($columns)) {
-    return $columns;
-  }
-
-  if ($cache = cache_get($cache_id)){
-    return $cache->data;
-  }
-
-  $columns = array();
-  $rows = mcneese_event_workflow_oracle_select('select * from ucs.msu_venue_detail where rownum = 1');
-
-  // determine columns names by selecting the first
-  if (!empty($rows)) {
-    $row = array_pop($rows);
-    foreach ($row as $key => &$value) {
-      // oracle returns duplicate/redundant data in numeric rows.
-      if (is_numeric($key)) continue;
-
-      if (!array_key_exists($key, $columns)) {
-        $columns[] = $key;
-      }
-    }
-  }
-
-  if (empty($columns)) return FALSE;
-
-  cache_set($cache_id, $columns, 'cache', CACHE_PERMANENT);
-
-  return $columns;
-}
-
-/**
- * Returns a list of columns defined in the venue list table.
- *
- * @return array|bool
- *   An array containing the column names.
- *   FALSE is returned on error.
- *
- * @see: mcneese_event_workflow_oracle_select()
- */
-function mcneese_event_workflow_load_venue_list_columns() {
-  $cache_id = __function__;
-  $columns = &drupal_static($cache_id, NULL);
-  if (is_array($columns)) {
-    return $columns;
-  }
-
-  if ($cache = cache_get($cache_id)){
-    return $cache->data;
-  }
-
-  $columns = array();
-  $rows = mcneese_event_workflow_oracle_select('select * from ucs.msu_venue_list where rownum = 1');
-
-  // determine columns names by selecting the first row.
-  if (!empty($rows)) {
-    $row = array_pop($rows);
-    foreach ($row as $key => &$value) {
-      // oracle returns duplicate/redundant data in numeric rows.
-      if (is_numeric($key)) continue;
-
-      if (!array_key_exists($key, $columns)) {
-        $columns[] = $key;
-      }
-    }
-  }
-
-  if (empty($columns)) return FALSE;
-
-  cache_set($cache_id, $columns, 'cache', CACHE_PERMANENT);
-
-  return $columns;
-}
-
-/**
- * Returns a list of buildings available.
- *
- * @param string|null $column
- *   (optional) when specified, only load a single, specific, column.
- *   Note: ucs.msu_venue_list calls the building location 'category', so use
- *  'category' for the 'location' column.
- * @param bool $column
- *   (optional) When specified, only load distinct results.
- *
- * @return array|bool
- *   An array containing the basic building information.
- *   FALSE is returned on error.
- *
- * @see: mcneese_event_workflow_load_venue_list_columns()
- * @see: mcneese_event_workflow_oracle_select()
- */
-function mcneese_event_workflow_load_buildings_list($column = NULL, $distinct = FALSE) {
-  if (!is_null($column) && !is_string($column)) {
-    cf_error::invalid_string('column');
+function mcneese_event_workflow_load_locations($location = NULL, $disabled = FALSE) {
+  if (!is_null($location) && !cf_is_integer($location)) {
+    cf_error::invalid_integer('location');
     return FALSE;
   }
 
-  if (!is_bool($distinct)) {
-    cf_error::invalid_bool('distinct');
+  if (!is_bool($disabled)) {
+    cf_error::invalid_bool('disabled');
     return FALSE;
   }
 
   $cache_id = __function__;
-  $cache_expire = '+1 day';
 
-  if (!empty($column)) {
-    $cache_id .= '_' . $column;
-  }
-
-  if ($distinct) {
-    $cache_id .= '_distinct';
+  if ($disabled) {
+    $cache_id .= '_disabled';
   }
 
   $items = &drupal_static($cache_id, NULL);
   if (is_array($items)) {
-    return $items;
-  }
+    if (is_null($location)) {
+      return $items;
+    }
 
-  if ($cache = cache_get($cache_id)){
-    return $cache->data;
-  }
+    if (array_key_exists($location, $items)) {
+      return $location[$items];
+    }
 
-  $columns = '*';
-  if (!empty($column)) {
-    // sanitize string by only allowing 'word' characters.
-    $columns = preg_replace('/\W*/i', '', $column);
-  }
-
-  if ($distinct) {
-    $columns = 'distinct (' . $columns . ')';
+    return FALSE;
   }
 
   $items = array();
-  $rows = (array) mcneese_event_workflow_oracle_select('select ' . $columns . ' from ucs.msu_venue_list');
+  try {
+    $query = db_select('mew_banner_locations', 'mbl');
 
-  if (empty($column)) {
-    foreach ($rows as &$row) {
-      $item = array();
+    if (!$disabled) {
+      $query->condition('mbl.disabled', 0);
+    }
 
-      if (is_array($row)) {
-        foreach ($row as $key => &$value) {
-          // oracle returns duplicate/redundant data in numeric rows.
-          if (is_numeric($key)) continue;
+    $query->addField('mbl', 'id', 'location_id');
+    $query->addField('mbl', 'human_name', 'location_name');
 
-          $item[$key] = $value;
-        }
-      }
+    $query->orderby('mbl.human_name');
 
-      $items[] = $item;
+    $items = $query->execute()->fetchAllAssoc('location_id');
+
+    if (is_null($location)) {
+      return $items;
+    }
+    elseif (array_key_exists($location, $items)) {
+      return $items[$location];
     }
   }
-  else {
-    // return a single depth array when there is only 1 column being selected.
-    foreach ($rows as &$row) {
-      if (is_array($row)) {
-        foreach ($row as $key => &$value) {
-          // oracle returns duplicate/redundant data in numeric rows.
-          if (is_numeric($key)) continue;
+  catch (Exception $ex) {
+    cf_error::on_query_execution($ex);
 
-          $items[] = $value;
-        }
-      }
-    }
+    return FALSE;
   }
 
-  if (empty($items)) return FALSE;
-
-  $reset_cache_interval = new DateTime($cache_expire);
-  cache_set($cache_id, $items, 'cache', $reset_cache_interval->getTimestamp());
-
-  return $items;
+  return FALSE;
 }
 
- /**
+/**
  * Returns a list of buildings available.
  *
  * Note: ucs.msu_venue_list calls the building location 'category'.
  *
- * @param string|null $location
- *   (optional) when specified, load all buildings associated with a location.
- * @param string|null $building_code
- *   (optional) when specified, load all buildings associated with a building_code.
- * @param string|null $room_number
- *   (optional) when specified, load all buildings associated with a room_number.
+ * @param int|null $location
+ *   (optional) When specified, load buildings associated with the location id.
+ * @param int|null $building
+ *   (optional) When specified, load the building associated with the building id.
+ * @param bool $disabled
+ *   (optional) When TRUE, will also load the disabled rooms.
  *
- * @return array|bool
- *   An array containing the detailed building information.
+* @return array|object|bool
+ *   An array of building objects or a single building object.
  *   FALSE is returned on error.
- *
- * @see: mcneese_event_workflow_load_buildings_list()
- * @see: mcneese_event_workflow_load_venue_list_columns()
- * @see: mcneese_event_workflow_oracle_select()
  */
-function mcneese_event_workflow_load_buildings($location = NULL, $building_code = NULL, $room_number = NULL) {
-  if (!is_null($location) && !is_string($location)) {
-    cf_error::invalid_string('location');
+function mcneese_event_workflow_load_buildings($location = NULL, $building = NULL, $disabled = FALSE) {
+  if (!is_null($location) && !cf_is_integer($location)) {
+    cf_error::invalid_integer('location');
     return FALSE;
   }
 
-  if (!is_null($building_code) && !is_string($building_code)) {
-    cf_error::invalid_string('building_code');
+  if (!is_null($building) && !cf_is_integer($building)) {
+    cf_error::invalid_integer('building');
     return FALSE;
   }
 
-  if (!is_null($room_number) && !is_string($room_number)) {
-    cf_error::invalid_string('room_number');
+  if (!is_bool($disabled)) {
+    cf_error::invalid_bool('disabled');
     return FALSE;
   }
 
   $cache_id = __function__;
-  $cache_expire = '+1 day';
-  $load_details = FALSE;
 
-  if (!empty($location)) {
+  if (!is_null($location)) {
     $cache_id .= '_' . $location;
   }
 
-  if (!empty($building_code)) {
-    $load_details = TRUE;
-    $cache_id .= '_' . $building_code;
-  }
-
-  if (!empty($room_number)) {
-    $load_details = TRUE;
-    $cache_id .= '_' . $room_number;
+  if ($disabled) {
+    $cache_id .= '_disabled';
   }
 
   $items = &drupal_static($cache_id, NULL);
   if (is_array($items)) {
-    return $items;
-  }
-
-  if ($cache = cache_get($cache_id)){
-    return $cache->data;
-  }
-
-  $where = '';
-  if ($load_details) {
-    $where .= ' where mvd.category is not NULL';
-
-    if (!empty($location)) {
-      // sanitize string by only allowing 'word' characters.
-      $sanitized_location = preg_replace('/\W*/i', '', $location);
-
-      $where .= ' AND mvd.category = \'' . $sanitized_location . '\'';
+    if (is_null($building)) {
+      return $items;
     }
 
-    if (!empty($building_code)) {
-      // sanitize string by only allowing 'word' characters.
-      $sanitized_building_code = preg_replace('/\W*/i', '', $building_code);
-
-      $where .= ' AND mvd.building_code = \'' . $sanitized_building_code . '\'';
+    if (array_key_exists($building, $items)) {
+      return $building[$items];
     }
 
-    if (!empty($room_number)) {
-      // sanitize string by only allowing 'word' characters.
-      $sanitized_room_number = preg_replace('/\W*/i', '', $room_number);
-
-      $where .= ' AND mvd.room_number = \'' . $sanitized_room_number . '\'';
-    }
-  }
-  else {
-    $where .= ' where mvl.category is not NULL';
-
-    if (!empty($location)) {
-      // sanitize string by only allowing 'word' characters.
-      $sanitized_location = preg_replace('/\W*/i', '', $location);
-
-      $where .= ' AND mvl.category = \'' . $sanitized_location . '\'';
-    }
-  }
-
-  $items = array();
-  if ($load_details) {
-    $join = ' inner join ucs.msu_venue_list mvl on (mvl.category = mvd.category and mvl.building_code = mvd.building_code and mvl.room_number = mvd.room_number)';
-
-    $select = 'mvd.*';
-    $select .= ', mvl.building_desc as building_desc';
-    $select .= ', mvl.room_desc as room_desc';
-
-    $rows = mcneese_event_workflow_oracle_select('select ' . $select . ' from ucs.msu_venue_detail mvd' . $join . $where);
-  }
-  else {
-    $select = 'mvl.*';
-
-    $rows = mcneese_event_workflow_oracle_select('select ' . $select . ' from ucs.msu_venue_list mvl' . $where);
-  }
-
-  if ($rows === FALSE) {
     return FALSE;
   }
 
-  if (empty($column)) {
-    foreach ($rows as &$row) {
-      $item = array();
+  $items = array();
+  try {
+    $query = db_select('mew_banner_buildings', 'mbb');
 
-      if (is_array($row)) {
-        foreach ($row as $key => &$value) {
-          // oracle returns duplicate/redundant data in numeric rows.
-          if (is_numeric($key)) continue;
+    if (!is_null($location)) {
+      $query->innerJoin('mew_banner_building_to_location', 'mbbl', 'mbb.id = mbbl.building');
+      $query->innerJoin('mew_banner_locations', 'mbl', 'mbbl.location = mbl.id');
 
-          $item[$key] = $value;
-        }
-      }
+      $query->condition('mbl.id', $location);
 
-      $items[] = $item;
-    }
-  }
-  else {
-    // return a single depth array when there is only 1 column being selected.
-    foreach ($rows as &$row) {
-      if (is_array($row)) {
-        foreach ($row as $key => &$value) {
-          // oracle returns duplicate/redundant data in numeric rows.
-          if (is_numeric($key)) continue;
+      $query->addField('mbl', 'id', 'location_id');
+      $query->addField('mbl', 'machine_name', 'location_code');
+      $query->addField('mbl', 'human_name', 'location_name');
 
-          $items[] = $value;
-        }
+      $query->orderby('mbl.human_name');
+
+      if (!$disabled) {
+        $query->condition('mbl.disabled', 0);
       }
     }
+
+    if (!$disabled) {
+      $query->condition('mbb.disabled', 0);
+    }
+
+    $query->addField('mbb', 'id', 'building_id');
+    $query->addField('mbb', 'machine_name', 'building_code');
+    $query->addField('mbb', 'human_name', 'building_name');
+    $query->orderby('mbb.human_name');
+
+    $items = $query->execute()->fetchAllAssoc('building_id');
+
+    if (is_null($building)) {
+      return $items;
+    }
+    elseif (array_key_exists($building, $items)) {
+      return $items[$building];
+    }
+  }
+  catch (Exception $ex) {
+    cf_error::on_query_execution($ex);
+
+    return FALSE;
   }
 
-  if (empty($items)) return FALSE;
+  return FALSE;
+}
 
-  $reset_cache_interval = new DateTime($cache_expire);
-  cache_set($cache_id, $items, 'cache', $reset_cache_interval->getTimestamp());
+/**
+ * Returns a list of rooms available.
+ *
+ * @param int|null $location
+ *   (optional) When specified, load rooms associated with the location id.
+ * @param int|null $building
+ *   (optional) When specified, load rooms associated with the building id.
+ * @param int|null $room
+ *   (optional) When specified, load the room associated with the room id.
+ * @param bool $disabled
+ *   (optional) When TRUE, will also load the disabled rooms.
+ *
+ * @return array|bool
+ *   An array of rooms or a single room array.
+ *   FALSE is returned on error.
+ */
+function mcneese_event_workflow_load_rooms($location = NULL, $building = NULL, $room = NULL, $disabled = FALSE) {
+  if (!is_null($location) && !cf_is_integer($location)) {
+    cf_error::invalid_integer('location');
+    return FALSE;
+  }
 
-  return $items;
+  if (!is_null($building) && !cf_is_integer($building)) {
+    cf_error::invalid_integer('building');
+    return FALSE;
+  }
+
+  if (!is_null($room) && !cf_is_integer($room)) {
+    cf_error::invalid_integer('room');
+    return FALSE;
+  }
+
+  if (!is_bool($disabled)) {
+    cf_error::invalid_bool('disabled');
+    return FALSE;
+  }
+
+  $cache_id = __function__;
+
+  if (!is_null($location) || !is_null($building)) {
+    $cache_id .= '_' . $location;
+    $cache_id .= '_' . $building;
+  }
+
+  if ($disabled) {
+    $cache_id .= '_disabled';
+  }
+
+  $items = &drupal_static($cache_id, NULL);
+  if (is_array($items)) {
+    if (is_null($room)) {
+      return $items;
+    }
+
+    if (array_key_exists($room, $items)) {
+      return $items[$room];
+    }
+
+    return FALSE;
+  }
+
+  $items = array();
+  try {
+    $query = db_select('mew_banner_rooms', 'mbr');
+    $query->innerJoin('mew_banner_buildings', 'mbb', 'mbr.building = mbb.id');
+
+    if (!is_null($location)) {
+      $query->innerJoin('mew_banner_building_to_location', 'mbbl', 'mbb.id = mbbl.building AND mbr.building = mbbl.building');
+      $query->innerJoin('mew_banner_locations', 'mbl', 'mbbl.location = mbl.id');
+
+      $query->condition('mbl.id', $location);
+
+      $query->addField('mbl', 'id', 'location_id');
+      $query->addField('mbl', 'machine_name', 'location_code');
+      $query->addField('mbl', 'human_name', 'location_name');
+
+      $query->orderby('mbl.human_name');
+
+      if (!$disabled) {
+        $query->condition('mbl.disabled', 0);
+      }
+    }
+
+    if (!$disabled) {
+      $query->condition('mbr.disabled', 0);
+      $query->condition('mbb.disabled', 0);
+    }
+
+    if (!is_null($building)) {
+      $query->condition('mbb.id', $building);
+    }
+
+    $query->addField('mbr', 'id', 'room_id');
+    $query->addField('mbr', 'machine_name', 'room_number');
+    $query->addField('mbr', 'human_name', 'room_name');
+    $query->addField('mbr', 'coordinator_id', 'coordinator_id');
+    $query->addField('mbr', 'capacity_normal', 'capacity_normal');
+    $query->addField('mbr', 'capacity_max', 'capacity_max');
+
+    $query->addField('mbb', 'id', 'building_id');
+    $query->addField('mbb', 'machine_name', 'building_code');
+    $query->addField('mbb', 'human_name', 'building_name');
+
+    $query->orderby('mbb.human_name');
+    $query->orderby('mbr.human_name');
+    $query->orderby('mbr.machine_name');
+
+    $items = $query->execute()->fetchAllAssoc('room_id');
+    if (is_null($room)) {
+      return $items;
+    }
+    elseif (array_key_exists($room, $items)) {
+      return $items[$room];
+    }
+  }
+  catch (Exception $ex) {
+    cf_error::on_query_execution($ex);
+
+    return FALSE;
+  }
+
+  return FALSE;
 }
 
 /**
@@ -1745,9 +1705,9 @@ function mcneese_event_workflow_load_event_user_roles() {
   $rows = (array) mcneese_event_workflow_oracle_select('select distinct role from ucs.msu_event_role');
 
   // strip out redundant rows provided by oracle.
-  foreach ($rows as &$row) {
+  foreach ($rows as $row) {
     if (is_array($row)) {
-      foreach ($row as $key => &$value) {
+      foreach ($row as $key => $value) {
         // oracle returns duplicate/redundant data in numeric rows.
         if (is_numeric($key)) continue;
 
@@ -1848,8 +1808,8 @@ function mcneese_event_workflow_load_event_user($banner_id) {
   $rows = (array) mcneese_event_workflow_oracle_select('select * from ucs.msu_event_role where id = :banner_id', array('banner_id' => $banner_id));
 
   // strip out redundant rows provided by oracle.
-  foreach ($rows as &$row) {
-    foreach ($row as $key => &$value) {
+  foreach ($rows as $row) {
+    foreach ($row as $key => $value) {
       // oracle returns duplicate/redundant data in numeric rows.
       if (is_numeric($key)) continue;
 
@@ -2175,46 +2135,10 @@ function mcneese_event_workflow_ensure_user_by_email($email, $roles = array()) {
  */
 function mcneese_event_workflow_force_cache($save = TRUE) {
   // reset is performed in both cases to ensure that the cache is fresh.
-  cache_clear_all('mcneese_event_workflow_load_venue_detail_columns', 'cache');
-  cache_clear_all('mcneese_event_workflow_load_venue_list_columns', 'cache');
   cache_clear_all('mcneese_event_workflow_load_event_user_roles', 'cache');
 
-  cache_clear_all('mcneese_event_workflow_load_buildings_list', 'cache');
-  cache_clear_all('mcneese_event_workflow_load_buildings_list_', 'cache', TRUE);
-
-  cache_clear_all('mcneese_event_workflow_load_buildings', 'cache');
-  cache_clear_all('mcneese_event_workflow_load_buildings_', 'cache', TRUE);
-
   if ($save) {
-    mcneese_event_workflow_load_venue_detail_columns();
-    mcneese_event_workflow_load_event_user_roles();
-
-    $venue_list_columns = mcneese_event_workflow_load_venue_list_columns();
-
-    if ($venue_list_columns == FALSE) {
-      // @todo: throw watchdog error?
-      $venue_list_columns = array();
-    }
-
-    mcneese_event_workflow_load_buildings_list();
-
-    foreach ($venue_list_columns as $column) {
-      mcneese_event_workflow_load_buildings_list($column, FALSE);
-      mcneese_event_workflow_load_buildings_list($column, TRUE);
-    }
-
-    $building_locations = mcneese_event_workflow_load_buildings_list('category', TRUE);
-
-    if ($building_locations == FALSE) {
-      // @todo: throw watchdog error?
-      $building_location = array();
-    }
-
-    mcneese_event_workflow_load_buildings();
-
-    foreach ($building_locations as $location) {
-      mcneese_event_workflow_load_buildings($location);
-    }
+    mcneese_event_workflow_sync_banner_to_local();
   }
 }
 
@@ -2224,7 +2148,7 @@ function mcneese_event_workflow_force_cache($save = TRUE) {
  * @return bool
  *   TRUE on success, FALSE otherwise.
  */
-function mcneese_event_workflow_sync_banner_venue_to_local() {
+function mcneese_event_workflow_sync_banner_to_local() {
   $join = ' inner join ucs.msu_venue_list mvl on (mvl.category = mvd.category and mvl.building_code = mvd.building_code and mvl.room_number = mvd.room_number)';
 
   $select = 'mvd.*';
@@ -2241,30 +2165,55 @@ function mcneese_event_workflow_sync_banner_venue_to_local() {
   $row = array_pop($rows);
 
   mcneese_event_workflow_include(4);
-  $event_locations = event_workflow_get_event_location_list_options();
+  $event_locations = event_workflow_get_event_location_list_options(NULL, TRUE);
 
-
+  $transaction = db_transaction();
   try {
-    foreach ($rows as &$row) {
+    // disable all locations, buildings, and rooms such that the ones that are not added back will be disabled.
+    if (is_array($rows) && !empty(($rows))) {
+      $query = db_update('mew_banner_locations');
+      $query->fields(array('disabled' => 1));
+      $query->execute();
+
+      $query = db_update('mew_banner_buildings');
+      $query->fields(array('disabled' => 1));
+      $query->execute();
+
+      $query = db_update('mew_banner_rooms');
+      $query->fields(array('disabled' => 1));
+      $query->execute();
+
+      $query = db_update('mew_banner_building_to_location');
+      $query->fields(array('disabled' => 1));
+      $query->execute();
+    }
+
+    foreach ($rows as $row) {
       $location_item = array();
       $building_item = array();
       $room_item = array();
       $coordinator_room_item = array();
       $coordinator_venue_item = array();
+      $location_to_building_item = array();
 
       if (is_array($row)) {
-        foreach ($row as $key => &$value) {
+        foreach ($row as $key => $value) {
           // oracle returns duplicate/redundant data in numeric rows.
           if (is_numeric($key)) continue;
 
+          // remove possible trailing whitespaces.
+          $v = trim($value);
+
           if ($key == 'building_code') {
-            $building_item['machine_name'] = $value;
+            $building_item['machine_name'] = $v;
+            $building_item['disabled'] = 0;
           }
           elseif ($key == 'building_desc') {
-            $building_item['human_name'] = $value;
+            $building_item['human_name'] = $v;
           }
           elseif ($key == 'room_number') {
-            $room_item['machine_name'] = $value;
+            $room_item['machine_name'] = $v;
+            $room_item['disabled'] = 0;
 
             // Banner stores other things inside of the room number, so if it actually is a number, store it in the human name, which contains the description.
             if (isset($room_item['human_name']) && cf_is_integer($room_item['machine_name'])) {
@@ -2277,7 +2226,7 @@ function mcneese_event_workflow_sync_banner_venue_to_local() {
             }
           }
           elseif ($key == 'room_desc') {
-            $room_item['human_name'] = $value;
+            $room_item['human_name'] = $v;
 
             // Banner stores other things inside of the room number, so if it actually is a number, store it in the human name, which contains the description.
             if (isset($room_item['machine_name']) && cf_is_integer($room_item['machine_name'])) {
@@ -2288,28 +2237,29 @@ function mcneese_event_workflow_sync_banner_venue_to_local() {
             }
           }
           elseif ($key == 'capacity') {
-            $room_item['capacity_normal'] = $value;
+            $room_item['capacity_normal'] = $v;
           }
           elseif ($key == 'max_capacity') {
-            $room_item['capacity_max'] = $value;
+            $room_item['capacity_max'] = $v;
           }
           elseif ($key == 'category') {
-            $location_item['machine_name'] = $value;
-            $location_item['human_name'] = $value;
+            $location_item['machine_name'] = $v;
+            $location_item['human_name'] = $v;
+            $location_item['disabled'] = 0;
 
-            if (array_key_exists($value, $event_locations)) {
-              $location_item['human_name'] = $event_locations[$value];
+            if (array_key_exists($v, $event_locations)) {
+              $location_item['human_name'] = substr($event_locations[$v], 0, 63);
             }
           }
           elseif ($key == 'room_coordinator_email') {
-            $coordinator_room_item['email'] = $value;
+            $coordinator_room_item['email'] = $v;
           }
           elseif ($key == 'venue_coordinator_email') {
-            $coordinator_venue_item['email'] = $value;
+            $coordinator_venue_item['email'] = $v;
 
             // have the room coordinator fallback to the venue coordinator if no room coordinator is specified.
             if (!isset($coordinator_room_item['email'])) {
-              $coordinator_room_item['email'] = $value;
+              $coordinator_room_item['email'] = $v;
             }
           }
         }
@@ -2350,13 +2300,10 @@ function mcneese_event_workflow_sync_banner_venue_to_local() {
           $location_id = $query->execute();
         }
 
-        $building_item['location'] = $location_id;
-
         // add/update the building.
         $query = db_select('mew_banner_buildings', 'mbb');
         $query->addField('mbb', 'id', 'id');
         $query->condition('mbb.machine_name', $building_item['machine_name']);
-        $query->condition('mbb.location', $location_id);
 
         $building_id = $query->execute()->fetchField();
 
@@ -2393,9 +2340,38 @@ function mcneese_event_workflow_sync_banner_venue_to_local() {
           $query->fields($room_item);
           $room_id = $query->execute();
         }
+
+        // add/update the location to building relations
+        $location_to_building_item['location'] = $location_id;
+        $location_to_building_item['building'] = $building_id;
+        $location_to_building_item['disabled'] = 0;
+
+        $query = db_select('mew_banner_building_to_location', 'mbbl');
+        $query->addExpression('count(mbbl.building)');
+        $query->condition('mbbl.location', $location_id);
+        $query->condition('mbbl.building', $building_id);
+
+        $building_to_location_count = $query->execute()->fetchField();
+
+        if ($building_to_location_count > 0) {
+          $query = db_update('mew_banner_building_to_location');
+          $query->fields($location_to_building_item);
+          $query->condition('location', $location_id);
+          $query->condition('building', $building_id);
+          $query->execute();
+        }
+        else {
+          $query = db_insert('mew_banner_building_to_location');
+          $query->fields($location_to_building_item);
+          $query->execute();
+        }
       }
     }
+
+    // enforce transaction execution
+    unset($transaction);
   } catch (Exception $ex) {
+    $transaction->rollback();
     cf_error::on_exception($ex);
 
     return FALSE;
@@ -3634,6 +3610,7 @@ function mcneese_event_workflow_build_table_structure($structure, &$structure_ta
             if ($method_name == 'explode') {
               $alternate_values = explode($method_values[0], $value, $method_values[1]);
             }
+
             break;
           }
         }
@@ -3818,10 +3795,6 @@ function mcneese_event_workflow_get_reviewers($conditions = array(), $join = FAL
  * - date values have their time reset to 0 (aka: 12:00:00am).
  * - time values have their dates set to the same day as the date value.
  *
- * @param string $location
- *   The location string.
- * @param string $building
- *   The building string.
  * @param string $room
  *   The room string.
  * @param array $dates
@@ -3839,17 +3812,7 @@ function mcneese_event_workflow_get_reviewers($conditions = array(), $join = FAL
  *   An array containing any events currently using the room at the specified date and time.
  *   FALSE on error.
  */
-function mcneese_event_workflow_check_room_availability($location, $building, $room, $date, $time_start, $time_stop, $event_id = NULL) {
-  if (!is_string($location) || empty($location)) {
-    cf_error::invalid_string('location');
-    return FALSE;
-  }
-
-  if (!is_string($building) || empty($building)) {
-    cf_error::invalid_string('building');
-    return FALSE;
-  }
-
+function mcneese_event_workflow_check_room_availability($room, $date, $time_start, $time_stop, $event_id = NULL) {
   if (!is_string($room) || empty($room)) {
     cf_error::invalid_string('room');
     return FALSE;
@@ -3883,8 +3846,6 @@ function mcneese_event_workflow_check_room_availability($location, $building, $r
 
     $query->innerjoin('mew_field_top_status', 'mfts', 'mct.event_id = mfts.event_id AND mcd.event_id = mfts.event_id AND mct.status = mfts.revision AND mfts.delta = 0');
     $query->innerjoin('mew_field_top_step', 'mftsp', 'mct.event_id = mftsp.event_id AND mcd.event_id = mftsp.event_id AND mct.step = mftsp.revision AND mftsp.delta = 0');
-    $query->innerjoin('mew_field_top_location', 'mftl', 'mct.event_id = mftl.event_id AND mcd.event_id = mftl.event_id AND mct.location = mftl.revision AND mftl.delta = 0');
-    $query->innerjoin('mew_field_top_building', 'mftb', 'mct.event_id = mftb.event_id AND mcd.event_id = mftb.event_id AND mct.building = mftb.revision AND mftb.delta = 0');
     $query->innerjoin('mew_field_top_room', 'mftr', 'mct.event_id = mftr.event_id AND mcd.event_id = mftr.event_id AND mct.room = mftr.revision AND mftr.delta = 0');
 
     $query->innerjoin('mew_field_dates_date', 'mfdd', 'mct.event_id = mfdd.event_id AND mcd.event_id = mfdd.event_id AND mcd.date = mfdd.revision');
@@ -3903,8 +3864,6 @@ function mcneese_event_workflow_check_room_availability($location, $building, $r
     );
 
     $query->condition('mfts.value', $statuses, 'IN');
-    $query->condition('mftl.value', $location);
-    $query->condition('mftb.value', $building);
     $query->condition('mftr.value', $room);
     $query->condition('mfdd.value', $date, 'IN');
 
@@ -4405,9 +4364,6 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
 
   $status_options = event_workflow_get_event_status_list_options();
   $step_options = event_workflow_get_event_steps_list_options();
-  $location_options = event_workflow_get_event_location_list_options();
-  $building_options = event_workflow_get_event_building_list_options();
-  $room_options = event_workflow_get_event_room_list_options();
   $information_type_options = event_workflow_get_information_type_list_options();
 
   // load search options
@@ -4474,33 +4430,6 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
       }
     }
 
-    $location = array();
-    foreach ($preg_parts as $search_part) {
-      foreach ($location_options as $key => $option) {
-        if (preg_match('/' . $search_part . '/' . $s, $option)) {
-          $location[$key] = $key;
-        }
-      }
-    }
-
-    $building = array();
-    foreach ($preg_parts as $search_part) {
-      foreach ($building_options as $key => $option) {
-        if (preg_match('/' . $search_part . '/' . $s, $option)) {
-          $building[$key] = $key;
-        }
-      }
-    }
-
-    $room = array();
-    foreach ($preg_parts as $search_part) {
-      foreach ($room_options as $key => $option) {
-        if (preg_match('/' . $search_part . '/' . $s, $option)) {
-          $room[$key] = $key;
-        }
-      }
-    }
-
     $information_type = array();
     foreach ($preg_parts as $search_part) {
       foreach ($information_type_options as $key => $option) {
@@ -4531,14 +4460,20 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
     $query->innerjoin('mew_field_top_status', 'mfts', 'mct.event_id = mfts.event_id AND mct.status = mfts.revision AND mfts.delta = 0');
     $query->innerjoin('mew_field_top_step', 'mftsp', 'mct.event_id = mftsp.event_id AND mct.step = mftsp.revision AND mftsp.delta = 0');
     $query->innerjoin('mew_field_top_location', 'mftl', 'mct.event_id = mftl.event_id AND mct.location = mftl.revision AND mftl.delta = 0');
-    $query->innerjoin('mew_field_top_building', 'mftb', 'mct.event_id = mftb.event_id AND mct.building = mftb.revision AND mftb.delta = 0');
     $query->innerjoin('mew_field_top_room', 'mftr', 'mct.event_id = mftr.event_id AND mct.room = mftr.revision AND mftr.delta = 0');
 
     $already_joined['mew_field_top_status'] = 'mfts';
     $already_joined['mew_field_top_step'] = 'mftsp';
     $already_joined['mew_field_top_location'] = 'mftl';
-    $already_joined['mew_field_top_building'] = 'mftb';
     $already_joined['mew_field_top_room'] = 'mftr';
+
+    $query->innerjoin('mew_banner_rooms', 'mbr', 'mftr.value = mbr.id');
+    $query->innerjoin('mew_banner_buildings', 'mbb', 'mbr.building = mbb.id');
+    $query->innerjoin('mew_banner_locations', 'mbl', 'mftl.value = mbl.id');
+
+    $already_joined['mew_banner_rooms'] = 'mbr';
+    $already_joined['mew_banner_buildings'] = 'mbb';
+    $already_joined['mew_banner_locations'] = 'mbl';
 
     $query->innerjoin('mew_field_information_title', 'mfit', 'mci.event_id = mfit.event_id AND mci.title = mfit.revision AND mfit.delta = 0');
     $query->innerjoin('mew_field_information_type', 'mfitp', 'mci.event_id = mfitp.event_id AND mci.type = mfitp.revision AND mfitp.delta = 0');
@@ -4567,13 +4502,21 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
     $already_added['title'] = 'mfit.value';
     $already_added['type'] = 'mfitp.value';
 
-    $query->addField('mftl', 'value', 'location');
-    $query->addField('mftb', 'value', 'building');
-    $query->addField('mftr', 'value', 'room');
+    $query->addField('mbr', 'id', 'room');
+    $query->addField('mbb', 'id', 'building');
+    $query->addField('mbl', 'id', 'location');
 
-    $already_added['location'] = 'mftl.value';
-    $already_added['building'] = 'mftb.value';
-    $already_added['room'] = 'mftr.value';
+    $already_added['location'] = 'mbr.room';
+    $already_added['building'] = 'mbb.building';
+    $already_added['room'] = 'mbl.location';
+
+    $query->addField('mbr', 'human_name', 'room_name');
+    $query->addField('mbb', 'human_name', 'building_name');
+    $query->addField('mbl', 'human_name', 'location_name');
+
+    $already_added['room_name'] = 'mbr.human_name';
+    $already_added['building_name'] = 'mbb.human_name';
+    $already_added['location_name'] = 'mbl.human_name';
 
     $query->addField('mfts', 'value', 'status');
     $query->addField('mftsp', 'value', 'step');
@@ -4748,6 +4691,7 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
     // do not include deleted requests.
     $query->condition('mfts.value', MEW_EVENT_STATUS_DELETED, '<>');
 
+    // @todo: should the simple search add the additional text areas and search them as well?
     if (!is_null($search) && !is_array($search)) {
       $or = db_or();
 
@@ -4757,6 +4701,16 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
         if (count($search_part_pieces) == 1) {
           $or->condition('mfit.value', db_like($search_part), $like);
           $or->condition('mfit.value', '%' . db_like($search_part) . '%', $like);
+
+          $or->condition('mbl.human_name', db_like($search_part), $like);
+          $or->condition('mbl.human_name', '%' . db_like($search_part) . '%', $like);
+
+          $or->condition('mbb.human_name', db_like($search_part), $like);
+          $or->condition('mbb.human_name', '%' . db_like($search_part) . '%', $like);
+
+          $or->condition('mbr.human_name', db_like($search_part), $like);
+          $or->condition('mbr.human_name', '%' . db_like($search_part) . '%', $like);
+
           continue;
         }
 
@@ -4768,6 +4722,15 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
         $search_part_pieces_combined = implode('%', $search_part_pieces_fixed);
         $or->condition('mfit.value', $search_part_pieces_combined, $like);
         $or->condition('mfit.value', '%' . $search_part_pieces_combined . '%', $like);
+
+        $or->condition('mbl.human_name', $search_part_pieces_combined, $like);
+        $or->condition('mbl.human_name', '%' . $search_part_pieces_combined . '%', $like);
+
+        $or->condition('mbb.human_name', $search_part_pieces_combined, $like);
+        $or->condition('mbb.human_name', '%' . $search_part_pieces_combined . '%', $like);
+
+        $or->condition('mbr.human_name', $search_part_pieces_combined, $like);
+        $or->condition('mbr.human_name', '%' . $search_part_pieces_combined . '%', $like);
       }
 
       if (!empty($status)) {
@@ -4776,18 +4739,6 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
 
       if (!empty($steps)) {
         $or->condition('mftsp.value', $steps, 'IN');
-      }
-
-      if (!empty($location)) {
-        $or->condition('mftl.value', $location, 'IN');
-      }
-
-      if (!empty($building)) {
-        $or->condition('mftb.value', $building, 'IN');
-      }
-
-      if (!empty($room)) {
-        $or->condition('mftr.value', $room, 'IN');
       }
 
       if (!empty($information_type)) {
@@ -4814,13 +4765,13 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
         $query->orderBy('step', is_null($sort) ? 'ASC' : $sort);
       }
       elseif ($order == 'location') {
-        $query->orderBy('location', is_null($sort) ? 'ASC' : $sort);
+        $query->orderBy('location_name', is_null($sort) ? 'ASC' : $sort);
       }
       elseif ($order == 'building') {
-        $query->orderBy('building', is_null($sort) ? 'ASC' : $sort);
+        $query->orderBy('building_name', is_null($sort) ? 'ASC' : $sort);
       }
       elseif ($order == 'room') {
-        $query->orderBy('room', is_null($sort) ? 'ASC' : $sort);
+        $query->orderBy('room_name', is_null($sort) ? 'ASC' : $sort);
       }
       elseif ($order == 'date') {
         // @todo: find a way to sort by dates (due to multiple values, one cannot simply just sort delta = 0).
@@ -4896,25 +4847,6 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
     elseif ($order == 'step') {
       foreach ($found as $event_id => $field) {
         $ordered[$step_options[$field->step]][$field->id] = $field;
-      }
-    }
-    elseif ($order == 'location') {
-      foreach ($found as $event_id => $field) {
-        $ordered[$location_options[$field->location]][$field->id] = $field;
-      }
-    }
-    elseif ($order == 'building') {
-      $ordered = array();
-
-      foreach ($found as $event_id => $field) {
-        $ordered[$building_options[$field->building]][$field->id] = $field;
-      }
-    }
-    elseif ($order == 'room') {
-      $ordered = array();
-
-      foreach ($found as $event_id => $field) {
-        $ordered[$room_options[$field->room]][$field->id] = $field;
       }
     }
 

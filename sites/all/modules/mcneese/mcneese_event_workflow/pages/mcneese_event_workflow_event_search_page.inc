@@ -1162,6 +1162,9 @@ function mcneese_event_workflow_event_search_0_form_build_target($form, &$form_s
       elseif ($field_name == 'location') {
         $location['targets'][$target_name][$target_delta]['search']['#options'] = event_workflow_get_event_location_list_options('search');
       }
+      elseif ($field_name == 'building') {
+        $location['targets'][$target_name][$target_delta]['search']['#options'] = event_workflow_get_event_building_list_options(NULL, 'search');
+      }
       elseif ($field_name == 'room') {
         $location['targets'][$target_name][$target_delta]['search']['#options'] = event_workflow_get_event_room_list_options(NULL, 'search');
       }

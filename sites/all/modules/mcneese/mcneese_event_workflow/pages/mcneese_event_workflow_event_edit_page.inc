@@ -486,7 +486,7 @@ function mcneese_event_workflow_event_edit_0_form_validate($form, &$form_state) 
           }
 
           if (!empty($date)) {
-            $events_using_room = mcneese_event_workflow_check_room_availability($room[0], $room[1], $room[2], $date, $time_start, $time_stop, $event_id);
+            $events_using_room = mcneese_event_workflow_check_room_availability($room[0], $date, $time_start, $time_stop, $event_id);
 
             if ($events_using_room === FALSE) {
               form_set_error('', "An internal error occurred while checking the room for availability. Please contact the support staff.");

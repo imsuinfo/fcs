@@ -99,35 +99,9 @@ function mcneese_event_workflow_event_list_0_page($form, &$form_state, $page_num
 
       $row['id'] = $item->id;
       $row['title'] = check_plain($item->title);
-
-      $location_options = event_workflow_get_event_location_list_options();
-      $building_options = event_workflow_get_event_building_list_options($item->location);
-      $room_options = event_workflow_get_event_room_list_options();
-
-      $location = "";
-      if (!empty($item->location)) {
-        if (isset($location_options[$item->location])) {
-          $location = check_plain($location_options[$item->location]);
-        }
-      }
-
-      $building = "";
-      if (!empty($item->building)) {
-        if (isset($building_options[$item->building])) {
-          $building = check_plain($building_options[$item->building]);
-        }
-      }
-
-      $room = "";
-      if (!empty($item->room)) {
-        if (isset($room_options[$item->room])) {
-          $room = check_plain($room_options[$item->room]);
-        }
-      }
-
-      $row['location'] = $location;
-      $row['building'] = $building;
-      $row['room'] = $room;
+      $row['location'] = check_plain($item->location_name);
+      $row['building'] = check_plain($item->building_name);
+      $row['room'] = check_plain($item->room_name);
 
       foreach ($item->date as $delta => $date) {
         if (!isset($row['date'])) {
