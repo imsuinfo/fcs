@@ -39,7 +39,10 @@ function mcneese_event_workflow_pre_validate_event_fields(&$form, &$form_state, 
     }
 
     if (!array_key_exists($ps, $location_state)) {
-      watchdog('mer', "Failed to perform pre-validation, the key '@key' is missing from the form_state. Currently processed path is @processed", array('@key' => $ps, '@processed' => isset($ps_p) ? $ps_p : NULL), WATCHDOG_ERROR);
+      // for creating new events, the form state may not yet exist under certain circumstances and in such cases do not present and error.
+      if (isset($form['form']['event'])) {
+        watchdog('mer', "Failed to perform pre-validation, the key '@key' is missing from the form_state. Currently processed path is @processed", array('@key' => $ps, '@processed' => isset($ps_p) ? $ps_p : NULL), WATCHDOG_ERROR);
+      }
       return NULL;
     }
 
@@ -184,7 +187,10 @@ function mcneese_event_workflow_validate_event_fields($form, &$form_state) {
     }
 
     if (!array_key_exists($ps, $location_state)) {
-      watchdog('mer', "Failed to perform validation, the key '@key' is missing from the form_state. Currently processed path is @processed", array('@key' => $ps, '@processed' => isset($ps_p) ? $ps_p : NULL), WATCHDOG_ERROR);
+      // for creating new events, the form state may not yet exist under certain circumstances and in such cases do not present and error.
+      if (isset($form['form']['event'])) {
+        watchdog('mer', "Failed to perform validation, the key '@key' is missing from the form_state. Currently processed path is @processed", array('@key' => $ps, '@processed' => isset($ps_p) ? $ps_p : NULL), WATCHDOG_ERROR);
+      }
       return NULL;
     }
 
