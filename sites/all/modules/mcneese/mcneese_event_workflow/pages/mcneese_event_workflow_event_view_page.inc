@@ -501,18 +501,29 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
             // process collate
             if (!empty($field_presentation['collate'])) {
               $collate_name = $field_presentation['collate'];
+
               $collate_order = 0;
               if (!empty($field_presentation['collate_order'])) {
                 $collate_order = $field_presentation['collate_order'];
+              }
+
+              $collate_into = FALSE;
+              if (!empty($field_presentation['collate_into'])) {
+                $collate_into = $field_presentation['collate_into'];
               }
 
               if (!isset($collate[$collate_name])) {
                 $collate[$collate_name] = array();
               }
 
+              if (!isset($collate[$collate_name]['collate_into'])) {
+                $collate[$collate_name]['collate_into'] = $collate_order;
+              }
+
               $collate[$collate_name][$collate_order] = array(
                 'field_name' => $field_presentation_name,
                 'field_path' => &$group_path[$group][$weight],
+                'collate_into' => $collate_into,
               );
             }
           }
@@ -525,18 +536,28 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
 
     // perform collation
     foreach ($collate as $collate_name => &$collate_fields) {
+      $collate_into = $collate_fields['collate_into'];
+      unset($collate_fields['collate_into']);
+      unset($collate_fields[$collate_into]);
+
       ksort($collate_fields);
 
-      $collate_parent = array_shift($collate_fields);
-
       if (!empty($collate_fields)) {
-        foreach ($collate_fields as &$collate_value) {
+        foreach ($collate_fields as $collate_delta => &$collate_value) {
           foreach ($collate_value['field_path'][$collate_value['field_name']] as $delta => &$value) {
             foreach ($value['value'] as $value_name => &$value_value) {
               if (!isset($collate_value['field_path'][$collate_name][$delta]['value'][$value_name]['markup']['#markup'])) {
                 $collate_value['field_path'][$collate_name][$delta]['value'][$value_name]['markup']['#markup'] = '';
               }
-              $collate_value['field_path'][$collate_name][$delta]['value'][$value_name]['markup']['#markup'] .= $value_value['markup']['#markup'];
+
+              $collate_markup = &$collate_value['field_path'][$collate_name][$delta]['value'][$value_name]['markup']['#markup'];
+
+              if ($collate_delta < $collate_into) {
+                $collate_markup = $value_value['markup']['#markup'] . $collate_markup;
+              }
+              else {
+                $collate_markup .= $value_value['markup']['#markup'];
+              }
             }
           }
 

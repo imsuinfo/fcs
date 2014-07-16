@@ -156,6 +156,12 @@ function mcneese_event_workflow_table_structure() {
       'timestamp' => array('view' => 'h:ia', 'relative_to' => 'event][dates][date'),
       'multiple' => TRUE,
     ),
+    'category' => array(
+      'path' => 'event][dates][category',
+      'name' => "Date Category",
+      'type' => 'options',
+      'multiple' => TRUE,
+    ),
   );
 
   $structure['venue_coordinator'] = array(
@@ -226,11 +232,6 @@ function mcneese_event_workflow_table_structure() {
     'activities' => array(
       'path' => 'event][plans][activities',
       'name' => "Planned Activities",
-      'type' => 'text',
-    ),
-    'dates' => array(
-      'path' => 'event][plans][dates',
-      'name' => "Additional Dates and Times",
       'type' => 'text',
     ),
   );
@@ -890,7 +891,8 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
         'hide' => FALSE,
       ),
       'collate' => 'date',
-      'collate_order' => 0,
+      'collate_order' => 1,
+      'collate_into' => TRUE,
     ),
     'time_start' => array(
       'label' => 'Start Time',
@@ -905,7 +907,7 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
         'hide' => FALSE,
       ),
       'collate' => 'date',
-      'collate_order' => 1,
+      'collate_order' => 2,
       'prefix' => ', ',
     ),
     'time_stop' => array(
@@ -921,8 +923,22 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
         'hide' => FALSE,
       ),
       'collate' => 'date',
-      'collate_order' => 2,
+      'collate_order' => 3,
       'prefix' => ' to ',
+    ),
+    'category' => array(
+      'label' => 'Date Category',
+      'type' => array(
+        'value' => 'taxonomy',
+      ),
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
+      'collate' => 'date',
+      'collate_order' => 0,
+      'prefix' => '(',
+      'suffix' => ') ',
     ),
   );
 
@@ -1082,14 +1098,6 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
     ),
     'activities' => array(
       'label' => 'Planned Activities',
-      'size' => 'large',
-      'event_type' => array(
-        'show' => TRUE,
-        'hide' => array(57),
-      ),
-    ),
-    'dates' => array(
-      'label' => 'Dates and Times',
       'size' => 'large',
       'event_type' => array(
         'show' => TRUE,

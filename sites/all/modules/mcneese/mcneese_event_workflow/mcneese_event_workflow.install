@@ -45,6 +45,7 @@ function mcneese_event_workflow_table_install_structure() {
     'date' => 'timestamp',
     'time_start' => 'time',
     'time_stop' => 'time',
+    'category' => 'unsigned',
   );
 
   $structure['event_coordinator'] = array(
@@ -69,7 +70,6 @@ function mcneese_event_workflow_table_install_structure() {
     'audience' => 'unsigned',
     'description' => 'text',
     'activities' => 'text',
-    'dates' => 'text',
   );
 
   $structure['registration'] = array(

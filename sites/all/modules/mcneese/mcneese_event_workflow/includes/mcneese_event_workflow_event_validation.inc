@@ -130,7 +130,7 @@ function mcneese_event_workflow_pre_validate_event_fields(&$form, &$form_state, 
   // condition 0 is for when fields are displayed, only then are they required.
   if (array_key_exists($clicked_id, $dont_validate)) {
     if (!empty($form_state['conditionally_required'][0])) {
-      foreach ($form_state['conditionally_required'][0] as $field) {
+      foreach ($form_state['conditionally_required'][0] as &$field) {
         if (is_string($field)) {
           mcneese_event_workflow_assign_validation_requirement($field, $location_form, FALSE);
         }

@@ -110,6 +110,11 @@ define('MEW_EVENT_STATUS_CANCELLED', 7);
  define('MEW_VID_EVENT_REVIEWER_DECISION', 18);
 
 /**
+ * Taxonomy VID for the event reviewer decision.
+ */
+ define('MEW_VID_EVENT_DATES_CATEGORY', 20);
+
+/**
  * Taxonomy TID for the review step completed.
  */
  define('MEW_REVIEW_STEP_COMPLETED', 134);
@@ -270,9 +275,25 @@ define('MEW_EVENT_STATUS_CANCELLED', 7);
  define('MEW_EVENT_CLASSIFICATION_EXTERNAL', 4);
 
 /**
+ * Taxonomy TID for the event classification.
+ */
+ define('MEW_EVENT_DATES_CATEGORY_ACTUAL', 137);
+
+/**
+ * Taxonomy TID for the event classification.
+ */
+ define('MEW_EVENT_DATES_CATEGORY_SETUP', 138);
+
+/**
+ * Taxonomy TID for the event classification.
+ */
+ define('MEW_EVENT_DATES_CATEGORY_CLEANUP', 139);
+
+/**
  * Defines a recursion limit for the search and/or operations.
  */
  define('MEW_MAX_SEARCH_RECURSION', 3);
+
 /**
  * Defines a failsafe coordinator id to use.
  */
@@ -2469,14 +2490,6 @@ function mcneese_event_workflow_build_event_request_item_structure($event_id, $f
   }
 
   $label_length = strlen($label);
-
-  // define the collate to alter how the fields are displayed.
-  $collate = FALSE;
-  $collate_name = '';
-  if (!empty($presentation['collate'])) {
-    $collate = TRUE;
-    $collate_name = $presentation['collate'];
-  }
 
   $output = array();
   $no_values = TRUE;

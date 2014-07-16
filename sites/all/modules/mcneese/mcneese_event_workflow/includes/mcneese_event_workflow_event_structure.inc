@@ -269,12 +269,27 @@ function mcneese_event_workflow_get_event_fields($form, &$form_state) {
     );
   }
 
-  mcneese_event_workflow_get_event_field_dates_date($form, $form_state, $fields, $event_state, $ps);
-  mcneese_event_workflow_get_event_field_dates_time_start($form, $form_state, $fields, $event_state, $ps);
-  mcneese_event_workflow_get_event_field_dates_time_stop($form, $form_state, $fields, $event_state, $ps);
+  // date field contains different fields grouped togethor with it, process them simultanseously.
+  mcneese_event_workflow_get_event_group_dates_date($form, $form_state, $fields, $event_state, $ps);
 
   // add/remove date fields
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('dates', $form['form']['sections']['#value'])) {
+    $dates = array(0 => NULL);
+    if (!empty($event_state['dates']['date'])) {
+      $dates = $event_state['dates']['date'];
+    }
+
+    if (count($dates) > 1) {
+      foreach ($dates as $date_key => $date_value) {
+        $fields['dates']['group_dates'][$date_key]['dates']['remove_date-' . $date_key] = array(
+          '#id' => 'submit-event-remove-date-' . $date_key,
+          '#name' => 'submit-event-remove-date-' . $date_key,
+          '#type' => 'submit',
+          '#default_value' => t("Remove Date"),
+        );
+      }
+    }
+
     $fields['dates']['add_remove_date_buttons'] = array(
       '#id' => 'buttons-event-add_remove_date',
       '#type' => 'container',
@@ -282,13 +297,9 @@ function mcneese_event_workflow_get_event_fields($form, &$form_state) {
 
     $fields['dates']['add_remove_date_buttons']['add_date'] = array(
       '#id' => 'submit-event-add-date',
+      '#name' => 'submit-event-add-date',
       '#type' => 'submit',
       '#default_value' => t("Add Date"),
-    );
-    $fields['dates']['add_remove_date_buttons']['remove_date'] = array(
-      '#id' => 'submit-event-remove-date',
-      '#type' => 'submit',
-      '#default_value' => t("Remove Date"),
     );
   }
 
@@ -426,7 +437,6 @@ function mcneese_event_workflow_get_event_fields($form, &$form_state) {
   mcneese_event_workflow_get_event_field_plans_note($form, $form_state, $fields, $event_state, $ps);
   mcneese_event_workflow_get_event_field_plans_description($form, $form_state, $fields, $event_state, $ps);
   mcneese_event_workflow_get_event_field_plans_activities($form, $form_state, $fields, $event_state, $ps);
-  mcneese_event_workflow_get_event_field_plans_dates($form, $form_state, $fields, $event_state, $ps);
   mcneese_event_workflow_get_event_field_plans_audience($form, $form_state, $fields, $event_state, $ps);
 
 
@@ -626,16 +636,20 @@ function mcneese_event_workflow_get_event_field_status($form, &$form_state, &$fi
     $values = $event_state['status'];
   }
 
-  $fields['status'] = array(
-    '#id' => 'field-event-status',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
+  if ($form['form']['step']['#value'] == 'status' && array_key_exists('information', $form['form']['sections']['#value'])) {
+    $fields['status'] = array(
+      '#id' => 'field-event-status',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-status',
+        ),
       ),
-    ),
-  );
+    );
+  }
 
   foreach ($values as $key => $value) {
     $fields['status'][$key] = array(
@@ -669,16 +683,20 @@ function mcneese_event_workflow_get_event_field_step($form, &$form_state, &$fiel
     $values = $event_state['step'];
   }
 
-  $fields['step'] = array(
-    '#id' => 'field-event-step',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
+  if ($form['form']['step']['#value'] == 'step' && array_key_exists('information', $form['form']['sections']['#value'])) {
+    $fields['step'] = array(
+      '#id' => 'field-event-step',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-step',
+        ),
       ),
-    ),
-  );
+    );
+  }
 
   foreach ($values as $key => $value) {
     $fields['step'][$key] = array(
@@ -700,18 +718,20 @@ function mcneese_event_workflow_get_event_field_location($form, &$form_state, &$
     $values = $event_state['location'];
   }
 
-  $fields['location'] = array(
-    '#id' => 'field-event-location',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($form['form']['step']['#value'] == 'location' && array_key_exists('information', $form['form']['sections']['#value'])) {
+    $fields['location'] = array(
+      '#id' => 'field-event-location',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-location',
+        ),
+      ),
+    );
+
     global $base_path;
     $module_path = drupal_get_path('module', 'mcneese_event_workflow');
 
@@ -772,16 +792,20 @@ function mcneese_event_workflow_get_event_field_building($form, &$form_state, &$
     }
   }
 
-  $fields['building'] = array(
-    '#id' => 'field-event-building',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
+  if ($form['form']['step']['#value'] == 'building' && array_key_exists('information', $form['form']['sections']['#value'])) {
+    $fields['building'] = array(
+      '#id' => 'field-event-building',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-building',
+        ),
       ),
-    ),
-  );
+    );
+  }
 
   // the building is determined by the room, therefore this is more or less a stub/placeholder.
   foreach ($values as $key => $value) {
@@ -804,18 +828,20 @@ function mcneese_event_workflow_get_event_field_room($form, &$form_state, &$fiel
     $values = $event_state['room'];
   }
 
-  $fields['room'] = array(
-    '#id' => 'field-event-room',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($form['form']['step']['#value'] == 'rooms' && array_key_exists('information', $form['form']['sections']['#value'])) {
+    $fields['room'] = array(
+      '#id' => 'field-event-room',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-room',
+        ),
+      ),
+    );
+
     foreach ($values as $key => &$value) {
       if (!empty($value)) {
         $parts = explode('_', $value);
@@ -914,24 +940,92 @@ function mcneese_event_workflow_get_event_field_review_review($form, &$form_stat
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_dates_date($form, &$form_state, &$fields, &$event_state, $ps) {
+function mcneese_event_workflow_get_event_group_dates_date($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
   if (!empty($event_state['dates']['date'])) {
     $values = $event_state['dates']['date'];
   }
 
-  $fields['dates']['date'] = array(
-    '#id' => 'field-event-dates-date',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
+  if ($form['form']['step']['#value'] == 'standard' && array_key_exists('dates', $form['form']['sections']['#value'])) {
+    $fields['dates']['group_dates'] = array(
+      '#id' => 'group-event-dates-date',
+      '#type' => 'container',
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'group-event-item',
+          'group-event-item-dates-date',
+        ),
       ),
-    ),
-  );
+    );
+
+    foreach ($values as $key => $value) {
+      $fields['dates']['group_dates'][$key] = array(
+        '#type' => 'container',
+        '#attributes' => array(
+          'class' => array(
+            'group-field-container',
+            'group-field-container-' . $key,
+          ),
+        ),
+      );
+
+      $new_ps = $ps . '[group_dates][' . $key . ']';
+
+      mcneese_event_workflow_get_event_field_dates_date($form, $form_state, $fields['dates']['group_dates'][$key], $event_state, $new_ps, $key);
+      mcneese_event_workflow_get_event_field_dates_time_start($form, $form_state, $fields['dates']['group_dates'][$key], $event_state, $new_ps, $key);
+      mcneese_event_workflow_get_event_field_dates_time_stop($form, $form_state, $fields['dates']['group_dates'][$key], $event_state, $new_ps, $key);
+      mcneese_event_workflow_get_event_field_dates_category($form, $form_state, $fields['dates']['group_dates'][$key], $event_state, $new_ps, $key);
+    }
+  }
+  else {
+    foreach ($values as $key => $value) {
+      $new_ps = $ps . '[group_dates][' . $key . ']';
+
+      mcneese_event_workflow_get_event_field_dates_date($form, $form_state, $fields['dates']['group_dates'][$key], $event_state, $new_ps, $key);
+      mcneese_event_workflow_get_event_field_dates_time_start($form, $form_state, $fields['dates']['group_dates'][$key], $event_state, $new_ps, $key);
+      mcneese_event_workflow_get_event_field_dates_time_stop($form, $form_state, $fields['dates']['group_dates'][$key], $event_state, $new_ps, $key);
+      mcneese_event_workflow_get_event_field_dates_category($form, $form_state, $fields['dates']['group_dates'][$key], $event_state, $new_ps, $key);
+    }
+  }
+
+  return $values;
+}
+
+/**
+ * Process and build a specific form field.
+ */
+function mcneese_event_workflow_get_event_field_dates_date($form, &$form_state, &$fields, &$event_state, $ps, $delta = NULL) {
+  $values = array(0 => NULL);
+  if (!empty($event_state['dates']['date'])) {
+    $values = $event_state['dates']['date'];
+  }
+
+  $delta_id = NULL;
+  if (is_numeric($delta)) {
+    $values = array($delta => NULL);
+
+    if (!empty($event_state['dates']['date'][$delta])) {
+      $values[$delta] = $event_state['dates']['date'][$delta];
+    }
+
+    $delta_id = '-delta_' . $delta;
+  }
 
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('dates', $form['form']['sections']['#value'])) {
+    $fields['dates']['date'] = array(
+      '#id' => 'field-event-dates-date' . $delta_id,
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-dates-date',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['dates']['date'][$key] = array(
         '#id' => 'field-event-dates-date-' . $key,
@@ -949,11 +1043,17 @@ function mcneese_event_workflow_get_event_field_dates_date($form, &$form_state, 
             'form-item-delta-' . $key,
           ),
         ),
+        '#parents' => array('event', 'dates', 'date', $delta),
       );
     }
     krsort($fields['dates']['date']);
 
-    $form_state['conditionally_required'][0][] = 'dates][date';
+    if (is_numeric($delta)) {
+      $form_state['conditionally_required'][0][] = $ps . '[dates][date';
+    }
+    else {
+      $form_state['conditionally_required'][0][] = 'dates][date';
+    }
   }
   else {
     foreach ($values as $key => $value) {
@@ -961,6 +1061,7 @@ function mcneese_event_workflow_get_event_field_dates_date($form, &$form_state, 
         '#id' => 'field-event-dates-date-' . $key,
         '#type' => 'value',
         '#value' => $value,
+        '#parents' => array('event', 'dates', 'date', $delta),
       );
     }
   }
@@ -971,24 +1072,37 @@ function mcneese_event_workflow_get_event_field_dates_date($form, &$form_state, 
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_dates_time_start($form, &$form_state, &$fields, &$event_state, $ps) {
+function mcneese_event_workflow_get_event_field_dates_time_start($form, &$form_state, &$fields, &$event_state, $ps, $delta = NULL) {
   $values = array(0 => NULL);
   if (!empty($event_state['dates']['time_start'])) {
     $values = $event_state['dates']['time_start'];
   }
 
-  $fields['dates']['time_start'] = array(
-    '#id' => 'field-event-dates-time_start',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
+  $delta_id = NULL;
+  if (is_numeric($delta)) {
+    $values = array($delta => NULL);
+
+    if (!empty($event_state['dates']['time_start'][$delta])) {
+      $values[$delta] = $event_state['dates']['time_start'][$delta];
+    }
+
+    $delta_id = '-delta_' . $delta;
+  }
 
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('dates', $form['form']['sections']['#value'])) {
+    $fields['dates']['time_start'] = array(
+      '#id' => 'field-event-dates-time_start' . $delta_id,
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-dates-time_start',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['dates']['time_start'][$key] = array(
         '#id' => 'field-event-dates-time_start-' . $key,
@@ -1006,6 +1120,7 @@ function mcneese_event_workflow_get_event_field_dates_time_start($form, &$form_s
             'form-item-delta-' . $key,
           ),
         ),
+        '#parents' => array('event', 'dates', 'time_start', $delta),
       );
     }
     krsort($fields['dates']['time_start']);
@@ -1016,6 +1131,7 @@ function mcneese_event_workflow_get_event_field_dates_time_start($form, &$form_s
         '#id' => 'field-event-dates-time_start-' . $key,
         '#type' => 'value',
         '#value' => $value,
+        '#parents' => array('event', 'dates', 'time_start', $delta),
       );
     }
   }
@@ -1026,24 +1142,37 @@ function mcneese_event_workflow_get_event_field_dates_time_start($form, &$form_s
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_dates_time_stop($form, &$form_state, &$fields, &$event_state, $ps) {
+function mcneese_event_workflow_get_event_field_dates_time_stop($form, &$form_state, &$fields, &$event_state, $ps, $delta = NULL) {
   $values = array(0 => NULL);
   if (!empty($event_state['dates']['time_stop'])) {
     $values = $event_state['dates']['time_stop'];
   }
 
-  $fields['dates']['time_stop'] = array(
-    '#id' => 'field-event-dates-time_stop',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
+  $delta_id = NULL;
+  if (is_numeric($delta)) {
+    $values = array($delta => NULL);
+
+    if (!empty($event_state['dates']['time_stop'][$delta])) {
+      $values[$delta] = $event_state['dates']['time_stop'][$delta];
+    }
+
+    $delta_id = '-delta_' . $delta;
+  }
 
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('dates', $form['form']['sections']['#value'])) {
+    $fields['dates']['time_stop'] = array(
+      '#id' => 'field-event-dates-time_stop' . $delta_id,
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-dates-time_stop',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['dates']['time_stop'][$key] = array(
         '#id' => 'field-event-dates-time_stop-' . $key,
@@ -1061,6 +1190,7 @@ function mcneese_event_workflow_get_event_field_dates_time_stop($form, &$form_st
             'form-item-delta-' . $key,
           ),
         ),
+        '#parents' => array('event', 'dates', 'time_stop', $delta),
       );
     }
     krsort($fields['dates']['time_stop']);
@@ -1071,6 +1201,83 @@ function mcneese_event_workflow_get_event_field_dates_time_stop($form, &$form_st
         '#id' => 'field-event-dates-time_stop-' . $key,
         '#type' => 'value',
         '#value' => $value,
+        '#parents' => array('event', 'dates', 'time_stop', $delta),
+      );
+    }
+  }
+
+  return $values;
+}
+
+/**
+ * Process and build a specific form field.
+ */
+function mcneese_event_workflow_get_event_field_dates_category($form, &$form_state, &$fields, &$event_state, $ps, $delta = NULL) {
+  $values = array(0 => NULL);
+  if (!empty($event_state['dates']['category'])) {
+    $values = $event_state['dates']['category'];
+  }
+
+  $delta_id = NULL;
+  if (is_numeric($delta)) {
+    $values = array($delta => NULL);
+
+    if (!empty($event_state['dates']['category'][$delta])) {
+      $values[$delta] = $event_state['dates']['category'][$delta];
+    }
+
+    $delta_id = '-delta_' . $delta;
+  }
+
+  if ($form['form']['step']['#value'] == 'standard' && array_key_exists('dates', $form['form']['sections']['#value'])) {
+    $fields['dates']['category'] = array(
+      '#id' => 'field-event-dates-category' . $delta_id,
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-dates-category',
+        ),
+      ),
+    );
+
+    $dates_category_options = event_workflow_get_dates_category_list_options('select');
+
+    foreach ($values as $key => $value) {
+      $fields['dates']['category'][$key] = array(
+        '#id' => 'field-event-dates-category-' . $key,
+        '#type' => 'select',
+        '#title' => 'Category',
+        '#required' => TRUE,
+        '#default_value' => $value,
+        '#options' => $dates_category_options,
+        '#attributes' => array(
+          'class' => array(
+            'form-item-delta',
+            'form-item-delta-' . $key,
+          ),
+        ),
+        '#parents' => array('event', 'dates', 'category', $delta),
+      );
+    }
+    krsort($fields['dates']['category']);
+
+    if (is_numeric($delta)) {
+      $form_state['conditionally_required'][0][] = $ps . '[dates][category';
+    }
+    else {
+      $form_state['conditionally_required'][0][] = 'dates][category';
+    }
+  }
+  else {
+    foreach ($values as $key => $value) {
+      $fields['dates']['category'][$key] = array(
+        '#id' => 'field-event-dates-category-' . $key,
+        '#type' => 'value',
+        '#value' => $value,
+        '#parents' => array('event', 'dates', 'category', $delta),
       );
     }
   }
@@ -1127,18 +1334,20 @@ function mcneese_event_workflow_get_event_field_event_coordinator_name($form, &$
     }
   }
 
-  $fields['event_coordinator']['name'] = array(
-    '#id' => 'field-event-event_coordinator-name',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('coordinator', $form['form']['sections']['#value'])) {
+    $fields['event_coordinator']['name'] = array(
+      '#id' => 'field-event-event_coordinator-name',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-event_coordinator-name',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['event_coordinator']['name'][$key] = array(
         '#id' => 'field-event-event_coordinator-name-' . $key,
@@ -1190,18 +1399,20 @@ function mcneese_event_workflow_get_event_field_event_coordinator_phone($form, &
     }
   }
 
-  $fields['event_coordinator']['phone'] = array(
-    '#id' => 'field-event-event_coordinator-phone',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('coordinator', $form['form']['sections']['#value'])) {
+    $fields['event_coordinator']['phone'] = array(
+      '#id' => 'field-event-event_coordinator-phone',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-event_coordinator-phone',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['event_coordinator']['phone'][$key] = array(
         '#id' => 'field-event-event_coordinator-phone-' . $key,
@@ -1249,18 +1460,20 @@ function mcneese_event_workflow_get_event_field_event_coordinator_email($form, &
     }
   }
 
-  $fields['event_coordinator']['email'] = array(
-    '#id' => 'field-event-event_coordinator-email',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('coordinator', $form['form']['sections']['#value'])) {
+    $fields['event_coordinator']['email'] = array(
+      '#id' => 'field-event-event_coordinator-email',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-event_coordinator-email',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['event_coordinator']['email'][$key] = array(
         '#id' => 'field-event-event_coordinator-email-' . $key,
@@ -1321,18 +1534,20 @@ function mcneese_event_workflow_get_event_field_event_coordinator_classification
     $values = array(0 => $classification['value']);
   }
 
-  $fields['event_coordinator']['classification'] = array(
-    '#id' => 'field-event-event_coordinator-classification',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('coordinator', $form['form']['sections']['#value'])) {
+    $fields['event_coordinator']['classification'] = array(
+      '#id' => 'field-event-event_coordinator-classification',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-event_coordinator-classification',
+        ),
+      ),
+    );
+
     // multiple classifications exists, so prompt user for desired classification.
     if ($classification['count'] > 1) {
       foreach ($values as $key => $value) {
@@ -1396,6 +1611,237 @@ function mcneese_event_workflow_get_event_field_event_coordinator_classification
 /**
  * Process and build a specific form field.
  */
+function mcneese_event_workflow_get_event_field_information_title($form, &$form_state, &$fields, &$event_state, $ps) {
+  $values = array(0 => NULL);
+  if (!empty($event_state['information']['title'])) {
+    $values = $event_state['information']['title'];
+  }
+
+  if ($form['form']['step']['#value'] == 'standard' && array_key_exists('information', $form['form']['sections']['#value'])) {
+    $fields['information']['title'] = array(
+      '#id' => 'field-event-information-title',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-information-title',
+        ),
+      ),
+    );
+
+    foreach ($values as $key => $value) {
+      $fields['information']['title'][$key] = array(
+        '#id' => 'field-event-information-title-' . $key,
+        '#type' => 'textfield',
+        '#title' => 'Event Title',
+        '#default_value' => $value,
+        '#required' => TRUE,
+        '#size' => 48,
+        '#maxlength' => 255,
+        '#attributes' => array(
+          'class' => array(
+            'form-item-delta',
+            'form-item-delta-' . $key,
+          ),
+        ),
+      );
+    }
+    krsort($fields['information']['title']);
+
+    $form_state['conditionally_required'][0][] = 'information][title';
+  }
+  else {
+    foreach ($values as $key => $value) {
+      $fields['information']['title'][$key] = array(
+        '#id' => 'field-event-information-title-' . $key,
+        '#type' => 'value',
+        '#value' => $value,
+      );
+    }
+  }
+
+  return $values;
+}
+
+/**
+ * Process and build a specific form field.
+ */
+function mcneese_event_workflow_get_event_field_information_attendance($form, &$form_state, &$fields, &$event_state, $ps) {
+  $values = array(0 => NULL);
+  if (!empty($event_state['information']['attendance'])) {
+    $values = $event_state['information']['attendance'];
+  }
+
+  if ($form['form']['step']['#value'] == 'standard' && array_key_exists('information', $form['form']['sections']['#value'])) {
+    $fields['information']['attendance'] = array(
+      '#id' => 'field-event-information-attendance',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-information-attendance',
+        ),
+      ),
+    );
+
+    foreach ($values as $key => $value) {
+      $fields['information']['attendance'][$key] = array(
+        '#id' => 'field-event-information-attendance-' . $key,
+        '#type' => 'numberfield',
+        '#title' => 'Expected Number of Attendance',
+        '#default_value' => $value,
+        '#min' => 0,
+        '#attributes' => array(
+          'class' => array(
+            'form-item-delta',
+            'form-item-delta-' . $key,
+          ),
+        ),
+      );
+
+      if (!empty($form['form']['room_information']['#value']->capacity_normal)) {
+        $fields['information']['attendance'][$key]['#max'] = (int) $form['form']['room_information']['#value']->capacity_normal;
+        $fields['information']['attendance'][$key]['#description'] = 'Current room has a max attendance of ' . $fields['information']['attendance'][$key]['#max'] . '.';
+      }
+    }
+    krsort($fields['information']['attendance']);
+  }
+  else {
+    foreach ($values as $key => $value) {
+      $fields['information']['attendance'][$key] = array(
+        '#id' => 'field-event-information-attendance-' . $key,
+        '#type' => 'value',
+        '#value' => $value,
+      );
+    }
+  }
+
+  return $values;
+}
+
+/**
+ * Process and build a specific form field.
+ */
+function mcneese_event_workflow_get_event_field_information_type($form, &$form_state, &$fields, &$event_state, $ps) {
+  $values = array(0 => NULL);
+  if (!empty($event_state['information']['type'])) {
+    $values = $event_state['information']['type'];
+  }
+
+  if ($form['form']['step']['#value'] == 'standard' && array_key_exists('information', $form['form']['sections']['#value'])) {
+    $fields['information']['type'] = array(
+      '#id' => 'field-event-information-type',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-information-type',
+        ),
+      ),
+    );
+
+    $type_options = event_workflow_get_information_type_list_options('select');
+
+    foreach ($values as $key => $value) {
+      $fields['information']['type'][$key] = array(
+        '#id' => 'field-event-information-type-' . $key,
+        '#type' => 'select',
+        '#title' => 'Type of Event',
+        '#default_value' => $value,
+        '#options' => $type_options,
+        '#required' => TRUE,
+        '#attributes' => array(
+          'class' => array(
+            'form-item-delta',
+            'form-item-delta-' . $key,
+          ),
+        ),
+      );
+    }
+    krsort($fields['information']['type']);
+
+    $form_state['conditionally_required'][0][] = 'information][type';
+  }
+  else {
+    foreach ($values as $key => $value) {
+      $fields['information']['type'][$key] = array(
+        '#id' => 'field-event-information-type-' . $key,
+        '#type' => 'value',
+        '#value' => $value,
+      );
+    }
+  }
+
+  return $values;
+}
+
+/**
+ * Process and build a specific form field.
+ */
+function mcneese_event_workflow_get_event_field_information_organization($form, &$form_state, &$fields, &$event_state, $ps) {
+  $values = array(0 => NULL);
+  if (!empty($event_state['information']['organization'])) {
+    $values = $event_state['information']['organization'];
+  }
+
+  if ($form['form']['step']['#value'] == 'standard' && array_key_exists('information', $form['form']['sections']['#value'])) {
+    $fields['information']['organization'] = array(
+      '#id' => 'field-event-information-organization',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-information-organization',
+        ),
+      ),
+    );
+
+    foreach ($values as $key => $value) {
+      $fields['information']['organization'][$key] = array(
+        '#id' => 'field-event-information-organization-' . $key,
+        '#type' => 'textfield',
+        '#title' => 'Organization / Affiliation',
+        '#default_value' => $value,
+        '#required' => FALSE,
+        '#size' => 48,
+        '#maxlength' => 255,
+        '#attributes' => array(
+          'class' => array(
+            'form-item-delta',
+            'form-item-delta-' . $key,
+          ),
+        ),
+      );
+    }
+    krsort($fields['information']['organization']);
+
+    $form_state['conditionally_required'][0][] = 'information][organization';
+    $form_state['conditionally_required'][2][] = 'information][organization'; // only if student organization.
+  }
+  else {
+    foreach ($values as $key => $value) {
+      $fields['information']['organization'][$key] = array(
+        '#id' => 'field-event-information-organization-' . $key,
+        '#type' => 'value',
+        '#value' => $value,
+      );
+    }
+  }
+
+  return $values;
+}
+
+/**
+ * Process and build a specific form field.
+ */
 function mcneese_event_workflow_get_event_field_plans_note($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
 
@@ -1404,18 +1850,20 @@ function mcneese_event_workflow_get_event_field_plans_note($form, &$form_state, 
     $build = TRUE;
   }
 
-  $fields['plans']['note'] = array(
-    '#id' => 'field-event-plans-note',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('plans', $form['form']['sections']['#value'])) {
+    $fields['plans']['note'] = array(
+      '#id' => 'field-event-plans-note',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-plans-note',
+        ),
+      ),
+    );
+
     $fields['plans']['note'][0] = array(
       '#id' => 'field-event-plans-note-0',
       '#type' => 'container',
@@ -1454,18 +1902,20 @@ function mcneese_event_workflow_get_event_field_plans_description($form, &$form_
     $build = TRUE;
   }
 
-  $fields['plans']['description'] = array(
-    '#id' => 'field-event-plans-description',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('plans', $form['form']['sections']['#value'])) {
+    $fields['plans']['description'] = array(
+      '#id' => 'field-event-plans-description',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-plans-description',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['plans']['description'][$key] = array(
         '#id' => 'field-event-plans-description-' . $key,
@@ -1510,18 +1960,20 @@ function mcneese_event_workflow_get_event_field_plans_activities($form, &$form_s
     $build = TRUE;
   }
 
-  $fields['plans']['activities'] = array(
-    '#id' => 'field-event-plans-activities',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('plans', $form['form']['sections']['#value'])) {
+    $fields['plans']['activities'] = array(
+      '#id' => 'field-event-plans-activities',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-plans-activities',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['plans']['activities'][$key] = array(
         '#id' => 'field-event-plans-activities-' . $key,
@@ -1555,80 +2007,26 @@ function mcneese_event_workflow_get_event_field_plans_activities($form, &$form_s
 /**
  * Process and build a specific form field.
  */
-function mcneese_event_workflow_get_event_field_plans_dates($form, &$form_state, &$fields, &$event_state, $ps) {
-  $values = array(0 => NULL);
-  if (!empty($event_state['plans']['dates'])) {
-    $values = $event_state['plans']['dates'];
-  }
-
-  $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
-    $build = TRUE;
-  }
-
-  $fields['plans']['dates'] = array(
-    '#id' => 'field-event-plans-dates',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
-  if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('plans', $form['form']['sections']['#value'])) {
-    foreach ($values as $key => $value) {
-      $fields['plans']['dates'][$key] = array(
-        '#id' => 'field-event-plans-dates-' . $key,
-        '#type' => 'textarea',
-        '#title' => 'Please indicate all additional dates and times needed for plans and/or rehearsals',
-        '#default_value' => $value,
-        '#rows' => 2,
-        '#attributes' => array(
-          'class' => array(
-            'form-item-delta',
-            'form-item-delta-' . $key,
-          ),
-        ),
-      );
-    }
-    krsort($fields['plans']['dates']);
-  }
-  else {
-    foreach ($values as $key => $value) {
-      $fields['plans']['dates'][$key] = array(
-        '#id' => 'field-event-plans-dates-' . $key,
-        '#type' => 'value',
-        '#value' => $value,
-      );
-    }
-  }
-
-  return $values;
-}
-
-/**
- * Process and build a specific form field.
- */
 function mcneese_event_workflow_get_event_field_plans_audience($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
   if (!empty($event_state['plans']['audience'])) {
     $values = $event_state['plans']['audience'];
   }
 
-  $fields['plans']['audience'] = array(
-    '#id' => 'field-event-plans-audience',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('plans', $form['form']['sections']['#value'])) {
+    $fields['plans']['audience'] = array(
+      '#id' => 'field-event-plans-audience',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-plans-audience',
+        ),
+      ),
+    );
+
     $audience_options = event_workflow_get_audience_list_options('select');
 
     foreach ($values as $key => $value) {
@@ -1678,18 +2076,20 @@ function mcneese_event_workflow_get_event_field_registration_require($form, &$fo
     $build = TRUE;
   }
 
-  $fields['registration']['require'] = array(
-    '#id' => 'field-event-registration-require',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('registration', $form['form']['sections']['#value'])) {
+    $fields['registration']['require'] = array(
+      '#id' => 'field-event-registration-require',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-registration-require',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['registration']['require'][$key] = array(
         '#id' => 'field-event-registration-require-' . $key,
@@ -1737,18 +2137,20 @@ function mcneese_event_workflow_get_event_field_registration_website($form, &$fo
     $build = TRUE;
   }
 
-  $fields['registration']['website'] = array(
-    '#id' => 'field-event-registration-website',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('registration', $form['form']['sections']['#value'])) {
+    $fields['registration']['website'] = array(
+      '#id' => 'field-event-registration-website',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-registration-website',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['registration']['website'][$key] = array(
         '#id' => 'field-event-registration-website-' . $key,
@@ -1805,18 +2207,20 @@ function mcneese_event_workflow_get_event_field_registration_phone($form, &$form
     $build = TRUE;
   }
 
-  $fields['registration']['phone'] = array(
-    '#id' => 'field-event-registration-phone',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('registration', $form['form']['sections']['#value'])) {
+    $fields['registration']['phone'] = array(
+      '#id' => 'field-event-registration-phone',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-registration-phone',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['registration']['phone'][$key] = array(
         '#id' => 'field-event-registration-phone-' . $key,
@@ -1871,18 +2275,20 @@ function mcneese_event_workflow_get_event_field_registration_ticket_price($form,
     $build = TRUE;
   }
 
-  $fields['registration']['ticket_price'] = array(
-    '#id' => 'field-event-registration-ticket_price',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('registration', $form['form']['sections']['#value'])) {
+    $fields['registration']['ticket_price'] = array(
+      '#id' => 'field-event-registration-ticket_price',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-registration-ticket_price',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['registration']['ticket_price'][$key] = array(
         '#id' => 'field-event-registration-ticket_price-' . $key,
@@ -1939,18 +2345,20 @@ function mcneese_event_workflow_get_event_field_registration_ticket_dates($form,
     $build = TRUE;
   }
 
-  $fields['registration']['ticket_dates'] = array(
-    '#id' => 'field-event-registration-ticket_dates',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('registration', $form['form']['sections']['#value'])) {
+    $fields['registration']['ticket_dates'] = array(
+      '#id' => 'field-event-registration-ticket_dates',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-registration-ticket_dates',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['registration']['ticket_dates'][$key] = array(
         '#id' => 'field-event-registration-ticket_dates-' . $key,
@@ -2007,18 +2415,20 @@ function mcneese_event_workflow_get_event_field_registration_ticket_website($for
     $build = TRUE;
   }
 
-  $fields['registration']['ticket_website'] = array(
-    '#id' => 'field-event-registration-ticket_website',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('registration', $form['form']['sections']['#value'])) {
+    $fields['registration']['ticket_website'] = array(
+      '#id' => 'field-event-registration-ticket_website',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-registration-ticket_website',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['registration']['ticket_website'][$key] = array(
         '#id' => 'field-event-registration-ticket_website-' . $key,
@@ -2075,18 +2485,20 @@ function mcneese_event_workflow_get_event_field_registration_ticket_phone($form,
     $build = TRUE;
   }
 
-  $fields['registration']['ticket_phone'] = array(
-    '#id' => 'field-event-registration-ticket_phone',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('registration', $form['form']['sections']['#value'])) {
+    $fields['registration']['ticket_phone'] = array(
+      '#id' => 'field-event-registration-ticket_phone',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-registration-ticket_phone',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['registration']['ticket_phone'][$key] = array(
         '#id' => 'field-event-registration-ticket_phone-' . $key,
@@ -2143,18 +2555,20 @@ function mcneese_event_workflow_get_event_field_registration_generate_revenue($f
     $build = TRUE;
   }
 
-  $fields['registration']['generate_revenue'] = array(
-    '#id' => 'field-event-registration-generate_revenue',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('registration', $form['form']['sections']['#value'])) {
+    $fields['registration']['generate_revenue'] = array(
+      '#id' => 'field-event-registration-generate_revenue',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-registration-generate_revenue',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['registration']['generate_revenue'][$key] = array(
         '#id' => 'field-event-registration-generate_revenue-' . $key,
@@ -2202,18 +2616,20 @@ function mcneese_event_workflow_get_event_field_registration_revenue_generated($
     $build = TRUE;
   }
 
-  $fields['registration']['revenue_generated'] = array(
-    '#id' => 'field-event-registration-revenue_generated',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('registration', $form['form']['sections']['#value'])) {
+    $fields['registration']['revenue_generated'] = array(
+      '#id' => 'field-event-registration-revenue_generated',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-registration-revenue_generated',
+        ),
+      ),
+    );
+
     $revenue_generated_options = event_workflow_get_revenue_generated_list_options('checkboxes');
 
     foreach ($values as $key => $value) {
@@ -2266,18 +2682,20 @@ function mcneese_event_workflow_get_event_field_setup_rectangular_tables_8ft($fo
     $values = $event_state['setup']['rectangular_tables_8ft'];
   }
 
-  $fields['setup']['rectangular_tables_8ft'] = array(
-    '#id' => 'field-event-setup-rectangular_tables_8ft',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
+    $fields['setup']['rectangular_tables_8ft'] = array(
+      '#id' => 'field-event-setup-rectangular_tables_8ft',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-setup-rectangular_tables_8ft',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['setup']['rectangular_tables_8ft'][$key] = array(
         '#id' => 'field-event-setup-rectangular_tables_8ft-' . $key,
@@ -2319,18 +2737,20 @@ function mcneese_event_workflow_get_event_field_setup_round_tables_8ft($form, &$
     $values = $event_state['setup']['round_tables_8ft'];
   }
 
-  $fields['setup']['round_tables_8ft'] = array(
-    '#id' => 'field-event-setup-round_tables_8ft',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
+    $fields['setup']['round_tables_8ft'] = array(
+      '#id' => 'field-event-setup-round_tables_8ft',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-setup-round_tables_8ft',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['setup']['round_tables_8ft'][$key] = array(
         '#id' => 'field-event-setup-round_tables_8ft-' . $key,
@@ -2377,18 +2797,20 @@ function mcneese_event_workflow_get_event_field_setup_other_tables($form, &$form
     $build = TRUE;
   }
 
-  $fields['setup']['other_tables'] = array(
-    '#id' => 'field-event-setup-other_tables',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
+    $fields['setup']['other_tables'] = array(
+      '#id' => 'field-event-setup-other_tables',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-setup-other_tables',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['setup']['other_tables'][$key] = array(
         '#id' => 'field-event-setup-other_tables-' . $key,
@@ -2428,18 +2850,20 @@ function mcneese_event_workflow_get_event_field_setup_standard_blue_chairs($form
     $values = $event_state['setup']['standard_blue_chairs'];
   }
 
-  $fields['setup']['standard_blue_chairs'] = array(
-    '#id' => 'field-event-setup-standard_blue_chairs',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
+    $fields['setup']['standard_blue_chairs'] = array(
+      '#id' => 'field-event-setup-standard_blue_chairs',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-setup-standard_blue_chairs',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['setup']['standard_blue_chairs'][$key] = array(
         '#id' => 'field-event-setup-standard_blue_chairs-' . $key,
@@ -2481,18 +2905,20 @@ function mcneese_event_workflow_get_event_field_setup_podium($form, &$form_state
     $values = $event_state['setup']['podium'];
   }
 
-  $fields['setup']['podium'] = array(
-    '#id' => 'field-event-setup-podium',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
+    $fields['setup']['podium'] = array(
+      '#id' => 'field-event-setup-podium',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-setup-podium',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['setup']['podium'][$key] = array(
         '#id' => 'field-event-setup-podium-' . $key,
@@ -2540,18 +2966,20 @@ function mcneese_event_workflow_get_event_field_setup_portable_stage($form, &$fo
     $build = TRUE;
   }
 
-  $fields['setup']['portable_stage'] = array(
-    '#id' => 'field-event-setup-portable_stage',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
+    $fields['setup']['portable_stage'] = array(
+      '#id' => 'field-event-setup-portable_stage',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-setup-portable_stage',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['setup']['portable_stage'][$key] = array(
         '#id' => 'field-event-setup-portable_stage-' . $key,
@@ -2599,18 +3027,20 @@ function mcneese_event_workflow_get_event_field_setup_portable_stage_configurati
     $build = TRUE;
   }
 
-  $fields['setup']['portable_stage_configuration'] = array(
-    '#id' => 'field-event-setup-portable_stage_configuration',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
+    $fields['setup']['portable_stage_configuration'] = array(
+      '#id' => 'field-event-setup-portable_stage_configuration',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-setup-portable_stage_configuration',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['setup']['portable_stage_configuration'][$key] = array(
         '#id' => 'field-event-setup-portable_stage_configuration-' . $key,
@@ -2668,18 +3098,20 @@ function mcneese_event_workflow_get_event_field_setup_security($form, &$form_sta
     $build = TRUE;
   }
 
-  $fields['setup']['security'] = array(
-    '#id' => 'field-event-setup-security',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
+    $fields['setup']['security'] = array(
+      '#id' => 'field-event-setup-security',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-setup-security',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['setup']['security'][$key] = array(
         '#id' => 'field-event-setup-security-' . $key,
@@ -2727,18 +3159,20 @@ function mcneese_event_workflow_get_event_field_setup_parking_assistance($form, 
     $build = TRUE;
   }
 
-  $fields['setup']['parking_assistance'] = array(
-    '#id' => 'field-event-setup-parking_assistance',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
+    $fields['setup']['parking_assistance'] = array(
+      '#id' => 'field-event-setup-parking_assistance',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-setup-parking_assistance',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['setup']['parking_assistance'][$key] = array(
         '#id' => 'field-event-setup-parking_assistance-' . $key,
@@ -2786,18 +3220,20 @@ function mcneese_event_workflow_get_event_field_setup_parking_assistance_area($f
     $build = TRUE;
   }
 
-  $fields['setup']['parking_assistance_area'] = array(
-    '#id' => 'field-event-setup-parking_assistance_area',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
+    $fields['setup']['parking_assistance_area'] = array(
+      '#id' => 'field-event-setup-parking_assistance_area',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-setup-parking_assistance_area',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['setup']['parking_assistance_area'][$key] = array(
         '#id' => 'field-event-setup-parking_assistance_area-' . $key,
@@ -2855,18 +3291,20 @@ function mcneese_event_workflow_get_event_field_setup_road_closures($form, &$for
     $build = TRUE;
   }
 
-  $fields['setup']['road_closures'] = array(
-    '#id' => 'field-event-setup-road_closures',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
+    $fields['setup']['road_closures'] = array(
+      '#id' => 'field-event-setup-road_closures',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-setup-road_closures',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['setup']['road_closures'][$key] = array(
         '#id' => 'field-event-setup-road_closures-' . $key,
@@ -2914,18 +3352,20 @@ function mcneese_event_workflow_get_event_field_setup_road_closures_details($for
     $build = TRUE;
   }
 
-  $fields['setup']['road_closures_details'] = array(
-    '#id' => 'field-event-setup-road_closures_details',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
+    $fields['setup']['road_closures_details'] = array(
+      '#id' => 'field-event-setup-road_closures_details',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-setup-road_closures_details',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['setup']['road_closures_details'][$key] = array(
         '#id' => 'field-event-setup-road_closures_details-' . $key,
@@ -2983,18 +3423,20 @@ function mcneese_event_workflow_get_event_field_setup_special_requests($form, &$
     $build = TRUE;
   }
 
-  $fields['setup']['special_requests'] = array(
-    '#id' => 'field-event-setup-special_requests',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
+    $fields['setup']['special_requests'] = array(
+      '#id' => 'field-event-setup-special_requests',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-setup-special_requests',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['setup']['special_requests'][$key] = array(
         '#id' => 'field-event-setup-special_requests-' . $key,
@@ -3042,18 +3484,20 @@ function mcneese_event_workflow_get_event_field_setup_special_requests_details($
     $build = TRUE;
   }
 
-  $fields['setup']['special_requests_details'] = array(
-    '#id' => 'field-event-setup-special_requests_details',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
+    $fields['setup']['special_requests_details'] = array(
+      '#id' => 'field-event-setup-special_requests_details',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-setup-special_requests_details',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['setup']['special_requests_details'][$key] = array(
         '#id' => 'field-event-setup-special_requests_details-' . $key,
@@ -3106,18 +3550,20 @@ function mcneese_event_workflow_get_event_field_presentation_technical_equipment
     $values = $event_state['presentation']['technical_equipment'];
   }
 
-  $fields['presentation']['technical_equipment'] = array(
-    '#id' => 'field-event-presentation-technical_equipment',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
+    $fields['presentation']['technical_equipment'] = array(
+      '#id' => 'field-event-presentation-technical_equipment',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-presentation-technical_equipment',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['presentation']['technical_equipment'][$key] = array(
         '#id' => 'field-event-presentation-technical_equipment-' . $key,
@@ -3160,18 +3606,20 @@ function mcneese_event_workflow_get_event_field_presentation_technical_equipment
     $values = $event_state['presentation']['technical_equipment_details'];
   }
 
-  $fields['presentation']['technical_equipment_details'] = array(
-    '#id' => 'field-event-presentation-technical_equipment_details',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
+    $fields['presentation']['technical_equipment_details'] = array(
+      '#id' => 'field-event-presentation-technical_equipment_details',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-presentation-technical_equipment_details',
+        ),
+      ),
+    );
+
     $technical_equipment_details_options = event_workflow_get_technical_equipment_details_list_options('checkboxes');
 
     foreach ($values as $key => $value) {
@@ -3227,18 +3675,20 @@ function mcneese_event_workflow_get_event_field_presentation_technical_equipment
     $values = $event_state['presentation']['technical_equipment_microphone'];
   }
 
-  $fields['presentation']['technical_equipment_microphone'] = array(
-    '#id' => 'field-event-presentation-technical_equipment_microphone',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
+    $fields['presentation']['technical_equipment_microphone'] = array(
+      '#id' => 'field-event-presentation-technical_equipment_microphone',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-presentation-technical_equipment_microphone',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['presentation']['technical_equipment_microphone'][$key] = array(
         '#id' => 'field-event-presentation-technical_equipment_microphone-' . $key,
@@ -3299,18 +3749,20 @@ function mcneese_event_workflow_get_event_field_presentation_external_audio_pers
     $build = TRUE;
   }
 
-  $fields['presentation']['external_audio_person'] = array(
-    '#id' => 'field-event-presentation-external_audio_person',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
+    $fields['presentation']['external_audio_person'] = array(
+      '#id' => 'field-event-presentation-external_audio_person',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-presentation-external_audio_person',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['presentation']['external_audio_person'][$key] = array(
         '#id' => 'field-event-presentation-external_audio_person-' . $key,
@@ -3358,18 +3810,20 @@ function mcneese_event_workflow_get_event_field_presentation_external_audio_pers
     $build = TRUE;
   }
 
-  $fields['presentation']['external_audio_person_name'] = array(
-    '#id' => 'field-event-presentation-external_audio_person_name',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
+    $fields['presentation']['external_audio_person_name'] = array(
+      '#id' => 'field-event-presentation-external_audio_person_name',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-presentation-external_audio_person_name',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['presentation']['external_audio_person_name'][$key] = array(
         '#id' => 'field-event-presentation-external_audio_person_name-' . $key,
@@ -3428,18 +3882,20 @@ function mcneese_event_workflow_get_event_field_presentation_external_audio_pers
     $build = TRUE;
   }
 
-  $fields['presentation']['external_audio_person_email'] = array(
-    '#id' => 'field-event-presentation-external_audio_person_email',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
+    $fields['presentation']['external_audio_person_email'] = array(
+      '#id' => 'field-event-presentation-external_audio_person_email',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-presentation-external_audio_person_email',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['presentation']['external_audio_person_email'][$key] = array(
         '#id' => 'field-event-presentation-external_audio_person_email-' . $key,
@@ -3498,18 +3954,20 @@ function mcneese_event_workflow_get_event_field_presentation_external_audio_pers
     $build = TRUE;
   }
 
-  $fields['presentation']['external_audio_person_phone'] = array(
-    '#id' => 'field-event-presentation-external_audio_person_phone',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
+    $fields['presentation']['external_audio_person_phone'] = array(
+      '#id' => 'field-event-presentation-external_audio_person_phone',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-presentation-external_audio_person_phone',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['presentation']['external_audio_person_phone'][$key] = array(
         '#id' => 'field-event-presentation-external_audio_person_phone-' . $key,
@@ -3566,18 +4024,20 @@ function mcneese_event_workflow_get_event_field_presentation_production($form, &
     $build = TRUE;
   }
 
-  $fields['presentation']['production'] = array(
-    '#id' => 'field-event-presentation-production',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
+    $fields['presentation']['production'] = array(
+      '#id' => 'field-event-presentation-production',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-presentation-production',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['presentation']['production'][$key] = array(
         '#id' => 'field-event-presentation-production-' . $key,
@@ -3625,18 +4085,20 @@ function mcneese_event_workflow_get_event_field_presentation_production_name($fo
     $build = TRUE;
   }
 
-  $fields['presentation']['production_name'] = array(
-    '#id' => 'field-event-presentation-production_name',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
+    $fields['presentation']['production_name'] = array(
+      '#id' => 'field-event-presentation-production_name',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-presentation-production_name',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['presentation']['production_name'][$key] = array(
         '#id' => 'field-event-presentation-production_name-' . $key,
@@ -3695,18 +4157,20 @@ function mcneese_event_workflow_get_event_field_presentation_production_email($f
     $build = TRUE;
   }
 
-  $fields['presentation']['production_email'] = array(
-    '#id' => 'field-event-presentation-production_email',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
+    $fields['presentation']['production_email'] = array(
+      '#id' => 'field-event-presentation-production_email',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-presentation-production_email',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['presentation']['production_email'][$key] = array(
         '#id' => 'field-event-presentation-production_email-' . $key,
@@ -3765,18 +4229,20 @@ function mcneese_event_workflow_get_event_field_presentation_production_phone($f
     $build = TRUE;
   }
 
-  $fields['presentation']['production_phone'] = array(
-    '#id' => 'field-event-presentation-production_phone',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
+    $fields['presentation']['production_phone'] = array(
+      '#id' => 'field-event-presentation-production_phone',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-presentation-production_phone',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['presentation']['production_phone'][$key] = array(
         '#id' => 'field-event-presentation-production_phone-' . $key,
@@ -3828,18 +4294,20 @@ function mcneese_event_workflow_get_event_field_presentation_publicity($form, &$
     $values = $event_state['presentation']['publicity'];
   }
 
-  $fields['presentation']['publicity'] = array(
-    '#id' => 'field-event-presentation-publicity',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
+    $fields['presentation']['publicity'] = array(
+      '#id' => 'field-event-presentation-publicity',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-presentation-publicity',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['presentation']['publicity'][$key] = array(
         '#id' => 'field-event-presentation-publicity-' . $key,
@@ -3882,18 +4350,20 @@ function mcneese_event_workflow_get_event_field_presentation_publicity_details($
     $values = $event_state['presentation']['publicity_details'];
   }
 
-  $fields['presentation']['publicity_details'] = array(
-    '#id' => 'field-event-presentation-publicity_details',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
+    $fields['presentation']['publicity_details'] = array(
+      '#id' => 'field-event-presentation-publicity_details',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-presentation-publicity_details',
+        ),
+      ),
+    );
+
     $publicity_details_options = event_workflow_get_publicity_details_list_options('checkboxes');
 
     foreach ($values as $key => $value) {
@@ -3953,18 +4423,20 @@ function mcneese_event_workflow_get_event_field_presentation_printed_material($f
     $build = TRUE;
   }
 
-  $fields['presentation']['printed_material'] = array(
-    '#id' => 'field-event-presentation-printed_material',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
+    $fields['presentation']['printed_material'] = array(
+      '#id' => 'field-event-presentation-printed_material',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-presentation-printed_material',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['presentation']['printed_material'][$key] = array(
         '#id' => 'field-event-presentation-printed_material-' . $key,
@@ -4012,18 +4484,20 @@ function mcneese_event_workflow_get_event_field_presentation_university_logo($fo
     $build = TRUE;
   }
 
-  $fields['presentation']['university_logo'] = array(
-    '#id' => 'field-event-presentation-university_logo',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
+    $fields['presentation']['university_logo'] = array(
+      '#id' => 'field-event-presentation-university_logo',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-presentation-university_logo',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['presentation']['university_logo'][$key] = array(
         '#id' => 'field-event-presentation-university_logo-' . $key,
@@ -4083,18 +4557,20 @@ function mcneese_event_workflow_get_event_field_presentation_designing_material(
     $build = TRUE;
   }
 
-  $fields['presentation']['designing_material'] = array(
-    '#id' => 'field-event-presentation-designing_material',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
+    $fields['presentation']['designing_material'] = array(
+      '#id' => 'field-event-presentation-designing_material',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-presentation-designing_material',
+        ),
+      ),
+    );
+
     $desiging_material_options = event_workflow_get_designing_material_list_options('checkboxes');
 
     foreach ($values as $key => $value) {
@@ -4157,18 +4633,20 @@ function mcneese_event_workflow_get_event_field_presentation_designing_material_
     $build = TRUE;
   }
 
-  $fields['presentation']['designing_material_name'] = array(
-    '#id' => 'field-event-presentation-designing_material_name',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
+    $fields['presentation']['designing_material_name'] = array(
+      '#id' => 'field-event-presentation-designing_material_name',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-presentation-designing_material_name',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['presentation']['designing_material_name'][$key] = array(
         '#id' => 'field-event-presentation-designing_material_name-' . $key,
@@ -4232,18 +4710,20 @@ function mcneese_event_workflow_get_event_field_presentation_designing_material_
     $build = TRUE;
   }
 
-  $fields['presentation']['designing_material_email'] = array(
-    '#id' => 'field-event-presentation-designing_material_email',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
+    $fields['presentation']['designing_material_email'] = array(
+      '#id' => 'field-event-presentation-designing_material_email',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-presentation-designing_material_email',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['presentation']['designing_material_email'][$key] = array(
         '#id' => 'field-event-presentation-designing_material_email-' . $key,
@@ -4307,18 +4787,20 @@ function mcneese_event_workflow_get_event_field_presentation_designing_material_
     $build = TRUE;
   }
 
-  $fields['presentation']['designing_material_phone'] = array(
-    '#id' => 'field-event-presentation-designing_material_phone',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
+    $fields['presentation']['designing_material_phone'] = array(
+      '#id' => 'field-event-presentation-designing_material_phone',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-presentation-designing_material_phone',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['presentation']['designing_material_phone'][$key] = array(
         '#id' => 'field-event-presentation-designing_material_phone-' . $key,
@@ -4375,18 +4857,20 @@ function mcneese_event_workflow_get_event_field_services_food_served($form, &$fo
     $values = $event_state['services']['food_served'];
   }
 
-  $fields['services']['food_served'] = array(
-    '#id' => 'field-event-services-food_served',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('services', $form['form']['sections']['#value'])) {
+    $fields['services']['food_served'] = array(
+      '#id' => 'field-event-services-food_served',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-services-food_served',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['services']['food_served'][$key] = array(
         '#id' => 'field-event-services-food_served-' . $key,
@@ -4419,6 +4903,7 @@ function mcneese_event_workflow_get_event_field_services_food_served($form, &$fo
 
   return $values;
 }
+
 /**
  * Process and build a specific form field.
  */
@@ -4428,18 +4913,20 @@ function mcneese_event_workflow_get_event_field_services_food_caterer($form, &$f
     $values = $event_state['services']['food_caterer'];
   }
 
-  $fields['services']['food_caterer'] = array(
-    '#id' => 'field-event-services-food_caterer',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('services', $form['form']['sections']['#value'])) {
+    $fields['services']['food_caterer'] = array(
+      '#id' => 'field-event-services-food_caterer',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-services-food_caterer',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['services']['food_caterer'][$key] = array(
         '#id' => 'field-event-services-food_caterer-' . $key,
@@ -4493,18 +4980,20 @@ function mcneese_event_workflow_get_event_field_services_alcohol($form, &$form_s
     $values = $event_state['services']['alcohol'];
   }
 
-  $fields['services']['alcohol'] = array(
-    '#id' => 'field-event-services-alcohol',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('services', $form['form']['sections']['#value'])) {
+    $fields['services']['alcohol'] = array(
+      '#id' => 'field-event-services-alcohol',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-services-alcohol',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['services']['alcohol'][$key] = array(
         '#id' => 'field-event-services-alcohol-' . $key,
@@ -4544,18 +5033,20 @@ function mcneese_event_workflow_get_event_field_services_alcohol($form, &$form_s
 function mcneese_event_workflow_get_event_field_services_alcohol_note($form, &$form_state, &$fields, &$event_state, $ps) {
   $values = array(0 => NULL);
 
-  $fields['services']['alcohol_note'] = array(
-    '#id' => 'field-event-services-alcohol_note',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('services', $form['form']['sections']['#value'])) {
+    $fields['services']['alcohol_note'] = array(
+      '#id' => 'field-event-services-alcohol_note',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-services-alcohol_note',
+        ),
+      ),
+    );
+
     $fields['services']['alcohol_note'][0] = array(
       '#id' => 'field-event-services-alcohol_note-0',
       '#type' => 'container',
@@ -4605,18 +5096,20 @@ function mcneese_event_workflow_get_event_field_services_open_flames($form, &$fo
     $build = TRUE;
   }
 
-  $fields['services']['open_flames'] = array(
-    '#id' => 'field-event-services-open_flames',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('services', $form['form']['sections']['#value'])) {
+    $fields['services']['open_flames'] = array(
+      '#id' => 'field-event-services-open_flames',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-services-open_flames',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['services']['open_flames'][$key] = array(
         '#id' => 'field-event-open_flames-' . $key,
@@ -4659,18 +5152,20 @@ function mcneese_event_workflow_get_event_field_additional($form, &$form_state, 
     $values = $event_state['additional'];
   }
 
-  $fields['additional'] = array(
-    '#id' => 'field-event-additional',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('top', $form['form']['sections']['#value'])) {
+    $fields['additional'] = array(
+      '#id' => 'field-event-additional',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-additional',
+        ),
+      ),
+    );
+
     foreach ($values as $key => $value) {
       $fields['additional'][$key] = array(
         '#id' => 'field-event-additional-' . $key,
@@ -4692,229 +5187,6 @@ function mcneese_event_workflow_get_event_field_additional($form, &$form_state, 
     foreach ($values as $key => $value) {
       $fields['additional'][$key] = array(
         '#id' => 'field-event-additional-' . $key,
-        '#type' => 'value',
-        '#value' => $value,
-      );
-    }
-  }
-
-  return $values;
-}
-
-/**
- * Process and build a specific form field.
- */
-function mcneese_event_workflow_get_event_field_information_title($form, &$form_state, &$fields, &$event_state, $ps) {
-  $values = array(0 => NULL);
-  if (!empty($event_state['information']['title'])) {
-    $values = $event_state['information']['title'];
-  }
-
-  $fields['information']['title'] = array(
-    '#id' => 'field-event-information-title',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
-  if ($form['form']['step']['#value'] == 'standard' && array_key_exists('information', $form['form']['sections']['#value'])) {
-    foreach ($values as $key => $value) {
-      $fields['information']['title'][$key] = array(
-        '#id' => 'field-event-information-title-' . $key,
-        '#type' => 'textfield',
-        '#title' => 'Event Title',
-        '#default_value' => $value,
-        '#required' => TRUE,
-        '#size' => 48,
-        '#maxlength' => 255,
-        '#attributes' => array(
-          'class' => array(
-            'form-item-delta',
-            'form-item-delta-' . $key,
-          ),
-        ),
-      );
-    }
-    krsort($fields['information']['title']);
-
-    $form_state['conditionally_required'][0][] = 'information][title';
-  }
-  else {
-    foreach ($values as $key => $value) {
-      $fields['information']['title'][$key] = array(
-        '#id' => 'field-event-information-title-' . $key,
-        '#type' => 'value',
-        '#value' => $value,
-      );
-    }
-  }
-
-  return $values;
-}
-
-/**
- * Process and build a specific form field.
- */
-function mcneese_event_workflow_get_event_field_information_attendance($form, &$form_state, &$fields, &$event_state, $ps) {
-  $values = array(0 => NULL);
-  if (!empty($event_state['information']['attendance'])) {
-    $values = $event_state['information']['attendance'];
-  }
-
-  $fields['information']['attendance'] = array(
-    '#id' => 'field-event-information-attendance',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
-  if ($form['form']['step']['#value'] == 'standard' && array_key_exists('information', $form['form']['sections']['#value'])) {
-    foreach ($values as $key => $value) {
-      $fields['information']['attendance'][$key] = array(
-        '#id' => 'field-event-information-attendance-' . $key,
-        '#type' => 'numberfield',
-        '#title' => 'Expected Number of Attendance',
-        '#default_value' => $value,
-        '#min' => 0,
-        '#attributes' => array(
-          'class' => array(
-            'form-item-delta',
-            'form-item-delta-' . $key,
-          ),
-        ),
-      );
-
-      if (!empty($form['form']['room_information']['#value']->capacity_normal)) {
-        $fields['information']['attendance'][$key]['#max'] = (int) $form['form']['room_information']['#value']->capacity_normal;
-        $fields['information']['attendance'][$key]['#description'] = 'Current room has a max attendance of ' . $fields['information']['attendance'][$key]['#max'] . '.';
-      }
-    }
-    krsort($fields['information']['attendance']);
-  }
-  else {
-    foreach ($values as $key => $value) {
-      $fields['information']['attendance'][$key] = array(
-        '#id' => 'field-event-information-attendance-' . $key,
-        '#type' => 'value',
-        '#value' => $value,
-      );
-    }
-  }
-
-  return $values;
-}
-
-/**
- * Process and build a specific form field.
- */
-function mcneese_event_workflow_get_event_field_information_type($form, &$form_state, &$fields, &$event_state, $ps) {
-  $values = array(0 => NULL);
-  if (!empty($event_state['information']['type'])) {
-    $values = $event_state['information']['type'];
-  }
-
-  $fields['information']['type'] = array(
-    '#id' => 'field-event-information-type',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
-  if ($form['form']['step']['#value'] == 'standard' && array_key_exists('information', $form['form']['sections']['#value'])) {
-    $type_options = event_workflow_get_information_type_list_options('select');
-
-    foreach ($values as $key => $value) {
-      $fields['information']['type'][$key] = array(
-        '#id' => 'field-event-information-type-' . $key,
-        '#type' => 'select',
-        '#title' => 'Type of Event',
-        '#default_value' => $value,
-        '#options' => $type_options,
-        '#required' => TRUE,
-        '#attributes' => array(
-          'class' => array(
-            'form-item-delta',
-            'form-item-delta-' . $key,
-          ),
-        ),
-      );
-    }
-    krsort($fields['information']['type']);
-
-    $form_state['conditionally_required'][0][] = 'information][type';
-  }
-  else {
-    foreach ($values as $key => $value) {
-      $fields['information']['type'][$key] = array(
-        '#id' => 'field-event-information-type-' . $key,
-        '#type' => 'value',
-        '#value' => $value,
-      );
-    }
-  }
-
-  return $values;
-}
-
-/**
- * Process and build a specific form field.
- */
-function mcneese_event_workflow_get_event_field_information_organization($form, &$form_state, &$fields, &$event_state, $ps) {
-  $values = array(0 => NULL);
-  if (!empty($event_state['information']['organization'])) {
-    $values = $event_state['information']['organization'];
-  }
-
-  $fields['information']['organization'] = array(
-    '#id' => 'field-event-information-organization',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
-  if ($form['form']['step']['#value'] == 'standard' && array_key_exists('information', $form['form']['sections']['#value'])) {
-    foreach ($values as $key => $value) {
-      $fields['information']['organization'][$key] = array(
-        '#id' => 'field-event-information-organization-' . $key,
-        '#type' => 'textfield',
-        '#title' => 'Organization / Affiliation',
-        '#default_value' => $value,
-        '#required' => FALSE,
-        '#size' => 48,
-        '#maxlength' => 255,
-        '#attributes' => array(
-          'class' => array(
-            'form-item-delta',
-            'form-item-delta-' . $key,
-          ),
-        ),
-      );
-    }
-    krsort($fields['information']['organization']);
-
-    $form_state['conditionally_required'][0][] = 'information][organization';
-    $form_state['conditionally_required'][2][] = 'information][organization'; // only if student organization.
-  }
-  else {
-    foreach ($values as $key => $value) {
-      $fields['information']['organization'][$key] = array(
-        '#id' => 'field-event-information-organization-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );

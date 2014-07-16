@@ -322,12 +322,31 @@ function mcneese_event_workflow_event_edit_0_form($form, &$form_state, $id, $tar
  * @see: mcneese_event_workflow_event_edit_0_form()
  */
 function mcneese_event_workflow_event_edit_0_form_pre_validate(&$form, &$form_state) {
+  $clicked_id = '';
+  if (isset($form_state['triggering_element']['#id'])) {
+    $clicked_id = $form_state['triggering_element']['#id'];
+  }
+
+  $clicked_sub_id = NULL;
+  $clicked_id_part = NULL;
+  $clicked_id_parts = explode('-', $clicked_id);
+  if (!empty($clicked_id_parts)) {
+    $clicked_id_part = array_pop($clicked_id_parts);
+    $clicked_sub_id = implode('-', $clicked_id_parts);
+  }
+  unset($clicked_id_parts);
+
+  // do not perform validation when not going backwards or adding fields.
   $dont_validate = array(
     'submit-event-cancel' => TRUE,
     'submit-event-prev' => TRUE,
     'submit-event-add-date' => TRUE,
     'submit-event-remove-date' => TRUE,
   );
+
+  if ($clicked_sub_id == 'submit-event-remove-date' && is_numeric($clicked_id_part)) {
+    $dont_validate[$clicked_id] = TRUE;
+  }
 
   mcneese_event_workflow_include(2);
 
@@ -352,6 +371,15 @@ function mcneese_event_workflow_event_edit_0_form_validate($form, &$form_state) 
   if (isset($form_state['triggering_element']['#id'])) {
     $clicked_id = $form_state['triggering_element']['#id'];
   }
+
+  $clicked_sub_id = NULL;
+  $clicked_id_part = NULL;
+  $clicked_id_parts = explode('-', $clicked_id);
+  if (!empty($clicked_id_parts)) {
+    $clicked_id_part = array_pop($clicked_id_parts);
+    $clicked_sub_id = implode('-', $clicked_id_parts);
+  }
+  unset($clicked_id_parts);
 
   if (empty($form_state['values']['form']['step'])) {
     return;
@@ -402,11 +430,15 @@ function mcneese_event_workflow_event_edit_0_form_validate($form, &$form_state) 
     form_set_error('form][step', "An internal error occured. Form Step is not defined. Please contact the support staff.");
   }
 
-  // perform validation when not going backwards or adding fields.
+  // do not perform validation when not going backwards or adding fields.
   $dont_validate = array(
     'submit-event-prev' => TRUE,
     'submit-event-add-date' => TRUE,
   );
+
+  if ($clicked_sub_id == 'submit-event-remove-date' && is_numeric($clicked_id_part)) {
+    $dont_validate[$clicked_id] = TRUE;
+  }
 
   if (!array_key_exists($clicked_id, $dont_validate)) {
     mcneese_event_workflow_include(2);
@@ -436,21 +468,23 @@ function mcneese_event_workflow_event_edit_0_form_validate($form, &$form_state) 
         }
         elseif ($clicked_id == 'submit-event-add-date') {
           $next_date = count($form_state['values']['event']['dates']['date']);
-          $form_state['values']['event']['dates']['date'][$next_date] = NULL;
+          $form_state['values']['event']['group_dates']['dates']['date'][$next_date] = NULL;
           $form_state['values']['event']['dates']['time_start'][$next_date] = NULL;
           $form_state['values']['event']['dates']['time_stop'][$next_date] = NULL;
+          $form_state['values']['event']['dates']['category'][$next_date] = NULL;
         }
-        elseif ($clicked_id == 'submit-event-remove-date') {
-          $prev_date = count($form_state['values']['event']['dates']['date']) - 1;
-          unset($form_state['values']['event']['dates']['date'][$prev_date]);
-          unset($form_state['values']['event']['dates']['time_start'][$prev_date]);
-          unset($form_state['values']['event']['dates']['time_stop'][$prev_date]);
+        elseif ($clicked_sub_id == 'submit-event-remove-date' && is_numeric($clicked_id_part)) {
+          unset($form_state['values']['event']['dates']['date'][$clicked_id_part]);
+          unset($form_state['values']['event']['dates']['time_start'][$clicked_id_part]);
+          unset($form_state['values']['event']['dates']['time_stop'][$clicked_id_part]);
+          unset($form_state['values']['event']['dates']['category'][$clicked_id_part]);
         }
         else {
           $room = explode('_', $form_state['values']['event']['room'][0], 3);
           $date = $form_state['values']['event']['dates']['date'];
           $time_start = $form_state['values']['event']['dates']['time_start'];
           $time_stop = $form_state['values']['event']['dates']['time_stop'];
+          $category = $form_state['values']['event']['dates']['category'];
 
           foreach ($date as $key => $d) {
             $v = event_workflow_convert_value_to_database_format($d, 'date_popup', array('view' => 'Y/m/d'), $form_state, $key);
@@ -459,6 +493,7 @@ function mcneese_event_workflow_event_edit_0_form_validate($form, &$form_state) 
               unset($date[$key]);
               unset($time_start[$key]);
               unset($time_stop[$key]);
+              unset($category[$key]);
             }
             else {
               $date[$key] = $v;
@@ -467,6 +502,7 @@ function mcneese_event_workflow_event_edit_0_form_validate($form, &$form_state) 
               if ($v === FALSE) {
                 $time_start[$key] = NULL;
                 $time_stop[$key] = NULL;
+                $category[$key] = NULL;
               }
               else {
                 $time_start[$key] = $v;
@@ -475,6 +511,7 @@ function mcneese_event_workflow_event_edit_0_form_validate($form, &$form_state) 
                 if ($v === FALSE) {
                   $time_start[$key] = NULL;
                   $time_stop[$key] = NULL;
+                  $category[$key] = NULL;
                 }
                 else {
                   $time_stop[$key] = $v;
@@ -500,6 +537,7 @@ function mcneese_event_workflow_event_edit_0_form_validate($form, &$form_state) 
           unset($date);
           unset($time_start);
           unset($time_stop);
+          unset($category);
 
           if (empty($form_state['values']['event']['information']['type'][0])) {
             form_set_error('event][information][type][0', "The <strong>" . $form['event']['information']['type'][0]['#title'] . "</strong> is required.");
@@ -534,12 +572,13 @@ function mcneese_event_workflow_event_edit_0_form_validate($form, &$form_state) 
         $form_state['values']['event']['dates']['date'][$next_date] = NULL;
         $form_state['values']['event']['dates']['time_start'][$next_date] = NULL;
         $form_state['values']['event']['dates']['time_stop'][$next_date] = NULL;
+        $form_state['values']['event']['dates']['category'][$next_date] = NULL;
       }
-      elseif ($clicked_id == 'submit-event-remove-date') {
-        $prev_date = count($form_state['values']['event']['dates']['date']) - 1;
-        unset($form_state['values']['event']['dates']['date'][$prev_date]);
-        unset($form_state['values']['event']['dates']['time_start'][$prev_date]);
-        unset($form_state['values']['event']['dates']['time_stop'][$prev_date]);
+      elseif ($clicked_sub_id == 'submit-event-remove-date' && is_numeric($clicked_id_part)) {
+        unset($form_state['values']['event']['dates']['date'][$clicked_id_part]);
+        unset($form_state['values']['event']['dates']['time_start'][$clicked_id_part]);
+        unset($form_state['values']['event']['dates']['time_stop'][$clicked_id_part]);
+        unset($form_state['values']['event']['dates']['category'][$clicked_id_part]);
       }
     }
   }

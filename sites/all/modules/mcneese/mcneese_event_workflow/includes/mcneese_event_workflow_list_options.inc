@@ -251,6 +251,32 @@ function event_workflow_get_event_room_list_options($location = NULL, $option = 
 }
 
 /**
+ * Returns an array of dates category options for populating lists.
+ *
+ * @param string|null $option
+ *   (optional) A string designating how the list will be populated.
+ *
+ * @return array
+ *   An array of options available.
+ */
+function event_workflow_get_dates_category_list_options($option = NULL) {
+  $options = array();
+
+  if ($option == 'select') {
+    $options[''] = "- Select -";
+  }
+
+  $options_tree = taxonomy_get_tree(MEW_VID_EVENT_DATES_CATEGORY, 0, NULL, TRUE);
+  foreach ($options_tree as $branch) {
+    $options[$branch->tid] = $branch->name;
+  }
+
+  asort($options);
+
+  return $options;
+}
+
+/**
  * Returns an array of event intended audience options for populating lists.
  *
  * @param string|null $option

@@ -1174,6 +1174,11 @@ function mcneese_event_workflow_event_search_0_form_build_target($form, &$form_s
         $location['targets'][$target_name][$target_delta]['search']['#options'] = event_workflow_get_information_type_list_options('search');
       }
     }
+    elseif ($table_name == 'dates') {
+      if ($field_name == 'category') {
+        $location['targets'][$target_name][$target_delta]['search']['#options'] = event_workflow_get_dates_category_list_options('search');
+      }
+    }
     elseif ($table_name == 'plans') {
       if ($field_name == 'audience') {
         $location['targets'][$target_name][$target_delta]['search']['#options'] = event_workflow_get_audience_list_options('search');
