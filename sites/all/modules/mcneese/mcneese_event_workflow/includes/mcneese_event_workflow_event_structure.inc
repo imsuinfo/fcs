@@ -281,25 +281,50 @@ function mcneese_event_workflow_get_event_fields($form, &$form_state) {
 
     if (count($dates) > 1) {
       foreach ($dates as $date_key => $date_value) {
-        $fields['dates']['group_dates'][$date_key]['dates']['remove_date-' . $date_key] = array(
+        $fields['dates']['group_dates'][$date_key]['dates']['remove'] = array(
+          '#id' => 'buttons-event-remove-date-' . $date_key,
+          '#type' => 'container',
+          '#attributes' => array(
+            'class' => array(
+              'buttons-event-remove-date',
+            ),
+          ),
+        );
+
+        $fields['dates']['group_dates'][$date_key]['dates']['remove']['button-' . $date_key] = array(
           '#id' => 'submit-event-remove-date-' . $date_key,
           '#name' => 'submit-event-remove-date-' . $date_key,
           '#type' => 'submit',
           '#default_value' => t("Remove Date"),
+          '#attributes' => array(
+            'class' => array(
+              'buttons-event-remove-date-button',
+            ),
+          ),
         );
       }
     }
 
-    $fields['dates']['add_remove_date_buttons'] = array(
-      '#id' => 'buttons-event-add_remove_date',
+    $fields['dates']['add'] = array(
+      '#id' => 'buttons-event-add-date',
       '#type' => 'container',
+      '#attributes' => array(
+        'class' => array(
+          'buttons-event-add-date',
+        ),
+      ),
     );
 
-    $fields['dates']['add_remove_date_buttons']['add_date'] = array(
+    $fields['dates']['add']['button'] = array(
       '#id' => 'submit-event-add-date',
       '#name' => 'submit-event-add-date',
       '#type' => 'submit',
       '#default_value' => t("Add Date"),
+      '#attributes' => array(
+        'class' => array(
+          'buttons-event-add-date-button',
+        ),
+      ),
     );
   }
 
