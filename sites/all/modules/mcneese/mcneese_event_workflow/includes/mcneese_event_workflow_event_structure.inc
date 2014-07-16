@@ -1269,12 +1269,12 @@ function mcneese_event_workflow_get_event_field_dates_category($form, &$form_sta
       ),
     );
 
-    $dates_category_options = event_workflow_get_dates_category_list_options('select');
+    $dates_category_options = event_workflow_get_dates_category_list_options('radios');
 
     foreach ($values as $key => $value) {
       $fields['dates']['category'][$key] = array(
         '#id' => 'field-event-dates-category-' . $key,
-        '#type' => 'select',
+        '#type' => 'radios',
         '#title' => 'Category',
         '#required' => TRUE,
         '#default_value' => $value,
