@@ -446,19 +446,6 @@ function mcneese_event_workflow_menu() {
     'type' => MENU_CALLBACK,
   );
 
-  #$items['events/edit-0/ctools/%/%'] = array(
-  #  'title' => "Edit Request",
-  #  'description' => "Make changes to an existing facilities and special event request form.",
-  #  'page callback' => 'mcneese_event_workflow_event_edit_0_form_ctools',
-  #  'page arguments' => array(3, 4),
-  #  'file' => 'mcneese_event_workflow_event_edit_page.inc',
-  #  'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
-  #  'access callback' => 'mcneese_event_workflow_management_page_event_access',
-  #  'access arguments' => array('edit', 3),
-  #  'tab_parent' => 'events',
-  #  'type' => MENU_CALLBACK,
-  #);
-
   $items['events/reviewers-0'] = array(
     'title' => "Manage Reviewers",
     'description' => "Review Request",

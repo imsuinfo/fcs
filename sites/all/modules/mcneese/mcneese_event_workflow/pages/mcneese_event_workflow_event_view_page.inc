@@ -171,15 +171,6 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
 
   $can['history'] = (bool) mcneese_event_workflow_management_page_event_access('history', $event_id);
 
-  if ($can['edit']) {
-    // Include the CTools tools that we need.
-    #ctools_include('ajax');
-    #ctools_include('modal');
-
-    // Add CTools' javascript to the page.
-    #ctools_modal_add_js();
-  }
-
   $page_title = "Event Request";
   if (!empty($event['information']['title'][0]->value)) {
     $page_title = "Event Request: " . $event['information']['title'][0]->value;
@@ -1321,9 +1312,6 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
 /**
  * Create the group path presentation structure.
  *
- * The appropraite ctools_include() and ctools_modal_add_js() must be called
- * before using this function when $show_edit is TRUE.
- *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param int $event_id
@@ -1344,8 +1332,6 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
  *   FALSE is returned for in
  *
  * @see: mcneese_event_workflow_event_view_0_page()
- * @see: ctools_include()
- * @see: ctools_modal_add_js()
  */
 function mcneese_event_workflow_event_view_0_page_setup_group_path(&$form, $event_id, $group, $presentation_tables, $show, $event) {
   $row = NULL;
@@ -1412,10 +1398,6 @@ function mcneese_event_workflow_event_view_0_page_setup_group_path(&$form, $even
       $group_path[$group]['#extra_prefix'] .= '<div class="section-event-' . $event_id . '-' . $group . '-label-wrapper section-event-label-wrapper">';
 
       if ($show_link) {
-        #if ($show['edit'] && function_exists('ctools_modal_text_button')) {
-        #  $group_path[$group]['#extra_prefix'] .= ctools_modal_text_button(t("Edit"), 'events/edit-0/ctools/' . $event_id . '/' . $group, t("Edit " . $presentation_tables[$group]['label']), 'section-event-' . $event_id . '-' . $group . '-edit section-event-edit no-print');
-        #}
-
         if ($show['edit']) {
           $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'events/edit-0/' . $event_id . '/' . $group . '" class="section-event-' . $event_id . '-' . $group . '-edit section-event-edit no-print" title="'. t("Edit " . $presentation_tables[$group]['label']) . '">Edit</a>';
         }

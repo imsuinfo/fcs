@@ -11,84 +11,6 @@
  */
 
 /**
- * Wrapper to mcneese_event_workflow_event_edit_0_form() for ctools.
- *
- * @param int $id
- *   The unique identifier for an event request.
- * @param string|null $target_section
- *   Load only the specified section.
- *
- * @return string
- *   The HTML output representing the page.
- *
- * @see mcneese_event_workflow_event_edit_0_form()
- * @see ctools_include()
- * @see ctools_add_js()
- * @see ctools_build_form()
- */
-function mcneese_event_workflow_event_edit_0_form_ctools($id, $target_section) {
-  if (!function_exists('ctools_api_version')) {
-    drupal_not_found();
-    drupal_exit();
-    return '';
-  }
-
-  $js = !empty($_REQUEST['js']);
-
-  $commands = array();
-
-  if ($js) {
-    ctools_include('modal');
-    ctools_add_js('ajax-responder');
-  }
-
-  ctools_include('wizard');
-
-  if (!cf_is_integer($id)) {
-    $commands[] = ajax_command_html('#page_not_found', "Page Not Found");
-    $commands[] = ctools_modal_command_dismiss();
-    print(ajax_render($commands));
-    exit();
-  }
-
-  if (!is_string($target_section)) {
-    $commands[] = ajax_command_html('#page_not_found', "Page Not Found");
-    $commands[] = ctools_modal_command_dismiss();
-    print(ajax_render($commands));
-    exit();
-  }
-
-  $form_state = array();
-  $form_state['ajax'] = $js;
-  $form_state['mcneese_event_workflow_event_edit_0_form_ctools'] = TRUE;
-  $form_state['no_redirect'] = TRUE;
-  $form_state['re_render'] = TRUE;
-  $form_state['build_info'] = array(
-    'args' => array($id, $target_section),
-  );
-
-  $form = drupal_build_form('mcneese_event_workflow_event_edit_0_form', $form_state);
-  $output = drupal_render($form);
-
-  if ($output === FALSE) {
-    $commands[] = ctools_modal_command_dismiss();
-  }
-  elseif (array_key_exists('ajax_cancel', $form_state) && $form_state['ajax_cancel']) {
-    $commands[] = ctools_modal_command_dismiss();
-  }
-  else {
-    $commands = ctools_modal_form_render($form_state, $output);
-  }
-
-  if ($js) {
-    print(ajax_render($commands));
-    exit();
-  }
-
-  return $output;
-}
-
-/**
  * Provides the event workflow event edit page.
  *
  * @param array $form
@@ -102,8 +24,6 @@ function mcneese_event_workflow_event_edit_0_form_ctools($id, $target_section) {
  *
  * @return string
  *   The HTML output representing the page.
- *
- * @see ctools_include()
  */
 function mcneese_event_workflow_event_edit_0_form($form, &$form_state, $id, $target_section = NULL) {
   // force the page to load the view page when only the id is specified.
@@ -114,34 +34,16 @@ function mcneese_event_workflow_event_edit_0_form($form, &$form_state, $id, $tar
 
   if (!cf_is_integer($id)) {
     cf_error::invalid_integer('id');
-
-    if (array_key_exists('mcneese_event_workflow_event_edit_0_form_ctools', $form_state)) {
-      $commands[] = ctools_modal_command_dismiss();
-      print(ajax_render($commands));
-      exit();
-    }
-    else {
-      drupal_not_found();
-      drupal_exit();
-    }
-
-    return array();
+    drupal_not_found();
+    drupal_exit();
   }
 
   $event = event_workflow_load_event_by_id($id);
 
   if (empty($event)) {
     watchdog('mew', "Unable to find event with id of @id.", array('@id' => $id), WATCHDOG_ERROR);
-
-    if (array_key_exists('mcneese_event_workflow_event_edit_0_form_ctools', $form_state)) {
-      $commands[] = ctools_modal_command_dismiss();
-      print(ajax_render($commands));
-      exit();
-    }
-    else {
-      drupal_not_found();
-      drupal_exit();
-    }
+    drupal_not_found();
+    drupal_exit();
   }
 
   mcneese_event_workflow_include(1);
@@ -150,16 +52,8 @@ function mcneese_event_workflow_event_edit_0_form($form, &$form_state, $id, $tar
 
   if (empty($section_information[$target_section]['steps'])) {
     watchdog('mew', "The section @target_section does not exist or has no steps.", array('@target_section' => $target_section), WATCHDOG_ERROR);
-
-    if (array_key_exists('mcneese_event_workflow_event_edit_0_form_ctools', $form_state)) {
-      $commands[] = ctools_modal_command_dismiss();
-      print(ajax_render($commands));
-      exit();
-    }
-    else {
-      drupal_not_found();
-      drupal_exit();
-    }
+    drupal_not_found();
+    drupal_exit();
   }
 
   $form = array();
@@ -172,13 +66,6 @@ function mcneese_event_workflow_event_edit_0_form($form, &$form_state, $id, $tar
   }
 
   if ($step == 'cancel') {
-    if (array_key_exists('mcneese_event_workflow_event_edit_0_form_ctools', $form_state)) {
-      $commands = array();
-      $commands[] = ctools_modal_command_dismiss();
-      print(ajax_render($commands));
-      exit();
-    }
-
     // @todo: perform a normal redirect to some previous page up the path tree.
     return array();
   }
