@@ -216,6 +216,11 @@ function mcneese_event_workflow_table_structure() {
       'name' => "Organization / Affiliation",
       'type' => 'text',
     ),
+    'adviser_approval' => array(
+      'name' => "Adviser Approval",
+      'type' => 'bool',
+      'path' => 'event][information][adviser_approval',
+    ),
   );
 
   $structure['plans'] = array(
@@ -1077,6 +1082,21 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
       'event_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
+      ),
+    ),
+    'adviser_approval' => array(
+      'label' => 'Adviser Approval',
+      'weight' => 5,
+      'type' => array(
+        'value' => 'boolean',
+      ),
+      'event_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
+      'event_classification' => array(
+        'show' => array(1),
+        'hide' => TRUE,
       ),
     ),
   );

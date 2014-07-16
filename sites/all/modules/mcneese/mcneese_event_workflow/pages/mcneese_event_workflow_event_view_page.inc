@@ -228,6 +228,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
     return $form;
   }
 
+  $event_classification = $event['event_coordinator']['classification'][0]->value;
   $event_type = $event['information']['type'][0]->value;
 
   if ($show_display) {
@@ -353,25 +354,27 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
 
     // build the presentation tables.
     foreach ($event as $field_group => $event_array) {
-      if (isset($presentation_tables[$field_group]['event_type']) && is_array($presentation_tables[$field_group]['event_type']) && array_key_exists('hide', $presentation_tables[$field_group]['event_type'])) {
-        if ($presentation_tables[$field_group]['event_type']['hide'] === TRUE) {
-          if (array_key_exists('show', $presentation_tables[$field_group]['event_type'])) {
-            if ($presentation_tables[$field_group]['event_type']['show'] === TRUE) {
-              // do nothing
-            }
-            elseif ($presentation_tables[$field_group]['event_type']['show'] === FALSE) {
-              continue;
-            }
-            elseif (is_array($presentation_tables[$field_group]['event_type']['show']) && !in_array($event_type, $presentation_tables[$field_group]['event_type']['show'])) {
-              continue;
+      foreach (array('event_type' => $event_type, 'event_classification' => $event_classification) as $show_hide_type => $show_hide_value) {
+        if (isset($presentation_tables[$field_group][$show_hide_type]) && is_array($presentation_tables[$field_group][$show_hide_type]) && array_key_exists('hide', $presentation_tables[$field_group][$show_hide_type])) {
+          if ($presentation_tables[$field_group][$show_hide_type]['hide'] === TRUE) {
+            if (array_key_exists('show', $presentation_tables[$field_group][$show_hide_type])) {
+              if ($presentation_tables[$field_group][$show_hide_type]['show'] === TRUE) {
+                // do nothing
+              }
+              elseif ($presentation_tables[$field_group][$show_hide_type]['show'] === FALSE) {
+                continue 2;
+              }
+              elseif (is_array($presentation_tables[$field_group][$show_hide_type]['show']) && !in_array($show_hide_value, $presentation_tables[$field_group][$show_hide_type]['show'])) {
+                continue 2;
+              }
             }
           }
-        }
-        elseif ($presentation_tables[$field_group]['event_type']['hide'] === FALSE) {
-          // do nothing
-        }
-        elseif (is_array($presentation_tables[$field_group]['event_type']['hide']) && in_array($event_type, $presentation_tables[$field_group]['event_type']['hide'])) {
-          continue;
+          elseif ($presentation_tables[$field_group][$show_hide_type]['hide'] === FALSE) {
+            // do nothing
+          }
+          elseif (is_array($presentation_tables[$field_group][$show_hide_type]['hide']) && in_array($show_hide_value, $presentation_tables[$field_group][$show_hide_type]['hide'])) {
+            continue 2;
+          }
         }
       }
 
@@ -411,25 +414,27 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
             continue;
           }
 
-          if (isset($field_presentation['event_type']) && is_array($field_presentation['event_type']) && array_key_exists('hide', $field_presentation['event_type'])) {
-            if ($field_presentation['event_type']['hide'] === TRUE) {
-              if (array_key_exists('show', $field_presentation['event_type'])) {
-                if ($field_presentation['event_type']['show'] === TRUE) {
-                  // do nothing
-                }
-                elseif ($field_presentation['event_type']['show'] === FALSE) {
-                  continue;
-                }
-                elseif (is_array($field_presentation['event_type']['show']) && !in_array($event_type, $field_presentation['event_type']['show'])) {
-                  continue;
+          foreach (array('event_type' => $event_type, 'event_classification' => $event_classification) as $show_hide_type => $show_hide_value) {
+            if (isset($field_presentation[$show_hide_type]) && is_array($field_presentation[$show_hide_type]) && array_key_exists('hide', $field_presentation[$show_hide_type])) {
+              if ($field_presentation[$show_hide_type]['hide'] === TRUE) {
+                if (array_key_exists('show', $field_presentation[$show_hide_type])) {
+                  if ($field_presentation[$show_hide_type]['show'] === TRUE) {
+                    // do nothing
+                  }
+                  elseif ($field_presentation[$show_hide_type]['show'] === FALSE) {
+                    continue 2;
+                  }
+                  elseif (is_array($field_presentation[$show_hide_type]['show']) && !in_array($show_hide_value, $field_presentation[$show_hide_type]['show'])) {
+                    continue 2;
+                  }
                 }
               }
-            }
-            elseif ($field_presentation['event_type']['hide'] === FALSE) {
-              // do nothing
-            }
-            elseif (is_array($field_presentation['event_type']['hide']) && in_array($event_type, $field_presentation['event_type']['hide'])) {
-              continue;
+              elseif ($field_presentation[$show_hide_type]['hide'] === FALSE) {
+                // do nothing
+              }
+              elseif (is_array($field_presentation[$show_hide_type]['hide']) && in_array($show_hide_value, $field_presentation[$show_hide_type]['hide'])) {
+                continue 2;
+              }
             }
           }
 

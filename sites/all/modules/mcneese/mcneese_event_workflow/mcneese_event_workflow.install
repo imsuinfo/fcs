@@ -64,6 +64,7 @@ function mcneese_event_workflow_table_install_structure() {
     'attendance' => 'unsigned',
     'type' => 'unsigned',
     'organization' => 'varchar',
+    'adviser_approval' => 'unsigned_tiny',
   );
 
   $structure['plans'] = array(

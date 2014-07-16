@@ -421,6 +421,7 @@ function mcneese_event_workflow_get_event_fields($form, &$form_state) {
   $information_attendance = mcneese_event_workflow_get_event_field_information_attendance($form, $form_state, $fields, $event_state, $ps);
   $information_type = mcneese_event_workflow_get_event_field_information_type($form, $form_state, $fields, $event_state, $ps);
   $information_organization = mcneese_event_workflow_get_event_field_information_organization($form, $form_state, $fields, $event_state, $ps);
+  $information_adviser_approval = mcneese_event_workflow_get_event_field_information_adviser_approval($form, $form_state, $fields, $event_state, $ps);
 
   $form['form']['information_type'] = array(
     '#type' => 'value',
@@ -1855,6 +1856,74 @@ function mcneese_event_workflow_get_event_field_information_organization($form, 
     foreach ($values as $key => $value) {
       $fields['information']['organization'][$key] = array(
         '#id' => 'field-event-information-organization-' . $key,
+        '#type' => 'value',
+        '#value' => $value,
+      );
+    }
+  }
+
+  return $values;
+}
+
+/**
+ * Process and build a specific form field.
+ */
+function mcneese_event_workflow_get_event_field_information_adviser_approval($form, &$form_state, &$fields, &$event_state, $ps) {
+  $values = array(0 => NULL);
+  if (!empty($event_state['information']['adviser_approval'])) {
+    $values = $event_state['information']['adviser_approval'];
+  }
+
+  if ($form['form']['step']['#value'] == 'standard' && array_key_exists('information', $form['form']['sections']['#value'])) {
+    $fields['information']['adviser_approval'] = array(
+      '#id' => 'field-event-information-adviser_approval',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-event-item',
+          'field-event-item-information-adviser_approval',
+        ),
+      ),
+    );
+
+    foreach ($values as $key => $value) {
+      $fields['information']['adviser_approval'][$key] = array(
+        '#id' => 'field-event-information-adviser_approval-' . $key,
+        '#type' => 'checkbox',
+        '#title' => "Has your adviser been notified and has approved this event?",
+        '#default_value' => $value,
+        '#required' => FALSE,
+        '#fieldset' => TRUE,
+        '#fieldset_legend' => 'Adviser Approval',
+        '#attributes' => array(
+          'class' => array(
+            'form-item-delta',
+            'form-item-delta-' . $key,
+          ),
+        ),
+        '#states' => array(
+          'visible' => array(
+            ':input[name="' . $form['form']['parents']['#value']['path'] . 'event_coordinator][classification]' . '[' . $key . ']'  . '"]' => array('value' => 1),
+          ),
+          'invisible' => array(
+            'or' => array(
+              ':input[name="' . $form['form']['parents']['#value']['path'] . 'event_coordinator][classification]' . '[' . $key . ']'  . '"]' => array('value' => NULL),
+            ),
+          ),
+        ),
+      );
+    }
+    krsort($fields['information']['adviser_approval']);
+
+    $form_state['conditionally_required'][0][] = 'information][adviser_approval';
+    $form_state['conditionally_required'][2][] = 'information][adviser_approval'; // only if student adviser_approval.
+  }
+  else {
+    foreach ($values as $key => $value) {
+      $fields['information']['adviser_approval'][$key] = array(
+        '#id' => 'field-event-information-adviser_approval-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
