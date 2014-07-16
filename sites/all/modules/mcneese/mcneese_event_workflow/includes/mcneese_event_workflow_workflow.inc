@@ -1297,6 +1297,7 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
       $email_params['title_suffix'] = "Approved";
       $email_params['content'] = "";
       $email_params['content'] .= "The event request has been approved.\n";
+      $email_params['content'] .= "For more information, view the review log.\n";
       $email_params['content'] .= $standard_content;
 
       $email_to[$event_requester->mail] = $event_requester->mail;
@@ -1314,6 +1315,7 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
       $email_params['title_suffix'] = "Denied";
       $email_params['content'] = "";
       $email_params['content'] .= "The event request has been denied.\n";
+      $email_params['content'] .= "For more information, view the review log.\n";
       $email_params['content'] .= $standard_content;
 
       $email_to[$event_requester->mail] = $event_requester->mail;
