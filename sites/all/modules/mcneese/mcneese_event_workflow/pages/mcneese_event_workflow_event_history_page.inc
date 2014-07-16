@@ -37,6 +37,12 @@ function mcneese_event_workflow_event_history_0_form($form, &$form_state, $event
 
   global $base_path;
 
+  $page_title = "Event Request History";
+  if (!empty($event['information']['title'][0]->value)) {
+    $page_title = "Event Request History: " . $event['information']['title'][0]->value;
+  }
+  drupal_set_title($page_title);
+
   $user = cf_current_user();
 
   $manager = user_access('mcneese event workflow manage');
