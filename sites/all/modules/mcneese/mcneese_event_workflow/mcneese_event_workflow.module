@@ -2588,12 +2588,18 @@ function mcneese_event_workflow_build_event_request_item_structure($event_id, $f
  *   A collection of variables to tweak how this value is presented.
  * @param array $event
  *   The event array containing all of the event values.
+ * @param array $options
+ *   (optional) An array of options tweaking how this function will run.
+ *   - 'no_prefix': If TRUE, don't show prefix.
+ *   - 'no_suffix': If TRUE, don't show suffix.
+ *   - 'print_delta_for_multiple': If TRUE, prepend the delta to the value for
+ *      fields that have #multiple set to TRUE.
  *
  * @return array|bool
  *   The built array.
  *   FALSE is returend on failure.
  */
-function mcneese_event_workflow_build_event_request_value_structure($event_id, $field_group, $field_name, $delta, $value, $presentation, $event) {
+function mcneese_event_workflow_build_event_request_value_structure($event_id, $field_group, $field_name, $delta, $value, $presentation, $event, $options = array()) {
   if (!is_string($field_group)) {
     cf_error::invalid_string('field_group');
     return FALSE;
@@ -2621,6 +2627,11 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
 
   $event = event_workflow_load_event_by_id($event_id);
   if (empty($event)) {
+    return FALSE;
+  }
+
+  if (!is_array($options)) {
+    cf_error::invalid_array('options');
     return FALSE;
   }
 
@@ -2654,10 +2665,25 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
     $prefix = $presentation['prefix'];
   }
 
+  if (isset($options['no_prefix']) && $options['no_prefix']) {
+    $prefix = '';
+  }
+
   // define a suffix to prepend after the value.
   $suffix = '';
   if (!empty($presentation['suffix'])) {
     $suffix = $presentation['suffix'];
+  }
+
+  if (isset($options['no_suffix']) && $options['no_suffix']) {
+    $suffix = '';
+  }
+
+  $delta_prefix = '';
+  if (isset($options['print_delta_for_multiple']) && $options['print_delta_for_multiple']) {
+    if (isset($presentation['multiple']) && $presentation['multiple']) {
+      $delta_prefix = '<span class="item-delta">[' . $delta . ']</span> ';
+    }
   }
 
   $venue_coordinator = NULL;
@@ -2963,7 +2989,7 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
         $empty_value = FALSE;
 
         if (!$combined) {
-          $markup = $prefix . $markup . $suffix;
+          $markup = $delta_prefix . $prefix . $markup . $suffix;
         }
       }
 
@@ -2976,7 +3002,7 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
     $output['no_values'] = TRUE;
   }
   elseif ($combined && !$empty_value) {
-    $output['value']['markup']['#markup'] = $prefix . $output['value']['markup']['#markup'] . $suffix;
+    $output['value']['markup']['#markup'] = $delta_prefix . $prefix . $output['value']['markup']['#markup'] . $suffix;
   }
 
   return $output;

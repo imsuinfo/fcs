@@ -247,7 +247,13 @@ function mcneese_event_workflow_event_history_0_form($form, &$form_state, $event
                         }
                       }
 
-                      $value_array = mcneese_event_workflow_build_event_request_value_structure($event_id, $group_name, $field_name, $key, $value, $presentation[$group_name][$field_name], $history);
+                      $options = array(
+                        'no_prefix' => TRUE,
+                        'no_suffix' => TRUE,
+                        'print_delta_for_multiple' => TRUE,
+                      );
+
+                      $value_array = mcneese_event_workflow_build_event_request_value_structure($event_id, $group_name, $field_name, $key, $value, $presentation[$group_name][$field_name], $history, $options);
 
                       if (is_array($value_array) && !isset($value_array['no_values'])) {
                         $processed_values[$value->user_id]['fields'][$group_name][$field_name][$key] = $value_array;
@@ -298,7 +304,13 @@ function mcneese_event_workflow_event_history_0_form($form, &$form_state, $event
                       }
                     }
 
-                    $value_array = mcneese_event_workflow_build_event_request_value_structure($event_id, $group_name, $field_name, $key, $value, $presentation[$group_name][$field_name], $history);
+                    $options = array(
+                      'no_prefix' => TRUE,
+                      'no_suffix' => TRUE,
+                      'print_delta_for_multiple' => TRUE,
+                    );
+
+                    $value_array = mcneese_event_workflow_build_event_request_value_structure($event_id, $group_name, $field_name, $key, $value, $presentation[$group_name][$field_name], $history, $options);
 
                     if (is_array($value_array) && !isset($value_array['no_values'])) {
                       $processed_values[$value->user_id]['fields'][$group_name][$field_name][$key] = $value_array;

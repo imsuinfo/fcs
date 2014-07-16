@@ -893,6 +893,7 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
       'collate' => 'date',
       'collate_order' => 1,
       'collate_into' => TRUE,
+      'multiple' => TRUE,
     ),
     'time_start' => array(
       'label' => 'Start Time',
@@ -909,6 +910,7 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
       'collate' => 'date',
       'collate_order' => 2,
       'prefix' => ', ',
+      'multiple' => TRUE,
     ),
     'time_stop' => array(
       'label' => 'Stop Time',
@@ -925,6 +927,7 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
       'collate' => 'date',
       'collate_order' => 3,
       'prefix' => ' to ',
+      'multiple' => TRUE,
     ),
     'category' => array(
       'label' => 'Date Category',
@@ -939,6 +942,7 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
       'collate_order' => 0,
       'prefix' => '(',
       'suffix' => ') ',
+      'multiple' => TRUE,
     ),
   );
 
