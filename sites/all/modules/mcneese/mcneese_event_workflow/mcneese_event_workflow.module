@@ -1427,7 +1427,7 @@ function mcneese_event_workflow_load_locations($location = NULL, $disabled = FAL
     }
 
     if (array_key_exists($location, $items)) {
-      return $location[$items];
+      return $items[$location];
     }
 
     return FALSE;
@@ -1513,7 +1513,7 @@ function mcneese_event_workflow_load_buildings($location = NULL, $building = NUL
     }
 
     if (array_key_exists($building, $items)) {
-      return $building[$items];
+      return $items[$building];
     }
 
     return FALSE;
