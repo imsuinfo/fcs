@@ -787,7 +787,7 @@ function mcneese_event_workflow_schema() {
             'size' => 'big',
             'not null' => FALSE,
             'default' => 0,
-            'unsigned' => TRUE,
+            'unsigned' => FALSE,
           );
         }
         elseif ($type == 'timestamp') {
@@ -795,7 +795,7 @@ function mcneese_event_workflow_schema() {
             'type' => 'int',
             'size' => 'big',
             'not null' => FALSE,
-            'unsigned' => TRUE,
+            'unsigned' => FALSE,
           );
         }
         elseif ($type == 'time') {
@@ -803,7 +803,15 @@ function mcneese_event_workflow_schema() {
             'type' => 'int',
             'size' => 'big',
             'not null' => FALSE,
-            'unsigned' => TRUE,
+            'unsigned' => FALSE,
+          );
+
+          // Lose some storage space to gain simplified querying based on generalized times.
+          $schema[$table_name]['fields'][$name . '_relative'] = array(
+            'type' => 'int',
+            'size' => 'big',
+            'not null' => FALSE,
+            'unsigned' => FALSE,
           );
         }
         elseif ($type == 'serial') {

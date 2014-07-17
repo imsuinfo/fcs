@@ -2880,6 +2880,13 @@ function event_workflow_convert_value_to_database_format($value, $method, $optio
 
     return strtotime($value);
   }
+  elseif ($method == 'timestamp_relative') {
+    if (empty($value)) {
+      return FALSE;
+    }
+
+    return strtotime($value, 0);
+  }
   elseif ($method == 'date_popup') {
     if (!is_string($value) || empty($value)) {
       return FALSE;
@@ -2918,6 +2925,11 @@ function event_workflow_convert_value_to_database_format($value, $method, $optio
  */
 function event_workflow_convert_value_from_database_format($value, $method, $option = array()) {
   if ($method == 'timestamp') {
+    if (empty($value)) return NULL;
+
+    return date($option['view'], $value);
+  }
+  elseif ($method == 'timestamp_relative') {
     if (empty($value)) return NULL;
 
     return date($option['view'], $value);
@@ -3507,6 +3519,21 @@ function mcneese_event_workflow_build_table_structure($structure, &$structure_ta
 
         if ($storage_values !== FALSE && !is_null($storage_values)) {
           $structure_field_tables[$db_table_field][$delta]['value'] = $storage_values;
+        }
+
+        // exception case: the time type is also stored in a field with the y/m/d set to 0 for quick and easy relative searches at the cost of extra space usage.
+        if (isset($structure[$table_name][$field_name]['type']) && $structure[$table_name][$field_name]['type'] == 'time' && $storage_key == 'timestamp') {
+          $storage_values = FALSE;
+          if (isset($structure[$table_name][$field_name][$storage_key]) && is_array($structure[$table_name][$field_name][$storage_key])) {
+            $storage_options = $structure[$table_name][$field_name][$storage_key];
+            unset($storage_options['relative_to']);
+            $storage_values = event_workflow_convert_value_to_database_format($value, 'timestamp_relative', $storage_options);
+            unset($storage_options);
+          }
+
+          if ($storage_values !== FALSE && !is_null($storage_values)) {
+            $structure_field_tables[$db_table_field][$delta]['value_relative'] = $storage_values;
+          }
         }
       }
     }

@@ -278,13 +278,19 @@ function mcneese_event_workflow_event_search_0_form($form, &$form_state) {
     '#weight' => -2,
   );
 
+  $collapse_controls = FALSE;
+  // When a search query is made, auto-collapse controls by default.
+  if (isset($form_state['triggering_element']['#id']) && $form_state['triggering_element']['#id'] == 'search-advanced-submit-search') {
+    $collapse_controls = TRUE;
+  }
+
   $form['advanced']['targets'] = array(
     '#id' => 'search-advanced-targets',
     '#type' => 'fieldset',
     '#title' => "And",
     '#description' => "All targets within this fieldset are matched using the " . '<em class="uppercase">And</em>' . " operation.",
     '#collapsible' => TRUE,
-    '#collapsed' => FALSE,
+    '#collapsed' => $collapse_controls,
     '#attributes' => array(
       'class' => array(
         'no-print',
@@ -1123,16 +1129,30 @@ function mcneese_event_workflow_event_search_0_form_build_target($form, &$form_s
     ),
   );
 
-  $operators = array(
-    MEW_OPERATOR_LESS_THAN => "Less Than",
-    MEW_OPERATOR_LESS_THAN_EQUAL => "Less Than or Equal To",
-    MEW_OPERATOR_EQUAL => "Equal To",
-    MEW_OPERATOR_LIKE => "Similar To",
-    MEW_OPERATOR_GREATER_THAN_EQUAL => "Greater Than or Equal To",
-    MEW_OPERATOR_GREATER_THAN => "Greater Than",
-    MEW_OPERATOR_NOT_EQUAL => "Not Equal To",
-    MEW_OPERATOR_NOT_LIKE => "Not Similar To",
-  );
+  if ($field['type'] == 'number') {
+    $operators = array(
+      MEW_OPERATOR_LESS_THAN => "Less Than",
+      MEW_OPERATOR_LESS_THAN_EQUAL => "Less Than or Equal To",
+      MEW_OPERATOR_EQUAL => "Equal To",
+      MEW_OPERATOR_GREATER_THAN_EQUAL => "Greater Than or Equal To",
+      MEW_OPERATOR_GREATER_THAN => "Greater Than",
+      MEW_OPERATOR_NOT_EQUAL => "Not Equal To",
+    );
+  }
+  elseif ($field['type'] == 'text') {
+    $operators = array(
+      MEW_OPERATOR_LIKE => "Similar To",
+      MEW_OPERATOR_NOT_LIKE => "Not Similar To",
+      MEW_OPERATOR_EQUAL => "Equal To",
+      MEW_OPERATOR_NOT_EQUAL => "Not Equal To",
+    );
+  }
+  else {
+    $operators = array(
+      MEW_OPERATOR_EQUAL => "Equal To",
+      MEW_OPERATOR_NOT_EQUAL => "Not Equal To",
+    );
+  }
 
   $location['targets'][$target_name][$target_delta]['operator'] = array(
     '#id' => 'search-advanced-targets' . $id_extra . '-targets-' . $target_name . '-' . $target_delta . '-operator',
@@ -1223,28 +1243,47 @@ function mcneese_event_workflow_event_search_0_form_build_target($form, &$form_s
     }
   }
   elseif ($field['type'] == 'checkboxes') {
-    $location['targets'][$target_name][$target_delta]['search']['#type'] = 'checkboxes';
+    $location['targets'][$target_name][$target_delta]['option'] = array(
+      '#id' => 'search-advanced-targets' . $id_extra . '-targets-' . $target_name . '-' . $target_delta . '-field',
+      '#title' => "Option",
+      '#type' => "select",
+      '#default_value' => NULL,
+      '#required' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'search-advanced-target-field',
+          'search-advanced-target-' . $target_name . '-field',
+          'search-advanced-target-' . $target_name . '-' . $target_delta . '-field',
+        ),
+      ),
+    );
+
+    if (isset($form_state['values']['advanced']['targets'][$target_name][$target_delta]['option'])) {
+      $location['targets'][$target_name][$target_delta]['option']['#default_value'] = $form_state['values']['advanced']['targets'][$target_name][$target_delta]['option'];
+    }
+
+    $location['targets'][$target_name][$target_delta]['search']['#type'] = 'select';
+    $location['targets'][$target_name][$target_delta]['search']['#options'] = array(0 => "Unchecked / Disabled", 1 => "Checked / Enabled");
+
+    if (isset($form_state['values']['advanced']['targets'][$target_name][$target_delta]['search'])) {
+      $location['targets'][$target_name][$target_delta]['search']['#default_value'] = $form_state['values']['advanced']['targets'][$target_name][$target_delta]['search'];
+    }
 
     if ($table_name == 'registration') {
       if ($field_name == 'revenue_generated') {
-        $location['targets'][$target_name][$target_delta]['search']['#options'] = event_workflow_get_revenue_generated_list_options('search');
+        $location['targets'][$target_name][$target_delta]['option']['#options'] = event_workflow_get_revenue_generated_list_options('search');
       }
     }
     elseif ($table_name == 'presentation') {
       if ($field_name == 'technical_equipment_details') {
-        $location['targets'][$target_name][$target_delta]['search']['#options'] = event_workflow_get_technical_equipment_details_list_options('search');
+        $location['targets'][$target_name][$target_delta]['option']['#options'] = event_workflow_get_technical_equipment_details_list_options('search');
       }
       elseif ($field_name == 'publicity_details') {
-        $location['targets'][$target_name][$target_delta]['search']['#options'] = event_workflow_get_publicity_details_list_options('search');
+        $location['targets'][$target_name][$target_delta]['option']['#options'] = event_workflow_get_publicity_details_list_options('search');
       }
       elseif ($field_name == 'designing_material') {
-        $location['targets'][$target_name][$target_delta]['search']['#options'] = event_workflow_get_designing_material_list_options('search');
+        $location['targets'][$target_name][$target_delta]['option']['#options'] = event_workflow_get_designing_material_list_options('search');
       }
-    }
-
-    $location['targets'][$target_name][$target_delta]['search']['#default_value'] = array();
-    foreach ($location['targets'][$target_name][$target_delta]['search']['#options'] as $options_key => $options_value) {
-      $location['targets'][$target_name][$target_delta]['search']['#default_value'][$options_key] = NULL;
     }
   }
   elseif ($field['type'] == 'use_fees') {
@@ -1510,47 +1549,80 @@ function mcneese_event_workflow_event_search_0_form_build_search_target($structu
   }
   elseif (isset($field['columns']) && is_array($field['columns'])) {
     if (is_array($target_values) && array_key_exists('search', $target_values)) {
-      $and = array();
+      if (isset($target_values['option']) && !empty($target_values['option'])) {
+        if (array_key_exists($target_values['option'], $field['columns']) && !is_array($search_value)) {
+          // checkboxes have their values stored with the key and not a boolean, so convert the boolean to the appropriate key.
+          if ($field['type'] == 'checkboxes') {
+            if ($search_value == 1) {
+              $search_value = $target_values['option'];
+            }
+          }
 
-      foreach ($field['columns'] as $term_id => $column_name) {
-        $target_field_name = 'field_' . $target_name . '-' . $column_name . '-' . $target_delta;
-        $and[$target_field_name] = array();
-        $and[$target_field_name]['group_name'] = $table_name;
-        $and[$target_field_name]['field_name'] = $field_name;
-        $and[$target_field_name]['column'] = $column_name;
-        $and[$target_field_name]['type'] = $field['type'];
-        $and[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
-        $and[$target_field_name]['search'] = $search_value[$term_id];
-        $and[$target_field_name]['operator'] = $operator_value;
+          $column_name = $field['columns'][$target_values['option']];
+          $target_field_name = 'field_' . $target_name . '-' . $column_name . '-' . $target_delta;
+          $search[$target_field_name] = array();
+          $search[$target_field_name]['group_name'] = $table_name;
+          $search[$target_field_name]['field_name'] = $field_name;
+          $search[$target_field_name]['column'] = $column_name;
+          $search[$target_field_name]['type'] = $field['type'];
+          $search[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
+          $search[$target_field_name]['search'] = $search_value;
+          $search[$target_field_name]['operator'] = $operator_value;
+        }
       }
+      elseif (is_array($search_value)) {
+        $and = array();
 
-      if (!empty($and)) {
-        $search['and_' . $target_delta . '_field'] = $and;
+        foreach ($field['columns'] as $term_id => $column_name) {
+          $target_field_name = 'field_' . $target_name . '-' . $column_name . '-' . $target_delta;
+          $and[$target_field_name] = array();
+          $and[$target_field_name]['group_name'] = $table_name;
+          $and[$target_field_name]['field_name'] = $field_name;
+          $and[$target_field_name]['column'] = $column_name;
+          $and[$target_field_name]['type'] = $field['type'];
+          $and[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
+          $and[$target_field_name]['search'] = $search_value[$term_id];
+          $and[$target_field_name]['operator'] = $operator_value;
+        }
+
+        if (!empty($and)) {
+          $search['and_' . $target_delta . '_field'] = $and;
+        }
       }
     }
   }
   else {
     if (is_array($target_values) && array_key_exists('search', $target_values)) {
-      $target_field_name = 'field_' . $target_name . '-' . $target_delta;
-      $search[$target_field_name] = array();
-      $search[$target_field_name]['group_name'] = $table_name;
-      $search[$target_field_name]['field_name'] = $field_name;
-      $search[$target_field_name]['column'] = 'value';
-      $search[$target_field_name]['type'] = $field['type'];
-      $search[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
-      $search[$target_field_name]['operator'] = $operator_value;
+      $column_name = 'value';
 
       // force empty values for numeric types to be 0.
       if ($field['type'] == 'number' && empty($search_value)) {
         $search_value = 0;
       }
 
-      if (!empty($field['storage'])) {
-        $search[$target_field_name]['search'] = event_workflow_convert_value_to_database_format($search_value, $field['storage']);
+      // Handle types that are stored in their own special formats.
+      if ($field['storage'] == 'timestamp') {
+        if ($field['type'] == 'time') {
+          $search_value = event_workflow_convert_value_to_database_format($search_value, 'timestamp_relative');
+          $column_name .= '_relative';
+        }
+        else {
+          $search_value = event_workflow_convert_value_to_database_format($search_value, 'timestamp');
+        }
       }
-      else {
-        $search[$target_field_name]['search'] = $search_value;
+      elseif (!empty($field['storage'])) {
+        $search_value = event_workflow_convert_value_to_database_format($search_value, $field['storage']);
       }
+
+      $target_field_name = 'field_' . $target_name . '-' . $target_delta;
+      $search[$target_field_name] = array();
+      $search[$target_field_name]['group_name'] = $table_name;
+      $search[$target_field_name]['field_name'] = $field_name;
+      $search[$target_field_name]['column'] = $column_name;
+      $search[$target_field_name]['type'] = $field['type'];
+      $search[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
+      $search[$target_field_name]['operator'] = $operator_value;
+      $search[$target_field_name]['search'] = $search_value;
     }
   }
 
@@ -1578,7 +1650,7 @@ function mcneese_event_workflow_event_search_0_form_build_search_target($structu
  * @return bool
  *   TRUE on success, FALSE otherwise.
  */
-function mcneese_event_workflow_event_search_0_form_build_grouping($form, $form_state, &$location, $recurse_count, $id_extra, $chosen_options, $logic_options) {
+function mcneese_event_workflow_event_search_0_form_build_grouping($form, &$form_state, &$location, $recurse_count, $id_extra, $chosen_options, $logic_options) {
   if (!is_array($form)) {
     cf_error::invalid_array('form');
     return FALSE;
