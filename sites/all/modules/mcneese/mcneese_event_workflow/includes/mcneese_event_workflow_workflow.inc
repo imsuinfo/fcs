@@ -599,7 +599,8 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
       );
     }
   }
-  elseif (($step == MEW_REVIEW_STEP_VENUE_AVAILABLE || $step == MEW_REVIEW_STEP_REVIEW) && $decision == MEW_REVIEW_DECISION_WAVE) {
+
+  if (($step == MEW_REVIEW_STEP_VENUE_AVAILABLE || $step == MEW_REVIEW_STEP_REVIEW) && ($decision == MEW_REVIEW_DECISION_WAVE || $decision == MEW_REVIEW_DECISION_USAGE_FEE)) {
     $fees_waved = 0;
     if (isset($extra['use_fees']['waved'])) {
       $fees_waved = $extra['use_fees']['waved'];

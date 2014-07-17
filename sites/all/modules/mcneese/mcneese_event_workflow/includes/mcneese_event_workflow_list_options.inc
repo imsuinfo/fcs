@@ -555,13 +555,18 @@ function event_workflow_get_reviewer_classification_list_options($option = NULL,
 function event_workflow_get_reviewer_decision_list_options($option = NULL) {
   $options = array();
 
-  if ($option == 'select') {
+  if ($option == 'select' || $option == 'review_step') {
     $options[''] = "- Select -";
   }
 
   $options_tree = taxonomy_get_tree(MEW_VID_EVENT_REVIEWER_DECISION, 0, NULL, TRUE);
   foreach ($options_tree as $branch) {
     $options[$branch->tid] = $branch->name;
+  }
+
+  // wave option is hidden from the users.
+  if ($option == 'review_step') {
+    unset($options[MEW_REVIEW_DECISION_WAVE]);
   }
 
   asort($options);
