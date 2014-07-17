@@ -13,281 +13,99 @@
  */
 
 /**
- * Provides a status for 'soft-delete'.
- * Event is considered deleted, but actually still exists.
+ * Defines event status codes.
  */
 define('MEW_EVENT_STATUS_DELETED', 0);
-
-/**
- * This is the normal status of an event, event locks dates and times from others.
- */
 define('MEW_EVENT_STATUS_LOCKED', 1);
-
-/**
- * This is the normal status of an event, event does not lock dates and times from others.
- */
 define('MEW_EVENT_STATUS_UNLOCKED', 2);
-
-/**
- * This event has been accepted and no other event make take up its time slots.
- */
 define('MEW_EVENT_STATUS_CLOSED_ACCEPTED', 3);
-
-/**
- * This event has been denied, the time slots are available.
- */
 define('MEW_EVENT_STATUS_CLOSED_DENIED', 4);
-
-/**
- * This event was not available for the time slots were not available when the request was made.
- */
 define('MEW_EVENT_STATUS_CLOSED_UNAVAILABLE', 5);
-
-/**
- * This event was not available for the time slots were not available when the request was made.
- * Another, yet to be approved, event had the time slot lot at the time of the request.
- */
 define('MEW_EVENT_STATUS_CLOSED_DUE_TO_LOCK', 6);
-
-/**
- * This event request was cancelled.
- */
 define('MEW_EVENT_STATUS_CANCELLED', 7);
 
 /**
- * Taxonomy VID for the event classification.
+ * Defines Taxonomy VIDs.
  */
  define('MEW_VID_EVENT_CLASSIFICATION', 1);
-
-/**
- * Taxonomy VID for the event classification.
- */
  define('MEW_VID_EVENT_STEPS', 19);
-
-/**
- * Taxonomy VID for the event location.
- */
  define('MEW_VID_EVENT_LOCATION', 7);
-
-/**
- * Taxonomy VID for the event audience.
- */
  define('MEW_VID_EVENT_AUDIENCE', 9);
-
-/**
- * Taxonomy VID for the event revenue generated.
- */
  define('MEW_VID_REVENUE_GENERATED', 15);
-
-/**
- * Taxonomy VID for the event information type.
- */
  define('MEW_VID_EVENT_INFORMATION_TYPE', 8);
-
-/**
- * Taxonomy VID for the event publicity details.
- */
  define('MEW_VID_EVENT_PUBLICITY_DETAILS', 11);
-
-/**
- * Taxonomy VID for the event designing material.
- */
  define('MEW_VID_EVENT_DESIGNING_MATERIAL', 16);
-
-/**
- * Taxonomy VID for the event technical equipment details.
- */
  define('MEW_VID_EVENT_TECHNICAL_EQUIPMENT_DETAILS', 10);
-
-/**
- * Taxonomy VID for the event reviewer classification.
- */
  define('MEW_VID_EVENT_REVIEWER_CLASSIFICATION', 17);
-
-/**
- * Taxonomy VID for the event reviewer decision.
- */
  define('MEW_VID_EVENT_REVIEWER_DECISION', 18);
-
-/**
- * Taxonomy VID for the event reviewer decision.
- */
  define('MEW_VID_EVENT_DATES_CATEGORY', 20);
 
 /**
- * Taxonomy TID for the review step completed.
+ * Defines Taxonomy TIDs for review steps.
  */
  define('MEW_REVIEW_STEP_COMPLETED', 134);
-
-/**
- * Taxonomy TID for the review step confirm and reserve food services.
- */
  define('MEW_REVIEW_STEP_CONFIRM_AND_RESERVE_SERVICES', 121);
-
-/**
- * Taxonomy TID for the review step confirm and reserve housing.
- */
  define('MEW_REVIEW_STEP_CONFIRM_AND_RESERVE_HOUSING', 120);
-
-/**
- * Taxonomy TID for the review step confirm and reserve venue.
- */
  define('MEW_REVIEW_STEP_CONFIRM_AND_RESERVE_VENUE', 119);
-
-/**
- * Taxonomy TID for the review step coordinator review / resolve conflicts / make decisions.
- */
  define('MEW_REVIEW_STEP_MAKE_DECISIONS', 117);
-
-/**
- * Taxonomy TID for the review step release tentative hold.
- */
  define('MEW_REVIEW_STEP_RELEASE_HOLD', 118);
-
-/**
- * Taxonomy TID for the review step review.
- */
  define('MEW_REVIEW_STEP_REVIEW', 132);
-
-/**
- * Taxonomy TID for the review step usage fees.
- */
  define('MEW_REVIEW_STEP_USAGE_FEES', 133);
-
-/**
- * Taxonomy TID for the review step venue available.
- */
  define('MEW_REVIEW_STEP_VENUE_AVAILABLE', 116);
 
 /**
- * Taxonomy TID for the review decision approve.
+ * Defines Taxonomy TID for review decisions.
  */
  define('MEW_REVIEW_DECISION_APPROVE', 115);
-
-/**
- * Taxonomy TID for the review decision comment.
- */
  define('MEW_REVIEW_DECISION_COMMENT', 113);
-
-/**
- * Taxonomy TID for the review decision deny.
- */
  define('MEW_REVIEW_DECISION_DENY', 114);
-
-/**
- * Taxonomy TID for the review decision wave.
- */
  define('MEW_REVIEW_DECISION_WAVE', 135);
-
-/**
- * Taxonomy TID for the review decision usage fee.
- */
  define('MEW_REVIEW_DECISION_USAGE_FEE', 136);
 
 /**
- * Taxonomy TID for the review classification administrative accounting.
+ * Defines Taxonomy TIDs for review classifications.
  */
  define('MEW_REVIEW_CLASSIFICATION_ADMINISTRATIVE_ACCOUNTING', 105);
-
-/**
- * Taxonomy TID for the review classification event coordinator.
- */
  define('MEW_REVIEW_CLASSIFICATION_EVENT_COORDINATOR', 99);
-
-/**
- * Taxonomy TID for the review classification facilities / custodial services.
- */
  define('MEW_REVIEW_CLASSIFICATION_FACILITIES', 104);
-
-/**
- * Taxonomy TID for the review classification faculty advisor.
- */
  define('MEW_REVIEW_CLASSIFICATION_FACULTY_ADVISOR', 100);
-
-/**
- * Taxonomy TID for the review classification food services.
- */
  define('MEW_REVIEW_CLASSIFICATION_FOOD_SERVICES', 108);
-
-/**
- * Taxonomy TID for the review classification housing.
- */
  define('MEW_REVIEW_CLASSIFICATION_HOUSING', 107);
-
-/**
- * Taxonomy TID for the review classification maintenance.
- */
  define('MEW_REVIEW_CLASSIFICATION_MAINTENANCE', 103);
-
-/**
- * Taxonomy TID for the review classification purchasing / insurance.
- */
  define('MEW_REVIEW_CLASSIFICATION_PURCHASING', 106);
-
-/**
- * Taxonomy TID for the review classification security / university police.
- */
  define('MEW_REVIEW_CLASSIFICATION_SECURITY', 102);
-
-/**
- * Taxonomy TID for the review classification student services.
- */
  define('MEW_REVIEW_CLASSIFICATION_STUDENT_SERVICES', 101);
-
-/**
- * Taxonomy TID for the review classification venue coordinator.
- */
  define('MEW_REVIEW_CLASSIFICATION_VENUE_COORDINATOR', 112);
-
-/**
- * Taxonomy TID for the review classification manager.
- */
  define('MEW_REVIEW_CLASSIFICATION_SYSTEM_ADMINISTRATOR', 1);
-
-/**
- * Taxonomy TID for the review classification manager.
- */
  define('MEW_REVIEW_CLASSIFICATION_MANAGER', 2);
-
-/**
- * E-mail address for a failsafe venue/event coordinator.
- */
  define('MEW_REVIEW_CLASSIFICATION_FAILSAFE_COORDINATOR', 45);
 
 /**
- * Taxonomy TID for the event classification.
+ * Defines Taxonomy TIDs for event classifications.
  */
  define('MEW_EVENT_CLASSIFICATION_STUDENT', 1);
-
-/**
- * Taxonomy TID for the event classification.
- */
  define('MEW_EVENT_CLASSIFICATION_CAMPS', 2);
-
-/**
- * Taxonomy TID for the event classification.
- */
  define('MEW_EVENT_CLASSIFICATION_FACULTY', 3);
-
-/**
- * Taxonomy TID for the event classification.
- */
  define('MEW_EVENT_CLASSIFICATION_EXTERNAL', 4);
 
 /**
- * Taxonomy TID for the event classification.
+ * Defines Taxonomy TIDs for event dates categories.
  */
  define('MEW_EVENT_DATES_CATEGORY_ACTUAL', 137);
-
-/**
- * Taxonomy TID for the event classification.
- */
  define('MEW_EVENT_DATES_CATEGORY_SETUP', 138);
+ define('MEW_EVENT_DATES_CATEGORY_CLEANUP', 139);
 
 /**
- * Taxonomy TID for the event classification.
+ * Defines operator codes for building search queries.
  */
- define('MEW_EVENT_DATES_CATEGORY_CLEANUP', 139);
+ define('MEW_OPERATOR_LESS_THAN', 1);
+ define('MEW_OPERATOR_LESS_THAN_EQUAL', 2);
+ define('MEW_OPERATOR_EQUAL', 3);
+ define('MEW_OPERATOR_LIKE', 4);
+ define('MEW_OPERATOR_GREATER_THAN_EQUAL', 5);
+ define('MEW_OPERATOR_GREATER_THAN', 6);
+ define('MEW_OPERATOR_NOT_EQUAL', 7);
+ define('MEW_OPERATOR_NOT_LIKE', 8);
 
 /**
  * Defines a recursion limit for the search and/or operations.
@@ -5063,12 +4881,46 @@ function mcneese_event_workflow_event_process_listing_search_array(&$query, &$op
         $query->addField($field_alias, $search_values['column'], $search_values['field_name']);
       }
 
-      if ($search_values['type'] == 'text' && $search_values['search'] != "") {
-        $operand->condition($field_alias . '.' . $search_values['column'], '%' . db_like($search_values['search']) . '%', $like);
+      $operator = '=';
+      $search_string = $search_values['search'];
+      if ($search_values['operator'] == MEW_OPERATOR_LESS_THAN) {
+        $operator = '<';
       }
-      else {
-        $operand->condition($field_alias . '.' . $search_values['column'], $search_values['search']);
+      elseif ($search_values['operator'] == MEW_OPERATOR_LESS_THAN_EQUAL) {
+        $operator = '<=';
       }
+      elseif ($search_values['operator'] == MEW_OPERATOR_EQUAL) {
+        $operator = '=';
+      }
+      elseif ($search_values['operator'] == MEW_OPERATOR_LIKE) {
+        if ($search_string == "") {
+          $operator = '=';
+        }
+        else {
+          $operator = 'LIKE';
+          $search_string = '%' . db_like($search_values['search']) . '%';
+        }
+      }
+      elseif ($search_values['operator'] == MEW_OPERATOR_GREATER_THAN_EQUAL) {
+        $operator = '>=';
+      }
+      elseif ($search_values['operator'] == MEW_OPERATOR_GREATER_THAN) {
+        $operator = '>';
+      }
+      elseif ($search_values['operator'] == MEW_OPERATOR_NOT_EQUAL) {
+        $operator = '<>';
+      }
+      elseif ($search_values['operator'] == MEW_OPERATOR_NOT_LIKE) {
+        if ($search_string == "") {
+          $operator = '=';
+        }
+        else {
+          $operator = 'NOT LIKE';
+          $search_string = '%' . db_like($search_values['search']) . '%';
+        }
+      }
+
+      $operand->condition($field_alias . '.' . $search_values['column'], $search_string, $operator);
 
       $found_values = TRUE;
       continue;
