@@ -1006,7 +1006,34 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
         $uses_personnel = array('custodial', 'security');
         $uses_hours = array('custodial', 'security');
         $uses_requirements = array('facilities' => TRUE, 'equipment' => FALSE, 'custodial' => TRUE, 'security' => TRUE);
+        $uses_review = array('facilities' => FALSE, 'equipment' => FALSE, 'custodial' => TRUE, 'security' => TRUE);
         foreach ($uses as $use_name => $use_title) {
+          if ($uses_review[$use_name] && $step != MEW_REVIEW_STEP_REVIEW) {
+            continue;
+          }
+
+          $states = array(
+            'visible' => array(
+              ':input[name="review[operations][decision]"]' => array('value' => MEW_REVIEW_DECISION_USAGE_FEE),
+            ),
+          );
+
+          if (!$uses_review[$use_name] && $step != MEW_REVIEW_STEP_REVIEW) {
+            $states = array(
+              'visible' => array(
+                ':input[name="review[operations][decision]"]' => array('value' => MEW_REVIEW_DECISION_USAGE_FEE),
+                ':input[name="review[operations][presidents_approval]"]' => array('checked' => FALSE),
+                ':input[name="review[operations][university_business]"]' => array('checked' => FALSE),
+              ),
+              'invisible' => array(
+                'or' => array(
+                  ':input[name="review[operations][presidents_approval]"]' => array('checked' => TRUE),
+                  ':input[name="review[operations][university_business]"]' => array('checked' => TRUE),
+                ),
+              ),
+            );
+          }
+
           $form['review']['operations']['use_fees'][$use_name] = array(
             '#type' => 'fieldset',
             '#title' => $use_title . ' Use Fee',
@@ -1020,19 +1047,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
                 'use_fees',
               ),
             ),
-            '#states' => array(
-              'visible' => array(
-                ':input[name="review[operations][decision]"]' => array('value' => MEW_REVIEW_DECISION_USAGE_FEE),
-                ':input[name="review[operations][presidents_approval]"]' => array('checked' => FALSE),
-                ':input[name="review[operations][university_business]"]' => array('checked' => FALSE),
-              ),
-              'invisible' => array(
-                'or' => array(
-                  ':input[name="review[operations][presidents_approval]"]' => array('checked' => TRUE),
-                  ':input[name="review[operations][university_business]"]' => array('checked' => TRUE),
-                ),
-              ),
-            ),
+            '#states' => $states,
           );
 
           if (in_array($use_name, $uses_personnel)) {
@@ -1050,19 +1065,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
                   'use_fee-quantity',
                 ),
               ),
-              '#states' => array(
-                'visible' => array(
-                  ':input[name="review[operations][decision]"]' => array('value' => MEW_REVIEW_DECISION_USAGE_FEE),
-                  ':input[name="review[operations][presidents_approval]"]' => array('checked' => FALSE),
-                  ':input[name="review[operations][university_business]"]' => array('checked' => FALSE),
-                ),
-                'invisible' => array(
-                  'or' => array(
-                    ':input[name="review[operations][presidents_approval]"]' => array('checked' => TRUE),
-                    ':input[name="review[operations][university_business]"]' => array('checked' => TRUE),
-                  ),
-                ),
-              ),
+              '#states' => $states,
             );
 
             if (!empty($event['use_fees'][$use_name][0])) {
@@ -1085,19 +1088,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
                   'use_fee-hours',
                 ),
               ),
-              '#states' => array(
-                'visible' => array(
-                  ':input[name="review[operations][decision]"]' => array('value' => MEW_REVIEW_DECISION_USAGE_FEE),
-                  ':input[name="review[operations][presidents_approval]"]' => array('checked' => FALSE),
-                  ':input[name="review[operations][university_business]"]' => array('checked' => FALSE),
-                ),
-                'invisible' => array(
-                  'or' => array(
-                    ':input[name="review[operations][presidents_approval]"]' => array('checked' => TRUE),
-                    ':input[name="review[operations][university_business]"]' => array('checked' => TRUE),
-                  ),
-                ),
-              ),
+              '#states' => $states,
             );
 
             if (!empty($event['use_fees'][$use_name][0])) {
@@ -1119,19 +1110,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
                 'use_fee-days',
               ),
             ),
-            '#states' => array(
-              'visible' => array(
-                ':input[name="review[operations][decision]"]' => array('value' => MEW_REVIEW_DECISION_USAGE_FEE),
-                ':input[name="review[operations][presidents_approval]"]' => array('checked' => FALSE),
-                ':input[name="review[operations][university_business]"]' => array('checked' => FALSE),
-              ),
-              'invisible' => array(
-                'or' => array(
-                  ':input[name="review[operations][presidents_approval]"]' => array('checked' => TRUE),
-                  ':input[name="review[operations][university_business]"]' => array('checked' => TRUE),
-                ),
-              ),
-            ),
+            '#states' => $states,
           );
 
           if (!empty($event['use_fees'][$use_name][0])) {
@@ -1153,19 +1132,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
                 'use_fee-amount',
               ),
             ),
-            '#states' => array(
-              'visible' => array(
-                ':input[name="review[operations][decision]"]' => array('value' => MEW_REVIEW_DECISION_USAGE_FEE),
-                ':input[name="review[operations][presidents_approval]"]' => array('checked' => FALSE),
-                ':input[name="review[operations][university_business]"]' => array('checked' => FALSE),
-              ),
-              'invisible' => array(
-                'or' => array(
-                  ':input[name="review[operations][presidents_approval]"]' => array('checked' => TRUE),
-                  ':input[name="review[operations][university_business]"]' => array('checked' => TRUE),
-                ),
-              ),
-            ),
+            '#states' => $states,
           );
 
           if (!empty($event['use_fees'][$use_name][0])) {
@@ -1216,7 +1183,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
           '#tree' => TRUE,
         );
 
-        if ($insurance_fee) {
+        if ($insurance_fee && $step == MEW_REVIEW_STEP_REVIEW) {
           $form['review']['operations']['insurance']['contractor'] = array(
             '#id' => 'event-review-operations-insurance-contractor',
             '#type' => 'checkbox',
@@ -1233,14 +1200,6 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
             '#states' => array(
               'visible' => array(
                 ':input[name="review[operations][decision]"]' => array('value' => MEW_REVIEW_DECISION_USAGE_FEE),
-                ':input[name="review[operations][presidents_approval]"]' => array('checked' => FALSE),
-                ':input[name="review[operations][university_business]"]' => array('checked' => FALSE),
-              ),
-              'invisible' => array(
-                'or' => array(
-                  ':input[name="review[operations][presidents_approval]"]' => array('checked' => TRUE),
-                  ':input[name="review[operations][university_business]"]' => array('checked' => TRUE),
-                ),
               ),
             ),
           );
@@ -1265,14 +1224,6 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
             '#states' => array(
               'visible' => array(
                 ':input[name="review[operations][decision]"]' => array('value' => MEW_REVIEW_DECISION_USAGE_FEE),
-                ':input[name="review[operations][presidents_approval]"]' => array('checked' => FALSE),
-                ':input[name="review[operations][university_business]"]' => array('checked' => FALSE),
-              ),
-              'invisible' => array(
-                'or' => array(
-                  ':input[name="review[operations][presidents_approval]"]' => array('checked' => TRUE),
-                  ':input[name="review[operations][university_business]"]' => array('checked' => TRUE),
-                ),
               ),
             ),
           );
@@ -1283,7 +1234,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
         }
       }
 
-      if ($can_review_event) {
+      if ($can_review_event && $step == MEW_REVIEW_STEP_VENUE_AVAILABLE) {
         $form['review']['operations']['presidents_approval'] = array(
           '#id' => 'event-review-operations-presidents_approval',
           '#type' => 'checkbox',
