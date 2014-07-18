@@ -1008,7 +1008,7 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
 
   $presentation['event_coordinator'] = array(
     'name' => array(
-      'label' => 'Coordinator Name',
+      'label' => 'Event Coordinator Name',
       'group' => 'coordinator',
       'weight' => 4,
       'event_type' => array(
@@ -1017,7 +1017,7 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
       ),
     ),
     'phone' => array(
-      'label' => 'Coordinator Phone',
+      'label' => 'Event Coordinator Phone',
       'group' => 'coordinator',
       'weight' => 5,
       'event_type' => array(
@@ -1026,7 +1026,7 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
       ),
     ),
     'email' => array(
-      'label' => 'Coordinator E-Mail',
+      'label' => 'Event Coordinator E-Mail',
       'group' => 'coordinator',
       'weight' => 6,
       'event_type' => array(
@@ -1035,7 +1035,7 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
       ),
     ),
     'classification' => array(
-      'label' => 'Coordinator Classification',
+      'label' => 'Event Coordinator Classification',
       'group' => 'coordinator',
       'weight' => 7,
       'type' => array(
