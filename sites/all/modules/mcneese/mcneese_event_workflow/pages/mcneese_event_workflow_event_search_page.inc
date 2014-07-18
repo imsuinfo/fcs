@@ -308,7 +308,12 @@ function mcneese_event_workflow_event_search_0_form($form, &$form_state) {
 
   $chosen_options = array();
   $logic_options = array();
-  mcneese_event_workflow_event_search_0_form_build_targets_and_groups($form, $form_state, $form['advanced'], $chosen_targets, 0, '', $chosen_options, $logic_options);
+  $state_location = NULL;
+  if (isset($form_state['values']['advanced']['targets'])) {
+    $state_location = $form_state['values']['advanced']['targets'];
+  }
+
+  mcneese_event_workflow_event_search_0_form_build_targets_and_groups($form, $form_state, $form['advanced'], $state_location, $chosen_targets, 0, '', $chosen_options, $logic_options);
   mcneese_event_workflow_event_search_0_form_build_grouping($form, $form_state, $form['advanced'], 0, '', $chosen_options, $logic_options);
 
   $form['advanced']['submit'] = array(
@@ -483,10 +488,21 @@ function mcneese_event_workflow_event_search_0_form_validate($form, &$form_state
   elseif ($clicked_id == 'search-advanced-results-navigation-next') {
   }
   elseif ($clicked_id == 'search-advanced-search-controls-manage-new-submit-save') {
+    if (empty($form_state['advanced_search-chosen_targets'])) {
+      form_set_error('advanced[search][controls][manage][existing][save]', "There are no search targets available for performing the requested action.");
+    }
   }
   elseif ($clicked_id == 'search-advanced-search-controls-manage-existing-submit-load') {
     if (empty($form_state['values']['advanced']['search']['controls']['manage']['existing']['select'])) {
       form_set_error('advanced[search][controls][manage][existing][select]', "There are no search target groupings available for performing the requested action.");
+    }
+  }
+  elseif ($clicked_id == 'search-advanced-search-controls-manage-existing-submit-update') {
+    if (empty($form_state['values']['advanced']['search']['controls']['manage']['existing']['select'])) {
+      form_set_error('advanced[search][controls][manage][existing][update]', "There are no search target groupings available for performing the requested action.");
+    }
+    elseif (empty($form_state['advanced_search-chosen_targets'])) {
+      form_set_error('advanced[search][controls][manage][existing][update]', "There are no search targets available for performing the requested action.");
     }
   }
   elseif ($clicked_id == 'search-advanced-search-controls-manage-existing-submit-delete') {
@@ -637,15 +653,20 @@ function mcneese_event_workflow_event_search_0_form_submit($form, &$form_state) 
     }
   }
   elseif ($clicked_id == 'search-advanced-search-controls-manage-new-submit-save') {
-    if (isset($form_state['values']['advanced']['search']['controls']['manage']['new']['human_name'])) {
+    if (isset($form_state['values']['advanced']['search']['controls']['manage']['new']['human_name']) && isset($form_state['advanced_search-chosen_targets'])) {
       $human_name = $form_state['values']['advanced']['search']['controls']['manage']['new']['human_name'];
+
+      $targets_data = array(
+        'targets_values' => $form_state['values']['advanced']['targets'],
+        'chosen_targets' => $form_state['advanced_search-chosen_targets'],
+      );
 
       $transaction = db_transaction();
       try {
         $mew_search_settings = array(
           'user_id' => $user->uid,
           'human_name' => $human_name,
-          'data' => serialize($form_state['advanced_search-chosen_targets']),
+          'data' => serialize($targets_data),
         );
         unset($human_name);
 
@@ -671,7 +692,41 @@ function mcneese_event_workflow_event_search_0_form_submit($form, &$form_state) 
     if (isset($form_state['values']['advanced']['search']['controls']['manage']['existing']['select'])) {
       $id = $form_state['values']['advanced']['search']['controls']['manage']['existing']['select'];
       if (array_key_exists($id, $form['form']['existing_search_targets']['#value'])) {
-        $form_state['advanced_search-chosen_targets'] = unserialize($form['form']['existing_search_targets']['#value'][$id]->data);
+        $targets_data = unserialize($form['form']['existing_search_targets']['#value'][$id]->data);
+
+        $form_state['values']['advanced']['targets'] = $targets_data['targets_values'];
+        $form_state['advanced_search-chosen_targets'] = $targets_data['chosen_targets'];
+      }
+    }
+  }
+  elseif ($clicked_id == 'search-advanced-search-controls-manage-existing-submit-update') {
+    if (isset($form_state['values']['advanced']['search']['controls']['manage']['existing']['select']) && isset($form_state['advanced_search-chosen_targets'])) {
+      $id = $form_state['values']['advanced']['search']['controls']['manage']['existing']['select'];
+
+      $targets_data = array(
+        'targets_values' => $form_state['values']['advanced']['targets'],
+        'chosen_targets' => $form_state['advanced_search-chosen_targets'],
+      );
+
+      $transaction = db_transaction();
+      try {
+        $query = db_update('mew_search_settings');
+        $query->fields(array('data' => serialize($targets_data)));
+        $query->condition('id', $id);
+
+        // for security reasons require that the current user be the only user allowed to update their own settings.
+        $query->condition('user_id', $user->uid);
+
+        $query->execute();
+
+        // enforce transaction execution
+        unset($transaction);
+      }
+      catch (Exception $ex) {
+        $transaction->rollback();
+        cf_error::on_exception($ex);
+
+        return FALSE;
       }
     }
   }
@@ -886,6 +941,9 @@ function mcneese_event_workflow_event_search_0_form_submit($form, &$form_state) 
  *   The form state array as defined by drupals form api.
  * @param array $location
  *   Location in the form array where to build the target.
+ * @param array|null $state_location
+ *   Location in the form state array where the target might store its default
+ *   values. If NULL, then there are no current default values.
  * @param array $chosen_targets
  *   An array of targets already chosen prior to this function call.
  * @param int $recurse_count
@@ -900,7 +958,7 @@ function mcneese_event_workflow_event_search_0_form_submit($form, &$form_state) 
  * @return bool
  *   TRUE on success, FALSE otherwise.
  */
-function mcneese_event_workflow_event_search_0_form_build_targets_and_groups($form, &$form_state, &$location, $chosen_targets, $recurse_count, $id_extra, &$chosen_options, &$logic_options) {
+function mcneese_event_workflow_event_search_0_form_build_targets_and_groups($form, &$form_state, &$location, $state_location, $chosen_targets, $recurse_count, $id_extra, &$chosen_options, &$logic_options) {
   if (!is_array($form)) {
     cf_error::invalid_array('form');
     return FALSE;
@@ -913,6 +971,11 @@ function mcneese_event_workflow_event_search_0_form_build_targets_and_groups($fo
 
   if (!is_array($location)) {
     cf_error::invalid_array('location');
+    return FALSE;
+  }
+
+  if (!is_array($state_location) && !is_null($state_location)) {
+    cf_error::invalid_array('state_location');
     return FALSE;
   }
 
@@ -1004,7 +1067,12 @@ function mcneese_event_workflow_event_search_0_form_build_targets_and_groups($fo
 
       $new_recurse_count = $recurse_count + 1;
 
-      mcneese_event_workflow_event_search_0_form_build_targets_and_groups($form, $form_state, $location['targets'][$chosen_name], $chosen_values, $new_recurse_count, $new_id_extra, $chosen_options[$chosen_name], $logic_options[$chosen_name]);
+      $state_location_next = NULL;
+      if (isset($state_location[$chosen_name]['targets'])) {
+        $state_location_next = $state_location[$chosen_name]['targets'];
+      }
+
+      mcneese_event_workflow_event_search_0_form_build_targets_and_groups($form, $form_state, $location['targets'][$chosen_name], $state_location_next, $chosen_values, $new_recurse_count, $new_id_extra, $chosen_options[$chosen_name], $logic_options[$chosen_name]);
       mcneese_event_workflow_event_search_0_form_build_grouping($form, $form_state, $location['targets'][$chosen_name], $new_recurse_count, $new_id_extra, $chosen_options[$chosen_name], $logic_options[$chosen_name]);
     }
     else {
@@ -1017,7 +1085,7 @@ function mcneese_event_workflow_event_search_0_form_build_targets_and_groups($fo
 
         $chosen_options['options'][$chosen_name][$chosen_name . '-' . $delta] = $chosen_human_name . ' #' . $delta;
 
-        mcneese_event_workflow_event_search_0_form_build_target($form, $form_state, $location, $chosen_name, $delta, $id_extra);
+        mcneese_event_workflow_event_search_0_form_build_target($form, $form_state, $location, $state_location, $chosen_name, $delta, $id_extra);
       }
     }
   }
@@ -1034,6 +1102,9 @@ function mcneese_event_workflow_event_search_0_form_build_targets_and_groups($fo
  *   The form state array as defined by drupals form api.
  * @param array $location
  *   Location in the form array where to build the target.
+ * @param array|null $state_location
+ *   Location in the form state array where the target might store its default
+ *   values. If NULL, then there are no current default values.
  * @param string $target_name
  *   Name of the field to process and convert into a search field.
  * @param int $target_delta
@@ -1046,7 +1117,7 @@ function mcneese_event_workflow_event_search_0_form_build_targets_and_groups($fo
  *
  * @see mcneese_event_workflow_table_structure()
  */
-function mcneese_event_workflow_event_search_0_form_build_target($form, &$form_state, &$location, $target_name, $target_delta, $id_extra) {
+function mcneese_event_workflow_event_search_0_form_build_target($form, &$form_state, &$location, $state_location, $target_name, $target_delta, $id_extra) {
   if (!is_array($form)) {
     cf_error::invalid_array('form');
     return FALSE;
@@ -1059,6 +1130,11 @@ function mcneese_event_workflow_event_search_0_form_build_target($form, &$form_s
 
   if (!is_array($location)) {
     cf_error::invalid_array('location');
+    return FALSE;
+  }
+
+  if (!is_array($state_location) && !is_null($state_location)) {
+    cf_error::invalid_array('state_location');
     return FALSE;
   }
 
@@ -1154,11 +1230,15 @@ function mcneese_event_workflow_event_search_0_form_build_target($form, &$form_s
     );
   }
 
+  $default_value = MEW_OPERATOR_EQUAL;
+  if (isset($state_location[$target_name][$target_delta]['operator'])) {
+    $default_value = $state_location[$target_name][$target_delta]['operator'];
+  }
   $location['targets'][$target_name][$target_delta]['operator'] = array(
     '#id' => 'search-advanced-targets' . $id_extra . '-targets-' . $target_name . '-' . $target_delta . '-operator',
     '#title' => "Operator",
     '#type' => 'select',
-    '#default_value' => MEW_OPERATOR_EQUAL,
+    '#default_value' => $default_value,
     '#options' => $operators,
     '#required' => TRUE,
     '#attributes' => array(
@@ -1170,10 +1250,14 @@ function mcneese_event_workflow_event_search_0_form_build_target($form, &$form_s
     ),
   );
 
+  $default_value = NULL;
+  if (isset($state_location[$target_name][$target_delta]['search'])) {
+    $default_value = $state_location[$target_name][$target_delta]['search'];
+  }
   $location['targets'][$target_name][$target_delta]['search'] = array(
     '#id' => 'search-advanced-targets' . $id_extra . '-targets-' . $target_name . '-' . $target_delta . '-search',
     '#title' => "Value",
-    '#default_value' => NULL,
+    '#default_value' => $default_value,
     '#required' => FALSE,
     '#attributes' => array(
       'class' => array(
@@ -1900,7 +1984,7 @@ function mcneese_event_workflow_event_search_0_form_build_grouping($form, &$form
       '#id' => 'search-advanced-search-controls-manage',
       '#type' => 'fieldset',
       '#title' => "Search Target Groupings",
-      '#description' => "Load, save, or delete existing search target structures.",
+      '#description' => "Load, update, save, or delete existing search target structures.",
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
       '#attributes' => array(
@@ -1956,6 +2040,18 @@ function mcneese_event_workflow_event_search_0_form_build_grouping($form, &$form
       '#attributes' => array(
         'class' => array(
           'search-advanced-search-controls-manage-existing-submit-load',
+        ),
+      ),
+    );
+
+    $location['search']['controls']['manage']['existing']['submit']['update'] = array(
+      '#id' => 'search-advanced-search-controls-manage-existing-submit-update',
+      '#name' => 'search-advanced-search-controls-manage-existing-submit-update',
+      '#type' => 'submit',
+      '#default_value' => t("Update"),
+      '#attributes' => array(
+        'class' => array(
+          'search-advanced-search-controls-manage-existing-submit-update',
         ),
       ),
     );
