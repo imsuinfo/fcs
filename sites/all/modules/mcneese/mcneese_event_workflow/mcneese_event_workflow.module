@@ -4958,7 +4958,7 @@ function mcneese_event_workflow_event_process_listing_search_array(&$query, &$op
       }
 
       if (!array_key_exists($search_values['field_name'], $already_added)) {
-        $query->addField($field_alias, $search_values['column'], $search_values['field_name']);
+        $query->addField($field_alias, $search_values['column'], $search_values['group_name'] . '_' . $search_values['field_name']);
       }
 
       $operator = '=';
@@ -4977,7 +4977,7 @@ function mcneese_event_workflow_event_process_listing_search_array(&$query, &$op
           $operator = '=';
         }
         else {
-          $operator = 'LIKE';
+          $operator = $like;
           $search_string = '%' . db_like($search_values['search']) . '%';
         }
       }
@@ -4995,7 +4995,7 @@ function mcneese_event_workflow_event_process_listing_search_array(&$query, &$op
           $operator = '=';
         }
         else {
-          $operator = 'NOT LIKE';
+          $operator = 'NOT ' . $like;
           $search_string = '%' . db_like($search_values['search']) . '%';
         }
       }
