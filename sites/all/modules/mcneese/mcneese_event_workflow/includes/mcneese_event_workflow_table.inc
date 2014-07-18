@@ -175,22 +175,22 @@ function mcneese_event_workflow_table_structure() {
   $structure['event_coordinator'] = array(
     'name' => array(
       'path' => 'event][event_coordinator][name',
-      'name' => "Coordinator Name",
+      'name' => "Event Coordinator Name",
       'type' => 'text',
     ),
     'phone' => array(
       'path' => 'event][event_coordinator][phone',
-      'name' => "Coordinator Phone",
+      'name' => "Event Coordinator Phone",
       'type' => 'text',
     ),
     'email' => array(
       'path' => 'event][event_coordinator][email',
-      'name' => "Coordinator E-mail",
+      'name' => "Event Coordinator E-mail",
       'type' => 'text',
     ),
     'classification' => array(
       'path' => 'event][event_coordinator][classification',
-      'name' => "Coordinator Classification",
+      'name' => "Event Coordinator Classification",
       'type' => 'option',
     ),
   );
