@@ -4897,9 +4897,9 @@ function mcneese_event_workflow_event_process_listing_search_array(&$query, &$op
 
   // process the inner fields, can be either a 'field_+', 'or_+', 'and_+', 'nor_+', or 'nand_+'.
   foreach ($search as $search_operand_or_field => $search_values) {
-    $search_op = explode('_', $search_operand_or_field, 3);
+    $search_op = explode('_', $search_operand_or_field, 2);
 
-    if (count($search_op) < 2) {
+    if (count($search_op) != 2) {
       // not valid, just skip.
       continue;
     }
