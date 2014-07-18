@@ -1601,17 +1601,19 @@ function mcneese_event_workflow_event_search_0_form_build_search_target($structu
       }
 
       // Handle types that are stored in their own special formats.
-      if ($field['storage'] == 'timestamp') {
-        if ($field['type'] == 'time') {
-          $search_value = event_workflow_convert_value_to_database_format($search_value, 'timestamp_relative');
-          $column_name .= '_relative';
+      if (isset($field['storage'])) {
+        if ($field['storage'] == 'timestamp') {
+          if ($field['type'] == 'time') {
+            $search_value = event_workflow_convert_value_to_database_format($search_value, 'timestamp_relative');
+            $column_name .= '_relative';
+          }
+          else {
+            $search_value = event_workflow_convert_value_to_database_format($search_value, 'timestamp');
+          }
         }
-        else {
-          $search_value = event_workflow_convert_value_to_database_format($search_value, 'timestamp');
+        elseif (!empty($field['storage'])) {
+          $search_value = event_workflow_convert_value_to_database_format($search_value, $field['storage']);
         }
-      }
-      elseif (!empty($field['storage'])) {
-        $search_value = event_workflow_convert_value_to_database_format($search_value, $field['storage']);
       }
 
       $target_field_name = 'field_' . $target_name . '-' . $target_delta;
