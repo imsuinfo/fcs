@@ -478,6 +478,7 @@ function mcneese_event_workflow_event_search_0_form_validate($form, &$form_state
     }
   }
   elseif ($clicked_id == 'search-advanced-submit-search') {
+    // @todo: validate all fields, this will need to be recursive.
   }
   elseif ($clicked_id == 'search-simple-results-navigation-previous') {
   }
@@ -1205,7 +1206,7 @@ function mcneese_event_workflow_event_search_0_form_build_target($form, &$form_s
     ),
   );
 
-  if ($field['type'] == 'number') {
+  if ($field['type'] == 'number' || $field['type'] == 'date') {
     $operators = array(
       MEW_OPERATOR_LESS_THAN => "Less Than",
       MEW_OPERATOR_LESS_THAN_EQUAL => "Less Than or Equal To",
@@ -1428,11 +1429,28 @@ function mcneese_event_workflow_event_search_0_form_build_target($form, &$form_s
     $location['targets'][$target_name][$target_delta]['search']['#size'] = 32;
   }
   elseif ($field['type'] == 'date') {
-    $location['targets'][$target_name][$target_delta]['search']['#type'] = 'date_popup';
-    $location['targets'][$target_name][$target_delta]['search']['#size'] = 32;
-    $location['targets'][$target_name][$target_delta]['search']['#date_format'] = "Y/m/d";
-    $location['targets'][$target_name][$target_delta]['search']['#date_label_position'] = 'invisible';
-    $location['targets'][$target_name][$target_delta]['search']['#expected_format'] = array('date' => "Y/m/d");
+    $location['targets'][$target_name][$target_delta]['search']['#type'] = 'textfield';
+    $location['targets'][$target_name][$target_delta]['search']['#size'] = 20;
+
+    $default_value = 'y/m/d';
+    if (isset($state_location[$target_name][$target_delta]['date_mode'])) {
+      $default_value = $state_location[$target_name][$target_delta]['date_mode'];
+    }
+    $location['targets'][$target_name][$target_delta]['date_mode'] = array(
+      '#id' => 'search-advanced-targets' . $id_extra . '-targets-' . $target_name . '-' . $target_delta . '-date_mode',
+      '#title' => "Date Mode",
+      '#type' => 'select',
+      '#default_value' => $default_value,
+      '#options' => array('y' => "Year", 'y/m' => "Year / Month", 'y/m/d' => "Year / Month / Day", 'm' => "Month", 'd' => "Day"),
+      '#required' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'search-advanced-target-date_mode',
+          'search-advanced-target-' . $target_name . '-date_mode',
+          'search-advanced-target-' . $target_name . '-' . $target_delta . '-date_mode',
+        ),
+      ),
+    );
   }
   elseif ($field['type'] == 'time') {
     $location['targets'][$target_name][$target_delta]['search']['#type'] = 'textfield';
@@ -1585,7 +1603,7 @@ function mcneese_event_workflow_event_search_0_form_build_search_target($structu
     $search_value = &$target_values['search'];
   }
 
-  $operator_value = '=';
+  $operator_value = MEW_OPERATOR_EQUAL;
   if (is_array($target_values) && array_key_exists('operator', $target_values)) {
     $operator_value = &$target_values['operator'];
   }
@@ -1629,6 +1647,199 @@ function mcneese_event_workflow_event_search_0_form_build_search_target($structu
 
     if (!empty($and)) {
       $search['and_' . $target_delta . '_field'] = $and;
+    }
+  }
+  elseif ($field['type'] == 'date') {
+    $column_name = 'value';
+
+    $date_mode = 'y/m/d';
+    if (isset($target_values['date_mode'])) {
+      $date_mode = $target_values['date_mode'];
+    }
+
+    if (is_numeric($search_value)) {
+      $date_value = (int) $search_value;
+    }
+    else {
+      $date_value_stamp = strtotime($search_value);
+
+      if ($date_mode == 'y/m/d' || $date_mode == 'y/m') {
+        $date_value = $date_value_stamp;
+      }
+      elseif ($date_mode == 'y') {
+        $date_value = date("Y", $date_value_stamp);
+      }
+      elseif ($date_mode == 'm') {
+        $date_value = date("n", $date_value_stamp);
+      }
+      elseif ($date_mode == 'd') {
+        $date_value = date("d", $date_value_stamp);
+      }
+      else {
+        // silently ignore invalid date values.
+        return array();
+      }
+
+      if ($date_value === FALSE) {
+        // silently ignore invalid date values.
+        return array();
+      }
+      else {
+        $date_value = (int) $date_value;
+      }
+    }
+
+    if ($date_mode == 'y') {
+      $timestamp_start = strtotime('midnight first day of january ' . $date_value);
+      $timestamp_stop = strtotime('midnight last day of december ' . $date_value);
+      $timestamp_stop = strtotime('midnight tomorrow', $timestamp_stop);
+
+      if ($operator_value == MEW_OPERATOR_EQUAL || $operator_value == MEW_OPERATOR_NOT_EQUAL) {
+        $start_op = MEW_OPERATOR_GREATER_THAN_EQUAL;
+        $stop_op = MEW_OPERATOR_LESS_THAN;
+
+        $conjunction = array();
+        $conjunction_type = 'and';
+        if ($operator_value == MEW_OPERATOR_NOT_EQUAL) {
+          $conjunction_type = 'nand';
+        }
+
+        $target_field_name = 'field_' . $target_name . '-start-' . $target_delta;
+        $conjunction[$target_field_name]['group_name'] = $table_name;
+        $conjunction[$target_field_name]['field_name'] = $field_name;
+        $conjunction[$target_field_name]['column'] = $column_name;
+        $conjunction[$target_field_name]['search'] = $timestamp_start;
+        $conjunction[$target_field_name]['type'] = $field['type'];
+        $conjunction[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
+        $conjunction[$target_field_name]['operator'] = $start_op;
+
+        $target_field_name = 'field_' . $target_name . '-stop-' . $target_delta;
+        $conjunction[$target_field_name]['group_name'] = $table_name;
+        $conjunction[$target_field_name]['field_name'] = $field_name;
+        $conjunction[$target_field_name]['column'] = $column_name;
+        $conjunction[$target_field_name]['search'] = $timestamp_stop;
+        $conjunction[$target_field_name]['type'] = $field['type'];
+        $conjunction[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
+        $conjunction[$target_field_name]['operator'] = $stop_op;
+
+        if (!empty($conjunction)) {
+          $search[$conjunction_type . '_' . $target_delta . '_field'] = $conjunction;
+        }
+      }
+      else {
+        if ($operator_value == MEW_OPERATOR_LESS_THAN) {
+          $date_value = $timestamp_start;
+        }
+        elseif ($operator_value == MEW_OPERATOR_LESS_THAN_EQUAL) {
+          $date_value = $timestamp_stop;
+          $operator_value = MEW_OPERATOR_LESS_THAN;
+        }
+        elseif ($operator_value == MEW_OPERATOR_GREATER_THAN) {
+          $date_value = $timestamp_stop;
+          $operator_value = MEW_OPERATOR_GREATER_THAN_EQUAL;
+        }
+        elseif ($operator_value == MEW_OPERATOR_GREATER_THAN_EQUAL) {
+          $date_value = $timestamp_start;
+        }
+
+        $target_field_name = 'field_' . $target_name . '-' . $target_delta;
+        $search[$target_field_name] = array();
+        $search[$target_field_name]['group_name'] = $table_name;
+        $search[$target_field_name]['field_name'] = $field_name;
+        $search[$target_field_name]['column'] = $column_name;
+        $search[$target_field_name]['type'] = $field['type'];
+        $search[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
+        $search[$target_field_name]['operator'] = $operator_value;
+        $search[$target_field_name]['search'] = $date_value;
+      }
+    }
+    elseif ($date_mode == 'm') {
+      $target_field_name = 'field_' . $target_name . '-' . $target_delta;
+      $search[$target_field_name] = array();
+      $search[$target_field_name]['group_name'] = $table_name;
+      $search[$target_field_name]['field_name'] = $field_name;
+      $search[$target_field_name]['column'] = $column_name . '_month';
+      $search[$target_field_name]['type'] = $field['type'];
+      $search[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
+      $search[$target_field_name]['operator'] = $operator_value;
+      $search[$target_field_name]['search'] = $date_value;
+    }
+    elseif ($date_mode == 'd') {
+      $target_field_name = 'field_' . $target_name . '-' . $target_delta;
+      $search[$target_field_name] = array();
+      $search[$target_field_name]['group_name'] = $table_name;
+      $search[$target_field_name]['field_name'] = $field_name;
+      $search[$target_field_name]['column'] = $column_name . '_day';
+      $search[$target_field_name]['type'] = $field['type'];
+      $search[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
+      $search[$target_field_name]['operator'] = $operator_value;
+      $search[$target_field_name]['search'] = $date_value;
+    }
+    elseif ($operator_value == MEW_OPERATOR_EQUAL || $operator_value == MEW_OPERATOR_NOT_EQUAL) {
+      $date_value = date($search_value);
+
+      if ($date_mode == 'y/m/d') {
+        $target_field_name = 'field_' . $target_name . '-' . $target_delta;
+        $search[$target_field_name] = array();
+        $search[$target_field_name]['group_name'] = $table_name;
+        $search[$target_field_name]['field_name'] = $field_name;
+        $search[$target_field_name]['column'] = $column_name;
+        $search[$target_field_name]['type'] = $field['type'];
+        $search[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
+        $search[$target_field_name]['operator'] = $operator_value;
+        $search[$target_field_name]['search'] = $date_value;
+      }
+      else {
+        $conjunction = array();
+        $conjunction_type = NULL;
+
+        if ($date_mode == 'y/m') {
+          $timestamp_start = strtotime('midnight first day of', $date_value);
+          $timestamp_stop = strtotime('midnight last day of', $date_value);
+          $timestamp_stop = strtotime('midnight tomorrow', $timestamp_stop);
+
+          $start_op = MEW_OPERATOR_GREATER_THAN_EQUAL;
+          $stop_op = MEW_OPERATOR_LESS_THAN;
+
+          $conjunction_type = 'and';
+          if ($operator_value == MEW_OPERATOR_NOT_EQUAL) {
+            $conjunction_type = 'nand';
+          }
+
+          $target_field_name = 'field_' . $target_name . '-start-' . $target_delta;
+          $conjunction[$target_field_name]['group_name'] = $table_name;
+          $conjunction[$target_field_name]['field_name'] = $field_name;
+          $conjunction[$target_field_name]['column'] = $column_name;
+          $conjunction[$target_field_name]['search'] = $timestamp_start;
+          $conjunction[$target_field_name]['type'] = $field['type'];
+          $conjunction[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
+          $conjunction[$target_field_name]['operator'] = $start_op;
+
+          $target_field_name = 'field_' . $target_name . '-stop-' . $target_delta;
+          $conjunction[$target_field_name]['group_name'] = $table_name;
+          $conjunction[$target_field_name]['field_name'] = $field_name;
+          $conjunction[$target_field_name]['column'] = $column_name;
+          $conjunction[$target_field_name]['search'] = $timestamp_stop;
+          $conjunction[$target_field_name]['type'] = $field['type'];
+          $conjunction[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
+          $conjunction[$target_field_name]['operator'] = $stop_op;
+        }
+
+        if (!empty($conjunction)) {
+          $search[$conjunction_type . '_' . $target_delta . '_field'] = $conjunction;
+        }
+      }
+    }
+    else {
+      $target_field_name = 'field_' . $target_name . '-' . $target_delta;
+      $search[$target_field_name] = array();
+      $search[$target_field_name]['group_name'] = $table_name;
+      $search[$target_field_name]['field_name'] = $field_name;
+      $search[$target_field_name]['column'] = $column_name;
+      $search[$target_field_name]['type'] = $field['type'];
+      $search[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
+      $search[$target_field_name]['operator'] = $operator_value;
+      $search[$target_field_name]['search'] = $date_value;
     }
   }
   elseif (isset($field['columns']) && is_array($field['columns'])) {

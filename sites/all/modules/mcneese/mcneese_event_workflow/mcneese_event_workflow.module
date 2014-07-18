@@ -2897,6 +2897,22 @@ function event_workflow_convert_value_to_database_format($value, $method, $optio
     $date = date("Y/m/d", $date_stamp);
     return strtotime($date, 0);
   }
+  elseif ($method == 'date_month') {
+    if (!is_string($value) || empty($value)) {
+      return FALSE;
+    }
+
+    $date_stamp = strtotime($value);
+    return (int) date("m", $date_stamp);
+  }
+  elseif ($method == 'date_day') {
+    if (!is_string($value) || empty($value)) {
+      return FALSE;
+    }
+
+    $date_stamp = strtotime($value);
+    return (int) date("d", $date_stamp);
+  }
   elseif ($method == 'currency') {
     if (is_null($value)) {
       return FALSE;
@@ -2938,6 +2954,16 @@ function event_workflow_convert_value_from_database_format($value, $method, $opt
     if (empty($value)) return NULL;
 
     return date('Y-m-d', $value);
+  }
+  elseif ($method == 'date_month') {
+    if (empty($value)) return NULL;
+
+    return $value;
+  }
+  elseif ($method == 'date_day') {
+    if (empty($value)) return NULL;
+
+    return $value;
   }
   elseif ($method == 'currency') {
     if (is_null($value)) return NULL;
@@ -3521,18 +3547,46 @@ function mcneese_event_workflow_build_table_structure($structure, &$structure_ta
           $structure_field_tables[$db_table_field][$delta]['value'] = $storage_values;
         }
 
-        // exception case: the time type is also stored in a field with the y/m/d set to 0 for quick and easy relative searches at the cost of extra space usage.
-        if (isset($structure[$table_name][$field_name]['type']) && $structure[$table_name][$field_name]['type'] == 'time' && $storage_key == 'timestamp') {
-          $storage_values = FALSE;
-          if (isset($structure[$table_name][$field_name][$storage_key]) && is_array($structure[$table_name][$field_name][$storage_key])) {
-            $storage_options = $structure[$table_name][$field_name][$storage_key];
-            unset($storage_options['relative_to']);
-            $storage_values = event_workflow_convert_value_to_database_format($value, 'timestamp_relative', $storage_options);
-            unset($storage_options);
-          }
+        if (isset($structure[$table_name][$field_name]['type'])) {
+          // exception case: the time type is also stored in a field with the y/m/d set to 0 for quick and easy relative searches at the cost of extra space usage.
+          if ($structure[$table_name][$field_name]['type'] == 'time' && $storage_key == 'timestamp') {
+            $storage_values = FALSE;
+            if (isset($structure[$table_name][$field_name][$storage_key]) && is_array($structure[$table_name][$field_name][$storage_key])) {
+              $storage_options = $structure[$table_name][$field_name][$storage_key];
+              unset($storage_options['relative_to']);
+              $storage_values = event_workflow_convert_value_to_database_format($value, 'timestamp_relative', $storage_options);
+              unset($storage_options);
+            }
 
-          if ($storage_values !== FALSE && !is_null($storage_values)) {
-            $structure_field_tables[$db_table_field][$delta]['value_relative'] = $storage_values;
+            if ($storage_values !== FALSE && !is_null($storage_values)) {
+              $structure_field_tables[$db_table_field][$delta]['value_relative'] = $storage_values;
+            }
+          }
+          // exception case: the date_popup type is also stored in a month and a day field for quick and easy relative searches at the cost of extra space usage.
+          elseif ($structure[$table_name][$field_name]['type'] == 'date' && $storage_key == 'date_popup') {
+            $storage_values = FALSE;
+            if (isset($structure[$table_name][$field_name][$storage_key]) && is_array($structure[$table_name][$field_name][$storage_key])) {
+              $storage_options = $structure[$table_name][$field_name][$storage_key];
+              unset($storage_options['relative_to']);
+              $storage_values = event_workflow_convert_value_to_database_format($value, 'date_month', $storage_options);
+              unset($storage_options);
+            }
+
+            if ($storage_values !== FALSE && !is_null($storage_values)) {
+              $structure_field_tables[$db_table_field][$delta]['value_month'] = $storage_values;
+            }
+
+            $storage_values = FALSE;
+            if (isset($structure[$table_name][$field_name][$storage_key]) && is_array($structure[$table_name][$field_name][$storage_key])) {
+              $storage_options = $structure[$table_name][$field_name][$storage_key];
+              unset($storage_options['relative_to']);
+              $storage_values = event_workflow_convert_value_to_database_format($value, 'date_day', $storage_options);
+              unset($storage_options);
+            }
+
+            if ($storage_values !== FALSE && !is_null($storage_values)) {
+              $structure_field_tables[$db_table_field][$delta]['value_day'] = $storage_values;
+            }
           }
         }
       }
@@ -4839,14 +4893,13 @@ function mcneese_event_workflow_event_process_listing_search_array(&$query, &$op
   if ($recurse_count > MEW_MAX_SEARCH_RECURSION) {
     return FALSE;
   }
-
   $found_values = FALSE;
 
-  // process the inner fields, can be either a 'field_+', 'or_+', or 'and_+'.
+  // process the inner fields, can be either a 'field_+', 'or_+', 'and_+', 'nor_+', or 'nand_+'.
   foreach ($search as $search_operand_or_field => $search_values) {
-    $search_op = explode('_', $search_operand_or_field, 2);
+    $search_op = explode('_', $search_operand_or_field, 3);
 
-    if (count($search_op) != 2) {
+    if (count($search_op) < 2) {
       // not valid, just skip.
       continue;
     }
@@ -4957,6 +5010,14 @@ function mcneese_event_workflow_event_process_listing_search_array(&$query, &$op
     }
     elseif ($search_op[0] == 'and') {
       $inner_operand = db_and();
+    }
+    elseif ($search_op[0] == 'nor') {
+      $inner_operand = db_or();
+      $inner_operand->not();
+    }
+    elseif ($search_op[0] == 'nand') {
+      $inner_operand = db_and();
+      $inner_operand->not();
     }
     else {
       // not valid, just skip.
