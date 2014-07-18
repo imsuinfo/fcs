@@ -23,27 +23,27 @@ function mcneese_event_workflow_table_structure() {
   $structure['top'] = array(
     'status' => array(
       'path' => 'event][status',
-      'name' => "Event Status",
+      'name' => "Status",
       'type' => 'options',
     ),
     'step' => array(
       'path' => 'event][step',
-      'name' => "Event Step",
+      'name' => "Step",
       'type' => 'options',
     ),
     'location' => array(
       'path' => 'event][location',
-      'name' => "Event Location",
+      'name' => "Location",
       'type' => 'options',
     ),
     'building' => array(
       'path' => 'event][building',
-      'name' => "Event Building",
+      'name' => "Building",
       'type' => 'options',
     ),
     'room' => array(
       'path' => 'event][room',
-      'name' => "Event Room",
+      'name' => "Room",
       'type' => 'options',
     ),
     'additional' => array(
@@ -175,22 +175,22 @@ function mcneese_event_workflow_table_structure() {
   $structure['event_coordinator'] = array(
     'name' => array(
       'path' => 'event][event_coordinator][name',
-      'name' => "Event Coordinator Name",
+      'name' => "Coordinator Name",
       'type' => 'text',
     ),
     'phone' => array(
       'path' => 'event][event_coordinator][phone',
-      'name' => "Event Coordinator Phone",
+      'name' => "Coordinator Phone",
       'type' => 'text',
     ),
     'email' => array(
       'path' => 'event][event_coordinator][email',
-      'name' => "Event Coordinator E-mail",
+      'name' => "Coordinator E-mail",
       'type' => 'text',
     ),
     'classification' => array(
       'path' => 'event][event_coordinator][classification',
-      'name' => "Event Coordinator Classification",
+      'name' => "Coordinator Classification",
       'type' => 'option',
     ),
   );
@@ -198,7 +198,7 @@ function mcneese_event_workflow_table_structure() {
   $structure['information'] = array(
     'title' => array(
       'path' => 'event][information][title',
-      'name' => "Event Title",
+      'name' => "Title",
       'type' => 'text',
     ),
     'attendance' => array(
@@ -208,7 +208,7 @@ function mcneese_event_workflow_table_structure() {
     ),
     'type' => array(
       'path' => 'event][information][type',
-      'name' => "Event Type",
+      'name' => "Type",
       'type' => 'options',
     ),
     'organization' => array(
@@ -1008,7 +1008,7 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
 
   $presentation['event_coordinator'] = array(
     'name' => array(
-      'label' => 'Event Coordinator Name',
+      'label' => 'Coordinator Name',
       'group' => 'coordinator',
       'weight' => 4,
       'event_type' => array(
@@ -1017,7 +1017,7 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
       ),
     ),
     'phone' => array(
-      'label' => 'Event Coordinator Phone',
+      'label' => 'Coordinator Phone',
       'group' => 'coordinator',
       'weight' => 5,
       'event_type' => array(
@@ -1026,7 +1026,7 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
       ),
     ),
     'email' => array(
-      'label' => 'Event Coordinator E-Mail',
+      'label' => 'Coordinator E-Mail',
       'group' => 'coordinator',
       'weight' => 6,
       'event_type' => array(
@@ -1035,7 +1035,7 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
       ),
     ),
     'classification' => array(
-      'label' => 'Event Coordinator Classification',
+      'label' => 'Coordinator Classification',
       'group' => 'coordinator',
       'weight' => 7,
       'type' => array(
@@ -1113,7 +1113,7 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
       ),
     ),
     'description' => array(
-      'label' => 'Event Description/Purpose',
+      'label' => 'Description/Purpose',
       'size' => 'large',
       'event_type' => array(
         'show' => TRUE,
