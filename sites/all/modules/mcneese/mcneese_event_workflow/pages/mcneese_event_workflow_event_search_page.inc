@@ -1673,14 +1673,27 @@ function mcneese_event_workflow_event_search_0_form_build_search_target($structu
     else {
       $date_value_stamp = strtotime($search_value);
 
-      if ($date_mode == 'y/m/d' || $date_mode == 'y/m') {
+      if ($date_mode == 'y/m/d') {
         $date_value = $date_value_stamp;
+      }
+      elseif ($date_mode == 'y/m') {
+        $matches = array();
+        $matched = preg_match('@(\d\d\d\d)\s*/\s*(\d+)\s*(/\s*\d+)*@i', $search_value, $matches);
+
+        if ($matched) {
+          $date_value_stamp = strtotime($matches[1] . '/' . $matches[2] . '/1');
+          $date_value = $date_value_stamp;
+        }
+        else {
+          // silently ignore invalid date values.
+          return array();
+        }
       }
       elseif ($date_mode == 'y') {
         $date_value = date("Y", $date_value_stamp);
       }
       elseif ($date_mode == 'm') {
-        $date_value = date("n", $date_value_stamp);
+        $date_value = date("m", $date_value_stamp);
       }
       elseif ($date_mode == 'd') {
         $date_value = date("d", $date_value_stamp);
@@ -1786,8 +1799,6 @@ function mcneese_event_workflow_event_search_0_form_build_search_target($structu
       $search[$target_field_name]['search'] = $date_value;
     }
     elseif ($operator_value == MEW_OPERATOR_EQUAL || $operator_value == MEW_OPERATOR_NOT_EQUAL) {
-      $date_value = date($search_value);
-
       if ($date_mode == 'y/m/d') {
         $timestamp = strtotime($date_value);
         $target_field_name = 'field_' . $target_name . '-' . $target_delta;
