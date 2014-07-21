@@ -1425,8 +1425,13 @@ function mcneese_event_workflow_event_search_0_form_build_target($form, &$form_s
     $form['form']['conditionally_required']['#value'][0][$target_name][] = &$location['targets'][$target_name][$target_delta]['amount'];
   }
   elseif ($field['type'] == 'venue_coordinator') {
-    $location['targets'][$target_name][$target_delta]['search']['#type'] = 'textfield';
-    $location['targets'][$target_name][$target_delta]['search']['#size'] = 32;
+    $venue_coordinator_options = mcneese_event_workflow_event_get_available_venue_coordinators();
+    if (!is_array($venue_coordinator_options)) {
+      $venue_coordinator_options = array();
+    }
+
+    $location['targets'][$target_name][$target_delta]['search']['#type'] = 'select';
+    $location['targets'][$target_name][$target_delta]['search']['#options'] = $venue_coordinator_options;
   }
   elseif ($field['type'] == 'date') {
     $location['targets'][$target_name][$target_delta]['search']['#type'] = 'textfield';

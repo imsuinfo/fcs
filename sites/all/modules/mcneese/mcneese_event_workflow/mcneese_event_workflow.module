@@ -5370,5 +5370,77 @@ function mcneese_event_workflow_build_request_table($items, $max_rows, $columns 
 }
 
 /**
+ * Load venue coordinators that are available.
+ *
+ * @return array|bool
+ *   An array of venue coordinators or FALSE on error.
+ */
+function mcneese_event_workflow_event_get_available_venue_coordinators() {
+  $ilike = 'LIKE';
+  if (db_driver() == 'pgsql') {
+    $ilike = 'ILIKE';
+  }
+
+  try {
+    $query = db_select('users', 'u');
+    $query->innerjoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id AND u.uid = fdfufn.entity_id AND fdfufn.delta = 0');
+    $query->innerjoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id AND u.uid = fdfuln.entity_id AND fdfufn.entity_id = fdfuln.entity_id AND fdfuln.delta = 0');
+
+    $query->addField('u', 'uid', 'user_id');
+    $query->addField('u', 'name', 'name');
+    $query->addField('u', 'mail', 'email');
+
+    $query->addField('fdfufn', 'field_user_first_name_value', 'first_name');
+    $query->addField('fdfuln', 'field_user_last_name_value', 'last_name');
+
+    $subquery = db_select('mew_banner_rooms', 'mbr');
+    $subquery->addField('mbr', 'coordinator_id', 'coordinator_id');
+    $subquery->condition('mbr.disabled', 0);
+    $subquery->distinct();
+
+    $query->condition('u.uid', $subquery, 'IN');
+    $query->condition('u.status', 0, '<>');
+    $query->condition('u.uid', 1, '>');
+
+    $query->orderBy('last_name');
+    $query->orderBy('first_name');
+    $query->orderBy('name');
+    $query->orderBy('uid');
+
+    $results = $query->execute()->fetchAll();
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
+    return FALSE;
+  }
+
+  $matches = array();
+  foreach ($results as $result) {
+    $name = "";
+    if (!empty($result->last_name)) {
+      $name .= $result->last_name;
+    }
+
+    if (!empty($result->last_name)) {
+      if (!empty($name)) {
+        $name .= ", ";
+      }
+      $name .= $result->first_name;
+    }
+
+    $name_value = $name;
+
+    if (!empty($name)) {
+      $name = '"' . $name . '" ';
+    }
+
+    $value = $name . $result->email;
+    $matches[$result->user_id] = $value;
+  }
+
+  return $matches;
+}
+
+/**
  * @} End of '@defgroup mcneese_event_workflow McNeese Event Workflow'.
  */
