@@ -1326,6 +1326,11 @@ function mcneese_event_workflow_event_search_0_form_build_target($form, &$form_s
         $location['targets'][$target_name][$target_delta]['search']['#options'] = event_workflow_get_audience_list_options('search');
       }
     }
+    elseif ($table_name == 'event_coordinator') {
+      if ($field_name == 'classification') {
+        $location['targets'][$target_name][$target_delta]['search']['#options'] = event_workflow_get_event_classification_list_options('search');
+      }
+    }
   }
   elseif ($field['type'] == 'checkboxes') {
     $location['targets'][$target_name][$target_delta]['option'] = array(

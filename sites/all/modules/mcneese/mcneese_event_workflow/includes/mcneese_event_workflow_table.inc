@@ -191,7 +191,7 @@ function mcneese_event_workflow_table_structure() {
     'classification' => array(
       'path' => 'event][event_coordinator][classification',
       'name' => "Event Coordinator Classification",
-      'type' => 'option',
+      'type' => 'options',
     ),
   );
 
