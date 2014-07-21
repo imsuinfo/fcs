@@ -17,6 +17,7 @@
  *
  * @param string $string
  *   A string to match node titles against.
+ *
  * @return array
  *   An array of string matches.
  */
@@ -55,6 +56,9 @@ function mcneese_event_workflow_event_reviewers_0_autocomplete_user_id($string) 
     $or->condition('fdfuln.field_user_last_name_value', '%' . db_like($s) . '%', $ilike);
     $query->condition($or);
 
+    $query->condition('u.status', 0, '<>');
+    $query->condition('u.uid', 1, '>');
+
     $query->orderBy('name');
     $query->orderBy('last_name');
     $query->orderBy('first_name');
@@ -85,6 +89,7 @@ function mcneese_event_workflow_event_reviewers_0_autocomplete_user_id($string) 
  *
  * @param string $string
  *   A string to match node titles against.
+ *
  * @return array
  *   An array of string matches.
  */
@@ -143,6 +148,7 @@ function mcneese_event_workflow_event_reviewers_0_autocomplete_reviewer_classifi
  *
  * @param string $string
  *   A string to match node titles against.
+ *
  * @return array
  *   An array of string matches.
  */
@@ -165,17 +171,7 @@ function mcneese_event_workflow_event_edit_0_autocomplete_event_coordinator_name
   }
 
   try {
-    $query = db_select('users', 'u');
-
-    $query->innerjoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id AND fdfufn.delta = 0');
-    $query->innerjoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id AND fdfuln.delta = 0');
-
-    $query->addField('u', 'uid', 'user_id');
-    $query->addField('u', 'name', 'name');
-    $query->addField('u', 'mail', 'email');
-
-    $query->addField('fdfufn', 'field_user_first_name_value', 'first_name');
-    $query->addField('fdfuln', 'field_user_last_name_value', 'last_name');
+    $query = mcneese_event_workflow_autocomplete_build_event_coordinator_query();
 
     $db_string = db_like($string);
     $or = db_or();
@@ -184,13 +180,6 @@ function mcneese_event_workflow_event_edit_0_autocomplete_event_coordinator_name
     $or->condition('u.name', '%' . $db_string . '%', $ilike);
     $or->condition('u.mail', '%' . $db_string . '%', $ilike);
     $query->condition($or);
-
-    $query->condition('u.status', 0, '<>');
-
-    $query->orderBy('last_name');
-    $query->orderBy('first_name');
-    $query->orderBy('name');
-    $query->orderBy('uid');
 
     $query->range(0, 9);
 
@@ -236,6 +225,7 @@ function mcneese_event_workflow_event_edit_0_autocomplete_event_coordinator_name
  *
  * @param string $string
  *   A string to match node titles against.
+ *
  * @return array
  *   An array of string matches.
  */
@@ -258,17 +248,7 @@ function mcneese_event_workflow_event_edit_0_autocomplete_event_coordinator_emai
   }
 
   try {
-    $query = db_select('users', 'u');
-
-    $query->innerjoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id AND fdfufn.delta = 0');
-    $query->innerjoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id AND fdfuln.delta = 0');
-
-    $query->addField('u', 'uid', 'user_id');
-    $query->addField('u', 'name', 'name');
-    $query->addField('u', 'mail', 'email');
-
-    $query->addField('fdfufn', 'field_user_first_name_value', 'first_name');
-    $query->addField('fdfuln', 'field_user_last_name_value', 'last_name');
+    $query = mcneese_event_workflow_autocomplete_build_event_coordinator_query();
 
     $db_string = db_like($string);
     $or = db_or();
@@ -277,14 +257,6 @@ function mcneese_event_workflow_event_edit_0_autocomplete_event_coordinator_emai
     $or->condition('u.name', '%' . $db_string . '%', $ilike);
     $or->condition('u.mail', '%' . $db_string . '%', $ilike);
     $query->condition($or);
-
-    $query->condition('u.status', 0, '<>');
-
-    $query->orderBy('last_name');
-    $query->orderBy('first_name');
-    $query->orderBy('name');
-    $query->orderBy('uid');
-
 
     $query->range(0, 9);
 
@@ -328,6 +300,7 @@ function mcneese_event_workflow_event_edit_0_autocomplete_event_coordinator_emai
  *
  * @param string $string
  *   A string to match node titles against.
+ *
  * @return array
  *   An array of string matches.
  */
@@ -350,18 +323,9 @@ function mcneese_event_workflow_event_edit_0_autocomplete_event_coordinator_phon
   }
 
   try {
-    $query = db_select('users', 'u');
+    $query = mcneese_event_workflow_autocomplete_build_event_coordinator_query();
 
-    $query->innerjoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id AND fdfufn.delta = 0');
-    $query->innerjoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id AND fdfuln.delta = 0');
     $query->innerjoin('field_data_field_user_phone_number', 'fdfupn', 'u.uid = fdfupn.entity_id AND fdfupn.delta = 0');
-
-    $query->addField('u', 'uid', 'user_id');
-    $query->addField('u', 'name', 'name');
-    $query->addField('u', 'mail', 'email');
-
-    $query->addField('fdfufn', 'field_user_first_name_value', 'first_name');
-    $query->addField('fdfuln', 'field_user_last_name_value', 'last_name');
     $query->addField('fdfupn', 'field_user_phone_number_value', 'phone_number');
 
     $db_string = db_like($string);
@@ -371,13 +335,6 @@ function mcneese_event_workflow_event_edit_0_autocomplete_event_coordinator_phon
     $or->condition('u.name', '%' . $db_string . '%', $ilike);
     $or->condition('u.mail', '%' . $db_string . '%', $ilike);
     $query->condition($or);
-
-    $query->condition('u.status', 0, '<>');
-
-    $query->orderBy('last_name');
-    $query->orderBy('first_name');
-    $query->orderBy('name');
-    $query->orderBy('uid');
 
     $query->range(0, 9);
 
@@ -418,6 +375,37 @@ function mcneese_event_workflow_event_edit_0_autocomplete_event_coordinator_phon
   }
 
   drupal_json_output($matches);
+}
+
+/**
+ * Builds the Event Coordinator query.
+ *
+ * This should be called inside of a try {} catch {}.
+ *
+ * @return object|false
+ *   The build query object or FALSE on error;
+ */
+function mcneese_event_workflow_autocomplete_build_event_coordinator_query() {
+  $query = db_select('users', 'u');
+  $query->innerjoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id AND u.uid = fdfufn.entity_id AND fdfufn.delta = 0');
+  $query->innerjoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id AND u.uid = fdfuln.entity_id AND fdfufn.entity_id = fdfuln.entity_id AND fdfuln.delta = 0');
+
+  $query->addField('u', 'uid', 'user_id');
+  $query->addField('u', 'name', 'name');
+  $query->addField('u', 'mail', 'email');
+
+  $query->addField('fdfufn', 'field_user_first_name_value', 'first_name');
+  $query->addField('fdfuln', 'field_user_last_name_value', 'last_name');
+
+  $query->condition('u.status', 0, '<>');
+  $query->condition('u.uid', 1, '>');
+
+  $query->orderBy('last_name');
+  $query->orderBy('first_name');
+  $query->orderBy('name');
+  $query->orderBy('uid');
+
+  return $query;
 }
 
 /**
