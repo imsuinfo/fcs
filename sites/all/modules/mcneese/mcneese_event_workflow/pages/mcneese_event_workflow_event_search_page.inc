@@ -1789,6 +1789,7 @@ function mcneese_event_workflow_event_search_0_form_build_search_target($structu
       $date_value = date($search_value);
 
       if ($date_mode == 'y/m/d') {
+        $timestamp = strtotime($date_value);
         $target_field_name = 'field_' . $target_name . '-' . $target_delta;
         $search[$target_field_name] = array();
         $search[$target_field_name]['group_name'] = $table_name;
@@ -1797,7 +1798,7 @@ function mcneese_event_workflow_event_search_0_form_build_search_target($structu
         $search[$target_field_name]['type'] = $field['type'];
         $search[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
         $search[$target_field_name]['operator'] = $operator_value;
-        $search[$target_field_name]['search'] = $date_value;
+        $search[$target_field_name]['search'] = $timestamp;
       }
       else {
         $conjunction = array();
