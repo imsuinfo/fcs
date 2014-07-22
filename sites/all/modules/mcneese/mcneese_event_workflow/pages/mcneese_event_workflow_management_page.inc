@@ -108,129 +108,111 @@ function mcneese_event_workflow_management_page() {
 
 
   if ($can_list) {
-    $total_items = 5;
-
-    // load sorting information
-    $sorting = array();
-    $order = NULL;
-    if (isset($_GET['order'])) {
-      $order = strtolower($_GET['order']);
-      $sorting['order'] = $order;
-    }
-
-    $sort = NULL;
-    if (isset($_GET['sort'])) {
-      $sort = strtoupper($_GET['sort']);
-
-      if ($sort != 'ASC' && $sort != 'DESC') {
-        $sort = NULL;
-      }
-      else {
-        $sorting['sort'] = $sort;
-      }
-    }
-
-
     mcneese_event_workflow_include(4);
 
-    $results = mcneese_event_workflow_event_load_listing(NULL, FALSE, 0, $total_items, $sorting);
+    $month_start = strtotime('midnight first day of', REQUEST_TIME);
+    $month_end = strtotime('midnight last day of', REQUEST_TIME);
+    $month_stop = strtotime('midnight tomorrow', $month_end);
+
+    // determine the begin and end weeks for the month.
+    $absolute_start = strtotime('midnight last sunday', $month_start);
+    $absolute_stop = strtotime('midnight next saturday', $month_end);
+    $absolute_stop = strtotime('midnight tomorrow', $absolute_stop);
+
+    if (date('w', $month_start) == 0) {
+      $absolute_start = $month_start;
+    }
+
+    if (date('w', $month_end) == 6) {
+      $absolute_stop = $month_stop;
+    }
+
+    // ISO-8601 dates start with monday = 1 and ends with sunday = 7.
+    #$absolute_start = strtotime('midnight last monday', $month_start);
+    #$absolute_stop = strtotime('midnight next sunday', $month_stop);
+    #$absolute_stop = strtotime('midnight tomorrow', $absolute_stop);
+    #
+    #if (date('w', $month_start) == 1) {
+    #  $absolute_start = $month_start;
+    #}
+    #
+    #if (date('w', $month_end) == 7) {
+    #  $absolute_stop = $month_stop;
+    #}
+
+    $and = array();
+
+    $target_field_name = 'field_dates-date-start-0';
+    $and[$target_field_name]['group_name'] = 'dates';
+    $and[$target_field_name]['field_name'] = 'date';
+    $and[$target_field_name]['column'] = 'value';
+    $and[$target_field_name]['search'] = $absolute_start;
+    $and[$target_field_name]['type'] = 'date';
+    $and[$target_field_name]['multiple'] = TRUE;
+    $and[$target_field_name]['operator'] = MEW_OPERATOR_GREATER_THAN_EQUAL;
+
+    $target_field_name = 'field_dates-date-stop-0';
+    $and[$target_field_name]['group_name'] = 'dates';
+    $and[$target_field_name]['field_name'] = 'date';
+    $and[$target_field_name]['column'] = 'value';
+    $and[$target_field_name]['search'] = $absolute_stop;
+    $and[$target_field_name]['type'] = 'date';
+    $and[$target_field_name]['multiple'] = TRUE;
+    $and[$target_field_name]['operator'] = MEW_OPERATOR_LESS_THAN;
+
+    $search['and_0_field'] = $and;
+
+    $sorting = array(
+      'order' => 'date',
+      'sort' => 'ASC',
+    );
+
+    $results = mcneese_event_workflow_event_load_listing($search, FALSE, 0, 0, $sorting);
 
     $rows = array();
     $rows_count = 0;
     if (!empty($results)) {
       foreach ($results as $item) {
-        $row = array();
-        $rows_count++;
-
-        // Rows per page + 1 is loaded so that it can be detected whether or not a 'next' link needs to be provided.
-        if ($rows_count > $total_items) {
-          break;
-        }
-
         $can_view_event = mcneese_event_workflow_management_page_event_access('view', $item->id);
-        $can_edit_event = mcneese_event_workflow_management_page_event_access('edit', $item->id);
-        $can_review_event = mcneese_event_workflow_management_page_event_access('review', $item->id);
-        $can_log_event = mcneese_event_workflow_management_page_event_access('log', $item->id);
-        $can_history_event = mcneese_event_workflow_management_page_event_access('history', $item->id);
-
-        $row['id'] = $item->id;
-        $row['title'] = check_plain($item->title);
-        $row['location'] = check_plain($item->location_name);
-        $row['building'] = check_plain($item->building_name);
-        $row['room'] = check_plain($item->room_name);
+        if (!$can_view_event) {
+          continue;
+        }
 
         foreach ($item->date as $delta => $date) {
-          if (!isset($row['date'])) {
-            $row['date'] = '';
+          $day = date('d', $date);
+          if (!isset($rows[$day])) {
+            $rows[$day] = array();
+          }
+
+          $is_current_month = TRUE;
+          if ($date < $month_start || $date >= $month_stop) {
+            $is_current_month = FALSE;
+          }
+
+          if (isset($rows[$day][$item->id])) {
+            $rows[$day][$item->id]['time_start'][] = array('start' => $item->time_start, 'stop' => $item->time_stop);
           }
           else {
-            $row['date'] .= '<br>';
+            $item_title = check_plain($item->title);
+            $rows[$day][$item->id] = array(
+              'href' => $base_path . 'events/view-0/' . $item->id,
+              'title' => $item_title,
+              'tooltip' => '[' . check_plain($item->location_name) . '] ' . check_plain($item->building_name) . ' ' . check_plain($item->room_name) . ': ' . $item_title,
+              'date' => $date,
+              'times' => array(array('start' => $item->time_start, 'stop' => $item->time_stop)),
+            );
+            unset($item_title);
           }
-
-          $row['date'] .= check_plain(date("Y/m/d", $date));
-
-          if (array_key_exists($delta, $item->time_start) && !is_null($item->time_start[$delta]) && array_key_exists($delta, $item->time_stop) && !is_null($item->time_stop[$delta])) {
-            $row['date'] .= ' ' . check_plain(date("h:ia", $item->time_start[$delta]));
-            $row['date'] .= ' to ' . check_plain(date("h:ia", $item->time_stop[$delta]));
-          }
         }
-
-        $date_stamp = $item->created;
-        $row['created'] = check_plain(date("Y/m/d h:ia", $date_stamp));
-
-        $row['operations'] = '';
-
-        if ($can_view_event) {
-          $row['operations'] .= '<a href="' . $base_path . 'events/view-0/' . $item->id . '" class="operation-link operation-link-view">View</a> ';
-        }
-
-        if ($can_edit_event) {
-          $row['operations'] .= '<a href="' . $base_path . 'events/edit-0/' . $item->id . '/request" class="operation-link operation-link-edit">Edit</a> ';
-        }
-
-        if ($can_review_event) {
-          $row['operations'] .= '<a href="' . $base_path . 'events/view-0/' . $item->id . '/3" class="operation-link operation-link-review">Review</a> ';
-        }
-
-        if ($can_log_event) {
-          $row['operations'] .= '<a href="' . $base_path . 'events/view-0/' . $item->id . '/2" class="operation-link operation-link-log">Log</a> ';
-        }
-
-        if ($can_history_event) {
-          $row['operations'] .= '<a href="' . $base_path . 'events/history-0/' . $item->id . '" class="operation-link operation-link-history">History</a> ';
-        }
-
-        if ($can_delete) {
-          // @todo: implement this.
-          #$row['operations'] .= '<a href="' . $base_path . 'events/delete-0/' . $item->id . '" class="operation-link operation-link-delete">Delete</a> ';
-        }
-
-        $rows[$item->id] = $row;
       }
     }
 
-    $quick_list = array();
-    $quick_list['caption'] = t("Most Recent Event Requests");
-    $quick_list['header'] = array(
-      'id' => array('field' => 'id', 'data' => "ID", 'align' => 'center'),
-      'title' => array('field' => 'title', 'data' => "Title", 'align' => 'center'),
-      'location' => array('field' => 'location', 'data' => "Location", 'align' => 'center'),
-      'building' => array('field' => 'building', 'data' => "Building", 'align' => 'center'),
-      'room' => array('field' => 'room', 'data' => "Room", 'align' => 'center'),
-      'date' => array('field' => 'date', 'data' => "Date", 'align' => 'center'),
-      'submitted_on' => array('field' => 'submitted_on', 'data' => "Submitted On", 'sort' => 'desc', 'align' => 'center'),
-      t("Operations"),
-    );
-
-    $quick_list['attributes'] = array();
-    $quick_list['attributes']['id'] = 'mcneese_event_workflow-management_page-quick_list';
-    $quick_list['attributes']['class'] = array ('mcneese_event_workflow-management_page-quick_list');
-    $quick_list['attributes']['summary'] = 'A short version of the list, limited to the ' . $total_items . ' most recent items.';
-
-    $quick_list['rows'] = $rows;
-    $quick_list['empty'] = t("There are no event requests available to your account.");
-
-    $markup .= theme('table', $quick_list);
+    $title = '<h3><a href="' . $base_path . 'events/calendar-0/month">' . "Events for " . date("F, Y", $month_start) . '</a></h3>';
+    $result = mcneese_event_workflow_build_calendar_month_markup($rows, $month_start, $month_stop, $absolute_start, $absolute_stop, $title);
+    if ($result !== FALSE) {
+      $markup .= $result;
+    }
+    unset($result);
   }
 
   return $markup;

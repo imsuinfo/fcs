@@ -400,6 +400,58 @@ function mcneese_event_workflow_menu() {
     'tab_root' => 'events',
   );
 
+  $items['events/calendar-0/month'] = array(
+    'title' => "Request Calendar",
+    'description' => "Request Calendar - Month",
+    'page callback' => 'mcneese_event_workflow_event_calendar_month_0_page',
+    'page arguments' => array(NULL, NULL),
+    'file' => 'mcneese_event_workflow_event_calendar_page.inc',
+    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
+    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'access arguments' => array('list'),
+    'tab_parent' => 'events',
+    'tab_root' => 'events',
+  );
+
+  $items['events/calendar-0/month/%/%'] = array(
+    'title' => "Request Calendar",
+    'description' => "Requests Calendar - Month",
+    'page callback' => 'mcneese_event_workflow_event_calendar_month_0_page',
+    'page arguments' => array(3, 4),
+    'file' => 'mcneese_event_workflow_event_calendar_page.inc',
+    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
+    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'access arguments' => array('list'),
+    'tab_parent' => 'events',
+    'tab_root' => 'events',
+  );
+
+  $items['events/calendar-0/day'] = array(
+    'title' => "Request Calendar",
+    'description' => "Requests Calendar - Day",
+    'page callback' => 'mcneese_event_workflow_event_calendar_day_0_page',
+    'page arguments' => array(),
+    'file' => 'mcneese_event_workflow_event_calendar_page.inc',
+    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
+    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'access arguments' => array('list'),
+    'tab_parent' => 'events',
+    'tab_root' => 'events',
+  );
+
+  $items['events/calendar-0/day/%/%/%'] = array(
+    'title' => "Request Calendar",
+    'description' => "Requests Calendar - Day",
+    'page callback' => 'mcneese_event_workflow_event_calendar_day_0_page',
+    'page arguments' => array(3, 4, 5),
+    'file' => 'mcneese_event_workflow_event_calendar_page.inc',
+    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
+    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'access arguments' => array('list'),
+    'tab_parent' => 'events',
+    'tab_root' => 'events',
+  );
+
   $items['events/list-0/%'] = array(
     'title' => "List Requests",
     'description' => "List Requests",
@@ -480,6 +532,180 @@ function mcneese_event_workflow_menu() {
   );
 
   return $items;
+}
+
+/**
+ * Build a month calendar display.
+ *
+ * @param array $items
+ *   An array of event request items to link to.
+ * @param int $month_start
+ *   Unix timestamp for the start of the month.
+ * @param int $month_stop
+ *   Unix timestamp for the first day of the next month.
+ * @param int $absolute_start
+ *   Unix timestamp for the first day of the week in which the first day of
+ *   the month may be found.
+ * @param int $absolute_stop
+ *   Unix timestamp for the last day of the week in which the last day of
+ *   the month may be found.
+ * @param string $title
+ *   An HTML title for describing the calendar.
+ * @param string $id
+ *   (optional) A unique HTML id to associate with the calendar.
+ *
+ * @return string|bool
+ *   The generate HTML markup or FALSE on error.
+ */
+function mcneese_event_workflow_build_calendar_month_markup($items, $month_start, $month_stop, $absolute_start, $absolute_stop, $title, $id = NULL) {
+  if (!is_array($items)) {
+    cf_error::invalid_array('items');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($month_start)) {
+    cf_error::invalid_integer('month_start');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($month_stop)) {
+    cf_error::invalid_integer('month_stop');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($absolute_start)) {
+    cf_error::invalid_integer('absolute_start');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($absolute_stop)) {
+    cf_error::invalid_integer('absolute_stop');
+    return FALSE;
+  }
+
+  if (!is_string($title)) {
+    cf_error::invalid_string('title');
+    return FALSE;
+  }
+
+  $id_string = "";
+  if (!empty($id)) {
+    if (!is_string($id)) {
+      cf_error::invalid_string('id');
+      return FALSE;
+    }
+
+    $id_string = ' id="' . check_plain($id) . '"';
+  }
+
+  global $base_path;
+
+  $week_start = 0;
+  $week_stop = 6;
+
+  // for ISO-8601.
+  #$week_start = 1;
+  #$week_stop = 7;
+
+  $days_of_week = array(
+    0 => 'Sunday',
+    1 => 'Monday',
+    2 => 'Tuesday',
+    3 => 'Wednesday',
+    4 => 'Thursday',
+    5 => 'Friday',
+    6 => 'Saturday',
+    7 => 'Sunday', // In the case of ISO-8601, Sunday = 7.
+  );
+
+
+  // begin wrappers
+  $markup = '<div' . $id_string . ' class="calendar-month-wrapper"><div class="calendar-month">';
+
+
+  // title
+  $markup .= '<div class="calendar-title">' . $title . '</div>';
+
+
+  // navigation
+  $last_month = strtotime('midnight first day of last month', $month_start);
+  $next_month = strtotime('midnight first day of next month', $month_start);
+
+  $url_base = $base_path . 'events/calendar-0/month/';
+
+  $last_url = $url_base . date('Y', $last_month) . '/' . date('F', $last_month);
+  $next_url = $url_base . date('Y', $next_month) . '/' . date('F', $next_month);
+
+  $markup .= '<div class="calendar-navigation">';
+  $markup .= '<div class="calendar-navigation-previous">';
+  $markup .= '<a href="' . $last_url . '">Previous</a>';
+  $markup .= '</div>';
+  $markup .= '<div class="calendar-navigation-next">';
+  $markup .= '<a href="' . $next_url . '">Next</a>';
+  $markup .= '</div>';
+  $markup .= '</div>';
+
+
+  // header
+  $markup .= '<div class="calendar-header">';
+  $week_count = $week_start;
+  while ($week_count <= $week_stop) {
+    $markup .= '<div class="calendar-day weekday-' . $week_count . '">' . $days_of_week[$week_count] . '</div>';
+    $week_count++;
+  }
+  $markup .= '</div>';
+
+
+  // body
+  $markup .= '<div class="calendar-body">';
+  $current_date = $absolute_start;
+  $week_first = date('W', $current_date);
+  $week_count = $week_start;
+
+  $weeks_processed = array();
+  while ($current_date < $absolute_stop) {
+    $current_week = date('W', $current_date);
+    $current_day = date('j', $current_date);
+
+    if ($week_count == $week_start && !isset($weeks_processed[$week_first])) {
+      $markup .= '<div class="calendar-week week_number-' . $current_week . '">';
+      $weeks_processed[$week_first] = TRUE;
+    }
+
+    $current_month = ' month-current';
+    if ($current_date < $month_start) {
+      $current_month = ' month-previous';
+    }
+    elseif ($current_date >= $month_stop) {
+      $current_month = ' month-next';
+    }
+
+    $markup .= '<div class="calendar-day weekday-' . $week_count . ' day-' . $current_day . $current_month . '">';
+    $markup .= '<div class="calendar-label">' . $current_day . '</div>';
+    if (!empty($items[$current_day])) {
+      foreach ($items[$current_day] as $item_id => $item) {
+        $markup .= '<div class="calendar-item"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
+      }
+    }
+    $markup .= '</div>';
+
+    $current_date = strtotime('midnight tomorrow', $current_date);
+
+    $week_count++;
+    if ($week_count > $week_stop) {
+      $markup .= '</div>';
+
+      $week_first = date('W', $current_date);
+      $week_count = $week_start;
+    }
+  }
+  $markup .= '</div>';
+
+
+  // end wrappers
+  $markup .= '</div></div>';
+
+  return $markup;
 }
 
 /**
@@ -847,7 +1073,6 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
 
   return FALSE;
 }
-
 
 /**
  * Check to see if a given user is allowed to review a given event.
@@ -4224,7 +4449,7 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
     return FALSE;
   }
 
-  if (!cf_is_integer($limit) || $limit < 1) {
+  if (!cf_is_integer($limit) || $limit < 0) {
     cf_error::invalid_integer('limit');
     return FALSE;
   }
@@ -4478,7 +4703,9 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
       }
     }
 
-    $query->range($start, $limit + 1);
+    if ($limit > 0) {
+      $query->range($start, $limit + 1);
+    }
 
     if ($manager_as_administer) {
       // add no restrictions.
