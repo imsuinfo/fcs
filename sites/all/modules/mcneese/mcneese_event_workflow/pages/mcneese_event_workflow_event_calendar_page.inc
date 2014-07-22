@@ -175,9 +175,15 @@ function mcneese_event_workflow_event_calendar_month_0_page($year = NULL, $month
       }
 
       foreach ($item->date as $delta => $date) {
-        $day = date('d', $date);
-        if (!isset($rows[$day])) {
-          $rows[$day] = array();
+        if ($date < $absolute_start || $date >= $absolute_stop) {
+          continue;
+        }
+
+        $day = date('j', $date);
+        $month = date('n', $date);
+        $month_day = $month . '-' . $day;
+        if (!isset($rows[$month_day])) {
+          $rows[$month_day] = array();
         }
 
         $is_current_month = TRUE;
@@ -185,17 +191,15 @@ function mcneese_event_workflow_event_calendar_month_0_page($year = NULL, $month
           $is_current_month = FALSE;
         }
 
-        if (isset($rows[$day][$item->id])) {
-          $rows[$day][$item->id]['time_start'][] = array('start' => $item->time_start, 'stop' => $item->time_stop);
-        }
-        else {
+        if (!isset($rows[$month_day][$item->id])) {
           $item_title = check_plain($item->title);
-          $rows[$day][$item->id] = array(
+          $rows[$month_day][$item->id] = array(
             'href' => $base_path . 'events/view-0/' . $item->id,
             'title' => $item_title,
             'tooltip' => '[' . check_plain($item->location_name) . '] ' . check_plain($item->building_name) . ' ' . check_plain($item->room_name) . ': ' . $item_title,
             'date' => $date,
-            'times' => array(array('start' => $item->time_start, 'stop' => $item->time_stop)),
+            'month' => $month,
+            'day' => $day,
           );
           unset($item_title);
         }
