@@ -140,34 +140,37 @@ function mcneese_event_workflow_management_page() {
     #  $absolute_stop = $month_stop;
     #}
 
-    $and = array();
-
     $target_field_name = 'field_dates-date-start-0';
-    $and[$target_field_name]['group_name'] = 'dates';
-    $and[$target_field_name]['field_name'] = 'date';
-    $and[$target_field_name]['column'] = 'value';
-    $and[$target_field_name]['search'] = $absolute_start;
-    $and[$target_field_name]['type'] = 'date';
-    $and[$target_field_name]['multiple'] = TRUE;
-    $and[$target_field_name]['operator'] = MEW_OPERATOR_GREATER_THAN_EQUAL;
+    $search[$target_field_name]['group_name'] = 'dates';
+    $search[$target_field_name]['field_name'] = 'date';
+    $search[$target_field_name]['column'] = 'value';
+    $search[$target_field_name]['search'] = $absolute_start;
+    $search[$target_field_name]['type'] = 'date';
+    $search[$target_field_name]['multiple'] = TRUE;
+    $search[$target_field_name]['operator'] = MEW_OPERATOR_GREATER_THAN_EQUAL;
 
     $target_field_name = 'field_dates-date-stop-0';
-    $and[$target_field_name]['group_name'] = 'dates';
-    $and[$target_field_name]['field_name'] = 'date';
-    $and[$target_field_name]['column'] = 'value';
-    $and[$target_field_name]['search'] = $absolute_stop;
-    $and[$target_field_name]['type'] = 'date';
-    $and[$target_field_name]['multiple'] = TRUE;
-    $and[$target_field_name]['operator'] = MEW_OPERATOR_LESS_THAN;
+    $search[$target_field_name]['group_name'] = 'dates';
+    $search[$target_field_name]['field_name'] = 'date';
+    $search[$target_field_name]['column'] = 'value';
+    $search[$target_field_name]['search'] = $absolute_stop;
+    $search[$target_field_name]['type'] = 'date';
+    $search[$target_field_name]['multiple'] = TRUE;
+    $search[$target_field_name]['operator'] = MEW_OPERATOR_LESS_THAN;
 
-    $search['and_0_field'] = $and;
+    $target_field_name = 'field_top-status-0';
+    $search[$target_field_name]['group_name'] = 'top';
+    $search[$target_field_name]['field_name'] = 'status';
+    $search[$target_field_name]['column'] = 'value';
+    $search[$target_field_name]['search'] = MEW_EVENT_STATUS_CLOSED_ACCEPTED;
+    $search[$target_field_name]['type'] = 'options';
+    $search[$target_field_name]['multiple'] = FALSE;
+    $search[$target_field_name]['operator'] = MEW_OPERATOR_EQUAL;
 
     $sorting = array(
       'order' => 'date',
       'sort' => 'ASC',
     );
-
-    $results = mcneese_event_workflow_event_load_listing($search, FALSE, 0, 0, $sorting);
 
     $rows = array();
     $rows_count = 0;
