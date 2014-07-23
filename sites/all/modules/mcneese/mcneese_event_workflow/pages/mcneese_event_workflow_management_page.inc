@@ -172,6 +172,8 @@ function mcneese_event_workflow_management_page() {
       'sort' => 'ASC',
     );
 
+    $results = mcneese_event_workflow_event_load_listing($search, FALSE, 0, 0, $sorting);
+
     $rows = array();
     $rows_count = 0;
     if (!empty($results)) {
