@@ -980,6 +980,21 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
           '#tree' => TRUE,
         );
 
+        $form['form']['use_fees-custodial'] = array(
+          '#type' => 'value',
+          '#value' => FALSE,
+        );
+
+        $form['form']['use_fees-security'] = array(
+          '#type' => 'value',
+          '#value' => FALSE,
+        );
+
+        $form['form']['use_fees-insurance'] = array(
+          '#type' => 'value',
+          '#value' => FALSE,
+        );
+
         $uses = array();
         $insurance_fee = FALSE;
         if ($step == MEW_REVIEW_STEP_VENUE_AVAILABLE) {
@@ -992,12 +1007,15 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
           foreach ($reviewers as $reviewer) {
             if ($reviewer->reviewer_classification == MEW_REVIEW_CLASSIFICATION_FACILITIES) {
               $uses['custodial'] = "Custodial";
+              $form['form']['use_fees-custodial']['#value'] = TRUE;
             }
             elseif ($reviewer->reviewer_classification == MEW_REVIEW_CLASSIFICATION_SECURITY) {
               $uses['security'] = "Security";
+              $form['form']['use_fees-security']['#value'] = TRUE;
             }
             elseif ($reviewer->reviewer_classification == MEW_REVIEW_CLASSIFICATION_PURCHASING) {
               $insurance_fee = TRUE;
+              $form['form']['use_fees-insurance']['#value'] = TRUE;
             }
           }
         }
@@ -1716,6 +1734,25 @@ function mcneese_event_workflow_event_view_0_page_validate($form, &$form_state) 
         if ($event['use_fees']['university'][0]->value) {
           $fees_not_supplied = FALSE;
         }
+      }
+
+      $custodial_fees_required = FALSE;
+      if (isset($form['form']['use_fees-custodial']['#value'])) {
+        $custodial_fees_required = $form['form']['use_fees-custodial']['#value'];
+      }
+
+      $security_fees_required = FALSE;
+      if (isset($form['form']['use_fees-custodial']['#value'])) {
+        $security_fees_required = $form['form']['use_fees-security']['#value'];
+      }
+
+      $insurance_fees_required = FALSE;
+      if (isset($form['form']['use_fees-custodial']['#value'])) {
+        $insurance_fees_required = $form['form']['use_fees-insurance']['#value'];
+      }
+
+      if (!$custodial_fees_required && !$security_fees_required && !$insurance_fees_required) {
+        $fees_not_supplied = FALSE;
       }
 
       if (isset($form['review']['operations']['use_fees']['custodial'])) {
