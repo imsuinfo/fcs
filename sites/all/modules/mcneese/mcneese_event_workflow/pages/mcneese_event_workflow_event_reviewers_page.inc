@@ -452,6 +452,7 @@ function mcneese_event_workflow_event_reviewers_0_form_submit($form, &$form_stat
       $query->addField('mr', 'id', 'id');
       $query->condition('mr.user_id', $values['user_id']);
       $query->condition('mr.event_classification', $values['event_classification']);
+      $query->condition('mr.reviewer_classification', $values['reviewer_classification']);
       $query->condition('mr.review_step', $values['review_step']);
       $query->condition('mr.disabled', 1);
 
