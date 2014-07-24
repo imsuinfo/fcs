@@ -519,19 +519,25 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
       }
 
       if (!empty($extra['use_fees'][$use]['hours'])) {
-        $use_fees['hours'] = $extra['use_fees'][$use]['hours'];
+        $hours = event_workflow_convert_value_to_database_format($extra['use_fees'][$use]['hours'], 'currency');
+        if ($hours !== FALSE) {
+          $use_fees['hours'] = $hours;
+        }
       }
 
       if (!empty($extra['use_fees'][$use]['days'])) {
-        $use_fees['days'] = $extra['use_fees'][$use]['days'];
+        $days = event_workflow_convert_value_to_database_format($extra['use_fees'][$use]['days'], 'currency');
+        if ($days !== FALSE) {
+          $use_fees['days'] = $days;
+        }
       }
 
       if (!empty($extra['use_fees'][$use]['amount'])) {
-        $use_fees['amount'] = event_workflow_convert_value_to_database_format($extra['use_fees'][$use]['amount'], 'currency');
-      }
+        $amount = event_workflow_convert_value_to_database_format($extra['use_fees'][$use]['amount'], 'currency');
 
-      if ($use_fees['amount'] === FALSE) {
-        $use_fees['amount'] = 0;
+        if ($amount !== FALSE) {
+          $use_fees['amount'] = $amount;
+        }
       }
 
       if (is_null($mew_current_use_fees[$use])) {

@@ -1659,7 +1659,26 @@ function mcneese_event_workflow_event_view_0_page_validate($form, &$form_state) 
       }
     }
 
-    if ($step == MEW_REVIEW_STEP_VENUE_AVAILABLE || $step == MEW_REVIEW_STEP_REVIEW) {
+    $fees_required = TRUE;
+    if (isset($event['use_fees']['waved'][0]->value)) {
+      if ($event['use_fees']['waved'][0]->value == 1) {
+        $fees_required = FALSE;
+      }
+    }
+
+    if (isset($event['use_fees']['university'][0]->value)) {
+      if ($event['use_fees']['university'][0]->value == 1) {
+        $fees_required = FALSE;
+      }
+    }
+
+    if (!$fees_required) {
+      if (isset($form_state['values']['review']['operations']['use_fees'])) {
+        unset($form_state['values']['review']['operations']['use_fees']);
+      }
+    }
+
+    if ($step == MEW_REVIEW_STEP_REVIEW && $decision == MEW_REVIEW_DECISION_USAGE_FEE) {
       $use_fees = array();
       if (isset($form_state['values']['review']['operations']['use_fees'])) {
         $use_fees = $form_state['values']['review']['operations']['use_fees'];
@@ -1675,17 +1694,17 @@ function mcneese_event_workflow_event_view_0_page_validate($form, &$form_state) 
         }
 
         if (isset($use_fees['facilities']['quantity']) && intval($use_fees['facilities']['quantity']) != $use_fees['facilities']['quantity']) {
-          form_set_error('review][operations][use_fees][facilities][quantity', t("@quantity is not an allowed mumber. Use only numbers without decimal places.", array('@quantity' => $use_fees['facilities']['quantity'])));
+          form_set_error('review][operations][use_fees][facilities][quantity', t("@quantity is not an allowed number. Use only numbers without decimal places.", array('@quantity' => $use_fees['facilities']['quantity'])));
           $failure = TRUE;
         }
 
         if (isset($use_fees['facilities']['hours']) && !cf_is_integer($use_fees['facilities']['hours'])) {
-          form_set_error('review][operations][use_fees][facilities][hours', t("@hours is not an valid mumber. Use only numbers places.", array('@hours' => $use_fees['facilities']['hours'])));
+          form_set_error('review][operations][use_fees][facilities][hours', t("@hours is not an valid number. Use only numbers places.", array('@hours' => $use_fees['facilities']['hours'])));
           $failure = TRUE;
         }
 
         if (isset($use_fees['facilities']['days']) && intval($use_fees['facilities']['days']) != $use_fees['facilities']['days']) {
-          form_set_error('review][operations][use_fees][facilities][days', t("@days is not an allowed mumber. Use only numbers without decimal places.", array('@days' => $use_fees['facilities']['days'])));
+          form_set_error('review][operations][use_fees][facilities][days', t("@days is not an allowed number. Use only numbers without decimal places.", array('@days' => $use_fees['facilities']['days'])));
           $failure = TRUE;
         }
       }
@@ -1700,17 +1719,17 @@ function mcneese_event_workflow_event_view_0_page_validate($form, &$form_state) 
         }
 
         if (isset($use_fees['equipment']['quantity']) && intval($use_fees['equipment']['quantity']) != $use_fees['equipment']['quantity']) {
-          form_set_error('review][operations][use_fees][equipment][quantity', t("@quantity is not an allowed mumber. Use only numbers without decimal places.", array('@quantity' => $use_fees['equipment']['quantity'])));
+          form_set_error('review][operations][use_fees][equipment][quantity', t("@quantity is not an allowed number. Use only numbers without decimal places.", array('@quantity' => $use_fees['equipment']['quantity'])));
           $failure = TRUE;
         }
 
         if (isset($use_fees['equipment']['hours']) && !cf_is_integer($use_fees['equipment']['hours'])) {
-          form_set_error('review][operations][use_fees][equipment][hours', t("@hours is not an valid mumber. Use only numbers places.", array('@hours' => $use_fees['equipment']['hours'])));
+          form_set_error('review][operations][use_fees][equipment][hours', t("@hours is not an valid number. Use only numbers places.", array('@hours' => $use_fees['equipment']['hours'])));
           $failure = TRUE;
         }
 
         if (isset($use_fees['equipment']['days']) && intval($use_fees['equipment']['days']) != $use_fees['equipment']['days']) {
-          form_set_error('review][operations][use_fees][equipment][days', t("@days is not an allowed mumber. Use only numbers without decimal places.", array('@days' => $use_fees['equipment']['days'])));
+          form_set_error('review][operations][use_fees][equipment][days', t("@days is not an allowed number. Use only numbers without decimal places.", array('@days' => $use_fees['equipment']['days'])));
           $failure = TRUE;
         }
       }
@@ -1725,17 +1744,17 @@ function mcneese_event_workflow_event_view_0_page_validate($form, &$form_state) 
         }
 
         if (isset($use_fees['custodial']['quantity']) && intval($use_fees['custodial']['quantity']) != $use_fees['custodial']['quantity']) {
-          form_set_error('review][operations][use_fees][custodial][quantity', t("@quantity is not an allowed mumber. Use only numbers without decimal places.", array('@quantity' => $use_fees['custodial']['quantity'])));
+          form_set_error('review][operations][use_fees][custodial][quantity', t("@quantity is not an allowed number. Use only numbers without decimal places.", array('@quantity' => $use_fees['custodial']['quantity'])));
           $failure = TRUE;
         }
 
         if (isset($use_fees['custodial']['hours']) && !cf_is_integer($use_fees['custodial']['hours'])) {
-          form_set_error('review][operations][use_fees][custodial][hours', t("@hours is not an valid mumber. Use only numbers places.", array('@hours' => $use_fees['custodial']['hours'])));
+          form_set_error('review][operations][use_fees][custodial][hours', t("@hours is not an valid number. Use only numbers places.", array('@hours' => $use_fees['custodial']['hours'])));
           $failure = TRUE;
         }
 
         if (isset($use_fees['custodial']['days']) && intval($use_fees['custodial']['days']) != $use_fees['custodial']['days']) {
-          form_set_error('review][operations][use_fees][custodial][days', t("@days is not an allowed mumber. Use only numbers without decimal places.", array('@days' => $use_fees['custodial']['days'])));
+          form_set_error('review][operations][use_fees][custodial][days', t("@days is not an allowed number. Use only numbers without decimal places.", array('@days' => $use_fees['custodial']['days'])));
           $failure = TRUE;
         }
       }
@@ -1750,17 +1769,17 @@ function mcneese_event_workflow_event_view_0_page_validate($form, &$form_state) 
         }
 
         if (isset($use_fees['security']['quantity']) && intval($use_fees['security']['quantity']) != $use_fees['security']['quantity']) {
-          form_set_error('review][operations][use_fees][security][quantity', t("@quantity is not an allowed mumber. Use only numbers without decimal places.", array('@quantity' => $use_fees['security']['quantity'])));
+          form_set_error('review][operations][use_fees][security][quantity', t("@quantity is not an allowed number. Use only numbers without decimal places.", array('@quantity' => $use_fees['security']['quantity'])));
           $failure = TRUE;
         }
 
         if (isset($use_fees['security']['hours']) && !cf_is_integer($use_fees['security']['hours'])) {
-          form_set_error('review][operations][use_fees][security][hours', t("@hours is not an valid mumber. Use only numbers places.", array('@hours' => $use_fees['security']['hours'])));
+          form_set_error('review][operations][use_fees][security][hours', t("@hours is not an valid number. Use only numbers places.", array('@hours' => $use_fees['security']['hours'])));
           $failure = TRUE;
         }
 
         if (isset($use_fees['security']['days']) && intval($use_fees['security']['days']) != $use_fees['security']['days']) {
-          form_set_error('review][operations][use_fees][security][days', t("@days is not an allowed mumber. Use only numbers without decimal places.", array('@days' => $use_fees['security']['days'])));
+          form_set_error('review][operations][use_fees][security][days', t("@days is not an allowed number. Use only numbers without decimal places.", array('@days' => $use_fees['security']['days'])));
           $failure = TRUE;
         }
       }

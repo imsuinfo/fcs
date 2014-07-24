@@ -1169,15 +1169,10 @@ function mcneese_event_workflow_management_page_event_reviewer_access($user, $ev
       $or->condition($and);
     }
     elseif ($review_restrictions === FALSE) {
-      $and = db_and();
-      $and->condition('mfts.value', $show_status, 'IN');
-      $and->condition('mftsp.value', $show_step, 'IN');
-      $and->condition('mfvcui.value', $user->uid);
-
       if (is_null($or)) {
         $or = db_or();
       }
-      $or->condition($and);
+      $or->condition('mfvcui.value', $user->uid);
     }
 
     // process review access.
@@ -1203,6 +1198,7 @@ function mcneese_event_workflow_management_page_event_reviewer_access($user, $ev
       $can_review_query->where('c_mr_2.event_classification = mfecc.value AND c_mr_2.review_step = mftsp.value');
       $can_review_query->condition('c_mr_2.user_id', $user->uid);
       $can_review_query->condition('c_mr_2.review_step', $show_step, 'IN');
+      $can_review_query->condition('c_mr_2.disabled', 0);
       $can_review_query->distinct();
 
       $already_reviewed_query = db_select('mew_field_review_review', 'mfrr');
@@ -1235,6 +1231,7 @@ function mcneese_event_workflow_management_page_event_reviewer_access($user, $ev
       $can_review_query->where('c_mr_2.event_classification = mfecc.value AND c_mr_2.review_step = mftsp.value');
       $can_review_query->condition('c_mr_2.user_id', $user->uid);
       $can_review_query->condition('c_mr_2.review_step', $show_step, 'IN');
+      $can_review_query->condition('c_mr_2.disabled', 0);
       $can_review_query->distinct();
 
       $and = db_and();
@@ -4786,15 +4783,10 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
         $or->condition($and);
       }
       elseif ($review_restrictions === FALSE) {
-        $and = db_and();
-        $and->condition('mfts.value', $show_status, 'IN');
-        $and->condition('mftsp.value', $show_step, 'IN');
-        $and->condition('mfvcui.value', $user->uid);
-
         if (is_null($or)) {
           $or = db_or();
         }
-        $or->condition($and);
+        $or->condition('mfvcui.value', $user->uid);
       }
 
       // process reviewer access.
@@ -4820,6 +4812,7 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
         $can_review_query->where('c_mr_2.event_classification = mfecc.value AND c_mr_2.review_step = mftsp.value');
         $can_review_query->condition('c_mr_2.user_id', $user->uid);
         $can_review_query->condition('c_mr_2.review_step', $show_step, 'IN');
+        $can_review_query->condition('c_mr_2.disabled', 0);
         $can_review_query->distinct();
 
         $already_reviewed_query = db_select('mew_field_review_review', 'mfrr');
@@ -4852,6 +4845,7 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
         $can_review_query->where('c_mr_2.event_classification = mfecc.value AND c_mr_2.review_step = mftsp.value');
         $can_review_query->condition('c_mr_2.user_id', $user->uid);
         $can_review_query->condition('c_mr_2.review_step', $show_step, 'IN');
+        $can_review_query->condition('c_mr_2.disabled', 0);
         $can_review_query->distinct();
 
         $and = db_and();
@@ -5073,7 +5067,7 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
         $ordered[$step_options[$field->step]][$field->id] = $field;
       }
     }
-    elseif ($order == 'date') {
+    elseif ($order == 'date' && isset($date_order['start'])) {
       $ordered = $date_order['start'];
     }
 
