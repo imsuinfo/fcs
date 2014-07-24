@@ -1279,6 +1279,8 @@ function mcneese_event_workflow_event_search_0_form_build_target($form, &$form_s
       MEW_OPERATOR_GREATER_THAN => "Greater Than",
       MEW_OPERATOR_NOT_EQUAL => "Not Equal To",
     );
+
+    $default_value = MEW_OPERATOR_EQUAL;
   }
   elseif ($field['type'] == 'text') {
     $operators = array(
@@ -1287,15 +1289,18 @@ function mcneese_event_workflow_event_search_0_form_build_target($form, &$form_s
       MEW_OPERATOR_EQUAL => "Equal To",
       MEW_OPERATOR_NOT_EQUAL => "Not Equal To",
     );
+
+    $default_value = MEW_OPERATOR_LIKE;
   }
   else {
     $operators = array(
       MEW_OPERATOR_EQUAL => "Equal To",
       MEW_OPERATOR_NOT_EQUAL => "Not Equal To",
     );
+
+    $default_value = MEW_OPERATOR_EQUAL;
   }
 
-  $default_value = MEW_OPERATOR_EQUAL;
   if (isset($state_location[$target_name][$target_delta]['operator'])) {
     $default_value = $state_location[$target_name][$target_delta]['operator'];
   }
