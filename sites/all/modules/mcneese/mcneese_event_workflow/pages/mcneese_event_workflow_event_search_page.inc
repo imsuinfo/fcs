@@ -1182,7 +1182,7 @@ function mcneese_event_workflow_event_search_0_form_build_targets_and_groups($fo
  *
  * @see mcneese_event_workflow_table_structure()
  */
-function mcneese_event_workflow_event_search_0_form_build_target($form, &$form_state, &$location, $state_location, $target_name, $target_delta, $id_extra) {
+function mcneese_event_workflow_event_search_0_form_build_target(&$form, &$form_state, &$location, $state_location, $target_name, $target_delta, $id_extra) {
   if (!is_array($form)) {
     cf_error::invalid_array('form');
     return FALSE;
@@ -1521,10 +1521,9 @@ function mcneese_event_workflow_event_search_0_form_build_target($form, &$form_s
 
     $default_value = 'y/m/d';
     if (isset($state_location[$target_name][$target_delta]['date_mode'])) {
-      $default_value = $state_location[$target_name][$target_delta]['date_mode'];
-    }
-    if (isset($form_state['advanced_search-clear']) && $form_state['advanced_search-clear']) {
-      $default_value = NULL;
+      if (isset($form_state['advanced_search-clear']) && $form_state['advanced_search-clear']) {
+        $default_value = $state_location[$target_name][$target_delta]['date_mode'];
+      }
     }
     $location['targets'][$target_name][$target_delta]['date_mode'] = array(
       '#id' => 'search-advanced-targets' . $id_extra . '-targets-' . $target_name . '-' . $target_delta . '-date_mode',
@@ -1541,6 +1540,8 @@ function mcneese_event_workflow_event_search_0_form_build_target($form, &$form_s
         ),
       ),
     );
+
+    $form['form']['conditionally_required']['#value'][0][$target_name][] = &$location['targets'][$target_name][$target_delta]['date_mode'];
   }
   elseif ($field['type'] == 'time') {
     $location['targets'][$target_name][$target_delta]['search']['#type'] = 'textfield';
