@@ -1174,6 +1174,13 @@ function mcneese_event_workflow_management_page_event_reviewer_access($user, $ev
       }
       $or->condition('mfvcui.value', $user->uid);
     }
+    else {
+      if (is_null($or)) {
+        $or = db_or();
+      }
+      $or->condition('mer.user_id', $user->uid);
+      $or->condition('mfvcui.value', $user->uid);
+    }
 
     // process review access.
     $show_status = array(
@@ -1243,6 +1250,21 @@ function mcneese_event_workflow_management_page_event_reviewer_access($user, $ev
         $or = db_or();
       }
       $or->condition($and);
+    }
+    else {
+      $can_review_query = db_select('mew_reviewers', 'c_mr_2');
+
+      $can_review_query->addfield('c_mr_2', 'user_id', 'user_id');
+
+      $can_review_query->where('c_mr_2.event_classification = mfecc.value');
+      $can_review_query->condition('c_mr_2.user_id', $user->uid);
+      $can_review_query->condition('c_mr_2.disabled', 0);
+      $can_review_query->distinct();
+
+      if (is_null($or)) {
+        $or = db_or();
+      }
+      $or->condition($user->uid, $can_review_query, 'IN');
     }
 
     if (!is_null($or)) {
@@ -4788,6 +4810,13 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
         }
         $or->condition('mfvcui.value', $user->uid);
       }
+      else {
+        if (is_null($or)) {
+          $or = db_or();
+        }
+        $or->condition('mer.user_id', $user->uid);
+        $or->condition('mfvcui.value', $user->uid);
+      }
 
       // process reviewer access.
       $show_status = array(
@@ -4857,6 +4886,21 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
           $or = db_or();
         }
         $or->condition($and);
+      }
+      else {
+        $can_review_query = db_select('mew_reviewers', 'c_mr_2');
+
+        $can_review_query->addfield('c_mr_2', 'user_id', 'user_id');
+
+        $can_review_query->where('c_mr_2.event_classification = mfecc.value');
+        $can_review_query->condition('c_mr_2.user_id', $user->uid);
+        $can_review_query->condition('c_mr_2.disabled', 0);
+        $can_review_query->distinct();
+
+        if (is_null($or)) {
+          $or = db_or();
+        }
+        $or->condition($user->uid, $can_review_query, 'IN');
       }
 
       if (!is_null($or)) {
