@@ -4656,6 +4656,8 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
       $query->innerjoin('mew_field_dates_time_stop', 'mfdtsp', 'mcd.event_id = mfdtsp.event_id AND mcd.time_stop = mfdtsp.revision AND mfdtsp.delta = 0');
     }
     else {
+      $query->distinct();
+
       $query->innerjoin('mew_field_dates_date', 'mfdd', 'mcd.event_id = mfdd.event_id AND mcd.date = mfdd.revision');
       $query->innerjoin('mew_field_dates_time_start', 'mfdts', 'mcd.event_id = mfdts.event_id AND mcd.time_start = mfdts.revision');
       $query->innerjoin('mew_field_dates_time_stop', 'mfdtsp', 'mcd.event_id = mfdtsp.event_id AND mcd.time_stop = mfdtsp.revision');
@@ -4710,13 +4712,15 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
     $already_added['status'] = 'mfts.value';
     $already_added['step'] = 'mftsp.value';
 
-    $query->addField('mfdd', 'value', 'date');
-    $query->addField('mfdts', 'value', 'time_start');
-    $query->addField('mfdtsp', 'value', 'time_stop');
+    if (is_null($search)) {
+      $query->addField('mfdd', 'value', 'date');
+      $query->addField('mfdts', 'value', 'time_start');
+      $query->addField('mfdtsp', 'value', 'time_stop');
 
-    $already_added['date'] = 'mfdd.value';
-    $already_added['time_start'] = 'mfdts.value';
-    $already_added['time_stop'] = 'mfdtsp.value';
+      $already_added['date'] = 'mfdd.value';
+      $already_added['time_start'] = 'mfdts.value';
+      $already_added['time_stop'] = 'mfdtsp.value';
+    }
 
     $query->fields('mer');
 
