@@ -2133,7 +2133,7 @@ function mcneese_event_workflow_build_reviews_log(&$form, &$form_state, $event_i
     $query->condition('mfrr.event_id', $event_id);
     $query->condition('mfrr.revision', $review_revision);
 
-    $query->orderby('mfrr.date');
+    $query->orderBy('mfrr.date');
 
     $reviews = $query->execute()->fetchAll();
 
