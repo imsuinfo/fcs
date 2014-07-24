@@ -122,6 +122,8 @@ function mcneese_event_workflow_event_search_0_form($form, &$form_state) {
   $form['simple']['text'] = array(
     '#id' => 'search-simple-text',
     '#type' => 'textfield',
+    '#default_value' => isset($form_state['values']['simple']['text']) ? $form_state['values']['simple']['text'] : FALSE,
+    '#defaults_loaded' => FALSE,
     '#element_attributes' => array(
       'class' => array(
         'no-print',
@@ -137,7 +139,7 @@ function mcneese_event_workflow_event_search_0_form($form, &$form_state) {
     '#id' => 'search-simple-sensitive',
     '#type' => 'checkbox',
     '#title' => "Case Sensitive",
-    '#default_value' => FALSE,
+    '#default_value' => isset($form_state['values']['simple']['sensitive']) ? $form_state['values']['simple']['sensitive'] : FALSE,
     '#element_attributes' => array(
       'class' => array(
         'no-print',
@@ -171,6 +173,20 @@ function mcneese_event_workflow_event_search_0_form($form, &$form_state) {
       'class' => array(
         'no-print',
         'search-simple-submit-search',
+        'page-' . $form['form']['simple_search-page_number']['#value'],
+      ),
+    ),
+  );
+
+  $form['simple']['submit']['clear'] = array(
+    '#id' => 'search-simple-submit-clear',
+    '#name' => 'search-simple-submit-clear',
+    '#type' => 'submit',
+    '#default_value' => t("Clear"),
+    '#attributes' => array(
+      'class' => array(
+        'no-print',
+        'search-simple-submit-clear',
         'page-' . $form['form']['simple_search-page_number']['#value'],
       ),
     ),
@@ -265,7 +281,7 @@ function mcneese_event_workflow_event_search_0_form($form, &$form_state) {
     '#id' => 'search-advanced-sensitive',
     '#type' => 'checkbox',
     '#title' => "Case Sensitive",
-    '#default_value' => FALSE,
+    '#default_value' => isset($form_state['values']['advanced']['sensitive']) ? $form_state['values']['advanced']['sensitive'] : FALSE,
     '#element_attributes' => array(
       'class' => array(
         'no-print',
@@ -278,19 +294,13 @@ function mcneese_event_workflow_event_search_0_form($form, &$form_state) {
     '#weight' => -2,
   );
 
-  $collapse_controls = FALSE;
-  // When a search query is made, auto-collapse controls by default.
-  if (isset($form_state['triggering_element']['#id']) && $form_state['triggering_element']['#id'] == 'search-advanced-submit-search') {
-    $collapse_controls = TRUE;
-  }
-
   $form['advanced']['targets'] = array(
     '#id' => 'search-advanced-targets',
     '#type' => 'fieldset',
-    '#title' => "And",
+    '#title' => "Search Targets",
     '#description' => "All targets within this fieldset are matched using the " . '<em class="uppercase">And</em>' . " operation.",
     '#collapsible' => TRUE,
-    '#collapsed' => $collapse_controls,
+    '#collapsed' => FALSE,
     '#attributes' => array(
       'class' => array(
         'no-print',
@@ -339,6 +349,34 @@ function mcneese_event_workflow_event_search_0_form($form, &$form_state) {
       'class' => array(
         'no-print',
         'search-advanced-submit-search',
+        'page-' . $form['form']['advanced_search-page_number']['#value'],
+      ),
+    ),
+  );
+
+  $form['advanced']['submit']['clear'] = array(
+    '#id' => 'search-advanced-submit-clear',
+    '#name' => 'search-advanced-submit-clear',
+    '#type' => 'submit',
+    '#default_value' => t("Clear"),
+    '#attributes' => array(
+      'class' => array(
+        'no-print',
+        'search-advanced-submit-clear',
+        'page-' . $form['form']['advanced_search-page_number']['#value'],
+      ),
+    ),
+  );
+
+  $form['advanced']['submit']['reset'] = array(
+    '#id' => 'search-advanced-submit-reset',
+    '#name' => 'search-advanced-submit-reset',
+    '#type' => 'submit',
+    '#default_value' => t("Reset"),
+    '#attributes' => array(
+      'class' => array(
+        'no-print',
+        'search-advanced-submit-reset',
         'page-' . $form['form']['advanced_search-page_number']['#value'],
       ),
     ),
@@ -477,8 +515,14 @@ function mcneese_event_workflow_event_search_0_form_validate($form, &$form_state
       form_set_error('simple][text', "You must supply some text to search for.");
     }
   }
+  elseif ($clicked_id == 'search-simple-submit-clear') {
+  }
   elseif ($clicked_id == 'search-advanced-submit-search') {
     // @todo: validate all fields, this will need to be recursive.
+  }
+  elseif ($clicked_id == 'search-advanced-submit-clear') {
+  }
+  elseif ($clicked_id == 'search-advanced-submit-reset') {
   }
   elseif ($clicked_id == 'search-simple-results-navigation-previous') {
   }
@@ -576,6 +620,12 @@ function mcneese_event_workflow_event_search_0_form_submit($form, &$form_state) 
     $form_state['simple_search-search'] = $search;
     $form_state['simple_search-sensitive'] = $sensitive;
   }
+  elseif ($clicked_id == 'search-simple-submit-clear') {
+    unset($form_state['simple_search-results']);
+    unset($form_state['simple_search-search']);
+    unset($form_state['values']['simple']['text']);
+    unset($form_state['input']['simple']['text']);
+  }
   elseif ($clicked_id == 'search-simple-results-navigation-previous') {
     $previous_page = $form['form']['simple_search-page_number']['#value'] - 1;
     $search = $form_state['simple_search-search'];
@@ -652,6 +702,20 @@ function mcneese_event_workflow_event_search_0_form_submit($form, &$form_state) 
         $form_state['advanced_search-sensitive'] = $sensitive;
       }
     }
+  }
+  elseif ($clicked_id == 'search-advanced-submit-clear') {
+    unset($form_state['advanced_search-results']);
+    unset($form_state['advanced_search-search']);
+    unset($form_state['values']['advanced']);
+    unset($form_state['input']['advanced']);
+  }
+  elseif ($clicked_id == 'search-advanced-submit-reset') {
+    unset($form_state['advanced_search-results']);
+    unset($form_state['advanced_search-search']);
+    $form_state['advanced_search-clear'] = TRUE;
+
+    unset($form_state['values']['advanced']['targets']);
+    unset($form_state['advanced_search-chosen_targets']);
   }
   elseif ($clicked_id == 'search-advanced-search-controls-manage-new-submit-save') {
     if (isset($form_state['values']['advanced']['search']['controls']['manage']['new']['human_name']) && isset($form_state['advanced_search-chosen_targets'])) {
@@ -1252,8 +1316,11 @@ function mcneese_event_workflow_event_search_0_form_build_target($form, &$form_s
   );
 
   $default_value = NULL;
+
   if (isset($state_location[$target_name][$target_delta]['search'])) {
-    $default_value = $state_location[$target_name][$target_delta]['search'];
+    if (!isset($form_state['advanced_search-clear']) || !$form_state['advanced_search-clear']) {
+      $default_value = $state_location[$target_name][$target_delta]['search'];
+    }
   }
   $location['targets'][$target_name][$target_delta]['search'] = array(
     '#id' => 'search-advanced-targets' . $id_extra . '-targets-' . $target_name . '-' . $target_delta . '-search',
@@ -1348,15 +1415,20 @@ function mcneese_event_workflow_event_search_0_form_build_target($form, &$form_s
       ),
     );
 
+
     if (isset($form_state['values']['advanced']['targets'][$target_name][$target_delta]['option'])) {
-      $location['targets'][$target_name][$target_delta]['option']['#default_value'] = $form_state['values']['advanced']['targets'][$target_name][$target_delta]['option'];
+      if (!isset($form_state['advanced_search-clear']) || !$form_state['advanced_search-clear']) {
+        $location['targets'][$target_name][$target_delta]['option']['#default_value'] = $form_state['values']['advanced']['targets'][$target_name][$target_delta]['option'];
+      }
     }
 
     $location['targets'][$target_name][$target_delta]['search']['#type'] = 'select';
     $location['targets'][$target_name][$target_delta]['search']['#options'] = array(0 => "Unchecked / Disabled", 1 => "Checked / Enabled");
 
     if (isset($form_state['values']['advanced']['targets'][$target_name][$target_delta]['search'])) {
-      $location['targets'][$target_name][$target_delta]['search']['#default_value'] = $form_state['values']['advanced']['targets'][$target_name][$target_delta]['search'];
+      if (!isset($form_state['advanced_search-clear']) || !$form_state['advanced_search-clear']) {
+        $location['targets'][$target_name][$target_delta]['search']['#default_value'] = $form_state['values']['advanced']['targets'][$target_name][$target_delta]['search'];
+      }
     }
 
     if ($table_name == 'registration') {
@@ -1445,6 +1517,9 @@ function mcneese_event_workflow_event_search_0_form_build_target($form, &$form_s
     $default_value = 'y/m/d';
     if (isset($state_location[$target_name][$target_delta]['date_mode'])) {
       $default_value = $state_location[$target_name][$target_delta]['date_mode'];
+    }
+    if (isset($form_state['advanced_search-clear']) && $form_state['advanced_search-clear']) {
+      $default_value = NULL;
     }
     $location['targets'][$target_name][$target_delta]['date_mode'] = array(
       '#id' => 'search-advanced-targets' . $id_extra . '-targets-' . $target_name . '-' . $target_delta . '-date_mode',
@@ -1626,7 +1701,7 @@ function mcneese_event_workflow_event_search_0_form_build_search_target($structu
       $target_field_name = 'field_' . $target_name . '-hours-' . $target_delta;
       $and[$target_field_name]['group_name'] = $table_name;
       $and[$target_field_name]['field_name'] = $field_name;
-      $and[$target_field_name]['search'] = $target_values['hours'];
+      $and[$target_field_name]['search'] = event_workflow_convert_value_to_database_format($target_values['hours'], 'currency');
       $and[$target_field_name]['column'] = 'hours';
       $and[$target_field_name]['type'] = $field['type'];
       $and[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
@@ -1637,7 +1712,7 @@ function mcneese_event_workflow_event_search_0_form_build_search_target($structu
       $target_field_name = 'field_' . $target_name . '-days-' . $target_delta;
       $and[$target_field_name]['group_name'] = $table_name;
       $and[$target_field_name]['field_name'] = $field_name;
-      $and[$target_field_name]['search'] = $target_values['days'];
+      $and[$target_field_name]['search'] = event_workflow_convert_value_to_database_format($target_values['days'], 'currency');
       $and[$target_field_name]['column'] = 'days';
       $and[$target_field_name]['type'] = $field['type'];
       $and[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;

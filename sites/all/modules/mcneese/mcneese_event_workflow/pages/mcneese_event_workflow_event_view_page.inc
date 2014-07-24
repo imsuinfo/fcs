@@ -1020,6 +1020,12 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
           }
         }
 
+        // if the reviewer has no usage fees or insurance fees to specify, then do not display the Usage Fees select option.
+        if (!$insurance_fee && empty($uses)) {
+          unset($decision_options[MEW_REVIEW_DECISION_USAGE_FEE]);
+          $form['review']['operations']['decision']['#options'] = $decision_options;
+        }
+
         $use_fees_amount_defaults = array('custodial' => '18.50', 'security' => '30.00');
         $uses_personnel = array('custodial', 'security');
         $uses_hours = array('custodial', 'security');
@@ -1074,6 +1080,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
               '#type' => 'numberfield',
               '#title' => '<span class="element-invisible">' . $use_title . ' Use Fee </span>Personnel',
               '#default_value' => NULL,
+              '#size' => 16,
               '#min' => 0,
               '#required' => $uses_requirements[$use_name],
               '#attributes' => array(
@@ -1094,9 +1101,10 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
           if (in_array($use_name, $uses_hours)) {
             $form['review']['operations']['use_fees'][$use_name]['hours'] = array(
               '#id' => 'event-review-operations-use_fees-' . $use_name . '-hours',
-              '#type' => 'numberfield',
+              '#type' => 'textfield',
               '#title' => '<span class="element-invisible">' . $use_title . ' Use Fee </span>Hours',
               '#default_value' => NULL,
+              '#size' => 16,
               '#min' => 0,
               '#required' => $uses_requirements[$use_name],
               '#attributes' => array(
@@ -1110,7 +1118,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
             );
 
             if (!empty($event['use_fees'][$use_name][0])) {
-              $form['review']['operations']['use_fees'][$use_name]['hours']['#default_value'] = $event['use_fees'][$use_name][0]->hours;
+              $form['review']['operations']['use_fees'][$use_name]['hours']['#default_value'] = event_workflow_convert_value_from_database_format($event['use_fees'][$use_name][0]->hours, 'currency');
             }
           }
 
@@ -1120,6 +1128,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
             '#title' => '<span class="element-invisible">' . $use_title . ' Use Fee </span>Days',
             '#default_value' => NULL,
             '#min' => 0,
+            '#size' => 16,
             '#required' => $uses_requirements[$use_name],
             '#attributes' => array(
               'class' => array(
@@ -1132,7 +1141,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
           );
 
           if (!empty($event['use_fees'][$use_name][0])) {
-            $form['review']['operations']['use_fees'][$use_name]['days']['#default_value'] = $event['use_fees'][$use_name][0]->days;
+            $form['review']['operations']['use_fees'][$use_name]['days']['#default_value'] = event_workflow_convert_value_from_database_format($event['use_fees'][$use_name][0]->days, 'currency');
           }
 
           $form['review']['operations']['use_fees'][$use_name]['amount'] = array(
@@ -1140,7 +1149,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
             '#type' => 'textfield',
             '#title' => '<span class="element-invisible">' . $use_title . ' Use Fee </span>Amount',
             '#default_value' => NULL,
-            '#size' => 31,
+            '#size' => 16,
             '#min' => 0,
             '#required' => $uses_requirements[$use_name],
             '#attributes' => array(
@@ -1664,6 +1673,21 @@ function mcneese_event_workflow_event_view_0_page_validate($form, &$form_state) 
           form_set_error('review][operations][use_fees][facilities][amount', t("@facilities_use_fee is not a valid facilities usage fee amount. Use only numbers and two decimal places. Do not provide a dollar sign.", array('@facilities' => $use_fees['facilities']['amount'])));
           $failure = TRUE;
         }
+
+        if (isset($use_fees['facilities']['quantity']) && intval($use_fees['facilities']['quantity']) != $use_fees['facilities']['quantity']) {
+          form_set_error('review][operations][use_fees][facilities][quantity', t("@quantity is not an allowed mumber. Use only numbers without decimal places.", array('@quantity' => $use_fees['facilities']['quantity'])));
+          $failure = TRUE;
+        }
+
+        if (isset($use_fees['facilities']['hours']) && !cf_is_integer($use_fees['facilities']['hours'])) {
+          form_set_error('review][operations][use_fees][facilities][hours', t("@hours is not an valid mumber. Use only numbers places.", array('@hours' => $use_fees['facilities']['hours'])));
+          $failure = TRUE;
+        }
+
+        if (isset($use_fees['facilities']['days']) && intval($use_fees['facilities']['days']) != $use_fees['facilities']['days']) {
+          form_set_error('review][operations][use_fees][facilities][days', t("@days is not an allowed mumber. Use only numbers without decimal places.", array('@days' => $use_fees['facilities']['days'])));
+          $failure = TRUE;
+        }
       }
 
       if (array_key_exists('equipment', $use_fees) && !empty($use_fees['equipment']['amount'])) {
@@ -1672,6 +1696,21 @@ function mcneese_event_workflow_event_view_0_page_validate($form, &$form_state) 
 
         if (!$matched) {
           form_set_error('review][operations][use_fees][equipment][amount', t("@equipment is not a valid additional equipment usage fee. Use only numbers and two decimal places. Do not provide a dollar sign.", array('@equipment' => $use_fees['equipment']['amount'])));
+          $failure = TRUE;
+        }
+
+        if (isset($use_fees['equipment']['quantity']) && intval($use_fees['equipment']['quantity']) != $use_fees['equipment']['quantity']) {
+          form_set_error('review][operations][use_fees][equipment][quantity', t("@quantity is not an allowed mumber. Use only numbers without decimal places.", array('@quantity' => $use_fees['equipment']['quantity'])));
+          $failure = TRUE;
+        }
+
+        if (isset($use_fees['equipment']['hours']) && !cf_is_integer($use_fees['equipment']['hours'])) {
+          form_set_error('review][operations][use_fees][equipment][hours', t("@hours is not an valid mumber. Use only numbers places.", array('@hours' => $use_fees['equipment']['hours'])));
+          $failure = TRUE;
+        }
+
+        if (isset($use_fees['equipment']['days']) && intval($use_fees['equipment']['days']) != $use_fees['equipment']['days']) {
+          form_set_error('review][operations][use_fees][equipment][days', t("@days is not an allowed mumber. Use only numbers without decimal places.", array('@days' => $use_fees['equipment']['days'])));
           $failure = TRUE;
         }
       }
@@ -1684,6 +1723,21 @@ function mcneese_event_workflow_event_view_0_page_validate($form, &$form_state) 
           form_set_error('review][operations][use_fees][custodial][amount', t("@custodial is not a valid custodial usage fee amount. Use only numbers and two decimal places. Do not provide a dollar sign.", array('@custodial' => $use_fees['custodial']['amount'])));
           $failure = TRUE;
         }
+
+        if (isset($use_fees['custodial']['quantity']) && intval($use_fees['custodial']['quantity']) != $use_fees['custodial']['quantity']) {
+          form_set_error('review][operations][use_fees][custodial][quantity', t("@quantity is not an allowed mumber. Use only numbers without decimal places.", array('@quantity' => $use_fees['custodial']['quantity'])));
+          $failure = TRUE;
+        }
+
+        if (isset($use_fees['custodial']['hours']) && !cf_is_integer($use_fees['custodial']['hours'])) {
+          form_set_error('review][operations][use_fees][custodial][hours', t("@hours is not an valid mumber. Use only numbers places.", array('@hours' => $use_fees['custodial']['hours'])));
+          $failure = TRUE;
+        }
+
+        if (isset($use_fees['custodial']['days']) && intval($use_fees['custodial']['days']) != $use_fees['custodial']['days']) {
+          form_set_error('review][operations][use_fees][custodial][days', t("@days is not an allowed mumber. Use only numbers without decimal places.", array('@days' => $use_fees['custodial']['days'])));
+          $failure = TRUE;
+        }
       }
 
       if (array_key_exists('security', $use_fees) && !empty($use_fees['security']['amount'])) {
@@ -1694,12 +1748,27 @@ function mcneese_event_workflow_event_view_0_page_validate($form, &$form_state) 
           form_set_error('review][operations][use_fees][security][amount', t("@security is not a valid security usage fee amount. Use only numbers and two decimal places. Do not provide a dollar sign.", array('@security' => $use_fees['security']['amount'])));
           $failure = TRUE;
         }
+
+        if (isset($use_fees['security']['quantity']) && intval($use_fees['security']['quantity']) != $use_fees['security']['quantity']) {
+          form_set_error('review][operations][use_fees][security][quantity', t("@quantity is not an allowed mumber. Use only numbers without decimal places.", array('@quantity' => $use_fees['security']['quantity'])));
+          $failure = TRUE;
+        }
+
+        if (isset($use_fees['security']['hours']) && !cf_is_integer($use_fees['security']['hours'])) {
+          form_set_error('review][operations][use_fees][security][hours', t("@hours is not an valid mumber. Use only numbers places.", array('@hours' => $use_fees['security']['hours'])));
+          $failure = TRUE;
+        }
+
+        if (isset($use_fees['security']['days']) && intval($use_fees['security']['days']) != $use_fees['security']['days']) {
+          form_set_error('review][operations][use_fees][security][days', t("@days is not an allowed mumber. Use only numbers without decimal places.", array('@days' => $use_fees['security']['days'])));
+          $failure = TRUE;
+        }
       }
 
       unset($use_fees);
     }
 
-    if ($step == MEW_REVIEW_STEP_VENUE_AVAILABLE && ($decision == MEW_REVIEW_DECISION_APPROVE || $decision == MEW_REVIEW_DECISION_DENY)) {
+    if ($step == MEW_REVIEW_STEP_VENUE_AVAILABLE && $decision == MEW_REVIEW_DECISION_APPROVE) {
       $fees_not_supplied = TRUE;
       if (isset($event['use_fees']['waved'][0]->value)) {
         if ($event['use_fees']['waved'][0]->value) {
@@ -1718,11 +1787,11 @@ function mcneese_event_workflow_event_view_0_page_validate($form, &$form_state) 
       }
 
       if ($fees_not_supplied) {
-        form_set_error('review][operations][decision', t("The event cannot be approved or denied until the usage fees are either specified or waved."));
+        form_set_error('review][operations][decision', t("The event cannot be approved until the usage fees are either specified or waved."));
       }
     }
 
-    if ($step == MEW_REVIEW_STEP_REVIEW && ($decision == MEW_REVIEW_DECISION_APPROVE || $decision == MEW_REVIEW_DECISION_DENY)) {
+    if ($step == MEW_REVIEW_STEP_REVIEW && $decision == MEW_REVIEW_DECISION_APPROVE) {
       $fees_not_supplied = TRUE;
       if (isset($event['use_fees']['waved'][0]->value)) {
         if ($event['use_fees']['waved'][0]->value) {
@@ -1780,7 +1849,7 @@ function mcneese_event_workflow_event_view_0_page_validate($form, &$form_state) 
       }
 
       if ($fees_not_supplied) {
-        form_set_error('review][operations][decision', t("The event cannot be approved or denied until the usage fees are specified."));
+        form_set_error('review][operations][decision', t("The event cannot be approved until the usage fees are specified."));
       }
     }
 
