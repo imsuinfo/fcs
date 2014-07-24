@@ -4987,8 +4987,8 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
       }
       elseif ($order == 'date') {
         // @todo: find a way to sort by dates (due to multiple values, one cannot simply just sort delta = 0).
-        $query->orderBy('date', is_null($sort) ? 'ASC' : $sort);
-        $query->orderBy('time_start', is_null($sort) ? 'ASC' : $sort);
+        #$query->orderBy('date', is_null($sort) ? 'ASC' : $sort);
+        #$query->orderBy('time_start', is_null($sort) ? 'ASC' : $sort);
       }
       elseif ($order == 'submitted by') {
         $query->orderBy('user_id', is_null($sort) ? 'ASC' : $sort);
@@ -5000,6 +5000,7 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
 
     $results = $query->execute()->fetchAll();
 
+    $date_order = array();
     foreach ($results as $result) {
       if (array_key_exists($result->id, $found)) {
         continue;
@@ -5039,6 +5040,17 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
         $found[$result->id]->date[$sub_result->delta] = $sub_result->date;
         $found[$result->id]->time_start[$sub_result->delta] = $sub_result->time_start;
         $found[$result->id]->time_stop[$sub_result->delta] = $sub_result->time_stop;
+
+        if (is_null($sub_result->time_start)) {
+          if (!isset($date_order['start'][$sub_result->date])) {
+            $date_order['start'][$sub_result->date][$result->id] = $found[$result->id];
+          }
+        }
+        else {
+          if (!isset($date_order['start'][$sub_result->time_start])) {
+            $date_order['start'][$sub_result->time_start][$result->id] = $found[$result->id];
+          }
+        }
       }
     }
   }
@@ -5060,6 +5072,9 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
       foreach ($found as $event_id => $field) {
         $ordered[$step_options[$field->step]][$field->id] = $field;
       }
+    }
+    elseif ($order == 'date') {
+      $ordered = $date_order['start'];
     }
 
     if (!empty($ordered)) {
