@@ -785,10 +785,30 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
         '#weight' => 1,
       );
 
+      $reviewers_yet_to_review = mcneese_event_workflow_get_reviewers_yet_to_review($event_id);
+
+      $yet_to_review_markup = '';
+      if (!empty($reviewers_yet_to_review)) {
+        $yet_to_review_markup .= '<div id="event-' . $event_id . '-section-review-log-yet_to_review" class="event-section-review-log-yet_to_review">';
+        $yet_to_review_markup .= '<div class="event-section-review-log-yet_to_review-label">Reviewer classifications that have not yet reviewed:</div>';
+        $yet_to_review_markup .= '<ul class="event-section-review-log-yet_to_review-list">';
+
+        foreach ($reviewers_yet_to_review as $yet_to_review_classification) {
+          $yet_to_review_markup .= '<li class="event-section-review-log-yet_to_review-list_item">' . $yet_to_review_classification . '</li>';
+        }
+
+        $yet_to_review_markup .= '</ul>';
+      }
+
+      $form['review']['log']['yet_to_review'] = array(
+        '#markup' => $yet_to_review_markup,
+        '#weight' => 2,
+      );
+
       $form['review']['log']['history'] = array(
         '#prefix' => '<div id="event-' . $event_id . '-section-review-log-history" class="event-section-review-log-history mode-' . $mode . '">',
         '#suffix' => '</div>',
-        '#weight' => 2,
+        '#weight' => 3,
       );
 
       mcneese_event_workflow_build_reviews_log($form, $form_state, $event_id);

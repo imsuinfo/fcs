@@ -5749,5 +5749,88 @@ function mcneese_event_workflow_event_get_available_venue_coordinators() {
 }
 
 /**
+ * Loads a list of reviewers who have yet to review the given event.
+ *
+ * This only applies to the current active review state.
+ *
+ * @param int $event_id
+ *   The event id of the event to operate on.
+ *
+ * @return array|bool
+ *   An array of reviewers, with their reviewer classifications, who have not
+ *   yet reviewed the given event. FALSE is returned on error.
+ */
+function mcneese_event_workflow_get_reviewers_yet_to_review($event_id) {
+  $event = event_workflow_load_event_by_id($event_id);
+
+  if (empty($event)) {
+    watchdog('mew', "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
+    return FALSE;
+  }
+
+  $conditions = array(
+    'mr.event_classification' => $event['event_coordinator']['classification'][0]->value,
+    'mr.review_step' => $event['top']['step'][0]->value,
+    'mr.disabled' => 0,
+  );
+
+  $reviewers = mcneese_event_workflow_get_reviewers($conditions);
+  if (empty($reviewers)) {
+    return array();
+  }
+
+  mcneese_event_workflow_include(4);
+
+  $reviewer_classification_options = event_workflow_get_reviewer_classification_list_options();
+
+  $review_classifications = array();
+  $reviewer_ids = array();
+  $yet_to_review = array();
+
+  foreach ($reviewers as $reviewer) {
+    if (!isset($review_classifications[$reviewer->user_id])) {
+      $review_classifications[$reviewer->user_id] = array();
+    }
+
+    $review_classifications[$reviewer->user_id][$reviewer->reviewer_classification] = $reviewer->reviewer_classification;
+    $reviewer_ids[$reviewer->user_id] = $reviewer->user_id;
+    $yet_to_review[$reviewer->reviewer_classification] = $reviewer_classification_options[$reviewer->reviewer_classification];
+  }
+  unset($reviewers);
+
+  try {
+    $query = db_select('mew_field_review_review', 'mfrr');
+    $query->innerjoin('mew_current_review', 'mcr', 'mfrr.event_id = mcr.event_id and mfrr.revision = mcr.review');
+
+    $query->addField('mfrr', 'user_id', 'user_id');
+
+    $query->condition('mfrr.event_id', $event_id);
+    $query->condition('mfrr.step', $event['top']['step'][0]->value);
+    $query->condition('mfrr.user_id', $reviewer_ids, 'IN');
+    $query->condition('mfrr.decision', array(MEW_REVIEW_DECISION_APPROVE, MEW_REVIEW_DECISION_DENY), 'IN');
+    $query->distinct();
+
+    $results = $query->execute()->fetchAll();
+
+    if (!empty($results)) {
+      foreach ($results as $result) {
+        if (array_key_exists($result->user_id, $review_classifications)) {
+          foreach ($review_classifications[$result->user_id] as $review_classification) {
+            unset($yet_to_review[$review_classification]);
+          }
+        }
+      }
+    }
+  }
+  catch (Exception $ex) {
+    cf_error::on_query_execution($ex);
+
+    return FALSE;
+  }
+
+  return $yet_to_review;
+}
+
+/**
  * @} End of '@defgroup mcneese_event_workflow McNeese Event Workflow'.
  */
