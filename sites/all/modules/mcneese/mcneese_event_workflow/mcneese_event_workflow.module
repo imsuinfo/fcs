@@ -1501,7 +1501,7 @@ function mcneese_event_workflow_load_locations($location = NULL, $disabled = FAL
     $query->addField('mbl', 'id', 'location_id');
     $query->addField('mbl', 'human_name', 'location_name');
 
-    $query->orderby('mbl.human_name');
+    $query->orderBy('mbl.human_name');
 
     $items = $query->execute()->fetchAllAssoc('location_id');
 
@@ -1590,7 +1590,7 @@ function mcneese_event_workflow_load_buildings($location = NULL, $building = NUL
       $query->addField('mbl', 'machine_name', 'location_code');
       $query->addField('mbl', 'human_name', 'location_name');
 
-      $query->orderby('mbl.human_name');
+      $query->orderBy('mbl.human_name');
 
       if (!$disabled) {
         $query->condition('mbl.disabled', 0);
@@ -1604,7 +1604,7 @@ function mcneese_event_workflow_load_buildings($location = NULL, $building = NUL
     $query->addField('mbb', 'id', 'building_id');
     $query->addField('mbb', 'machine_name', 'building_code');
     $query->addField('mbb', 'human_name', 'building_name');
-    $query->orderby('mbb.human_name');
+    $query->orderBy('mbb.human_name');
 
     $items = $query->execute()->fetchAllAssoc('building_id');
 
@@ -1700,7 +1700,7 @@ function mcneese_event_workflow_load_rooms($location = NULL, $building = NULL, $
       $query->addField('mbl', 'machine_name', 'location_code');
       $query->addField('mbl', 'human_name', 'location_name');
 
-      $query->orderby('mbl.human_name');
+      $query->orderBy('mbl.human_name');
 
       if (!$disabled) {
         $query->condition('mbl.disabled', 0);
@@ -1727,9 +1727,9 @@ function mcneese_event_workflow_load_rooms($location = NULL, $building = NULL, $
     $query->addField('mbb', 'machine_name', 'building_code');
     $query->addField('mbb', 'human_name', 'building_name');
 
-    $query->orderby('mbb.human_name');
-    $query->orderby('mbr.human_name');
-    $query->orderby('mbr.machine_name');
+    $query->orderBy('mbb.human_name');
+    $query->orderBy('mbr.human_name');
+    $query->orderBy('mbr.machine_name');
 
     $items = $query->execute()->fetchAllAssoc('room_id');
     if (is_null($room)) {
@@ -3449,7 +3449,7 @@ function event_workflow_load_event_by_timestamp($event_id, $revision, $desired_f
     $query->condition('id', $event_id);
     $query->condition('merv.date', $revision);
 
-    $query->orderby('merv.date');
+    $query->orderBy('merv.date');
 
     $results = $query->execute()->fetchAll();
 
@@ -3572,7 +3572,7 @@ function mcneese_event_workflow_load_event_revision_number($event_id, $table_fie
       $query = db_select('mew_event_revisions', 'merv');
       $query->addfield('merv', 'revision', 'revision');
       $query->condition('merv.event_id', $event_id);
-      $query->orderby('merv.revision', 'DESC');
+      $query->orderBy('merv.revision', 'DESC');
       $query->range(0, 1);
 
       $field = $query->execute()->fetchfield();

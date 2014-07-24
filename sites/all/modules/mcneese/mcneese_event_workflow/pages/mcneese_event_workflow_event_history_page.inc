@@ -91,7 +91,7 @@ function mcneese_event_workflow_event_history_0_form($form, &$form_state, $event
 
     $query->fields('merv');
     $query->condition('merv.event_id', $event_id);
-    $query->orderby('merv.date', 'DESC');
+    $query->orderBy('merv.date', 'DESC');
     $query->range($start_range, $rows_per_page + 1);
 
     $revisions = $query->execute()->fetchall();

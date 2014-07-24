@@ -2461,7 +2461,7 @@ function mcneese_event_workflow_search_target_grouping_load($user = NULL) {
     $query->fields('mss');
 
     $query->condition('mss.user_id', $user->uid);
-    $query->orderby('mss.human_name');
+    $query->orderBy('mss.human_name');
 
     $results = $query->execute()->fetchAll();
 

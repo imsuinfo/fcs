@@ -331,7 +331,7 @@ function mcneese_event_workflow_event_uncancel_0_form_submit($form, &$form_state
     $query->condition('mfts.revision', $form['form']['event']['#value']['current']['top']['status'], '<');
 
     $query->range(0, 1);
-    $query->orderby('mfts.revision', 'desc');
+    $query->orderBy('mfts.revision', 'desc');
 
     $previous = $query->execute()->fetchAll();
   }
