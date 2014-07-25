@@ -81,35 +81,6 @@ function mcneese_event_workflow_pre_validate_event_fields(&$form, &$form_state, 
       $form['form']['room_information']['#value'] = mcneese_event_workflow_load_rooms(NULL, NULL, $form_state['values']['event']['room'][0]);
     }
 
-    // The already saved room may not be available at the current location and going backwards would then cause an internal error.
-    // Prevent this by forefully making the default_value a possible option when going backwards.
-    if ($clicked_id == 'submit-event-prev') {
-      if (!empty($location_form['room'])) {
-        foreach ($location_form['room'] as $key => &$value) {
-          if (!isset($value['#default_value_original'])) continue;
-
-          $value['#default_value'] = $value['#default_value_original'];
-          $value['#value'] = $value['#default_value_original'];
-
-          if (!array_key_exists($value['#default_value_original'], $value['#options'])) {
-            $value['#options'][$value['#default_value_original']] = $value['#default_value_original'];
-          }
-        }
-      }
-    }
-    elseif ($clicked_id == 'submit-event-next') {
-      if (!empty($location_form['room'])) {
-        foreach ($location_form['room'] as $key => &$value) {
-          if (!isset($value['#default_value_original'])) continue;
-
-          if (!array_key_exists($value['#default_value_original'], $value['#options'])) {
-            $value['#default_value'] = NULL;
-            $value['#value'] = NULL;
-          }
-        }
-      }
-    }
-
     $coordinator = NULL;
     if (isset($form['form']['room_information']['#value']->coordinator_id)) {
       $coordinator = user_load($form['form']['room_information']['#value']->coordinator_id);

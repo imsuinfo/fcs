@@ -868,28 +868,27 @@ function mcneese_event_workflow_get_event_field_room($form, &$form_state, &$fiel
       ),
     );
 
-    foreach ($values as $key => &$value) {
-      if (!empty($value)) {
-        $parts = explode('_', $value);
-
-        if (empty($parts[0])) {
-          $parts[0] = 'undecided';
-          $value = implode('_', $parts);
-        }
-      }
-
+    foreach ($values as $key => $value) {
       $location = "";
       if (!empty($event_state['location'][$key])) {
         $location = $event_state['location'][$key];
+      }
+
+      $options = event_workflow_get_event_room_list_options($location, 'special');
+      if (!is_array($options)) {
+        $options = array();
+        $value = NULL;
+      }
+      elseif (!array_key_exists($value, $options)) {
+        $value = NULL;
       }
 
       $fields['room'][$key] = array(
         '#id' => 'field-event-room-' . $key,
         '#type' => 'radios',
         '#title' => 'Select a Room',
-        '#options' => event_workflow_get_event_room_list_options($location, 'special'),
+        '#options' => $options,
         '#default_value' => $value,
-        '#default_value_original' => $value,
         '#required' => TRUE,
         '#attributes' => array(
           'class' => array(
