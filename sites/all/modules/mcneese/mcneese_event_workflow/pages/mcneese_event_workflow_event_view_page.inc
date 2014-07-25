@@ -1503,7 +1503,7 @@ function mcneese_event_workflow_event_view_0_page_setup_group_path(&$form, $even
 
       if ($show_link) {
         if ($show['clone']) {
-          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'events/create-0/' . $event_id . '" class="section-event-' . $event_id . '-' . $group . '-history section-event-clone no-print" title="'. t("Clone " . $presentation_tables[$group]['label']) . '">Clone</a>';
+          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'events/create-0/' . $event_id . '" class="section-event-' . $event_id . '-' . $group . '-history section-event-clone no-print" title="'. t("Copy " . $presentation_tables[$group]['label']) . '">Copy</a>';
         }
 
         if ($show['edit']) {

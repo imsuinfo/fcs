@@ -181,7 +181,7 @@ function mcneese_event_workflow_event_list_0_page($form, &$form_state, $page_num
       }
 
       if ($can_view_event && $can_create) {
-        $row['operations'] .= '<a href="' . $base_path . 'events/create-0/' . $item->id . '" class="operation-link operation-link-clone">Clone</a> ';
+        $row['operations'] .= '<a href="' . $base_path . 'events/create-0/' . $item->id . '" class="operation-link operation-link-clone">Copy</a> ';
       }
 
       $rows[$item->id] = $row;

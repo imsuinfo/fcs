@@ -5704,7 +5704,7 @@ function mcneese_event_workflow_build_request_table($items, $max_rows, $columns 
       }
 
       if ($can_view_event && $can_create) {
-        $row['operations'] .= '<a href="' . $base_path . 'events/create-0/' . $item->id . '" class="operation-link operation-link-clone">Clone</a> ';
+        $row['operations'] .= '<a href="' . $base_path . 'events/create-0/' . $item->id . '" class="operation-link operation-link-clone">Copy</a> ';
       }
     }
 
