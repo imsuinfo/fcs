@@ -181,6 +181,10 @@ function mcneese_event_workflow_event_review_0_page($form, &$form_state, $page_n
         #$row['operations'] .= '<a href="' . $base_path . 'events/delete-0/' . $item->id . '" class="operation-link operation-link-delete">Delete</a> ';
       }
 
+      if ($can_view_event && $can_create) {
+        $row['operations'] .= '<a href="' . $base_path . 'events/create-0/' . $item->id . '" class="operation-link operation-link-clone">Clone</a> ';
+      }
+
       $rows[$item->id] = $row;
     }
   }

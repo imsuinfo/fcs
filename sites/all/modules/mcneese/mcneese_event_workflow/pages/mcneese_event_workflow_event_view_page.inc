@@ -77,6 +77,19 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
 
   $venue_coordinator = ($event['venue_coordinator']['user_id'][0]->value == $user->uid);
 
+  $can_create = mcneese_event_workflow_management_page_event_access('create');
+
+  $can_create = mcneese_event_workflow_management_page_event_access('create');
+  $can_edit = mcneese_event_workflow_management_page_event_access('edit');
+  $can_view = mcneese_event_workflow_management_page_event_access('view');
+  $can_list = mcneese_event_workflow_management_page_event_access('list');
+  $can_search = mcneese_event_workflow_management_page_event_access('search');
+  $can_delete = mcneese_event_workflow_management_page_event_access('delete');
+  $can_log = mcneese_event_workflow_management_page_event_access('log');
+  $can_review = mcneese_event_workflow_management_page_event_access('review');
+
+  $can_view_event = mcneese_event_workflow_management_page_event_access('view', $event_id);
+  $can_edit_event = mcneese_event_workflow_management_page_event_access('edit', $event_id);
   $can_log_event = mcneese_event_workflow_management_page_event_access('log', $event_id);
   $can_review_event = mcneese_event_workflow_management_page_event_access('review', $event_id);
   $can_comment_event = mcneese_event_workflow_management_page_event_access('comment', $event_id);
@@ -164,12 +177,14 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
 
   if ($pdf) {
     $can['edit'] = FALSE;
+    $can['history'] = FALSE;
+    $can['clone'] = FALSE;
   }
   else {
-    $can['edit'] = (bool) mcneese_event_workflow_management_page_event_access('edit', $event_id);
+    $can['edit'] = (bool) $can_edit_event;
+    $can['history'] = (bool) $can_history_event;
+    $can['clone'] = (bool) ($can_create && $can_view_event);
   }
-
-  $can['history'] = (bool) mcneese_event_workflow_management_page_event_access('history', $event_id);
 
   $page_title = "Event Request";
   if (!empty($event['information']['title'][0]->value)) {
@@ -1440,6 +1455,12 @@ function mcneese_event_workflow_event_view_0_page_setup_group_path(&$form, $even
     }
   }
 
+  if ($show['clone']) {
+    if ($group != 'request') {
+      $show['clone'] = FALSE;
+    }
+  }
+
   if (array_key_exists('group', $presentation_tables[$group])) {
     $row = (int) $presentation_tables[$group]['group'];
 
@@ -1487,6 +1508,10 @@ function mcneese_event_workflow_event_view_0_page_setup_group_path(&$form, $even
 
         if ($show['history']) {
           $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'events/history-0/' . $event_id . '" class="section-event-' . $event_id . '-' . $group . '-history section-event-history no-print" title="'. t("Edit " . $presentation_tables[$group]['label']) . '">History</a>';
+        }
+
+        if ($show['clone']) {
+          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'events/create-0/' . $event_id . '" class="section-event-' . $event_id . '-' . $group . '-history section-event-clone no-print" title="'. t("Clone " . $presentation_tables[$group]['label']) . '">Clone</a>';
         }
       }
 

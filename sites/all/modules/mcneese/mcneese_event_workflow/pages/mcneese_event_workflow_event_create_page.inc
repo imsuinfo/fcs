@@ -17,12 +17,40 @@
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
+ * @param int $clone_event
+ *   (optional) When specified, will clone an existing event in which the
+ *   current user has appropriate access to view and edit.
  *
  * @return array $form
  *   An array containing the generated form.
  */
-function mcneese_event_workflow_event_create_0_form($form, &$form_state) {
+function mcneese_event_workflow_event_create_0_form($form, &$form_state, $clone_event = NULL) {
   $form = array();
+
+  $event = NULL;
+  if (!is_null($clone_event)) {
+    if (!cf_is_integer($clone_event)) {
+      cf_error::invalid_integer('clone_event');
+      drupal_not_found();
+      drupal_exit();
+    }
+
+    $event = event_workflow_load_event_by_id($clone_event);
+
+    if (empty($event)) {
+      watchdog('mew', "Unable to find event with id of @id.", array('@id' => $clone_event), WATCHDOG_ERROR);
+      drupal_not_found();
+      drupal_exit();
+    }
+
+    $can_view = mcneese_event_workflow_management_page_event_access('view', $clone_event);
+
+    if (!$can_view) {
+      // return not found instead of access denied to obscure whether or not the requested event exists.
+      drupal_not_found();
+      drupal_exit();
+    }
+  }
 
   mcneese_event_workflow_include(1);
 
@@ -59,6 +87,12 @@ function mcneese_event_workflow_event_create_0_form($form, &$form_state) {
     '#value' => $step,
   );
 
+  $form['form']['new'] = array(
+    '#id' => 'field-form-new',
+    '#type' => 'value',
+    '#value' => TRUE,
+  );
+
   $form['form']['existing'] = array(
     '#id' => 'field-form-existing',
     '#type' => 'value',
@@ -79,6 +113,18 @@ function mcneese_event_workflow_event_create_0_form($form, &$form_state) {
       'path' => 'event[',
     ),
   );
+
+  if (is_array($event)) {
+    $form['form']['existing']['#value'] = event_workflow_get_event_existing_values($event);
+    $event_fields = &$form['form']['existing']['#value']['event'];
+
+    // Reset fields that should not be copied by the clone process.
+    unset($event_fields['status']);
+    unset($event_fields['step']);
+    unset($event_fields['review']);
+    unset($event_fields['use_fees']);
+    unset($event_fields['insurance']);
+  }
 
   $statement_markup = 'McNeese State University is happy to provide facilities and resources to our Students, Employees, and the Community to further educational, cultural, and recreational initiatives through events held on campus.<br>';
   $statement_markup .= '<br>';

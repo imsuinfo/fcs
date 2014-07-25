@@ -177,6 +177,19 @@ function mcneese_event_workflow_menu() {
     'tab_root' => 'events',
   );
 
+  $items['events/create-0/%'] = array(
+    'title' => "Request Event",
+    'description' => "New Request",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mcneese_event_workflow_event_create_0_form', 2),
+    'file' => 'mcneese_event_workflow_event_create_page.inc',
+    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
+    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'access arguments' => array('create'),
+    'tab_parent' => 'events',
+    'tab_root' => 'events',
+  );
+
   $items['events/create-0/autocomplete/event_coordinator/email'] = array(
     'title' => "",
     'page callback' => 'mcneese_event_workflow_event_edit_0_autocomplete_event_coordinator_email',
@@ -5562,6 +5575,22 @@ function mcneese_event_workflow_build_request_table($items, $max_rows, $columns 
     return $table;
   }
 
+  $user = cf_current_user();
+
+  $manager = user_access('mcneese event workflow manage');
+  $reviewer = user_access('mcneese event workflow review');
+  $requester = user_access('mcneese event workflow request');
+
+  $can_create = mcneese_event_workflow_management_page_event_access('create');
+  $can_edit = mcneese_event_workflow_management_page_event_access('edit');
+  $can_view = mcneese_event_workflow_management_page_event_access('view');
+  $can_list = mcneese_event_workflow_management_page_event_access('list');
+  $can_search = mcneese_event_workflow_management_page_event_access('search');
+  $can_delete = mcneese_event_workflow_management_page_event_access('delete');
+  $can_log = mcneese_event_workflow_management_page_event_access('log');
+  $can_review = mcneese_event_workflow_management_page_event_access('review');
+
+
   $total_results = count($items);
   foreach ($items as $item) {
     $row = array();
@@ -5672,6 +5701,10 @@ function mcneese_event_workflow_build_request_table($items, $max_rows, $columns 
 
       if ($can_delete_event) {
         $row['operations'] .= '<a href="' . $base_path . 'events/delete-0/' . $item->id . '" class="operation-link operation-link-delete">Delete</a> ';
+      }
+
+      if ($can_view_event && $can_create) {
+        $row['operations'] .= '<a href="' . $base_path . 'events/create-0/' . $item->id . '" class="operation-link operation-link-clone">Clone</a> ';
       }
     }
 

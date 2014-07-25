@@ -17,7 +17,7 @@
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
- * @param int $id
+ * @param int $event_id
  *   The unique identifier for an event request.
  * @param string|null $target_section
  *   (optional) Load only the specified section.
@@ -25,23 +25,23 @@
  * @return string
  *   The HTML output representing the page.
  */
-function mcneese_event_workflow_event_edit_0_form($form, &$form_state, $id, $target_section = NULL) {
+function mcneese_event_workflow_event_edit_0_form($form, &$form_state, $event_id, $target_section = NULL) {
   // force the page to load the view page when only the id is specified.
   if (is_null($target_section)) {
-    drupal_goto('events/view-0/' . $id, array('query' => drupal_get_query_parameters()));
+    drupal_goto('events/view-0/' . $event_id, array('query' => drupal_get_query_parameters()));
     return '';
   }
 
-  if (!cf_is_integer($id)) {
-    cf_error::invalid_integer('id');
+  if (!cf_is_integer($event_id)) {
+    cf_error::invalid_integer('event_id');
     drupal_not_found();
     drupal_exit();
   }
 
-  $event = event_workflow_load_event_by_id($id);
+  $event = event_workflow_load_event_by_id($event_id);
 
   if (empty($event)) {
-    watchdog('mew', "Unable to find event with id of @id.", array('@id' => $id), WATCHDOG_ERROR);
+    watchdog('mew', "Unable to find event with id of @id.", array('@id' => $event_id), WATCHDOG_ERROR);
     drupal_not_found();
     drupal_exit();
   }
@@ -84,6 +84,12 @@ function mcneese_event_workflow_event_edit_0_form($form, &$form_state, $id, $tar
     '#id' => 'field-form-step',
     '#type' => 'value',
     '#value' => $step,
+  );
+
+  $form['form']['new'] = array(
+    '#id' => 'field-form-new',
+    '#type' => 'value',
+    '#value' => FALSE,
   );
 
   $form['form']['existing'] = array(
