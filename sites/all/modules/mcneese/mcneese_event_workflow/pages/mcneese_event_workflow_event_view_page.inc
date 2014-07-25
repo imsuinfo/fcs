@@ -2396,44 +2396,46 @@ function mcneese_event_workflow_build_reviews_log(&$form, &$form_state, $event_i
         $message .= '</div>';
       }
 
-      if (!empty($changelog['use_fees']['waved'])) {
-        $message .= '<div class="review-item-message-use_fees-waved review-item-message-use_fees review-item-message-fees">';
-        $message .= '<div class="item-label">Waved with Presidents Approval:</div> ';
+      if ($review_step == MEW_REVIEW_STEP_VENUE_AVAILABLE && $decision == MEW_REVIEW_DECISION_USAGE_FEE) {
+        if (!empty($changelog['use_fees']['waved'])) {
+          $message .= '<div class="review-item-message-use_fees-waved review-item-message-use_fees review-item-message-fees">';
+          $message .= '<div class="item-label">Waved with Presidents Approval:</div> ';
 
-        // always display the boolean when displayed in the review log.
-        foreach ($presentation['use_fees']['waved']['display'] as &$value) {
-          if ($value == 'when_true' || $value == 'when_false') {
-            $value = 'raw';
+          // always display the boolean when displayed in the review log.
+          foreach ($presentation['use_fees']['waved']['display'] as &$value) {
+            if ($value == 'when_true' || $value == 'when_false') {
+              $value = 'raw';
+            }
           }
-        }
 
-        $value = reset($changelog['use_fees']['waved']);
-        $value_markup = mcneese_event_workflow_build_event_request_value_structure($event_id, 'use_fees', 'waved', 0, $value, $presentation['use_fees']['waved'], $changelog);
+          $value = reset($changelog['use_fees']['waved']);
+          $value_markup = mcneese_event_workflow_build_event_request_value_structure($event_id, 'use_fees', 'waved', 0, $value, $presentation['use_fees']['waved'], $changelog);
 
-        if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
-          $message .= drupal_render($value_markup);
-        }
-        $message .= '</div>';
-      }
-
-      if (!empty($changelog['use_fees']['university'])) {
-        $message .= '<div class="review-item-message-use_fees-university review-item-message-university review-item-message-fees">';
-        $message .= '<div class="item-label">Strictly University Business:</div> ';
-
-        // always display the boolean when displayed in the review log.
-        foreach ($presentation['use_fees']['university']['display'] as &$value) {
-          if ($value == 'when_true' || $value == 'when_false') {
-            $value = 'raw';
+          if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
+            $message .= drupal_render($value_markup);
           }
+          $message .= '</div>';
         }
 
-        $value = reset($changelog['use_fees']['university']);
-        $value_markup = mcneese_event_workflow_build_event_request_value_structure($event_id, 'use_fees', 'university', 0, $value, $presentation['use_fees']['university'], $changelog);
+        if (!empty($changelog['use_fees']['university'])) {
+          $message .= '<div class="review-item-message-use_fees-university review-item-message-university review-item-message-fees">';
+          $message .= '<div class="item-label">Strictly University Business:</div> ';
 
-        if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
-          $message .= drupal_render($value_markup);
+          // always display the boolean when displayed in the review log.
+          foreach ($presentation['use_fees']['university']['display'] as &$value) {
+            if ($value == 'when_true' || $value == 'when_false') {
+              $value = 'raw';
+            }
+          }
+
+          $value = reset($changelog['use_fees']['university']);
+          $value_markup = mcneese_event_workflow_build_event_request_value_structure($event_id, 'use_fees', 'university', 0, $value, $presentation['use_fees']['university'], $changelog);
+
+          if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
+            $message .= drupal_render($value_markup);
+          }
+          $message .= '</div>';
         }
-        $message .= '</div>';
       }
 
       if (!empty($changelog['insurance']['contractor'])) {
