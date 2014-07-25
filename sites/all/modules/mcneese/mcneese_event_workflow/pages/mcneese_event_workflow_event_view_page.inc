@@ -2396,7 +2396,7 @@ function mcneese_event_workflow_build_reviews_log(&$form, &$form_state, $event_i
         $message .= '</div>';
       }
 
-      if ($review_step == MEW_REVIEW_STEP_VENUE_AVAILABLE && $decision == MEW_REVIEW_DECISION_USAGE_FEE) {
+      if ($review_step == MEW_REVIEW_STEP_VENUE_AVAILABLE && ($decision == MEW_REVIEW_DECISION_USAGE_FEE || $decision == MEW_REVIEW_DECISION_WAVE)) {
         if (!empty($changelog['use_fees']['waved'])) {
           $message .= '<div class="review-item-message-use_fees-waved review-item-message-use_fees review-item-message-fees">';
           $message .= '<div class="item-label">Waved with Presidents Approval:</div> ';
