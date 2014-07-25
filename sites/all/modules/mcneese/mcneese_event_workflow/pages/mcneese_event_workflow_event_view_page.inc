@@ -1502,16 +1502,16 @@ function mcneese_event_workflow_event_view_0_page_setup_group_path(&$form, $even
       $group_path[$group]['#extra_prefix'] .= '<div class="section-event-' . $event_id . '-' . $group . '-label-wrapper section-event-label-wrapper">';
 
       if ($show_link) {
+        if ($show['clone']) {
+          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'events/create-0/' . $event_id . '" class="section-event-' . $event_id . '-' . $group . '-history section-event-clone no-print" title="'. t("Clone " . $presentation_tables[$group]['label']) . '">Clone</a>';
+        }
+
         if ($show['edit']) {
           $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'events/edit-0/' . $event_id . '/' . $group . '" class="section-event-' . $event_id . '-' . $group . '-edit section-event-edit no-print" title="'. t("Edit " . $presentation_tables[$group]['label']) . '">Edit</a>';
         }
 
         if ($show['history']) {
           $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'events/history-0/' . $event_id . '" class="section-event-' . $event_id . '-' . $group . '-history section-event-history no-print" title="'. t("Edit " . $presentation_tables[$group]['label']) . '">History</a>';
-        }
-
-        if ($show['clone']) {
-          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'events/create-0/' . $event_id . '" class="section-event-' . $event_id . '-' . $group . '-history section-event-clone no-print" title="'. t("Clone " . $presentation_tables[$group]['label']) . '">Clone</a>';
         }
       }
 
