@@ -15,7 +15,7 @@
             }
           });
 
-          if ($(item).val() == 'SEED') {
+          if ($(item).val() == 9) {
             $('#field-event-location-0-image-1', context).each(function() {
               if ($(this).hasClass('location-image-invisible')) {
                 $(this).removeClass('location-image-invisible');
