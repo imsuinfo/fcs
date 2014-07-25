@@ -920,6 +920,10 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
         '#markup' => '',
       );
 
+      $form['review']['operations']['usage_fees'] = array(
+        '#markup' => '',
+      );
+
       mcneese_event_workflow_include(4);
       $reviewer_classification_options = event_workflow_get_reviewer_classification_list_options();
 
@@ -1044,6 +1048,24 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
         if (!$insurance_fee && empty($uses)) {
           unset($decision_options[MEW_REVIEW_DECISION_USAGE_FEE]);
           $form['review']['operations']['decision']['#options'] = $decision_options;
+        }
+
+        // if the usage fees are waved, then do not display the Usage Fees select option.
+        $usage_fees_waved = FALSE;
+        if (isset($event['use_fees']['waved'][0]->value) && $event['use_fees']['waved'][0]->value == 1) {
+          $usage_fees_waved = TRUE;
+        }
+        elseif (isset($event['use_fees']['university'][0]->value) && $event['use_fees']['university'][0]->value == 1) {
+          $usage_fees_waved = TRUE;
+        }
+
+        if ($usage_fees_waved) {
+          unset($decision_options[MEW_REVIEW_DECISION_USAGE_FEE]);
+          $form['review']['operations']['decision']['#options'] = $decision_options;
+
+          $form['review']['operations']['usage_fees']['#markup'] = '<div class="event-section-review-operations-usage_fees">';
+          $form['review']['operations']['usage_fees']['#markup'] .= "Usage Fees are waved and therefore no usage fee option is provided. You may immediately approve/deny this request.";
+          $form['review']['operations']['usage_fees']['#markup'] .= '</div>';
         }
 
         $use_fees_amount_defaults = array('custodial' => '18.50', 'security' => '30.00');
@@ -1698,7 +1720,7 @@ function mcneese_event_workflow_event_view_0_page_validate($form, &$form_state) 
       }
     }
 
-    if ($step == MEW_REVIEW_STEP_REVIEW && $decision == MEW_REVIEW_DECISION_USAGE_FEE) {
+    if ($step == MEW_REVIEW_STEP_REVIEW && $decision == MEW_REVIEW_DECISION_USAGE_FEE && $fees_required) {
       $use_fees = array();
       if (isset($form_state['values']['review']['operations']['use_fees'])) {
         $use_fees = $form_state['values']['review']['operations']['use_fees'];
