@@ -8,7 +8,7 @@
 /**
  * The current system version.
  */
-define('VERSION', '7.28');
+define('VERSION', '7.30');
 
 /**
  * Core API compatibility.
@@ -694,7 +694,14 @@ function drupal_environment_initialize() {
  *  TRUE if only containing valid characters, or FALSE otherwise.
  */
 function drupal_valid_http_host($host) {
-  return preg_match('/^\[?(?:[a-zA-Z0-9-:\]_]+\.?)+$/', $host);
+  // Limit the length of the host name to 1000 bytes to prevent DoS attacks with
+  // long host names.
+  return strlen($host) <= 1000
+    // Limit the number of subdomains and port separators to prevent DoS attacks
+    // in conf_path().
+    && substr_count($host, '.') <= 100
+    && substr_count($host, ':') <= 100
+    && preg_match('/^\[?(?:[a-zA-Z0-9-:\]_]+\.?)+$/', $host);
 }
 
 /**
@@ -2805,7 +2812,6 @@ function request_path() {
     return $path;
   }
 
-  global $conf;
   $clean_url = variable_get('clean_url', FALSE);
   if (!$clean_url && isset($_GET['q']) && is_string($_GET['q'])) {
     // This is a request with a ?q=foo/bar query string. $_GET['q'] is

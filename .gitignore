@@ -8,6 +8,14 @@ sites/*/private
 files
 private
 
+# ignore .gitignore files inside of drupal subdirectories
+sites/all/*/*/.gitignore
+
 # Custom ignores
 sites/default/deprecated
 *.swp
+
+# Ignore Mac Files
+._*
+.apdisk
+.DS_Store
