@@ -908,28 +908,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
         '#markup' => '',
       );
 
-      if ($step == MEW_REVIEW_STEP_VENUE_AVAILABLE) {
-        $form['review']['operations']['instructions']['#markup'] .= "The <em>" . $step_options[$step] . "</em> step allows for the venue coordinator to determine whether or not a given room is available at the specified time slots and to specify the usage fees. ";
-        $form['review']['operations']['instructions']['#markup'] .= "When you select <em>" . $decision_options[MEW_REVIEW_DECISION_APPROVE] . "</em>, then the event request is considered to be available and will continue to the next step. ";
-        $form['review']['operations']['instructions']['#markup'] .= "When you select <em>" . $decision_options[MEW_REVIEW_DECISION_DENY] . "</em>, then the event request is considered to be unavailable and will be denied on grounds of no availability. ";
-        $form['review']['operations']['instructions']['#markup'] .= "When you select <em>" . $decision_options[MEW_REVIEW_DECISION_USAGE_FEE] . "</em>, then the usage fees must be specified or waved. This must be specified <em>before</em> you are allowed to approve a request.";
-      }
-      elseif ($step == MEW_REVIEW_STEP_REVIEW) {
-        $form['review']['operations']['instructions']['#markup'] .= "The <em>" . $step_options[$step] . "</em> step allows for the reviewers to approve or deny this event and to provide any applicable usage fees. ";
-        $form['review']['operations']['instructions']['#markup'] .= "When you select <em>" . $decision_options[MEW_REVIEW_DECISION_APPROVE] . "</em>, then the event request is considered to be accapted by you. ";
-        $form['review']['operations']['instructions']['#markup'] .= "When you select <em>" . $decision_options[MEW_REVIEW_DECISION_DENY] . "</em>, then the event request is considered to be denied by you. ";
-        $form['review']['operations']['instructions']['#markup'] .= "Once all reviewers have had their say, the event will proceed to the next step. ";
-      }
-      elseif ($step == MEW_REVIEW_STEP_USAGE_FEES) {
-        $form['review']['operations']['instructions']['#markup'] .= "The <em>" . $step_options[$step] . "</em> step allows for the review of the usage fees and the approval of all usage fees and usage fee waivers. ";
-        $form['review']['operations']['instructions']['#markup'] .= "When you select <em>" . $decision_options[MEW_REVIEW_DECISION_APPROVE] . "</em>, then the usage fees are considered to be accapted by you. ";
-        $form['review']['operations']['instructions']['#markup'] .= "When you select <em>" . $decision_options[MEW_REVIEW_DECISION_DENY] . "</em>, then the usage fees are considered to be denied by you. ";
-      }
-      elseif ($step == MEW_REVIEW_STEP_MAKE_DECISIONS) {
-        $form['review']['operations']['instructions']['#markup'] .= "The <em>" . $step_options[$step] . "</em> step allows for the venue coordinator to perform the final approvel or denial. ";
-        $form['review']['operations']['instructions']['#markup'] .= "When you select <em>" . $decision_options[MEW_REVIEW_DECISION_APPROVE] . "</em>, then the event request is considered to be accapted. ";
-        $form['review']['operations']['instructions']['#markup'] .= "When you select <em>" . $decision_options[MEW_REVIEW_DECISION_DENY] . "</em>, then the event request is considered to be denied. ";
-      }
+      $form['review']['operations']['instructions']['#markup'] .= "The current step is: <strong>" . $step_options[$step] . "</strong>. ";
 
       $form['review']['operations']['as_reviewer'] = array(
         '#markup' => '',
