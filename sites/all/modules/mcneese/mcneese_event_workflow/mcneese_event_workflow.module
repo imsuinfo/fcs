@@ -792,7 +792,9 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
       }
     }
     elseif ($requester) {
-      if (is_null($event_id)) return FALSE;
+      if (is_null($event_id)) {
+        return FALSE;
+      }
 
       try {
         $query = db_select('mew_event_requests', 'mer');
@@ -822,6 +824,10 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
   }
   elseif ($operation == 'view') {
     if ($manager) {
+      if (is_null($event_id)) {
+        return TRUE;
+      }
+
       try {
         $query = db_select('mew_event_requests', 'mer');
 
@@ -851,30 +857,13 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
         return TRUE;
       }
       else {
-        // do a quick test to see if the reviewer is also the requester, if so, then grant access when $ignore_decisions
-        if ($requester) {
-          $query = db_select('mew_event_requests', 'mer');
-
-          $query->innerjoin('mew_current_top', 'mct', 'mer.id = mct.event_id');
-          $query->innerjoin('mew_field_top_status', 'mfts', 'mct.event_id = mfts.event_id AND mct.status = mfts.revision AND mfts.delta = 0');
-
-          // $query->countQuery() does not appear to be functioning as expected, so manually count.
-          $query->addExpression('count(mer.id)');
-
-          $query->condition('mer.id', $event_id);
-          $query->condition('mer.user_id', $user->uid);
-          $query->condition('mfts.value', $request_status, 'IN');
-
-          $result = $query->execute()->fetchField();
-
-          if ($result > 0) return TRUE;
-        }
-
-        return mcneese_event_workflow_management_page_event_reviewer_access($user, $event_id, FALSE);
+        return mcneese_event_workflow_management_page_event_reviewer_access($user, $event_id, NULL);
       }
     }
     elseif ($requester) {
-      if (is_null($event_id)) return FALSE;
+      if (is_null($event_id)) {
+        return TRUE;
+      }
 
       try {
         $query = db_select('mew_event_requests', 'mer');
@@ -949,7 +938,7 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
         return TRUE;
       }
       else {
-        return mcneese_event_workflow_management_page_event_reviewer_access($user, $event_id, FALSE);
+        return mcneese_event_workflow_management_page_event_reviewer_access($user, $event_id, NULL);
       }
     }
   }
