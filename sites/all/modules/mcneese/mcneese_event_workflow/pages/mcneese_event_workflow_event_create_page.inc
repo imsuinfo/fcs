@@ -37,18 +37,12 @@ function mcneese_event_workflow_event_create_0_form($form, &$form_state, $clone_
 
     $event = event_workflow_load_event_by_id($clone_event);
 
-    if (empty($event)) {
-      watchdog('mew', "Unable to find event with id of @id.", array('@id' => $clone_event), WATCHDOG_ERROR);
-      drupal_not_found();
-      drupal_exit();
-    }
-
     $can_view = mcneese_event_workflow_management_page_event_access('view', $clone_event);
 
-    if (!$can_view) {
-      // return not found instead of access denied to obscure whether or not the requested event exists.
-      drupal_not_found();
-      drupal_exit();
+    // if the event does not exist or the user cannot access the event to copy, fallback to a normal create.
+    if (empty($event) || !$can_view) {
+      $event = NULL;
+      $clone_event = NULL;
     }
   }
 
