@@ -4685,6 +4685,10 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
     $already_joined['mew_field_dates_time_start'] = 'mfdts';
     $already_joined['mew_field_dates_time_stop'] = 'mfdtsp';
 
+    $already_added['date'] = 'mfdd.value';
+    $already_added['time_start'] = 'mfdts.value';
+    $already_added['time_stop'] = 'mfdtsp.value';
+
     $query->addField('mfit', 'value', 'title');
     $query->addField('mfitp', 'value', 'type');
 
@@ -4717,10 +4721,6 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
       $query->addField('mfdd', 'value', 'date');
       $query->addField('mfdts', 'value', 'time_start');
       $query->addField('mfdtsp', 'value', 'time_stop');
-
-      $already_added['date'] = 'mfdd.value';
-      $already_added['time_start'] = 'mfdts.value';
-      $already_added['time_stop'] = 'mfdtsp.value';
     }
 
     $query->fields('mer');
@@ -5014,9 +5014,7 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
         $query->orderBy('room_name', is_null($sort) ? 'ASC' : $sort);
       }
       elseif ($order == 'date') {
-        // @todo: find a way to sort by dates (due to multiple values, one cannot simply just sort delta = 0).
-        #$query->orderBy('date', is_null($sort) ? 'ASC' : $sort);
-        #$query->orderBy('time_start', is_null($sort) ? 'ASC' : $sort);
+        // dates are sorted later on, outside of the query.
       }
       elseif ($order == 'submitted by') {
         $query->orderBy('user_id', is_null($sort) ? 'ASC' : $sort);
