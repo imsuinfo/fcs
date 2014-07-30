@@ -5068,12 +5068,12 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
         $found[$result->id]->time_stop[$sub_result->delta] = $sub_result->time_stop;
 
         if (is_null($sub_result->time_start)) {
-          if (!isset($date_order['start'][$sub_result->date])) {
+          if (!isset($date_order['start'][$sub_result->date][$result->id])) {
             $date_order['start'][$sub_result->date][$result->id] = $found[$result->id];
           }
         }
         else {
-          if (!isset($date_order['start'][$sub_result->time_start])) {
+          if (!isset($date_order['start'][$sub_result->time_start][$result->id])) {
             $date_order['start'][$sub_result->time_start][$result->id] = $found[$result->id];
           }
         }
