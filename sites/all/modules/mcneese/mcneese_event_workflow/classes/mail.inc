@@ -28,8 +28,9 @@ class McNeeseEventWorkflowMail implements MailSystemInterface {
     $message['headers']['X-Mailer'] = 'McNeese Event Workflow System';
     $message['headers']['Date'] = date('r', REQUEST_TIME);
     #$message['headers']['Content-Transfer-Encoding'] = '7Bit';
-    $message['headers']['Return-Path'] = $message['from'];
+    $message['headers']['Return-Path'] = $message['from_address'];
 
+    #$message['headers']['Sender'] = $message['from_address'];
     unset($message['headers']['Sender']);
 
     $message['headers']['Message-ID'] = '<';
@@ -154,11 +155,11 @@ class McNeeseEventWorkflowMail implements MailSystemInterface {
   private function gpg_sign(&$message, $boundary, $content_type = 'multipart/related') {
     global $conf;
 
-    if (!class_exists('gnupg') || !isset($conf['gpg-mail'][$message['from']]['fingerprint'])) {
+    if (!class_exists('gnupg') || !isset($conf['gpg-mail'][$message['from_address']]['fingerprint'])) {
       return FALSE;
     }
 
-    if (!is_string($conf['gpg-mail'][$message['from']]['fingerprint'])) {
+    if (!is_string($conf['gpg-mail'][$message['from_address']]['fingerprint'])) {
       return FALSE;
     }
 
@@ -176,7 +177,7 @@ class McNeeseEventWorkflowMail implements MailSystemInterface {
 
       $prepend = 'Content-Type: ' . $content_type . ";\n";
       $prepend .= '  boundary="' . $boundary . '"' . ";\n";
-      $prepend .= 'Content-Transfer-Encoding: 7bit' . ";\n\n";
+      $prepend .= 'Content-Transfer-Encoding: 7bit' . "\n\n";
 
       $message['body'] = $prepend . $message['body'];
 
