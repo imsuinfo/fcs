@@ -29,7 +29,6 @@ class McNeeseEventWorkflowMail implements MailSystemInterface {
     $message['headers']['Date'] = date('r', REQUEST_TIME);
     #$message['headers']['Content-Transfer-Encoding'] = '7Bit';
     $message['headers']['Return-Path'] = $message['from'];
-    $message['headers']['Content-Type'] = 'multipart/mixed; boundary="' . $boundary . '"';
 
     unset($message['headers']['Sender']);
 
@@ -43,6 +42,7 @@ class McNeeseEventWorkflowMail implements MailSystemInterface {
     $message['headers']['Keywords'] = 'McNeese, Event Workflow, Review';
 
     $boundary = hash('sha256', $message['headers']['Message-ID']);
+    $message['headers']['Content-Type'] = 'multipart/mixed; boundary="' . $boundary . '"';
 
     if (empty($message['body'])) {
       $final_string .= '--' . $boundary . "\n";
