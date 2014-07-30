@@ -1328,31 +1328,11 @@ function mcneese_event_workflow_cronapi() {
 function mcneese_event_workflow_mail($key, &$message, $params) {
   global $base_url;
 
-  $language = $message['language'];
-  $headers = array();
   $subject = '';
-
-  $headers['MIME-Version'] = '1.0';
-  $headers['X-Mailer'] = 'McNeese Event Workflow System';
-  $headers['Date'] = date('r', REQUEST_TIME);
-  $headers['Content-Transfer-Encoding'] = '8Bit';
-
-  $boundary = hash('sha256', drupal_random_key());
-  $headers['Content-Type'] = 'multipart/mixed; boundary="' . $boundary . '"';
-
-  $body = '--' . $boundary . "\n";
-  $body .= 'Content-Type: text/plain; charset=UTF-8' . "\n\n";
+  $body = '';
+  $files = array();
 
   if ($key == 'event_request_alert') {
-    $headers['Message-ID'] = '<';
-    $headers['Message-ID'] .= drupal_random_key(12);
-    $headers['Message-ID'] .= '.' . REQUEST_TIME;
-    $headers['Message-ID'] .= '@';
-    $headers['Message-ID'] .= 'mcneese_event_request';
-    $headers['Message-ID'] .= '>';
-
-    $headers['Keywords'] = 'McNeese, Event Request, Review';
-
     $subject = 'McNeese Event Request: ' . $params['event_id'] . ' - ' . $params['event_title'];
 
     if (!empty($params['title_suffix'])) {
@@ -1365,18 +1345,18 @@ function mcneese_event_workflow_mail($key, &$message, $params) {
     $body .= "Event URL:\n - " . $base_url . '/events/view-0/' . $params['event_id'] . "\n\n";
 
     $body .= "\n";
-    $body .= "This e-mail was generated on:\n - " . date("Y/m/d h:i:s a T", REQUEST_TIME) . "\n\n";
+    $body .= "This e-mail was generated on:\n - " . date("Y/m/d h:i:s a T", REQUEST_TIME) . "\n";
 
     // add PDF attachment
     if (!empty($params['filename'])) {
       foreach ($params['filename'] as $filename) {
-        $file_path = 'private://event_requests/local/';
-
-        $body .= "\n" . '--' . $boundary . "\n";
-        $body .= 'Content-Type: application/pdf; name=' . $filename . "\n";
-        $body .= 'Content-Disposition: attachment; filename=' . $filename . "\n";
-        $body .= 'Content-Transfer-Encoding: base64' . "\n\n";
-        $body .= chunk_split(base64_encode(file_get_contents($file_path . $filename))) . "\n";
+        $files[] = array(
+          'name' => $filename,
+          'type' => 'application/pdf',
+          'disposition' => 'attachment',
+          'encoding' => 'base64',
+          'uri' => 'private://event_requests/local/' . $filename,
+        );
       }
     }
   }
@@ -1384,14 +1364,10 @@ function mcneese_event_workflow_mail($key, &$message, $params) {
     return;
   }
 
-  $body .= '--' . $boundary . "--\n";
-
-  foreach ($headers as $header_name => $header_value) {
-    $message['headers'][$header_name] = $header_value;
-  }
-
   $message['subject'] = $subject;
   $message['body'] = array($body);
+  $message['files'] = $files;
+  $message['from_address'] = isset($params['from']) ? $params['from'] : $message['from'];
 }
 
 /**

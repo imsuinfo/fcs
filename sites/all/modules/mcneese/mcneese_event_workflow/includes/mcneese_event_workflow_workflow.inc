@@ -1185,9 +1185,9 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
   $email_params = array();
   $email_params['event_id'] = $event_id;
   #$email_params['filename'] = array($filename); // @todo: should files be attached?
+  $email_params['from'] = 'event_workflow@mcneese.edu';
 
-  $email_from = '"McNeese Event Workflow System" <no-reply@mcneese.edu>';
-  $email_to = array();
+  $email_from = '"McNeese Event Workflow System" <event_workflow@mcneese.edu>';
 
   $location = mcneese_event_workflow_load_locations($event['top']['location'][0]->value);
   $location_text = '';

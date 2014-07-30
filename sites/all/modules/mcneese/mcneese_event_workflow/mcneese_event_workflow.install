@@ -980,12 +980,23 @@ function mcneese_event_workflow_install() {
   }
 
   db_query('ALTER TABLE {mew_review_classifications} ADD CONSTRAINT review_fkey FOREIGN KEY (review_id) REFERENCES {mew_field_review_review} (id) ON DELETE CASCADE');
+
+
+  // assign the new mail system as default.
+  $mail_system = variable_get('mail_system' , array('default-system' => 'DefaultMailSystem'));
+  $mail_system['default-system'] = 'McNeeseEventWorkflowMail';
+  variable_set('mail_system', $mail_system);
 }
 
 /**
  * Implementation of hook_uninstall().
  */
 function mcneese_event_workflow_uninstall() {
+  // restore the mail system default.
+  $mail_system = variable_get('mail_system' , array('default-system' => 'DefaultMailSystem'));
+  $mail_system['default-system'] = 'DefaultMailSystem';
+  variable_set('mail_system', $mail_system);
+
   $registered = cf_settings_get_registered(array('module_name' => 'mcneese_event_workflow'), 'id');
 
   foreach ($registered as &$r) {

@@ -14,6 +14,7 @@ dependencies[] = ldap_authentication
 
 files[] = mcneese_event_workflow.install
 files[] = mcneese_event_workflow.module
+files[] = classes/mail.inc
 files[] = includes/mcneese_event_workflow_autocomplete.inc
 files[] = includes/mcneese_event_workflow_event_structure.inc
 files[] = includes/mcneese_event_workflow_event_validation.inc
