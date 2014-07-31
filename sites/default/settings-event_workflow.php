@@ -691,6 +691,18 @@ $conf['workbench_menu_item_use_normal_path'] = TRUE;
 
 
 /**
+ *  GNU PG Support
+ */
+putenv('GNUPGHOME=/var/www/drupal/event_workflow/sites/default/gnupg');
+$conf['gpg-mail'] = array(
+  'event_workflow@mcneese.edu' => array(
+    'fingerprint' => '735D221DC35DC55767F7B30305257680DDEB1921',
+    'short_id' => 'DDEB1921',
+  ),
+);
+
+
+/**
  * Additional file_db variables.
  */
 $conf['file_db_server_id'] = 6;
