@@ -1330,6 +1330,7 @@ function mcneese_event_workflow_mail($key, &$message, $params) {
 
   $subject = '';
   $body = '';
+  $markup = '';
   $files = array();
 
   if ($key == 'event_request_alert') {
@@ -1346,6 +1347,17 @@ function mcneese_event_workflow_mail($key, &$message, $params) {
 
     $body .= "\n";
     $body .= "This e-mail was generated on:\n - " . date("Y/m/d h:i:s a T", REQUEST_TIME) . "\n";
+
+
+    if (isset($params['markup'])) {
+      $markup .= $params['markup'] . "\n";
+
+      $markup .= "<br>\n";
+      $markup .= "<strong>Event URL</strong>:\n<ul><li>" . $base_url . '/events/view-0/' . $params['event_id'] . "</li></ul>\n<br>\n";
+
+      $markup .= "<br>\n";
+      $markup .= "<em>This e-mail was generated on</em>:\n<ul><li><em>" . date("Y/m/d h:i:s a T", REQUEST_TIME) . "</em></li></ul>\n";
+    }
 
     // add PDF attachment
     if (!empty($params['filename'])) {
@@ -1366,6 +1378,7 @@ function mcneese_event_workflow_mail($key, &$message, $params) {
 
   $message['subject'] = $subject;
   $message['body'] = array($body);
+  $message['markup'] = isset($params['markup']) ? array($markup) : array();
   $message['files'] = $files;
   $message['from_address'] = isset($params['from']) ? $params['from'] : $message['from'];
 }

@@ -1216,15 +1216,29 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
   $standard_content .= "Building:\n - " . $building_text . "\n\n";
   $standard_content .= "Room:\n - " . $room_text . "\n\n";
   $standard_content .= "Dates:\n";
+
+  $standard_markup = "<br>\n<br>\n";
+  $standard_markup .= "<strong>Request ID</strong>:\n<ul><li>" . $event_id . "</li></ul>\n<br>\n";
+  $standard_markup .= "<strong>Request Title</strong>:\n<ul><li>" . $event['information']['title'][0]->value . "</li></ul>\n<br>\n";
+  $standard_markup .= "<strong>Location</strong>:\n<ul><li>" . $location_text . "</li></ul>\n<br>\n";
+  $standard_markup .= "<strong>Building</strong>:\n<ul><li>" . $building_text . "</li></ul>\n<br>\n";
+  $standard_markup .= "<strong>Room</strong>:\n<ul><li>" . $room_text . "</li></ul>\n<br>\n";
+  $standard_markup .= "<strong>Dates</strong>:\n";
+
   foreach ($event['dates']['date'] as $key => $date) {
     $standard_content .= " - " . date("Y/m/d", $date->value);
+    $standard_markup .= "<ul><li>" . date("Y/m/d", $date->value);
 
     if (!is_null($event['dates']['time_start'][$key]->value)) {
       $standard_content .= " " . date("h:ia", $event['dates']['time_start'][$key]->value);
       $standard_content .= " to " . date("h:ia", $event['dates']['time_stop'][$key]->value);
+
+      $standard_markup .= " " . date("h:ia", $event['dates']['time_start'][$key]->value);
+      $standard_markup .= " to " . date("h:ia", $event['dates']['time_stop'][$key]->value);
     }
 
     $standard_content .= "\n";
+    $standard_markup .= "</li></ul>\n";
   }
 
   $email_params['event_title'] = $event['information']['title'][0]->value;
@@ -1234,6 +1248,9 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
     $email_params['content'] = "";
     $email_params['content'] .= $changed_by_string . " has created this event request.\n";
     $email_params['content'] .= $standard_content;
+    $email_params['markup'] = "";
+    $email_params['markup'] .= $changed_by_string . " has created this event request.<br>\n";
+    $email_params['markup'] .= $standard_markup;
 
     if (is_object($venue_coordinator)) {
       $email_to[$venue_coordinator->mail] = $venue_coordinator->mail;
@@ -1244,6 +1261,9 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
     $email_params['content'] = "";
     $email_params['content'] .= $changed_by_string . " has modified this event request.\n";
     $email_params['content'] .= $standard_content;
+    $email_params['markup'] = "";
+    $email_params['markup'] .= $changed_by_string . " has modified this event request.<br>\n";
+    $email_params['markup'] .= $standard_markup;
 
     // the update message only needs to be sent during the review process.
     if ($status == MEW_EVENT_STATUS_LOCKED || $status == MEW_EVENT_STATUS_UNLOCKED) {
@@ -1267,21 +1287,26 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
   elseif ($is_cancelled || $is_uncancelled || !is_null($status)) {
     if ($is_cancelled || $is_uncancelled || $status == MEW_EVENT_STATUS_CANCELLED || $status == MEW_EVENT_STATUS_DELETED) {
       $email_params['content'] = "";
+      $email_params['markup'] = "";
 
       if ($is_cancelled || $status == MEW_EVENT_STATUS_CANCELLED) {
         $email_params['title_suffix'] = "Cancelled";
         $email_params['content'] .= $changed_by_string . " has cancelled the event request.\n";
+        $email_params['markup'] .= $changed_by_string . " has cancelled the event request.<br>\n";
       }
       elseif ($is_uncancelled) {
         $email_params['title_suffix'] = "Uncancelled";
         $email_params['content'] .= $changed_by_string . " has uncancelled the event request.\n";
+        $email_params['markup'] .= $changed_by_string . " has uncancelled the event request.<br>\n";
       }
       elseif ($status == MEW_EVENT_STATUS_DELETED) {
         $email_params['title_suffix'] = "Deleted";
         $email_params['content'] .= $changed_by_string . " has deleted the event request.\n";
+        $email_params['markup'] .= $changed_by_string . " has deleted the event request.<br>\n";
       }
 
       $email_params['content'] .= $standard_content;
+      $email_params['markup'] .= $standard_markup;
 
       $email_to[$event_requester->mail] = $event_requester->mail;
 
@@ -1306,6 +1331,10 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
       $email_params['content'] .= "The event request has been approved.\n";
       $email_params['content'] .= "For more information, view the review log.\n";
       $email_params['content'] .= $standard_content;
+      $email_params['markup'] = "";
+      $email_params['markup'] .= "The event request has been approved.<br>\n";
+      $email_params['markup'] .= "For more information, view the review log.<br>\n";
+      $email_params['markup'] .= $standard_markup;
 
       $email_to[$event_requester->mail] = $event_requester->mail;
 
@@ -1324,6 +1353,10 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
       $email_params['content'] .= "The event request has been denied.\n";
       $email_params['content'] .= "For more information, view the review log.\n";
       $email_params['content'] .= $standard_content;
+      $email_params['markup'] = "";
+      $email_params['markup'] .= "The event request has been denied.<br>\n";
+      $email_params['markup'] .= "For more information, view the review log.<br>\n";
+      $email_params['markup'] .= $standard_markup;
 
       $email_to[$event_requester->mail] = $event_requester->mail;
 
@@ -1341,6 +1374,9 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
       $email_params['content'] = "";
       $email_params['content'] .= "The event request has been denied due to the requested location not being available for the requested time slots.\n";
       $email_params['content'] .= $standard_content;
+      $email_params['markup'] = "";
+      $email_params['markup'] .= "The event request has been <em>denied</em> due to the requested location <em>not being available</em> for the requested time slots.<br>\n";
+      $email_params['markup'] .= $standard_markup;
 
       $email_to[$event_requester->mail] = $event_requester->mail;
     }
@@ -1353,6 +1389,11 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
       $email_params['content'] .= "\n";
       $email_params['content'] .= $message . "\n";
       $email_params['content'] .= $standard_content;
+      $email_params['markup'] = "";
+      $email_params['markup'] .= $changed_by_string . " has made the event request available for <em>review</em>.<br>\n";
+      $email_params['markup'] .= "<br>\n";
+      $email_params['markup'] .= $message . "<br>\n";
+      $email_params['markup'] .= $standard_markup;
 
       foreach ($step_1_reviewers as $r) {
         $email_to[$r->email] = $r->email;
@@ -1365,6 +1406,11 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
       $email_params['content'] .= "\n";
       $email_params['content'] .= $message . "\n";
       $email_params['content'] .= $standard_content;
+      $email_params['markup'] = "";
+      $email_params['markup'] .= "The event request is available for <em>review</em>.<br>\n";
+      $email_params['markup'] .= "<br>\n";
+      $email_params['markup'] .= $message . "<br>\n";
+      $email_params['markup'] .= $standard_markup;
 
       foreach ($step_2_reviewers as $r) {
         $email_to[$r->email] = $r->email;
@@ -1377,6 +1423,11 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
       $email_params['content'] .= "\n";
       $email_params['content'] .= $message . "\n";
       $email_params['content'] .= $standard_content;
+      $email_params['markup'] = "";
+      $email_params['markup'] .= "The event request is ready to have its usage fees <em>approved or denied</em>.<br>\n";
+      $email_params['markup'] .= "<br>\n";
+      $email_params['markup'] .= $message . "<br>\n";
+      $email_params['markup'] .= $standard_markup;
 
       foreach ($step_2_reviewers as $r) {
         $email_to[$r->email] = $r->email;
@@ -1389,6 +1440,11 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
       $email_params['content'] .= "\n";
       $email_params['content'] .= $message . "\n";
       $email_params['content'] .= $standard_content;
+      $email_params['markup'] = "";
+      $email_params['markup'] .= "The event request has been reviewed and is ready for <em>conflict resolution / decision making / final review</em>.<br>\n";
+      $email_params['markup'] .= "<br>\n";
+      $email_params['markup'] .= $message . "<br>\n";
+      $email_params['markup'] .= $standard_markup;
 
       if (is_object($venue_coordinator)) {
         $email_to[$venue_coordinator->mail] = $venue_coordinator->mail;
@@ -1403,6 +1459,11 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
       $email_params['content'] .= "\n";
       $email_params['content'] .= $message . "\n";
       $email_params['content'] .= $standard_content;
+      $email_params['markup'] = "";
+      $email_params['markup'] .= '<em>' . $changed_by_string . "</em> has made the following <em>comment</em>:<br>\n";
+      $email_params['markup'] .= "<br>\n";
+      $email_params['markup'] .= $message . "<br>\n";
+      $email_params['markup'] .= $standard_markup;
 
       if (is_object($venue_coordinator)) {
         $email_to[$venue_coordinator->mail] = $venue_coordinator->mail;

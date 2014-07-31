@@ -49,15 +49,29 @@ class McNeeseEventWorkflowMail implements MailSystemInterface {
     $message['headers']['Content-Type'] = 'multipart/mixed; boundary="' . $boundary . '"';
 
     if (empty($message['body'])) {
-      $final_string .= '--' . $boundary . "\n";
+      if (empty($message['markup']) && empty($message['files'])) {
+        $final_string .= '--' . $boundary . "\n";
+      }
     }
     else {
+      $final_string .= '--' . $boundary . "\n";
+
       foreach ($message['body'] as $body) {
-        $final_string .= '--' . $boundary . "\n";
         $final_string .= 'Content-Type: text/plain; charset=UTF-8' . "\n";
-        $final_string .= 'Content-Transfer-Encoding: quoted-printable' . "\n\n";
+        $final_string .= 'Content-Transfer-Encoding: quoted-printable' . "\n";
+        $final_string .= 'Content-Description: McNeese Event Workflow System - Message - Plain Text' . "\n\n";
         $final_string .= quoted_printable_encode($body);
-        #$final_string .= $body;
+      }
+    }
+
+    if (!empty($message['markup'])) {
+      $final_string .= "\n" . '--' . $boundary . "\n";
+
+      foreach ($message['markup'] as $markup) {
+        $final_string .= 'Content-Type: text/html; charset=UTF-8' . "\n";
+        $final_string .= 'Content-Transfer-Encoding: quoted-printable' . "\n";
+        $final_string .= 'Content-Description: McNeese Event Workflow System - Message - HTML Text' . "\n\n";
+        $final_string .= quoted_printable_encode($markup);
       }
     }
 
@@ -195,7 +209,7 @@ class McNeeseEventWorkflowMail implements MailSystemInterface {
       $prepend = '--' . $sig_boundary . "\n";
 
       $append = "\n" . '--' . $sig_boundary . "\n";
-      $append .= 'Content-Type: application/pgp-signature; name=signature.sig' . "\n";
+      $append .= 'Content-Type: application/pgp-signature; name="Digital Signature"' . "\n";
       $append .= 'Content-Disposition: attachment; filename=signature.sig' . "\n";
       $append .= 'Content-Description: OpenPG Digital Signature' . "\n\n";
       $append .= $signature . "\n";
@@ -287,7 +301,7 @@ class McNeeseEventWorkflowMail implements MailSystemInterface {
     $prepend = '--' . $sig_boundary . "\n";
 
     $append = "\n" . '--' . $sig_boundary . "\n";
-    $append .= 'Content-Type: application/pgp-signature; name=signature.sig' . "\n";
+    $append .= 'Content-Type: application/pgp-signature; name="Digital Signature"' . "\n";
     $append .= 'Content-Disposition: attachment; filename=signature.sig' . "\n";
     $append .= 'Content-Description: OpenPG Digital Signature' . "\n\n";
     $append .= $signature . "\n";
