@@ -27,8 +27,11 @@ class McNeeseEventWorkflowMail implements MailSystemInterface {
     $message['headers']['MIME-Version'] = '1.0';
     $message['headers']['X-Mailer'] = 'McNeese Event Workflow System';
     $message['headers']['Date'] = date('r', REQUEST_TIME);
-    #$message['headers']['Content-Transfer-Encoding'] = '7Bit';
     $message['headers']['Return-Path'] = $message['from_address'];
+
+    $message['headers']['Content-Transfer-Encoding'] = '8Bit';
+    #$message['headers']['Content-Transfer-Encoding'] = '7Bit';
+    #unset($message['headers']['Content-Transfer-Encoding']);
 
     #$message['headers']['Sender'] = $message['from_address'];
     unset($message['headers']['Sender']);
@@ -42,7 +45,7 @@ class McNeeseEventWorkflowMail implements MailSystemInterface {
 
     $message['headers']['Keywords'] = 'McNeese, Event Workflow, Review';
 
-    $boundary = hash('sha256', $message['headers']['Message-ID']);
+    $boundary = hash('sha1', $message['headers']['Message-ID']);
     $message['headers']['Content-Type'] = 'multipart/mixed; boundary="' . $boundary . '"';
 
     if (empty($message['body'])) {
@@ -53,25 +56,27 @@ class McNeeseEventWorkflowMail implements MailSystemInterface {
         $final_string .= '--' . $boundary . "\n";
         $final_string .= 'Content-Type: text/plain; charset=UTF-8' . "\n";
         $final_string .= 'Content-Transfer-Encoding: quoted-printable' . "\n\n";
-        $final_string .= quoted_printable_encode($body) . "\n\n";
+        $final_string .= quoted_printable_encode($body);
+        #$final_string .= $body;
       }
     }
 
     foreach ($message['files'] as $file) {
-      $final_string .= '--' . $boundary . "\n";
+      $final_string .= "\n" . '--' . $boundary . "\n";
       $final_string .= 'Content-Type: ' . $file['type'] . '; name=' . $file['name'] . "\n";
       $final_string .= 'Content-Disposition: ' . $file['disposition'] . '; filename=' . $file['name'] . "\n";
       $final_string .= 'Content-Transfer-Encoding: ' . $file['encoding'] . "\n\n";
-      $final_string .=  chunk_split(base64_encode(file_get_contents($file['uri']))) . "\n";
+      $final_string .=  chunk_split(base64_encode(file_get_contents($file['uri'])));
     }
 
-    $final_string .= '--' . $boundary . "--\n";
+    $final_string .= "\n" . '--' . $boundary . "--\n";
     $message['body'] = $final_string;
     unset($final_string);
 
 
     // process GNU PGP keys.
     $this->gpg_sign($message, $boundary);
+    #$this->gpg_sign_manually($message, $boundary);
 
 
     return $message;
@@ -169,6 +174,7 @@ class McNeeseEventWorkflowMail implements MailSystemInterface {
     }
 
     try {
+      $sig_boundary = 'sig_' . $boundary;
       $fingerprint = $conf['gpg-mail'][$message['from_address']]['fingerprint'];
       $gpg->seterrormode(gnupg::ERROR_EXCEPTION);
       $gpg->addsignkey($fingerprint);
@@ -177,13 +183,14 @@ class McNeeseEventWorkflowMail implements MailSystemInterface {
 
       $prepend = 'Content-Type: ' . $content_type . ";\n";
       $prepend .= '  boundary="' . $boundary . '"' . ";\n";
-      $prepend .= 'Content-Transfer-Encoding: 7bit' . "\n\n";
+      $prepend .= "\n";
 
-      $message['body'] = $prepend . $message['body'];
+      // e-mail clients/transports will clobber the line endings, so validate one with "\r\n".
+      $body = preg_replace("/\r/i", '', $prepend . $message['body']);
+      $body = preg_replace("/\n/i", "\r\n", $body);
 
-      $signature = $gpg->sign($message['body']);
-
-      $sig_boundary = 'sig_' . $boundary;
+      $signature = $gpg->sign($body);
+      #$valid = $gpg->verify($body, $signature);
 
       $prepend = '--' . $sig_boundary . "\n";
 
@@ -192,15 +199,105 @@ class McNeeseEventWorkflowMail implements MailSystemInterface {
       $append .= 'Content-Disposition: attachment; filename=signature.sig' . "\n";
       $append .= 'Content-Description: OpenPG Digital Signature' . "\n\n";
       $append .= $signature . "\n";
-      $append .= '--' . $sig_boundary . "--\n";
+      $append .= '--' . $sig_boundary . '--';
     }
     catch (Exception $ex) {
       watchdog('error', "Failed to sign PGP key: @key, reason: @reason", array('@key' => $fingerprint, '@reason' => $ex->getMessage()), WATCHDOG_ERROR);
       return FALSE;
     }
 
+    // e-mail clients/transports will clobber the line endings, so reset.
+    $body = preg_replace("/\r\n/i", "\n", $body);
+
     $message['headers']['Content-Type'] = 'multipart/signed; boundary="' . $sig_boundary . '"; protocol="application/pgp-signature"; micalg=pgp-sha256;';
-    $message['body'] = $prepend . $message['body'] . $append;
+    $message['body'] = $prepend . $body . $append;
+
+    return TRUE;
+  }
+
+  /**
+   * Sign the message us GNU PG.
+   *
+   * This variant was written to test and debug problems in signature
+   * generation. Use this for testing or as a last resort.
+   *
+   * @param $message
+   *   A message array, as described in hook_mail_alter().
+   * @param $content_type
+   *   (optional) The content type to use, such as: 'multipart/mixed'.
+   *
+   * @param bool
+   *   TRUE if signed, FALSE otherwise.
+   *
+   * @see gpg_sign()
+   */
+  private function gpg_sign_manually(&$message, $boundary, $content_type = 'multipart/related') {
+    global $conf;
+
+    if (!is_string($conf['gpg-mail'][$message['from_address']]['short_id'])) {
+      return FALSE;
+    }
+
+    $sig_boundary = 'sig_' . $boundary;
+    $short_id = $conf['gpg-mail'][$message['from_address']]['short_id'];
+
+    $prepend = 'Content-Type: ' . $content_type . ";\n";
+    $prepend .= '  boundary="' . $boundary . '"' . ";\n";
+    $prepend .= "\n";
+
+    // e-mail clients/transports will clobber the line endings, so validate one with "\r\n".
+    $body = preg_replace("/\r/i", '', $prepend . $message['body']);
+    $body = preg_replace("/\n/i", "\r\n", $body);
+
+    $temp_name = drupal_tempnam('temporary://', 'gpg_signature-');
+    $file_name = drupal_realpath($temp_name);
+    $file_signature = $file_name . '.asc';
+
+    // make sure there is not existing .asc file.
+    if (file_exists($file_signature)) {
+      unlink($file_signature);
+    }
+
+    $result = file_put_contents($temp_name, $body);
+    if ($result === FALSE || !file_exists($file_name)) {
+      if (file_exists($file_name)) {
+        unlink($file_name);
+      }
+      return FALSE;
+    }
+
+    $gpg_path = '/usr/bin/gpg';
+    $gpg_command = 'gpg --detach-sign --armor --default-key ' . escapeshellarg($short_id) . ' --batch ' . escapeshellarg($file_name);
+    $result = exec($gpg_command);
+
+    $signature = file_get_contents($file_signature);
+
+    if (file_exists($file_name)) {
+      unlink($file_name);
+    }
+
+    if (file_exists($file_signature)) {
+      unlink($file_signature);
+    }
+
+    if ($signature === FALSE) {
+      return FALSE;
+    }
+
+    $prepend = '--' . $sig_boundary . "\n";
+
+    $append = "\n" . '--' . $sig_boundary . "\n";
+    $append .= 'Content-Type: application/pgp-signature; name=signature.sig' . "\n";
+    $append .= 'Content-Disposition: attachment; filename=signature.sig' . "\n";
+    $append .= 'Content-Description: OpenPG Digital Signature' . "\n\n";
+    $append .= $signature . "\n";
+    $append .= '--' . $sig_boundary . '--';
+
+    // e-mail clients/transports will clobber the line endings, so reset.
+    $body = preg_replace("/\r\n/i", "\n", $body);
+
+    $message['headers']['Content-Type'] = 'multipart/signed; boundary="' . $sig_boundary . '"; protocol="application/pgp-signature"; micalg=pgp-sha256;';
+    $message['body'] = $prepend . $body . $append;
 
     return TRUE;
   }
