@@ -178,6 +178,11 @@ function mcneese_event_workflow_validate_event_fields($form, &$form_state) {
   unset($ps_c);
   unset($ps);
 
+  $is_new_event = NULL;
+  if (isset($form['form']['new']['#value'])) {
+    $is_new_event = $form['form']['new']['#value'];
+  }
+
   $passed = TRUE;
   if ($form_state['values']['form']['step'] == 'standard') {
     $date_timestamp = array(0 => NULL);
@@ -189,7 +194,10 @@ function mcneese_event_workflow_validate_event_fields($form, &$form_state) {
         if (isset($form['form']['existing']['#value']['event']['dates']['date'])) {
           if (in_array($value, $form['form']['existing']['#value']['event']['dates']['date'])) {
             // skip values already saved to allow updating events if they are sufficiently near/past the event date.
-            continue;
+            // but only do this when the event is not new.
+            if ($is_new_event !== TRUE) {
+              continue;
+            }
           }
         }
 
@@ -228,7 +236,10 @@ function mcneese_event_workflow_validate_event_fields($form, &$form_state) {
         if (isset($form['form']['existing']['#value']['event']['dates']['time_start'])) {
           if (in_array($value, $form['form']['existing']['#value']['event']['dates']['time_start'])) {
             // skip values already saved to allow updating events if they are sufficiently near/past the event date.
-            continue;
+            // but only do this when the event is not new.
+            if ($is_new_event !== TRUE) {
+              continue;
+            }
           }
         }
 
@@ -257,7 +268,10 @@ function mcneese_event_workflow_validate_event_fields($form, &$form_state) {
         if (isset($form['form']['existing']['#value']['event']['dates']['time_stop'])) {
           if (in_array($value, $form['form']['existing']['#value']['event']['dates']['time_stop'])) {
             // skip values already saved to allow updating events if they are sufficiently near/past the event date.
-            continue;
+            // but only do this when the event is not new.
+            if ($is_new_event !== TRUE) {
+              continue;
+            }
           }
         }
 
@@ -297,7 +311,10 @@ function mcneese_event_workflow_validate_event_fields($form, &$form_state) {
         if (isset($form['form']['existing']['#value']['event']['dates']['time_start'])) {
           if (in_array($value, $form['form']['existing']['#value']['event']['dates']['time_start'])) {
             // skip values already saved to allow updating events if they are sufficiently near/past the event date.
-            continue;
+            // but only do this when the event is not new.
+            if ($is_new_event !== TRUE) {
+              continue;
+            }
           }
         }
 
