@@ -48,33 +48,29 @@ class McNeeseEventWorkflowMail implements MailSystemInterface {
     $boundary = hash('sha1', $message['headers']['Message-ID']);
     $message['headers']['Content-Type'] = 'multipart/related; boundary="' . $boundary . '"';
 
-    // @fixme: change body and markup to be multipart/alternate, using separate boundary.
-    if (empty($message['body'])) {
-      if (empty($message['markup']) && empty($message['files'])) {
-        $final_string .= '--' . $boundary . "\n";
-      }
-    }
-    else {
-      $final_string .= '--' . $boundary . "\n";
+    $final_string .= '--' . $boundary . "\n";
+    $final_string .= 'Content-Type: multipart/alternative;' . "\n";
+    $final_string .= '  boundary="-alt_' . $boundary . '"' . "\n";
 
-      foreach ($message['body'] as $body) {
-        $final_string .= 'Content-Type: text/plain; charset=UTF-8' . "\n";
-        $final_string .= 'Content-Transfer-Encoding: quoted-printable' . "\n";
-        $final_string .= 'Content-Description: McNeese Event Workflow System - Message - Plain Text' . "\n\n";
-        $final_string .= quoted_printable_encode($body);
-      }
+    $final_string .= "\n" . '---alt_' . $boundary . "\n";
+    $final_string .= 'Content-Type: text/plain; charset=UTF-8' . "\n";
+    $final_string .= 'Content-Transfer-Encoding: quoted-printable' . "\n";
+    $final_string .= 'Content-Description: McNeese Event Workflow System - Message - Plain Text' . "\n\n";
+
+    if (!empty($message['body'])) {
+      $final_string .= quoted_printable_encode(implode('', $message['body']));
     }
+
+    $final_string .= "\n" . '---alt_' . $boundary . "\n";
+    $final_string .= 'Content-Type: text/html; charset=UTF-8' . "\n";
+    $final_string .= 'Content-Transfer-Encoding: quoted-printable' . "\n";
+    $final_string .= 'Content-Description: McNeese Event Workflow System - Message - HTML Text' . "\n\n";
 
     if (!empty($message['markup'])) {
-      $final_string .= "\n" . '--' . $boundary . "\n";
-
-      foreach ($message['markup'] as $markup) {
-        $final_string .= 'Content-Type: text/html; charset=UTF-8' . "\n";
-        $final_string .= 'Content-Transfer-Encoding: quoted-printable' . "\n";
-        $final_string .= 'Content-Description: McNeese Event Workflow System - Message - HTML Text' . "\n\n";
-        $final_string .= quoted_printable_encode($markup);
-      }
+      $final_string .= quoted_printable_encode(implode('', $message['markup']));
     }
+
+    $final_string .= "\n" . '---alt_' . $boundary . "--\n";
 
     foreach ($message['files'] as $file) {
       $final_string .= "\n" . '--' . $boundary . "\n";
@@ -197,7 +193,7 @@ class McNeeseEventWorkflowMail implements MailSystemInterface {
       $gpg->setarmor(1);
 
       $prepend = 'Content-Type: ' . $content_type . ";\n";
-      $prepend .= '  boundary="' . $boundary . '"' . ";\n";
+      $prepend .= '  boundary="' . $boundary . '"' . "\n";
       $prepend .= "\n";
 
       // e-mail clients/transports will clobber the line endings, so validate one with "\r\n".
@@ -224,7 +220,7 @@ class McNeeseEventWorkflowMail implements MailSystemInterface {
     // e-mail clients/transports will clobber the line endings, so reset.
     $body = preg_replace("/\r\n/i", "\n", $body);
 
-    $message['headers']['Content-Type'] = 'multipart/signed; boundary="' . $sig_boundary . '"; protocol="application/pgp-signature"; micalg=pgp-sha256;';
+    $message['headers']['Content-Type'] = 'multipart/signed; boundary="' . $sig_boundary . '"; protocol="application/pgp-signature"; micalg=pgp-sha256';
     $message['body'] = $prepend . $body . $append;
 
     return TRUE;
@@ -257,7 +253,7 @@ class McNeeseEventWorkflowMail implements MailSystemInterface {
     $short_id = $conf['gpg-mail'][$message['from_address']]['short_id'];
 
     $prepend = 'Content-Type: ' . $content_type . ";\n";
-    $prepend .= '  boundary="' . $boundary . '"' . ";\n";
+    $prepend .= '  boundary="' . $boundary . '"' . "\n";
     $prepend .= "\n";
 
     // e-mail clients/transports will clobber the line endings, so validate one with "\r\n".
@@ -311,7 +307,7 @@ class McNeeseEventWorkflowMail implements MailSystemInterface {
     // e-mail clients/transports will clobber the line endings, so reset.
     $body = preg_replace("/\r\n/i", "\n", $body);
 
-    $message['headers']['Content-Type'] = 'multipart/signed; boundary="' . $sig_boundary . '"; protocol="application/pgp-signature"; micalg=pgp-sha256;';
+    $message['headers']['Content-Type'] = 'multipart/signed; boundary="' . $sig_boundary . '"; protocol="application/pgp-signature"; micalg=pgp-sha256';
     $message['body'] = $prepend . $body . $append;
 
     return TRUE;
