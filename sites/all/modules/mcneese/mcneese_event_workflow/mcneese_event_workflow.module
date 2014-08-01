@@ -1343,10 +1343,12 @@ function mcneese_event_workflow_mail($key, &$message, $params) {
       $subject .= ' - ' . $params['title_suffix'];
     }
 
+    $event_url = $base_url . '/events/view-0/' . $params['event_id'];
+
     $body .= $params['content'] . "\n";
 
     $body .= "\n";
-    $body .= "Event URL:\n - " . $base_url . '/events/view-0/' . $params['event_id'] . "\n\n";
+    $body .= "Event URL:\n - " . $event_url . "\n\n";
 
     $body .= "\n";
     $body .= "This e-mail was generated on:\n - " . date("Y/m/d h:i:s a T", REQUEST_TIME) . "\n";
@@ -1356,7 +1358,7 @@ function mcneese_event_workflow_mail($key, &$message, $params) {
       $markup .= $params['markup'] . "\n";
 
       $markup .= "<br>\n";
-      $markup .= "<strong>Event URL</strong>:\n<ul><li>" . $base_url . '/events/view-0/' . $params['event_id'] . "</li></ul>\n<br>\n";
+      $markup .= "<strong>Event URL</strong>:\n<ul><li><a href=" . '"' . $event_url . '"' . ">" . $event_url . "</a></li></ul>\n<br>\n";
 
       $markup .= "<br>\n";
       $markup .= "<em>This e-mail was generated on</em>:\n<ul><li><em>" . date("Y/m/d h:i:s a T", REQUEST_TIME) . "</em></li></ul>\n";

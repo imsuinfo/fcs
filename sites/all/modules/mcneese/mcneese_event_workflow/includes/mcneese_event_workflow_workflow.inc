@@ -1235,6 +1235,10 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
     }
   }
 
+  global $base_url;
+
+  $event_view_url = $base_url . '/events/view-0/' . $event_id;
+
   $event_requester = user_load($event['mer']['user_id'][0]->value);
 
   // load appropriate reviewers in their own categories.
@@ -1434,7 +1438,7 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
       $email_params['content'] .= $standard_content;
       $email_params['markup'] = "";
       $email_params['markup'] .= "The event request has been approved.<br>\n";
-      $email_params['markup'] .= "For more information, view the review log.<br>\n";
+      $email_params['markup'] .= "For more information, view the <a href=" . '"' . $event_view_url . '/2"' . ">review log</a>.<br>\n";
       $email_params['markup'] .= $standard_markup;
 
       $email_to[$event_requester->mail] = $event_requester->mail;
@@ -1456,7 +1460,7 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
       $email_params['content'] .= $standard_content;
       $email_params['markup'] = "";
       $email_params['markup'] .= "The event request has been denied.<br>\n";
-      $email_params['markup'] .= "For more information, view the review log.<br>\n";
+      $email_params['markup'] .= "For more information, view the <a href=" . '"' . $event_view_url . '/2"' . ">review log</a>.<br>\n";
       $email_params['markup'] .= $standard_markup;
 
       $email_to[$event_requester->mail] = $event_requester->mail;
