@@ -329,6 +329,21 @@ function mcneese_event_workflow_validate_event_fields($form, &$form_state) {
       }
     }
 
+    $no_actual_event = TRUE;
+    if (!empty($location_state['dates']['category'])) {
+      foreach ($location_state['dates']['category'] as $key => &$value) {
+        if ($value == MEW_EVENT_DATES_CATEGORY_ACTUAL) {
+          $no_actual_event = FALSE;
+          break;
+        }
+      }
+    }
+
+    if ($no_actual_event) {
+      form_set_error($ps_p . '][dates][category', "At least one event must have a category of 'Actual Event'.");
+      $passed = FALSE;
+    }
+
     $coordinator_user = NULL;
     if (isset($location_form['venue_coordinator']['user_id'][0]['#value'])) {
       $coordinator_user = user_load($location_form['venue_coordinator']['user_id'][0]['#value']);
