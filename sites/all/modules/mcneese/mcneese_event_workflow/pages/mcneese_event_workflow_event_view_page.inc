@@ -1046,11 +1046,13 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
 
         // if the usage fees are waved, then do not display the Usage Fees select option.
         $usage_fees_waved = FALSE;
-        if (isset($event['use_fees']['waved'][0]->value) && $event['use_fees']['waved'][0]->value == 1) {
-          $usage_fees_waved = TRUE;
-        }
-        elseif (isset($event['use_fees']['university'][0]->value) && $event['use_fees']['university'][0]->value == 1) {
-          $usage_fees_waved = TRUE;
+        if ($step != MEW_REVIEW_STEP_VENUE_AVAILABLE) {
+          if (isset($event['use_fees']['waved'][0]->value) && $event['use_fees']['waved'][0]->value == 1) {
+            $usage_fees_waved = TRUE;
+          }
+          elseif (isset($event['use_fees']['university'][0]->value) && $event['use_fees']['university'][0]->value == 1) {
+            $usage_fees_waved = TRUE;
+          }
         }
 
         if ($usage_fees_waved) {
@@ -2196,7 +2198,7 @@ function mcneese_event_workflow_build_reviews_log(&$form, &$form_state, $event_i
     $query->fields('mfrr');
 
     $query->condition('mfrr.event_id', $event_id);
-    $query->condition('mfrr.revision', $review_revision);
+    #$query->condition('mfrr.revision', $review_revision);
 
     $query->orderBy('mfrr.date');
 
@@ -2214,6 +2216,22 @@ function mcneese_event_workflow_build_reviews_log(&$form, &$form_state, $event_i
         $review->reviewer_classifications = array();
         if (is_array($review_classifications)) {
           foreach ($review_classifications as $review_classification) {
+            // some classifications are not allowed in certain steps.
+            if ($review->step == MEW_REVIEW_STEP_REVIEW ||$review->step == MEW_REVIEW_STEP_USAGE_FEES) {
+              if ($review_classification->classification == MEW_REVIEW_CLASSIFICATION_VENUE_COORDINATOR) {
+                continue;
+              }
+              elseif ($review_classification->classification == MEW_REVIEW_CLASSIFICATION_SYSTEM_ADMINISTRATOR) {
+                continue;
+              }
+              elseif ($review_classification->classification == MEW_REVIEW_CLASSIFICATION_MANAGER) {
+                continue;
+              }
+              elseif ($review_classification->classification == MEW_REVIEW_CLASSIFICATION_FAILSAFE_COORDINATOR) {
+                continue;
+              }
+            }
+
             $review->reviewer_classifications[$review_classification->classification] = $review_classification->classification;
           }
         }
@@ -2314,7 +2332,11 @@ function mcneese_event_workflow_build_reviews_log(&$form, &$form_state, $event_i
 
       $markup .= '<div class="review-item-label">';
       $markup .= '<h3 class="review-item-label-text">' . $row_id_block . '<div class="review-item-label-text-title">';
-      if ($review_step == MEW_REVIEW_STEP_VENUE_AVAILABLE && $decision == MEW_REVIEW_DECISION_APPROVE) {
+
+      if ($decision == MEW_REVIEW_DECISION_AMENDMENT) {
+        $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">' . "Amended" . '</strong> the event request' . $reviewer_classification . '.';
+      }
+      elseif ($review_step == MEW_REVIEW_STEP_VENUE_AVAILABLE && $decision == MEW_REVIEW_DECISION_APPROVE) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has designated that the <strong class="review-item-label-text-row-decision">Venue is Available</strong>' . $reviewer_classification . '.';
       }
       elseif ($review_step == MEW_REVIEW_STEP_VENUE_AVAILABLE && $decision == MEW_REVIEW_DECISION_DENY) {
@@ -2350,6 +2372,12 @@ function mcneese_event_workflow_build_reviews_log(&$form, &$form_state, $event_i
 
 
       // provide additional changelog information.
+      if ($decision == MEW_REVIEW_DECISION_AMENDMENT) {
+        $message .= '<div class="review-item-message-decision-amendment review-item-message-decision">';
+        $message .= 'The review step has been reset and all prior reviews no longer apply.';
+        $message .= '</div>';
+      }
+
       if (!empty($changelog['use_fees']['facilities'])) {
         $message .= '<div class="review-item-message-use_fees-facilities review-item-message-use_fees review-item-message-fees">';
         $message .= '<div class="item-label">Facilities Use Fees:</div> ';

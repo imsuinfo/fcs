@@ -57,6 +57,7 @@ define('MEW_EVENT_STATUS_CANCELLED', 7);
 /**
  * Defines Taxonomy TID for review decisions.
  */
+ define('MEW_REVIEW_DECISION_AMENDMENT', 141);
  define('MEW_REVIEW_DECISION_APPROVE', 115);
  define('MEW_REVIEW_DECISION_COMMENT', 113);
  define('MEW_REVIEW_DECISION_DENY', 114);
@@ -769,6 +770,7 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
   elseif ($operation == 'edit') {
     $edit_request_status = array(
       MEW_EVENT_STATUS_UNLOCKED,
+      MEW_EVENT_STATUS_LOCKED,
     );
 
     if ($manager) {
@@ -5470,6 +5472,13 @@ function mcneese_event_workflow_get_latest_reviews($event_id, $steps = array(), 
     if (!empty($decisions)) {
       $query->condition('mfrr.decision', $decisions, 'IN');
     }
+
+    // some classifications are only allowed in certain steps.
+    $and = db_and();
+    $and->condition('mfrr.step', array(MEW_REVIEW_STEP_REVIEW, MEW_REVIEW_STEP_USAGE_FEES), 'IN');
+    $and->condition('mrc.classification', array(MEW_REVIEW_CLASSIFICATION_VENUE_COORDINATOR, MEW_REVIEW_CLASSIFICATION_SYSTEM_ADMINISTRATOR, MEW_REVIEW_CLASSIFICATION_MANAGER, MEW_REVIEW_CLASSIFICATION_FAILSAFE_COORDINATOR), 'IN');
+    $and->not();
+    $query->condition($and);
 
     $query->orderBy('mfrr.step');
     $query->orderBy('mrc.classification');

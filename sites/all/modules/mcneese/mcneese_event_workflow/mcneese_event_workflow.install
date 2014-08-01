@@ -889,7 +889,7 @@ function mcneese_event_workflow_schema() {
           'type' => 'int',
           'size' => 'big',
           'unsigned' => TRUE,
-          'not null' => TRUE,
+          'not null' => FALSE,
         ),
       ),
       'primary key' => array('event_id'),

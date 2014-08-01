@@ -214,7 +214,12 @@ function mcneese_event_workflow_event_history_0_form($form, &$form_state, $event
                       $decision_options = event_workflow_get_reviewer_decision_list_options();
 
 
-                      if ($value->decision == MEW_REVIEW_DECISION_APPROVE || $value->decision == MEW_REVIEW_DECISION_DENY) {
+
+                      if ($value->decision == MEW_REVIEW_DECISION_AMENDMENT) {
+                        $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
+                        $custom_message .= 'the event request information was amended and therefore the review process was restarted. ';
+                      }
+                      elseif ($value->decision == MEW_REVIEW_DECISION_APPROVE || $value->decision == MEW_REVIEW_DECISION_DENY) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
                         $custom_message .= 'made a decision of <strong class="review-decision">' . $decision_options[$value->decision] . '</strong>. ';
                       }

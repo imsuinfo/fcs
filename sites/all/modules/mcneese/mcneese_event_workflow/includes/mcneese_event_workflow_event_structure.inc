@@ -699,10 +699,7 @@ function mcneese_event_workflow_get_event_field_step($form, &$form_state, &$fiel
       $form['form']['step']['#value'] = $form['form']['existing']['#value']['event']['step'];
     }
     else {
-      mcneese_event_workflow_include(4);
-
-      $workflow_states = event_workflow_get_event_steps_list_options();
-      $form['form']['state']['#value'] = array(MEW_REVIEW_STEP_VENUE_AVAILABLE);
+      $form['form']['step']['#value'] = array(MEW_REVIEW_STEP_VENUE_AVAILABLE);
     }
   }
   else {

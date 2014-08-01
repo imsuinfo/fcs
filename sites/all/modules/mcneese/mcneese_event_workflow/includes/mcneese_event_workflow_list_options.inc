@@ -564,8 +564,9 @@ function event_workflow_get_reviewer_decision_list_options($option = NULL) {
     $options[$branch->tid] = $branch->name;
   }
 
-  // wave option is hidden from the users.
+  // these options are hidden from the users.
   if ($option == 'review_step') {
+    unset($options[MEW_REVIEW_DECISION_AMENDMENT]);
     unset($options[MEW_REVIEW_DECISION_WAVE]);
   }
 

@@ -496,6 +496,9 @@ function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
   $failure = FALSE;
   $event = &$form['form']['event']['#value'];
   $event_id = (int) $event['mer']['id'][0]->value;
+  $status = (int) $event['top']['status'][0]->value;
+  $step = (int) $event['top']['step'][0]->value;
+  $use_fees = $event['current']['use_fees'];
 
   // make sure the cancel button is never treated as a save submit.
   if ($clicked_id == 'submit-event-cancel') {
@@ -604,9 +607,6 @@ function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
         $structure_tables[$db_table] = array();
       }
 
-      // @todo: add support for using multiple values instead of using only delta = 0.
-      $delta = 0;
-
       $db_table_field = 'mew_field_' . $table_name . '_' . $field_name;
 
       mcneese_event_workflow_build_table_structure($structure, $structure_tables, $structure_field_tables, $table_name, $field_name, $db_table, $db_table_field, $user_data, $current_new, $form_state, $event);
@@ -647,6 +647,93 @@ function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
         $query->execute();
       }
 
+      // if the event has been updated while it is in a locked status.
+      if ($status == MEW_EVENT_STATUS_LOCKED) {
+        $step_revision = $event['current']['top']['step'] + 1;
+
+        $mew_current_top = array(
+          'step' => $step_revision,
+        );
+
+        $mew_field_top_step = array(
+          'event_id' => $event_id,
+          'revision' => $step_revision,
+          'delta' => 0,
+          'user_id' => $user->uid,
+          'date' => REQUEST_TIME,
+          'value' => MEW_REVIEW_STEP_VENUE_AVAILABLE,
+        );
+
+        $query = db_insert('mew_field_top_step');
+        $query->fields($mew_field_top_step);
+        $query->execute();
+
+        $query = db_update('mew_current_top');
+        $query->condition('event_id', $event_id);
+        $query->fields($mew_current_top);
+        $query->execute();
+
+        $review_revision = mcneese_event_workflow_load_event_revision_number($event_id, 'mew_field_review_review');
+
+        if ($review_revision === FALSE || is_null($review_revision)) {
+          $review_revision = 0;
+        }
+        else {
+          $review_revision++;
+        }
+
+        $mew_current_review = array(
+          'review' => $review_revision,
+        );
+
+        $mew_field_review_review = array(
+          'event_id' => $event_id,
+          'revision' => $review_revision,
+          'delta' => 0,
+          'user_id' => $user->uid,
+          'date' => REQUEST_TIME,
+          'step' => $step,
+          'decision' => MEW_REVIEW_DECISION_AMENDMENT,
+          'message' => '',
+        );
+
+        $query = db_insert('mew_field_review_review');
+        $query->fields($mew_field_review_review);
+        $query->execute();
+
+        $query = db_update('mew_current_review');
+        $query->condition('event_id', $event_id);
+        $query->fields($mew_current_review);
+        $query->execute();
+
+        $mew_current_use_fees = array(
+          'event_id' => $event_id,
+          'facilities' => NULL,
+          'equipment' => NULL,
+          'custodial' => NULL,
+          'security' => NULL,
+          'other' => NULL,
+          'waved' => NULL,
+          'university' => NULL,
+        );
+
+        $mew_current_insurance = array(
+          'event_id' => $event_id,
+          'contractor' => NULL,
+          'unaffiliated' => NULL,
+        );
+
+        $query = db_update('mew_current_use_fees');
+        $query->condition('event_id', $event_id);
+        $query->fields($mew_current_use_fees);
+        $query->execute();
+
+        $query = db_update('mew_current_insurance');
+        $query->condition('event_id', $event_id);
+        $query->fields($mew_current_insurance);
+        $query->execute();
+      }
+
       // enforce transaction execution
       unset($transaction);
     }
@@ -673,13 +760,21 @@ function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
 
       mcneese_event_workflow_include(6);
 
+      // send an e-mail to all reviewers that the event step has been reset.
+      if ($status == MEW_EVENT_STATUS_LOCKED) {
+        $parameters['amendment'] = TRUE;
+      }
+      else {
+        $parameters['update'] = TRUE;
+      }
+
       $parameters = array();
       $parameters['changed_by'] = $user->uid;
       $parameters['changed_type'] = 'user';
-      $parameters['update'] = TRUE;
       mcneese_event_workflow_send_workflow_emails($event_id, $parameters);
     }
   }
+
 
   // redirect after submitting.
   if (empty($form_state['values']['redirect_to'])) {

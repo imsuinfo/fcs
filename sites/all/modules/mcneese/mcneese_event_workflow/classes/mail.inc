@@ -46,8 +46,9 @@ class McNeeseEventWorkflowMail implements MailSystemInterface {
     $message['headers']['Keywords'] = 'McNeese, Event Workflow, Review';
 
     $boundary = hash('sha1', $message['headers']['Message-ID']);
-    $message['headers']['Content-Type'] = 'multipart/mixed; boundary="' . $boundary . '"';
+    $message['headers']['Content-Type'] = 'multipart/related; boundary="' . $boundary . '"';
 
+    // @fixme: change body and markup to be multipart/alternate, using separate boundary.
     if (empty($message['body'])) {
       if (empty($message['markup']) && empty($message['files'])) {
         $final_string .= '--' . $boundary . "\n";

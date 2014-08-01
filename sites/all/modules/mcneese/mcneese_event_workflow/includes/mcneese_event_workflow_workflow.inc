@@ -387,34 +387,34 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
     'university' => NULL,
   );
 
-  if (!empty($event['current']['use_fees'])) {
-    if (array_key_exists('facilities', $event['current']['use_fees']) && !is_null($event['current']['use_fees']['facilities'])) {
-      $mew_current_use_fees['facilities'] = $event['current']['use_fees']['facilities'];
-    }
+  $usage_fees_latest = $mew_current_use_fees;
+  unset($usage_fees_latest['event_id']);
 
-    if (array_key_exists('equipment', $event['current']['use_fees']) && !is_null($event['current']['use_fees']['equipment'])) {
-      $mew_current_use_fees['equipment'] = $event['current']['use_fees']['equipment'];
-    }
+  try {
+    foreach ($usage_fees_latest as $usage_fee_name => &$usage_fee_latest_value) {
+      if (array_key_exists($usage_fee_name, $event['current']['use_fees']) && !is_null($event['current']['use_fees'][$usage_fee_name])) {
+        $mew_current_use_fees[$usage_fee_name] = $event['current']['use_fees'][$usage_fee_name];
+        $usage_fee_latest_value = $mew_current_use_fees[$usage_fee_name];
+      }
+      else {
+        $query = db_select('mew_field_use_fees_' . $usage_fee_name, 'mfufx');
+        $query->addField('mfufx', 'revision', 'revision');
+        $query->condition('mfufx.event_id', $event_id);
+        $query->orderBy('mfufx.revision', 'DESC');
+        $query->range(0, 1);
 
-    if (array_key_exists('custodial', $event['current']['use_fees']) && !is_null($event['current']['use_fees']['custodial'])) {
-      $mew_current_use_fees['custodial'] = $event['current']['use_fees']['custodial'];
+        $result = $query->execute()->fetchField();
+        if ($result !== FALSE) {
+          $usage_fee_latest_value = $result;
+        }
+      }
     }
+  }
+  catch (Exception $ex) {
+    $transaction->rollback();
+    cf_error::on_query_execution($ex);
 
-    if (array_key_exists('security', $event['current']['use_fees']) && !is_null($event['current']['use_fees']['security'])) {
-      $mew_current_use_fees['security'] = $event['current']['use_fees']['security'];
-    }
-
-    if (array_key_exists('other', $event['current']['use_fees']) && !is_null($event['current']['use_fees']['other'])) {
-      $mew_current_use_fees['other'] = $event['current']['use_fees']['other'];
-    }
-
-    if (array_key_exists('waved', $event['current']['use_fees']) && !is_null($event['current']['use_fees']['waved'])) {
-      $mew_current_use_fees['waved'] = $event['current']['use_fees']['waved'];
-    }
-
-    if (array_key_exists('university', $event['current']['use_fees']) && !is_null($event['current']['use_fees']['university'])) {
-      $mew_current_use_fees['university'] = $event['current']['use_fees']['university'];
-    }
+    return FALSE;
   }
 
   $mew_current_insurance = array(
@@ -422,6 +422,9 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
     'contractor' => NULL,
     'unaffiliated' => NULL,
   );
+
+  $insurance_latest = $mew_current_insurance;
+  unset($insurance_latest['event_id']);
 
   if (!empty($event['current']['insurance'])) {
     if (array_key_exists('contractor', $event['current']['insurance']) && !is_null($event['current']['insurance']['contractor'])) {
@@ -431,6 +434,33 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
     if (array_key_exists('unaffiliated', $event['current']['insurance']) && !is_null($event['current']['insurance']['unaffiliated'])) {
       $mew_current_insurance['unaffiliated'] = $event['current']['insurance']['unaffiliated'];
     }
+  }
+
+  try {
+    foreach ($insurance_latest as $insurance_name => &$insurance_latest_value) {
+      if (array_key_exists($insurance_name, $event['current']['insurance']) && !is_null($event['current']['insurance'][$insurance_name])) {
+        $mew_current_insurance[$insurance_name] = $event['current']['insurance'][$insurance_name];
+        $insurance_latest_value = $mew_current_insurance[$insurance_name];
+      }
+      else {
+        $query = db_select('mew_field_insurance_' . $insurance_name, 'mfix');
+        $query->addField('mfix', 'revision', 'revision');
+        $query->condition('mfix.event_id', $event_id);
+        $query->orderBy('mfix.revision', 'DESC');
+        $query->range(0, 1);
+
+        $result = $query->execute()->fetchField();
+        if ($result !== FALSE) {
+          $insurance_latest_value = $result;
+        }
+      }
+    }
+  }
+  catch (Exception $ex) {
+    $transaction->rollback();
+    cf_error::on_query_execution($ex);
+
+    return FALSE;
   }
 
   $mew_field_review_review = array(
@@ -452,7 +482,12 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
     }
 
     if (is_null($mew_current_use_fees['other'])) {
-      $mew_current_use_fees['other'] = 0;
+      if (is_null($usage_fees_latest['other'])) {
+        $mew_current_use_fees['other'] = 0;
+      }
+      else {
+        $mew_current_use_fees['other'] = $usage_fees_latest['other'] + 1;
+      }
     }
     else {
       $mew_current_use_fees['other']++;
@@ -575,7 +610,12 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
       }
 
       if (is_null($mew_current_insurance['contractor'])) {
-        $mew_current_insurance['contractor'] = 0;
+        if (is_null($insurance_latest['contractor'])) {
+          $mew_current_insurance['contractor'] = 0;
+        }
+        else {
+          $mew_current_insurance['contractor'] = $insurance_latest['contractor'] + 1;
+        }
       }
       else {
         $mew_current_insurance['contractor']++;
@@ -590,7 +630,12 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
       );
 
       if (is_null($mew_current_insurance['unaffiliated'])) {
-        $mew_current_insurance['unaffiliated'] = 0;
+        if (is_null($insurance_latest['unaffiliated'])) {
+          $mew_current_insurance['unaffiliated'] = 0;
+        }
+        else {
+          $mew_current_insurance['unaffiliated'] = $insurance_latest['unaffiliated'] + 1;
+        }
       }
       else {
         $mew_current_insurance['unaffiliated']++;
@@ -613,7 +658,12 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
     }
 
     if (is_null($mew_current_use_fees['waved'])) {
-      $mew_current_use_fees['waved'] = 0;
+      if (is_null($usage_fees_latest['waved'])) {
+        $mew_current_use_fees['waved'] = 0;
+      }
+      else {
+        $mew_current_use_fees['waved'] = $usage_fees_latest['waved'] + 1;
+      }
     }
     else {
       $mew_current_use_fees['waved']++;
@@ -634,7 +684,12 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
     }
 
     if (is_null($mew_current_use_fees['university'])) {
-      $mew_current_use_fees['university'] = 0;
+      if (is_null($usage_fees_latest['university'])) {
+        $mew_current_use_fees['university'] = 0;
+      }
+      else {
+        $mew_current_use_fees['university'] = $usage_fees_latest['university'] + 1;
+      }
     }
     else {
       $mew_current_use_fees['university']++;
@@ -653,12 +708,23 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
   // replace all remaining NULL values with 0.
   foreach ($mew_current_use_fees as $key => &$value) {
     if (is_null($value)) {
-      $value = 0;
+      if (is_null($usage_fees_latest[$key])) {
+        $value = 0;
+      }
+      else {
+        $value = $usage_fees_latest[$key] + 1;
+      }
     }
   }
+
   foreach ($mew_current_insurance as $key => &$value) {
     if (is_null($value)) {
-      $value = 0;
+      if (is_null($insurance_latest[$key])) {
+        $value = 0;
+      }
+      else {
+        $value = $insurance_latest[$key] + 1;
+      }
     }
   }
 
@@ -1133,6 +1199,15 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
     }
   }
 
+  $is_amendment = FALSE;
+  if (array_key_exists('amendment',  $parameters)) {
+    $is_amendment = $parameters['amendment'];
+    if (!is_bool($is_amendment)) {
+      cf_error::invalid_bool('parameters[amendment]');
+      return FALSE;
+    }
+  }
+
   $is_cancelled = FALSE;
   if (array_key_exists('cancelled',  $parameters)) {
     $is_cancelled = $parameters['cancelled'];
@@ -1281,6 +1356,32 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
         foreach ($step_2_reviewers as $r) {
           $email_to[$r->email] = $r->email;
         }
+      }
+    }
+  }
+  elseif ($is_amendment) {
+    $email_params['title_suffix'] = "Amended";
+    $email_params['content'] = "";
+    $email_params['content'] .= $changed_by_string . " has amended this event request.\n";
+    $email_params['content'] .= "The review process has been restarted.\n";
+    $email_params['content'] .= $standard_content;
+    $email_params['markup'] = "";
+    $email_params['markup'] .= $changed_by_string . " has amended this event request.<br>\n";
+    $email_params['markup'] .= "The review process has been restarted.<br>\n";
+    $email_params['markup'] .= $standard_markup;
+
+    // amendments can only happen while the event is locked.
+    if ($status == MEW_EVENT_STATUS_LOCKED) {
+      if (is_object($venue_coordinator)) {
+        $email_to[$venue_coordinator->mail] = $venue_coordinator->mail;
+      }
+
+      foreach ($step_1_reviewers as $r) {
+        $email_to[$r->email] = $r->email;
+      }
+
+      foreach ($step_2_reviewers as $r) {
+        $email_to[$r->email] = $r->email;
       }
     }
   }
