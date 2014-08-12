@@ -21,17 +21,13 @@
  *   The unique identifier for an event request.
  * @param int $mode
  *   Specifies the mode that alters how the form is rendered.
- *   0: No restrictions.
- *   1: Render only the display part.
- *   2: Render only the log part.
- *   3: Render only the operations part.
  * @param bool $pdf
  *   (optional) Enable special handling for PDF generation.
  *
  * @return string
  *   The HTML output representing the page.
  */
-function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id, $mode = 0, $pdf = FALSE) {
+function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id, $mode = MEW_VIEW_MODE_NORMAL, $pdf = FALSE) {
   $event = event_workflow_load_event_by_id($event_id);
 
   if (empty($event)) {
@@ -41,8 +37,8 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
     return array();
   }
 
-  if (!is_numeric($mode) || $mode < 0 || $mode > 3) {
-    $mode = 0;
+  if (!is_numeric($mode) || $mode < MEW_VIEW_MODE_NORMAL || $mode > MEW_VIEW_MODE_OPERATIONS) {
+    $mode = MEW_VIEW_MODE_NORMAL;
   }
   else {
     $mode = (int) $mode;
@@ -98,15 +94,15 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
   $show_display = TRUE;
   $show_log = TRUE;
   $show_operations = TRUE;
-  if ($mode == 1) {
+  if ($mode == MEW_VIEW_MODE_DISPLAY) {
     $show_log = FALSE;
     $show_operations = FALSE;
   }
-  elseif ($mode == 2) {
+  elseif ($mode == MEW_VIEW_MODE_LOG) {
     $show_display = FALSE;
     $show_operations = FALSE;
   }
-  elseif ($mode == 3) {
+  elseif ($mode == MEW_VIEW_MODE_OPERATIONS) {
     $show_display = FALSE;
     $show_log = FALSE;
   }
@@ -114,7 +110,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
   if (!$can_log_event) {
     $show_log = FALSE;
 
-    if ($mode == 2) {
+    if ($mode == MEW_VIEW_MODE_LOG) {
       drupal_access_denied();
       drupal_exit();
       return array();
@@ -136,7 +132,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
     if (!in_array($status, $allowed_statuses)) {
       $show_operations = FALSE;
 
-      if ($mode == 3) {
+      if ($mode == MEW_VIEW_MODE_OPERATIONS) {
         drupal_access_denied();
         drupal_exit();
         return array();
@@ -153,7 +149,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
     if (!in_array($step, $allowed_steps)) {
       $show_operations = FALSE;
 
-      if ($mode == 3) {
+      if ($mode == MEW_VIEW_MODE_OPERATIONS) {
         drupal_access_denied();
         drupal_exit();
         return array();
@@ -163,7 +159,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
   else {
     $show_operations = FALSE;
 
-    if ($mode == 3) {
+    if ($mode == MEW_VIEW_MODE_OPERATIONS) {
       drupal_access_denied();
       drupal_exit();
       return array();
@@ -1613,14 +1609,14 @@ function mcneese_event_workflow_event_view_0_page_validate($form, &$form_state) 
     $form_state['rebuild'] = FALSE;
   }
   elseif ($clicked_id == 'event-display-submit-cancel') {
-    if ($mode != 0 && $mode != 1) {
+    if ($mode != MEW_VIEW_MODE_NORMAL && $mode != MEW_VIEW_MODE_DISPLAY) {
       form_set_error('', "Illegal operation detected.");
     }
 
     $form_state['cancel_was_clicked'] = TRUE;
   }
   elseif ($clicked_id == 'event-display-submit-uncancel') {
-    if ($mode != 0 && $mode != 1) {
+    if ($mode != MEW_VIEW_MODE_NORMAL && $mode != MEW_VIEW_MODE_DISPLAY) {
       form_set_error('', "Illegal operation detected.");
     }
 
@@ -1653,7 +1649,7 @@ function mcneese_event_workflow_event_view_0_page_validate($form, &$form_state) 
     }
 
     $reviewers = array();
-    if ($mode < 0 && $mode > 3) {
+    if ($mode < MEW_VIEW_MODE_NORMAL && $mode > MEW_VIEW_MODE_OPERATIONS) {
       form_set_error('', "Illegal operation detected. Invalid mode selected.");
       $failure = TRUE;
     }

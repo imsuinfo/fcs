@@ -124,6 +124,14 @@ define('MEW_EVENT_STATUS_CANCELLED', 7);
  */
  define('MEW_WATCHDOG_ID', 'mew');
 
+/**
+ * Defines standard view modes.
+ */
+ define('MEW_VIEW_MODE_NORMAL', 0);
+ define('MEW_VIEW_MODE_DISPLAY', 1);
+ define('MEW_VIEW_MODE_LOG', 2);
+ define('MEW_VIEW_MODE_OPERATIONS', 3);
+
 
 /**
  * Implements hook_permission().
@@ -4192,7 +4200,7 @@ function mcneese_event_workflow_display_room_unavailable_message() {
  * @return bool
  *   TRUE on success, FALSE otherwise.
  */
-function mcneese_event_workflow_generate_pdf($event_id, $mode = 1, $local = FALSE) {
+function mcneese_event_workflow_generate_pdf($event_id, $mode = MEW_VIEW_MODE_DISPLAY, $local = FALSE) {
   $event = event_workflow_load_event_by_id($event_id);
 
   if (empty($event)) {
@@ -4427,7 +4435,7 @@ function mcneese_event_workflow_event_pdf_0_page_using_wkhtmltopdf($event_id, $h
  * @return string|false
  *   The built filename string or FALSE on error.
  */
-function mcneese_event_workflow_build_filename($event_id, $mode = 0) {
+function mcneese_event_workflow_build_filename($event_id, $mode = MEW_VIEW_MODE_NORMAL) {
   $event = event_workflow_load_event_by_id($event_id);
 
   if (empty($event)) {
@@ -4435,27 +4443,27 @@ function mcneese_event_workflow_build_filename($event_id, $mode = 0) {
     return FALSE;
   }
 
-  if (!cf_is_integer($mode) || $mode < 0 || $mode > 3) {
+  if (!cf_is_integer($mode) || $mode < MEW_VIEW_MODE_NORMAL || $mode > MEW_VIEW_MODE_OPERATIONS) {
     cf_error::invalid_integer('mode');
     return FALSE;
   }
 
-  if ($mode == 0) {
+  if ($mode == MEW_VIEW_MODE_NORMAL) {
     $fixed_title = preg_replace('/\W/i', '_', $event['information']['title'][0]->value);
     $fixed_title = preg_replace('/_+/i', '_', $fixed_title);
 
     return sprintf("%'010s", $event_id) . '-event_request-' . $fixed_title . '.pdf';
   }
 
-  if ($mode == 1) {
+  if ($mode == MEW_VIEW_MODE_DISPLAY) {
     return sprintf("%'010s", $event_id) . '.pdf';
   }
 
-  if ($mode == 2) {
+  if ($mode == MEW_VIEW_MODE_LOG) {
     return sprintf("%'010s", $event_id) . '.meta';
   }
 
-  if ($mode == 3) {
+  if ($mode == MEW_VIEW_MODE_OPERATIONS) {
     return sprintf("%'010s", $event_id) . '.email';
   }
 
