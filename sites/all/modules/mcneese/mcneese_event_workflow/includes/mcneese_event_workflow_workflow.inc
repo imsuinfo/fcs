@@ -651,7 +651,7 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
     }
   }
 
-  if (($step == MEW_REVIEW_STEP_VENUE_AVAILABLE || $step == MEW_REVIEW_STEP_REVIEW) && ($decision == MEW_REVIEW_DECISION_WAVE || $decision == MEW_REVIEW_DECISION_USAGE_FEE)) {
+  if ($step == MEW_REVIEW_STEP_VENUE_AVAILABLE && ($decision == MEW_REVIEW_DECISION_WAVE || $decision == MEW_REVIEW_DECISION_USAGE_FEE)) {
     $fees_waved = 0;
     if (isset($extra['use_fees']['waved'])) {
       $fees_waved = $extra['use_fees']['waved'];
@@ -786,7 +786,7 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
       $query->fields($mew_current_insurance);
       $query->execute();
     }
-    elseif (($step == MEW_REVIEW_STEP_VENUE_AVAILABLE || $step == MEW_REVIEW_STEP_REVIEW) && $decision == MEW_REVIEW_DECISION_WAVE) {
+    elseif ($step == MEW_REVIEW_STEP_VENUE_AVAILABLE && $decision == MEW_REVIEW_DECISION_WAVE) {
       $query = db_insert('mew_field_use_fees_waved');
       $query->fields($mew_field_use_fees['waved']);
       $query->execute();

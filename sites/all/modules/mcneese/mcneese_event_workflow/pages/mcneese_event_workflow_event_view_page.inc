@@ -1044,26 +1044,6 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
           $form['review']['operations']['decision']['#options'] = $decision_options;
         }
 
-        // if the usage fees are waved, then do not display the Usage Fees select option.
-        $usage_fees_waved = FALSE;
-        if ($step != MEW_REVIEW_STEP_VENUE_AVAILABLE) {
-          if (isset($event['use_fees']['waved'][0]->value) && $event['use_fees']['waved'][0]->value == 1) {
-            $usage_fees_waved = TRUE;
-          }
-          elseif (isset($event['use_fees']['university'][0]->value) && $event['use_fees']['university'][0]->value == 1) {
-            $usage_fees_waved = TRUE;
-          }
-        }
-
-        if ($usage_fees_waved) {
-          unset($decision_options[MEW_REVIEW_DECISION_USAGE_FEE]);
-          $form['review']['operations']['decision']['#options'] = $decision_options;
-
-          $form['review']['operations']['usage_fees']['#markup'] = '<div class="event-section-review-operations-usage_fees">';
-          $form['review']['operations']['usage_fees']['#markup'] .= "Usage Fees are waved and therefore no usage fee option is provided. You may immediately approve/deny this request.";
-          $form['review']['operations']['usage_fees']['#markup'] .= '</div>';
-        }
-
         $use_fees_amount_defaults = array('custodial' => '18.50', 'security' => '30.00');
         $uses_personnel = array('custodial', 'security');
         $uses_hours = array('custodial', 'security');
@@ -1551,7 +1531,7 @@ function mcneese_event_workflow_event_view_0_page_pre_validate(&$form, &$form_st
   }
 
   $unrequire_usage_fields = TRUE;
-  if ($step == MEW_REVIEW_STEP_VENUE_AVAILABLE || $step == MEW_REVIEW_STEP_REVIEW) {
+  if ($step == MEW_REVIEW_STEP_VENUE_AVAILABLE) {
     if ($decision == MEW_REVIEW_DECISION_USAGE_FEE) {
       $usage_fees_waved = FALSE;
       if (isset($form_state['values']['review']['operations']['presidents_approval']) && $form_state['values']['review']['operations']['presidents_approval'] == 1) {
@@ -1708,15 +1688,17 @@ function mcneese_event_workflow_event_view_0_page_validate($form, &$form_state) 
     }
 
     $fees_required = TRUE;
-    if (isset($event['use_fees']['waved'][0]->value)) {
-      if ($event['use_fees']['waved'][0]->value == 1) {
-        $fees_required = FALSE;
+    if ($step == MEW_REVIEW_STEP_VENUE_AVAILABLE) {
+      if (isset($event['use_fees']['waved'][0]->value)) {
+        if ($event['use_fees']['waved'][0]->value == 1) {
+          $fees_required = FALSE;
+        }
       }
-    }
 
-    if (isset($event['use_fees']['university'][0]->value)) {
-      if ($event['use_fees']['university'][0]->value == 1) {
-        $fees_required = FALSE;
+      if (isset($event['use_fees']['university'][0]->value)) {
+        if ($event['use_fees']['university'][0]->value == 1) {
+          $fees_required = FALSE;
+        }
       }
     }
 
@@ -1837,15 +1819,18 @@ function mcneese_event_workflow_event_view_0_page_validate($form, &$form_state) 
 
     if ($step == MEW_REVIEW_STEP_VENUE_AVAILABLE && $decision == MEW_REVIEW_DECISION_APPROVE) {
       $fees_not_supplied = TRUE;
-      if (isset($event['use_fees']['waved'][0]->value)) {
-        if ($event['use_fees']['waved'][0]->value) {
-          $fees_not_supplied = FALSE;
-        }
-      }
 
-      if (isset($event['use_fees']['university'][0]->value)) {
-        if ($event['use_fees']['university'][0]->value) {
-          $fees_not_supplied = FALSE;
+      if ($step == MEW_REVIEW_STEP_VENUE_AVAILABLE) {
+        if (isset($event['use_fees']['waved'][0]->value)) {
+          if ($event['use_fees']['waved'][0]->value) {
+            $fees_not_supplied = FALSE;
+          }
+        }
+
+        if (isset($event['use_fees']['university'][0]->value)) {
+          if ($event['use_fees']['university'][0]->value) {
+            $fees_not_supplied = FALSE;
+          }
         }
       }
 
@@ -1860,15 +1845,18 @@ function mcneese_event_workflow_event_view_0_page_validate($form, &$form_state) 
 
     if ($step == MEW_REVIEW_STEP_REVIEW && $decision == MEW_REVIEW_DECISION_APPROVE) {
       $fees_not_supplied = TRUE;
-      if (isset($event['use_fees']['waved'][0]->value)) {
-        if ($event['use_fees']['waved'][0]->value) {
-          $fees_not_supplied = FALSE;
-        }
-      }
 
-      if (isset($event['use_fees']['university'][0]->value)) {
-        if ($event['use_fees']['university'][0]->value) {
-          $fees_not_supplied = FALSE;
+      if ($step == MEW_REVIEW_STEP_VENUE_AVAILABLE) {
+        if (isset($event['use_fees']['waved'][0]->value)) {
+          if ($event['use_fees']['waved'][0]->value) {
+            $fees_not_supplied = FALSE;
+          }
+        }
+
+        if (isset($event['use_fees']['university'][0]->value)) {
+          if ($event['use_fees']['university'][0]->value) {
+            $fees_not_supplied = FALSE;
+          }
         }
       }
 
