@@ -119,6 +119,11 @@ define('MEW_EVENT_STATUS_CANCELLED', 7);
  */
  define('MEW_FAILSAFE_COORDINATOR_ID', 45);
 
+/**
+ * Defines a standardized string for consiting watchdog error reporting.
+ */
+ define('MEW_WATCHDOG_ID', 'mew');
+
 
 /**
  * Implements hook_permission().
@@ -3735,7 +3740,7 @@ function mcneese_event_workflow_build_table_structure($structure, &$structure_ta
 
     $revision = mcneese_event_workflow_load_event_revision_number($event_id, $db_table_field);
     if ($revision === FALSE) {
-      watchdog('mew', "Failed to load revision number for event %event_id while building the table structure, forcing revision number to be 0.", array('%event_id' => $event_id), WATCHDOG_ERROR);
+      watchdog(MEW_WATCHDOG_ID, "Failed to load revision number for event %event_id while building the table structure, forcing revision number to be 0.", array('%event_id' => $event_id), WATCHDOG_ERROR);
       $revision = 0;
     }
     elseif (is_null($revision)) {
@@ -4191,7 +4196,7 @@ function mcneese_event_workflow_generate_pdf($event_id, $mode = 1, $local = FALS
   $event = event_workflow_load_event_by_id($event_id);
 
   if (empty($event)) {
-    watchdog('mew', "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
+    watchdog(MEW_WATCHDOG_ID, "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
     return FALSE;
   }
 
@@ -4232,7 +4237,7 @@ function mcneese_event_workflow_event_pdf_0_page_using_wkhtmltopdf($event_id, $h
   $event = event_workflow_load_event_by_id($event_id);
 
   if (empty($event)) {
-    watchdog('mew', "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
+    watchdog(MEW_WATCHDOG_ID, "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
     return FALSE;
   }
 
@@ -4401,7 +4406,7 @@ function mcneese_event_workflow_event_pdf_0_page_using_wkhtmltopdf($event_id, $h
   }
 
   if (!$result) {
-    watchdog('mew', "Error occured while generating the PDF of event @id: @error", array('@id' => $event_id, '@error' => $wkpdf->getError()), WATCHDOG_ERROR);
+    watchdog(MEW_WATCHDOG_ID, "Error occured while generating the PDF of event @id: @error", array('@id' => $event_id, '@error' => $wkpdf->getError()), WATCHDOG_ERROR);
   }
 
   return TRUE;
@@ -4426,7 +4431,7 @@ function mcneese_event_workflow_build_filename($event_id, $mode = 0) {
   $event = event_workflow_load_event_by_id($event_id);
 
   if (empty($event)) {
-    watchdog('mew', "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
+    watchdog(MEW_WATCHDOG_ID, "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
     return FALSE;
   }
 
@@ -5352,76 +5357,6 @@ function mcneese_event_workflow_event_process_listing_search_array(&$query, &$op
 }
 
 /**
- * Changes a form field's required state.
- *
- * @param string $field
- *   The array path name of the field.
- * @param array $form
- *   The form array where the field is stored.
- *   This will be updated.
- * @param bool $is_required
- *   Whether or not to change the field to required or not required.
- *
- * @return bool
- *   TRUE on successfull processing, FALSE otherwise.
- */
-function mcneese_event_workflow_assign_validation_requirement($field, &$form, $is_required) {
-  if (!is_string($field)) {
-    cf_error::invalid_string('field');
-    return FALSE;
-  }
-
-  if (!is_array($form)) {
-    cf_error::invalid_array('form');
-    return FALSE;
-  }
-
-  if (!is_bool($is_required)) {
-    cf_error::invalid_bool('is_required');
-    return FALSE;
-  }
-
-  $parts = explode('][', $field);
-
-  $found = TRUE;
-  $location = &$form;
-  while (!empty($parts)) {
-    $part = array_shift($parts);
-    if (!is_array($location) || !array_key_exists($part, $location)) {
-      $found = FALSE;
-      break;
-    }
-
-    $location = &$location[$part];
-  }
-
-  if ($found && !empty($location)) {
-    foreach ($location as $delta => &$location_field) {
-      if (!is_numeric($delta)) continue;
-
-      if (array_key_exists('#required', $location_field)) {
-        if (isset($location['#options']) && is_array($location_field['#options'])) {
-          if ($is_required) {
-            if (array_key_exists('', $location_field['#options'])) {
-              unset($location_field['#options']['']);
-            }
-          }
-          else {
-            if (!array_key_exists('', $location_field['#options'])) {
-              $location_field['#options'][''] = '';
-            }
-          }
-        }
-
-        $location_field['#required'] = $is_required;
-      }
-    }
-  }
-
-  return TRUE;
-}
-
-/**
  * Loads the reviews by step, classification, and date.
  *
  * @parem int $event_id
@@ -5797,7 +5732,7 @@ function mcneese_event_workflow_get_reviewers_yet_to_review($event_id) {
   $event = event_workflow_load_event_by_id($event_id);
 
   if (empty($event)) {
-    watchdog('mew', "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
+    watchdog(MEW_WATCHDOG_ID, "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
     return FALSE;
   }
 

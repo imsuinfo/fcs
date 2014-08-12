@@ -41,7 +41,7 @@ function mcneese_event_workflow_event_edit_0_form($form, &$form_state, $event_id
   $event = event_workflow_load_event_by_id($event_id);
 
   if (empty($event)) {
-    watchdog('mew', "Unable to find event with id of @id.", array('@id' => $event_id), WATCHDOG_ERROR);
+    watchdog(MEW_WATCHDOG_ID, "Unable to find event with id of @id.", array('@id' => $event_id), WATCHDOG_ERROR);
     drupal_not_found();
     drupal_exit();
   }
@@ -51,7 +51,7 @@ function mcneese_event_workflow_event_edit_0_form($form, &$form_state, $event_id
   $section_information = mcneese_event_workflow_get_event_section_information();
 
   if (empty($section_information[$target_section]['steps'])) {
-    watchdog('mew', "The section @target_section does not exist or has no steps.", array('@target_section' => $target_section), WATCHDOG_ERROR);
+    watchdog(MEW_WATCHDOG_ID, "The section @target_section does not exist or has no steps.", array('@target_section' => $target_section), WATCHDOG_ERROR);
     drupal_not_found();
     drupal_exit();
   }
@@ -532,7 +532,7 @@ function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
 
   if ($event_revision === FALSE) {
     form_set_error('form', "An error occurred while trying to save the event request. Please contact the support staff.");
-    watchdog('mew', "Failed to load revision number for event %event_id while trying to save the event request.", array('%event_id' => $event_id), WATCHDOG_ERROR);
+    watchdog(MEW_WATCHDOG_ID, "Failed to load revision number for event %event_id while trying to save the event request.", array('%event_id' => $event_id), WATCHDOG_ERROR);
 
     $form_state['rebuild'] = TRUE;
     $form_state['redirect'] = FALSE;
@@ -584,12 +584,12 @@ function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
         $part = array_shift($parts);
 
         if (!is_array($current_existing) || !array_key_exists($part, $current_existing)) {
-          watchdog('mew', "Failed to process '@part' for '@field_name' in '@table_name' during form submit. Invalid array or missing array key (existing).", array('@part' => $part, '@field_name' => $field_name, '@table_name' => $table_name), WATCHDOG_ERROR);
+          watchdog(MEW_WATCHDOG_ID, "Failed to process '@part' for '@field_name' in '@table_name' during form submit. Invalid array or missing array key (existing).", array('@part' => $part, '@field_name' => $field_name, '@table_name' => $table_name), WATCHDOG_ERROR);
           continue 2;
         }
 
         if (!is_array($current_new) || !array_key_exists($part, $current_new)) {
-          watchdog('mew', "Failed to process '@part' for '@field_name' in '@table_name' during form submit. Invalid array or missing array key (new).", array('@part' => $part, '@field_name' => $field_name, '@table_name' => $table_name), WATCHDOG_ERROR);
+          watchdog(MEW_WATCHDOG_ID, "Failed to process '@part' for '@field_name' in '@table_name' during form submit. Invalid array or missing array key (new).", array('@part' => $part, '@field_name' => $field_name, '@table_name' => $table_name), WATCHDOG_ERROR);
           continue 2;
         }
 
@@ -746,7 +746,7 @@ function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
 
     if ($failure) {
       form_set_error('form', "An error occurred while trying to save the event request. Please contact the support staff.");
-      watchdog('mew', "An error occured while trying to save the event request: @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
+      watchdog(MEW_WATCHDOG_ID, "An error occured while trying to save the event request: @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
 
       $form_state['rebuild'] = TRUE;
       $form_state['redirect'] = FALSE;

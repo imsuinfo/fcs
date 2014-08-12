@@ -159,7 +159,7 @@ function mcneese_event_workflow_event_cancel_0_form_submit($form, &$form_state) 
   }
   else {
     form_set_error('form', "An error occurred while trying to cancel the event request. Please contact the support staff.");
-    watchdog('mew', "An error occured while trying to cancel the event request: @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
+    watchdog(MEW_WATCHDOG_ID, "An error occured while trying to cancel the event request: @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
 
     $form_state['rebuild'] = TRUE;
     $form_state['redirect'] = FALSE;
@@ -358,7 +358,7 @@ function mcneese_event_workflow_event_uncancel_0_form_submit($form, &$form_state
   }
   else {
     form_set_error('form', "An error occurred while trying to uncancel the event request. Please contact the support staff.");
-    watchdog('mew', "An error occured while trying to uncancel the event request: @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
+    watchdog(MEW_WATCHDOG_ID, "An error occured while trying to uncancel the event request: @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
 
     $form_state['rebuild'] = TRUE;
     $form_state['redirect'] = FALSE;

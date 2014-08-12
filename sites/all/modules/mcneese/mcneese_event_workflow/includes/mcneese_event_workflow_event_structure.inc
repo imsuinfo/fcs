@@ -163,6 +163,10 @@ function mcneese_event_workflow_get_event_fields($form, &$form_state) {
   }
 
 
+  // initialize conditionally_required 3, which defines range limits for each given field.
+  $form_state['conditionally_required'][3] = array();
+
+
   // Fieldset: Status
   mcneese_event_workflow_get_event_field_status($form, $form_state, $fields, $event_state, $ps);
 
@@ -629,6 +633,10 @@ function mcneese_event_workflow_get_event_fields($form, &$form_state) {
 
 
   // Fieldset: Additional
+  $ps = 'top';
+  if (!is_null($form['form']['parents']['#value']['path'])) {
+    $ps .= ']';
+  }
   mcneese_event_workflow_get_event_field_additional($form, $form_state, $fields, $event_state, $ps);
 
 
@@ -662,6 +670,17 @@ function mcneese_event_workflow_get_event_field_status($form, &$form_state, &$fi
     $values = $event_state['status'];
   }
 
+  $limits_check = array(
+    'title' => "Status",
+    'field' => 'status',
+    'group' => 'top',
+    'path' => 'status',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
   if ($form['form']['step']['#value'] == 'status' && array_key_exists('information', $form['form']['sections']['#value'])) {
     $fields['status'] = array(
       '#id' => 'field-event-status',
@@ -675,6 +694,8 @@ function mcneese_event_workflow_get_event_field_status($form, &$form_state, &$fi
         ),
       ),
     );
+
+    $limits_check['visible'] = TRUE;
   }
 
   foreach ($values as $key => $value) {
@@ -706,6 +727,17 @@ function mcneese_event_workflow_get_event_field_step($form, &$form_state, &$fiel
     $values = $event_state['step'];
   }
 
+  $limits_check = array(
+    'title' => "Step",
+    'field' => 'step',
+    'group' => 'top',
+    'path' => 'step',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
   if ($form['form']['step']['#value'] == 'step' && array_key_exists('information', $form['form']['sections']['#value'])) {
     $fields['step'] = array(
       '#id' => 'field-event-step',
@@ -719,6 +751,8 @@ function mcneese_event_workflow_get_event_field_step($form, &$form_state, &$fiel
         ),
       ),
     );
+
+    $limits_check['visible'] = TRUE;
   }
 
   foreach ($values as $key => $value) {
@@ -740,6 +774,18 @@ function mcneese_event_workflow_get_event_field_location($form, &$form_state, &$
   if (!empty($event_state['location'])) {
     $values = $event_state['location'];
   }
+
+  $field_title = "Please indicate the requested facility or event location?";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'location',
+    'group' => 'top',
+    'path' => 'location',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
 
   if ($form['form']['step']['#value'] == 'location' && array_key_exists('information', $form['form']['sections']['#value'])) {
     $fields['location'] = array(
@@ -764,7 +810,7 @@ function mcneese_event_workflow_get_event_field_location($form, &$form_state, &$
       $fields['location'][$key] = array(
         '#id' => 'field-event-location-' . $key,
         '#type' => 'radios',
-        '#title' => '<span class="strong underline">Please indicate the requested facility or event location?</span>',
+        '#title' => '<span class="strong underline">' . $field_title . '</span>',
         '#options' => event_workflow_get_event_location_list_options('radios'),
         '#default_value' => $value,
         '#required' => TRUE,
@@ -790,6 +836,8 @@ function mcneese_event_workflow_get_event_field_location($form, &$form_state, &$
 
     $fields['location'][0]['location-images'][0]['#markup'] = '<img id="field-event-location-0-image-0" src="' . $base_path . $module_path . '/images/example-map.png" alt="Campus Map" class="location-image location-image-visible noscript">';
     $fields['location'][0]['location-images'][1]['#markup'] = '<img id="field-event-location-0-image-1" src="' . $base_path . $module_path . '/images/example-seed.png" alt="Campus Map, SEED Center" class="location-image location-image-invisible noscript">';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -815,6 +863,17 @@ function mcneese_event_workflow_get_event_field_building($form, &$form_state, &$
     }
   }
 
+  $limits_check = array(
+    'title' => "Building",
+    'field' => 'building',
+    'group' => 'top',
+    'path' => 'building',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
   if ($form['form']['step']['#value'] == 'building' && array_key_exists('information', $form['form']['sections']['#value'])) {
     $fields['building'] = array(
       '#id' => 'field-event-building',
@@ -828,6 +887,8 @@ function mcneese_event_workflow_get_event_field_building($form, &$form_state, &$
         ),
       ),
     );
+
+    $limits_check['visible'] = TRUE;
   }
 
   // the building is determined by the room, therefore this is more or less a stub/placeholder.
@@ -850,6 +911,19 @@ function mcneese_event_workflow_get_event_field_room($form, &$form_state, &$fiel
   if (!empty($event_state['room'])) {
     $values = $event_state['room'];
   }
+
+  $field_title = "Select a Room";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'room',
+    'group' => 'top',
+    'path' => 'room',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
 
   if ($form['form']['step']['#value'] == 'rooms' && array_key_exists('information', $form['form']['sections']['#value'])) {
     $fields['room'] = array(
@@ -883,7 +957,7 @@ function mcneese_event_workflow_get_event_field_room($form, &$form_state, &$fiel
       $fields['room'][$key] = array(
         '#id' => 'field-event-room-' . $key,
         '#type' => 'radios',
-        '#title' => 'Select a Room',
+        '#title' => $field_title,
         '#options' => $options,
         '#default_value' => $value,
         '#required' => TRUE,
@@ -898,6 +972,8 @@ function mcneese_event_workflow_get_event_field_room($form, &$form_state, &$fiel
     krsort($fields['room']);
 
     $form_state['conditionally_required'][0][] = 'room';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -1034,6 +1110,19 @@ function mcneese_event_workflow_get_event_field_dates_date($form, &$form_state, 
     $delta_id = '-delta_' . $delta;
   }
 
+  $field_title = "Date of Event";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'date',
+    'group' => 'date',
+    'path' => 'dates][date',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('dates', $form['form']['sections']['#value'])) {
     $fields['dates']['date'] = array(
       '#id' => 'field-event-dates-date' . $delta_id,
@@ -1052,7 +1141,7 @@ function mcneese_event_workflow_get_event_field_dates_date($form, &$form_state, 
       $fields['dates']['date'][$key] = array(
         '#id' => 'field-event-dates-date-' . $key,
         '#type' => 'date_popup',
-        '#title' => 'Date of Event',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#date_format' => "Y/m/d",
         '#date_label_position' => 'invisible',
@@ -1076,6 +1165,8 @@ function mcneese_event_workflow_get_event_field_dates_date($form, &$form_state, 
     else {
       $form_state['conditionally_required'][0][] = 'dates][date';
     }
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -1111,6 +1202,19 @@ function mcneese_event_workflow_get_event_field_dates_time_start($form, &$form_s
     $delta_id = '-delta_' . $delta;
   }
 
+  $field_title = "Event Start Time";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'time_start',
+    'group' => 'date',
+    'path' => 'dates][time_start',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('dates', $form['form']['sections']['#value'])) {
     $fields['dates']['time_start'] = array(
       '#id' => 'field-event-dates-time_start' . $delta_id,
@@ -1129,7 +1233,7 @@ function mcneese_event_workflow_get_event_field_dates_time_start($form, &$form_s
       $fields['dates']['time_start'][$key] = array(
         '#id' => 'field-event-dates-time_start-' . $key,
         '#type' => 'textfield',
-        '#title' => 'Event Start Time',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#size' => 8,
         '#maxlength' => 8,
@@ -1146,6 +1250,8 @@ function mcneese_event_workflow_get_event_field_dates_time_start($form, &$form_s
       );
     }
     krsort($fields['dates']['time_start']);
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -1181,6 +1287,19 @@ function mcneese_event_workflow_get_event_field_dates_time_stop($form, &$form_st
     $delta_id = '-delta_' . $delta;
   }
 
+  $field_title = "Event Stop Time";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'time_stop',
+    'group' => 'date',
+    'path' => 'dates][time_stop',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('dates', $form['form']['sections']['#value'])) {
     $fields['dates']['time_stop'] = array(
       '#id' => 'field-event-dates-time_stop' . $delta_id,
@@ -1199,7 +1318,7 @@ function mcneese_event_workflow_get_event_field_dates_time_stop($form, &$form_st
       $fields['dates']['time_stop'][$key] = array(
         '#id' => 'field-event-dates-time_stop-' . $key,
         '#type' => 'textfield',
-        '#title' => 'Event Stop Time',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#size' => 8,
         '#maxlength' => 8,
@@ -1216,6 +1335,8 @@ function mcneese_event_workflow_get_event_field_dates_time_stop($form, &$form_st
       );
     }
     krsort($fields['dates']['time_stop']);
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -1251,6 +1372,19 @@ function mcneese_event_workflow_get_event_field_dates_category($form, &$form_sta
     $delta_id = '-delta_' . $delta;
   }
 
+  $field_title = "Category";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'category',
+    'group' => 'date',
+    'path' => 'dates][category',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('dates', $form['form']['sections']['#value'])) {
     $fields['dates']['category'] = array(
       '#id' => 'field-event-dates-category' . $delta_id,
@@ -1271,7 +1405,7 @@ function mcneese_event_workflow_get_event_field_dates_category($form, &$form_sta
       $fields['dates']['category'][$key] = array(
         '#id' => 'field-event-dates-category-' . $key,
         '#type' => 'radios',
-        '#title' => 'Category',
+        '#title' => $field_title,
         '#required' => TRUE,
         '#default_value' => $value,
         '#options' => $dates_category_options,
@@ -1292,6 +1426,8 @@ function mcneese_event_workflow_get_event_field_dates_category($form, &$form_sta
     else {
       $form_state['conditionally_required'][0][] = 'dates][category';
     }
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -1356,6 +1492,19 @@ function mcneese_event_workflow_get_event_field_event_coordinator_name($form, &$
     }
   }
 
+  $field_title = "Event Coordinator Name";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'name',
+    'group' => 'event_coordinator',
+    'path' => 'event_coordinator][name',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('coordinator', $form['form']['sections']['#value'])) {
     $fields['event_coordinator']['name'] = array(
       '#id' => 'field-event-event_coordinator-name',
@@ -1374,7 +1523,7 @@ function mcneese_event_workflow_get_event_field_event_coordinator_name($form, &$
       $fields['event_coordinator']['name'][$key] = array(
         '#id' => 'field-event-event_coordinator-name-' . $key,
         '#type' => 'textfield',
-        '#title' => 'Event Coordinator Name',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#required' => TRUE,
         '#size' => 48,
@@ -1392,6 +1541,8 @@ function mcneese_event_workflow_get_event_field_event_coordinator_name($form, &$
     krsort($fields['event_coordinator']['name']);
 
     $form_state['conditionally_required'][0][] = 'event_coordinator][name';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -1421,6 +1572,19 @@ function mcneese_event_workflow_get_event_field_event_coordinator_phone($form, &
     }
   }
 
+  $field_title = "Event Coordinator Phone";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'phone',
+    'group' => 'event_coordinator',
+    'path' => 'event_coordinator][phone',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('coordinator', $form['form']['sections']['#value'])) {
     $fields['event_coordinator']['phone'] = array(
       '#id' => 'field-event-event_coordinator-phone',
@@ -1439,7 +1603,7 @@ function mcneese_event_workflow_get_event_field_event_coordinator_phone($form, &
       $fields['event_coordinator']['phone'][$key] = array(
         '#id' => 'field-event-event_coordinator-phone-' . $key,
         '#type' => 'telfield',
-        '#title' => 'Event Coordinator Phone',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#attributes' => array(
           'class' => array(
@@ -1453,6 +1617,8 @@ function mcneese_event_workflow_get_event_field_event_coordinator_phone($form, &
     krsort($fields['event_coordinator']['phone']);
 
     $values = $event_state['event_coordinator']['phone'];
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -1482,6 +1648,19 @@ function mcneese_event_workflow_get_event_field_event_coordinator_email($form, &
     }
   }
 
+  $field_title = "Event Coordinator E-Mail";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'email',
+    'group' => 'event_coordinator',
+    'path' => 'event_coordinator][email',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('coordinator', $form['form']['sections']['#value'])) {
     $fields['event_coordinator']['email'] = array(
       '#id' => 'field-event-event_coordinator-email',
@@ -1500,7 +1679,7 @@ function mcneese_event_workflow_get_event_field_event_coordinator_email($form, &
       $fields['event_coordinator']['email'][$key] = array(
         '#id' => 'field-event-event_coordinator-email-' . $key,
         '#type' => 'emailfield',
-        '#title' => 'Event Coordinator E-Mail',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#size' => 48,
         '#maxlength' => 255,
@@ -1517,6 +1696,8 @@ function mcneese_event_workflow_get_event_field_event_coordinator_email($form, &
     krsort($fields['event_coordinator']['email']);
 
     $form_state['conditionally_required'][0][] = 'event_coordinator][email';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -1556,6 +1737,19 @@ function mcneese_event_workflow_get_event_field_event_coordinator_classification
     $values = array(0 => $classification['value']);
   }
 
+  $field_title = "Event Coordinator Classification";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'classification',
+    'group' => 'event_coordinator',
+    'path' => 'event_coordinator][classification',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('coordinator', $form['form']['sections']['#value'])) {
     $fields['event_coordinator']['classification'] = array(
       '#id' => 'field-event-event_coordinator-classification',
@@ -1576,7 +1770,7 @@ function mcneese_event_workflow_get_event_field_event_coordinator_classification
         $fields['event_coordinator']['classification'][$key] = array(
           '#id' => 'field-event-event_coordinator-classification-' . $key,
           '#type' => 'select',
-          '#title' => t("Event Coordinator Classification"),
+          '#title' => $field_title,
           '#description' => t("Associate this event request with a specific classification."),
           '#options' => $classification['options'],
           '#default_value' => $value,
@@ -1592,6 +1786,8 @@ function mcneese_event_workflow_get_event_field_event_coordinator_classification
       krsort($fields['event_coordinator']['classification']);
 
       $form_state['conditionally_required'][0][] = 'event_coordinator][classification';
+
+      $limits_check['visible'] = TRUE;
     }
     else {
       foreach ($values as $key => $value) {
@@ -1639,6 +1835,19 @@ function mcneese_event_workflow_get_event_field_information_title($form, &$form_
     $values = $event_state['information']['title'];
   }
 
+  $field_title = "Event Title";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'title',
+    'group' => 'information',
+    'path' => 'information][title',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('information', $form['form']['sections']['#value'])) {
     $fields['information']['title'] = array(
       '#id' => 'field-event-information-title',
@@ -1657,7 +1866,7 @@ function mcneese_event_workflow_get_event_field_information_title($form, &$form_
       $fields['information']['title'][$key] = array(
         '#id' => 'field-event-information-title-' . $key,
         '#type' => 'textfield',
-        '#title' => 'Event Title',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#required' => TRUE,
         '#size' => 48,
@@ -1673,6 +1882,8 @@ function mcneese_event_workflow_get_event_field_information_title($form, &$form_
     krsort($fields['information']['title']);
 
     $form_state['conditionally_required'][0][] = 'information][title';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -1696,6 +1907,19 @@ function mcneese_event_workflow_get_event_field_information_attendance($form, &$
     $values = $event_state['information']['attendance'];
   }
 
+  $field_title = "Expected Number of Attendance";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'attendance',
+    'group' => 'information',
+    'path' => 'information][attendance',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('information', $form['form']['sections']['#value'])) {
     $fields['information']['attendance'] = array(
       '#id' => 'field-event-information-attendance',
@@ -1714,7 +1938,7 @@ function mcneese_event_workflow_get_event_field_information_attendance($form, &$
       $fields['information']['attendance'][$key] = array(
         '#id' => 'field-event-information-attendance-' . $key,
         '#type' => 'numberfield',
-        '#title' => 'Expected Number of Attendance',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#min' => 0,
         '#attributes' => array(
@@ -1731,6 +1955,8 @@ function mcneese_event_workflow_get_event_field_information_attendance($form, &$
       }
     }
     krsort($fields['information']['attendance']);
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -1754,6 +1980,19 @@ function mcneese_event_workflow_get_event_field_information_type($form, &$form_s
     $values = $event_state['information']['type'];
   }
 
+  $field_title = "Type of Event";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'type',
+    'group' => 'information',
+    'path' => 'information][type',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('information', $form['form']['sections']['#value'])) {
     $fields['information']['type'] = array(
       '#id' => 'field-event-information-type',
@@ -1774,7 +2013,7 @@ function mcneese_event_workflow_get_event_field_information_type($form, &$form_s
       $fields['information']['type'][$key] = array(
         '#id' => 'field-event-information-type-' . $key,
         '#type' => 'select',
-        '#title' => 'Type of Event',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#options' => $type_options,
         '#required' => TRUE,
@@ -1789,6 +2028,8 @@ function mcneese_event_workflow_get_event_field_information_type($form, &$form_s
     krsort($fields['information']['type']);
 
     $form_state['conditionally_required'][0][] = 'information][type';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -1812,6 +2053,19 @@ function mcneese_event_workflow_get_event_field_information_organization($form, 
     $values = $event_state['information']['organization'];
   }
 
+  $field_title = "Organization / Affiliation";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'organization',
+    'group' => 'information',
+    'path' => 'information][organization',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('information', $form['form']['sections']['#value'])) {
     $fields['information']['organization'] = array(
       '#id' => 'field-event-information-organization',
@@ -1830,7 +2084,7 @@ function mcneese_event_workflow_get_event_field_information_organization($form, 
       $fields['information']['organization'][$key] = array(
         '#id' => 'field-event-information-organization-' . $key,
         '#type' => 'textfield',
-        '#title' => 'Organization / Affiliation',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#required' => FALSE,
         '#size' => 48,
@@ -1847,6 +2101,8 @@ function mcneese_event_workflow_get_event_field_information_organization($form, 
 
     $form_state['conditionally_required'][0][] = 'information][organization';
     $form_state['conditionally_required'][2][] = 'information][organization'; // only if student organization.
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -1870,6 +2126,19 @@ function mcneese_event_workflow_get_event_field_information_adviser_approval($fo
     $values = $event_state['information']['adviser_approval'];
   }
 
+  $field_title = "Has your adviser been notified and has approved this event?";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'adviser_approval',
+    'group' => 'information',
+    'path' => 'information][adviser_approval',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('information', $form['form']['sections']['#value'])) {
     $fields['information']['adviser_approval'] = array(
       '#id' => 'field-event-information-adviser_approval',
@@ -1888,7 +2157,7 @@ function mcneese_event_workflow_get_event_field_information_adviser_approval($fo
       $fields['information']['adviser_approval'][$key] = array(
         '#id' => 'field-event-information-adviser_approval-' . $key,
         '#type' => 'checkbox',
-        '#title' => "Has your adviser been notified and has approved this event?",
+        '#title' => $field_title,
         '#default_value' => $value,
         '#required' => FALSE,
         '#fieldset' => TRUE,
@@ -1915,6 +2184,8 @@ function mcneese_event_workflow_get_event_field_information_adviser_approval($fo
 
     $form_state['conditionally_required'][0][] = 'information][adviser_approval';
     $form_state['conditionally_required'][2][] = 'information][adviser_approval'; // only if student adviser_approval.
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -1992,6 +2263,19 @@ function mcneese_event_workflow_get_event_field_plans_description($form, &$form_
     $build = TRUE;
   }
 
+  $field_title = "Event Description/Purpose";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'description',
+    'group' => 'plans',
+    'path' => 'plans][description',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('plans', $form['form']['sections']['#value'])) {
     $fields['plans']['description'] = array(
       '#id' => 'field-event-plans-description',
@@ -2010,7 +2294,7 @@ function mcneese_event_workflow_get_event_field_plans_description($form, &$form_
       $fields['plans']['description'][$key] = array(
         '#id' => 'field-event-plans-description-' . $key,
         '#type' => 'textarea',
-        '#title' => 'Event Description/Purpose',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#rows' => 2,
         '#attributes' => array(
@@ -2022,6 +2306,8 @@ function mcneese_event_workflow_get_event_field_plans_description($form, &$form_
       );
     }
     krsort($fields['plans']['description']);
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -2050,6 +2336,19 @@ function mcneese_event_workflow_get_event_field_plans_activities($form, &$form_s
     $build = TRUE;
   }
 
+  $field_title = "List all activities planned within the event";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'activities',
+    'group' => 'plans',
+    'path' => 'plans][activities',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('plans', $form['form']['sections']['#value'])) {
     $fields['plans']['activities'] = array(
       '#id' => 'field-event-plans-activities',
@@ -2068,7 +2367,7 @@ function mcneese_event_workflow_get_event_field_plans_activities($form, &$form_s
       $fields['plans']['activities'][$key] = array(
         '#id' => 'field-event-plans-activities-' . $key,
         '#type' => 'textarea',
-        '#title' => 'List all activities planned within the event',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#rows' => 2,
         '#attributes' => array(
@@ -2080,6 +2379,8 @@ function mcneese_event_workflow_get_event_field_plans_activities($form, &$form_s
       );
     }
     krsort($fields['plans']['activities']);
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -2103,6 +2404,19 @@ function mcneese_event_workflow_get_event_field_plans_audience($form, &$form_sta
     $values = $event_state['plans']['audience'];
   }
 
+  $field_title = "Intended Audience";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'audience',
+    'group' => 'plans',
+    'path' => 'plans][audience',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('plans', $form['form']['sections']['#value'])) {
     $fields['plans']['audience'] = array(
       '#id' => 'field-event-plans-audience',
@@ -2123,7 +2437,7 @@ function mcneese_event_workflow_get_event_field_plans_audience($form, &$form_sta
       $fields['plans']['audience'][$key] = array(
         '#id' => 'field-event-plans-audience-' . $key,
         '#type' => 'select',
-        '#title' => 'Intended Audience',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#options' => $audience_options,
         '#required' => TRUE,
@@ -2138,6 +2452,8 @@ function mcneese_event_workflow_get_event_field_plans_audience($form, &$form_sta
     krsort($fields['plans']['audience']);
 
     $form_state['conditionally_required'][0][] = 'plans][audience';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -2166,6 +2482,19 @@ function mcneese_event_workflow_get_event_field_registration_require($form, &$fo
     $build = TRUE;
   }
 
+  $field_title = "Does the event require registration or ticket purchase?";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'require',
+    'group' => 'registration',
+    'path' => 'registration][require',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('registration', $form['form']['sections']['#value'])) {
     $fields['registration']['require'] = array(
       '#id' => 'field-event-registration-require',
@@ -2184,7 +2513,7 @@ function mcneese_event_workflow_get_event_field_registration_require($form, &$fo
       $fields['registration']['require'][$key] = array(
         '#id' => 'field-event-registration-require-' . $key,
         '#type' => 'radios',
-        '#title' => 'Does the event require registration or ticket purchase?',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#options' => array(1 => "Yes", 0 => "No"),
         '#required' => TRUE,
@@ -2199,6 +2528,8 @@ function mcneese_event_workflow_get_event_field_registration_require($form, &$fo
     krsort($fields['registration']['require']);
 
     $form_state['conditionally_required'][0][] = 'registration][require';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -2227,6 +2558,19 @@ function mcneese_event_workflow_get_event_field_registration_website($form, &$fo
     $build = TRUE;
   }
 
+  $field_title = "Please indicate a <em>Registration Website</em>";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'website',
+    'group' => 'registration',
+    'path' => 'registration][website',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('registration', $form['form']['sections']['#value'])) {
     $fields['registration']['website'] = array(
       '#id' => 'field-event-registration-website',
@@ -2245,7 +2589,7 @@ function mcneese_event_workflow_get_event_field_registration_website($form, &$fo
       $fields['registration']['website'][$key] = array(
         '#id' => 'field-event-registration-website-' . $key,
         '#type' => 'textfield',
-        '#title' => 'Please indicate a <em>Registration Website</em>',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#size' => 48,
         '#maxlength' => 255,
@@ -2269,6 +2613,8 @@ function mcneese_event_workflow_get_event_field_registration_website($form, &$fo
       );
     }
     krsort($fields['registration']['website']);
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -2297,6 +2643,19 @@ function mcneese_event_workflow_get_event_field_registration_phone($form, &$form
     $build = TRUE;
   }
 
+  $field_title = "Please indicate a <em>Registration Phone</em>";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'phone',
+    'group' => 'registration',
+    'path' => 'registration][phone',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('registration', $form['form']['sections']['#value'])) {
     $fields['registration']['phone'] = array(
       '#id' => 'field-event-registration-phone',
@@ -2315,7 +2674,7 @@ function mcneese_event_workflow_get_event_field_registration_phone($form, &$form
       $fields['registration']['phone'][$key] = array(
         '#id' => 'field-event-registration-phone-' . $key,
         '#type' => 'telfield',
-        '#title' => 'Please indicate a <em>Registration Phone</em>',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#states' => array(
           'visible' => array(
@@ -2327,16 +2686,18 @@ function mcneese_event_workflow_get_event_field_registration_phone($form, &$form
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[require]' . '[' . $key . ']'  . '"]' => array('value' => NULL),
             ),
           ),
+        ),
         '#attributes' => array(
           'class' => array(
             'form-item-delta',
             'form-item-delta-' . $key,
           ),
         ),
-        ),
       );
     }
     krsort($fields['registration']['phone']);
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -2365,6 +2726,19 @@ function mcneese_event_workflow_get_event_field_registration_ticket_price($form,
     $build = TRUE;
   }
 
+  $field_title = "Please indicate a <em>Ticket Price</em>";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'ticket_price',
+    'group' => 'registration',
+    'path' => 'registration][ticket_price',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('registration', $form['form']['sections']['#value'])) {
     $fields['registration']['ticket_price'] = array(
       '#id' => 'field-event-registration-ticket_price',
@@ -2383,7 +2757,7 @@ function mcneese_event_workflow_get_event_field_registration_ticket_price($form,
       $fields['registration']['ticket_price'][$key] = array(
         '#id' => 'field-event-registration-ticket_price-' . $key,
         '#type' => 'textfield',
-        '#title' => 'Please indicate a <em>Ticket Price</em>',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#size' => 48,
         '#maxlength' => 255,
@@ -2407,6 +2781,8 @@ function mcneese_event_workflow_get_event_field_registration_ticket_price($form,
       );
     }
     krsort($fields['registration']['ticket_price']);
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -2435,6 +2811,18 @@ function mcneese_event_workflow_get_event_field_registration_ticket_dates($form,
     $build = TRUE;
   }
 
+  $field_title = "Please indicate <em>Dates</em> the tickets are one sale";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'ticket_dates',
+    'group' => 'registration',
+    'path' => 'registration][ticket_dates',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('registration', $form['form']['sections']['#value'])) {
     $fields['registration']['ticket_dates'] = array(
       '#id' => 'field-event-registration-ticket_dates',
@@ -2453,7 +2841,7 @@ function mcneese_event_workflow_get_event_field_registration_ticket_dates($form,
       $fields['registration']['ticket_dates'][$key] = array(
         '#id' => 'field-event-registration-ticket_dates-' . $key,
         '#type' => 'textfield',
-        '#title' => 'Please indicate <em>Dates</em> the tickets are one sale',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#size' => 48,
         '#maxlength' => 255,
@@ -2477,6 +2865,8 @@ function mcneese_event_workflow_get_event_field_registration_ticket_dates($form,
       );
     }
     krsort($fields['registration']['ticket_dates']);
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -2505,6 +2895,19 @@ function mcneese_event_workflow_get_event_field_registration_ticket_website($for
     $build = TRUE;
   }
 
+  $field_title = "Please indicate a <em>Ticket Website</em>";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'ticket_website',
+    'group' => 'registration',
+    'path' => 'registration][ticket_website',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('registration', $form['form']['sections']['#value'])) {
     $fields['registration']['ticket_website'] = array(
       '#id' => 'field-event-registration-ticket_website',
@@ -2523,7 +2926,7 @@ function mcneese_event_workflow_get_event_field_registration_ticket_website($for
       $fields['registration']['ticket_website'][$key] = array(
         '#id' => 'field-event-registration-ticket_website-' . $key,
         '#type' => 'textfield',
-        '#title' => 'Please indicate a <em>Ticket Website</em>',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#size' => 48,
         '#maxlength' => 255,
@@ -2547,6 +2950,8 @@ function mcneese_event_workflow_get_event_field_registration_ticket_website($for
       );
     }
     krsort($fields['registration']['ticket_website']);
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -2575,6 +2980,19 @@ function mcneese_event_workflow_get_event_field_registration_ticket_phone($form,
     $build = TRUE;
   }
 
+  $field_title = "Please indicate a <em>Ticket Phone</em>";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'ticket_phone',
+    'group' => 'registration',
+    'path' => 'registration][ticket_phone',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('registration', $form['form']['sections']['#value'])) {
     $fields['registration']['ticket_phone'] = array(
       '#id' => 'field-event-registration-ticket_phone',
@@ -2593,7 +3011,7 @@ function mcneese_event_workflow_get_event_field_registration_ticket_phone($form,
       $fields['registration']['ticket_phone'][$key] = array(
         '#id' => 'field-event-registration-ticket_phone-' . $key,
         '#type' => 'textfield',
-        '#title' => 'Please indicate a <em>Ticket Phone</em>',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#size' => 48,
         '#maxlength' => 255,
@@ -2617,6 +3035,8 @@ function mcneese_event_workflow_get_event_field_registration_ticket_phone($form,
       );
     }
     krsort($fields['registration']['ticket_phone']);
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -2645,6 +3065,19 @@ function mcneese_event_workflow_get_event_field_registration_generate_revenue($f
     $build = TRUE;
   }
 
+  $field_title = "Will the Event Generate Revenue?";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'generate_revenue',
+    'group' => 'registration',
+    'path' => 'registration][generate_revenue',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('registration', $form['form']['sections']['#value'])) {
     $fields['registration']['generate_revenue'] = array(
       '#id' => 'field-event-registration-generate_revenue',
@@ -2663,7 +3096,7 @@ function mcneese_event_workflow_get_event_field_registration_generate_revenue($f
       $fields['registration']['generate_revenue'][$key] = array(
         '#id' => 'field-event-registration-generate_revenue-' . $key,
         '#type' => 'radios',
-        '#title' => 'Will the Event Generate Revenue?',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#options' => array(1 => "Yes", 0 => "No"),
         '#required' => TRUE,
@@ -2678,6 +3111,8 @@ function mcneese_event_workflow_get_event_field_registration_generate_revenue($f
     krsort($fields['registration']['generate_revenue']);
 
     $form_state['conditionally_required'][0][] = 'registration][generate_revenue';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -2706,6 +3141,19 @@ function mcneese_event_workflow_get_event_field_registration_revenue_generated($
     $build = TRUE;
   }
 
+  $field_title = "How Will Revenue be Generated?";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'revenue_generated',
+    'group' => 'registration',
+    'path' => 'registration][revenue_generated',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('registration', $form['form']['sections']['#value'])) {
     $fields['registration']['revenue_generated'] = array(
       '#id' => 'field-event-registration-revenue_generated',
@@ -2726,7 +3174,7 @@ function mcneese_event_workflow_get_event_field_registration_revenue_generated($
       $fields['registration']['revenue_generated'][$key] = array(
         '#id' => 'field-event-registration-revenue_generated-' . $key,
         '#type' => 'checkboxes',
-        '#title' => 'How Will Revenue be Generated?',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#states' => array(
           'visible' => array(
@@ -2749,6 +3197,8 @@ function mcneese_event_workflow_get_event_field_registration_revenue_generated($
       );
     }
     krsort($fields['registration']['revenue_generated']);
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -2772,6 +3222,19 @@ function mcneese_event_workflow_get_event_field_setup_rectangular_tables_8ft($fo
     $values = $event_state['setup']['rectangular_tables_8ft'];
   }
 
+  $field_title = "How Many 8 ft Rectangular Tables Will You Need?";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'rectangular_tables_8ft',
+    'group' => 'setup',
+    'path' => 'setup][rectangular_tables_8ft',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
     $fields['setup']['rectangular_tables_8ft'] = array(
       '#id' => 'field-event-setup-rectangular_tables_8ft',
@@ -2790,7 +3253,7 @@ function mcneese_event_workflow_get_event_field_setup_rectangular_tables_8ft($fo
       $fields['setup']['rectangular_tables_8ft'][$key] = array(
         '#id' => 'field-event-setup-rectangular_tables_8ft-' . $key,
         '#type' => 'numberfield',
-        '#title' => 'How Many 8 ft Rectangular Tables Will You Need?',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#min' => 0,
         '#attributes' => array(
@@ -2804,6 +3267,8 @@ function mcneese_event_workflow_get_event_field_setup_rectangular_tables_8ft($fo
     krsort($fields['setup']['rectangular_tables_8ft']);
 
     $form_state['conditionally_required'][0][] = 'setup][rectangular_tables_8ft';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -2827,6 +3292,19 @@ function mcneese_event_workflow_get_event_field_setup_round_tables_8ft($form, &$
     $values = $event_state['setup']['round_tables_8ft'];
   }
 
+  $field_title = "How Many 8 ft Round Tables Will You Need?";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'round_tables_8ft',
+    'group' => 'setup',
+    'path' => 'setup][round_tables_8ft',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
     $fields['setup']['round_tables_8ft'] = array(
       '#id' => 'field-event-setup-round_tables_8ft',
@@ -2845,7 +3323,7 @@ function mcneese_event_workflow_get_event_field_setup_round_tables_8ft($form, &$
       $fields['setup']['round_tables_8ft'][$key] = array(
         '#id' => 'field-event-setup-round_tables_8ft-' . $key,
         '#type' => 'numberfield',
-        '#title' => 'How Many 8 ft Round Tables Will You Need?',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#min' => 0,
         '#attributes' => array(
@@ -2859,6 +3337,8 @@ function mcneese_event_workflow_get_event_field_setup_round_tables_8ft($form, &$
     krsort($fields['setup']['round_tables_8ft']);
 
     $form_state['conditionally_required'][0][] = 'setup][round_tables_8ft';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -2887,6 +3367,19 @@ function mcneese_event_workflow_get_event_field_setup_other_tables($form, &$form
     $build = TRUE;
   }
 
+  $field_title = "How Many Other Tables Will You Need? " . '<span class="title_display-note describe_the_table">' . "(Describe the Table)</span>";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'other_tables',
+    'group' => 'setup',
+    'path' => 'setup][other_tables',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
     $fields['setup']['other_tables'] = array(
       '#id' => 'field-event-setup-other_tables',
@@ -2905,7 +3398,7 @@ function mcneese_event_workflow_get_event_field_setup_other_tables($form, &$form
       $fields['setup']['other_tables'][$key] = array(
         '#id' => 'field-event-setup-other_tables-' . $key,
         '#type' => 'textarea',
-        '#title' => 'How Many Other Tables Will You Need? <span class="title_display-note describe_the_table">(Describe the Table)</span>',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#rows' => 2,
         '#attributes' => array(
@@ -2917,6 +3410,8 @@ function mcneese_event_workflow_get_event_field_setup_other_tables($form, &$form
       );
     }
     krsort($fields['setup']['other_tables']);
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -2940,6 +3435,19 @@ function mcneese_event_workflow_get_event_field_setup_standard_blue_chairs($form
     $values = $event_state['setup']['standard_blue_chairs'];
   }
 
+  $field_title = "How Many Standard Blue Chairs Will You Need?";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'standard_blue_chairs',
+    'group' => 'setup',
+    'path' => 'setup][standard_blue_chairs',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
     $fields['setup']['standard_blue_chairs'] = array(
       '#id' => 'field-event-setup-standard_blue_chairs',
@@ -2958,7 +3466,7 @@ function mcneese_event_workflow_get_event_field_setup_standard_blue_chairs($form
       $fields['setup']['standard_blue_chairs'][$key] = array(
         '#id' => 'field-event-setup-standard_blue_chairs-' . $key,
         '#type' => 'numberfield',
-        '#title' => 'How Many Standard Blue Chairs Will You Need?',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#min' => 0,
         '#attributes' => array(
@@ -2972,6 +3480,8 @@ function mcneese_event_workflow_get_event_field_setup_standard_blue_chairs($form
     krsort($fields['setup']['standard_blue_chairs']);
 
     $form_state['conditionally_required'][0][] = 'setup][standard_blue_chairs';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -2995,6 +3505,19 @@ function mcneese_event_workflow_get_event_field_setup_podium($form, &$form_state
     $values = $event_state['setup']['podium'];
   }
 
+  $field_title = "Will You Need a Podium?";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'podium',
+    'group' => 'setup',
+    'path' => 'setup][podium',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
     $fields['setup']['podium'] = array(
       '#id' => 'field-event-setup-podium',
@@ -3013,7 +3536,7 @@ function mcneese_event_workflow_get_event_field_setup_podium($form, &$form_state
       $fields['setup']['podium'][$key] = array(
         '#id' => 'field-event-setup-podium-' . $key,
         '#type' => 'radios',
-        '#title' => 'Will You Need a Podium?',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#options' => array(1 => "Yes", 0 => "No"),
         '#required' => TRUE,
@@ -3028,6 +3551,8 @@ function mcneese_event_workflow_get_event_field_setup_podium($form, &$form_state
     krsort($fields['setup']['podium']);
 
     $form_state['conditionally_required'][0][] = 'setup][podium';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -3056,6 +3581,19 @@ function mcneese_event_workflow_get_event_field_setup_portable_stage($form, &$fo
     $build = TRUE;
   }
 
+  $field_title = "Will You Require a Portable Stage?";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'portable_stage',
+    'group' => 'setup',
+    'path' => 'setup][portable_stage',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
     $fields['setup']['portable_stage'] = array(
       '#id' => 'field-event-setup-portable_stage',
@@ -3074,7 +3612,7 @@ function mcneese_event_workflow_get_event_field_setup_portable_stage($form, &$fo
       $fields['setup']['portable_stage'][$key] = array(
         '#id' => 'field-event-setup-portable_stage-' . $key,
         '#type' => 'radios',
-        '#title' => 'Will You Require a Portable Stage?',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#options' => array(1 => "Yes", 0 => "No"),
         '#required' => TRUE,
@@ -3089,6 +3627,8 @@ function mcneese_event_workflow_get_event_field_setup_portable_stage($form, &$fo
     krsort($fields['setup']['portable_stage']);
 
     $form_state['conditionally_required'][0][] = 'setup][portable_stage';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -3117,6 +3657,19 @@ function mcneese_event_workflow_get_event_field_setup_portable_stage_configurati
     $build = TRUE;
   }
 
+  $field_title = "What size stage and configuration is needed?";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'portable_stage_configuration',
+    'group' => 'setup',
+    'path' => 'setup][portable_stage_configuration',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
     $fields['setup']['portable_stage_configuration'] = array(
       '#id' => 'field-event-setup-portable_stage_configuration',
@@ -3135,7 +3688,7 @@ function mcneese_event_workflow_get_event_field_setup_portable_stage_configurati
       $fields['setup']['portable_stage_configuration'][$key] = array(
         '#id' => 'field-event-setup-portable_stage_configuration-' . $key,
         '#type' => 'textarea',
-        '#title' => 'What size stage and configuration is needed?',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#states' => array(
           'visible' => array(
@@ -3160,6 +3713,8 @@ function mcneese_event_workflow_get_event_field_setup_portable_stage_configurati
     krsort($fields['setup']['portable_stage_configuration']);
 
     $form_state['conditionally_required'][1][] = 'setup][portable_stage_configuration';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -3188,6 +3743,19 @@ function mcneese_event_workflow_get_event_field_setup_security($form, &$form_sta
     $build = TRUE;
   }
 
+  $field_title = "Will the Event Require Security? " . '<span class="title_display-note additional_fees_may_apply">' . "(Additional Fees May Apply)</span>";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'security',
+    'group' => 'setup',
+    'path' => 'setup][security',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
     $fields['setup']['security'] = array(
       '#id' => 'field-event-setup-security',
@@ -3206,7 +3774,7 @@ function mcneese_event_workflow_get_event_field_setup_security($form, &$form_sta
       $fields['setup']['security'][$key] = array(
         '#id' => 'field-event-setup-security-' . $key,
         '#type' => 'radios',
-        '#title' => 'Will the Event Require Security? <span class="title_display-note additional_fees_may_apply">(Additional Fees May Apply)</span>',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#options' => array(1 => "Yes", 0 => "No"),
         '#required' => TRUE,
@@ -3221,6 +3789,8 @@ function mcneese_event_workflow_get_event_field_setup_security($form, &$form_sta
     krsort($fields['setup']['security']);
 
     $form_state['conditionally_required'][0][] = 'setup][security';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -3249,6 +3819,19 @@ function mcneese_event_workflow_get_event_field_setup_parking_assistance($form, 
     $build = TRUE;
   }
 
+  $field_title = "Will the Event Require Parking Assistance or Restrictions?";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'parking_assistance',
+    'group' => 'setup',
+    'path' => 'setup][parking_assistance',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
     $fields['setup']['parking_assistance'] = array(
       '#id' => 'field-event-setup-parking_assistance',
@@ -3267,7 +3850,7 @@ function mcneese_event_workflow_get_event_field_setup_parking_assistance($form, 
       $fields['setup']['parking_assistance'][$key] = array(
         '#id' => 'field-event-setup-parking_assistance-' . $key,
         '#type' => 'radios',
-        '#title' => 'Will the Event Require Parking Assistance or Restrictions?',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#options' => array(1 => "Yes", 0 => "No"),
         '#required' => TRUE,
@@ -3282,6 +3865,8 @@ function mcneese_event_workflow_get_event_field_setup_parking_assistance($form, 
     krsort($fields['setup']['parking_assistance']);
 
     $form_state['conditionally_required'][0][] = 'setup][parking_assistance';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -3310,6 +3895,19 @@ function mcneese_event_workflow_get_event_field_setup_parking_assistance_area($f
     $build = TRUE;
   }
 
+  $field_title = "What Parking Area will be Accessed or Restricted?";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'parking_assistance_area',
+    'group' => 'setup',
+    'path' => 'setup][parking_assistance_area',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
     $fields['setup']['parking_assistance_area'] = array(
       '#id' => 'field-event-setup-parking_assistance_area',
@@ -3328,7 +3926,7 @@ function mcneese_event_workflow_get_event_field_setup_parking_assistance_area($f
       $fields['setup']['parking_assistance_area'][$key] = array(
         '#id' => 'field-event-setup-parking_assistance_area-' . $key,
         '#type' => 'textarea',
-        '#title' => 'What Parking Area will be Accessed or Restricted?',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#states' => array(
           'visible' => array(
@@ -3353,6 +3951,8 @@ function mcneese_event_workflow_get_event_field_setup_parking_assistance_area($f
     krsort($fields['setup']['parking_assistance_area']);
 
     $form_state['conditionally_required'][1][] = 'setup][parking_assistance_area';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -3381,6 +3981,19 @@ function mcneese_event_workflow_get_event_field_setup_road_closures($form, &$for
     $build = TRUE;
   }
 
+  $field_title = "Will the Event Require Road Closures or Barricades?";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'road_closures',
+    'group' => 'setup',
+    'path' => 'setup][road_closures',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
     $fields['setup']['road_closures'] = array(
       '#id' => 'field-event-setup-road_closures',
@@ -3399,7 +4012,7 @@ function mcneese_event_workflow_get_event_field_setup_road_closures($form, &$for
       $fields['setup']['road_closures'][$key] = array(
         '#id' => 'field-event-setup-road_closures-' . $key,
         '#type' => 'radios',
-        '#title' => 'Will the Event Require Road Closures or Barricades?',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#options' => array(1 => "Yes", 0 => "No"),
         '#required' => TRUE,
@@ -3414,6 +4027,8 @@ function mcneese_event_workflow_get_event_field_setup_road_closures($form, &$for
     krsort($fields['setup']['road_closures']);
 
     $form_state['conditionally_required'][0][] = 'setup][road_closures';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -3442,6 +4057,19 @@ function mcneese_event_workflow_get_event_field_setup_road_closures_details($for
     $build = TRUE;
   }
 
+  $field_title = "Provide an Explanation on the Road Closures or Barricades";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'road_closures_details',
+    'group' => 'setup',
+    'path' => 'setup][road_closures_details',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
     $fields['setup']['road_closures_details'] = array(
       '#id' => 'field-event-setup-road_closures_details',
@@ -3460,7 +4088,7 @@ function mcneese_event_workflow_get_event_field_setup_road_closures_details($for
       $fields['setup']['road_closures_details'][$key] = array(
         '#id' => 'field-event-setup-road_closures_details-' . $key,
         '#type' => 'textarea',
-        '#title' => 'Provide an Explanation on the Road Closures or Barricades',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#rows' => 2,
         '#states' => array(
@@ -3485,6 +4113,8 @@ function mcneese_event_workflow_get_event_field_setup_road_closures_details($for
     krsort($fields['setup']['road_closures_details']);
 
     $form_state['conditionally_required'][1][] = 'setup][road_closures_details';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -3513,6 +4143,19 @@ function mcneese_event_workflow_get_event_field_setup_special_requests($form, &$
     $build = TRUE;
   }
 
+  $field_title = "Will the Event Require any Additional Special Requests for Setup?";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'special_requests',
+    'group' => 'setup',
+    'path' => 'setup][special_requests',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
     $fields['setup']['special_requests'] = array(
       '#id' => 'field-event-setup-special_requests',
@@ -3531,7 +4174,7 @@ function mcneese_event_workflow_get_event_field_setup_special_requests($form, &$
       $fields['setup']['special_requests'][$key] = array(
         '#id' => 'field-event-setup-special_requests-' . $key,
         '#type' => 'radios',
-        '#title' => 'Will the Event Require any Additional Special Requests for Setup?',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#options' => array(1 => "Yes", 0 => "No"),
         '#required' => TRUE,
@@ -3546,6 +4189,8 @@ function mcneese_event_workflow_get_event_field_setup_special_requests($form, &$
     krsort($fields['setup']['special_requests']);
 
     $form_state['conditionally_required'][0][] = 'setup][special_requests';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -3574,6 +4219,18 @@ function mcneese_event_workflow_get_event_field_setup_special_requests_details($
     $build = TRUE;
   }
 
+  $field_title = "Explanation on the Special Requests";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'special_requests_details',
+    'group' => 'setup',
+    'path' => 'setup][special_requests_details',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
     $fields['setup']['special_requests_details'] = array(
       '#id' => 'field-event-setup-special_requests_details',
@@ -3592,7 +4249,7 @@ function mcneese_event_workflow_get_event_field_setup_special_requests_details($
       $fields['setup']['special_requests_details'][$key] = array(
         '#id' => 'field-event-setup-special_requests_details-' . $key,
         '#type' => 'textarea',
-        '#title' => 'Explanation on the Special Requests',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#rows' => 2,
         '#states' => array(
@@ -3617,6 +4274,8 @@ function mcneese_event_workflow_get_event_field_setup_special_requests_details($
     krsort($fields['setup']['special_requests_details']);
 
     $form_state['conditionally_required'][1][] = 'setup][special_requests_details';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -3640,6 +4299,19 @@ function mcneese_event_workflow_get_event_field_presentation_technical_equipment
     $values = $event_state['presentation']['technical_equipment'];
   }
 
+  $field_title = "Will the Event Require any Technical Equipment? " . '<span class="title_display-note additional_fees_may_apply">' . "(Additional Fees May Apply)</span>";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'technical_equipment',
+    'group' => 'presentation',
+    'path' => 'presentation][technical_equipment',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['technical_equipment'] = array(
       '#id' => 'field-event-presentation-technical_equipment',
@@ -3658,7 +4330,7 @@ function mcneese_event_workflow_get_event_field_presentation_technical_equipment
       $fields['presentation']['technical_equipment'][$key] = array(
         '#id' => 'field-event-presentation-technical_equipment-' . $key,
         '#type' => 'radios',
-        '#title' => 'Will the Event Require any Technical Equipment? <span class="title_display-note additional_fees_may_apply">(Additional Fees May Apply)</span>',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#options' => array(1 => "Yes", 0 => "No"),
         '#required' => TRUE,
@@ -3673,6 +4345,8 @@ function mcneese_event_workflow_get_event_field_presentation_technical_equipment
     krsort($fields['presentation']['technical_equipment']);
 
     $form_state['conditionally_required'][0][] = 'presentation][technical_equipment';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -3696,6 +4370,19 @@ function mcneese_event_workflow_get_event_field_presentation_technical_equipment
     $values = $event_state['presentation']['technical_equipment_details'];
   }
 
+  $field_title = "Specify the Equipment Needed";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'technical_equipment_details',
+    'group' => 'presentation',
+    'path' => 'presentation][technical_equipment_details',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['technical_equipment_details'] = array(
       '#id' => 'field-event-presentation-technical_equipment_details',
@@ -3716,7 +4403,7 @@ function mcneese_event_workflow_get_event_field_presentation_technical_equipment
       $fields['presentation']['technical_equipment_details'][$key] = array(
         '#id' => 'field-event-presentation-technical_equipment_details-' . $key,
         '#type' => 'checkboxes',
-        '#title' => 'Specify the Equipment Needed',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#options' => $technical_equipment_details_options,
         '#states' => array(
@@ -3742,6 +4429,8 @@ function mcneese_event_workflow_get_event_field_presentation_technical_equipment
 
     $form_state['conditionally_required'][0][] = 'presentation][technical_equipment_details';
     $form_state['conditionally_required'][1][] = 'presentation][technical_equipment_details';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -3765,6 +4454,19 @@ function mcneese_event_workflow_get_event_field_presentation_technical_equipment
     $values = $event_state['presentation']['technical_equipment_microphone'];
   }
 
+  $field_title = "Specify the Quantity of Microphones";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'technical_equipment_microphone',
+    'group' => 'presentation',
+    'path' => 'presentation][technical_equipment_microphone',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['technical_equipment_microphone'] = array(
       '#id' => 'field-event-presentation-technical_equipment_microphone',
@@ -3783,7 +4485,7 @@ function mcneese_event_workflow_get_event_field_presentation_technical_equipment
       $fields['presentation']['technical_equipment_microphone'][$key] = array(
         '#id' => 'field-event-presentation-technical_equipment_microphone-' . $key,
         '#type' => 'numberfield',
-        '#title' => 'Specify the Quantity of Microphones',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#min' => 0,
         '#states' => array(
@@ -3811,6 +4513,8 @@ function mcneese_event_workflow_get_event_field_presentation_technical_equipment
     krsort($fields['presentation']['technical_equipment_microphone']);
 
     $form_state['conditionally_required'][1][] = 'presentation][technical_equipment_microphone';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -3839,6 +4543,19 @@ function mcneese_event_workflow_get_event_field_presentation_external_audio_pers
     $build = TRUE;
   }
 
+  $field_title = "Will an External Audio/Video Person/Company be Utilized?";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'external_audio_person',
+    'group' => 'presentation',
+    'path' => 'presentation][external_audio_person',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['external_audio_person'] = array(
       '#id' => 'field-event-presentation-external_audio_person',
@@ -3857,7 +4574,7 @@ function mcneese_event_workflow_get_event_field_presentation_external_audio_pers
       $fields['presentation']['external_audio_person'][$key] = array(
         '#id' => 'field-event-presentation-external_audio_person-' . $key,
         '#type' => 'radios',
-        '#title' => 'Will an External Audio/Video Person/Company be Utilized?',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#options' => array(1 => "Yes", 0 => "No"),
         '#required' => TRUE,
@@ -3872,6 +4589,8 @@ function mcneese_event_workflow_get_event_field_presentation_external_audio_pers
     krsort($fields['presentation']['external_audio_person']);
 
     $form_state['conditionally_required'][0][] = 'presentation][external_audio_person';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -3900,6 +4619,19 @@ function mcneese_event_workflow_get_event_field_presentation_external_audio_pers
     $build = TRUE;
   }
 
+  $field_title = "Provide the Name of the Person/Company Providing the External Audio/Video";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'external_audio_person_name',
+    'group' => 'presentation',
+    'path' => 'presentation][external_audio_person_name',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['external_audio_person_name'] = array(
       '#id' => 'field-event-presentation-external_audio_person_name',
@@ -3918,7 +4650,7 @@ function mcneese_event_workflow_get_event_field_presentation_external_audio_pers
       $fields['presentation']['external_audio_person_name'][$key] = array(
         '#id' => 'field-event-presentation-external_audio_person_name-' . $key,
         '#type' => 'textfield',
-        '#title' => 'Provide the Name of the Person/Company Providing the External Audio/Video',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#size' => 48,
         '#maxlength' => 255,
@@ -3944,6 +4676,8 @@ function mcneese_event_workflow_get_event_field_presentation_external_audio_pers
     krsort($fields['presentation']['external_audio_person_name']);
 
     $form_state['conditionally_required'][1][] = 'presentation][external_audio_person_name';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -3972,6 +4706,19 @@ function mcneese_event_workflow_get_event_field_presentation_external_audio_pers
     $build = TRUE;
   }
 
+  $field_title = "Provide the E-mail of the Person/Company Providing the External Audio/Video";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'external_audio_person_email',
+    'group' => 'presentation',
+    'path' => 'presentation][external_audio_person_email',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['external_audio_person_email'] = array(
       '#id' => 'field-event-presentation-external_audio_person_email',
@@ -3990,7 +4737,7 @@ function mcneese_event_workflow_get_event_field_presentation_external_audio_pers
       $fields['presentation']['external_audio_person_email'][$key] = array(
         '#id' => 'field-event-presentation-external_audio_person_email-' . $key,
         '#type' => 'emailfield',
-        '#title' => 'Provide the E-mail of the Person/Company Providing the External Audio/Video',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#size' => 48,
         '#maxlength' => 255,
@@ -4016,6 +4763,8 @@ function mcneese_event_workflow_get_event_field_presentation_external_audio_pers
     krsort($fields['presentation']['external_audio_person_email']);
 
     $form_state['conditionally_required'][0][] = 'presentation][external_audio_person_email';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -4044,6 +4793,19 @@ function mcneese_event_workflow_get_event_field_presentation_external_audio_pers
     $build = TRUE;
   }
 
+  $field_title = "Provide the Phone Number of the Person/Company Providing the External Audio/Video";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'external_audio_person_phone',
+    'group' => 'presentation',
+    'path' => 'presentation][external_audio_person_phone',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['external_audio_person_phone'] = array(
       '#id' => 'field-event-presentation-external_audio_person_phone',
@@ -4062,7 +4824,7 @@ function mcneese_event_workflow_get_event_field_presentation_external_audio_pers
       $fields['presentation']['external_audio_person_phone'][$key] = array(
         '#id' => 'field-event-presentation-external_audio_person_phone-' . $key,
         '#type' => 'telfield',
-        '#title' => 'Provide the Phone Number of the Person/Company Providing the External Audio/Video',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#states' => array(
           'visible' => array(
@@ -4086,6 +4848,8 @@ function mcneese_event_workflow_get_event_field_presentation_external_audio_pers
     krsort($fields['presentation']['external_audio_person_phone']);
 
     $form_state['conditionally_required'][1][] = 'presentation][external_audio_person_phone';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -4114,6 +4878,19 @@ function mcneese_event_workflow_get_event_field_presentation_production($form, &
     $build = TRUE;
   }
 
+  $field_title = "Is the Event Using a Production Company or Professional Promoter?";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'production',
+    'group' => 'presentation',
+    'path' => 'presentation][production',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['production'] = array(
       '#id' => 'field-event-presentation-production',
@@ -4132,7 +4909,7 @@ function mcneese_event_workflow_get_event_field_presentation_production($form, &
       $fields['presentation']['production'][$key] = array(
         '#id' => 'field-event-presentation-production-' . $key,
         '#type' => 'radios',
-        '#title' => 'Is the Event Using a Production Company or Professional Promoter?',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#options' => array(1 => "Yes", 0 => "No"),
         '#required' => TRUE,
@@ -4147,6 +4924,8 @@ function mcneese_event_workflow_get_event_field_presentation_production($form, &
     krsort($fields['presentation']['production']);
 
     $form_state['conditionally_required'][0][] = 'presentation][production';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -4175,6 +4954,18 @@ function mcneese_event_workflow_get_event_field_presentation_production_name($fo
     $build = TRUE;
   }
 
+  $field_title = "Name of the Company/Individual";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'production_name',
+    'group' => 'presentation',
+    'path' => 'presentation][production_name',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['production_name'] = array(
       '#id' => 'field-event-presentation-production_name',
@@ -4193,7 +4984,7 @@ function mcneese_event_workflow_get_event_field_presentation_production_name($fo
       $fields['presentation']['production_name'][$key] = array(
         '#id' => 'field-event-presentation-production_name-' . $key,
         '#type' => 'textfield',
-        '#title' => 'Name of the Company/Individual',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#size' => 48,
         '#maxlength' => 255,
@@ -4219,6 +5010,8 @@ function mcneese_event_workflow_get_event_field_presentation_production_name($fo
     krsort($fields['presentation']['production_name']);
 
     $form_state['conditionally_required'][0][] = 'presentation][production_name';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -4247,6 +5040,19 @@ function mcneese_event_workflow_get_event_field_presentation_production_email($f
     $build = TRUE;
   }
 
+  $field_title = "Contact E-mail of the Company/Individual";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'production_email',
+    'group' => 'presentation',
+    'path' => 'presentation][production_email',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['production_email'] = array(
       '#id' => 'field-event-presentation-production_email',
@@ -4265,7 +5071,7 @@ function mcneese_event_workflow_get_event_field_presentation_production_email($f
       $fields['presentation']['production_email'][$key] = array(
         '#id' => 'field-event-presentation-production_email-' . $key,
         '#type' => 'emailfield',
-        '#title' => 'Contact E-mail of the Company/Individual',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#size' => 48,
         '#maxlength' => 255,
@@ -4291,6 +5097,8 @@ function mcneese_event_workflow_get_event_field_presentation_production_email($f
     krsort($fields['presentation']['production_email']);
 
     $form_state['conditionally_required'][0][] = 'presentation][production_email';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -4319,6 +5127,18 @@ function mcneese_event_workflow_get_event_field_presentation_production_phone($f
     $build = TRUE;
   }
 
+  $field_title = "Phone Number of the Company/Individual";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'production_phone',
+    'group' => 'presentation',
+    'path' => 'presentation][production_phone',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['production_phone'] = array(
       '#id' => 'field-event-presentation-production_phone',
@@ -4337,7 +5157,7 @@ function mcneese_event_workflow_get_event_field_presentation_production_phone($f
       $fields['presentation']['production_phone'][$key] = array(
         '#id' => 'field-event-presentation-production_phone-' . $key,
         '#type' => 'telfield',
-        '#title' => 'Phone Number of the Company/Individual',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#states' => array(
           'visible' => array(
@@ -4361,6 +5181,8 @@ function mcneese_event_workflow_get_event_field_presentation_production_phone($f
     krsort($fields['presentation']['production_phone']);
 
     $form_state['conditionally_required'][0][] = 'presentation][production_phone';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -4384,6 +5206,18 @@ function mcneese_event_workflow_get_event_field_presentation_publicity($form, &$
     $values = $event_state['presentation']['publicity'];
   }
 
+  $field_title = "Will the Event Need Publicity?";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'publicity',
+    'group' => 'presentation',
+    'path' => 'presentation][publicity',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['publicity'] = array(
       '#id' => 'field-event-presentation-publicity',
@@ -4402,7 +5236,7 @@ function mcneese_event_workflow_get_event_field_presentation_publicity($form, &$
       $fields['presentation']['publicity'][$key] = array(
         '#id' => 'field-event-presentation-publicity-' . $key,
         '#type' => 'radios',
-        '#title' => 'Will the Event Need Publicity?',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#options' => array(1 => "Yes", 0 => "No"),
         '#required' => TRUE,
@@ -4417,6 +5251,8 @@ function mcneese_event_workflow_get_event_field_presentation_publicity($form, &$
     krsort($fields['presentation']['publicity']);
 
     $form_state['conditionally_required'][0][] = 'presentation][publicity';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -4440,6 +5276,18 @@ function mcneese_event_workflow_get_event_field_presentation_publicity_details($
     $values = $event_state['presentation']['publicity_details'];
   }
 
+  $field_title = "Specify all Publicity Medium that Apply";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'publicity_details',
+    'group' => 'presentation',
+    'path' => 'presentation][publicity_details',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['publicity_details'] = array(
       '#id' => 'field-event-presentation-publicity_details',
@@ -4460,7 +5308,7 @@ function mcneese_event_workflow_get_event_field_presentation_publicity_details($
       $fields['presentation']['publicity_details'][$key] = array(
         '#id' => 'field-event-presentation-publicity_details-' . $key,
         '#type' => 'checkboxes',
-        '#title' => 'Specify all Publicity Medium that Apply',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#options' => $publicity_details_options,
         '#states' => array(
@@ -4485,6 +5333,8 @@ function mcneese_event_workflow_get_event_field_presentation_publicity_details($
     krsort($fields['presentation']['publicity_details']);
 
     $form_state['conditionally_required'][1][] = 'presentation][publicity_details';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -4513,6 +5363,18 @@ function mcneese_event_workflow_get_event_field_presentation_printed_material($f
     $build = TRUE;
   }
 
+  $field_title = "Will the Event use Printed Material?";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'printed_material',
+    'group' => 'presentation',
+    'path' => 'presentation][printed_material',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['printed_material'] = array(
       '#id' => 'field-event-presentation-printed_material',
@@ -4531,7 +5393,7 @@ function mcneese_event_workflow_get_event_field_presentation_printed_material($f
       $fields['presentation']['printed_material'][$key] = array(
         '#id' => 'field-event-presentation-printed_material-' . $key,
         '#type' => 'radios',
-        '#title' => 'Will the Event use Printed Material?',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#options' => array(1 => "Yes", 0 => "No"),
         '#required' => TRUE,
@@ -4546,6 +5408,8 @@ function mcneese_event_workflow_get_event_field_presentation_printed_material($f
     krsort($fields['presentation']['printed_material']);
 
     $form_state['conditionally_required'][0][] = 'presentation][printed_material';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -4574,6 +5438,18 @@ function mcneese_event_workflow_get_event_field_presentation_university_logo($fo
     $build = TRUE;
   }
 
+  $field_title = "Will the Event use the University Logo?";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'university_logo',
+    'group' => 'presentation',
+    'path' => 'presentation][university_logo',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['university_logo'] = array(
       '#id' => 'field-event-presentation-university_logo',
@@ -4592,7 +5468,7 @@ function mcneese_event_workflow_get_event_field_presentation_university_logo($fo
       $fields['presentation']['university_logo'][$key] = array(
         '#id' => 'field-event-presentation-university_logo-' . $key,
         '#type' => 'radios',
-        '#title' => 'Will the Event use the University Logo?',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#options' => array(1 => "Yes", 0 => "No"),
         '#states' => array(
@@ -4619,6 +5495,8 @@ function mcneese_event_workflow_get_event_field_presentation_university_logo($fo
 
     $form_state['conditionally_required'][0][] = 'presentation][university_logo';
     $form_state['conditionally_required'][1][] = 'presentation][university_logo';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -4647,6 +5525,18 @@ function mcneese_event_workflow_get_event_field_presentation_designing_material(
     $build = TRUE;
   }
 
+  $field_title = "Who will be Designing the Material?";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'designing_material',
+    'group' => 'presentation',
+    'path' => 'presentation][designing_material',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['designing_material'] = array(
       '#id' => 'field-event-presentation-designing_material',
@@ -4667,7 +5557,7 @@ function mcneese_event_workflow_get_event_field_presentation_designing_material(
       $fields['presentation']['designing_material'][$key] = array(
         '#id' => 'field-event-presentation-designing_material-' . $key,
         '#type' => 'checkboxes',
-        '#title' => 'Who will be Designing the Material?',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#options' => $desiging_material_options,
         '#states' => array(
@@ -4695,6 +5585,8 @@ function mcneese_event_workflow_get_event_field_presentation_designing_material(
     krsort($fields['presentation']['designing_material']);
 
     $form_state['conditionally_required'][1][] = 'presentation][designing_material';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -4723,6 +5615,19 @@ function mcneese_event_workflow_get_event_field_presentation_designing_material_
     $build = TRUE;
   }
 
+  $field_title = "Name of who will be Designing the Material";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'designing_material_name',
+    'group' => 'presentation',
+    'path' => 'presentation][designing_material_name',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['designing_material_name'] = array(
       '#id' => 'field-event-presentation-designing_material_name',
@@ -4741,7 +5646,7 @@ function mcneese_event_workflow_get_event_field_presentation_designing_material_
       $fields['presentation']['designing_material_name'][$key] = array(
         '#id' => 'field-event-presentation-designing_material_name-' . $key,
         '#type' => 'textfield',
-        '#title' => 'Name of who will be Designing the Material',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#size' => 48,
         '#maxlength' => 255,
@@ -4772,6 +5677,8 @@ function mcneese_event_workflow_get_event_field_presentation_designing_material_
     krsort($fields['presentation']['designing_material_name']);
 
     $form_state['conditionally_required'][1][] = 'presentation][designing_material_name';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -4800,6 +5707,19 @@ function mcneese_event_workflow_get_event_field_presentation_designing_material_
     $build = TRUE;
   }
 
+  $field_title = "E-mail of who will be Designing the Material";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'designing_material_email',
+    'group' => 'presentation',
+    'path' => 'presentation][designing_material_email',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['designing_material_email'] = array(
       '#id' => 'field-event-presentation-designing_material_email',
@@ -4818,7 +5738,7 @@ function mcneese_event_workflow_get_event_field_presentation_designing_material_
       $fields['presentation']['designing_material_email'][$key] = array(
         '#id' => 'field-event-presentation-designing_material_email-' . $key,
         '#type' => 'emailfield',
-        '#title' => 'E-mail of who will be Designing the Material',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#size' => 48,
         '#maxlength' => 255,
@@ -4849,6 +5769,8 @@ function mcneese_event_workflow_get_event_field_presentation_designing_material_
     krsort($fields['presentation']['designing_material_email']);
 
     $form_state['conditionally_required'][1][] = 'presentation][designing_material_email';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -4877,6 +5799,19 @@ function mcneese_event_workflow_get_event_field_presentation_designing_material_
     $build = TRUE;
   }
 
+  $field_title = "Phone Number of who will be Designing the Material";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'designing_material_phone',
+    'group' => 'presentation',
+    'path' => 'presentation][designing_material_phone',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['designing_material_phone'] = array(
       '#id' => 'field-event-presentation-designing_material_phone',
@@ -4895,7 +5830,7 @@ function mcneese_event_workflow_get_event_field_presentation_designing_material_
       $fields['presentation']['designing_material_phone'][$key] = array(
         '#id' => 'field-event-presentation-designing_material_phone-' . $key,
         '#type' => 'telfield',
-        '#title' => 'Phone Number of who will be Designing the Material',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#states' => array(
           'visible' => array(
@@ -4924,6 +5859,8 @@ function mcneese_event_workflow_get_event_field_presentation_designing_material_
     krsort($fields['presentation']['designing_material_phone']);
 
     $form_state['conditionally_required'][1][] = 'presentation][designing_material_phone';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -4947,6 +5884,19 @@ function mcneese_event_workflow_get_event_field_services_food_served($form, &$fo
     $values = $event_state['services']['food_served'];
   }
 
+  $field_title = "Will Food or Drink be Served? " . '<span class="title_display-note some_venues_dont_permit">' . "(Note some venues do not permit food and drink)</span>";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'food_served',
+    'group' => 'services',
+    'path' => 'services][food_served',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('services', $form['form']['sections']['#value'])) {
     $fields['services']['food_served'] = array(
       '#id' => 'field-event-services-food_served',
@@ -4965,7 +5915,7 @@ function mcneese_event_workflow_get_event_field_services_food_served($form, &$fo
       $fields['services']['food_served'][$key] = array(
         '#id' => 'field-event-services-food_served-' . $key,
         '#type' => 'radios',
-        '#title' => 'Will Food or Drink be Served? <span class="title_display-note some_venues_dont_permit">(Note some venues do not permit food and drink)</span>',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#options' => array(1 => "Yes", 0 => "No"),
         '#required' => TRUE,
@@ -4980,6 +5930,8 @@ function mcneese_event_workflow_get_event_field_services_food_served($form, &$fo
     krsort($fields['services']['food_served']);
 
     $form_state['conditionally_required'][0][] = 'services][food_served';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -5003,6 +5955,18 @@ function mcneese_event_workflow_get_event_field_services_food_caterer($form, &$f
     $values = $event_state['services']['food_caterer'];
   }
 
+  $field_title = "Provide the Name of the Caterer/Busineess";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'food_caterer',
+    'group' => 'services',
+    'path' => 'services][food_caterer',
+    'visible' => TRUE,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('services', $form['form']['sections']['#value'])) {
     $fields['services']['food_caterer'] = array(
       '#id' => 'field-event-services-food_caterer',
@@ -5021,7 +5985,7 @@ function mcneese_event_workflow_get_event_field_services_food_caterer($form, &$f
       $fields['services']['food_caterer'][$key] = array(
         '#id' => 'field-event-services-food_caterer-' . $key,
         '#type' => 'textfield',
-        '#title' => 'Provide the Name of the Caterer/Busineess',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#size' => 48,
         '#maxlength' => 255,
@@ -5047,6 +6011,8 @@ function mcneese_event_workflow_get_event_field_services_food_caterer($form, &$f
     krsort($fields['services']['food_caterer']);
 
     $form_state['conditionally_required'][1][] = 'services][food_caterer';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -5070,6 +6036,19 @@ function mcneese_event_workflow_get_event_field_services_alcohol($form, &$form_s
     $values = $event_state['services']['alcohol'];
   }
 
+  $field_title = "Will Alcohol be Served?";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'alcohol',
+    'group' => 'services',
+    'path' => 'services][alcohol',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('services', $form['form']['sections']['#value'])) {
     $fields['services']['alcohol'] = array(
       '#id' => 'field-event-services-alcohol',
@@ -5088,7 +6067,7 @@ function mcneese_event_workflow_get_event_field_services_alcohol($form, &$form_s
       $fields['services']['alcohol'][$key] = array(
         '#id' => 'field-event-services-alcohol-' . $key,
         '#type' => 'radios',
-        '#title' => 'Will Alcohol be Served?',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#options' => array(1 => "Yes", 0 => "No"),
         '#required' => TRUE,
@@ -5103,6 +6082,8 @@ function mcneese_event_workflow_get_event_field_services_alcohol($form, &$form_s
     krsort($fields['services']['alcohol']);
 
     $form_state['conditionally_required'][0][] = 'services][alcohol';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -5186,6 +6167,18 @@ function mcneese_event_workflow_get_event_field_services_open_flames($form, &$fo
     $build = TRUE;
   }
 
+  $field_title = "Will Open Flames be Used? " . '<span class="title_display-note examples">' . "(Examples: Sternos, Grill, Candles)</span>";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'open_flames',
+    'group' => 'services',
+    'path' => 'services][open_flames',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('services', $form['form']['sections']['#value'])) {
     $fields['services']['open_flames'] = array(
       '#id' => 'field-event-services-open_flames',
@@ -5204,7 +6197,7 @@ function mcneese_event_workflow_get_event_field_services_open_flames($form, &$fo
       $fields['services']['open_flames'][$key] = array(
         '#id' => 'field-event-open_flames-' . $key,
         '#type' => 'radios',
-        '#title' => 'Will Open Flames be Used? <span class="title_display-note examples">(Examples: Sternos, Grill, Candles)</span>',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#options' => array(1 => "Yes", 0 => "No"),
         '#required' => TRUE,
@@ -5219,6 +6212,8 @@ function mcneese_event_workflow_get_event_field_services_open_flames($form, &$fo
     krsort($fields['services']['open_flames']);
 
     $form_state['conditionally_required'][0][] = 'services][open_flames';
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
@@ -5242,6 +6237,19 @@ function mcneese_event_workflow_get_event_field_additional($form, &$form_state, 
     $values = $event_state['additional'];
   }
 
+  $field_title = "Please Provide any Other Information or Questions you may Have for Campus Officials";
+  $limits_check = array(
+    'title' => $field_title,
+    'field' => 'additional',
+    'group' => 'top',
+    'path' => 'additional',
+    'visible' => FALSE,
+    'ps' => $ps,
+  );
+
+  $form_state['conditionally_required'][3][] = &$limits_check;
+
+
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('top', $form['form']['sections']['#value'])) {
     $fields['additional'] = array(
       '#id' => 'field-event-additional',
@@ -5260,7 +6268,7 @@ function mcneese_event_workflow_get_event_field_additional($form, &$form_state, 
       $fields['additional'][$key] = array(
         '#id' => 'field-event-additional-' . $key,
         '#type' => 'textarea',
-        '#title' => 'Please Provide any Other Information or Questions you may Have for Campus Officials',
+        '#title' => $field_title,
         '#default_value' => $value,
         '#rows' => 4,
         '#attributes' => array(
@@ -5272,6 +6280,8 @@ function mcneese_event_workflow_get_event_field_additional($form, &$form_state, 
       );
     }
     krsort($fields['additional']);
+
+    $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {

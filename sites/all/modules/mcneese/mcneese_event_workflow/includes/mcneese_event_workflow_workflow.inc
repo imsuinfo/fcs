@@ -27,7 +27,7 @@ function mcneese_event_workflow_workflow_set_step($event_id, $step, $user = NULL
   $event = event_workflow_load_event_by_id($event_id);
 
   if (empty($event)) {
-    watchdog('mew', "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
+    watchdog(MEW_WATCHDOG_ID, "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
     return FALSE;
   }
 
@@ -50,7 +50,7 @@ function mcneese_event_workflow_workflow_set_step($event_id, $step, $user = NULL
   $step_options = event_workflow_get_review_step_list_options();
 
   if (!array_key_exists($step, $step_options)) {
-    watchdog('mew', "%step is not a valid step.", array('%step' => $step), WATCHDOG_ERROR);
+    watchdog(MEW_WATCHDOG_ID, "%step is not a valid step.", array('%step' => $step), WATCHDOG_ERROR);
     return FALSE;
   }
 
@@ -62,7 +62,7 @@ function mcneese_event_workflow_workflow_set_step($event_id, $step, $user = NULL
   $processed_mew_event_revisions = &drupal_static('processed_mew_event_revisions_' . REQUEST_TIME, FALSE);
 
   if ($event_revision === FALSE) {
-    watchdog('mew', "Failed to load revision number for event %event_id.", array('%event_id' => $event_id), WATCHDOG_ERROR);
+    watchdog(MEW_WATCHDOG_ID, "Failed to load revision number for event %event_id.", array('%event_id' => $event_id), WATCHDOG_ERROR);
     return FALSE;
   }
   elseif (is_null($event_revision)) {
@@ -152,7 +152,7 @@ function mcneese_event_workflow_workflow_set_status($event_id, $status, $user = 
   $event = event_workflow_load_event_by_id($event_id);
 
   if (empty($event)) {
-    watchdog('mew', "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
+    watchdog(MEW_WATCHDOG_ID, "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
     return FALSE;
   }
 
@@ -182,7 +182,7 @@ function mcneese_event_workflow_workflow_set_status($event_id, $status, $user = 
   );
 
   if (!in_array($status, $status_options)) {
-    watchdog('mew', "%status is not a valid status.", array('%status' => $status), WATCHDOG_ERROR);
+    watchdog(MEW_WATCHDOG_ID, "%status is not a valid status.", array('%status' => $status), WATCHDOG_ERROR);
     return FALSE;
   }
 
@@ -194,7 +194,7 @@ function mcneese_event_workflow_workflow_set_status($event_id, $status, $user = 
   $processed_mew_event_revisions = &drupal_static('processed_mew_event_revisions_' . REQUEST_TIME, FALSE);
 
   if ($event_revision === FALSE) {
-    watchdog('mew', "Failed to load revision number for event %event_id.", array('%event_id' => $event_id), WATCHDOG_ERROR);
+    watchdog(MEW_WATCHDOG_ID, "Failed to load revision number for event %event_id.", array('%event_id' => $event_id), WATCHDOG_ERROR);
     return FALSE;
   }
   elseif (is_null($event_revision)) {
@@ -291,7 +291,7 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
   $event = event_workflow_load_event_by_id($event_id);
 
   if (empty($event)) {
-    watchdog('mew', "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
+    watchdog(MEW_WATCHDOG_ID, "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
     return FALSE;
   }
 
@@ -332,7 +332,7 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
   $event = event_workflow_load_event_by_id($event_id);
 
   if (empty($event)) {
-    watchdog('mew', "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
+    watchdog(MEW_WATCHDOG_ID, "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
     return FALSE;
   }
 
@@ -360,7 +360,7 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
   $processed_mew_event_revisions = &drupal_static('processed_mew_event_revisions_' . REQUEST_TIME, FALSE);
 
   if ($event_revision === FALSE) {
-    watchdog('mew', "Failed to load revision number for event %event_id.", array('%event_id' => $event_id), WATCHDOG_ERROR);
+    watchdog(MEW_WATCHDOG_ID, "Failed to load revision number for event %event_id.", array('%event_id' => $event_id), WATCHDOG_ERROR);
     return FALSE;
   }
   elseif (is_null($event_revision)) {
@@ -872,7 +872,7 @@ function mcneese_event_workflow_workflow_step_review($event_id, $user, $step, $d
 
       $reviews = $query->execute()->fetchAll();
       if ($reviews === FALSE) {
-        watchdog('mew', "Failed to load reviewer classification count for event %event_id with classification %classification on step %step. Assuming total is 0.", array('%event_id' => $event_id, '%classification' => $event_classification, '%step' => $event_step), WATCHDOG_ERROR);
+        watchdog(MEW_WATCHDOG_ID, "Failed to load reviewer classification count for event %event_id with classification %classification on step %step. Assuming total is 0.", array('%event_id' => $event_id, '%classification' => $event_classification, '%step' => $event_step), WATCHDOG_ERROR);
         $total_reviews = 0;
       }
       else {
@@ -1031,7 +1031,7 @@ function mcneese_event_workflow_workflow_status_change_alert($event_id, $status,
   $event = event_workflow_load_event_by_id($event_id);
 
   if (empty($event)) {
-    watchdog('mew', "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
+    watchdog(MEW_WATCHDOG_ID, "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
     return FALSE;
   }
 
@@ -1090,7 +1090,7 @@ function mcneese_event_workflow_send_workflow_emails($event_id, $parameters) {
   $event = event_workflow_load_event_by_id($event_id);
 
   if (empty($event)) {
-    watchdog('mew', "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
+    watchdog(MEW_WATCHDOG_ID, "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
     return FALSE;
   }
 

@@ -213,7 +213,7 @@ class McNeeseEventWorkflowMail implements MailSystemInterface {
       $append .= '--' . $sig_boundary . '--';
     }
     catch (Exception $ex) {
-      watchdog('error', "Failed to sign PGP key: @key, reason: @reason", array('@key' => $fingerprint, '@reason' => $ex->getMessage()), WATCHDOG_ERROR);
+      watchdog(MEW_WATCHDOG_ID, "Failed to sign PGP key: @key, reason: @reason", array('@key' => $fingerprint, '@reason' => $ex->getMessage()), WATCHDOG_ERROR);
       return FALSE;
     }
 

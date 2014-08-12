@@ -34,14 +34,14 @@ function mcneese_event_workflow_pre_validate_event_fields(&$form, &$form_state, 
     $ps = array_pop($ps_c);
 
     if (!array_key_exists($ps, $location_form)) {
-      watchdog('mer', "Failed to perform pre-validation, the key '@key' is missing from the form. Currently processed path is @processed", array('@key' => $ps, '@processed' => isset($ps_p) ? $ps_p : NULL), WATCHDOG_ERROR);
+      watchdog(MEW_WATCHDOG_ID, "Failed to perform pre-validation, the key '@key' is missing from the form. Currently processed path is @processed", array('@key' => $ps, '@processed' => isset($ps_p) ? $ps_p : NULL), WATCHDOG_ERROR);
       return NULL;
     }
 
     if (!array_key_exists($ps, $location_state)) {
       // for creating new events, the form state may not yet exist under certain circumstances and in such cases do not present and error.
       if (isset($form['form']['event'])) {
-        watchdog('mer', "Failed to perform pre-validation, the key '@key' is missing from the form_state. Currently processed path is @processed", array('@key' => $ps, '@processed' => isset($ps_p) ? $ps_p : NULL), WATCHDOG_ERROR);
+        watchdog(MEW_WATCHDOG_ID, "Failed to perform pre-validation, the key '@key' is missing from the form_state. Currently processed path is @processed", array('@key' => $ps, '@processed' => isset($ps_p) ? $ps_p : NULL), WATCHDOG_ERROR);
       }
       return NULL;
     }
@@ -153,14 +153,14 @@ function mcneese_event_workflow_validate_event_fields($form, &$form_state) {
     $ps = array_pop($ps_c);
 
     if (!array_key_exists($ps, $location_form)) {
-      watchdog('mer', "Failed to perform validation, the key '@key' is missing from the form. Currently processed path is @processed", array('@key' => $ps, '@processed' => isset($ps_p) ? $ps_p : NULL), WATCHDOG_ERROR);
+      watchdog(MEW_WATCHDOG_ID, "Failed to perform validation, the key '@key' is missing from the form. Currently processed path is @processed", array('@key' => $ps, '@processed' => isset($ps_p) ? $ps_p : NULL), WATCHDOG_ERROR);
       return NULL;
     }
 
     if (!array_key_exists($ps, $location_state)) {
       // for creating new events, the form state may not yet exist under certain circumstances and in such cases do not present and error.
       if (isset($form['form']['event'])) {
-        watchdog('mer', "Failed to perform validation, the key '@key' is missing from the form_state. Currently processed path is @processed", array('@key' => $ps, '@processed' => isset($ps_p) ? $ps_p : NULL), WATCHDOG_ERROR);
+        watchdog(MEW_WATCHDOG_ID, "Failed to perform validation, the key '@key' is missing from the form_state. Currently processed path is @processed", array('@key' => $ps, '@processed' => isset($ps_p) ? $ps_p : NULL), WATCHDOG_ERROR);
       }
       return NULL;
     }
@@ -354,9 +354,429 @@ function mcneese_event_workflow_validate_event_fields($form, &$form_state) {
     }
   }
 
+  // condition 3 is for range limiting to provide more graceful errors than what the database would otherwise present.
+  if (!empty($form_state['conditionally_required'][3])) {
+    mcneese_event_workflow_include(0);
+    $structure = mcneese_event_workflow_table_structure();
+
+    foreach ($form_state['conditionally_required'][3] as $field) {
+      if (is_array($field)) {
+        $result = mcneese_event_workflow_check_range_limits($field, $form, $form_state, $structure);
+
+        if ($result === FALSE) {
+          // @todo: present error.
+        }
+      }
+    }
+  }
+
   return $passed;
 }
 
+/**
+ * Changes a form field's required state.
+ *
+ * @param string $field
+ *   The array path name of the field.
+ * @param array $form
+ *   The form array where the field is stored.
+ *   This will be updated.
+ * @param bool $is_required
+ *   Whether or not to change the field to required or not required.
+ *
+ * @return bool
+ *   TRUE on successfull processing, FALSE otherwise.
+ */
+function mcneese_event_workflow_assign_validation_requirement($field, &$form, $is_required) {
+  if (!is_string($field)) {
+    cf_error::invalid_string('field');
+    return FALSE;
+  }
+
+  if (!is_array($form)) {
+    cf_error::invalid_array('form');
+    return FALSE;
+  }
+
+  if (!is_bool($is_required)) {
+    cf_error::invalid_bool('is_required');
+    return FALSE;
+  }
+
+  $parts = explode('][', $field);
+
+  $found = TRUE;
+  $location = &$form;
+  while (!empty($parts)) {
+    $part = array_shift($parts);
+    if (!is_array($location) || !array_key_exists($part, $location)) {
+      $found = FALSE;
+      break;
+    }
+
+    $location = &$location[$part];
+  }
+
+  if ($found && !empty($location)) {
+    foreach ($location as $delta => &$location_field) {
+      if (!is_numeric($delta)) continue;
+
+      if (array_key_exists('#required', $location_field)) {
+        if (isset($location['#options']) && is_array($location_field['#options'])) {
+          if ($is_required) {
+            if (array_key_exists('', $location_field['#options'])) {
+              unset($location_field['#options']['']);
+            }
+          }
+          else {
+            if (!array_key_exists('', $location_field['#options'])) {
+              $location_field['#options'][''] = '';
+            }
+          }
+        }
+
+        $location_field['#required'] = $is_required;
+      }
+    }
+  }
+
+  return TRUE;
+}
+
+/**
+ * Confirms that a form field's values are within their allowed range.
+ *
+ * @param array $field
+ *   The array path name of the field.
+ * @param array $form
+ *   The form array where the field is stored.
+ * @param array $form_state
+ *   The form state array where the field is stored.
+ * @param array $structure
+ *   The table data structure for all fields.
+ * @param bool $always
+ *   (optional) When TRUE, always performs validation on field regardless of
+ *   its visibility state. This is useful for the final submit process on
+ *   multi-page forms where all values should be checked before submitting.
+ *
+ * @return bool
+ *   TRUE on no validation errors, FALSE on validation errors, NULL in all
+ *   other cases.
+ */
+function mcneese_event_workflow_check_range_limits($field, $form, &$form_state, $structure, $always = FALSE) {
+  if (!is_array($field)) {
+    cf_error::invalid_array('field');
+    return NULL;
+  }
+
+  if (!is_array($form)) {
+    cf_error::invalid_array('form');
+    return NULL;
+  }
+
+  if (!is_array($form_state)) {
+    cf_error::invalid_array('form_state');
+    return NULL;
+  }
+
+  if (!is_array($structure)) {
+    cf_error::invalid_array('structure');
+    return NULL;
+  }
+
+  if (!isset($field['group']) || !isset($field['field']) || !isset($structure[$field['group']][$field['field']])) {
+    return NULL;
+  }
+
+  if (empty($field['path']) || !isset($field['ps']) || empty($field['title'])) {
+    return NULL;
+  }
+
+  if (!$always) {
+    if (!isset($field['visible']) || $field['visible'] === FALSE) {
+      return NULL;
+    }
+  }
+
+  if (empty($structure[$field['group']][$field['field']]['size'])) {
+    return NULL;
+  }
+  $size = $structure[$field['group']][$field['field']]['size'];
+
+  $parts = array_merge($form['form']['parents']['#value']['structure'], explode('][', $field['path']));
+
+  $found = TRUE;
+  $location_state = &$form_state['values'];
+  while (!empty($parts)) {
+    $part = array_shift($parts);
+    if (!is_array($location_state) || !array_key_exists($part, $location_state)) {
+      $found = FALSE;
+      break;
+    }
+
+    $location_state = &$location_state[$part];
+  }
+
+  if (!$found || empty($location_state)) {
+    return NULL;
+  }
+
+  $success = NULL;
+  foreach ($location_state as $delta => &$location_value) {
+    if (!is_numeric($delta)) continue;
+
+    if (is_array($size)) {
+      foreach ($size as $key => $value) {
+        if (!array_key_exists($key, $location_value)) continue;
+
+        $result = mcneese_event_workflow_check_range_limit($field, $form, $structure, $size[$key], $delta, $location_value[$key]);
+
+        if ($result === FALSE) {
+          $success = FALSE;
+        }
+        elseif (is_null($success) && $result === TRUE) {
+          $success = TRUE;
+        }
+      }
+    }
+    else {
+      $result = mcneese_event_workflow_check_range_limit($field, $form, $structure, $size, $delta, $location_value);
+
+      if ($result === FALSE) {
+        $success = FALSE;
+      }
+      elseif (is_null($success) && $result === TRUE) {
+        $success = TRUE;
+      }
+    }
+  }
+
+  return $success;
+}
+
+/**
+ * Confirms that a form field's value is within its allowed range.
+ *
+ * @param array $field
+ *   The array path name of the field.
+ * @param array $form
+ *   The form array where the field is stored.
+ * @param array $structure
+ *   The array defining the structure settings for individual fields.
+ * @param int|string $size
+ *   The form state array where the field is stored.
+ * @param int $delta
+ *   The numeric index that the value is associated with.
+ * @param $value
+ *   The value to check the range of.
+ *
+ * @return bool
+ *   TRUE on no validation errors, FALSE on validation errors, NULL in all
+ *   other cases.
+ */
+function mcneese_event_workflow_check_range_limit($field, $form, $structure, $size, $delta, $value) {
+  if (!is_array($field)) {
+    cf_error::invalid_array('field');
+    return NULL;
+  }
+
+  if (!is_array($form)) {
+    cf_error::invalid_array('form');
+    return NULL;
+  }
+
+  if (!is_array($structure)) {
+    cf_error::invalid_array('structure');
+    return NULL;
+  }
+
+  if (!cf_is_integer($delta)) {
+    cf_error::invalid_integer('delta');
+    return NULL;
+  }
+
+  $ps = '';
+  if (!empty($form['form']['parents']['#value']['structure'])) {
+    $ps .= implode('][', $form['form']['parents']['#value']['structure']);
+    $ps .= '][';
+  }
+
+  if ($field['ps'] == 'top]' || $field['ps'] == 'top') {
+    // top ps means the field is at the top level and is not nested under any array.
+    $ps .= $field['field'] . ']';
+  }
+  else {
+    $ps .= $field['ps'] . '[' . $field['field'] . ']';
+  }
+
+  $unsigned = TRUE;
+  if (isset($structure[$field['group']][$field['field']]['signed']) && $structure[$field['group']][$field['field']]['signed']) {
+    $unsigned = FALSE;
+  }
+
+  $storage = NULL;
+  if (isset($structure[$field['group']][$field['field']]['storage'])) {
+    $storage = $structure[$field['group']][$field['field']]['storage'];
+  }
+
+  $type = NULL;
+  if (isset($structure[$field['group']][$field['field']]['type'])) {
+    $type = $structure[$field['group']][$field['field']]['type'];
+  }
+
+  $specific_min = NULL;
+  if (isset($structure[$field['group']][$field['field']]['min'])) {
+    $specific_min = $structure[$field['group']][$field['field']]['min'];
+  }
+
+  $specific_max = NULL;
+  if (isset($structure[$field['group']][$field['field']]['max'])) {
+    $specific_max = $structure[$field['group']][$field['field']]['max'];
+  }
+
+  $title = strip_tags($field['title']);
+
+
+  if ($type == 'bool') {
+    // bools are either true or false, aka: 0 or 1.
+    if ($value != 0 && $value != 1) {
+      form_set_error($ps . '[' . $delta, t("The field '@title' has an invalid value.", array('@title' => $title)));
+      return FALSE;
+    }
+  }
+  elseif (is_numeric($size)) {
+    // when size is numeric, the value needs to be a string of a certain length.
+    if (!is_string($value)) {
+      form_set_error($ps . '[' . $delta, t("The field '@title' had an internal error. Please contact the support staff.", array('@title' => $title)));
+      watchdog(MEW_WATCHDOG_ID, "Field value is supposed to be a string but is not. Field: @title. Path: @path. Value: @value.", array('@title' => $title, '@path' => $field['path'], '@value' => $value), WATCHDOG_ERROR);
+      return FALSE;
+    }
+
+    $min = 0;
+    $max = $size;
+
+    // now process a specific min/max as defined by the fields storage settings.
+    // this cannot go lower/higher than the current $min/$max that represent the database limitations (or PHP limitations).
+    if (!is_null($specific_min)) {
+      if ($specific_min > $min) {
+        $min = $specific_min;
+      }
+    }
+
+    if (!is_null($specific_max)) {
+      if ($specific_max < $max) {
+        $max = $specific_max;
+      }
+    }
+
+    $length = strlen($value);
+
+    if ($length < $min) {
+      form_set_error($ps . '[' . $delta, t("The field '@title' is too short. The field has a minimum length of @length characters.", array('@title' => $title, '@length' => number_format($min))));
+      return FALSE;
+    }
+
+    if ($length > $max) {
+      form_set_error($ps . '[' . $delta, t("The field '@title' is too long. The field has a maximum length of @length characters.", array('@title' => $title, '@length' => number_format($max))));
+      return FALSE;
+    }
+  }
+  elseif (is_string($size)) {
+    $max = NULL;
+
+    // when size is a string, then it is an integer of some size.
+    if ($size == 'normal') {
+      // normal appears to bo the same as big.
+      if ($unsigned) {
+        // PHP does not support unsigned 8-byte integers and converts them to floats.
+        #$max = 18446744073709551615;
+        $max = 9223372036854775807;
+      }
+      else {
+        $max = 9223372036854775807;
+      }
+    }
+    elseif ($size == 'tiny') {
+      if ($unsigned) {
+        $max = 255;
+      }
+      else {
+        $max = 127;
+      }
+    }
+    elseif ($size == 'small') {
+      if ($unsigned) {
+        $max = 65535;
+      }
+      else {
+        $max = 32767;
+      }
+    }
+    elseif ($size == 'medium') {
+      if ($unsigned) {
+        $max = 4294967295;
+      }
+      else {
+        $max = 2147483647;
+      }
+    }
+    elseif ($size == 'big') {
+      if ($unsigned) {
+        // PHP does not support unsigned 8-byte integers and converts them to floats.
+        #$max = 18446744073709551615;
+        $max = 9223372036854775807;
+      }
+      else {
+        $max = 9223372036854775807;
+      }
+    }
+    else {
+      // unknown size.
+      return NULL;
+    }
+
+    // note: I would be using number_form() on the outputs, but PHP's number_format() does not function properly wioth large integers.
+    // for example: 9223372036854775807 gets reported as 9223372036854775808.
+
+    // currency uses an integer that is shifted by 10^2 places.
+    if ($storage == 'currency') {
+      $max = floor($max / 100);
+    }
+
+    if ($unsigned) {
+      $min = 0;
+    }
+    else {
+      $min = -$max;
+    }
+
+    // now process a specific min/max as defined by the fields storage settings.
+    // this cannot go lower/higher than the current $min/$max that represent the database limitations (or PHP limitations).
+    if (!is_null($specific_min)) {
+      if ($specific_min > $min) {
+        $min = $specific_min;
+      }
+    }
+
+    if (!is_null($specific_max)) {
+      if ($specific_max < $max) {
+        $max = $specific_max;
+      }
+    }
+
+    if ($value < $min) {
+      form_set_error($ps . '[' . $delta, t("The field '@title' is too small. The field can be no smaller than @size.", array('@title' => $title, '@size' => $min)));
+      return FALSE;
+    }
+
+    if ($value > $max) {
+      form_set_error($ps . '[' . $delta, t("The field '@title' is too large. The field can be no larger than @size.", array('@title' => $title, '@size' => $max)));
+      return FALSE;
+    }
+  }
+
+  return TRUE;
+}
 
 /**
  * @} End of '@addtogroup mcneese_event_workflow'.

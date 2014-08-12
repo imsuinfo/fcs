@@ -35,7 +35,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
   $event = event_workflow_load_event_by_id($event_id);
 
   if (empty($event)) {
-    watchdog('mew', "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
+    watchdog(MEW_WATCHDOG_ID, "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
     drupal_not_found();
     drupal_exit();
     return array();
@@ -2012,7 +2012,7 @@ function mcneese_event_workflow_event_view_0_page_submit($form, &$form_state) {
     }
     else {
       form_set_error('form', "An error occurred while trying to submit the event review. Please contact the support staff.");
-      watchdog('mew', "An error occured while trying to submit the event review.", array(), WATCHDOG_ERROR);
+      watchdog(MEW_WATCHDOG_ID, "An error occured while trying to submit the event review.", array(), WATCHDOG_ERROR);
 
       $form_state['rebuild'] = TRUE;
       $form_state['redirect'] = FALSE;
@@ -2101,7 +2101,7 @@ function mcneese_event_workflow_event_pdf_0_page($event_id, $mode) {
   $event = event_workflow_load_event_by_id($event_id);
 
   if (empty($event)) {
-    watchdog('mew', "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
+    watchdog(MEW_WATCHDOG_ID, "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
     drupal_not_found();
     drupal_exit();
     return array();
@@ -2172,7 +2172,7 @@ function mcneese_event_workflow_build_reviews_log(&$form, &$form_state, $event_i
   $event = event_workflow_load_event_by_id($event_id);
 
   if (empty($event)) {
-    watchdog('mew', "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
+    watchdog(MEW_WATCHDOG_ID, "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
     return FALSE;
   }
 

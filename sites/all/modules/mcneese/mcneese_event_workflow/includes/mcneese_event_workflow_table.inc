@@ -25,31 +25,37 @@ function mcneese_event_workflow_table_structure() {
       'path' => 'event][status',
       'name' => "Status",
       'type' => 'options',
+      'size' => 'small',
     ),
     'step' => array(
       'path' => 'event][step',
       'name' => "Step",
       'type' => 'options',
+      'size' => 'normal',
     ),
     'location' => array(
       'path' => 'event][location',
       'name' => "Location",
       'type' => 'options',
+      'size' => 'big',
     ),
     'building' => array(
       'path' => 'event][building',
       'name' => "Building",
       'type' => 'options',
+      'size' => 'big',
     ),
     'room' => array(
       'path' => 'event][room',
       'name' => "Room",
       'type' => 'options',
+      'size' => 'big',
     ),
     'additional' => array(
       'path' => 'event][additional',
       'name' => "Additional Information",
       'type' => 'text',
+      'size' => 2048,
     ),
   );
 
@@ -59,6 +65,7 @@ function mcneese_event_workflow_table_structure() {
       'name' => "Review Log",
       'type' => 'review_log',
       'columns' => array('reviewer', 'step', 'decision', 'message'),
+      'size' => array('normal', 'normal', 'normal', '4096'),
       'manual_processing' => TRUE,
     ),
   );
@@ -70,6 +77,7 @@ function mcneese_event_workflow_table_structure() {
       'type' => 'use_fees',
       'manual_processing' => TRUE,
       'columns' => array('hours', 'days', 'amount'),
+      'size' => array('normal', 'normal', 'normal'),
       'storage' => 'currency',
     ),
     'equipment' => array(
@@ -78,6 +86,7 @@ function mcneese_event_workflow_table_structure() {
       'type' => 'use_fees',
       'manual_processing' => TRUE,
       'columns' => array('hours', 'days', 'amount'),
+      'size' => array('normal', 'normal', 'normal'),
       'storage' => 'currency',
     ),
     'custodial' => array(
@@ -86,6 +95,7 @@ function mcneese_event_workflow_table_structure() {
       'type' => 'use_fees',
       'manual_processing' => TRUE,
       'columns' => array('hours', 'days', 'amount'),
+      'size' => array('normal', 'normal', 'normal'),
       'storage' => 'currency',
     ),
     'security' => array(
@@ -94,23 +104,27 @@ function mcneese_event_workflow_table_structure() {
       'type' => 'use_fees',
       'manual_processing' => TRUE,
       'columns' => array('hours', 'days', 'amount'),
+      'size' => array('normal', 'normal', 'normal'),
       'storage' => 'currency',
     ),
     'other' => array(
       'name' => "Other Use Fees",
       'path' => 'event][use_fees][other',
       'type' => 'bool',
+      'size' => 'tiny',
       'manual_processing' => TRUE,
     ),
     'waved' => array(
       'name' => "Use Fees Waved (with Presidents Approval)",
       'path' => 'event][use_fees][waved',
       'type' => 'bool',
+      'size' => 'tiny',
       'manual_processing' => TRUE,
     ),
     'university' => array(
       'name' => "University Use Fees",
       'type' => 'bool',
+      'size' => 'tiny',
       'path' => 'event][use_fees][university',
       'manual_processing' => TRUE,
     ),
@@ -121,12 +135,14 @@ function mcneese_event_workflow_table_structure() {
       'path' => 'event][insurance][contractor',
       'name' => "Contractor Insurance",
       'type' => 'bool',
+      'size' => 'tiny',
       'manual_processing' => TRUE,
     ),
     'unaffiliated' => array(
       'name' => "Uniffiliated Insurance",
       'path' => 'event][insurance][unaffiliated',
       'type' => 'bool',
+      'size' => 'tiny',
       'manual_processing' => TRUE,
     ),
   );
@@ -136,6 +152,7 @@ function mcneese_event_workflow_table_structure() {
       'path' => 'event][dates][date',
       'name' => "Date",
       'type' => 'date',
+      'size' => 'big',
       'storage' => 'date_popup',
       'date_popup' => array('view' => 'Y/m/d'),
       'multiple' => TRUE,
@@ -144,6 +161,7 @@ function mcneese_event_workflow_table_structure() {
       'path' => 'event][dates][time_start',
       'name' => "Start Time",
       'type' => 'time',
+      'size' => 'big',
       'storage' => 'timestamp',
       'timestamp' => array('view' => 'h:ia', 'relative_to' => 'event][dates][date'),
       'multiple' => TRUE,
@@ -152,6 +170,7 @@ function mcneese_event_workflow_table_structure() {
       'path' => 'event][dates][time_stop',
       'name' => "Stop Time",
       'type' => 'time',
+      'size' => 'big',
       'storage' => 'timestamp',
       'timestamp' => array('view' => 'h:ia', 'relative_to' => 'event][dates][date'),
       'multiple' => TRUE,
@@ -160,6 +179,7 @@ function mcneese_event_workflow_table_structure() {
       'path' => 'event][dates][category',
       'name' => "Date Category",
       'type' => 'options',
+      'size' => 'normal',
       'multiple' => TRUE,
     ),
   );
@@ -169,6 +189,7 @@ function mcneese_event_workflow_table_structure() {
       'path' => 'event][venue_coordinator][user_id',
       'name' => "Venue Coordinator",
       'type' => 'venue_coordinator',
+      'size' => 'normal',
     ),
   );
 
@@ -177,21 +198,25 @@ function mcneese_event_workflow_table_structure() {
       'path' => 'event][event_coordinator][name',
       'name' => "Event Coordinator Name",
       'type' => 'text',
+      'size' => 255,
     ),
     'phone' => array(
       'path' => 'event][event_coordinator][phone',
       'name' => "Event Coordinator Phone",
       'type' => 'text',
+      'size' => 255,
     ),
     'email' => array(
       'path' => 'event][event_coordinator][email',
       'name' => "Event Coordinator E-mail",
       'type' => 'text',
+      'size' => 255,
     ),
     'classification' => array(
       'path' => 'event][event_coordinator][classification',
       'name' => "Event Coordinator Classification",
       'type' => 'options',
+      'size' => 'normal',
     ),
   );
 
@@ -200,26 +225,31 @@ function mcneese_event_workflow_table_structure() {
       'path' => 'event][information][title',
       'name' => "Title",
       'type' => 'text',
+      'size' => 255,
     ),
     'attendance' => array(
       'path' => 'event][information][attendance',
       'name' => "Expected Attendance",
       'type' => 'text',
+      'size' => 'normal',
     ),
     'type' => array(
       'path' => 'event][information][type',
       'name' => "Type",
       'type' => 'options',
+      'size' => 'normal',
     ),
     'organization' => array(
       'path' => 'event][information][organization',
       'name' => "Organization / Affiliation",
       'type' => 'text',
+      'size' => 255,
     ),
     'adviser_approval' => array(
       'name' => "Adviser Approval",
       'type' => 'bool',
       'path' => 'event][information][adviser_approval',
+      'size' => 'tiny',
     ),
   );
 
@@ -228,239 +258,313 @@ function mcneese_event_workflow_table_structure() {
       'path' => 'event][plans][audience',
       'name' => "Intended Audience",
       'type' => 'options',
+      'size' => 'normal',
     ),
     'description' => array(
       'path' => 'event][plans][description',
       'name' => "Description / Purpose",
       'type' => 'text',
+      'size' => 2048,
     ),
     'activities' => array(
       'path' => 'event][plans][activities',
       'name' => "Planned Activities",
       'type' => 'text',
+      'size' => 2048,
     ),
   );
+
+
+  $revenue_generated_columns = event_workflow_get_revenue_generated_list_options('column_name');
+  $revenue_generated_size = array();
+  foreach ($revenue_generated_columns as $key => $value) {
+    $revenue_generated_size[$key] = 'normal';
+  }
+
+  $technical_equipment_details_columns = event_workflow_get_technical_equipment_details_list_options('column_name');
+  $technical_equipment_details_size = array();
+  foreach ($technical_equipment_details_columns as $key => $value) {
+    $technical_equipment_details_size[$key] = 'normal';
+  }
 
   $structure['registration'] = array(
     'require' => array(
       'path' => 'event][registration][require',
       'name' => "Registration or Ticket Purchase",
       'type' => 'bool',
+      'size' => 'tiny',
     ),
     'website' => array(
       'path' => 'event][registration][website',
       'name' => "Registration Website",
       'type' => 'text',
+      'size' => 255,
     ),
     'phone' => array(
       'path' => 'event][registration][phone',
       'name' => "Registration Phone",
       'type' => 'text',
+      'size' => 255,
     ),
     'ticket_price' => array(
       'path' => 'event][registration][ticket_price',
       'name' => "Ticket Prices",
       'type' => 'text',
+      'size' => 255,
     ),
     'ticket_dates' => array(
       'path' => 'event][registration][ticket_dates',
       'name' => "Ticket Dates",
       'type' => 'text',
+      'size' => 255,
     ),
     'ticket_website' => array(
       'path' => 'event][registration][ticket_website',
       'name' => "Ticket Website",
       'type' => 'text',
+      'size' => 255,
     ),
     'ticket_phone' => array(
       'path' => 'event][registration][ticket_phone',
       'name' => "Ticket Phone",
       'type' => 'text',
+      'size' => 255,
     ),
     'generate_revenue' => array(
       'path' => 'event][registration][generate_revenue',
       'name' => "Generate Revenue",
       'type' => 'bool',
+      'size' => 'tiny',
     ),
     'revenue_generated' => array(
       'path' => 'event][registration][revenue_generated',
-      'columns' => event_workflow_get_revenue_generated_list_options('column_name'),
+      'columns' => $revenue_generated_columns,
+      'size' => $revenue_generated_size,
       'name' => "How Revenue is Generated",
       'type' => 'checkboxes',
     ),
   );
+
 
   $structure['setup'] = array(
     'rectangular_tables_8ft' => array(
       'path' => 'event][setup][rectangular_tables_8ft',
       'name' => "8ft Rectangular Tables",
       'type' => 'number',
+      'size' => 'normal',
     ),
     'round_tables_8ft' => array(
       'path' => 'event][setup][round_tables_8ft',
       'name' => "8ft Round Tables",
       'type' => 'number',
+      'size' => 'normal',
     ),
     'other_tables' => array(
       'path' => 'event][setup][other_tables',
       'name' => "Other Tables",
       'type' => 'text',
+      'size' => 255,
     ),
     'standard_blue_chairs' => array(
       'path' => 'event][setup][standard_blue_chairs',
       'name' => "Standard Blue Chairs",
       'type' => 'number',
+      'size' => 'normal',
     ),
     'podium' => array(
       'path' => 'event][setup][podium',
       'name' => "Podium Needed",
       'type' => 'bool',
+      'size' => 'tiny',
     ),
     'portable_stage' => array(
       'path' => 'event][setup][portable_stage',
       'name' => "Portable Stage Needed",
       'type' => 'bool',
+      'size' => 'tiny',
     ),
     'portable_stage_configuration' => array(
       'path' => 'event][setup][portable_stage_configuration',
       'name' => "Portable Stage Configuration",
       'type' => 'text',
+      'size' => 255,
     ),
     'security' => array(
       'path' => 'event][setup][security',
       'name' => "Security Needed",
       'type' => 'bool',
+      'size' => 'tiny',
     ),
     'parking_assistance' => array(
       'path' => 'event][setup][parking_assistance',
       'name' => "Parking Assistance Needed",
       'type' => 'bool',
+      'size' => 'tiny',
     ),
     'parking_assistance_area' => array(
       'path' => 'event][setup][parking_assistance_area',
       'name' => "Parking Assistance Area",
       'type' => 'text',
+      'size' => 255,
     ),
     'road_closures' => array(
       'path' => 'event][setup][road_closures',
       'name' => "Road Closures or Barricades",
       'type' => 'bool',
+      'size' => 'tiny',
     ),
     'road_closures_details' => array(
       'path' => 'event][setup][road_closures_details',
       'name' => "Road Closure Details",
       'type' => 'text',
+      'size' => 255,
     ),
     'special_requests' => array(
       'path' => 'event][setup][special_requests',
       'name' => "Special Requests",
       'type' => 'bool',
+      'size' => 'tiny',
     ),
     'special_requests_details' => array(
       'path' => 'event][setup][special_requests_details',
       'name' => "Special Request Details",
       'type' => 'text',
+      'size' => 255,
     ),
   );
+
+
+  $publicity_details_columns = event_workflow_get_publicity_details_list_options('column_name');
+  $publicity_details_size = array();
+  foreach ($publicity_details_columns as $key => $value) {
+    $publicity_details_size[$key] = 'normal';
+  }
+
+  $designing_material_columns = event_workflow_get_designing_material_list_options('column_name');
+  $designing_material_size = array();
+  foreach ($designing_material_columns as $key => $value) {
+    $designing_material_size[$key] = 'normal';
+  }
+
+
 
   $structure['presentation'] = array(
     'technical_equipment' => array(
       'path' => 'event][presentation][technical_equipment',
       'name' => "Need Technical Equipment",
       'type' => 'bool',
+      'size' => 'tiny',
     ),
     'technical_equipment_details' => array(
       'path' => 'event][presentation][technical_equipment_details',
-      'columns' => event_workflow_get_technical_equipment_details_list_options('column_name'),
+      'columns' => $technical_equipment_details_columns,
       'name' => "Technical Equipment Details",
       'type' => 'checkboxes',
+      'size' => $technical_equipment_details_size,
     ),
     'technical_equipment_microphone' => array(
       'path' => 'event][presentation][technical_equipment_microphone',
       'name' => "Quantity of Microphones",
       'type' => 'text',
+      'size' => 'normal',
     ),
     'external_audio_person' => array(
       'path' => 'event][presentation][external_audio_person',
       'name' => "External Audio Person/Company",
       'type' => 'bool',
+      'size' => 'tiny',
     ),
     'external_audio_person_name' => array(
       'path' => 'event][presentation][external_audio_person_name',
       'name' => "Name of Audio Person/Company",
       'type' => 'text',
+      'size' => 255,
     ),
     'external_audio_person_email' => array(
       'path' => 'event][presentation][external_audio_person_email',
       'name' => "E-Mail of Audio Person/Company",
       'type' => 'text',
+      'size' => 255,
     ),
     'external_audio_person_phone' =>  array(
       'path' =>'event][presentation][external_audio_person_phone',
       'name' => "Phone of Audio Person/Company",
       'type' => 'text',
+      'size' => 255,
     ),
     'publicity' => array(
       'path' => 'event][presentation][publicity',
       'name' => "Need Publicity",
       'type' => 'bool',
+      'size' => 'tiny',
     ),
     'publicity_details' => array(
       'path' => 'event][presentation][publicity_details',
-      'columns' => event_workflow_get_publicity_details_list_options('column_name'),
+      'columns' => $publicity_details_columns,
       'name' => "Publicity Methods",
       'type' => 'checkboxes',
+      'size' => $publicity_details_size,
     ),
     'production' => array(
       'path' => 'event][presentation][production',
       'name' => "Using Production Company/Promoter",
       'type' => 'bool',
+      'size' => 'tiny',
     ),
     'production_name' => array(
       'path' => 'event][presentation][production_name',
       'name' => "Name of Production Company/Promoter",
       'type' => 'text',
+      'size' => 255,
     ),
     'production_email' => array(
       'path' => 'event][presentation][production_email',
       'name' => "E-Mail of Production Company/Promoter",
       'type' => 'text',
+      'size' => 255,
     ),
     'production_phone' => array(
       'path' => 'event][presentation][production_phone',
       'name' => "Phone of Production Company/Promoter",
       'type' => 'text',
+      'size' => 255,
     ),
     'printed_material' => array(
       'path' => 'event][presentation][printed_material',
       'name' => "Using Printed Material",
       'type' => 'bool',
+      'size' => 'tiny',
     ),
     'university_logo' => array(
       'path' => 'event][presentation][university_logo',
       'name' => "Using University Logo",
       'type' => 'bool',
+      'size' => 'tiny',
     ),
     'designing_material' => array(
       'path' => 'event][presentation][designing_material',
-      'columns' => event_workflow_get_designing_material_list_options('column_name'),
+      'columns' => $designing_material_columns,
       'name' => "Material Designer",
       'type' => 'checkboxes',
+      'size' => $designing_material_size,
     ),
     'designing_material_name' => array(
       'path' => 'event][presentation][designing_material_name',
       'name' => "Material Designer Name",
       'type' => 'text',
+      'size' => 255,
     ),
     'designing_material_email' => array(
       'path' => 'event][presentation][designing_material_email',
       'name' => "Material Designer E-Mail",
       'type' => 'text',
+      'size' => 255,
     ),
     'designing_material_phone' => array(
       'path' => 'event][presentation][designing_material_phone',
       'name' => "Material Designer Phone",
       'type' => 'text',
+      'size' => 255,
     ),
   );
 
@@ -469,21 +573,25 @@ function mcneese_event_workflow_table_structure() {
       'path' => 'event][services][food_served',
       'name' => "Food Served",
       'type' => 'bool',
+      'size' => 'tiny',
     ),
     'food_caterer' => array(
       'path' => 'event][services][food_caterer',
       'name' => "Food Caterer",
       'type' => 'text',
+      'size' => 255,
     ),
     'alcohol' => array(
       'path' => 'event][services][alcohol',
       'name' => "Alcohol Served",
       'type' => 'bool',
+      'size' => 'tiny',
     ),
     'open_flames' => array(
       'path' => 'event][services][open_flames',
       'name' => "Open Flames Used",
       'type' => 'bool',
+      'size' => 'tiny',
     ),
   );
 

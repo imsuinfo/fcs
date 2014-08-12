@@ -29,7 +29,7 @@ function mcneese_event_workflow_event_history_0_form($form, &$form_state, $event
   $event = event_workflow_load_event_by_id($event_id);
 
   if (empty($event)) {
-    watchdog('mew', "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
+    watchdog(MEW_WATCHDOG_ID, "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
     drupal_not_found();
     drupal_exit();
     return array();

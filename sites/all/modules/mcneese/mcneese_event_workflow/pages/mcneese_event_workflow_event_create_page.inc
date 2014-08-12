@@ -465,7 +465,7 @@ function mcneese_event_workflow_event_create_0_form_submit($form, &$form_state) 
             }
           }
           else {
-            watchdog('mew', "Failed to process '@part' for '@field_name' in '@table_name' during form submit. Invalid array or missing array key (new).", array('@part' => $part, '@field_name' => $field_name, '@table_name' => $table_name), WATCHDOG_ERROR);
+            watchdog(MEW_WATCHDOG_ID, "Failed to process '@part' for '@field_name' in '@table_name' during form submit. Invalid array or missing array key (new).", array('@part' => $part, '@field_name' => $field_name, '@table_name' => $table_name), WATCHDOG_ERROR);
             unset($current);
             $current = NULL;
             continue 2;
@@ -528,7 +528,7 @@ function mcneese_event_workflow_event_create_0_form_submit($form, &$form_state) 
 
   if ($failure) {
     form_set_error('form', "An error occurred while trying to save the event request. Please contact the support staff.");
-    watchdog('mew', "An error occured while trying to save the event request.", array(), WATCHDOG_ERROR);
+    watchdog(MEW_WATCHDOG_ID, "An error occured while trying to save the event request.", array(), WATCHDOG_ERROR);
 
     $form_state['rebuild'] = TRUE;
     $form_state['redirect'] = FALSE;

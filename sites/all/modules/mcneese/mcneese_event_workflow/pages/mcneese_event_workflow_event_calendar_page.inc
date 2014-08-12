@@ -222,6 +222,7 @@ function mcneese_event_workflow_event_calendar_month_0_page($year = NULL, $month
 
   return $markup;
 }
+
 /**
  * Provides the event workflow event calendar month page.
  *
@@ -266,6 +267,7 @@ function mcneese_event_workflow_event_calendar_day_0_page($year = NULL, $month =
   // @todo: finish this.
   return '';
 }
+
 /**
  * @} End of '@addtogroup mcneese_event_workflow'.
  */
