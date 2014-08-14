@@ -407,8 +407,8 @@ ini_set('session.cookie_lifetime', 432000);
  * - anonymous: Defines the human-readable name of anonymous users.
  * Remove the leading hash signs to enable.
  */
-$conf['site_name'] = 'Event Workflow';
-$conf['theme_default'] = 'mcneese_event_workflow';
+$conf['site_name'] = 'McNeese Facilities Use System';
+$conf['theme_default'] = 'mcneese_fcs';
 # $conf['anonymous'] = 'Visitor';
 
 /**
@@ -419,7 +419,7 @@ $conf['theme_default'] = 'mcneese_event_workflow';
  * theme. It is located inside 'modules/system/maintenance-page.tpl.php'.
  * Note: This setting does not apply to installation and update pages.
  */
-$conf['maintenance_theme'] = 'mcneese_event_workflow';
+$conf['maintenance_theme'] = 'mcneese_fcs';
 
 /**
  * Reverse Proxy Configuration:
