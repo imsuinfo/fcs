@@ -2,36 +2,36 @@
 
 /**
  * @file
- * Defines McNeese event workflow event cancel page functions.
+ * Defines McNeese facilities use event cancel page functions.
  */
 
 /**
- * @addtogroup mcneese_event_workflow
+ * @addtogroup mfcs
  * @{
  */
 
 /**
- * Provides the event workflow event cancel page.
+ * Provides the facilities use event cancel page.
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
- * @param int $event_id
+ * @param int $request_id
  *   The unique identifier for an event request.
  *
  * @return string
  *   The HTML output representing the page.
  */
-function mcneese_event_workflow_event_cancel_0_form($form, &$form_state, $event_id) {
-  if (!cf_is_integer($event_id)) {
-    cf_error::invalid_integer('event_id');
+function mfcs_event_cancel_0_form($form, &$form_state, $request_id) {
+  if (!cf_is_integer($request_id)) {
+    cf_error::invalid_integer('request_id');
     drupal_access_denied();
     drupal_exit();
     return array();
   }
 
-  $event = event_workflow_load_event_by_id($event_id);
+  $event = event_workflow_load_event_by_id($request_id);
 
   if (empty($event)) {
     cf_error::invalid_array('event');
@@ -46,9 +46,9 @@ function mcneese_event_workflow_event_cancel_0_form($form, &$form_state, $event_
     '#tree' => TRUE,
   );
 
-  $form['form']['event_id'] = array(
+  $form['form']['request_id'] = array(
     '#type' => 'value',
-    '#value' => $event_id,
+    '#value' => $request_id,
   );
 
   $form['form']['event'] = array(
@@ -98,29 +98,29 @@ function mcneese_event_workflow_event_cancel_0_form($form, &$form_state, $event_
 }
 
 /**
- * Validation for mcneese_event_workflow_event_cancel_0_form().
+ * Validation for mfcs_event_cancel_0_form().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mcneese_event_workflow_event_cancel_0_form()
+ * @see: mfcs_event_cancel_0_form()
  */
-function mcneese_event_workflow_event_cancel_0_form_validate($form, &$form_state) {
+function mfcs_event_cancel_0_form_validate($form, &$form_state) {
 }
 
 /**
- * Submit process for mcneese_event_workflow_event_cancel_0_form().
+ * Submit process for mfcs_event_cancel_0_form().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mcneese_event_workflow_event_cancel_0_form()
+ * @see: mfcs_event_cancel_0_form()
  */
-function mcneese_event_workflow_event_cancel_0_form_submit($form, &$form_state) {
+function mfcs_event_cancel_0_form_submit($form, &$form_state) {
   $user = cf_current_user();
 
   $clicked_id = '';
@@ -128,15 +128,15 @@ function mcneese_event_workflow_event_cancel_0_form_submit($form, &$form_state) 
     $clicked_id = $form_state['triggering_element']['#id'];
   }
 
-  $event_id = (int) $form['form']['event_id']['#value'];
+  $request_id = (int) $form['form']['request_id']['#value'];
 
   if ($clicked_id == 'event-cancel-submit-no') {
     if (empty($form_state['values']['redirect_to'])) {
-      if (empty($event_id)) {
+      if (empty($request_id)) {
         $form_state['redirect'] = 'events';
       }
       else {
-        $form_state['redirect'] = 'events/view-0/' . $event_id;
+        $form_state['redirect'] = 'events/view-0/' . $request_id;
       }
     }
     else {
@@ -146,20 +146,20 @@ function mcneese_event_workflow_event_cancel_0_form_submit($form, &$form_state) 
     return;
   }
 
-  mcneese_event_workflow_include(6);
+  mfcs_include(6);
 
-  $cancelled = mcneese_event_workflow_workflow_set_status($event_id, MEW_EVENT_STATUS_CANCELLED);
+  $cancelled = mfcs_workflow_set_status($request_id, MFCS_EVENT_STATUS_CANCELLED);
 
   if ($cancelled) {
     $parameters = array();
     $parameters['changed_by'] = $user->uid;
     $parameters['changed_type'] = 'user';
     $parameters['cancelled'] = TRUE;
-    mcneese_event_workflow_send_workflow_emails($event_id, $parameters);
+    mfcs_send_workflow_emails($request_id, $parameters);
   }
   else {
     form_set_error('form', "An error occurred while trying to cancel the event request. Please contact the support staff.");
-    watchdog(MEW_WATCHDOG_ID, "An error occured while trying to cancel the event request: @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
+    watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to cancel the event request: @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
 
     $form_state['rebuild'] = TRUE;
     $form_state['redirect'] = FALSE;
@@ -170,7 +170,7 @@ function mcneese_event_workflow_event_cancel_0_form_submit($form, &$form_state) 
 
   // redirect after submitting.
   if (empty($form_state['values']['redirect_to'])) {
-    if (empty($event_id)) {
+    if (empty($request_id)) {
       $form_state['redirect'] = 'events';
     }
     else {
@@ -183,27 +183,27 @@ function mcneese_event_workflow_event_cancel_0_form_submit($form, &$form_state) 
 }
 
 /**
- * Provides the event workflow event uncancel page.
+ * Provides the facilities use event uncancel page.
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
- * @param int $event_id
+ * @param int $request_id
  *   The unique identifier for an event request.
  *
  * @return string
  *   The HTML output representing the page.
  */
-function mcneese_event_workflow_event_uncancel_0_form($form, &$form_state, $event_id) {
-  if (!cf_is_integer($event_id)) {
-    cf_error::invalid_integer('event_id');
+function mfcs_event_uncancel_0_form($form, &$form_state, $request_id) {
+  if (!cf_is_integer($request_id)) {
+    cf_error::invalid_integer('request_id');
     drupal_access_denied();
     drupal_exit();
     return array();
   }
 
-  $event = event_workflow_load_event_by_id($event_id);
+  $event = event_workflow_load_event_by_id($request_id);
 
   if (empty($event)) {
     cf_error::invalid_array('event');
@@ -218,9 +218,9 @@ function mcneese_event_workflow_event_uncancel_0_form($form, &$form_state, $even
     '#tree' => TRUE,
   );
 
-  $form['form']['event_id'] = array(
+  $form['form']['request_id'] = array(
     '#type' => 'value',
-    '#value' => $event_id,
+    '#value' => $request_id,
   );
 
   $form['form']['event'] = array(
@@ -270,29 +270,29 @@ function mcneese_event_workflow_event_uncancel_0_form($form, &$form_state, $even
 }
 
 /**
- * Validation for mcneese_event_workflow_event_uncancel_0_form().
+ * Validation for mfcs_event_uncancel_0_form().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mcneese_event_workflow_event_uncancel_0_form()
+ * @see: mfcs_event_uncancel_0_form()
  */
-function mcneese_event_workflow_event_uncancel_0_form_validate($form, &$form_state) {
+function mfcs_event_uncancel_0_form_validate($form, &$form_state) {
 }
 
 /**
- * Submit process for mcneese_event_workflow_event_uncancel_0_form().
+ * Submit process for mfcs_event_uncancel_0_form().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mcneese_event_workflow_event_uncancel_0_form()
+ * @see: mfcs_event_uncancel_0_form()
  */
-function mcneese_event_workflow_event_uncancel_0_form_submit($form, &$form_state) {
+function mfcs_event_uncancel_0_form_submit($form, &$form_state) {
   $user = cf_current_user();
 
   $clicked_id = '';
@@ -300,15 +300,15 @@ function mcneese_event_workflow_event_uncancel_0_form_submit($form, &$form_state
     $clicked_id = $form_state['triggering_element']['#id'];
   }
 
-  $event_id = (int) $form['form']['event_id']['#value'];
+  $request_id = (int) $form['form']['request_id']['#value'];
 
   if ($clicked_id == 'event-uncancel-submit-no') {
     if (empty($form_state['values']['redirect_to'])) {
-      if (empty($event_id)) {
+      if (empty($request_id)) {
         $form_state['redirect'] = 'events';
       }
       else {
-        $form_state['redirect'] = 'events/view-0/' . $event_id;
+        $form_state['redirect'] = 'events/view-0/' . $request_id;
       }
     }
     else {
@@ -318,16 +318,16 @@ function mcneese_event_workflow_event_uncancel_0_form_submit($form, &$form_state
     return;
   }
 
-  mcneese_event_workflow_include(6);
+  mfcs_include(6);
 
   $previous = NULL;
   $uncancelled = TRUE;
   try {
-    $query = db_select('mew_field_top_status', 'mfts');
+    $query = db_select('mfcs_field_top_status', 'mfts');
 
     $query->fields('mfts');
 
-    $query->condition('mfts.event_id', $event_id);
+    $query->condition('mfts.request_id', $request_id);
     $query->condition('mfts.revision', $form['form']['event']['#value']['current']['top']['status'], '<');
 
     $query->range(0, 1);
@@ -346,7 +346,7 @@ function mcneese_event_workflow_event_uncancel_0_form_submit($form, &$form_state
   }
 
   if ($uncancelled) {
-    $uncancelled = mcneese_event_workflow_workflow_set_status($event_id, $previous[0]->value);
+    $uncancelled = mfcs_workflow_set_status($request_id, $previous[0]->value);
   }
 
   if ($uncancelled) {
@@ -354,11 +354,11 @@ function mcneese_event_workflow_event_uncancel_0_form_submit($form, &$form_state
     $parameters['changed_by'] = $user->uid;
     $parameters['changed_type'] = 'user';
     $parameters['uncancelled'] = TRUE;
-    mcneese_event_workflow_send_workflow_emails($event_id, $parameters);
+    mfcs_send_workflow_emails($request_id, $parameters);
   }
   else {
     form_set_error('form', "An error occurred while trying to uncancel the event request. Please contact the support staff.");
-    watchdog(MEW_WATCHDOG_ID, "An error occured while trying to uncancel the event request: @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
+    watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to uncancel the event request: @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
 
     $form_state['rebuild'] = TRUE;
     $form_state['redirect'] = FALSE;
@@ -367,20 +367,3 @@ function mcneese_event_workflow_event_uncancel_0_form_submit($form, &$form_state
     return;
   }
 
-  // redirect after submitting.
-  if (empty($form_state['values']['redirect_to'])) {
-    if (empty($event_id)) {
-      $form_state['redirect'] = 'events';
-    }
-    else {
-      $form_state['redirect'] = 'events/list-0';
-    }
-  }
-  else {
-    $form_state['redirect'] = $form_state['values']['redirect_to'];
-  }
-}
-
-/**
- * @} End of '@addtogroup mcneese_event_workflow'.
- */

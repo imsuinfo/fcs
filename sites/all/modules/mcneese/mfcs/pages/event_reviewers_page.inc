@@ -2,34 +2,34 @@
 
 /**
  * @file
- * Defines McNeese event workflow event reviewer page functions.
+ * Defines McNeese facilities use event reviewer page functions.
  */
 
 /**
- * @addtogroup mcneese_event_workflow
+ * @addtogroup mfcs
  * @{
  */
 
 /**
- * Provides the event workflow event reviewer page.
+ * Provides the facilities use event reviewer page.
  *
  * @return string
  *   The HTML output representing the page.
  */
-function mcneese_event_workflow_event_reviewers_0_page() {
+function mfcs_event_reviewers_0_page() {
   global $base_path;
   $user = cf_current_user();
 
-  $manager = user_access('mcneese event workflow manage');
-  $reviewer = user_access('mcneese event workflow review');
-  $requester = user_access('mcneese event workflow request');
+  $manager = user_access('mcneese facilities use manage');
+  $reviewer = user_access('mcneese facilities use review');
+  $requester = user_access('mcneese facilities use request');
 
-  mcneese_event_workflow_include(4);
+  mfcs_include(4);
 
   $event_classifications = event_workflow_get_event_classification_list_options();
   $review_steps = event_workflow_get_review_step_list_options('object');
 
-  $markup = '<div id="mcneese_event_workflow-manage_reviewers">';
+  $markup = '<div id="mfcs-manage_reviewers">';
   $groups = array();
   foreach ($event_classifications as $classification_id => $classification_label) {
     if (!is_numeric($classification_id)) continue;
@@ -41,8 +41,8 @@ function mcneese_event_workflow_event_reviewers_0_page() {
       }
 
       // these are automatically the venue coordinator, therefore skip them.
-      if ($review_step_id == MEW_REVIEW_STEP_VENUE_AVAILABLE) continue;
-      if ($review_step_id == MEW_REVIEW_STEP_MAKE_DECISIONS) continue;
+      if ($review_step_id == MFCS_REVIEW_STEP_VENUE_AVAILABLE) continue;
+      if ($review_step_id == MFCS_REVIEW_STEP_MAKE_DECISIONS) continue;
 
       $unmatched = TRUE;
       foreach ($review_step_object->field_review_event_roles['und'] as $key => $value) {
@@ -56,9 +56,8 @@ function mcneese_event_workflow_event_reviewers_0_page() {
         continue;
       }
 
-      $link = '<a id="mcneese_event_workflow-manage_reviewers-manage-' . $classification_id . '-link-' . $review_step_id .'" href="' . $base_path . 'events/reviewers-0/list/' . $classification_id . '/' . $review_step_id . '" class="item-link mcneese_event_workflow-manage_reviewers-manage-link">' . $review_step_object->name . ' Step</a>';
+      $link = '<a id="mfcs-manage_reviewers-manage-' . $classification_id . '-link-' . $review_step_id .'" href="' . $base_path . 'events/reviewers-0/list/' . $classification_id . '/' . $review_step_id . '" class="item-link mfcs-manage_reviewers-manage-link">' . $review_step_object->name . ' Step</a>';
       $items[] = array(
-        'id' => '',
         'data' => $link,
         'class' => array(
         ),
@@ -67,8 +66,8 @@ function mcneese_event_workflow_event_reviewers_0_page() {
 
     $item_list = theme('item_list', array('items' => $items, 'type' => 'ul'));
 
-    $markup .= '<div id="mcneese_event_workflow-manage_reviewers-manage-' . $classification_id . '" class="mcneese_event_workflow-manage_reviewers-manage">';
-    $markup .= '<h3 class="mcneese_event_workflow-manage_reviewers-manage-header">' . "Manage " . $classification_label . " Reviewers" . '</h3>';
+    $markup .= '<div id="mfcs-manage_reviewers-manage-' . $classification_id . '" class="mfcs-manage_reviewers-manage">';
+    $markup .= '<h3 class="mfcs-manage_reviewers-manage-header">' . "Manage " . $classification_label . " Reviewers" . '</h3>';
     $markup .= $item_list;
     $markup .= '</div>';
   }
@@ -79,7 +78,7 @@ function mcneese_event_workflow_event_reviewers_0_page() {
 }
 
 /**
- * Provides the event workflow event reviewer page.
+ * Provides the facilities use event reviewer page.
  *
  * @param array $form
  *   The form array as defined by drupals form api.
@@ -94,7 +93,7 @@ function mcneese_event_workflow_event_reviewers_0_page() {
  * @return string
  *   The HTML output representing the page.
  */
-function mcneese_event_workflow_event_reviewers_0_form($form, &$form_state, $classification, $review_step) {
+function mfcs_event_reviewers_0_form($form, &$form_state, $classification, $review_step) {
   if (!cf_is_integer($classification)) {
     cf_error::invalid_integer('classification');
     drupal_not_found();
@@ -110,7 +109,7 @@ function mcneese_event_workflow_event_reviewers_0_form($form, &$form_state, $cla
   }
 
   // these are automatically the venue coordinator, therefore skip them.
-  if ($review_step == MEW_REVIEW_STEP_VENUE_AVAILABLE || $review_step == MEW_REVIEW_STEP_MAKE_DECISIONS) {
+  if ($review_step == MFCS_REVIEW_STEP_VENUE_AVAILABLE || $review_step == MFCS_REVIEW_STEP_MAKE_DECISIONS) {
     drupal_not_found();
     drupal_exit();
     return array();
@@ -121,11 +120,11 @@ function mcneese_event_workflow_event_reviewers_0_form($form, &$form_state, $cla
 
   $form = array();
 
-  $manager = user_access('mcneese event workflow manage');
-  $reviewer = user_access('mcneese event workflow review');
-  $requester = user_access('mcneese event workflow request');
+  $manager = user_access('mcneese facilities use manage');
+  $reviewer = user_access('mcneese facilities use review');
+  $requester = user_access('mcneese facilities use request');
 
-  mcneese_event_workflow_include(4);
+  mfcs_include(4);
 
   $event_classifications = event_workflow_get_event_classification_list_options();
   $review_steps = event_workflow_get_review_step_list_options();
@@ -182,7 +181,7 @@ function mcneese_event_workflow_event_reviewers_0_form($form, &$form_state, $cla
     }
   }
 
-  $reviewers = mcneese_event_workflow_get_reviewers(array('mr.event_classification' => $classification, 'mr.review_step' => $review_step, 'mr.disabled' => 0), TRUE, $sorting);
+  $reviewers = mfcs_get_reviewers(array('mr.event_classification' => $classification, 'mr.review_step' => $review_step, 'mr.disabled' => 0), TRUE, $sorting);
 
   if (!is_array($reviewers)) {
     $reviewers = array();
@@ -232,8 +231,8 @@ function mcneese_event_workflow_event_reviewers_0_form($form, &$form_state, $cla
   );
 
   $reviewers_list['attributes'] = array();
-  $reviewers_list['attributes']['id'] = 'mcneese_event_workflow-reviewers_form-reviewers_list';
-  $reviewers_list['attributes']['class'] = array ('mcneese_event_workflow-reviewers_form-reviewers_list');
+  $reviewers_list['attributes']['id'] = 'mfcs-reviewers_form-reviewers_list';
+  $reviewers_list['attributes']['class'] = array ('mfcs-reviewers_form-reviewers_list');
   $reviewers_list['attributes']['summary'] = 'All users who are considered reviewers for the given event classification.';
 
   $reviewers_list['rows'] = $rows;
@@ -284,16 +283,16 @@ function mcneese_event_workflow_event_reviewers_0_form($form, &$form_state, $cla
 }
 
 /**
- * Pre-Validation for mcneese_event_workflow_event_reviewers_0_form().
+ * Pre-Validation for mfcs_event_reviewers_0_form().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mcneese_event_workflow_event_reviewers_0_form()
+ * @see: mfcs_event_reviewers_0_form()
  */
-function mcneese_event_workflow_event_edit_0_form_pre_validate(&$form, &$form_state) {
+function mfcs_event_edit_0_form_pre_validate(&$form, &$form_state) {
   $clicked_id = '';
   if (isset($form_state['triggering_element']['#id'])) {
     $clicked_id = $form_state['triggering_element']['#id'];
@@ -308,16 +307,16 @@ function mcneese_event_workflow_event_edit_0_form_pre_validate(&$form, &$form_st
 }
 
 /**
- * Validation for mcneese_event_workflow_event_reviewers_0_form().
+ * Validation for mfcs_event_reviewers_0_form().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mcneese_event_workflow_event_reviewers_0_form()
+ * @see: mfcs_event_reviewers_0_form()
  */
-function mcneese_event_workflow_event_reviewers_0_form_validate($form, &$form_state) {
+function mfcs_event_reviewers_0_form_validate($form, &$form_state) {
   $clicked_id = '';
   if (isset($form_state['triggering_element']['#id'])) {
     $clicked_id = $form_state['triggering_element']['#id'];
@@ -388,7 +387,7 @@ function mcneese_event_workflow_event_reviewers_0_form_validate($form, &$form_st
         'mr.disabled' => 0,
       );
 
-      $reviewers = mcneese_event_workflow_get_reviewers($conditions);
+      $reviewers = mfcs_get_reviewers($conditions);
 
       if (count($reviewers) > 0) {
         form_set_error('reviewer][user_id', "The specified user already exists with the specified reviewer classification.");
@@ -401,16 +400,16 @@ function mcneese_event_workflow_event_reviewers_0_form_validate($form, &$form_st
 }
 
 /**
- * Submit process for mcneese_event_workflow_event_reviewers_0_form().
+ * Submit process for mfcs_event_reviewers_0_form().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mcneese_event_workflow_event_reviewers_0_form()
+ * @see: mfcs_event_reviewers_0_form()
  */
-function mcneese_event_workflow_event_reviewers_0_form_submit($form, &$form_state) {
+function mfcs_event_reviewers_0_form_submit($form, &$form_state) {
   $clicked_id = '';
   if (isset($form_state['triggering_element']['#id'])) {
     $clicked_id = $form_state['triggering_element']['#id'];
@@ -448,7 +447,7 @@ function mcneese_event_workflow_event_reviewers_0_form_submit($form, &$form_stat
     $failure = FALSE;
     $transaction = db_transaction();
     try {
-      $query = db_select('mew_reviewers', 'mr');
+      $query = db_select('mfcs_reviewers', 'mr');
       $query->addField('mr', 'id', 'id');
       $query->condition('mr.user_id', $values['user_id']);
       $query->condition('mr.event_classification', $values['event_classification']);
@@ -459,13 +458,13 @@ function mcneese_event_workflow_event_reviewers_0_form_submit($form, &$form_stat
       $result = $query->execute()->fetchField();
 
       if ($result > 0) {
-        $query = db_update('mew_reviewers');
+        $query = db_update('mfcs_reviewers');
         $query->fields(array('disabled' => 0));
         $query->condition('id', $result);
         $query->execute();
       }
       else {
-        $query = db_insert('mew_reviewers');
+        $query = db_insert('mfcs_reviewers');
         $query->fields($values);
         $query->execute();
       }
@@ -493,7 +492,7 @@ function mcneese_event_workflow_event_reviewers_0_form_submit($form, &$form_stat
 }
 
 /**
- * Provides the event workflow event reviewer delete page.
+ * Provides the facilities use event reviewer delete page.
  *
  * @param array $form
  *   The form array as defined by drupals form api.
@@ -505,7 +504,7 @@ function mcneese_event_workflow_event_reviewers_0_form_submit($form, &$form_stat
  * @return string
  *   The HTML output representing the page.
  */
-function mcneese_event_workflow_event_reviewers_0_delete_form($form, &$form_state, $id) {
+function mfcs_event_reviewers_0_delete_form($form, &$form_state, $id) {
   if (!cf_is_integer($id)) {
     cf_error::invalid_integer('id');
     drupal_not_found();
@@ -513,7 +512,7 @@ function mcneese_event_workflow_event_reviewers_0_delete_form($form, &$form_stat
     return array();
   }
 
-  $reviewers = mcneese_event_workflow_get_reviewers(array('mr.id' => $id));
+  $reviewers = mfcs_get_reviewers(array('mr.id' => $id));
   $reviewer = NULL;
   if (!empty($reviewers)) {
     $reviewer = array_pop($reviewers);
@@ -532,7 +531,7 @@ function mcneese_event_workflow_event_reviewers_0_delete_form($form, &$form_stat
     $user_name = $user->name;
   }
 
-  mcneese_event_workflow_include(4);
+  mfcs_include(4);
 
   $event_classifications = event_workflow_get_event_classification_list_options();
 
@@ -583,17 +582,17 @@ function mcneese_event_workflow_event_reviewers_0_delete_form($form, &$form_stat
 }
 
 /**
- * Validation for mcneese_event_workflow_event_reviewers_0_delete_form().
+ * Validation for mfcs_event_reviewers_0_delete_form().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mcneese_event_workflow_event_reviewers_0_delete_form()
+ * @see: mfcs_event_reviewers_0_delete_form()
  */
-function mcneese_event_workflow_event_reviewers_0_delete_form_validate($form, &$form_state) {
-  $reviewers = mcneese_event_workflow_get_reviewers(array('mr.id' => $form['form']['id']['#value']));
+function mfcs_event_reviewers_0_delete_form_validate($form, &$form_state) {
+  $reviewers = mfcs_get_reviewers(array('mr.id' => $form['form']['id']['#value']));
   $reviewer = NULL;
   if (!empty($reviewers)) {
     $reviewer = array_pop($reviewers);
@@ -605,43 +604,24 @@ function mcneese_event_workflow_event_reviewers_0_delete_form_validate($form, &$
 }
 
 /**
- * Submit process for mcneese_event_workflow_event_reviewers_0_delete_form().
+ * Submit process for mfcs_event_reviewers_0_delete_form().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mcneese_event_workflow_event_reviewers_0_delete_form()
+ * @see: mfcs_event_reviewers_0_delete_form()
  */
-function mcneese_event_workflow_event_reviewers_0_delete_form_submit($form, &$form_state) {
+function mfcs_event_reviewers_0_delete_form_submit($form, &$form_state) {
 
   $transaction = db_transaction();
   try {
-    $query = db_update('mew_reviewers');
+    $query = db_update('mfcs_reviewers');
     $query->fields(array('disabled' => 1));
     $query->condition('id', $form['form']['id']['#value']);
     $query->execute();
   }
   catch (Exception $ex) {
     $transaction->rollback();
-    cf_error::on_query_execution($ex);
-  }
-
-  // redirect after submitting.
-  if (empty($form_state['values']['redirect_to'])) {
-    if (empty($form['form']['event_classification']['#value']) || empty($form['form']['review_step']['#value'])) {
-      $form_state['redirect'] = 'events/reviewers-0';
-    }
-    else {
-      $form_state['redirect'] = 'events/reviewers-0/list/' . $form['form']['event_classification']['#value'] . '/' . $form['form']['review_step']['#value'];
-    }
-  }
-  else {
-    $form_state['redirect'] = $form_state['values']['redirect_to'];
-  }
-}
-
-/**
- * @} End of '@addtogroup mcneese_event_workflow'.
- */
+    cf_error::on_query_executi

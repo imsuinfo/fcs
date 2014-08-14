@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Install file for mcneese_event_workflow module.
+ * Install file for mfcs module.
  */
 
 /**
@@ -11,7 +11,7 @@
  * @return array
  *  A list of secondary tables and their structure.
  */
-function mcneese_event_workflow_table_install_structure() {
+function mfcs_table_install_structure() {
   $structure = array();
   $structure['top'] = array(
     'status' => 'unsigned_small',
@@ -26,7 +26,7 @@ function mcneese_event_workflow_table_install_structure() {
     'review' => array('id' => 'serial_pkey', 'user_id' => 'unsigned', 'step' => 'unsigned', 'decision' => 'unsigned', 'message' => 'text'),
   );
 
-  $structure['use_fees'] = array(
+  $structure['requirements'] = array(
     'facilities' => array('quantity' => 'unsigned', 'hours' => 'unsigned', 'days' => 'unsigned', 'amount' => 'unsigned'),
     'equipment' => array('quantity' => 'unsigned', 'hours' => 'unsigned', 'days' => 'unsigned', 'amount' => 'unsigned'),
     'security' => array('quantity' => 'unsigned', 'hours' => 'unsigned', 'days' => 'unsigned', 'amount' => 'unsigned'),
@@ -137,14 +137,14 @@ function mcneese_event_workflow_table_install_structure() {
 /**
  * Implementation of hook_schema().
  */
-function mcneese_event_workflow_schema() {
+function mfcs_schema() {
   $schema = array();
   $t = get_t();
 
 
   // create the primary tables.
-  $schema['mew_event_requests'] = array(
-    'description' => $t("McNeese Event Workflow Event Requests table. This represents individual events and is the primary table for event information."),
+  $schema['mfcs_event_requests'] = array(
+    'description' => $t("McNeese Facilities Use Event Requests table. This represents individual events and is the primary table for event information."),
     'fields' => array(
       'id' => array(
         'description' => $t("The primary key used to represent an event request."),
@@ -178,11 +178,11 @@ function mcneese_event_workflow_schema() {
     'primary key' => array('id'),
   );
 
-  $schema['mew_event_revisions'] = array(
-    'description' => $t("McNeese Event Workflow Events field table representing the revision history."),
+  $schema['mfcs_event_revisions'] = array(
+    'description' => $t("McNeese Facilities Use Events field table representing the revision history."),
     'fields' => array(
-      'event_id' => array(
-        'description' => $t("Foreign key to the primary key in the {mew_event_requests} table."),
+      'request_id' => array(
+        'description' => $t("Foreign key to the primary key in the {mfcs_event_requests} table."),
         'type' => 'int',
         'size' => 'big',
         'unsigned' => TRUE,
@@ -203,17 +203,17 @@ function mcneese_event_workflow_schema() {
         'not null' => TRUE,
       ),
     ),
-    'primary key' => array('event_id', 'revision'),
+    'primary key' => array('request_id', 'revision'),
     'foreign keys' => array(
-      'event_id' => array(
-        'table' => 'mew_event_requests',
-        'columns' => array('event_id' => 'id'),
+      'request_id' => array(
+        'table' => 'mfcs_event_requests',
+        'columns' => array('request_id' => 'id'),
       ),
     ),
   );
 
-  $schema['mew_reviewers'] = array(
-    'description' => $t("McNeese Event Workflow mapping users to an event classification and a review classification."),
+  $schema['mfcs_reviewers'] = array(
+    'description' => $t("McNeese Facilities Use mapping users to an event classification and a review classification."),
     'fields' => array(
       'id' => array(
         'description' => $t("The primary key used to represent an reviewer."),
@@ -271,11 +271,11 @@ function mcneese_event_workflow_schema() {
     ),
   );
 
-  $schema['mew_review_classifications'] = array(
-    'description' => $t("McNeese Event Workflow Events field table representing a users classifications associated with a given review."),
+  $schema['mfcs_review_classifications'] = array(
+    'description' => $t("McNeese Facilities Use Events field table representing a users classifications associated with a given review."),
     'fields' => array(
       'review_id' => array(
-        'description' => $t("Foreign key to the primary key in the {mew_field_review_review} table."),
+        'description' => $t("Foreign key to the primary key in the {mfcs_field_review_review} table."),
         'type' => 'int',
         'size' => 'big',
         'unsigned' => TRUE,
@@ -294,14 +294,14 @@ function mcneese_event_workflow_schema() {
     ),
     'foreign keys' => array(
       'review_id' => array(
-        'table' => 'mew_field_review_review',
+        'table' => 'mfcs_field_review_review',
         'columns' => array('review_id' => 'id'),
       ),
     ),
   );
 
-  $schema['mew_location_images'] = array(
-    'description' => $t("McNeese Event Workflow Location Images table. For displaying an image of a given location/building/room."),
+  $schema['mfcs_location_images'] = array(
+    'description' => $t("McNeese Facilities Use Location Images table. For displaying an image of a given location/building/room."),
     'fields' => array(
       'id' => array(
         'description' => $t("The primary key used to represent the associated between an image and the location/building/room."),
@@ -370,8 +370,8 @@ function mcneese_event_workflow_schema() {
     ),
   );
 
-  $schema['mew_search_settings'] = array(
-    'description' => $t("McNeese Event Workflow Event Search Settings table. This represents search saved target structures for individual users."),
+  $schema['mfcs_search_settings'] = array(
+    'description' => $t("McNeese Facilities Use Event Search Settings table. This represents search saved target structures for individual users."),
     'fields' => array(
       'id' => array(
         'description' => $t("The primary key used to represent the search setting."),
@@ -412,8 +412,8 @@ function mcneese_event_workflow_schema() {
     ),
   );
 
-  $schema['mew_banner_locations'] = array(
-    'description' => $t("McNeese Event Workflow Event Banner table. This is for providing local storage of a given banner category."),
+  $schema['mfcs_banner_locations'] = array(
+    'description' => $t("McNeese Facilities Use Event Banner table. This is for providing local storage of a given banner category."),
     'fields' => array(
       'id' => array(
         'description' => $t("The primary key used to represent an event request."),
@@ -451,8 +451,8 @@ function mcneese_event_workflow_schema() {
     ),
   );
 
-  $schema['mew_banner_buildings'] = array(
-    'description' => $t("McNeese Event Workflow Event Banner table. This is for providing local storage of a given banner category."),
+  $schema['mfcs_banner_buildings'] = array(
+    'description' => $t("McNeese Facilities Use Event Banner table. This is for providing local storage of a given banner category."),
     'fields' => array(
       'id' => array(
         'description' => $t("The primary key used to represent an event request."),
@@ -487,7 +487,7 @@ function mcneese_event_workflow_schema() {
     'primary key' => array('id'),
     'foreign keys' => array(
       'location' => array(
-        'table' => 'mew_banner_locations',
+        'table' => 'mfcs_banner_locations',
         'columns' => array('location' => 'id'),
       ),
     ),
@@ -496,18 +496,18 @@ function mcneese_event_workflow_schema() {
     ),
   );
 
-  $schema['mew_banner_building_to_location'] = array(
-    'description' => $t("McNeese Event Workflow Event Banner table. This provides associations between buildings and locations."),
+  $schema['mfcs_banner_building_to_location'] = array(
+    'description' => $t("McNeese Facilities Use Event Banner table. This provides associations between buildings and locations."),
     'fields' => array(
       'building' => array(
-        'description' => $t("Foreign key to the {mew_banner_buildings} table."),
+        'description' => $t("Foreign key to the {mfcs_banner_buildings} table."),
         'type' => 'int',
         'size' => 'big',
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
       'location' => array(
-        'description' => $t("Foreign key to the {mew_banner_locations} table."),
+        'description' => $t("Foreign key to the {mfcs_banner_locations} table."),
         'type' => 'int',
         'size' => 'big',
         'unsigned' => TRUE,
@@ -525,8 +525,8 @@ function mcneese_event_workflow_schema() {
     'primary key' => array('building', 'location'),
   );
 
-  $schema['mew_banner_rooms'] = array(
-    'description' => $t("McNeese Event Workflow Event Banner table. This is for providing local storage of a given banner category."),
+  $schema['mfcs_banner_rooms'] = array(
+    'description' => $t("McNeese Facilities Use Event Banner table. This is for providing local storage of a given banner category."),
     'fields' => array(
       'id' => array(
         'description' => $t("The primary key used to represent an event request."),
@@ -550,7 +550,7 @@ function mcneese_event_workflow_schema() {
         'default' => '',
       ),
       'building' => array(
-        'description' => $t("Foreign key to the {mew_banner_buildings} table."),
+        'description' => $t("Foreign key to the {mfcs_banner_buildings} table."),
         'type' => 'int',
         'size' => 'big',
         'unsigned' => TRUE,
@@ -589,7 +589,7 @@ function mcneese_event_workflow_schema() {
     'primary key' => array('id'),
     'foreign keys' => array(
       'building' => array(
-        'table' => 'mew_banner_buildings',
+        'table' => 'mfcs_banner_buildings',
         'columns' => array('building' => 'id'),
       ),
       'coordinator_id' => array(
@@ -603,18 +603,18 @@ function mcneese_event_workflow_schema() {
   );
 
 
-  // create the secondary tables associated with the table mew_event_requests.
-  $structure = mcneese_event_workflow_table_install_structure();
+  // create the secondary tables associated with the table mfcs_event_requests.
+  $structure = mfcs_table_install_structure();
 
   foreach ($structure as $structure_name => &$structure_array) {
     foreach ($structure_array as $field_name => &$field_type) {
-      $table_name = 'mew_field_' . $structure_name . '_' . $field_name;
+      $table_name = 'mfcs_field_' . $structure_name . '_' . $field_name;
 
       $schema[$table_name] = array(
-        'description' => $t("McNeese Event Workflow Events field table for the field: " . $field_name . " associated with the group: " . $structure_name . "."),
+        'description' => $t("McNeese Facilities Use Events field table for the field: " . $field_name . " associated with the group: " . $structure_name . "."),
         'fields' => array(
-          'event_id' => array(
-            'description' => $t("Foreign key to the primary key in the {mew_event_requests} table."),
+          'request_id' => array(
+            'description' => $t("Foreign key to the primary key in the {mfcs_event_requests} table."),
             'type' => 'int',
             'size' => 'big',
             'unsigned' => TRUE,
@@ -650,11 +650,11 @@ function mcneese_event_workflow_schema() {
             'not null' => TRUE,
           ),
         ),
-        'primary key' => array('event_id', 'revision', 'delta'),
+        'primary key' => array('request_id', 'revision', 'delta'),
         'foreign keys' => array(
-          'event_id' => array(
-            'table' => 'mew_event_requests',
-            'columns' => array('event_id' => 'id'),
+          'request_id' => array(
+            'table' => 'mfcs_event_requests',
+            'columns' => array('request_id' => 'id'),
           ),
         ),
       );
@@ -879,30 +879,30 @@ function mcneese_event_workflow_schema() {
       }
     }
 
-    // create the tirtiary tables that map the secondary tables for mew_event_requests to the primary table mew_event_requests.
-    $table_name = 'mew_current_' . $structure_name;
+    // create the tirtiary tables that map the secondary tables for mfcs_event_requests to the primary table mfcs_event_requests.
+    $table_name = 'mfcs_current_' . $structure_name;
     $schema[$table_name] = array(
-      'description' => $t("McNeese Event Workflow Events field table representing the current (active) revisions for fields structured under: " . $structure_name . "."),
+      'description' => $t("McNeese Facilities Use Events field table representing the current (active) revisions for fields structured under: " . $structure_name . "."),
       'fields' => array(
-        'event_id' => array(
-          'description' => $t("Foreign key to the primary key in the {mew_event_requests} table."),
+        'request_id' => array(
+          'description' => $t("Foreign key to the primary key in the {mfcs_event_requests} table."),
           'type' => 'int',
           'size' => 'big',
           'unsigned' => TRUE,
           'not null' => FALSE,
         ),
       ),
-      'primary key' => array('event_id'),
+      'primary key' => array('request_id'),
       'foreign keys' => array(
-        'event_id' => array(
-          'table' => 'mew_event_requests',
-          'columns' => array('event_id' => 'id'),
+        'request_id' => array(
+          'table' => 'mfcs_event_requests',
+          'columns' => array('request_id' => 'id'),
         ),
       ),
     );
 
     foreach ($structure_array as $field_name => &$field_type) {
-      $field_table_name = 'mew_field_' . $structure_name . '_' . $field_name;
+      $field_table_name = 'mfcs_field_' . $structure_name . '_' . $field_name;
 
       $schema[$table_name]['fields'][$field_name] = array(
         'description' => $t("Foreign key to the current revision in the " . $field_table_name . " table."),
@@ -927,11 +927,11 @@ function mcneese_event_workflow_schema() {
 /**
  * Implementation of hook_install().
  */
-function mcneese_event_workflow_install() {
+function mfcs_install() {
   // drupal does not support automatically assigning foreign key relations, so this must be manually performed.
-  $key1_name = 'event_id';
-  $key1_foreign = 'event_id_fkey';
-  $table1_foreign = 'mew_event_requests';
+  $key1_name = 'request_id';
+  $key1_foreign = 'request_id_fkey';
+  $table1_foreign = 'mfcs_event_requests';
   $table1_foreign_key = 'id';
 
   $key2_name = 'user_id';
@@ -943,43 +943,43 @@ function mcneese_event_workflow_install() {
 
   $key3_name = 'location';
   $key3_foreign = 'location_fkey';
-  $table3_foreign = 'mew_banner_locations';
+  $table3_foreign = 'mfcs_banner_locations';
   $table3_foreign_key = 'id';
 
   $key4_name = 'building';
   $key4_foreign = 'building_fkey';
-  $table4_foreign = 'mew_banner_buildings';
+  $table4_foreign = 'mfcs_banner_buildings';
   $table4_foreign_key = 'id';
 
   $key5_name = 'room';
   $key5_foreign = 'room_fkey';
-  $table5_foreign = 'mew_banner_rooms';
+  $table5_foreign = 'mfcs_banner_rooms';
   $table5_foreign_key = 'id';
 
-  $structure = mcneese_event_workflow_table_install_structure();
+  $structure = mfcs_table_install_structure();
 
-  db_query('ALTER TABLE {mew_event_revisions} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
-  db_query('ALTER TABLE {mew_reviewers} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE CASCADE');
-  db_query('ALTER TABLE {mew_search_settings} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE CASCADE');
+  db_query('ALTER TABLE {mfcs_event_revisions} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
+  db_query('ALTER TABLE {mfcs_reviewers} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE CASCADE');
+  db_query('ALTER TABLE {mfcs_search_settings} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE CASCADE');
 
-  db_query('ALTER TABLE {mew_banner_building_to_location} ADD CONSTRAINT ' . $key3_foreign . ' FOREIGN KEY (' . $key3_name . ') REFERENCES {' . $table3_foreign . '} (' . $table3_foreign_key . ') ON DELETE CASCADE');
-  db_query('ALTER TABLE {mew_banner_building_to_location} ADD CONSTRAINT ' . $key4_foreign . ' FOREIGN KEY (' . $key4_name . ') REFERENCES {' . $table4_foreign . '} (' . $table4_foreign_key . ') ON DELETE CASCADE');
-  db_query('ALTER TABLE {mew_banner_rooms} ADD CONSTRAINT ' . $key4_foreign . ' FOREIGN KEY (' . $key4_name . ') REFERENCES {' . $table4_foreign . '} (' . $table4_foreign_key . ') ON DELETE CASCADE');
-  db_query('ALTER TABLE {mew_banner_rooms} ADD CONSTRAINT ' . $key2_foreign_1 . ' FOREIGN KEY (' . $key2_name_1 . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_banner_building_to_location} ADD CONSTRAINT ' . $key3_foreign . ' FOREIGN KEY (' . $key3_name . ') REFERENCES {' . $table3_foreign . '} (' . $table3_foreign_key . ') ON DELETE CASCADE');
+  db_query('ALTER TABLE {mfcs_banner_building_to_location} ADD CONSTRAINT ' . $key4_foreign . ' FOREIGN KEY (' . $key4_name . ') REFERENCES {' . $table4_foreign . '} (' . $table4_foreign_key . ') ON DELETE CASCADE');
+  db_query('ALTER TABLE {mfcs_banner_rooms} ADD CONSTRAINT ' . $key4_foreign . ' FOREIGN KEY (' . $key4_name . ') REFERENCES {' . $table4_foreign . '} (' . $table4_foreign_key . ') ON DELETE CASCADE');
+  db_query('ALTER TABLE {mfcs_banner_rooms} ADD CONSTRAINT ' . $key2_foreign_1 . ' FOREIGN KEY (' . $key2_name_1 . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
 
   foreach ($structure as $structure_name => &$structure_array) {
-    $table1_name = 'mew_current_' . $structure_name;
+    $table1_name = 'mfcs_current_' . $structure_name;
 
     db_query('ALTER TABLE {' . $table1_name . '} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
 
     foreach ($structure_array as $field_name => &$field_type) {
-      $field_table1_name = 'mew_field_' . $structure_name . '_' . $field_name;
+      $field_table1_name = 'mfcs_field_' . $structure_name . '_' . $field_name;
 
       db_query('ALTER TABLE {' . $field_table1_name . '} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
     }
   }
 
-  db_query('ALTER TABLE {mew_review_classifications} ADD CONSTRAINT review_fkey FOREIGN KEY (review_id) REFERENCES {mew_field_review_review} (id) ON DELETE CASCADE');
+  db_query('ALTER TABLE {mfcs_review_classifications} ADD CONSTRAINT review_fkey FOREIGN KEY (review_id) REFERENCES {mfcs_field_review_review} (id) ON DELETE CASCADE');
 
 
   // assign the new mail system as default.
@@ -991,20 +991,20 @@ function mcneese_event_workflow_install() {
 /**
  * Implementation of hook_uninstall().
  */
-function mcneese_event_workflow_uninstall() {
+function mfcs_uninstall() {
   // restore the mail system default.
   $mail_system = variable_get('mail_system' , array('default-system' => 'DefaultMailSystem'));
   $mail_system['default-system'] = 'DefaultMailSystem';
   variable_set('mail_system', $mail_system);
 
-  $registered = cf_settings_get_registered(array('module_name' => 'mcneese_event_workflow'), 'id');
+  $registered = cf_settings_get_registered(array('module_name' => 'mfcs'), 'id');
 
   foreach ($registered as &$r) {
     cf_settings_unregister($r->variable_name, $r->variable_type, $r->module);
   }
 
   // drupal does not pay attention to foreign key relations when dropping the database, so manually remove all manually added foreign keys.
-  $key1_foreign = 'event_id_fkey';
+  $key1_foreign = 'request_id_fkey';
   $key2_foreign = 'user_id_fkey';
   $key2_foreign_1 = 'coordinator_id_fkey';
   $key3_foreign = 'location_fkey';
@@ -1012,26 +1012,21 @@ function mcneese_event_workflow_uninstall() {
   $key5_foreign = 'room_fkey';
   $keyR_foreign = 'review_fkey';
 
-  $structure = mcneese_event_workflow_table_install_structure();
+  $structure = mfcs_table_install_structure();
 
-  db_query('ALTER TABLE {mew_event_revisions} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
-  db_query('ALTER TABLE {mew_reviewers} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
-  db_query('ALTER TABLE {mew_search_settings} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
-  db_query('ALTER TABLE {mew_banner_building_to_location} DROP CONSTRAINT IF EXISTS ' . $key3_foreign);
-  db_query('ALTER TABLE {mew_banner_building_to_location} DROP CONSTRAINT IF EXISTS ' . $key4_foreign);
-  db_query('ALTER TABLE {mew_banner_rooms} DROP CONSTRAINT IF EXISTS ' . $key4_foreign);
-  db_query('ALTER TABLE {mew_banner_rooms} DROP CONSTRAINT IF EXISTS ' . $key2_foreign_1);
-  db_query('ALTER TABLE {mew_review_classifications} DROP CONSTRAINT IF EXISTS ' . $keyR_foreign);
+  db_query('ALTER TABLE {mfcs_event_revisions} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
+  db_query('ALTER TABLE {mfcs_reviewers} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
+  db_query('ALTER TABLE {mfcs_search_settings} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
+  db_query('ALTER TABLE {mfcs_banner_building_to_location} DROP CONSTRAINT IF EXISTS ' . $key3_foreign);
+  db_query('ALTER TABLE {mfcs_banner_building_to_location} DROP CONSTRAINT IF EXISTS ' . $key4_foreign);
+  db_query('ALTER TABLE {mfcs_banner_rooms} DROP CONSTRAINT IF EXISTS ' . $key4_foreign);
+  db_query('ALTER TABLE {mfcs_banner_rooms} DROP CONSTRAINT IF EXISTS ' . $key2_foreign_1);
+  db_query('ALTER TABLE {mfcs_review_classifications} DROP CONSTRAINT IF EXISTS ' . $keyR_foreign);
 
   foreach ($structure as $structure_name => &$structure_array) {
-    $table_name = 'mew_current_' . $structure_name;
+    $table_name = 'mfcs_current_' . $structure_name;
 
     db_query('ALTER TABLE {' . $table_name . '} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
 
     foreach ($structure_array as $field_name => &$field_type) {
-      $field_table_name = 'mew_field_' . $structure_name . '_' . $field_name;
-
-      db_query('ALTER TABLE {' . $field_table_name . '} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
-    }
-  }
-}
+      $field_table_name = 'mfcs_field_' .

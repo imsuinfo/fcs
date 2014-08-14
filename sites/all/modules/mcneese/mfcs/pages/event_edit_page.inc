@@ -2,22 +2,22 @@
 
 /**
  * @file
- * Defines McNeese event workflow event edit page functions.
+ * Defines McNeese facilities use event edit page functions.
  */
 
 /**
- * @addtogroup mcneese_event_workflow
+ * @addtogroup mfcs
  * @{
  */
 
 /**
- * Provides the event workflow event edit page.
+ * Provides the facilities use event edit page.
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
- * @param int $event_id
+ * @param int $request_id
  *   The unique identifier for an event request.
  * @param string|null $target_section
  *   (optional) Load only the specified section.
@@ -25,33 +25,33 @@
  * @return string
  *   The HTML output representing the page.
  */
-function mcneese_event_workflow_event_edit_0_form($form, &$form_state, $event_id, $target_section = NULL) {
+function mfcs_event_edit_0_form($form, &$form_state, $request_id, $target_section = NULL) {
   // force the page to load the view page when only the id is specified.
   if (is_null($target_section)) {
-    drupal_goto('events/view-0/' . $event_id, array('query' => drupal_get_query_parameters()));
+    drupal_goto('events/view-0/' . $request_id, array('query' => drupal_get_query_parameters()));
     return '';
   }
 
-  if (!cf_is_integer($event_id)) {
-    cf_error::invalid_integer('event_id');
+  if (!cf_is_integer($request_id)) {
+    cf_error::invalid_integer('request_id');
     drupal_not_found();
     drupal_exit();
   }
 
-  $event = event_workflow_load_event_by_id($event_id);
+  $event = event_workflow_load_event_by_id($request_id);
 
   if (empty($event)) {
-    watchdog(MEW_WATCHDOG_ID, "Unable to find event with id of @id.", array('@id' => $event_id), WATCHDOG_ERROR);
+    watchdog(MFCS_WATCHDOG_ID, "Unable to find event with id of @id.", array('@id' => $request_id), WATCHDOG_ERROR);
     drupal_not_found();
     drupal_exit();
   }
 
-  mcneese_event_workflow_include(1);
+  mfcs_include(1);
 
-  $section_information = mcneese_event_workflow_get_event_section_information();
+  $section_information = mfcs_get_event_section_information();
 
   if (empty($section_information[$target_section]['steps'])) {
-    watchdog(MEW_WATCHDOG_ID, "The section @target_section does not exist or has no steps.", array('@target_section' => $target_section), WATCHDOG_ERROR);
+    watchdog(MFCS_WATCHDOG_ID, "The section @target_section does not exist or has no steps.", array('@target_section' => $target_section), WATCHDOG_ERROR);
     drupal_not_found();
     drupal_exit();
   }
@@ -77,7 +77,7 @@ function mcneese_event_workflow_event_edit_0_form($form, &$form_state, $event_id
 
   $form['form']['sections'] = array(
     '#type' => 'value',
-    '#value' => mcneese_event_workflow_get_event_section_information(),
+    '#value' => mfcs_get_event_section_information(),
   );
 
   $form['form']['step'] = array(
@@ -146,7 +146,7 @@ function mcneese_event_workflow_event_edit_0_form($form, &$form_state, $event_id
     '#tree' => TRUE,
   );
 
-  $form['event'] = mcneese_event_workflow_get_event_fields($form, $form_state);
+  $form['event'] = mfcs_get_event_fields($form, $form_state);
   $form['event']['#id'] = 'section-event';
   $form['event']['#tree'] = TRUE;
 
@@ -205,16 +205,16 @@ function mcneese_event_workflow_event_edit_0_form($form, &$form_state, $event_id
 }
 
 /**
- * Pre-Validation for mcneese_event_workflow_event_edit_0_form().
+ * Pre-Validation for mfcs_event_edit_0_form().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mcneese_event_workflow_event_edit_0_form()
+ * @see: mfcs_event_edit_0_form()
  */
-function mcneese_event_workflow_event_edit_0_form_pre_validate(&$form, &$form_state) {
+function mfcs_event_edit_0_form_pre_validate(&$form, &$form_state) {
   $clicked_id = '';
   if (isset($form_state['triggering_element']['#id'])) {
     $clicked_id = $form_state['triggering_element']['#id'];
@@ -241,22 +241,22 @@ function mcneese_event_workflow_event_edit_0_form_pre_validate(&$form, &$form_st
     $dont_validate[$clicked_id] = TRUE;
   }
 
-  mcneese_event_workflow_include(2);
+  mfcs_include(2);
 
-  mcneese_event_workflow_pre_validate_event_fields($form, $form_state, $dont_validate);
+  mfcs_pre_validate_event_fields($form, $form_state, $dont_validate);
 }
 
 /**
- * Validation for mcneese_event_workflow_event_edit_0_form().
+ * Validation for mfcs_event_edit_0_form().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mcneese_event_workflow_event_edit_0_form()
+ * @see: mfcs_event_edit_0_form()
  */
-function mcneese_event_workflow_event_edit_0_form_validate($form, &$form_state) {
+function mfcs_event_edit_0_form_validate($form, &$form_state) {
   $no_problems = TRUE;
   $form_state['rebuild'] = TRUE;
 
@@ -279,10 +279,10 @@ function mcneese_event_workflow_event_edit_0_form_validate($form, &$form_state) 
   }
 
   $event = $form['form']['event']['#value'];
-  $event_id = (int) $event['mer']['id'][0]->value;
+  $request_id = (int) $event['mer']['id'][0]->value;
 
-  $can_edit_event = mcneese_event_workflow_management_page_event_access('edit', $event_id);
-  $can_cancel_event = mcneese_event_workflow_management_page_event_access('cancel', $event_id);
+  $can_edit_event = mfcs_management_page_event_access('edit', $request_id);
+  $can_cancel_event = mfcs_management_page_event_access('cancel', $request_id);
 
   if (!$can_edit_event) {
     form_set_error('', "Illegal operation detected. Unauthorized access attempt.");
@@ -304,11 +304,11 @@ function mcneese_event_workflow_event_edit_0_form_validate($form, &$form_state) 
       $form_state['rebuild'] = FALSE;
 
       if (empty($form_state['values']['redirect_to'])) {
-        if (empty($event_id)) {
+        if (empty($request_id)) {
           $form_state['redirect'] = 'events';
         }
         else {
-          $form_state['redirect'] = 'events/view-0/' . $event_id;
+          $form_state['redirect'] = 'events/view-0/' . $request_id;
         }
       }
       else {
@@ -334,9 +334,9 @@ function mcneese_event_workflow_event_edit_0_form_validate($form, &$form_state) 
   }
 
   if (!array_key_exists($clicked_id, $dont_validate)) {
-    mcneese_event_workflow_include(2);
+    mfcs_include(2);
 
-    $no_problems = mcneese_event_workflow_validate_event_fields($form, $form_state);
+    $no_problems = mfcs_validate_event_fields($form, $form_state);
     if (is_null($no_problems)) {
       $no_problems = TRUE;
     }
@@ -416,13 +416,13 @@ function mcneese_event_workflow_event_edit_0_form_validate($form, &$form_state) 
           }
 
           if (!empty($date)) {
-            $events_using_room = mcneese_event_workflow_check_room_availability($room[0], $date, $time_start, $time_stop, $event_id);
+            $events_using_room = mfcs_check_room_availability($room[0], $date, $time_start, $time_stop, $request_id);
 
             if ($events_using_room === FALSE) {
               form_set_error('', "An internal error occurred while checking the room for availability. Please contact the support staff.");
             }
             elseif (!empty($events_using_room)) {
-              mcneese_event_workflow_display_room_unavailable_message();
+              mfcs_display_room_unavailable_message();
             }
           }
 
@@ -478,16 +478,16 @@ function mcneese_event_workflow_event_edit_0_form_validate($form, &$form_state) 
 }
 
 /**
- * Submit process for mcneese_event_workflow_event_edit_0_form().
+ * Submit process for mfcs_event_edit_0_form().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mcneese_event_workflow_event_edit_0_form()
+ * @see: mfcs_event_edit_0_form()
  */
-function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
+function mfcs_event_edit_0_form_submit($form, &$form_state) {
   $clicked_id = '';
   if (isset($form_state['triggering_element']['#id'])) {
     $clicked_id = $form_state['triggering_element']['#id'];
@@ -495,19 +495,19 @@ function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
 
   $failure = FALSE;
   $event = &$form['form']['event']['#value'];
-  $event_id = (int) $event['mer']['id'][0]->value;
+  $request_id = (int) $event['mer']['id'][0]->value;
   $status = (int) $event['top']['status'][0]->value;
   $step = (int) $event['top']['step'][0]->value;
-  $use_fees = $event['current']['use_fees'];
+  $requirements = $event['current']['requirements'];
 
   // make sure the cancel button is never treated as a save submit.
   if ($clicked_id == 'submit-event-cancel') {
     if (empty($form_state['values']['redirect_to'])) {
-      if (empty($event_id)) {
+      if (empty($request_id)) {
         $form_state['redirect'] = 'events';
       }
       else {
-        $form_state['redirect'] = 'events/view-0/' . $event_id;
+        $form_state['redirect'] = 'events/view-0/' . $request_id;
       }
     }
     else {
@@ -523,16 +523,16 @@ function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
     'user_id' => $user->uid,
   );
 
-  $mew_event_requests = array(
+  $mfcs_event_requests = array(
     'updated' => REQUEST_TIME,
   );
 
-  $event_revision = mcneese_event_workflow_load_event_revision_number($event_id);
-  $processed_mew_event_revisions = &drupal_static('processed_mew_event_revisions_' . REQUEST_TIME, FALSE);
+  $event_revision = mfcs_load_event_revision_number($request_id);
+  $processed_mfcs_event_revisions = &drupal_static('processed_mfcs_event_revisions_' . REQUEST_TIME, FALSE);
 
   if ($event_revision === FALSE) {
     form_set_error('form', "An error occurred while trying to save the event request. Please contact the support staff.");
-    watchdog(MEW_WATCHDOG_ID, "Failed to load revision number for event %event_id while trying to save the event request.", array('%event_id' => $event_id), WATCHDOG_ERROR);
+    watchdog(MFCS_WATCHDOG_ID, "Failed to load revision number for event %request_id while trying to save the event request.", array('%request_id' => $request_id), WATCHDOG_ERROR);
 
     $form_state['rebuild'] = TRUE;
     $form_state['redirect'] = FALSE;
@@ -546,20 +546,20 @@ function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
     $event_revision_next = $event_revision + 1;
   }
 
-  $mew_event_revisions = array(
-    'event_id' => $event_id,
+  $mfcs_event_revisions = array(
+    'request_id' => $request_id,
     'date' => REQUEST_TIME,
     'revision' => $event_revision_next,
   );
 
-  mcneese_event_workflow_include(0);
+  mfcs_include(0);
 
-  $structure = mcneese_event_workflow_table_structure();
+  $structure = mfcs_table_structure();
   $structure_tables = array();
   $structure_field_tables = array();
 
   foreach ($structure as $table_name => &$fields) {
-    $db_table = 'mew_current_' . $table_name;
+    $db_table = 'mfcs_current_' . $table_name;
 
     foreach ($fields as $field_name => &$field_values) {
       // manual processing fields must not be auto-populated through the normal form submit process.
@@ -584,12 +584,12 @@ function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
         $part = array_shift($parts);
 
         if (!is_array($current_existing) || !array_key_exists($part, $current_existing)) {
-          watchdog(MEW_WATCHDOG_ID, "Failed to process '@part' for '@field_name' in '@table_name' during form submit. Invalid array or missing array key (existing).", array('@part' => $part, '@field_name' => $field_name, '@table_name' => $table_name), WATCHDOG_ERROR);
+          watchdog(MFCS_WATCHDOG_ID, "Failed to process '@part' for '@field_name' in '@table_name' during form submit. Invalid array or missing array key (existing).", array('@part' => $part, '@field_name' => $field_name, '@table_name' => $table_name), WATCHDOG_ERROR);
           continue 2;
         }
 
         if (!is_array($current_new) || !array_key_exists($part, $current_new)) {
-          watchdog(MEW_WATCHDOG_ID, "Failed to process '@part' for '@field_name' in '@table_name' during form submit. Invalid array or missing array key (new).", array('@part' => $part, '@field_name' => $field_name, '@table_name' => $table_name), WATCHDOG_ERROR);
+          watchdog(MFCS_WATCHDOG_ID, "Failed to process '@part' for '@field_name' in '@table_name' during form submit. Invalid array or missing array key (new).", array('@part' => $part, '@field_name' => $field_name, '@table_name' => $table_name), WATCHDOG_ERROR);
           continue 2;
         }
 
@@ -607,9 +607,9 @@ function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
         $structure_tables[$db_table] = array();
       }
 
-      $db_table_field = 'mew_field_' . $table_name . '_' . $field_name;
+      $db_table_field = 'mfcs_field_' . $table_name . '_' . $field_name;
 
-      mcneese_event_workflow_build_table_structure($structure, $structure_tables, $structure_field_tables, $table_name, $field_name, $db_table, $db_table_field, $user_data, $current_new, $form_state, $event);
+      mfcs_build_table_structure($structure, $structure_tables, $structure_field_tables, $table_name, $field_name, $db_table, $db_table_field, $user_data, $current_new, $form_state, $event);
     }
   }
 
@@ -619,17 +619,17 @@ function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
 
     try {
       // now perform the operations.
-      $query = db_update('mew_event_requests');
-      $query->condition('id', $event_id);
-      $query->fields($mew_event_requests);
+      $query = db_update('mfcs_event_requests');
+      $query->condition('id', $request_id);
+      $query->fields($mfcs_event_requests);
       $query->execute();
 
-      if (!$processed_mew_event_revisions) {
-        $query = db_insert('mew_event_revisions');
-        $query->fields($mew_event_revisions);
+      if (!$processed_mfcs_event_revisions) {
+        $query = db_insert('mfcs_event_revisions');
+        $query->fields($mfcs_event_revisions);
         $query->execute();
 
-        $processed_mew_event_revisions = TRUE;
+        $processed_mfcs_event_revisions = TRUE;
       }
 
       foreach ($structure_field_tables as $table_name => $fields) {
@@ -642,38 +642,38 @@ function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
 
       foreach ($structure_tables as $table_name => $fields) {
         $query = db_update($table_name);
-        $query->condition('event_id', $event_id);
+        $query->condition('request_id', $request_id);
         $query->fields($fields);
         $query->execute();
       }
 
       // if the event has been updated while it is in a locked status.
-      if ($status == MEW_EVENT_STATUS_LOCKED) {
+      if ($status == MFCS_EVENT_STATUS_LOCKED) {
         $step_revision = $event['current']['top']['step'] + 1;
 
-        $mew_current_top = array(
+        $mfcs_current_top = array(
           'step' => $step_revision,
         );
 
-        $mew_field_top_step = array(
-          'event_id' => $event_id,
+        $mfcs_field_top_step = array(
+          'request_id' => $request_id,
           'revision' => $step_revision,
           'delta' => 0,
           'user_id' => $user->uid,
           'date' => REQUEST_TIME,
-          'value' => MEW_REVIEW_STEP_VENUE_AVAILABLE,
+          'value' => MFCS_REVIEW_STEP_VENUE_AVAILABLE,
         );
 
-        $query = db_insert('mew_field_top_step');
-        $query->fields($mew_field_top_step);
+        $query = db_insert('mfcs_field_top_step');
+        $query->fields($mfcs_field_top_step);
         $query->execute();
 
-        $query = db_update('mew_current_top');
-        $query->condition('event_id', $event_id);
-        $query->fields($mew_current_top);
+        $query = db_update('mfcs_current_top');
+        $query->condition('request_id', $request_id);
+        $query->fields($mfcs_current_top);
         $query->execute();
 
-        $review_revision = mcneese_event_workflow_load_event_revision_number($event_id, 'mew_field_review_review');
+        $review_revision = mfcs_load_event_revision_number($request_id, 'mfcs_field_review_review');
 
         if ($review_revision === FALSE || is_null($review_revision)) {
           $review_revision = 0;
@@ -682,32 +682,32 @@ function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
           $review_revision++;
         }
 
-        $mew_current_review = array(
+        $mfcs_current_review = array(
           'review' => $review_revision,
         );
 
-        $mew_field_review_review = array(
-          'event_id' => $event_id,
+        $mfcs_field_review_review = array(
+          'request_id' => $request_id,
           'revision' => $review_revision,
           'delta' => 0,
           'user_id' => $user->uid,
           'date' => REQUEST_TIME,
           'step' => $step,
-          'decision' => MEW_REVIEW_DECISION_AMENDMENT,
+          'decision' => MFCS_REVIEW_DECISION_AMENDMENT,
           'message' => '',
         );
 
-        $query = db_insert('mew_field_review_review');
-        $query->fields($mew_field_review_review);
+        $query = db_insert('mfcs_field_review_review');
+        $query->fields($mfcs_field_review_review);
         $query->execute();
 
-        $query = db_update('mew_current_review');
-        $query->condition('event_id', $event_id);
-        $query->fields($mew_current_review);
+        $query = db_update('mfcs_current_review');
+        $query->condition('request_id', $request_id);
+        $query->fields($mfcs_current_review);
         $query->execute();
 
-        $mew_current_use_fees = array(
-          'event_id' => $event_id,
+        $mfcs_current_requirements = array(
+          'request_id' => $request_id,
           'facilities' => NULL,
           'equipment' => NULL,
           'custodial' => NULL,
@@ -717,20 +717,20 @@ function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
           'university' => NULL,
         );
 
-        $mew_current_insurance = array(
-          'event_id' => $event_id,
+        $mfcs_current_insurance = array(
+          'request_id' => $request_id,
           'contractor' => NULL,
           'unaffiliated' => NULL,
         );
 
-        $query = db_update('mew_current_use_fees');
-        $query->condition('event_id', $event_id);
-        $query->fields($mew_current_use_fees);
+        $query = db_update('mfcs_current_requirements');
+        $query->condition('request_id', $request_id);
+        $query->fields($mfcs_current_requirements);
         $query->execute();
 
-        $query = db_update('mew_current_insurance');
-        $query->condition('event_id', $event_id);
-        $query->fields($mew_current_insurance);
+        $query = db_update('mfcs_current_insurance');
+        $query->condition('request_id', $request_id);
+        $query->fields($mfcs_current_insurance);
         $query->execute();
       }
 
@@ -746,7 +746,7 @@ function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
 
     if ($failure) {
       form_set_error('form', "An error occurred while trying to save the event request. Please contact the support staff.");
-      watchdog(MEW_WATCHDOG_ID, "An error occured while trying to save the event request: @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
+      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to save the event request: @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
 
       $form_state['rebuild'] = TRUE;
       $form_state['redirect'] = FALSE;
@@ -756,12 +756,12 @@ function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
     }
     else {
       // forcefully clear the event cache so that it can reflect the changes.
-      event_workflow_load_event_by_id($event_id, TRUE);
+      event_workflow_load_event_by_id($request_id, TRUE);
 
-      mcneese_event_workflow_include(6);
+      mfcs_include(6);
 
       // send an e-mail to all reviewers that the event step has been reset.
-      if ($status == MEW_EVENT_STATUS_LOCKED) {
+      if ($status == MFCS_EVENT_STATUS_LOCKED) {
         $parameters['amendment'] = TRUE;
       }
       else {
@@ -769,27 +769,4 @@ function mcneese_event_workflow_event_edit_0_form_submit($form, &$form_state) {
       }
 
       $parameters = array();
-      $parameters['changed_by'] = $user->uid;
-      $parameters['changed_type'] = 'user';
-      mcneese_event_workflow_send_workflow_emails($event_id, $parameters);
-    }
-  }
-
-
-  // redirect after submitting.
-  if (empty($form_state['values']['redirect_to'])) {
-    if (empty($event_id)) {
-      $form_state['redirect'] = 'events';
-    }
-    else {
-      $form_state['redirect'] = 'events/view-0/' . $event_id;
-    }
-  }
-  else {
-    $form_state['redirect'] = $form_state['values']['redirect_to'];
-  }
-}
-
-/**
- * @} End of '@addtogroup mcneese_event_workflow'.
- */
+      $parameters['changed_by'] = $user->ui

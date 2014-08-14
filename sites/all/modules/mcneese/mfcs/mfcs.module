@@ -2,11 +2,11 @@
 
 /**
  * @file
- * McNeese State University Event Workflow module.
+ * McNeese State University Facilities Use module.
  */
 
 /**
- * @defgroup mcneese_event_workflow McNeese Event Workflow
+ * @defgroup mfcs McNeese Facilities Use
  * @{
  * Provides Workflow specific module functionality for the Events Workflow
  * System.
@@ -15,146 +15,146 @@
 /**
  * Defines event status codes.
  */
-define('MEW_EVENT_STATUS_DELETED', 0);
-define('MEW_EVENT_STATUS_LOCKED', 1);
-define('MEW_EVENT_STATUS_UNLOCKED', 2);
-define('MEW_EVENT_STATUS_CLOSED_ACCEPTED', 3);
-define('MEW_EVENT_STATUS_CLOSED_DENIED', 4);
-define('MEW_EVENT_STATUS_CLOSED_UNAVAILABLE', 5);
-define('MEW_EVENT_STATUS_CLOSED_DUE_TO_LOCK', 6);
-define('MEW_EVENT_STATUS_CANCELLED', 7);
+define('MFCS_EVENT_STATUS_DELETED', 0);
+define('MFCS_EVENT_STATUS_LOCKED', 1);
+define('MFCS_EVENT_STATUS_UNLOCKED', 2);
+define('MFCS_EVENT_STATUS_CLOSED_ACCEPTED', 3);
+define('MFCS_EVENT_STATUS_CLOSED_DENIED', 4);
+define('MFCS_EVENT_STATUS_CLOSED_UNAVAILABLE', 5);
+define('MFCS_EVENT_STATUS_CLOSED_DUE_TO_LOCK', 6);
+define('MFCS_EVENT_STATUS_CANCELLED', 7);
 
 /**
  * Defines Taxonomy VIDs.
  */
- define('MEW_VID_EVENT_CLASSIFICATION', 1);
- define('MEW_VID_EVENT_STEPS', 19);
- define('MEW_VID_EVENT_LOCATION', 7);
- define('MEW_VID_EVENT_AUDIENCE', 9);
- define('MEW_VID_REVENUE_GENERATED', 15);
- define('MEW_VID_EVENT_INFORMATION_TYPE', 8);
- define('MEW_VID_EVENT_PUBLICITY_DETAILS', 11);
- define('MEW_VID_EVENT_DESIGNING_MATERIAL', 16);
- define('MEW_VID_EVENT_TECHNICAL_EQUIPMENT_DETAILS', 10);
- define('MEW_VID_EVENT_REVIEWER_CLASSIFICATION', 17);
- define('MEW_VID_EVENT_REVIEWER_DECISION', 18);
- define('MEW_VID_EVENT_DATES_CATEGORY', 20);
+ define('MFCS_VID_EVENT_CLASSIFICATION', 1);
+ define('MFCS_VID_EVENT_STEPS', 19);
+ define('MFCS_VID_EVENT_LOCATION', 7);
+ define('MFCS_VID_EVENT_AUDIENCE', 9);
+ define('MFCS_VID_REVENUE_GENERATED', 15);
+ define('MFCS_VID_EVENT_INFORMATION_TYPE', 8);
+ define('MFCS_VID_EVENT_PUBLICITY_DETAILS', 11);
+ define('MFCS_VID_EVENT_DESIGNING_MATERIAL', 16);
+ define('MFCS_VID_EVENT_TECHNICAL_EQUIPMENT_DETAILS', 10);
+ define('MFCS_VID_EVENT_REVIEWER_CLASSIFICATION', 17);
+ define('MFCS_VID_EVENT_REVIEWER_DECISION', 18);
+ define('MFCS_VID_EVENT_DATES_CATEGORY', 20);
 
 /**
  * Defines Taxonomy TIDs for review steps.
  */
- define('MEW_REVIEW_STEP_CHANGES_REQUIRED', 140);
- define('MEW_REVIEW_STEP_COMPLETED', 134);
- define('MEW_REVIEW_STEP_CONFIRM_AND_RESERVE_SERVICES', 121);
- define('MEW_REVIEW_STEP_CONFIRM_AND_RESERVE_HOUSING', 120);
- define('MEW_REVIEW_STEP_CONFIRM_AND_RESERVE_VENUE', 119);
- define('MEW_REVIEW_STEP_MAKE_DECISIONS', 117);
- define('MEW_REVIEW_STEP_RELEASE_HOLD', 118);
- define('MEW_REVIEW_STEP_REVIEW', 132);
- define('MEW_REVIEW_STEP_USAGE_FEES', 133);
- define('MEW_REVIEW_STEP_VENUE_AVAILABLE', 116);
+ define('MFCS_REVIEW_STEP_CHANGES_REQUIRED', 140);
+ define('MFCS_REVIEW_STEP_COMPLETED', 134);
+ define('MFCS_REVIEW_STEP_CONFIRM_AND_RESERVE_SERVICES', 121);
+ define('MFCS_REVIEW_STEP_CONFIRM_AND_RESERVE_HOUSING', 120);
+ define('MFCS_REVIEW_STEP_CONFIRM_AND_RESERVE_VENUE', 119);
+ define('MFCS_REVIEW_STEP_MAKE_DECISIONS', 117);
+ define('MFCS_REVIEW_STEP_RELEASE_HOLD', 118);
+ define('MFCS_REVIEW_STEP_REVIEW', 132);
+ define('MFCS_REVIEW_STEP_REQUIREMENTS', 133);
+ define('MFCS_REVIEW_STEP_VENUE_AVAILABLE', 116);
 
 /**
  * Defines Taxonomy TID for review decisions.
  */
- define('MEW_REVIEW_DECISION_AMENDMENT', 141);
- define('MEW_REVIEW_DECISION_APPROVE', 115);
- define('MEW_REVIEW_DECISION_COMMENT', 113);
- define('MEW_REVIEW_DECISION_DENY', 114);
- define('MEW_REVIEW_DECISION_WAVE', 135);
- define('MEW_REVIEW_DECISION_USAGE_FEE', 136);
+ define('MFCS_REVIEW_DECISION_AMENDMENT', 141);
+ define('MFCS_REVIEW_DECISION_APPROVE', 115);
+ define('MFCS_REVIEW_DECISION_COMMENT', 113);
+ define('MFCS_REVIEW_DECISION_DENY', 114);
+ define('MFCS_REVIEW_DECISION_WAVE', 135);
+ define('MFCS_REVIEW_DECISION_REQUIREMENT', 136);
 
 /**
  * Defines Taxonomy TIDs for review classifications.
  */
- define('MEW_REVIEW_CLASSIFICATION_ADMINISTRATIVE_ACCOUNTING', 105);
- define('MEW_REVIEW_CLASSIFICATION_EVENT_COORDINATOR', 99);
- define('MEW_REVIEW_CLASSIFICATION_FACILITIES', 104);
- define('MEW_REVIEW_CLASSIFICATION_FACULTY_ADVISOR', 100);
- define('MEW_REVIEW_CLASSIFICATION_FOOD_SERVICES', 108);
- define('MEW_REVIEW_CLASSIFICATION_HOUSING', 107);
- define('MEW_REVIEW_CLASSIFICATION_MAINTENANCE', 103);
- define('MEW_REVIEW_CLASSIFICATION_PURCHASING', 106);
- define('MEW_REVIEW_CLASSIFICATION_SECURITY', 102);
- define('MEW_REVIEW_CLASSIFICATION_STUDENT_SERVICES', 101);
- define('MEW_REVIEW_CLASSIFICATION_VENUE_COORDINATOR', 112);
- define('MEW_REVIEW_CLASSIFICATION_SYSTEM_ADMINISTRATOR', 1);
- define('MEW_REVIEW_CLASSIFICATION_MANAGER', 2);
- define('MEW_REVIEW_CLASSIFICATION_FAILSAFE_COORDINATOR', 45);
+ define('MFCS_REVIEW_CLASSIFICATION_ADMINISTRATIVE_ACCOUNTING', 105);
+ define('MFCS_REVIEW_CLASSIFICATION_EVENT_COORDINATOR', 99);
+ define('MFCS_REVIEW_CLASSIFICATION_FACILITIES', 104);
+ define('MFCS_REVIEW_CLASSIFICATION_FACULTY_ADVISOR', 100);
+ define('MFCS_REVIEW_CLASSIFICATION_FOOD_SERVICES', 108);
+ define('MFCS_REVIEW_CLASSIFICATION_HOUSING', 107);
+ define('MFCS_REVIEW_CLASSIFICATION_MAINTENANCE', 103);
+ define('MFCS_REVIEW_CLASSIFICATION_PURCHASING', 106);
+ define('MFCS_REVIEW_CLASSIFICATION_SECURITY', 102);
+ define('MFCS_REVIEW_CLASSIFICATION_STUDENT_SERVICES', 101);
+ define('MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR', 112);
+ define('MFCS_REVIEW_CLASSIFICATION_SYSTEM_ADMINISTRATOR', 1);
+ define('MFCS_REVIEW_CLASSIFICATION_MANAGER', 2);
+ define('MFCS_REVIEW_CLASSIFICATION_FAILSAFE_COORDINATOR', 45);
 
 /**
  * Defines Taxonomy TIDs for event classifications.
  */
- define('MEW_EVENT_CLASSIFICATION_STUDENT', 1);
- define('MEW_EVENT_CLASSIFICATION_CAMPS', 2);
- define('MEW_EVENT_CLASSIFICATION_FACULTY', 3);
- define('MEW_EVENT_CLASSIFICATION_EXTERNAL', 4);
+ define('MFCS_EVENT_CLASSIFICATION_STUDENT', 1);
+ define('MFCS_EVENT_CLASSIFICATION_CAMPS', 2);
+ define('MFCS_EVENT_CLASSIFICATION_FACULTY', 3);
+ define('MFCS_EVENT_CLASSIFICATION_EXTERNAL', 4);
 
 /**
  * Defines Taxonomy TIDs for event dates categories.
  */
- define('MEW_EVENT_DATES_CATEGORY_ACTUAL', 137);
- define('MEW_EVENT_DATES_CATEGORY_SETUP', 138);
- define('MEW_EVENT_DATES_CATEGORY_CLEANUP', 139);
+ define('MFCS_EVENT_DATES_CATEGORY_ACTUAL', 137);
+ define('MFCS_EVENT_DATES_CATEGORY_SETUP', 138);
+ define('MFCS_EVENT_DATES_CATEGORY_CLEANUP', 139);
 
 /**
  * Defines operator codes for building search queries.
  */
- define('MEW_OPERATOR_LESS_THAN', 1);
- define('MEW_OPERATOR_LESS_THAN_EQUAL', 2);
- define('MEW_OPERATOR_EQUAL', 3);
- define('MEW_OPERATOR_LIKE', 4);
- define('MEW_OPERATOR_GREATER_THAN_EQUAL', 5);
- define('MEW_OPERATOR_GREATER_THAN', 6);
- define('MEW_OPERATOR_NOT_EQUAL', 7);
- define('MEW_OPERATOR_NOT_LIKE', 8);
+ define('MFCS_OPERATOR_LESS_THAN', 1);
+ define('MFCS_OPERATOR_LESS_THAN_EQUAL', 2);
+ define('MFCS_OPERATOR_EQUAL', 3);
+ define('MFCS_OPERATOR_LIKE', 4);
+ define('MFCS_OPERATOR_GREATER_THAN_EQUAL', 5);
+ define('MFCS_OPERATOR_GREATER_THAN', 6);
+ define('MFCS_OPERATOR_NOT_EQUAL', 7);
+ define('MFCS_OPERATOR_NOT_LIKE', 8);
 
 /**
  * Defines a recursion limit for the search and/or operations.
  */
- define('MEW_MAX_SEARCH_RECURSION', 3);
+ define('MFCS_MAX_SEARCH_RECURSION', 3);
 
 /**
  * Defines a failsafe coordinator id to use.
  */
- define('MEW_FAILSAFE_COORDINATOR_ID', 45);
+ define('MFCS_FAILSAFE_COORDINATOR_ID', 45);
 
 /**
  * Defines a standardized string for consiting watchdog error reporting.
  */
- define('MEW_WATCHDOG_ID', 'mew');
+ define('MFCS_WATCHDOG_ID', 'mfcs');
 
 /**
  * Defines standard view modes.
  */
- define('MEW_VIEW_MODE_NORMAL', 0);
- define('MEW_VIEW_MODE_DISPLAY', 1);
- define('MEW_VIEW_MODE_LOG', 2);
- define('MEW_VIEW_MODE_OPERATIONS', 3);
+ define('MFCS_VIEW_MODE_NORMAL', 0);
+ define('MFCS_VIEW_MODE_DISPLAY', 1);
+ define('MFCS_VIEW_MODE_LOG', 2);
+ define('MFCS_VIEW_MODE_OPERATIONS', 3);
 
 
 /**
  * Implements hook_permission().
  */
-function mcneese_event_workflow_permission() {
+function mfcs_permission() {
   $permissions = array();
-  $permissions['mcneese event workflow administer'] = array(
-    'title' => t("Administer Event Workflow"),
+  $permissions['mcneese facilities use administer'] = array(
+    'title' => t("Administer Facilities Use"),
     'description' => t("Grants permissions to administer event requests and workflow."),
   );
 
-  $permissions['mcneese event workflow request'] = array(
-    'title' => t("Request Event Workflow"),
+  $permissions['mcneese facilities use request'] = array(
+    'title' => t("Request Facilities Use"),
     'description' => t("Grants permissions to make request events."),
   );
 
-  $permissions['mcneese event workflow review'] = array(
-    'title' => t("Review Event Workflow"),
+  $permissions['mcneese facilities use review'] = array(
+    'title' => t("Review Facilities Use"),
     'description' => t("Grants permissions to review event requests."),
   );
 
-  $permissions['mcneese event workflow manage'] = array(
-    'title' => t("Manage Event Workflow"),
+  $permissions['mcneese facilities use manage'] = array(
+    'title' => t("Manage Facilities Use"),
     'description' => t("Grants permissions to manage event requests."),
   );
 
@@ -165,16 +165,16 @@ function mcneese_event_workflow_permission() {
 /**
  * Implements hook_menu().
  */
-function mcneese_event_workflow_menu() {
+function mfcs_menu() {
   $items = array();
 
   $items['events'] = array(
     'title' => "Event Requests Dashboard",
-    'description' => "Event Dashboard",
-    'page callback' => 'mcneese_event_workflow_management_page',
-    'file' => 'mcneese_event_workflow_management_page.inc',
-    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
-    'access callback' => 'mcneese_event_workflow_management_page_access',
+    'description' => "Event Requests Dashboard",
+    'page callback' => 'mfcs_management_page',
+    'file' => 'mfcs_management_page.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
+    'access callback' => 'mfcs_management_page_access',
     'tab_parent' => '',
     'tab_root' => '',
   );
@@ -183,10 +183,10 @@ function mcneese_event_workflow_menu() {
     'title' => "Request Event",
     'description' => "New Request",
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mcneese_event_workflow_event_create_0_form'),
-    'file' => 'mcneese_event_workflow_event_create_page.inc',
-    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
-    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'page arguments' => array('mfcs_event_create_0_form'),
+    'file' => 'mfcs_event_create_page.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
+    'access callback' => 'mfcs_management_page_event_access',
     'access arguments' => array('create'),
     'tab_parent' => 'events',
     'tab_root' => 'events',
@@ -196,10 +196,10 @@ function mcneese_event_workflow_menu() {
     'title' => "Request Event",
     'description' => "New Request",
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mcneese_event_workflow_event_create_0_form', 2),
-    'file' => 'mcneese_event_workflow_event_create_page.inc',
-    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
-    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'page arguments' => array('mfcs_event_create_0_form', 2),
+    'file' => 'mfcs_event_create_page.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
+    'access callback' => 'mfcs_management_page_event_access',
     'access arguments' => array('create'),
     'tab_parent' => 'events',
     'tab_root' => 'events',
@@ -207,30 +207,30 @@ function mcneese_event_workflow_menu() {
 
   $items['events/create-0/autocomplete/event_coordinator/email'] = array(
     'title' => "",
-    'page callback' => 'mcneese_event_workflow_event_edit_0_autocomplete_event_coordinator_email',
-    'file' => 'mcneese_event_workflow_autocomplete.inc',
-    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/includes',
-    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'page callback' => 'mfcs_event_edit_0_autocomplete_event_coordinator_email',
+    'file' => 'mfcs_autocomplete.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/includes',
+    'access callback' => 'mfcs_management_page_event_access',
     'access arguments' => array('create'),
     'type' => MENU_CALLBACK,
   );
 
   $items['events/create-0/autocomplete/event_coordinator/name'] = array(
     'title' => "",
-    'page callback' => 'mcneese_event_workflow_event_edit_0_autocomplete_event_coordinator_name',
-    'file' => 'mcneese_event_workflow_autocomplete.inc',
-    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/includes',
-    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'page callback' => 'mfcs_event_edit_0_autocomplete_event_coordinator_name',
+    'file' => 'mfcs_autocomplete.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/includes',
+    'access callback' => 'mfcs_management_page_event_access',
     'access arguments' => array('create'),
     'type' => MENU_CALLBACK,
   );
 
   $items['events/create-0/autocomplete/event_coordinator/phone'] = array(
     'title' => "",
-    'page callback' => 'mcneese_event_workflow_event_edit_0_autocomplete_event_coordinator_phone',
-    'file' => 'mcneese_event_workflow_autocomplete.inc',
-    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/includes',
-    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'page callback' => 'mfcs_event_edit_0_autocomplete_event_coordinator_phone',
+    'file' => 'mfcs_autocomplete.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/includes',
+    'access callback' => 'mfcs_management_page_event_access',
     'access arguments' => array('create'),
     'type' => MENU_CALLBACK,
   );
@@ -240,10 +240,10 @@ function mcneese_event_workflow_menu() {
     'title' => "View Request",
     'description' => "Edit Request",
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mcneese_event_workflow_event_edit_0_form', 2),
-    'file' => 'mcneese_event_workflow_event_edit_page.inc',
-    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
-    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'page arguments' => array('mfcs_event_edit_0_form', 2),
+    'file' => 'mfcs_event_edit_page.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
+    'access callback' => 'mfcs_management_page_event_access',
     'access arguments' => array('edit', 2),
     'tab_parent' => 'events',
     'tab_root' => 'events',
@@ -253,10 +253,10 @@ function mcneese_event_workflow_menu() {
     'title' => "Edit Request",
     'description' => "Edit Request",
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mcneese_event_workflow_event_edit_0_form', 2, 3),
-    'file' => 'mcneese_event_workflow_event_edit_page.inc',
-    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
-    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'page arguments' => array('mfcs_event_edit_0_form', 2, 3),
+    'file' => 'mfcs_event_edit_page.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
+    'access callback' => 'mfcs_management_page_event_access',
     'access arguments' => array('edit', 2),
     'tab_parent' => 'events',
     'tab_root' => 'events',
@@ -264,30 +264,30 @@ function mcneese_event_workflow_menu() {
 
   $items['events/edit-0/autocomplete/event_coordinator/email'] = array(
     'title' => "",
-    'page callback' => 'mcneese_event_workflow_event_edit_0_autocomplete_event_coordinator_email',
-    'file' => 'mcneese_event_workflow_autocomplete.inc',
-    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/includes',
-    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'page callback' => 'mfcs_event_edit_0_autocomplete_event_coordinator_email',
+    'file' => 'mfcs_autocomplete.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/includes',
+    'access callback' => 'mfcs_management_page_event_access',
     'access arguments' => array('edit'),
     'type' => MENU_CALLBACK,
   );
 
   $items['events/edit-0/autocomplete/event_coordinator/name'] = array(
     'title' => "",
-    'page callback' => 'mcneese_event_workflow_event_edit_0_autocomplete_event_coordinator_name',
-    'file' => 'mcneese_event_workflow_autocomplete.inc',
-    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/includes',
-    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'page callback' => 'mfcs_event_edit_0_autocomplete_event_coordinator_name',
+    'file' => 'mfcs_autocomplete.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/includes',
+    'access callback' => 'mfcs_management_page_event_access',
     'access arguments' => array('edit'),
     'type' => MENU_CALLBACK,
   );
 
   $items['events/edit-0/autocomplete/event_coordinator/phone'] = array(
     'title' => "",
-    'page callback' => 'mcneese_event_workflow_event_edit_0_autocomplete_event_coordinator_phone',
-    'file' => 'mcneese_event_workflow_autocomplete.inc',
-    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/includes',
-    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'page callback' => 'mfcs_event_edit_0_autocomplete_event_coordinator_phone',
+    'file' => 'mfcs_autocomplete.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/includes',
+    'access callback' => 'mfcs_management_page_event_access',
     'access arguments' => array('edit'),
     'type' => MENU_CALLBACK,
   );
@@ -295,10 +295,10 @@ function mcneese_event_workflow_menu() {
   $items['events/reviewers-0'] = array(
     'title' => "Manage Reviewers",
     'description' => "Review Request",
-    'page callback' => 'mcneese_event_workflow_event_reviewers_0_page',
-    'file' => 'mcneese_event_workflow_event_reviewers_page.inc',
-    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
-    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'page callback' => 'mfcs_event_reviewers_0_page',
+    'file' => 'mfcs_event_reviewers_page.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
+    'access callback' => 'mfcs_management_page_event_access',
     'access arguments' => array('reviewers'),
     'tab_parent' => 'events',
     'tab_root' => 'events',
@@ -308,10 +308,10 @@ function mcneese_event_workflow_menu() {
     'title' => "List Reviewers",
     'description' => "List Reviewers",
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mcneese_event_workflow_event_reviewers_0_form', 3, 4),
-    'file' => 'mcneese_event_workflow_event_reviewers_page.inc',
-    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
-    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'page arguments' => array('mfcs_event_reviewers_0_form', 3, 4),
+    'file' => 'mfcs_event_reviewers_page.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
+    'access callback' => 'mfcs_management_page_event_access',
     'access arguments' => array('reviewers'),
     'tab_parent' => 'events/reviewers-0',
     'tab_root' => 'events/reviewers-0',
@@ -321,10 +321,10 @@ function mcneese_event_workflow_menu() {
     'title' => "Delete Reviewer",
     'description' => "Delete Reviewer",
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mcneese_event_workflow_event_reviewers_0_delete_form', 3),
-    'file' => 'mcneese_event_workflow_event_reviewers_page.inc',
-    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
-    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'page arguments' => array('mfcs_event_reviewers_0_delete_form', 3),
+    'file' => 'mfcs_event_reviewers_page.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
+    'access callback' => 'mfcs_management_page_event_access',
     'access arguments' => array('reviewers'),
     'tab_parent' => 'events/reviewers-0',
     'tab_root' => 'events/reviewers-0',
@@ -332,20 +332,20 @@ function mcneese_event_workflow_menu() {
 
   $items['events/reviewers-0/autocomplete/user_id'] = array(
     'title' => "",
-    'page callback' => 'mcneese_event_workflow_event_reviewers_0_autocomplete_user_id',
-    'file' => 'mcneese_event_workflow_autocomplete.inc',
-    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/includes',
-    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'page callback' => 'mfcs_event_reviewers_0_autocomplete_user_id',
+    'file' => 'mfcs_autocomplete.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/includes',
+    'access callback' => 'mfcs_management_page_event_access',
     'access arguments' => array('reviewers'),
     'type' => MENU_CALLBACK,
   );
 
   $items['events/reviewers-0/autocomplete/reviewer_classification'] = array(
     'title' => "",
-    'page callback' => 'mcneese_event_workflow_event_reviewers_0_autocomplete_reviewer_classification',
-    'file' => 'mcneese_event_workflow_autocomplete.inc',
-    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/includes',
-    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'page callback' => 'mfcs_event_reviewers_0_autocomplete_reviewer_classification',
+    'file' => 'mfcs_autocomplete.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/includes',
+    'access callback' => 'mfcs_management_page_event_access',
     'access arguments' => array('reviewers'),
     'type' => MENU_CALLBACK,
   );
@@ -354,10 +354,10 @@ function mcneese_event_workflow_menu() {
     'title' => "Review Requests",
     'description' => "Review Request",
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mcneese_event_workflow_event_review_0_page'),
-    'file' => 'mcneese_event_workflow_event_review_page.inc',
-    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
-    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'page arguments' => array('mfcs_event_review_0_page'),
+    'file' => 'mfcs_event_review_page.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
+    'access callback' => 'mfcs_management_page_event_access',
     'access arguments' => array('review'),
     'tab_parent' => 'events',
     'tab_root' => 'events',
@@ -367,10 +367,10 @@ function mcneese_event_workflow_menu() {
     'title' => "Review Requests",
     'description' => "Review Request",
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mcneese_event_workflow_event_review_0_page', 2),
-    'file' => 'mcneese_event_workflow_event_review_page.inc',
-    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
-    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'page arguments' => array('mfcs_event_review_0_page', 2),
+    'file' => 'mfcs_event_review_page.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
+    'access callback' => 'mfcs_management_page_event_access',
     'access arguments' => array('review'),
     'tab_parent' => 'events',
     'tab_root' => 'events',
@@ -380,10 +380,10 @@ function mcneese_event_workflow_menu() {
     'title' => "Delete Request",
     'description' => "Delete Request",
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mcneese_event_workflow_event_delete_0_form', 2),
-    'file' => 'mcneese_event_workflow_event_delete_page.inc',
-    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
-    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'page arguments' => array('mfcs_event_delete_0_form', 2),
+    'file' => 'mfcs_event_delete_page.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
+    'access callback' => 'mfcs_management_page_event_access',
     'access arguments' => array('delete', 2),
     'tab_parent' => 'events',
     'tab_root' => 'events',
@@ -393,10 +393,10 @@ function mcneese_event_workflow_menu() {
     'title' => "Cancel Request",
     'description' => "Cancel Request",
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mcneese_event_workflow_event_cancel_0_form', 2),
-    'file' => 'mcneese_event_workflow_event_cancel_page.inc',
-    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
-    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'page arguments' => array('mfcs_event_cancel_0_form', 2),
+    'file' => 'mfcs_event_cancel_page.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
+    'access callback' => 'mfcs_management_page_event_access',
     'access arguments' => array('cancel', 2),
     'tab_parent' => 'events',
     'tab_root' => 'events',
@@ -406,10 +406,10 @@ function mcneese_event_workflow_menu() {
     'title' => "Cancel Request",
     'description' => "Uncancel Request",
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mcneese_event_workflow_event_uncancel_0_form', 2),
-    'file' => 'mcneese_event_workflow_event_cancel_page.inc',
-    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
-    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'page arguments' => array('mfcs_event_uncancel_0_form', 2),
+    'file' => 'mfcs_event_cancel_page.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
+    'access callback' => 'mfcs_management_page_event_access',
     'access arguments' => array('uncancel', 2),
     'tab_parent' => 'events',
     'tab_root' => 'events',
@@ -419,10 +419,10 @@ function mcneese_event_workflow_menu() {
     'title' => "List Requests",
     'description' => "List Requests",
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mcneese_event_workflow_event_list_0_page'),
-    'file' => 'mcneese_event_workflow_event_list_page.inc',
-    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
-    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'page arguments' => array('mfcs_event_list_0_page'),
+    'file' => 'mfcs_event_list_page.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
+    'access callback' => 'mfcs_management_page_event_access',
     'access arguments' => array('list'),
     'tab_parent' => 'events',
     'tab_root' => 'events',
@@ -431,11 +431,11 @@ function mcneese_event_workflow_menu() {
   $items['events/calendar-0/month'] = array(
     'title' => "Request Calendar",
     'description' => "Request Calendar - Month",
-    'page callback' => 'mcneese_event_workflow_event_calendar_month_0_page',
+    'page callback' => 'mfcs_event_calendar_month_0_page',
     'page arguments' => array(NULL, NULL),
-    'file' => 'mcneese_event_workflow_event_calendar_page.inc',
-    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
-    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'file' => 'mfcs_event_calendar_page.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
+    'access callback' => 'mfcs_management_page_event_access',
     'access arguments' => array('list'),
     'tab_parent' => 'events',
     'tab_root' => 'events',
@@ -444,11 +444,11 @@ function mcneese_event_workflow_menu() {
   $items['events/calendar-0/month/%/%'] = array(
     'title' => "Request Calendar",
     'description' => "Requests Calendar - Month",
-    'page callback' => 'mcneese_event_workflow_event_calendar_month_0_page',
+    'page callback' => 'mfcs_event_calendar_month_0_page',
     'page arguments' => array(3, 4),
-    'file' => 'mcneese_event_workflow_event_calendar_page.inc',
-    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
-    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'file' => 'mfcs_event_calendar_page.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
+    'access callback' => 'mfcs_management_page_event_access',
     'access arguments' => array('list'),
     'tab_parent' => 'events',
     'tab_root' => 'events',
@@ -457,11 +457,11 @@ function mcneese_event_workflow_menu() {
   $items['events/calendar-0/day'] = array(
     'title' => "Request Calendar",
     'description' => "Requests Calendar - Day",
-    'page callback' => 'mcneese_event_workflow_event_calendar_day_0_page',
+    'page callback' => 'mfcs_event_calendar_day_0_page',
     'page arguments' => array(),
-    'file' => 'mcneese_event_workflow_event_calendar_page.inc',
-    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
-    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'file' => 'mfcs_event_calendar_page.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
+    'access callback' => 'mfcs_management_page_event_access',
     'access arguments' => array('list'),
     'tab_parent' => 'events',
     'tab_root' => 'events',
@@ -470,11 +470,11 @@ function mcneese_event_workflow_menu() {
   $items['events/calendar-0/day/%/%/%'] = array(
     'title' => "Request Calendar",
     'description' => "Requests Calendar - Day",
-    'page callback' => 'mcneese_event_workflow_event_calendar_day_0_page',
+    'page callback' => 'mfcs_event_calendar_day_0_page',
     'page arguments' => array(3, 4, 5),
-    'file' => 'mcneese_event_workflow_event_calendar_page.inc',
-    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
-    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'file' => 'mfcs_event_calendar_page.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
+    'access callback' => 'mfcs_management_page_event_access',
     'access arguments' => array('list'),
     'tab_parent' => 'events',
     'tab_root' => 'events',
@@ -484,10 +484,10 @@ function mcneese_event_workflow_menu() {
     'title' => "List Requests",
     'description' => "List Requests",
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mcneese_event_workflow_event_list_0_page', 2),
-    'file' => 'mcneese_event_workflow_event_list_page.inc',
-    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
-    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'page arguments' => array('mfcs_event_list_0_page', 2),
+    'file' => 'mfcs_event_list_page.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
+    'access callback' => 'mfcs_management_page_event_access',
     'access arguments' => array('list'),
     'tab_parent' => 'events',
     'tab_root' => 'events',
@@ -497,10 +497,10 @@ function mcneese_event_workflow_menu() {
     'title' => "Search Requests",
     'description' => "Search Requests",
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mcneese_event_workflow_event_search_0_form'),
-    'file' => 'mcneese_event_workflow_event_search_page.inc',
-    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
-    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'page arguments' => array('mfcs_event_search_0_form'),
+    'file' => 'mfcs_event_search_page.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
+    'access callback' => 'mfcs_management_page_event_access',
     'access arguments' => array('search'),
     'tab_parent' => 'events',
     'tab_root' => 'events',
@@ -510,10 +510,10 @@ function mcneese_event_workflow_menu() {
     'title' => "View Request",
     'description' => "View Request",
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mcneese_event_workflow_event_view_0_page', 2),
-    'file' => 'mcneese_event_workflow_event_view_page.inc',
-    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
-    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'page arguments' => array('mfcs_event_view_0_page', 2),
+    'file' => 'mfcs_event_view_page.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
+    'access callback' => 'mfcs_management_page_event_access',
     'access arguments' => array('view', 2),
     'tab_parent' => 'events/list-0',
     'tab_root' => 'events/list-0',
@@ -523,10 +523,10 @@ function mcneese_event_workflow_menu() {
     'title' => "View Request",
     'description' => "View Request",
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mcneese_event_workflow_event_view_0_page', 2, 3),
-    'file' => 'mcneese_event_workflow_event_view_page.inc',
-    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
-    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'page arguments' => array('mfcs_event_view_0_page', 2, 3),
+    'file' => 'mfcs_event_view_page.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
+    'access callback' => 'mfcs_management_page_event_access',
     'access arguments' => array('view', 2),
     'tab_parent' => 'events/list-0',
     'tab_root' => 'events/list-0',
@@ -535,11 +535,11 @@ function mcneese_event_workflow_menu() {
   $items['events/pdf-0/%/%'] = array(
     'title' => "Request PDF",
     'description' => "Download Request PDF",
-    'page callback' => 'mcneese_event_workflow_event_pdf_0_page',
+    'page callback' => 'mfcs_event_pdf_0_page',
     'page arguments' => array(2, 3),
-    'file' => 'mcneese_event_workflow_event_view_page.inc',
-    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
-    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'file' => 'mfcs_event_view_page.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
+    'access callback' => 'mfcs_management_page_event_access',
     'access arguments' => array('view', 2),
     'tab_parent' => 'events/list-0',
     'tab_root' => 'events/list-0',
@@ -550,11 +550,37 @@ function mcneese_event_workflow_menu() {
     'title' => "Event History",
     'description' => "Event History",
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mcneese_event_workflow_event_history_0_form', 2),
-    'file' => 'mcneese_event_workflow_event_history_page.inc',
-    'file path' => drupal_get_path('module', 'mcneese_event_workflow') . '/pages',
-    'access callback' => 'mcneese_event_workflow_management_page_event_access',
+    'page arguments' => array('mfcs_event_history_0_form', 2),
+    'file' => 'mfcs_event_history_page.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
+    'access callback' => 'mfcs_management_page_event_access',
     'access arguments' => array('history', 2),
+    'tab_parent' => 'events',
+    'tab_root' => 'events',
+  );
+
+  $items['events/agreement-0/%'] = array(
+    'title' => "Facilities Use Agreement",
+    'description' => "Facilities Use Agreement",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_event_agreement_0_form', 2),
+    'file' => 'mfcs_event_agreement_page.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
+    'access callback' => 'mfcs_management_page_event_access',
+    'access arguments' => array('agreement', 2),
+    'tab_parent' => 'events',
+    'tab_root' => 'events',
+  );
+
+  $items['events/agreement-0/%/pdf'] = array(
+    'title' => "Facilities Use Agreement",
+    'description' => "Facilities Use Agreement",
+    'page callback' => 'mfcs_event_agreement_0_pdf',
+    'page arguments' => array(2),
+    'file' => 'mfcs_event_agreement_page.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
+    'access callback' => 'mfcs_management_page_event_access',
+    'access arguments' => array('agreement', 2),
     'tab_parent' => 'events',
     'tab_root' => 'events',
   );
@@ -585,7 +611,7 @@ function mcneese_event_workflow_menu() {
  * @return string|bool
  *   The generate HTML markup or FALSE on error.
  */
-function mcneese_event_workflow_build_calendar_month_markup($items, $month_start, $month_stop, $absolute_start, $absolute_stop, $title, $id = NULL) {
+function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $absolute_start, $absolute_stop, $title, $id = NULL) {
   if (!is_array($items)) {
     cf_error::invalid_array('items');
     return FALSE;
@@ -743,11 +769,11 @@ function mcneese_event_workflow_build_calendar_month_markup($items, $month_start
 }
 
 /**
- * Access callback for event workflow management page.
+ * Access callback for facilities use management page.
  *
  * @param string $operation
  *   (optional) When specified, performs access check based on operation.
- * @param int $event_id
+ * @param int $request_id
  *   (optional) When specified, performs access check based the provided id.
  *   Some operations require this to return TRUE under certain circumstances.
  * @param object $user
@@ -756,24 +782,24 @@ function mcneese_event_workflow_build_calendar_month_markup($items, $month_start
  * @param bool
  *   TRUE on access granted, FALSE otherwise.
  */
-function mcneese_event_workflow_management_page_event_access($operation = NULL, $event_id = NULL, $user = NULL) {
+function mfcs_management_page_event_access($operation = NULL, $request_id = NULL, $user = NULL) {
   if (is_null($user) || !is_object($user)) {
     $user = cf_current_user();
   }
 
   $request_status = array(
-    MEW_EVENT_STATUS_LOCKED,
-    MEW_EVENT_STATUS_UNLOCKED,
-    MEW_EVENT_STATUS_CLOSED_ACCEPTED,
-    MEW_EVENT_STATUS_CLOSED_DENIED,
-    MEW_EVENT_STATUS_CLOSED_UNAVAILABLE,
-    MEW_EVENT_STATUS_CLOSED_DUE_TO_LOCK,
-    MEW_EVENT_STATUS_CANCELLED,
+    MFCS_EVENT_STATUS_LOCKED,
+    MFCS_EVENT_STATUS_UNLOCKED,
+    MFCS_EVENT_STATUS_CLOSED_ACCEPTED,
+    MFCS_EVENT_STATUS_CLOSED_DENIED,
+    MFCS_EVENT_STATUS_CLOSED_UNAVAILABLE,
+    MFCS_EVENT_STATUS_CLOSED_DUE_TO_LOCK,
+    MFCS_EVENT_STATUS_CANCELLED,
   );
 
-  $manager = user_access('mcneese event workflow manage');
-  $reviewer = user_access('mcneese event workflow review');
-  $requester = user_access('mcneese event workflow request');
+  $manager = user_access('mcneese facilities use manage');
+  $reviewer = user_access('mcneese facilities use review');
+  $requester = user_access('mcneese facilities use request');
 
   if ($operation == 'create') {
     if ($requester) {
@@ -782,21 +808,21 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
   }
   elseif ($operation == 'edit') {
     $edit_request_status = array(
-      MEW_EVENT_STATUS_UNLOCKED,
-      MEW_EVENT_STATUS_LOCKED,
+      MFCS_EVENT_STATUS_UNLOCKED,
+      MFCS_EVENT_STATUS_LOCKED,
     );
 
     if ($manager) {
       try {
-        $query = db_select('mew_event_requests', 'mer');
+        $query = db_select('mfcs_event_requests', 'mer');
 
-        $query->innerjoin('mew_current_top', 'mct', 'mer.id = mct.event_id');
-        $query->innerjoin('mew_field_top_status', 'mfts', 'mct.event_id = mfts.event_id AND mct.status = mfts.revision AND mfts.delta = 0');
+        $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
+        $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
 
         // $query->countQuery() does not appear to be functioning as expected, so manually count.
         $query->addExpression('count(mer.id)');
 
-        $query->condition('mer.id', $event_id);
+        $query->condition('mer.id', $request_id);
         $query->condition('mfts.value', $edit_request_status, 'IN');
 
         $result = $query->execute()->fetchField();
@@ -812,20 +838,20 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
       }
     }
     elseif ($requester) {
-      if (is_null($event_id)) {
+      if (is_null($request_id)) {
         return FALSE;
       }
 
       try {
-        $query = db_select('mew_event_requests', 'mer');
+        $query = db_select('mfcs_event_requests', 'mer');
 
-        $query->innerjoin('mew_current_top', 'mct', 'mer.id = mct.event_id');
-        $query->innerjoin('mew_field_top_status', 'mfts', 'mct.event_id = mfts.event_id AND mct.status = mfts.revision AND mfts.delta = 0');
+        $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
+        $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
 
         // $query->countQuery() does not appear to be functioning as expected, so manually count.
         $query->addExpression('count(mer.id)');
 
-        $query->condition('mer.id', $event_id);
+        $query->condition('mer.id', $request_id);
         $query->condition('mer.user_id', $user->uid);
         $query->condition('mfts.value', $edit_request_status, 'IN');
 
@@ -844,21 +870,21 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
   }
   elseif ($operation == 'view') {
     if ($manager) {
-      if (is_null($event_id)) {
+      if (is_null($request_id)) {
         return TRUE;
       }
 
       try {
-        $query = db_select('mew_event_requests', 'mer');
+        $query = db_select('mfcs_event_requests', 'mer');
 
-        $query->innerjoin('mew_current_top', 'mct', 'mer.id = mct.event_id');
-        $query->innerjoin('mew_field_top_status', 'mfts', 'mct.event_id = mfts.event_id AND mct.status = mfts.revision AND mfts.delta = 0');
+        $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
+        $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
 
         // $query->countQuery() does not appear to be functioning as expected, so manually count.
         $query->addExpression('count(mer.id)');
 
-        $query->condition('mer.id', $event_id);
-        $query->condition('mfts.value', MEW_EVENT_STATUS_DELETED, '<>');
+        $query->condition('mer.id', $request_id);
+        $query->condition('mfts.value', MFCS_EVENT_STATUS_DELETED, '<>');
 
         $result = $query->execute()->fetchField();
 
@@ -873,30 +899,43 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
       }
     }
     elseif ($reviewer) {
-      if (is_null($event_id)) {
+      if (is_null($request_id)) {
         return TRUE;
       }
       else {
-        return mcneese_event_workflow_management_page_event_reviewer_access($user, $event_id, NULL);
+        return mfcs_management_page_event_reviewer_access($user, $request_id, NULL);
       }
     }
     elseif ($requester) {
-      if (is_null($event_id)) {
+      if (is_null($request_id)) {
         return TRUE;
       }
 
       try {
-        $query = db_select('mew_event_requests', 'mer');
+        $query = db_select('mfcs_event_requests', 'mer');
 
-        $query->innerjoin('mew_current_top', 'mct', 'mer.id = mct.event_id');
-        $query->innerjoin('mew_field_top_status', 'mfts', 'mct.event_id = mfts.event_id AND mct.status = mfts.revision AND mfts.delta = 0');
+        $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
+        $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
+        $query->innerjoin('mfcs_field_top_step', 'mftsp', 'mct.request_id = mftsp.request_id AND mct.step = mftsp.revision AND mftsp.delta = 0');
 
         // $query->countQuery() does not appear to be functioning as expected, so manually count.
         $query->addExpression('count(mer.id)');
 
-        $query->condition('mer.id', $event_id);
-        $query->condition('mer.user_id', $user->uid);
-        $query->condition('mfts.value', $request_status, 'IN');
+        $or = db_or();
+
+        $and = db_and();
+        $and->condition('mer.user_id', $user->uid);
+        $and->condition('mfts.value', $request_status, 'IN');
+        $or->condition($and);
+
+        // always show completed and accepted events when there are no restrictions.
+        $and = db_and();
+        $and->condition('mfts.value', MFCS_EVENT_STATUS_CLOSED_ACCEPTED);
+        $and->condition('mftsp.value', MFCS_REVIEW_STEP_COMPLETED);
+        $or->condition($and);
+
+        $query->condition('mer.id', $request_id);
+        $query->condition($or);
 
         $result = $query->execute()->fetchField();
 
@@ -927,13 +966,13 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
     }
   }
   elseif ($operation == 'review') {
-    if (is_null($event_id)) {
+    if (is_null($request_id)) {
       if ($reviewer) {
         return TRUE;
       }
     }
     else {
-      return mcneese_event_workflow_management_page_event_reviewer_access($user, $event_id, TRUE);
+      return mfcs_management_page_event_reviewer_access($user, $request_id, TRUE);
     }
   }
   elseif ($operation == 'comment') {
@@ -944,8 +983,8 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
       return TRUE;
     }
 
-    if (!is_null($event_id)) {
-      return mcneese_event_workflow_management_page_event_reviewer_access($user, $event_id, TRUE);
+    if (!is_null($request_id)) {
+      return mfcs_management_page_event_reviewer_access($user, $request_id, TRUE);
     }
   }
   elseif ($operation == 'log') {
@@ -954,11 +993,11 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
     }
 
     if ($reviewer) {
-      if (is_null($event_id)) {
+      if (is_null($request_id)) {
         return TRUE;
       }
       else {
-        return mcneese_event_workflow_management_page_event_reviewer_access($user, $event_id, NULL);
+        return mfcs_management_page_event_reviewer_access($user, $request_id, NULL);
       }
     }
   }
@@ -970,28 +1009,28 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
 
   elseif ($operation == 'cancel') {
     $cancellable_status_normal = array(
-      MEW_EVENT_STATUS_UNLOCKED,
+      MFCS_EVENT_STATUS_UNLOCKED,
     );
 
     $cancellable_status_admin = array(
-      MEW_EVENT_STATUS_LOCKED,
-      MEW_EVENT_STATUS_UNLOCKED,
+      MFCS_EVENT_STATUS_LOCKED,
+      MFCS_EVENT_STATUS_UNLOCKED,
     );
 
     // if the user is the venue coordinator, then allow them to cancel an event at any point in the process.
     try {
-      $query = db_select('mew_event_requests', 'mer');
+      $query = db_select('mfcs_event_requests', 'mer');
 
-      $query->innerjoin('mew_current_top', 'mct', 'mer.id = mct.event_id');
-      $query->innerjoin('mew_field_top_status', 'mfts', 'mct.event_id = mfts.event_id AND mct.status = mfts.revision AND mfts.delta = 0');
+      $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
+      $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
 
-      $query->innerjoin('mew_current_venue_coordinator', 'mcvc', 'mer.id = mcvc.event_id');
-      $query->innerjoin('mew_field_venue_coordinator_user_id', 'mfvcui', 'mcvc.event_id = mfvcui.event_id AND mcvc.user_id = mfvcui.revision AND mfvcui.delta = 0');
+      $query->innerjoin('mfcs_current_venue_coordinator', 'mcvc', 'mer.id = mcvc.request_id');
+      $query->innerjoin('mfcs_field_venue_coordinator_user_id', 'mfvcui', 'mcvc.request_id = mfvcui.request_id AND mcvc.user_id = mfvcui.revision AND mfvcui.delta = 0');
 
       // $query->countQuery() does not appear to be functioning as expected, so manually count.
       $query->addExpression('count(mer.id)');
 
-      $query->condition('mer.id', $event_id);
+      $query->condition('mer.id', $request_id);
       $query->condition('mfts.value', $cancellable_status_admin, 'IN');
       $query->condition('mfvcui.value', $user->uid);
 
@@ -1006,15 +1045,15 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
 
     if ($manager || $requester) {
       try {
-        $query = db_select('mew_event_requests', 'mer');
+        $query = db_select('mfcs_event_requests', 'mer');
 
-        $query->innerjoin('mew_current_top', 'mct', 'mer.id = mct.event_id');
-        $query->innerjoin('mew_field_top_status', 'mfts', 'mct.event_id = mfts.event_id AND mct.status = mfts.revision AND mfts.delta = 0');
+        $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
+        $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
 
         // $query->countQuery() does not appear to be functioning as expected, so manually count.
         $query->addExpression('count(mer.id)');
 
-        $query->condition('mer.id', $event_id);
+        $query->condition('mer.id', $request_id);
 
         if ($requester && !$manager) {
           $query->condition('mer.user_id', $user->uid);
@@ -1036,23 +1075,23 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
   }
   elseif ($operation == 'uncancel') {
     $uncancellable_status = array(
-      MEW_EVENT_STATUS_CANCELLED,
+      MFCS_EVENT_STATUS_CANCELLED,
     );
 
     // if the user is the venue coordinator, then allow them to cancel an event at any point in the process.
     try {
-      $query = db_select('mew_event_requests', 'mer');
+      $query = db_select('mfcs_event_requests', 'mer');
 
-      $query->innerjoin('mew_current_top', 'mct', 'mer.id = mct.event_id');
-      $query->innerjoin('mew_field_top_status', 'mfts', 'mct.event_id = mfts.event_id AND mct.status = mfts.revision AND mfts.delta = 0');
+      $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
+      $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
 
-      $query->innerjoin('mew_current_venue_coordinator', 'mcvc', 'mer.id = mcvc.event_id');
-      $query->innerjoin('mew_field_venue_coordinator_user_id', 'mfvcui', 'mcvc.event_id = mfvcui.event_id AND mcvc.user_id = mfvcui.revision AND mfvcui.delta = 0');
+      $query->innerjoin('mfcs_current_venue_coordinator', 'mcvc', 'mer.id = mcvc.request_id');
+      $query->innerjoin('mfcs_field_venue_coordinator_user_id', 'mfvcui', 'mcvc.request_id = mfvcui.request_id AND mcvc.user_id = mfvcui.revision AND mfvcui.delta = 0');
 
       // $query->countQuery() does not appear to be functioning as expected, so manually count.
       $query->addExpression('count(mer.id)');
 
-      $query->condition('mer.id', $event_id);
+      $query->condition('mer.id', $request_id);
       $query->condition('mfts.value', $uncancellable_status, 'IN');
       $query->condition('mfvcui.value', $user->uid);
 
@@ -1067,15 +1106,15 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
 
     if ($manager) {
       try {
-        $query = db_select('mew_event_requests', 'mer');
+        $query = db_select('mfcs_event_requests', 'mer');
 
-        $query->innerjoin('mew_current_top', 'mct', 'mer.id = mct.event_id');
-        $query->innerjoin('mew_field_top_status', 'mfts', 'mct.event_id = mfts.event_id AND mct.status = mfts.revision AND mfts.delta = 0');
+        $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
+        $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
 
         // $query->countQuery() does not appear to be functioning as expected, so manually count.
         $query->addExpression('count(mer.id)');
 
-        $query->condition('mer.id', $event_id);
+        $query->condition('mer.id', $request_id);
         $query->condition('mfts.value', $uncancellable_status, 'IN');
 
         $result = $query->execute()->fetchField();
@@ -1094,6 +1133,61 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
       return TRUE;
     }
   }
+  elseif ($operation == 'agreement') {
+    if (!$manager && !$requester && !$reviewer) {
+      return FALSE;
+    }
+
+    // Agreement functionality requires an event.
+    if (is_null($request_id)) {
+      return FALSE;
+    }
+
+    $agreement_request_status = array(
+      MFCS_EVENT_STATUS_LOCKED,
+      MFCS_EVENT_STATUS_CLOSED_ACCEPTED,
+      MFCS_EVENT_STATUS_CLOSED_DENIED,
+      MFCS_EVENT_STATUS_CANCELLED,
+    );
+
+    if ($manager || $reviewer) {
+      $agreement_request_step = array(
+        MFCS_REVIEW_STEP_COMPLETED,
+        MFCS_REVIEW_STEP_MAKE_DECISIONS,
+        MFCS_REVIEW_STEP_REVIEW,
+        MFCS_REVIEW_STEP_REQUIREMENTS,
+      );
+    }
+    else {
+      $agreement_request_step = array(
+        MFCS_REVIEW_STEP_COMPLETED,
+      );
+    }
+
+    try {
+      $query = db_select('mfcs_event_requests', 'mer');
+
+      $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
+      $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
+      $query->innerjoin('mfcs_field_top_step', 'mftsp', 'mct.request_id = mftsp.request_id AND mct.step = mftsp.revision AND mftsp.delta = 0');
+
+      // $query->countQuery() does not appear to be functioning as expected, so manually count.
+      $query->addExpression('count(mer.id)');
+
+      $query->condition('mer.id', $request_id);
+      $query->condition('mfts.value', $agreement_request_status, 'IN');
+      $query->condition('mftsp.value', $agreement_request_step, 'IN');
+
+      $result = $query->execute()->fetchField();
+
+      if ($result > 0) return TRUE;
+    }
+    catch (Exception $ex) {
+      cf_error::on_exception($ex);
+
+      return FALSE;
+    }
+  }
 
   return FALSE;
 }
@@ -1103,7 +1197,7 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
  *
  * @param object $user
  *   User to check if is a valid reviewer of the given event.
- * @param int $event_id
+ * @param int $request_id
  *   ID of the event to check review access for.
  * @param null|bool $review_restrictions
  *   When NULL, no review restrictions are applied.
@@ -1113,14 +1207,14 @@ function mcneese_event_workflow_management_page_event_access($operation = NULL, 
  * @return bool
  *   TRUE on access granted, FALSE otherwise.
  */
-function mcneese_event_workflow_management_page_event_reviewer_access($user, $event_id, $review_restrictions) {
+function mfcs_management_page_event_reviewer_access($user, $request_id, $review_restrictions) {
   if (!is_object($user)) {
     cf_error::invalid_object('user');
     return FALSE;
   }
 
-  if (!cf_is_integer($event_id)) {
-    cf_error::invalid_integer('event_id');
+  if (!cf_is_integer($request_id)) {
+    cf_error::invalid_integer('request_id');
     return FALSE;
   }
 
@@ -1130,50 +1224,50 @@ function mcneese_event_workflow_management_page_event_reviewer_access($user, $ev
   }
 
   try {
-    $query = db_select('mew_event_requests', 'mer');
+    $query = db_select('mfcs_event_requests', 'mer');
 
-    $query->innerjoin('mew_current_top', 'mct', 'mer.id = mct.event_id');
+    $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
 
-    $query->innerjoin('mew_field_top_status', 'mfts', 'mct.event_id = mfts.event_id AND mct.status = mfts.revision AND mfts.delta = 0');
-    $query->innerjoin('mew_field_top_step', 'mftsp', 'mct.event_id = mftsp.event_id AND mct.step = mftsp.revision AND mftsp.delta = 0');
+    $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
+    $query->innerjoin('mfcs_field_top_step', 'mftsp', 'mct.request_id = mftsp.request_id AND mct.step = mftsp.revision AND mftsp.delta = 0');
 
     // $query->countQuery() does not appear to be functioning as expected, so manually count.
     $query->addExpression('count(mer.id)');
 
-    $query->condition('mfts.value', MEW_EVENT_STATUS_DELETED, '<>');
-    $query->condition('mfts.event_id', $event_id);
+    $query->condition('mfts.value', MFCS_EVENT_STATUS_DELETED, '<>');
+    $query->condition('mfts.request_id', $request_id);
 
-    $query->innerjoin('mew_current_event_coordinator', 'mcec', 'mer.id = mcec.event_id');
-    $query->innerjoin('mew_field_event_coordinator_classification', 'mfecc', 'mcec.event_id = mfecc.event_id AND mcec.classification = mfecc.revision AND mfecc.delta = 0');
+    $query->innerjoin('mfcs_current_event_coordinator', 'mcec', 'mer.id = mcec.request_id');
+    $query->innerjoin('mfcs_field_event_coordinator_classification', 'mfecc', 'mcec.request_id = mfecc.request_id AND mcec.classification = mfecc.revision AND mfecc.delta = 0');
 
-    $query->innerjoin('mew_current_venue_coordinator', 'mcvc', 'mer.id = mcvc.event_id');
-    $query->innerjoin('mew_field_venue_coordinator_user_id', 'mfvcui', 'mcvc.event_id = mfvcui.event_id AND mcvc.user_id = mfvcui.revision AND mfvcui.delta = 0');
+    $query->innerjoin('mfcs_current_venue_coordinator', 'mcvc', 'mer.id = mcvc.request_id');
+    $query->innerjoin('mfcs_field_venue_coordinator_user_id', 'mfvcui', 'mcvc.request_id = mfvcui.request_id AND mcvc.user_id = mfvcui.revision AND mfvcui.delta = 0');
 
     $or = null;
 
     $show_status = array(
-      MEW_EVENT_STATUS_LOCKED,
-      MEW_EVENT_STATUS_UNLOCKED,
+      MFCS_EVENT_STATUS_LOCKED,
+      MFCS_EVENT_STATUS_UNLOCKED,
     );
 
     $show_step = array(
-      MEW_REVIEW_STEP_VENUE_AVAILABLE,
-      MEW_REVIEW_STEP_MAKE_DECISIONS,
+      MFCS_REVIEW_STEP_VENUE_AVAILABLE,
+      MFCS_REVIEW_STEP_MAKE_DECISIONS,
     );
 
     // process venue coordinator access.
     if ($review_restrictions === TRUE) {
       $show_decision = array(
-        MEW_REVIEW_DECISION_APPROVE,
-        MEW_REVIEW_DECISION_DENY,
+        MFCS_REVIEW_DECISION_APPROVE,
+        MFCS_REVIEW_DECISION_DENY,
       );
 
-      $already_reviewed_query = db_select('mew_field_review_review', 'mfrr');
-      $already_reviewed_query->innerjoin('mew_current_review', 'mcr', 'mfrr.event_id = mcr.event_id and mfrr.revision = mcr.review');
+      $already_reviewed_query = db_select('mfcs_field_review_review', 'mfrr');
+      $already_reviewed_query->innerjoin('mfcs_current_review', 'mcr', 'mfrr.request_id = mcr.request_id and mfrr.revision = mcr.review');
 
       $already_reviewed_query->addfield('mfrr', 'step', 'step');
 
-      $already_reviewed_query->where('mfrr.event_id = mftsp.event_id');
+      $already_reviewed_query->where('mfrr.request_id = mftsp.request_id');
       $already_reviewed_query->condition('mfrr.user_id', $user->uid);
       $already_reviewed_query->condition('mfrr.step', $show_step, 'IN');
       $already_reviewed_query->condition('mfrr.decision', $show_decision, 'IN');
@@ -1200,27 +1294,34 @@ function mcneese_event_workflow_management_page_event_reviewer_access($user, $ev
       if (is_null($or)) {
         $or = db_or();
       }
+
+      // always show completed and accepted events when there are no restrictions.
+      $and = db_and();
+      $and->condition('mfts.value', MFCS_EVENT_STATUS_CLOSED_ACCEPTED);
+      $and->condition('mftsp.value', MFCS_REVIEW_STEP_COMPLETED);
+      $or->condition($and);
+
       $or->condition('mer.user_id', $user->uid);
       $or->condition('mfvcui.value', $user->uid);
     }
 
     // process review access.
     $show_status = array(
-      MEW_EVENT_STATUS_LOCKED,
+      MFCS_EVENT_STATUS_LOCKED,
     );
 
     $show_step = array(
-      MEW_REVIEW_STEP_REVIEW,
-      MEW_REVIEW_STEP_USAGE_FEES,
+      MFCS_REVIEW_STEP_REVIEW,
+      MFCS_REVIEW_STEP_REQUIREMENTS,
     );
 
     if ($review_restrictions === TRUE) {
       $show_decision = array(
-        MEW_REVIEW_DECISION_APPROVE,
-        MEW_REVIEW_DECISION_DENY
+        MFCS_REVIEW_DECISION_APPROVE,
+        MFCS_REVIEW_DECISION_DENY
       );
 
-      $can_review_query = db_select('mew_reviewers', 'c_mr_2');
+      $can_review_query = db_select('mfcs_reviewers', 'c_mr_2');
 
       $can_review_query->addfield('c_mr_2', 'user_id', 'user_id');
 
@@ -1230,12 +1331,12 @@ function mcneese_event_workflow_management_page_event_reviewer_access($user, $ev
       $can_review_query->condition('c_mr_2.disabled', 0);
       $can_review_query->distinct();
 
-      $already_reviewed_query = db_select('mew_field_review_review', 'mfrr');
-      $already_reviewed_query->innerjoin('mew_current_review', 'mcr', 'mfrr.event_id = mcr.event_id and mfrr.revision = mcr.review');
+      $already_reviewed_query = db_select('mfcs_field_review_review', 'mfrr');
+      $already_reviewed_query->innerjoin('mfcs_current_review', 'mcr', 'mfrr.request_id = mcr.request_id and mfrr.revision = mcr.review');
 
       $already_reviewed_query->addfield('mfrr', 'step', 'step');
 
-      $already_reviewed_query->where('mfrr.event_id = mftsp.event_id and mfrr.step = mftsp.value');
+      $already_reviewed_query->where('mfrr.request_id = mftsp.request_id and mfrr.step = mftsp.value');
       $already_reviewed_query->condition('mfrr.user_id', $user->uid);
       $already_reviewed_query->condition('mfrr.step', $show_step, 'IN');
       $already_reviewed_query->condition('mfrr.decision', $show_decision, 'IN');
@@ -1253,7 +1354,7 @@ function mcneese_event_workflow_management_page_event_reviewer_access($user, $ev
       $or->condition($and);
     }
     elseif ($review_restrictions === FALSE) {
-      $can_review_query = db_select('mew_reviewers', 'c_mr_2');
+      $can_review_query = db_select('mfcs_reviewers', 'c_mr_2');
 
       $can_review_query->addfield('c_mr_2', 'user_id', 'user_id');
 
@@ -1274,7 +1375,7 @@ function mcneese_event_workflow_management_page_event_reviewer_access($user, $ev
       $or->condition($and);
     }
     else {
-      $can_review_query = db_select('mew_reviewers', 'c_mr_2');
+      $can_review_query = db_select('mfcs_reviewers', 'c_mr_2');
 
       $can_review_query->addfield('c_mr_2', 'user_id', 'user_id');
 
@@ -1309,13 +1410,13 @@ function mcneese_event_workflow_management_page_event_reviewer_access($user, $ev
 }
 
 /**
- * Access callback for event workflow management page.
+ * Access callback for facilities use management page.
  *
  * @param bool
  *   TRUE on access granted, FALSE otherwise.
  */
-function mcneese_event_workflow_management_page_access() {
-  if (user_access('mcneese event workflow administer') || user_access('mcneese event workflow request') || user_access('mcneese event workflow review') || user_access('mcneese event workflow manage')) {
+function mfcs_management_page_access() {
+  if (user_access('mcneese facilities use administer') || user_access('mcneese facilities use request') || user_access('mcneese facilities use review') || user_access('mcneese facilities use manage')) {
     return TRUE;
   }
 
@@ -1325,12 +1426,12 @@ function mcneese_event_workflow_management_page_access() {
 /**
  * Implements hook_cronapi().
  */
-function mcneese_event_workflow_cronapi() {
+function mfcs_cronapi() {
   $items = array();
 
-  $items['mcneese_event_workflow_oracle_recache'] = array(
+  $items['mfcs_oracle_recache'] = array(
     'title' => t("Recreate Oracle Cache"),
-    'callback' => 'mcneese_event_workflow_oracle_recache_cron',
+    'callback' => 'mfcs_oracle_recache_cron',
     'callback arguments' => array(),
     'enabled' => FALSE,
   );
@@ -1341,7 +1442,7 @@ function mcneese_event_workflow_cronapi() {
 /**
  * Implements hook_mail().
  */
-function mcneese_event_workflow_mail($key, &$message, $params) {
+function mfcs_mail($key, &$message, $params) {
   global $base_url;
 
   $subject = '';
@@ -1350,13 +1451,13 @@ function mcneese_event_workflow_mail($key, &$message, $params) {
   $files = array();
 
   if ($key == 'event_request_alert') {
-    $subject = 'McNeese Event Request: ' . $params['event_id'] . ' - ' . $params['event_title'];
+    $subject = 'McNeese Event Request: ' . $params['request_id'] . ' - ' . $params['event_title'];
 
     if (!empty($params['title_suffix'])) {
       $subject .= ' - ' . $params['title_suffix'];
     }
 
-    $event_url = $base_url . '/events/view-0/' . $params['event_id'];
+    $event_url = $base_url . '/events/view-0/' . $params['request_id'];
 
     $body .= $params['content'] . "\n";
 
@@ -1407,34 +1508,34 @@ function mcneese_event_workflow_mail($key, &$message, $params) {
  * @param int $id
  *   The number associated with the file to include.
  */
-function mcneese_event_workflow_include($id) {
+function mfcs_include($id) {
   if (!is_numeric($id)) {
     cf_error::invalid_number('id');
     return;
   }
 
-  $module_path = drupal_get_path('module', 'mcneese_event_workflow');
+  $module_path = drupal_get_path('module', 'mfcs');
 
   if ($id == 0) {
-    require_once($module_path . '/includes/mcneese_event_workflow_table.inc');
+    require_once($module_path . '/includes/mfcs_table.inc');
   }
   elseif ($id == 1) {
-    require_once($module_path . '/includes/mcneese_event_workflow_event_structure.inc');
+    require_once($module_path . '/includes/mfcs_event_structure.inc');
   }
   elseif ($id == 2) {
-    require_once($module_path . '/includes/mcneese_event_workflow_event_validation.inc');
+    require_once($module_path . '/includes/mfcs_event_validation.inc');
   }
   elseif ($id == 3) {
-    require_once($module_path . '/includes/mcneese_event_workflow_autocomplete.inc');
+    require_once($module_path . '/includes/mfcs_autocomplete.inc');
   }
   elseif ($id == 4) {
-    require_once($module_path . '/includes/mcneese_event_workflow_list_options.inc');
+    require_once($module_path . '/includes/mfcs_list_options.inc');
   }
   elseif ($id == 5) {
-    require_once($module_path . '/pages/mcneese_event_workflow_event_cancel_page.inc');
+    require_once($module_path . '/pages/mfcs_event_cancel_page.inc');
   }
   elseif ($id == 6) {
-    require_once($module_path . '/includes/mcneese_event_workflow_workflow.inc');
+    require_once($module_path . '/includes/mfcs_workflow.inc');
   }
 }
 
@@ -1450,7 +1551,7 @@ function mcneese_event_workflow_include($id) {
  *   An array containing the query results.
  *   FALSE is returned on error.
  */
-function mcneese_event_workflow_oracle_select($query, $arguments = array()) {
+function mfcs_oracle_select($query, $arguments = array()) {
   if (!is_string($query)) {
     cf_error::invalid_string('query');
 
@@ -1492,7 +1593,7 @@ function mcneese_event_workflow_oracle_select($query, $arguments = array()) {
  *   An array of locations objects or a single location object.
  *   FALSE is returned on error.
  */
-function mcneese_event_workflow_load_locations($location = NULL, $disabled = FALSE) {
+function mfcs_load_locations($location = NULL, $disabled = FALSE) {
   if (!is_null($location) && !cf_is_integer($location)) {
     cf_error::invalid_integer('location');
     return FALSE;
@@ -1524,7 +1625,7 @@ function mcneese_event_workflow_load_locations($location = NULL, $disabled = FAL
 
   $items = array();
   try {
-    $query = db_select('mew_banner_locations', 'mbl');
+    $query = db_select('mfcs_banner_locations', 'mbl');
 
     if (!$disabled) {
       $query->condition('mbl.disabled', 0);
@@ -1569,7 +1670,7 @@ function mcneese_event_workflow_load_locations($location = NULL, $disabled = FAL
  *   An array of building objects or a single building object.
  *   FALSE is returned on error.
  */
-function mcneese_event_workflow_load_buildings($location = NULL, $building = NULL, $disabled = FALSE) {
+function mfcs_load_buildings($location = NULL, $building = NULL, $disabled = FALSE) {
   if (!is_null($location) && !cf_is_integer($location)) {
     cf_error::invalid_integer('location');
     return FALSE;
@@ -1610,11 +1711,11 @@ function mcneese_event_workflow_load_buildings($location = NULL, $building = NUL
 
   $items = array();
   try {
-    $query = db_select('mew_banner_buildings', 'mbb');
+    $query = db_select('mfcs_banner_buildings', 'mbb');
 
     if (!is_null($location)) {
-      $query->innerJoin('mew_banner_building_to_location', 'mbbl', 'mbb.id = mbbl.building');
-      $query->innerJoin('mew_banner_locations', 'mbl', 'mbbl.location = mbl.id');
+      $query->innerJoin('mfcs_banner_building_to_location', 'mbbl', 'mbb.id = mbbl.building');
+      $query->innerJoin('mfcs_banner_locations', 'mbl', 'mbbl.location = mbl.id');
 
       $query->condition('mbl.id', $location);
 
@@ -1672,7 +1773,7 @@ function mcneese_event_workflow_load_buildings($location = NULL, $building = NUL
  *   An array of rooms or a single room array.
  *   FALSE is returned on error.
  */
-function mcneese_event_workflow_load_rooms($location = NULL, $building = NULL, $room = NULL, $disabled = FALSE) {
+function mfcs_load_rooms($location = NULL, $building = NULL, $room = NULL, $disabled = FALSE) {
   if (!is_null($location) && !cf_is_integer($location)) {
     cf_error::invalid_integer('location');
     return FALSE;
@@ -1719,12 +1820,12 @@ function mcneese_event_workflow_load_rooms($location = NULL, $building = NULL, $
 
   $items = array();
   try {
-    $query = db_select('mew_banner_rooms', 'mbr');
-    $query->innerJoin('mew_banner_buildings', 'mbb', 'mbr.building = mbb.id');
+    $query = db_select('mfcs_banner_rooms', 'mbr');
+    $query->innerJoin('mfcs_banner_buildings', 'mbb', 'mbr.building = mbb.id');
 
     if (!is_null($location)) {
-      $query->innerJoin('mew_banner_building_to_location', 'mbbl', 'mbb.id = mbbl.building AND mbr.building = mbbl.building');
-      $query->innerJoin('mew_banner_locations', 'mbl', 'mbbl.location = mbl.id');
+      $query->innerJoin('mfcs_banner_building_to_location', 'mbbl', 'mbb.id = mbbl.building AND mbr.building = mbbl.building');
+      $query->innerJoin('mfcs_banner_locations', 'mbl', 'mbbl.location = mbl.id');
 
       $query->condition('mbl.id', $location);
 
@@ -1787,7 +1888,7 @@ function mcneese_event_workflow_load_rooms($location = NULL, $building = NULL, $
  *   An array containing the roles.
  *   FALSE is returned on error.
  */
-function mcneese_event_workflow_load_event_user_roles() {
+function mfcs_load_event_user_roles() {
   $cache_id = __function__;
   $roles = &drupal_static($cache_id, NULL);
   if (is_array($roles)) {
@@ -1799,7 +1900,7 @@ function mcneese_event_workflow_load_event_user_roles() {
   }
 
   $columns = array();
-  $rows = (array) mcneese_event_workflow_oracle_select('select distinct role from ucs.msu_event_role');
+  $rows = (array) mfcs_oracle_select('select distinct role from ucs.msu_event_role');
 
   // strip out redundant rows provided by oracle.
   foreach ($rows as $row) {
@@ -1829,7 +1930,7 @@ function mcneese_event_workflow_load_event_user_roles() {
  *   An array containing the mapping information.
  *   FALSE is returned on error.
  */
-function mcneese_event_workflow_load_event_user_role_mapping() {
+function mfcs_load_event_user_role_mapping() {
   $cache_id = __function__;
   $terms = &drupal_static($cache_id, array());
   if (!empty($terms)) {
@@ -1888,7 +1989,7 @@ function mcneese_event_workflow_load_event_user_role_mapping() {
  *   An array containing the user information.
  *   FALSE is returned on error.
  */
-function mcneese_event_workflow_load_event_user($banner_id) {
+function mfcs_load_event_user($banner_id) {
   $cache_id = __function__;
   $user = &drupal_static($cache_id, NULL);
   if (is_array($user)) {
@@ -1902,7 +2003,7 @@ function mcneese_event_workflow_load_event_user($banner_id) {
   }
 
   $user = array();
-  $rows = (array) mcneese_event_workflow_oracle_select('select * from ucs.msu_event_role where id = :banner_id', array('banner_id' => $banner_id));
+  $rows = (array) mfcs_oracle_select('select * from ucs.msu_event_role where id = :banner_id', array('banner_id' => $banner_id));
 
   // strip out redundant rows provided by oracle.
   foreach ($rows as $row) {
@@ -1942,7 +2043,7 @@ function mcneese_event_workflow_load_event_user($banner_id) {
  * @return bool
  *   TRUE on success, FALSE otherwise.
  */
-function mcneese_event_workflow_synchronize_user_settings($user = NULL, $roles = array()) {
+function mfcs_synchronize_user_settings($user = NULL, $roles = array()) {
   if (is_null($user)) {
     $user = cf_current_user();
   }
@@ -1982,7 +2083,7 @@ function mcneese_event_workflow_synchronize_user_settings($user = NULL, $roles =
     return TRUE;
   }
 
-  $mappings = mcneese_event_workflow_load_event_user_role_mapping();
+  $mappings = mfcs_load_event_user_role_mapping();
 
   // unset all system role information associated with oracle.
   $system_roles = (array) $user->roles;
@@ -2034,7 +2135,7 @@ function mcneese_event_workflow_synchronize_user_settings($user = NULL, $roles =
   }
 
   if (isset($user->field_user_banner_id['und'][0]['value'])) {
-    $u = mcneese_event_workflow_load_event_user($user->field_user_banner_id['und'][0]['value']);
+    $u = mfcs_load_event_user($user->field_user_banner_id['und'][0]['value']);
 
     if ($u == FALSE) {
       // @todo: throw watchdog error?
@@ -2071,7 +2172,7 @@ function mcneese_event_workflow_synchronize_user_settings($user = NULL, $roles =
  * @return object|false
  *   User object on success, FALSE otherwise.
  */
-function mcneese_event_workflow_ensure_user_by_email($email, $roles = array()) {
+function mfcs_ensure_user_by_email($email, $roles = array()) {
   if (!is_string($email) || empty($email)) {
     cf_error::invalid_string('email');
     return FALSE;
@@ -2210,7 +2311,7 @@ function mcneese_event_workflow_ensure_user_by_email($email, $roles = array()) {
     rules_invoke_event('ldap_user_created', $drupal_account, FALSE);
   }
 
-  mcneese_event_workflow_synchronize_user_settings($drupal_account, $roles);
+  mfcs_synchronize_user_settings($drupal_account, $roles);
 
   // reset the user object cache to force loading of new settings.
   $user = user_load($drupal_account->uid, TRUE);
@@ -2230,12 +2331,12 @@ function mcneese_event_workflow_ensure_user_by_email($email, $roles = array()) {
  *   (optional) When TRUE, caches are saved.
  *   When FALSE, caches are purged.
  */
-function mcneese_event_workflow_force_cache($save = TRUE) {
+function mfcs_force_cache($save = TRUE) {
   // reset is performed in both cases to ensure that the cache is fresh.
-  cache_clear_all('mcneese_event_workflow_load_event_user_roles', 'cache');
+  cache_clear_all('mfcs_load_event_user_roles', 'cache');
 
   if ($save) {
-    mcneese_event_workflow_sync_banner_to_local();
+    mfcs_sync_banner_to_local();
   }
 }
 
@@ -2245,14 +2346,14 @@ function mcneese_event_workflow_force_cache($save = TRUE) {
  * @return bool
  *   TRUE on success, FALSE otherwise.
  */
-function mcneese_event_workflow_sync_banner_to_local() {
+function mfcs_sync_banner_to_local() {
   $join = ' inner join ucs.msu_venue_list mvl on (mvl.category = mvd.category and mvl.building_code = mvd.building_code and mvl.room_number = mvd.room_number)';
 
   $select = 'mvd.*';
   $select .= ', mvl.building_desc as building_desc';
   $select .= ', mvl.room_desc as room_desc';
 
-  $rows = mcneese_event_workflow_oracle_select('select ' . $select . ' from ucs.msu_venue_detail mvd' . $join);
+  $rows = mfcs_oracle_select('select ' . $select . ' from ucs.msu_venue_detail mvd' . $join);
 
   // determine columns names by selecting the first
   if (empty($rows)) {
@@ -2261,26 +2362,26 @@ function mcneese_event_workflow_sync_banner_to_local() {
 
   $row = array_pop($rows);
 
-  mcneese_event_workflow_include(4);
+  mfcs_include(4);
   $event_locations = event_workflow_get_event_location_list_options(NULL, TRUE);
 
   $transaction = db_transaction();
   try {
     // disable all locations, buildings, and rooms such that the ones that are not added back will be disabled.
     if (is_array($rows) && !empty(($rows))) {
-      $query = db_update('mew_banner_locations');
+      $query = db_update('mfcs_banner_locations');
       $query->fields(array('disabled' => 1));
       $query->execute();
 
-      $query = db_update('mew_banner_buildings');
+      $query = db_update('mfcs_banner_buildings');
       $query->fields(array('disabled' => 1));
       $query->execute();
 
-      $query = db_update('mew_banner_rooms');
+      $query = db_update('mfcs_banner_rooms');
       $query->fields(array('disabled' => 1));
       $query->execute();
 
-      $query = db_update('mew_banner_building_to_location');
+      $query = db_update('mfcs_banner_building_to_location');
       $query->fields(array('disabled' => 1));
       $query->execute();
     }
@@ -2364,54 +2465,54 @@ function mcneese_event_workflow_sync_banner_to_local() {
         // add the room and venue coordinators.
         $room_coordinator = NULL;
         if (!empty($coordinator_room_item['email'])) {
-          $room_coordinator = mcneese_event_workflow_ensure_user_by_email($coordinator_room_item['email'], array('reviewer'));
+          $room_coordinator = mfcs_ensure_user_by_email($coordinator_room_item['email'], array('reviewer'));
         }
 
         if (!is_object($room_coordinator) && !empty($coordinator_venue_item['email'])) {
-          $room_coordinator = mcneese_event_workflow_ensure_user_by_email($coordinator_venue_item['email'], array('reviewer'));
+          $room_coordinator = mfcs_ensure_user_by_email($coordinator_venue_item['email'], array('reviewer'));
         }
 
         if (is_object($room_coordinator)) {
           $room_item['coordinator_id'] = $room_coordinator->uid;
         }
         else {
-          $room_item['coordinator_id'] = MEW_FAILSAFE_COORDINATOR_ID;
+          $room_item['coordinator_id'] = MFCS_FAILSAFE_COORDINATOR_ID;
         }
 
         // add/update the location.
-        $query = db_select('mew_banner_locations', 'mbl');
+        $query = db_select('mfcs_banner_locations', 'mbl');
         $query->addField('mbl', 'id', 'id');
         $query->condition('mbl.machine_name', $location_item['machine_name']);
 
         $location_id = $query->execute()->fetchField();
 
         if ($location_id > 0) {
-          $query = db_update('mew_banner_locations');
+          $query = db_update('mfcs_banner_locations');
           $query->fields($location_item);
           $query->condition('id', $location_id);
           $query->execute();
         }
         else {
-          $query = db_insert('mew_banner_locations');
+          $query = db_insert('mfcs_banner_locations');
           $query->fields($location_item);
           $location_id = $query->execute();
         }
 
         // add/update the building.
-        $query = db_select('mew_banner_buildings', 'mbb');
+        $query = db_select('mfcs_banner_buildings', 'mbb');
         $query->addField('mbb', 'id', 'id');
         $query->condition('mbb.machine_name', $building_item['machine_name']);
 
         $building_id = $query->execute()->fetchField();
 
         if ($building_id > 0) {
-          $query = db_update('mew_banner_buildings');
+          $query = db_update('mfcs_banner_buildings');
           $query->fields($building_item);
           $query->condition('id', $building_id);
           $query->execute();
         }
         else {
-          $query = db_insert('mew_banner_buildings');
+          $query = db_insert('mfcs_banner_buildings');
           $query->fields($building_item);
           $building_id = $query->execute();
         }
@@ -2419,7 +2520,7 @@ function mcneese_event_workflow_sync_banner_to_local() {
         $room_item['building'] = $building_id;
 
         // add/update the room.
-        $query = db_select('mew_banner_rooms', 'mbr');
+        $query = db_select('mfcs_banner_rooms', 'mbr');
         $query->addField('mbr', 'id', 'id');
         $query->condition('mbr.machine_name', $room_item['machine_name']);
         $query->condition('mbr.building', $building_id);
@@ -2427,13 +2528,13 @@ function mcneese_event_workflow_sync_banner_to_local() {
         $room_id = $query->execute()->fetchField();
 
         if ($room_id > 0) {
-          $query = db_update('mew_banner_rooms');
+          $query = db_update('mfcs_banner_rooms');
           $query->fields($room_item);
           $query->condition('id', $room_id);
           $query->execute();
         }
         else {
-          $query = db_insert('mew_banner_rooms');
+          $query = db_insert('mfcs_banner_rooms');
           $query->fields($room_item);
           $room_id = $query->execute();
         }
@@ -2443,7 +2544,7 @@ function mcneese_event_workflow_sync_banner_to_local() {
         $location_to_building_item['building'] = $building_id;
         $location_to_building_item['disabled'] = 0;
 
-        $query = db_select('mew_banner_building_to_location', 'mbbl');
+        $query = db_select('mfcs_banner_building_to_location', 'mbbl');
         $query->addExpression('count(mbbl.building)');
         $query->condition('mbbl.location', $location_id);
         $query->condition('mbbl.building', $building_id);
@@ -2451,14 +2552,14 @@ function mcneese_event_workflow_sync_banner_to_local() {
         $building_to_location_count = $query->execute()->fetchField();
 
         if ($building_to_location_count > 0) {
-          $query = db_update('mew_banner_building_to_location');
+          $query = db_update('mfcs_banner_building_to_location');
           $query->fields($location_to_building_item);
           $query->condition('location', $location_id);
           $query->condition('building', $building_id);
           $query->execute();
         }
         else {
-          $query = db_insert('mew_banner_building_to_location');
+          $query = db_insert('mfcs_banner_building_to_location');
           $query->fields($location_to_building_item);
           $query->execute();
         }
@@ -2482,17 +2583,17 @@ function mcneese_event_workflow_sync_banner_to_local() {
  *
  * This requires the ultimate_cron module to function.
  *
- * @see mcneese_event_workflow_cronapi()
- * @see mcneese_event_workflow_force_cache()
+ * @see mfcs_cronapi()
+ * @see mfcs_force_cache()
  */
-function mcneese_event_workflow_oracle_recache_cron() {
-  mcneese_event_workflow_force_cache();
+function mfcs_oracle_recache_cron() {
+  mfcs_force_cache();
 }
 
 /**
  * Generate an array structure for a specific event request item.
  *
- * @param int $event_id
+ * @param int $request_id
  *   The id representing the specific event request.
  * @param string $field_group
  *   The name of the group the values are associated with.
@@ -2510,9 +2611,9 @@ function mcneese_event_workflow_oracle_recache_cron() {
  *   NULL is returned when there should be no array to build.
  *   FALSE is returned on failure.
  */
-function mcneese_event_workflow_build_event_request_item_structure($event_id, $field_group, $field_name, $values, $presentation, $event) {
-  if (!cf_is_integer($event_id)) {
-    cf_error::invalid_integer('event_id');
+function mfcs_build_event_request_item_structure($request_id, $field_group, $field_name, $values, $presentation, $event) {
+  if (!cf_is_integer($request_id)) {
+    cf_error::invalid_integer('request_id');
     return FALSE;
   }
 
@@ -2536,7 +2637,7 @@ function mcneese_event_workflow_build_event_request_item_structure($event_id, $f
     return FALSE;
   }
 
-  $event = event_workflow_load_event_by_id($event_id);
+  $event = event_workflow_load_event_by_id($request_id);
   if (empty($event)) {
     return FALSE;
   }
@@ -2570,10 +2671,10 @@ function mcneese_event_workflow_build_event_request_item_structure($event_id, $f
   $output = array();
   $no_values = TRUE;
   foreach ($values as $delta => &$value) {
-    $generated = mcneese_event_workflow_build_event_request_value_structure($event_id, $field_group, $field_name, $delta, $value, $presentation, $event);
+    $generated = mfcs_build_event_request_value_structure($request_id, $field_group, $field_name, $delta, $value, $presentation, $event);
 
     if ($generated !== FALSE && !isset($generated['no_values'])) {
-      $id = 'field-event-' . $event_id . '-item-' . $field_group . '-' . $field_name . '-' . $delta;
+      $id = 'field-event-' . $request_id . '-item-' . $field_group . '-' . $field_name . '-' . $delta;
 
       if ($size == 'auto') {
         $size = 'small';
@@ -2598,7 +2699,7 @@ function mcneese_event_workflow_build_event_request_item_structure($event_id, $f
         '#attributes' => array(
           'class' => array(
             'item-delta-' . $delta,
-            'item-request-' . $event_id,
+            'item-request-' . $request_id,
             'item-group-' . $field_group,
             'item-field-' . $field_name,
             'item-size-' . $size,
@@ -2636,7 +2737,7 @@ function mcneese_event_workflow_build_event_request_item_structure($event_id, $f
     $delta = 0;
 
     $class = $field_group . '-' . $field_name . '-' . $delta;
-    $id = 'field-event-' . $event_id . '-item-' . $class;
+    $id = 'field-event-' . $request_id . '-item-' . $class;
 
     $output = array();
     $output[$delta] = array(
@@ -2662,7 +2763,7 @@ function mcneese_event_workflow_build_event_request_item_structure($event_id, $f
 /**
  * Generate an array structure for a specific event request value.
  *
- * @param int $event_id
+ * @param int $request_id
  *   The id representing the specific event request.
  * @param string $field_group
  *   The name of the group the values are associated with.
@@ -2688,7 +2789,7 @@ function mcneese_event_workflow_build_event_request_item_structure($event_id, $f
  *   The built array.
  *   FALSE is returend on failure.
  */
-function mcneese_event_workflow_build_event_request_value_structure($event_id, $field_group, $field_name, $delta, $value, $presentation, $event, $options = array()) {
+function mfcs_build_event_request_value_structure($request_id, $field_group, $field_name, $delta, $value, $presentation, $event, $options = array()) {
   if (!is_string($field_group)) {
     cf_error::invalid_string('field_group');
     return FALSE;
@@ -2714,7 +2815,7 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
     return FALSE;
   }
 
-  $event = event_workflow_load_event_by_id($event_id);
+  $event = event_workflow_load_event_by_id($request_id);
   if (empty($event)) {
     return FALSE;
   }
@@ -2782,7 +2883,7 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
 
   global $base_path;
 
-  $id = 'field-event-' . $event_id . '-item-' . $field_group . '-' . $field_name . '-' . $delta . '-value';
+  $id = 'field-event-' . $request_id . '-item-' . $field_group . '-' . $field_name . '-' . $delta . '-value';
 
   $output = array();
   $empty_value = TRUE;
@@ -2908,7 +3009,7 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
         unset($user);
       }
       elseif ($type[$value_name] == 'status') {
-        mcneese_event_workflow_include(4);
+        mfcs_include(4);
 
         $status_options = event_workflow_get_event_status_list_options();
 
@@ -2918,7 +3019,7 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
         }
       }
       elseif ($type[$value_name] == 'step') {
-        mcneese_event_workflow_include(4);
+        mfcs_include(4);
 
         $step_options = event_workflow_get_event_steps_list_options();
 
@@ -2928,7 +3029,7 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
         }
       }
       elseif ($type[$value_name] == 'location') {
-        mcneese_event_workflow_include(4);
+        mfcs_include(4);
 
         $location_options = event_workflow_get_event_location_list_options();
 
@@ -2938,7 +3039,7 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
         }
       }
       elseif ($type[$value_name] == 'building') {
-        mcneese_event_workflow_include(4);
+        mfcs_include(4);
 
         $building_options = event_workflow_get_event_building_list_options();
 
@@ -2948,7 +3049,7 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
         }
       }
       elseif ($type[$value_name] == 'room') {
-        mcneese_event_workflow_include(4);
+        mfcs_include(4);
 
         $room_options = event_workflow_get_event_room_list_options();
 
@@ -2989,11 +3090,11 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
           }
         }
       }
-      elseif ($type[$value_name] == 'use_fee_personnel') {
+      elseif ($type[$value_name] == 'requirement_personnel') {
         $markup .= ' ' . $value->$value_name . ' personnel';
         $length += strlen($value->$value_name . ' personnel');
       }
-      elseif ($type[$value_name] == 'use_fee_hours') {
+      elseif ($type[$value_name] == 'requirement_hours') {
         $hours = event_workflow_convert_value_from_database_format($value->$value_name, 'currency');
 
         if (intval($hours) == $hours) {
@@ -3005,7 +3106,7 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
 
         $length += strlen($hours . ' hours');
       }
-      elseif ($type[$value_name] == 'use_fee_days') {
+      elseif ($type[$value_name] == 'requirement_days') {
         $days = event_workflow_convert_value_from_database_format($value->$value_name, 'currency');
 
         if (intval($days) == $days) {
@@ -3017,7 +3118,7 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
 
         $length += strlen($days . 'days');
       }
-      elseif ($type[$value_name] == 'use_fee_amount') {
+      elseif ($type[$value_name] == 'requirement_amount') {
         $amount = event_workflow_convert_value_from_database_format($value->$value_name, 'currency');
 
         if ($amount !== FALSE) {
@@ -3085,11 +3186,11 @@ function mcneese_event_workflow_build_event_request_value_structure($event_id, $
         }
       }
       elseif ($type[$value_name] == 'review_decision') {
-        if ($value->$value_name == MEW_REVIEW_DECISION_APPROVE) {
+        if ($value->$value_name == MFCS_REVIEW_DECISION_APPROVE) {
           $markup .= "Approved";
           $length += strlen("Approved");
         }
-        elseif ($value->$value_name == MEW_REVIEW_DECISION_DENY) {
+        elseif ($value->$value_name == MFCS_REVIEW_DECISION_DENY) {
           $markup .= "Denied";
           $length += strlen("Denied");
         }
@@ -3272,37 +3373,37 @@ function event_workflow_convert_value_from_database_format($value, $method, $opt
 /**
  * Loads an event by its ID.
  *
- * @param int $event_id
- *   The numeric event id.
+ * @param int $request_id
+ *   The numeric request id.
  * @param bool $reset
  *   (optional) If TRUE, the cache for the specified event is reset.
  *
  * @return array|bool
- *   An array of values associated with the event id.
+ *   An array of values associated with the request id.
  *   FALSE is returned on error.
  *   An empty array is returned when there is no event by that id.
  */
-function event_workflow_load_event_by_id($event_id, $reset = FALSE) {
-  if (!cf_is_integer($event_id)) {
-    cf_error::invalid_integer('event_id');
+function event_workflow_load_event_by_id($request_id, $reset = FALSE) {
+  if (!cf_is_integer($request_id)) {
+    cf_error::invalid_integer('request_id');
     return FALSE;
   }
 
   $cache_id = __function__;
   $cached_events = &drupal_static($cache_id, NULL);
-  if (!$reset && is_array($cached_events) && array_key_exists($event_id, $cached_events)) {
-    return $cached_events[$event_id];
+  if (!$reset && is_array($cached_events) && array_key_exists($request_id, $cached_events)) {
+    return $cached_events[$request_id];
   }
 
-  mcneese_event_workflow_include(0);
+  mfcs_include(0);
 
   $event = array();
-  $structure = mcneese_event_workflow_table_structure();
+  $structure = mfcs_table_structure();
 
   try {
-    $query = db_select('mew_event_requests', 'mer');
+    $query = db_select('mfcs_event_requests', 'mer');
     $query->fields('mer');
-    $query->condition('id', $event_id);
+    $query->condition('id', $request_id);
 
     $results = $query->execute()->fetchAll();
 
@@ -3322,14 +3423,14 @@ function event_workflow_load_event_by_id($event_id, $reset = FALSE) {
     }
 
     foreach ($structure as $table_name => &$fields) {
-      $current_table_name = 'mew_current_' . $table_name;
+      $current_table_name = 'mfcs_current_' . $table_name;
 
       if (!array_key_exists($table_name, $event)) {
         $event[$table_name] = array();
       }
 
       $query = db_select($current_table_name, 'mctn');
-      $query->condition('mctn.event_id', $event_id);
+      $query->condition('mctn.request_id', $request_id);
       $query->fields('mctn');
 
       $results = $query->execute()->fetchAll();
@@ -3351,17 +3452,17 @@ function event_workflow_load_event_by_id($event_id, $reset = FALSE) {
 
       $event['current'][$table_name] = array();
       foreach ((array) $current as $current_keys => $current_values) {
-        if ($current_keys == 'event_id') continue;
+        if ($current_keys == 'request_id') continue;
         $event['current'][$table_name][$current_keys] = $current_values;
       }
 
       foreach ($fields as $field_name => &$field_values) {
         if (isset($structure[$table_name][$field_name]['storage']) && $structure[$table_name][$field_name]['storage'] == 'alternate' && array_key_exists('alternate', $structure[$table_name][$field_name])) {
           foreach ($structure[$table_name][$field_name]['alternate'] as $alternate_name => &$alternate_data) {
-            $field_table_name = 'mew_field_' . $table_name . '_' . $alternate_name;
+            $field_table_name = 'mfcs_field_' . $table_name . '_' . $alternate_name;
 
             $query = db_select($field_table_name, 'mftf');
-            $query->condition('mftf.event_id', $event_id);
+            $query->condition('mftf.request_id', $request_id);
             $query->condition('mftf.revision', $current->$alternate_name);
             $query->fields('mftf');
 
@@ -3376,10 +3477,10 @@ function event_workflow_load_event_by_id($event_id, $reset = FALSE) {
           }
         }
         else {
-          $field_table_name = 'mew_field_' . $table_name . '_' . $field_name;
+          $field_table_name = 'mfcs_field_' . $table_name . '_' . $field_name;
 
           $query = db_select($field_table_name, 'mftf');
-          $query->condition('mftf.event_id', $event_id);
+          $query->condition('mftf.request_id', $request_id);
           $query->condition('mftf.revision', $current->$field_name);
           $query->fields('mftf');
 
@@ -3407,17 +3508,17 @@ function event_workflow_load_event_by_id($event_id, $reset = FALSE) {
     return FALSE;
   }
 
-  $cached_events[$event_id] = &$event;
+  $cached_events[$request_id] = &$event;
 
-  return $cached_events[$event_id];
+  return $cached_events[$request_id];
 }
 
 
 /**
  * Loads event with fields matching a revision timestamp.
  *
- * @param int $event_id
- *   The numeric event id.
+ * @param int $request_id
+ *   The numeric request id.
  * @param int $revision
  *   Unix Timestamp representing the exact date and time to load.
  * @param array $desired_fields
@@ -3431,11 +3532,11 @@ function event_workflow_load_event_by_id($event_id, $reset = FALSE) {
  *   An array of values associated with the event, date, and fields.
  *   FALSE is returned on error.
  *
- * @see mcneese_event_workflow_table_structure()
+ * @see mfcs_table_structure()
  */
-function event_workflow_load_event_by_timestamp($event_id, $revision, $desired_fields = array()) {
-  if (!cf_is_integer($event_id)) {
-    cf_error::invalid_integer('event_id');
+function event_workflow_load_event_by_timestamp($request_id, $revision, $desired_fields = array()) {
+  if (!cf_is_integer($request_id)) {
+    cf_error::invalid_integer('request_id');
     return FALSE;
   }
 
@@ -3449,10 +3550,10 @@ function event_workflow_load_event_by_timestamp($event_id, $revision, $desired_f
     return FALSE;
   }
 
-  mcneese_event_workflow_include(0);
+  mfcs_include(0);
 
   $event = array();
-  $structure = mcneese_event_workflow_table_structure();
+  $structure = mfcs_table_structure();
 
   // filter out all fields that were not requested.
   if (!empty($desired_fields)) {
@@ -3472,13 +3573,13 @@ function event_workflow_load_event_by_timestamp($event_id, $revision, $desired_f
   }
 
   try {
-    $query = db_select('mew_event_requests', 'mer');
-    $query->innerjoin('mew_event_revisions', 'merv', 'mer.id = merv.event_id');
+    $query = db_select('mfcs_event_requests', 'mer');
+    $query->innerjoin('mfcs_event_revisions', 'merv', 'mer.id = merv.request_id');
 
     $query->fields('mer');
     $query->addField('merv', 'revision', 'revision');
 
-    $query->condition('id', $event_id);
+    $query->condition('id', $request_id);
     $query->condition('merv.date', $revision);
 
     $query->orderBy('merv.date');
@@ -3500,7 +3601,7 @@ function event_workflow_load_event_by_timestamp($event_id, $revision, $desired_f
     }
 
     foreach ($structure as $table_name => &$fields) {
-      $current_table_name = 'mew_current_' . $table_name;
+      $current_table_name = 'mfcs_current_' . $table_name;
 
       if (!array_key_exists($table_name, $event)) {
         $event[$table_name] = array();
@@ -3516,10 +3617,10 @@ function event_workflow_load_event_by_timestamp($event_id, $revision, $desired_f
       foreach ($fields as $field_name => &$field_values) {
         if (isset($structure[$table_name][$field_name]['storage']) && $structure[$table_name][$field_name]['storage'] == 'alternate' && array_key_exists('alternate', $structure[$table_name][$field_name])) {
           foreach ($structure[$table_name][$field_name]['alternate'] as $alternate_name => &$alternate_data) {
-            $field_table_name = 'mew_field_' . $table_name . '_' . $alternate_name;
+            $field_table_name = 'mfcs_field_' . $table_name . '_' . $alternate_name;
 
             $query = db_select($field_table_name, 'mftf');
-            $query->condition('mftf.event_id', $event_id);
+            $query->condition('mftf.request_id', $request_id);
             $query->condition('mftf.date', $revision);
             $query->fields('mftf');
 
@@ -3539,10 +3640,10 @@ function event_workflow_load_event_by_timestamp($event_id, $revision, $desired_f
           }
         }
         else {
-          $field_table_name = 'mew_field_' . $table_name . '_' . $field_name;
+          $field_table_name = 'mfcs_field_' . $table_name . '_' . $field_name;
 
           $query = db_select($field_table_name, 'mftf');
-          $query->condition('mftf.event_id', $event_id);
+          $query->condition('mftf.request_id', $request_id);
           $query->condition('mftf.date', $revision);
           $query->fields('mftf');
 
@@ -3582,8 +3683,8 @@ function event_workflow_load_event_by_timestamp($event_id, $revision, $desired_f
 /**
  * Loads the event revision number.
  *
- * @param int $event_id
- *   The numeric event id.
+ * @param int $request_id
+ *   The numeric request id.
  * @param string $table_field_name
  *   (optional) The name of a specific table to load a revision number from.
  *   When not specified, this returns the latest revision number of a given
@@ -3593,17 +3694,17 @@ function event_workflow_load_event_by_timestamp($event_id, $revision, $desired_f
  *  FALSE is returned on error.
  *  NULL is returned when there is no existing revision number.
  */
-function mcneese_event_workflow_load_event_revision_number($event_id, $table_field_name = NULL) {
-  if (!cf_is_integer($event_id)) {
-    cf_error::invalid_integer('event_id');
+function mfcs_load_event_revision_number($request_id, $table_field_name = NULL) {
+  if (!cf_is_integer($request_id)) {
+    cf_error::invalid_integer('request_id');
     return FALSE;
   }
 
   if (is_null($table_field_name)) {
     try {
-      $query = db_select('mew_event_revisions', 'merv');
+      $query = db_select('mfcs_event_revisions', 'merv');
       $query->addfield('merv', 'revision', 'revision');
-      $query->condition('merv.event_id', $event_id);
+      $query->condition('merv.request_id', $request_id);
       $query->orderBy('merv.revision', 'DESC');
       $query->range(0, 1);
 
@@ -3630,7 +3731,7 @@ function mcneese_event_workflow_load_event_revision_number($event_id, $table_fie
   try {
     $query = db_select($table_field_name, 'tfn');
     $query->fields('tfn', array('revision'));
-    $query->condition('tfn.event_id', $event_id);
+    $query->condition('tfn.request_id', $request_id);
     $query->orderBy('tfn.revision', 'DESC');
     $query->range(0, 1);
 
@@ -3734,21 +3835,21 @@ function event_workflow_load_user_by_banner_id($banner_id, $reset = FALSE) {
  *   When an array, the created tables are updates to existing values.
  *   The array should be populated by event_workflow_load_event_by_id().
  *
- * @see mcneese_event_workflow_table_structure()
+ * @see mfcs_table_structure()
  * @see event_workflow_load_event_by_id()
  */
-function mcneese_event_workflow_build_table_structure($structure, &$structure_tables, &$structure_field_tables, $table_name, $field_name, $db_table, $db_table_field, $user_data, $values, $form_state, $event = NULL) {
+function mfcs_build_table_structure($structure, &$structure_tables, &$structure_field_tables, $table_name, $field_name, $db_table, $db_table_field, $user_data, $values, $form_state, $event = NULL) {
   if (is_null($event)) {
-    $event_id = NULL;
+    $request_id = NULL;
     $revision = 0;
   }
   else {
-    $event_id = $event['mer']['id'][0]->value;
-    $structure_tables[$db_table]['event_id'] = $event_id;
+    $request_id = $event['mer']['id'][0]->value;
+    $structure_tables[$db_table]['request_id'] = $request_id;
 
-    $revision = mcneese_event_workflow_load_event_revision_number($event_id, $db_table_field);
+    $revision = mfcs_load_event_revision_number($request_id, $db_table_field);
     if ($revision === FALSE) {
-      watchdog(MEW_WATCHDOG_ID, "Failed to load revision number for event %event_id while building the table structure, forcing revision number to be 0.", array('%event_id' => $event_id), WATCHDOG_ERROR);
+      watchdog(MFCS_WATCHDOG_ID, "Failed to load revision number for event %request_id while building the table structure, forcing revision number to be 0.", array('%request_id' => $request_id), WATCHDOG_ERROR);
       $revision = 0;
     }
     elseif (is_null($revision)) {
@@ -3795,7 +3896,7 @@ function mcneese_event_workflow_build_table_structure($structure, &$structure_ta
         foreach ($structure[$table_name][$field_name]['alternate'] as $alternate_name => &$alternate_data) {
           if (!array_key_exists('key', $alternate_data)) continue;
 
-          $db_table_field = 'mew_field_' . $table_name . '_' . $alternate_name;
+          $db_table_field = 'mfcs_field_' . $table_name . '_' . $alternate_name;
 
           if (!isset($structure_field_tables[$db_table_field])) {
             $structure_field_tables[$db_table_field] = array();
@@ -3811,8 +3912,8 @@ function mcneese_event_workflow_build_table_structure($structure, &$structure_ta
             $structure_field_tables[$db_table_field][$delta]['value'] = $alternate_values[$alternate_data['key']];
           }
 
-          if (!is_null($event_id)) {
-            $structure_field_tables[$db_table_field][$delta]['event_id'] = $event_id;
+          if (!is_null($request_id)) {
+            $structure_field_tables[$db_table_field][$delta]['request_id'] = $request_id;
           }
 
           $structure_tables[$db_table][$alternate_name] = $revision;
@@ -3830,7 +3931,7 @@ function mcneese_event_workflow_build_table_structure($structure, &$structure_ta
         $structure_field_tables[$db_table_field][$delta]['revision'] = $revision;
 
         if (!is_null($event)) {
-          $structure_field_tables[$db_table_field][$delta]['event_id'] = $event_id;
+          $structure_field_tables[$db_table_field][$delta]['request_id'] = $request_id;
         }
 
         $storage_values = FALSE;
@@ -3898,7 +3999,7 @@ function mcneese_event_workflow_build_table_structure($structure, &$structure_ta
       $structure_field_tables[$db_table_field][$delta]['revision'] = $revision;
 
       if (!is_null($event)) {
-        $structure_field_tables[$db_table_field][$delta]['event_id'] = $event_id;
+        $structure_field_tables[$db_table_field][$delta]['request_id'] = $request_id;
       }
 
       if (isset($structure[$table_name][$field_name]['columns'])) {
@@ -3936,7 +4037,7 @@ function mcneese_event_workflow_build_table_structure($structure, &$structure_ta
  *   An array of database objects representing the reviewers.
  *   FALSE is returned on error.
  */
-function mcneese_event_workflow_get_reviewers($conditions = array(), $join = FALSE, $sort = array()) {
+function mfcs_get_reviewers($conditions = array(), $join = FALSE, $sort = array()) {
   if (!is_array($conditions)) {
     cf_error::invalid_array('conditions');
     return FALSE;
@@ -3953,7 +4054,7 @@ function mcneese_event_workflow_get_reviewers($conditions = array(), $join = FAL
   }
 
   try {
-    $query = db_select('mew_reviewers', 'mr');
+    $query = db_select('mfcs_reviewers', 'mr');
     $query->fields('mr');
 
     if ($join) {
@@ -4023,8 +4124,8 @@ function mcneese_event_workflow_get_reviewers($conditions = array(), $join = FAL
  *   An array containing the time start values.
  * @param array $time_stop
  *   An array containing the time stop values.
- * @param int|null $event_id
- *   (optional) When not NULL, this represents the event_id to ignore.
+ * @param int|null $request_id
+ *   (optional) When not NULL, this represents the request_id to ignore.
  *   Use this so that when editing an existing event, it does not report
  *   itself as the event using the room.
  *
@@ -4032,7 +4133,7 @@ function mcneese_event_workflow_get_reviewers($conditions = array(), $join = FAL
  *   An array containing any events currently using the room at the specified date and time.
  *   FALSE on error.
  */
-function mcneese_event_workflow_check_room_availability($room, $date, $time_start, $time_stop, $event_id = NULL) {
+function mfcs_check_room_availability($room, $date, $time_start, $time_stop, $request_id = NULL) {
   if (!is_string($room) || empty($room)) {
     cf_error::invalid_string('room');
     return FALSE;
@@ -4053,24 +4154,24 @@ function mcneese_event_workflow_check_room_availability($room, $date, $time_star
     return FALSE;
   }
 
-  if (!is_null($event_id) && !cf_is_integer($event_id)) {
-    cf_error::invalid_integer('event_id');
+  if (!is_null($request_id) && !cf_is_integer($request_id)) {
+    cf_error::invalid_integer('request_id');
     return FALSE;
   }
 
   try {
-    $query = db_select('mew_event_requests', 'mer');
+    $query = db_select('mfcs_event_requests', 'mer');
 
-    $query->innerjoin('mew_current_top', 'mct', 'mer.id = mct.event_id');
-    $query->innerjoin('mew_current_dates', 'mcd', 'mer.id = mcd.event_id AND mct.event_id = mcd.event_id');
+    $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
+    $query->innerjoin('mfcs_current_dates', 'mcd', 'mer.id = mcd.request_id AND mct.request_id = mcd.request_id');
 
-    $query->innerjoin('mew_field_top_status', 'mfts', 'mct.event_id = mfts.event_id AND mcd.event_id = mfts.event_id AND mct.status = mfts.revision AND mfts.delta = 0');
-    $query->innerjoin('mew_field_top_step', 'mftsp', 'mct.event_id = mftsp.event_id AND mcd.event_id = mftsp.event_id AND mct.step = mftsp.revision AND mftsp.delta = 0');
-    $query->innerjoin('mew_field_top_room', 'mftr', 'mct.event_id = mftr.event_id AND mcd.event_id = mftr.event_id AND mct.room = mftr.revision AND mftr.delta = 0');
+    $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mcd.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
+    $query->innerjoin('mfcs_field_top_step', 'mftsp', 'mct.request_id = mftsp.request_id AND mcd.request_id = mftsp.request_id AND mct.step = mftsp.revision AND mftsp.delta = 0');
+    $query->innerjoin('mfcs_field_top_room', 'mftr', 'mct.request_id = mftr.request_id AND mcd.request_id = mftr.request_id AND mct.room = mftr.revision AND mftr.delta = 0');
 
-    $query->innerjoin('mew_field_dates_date', 'mfdd', 'mct.event_id = mfdd.event_id AND mcd.event_id = mfdd.event_id AND mcd.date = mfdd.revision');
+    $query->innerjoin('mfcs_field_dates_date', 'mfdd', 'mct.request_id = mfdd.request_id AND mcd.request_id = mfdd.request_id AND mcd.date = mfdd.revision');
 
-    $query->addField('mer', 'id', 'event_id');
+    $query->addField('mer', 'id', 'request_id');
     $query->addField('mfdd', 'value', 'date');
     $query->addField('mcd', 'date', 'date_revision');
     $query->addField('mcd', 'time_start', 'time_start_revision');
@@ -4079,16 +4180,16 @@ function mcneese_event_workflow_check_room_availability($room, $date, $time_star
     $query->distinct();
 
     $statuses = array(
-      MEW_EVENT_STATUS_LOCKED,
-      MEW_EVENT_STATUS_CLOSED_ACCEPTED,
+      MFCS_EVENT_STATUS_LOCKED,
+      MFCS_EVENT_STATUS_CLOSED_ACCEPTED,
     );
 
     $query->condition('mfts.value', $statuses, 'IN');
     $query->condition('mftr.value', $room);
     $query->condition('mfdd.value', $date, 'IN');
 
-    if (!is_null($event_id)) {
-      $query->condition('mer.id', $event_id, '<>');
+    if (!is_null($request_id)) {
+      $query->condition('mer.id', $request_id, '<>');
     }
 
     $results = $query->execute()->fetchAll();
@@ -4098,33 +4199,33 @@ function mcneese_event_workflow_check_room_availability($room, $date, $time_star
       return array();
     }
 
-    $event_ids = array();
+    $request_ids = array();
 
     // the results contain all locked events that have something in the given room during the given date.
     // however, this does not mention the time, so loop through the times and see if they are all valid.
     foreach ($results as $result) {
-      $query = db_select('mew_field_dates_date', 'mfdd');
+      $query = db_select('mfcs_field_dates_date', 'mfdd');
 
-      $query->innerjoin('mew_field_dates_time_start', 'mfdts', 'mfdd.event_id = mfdts.event_id AND mfdd.delta = mfdts.delta');
-      $query->innerjoin('mew_field_dates_time_stop', 'mfdtsp', 'mfdd.event_id = mfdtsp.event_id AND mfdd.delta = mfdtsp.delta');
+      $query->innerjoin('mfcs_field_dates_time_start', 'mfdts', 'mfdd.request_id = mfdts.request_id AND mfdd.delta = mfdts.delta');
+      $query->innerjoin('mfcs_field_dates_time_stop', 'mfdtsp', 'mfdd.request_id = mfdtsp.request_id AND mfdd.delta = mfdtsp.delta');
 
-      $query->addField('mfdd', 'event_id', 'event_id');
+      $query->addField('mfdd', 'request_id', 'request_id');
       $query->addField('mfdd', 'revision', 'revision');
       $query->addField('mfdd', 'delta', 'delta');
       $query->addField('mfdd', 'value', 'date');
       $query->addField('mfdts', 'value', 'time_start');
       $query->addField('mfdtsp', 'value', 'time_stop');
 
-      $query->condition('mfdd.event_id', $result->event_id);
-      $query->condition('mfdts.event_id', $result->event_id);
-      $query->condition('mfdtsp.event_id', $result->event_id);
+      $query->condition('mfdd.request_id', $result->request_id);
+      $query->condition('mfdts.request_id', $result->request_id);
+      $query->condition('mfdtsp.request_id', $result->request_id);
 
       $query->condition('mfdd.revision', $result->date_revision);
       $query->condition('mfdts.revision', $result->time_start_revision);
       $query->condition('mfdtsp.revision', $result->time_stop_revision);
 
-      if (!is_null($event_id)) {
-        $query->condition('mfdd.event_id', $event_id, '<>');
+      if (!is_null($request_id)) {
+        $query->condition('mfdd.request_id', $request_id, '<>');
       }
 
       $or = db_or();
@@ -4140,7 +4241,7 @@ function mcneese_event_workflow_check_room_availability($room, $date, $time_star
       foreach ($date as $key => $value) {
         // all day events match, they have NULL for start and stop time values.
         if (is_null($time_start[$key]) && is_null($time_stop[$key])) {
-          $event_ids[] = $result->event_id;
+          $request_ids[] = $result->request_id;
         }
 
         $and = db_and();
@@ -4161,7 +4262,7 @@ function mcneese_event_workflow_check_room_availability($room, $date, $time_star
       $matches = $query->execute()->fetchAll();
 
       foreach ($matches as $match) {
-        $event_ids[] = $match->event_id;
+        $request_ids[] = $match->request_id;
       }
     }
   }
@@ -4170,15 +4271,15 @@ function mcneese_event_workflow_check_room_availability($room, $date, $time_star
     return FALSE;
   }
 
-  return $event_ids;
+  return $request_ids;
 }
 
 /**
  * Prints a warning message about the room being unavailable.
  *
- * @see mcneese_event_workflow_check_room_availability()
+ * @see mfcs_check_room_availability()
  */
-function mcneese_event_workflow_display_room_unavailable_message() {
+function mfcs_display_room_unavailable_message() {
   $unavailable_message = '';
   $unavailable_message .= '<span class="uppercase">Warning</span>: The specified room is currently unavailable. ';
   $unavailable_message .= 'You may still submit this request and your request attempt will still be logged. ';
@@ -4188,8 +4289,8 @@ function mcneese_event_workflow_display_room_unavailable_message() {
 /**
  * Builds the event pdf and saves it to the local disk.
  *
- * @param int $event_id
- *   The Event ID.
+ * @param int $request_id
+ *   The Request ID.
  * @param int $mode
  *   (optional) The page mode used to determine which parts of a page are
  *   processed.
@@ -4200,11 +4301,11 @@ function mcneese_event_workflow_display_room_unavailable_message() {
  * @return bool
  *   TRUE on success, FALSE otherwise.
  */
-function mcneese_event_workflow_generate_pdf($event_id, $mode = MEW_VIEW_MODE_DISPLAY, $local = FALSE) {
-  $event = event_workflow_load_event_by_id($event_id);
+function mfcs_generate_pdf($request_id, $mode = MFCS_VIEW_MODE_DISPLAY, $local = FALSE) {
+  $event = event_workflow_load_event_by_id($request_id);
 
   if (empty($event)) {
-    watchdog(MEW_WATCHDOG_ID, "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
+    watchdog(MFCS_WATCHDOG_ID, "Unable to find event with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
     return FALSE;
   }
 
@@ -4215,37 +4316,39 @@ function mcneese_event_workflow_generate_pdf($event_id, $mode = MEW_VIEW_MODE_DI
   $page['html'] = array(
     '#type' => 'container',
     '#attributes' => array(
-      'id' => 'mcneese-event-workflow-event-view-0-page',
+      'id' => 'mfcs-event-view-0-page',
       'class' => array(
-        'mcneese-event-workflow-event-pdf-0',
+        'mfcs-event-pdf-0',
       ),
     ),
   );
 
-  $page['html']['content'] = array(mcneese_event_workflow_event_view_0_page($form, $form_state, $event_id, $mode, TRUE));
+  $page['html']['content'] = array(mfcs_event_view_0_page($form, $form_state, $request_id, $mode, TRUE));
   $renderred = drupal_render($page);
   $html = drupal_render_page($renderred);
 
-  return mcneese_event_workflow_event_pdf_0_page_using_wkhtmltopdf($event_id, $html, $local);
+  return mfcs_event_pdf_0_page_using_wkhtmltopdf($request_id, $html, $local);
 }
 
 /**
  * Renders a PDF of a given event request using the wkhtmltopdf library.
  *
- * @param int $event_id
+ * @param int $request_id
  *   The unique identifier for an event request.
  * @param bool $local
  *   (optional) If TRUE, then the file is saved to the local disk.
  *   If FALSE, then the file is print to stdout.
+ * @param array $parameters
+ *   (optional) Change the default behavior on how the page is generated.
  *
  * @return bool
  *   TRUE on success, FALSE otherwise.
  */
-function mcneese_event_workflow_event_pdf_0_page_using_wkhtmltopdf($event_id, $html, $local = FALSE) {
-  $event = event_workflow_load_event_by_id($event_id);
+function mfcs_event_pdf_0_page_using_wkhtmltopdf($request_id, $html, $local = FALSE, $parameters = array()) {
+  $event = event_workflow_load_event_by_id($request_id);
 
   if (empty($event)) {
-    watchdog(MEW_WATCHDOG_ID, "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
+    watchdog(MFCS_WATCHDOG_ID, "Unable to find event with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
     return FALSE;
   }
 
@@ -4256,6 +4359,11 @@ function mcneese_event_workflow_event_pdf_0_page_using_wkhtmltopdf($event_id, $h
 
   if (!is_bool($local)) {
     cf_error::invalid_bool('local');
+    return FALSE;
+  }
+
+  if (!is_array($parameters)) {
+    cf_error::invalid_array('parameters');
     return FALSE;
   }
 
@@ -4314,7 +4422,7 @@ function mcneese_event_workflow_event_pdf_0_page_using_wkhtmltopdf($event_id, $h
             if (isset($parts[5])) {
               if ($parts[5] == 'mcneese') {
               }
-              elseif ($parts[5] == 'mcneese_event_workflow') {
+              elseif ($parts[5] == 'mfcs') {
               }
               else {
                 continue;
@@ -4356,8 +4464,14 @@ function mcneese_event_workflow_event_pdf_0_page_using_wkhtmltopdf($event_id, $h
   }
 
   // title tags
-  $page_title = "Event Request: " . $event['information']['title'][0]->value;
-  $head_markup .= '<title>Event Request #' . $event_id . ': ' . $event['information']['title'][0]->value . '</title>';
+  if (empty($parameters['page_title'])) {
+    $page_title = "Event Request: " . $event['information']['title'][0]->value;
+    $head_markup .= '<title>Event Request #' . $request_id . ': ' . $event['information']['title'][0]->value . '</title>';
+  }
+  else {
+    $page_title = $parameters['page_title'];
+    $head_markup .= '<title>' . $parameters['page_title'] . '</title>';
+  }
 
   $body_markup .= $cf_dom->get_dom()->saveHTML($main_tag) . "\n";
 
@@ -4365,6 +4479,10 @@ function mcneese_event_workflow_event_pdf_0_page_using_wkhtmltopdf($event_id, $h
   $cf = &drupal_static('cf_theme_get_variables', array());
   if (isset($cf['markup_css']['body']['class'])) {
     $body_class .= $cf['markup_css']['body']['class'];
+  }
+
+  if (!empty($parameters['body_class']) && is_array($parameters['body_class'])) {
+    $body_class .= ' ' . implode(' ', $parameters['body_class']);
   }
 
   $html = '';
@@ -4396,7 +4514,7 @@ function mcneese_event_workflow_event_pdf_0_page_using_wkhtmltopdf($event_id, $h
 
   $wkpdf->addPage($html);
 
-  $filename = mcneese_event_workflow_build_filename($event_id, 0);
+  $filename = mfcs_build_filename($request_id, 0);
 
   if ($local) {
     // save the file, locally.
@@ -4414,7 +4532,7 @@ function mcneese_event_workflow_event_pdf_0_page_using_wkhtmltopdf($event_id, $h
   }
 
   if (!$result) {
-    watchdog(MEW_WATCHDOG_ID, "Error occured while generating the PDF of event @id: @error", array('@id' => $event_id, '@error' => $wkpdf->getError()), WATCHDOG_ERROR);
+    watchdog(MFCS_WATCHDOG_ID, "Error occured while generating the PDF of event @id: @error", array('@id' => $request_id, '@error' => $wkpdf->getError()), WATCHDOG_ERROR);
   }
 
   return TRUE;
@@ -4423,8 +4541,8 @@ function mcneese_event_workflow_event_pdf_0_page_using_wkhtmltopdf($event_id, $h
 /**
  * Builds the PDF filename string for an event.
  *
- * @param int $event_id
- *   The Event ID.
+ * @param int $request_id
+ *   The Request ID.
  * @param int $mode
  *   (optional) Determines how the filename is generated:
  *   0 - use the local filename method.
@@ -4435,36 +4553,36 @@ function mcneese_event_workflow_event_pdf_0_page_using_wkhtmltopdf($event_id, $h
  * @return string|false
  *   The built filename string or FALSE on error.
  */
-function mcneese_event_workflow_build_filename($event_id, $mode = MEW_VIEW_MODE_NORMAL) {
-  $event = event_workflow_load_event_by_id($event_id);
+function mfcs_build_filename($request_id, $mode = MFCS_VIEW_MODE_NORMAL) {
+  $event = event_workflow_load_event_by_id($request_id);
 
   if (empty($event)) {
-    watchdog(MEW_WATCHDOG_ID, "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
+    watchdog(MFCS_WATCHDOG_ID, "Unable to find event with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
     return FALSE;
   }
 
-  if (!cf_is_integer($mode) || $mode < MEW_VIEW_MODE_NORMAL || $mode > MEW_VIEW_MODE_OPERATIONS) {
+  if (!cf_is_integer($mode) || $mode < MFCS_VIEW_MODE_NORMAL || $mode > MFCS_VIEW_MODE_OPERATIONS) {
     cf_error::invalid_integer('mode');
     return FALSE;
   }
 
-  if ($mode == MEW_VIEW_MODE_NORMAL) {
+  if ($mode == MFCS_VIEW_MODE_NORMAL) {
     $fixed_title = preg_replace('/\W/i', '_', $event['information']['title'][0]->value);
     $fixed_title = preg_replace('/_+/i', '_', $fixed_title);
 
-    return sprintf("%'010s", $event_id) . '-event_request-' . $fixed_title . '.pdf';
+    return sprintf("%'010s", $request_id) . '-event_request-' . $fixed_title . '.pdf';
   }
 
-  if ($mode == MEW_VIEW_MODE_DISPLAY) {
-    return sprintf("%'010s", $event_id) . '.pdf';
+  if ($mode == MFCS_VIEW_MODE_DISPLAY) {
+    return sprintf("%'010s", $request_id) . '.pdf';
   }
 
-  if ($mode == MEW_VIEW_MODE_LOG) {
-    return sprintf("%'010s", $event_id) . '.meta';
+  if ($mode == MFCS_VIEW_MODE_LOG) {
+    return sprintf("%'010s", $request_id) . '.meta';
   }
 
-  if ($mode == MEW_VIEW_MODE_OPERATIONS) {
-    return sprintf("%'010s", $event_id) . '.email';
+  if ($mode == MFCS_VIEW_MODE_OPERATIONS) {
+    return sprintf("%'010s", $request_id) . '.email';
   }
 
   return FALSE;
@@ -4498,7 +4616,7 @@ function mcneese_event_workflow_build_filename($event_id, $mode = MEW_VIEW_MODE_
  * @return array|FALSE
  *   An array of all items found or FALSE on error.
  */
-function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = FALSE, $start = 0, $limit = 20, $sorting = array(), $review_restrictions = NULL) {
+function mfcs_event_load_listing($search = NULL, $sensitive = FALSE, $start = 0, $limit = 20, $sorting = array(), $review_restrictions = NULL) {
   if (!is_null($search) && !is_string($search) && !is_array($search)) {
     cf_error::invalid_string('search');
     return FALSE;
@@ -4535,9 +4653,9 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
 
   $user = cf_current_user();
 
-  $manager = user_access('mcneese event workflow manage');
-  $reviewer = user_access('mcneese event workflow review');
-  $requester = user_access('mcneese event workflow request');
+  $manager = user_access('mcneese facilities use manage');
+  $reviewer = user_access('mcneese facilities use review');
+  $requester = user_access('mcneese facilities use request');
 
   $s = 'i';
   $like = 'ILIKE';
@@ -4561,7 +4679,7 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
     }
   }
 
-  mcneese_event_workflow_include(4);
+  mfcs_include(4);
 
   $status_options = event_workflow_get_event_status_list_options();
   $step_options = event_workflow_get_event_steps_list_options();
@@ -4648,73 +4766,73 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
 
   $found = array();
   try {
-    $query = db_select('mew_event_requests', 'mer');
+    $query = db_select('mfcs_event_requests', 'mer');
 
-    $query->innerjoin('mew_current_top', 'mct', 'mer.id = mct.event_id');
-    $query->innerjoin('mew_current_information', 'mci', 'mer.id = mci.event_id');
-    $query->innerjoin('mew_current_dates', 'mcd', 'mer.id = mcd.event_id');
+    $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
+    $query->innerjoin('mfcs_current_information', 'mci', 'mer.id = mci.request_id');
+    $query->innerjoin('mfcs_current_dates', 'mcd', 'mer.id = mcd.request_id');
 
-    $already_joined['mew_current_top'] = 'mct';
-    $already_joined['mew_current_information'] = 'mci';
-    $already_joined['mew_current_dates'] = 'mcd';
+    $already_joined['mfcs_current_top'] = 'mct';
+    $already_joined['mfcs_current_information'] = 'mci';
+    $already_joined['mfcs_current_dates'] = 'mcd';
 
-    $query->innerjoin('mew_field_top_status', 'mfts', 'mct.event_id = mfts.event_id AND mct.status = mfts.revision AND mfts.delta = 0');
-    $query->innerjoin('mew_field_top_step', 'mftsp', 'mct.event_id = mftsp.event_id AND mct.step = mftsp.revision AND mftsp.delta = 0');
-    $query->innerjoin('mew_field_top_location', 'mftl', 'mct.event_id = mftl.event_id AND mct.location = mftl.revision AND mftl.delta = 0');
-    $query->innerjoin('mew_field_top_room', 'mftr', 'mct.event_id = mftr.event_id AND mct.room = mftr.revision AND mftr.delta = 0');
+    $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
+    $query->innerjoin('mfcs_field_top_step', 'mftsp', 'mct.request_id = mftsp.request_id AND mct.step = mftsp.revision AND mftsp.delta = 0');
+    $query->innerjoin('mfcs_field_top_location', 'mftl', 'mct.request_id = mftl.request_id AND mct.location = mftl.revision AND mftl.delta = 0');
+    $query->innerjoin('mfcs_field_top_room', 'mftr', 'mct.request_id = mftr.request_id AND mct.room = mftr.revision AND mftr.delta = 0');
 
-    $already_joined['mew_field_top_status'] = 'mfts';
-    $already_joined['mew_field_top_step'] = 'mftsp';
-    $already_joined['mew_field_top_location'] = 'mftl';
-    $already_joined['mew_field_top_room'] = 'mftr';
+    $already_joined['mfcs_field_top_status'] = 'mfts';
+    $already_joined['mfcs_field_top_step'] = 'mftsp';
+    $already_joined['mfcs_field_top_location'] = 'mftl';
+    $already_joined['mfcs_field_top_room'] = 'mftr';
 
-    $query->innerjoin('mew_banner_rooms', 'mbr', 'mftr.value = mbr.id');
-    $query->innerjoin('mew_banner_buildings', 'mbb', 'mbr.building = mbb.id');
-    $query->innerjoin('mew_banner_locations', 'mbl', 'mftl.value = mbl.id');
+    $query->innerjoin('mfcs_banner_rooms', 'mbr', 'mftr.value = mbr.id');
+    $query->innerjoin('mfcs_banner_buildings', 'mbb', 'mbr.building = mbb.id');
+    $query->innerjoin('mfcs_banner_locations', 'mbl', 'mftl.value = mbl.id');
 
-    $already_joined['mew_banner_rooms'] = 'mbr';
-    $already_joined['mew_banner_buildings'] = 'mbb';
-    $already_joined['mew_banner_locations'] = 'mbl';
+    $already_joined['mfcs_banner_rooms'] = 'mbr';
+    $already_joined['mfcs_banner_buildings'] = 'mbb';
+    $already_joined['mfcs_banner_locations'] = 'mbl';
 
-    $query->innerjoin('mew_field_information_title', 'mfit', 'mci.event_id = mfit.event_id AND mci.title = mfit.revision AND mfit.delta = 0');
-    $query->innerjoin('mew_field_information_type', 'mfitp', 'mci.event_id = mfitp.event_id AND mci.type = mfitp.revision AND mfitp.delta = 0');
+    $query->innerjoin('mfcs_field_information_title', 'mfit', 'mci.request_id = mfit.request_id AND mci.title = mfit.revision AND mfit.delta = 0');
+    $query->innerjoin('mfcs_field_information_type', 'mfitp', 'mci.request_id = mfitp.request_id AND mci.type = mfitp.revision AND mfitp.delta = 0');
 
-    $already_joined['mew_field_information_title'] = 'mfit';
-    $already_joined['mew_field_information_type'] = 'mfitp';
+    $already_joined['mfcs_field_information_title'] = 'mfit';
+    $already_joined['mfcs_field_information_type'] = 'mfitp';
 
     if (is_null($search)) {
-      $query->innerjoin('mew_field_dates_date', 'mfdd', 'mcd.event_id = mfdd.event_id AND mcd.date = mfdd.revision AND mfdd.delta = 0');
-      $query->innerjoin('mew_field_dates_time_start', 'mfdts', 'mcd.event_id = mfdts.event_id AND mcd.time_start = mfdts.revision AND mfdts.delta = 0');
-      $query->innerjoin('mew_field_dates_time_stop', 'mfdtsp', 'mcd.event_id = mfdtsp.event_id AND mcd.time_stop = mfdtsp.revision AND mfdtsp.delta = 0');
+      $query->innerjoin('mfcs_field_dates_date', 'mfdd', 'mcd.request_id = mfdd.request_id AND mcd.date = mfdd.revision AND mfdd.delta = 0');
+      $query->innerjoin('mfcs_field_dates_time_start', 'mfdts', 'mcd.request_id = mfdts.request_id AND mcd.time_start = mfdts.revision AND mfdts.delta = 0');
+      $query->innerjoin('mfcs_field_dates_time_stop', 'mfdtsp', 'mcd.request_id = mfdtsp.request_id AND mcd.time_stop = mfdtsp.revision AND mfdtsp.delta = 0');
     }
     else {
       $query->distinct();
 
-      $query->innerjoin('mew_field_dates_date', 'mfdd', 'mcd.event_id = mfdd.event_id AND mcd.date = mfdd.revision');
-      $query->innerjoin('mew_field_dates_time_start', 'mfdts', 'mcd.event_id = mfdts.event_id AND mcd.time_start = mfdts.revision');
-      $query->innerjoin('mew_field_dates_time_stop', 'mfdtsp', 'mcd.event_id = mfdtsp.event_id AND mcd.time_stop = mfdtsp.revision');
+      $query->innerjoin('mfcs_field_dates_date', 'mfdd', 'mcd.request_id = mfdd.request_id AND mcd.date = mfdd.revision');
+      $query->innerjoin('mfcs_field_dates_time_start', 'mfdts', 'mcd.request_id = mfdts.request_id AND mcd.time_start = mfdts.revision');
+      $query->innerjoin('mfcs_field_dates_time_stop', 'mfdtsp', 'mcd.request_id = mfdtsp.request_id AND mcd.time_stop = mfdtsp.revision');
 
       // when using simple search, include a few additional textarea fields.
       if (is_string($search)) {
-        $query->innerjoin('mew_field_top_additional', 'mfta', 'mct.event_id = mfta.event_id AND mct.additional = mfta.revision AND mfta.delta = 0');
-        $query->innerjoin('mew_field_information_organization', 'mfio', 'mci.event_id = mfio.event_id AND mci.organization = mfio.revision AND mfta.delta = 0');
+        $query->innerjoin('mfcs_field_top_additional', 'mfta', 'mct.request_id = mfta.request_id AND mct.additional = mfta.revision AND mfta.delta = 0');
+        $query->innerjoin('mfcs_field_information_organization', 'mfio', 'mci.request_id = mfio.request_id AND mci.organization = mfio.revision AND mfta.delta = 0');
 
-        $already_joined['mew_field_top_additional'] = 'mfta';
-        $already_joined['mew_field_information_organization'] = 'mfio';
+        $already_joined['mfcs_field_top_additional'] = 'mfta';
+        $already_joined['mfcs_field_information_organization'] = 'mfio';
 
-        $query->innerjoin('mew_current_plans', 'mcp', 'mer.id = mcp.event_id');
-        $query->innerjoin('mew_field_plans_activities', 'mfpa', 'mcp.event_id = mfpa.event_id AND mcp.activities = mfpa.revision AND mfpa.delta = 0');
-        $query->innerjoin('mew_field_plans_description', 'mfpd', 'mcp.event_id = mfpd.event_id AND mcp.description = mfpd.revision AND mfpd.delta = 0');
+        $query->innerjoin('mfcs_current_plans', 'mcp', 'mer.id = mcp.request_id');
+        $query->innerjoin('mfcs_field_plans_activities', 'mfpa', 'mcp.request_id = mfpa.request_id AND mcp.activities = mfpa.revision AND mfpa.delta = 0');
+        $query->innerjoin('mfcs_field_plans_description', 'mfpd', 'mcp.request_id = mfpd.request_id AND mcp.description = mfpd.revision AND mfpd.delta = 0');
 
-        $already_joined['mew_current_plans'] = 'mcp';
-        $already_joined['mew_field_plans_activities'] = 'mfpa';
-        $already_joined['mew_field_plans_description'] = 'mfpd';
+        $already_joined['mfcs_current_plans'] = 'mcp';
+        $already_joined['mfcs_field_plans_activities'] = 'mfpa';
+        $already_joined['mfcs_field_plans_description'] = 'mfpd';
       }
     }
 
-    $already_joined['mew_field_dates_date'] = 'mfdd';
-    $already_joined['mew_field_dates_time_start'] = 'mfdts';
-    $already_joined['mew_field_dates_time_stop'] = 'mfdtsp';
+    $already_joined['mfcs_field_dates_date'] = 'mfdd';
+    $already_joined['mfcs_field_dates_time_start'] = 'mfdts';
+    $already_joined['mfcs_field_dates_time_stop'] = 'mfdtsp';
 
     $already_added['date'] = 'mfdd.value';
     $already_added['time_start'] = 'mfdts.value';
@@ -4758,7 +4876,7 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
 
     if (is_array($search)) {
       $operand = db_and();
-      $result = mcneese_event_workflow_event_process_listing_search_array($query, $operand, $already_joined, $already_joined_count, $already_added, $search, 1, $like);
+      $result = mfcs_event_process_listing_search_array($query, $operand, $already_joined, $already_joined_count, $already_added, $search, 1, $like);
 
       if ($result) {
         $query->condition($operand);
@@ -4770,37 +4888,37 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
     }
 
     if ($reviewer || $manager) {
-      $query->innerjoin('mew_current_event_coordinator', 'mcec', 'mer.id = mcec.event_id');
-      $query->innerjoin('mew_field_event_coordinator_classification', 'mfecc', 'mcec.event_id = mfecc.event_id AND mcec.classification = mfecc.revision AND mfecc.delta = 0');
+      $query->innerjoin('mfcs_current_event_coordinator', 'mcec', 'mer.id = mcec.request_id');
+      $query->innerjoin('mfcs_field_event_coordinator_classification', 'mfecc', 'mcec.request_id = mfecc.request_id AND mcec.classification = mfecc.revision AND mfecc.delta = 0');
 
-      $query->innerjoin('mew_current_venue_coordinator', 'mcvc', 'mer.id = mcvc.event_id');
-      $query->innerjoin('mew_field_venue_coordinator_user_id', 'mfvcui', 'mcvc.event_id = mfvcui.event_id AND mcvc.user_id = mfvcui.revision AND mfvcui.delta = 0');
+      $query->innerjoin('mfcs_current_venue_coordinator', 'mcvc', 'mer.id = mcvc.request_id');
+      $query->innerjoin('mfcs_field_venue_coordinator_user_id', 'mfvcui', 'mcvc.request_id = mfvcui.request_id AND mcvc.user_id = mfvcui.revision AND mfvcui.delta = 0');
 
       $or = NULL;
 
       // process venue coordinator access.
       $show_status = array(
-        MEW_EVENT_STATUS_LOCKED,
-        MEW_EVENT_STATUS_UNLOCKED,
+        MFCS_EVENT_STATUS_LOCKED,
+        MFCS_EVENT_STATUS_UNLOCKED,
       );
 
       $show_step = array(
-        MEW_REVIEW_STEP_VENUE_AVAILABLE,
-        MEW_REVIEW_STEP_MAKE_DECISIONS
+        MFCS_REVIEW_STEP_VENUE_AVAILABLE,
+        MFCS_REVIEW_STEP_MAKE_DECISIONS
       );
 
       if ($review_restrictions === TRUE) {
         $show_decision = array(
-          MEW_REVIEW_DECISION_APPROVE,
-          MEW_REVIEW_DECISION_DENY
+          MFCS_REVIEW_DECISION_APPROVE,
+          MFCS_REVIEW_DECISION_DENY
         );
 
-        $already_reviewed_query = db_select('mew_field_review_review', 'mfrr');
-        $already_reviewed_query->innerjoin('mew_current_review', 'mcr', 'mfrr.event_id = mcr.event_id and mfrr.revision = mcr.review');
+        $already_reviewed_query = db_select('mfcs_field_review_review', 'mfrr');
+        $already_reviewed_query->innerjoin('mfcs_current_review', 'mcr', 'mfrr.request_id = mcr.request_id and mfrr.revision = mcr.review');
 
         $already_reviewed_query->addfield('mfrr', 'step', 'step');
 
-        $already_reviewed_query->where('mfrr.event_id = mftsp.event_id');
+        $already_reviewed_query->where('mfrr.request_id = mftsp.request_id');
         $already_reviewed_query->condition('mfrr.user_id', $user->uid);
         $already_reviewed_query->condition('mfrr.step', $show_step, 'IN');
         $already_reviewed_query->condition('mfrr.decision', $show_decision, 'IN');
@@ -4837,21 +4955,21 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
 
       // process reviewer access.
       $show_status = array(
-        MEW_EVENT_STATUS_LOCKED,
+        MFCS_EVENT_STATUS_LOCKED,
       );
 
       $show_step = array(
-        MEW_REVIEW_STEP_REVIEW,
-        MEW_REVIEW_STEP_USAGE_FEES,
+        MFCS_REVIEW_STEP_REVIEW,
+        MFCS_REVIEW_STEP_REQUIREMENTS,
       );
 
       if ($review_restrictions === TRUE) {
         $show_decision = array(
-          MEW_REVIEW_DECISION_APPROVE,
-          MEW_REVIEW_DECISION_DENY
+          MFCS_REVIEW_DECISION_APPROVE,
+          MFCS_REVIEW_DECISION_DENY
         );
 
-        $can_review_query = db_select('mew_reviewers', 'c_mr_2');
+        $can_review_query = db_select('mfcs_reviewers', 'c_mr_2');
 
         $can_review_query->addfield('c_mr_2', 'user_id', 'user_id');
 
@@ -4861,12 +4979,12 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
         $can_review_query->condition('c_mr_2.disabled', 0);
         $can_review_query->distinct();
 
-        $already_reviewed_query = db_select('mew_field_review_review', 'mfrr');
-        $already_reviewed_query->innerjoin('mew_current_review', 'mcr', 'mfrr.event_id = mcr.event_id and mfrr.revision = mcr.review');
+        $already_reviewed_query = db_select('mfcs_field_review_review', 'mfrr');
+        $already_reviewed_query->innerjoin('mfcs_current_review', 'mcr', 'mfrr.request_id = mcr.request_id and mfrr.revision = mcr.review');
 
         $already_reviewed_query->addfield('mfrr', 'step', 'step');
 
-        $already_reviewed_query->where('mfrr.event_id = mftsp.event_id and mfrr.step = mftsp.value');
+        $already_reviewed_query->where('mfrr.request_id = mftsp.request_id and mfrr.step = mftsp.value');
         $already_reviewed_query->condition('mfrr.user_id', $user->uid);
         $already_reviewed_query->condition('mfrr.step', $show_step, 'IN');
         $already_reviewed_query->condition('mfrr.decision', $show_decision, 'IN');
@@ -4885,7 +5003,7 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
       }
       elseif ($review_restrictions === FALSE) {
         if (!$manager) {
-          $can_review_query = db_select('mew_reviewers', 'c_mr_2');
+          $can_review_query = db_select('mfcs_reviewers', 'c_mr_2');
 
           $can_review_query->addfield('c_mr_2', 'user_id', 'user_id');
 
@@ -4908,7 +5026,7 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
       }
       else {
         if (!$manager) {
-          $can_review_query = db_select('mew_reviewers', 'c_mr_2');
+          $can_review_query = db_select('mfcs_reviewers', 'c_mr_2');
 
           $can_review_query->addfield('c_mr_2', 'user_id', 'user_id');
 
@@ -4924,12 +5042,41 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
         }
       }
 
+      // always show completed and accepted events when there are no restrictions.
+      if (is_null($review_restrictions)) {
+        if (is_null($or)) {
+          $or = db_or();
+        }
+
+        $and = db_and();
+        $and->condition('mfts.value', MFCS_EVENT_STATUS_CLOSED_ACCEPTED);
+        $and->condition('mftsp.value', MFCS_REVIEW_STEP_COMPLETED);
+
+        $or->condition($and);
+      }
+
       if (!is_null($or)) {
         $query->condition($or);
       }
     }
     elseif ($requester) {
-      $query->condition('mer.user_id', $user->uid);
+      // always show completed and accepted events when there are no restrictions.
+      if (is_null($review_restrictions)) {
+        $and = db_and();
+        $and->condition('mfts.value', MFCS_EVENT_STATUS_CLOSED_ACCEPTED);
+        $and->condition('mftsp.value', MFCS_REVIEW_STEP_COMPLETED);
+
+        $or = db_or();
+        $or->condition($and);
+        $or->condition('mer.user_id', $user->uid);
+
+        $query->condition($or);
+      }
+      else {
+        $query->condition('mer.user_id', $user->uid);
+
+        drupal_set_message("DEBUG");
+      }
     }
     else {
       // failsafe, should never happen.
@@ -4937,7 +5084,7 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
     }
 
     // do not include deleted requests.
-    $query->condition('mfts.value', MEW_EVENT_STATUS_DELETED, '<>');
+    $query->condition('mfts.value', MFCS_EVENT_STATUS_DELETED, '<>');
 
     if (!is_null($search) && is_string($search)) {
       $or = db_or();
@@ -5072,17 +5219,17 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
       }
 
       // fetch all available dates:
-      $sub_query = db_select('mew_current_dates', 'mcd');
-      $sub_query->innerjoin('mew_field_dates_date', 'mfdd', 'mcd.event_id = mfdd.event_id AND mcd.date = mfdd.revision');
-      $sub_query->innerjoin('mew_field_dates_time_start', 'mfdts', 'mcd.event_id = mfdts.event_id AND mcd.time_start = mfdts.revision and mfdd.event_id = mfdts.event_id and mfdd.delta = mfdts.delta');
-      $sub_query->innerjoin('mew_field_dates_time_stop', 'mfdtsp', 'mcd.event_id = mfdtsp.event_id AND mcd.time_start = mfdtsp.revision and mfdd.event_id = mfdts.event_id and mfdd.delta = mfdtsp.delta');
+      $sub_query = db_select('mfcs_current_dates', 'mcd');
+      $sub_query->innerjoin('mfcs_field_dates_date', 'mfdd', 'mcd.request_id = mfdd.request_id AND mcd.date = mfdd.revision');
+      $sub_query->leftjoin('mfcs_field_dates_time_start', 'mfdts', 'mcd.request_id = mfdts.request_id AND mcd.time_start = mfdts.revision AND mfdd.delta = mfdts.delta');
+      $sub_query->leftjoin('mfcs_field_dates_time_stop', 'mfdtsp', 'mcd.request_id = mfdtsp.request_id AND mcd.time_stop = mfdtsp.revision AND mfdts.delta = mfdtsp.delta');
 
       $sub_query->addField('mfdd', 'value', 'date');
       $sub_query->addField('mfdd', 'delta', 'delta');
       $sub_query->addField('mfdts', 'value', 'time_start');
       $sub_query->addField('mfdtsp', 'value', 'time_stop');
 
-      $sub_query->condition('mfdd.event_id', $result->id);
+      $sub_query->condition('mfdd.request_id', $result->id);
 
       $sub_query->orderBy('date', 'ASC');
       $sub_query->orderBy('time_start', 'ASC');
@@ -5121,12 +5268,12 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
     $ordered = array();
 
     if ($order == 'status') {
-      foreach ($found as $event_id => $field) {
+      foreach ($found as $request_id => $field) {
         $ordered[$status_options[$field->status]][$field->id] = $field;
       }
     }
     elseif ($order == 'step') {
-      foreach ($found as $event_id => $field) {
+      foreach ($found as $request_id => $field) {
         $ordered[$step_options[$field->step]][$field->id] = $field;
       }
     }
@@ -5173,9 +5320,9 @@ function mcneese_event_workflow_event_load_listing($search = NULL, $sensitive = 
  *   TRUE when a valid field is found and added to the $operand and FALSE
  *   otherwise.
  *
- * @see mcneese_event_workflow_event_load_listing()
+ * @see mfcs_event_load_listing()
  */
-function mcneese_event_workflow_event_process_listing_search_array(&$query, &$operand, &$already_joined, &$already_joined_count, &$already_added, $search, $recurse_count, $like) {
+function mfcs_event_process_listing_search_array(&$query, &$operand, &$already_joined, &$already_joined_count, &$already_added, $search, $recurse_count, $like) {
   if (!is_object($query)) {
     cf_error::invalid_object('query');
     return FALSE;
@@ -5216,7 +5363,7 @@ function mcneese_event_workflow_event_process_listing_search_array(&$query, &$op
     return FALSE;
   }
 
-  if ($recurse_count > MEW_MAX_SEARCH_RECURSION) {
+  if ($recurse_count > MFCS_MAX_SEARCH_RECURSION) {
     return FALSE;
   }
   $found_values = FALSE;
@@ -5251,36 +5398,36 @@ function mcneese_event_workflow_event_process_listing_search_array(&$query, &$op
         continue;
       }
 
-      $mew_current = 'mew_current_' . $search_values['group_name'];
-      $mew_field = 'mew_field_' . $search_values['group_name'] . '_' . $search_values['field_name'];
+      $mfcs_current = 'mfcs_current_' . $search_values['group_name'];
+      $mfcs_field = 'mfcs_field_' . $search_values['group_name'] . '_' . $search_values['field_name'];
 
-      if (!array_key_exists($mew_current, $already_joined)) {
-        $already_joined[$mew_current] = 'mc_c_' . $already_joined_count;
+      if (!array_key_exists($mfcs_current, $already_joined)) {
+        $already_joined[$mfcs_current] = 'mc_c_' . $already_joined_count;
         $already_joined_count++;
 
-        $current_alias = $already_joined[$mew_current];
+        $current_alias = $already_joined[$mfcs_current];
 
-        $query->innerjoin($mew_current, $current_alias, 'mer.id = ' . $current_alias . '.event_id');
+        $query->innerjoin($mfcs_current, $current_alias, 'mer.id = ' . $current_alias . '.request_id');
       }
       else {
-        $current_alias = $already_joined[$mew_current];
+        $current_alias = $already_joined[$mfcs_current];
       }
 
-      if (!array_key_exists($mew_field, $already_joined)) {
-        $already_joined[$mew_field] = 'mfg_c_' . $already_joined_count;
+      if (!array_key_exists($mfcs_field, $already_joined)) {
+        $already_joined[$mfcs_field] = 'mfg_c_' . $already_joined_count;
         $already_joined_count++;
 
-        $field_alias = $already_joined[$mew_field];
+        $field_alias = $already_joined[$mfcs_field];
 
         if (isset($search_values['multiple']) && $search_values['multiple']) {
-          $query->innerjoin($mew_field, $field_alias, $current_alias . '.event_id = ' . $field_alias . '.event_id AND ' . $current_alias . '.' . $search_values['field_name'] . ' = ' . $field_alias . '.revision');
+          $query->innerjoin($mfcs_field, $field_alias, $current_alias . '.request_id = ' . $field_alias . '.request_id AND ' . $current_alias . '.' . $search_values['field_name'] . ' = ' . $field_alias . '.revision');
         }
         else {
-          $query->innerjoin($mew_field, $field_alias, $current_alias . '.event_id = ' . $field_alias . '.event_id AND ' . $current_alias . '.' . $search_values['field_name'] . ' = ' . $field_alias . '.revision AND ' . $field_alias . '.delta = 0');
+          $query->innerjoin($mfcs_field, $field_alias, $current_alias . '.request_id = ' . $field_alias . '.request_id AND ' . $current_alias . '.' . $search_values['field_name'] . ' = ' . $field_alias . '.revision AND ' . $field_alias . '.delta = 0');
         }
       }
       else {
-        $field_alias = $already_joined[$mew_field];
+        $field_alias = $already_joined[$mfcs_field];
       }
 
       if (!array_key_exists($search_values['field_name'], $already_added)) {
@@ -5289,16 +5436,16 @@ function mcneese_event_workflow_event_process_listing_search_array(&$query, &$op
 
       $operator = '=';
       $search_string = $search_values['search'];
-      if ($search_values['operator'] == MEW_OPERATOR_LESS_THAN) {
+      if ($search_values['operator'] == MFCS_OPERATOR_LESS_THAN) {
         $operator = '<';
       }
-      elseif ($search_values['operator'] == MEW_OPERATOR_LESS_THAN_EQUAL) {
+      elseif ($search_values['operator'] == MFCS_OPERATOR_LESS_THAN_EQUAL) {
         $operator = '<=';
       }
-      elseif ($search_values['operator'] == MEW_OPERATOR_EQUAL) {
+      elseif ($search_values['operator'] == MFCS_OPERATOR_EQUAL) {
         $operator = '=';
       }
-      elseif ($search_values['operator'] == MEW_OPERATOR_LIKE) {
+      elseif ($search_values['operator'] == MFCS_OPERATOR_LIKE) {
         if ($search_string == "") {
           $operator = '=';
         }
@@ -5307,16 +5454,16 @@ function mcneese_event_workflow_event_process_listing_search_array(&$query, &$op
           $search_string = '%' . db_like($search_values['search']) . '%';
         }
       }
-      elseif ($search_values['operator'] == MEW_OPERATOR_GREATER_THAN_EQUAL) {
+      elseif ($search_values['operator'] == MFCS_OPERATOR_GREATER_THAN_EQUAL) {
         $operator = '>=';
       }
-      elseif ($search_values['operator'] == MEW_OPERATOR_GREATER_THAN) {
+      elseif ($search_values['operator'] == MFCS_OPERATOR_GREATER_THAN) {
         $operator = '>';
       }
-      elseif ($search_values['operator'] == MEW_OPERATOR_NOT_EQUAL) {
+      elseif ($search_values['operator'] == MFCS_OPERATOR_NOT_EQUAL) {
         $operator = '<>';
       }
-      elseif ($search_values['operator'] == MEW_OPERATOR_NOT_LIKE) {
+      elseif ($search_values['operator'] == MFCS_OPERATOR_NOT_LIKE) {
         if ($search_string == "") {
           $operator = '=';
         }
@@ -5351,7 +5498,7 @@ function mcneese_event_workflow_event_process_listing_search_array(&$query, &$op
     }
 
     $next_count = $recurse_count + 1;
-    $result = mcneese_event_workflow_event_process_listing_search_array($query, $inner_operand, $already_joined, $already_joined_count, $already_added, $search_values, $next_count, $like);
+    $result = mfcs_event_process_listing_search_array($query, $inner_operand, $already_joined, $already_joined_count, $already_added, $search_values, $next_count, $like);
 
     if ($result) {
       $operand->condition($inner_operand);
@@ -5367,8 +5514,8 @@ function mcneese_event_workflow_event_process_listing_search_array(&$query, &$op
 /**
  * Loads the reviews by step, classification, and date.
  *
- * @parem int $event_id
- *   The numeric event id representing the event request to process.
+ * @parem int $request_id
+ *   The numeric request id representing the event request to process.
  * @parem array $steps
  *   (optional) Limit the results to only the provided steps.
  * @parem array $decisions
@@ -5378,9 +5525,9 @@ function mcneese_event_workflow_event_process_listing_search_array(&$query, &$op
  *   An array of reviews by order of step, classification, and then date
  *   (with the date descending). FALSE is returned on error.
  */
-function mcneese_event_workflow_get_latest_reviews($event_id, $steps = array(), $decisions = array()) {
-  if (!cf_is_integer($event_id)) {
-    cf_error::invalid_integer('event_id');
+function mfcs_get_latest_reviews($request_id, $steps = array(), $decisions = array()) {
+  if (!cf_is_integer($request_id)) {
+    cf_error::invalid_integer('request_id');
     return FALSE;
   }
 
@@ -5396,10 +5543,10 @@ function mcneese_event_workflow_get_latest_reviews($event_id, $steps = array(), 
 
   $reviews = array();
   try {
-    $query = db_select('mew_field_review_review', 'mfrr');
+    $query = db_select('mfcs_field_review_review', 'mfrr');
 
-    $query->innerjoin('mew_review_classifications', 'mrc', 'mfrr.id = mrc.review_id');
-    $query->innerjoin('mew_current_review', 'mcr', 'mfrr.event_id = mcr.event_id and mfrr.revision = mcr.review');
+    $query->innerjoin('mfcs_review_classifications', 'mrc', 'mfrr.id = mrc.review_id');
+    $query->innerjoin('mfcs_current_review', 'mcr', 'mfrr.request_id = mcr.request_id and mfrr.revision = mcr.review');
 
     $query->addField('mfrr', 'id', 'id');
     $query->addField('mfrr', 'user_id', 'user_id');
@@ -5408,7 +5555,7 @@ function mcneese_event_workflow_get_latest_reviews($event_id, $steps = array(), 
     $query->addField('mfrr', 'decision', 'decision');
     $query->addfield('mrc', 'classification', 'classification');
 
-    $query->condition('mfrr.event_id', $event_id);
+    $query->condition('mfrr.request_id', $request_id);
 
     if (!empty($steps)) {
       $query->condition('mfrr.step', $steps, 'IN');
@@ -5420,8 +5567,8 @@ function mcneese_event_workflow_get_latest_reviews($event_id, $steps = array(), 
 
     // some classifications are only allowed in certain steps.
     $and = db_and();
-    $and->condition('mfrr.step', array(MEW_REVIEW_STEP_REVIEW, MEW_REVIEW_STEP_USAGE_FEES), 'IN');
-    $and->condition('mrc.classification', array(MEW_REVIEW_CLASSIFICATION_VENUE_COORDINATOR, MEW_REVIEW_CLASSIFICATION_SYSTEM_ADMINISTRATOR, MEW_REVIEW_CLASSIFICATION_MANAGER, MEW_REVIEW_CLASSIFICATION_FAILSAFE_COORDINATOR), 'IN');
+    $and->condition('mfrr.step', array(MFCS_REVIEW_STEP_REVIEW, MFCS_REVIEW_STEP_REQUIREMENTS), 'IN');
+    $and->condition('mrc.classification', array(MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR, MFCS_REVIEW_CLASSIFICATION_SYSTEM_ADMINISTRATOR, MFCS_REVIEW_CLASSIFICATION_MANAGER, MFCS_REVIEW_CLASSIFICATION_FAILSAFE_COORDINATOR), 'IN');
     $and->not();
     $query->condition($and);
 
@@ -5459,7 +5606,7 @@ function mcneese_event_workflow_get_latest_reviews($event_id, $steps = array(), 
  *
  * @param array $items
  *   An array of items to add to the table as returned by
- *   mcneese_event_workflow_event_load_listing().
+ *   mfcs_event_load_listing().
  * @param int $max_rows
  *   The number of items allowed to be listed on the table at one time.
  *
@@ -5468,10 +5615,10 @@ function mcneese_event_workflow_get_latest_reviews($event_id, $steps = array(), 
  *   Additional keys are added to the table structure:
  *   - 'error': TRUE on success, FALSE on error.
  *
- * @see: mcneese_event_workflow_event_load_listing()
+ * @see: mfcs_event_load_listing()
  * @see: theme_table()
  */
-function mcneese_event_workflow_build_request_table($items, $max_rows, $columns = array('id' => "ID", 'title' => "Title", 'location' => "Location", 'building' => "Building", 'room' => "Room", 'date' => "Date", 'submitted_on' => "Submitted On", 'operations' => "Operations"), $user = NULL) {
+function mfcs_build_request_table($items, $max_rows, $columns = array('id' => "ID", 'title' => "Title", 'location' => "Location", 'building' => "Building", 'room' => "Room", 'date' => "Date", 'submitted_on' => "Submitted On", 'operations' => "Operations"), $user = NULL) {
   $table = array();
   foreach ($columns as $column_name => $column_title) {
     if ($column_name == 'operations') {
@@ -5512,18 +5659,18 @@ function mcneese_event_workflow_build_request_table($items, $max_rows, $columns 
 
   $user = cf_current_user();
 
-  $manager = user_access('mcneese event workflow manage');
-  $reviewer = user_access('mcneese event workflow review');
-  $requester = user_access('mcneese event workflow request');
+  $manager = user_access('mcneese facilities use manage');
+  $reviewer = user_access('mcneese facilities use review');
+  $requester = user_access('mcneese facilities use request');
 
-  $can_create = mcneese_event_workflow_management_page_event_access('create');
-  $can_edit = mcneese_event_workflow_management_page_event_access('edit');
-  $can_view = mcneese_event_workflow_management_page_event_access('view');
-  $can_list = mcneese_event_workflow_management_page_event_access('list');
-  $can_search = mcneese_event_workflow_management_page_event_access('search');
-  $can_delete = mcneese_event_workflow_management_page_event_access('delete');
-  $can_log = mcneese_event_workflow_management_page_event_access('log');
-  $can_review = mcneese_event_workflow_management_page_event_access('review');
+  $can_create = mfcs_management_page_event_access('create');
+  $can_edit = mfcs_management_page_event_access('edit');
+  $can_view = mfcs_management_page_event_access('view');
+  $can_list = mfcs_management_page_event_access('list');
+  $can_search = mfcs_management_page_event_access('search');
+  $can_delete = mfcs_management_page_event_access('delete');
+  $can_log = mfcs_management_page_event_access('log');
+  $can_review = mfcs_management_page_event_access('review');
 
 
   $total_results = count($items);
@@ -5536,12 +5683,11 @@ function mcneese_event_workflow_build_request_table($items, $max_rows, $columns 
       break;
     }
 
-    $can_view_event = mcneese_event_workflow_management_page_event_access('view', $item->id, $user);
-    $can_edit_event = mcneese_event_workflow_management_page_event_access('edit', $item->id, $user);
-    $can_review_event = mcneese_event_workflow_management_page_event_access('review', $item->id, $user);
-    $can_log_event = mcneese_event_workflow_management_page_event_access('log', $item->id, $user);
-    $can_history_event = mcneese_event_workflow_management_page_event_access('history', $item->id, $user);
-    $can_delete_event = mcneese_event_workflow_management_page_event_access('delete', $item->id, $user);
+    $can_edit_event = mfcs_management_page_event_access('edit', $item->id, $user);
+    $can_review_event = mfcs_management_page_event_access('review', $item->id, $user);
+    $can_log_event = mfcs_management_page_event_access('log', $item->id, $user);
+    $can_history_event = mfcs_management_page_event_access('history', $item->id, $user);
+    $can_delete_event = mfcs_management_page_event_access('delete', $item->id, $user);
 
     if (isset($columns['id'])) {
       $row['id'] = $item->id;
@@ -5614,9 +5760,7 @@ function mcneese_event_workflow_build_request_table($items, $max_rows, $columns 
     if (isset($columns['operations'])) {
       $row['operations'] = '';
 
-      if ($can_view_event) {
-        $row['operations'] .= '<a href="' . $base_path . 'events/view-0/' . $item->id . '" class="operation-link operation-link-view">View</a> ';
-      }
+      $row['operations'] .= '<a href="' . $base_path . 'events/view-0/' . $item->id . '" class="operation-link operation-link-view">View</a> ';
 
       if ($can_edit_event) {
         $row['operations'] .= '<a href="' . $base_path . 'events/edit-0/' . $item->id . '/request" class="operation-link operation-link-edit">Edit</a> ';
@@ -5638,7 +5782,7 @@ function mcneese_event_workflow_build_request_table($items, $max_rows, $columns 
         $row['operations'] .= '<a href="' . $base_path . 'events/delete-0/' . $item->id . '" class="operation-link operation-link-delete">Delete</a> ';
       }
 
-      if ($can_view_event && $can_create) {
+      if ($can_create) {
         $row['operations'] .= '<a href="' . $base_path . 'events/create-0/' . $item->id . '" class="operation-link operation-link-clone">Copy</a> ';
       }
     }
@@ -5658,7 +5802,7 @@ function mcneese_event_workflow_build_request_table($items, $max_rows, $columns 
  * @return array|bool
  *   An array of venue coordinators or FALSE on error.
  */
-function mcneese_event_workflow_event_get_available_venue_coordinators() {
+function mfcs_event_get_available_venue_coordinators() {
   $ilike = 'LIKE';
   if (db_driver() == 'pgsql') {
     $ilike = 'ILIKE';
@@ -5671,142 +5815,4 @@ function mcneese_event_workflow_event_get_available_venue_coordinators() {
 
     $query->addField('u', 'uid', 'user_id');
     $query->addField('u', 'name', 'name');
-    $query->addField('u', 'mail', 'email');
-
-    $query->addField('fdfufn', 'field_user_first_name_value', 'first_name');
-    $query->addField('fdfuln', 'field_user_last_name_value', 'last_name');
-
-    $subquery = db_select('mew_banner_rooms', 'mbr');
-    $subquery->addField('mbr', 'coordinator_id', 'coordinator_id');
-    $subquery->condition('mbr.disabled', 0);
-    $subquery->distinct();
-
-    $query->condition('u.uid', $subquery, 'IN');
-    $query->condition('u.status', 0, '<>');
-    $query->condition('u.uid', 1, '>');
-
-    $query->orderBy('last_name');
-    $query->orderBy('first_name');
-    $query->orderBy('name');
-    $query->orderBy('uid');
-
-    $results = $query->execute()->fetchAll();
-  }
-  catch (Exception $e) {
-    cf_error::on_query_execution($e);
-    return FALSE;
-  }
-
-  $matches = array();
-  foreach ($results as $result) {
-    $name = "";
-    if (!empty($result->last_name)) {
-      $name .= $result->last_name;
-    }
-
-    if (!empty($result->last_name)) {
-      if (!empty($name)) {
-        $name .= ", ";
-      }
-      $name .= $result->first_name;
-    }
-
-    $name_value = $name;
-
-    if (!empty($name)) {
-      $name = '"' . $name . '" ';
-    }
-
-    $value = $name . $result->email;
-    $matches[$result->user_id] = $value;
-  }
-
-  return $matches;
-}
-
-/**
- * Loads a list of reviewers who have yet to review the given event.
- *
- * This only applies to the current active review state.
- *
- * @param int $event_id
- *   The event id of the event to operate on.
- *
- * @return array|bool
- *   An array of reviewers, with their reviewer classifications, who have not
- *   yet reviewed the given event. FALSE is returned on error.
- */
-function mcneese_event_workflow_get_reviewers_yet_to_review($event_id) {
-  $event = event_workflow_load_event_by_id($event_id);
-
-  if (empty($event)) {
-    watchdog(MEW_WATCHDOG_ID, "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
-    return FALSE;
-  }
-
-  $conditions = array(
-    'mr.event_classification' => $event['event_coordinator']['classification'][0]->value,
-    'mr.review_step' => $event['top']['step'][0]->value,
-    'mr.disabled' => 0,
-  );
-
-  $reviewers = mcneese_event_workflow_get_reviewers($conditions);
-  if (empty($reviewers)) {
-    return array();
-  }
-
-  mcneese_event_workflow_include(4);
-
-  $reviewer_classification_options = event_workflow_get_reviewer_classification_list_options();
-
-  $review_classifications = array();
-  $reviewer_ids = array();
-  $yet_to_review = array();
-
-  foreach ($reviewers as $reviewer) {
-    if (!isset($review_classifications[$reviewer->user_id])) {
-      $review_classifications[$reviewer->user_id] = array();
-    }
-
-    $review_classifications[$reviewer->user_id][$reviewer->reviewer_classification] = $reviewer->reviewer_classification;
-    $reviewer_ids[$reviewer->user_id] = $reviewer->user_id;
-    $yet_to_review[$reviewer->reviewer_classification] = $reviewer_classification_options[$reviewer->reviewer_classification];
-  }
-  unset($reviewers);
-
-  try {
-    $query = db_select('mew_field_review_review', 'mfrr');
-    $query->innerjoin('mew_current_review', 'mcr', 'mfrr.event_id = mcr.event_id and mfrr.revision = mcr.review');
-
-    $query->addField('mfrr', 'user_id', 'user_id');
-
-    $query->condition('mfrr.event_id', $event_id);
-    $query->condition('mfrr.step', $event['top']['step'][0]->value);
-    $query->condition('mfrr.user_id', $reviewer_ids, 'IN');
-    $query->condition('mfrr.decision', array(MEW_REVIEW_DECISION_APPROVE, MEW_REVIEW_DECISION_DENY), 'IN');
-    $query->distinct();
-
-    $results = $query->execute()->fetchAll();
-
-    if (!empty($results)) {
-      foreach ($results as $result) {
-        if (array_key_exists($result->user_id, $review_classifications)) {
-          foreach ($review_classifications[$result->user_id] as $review_classification) {
-            unset($yet_to_review[$review_classification]);
-          }
-        }
-      }
-    }
-  }
-  catch (Exception $ex) {
-    cf_error::on_query_execution($ex);
-
-    return FALSE;
-  }
-
-  return $yet_to_review;
-}
-
-/**
- * @} End of '@defgroup mcneese_event_workflow McNeese Event Workflow'.
- */
+    $query->addField('u', 'mail', 'email')

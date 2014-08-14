@@ -2,11 +2,11 @@
 
 /**
  * @file
- * Defines McNeese event workflow autocomplete json functions.
+ * Defines McNeese facilities use autocomplete json functions.
  */
 
 /**
- * @addtogroup mcneese_event_workflow
+ * @addtogroup mfcs
  * @{
  */
 
@@ -21,7 +21,7 @@
  * @return array
  *   An array of string matches.
  */
-function mcneese_event_workflow_event_reviewers_0_autocomplete_user_id($string) {
+function mfcs_event_reviewers_0_autocomplete_user_id($string) {
   if (function_exists('devel_menu')) {
     $GLOBALS['devel_shutdown'] = FALSE;
   }
@@ -93,7 +93,7 @@ function mcneese_event_workflow_event_reviewers_0_autocomplete_user_id($string) 
  * @return array
  *   An array of string matches.
  */
-function mcneese_event_workflow_event_reviewers_0_autocomplete_reviewer_classification($string) {
+function mfcs_event_reviewers_0_autocomplete_reviewer_classification($string) {
   if (function_exists('devel_menu')) {
     $GLOBALS['devel_shutdown'] = FALSE;
   }
@@ -152,7 +152,7 @@ function mcneese_event_workflow_event_reviewers_0_autocomplete_reviewer_classifi
  * @return array
  *   An array of string matches.
  */
-function mcneese_event_workflow_event_edit_0_autocomplete_event_coordinator_name($string) {
+function mfcs_event_edit_0_autocomplete_event_coordinator_name($string) {
   if (function_exists('devel_menu')) {
     $GLOBALS['devel_shutdown'] = FALSE;
   }
@@ -171,7 +171,7 @@ function mcneese_event_workflow_event_edit_0_autocomplete_event_coordinator_name
   }
 
   try {
-    $query = mcneese_event_workflow_autocomplete_build_event_coordinator_query();
+    $query = mfcs_autocomplete_build_event_coordinator_query();
 
     $db_string = db_like($string);
     $or = db_or();
@@ -229,7 +229,7 @@ function mcneese_event_workflow_event_edit_0_autocomplete_event_coordinator_name
  * @return array
  *   An array of string matches.
  */
-function mcneese_event_workflow_event_edit_0_autocomplete_event_coordinator_email($string) {
+function mfcs_event_edit_0_autocomplete_event_coordinator_email($string) {
   if (function_exists('devel_menu')) {
     $GLOBALS['devel_shutdown'] = FALSE;
   }
@@ -248,7 +248,7 @@ function mcneese_event_workflow_event_edit_0_autocomplete_event_coordinator_emai
   }
 
   try {
-    $query = mcneese_event_workflow_autocomplete_build_event_coordinator_query();
+    $query = mfcs_autocomplete_build_event_coordinator_query();
 
     $db_string = db_like($string);
     $or = db_or();
@@ -304,7 +304,7 @@ function mcneese_event_workflow_event_edit_0_autocomplete_event_coordinator_emai
  * @return array
  *   An array of string matches.
  */
-function mcneese_event_workflow_event_edit_0_autocomplete_event_coordinator_phone($string) {
+function mfcs_event_edit_0_autocomplete_event_coordinator_phone($string) {
   if (function_exists('devel_menu')) {
     $GLOBALS['devel_shutdown'] = FALSE;
   }
@@ -323,7 +323,7 @@ function mcneese_event_workflow_event_edit_0_autocomplete_event_coordinator_phon
   }
 
   try {
-    $query = mcneese_event_workflow_autocomplete_build_event_coordinator_query();
+    $query = mfcs_autocomplete_build_event_coordinator_query();
 
     $query->innerjoin('field_data_field_user_phone_number', 'fdfupn', 'u.uid = fdfupn.entity_id AND fdfupn.delta = 0');
     $query->addField('fdfupn', 'field_user_phone_number_value', 'phone_number');
@@ -385,7 +385,7 @@ function mcneese_event_workflow_event_edit_0_autocomplete_event_coordinator_phon
  * @return object|false
  *   The build query object or FALSE on error;
  */
-function mcneese_event_workflow_autocomplete_build_event_coordinator_query() {
+function mfcs_autocomplete_build_event_coordinator_query() {
   $query = db_select('users', 'u');
   $query->innerjoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id AND u.uid = fdfufn.entity_id AND fdfufn.delta = 0');
   $query->innerjoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id AND u.uid = fdfuln.entity_id AND fdfufn.entity_id = fdfuln.entity_id AND fdfuln.delta = 0');
@@ -400,14 +400,4 @@ function mcneese_event_workflow_autocomplete_build_event_coordinator_query() {
   $query->condition('u.status', 0, '<>');
   $query->condition('u.uid', 1, '>');
 
-  $query->orderBy('last_name');
-  $query->orderBy('first_name');
-  $query->orderBy('name');
-  $query->orderBy('uid');
-
-  return $query;
-}
-
-/**
- * @} End of '@addtogroup mcneese_event_workflow'.
- */
+  $query->o

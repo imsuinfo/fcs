@@ -1,5 +1,5 @@
 (function ($) {
-  Drupal.behaviors.mcneese_event_workflow_images_location = {
+  Drupal.behaviors.mfcs_images_location = {
     attach:function(context) {
       $('#field-event-location-0 > .form-item.form-type-radio > input', context).each(function() {
         var item = $(this);
@@ -40,5 +40,3 @@
         });
       });
     }
-  }
-})(jQuery);

@@ -2,11 +2,11 @@
 
 /**
  * @file
- * Defines McNeese event workflow secondary table functions.
+ * Defines McNeese facilities use secondary table functions.
  */
 
 /**
- * @addtogroup mcneese_event_workflow
+ * @addtogroup mfcs
  * @{
  */
 
@@ -16,8 +16,8 @@
  * @return array
  *  A list of secondary tables and their structure.
  */
-function mcneese_event_workflow_table_structure() {
-  mcneese_event_workflow_include(4);
+function mfcs_table_structure() {
+  mfcs_include(4);
 
   $structure = array();
   $structure['top'] = array(
@@ -70,62 +70,62 @@ function mcneese_event_workflow_table_structure() {
     ),
   );
 
-  $structure['use_fees'] = array(
+  $structure['requirements'] = array(
     'facilities' => array(
-      'path' => 'event][use_fees][facilities',
-      'name' => "Facilities Use Fees",
-      'type' => 'use_fees',
+      'path' => 'event][requirements][facilities',
+      'name' => "Facilities Fees",
+      'type' => 'requirements',
       'manual_processing' => TRUE,
       'columns' => array('hours', 'days', 'amount'),
       'size' => array('normal', 'normal', 'normal'),
       'storage' => 'currency',
     ),
     'equipment' => array(
-      'path' => 'event][use_fees][equipment',
-      'name' => "Equipment Use Fees",
-      'type' => 'use_fees',
+      'path' => 'event][requirements][equipment',
+      'name' => "Equipment Fees",
+      'type' => 'requirements',
       'manual_processing' => TRUE,
       'columns' => array('hours', 'days', 'amount'),
       'size' => array('normal', 'normal', 'normal'),
       'storage' => 'currency',
     ),
     'custodial' => array(
-      'path' => 'event][use_fees][custodial',
-      'name' => "Custodial Use Fees",
-      'type' => 'use_fees',
+      'path' => 'event][requirements][custodial',
+      'name' => "Custodial Fees",
+      'type' => 'requirements',
       'manual_processing' => TRUE,
       'columns' => array('hours', 'days', 'amount'),
       'size' => array('normal', 'normal', 'normal'),
       'storage' => 'currency',
     ),
     'security' => array(
-      'path' => 'event][use_fees][security',
-      'name' => "Security Use Fees",
-      'type' => 'use_fees',
+      'path' => 'event][requirements][security',
+      'name' => "Security Fees",
+      'type' => 'requirements',
       'manual_processing' => TRUE,
       'columns' => array('hours', 'days', 'amount'),
       'size' => array('normal', 'normal', 'normal'),
       'storage' => 'currency',
     ),
     'other' => array(
-      'name' => "Other Use Fees",
-      'path' => 'event][use_fees][other',
+      'name' => "Other Fees",
+      'path' => 'event][requirements][other',
       'type' => 'bool',
       'size' => 'tiny',
       'manual_processing' => TRUE,
     ),
     'waved' => array(
-      'name' => "Use Fees Waved (with Presidents Approval)",
-      'path' => 'event][use_fees][waved',
+      'name' => "Requirements / Fees Waved (with Presidents Approval)",
+      'path' => 'event][requirements][waved',
       'type' => 'bool',
       'size' => 'tiny',
       'manual_processing' => TRUE,
     ),
     'university' => array(
-      'name' => "University Use Fees",
+      'name' => "University Fees",
       'type' => 'bool',
       'size' => 'tiny',
-      'path' => 'event][use_fees][university',
+      'path' => 'event][requirements][university',
       'manual_processing' => TRUE,
     ),
   );
@@ -609,7 +609,7 @@ function mcneese_event_workflow_table_structure() {
  * @return array
  *  A list of secondary tables and their presentation options.
  */
-function mcneese_event_workflow_table_presentation($option = NULL) {
+function mfcs_table_presentation($option = NULL) {
   $presentation = array();
 
   if (!is_null($option)) {
@@ -677,10 +677,10 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
         'label' => "Miscellaneous",
       );
 
-      $presentation['fees'] = array(
+      $presentation['requirements'] = array(
         'weight' => 0,
         'group' => 5,
-        'label' => "Fees",
+        'label' => "Requirements / Fees",
         'editable' => FALSE,
       );
 
@@ -838,7 +838,7 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
     ),
   );
 
-  $presentation['use_fees'] = array(
+  $presentation['requirements'] = array(
     'facilities' => array(
       'label' => 'Facilities Use',
       'combined' => TRUE,
@@ -847,10 +847,10 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
         'amount',
       ),
       'type' => array(
-        'days' => 'use_fee_days',
-        'amount' => 'use_fee_amount',
+        'days' => 'requirement_days',
+        'amount' => 'requirement_amount',
        ),
-      'group' => 'fees',
+      'group' => 'requirements',
       'event_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
@@ -864,10 +864,10 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
         'amount',
       ),
       'type' => array(
-        'days' => 'use_fee_days',
-        'amount' => 'use_fee_amount',
+        'days' => 'requirement_days',
+        'amount' => 'requirement_amount',
        ),
-      'group' => 'fees',
+      'group' => 'requirements',
       'event_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
@@ -883,12 +883,12 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
         'amount',
       ),
       'type' => array(
-        'quantity' => 'use_fee_personnel',
-        'hours' => 'use_fee_hours',
-        'days' => 'use_fee_days',
-        'amount' => 'use_fee_amount',
+        'quantity' => 'requirement_personnel',
+        'hours' => 'requirement_hours',
+        'days' => 'requirement_days',
+        'amount' => 'requirement_amount',
       ),
-      'group' => 'fees',
+      'group' => 'requirements',
       'event_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
@@ -904,12 +904,12 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
         'amount',
       ),
       'type' => array(
-        'quantity' => 'use_fee_personnel',
-        'hours' => 'use_fee_hours',
-        'days' => 'use_fee_days',
-        'amount' => 'use_fee_amount',
+        'quantity' => 'requirement_personnel',
+        'hours' => 'requirement_hours',
+        'days' => 'requirement_days',
+        'amount' => 'requirement_amount',
       ),
-      'group' => 'fees',
+      'group' => 'requirements',
       'event_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
@@ -923,21 +923,21 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
       'display' => array(
         'value' => 'when_true',
       ),
-      'group' => 'fees',
+      'group' => 'requirements',
       'event_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
     ),
     'waved' => array(
-      'label' => 'Fees Waved',
+      'label' => 'Requirements / Fees Waved',
       'type' => array(
         'value' => 'boolean',
       ),
       'display' => array(
         'value' => 'when_true',
       ),
-      'group' => 'fees',
+      'group' => 'requirements',
       'event_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
@@ -951,7 +951,7 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
       'display' => array(
         'value' => 'when_true',
       ),
-      'group' => 'fees',
+      'group' => 'requirements',
       'event_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
@@ -968,7 +968,7 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
       'display' => array(
         'value' => 'when_true',
       ),
-      'group' => 'fees',
+      'group' => 'requirements',
       'event_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
@@ -982,7 +982,7 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
       'display' => array(
         'value' => 'when_true',
       ),
-      'group' => 'fees',
+      'group' => 'requirements',
       'event_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
@@ -1692,9 +1692,3 @@ function mcneese_event_workflow_table_presentation($option = NULL) {
     ),
   );
 
-  return $presentation;
-}
-
-/**
- * @} End of '@addtogroup mcneese_event_workflow'.
- */

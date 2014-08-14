@@ -2,16 +2,16 @@
 
 /**
  * @file
- * Defines McNeese event workflow event delete page functions.
+ * Defines McNeese facilities use event delete page functions.
  */
 
 /**
- * @addtogroup mcneese_event_workflow
+ * @addtogroup mfcs
  * @{
  */
 
 /**
- * Provides the event workflow event delete page.
+ * Provides the facilities use event delete page.
  *
  * @param array $form
  *   The form array as defined by drupals form api.
@@ -23,7 +23,7 @@
  * @return string
  *   The HTML output representing the page.
  */
-function mcneese_event_workflow_event_delete_0_form($form, &$form_state, $id) {
+function mfcs_event_delete_0_form($form, &$form_state, $id) {
   if (!cf_is_integer($id)) {
     drupal_access_denied();
     drupal_exit();
@@ -36,5 +36,4 @@ function mcneese_event_workflow_event_delete_0_form($form, &$form_state, $id) {
 }
 
 /**
- * @} End of '@addtogroup mcneese_event_workflow'.
- */
+ * @

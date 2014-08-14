@@ -2,16 +2,16 @@
 
 /**
  * @file
- * Defines McNeese event workflow event search page functions.
+ * Defines McNeese facilities use event search page functions.
  */
 
 /**
- * @addtogroup mcneese_event_workflow
+ * @addtogroup mfcs
  * @{
  */
 
 /**
- * Provides the event workflow event search page.
+ * Provides the facilities use event search page.
  *
  * @param array $form
  *   The form array as defined by drupals form api.
@@ -21,10 +21,10 @@
  * @return array
  *   An array containing the generated form.
  */
-function mcneese_event_workflow_event_search_0_form($form, &$form_state) {
-  $manager = user_access('mcneese event workflow manage');
-  $reviewer = user_access('mcneese event workflow review');
-  $requester = user_access('mcneese event workflow request');
+function mfcs_event_search_0_form($form, &$form_state) {
+  $manager = user_access('mcneese facilities use manage');
+  $reviewer = user_access('mcneese facilities use review');
+  $requester = user_access('mcneese facilities use request');
 
   $form = array();
   $form['form'] = array(
@@ -65,16 +65,16 @@ function mcneese_event_workflow_event_search_0_form($form, &$form_state) {
   );
 
   if (empty($form['form']['existing_search_targets']['#value'])) {
-    $existing_search_targets = mcneese_event_workflow_search_target_grouping_load();
+    $existing_search_targets = mfcs_search_target_grouping_load();
     if (is_array($existing_search_targets)) {
       $form['form']['existing_search_targets']['#value'] = $existing_search_targets;
     }
   }
 
-  mcneese_event_workflow_include(0);
-  mcneese_event_workflow_include(4);
+  mfcs_include(0);
+  mfcs_include(4);
 
-  $structure = mcneese_event_workflow_table_structure();
+  $structure = mfcs_table_structure();
 
   $possible_targets = array();
   foreach ($structure as $table_name => $table_fields) {
@@ -199,14 +199,14 @@ function mcneese_event_workflow_event_search_0_form($form, &$form_state) {
 
   // populate the search results.
   if (isset($form_state['simple_search-results']) && is_array($form_state['simple_search-results'])) {
-    $simple_table = mcneese_event_workflow_build_request_table($form_state['simple_search-results'], $form['form']['per_page']['#value']);
+    $simple_table = mfcs_build_request_table($form_state['simple_search-results'], $form['form']['per_page']['#value']);
 
     $simple_table['caption'] = t("Simple Search Results");
     $simple_table['header']['submitted_on']['sort'] = 'desc';
 
     $simple_table['attributes'] = array();
-    $simple_table['attributes']['id'] = 'mcneese_event_workflow-management_page-simple_table';
-    $simple_table['attributes']['class'] = array ('mcneese_event_workflow-management_page-simple_table');
+    $simple_table['attributes']['id'] = 'mfcs-management_page-simple_table';
+    $simple_table['attributes']['class'] = array ('mfcs-management_page-simple_table');
     $simple_table['attributes']['summary'] = 'A table containing the search results.';
 
     $simple_table['empty'] = t("No event requests were found matching your simple search query.");
@@ -323,8 +323,8 @@ function mcneese_event_workflow_event_search_0_form($form, &$form_state) {
     $state_location = $form_state['values']['advanced']['targets'];
   }
 
-  mcneese_event_workflow_event_search_0_form_build_targets_and_groups($form, $form_state, $form['advanced'], $state_location, $chosen_targets, 0, '', $chosen_options, $logic_options);
-  mcneese_event_workflow_event_search_0_form_build_grouping($form, $form_state, $form['advanced'], 0, '', $chosen_options, $logic_options);
+  mfcs_event_search_0_form_build_targets_and_groups($form, $form_state, $form['advanced'], $state_location, $chosen_targets, 0, '', $chosen_options, $logic_options);
+  mfcs_event_search_0_form_build_grouping($form, $form_state, $form['advanced'], 0, '', $chosen_options, $logic_options);
 
   $form['advanced']['submit'] = array(
     '#id' => 'search-advanced-submit',
@@ -390,13 +390,13 @@ function mcneese_event_workflow_event_search_0_form($form, &$form_state) {
 
   // populate the search results.
   if (isset($form_state['advanced_search-results']) && is_array($form_state['advanced_search-results'])) {
-    $advanced_table = mcneese_event_workflow_build_request_table($form_state['advanced_search-results'], $form['form']['per_page']['#value']);
+    $advanced_table = mfcs_build_request_table($form_state['advanced_search-results'], $form['form']['per_page']['#value']);
 
     $advanced_table['caption'] = t("Advanced Search Results");
     $advanced_table['header']['submitted_on']['sort'] = 'desc';
 
-    $advanced_table['attributes']['id'] = 'mcneese_event_workflow-management_page-advanced_table';
-    $advanced_table['attributes']['class'] = array ('mcneese_event_workflow-management_page-advanced_table');
+    $advanced_table['attributes']['id'] = 'mfcs-management_page-advanced_table';
+    $advanced_table['attributes']['class'] = array ('mfcs-management_page-advanced_table');
     $advanced_table['attributes']['summary'] = 'A table containing the search results.';
 
     $advanced_table['empty'] = t("No event requests were found matching your advanced search query.");
@@ -462,16 +462,16 @@ function mcneese_event_workflow_event_search_0_form($form, &$form_state) {
 }
 
 /**
- * Pre-Validation for mcneese_event_workflow_event_search_0_form().
+ * Pre-Validation for mfcs_event_search_0_form().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api.
  *
- * @see: mcneese_event_workflow_event_search_0_form()
+ * @see: mfcs_event_search_0_form()
  */
-function mcneese_event_workflow_event_search_0_form_pre_validate(&$form, &$form_state) {
+function mfcs_event_search_0_form_pre_validate(&$form, &$form_state) {
   $clicked_id = '';
   if (isset($form_state['triggering_element']['#id'])) {
     $clicked_id = $form_state['triggering_element']['#id'];
@@ -495,16 +495,16 @@ function mcneese_event_workflow_event_search_0_form_pre_validate(&$form, &$form_
 }
 
 /**
- * Validation for mcneese_event_workflow_event_search_0_form().
+ * Validation for mfcs_event_search_0_form().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api.
  *
- * @see: mcneese_event_workflow_event_search_0_form()
+ * @see: mfcs_event_search_0_form()
  */
-function mcneese_event_workflow_event_search_0_form_validate($form, &$form_state) {
+function mfcs_event_search_0_form_validate($form, &$form_state) {
   $clicked_id = '';
   if (isset($form_state['triggering_element']['#id'])) {
     $clicked_id = $form_state['triggering_element']['#id'];
@@ -592,16 +592,16 @@ function mcneese_event_workflow_event_search_0_form_validate($form, &$form_state
 }
 
 /**
- * Submit for mcneese_event_workflow_event_search_0_form().
+ * Submit for mfcs_event_search_0_form().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api.
  *
- * @see: mcneese_event_workflow_event_search_0_form()
+ * @see: mfcs_event_search_0_form()
  */
-function mcneese_event_workflow_event_search_0_form_submit($form, &$form_state) {
+function mfcs_event_search_0_form_submit($form, &$form_state) {
   $user = cf_current_user();
 
   $clicked_id = '';
@@ -616,7 +616,7 @@ function mcneese_event_workflow_event_search_0_form_submit($form, &$form_state) 
     $per_page = $form['form']['per_page']['#value'];
     $start = $form['form']['simple_search-page_number']['#value'] * $per_page;
 
-    $form_state['simple_search-results'] = mcneese_event_workflow_event_load_listing($search, $sensitive, $start, $per_page);
+    $form_state['simple_search-results'] = mfcs_event_load_listing($search, $sensitive, $start, $per_page);
     $form_state['simple_search-search'] = $search;
     $form_state['simple_search-sensitive'] = $sensitive;
   }
@@ -634,7 +634,7 @@ function mcneese_event_workflow_event_search_0_form_submit($form, &$form_state) 
     $per_page = $form['form']['per_page']['#value'];
     $start = $previous_page * $per_page;
 
-    $form_state['simple_search-results'] = mcneese_event_workflow_event_load_listing($search, $sensitive, $start, $per_page);
+    $form_state['simple_search-results'] = mfcs_event_load_listing($search, $sensitive, $start, $per_page);
     $form_state['simple_search-page_number'] = $previous_page;
     $form_state['simple_search-search'] = $search;
     $form_state['simple_search-sensitive'] = $sensitive;
@@ -647,7 +647,7 @@ function mcneese_event_workflow_event_search_0_form_submit($form, &$form_state) 
     $per_page = $form['form']['per_page']['#value'];
     $start = $next_page * $per_page;
 
-    $form_state['simple_search-results'] = mcneese_event_workflow_event_load_listing($search, $sensitive, $start, $per_page);
+    $form_state['simple_search-results'] = mfcs_event_load_listing($search, $sensitive, $start, $per_page);
     $form_state['simple_search-page_number'] = $next_page;
     $form_state['simple_search-search'] = $search;
     $form_state['simple_search-sensitive'] = $sensitive;
@@ -660,7 +660,7 @@ function mcneese_event_workflow_event_search_0_form_submit($form, &$form_state) 
     $per_page = $form['form']['per_page']['#value'];
     $start = $previous_page * $per_page;
 
-    $form_state['advanced_search-results'] = mcneese_event_workflow_event_load_listing($search, $sensitive, $start, $per_page);
+    $form_state['advanced_search-results'] = mfcs_event_load_listing($search, $sensitive, $start, $per_page);
     $form_state['advanced_search-page_number'] = $previous_page;
     $form_state['advanced_search-search'] = $search;
     $form_state['advanced_search-sensitive'] = $sensitive;
@@ -673,7 +673,7 @@ function mcneese_event_workflow_event_search_0_form_submit($form, &$form_state) 
     $per_page = $form['form']['per_page']['#value'];
     $start = $next_page * $per_page;
 
-    $form_state['advanced_search-results'] = mcneese_event_workflow_event_load_listing($search, $sensitive, $start, $per_page);
+    $form_state['advanced_search-results'] = mfcs_event_load_listing($search, $sensitive, $start, $per_page);
     $form_state['advanced_search-page_number'] = $next_page;
     $form_state['advanced_search-search'] = $search;
     $form_state['advanced_search-sensitive'] = $sensitive;
@@ -684,9 +684,9 @@ function mcneese_event_workflow_event_search_0_form_submit($form, &$form_state) 
     $per_page = $form['form']['per_page']['#value'];
     $start = $form['form']['advanced_search-page_number']['#value'] * $per_page;
 
-    mcneese_event_workflow_include(0);
+    mfcs_include(0);
 
-    $structure = mcneese_event_workflow_table_structure();
+    $structure = mfcs_table_structure();
 
     if (empty($form_state['values']['advanced']['targets'])) {
       $form_state['advanced_search-results'] = array();
@@ -694,10 +694,10 @@ function mcneese_event_workflow_event_search_0_form_submit($form, &$form_state) 
       $form_state['advanced_search-sensitive'] = $sensitive;
     }
     else {
-      $search = mcneese_event_workflow_event_search_0_form_build_search_targets($structure, $form_state['values']['advanced']['targets'], 0);
+      $search = mfcs_event_search_0_form_build_search_targets($structure, $form_state['values']['advanced']['targets'], 0);
 
       if (is_array($search)) {
-        $form_state['advanced_search-results'] = mcneese_event_workflow_event_load_listing($search, $sensitive, $start, $per_page);
+        $form_state['advanced_search-results'] = mfcs_event_load_listing($search, $sensitive, $start, $per_page);
         $form_state['advanced_search-search'] = $search;
         $form_state['advanced_search-sensitive'] = $sensitive;
       }
@@ -728,15 +728,15 @@ function mcneese_event_workflow_event_search_0_form_submit($form, &$form_state) 
 
       $transaction = db_transaction();
       try {
-        $mew_search_settings = array(
+        $mfcs_search_settings = array(
           'user_id' => $user->uid,
           'human_name' => $human_name,
           'data' => serialize($targets_data),
         );
         unset($human_name);
 
-        $query = db_insert('mew_search_settings');
-        $query->fields($mew_search_settings);
+        $query = db_insert('mfcs_search_settings');
+        $query->fields($mfcs_search_settings);
         $query->execute();
 
         // enforce transaction execution
@@ -775,7 +775,7 @@ function mcneese_event_workflow_event_search_0_form_submit($form, &$form_state) 
 
       $transaction = db_transaction();
       try {
-        $query = db_update('mew_search_settings');
+        $query = db_update('mfcs_search_settings');
         $query->fields(array('data' => serialize($targets_data)));
         $query->condition('id', $id);
 
@@ -801,7 +801,7 @@ function mcneese_event_workflow_event_search_0_form_submit($form, &$form_state) 
 
       $transaction = db_transaction();
       try {
-        $query = db_delete('mew_search_settings');
+        $query = db_delete('mfcs_search_settings');
         $query->condition('id', $id);
 
         // for security reasons require that the current user be the only user allowed to delete their own settings.
@@ -845,7 +845,7 @@ function mcneese_event_workflow_event_search_0_form_submit($form, &$form_state) 
 
       if (!empty($row_names)) {
         $recurse_count = 0;
-        while (count($row_names) > 0 && $recurse_count < MEW_MAX_SEARCH_RECURSION) {
+        while (count($row_names) > 0 && $recurse_count < MFCS_MAX_SEARCH_RECURSION) {
           $row_name = array_pop($row_names);
           $recurse_count++;
 
@@ -884,7 +884,7 @@ function mcneese_event_workflow_event_search_0_form_submit($form, &$form_state) 
 
       if (!empty($row_names)) {
         $recurse_count = 0;
-        while (count($row_names) > 0 && $recurse_count < MEW_MAX_SEARCH_RECURSION) {
+        while (count($row_names) > 0 && $recurse_count < MFCS_MAX_SEARCH_RECURSION) {
           $row_name = array_pop($row_names);
           $recurse_count++;
 
@@ -936,7 +936,7 @@ function mcneese_event_workflow_event_search_0_form_submit($form, &$form_state) 
 
         if (!empty($row_names)) {
           $recurse_count = 0;
-          while (count($row_names) > 0 && $recurse_count < MEW_MAX_SEARCH_RECURSION) {
+          while (count($row_names) > 0 && $recurse_count < MFCS_MAX_SEARCH_RECURSION) {
             $row_name = array_pop($row_names);
             $recurse_count++;
 
@@ -969,7 +969,7 @@ function mcneese_event_workflow_event_search_0_form_submit($form, &$form_state) 
 
         if (!empty($row_names)) {
           $recurse_count = 0;
-          while (count($row_names) > 0 && $recurse_count < MEW_MAX_SEARCH_RECURSION) {
+          while (count($row_names) > 0 && $recurse_count < MFCS_MAX_SEARCH_RECURSION) {
             $row_name = array_pop($row_names);
             $recurse_count++;
 
@@ -1023,7 +1023,7 @@ function mcneese_event_workflow_event_search_0_form_submit($form, &$form_state) 
  * @return bool
  *   TRUE on success, FALSE otherwise.
  */
-function mcneese_event_workflow_event_search_0_form_build_targets_and_groups($form, &$form_state, &$location, $state_location, $chosen_targets, $recurse_count, $id_extra, &$chosen_options, &$logic_options) {
+function mfcs_event_search_0_form_build_targets_and_groups($form, &$form_state, &$location, $state_location, $chosen_targets, $recurse_count, $id_extra, &$chosen_options, &$logic_options) {
   if (!is_array($form)) {
     cf_error::invalid_array('form');
     return FALSE;
@@ -1069,7 +1069,7 @@ function mcneese_event_workflow_event_search_0_form_build_targets_and_groups($fo
     return FALSE;
   }
 
-  if ($recurse_count > MEW_MAX_SEARCH_RECURSION) {
+  if ($recurse_count > MFCS_MAX_SEARCH_RECURSION) {
     return FALSE;
   }
 
@@ -1083,7 +1083,7 @@ function mcneese_event_workflow_event_search_0_form_build_targets_and_groups($fo
 
     $chosen_name_parts = explode('_', $chosen_name, 2);
     if (count($chosen_name_parts) == 2 && ($chosen_name_parts[0] == 'and' || $chosen_name_parts[0] == 'or')) {
-      if ($recurse_count == MEW_MAX_SEARCH_RECURSION) {
+      if ($recurse_count == MFCS_MAX_SEARCH_RECURSION) {
         continue;
       }
 
@@ -1137,8 +1137,8 @@ function mcneese_event_workflow_event_search_0_form_build_targets_and_groups($fo
         $state_location_next = $state_location[$chosen_name]['targets'];
       }
 
-      mcneese_event_workflow_event_search_0_form_build_targets_and_groups($form, $form_state, $location['targets'][$chosen_name], $state_location_next, $chosen_values, $new_recurse_count, $new_id_extra, $chosen_options[$chosen_name], $logic_options[$chosen_name]);
-      mcneese_event_workflow_event_search_0_form_build_grouping($form, $form_state, $location['targets'][$chosen_name], $new_recurse_count, $new_id_extra, $chosen_options[$chosen_name], $logic_options[$chosen_name]);
+      mfcs_event_search_0_form_build_targets_and_groups($form, $form_state, $location['targets'][$chosen_name], $state_location_next, $chosen_values, $new_recurse_count, $new_id_extra, $chosen_options[$chosen_name], $logic_options[$chosen_name]);
+      mfcs_event_search_0_form_build_grouping($form, $form_state, $location['targets'][$chosen_name], $new_recurse_count, $new_id_extra, $chosen_options[$chosen_name], $logic_options[$chosen_name]);
     }
     else {
       if (empty($chosen_values)) continue;
@@ -1150,7 +1150,7 @@ function mcneese_event_workflow_event_search_0_form_build_targets_and_groups($fo
 
         $chosen_options['options'][$chosen_name][$chosen_name . '-' . $delta] = $chosen_human_name . ' #' . $delta;
 
-        mcneese_event_workflow_event_search_0_form_build_target($form, $form_state, $location, $state_location, $chosen_name, $delta, $id_extra);
+        mfcs_event_search_0_form_build_target($form, $form_state, $location, $state_location, $chosen_name, $delta, $id_extra);
       }
     }
   }
@@ -1180,9 +1180,9 @@ function mcneese_event_workflow_event_search_0_form_build_targets_and_groups($fo
  * @return bool
  *   TRUE on success, FALSE otherwise.
  *
- * @see mcneese_event_workflow_table_structure()
+ * @see mfcs_table_structure()
  */
-function mcneese_event_workflow_event_search_0_form_build_target(&$form, &$form_state, &$location, $state_location, $target_name, $target_delta, $id_extra) {
+function mfcs_event_search_0_form_build_target(&$form, &$form_state, &$location, $state_location, $target_name, $target_delta, $id_extra) {
   if (!is_array($form)) {
     cf_error::invalid_array('form');
     return FALSE;
@@ -1272,33 +1272,33 @@ function mcneese_event_workflow_event_search_0_form_build_target(&$form, &$form_
 
   if ($field['type'] == 'number' || $field['type'] == 'date') {
     $operators = array(
-      MEW_OPERATOR_LESS_THAN => "Less Than",
-      MEW_OPERATOR_LESS_THAN_EQUAL => "Less Than or Equal To",
-      MEW_OPERATOR_EQUAL => "Equal To",
-      MEW_OPERATOR_GREATER_THAN_EQUAL => "Greater Than or Equal To",
-      MEW_OPERATOR_GREATER_THAN => "Greater Than",
-      MEW_OPERATOR_NOT_EQUAL => "Not Equal To",
+      MFCS_OPERATOR_LESS_THAN => "Less Than",
+      MFCS_OPERATOR_LESS_THAN_EQUAL => "Less Than or Equal To",
+      MFCS_OPERATOR_EQUAL => "Equal To",
+      MFCS_OPERATOR_GREATER_THAN_EQUAL => "Greater Than or Equal To",
+      MFCS_OPERATOR_GREATER_THAN => "Greater Than",
+      MFCS_OPERATOR_NOT_EQUAL => "Not Equal To",
     );
 
-    $default_value = MEW_OPERATOR_EQUAL;
+    $default_value = MFCS_OPERATOR_EQUAL;
   }
   elseif ($field['type'] == 'text') {
     $operators = array(
-      MEW_OPERATOR_LIKE => "Similar To",
-      MEW_OPERATOR_NOT_LIKE => "Not Similar To",
-      MEW_OPERATOR_EQUAL => "Equal To",
-      MEW_OPERATOR_NOT_EQUAL => "Not Equal To",
+      MFCS_OPERATOR_LIKE => "Similar To",
+      MFCS_OPERATOR_NOT_LIKE => "Not Similar To",
+      MFCS_OPERATOR_EQUAL => "Equal To",
+      MFCS_OPERATOR_NOT_EQUAL => "Not Equal To",
     );
 
-    $default_value = MEW_OPERATOR_LIKE;
+    $default_value = MFCS_OPERATOR_LIKE;
   }
   else {
     $operators = array(
-      MEW_OPERATOR_EQUAL => "Equal To",
-      MEW_OPERATOR_NOT_EQUAL => "Not Equal To",
+      MFCS_OPERATOR_EQUAL => "Equal To",
+      MFCS_OPERATOR_NOT_EQUAL => "Not Equal To",
     );
 
-    $default_value = MEW_OPERATOR_EQUAL;
+    $default_value = MFCS_OPERATOR_EQUAL;
   }
 
   if (isset($state_location[$target_name][$target_delta]['operator'])) {
@@ -1453,7 +1453,7 @@ function mcneese_event_workflow_event_search_0_form_build_target(&$form, &$form_
       }
     }
   }
-  elseif ($field['type'] == 'use_fees') {
+  elseif ($field['type'] == 'requirements') {
     unset($location['targets'][$target_name][$target_delta]['search']);
     unset($form['form']['conditionally_required']['#value'][0][$target_name][$target_delta]);
 
@@ -1507,7 +1507,7 @@ function mcneese_event_workflow_event_search_0_form_build_target(&$form, &$form_
     $form['form']['conditionally_required']['#value'][0][$target_name][] = &$location['targets'][$target_name][$target_delta]['amount'];
   }
   elseif ($field['type'] == 'venue_coordinator') {
-    $venue_coordinator_options = mcneese_event_workflow_event_get_available_venue_coordinators();
+    $venue_coordinator_options = mfcs_event_get_available_venue_coordinators();
     if (!is_array($venue_coordinator_options)) {
       $venue_coordinator_options = array();
     }
@@ -1561,7 +1561,7 @@ function mcneese_event_workflow_event_search_0_form_build_target(&$form, &$form_
  * Recursively builds the list search array for the search targets.
  *
  * @param array $structure
- *   Structure array as returned by mcneese_event_workflow_table_structure().
+ *   Structure array as returned by mfcs_table_structure().
  * @param string $targets
  *   An array of all target field values to convert into a search list array.
  * @param int $recurse_count
@@ -1570,9 +1570,9 @@ function mcneese_event_workflow_event_search_0_form_build_target(&$form, &$form_
  * @return array|bool
  *   Array of built search targets or FALSE on error.
  *
- * @see mcneese_event_workflow_table_structure()
+ * @see mfcs_table_structure()
  */
-function mcneese_event_workflow_event_search_0_form_build_search_targets($structure, $targets, $recurse_count) {
+function mfcs_event_search_0_form_build_search_targets($structure, $targets, $recurse_count) {
   if (!is_array($structure)) {
     cf_error:invalid_array('structure');
     return FALSE;
@@ -1588,7 +1588,7 @@ function mcneese_event_workflow_event_search_0_form_build_search_targets($struct
     return FALSE;
   }
 
-  if ($recurse_count >= MEW_MAX_SEARCH_RECURSION) {
+  if ($recurse_count >= MFCS_MAX_SEARCH_RECURSION) {
     return FALSE;
   }
 
@@ -1606,7 +1606,7 @@ function mcneese_event_workflow_event_search_0_form_build_search_targets($struct
         continue;
       }
 
-      $search_items = mcneese_event_workflow_event_search_0_form_build_search_targets($structure, $target_values['targets'], $recurse_count + 1);
+      $search_items = mfcs_event_search_0_form_build_search_targets($structure, $target_values['targets'], $recurse_count + 1);
 
       if (is_array($search_items)) {
         $search[$target_name] = $search_items;
@@ -1614,7 +1614,7 @@ function mcneese_event_workflow_event_search_0_form_build_search_targets($struct
     }
     else {
       foreach ($target_values as $target_delta => $target_value) {
-        $search_item = mcneese_event_workflow_event_search_0_form_build_search_target($structure, $target_name, $target_delta, $target_value);
+        $search_item = mfcs_event_search_0_form_build_search_target($structure, $target_name, $target_delta, $target_value);
 
         if (is_array($search_item)) {
           foreach ($search_item as $search_item_name => $search_item_values) {
@@ -1632,7 +1632,7 @@ function mcneese_event_workflow_event_search_0_form_build_search_targets($struct
  * Build a list search array item for a single search target.
  *
  * @param array $structure
- *   Structure array as returned by mcneese_event_workflow_table_structure().
+ *   Structure array as returned by mfcs_table_structure().
  * @param string $target_name
  *   Name of the field to process and convert into a search field.
  * @param int $target_delta
@@ -1643,9 +1643,9 @@ function mcneese_event_workflow_event_search_0_form_build_search_targets($struct
  * @return array|bool
  *   Array of search options or FALSE on error.
  *
- * @see mcneese_event_workflow_table_structure()
+ * @see mfcs_table_structure()
  */
-function mcneese_event_workflow_event_search_0_form_build_search_target($structure, $target_name, $target_delta, $target_values) {
+function mfcs_event_search_0_form_build_search_target($structure, $target_name, $target_delta, $target_values) {
   if (!is_array($structure)) {
     cf_error::invalid_array('structure');
     return FALSE;
@@ -1694,13 +1694,13 @@ function mcneese_event_workflow_event_search_0_form_build_search_target($structu
     $search_value = &$target_values['search'];
   }
 
-  $operator_value = MEW_OPERATOR_EQUAL;
+  $operator_value = MFCS_OPERATOR_EQUAL;
   if (is_array($target_values) && array_key_exists('operator', $target_values)) {
     $operator_value = &$target_values['operator'];
   }
 
   $search = array();
-  if ($field['type'] == 'use_fees') {
+  if ($field['type'] == 'requirements') {
     $and = array();
 
     if (!empty($target_values['hours'])) {
@@ -1798,13 +1798,13 @@ function mcneese_event_workflow_event_search_0_form_build_search_target($structu
       $timestamp_stop = strtotime('midnight last day of december ' . $date_value);
       $timestamp_stop = strtotime('midnight tomorrow', $timestamp_stop);
 
-      if ($operator_value == MEW_OPERATOR_EQUAL || $operator_value == MEW_OPERATOR_NOT_EQUAL) {
-        $start_op = MEW_OPERATOR_GREATER_THAN_EQUAL;
-        $stop_op = MEW_OPERATOR_LESS_THAN;
+      if ($operator_value == MFCS_OPERATOR_EQUAL || $operator_value == MFCS_OPERATOR_NOT_EQUAL) {
+        $start_op = MFCS_OPERATOR_GREATER_THAN_EQUAL;
+        $stop_op = MFCS_OPERATOR_LESS_THAN;
 
         $conjunction = array();
         $conjunction_type = 'and';
-        if ($operator_value == MEW_OPERATOR_NOT_EQUAL) {
+        if ($operator_value == MFCS_OPERATOR_NOT_EQUAL) {
           $conjunction_type = 'nand';
         }
 
@@ -1831,18 +1831,18 @@ function mcneese_event_workflow_event_search_0_form_build_search_target($structu
         }
       }
       else {
-        if ($operator_value == MEW_OPERATOR_LESS_THAN) {
+        if ($operator_value == MFCS_OPERATOR_LESS_THAN) {
           $date_value = $timestamp_start;
         }
-        elseif ($operator_value == MEW_OPERATOR_LESS_THAN_EQUAL) {
+        elseif ($operator_value == MFCS_OPERATOR_LESS_THAN_EQUAL) {
           $date_value = $timestamp_stop;
-          $operator_value = MEW_OPERATOR_LESS_THAN;
+          $operator_value = MFCS_OPERATOR_LESS_THAN;
         }
-        elseif ($operator_value == MEW_OPERATOR_GREATER_THAN) {
+        elseif ($operator_value == MFCS_OPERATOR_GREATER_THAN) {
           $date_value = $timestamp_stop;
-          $operator_value = MEW_OPERATOR_GREATER_THAN_EQUAL;
+          $operator_value = MFCS_OPERATOR_GREATER_THAN_EQUAL;
         }
-        elseif ($operator_value == MEW_OPERATOR_GREATER_THAN_EQUAL) {
+        elseif ($operator_value == MFCS_OPERATOR_GREATER_THAN_EQUAL) {
           $date_value = $timestamp_start;
         }
 
@@ -1879,7 +1879,7 @@ function mcneese_event_workflow_event_search_0_form_build_search_target($structu
       $search[$target_field_name]['operator'] = $operator_value;
       $search[$target_field_name]['search'] = $date_value;
     }
-    elseif ($operator_value == MEW_OPERATOR_EQUAL || $operator_value == MEW_OPERATOR_NOT_EQUAL) {
+    elseif ($operator_value == MFCS_OPERATOR_EQUAL || $operator_value == MFCS_OPERATOR_NOT_EQUAL) {
       if ($date_mode == 'y/m/d') {
         $timestamp = strtotime($date_value);
         $target_field_name = 'field_' . $target_name . '-' . $target_delta;
@@ -1901,11 +1901,11 @@ function mcneese_event_workflow_event_search_0_form_build_search_target($structu
           $timestamp_stop = strtotime('midnight last day of', $date_value);
           $timestamp_stop = strtotime('midnight tomorrow', $timestamp_stop);
 
-          $start_op = MEW_OPERATOR_GREATER_THAN_EQUAL;
-          $stop_op = MEW_OPERATOR_LESS_THAN;
+          $start_op = MFCS_OPERATOR_GREATER_THAN_EQUAL;
+          $stop_op = MFCS_OPERATOR_LESS_THAN;
 
           $conjunction_type = 'and';
-          if ($operator_value == MEW_OPERATOR_NOT_EQUAL) {
+          if ($operator_value == MFCS_OPERATOR_NOT_EQUAL) {
             $conjunction_type = 'nand';
           }
 
@@ -2050,7 +2050,7 @@ function mcneese_event_workflow_event_search_0_form_build_search_target($structu
  * @return bool
  *   TRUE on success, FALSE otherwise.
  */
-function mcneese_event_workflow_event_search_0_form_build_grouping($form, &$form_state, &$location, $recurse_count, $id_extra, $chosen_options, $logic_options) {
+function mfcs_event_search_0_form_build_grouping($form, &$form_state, &$location, $recurse_count, $id_extra, $chosen_options, $logic_options) {
   if (!is_array($form)) {
     cf_error::invalid_array('form');
     return FALSE;
@@ -2225,7 +2225,7 @@ function mcneese_event_workflow_event_search_0_form_build_grouping($form, &$form
     ),
   );
 
-  if ($recurse_count < MEW_MAX_SEARCH_RECURSION) {
+  if ($recurse_count < MFCS_MAX_SEARCH_RECURSION) {
     $location['search']['controls']['grouping'] = array(
       '#id' => 'search-advanced-search-controls-grouping' . $id_extra,
       '#type' => 'container',
@@ -2440,44 +2440,4 @@ function mcneese_event_workflow_event_search_0_form_build_grouping($form, &$form
  * Loads all saved search target groupings for a given user.
  *
  * @param object|null $user
- *   The user object of the user to load or NULL for current user.
- *
- * @return array|bool
- *   The saved target search groupings or FALSE on error.
- */
-function mcneese_event_workflow_search_target_grouping_load($user = NULL) {
-  if (is_null($user)) {
-    $user = cf_current_user();
-  }
-
-  if (!is_object($user)) {
-    cf_error::invalid_object('user');
-    return FALSE;
-  }
-
-  $grouping = array();
-  try {
-    $query = db_select('mew_search_settings', 'mss');
-    $query->fields('mss');
-
-    $query->condition('mss.user_id', $user->uid);
-    $query->orderBy('mss.human_name');
-
-    $results = $query->execute()->fetchAll();
-
-    foreach ($results as $result) {
-      $grouping[$result->id] = $result;
-    }
-  }
-  catch (Exception $ex) {
-    cf_error::on_exception($ex);
-
-    return FALSE;
-  }
-
-  return $grouping;
-}
-
-/**
- * @} End of '@addtogroup mcneese_event_workflow'.
- */
+ *   The user object of the us

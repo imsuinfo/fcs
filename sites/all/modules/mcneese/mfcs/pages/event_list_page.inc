@@ -2,25 +2,25 @@
 
 /**
  * @file
- * Defines McNeese event workflow event review page functions.
+ * Defines McNeese facilities use event list page functions.
  */
 
 /**
- * @addtogroup mcneese_event_workflow
+ * @addtogroup mfcs
  * @{
  */
 
- /**
- * Provides the event workflow event review page.
+/**
+ * Provides the facilities use event list page.
  *
  * @param int $page_number
  *   (optional) When there are more than a certain number of rows,
  *   this represent the page number for a given sequence of rows.
  *
- * @return string
- *   The HTML output representing the page.
+ * @return array
+ *   An array containing the generated form.
  */
-function mcneese_event_workflow_event_review_0_page($form, &$form_state, $page_number = 0) {
+function mfcs_event_list_0_page($form, &$form_state, $page_number = 0) {
   if (!cf_is_integer($page_number)) {
     // because this is a url argument passed as a variable, just force a 0 for invalid paths.
     $page_number = 0;
@@ -38,18 +38,18 @@ function mcneese_event_workflow_event_review_0_page($form, &$form_state, $page_n
 
   $user = cf_current_user();
 
-  $can_create = mcneese_event_workflow_management_page_event_access('create');
-  $can_edit = mcneese_event_workflow_management_page_event_access('edit');
-  $can_view = mcneese_event_workflow_management_page_event_access('view');
-  $can_list = mcneese_event_workflow_management_page_event_access('list');
-  $can_search = mcneese_event_workflow_management_page_event_access('search');
-  $can_delete = mcneese_event_workflow_management_page_event_access('delete');
-  $can_log = mcneese_event_workflow_management_page_event_access('log');
-  $can_review = mcneese_event_workflow_management_page_event_access('review');
+  $can_create = mfcs_management_page_event_access('create');
+  $can_edit = mfcs_management_page_event_access('edit');
+  $can_view = mfcs_management_page_event_access('view');
+  $can_list = mfcs_management_page_event_access('list');
+  $can_search = mfcs_management_page_event_access('search');
+  $can_delete = mfcs_management_page_event_access('delete');
+  $can_log = mfcs_management_page_event_access('log');
+  $can_review = mfcs_management_page_event_access('review');
 
-  $manager = user_access('mcneese event workflow manage');
-  $reviewer = user_access('mcneese event workflow review');
-  $requester = user_access('mcneese event workflow request');
+  $manager = user_access('mcneese facilities use manage');
+  $reviewer = user_access('mcneese facilities use review');
+  $requester = user_access('mcneese facilities use request');
 
 
   // load sorting information
@@ -72,10 +72,9 @@ function mcneese_event_workflow_event_review_0_page($form, &$form_state, $page_n
     }
   }
 
+  mfcs_include(4);
 
-  mcneese_event_workflow_include(4);
-
-  $results = mcneese_event_workflow_event_load_listing(NULL, FALSE, $page_number * $rows_per_page, $rows_per_page, $sorting, TRUE);
+  $results = mfcs_event_load_listing(NULL, FALSE, $page_number * $rows_per_page, $rows_per_page, $sorting);
 
   $rows = array();
   $total_results = 0;
@@ -88,15 +87,14 @@ function mcneese_event_workflow_event_review_0_page($form, &$form_state, $page_n
       $rows_count++;
 
       // Rows per page + 1 is loaded so that it can be detected whether or not a 'next' link needs to be provided.
-      if ($rows_count > $rows_per_page) {
+      if ($rows_count > $total_results) {
         break;
       }
 
-      $can_view_event = mcneese_event_workflow_management_page_event_access('view', $item->id);
-      $can_edit_event = mcneese_event_workflow_management_page_event_access('edit', $item->id);
-      $can_review_event = mcneese_event_workflow_management_page_event_access('review', $item->id);
-      $can_log_event = mcneese_event_workflow_management_page_event_access('log', $item->id);
-      $can_history_event = mcneese_event_workflow_management_page_event_access('history', $item->id);
+      $can_edit_event = mfcs_management_page_event_access('edit', $item->id);
+      $can_review_event = mfcs_management_page_event_access('review', $item->id);
+      $can_log_event = mfcs_management_page_event_access('log', $item->id);
+      $can_history_event = mfcs_management_page_event_access('history', $item->id);
 
       $row['id'] = $item->id;
       $row['title'] = check_plain($item->title);
@@ -104,25 +102,30 @@ function mcneese_event_workflow_event_review_0_page($form, &$form_state, $page_n
       $row['building'] = check_plain($item->building_name);
       $row['room'] = check_plain($item->room_name);
 
-      foreach ($item->date as $delta => $date) {
-        if (!isset($row['date'])) {
-          $row['date'] = '';
-        }
-        else {
-          $row['date'] .= '<br>';
-        }
+      if (empty($item->date)) {
+        $row['date'] = '';
+      }
+      else {
+        foreach ($item->date as $delta => $date) {
+          if (!isset($row['date'])) {
+            $row['date'] = '';
+          }
+          else {
+            $row['date'] .= '<br>';
+          }
 
-        $row['date'] .= check_plain(date("Y/m/d", $date));
+          $row['date'] .= check_plain(date("Y/m/d", $date));
 
-        if (array_key_exists($delta, $item->time_start) && !is_null($item->time_start[$delta]) && array_key_exists($delta, $item->time_stop) && !is_null($item->time_stop[$delta])) {
-          $row['date'] .= ' ' . check_plain(date("h:ia", $item->time_start[$delta]));
-          $row['date'] .= ' to ' . check_plain(date("h:ia", $item->time_stop[$delta]));
+          if (array_key_exists($delta, $item->time_start) && !is_null($item->time_start[$delta]) && array_key_exists($delta, $item->time_stop) && !is_null($item->time_stop[$delta])) {
+            $row['date'] .= ' ' . check_plain(date("h:ia", $item->time_start[$delta]));
+            $row['date'] .= ' to ' . check_plain(date("h:ia", $item->time_stop[$delta]));
+          }
         }
       }
 
-      $step_options = event_workflow_get_event_steps_list_options();
+      $status_options = event_workflow_get_event_status_list_options();
 
-      $row['step'] = $step_options[$item->step];
+      $row['status'] = $status_options[$item->status];
 
       $submitter = user_load($item->user_id);
 
@@ -156,9 +159,7 @@ function mcneese_event_workflow_event_review_0_page($form, &$form_state, $page_n
 
       $row['operations'] = '';
 
-      if ($can_view_event) {
-        $row['operations'] .= '<a href="' . $base_path . 'events/view-0/' . $item->id . '" class="operation-link operation-link-view">View</a> ';
-      }
+      $row['operations'] .= '<a href="' . $base_path . 'events/view-0/' . $item->id . '" class="operation-link operation-link-view">View</a> ';
 
       if ($can_edit_event) {
         $row['operations'] .= '<a href="' . $base_path . 'events/edit-0/' . $item->id . '/request" class="operation-link operation-link-edit">Edit</a> ';
@@ -181,7 +182,7 @@ function mcneese_event_workflow_event_review_0_page($form, &$form_state, $page_n
         #$row['operations'] .= '<a href="' . $base_path . 'events/delete-0/' . $item->id . '" class="operation-link operation-link-delete">Delete</a> ';
       }
 
-      if ($can_view_event && $can_create) {
+      if ($can_create) {
         $row['operations'] .= '<a href="' . $base_path . 'events/create-0/' . $item->id . '" class="operation-link operation-link-clone">Copy</a> ';
       }
 
@@ -198,7 +199,7 @@ function mcneese_event_workflow_event_review_0_page($form, &$form_state, $page_n
     'building' => array('field' => 'building', 'data' => "Building", 'align' => 'center'),
     'room' => array('field' => 'room', 'data' => "Room", 'align' => 'center'),
     'date' => array('field' => 'date', 'data' => "Date", 'align' => 'center'),
-    'step' => array('field' => 'step', 'data' => "Step", 'align' => 'center'),
+    'status' => array('field' => 'status', 'data' => "Status", 'align' => 'center'),
     'submitted_by' => array('field' => 'submitted_by', 'data' => "Submitted By", 'align' => 'center'),
     'submitted_on' => array('field' => 'submitted_on', 'data' => "Submitted On", 'sort' => 'desc', 'align' => 'center'),
     t("Operations"),
@@ -212,26 +213,17 @@ function mcneese_event_workflow_event_review_0_page($form, &$form_state, $page_n
 
   $output .= theme('table', $table);
 
-  $output .= '<div class="event_request-listing-page-navigator">';
+  $output .= '<div class="event_request-listing-page-navigator no-print">';
   if ($page_number > 0) {
     if ($page_number == 1) {
-      $output .= '<a href="' . $base_path . 'events/review-0" class="event_request-listing-page-choice event_request-listing-page-previous" title="Previous Page">Prev</a>';
+      $output .= '<a href="' . $base_path . 'events/list-0" class="event_request-listing-page-choice event_request-listing-page-previous no-print" title="Previous Page">Prev</a>';
     }
     else {
       $previous_page = $page_number - 1;
-      $output .= '<a href="' . $base_path . 'events/review-0/' . $previous_page . '" class="event_request-listing-page-choice event_request-listing-page-previous" title="Previous Page">Prev</a>';
+      $output .= '<a href="' . $base_path . 'events/list-0/' . $previous_page . '" class="event_request-listing-page-choice event_request-listing-page-previous no-print" title="Previous Page">Prev</a>';
     }
   }
 
   if ($total_results > $rows_per_page) {
     $next_page = $page_number + 1;
-    $output .= '<a href="' . $base_path . 'events/review-0/' . $next_page . '" class="event_request-listing-page-choice event_request-listing-page-next" title="Next Page">Next</a>';
-  }
-  $output .= '</div>';
-
-  return $form;
-}
-
-/**
- * @} End of '@addtogroup mcneese_event_workflow'.
- */
+    $o

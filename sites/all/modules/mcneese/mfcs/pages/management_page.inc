@@ -2,38 +2,38 @@
 
 /**
  * @file
- * Defines McNeese event workflow management page functions.
+ * Defines McNeese facilities use management page functions.
  */
 
 /**
- * @addtogroup mcneese_event_workflow
+ * @addtogroup mfcs
  * @{
  */
 
 /**
- * Provides the event workflow event manage page.
+ * Provides the facilities use event manage page.
  *
  * @return string
  *   The HTML output representing the page.
  *
- * @see mcneese_event_workflow_blocks_at_path()
+ * @see mfcs_blocks_at_path()
  */
-function mcneese_event_workflow_management_page() {
+function mfcs_management_page() {
   global $base_path;
   $user = cf_current_user();
 
-  $can_create = mcneese_event_workflow_management_page_event_access('create');
-  $can_edit = mcneese_event_workflow_management_page_event_access('edit');
-  $can_view = mcneese_event_workflow_management_page_event_access('view');
-  $can_list = mcneese_event_workflow_management_page_event_access('list');
-  $can_search = mcneese_event_workflow_management_page_event_access('search');
-  $can_delete = mcneese_event_workflow_management_page_event_access('delete');
-  $can_log = mcneese_event_workflow_management_page_event_access('log');
-  $can_review = mcneese_event_workflow_management_page_event_access('review');
+  $can_create = mfcs_management_page_event_access('create');
+  $can_edit = mfcs_management_page_event_access('edit');
+  $can_view = mfcs_management_page_event_access('view');
+  $can_list = mfcs_management_page_event_access('list');
+  $can_search = mfcs_management_page_event_access('search');
+  $can_delete = mfcs_management_page_event_access('delete');
+  $can_log = mfcs_management_page_event_access('log');
+  $can_review = mfcs_management_page_event_access('review');
 
-  $manager = user_access('mcneese event workflow manage');
-  $reviewer = user_access('mcneese event workflow review');
-  $requester = user_access('mcneese event workflow request');
+  $manager = user_access('mcneese facilities use manage');
+  $reviewer = user_access('mcneese facilities use review');
+  $requester = user_access('mcneese facilities use request');
 
   $items_1 = array();
   $items_2 = array();
@@ -44,7 +44,6 @@ function mcneese_event_workflow_management_page() {
     $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'events/create-0" class="item-link">Request Event</a></h4>';
     $help = '<div class="item-description inline-block">Make a request to use the facilities or host special events at McNeese State University.</div>';
     $items_1[] = array(
-      'id' => '',
       'data' => $link . '<br>' . $help,
       'class' => array(
       ),
@@ -55,7 +54,6 @@ function mcneese_event_workflow_management_page() {
     $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'events/list-0" class="item-link">List Requests</a></h4>';
     $help = '<div class="item-description inline-block">View a list of event requests available to the current user.</div>';
     $items_1[] = array(
-      'id' => '',
       'data' => $link . '<br>' . $help,
       'class' => array(
       ),
@@ -66,7 +64,6 @@ function mcneese_event_workflow_management_page() {
     $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'events/search-0" class="item-link">Search Requests</a></h4>';
     $help = '<div class="item-description inline-block">Use advanced search tools to help locate and find one or more event requests.</div>';
     $items_3[] = array(
-      'id' => '',
       'data' => $link . '<br>' . $help,
       'class' => array(
       ),
@@ -77,7 +74,6 @@ function mcneese_event_workflow_management_page() {
     $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'events/review-0" class="item-link">Review Requests</a></h4>';
     $help = '<div class="item-description inline-block">Manage requests the current user is allowed to review.</div>';
     $items_2[] = array(
-      'id' => '',
       'data' => $link . '<br>' . $help,
       'class' => array(
       ),
@@ -88,7 +84,6 @@ function mcneese_event_workflow_management_page() {
     $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'events/reviewers-0" class="item-link">Manage Reviewers</a></h4>';
     $help = '<div class="item-description inline-block">Manage what users are allowed to approve/deny event requests by event type.</div>';
     $items_2[] = array(
-      'id' => '',
       'data' => $link . '<br>' . $help,
       'class' => array(
       ),
@@ -99,16 +94,26 @@ function mcneese_event_workflow_management_page() {
   $item_list_2 = theme('item_list', array('items' => $items_2, 'type' => 'ul'));
   $item_list_3 = theme('item_list', array('items' => $items_3, 'type' => 'ul'));
 
-  $markup = '<div id="mcneese_event_workflow-management_page-choices" class="mcneese_event_workflow-management_page-choices">';
-  $markup .= '<h3 class="mcneese_event_workflow-management_page-choices-header">Facilities Use and Special Event Request Form</h3>';
-  $markup .= '<div class="mcneese_event_workflow-management_page-choices-list_1">' . $item_list_1 . '</div>';
-  $markup .= '<div class="mcneese_event_workflow-management_page-choices-list_2">' . $item_list_2 . '</div>';
-  $markup .= '<div class="mcneese_event_workflow-management_page-choices-list_3">' . $item_list_3 . '</div>';
+  $markup = '<div id="mfcs-management_page-choices" class="mfcs-management_page-choices">';
+  $markup .= '<h3 class="mfcs-management_page-choices-header">Facilities Use and Special Event Request Form</h3>';
+
+  if (!empty($items_1)) {
+    $markup .= '<div class="mfcs-management_page-choices-list_1">' . $item_list_1 . '</div>';
+  }
+
+  if (!empty($items_2)) {
+    $markup .= '<div class="mfcs-management_page-choices-list_2">' . $item_list_2 . '</div>';
+  }
+
+  if (!empty($items_3)) {
+    $markup .= '<div class="mfcs-management_page-choices-list_3">' . $item_list_3 . '</div>';
+  }
+
   $markup .= '</div>';
 
 
   if ($can_list) {
-    mcneese_event_workflow_include(4);
+    mfcs_include(4);
 
     $month_start = strtotime('midnight first day of', REQUEST_TIME);
     $month_end = strtotime('midnight last day of', REQUEST_TIME);
@@ -147,7 +152,7 @@ function mcneese_event_workflow_management_page() {
     $search[$target_field_name]['search'] = $absolute_start;
     $search[$target_field_name]['type'] = 'date';
     $search[$target_field_name]['multiple'] = TRUE;
-    $search[$target_field_name]['operator'] = MEW_OPERATOR_GREATER_THAN_EQUAL;
+    $search[$target_field_name]['operator'] = MFCS_OPERATOR_GREATER_THAN_EQUAL;
 
     $target_field_name = 'field_dates-date-stop-0';
     $search[$target_field_name]['group_name'] = 'dates';
@@ -156,33 +161,28 @@ function mcneese_event_workflow_management_page() {
     $search[$target_field_name]['search'] = $absolute_stop;
     $search[$target_field_name]['type'] = 'date';
     $search[$target_field_name]['multiple'] = TRUE;
-    $search[$target_field_name]['operator'] = MEW_OPERATOR_LESS_THAN;
+    $search[$target_field_name]['operator'] = MFCS_OPERATOR_LESS_THAN;
 
     $target_field_name = 'field_top-status-0';
     $search[$target_field_name]['group_name'] = 'top';
     $search[$target_field_name]['field_name'] = 'status';
     $search[$target_field_name]['column'] = 'value';
-    $search[$target_field_name]['search'] = MEW_EVENT_STATUS_CLOSED_ACCEPTED;
+    $search[$target_field_name]['search'] = MFCS_EVENT_STATUS_CLOSED_ACCEPTED;
     $search[$target_field_name]['type'] = 'options';
     $search[$target_field_name]['multiple'] = FALSE;
-    $search[$target_field_name]['operator'] = MEW_OPERATOR_EQUAL;
+    $search[$target_field_name]['operator'] = MFCS_OPERATOR_EQUAL;
 
     $sorting = array(
       'order' => 'date',
       'sort' => 'ASC',
     );
 
-    $results = mcneese_event_workflow_event_load_listing($search, FALSE, 0, 0, $sorting);
+    $results = mfcs_event_load_listing($search, FALSE, 0, 0, $sorting);
 
     $rows = array();
     $rows_count = 0;
     if (!empty($results)) {
       foreach ($results as $item) {
-        $can_view_event = mcneese_event_workflow_management_page_event_access('view', $item->id);
-        if (!$can_view_event) {
-          continue;
-        }
-
         foreach ($item->date as $delta => $date) {
           if ($date < $absolute_start || $date >= $absolute_stop) {
             continue;
@@ -220,17 +220,4 @@ function mcneese_event_workflow_management_page() {
       }
     }
 
-    $title = '<h3><a href="' . $base_path . 'events/calendar-0/month">' . "Events for " . date("F, Y", $month_start) . '</a></h3>';
-    $result = mcneese_event_workflow_build_calendar_month_markup($rows, $month_start, $month_stop, $absolute_start, $absolute_stop, $title);
-    if ($result !== FALSE) {
-      $markup .= $result;
-    }
-    unset($result);
-  }
-
-  return $markup;
-}
-
-/**
- * @} End of '@addtogroup mcneese_event_workflow'.
- */
+    $title = '<h3><a href="' . $base_path . 'events/calendar-0/month">' . "Events

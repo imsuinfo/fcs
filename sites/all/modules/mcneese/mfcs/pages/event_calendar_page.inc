@@ -2,16 +2,16 @@
 
 /**
  * @file
- * Defines McNeese event workflow event calendar page functions.
+ * Defines McNeese facilities use event calendar page functions.
  */
 
 /**
- * @addtogroup mcneese_event_workflow
+ * @addtogroup mfcs
  * @{
  */
 
 /**
- * Provides the event workflow event calendar month page.
+ * Provides the facilities use event calendar month page.
  *
  * @param int $year
  *   (optional) When specified, represents the year.
@@ -22,7 +22,7 @@
  * @return string
  *   The HTML output representing the page.
  */
-function mcneese_event_workflow_event_calendar_month_0_page($year = NULL, $month = NULL) {
+function mfcs_event_calendar_month_0_page($year = NULL, $month = NULL) {
   if (!is_null($year) && !cf_is_integer($year)) {
     cf_error::invalid_integer('year');
 
@@ -46,7 +46,7 @@ function mcneese_event_workflow_event_calendar_month_0_page($year = NULL, $month
 
   $user = cf_current_user();
 
-  mcneese_event_workflow_include(4);
+  mfcs_include(4);
 
   if (is_null($year) && is_null($month)) {
     $month_start = strtotime('midnight first day of', REQUEST_TIME);
@@ -143,7 +143,7 @@ function mcneese_event_workflow_event_calendar_month_0_page($year = NULL, $month
   $search[$target_field_name]['search'] = $absolute_start;
   $search[$target_field_name]['type'] = 'date';
   $search[$target_field_name]['multiple'] = TRUE;
-  $search[$target_field_name]['operator'] = MEW_OPERATOR_GREATER_THAN_EQUAL;
+  $search[$target_field_name]['operator'] = MFCS_OPERATOR_GREATER_THAN_EQUAL;
 
   $target_field_name = 'field_dates-date-stop-0';
   $search[$target_field_name]['group_name'] = 'dates';
@@ -152,33 +152,28 @@ function mcneese_event_workflow_event_calendar_month_0_page($year = NULL, $month
   $search[$target_field_name]['search'] = $absolute_stop;
   $search[$target_field_name]['type'] = 'date';
   $search[$target_field_name]['multiple'] = TRUE;
-  $search[$target_field_name]['operator'] = MEW_OPERATOR_LESS_THAN;
+  $search[$target_field_name]['operator'] = MFCS_OPERATOR_LESS_THAN;
 
   $target_field_name = 'field_top-status-0';
   $search[$target_field_name]['group_name'] = 'top';
   $search[$target_field_name]['field_name'] = 'status';
   $search[$target_field_name]['column'] = 'value';
-  $search[$target_field_name]['search'] = MEW_EVENT_STATUS_CLOSED_ACCEPTED;
+  $search[$target_field_name]['search'] = MFCS_EVENT_STATUS_CLOSED_ACCEPTED;
   $search[$target_field_name]['type'] = 'options';
   $search[$target_field_name]['multiple'] = FALSE;
-  $search[$target_field_name]['operator'] = MEW_OPERATOR_EQUAL;
+  $search[$target_field_name]['operator'] = MFCS_OPERATOR_EQUAL;
 
   $sorting = array(
     'order' => 'date',
     'sort' => 'ASC',
   );
 
-  $results = mcneese_event_workflow_event_load_listing($search, FALSE, 0, 0, $sorting);
+  $results = mfcs_event_load_listing($search, FALSE, 0, 0, $sorting);
 
   $rows = array();
   $rows_count = 0;
   if (!empty($results)) {
     foreach ($results as $item) {
-      $can_view_event = mcneese_event_workflow_management_page_event_access('view', $item->id);
-      if (!$can_view_event) {
-        continue;
-      }
-
       foreach ($item->date as $delta => $date) {
         if ($date < $absolute_start || $date >= $absolute_stop) {
           continue;
@@ -214,7 +209,7 @@ function mcneese_event_workflow_event_calendar_month_0_page($year = NULL, $month
 
   $markup = '';
   $title = '<h3>' . "Events for " . date("F, Y", $month_start) . '</h3>';
-  $result = mcneese_event_workflow_build_calendar_month_markup($rows, $month_start, $month_stop, $absolute_start, $absolute_stop, $title);
+  $result = mfcs_build_calendar_month_markup($rows, $month_start, $month_stop, $absolute_start, $absolute_stop, $title);
   if ($result !== FALSE) {
     $markup .= $result;
   }
@@ -224,7 +219,7 @@ function mcneese_event_workflow_event_calendar_month_0_page($year = NULL, $month
 }
 
 /**
- * Provides the event workflow event calendar month page.
+ * Provides the facilities use event calendar month page.
  *
  * @param int $year
  *   (optional) When specified, represents the year.
@@ -238,7 +233,7 @@ function mcneese_event_workflow_event_calendar_month_0_page($year = NULL, $month
  * @return string
  *   The HTML output representing the page.
  */
-function mcneese_event_workflow_event_calendar_day_0_page($year = NULL, $month = NULL, $day = NULL) {
+function mfcs_event_calendar_day_0_page($year = NULL, $month = NULL, $day = NULL) {
   if (!is_null($year) && !cf_is_integer($year)) {
     cf_error::invalid_integer('year');
 
@@ -262,12 +257,3 @@ function mcneese_event_workflow_event_calendar_day_0_page($year = NULL, $month =
 
   $user = cf_current_user();
 
-  mcneese_event_workflow_include(4);
-
-  // @todo: finish this.
-  return '';
-}
-
-/**
- * @} End of '@addtogroup mcneese_event_workflow'.
- */

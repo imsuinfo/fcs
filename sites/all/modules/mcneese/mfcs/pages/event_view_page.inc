@@ -2,22 +2,22 @@
 
 /**
  * @file
- * Defines McNeese event workflow event view page functions.
+ * Defines McNeese facilities use event view page functions.
  */
 
 /**
- * @addtogroup mcneese_event_workflow
+ * @addtogroup mfcs
  * @{
  */
 
 /**
- * Provides the event workflow event view page.
+ * Provides the facilities use event view page.
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
- * @param int $event_id
+ * @param int $request_id
  *   The unique identifier for an event request.
  * @param int $mode
  *   Specifies the mode that alters how the form is rendered.
@@ -27,18 +27,18 @@
  * @return string
  *   The HTML output representing the page.
  */
-function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id, $mode = MEW_VIEW_MODE_NORMAL, $pdf = FALSE) {
-  $event = event_workflow_load_event_by_id($event_id);
+function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_VIEW_MODE_NORMAL, $pdf = FALSE) {
+  $event = event_workflow_load_event_by_id($request_id);
 
   if (empty($event)) {
-    watchdog(MEW_WATCHDOG_ID, "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
+    watchdog(MFCS_WATCHDOG_ID, "Unable to find event with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
     drupal_not_found();
     drupal_exit();
     return array();
   }
 
-  if (!is_numeric($mode) || $mode < MEW_VIEW_MODE_NORMAL || $mode > MEW_VIEW_MODE_OPERATIONS) {
-    $mode = MEW_VIEW_MODE_NORMAL;
+  if (!is_numeric($mode) || $mode < MFCS_VIEW_MODE_NORMAL || $mode > MFCS_VIEW_MODE_OPERATIONS) {
+    $mode = MFCS_VIEW_MODE_NORMAL;
   }
   else {
     $mode = (int) $mode;
@@ -50,59 +50,59 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
 
   // if cancelling the event, return only the cancellation confirmation form.
   if (isset($form_state['cancel_was_clicked'])) {
-    mcneese_event_workflow_include(5);
+    mfcs_include(5);
 
     $cancel_form = array();
     $cancel_form_state = array();
-    return mcneese_event_workflow_event_cancel_0_form($cancel_form, $cancel_form_state, $event_id);
+    return mfcs_event_cancel_0_form($cancel_form, $cancel_form_state, $request_id);
   }
   // if uncancelling the event, return only the uncancellation confirmation form.
   elseif (isset($form_state['uncancel_was_clicked'])) {
-    mcneese_event_workflow_include(5);
+    mfcs_include(5);
 
     $cancel_form = array();
     $cancel_form_state = array();
-    return mcneese_event_workflow_event_uncancel_0_form($cancel_form, $cancel_form_state, $event_id);
+    return mfcs_event_uncancel_0_form($cancel_form, $cancel_form_state, $request_id);
   }
 
   $user = cf_current_user();
 
-  $manager = user_access('mcneese event workflow manage');
-  $reviewer = user_access('mcneese event workflow review');
-  $requester = user_access('mcneese event workflow request');
+  $manager = user_access('mcneese facilities use manage');
+  $reviewer = user_access('mcneese facilities use review');
+  $requester = user_access('mcneese facilities use request');
 
   $venue_coordinator = ($event['venue_coordinator']['user_id'][0]->value == $user->uid);
 
-  $can_create = mcneese_event_workflow_management_page_event_access('create');
+  $can_create = mfcs_management_page_event_access('create');
 
-  $can_create = mcneese_event_workflow_management_page_event_access('create');
-  $can_edit = mcneese_event_workflow_management_page_event_access('edit');
-  $can_view = mcneese_event_workflow_management_page_event_access('view');
-  $can_list = mcneese_event_workflow_management_page_event_access('list');
-  $can_search = mcneese_event_workflow_management_page_event_access('search');
-  $can_delete = mcneese_event_workflow_management_page_event_access('delete');
-  $can_log = mcneese_event_workflow_management_page_event_access('log');
-  $can_review = mcneese_event_workflow_management_page_event_access('review');
+  $can_create = mfcs_management_page_event_access('create');
+  $can_edit = mfcs_management_page_event_access('edit');
+  $can_view = mfcs_management_page_event_access('view');
+  $can_list = mfcs_management_page_event_access('list');
+  $can_search = mfcs_management_page_event_access('search');
+  $can_delete = mfcs_management_page_event_access('delete');
+  $can_log = mfcs_management_page_event_access('log');
+  $can_review = mfcs_management_page_event_access('review');
 
-  $can_view_event = mcneese_event_workflow_management_page_event_access('view', $event_id);
-  $can_edit_event = mcneese_event_workflow_management_page_event_access('edit', $event_id);
-  $can_log_event = mcneese_event_workflow_management_page_event_access('log', $event_id);
-  $can_review_event = mcneese_event_workflow_management_page_event_access('review', $event_id);
-  $can_comment_event = mcneese_event_workflow_management_page_event_access('comment', $event_id);
-  $can_history_event = mcneese_event_workflow_management_page_event_access('history', $event_id);
+  $can_edit_event = mfcs_management_page_event_access('edit', $request_id);
+  $can_log_event = mfcs_management_page_event_access('log', $request_id);
+  $can_review_event = mfcs_management_page_event_access('review', $request_id);
+  $can_comment_event = mfcs_management_page_event_access('comment', $request_id);
+  $can_history_event = mfcs_management_page_event_access('history', $request_id);
+  $can_agreement_event = mfcs_management_page_event_access('agreement', $request_id);
 
   $show_display = TRUE;
   $show_log = TRUE;
   $show_operations = TRUE;
-  if ($mode == MEW_VIEW_MODE_DISPLAY) {
+  if ($mode == MFCS_VIEW_MODE_DISPLAY) {
     $show_log = FALSE;
     $show_operations = FALSE;
   }
-  elseif ($mode == MEW_VIEW_MODE_LOG) {
+  elseif ($mode == MFCS_VIEW_MODE_LOG) {
     $show_display = FALSE;
     $show_operations = FALSE;
   }
-  elseif ($mode == MEW_VIEW_MODE_OPERATIONS) {
+  elseif ($mode == MFCS_VIEW_MODE_OPERATIONS) {
     $show_display = FALSE;
     $show_log = FALSE;
   }
@@ -110,7 +110,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
   if (!$can_log_event) {
     $show_log = FALSE;
 
-    if ($mode == MEW_VIEW_MODE_LOG) {
+    if ($mode == MFCS_VIEW_MODE_LOG) {
       drupal_access_denied();
       drupal_exit();
       return array();
@@ -125,14 +125,14 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
 
     // only show operations for states and steps that make sense to.
     $allowed_statuses = array(
-      MEW_EVENT_STATUS_LOCKED,
-      MEW_EVENT_STATUS_UNLOCKED,
+      MFCS_EVENT_STATUS_LOCKED,
+      MFCS_EVENT_STATUS_UNLOCKED,
     );
 
     if (!in_array($status, $allowed_statuses)) {
       $show_operations = FALSE;
 
-      if ($mode == MEW_VIEW_MODE_OPERATIONS) {
+      if ($mode == MFCS_VIEW_MODE_OPERATIONS) {
         drupal_access_denied();
         drupal_exit();
         return array();
@@ -140,16 +140,16 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
     }
 
     $allowed_steps = array(
-      MEW_REVIEW_STEP_VENUE_AVAILABLE,
-      MEW_REVIEW_STEP_REVIEW,
-      MEW_REVIEW_STEP_USAGE_FEES,
-      MEW_REVIEW_STEP_MAKE_DECISIONS,
+      MFCS_REVIEW_STEP_VENUE_AVAILABLE,
+      MFCS_REVIEW_STEP_REVIEW,
+      MFCS_REVIEW_STEP_REQUIREMENTS,
+      MFCS_REVIEW_STEP_MAKE_DECISIONS,
     );
 
     if (!in_array($step, $allowed_steps)) {
       $show_operations = FALSE;
 
-      if ($mode == MEW_VIEW_MODE_OPERATIONS) {
+      if ($mode == MFCS_VIEW_MODE_OPERATIONS) {
         drupal_access_denied();
         drupal_exit();
         return array();
@@ -159,7 +159,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
   else {
     $show_operations = FALSE;
 
-    if ($mode == MEW_VIEW_MODE_OPERATIONS) {
+    if ($mode == MFCS_VIEW_MODE_OPERATIONS) {
       drupal_access_denied();
       drupal_exit();
       return array();
@@ -169,17 +169,20 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
   $can = array(
     'edit' => FALSE,
     'history' => FALSE,
+    'agreement' => FALSE,
   );
 
   if ($pdf) {
     $can['edit'] = FALSE;
     $can['history'] = FALSE;
+    $can['agreement'] = FALSE;
     $can['clone'] = FALSE;
   }
   else {
     $can['edit'] = (bool) $can_edit_event;
     $can['history'] = (bool) $can_history_event;
-    $can['clone'] = (bool) ($can_create && $can_view_event);
+    $can['agreement'] = (bool) $can_agreement_event;
+    $can['clone'] = (bool) $can_create;
   }
 
   $page_title = "Event Request";
@@ -205,9 +208,9 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
     '#tree' => TRUE,
   );
 
-  $form['form']['event_id'] = array(
+  $form['form']['request_id'] = array(
     '#type' => 'value',
-    '#value' => $event_id,
+    '#value' => $request_id,
   );
 
   $form['form']['event'] = array(
@@ -233,7 +236,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
   if (!isset($event['information']['type'][0]->value) || !cf_is_integer($event['information']['type'][0]->value)) {
     cf_error::invalid_integer('event[information][type][0]->value');
     $form['message'] = array(
-      '#markup' => "Error: Unable to load event (ID = " . check_plain($event_id) . ") due to missing event type value.",
+      '#markup' => "Error: Unable to load event (ID = " . check_plain($request_id) . ") due to missing event type value.",
     );
 
     return $form;
@@ -244,7 +247,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
 
   if ($show_display) {
     $form['display'] = array(
-      '#id' => 'event-' . $event_id . '-section-display',
+      '#id' => 'event-' . $request_id . '-section-display',
       '#type' => 'fieldset',
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
@@ -264,11 +267,11 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
       unset($form['display']['#collapsed']);
 
       $form['display']['log']['#type'] = 'container';
-      $form['display']['log']['#attributes']['id'] = 'event-' . $event_id . '-section-display';
+      $form['display']['log']['#attributes']['id'] = 'event-' . $request_id . '-section-display';
     }
 
     $form['display']['groups'] = array(
-      '#prefix' => '<div id="event-' . $event_id . '-field_groups" class="event-field_groups mode-' . $mode . '">',
+      '#prefix' => '<div id="event-' . $request_id . '-field_groups" class="event-field_groups mode-' . $mode . '">',
       '#suffix' => '</div>',
     );
 
@@ -279,32 +282,32 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
 
     $fields_count = array('top' => 0, 'group' => array());
 
-    mcneese_event_workflow_include(0);
+    mfcs_include(0);
 
-    $presentation = mcneese_event_workflow_table_presentation();
-    $presentation_tables = mcneese_event_workflow_table_presentation(1);
+    $presentation = mfcs_table_presentation();
+    $presentation_tables = mfcs_table_presentation(1);
 
     $collate = array();
 
     foreach ($presentation_tables as $field_group => $presentation_table) {
-      mcneese_event_workflow_event_view_0_page_setup_group_path($form, $event_id, $field_group, $presentation_tables, $can, $event);
+      mfcs_event_view_0_page_setup_group_path($form, $request_id, $field_group, $presentation_tables, $can, $event);
     }
 
     // pre-process special case of review decisions.
     $decision_presentation = $presentation['reviews']['decision'];
     unset($presentation['reviews']['decision']);
 
-    $reviews = mcneese_event_workflow_get_latest_reviews($event_id, array(MEW_REVIEW_STEP_REVIEW, MEW_REVIEW_STEP_MAKE_DECISIONS), array(MEW_REVIEW_DECISION_APPROVE, MEW_REVIEW_DECISION_DENY));
+    $reviews = mfcs_get_latest_reviews($request_id, array(MFCS_REVIEW_STEP_REVIEW, MFCS_REVIEW_STEP_MAKE_DECISIONS), array(MFCS_REVIEW_DECISION_APPROVE, MFCS_REVIEW_DECISION_DENY));
 
     if (!empty($reviews)) {
-      mcneese_event_workflow_include(4);
+      mfcs_include(4);
 
       $classification_options = event_workflow_get_reviewer_classification_list_options(NULL, TRUE);
       $preprocessed_decisions = array();
 
       $reviews_step = array();
-      if (isset($reviews[MEW_REVIEW_STEP_REVIEW])) {
-        $reviews_step = $reviews[MEW_REVIEW_STEP_REVIEW];
+      if (isset($reviews[MFCS_REVIEW_STEP_REVIEW])) {
+        $reviews_step = $reviews[MFCS_REVIEW_STEP_REVIEW];
       }
 
       if (!empty($reviews_step)) {
@@ -335,8 +338,8 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
 
       // display the final decision last.
       $decision_step = array();
-      if (isset($reviews[MEW_REVIEW_STEP_MAKE_DECISIONS])) {
-        $decision_step = $reviews[MEW_REVIEW_STEP_MAKE_DECISIONS];
+      if (isset($reviews[MFCS_REVIEW_STEP_MAKE_DECISIONS])) {
+        $decision_step = $reviews[MFCS_REVIEW_STEP_MAKE_DECISIONS];
       }
 
       if (!empty($decision_step)) {
@@ -391,7 +394,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
 
       $row = NULL;
       if (isset($presentation_tables[$field_group])) {
-        $row = mcneese_event_workflow_event_view_0_page_setup_group_path($form, $event_id, $field_group, $presentation_tables, $can, $event);
+        $row = mfcs_event_view_0_page_setup_group_path($form, $request_id, $field_group, $presentation_tables, $can, $event);
       }
 
       if (!array_key_exists($field_group, $form['groups'])) {
@@ -454,7 +457,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
 
             $custom_row = NULL;
             if (isset($presentation_tables[$group])) {
-              $custom_row = mcneese_event_workflow_event_view_0_page_setup_group_path($form, $event_id, $group, $presentation_tables, $can, $event);
+              $custom_row = mfcs_event_view_0_page_setup_group_path($form, $request_id, $group, $presentation_tables, $can, $event);
             }
 
             if (is_null($custom_row)) {
@@ -498,7 +501,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
             $group_path[$group][$weight] = array();
           }
 
-          $group_path[$group][$weight][$field_presentation_name] = mcneese_event_workflow_build_event_request_item_structure($event_id, $group, $field_presentation_name, $values, $field_presentation, $event);
+          $group_path[$group][$weight][$field_presentation_name] = mfcs_build_event_request_item_structure($request_id, $group, $field_presentation_name, $values, $field_presentation, $event);
 
           // This can be FALSE on error or NULL when the ROW should not be displayed, so remove the field entirely.
           if ($group_path[$group][$weight][$field_presentation_name] === FALSE || is_null($group_path[$group][$weight][$field_presentation_name])) {
@@ -676,7 +679,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
         '#weight' => 1000,
       );
 
-      if (mcneese_event_workflow_management_page_event_access('cancel', $event_id)) {
+      if (mfcs_management_page_event_access('cancel', $request_id)) {
         $form['display']['submit']['cancel'] = array(
           '#id' => 'event-display-submit-cancel',
           '#name' => 'event-display-submit-cancel',
@@ -690,11 +693,11 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
             ),
           ),
           '#submit' => array(
-            'mcneese_event_workflow_event_cancel_0_form_submit',
+            'mfcs_event_cancel_0_form_submit',
           ),
         );
       }
-      elseif (mcneese_event_workflow_management_page_event_access('uncancel', $event_id)) {
+      elseif (mfcs_management_page_event_access('uncancel', $request_id)) {
         $form['display']['submit']['uncancel'] = array(
           '#id' => 'event-display-submit-uncancel',
           '#name' => 'event-display-submit-uncancel',
@@ -708,7 +711,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
             ),
           ),
           '#submit' => array(
-            'mcneese_event_workflow_event_uncancel_0_form_submit',
+            'mfcs_event_uncancel_0_form_submit',
           ),
         );
       }
@@ -741,7 +744,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
           ),
         ),
         '#submit' => array(
-          'mcneese_event_workflow_event_view_0_page_submit_pdf',
+          'mfcs_event_view_0_page_submit_pdf',
         ),
       );
     }
@@ -752,13 +755,13 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
       '#tree' => TRUE,
     );
 
-    mcneese_event_workflow_include(4);
+    mfcs_include(4);
 
     $step_options = event_workflow_get_event_steps_list_options();
 
     if ($show_log) {
       $form['review']['log'] = array(
-        '#id' => 'event-' . $event_id . '-section-review-log',
+        '#id' => 'event-' . $request_id . '-section-review-log',
         '#type' => 'fieldset',
         '#collapsible' => TRUE,
         '#collapsed' => FALSE,
@@ -778,7 +781,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
       }
 
       $form['review']['log']['page_title'] = array(
-        '#markup' => '<div id="' . 'event-' . $event_id . '-section-review-log-page_title' . '" class="event-section-review-log-page_title ' . $log_page_title_css . '">' . $page_title . '</div>',
+        '#markup' => '<div id="' . 'event-' . $request_id . '-section-review-log-page_title' . '" class="event-section-review-log-page_title ' . $log_page_title_css . '">' . $page_title . '</div>',
         '#weight' => 0,
       );
 
@@ -788,19 +791,19 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
         unset($form['review']['log']['#collapsed']);
 
         $form['review']['log']['#type'] = 'container';
-        $form['review']['log']['#attributes']['id'] = 'event-' . $event_id . '-section-review-log';
+        $form['review']['log']['#attributes']['id'] = 'event-' . $request_id . '-section-review-log';
       }
 
       $form['review']['log']['header'] = array(
-        '#markup' => '<h2 id="event-' . $event_id . '-section-review-log-header" class="event-section-review-log-header">Review Log</h2>',
+        '#markup' => '<h2 id="event-' . $request_id . '-section-review-log-header" class="event-section-review-log-header">Review Log</h2>',
         '#weight' => 1,
       );
 
-      $reviewers_yet_to_review = mcneese_event_workflow_get_reviewers_yet_to_review($event_id);
+      $reviewers_yet_to_review = mfcs_get_reviewers_yet_to_review($request_id);
 
       $yet_to_review_markup = '';
       if (!empty($reviewers_yet_to_review)) {
-        $yet_to_review_markup .= '<div id="event-' . $event_id . '-section-review-log-yet_to_review" class="event-section-review-log-yet_to_review">';
+        $yet_to_review_markup .= '<div id="event-' . $request_id . '-section-review-log-yet_to_review" class="event-section-review-log-yet_to_review">';
         $yet_to_review_markup .= '<div class="event-section-review-log-yet_to_review-label">Reviewer classifications that have not yet reviewed:</div>';
         $yet_to_review_markup .= '<ul class="event-section-review-log-yet_to_review-list">';
 
@@ -817,12 +820,12 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
       );
 
       $form['review']['log']['history'] = array(
-        '#prefix' => '<div id="event-' . $event_id . '-section-review-log-history" class="event-section-review-log-history mode-' . $mode . '">',
+        '#prefix' => '<div id="event-' . $request_id . '-section-review-log-history" class="event-section-review-log-history mode-' . $mode . '">',
         '#suffix' => '</div>',
         '#weight' => 3,
       );
 
-      mcneese_event_workflow_build_reviews_log($form, $form_state, $event_id);
+      mfcs_build_reviews_log($form, $form_state, $request_id);
 
       $form['review']['log']['submit'] = array(
         '#id' => 'event-review-log-submit',
@@ -866,7 +869,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
           ),
         ),
         '#submit' => array(
-          'mcneese_event_workflow_event_view_0_page_submit_pdf',
+          'mfcs_event_view_0_page_submit_pdf',
         ),
       );
     }
@@ -875,7 +878,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
       $decision_options = event_workflow_get_reviewer_decision_list_options('review_step');
 
       $form['review']['operations'] = array(
-        '#id' => 'event-' . $event_id . '-section-review-operations',
+        '#id' => 'event-' . $request_id . '-section-review-operations',
         '#type' => 'fieldset',
         '#collapsible' => TRUE,
         '#collapsed' => FALSE,
@@ -897,7 +900,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
       }
 
       $form['review']['operations']['header'] = array(
-        '#markup' => '<h2 id="event- ' . $event_id . '-section-review-operations-header" class="event-section-review-operations-header">Review Operations</h2>',
+        '#markup' => '<h2 id="event- ' . $request_id . '-section-review-operations-header" class="event-section-review-operations-header">Review Operations</h2>',
       );
 
       $form['review']['operations']['instructions'] = array(
@@ -910,11 +913,11 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
         '#markup' => '',
       );
 
-      $form['review']['operations']['usage_fees'] = array(
+      $form['review']['operations']['requirements'] = array(
         '#markup' => '',
       );
 
-      mcneese_event_workflow_include(4);
+      mfcs_include(4);
       $reviewer_classification_options = event_workflow_get_reviewer_classification_list_options();
 
       $reviewer_conditions = array(
@@ -924,7 +927,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
         'mr.disabled' => 0,
       );
 
-      $reviewers = mcneese_event_workflow_get_reviewers($reviewer_conditions, TRUE);
+      $reviewers = mfcs_get_reviewers($reviewer_conditions, TRUE);
       if (!is_array($reviewers)) {
         $reviewers = array();
       }
@@ -932,12 +935,12 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
       $form['review']['operations']['as_reviewer']['#markup'] = '<div class="event-section-review-operations-as_reviewer">';
 
       $reviewer_classification = array();
-      if ($step == MEW_REVIEW_STEP_VENUE_AVAILABLE || $step == MEW_REVIEW_STEP_MAKE_DECISIONS) {
+      if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE || $step == MFCS_REVIEW_STEP_MAKE_DECISIONS) {
         if ($venue_coordinator) {
-          $reviewer_classification[MEW_REVIEW_CLASSIFICATION_VENUE_COORDINATOR] = "Venue Coordinator";
+          $reviewer_classification[MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR] = "Venue Coordinator";
         }
       }
-      elseif ($step == MEW_REVIEW_STEP_REVIEW || $step == MEW_REVIEW_STEP_USAGE_FEES) {
+      elseif ($step == MFCS_REVIEW_STEP_REVIEW || $step == MFCS_REVIEW_STEP_REQUIREMENTS) {
         foreach ($reviewers as $reviewer) {
           if (isset($reviewer->review_step) && $reviewer->review_step == $step) {
             if (isset($reviewer->reviewer_classification)) {
@@ -950,7 +953,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
       if ($can_comment_event) {
         if (empty($reviewer_classification)) {
           if ($manager) {
-            $reviewer_classification[MEW_REVIEW_CLASSIFICATION_MANAGER] = 'Manager';
+            $reviewer_classification[MFCS_REVIEW_CLASSIFICATION_MANAGER] = 'Manager';
           }
         }
       }
@@ -962,15 +965,15 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
 
       $form['review']['operations']['as_reviewer']['#markup'] .= '</div>';
 
-      // make the 'usage fee' step available only under very specific situations.
-      if ($step != MEW_REVIEW_STEP_VENUE_AVAILABLE && $step != MEW_REVIEW_STEP_REVIEW) {
-        unset($decision_options[MEW_REVIEW_DECISION_USAGE_FEE]);
+      // make the 'requirement' step available only under very specific situations.
+      if ($step != MFCS_REVIEW_STEP_VENUE_AVAILABLE && $step != MFCS_REVIEW_STEP_REVIEW) {
+        unset($decision_options[MFCS_REVIEW_DECISION_REQUIREMENT]);
       }
 
       // restrict options to commenting only, if the user is only allowed to comment.
       if (!$can_review_event && $can_comment_event) {
         $decision_options = array(
-          MEW_REVIEW_DECISION_COMMENT => $decision_options[MEW_REVIEW_DECISION_COMMENT],
+          MFCS_REVIEW_DECISION_COMMENT => $decision_options[MFCS_REVIEW_DECISION_COMMENT],
         );
       }
 
@@ -989,29 +992,29 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
         ),
       );
 
-      if ($can_review_event && ($step == MEW_REVIEW_STEP_REVIEW || $step == MEW_REVIEW_STEP_VENUE_AVAILABLE)) {
-        $form['review']['operations']['use_fees'] = array(
+      if ($can_review_event && ($step == MFCS_REVIEW_STEP_REVIEW || $step == MFCS_REVIEW_STEP_VENUE_AVAILABLE)) {
+        $form['review']['operations']['requirements'] = array(
           '#tree' => TRUE,
         );
 
-        $form['form']['use_fees-custodial'] = array(
+        $form['form']['requirements-custodial'] = array(
           '#type' => 'value',
           '#value' => FALSE,
         );
 
-        $form['form']['use_fees-security'] = array(
+        $form['form']['requirements-security'] = array(
           '#type' => 'value',
           '#value' => FALSE,
         );
 
-        $form['form']['use_fees-insurance'] = array(
+        $form['form']['requirements-insurance'] = array(
           '#type' => 'value',
           '#value' => FALSE,
         );
 
         $uses = array();
-        $insurance_fee = FALSE;
-        if ($step == MEW_REVIEW_STEP_VENUE_AVAILABLE) {
+        $insurance_requirement = FALSE;
+        if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
           if ($venue_coordinator) {
             $uses['facilities'] = "Facilities";
             $uses['equipment'] = "Additional Equipment";
@@ -1019,47 +1022,47 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
         }
         else {
           foreach ($reviewers as $reviewer) {
-            if ($reviewer->reviewer_classification == MEW_REVIEW_CLASSIFICATION_FACILITIES) {
+            if ($reviewer->reviewer_classification == MFCS_REVIEW_CLASSIFICATION_FACILITIES) {
               $uses['custodial'] = "Custodial";
-              $form['form']['use_fees-custodial']['#value'] = TRUE;
+              $form['form']['requirements-custodial']['#value'] = TRUE;
             }
-            elseif ($reviewer->reviewer_classification == MEW_REVIEW_CLASSIFICATION_SECURITY) {
+            elseif ($reviewer->reviewer_classification == MFCS_REVIEW_CLASSIFICATION_SECURITY) {
               $uses['security'] = "Security";
-              $form['form']['use_fees-security']['#value'] = TRUE;
+              $form['form']['requirements-security']['#value'] = TRUE;
             }
-            elseif ($reviewer->reviewer_classification == MEW_REVIEW_CLASSIFICATION_PURCHASING) {
-              $insurance_fee = TRUE;
-              $form['form']['use_fees-insurance']['#value'] = TRUE;
+            elseif ($reviewer->reviewer_classification == MFCS_REVIEW_CLASSIFICATION_PURCHASING) {
+              $insurance_requirement = TRUE;
+              $form['form']['requirements-insurance']['#value'] = TRUE;
             }
           }
         }
 
-        // if the reviewer has no usage fees or insurance fees to specify, then do not display the Usage Fees select option.
-        if (!$insurance_fee && empty($uses)) {
-          unset($decision_options[MEW_REVIEW_DECISION_USAGE_FEE]);
+        // if the reviewer has no requirements or insurance requirements to specify, then do not display the Requirements select option.
+        if (!$insurance_requirement && empty($uses)) {
+          unset($decision_options[MFCS_REVIEW_DECISION_REQUIREMENT]);
           $form['review']['operations']['decision']['#options'] = $decision_options;
         }
 
-        $use_fees_amount_defaults = array('custodial' => '18.50', 'security' => '30.00');
+        $requirements_amount_defaults = array('custodial' => '18.50', 'security' => '30.00');
         $uses_personnel = array('custodial', 'security');
         $uses_hours = array('custodial', 'security');
         $uses_requirements = array('facilities' => TRUE, 'equipment' => FALSE, 'custodial' => TRUE, 'security' => TRUE);
         $uses_review = array('facilities' => FALSE, 'equipment' => FALSE, 'custodial' => TRUE, 'security' => TRUE);
         foreach ($uses as $use_name => $use_title) {
-          if ($uses_review[$use_name] && $step != MEW_REVIEW_STEP_REVIEW) {
+          if ($uses_review[$use_name] && $step != MFCS_REVIEW_STEP_REVIEW) {
             continue;
           }
 
           $states = array(
             'visible' => array(
-              ':input[name="review[operations][decision]"]' => array('value' => MEW_REVIEW_DECISION_USAGE_FEE),
+              ':input[name="review[operations][decision]"]' => array('value' => MFCS_REVIEW_DECISION_REQUIREMENT),
             ),
           );
 
-          if (!$uses_review[$use_name] && $step != MEW_REVIEW_STEP_REVIEW) {
+          if (!$uses_review[$use_name] && $step != MFCS_REVIEW_STEP_REVIEW) {
             $states = array(
               'visible' => array(
-                ':input[name="review[operations][decision]"]' => array('value' => MEW_REVIEW_DECISION_USAGE_FEE),
+                ':input[name="review[operations][decision]"]' => array('value' => MFCS_REVIEW_DECISION_REQUIREMENT),
                 ':input[name="review[operations][presidents_approval]"]' => array('checked' => FALSE),
                 ':input[name="review[operations][university_business]"]' => array('checked' => FALSE),
               ),
@@ -1072,9 +1075,9 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
             );
           }
 
-          $form['review']['operations']['use_fees'][$use_name] = array(
+          $form['review']['operations']['requirements'][$use_name] = array(
             '#type' => 'fieldset',
-            '#title' => $use_title . ' Use Fee',
+            '#title' => $use_title . ' Fee',
             '#collapsible' => TRUE,
             '#collapsed' => FALSE,
             '#tree' => TRUE,
@@ -1082,17 +1085,17 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
               'class' => array(
                 'no-print',
                 'mode-' . $mode,
-                'use_fees',
+                'requirements',
               ),
             ),
             '#states' => $states,
           );
 
           if (in_array($use_name, $uses_personnel)) {
-            $form['review']['operations']['use_fees'][$use_name]['quantity'] = array(
-              '#id' => 'event-review-operations-use_fees-' . $use_name . '-quantity',
+            $form['review']['operations']['requirements'][$use_name]['quantity'] = array(
+              '#id' => 'event-review-operations-requirements-' . $use_name . '-quantity',
               '#type' => 'numberfield',
-              '#title' => '<span class="element-invisible">' . $use_title . ' Use Fee </span>Personnel',
+              '#title' => '<span class="element-invisible">' . $use_title . ' Fee </span>Personnel',
               '#default_value' => NULL,
               '#size' => 16,
               '#min' => 0,
@@ -1101,22 +1104,22 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
                 'class' => array(
                   'no-print',
                   'mode-' . $mode,
-                  'use_fee-quantity',
+                  'requirement-quantity',
                 ),
               ),
               '#states' => $states,
             );
 
-            if (!empty($event['use_fees'][$use_name][0])) {
-              $form['review']['operations']['use_fees'][$use_name]['quantity']['#default_value'] = $event['use_fees'][$use_name][0]->quantity;
+            if (!empty($event['requirements'][$use_name][0])) {
+              $form['review']['operations']['requirements'][$use_name]['quantity']['#default_value'] = $event['requirements'][$use_name][0]->quantity;
             }
           }
 
           if (in_array($use_name, $uses_hours)) {
-            $form['review']['operations']['use_fees'][$use_name]['hours'] = array(
-              '#id' => 'event-review-operations-use_fees-' . $use_name . '-hours',
+            $form['review']['operations']['requirements'][$use_name]['hours'] = array(
+              '#id' => 'event-review-operations-requirements-' . $use_name . '-hours',
               '#type' => 'textfield',
-              '#title' => '<span class="element-invisible">' . $use_title . ' Use Fee </span>Hours',
+              '#title' => '<span class="element-invisible">' . $use_title . ' Fee </span>Hours',
               '#default_value' => NULL,
               '#size' => 16,
               '#min' => 0,
@@ -1125,21 +1128,21 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
                 'class' => array(
                   'no-print',
                   'mode-' . $mode,
-                  'use_fee-hours',
+                  'requirement-hours',
                 ),
               ),
               '#states' => $states,
             );
 
-            if (!empty($event['use_fees'][$use_name][0])) {
-              $form['review']['operations']['use_fees'][$use_name]['hours']['#default_value'] = event_workflow_convert_value_from_database_format($event['use_fees'][$use_name][0]->hours, 'currency');
+            if (!empty($event['requirements'][$use_name][0])) {
+              $form['review']['operations']['requirements'][$use_name]['hours']['#default_value'] = event_workflow_convert_value_from_database_format($event['requirements'][$use_name][0]->hours, 'currency');
             }
           }
 
-          $form['review']['operations']['use_fees'][$use_name]['days'] = array(
-            '#id' => 'event-review-operations-use_fees-' . $use_name . '-days',
+          $form['review']['operations']['requirements'][$use_name]['days'] = array(
+            '#id' => 'event-review-operations-requirements-' . $use_name . '-days',
             '#type' => 'numberfield',
-            '#title' => '<span class="element-invisible">' . $use_title . ' Use Fee </span>Days',
+            '#title' => '<span class="element-invisible">' . $use_title . ' Fee </span>Days',
             '#default_value' => NULL,
             '#min' => 0,
             '#size' => 16,
@@ -1148,20 +1151,20 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
               'class' => array(
                 'no-print',
                 'mode-' . $mode,
-                'use_fee-days',
+                'requirement-days',
               ),
             ),
             '#states' => $states,
           );
 
-          if (!empty($event['use_fees'][$use_name][0])) {
-            $form['review']['operations']['use_fees'][$use_name]['days']['#default_value'] = event_workflow_convert_value_from_database_format($event['use_fees'][$use_name][0]->days, 'currency');
+          if (!empty($event['requirements'][$use_name][0])) {
+            $form['review']['operations']['requirements'][$use_name]['days']['#default_value'] = event_workflow_convert_value_from_database_format($event['requirements'][$use_name][0]->days, 'currency');
           }
 
-          $form['review']['operations']['use_fees'][$use_name]['amount'] = array(
-            '#id' => 'event-review-operations-use_fees-' . $use_name . '-amount',
+          $form['review']['operations']['requirements'][$use_name]['amount'] = array(
+            '#id' => 'event-review-operations-requirements-' . $use_name . '-amount',
             '#type' => 'textfield',
-            '#title' => '<span class="element-invisible">' . $use_title . ' Use Fee </span>Amount',
+            '#title' => '<span class="element-invisible">' . $use_title . ' Fee </span>Amount',
             '#default_value' => NULL,
             '#size' => 16,
             '#min' => 0,
@@ -1170,38 +1173,38 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
               'class' => array(
                 'no-print',
                 'mode-' . $mode,
-                'use_fee-amount',
+                'requirement-amount',
               ),
             ),
             '#states' => $states,
           );
 
-          if (!empty($event['use_fees'][$use_name][0])) {
-            $form['review']['operations']['use_fees'][$use_name]['amount']['#default_value'] = event_workflow_convert_value_from_database_format($event['use_fees'][$use_name][0]->amount, 'currency');
+          if (!empty($event['requirements'][$use_name][0])) {
+            $form['review']['operations']['requirements'][$use_name]['amount']['#default_value'] = event_workflow_convert_value_from_database_format($event['requirements'][$use_name][0]->amount, 'currency');
           }
-          elseif (isset($use_fees_amount_defaults[$use_name])) {
-            $form['review']['operations']['use_fees'][$use_name]['amount']['#default_value'] = $use_fees_amount_defaults[$use_name];
+          elseif (isset($requirements_amount_defaults[$use_name])) {
+            $form['review']['operations']['requirements'][$use_name]['amount']['#default_value'] = $requirements_amount_defaults[$use_name];
           }
         }
 
-        if ($step == MEW_REVIEW_STEP_VENUE_AVAILABLE) {
+        if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
           if ($venue_coordinator) {
-            $form['review']['operations']['use_fees']['other'] = array(
-              '#id' => 'event-review-operations-use_fees-other',
+            $form['review']['operations']['requirements']['other'] = array(
+              '#id' => 'event-review-operations-requirements-other',
               '#type' => 'checkbox',
-              '#title' => 'Other Use Fees',
-              '#description' => "Other charges, unknown presently, will be billed to the presenter at a later time.",
+              '#title' => 'Other Fees',
+              '#description' => "Other charges, unknown presently, will be agreemented to the presenter at a later time.",
               '#default_value' => NULL,
               '#attributes' => array(
                 'class' => array(
                   'no-print',
                   'mode-' . $mode,
-                  'use_fee-other',
+                  'requirement-other',
                 ),
               ),
               '#states' => array(
                 'visible' => array(
-                  ':input[name="review[operations][decision]"]' => array('value' => MEW_REVIEW_DECISION_USAGE_FEE),
+                  ':input[name="review[operations][decision]"]' => array('value' => MFCS_REVIEW_DECISION_REQUIREMENT),
                   ':input[name="review[operations][presidents_approval]"]' => array('checked' => FALSE),
                   ':input[name="review[operations][university_business]"]' => array('checked' => FALSE),
                 ),
@@ -1214,8 +1217,8 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
               ),
             );
 
-            if (!empty($event['use_fees']['other'][0])) {
-              $form['review']['operations']['use_fees']['other']['#default_value'] = $event['use_fees']['other'][0]->value;
+            if (!empty($event['requirements']['other'][0])) {
+              $form['review']['operations']['requirements']['other']['#default_value'] = $event['requirements']['other'][0]->value;
             }
           }
         }
@@ -1224,7 +1227,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
           '#tree' => TRUE,
         );
 
-        if ($insurance_fee && $step == MEW_REVIEW_STEP_REVIEW) {
+        if ($insurance_requirement && $step == MFCS_REVIEW_STEP_REVIEW) {
           $form['review']['operations']['insurance']['contractor'] = array(
             '#id' => 'event-review-operations-insurance-contractor',
             '#type' => 'checkbox',
@@ -1240,7 +1243,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
             ),
             '#states' => array(
               'visible' => array(
-                ':input[name="review[operations][decision]"]' => array('value' => MEW_REVIEW_DECISION_USAGE_FEE),
+                ':input[name="review[operations][decision]"]' => array('value' => MFCS_REVIEW_DECISION_REQUIREMENT),
               ),
             ),
           );
@@ -1264,7 +1267,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
             ),
             '#states' => array(
               'visible' => array(
-                ':input[name="review[operations][decision]"]' => array('value' => MEW_REVIEW_DECISION_USAGE_FEE),
+                ':input[name="review[operations][decision]"]' => array('value' => MFCS_REVIEW_DECISION_REQUIREMENT),
               ),
             ),
           );
@@ -1275,7 +1278,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
         }
       }
 
-      if ($can_review_event && $step == MEW_REVIEW_STEP_VENUE_AVAILABLE) {
+      if ($can_review_event && $step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
         $form['review']['operations']['presidents_approval'] = array(
           '#id' => 'event-review-operations-presidents_approval',
           '#type' => 'checkbox',
@@ -1291,7 +1294,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
           ),
           '#states' => array(
             'visible' => array(
-              ':input[name="review[operations][decision]"]' => array('value' => MEW_REVIEW_DECISION_USAGE_FEE),
+              ':input[name="review[operations][decision]"]' => array('value' => MFCS_REVIEW_DECISION_REQUIREMENT),
             ),
           ),
         );
@@ -1300,7 +1303,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
           '#id' => 'event-review-operations-university_business',
           '#type' => 'checkbox',
           '#title' => "Strictly University Business",
-          '#description' => "By selecting this checkbox you claim that this is strictly for university business and usage fees do not apply.",
+          '#description' => "By selecting this checkbox you claim that this is strictly for university business and requirements do not apply.",
           '#default_value' => NULL,
           '#required' => FALSE,
           '#attributes' => array(
@@ -1311,7 +1314,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
           ),
           '#states' => array(
             'visible' => array(
-              ':input[name="review[operations][decision]"]' => array('value' => MEW_REVIEW_DECISION_USAGE_FEE),
+              ':input[name="review[operations][decision]"]' => array('value' => MFCS_REVIEW_DECISION_REQUIREMENT),
             ),
           ),
         );
@@ -1369,7 +1372,7 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
  *
  * @param array $form
  *   The form array as defined by drupals form api.
- * @param int $event_id
+ * @param int $request_id
  *   The event request id.
  * @param string $group
  *   The group name.
@@ -1386,9 +1389,9 @@ function mcneese_event_workflow_event_view_0_page($form, &$form_state, $event_id
  *   The row number or NULL when there is no valid row.
  *   FALSE is returned for in
  *
- * @see: mcneese_event_workflow_event_view_0_page()
+ * @see: mfcs_event_view_0_page()
  */
-function mcneese_event_workflow_event_view_0_page_setup_group_path(&$form, $event_id, $group, $presentation_tables, $show, $event) {
+function mfcs_event_view_0_page_setup_group_path(&$form, $request_id, $group, $presentation_tables, $show, $event) {
   $row = NULL;
   $group_path = &$form['display']['groups'];
   $event_type = $event['information']['type'][0]->value;
@@ -1412,6 +1415,12 @@ function mcneese_event_workflow_event_view_0_page_setup_group_path(&$form, $even
     }
   }
 
+  if ($show['agreement']) {
+    if ($group != 'request') {
+      $show['agreement'] = FALSE;
+    }
+  }
+
   if ($show['clone']) {
     if ($group != 'request') {
       $show['clone'] = FALSE;
@@ -1427,7 +1436,7 @@ function mcneese_event_workflow_event_view_0_page_setup_group_path(&$form, $even
         '#suffix' => '',
         '#weight' => $row,
         '#attributes' => array(
-          'id' => 'section-event-' . $event_id . '-group-' . $row,
+          'id' => 'section-event-' . $request_id . '-group-' . $row,
           'class' => array(
             'group',
             'group-' . $row,
@@ -1446,7 +1455,7 @@ function mcneese_event_workflow_event_view_0_page_setup_group_path(&$form, $even
       '#suffix' => '',
       '#weight' => 0,
       '#attributes' => array(
-        'id' => 'section-event-' . $event_id . '-' . $group,
+        'id' => 'section-event-' . $request_id . '-' . $group,
         'class' => array(
           'section-event',
           'section-event-' . $group,
@@ -1456,23 +1465,27 @@ function mcneese_event_workflow_event_view_0_page_setup_group_path(&$form, $even
     );
 
     if (isset($presentation_tables[$group]['label'])) {
-      $group_path[$group]['#extra_prefix'] .= '<div class="section-event-' . $event_id . '-' . $group . '-label-wrapper section-event-label-wrapper">';
+      $group_path[$group]['#extra_prefix'] .= '<div class="section-event-' . $request_id . '-' . $group . '-label-wrapper section-event-label-wrapper">';
 
       if ($show_link) {
         if ($show['clone']) {
-          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'events/create-0/' . $event_id . '" class="section-event-' . $event_id . '-' . $group . '-history section-event-clone no-print" title="'. t("Copy " . $presentation_tables[$group]['label']) . '">Copy</a>';
+          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'events/create-0/' . $request_id . '" class="section-event-' . $request_id . '-' . $group . '-history section-event-clone no-print" title="'. t("Copy " . $presentation_tables[$group]['label']) . '">Copy</a>';
         }
 
         if ($show['edit']) {
-          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'events/edit-0/' . $event_id . '/' . $group . '" class="section-event-' . $event_id . '-' . $group . '-edit section-event-edit no-print" title="'. t("Edit " . $presentation_tables[$group]['label']) . '">Edit</a>';
+          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'events/edit-0/' . $request_id . '/' . $group . '" class="section-event-' . $request_id . '-' . $group . '-edit section-event-edit no-print" title="'. t("Edit " . $presentation_tables[$group]['label']) . '">Edit</a>';
         }
 
         if ($show['history']) {
-          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'events/history-0/' . $event_id . '" class="section-event-' . $event_id . '-' . $group . '-history section-event-history no-print" title="'. t("Edit " . $presentation_tables[$group]['label']) . '">History</a>';
+          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'events/history-0/' . $request_id . '" class="section-event-' . $request_id . '-' . $group . '-history section-event-history no-print" title="'. t("Edit " . $presentation_tables[$group]['label']) . '">History</a>';
+        }
+
+        if ($show['agreement']) {
+          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'events/agreement-0/' . $request_id . '" class="section-event-' . $request_id . '-' . $group . '-agreement section-event-agreement no-print" title="'. t("View Facilities Use Agreement for " . $presentation_tables[$group]['label']) . '">Agreement</a>';
         }
       }
 
-      $group_path[$group]['#extra_prefix'] .= '<h2 id="section-event-' . $event_id . '-' . $group . '-label" class="section-event-label section-event-' . $group . '-label">';
+      $group_path[$group]['#extra_prefix'] .= '<h2 id="section-event-' . $request_id . '-' . $group . '-label" class="section-event-label section-event-' . $group . '-label">';
       $group_path[$group]['#extra_prefix'] .= $presentation_tables[$group]['label'];
       $group_path[$group]['#extra_prefix'] .= '</h2>';
 
@@ -1488,23 +1501,23 @@ function mcneese_event_workflow_event_view_0_page_setup_group_path(&$form, $even
 }
 
 /**
- * Pre-Validation for mcneese_event_workflow_event_view_0_page().
+ * Pre-Validation for mfcs_event_view_0_page().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mcneese_event_workflow_event_view_0_page()
+ * @see: mfcs_event_view_0_page()
  */
-function mcneese_event_workflow_event_view_0_page_pre_validate(&$form, &$form_state) {
+function mfcs_event_view_0_page_pre_validate(&$form, &$form_state) {
   $clicked_id = '';
   if (isset($form_state['triggering_element']['#id'])) {
     $clicked_id = $form_state['triggering_element']['#id'];
   }
 
   if ($clicked_id == 'event-review-operations-submit-submit') {
-    if (isset($form_state['values']['review']['operations']['decision']) && $form_state['values']['review']['operations']['decision'] == MEW_REVIEW_DECISION_COMMENT) {
+    if (isset($form_state['values']['review']['operations']['decision']) && $form_state['values']['review']['operations']['decision'] == MFCS_REVIEW_DECISION_COMMENT) {
       $form['review']['operations']['message']['#required'] = TRUE;
     }
   }
@@ -1513,7 +1526,7 @@ function mcneese_event_workflow_event_view_0_page_pre_validate(&$form, &$form_st
   }
 
   $event = $form['form']['event']['#value'];
-  $event_id = (int) $form['form']['event_id']['#value'];
+  $request_id = (int) $form['form']['request_id']['#value'];
   $mode = (int) $form['form']['mode']['#value'];
   $user = cf_current_user();
 
@@ -1527,24 +1540,24 @@ function mcneese_event_workflow_event_view_0_page_pre_validate(&$form, &$form_st
   }
 
   $unrequire_usage_fields = TRUE;
-  if ($step == MEW_REVIEW_STEP_VENUE_AVAILABLE) {
-    if ($decision == MEW_REVIEW_DECISION_USAGE_FEE) {
-      $usage_fees_waved = FALSE;
+  if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
+    if ($decision == MFCS_REVIEW_DECISION_REQUIREMENT) {
+      $requirements_waved = FALSE;
       if (isset($form_state['values']['review']['operations']['presidents_approval']) && $form_state['values']['review']['operations']['presidents_approval'] == 1) {
-        $usage_fees_waved = TRUE;
+        $requirements_waved = TRUE;
       }
 
       if (isset($form_state['values']['review']['operations']['university_business']) && $form_state['values']['review']['operations']['university_business'] == 1) {
-        $usage_fees_waved = TRUE;
+        $requirements_waved = TRUE;
       }
 
-      $unrequire_usage_fields = $usage_fees_waved;
+      $unrequire_usage_fields = $requirements_waved;
     }
   }
 
   if ($unrequire_usage_fields) {
-    if (isset($form['review']['operations']['use_fees']) && is_array($form['review']['operations']['use_fees'])) {
-      foreach ($form['review']['operations']['use_fees'] as $key => &$value) {
+    if (isset($form['review']['operations']['requirements']) && is_array($form['review']['operations']['requirements'])) {
+      foreach ($form['review']['operations']['requirements'] as $key => &$value) {
         if (is_array($value)) {
           if (isset($value['#required'])) {
             $value['#required'] = FALSE;
@@ -1564,16 +1577,16 @@ function mcneese_event_workflow_event_view_0_page_pre_validate(&$form, &$form_st
 }
 
 /**
- * Validation for mcneese_event_workflow_event_view_0_page().
+ * Validation for mfcs_event_view_0_page().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mcneese_event_workflow_event_view_0_page()
+ * @see: mfcs_event_view_0_page()
  */
-function mcneese_event_workflow_event_view_0_page_validate($form, &$form_state) {
+function mfcs_event_view_0_page_validate($form, &$form_state) {
   $clicked_id = '';
   if (isset($form_state['triggering_element']['#id'])) {
     $clicked_id = $form_state['triggering_element']['#id'];
@@ -1581,17 +1594,17 @@ function mcneese_event_workflow_event_view_0_page_validate($form, &$form_state) 
 
   $form_state['rebuild'] = TRUE;
 
-  $manager = user_access('mcneese event workflow manage');
-  $reviewer = user_access('mcneese event workflow review');
-  $requester = user_access('mcneese event workflow request');
+  $manager = user_access('mcneese facilities use manage');
+  $reviewer = user_access('mcneese facilities use review');
+  $requester = user_access('mcneese facilities use request');
 
   $event = $form['form']['event']['#value'];
-  $event_id = (int) $form['form']['event_id']['#value'];
+  $request_id = (int) $form['form']['request_id']['#value'];
   $mode = (int) $form['form']['mode']['#value'];
   $user = cf_current_user();
 
-  $can_review_event = mcneese_event_workflow_management_page_event_access('review', $event_id);
-  $can_comment_event = mcneese_event_workflow_management_page_event_access('comment', $event_id);
+  $can_review_event = mfcs_management_page_event_access('review', $request_id);
+  $can_comment_event = mfcs_management_page_event_access('comment', $request_id);
 
   $event_classification = $event['event_coordinator']['classification'][0]->value;
   $step = $event['top']['step'][0]->value;
@@ -1609,14 +1622,14 @@ function mcneese_event_workflow_event_view_0_page_validate($form, &$form_state) 
     $form_state['rebuild'] = FALSE;
   }
   elseif ($clicked_id == 'event-display-submit-cancel') {
-    if ($mode != MEW_VIEW_MODE_NORMAL && $mode != MEW_VIEW_MODE_DISPLAY) {
+    if ($mode != MFCS_VIEW_MODE_NORMAL && $mode != MFCS_VIEW_MODE_DISPLAY) {
       form_set_error('', "Illegal operation detected.");
     }
 
     $form_state['cancel_was_clicked'] = TRUE;
   }
   elseif ($clicked_id == 'event-display-submit-uncancel') {
-    if ($mode != MEW_VIEW_MODE_NORMAL && $mode != MEW_VIEW_MODE_DISPLAY) {
+    if ($mode != MFCS_VIEW_MODE_NORMAL && $mode != MFCS_VIEW_MODE_DISPLAY) {
       form_set_error('', "Illegal operation detected.");
     }
 
@@ -1627,8 +1640,8 @@ function mcneese_event_workflow_event_view_0_page_validate($form, &$form_state) 
 
     // only allow operations for states and steps that make sense to.
     $allowed_statuses = array(
-      MEW_EVENT_STATUS_LOCKED,
-      MEW_EVENT_STATUS_UNLOCKED,
+      MFCS_EVENT_STATUS_LOCKED,
+      MFCS_EVENT_STATUS_UNLOCKED,
     );
 
     if (!in_array($status, $allowed_statuses)) {
@@ -1637,10 +1650,10 @@ function mcneese_event_workflow_event_view_0_page_validate($form, &$form_state) 
     }
 
     $allowed_steps = array(
-      MEW_REVIEW_STEP_VENUE_AVAILABLE,
-      MEW_REVIEW_STEP_REVIEW,
-      MEW_REVIEW_STEP_USAGE_FEES,
-      MEW_REVIEW_STEP_MAKE_DECISIONS,
+      MFCS_REVIEW_STEP_VENUE_AVAILABLE,
+      MFCS_REVIEW_STEP_REVIEW,
+      MFCS_REVIEW_STEP_REQUIREMENTS,
+      MFCS_REVIEW_STEP_MAKE_DECISIONS,
     );
 
     if (!in_array($step, $allowed_steps)) {
@@ -1649,14 +1662,14 @@ function mcneese_event_workflow_event_view_0_page_validate($form, &$form_state) 
     }
 
     $reviewers = array();
-    if ($mode < MEW_VIEW_MODE_NORMAL && $mode > MEW_VIEW_MODE_OPERATIONS) {
+    if ($mode < MFCS_VIEW_MODE_NORMAL && $mode > MFCS_VIEW_MODE_OPERATIONS) {
       form_set_error('', "Illegal operation detected. Invalid mode selected.");
       $failure = TRUE;
     }
     elseif (!$can_review_event) {
-      if ($decision == MEW_REVIEW_DECISION_COMMENT) {
+      if ($decision == MFCS_REVIEW_DECISION_COMMENT) {
         if ($can_comment_event) {
-          unset($form_state['values']['review']['operations']['use_fees']);
+          unset($form_state['values']['review']['operations']['requirements']);
           unset($form_state['values']['review']['operations']['insurance']);
         }
         else {
@@ -1670,237 +1683,230 @@ function mcneese_event_workflow_event_view_0_page_validate($form, &$form_state) 
       }
     }
 
-    // A request was made to have the fees waved options be displayed with the usage fees to avoid confusion.
-    // To do this without changing the underlining design, when the usage fee is specified with a wave checked, then convert the decision to a wave.
-    if ($step == MEW_REVIEW_STEP_VENUE_AVAILABLE && $decision == MEW_REVIEW_DECISION_USAGE_FEE) {
+    // A request was made to have the requirements waved options be displayed with the requirements to avoid confusion.
+    // To do this without changing the underlining design, when the requirement is specified with a wave checked, then convert the decision to a wave.
+    if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE && $decision == MFCS_REVIEW_DECISION_REQUIREMENT) {
       if (isset($form_state['values']['review']['operations']['presidents_approval']) && $form_state['values']['review']['operations']['presidents_approval'] == 1) {
-        $form_state['values']['review']['operations']['decision'] = MEW_REVIEW_DECISION_WAVE;
-        $decision = MEW_REVIEW_DECISION_WAVE;
+        $form_state['values']['review']['operations']['decision'] = MFCS_REVIEW_DECISION_WAVE;
+        $decision = MFCS_REVIEW_DECISION_WAVE;
       }
       elseif (isset($form_state['values']['review']['operations']['university_business']) && $form_state['values']['review']['operations']['university_business'] == 1) {
-        $form_state['values']['review']['operations']['decision'] = MEW_REVIEW_DECISION_WAVE;
-        $decision = MEW_REVIEW_DECISION_WAVE;
+        $form_state['values']['review']['operations']['decision'] = MFCS_REVIEW_DECISION_WAVE;
+        $decision = MFCS_REVIEW_DECISION_WAVE;
       }
     }
 
-    $fees_required = TRUE;
-    if ($step == MEW_REVIEW_STEP_VENUE_AVAILABLE) {
-      if (isset($event['use_fees']['waved'][0]->value)) {
-        if ($event['use_fees']['waved'][0]->value == 1) {
-          $fees_required = FALSE;
+    $requirements_required = TRUE;
+    if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
+      if (isset($event['requirements']['waved'][0]->value)) {
+        if ($event['requirements']['waved'][0]->value == 1) {
+          $requirements_required = FALSE;
         }
       }
 
-      if (isset($event['use_fees']['university'][0]->value)) {
-        if ($event['use_fees']['university'][0]->value == 1) {
-          $fees_required = FALSE;
+      if (isset($event['requirements']['university'][0]->value)) {
+        if ($event['requirements']['university'][0]->value == 1) {
+          $requirements_required = FALSE;
         }
-      }
-    }
-
-    if (!$fees_required) {
-      if (isset($form_state['values']['review']['operations']['use_fees'])) {
-        unset($form_state['values']['review']['operations']['use_fees']);
       }
     }
 
-    if ($step == MEW_REVIEW_STEP_REVIEW && $decision == MEW_REVIEW_DECISION_USAGE_FEE && $fees_required) {
-      $use_fees = array();
-      if (isset($form_state['values']['review']['operations']['use_fees'])) {
-        $use_fees = $form_state['values']['review']['operations']['use_fees'];
+    if (!$requirements_required) {
+      if (isset($form_state['values']['review']['operations']['requirements'])) {
+        unset($form_state['values']['review']['operations']['requirements']);
       }
-
-      if (array_key_exists('facilities', $use_fees) && !empty($use_fees['facilities']['amount'])) {
-        $matches = array();
-        $matched = preg_match('/^(\d+|\d+\.\d|\d+\.\d\d)$/i', $use_fees['facilities']['amount'], $matches);
-
-        if (!$matched) {
-          form_set_error('review][operations][use_fees][facilities][amount', t("@facilities_use_fee is not a valid facilities usage fee amount. Use only numbers and two decimal places. Do not provide a dollar sign.", array('@facilities' => $use_fees['facilities']['amount'])));
-          $failure = TRUE;
-        }
-
-        if (isset($use_fees['facilities']['quantity']) && intval($use_fees['facilities']['quantity']) != $use_fees['facilities']['quantity']) {
-          form_set_error('review][operations][use_fees][facilities][quantity', t("@quantity is not an allowed number. Use only numbers without decimal places.", array('@quantity' => $use_fees['facilities']['quantity'])));
-          $failure = TRUE;
-        }
-
-        if (isset($use_fees['facilities']['hours']) && !cf_is_integer($use_fees['facilities']['hours'])) {
-          form_set_error('review][operations][use_fees][facilities][hours', t("@hours is not an valid number. Use only numbers places.", array('@hours' => $use_fees['facilities']['hours'])));
-          $failure = TRUE;
-        }
-
-        if (isset($use_fees['facilities']['days']) && intval($use_fees['facilities']['days']) != $use_fees['facilities']['days']) {
-          form_set_error('review][operations][use_fees][facilities][days', t("@days is not an allowed number. Use only numbers without decimal places.", array('@days' => $use_fees['facilities']['days'])));
-          $failure = TRUE;
-        }
-      }
-
-      if (array_key_exists('equipment', $use_fees) && !empty($use_fees['equipment']['amount'])) {
-        $matches = array();
-        $matched = preg_match('/^(\d+|\d+\.\d|\d+\.\d\d)$/i', $use_fees['equipment']['amount'], $matches);
-
-        if (!$matched) {
-          form_set_error('review][operations][use_fees][equipment][amount', t("@equipment is not a valid additional equipment usage fee. Use only numbers and two decimal places. Do not provide a dollar sign.", array('@equipment' => $use_fees['equipment']['amount'])));
-          $failure = TRUE;
-        }
-
-        if (isset($use_fees['equipment']['quantity']) && intval($use_fees['equipment']['quantity']) != $use_fees['equipment']['quantity']) {
-          form_set_error('review][operations][use_fees][equipment][quantity', t("@quantity is not an allowed number. Use only numbers without decimal places.", array('@quantity' => $use_fees['equipment']['quantity'])));
-          $failure = TRUE;
-        }
-
-        if (isset($use_fees['equipment']['hours']) && !cf_is_integer($use_fees['equipment']['hours'])) {
-          form_set_error('review][operations][use_fees][equipment][hours', t("@hours is not an valid number. Use only numbers places.", array('@hours' => $use_fees['equipment']['hours'])));
-          $failure = TRUE;
-        }
-
-        if (isset($use_fees['equipment']['days']) && intval($use_fees['equipment']['days']) != $use_fees['equipment']['days']) {
-          form_set_error('review][operations][use_fees][equipment][days', t("@days is not an allowed number. Use only numbers without decimal places.", array('@days' => $use_fees['equipment']['days'])));
-          $failure = TRUE;
-        }
-      }
-
-      if (array_key_exists('custodial', $use_fees) && !empty($use_fees['custodial']['amount'])) {
-        $matches = array();
-        $matched = preg_match('/^(\d+|\d+\.\d|\d+\.\d\d)$/i', $use_fees['custodial']['amount'], $matches);
-
-        if (!$matched) {
-          form_set_error('review][operations][use_fees][custodial][amount', t("@custodial is not a valid custodial usage fee amount. Use only numbers and two decimal places. Do not provide a dollar sign.", array('@custodial' => $use_fees['custodial']['amount'])));
-          $failure = TRUE;
-        }
-
-        if (isset($use_fees['custodial']['quantity']) && intval($use_fees['custodial']['quantity']) != $use_fees['custodial']['quantity']) {
-          form_set_error('review][operations][use_fees][custodial][quantity', t("@quantity is not an allowed number. Use only numbers without decimal places.", array('@quantity' => $use_fees['custodial']['quantity'])));
-          $failure = TRUE;
-        }
-
-        if (isset($use_fees['custodial']['hours']) && !cf_is_integer($use_fees['custodial']['hours'])) {
-          form_set_error('review][operations][use_fees][custodial][hours', t("@hours is not an valid number. Use only numbers places.", array('@hours' => $use_fees['custodial']['hours'])));
-          $failure = TRUE;
-        }
-
-        if (isset($use_fees['custodial']['days']) && intval($use_fees['custodial']['days']) != $use_fees['custodial']['days']) {
-          form_set_error('review][operations][use_fees][custodial][days', t("@days is not an allowed number. Use only numbers without decimal places.", array('@days' => $use_fees['custodial']['days'])));
-          $failure = TRUE;
-        }
-      }
-
-      if (array_key_exists('security', $use_fees) && !empty($use_fees['security']['amount'])) {
-        $matches = array();
-        $matched = preg_match('/^(\d+|\d+\.\d|\d+\.\d\d)$/i', $use_fees['security']['amount'], $matches);
-
-        if (!$matched) {
-          form_set_error('review][operations][use_fees][security][amount', t("@security is not a valid security usage fee amount. Use only numbers and two decimal places. Do not provide a dollar sign.", array('@security' => $use_fees['security']['amount'])));
-          $failure = TRUE;
-        }
-
-        if (isset($use_fees['security']['quantity']) && intval($use_fees['security']['quantity']) != $use_fees['security']['quantity']) {
-          form_set_error('review][operations][use_fees][security][quantity', t("@quantity is not an allowed number. Use only numbers without decimal places.", array('@quantity' => $use_fees['security']['quantity'])));
-          $failure = TRUE;
-        }
-
-        if (isset($use_fees['security']['hours']) && !cf_is_integer($use_fees['security']['hours'])) {
-          form_set_error('review][operations][use_fees][security][hours', t("@hours is not an valid number. Use only numbers places.", array('@hours' => $use_fees['security']['hours'])));
-          $failure = TRUE;
-        }
-
-        if (isset($use_fees['security']['days']) && intval($use_fees['security']['days']) != $use_fees['security']['days']) {
-          form_set_error('review][operations][use_fees][security][days', t("@days is not an allowed number. Use only numbers without decimal places.", array('@days' => $use_fees['security']['days'])));
-          $failure = TRUE;
-        }
-      }
-
-      unset($use_fees);
     }
 
-    if ($step == MEW_REVIEW_STEP_VENUE_AVAILABLE && $decision == MEW_REVIEW_DECISION_APPROVE) {
-      $fees_not_supplied = TRUE;
+    if ($step == MFCS_REVIEW_STEP_REVIEW && $decision == MFCS_REVIEW_DECISION_REQUIREMENT && $requirements_required) {
+      $requirements = array();
+      if (isset($form_state['values']['review']['operations']['requirements'])) {
+        $requirements = $form_state['values']['review']['operations']['requirements'];
+      }
 
-      if ($step == MEW_REVIEW_STEP_VENUE_AVAILABLE) {
-        if (isset($event['use_fees']['waved'][0]->value)) {
-          if ($event['use_fees']['waved'][0]->value) {
-            $fees_not_supplied = FALSE;
+      if (array_key_exists('facilities', $requirements) && !empty($requirements['facilities']['amount'])) {
+        $matches = array();
+        $matched = preg_match('/^(\d+|\d+\.\d|\d+\.\d\d)$/i', $requirements['facilities']['amount'], $matches);
+
+        if (!$matched) {
+          form_set_error('review][operations][requirements][facilities][amount', t("@facilities_requirement is not a valid facilities requirement amount. Use only numbers and two decimal places. Do not provide a dollar sign.", array('@facilities' => $requirements['facilities']['amount'])));
+          $failure = TRUE;
+        }
+
+        if (isset($requirements['facilities']['quantity']) && intval($requirements['facilities']['quantity']) != $requirements['facilities']['quantity']) {
+          form_set_error('review][operations][requirements][facilities][quantity', t("@quantity is not an allowed number. Use only numbers without decimal places.", array('@quantity' => $requirements['facilities']['quantity'])));
+          $failure = TRUE;
+        }
+
+        if (isset($requirements['facilities']['hours']) && !cf_is_integer($requirements['facilities']['hours'])) {
+          form_set_error('review][operations][requirements][facilities][hours', t("@hours is not an valid number. Use only numbers.", array('@hours' => $requirements['facilities']['hours'])));
+          $failure = TRUE;
+        }
+
+        if (isset($requirements['facilities']['days']) && intval($requirements['facilities']['days']) != $requirements['facilities']['days']) {
+          form_set_error('review][operations][requirements][facilities][days', t("@days is not an allowed number. Use only numbers without decimal places.", array('@days' => $requirements['facilities']['days'])));
+          $failure = TRUE;
+        }
+      }
+
+      if (array_key_exists('equipment', $requirements) && !empty($requirements['equipment']['amount'])) {
+        $matches = array();
+        $matched = preg_match('/^(\d+|\d+\.\d|\d+\.\d\d)$/i', $requirements['equipment']['amount'], $matches);
+
+        if (!$matched) {
+          form_set_error('review][operations][requirements][equipment][amount', t("@equipment is not a valid additional equipment requirement. Use only numbers and two decimal places. Do not provide a dollar sign.", array('@equipment' => $requirements['equipment']['amount'])));
+          $failure = TRUE;
+        }
+
+        if (isset($requirements['equipment']['quantity']) && intval($requirements['equipment']['quantity']) != $requirements['equipment']['quantity']) {
+          form_set_error('review][operations][requirements][equipment][quantity', t("@quantity is not an allowed number. Use only numbers without decimal places.", array('@quantity' => $requirements['equipment']['quantity'])));
+          $failure = TRUE;
+        }
+
+        if (isset($requirements['equipment']['hours']) && !cf_is_integer($requirements['equipment']['hours'])) {
+          form_set_error('review][operations][requirements][equipment][hours', t("@hours is not an valid number. Use only numbers.", array('@hours' => $requirements['equipment']['hours'])));
+          $failure = TRUE;
+        }
+
+        if (isset($requirements['equipment']['days']) && intval($requirements['equipment']['days']) != $requirements['equipment']['days']) {
+          form_set_error('review][operations][requirements][equipment][days', t("@days is not an allowed number. Use only numbers without decimal places.", array('@days' => $requirements['equipment']['days'])));
+          $failure = TRUE;
+        }
+      }
+
+      if (array_key_exists('custodial', $requirements) && !empty($requirements['custodial']['amount'])) {
+        $matches = array();
+        $matched = preg_match('/^(\d+|\d+\.\d|\d+\.\d\d)$/i', $requirements['custodial']['amount'], $matches);
+
+        if (!$matched) {
+          form_set_error('review][operations][requirements][custodial][amount', t("@custodial is not a valid custodial requirement amount. Use only numbers and two decimal places. Do not provide a dollar sign.", array('@custodial' => $requirements['custodial']['amount'])));
+          $failure = TRUE;
+        }
+
+        if (isset($requirements['custodial']['quantity']) && intval($requirements['custodial']['quantity']) != $requirements['custodial']['quantity']) {
+          form_set_error('review][operations][requirements][custodial][quantity', t("@quantity is not an allowed number. Use only numbers without decimal places.", array('@quantity' => $requirements['custodial']['quantity'])));
+          $failure = TRUE;
+        }
+
+        if (isset($requirements['custodial']['hours']) && !cf_is_integer($requirements['custodial']['hours'])) {
+          form_set_error('review][operations][requirements][custodial][hours', t("@hours is not an valid number. Use only numbers.", array('@hours' => $requirements['custodial']['hours'])));
+          $failure = TRUE;
+        }
+
+        if (isset($requirements['custodial']['days']) && intval($requirements['custodial']['days']) != $requirements['custodial']['days']) {
+          form_set_error('review][operations][requirements][custodial][days', t("@days is not an allowed number. Use only numbers without decimal places.", array('@days' => $requirements['custodial']['days'])));
+          $failure = TRUE;
+        }
+      }
+
+      if (array_key_exists('security', $requirements) && !empty($requirements['security']['amount'])) {
+        $matches = array();
+        $matched = preg_match('/^(\d+|\d+\.\d|\d+\.\d\d)$/i', $requirements['security']['amount'], $matches);
+
+        if (!$matched) {
+          form_set_error('review][operations][requirements][security][amount', t("@security is not a valid security requirement amount. Use only numbers and two decimal places. Do not provide a dollar sign.", array('@security' => $requirements['security']['amount'])));
+          $failure = TRUE;
+        }
+
+        if (isset($requirements['security']['quantity']) && intval($requirements['security']['quantity']) != $requirements['security']['quantity']) {
+          form_set_error('review][operations][requirements][security][quantity', t("@quantity is not an allowed number. Use only numbers without decimal places.", array('@quantity' => $requirements['security']['quantity'])));
+          $failure = TRUE;
+        }
+
+        if (isset($requirements['security']['hours']) && !cf_is_integer($requirements['security']['hours'])) {
+          form_set_error('review][operations][requirements][security][hours', t("@hours is not an valid number. Use only numbers.", array('@hours' => $requirements['security']['hours'])));
+          $failure = TRUE;
+        }
+
+        if (isset($requirements['security']['days']) && intval($requirements['security']['days']) != $requirements['security']['days']) {
+          form_set_error('review][operations][requirements][security][days', t("@days is not an allowed number. Use only numbers without decimal places.", array('@days' => $requirements['security']['days'])));
+          $failure = TRUE;
+        }
+      }
+
+      unset($requirements);
+    }
+
+    if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE && $decision == MFCS_REVIEW_DECISION_APPROVE) {
+      $requirements_not_supplied = TRUE;
+
+      if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
+        if (isset($event['requirements']['waved'][0]->value)) {
+          if ($event['requirements']['waved'][0]->value) {
+            $requirements_not_supplied = FALSE;
           }
         }
 
-        if (isset($event['use_fees']['university'][0]->value)) {
-          if ($event['use_fees']['university'][0]->value) {
-            $fees_not_supplied = FALSE;
-          }
-        }
-      }
-
-      if (isset($event['use_fees']['facilities'][0]->days)) {
-        $fees_not_supplied = FALSE;
-      }
-
-      if ($fees_not_supplied) {
-        form_set_error('review][operations][decision', t("The event cannot be approved until the usage fees are either specified or waved."));
-      }
-    }
-
-    if ($step == MEW_REVIEW_STEP_REVIEW && $decision == MEW_REVIEW_DECISION_APPROVE) {
-      $fees_not_supplied = TRUE;
-
-      if ($step == MEW_REVIEW_STEP_VENUE_AVAILABLE) {
-        if (isset($event['use_fees']['waved'][0]->value)) {
-          if ($event['use_fees']['waved'][0]->value) {
-            $fees_not_supplied = FALSE;
-          }
-        }
-
-        if (isset($event['use_fees']['university'][0]->value)) {
-          if ($event['use_fees']['university'][0]->value) {
-            $fees_not_supplied = FALSE;
+        if (isset($event['requirements']['university'][0]->value)) {
+          if ($event['requirements']['university'][0]->value) {
+            $requirements_not_supplied = FALSE;
           }
         }
       }
 
-      $custodial_fees_required = FALSE;
-      if (isset($form['form']['use_fees-custodial']['#value'])) {
-        $custodial_fees_required = $form['form']['use_fees-custodial']['#value'];
+      if (isset($event['requirements']['facilities'][0]->days)) {
+        $requirements_not_supplied = FALSE;
       }
 
-      $security_fees_required = FALSE;
-      if (isset($form['form']['use_fees-custodial']['#value'])) {
-        $security_fees_required = $form['form']['use_fees-security']['#value'];
+      if ($requirements_not_supplied) {
+        form_set_error('review][operations][decision', t("The event cannot be approved until the requirements are either specified or waved."));
+      }
+    }
+
+    // autowave will be set to TRUE if and only if a reviewer has not specified a WAVE yet, but still APPROVED.
+    $form_state['autowave'] = FALSE;
+
+    if ($step == MFCS_REVIEW_STEP_REVIEW && $decision == MFCS_REVIEW_DECISION_APPROVE) {
+      $requirements_not_supplied = TRUE;
+      $requirements_exist = TRUE;
+
+      $custodial_requirements_required = FALSE;
+      if (isset($form['form']['requirements-custodial']['#value'])) {
+        $custodial_requirements_required = $form['form']['requirements-custodial']['#value'];
       }
 
-      $insurance_fees_required = FALSE;
-      if (isset($form['form']['use_fees-custodial']['#value'])) {
-        $insurance_fees_required = $form['form']['use_fees-insurance']['#value'];
+      $security_requirements_required = FALSE;
+      if (isset($form['form']['requirements-custodial']['#value'])) {
+        $security_requirements_required = $form['form']['requirements-security']['#value'];
       }
 
-      if (!$custodial_fees_required && !$security_fees_required && !$insurance_fees_required) {
-        $fees_not_supplied = FALSE;
+      $insurance_requirements_required = FALSE;
+      if (isset($form['form']['requirements-custodial']['#value'])) {
+        $insurance_requirements_required = $form['form']['requirements-insurance']['#value'];
       }
 
-      if (isset($form['review']['operations']['use_fees']['custodial'])) {
-        if (isset($event['use_fees']['custodial'][0]->amount)) {
-          $fees_not_supplied = FALSE;
+      if (!$custodial_requirements_required && !$security_requirements_required && !$insurance_requirements_required) {
+        $requirements_not_supplied = FALSE;
+        $requirements_exist = FALSE;
+      }
+
+      if (isset($form['review']['operations']['requirements']['custodial'])) {
+        if (isset($event['requirements']['custodial'][0]->amount)) {
+          $requirements_not_supplied = FALSE;
         }
       }
 
-      if (isset($form['review']['operations']['use_fees']['security'])) {
-        if (isset($event['use_fees']['security'][0]->amount)) {
-          $fees_not_supplied = FALSE;
+      if (isset($form['review']['operations']['requirements']['security'])) {
+        if (isset($event['requirements']['security'][0]->amount)) {
+          $requirements_not_supplied = FALSE;
         }
       }
 
       if (isset($form['review']['operations']['insurance']['contractor'])) {
         if (isset($event['insurance']['contractor'][0]->value)) {
-          $fees_not_supplied = FALSE;
+          $requirements_not_supplied = FALSE;
         }
       }
 
       if (isset($form['review']['operations']['insurance']['unaffiliated'])) {
         if (isset($event['insurance']['unaffiliated'][0]->value)) {
-          $fees_not_supplied = FALSE;
+          $requirements_not_supplied = FALSE;
         }
       }
 
-      if ($fees_not_supplied) {
-        form_set_error('review][operations][decision', t("The event cannot be approved until the usage fees are specified."));
+      if ($step == MFCS_REVIEW_STEP_REVIEW && $requirements_exist) {
+        if ($requirements_not_supplied) {
+          $form_state['autowave'] = TRUE;
+        }
       }
     }
 
@@ -1917,21 +1923,21 @@ function mcneese_event_workflow_event_view_0_page_validate($form, &$form_state) 
 }
 
 /**
- * Submit process for mcneese_event_workflow_event_view_0_page().
+ * Submit process for mfcs_event_view_0_page().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mcneese_event_workflow_event_view_0_page()
+ * @see: mfcs_event_view_0_page()
  */
-function mcneese_event_workflow_event_view_0_page_submit($form, &$form_state) {
+function mfcs_event_view_0_page_submit($form, &$form_state) {
   $user = cf_current_user();
 
-  $event_id = NULL;
-  if (isset($form['form']['event_id']['#value'])) {
-    $event_id = $form['form']['event_id']['#value'];
+  $request_id = NULL;
+  if (isset($form['form']['request_id']['#value'])) {
+    $request_id = $form['form']['request_id']['#value'];
   }
 
   $clicked_id = '';
@@ -1940,16 +1946,16 @@ function mcneese_event_workflow_event_view_0_page_submit($form, &$form_state) {
   }
 
   if ($clicked_id == 'event-cancel-submit-yes') {
-    $deleted = mcneese_event_workflow_include(5);
+    $deleted = mfcs_include(5);
 
-    mcneese_event_workflow_event_cancel_0_form_submit($form, $form_state);
+    mfcs_event_cancel_0_form_submit($form, $form_state);
 
     return;
   }
   elseif ($clicked_id == 'event-uncancel-submit-yes') {
-    $deleted = mcneese_event_workflow_include(5);
+    $deleted = mfcs_include(5);
 
-    mcneese_event_workflow_event_uncancel_0_form_submit($form, $form_state);
+    mfcs_event_uncancel_0_form_submit($form, $form_state);
 
     return;
   }
@@ -1957,7 +1963,7 @@ function mcneese_event_workflow_event_view_0_page_submit($form, &$form_state) {
   elseif ($clicked_id == 'event-review-operations-submit-submit') {
     $success = TRUE;
 
-    mcneese_event_workflow_include(6);
+    mfcs_include(6);
     $decision = $form_state['values']['review']['operations']['decision'];
     $message = $form_state['values']['review']['operations']['message'];
 
@@ -1967,9 +1973,9 @@ function mcneese_event_workflow_event_view_0_page_submit($form, &$form_state) {
     $step = $event['top']['step'][0]->value;
 
     $extra = array();
-    if ($step == MEW_REVIEW_STEP_VENUE_AVAILABLE || $step == MEW_REVIEW_STEP_REVIEW) {
-      if (isset($form_state['values']['review']['operations']['use_fees'])) {
-        $extra['use_fees'] = $form_state['values']['review']['operations']['use_fees'];
+    if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE || $step == MFCS_REVIEW_STEP_REVIEW) {
+      if (isset($form_state['values']['review']['operations']['requirements'])) {
+        $extra['requirements'] = $form_state['values']['review']['operations']['requirements'];
       }
 
       if (isset($form_state['values']['review']['operations']['insurance'])) {
@@ -1977,18 +1983,24 @@ function mcneese_event_workflow_event_view_0_page_submit($form, &$form_state) {
       }
     }
 
-    if ($step == MEW_REVIEW_STEP_VENUE_AVAILABLE) {
+    if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
       if (isset($form_state['values']['review']['operations']['presidents_approval'])) {
-        $extra['use_fees']['waved'] = $form_state['values']['review']['operations']['presidents_approval'];
+        $extra['requirements']['waved'] = $form_state['values']['review']['operations']['presidents_approval'];
       }
 
       if (isset($form_state['values']['review']['operations']['university_business'])) {
-        $extra['use_fees']['university'] = $form_state['values']['review']['operations']['university_business'];
+        $extra['requirements']['university'] = $form_state['values']['review']['operations']['university_business'];
+      }
+    }
+    elseif ($step == MFCS_REVIEW_STEP_REVIEW) {
+      if (isset($form_state['autowave']) && $form_state['autowave']) {
+        mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], MFCS_REVIEW_STEP_REVIEW, MFCS_REVIEW_DECISION_WAVE, "", array('send_email' => FALSE));
       }
     }
 
+
     if ($success) {
-      $success = mcneese_event_workflow_workflow_step_review($event_id, $form['form']['user']['#value'], $step, $decision, $message, $extra);
+      $success = mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], $step, $decision, $message, $extra);
     }
 
     if ($success) {
@@ -1996,7 +2008,7 @@ function mcneese_event_workflow_event_view_0_page_submit($form, &$form_state) {
     }
     else {
       form_set_error('form', "An error occurred while trying to submit the event review. Please contact the support staff.");
-      watchdog(MEW_WATCHDOG_ID, "An error occured while trying to submit the event review.", array(), WATCHDOG_ERROR);
+      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to submit the event review.", array(), WATCHDOG_ERROR);
 
       $form_state['rebuild'] = TRUE;
       $form_state['redirect'] = FALSE;
@@ -2006,22 +2018,22 @@ function mcneese_event_workflow_event_view_0_page_submit($form, &$form_state) {
     }
 
     // change to the event view page on submit for these decisions to prevent potential access denied messages following the submit process.
-    if ($decision == MEW_REVIEW_DECISION_APPROVE || $decision == MEW_REVIEW_DECISION_DENY) {
-      $form_state['values']['redirect_to'] = 'events/view-0/' .  $event_id;
+    if ($decision == MFCS_REVIEW_DECISION_APPROVE || $decision == MFCS_REVIEW_DECISION_DENY) {
+      $form_state['values']['redirect_to'] = 'events/view-0/' .  $request_id;
     }
   }
 
   // redirect after submitting.
   if (empty($form_state['values']['redirect_to'])) {
-    if (empty($event_id)) {
+    if (empty($request_id)) {
       $form_state['redirect'] = 'events';
     }
     else {
       if ($form['form']['mode']['#value'] > 0) {
-        $form_state['redirect'] = 'events/view-0/' . $event_id . '/' . $form['form']['mode']['#value'];
+        $form_state['redirect'] = 'events/view-0/' . $request_id . '/' . $form['form']['mode']['#value'];
       }
       else {
-        $form_state['redirect'] = 'events/view-0/' . $event_id;
+        $form_state['redirect'] = 'events/view-0/' . $request_id;
       }
     }
   }
@@ -2031,7 +2043,7 @@ function mcneese_event_workflow_event_view_0_page_submit($form, &$form_state) {
 }
 
 /**
- * Custom submit process for mcneese_event_workflow_event_view_0_page().
+ * Custom submit process for mfcs_event_view_0_page().
  *
  * Used for generating a print PDF.
  *
@@ -2040,9 +2052,9 @@ function mcneese_event_workflow_event_view_0_page_submit($form, &$form_state) {
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mcneese_event_workflow_event_view_0_page()
+ * @see: mfcs_event_view_0_page()
  */
-function mcneese_event_workflow_event_view_0_page_submit_pdf($form, &$form_state) {
+function mfcs_event_view_0_page_submit_pdf($form, &$form_state) {
   $user = cf_current_user();
 
   $clicked_id = '';
@@ -2050,14 +2062,14 @@ function mcneese_event_workflow_event_view_0_page_submit_pdf($form, &$form_state
     $clicked_id = $form_state['triggering_element']['#id'];
   }
 
-  $event_id = (int) $form['form']['event_id']['#value'];
+  $request_id = (int) $form['form']['request_id']['#value'];
 
-  if (($clicked_id != 'event-display-submit-download' && $clicked_id != 'event-review-log-submit-download') || empty($event_id)) {
-    if (empty($event_id)) {
+  if (($clicked_id != 'event-display-submit-download' && $clicked_id != 'event-review-log-submit-download') || empty($request_id)) {
+    if (empty($request_id)) {
       $form_state['redirect'] = 'events';
     }
     else {
-      $form_state['redirect'] = 'events/view-0/' . $event_id;
+      $form_state['redirect'] = 'events/view-0/' . $request_id;
     }
 
     return;
@@ -2066,26 +2078,26 @@ function mcneese_event_workflow_event_view_0_page_submit_pdf($form, &$form_state
   global $base_path;
 
   $mode = $form['form']['mode']['#value'];
-  $form_state['redirect'] = '/events/pdf-0/' . $event_id . '/' . $mode;
+  $form_state['redirect'] = '/events/pdf-0/' . $request_id . '/' . $mode;
 }
 
 /**
  * Renders a PDF of a given event request.
  *
- * @param int $event_id
+ * @param int $request_id
  *   The unique identifier for an event request.
  * @param int|null $mode
  *   Specifies the mode that alters how the form is rendered.
  *   1: Render only the display part.
  */
-function mcneese_event_workflow_event_pdf_0_page($event_id, $mode) {
+function mfcs_event_pdf_0_page($request_id, $mode) {
   $page_title = "Event Request";
   drupal_set_title($page_title);
 
-  $event = event_workflow_load_event_by_id($event_id);
+  $event = event_workflow_load_event_by_id($request_id);
 
   if (empty($event)) {
-    watchdog(MEW_WATCHDOG_ID, "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
+    watchdog(MFCS_WATCHDOG_ID, "Unable to find event with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
     drupal_not_found();
     drupal_exit();
     return array();
@@ -2103,9 +2115,9 @@ function mcneese_event_workflow_event_pdf_0_page($event_id, $mode) {
   $page['html'] = array(
     '#type' => 'container',
     '#attributes' => array(
-      'id' => 'mcneese-event-workflow-event-view-0-page',
+      'id' => 'mfcs-event-view-0-page',
       'class' => array(
-        'mcneese-event-workflow-event-pdf-0',
+        'mfcs-event-pdf-0',
       ),
     ),
   );
@@ -2113,11 +2125,11 @@ function mcneese_event_workflow_event_pdf_0_page($event_id, $mode) {
   // turn off devel shutdown functionality.
   $GLOBALS['devel_shutdown'] = FALSE;
 
-  $page['html']['content'] = array(mcneese_event_workflow_event_view_0_page($form, $form_state, $event_id, $mode, TRUE));
+  $page['html']['content'] = array(mfcs_event_view_0_page($form, $form_state, $request_id, $mode, TRUE));
   $renderred = drupal_render($page);
   $html = drupal_render_page($renderred);
 
-  $result = mcneese_event_workflow_event_pdf_0_page_using_wkhtmltopdf($event_id, $html);
+  $result = mfcs_event_pdf_0_page_using_wkhtmltopdf($request_id, $html);
 
   if ($result) {
     exit();
@@ -2136,13 +2148,13 @@ function mcneese_event_workflow_event_pdf_0_page($event_id, $mode) {
  *   The form array.
  * @param array $form_state
  *   The form state array.
- * @param int $event_id
- *   The numeric event id.
+ * @param int $request_id
+ *   The numeric request id.
  *
  * @return bool
  *   TRUE on success, FALSE otherwise.
  */
-function mcneese_event_workflow_build_reviews_log(&$form, &$form_state, $event_id) {
+function mfcs_build_reviews_log(&$form, &$form_state, $request_id) {
   if (!is_array($form)) {
     cf_error::invalid_array('form');
     return FALSE;
@@ -2153,35 +2165,35 @@ function mcneese_event_workflow_build_reviews_log(&$form, &$form_state, $event_i
     return FALSE;
   }
 
-  $event = event_workflow_load_event_by_id($event_id);
+  $event = event_workflow_load_event_by_id($request_id);
 
   if (empty($event)) {
-    watchdog(MEW_WATCHDOG_ID, "Unable to find event with id of @event_id.", array('@event_id' => $event_id), WATCHDOG_ERROR);
+    watchdog(MFCS_WATCHDOG_ID, "Unable to find event with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
     return FALSE;
   }
 
-  mcneese_event_workflow_include(0);
+  mfcs_include(0);
 
-  $presentation = mcneese_event_workflow_table_presentation();
+  $presentation = mfcs_table_presentation();
 
-  mcneese_event_workflow_include(4);
+  mfcs_include(4);
 
   $decision_options = event_workflow_get_reviewer_decision_list_options();
 
   // review revisions are neither used nor incremented in the same manner as other fields.
   // the revision number will not increment when a new review is made.
-  $review_revision = mcneese_event_workflow_load_event_revision_number($event_id, 'mew_field_review_review');
+  $review_revision = mfcs_load_event_revision_number($request_id, 'mfcs_field_review_review');
 
   if ($review_revision === FALSE || is_null($review_revision)) {
     $review_revision = 0;
   }
 
   try {
-    $query = db_select('mew_field_review_review', 'mfrr');
+    $query = db_select('mfcs_field_review_review', 'mfrr');
 
     $query->fields('mfrr');
 
-    $query->condition('mfrr.event_id', $event_id);
+    $query->condition('mfrr.request_id', $request_id);
     #$query->condition('mfrr.revision', $review_revision);
 
     $query->orderBy('mfrr.date');
@@ -2190,7 +2202,7 @@ function mcneese_event_workflow_build_reviews_log(&$form, &$form_state, $event_i
 
     if (is_array($reviews)) {
       foreach ($reviews as $review) {
-        $query = db_select('mew_review_classifications', 'mrc');
+        $query = db_select('mfcs_review_classifications', 'mrc');
 
         $query->fields('mrc');
         $query->condition('mrc.review_id', $review->id);
@@ -2201,17 +2213,17 @@ function mcneese_event_workflow_build_reviews_log(&$form, &$form_state, $event_i
         if (is_array($review_classifications)) {
           foreach ($review_classifications as $review_classification) {
             // some classifications are not allowed in certain steps.
-            if ($review->step == MEW_REVIEW_STEP_REVIEW ||$review->step == MEW_REVIEW_STEP_USAGE_FEES) {
-              if ($review_classification->classification == MEW_REVIEW_CLASSIFICATION_VENUE_COORDINATOR) {
+            if ($review->step == MFCS_REVIEW_STEP_REVIEW ||$review->step == MFCS_REVIEW_STEP_REQUIREMENTS) {
+              if ($review_classification->classification == MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR) {
                 continue;
               }
-              elseif ($review_classification->classification == MEW_REVIEW_CLASSIFICATION_SYSTEM_ADMINISTRATOR) {
+              elseif ($review_classification->classification == MFCS_REVIEW_CLASSIFICATION_SYSTEM_ADMINISTRATOR) {
                 continue;
               }
-              elseif ($review_classification->classification == MEW_REVIEW_CLASSIFICATION_MANAGER) {
+              elseif ($review_classification->classification == MFCS_REVIEW_CLASSIFICATION_MANAGER) {
                 continue;
               }
-              elseif ($review_classification->classification == MEW_REVIEW_CLASSIFICATION_FAILSAFE_COORDINATOR) {
+              elseif ($review_classification->classification == MFCS_REVIEW_CLASSIFICATION_FAILSAFE_COORDINATOR) {
                 continue;
               }
             }
@@ -2230,7 +2242,7 @@ function mcneese_event_workflow_build_reviews_log(&$form, &$form_state, $event_i
 
 
   $changelog_fields = array();
-  $changelog_fields['use_fees'] = array(
+  $changelog_fields['requirements'] = array(
     'facilities',
     'equipment',
     'custodial',
@@ -2258,7 +2270,7 @@ function mcneese_event_workflow_build_reviews_log(&$form, &$form_state, $event_i
       $message = $review->message;
       $date = $review->date;
 
-      $changelog = event_workflow_load_event_by_timestamp($event_id, $date, $changelog_fields);
+      $changelog = event_workflow_load_event_by_timestamp($request_id, $date, $changelog_fields);
 
       if (!array_key_exists($user_id, $users)) {
         $users[$user_id] = user_load($user_id);
@@ -2285,13 +2297,13 @@ function mcneese_event_workflow_build_reviews_log(&$form, &$form_state, $event_i
           $reviewer_classification .= ', ';
         }
 
-        if ($classification == MEW_REVIEW_CLASSIFICATION_VENUE_COORDINATOR) {
+        if ($classification == MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR) {
           $reviewer_classification .= "Venue Coordinator";
         }
-        elseif ($classification == MEW_REVIEW_CLASSIFICATION_MANAGER) {
+        elseif ($classification == MFCS_REVIEW_CLASSIFICATION_MANAGER) {
           $reviewer_classification .= "Manager";
         }
-        elseif ($classification == MEW_REVIEW_CLASSIFICATION_SYSTEM_ADMINISTRATOR) {
+        elseif ($classification == MFCS_REVIEW_CLASSIFICATION_SYSTEM_ADMINISTRATOR) {
           $reviewer_classification .= "System Administrator";
         }
         else {
@@ -2317,34 +2329,34 @@ function mcneese_event_workflow_build_reviews_log(&$form, &$form_state, $event_i
       $markup .= '<div class="review-item-label">';
       $markup .= '<h3 class="review-item-label-text">' . $row_id_block . '<div class="review-item-label-text-title">';
 
-      if ($decision == MEW_REVIEW_DECISION_AMENDMENT) {
+      if ($decision == MFCS_REVIEW_DECISION_AMENDMENT) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">' . "Amended" . '</strong> the event request' . $reviewer_classification . '.';
       }
-      elseif ($review_step == MEW_REVIEW_STEP_VENUE_AVAILABLE && $decision == MEW_REVIEW_DECISION_APPROVE) {
+      elseif ($review_step == MFCS_REVIEW_STEP_VENUE_AVAILABLE && $decision == MFCS_REVIEW_DECISION_APPROVE) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has designated that the <strong class="review-item-label-text-row-decision">Venue is Available</strong>' . $reviewer_classification . '.';
       }
-      elseif ($review_step == MEW_REVIEW_STEP_VENUE_AVAILABLE && $decision == MEW_REVIEW_DECISION_DENY) {
+      elseif ($review_step == MFCS_REVIEW_STEP_VENUE_AVAILABLE && $decision == MFCS_REVIEW_DECISION_DENY) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has designated that the <strong class="review-item-label-text-row-decision">Venue is Unavailable</strong>' . $reviewer_classification . '.';
       }
-      elseif ($review_step == MEW_REVIEW_STEP_MAKE_DECISIONS && $decision == MEW_REVIEW_DECISION_APPROVE) {
+      elseif ($review_step == MFCS_REVIEW_STEP_MAKE_DECISIONS && $decision == MFCS_REVIEW_DECISION_APPROVE) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">Confirmed and Reserved</strong> the request' . $reviewer_classification . "";
       }
-      elseif ($review_step == MEW_REVIEW_STEP_MAKE_DECISIONS && $decision == MEW_REVIEW_DECISION_DENY) {
+      elseif ($review_step == MFCS_REVIEW_STEP_MAKE_DECISIONS && $decision == MFCS_REVIEW_DECISION_DENY) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">Denied</strong> the request' . $reviewer_classification . '.';
       }
-      elseif ($decision == MEW_REVIEW_DECISION_COMMENT) {
+      elseif ($decision == MFCS_REVIEW_DECISION_COMMENT) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has made a <strong class="review-item-label-text-row-decision">' . $decision_options[$decision] . '</strong>' . $reviewer_classification . '.';
       }
-      elseif ($review_step == MEW_REVIEW_STEP_REVIEW && $decision == MEW_REVIEW_DECISION_USAGE_FEE) {
+      elseif (($review_step == MFCS_REVIEW_STEP_REVIEW || $review_step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) && $decision == MFCS_REVIEW_DECISION_REQUIREMENT) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has designated the <strong class="review-item-label-text-row-decision">' . $decision_options[$decision] . '</strong>' . $reviewer_classification . '.';
       }
-      elseif ($review_step == MEW_REVIEW_STEP_REVIEW && $decision == MEW_REVIEW_DECISION_WAVE) {
-        $markup .= $user_name_markup . ' ' . $user_id_markup . ' has waved the <strong class="review-item-label-text-row-decision">' . $decision_options[$decision] . '</strong> step' . $reviewer_classification . '.';
+      elseif (($review_step == MFCS_REVIEW_STEP_REVIEW || $review_step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) && $decision == MFCS_REVIEW_DECISION_WAVE) {
+        $markup .= $user_name_markup . ' ' . $user_id_markup . ' has waved the <strong class="review-item-label-text-row-decision">' . $decision_options[MFCS_REVIEW_DECISION_REQUIREMENT] . '</strong> ' . $reviewer_classification . '.';
       }
-      elseif ($review_step == MEW_REVIEW_STEP_USAGE_FEES && $decision == MEW_REVIEW_DECISION_APPROVE) {
+      elseif ($review_step == MFCS_REVIEW_STEP_REQUIREMENTS && $decision == MFCS_REVIEW_DECISION_APPROVE) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has accepted the <strong class="review-item-label-text-row-decision">' . $review_step_options[$review_step] . '</strong>' . $reviewer_classification . '.';
       }
-      elseif ($review_step == MEW_REVIEW_STEP_USAGE_FEES && $decision == MEW_REVIEW_DECISION_DENY) {
+      elseif ($review_step == MFCS_REVIEW_STEP_REQUIREMENTS && $decision == MFCS_REVIEW_DECISION_DENY) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has denied the <strong class="review-item-label-text-row-decision">' . $review_step_options[$review_step] . '</strong>' . $reviewer_classification . '.';
       }
       else {
@@ -2356,31 +2368,18 @@ function mcneese_event_workflow_build_reviews_log(&$form, &$form_state, $event_i
 
 
       // provide additional changelog information.
-      if ($decision == MEW_REVIEW_DECISION_AMENDMENT) {
+      if ($decision == MFCS_REVIEW_DECISION_AMENDMENT) {
         $message .= '<div class="review-item-message-decision-amendment review-item-message-decision">';
         $message .= 'The review step has been reset and all prior reviews no longer apply.';
         $message .= '</div>';
       }
 
-      if (!empty($changelog['use_fees']['facilities'])) {
-        $message .= '<div class="review-item-message-use_fees-facilities review-item-message-use_fees review-item-message-fees">';
-        $message .= '<div class="item-label">Facilities Use Fees:</div> ';
+      if (!empty($changelog['requirements']['facilities'])) {
+        $message .= '<div class="review-item-message-requirements-facilities review-item-message-requirements review-item-message-requirements">';
+        $message .= '<div class="item-label">Facilities Fees:</div> ';
 
-        $value = reset($changelog['use_fees']['facilities']);
-        $value_markup = mcneese_event_workflow_build_event_request_value_structure($event_id, 'use_fees', 'facilities', 0, $value, $presentation['use_fees']['facilities'], $changelog);
-
-        if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
-          $message .= drupal_render($value_markup);
-        }
-        $message .= '</div>';
-      }
-
-      if (!empty($changelog['use_fees']['equipment'])) {
-        $message .= '<div class="review-item-message-use_fees-equipment review-item-message-use_fees review-item-message-fees">';
-        $message .= '<div class="item-label">Additional Equipment Use Fees:</div> ';
-
-        $value = reset($changelog['use_fees']['equipment']);
-        $value_markup = mcneese_event_workflow_build_event_request_value_structure($event_id, 'use_fees', 'equipment', 0, $value, $presentation['use_fees']['equipment'], $changelog);
+        $value = reset($changelog['requirements']['facilities']);
+        $value_markup = mfcs_build_event_request_value_structure($request_id, 'requirements', 'facilities', 0, $value, $presentation['requirements']['facilities'], $changelog);
 
         if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
           $message .= drupal_render($value_markup);
@@ -2388,25 +2387,12 @@ function mcneese_event_workflow_build_reviews_log(&$form, &$form_state, $event_i
         $message .= '</div>';
       }
 
-      if (!empty($changelog['use_fees']['security'])) {
-        $message .= '<div class="review-item-message-use_fees-security review-item-message-use_fees review-item-message-fees">';
-        $message .= '<div class="item-label">Security Use Fees:</div> ';
+      if (!empty($changelog['requirements']['equipment'])) {
+        $message .= '<div class="review-item-message-requirements-equipment review-item-message-requirements review-item-message-requirements">';
+        $message .= '<div class="item-label">Additional Equipment Fees:</div> ';
 
-        $value = reset($changelog['use_fees']['security']);
-        $value_markup = mcneese_event_workflow_build_event_request_value_structure($event_id, 'use_fees', 'security', 0, $value, $presentation['use_fees']['security'], $changelog);
-
-        if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
-          $message .= drupal_render($value_markup);
-        }
-        $message .= '</div>';
-      }
-
-      if (!empty($changelog['use_fees']['custodial'])) {
-        $message .= '<div class="review-item-message-use_fees-custodial review-item-message-use_fees review-item-message-fees">';
-        $message .= '<div class="item-label">Custodial Use Fees:</div> ';
-
-        $value = reset($changelog['use_fees']['custodial']);
-        $value_markup = mcneese_event_workflow_build_event_request_value_structure($event_id, 'use_fees', 'custodial', 0, $value, $presentation['use_fees']['custodial'], $changelog);
+        $value = reset($changelog['requirements']['equipment']);
+        $value_markup = mfcs_build_event_request_value_structure($request_id, 'requirements', 'equipment', 0, $value, $presentation['requirements']['equipment'], $changelog);
 
         if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
           $message .= drupal_render($value_markup);
@@ -2414,19 +2400,45 @@ function mcneese_event_workflow_build_reviews_log(&$form, &$form_state, $event_i
         $message .= '</div>';
       }
 
-      if (!empty($changelog['use_fees']['other'])) {
-        $message .= '<div class="review-item-message-use_fees-other review-item-message-use_fees review-item-message-fees">';
-        $message .= '<div class="item-label">Other Use Fees:</div> ';
+      if (!empty($changelog['requirements']['security'])) {
+        $message .= '<div class="review-item-message-requirements-security review-item-message-requirements review-item-message-requirements">';
+        $message .= '<div class="item-label">Security Fees:</div> ';
+
+        $value = reset($changelog['requirements']['security']);
+        $value_markup = mfcs_build_event_request_value_structure($request_id, 'requirements', 'security', 0, $value, $presentation['requirements']['security'], $changelog);
+
+        if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
+          $message .= drupal_render($value_markup);
+        }
+        $message .= '</div>';
+      }
+
+      if (!empty($changelog['requirements']['custodial'])) {
+        $message .= '<div class="review-item-message-requirements-custodial review-item-message-requirements review-item-message-requirements">';
+        $message .= '<div class="item-label">Custodial Fees:</div> ';
+
+        $value = reset($changelog['requirements']['custodial']);
+        $value_markup = mfcs_build_event_request_value_structure($request_id, 'requirements', 'custodial', 0, $value, $presentation['requirements']['custodial'], $changelog);
+
+        if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
+          $message .= drupal_render($value_markup);
+        }
+        $message .= '</div>';
+      }
+
+      if (!empty($changelog['requirements']['other'])) {
+        $message .= '<div class="review-item-message-requirements-other review-item-message-requirements review-item-message-requirements">';
+        $message .= '<div class="item-label">Other Fees:</div> ';
 
         // always display the boolean when displayed in the review log.
-        foreach ($presentation['use_fees']['other']['display'] as &$value) {
+        foreach ($presentation['requirements']['other']['display'] as &$value) {
           if ($value == 'when_true' || $value == 'when_false') {
             $value = 'raw';
           }
         }
 
-        $value = reset($changelog['use_fees']['other']);
-        $value_markup = mcneese_event_workflow_build_event_request_value_structure($event_id, 'use_fees', 'other', 0, $value, $presentation['use_fees']['other'], $changelog);
+        $value = reset($changelog['requirements']['other']);
+        $value_markup = mfcs_build_event_request_value_structure($request_id, 'requirements', 'other', 0, $value, $presentation['requirements']['other'], $changelog);
 
         if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
           $message .= drupal_render($value_markup);
@@ -2434,20 +2446,20 @@ function mcneese_event_workflow_build_reviews_log(&$form, &$form_state, $event_i
         $message .= '</div>';
       }
 
-      if ($review_step == MEW_REVIEW_STEP_VENUE_AVAILABLE && ($decision == MEW_REVIEW_DECISION_USAGE_FEE || $decision == MEW_REVIEW_DECISION_WAVE)) {
-        if (!empty($changelog['use_fees']['waved'])) {
-          $message .= '<div class="review-item-message-use_fees-waved review-item-message-use_fees review-item-message-fees">';
+      if ($review_step == MFCS_REVIEW_STEP_VENUE_AVAILABLE && ($decision == MFCS_REVIEW_DECISION_REQUIREMENT || $decision == MFCS_REVIEW_DECISION_WAVE)) {
+        if (!empty($changelog['requirements']['waved'])) {
+          $message .= '<div class="review-item-message-requirements-waved review-item-message-requirements review-item-message-requirements">';
           $message .= '<div class="item-label">Waved with Presidents Approval:</div> ';
 
           // always display the boolean when displayed in the review log.
-          foreach ($presentation['use_fees']['waved']['display'] as &$value) {
+          foreach ($presentation['requirements']['waved']['display'] as &$value) {
             if ($value == 'when_true' || $value == 'when_false') {
               $value = 'raw';
             }
           }
 
-          $value = reset($changelog['use_fees']['waved']);
-          $value_markup = mcneese_event_workflow_build_event_request_value_structure($event_id, 'use_fees', 'waved', 0, $value, $presentation['use_fees']['waved'], $changelog);
+          $value = reset($changelog['requirements']['waved']);
+          $value_markup = mfcs_build_event_request_value_structure($request_id, 'requirements', 'waved', 0, $value, $presentation['requirements']['waved'], $changelog);
 
           if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
             $message .= drupal_render($value_markup);
@@ -2455,19 +2467,19 @@ function mcneese_event_workflow_build_reviews_log(&$form, &$form_state, $event_i
           $message .= '</div>';
         }
 
-        if (!empty($changelog['use_fees']['university'])) {
-          $message .= '<div class="review-item-message-use_fees-university review-item-message-university review-item-message-fees">';
+        if (!empty($changelog['requirements']['university'])) {
+          $message .= '<div class="review-item-message-requirements-university review-item-message-university review-item-message-requirements">';
           $message .= '<div class="item-label">Strictly University Business:</div> ';
 
           // always display the boolean when displayed in the review log.
-          foreach ($presentation['use_fees']['university']['display'] as &$value) {
+          foreach ($presentation['requirements']['university']['display'] as &$value) {
             if ($value == 'when_true' || $value == 'when_false') {
               $value = 'raw';
             }
           }
 
-          $value = reset($changelog['use_fees']['university']);
-          $value_markup = mcneese_event_workflow_build_event_request_value_structure($event_id, 'use_fees', 'university', 0, $value, $presentation['use_fees']['university'], $changelog);
+          $value = reset($changelog['requirements']['university']);
+          $value_markup = mfcs_build_event_request_value_structure($request_id, 'requirements', 'university', 0, $value, $presentation['requirements']['university'], $changelog);
 
           if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
             $message .= drupal_render($value_markup);
@@ -2477,7 +2489,7 @@ function mcneese_event_workflow_build_reviews_log(&$form, &$form_state, $event_i
       }
 
       if (!empty($changelog['insurance']['contractor'])) {
-        $message .= '<div class="review-item-message-insurance-contractor review-item-message-insurance review-item-message-fees">';
+        $message .= '<div class="review-item-message-insurance-contractor review-item-message-insurance review-item-message-requirements">';
         $message .= '<div class="item-label">Contractor Insurance:</div> ';
 
         // always display the boolean when displayed in the review log.
@@ -2488,7 +2500,7 @@ function mcneese_event_workflow_build_reviews_log(&$form, &$form_state, $event_i
         }
 
         $value = reset($changelog['insurance']['contractor']);
-        $value_markup = mcneese_event_workflow_build_event_request_value_structure($event_id, 'insurance', 'contractor', 0, $value, $presentation['insurance']['contractor'], $changelog);
+        $value_markup = mfcs_build_event_request_value_structure($request_id, 'insurance', 'contractor', 0, $value, $presentation['insurance']['contractor'], $changelog);
 
         if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
           $message .= drupal_render($value_markup);
@@ -2497,47 +2509,4 @@ function mcneese_event_workflow_build_reviews_log(&$form, &$form_state, $event_i
       }
 
       if (!empty($changelog['insurance']['unaffiliated'])) {
-        $message .= '<div class="review-item-message-insurance-unaffiliated review-item-message-insurance review-item-message-fees">';
-        $message .= '<div class="item-label">Unaffiliated Insurance:</div> ';
-
-        // always display the boolean when displayed in the review log.
-        foreach ($presentation['insurance']['unaffiliated']['display'] as &$value) {
-          if ($value == 'when_true' || $value == 'when_false') {
-            $value = 'raw';
-          }
-        }
-
-        $value = reset($changelog['insurance']['unaffiliated']);
-        $value_markup = mcneese_event_workflow_build_event_request_value_structure($event_id, 'insurance', 'unaffiliated', 0, $value, $presentation['insurance']['unaffiliated'], $changelog);
-
-        if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
-          $message .= drupal_render($value_markup);
-        }
-        $message .= '</div>';
-      }
-
-      $markup .= '<div class="review-item-message">' . $message . '</div>';
-
-      $markup .= '</div>';
-
-      $form['review']['log']['history'][$row] = array(
-        '#markup' => $markup,
-      );
-
-      $has_log = TRUE;
-      unset($changelog);
-    }
-  }
-
-  if (!$has_log) {
-    $form['review']['log']['history']['nothing'] = array(
-      '#markup' => 'The review log is empty.',
-    );
-  }
-
-  return TRUE;
-}
-
-/**
- * @} End of '@addtogroup mcneese_event_workflow'.
- */
+        $m

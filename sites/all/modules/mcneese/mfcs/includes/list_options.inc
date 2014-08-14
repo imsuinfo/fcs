@@ -2,16 +2,16 @@
 
 /**
  * @file
- * Defines McNeese event workflow list options functions.
+ * Defines McNeese facilities use list options functions.
  */
 
 /**
- * @addtogroup mcneese_event_workflow
+ * @addtogroup mfcs
  * @{
  */
 
 /**
- * Returns an array of event workflow status options for populating lists.
+ * Returns an array of facilities use status options for populating lists.
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
@@ -26,17 +26,17 @@ function event_workflow_get_event_status_list_options($option = NULL) {
     $options[''] = "- Select -";
   }
 
-  $options[MEW_EVENT_STATUS_DELETED] = "Deleted";
-  $options[MEW_EVENT_STATUS_LOCKED] = "Queued (Locked)";
-  $options[MEW_EVENT_STATUS_UNLOCKED] = "Queued (Unlocked)";
-  $options[MEW_EVENT_STATUS_CLOSED_ACCEPTED] = "Accepted";
-  $options[MEW_EVENT_STATUS_CLOSED_DENIED] = "Denied";
-  $options[MEW_EVENT_STATUS_CLOSED_UNAVAILABLE] = "Room Unavailable";
-  $options[MEW_EVENT_STATUS_CLOSED_DUE_TO_LOCK] = "Room Unavailable (due to lock)";
-  $options[MEW_EVENT_STATUS_CANCELLED] = "Cancelled";
+  $options[MFCS_EVENT_STATUS_DELETED] = "Deleted";
+  $options[MFCS_EVENT_STATUS_LOCKED] = "Queued (Locked)";
+  $options[MFCS_EVENT_STATUS_UNLOCKED] = "Queued (Unlocked)";
+  $options[MFCS_EVENT_STATUS_CLOSED_ACCEPTED] = "Accepted";
+  $options[MFCS_EVENT_STATUS_CLOSED_DENIED] = "Denied";
+  $options[MFCS_EVENT_STATUS_CLOSED_UNAVAILABLE] = "Room Unavailable";
+  $options[MFCS_EVENT_STATUS_CLOSED_DUE_TO_LOCK] = "Room Unavailable (due to lock)";
+  $options[MFCS_EVENT_STATUS_CANCELLED] = "Cancelled";
 
   if ($option == 'search') {
-    unset($options[MEW_EVENT_STATUS_DELETED]);
+    unset($options[MFCS_EVENT_STATUS_DELETED]);
   }
 
   asort($options);
@@ -45,7 +45,7 @@ function event_workflow_get_event_status_list_options($option = NULL) {
 }
 
 /**
- * Returns an array of event workflow state options for populating lists.
+ * Returns an array of facilities use state options for populating lists.
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
@@ -60,7 +60,7 @@ function event_workflow_get_event_steps_list_options($option = NULL) {
     $options[''] = "- Select -";
   }
 
-  $options_tree = taxonomy_get_tree(MEW_VID_EVENT_STEPS, 0, NULL, TRUE);
+  $options_tree = taxonomy_get_tree(MFCS_VID_EVENT_STEPS, 0, NULL, TRUE);
   foreach ($options_tree as $branch) {
     $options[$branch->tid] = $branch->name;
   }
@@ -95,7 +95,7 @@ function event_workflow_get_event_classification_list_options($option = NULL, $u
     $options[''] = "- Select -";
   }
 
-  $options_tree = taxonomy_get_tree(MEW_VID_EVENT_CLASSIFICATION, 0, NULL, TRUE);
+  $options_tree = taxonomy_get_tree(MFCS_VID_EVENT_CLASSIFICATION, 0, NULL, TRUE);
 
   if (is_object($user)) {
     foreach ($options_tree as $branch) {
@@ -126,7 +126,7 @@ function event_workflow_get_event_classification_list_options($option = NULL, $u
  *   (optional) A string designating how the list will be populated.
  * @param bool $taxonomy
  *   (optional) When TRUE, will load the taxonomy term data. When FALSE will
- *   load the {mew_banner_locations} data.
+ *   load the {mfcs_banner_locations} data.
  *
  * @return array
  *   An array of options available.
@@ -144,7 +144,7 @@ function event_workflow_get_event_location_list_options($option = NULL, $taxonom
       $system_column_name = TRUE;
     }
 
-    $options_tree = taxonomy_get_tree(MEW_VID_EVENT_LOCATION, 0, NULL, TRUE);
+    $options_tree = taxonomy_get_tree(MFCS_VID_EVENT_LOCATION, 0, NULL, TRUE);
     foreach ($options_tree as $branch) {
       if ($system_column_name) {
         if (!empty($branch->field_system_column_name['und'][0]['value'])) {
@@ -164,7 +164,7 @@ function event_workflow_get_event_location_list_options($option = NULL, $taxonom
     asort($options);
   }
   else {
-    $locations = mcneese_event_workflow_load_locations();
+    $locations = mfcs_load_locations();
 
     if (is_array($locations)) {
       foreach ($locations as $location) {
@@ -194,7 +194,7 @@ function event_workflow_get_event_building_list_options($location = NULL, $optio
     $options[''] = "- Select -";
   }
 
-  $buildings = mcneese_event_workflow_load_buildings($location);
+  $buildings = mfcs_load_buildings($location);
 
   foreach ($buildings as &$building) {
     $options[$building->building_id] = $building->building_name;
@@ -219,7 +219,7 @@ function event_workflow_get_event_building_list_options($location = NULL, $optio
 function event_workflow_get_event_room_list_options($location = NULL, $option = NULL) {
   $options = array();
 
-  $rooms = mcneese_event_workflow_load_rooms($location);
+  $rooms = mfcs_load_rooms($location);
 
   if ($option == 'special') {
     foreach ($rooms as $room) {
@@ -266,7 +266,7 @@ function event_workflow_get_dates_category_list_options($option = NULL) {
     $options[''] = "- Select -";
   }
 
-  $options_tree = taxonomy_get_tree(MEW_VID_EVENT_DATES_CATEGORY, 0, NULL, TRUE);
+  $options_tree = taxonomy_get_tree(MFCS_VID_EVENT_DATES_CATEGORY, 0, NULL, TRUE);
   foreach ($options_tree as $branch) {
     $options[$branch->tid] = $branch->name;
   }
@@ -297,7 +297,7 @@ function event_workflow_get_audience_list_options($option = NULL) {
     $system_column_name = TRUE;
   }
 
-  $options_tree = taxonomy_get_tree(MEW_VID_EVENT_AUDIENCE, 0, NULL, TRUE);
+  $options_tree = taxonomy_get_tree(MFCS_VID_EVENT_AUDIENCE, 0, NULL, TRUE);
   foreach ($options_tree as $branch) {
     if ($system_column_name) {
       if (!empty($branch->field_system_column_name['und'][0]['value'])) {
@@ -335,7 +335,7 @@ function event_workflow_get_revenue_generated_list_options($option = NULL) {
     $system_column_name = TRUE;
   }
 
-  $options_tree = taxonomy_get_tree(MEW_VID_REVENUE_GENERATED, 0, NULL, TRUE);
+  $options_tree = taxonomy_get_tree(MFCS_VID_REVENUE_GENERATED, 0, NULL, TRUE);
   foreach ($options_tree as $branch) {
     if ($system_column_name) {
       if (!empty($branch->field_system_column_name['und'][0]['value'])) {
@@ -373,7 +373,7 @@ function event_workflow_get_information_type_list_options($option = NULL) {
     $system_column_name = TRUE;
   }
 
-  $options_tree = taxonomy_get_tree(MEW_VID_EVENT_INFORMATION_TYPE, 0, NULL, TRUE);
+  $options_tree = taxonomy_get_tree(MFCS_VID_EVENT_INFORMATION_TYPE, 0, NULL, TRUE);
   foreach ($options_tree as $branch) {
     if ($system_column_name) {
       if (!empty($branch->field_system_column_name['und'][0]['value'])) {
@@ -411,7 +411,7 @@ function event_workflow_get_publicity_details_list_options($option = NULL) {
     $system_column_name = TRUE;
   }
 
-  $options_tree = taxonomy_get_tree(MEW_VID_EVENT_PUBLICITY_DETAILS, 0, NULL, TRUE);
+  $options_tree = taxonomy_get_tree(MFCS_VID_EVENT_PUBLICITY_DETAILS, 0, NULL, TRUE);
   foreach ($options_tree as $branch) {
     if ($system_column_name) {
       if (!empty($branch->field_system_column_name['und'][0]['value'])) {
@@ -449,7 +449,7 @@ function event_workflow_get_designing_material_list_options($option = NULL) {
     $system_column_name = TRUE;
   }
 
-  $options_tree = taxonomy_get_tree(MEW_VID_EVENT_DESIGNING_MATERIAL, 0, NULL, TRUE);
+  $options_tree = taxonomy_get_tree(MFCS_VID_EVENT_DESIGNING_MATERIAL, 0, NULL, TRUE);
   foreach ($options_tree as $branch) {
     if ($system_column_name) {
       if (!empty($branch->field_system_column_name['und'][0]['value'])) {
@@ -487,7 +487,7 @@ function event_workflow_get_technical_equipment_details_list_options($option = N
     $system_column_name = TRUE;
   }
 
-  $options_tree = taxonomy_get_tree(MEW_VID_EVENT_TECHNICAL_EQUIPMENT_DETAILS, 0, NULL, TRUE);
+  $options_tree = taxonomy_get_tree(MFCS_VID_EVENT_TECHNICAL_EQUIPMENT_DETAILS, 0, NULL, TRUE);
   foreach ($options_tree as $branch) {
     if ($system_column_name) {
       if (!empty($branch->field_system_column_name['und'][0]['value'])) {
@@ -527,15 +527,15 @@ function event_workflow_get_reviewer_classification_list_options($option = NULL,
     $options[''] = "- Select -";
   }
 
-  $options_tree = taxonomy_get_tree(MEW_VID_EVENT_REVIEWER_CLASSIFICATION, 0, NULL, TRUE);
+  $options_tree = taxonomy_get_tree(MFCS_VID_EVENT_REVIEWER_CLASSIFICATION, 0, NULL, TRUE);
   foreach ($options_tree as $branch) {
     $options[$branch->tid] = $branch->name;
   }
 
   if ($include_hidden) {
-    $options[MEW_REVIEW_CLASSIFICATION_VENUE_COORDINATOR] = "Venue Coordinator";
-    $options[MEW_REVIEW_CLASSIFICATION_SYSTEM_ADMINISTRATOR] = "System Administrator";
-    $options[MEW_REVIEW_CLASSIFICATION_MANAGER] = "Manager";
+    $options[MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR] = "Venue Coordinator";
+    $options[MFCS_REVIEW_CLASSIFICATION_SYSTEM_ADMINISTRATOR] = "System Administrator";
+    $options[MFCS_REVIEW_CLASSIFICATION_MANAGER] = "Manager";
   }
 
   asort($options);
@@ -559,15 +559,15 @@ function event_workflow_get_reviewer_decision_list_options($option = NULL) {
     $options[''] = "- Select -";
   }
 
-  $options_tree = taxonomy_get_tree(MEW_VID_EVENT_REVIEWER_DECISION, 0, NULL, TRUE);
+  $options_tree = taxonomy_get_tree(MFCS_VID_EVENT_REVIEWER_DECISION, 0, NULL, TRUE);
   foreach ($options_tree as $branch) {
     $options[$branch->tid] = $branch->name;
   }
 
   // these options are hidden from the users.
   if ($option == 'review_step') {
-    unset($options[MEW_REVIEW_DECISION_AMENDMENT]);
-    unset($options[MEW_REVIEW_DECISION_WAVE]);
+    unset($options[MFCS_REVIEW_DECISION_AMENDMENT]);
+    unset($options[MFCS_REVIEW_DECISION_WAVE]);
   }
 
   asort($options);
@@ -591,7 +591,7 @@ function event_workflow_get_review_step_list_options($option = NULL) {
     $options[''] = "- Select -";
   }
 
-  $options_tree = taxonomy_get_tree(MEW_VID_EVENT_STEPS, 0, NULL, TRUE);
+  $options_tree = taxonomy_get_tree(MFCS_VID_EVENT_STEPS, 0, NULL, TRUE);
 
   if ($option == 'object') {
     $unsorted = array();
@@ -613,11 +613,3 @@ function event_workflow_get_review_step_list_options($option = NULL) {
     }
 
     asort($options);
-  }
-
-  return $options;
-}
-
-/**
- * @} End of '@addtogroup mcneese_event_workflow'.
- */

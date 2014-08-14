@@ -25,7 +25,7 @@ class McNeeseEventWorkflowMail implements MailSystemInterface {
 
     // override any pre-defined headers.
     $message['headers']['MIME-Version'] = '1.0';
-    $message['headers']['X-Mailer'] = 'McNeese Event Workflow System';
+    $message['headers']['X-Mailer'] = 'McNeese Facilities Use System';
     $message['headers']['Date'] = date('r', REQUEST_TIME);
     $message['headers']['Return-Path'] = $message['from_address'];
 
@@ -40,10 +40,10 @@ class McNeeseEventWorkflowMail implements MailSystemInterface {
     $message['headers']['Message-ID'] .= drupal_random_key(12);
     $message['headers']['Message-ID'] .= '.' . REQUEST_TIME;
     $message['headers']['Message-ID'] .= '@';
-    $message['headers']['Message-ID'] .= 'mcneese_event_request';
+    $message['headers']['Message-ID'] .= 'mfcs';
     $message['headers']['Message-ID'] .= '>';
 
-    $message['headers']['Keywords'] = 'McNeese, Event Workflow, Review';
+    $message['headers']['Keywords'] = 'McNeese, Facilities Use';
 
     $boundary = hash('sha1', $message['headers']['Message-ID']);
     $message['headers']['Content-Type'] = 'multipart/related; boundary="' . $boundary . '"';
@@ -55,7 +55,7 @@ class McNeeseEventWorkflowMail implements MailSystemInterface {
     $final_string .= "\n" . '---alt_' . $boundary . "\n";
     $final_string .= 'Content-Type: text/plain; charset=UTF-8' . "\n";
     $final_string .= 'Content-Transfer-Encoding: quoted-printable' . "\n";
-    $final_string .= 'Content-Description: McNeese Event Workflow System - Message - Plain Text' . "\n\n";
+    $final_string .= 'Content-Description: McNeese Facilities Use System - Message - Plain Text' . "\n\n";
 
     if (!empty($message['body'])) {
       $final_string .= quoted_printable_encode(implode('', $message['body']));
@@ -64,7 +64,7 @@ class McNeeseEventWorkflowMail implements MailSystemInterface {
     $final_string .= "\n" . '---alt_' . $boundary . "\n";
     $final_string .= 'Content-Type: text/html; charset=UTF-8' . "\n";
     $final_string .= 'Content-Transfer-Encoding: quoted-printable' . "\n";
-    $final_string .= 'Content-Description: McNeese Event Workflow System - Message - HTML Text' . "\n\n";
+    $final_string .= 'Content-Description: McNeese Facilities Use System - Message - HTML Text' . "\n\n";
 
     if (!empty($message['markup'])) {
       $final_string .= quoted_printable_encode(implode('', $message['markup']));
@@ -213,7 +213,7 @@ class McNeeseEventWorkflowMail implements MailSystemInterface {
       $append .= '--' . $sig_boundary . '--';
     }
     catch (Exception $ex) {
-      watchdog(MEW_WATCHDOG_ID, "Failed to sign PGP key: @key, reason: @reason", array('@key' => $fingerprint, '@reason' => $ex->getMessage()), WATCHDOG_ERROR);
+      watchdog(MFCS_WATCHDOG_ID, "Failed to sign PGP key: @key, reason: @reason", array('@key' => $fingerprint, '@reason' => $ex->getMessage()), WATCHDOG_ERROR);
       return FALSE;
     }
 

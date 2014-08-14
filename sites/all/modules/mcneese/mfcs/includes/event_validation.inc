@@ -2,11 +2,11 @@
 
 /**
  * @file
- * Defines McNeese event workflow event commonly used form and validation functions.
+ * Defines McNeese facilities use event commonly used form and validation functions.
  */
 
 /**
- * @addtogroup mcneese_event_workflow
+ * @addtogroup mfcs
  * @{
  */
 
@@ -24,7 +24,7 @@
  *   TRUE on no failures, FALSE otherwise.
  *   NULL is returned when unable to traverse the form or form state.
  */
-function mcneese_event_workflow_pre_validate_event_fields(&$form, &$form_state, $dont_validate = array()) {
+function mfcs_pre_validate_event_fields(&$form, &$form_state, $dont_validate = array()) {
   $location_form = &$form;
   $location_state = &$form_state['values'];
 
@@ -34,14 +34,14 @@ function mcneese_event_workflow_pre_validate_event_fields(&$form, &$form_state, 
     $ps = array_pop($ps_c);
 
     if (!array_key_exists($ps, $location_form)) {
-      watchdog(MEW_WATCHDOG_ID, "Failed to perform pre-validation, the key '@key' is missing from the form. Currently processed path is @processed", array('@key' => $ps, '@processed' => isset($ps_p) ? $ps_p : NULL), WATCHDOG_ERROR);
+      watchdog(MFCS_WATCHDOG_ID, "Failed to perform pre-validation, the key '@key' is missing from the form. Currently processed path is @processed", array('@key' => $ps, '@processed' => isset($ps_p) ? $ps_p : NULL), WATCHDOG_ERROR);
       return NULL;
     }
 
     if (!array_key_exists($ps, $location_state)) {
       // for creating new events, the form state may not yet exist under certain circumstances and in such cases do not present and error.
       if (isset($form['form']['event'])) {
-        watchdog(MEW_WATCHDOG_ID, "Failed to perform pre-validation, the key '@key' is missing from the form_state. Currently processed path is @processed", array('@key' => $ps, '@processed' => isset($ps_p) ? $ps_p : NULL), WATCHDOG_ERROR);
+        watchdog(MFCS_WATCHDOG_ID, "Failed to perform pre-validation, the key '@key' is missing from the form_state. Currently processed path is @processed", array('@key' => $ps, '@processed' => isset($ps_p) ? $ps_p : NULL), WATCHDOG_ERROR);
       }
       return NULL;
     }
@@ -78,7 +78,7 @@ function mcneese_event_workflow_pre_validate_event_fields(&$form, &$form_state, 
     }
 
     if (!empty($form_state['values']['event']['room'][0]) && isset($form_state['values']['event']['room'][0])) {
-      $form['form']['room_information']['#value'] = mcneese_event_workflow_load_rooms(NULL, NULL, $form_state['values']['event']['room'][0]);
+      $form['form']['room_information']['#value'] = mfcs_load_rooms(NULL, NULL, $form_state['values']['event']['room'][0]);
     }
 
     $coordinator = NULL;
@@ -87,7 +87,7 @@ function mcneese_event_workflow_pre_validate_event_fields(&$form, &$form_state, 
     }
 
     if (!is_object($coordinator)) {
-      $coordinator = user_load(MEW_REVIEW_CLASSIFICATION_FAILSAFE_COORDINATOR);
+      $coordinator = user_load(MFCS_REVIEW_CLASSIFICATION_FAILSAFE_COORDINATOR);
     }
 
     // override field settings with the proper attributes.
@@ -103,7 +103,7 @@ function mcneese_event_workflow_pre_validate_event_fields(&$form, &$form_state, 
     if (!empty($form_state['conditionally_required'][0])) {
       foreach ($form_state['conditionally_required'][0] as &$field) {
         if (is_string($field)) {
-          mcneese_event_workflow_assign_validation_requirement($field, $location_form, FALSE);
+          mfcs_assign_validation_requirement($field, $location_form, FALSE);
         }
       }
     }
@@ -116,14 +116,14 @@ function mcneese_event_workflow_pre_validate_event_fields(&$form, &$form_state, 
     $is_required = FALSE;
 
     if (isset($location_state['event_coordinator']['classification']) && array_key_exists(0, $location_state['event_coordinator']['classification'])) {
-      if ($location_state['event_coordinator']['classification'][0] == MEW_EVENT_CLASSIFICATION_STUDENT) {
+      if ($location_state['event_coordinator']['classification'][0] == MFCS_EVENT_CLASSIFICATION_STUDENT) {
         $is_required = TRUE;
       }
     }
 
     foreach ($form_state['conditionally_required'][2] as $field) {
       if (is_string($field)) {
-        mcneese_event_workflow_assign_validation_requirement($field, $location_form, $is_required);
+        mfcs_assign_validation_requirement($field, $location_form, $is_required);
       }
     }
   }
@@ -143,7 +143,7 @@ function mcneese_event_workflow_pre_validate_event_fields(&$form, &$form_state, 
  *   TRUE on no failures, FALSE otherwise.
  *   NULL is returned when unable to traverse the form or form state.
  */
-function mcneese_event_workflow_validate_event_fields($form, &$form_state) {
+function mfcs_validate_event_fields($form, &$form_state) {
   $location_form = &$form;
   $location_state = &$form_state['values'];
 
@@ -153,14 +153,14 @@ function mcneese_event_workflow_validate_event_fields($form, &$form_state) {
     $ps = array_pop($ps_c);
 
     if (!array_key_exists($ps, $location_form)) {
-      watchdog(MEW_WATCHDOG_ID, "Failed to perform validation, the key '@key' is missing from the form. Currently processed path is @processed", array('@key' => $ps, '@processed' => isset($ps_p) ? $ps_p : NULL), WATCHDOG_ERROR);
+      watchdog(MFCS_WATCHDOG_ID, "Failed to perform validation, the key '@key' is missing from the form. Currently processed path is @processed", array('@key' => $ps, '@processed' => isset($ps_p) ? $ps_p : NULL), WATCHDOG_ERROR);
       return NULL;
     }
 
     if (!array_key_exists($ps, $location_state)) {
       // for creating new events, the form state may not yet exist under certain circumstances and in such cases do not present and error.
       if (isset($form['form']['event'])) {
-        watchdog(MEW_WATCHDOG_ID, "Failed to perform validation, the key '@key' is missing from the form_state. Currently processed path is @processed", array('@key' => $ps, '@processed' => isset($ps_p) ? $ps_p : NULL), WATCHDOG_ERROR);
+        watchdog(MFCS_WATCHDOG_ID, "Failed to perform validation, the key '@key' is missing from the form_state. Currently processed path is @processed", array('@key' => $ps, '@processed' => isset($ps_p) ? $ps_p : NULL), WATCHDOG_ERROR);
       }
       return NULL;
     }
@@ -332,7 +332,7 @@ function mcneese_event_workflow_validate_event_fields($form, &$form_state) {
     $no_actual_event = TRUE;
     if (!empty($location_state['dates']['category'])) {
       foreach ($location_state['dates']['category'] as $key => &$value) {
-        if ($value == MEW_EVENT_DATES_CATEGORY_ACTUAL) {
+        if ($value == MFCS_EVENT_DATES_CATEGORY_ACTUAL) {
           $no_actual_event = FALSE;
           break;
         }
@@ -356,12 +356,12 @@ function mcneese_event_workflow_validate_event_fields($form, &$form_state) {
 
   // condition 3 is for range limiting to provide more graceful errors than what the database would otherwise present.
   if (!empty($form_state['conditionally_required'][3])) {
-    mcneese_event_workflow_include(0);
-    $structure = mcneese_event_workflow_table_structure();
+    mfcs_include(0);
+    $structure = mfcs_table_structure();
 
     foreach ($form_state['conditionally_required'][3] as $field) {
       if (is_array($field)) {
-        $result = mcneese_event_workflow_check_range_limits($field, $form, $form_state, $structure);
+        $result = mfcs_check_range_limits($field, $form, $form_state, $structure);
 
         if ($result === FALSE) {
           // @todo: present error.
@@ -387,7 +387,7 @@ function mcneese_event_workflow_validate_event_fields($form, &$form_state) {
  * @return bool
  *   TRUE on successfull processing, FALSE otherwise.
  */
-function mcneese_event_workflow_assign_validation_requirement($field, &$form, $is_required) {
+function mfcs_assign_validation_requirement($field, &$form, $is_required) {
   if (!is_string($field)) {
     cf_error::invalid_string('field');
     return FALSE;
@@ -463,7 +463,7 @@ function mcneese_event_workflow_assign_validation_requirement($field, &$form, $i
  *   TRUE on no validation errors, FALSE on validation errors, NULL in all
  *   other cases.
  */
-function mcneese_event_workflow_check_range_limits($field, $form, &$form_state, $structure, $always = FALSE) {
+function mfcs_check_range_limits($field, $form, &$form_state, $structure, $always = FALSE) {
   if (!is_array($field)) {
     cf_error::invalid_array('field');
     return NULL;
@@ -529,7 +529,7 @@ function mcneese_event_workflow_check_range_limits($field, $form, &$form_state, 
       foreach ($size as $key => $value) {
         if (!array_key_exists($key, $location_value)) continue;
 
-        $result = mcneese_event_workflow_check_range_limit($field, $form, $structure, $size[$key], $delta, $location_value[$key]);
+        $result = mfcs_check_range_limit($field, $form, $structure, $size[$key], $delta, $location_value[$key]);
 
         if ($result === FALSE) {
           $success = FALSE;
@@ -540,7 +540,7 @@ function mcneese_event_workflow_check_range_limits($field, $form, &$form_state, 
       }
     }
     else {
-      $result = mcneese_event_workflow_check_range_limit($field, $form, $structure, $size, $delta, $location_value);
+      $result = mfcs_check_range_limit($field, $form, $structure, $size, $delta, $location_value);
 
       if ($result === FALSE) {
         $success = FALSE;
@@ -574,7 +574,7 @@ function mcneese_event_workflow_check_range_limits($field, $form, &$form_state, 
  *   TRUE on no validation errors, FALSE on validation errors, NULL in all
  *   other cases.
  */
-function mcneese_event_workflow_check_range_limit($field, $form, $structure, $size, $delta, $value) {
+function mfcs_check_range_limit($field, $form, $structure, $size, $delta, $value) {
   if (!is_array($field)) {
     cf_error::invalid_array('field');
     return NULL;
@@ -648,7 +648,7 @@ function mcneese_event_workflow_check_range_limit($field, $form, $structure, $si
     // when size is numeric, the value needs to be a string of a certain length.
     if (!is_string($value)) {
       form_set_error($ps . '[' . $delta, t("The field '@title' had an internal error. Please contact the support staff.", array('@title' => $title)));
-      watchdog(MEW_WATCHDOG_ID, "Field value is supposed to be a string but is not. Field: @title. Path: @path. Value: @value.", array('@title' => $title, '@path' => $field['path'], '@value' => $value), WATCHDOG_ERROR);
+      watchdog(MFCS_WATCHDOG_ID, "Field value is supposed to be a string but is not. Field: @title. Path: @path. Value: @value.", array('@title' => $title, '@path' => $field['path'], '@value' => $value), WATCHDOG_ERROR);
       return FALSE;
     }
 
@@ -770,14 +770,4 @@ function mcneese_event_workflow_check_range_limit($field, $form, $structure, $si
     }
 
     if ($value > $max) {
-      form_set_error($ps . '[' . $delta, t("The field '@title' is too large. The field can be no larger than @size.", array('@title' => $title, '@size' => $max)));
-      return FALSE;
-    }
-  }
-
-  return TRUE;
-}
-
-/**
- * @} End of '@addtogroup mcneese_event_workflow'.
- */
+      form_set_er
