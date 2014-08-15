@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Defines McNeese facilities use event view page functions.
+ * Defines McNeese facilities use request view page functions.
  */
 
 /**
@@ -11,14 +11,14 @@
  */
 
 /**
- * Provides the facilities use event view page.
+ * Provides the facilities use request view page.
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  * @param int $request_id
- *   The unique identifier for an event request.
+ *   The unique identifier for an request.
  * @param int $mode
  *   Specifies the mode that alters how the form is rendered.
  * @param bool $pdf
@@ -27,11 +27,11 @@
  * @return string
  *   The HTML output representing the page.
  */
-function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_VIEW_MODE_NORMAL, $pdf = FALSE) {
-  $event = event_workflow_load_event_by_id($request_id);
+function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS_VIEW_MODE_NORMAL, $pdf = FALSE) {
+  $request = mfcs_load_request_by_id($request_id);
 
-  if (empty($event)) {
-    watchdog(MFCS_WATCHDOG_ID, "Unable to find event with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
+  if (empty($request)) {
+    watchdog(MFCS_WATCHDOG_ID, "Unable to find request with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
     drupal_not_found();
     drupal_exit();
     return array();
@@ -48,48 +48,48 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
     $pdf = FALSE;
   }
 
-  // if cancelling the event, return only the cancellation confirmation form.
+  // if cancelling the request, return only the cancellation confirmation form.
   if (isset($form_state['cancel_was_clicked'])) {
     mfcs_include(5);
 
     $cancel_form = array();
     $cancel_form_state = array();
-    return mfcs_event_cancel_0_form($cancel_form, $cancel_form_state, $request_id);
+    return mfcs_request_cancel_0_form($cancel_form, $cancel_form_state, $request_id);
   }
-  // if uncancelling the event, return only the uncancellation confirmation form.
+  // if uncancelling the request, return only the uncancellation confirmation form.
   elseif (isset($form_state['uncancel_was_clicked'])) {
     mfcs_include(5);
 
     $cancel_form = array();
     $cancel_form_state = array();
-    return mfcs_event_uncancel_0_form($cancel_form, $cancel_form_state, $request_id);
+    return mfcs_request_uncancel_0_form($cancel_form, $cancel_form_state, $request_id);
   }
 
   $user = cf_current_user();
 
-  $manager = user_access('mcneese facilities use manage');
-  $reviewer = user_access('mcneese facilities use review');
-  $requester = user_access('mcneese facilities use request');
+  $manager = user_access('mfcs manage');
+  $reviewer = user_access('mfcs review');
+  $requester = user_access('mfcs request');
 
-  $venue_coordinator = ($event['venue_coordinator']['user_id'][0]->value == $user->uid);
+  $venue_coordinator = ($request['venue_coordinator']['user_id'][0]->value == $user->uid);
 
-  $can_create = mfcs_management_page_event_access('create');
+  $can_create = mfcs_management_page_request_access('create');
 
-  $can_create = mfcs_management_page_event_access('create');
-  $can_edit = mfcs_management_page_event_access('edit');
-  $can_view = mfcs_management_page_event_access('view');
-  $can_list = mfcs_management_page_event_access('list');
-  $can_search = mfcs_management_page_event_access('search');
-  $can_delete = mfcs_management_page_event_access('delete');
-  $can_log = mfcs_management_page_event_access('log');
-  $can_review = mfcs_management_page_event_access('review');
+  $can_create = mfcs_management_page_request_access('create');
+  $can_edit = mfcs_management_page_request_access('edit');
+  $can_view = mfcs_management_page_request_access('view');
+  $can_list = mfcs_management_page_request_access('list');
+  $can_search = mfcs_management_page_request_access('search');
+  $can_delete = mfcs_management_page_request_access('delete');
+  $can_log = mfcs_management_page_request_access('log');
+  $can_review = mfcs_management_page_request_access('review');
 
-  $can_edit_event = mfcs_management_page_event_access('edit', $request_id);
-  $can_log_event = mfcs_management_page_event_access('log', $request_id);
-  $can_review_event = mfcs_management_page_event_access('review', $request_id);
-  $can_comment_event = mfcs_management_page_event_access('comment', $request_id);
-  $can_history_event = mfcs_management_page_event_access('history', $request_id);
-  $can_agreement_event = mfcs_management_page_event_access('agreement', $request_id);
+  $can_edit_request = mfcs_management_page_request_access('edit', $request_id);
+  $can_log_request = mfcs_management_page_request_access('log', $request_id);
+  $can_review_request = mfcs_management_page_request_access('review', $request_id);
+  $can_comment_request = mfcs_management_page_request_access('comment', $request_id);
+  $can_history_request = mfcs_management_page_request_access('history', $request_id);
+  $can_agreement_request = mfcs_management_page_request_access('agreement', $request_id);
 
   $show_display = TRUE;
   $show_log = TRUE;
@@ -107,7 +107,7 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
     $show_log = FALSE;
   }
 
-  if (!$can_log_event) {
+  if (!$can_log_request) {
     $show_log = FALSE;
 
     if ($mode == MFCS_VIEW_MODE_LOG) {
@@ -117,11 +117,11 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
     }
   }
 
-  if ($can_review_event || $can_comment_event) {
+  if ($can_review_request || $can_comment_request) {
     // show review operations only if the content is reviewable by the current user.
-    $event_classification = $event['event_coordinator']['classification'][0]->value;
-    $step = $event['top']['step'][0]->value;
-    $status = $event['top']['status'][0]->value;
+    $request_classification = $request['request_coordinator']['classification'][0]->value;
+    $step = $request['top']['step'][0]->value;
+    $status = $request['top']['status'][0]->value;
 
     // only show operations for states and steps that make sense to.
     $allowed_statuses = array(
@@ -179,15 +179,15 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
     $can['clone'] = FALSE;
   }
   else {
-    $can['edit'] = (bool) $can_edit_event;
-    $can['history'] = (bool) $can_history_event;
-    $can['agreement'] = (bool) $can_agreement_event;
+    $can['edit'] = (bool) $can_edit_request;
+    $can['history'] = (bool) $can_history_request;
+    $can['agreement'] = (bool) $can_agreement_request;
     $can['clone'] = (bool) $can_create;
   }
 
   $page_title = "Event Request";
-  if (!empty($event['information']['title'][0]->value)) {
-    $page_title = "Event Request: " . $event['information']['title'][0]->value;
+  if (!empty($request['information']['title'][0]->value)) {
+    $page_title = "Event Request: " . $request['information']['title'][0]->value;
   }
   drupal_set_title($page_title);
 
@@ -213,9 +213,9 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
     '#value' => $request_id,
   );
 
-  $form['form']['event'] = array(
+  $form['form']['request'] = array(
     '#type' => 'value',
-    '#value' => &$event,
+    '#value' => &$request,
   );
 
   $form['form']['mode'] = array(
@@ -233,28 +233,28 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
     '#value' => $user,
   );
 
-  if (!isset($event['information']['type'][0]->value) || !cf_is_integer($event['information']['type'][0]->value)) {
-    cf_error::invalid_integer('event[information][type][0]->value');
+  if (!isset($request['information']['type'][0]->value) || !cf_is_integer($request['information']['type'][0]->value)) {
+    cf_error::invalid_integer('request[information][type][0]->value');
     $form['message'] = array(
-      '#markup' => "Error: Unable to load event (ID = " . check_plain($request_id) . ") due to missing event type value.",
+      '#markup' => "Error: Unable to load request (ID = " . check_plain($request_id) . ") due to missing request type value.",
     );
 
     return $form;
   }
 
-  $event_classification = $event['event_coordinator']['classification'][0]->value;
-  $event_type = $event['information']['type'][0]->value;
+  $request_classification = $request['request_coordinator']['classification'][0]->value;
+  $request_type = $request['information']['type'][0]->value;
 
   if ($show_display) {
     $form['display'] = array(
-      '#id' => 'event-' . $request_id . '-section-display',
+      '#id' => 'request-' . $request_id . '-section-display',
       '#type' => 'fieldset',
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
       '#title' => "Request Details",
       '#attributes' => array(
         'class' => array(
-          'event-section-display',
+          'request-section-display',
           'mode-' . $mode,
         ),
       ),
@@ -267,11 +267,11 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
       unset($form['display']['#collapsed']);
 
       $form['display']['log']['#type'] = 'container';
-      $form['display']['log']['#attributes']['id'] = 'event-' . $request_id . '-section-display';
+      $form['display']['log']['#attributes']['id'] = 'request-' . $request_id . '-section-display';
     }
 
     $form['display']['groups'] = array(
-      '#prefix' => '<div id="event-' . $request_id . '-field_groups" class="event-field_groups mode-' . $mode . '">',
+      '#prefix' => '<div id="request-' . $request_id . '-field_groups" class="request-field_groups mode-' . $mode . '">',
       '#suffix' => '</div>',
     );
 
@@ -290,7 +290,7 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
     $collate = array();
 
     foreach ($presentation_tables as $field_group => $presentation_table) {
-      mfcs_event_view_0_page_setup_group_path($form, $request_id, $field_group, $presentation_tables, $can, $event);
+      mfcs_request_view_0_page_setup_group_path($form, $request_id, $field_group, $presentation_tables, $can, $request);
     }
 
     // pre-process special case of review decisions.
@@ -302,7 +302,7 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
     if (!empty($reviews)) {
       mfcs_include(4);
 
-      $classification_options = event_workflow_get_reviewer_classification_list_options(NULL, TRUE);
+      $classification_options = mfcs_get_reviewer_classification_list_options(NULL, TRUE);
       $preprocessed_decisions = array();
 
       $reviews_step = array();
@@ -331,7 +331,7 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
           $presentation['reviews'][$key_string]['label'] = $name;
           $presentation['reviews'][$key_string]['weight'] = $weight;
 
-          $event['reviews'][$key_string] = $preprocessed_decisions[$key];
+          $request['reviews'][$key_string] = $preprocessed_decisions[$key];
           $weight++;
         }
       }
@@ -356,7 +356,7 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
           $presentation['reviews'][$key_string]['label'] = "Final Decision";
           $presentation['reviews'][$key_string]['weight'] = $weight;
 
-          $event['reviews'][$key_string] = array(0 => $decision);
+          $request['reviews'][$key_string] = array(0 => $decision);
           $weight++;
           break;
         }
@@ -367,8 +367,8 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
     unset($reviews);
 
     // build the presentation tables.
-    foreach ($event as $field_group => $event_array) {
-      foreach (array('event_type' => $event_type, 'event_classification' => $event_classification) as $show_hide_type => $show_hide_value) {
+    foreach ($request as $field_group => $request_array) {
+      foreach (array('request_type' => $request_type, 'request_classification' => $request_classification) as $show_hide_type => $show_hide_value) {
         if (isset($presentation_tables[$field_group][$show_hide_type]) && is_array($presentation_tables[$field_group][$show_hide_type]) && array_key_exists('hide', $presentation_tables[$field_group][$show_hide_type])) {
           if ($presentation_tables[$field_group][$show_hide_type]['hide'] === TRUE) {
             if (array_key_exists('show', $presentation_tables[$field_group][$show_hide_type])) {
@@ -394,7 +394,7 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
 
       $row = NULL;
       if (isset($presentation_tables[$field_group])) {
-        $row = mfcs_event_view_0_page_setup_group_path($form, $request_id, $field_group, $presentation_tables, $can, $event);
+        $row = mfcs_request_view_0_page_setup_group_path($form, $request_id, $field_group, $presentation_tables, $can, $request);
       }
 
       if (!array_key_exists($field_group, $form['groups'])) {
@@ -403,7 +403,7 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
         );
       }
 
-      foreach ($event_array as $field_name => $values) {
+      foreach ($request_array as $field_name => $values) {
         if (!isset($presentation[$field_group][$field_name])) {
           continue;
         }
@@ -428,7 +428,7 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
             continue;
           }
 
-          foreach (array('event_type' => $event_type, 'event_classification' => $event_classification) as $show_hide_type => $show_hide_value) {
+          foreach (array('request_type' => $request_type, 'request_classification' => $request_classification) as $show_hide_type => $show_hide_value) {
             if (isset($field_presentation[$show_hide_type]) && is_array($field_presentation[$show_hide_type]) && array_key_exists('hide', $field_presentation[$show_hide_type])) {
               if ($field_presentation[$show_hide_type]['hide'] === TRUE) {
                 if (array_key_exists('show', $field_presentation[$show_hide_type])) {
@@ -457,7 +457,7 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
 
             $custom_row = NULL;
             if (isset($presentation_tables[$group])) {
-              $custom_row = mfcs_event_view_0_page_setup_group_path($form, $request_id, $group, $presentation_tables, $can, $event);
+              $custom_row = mfcs_request_view_0_page_setup_group_path($form, $request_id, $group, $presentation_tables, $can, $request);
             }
 
             if (is_null($custom_row)) {
@@ -501,7 +501,7 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
             $group_path[$group][$weight] = array();
           }
 
-          $group_path[$group][$weight][$field_presentation_name] = mfcs_build_event_request_item_structure($request_id, $group, $field_presentation_name, $values, $field_presentation, $event);
+          $group_path[$group][$weight][$field_presentation_name] = mfcs_build_request_item_structure($request_id, $group, $field_presentation_name, $values, $field_presentation, $request);
 
           // This can be FALSE on error or NULL when the ROW should not be displayed, so remove the field entirely.
           if ($group_path[$group][$weight][$field_presentation_name] === FALSE || is_null($group_path[$group][$weight][$field_presentation_name])) {
@@ -666,65 +666,65 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
 
     if (!$pdf) {
       $form['display']['submit'] = array(
-        '#id' => 'event-display-submit',
+        '#id' => 'request-display-submit',
         '#type' => 'container',
         '#tree' => TRUE,
         '#attributes' => array(
           'class' => array(
             'no-print',
-            'event-display-submit',
+            'request-display-submit',
             'mode-' . $mode,
           ),
         ),
         '#weight' => 1000,
       );
 
-      if (mfcs_management_page_event_access('cancel', $request_id)) {
+      if (mfcs_management_page_request_access('cancel', $request_id)) {
         $form['display']['submit']['cancel'] = array(
-          '#id' => 'event-display-submit-cancel',
-          '#name' => 'event-display-submit-cancel',
+          '#id' => 'request-display-submit-cancel',
+          '#name' => 'request-display-submit-cancel',
           '#type' => 'submit',
           '#default_value' => t("Cancel"),
           '#attributes' => array(
             'class' => array(
               'no-print',
-              'event-display-submit-cancel',
+              'request-display-submit-cancel',
               'mode-' . $mode,
             ),
           ),
           '#submit' => array(
-            'mfcs_event_cancel_0_form_submit',
+            'mfcs_request_cancel_0_form_submit',
           ),
         );
       }
-      elseif (mfcs_management_page_event_access('uncancel', $request_id)) {
+      elseif (mfcs_management_page_request_access('uncancel', $request_id)) {
         $form['display']['submit']['uncancel'] = array(
-          '#id' => 'event-display-submit-uncancel',
-          '#name' => 'event-display-submit-uncancel',
+          '#id' => 'request-display-submit-uncancel',
+          '#name' => 'request-display-submit-uncancel',
           '#type' => 'submit',
           '#default_value' => t("Uncancel"),
           '#attributes' => array(
             'class' => array(
               'no-print',
-              'event-display-submit-uncancel',
+              'request-display-submit-uncancel',
               'mode-' . $mode,
             ),
           ),
           '#submit' => array(
-            'mfcs_event_uncancel_0_form_submit',
+            'mfcs_request_uncancel_0_form_submit',
           ),
         );
       }
 
       $form['display']['submit']['print'] = array(
-        '#id' => 'event-display-submit-print',
-        '#name' => 'event-display-submit-print',
+        '#id' => 'request-display-submit-print',
+        '#name' => 'request-display-submit-print',
         '#type' => 'submit',
         '#default_value' => t("Print"),
         '#attributes' => array(
           'class' => array(
             'no-print',
-            'event-display-submit-print',
+            'request-display-submit-print',
             'mode-' . $mode,
           ),
           'onclick' => 'window.print(); return false;',
@@ -732,19 +732,19 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
       );
 
       $form['display']['submit']['download'] = array(
-        '#id' => 'event-display-submit-download',
-        '#name' => 'event-display-submit-download',
+        '#id' => 'request-display-submit-download',
+        '#name' => 'request-display-submit-download',
         '#type' => 'submit',
         '#default_value' => t("Download"),
         '#attributes' => array(
           'class' => array(
             'no-print',
-            'event-display-submit-download',
+            'request-display-submit-download',
             'mode-' . $mode,
           ),
         ),
         '#submit' => array(
-          'mfcs_event_view_0_page_submit_pdf',
+          'mfcs_request_view_0_page_submit_pdf',
         ),
       );
     }
@@ -757,18 +757,18 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
 
     mfcs_include(4);
 
-    $step_options = event_workflow_get_event_steps_list_options();
+    $step_options = mfcs_get_request_steps_list_options();
 
     if ($show_log) {
       $form['review']['log'] = array(
-        '#id' => 'event-' . $request_id . '-section-review-log',
+        '#id' => 'request-' . $request_id . '-section-review-log',
         '#type' => 'fieldset',
         '#collapsible' => TRUE,
         '#collapsed' => FALSE,
         '#title' => "Review Log",
         '#attributes' => array(
           'class' => array(
-            'event-section-review-log',
+            'request-section-review-log',
             'mode-' . $mode,
           ),
         ),
@@ -781,7 +781,7 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
       }
 
       $form['review']['log']['page_title'] = array(
-        '#markup' => '<div id="' . 'event-' . $request_id . '-section-review-log-page_title' . '" class="event-section-review-log-page_title ' . $log_page_title_css . '">' . $page_title . '</div>',
+        '#markup' => '<div id="' . 'request-' . $request_id . '-section-review-log-page_title' . '" class="request-section-review-log-page_title ' . $log_page_title_css . '">' . $page_title . '</div>',
         '#weight' => 0,
       );
 
@@ -791,11 +791,11 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
         unset($form['review']['log']['#collapsed']);
 
         $form['review']['log']['#type'] = 'container';
-        $form['review']['log']['#attributes']['id'] = 'event-' . $request_id . '-section-review-log';
+        $form['review']['log']['#attributes']['id'] = 'request-' . $request_id . '-section-review-log';
       }
 
       $form['review']['log']['header'] = array(
-        '#markup' => '<h2 id="event-' . $request_id . '-section-review-log-header" class="event-section-review-log-header">Review Log</h2>',
+        '#markup' => '<h2 id="request-' . $request_id . '-section-review-log-header" class="request-section-review-log-header">Review Log</h2>',
         '#weight' => 1,
       );
 
@@ -803,12 +803,12 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
 
       $yet_to_review_markup = '';
       if (!empty($reviewers_yet_to_review)) {
-        $yet_to_review_markup .= '<div id="event-' . $request_id . '-section-review-log-yet_to_review" class="event-section-review-log-yet_to_review">';
-        $yet_to_review_markup .= '<div class="event-section-review-log-yet_to_review-label">Reviewer classifications that have not yet reviewed:</div>';
-        $yet_to_review_markup .= '<ul class="event-section-review-log-yet_to_review-list">';
+        $yet_to_review_markup .= '<div id="request-' . $request_id . '-section-review-log-yet_to_review" class="request-section-review-log-yet_to_review">';
+        $yet_to_review_markup .= '<div class="request-section-review-log-yet_to_review-label">Reviewer classifications that have not yet reviewed:</div>';
+        $yet_to_review_markup .= '<ul class="request-section-review-log-yet_to_review-list">';
 
         foreach ($reviewers_yet_to_review as $yet_to_review_classification) {
-          $yet_to_review_markup .= '<li class="event-section-review-log-yet_to_review-list_item">' . $yet_to_review_classification . '</li>';
+          $yet_to_review_markup .= '<li class="request-section-review-log-yet_to_review-list_item">' . $yet_to_review_classification . '</li>';
         }
 
         $yet_to_review_markup .= '</ul>';
@@ -820,7 +820,7 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
       );
 
       $form['review']['log']['history'] = array(
-        '#prefix' => '<div id="event-' . $request_id . '-section-review-log-history" class="event-section-review-log-history mode-' . $mode . '">',
+        '#prefix' => '<div id="request-' . $request_id . '-section-review-log-history" class="request-section-review-log-history mode-' . $mode . '">',
         '#suffix' => '</div>',
         '#weight' => 3,
       );
@@ -828,13 +828,13 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
       mfcs_build_reviews_log($form, $form_state, $request_id);
 
       $form['review']['log']['submit'] = array(
-        '#id' => 'event-review-log-submit',
+        '#id' => 'request-review-log-submit',
         '#type' => 'container',
         '#tree' => TRUE,
         '#attributes' => array(
           'class' => array(
             'no-print',
-            'event-review-log-submit',
+            'request-review-log-submit',
             'mode-' . $mode,
           ),
         ),
@@ -842,14 +842,14 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
       );
 
       $form['review']['log']['submit']['print'] = array(
-        '#id' => 'event-review-log-submit-print',
-        '#name' => 'event-review-log-submit-print',
+        '#id' => 'request-review-log-submit-print',
+        '#name' => 'request-review-log-submit-print',
         '#type' => 'submit',
         '#default_value' => t("Print"),
         '#attributes' => array(
           'class' => array(
             'no-print',
-            'event-review-log-submit-print',
+            'request-review-log-submit-print',
             'mode-' . $mode,
           ),
           'onclick' => 'window.print(); return false;',
@@ -857,35 +857,35 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
       );
 
       $form['review']['log']['submit']['download'] = array(
-        '#id' => 'event-review-log-submit-download',
-        '#name' => 'event-review-log-submit-download',
+        '#id' => 'request-review-log-submit-download',
+        '#name' => 'request-review-log-submit-download',
         '#type' => 'submit',
         '#default_value' => t("Download"),
         '#attributes' => array(
           'class' => array(
             'no-print',
-            'event-review-log-submit-download',
+            'request-review-log-submit-download',
             'mode-' . $mode,
           ),
         ),
         '#submit' => array(
-          'mfcs_event_view_0_page_submit_pdf',
+          'mfcs_request_view_0_page_submit_pdf',
         ),
       );
     }
 
     if ($show_operations && !$pdf) {
-      $decision_options = event_workflow_get_reviewer_decision_list_options('review_step');
+      $decision_options = mfcs_get_reviewer_decision_list_options('review_step');
 
       $form['review']['operations'] = array(
-        '#id' => 'event-' . $request_id . '-section-review-operations',
+        '#id' => 'request-' . $request_id . '-section-review-operations',
         '#type' => 'fieldset',
         '#collapsible' => TRUE,
         '#collapsed' => FALSE,
         '#title' => "Review Operations",
         '#attributes' => array(
           'class' => array(
-            'event-section-review-operations',
+            'request-section-review-operations',
             'no-print',
             'mode-' . $mode,
           ),
@@ -900,7 +900,7 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
       }
 
       $form['review']['operations']['header'] = array(
-        '#markup' => '<h2 id="event- ' . $request_id . '-section-review-operations-header" class="event-section-review-operations-header">Review Operations</h2>',
+        '#markup' => '<h2 id="request- ' . $request_id . '-section-review-operations-header" class="request-section-review-operations-header">Review Operations</h2>',
       );
 
       $form['review']['operations']['instructions'] = array(
@@ -918,11 +918,11 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
       );
 
       mfcs_include(4);
-      $reviewer_classification_options = event_workflow_get_reviewer_classification_list_options();
+      $reviewer_classification_options = mfcs_get_reviewer_classification_list_options();
 
       $reviewer_conditions = array(
         'mr.user_id' => $user->uid,
-        'mr.event_classification' => $event_classification,
+        'mr.request_classification' => $request_classification,
         'mr.review_step' => $step,
         'mr.disabled' => 0,
       );
@@ -932,7 +932,7 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
         $reviewers = array();
       }
 
-      $form['review']['operations']['as_reviewer']['#markup'] = '<div class="event-section-review-operations-as_reviewer">';
+      $form['review']['operations']['as_reviewer']['#markup'] = '<div class="request-section-review-operations-as_reviewer">';
 
       $reviewer_classification = array();
       if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE || $step == MFCS_REVIEW_STEP_MAKE_DECISIONS) {
@@ -950,7 +950,7 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
         }
       }
 
-      if ($can_comment_event) {
+      if ($can_comment_request) {
         if (empty($reviewer_classification)) {
           if ($manager) {
             $reviewer_classification[MFCS_REVIEW_CLASSIFICATION_MANAGER] = 'Manager';
@@ -959,8 +959,8 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
       }
 
       if (!empty($reviewer_classification)) {
-        $form['review']['operations']['as_reviewer']['#markup'] .= '<div class="event-section-review-operations-as_reviewer-message">You are reviewing with the following classifications:</div>';
-        $form['review']['operations']['as_reviewer']['#markup'] .= theme('item_list', array('items' => $reviewer_classification, 'type' => 'ul', 'attributes' => array('class' => array('event-section-review-operations-as_reviewer-list'))));
+        $form['review']['operations']['as_reviewer']['#markup'] .= '<div class="request-section-review-operations-as_reviewer-message">You are reviewing with the following classifications:</div>';
+        $form['review']['operations']['as_reviewer']['#markup'] .= theme('item_list', array('items' => $reviewer_classification, 'type' => 'ul', 'attributes' => array('class' => array('request-section-review-operations-as_reviewer-list'))));
       }
 
       $form['review']['operations']['as_reviewer']['#markup'] .= '</div>';
@@ -971,14 +971,14 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
       }
 
       // restrict options to commenting only, if the user is only allowed to comment.
-      if (!$can_review_event && $can_comment_event) {
+      if (!$can_review_request && $can_comment_request) {
         $decision_options = array(
           MFCS_REVIEW_DECISION_COMMENT => $decision_options[MFCS_REVIEW_DECISION_COMMENT],
         );
       }
 
       $form['review']['operations']['decision'] = array(
-        '#id' => 'event-review-operations-decision',
+        '#id' => 'request-review-operations-decision',
         '#type' => 'select',
         '#title' => "Decision",
         '#default_value' => NULL,
@@ -992,7 +992,7 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
         ),
       );
 
-      if ($can_review_event && ($step == MFCS_REVIEW_STEP_REVIEW || $step == MFCS_REVIEW_STEP_VENUE_AVAILABLE)) {
+      if ($can_review_request && ($step == MFCS_REVIEW_STEP_REVIEW || $step == MFCS_REVIEW_STEP_VENUE_AVAILABLE)) {
         $form['review']['operations']['requirements'] = array(
           '#tree' => TRUE,
         );
@@ -1093,7 +1093,7 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
 
           if (in_array($use_name, $uses_personnel)) {
             $form['review']['operations']['requirements'][$use_name]['quantity'] = array(
-              '#id' => 'event-review-operations-requirements-' . $use_name . '-quantity',
+              '#id' => 'request-review-operations-requirements-' . $use_name . '-quantity',
               '#type' => 'numberfield',
               '#title' => '<span class="element-invisible">' . $use_title . ' Fee </span>Personnel',
               '#default_value' => NULL,
@@ -1110,14 +1110,14 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
               '#states' => $states,
             );
 
-            if (!empty($event['requirements'][$use_name][0])) {
-              $form['review']['operations']['requirements'][$use_name]['quantity']['#default_value'] = $event['requirements'][$use_name][0]->quantity;
+            if (!empty($request['requirements'][$use_name][0])) {
+              $form['review']['operations']['requirements'][$use_name]['quantity']['#default_value'] = $request['requirements'][$use_name][0]->quantity;
             }
           }
 
           if (in_array($use_name, $uses_hours)) {
             $form['review']['operations']['requirements'][$use_name]['hours'] = array(
-              '#id' => 'event-review-operations-requirements-' . $use_name . '-hours',
+              '#id' => 'request-review-operations-requirements-' . $use_name . '-hours',
               '#type' => 'textfield',
               '#title' => '<span class="element-invisible">' . $use_title . ' Fee </span>Hours',
               '#default_value' => NULL,
@@ -1134,13 +1134,13 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
               '#states' => $states,
             );
 
-            if (!empty($event['requirements'][$use_name][0])) {
-              $form['review']['operations']['requirements'][$use_name]['hours']['#default_value'] = event_workflow_convert_value_from_database_format($event['requirements'][$use_name][0]->hours, 'currency');
+            if (!empty($request['requirements'][$use_name][0])) {
+              $form['review']['operations']['requirements'][$use_name]['hours']['#default_value'] = mfcs_convert_value_from_database_format($request['requirements'][$use_name][0]->hours, 'currency');
             }
           }
 
           $form['review']['operations']['requirements'][$use_name]['days'] = array(
-            '#id' => 'event-review-operations-requirements-' . $use_name . '-days',
+            '#id' => 'request-review-operations-requirements-' . $use_name . '-days',
             '#type' => 'numberfield',
             '#title' => '<span class="element-invisible">' . $use_title . ' Fee </span>Days',
             '#default_value' => NULL,
@@ -1157,12 +1157,12 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
             '#states' => $states,
           );
 
-          if (!empty($event['requirements'][$use_name][0])) {
-            $form['review']['operations']['requirements'][$use_name]['days']['#default_value'] = event_workflow_convert_value_from_database_format($event['requirements'][$use_name][0]->days, 'currency');
+          if (!empty($request['requirements'][$use_name][0])) {
+            $form['review']['operations']['requirements'][$use_name]['days']['#default_value'] = mfcs_convert_value_from_database_format($request['requirements'][$use_name][0]->days, 'currency');
           }
 
           $form['review']['operations']['requirements'][$use_name]['amount'] = array(
-            '#id' => 'event-review-operations-requirements-' . $use_name . '-amount',
+            '#id' => 'request-review-operations-requirements-' . $use_name . '-amount',
             '#type' => 'textfield',
             '#title' => '<span class="element-invisible">' . $use_title . ' Fee </span>Amount',
             '#default_value' => NULL,
@@ -1179,8 +1179,8 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
             '#states' => $states,
           );
 
-          if (!empty($event['requirements'][$use_name][0])) {
-            $form['review']['operations']['requirements'][$use_name]['amount']['#default_value'] = event_workflow_convert_value_from_database_format($event['requirements'][$use_name][0]->amount, 'currency');
+          if (!empty($request['requirements'][$use_name][0])) {
+            $form['review']['operations']['requirements'][$use_name]['amount']['#default_value'] = mfcs_convert_value_from_database_format($request['requirements'][$use_name][0]->amount, 'currency');
           }
           elseif (isset($requirements_amount_defaults[$use_name])) {
             $form['review']['operations']['requirements'][$use_name]['amount']['#default_value'] = $requirements_amount_defaults[$use_name];
@@ -1190,7 +1190,7 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
         if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
           if ($venue_coordinator) {
             $form['review']['operations']['requirements']['other'] = array(
-              '#id' => 'event-review-operations-requirements-other',
+              '#id' => 'request-review-operations-requirements-other',
               '#type' => 'checkbox',
               '#title' => 'Other Fees',
               '#description' => "Other charges, unknown presently, will be agreemented to the presenter at a later time.",
@@ -1217,8 +1217,8 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
               ),
             );
 
-            if (!empty($event['requirements']['other'][0])) {
-              $form['review']['operations']['requirements']['other']['#default_value'] = $event['requirements']['other'][0]->value;
+            if (!empty($request['requirements']['other'][0])) {
+              $form['review']['operations']['requirements']['other']['#default_value'] = $request['requirements']['other'][0]->value;
             }
           }
         }
@@ -1229,7 +1229,7 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
 
         if ($insurance_requirement && $step == MFCS_REVIEW_STEP_REVIEW) {
           $form['review']['operations']['insurance']['contractor'] = array(
-            '#id' => 'event-review-operations-insurance-contractor',
+            '#id' => 'request-review-operations-insurance-contractor',
             '#type' => 'checkbox',
             '#title' => 'Contractor Insurance',
             '#description' => "Each technical/service industry contractor must provide proof of liability insurance in amounts and coverages specified.",
@@ -1248,12 +1248,12 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
             ),
           );
 
-          if (!empty($event['insurance']['contractor'][0])) {
-            $form['review']['operations']['insurance']['contractor']['#default_value'] = $event['insurance']['contractor'][0]->value;
+          if (!empty($request['insurance']['contractor'][0])) {
+            $form['review']['operations']['insurance']['contractor']['#default_value'] = $request['insurance']['contractor'][0]->value;
           }
 
           $form['review']['operations']['insurance']['unaffiliated'] = array(
-            '#id' => 'event-review-operations-insurance-unaffiliated',
+            '#id' => 'request-review-operations-insurance-unaffiliated',
             '#type' => 'checkbox',
             '#title' => 'Unaffiliated Insurance',
             '#description' => "Non-affiliated entity (renter) must provide proof of liability insurance in amounts and coverages specified.",
@@ -1272,15 +1272,15 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
             ),
           );
 
-          if (!empty($event['insurance']['unaffiliated'][0])) {
-            $form['review']['operations']['insurance']['unaffiliated']['#default_value'] = $event['insurance']['unaffiliated'][0]->value;
+          if (!empty($request['insurance']['unaffiliated'][0])) {
+            $form['review']['operations']['insurance']['unaffiliated']['#default_value'] = $request['insurance']['unaffiliated'][0]->value;
           }
         }
       }
 
-      if ($can_review_event && $step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
+      if ($can_review_request && $step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
         $form['review']['operations']['presidents_approval'] = array(
-          '#id' => 'event-review-operations-presidents_approval',
+          '#id' => 'request-review-operations-presidents_approval',
           '#type' => 'checkbox',
           '#title' => "Approved by the President",
           '#description' => "By selecting this checkbox you claim that the president has approved this action. This action will be logged.",
@@ -1300,7 +1300,7 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
         );
 
         $form['review']['operations']['university_business'] = array(
-          '#id' => 'event-review-operations-university_business',
+          '#id' => 'request-review-operations-university_business',
           '#type' => 'checkbox',
           '#title' => "Strictly University Business",
           '#description' => "By selecting this checkbox you claim that this is strictly for university business and requirements do not apply.",
@@ -1321,7 +1321,7 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
       }
 
       $form['review']['operations']['message'] = array(
-        '#id' => 'event-review-operations-message',
+        '#id' => 'request-review-operations-message',
         '#type' => 'textarea',
         '#title' => "Message",
         '#default_value' => NULL,
@@ -1335,13 +1335,13 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
       );
 
       $form['review']['operations']['submit'] = array(
-        '#id' => 'event-review-operations-submit',
+        '#id' => 'request-review-operations-submit',
         '#type' => 'container',
         '#tree' => TRUE,
         '#attributes' => array(
           'class' => array(
             'no-print',
-            'event-review-operations-submit',
+            'request-review-operations-submit',
             'mode-' . $mode,
           ),
         ),
@@ -1349,14 +1349,14 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
       );
 
       $form['review']['operations']['submit']['submit'] = array(
-        '#id' => 'event-review-operations-submit-submit',
-        '#name' => 'event-review-operations-submit-submit',
+        '#id' => 'request-review-operations-submit-submit',
+        '#name' => 'request-review-operations-submit-submit',
         '#type' => 'submit',
         '#default_value' => t("Submit"),
         '#attributes' => array(
           'class' => array(
             'no-print',
-            'event-review-operations-submit-submit',
+            'request-review-operations-submit-submit',
             'mode-' . $mode,
           ),
         ),
@@ -1373,7 +1373,7 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param int $request_id
- *   The event request id.
+ *   The request id.
  * @param string $group
  *   The group name.
  * @param array $presentation_tables
@@ -1382,23 +1382,23 @@ function mfcs_event_view_0_page($form, &$form_state, $request_id, $mode = MFCS_V
  *   An array containing the following keys:
  *   'edit': When TRUE, the edit link will be shown in the group header.
  *   'history': When TRUE, the history link is made visible.
- * @param array $event
- *   The event settings array.
+ * @param array $request
+ *   The request settings array.
  *
  * @return int|null
  *   The row number or NULL when there is no valid row.
  *   FALSE is returned for in
  *
- * @see: mfcs_event_view_0_page()
+ * @see: mfcs_request_view_0_page()
  */
-function mfcs_event_view_0_page_setup_group_path(&$form, $request_id, $group, $presentation_tables, $show, $event) {
+function mfcs_request_view_0_page_setup_group_path(&$form, $request_id, $group, $presentation_tables, $show, $request) {
   $row = NULL;
   $group_path = &$form['display']['groups'];
-  $event_type = $event['information']['type'][0]->value;
+  $request_type = $request['information']['type'][0]->value;
 
   $show_link = TRUE;
-  if (isset($presentation_tables[$group]['event_type']['hide_link']) && is_array($presentation_tables[$group]['event_type']['hide_link'])) {
-    if (in_array($event_type, $presentation_tables[$group]['event_type']['hide_link'])) {
+  if (isset($presentation_tables[$group]['request_type']['hide_link']) && is_array($presentation_tables[$group]['request_type']['hide_link'])) {
+    if (in_array($request_type, $presentation_tables[$group]['request_type']['hide_link'])) {
       $show_link = FALSE;
     }
   }
@@ -1436,7 +1436,7 @@ function mfcs_event_view_0_page_setup_group_path(&$form, $request_id, $group, $p
         '#suffix' => '',
         '#weight' => $row,
         '#attributes' => array(
-          'id' => 'section-event-' . $request_id . '-group-' . $row,
+          'id' => 'section-request-' . $request_id . '-group-' . $row,
           'class' => array(
             'group',
             'group-' . $row,
@@ -1455,37 +1455,37 @@ function mfcs_event_view_0_page_setup_group_path(&$form, $request_id, $group, $p
       '#suffix' => '',
       '#weight' => 0,
       '#attributes' => array(
-        'id' => 'section-event-' . $request_id . '-' . $group,
+        'id' => 'section-request-' . $request_id . '-' . $group,
         'class' => array(
-          'section-event',
-          'section-event-' . $group,
+          'section-request',
+          'section-request-' . $group,
         ),
       ),
       '#extra_prefix' => '',
     );
 
     if (isset($presentation_tables[$group]['label'])) {
-      $group_path[$group]['#extra_prefix'] .= '<div class="section-event-' . $request_id . '-' . $group . '-label-wrapper section-event-label-wrapper">';
+      $group_path[$group]['#extra_prefix'] .= '<div class="section-request-' . $request_id . '-' . $group . '-label-wrapper section-request-label-wrapper">';
 
       if ($show_link) {
         if ($show['clone']) {
-          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'events/create-0/' . $request_id . '" class="section-event-' . $request_id . '-' . $group . '-history section-event-clone no-print" title="'. t("Copy " . $presentation_tables[$group]['label']) . '">Copy</a>';
+          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/create-0/' . $request_id . '" class="section-request-' . $request_id . '-' . $group . '-history section-request-clone no-print" title="'. t("Copy " . $presentation_tables[$group]['label']) . '">Copy</a>';
         }
 
         if ($show['edit']) {
-          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'events/edit-0/' . $request_id . '/' . $group . '" class="section-event-' . $request_id . '-' . $group . '-edit section-event-edit no-print" title="'. t("Edit " . $presentation_tables[$group]['label']) . '">Edit</a>';
+          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/edit-0/' . $request_id . '/' . $group . '" class="section-request-' . $request_id . '-' . $group . '-edit section-request-edit no-print" title="'. t("Edit " . $presentation_tables[$group]['label']) . '">Edit</a>';
         }
 
         if ($show['history']) {
-          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'events/history-0/' . $request_id . '" class="section-event-' . $request_id . '-' . $group . '-history section-event-history no-print" title="'. t("Edit " . $presentation_tables[$group]['label']) . '">History</a>';
+          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/history-0/' . $request_id . '" class="section-request-' . $request_id . '-' . $group . '-history section-request-history no-print" title="'. t("Edit " . $presentation_tables[$group]['label']) . '">History</a>';
         }
 
         if ($show['agreement']) {
-          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'events/agreement-0/' . $request_id . '" class="section-event-' . $request_id . '-' . $group . '-agreement section-event-agreement no-print" title="'. t("View Facilities Use Agreement for " . $presentation_tables[$group]['label']) . '">Agreement</a>';
+          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/agreement-0/' . $request_id . '" class="section-request-' . $request_id . '-' . $group . '-agreement section-request-agreement no-print" title="'. t("View Facilities Use Agreement for " . $presentation_tables[$group]['label']) . '">Agreement</a>';
         }
       }
 
-      $group_path[$group]['#extra_prefix'] .= '<h2 id="section-event-' . $request_id . '-' . $group . '-label" class="section-event-label section-event-' . $group . '-label">';
+      $group_path[$group]['#extra_prefix'] .= '<h2 id="section-request-' . $request_id . '-' . $group . '-label" class="section-request-label section-request-' . $group . '-label">';
       $group_path[$group]['#extra_prefix'] .= $presentation_tables[$group]['label'];
       $group_path[$group]['#extra_prefix'] .= '</h2>';
 
@@ -1501,22 +1501,22 @@ function mfcs_event_view_0_page_setup_group_path(&$form, $request_id, $group, $p
 }
 
 /**
- * Pre-Validation for mfcs_event_view_0_page().
+ * Pre-Validation for mfcs_request_view_0_page().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mfcs_event_view_0_page()
+ * @see: mfcs_request_view_0_page()
  */
-function mfcs_event_view_0_page_pre_validate(&$form, &$form_state) {
+function mfcs_request_view_0_page_pre_validate(&$form, &$form_state) {
   $clicked_id = '';
   if (isset($form_state['triggering_element']['#id'])) {
     $clicked_id = $form_state['triggering_element']['#id'];
   }
 
-  if ($clicked_id == 'event-review-operations-submit-submit') {
+  if ($clicked_id == 'request-review-operations-submit-submit') {
     if (isset($form_state['values']['review']['operations']['decision']) && $form_state['values']['review']['operations']['decision'] == MFCS_REVIEW_DECISION_COMMENT) {
       $form['review']['operations']['message']['#required'] = TRUE;
     }
@@ -1525,14 +1525,14 @@ function mfcs_event_view_0_page_pre_validate(&$form, &$form_state) {
     $form['review']['operations']['decision']['#required'] = FALSE;
   }
 
-  $event = $form['form']['event']['#value'];
+  $request = $form['form']['request']['#value'];
   $request_id = (int) $form['form']['request_id']['#value'];
   $mode = (int) $form['form']['mode']['#value'];
   $user = cf_current_user();
 
-  $event_classification = $event['event_coordinator']['classification'][0]->value;
-  $step = $event['top']['step'][0]->value;
-  $status = $event['top']['status'][0]->value;
+  $request_classification = $request['request_coordinator']['classification'][0]->value;
+  $step = $request['top']['step'][0]->value;
+  $status = $request['top']['status'][0]->value;
 
   $decision = NULL;
   if (isset($form_state['values']['review']['operations']['decision'])) {
@@ -1577,16 +1577,16 @@ function mfcs_event_view_0_page_pre_validate(&$form, &$form_state) {
 }
 
 /**
- * Validation for mfcs_event_view_0_page().
+ * Validation for mfcs_request_view_0_page().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mfcs_event_view_0_page()
+ * @see: mfcs_request_view_0_page()
  */
-function mfcs_event_view_0_page_validate($form, &$form_state) {
+function mfcs_request_view_0_page_validate($form, &$form_state) {
   $clicked_id = '';
   if (isset($form_state['triggering_element']['#id'])) {
     $clicked_id = $form_state['triggering_element']['#id'];
@@ -1594,48 +1594,48 @@ function mfcs_event_view_0_page_validate($form, &$form_state) {
 
   $form_state['rebuild'] = TRUE;
 
-  $manager = user_access('mcneese facilities use manage');
-  $reviewer = user_access('mcneese facilities use review');
-  $requester = user_access('mcneese facilities use request');
+  $manager = user_access('mfcs manage');
+  $reviewer = user_access('mfcs review');
+  $requester = user_access('mfcs request');
 
-  $event = $form['form']['event']['#value'];
+  $request = $form['form']['request']['#value'];
   $request_id = (int) $form['form']['request_id']['#value'];
   $mode = (int) $form['form']['mode']['#value'];
   $user = cf_current_user();
 
-  $can_review_event = mfcs_management_page_event_access('review', $request_id);
-  $can_comment_event = mfcs_management_page_event_access('comment', $request_id);
+  $can_review_request = mfcs_management_page_request_access('review', $request_id);
+  $can_comment_request = mfcs_management_page_request_access('comment', $request_id);
 
-  $event_classification = $event['event_coordinator']['classification'][0]->value;
-  $step = $event['top']['step'][0]->value;
-  $status = $event['top']['status'][0]->value;
+  $request_classification = $request['request_coordinator']['classification'][0]->value;
+  $step = $request['top']['step'][0]->value;
+  $status = $request['top']['status'][0]->value;
 
   $decision = NULL;
   if (isset($form_state['values']['review']['operations']['decision'])) {
     $decision = $form_state['values']['review']['operations']['decision'];
   }
 
-  if ($clicked_id == 'event-display-submit-print' || $clicked_id == 'event-review-log-submit-print') {
+  if ($clicked_id == 'request-display-submit-print' || $clicked_id == 'request-review-log-submit-print') {
     form_set_error('', "The print button uses javascript to help force a print. You can always use your browsers print button (or equivalent) directly.");
   }
-  elseif ($clicked_id == 'event-display-submit-download' || $clicked_id == 'event-review-log-submit-download') {
+  elseif ($clicked_id == 'request-display-submit-download' || $clicked_id == 'request-review-log-submit-download') {
     $form_state['rebuild'] = FALSE;
   }
-  elseif ($clicked_id == 'event-display-submit-cancel') {
+  elseif ($clicked_id == 'request-display-submit-cancel') {
     if ($mode != MFCS_VIEW_MODE_NORMAL && $mode != MFCS_VIEW_MODE_DISPLAY) {
       form_set_error('', "Illegal operation detected.");
     }
 
     $form_state['cancel_was_clicked'] = TRUE;
   }
-  elseif ($clicked_id == 'event-display-submit-uncancel') {
+  elseif ($clicked_id == 'request-display-submit-uncancel') {
     if ($mode != MFCS_VIEW_MODE_NORMAL && $mode != MFCS_VIEW_MODE_DISPLAY) {
       form_set_error('', "Illegal operation detected.");
     }
 
     $form_state['uncancel_was_clicked'] = TRUE;
   }
-  elseif ($clicked_id == 'event-review-operations-submit-submit') {
+  elseif ($clicked_id == 'request-review-operations-submit-submit') {
     $failure = FALSE;
 
     // only allow operations for states and steps that make sense to.
@@ -1666,9 +1666,9 @@ function mfcs_event_view_0_page_validate($form, &$form_state) {
       form_set_error('', "Illegal operation detected. Invalid mode selected.");
       $failure = TRUE;
     }
-    elseif (!$can_review_event) {
+    elseif (!$can_review_request) {
       if ($decision == MFCS_REVIEW_DECISION_COMMENT) {
-        if ($can_comment_event) {
+        if ($can_comment_request) {
           unset($form_state['values']['review']['operations']['requirements']);
           unset($form_state['values']['review']['operations']['insurance']);
         }
@@ -1698,14 +1698,14 @@ function mfcs_event_view_0_page_validate($form, &$form_state) {
 
     $requirements_required = TRUE;
     if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
-      if (isset($event['requirements']['waved'][0]->value)) {
-        if ($event['requirements']['waved'][0]->value == 1) {
+      if (isset($request['requirements']['waved'][0]->value)) {
+        if ($request['requirements']['waved'][0]->value == 1) {
           $requirements_required = FALSE;
         }
       }
 
-      if (isset($event['requirements']['university'][0]->value)) {
-        if ($event['requirements']['university'][0]->value == 1) {
+      if (isset($request['requirements']['university'][0]->value)) {
+        if ($request['requirements']['university'][0]->value == 1) {
           $requirements_required = FALSE;
         }
       }
@@ -1830,25 +1830,25 @@ function mfcs_event_view_0_page_validate($form, &$form_state) {
       $requirements_not_supplied = TRUE;
 
       if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
-        if (isset($event['requirements']['waved'][0]->value)) {
-          if ($event['requirements']['waved'][0]->value) {
+        if (isset($request['requirements']['waved'][0]->value)) {
+          if ($request['requirements']['waved'][0]->value) {
             $requirements_not_supplied = FALSE;
           }
         }
 
-        if (isset($event['requirements']['university'][0]->value)) {
-          if ($event['requirements']['university'][0]->value) {
+        if (isset($request['requirements']['university'][0]->value)) {
+          if ($request['requirements']['university'][0]->value) {
             $requirements_not_supplied = FALSE;
           }
         }
       }
 
-      if (isset($event['requirements']['facilities'][0]->days)) {
+      if (isset($request['requirements']['facilities'][0]->days)) {
         $requirements_not_supplied = FALSE;
       }
 
       if ($requirements_not_supplied) {
-        form_set_error('review][operations][decision', t("The event cannot be approved until the requirements are either specified or waved."));
+        form_set_error('review][operations][decision', t("The request cannot be approved until the requirements are either specified or waved."));
       }
     }
 
@@ -1880,25 +1880,25 @@ function mfcs_event_view_0_page_validate($form, &$form_state) {
       }
 
       if (isset($form['review']['operations']['requirements']['custodial'])) {
-        if (isset($event['requirements']['custodial'][0]->amount)) {
+        if (isset($request['requirements']['custodial'][0]->amount)) {
           $requirements_not_supplied = FALSE;
         }
       }
 
       if (isset($form['review']['operations']['requirements']['security'])) {
-        if (isset($event['requirements']['security'][0]->amount)) {
+        if (isset($request['requirements']['security'][0]->amount)) {
           $requirements_not_supplied = FALSE;
         }
       }
 
       if (isset($form['review']['operations']['insurance']['contractor'])) {
-        if (isset($event['insurance']['contractor'][0]->value)) {
+        if (isset($request['insurance']['contractor'][0]->value)) {
           $requirements_not_supplied = FALSE;
         }
       }
 
       if (isset($form['review']['operations']['insurance']['unaffiliated'])) {
-        if (isset($event['insurance']['unaffiliated'][0]->value)) {
+        if (isset($request['insurance']['unaffiliated'][0]->value)) {
           $requirements_not_supplied = FALSE;
         }
       }
@@ -1914,25 +1914,25 @@ function mfcs_event_view_0_page_validate($form, &$form_state) {
       $form_state['rebuild'] = FALSE;
     }
   }
-  elseif ($clicked_id == 'event-cancel-submit-yes' || $clicked_id == 'event-cancel-submit-no') {
+  elseif ($clicked_id == 'request-cancel-submit-yes' || $clicked_id == 'request-cancel-submit-no') {
     $form_state['rebuild'] = FALSE;
   }
-  elseif ($clicked_id == 'event-uncancel-submit-yes' || $clicked_id == 'unevent-cancel-submit-no') {
+  elseif ($clicked_id == 'request-uncancel-submit-yes' || $clicked_id == 'unrequest-cancel-submit-no') {
     $form_state['rebuild'] = FALSE;
   }
 }
 
 /**
- * Submit process for mfcs_event_view_0_page().
+ * Submit process for mfcs_request_view_0_page().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mfcs_event_view_0_page()
+ * @see: mfcs_request_view_0_page()
  */
-function mfcs_event_view_0_page_submit($form, &$form_state) {
+function mfcs_request_view_0_page_submit($form, &$form_state) {
   $user = cf_current_user();
 
   $request_id = NULL;
@@ -1945,32 +1945,32 @@ function mfcs_event_view_0_page_submit($form, &$form_state) {
     $clicked_id = $form_state['triggering_element']['#id'];
   }
 
-  if ($clicked_id == 'event-cancel-submit-yes') {
+  if ($clicked_id == 'request-cancel-submit-yes') {
     $deleted = mfcs_include(5);
 
-    mfcs_event_cancel_0_form_submit($form, $form_state);
+    mfcs_request_cancel_0_form_submit($form, $form_state);
 
     return;
   }
-  elseif ($clicked_id == 'event-uncancel-submit-yes') {
+  elseif ($clicked_id == 'request-uncancel-submit-yes') {
     $deleted = mfcs_include(5);
 
-    mfcs_event_uncancel_0_form_submit($form, $form_state);
+    mfcs_request_uncancel_0_form_submit($form, $form_state);
 
     return;
   }
   // @todo: add submit processing for resetting the step back to the review stage.
-  elseif ($clicked_id == 'event-review-operations-submit-submit') {
+  elseif ($clicked_id == 'request-review-operations-submit-submit') {
     $success = TRUE;
 
     mfcs_include(6);
     $decision = $form_state['values']['review']['operations']['decision'];
     $message = $form_state['values']['review']['operations']['message'];
 
-    $event = $form['form']['event']['#value'];
+    $request = $form['form']['request']['#value'];
 
-    $event_classification = $event['event_coordinator']['classification'][0]->value;
-    $step = $event['top']['step'][0]->value;
+    $request_classification = $request['request_coordinator']['classification'][0]->value;
+    $step = $request['top']['step'][0]->value;
 
     $extra = array();
     if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE || $step == MFCS_REVIEW_STEP_REVIEW) {
@@ -2007,8 +2007,8 @@ function mfcs_event_view_0_page_submit($form, &$form_state) {
       drupal_set_message("Your review or comment has been recieved.");
     }
     else {
-      form_set_error('form', "An error occurred while trying to submit the event review. Please contact the support staff.");
-      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to submit the event review.", array(), WATCHDOG_ERROR);
+      form_set_error('form', "An error occurred while trying to submit the request review. Please contact the support staff.");
+      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to submit the request review.", array(), WATCHDOG_ERROR);
 
       $form_state['rebuild'] = TRUE;
       $form_state['redirect'] = FALSE;
@@ -2017,23 +2017,23 @@ function mfcs_event_view_0_page_submit($form, &$form_state) {
       return;
     }
 
-    // change to the event view page on submit for these decisions to prevent potential access denied messages following the submit process.
+    // change to the request view page on submit for these decisions to prrequest potential access denied messages following the submit process.
     if ($decision == MFCS_REVIEW_DECISION_APPROVE || $decision == MFCS_REVIEW_DECISION_DENY) {
-      $form_state['values']['redirect_to'] = 'events/view-0/' .  $request_id;
+      $form_state['values']['redirect_to'] = 'requests/view-0/' .  $request_id;
     }
   }
 
   // redirect after submitting.
   if (empty($form_state['values']['redirect_to'])) {
     if (empty($request_id)) {
-      $form_state['redirect'] = 'events';
+      $form_state['redirect'] = 'requests';
     }
     else {
       if ($form['form']['mode']['#value'] > 0) {
-        $form_state['redirect'] = 'events/view-0/' . $request_id . '/' . $form['form']['mode']['#value'];
+        $form_state['redirect'] = 'requests/view-0/' . $request_id . '/' . $form['form']['mode']['#value'];
       }
       else {
-        $form_state['redirect'] = 'events/view-0/' . $request_id;
+        $form_state['redirect'] = 'requests/view-0/' . $request_id;
       }
     }
   }
@@ -2043,7 +2043,7 @@ function mfcs_event_view_0_page_submit($form, &$form_state) {
 }
 
 /**
- * Custom submit process for mfcs_event_view_0_page().
+ * Custom submit process for mfcs_request_view_0_page().
  *
  * Used for generating a print PDF.
  *
@@ -2052,9 +2052,9 @@ function mfcs_event_view_0_page_submit($form, &$form_state) {
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mfcs_event_view_0_page()
+ * @see: mfcs_request_view_0_page()
  */
-function mfcs_event_view_0_page_submit_pdf($form, &$form_state) {
+function mfcs_request_view_0_page_submit_pdf($form, &$form_state) {
   $user = cf_current_user();
 
   $clicked_id = '';
@@ -2064,12 +2064,12 @@ function mfcs_event_view_0_page_submit_pdf($form, &$form_state) {
 
   $request_id = (int) $form['form']['request_id']['#value'];
 
-  if (($clicked_id != 'event-display-submit-download' && $clicked_id != 'event-review-log-submit-download') || empty($request_id)) {
+  if (($clicked_id != 'request-display-submit-download' && $clicked_id != 'request-review-log-submit-download') || empty($request_id)) {
     if (empty($request_id)) {
-      $form_state['redirect'] = 'events';
+      $form_state['redirect'] = 'requests';
     }
     else {
-      $form_state['redirect'] = 'events/view-0/' . $request_id;
+      $form_state['redirect'] = 'requests/view-0/' . $request_id;
     }
 
     return;
@@ -2078,33 +2078,33 @@ function mfcs_event_view_0_page_submit_pdf($form, &$form_state) {
   global $base_path;
 
   $mode = $form['form']['mode']['#value'];
-  $form_state['redirect'] = '/events/pdf-0/' . $request_id . '/' . $mode;
+  $form_state['redirect'] = '/requests/pdf-0/' . $request_id . '/' . $mode;
 }
 
 /**
- * Renders a PDF of a given event request.
+ * Renders a PDF of a given request.
  *
  * @param int $request_id
- *   The unique identifier for an event request.
+ *   The unique identifier for an request.
  * @param int|null $mode
  *   Specifies the mode that alters how the form is rendered.
  *   1: Render only the display part.
  */
-function mfcs_event_pdf_0_page($request_id, $mode) {
+function mfcs_request_pdf_0_page($request_id, $mode) {
   $page_title = "Event Request";
   drupal_set_title($page_title);
 
-  $event = event_workflow_load_event_by_id($request_id);
+  $request = mfcs_load_request_by_id($request_id);
 
-  if (empty($event)) {
-    watchdog(MFCS_WATCHDOG_ID, "Unable to find event with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
+  if (empty($request)) {
+    watchdog(MFCS_WATCHDOG_ID, "Unable to find request with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
     drupal_not_found();
     drupal_exit();
     return array();
   }
 
-  if (!empty($event['information']['title'][0]->value)) {
-    $page_title = "Event Request: " . $event['information']['title'][0]->value;
+  if (!empty($request['information']['title'][0]->value)) {
+    $page_title = "Event Request: " . $request['information']['title'][0]->value;
     drupal_set_title($page_title);
   }
 
@@ -2115,9 +2115,9 @@ function mfcs_event_pdf_0_page($request_id, $mode) {
   $page['html'] = array(
     '#type' => 'container',
     '#attributes' => array(
-      'id' => 'mfcs-event-view-0-page',
+      'id' => 'mfcs-request-view-0-page',
       'class' => array(
-        'mfcs-event-pdf-0',
+        'mfcs-request-pdf-0',
       ),
     ),
   );
@@ -2125,11 +2125,11 @@ function mfcs_event_pdf_0_page($request_id, $mode) {
   // turn off devel shutdown functionality.
   $GLOBALS['devel_shutdown'] = FALSE;
 
-  $page['html']['content'] = array(mfcs_event_view_0_page($form, $form_state, $request_id, $mode, TRUE));
+  $page['html']['content'] = array(mfcs_request_view_0_page($form, $form_state, $request_id, $mode, TRUE));
   $renderred = drupal_render($page);
   $html = drupal_render_page($renderred);
 
-  $result = mfcs_event_pdf_0_page_using_wkhtmltopdf($request_id, $html);
+  $result = mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $html);
 
   if ($result) {
     exit();
@@ -2165,10 +2165,10 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id) {
     return FALSE;
   }
 
-  $event = event_workflow_load_event_by_id($request_id);
+  $request = mfcs_load_request_by_id($request_id);
 
-  if (empty($event)) {
-    watchdog(MFCS_WATCHDOG_ID, "Unable to find event with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
+  if (empty($request)) {
+    watchdog(MFCS_WATCHDOG_ID, "Unable to find request with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
     return FALSE;
   }
 
@@ -2178,11 +2178,11 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id) {
 
   mfcs_include(4);
 
-  $decision_options = event_workflow_get_reviewer_decision_list_options();
+  $decision_options = mfcs_get_reviewer_decision_list_options();
 
   // review revisions are neither used nor incremented in the same manner as other fields.
   // the revision number will not increment when a new review is made.
-  $review_revision = mfcs_load_event_revision_number($request_id, 'mfcs_field_review_review');
+  $review_revision = mfcs_load_request_revision_number($request_id, 'mfcs_field_review_review');
 
   if ($review_revision === FALSE || is_null($review_revision)) {
     $review_revision = 0;
@@ -2260,8 +2260,8 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id) {
   $reviewers = array();
   $has_log = FALSE;
   if (is_array($reviews)) {
-    $review_step_options = event_workflow_get_review_step_list_options();
-    $reviewer_classification_options = event_workflow_get_reviewer_classification_list_options();
+    $review_step_options = mfcs_get_review_step_list_options();
+    $reviewer_classification_options = mfcs_get_reviewer_classification_list_options();
 
     foreach ($reviews as $row => $review) {
       $user_id = $review->user_id;
@@ -2270,7 +2270,7 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id) {
       $message = $review->message;
       $date = $review->date;
 
-      $changelog = event_workflow_load_event_by_timestamp($request_id, $date, $changelog_fields);
+      $changelog = mfcs_load_request_by_timestamp($request_id, $date, $changelog_fields);
 
       if (!array_key_exists($user_id, $users)) {
         $users[$user_id] = user_load($user_id);
@@ -2330,7 +2330,7 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id) {
       $markup .= '<h3 class="review-item-label-text">' . $row_id_block . '<div class="review-item-label-text-title">';
 
       if ($decision == MFCS_REVIEW_DECISION_AMENDMENT) {
-        $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">' . "Amended" . '</strong> the event request' . $reviewer_classification . '.';
+        $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">' . "Amended" . '</strong> the request' . $reviewer_classification . '.';
       }
       elseif ($review_step == MFCS_REVIEW_STEP_VENUE_AVAILABLE && $decision == MFCS_REVIEW_DECISION_APPROVE) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has designated that the <strong class="review-item-label-text-row-decision">Venue is Available</strong>' . $reviewer_classification . '.';
@@ -2360,7 +2360,7 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has denied the <strong class="review-item-label-text-row-decision">' . $review_step_options[$review_step] . '</strong>' . $reviewer_classification . '.';
       }
       else {
-        $markup .= $user_name_markup . ' ' . $user_id_markup . ' chose to <strong class="review-item-label-text-row-decision">' . $decision_options[$decision] . '</strong> the event request' . $reviewer_classification . '.';
+        $markup .= $user_name_markup . ' ' . $user_id_markup . ' chose to <strong class="review-item-label-text-row-decision">' . $decision_options[$decision] . '</strong> the request' . $reviewer_classification . '.';
       }
       $markup .= '</div></h3>';
       $markup .= '<div class="review-item-label-date">' . date("Y/m/d h:i:s a", $date) . "</div>";
@@ -2379,7 +2379,7 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id) {
         $message .= '<div class="item-label">Facilities Fees:</div> ';
 
         $value = reset($changelog['requirements']['facilities']);
-        $value_markup = mfcs_build_event_request_value_structure($request_id, 'requirements', 'facilities', 0, $value, $presentation['requirements']['facilities'], $changelog);
+        $value_markup = mfcs_build_request_value_structure($request_id, 'requirements', 'facilities', 0, $value, $presentation['requirements']['facilities'], $changelog);
 
         if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
           $message .= drupal_render($value_markup);
@@ -2392,7 +2392,7 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id) {
         $message .= '<div class="item-label">Additional Equipment Fees:</div> ';
 
         $value = reset($changelog['requirements']['equipment']);
-        $value_markup = mfcs_build_event_request_value_structure($request_id, 'requirements', 'equipment', 0, $value, $presentation['requirements']['equipment'], $changelog);
+        $value_markup = mfcs_build_request_value_structure($request_id, 'requirements', 'equipment', 0, $value, $presentation['requirements']['equipment'], $changelog);
 
         if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
           $message .= drupal_render($value_markup);
@@ -2405,7 +2405,7 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id) {
         $message .= '<div class="item-label">Security Fees:</div> ';
 
         $value = reset($changelog['requirements']['security']);
-        $value_markup = mfcs_build_event_request_value_structure($request_id, 'requirements', 'security', 0, $value, $presentation['requirements']['security'], $changelog);
+        $value_markup = mfcs_build_request_value_structure($request_id, 'requirements', 'security', 0, $value, $presentation['requirements']['security'], $changelog);
 
         if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
           $message .= drupal_render($value_markup);
@@ -2418,7 +2418,7 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id) {
         $message .= '<div class="item-label">Custodial Fees:</div> ';
 
         $value = reset($changelog['requirements']['custodial']);
-        $value_markup = mfcs_build_event_request_value_structure($request_id, 'requirements', 'custodial', 0, $value, $presentation['requirements']['custodial'], $changelog);
+        $value_markup = mfcs_build_request_value_structure($request_id, 'requirements', 'custodial', 0, $value, $presentation['requirements']['custodial'], $changelog);
 
         if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
           $message .= drupal_render($value_markup);
@@ -2438,7 +2438,7 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id) {
         }
 
         $value = reset($changelog['requirements']['other']);
-        $value_markup = mfcs_build_event_request_value_structure($request_id, 'requirements', 'other', 0, $value, $presentation['requirements']['other'], $changelog);
+        $value_markup = mfcs_build_request_value_structure($request_id, 'requirements', 'other', 0, $value, $presentation['requirements']['other'], $changelog);
 
         if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
           $message .= drupal_render($value_markup);
@@ -2459,7 +2459,7 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id) {
           }
 
           $value = reset($changelog['requirements']['waved']);
-          $value_markup = mfcs_build_event_request_value_structure($request_id, 'requirements', 'waved', 0, $value, $presentation['requirements']['waved'], $changelog);
+          $value_markup = mfcs_build_request_value_structure($request_id, 'requirements', 'waved', 0, $value, $presentation['requirements']['waved'], $changelog);
 
           if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
             $message .= drupal_render($value_markup);
@@ -2479,7 +2479,7 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id) {
           }
 
           $value = reset($changelog['requirements']['university']);
-          $value_markup = mfcs_build_event_request_value_structure($request_id, 'requirements', 'university', 0, $value, $presentation['requirements']['university'], $changelog);
+          $value_markup = mfcs_build_request_value_structure($request_id, 'requirements', 'university', 0, $value, $presentation['requirements']['university'], $changelog);
 
           if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
             $message .= drupal_render($value_markup);
@@ -2500,7 +2500,7 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id) {
         }
 
         $value = reset($changelog['insurance']['contractor']);
-        $value_markup = mfcs_build_event_request_value_structure($request_id, 'insurance', 'contractor', 0, $value, $presentation['insurance']['contractor'], $changelog);
+        $value_markup = mfcs_build_request_value_structure($request_id, 'insurance', 'contractor', 0, $value, $presentation['insurance']['contractor'], $changelog);
 
         if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
           $message .= drupal_render($value_markup);
@@ -2509,4 +2509,47 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id) {
       }
 
       if (!empty($changelog['insurance']['unaffiliated'])) {
-        $m
+        $message .= '<div class="review-item-message-insurance-unaffiliated review-item-message-insurance review-item-message-requirements">';
+        $message .= '<div class="item-label">Unaffiliated Insurance:</div> ';
+
+        // always display the boolean when displayed in the review log.
+        foreach ($presentation['insurance']['unaffiliated']['display'] as &$value) {
+          if ($value == 'when_true' || $value == 'when_false') {
+            $value = 'raw';
+          }
+        }
+
+        $value = reset($changelog['insurance']['unaffiliated']);
+        $value_markup = mfcs_build_request_value_structure($request_id, 'insurance', 'unaffiliated', 0, $value, $presentation['insurance']['unaffiliated'], $changelog);
+
+        if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
+          $message .= drupal_render($value_markup);
+        }
+        $message .= '</div>';
+      }
+
+      $markup .= '<div class="review-item-message">' . $message . '</div>';
+
+      $markup .= '</div>';
+
+      $form['review']['log']['history'][$row] = array(
+        '#markup' => $markup,
+      );
+
+      $has_log = TRUE;
+      unset($changelog);
+    }
+  }
+
+  if (!$has_log) {
+    $form['review']['log']['history']['nothing'] = array(
+      '#markup' => 'The review log is empty.',
+    );
+  }
+
+  return TRUE;
+}
+
+/**
+ * @} End of '@addtogroup mfcs'.
+ */

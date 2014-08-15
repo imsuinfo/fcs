@@ -22,37 +22,37 @@ function mfcs_table_structure() {
   $structure = array();
   $structure['top'] = array(
     'status' => array(
-      'path' => 'event][status',
+      'path' => 'request][status',
       'name' => "Status",
       'type' => 'options',
       'size' => 'small',
     ),
     'step' => array(
-      'path' => 'event][step',
+      'path' => 'request][step',
       'name' => "Step",
       'type' => 'options',
       'size' => 'normal',
     ),
     'location' => array(
-      'path' => 'event][location',
+      'path' => 'request][location',
       'name' => "Location",
       'type' => 'options',
       'size' => 'big',
     ),
     'building' => array(
-      'path' => 'event][building',
+      'path' => 'request][building',
       'name' => "Building",
       'type' => 'options',
       'size' => 'big',
     ),
     'room' => array(
-      'path' => 'event][room',
+      'path' => 'request][room',
       'name' => "Room",
       'type' => 'options',
       'size' => 'big',
     ),
     'additional' => array(
-      'path' => 'event][additional',
+      'path' => 'request][additional',
       'name' => "Additional Information",
       'type' => 'text',
       'size' => 2048,
@@ -61,7 +61,7 @@ function mfcs_table_structure() {
 
   $structure['review'] = array(
     'review' => array(
-      'path' => 'event][review][review',
+      'path' => 'request][review][review',
       'name' => "Review Log",
       'type' => 'review_log',
       'columns' => array('reviewer', 'step', 'decision', 'message'),
@@ -72,7 +72,7 @@ function mfcs_table_structure() {
 
   $structure['requirements'] = array(
     'facilities' => array(
-      'path' => 'event][requirements][facilities',
+      'path' => 'request][requirements][facilities',
       'name' => "Facilities Fees",
       'type' => 'requirements',
       'manual_processing' => TRUE,
@@ -81,7 +81,7 @@ function mfcs_table_structure() {
       'storage' => 'currency',
     ),
     'equipment' => array(
-      'path' => 'event][requirements][equipment',
+      'path' => 'request][requirements][equipment',
       'name' => "Equipment Fees",
       'type' => 'requirements',
       'manual_processing' => TRUE,
@@ -90,7 +90,7 @@ function mfcs_table_structure() {
       'storage' => 'currency',
     ),
     'custodial' => array(
-      'path' => 'event][requirements][custodial',
+      'path' => 'request][requirements][custodial',
       'name' => "Custodial Fees",
       'type' => 'requirements',
       'manual_processing' => TRUE,
@@ -99,7 +99,7 @@ function mfcs_table_structure() {
       'storage' => 'currency',
     ),
     'security' => array(
-      'path' => 'event][requirements][security',
+      'path' => 'request][requirements][security',
       'name' => "Security Fees",
       'type' => 'requirements',
       'manual_processing' => TRUE,
@@ -109,14 +109,14 @@ function mfcs_table_structure() {
     ),
     'other' => array(
       'name' => "Other Fees",
-      'path' => 'event][requirements][other',
+      'path' => 'request][requirements][other',
       'type' => 'bool',
       'size' => 'tiny',
       'manual_processing' => TRUE,
     ),
     'waved' => array(
       'name' => "Requirements / Fees Waved (with Presidents Approval)",
-      'path' => 'event][requirements][waved',
+      'path' => 'request][requirements][waved',
       'type' => 'bool',
       'size' => 'tiny',
       'manual_processing' => TRUE,
@@ -125,14 +125,14 @@ function mfcs_table_structure() {
       'name' => "University Fees",
       'type' => 'bool',
       'size' => 'tiny',
-      'path' => 'event][requirements][university',
+      'path' => 'request][requirements][university',
       'manual_processing' => TRUE,
     ),
   );
 
   $structure['insurance'] = array(
     'contractor' => array(
-      'path' => 'event][insurance][contractor',
+      'path' => 'request][insurance][contractor',
       'name' => "Contractor Insurance",
       'type' => 'bool',
       'size' => 'tiny',
@@ -140,7 +140,7 @@ function mfcs_table_structure() {
     ),
     'unaffiliated' => array(
       'name' => "Uniffiliated Insurance",
-      'path' => 'event][insurance][unaffiliated',
+      'path' => 'request][insurance][unaffiliated',
       'type' => 'bool',
       'size' => 'tiny',
       'manual_processing' => TRUE,
@@ -149,7 +149,7 @@ function mfcs_table_structure() {
 
   $structure['dates'] = array(
     'date' => array(
-      'path' => 'event][dates][date',
+      'path' => 'request][dates][date',
       'name' => "Date",
       'type' => 'date',
       'size' => 'big',
@@ -158,25 +158,25 @@ function mfcs_table_structure() {
       'multiple' => TRUE,
     ),
     'time_start' => array(
-      'path' => 'event][dates][time_start',
+      'path' => 'request][dates][time_start',
       'name' => "Start Time",
       'type' => 'time',
       'size' => 'big',
       'storage' => 'timestamp',
-      'timestamp' => array('view' => 'h:ia', 'relative_to' => 'event][dates][date'),
+      'timestamp' => array('view' => 'h:ia', 'relative_to' => 'request][dates][date'),
       'multiple' => TRUE,
     ),
     'time_stop' => array(
-      'path' => 'event][dates][time_stop',
+      'path' => 'request][dates][time_stop',
       'name' => "Stop Time",
       'type' => 'time',
       'size' => 'big',
       'storage' => 'timestamp',
-      'timestamp' => array('view' => 'h:ia', 'relative_to' => 'event][dates][date'),
+      'timestamp' => array('view' => 'h:ia', 'relative_to' => 'request][dates][date'),
       'multiple' => TRUE,
     ),
     'category' => array(
-      'path' => 'event][dates][category',
+      'path' => 'request][dates][category',
       'name' => "Date Category",
       'type' => 'options',
       'size' => 'normal',
@@ -186,34 +186,34 @@ function mfcs_table_structure() {
 
   $structure['venue_coordinator'] = array(
     'user_id' => array(
-      'path' => 'event][venue_coordinator][user_id',
+      'path' => 'request][venue_coordinator][user_id',
       'name' => "Venue Coordinator",
       'type' => 'venue_coordinator',
       'size' => 'normal',
     ),
   );
 
-  $structure['event_coordinator'] = array(
+  $structure['request_coordinator'] = array(
     'name' => array(
-      'path' => 'event][event_coordinator][name',
+      'path' => 'request][request_coordinator][name',
       'name' => "Event Coordinator Name",
       'type' => 'text',
       'size' => 255,
     ),
     'phone' => array(
-      'path' => 'event][event_coordinator][phone',
+      'path' => 'request][request_coordinator][phone',
       'name' => "Event Coordinator Phone",
       'type' => 'text',
       'size' => 255,
     ),
     'email' => array(
-      'path' => 'event][event_coordinator][email',
+      'path' => 'request][request_coordinator][email',
       'name' => "Event Coordinator E-mail",
       'type' => 'text',
       'size' => 255,
     ),
     'classification' => array(
-      'path' => 'event][event_coordinator][classification',
+      'path' => 'request][request_coordinator][classification',
       'name' => "Event Coordinator Classification",
       'type' => 'options',
       'size' => 'normal',
@@ -222,25 +222,25 @@ function mfcs_table_structure() {
 
   $structure['information'] = array(
     'title' => array(
-      'path' => 'event][information][title',
+      'path' => 'request][information][title',
       'name' => "Title",
       'type' => 'text',
       'size' => 255,
     ),
     'attendance' => array(
-      'path' => 'event][information][attendance',
+      'path' => 'request][information][attendance',
       'name' => "Expected Attendance",
       'type' => 'text',
       'size' => 'normal',
     ),
     'type' => array(
-      'path' => 'event][information][type',
+      'path' => 'request][information][type',
       'name' => "Type",
       'type' => 'options',
       'size' => 'normal',
     ),
     'organization' => array(
-      'path' => 'event][information][organization',
+      'path' => 'request][information][organization',
       'name' => "Organization / Affiliation",
       'type' => 'text',
       'size' => 255,
@@ -248,26 +248,26 @@ function mfcs_table_structure() {
     'adviser_approval' => array(
       'name' => "Adviser Approval",
       'type' => 'bool',
-      'path' => 'event][information][adviser_approval',
+      'path' => 'request][information][adviser_approval',
       'size' => 'tiny',
     ),
   );
 
   $structure['plans'] = array(
     'audience' => array(
-      'path' => 'event][plans][audience',
+      'path' => 'request][plans][audience',
       'name' => "Intended Audience",
       'type' => 'options',
       'size' => 'normal',
     ),
     'description' => array(
-      'path' => 'event][plans][description',
+      'path' => 'request][plans][description',
       'name' => "Description / Purpose",
       'type' => 'text',
       'size' => 2048,
     ),
     'activities' => array(
-      'path' => 'event][plans][activities',
+      'path' => 'request][plans][activities',
       'name' => "Planned Activities",
       'type' => 'text',
       'size' => 2048,
@@ -275,13 +275,13 @@ function mfcs_table_structure() {
   );
 
 
-  $revenue_generated_columns = event_workflow_get_revenue_generated_list_options('column_name');
+  $revenue_generated_columns = mfcs_get_revenue_generated_list_options('column_name');
   $revenue_generated_size = array();
   foreach ($revenue_generated_columns as $key => $value) {
     $revenue_generated_size[$key] = 'normal';
   }
 
-  $technical_equipment_details_columns = event_workflow_get_technical_equipment_details_list_options('column_name');
+  $technical_equipment_details_columns = mfcs_get_technical_equipment_details_list_options('column_name');
   $technical_equipment_details_size = array();
   foreach ($technical_equipment_details_columns as $key => $value) {
     $technical_equipment_details_size[$key] = 'normal';
@@ -289,55 +289,55 @@ function mfcs_table_structure() {
 
   $structure['registration'] = array(
     'require' => array(
-      'path' => 'event][registration][require',
+      'path' => 'request][registration][require',
       'name' => "Registration or Ticket Purchase",
       'type' => 'bool',
       'size' => 'tiny',
     ),
     'website' => array(
-      'path' => 'event][registration][website',
+      'path' => 'request][registration][website',
       'name' => "Registration Website",
       'type' => 'text',
       'size' => 255,
     ),
     'phone' => array(
-      'path' => 'event][registration][phone',
+      'path' => 'request][registration][phone',
       'name' => "Registration Phone",
       'type' => 'text',
       'size' => 255,
     ),
     'ticket_price' => array(
-      'path' => 'event][registration][ticket_price',
+      'path' => 'request][registration][ticket_price',
       'name' => "Ticket Prices",
       'type' => 'text',
       'size' => 255,
     ),
     'ticket_dates' => array(
-      'path' => 'event][registration][ticket_dates',
+      'path' => 'request][registration][ticket_dates',
       'name' => "Ticket Dates",
       'type' => 'text',
       'size' => 255,
     ),
     'ticket_website' => array(
-      'path' => 'event][registration][ticket_website',
+      'path' => 'request][registration][ticket_website',
       'name' => "Ticket Website",
       'type' => 'text',
       'size' => 255,
     ),
     'ticket_phone' => array(
-      'path' => 'event][registration][ticket_phone',
+      'path' => 'request][registration][ticket_phone',
       'name' => "Ticket Phone",
       'type' => 'text',
       'size' => 255,
     ),
     'generate_revenue' => array(
-      'path' => 'event][registration][generate_revenue',
+      'path' => 'request][registration][generate_revenue',
       'name' => "Generate Revenue",
       'type' => 'bool',
       'size' => 'tiny',
     ),
     'revenue_generated' => array(
-      'path' => 'event][registration][revenue_generated',
+      'path' => 'request][registration][revenue_generated',
       'columns' => $revenue_generated_columns,
       'size' => $revenue_generated_size,
       'name' => "How Revenue is Generated",
@@ -348,85 +348,85 @@ function mfcs_table_structure() {
 
   $structure['setup'] = array(
     'rectangular_tables_8ft' => array(
-      'path' => 'event][setup][rectangular_tables_8ft',
+      'path' => 'request][setup][rectangular_tables_8ft',
       'name' => "8ft Rectangular Tables",
       'type' => 'number',
       'size' => 'normal',
     ),
     'round_tables_8ft' => array(
-      'path' => 'event][setup][round_tables_8ft',
+      'path' => 'request][setup][round_tables_8ft',
       'name' => "8ft Round Tables",
       'type' => 'number',
       'size' => 'normal',
     ),
     'other_tables' => array(
-      'path' => 'event][setup][other_tables',
+      'path' => 'request][setup][other_tables',
       'name' => "Other Tables",
       'type' => 'text',
       'size' => 255,
     ),
     'standard_blue_chairs' => array(
-      'path' => 'event][setup][standard_blue_chairs',
+      'path' => 'request][setup][standard_blue_chairs',
       'name' => "Standard Blue Chairs",
       'type' => 'number',
       'size' => 'normal',
     ),
     'podium' => array(
-      'path' => 'event][setup][podium',
+      'path' => 'request][setup][podium',
       'name' => "Podium Needed",
       'type' => 'bool',
       'size' => 'tiny',
     ),
     'portable_stage' => array(
-      'path' => 'event][setup][portable_stage',
+      'path' => 'request][setup][portable_stage',
       'name' => "Portable Stage Needed",
       'type' => 'bool',
       'size' => 'tiny',
     ),
     'portable_stage_configuration' => array(
-      'path' => 'event][setup][portable_stage_configuration',
+      'path' => 'request][setup][portable_stage_configuration',
       'name' => "Portable Stage Configuration",
       'type' => 'text',
       'size' => 255,
     ),
     'security' => array(
-      'path' => 'event][setup][security',
+      'path' => 'request][setup][security',
       'name' => "Security Needed",
       'type' => 'bool',
       'size' => 'tiny',
     ),
     'parking_assistance' => array(
-      'path' => 'event][setup][parking_assistance',
+      'path' => 'request][setup][parking_assistance',
       'name' => "Parking Assistance Needed",
       'type' => 'bool',
       'size' => 'tiny',
     ),
     'parking_assistance_area' => array(
-      'path' => 'event][setup][parking_assistance_area',
+      'path' => 'request][setup][parking_assistance_area',
       'name' => "Parking Assistance Area",
       'type' => 'text',
       'size' => 255,
     ),
     'road_closures' => array(
-      'path' => 'event][setup][road_closures',
+      'path' => 'request][setup][road_closures',
       'name' => "Road Closures or Barricades",
       'type' => 'bool',
       'size' => 'tiny',
     ),
     'road_closures_details' => array(
-      'path' => 'event][setup][road_closures_details',
+      'path' => 'request][setup][road_closures_details',
       'name' => "Road Closure Details",
       'type' => 'text',
       'size' => 255,
     ),
     'special_requests' => array(
-      'path' => 'event][setup][special_requests',
+      'path' => 'request][setup][special_requests',
       'name' => "Special Requests",
       'type' => 'bool',
       'size' => 'tiny',
     ),
     'special_requests_details' => array(
-      'path' => 'event][setup][special_requests_details',
+      'path' => 'request][setup][special_requests_details',
       'name' => "Special Request Details",
       'type' => 'text',
       'size' => 255,
@@ -434,13 +434,13 @@ function mfcs_table_structure() {
   );
 
 
-  $publicity_details_columns = event_workflow_get_publicity_details_list_options('column_name');
+  $publicity_details_columns = mfcs_get_publicity_details_list_options('column_name');
   $publicity_details_size = array();
   foreach ($publicity_details_columns as $key => $value) {
     $publicity_details_size[$key] = 'normal';
   }
 
-  $designing_material_columns = event_workflow_get_designing_material_list_options('column_name');
+  $designing_material_columns = mfcs_get_designing_material_list_options('column_name');
   $designing_material_size = array();
   foreach ($designing_material_columns as $key => $value) {
     $designing_material_size[$key] = 'normal';
@@ -450,118 +450,118 @@ function mfcs_table_structure() {
 
   $structure['presentation'] = array(
     'technical_equipment' => array(
-      'path' => 'event][presentation][technical_equipment',
+      'path' => 'request][presentation][technical_equipment',
       'name' => "Need Technical Equipment",
       'type' => 'bool',
       'size' => 'tiny',
     ),
     'technical_equipment_details' => array(
-      'path' => 'event][presentation][technical_equipment_details',
+      'path' => 'request][presentation][technical_equipment_details',
       'columns' => $technical_equipment_details_columns,
       'name' => "Technical Equipment Details",
       'type' => 'checkboxes',
       'size' => $technical_equipment_details_size,
     ),
     'technical_equipment_microphone' => array(
-      'path' => 'event][presentation][technical_equipment_microphone',
+      'path' => 'request][presentation][technical_equipment_microphone',
       'name' => "Quantity of Microphones",
       'type' => 'text',
       'size' => 'normal',
     ),
     'external_audio_person' => array(
-      'path' => 'event][presentation][external_audio_person',
+      'path' => 'request][presentation][external_audio_person',
       'name' => "External Audio Person/Company",
       'type' => 'bool',
       'size' => 'tiny',
     ),
     'external_audio_person_name' => array(
-      'path' => 'event][presentation][external_audio_person_name',
+      'path' => 'request][presentation][external_audio_person_name',
       'name' => "Name of Audio Person/Company",
       'type' => 'text',
       'size' => 255,
     ),
     'external_audio_person_email' => array(
-      'path' => 'event][presentation][external_audio_person_email',
+      'path' => 'request][presentation][external_audio_person_email',
       'name' => "E-Mail of Audio Person/Company",
       'type' => 'text',
       'size' => 255,
     ),
     'external_audio_person_phone' =>  array(
-      'path' =>'event][presentation][external_audio_person_phone',
+      'path' =>'request][presentation][external_audio_person_phone',
       'name' => "Phone of Audio Person/Company",
       'type' => 'text',
       'size' => 255,
     ),
     'publicity' => array(
-      'path' => 'event][presentation][publicity',
+      'path' => 'request][presentation][publicity',
       'name' => "Need Publicity",
       'type' => 'bool',
       'size' => 'tiny',
     ),
     'publicity_details' => array(
-      'path' => 'event][presentation][publicity_details',
+      'path' => 'request][presentation][publicity_details',
       'columns' => $publicity_details_columns,
       'name' => "Publicity Methods",
       'type' => 'checkboxes',
       'size' => $publicity_details_size,
     ),
     'production' => array(
-      'path' => 'event][presentation][production',
+      'path' => 'request][presentation][production',
       'name' => "Using Production Company/Promoter",
       'type' => 'bool',
       'size' => 'tiny',
     ),
     'production_name' => array(
-      'path' => 'event][presentation][production_name',
+      'path' => 'request][presentation][production_name',
       'name' => "Name of Production Company/Promoter",
       'type' => 'text',
       'size' => 255,
     ),
     'production_email' => array(
-      'path' => 'event][presentation][production_email',
+      'path' => 'request][presentation][production_email',
       'name' => "E-Mail of Production Company/Promoter",
       'type' => 'text',
       'size' => 255,
     ),
     'production_phone' => array(
-      'path' => 'event][presentation][production_phone',
+      'path' => 'request][presentation][production_phone',
       'name' => "Phone of Production Company/Promoter",
       'type' => 'text',
       'size' => 255,
     ),
     'printed_material' => array(
-      'path' => 'event][presentation][printed_material',
+      'path' => 'request][presentation][printed_material',
       'name' => "Using Printed Material",
       'type' => 'bool',
       'size' => 'tiny',
     ),
     'university_logo' => array(
-      'path' => 'event][presentation][university_logo',
+      'path' => 'request][presentation][university_logo',
       'name' => "Using University Logo",
       'type' => 'bool',
       'size' => 'tiny',
     ),
     'designing_material' => array(
-      'path' => 'event][presentation][designing_material',
+      'path' => 'request][presentation][designing_material',
       'columns' => $designing_material_columns,
       'name' => "Material Designer",
       'type' => 'checkboxes',
       'size' => $designing_material_size,
     ),
     'designing_material_name' => array(
-      'path' => 'event][presentation][designing_material_name',
+      'path' => 'request][presentation][designing_material_name',
       'name' => "Material Designer Name",
       'type' => 'text',
       'size' => 255,
     ),
     'designing_material_email' => array(
-      'path' => 'event][presentation][designing_material_email',
+      'path' => 'request][presentation][designing_material_email',
       'name' => "Material Designer E-Mail",
       'type' => 'text',
       'size' => 255,
     ),
     'designing_material_phone' => array(
-      'path' => 'event][presentation][designing_material_phone',
+      'path' => 'request][presentation][designing_material_phone',
       'name' => "Material Designer Phone",
       'type' => 'text',
       'size' => 255,
@@ -570,25 +570,25 @@ function mfcs_table_structure() {
 
   $structure['services'] = array(
     'food_served' => array(
-      'path' => 'event][services][food_served',
+      'path' => 'request][services][food_served',
       'name' => "Food Served",
       'type' => 'bool',
       'size' => 'tiny',
     ),
     'food_caterer' => array(
-      'path' => 'event][services][food_caterer',
+      'path' => 'request][services][food_caterer',
       'name' => "Food Caterer",
       'type' => 'text',
       'size' => 255,
     ),
     'alcohol' => array(
-      'path' => 'event][services][alcohol',
+      'path' => 'request][services][alcohol',
       'name' => "Alcohol Served",
       'type' => 'bool',
       'size' => 'tiny',
     ),
     'open_flames' => array(
-      'path' => 'event][services][open_flames',
+      'path' => 'request][services][open_flames',
       'name' => "Open Flames Used",
       'type' => 'bool',
       'size' => 'tiny',
@@ -648,7 +648,7 @@ function mfcs_table_presentation($option = NULL) {
         'weight' => 1,
         'group' => 2,
         'label' => "Registration",
-        'event_type' => array(
+        'request_type' => array(
           'hide_link' => array(57),
         ),
       );
@@ -700,7 +700,7 @@ function mfcs_table_presentation($option = NULL) {
       'label' => 'Request ID',
       'group' => 'request',
       'weight' => 0,
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -715,7 +715,7 @@ function mfcs_table_presentation($option = NULL) {
       'display' => array(
         'value' => 'Y/m/d h:ia',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -730,7 +730,7 @@ function mfcs_table_presentation($option = NULL) {
       'display' => array(
         'value' => 'account_name',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -745,7 +745,7 @@ function mfcs_table_presentation($option = NULL) {
       'display' => array(
         'value' => 'Y/m/d h:ia',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -763,7 +763,7 @@ function mfcs_table_presentation($option = NULL) {
       'display' => array(
         'value' => NULL,
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -778,7 +778,7 @@ function mfcs_table_presentation($option = NULL) {
       'display' => array(
         'value' => NULL,
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -793,7 +793,7 @@ function mfcs_table_presentation($option = NULL) {
       'display' => array(
         'value' => NULL,
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -808,7 +808,7 @@ function mfcs_table_presentation($option = NULL) {
       'display' => array(
         'value' => NULL,
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -823,7 +823,7 @@ function mfcs_table_presentation($option = NULL) {
       'display' => array(
         'value' => NULL,
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -831,7 +831,7 @@ function mfcs_table_presentation($option = NULL) {
     'additional' => array(
       'label' => 'Additional Information or Questions to Campus Officials',
       'size' => 'small',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -851,7 +851,7 @@ function mfcs_table_presentation($option = NULL) {
         'amount' => 'requirement_amount',
        ),
       'group' => 'requirements',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -868,7 +868,7 @@ function mfcs_table_presentation($option = NULL) {
         'amount' => 'requirement_amount',
        ),
       'group' => 'requirements',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -889,7 +889,7 @@ function mfcs_table_presentation($option = NULL) {
         'amount' => 'requirement_amount',
       ),
       'group' => 'requirements',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -910,7 +910,7 @@ function mfcs_table_presentation($option = NULL) {
         'amount' => 'requirement_amount',
       ),
       'group' => 'requirements',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -924,7 +924,7 @@ function mfcs_table_presentation($option = NULL) {
         'value' => 'when_true',
       ),
       'group' => 'requirements',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -938,7 +938,7 @@ function mfcs_table_presentation($option = NULL) {
         'value' => 'when_true',
       ),
       'group' => 'requirements',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -952,7 +952,7 @@ function mfcs_table_presentation($option = NULL) {
         'value' => 'when_true',
       ),
       'group' => 'requirements',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -969,7 +969,7 @@ function mfcs_table_presentation($option = NULL) {
         'value' => 'when_true',
       ),
       'group' => 'requirements',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -983,7 +983,7 @@ function mfcs_table_presentation($option = NULL) {
         'value' => 'when_true',
       ),
       'group' => 'requirements',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -999,7 +999,7 @@ function mfcs_table_presentation($option = NULL) {
       'display' => array(
         'value' => 'Y/m/d',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -1016,7 +1016,7 @@ function mfcs_table_presentation($option = NULL) {
       'display' => array(
         'value' => 'h:ia',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -1033,7 +1033,7 @@ function mfcs_table_presentation($option = NULL) {
       'display' => array(
         'value' => 'h:ia',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -1047,7 +1047,7 @@ function mfcs_table_presentation($option = NULL) {
       'type' => array(
         'value' => 'taxonomy',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -1077,7 +1077,7 @@ function mfcs_table_presentation($option = NULL) {
       'display' => array(
         'value' => 'name',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -1092,7 +1092,7 @@ function mfcs_table_presentation($option = NULL) {
       'display' => array(
         'value' => 'phone',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -1107,19 +1107,19 @@ function mfcs_table_presentation($option = NULL) {
       'display' => array(
         'value' => 'email',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
     ),
   );
 
-  $presentation['event_coordinator'] = array(
+  $presentation['request_coordinator'] = array(
     'name' => array(
       'label' => 'Event Coordinator Name',
       'group' => 'coordinator',
       'weight' => 4,
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -1128,7 +1128,7 @@ function mfcs_table_presentation($option = NULL) {
       'label' => 'Event Coordinator Phone',
       'group' => 'coordinator',
       'weight' => 5,
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -1137,7 +1137,7 @@ function mfcs_table_presentation($option = NULL) {
       'label' => 'Event Coordinator E-Mail',
       'group' => 'coordinator',
       'weight' => 6,
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -1149,7 +1149,7 @@ function mfcs_table_presentation($option = NULL) {
       'type' => array(
         'value' => 'taxonomy',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -1160,7 +1160,7 @@ function mfcs_table_presentation($option = NULL) {
     'title' => array(
       'label' => 'Request Title',
       'weight' => 1,
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -1168,7 +1168,7 @@ function mfcs_table_presentation($option = NULL) {
     'attendance' => array(
       'label' => 'Expected Attendance',
       'weight' => 3,
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -1179,7 +1179,7 @@ function mfcs_table_presentation($option = NULL) {
       'type' => array(
         'value' => 'taxonomy',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -1187,7 +1187,7 @@ function mfcs_table_presentation($option = NULL) {
     'organization' => array(
       'label' => 'Organization / Affiliation',
       'weight' => 4,
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -1198,11 +1198,11 @@ function mfcs_table_presentation($option = NULL) {
       'type' => array(
         'value' => 'boolean',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
-      'event_classification' => array(
+      'request_classification' => array(
         'show' => array(1),
         'hide' => TRUE,
       ),
@@ -1215,7 +1215,7 @@ function mfcs_table_presentation($option = NULL) {
       'type' => array(
         'value' => 'taxonomy',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -1223,7 +1223,7 @@ function mfcs_table_presentation($option = NULL) {
     'description' => array(
       'label' => 'Description/Purpose',
       'size' => 'large',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
@@ -1231,7 +1231,7 @@ function mfcs_table_presentation($option = NULL) {
     'activities' => array(
       'label' => 'Planned Activities',
       'size' => 'large',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
@@ -1244,49 +1244,49 @@ function mfcs_table_presentation($option = NULL) {
       'type' => array(
         'value' => 'boolean',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
     ),
     'website' => array(
       'label' => 'Registration Website',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
     ),
     'phone' => array(
       'label' => 'Registration Phone',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
     ),
     'ticket_price' => array(
       'label' => 'Ticket Price',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
     ),
     'ticket_dates' => array(
       'label' => 'Ticket Dates',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
     ),
     'ticket_website' => array(
       'label' => 'Ticket Website',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
     ),
     'ticket_phone' => array(
       'label' => 'Ticket Phone',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
@@ -1296,7 +1296,7 @@ function mfcs_table_presentation($option = NULL) {
       'type' => array(
         'value' => 'boolean',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
@@ -1313,7 +1313,7 @@ function mfcs_table_presentation($option = NULL) {
         'merchandise' => 'taxonomy',
         'concession' => 'taxonomy',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
@@ -1323,14 +1323,14 @@ function mfcs_table_presentation($option = NULL) {
   $presentation['setup'] = array(
     'rectangular_tables_8ft' => array(
       'label' => 'Quantity of 8ft Rectangular Tables',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
     ),
     'round_tables_8ft' => array(
       'label' => 'Quantity of 8ft Round Tables',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -1338,14 +1338,14 @@ function mfcs_table_presentation($option = NULL) {
     'other_tables' => array(
       'label' => 'Description and Quantity of Other Tables',
       'size' => 'large',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
     ),
     'standard_blue_chairs' => array(
       'label' => 'Quantity of Blue Chairs',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -1355,7 +1355,7 @@ function mfcs_table_presentation($option = NULL) {
       'type' => array(
         'value' => 'boolean',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -1365,7 +1365,7 @@ function mfcs_table_presentation($option = NULL) {
       'type' => array(
         'value' => 'boolean',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
@@ -1373,7 +1373,7 @@ function mfcs_table_presentation($option = NULL) {
     'portable_stage_configuration' => array(
       'label' => 'Portable Stage Configuration',
       'size' => 'large',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
@@ -1383,7 +1383,7 @@ function mfcs_table_presentation($option = NULL) {
       'type' => array(
         'value' => 'boolean',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
@@ -1393,7 +1393,7 @@ function mfcs_table_presentation($option = NULL) {
       'type' => array(
         'value' => 'boolean',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
@@ -1401,7 +1401,7 @@ function mfcs_table_presentation($option = NULL) {
     'parking_assistance_area' => array(
       'label' => 'Parking Assistance or Restriction Explanation',
       'size' => 'large',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
@@ -1411,7 +1411,7 @@ function mfcs_table_presentation($option = NULL) {
       'type' => array(
         'value' => 'boolean',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
@@ -1419,7 +1419,7 @@ function mfcs_table_presentation($option = NULL) {
     'road_closures_details' => array(
       'label' => 'Road Closures or Barricades Explanation',
       'size' => 'large',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
@@ -1429,7 +1429,7 @@ function mfcs_table_presentation($option = NULL) {
       'type' => array(
         'value' => 'boolean',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
@@ -1437,7 +1437,7 @@ function mfcs_table_presentation($option = NULL) {
     'special_requests_details' => array(
       'label' => 'Special Requests Explanation',
       'size' => 'large',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
@@ -1450,7 +1450,7 @@ function mfcs_table_presentation($option = NULL) {
       'type' => array(
         'value' => 'boolean',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -1469,14 +1469,14 @@ function mfcs_table_presentation($option = NULL) {
         'computer' => 'taxonomy',
         'sound' => 'taxonomy',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
     ),
     'technical_equipment_microphone' => array(
       'label' => 'Quantity of Microphones',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -1486,28 +1486,28 @@ function mfcs_table_presentation($option = NULL) {
       'type' => array(
         'value' => 'boolean',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
     ),
     'external_audio_person_name' => array(
       'label' => 'Name of Person/Company',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
     ),
     'external_audio_person_email' => array(
       'label' => 'E-mail of Person/Company',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
     ),
     'external_audio_person_phone' => array(
       'label' => 'Phone of Person/Company',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
@@ -1517,7 +1517,7 @@ function mfcs_table_presentation($option = NULL) {
       'type' => array(
         'value' => 'boolean',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -1540,7 +1540,7 @@ function mfcs_table_presentation($option = NULL) {
         'axis_tv' => 'taxonomy',
         'press_release' => 'taxonomy',
        ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -1550,28 +1550,28 @@ function mfcs_table_presentation($option = NULL) {
       'type' => array(
         'value' => 'boolean',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
     ),
     'production_name' => array(
       'label' => 'Production Company or Professional Promoter Name',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
     ),
     'production_email' => array(
       'label' => 'Production Company or Professional Promoter E-mail',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
     ),
     'production_phone' => array(
       'label' => 'Production Company or Professional Promoter Phone',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
@@ -1581,7 +1581,7 @@ function mfcs_table_presentation($option = NULL) {
       'type' => array(
         'value' => 'boolean',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
@@ -1591,14 +1591,14 @@ function mfcs_table_presentation($option = NULL) {
       'type' => array(
         'value' => 'boolean',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
     ),
     'designing_material' => array(
       'label' => 'Printed Material Designer',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
@@ -1615,21 +1615,21 @@ function mfcs_table_presentation($option = NULL) {
         'marketing' => 'taxonomy',
         'other' => 'taxonomy',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
     ),
     'designing_material_email' => array(
       'label' => 'E-mail of Printed Material Designer',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
     ),
     'designing_material_phone' => array(
       'label' => 'Phone of Printed Material Designer',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
@@ -1642,14 +1642,14 @@ function mfcs_table_presentation($option = NULL) {
       'type' => array(
         'value' => 'boolean',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
     ),
     'food_caterer' => array(
       'label' => 'Name of the Caterer/Business',
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -1659,7 +1659,7 @@ function mfcs_table_presentation($option = NULL) {
       'type' => array(
         'value' => 'boolean',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
@@ -1669,7 +1669,7 @@ function mfcs_table_presentation($option = NULL) {
       'type' => array(
         'value' => 'boolean',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => array(57),
       ),
@@ -1685,10 +1685,16 @@ function mfcs_table_presentation($option = NULL) {
       'type' => array(
         'decision' => 'review_decision',
       ),
-      'event_type' => array(
+      'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
       ),
     ),
   );
 
+  return $presentation;
+}
+
+/**
+ * @} End of '@addtogroup mcneese_event_workflow'.
+ */

@@ -11,12 +11,12 @@
  */
 
 /**
- * Assign a new step to a given event request.
+ * Assign a new step to a given request.
  *
  * @param int $request_id
- *   The id of the given event.
+ *   The id of the given request.
  * @param int $step
- *   The new step to assign to the specified event.
+ *   The new step to assign to the specified request.
  * @param object|null $user
  *   If specified, the user to log this change as.
  *
@@ -24,10 +24,10 @@
  *   (optional) TRUE on success, FALSE otherwise.
  */
 function mfcs_workflow_set_step($request_id, $step, $user = NULL) {
-  $event = event_workflow_load_event_by_id($request_id);
+  $request = mfcs_load_request_by_id($request_id);
 
-  if (empty($event)) {
-    watchdog(MFCS_WATCHDOG_ID, "Unable to find event with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
+  if (empty($request)) {
+    watchdog(MFCS_WATCHDOG_ID, "Unable to find request with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
     return FALSE;
   }
 
@@ -47,38 +47,38 @@ function mfcs_workflow_set_step($request_id, $step, $user = NULL) {
 
   mfcs_include(4);
 
-  $step_options = event_workflow_get_review_step_list_options();
+  $step_options = mfcs_get_review_step_list_options();
 
   if (!array_key_exists($step, $step_options)) {
     watchdog(MFCS_WATCHDOG_ID, "%step is not a valid step.", array('%step' => $step), WATCHDOG_ERROR);
     return FALSE;
   }
 
-  $mfcs_event_requests = array(
+  $mfcs_requests = array(
     'updated' => REQUEST_TIME,
   );
 
-  $event_revision = mfcs_load_event_revision_number($request_id);
-  $processed_mfcs_event_revisions = &drupal_static('processed_mfcs_event_revisions_' . REQUEST_TIME, FALSE);
+  $request_revision = mfcs_load_request_revision_number($request_id);
+  $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . REQUEST_TIME, FALSE);
 
-  if ($event_revision === FALSE) {
-    watchdog(MFCS_WATCHDOG_ID, "Failed to load revision number for event %request_id.", array('%request_id' => $request_id), WATCHDOG_ERROR);
+  if ($request_revision === FALSE) {
+    watchdog(MFCS_WATCHDOG_ID, "Failed to load revision number for request %request_id.", array('%request_id' => $request_id), WATCHDOG_ERROR);
     return FALSE;
   }
-  elseif (is_null($event_revision)) {
-    $event_revision_next = 0;
+  elseif (is_null($request_revision)) {
+    $request_revision_next = 0;
   }
   else {
-    $event_revision_next = $event_revision + 1;
+    $request_revision_next = $request_revision + 1;
   }
 
-  $mfcs_event_revisions = array(
+  $mfcs_request_revisions = array(
     'request_id' => $request_id,
     'date' => REQUEST_TIME,
-    'revision' => $event_revision_next,
+    'revision' => $request_revision_next,
   );
 
-  $step_revision = $event['current']['top']['step'] + 1;
+  $step_revision = $request['current']['top']['step'] + 1;
 
   $mfcs_current_top = array(
     'step' => $step_revision,
@@ -97,17 +97,17 @@ function mfcs_workflow_set_step($request_id, $step, $user = NULL) {
   $transaction = db_transaction();
 
   try {
-    $query = db_update('mfcs_event_requests');
+    $query = db_update('mfcs_requests');
     $query->condition('id', $request_id);
-    $query->fields($mfcs_event_requests);
+    $query->fields($mfcs_requests);
     $query->execute();
 
-    if (!$processed_mfcs_event_revisions) {
-      $query = db_insert('mfcs_event_revisions');
-      $query->fields($mfcs_event_revisions);
+    if (!$processed_mfcs_request_revisions) {
+      $query = db_insert('mfcs_request_revisions');
+      $query->fields($mfcs_request_revisions);
       $query->execute();
 
-      $processed_mfcs_event_revisions = TRUE;
+      $processed_mfcs_request_revisions = TRUE;
     }
 
     $query = db_insert('mfcs_field_top_step');
@@ -129,19 +129,19 @@ function mfcs_workflow_set_step($request_id, $step, $user = NULL) {
     return FALSE;
   }
 
-  // reset the cached event object
-  event_workflow_load_event_by_id($request_id, TRUE);
+  // reset the cached request object
+  mfcs_load_request_by_id($request_id, TRUE);
 
   return TRUE;
 }
 
 /**
- * Assign a new status to a given event request.
+ * Assign a new status to a given request.
  *
  * @param int $request_id
- *   The id of the given event.
+ *   The id of the given request.
  * @param int $status
- *   The new status to assign to the specified event.
+ *   The new status to assign to the specified request.
  * @param object|null $user
  *   (optional) If specified, the user to log this change as.
  *
@@ -149,10 +149,10 @@ function mfcs_workflow_set_step($request_id, $step, $user = NULL) {
  *   TRUE on success, FALSE otherwise.
  */
 function mfcs_workflow_set_status($request_id, $status, $user = NULL) {
-  $event = event_workflow_load_event_by_id($request_id);
+  $request = mfcs_load_request_by_id($request_id);
 
-  if (empty($event)) {
-    watchdog(MFCS_WATCHDOG_ID, "Unable to find event with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
+  if (empty($request)) {
+    watchdog(MFCS_WATCHDOG_ID, "Unable to find request with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
     return FALSE;
   }
 
@@ -186,31 +186,31 @@ function mfcs_workflow_set_status($request_id, $status, $user = NULL) {
     return FALSE;
   }
 
-  $mfcs_event_requests = array(
+  $mfcs_requests = array(
     'updated' => REQUEST_TIME,
   );
 
-  $event_revision = mfcs_load_event_revision_number($request_id);
-  $processed_mfcs_event_revisions = &drupal_static('processed_mfcs_event_revisions_' . REQUEST_TIME, FALSE);
+  $request_revision = mfcs_load_request_revision_number($request_id);
+  $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . REQUEST_TIME, FALSE);
 
-  if ($event_revision === FALSE) {
-    watchdog(MFCS_WATCHDOG_ID, "Failed to load revision number for event %request_id.", array('%request_id' => $request_id), WATCHDOG_ERROR);
+  if ($request_revision === FALSE) {
+    watchdog(MFCS_WATCHDOG_ID, "Failed to load revision number for request %request_id.", array('%request_id' => $request_id), WATCHDOG_ERROR);
     return FALSE;
   }
-  elseif (is_null($event_revision)) {
-    $event_revision_next = 0;
+  elseif (is_null($request_revision)) {
+    $request_revision_next = 0;
   }
   else {
-    $event_revision_next = $event_revision + 1;
+    $request_revision_next = $request_revision + 1;
   }
 
-  $mfcs_event_revisions = array(
+  $mfcs_request_revisions = array(
     'request_id' => $request_id,
     'date' => REQUEST_TIME,
-    'revision' => $event_revision_next,
+    'revision' => $request_revision_next,
   );
 
-  $status_revision = $event['current']['top']['status'] + 1;
+  $status_revision = $request['current']['top']['status'] + 1;
 
   $mfcs_current_top = array(
     'status' => $status_revision,
@@ -228,17 +228,17 @@ function mfcs_workflow_set_status($request_id, $status, $user = NULL) {
   $transaction = db_transaction();
 
   try {
-    $query = db_update('mfcs_event_requests');
+    $query = db_update('mfcs_requests');
     $query->condition('id', $request_id);
-    $query->fields($mfcs_event_requests);
+    $query->fields($mfcs_requests);
     $query->execute();
 
-    if (!$processed_mfcs_event_revisions) {
-      $query = db_insert('mfcs_event_revisions');
-      $query->fields($mfcs_event_revisions);
+    if (!$processed_mfcs_request_revisions) {
+      $query = db_insert('mfcs_request_revisions');
+      $query->fields($mfcs_request_revisions);
       $query->execute();
 
-      $processed_mfcs_event_revisions = TRUE;
+      $processed_mfcs_request_revisions = TRUE;
     }
 
     $query = db_insert('mfcs_field_top_status');
@@ -260,8 +260,8 @@ function mfcs_workflow_set_status($request_id, $status, $user = NULL) {
     return FALSE;
   }
 
-  // reset the cached event object
-  event_workflow_load_event_by_id($request_id, TRUE);
+  // reset the cached request object
+  mfcs_load_request_by_id($request_id, TRUE);
 
   // @todo: if it is the final step, accepted, etc..make sure to generate the PDF file and save it to the file system for remote storage.
 
@@ -276,7 +276,7 @@ function mfcs_workflow_set_status($request_id, $status, $user = NULL) {
  * @param object $reviewer
  *   The reviewer.
  * @param int $step
- *   The event review step at the time of the decision.
+ *   The request review step at the time of the decision.
  * @param int $decision
  *   The facilities use decision.
  * @param int $message
@@ -288,10 +288,10 @@ function mfcs_workflow_set_status($request_id, $status, $user = NULL) {
  *   TRUE on success, FALSE otherwise.
  */
 function mfcs_workflow_step_review($request_id, $user, $step, $decision, $message, $extra = array()) {
-  $event = event_workflow_load_event_by_id($request_id);
+  $request = mfcs_load_request_by_id($request_id);
 
-  if (empty($event)) {
-    watchdog(MFCS_WATCHDOG_ID, "Unable to find event with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
+  if (empty($request)) {
+    watchdog(MFCS_WATCHDOG_ID, "Unable to find request with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
     return FALSE;
   }
 
@@ -329,20 +329,20 @@ function mfcs_workflow_step_review($request_id, $user, $step, $decision, $messag
     return FALSE;
   }
 
-  $event = event_workflow_load_event_by_id($request_id);
+  $request = mfcs_load_request_by_id($request_id);
 
-  if (empty($event)) {
-    watchdog(MFCS_WATCHDOG_ID, "Unable to find event with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
+  if (empty($request)) {
+    watchdog(MFCS_WATCHDOG_ID, "Unable to find request with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
     return FALSE;
   }
 
-  $event_classification = $event['event_coordinator']['classification'][0]->value;
-  $step = $event['top']['step'][0]->value;
-  $venue_coordinator_id = $event['venue_coordinator']['user_id'][0]->value;
+  $request_classification = $request['request_coordinator']['classification'][0]->value;
+  $step = $request['top']['step'][0]->value;
+  $venue_coordinator_id = $request['venue_coordinator']['user_id'][0]->value;
 
   // review revisions are neither used nor incremented in the same manner as other fields.
   // the revision number will not increment when a new review is made.
-  $review_revision = mfcs_load_event_revision_number($request_id, 'mfcs_field_review_review');
+  $review_revision = mfcs_load_request_revision_number($request_id, 'mfcs_field_review_review');
 
   if ($review_revision === FALSE || is_null($review_revision)) {
     $review_revision = 0;
@@ -352,28 +352,28 @@ function mfcs_workflow_step_review($request_id, $user, $step, $decision, $messag
     'user_id' => $user->uid,
   );
 
-  $mfcs_event_requests = array(
+  $mfcs_requests = array(
     'updated' => REQUEST_TIME,
   );
 
-  $event_revision = mfcs_load_event_revision_number($request_id);
-  $processed_mfcs_event_revisions = &drupal_static('processed_mfcs_event_revisions_' . REQUEST_TIME, FALSE);
+  $request_revision = mfcs_load_request_revision_number($request_id);
+  $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . REQUEST_TIME, FALSE);
 
-  if ($event_revision === FALSE) {
-    watchdog(MFCS_WATCHDOG_ID, "Failed to load revision number for event %request_id.", array('%request_id' => $request_id), WATCHDOG_ERROR);
+  if ($request_revision === FALSE) {
+    watchdog(MFCS_WATCHDOG_ID, "Failed to load revision number for request %request_id.", array('%request_id' => $request_id), WATCHDOG_ERROR);
     return FALSE;
   }
-  elseif (is_null($event_revision)) {
-    $event_revision_next = 0;
+  elseif (is_null($request_revision)) {
+    $request_revision_next = 0;
   }
   else {
-    $event_revision_next = $event_revision + 1;
+    $request_revision_next = $request_revision + 1;
   }
 
-  $mfcs_event_revisions = array(
+  $mfcs_request_revisions = array(
     'request_id' => $request_id,
     'date' => REQUEST_TIME,
-    'revision' => $event_revision_next,
+    'revision' => $request_revision_next,
   );
 
   $mfcs_current_requirements = array(
@@ -392,8 +392,8 @@ function mfcs_workflow_step_review($request_id, $user, $step, $decision, $messag
 
   try {
     foreach ($requirements_latest as $requirement_name => &$requirement_latest_value) {
-      if (array_key_exists($requirement_name, $event['current']['requirements']) && !is_null($event['current']['requirements'][$requirement_name])) {
-        $mfcs_current_requirements[$requirement_name] = $event['current']['requirements'][$requirement_name];
+      if (array_key_exists($requirement_name, $request['current']['requirements']) && !is_null($request['current']['requirements'][$requirement_name])) {
+        $mfcs_current_requirements[$requirement_name] = $request['current']['requirements'][$requirement_name];
         $requirement_latest_value = $mfcs_current_requirements[$requirement_name];
       }
       else {
@@ -426,20 +426,20 @@ function mfcs_workflow_step_review($request_id, $user, $step, $decision, $messag
   $insurance_latest = $mfcs_current_insurance;
   unset($insurance_latest['request_id']);
 
-  if (!empty($event['current']['insurance'])) {
-    if (array_key_exists('contractor', $event['current']['insurance']) && !is_null($event['current']['insurance']['contractor'])) {
-      $mfcs_current_insurance['contractor'] = $event['current']['insurance']['contractor'];
+  if (!empty($request['current']['insurance'])) {
+    if (array_key_exists('contractor', $request['current']['insurance']) && !is_null($request['current']['insurance']['contractor'])) {
+      $mfcs_current_insurance['contractor'] = $request['current']['insurance']['contractor'];
     }
 
-    if (array_key_exists('unaffiliated', $event['current']['insurance']) && !is_null($event['current']['insurance']['unaffiliated'])) {
-      $mfcs_current_insurance['unaffiliated'] = $event['current']['insurance']['unaffiliated'];
+    if (array_key_exists('unaffiliated', $request['current']['insurance']) && !is_null($request['current']['insurance']['unaffiliated'])) {
+      $mfcs_current_insurance['unaffiliated'] = $request['current']['insurance']['unaffiliated'];
     }
   }
 
   try {
     foreach ($insurance_latest as $insurance_name => &$insurance_latest_value) {
-      if (array_key_exists($insurance_name, $event['current']['insurance']) && !is_null($event['current']['insurance'][$insurance_name])) {
-        $mfcs_current_insurance[$insurance_name] = $event['current']['insurance'][$insurance_name];
+      if (array_key_exists($insurance_name, $request['current']['insurance']) && !is_null($request['current']['insurance'][$insurance_name])) {
+        $mfcs_current_insurance[$insurance_name] = $request['current']['insurance'][$insurance_name];
         $insurance_latest_value = $mfcs_current_insurance[$insurance_name];
       }
       else {
@@ -504,7 +504,7 @@ function mfcs_workflow_step_review($request_id, $user, $step, $decision, $messag
 
   $reviewer_conditions = array(
     'mr.user_id' => $user->uid,
-    'mr.event_classification' => $event_classification,
+    'mr.request_classification' => $request_classification,
     'mr.review_step' => $step,
     'mr.disabled' => 0,
   );
@@ -527,7 +527,7 @@ function mfcs_workflow_step_review($request_id, $user, $step, $decision, $messag
     $uses = array();
     $insurance_requirements = FALSE;
     if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
-      if ($event['venue_coordinator']['user_id'][0]->value == $user->uid) {
+      if ($request['venue_coordinator']['user_id'][0]->value == $user->uid) {
         $uses['facilities'] = 'facilities';
         $uses['equipment'] = 'equipment';
       }
@@ -554,21 +554,21 @@ function mfcs_workflow_step_review($request_id, $user, $step, $decision, $messag
       }
 
       if (!empty($extra['requirements'][$use]['hours'])) {
-        $hours = event_workflow_convert_value_to_database_format($extra['requirements'][$use]['hours'], 'currency');
+        $hours = mfcs_convert_value_to_database_format($extra['requirements'][$use]['hours'], 'currency');
         if ($hours !== FALSE) {
           $requirements['hours'] = $hours;
         }
       }
 
       if (!empty($extra['requirements'][$use]['days'])) {
-        $days = event_workflow_convert_value_to_database_format($extra['requirements'][$use]['days'], 'currency');
+        $days = mfcs_convert_value_to_database_format($extra['requirements'][$use]['days'], 'currency');
         if ($days !== FALSE) {
           $requirements['days'] = $days;
         }
       }
 
       if (!empty($extra['requirements'][$use]['amount'])) {
-        $amount = event_workflow_convert_value_to_database_format($extra['requirements'][$use]['amount'], 'currency');
+        $amount = mfcs_convert_value_to_database_format($extra['requirements'][$use]['amount'], 'currency');
 
         if ($amount !== FALSE) {
           $requirements['amount'] = $amount;
@@ -732,16 +732,16 @@ function mfcs_workflow_step_review($request_id, $user, $step, $decision, $messag
   $transaction = db_transaction();
 
   try {
-    $query = db_update('mfcs_event_requests');
+    $query = db_update('mfcs_requests');
     $query->condition('id', $request_id);
-    $query->fields($mfcs_event_requests);
+    $query->fields($mfcs_requests);
     $query->execute();
 
-    if (!$processed_mfcs_event_revisions) {
-      $query = db_insert('mfcs_event_revisions');
-      $query->fields($mfcs_event_revisions);
+    if (!$processed_mfcs_request_revisions) {
+      $query = db_insert('mfcs_request_revisions');
+      $query->fields($mfcs_request_revisions);
       $query->execute();
-      $processed_mfcs_event_revisions = TRUE;
+      $processed_mfcs_request_revisions = TRUE;
     }
 
     $query = db_insert('mfcs_field_review_review');
@@ -812,8 +812,8 @@ function mfcs_workflow_step_review($request_id, $user, $step, $decision, $messag
     return FALSE;
   }
 
-  // forcefully clear the event cache so that it can reflect the changes.
-  event_workflow_load_event_by_id($request_id, TRUE);
+  // forcefully clear the request cache so that it can reflect the changes.
+  mfcs_load_request_by_id($request_id, TRUE);
 
   // handle steps that do not alter the workflow.
   if ($decision == MFCS_REVIEW_DECISION_COMMENT) {
@@ -831,12 +831,12 @@ function mfcs_workflow_step_review($request_id, $user, $step, $decision, $messag
   }
 
   // continue to next step only if at least 1 of each reviewer classification has submitted a reply.
-  $event_status = $event['top']['status'][0]->value;
-  $event_step = $event['top']['step'][0]->value;
-  $event_classification = $event['event_coordinator']['classification'][0]->value;
+  $request_status = $request['top']['status'][0]->value;
+  $request_step = $request['top']['step'][0]->value;
+  $request_classification = $request['request_coordinator']['classification'][0]->value;
 
-  if ($event_step == MFCS_REVIEW_STEP_REVIEW || $event_step == MFCS_REVIEW_STEP_REQUIREMENTS) {
-    $reviewers = mfcs_get_reviewers(array('mr.event_classification' => $event_classification, 'mr.review_step' => $event_step, 'mr.disabled' => 0));
+  if ($request_step == MFCS_REVIEW_STEP_REVIEW || $request_step == MFCS_REVIEW_STEP_REQUIREMENTS) {
+    $reviewers = mfcs_get_reviewers(array('mr.request_classification' => $request_classification, 'mr.review_step' => $request_step, 'mr.disabled' => 0));
 
     $required_reviews = 0;
     $reviewers_steps_by_classification = array();
@@ -872,7 +872,7 @@ function mfcs_workflow_step_review($request_id, $user, $step, $decision, $messag
 
       $reviews = $query->execute()->fetchAll();
       if ($reviews === FALSE) {
-        watchdog(MFCS_WATCHDOG_ID, "Failed to load reviewer classification count for event %request_id with classification %classification on step %step. Assuming total is 0.", array('%request_id' => $request_id, '%classification' => $event_classification, '%step' => $event_step), WATCHDOG_ERROR);
+        watchdog(MFCS_WATCHDOG_ID, "Failed to load reviewer classification count for request %request_id with classification %classification on step %step. Assuming total is 0.", array('%request_id' => $request_id, '%classification' => $request_classification, '%step' => $request_step), WATCHDOG_ERROR);
         $total_reviews = 0;
       }
       else {
@@ -900,7 +900,7 @@ function mfcs_workflow_step_review($request_id, $user, $step, $decision, $messag
   $changed_type = 'reviewer';
 
   // Venue Available
-  if ($event_step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
+  if ($request_step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
     if ($decision == MFCS_REVIEW_DECISION_APPROVE) {
       $new_status = MFCS_EVENT_STATUS_LOCKED;
       $new_step = MFCS_REVIEW_STEP_REVIEW;
@@ -912,7 +912,7 @@ function mfcs_workflow_step_review($request_id, $user, $step, $decision, $messag
     }
   }
   // Review Step
-  elseif ($event_step == MFCS_REVIEW_STEP_REVIEW) {
+  elseif ($request_step == MFCS_REVIEW_STEP_REVIEW) {
     if ($decision == MFCS_REVIEW_DECISION_DENY || $decision == MFCS_REVIEW_DECISION_APPROVE) {
       $changed_user = $system_user;
       $changed_by = $system_user->uid;
@@ -921,7 +921,7 @@ function mfcs_workflow_step_review($request_id, $user, $step, $decision, $messag
     }
   }
   // Requirements Step
-  elseif ($event_step == MFCS_REVIEW_STEP_REQUIREMENTS) {
+  elseif ($request_step == MFCS_REVIEW_STEP_REQUIREMENTS) {
     if ($decision == MFCS_REVIEW_DECISION_DENY || $decision == MFCS_REVIEW_DECISION_APPROVE || $decision == MFCS_REVIEW_DECISION_WAVE) {
       $changed_user = $system_user;
       $changed_by = $system_user->uid;
@@ -930,7 +930,7 @@ function mfcs_workflow_step_review($request_id, $user, $step, $decision, $messag
     }
   }
   // Venue Coordinator (Final) Review Step
-  elseif ($event_step == MFCS_REVIEW_STEP_MAKE_DECISIONS) {
+  elseif ($request_step == MFCS_REVIEW_STEP_MAKE_DECISIONS) {
     $message = '';
 
     if ($decision == MFCS_REVIEW_DECISION_APPROVE) {
@@ -949,7 +949,7 @@ function mfcs_workflow_step_review($request_id, $user, $step, $decision, $messag
     if (!empty($reviews)) {
       mfcs_include(4);
 
-      $classification_options = event_workflow_get_reviewer_classification_list_options(NULL, TRUE);
+      $classification_options = mfcs_get_reviewer_classification_list_options(NULL, TRUE);
       $preprocessed_decisions = array();
 
       $reviews_step = array();
@@ -1022,12 +1022,12 @@ function mfcs_workflow_step_review($request_id, $user, $step, $decision, $messag
 }
 
 /**
- * Process the change of an events status.
+ * Process the change of an requests status.
  *
  * @param int $request_id
  *   The request id.
  * @param int $status
- *   The new workflow status the event is going to.
+ *   The new workflow status the request is going to.
  * @param object|null $user
  *   (optional) If specified, the user to log this change as.
  *
@@ -1035,10 +1035,10 @@ function mfcs_workflow_step_review($request_id, $user, $step, $decision, $messag
  *   TRUE on success, FALSE otherwise.
  */
 function mfcs_workflow_status_change_alert($request_id, $status, $user = NULL) {
-  $event = event_workflow_load_event_by_id($request_id);
+  $request = mfcs_load_request_by_id($request_id);
 
-  if (empty($event)) {
-    watchdog(MFCS_WATCHDOG_ID, "Unable to find event with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
+  if (empty($request)) {
+    watchdog(MFCS_WATCHDOG_ID, "Unable to find request with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
     return FALSE;
   }
 
@@ -1067,24 +1067,24 @@ function mfcs_workflow_status_change_alert($request_id, $status, $user = NULL) {
 }
 
 /**
- * Sends e-mails about certain events.
+ * Sends e-mails about certain requests.
  *
  * @param int $request_id
  *   The Request ID.
  * @param arary $parameters
  *   Array with the following keys:
- *   - changed_by: The Reviewer ID or User ID who changed the event request.
+ *   - changed_by: The Reviewer ID or User ID who changed the request.
  *   - changed_type: Either 'reviewer', 'user', or 'system'.
  *   - message: A message to display in regards to the decision.
- *   - status: A taxonomy number representing the previous event request status.
+ *   - status: A taxonomy number representing the previous request status.
  *     If NULL, then there is no old status or it is not to be processed.
  *   - step: A boolean representing whether or not to process as a new step.
  *   - new: A boolean representing whether or not this is new.
  *   - update: A boolean representing whether or not this was updated.
  *   - comment: A boolean representing whether or not this is a comment.
- *   - cancelled: A boolean representing whether or not the event was
+ *   - cancelled: A boolean representing whether or not the request was
  *     cancelled.
- *   - uncancelled: A boolean representing whether or not the event was
+ *   - uncancelled: A boolean representing whether or not the request was
  *     uncancelled.
  *
  *   The keys: 'new', 'update', 'step', 'status', 'cancelled', and
@@ -1094,10 +1094,10 @@ function mfcs_workflow_status_change_alert($request_id, $status, $user = NULL) {
  *   TRUE on success, FALSE otherwise.
  */
 function mfcs_send_workflow_emails($request_id, $parameters) {
-  $event = event_workflow_load_event_by_id($request_id);
+  $request = mfcs_load_request_by_id($request_id);
 
-  if (empty($event)) {
-    watchdog(MFCS_WATCHDOG_ID, "Unable to find event with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
+  if (empty($request)) {
+    watchdog(MFCS_WATCHDOG_ID, "Unable to find request with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
     return FALSE;
   }
 
@@ -1244,14 +1244,14 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
 
   global $base_url;
 
-  $event_view_url = $base_url . '/events/view-0/' . $request_id;
+  $request_view_url = $base_url . '/requests/view-0/' . $request_id;
 
-  $event_requester = user_load($event['mer']['user_id'][0]->value);
+  $request_requester = user_load($request['mer']['user_id'][0]->value);
 
   // load appropriate reviewers in their own categories.
-  $venue_coordinator = user_load($event['venue_coordinator']['user_id'][0]->value);
+  $venue_coordinator = user_load($request['venue_coordinator']['user_id'][0]->value);
 
-  $reviewers = mfcs_get_reviewers(array('mr.event_classification' => $event['event_coordinator']['classification'][0]->value, 'mr.review_step' => MFCS_REVIEW_STEP_REVIEW, 'mr.disabled' => 0), TRUE);
+  $reviewers = mfcs_get_reviewers(array('mr.request_classification' => $request['request_coordinator']['classification'][0]->value, 'mr.review_step' => MFCS_REVIEW_STEP_REVIEW, 'mr.disabled' => 0), TRUE);
   $step_1_reviewers = array();
   if (!empty($reviewers)) {
     foreach ($reviewers as $r) {
@@ -1259,7 +1259,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     }
   }
 
-  $reviewers = mfcs_get_reviewers(array('mr.event_classification' => $event['event_coordinator']['classification'][0]->value, 'mr.review_step' => MFCS_REVIEW_STEP_REQUIREMENTS, 'mr.disabled' => 0), TRUE);
+  $reviewers = mfcs_get_reviewers(array('mr.request_classification' => $request['request_coordinator']['classification'][0]->value, 'mr.review_step' => MFCS_REVIEW_STEP_REQUIREMENTS, 'mr.disabled' => 0), TRUE);
   $step_2_reviewers = array();
   if (!empty($reviewers)) {
     foreach ($reviewers as $r) {
@@ -1275,14 +1275,14 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
 
   $email_from = '"McNeese Facilities Use System" <event_workflow@mcneese.edu>';
 
-  $location = mfcs_load_locations($event['top']['location'][0]->value);
+  $location = mfcs_load_locations($request['top']['location'][0]->value);
   $location_text = '';
 
   if (is_object($location)) {
     $location_text = $location->location_name;
   }
 
-  $room = mfcs_load_rooms(NULL, NULL, $event['top']['room'][0]->value);
+  $room = mfcs_load_rooms(NULL, NULL, $request['top']['room'][0]->value);
   $room_text = '';
 
   if (is_object($room)) {
@@ -1297,7 +1297,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
 
   $standard_content = "\n\n";
   $standard_content .= "Request ID:\n - " . $request_id . "\n\n";
-  $standard_content .= "Request Title:\n - " . $event['information']['title'][0]->value . "\n\n";
+  $standard_content .= "Request Title:\n - " . $request['information']['title'][0]->value . "\n\n";
   $standard_content .= "Location:\n - " . $location_text . "\n\n";
   $standard_content .= "Building:\n - " . $building_text . "\n\n";
   $standard_content .= "Room:\n - " . $room_text . "\n\n";
@@ -1305,37 +1305,37 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
 
   $standard_markup = "<br>\n<br>\n";
   $standard_markup .= "<strong>Request ID</strong>:\n<ul><li>" . $request_id . "</li></ul>\n<br>\n";
-  $standard_markup .= "<strong>Request Title</strong>:\n<ul><li>" . $event['information']['title'][0]->value . "</li></ul>\n<br>\n";
+  $standard_markup .= "<strong>Request Title</strong>:\n<ul><li>" . $request['information']['title'][0]->value . "</li></ul>\n<br>\n";
   $standard_markup .= "<strong>Location</strong>:\n<ul><li>" . $location_text . "</li></ul>\n<br>\n";
   $standard_markup .= "<strong>Building</strong>:\n<ul><li>" . $building_text . "</li></ul>\n<br>\n";
   $standard_markup .= "<strong>Room</strong>:\n<ul><li>" . $room_text . "</li></ul>\n<br>\n";
   $standard_markup .= "<strong>Dates</strong>:\n";
 
-  foreach ($event['dates']['date'] as $key => $date) {
+  foreach ($request['dates']['date'] as $key => $date) {
     $standard_content .= " - " . date("Y/m/d", $date->value);
     $standard_markup .= "<ul><li>" . date("Y/m/d", $date->value);
 
-    if (!is_null($event['dates']['time_start'][$key]->value)) {
-      $standard_content .= " " . date("h:ia", $event['dates']['time_start'][$key]->value);
-      $standard_content .= " to " . date("h:ia", $event['dates']['time_stop'][$key]->value);
+    if (!is_null($request['dates']['time_start'][$key]->value)) {
+      $standard_content .= " " . date("h:ia", $request['dates']['time_start'][$key]->value);
+      $standard_content .= " to " . date("h:ia", $request['dates']['time_stop'][$key]->value);
 
-      $standard_markup .= " " . date("h:ia", $event['dates']['time_start'][$key]->value);
-      $standard_markup .= " to " . date("h:ia", $event['dates']['time_stop'][$key]->value);
+      $standard_markup .= " " . date("h:ia", $request['dates']['time_start'][$key]->value);
+      $standard_markup .= " to " . date("h:ia", $request['dates']['time_stop'][$key]->value);
     }
 
     $standard_content .= "\n";
     $standard_markup .= "</li></ul>\n";
   }
 
-  $email_params['event_title'] = $event['information']['title'][0]->value;
+  $email_params['request_title'] = $request['information']['title'][0]->value;
 
   if ($is_new) {
     $email_params['title_suffix'] = "Requested";
     $email_params['content'] = "";
-    $email_params['content'] .= $changed_by_string . " has created this event request.\n";
+    $email_params['content'] .= $changed_by_string . " has created this request.\n";
     $email_params['content'] .= $standard_content;
     $email_params['markup'] = "";
-    $email_params['markup'] .= $changed_by_string . " has created this event request.<br>\n";
+    $email_params['markup'] .= $changed_by_string . " has created this request.<br>\n";
     $email_params['markup'] .= $standard_markup;
 
     if (is_object($venue_coordinator)) {
@@ -1345,10 +1345,10 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
   elseif ($is_update) {
     $email_params['title_suffix'] = "Modified";
     $email_params['content'] = "";
-    $email_params['content'] .= $changed_by_string . " has modified this event request.\n";
+    $email_params['content'] .= $changed_by_string . " has modified this request.\n";
     $email_params['content'] .= $standard_content;
     $email_params['markup'] = "";
-    $email_params['markup'] .= $changed_by_string . " has modified this event request.<br>\n";
+    $email_params['markup'] .= $changed_by_string . " has modified this request.<br>\n";
     $email_params['markup'] .= $standard_markup;
 
     // the update message only needs to be sent during the review process.
@@ -1357,13 +1357,13 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
         $email_to[$venue_coordinator->mail] = $venue_coordinator->mail;
       }
 
-      if ($event['top']['step'][0]->value == MFCS_REVIEW_STEP_REVIEW) {
+      if ($request['top']['step'][0]->value == MFCS_REVIEW_STEP_REVIEW) {
         foreach ($step_1_reviewers as $r) {
           $email_to[$r->email] = $r->email;
         }
       }
 
-      if ($event['top']['step'][0]->value == MFCS_REVIEW_STEP_REQUIREMENTS) {
+      if ($request['top']['step'][0]->value == MFCS_REVIEW_STEP_REQUIREMENTS) {
         foreach ($step_2_reviewers as $r) {
           $email_to[$r->email] = $r->email;
         }
@@ -1373,15 +1373,15 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
   elseif ($is_amendment) {
     $email_params['title_suffix'] = "Amended";
     $email_params['content'] = "";
-    $email_params['content'] .= $changed_by_string . " has amended this event request.\n";
+    $email_params['content'] .= $changed_by_string . " has amended this request.\n";
     $email_params['content'] .= "The review process has been restarted.\n";
     $email_params['content'] .= $standard_content;
     $email_params['markup'] = "";
-    $email_params['markup'] .= $changed_by_string . " has amended this event request.<br>\n";
+    $email_params['markup'] .= $changed_by_string . " has amended this request.<br>\n";
     $email_params['markup'] .= "The review process has been restarted.<br>\n";
     $email_params['markup'] .= $standard_markup;
 
-    // amendments can only happen while the event is locked.
+    // amendments can only happen while the request is locked.
     if ($status == MFCS_EVENT_STATUS_LOCKED) {
       if (is_object($venue_coordinator)) {
         $email_to[$venue_coordinator->mail] = $venue_coordinator->mail;
@@ -1403,24 +1403,24 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
 
       if ($is_cancelled || $status == MFCS_EVENT_STATUS_CANCELLED) {
         $email_params['title_suffix'] = "Cancelled";
-        $email_params['content'] .= $changed_by_string . " has cancelled the event request.\n";
-        $email_params['markup'] .= $changed_by_string . " has cancelled the event request.<br>\n";
+        $email_params['content'] .= $changed_by_string . " has cancelled the request.\n";
+        $email_params['markup'] .= $changed_by_string . " has cancelled the request.<br>\n";
       }
       elseif ($is_uncancelled) {
         $email_params['title_suffix'] = "Uncancelled";
-        $email_params['content'] .= $changed_by_string . " has uncancelled the event request.\n";
-        $email_params['markup'] .= $changed_by_string . " has uncancelled the event request.<br>\n";
+        $email_params['content'] .= $changed_by_string . " has uncancelled the request.\n";
+        $email_params['markup'] .= $changed_by_string . " has uncancelled the request.<br>\n";
       }
       elseif ($status == MFCS_EVENT_STATUS_DELETED) {
         $email_params['title_suffix'] = "Deleted";
-        $email_params['content'] .= $changed_by_string . " has deleted the event request.\n";
-        $email_params['markup'] .= $changed_by_string . " has deleted the event request.<br>\n";
+        $email_params['content'] .= $changed_by_string . " has deleted the request.\n";
+        $email_params['markup'] .= $changed_by_string . " has deleted the request.<br>\n";
       }
 
       $email_params['content'] .= $standard_content;
       $email_params['markup'] .= $standard_markup;
 
-      $email_to[$event_requester->mail] = $event_requester->mail;
+      $email_to[$request_requester->mail] = $request_requester->mail;
 
       if (is_object($venue_coordinator)) {
         $email_to[$venue_coordinator->mail] = $venue_coordinator->mail;
@@ -1440,15 +1440,15 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     elseif ($status == MFCS_EVENT_STATUS_CLOSED_ACCEPTED) {
       $email_params['title_suffix'] = "Approved";
       $email_params['content'] = "";
-      $email_params['content'] .= "The event request has been approved.\n";
+      $email_params['content'] .= "The request has been approved.\n";
       $email_params['content'] .= "For more information, view the review log.\n";
       $email_params['content'] .= $standard_content;
       $email_params['markup'] = "";
-      $email_params['markup'] .= "The event request has been approved.<br>\n";
-      $email_params['markup'] .= "For more information, view the <a href=" . '"' . $event_view_url . '/2"' . ">review log</a>.<br>\n";
+      $email_params['markup'] .= "The request has been approved.<br>\n";
+      $email_params['markup'] .= "For more information, view the <a href=" . '"' . $request_view_url . '/2"' . ">review log</a>.<br>\n";
       $email_params['markup'] .= $standard_markup;
 
-      $email_to[$event_requester->mail] = $event_requester->mail;
+      $email_to[$request_requester->mail] = $request_requester->mail;
 
       // send messages to all reviewers.
       foreach ($step_1_reviewers as $r) {
@@ -1462,15 +1462,15 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     elseif ($status == MFCS_EVENT_STATUS_CLOSED_DENIED) {
       $email_params['title_suffix'] = "Denied";
       $email_params['content'] = "";
-      $email_params['content'] .= "The event request has been denied.\n";
+      $email_params['content'] .= "The request has been denied.\n";
       $email_params['content'] .= "For more information, view the review log.\n";
       $email_params['content'] .= $standard_content;
       $email_params['markup'] = "";
-      $email_params['markup'] .= "The event request has been denied.<br>\n";
-      $email_params['markup'] .= "For more information, view the <a href=" . '"' . $event_view_url . '/2"' . ">review log</a>.<br>\n";
+      $email_params['markup'] .= "The request has been denied.<br>\n";
+      $email_params['markup'] .= "For more information, view the <a href=" . '"' . $request_view_url . '/2"' . ">review log</a>.<br>\n";
       $email_params['markup'] .= $standard_markup;
 
-      $email_to[$event_requester->mail] = $event_requester->mail;
+      $email_to[$request_requester->mail] = $request_requester->mail;
 
       // send messages to all reviewers.
       foreach ($step_1_reviewers as $r) {
@@ -1484,25 +1484,25 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     elseif ($status == MFCS_EVENT_STATUS_CLOSED_UNAVAILABLE || $status == MFCS_EVENT_STATUS_CLOSED_DUE_TO_LOCK) {
       $email_params['title_suffix'] = "Denied";
       $email_params['content'] = "";
-      $email_params['content'] .= "The event request has been denied due to the requested location not being available for the requested time slots.\n";
+      $email_params['content'] .= "The request has been denied due to the requested location not being available for the requested time slots.\n";
       $email_params['content'] .= $standard_content;
       $email_params['markup'] = "";
-      $email_params['markup'] .= "The event request has been <em>denied</em> due to the requested location <em>not being available</em> for the requested time slots.<br>\n";
+      $email_params['markup'] .= "The request has been <em>denied</em> due to the requested location <em>not being available</em> for the requested time slots.<br>\n";
       $email_params['markup'] .= $standard_markup;
 
-      $email_to[$event_requester->mail] = $event_requester->mail;
+      $email_to[$request_requester->mail] = $request_requester->mail;
     }
   }
   elseif (!is_null($step)) {
-    if ($event['top']['step'][0]->value == MFCS_REVIEW_STEP_REVIEW) {
+    if ($request['top']['step'][0]->value == MFCS_REVIEW_STEP_REVIEW) {
       $email_params['title_suffix'] = "Needs Review";
       $email_params['content'] = "";
-      $email_params['content'] .= $changed_by_string . " has made the event request available for review.\n";
+      $email_params['content'] .= $changed_by_string . " has made the request available for review.\n";
       $email_params['content'] .= "\n";
       $email_params['content'] .= $message . "\n";
       $email_params['content'] .= $standard_content;
       $email_params['markup'] = "";
-      $email_params['markup'] .= $changed_by_string . " has made the event request available for <em>review</em>.<br>\n";
+      $email_params['markup'] .= $changed_by_string . " has made the request available for <em>review</em>.<br>\n";
       $email_params['markup'] .= "<br>\n";
       $email_params['markup'] .= $message . "<br>\n";
       $email_params['markup'] .= $standard_markup;
@@ -1511,15 +1511,15 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
         $email_to[$r->email] = $r->email;
       }
     }
-    elseif ($event['top']['step'][0]->value == MFCS_REVIEW_STEP_REVIEW) {
+    elseif ($request['top']['step'][0]->value == MFCS_REVIEW_STEP_REVIEW) {
       $email_params['title_suffix'] = "Needs Review";
       $email_params['content'] = "";
-      $email_params['content'] .= "The event request is available for review.\n";
+      $email_params['content'] .= "The request is available for review.\n";
       $email_params['content'] .= "\n";
       $email_params['content'] .= $message . "\n";
       $email_params['content'] .= $standard_content;
       $email_params['markup'] = "";
-      $email_params['markup'] .= "The event request is available for <em>review</em>.<br>\n";
+      $email_params['markup'] .= "The request is available for <em>review</em>.<br>\n";
       $email_params['markup'] .= "<br>\n";
       $email_params['markup'] .= $message . "<br>\n";
       $email_params['markup'] .= $standard_markup;
@@ -1528,15 +1528,15 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
         $email_to[$r->email] = $r->email;
       }
     }
-    elseif ($event['top']['step'][0]->value == MFCS_REVIEW_STEP_REQUIREMENTS) {
+    elseif ($request['top']['step'][0]->value == MFCS_REVIEW_STEP_REQUIREMENTS) {
       $email_params['title_suffix'] = "Requirements";
       $email_params['content'] = "";
-      $email_params['content'] .= "The event request is ready to have its requirements approved or denied.\n";
+      $email_params['content'] .= "The request is ready to have its requirements approved or denied.\n";
       $email_params['content'] .= "\n";
       $email_params['content'] .= $message . "\n";
       $email_params['content'] .= $standard_content;
       $email_params['markup'] = "";
-      $email_params['markup'] .= "The event request is ready to have its requirements <em>approved or denied</em>.<br>\n";
+      $email_params['markup'] .= "The request is ready to have its requirements <em>approved or denied</em>.<br>\n";
       $email_params['markup'] .= "<br>\n";
       $email_params['markup'] .= $message . "<br>\n";
       $email_params['markup'] .= $standard_markup;
@@ -1545,15 +1545,15 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
         $email_to[$r->email] = $r->email;
       }
     }
-    elseif ($event['top']['step'][0]->value == MFCS_REVIEW_STEP_MAKE_DECISIONS) {
+    elseif ($request['top']['step'][0]->value == MFCS_REVIEW_STEP_MAKE_DECISIONS) {
       $email_params['title_suffix'] = "Reviewed";
       $email_params['content'] = "";
-      $email_params['content'] .= "The event request has been reviewed and is ready for conflict resolution / decision making / final review.\n";
+      $email_params['content'] .= "The request has been reviewed and is ready for conflict resolution / decision making / final review.\n";
       $email_params['content'] .= "\n";
       $email_params['content'] .= $message . "\n";
       $email_params['content'] .= $standard_content;
       $email_params['markup'] = "";
-      $email_params['markup'] .= "The event request has been reviewed and is ready for <em>conflict resolution / decision making / final review</em>.<br>\n";
+      $email_params['markup'] .= "The request has been reviewed and is ready for <em>conflict resolution / decision making / final review</em>.<br>\n";
       $email_params['markup'] .= "<br>\n";
       $email_params['markup'] .= $message . "<br>\n";
       $email_params['markup'] .= $standard_markup;
@@ -1564,7 +1564,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     }
   }
   elseif ($is_comment) {
-    if ($event['top']['status'][0]->value == MFCS_EVENT_STATUS_LOCKED || $event['top']['status'][0]->value == MFCS_EVENT_STATUS_UNLOCKED) {
+    if ($request['top']['status'][0]->value == MFCS_EVENT_STATUS_LOCKED || $request['top']['status'][0]->value == MFCS_EVENT_STATUS_UNLOCKED) {
       $email_params['title_suffix'] = "Comment";
       $email_params['content'] = "";
       $email_params['content'] .= $changed_by_string . " has made the following comment:\n";
@@ -1592,7 +1592,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
   }
 
   if (!empty($email_to)) {
-    // DEBUG: temporarily disable e-mailing to prevent production accounts from receiving e-mails.
+    // DEBUG: temporarily disable e-mailing to prrequest production accounts from receiving e-mails.
     //        only allow reserved accounts to receive e-mails
     $debug_accounts = array();
     $debug_accounts[] = 'kday@mcneese.edu';
@@ -1613,3 +1613,18 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
 
     foreach ($email_to as $to) {
       if (!in_array($to, $debug_accounts)) {
+        drupal_set_message(t("Warning: not sending mail to @to while testing the system.", array('@to' => $to)), 'warning');
+        watchdog('debug', "Warning: not sending mail to @to while testing the system.", array('@to' => $to), WATCHDOG_WARNING);
+        continue;
+      }
+
+      drupal_mail('mfcs', 'request_alert', $to, language_default(), $email_params, $email_from, TRUE);
+    }
+  }
+
+  return TRUE;
+}
+
+/**
+ * @} End of '@addtogroup mfcs'.
+ */

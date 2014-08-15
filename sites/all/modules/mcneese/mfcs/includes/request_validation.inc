@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Defines McNeese facilities use event commonly used form and validation functions.
+ * Defines McNeese facilities use request commonly used form and validation functions.
  */
 
 /**
@@ -11,7 +11,7 @@
  */
 
  /**
- * Perform pre-validation on a list of event form fields.
+ * Perform pre-validation on a list of request form fields.
  *
  * @param array $form
  *   The form array as defined by drupals form api.
@@ -24,7 +24,7 @@
  *   TRUE on no failures, FALSE otherwise.
  *   NULL is returned when unable to traverse the form or form state.
  */
-function mfcs_pre_validate_event_fields(&$form, &$form_state, $dont_validate = array()) {
+function mfcs_pre_validate_request_fields(&$form, &$form_state, $dont_validate = array()) {
   $location_form = &$form;
   $location_state = &$form_state['values'];
 
@@ -39,8 +39,8 @@ function mfcs_pre_validate_event_fields(&$form, &$form_state, $dont_validate = a
     }
 
     if (!array_key_exists($ps, $location_state)) {
-      // for creating new events, the form state may not yet exist under certain circumstances and in such cases do not present and error.
-      if (isset($form['form']['event'])) {
+      // for creating new requests, the form state may not yet exist under certain circumstances and in such cases do not present and error.
+      if (isset($form['form']['request'])) {
         watchdog(MFCS_WATCHDOG_ID, "Failed to perform pre-validation, the key '@key' is missing from the form_state. Currently processed path is @processed", array('@key' => $ps, '@processed' => isset($ps_p) ? $ps_p : NULL), WATCHDOG_ERROR);
       }
       return NULL;
@@ -77,8 +77,8 @@ function mfcs_pre_validate_event_fields(&$form, &$form_state, $dont_validate = a
       $location_state['venue_coordinator']['user_id'][0] = NULL;
     }
 
-    if (!empty($form_state['values']['event']['room'][0]) && isset($form_state['values']['event']['room'][0])) {
-      $form['form']['room_information']['#value'] = mfcs_load_rooms(NULL, NULL, $form_state['values']['event']['room'][0]);
+    if (!empty($form_state['values']['request']['room'][0]) && isset($form_state['values']['request']['room'][0])) {
+      $form['form']['room_information']['#value'] = mfcs_load_rooms(NULL, NULL, $form_state['values']['request']['room'][0]);
     }
 
     $coordinator = NULL;
@@ -111,12 +111,12 @@ function mfcs_pre_validate_event_fields(&$form, &$form_state, $dont_validate = a
     // @todo: handle conditionally_required[1] fields, which are required only when their dependant fields make them visible based on the '#state' field settings.
   }
 
-  // condition 2 is for student events.
+  // condition 2 is for student requests.
   if (!empty($form_state['conditionally_required'][2])) {
     $is_required = FALSE;
 
-    if (isset($location_state['event_coordinator']['classification']) && array_key_exists(0, $location_state['event_coordinator']['classification'])) {
-      if ($location_state['event_coordinator']['classification'][0] == MFCS_EVENT_CLASSIFICATION_STUDENT) {
+    if (isset($location_state['request_coordinator']['classification']) && array_key_exists(0, $location_state['request_coordinator']['classification'])) {
+      if ($location_state['request_coordinator']['classification'][0] == MFCS_EVENT_CLASSIFICATION_STUDENT) {
         $is_required = TRUE;
       }
     }
@@ -132,7 +132,7 @@ function mfcs_pre_validate_event_fields(&$form, &$form_state, $dont_validate = a
 }
 
 /**
- * Perform validation on a list of event form fields.
+ * Perform validation on a list of request form fields.
  *
  * @param array $form
  *   The form array as defined by drupals form api.
@@ -143,7 +143,7 @@ function mfcs_pre_validate_event_fields(&$form, &$form_state, $dont_validate = a
  *   TRUE on no failures, FALSE otherwise.
  *   NULL is returned when unable to traverse the form or form state.
  */
-function mfcs_validate_event_fields($form, &$form_state) {
+function mfcs_validate_request_fields($form, &$form_state) {
   $location_form = &$form;
   $location_state = &$form_state['values'];
 
@@ -158,8 +158,8 @@ function mfcs_validate_event_fields($form, &$form_state) {
     }
 
     if (!array_key_exists($ps, $location_state)) {
-      // for creating new events, the form state may not yet exist under certain circumstances and in such cases do not present and error.
-      if (isset($form['form']['event'])) {
+      // for creating new requests, the form state may not yet exist under certain circumstances and in such cases do not present and error.
+      if (isset($form['form']['request'])) {
         watchdog(MFCS_WATCHDOG_ID, "Failed to perform validation, the key '@key' is missing from the form_state. Currently processed path is @processed", array('@key' => $ps, '@processed' => isset($ps_p) ? $ps_p : NULL), WATCHDOG_ERROR);
       }
       return NULL;
@@ -178,9 +178,9 @@ function mfcs_validate_event_fields($form, &$form_state) {
   unset($ps_c);
   unset($ps);
 
-  $is_new_event = NULL;
+  $is_new_request = NULL;
   if (isset($form['form']['new']['#value'])) {
-    $is_new_event = $form['form']['new']['#value'];
+    $is_new_request = $form['form']['new']['#value'];
   }
 
   $passed = TRUE;
@@ -191,11 +191,11 @@ function mfcs_validate_event_fields($form, &$form_state) {
 
     if (!empty($location_state['dates']['date'])) {
       foreach ($location_state['dates']['date'] as $key => &$value) {
-        if (isset($form['form']['existing']['#value']['event']['dates']['date'])) {
-          if (in_array($value, $form['form']['existing']['#value']['event']['dates']['date'])) {
-            // skip values already saved to allow updating events if they are sufficiently near/past the event date.
-            // but only do this when the event is not new.
-            if ($is_new_event !== TRUE) {
+        if (isset($form['form']['existing']['#value']['request']['dates']['date'])) {
+          if (in_array($value, $form['form']['existing']['#value']['request']['dates']['date'])) {
+            // skip values already saved to allow updating requests if they are sufficiently near/past the request date.
+            // but only do this when the request is not new.
+            if ($is_new_request !== TRUE) {
               continue;
             }
           }
@@ -218,7 +218,7 @@ function mfcs_validate_event_fields($form, &$form_state) {
           $request_string = date("Y/m/d", REQUEST_TIME);
 
           if ($date_string == $request_string) {
-            form_set_error($ps_p . '][dates][date][' . $key . '][date', t("The date '@date' is too soon, the event request process takes time.", array('@date' => $value)));
+            form_set_error($ps_p . '][dates][date][' . $key . '][date', t("The date '@date' is too soon, the request process takes time.", array('@date' => $value)));
           }
           elseif ($date_timestamp[$key] < REQUEST_TIME) {
             form_set_error($ps_p . '][dates][date][' . $key . '][date', t("The date '@date' is in the past and cannot be used.", array('@date' => $value)));
@@ -233,11 +233,11 @@ function mfcs_validate_event_fields($form, &$form_state) {
           continue;
         }
 
-        if (isset($form['form']['existing']['#value']['event']['dates']['time_start'])) {
-          if (in_array($value, $form['form']['existing']['#value']['event']['dates']['time_start'])) {
-            // skip values already saved to allow updating events if they are sufficiently near/past the event date.
-            // but only do this when the event is not new.
-            if ($is_new_event !== TRUE) {
+        if (isset($form['form']['existing']['#value']['request']['dates']['time_start'])) {
+          if (in_array($value, $form['form']['existing']['#value']['request']['dates']['time_start'])) {
+            // skip values already saved to allow updating requests if they are sufficiently near/past the request date.
+            // but only do this when the request is not new.
+            if ($is_new_request !== TRUE) {
               continue;
             }
           }
@@ -265,11 +265,11 @@ function mfcs_validate_event_fields($form, &$form_state) {
           continue;
         }
 
-        if (isset($form['form']['existing']['#value']['event']['dates']['time_stop'])) {
-          if (in_array($value, $form['form']['existing']['#value']['event']['dates']['time_stop'])) {
-            // skip values already saved to allow updating events if they are sufficiently near/past the event date.
-            // but only do this when the event is not new.
-            if ($is_new_event !== TRUE) {
+        if (isset($form['form']['existing']['#value']['request']['dates']['time_stop'])) {
+          if (in_array($value, $form['form']['existing']['#value']['request']['dates']['time_stop'])) {
+            // skip values already saved to allow updating requests if they are sufficiently near/past the request date.
+            // but only do this when the request is not new.
+            if ($is_new_request !== TRUE) {
               continue;
             }
           }
@@ -308,11 +308,11 @@ function mfcs_validate_event_fields($form, &$form_state) {
 
     if (!empty($location_state['dates']['time_start'])) {
       foreach ($location_state['dates']['time_start'] as $key => &$value) {
-        if (isset($form['form']['existing']['#value']['event']['dates']['time_start'])) {
-          if (in_array($value, $form['form']['existing']['#value']['event']['dates']['time_start'])) {
-            // skip values already saved to allow updating events if they are sufficiently near/past the event date.
-            // but only do this when the event is not new.
-            if ($is_new_event !== TRUE) {
+        if (isset($form['form']['existing']['#value']['request']['dates']['time_start'])) {
+          if (in_array($value, $form['form']['existing']['#value']['request']['dates']['time_start'])) {
+            // skip values already saved to allow updating requests if they are sufficiently near/past the request date.
+            // but only do this when the request is not new.
+            if ($is_new_request !== TRUE) {
               continue;
             }
           }
@@ -329,18 +329,18 @@ function mfcs_validate_event_fields($form, &$form_state) {
       }
     }
 
-    $no_actual_event = TRUE;
+    $no_actual_request = TRUE;
     if (!empty($location_state['dates']['category'])) {
       foreach ($location_state['dates']['category'] as $key => &$value) {
         if ($value == MFCS_EVENT_DATES_CATEGORY_ACTUAL) {
-          $no_actual_event = FALSE;
+          $no_actual_request = FALSE;
           break;
         }
       }
     }
 
-    if ($no_actual_event) {
-      form_set_error($ps_p . '][dates][category', "At least one event must have a category of 'Actual Event'.");
+    if ($no_actual_request) {
+      form_set_error($ps_p . '][dates][category', "At least one request must have a category of 'Actual Event'.");
       $passed = FALSE;
     }
 
@@ -770,4 +770,14 @@ function mfcs_check_range_limit($field, $form, $structure, $size, $delta, $value
     }
 
     if ($value > $max) {
-      form_set_er
+      form_set_error($ps . '[' . $delta, t("The field '@title' is too large. The field can be no larger than @size.", array('@title' => $title, '@size' => $max)));
+      return FALSE;
+    }
+  }
+
+  return TRUE;
+}
+
+/**
+ * @} End of '@addtogroup mfcs'.
+ */

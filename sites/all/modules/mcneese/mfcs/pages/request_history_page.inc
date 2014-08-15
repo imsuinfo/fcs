@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Defines McNeese facilities use event history page functions.
+ * Defines McNeese facilities use request history page functions.
  */
 
 /**
@@ -11,25 +11,25 @@
  */
 
 /**
- * Provides the facilities use event history page.
+ * Provides the facilities use request history page.
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  * @param int $request_id
- *   The unique identifier for an event request.
+ *   The unique identifier for an request.
  * @param int $page_number
  *   (optional) Page number to view results.
  *
  * @return string
  *   The HTML output representing the page.
  */
-function mfcs_event_history_0_form($form, &$form_state, $request_id, $page_number = 0, $group = NULL, $field = NULL) {
-  $event = event_workflow_load_event_by_id($request_id);
+function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_number = 0, $group = NULL, $field = NULL) {
+  $request = mfcs_load_request_by_id($request_id);
 
-  if (empty($event)) {
-    watchdog(MFCS_WATCHDOG_ID, "Unable to find event with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
+  if (empty($request)) {
+    watchdog(MFCS_WATCHDOG_ID, "Unable to find request with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
     drupal_not_found();
     drupal_exit();
     return array();
@@ -38,16 +38,16 @@ function mfcs_event_history_0_form($form, &$form_state, $request_id, $page_numbe
   global $base_path;
 
   $page_title = "Event Request History";
-  if (!empty($event['information']['title'][0]->value)) {
-    $page_title = "Event Request History: " . $event['information']['title'][0]->value;
+  if (!empty($request['information']['title'][0]->value)) {
+    $page_title = "Event Request History: " . $request['information']['title'][0]->value;
   }
   drupal_set_title($page_title);
 
   $user = cf_current_user();
 
-  $manager = user_access('mcneese facilities use manage');
-  $reviewer = user_access('mcneese facilities use review');
-  $requester = user_access('mcneese facilities use request');
+  $manager = user_access('mfcs manage');
+  $reviewer = user_access('mfcs review');
+  $requester = user_access('mfcs request');
 
   $form = array();
   $form['navigator_top'] = array(
@@ -55,8 +55,8 @@ function mfcs_event_history_0_form($form, &$form_state, $request_id, $page_numbe
     '#tree' => TRUE,
     '#attributes' => array(
       'class' => array(
-        'event_request-history-page-navigator',
-        'event_request-history-page-navigator-top',
+        'request-history-page-navigator',
+        'request-history-page-navigator-top',
       ),
     ),
   );
@@ -70,8 +70,8 @@ function mfcs_event_history_0_form($form, &$form_state, $request_id, $page_numbe
     '#tree' => TRUE,
     '#attributes' => array(
       'class' => array(
-        'event_request-history-page-navigator',
-        'event_request-history-page-navigator-bottom',
+        'request-history-page-navigator',
+        'request-history-page-navigator-bottom',
       ),
     ),
   );
@@ -87,11 +87,11 @@ function mfcs_event_history_0_form($form, &$form_state, $request_id, $page_numbe
   $presentation = mfcs_table_presentation();
   $presentation_tables = mfcs_table_presentation(1);
 
-  $status_options = event_workflow_get_event_status_list_options();
-  $step_options = event_workflow_get_event_steps_list_options();
+  $status_options = mfcs_get_request_status_list_options();
+  $step_options = mfcs_get_request_steps_list_options();
 
   try {
-    $query = db_select('mfcs_event_revisions', 'merv');
+    $query = db_select('mfcs_request_revisions', 'merv');
 
     $query->fields('merv');
     $query->condition('merv.request_id', $request_id);
@@ -111,10 +111,10 @@ function mfcs_event_history_0_form($form, &$form_state, $request_id, $page_numbe
           break;
         }
 
-        $history = event_workflow_load_event_by_timestamp($request_id, $revision->date);
+        $history = mfcs_load_request_by_timestamp($request_id, $revision->date);
         $date = date("Y/m/d h:ia", $revision->date);
 
-        $fieldset_id = 'event-' . $request_id . '-history_items-' . $revision->date;
+        $fieldset_id = 'request-' . $request_id . '-history_items-' . $revision->date;
         $fieldset_name = 'history_items-' . $revision->date;
         $form['history'][$fieldset_name] = array(
           '#type' => 'fieldset',
@@ -142,11 +142,11 @@ function mfcs_event_history_0_form($form, &$form_state, $request_id, $page_numbe
           }
 
           if (!is_null($user_id)) {
-            $updater_name = mfcs_event_history_0_form_build_updater_name($user_id, $processed_values);
+            $updater_name = mfcs_request_history_0_form_build_updater_name($user_id, $processed_values);
 
             $values_name = 'history_item-created-label';
             $form['history'][$fieldset_name][$values_name] = array(
-              '#id' => 'event-' . $request_id . '-history_item-created-label',
+              '#id' => 'request-' . $request_id . '-history_item-created-label',
               '#type' => 'container',
               '#tree' => TRUE,
               '#attributes' => array(
@@ -165,12 +165,12 @@ function mfcs_event_history_0_form($form, &$form_state, $request_id, $page_numbe
                   'history_item-values',
                 ),
               ),
-              '#prefix' => '<div class="history_item-label"><strong class="updater_name">' . $updater_name . '</strong> <span class="updater_id">[id: ' . $user_id . ']</span> has created the event.</div> ',
+              '#prefix' => '<div class="history_item-label"><strong class="updater_name">' . $updater_name . '</strong> <span class="updater_id">[id: ' . $user_id . ']</span> has created the request.</div> ',
             );
 
             $notes_markup = '<div class="history_item-notes">';
             if ($history['top']['status'][0]->value == MFCS_EVENT_STATUS_CLOSED_UNAVAILABLE || $history['top']['status'][0]->value == MFCS_EVENT_STATUS_CLOSED_DUE_TO_LOCK) {
-              $notes_markup .= '<div class="history_item-note">This event has been auto-closed because the room was not available when this request was made.</div>';
+              $notes_markup .= '<div class="history_item-note">This request has been auto-closed because the room was not available when this request was made.</div>';
             }
             $notes_markup .= '</div>';
 
@@ -210,7 +210,7 @@ function mfcs_event_history_0_form($form, &$form_state, $request_id, $page_numbe
                     continue;
                   }
 
-                  $updater_name = mfcs_event_history_0_form_build_updater_name($value->user_id, $processed_values);
+                  $updater_name = mfcs_request_history_0_form_build_updater_name($value->user_id, $processed_values);
 
                   if (!isset($processed_values[$value->user_id]['fields'][$group_name])) {
                     $processed_values[$value->user_id]['fields'][$group_name] = array(
@@ -224,14 +224,14 @@ function mfcs_event_history_0_form($form, &$form_state, $request_id, $page_numbe
 
                   if ($group_name == 'review') {
                     if ($field_name == 'review') {
-                      $step_options = event_workflow_get_event_steps_list_options();
-                      $decision_options = event_workflow_get_reviewer_decision_list_options();
+                      $step_options = mfcs_get_request_steps_list_options();
+                      $decision_options = mfcs_get_reviewer_decision_list_options();
 
 
 
                       if ($value->decision == MFCS_REVIEW_DECISION_AMENDMENT) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
-                        $custom_message .= 'the event request information was amended and therefore the review process was restarted. ';
+                        $custom_message .= 'the request information was amended and therefore the review process was restarted. ';
                       }
                       elseif ($value->decision == MFCS_REVIEW_DECISION_APPROVE || $value->decision == MFCS_REVIEW_DECISION_DENY) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
@@ -278,7 +278,7 @@ function mfcs_event_history_0_form($form, &$form_state, $request_id, $page_numbe
                         'print_delta_for_multiple' => TRUE,
                       );
 
-                      $value_array = mfcs_build_event_request_value_structure($request_id, $group_name, $field_name, $key, $value, $presentation[$group_name][$field_name], $history, $options);
+                      $value_array = mfcs_build_request_value_structure($request_id, $group_name, $field_name, $key, $value, $presentation[$group_name][$field_name], $history, $options);
 
                       if (is_array($value_array) && !isset($value_array['no_values'])) {
                         $processed_values[$value->user_id]['fields'][$group_name][$field_name][$key] = $value_array;
@@ -301,7 +301,7 @@ function mfcs_event_history_0_form($form, &$form_state, $request_id, $page_numbe
                     continue;
                   }
 
-                  $updater_name = mfcs_event_history_0_form_build_updater_name($value->user_id, $processed_values);
+                  $updater_name = mfcs_request_history_0_form_build_updater_name($value->user_id, $processed_values);
 
                   if (!isset($processed_values[$value->user_id]['fields'][$group_name])) {
                     $processed_values[$value->user_id]['fields'][$group_name] = array(
@@ -335,7 +335,7 @@ function mfcs_event_history_0_form($form, &$form_state, $request_id, $page_numbe
                       'print_delta_for_multiple' => TRUE,
                     );
 
-                    $value_array = mfcs_build_event_request_value_structure($request_id, $group_name, $field_name, $key, $value, $presentation[$group_name][$field_name], $history, $options);
+                    $value_array = mfcs_build_request_value_structure($request_id, $group_name, $field_name, $key, $value, $presentation[$group_name][$field_name], $history, $options);
 
                     if (is_array($value_array) && !isset($value_array['no_values'])) {
                       $processed_values[$value->user_id]['fields'][$group_name][$field_name][$key] = $value_array;
@@ -419,17 +419,17 @@ function mfcs_event_history_0_form($form, &$form_state, $request_id, $page_numbe
 
     if ($page_number > 0) {
       if ($page_number == 1) {
-        $output .= '<a href="' . $base_path . 'events/history-0/' . $request_id . '" class="event_request-history-page-choice event_request-history-page-previous" title="Previous Page">Prev</a>';
+        $output .= '<a href="' . $base_path . 'requests/history-0/' . $request_id . '" class="request-history-page-choice request-history-page-previous" title="Previous Page">Prev</a>';
       }
       else {
         $previous_page = $page_number - 1;
-        $output .= '<a href="' . $base_path . 'events/history-0/' . $request_id . '/' . $previous_page . '" class="event_request-history-page-choice event_request-history-page-previous" title="Previous Page">Prev</a>';
+        $output .= '<a href="' . $base_path . 'requests/history-0/' . $request_id . '/' . $previous_page . '" class="request-history-page-choice request-history-page-previous" title="Previous Page">Prev</a>';
       }
     }
 
     if ($total_results > $rows_per_page) {
       $next_page = $page_number + 1;
-      $output .= '<a href="' . $base_path . 'events/history-0/' . $request_id . '/' . $next_page . '" class="event_request-history-page-choice event_request-history-page-next" title="Next Page">Next</a>';
+      $output .= '<a href="' . $base_path . 'requests/history-0/' . $request_id . '/' . $next_page . '" class="request-history-page-choice request-history-page-next" title="Next Page">Next</a>';
     }
 
     $form['navigator_bottom']['markup'] = $form['navigator_top']['markup'];
@@ -456,7 +456,7 @@ function mfcs_event_history_0_form($form, &$form_state, $request_id, $page_numbe
  *   NULL for no user name generated.
  *   FALSE on error.
  */
-function mfcs_event_history_0_form_build_updater_name($user_id, &$processed_values) {
+function mfcs_request_history_0_form_build_updater_name($user_id, &$processed_values) {
   if (!cf_is_integer($user_id)) {
     cf_error::invalid_integer('user_id');
     return FALSE;
@@ -492,3 +492,18 @@ function mfcs_event_history_0_form_build_updater_name($user_id, &$processed_valu
     }
 
     $processed_values[$user_id] = array(
+      'updater_name' => $updater_name,
+      'fields' => array(),
+    );
+  }
+  else {
+    $updater_name = $processed_values[$user_id]['updater_name'];
+  }
+
+  return $updater_name;
+}
+
+
+/**
+ * @} End of '@addtogroup mfcs'.
+ */

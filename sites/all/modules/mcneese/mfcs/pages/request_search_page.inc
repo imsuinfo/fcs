@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Defines McNeese facilities use event search page functions.
+ * Defines McNeese facilities use request search page functions.
  */
 
 /**
@@ -11,7 +11,7 @@
  */
 
 /**
- * Provides the facilities use event search page.
+ * Provides the facilities use request search page.
  *
  * @param array $form
  *   The form array as defined by drupals form api.
@@ -21,10 +21,10 @@
  * @return array
  *   An array containing the generated form.
  */
-function mfcs_event_search_0_form($form, &$form_state) {
-  $manager = user_access('mcneese facilities use manage');
-  $reviewer = user_access('mcneese facilities use review');
-  $requester = user_access('mcneese facilities use request');
+function mfcs_request_search_0_form($form, &$form_state) {
+  $manager = user_access('mfcs manage');
+  $reviewer = user_access('mfcs review');
+  $requester = user_access('mfcs request');
 
   $form = array();
   $form['form'] = array(
@@ -209,7 +209,7 @@ function mfcs_event_search_0_form($form, &$form_state) {
     $simple_table['attributes']['class'] = array ('mfcs-management_page-simple_table');
     $simple_table['attributes']['summary'] = 'A table containing the search results.';
 
-    $simple_table['empty'] = t("No event requests were found matching your simple search query.");
+    $simple_table['empty'] = t("No requests were found matching your simple search query.");
 
     $form['simple']['results']['table'] = array(
       '#markup' => theme('table', $simple_table),
@@ -323,8 +323,8 @@ function mfcs_event_search_0_form($form, &$form_state) {
     $state_location = $form_state['values']['advanced']['targets'];
   }
 
-  mfcs_event_search_0_form_build_targets_and_groups($form, $form_state, $form['advanced'], $state_location, $chosen_targets, 0, '', $chosen_options, $logic_options);
-  mfcs_event_search_0_form_build_grouping($form, $form_state, $form['advanced'], 0, '', $chosen_options, $logic_options);
+  mfcs_request_search_0_form_build_targets_and_groups($form, $form_state, $form['advanced'], $state_location, $chosen_targets, 0, '', $chosen_options, $logic_options);
+  mfcs_request_search_0_form_build_grouping($form, $form_state, $form['advanced'], 0, '', $chosen_options, $logic_options);
 
   $form['advanced']['submit'] = array(
     '#id' => 'search-advanced-submit',
@@ -399,7 +399,7 @@ function mfcs_event_search_0_form($form, &$form_state) {
     $advanced_table['attributes']['class'] = array ('mfcs-management_page-advanced_table');
     $advanced_table['attributes']['summary'] = 'A table containing the search results.';
 
-    $advanced_table['empty'] = t("No event requests were found matching your advanced search query.");
+    $advanced_table['empty'] = t("No requests were found matching your advanced search query.");
 
     $form['advanced']['results']['table'] = array(
       '#markup' => theme('table', $advanced_table),
@@ -462,16 +462,16 @@ function mfcs_event_search_0_form($form, &$form_state) {
 }
 
 /**
- * Pre-Validation for mfcs_event_search_0_form().
+ * Pre-Validation for mfcs_request_search_0_form().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api.
  *
- * @see: mfcs_event_search_0_form()
+ * @see: mfcs_request_search_0_form()
  */
-function mfcs_event_search_0_form_pre_validate(&$form, &$form_state) {
+function mfcs_request_search_0_form_pre_validate(&$form, &$form_state) {
   $clicked_id = '';
   if (isset($form_state['triggering_element']['#id'])) {
     $clicked_id = $form_state['triggering_element']['#id'];
@@ -495,16 +495,16 @@ function mfcs_event_search_0_form_pre_validate(&$form, &$form_state) {
 }
 
 /**
- * Validation for mfcs_event_search_0_form().
+ * Validation for mfcs_request_search_0_form().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api.
  *
- * @see: mfcs_event_search_0_form()
+ * @see: mfcs_request_search_0_form()
  */
-function mfcs_event_search_0_form_validate($form, &$form_state) {
+function mfcs_request_search_0_form_validate($form, &$form_state) {
   $clicked_id = '';
   if (isset($form_state['triggering_element']['#id'])) {
     $clicked_id = $form_state['triggering_element']['#id'];
@@ -592,16 +592,16 @@ function mfcs_event_search_0_form_validate($form, &$form_state) {
 }
 
 /**
- * Submit for mfcs_event_search_0_form().
+ * Submit for mfcs_request_search_0_form().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api.
  *
- * @see: mfcs_event_search_0_form()
+ * @see: mfcs_request_search_0_form()
  */
-function mfcs_event_search_0_form_submit($form, &$form_state) {
+function mfcs_request_search_0_form_submit($form, &$form_state) {
   $user = cf_current_user();
 
   $clicked_id = '';
@@ -616,7 +616,7 @@ function mfcs_event_search_0_form_submit($form, &$form_state) {
     $per_page = $form['form']['per_page']['#value'];
     $start = $form['form']['simple_search-page_number']['#value'] * $per_page;
 
-    $form_state['simple_search-results'] = mfcs_event_load_listing($search, $sensitive, $start, $per_page);
+    $form_state['simple_search-results'] = mfcs_request_load_listing($search, $sensitive, $start, $per_page);
     $form_state['simple_search-search'] = $search;
     $form_state['simple_search-sensitive'] = $sensitive;
   }
@@ -634,7 +634,7 @@ function mfcs_event_search_0_form_submit($form, &$form_state) {
     $per_page = $form['form']['per_page']['#value'];
     $start = $previous_page * $per_page;
 
-    $form_state['simple_search-results'] = mfcs_event_load_listing($search, $sensitive, $start, $per_page);
+    $form_state['simple_search-results'] = mfcs_request_load_listing($search, $sensitive, $start, $per_page);
     $form_state['simple_search-page_number'] = $previous_page;
     $form_state['simple_search-search'] = $search;
     $form_state['simple_search-sensitive'] = $sensitive;
@@ -647,7 +647,7 @@ function mfcs_event_search_0_form_submit($form, &$form_state) {
     $per_page = $form['form']['per_page']['#value'];
     $start = $next_page * $per_page;
 
-    $form_state['simple_search-results'] = mfcs_event_load_listing($search, $sensitive, $start, $per_page);
+    $form_state['simple_search-results'] = mfcs_request_load_listing($search, $sensitive, $start, $per_page);
     $form_state['simple_search-page_number'] = $next_page;
     $form_state['simple_search-search'] = $search;
     $form_state['simple_search-sensitive'] = $sensitive;
@@ -660,7 +660,7 @@ function mfcs_event_search_0_form_submit($form, &$form_state) {
     $per_page = $form['form']['per_page']['#value'];
     $start = $previous_page * $per_page;
 
-    $form_state['advanced_search-results'] = mfcs_event_load_listing($search, $sensitive, $start, $per_page);
+    $form_state['advanced_search-results'] = mfcs_request_load_listing($search, $sensitive, $start, $per_page);
     $form_state['advanced_search-page_number'] = $previous_page;
     $form_state['advanced_search-search'] = $search;
     $form_state['advanced_search-sensitive'] = $sensitive;
@@ -673,7 +673,7 @@ function mfcs_event_search_0_form_submit($form, &$form_state) {
     $per_page = $form['form']['per_page']['#value'];
     $start = $next_page * $per_page;
 
-    $form_state['advanced_search-results'] = mfcs_event_load_listing($search, $sensitive, $start, $per_page);
+    $form_state['advanced_search-results'] = mfcs_request_load_listing($search, $sensitive, $start, $per_page);
     $form_state['advanced_search-page_number'] = $next_page;
     $form_state['advanced_search-search'] = $search;
     $form_state['advanced_search-sensitive'] = $sensitive;
@@ -694,10 +694,10 @@ function mfcs_event_search_0_form_submit($form, &$form_state) {
       $form_state['advanced_search-sensitive'] = $sensitive;
     }
     else {
-      $search = mfcs_event_search_0_form_build_search_targets($structure, $form_state['values']['advanced']['targets'], 0);
+      $search = mfcs_request_search_0_form_build_search_targets($structure, $form_state['values']['advanced']['targets'], 0);
 
       if (is_array($search)) {
-        $form_state['advanced_search-results'] = mfcs_event_load_listing($search, $sensitive, $start, $per_page);
+        $form_state['advanced_search-results'] = mfcs_request_load_listing($search, $sensitive, $start, $per_page);
         $form_state['advanced_search-search'] = $search;
         $form_state['advanced_search-sensitive'] = $sensitive;
       }
@@ -1023,7 +1023,7 @@ function mfcs_event_search_0_form_submit($form, &$form_state) {
  * @return bool
  *   TRUE on success, FALSE otherwise.
  */
-function mfcs_event_search_0_form_build_targets_and_groups($form, &$form_state, &$location, $state_location, $chosen_targets, $recurse_count, $id_extra, &$chosen_options, &$logic_options) {
+function mfcs_request_search_0_form_build_targets_and_groups($form, &$form_state, &$location, $state_location, $chosen_targets, $recurse_count, $id_extra, &$chosen_options, &$logic_options) {
   if (!is_array($form)) {
     cf_error::invalid_array('form');
     return FALSE;
@@ -1137,8 +1137,8 @@ function mfcs_event_search_0_form_build_targets_and_groups($form, &$form_state, 
         $state_location_next = $state_location[$chosen_name]['targets'];
       }
 
-      mfcs_event_search_0_form_build_targets_and_groups($form, $form_state, $location['targets'][$chosen_name], $state_location_next, $chosen_values, $new_recurse_count, $new_id_extra, $chosen_options[$chosen_name], $logic_options[$chosen_name]);
-      mfcs_event_search_0_form_build_grouping($form, $form_state, $location['targets'][$chosen_name], $new_recurse_count, $new_id_extra, $chosen_options[$chosen_name], $logic_options[$chosen_name]);
+      mfcs_request_search_0_form_build_targets_and_groups($form, $form_state, $location['targets'][$chosen_name], $state_location_next, $chosen_values, $new_recurse_count, $new_id_extra, $chosen_options[$chosen_name], $logic_options[$chosen_name]);
+      mfcs_request_search_0_form_build_grouping($form, $form_state, $location['targets'][$chosen_name], $new_recurse_count, $new_id_extra, $chosen_options[$chosen_name], $logic_options[$chosen_name]);
     }
     else {
       if (empty($chosen_values)) continue;
@@ -1150,7 +1150,7 @@ function mfcs_event_search_0_form_build_targets_and_groups($form, &$form_state, 
 
         $chosen_options['options'][$chosen_name][$chosen_name . '-' . $delta] = $chosen_human_name . ' #' . $delta;
 
-        mfcs_event_search_0_form_build_target($form, $form_state, $location, $state_location, $chosen_name, $delta, $id_extra);
+        mfcs_request_search_0_form_build_target($form, $form_state, $location, $state_location, $chosen_name, $delta, $id_extra);
       }
     }
   }
@@ -1182,7 +1182,7 @@ function mfcs_event_search_0_form_build_targets_and_groups($form, &$form_state, 
  *
  * @see mfcs_table_structure()
  */
-function mfcs_event_search_0_form_build_target(&$form, &$form_state, &$location, $state_location, $target_name, $target_delta, $id_extra) {
+function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$location, $state_location, $target_name, $target_delta, $id_extra) {
   if (!is_array($form)) {
     cf_error::invalid_array('form');
     return FALSE;
@@ -1368,39 +1368,39 @@ function mfcs_event_search_0_form_build_target(&$form, &$form_state, &$location,
 
     if ($table_name == 'top') {
       if ($field_name == 'status') {
-        $location['targets'][$target_name][$target_delta]['search']['#options'] = event_workflow_get_event_status_list_options('search');
+        $location['targets'][$target_name][$target_delta]['search']['#options'] = mfcs_get_request_status_list_options('search');
       }
       elseif ($field_name == 'step') {
-        $location['targets'][$target_name][$target_delta]['search']['#options'] = event_workflow_get_event_steps_list_options('search');
+        $location['targets'][$target_name][$target_delta]['search']['#options'] = mfcs_get_request_steps_list_options('search');
       }
       elseif ($field_name == 'location') {
-        $location['targets'][$target_name][$target_delta]['search']['#options'] = event_workflow_get_event_location_list_options('search');
+        $location['targets'][$target_name][$target_delta]['search']['#options'] = mfcs_get_request_location_list_options('search');
       }
       elseif ($field_name == 'building') {
-        $location['targets'][$target_name][$target_delta]['search']['#options'] = event_workflow_get_event_building_list_options(NULL, 'search');
+        $location['targets'][$target_name][$target_delta]['search']['#options'] = mfcs_get_request_building_list_options(NULL, 'search');
       }
       elseif ($field_name == 'room') {
-        $location['targets'][$target_name][$target_delta]['search']['#options'] = event_workflow_get_event_room_list_options(NULL, 'search');
+        $location['targets'][$target_name][$target_delta]['search']['#options'] = mfcs_get_request_room_list_options(NULL, 'search');
       }
     }
     elseif ($table_name == 'information') {
       if ($field_name == 'type') {
-        $location['targets'][$target_name][$target_delta]['search']['#options'] = event_workflow_get_information_type_list_options('search');
+        $location['targets'][$target_name][$target_delta]['search']['#options'] = mfcs_get_information_type_list_options('search');
       }
     }
     elseif ($table_name == 'dates') {
       if ($field_name == 'category') {
-        $location['targets'][$target_name][$target_delta]['search']['#options'] = event_workflow_get_dates_category_list_options('search');
+        $location['targets'][$target_name][$target_delta]['search']['#options'] = mfcs_get_dates_category_list_options('search');
       }
     }
     elseif ($table_name == 'plans') {
       if ($field_name == 'audience') {
-        $location['targets'][$target_name][$target_delta]['search']['#options'] = event_workflow_get_audience_list_options('search');
+        $location['targets'][$target_name][$target_delta]['search']['#options'] = mfcs_get_audience_list_options('search');
       }
     }
-    elseif ($table_name == 'event_coordinator') {
+    elseif ($table_name == 'request_coordinator') {
       if ($field_name == 'classification') {
-        $location['targets'][$target_name][$target_delta]['search']['#options'] = event_workflow_get_event_classification_list_options('search');
+        $location['targets'][$target_name][$target_delta]['search']['#options'] = mfcs_get_request_classification_list_options('search');
       }
     }
   }
@@ -1438,18 +1438,18 @@ function mfcs_event_search_0_form_build_target(&$form, &$form_state, &$location,
 
     if ($table_name == 'registration') {
       if ($field_name == 'revenue_generated') {
-        $location['targets'][$target_name][$target_delta]['option']['#options'] = event_workflow_get_revenue_generated_list_options('search');
+        $location['targets'][$target_name][$target_delta]['option']['#options'] = mfcs_get_revenue_generated_list_options('search');
       }
     }
     elseif ($table_name == 'presentation') {
       if ($field_name == 'technical_equipment_details') {
-        $location['targets'][$target_name][$target_delta]['option']['#options'] = event_workflow_get_technical_equipment_details_list_options('search');
+        $location['targets'][$target_name][$target_delta]['option']['#options'] = mfcs_get_technical_equipment_details_list_options('search');
       }
       elseif ($field_name == 'publicity_details') {
-        $location['targets'][$target_name][$target_delta]['option']['#options'] = event_workflow_get_publicity_details_list_options('search');
+        $location['targets'][$target_name][$target_delta]['option']['#options'] = mfcs_get_publicity_details_list_options('search');
       }
       elseif ($field_name == 'designing_material') {
-        $location['targets'][$target_name][$target_delta]['option']['#options'] = event_workflow_get_designing_material_list_options('search');
+        $location['targets'][$target_name][$target_delta]['option']['#options'] = mfcs_get_designing_material_list_options('search');
       }
     }
   }
@@ -1507,7 +1507,7 @@ function mfcs_event_search_0_form_build_target(&$form, &$form_state, &$location,
     $form['form']['conditionally_required']['#value'][0][$target_name][] = &$location['targets'][$target_name][$target_delta]['amount'];
   }
   elseif ($field['type'] == 'venue_coordinator') {
-    $venue_coordinator_options = mfcs_event_get_available_venue_coordinators();
+    $venue_coordinator_options = mfcs_request_get_available_venue_coordinators();
     if (!is_array($venue_coordinator_options)) {
       $venue_coordinator_options = array();
     }
@@ -1572,7 +1572,7 @@ function mfcs_event_search_0_form_build_target(&$form, &$form_state, &$location,
  *
  * @see mfcs_table_structure()
  */
-function mfcs_event_search_0_form_build_search_targets($structure, $targets, $recurse_count) {
+function mfcs_request_search_0_form_build_search_targets($structure, $targets, $recurse_count) {
   if (!is_array($structure)) {
     cf_error:invalid_array('structure');
     return FALSE;
@@ -1606,7 +1606,7 @@ function mfcs_event_search_0_form_build_search_targets($structure, $targets, $re
         continue;
       }
 
-      $search_items = mfcs_event_search_0_form_build_search_targets($structure, $target_values['targets'], $recurse_count + 1);
+      $search_items = mfcs_request_search_0_form_build_search_targets($structure, $target_values['targets'], $recurse_count + 1);
 
       if (is_array($search_items)) {
         $search[$target_name] = $search_items;
@@ -1614,7 +1614,7 @@ function mfcs_event_search_0_form_build_search_targets($structure, $targets, $re
     }
     else {
       foreach ($target_values as $target_delta => $target_value) {
-        $search_item = mfcs_event_search_0_form_build_search_target($structure, $target_name, $target_delta, $target_value);
+        $search_item = mfcs_request_search_0_form_build_search_target($structure, $target_name, $target_delta, $target_value);
 
         if (is_array($search_item)) {
           foreach ($search_item as $search_item_name => $search_item_values) {
@@ -1645,7 +1645,7 @@ function mfcs_event_search_0_form_build_search_targets($structure, $targets, $re
  *
  * @see mfcs_table_structure()
  */
-function mfcs_event_search_0_form_build_search_target($structure, $target_name, $target_delta, $target_values) {
+function mfcs_request_search_0_form_build_search_target($structure, $target_name, $target_delta, $target_values) {
   if (!is_array($structure)) {
     cf_error::invalid_array('structure');
     return FALSE;
@@ -1707,7 +1707,7 @@ function mfcs_event_search_0_form_build_search_target($structure, $target_name, 
       $target_field_name = 'field_' . $target_name . '-hours-' . $target_delta;
       $and[$target_field_name]['group_name'] = $table_name;
       $and[$target_field_name]['field_name'] = $field_name;
-      $and[$target_field_name]['search'] = event_workflow_convert_value_to_database_format($target_values['hours'], 'currency');
+      $and[$target_field_name]['search'] = mfcs_convert_value_to_database_format($target_values['hours'], 'currency');
       $and[$target_field_name]['column'] = 'hours';
       $and[$target_field_name]['type'] = $field['type'];
       $and[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
@@ -1718,7 +1718,7 @@ function mfcs_event_search_0_form_build_search_target($structure, $target_name, 
       $target_field_name = 'field_' . $target_name . '-days-' . $target_delta;
       $and[$target_field_name]['group_name'] = $table_name;
       $and[$target_field_name]['field_name'] = $field_name;
-      $and[$target_field_name]['search'] = event_workflow_convert_value_to_database_format($target_values['days'], 'currency');
+      $and[$target_field_name]['search'] = mfcs_convert_value_to_database_format($target_values['days'], 'currency');
       $and[$target_field_name]['column'] = 'days';
       $and[$target_field_name]['type'] = $field['type'];
       $and[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
@@ -1729,7 +1729,7 @@ function mfcs_event_search_0_form_build_search_target($structure, $target_name, 
       $target_field_name = 'field_' . $target_name . '-amount-' . $target_delta;
       $and[$target_field_name]['group_name'] = $table_name;
       $and[$target_field_name]['field_name'] = $field_name;
-      $and[$target_field_name]['search'] = event_workflow_convert_value_to_database_format($target_values['amount'], 'currency');
+      $and[$target_field_name]['search'] = mfcs_convert_value_to_database_format($target_values['amount'], 'currency');
       $and[$target_field_name]['column'] = 'amount';
       $and[$target_field_name]['type'] = $field['type'];
       $and[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
@@ -2002,15 +2002,15 @@ function mfcs_event_search_0_form_build_search_target($structure, $target_name, 
       if (isset($field['storage'])) {
         if ($field['storage'] == 'timestamp') {
           if ($field['type'] == 'time') {
-            $search_value = event_workflow_convert_value_to_database_format($search_value, 'timestamp_relative');
+            $search_value = mfcs_convert_value_to_database_format($search_value, 'timestamp_relative');
             $column_name .= '_relative';
           }
           else {
-            $search_value = event_workflow_convert_value_to_database_format($search_value, 'timestamp');
+            $search_value = mfcs_convert_value_to_database_format($search_value, 'timestamp');
           }
         }
         elseif (!empty($field['storage'])) {
-          $search_value = event_workflow_convert_value_to_database_format($search_value, $field['storage']);
+          $search_value = mfcs_convert_value_to_database_format($search_value, $field['storage']);
         }
       }
 
@@ -2050,7 +2050,7 @@ function mfcs_event_search_0_form_build_search_target($structure, $target_name, 
  * @return bool
  *   TRUE on success, FALSE otherwise.
  */
-function mfcs_event_search_0_form_build_grouping($form, &$form_state, &$location, $recurse_count, $id_extra, $chosen_options, $logic_options) {
+function mfcs_request_search_0_form_build_grouping($form, &$form_state, &$location, $recurse_count, $id_extra, $chosen_options, $logic_options) {
   if (!is_array($form)) {
     cf_error::invalid_array('form');
     return FALSE;
@@ -2440,4 +2440,44 @@ function mfcs_event_search_0_form_build_grouping($form, &$form_state, &$location
  * Loads all saved search target groupings for a given user.
  *
  * @param object|null $user
- *   The user object of the us
+ *   The user object of the user to load or NULL for current user.
+ *
+ * @return array|bool
+ *   The saved target search groupings or FALSE on error.
+ */
+function mfcs_search_target_grouping_load($user = NULL) {
+  if (is_null($user)) {
+    $user = cf_current_user();
+  }
+
+  if (!is_object($user)) {
+    cf_error::invalid_object('user');
+    return FALSE;
+  }
+
+  $grouping = array();
+  try {
+    $query = db_select('mfcs_search_settings', 'mss');
+    $query->fields('mss');
+
+    $query->condition('mss.user_id', $user->uid);
+    $query->orderBy('mss.human_name');
+
+    $results = $query->execute()->fetchAll();
+
+    foreach ($results as $result) {
+      $grouping[$result->id] = $result;
+    }
+  }
+  catch (Exception $ex) {
+    cf_error::on_exception($ex);
+
+    return FALSE;
+  }
+
+  return $grouping;
+}
+
+/**
+ * @} End of '@addtogroup mfcs'.
+ */

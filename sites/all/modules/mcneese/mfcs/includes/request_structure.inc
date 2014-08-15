@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Defines McNeese facilities use event commonly used form and structure functions.
+ * Defines McNeese facilities use request commonly used form and structure functions.
  */
 
 /**
@@ -13,14 +13,14 @@
 /**
  * Return a list of sections and their relevant information.
  *
- * Manually updated to reflect mfcs_get_event_fields().
+ * Manually updated to reflect mfcs_get_request_fields().
  *
  * @return array
  *   An array containing the generated sections.
  *
- * @see mfcs_get_event_fields()
+ * @see mfcs_get_request_fields()
  */
-function mfcs_get_event_section_information() {
+function mfcs_get_request_section_information() {
   $information = array();
 
   $information['request'] = array(
@@ -108,7 +108,7 @@ function mfcs_get_event_section_information() {
 }
 
 /**
- * Return a list of event form fields.
+ * Return a list of request form fields.
  *
  * This requires the following fields to be defined before calling:
  * - $form['form']['sections']
@@ -125,7 +125,7 @@ function mfcs_get_event_section_information() {
  * @return array
  *   An array containing the generated form.
  */
-function mfcs_get_event_fields($form, &$form_state) {
+function mfcs_get_request_fields($form, &$form_state) {
   if (!is_array($form)) {
     cf_error::invalid_array('form');
 
@@ -144,21 +144,21 @@ function mfcs_get_event_fields($form, &$form_state) {
 
   $ps = NULL;
 
-  if (!isset($form_state['values']['event'])) {
-    if (isset($form['form']['existing']['#value']['event'])) {
-      $form_state['values']['event'] = $form['form']['existing']['#value']['event'];
+  if (!isset($form_state['values']['request'])) {
+    if (isset($form['form']['existing']['#value']['request'])) {
+      $form_state['values']['request'] = $form['form']['existing']['#value']['request'];
     }
     else {
-      $form_state['values']['event'] = array();
+      $form_state['values']['request'] = array();
     }
   }
-  $event_state = &$form_state['values']['event'];
+  $request_state = &$form_state['values']['request'];
 
   $fields = array();
   if (!isset($form['form']['sections']['#value']) || !is_array($form['form']['sections']['#value'])) {
     $form['form']['sections'] = array(
       '#type' => 'value',
-      '#value' => mfcs_get_event_section_information(),
+      '#value' => mfcs_get_request_section_information(),
     );
   }
 
@@ -168,19 +168,19 @@ function mfcs_get_event_fields($form, &$form_state) {
 
 
   // Fieldset: Status
-  mfcs_get_event_field_status($form, $form_state, $fields, $event_state, $ps);
+  mfcs_get_request_field_status($form, $form_state, $fields, $request_state, $ps);
 
 
   // Fieldset: Step
-  mfcs_get_event_field_step($form, $form_state, $fields, $event_state, $ps);
+  mfcs_get_request_field_step($form, $form_state, $fields, $request_state, $ps);
 
 
   // Fieldset: Location
-  mfcs_get_event_field_location($form, $form_state, $fields, $event_state, $ps);
+  mfcs_get_request_field_location($form, $form_state, $fields, $request_state, $ps);
 
 
   // Fieldset: Room
-  $room = mfcs_get_event_field_room($form, $form_state, $fields, $event_state, $ps);
+  $room = mfcs_get_request_field_room($form, $form_state, $fields, $request_state, $ps);
 
   $form['form']['room_information'] = array(
     '#type' => 'value',
@@ -193,12 +193,12 @@ function mfcs_get_event_fields($form, &$form_state) {
 
 
   // Fieldset: Building
-  mfcs_get_event_field_building($form, $form_state, $fields, $event_state, $ps);
+  mfcs_get_request_field_building($form, $form_state, $fields, $request_state, $ps);
 
 
   // Fieldset: Review
   if ($form['form']['step']['#value'] == 'review' && array_key_exists('review', $form['form']['sections']['#value'])) {
-    if (empty($form['form']['event']['#value']['mer']['id'][0]->value) || !mfcs_management_page_event_access('review', $form['form']['event']['#value']['mer']['id'][0]->value)) {
+    if (empty($form['form']['request']['#value']['mer']['id'][0]->value) || !mfcs_management_page_request_access('review', $form['form']['request']['#value']['mer']['id'][0]->value)) {
       drupal_access_denied();
       drupal_exit();
       return array();
@@ -209,21 +209,21 @@ function mfcs_get_event_fields($form, &$form_state) {
       $ps .= ']';
     }
 
-    if (!isset($event_state['review'])) {
-      $event_state['review'] = array();
+    if (!isset($request_state['review'])) {
+      $request_state['review'] = array();
     }
 
     $fields['review'] = array(
-      '#id' => 'section-event-review',
+      '#id' => 'section-request-review',
       '#tree' => TRUE,
     );
 
-    mfcs_get_event_field_review_review($form, $form_state, $fields, $event_state, $ps);
+    mfcs_get_request_field_review_review($form, $form_state, $fields, $request_state, $ps);
   }
 
   // Fieldset: Requirements
   if ($form['form']['step']['#value'] == 'requirements' && array_key_exists('requirements', $form['form']['sections']['#value'])) {
-    if (empty($form['form']['event']['#value']['mer']['id'][0]->value) || !mfcs_management_page_event_access('requirements', $form['form']['event']['#value']['mer']['id'][0]->value)) {
+    if (empty($form['form']['request']['#value']['mer']['id'][0]->value) || !mfcs_management_page_request_access('requirements', $form['form']['request']['#value']['mer']['id'][0]->value)) {
       drupal_access_denied();
       drupal_exit();
       return array();
@@ -234,12 +234,12 @@ function mfcs_get_event_fields($form, &$form_state) {
       $ps .= ']';
     }
 
-    if (!isset($event_state['requirements'])) {
-      $event_state['requirements'] = array();
+    if (!isset($request_state['requirements'])) {
+      $request_state['requirements'] = array();
     }
 
     $fields['requirements'] = array(
-      '#id' => 'section-event-requirements',
+      '#id' => 'section-request-requirements',
       '#tree' => TRUE,
     );
 
@@ -253,18 +253,18 @@ function mfcs_get_event_fields($form, &$form_state) {
     $ps .= ']';
   }
 
-  if (!isset($event_state['dates'])) {
-    $event_state['dates'] = array();
+  if (!isset($request_state['dates'])) {
+    $request_state['dates'] = array();
   }
 
   $fields['dates'] = array(
-    '#id' => 'section-event-dates',
+    '#id' => 'section-request-dates',
     '#tree' => TRUE,
   );
 
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('dates', $form['form']['sections']['#value'])) {
     $fields['dates'] = array(
-      '#id' => 'section-event-dates',
+      '#id' => 'section-request-dates',
       '#type' => 'fieldset',
       '#tree' => TRUE,
       '#collapsible' => TRUE,
@@ -274,35 +274,35 @@ function mfcs_get_event_fields($form, &$form_state) {
   }
 
   // date field contains different fields grouped togethor with it, process them simultanseously.
-  mfcs_get_event_group_dates_date($form, $form_state, $fields, $event_state, $ps);
+  mfcs_get_request_group_dates_date($form, $form_state, $fields, $request_state, $ps);
 
   // add/remove date fields
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('dates', $form['form']['sections']['#value'])) {
     $dates = array(0 => NULL);
-    if (!empty($event_state['dates']['date'])) {
-      $dates = $event_state['dates']['date'];
+    if (!empty($request_state['dates']['date'])) {
+      $dates = $request_state['dates']['date'];
     }
 
     if (count($dates) > 1) {
       foreach ($dates as $date_key => $date_value) {
         $fields['dates']['group_dates'][$date_key]['dates']['remove'] = array(
-          '#id' => 'buttons-event-remove-date-' . $date_key,
+          '#id' => 'buttons-request-remove-date-' . $date_key,
           '#type' => 'container',
           '#attributes' => array(
             'class' => array(
-              'buttons-event-remove-date',
+              'buttons-request-remove-date',
             ),
           ),
         );
 
         $fields['dates']['group_dates'][$date_key]['dates']['remove']['button-' . $date_key] = array(
-          '#id' => 'submit-event-remove-date-' . $date_key,
-          '#name' => 'submit-event-remove-date-' . $date_key,
+          '#id' => 'submit-request-remove-date-' . $date_key,
+          '#name' => 'submit-request-remove-date-' . $date_key,
           '#type' => 'submit',
           '#default_value' => t("Remove Date"),
           '#attributes' => array(
             'class' => array(
-              'buttons-event-remove-date-button',
+              'buttons-request-remove-date-button',
             ),
           ),
         );
@@ -310,23 +310,23 @@ function mfcs_get_event_fields($form, &$form_state) {
     }
 
     $fields['dates']['add'] = array(
-      '#id' => 'buttons-event-add-date',
+      '#id' => 'buttons-request-add-date',
       '#type' => 'container',
       '#attributes' => array(
         'class' => array(
-          'buttons-event-add-date',
+          'buttons-request-add-date',
         ),
       ),
     );
 
     $fields['dates']['add']['button'] = array(
-      '#id' => 'submit-event-add-date',
-      '#name' => 'submit-event-add-date',
+      '#id' => 'submit-request-add-date',
+      '#name' => 'submit-request-add-date',
       '#type' => 'submit',
       '#default_value' => t("Add Date"),
       '#attributes' => array(
         'class' => array(
-          'buttons-event-add-date-button',
+          'buttons-request-add-date-button',
         ),
       ),
     );
@@ -339,18 +339,18 @@ function mfcs_get_event_fields($form, &$form_state) {
     $ps .= ']';
   }
 
-  if (!isset($event_state['venue_coordinator'])) {
-    $event_state['venue_coordinator'] = array();
+  if (!isset($request_state['venue_coordinator'])) {
+    $request_state['venue_coordinator'] = array();
   }
 
   $fields['venue_coordinator'] = array(
-    '#id' => 'section-event-venue_coordinator',
+    '#id' => 'section-request-venue_coordinator',
     '#tree' => TRUE,
   );
 
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('coordinator', $form['form']['sections']['#value'])) {
     $fields['venue_coordinator'] = array(
-      '#id' => 'section-event-venue_coordinator',
+      '#id' => 'section-request-venue_coordinator',
       '#type' => 'fieldset',
       '#tree' => TRUE,
       '#collapsible' => TRUE,
@@ -360,27 +360,27 @@ function mfcs_get_event_fields($form, &$form_state) {
     );
   }
 
-  mfcs_get_event_field_venue_coordinator_user_id($form, $form_state, $fields, $event_state, $ps);
+  mfcs_get_request_field_venue_coordinator_user_id($form, $form_state, $fields, $request_state, $ps);
 
 
   // Fieldset: Event Coordinator
-  $ps = 'event_coordinator';
+  $ps = 'request_coordinator';
   if (!is_null($form['form']['parents']['#value']['path'])) {
     $ps .= ']';
   }
 
-  if (!isset($event_state['event_coordinator'])) {
-    $event_state['event_coordinator'] = array();
+  if (!isset($request_state['request_coordinator'])) {
+    $request_state['request_coordinator'] = array();
   }
 
-  $fields['event_coordinator'] = array(
-    '#id' => 'section-event-event_coordinator',
+  $fields['request_coordinator'] = array(
+    '#id' => 'section-request-request_coordinator',
     '#tree' => TRUE,
   );
 
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('coordinator', $form['form']['sections']['#value'])) {
-    $fields['event_coordinator'] = array(
-      '#id' => 'section-event-event_coordinator',
+    $fields['request_coordinator'] = array(
+      '#id' => 'section-request-request_coordinator',
       '#type' => 'fieldset',
       '#tree' => TRUE,
       '#collapsible' => TRUE,
@@ -389,10 +389,10 @@ function mfcs_get_event_fields($form, &$form_state) {
     );
   }
 
-  mfcs_get_event_field_event_coordinator_name($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_event_coordinator_phone($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_event_coordinator_email($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_event_coordinator_classification($form, $form_state, $fields, $event_state, $ps);
+  mfcs_get_request_field_request_coordinator_name($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_request_coordinator_phone($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_request_coordinator_email($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_request_coordinator_classification($form, $form_state, $fields, $request_state, $ps);
 
 
   // Fieldset: Information
@@ -401,18 +401,18 @@ function mfcs_get_event_fields($form, &$form_state) {
     $ps .= ']';
   }
 
-  if (!isset($event_state['information'])) {
-    $event_state['information'] = array();
+  if (!isset($request_state['information'])) {
+    $request_state['information'] = array();
   }
 
   $fields['information'] = array(
-    '#id' => 'section-event-information',
+    '#id' => 'section-request-information',
     '#tree' => TRUE,
   );
 
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('information', $form['form']['sections']['#value'])) {
     $fields['information'] = array(
-      '#id' => 'section-event-information',
+      '#id' => 'section-request-information',
       '#type' => 'fieldset',
       '#tree' => TRUE,
       '#collapsible' => TRUE,
@@ -421,11 +421,11 @@ function mfcs_get_event_fields($form, &$form_state) {
     );
   }
 
-  $information_title = mfcs_get_event_field_information_title($form, $form_state, $fields, $event_state, $ps);
-  $information_attendance = mfcs_get_event_field_information_attendance($form, $form_state, $fields, $event_state, $ps);
-  $information_type = mfcs_get_event_field_information_type($form, $form_state, $fields, $event_state, $ps);
-  $information_organization = mfcs_get_event_field_information_organization($form, $form_state, $fields, $event_state, $ps);
-  $information_adviser_approval = mfcs_get_event_field_information_adviser_approval($form, $form_state, $fields, $event_state, $ps);
+  $information_title = mfcs_get_request_field_information_title($form, $form_state, $fields, $request_state, $ps);
+  $information_attendance = mfcs_get_request_field_information_attendance($form, $form_state, $fields, $request_state, $ps);
+  $information_type = mfcs_get_request_field_information_type($form, $form_state, $fields, $request_state, $ps);
+  $information_organization = mfcs_get_request_field_information_organization($form, $form_state, $fields, $request_state, $ps);
+  $information_adviser_approval = mfcs_get_request_field_information_adviser_approval($form, $form_state, $fields, $request_state, $ps);
 
   $form['form']['information_type'] = array(
     '#type' => 'value',
@@ -444,18 +444,18 @@ function mfcs_get_event_fields($form, &$form_state) {
     $ps .= ']';
   }
 
-  if (!isset($event_state['plans'])) {
-    $event_state['plans'] = array();
+  if (!isset($request_state['plans'])) {
+    $request_state['plans'] = array();
   }
 
   $fields['plans'] = array(
-    '#id' => 'section-event-plans',
+    '#id' => 'section-request-plans',
     '#tree' => TRUE,
   );
 
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('plans', $form['form']['sections']['#value'])) {
     $fields['plans'] = array(
-      '#id' => 'section-event-plans',
+      '#id' => 'section-request-plans',
       '#type' => 'fieldset',
       '#tree' => TRUE,
       '#collapsible' => TRUE,
@@ -464,10 +464,10 @@ function mfcs_get_event_fields($form, &$form_state) {
     );
   }
 
-  mfcs_get_event_field_plans_note($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_plans_description($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_plans_activities($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_plans_audience($form, $form_state, $fields, $event_state, $ps);
+  mfcs_get_request_field_plans_note($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_plans_description($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_plans_activities($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_plans_audience($form, $form_state, $fields, $request_state, $ps);
 
 
   // Fieldset: Registration
@@ -476,19 +476,19 @@ function mfcs_get_event_fields($form, &$form_state) {
     $ps .= ']';
   }
 
-  if (!isset($event_state['registration'])) {
-    $event_state['registration'] = array();
+  if (!isset($request_state['registration'])) {
+    $request_state['registration'] = array();
   }
 
   $fields['registration'] = array(
-    '#id' => 'section-event-registration',
+    '#id' => 'section-request-registration',
     '#tree' => TRUE,
   );
 
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('registration', $form['form']['sections']['#value'])) {
     if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
       $fields['registration'] = array(
-        '#id' => 'section-event-registration',
+        '#id' => 'section-request-registration',
         '#type' => 'fieldset',
         '#tree' => TRUE,
         '#collapsible' => TRUE,
@@ -498,15 +498,15 @@ function mfcs_get_event_fields($form, &$form_state) {
     }
   }
 
-  mfcs_get_event_field_registration_require($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_registration_website($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_registration_phone($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_registration_ticket_price($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_registration_ticket_dates($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_registration_ticket_website($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_registration_ticket_phone($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_registration_generate_revenue($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_registration_revenue_generated($form, $form_state, $fields, $event_state, $ps);
+  mfcs_get_request_field_registration_require($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_registration_website($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_registration_phone($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_registration_ticket_price($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_registration_ticket_dates($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_registration_ticket_website($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_registration_ticket_phone($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_registration_generate_revenue($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_registration_revenue_generated($form, $form_state, $fields, $request_state, $ps);
 
 
   // Fieldset: Setup
@@ -515,18 +515,18 @@ function mfcs_get_event_fields($form, &$form_state) {
     $ps .= ']';
   }
 
-  if (!isset($event_state['setup'])) {
-    $event_state['setup'] = array();
+  if (!isset($request_state['setup'])) {
+    $request_state['setup'] = array();
   }
 
   $fields['setup'] = array(
-    '#id' => 'section-event-setup',
+    '#id' => 'section-request-setup',
     '#tree' => TRUE,
   );
 
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
     $fields['setup'] = array(
-      '#id' => 'section-event-setup',
+      '#id' => 'section-request-setup',
       '#type' => 'fieldset',
       '#tree' => TRUE,
       '#collapsible' => TRUE,
@@ -535,20 +535,20 @@ function mfcs_get_event_fields($form, &$form_state) {
     );
   }
 
-  mfcs_get_event_field_setup_rectangular_tables_8ft($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_setup_round_tables_8ft($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_setup_other_tables($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_setup_standard_blue_chairs($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_setup_podium($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_setup_portable_stage($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_setup_portable_stage_configuration($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_setup_security($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_setup_parking_assistance($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_setup_parking_assistance_area($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_setup_road_closures($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_setup_road_closures_details($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_setup_special_requests($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_setup_special_requests_details($form, $form_state, $fields, $event_state, $ps);
+  mfcs_get_request_field_setup_rectangular_tables_8ft($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_setup_round_tables_8ft($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_setup_other_tables($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_setup_standard_blue_chairs($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_setup_podium($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_setup_portable_stage($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_setup_portable_stage_configuration($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_setup_security($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_setup_parking_assistance($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_setup_parking_assistance_area($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_setup_road_closures($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_setup_road_closures_details($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_setup_special_requests($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_setup_special_requests_details($form, $form_state, $fields, $request_state, $ps);
 
 
   // Fieldset: Presentation
@@ -557,18 +557,18 @@ function mfcs_get_event_fields($form, &$form_state) {
     $ps .= ']';
   }
 
-  if (!isset($event_state['presentation'])) {
-    $event_state['presentation'] = array();
+  if (!isset($request_state['presentation'])) {
+    $request_state['presentation'] = array();
   }
 
   $fields['presentation'] = array(
-    '#id' => 'section-event-presentation',
+    '#id' => 'section-request-presentation',
     '#tree' => TRUE,
   );
 
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation'] = array(
-      '#id' => 'section-event-presentation',
+      '#id' => 'section-request-presentation',
       '#type' => 'fieldset',
       '#tree' => TRUE,
       '#collapsible' => TRUE,
@@ -577,26 +577,26 @@ function mfcs_get_event_fields($form, &$form_state) {
     );
   }
 
-  // mising: external_audio_person  // if (!$meeting_event) {
-  mfcs_get_event_field_presentation_technical_equipment($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_presentation_technical_equipment_details($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_presentation_technical_equipment_microphone($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_presentation_external_audio_person($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_presentation_external_audio_person_name($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_presentation_external_audio_person_email($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_presentation_external_audio_person_phone($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_presentation_production($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_presentation_production_name($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_presentation_production_email($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_presentation_production_phone($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_presentation_publicity($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_presentation_publicity_details($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_presentation_printed_material($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_presentation_university_logo($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_presentation_designing_material($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_presentation_designing_material_name($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_presentation_designing_material_email($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_presentation_designing_material_phone($form, $form_state, $fields, $event_state, $ps);
+  // mising: external_audio_person  // if (!$meeting_request) {
+  mfcs_get_request_field_presentation_technical_equipment($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_presentation_technical_equipment_details($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_presentation_technical_equipment_microphone($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_presentation_external_audio_person($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_presentation_external_audio_person_name($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_presentation_external_audio_person_email($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_presentation_external_audio_person_phone($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_presentation_production($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_presentation_production_name($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_presentation_production_email($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_presentation_production_phone($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_presentation_publicity($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_presentation_publicity_details($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_presentation_printed_material($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_presentation_university_logo($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_presentation_designing_material($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_presentation_designing_material_name($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_presentation_designing_material_email($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_presentation_designing_material_phone($form, $form_state, $fields, $request_state, $ps);
 
 
   // Fieldset: Services
@@ -605,18 +605,18 @@ function mfcs_get_event_fields($form, &$form_state) {
     $ps .= ']';
   }
 
-  if (!isset($event_state['services'])) {
-    $event_state['services'] = array();
+  if (!isset($request_state['services'])) {
+    $request_state['services'] = array();
   }
 
   $fields['services'] = array(
-    '#id' => 'section-event-services',
+    '#id' => 'section-request-services',
     '#tree' => TRUE,
   );
 
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('services', $form['form']['sections']['#value'])) {
     $fields['services'] = array(
-      '#id' => 'section-event-services',
+      '#id' => 'section-request-services',
       '#type' => 'fieldset',
       '#tree' => TRUE,
       '#collapsible' => TRUE,
@@ -625,11 +625,11 @@ function mfcs_get_event_fields($form, &$form_state) {
     );
   }
 
-  mfcs_get_event_field_services_food_served($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_services_food_caterer($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_services_alcohol($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_services_alcohol_note($form, $form_state, $fields, $event_state, $ps);
-  mfcs_get_event_field_services_open_flames($form, $form_state, $fields, $event_state, $ps);
+  mfcs_get_request_field_services_food_served($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_services_food_caterer($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_services_alcohol($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_services_alcohol_note($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_services_open_flames($form, $form_state, $fields, $request_state, $ps);
 
 
   // Fieldset: Additional
@@ -637,7 +637,7 @@ function mfcs_get_event_fields($form, &$form_state) {
   if (!is_null($form['form']['parents']['#value']['path'])) {
     $ps .= ']';
   }
-  mfcs_get_event_field_additional($form, $form_state, $fields, $event_state, $ps);
+  mfcs_get_request_field_additional($form, $form_state, $fields, $request_state, $ps);
 
 
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('message', $form['form']['sections']['#value'])) {
@@ -645,9 +645,9 @@ function mfcs_get_event_fields($form, &$form_state) {
       '#markup' => '',
     );
 
-    $fields['message']['#markup'] .= '<div id="markup-event-message" class="markup-event">';
+    $fields['message']['#markup'] .= '<div id="markup-request-message" class="markup-request">';
     $fields['message']['#markup'] .= 'Once your request has been approved appropriate campus personnel, you will be emailed with the outcome. ';
-    $fields['message']['#markup'] .= 'If the event receives approval, you will also receive an itemized detail of any and all charges that will be assessed to you. ';
+    $fields['message']['#markup'] .= 'If the request receives approval, you will also receive an itemized detail of any and all charges that will be assessed to you. ';
     $fields['message']['#markup'] .= 'You must agree and accept the terms offered for the venue to be reserved. ';
     $fields['message']['#markup'] .= '</div>';
   }
@@ -658,16 +658,16 @@ function mfcs_get_event_fields($form, &$form_state) {
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_status($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_status($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => MFCS_EVENT_STATUS_UNLOCKED);
 
-  if (empty($event_state['status'])) {
-    if (isset($form['form']['existing']['#value']['event']['status'])) {
-      $form['form']['status']['#value'] = $form['form']['existing']['#value']['event']['status'];
+  if (empty($request_state['status'])) {
+    if (isset($form['form']['existing']['#value']['request']['status'])) {
+      $form['form']['status']['#value'] = $form['form']['existing']['#value']['request']['status'];
     }
   }
   else {
-    $values = $event_state['status'];
+    $values = $request_state['status'];
   }
 
   $limits_check = array(
@@ -683,14 +683,14 @@ function mfcs_get_event_field_status($form, &$form_state, &$fields, &$event_stat
 
   if ($form['form']['step']['#value'] == 'status' && array_key_exists('information', $form['form']['sections']['#value'])) {
     $fields['status'] = array(
-      '#id' => 'field-event-status',
+      '#id' => 'field-request-status',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-status',
+          'field-request-item',
+          'field-request-item-status',
         ),
       ),
     );
@@ -700,7 +700,7 @@ function mfcs_get_event_field_status($form, &$form_state, &$fields, &$event_stat
 
   foreach ($values as $key => $value) {
     $fields['status'][$key] = array(
-      '#id' => 'field-event-status-' . $key,
+      '#id' => 'field-request-status-' . $key,
       '#type' => 'value',
       '#value' => $value,
     );
@@ -712,19 +712,19 @@ function mfcs_get_event_field_status($form, &$form_state, &$fields, &$event_stat
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_step($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_step($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => MFCS_REVIEW_STEP_VENUE_AVAILABLE);
 
-  if (empty($event_state['step'])) {
-    if (isset($form['form']['existing']['#value']['event']['step'])) {
-      $form['form']['step']['#value'] = $form['form']['existing']['#value']['event']['step'];
+  if (empty($request_state['step'])) {
+    if (isset($form['form']['existing']['#value']['request']['step'])) {
+      $form['form']['step']['#value'] = $form['form']['existing']['#value']['request']['step'];
     }
     else {
       $form['form']['step']['#value'] = array(MFCS_REVIEW_STEP_VENUE_AVAILABLE);
     }
   }
   else {
-    $values = $event_state['step'];
+    $values = $request_state['step'];
   }
 
   $limits_check = array(
@@ -740,14 +740,14 @@ function mfcs_get_event_field_step($form, &$form_state, &$fields, &$event_state,
 
   if ($form['form']['step']['#value'] == 'step' && array_key_exists('information', $form['form']['sections']['#value'])) {
     $fields['step'] = array(
-      '#id' => 'field-event-step',
+      '#id' => 'field-request-step',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-step',
+          'field-request-item',
+          'field-request-item-step',
         ),
       ),
     );
@@ -757,7 +757,7 @@ function mfcs_get_event_field_step($form, &$form_state, &$fields, &$event_state,
 
   foreach ($values as $key => $value) {
     $fields['step'][$key] = array(
-      '#id' => 'field-event-step-' . $key,
+      '#id' => 'field-request-step-' . $key,
       '#type' => 'value',
       '#value' => $value,
     );
@@ -769,13 +769,13 @@ function mfcs_get_event_field_step($form, &$form_state, &$fields, &$event_state,
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_location($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_location($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['location'])) {
-    $values = $event_state['location'];
+  if (!empty($request_state['location'])) {
+    $values = $request_state['location'];
   }
 
-  $field_title = "Please indicate the requested facility or event location?";
+  $field_title = "Please indicate the requested facility or request location?";
   $limits_check = array(
     'title' => $field_title,
     'field' => 'location',
@@ -789,14 +789,14 @@ function mfcs_get_event_field_location($form, &$form_state, &$fields, &$event_st
 
   if ($form['form']['step']['#value'] == 'location' && array_key_exists('information', $form['form']['sections']['#value'])) {
     $fields['location'] = array(
-      '#id' => 'field-event-location',
+      '#id' => 'field-request-location',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-location',
+          'field-request-item',
+          'field-request-item-location',
         ),
       ),
     );
@@ -808,10 +808,10 @@ function mfcs_get_event_field_location($form, &$form_state, &$fields, &$event_st
 
     foreach ($values as $key => $value) {
       $fields['location'][$key] = array(
-        '#id' => 'field-event-location-' . $key,
+        '#id' => 'field-request-location-' . $key,
         '#type' => 'radios',
         '#title' => '<span class="strong underline">' . $field_title . '</span>',
-        '#options' => event_workflow_get_event_location_list_options('radios'),
+        '#options' => mfcs_get_request_location_list_options('radios'),
         '#default_value' => $value,
         '#required' => TRUE,
         '#attributes' => array(
@@ -834,15 +834,15 @@ function mfcs_get_event_field_location($form, &$form_state, &$fields, &$event_st
     $fields['location'][0]['location-images'][0] = array();
     $fields['location'][0]['location-images'][1] = array();
 
-    $fields['location'][0]['location-images'][0]['#markup'] = '<img id="field-event-location-0-image-0" src="' . $base_path . $module_path . '/images/example-map.png" alt="Campus Map" class="location-image location-image-visible noscript">';
-    $fields['location'][0]['location-images'][1]['#markup'] = '<img id="field-event-location-0-image-1" src="' . $base_path . $module_path . '/images/example-seed.png" alt="Campus Map, SEED Center" class="location-image location-image-invisible noscript">';
+    $fields['location'][0]['location-images'][0]['#markup'] = '<img id="field-request-location-0-image-0" src="' . $base_path . $module_path . '/images/example-map.png" alt="Campus Map" class="location-image location-image-visible noscript">';
+    $fields['location'][0]['location-images'][1]['#markup'] = '<img id="field-request-location-0-image-1" src="' . $base_path . $module_path . '/images/example-seed.png" alt="Campus Map, SEED Center" class="location-image location-image-invisible noscript">';
 
     $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
       $fields['location'][$key] = array(
-        '#id' => 'field-event-location-' . $key,
+        '#id' => 'field-request-location-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -855,9 +855,9 @@ function mfcs_get_event_field_location($form, &$form_state, &$fields, &$event_st
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_building($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_building($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['building'])) {
+  if (!empty($request_state['building'])) {
     if (isset($form['form']['room_information']['#value']->building_id)) {
       $values[0] = $form['form']['room_information']['#value']->building_id;
     }
@@ -876,14 +876,14 @@ function mfcs_get_event_field_building($form, &$form_state, &$fields, &$event_st
 
   if ($form['form']['step']['#value'] == 'building' && array_key_exists('information', $form['form']['sections']['#value'])) {
     $fields['building'] = array(
-      '#id' => 'field-event-building',
+      '#id' => 'field-request-building',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-building',
+          'field-request-item',
+          'field-request-item-building',
         ),
       ),
     );
@@ -894,7 +894,7 @@ function mfcs_get_event_field_building($form, &$form_state, &$fields, &$event_st
   // the building is determined by the room, therefore this is more or less a stub/placeholder.
   foreach ($values as $key => $value) {
     $fields['building'][$key] = array(
-      '#id' => 'field-event-building-' . $key,
+      '#id' => 'field-request-building-' . $key,
       '#type' => 'value',
       '#value' => $value,
     );
@@ -906,10 +906,10 @@ function mfcs_get_event_field_building($form, &$form_state, &$fields, &$event_st
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_room($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_room($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['room'])) {
-    $values = $event_state['room'];
+  if (!empty($request_state['room'])) {
+    $values = $request_state['room'];
   }
 
   $field_title = "Select a Room";
@@ -927,25 +927,25 @@ function mfcs_get_event_field_room($form, &$form_state, &$fields, &$event_state,
 
   if ($form['form']['step']['#value'] == 'rooms' && array_key_exists('information', $form['form']['sections']['#value'])) {
     $fields['room'] = array(
-      '#id' => 'field-event-room',
+      '#id' => 'field-request-room',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-room',
+          'field-request-item',
+          'field-request-item-room',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $location = "";
-      if (!empty($event_state['location'][$key])) {
-        $location = $event_state['location'][$key];
+      if (!empty($request_state['location'][$key])) {
+        $location = $request_state['location'][$key];
       }
 
-      $options = event_workflow_get_event_room_list_options($location, 'special');
+      $options = mfcs_get_request_room_list_options($location, 'special');
       if (!is_array($options)) {
         $options = array();
         $value = NULL;
@@ -955,7 +955,7 @@ function mfcs_get_event_field_room($form, &$form_state, &$fields, &$event_state,
       }
 
       $fields['room'][$key] = array(
-        '#id' => 'field-event-room-' . $key,
+        '#id' => 'field-request-room-' . $key,
         '#type' => 'radios',
         '#title' => $field_title,
         '#options' => $options,
@@ -978,7 +978,7 @@ function mfcs_get_event_field_room($form, &$form_state, &$fields, &$event_state,
   else {
     foreach ($values as $key => $value) {
       $fields['room'][$key] = array(
-        '#id' => 'field-event-room-' . $key,
+        '#id' => 'field-request-room-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -991,7 +991,7 @@ function mfcs_get_event_field_room($form, &$form_state, &$fields, &$event_state,
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_review_review($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_review_review($form, &$form_state, &$fields, &$request_state, $ps) {
   if ($form['form']['step']['#value'] != 'standard' || !array_key_exists('review', $form['form']['sections']['#value'])) {
     return FALSE;
   }
@@ -1001,17 +1001,17 @@ function mfcs_get_event_field_review_review($form, &$form_state, &$fields, &$eve
   /*
   $values = array(0 => array('reviewer_id' => 0, 'decision' => 0, 'message' => NULL));
 
-  if (empty($event_state['review']['review'])) {
-    if (isset($form['form']['existing']['#value']['event']['review']['review'])) {
-      $form['form']['review']['review']['#value'] = $form['form']['existing']['#value']['event']['review']['review'];
+  if (empty($request_state['review']['review'])) {
+    if (isset($form['form']['existing']['#value']['request']['review']['review'])) {
+      $form['form']['review']['review']['#value'] = $form['form']['existing']['#value']['request']['review']['review'];
     }
   }
   else {
-    $values = $event_state['review']['review'];
+    $values = $request_state['review']['review'];
   }
 
   $fields['review'] = array(
-    '#id' => 'field-event-review-review',
+    '#id' => 'field-request-review-review',
     '#type' => 'container',
     '#tree' => TRUE,
     '#attributes' => array(
@@ -1023,7 +1023,7 @@ function mfcs_get_event_field_review_review($form, &$form_state, &$fields, &$eve
 
   foreach ($values as $key => $value) {
     $fields['review']['review'][$key] = array(
-      '#id' => 'field-event-review-review-' . $key,
+      '#id' => 'field-request-review-review-' . $key,
       '#type' => 'value',
       '#value' => $value,
     );
@@ -1038,21 +1038,21 @@ function mfcs_get_event_field_review_review($form, &$form_state, &$fields, &$eve
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_group_dates_date($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_group_dates_date($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['dates']['date'])) {
-    $values = $event_state['dates']['date'];
+  if (!empty($request_state['dates']['date'])) {
+    $values = $request_state['dates']['date'];
   }
 
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('dates', $form['form']['sections']['#value'])) {
     $fields['dates']['group_dates'] = array(
-      '#id' => 'group-event-dates-date',
+      '#id' => 'group-request-dates-date',
       '#type' => 'container',
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'group-event-item',
-          'group-event-item-dates-date',
+          'group-request-item',
+          'group-request-item-dates-date',
         ),
       ),
     );
@@ -1070,20 +1070,20 @@ function mfcs_get_event_group_dates_date($form, &$form_state, &$fields, &$event_
 
       $new_ps = $ps . '[group_dates][' . $key . ']';
 
-      mfcs_get_event_field_dates_date($form, $form_state, $fields['dates']['group_dates'][$key], $event_state, $new_ps, $key);
-      mfcs_get_event_field_dates_time_start($form, $form_state, $fields['dates']['group_dates'][$key], $event_state, $new_ps, $key);
-      mfcs_get_event_field_dates_time_stop($form, $form_state, $fields['dates']['group_dates'][$key], $event_state, $new_ps, $key);
-      mfcs_get_event_field_dates_category($form, $form_state, $fields['dates']['group_dates'][$key], $event_state, $new_ps, $key);
+      mfcs_get_request_field_dates_date($form, $form_state, $fields['dates']['group_dates'][$key], $request_state, $new_ps, $key);
+      mfcs_get_request_field_dates_time_start($form, $form_state, $fields['dates']['group_dates'][$key], $request_state, $new_ps, $key);
+      mfcs_get_request_field_dates_time_stop($form, $form_state, $fields['dates']['group_dates'][$key], $request_state, $new_ps, $key);
+      mfcs_get_request_field_dates_category($form, $form_state, $fields['dates']['group_dates'][$key], $request_state, $new_ps, $key);
     }
   }
   else {
     foreach ($values as $key => $value) {
       $new_ps = $ps . '[group_dates][' . $key . ']';
 
-      mfcs_get_event_field_dates_date($form, $form_state, $fields['dates']['group_dates'][$key], $event_state, $new_ps, $key);
-      mfcs_get_event_field_dates_time_start($form, $form_state, $fields['dates']['group_dates'][$key], $event_state, $new_ps, $key);
-      mfcs_get_event_field_dates_time_stop($form, $form_state, $fields['dates']['group_dates'][$key], $event_state, $new_ps, $key);
-      mfcs_get_event_field_dates_category($form, $form_state, $fields['dates']['group_dates'][$key], $event_state, $new_ps, $key);
+      mfcs_get_request_field_dates_date($form, $form_state, $fields['dates']['group_dates'][$key], $request_state, $new_ps, $key);
+      mfcs_get_request_field_dates_time_start($form, $form_state, $fields['dates']['group_dates'][$key], $request_state, $new_ps, $key);
+      mfcs_get_request_field_dates_time_stop($form, $form_state, $fields['dates']['group_dates'][$key], $request_state, $new_ps, $key);
+      mfcs_get_request_field_dates_category($form, $form_state, $fields['dates']['group_dates'][$key], $request_state, $new_ps, $key);
     }
   }
 
@@ -1093,18 +1093,18 @@ function mfcs_get_event_group_dates_date($form, &$form_state, &$fields, &$event_
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_dates_date($form, &$form_state, &$fields, &$event_state, $ps, $delta = NULL) {
+function mfcs_get_request_field_dates_date($form, &$form_state, &$fields, &$request_state, $ps, $delta = NULL) {
   $values = array(0 => NULL);
-  if (!empty($event_state['dates']['date'])) {
-    $values = $event_state['dates']['date'];
+  if (!empty($request_state['dates']['date'])) {
+    $values = $request_state['dates']['date'];
   }
 
   $delta_id = NULL;
   if (is_numeric($delta)) {
     $values = array($delta => NULL);
 
-    if (!empty($event_state['dates']['date'][$delta])) {
-      $values[$delta] = $event_state['dates']['date'][$delta];
+    if (!empty($request_state['dates']['date'][$delta])) {
+      $values[$delta] = $request_state['dates']['date'][$delta];
     }
 
     $delta_id = '-delta_' . $delta;
@@ -1125,21 +1125,21 @@ function mfcs_get_event_field_dates_date($form, &$form_state, &$fields, &$event_
 
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('dates', $form['form']['sections']['#value'])) {
     $fields['dates']['date'] = array(
-      '#id' => 'field-event-dates-date' . $delta_id,
+      '#id' => 'field-request-dates-date' . $delta_id,
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-dates-date',
+          'field-request-item',
+          'field-request-item-dates-date',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['dates']['date'][$key] = array(
-        '#id' => 'field-event-dates-date-' . $key,
+        '#id' => 'field-request-dates-date-' . $key,
         '#type' => 'date_popup',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -1154,7 +1154,7 @@ function mfcs_get_event_field_dates_date($form, &$form_state, &$fields, &$event_
             'form-item-delta-' . $key,
           ),
         ),
-        '#parents' => array('event', 'dates', 'date', $delta),
+        '#parents' => array('request', 'dates', 'date', $delta),
       );
     }
     krsort($fields['dates']['date']);
@@ -1171,10 +1171,10 @@ function mfcs_get_event_field_dates_date($form, &$form_state, &$fields, &$event_
   else {
     foreach ($values as $key => $value) {
       $fields['dates']['date'][$key] = array(
-        '#id' => 'field-event-dates-date-' . $key,
+        '#id' => 'field-request-dates-date-' . $key,
         '#type' => 'value',
         '#value' => $value,
-        '#parents' => array('event', 'dates', 'date', $delta),
+        '#parents' => array('request', 'dates', 'date', $delta),
       );
     }
   }
@@ -1185,18 +1185,18 @@ function mfcs_get_event_field_dates_date($form, &$form_state, &$fields, &$event_
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_dates_time_start($form, &$form_state, &$fields, &$event_state, $ps, $delta = NULL) {
+function mfcs_get_request_field_dates_time_start($form, &$form_state, &$fields, &$request_state, $ps, $delta = NULL) {
   $values = array(0 => NULL);
-  if (!empty($event_state['dates']['time_start'])) {
-    $values = $event_state['dates']['time_start'];
+  if (!empty($request_state['dates']['time_start'])) {
+    $values = $request_state['dates']['time_start'];
   }
 
   $delta_id = NULL;
   if (is_numeric($delta)) {
     $values = array($delta => NULL);
 
-    if (!empty($event_state['dates']['time_start'][$delta])) {
-      $values[$delta] = $event_state['dates']['time_start'][$delta];
+    if (!empty($request_state['dates']['time_start'][$delta])) {
+      $values[$delta] = $request_state['dates']['time_start'][$delta];
     }
 
     $delta_id = '-delta_' . $delta;
@@ -1217,21 +1217,21 @@ function mfcs_get_event_field_dates_time_start($form, &$form_state, &$fields, &$
 
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('dates', $form['form']['sections']['#value'])) {
     $fields['dates']['time_start'] = array(
-      '#id' => 'field-event-dates-time_start' . $delta_id,
+      '#id' => 'field-request-dates-time_start' . $delta_id,
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-dates-time_start',
+          'field-request-item',
+          'field-request-item-dates-time_start',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['dates']['time_start'][$key] = array(
-        '#id' => 'field-event-dates-time_start-' . $key,
+        '#id' => 'field-request-dates-time_start-' . $key,
         '#type' => 'textfield',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -1246,7 +1246,7 @@ function mfcs_get_event_field_dates_time_start($form, &$form_state, &$fields, &$
             'form-item-delta-' . $key,
           ),
         ),
-        '#parents' => array('event', 'dates', 'time_start', $delta),
+        '#parents' => array('request', 'dates', 'time_start', $delta),
       );
     }
     krsort($fields['dates']['time_start']);
@@ -1256,10 +1256,10 @@ function mfcs_get_event_field_dates_time_start($form, &$form_state, &$fields, &$
   else {
     foreach ($values as $key => $value) {
       $fields['dates']['time_start'][$key] = array(
-        '#id' => 'field-event-dates-time_start-' . $key,
+        '#id' => 'field-request-dates-time_start-' . $key,
         '#type' => 'value',
         '#value' => $value,
-        '#parents' => array('event', 'dates', 'time_start', $delta),
+        '#parents' => array('request', 'dates', 'time_start', $delta),
       );
     }
   }
@@ -1270,18 +1270,18 @@ function mfcs_get_event_field_dates_time_start($form, &$form_state, &$fields, &$
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_dates_time_stop($form, &$form_state, &$fields, &$event_state, $ps, $delta = NULL) {
+function mfcs_get_request_field_dates_time_stop($form, &$form_state, &$fields, &$request_state, $ps, $delta = NULL) {
   $values = array(0 => NULL);
-  if (!empty($event_state['dates']['time_stop'])) {
-    $values = $event_state['dates']['time_stop'];
+  if (!empty($request_state['dates']['time_stop'])) {
+    $values = $request_state['dates']['time_stop'];
   }
 
   $delta_id = NULL;
   if (is_numeric($delta)) {
     $values = array($delta => NULL);
 
-    if (!empty($event_state['dates']['time_stop'][$delta])) {
-      $values[$delta] = $event_state['dates']['time_stop'][$delta];
+    if (!empty($request_state['dates']['time_stop'][$delta])) {
+      $values[$delta] = $request_state['dates']['time_stop'][$delta];
     }
 
     $delta_id = '-delta_' . $delta;
@@ -1302,21 +1302,21 @@ function mfcs_get_event_field_dates_time_stop($form, &$form_state, &$fields, &$e
 
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('dates', $form['form']['sections']['#value'])) {
     $fields['dates']['time_stop'] = array(
-      '#id' => 'field-event-dates-time_stop' . $delta_id,
+      '#id' => 'field-request-dates-time_stop' . $delta_id,
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-dates-time_stop',
+          'field-request-item',
+          'field-request-item-dates-time_stop',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['dates']['time_stop'][$key] = array(
-        '#id' => 'field-event-dates-time_stop-' . $key,
+        '#id' => 'field-request-dates-time_stop-' . $key,
         '#type' => 'textfield',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -1331,7 +1331,7 @@ function mfcs_get_event_field_dates_time_stop($form, &$form_state, &$fields, &$e
             'form-item-delta-' . $key,
           ),
         ),
-        '#parents' => array('event', 'dates', 'time_stop', $delta),
+        '#parents' => array('request', 'dates', 'time_stop', $delta),
       );
     }
     krsort($fields['dates']['time_stop']);
@@ -1341,10 +1341,10 @@ function mfcs_get_event_field_dates_time_stop($form, &$form_state, &$fields, &$e
   else {
     foreach ($values as $key => $value) {
       $fields['dates']['time_stop'][$key] = array(
-        '#id' => 'field-event-dates-time_stop-' . $key,
+        '#id' => 'field-request-dates-time_stop-' . $key,
         '#type' => 'value',
         '#value' => $value,
-        '#parents' => array('event', 'dates', 'time_stop', $delta),
+        '#parents' => array('request', 'dates', 'time_stop', $delta),
       );
     }
   }
@@ -1355,18 +1355,18 @@ function mfcs_get_event_field_dates_time_stop($form, &$form_state, &$fields, &$e
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_dates_category($form, &$form_state, &$fields, &$event_state, $ps, $delta = NULL) {
+function mfcs_get_request_field_dates_category($form, &$form_state, &$fields, &$request_state, $ps, $delta = NULL) {
   $values = array(0 => NULL);
-  if (!empty($event_state['dates']['category'])) {
-    $values = $event_state['dates']['category'];
+  if (!empty($request_state['dates']['category'])) {
+    $values = $request_state['dates']['category'];
   }
 
   $delta_id = NULL;
   if (is_numeric($delta)) {
     $values = array($delta => NULL);
 
-    if (!empty($event_state['dates']['category'][$delta])) {
-      $values[$delta] = $event_state['dates']['category'][$delta];
+    if (!empty($request_state['dates']['category'][$delta])) {
+      $values[$delta] = $request_state['dates']['category'][$delta];
     }
 
     $delta_id = '-delta_' . $delta;
@@ -1387,23 +1387,23 @@ function mfcs_get_event_field_dates_category($form, &$form_state, &$fields, &$ev
 
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('dates', $form['form']['sections']['#value'])) {
     $fields['dates']['category'] = array(
-      '#id' => 'field-event-dates-category' . $delta_id,
+      '#id' => 'field-request-dates-category' . $delta_id,
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-dates-category',
+          'field-request-item',
+          'field-request-item-dates-category',
         ),
       ),
     );
 
-    $dates_category_options = event_workflow_get_dates_category_list_options('radios');
+    $dates_category_options = mfcs_get_dates_category_list_options('radios');
 
     foreach ($values as $key => $value) {
       $fields['dates']['category'][$key] = array(
-        '#id' => 'field-event-dates-category-' . $key,
+        '#id' => 'field-request-dates-category-' . $key,
         '#type' => 'radios',
         '#title' => $field_title,
         '#required' => TRUE,
@@ -1415,7 +1415,7 @@ function mfcs_get_event_field_dates_category($form, &$form_state, &$fields, &$ev
             'form-item-delta-' . $key,
           ),
         ),
-        '#parents' => array('event', 'dates', 'category', $delta),
+        '#parents' => array('request', 'dates', 'category', $delta),
       );
     }
     krsort($fields['dates']['category']);
@@ -1432,10 +1432,10 @@ function mfcs_get_event_field_dates_category($form, &$form_state, &$fields, &$ev
   else {
     foreach ($values as $key => $value) {
       $fields['dates']['category'][$key] = array(
-        '#id' => 'field-event-dates-category-' . $key,
+        '#id' => 'field-request-dates-category-' . $key,
         '#type' => 'value',
         '#value' => $value,
-        '#parents' => array('event', 'dates', 'category', $delta),
+        '#parents' => array('request', 'dates', 'category', $delta),
       );
     }
   }
@@ -1446,13 +1446,13 @@ function mfcs_get_event_field_dates_category($form, &$form_state, &$fields, &$ev
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_venue_coordinator_user_id($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_venue_coordinator_user_id($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
 
   // never assign default here because the default is inforced only after the room is selected, not before.
-  if (!empty($event_state['venue_coordinator']['user_id'][0])) {
-    if (!empty($event_state['venue_coordinator']['user_id']) && array_key_exists(0, $event_state['venue_coordinator']['user_id'])) {
-      $values[0] = $event_state['venue_coordinator']['user_id'][0];
+  if (!empty($request_state['venue_coordinator']['user_id'][0])) {
+    if (!empty($request_state['venue_coordinator']['user_id']) && array_key_exists(0, $request_state['venue_coordinator']['user_id'])) {
+      $values[0] = $request_state['venue_coordinator']['user_id'][0];
     }
   }
 
@@ -1461,7 +1461,7 @@ function mfcs_get_event_field_venue_coordinator_user_id($form, &$form_state, &$f
   );
 
   $fields['venue_coordinator']['user_id'][0] = array(
-    '#id' => 'field-event-venue_coordinator-user-0',
+    '#id' => 'field-request-venue_coordinator-user-0',
     '#type' => 'value',
     '#value' => $values[0],
   );
@@ -1472,11 +1472,11 @@ function mfcs_get_event_field_venue_coordinator_user_id($form, &$form_state, &$f
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_event_coordinator_name($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_request_coordinator_name($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
 
-  if (isset($event_state['event_coordinator']) && array_key_exists('name', $event_state['event_coordinator'])) {
-    $values = $event_state['event_coordinator']['name'];
+  if (isset($request_state['request_coordinator']) && array_key_exists('name', $request_state['request_coordinator'])) {
+    $values = $request_state['request_coordinator']['name'];
   }
   else {
     if (!empty($form['form']['user']['#value']->field_user_last_name['und'][0]['safe_value'])) {
@@ -1496,8 +1496,8 @@ function mfcs_get_event_field_event_coordinator_name($form, &$form_state, &$fiel
   $limits_check = array(
     'title' => $field_title,
     'field' => 'name',
-    'group' => 'event_coordinator',
-    'path' => 'event_coordinator][name',
+    'group' => 'request_coordinator',
+    'path' => 'request_coordinator][name',
     'visible' => FALSE,
     'ps' => $ps,
   );
@@ -1506,22 +1506,22 @@ function mfcs_get_event_field_event_coordinator_name($form, &$form_state, &$fiel
 
 
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('coordinator', $form['form']['sections']['#value'])) {
-    $fields['event_coordinator']['name'] = array(
-      '#id' => 'field-event-event_coordinator-name',
+    $fields['request_coordinator']['name'] = array(
+      '#id' => 'field-request-request_coordinator-name',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-event_coordinator-name',
+          'field-request-item',
+          'field-request-item-request_coordinator-name',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
-      $fields['event_coordinator']['name'][$key] = array(
-        '#id' => 'field-event-event_coordinator-name-' . $key,
+      $fields['request_coordinator']['name'][$key] = array(
+        '#id' => 'field-request-request_coordinator-name-' . $key,
         '#type' => 'textfield',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -1535,19 +1535,19 @@ function mfcs_get_event_field_event_coordinator_name($form, &$form_state, &$fiel
             'form-item-delta-' . $key,
           ),
         ),
-        '#autocomplete_path' => 'events/create-0/autocomplete/event_coordinator/name',
+        '#autocomplete_path' => 'requests/create-0/autocomplete/request_coordinator/name',
       );
     }
-    krsort($fields['event_coordinator']['name']);
+    krsort($fields['request_coordinator']['name']);
 
-    $form_state['conditionally_required'][0][] = 'event_coordinator][name';
+    $form_state['conditionally_required'][0][] = 'request_coordinator][name';
 
     $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
-      $fields['event_coordinator']['name'][$key] = array(
-        '#id' => 'field-event-event_coordinator-name-' . $key,
+      $fields['request_coordinator']['name'][$key] = array(
+        '#id' => 'field-request-request_coordinator-name-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -1560,11 +1560,11 @@ function mfcs_get_event_field_event_coordinator_name($form, &$form_state, &$fiel
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_event_coordinator_phone($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_request_coordinator_phone($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
 
-  if (isset($event_state['event_coordinator']) && array_key_exists('phone', $event_state['event_coordinator'])) {
-    $values = $event_state['event_coordinator']['phone'];
+  if (isset($request_state['request_coordinator']) && array_key_exists('phone', $request_state['request_coordinator'])) {
+    $values = $request_state['request_coordinator']['phone'];
   }
   else {
     if (!empty($form['form']['user']['#value']->field_user_phone_number['und'][0]['safe_value'])) {
@@ -1576,8 +1576,8 @@ function mfcs_get_event_field_event_coordinator_phone($form, &$form_state, &$fie
   $limits_check = array(
     'title' => $field_title,
     'field' => 'phone',
-    'group' => 'event_coordinator',
-    'path' => 'event_coordinator][phone',
+    'group' => 'request_coordinator',
+    'path' => 'request_coordinator][phone',
     'visible' => FALSE,
     'ps' => $ps,
   );
@@ -1586,22 +1586,22 @@ function mfcs_get_event_field_event_coordinator_phone($form, &$form_state, &$fie
 
 
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('coordinator', $form['form']['sections']['#value'])) {
-    $fields['event_coordinator']['phone'] = array(
-      '#id' => 'field-event-event_coordinator-phone',
+    $fields['request_coordinator']['phone'] = array(
+      '#id' => 'field-request-request_coordinator-phone',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-event_coordinator-phone',
+          'field-request-item',
+          'field-request-item-request_coordinator-phone',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
-      $fields['event_coordinator']['phone'][$key] = array(
-        '#id' => 'field-event-event_coordinator-phone-' . $key,
+      $fields['request_coordinator']['phone'][$key] = array(
+        '#id' => 'field-request-request_coordinator-phone-' . $key,
         '#type' => 'telfield',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -1611,19 +1611,19 @@ function mfcs_get_event_field_event_coordinator_phone($form, &$form_state, &$fie
             'form-item-delta-' . $key,
           ),
         ),
-        '#autocomplete_path' => 'events/create-0/autocomplete/event_coordinator/phone',
+        '#autocomplete_path' => 'requests/create-0/autocomplete/request_coordinator/phone',
       );
     }
-    krsort($fields['event_coordinator']['phone']);
+    krsort($fields['request_coordinator']['phone']);
 
-    $values = $event_state['event_coordinator']['phone'];
+    $values = $request_state['request_coordinator']['phone'];
 
     $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
-      $fields['event_coordinator']['phone'][$key] = array(
-        '#id' => 'field-event-event_coordinator-phone-' . $key,
+      $fields['request_coordinator']['phone'][$key] = array(
+        '#id' => 'field-request-request_coordinator-phone-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -1636,11 +1636,11 @@ function mfcs_get_event_field_event_coordinator_phone($form, &$form_state, &$fie
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_event_coordinator_email($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_request_coordinator_email($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
 
-  if (isset($event_state['event_coordinator']) && array_key_exists('email', $event_state['event_coordinator'])) {
-    $values = $event_state['event_coordinator']['email'];
+  if (isset($request_state['request_coordinator']) && array_key_exists('email', $request_state['request_coordinator'])) {
+    $values = $request_state['request_coordinator']['email'];
   }
   else {
     if (!empty($form['form']['user']['#value']->mail)) {
@@ -1652,8 +1652,8 @@ function mfcs_get_event_field_event_coordinator_email($form, &$form_state, &$fie
   $limits_check = array(
     'title' => $field_title,
     'field' => 'email',
-    'group' => 'event_coordinator',
-    'path' => 'event_coordinator][email',
+    'group' => 'request_coordinator',
+    'path' => 'request_coordinator][email',
     'visible' => FALSE,
     'ps' => $ps,
   );
@@ -1662,22 +1662,22 @@ function mfcs_get_event_field_event_coordinator_email($form, &$form_state, &$fie
 
 
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('coordinator', $form['form']['sections']['#value'])) {
-    $fields['event_coordinator']['email'] = array(
-      '#id' => 'field-event-event_coordinator-email',
+    $fields['request_coordinator']['email'] = array(
+      '#id' => 'field-request-request_coordinator-email',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-event_coordinator-email',
+          'field-request-item',
+          'field-request-item-request_coordinator-email',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
-      $fields['event_coordinator']['email'][$key] = array(
-        '#id' => 'field-event-event_coordinator-email-' . $key,
+      $fields['request_coordinator']['email'][$key] = array(
+        '#id' => 'field-request-request_coordinator-email-' . $key,
         '#type' => 'emailfield',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -1690,19 +1690,19 @@ function mfcs_get_event_field_event_coordinator_email($form, &$form_state, &$fie
             'form-item-delta-' . $key,
           ),
         ),
-        '#autocomplete_path' => 'events/create-0/autocomplete/event_coordinator/email',
+        '#autocomplete_path' => 'requests/create-0/autocomplete/request_coordinator/email',
       );
     }
-    krsort($fields['event_coordinator']['email']);
+    krsort($fields['request_coordinator']['email']);
 
-    $form_state['conditionally_required'][0][] = 'event_coordinator][email';
+    $form_state['conditionally_required'][0][] = 'request_coordinator][email';
 
     $limits_check['visible'] = TRUE;
   }
   else {
     foreach ($values as $key => $value) {
-      $fields['event_coordinator']['email'][$key] = array(
-        '#id' => 'field-event-event_coordinator-email-' . $key,
+      $fields['request_coordinator']['email'][$key] = array(
+        '#id' => 'field-request-request_coordinator-email-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -1715,7 +1715,7 @@ function mfcs_get_event_field_event_coordinator_email($form, &$form_state, &$fie
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_event_coordinator_classification($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_request_coordinator_classification($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
 
   $user = NULL;
@@ -1724,14 +1724,14 @@ function mfcs_get_event_field_event_coordinator_classification($form, &$form_sta
   }
 
   $state = array();
-  if (isset($event_state['event_coordinator']) && is_array($event_state['event_coordinator'])) {
-    $state = $event_state['event_coordinator'];
+  if (isset($request_state['request_coordinator']) && is_array($request_state['request_coordinator'])) {
+    $state = $request_state['request_coordinator'];
   }
 
-  $classification = event_workflow_determine_user_classification($state, $user);
+  $classification = mfcs_determine_user_classification($state, $user);
 
-  if (isset($event_state['event_coordinator']) && array_key_exists('classification', $event_state['event_coordinator'])) {
-    $values = $event_state['event_coordinator']['classification'];
+  if (isset($request_state['request_coordinator']) && array_key_exists('classification', $request_state['request_coordinator'])) {
+    $values = $request_state['request_coordinator']['classification'];
   }
   else {
     $values = array(0 => $classification['value']);
@@ -1741,8 +1741,8 @@ function mfcs_get_event_field_event_coordinator_classification($form, &$form_sta
   $limits_check = array(
     'title' => $field_title,
     'field' => 'classification',
-    'group' => 'event_coordinator',
-    'path' => 'event_coordinator][classification',
+    'group' => 'request_coordinator',
+    'path' => 'request_coordinator][classification',
     'visible' => FALSE,
     'ps' => $ps,
   );
@@ -1751,15 +1751,15 @@ function mfcs_get_event_field_event_coordinator_classification($form, &$form_sta
 
 
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('coordinator', $form['form']['sections']['#value'])) {
-    $fields['event_coordinator']['classification'] = array(
-      '#id' => 'field-event-event_coordinator-classification',
+    $fields['request_coordinator']['classification'] = array(
+      '#id' => 'field-request-request_coordinator-classification',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-event_coordinator-classification',
+          'field-request-item',
+          'field-request-item-request_coordinator-classification',
         ),
       ),
     );
@@ -1767,11 +1767,11 @@ function mfcs_get_event_field_event_coordinator_classification($form, &$form_sta
     // multiple classifications exists, so prompt user for desired classification.
     if ($classification['count'] > 1) {
       foreach ($values as $key => $value) {
-        $fields['event_coordinator']['classification'][$key] = array(
-          '#id' => 'field-event-event_coordinator-classification-' . $key,
+        $fields['request_coordinator']['classification'][$key] = array(
+          '#id' => 'field-request-request_coordinator-classification-' . $key,
           '#type' => 'select',
           '#title' => $field_title,
-          '#description' => t("Associate this event request with a specific classification."),
+          '#description' => t("Associate this request with a specific classification."),
           '#options' => $classification['options'],
           '#default_value' => $value,
           '#required' => TRUE,
@@ -1783,16 +1783,16 @@ function mfcs_get_event_field_event_coordinator_classification($form, &$form_sta
           ),
         );
       }
-      krsort($fields['event_coordinator']['classification']);
+      krsort($fields['request_coordinator']['classification']);
 
-      $form_state['conditionally_required'][0][] = 'event_coordinator][classification';
+      $form_state['conditionally_required'][0][] = 'request_coordinator][classification';
 
       $limits_check['visible'] = TRUE;
     }
     else {
       foreach ($values as $key => $value) {
-        $fields['event_coordinator']['classification'][$key] = array(
-          '#id' => 'field-event-event_coordinator-classification-' . $key,
+        $fields['request_coordinator']['classification'][$key] = array(
+          '#id' => 'field-request-request_coordinator-classification-' . $key,
           '#type' => 'select',
           '#title' => 'Event Coordinator Classification',
           '#options' => $classification['options'],
@@ -1810,13 +1810,13 @@ function mfcs_get_event_field_event_coordinator_classification($form, &$form_sta
         );
       }
 
-      $form_state['conditionally_required'][0][] = 'event_coordinator][classification';
+      $form_state['conditionally_required'][0][] = 'request_coordinator][classification';
     }
   }
   else {
     foreach ($values as $key => $value) {
-      $fields['event_coordinator']['classification'][$key] = array(
-        '#id' => 'field-event-event_coordinator-classification-' . $key,
+      $fields['request_coordinator']['classification'][$key] = array(
+        '#id' => 'field-request-request_coordinator-classification-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -1829,10 +1829,10 @@ function mfcs_get_event_field_event_coordinator_classification($form, &$form_sta
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_information_title($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_information_title($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['information']['title'])) {
-    $values = $event_state['information']['title'];
+  if (!empty($request_state['information']['title'])) {
+    $values = $request_state['information']['title'];
   }
 
   $field_title = "Event Title";
@@ -1850,21 +1850,21 @@ function mfcs_get_event_field_information_title($form, &$form_state, &$fields, &
 
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('information', $form['form']['sections']['#value'])) {
     $fields['information']['title'] = array(
-      '#id' => 'field-event-information-title',
+      '#id' => 'field-request-information-title',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-information-title',
+          'field-request-item',
+          'field-request-item-information-title',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['information']['title'][$key] = array(
-        '#id' => 'field-event-information-title-' . $key,
+        '#id' => 'field-request-information-title-' . $key,
         '#type' => 'textfield',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -1888,7 +1888,7 @@ function mfcs_get_event_field_information_title($form, &$form_state, &$fields, &
   else {
     foreach ($values as $key => $value) {
       $fields['information']['title'][$key] = array(
-        '#id' => 'field-event-information-title-' . $key,
+        '#id' => 'field-request-information-title-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -1901,10 +1901,10 @@ function mfcs_get_event_field_information_title($form, &$form_state, &$fields, &
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_information_attendance($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_information_attendance($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['information']['attendance'])) {
-    $values = $event_state['information']['attendance'];
+  if (!empty($request_state['information']['attendance'])) {
+    $values = $request_state['information']['attendance'];
   }
 
   $field_title = "Expected Number of Attendance";
@@ -1922,21 +1922,21 @@ function mfcs_get_event_field_information_attendance($form, &$form_state, &$fiel
 
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('information', $form['form']['sections']['#value'])) {
     $fields['information']['attendance'] = array(
-      '#id' => 'field-event-information-attendance',
+      '#id' => 'field-request-information-attendance',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-information-attendance',
+          'field-request-item',
+          'field-request-item-information-attendance',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['information']['attendance'][$key] = array(
-        '#id' => 'field-event-information-attendance-' . $key,
+        '#id' => 'field-request-information-attendance-' . $key,
         '#type' => 'numberfield',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -1961,7 +1961,7 @@ function mfcs_get_event_field_information_attendance($form, &$form_state, &$fiel
   else {
     foreach ($values as $key => $value) {
       $fields['information']['attendance'][$key] = array(
-        '#id' => 'field-event-information-attendance-' . $key,
+        '#id' => 'field-request-information-attendance-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -1974,10 +1974,10 @@ function mfcs_get_event_field_information_attendance($form, &$form_state, &$fiel
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_information_type($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_information_type($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['information']['type'])) {
-    $values = $event_state['information']['type'];
+  if (!empty($request_state['information']['type'])) {
+    $values = $request_state['information']['type'];
   }
 
   $field_title = "Type of Event";
@@ -1995,23 +1995,23 @@ function mfcs_get_event_field_information_type($form, &$form_state, &$fields, &$
 
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('information', $form['form']['sections']['#value'])) {
     $fields['information']['type'] = array(
-      '#id' => 'field-event-information-type',
+      '#id' => 'field-request-information-type',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-information-type',
+          'field-request-item',
+          'field-request-item-information-type',
         ),
       ),
     );
 
-    $type_options = event_workflow_get_information_type_list_options('select');
+    $type_options = mfcs_get_information_type_list_options('select');
 
     foreach ($values as $key => $value) {
       $fields['information']['type'][$key] = array(
-        '#id' => 'field-event-information-type-' . $key,
+        '#id' => 'field-request-information-type-' . $key,
         '#type' => 'select',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -2034,7 +2034,7 @@ function mfcs_get_event_field_information_type($form, &$form_state, &$fields, &$
   else {
     foreach ($values as $key => $value) {
       $fields['information']['type'][$key] = array(
-        '#id' => 'field-event-information-type-' . $key,
+        '#id' => 'field-request-information-type-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -2047,10 +2047,10 @@ function mfcs_get_event_field_information_type($form, &$form_state, &$fields, &$
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_information_organization($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_information_organization($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['information']['organization'])) {
-    $values = $event_state['information']['organization'];
+  if (!empty($request_state['information']['organization'])) {
+    $values = $request_state['information']['organization'];
   }
 
   $field_title = "Organization / Affiliation";
@@ -2068,21 +2068,21 @@ function mfcs_get_event_field_information_organization($form, &$form_state, &$fi
 
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('information', $form['form']['sections']['#value'])) {
     $fields['information']['organization'] = array(
-      '#id' => 'field-event-information-organization',
+      '#id' => 'field-request-information-organization',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-information-organization',
+          'field-request-item',
+          'field-request-item-information-organization',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['information']['organization'][$key] = array(
-        '#id' => 'field-event-information-organization-' . $key,
+        '#id' => 'field-request-information-organization-' . $key,
         '#type' => 'textfield',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -2107,7 +2107,7 @@ function mfcs_get_event_field_information_organization($form, &$form_state, &$fi
   else {
     foreach ($values as $key => $value) {
       $fields['information']['organization'][$key] = array(
-        '#id' => 'field-event-information-organization-' . $key,
+        '#id' => 'field-request-information-organization-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -2120,13 +2120,13 @@ function mfcs_get_event_field_information_organization($form, &$form_state, &$fi
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_information_adviser_approval($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_information_adviser_approval($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['information']['adviser_approval'])) {
-    $values = $event_state['information']['adviser_approval'];
+  if (!empty($request_state['information']['adviser_approval'])) {
+    $values = $request_state['information']['adviser_approval'];
   }
 
-  $field_title = "Has your adviser been notified and has approved this event?";
+  $field_title = "Has your adviser been notified and has approved this request?";
   $limits_check = array(
     'title' => $field_title,
     'field' => 'adviser_approval',
@@ -2141,21 +2141,21 @@ function mfcs_get_event_field_information_adviser_approval($form, &$form_state, 
 
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('information', $form['form']['sections']['#value'])) {
     $fields['information']['adviser_approval'] = array(
-      '#id' => 'field-event-information-adviser_approval',
+      '#id' => 'field-request-information-adviser_approval',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-information-adviser_approval',
+          'field-request-item',
+          'field-request-item-information-adviser_approval',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['information']['adviser_approval'][$key] = array(
-        '#id' => 'field-event-information-adviser_approval-' . $key,
+        '#id' => 'field-request-information-adviser_approval-' . $key,
         '#type' => 'checkbox',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -2170,11 +2170,11 @@ function mfcs_get_event_field_information_adviser_approval($form, &$form_state, 
         ),
         '#states' => array(
           'visible' => array(
-            ':input[name="' . $form['form']['parents']['#value']['path'] . 'event_coordinator][classification]' . '[' . $key . ']'  . '"]' => array('value' => 1),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . 'request_coordinator][classification]' . '[' . $key . ']'  . '"]' => array('value' => 1),
           ),
           'invisible' => array(
             'or' => array(
-              ':input[name="' . $form['form']['parents']['#value']['path'] . 'event_coordinator][classification]' . '[' . $key . ']'  . '"]' => array('value' => NULL),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . 'request_coordinator][classification]' . '[' . $key . ']'  . '"]' => array('value' => NULL),
             ),
           ),
         ),
@@ -2190,7 +2190,7 @@ function mfcs_get_event_field_information_adviser_approval($form, &$form_state, 
   else {
     foreach ($values as $key => $value) {
       $fields['information']['adviser_approval'][$key] = array(
-        '#id' => 'field-event-information-adviser_approval-' . $key,
+        '#id' => 'field-request-information-adviser_approval-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -2203,7 +2203,7 @@ function mfcs_get_event_field_information_adviser_approval($form, &$form_state, 
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_plans_note($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_plans_note($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
 
   $build = FALSE;
@@ -2213,20 +2213,20 @@ function mfcs_get_event_field_plans_note($form, &$form_state, &$fields, &$event_
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('plans', $form['form']['sections']['#value'])) {
     $fields['plans']['note'] = array(
-      '#id' => 'field-event-plans-note',
+      '#id' => 'field-request-plans-note',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-plans-note',
+          'field-request-item',
+          'field-request-item-plans-note',
         ),
       ),
     );
 
     $fields['plans']['note'][0] = array(
-      '#id' => 'field-event-plans-note-0',
+      '#id' => 'field-request-plans-note-0',
       '#type' => 'container',
       '#attributes' => array(
         'class' => array(
@@ -2240,7 +2240,7 @@ function mfcs_get_event_field_plans_note($form, &$form_state, &$fields, &$event_
       '#markup' => '',
     );
 
-    $fields['plans']['note'][0]['markup']['#markup'] .= '<div id="markup-event-plans-note" class="markup-event">';
+    $fields['plans']['note'][0]['markup']['#markup'] .= '<div id="markup-request-plans-note" class="markup-request">';
     $fields['plans']['note'][0]['markup']['#markup'] .= '*Please note a specified drawing of setup requests is required to complete the reservation. ';
     $fields['plans']['note'][0]['markup']['#markup'] .= 'The reserving office will provide a venue layout form for setup submission. ';
     $fields['plans']['note'][0]['markup']['#markup'] .= '</div>';
@@ -2252,10 +2252,10 @@ function mfcs_get_event_field_plans_note($form, &$form_state, &$fields, &$event_
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_plans_description($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_plans_description($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['plans']['description'])) {
-    $values = $event_state['plans']['description'];
+  if (!empty($request_state['plans']['description'])) {
+    $values = $request_state['plans']['description'];
   }
 
   $build = FALSE;
@@ -2278,21 +2278,21 @@ function mfcs_get_event_field_plans_description($form, &$form_state, &$fields, &
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('plans', $form['form']['sections']['#value'])) {
     $fields['plans']['description'] = array(
-      '#id' => 'field-event-plans-description',
+      '#id' => 'field-request-plans-description',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-plans-description',
+          'field-request-item',
+          'field-request-item-plans-description',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['plans']['description'][$key] = array(
-        '#id' => 'field-event-plans-description-' . $key,
+        '#id' => 'field-request-plans-description-' . $key,
         '#type' => 'textarea',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -2312,7 +2312,7 @@ function mfcs_get_event_field_plans_description($form, &$form_state, &$fields, &
   else {
     foreach ($values as $key => $value) {
       $fields['plans']['description'][$key] = array(
-        '#id' => 'field-event-plans-description-' . $key,
+        '#id' => 'field-request-plans-description-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -2325,10 +2325,10 @@ function mfcs_get_event_field_plans_description($form, &$form_state, &$fields, &
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_plans_activities($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_plans_activities($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['plans']['activities'])) {
-    $values = $event_state['plans']['activities'];
+  if (!empty($request_state['plans']['activities'])) {
+    $values = $request_state['plans']['activities'];
   }
 
   $build = FALSE;
@@ -2336,7 +2336,7 @@ function mfcs_get_event_field_plans_activities($form, &$form_state, &$fields, &$
     $build = TRUE;
   }
 
-  $field_title = "List all activities planned within the event";
+  $field_title = "List all activities planned within the request";
   $limits_check = array(
     'title' => $field_title,
     'field' => 'activities',
@@ -2351,21 +2351,21 @@ function mfcs_get_event_field_plans_activities($form, &$form_state, &$fields, &$
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('plans', $form['form']['sections']['#value'])) {
     $fields['plans']['activities'] = array(
-      '#id' => 'field-event-plans-activities',
+      '#id' => 'field-request-plans-activities',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-plans-activities',
+          'field-request-item',
+          'field-request-item-plans-activities',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['plans']['activities'][$key] = array(
-        '#id' => 'field-event-plans-activities-' . $key,
+        '#id' => 'field-request-plans-activities-' . $key,
         '#type' => 'textarea',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -2385,7 +2385,7 @@ function mfcs_get_event_field_plans_activities($form, &$form_state, &$fields, &$
   else {
     foreach ($values as $key => $value) {
       $fields['plans']['activities'][$key] = array(
-        '#id' => 'field-event-plans-activities-' . $key,
+        '#id' => 'field-request-plans-activities-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -2398,10 +2398,10 @@ function mfcs_get_event_field_plans_activities($form, &$form_state, &$fields, &$
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_plans_audience($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_plans_audience($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['plans']['audience'])) {
-    $values = $event_state['plans']['audience'];
+  if (!empty($request_state['plans']['audience'])) {
+    $values = $request_state['plans']['audience'];
   }
 
   $field_title = "Intended Audience";
@@ -2419,23 +2419,23 @@ function mfcs_get_event_field_plans_audience($form, &$form_state, &$fields, &$ev
 
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('plans', $form['form']['sections']['#value'])) {
     $fields['plans']['audience'] = array(
-      '#id' => 'field-event-plans-audience',
+      '#id' => 'field-request-plans-audience',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-plans-audience',
+          'field-request-item',
+          'field-request-item-plans-audience',
         ),
       ),
     );
 
-    $audience_options = event_workflow_get_audience_list_options('select');
+    $audience_options = mfcs_get_audience_list_options('select');
 
     foreach ($values as $key => $value) {
       $fields['plans']['audience'][$key] = array(
-        '#id' => 'field-event-plans-audience-' . $key,
+        '#id' => 'field-request-plans-audience-' . $key,
         '#type' => 'select',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -2458,7 +2458,7 @@ function mfcs_get_event_field_plans_audience($form, &$form_state, &$fields, &$ev
   else {
     foreach ($values as $key => $value) {
       $fields['plans']['audience'][$key] = array(
-        '#id' => 'field-event-plans-audience-' . $key,
+        '#id' => 'field-request-plans-audience-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -2471,10 +2471,10 @@ function mfcs_get_event_field_plans_audience($form, &$form_state, &$fields, &$ev
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_registration_require($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_registration_require($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => 0);
-  if (!empty($event_state['registration']['require'])) {
-    $values = $event_state['registration']['require'];
+  if (!empty($request_state['registration']['require'])) {
+    $values = $request_state['registration']['require'];
   }
 
   $build = FALSE;
@@ -2482,7 +2482,7 @@ function mfcs_get_event_field_registration_require($form, &$form_state, &$fields
     $build = TRUE;
   }
 
-  $field_title = "Does the event require registration or ticket purchase?";
+  $field_title = "Does the request require registration or ticket purchase?";
   $limits_check = array(
     'title' => $field_title,
     'field' => 'require',
@@ -2497,21 +2497,21 @@ function mfcs_get_event_field_registration_require($form, &$form_state, &$fields
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('registration', $form['form']['sections']['#value'])) {
     $fields['registration']['require'] = array(
-      '#id' => 'field-event-registration-require',
+      '#id' => 'field-request-registration-require',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-registration-require',
+          'field-request-item',
+          'field-request-item-registration-require',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['registration']['require'][$key] = array(
-        '#id' => 'field-event-registration-require-' . $key,
+        '#id' => 'field-request-registration-require-' . $key,
         '#type' => 'radios',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -2534,7 +2534,7 @@ function mfcs_get_event_field_registration_require($form, &$form_state, &$fields
   else {
     foreach ($values as $key => $value) {
       $fields['registration']['require'][$key] = array(
-        '#id' => 'field-event-registration-require-' . $key,
+        '#id' => 'field-request-registration-require-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -2547,10 +2547,10 @@ function mfcs_get_event_field_registration_require($form, &$form_state, &$fields
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_registration_website($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_registration_website($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['registration']['website'])) {
-    $values = $event_state['registration']['website'];
+  if (!empty($request_state['registration']['website'])) {
+    $values = $request_state['registration']['website'];
   }
 
   $build = FALSE;
@@ -2573,21 +2573,21 @@ function mfcs_get_event_field_registration_website($form, &$form_state, &$fields
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('registration', $form['form']['sections']['#value'])) {
     $fields['registration']['website'] = array(
-      '#id' => 'field-event-registration-website',
+      '#id' => 'field-request-registration-website',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-registration-website',
+          'field-request-item',
+          'field-request-item-registration-website',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['registration']['website'][$key] = array(
-        '#id' => 'field-event-registration-website-' . $key,
+        '#id' => 'field-request-registration-website-' . $key,
         '#type' => 'textfield',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -2619,7 +2619,7 @@ function mfcs_get_event_field_registration_website($form, &$form_state, &$fields
   else {
     foreach ($values as $key => $value) {
       $fields['registration']['website'][$key] = array(
-        '#id' => 'field-event-registration-website-' . $key,
+        '#id' => 'field-request-registration-website-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -2632,10 +2632,10 @@ function mfcs_get_event_field_registration_website($form, &$form_state, &$fields
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_registration_phone($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_registration_phone($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['registration']['phone'])) {
-    $values = $event_state['registration']['phone'];
+  if (!empty($request_state['registration']['phone'])) {
+    $values = $request_state['registration']['phone'];
   }
 
   $build = FALSE;
@@ -2658,21 +2658,21 @@ function mfcs_get_event_field_registration_phone($form, &$form_state, &$fields, 
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('registration', $form['form']['sections']['#value'])) {
     $fields['registration']['phone'] = array(
-      '#id' => 'field-event-registration-phone',
+      '#id' => 'field-request-registration-phone',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-registration-phone',
+          'field-request-item',
+          'field-request-item-registration-phone',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['registration']['phone'][$key] = array(
-        '#id' => 'field-event-registration-phone-' . $key,
+        '#id' => 'field-request-registration-phone-' . $key,
         '#type' => 'telfield',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -2702,7 +2702,7 @@ function mfcs_get_event_field_registration_phone($form, &$form_state, &$fields, 
   else {
     foreach ($values as $key => $value) {
       $fields['registration']['phone'][$key] = array(
-        '#id' => 'field-event-registration-phone-' . $key,
+        '#id' => 'field-request-registration-phone-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -2715,10 +2715,10 @@ function mfcs_get_event_field_registration_phone($form, &$form_state, &$fields, 
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_registration_ticket_price($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_registration_ticket_price($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['registration']['ticket_price'])) {
-    $values = $event_state['registration']['ticket_price'];
+  if (!empty($request_state['registration']['ticket_price'])) {
+    $values = $request_state['registration']['ticket_price'];
   }
 
   $build = FALSE;
@@ -2741,21 +2741,21 @@ function mfcs_get_event_field_registration_ticket_price($form, &$form_state, &$f
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('registration', $form['form']['sections']['#value'])) {
     $fields['registration']['ticket_price'] = array(
-      '#id' => 'field-event-registration-ticket_price',
+      '#id' => 'field-request-registration-ticket_price',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-registration-ticket_price',
+          'field-request-item',
+          'field-request-item-registration-ticket_price',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['registration']['ticket_price'][$key] = array(
-        '#id' => 'field-event-registration-ticket_price-' . $key,
+        '#id' => 'field-request-registration-ticket_price-' . $key,
         '#type' => 'textfield',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -2787,7 +2787,7 @@ function mfcs_get_event_field_registration_ticket_price($form, &$form_state, &$f
   else {
     foreach ($values as $key => $value) {
       $fields['registration']['ticket_price'][$key] = array(
-        '#id' => 'field-event-registration-ticket_price-' . $key,
+        '#id' => 'field-request-registration-ticket_price-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -2800,10 +2800,10 @@ function mfcs_get_event_field_registration_ticket_price($form, &$form_state, &$f
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_registration_ticket_dates($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_registration_ticket_dates($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['registration']['ticket_dates'])) {
-    $values = $event_state['registration']['ticket_dates'];
+  if (!empty($request_state['registration']['ticket_dates'])) {
+    $values = $request_state['registration']['ticket_dates'];
   }
 
   $build = FALSE;
@@ -2825,21 +2825,21 @@ function mfcs_get_event_field_registration_ticket_dates($form, &$form_state, &$f
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('registration', $form['form']['sections']['#value'])) {
     $fields['registration']['ticket_dates'] = array(
-      '#id' => 'field-event-registration-ticket_dates',
+      '#id' => 'field-request-registration-ticket_dates',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-registration-ticket_dates',
+          'field-request-item',
+          'field-request-item-registration-ticket_dates',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['registration']['ticket_dates'][$key] = array(
-        '#id' => 'field-event-registration-ticket_dates-' . $key,
+        '#id' => 'field-request-registration-ticket_dates-' . $key,
         '#type' => 'textfield',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -2871,7 +2871,7 @@ function mfcs_get_event_field_registration_ticket_dates($form, &$form_state, &$f
   else {
     foreach ($values as $key => $value) {
       $fields['registration']['ticket_dates'][$key] = array(
-        '#id' => 'field-event-registration-ticket_dates-' . $key,
+        '#id' => 'field-request-registration-ticket_dates-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -2884,10 +2884,10 @@ function mfcs_get_event_field_registration_ticket_dates($form, &$form_state, &$f
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_registration_ticket_website($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_registration_ticket_website($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['registration']['ticket_website'])) {
-    $values = $event_state['registration']['ticket_website'];
+  if (!empty($request_state['registration']['ticket_website'])) {
+    $values = $request_state['registration']['ticket_website'];
   }
 
   $build = FALSE;
@@ -2910,21 +2910,21 @@ function mfcs_get_event_field_registration_ticket_website($form, &$form_state, &
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('registration', $form['form']['sections']['#value'])) {
     $fields['registration']['ticket_website'] = array(
-      '#id' => 'field-event-registration-ticket_website',
+      '#id' => 'field-request-registration-ticket_website',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-registration-ticket_website',
+          'field-request-item',
+          'field-request-item-registration-ticket_website',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['registration']['ticket_website'][$key] = array(
-        '#id' => 'field-event-registration-ticket_website-' . $key,
+        '#id' => 'field-request-registration-ticket_website-' . $key,
         '#type' => 'textfield',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -2956,7 +2956,7 @@ function mfcs_get_event_field_registration_ticket_website($form, &$form_state, &
   else {
     foreach ($values as $key => $value) {
       $fields['registration']['ticket_website'][$key] = array(
-        '#id' => 'field-event-registration-ticket_website-' . $key,
+        '#id' => 'field-request-registration-ticket_website-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -2969,10 +2969,10 @@ function mfcs_get_event_field_registration_ticket_website($form, &$form_state, &
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_registration_ticket_phone($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_registration_ticket_phone($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['registration']['ticket_phone'])) {
-    $values = $event_state['registration']['ticket_phone'];
+  if (!empty($request_state['registration']['ticket_phone'])) {
+    $values = $request_state['registration']['ticket_phone'];
   }
 
   $build = FALSE;
@@ -2995,21 +2995,21 @@ function mfcs_get_event_field_registration_ticket_phone($form, &$form_state, &$f
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('registration', $form['form']['sections']['#value'])) {
     $fields['registration']['ticket_phone'] = array(
-      '#id' => 'field-event-registration-ticket_phone',
+      '#id' => 'field-request-registration-ticket_phone',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-registration-ticket_phone',
+          'field-request-item',
+          'field-request-item-registration-ticket_phone',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['registration']['ticket_phone'][$key] = array(
-        '#id' => 'field-event-registration-ticket_phone-' . $key,
+        '#id' => 'field-request-registration-ticket_phone-' . $key,
         '#type' => 'textfield',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -3041,7 +3041,7 @@ function mfcs_get_event_field_registration_ticket_phone($form, &$form_state, &$f
   else {
     foreach ($values as $key => $value) {
       $fields['registration']['ticket_phone'][$key] = array(
-        '#id' => 'field-event-registration-ticket_phone-' . $key,
+        '#id' => 'field-request-registration-ticket_phone-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -3054,10 +3054,10 @@ function mfcs_get_event_field_registration_ticket_phone($form, &$form_state, &$f
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_registration_generate_revenue($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_registration_generate_revenue($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => 0);
-  if (!empty($event_state['registration']['generate_revenue'])) {
-    $values = $event_state['registration']['generate_revenue'];
+  if (!empty($request_state['registration']['generate_revenue'])) {
+    $values = $request_state['registration']['generate_revenue'];
   }
 
   $build = FALSE;
@@ -3080,21 +3080,21 @@ function mfcs_get_event_field_registration_generate_revenue($form, &$form_state,
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('registration', $form['form']['sections']['#value'])) {
     $fields['registration']['generate_revenue'] = array(
-      '#id' => 'field-event-registration-generate_revenue',
+      '#id' => 'field-request-registration-generate_revenue',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-registration-generate_revenue',
+          'field-request-item',
+          'field-request-item-registration-generate_revenue',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['registration']['generate_revenue'][$key] = array(
-        '#id' => 'field-event-registration-generate_revenue-' . $key,
+        '#id' => 'field-request-registration-generate_revenue-' . $key,
         '#type' => 'radios',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -3117,7 +3117,7 @@ function mfcs_get_event_field_registration_generate_revenue($form, &$form_state,
   else {
     foreach ($values as $key => $value) {
       $fields['registration']['generate_revenue'][$key] = array(
-        '#id' => 'field-event-registration-generate_revenue-' . $key,
+        '#id' => 'field-request-registration-generate_revenue-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -3130,10 +3130,10 @@ function mfcs_get_event_field_registration_generate_revenue($form, &$form_state,
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_registration_revenue_generated($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_registration_revenue_generated($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => array());
-  if (!empty($event_state['registration']['revenue_generated'])) {
-    $values = $event_state['registration']['revenue_generated'];
+  if (!empty($request_state['registration']['revenue_generated'])) {
+    $values = $request_state['registration']['revenue_generated'];
   }
 
   $build = FALSE;
@@ -3156,23 +3156,23 @@ function mfcs_get_event_field_registration_revenue_generated($form, &$form_state
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('registration', $form['form']['sections']['#value'])) {
     $fields['registration']['revenue_generated'] = array(
-      '#id' => 'field-event-registration-revenue_generated',
+      '#id' => 'field-request-registration-revenue_generated',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-registration-revenue_generated',
+          'field-request-item',
+          'field-request-item-registration-revenue_generated',
         ),
       ),
     );
 
-    $revenue_generated_options = event_workflow_get_revenue_generated_list_options('checkboxes');
+    $revenue_generated_options = mfcs_get_revenue_generated_list_options('checkboxes');
 
     foreach ($values as $key => $value) {
       $fields['registration']['revenue_generated'][$key] = array(
-        '#id' => 'field-event-registration-revenue_generated-' . $key,
+        '#id' => 'field-request-registration-revenue_generated-' . $key,
         '#type' => 'checkboxes',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -3203,7 +3203,7 @@ function mfcs_get_event_field_registration_revenue_generated($form, &$form_state
   else {
     foreach ($values as $key => $value) {
       $fields['registration']['revenue_generated'][$key] = array(
-        '#id' => 'field-event-registration-revenue_generated-' . $key,
+        '#id' => 'field-request-registration-revenue_generated-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -3216,10 +3216,10 @@ function mfcs_get_event_field_registration_revenue_generated($form, &$form_state
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_setup_rectangular_tables_8ft($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_setup_rectangular_tables_8ft($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['setup']['rectangular_tables_8ft'])) {
-    $values = $event_state['setup']['rectangular_tables_8ft'];
+  if (!empty($request_state['setup']['rectangular_tables_8ft'])) {
+    $values = $request_state['setup']['rectangular_tables_8ft'];
   }
 
   $field_title = "How Many 8 ft Rectangular Tables Will You Need?";
@@ -3237,21 +3237,21 @@ function mfcs_get_event_field_setup_rectangular_tables_8ft($form, &$form_state, 
 
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
     $fields['setup']['rectangular_tables_8ft'] = array(
-      '#id' => 'field-event-setup-rectangular_tables_8ft',
+      '#id' => 'field-request-setup-rectangular_tables_8ft',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-setup-rectangular_tables_8ft',
+          'field-request-item',
+          'field-request-item-setup-rectangular_tables_8ft',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['setup']['rectangular_tables_8ft'][$key] = array(
-        '#id' => 'field-event-setup-rectangular_tables_8ft-' . $key,
+        '#id' => 'field-request-setup-rectangular_tables_8ft-' . $key,
         '#type' => 'numberfield',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -3273,7 +3273,7 @@ function mfcs_get_event_field_setup_rectangular_tables_8ft($form, &$form_state, 
   else {
     foreach ($values as $key => $value) {
       $fields['setup']['rectangular_tables_8ft'][$key] = array(
-        '#id' => 'field-event-setup-rectangular_tables_8ft-' . $key,
+        '#id' => 'field-request-setup-rectangular_tables_8ft-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -3286,10 +3286,10 @@ function mfcs_get_event_field_setup_rectangular_tables_8ft($form, &$form_state, 
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_setup_round_tables_8ft($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_setup_round_tables_8ft($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['setup']['round_tables_8ft'])) {
-    $values = $event_state['setup']['round_tables_8ft'];
+  if (!empty($request_state['setup']['round_tables_8ft'])) {
+    $values = $request_state['setup']['round_tables_8ft'];
   }
 
   $field_title = "How Many 8 ft Round Tables Will You Need?";
@@ -3307,21 +3307,21 @@ function mfcs_get_event_field_setup_round_tables_8ft($form, &$form_state, &$fiel
 
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
     $fields['setup']['round_tables_8ft'] = array(
-      '#id' => 'field-event-setup-round_tables_8ft',
+      '#id' => 'field-request-setup-round_tables_8ft',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-setup-round_tables_8ft',
+          'field-request-item',
+          'field-request-item-setup-round_tables_8ft',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['setup']['round_tables_8ft'][$key] = array(
-        '#id' => 'field-event-setup-round_tables_8ft-' . $key,
+        '#id' => 'field-request-setup-round_tables_8ft-' . $key,
         '#type' => 'numberfield',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -3343,7 +3343,7 @@ function mfcs_get_event_field_setup_round_tables_8ft($form, &$form_state, &$fiel
   else {
     foreach ($values as $key => $value) {
       $fields['setup']['round_tables_8ft'][$key] = array(
-        '#id' => 'field-event-setup-round_tables_8ft-' . $key,
+        '#id' => 'field-request-setup-round_tables_8ft-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -3356,10 +3356,10 @@ function mfcs_get_event_field_setup_round_tables_8ft($form, &$form_state, &$fiel
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_setup_other_tables($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_setup_other_tables($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['setup']['other_tables'])) {
-    $values = $event_state['setup']['other_tables'];
+  if (!empty($request_state['setup']['other_tables'])) {
+    $values = $request_state['setup']['other_tables'];
   }
 
   $build = FALSE;
@@ -3382,21 +3382,21 @@ function mfcs_get_event_field_setup_other_tables($form, &$form_state, &$fields, 
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
     $fields['setup']['other_tables'] = array(
-      '#id' => 'field-event-setup-other_tables',
+      '#id' => 'field-request-setup-other_tables',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-setup-other_tables',
+          'field-request-item',
+          'field-request-item-setup-other_tables',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['setup']['other_tables'][$key] = array(
-        '#id' => 'field-event-setup-other_tables-' . $key,
+        '#id' => 'field-request-setup-other_tables-' . $key,
         '#type' => 'textarea',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -3416,7 +3416,7 @@ function mfcs_get_event_field_setup_other_tables($form, &$form_state, &$fields, 
   else {
     foreach ($values as $key => $value) {
       $fields['setup']['other_tables'][$key] = array(
-        '#id' => 'field-event-setup-other_tables-' . $key,
+        '#id' => 'field-request-setup-other_tables-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -3429,10 +3429,10 @@ function mfcs_get_event_field_setup_other_tables($form, &$form_state, &$fields, 
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_setup_standard_blue_chairs($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_setup_standard_blue_chairs($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['setup']['standard_blue_chairs'])) {
-    $values = $event_state['setup']['standard_blue_chairs'];
+  if (!empty($request_state['setup']['standard_blue_chairs'])) {
+    $values = $request_state['setup']['standard_blue_chairs'];
   }
 
   $field_title = "How Many Standard Blue Chairs Will You Need?";
@@ -3450,21 +3450,21 @@ function mfcs_get_event_field_setup_standard_blue_chairs($form, &$form_state, &$
 
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
     $fields['setup']['standard_blue_chairs'] = array(
-      '#id' => 'field-event-setup-standard_blue_chairs',
+      '#id' => 'field-request-setup-standard_blue_chairs',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-setup-standard_blue_chairs',
+          'field-request-item',
+          'field-request-item-setup-standard_blue_chairs',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['setup']['standard_blue_chairs'][$key] = array(
-        '#id' => 'field-event-setup-standard_blue_chairs-' . $key,
+        '#id' => 'field-request-setup-standard_blue_chairs-' . $key,
         '#type' => 'numberfield',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -3486,7 +3486,7 @@ function mfcs_get_event_field_setup_standard_blue_chairs($form, &$form_state, &$
   else {
     foreach ($values as $key => $value) {
       $fields['setup']['standard_blue_chairs'][$key] = array(
-        '#id' => 'field-event-setup-standard_blue_chairs-' . $key,
+        '#id' => 'field-request-setup-standard_blue_chairs-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -3499,10 +3499,10 @@ function mfcs_get_event_field_setup_standard_blue_chairs($form, &$form_state, &$
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_setup_podium($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_setup_podium($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => 0);
-  if (!empty($event_state['setup']['podium'])) {
-    $values = $event_state['setup']['podium'];
+  if (!empty($request_state['setup']['podium'])) {
+    $values = $request_state['setup']['podium'];
   }
 
   $field_title = "Will You Need a Podium?";
@@ -3520,21 +3520,21 @@ function mfcs_get_event_field_setup_podium($form, &$form_state, &$fields, &$even
 
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
     $fields['setup']['podium'] = array(
-      '#id' => 'field-event-setup-podium',
+      '#id' => 'field-request-setup-podium',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-setup-podium',
+          'field-request-item',
+          'field-request-item-setup-podium',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['setup']['podium'][$key] = array(
-        '#id' => 'field-event-setup-podium-' . $key,
+        '#id' => 'field-request-setup-podium-' . $key,
         '#type' => 'radios',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -3557,7 +3557,7 @@ function mfcs_get_event_field_setup_podium($form, &$form_state, &$fields, &$even
   else {
     foreach ($values as $key => $value) {
       $fields['setup']['podium'][$key] = array(
-        '#id' => 'field-event-setup-podium-' . $key,
+        '#id' => 'field-request-setup-podium-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -3570,10 +3570,10 @@ function mfcs_get_event_field_setup_podium($form, &$form_state, &$fields, &$even
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_setup_portable_stage($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_setup_portable_stage($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => 0);
-  if (!empty($event_state['setup']['portable_stage'])) {
-    $values = $event_state['setup']['portable_stage'];
+  if (!empty($request_state['setup']['portable_stage'])) {
+    $values = $request_state['setup']['portable_stage'];
   }
 
   $build = FALSE;
@@ -3596,21 +3596,21 @@ function mfcs_get_event_field_setup_portable_stage($form, &$form_state, &$fields
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
     $fields['setup']['portable_stage'] = array(
-      '#id' => 'field-event-setup-portable_stage',
+      '#id' => 'field-request-setup-portable_stage',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-setup-portable_stage',
+          'field-request-item',
+          'field-request-item-setup-portable_stage',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['setup']['portable_stage'][$key] = array(
-        '#id' => 'field-event-setup-portable_stage-' . $key,
+        '#id' => 'field-request-setup-portable_stage-' . $key,
         '#type' => 'radios',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -3633,7 +3633,7 @@ function mfcs_get_event_field_setup_portable_stage($form, &$form_state, &$fields
   else {
     foreach ($values as $key => $value) {
       $fields['setup']['portable_stage'][$key] = array(
-        '#id' => 'field-event-setup-portable_stage-' . $key,
+        '#id' => 'field-request-setup-portable_stage-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -3646,10 +3646,10 @@ function mfcs_get_event_field_setup_portable_stage($form, &$form_state, &$fields
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_setup_portable_stage_configuration($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_setup_portable_stage_configuration($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['setup']['portable_stage_configuration'])) {
-    $values = $event_state['setup']['portable_stage_configuration'];
+  if (!empty($request_state['setup']['portable_stage_configuration'])) {
+    $values = $request_state['setup']['portable_stage_configuration'];
   }
 
   $build = FALSE;
@@ -3672,21 +3672,21 @@ function mfcs_get_event_field_setup_portable_stage_configuration($form, &$form_s
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
     $fields['setup']['portable_stage_configuration'] = array(
-      '#id' => 'field-event-setup-portable_stage_configuration',
+      '#id' => 'field-request-setup-portable_stage_configuration',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-setup-portable_stage_configuration',
+          'field-request-item',
+          'field-request-item-setup-portable_stage_configuration',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['setup']['portable_stage_configuration'][$key] = array(
-        '#id' => 'field-event-setup-portable_stage_configuration-' . $key,
+        '#id' => 'field-request-setup-portable_stage_configuration-' . $key,
         '#type' => 'textarea',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -3719,7 +3719,7 @@ function mfcs_get_event_field_setup_portable_stage_configuration($form, &$form_s
   else {
     foreach ($values as $key => $value) {
       $fields['setup']['portable_stage_configuration'][$key] = array(
-        '#id' => 'field-event-setup-portable_stage_configuration-' . $key,
+        '#id' => 'field-request-setup-portable_stage_configuration-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -3732,10 +3732,10 @@ function mfcs_get_event_field_setup_portable_stage_configuration($form, &$form_s
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_setup_security($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_setup_security($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => 0);
-  if (!empty($event_state['setup']['security'])) {
-    $values = $event_state['setup']['security'];
+  if (!empty($request_state['setup']['security'])) {
+    $values = $request_state['setup']['security'];
   }
 
   $build = FALSE;
@@ -3758,21 +3758,21 @@ function mfcs_get_event_field_setup_security($form, &$form_state, &$fields, &$ev
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
     $fields['setup']['security'] = array(
-      '#id' => 'field-event-setup-security',
+      '#id' => 'field-request-setup-security',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-setup-security',
+          'field-request-item',
+          'field-request-item-setup-security',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['setup']['security'][$key] = array(
-        '#id' => 'field-event-setup-security-' . $key,
+        '#id' => 'field-request-setup-security-' . $key,
         '#type' => 'radios',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -3795,7 +3795,7 @@ function mfcs_get_event_field_setup_security($form, &$form_state, &$fields, &$ev
   else {
     foreach ($values as $key => $value) {
       $fields['setup']['security'][$key] = array(
-        '#id' => 'field-event-setup-security-' . $key,
+        '#id' => 'field-request-setup-security-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -3808,10 +3808,10 @@ function mfcs_get_event_field_setup_security($form, &$form_state, &$fields, &$ev
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_setup_parking_assistance($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_setup_parking_assistance($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => 0);
-  if (!empty($event_state['setup']['parking_assistance'])) {
-    $values = $event_state['setup']['parking_assistance'];
+  if (!empty($request_state['setup']['parking_assistance'])) {
+    $values = $request_state['setup']['parking_assistance'];
   }
 
   $build = FALSE;
@@ -3834,21 +3834,21 @@ function mfcs_get_event_field_setup_parking_assistance($form, &$form_state, &$fi
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
     $fields['setup']['parking_assistance'] = array(
-      '#id' => 'field-event-setup-parking_assistance',
+      '#id' => 'field-request-setup-parking_assistance',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-setup-parking_assistance',
+          'field-request-item',
+          'field-request-item-setup-parking_assistance',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['setup']['parking_assistance'][$key] = array(
-        '#id' => 'field-event-setup-parking_assistance-' . $key,
+        '#id' => 'field-request-setup-parking_assistance-' . $key,
         '#type' => 'radios',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -3871,7 +3871,7 @@ function mfcs_get_event_field_setup_parking_assistance($form, &$form_state, &$fi
   else {
     foreach ($values as $key => $value) {
       $fields['setup']['parking_assistance'][$key] = array(
-        '#id' => 'field-event-setup-parking_assistance-' . $key,
+        '#id' => 'field-request-setup-parking_assistance-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -3884,10 +3884,10 @@ function mfcs_get_event_field_setup_parking_assistance($form, &$form_state, &$fi
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_setup_parking_assistance_area($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_setup_parking_assistance_area($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['setup']['parking_assistance_area'])) {
-    $values = $event_state['setup']['parking_assistance_area'];
+  if (!empty($request_state['setup']['parking_assistance_area'])) {
+    $values = $request_state['setup']['parking_assistance_area'];
   }
 
   $build = FALSE;
@@ -3910,21 +3910,21 @@ function mfcs_get_event_field_setup_parking_assistance_area($form, &$form_state,
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
     $fields['setup']['parking_assistance_area'] = array(
-      '#id' => 'field-event-setup-parking_assistance_area',
+      '#id' => 'field-request-setup-parking_assistance_area',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-setup-parking_assistance_area',
+          'field-request-item',
+          'field-request-item-setup-parking_assistance_area',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['setup']['parking_assistance_area'][$key] = array(
-        '#id' => 'field-event-setup-parking_assistance_area-' . $key,
+        '#id' => 'field-request-setup-parking_assistance_area-' . $key,
         '#type' => 'textarea',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -3957,7 +3957,7 @@ function mfcs_get_event_field_setup_parking_assistance_area($form, &$form_state,
   else {
     foreach ($values as $key => $value) {
       $fields['setup']['parking_assistance_area'][$key] = array(
-        '#id' => 'field-event-setup-parking_assistance_area-' . $key,
+        '#id' => 'field-request-setup-parking_assistance_area-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -3970,10 +3970,10 @@ function mfcs_get_event_field_setup_parking_assistance_area($form, &$form_state,
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_setup_road_closures($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_setup_road_closures($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => 0);
-  if (!empty($event_state['setup']['road_closures'])) {
-    $values = $event_state['setup']['road_closures'];
+  if (!empty($request_state['setup']['road_closures'])) {
+    $values = $request_state['setup']['road_closures'];
   }
 
   $build = FALSE;
@@ -3996,21 +3996,21 @@ function mfcs_get_event_field_setup_road_closures($form, &$form_state, &$fields,
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
     $fields['setup']['road_closures'] = array(
-      '#id' => 'field-event-setup-road_closures',
+      '#id' => 'field-request-setup-road_closures',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-setup-road_closures',
+          'field-request-item',
+          'field-request-item-setup-road_closures',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['setup']['road_closures'][$key] = array(
-        '#id' => 'field-event-setup-road_closures-' . $key,
+        '#id' => 'field-request-setup-road_closures-' . $key,
         '#type' => 'radios',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -4033,7 +4033,7 @@ function mfcs_get_event_field_setup_road_closures($form, &$form_state, &$fields,
   else {
     foreach ($values as $key => $value) {
       $fields['setup']['road_closures'][$key] = array(
-        '#id' => 'field-event-setup-road_closures-' . $key,
+        '#id' => 'field-request-setup-road_closures-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -4046,10 +4046,10 @@ function mfcs_get_event_field_setup_road_closures($form, &$form_state, &$fields,
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_setup_road_closures_details($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_setup_road_closures_details($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['setup']['road_closures_details'])) {
-    $values = $event_state['setup']['road_closures_details'];
+  if (!empty($request_state['setup']['road_closures_details'])) {
+    $values = $request_state['setup']['road_closures_details'];
   }
 
   $build = FALSE;
@@ -4072,21 +4072,21 @@ function mfcs_get_event_field_setup_road_closures_details($form, &$form_state, &
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
     $fields['setup']['road_closures_details'] = array(
-      '#id' => 'field-event-setup-road_closures_details',
+      '#id' => 'field-request-setup-road_closures_details',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-setup-road_closures_details',
+          'field-request-item',
+          'field-request-item-setup-road_closures_details',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['setup']['road_closures_details'][$key] = array(
-        '#id' => 'field-event-setup-road_closures_details-' . $key,
+        '#id' => 'field-request-setup-road_closures_details-' . $key,
         '#type' => 'textarea',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -4119,7 +4119,7 @@ function mfcs_get_event_field_setup_road_closures_details($form, &$form_state, &
   else {
     foreach ($values as $key => $value) {
       $fields['setup']['road_closures_details'][$key] = array(
-        '#id' => 'field-event-setup-road_closures_details-' . $key,
+        '#id' => 'field-request-setup-road_closures_details-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -4132,10 +4132,10 @@ function mfcs_get_event_field_setup_road_closures_details($form, &$form_state, &
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_setup_special_requests($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_setup_special_requests($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => 0);
-  if (!empty($event_state['setup']['special_requests'])) {
-    $values = $event_state['setup']['special_requests'];
+  if (!empty($request_state['setup']['special_requests'])) {
+    $values = $request_state['setup']['special_requests'];
   }
 
   $build = FALSE;
@@ -4158,21 +4158,21 @@ function mfcs_get_event_field_setup_special_requests($form, &$form_state, &$fiel
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
     $fields['setup']['special_requests'] = array(
-      '#id' => 'field-event-setup-special_requests',
+      '#id' => 'field-request-setup-special_requests',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-setup-special_requests',
+          'field-request-item',
+          'field-request-item-setup-special_requests',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['setup']['special_requests'][$key] = array(
-        '#id' => 'field-event-setup-special_requests-' . $key,
+        '#id' => 'field-request-setup-special_requests-' . $key,
         '#type' => 'radios',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -4195,7 +4195,7 @@ function mfcs_get_event_field_setup_special_requests($form, &$form_state, &$fiel
   else {
     foreach ($values as $key => $value) {
       $fields['setup']['special_requests'][$key] = array(
-        '#id' => 'field-event-setup-special_requests-' . $key,
+        '#id' => 'field-request-setup-special_requests-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -4208,10 +4208,10 @@ function mfcs_get_event_field_setup_special_requests($form, &$form_state, &$fiel
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_setup_special_requests_details($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_setup_special_requests_details($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['setup']['special_requests_details'])) {
-    $values = $event_state['setup']['special_requests_details'];
+  if (!empty($request_state['setup']['special_requests_details'])) {
+    $values = $request_state['setup']['special_requests_details'];
   }
 
   $build = FALSE;
@@ -4233,21 +4233,21 @@ function mfcs_get_event_field_setup_special_requests_details($form, &$form_state
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('setup', $form['form']['sections']['#value'])) {
     $fields['setup']['special_requests_details'] = array(
-      '#id' => 'field-event-setup-special_requests_details',
+      '#id' => 'field-request-setup-special_requests_details',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-setup-special_requests_details',
+          'field-request-item',
+          'field-request-item-setup-special_requests_details',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['setup']['special_requests_details'][$key] = array(
-        '#id' => 'field-event-setup-special_requests_details-' . $key,
+        '#id' => 'field-request-setup-special_requests_details-' . $key,
         '#type' => 'textarea',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -4280,7 +4280,7 @@ function mfcs_get_event_field_setup_special_requests_details($form, &$form_state
   else {
     foreach ($values as $key => $value) {
       $fields['setup']['special_requests_details'][$key] = array(
-        '#id' => 'field-event-setup-special_requests_details-' . $key,
+        '#id' => 'field-request-setup-special_requests_details-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -4293,10 +4293,10 @@ function mfcs_get_event_field_setup_special_requests_details($form, &$form_state
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_presentation_technical_equipment($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_presentation_technical_equipment($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => 0);
-  if (!empty($event_state['presentation']['technical_equipment'])) {
-    $values = $event_state['presentation']['technical_equipment'];
+  if (!empty($request_state['presentation']['technical_equipment'])) {
+    $values = $request_state['presentation']['technical_equipment'];
   }
 
   $field_title = "Will the Event Require any Technical Equipment? " . '<span class="title_display-note additional_requirements_may_apply">' . "(Additional Requirements May Apply)</span>";
@@ -4314,21 +4314,21 @@ function mfcs_get_event_field_presentation_technical_equipment($form, &$form_sta
 
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['technical_equipment'] = array(
-      '#id' => 'field-event-presentation-technical_equipment',
+      '#id' => 'field-request-presentation-technical_equipment',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-presentation-technical_equipment',
+          'field-request-item',
+          'field-request-item-presentation-technical_equipment',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['presentation']['technical_equipment'][$key] = array(
-        '#id' => 'field-event-presentation-technical_equipment-' . $key,
+        '#id' => 'field-request-presentation-technical_equipment-' . $key,
         '#type' => 'radios',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -4351,7 +4351,7 @@ function mfcs_get_event_field_presentation_technical_equipment($form, &$form_sta
   else {
     foreach ($values as $key => $value) {
       $fields['presentation']['technical_equipment'][$key] = array(
-        '#id' => 'field-event-presentation-technical_equipment-' . $key,
+        '#id' => 'field-request-presentation-technical_equipment-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -4364,10 +4364,10 @@ function mfcs_get_event_field_presentation_technical_equipment($form, &$form_sta
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_presentation_technical_equipment_details($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_presentation_technical_equipment_details($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => array());
-  if (!empty($event_state['presentation']['technical_equipment_details'])) {
-    $values = $event_state['presentation']['technical_equipment_details'];
+  if (!empty($request_state['presentation']['technical_equipment_details'])) {
+    $values = $request_state['presentation']['technical_equipment_details'];
   }
 
   $field_title = "Specify the Equipment Needed";
@@ -4385,23 +4385,23 @@ function mfcs_get_event_field_presentation_technical_equipment_details($form, &$
 
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['technical_equipment_details'] = array(
-      '#id' => 'field-event-presentation-technical_equipment_details',
+      '#id' => 'field-request-presentation-technical_equipment_details',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-presentation-technical_equipment_details',
+          'field-request-item',
+          'field-request-item-presentation-technical_equipment_details',
         ),
       ),
     );
 
-    $technical_equipment_details_options = event_workflow_get_technical_equipment_details_list_options('checkboxes');
+    $technical_equipment_details_options = mfcs_get_technical_equipment_details_list_options('checkboxes');
 
     foreach ($values as $key => $value) {
       $fields['presentation']['technical_equipment_details'][$key] = array(
-        '#id' => 'field-event-presentation-technical_equipment_details-' . $key,
+        '#id' => 'field-request-presentation-technical_equipment_details-' . $key,
         '#type' => 'checkboxes',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -4435,7 +4435,7 @@ function mfcs_get_event_field_presentation_technical_equipment_details($form, &$
   else {
     foreach ($values as $key => $value) {
       $fields['presentation']['technical_equipment_details'][$key] = array(
-        '#id' => 'field-event-presentation-technical_equipment_details-' . $key,
+        '#id' => 'field-request-presentation-technical_equipment_details-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -4448,10 +4448,10 @@ function mfcs_get_event_field_presentation_technical_equipment_details($form, &$
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_presentation_technical_equipment_microphone($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_presentation_technical_equipment_microphone($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['presentation']['technical_equipment_microphone'])) {
-    $values = $event_state['presentation']['technical_equipment_microphone'];
+  if (!empty($request_state['presentation']['technical_equipment_microphone'])) {
+    $values = $request_state['presentation']['technical_equipment_microphone'];
   }
 
   $field_title = "Specify the Quantity of Microphones";
@@ -4469,21 +4469,21 @@ function mfcs_get_event_field_presentation_technical_equipment_microphone($form,
 
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['technical_equipment_microphone'] = array(
-      '#id' => 'field-event-presentation-technical_equipment_microphone',
+      '#id' => 'field-request-presentation-technical_equipment_microphone',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-presentation-technical_equipment_microphone',
+          'field-request-item',
+          'field-request-item-presentation-technical_equipment_microphone',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['presentation']['technical_equipment_microphone'][$key] = array(
-        '#id' => 'field-event-presentation-technical_equipment_microphone-' . $key,
+        '#id' => 'field-request-presentation-technical_equipment_microphone-' . $key,
         '#type' => 'numberfield',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -4519,7 +4519,7 @@ function mfcs_get_event_field_presentation_technical_equipment_microphone($form,
   else {
     foreach ($values as $key => $value) {
       $fields['presentation']['technical_equipment_microphone'][$key] = array(
-        '#id' => 'field-event-presentation-technical_equipment_microphone-' . $key,
+        '#id' => 'field-request-presentation-technical_equipment_microphone-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -4532,10 +4532,10 @@ function mfcs_get_event_field_presentation_technical_equipment_microphone($form,
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_presentation_external_audio_person($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_presentation_external_audio_person($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => 0);
-  if (!empty($event_state['presentation']['external_audio_person'])) {
-    $values = $event_state['presentation']['external_audio_person'];
+  if (!empty($request_state['presentation']['external_audio_person'])) {
+    $values = $request_state['presentation']['external_audio_person'];
   }
 
   $build = FALSE;
@@ -4558,21 +4558,21 @@ function mfcs_get_event_field_presentation_external_audio_person($form, &$form_s
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['external_audio_person'] = array(
-      '#id' => 'field-event-presentation-external_audio_person',
+      '#id' => 'field-request-presentation-external_audio_person',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-presentation-external_audio_person',
+          'field-request-item',
+          'field-request-item-presentation-external_audio_person',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['presentation']['external_audio_person'][$key] = array(
-        '#id' => 'field-event-presentation-external_audio_person-' . $key,
+        '#id' => 'field-request-presentation-external_audio_person-' . $key,
         '#type' => 'radios',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -4595,7 +4595,7 @@ function mfcs_get_event_field_presentation_external_audio_person($form, &$form_s
   else {
     foreach ($values as $key => $value) {
       $fields['presentation']['external_audio_person'][$key] = array(
-        '#id' => 'field-event-presentation-external_audio_person-' . $key,
+        '#id' => 'field-request-presentation-external_audio_person-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -4608,10 +4608,10 @@ function mfcs_get_event_field_presentation_external_audio_person($form, &$form_s
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_presentation_external_audio_person_name($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_presentation_external_audio_person_name($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['presentation']['external_audio_person_name'])) {
-    $values = $event_state['presentation']['external_audio_person_name'];
+  if (!empty($request_state['presentation']['external_audio_person_name'])) {
+    $values = $request_state['presentation']['external_audio_person_name'];
   }
 
   $build = FALSE;
@@ -4634,21 +4634,21 @@ function mfcs_get_event_field_presentation_external_audio_person_name($form, &$f
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['external_audio_person_name'] = array(
-      '#id' => 'field-event-presentation-external_audio_person_name',
+      '#id' => 'field-request-presentation-external_audio_person_name',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-presentation-external_audio_person_name',
+          'field-request-item',
+          'field-request-item-presentation-external_audio_person_name',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['presentation']['external_audio_person_name'][$key] = array(
-        '#id' => 'field-event-presentation-external_audio_person_name-' . $key,
+        '#id' => 'field-request-presentation-external_audio_person_name-' . $key,
         '#type' => 'textfield',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -4682,7 +4682,7 @@ function mfcs_get_event_field_presentation_external_audio_person_name($form, &$f
   else {
     foreach ($values as $key => $value) {
       $fields['presentation']['external_audio_person_name'][$key] = array(
-        '#id' => 'field-event-presentation-external_audio_person_name-' . $key,
+        '#id' => 'field-request-presentation-external_audio_person_name-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -4695,10 +4695,10 @@ function mfcs_get_event_field_presentation_external_audio_person_name($form, &$f
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_presentation_external_audio_person_email($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_presentation_external_audio_person_email($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['presentation']['external_audio_person_email'])) {
-    $values = $event_state['presentation']['external_audio_person_email'];
+  if (!empty($request_state['presentation']['external_audio_person_email'])) {
+    $values = $request_state['presentation']['external_audio_person_email'];
   }
 
   $build = FALSE;
@@ -4721,21 +4721,21 @@ function mfcs_get_event_field_presentation_external_audio_person_email($form, &$
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['external_audio_person_email'] = array(
-      '#id' => 'field-event-presentation-external_audio_person_email',
+      '#id' => 'field-request-presentation-external_audio_person_email',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-presentation-external_audio_person_email',
+          'field-request-item',
+          'field-request-item-presentation-external_audio_person_email',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['presentation']['external_audio_person_email'][$key] = array(
-        '#id' => 'field-event-presentation-external_audio_person_email-' . $key,
+        '#id' => 'field-request-presentation-external_audio_person_email-' . $key,
         '#type' => 'emailfield',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -4769,7 +4769,7 @@ function mfcs_get_event_field_presentation_external_audio_person_email($form, &$
   else {
     foreach ($values as $key => $value) {
       $fields['presentation']['external_audio_person_email'][$key] = array(
-        '#id' => 'field-event-presentation-external_audio_person_email-' . $key,
+        '#id' => 'field-request-presentation-external_audio_person_email-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -4782,10 +4782,10 @@ function mfcs_get_event_field_presentation_external_audio_person_email($form, &$
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_presentation_external_audio_person_phone($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_presentation_external_audio_person_phone($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['presentation']['external_audio_person_phone'])) {
-    $values = $event_state['presentation']['external_audio_person_phone'];
+  if (!empty($request_state['presentation']['external_audio_person_phone'])) {
+    $values = $request_state['presentation']['external_audio_person_phone'];
   }
 
   $build = FALSE;
@@ -4808,21 +4808,21 @@ function mfcs_get_event_field_presentation_external_audio_person_phone($form, &$
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['external_audio_person_phone'] = array(
-      '#id' => 'field-event-presentation-external_audio_person_phone',
+      '#id' => 'field-request-presentation-external_audio_person_phone',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-presentation-external_audio_person_phone',
+          'field-request-item',
+          'field-request-item-presentation-external_audio_person_phone',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['presentation']['external_audio_person_phone'][$key] = array(
-        '#id' => 'field-event-presentation-external_audio_person_phone-' . $key,
+        '#id' => 'field-request-presentation-external_audio_person_phone-' . $key,
         '#type' => 'telfield',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -4854,7 +4854,7 @@ function mfcs_get_event_field_presentation_external_audio_person_phone($form, &$
   else {
     foreach ($values as $key => $value) {
       $fields['presentation']['external_audio_person_phone'][$key] = array(
-        '#id' => 'field-event-presentation-external_audio_person_phone-' . $key,
+        '#id' => 'field-request-presentation-external_audio_person_phone-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -4867,10 +4867,10 @@ function mfcs_get_event_field_presentation_external_audio_person_phone($form, &$
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_presentation_production($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_presentation_production($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => 0);
-  if (!empty($event_state['presentation']['production'])) {
-    $values = $event_state['presentation']['production'];
+  if (!empty($request_state['presentation']['production'])) {
+    $values = $request_state['presentation']['production'];
   }
 
   $build = FALSE;
@@ -4893,21 +4893,21 @@ function mfcs_get_event_field_presentation_production($form, &$form_state, &$fie
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['production'] = array(
-      '#id' => 'field-event-presentation-production',
+      '#id' => 'field-request-presentation-production',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-presentation-production',
+          'field-request-item',
+          'field-request-item-presentation-production',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['presentation']['production'][$key] = array(
-        '#id' => 'field-event-presentation-production-' . $key,
+        '#id' => 'field-request-presentation-production-' . $key,
         '#type' => 'radios',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -4930,7 +4930,7 @@ function mfcs_get_event_field_presentation_production($form, &$form_state, &$fie
   else {
     foreach ($values as $key => $value) {
       $fields['presentation']['production'][$key] = array(
-        '#id' => 'field-event-presentation-production-' . $key,
+        '#id' => 'field-request-presentation-production-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -4943,10 +4943,10 @@ function mfcs_get_event_field_presentation_production($form, &$form_state, &$fie
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_presentation_production_name($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_presentation_production_name($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['presentation']['production_name'])) {
-    $values = $event_state['presentation']['production_name'];
+  if (!empty($request_state['presentation']['production_name'])) {
+    $values = $request_state['presentation']['production_name'];
   }
 
   $build = FALSE;
@@ -4968,21 +4968,21 @@ function mfcs_get_event_field_presentation_production_name($form, &$form_state, 
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['production_name'] = array(
-      '#id' => 'field-event-presentation-production_name',
+      '#id' => 'field-request-presentation-production_name',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-presentation-production_name',
+          'field-request-item',
+          'field-request-item-presentation-production_name',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['presentation']['production_name'][$key] = array(
-        '#id' => 'field-event-presentation-production_name-' . $key,
+        '#id' => 'field-request-presentation-production_name-' . $key,
         '#type' => 'textfield',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -5016,7 +5016,7 @@ function mfcs_get_event_field_presentation_production_name($form, &$form_state, 
   else {
     foreach ($values as $key => $value) {
       $fields['presentation']['production_name'][$key] = array(
-        '#id' => 'field-event-presentation-production_name-' . $key,
+        '#id' => 'field-request-presentation-production_name-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -5029,10 +5029,10 @@ function mfcs_get_event_field_presentation_production_name($form, &$form_state, 
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_presentation_production_email($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_presentation_production_email($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['presentation']['production_email'])) {
-    $values = $event_state['presentation']['production_email'];
+  if (!empty($request_state['presentation']['production_email'])) {
+    $values = $request_state['presentation']['production_email'];
   }
 
   $build = FALSE;
@@ -5055,21 +5055,21 @@ function mfcs_get_event_field_presentation_production_email($form, &$form_state,
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['production_email'] = array(
-      '#id' => 'field-event-presentation-production_email',
+      '#id' => 'field-request-presentation-production_email',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-presentation-production_email',
+          'field-request-item',
+          'field-request-item-presentation-production_email',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['presentation']['production_email'][$key] = array(
-        '#id' => 'field-event-presentation-production_email-' . $key,
+        '#id' => 'field-request-presentation-production_email-' . $key,
         '#type' => 'emailfield',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -5103,7 +5103,7 @@ function mfcs_get_event_field_presentation_production_email($form, &$form_state,
   else {
     foreach ($values as $key => $value) {
       $fields['presentation']['production_email'][$key] = array(
-        '#id' => 'field-event-presentation-production_email-' . $key,
+        '#id' => 'field-request-presentation-production_email-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -5116,10 +5116,10 @@ function mfcs_get_event_field_presentation_production_email($form, &$form_state,
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_presentation_production_phone($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_presentation_production_phone($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['presentation']['production_phone'])) {
-    $values = $event_state['presentation']['production_phone'];
+  if (!empty($request_state['presentation']['production_phone'])) {
+    $values = $request_state['presentation']['production_phone'];
   }
 
   $build = FALSE;
@@ -5141,21 +5141,21 @@ function mfcs_get_event_field_presentation_production_phone($form, &$form_state,
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['production_phone'] = array(
-      '#id' => 'field-event-presentation-production_phone',
+      '#id' => 'field-request-presentation-production_phone',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-presentation-production_phone',
+          'field-request-item',
+          'field-request-item-presentation-production_phone',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['presentation']['production_phone'][$key] = array(
-        '#id' => 'field-event-presentation-production_phone-' . $key,
+        '#id' => 'field-request-presentation-production_phone-' . $key,
         '#type' => 'telfield',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -5187,7 +5187,7 @@ function mfcs_get_event_field_presentation_production_phone($form, &$form_state,
   else {
     foreach ($values as $key => $value) {
       $fields['presentation']['production_phone'][$key] = array(
-        '#id' => 'field-event-presentation-production_phone-' . $key,
+        '#id' => 'field-request-presentation-production_phone-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -5200,10 +5200,10 @@ function mfcs_get_event_field_presentation_production_phone($form, &$form_state,
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_presentation_publicity($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_presentation_publicity($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => 0);
-  if (!empty($event_state['presentation']['publicity'])) {
-    $values = $event_state['presentation']['publicity'];
+  if (!empty($request_state['presentation']['publicity'])) {
+    $values = $request_state['presentation']['publicity'];
   }
 
   $field_title = "Will the Event Need Publicity?";
@@ -5220,21 +5220,21 @@ function mfcs_get_event_field_presentation_publicity($form, &$form_state, &$fiel
 
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['publicity'] = array(
-      '#id' => 'field-event-presentation-publicity',
+      '#id' => 'field-request-presentation-publicity',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-presentation-publicity',
+          'field-request-item',
+          'field-request-item-presentation-publicity',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['presentation']['publicity'][$key] = array(
-        '#id' => 'field-event-presentation-publicity-' . $key,
+        '#id' => 'field-request-presentation-publicity-' . $key,
         '#type' => 'radios',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -5257,7 +5257,7 @@ function mfcs_get_event_field_presentation_publicity($form, &$form_state, &$fiel
   else {
     foreach ($values as $key => $value) {
       $fields['presentation']['publicity'][$key] = array(
-        '#id' => 'field-event-presentation-publicity-' . $key,
+        '#id' => 'field-request-presentation-publicity-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -5270,10 +5270,10 @@ function mfcs_get_event_field_presentation_publicity($form, &$form_state, &$fiel
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_presentation_publicity_details($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_presentation_publicity_details($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => array());
-  if (!empty($event_state['presentation']['publicity_details'])) {
-    $values = $event_state['presentation']['publicity_details'];
+  if (!empty($request_state['presentation']['publicity_details'])) {
+    $values = $request_state['presentation']['publicity_details'];
   }
 
   $field_title = "Specify all Publicity Medium that Apply";
@@ -5290,23 +5290,23 @@ function mfcs_get_event_field_presentation_publicity_details($form, &$form_state
 
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['publicity_details'] = array(
-      '#id' => 'field-event-presentation-publicity_details',
+      '#id' => 'field-request-presentation-publicity_details',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-presentation-publicity_details',
+          'field-request-item',
+          'field-request-item-presentation-publicity_details',
         ),
       ),
     );
 
-    $publicity_details_options = event_workflow_get_publicity_details_list_options('checkboxes');
+    $publicity_details_options = mfcs_get_publicity_details_list_options('checkboxes');
 
     foreach ($values as $key => $value) {
       $fields['presentation']['publicity_details'][$key] = array(
-        '#id' => 'field-event-presentation-publicity_details-' . $key,
+        '#id' => 'field-request-presentation-publicity_details-' . $key,
         '#type' => 'checkboxes',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -5339,7 +5339,7 @@ function mfcs_get_event_field_presentation_publicity_details($form, &$form_state
   else {
     foreach ($values as $key => $value) {
       $fields['presentation']['publicity_details'][$key] = array(
-        '#id' => 'field-event-presentation-publicity_details-' . $key,
+        '#id' => 'field-request-presentation-publicity_details-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -5352,10 +5352,10 @@ function mfcs_get_event_field_presentation_publicity_details($form, &$form_state
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_presentation_printed_material($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_presentation_printed_material($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => 0);
-  if (!empty($event_state['presentation']['printed_material'])) {
-    $values = $event_state['presentation']['printed_material'];
+  if (!empty($request_state['presentation']['printed_material'])) {
+    $values = $request_state['presentation']['printed_material'];
   }
 
   $build = FALSE;
@@ -5377,21 +5377,21 @@ function mfcs_get_event_field_presentation_printed_material($form, &$form_state,
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['printed_material'] = array(
-      '#id' => 'field-event-presentation-printed_material',
+      '#id' => 'field-request-presentation-printed_material',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-presentation-printed_material',
+          'field-request-item',
+          'field-request-item-presentation-printed_material',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['presentation']['printed_material'][$key] = array(
-        '#id' => 'field-event-presentation-printed_material-' . $key,
+        '#id' => 'field-request-presentation-printed_material-' . $key,
         '#type' => 'radios',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -5414,7 +5414,7 @@ function mfcs_get_event_field_presentation_printed_material($form, &$form_state,
   else {
     foreach ($values as $key => $value) {
       $fields['presentation']['printed_material'][$key] = array(
-        '#id' => 'field-event-presentation-printed_material-' . $key,
+        '#id' => 'field-request-presentation-printed_material-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -5427,10 +5427,10 @@ function mfcs_get_event_field_presentation_printed_material($form, &$form_state,
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_presentation_university_logo($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_presentation_university_logo($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => 0);
-  if (!empty($event_state['presentation']['university_logo'])) {
-    $values = $event_state['presentation']['university_logo'];
+  if (!empty($request_state['presentation']['university_logo'])) {
+    $values = $request_state['presentation']['university_logo'];
   }
 
   $build = FALSE;
@@ -5452,21 +5452,21 @@ function mfcs_get_event_field_presentation_university_logo($form, &$form_state, 
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['university_logo'] = array(
-      '#id' => 'field-event-presentation-university_logo',
+      '#id' => 'field-request-presentation-university_logo',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-presentation-university_logo',
+          'field-request-item',
+          'field-request-item-presentation-university_logo',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['presentation']['university_logo'][$key] = array(
-        '#id' => 'field-event-presentation-university_logo-' . $key,
+        '#id' => 'field-request-presentation-university_logo-' . $key,
         '#type' => 'radios',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -5501,7 +5501,7 @@ function mfcs_get_event_field_presentation_university_logo($form, &$form_state, 
   else {
     foreach ($values as $key => $value) {
       $fields['presentation']['university_logo'][$key] = array(
-        '#id' => 'field-event-presentation-university_logo-' . $key,
+        '#id' => 'field-request-presentation-university_logo-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -5514,10 +5514,10 @@ function mfcs_get_event_field_presentation_university_logo($form, &$form_state, 
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_presentation_designing_material($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_presentation_designing_material($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => array());
-  if (!empty($event_state['presentation']['designing_material'])) {
-    $values = $event_state['presentation']['designing_material'];
+  if (!empty($request_state['presentation']['designing_material'])) {
+    $values = $request_state['presentation']['designing_material'];
   }
 
   $build = FALSE;
@@ -5539,23 +5539,23 @@ function mfcs_get_event_field_presentation_designing_material($form, &$form_stat
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['designing_material'] = array(
-      '#id' => 'field-event-presentation-designing_material',
+      '#id' => 'field-request-presentation-designing_material',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-presentation-designing_material',
+          'field-request-item',
+          'field-request-item-presentation-designing_material',
         ),
       ),
     );
 
-    $desiging_material_options = event_workflow_get_designing_material_list_options('checkboxes');
+    $desiging_material_options = mfcs_get_designing_material_list_options('checkboxes');
 
     foreach ($values as $key => $value) {
       $fields['presentation']['designing_material'][$key] = array(
-        '#id' => 'field-event-presentation-designing_material-' . $key,
+        '#id' => 'field-request-presentation-designing_material-' . $key,
         '#type' => 'checkboxes',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -5591,7 +5591,7 @@ function mfcs_get_event_field_presentation_designing_material($form, &$form_stat
   else {
     foreach ($values as $key => $value) {
       $fields['presentation']['designing_material'][$key] = array(
-        '#id' => 'field-event-presentation-designing_material-' . $key,
+        '#id' => 'field-request-presentation-designing_material-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -5604,10 +5604,10 @@ function mfcs_get_event_field_presentation_designing_material($form, &$form_stat
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_presentation_designing_material_name($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_presentation_designing_material_name($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['presentation']['designing_material_name'])) {
-    $values = $event_state['presentation']['designing_material_name'];
+  if (!empty($request_state['presentation']['designing_material_name'])) {
+    $values = $request_state['presentation']['designing_material_name'];
   }
 
   $build = FALSE;
@@ -5630,21 +5630,21 @@ function mfcs_get_event_field_presentation_designing_material_name($form, &$form
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['designing_material_name'] = array(
-      '#id' => 'field-event-presentation-designing_material_name',
+      '#id' => 'field-request-presentation-designing_material_name',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-presentation-designing_material_name',
+          'field-request-item',
+          'field-request-item-presentation-designing_material_name',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['presentation']['designing_material_name'][$key] = array(
-        '#id' => 'field-event-presentation-designing_material_name-' . $key,
+        '#id' => 'field-request-presentation-designing_material_name-' . $key,
         '#type' => 'textfield',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -5683,7 +5683,7 @@ function mfcs_get_event_field_presentation_designing_material_name($form, &$form
   else {
     foreach ($values as $key => $value) {
       $fields['presentation']['designing_material_name'][$key] = array(
-        '#id' => 'field-event-presentation-designing_material_name-' . $key,
+        '#id' => 'field-request-presentation-designing_material_name-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -5696,10 +5696,10 @@ function mfcs_get_event_field_presentation_designing_material_name($form, &$form
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_presentation_designing_material_email($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_presentation_designing_material_email($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['presentation']['designing_material_email'])) {
-    $values = $event_state['presentation']['designing_material_email'];
+  if (!empty($request_state['presentation']['designing_material_email'])) {
+    $values = $request_state['presentation']['designing_material_email'];
   }
 
   $build = FALSE;
@@ -5722,21 +5722,21 @@ function mfcs_get_event_field_presentation_designing_material_email($form, &$for
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['designing_material_email'] = array(
-      '#id' => 'field-event-presentation-designing_material_email',
+      '#id' => 'field-request-presentation-designing_material_email',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-presentation-designing_material_email',
+          'field-request-item',
+          'field-request-item-presentation-designing_material_email',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['presentation']['designing_material_email'][$key] = array(
-        '#id' => 'field-event-presentation-designing_material_email-' . $key,
+        '#id' => 'field-request-presentation-designing_material_email-' . $key,
         '#type' => 'emailfield',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -5775,7 +5775,7 @@ function mfcs_get_event_field_presentation_designing_material_email($form, &$for
   else {
     foreach ($values as $key => $value) {
       $fields['presentation']['designing_material_email'][$key] = array(
-        '#id' => 'field-event-presentation-designing_material_email-' . $key,
+        '#id' => 'field-request-presentation-designing_material_email-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -5788,10 +5788,10 @@ function mfcs_get_event_field_presentation_designing_material_email($form, &$for
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_presentation_designing_material_phone($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_presentation_designing_material_phone($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['presentation']['designing_material_phone'])) {
-    $values = $event_state['presentation']['designing_material_phone'];
+  if (!empty($request_state['presentation']['designing_material_phone'])) {
+    $values = $request_state['presentation']['designing_material_phone'];
   }
 
   $build = FALSE;
@@ -5814,21 +5814,21 @@ function mfcs_get_event_field_presentation_designing_material_phone($form, &$for
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
     $fields['presentation']['designing_material_phone'] = array(
-      '#id' => 'field-event-presentation-designing_material_phone',
+      '#id' => 'field-request-presentation-designing_material_phone',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-presentation-designing_material_phone',
+          'field-request-item',
+          'field-request-item-presentation-designing_material_phone',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['presentation']['designing_material_phone'][$key] = array(
-        '#id' => 'field-event-presentation-designing_material_phone-' . $key,
+        '#id' => 'field-request-presentation-designing_material_phone-' . $key,
         '#type' => 'telfield',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -5865,7 +5865,7 @@ function mfcs_get_event_field_presentation_designing_material_phone($form, &$for
   else {
     foreach ($values as $key => $value) {
       $fields['presentation']['designing_material_phone'][$key] = array(
-        '#id' => 'field-event-presentation-designing_material_phone-' . $key,
+        '#id' => 'field-request-presentation-designing_material_phone-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -5878,10 +5878,10 @@ function mfcs_get_event_field_presentation_designing_material_phone($form, &$for
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_services_food_served($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_services_food_served($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => 0);
-  if (!empty($event_state['services']['food_served'])) {
-    $values = $event_state['services']['food_served'];
+  if (!empty($request_state['services']['food_served'])) {
+    $values = $request_state['services']['food_served'];
   }
 
   $field_title = "Will Food or Drink be Served? " . '<span class="title_display-note some_venues_dont_permit">' . "(Note some venues do not permit food and drink)</span>";
@@ -5899,21 +5899,21 @@ function mfcs_get_event_field_services_food_served($form, &$form_state, &$fields
 
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('services', $form['form']['sections']['#value'])) {
     $fields['services']['food_served'] = array(
-      '#id' => 'field-event-services-food_served',
+      '#id' => 'field-request-services-food_served',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-services-food_served',
+          'field-request-item',
+          'field-request-item-services-food_served',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['services']['food_served'][$key] = array(
-        '#id' => 'field-event-services-food_served-' . $key,
+        '#id' => 'field-request-services-food_served-' . $key,
         '#type' => 'radios',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -5936,7 +5936,7 @@ function mfcs_get_event_field_services_food_served($form, &$form_state, &$fields
   else {
     foreach ($values as $key => $value) {
       $fields['services']['food_served'][$key] = array(
-        '#id' => 'field-event-services-food_served-' . $key,
+        '#id' => 'field-request-services-food_served-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -5949,10 +5949,10 @@ function mfcs_get_event_field_services_food_served($form, &$form_state, &$fields
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_services_food_caterer($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_services_food_caterer($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['services']['food_caterer'])) {
-    $values = $event_state['services']['food_caterer'];
+  if (!empty($request_state['services']['food_caterer'])) {
+    $values = $request_state['services']['food_caterer'];
   }
 
   $field_title = "Provide the Name of the Caterer/Busineess";
@@ -5969,21 +5969,21 @@ function mfcs_get_event_field_services_food_caterer($form, &$form_state, &$field
 
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('services', $form['form']['sections']['#value'])) {
     $fields['services']['food_caterer'] = array(
-      '#id' => 'field-event-services-food_caterer',
+      '#id' => 'field-request-services-food_caterer',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-services-food_caterer',
+          'field-request-item',
+          'field-request-item-services-food_caterer',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['services']['food_caterer'][$key] = array(
-        '#id' => 'field-event-services-food_caterer-' . $key,
+        '#id' => 'field-request-services-food_caterer-' . $key,
         '#type' => 'textfield',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -6017,7 +6017,7 @@ function mfcs_get_event_field_services_food_caterer($form, &$form_state, &$field
   else {
     foreach ($values as $key => $value) {
       $fields['services']['food_caterer'][$key] = array(
-        '#id' => 'field-event-services-food_caterer-' . $key,
+        '#id' => 'field-request-services-food_caterer-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -6030,10 +6030,10 @@ function mfcs_get_event_field_services_food_caterer($form, &$form_state, &$field
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_services_alcohol($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_services_alcohol($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => 0);
-  if (!empty($event_state['services']['alcohol'])) {
-    $values = $event_state['services']['alcohol'];
+  if (!empty($request_state['services']['alcohol'])) {
+    $values = $request_state['services']['alcohol'];
   }
 
   $field_title = "Will Alcohol be Served?";
@@ -6051,21 +6051,21 @@ function mfcs_get_event_field_services_alcohol($form, &$form_state, &$fields, &$
 
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('services', $form['form']['sections']['#value'])) {
     $fields['services']['alcohol'] = array(
-      '#id' => 'field-event-services-alcohol',
+      '#id' => 'field-request-services-alcohol',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-services-alcohol',
+          'field-request-item',
+          'field-request-item-services-alcohol',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['services']['alcohol'][$key] = array(
-        '#id' => 'field-event-services-alcohol-' . $key,
+        '#id' => 'field-request-services-alcohol-' . $key,
         '#type' => 'radios',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -6088,7 +6088,7 @@ function mfcs_get_event_field_services_alcohol($form, &$form_state, &$fields, &$
   else {
     foreach ($values as $key => $value) {
       $fields['services']['alcohol'][$key] = array(
-        '#id' => 'field-event-services-alcohol-' . $key,
+        '#id' => 'field-request-services-alcohol-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -6101,25 +6101,25 @@ function mfcs_get_event_field_services_alcohol($form, &$form_state, &$fields, &$
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_services_alcohol_note($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_services_alcohol_note($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
 
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('services', $form['form']['sections']['#value'])) {
     $fields['services']['alcohol_note'] = array(
-      '#id' => 'field-event-services-alcohol_note',
+      '#id' => 'field-request-services-alcohol_note',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-services-alcohol_note',
+          'field-request-item',
+          'field-request-item-services-alcohol_note',
         ),
       ),
     );
 
     $fields['services']['alcohol_note'][0] = array(
-      '#id' => 'field-event-services-alcohol_note-0',
+      '#id' => 'field-request-services-alcohol_note-0',
       '#type' => 'container',
       '#states' => array(
         'visible' => array(
@@ -6144,8 +6144,8 @@ function mfcs_get_event_field_services_alcohol_note($form, &$form_state, &$field
       '#markup' => '',
     );
 
-    $fields['services']['alcohol_note'][0]['markup']['#markup'] .= '<div id="markup-event-services-alcohol_note" class="markup-event">';
-    $fields['services']['alcohol_note'][0]['markup']['#markup'] .= 'A formal written request must be submitted to the President for approval of any alcohol served on campus and may require police officer presence at your event for an additional requirement. ';
+    $fields['services']['alcohol_note'][0]['markup']['#markup'] .= '<div id="markup-request-services-alcohol_note" class="markup-request">';
+    $fields['services']['alcohol_note'][0]['markup']['#markup'] .= 'A formal written request must be submitted to the President for approval of any alcohol served on campus and may require police officer presence at your request for an additional requirement. ';
     $fields['services']['alcohol_note'][0]['markup']['#markup'] .= 'Contact the President\'s Office at ext. 5556 for more information. ';
     $fields['services']['alcohol_note'][0]['markup']['#markup'] .= '</div>';
   }
@@ -6156,10 +6156,10 @@ function mfcs_get_event_field_services_alcohol_note($form, &$form_state, &$field
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_services_open_flames($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_services_open_flames($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => 0);
-  if (!empty($event_state['services']['open_flames'])) {
-    $values = $event_state['services']['open_flames'];
+  if (!empty($request_state['services']['open_flames'])) {
+    $values = $request_state['services']['open_flames'];
   }
 
   $build = FALSE;
@@ -6181,21 +6181,21 @@ function mfcs_get_event_field_services_open_flames($form, &$form_state, &$fields
 
   if ($build && $form['form']['step']['#value'] == 'details' && array_key_exists('services', $form['form']['sections']['#value'])) {
     $fields['services']['open_flames'] = array(
-      '#id' => 'field-event-services-open_flames',
+      '#id' => 'field-request-services-open_flames',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-services-open_flames',
+          'field-request-item',
+          'field-request-item-services-open_flames',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['services']['open_flames'][$key] = array(
-        '#id' => 'field-event-open_flames-' . $key,
+        '#id' => 'field-request-open_flames-' . $key,
         '#type' => 'radios',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -6218,7 +6218,7 @@ function mfcs_get_event_field_services_open_flames($form, &$form_state, &$fields
   else {
     foreach ($values as $key => $value) {
       $fields['services']['open_flames'][$key] = array(
-        '#id' => 'field-event-services-open_flames-' . $key,
+        '#id' => 'field-request-services-open_flames-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -6231,10 +6231,10 @@ function mfcs_get_event_field_services_open_flames($form, &$form_state, &$fields
 /**
  * Process and build a specific form field.
  */
-function mfcs_get_event_field_additional($form, &$form_state, &$fields, &$event_state, $ps) {
+function mfcs_get_request_field_additional($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($event_state['additional'])) {
-    $values = $event_state['additional'];
+  if (!empty($request_state['additional'])) {
+    $values = $request_state['additional'];
   }
 
   $field_title = "Please Provide any Other Information or Questions you may Have for Campus Officials";
@@ -6252,21 +6252,21 @@ function mfcs_get_event_field_additional($form, &$form_state, &$fields, &$event_
 
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('top', $form['form']['sections']['#value'])) {
     $fields['additional'] = array(
-      '#id' => 'field-event-additional',
+      '#id' => 'field-request-additional',
       '#type' => 'container',
       '#tree' => TRUE,
       '#attributes' => array(
         'class' => array(
           'form-item-wrapper',
-          'field-event-item',
-          'field-event-item-additional',
+          'field-request-item',
+          'field-request-item-additional',
         ),
       ),
     );
 
     foreach ($values as $key => $value) {
       $fields['additional'][$key] = array(
-        '#id' => 'field-event-additional-' . $key,
+        '#id' => 'field-request-additional-' . $key,
         '#type' => 'textarea',
         '#title' => $field_title,
         '#default_value' => $value,
@@ -6286,7 +6286,7 @@ function mfcs_get_event_field_additional($form, &$form_state, &$fields, &$event_
   else {
     foreach ($values as $key => $value) {
       $fields['additional'][$key] = array(
-        '#id' => 'field-event-additional-' . $key,
+        '#id' => 'field-request-additional-' . $key,
         '#type' => 'value',
         '#value' => $value,
       );
@@ -6312,7 +6312,7 @@ function mfcs_get_event_field_additional($form, &$form_state, &$fields, &$event_
  *   - options: all available select list options.
  *   - value: the default value to use.
  */
-function event_workflow_determine_user_classification($state = array(), $user = NULL) {
+function mfcs_determine_user_classification($state = array(), $user = NULL) {
   $information = array();
   $information['count'] = 0;
   $information['options'] = array();
@@ -6329,7 +6329,7 @@ function event_workflow_determine_user_classification($state = array(), $user = 
     return $information;
   }
 
-  $information['options'] = event_workflow_get_event_classification_list_options(NULL, $user);
+  $information['options'] = mfcs_get_request_classification_list_options(NULL, $user);
   $information['count'] = count($information['options']);
 
   if ($information['count'] == 1) {
@@ -6355,18 +6355,18 @@ function event_workflow_determine_user_classification($state = array(), $user = 
 }
 
 /**
- * Returns an array containing event information details.
+ * Returns an array containing request information details.
  *
- * @param array $event
- *   The pre-loaded event values array.
+ * @param array $request
+ *   The pre-loaded request values array.
  *
  * @return array|bool
- *   An array containing the event information details.
+ *   An array containing the request information details.
  *   FALSE is returned on error.
  */
-function event_workflow_get_event_existing_values($event) {
-  if (!is_array($event)) {
-    cf_error::invalid_array('event');
+function mfcs_get_request_existing_values($request) {
+  if (!is_array($request)) {
+    cf_error::invalid_array('request');
     return FALSE;
   }
 
@@ -6399,8 +6399,8 @@ function event_workflow_get_event_existing_values($event) {
           $alternate_array = array(0 => NULL);
 
           foreach ($field_structure['alternate'] as $alternate_name => $alternate_structure) {
-            if (!empty($event[$structure_group][$alternate_name])) {
-              foreach ($event[$structure_group][$alternate_name] as $alternate_key => $alternate_object) {
+            if (!empty($request[$structure_group][$alternate_name])) {
+              foreach ($request[$structure_group][$alternate_name] as $alternate_key => $alternate_object) {
                 $alternate_array[$alternate_key][$alternate_structure['key']] = NULL;
 
                 if (property_exists($alternate_object, 'value')) {
@@ -6424,8 +6424,8 @@ function event_workflow_get_event_existing_values($event) {
 
             $alternate_exception = &$structure[$alternate_parts[0]][$alternate_parts[1]];
 
-            if (!empty($event[$alternate_parts[0]][$alternate_parts[1]])) {
-              foreach ($event[$alternate_parts[0]][$alternate_parts[1]] as $alternate_key => $alternate_object) {
+            if (!empty($request[$alternate_parts[0]][$alternate_parts[1]])) {
+              foreach ($request[$alternate_parts[0]][$alternate_parts[1]] as $alternate_key => $alternate_object) {
                 $alternate_array[$alternate_key][$alternate_structure['key']] = NULL;
 
                 if (property_exists($alternate_object, 'value')) {
@@ -6440,4 +6440,73 @@ function event_workflow_get_event_existing_values($event) {
 
           $current = array(0 => NULL);
           foreach ($alternate_array as $alternate_key => &$alternate_values) {
-            if
+            if (!empty($field_structure['alternate_method']['explode'][0]) && !empty($alternate_values)) {
+              ksort($alternate_values);
+              $current[$alternate_key] = implode($field_structure['alternate_method']['explode'][0], $alternate_values);
+            }
+            else {
+              $current[$alternate_key] = NULL;
+            }
+          }
+        }
+      }
+      else {
+        $current = array(0 => NULL);
+
+        if (!empty($request[$structure_group][$field_name])) {
+          foreach ($request[$structure_group][$field_name] as $field_key => $field_object) {
+            if (empty($field_structure['columns'])) {
+              if (property_exists($field_object, 'value')) {
+                $current[$field_key] = $field_object->value;
+
+                if (array_key_exists('storage', $field_structure) && is_string($field_structure['storage']) && !empty($field_structure['storage'])) {
+                  $storage_method = $field_structure['storage'];
+
+                  if (array_key_exists($storage_method, $field_structure) && is_array($field_structure[$storage_method])) {
+                    $converted = mfcs_convert_value_from_database_format($current[$field_key], $storage_method, $field_structure[$storage_method]);
+
+                    if ($converted !== FALSE) {
+                      $current[$field_key] = $converted;
+                    }
+                  }
+                }
+              }
+              else {
+                $current[$field_key] = NULL;
+              }
+            }
+            else {
+              $current[$field_key] = array();
+
+              foreach ($field_structure['columns'] as $column_id => $column_name) {
+                $current[$field_key][$column_id] = NULL;
+
+                if (property_exists($field_object, $column_name)) {
+                  $current[$field_key][$column_id] = $field_object->$column_name;
+
+                  if (array_key_exists('storage', $field_structure) && is_string($field_structure['storage']) && !empty($field_structure['storage'])) {
+                    $storage_method = $field_structure['storage'];
+
+                    if (array_key_exists($storage_method, $field_structure) && is_array($field_structure[$storage_method])) {
+                      $converted = mfcs_convert_value_from_database_format($current[$field_key][$column_id], $storage_method, $field_structure[$storage_method]);
+
+                      if ($converted !== FALSE) {
+                        $current[$field_key][$column_id] = $converted;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return $processed;
+}
+
+/**
+ * @} End of '@addtogroup mfcs'.
+ */

@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Defines McNeese facilities use event calendar page functions.
+ * Defines McNeese facilities use request calendar page functions.
  */
 
 /**
@@ -11,7 +11,7 @@
  */
 
 /**
- * Provides the facilities use event calendar month page.
+ * Provides the facilities use request calendar month page.
  *
  * @param int $year
  *   (optional) When specified, represents the year.
@@ -22,7 +22,7 @@
  * @return string
  *   The HTML output representing the page.
  */
-function mfcs_event_calendar_month_0_page($year = NULL, $month = NULL) {
+function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
   if (!is_null($year) && !cf_is_integer($year)) {
     cf_error::invalid_integer('year');
 
@@ -168,7 +168,7 @@ function mfcs_event_calendar_month_0_page($year = NULL, $month = NULL) {
     'sort' => 'ASC',
   );
 
-  $results = mfcs_event_load_listing($search, FALSE, 0, 0, $sorting);
+  $results = mfcs_request_load_listing($search, FALSE, 0, 0, $sorting);
 
   $rows = array();
   $rows_count = 0;
@@ -194,7 +194,7 @@ function mfcs_event_calendar_month_0_page($year = NULL, $month = NULL) {
         if (!isset($rows[$month_day][$item->id])) {
           $item_title = check_plain($item->title);
           $rows[$month_day][$item->id] = array(
-            'href' => $base_path . 'events/view-0/' . $item->id,
+            'href' => $base_path . 'requests/view-0/' . $item->id,
             'title' => $item_title,
             'tooltip' => '[' . check_plain($item->location_name) . '] ' . check_plain($item->building_name) . ' ' . check_plain($item->room_name) . ': ' . $item_title,
             'date' => $date,
@@ -208,7 +208,7 @@ function mfcs_event_calendar_month_0_page($year = NULL, $month = NULL) {
   }
 
   $markup = '';
-  $title = '<h3>' . "Events for " . date("F, Y", $month_start) . '</h3>';
+  $title = '<h3>' . "Requests for " . date("F, Y", $month_start) . '</h3>';
   $result = mfcs_build_calendar_month_markup($rows, $month_start, $month_stop, $absolute_start, $absolute_stop, $title);
   if ($result !== FALSE) {
     $markup .= $result;
@@ -219,7 +219,7 @@ function mfcs_event_calendar_month_0_page($year = NULL, $month = NULL) {
 }
 
 /**
- * Provides the facilities use event calendar month page.
+ * Provides the facilities use request calendar month page.
  *
  * @param int $year
  *   (optional) When specified, represents the year.
@@ -233,7 +233,7 @@ function mfcs_event_calendar_month_0_page($year = NULL, $month = NULL) {
  * @return string
  *   The HTML output representing the page.
  */
-function mfcs_event_calendar_day_0_page($year = NULL, $month = NULL, $day = NULL) {
+function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NULL) {
   if (!is_null($year) && !cf_is_integer($year)) {
     cf_error::invalid_integer('year');
 
@@ -257,3 +257,12 @@ function mfcs_event_calendar_day_0_page($year = NULL, $month = NULL, $day = NULL
 
   $user = cf_current_user();
 
+  mfcs_include(4);
+
+  // @todo: finish this.
+  return '';
+}
+
+/**
+ * @} End of '@addtogroup mfcs'.
+ */

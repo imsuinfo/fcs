@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Defines McNeese facilities use event create page functions.
+ * Defines McNeese facilities use request create page functions.
  */
 
 /**
@@ -11,38 +11,38 @@
  */
 
 /**
- * Provides the facilities use event create page.
+ * Provides the facilities use request create page.
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
- * @param int $clone_event
- *   (optional) When specified, will clone an existing event in which the
+ * @param int $clone_request
+ *   (optional) When specified, will clone an existing request in which the
  *   current user has appropriate access to view and edit.
  *
  * @return array $form
  *   An array containing the generated form.
  */
-function mfcs_event_create_0_form($form, &$form_state, $clone_event = NULL) {
+function mfcs_request_create_0_form($form, &$form_state, $clone_request = NULL) {
   $form = array();
 
-  $event = NULL;
-  if (!is_null($clone_event)) {
-    if (!cf_is_integer($clone_event)) {
-      cf_error::invalid_integer('clone_event');
+  $request = NULL;
+  if (!is_null($clone_request)) {
+    if (!cf_is_integer($clone_request)) {
+      cf_error::invalid_integer('clone_request');
       drupal_not_found();
       drupal_exit();
     }
 
-    $event = event_workflow_load_event_by_id($clone_event);
+    $request = mfcs_load_request_by_id($clone_request);
 
-    $can_view = mfcs_management_page_event_access('view', $clone_event);
+    $can_view = mfcs_management_page_request_access('view', $clone_request);
 
-    // if the event does not exist or the user cannot access the event to copy, fallback to a normal create.
-    if (empty($event) || !$can_view) {
-      $event = NULL;
-      $clone_event = NULL;
+    // if the request does not exist or the user cannot access the request to copy, fallback to a normal create.
+    if (empty($request) || !$can_view) {
+      $request = NULL;
+      $clone_request = NULL;
     }
   }
 
@@ -63,13 +63,13 @@ function mfcs_event_create_0_form($form, &$form_state, $clone_event = NULL) {
     '#tree' => TRUE,
   );
 
-  $form['event'] = array(
+  $form['request'] = array(
     '#tree' => TRUE,
   );
 
   $form['form']['sections'] = array(
     '#type' => 'value',
-    '#value' => mfcs_get_event_section_information(),
+    '#value' => mfcs_get_request_section_information(),
   );
 
   $form_state['conditionally_required'] = array('#tree' => FALSE, '#type' => 'value');
@@ -103,26 +103,26 @@ function mfcs_event_create_0_form($form, &$form_state, $clone_event = NULL) {
     '#id' => 'field-form-parents',
     '#type' => 'value',
     '#value' => array(
-      'structure' => array('event'),
-      'path' => 'event[',
+      'structure' => array('request'),
+      'path' => 'request[',
     ),
   );
 
-  if (is_array($event)) {
-    $form['form']['existing']['#value'] = event_workflow_get_event_existing_values($event);
-    $event_fields = &$form['form']['existing']['#value']['event'];
+  if (is_array($request)) {
+    $form['form']['existing']['#value'] = mfcs_get_request_existing_values($request);
+    $request_fields = &$form['form']['existing']['#value']['request'];
 
     // Reset fields that should not be copied by the clone process.
-    unset($event_fields['status']);
-    unset($event_fields['step']);
-    unset($event_fields['review']);
-    unset($event_fields['requirements']);
-    unset($event_fields['insurance']);
+    unset($request_fields['status']);
+    unset($request_fields['step']);
+    unset($request_fields['review']);
+    unset($request_fields['requirements']);
+    unset($request_fields['insurance']);
   }
 
-  $statement_markup = 'McNeese State University is happy to provide facilities and resources to our Students, Employees, and the Community to further educational, cultural, and recreational initiatives through events held on campus.<br>';
+  $statement_markup = 'McNeese State University is happy to provide facilities and resources to our Students, Employees, and the Community to further educational, cultural, and recreational initiatives through requests held on campus.<br>';
   $statement_markup .= '<br>';
-  $statement_markup .= 'All activities, meetings, or events, excluding scheduled academic classes, must be scheduled through the Facilities Use and Special Event Request form. The following questionnaire assists campus officials in not only scheduling campus facilities or maintaining a master calendar; it allows better service through inter-departmental communication and collaboration enhancing the excellence of McNeese.<br>';
+  $statement_markup .= 'All activities, meetings, or requests, excluding scheduled academic classes, must be scheduled through the Facilities Use and Special Event Request form. The following questionnaire assists campus officials in not only scheduling campus facilities or maintaining a master calendar; it allows better service through inter-departmental communication and collaboration enhancing the excellence of McNeese.<br>';
   $statement_markup .= '<br>';
   $statement_markup .= 'The questionnaire is designed according to the University\'s <a href="http://www.mcneese.edu/node/3217">Facility Use Policy</a>. Any activity scheduled on behalf of the University, regardless of venue, must be submitted.<br>';
   $statement_markup .= '<br>';
@@ -149,37 +149,37 @@ function mfcs_event_create_0_form($form, &$form_state, $clone_event = NULL) {
       '#default_value' => t("Continue"),
     );
 
-    $form['event'] = array(
-      '#id' => 'section-event',
+    $form['request'] = array(
+      '#id' => 'section-request',
       '#tree' => TRUE,
     );
   }
   else {
-    $form['event'] = mfcs_get_event_fields($form, $form_state);
-    $form['event']['#id'] = 'section-event';
-    $form['event']['#tree'] = TRUE;
+    $form['request'] = mfcs_get_request_fields($form, $form_state);
+    $form['request']['#id'] = 'section-request';
+    $form['request']['#tree'] = TRUE;
 
     if ($step != 'location') {
-      $form['event']['prev'] = array(
-        '#id' => 'submit-event-prev',
-        '#name' => 'submit-event-prev',
+      $form['request']['prev'] = array(
+        '#id' => 'submit-request-prev',
+        '#name' => 'submit-request-prev',
         '#type' => 'submit',
         '#default_value' => t("Back"),
       );
     }
 
     if ($step == 'details') {
-      $form['event']['submit'] = array(
-        '#id' => 'submit-event-submit',
-        '#name' => 'submit-event-submit',
+      $form['request']['submit'] = array(
+        '#id' => 'submit-request-submit',
+        '#name' => 'submit-request-submit',
         '#type' => 'submit',
         '#default_value' => t("Submit"),
       );
     }
     else {
-      $form['event']['next'] = array(
-        '#id' => 'submit-event-next',
-        '#name' => 'submit-event-next',
+      $form['request']['next'] = array(
+        '#id' => 'submit-request-next',
+        '#name' => 'submit-request-next',
         '#type' => 'submit',
         '#default_value' => t("Continue"),
       );
@@ -190,16 +190,16 @@ function mfcs_event_create_0_form($form, &$form_state, $clone_event = NULL) {
 }
 
 /**
- * Pre-Validation for mfcs_event_create_0_form().
+ * Pre-Validation for mfcs_request_create_0_form().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mfcs_event_create_0_form()
+ * @see: mfcs_request_create_0_form()
  */
-function mfcs_event_create_0_form_pre_validate(&$form, &$form_state) {
+function mfcs_request_create_0_form_pre_validate(&$form, &$form_state) {
   $clicked_id = '';
   if (isset($form_state['triggering_element']['#id'])) {
     $clicked_id = $form_state['triggering_element']['#id'];
@@ -216,31 +216,31 @@ function mfcs_event_create_0_form_pre_validate(&$form, &$form_state) {
 
   // do not perform validation when not going backwards or adding fields.
   $dont_validate = array(
-    'submit-event-prev' => TRUE,
-    'submit-event-add-date' => TRUE,
-    'submit-event-remove-date' => TRUE,
+    'submit-request-prev' => TRUE,
+    'submit-request-add-date' => TRUE,
+    'submit-request-remove-date' => TRUE,
   );
 
-  if ($clicked_sub_id == 'submit-event-remove-date' && is_numeric($clicked_id_part)) {
+  if ($clicked_sub_id == 'submit-request-remove-date' && is_numeric($clicked_id_part)) {
     $dont_validate[$clicked_id] = TRUE;
   }
 
   mfcs_include(2);
 
-  mfcs_pre_validate_event_fields($form, $form_state, $dont_validate);
+  mfcs_pre_validate_request_fields($form, $form_state, $dont_validate);
 }
 
 /**
- * Validation for mfcs_event_create_0_form().
+ * Validation for mfcs_request_create_0_form().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mfcs_event_create_0_form()
+ * @see: mfcs_request_create_0_form()
  */
-function mfcs_event_create_0_form_validate($form, &$form_state) {
+function mfcs_request_create_0_form_validate($form, &$form_state) {
   $no_problems = TRUE;
   $form_state['rebuild'] = TRUE;
 
@@ -264,18 +264,18 @@ function mfcs_event_create_0_form_validate($form, &$form_state) {
 
   // do not perform validation when not going backwards or adding fields.
   $dont_validate = array(
-    'submit-event-prev' => TRUE,
-    'submit-event-add-date' => TRUE,
+    'submit-request-prev' => TRUE,
+    'submit-request-add-date' => TRUE,
   );
 
-  if ($clicked_sub_id == 'submit-event-remove-date' && is_numeric($clicked_id_part)) {
+  if ($clicked_sub_id == 'submit-request-remove-date' && is_numeric($clicked_id_part)) {
     $dont_validate[$clicked_id] = TRUE;
   }
 
   if (!array_key_exists($clicked_id, $dont_validate)) {
     mfcs_include(2);
 
-    $no_problems = mfcs_validate_event_fields($form, $form_state);
+    $no_problems = mfcs_validate_request_fields($form, $form_state);
     if (is_null($no_problems)) {
       $no_problems = TRUE;
     }
@@ -294,7 +294,7 @@ function mfcs_event_create_0_form_validate($form, &$form_state) {
       $form_state['values']['form']['step'] = 'rooms';
     }
     elseif ($form_state['values']['form']['step'] == 'rooms') {
-      if ($clicked_id == 'submit-event-prev') {
+      if ($clicked_id == 'submit-request-prev') {
         $form_state['values']['form']['step'] = 'location';
       }
       else {
@@ -302,30 +302,30 @@ function mfcs_event_create_0_form_validate($form, &$form_state) {
       }
     }
     elseif ($form_state['values']['form']['step'] == 'standard') {
-      if ($clicked_id == 'submit-event-prev') {
+      if ($clicked_id == 'submit-request-prev') {
         $form_state['values']['form']['step'] = 'rooms';
       }
-      elseif ($clicked_id == 'submit-event-add-date') {
-        $next_date = count($form_state['values']['event']['dates']['date']);
-        $form_state['values']['event']['dates']['date'][$next_date] = NULL;
-        $form_state['values']['event']['dates']['time_start'][$next_date] = NULL;
-        $form_state['values']['event']['dates']['time_stop'][$next_date] = NULL;
-        $form_state['values']['event']['dates']['category'][$next_date] = NULL;
+      elseif ($clicked_id == 'submit-request-add-date') {
+        $next_date = count($form_state['values']['request']['dates']['date']);
+        $form_state['values']['request']['dates']['date'][$next_date] = NULL;
+        $form_state['values']['request']['dates']['time_start'][$next_date] = NULL;
+        $form_state['values']['request']['dates']['time_stop'][$next_date] = NULL;
+        $form_state['values']['request']['dates']['category'][$next_date] = NULL;
       }
-      elseif ($clicked_sub_id == 'submit-event-remove-date' && is_numeric($clicked_id_part)) {
-        unset($form_state['values']['event']['dates']['date'][$clicked_id_part]);
-        unset($form_state['values']['event']['dates']['time_start'][$clicked_id_part]);
-        unset($form_state['values']['event']['dates']['time_stop'][$clicked_id_part]);
-        unset($form_state['values']['event']['dates']['category'][$clicked_id_part]);
+      elseif ($clicked_sub_id == 'submit-request-remove-date' && is_numeric($clicked_id_part)) {
+        unset($form_state['values']['request']['dates']['date'][$clicked_id_part]);
+        unset($form_state['values']['request']['dates']['time_start'][$clicked_id_part]);
+        unset($form_state['values']['request']['dates']['time_stop'][$clicked_id_part]);
+        unset($form_state['values']['request']['dates']['category'][$clicked_id_part]);
       }
       else {
-        $room = explode('_', $form_state['values']['event']['room'][0], 3);
-        $date = $form_state['values']['event']['dates']['date'];
-        $time_start = $form_state['values']['event']['dates']['time_start'];
-        $time_stop = $form_state['values']['event']['dates']['time_stop'];
+        $room = explode('_', $form_state['values']['request']['room'][0], 3);
+        $date = $form_state['values']['request']['dates']['date'];
+        $time_start = $form_state['values']['request']['dates']['time_start'];
+        $time_stop = $form_state['values']['request']['dates']['time_stop'];
 
         foreach ($date as $key => $d) {
-          $v = event_workflow_convert_value_to_database_format($d, 'date_popup', array('view' => 'Y/m/d'), $form_state, $key);
+          $v = mfcs_convert_value_to_database_format($d, 'date_popup', array('view' => 'Y/m/d'), $form_state, $key);
 
           if ($v === FALSE) {
             unset($date[$key]);
@@ -335,7 +335,7 @@ function mfcs_event_create_0_form_validate($form, &$form_state) {
           else {
             $date[$key] = $v;
 
-            $v = event_workflow_convert_value_to_database_format($time_start[$key], 'timestamp', array('view' => 'h:ia', 'relative_to' => 'event][dates][date'), $form_state, $key);
+            $v = mfcs_convert_value_to_database_format($time_start[$key], 'timestamp', array('view' => 'h:ia', 'relative_to' => 'request][dates][date'), $form_state, $key);
             if ($v === FALSE) {
               $time_start[$key] = NULL;
               $time_stop[$key] = NULL;
@@ -343,7 +343,7 @@ function mfcs_event_create_0_form_validate($form, &$form_state) {
             else {
               $time_start[$key] = $v;
 
-              $v = event_workflow_convert_value_to_database_format($time_stop[$key], 'timestamp', array('view' => 'h:ia', 'relative_to' => 'event][dates][date'), $form_state, $key);
+              $v = mfcs_convert_value_to_database_format($time_stop[$key], 'timestamp', array('view' => 'h:ia', 'relative_to' => 'request][dates][date'), $form_state, $key);
               if ($v === FALSE) {
                 $time_start[$key] = NULL;
                 $time_stop[$key] = NULL;
@@ -358,17 +358,17 @@ function mfcs_event_create_0_form_validate($form, &$form_state) {
         }
 
         if (!empty($date)) {
-          $events_using_room = mfcs_check_room_availability($room[0], $date, $time_start, $time_stop);
+          $requests_using_room = mfcs_check_room_availability($room[0], $date, $time_start, $time_stop);
 
-          if ($events_using_room === FALSE) {
+          if ($requests_using_room === FALSE) {
             form_set_error('', "An internal error occurred while checking the room for availability. Please contact the support staff.");
           }
-          elseif (!empty($events_using_room)) {
+          elseif (!empty($requests_using_room)) {
             mfcs_display_room_unavailable_message();
 
             // force the status to be closed due to room being unavailable on save.
-            $form_state['values']['event']['status'][0] = MFCS_EVENT_STATUS_CLOSED_UNAVAILABLE;
-            $form_state['values']['event']['step'][0] = MFCS_REVIEW_STEP_COMPLETED;
+            $form_state['values']['request']['status'][0] = MFCS_EVENT_STATUS_CLOSED_UNAVAILABLE;
+            $form_state['values']['request']['step'][0] = MFCS_REVIEW_STEP_COMPLETED;
           }
         }
 
@@ -378,26 +378,26 @@ function mfcs_event_create_0_form_validate($form, &$form_state) {
         unset($time_stop);
 
 
-        if (empty($form_state['values']['event']['information']['type'][0])) {
-          form_set_error('event][information][type][0', "The <strong>" . $form['event']['information']['type'][0]['#title'] . "</strong> is required.");
+        if (empty($form_state['values']['request']['information']['type'][0])) {
+          form_set_error('request][information][type][0', "The <strong>" . $form['request']['information']['type'][0]['#title'] . "</strong> is required.");
         }
         else {
-          $type_term = taxonomy_term_load($form_state['values']['event']['information']['type'][0]);
+          $type_term = taxonomy_term_load($form_state['values']['request']['information']['type'][0]);
 
           if (is_object($type_term)) {
             $form_state['values']['form']['step'] = 'details';
           }
           else {
-            form_set_error('event][information][type][0', "An invalid <strong>" . $form['event']['information']['type'][0]['#title'] . "</strong> is has been selected.");
+            form_set_error('request][information][type][0', "An invalid <strong>" . $form['request']['information']['type'][0]['#title'] . "</strong> is has been selected.");
           }
         }
       }
     }
     elseif ($form_state['values']['form']['step'] == 'details') {
-      if ($clicked_id == 'submit-event-prev') {
+      if ($clicked_id == 'submit-request-prev') {
         $form_state['values']['form']['step'] = 'standard';
       }
-      elseif ($clicked_id == 'submit-event-submit') {
+      elseif ($clicked_id == 'submit-request-submit') {
         $form_state['rebuild'] = FALSE;
       }
     }
@@ -405,29 +405,29 @@ function mfcs_event_create_0_form_validate($form, &$form_state) {
 }
 
 /**
- * Submit process for mfcs_event_create_0_form().
+ * Submit process for mfcs_request_create_0_form().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mfcs_event_create_0_form()
+ * @see: mfcs_request_create_0_form()
  */
-function mfcs_event_create_0_form_submit($form, &$form_state) {
+function mfcs_request_create_0_form_submit($form, &$form_state) {
   $user = cf_current_user();
 
   $user_data = array(
     'user_id' => $user->uid,
   );
 
-  $mfcs_event_requests = array(
+  $mfcs_requests = array(
     'user_id' => (int) $user_data['user_id'],
     'created' => REQUEST_TIME,
     'updated' => REQUEST_TIME,
   );
 
-  $mfcs_event_revisions = array(
+  $mfcs_request_revisions = array(
     'date' => REQUEST_TIME,
     'revision' => 0,
   );
@@ -486,20 +486,20 @@ function mfcs_event_create_0_form_submit($form, &$form_state) {
 
   try {
     // now perform the operations.
-    $query = db_insert('mfcs_event_requests');
-    $query->fields($mfcs_event_requests);
+    $query = db_insert('mfcs_requests');
+    $query->fields($mfcs_requests);
     $request_id = $query->execute();
 
     if (!is_numeric($request_id) || $request_id <= 0) {
-      // the event was not properly saved, present an error here.
+      // the request was not properly saved, present an error here.
       $transaction->rollback();
       return FALSE;
     }
 
-    $mfcs_event_revisions['request_id'] = $request_id;
+    $mfcs_request_revisions['request_id'] = $request_id;
 
-    $query = db_insert('mfcs_event_revisions');
-    $query->fields($mfcs_event_revisions);
+    $query = db_insert('mfcs_request_revisions');
+    $query->fields($mfcs_request_revisions);
     $query->execute();
 
     foreach ($structure_field_tables as $table_name => $fields) {
@@ -531,8 +531,8 @@ function mfcs_event_create_0_form_submit($form, &$form_state) {
   }
 
   if ($failure) {
-    form_set_error('form', "An error occurred while trying to save the event request. Please contact the support staff.");
-    watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to save the event request.", array(), WATCHDOG_ERROR);
+    form_set_error('form', "An error occurred while trying to save the request. Please contact the support staff.");
+    watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to save the request.", array(), WATCHDOG_ERROR);
 
     $form_state['rebuild'] = TRUE;
     $form_state['redirect'] = FALSE;
@@ -547,4 +547,23 @@ function mfcs_event_create_0_form_submit($form, &$form_state) {
     $parameters['changed_by'] = $user->uid;
     $parameters['changed_type'] = 'user';
     $parameters['new'] = TRUE;
-    mcneese_
+    mfcs_send_workflow_emails($request_id, $parameters);
+  }
+
+  // redirect after submitting.
+  if (empty($form_state['values']['redirect_to'])) {
+    if (empty($request_id)) {
+      $form_state['redirect'] = 'requests';
+    }
+    else {
+      $form_state['redirect'] = 'requests/view-0/' . $request_id;
+    }
+  }
+  else {
+    $form_state['redirect'] = $form_state['values']['redirect_to'];
+  }
+}
+
+/**
+ * @} End of '@addtogroup mfcs'.
+ */

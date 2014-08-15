@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Defines McNeese facilities use event review page functions.
+ * Defines McNeese facilities use request review page functions.
  */
 
 /**
@@ -11,7 +11,7 @@
  */
 
  /**
- * Provides the facilities use event review page.
+ * Provides the facilities use request review page.
  *
  * @param int $page_number
  *   (optional) When there are more than a certain number of rows,
@@ -20,7 +20,7 @@
  * @return string
  *   The HTML output representing the page.
  */
-function mfcs_event_review_0_page($form, &$form_state, $page_number = 0) {
+function mfcs_request_review_0_page($form, &$form_state, $page_number = 0) {
   if (!cf_is_integer($page_number)) {
     // because this is a url argument passed as a variable, just force a 0 for invalid paths.
     $page_number = 0;
@@ -38,18 +38,18 @@ function mfcs_event_review_0_page($form, &$form_state, $page_number = 0) {
 
   $user = cf_current_user();
 
-  $can_create = mfcs_management_page_event_access('create');
-  $can_edit = mfcs_management_page_event_access('edit');
-  $can_view = mfcs_management_page_event_access('view');
-  $can_list = mfcs_management_page_event_access('list');
-  $can_search = mfcs_management_page_event_access('search');
-  $can_delete = mfcs_management_page_event_access('delete');
-  $can_log = mfcs_management_page_event_access('log');
-  $can_review = mfcs_management_page_event_access('review');
+  $can_create = mfcs_management_page_request_access('create');
+  $can_edit = mfcs_management_page_request_access('edit');
+  $can_view = mfcs_management_page_request_access('view');
+  $can_list = mfcs_management_page_request_access('list');
+  $can_search = mfcs_management_page_request_access('search');
+  $can_delete = mfcs_management_page_request_access('delete');
+  $can_log = mfcs_management_page_request_access('log');
+  $can_review = mfcs_management_page_request_access('review');
 
-  $manager = user_access('mcneese facilities use manage');
-  $reviewer = user_access('mcneese facilities use review');
-  $requester = user_access('mcneese facilities use request');
+  $manager = user_access('mfcs manage');
+  $reviewer = user_access('mfcs review');
+  $requester = user_access('mfcs request');
 
 
   // load sorting information
@@ -75,7 +75,7 @@ function mfcs_event_review_0_page($form, &$form_state, $page_number = 0) {
 
   mfcs_include(4);
 
-  $results = mfcs_event_load_listing(NULL, FALSE, $page_number * $rows_per_page, $rows_per_page, $sorting, TRUE);
+  $results = mfcs_request_load_listing(NULL, FALSE, $page_number * $rows_per_page, $rows_per_page, $sorting, TRUE);
 
   $rows = array();
   $total_results = 0;
@@ -92,10 +92,10 @@ function mfcs_event_review_0_page($form, &$form_state, $page_number = 0) {
         break;
       }
 
-      $can_edit_event = mfcs_management_page_event_access('edit', $item->id);
-      $can_review_event = mfcs_management_page_event_access('review', $item->id);
-      $can_log_event = mfcs_management_page_event_access('log', $item->id);
-      $can_history_event = mfcs_management_page_event_access('history', $item->id);
+      $can_edit_request = mfcs_management_page_request_access('edit', $item->id);
+      $can_review_request = mfcs_management_page_request_access('review', $item->id);
+      $can_log_request = mfcs_management_page_request_access('log', $item->id);
+      $can_history_request = mfcs_management_page_request_access('history', $item->id);
 
       $row['id'] = $item->id;
       $row['title'] = check_plain($item->title);
@@ -119,7 +119,7 @@ function mfcs_event_review_0_page($form, &$form_state, $page_number = 0) {
         }
       }
 
-      $step_options = event_workflow_get_event_steps_list_options();
+      $step_options = mfcs_get_request_steps_list_options();
 
       $row['step'] = $step_options[$item->step];
 
@@ -154,31 +154,31 @@ function mfcs_event_review_0_page($form, &$form_state, $page_number = 0) {
       $row['created'] = check_plain(date("Y/m/d h:ia", $date_stamp));
 
       $row['operations'] = '';
-      $row['operations'] .= '<a href="' . $base_path . 'events/view-0/' . $item->id . '" class="operation-link operation-link-view">View</a> ';
+      $row['operations'] .= '<a href="' . $base_path . 'requests/view-0/' . $item->id . '" class="operation-link operation-link-view">View</a> ';
 
-      if ($can_edit_event) {
-        $row['operations'] .= '<a href="' . $base_path . 'events/edit-0/' . $item->id . '/request" class="operation-link operation-link-edit">Edit</a> ';
+      if ($can_edit_request) {
+        $row['operations'] .= '<a href="' . $base_path . 'requests/edit-0/' . $item->id . '/request" class="operation-link operation-link-edit">Edit</a> ';
       }
 
-      if ($can_review_event) {
-        $row['operations'] .= '<a href="' . $base_path . 'events/view-0/' . $item->id . '/3" class="operation-link operation-link-review">Review</a> ';
+      if ($can_review_request) {
+        $row['operations'] .= '<a href="' . $base_path . 'requests/view-0/' . $item->id . '/3" class="operation-link operation-link-review">Review</a> ';
       }
 
-      if ($can_log_event) {
-        $row['operations'] .= '<a href="' . $base_path . 'events/view-0/' . $item->id . '/2" class="operation-link operation-link-log">Log</a> ';
+      if ($can_log_request) {
+        $row['operations'] .= '<a href="' . $base_path . 'requests/view-0/' . $item->id . '/2" class="operation-link operation-link-log">Log</a> ';
       }
 
-      if ($can_history_event) {
-        $row['operations'] .= '<a href="' . $base_path . 'events/history-0/' . $item->id . '" class="operation-link operation-link-history">History</a> ';
+      if ($can_history_request) {
+        $row['operations'] .= '<a href="' . $base_path . 'requests/history-0/' . $item->id . '" class="operation-link operation-link-history">History</a> ';
       }
 
       if ($can_delete) {
         // @todo: implement this.
-        #$row['operations'] .= '<a href="' . $base_path . 'events/delete-0/' . $item->id . '" class="operation-link operation-link-delete">Delete</a> ';
+        #$row['operations'] .= '<a href="' . $base_path . 'requests/delete-0/' . $item->id . '" class="operation-link operation-link-delete">Delete</a> ';
       }
 
       if ($can_create) {
-        $row['operations'] .= '<a href="' . $base_path . 'events/create-0/' . $item->id . '" class="operation-link operation-link-clone">Copy</a> ';
+        $row['operations'] .= '<a href="' . $base_path . 'requests/create-0/' . $item->id . '" class="operation-link operation-link-clone">Copy</a> ';
       }
 
       $rows[$item->id] = $row;
@@ -186,7 +186,7 @@ function mfcs_event_review_0_page($form, &$form_state, $page_number = 0) {
   }
 
   $table = array();
-  $table['caption'] = "Event Requests";
+  $table['caption'] = "Requests";
   $table['header'] = array(
     'id' => array('field' => 'id', 'data' => "ID", 'align' => 'center'),
     'title' => array('field' => 'title', 'data' => "Title", 'align' => 'center'),
@@ -201,23 +201,33 @@ function mfcs_event_review_0_page($form, &$form_state, $page_number = 0) {
   );
 
   $table['attributes'] = array();
-  $table['attributes']['summary'] = "A listing of event requests associated by ID.";
+  $table['attributes']['summary'] = "A listing of requests associated by ID.";
 
   $table['rows'] = $rows;
-  $table['empty'] = "There are no event requests available for to your account.";
+  $table['empty'] = "There are no requests available for to your account.";
 
   $output .= theme('table', $table);
 
-  $output .= '<div class="event_request-listing-page-navigator">';
+  $output .= '<div class="request-listing-page-navigator">';
   if ($page_number > 0) {
     if ($page_number == 1) {
-      $output .= '<a href="' . $base_path . 'events/review-0" class="event_request-listing-page-choice event_request-listing-page-previous" title="Previous Page">Prev</a>';
+      $output .= '<a href="' . $base_path . 'requests/review-0" class="request-listing-page-choice request-listing-page-previous" title="Previous Page">Prev</a>';
     }
     else {
       $previous_page = $page_number - 1;
-      $output .= '<a href="' . $base_path . 'events/review-0/' . $previous_page . '" class="event_request-listing-page-choice event_request-listing-page-previous" title="Previous Page">Prev</a>';
+      $output .= '<a href="' . $base_path . 'requests/review-0/' . $previous_page . '" class="request-listing-page-choice request-listing-page-previous" title="Previous Page">Prev</a>';
     }
   }
 
   if ($total_results > $rows_per_page) {
     $next_page = $page_number + 1;
+    $output .= '<a href="' . $base_path . 'requests/review-0/' . $next_page . '" class="request-listing-page-choice request-listing-page-next" title="Next Page">Next</a>';
+  }
+  $output .= '</div>';
+
+  return $form;
+}
+
+/**
+ * @} End of '@addtogroup mfcs'.
+ */

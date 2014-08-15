@@ -48,7 +48,7 @@ function mfcs_table_install_structure() {
     'category' => 'unsigned',
   );
 
-  $structure['event_coordinator'] = array(
+  $structure['request_coordinator'] = array(
     'name' => 'varchar',
     'phone' => 'varchar',
     'email' => 'varchar',
@@ -143,32 +143,32 @@ function mfcs_schema() {
 
 
   // create the primary tables.
-  $schema['mfcs_event_requests'] = array(
-    'description' => $t("McNeese Facilities Use Event Requests table. This represents individual events and is the primary table for event information."),
+  $schema['mfcs_requests'] = array(
+    'description' => $t("McNeese Facilities Use Requests table. This represents individual requests and is the primary table for request information."),
     'fields' => array(
       'id' => array(
-        'description' => $t("The primary key used to represent an event request."),
+        'description' => $t("The primary key used to represent an request."),
         'type' => 'serial',
         'size' => 'big',
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
       'user_id' => array(
-        'description' => $t("This is the system id. Represents the user who created the event. This is not a foreign key and instead loosely refers to the user id."),
+        'description' => $t("This is the system id. Represents the user who created the request. This is not a foreign key and instead loosely refers to the user id."),
         'type' => 'int',
         'size' => 'big',
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
       'created' => array(
-        'description' => $t("Represents the date the event was created."),
+        'description' => $t("Represents the date the request was created."),
         'type' => 'int',
         'size' => 'big',
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
       'updated' => array(
-        'description' => $t("Represents the date the event was last updated."),
+        'description' => $t("Represents the date the request was last updated."),
         'type' => 'int',
         'size' => 'big',
         'unsigned' => TRUE,
@@ -178,11 +178,11 @@ function mfcs_schema() {
     'primary key' => array('id'),
   );
 
-  $schema['mfcs_event_revisions'] = array(
-    'description' => $t("McNeese Facilities Use Events field table representing the revision history."),
+  $schema['mfcs_request_revisions'] = array(
+    'description' => $t("McNeese Facilities Use Requests field table representing the revision history."),
     'fields' => array(
       'request_id' => array(
-        'description' => $t("Foreign key to the primary key in the {mfcs_event_requests} table."),
+        'description' => $t("Foreign key to the primary key in the {mfcs_requests} table."),
         'type' => 'int',
         'size' => 'big',
         'unsigned' => TRUE,
@@ -196,7 +196,7 @@ function mfcs_schema() {
         'not null' => TRUE,
       ),
       'date' => array(
-        'description' => $t("Represents the date the event associated with this revision."),
+        'description' => $t("Represents the date the request associated with this revision."),
         'type' => 'int',
         'size' => 'big',
         'unsigned' => TRUE,
@@ -206,14 +206,14 @@ function mfcs_schema() {
     'primary key' => array('request_id', 'revision'),
     'foreign keys' => array(
       'request_id' => array(
-        'table' => 'mfcs_event_requests',
+        'table' => 'mfcs_requests',
         'columns' => array('request_id' => 'id'),
       ),
     ),
   );
 
   $schema['mfcs_reviewers'] = array(
-    'description' => $t("McNeese Facilities Use mapping users to an event classification and a review classification."),
+    'description' => $t("McNeese Facilities Use mapping users to an request classification and a review classification."),
     'fields' => array(
       'id' => array(
         'description' => $t("The primary key used to represent an reviewer."),
@@ -222,15 +222,15 @@ function mfcs_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
-      'event_classification' => array(
-        'description' => $t("The event classification this is associated with."),
+      'request_classification' => array(
+        'description' => $t("The request classification this is associated with."),
         'type' => 'int',
         'size' => 'medium',
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
       'review_step' => array(
-        'description' => $t("The review step for the specified event classification."),
+        'description' => $t("The review step for the specified request classification."),
         'type' => 'int',
         'size' => 'medium',
         'unsigned' => TRUE,
@@ -244,7 +244,7 @@ function mfcs_schema() {
         'not null' => TRUE,
       ),
       'user_id' => array(
-        'description' => $t("This is the system id. Represents the user who created the event."),
+        'description' => $t("This is the system id. Represents the user who created the request."),
         'type' => 'int',
         'size' => 'big',
         'unsigned' => TRUE,
@@ -261,7 +261,7 @@ function mfcs_schema() {
     ),
     'primary key' => array('id'),
     'unique keys' => array(
-      'reviewer' => array('event_classification', 'review_step', 'reviewer_classification', 'user_id'),
+      'reviewer' => array('request_classification', 'review_step', 'reviewer_classification', 'user_id'),
     ),
     'foreign keys' => array(
       'user_id' => array(
@@ -272,7 +272,7 @@ function mfcs_schema() {
   );
 
   $schema['mfcs_review_classifications'] = array(
-    'description' => $t("McNeese Facilities Use Events field table representing a users classifications associated with a given review."),
+    'description' => $t("McNeese Facilities Use Requests field table representing a users classifications associated with a given review."),
     'fields' => array(
       'review_id' => array(
         'description' => $t("Foreign key to the primary key in the {mfcs_field_review_review} table."),
@@ -381,7 +381,7 @@ function mfcs_schema() {
         'not null' => TRUE,
       ),
       'user_id' => array(
-        'description' => $t("This is the system id. Represents the user who created the event."),
+        'description' => $t("This is the system id. Represents the user who created the request."),
         'type' => 'int',
         'size' => 'big',
         'unsigned' => TRUE,
@@ -416,7 +416,7 @@ function mfcs_schema() {
     'description' => $t("McNeese Facilities Use Event Banner table. This is for providing local storage of a given banner category."),
     'fields' => array(
       'id' => array(
-        'description' => $t("The primary key used to represent an event request."),
+        'description' => $t("The primary key used to represent an request."),
         'type' => 'serial',
         'size' => 'big',
         'unsigned' => TRUE,
@@ -455,7 +455,7 @@ function mfcs_schema() {
     'description' => $t("McNeese Facilities Use Event Banner table. This is for providing local storage of a given banner category."),
     'fields' => array(
       'id' => array(
-        'description' => $t("The primary key used to represent an event request."),
+        'description' => $t("The primary key used to represent an request."),
         'type' => 'serial',
         'size' => 'big',
         'unsigned' => TRUE,
@@ -529,7 +529,7 @@ function mfcs_schema() {
     'description' => $t("McNeese Facilities Use Event Banner table. This is for providing local storage of a given banner category."),
     'fields' => array(
       'id' => array(
-        'description' => $t("The primary key used to represent an event request."),
+        'description' => $t("The primary key used to represent an request."),
         'type' => 'serial',
         'size' => 'big',
         'unsigned' => TRUE,
@@ -603,7 +603,7 @@ function mfcs_schema() {
   );
 
 
-  // create the secondary tables associated with the table mfcs_event_requests.
+  // create the secondary tables associated with the table mfcs_requests.
   $structure = mfcs_table_install_structure();
 
   foreach ($structure as $structure_name => &$structure_array) {
@@ -611,10 +611,10 @@ function mfcs_schema() {
       $table_name = 'mfcs_field_' . $structure_name . '_' . $field_name;
 
       $schema[$table_name] = array(
-        'description' => $t("McNeese Facilities Use Events field table for the field: " . $field_name . " associated with the group: " . $structure_name . "."),
+        'description' => $t("McNeese Facilities Use Requests field table for the field: " . $field_name . " associated with the group: " . $structure_name . "."),
         'fields' => array(
           'request_id' => array(
-            'description' => $t("Foreign key to the primary key in the {mfcs_event_requests} table."),
+            'description' => $t("Foreign key to the primary key in the {mfcs_requests} table."),
             'type' => 'int',
             'size' => 'big',
             'unsigned' => TRUE,
@@ -636,14 +636,14 @@ function mfcs_schema() {
             'default' => 0,
           ),
           'user_id' => array(
-            'description' => $t("This is the system id. Represents the user who created the event. This is not a foreign key and instead loosely refers to the user id."),
+            'description' => $t("This is the system id. Represents the user who created the request. This is not a foreign key and instead loosely refers to the user id."),
             'type' => 'int',
             'size' => 'big',
             'unsigned' => TRUE,
             'not null' => TRUE,
           ),
           'date' => array(
-            'description' => $t("This is the banner id. Represents the date the event was created."),
+            'description' => $t("This is the banner id. Represents the date the request was created."),
             'type' => 'int',
             'size' => 'big',
             'unsigned' => TRUE,
@@ -653,7 +653,7 @@ function mfcs_schema() {
         'primary key' => array('request_id', 'revision', 'delta'),
         'foreign keys' => array(
           'request_id' => array(
-            'table' => 'mfcs_event_requests',
+            'table' => 'mfcs_requests',
             'columns' => array('request_id' => 'id'),
           ),
         ),
@@ -879,13 +879,13 @@ function mfcs_schema() {
       }
     }
 
-    // create the tirtiary tables that map the secondary tables for mfcs_event_requests to the primary table mfcs_event_requests.
+    // create the tirtiary tables that map the secondary tables for mfcs_requests to the primary table mfcs_requests.
     $table_name = 'mfcs_current_' . $structure_name;
     $schema[$table_name] = array(
-      'description' => $t("McNeese Facilities Use Events field table representing the current (active) revisions for fields structured under: " . $structure_name . "."),
+      'description' => $t("McNeese Facilities Use Requests field table representing the current (active) revisions for fields structured under: " . $structure_name . "."),
       'fields' => array(
         'request_id' => array(
-          'description' => $t("Foreign key to the primary key in the {mfcs_event_requests} table."),
+          'description' => $t("Foreign key to the primary key in the {mfcs_requests} table."),
           'type' => 'int',
           'size' => 'big',
           'unsigned' => TRUE,
@@ -895,7 +895,7 @@ function mfcs_schema() {
       'primary key' => array('request_id'),
       'foreign keys' => array(
         'request_id' => array(
-          'table' => 'mfcs_event_requests',
+          'table' => 'mfcs_requests',
           'columns' => array('request_id' => 'id'),
         ),
       ),
@@ -931,7 +931,7 @@ function mfcs_install() {
   // drupal does not support automatically assigning foreign key relations, so this must be manually performed.
   $key1_name = 'request_id';
   $key1_foreign = 'request_id_fkey';
-  $table1_foreign = 'mfcs_event_requests';
+  $table1_foreign = 'mfcs_requests';
   $table1_foreign_key = 'id';
 
   $key2_name = 'user_id';
@@ -958,7 +958,7 @@ function mfcs_install() {
 
   $structure = mfcs_table_install_structure();
 
-  db_query('ALTER TABLE {mfcs_event_revisions} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
+  db_query('ALTER TABLE {mfcs_request_revisions} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
   db_query('ALTER TABLE {mfcs_reviewers} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE CASCADE');
   db_query('ALTER TABLE {mfcs_search_settings} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE CASCADE');
 
@@ -1014,7 +1014,7 @@ function mfcs_uninstall() {
 
   $structure = mfcs_table_install_structure();
 
-  db_query('ALTER TABLE {mfcs_event_revisions} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
+  db_query('ALTER TABLE {mfcs_request_revisions} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
   db_query('ALTER TABLE {mfcs_reviewers} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
   db_query('ALTER TABLE {mfcs_search_settings} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
   db_query('ALTER TABLE {mfcs_banner_building_to_location} DROP CONSTRAINT IF EXISTS ' . $key3_foreign);
@@ -1029,4 +1029,9 @@ function mfcs_uninstall() {
     db_query('ALTER TABLE {' . $table_name . '} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
 
     foreach ($structure_array as $field_name => &$field_type) {
-      $field_table_name = 'mfcs_field_' .
+      $field_table_name = 'mfcs_field_' . $structure_name . '_' . $field_name;
+
+      db_query('ALTER TABLE {' . $field_table_name . '} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
+    }
+  }
+}

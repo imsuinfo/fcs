@@ -11,7 +11,7 @@
  */
 
 /**
- * Provides the facilities use event manage page.
+ * Provides the facilities use request manage page.
  *
  * @return string
  *   The HTML output representing the page.
@@ -22,18 +22,18 @@ function mfcs_management_page() {
   global $base_path;
   $user = cf_current_user();
 
-  $can_create = mfcs_management_page_event_access('create');
-  $can_edit = mfcs_management_page_event_access('edit');
-  $can_view = mfcs_management_page_event_access('view');
-  $can_list = mfcs_management_page_event_access('list');
-  $can_search = mfcs_management_page_event_access('search');
-  $can_delete = mfcs_management_page_event_access('delete');
-  $can_log = mfcs_management_page_event_access('log');
-  $can_review = mfcs_management_page_event_access('review');
+  $can_create = mfcs_management_page_request_access('create');
+  $can_edit = mfcs_management_page_request_access('edit');
+  $can_view = mfcs_management_page_request_access('view');
+  $can_list = mfcs_management_page_request_access('list');
+  $can_search = mfcs_management_page_request_access('search');
+  $can_delete = mfcs_management_page_request_access('delete');
+  $can_log = mfcs_management_page_request_access('log');
+  $can_review = mfcs_management_page_request_access('review');
 
-  $manager = user_access('mcneese facilities use manage');
-  $reviewer = user_access('mcneese facilities use review');
-  $requester = user_access('mcneese facilities use request');
+  $manager = user_access('mfcs manage');
+  $reviewer = user_access('mfcs review');
+  $requester = user_access('mfcs request');
 
   $items_1 = array();
   $items_2 = array();
@@ -41,8 +41,8 @@ function mfcs_management_page() {
   $items_4 = array();
 
   if ($can_create) {
-    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'events/create-0" class="item-link">Request Event</a></h4>';
-    $help = '<div class="item-description inline-block">Make a request to use the facilities or host special events at McNeese State University.</div>';
+    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/create-0" class="item-link">Request Use</a></h4>';
+    $help = '<div class="item-description inline-block">Make a request to use the facilities or host special events at McNeese State University or related facilities.</div>';
     $items_1[] = array(
       'data' => $link . '<br>' . $help,
       'class' => array(
@@ -51,8 +51,8 @@ function mfcs_management_page() {
   }
 
   if ($can_list) {
-    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'events/list-0" class="item-link">List Requests</a></h4>';
-    $help = '<div class="item-description inline-block">View a list of event requests available to the current user.</div>';
+    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/list-0" class="item-link">List Requests</a></h4>';
+    $help = '<div class="item-description inline-block">View a list of requests available to the current user.</div>';
     $items_1[] = array(
       'data' => $link . '<br>' . $help,
       'class' => array(
@@ -61,8 +61,8 @@ function mfcs_management_page() {
   }
 
   if ($can_search) {
-    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'events/search-0" class="item-link">Search Requests</a></h4>';
-    $help = '<div class="item-description inline-block">Use advanced search tools to help locate and find one or more event requests.</div>';
+    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/search-0" class="item-link">Search Requests</a></h4>';
+    $help = '<div class="item-description inline-block">Use advanced search tools to help locate and find one or more requests.</div>';
     $items_3[] = array(
       'data' => $link . '<br>' . $help,
       'class' => array(
@@ -71,7 +71,7 @@ function mfcs_management_page() {
   }
 
   if ($can_review) {
-    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'events/review-0" class="item-link">Review Requests</a></h4>';
+    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/review-0" class="item-link">Review Requests</a></h4>';
     $help = '<div class="item-description inline-block">Manage requests the current user is allowed to review.</div>';
     $items_2[] = array(
       'data' => $link . '<br>' . $help,
@@ -81,8 +81,8 @@ function mfcs_management_page() {
   }
 
   if ($manager) {
-    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'events/reviewers-0" class="item-link">Manage Reviewers</a></h4>';
-    $help = '<div class="item-description inline-block">Manage what users are allowed to approve/deny event requests by event type.</div>';
+    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/reviewers-0" class="item-link">Manage Reviewers</a></h4>';
+    $help = '<div class="item-description inline-block">Manage what users are allowed to approve/deny requests by request type.</div>';
     $items_2[] = array(
       'data' => $link . '<br>' . $help,
       'class' => array(
@@ -177,7 +177,7 @@ function mfcs_management_page() {
       'sort' => 'ASC',
     );
 
-    $results = mfcs_event_load_listing($search, FALSE, 0, 0, $sorting);
+    $results = mfcs_request_load_listing($search, FALSE, 0, 0, $sorting);
 
     $rows = array();
     $rows_count = 0;
@@ -206,7 +206,7 @@ function mfcs_management_page() {
           else {
             $item_title = check_plain($item->title);
             $rows[$month_day][$item->id] = array(
-              'href' => $base_path . 'events/view-0/' . $item->id,
+              'href' => $base_path . 'requests/view-0/' . $item->id,
               'title' => $item_title,
               'tooltip' => '[' . check_plain($item->location_name) . '] ' . check_plain($item->building_name) . ' ' . check_plain($item->room_name) . ': ' . $item_title,
               'date' => $date,
@@ -220,4 +220,17 @@ function mfcs_management_page() {
       }
     }
 
-    $title = '<h3><a href="' . $base_path . 'events/calendar-0/month">' . "Events
+    $title = '<h3><a href="' . $base_path . 'requests/calendar-0/month">' . "Requests for " . date("F, Y", $month_start) . '</a></h3>';
+    $result = mfcs_build_calendar_month_markup($rows, $month_start, $month_stop, $absolute_start, $absolute_stop, $title);
+    if ($result !== FALSE) {
+      $markup .= $result;
+    }
+    unset($result);
+  }
+
+  return $markup;
+}
+
+/**
+ * @} End of '@addtogroup mfcs'.
+ */

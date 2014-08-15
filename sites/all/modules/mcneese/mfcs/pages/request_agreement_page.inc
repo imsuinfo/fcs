@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Defines McNeese facilities use event agreement page functions.
+ * Defines McNeese facilities use request agreement page functions.
  */
 
 /**
@@ -11,25 +11,25 @@
  */
 
 /**
- * Provides the facilities use event agreement page.
+ * Provides the facilities use request agreement page.
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  * @param int $request_id
- *   The unique identifier for an event request.
+ *   The unique identifier for an request.
  * @param bool $pdf
  *   (optional) When TRUE, the page is presented as a PDF.
  *
  * @return string
  *   The HTML output representing the page.
  */
-function mfcs_event_agreement_0_form($form, &$form_state, $request_id, $pdf = FALSE) {
-  $event = event_workflow_load_event_by_id($request_id);
+function mfcs_request_agreement_0_form($form, &$form_state, $request_id, $pdf = FALSE) {
+  $request = mfcs_load_request_by_id($request_id);
 
-  if (empty($event)) {
-    watchdog(MFCS_WATCHDOG_ID, "Unable to find event with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
+  if (empty($request)) {
+    watchdog(MFCS_WATCHDOG_ID, "Unable to find request with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
     drupal_not_found();
     drupal_exit();
     return array();
@@ -38,8 +38,8 @@ function mfcs_event_agreement_0_form($form, &$form_state, $request_id, $pdf = FA
   global $base_path;
 
   $page_title = "Facilities Use Agreement";
-  if (!empty($event['information']['title'][0]->value)) {
-    $page_title = "Facilities Use Agreement: " . $event['information']['title'][0]->value;
+  if (!empty($request['information']['title'][0]->value)) {
+    $page_title = "Facilities Use Agreement: " . $request['information']['title'][0]->value;
   }
   drupal_set_title($page_title);
 
@@ -54,9 +54,9 @@ function mfcs_event_agreement_0_form($form, &$form_state, $request_id, $pdf = FA
     '#value' => $request_id,
   );
 
-  $form['form']['event'] = array(
+  $form['form']['request'] = array(
     '#type' => 'value',
-    '#value' => &$event,
+    '#value' => &$request,
   );
 
   $form['form']['pdf'] = array(
@@ -65,7 +65,7 @@ function mfcs_event_agreement_0_form($form, &$form_state, $request_id, $pdf = FA
   );
 
   $form['agreement'] = array(
-    '#markup' => '<div id="mfcs-event_request-agreement" class="agreement-wrapper">',
+    '#markup' => '<div id="mfcs-request-agreement" class="agreement-wrapper">',
   );
 
   $markup = &$form['agreement']['#markup'];
@@ -83,9 +83,9 @@ function mfcs_event_agreement_0_form($form, &$form_state, $request_id, $pdf = FA
   $markup .= '<div class="agreement-header-information">';
 
   // determine the last review by date.
-  reset($event['review']['review']);
+  reset($request['review']['review']);
   $review_date = NULL;
-  foreach ($event['review']['review'] as $review) {
+  foreach ($request['review']['review'] as $review) {
     if ($review->step != MFCS_REVIEW_STEP_REVIEW) {
       continue;
     }
@@ -139,17 +139,17 @@ function mfcs_event_agreement_0_form($form, &$form_state, $request_id, $pdf = FA
 
   $requirements_found = FALSE;
   foreach ($requirements as $requirement => $requirement_name) {
-    if (!empty($event['requirements'][$requirement])) {
+    if (!empty($request['requirements'][$requirement])) {
       $requirements_found = TRUE;
       $markup .= '<div class="agreement-table-body-row">';
 
-      $value = reset($event['requirements'][$requirement]);
+      $value = reset($request['requirements'][$requirement]);
 
       $amount = array();
       $amount['quantity'] = (int) $value->quantity;
-      $amount['hours'] = (float) event_workflow_convert_value_from_database_format($value->hours, 'currency');
-      $amount['days'] = (float) event_workflow_convert_value_from_database_format($value->days, 'currency');
-      $amount['amount'] = (float) event_workflow_convert_value_from_database_format($value->amount, 'currency');
+      $amount['hours'] = (float) mfcs_convert_value_from_database_format($value->hours, 'currency');
+      $amount['days'] = (float) mfcs_convert_value_from_database_format($value->days, 'currency');
+      $amount['amount'] = (float) mfcs_convert_value_from_database_format($value->amount, 'currency');
 
       $amount['total'] = $amount['quantity'] * $amount['hours'] * $amount['days'] * $amount['amount'];
       $grand_total += $amount['total'];
@@ -246,7 +246,7 @@ function mfcs_event_agreement_0_form($form, &$form_state, $request_id, $pdf = FA
       '#attributes' => array(
         'class' => array(
           'no-print',
-          'event-agreement-submit',
+          'request-agreement-submit',
         ),
       ),
       '#weight' => 1000,
@@ -271,7 +271,7 @@ function mfcs_event_agreement_0_form($form, &$form_state, $request_id, $pdf = FA
 
 
 /**
- * Custom submit process for mfcs_event_view_0_page().
+ * Custom submit process for mfcs_request_view_0_page().
  *
  * Used for generating a print PDF.
  *
@@ -280,9 +280,9 @@ function mfcs_event_agreement_0_form($form, &$form_state, $request_id, $pdf = FA
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mfcs_event_view_0_page()
+ * @see: mfcs_request_view_0_page()
  */
-function mfcs_event_agreement_0_form_submit($form, &$form_state) {
+function mfcs_request_agreement_0_form_submit($form, &$form_state) {
   $clicked_id = '';
   if (isset($form_state['triggering_element']['#id'])) {
     $clicked_id = $form_state['triggering_element']['#id'];
@@ -292,10 +292,10 @@ function mfcs_event_agreement_0_form_submit($form, &$form_state) {
 
   if (($clicked_id != 'agreement-submit-download') || empty($request_id)) {
     if (empty($request_id)) {
-      $form_state['redirect'] = 'events';
+      $form_state['redirect'] = 'requests';
     }
     else {
-      $form_state['redirect'] = 'events/view-0/' . $request_id;
+      $form_state['redirect'] = 'requests/view-0/' . $request_id;
     }
 
     return;
@@ -303,20 +303,20 @@ function mfcs_event_agreement_0_form_submit($form, &$form_state) {
 
   global $base_path;
 
-  $form_state['redirect'] = '/events/agreement-0/' . $request_id . '/pdf';
+  $form_state['redirect'] = '/requests/agreement-0/' . $request_id . '/pdf';
 }
 
 /**
- * Renders a PDF of a given event request agreement.
+ * Renders a PDF of a given request agreement.
  *
  * @param int $request_id
- *   The unique identifier for an event request.
+ *   The unique identifier for an request.
  */
-function mfcs_event_agreement_0_pdf($request_id) {
-  $event = event_workflow_load_event_by_id($request_id);
+function mfcs_request_agreement_0_pdf($request_id) {
+  $request = mfcs_load_request_by_id($request_id);
 
-  if (empty($event)) {
-    watchdog(MFCS_WATCHDOG_ID, "Unable to find event with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
+  if (empty($request)) {
+    watchdog(MFCS_WATCHDOG_ID, "Unable to find request with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
     drupal_not_found();
     drupal_exit();
     return array();
@@ -327,8 +327,8 @@ function mfcs_event_agreement_0_pdf($request_id) {
   $parameters = array();
 
   $page_title = "Facilities Use Agreement";
-  if (!empty($event['information']['title'][0]->value)) {
-    $page_title = "Facilities Use Agreement: " . $event['information']['title'][0]->value;
+  if (!empty($request['information']['title'][0]->value)) {
+    $page_title = "Facilities Use Agreement: " . $request['information']['title'][0]->value;
   }
   drupal_set_title($page_title);
 
@@ -341,9 +341,9 @@ function mfcs_event_agreement_0_pdf($request_id) {
   $page['html'] = array(
     '#type' => 'container',
     '#attributes' => array(
-      'id' => 'mfcs-event-agreement-0-form',
+      'id' => 'mfcs-request-agreement-0-form',
       'class' => array(
-        'mfcs-event-agreement-0-pdf',
+        'mfcs-request-agreement-0-pdf',
       ),
     ),
   );
@@ -351,8 +351,22 @@ function mfcs_event_agreement_0_pdf($request_id) {
   // turn off devel shutdown functionality.
   $GLOBALS['devel_shutdown'] = FALSE;
 
-  $page['html']['content'] = array(mfcs_event_agreement_0_form($form, $form_state, $request_id, TRUE));
+  $page['html']['content'] = array(mfcs_request_agreement_0_form($form, $form_state, $request_id, TRUE));
   $renderred = drupal_render($page);
   $html = drupal_render_page($renderred);
 
-  $result = mfcs_event_pdf_0_page_using_wkhtmltopdf($request_id, $html, FALSE,
+  $result = mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $html, FALSE, $parameters);
+
+  if ($result) {
+    exit();
+  }
+  else {
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+}
+
+/**
+ * @} End of '@addtogroup mfcs'.
+ */

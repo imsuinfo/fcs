@@ -19,7 +19,7 @@
  * @return array
  *   An array of options available.
  */
-function event_workflow_get_event_status_list_options($option = NULL) {
+function mfcs_get_request_status_list_options($option = NULL) {
   $options = array();
 
   if ($option == 'select') {
@@ -53,7 +53,7 @@ function event_workflow_get_event_status_list_options($option = NULL) {
  * @return array
  *   An array of options available.
  */
-function event_workflow_get_event_steps_list_options($option = NULL) {
+function mfcs_get_request_steps_list_options($option = NULL) {
   $options = array();
 
   if ($option == 'select') {
@@ -78,7 +78,7 @@ function event_workflow_get_event_steps_list_options($option = NULL) {
 }
 
 /**
- * Returns an array of event classification options for populating lists.
+ * Returns an array of request classification options for populating lists.
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
@@ -88,7 +88,7 @@ function event_workflow_get_event_steps_list_options($option = NULL) {
  * @return array
  *   An array of options available.
  */
-function event_workflow_get_event_classification_list_options($option = NULL, $user = NULL) {
+function mfcs_get_request_classification_list_options($option = NULL, $user = NULL) {
   $options = array();
 
   if ($option == 'select') {
@@ -118,7 +118,7 @@ function event_workflow_get_event_classification_list_options($option = NULL, $u
 }
 
 /**
- * Returns an array of event category options for populating lists.
+ * Returns an array of request category options for populating lists.
  *
  * Note: ucs.msu_venue_list calls the building location 'category'.
  *
@@ -131,7 +131,7 @@ function event_workflow_get_event_classification_list_options($option = NULL, $u
  * @return array
  *   An array of options available.
  */
-function event_workflow_get_event_location_list_options($option = NULL, $taxonomy = FALSE) {
+function mfcs_get_request_location_list_options($option = NULL, $taxonomy = FALSE) {
   $options = array();
 
   if ($option == 'select') {
@@ -177,7 +177,7 @@ function event_workflow_get_event_location_list_options($option = NULL, $taxonom
 }
 
 /**
- * Returns an array of event building list for populating lists.
+ * Returns an array of request building list for populating lists.
  *
  * @param string|null $location
  *   (optional) When not NULL, select options based on provided location.
@@ -187,7 +187,7 @@ function event_workflow_get_event_location_list_options($option = NULL, $taxonom
  * @return array
  *   An array of options available.
  */
-function event_workflow_get_event_building_list_options($location = NULL, $option = NULL) {
+function mfcs_get_request_building_list_options($location = NULL, $option = NULL) {
   $options = array();
 
   if ($option == 'select') {
@@ -206,7 +206,7 @@ function event_workflow_get_event_building_list_options($location = NULL, $optio
 }
 
 /**
- * Returns an array of event room list for populating lists.
+ * Returns an array of request room list for populating lists.
  *
  * @param string|null $location
  *   (optional) When not NULL, select options based on provided location.
@@ -216,7 +216,7 @@ function event_workflow_get_event_building_list_options($location = NULL, $optio
  * @return array
  *   An array of options available.
  */
-function event_workflow_get_event_room_list_options($location = NULL, $option = NULL) {
+function mfcs_get_request_room_list_options($location = NULL, $option = NULL) {
   $options = array();
 
   $rooms = mfcs_load_rooms($location);
@@ -259,7 +259,7 @@ function event_workflow_get_event_room_list_options($location = NULL, $option = 
  * @return array
  *   An array of options available.
  */
-function event_workflow_get_dates_category_list_options($option = NULL) {
+function mfcs_get_dates_category_list_options($option = NULL) {
   $options = array();
 
   if ($option == 'select') {
@@ -277,7 +277,7 @@ function event_workflow_get_dates_category_list_options($option = NULL) {
 }
 
 /**
- * Returns an array of event intended audience options for populating lists.
+ * Returns an array of request intended audience options for populating lists.
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
@@ -285,7 +285,7 @@ function event_workflow_get_dates_category_list_options($option = NULL) {
  * @return array
  *   An array of options available.
  */
-function event_workflow_get_audience_list_options($option = NULL) {
+function mfcs_get_audience_list_options($option = NULL) {
   $options = array();
 
   if ($option == 'select') {
@@ -315,7 +315,7 @@ function event_workflow_get_audience_list_options($option = NULL) {
 }
 
 /**
- * Returns an array of event revenue generated options for populating lists.
+ * Returns an array of request revenue generated options for populating lists.
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
@@ -323,7 +323,7 @@ function event_workflow_get_audience_list_options($option = NULL) {
  * @return array
  *   An array of options available.
  */
-function event_workflow_get_revenue_generated_list_options($option = NULL) {
+function mfcs_get_revenue_generated_list_options($option = NULL) {
   $options = array();
 
   if ($option == 'select') {
@@ -353,7 +353,7 @@ function event_workflow_get_revenue_generated_list_options($option = NULL) {
 }
 
 /**
- * Returns an array of event information type options for populating lists.
+ * Returns an array of request information type options for populating lists.
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
@@ -361,7 +361,7 @@ function event_workflow_get_revenue_generated_list_options($option = NULL) {
  * @return array
  *   An array of options available.
  */
-function event_workflow_get_information_type_list_options($option = NULL) {
+function mfcs_get_information_type_list_options($option = NULL) {
   $options = array();
 
   if ($option == 'select') {
@@ -391,7 +391,7 @@ function event_workflow_get_information_type_list_options($option = NULL) {
 }
 
 /**
- * Returns an array of event publicity details options for populating lists.
+ * Returns an array of request publicity details options for populating lists.
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
@@ -399,7 +399,7 @@ function event_workflow_get_information_type_list_options($option = NULL) {
  * @return array
  *   An array of options available.
  */
-function event_workflow_get_publicity_details_list_options($option = NULL) {
+function mfcs_get_publicity_details_list_options($option = NULL) {
   $options = array();
 
   if ($option == 'select') {
@@ -429,7 +429,7 @@ function event_workflow_get_publicity_details_list_options($option = NULL) {
 }
 
 /**
- * Returns an array of event desiging materials options for populating lists.
+ * Returns an array of request desiging materials options for populating lists.
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
@@ -437,7 +437,7 @@ function event_workflow_get_publicity_details_list_options($option = NULL) {
  * @return array
  *   An array of options available.
  */
-function event_workflow_get_designing_material_list_options($option = NULL) {
+function mfcs_get_designing_material_list_options($option = NULL) {
   $options = array();
 
   if ($option == 'select') {
@@ -467,7 +467,7 @@ function event_workflow_get_designing_material_list_options($option = NULL) {
 }
 
 /**
- * Returns an array of event technical equipment details options for populating lists.
+ * Returns an array of request technical equipment details options for populating lists.
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
@@ -475,7 +475,7 @@ function event_workflow_get_designing_material_list_options($option = NULL) {
  * @return array
  *   An array of options available.
  */
-function event_workflow_get_technical_equipment_details_list_options($option = NULL) {
+function mfcs_get_technical_equipment_details_list_options($option = NULL) {
   $options = array();
 
   if ($option == 'select') {
@@ -516,7 +516,7 @@ function event_workflow_get_technical_equipment_details_list_options($option = N
  * @return array
  *   An array of options available.
  */
-function event_workflow_get_reviewer_classification_list_options($option = NULL, $include_hidden = FALSE) {
+function mfcs_get_reviewer_classification_list_options($option = NULL, $include_hidden = FALSE) {
   if (!is_bool($include_hidden)) {
     $include_hidden = FALSE;
   }
@@ -552,7 +552,7 @@ function event_workflow_get_reviewer_classification_list_options($option = NULL,
  * @return array
  *   An array of options available.
  */
-function event_workflow_get_reviewer_decision_list_options($option = NULL) {
+function mfcs_get_reviewer_decision_list_options($option = NULL) {
   $options = array();
 
   if ($option == 'select' || $option == 'review_step') {
@@ -576,7 +576,7 @@ function event_workflow_get_reviewer_decision_list_options($option = NULL) {
 }
 
 /**
- * Returns an array of event review step options for populating lists.
+ * Returns an array of request review step options for populating lists.
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
@@ -584,7 +584,7 @@ function event_workflow_get_reviewer_decision_list_options($option = NULL) {
  * @return array
  *   An array of options available.
  */
-function event_workflow_get_review_step_list_options($option = NULL) {
+function mfcs_get_review_step_list_options($option = NULL) {
   $options = array();
 
   if ($option == 'select') {
@@ -613,3 +613,11 @@ function event_workflow_get_review_step_list_options($option = NULL) {
     }
 
     asort($options);
+  }
+
+  return $options;
+}
+
+/**
+ * @} End of '@addtogroup mfcs'.
+ */
