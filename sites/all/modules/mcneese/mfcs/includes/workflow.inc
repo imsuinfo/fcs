@@ -421,6 +421,7 @@ function mfcs_workflow_step_review($request_id, $user, $step, $decision, $messag
     'request_id' => $request_id,
     'contractor' => NULL,
     'unaffiliated' => NULL,
+    'provided' => NULL,
   );
 
   $insurance_latest = $mfcs_current_insurance;
@@ -433,6 +434,10 @@ function mfcs_workflow_step_review($request_id, $user, $step, $decision, $messag
 
     if (array_key_exists('unaffiliated', $request['current']['insurance']) && !is_null($request['current']['insurance']['unaffiliated'])) {
       $mfcs_current_insurance['unaffiliated'] = $request['current']['insurance']['unaffiliated'];
+    }
+
+    if (array_key_exists('provided', $request['current']['insurance']) && !is_null($request['current']['insurance']['provided'])) {
+      $mfcs_current_insurance['provided'] = $request['current']['insurance']['provided'];
     }
   }
 
@@ -600,6 +605,7 @@ function mfcs_workflow_step_review($request_id, $user, $step, $decision, $messag
     if ($insurance_requirements) {
       $contractor_insurance = 0;
       $unaffiliated_insurance = 0;
+      $provided_insurance = 0;
 
       if (isset($extra['insurance']['contractor'])) {
         $contractor_insurance = $extra['insurance']['contractor'];
@@ -609,6 +615,11 @@ function mfcs_workflow_step_review($request_id, $user, $step, $decision, $messag
         $unaffiliated_insurance = $extra['insurance']['unaffiliated'];
       }
 
+      if (isset($extra['insurance']['provided'])) {
+        $provided_insurance = $extra['insurance']['provided'];
+      }
+
+      // contractor insurance
       if (is_null($mfcs_current_insurance['contractor'])) {
         if (is_null($insurance_latest['contractor'])) {
           $mfcs_current_insurance['contractor'] = 0;
@@ -629,6 +640,7 @@ function mfcs_workflow_step_review($request_id, $user, $step, $decision, $messag
         'value' => $contractor_insurance,
       );
 
+      // unaffiliated insurance
       if (is_null($mfcs_current_insurance['unaffiliated'])) {
         if (is_null($insurance_latest['unaffiliated'])) {
           $mfcs_current_insurance['unaffiliated'] = 0;
@@ -647,6 +659,27 @@ function mfcs_workflow_step_review($request_id, $user, $step, $decision, $messag
         'user_id' => $user->uid,
         'date' => REQUEST_TIME,
         'value' => $unaffiliated_insurance,
+      );
+
+      // provided insurance
+      if (is_null($mfcs_current_insurance['provided'])) {
+        if (is_null($insurance_latest['provided'])) {
+          $mfcs_current_insurance['provided'] = 0;
+        }
+        else {
+          $mfcs_current_insurance['provided'] = $insurance_latest['provided'] + 1;
+        }
+      }
+      else {
+        $mfcs_current_insurance['provided']++;
+      }
+      $mfcs_field_insurance_provided = array(
+        'request_id' => $request_id,
+        'revision' => $mfcs_current_insurance['provided'],
+        'delta' => 0,
+        'user_id' => $user->uid,
+        'date' => REQUEST_TIME,
+        'value' => $provided_insurance,
       );
     }
   }
@@ -778,6 +811,10 @@ function mfcs_workflow_step_review($request_id, $user, $step, $decision, $messag
 
         $query = db_insert('mfcs_field_insurance_unaffiliated');
         $query->fields($mfcs_field_insurance_unaffiliated);
+        $query->execute();
+
+        $query = db_insert('mfcs_field_insurance_provided');
+        $query->fields($mfcs_field_insurance_provided);
         $query->execute();
       }
 

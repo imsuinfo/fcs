@@ -39,6 +39,7 @@ function mfcs_table_install_structure() {
   $structure['insurance'] = array(
     'contractor' => 'unsigned_tiny',
     'unaffiliated' => 'unsigned_tiny',
+    'provided' => 'unsigned_tiny',
   );
 
   $structure['dates'] = array(
@@ -909,7 +910,7 @@ function mfcs_schema() {
         'type' => 'int',
         'size' => 'big',
         'unsigned' => TRUE,
-        'not null' => TRUE,
+        'not null' => FALSE,
       );
 
       $schema[$table_name]['foreign keys'][$field_name] = array(
@@ -984,7 +985,7 @@ function mfcs_install() {
 
   // assign the new mail system as default.
   $mail_system = variable_get('mail_system' , array('default-system' => 'DefaultMailSystem'));
-  $mail_system['default-system'] = 'McNeeseEventWorkflowMail';
+  $mail_system['default-system'] = 'McNeeseFacilitiesUseMail';
   variable_set('mail_system', $mail_system);
 }
 

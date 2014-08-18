@@ -185,9 +185,9 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
     $can['clone'] = (bool) $can_create;
   }
 
-  $page_title = "Event Request";
+  $page_title = "Facilities Use Request";
   if (!empty($request['information']['title'][0]->value)) {
-    $page_title = "Event Request: " . $request['information']['title'][0]->value;
+    $page_title = "Facilities Use Request: " . $request['information']['title'][0]->value;
   }
   drupal_set_title($page_title);
 
@@ -256,6 +256,7 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
         'class' => array(
           'request-section-display',
           'mode-' . $mode,
+          'fieldset_print_as_div',
         ),
       ),
       '#tree' => TRUE,
@@ -901,20 +902,24 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
 
       $form['review']['operations']['header'] = array(
         '#markup' => '<h2 id="request- ' . $request_id . '-section-review-operations-header" class="request-section-review-operations-header">Review Operations</h2>',
+        '#weight' => 0,
       );
 
       $form['review']['operations']['instructions'] = array(
         '#markup' => '',
+        '#weight' => 0,
       );
 
       $form['review']['operations']['instructions']['#markup'] .= "The current step is: <strong>" . $step_options[$step] . "</strong>. ";
 
       $form['review']['operations']['as_reviewer'] = array(
         '#markup' => '',
+        '#weight' => 0,
       );
 
       $form['review']['operations']['requirements'] = array(
         '#markup' => '',
+        '#weight' => 0,
       );
 
       mfcs_include(4);
@@ -990,11 +995,13 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
             'mode-' . $mode,
           ),
         ),
+        '#weight' => 1,
       );
 
       if ($can_review_request && ($step == MFCS_REVIEW_STEP_REVIEW || $step == MFCS_REVIEW_STEP_VENUE_AVAILABLE)) {
         $form['review']['operations']['requirements'] = array(
           '#tree' => TRUE,
+          '#weight' => 2,
         );
 
         $form['form']['requirements-custodial'] = array(
@@ -1225,9 +1232,11 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
 
         $form['review']['operations']['insurance'] = array(
           '#tree' => TRUE,
+          '#weight' => 3,
         );
 
         if ($insurance_requirement && $step == MFCS_REVIEW_STEP_REVIEW) {
+          // contractor insurance
           $form['review']['operations']['insurance']['contractor'] = array(
             '#id' => 'request-review-operations-insurance-contractor',
             '#type' => 'checkbox',
@@ -1252,6 +1261,7 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
             $form['review']['operations']['insurance']['contractor']['#default_value'] = $request['insurance']['contractor'][0]->value;
           }
 
+          // unaffiliated insurance
           $form['review']['operations']['insurance']['unaffiliated'] = array(
             '#id' => 'request-review-operations-insurance-unaffiliated',
             '#type' => 'checkbox',
@@ -1275,6 +1285,31 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
           if (!empty($request['insurance']['unaffiliated'][0])) {
             $form['review']['operations']['insurance']['unaffiliated']['#default_value'] = $request['insurance']['unaffiliated'][0]->value;
           }
+
+          // provided insurance
+          $form['review']['operations']['insurance']['provided'] = array(
+            '#id' => 'request-review-operations-insurance-provided',
+            '#type' => 'checkbox',
+            '#title' => 'Provided Insurance',
+            '#description' => "Select this once insurance has been provided. If insurance is required, then this must be selected before you can approve this request.",
+            '#default_value' => NULL,
+            '#attributes' => array(
+              'class' => array(
+                'no-print',
+                'mode-' . $mode,
+                'insurance-provided',
+              ),
+            ),
+            '#states' => array(
+              'visible' => array(
+                ':input[name="review[operations][decision]"]' => array('value' => MFCS_REVIEW_DECISION_REQUIREMENT),
+              ),
+            ),
+          );
+
+          if (!empty($request['insurance']['provided'][0])) {
+            $form['review']['operations']['insurance']['provided']['#default_value'] = $request['insurance']['provided'][0]->value;
+          }
         }
       }
 
@@ -1297,6 +1332,7 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
               ':input[name="review[operations][decision]"]' => array('value' => MFCS_REVIEW_DECISION_REQUIREMENT),
             ),
           ),
+          '#weight' => 4,
         );
 
         $form['review']['operations']['university_business'] = array(
@@ -1317,6 +1353,7 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
               ':input[name="review[operations][decision]"]' => array('value' => MFCS_REVIEW_DECISION_REQUIREMENT),
             ),
           ),
+          '#weight' => 5,
         );
       }
 
@@ -1332,6 +1369,7 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
             'mode-' . $mode,
           ),
         ),
+        '#weight' => 6,
       );
 
       $form['review']['operations']['submit'] = array(
@@ -1661,7 +1699,6 @@ function mfcs_request_view_0_page_validate($form, &$form_state) {
       $failure = TRUE;
     }
 
-    $reviewers = array();
     if ($mode < MFCS_VIEW_MODE_NORMAL && $mode > MFCS_VIEW_MODE_OPERATIONS) {
       form_set_error('', "Illegal operation detected. Invalid mode selected.");
       $failure = TRUE;
@@ -1859,6 +1896,9 @@ function mfcs_request_view_0_page_validate($form, &$form_state) {
       $requirements_not_supplied = TRUE;
       $requirements_exist = TRUE;
 
+      $insurance_contractor_required = FALSE;
+      $insurance_unaffiliated_required = FALSE;
+
       $custodial_requirements_required = FALSE;
       if (isset($form['form']['requirements-custodial']['#value'])) {
         $custodial_requirements_required = $form['form']['requirements-custodial']['#value'];
@@ -1894,18 +1934,44 @@ function mfcs_request_view_0_page_validate($form, &$form_state) {
       if (isset($form['review']['operations']['insurance']['contractor'])) {
         if (isset($request['insurance']['contractor'][0]->value)) {
           $requirements_not_supplied = FALSE;
+
+          if ($request['insurance']['unaffiliated'][0]->value) {
+            $insurance_contractor_required = TRUE;
+          }
         }
       }
 
       if (isset($form['review']['operations']['insurance']['unaffiliated'])) {
         if (isset($request['insurance']['unaffiliated'][0]->value)) {
           $requirements_not_supplied = FALSE;
+
+          if ($request['insurance']['unaffiliated'][0]->value) {
+            $insurance_unaffiliated_required = TRUE;
+          }
         }
       }
 
       if ($step == MFCS_REVIEW_STEP_REVIEW && $requirements_exist) {
         if ($requirements_not_supplied) {
           $form_state['autowave'] = TRUE;
+        }
+      }
+
+      // determine whether or not the purchasing/insurance reviewer can approve based on the status of the review checkboxes.
+      if ($insurance_contractor_required || $insurance_unaffiliated_required) {
+        $reviewers_conditions = array(
+          'u.uid' => $user->uid,
+          'mr.review_step' => $step,
+          'mr.request_classification' => $request_classification,
+          'mr.reviewer_classification' => MFCS_REVIEW_CLASSIFICATION_PURCHASING,
+        );
+
+        $reviewer_handles_purchasing = mfcs_get_reviewers($reviewers_conditions, TRUE);
+
+        if (!empty($reviewer_handles_purchasing)) {
+          if (!$request['insurance']['provided'][0]->value) {
+            form_set_error('review][operations][decision', t("The request cannot be approved until the insurance has been provided."));
+          }
         }
       }
     }
@@ -2091,7 +2157,7 @@ function mfcs_request_view_0_page_submit_pdf($form, &$form_state) {
  *   1: Render only the display part.
  */
 function mfcs_request_pdf_0_page($request_id, $mode) {
-  $page_title = "Event Request";
+  $page_title = "Facilities Use Request";
   drupal_set_title($page_title);
 
   $request = mfcs_load_request_by_id($request_id);
@@ -2104,7 +2170,7 @@ function mfcs_request_pdf_0_page($request_id, $mode) {
   }
 
   if (!empty($request['information']['title'][0]->value)) {
-    $page_title = "Event Request: " . $request['information']['title'][0]->value;
+    $page_title = "Facilities Use Request: " . $request['information']['title'][0]->value;
     drupal_set_title($page_title);
   }
 
@@ -2254,6 +2320,7 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id) {
   $changelog_fields['insurance'] = array(
     'insurance',
     'unaffiliated',
+    'provided',
   );
 
   $users = array();
@@ -2488,14 +2555,17 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id) {
         }
       }
 
+      // contractor insurance
       if (!empty($changelog['insurance']['contractor'])) {
         $message .= '<div class="review-item-message-insurance-contractor review-item-message-insurance review-item-message-requirements">';
         $message .= '<div class="item-label">Contractor Insurance:</div> ';
 
         // always display the boolean when displayed in the review log.
-        foreach ($presentation['insurance']['contractor']['display'] as &$value) {
-          if ($value == 'when_true' || $value == 'when_false') {
-            $value = 'raw';
+        if (!empty($presentation['insurance']['contractor']['display'])) {
+          foreach ($presentation['insurance']['contractor']['display'] as &$value) {
+            if ($value == 'when_true' || $value == 'when_false') {
+              $value = 'raw';
+            }
           }
         }
 
@@ -2508,19 +2578,45 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id) {
         $message .= '</div>';
       }
 
+      // unaffiliated insurance
       if (!empty($changelog['insurance']['unaffiliated'])) {
         $message .= '<div class="review-item-message-insurance-unaffiliated review-item-message-insurance review-item-message-requirements">';
         $message .= '<div class="item-label">Unaffiliated Insurance:</div> ';
 
         // always display the boolean when displayed in the review log.
-        foreach ($presentation['insurance']['unaffiliated']['display'] as &$value) {
-          if ($value == 'when_true' || $value == 'when_false') {
-            $value = 'raw';
+        if (!empty($presentation['insurance']['unaffiliated']['display'])) {
+          foreach ($presentation['insurance']['unaffiliated']['display'] as &$value) {
+            if ($value == 'when_true' || $value == 'when_false') {
+              $value = 'raw';
+            }
           }
         }
 
         $value = reset($changelog['insurance']['unaffiliated']);
         $value_markup = mfcs_build_request_value_structure($request_id, 'insurance', 'unaffiliated', 0, $value, $presentation['insurance']['unaffiliated'], $changelog);
+
+        if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
+          $message .= drupal_render($value_markup);
+        }
+        $message .= '</div>';
+      }
+
+      // provided insurance
+      if (!empty($changelog['insurance']['provided'])) {
+        $message .= '<div class="review-item-message-insurance-provided review-item-message-insurance review-item-message-requirements">';
+        $message .= '<div class="item-label">Provided Insurance:</div> ';
+
+        // always display the boolean when displayed in the review log.
+        if (!empty($presentation['insurance']['provided']['display'])) {
+          foreach ($presentation['insurance']['provided']['display'] as &$value) {
+            if ($value == 'when_true' || $value == 'when_false') {
+              $value = 'raw';
+            }
+          }
+        }
+
+        $value = reset($changelog['insurance']['provided']);
+        $value_markup = mfcs_build_request_value_structure($request_id, 'insurance', 'provided', 0, $value, $presentation['insurance']['provided'], $changelog);
 
         if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
           $message .= drupal_render($value_markup);

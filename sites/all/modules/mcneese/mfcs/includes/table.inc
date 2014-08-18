@@ -145,6 +145,13 @@ function mfcs_table_structure() {
       'size' => 'tiny',
       'manual_processing' => TRUE,
     ),
+    'provided' => array(
+      'name' => "Insurance Has Been Provided",
+      'path' => 'request][insurance][provided',
+      'type' => 'bool',
+      'size' => 'tiny',
+      'manual_processing' => TRUE,
+    ),
   );
 
   $structure['dates'] = array(
@@ -196,25 +203,25 @@ function mfcs_table_structure() {
   $structure['request_coordinator'] = array(
     'name' => array(
       'path' => 'request][request_coordinator][name',
-      'name' => "Event Coordinator Name",
+      'name' => "Request Coordinator Name",
       'type' => 'text',
       'size' => 255,
     ),
     'phone' => array(
       'path' => 'request][request_coordinator][phone',
-      'name' => "Event Coordinator Phone",
+      'name' => "Request Coordinator Phone",
       'type' => 'text',
       'size' => 255,
     ),
     'email' => array(
       'path' => 'request][request_coordinator][email',
-      'name' => "Event Coordinator E-mail",
+      'name' => "Request Coordinator E-mail",
       'type' => 'text',
       'size' => 255,
     ),
     'classification' => array(
       'path' => 'request][request_coordinator][classification',
-      'name' => "Event Coordinator Classification",
+      'name' => "Request Coordinator Classification",
       'type' => 'options',
       'size' => 'normal',
     ),
@@ -988,6 +995,17 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => FALSE,
       ),
     ),
+    'provided' => array(
+      'label' => 'Insurance Provided',
+      'type' => array(
+        'value' => 'boolean',
+      ),
+      'group' => 'requirements',
+      'request_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
+    ),
   );
 
   $presentation['dates'] = array(
@@ -1116,7 +1134,7 @@ function mfcs_table_presentation($option = NULL) {
 
   $presentation['request_coordinator'] = array(
     'name' => array(
-      'label' => 'Event Coordinator Name',
+      'label' => 'Request Coordinator Name',
       'group' => 'coordinator',
       'weight' => 4,
       'request_type' => array(
@@ -1125,7 +1143,7 @@ function mfcs_table_presentation($option = NULL) {
       ),
     ),
     'phone' => array(
-      'label' => 'Event Coordinator Phone',
+      'label' => 'Request Coordinator Phone',
       'group' => 'coordinator',
       'weight' => 5,
       'request_type' => array(
@@ -1134,7 +1152,7 @@ function mfcs_table_presentation($option = NULL) {
       ),
     ),
     'email' => array(
-      'label' => 'Event Coordinator E-Mail',
+      'label' => 'Request Coordinator E-Mail',
       'group' => 'coordinator',
       'weight' => 6,
       'request_type' => array(
@@ -1143,7 +1161,7 @@ function mfcs_table_presentation($option = NULL) {
       ),
     ),
     'classification' => array(
-      'label' => 'Event Coordinator Classification',
+      'label' => 'Request Coordinator Classification',
       'group' => 'coordinator',
       'weight' => 7,
       'type' => array(

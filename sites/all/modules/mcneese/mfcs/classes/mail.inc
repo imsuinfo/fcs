@@ -8,7 +8,7 @@
 /**
  * The default Drupal mail backend using PHP's mail function.
  */
-class McNeeseEventWorkflowMail implements MailSystemInterface {
+class McNeeseFacilitiesUseMail implements MailSystemInterface {
   /**
    * Concatenate and wrap the e-mail body for plain-text mails.
    *

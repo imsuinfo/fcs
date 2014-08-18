@@ -37,9 +37,9 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
 
   global $base_path;
 
-  $page_title = "Event Request History";
+  $page_title = "Request History";
   if (!empty($request['information']['title'][0]->value)) {
-    $page_title = "Event Request History: " . $request['information']['title'][0]->value;
+    $page_title = "Request History: " . $request['information']['title'][0]->value;
   }
   drupal_set_title($page_title);
 
@@ -245,7 +245,7 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
                         $custom_message .= 'decided to <strong class="review-decision">' . $decision_options[$value->decision] . '</strong> the requirements. ';
                       }
-                      elseif ($value->decision == MFCS_REVIEW_DECISION_REQUIREMENTs) {
+                      elseif ($value->decision == MFCS_REVIEW_DECISION_REQUIREMENT) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
                         $custom_message .= 'assigned a <strong class="review-decision">' . $decision_options[$value->decision] . '</strong>. ';
                       }

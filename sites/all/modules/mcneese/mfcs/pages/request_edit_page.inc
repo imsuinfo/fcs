@@ -721,6 +721,7 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
           'request_id' => $request_id,
           'contractor' => NULL,
           'unaffiliated' => NULL,
+          'provided' => NULL,
         );
 
         $query = db_update('mfcs_current_requirements');

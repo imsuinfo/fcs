@@ -40,10 +40,13 @@ function mfcs_management_page() {
   $items_3 = array();
   $items_4 = array();
 
+  $items_array = &$items_1;
+  $items_array_current = 1;
+
   if ($can_create) {
-    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/create-0" class="item-link">Request Use</a></h4>';
+    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/create-0" class="item-link">New Request</a></h4>';
     $help = '<div class="item-description inline-block">Make a request to use the facilities or host special events at McNeese State University or related facilities.</div>';
-    $items_1[] = array(
+    $items_array[] = array(
       'data' => $link . '<br>' . $help,
       'class' => array(
       ),
@@ -60,34 +63,94 @@ function mfcs_management_page() {
     );
   }
 
-  if ($can_search) {
-    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/search-0" class="item-link">Search Requests</a></h4>';
-    $help = '<div class="item-description inline-block">Use advanced search tools to help locate and find one or more requests.</div>';
-    $items_3[] = array(
-      'data' => $link . '<br>' . $help,
-      'class' => array(
-      ),
-    );
+  if (count($items_array) > 1) {
+    if ($items_array_current == 1) {
+      $items_array = &$items_2;
+      $items_array_current++;
+    }
+    elseif ($items_array_current == 2) {
+      $items_array = &$items_3;
+      $items_array_current++;
+    }
+    elseif ($items_array_current == 3) {
+      $items_array = &$items_4;
+      $items_array_current++;
+    }
   }
 
   if ($can_review) {
     $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/review-0" class="item-link">Review Requests</a></h4>';
     $help = '<div class="item-description inline-block">Manage requests the current user is allowed to review.</div>';
-    $items_2[] = array(
+    $items_array[] = array(
       'data' => $link . '<br>' . $help,
       'class' => array(
       ),
     );
   }
 
+  if (count($items_array) > 1) {
+    if ($items_array_current == 1) {
+      $items_array = &$items_2;
+      $items_array_current++;
+    }
+    elseif ($items_array_current == 2) {
+      $items_array = &$items_3;
+      $items_array_current++;
+    }
+    elseif ($items_array_current == 3) {
+      $items_array = &$items_4;
+      $items_array_current++;
+    }
+  }
+
   if ($manager) {
     $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/reviewers-0" class="item-link">Manage Reviewers</a></h4>';
     $help = '<div class="item-description inline-block">Manage what users are allowed to approve/deny requests by request type.</div>';
-    $items_2[] = array(
+    $items_array[] = array(
       'data' => $link . '<br>' . $help,
       'class' => array(
       ),
     );
+  }
+
+  if (count($items_array) > 1) {
+    if ($items_array_current == 1) {
+      $items_array = &$items_2;
+      $items_array_current++;
+    }
+    elseif ($items_array_current == 2) {
+      $items_array = &$items_3;
+      $items_array_current++;
+    }
+    elseif ($items_array_current == 3) {
+      $items_array = &$items_4;
+      $items_array_current++;
+    }
+  }
+
+  if ($can_search) {
+    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/search-0" class="item-link">Search Requests</a></h4>';
+    $help = '<div class="item-description inline-block">Use advanced search tools to help locate and find one or more requests.</div>';
+    $items_array[] = array(
+      'data' => $link . '<br>' . $help,
+      'class' => array(
+      ),
+    );
+  }
+
+  if (count($items_array) > 1) {
+    if ($items_array_current == 1) {
+      $items_array = &$items_2;
+      $items_array_current++;
+    }
+    elseif ($items_array_current == 2) {
+      $items_array = &$items_3;
+      $items_array_current++;
+    }
+    elseif ($items_array_current == 3) {
+      $items_array = &$items_4;
+      $items_array_current++;
+    }
   }
 
   $item_list_1 = theme('item_list', array('items' => $items_1, 'type' => 'ul'));

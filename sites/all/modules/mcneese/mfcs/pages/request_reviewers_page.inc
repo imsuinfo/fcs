@@ -36,7 +36,7 @@ function mfcs_request_reviewers_0_page() {
 
     $items = array();
     foreach ($review_steps as $review_step_id => $review_step_object) {
-      if (empty($review_step_object->field_review_request_roles['und'])) {
+      if (empty($review_step_object->field_review_event_roles['und'])) {
         continue;
       }
 
@@ -45,7 +45,7 @@ function mfcs_request_reviewers_0_page() {
       if ($review_step_id == MFCS_REVIEW_STEP_MAKE_DECISIONS) continue;
 
       $unmatched = TRUE;
-      foreach ($review_step_object->field_review_request_roles['und'] as $key => $value) {
+      foreach ($review_step_object->field_review_event_roles['und'] as $key => $value) {
         if ($value['tid'] == $classification_id) {
           $unmatched = FALSE;
           break;

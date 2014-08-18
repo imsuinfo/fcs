@@ -378,7 +378,7 @@ function mfcs_edit_0_autocomplete_request_coordinator_phone($string) {
 }
 
 /**
- * Builds the Event Coordinator query.
+ * Builds the Request Coordinator query.
  *
  * This should be called inside of a try {} catch {}.
  *

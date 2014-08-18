@@ -363,7 +363,7 @@ function mfcs_get_request_fields($form, &$form_state) {
   mfcs_get_request_field_venue_coordinator_user_id($form, $form_state, $fields, $request_state, $ps);
 
 
-  // Fieldset: Event Coordinator
+  // Fieldset: Request Coordinator
   $ps = 'request_coordinator';
   if (!is_null($form['form']['parents']['#value']['path'])) {
     $ps .= ']';
@@ -385,7 +385,7 @@ function mfcs_get_request_fields($form, &$form_state) {
       '#tree' => TRUE,
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
-      '#title' => "Event Coordinator Settings",
+      '#title' => "Request Coordinator Settings",
     );
   }
 
@@ -417,7 +417,7 @@ function mfcs_get_request_fields($form, &$form_state) {
       '#tree' => TRUE,
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
-      '#title' => "Event Information",
+      '#title' => "Request Information",
     );
   }
 
@@ -460,7 +460,7 @@ function mfcs_get_request_fields($form, &$form_state) {
       '#tree' => TRUE,
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
-      '#title' => "Event Plans",
+      '#title' => "Request Plans",
     );
   }
 
@@ -493,7 +493,7 @@ function mfcs_get_request_fields($form, &$form_state) {
         '#tree' => TRUE,
         '#collapsible' => TRUE,
         '#collapsed' => FALSE,
-        '#title' => "Event Registration",
+        '#title' => "Request Registration",
       );
     }
   }
@@ -531,7 +531,7 @@ function mfcs_get_request_fields($form, &$form_state) {
       '#tree' => TRUE,
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
-      '#title' => "Event Setup",
+      '#title' => "Request Setup",
     );
   }
 
@@ -573,7 +573,7 @@ function mfcs_get_request_fields($form, &$form_state) {
       '#tree' => TRUE,
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
-      '#title' => "Event Presentation",
+      '#title' => "Request Presentation",
     );
   }
 
@@ -621,7 +621,7 @@ function mfcs_get_request_fields($form, &$form_state) {
       '#tree' => TRUE,
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
-      '#title' => "Event Services",
+      '#title' => "Request Services",
     );
   }
 
@@ -1110,7 +1110,7 @@ function mfcs_get_request_field_dates_date($form, &$form_state, &$fields, &$requ
     $delta_id = '-delta_' . $delta;
   }
 
-  $field_title = "Date of Event";
+  $field_title = "Date of Request";
   $limits_check = array(
     'title' => $field_title,
     'field' => 'date',
@@ -1202,7 +1202,7 @@ function mfcs_get_request_field_dates_time_start($form, &$form_state, &$fields, 
     $delta_id = '-delta_' . $delta;
   }
 
-  $field_title = "Event Start Time";
+  $field_title = "Request Start Time";
   $limits_check = array(
     'title' => $field_title,
     'field' => 'time_start',
@@ -1287,7 +1287,7 @@ function mfcs_get_request_field_dates_time_stop($form, &$form_state, &$fields, &
     $delta_id = '-delta_' . $delta;
   }
 
-  $field_title = "Event Stop Time";
+  $field_title = "Request Stop Time";
   $limits_check = array(
     'title' => $field_title,
     'field' => 'time_stop',
@@ -1492,7 +1492,7 @@ function mfcs_get_request_field_request_coordinator_name($form, &$form_state, &$
     }
   }
 
-  $field_title = "Event Coordinator Name";
+  $field_title = "Request Coordinator Name";
   $limits_check = array(
     'title' => $field_title,
     'field' => 'name',
@@ -1572,7 +1572,7 @@ function mfcs_get_request_field_request_coordinator_phone($form, &$form_state, &
     }
   }
 
-  $field_title = "Event Coordinator Phone";
+  $field_title = "Request Coordinator Phone";
   $limits_check = array(
     'title' => $field_title,
     'field' => 'phone',
@@ -1648,7 +1648,7 @@ function mfcs_get_request_field_request_coordinator_email($form, &$form_state, &
     }
   }
 
-  $field_title = "Event Coordinator E-Mail";
+  $field_title = "Request Coordinator E-Mail";
   $limits_check = array(
     'title' => $field_title,
     'field' => 'email',
@@ -1737,7 +1737,7 @@ function mfcs_get_request_field_request_coordinator_classification($form, &$form
     $values = array(0 => $classification['value']);
   }
 
-  $field_title = "Event Coordinator Classification";
+  $field_title = "Request Coordinator Classification";
   $limits_check = array(
     'title' => $field_title,
     'field' => 'classification',
@@ -1794,7 +1794,7 @@ function mfcs_get_request_field_request_coordinator_classification($form, &$form
         $fields['request_coordinator']['classification'][$key] = array(
           '#id' => 'field-request-request_coordinator-classification-' . $key,
           '#type' => 'select',
-          '#title' => 'Event Coordinator Classification',
+          '#title' => 'Request Coordinator Classification',
           '#options' => $classification['options'],
           '#default_value' => $value,
           '#value' => $value,
@@ -1835,7 +1835,7 @@ function mfcs_get_request_field_information_title($form, &$form_state, &$fields,
     $values = $request_state['information']['title'];
   }
 
-  $field_title = "Event Title";
+  $field_title = "Request Title";
   $limits_check = array(
     'title' => $field_title,
     'field' => 'title',
@@ -1980,7 +1980,7 @@ function mfcs_get_request_field_information_type($form, &$form_state, &$fields, 
     $values = $request_state['information']['type'];
   }
 
-  $field_title = "Type of Event";
+  $field_title = "Type of Request";
   $limits_check = array(
     'title' => $field_title,
     'field' => 'type',
@@ -2263,7 +2263,7 @@ function mfcs_get_request_field_plans_description($form, &$form_state, &$fields,
     $build = TRUE;
   }
 
-  $field_title = "Event Description/Purpose";
+  $field_title = "Request Description/Purpose";
   $limits_check = array(
     'title' => $field_title,
     'field' => 'description',

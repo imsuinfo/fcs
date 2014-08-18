@@ -33,3 +33,4 @@ files[] = pages/request_search_page.inc
 files[] = pages/request_view_page.inc
 files[] = pages/request_history_page.inc
 files[] = pages/request_calendar_page.inc
+files[] = js/printing-fieldsets.js

@@ -132,6 +132,22 @@ define('MFCS_EVENT_STATUS_CANCELLED', 7);
  define('MFCS_VIEW_MODE_LOG', 2);
  define('MFCS_VIEW_MODE_OPERATIONS', 3);
 
+/**
+ * Defines PDF types.
+ */
+ define('MFCS_PDF_TYPE_REQUEST', 0);
+ define('MFCS_PDF_TYPE_AGREEMENT', 1);
+
+
+/**
+ * Implements hook_init().
+ */
+function mfcs_init() {
+  global $base_path;
+  $module_path = drupal_get_path('module', 'mfcs');
+
+  drupal_add_js($module_path . '/js/printing-fieldsets.js', array('type' => 'file', 'group' => JS_DEFAULT, 'preprocess' => TRUE));
+}
 
 /**
  * Implements hook_permission().
@@ -180,7 +196,7 @@ function mfcs_menu() {
   );
 
   $items['requests/create-0'] = array(
-    'title' => "Request Usage",
+    'title' => "New Request",
     'description' => "New Request",
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_create_0_form'),
@@ -193,7 +209,7 @@ function mfcs_menu() {
   );
 
   $items['requests/create-0/%'] = array(
-    'title' => "Request Usage",
+    'title' => "New Request",
     'description' => "New Request",
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_create_0_form', 2),
@@ -240,7 +256,7 @@ function mfcs_menu() {
     'title' => "View Request",
     'description' => "Edit Request",
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_edit_0_form', 2),
+    'page arguments' => array('mfcs_request_edit_0_form', 2),
     'file' => 'request_edit_page.inc',
     'file path' => drupal_get_path('module', 'mfcs') . '/pages',
     'access callback' => 'mfcs_management_page_request_access',
@@ -253,7 +269,7 @@ function mfcs_menu() {
     'title' => "Edit Request",
     'description' => "Edit Request",
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_edit_0_form', 2, 3),
+    'page arguments' => array('mfcs_request_edit_0_form', 2, 3),
     'file' => 'request_edit_page.inc',
     'file path' => drupal_get_path('module', 'mfcs') . '/pages',
     'access callback' => 'mfcs_management_page_request_access',
@@ -547,8 +563,8 @@ function mfcs_menu() {
   );
 
   $items['requests/history-0/%'] = array(
-    'title' => "Event History",
-    'description' => "Event History",
+    'title' => "Request History",
+    'description' => "Request History",
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_history_0_form', 2),
     'file' => 'request_history_page.inc',
@@ -1451,7 +1467,7 @@ function mfcs_mail($key, &$message, $params) {
   $files = array();
 
   if ($key == 'request_alert') {
-    $subject = 'McNeese Facilities Use Request: ' . $params['request_id'] . ' - ' . $params['request_title'];
+    $subject = 'Facilities Use Request: ' . $params['request_id'] . ' - ' . $params['request_title'];
 
     if (!empty($params['title_suffix'])) {
       $subject .= ' - ' . $params['title_suffix'];
@@ -1459,10 +1475,12 @@ function mfcs_mail($key, &$message, $params) {
 
     $request_url = $base_url . '/requests/view-0/' . $params['request_id'];
 
-    $body .= $params['content'] . "\n";
+    if (!empty($params['content'])) {
+      $body .= $params['content'] . "\n";
+    }
 
     $body .= "\n";
-    $body .= "Event URL:\n - " . $request_url . "\n\n";
+    $body .= "Request URL:\n - " . $request_url . "\n\n";
 
     $body .= "\n";
     $body .= "This e-mail was generated on:\n - " . date("Y/m/d h:i:s a T", REQUEST_TIME) . "\n";
@@ -1472,7 +1490,7 @@ function mfcs_mail($key, &$message, $params) {
       $markup .= $params['markup'] . "\n";
 
       $markup .= "<br>\n";
-      $markup .= "<strong>Event URL</strong>:\n<ul><li><a href=" . '"' . $request_url . '"' . ">" . $request_url . "</a></li></ul>\n<br>\n";
+      $markup .= "<strong>Request URL</strong>:\n<ul><li><a href=" . '"' . $request_url . '"' . ">" . $request_url . "</a></li></ul>\n<br>\n";
 
       $markup .= "<br>\n";
       $markup .= "<em>This e-mail was generated on</em>:\n<ul><li><em>" . date("Y/m/d h:i:s a T", REQUEST_TIME) . "</em></li></ul>\n";
@@ -2153,7 +2171,7 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array()) {
     }
 
     // Note: the system used to refer to requests as events, but because this is a drupal field, 'event' cannot be changed to 'request' in this explicit case.
-    $edit = array('field_user_event_roles' => array('und' => $event_roles), 'roles' => $system_roles);
+    $edit = array('field_user_event_roles' => array('und' => $request_roles), 'roles' => $system_roles);
 
     if (user_save($user, $edit)) return TRUE;
   }
@@ -4298,11 +4316,13 @@ function mfcs_display_room_unavailable_message() {
  * @param bool $local
  *   (optional) If TRUE, then the file is saved to the local disk.
  *   If FALSE, then the file is print to stdout.
+ * @param int $type
+ *   (optional) What the PDF represents, such as a request or an agreement.
  *
  * @return bool
  *   TRUE on success, FALSE otherwise.
  */
-function mfcs_generate_pdf($request_id, $mode = MFCS_VIEW_MODE_DISPLAY, $local = FALSE) {
+function mfcs_generate_pdf($request_id, $mode = MFCS_VIEW_MODE_DISPLAY, $local = FALSE, $type = MFCS_PDF_TYPE_REQUEST) {
   $request = mfcs_load_request_by_id($request_id);
 
   if (empty($request)) {
@@ -4328,7 +4348,7 @@ function mfcs_generate_pdf($request_id, $mode = MFCS_VIEW_MODE_DISPLAY, $local =
   $renderred = drupal_render($page);
   $html = drupal_render_page($renderred);
 
-  return mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $html, $local);
+  return mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $html, $local, array(), $type);
 }
 
 /**
@@ -4341,11 +4361,13 @@ function mfcs_generate_pdf($request_id, $mode = MFCS_VIEW_MODE_DISPLAY, $local =
  *   If FALSE, then the file is print to stdout.
  * @param array $parameters
  *   (optional) Change the default behavior on how the page is generated.
+ * @param int $type
+ *   (optional) What the PDF represents, such as a request or an agreement.
  *
  * @return bool
  *   TRUE on success, FALSE otherwise.
  */
-function mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $html, $local = FALSE, $parameters = array()) {
+function mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $html, $local = FALSE, $parameters = array(), $type = MFCS_PDF_TYPE_REQUEST) {
   $request = mfcs_load_request_by_id($request_id);
 
   if (empty($request)) {
@@ -4365,6 +4387,11 @@ function mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $html, $local = 
 
   if (!is_array($parameters)) {
     cf_error::invalid_array('parameters');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($type)) {
+    cf_error::invalid_integer('type');
     return FALSE;
   }
 
@@ -4423,6 +4450,8 @@ function mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $html, $local = 
             if (isset($parts[5])) {
               if ($parts[5] == 'mcneese') {
               }
+              elseif ($parts[5] == 'mcneese_fcs') {
+              }
               elseif ($parts[5] == 'mfcs') {
               }
               else {
@@ -4466,8 +4495,8 @@ function mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $html, $local = 
 
   // title tags
   if (empty($parameters['page_title'])) {
-    $page_title = "Event Request: " . $request['information']['title'][0]->value;
-    $head_markup .= '<title>Event Request #' . $request_id . ': ' . $request['information']['title'][0]->value . '</title>';
+    $page_title = "Facilities Use Request: " . $request['information']['title'][0]->value;
+    $head_markup .= '<title>Request #' . $request_id . ': ' . $request['information']['title'][0]->value . '</title>';
   }
   else {
     $page_title = $parameters['page_title'];
@@ -4505,7 +4534,6 @@ function mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $html, $local = 
   $html .= '</body>';
   $html .= '</html>' . "\n";
 
-
   $wkpdf = new WkHtmlToPdf();
 
   // setup the default options
@@ -4515,7 +4543,7 @@ function mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $html, $local = 
 
   $wkpdf->addPage($html);
 
-  $filename = mfcs_build_filename($request_id, 0);
+  $filename = mfcs_build_filename($request_id, 0, $type);
 
   if ($local) {
     // save the file, locally.
@@ -4550,12 +4578,14 @@ function mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $html, $local = 
  *   1 - use the BDM filename PDF.
  *   2 - use the BDM filename Meta.
  *   3 - use the Email filename marker.
+ * @param int $type
+ *   (optional) What the PDF represents, such as a request or an agreement.
  *
  * @return string|false
  *   The built filename string or FALSE on error.
  */
-function mfcs_build_filename($request_id, $mode = MFCS_VIEW_MODE_NORMAL) {
-  $request = request_workflow_load_request_by_id($request_id);
+function mfcs_build_filename($request_id, $mode = MFCS_VIEW_MODE_NORMAL, $type = MFCS_PDF_TYPE_REQUEST) {
+  $request = mfcs_load_request_by_id($request_id);
 
   if (empty($request)) {
     watchdog(MFCS_WATCHDOG_ID, "Unable to find request with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
@@ -4567,26 +4597,43 @@ function mfcs_build_filename($request_id, $mode = MFCS_VIEW_MODE_NORMAL) {
     return FALSE;
   }
 
+  if (!cf_is_integer($type)) {
+    cf_error::invalid_integer('type');
+    return FALSE;
+  }
+
+  $name = 'unknown';
+  if ($type == MFCS_PDF_TYPE_REQUEST) {
+    $name = 'request';
+  }
+  elseif ($type == MFCS_PDF_TYPE_AGREEMENT) {
+    $name = 'agreement';
+  }
+
+  $fixed_title = preg_replace('/\W/i', '_', $request['information']['title'][0]->value);
+  $fixed_title = preg_replace('/_+/i', '_', $fixed_title);
+
+  // remove leading and trailing '_'.
+  $fixed_title = preg_replace('/^_+/i', '', $fixed_title);
+  $fixed_title = preg_replace('/_+$/i', '', $fixed_title);
+
+  $extra = "";
   if ($mode == MFCS_VIEW_MODE_NORMAL) {
-    $fixed_title = preg_replace('/\W/i', '_', $request['information']['title'][0]->value);
-    $fixed_title = preg_replace('/_+/i', '_', $fixed_title);
-
-    return sprintf("%'010s", $request_id) . '-request-' . $fixed_title . '.pdf';
+  }
+  elseif ($mode == MFCS_VIEW_MODE_DISPLAY) {
+    $extra = '-display';
+  }
+  elseif ($mode == MFCS_VIEW_MODE_LOG) {
+    $extra = '-log';
+  }
+  elseif ($mode == MFCS_VIEW_MODE_OPERATIONS) {
+    $extra = '-operations';
+  }
+  else {
+    return FALSE;
   }
 
-  if ($mode == MFCS_VIEW_MODE_DISPLAY) {
-    return sprintf("%'010s", $request_id) . '.pdf';
-  }
-
-  if ($mode == MFCS_VIEW_MODE_LOG) {
-    return sprintf("%'010s", $request_id) . '.meta';
-  }
-
-  if ($mode == MFCS_VIEW_MODE_OPERATIONS) {
-    return sprintf("%'010s", $request_id) . '.email';
-  }
-
-  return FALSE;
+  return sprintf("%'010s", $request_id) . '-' . $name . '-' . $fixed_title . $extra . '.pdf';
 }
 
 /**
@@ -5045,15 +5092,14 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
 
       // always show completed and accepted requests when there are no restrictions.
       if (is_null($review_restrictions)) {
-        if (is_null($or)) {
-          $or = db_or();
+        // if there are no conditions, then don't add any!
+        if (!is_null($or)) {
+          $and = db_and();
+          $and->condition('mfts.value', MFCS_EVENT_STATUS_CLOSED_ACCEPTED);
+          $and->condition('mftsp.value', MFCS_REVIEW_STEP_COMPLETED);
+
+          $or->condition($and);
         }
-
-        $and = db_and();
-        $and->condition('mfts.value', MFCS_EVENT_STATUS_CLOSED_ACCEPTED);
-        $and->condition('mftsp.value', MFCS_REVIEW_STEP_COMPLETED);
-
-        $or->condition($and);
       }
 
       if (!is_null($or)) {
@@ -5075,8 +5121,6 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
       }
       else {
         $query->condition('mer.user_id', $user->uid);
-
-        drupal_set_message("DEBUG");
       }
     }
     else {
@@ -5698,9 +5742,9 @@ function mfcs_build_request_table($items, $max_rows, $columns = array('id' => "I
       $row['title'] = check_plain($item->title);
     }
 
-    $location_options = request_workflow_get_request_location_list_options();
-    $building_options = request_workflow_get_request_building_list_options($item->location);
-    $room_options = request_workflow_get_request_room_list_options();
+    $location_options = mfcs_get_request_location_list_options();
+    $building_options = mfcs_get_request_building_list_options($item->location);
+    $room_options = mfcs_get_request_room_list_options();
 
     if (isset($columns['location'])) {
       $location = "";
@@ -5953,5 +5997,5 @@ function mfcs_get_reviewers_yet_to_review($request_id) {
 }
 
 /**
- * @} End of '@defgroup mfcs McNeese Event Workflow'.
+ * @} End of '@defgroup mfcs McNeese Facilities Use'.
  */

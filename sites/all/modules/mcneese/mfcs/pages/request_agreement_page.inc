@@ -132,50 +132,135 @@ function mfcs_request_agreement_0_form($form, &$form_state, $request_id, $pdf = 
   $grand_total = (float) 0;
 
   $requirements = array();
-  $requirements['facilities'] = "Facilities";
-  $requirements['equipment'] = "Equipment";
-  $requirements['custodial'] = "Custodial";
-  $requirements['security'] = "Security";
+  $requirements['facilities'] = array(
+    'calculate' => array(
+      'days' => 'days',
+      'amount' => 'amount',
+    ),
+    'name' => "Facilities",
+  );
+
+  $requirements['equipment'] = array(
+    'calculate' => array(
+      'days' => 'days',
+      'amount' => 'amount',
+    ),
+    'name' => "Equipment",
+  );
+
+  $requirements['custodial'] = array(
+    'calculate' => array(
+      'quantity' => 'quantity',
+      'hours' => 'hours',
+      'days' => 'days',
+      'amount' => 'amount',
+    ),
+    'name' => "Custodial",
+  );
+
+  $requirements['security'] = array(
+    'calculate' => array(
+      'quantity' => 'quantity',
+      'hours' => 'hours',
+      'days' => 'days',
+      'amount' => 'amount',
+    ),
+    'name' => "Security",
+  );
 
   $requirements_found = FALSE;
-  foreach ($requirements as $requirement => $requirement_name) {
+  foreach ($requirements as $requirement => $requirement_data) {
     if (!empty($request['requirements'][$requirement])) {
       $requirements_found = TRUE;
-      $markup .= '<div class="agreement-table-body-row">';
 
       $value = reset($request['requirements'][$requirement]);
 
       $amount = array();
-      $amount['quantity'] = (int) $value->quantity;
-      $amount['hours'] = (float) mfcs_convert_value_from_database_format($value->hours, 'currency');
-      $amount['days'] = (float) mfcs_convert_value_from_database_format($value->days, 'currency');
-      $amount['amount'] = (float) mfcs_convert_value_from_database_format($value->amount, 'currency');
+      $amount['total'] = NULL;
+      $amount['quantity'] = NULL;
+      $amount['hours'] = NULL;
+      $amount['days'] = NULL;
+      $amount['amount'] = NULL;
 
-      $amount['total'] = $amount['quantity'] * $amount['hours'] * $amount['days'] * $amount['amount'];
+      if (isset($requirement_data['calculate']['quantity'])) {
+        if (is_null($amount['total'])) {
+          $amount['total'] = 1;
+        }
+
+        $amount['quantity'] = (int) $value->quantity;
+        $amount['total'] *= $amount['quantity'];
+      }
+
+      if (isset($requirement_data['calculate']['hours'])) {
+        if (is_null($amount['total'])) {
+          $amount['total'] = 1;
+        }
+
+        $amount['hours'] = (float) mfcs_convert_value_from_database_format($value->hours, 'currency');
+        $amount['total'] *= $amount['hours'];
+      }
+
+      if (isset($requirement_data['calculate']['days'])) {
+        if (is_null($amount['total'])) {
+          $amount['total'] = 1;
+        }
+
+        $amount['days'] = (float) mfcs_convert_value_from_database_format($value->days, 'currency');
+        $amount['total'] *= $amount['days'];
+      }
+
+      if (isset($requirement_data['calculate']['amount'])) {
+        if (is_null($amount['total'])) {
+          $amount['total'] = 1;
+        }
+
+        $amount['amount'] = (float) mfcs_convert_value_from_database_format($value->amount, 'currency');
+        $amount['total'] *= $amount['amount'];
+      }
+
+      if (is_null($amount['total'])) {
+        continue;
+      }
+
+      $markup .= '<div class="agreement-table-body-row">';
+
       $grand_total += $amount['total'];
 
       // column 0
       $markup .= '<div class="agreement-table-body-row-cell column-0">';
-      $markup .= '<div class="item-label">' . $requirement_name . ' Fees:</div> ';
+      $markup .= '<div class="item-label">' . $requirement_data['name'] . ' Fees:</div> ';
 
       $markup .= '<div class="item-value">';
 
-      $markup .= $amount['quantity'] . ' personnel ';
-      if (floor($amount['hours']) == $amount['hours']) {
-        $markup .= $amount['hours'];
+      if (isset($requirement_data['calculate']['quantity'])) {
+        $markup .= $amount['quantity'] . ' personnel ';
       }
-      else {
-        $markup .= sprintf('%01.2f', $amount['hours']);
-      }
-      $markup .= ' hours ';
 
-      if (floor($amount['days']) == $amount['days']) {
-        $markup .= $amount['days'];
+      if (isset($requirement_data['calculate']['hours'])) {
+        if (floor($amount['hours']) == $amount['hours']) {
+          $markup .= $amount['hours'];
+        }
+        else {
+          $markup .= sprintf('%01.2f', $amount['hours']);
+        }
+        $markup .= ' hours ';
       }
-      else {
-        $markup .= sprintf('%01.2f', $amount['days']);
+
+      if (isset($requirement_data['calculate']['days'])) {
+        if (floor($amount['days']) == $amount['days']) {
+          $markup .= $amount['days'];
+        }
+        else {
+          $markup .= sprintf('%01.2f', $amount['days']);
+        }
+
+        $markup .= ' days ';
       }
-      $markup .= ' days at $' . sprintf('%01.2f', $amount['amount']);
+
+      if (isset($requirement_data['calculate']['amount'])) {
+        $markup .= 'at $' . sprintf('%01.2f', $amount['amount']);
+      }
+
       $markup .= '</div>'; // item-value
       $markup .= '</div>'; // column-0
 
@@ -355,7 +440,7 @@ function mfcs_request_agreement_0_pdf($request_id) {
   $renderred = drupal_render($page);
   $html = drupal_render_page($renderred);
 
-  $result = mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $html, FALSE, $parameters);
+  $result = mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $html, FALSE, $parameters, MFCS_PDF_TYPE_AGREEMENT);
 
   if ($result) {
     exit();
