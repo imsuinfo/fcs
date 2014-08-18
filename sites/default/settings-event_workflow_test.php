@@ -213,27 +213,13 @@
 include_once DRUPAL_ROOT . '/sites/default/passwords.php';
 
 $databases = array (
-  'file_db' =>
+  'fcs' =>
   array (
     'default' =>
     array (
-      'database' => 'web_files',
-      'username' => 'event_workflow_user',
-      'password' => $dbp['event_workflow_user'],
-      'host' => '192.251.101.224',
-      'port' => '5092',
-      'driver' => 'pgsql',
-      'prefix' => '',
-      'transactions' => TRUE,
-    ),
-  ),
-  'event_workflow' =>
-  array (
-    'default' =>
-    array (
-      'database' => 'event_workflow',
-      'username' => 'event_workflow_user',
-      'password' => $dbp['event_workflow_user'],
+      'database' => 'fcs',
+      'username' => 'fcs_user',
+      'password' => $dbp['fcs_user'],
       'host' => '192.251.101.223',
       'port' => '5092',
       'driver' => 'pgsql',
@@ -255,22 +241,10 @@ $databases = array (
       'transactions' => TRUE,
       'use_tns' => TRUE,
     ),
-    'test' =>
-    array (
-      'database' => 'TEST',
-      'host' => '192.251.101.136',
-      'username' => 'MSU_EVENT',
-      'password' => $dbp['msu_event'],
-      'port' => '1521',
-      'driver' => 'oracle',
-      'prefix' => '',
-      'transactions' => TRUE,
-      'use_tns' => TRUE,
-    ),
   ),
 );
 
-$databases['default'] = $databases['event_workflow'];
+$databases['default'] = $databases['fcs'];
 unset($dbp);
 
 /**
@@ -408,7 +382,7 @@ ini_set('session.cookie_lifetime', 432000);
  * Remove the leading hash signs to enable.
  */
 $conf['site_name'] = 'Event Workflow (test)';
-$conf['theme_default'] = 'mcneese_event_workflow';
+$conf['theme_default'] = 'mcneese_fcs';
 # $conf['anonymous'] = 'Visitor';
 
 /**
@@ -419,7 +393,7 @@ $conf['theme_default'] = 'mcneese_event_workflow';
  * theme. It is located inside 'modules/system/maintenance-page.tpl.php'.
  * Note: This setting does not apply to installation and update pages.
  */
-$conf['maintenance_theme'] = 'mcneese_event_workflow';
+$conf['maintenance_theme'] = 'mcneese_fcs';
 
 /**
  * Reverse Proxy Configuration:
@@ -705,8 +679,8 @@ $conf['gpg-mail'] = array(
 /**
  * Additional file_db variables.
  */
-$conf['file_db_server_id'] = 6;
-$conf['file_entity_default_scheme'] = 'dbu';
+#$conf['file_db_server_id'] = 6;
+#$conf['file_entity_default_scheme'] = 'dbu';
 $conf['image_style_default_scheme'] = 'public';
 $conf['phplot_api_default_scheme'] = 'public';
 

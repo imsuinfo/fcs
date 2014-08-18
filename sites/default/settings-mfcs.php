@@ -213,27 +213,13 @@
 include_once DRUPAL_ROOT . '/sites/default/passwords.php';
 
 $databases = array (
-  'file_db' =>
+  'mfcs' =>
   array (
     'default' =>
     array (
-      'database' => 'web_files',
-      'username' => 'event_workflow_user',
-      'password' => $dbp['event_workflow_user'],
-      'host' => '192.251.101.224',
-      'port' => '5092',
-      'driver' => 'pgsql',
-      'prefix' => '',
-      'transactions' => TRUE,
-    ),
-  ),
-  'event_workflow' =>
-  array (
-    'default' =>
-    array (
-      'database' => 'event_workflow',
-      'username' => 'event_workflow_user',
-      'password' => $dbp['event_workflow_user'],
+      'database' => 'mfcs',
+      'username' => 'mfcs_user',
+      'password' => $dbp['mfcs_user'],
       'host' => '192.251.101.224',
       'port' => '5092',
       'driver' => 'pgsql',
@@ -255,22 +241,10 @@ $databases = array (
       'transactions' => TRUE,
       'use_tns' => TRUE,
     ),
-    'test' =>
-    array (
-      'database' => 'TEST',
-      'host' => '192.251.101.136',
-      'username' => 'MSU_EVENT',
-      'password' => $dbp['msu_event'],
-      'port' => '1521',
-      'driver' => 'oracle',
-      'prefix' => '',
-      'transactions' => TRUE,
-      'use_tns' => TRUE,
-    ),
   ),
 );
 
-$databases['default'] = $databases['event_workflow'];
+$databases['default'] = $databases['mfcs'];
 unset($dbp);
 
 /**
@@ -327,10 +301,10 @@ unset($dbs);
  * for you.
  */
 if ($_SERVER['SERVER_PORT'] == 443) {
-  $base_url = 'https://thebe.mcneese.edu/event_workflow';  // NO trailing slash!
+  $base_url = 'https://thebe.mcneese.edu/fcs';  // NO trailing slash!
 }
 else {
-  $base_url = 'http://thebe.mcneese.edu/event_workflow';  // NO trailing slash!
+  $base_url = 'http://thebe.mcneese.edu/fcs';  // NO trailing slash!
 }
 
 /**
@@ -693,7 +667,7 @@ $conf['workbench_menu_item_use_normal_path'] = TRUE;
 /**
  *  GNU PG Support
  */
-putenv('GNUPGHOME=/var/www/drupal/event_workflow/sites/default/gnupg');
+putenv('GNUPGHOME=/var/www/drupal/fcs/sites/default/gnupg');
 $conf['gpg-mail'] = array(
   'event_workflow@mcneese.edu' => array(
     'fingerprint' => '735D221DC35DC55767F7B30305257680DDEB1921',
@@ -705,8 +679,8 @@ $conf['gpg-mail'] = array(
 /**
  * Additional file_db variables.
  */
-$conf['file_db_server_id'] = 6;
-$conf['file_entity_default_scheme'] = 'dbu';
+#$conf['file_db_server_id'] = 6;
+#$conf['file_entity_default_scheme'] = 'dbu';
 $conf['image_style_default_scheme'] = 'public';
 $conf['phplot_api_default_scheme'] = 'public';
 
