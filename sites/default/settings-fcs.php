@@ -213,14 +213,14 @@
 include_once DRUPAL_ROOT . '/sites/default/passwords.php';
 
 $databases = array (
-  'mfcs' =>
+  'fcs' =>
   array (
     'default' =>
     array (
-      'database' => 'mfcs',
-      'username' => 'mfcs_user',
-      'password' => $dbp['mfcs_user'],
-      'host' => '192.251.101.224',
+      'database' => 'fcs',
+      'username' => 'fcs_user',
+      'password' => $dbp['fcs_user'],
+      'host' => '127.0.0.1',
       'port' => '5092',
       'driver' => 'pgsql',
       'prefix' => '',
@@ -244,7 +244,7 @@ $databases = array (
   ),
 );
 
-$databases['default'] = $databases['mfcs'];
+$databases['default'] = $databases['fcs'];
 unset($dbp);
 
 /**
@@ -301,10 +301,10 @@ unset($dbs);
  * for you.
  */
 if ($_SERVER['SERVER_PORT'] == 443) {
-  $base_url = 'https://thebe.mcneese.edu/fcs';  // NO trailing slash!
+  $base_url = 'https://fcs.mcneese.edu';  // NO trailing slash!
 }
 else {
-  $base_url = 'http://thebe.mcneese.edu/fcs';  // NO trailing slash!
+  $base_url = 'http://fcs.mcneese.edu';  // NO trailing slash!
 }
 
 /**
@@ -669,7 +669,7 @@ $conf['workbench_menu_item_use_normal_path'] = TRUE;
  */
 putenv('GNUPGHOME=/var/www/drupal/fcs/sites/default/gnupg');
 $conf['gpg-mail'] = array(
-  'event_workflow@mcneese.edu' => array(
+  'facilities_use@fcs.mcneese.edu' => array(
     'fingerprint' => '735D221DC35DC55767F7B30305257680DDEB1921',
     'short_id' => 'DDEB1921',
   ),
