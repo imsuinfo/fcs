@@ -191,17 +191,6 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
   }
   drupal_set_title($page_title);
 
-  // provide margin information in the printer-friendly version of the page.
-  $print_css = '@page { ' . "\n";
-  $print_css .= '  size: A4 portrait;' . "\n";
-  $print_css .= '  margin: 30px 30px 30px 30px;' . "\n";
-
-  // note: @top-left, and @top-right are currently not supported by most major browsers.
-  $print_css .= '  @top-left { content: "' . $page_title . '"; }' . "\n";
-  $print_css .= '  @top-right { content: "Page " counter(page); }' . "\n";
-  $print_css .= '}' . "\n";
-  drupal_add_css($print_css, array('type' => 'inline', 'group' => CSS_THEME, 'weight' => 10, 'media' => 'print', 'preprocess' => FALSE));
-
 
   $form = array();
   $form['form'] = array(
