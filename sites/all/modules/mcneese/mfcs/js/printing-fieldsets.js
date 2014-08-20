@@ -26,7 +26,8 @@
         var fieldsets_print_as_div = document.getElementsByClassName("fieldset_print_as_div");
 
         if (fieldsets_print_as_div != null) {
-          for (i = 0; i < fieldsets_print_as_div.length; i++) {
+
+          for (var i = 0; i < fieldsets_print_as_div.length; i++) {
             var replacement = document.createElement("fieldset");
 
             for (var j = 0; j < fieldsets_print_as_div[i].attributes.length; j++) {

@@ -771,6 +771,7 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
           'class' => array(
             'request-section-review-log',
             'mode-' . $mode,
+            'fieldset_print_as_div',
           ),
         ),
         '#tree' => TRUE,

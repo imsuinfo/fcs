@@ -4400,6 +4400,15 @@ function mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $html, $local = 
     return FALSE;
   }
 
+  global $base_path;
+
+  // determine the number of directories in the base path so that they can be stripped out properly.
+  $base_path_count = count(explode('/', $base_path));
+  $css_path_0 = $base_path_count;
+  $css_path_1 = $base_path_count + 1;
+  $css_path_2 = $base_path_count + 2;
+  $css_path_3 = $base_path_count + 3;
+
   // Reconstruct the HTML output.
   $cf_dom = new cf_dom(TRUE, TRUE, TRUE, $html);
 
@@ -4441,18 +4450,18 @@ function mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $html, $local = 
           // skip past css uneeded css
           if ($media == 'all') {
             $parts = explode('/', $m);
-            if (!isset($parts[4])) {
+            if (!isset($parts[$css_path_1])) {
               continue;
             }
-            if ($parts[3] == 'system') {
+            if ($parts[$css_path_0] == 'system') {
             }
 
-            if (isset($parts[5])) {
-              if ($parts[5] == 'mcneese') {
+            if (isset($parts[$css_path_2])) {
+              if ($parts[$css_path_2] == 'mcneese') {
               }
-              elseif ($parts[5] == 'mcneese_fcs') {
+              elseif ($parts[$css_path_2] == 'mcneese_fcs') {
               }
-              elseif ($parts[5] == 'mfcs') {
+              elseif ($parts[$css_path_2] == 'mfcs') {
               }
               else {
                 continue;
@@ -4462,11 +4471,15 @@ function mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $html, $local = 
 
           $fixed_path = preg_replace('/\?.*$/i', '', $m);
           $parts = explode('/', $fixed_path);
-          array_shift($parts);
-          array_shift($parts);
+
+          $bpc = 2;
+          while ($bpc <= $base_path_count) {
+            array_shift($parts);
+            $bpc++;
+          }
+
           $fixed_path = implode('/', $parts);
           $content = drupal_load_stylesheet(DRUPAL_ROOT . '/' . $fixed_path);
-
 
           if (!empty($content)) {
             // mPDF does not properly support the > selector.
@@ -4536,10 +4549,21 @@ function mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $html, $local = 
 
   $wkpdf = new WkHtmlToPdf();
 
+  $wk_options = array();
+
+  $wk_options['binPath'] = '/usr/local/bin/wkhtmltopdf';
+  $wk_options['binName'] = 'wkhtmltopdf';
+
+  // when not ignored, the PDF does not get generated.
+  $wk_options['ignoreWarnings'] = TRUE;
+
+  $wrapper = file_stream_wrapper_get_instance_by_scheme('temporary');
+  if (is_object($wrapper)) {
+    $wk_options['tmp'] = $wrapper->getDirectoryPath();
+  }
+
   // setup the default options
-  $wkpdf->setOptions(array(
-    'ignoreWarnings' => TRUE, // when not ignored, the PDF does not get generated.
-  ));
+  $wkpdf->setOptions($wk_options);
 
   $wkpdf->addPage($html);
 

@@ -1714,5 +1714,5 @@ function mfcs_table_presentation($option = NULL) {
 }
 
 /**
- * @} End of '@addtogroup mcneese_event_workflow'.
+ * @} End of '@addtogroup mfcs'.
  */

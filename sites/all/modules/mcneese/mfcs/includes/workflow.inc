@@ -1308,9 +1308,9 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
   $email_params = array();
   $email_params['request_id'] = $request_id;
   #$email_params['filename'] = array($filename); // @todo: should files be attached?
-  $email_params['from'] = 'event_workflow@mcneese.edu';
+  $email_params['from'] = 'facilities_use@fcs.mcneese.edu';
 
-  $email_from = '"McNeese Facilities Use System" <event_workflow@mcneese.edu>';
+  $email_from = '"McNeese Facilities Use System" <facilities_use@fcs.mcneese.edu>';
 
   $location = mfcs_load_locations($request['top']['location'][0]->value);
   $location_text = '';
