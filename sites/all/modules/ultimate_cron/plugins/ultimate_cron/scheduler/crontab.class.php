@@ -14,7 +14,7 @@ class UltimateCronCrontabScheduler extends UltimateCronScheduler {
   public function defaultSettings() {
     return array(
       'rules' => array('*/10+@ * * * *'),
-      'catch_up' => '300',
+      'catch_up' => '86400',
     );
   }
 
@@ -48,7 +48,7 @@ class UltimateCronCrontabScheduler extends UltimateCronScheduler {
       }
     }
     $parsed .= t('Next scheduled run at @datetime', array(
-      '@datetime' => format_date($next_schedule, 'custom', 'Y-m-d H:i:s')
+      '@datetime' => format_date($next_schedule, 'custom', 'Y-m-d H:i:s'),
     ));
     return $parsed;
   }
@@ -163,7 +163,7 @@ class UltimateCronCrontabScheduler extends UltimateCronScheduler {
     }
     $behind = REQUEST_TIME - $next_schedule;
 
-    return $behind > $settings['catch_up'] ? $behind: FALSE;
+    return $behind > $settings['catch_up'] ? $behind : FALSE;
   }
 
   /**

@@ -131,7 +131,7 @@ class UltimateCronLock {
    * @param float $timeout
    *   The timeout in seconds for the lock.
    *
-   * @return boolean
+   * @return bool
    *   TRUE if relock was successful.
    */
   static public function reLock($lock_id, $timeout = 30.0) {
@@ -152,7 +152,7 @@ class UltimateCronLock {
    *
    * @param string $name
    *   Name of the lock.
-   * @param boolean $ignore_expiration
+   * @param bool $ignore_expiration
    *   Ignore expiration, just check if it's present.
    *   Used for retrieving the lock id of an expired lock.
    *
@@ -228,13 +228,13 @@ class UltimateCronLock {
       }
       if ($job = $class::$currentJob) {
         if ($job->getSignal('kill')) {
-          watchdog('ultimate_cron', 'kill signal recieved', array(), WATCHDOG_WARNING);
+          watchdog('ultimate_cron', 'kill signal received', array(), WATCHDOG_INFO);
           return;
         }
       }
     } while ($lids);
     watchdog('ultimate_cron_lock', 'Cleaned up @count expired locks', array(
-      '@count' => $count
+      '@count' => $count,
     ), WATCHDOG_INFO);
   }
 }

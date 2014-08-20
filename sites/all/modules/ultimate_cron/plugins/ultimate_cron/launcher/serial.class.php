@@ -62,7 +62,11 @@ class UltimateCronSerialLauncher extends UltimateCronLauncher {
     if (!$job) {
       $max_threads = $values['max_threads'];
       $elements['timeouts']['max_execution_time'] = array(
-        '#parents' => array('settings', $this->type, $this->name, 'max_execution_time'),
+        '#parents' => array(
+          'settings',
+          $this->type, $this->name,
+          'max_execution_time',
+        ),
         '#title' => t("Maximum execution time"),
         '#type' => 'textfield',
         '#default_value' => $values['max_execution_time'],
@@ -82,7 +86,11 @@ class UltimateCronSerialLauncher extends UltimateCronLauncher {
         '#weight' => 1,
       );
       $elements['launcher']['poorman_keepalive'] = array(
-        '#parents' => array('settings', $this->type, $this->name, 'poorman_keepalive'),
+        '#parents' => array(
+          'settings',
+          $this->type, $this->name,
+          'poorman_keepalive',
+        ),
         '#title' => t("Poormans cron keepalive"),
         '#type' => 'checkbox',
         '#default_value' => $values['poorman_keepalive'],
@@ -97,8 +105,8 @@ class UltimateCronSerialLauncher extends UltimateCronLauncher {
     }
 
     $options = array(
-      'any' => t('-- Any -- '),
-      'fixed' => t('-- Fixed -- '),
+      'any' => '-- ' . t('Any') . ' --',
+      'fixed' => '-- ' . t('Fixed') . ' --',
     );
     for ($i = 1; $i <= $max_threads; $i++) {
       $options[$i] = $i;
@@ -125,7 +133,7 @@ class UltimateCronSerialLauncher extends UltimateCronLauncher {
     if (!$job) {
       if (intval($values['max_threads']) <= 0) {
         form_set_error("settings[$this->type][$this->name", t('%title must be greater than 0', array(
-          '%title' => $elements['launcher']['max_threads']['#title']
+          '%title' => $elements['launcher']['max_threads']['#title'],
         )));
       }
     }
@@ -218,7 +226,7 @@ class UltimateCronSerialLauncher extends UltimateCronLauncher {
       $job->run();
     }
     catch (Exception $e) {
-      watchdog('serial_launcher', 'Error executing %job: @error', array('%job' => $job->name, '@error' => $e->getMessage()), WATCHDOG_ERROR);
+      watchdog('serial_launcher', 'Error executing %job: @error', array('%job' => $job->name, '@error' => (string) $e), WATCHDOG_ERROR);
       $log_entry->finish();
       $job->unlock($lock_id);
       return FALSE;
@@ -385,12 +393,6 @@ class UltimateCronSerialLauncher extends UltimateCronLauncher {
         ultimate_cron_poorman_page_flush();
         $sleep = $cron_next - $time;
         sleep($sleep);
-        /*
-        while ($sleep--) {
-          error_log("SLEEPING3: $sleep");
-          sleep(1);
-        }
-        /**/
         ultimate_cron_poorman_trigger();
         $class::unLock($lock_id);
       }
@@ -403,7 +405,7 @@ class UltimateCronSerialLauncher extends UltimateCronLauncher {
 
     // Check poorman settings. If launcher has changed, we don't want
     // to keepalive.
-    $poorman = ultimate_cron_plugin_load('settings', 'poorman');
+    $poorman = _ultimate_cron_plugin_load('settings', 'poorman');
     if (!$poorman) {
       return;
     }
@@ -422,12 +424,6 @@ class UltimateCronSerialLauncher extends UltimateCronLauncher {
       if ($time < $cron_next) {
         $sleep = $cron_next - $time;
         sleep($sleep);
-        /*
-        while ($sleep--) {
-          error_log("SLEEPING4: $sleep");
-          sleep(1);
-        }
-        /**/
       }
 
       $class::unLock($lock_id);
