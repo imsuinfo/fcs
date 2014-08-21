@@ -326,8 +326,6 @@ class UltimateCronSerialLauncher extends UltimateCronLauncher {
       set_time_limit($settings['max_execution_time']);
     }
 
-    watchdog('serial_launcher', "Cron thread %thread started", array('%thread' => $thread), WATCHDOG_INFO);
-
     $this->runThread($lock_id, $thread, $jobs);
     $class::unlock($lock_id);
   }
