@@ -127,6 +127,7 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
     $allowed_statuses = array(
       MFCS_EVENT_STATUS_LOCKED,
       MFCS_EVENT_STATUS_UNLOCKED,
+      MFCS_EVENT_STATUS_CLOSED_ACCEPTED, // added due to insurance provided exception.
     );
 
     if (!in_array($status, $allowed_statuses)) {
@@ -144,6 +145,7 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
       MFCS_REVIEW_STEP_REVIEW,
       MFCS_REVIEW_STEP_REQUIREMENTS,
       MFCS_REVIEW_STEP_MAKE_DECISIONS,
+      MFCS_REVIEW_STEP_COMPLETED, // added due to insurance provided exception.
     );
 
     if (!in_array($step, $allowed_steps)) {
@@ -310,6 +312,8 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
           $decision = array_shift($reviewer_decisions);
           $preprocessed_decisions[$reviewer_classification] = array(0 => $decision);
         }
+
+        unset($reviewer_classification);
       }
 
       // apply alphabetical sorting to decisions.
@@ -350,6 +354,8 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
           $weight++;
           break;
         }
+
+        unset($reviewer_classification);
       }
 
       unset($classification_options);
@@ -867,6 +873,7 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
 
     if ($show_operations && !$pdf) {
       $decision_options = mfcs_get_reviewer_decision_list_options('review_step');
+      $decision_options_all = mfcs_get_reviewer_decision_list_options();
 
       $form['review']['operations'] = array(
         '#id' => 'request-' . $request_id . '-section-review-operations',
@@ -918,7 +925,6 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
       $reviewer_conditions = array(
         'mr.user_id' => $user->uid,
         'mr.request_classification' => $request_classification,
-        'mr.review_step' => $step,
         'mr.disabled' => 0,
       );
 
@@ -929,20 +935,20 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
 
       $form['review']['operations']['as_reviewer']['#markup'] = '<div class="request-section-review-operations-as_reviewer">';
 
+
+      // determine the reviewers classifications.
       $reviewer_classification = array();
-      if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE || $step == MFCS_REVIEW_STEP_MAKE_DECISIONS) {
-        if ($venue_coordinator) {
-          $reviewer_classification[MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR] = "Venue Coordinator";
+      $reviewer_classification_all = array();
+      foreach ($reviewers as $reviewer) {
+        if (!isset($reviewer->reviewer_classification)) {
+          continue;
         }
-      }
-      elseif ($step == MFCS_REVIEW_STEP_REVIEW || $step == MFCS_REVIEW_STEP_REQUIREMENTS) {
-        foreach ($reviewers as $reviewer) {
-          if (isset($reviewer->review_step) && $reviewer->review_step == $step) {
-            if (isset($reviewer->reviewer_classification)) {
-              $reviewer_classification[$reviewer->reviewer_classification] = $reviewer_classification_options[$reviewer->reviewer_classification];
-            }
-          }
+
+        if (isset($reviewer->review_step) && $reviewer->review_step == $step) {
+          $reviewer_classification[$reviewer->reviewer_classification] = $reviewer_classification_options[$reviewer->reviewer_classification];
         }
+
+        $reviewer_classification_all[$reviewer->reviewer_classification] = $reviewer_classification_options[$reviewer->reviewer_classification];
       }
 
       if ($can_comment_request) {
@@ -953,6 +959,59 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
         }
       }
 
+
+      // exception case: insurance provided must be able to be assigned at any point in time.
+      $form['form']['insurance_provided_available'] = array(
+        '#value' => FALSE,
+      );
+
+      $form['form']['insurance_provided_available_only'] = array(
+        '#value' => FALSE,
+      );
+
+      $insurance_provided_available = &$form['form']['insurance_provided_available']['#value'];
+      $insurance_provided_available_only = &$form['form']['insurance_provided_available_only']['#value'];
+      if ($can_review_request && ($step == MFCS_REVIEW_STEP_REVIEW || $step == MFCS_REVIEW_STEP_REQUIREMENTS || $step == MFCS_REVIEW_STEP_MAKE_DECISIONS || $step == MFCS_REVIEW_STEP_COMPLETED)) {
+        if ($status == MFCS_EVENT_STATUS_LOCKED || $status == MFCS_EVENT_STATUS_CLOSED_ACCEPTED) {
+          if (isset($reviewer_classification_all[MFCS_REVIEW_CLASSIFICATION_PURCHASING])) {
+            if ((isset($request['insurance']['contractor'][0]->value) && $request['insurance']['contractor'][0]->value == 1) || (isset($request['insurance']['unaffiliated'][0]->value) && $request['insurance']['unaffiliated'][0]->value == 1)) {
+              if (isset($request['insurance']['provided'][0]->value) && $request['insurance']['provided'][0]->value != 1) {
+                $insurance_provided_available = TRUE;
+              }
+            }
+          }
+        }
+      }
+
+      // the venue coordinator must be reported as venue coordinator when not reviewing.
+      if ($venue_coordinator) {
+        if (empty($reviewer_classification) || ($step != MFCS_REVIEW_STEP_REVIEW && $step != MFCS_REVIEW_STEP_REQUIREMENTS)) {
+          $reviewer_classification[MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR] = "Venue Coordinator";
+          $reviewer_classification_all[MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR] = "Venue Coordinator";
+        }
+      }
+
+      // make the 'requirement' step available only under very specific situations.
+      if ($insurance_provided_available) {
+        $decision_options[MFCS_REVIEW_DECISION_REQUIREMENT] = $decision_options_all[MFCS_REVIEW_DECISION_REQUIREMENT];
+
+        if ($step != MFCS_REVIEW_STEP_REVIEW && $step != MFCS_REVIEW_STEP_REQUIREMENTS && !isset($reviewer_classification[MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR])) {
+          $decision_options = array(
+            MFCS_REVIEW_DECISION_REQUIREMENT => $decision_options_all[MFCS_REVIEW_DECISION_REQUIREMENT]
+          );
+
+          if ($can_comment_request) {
+            $decision_options[MFCS_REVIEW_DECISION_COMMENT] = $decision_options_all[MFCS_REVIEW_DECISION_COMMENT];
+          }
+
+          $reviewer_classification[MFCS_REVIEW_CLASSIFICATION_PURCHASING] = $reviewer_classification_all[MFCS_REVIEW_CLASSIFICATION_PURCHASING];
+          $insurance_provided_available_only = TRUE;
+        }
+      }
+      elseif ($step != MFCS_REVIEW_STEP_VENUE_AVAILABLE && $step != MFCS_REVIEW_STEP_REVIEW) {
+        unset($decision_options[MFCS_REVIEW_DECISION_REQUIREMENT]);
+      }
+
       if (!empty($reviewer_classification)) {
         $form['review']['operations']['as_reviewer']['#markup'] .= '<div class="request-section-review-operations-as_reviewer-message">You are reviewing with the following classifications:</div>';
         $form['review']['operations']['as_reviewer']['#markup'] .= theme('item_list', array('items' => $reviewer_classification, 'type' => 'ul', 'attributes' => array('class' => array('request-section-review-operations-as_reviewer-list'))));
@@ -960,15 +1019,10 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
 
       $form['review']['operations']['as_reviewer']['#markup'] .= '</div>';
 
-      // make the 'requirement' step available only under very specific situations.
-      if ($step != MFCS_REVIEW_STEP_VENUE_AVAILABLE && $step != MFCS_REVIEW_STEP_REVIEW) {
-        unset($decision_options[MFCS_REVIEW_DECISION_REQUIREMENT]);
-      }
-
       // restrict options to commenting only, if the user is only allowed to comment.
       if (!$can_review_request && $can_comment_request) {
         $decision_options = array(
-          MFCS_REVIEW_DECISION_COMMENT => $decision_options[MFCS_REVIEW_DECISION_COMMENT],
+          MFCS_REVIEW_DECISION_COMMENT => $decision_options_all[MFCS_REVIEW_DECISION_COMMENT],
         );
       }
 
@@ -988,7 +1042,7 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
         '#weight' => 1,
       );
 
-      if ($can_review_request && ($step == MFCS_REVIEW_STEP_REVIEW || $step == MFCS_REVIEW_STEP_VENUE_AVAILABLE)) {
+      if ($can_review_request && ($step == MFCS_REVIEW_STEP_REVIEW || $step == MFCS_REVIEW_STEP_VENUE_AVAILABLE || $insurance_provided_available)) {
         $form['review']['operations']['requirements'] = array(
           '#tree' => TRUE,
           '#weight' => 2,
@@ -1225,55 +1279,58 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
           '#weight' => 3,
         );
 
-        if ($insurance_requirement && $step == MFCS_REVIEW_STEP_REVIEW) {
-          // contractor insurance
-          $form['review']['operations']['insurance']['contractor'] = array(
-            '#id' => 'request-review-operations-insurance-contractor',
-            '#type' => 'checkbox',
-            '#title' => 'Contractor Insurance',
-            '#description' => "Each technical/service industry contractor must provide proof of liability insurance in amounts and coverages specified.",
-            '#default_value' => NULL,
-            '#attributes' => array(
-              'class' => array(
-                'no-print',
-                'mode-' . $mode,
-                'insurance-contractor',
-              ),
-            ),
-            '#states' => array(
-              'visible' => array(
-                ':input[name="review[operations][decision]"]' => array('value' => MFCS_REVIEW_DECISION_REQUIREMENT),
-              ),
-            ),
-          );
+        if ($insurance_requirement && ($step == MFCS_REVIEW_STEP_REVIEW || $insurance_provided_available)) {
 
-          if (!empty($request['insurance']['contractor'][0])) {
-            $form['review']['operations']['insurance']['contractor']['#default_value'] = $request['insurance']['contractor'][0]->value;
-          }
-
-          // unaffiliated insurance
-          $form['review']['operations']['insurance']['unaffiliated'] = array(
-            '#id' => 'request-review-operations-insurance-unaffiliated',
-            '#type' => 'checkbox',
-            '#title' => 'Unaffiliated Insurance',
-            '#description' => "Non-affiliated entity (renter) must provide proof of liability insurance in amounts and coverages specified.",
-            '#default_value' => NULL,
-            '#attributes' => array(
-              'class' => array(
-                'no-print',
-                'mode-' . $mode,
-                'insurance-unaffiliated',
+          if (!$insurance_provided_available_only) {
+            // contractor insurance
+            $form['review']['operations']['insurance']['contractor'] = array(
+              '#id' => 'request-review-operations-insurance-contractor',
+              '#type' => 'checkbox',
+              '#title' => 'Contractor Insurance',
+              '#description' => "Each technical/service industry contractor must provide proof of liability insurance in amounts and coverages specified.",
+              '#default_value' => NULL,
+              '#attributes' => array(
+                'class' => array(
+                  'no-print',
+                  'mode-' . $mode,
+                  'insurance-contractor',
+                ),
               ),
-            ),
-            '#states' => array(
-              'visible' => array(
-                ':input[name="review[operations][decision]"]' => array('value' => MFCS_REVIEW_DECISION_REQUIREMENT),
+              '#states' => array(
+                'visible' => array(
+                  ':input[name="review[operations][decision]"]' => array('value' => MFCS_REVIEW_DECISION_REQUIREMENT),
+                ),
               ),
-            ),
-          );
+            );
 
-          if (!empty($request['insurance']['unaffiliated'][0])) {
-            $form['review']['operations']['insurance']['unaffiliated']['#default_value'] = $request['insurance']['unaffiliated'][0]->value;
+            if (!empty($request['insurance']['contractor'][0])) {
+              $form['review']['operations']['insurance']['contractor']['#default_value'] = $request['insurance']['contractor'][0]->value;
+            }
+
+            // unaffiliated insurance
+            $form['review']['operations']['insurance']['unaffiliated'] = array(
+              '#id' => 'request-review-operations-insurance-unaffiliated',
+              '#type' => 'checkbox',
+              '#title' => 'Unaffiliated Insurance',
+              '#description' => "Non-affiliated entity (renter) must provide proof of liability insurance in amounts and coverages specified.",
+              '#default_value' => NULL,
+              '#attributes' => array(
+                'class' => array(
+                  'no-print',
+                  'mode-' . $mode,
+                  'insurance-unaffiliated',
+                ),
+              ),
+              '#states' => array(
+                'visible' => array(
+                  ':input[name="review[operations][decision]"]' => array('value' => MFCS_REVIEW_DECISION_REQUIREMENT),
+                ),
+              ),
+            );
+
+            if (!empty($request['insurance']['unaffiliated'][0])) {
+              $form['review']['operations']['insurance']['unaffiliated']['#default_value'] = $request['insurance']['unaffiliated'][0]->value;
+            }
           }
 
           // provided insurance
@@ -1296,6 +1353,10 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
               ),
             ),
           );
+
+          if ($insurance_provided_available_only) {
+            $form['review']['operations']['insurance']['provided']['#required'] = TRUE;
+          }
 
           if (!empty($request['insurance']['provided'][0])) {
             $form['review']['operations']['insurance']['provided']['#default_value'] = $request['insurance']['provided'][0]->value;
@@ -1672,17 +1733,31 @@ function mfcs_request_view_0_page_validate($form, &$form_state) {
       MFCS_EVENT_STATUS_UNLOCKED,
     );
 
-    if (!in_array($status, $allowed_statuses)) {
-      form_set_error('', "Illegal operation detected. Operations cannot be performed for the request's current status.");
-      $failure = TRUE;
-    }
-
     $allowed_steps = array(
       MFCS_REVIEW_STEP_VENUE_AVAILABLE,
       MFCS_REVIEW_STEP_REVIEW,
       MFCS_REVIEW_STEP_REQUIREMENTS,
       MFCS_REVIEW_STEP_MAKE_DECISIONS,
     );
+
+    if (isset($form['form']['insurance_provided_available']['#value']) && $form['form']['insurance_provided_available']['#value']) {
+      $allowed_statuses = array(
+        MFCS_EVENT_STATUS_LOCKED,
+        MFCS_EVENT_STATUS_CLOSED_ACCEPTED,
+      );
+
+      $allowed_steps = array(
+        MFCS_REVIEW_STEP_REVIEW,
+        MFCS_REVIEW_STEP_REQUIREMENTS,
+        MFCS_REVIEW_STEP_MAKE_DECISIONS,
+        MFCS_REVIEW_STEP_COMPLETED,
+      );
+    }
+
+    if (!in_array($status, $allowed_statuses)) {
+      form_set_error('', "Illegal operation detected. Operations cannot be performed for the request's current status.");
+      $failure = TRUE;
+    }
 
     if (!in_array($step, $allowed_steps)) {
       form_set_error('', "Illegal operation detected. Operations cannot be performed for the request's current step.");
@@ -1946,24 +2021,6 @@ function mfcs_request_view_0_page_validate($form, &$form_state) {
           $form_state['autowave'] = TRUE;
         }
       }
-
-      // determine whether or not the purchasing/insurance reviewer can approve based on the status of the review checkboxes.
-      if ($insurance_contractor_required || $insurance_unaffiliated_required) {
-        $reviewers_conditions = array(
-          'u.uid' => $user->uid,
-          'mr.review_step' => $step,
-          'mr.request_classification' => $request_classification,
-          'mr.reviewer_classification' => MFCS_REVIEW_CLASSIFICATION_PURCHASING,
-        );
-
-        $reviewer_handles_purchasing = mfcs_get_reviewers($reviewers_conditions, TRUE);
-
-        if (!empty($reviewer_handles_purchasing)) {
-          if (!$request['insurance']['provided'][0]->value) {
-            form_set_error('review][operations][decision', t("The request cannot be approved until the insurance has been provided."));
-          }
-        }
-      }
     }
 
     if (!$failure) {
@@ -2028,6 +2085,11 @@ function mfcs_request_view_0_page_submit($form, &$form_state) {
     $request_classification = $request['request_coordinator']['classification'][0]->value;
     $step = $request['top']['step'][0]->value;
 
+    $insurance_provided_available = FALSE;
+    if (isset($form['form']['insurance_provided_available']['#value'])) {
+      $insurance_provided_available = (bool) $form['form']['insurance_provided_available']['#value'];
+    }
+
     $extra = array();
     if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE || $step == MFCS_REVIEW_STEP_REVIEW) {
       if (isset($form_state['values']['review']['operations']['requirements'])) {
@@ -2036,6 +2098,16 @@ function mfcs_request_view_0_page_submit($form, &$form_state) {
 
       if (isset($form_state['values']['review']['operations']['insurance'])) {
         $extra['insurance'] = $form_state['values']['review']['operations']['insurance'];
+      }
+    }
+
+    if ($insurance_provided_available) {
+      if (isset($form_state['values']['review']['operations']['insurance']['provided'])) {
+        if (!isset($extra['insurance'])) {
+          $extra['insurance'] = array();
+        }
+
+        $extra['insurance']['provided'] = $form_state['values']['review']['operations']['insurance']['provided'];
       }
     }
 
@@ -2053,7 +2125,6 @@ function mfcs_request_view_0_page_submit($form, &$form_state) {
         mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], MFCS_REVIEW_STEP_REVIEW, MFCS_REVIEW_DECISION_WAVE, "", array('send_email' => FALSE));
       }
     }
-
 
     if ($success) {
       $success = mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], $step, $decision, $message, $extra);
@@ -2075,6 +2146,9 @@ function mfcs_request_view_0_page_submit($form, &$form_state) {
 
     // change to the request view page on submit for these decisions to prrequest potential access denied messages following the submit process.
     if ($decision == MFCS_REVIEW_DECISION_APPROVE || $decision == MFCS_REVIEW_DECISION_DENY) {
+      $form_state['values']['redirect_to'] = 'requests/view-0/' .  $request_id;
+    }
+    elseif (isset($form['form']['insurance_provided_available']['#value']) && $form['form']['insurance_provided_available']['#value']) {
       $form_state['values']['redirect_to'] = 'requests/view-0/' .  $request_id;
     }
   }
@@ -2269,7 +2343,7 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id) {
         if (is_array($review_classifications)) {
           foreach ($review_classifications as $review_classification) {
             // some classifications are not allowed in certain steps.
-            if ($review->step == MFCS_REVIEW_STEP_REVIEW ||$review->step == MFCS_REVIEW_STEP_REQUIREMENTS) {
+            if ($review->step == MFCS_REVIEW_STEP_REVIEW || $review->step == MFCS_REVIEW_STEP_REQUIREMENTS) {
               if ($review_classification->classification == MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR) {
                 continue;
               }
@@ -2415,6 +2489,9 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id) {
       }
       elseif ($review_step == MFCS_REVIEW_STEP_REQUIREMENTS && $decision == MFCS_REVIEW_DECISION_DENY) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has denied the <strong class="review-item-label-text-row-decision">' . $review_step_options[$review_step] . '</strong>' . $reviewer_classification . '.';
+      }
+      elseif ($decision == MFCS_REVIEW_DECISION_REQUIREMENT) {
+        $markup .= $user_name_markup . ' ' . $user_id_markup . ' assigned the <strong class="review-item-label-text-row-decision">' . $decision_options[$decision] . '</strong> for the request' . $reviewer_classification . '.';
       }
       else {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' chose to <strong class="review-item-label-text-row-decision">' . $decision_options[$decision] . '</strong> the request' . $reviewer_classification . '.';
