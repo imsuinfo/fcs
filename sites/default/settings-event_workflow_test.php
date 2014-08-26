@@ -675,6 +675,14 @@ $conf['gpg-mail'] = array(
   ),
 );
 
+# using drush, and drush cron, will cause the current user to be used instead of apache.
+# the home directory must be specified and that user must have the appropriate gpg public & private keys as well.
+$env_current_user = getenv('USER');
+if (!empty($env_current_user)) {
+  putenv('GNUPGHOME=~/.gnupg');
+}
+unset($env_current_user);
+
 
 /**
  * Additional file_db variables.
