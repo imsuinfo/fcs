@@ -685,6 +685,14 @@ unset($env_current_user);
 
 
 /**
+ * fcs.mcneese.edu specific names
+ */
+$conf['mfcs_site_url'] = 'thebe.mcneese.edu/fcs';
+$conf['mfcs_email'] = 'facilities_use@fcs.mcneese.edu';
+$conf['mfcs_name'] = 'McNeese Facilities Use System';
+
+
+/**
  * Additional file_db variables.
  */
 #$conf['file_db_server_id'] = 6;
