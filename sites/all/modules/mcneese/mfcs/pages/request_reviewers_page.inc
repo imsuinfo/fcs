@@ -17,12 +17,14 @@
  *   The HTML output representing the page.
  */
 function mfcs_request_reviewers_0_page() {
+  mfcs_add_canonical_headers('requests/reviewers-0');
+
   global $base_path;
   $user = cf_current_user();
 
-  $manager = user_access('mfcs manage');
-  $reviewer = user_access('mfcs review');
-  $requester = user_access('mfcs request');
+  $manager = user_access('mfcs manage', $user);
+  $reviewer = user_access('mfcs review', $user);
+  $requester = user_access('mfcs request', $user);
 
   mfcs_include(4);
 
@@ -115,14 +117,16 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
     return array();
   }
 
+  mfcs_add_canonical_headers('requests/reviewers-0/list/' . $classification . '/' . $review_step);
+
   global $base_path;
   $user = cf_current_user();
 
   $form = array();
 
-  $manager = user_access('mfcs manage');
-  $reviewer = user_access('mfcs review');
-  $requester = user_access('mfcs request');
+  $manager = user_access('mfcs manage', $user);
+  $reviewer = user_access('mfcs review', $user);
+  $requester = user_access('mfcs request', $user);
 
   mfcs_include(4);
 
@@ -523,6 +527,8 @@ function mfcs_request_reviewers_0_delete_form($form, &$form_state, $id) {
     drupal_exit();
     return array();
   }
+
+  mfcs_add_canonical_headers('requests/reviewers-0/delete/' . $id);
 
   $user = user_load($reviewer->user_id);
 

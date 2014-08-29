@@ -90,6 +90,10 @@ class McNeeseFacilitiesUseMail implements MailSystemInterface {
     #$this->gpg_sign_manually($message, $boundary);
 
 
+    // save the e-mail to the log.
+    $this->log_email($message);
+
+
     return $message;
   }
 
@@ -311,5 +315,37 @@ class McNeeseFacilitiesUseMail implements MailSystemInterface {
     $message['body'] = $prepend . $body . $append;
 
     return TRUE;
+  }
+
+  /**
+   * Logs the e-mail in the database.
+   *
+   * @param array $message
+   *   A message array, as described in hook_mail_alter().
+   */
+  private function log_email($message) {
+    $fields = array(
+      'destination' => $message['to'],
+      'title' => $message['subject'],
+      'headers' => serialize($message['headers']),
+      'body' => serialize($message['body']),
+      'date' => REQUEST_TIME,
+    );
+
+    $transaction = db_transaction();
+
+    try {
+      $query = db_insert('mfcs_log_emails');
+      $query->fields($fields);
+      $query->execute();
+
+      // enforce transaction execution
+      unset($transaction);
+    } catch (Exception $ex) {
+      $transaction->rollback();
+      cf_error::on_exception($ex);
+
+      return FALSE;
+    }
   }
 }

@@ -56,6 +56,13 @@ function mfcs_request_edit_0_form($form, &$form_state, $request_id, $target_sect
     drupal_exit();
   }
 
+  if (is_null($target_section)) {
+    mfcs_add_canonical_headers('requests/edit-0/' . $request_id);
+  }
+  else {
+    mfcs_add_canonical_headers('requests/edit-0/' . $request_id . '/' . $target_section);
+  }
+
   $form = array();
 
   if (empty($form_state['values']['form']['step'])) {
@@ -101,16 +108,8 @@ function mfcs_request_edit_0_form($form, &$form_state, $request_id, $target_sect
   $form['form']['user'] = array(
     '#id' => 'field-form-user',
     '#type' => 'value',
-    '#value' => NULL,
+    '#value' => cf_current_user(),
   );
-
-  if (isset($request['mer']['user_id'][0]->value)) {
-    $form['form']['user']['#value'] = user_load($request['mer']['user_id'][0]->value);
-  }
-
-  if (!is_object($form['form']['user']['#value'])) {
-    $form['form']['user']['#value'] = cf_current_user();
-  }
 
   $form['form']['parents'] = array(
     '#id' => 'field-form-parents',
@@ -168,7 +167,32 @@ function mfcs_request_edit_0_form($form, &$form_state, $request_id, $target_sect
       );
     }
 
-    if ($step == 'details') {
+    if ($step == 'standard') {
+      $form['request']['next'] = array(
+        '#id' => 'submit-request-next',
+        '#name' => 'submit-request-next',
+        '#type' => 'submit',
+        '#default_value' => t("Continue"),
+        '#states' => array(
+          'invisible' => array(
+            ':input[name="' . $form['form']['parents']['#value']['path'] . 'information][type][0]' . '"]' => array('value' => MFCS_REQUEST_TYPE_QUICK_MEETING),
+          ),
+        ),
+      );
+
+      $form['request']['submit'] = array(
+        '#id' => 'submit-request-submit',
+        '#name' => 'submit-request-submit',
+        '#type' => 'submit',
+        '#default_value' => t("Submit"),
+        '#states' => array(
+          'visible' => array(
+            ':input[name="' . $form['form']['parents']['#value']['path'] . 'information][type][0]' . '"]' => array('value' => MFCS_REQUEST_TYPE_QUICK_MEETING),
+          ),
+        ),
+      );
+    }
+    elseif ($step == 'details') {
       $form['request']['submit'] = array(
         '#id' => 'submit-request-submit',
         '#name' => 'submit-request-submit',
@@ -281,8 +305,13 @@ function mfcs_request_edit_0_form_validate($form, &$form_state) {
   $request = $form['form']['request']['#value'];
   $request_id = (int) $request['mer']['id'][0]->value;
 
-  $can_edit_request = mfcs_management_page_request_access('edit', $request_id);
-  $can_cancel_request = mfcs_management_page_request_access('cancel', $request_id);
+  $user = NULL;
+  if (isset($form['form']['user']['#value']) && is_object($form['form']['user']['#value'])) {
+    $user = $form['form']['user']['#value'];
+  }
+
+  $can_edit_request = mfcs_request_access('edit', $request, $user);
+  $can_cancel_request = mfcs_request_access('cancel', $request, $user);
 
   if (!$can_edit_request) {
     form_set_error('', "Illegal operation detected. Unauthorized access attempt.");
@@ -757,7 +786,7 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
     }
     else {
       // forcefully clear the request cache so that it can reflect the changes.
-      mfcs_load_request_by_id($request_id, TRUE);
+      mfcs_load_request_by_id($request_id, FALSE);
 
       mfcs_include(6);
 

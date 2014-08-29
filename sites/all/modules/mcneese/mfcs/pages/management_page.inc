@@ -22,18 +22,17 @@ function mfcs_management_page() {
   global $base_path;
   $user = cf_current_user();
 
-  $can_create = mfcs_management_page_request_access('create');
-  $can_edit = mfcs_management_page_request_access('edit');
-  $can_view = mfcs_management_page_request_access('view');
-  $can_list = mfcs_management_page_request_access('list');
-  $can_search = mfcs_management_page_request_access('search');
-  $can_delete = mfcs_management_page_request_access('delete');
-  $can_log = mfcs_management_page_request_access('log');
-  $can_review = mfcs_management_page_request_access('review');
+  mfcs_add_canonical_headers('requests');
 
-  $manager = user_access('mfcs manage');
-  $reviewer = user_access('mfcs review');
-  $requester = user_access('mfcs request');
+  $can_create = mfcs_page_request_access('create', NULL, $user);
+  $can_view = mfcs_page_request_access('view', NULL, $user);
+  $can_list = mfcs_page_request_access('list', NULL, $user);
+  $can_search = mfcs_page_request_access('search', NULL, $user);
+  $can_review = mfcs_page_request_access('review', NULL, $user);
+
+  $manager = user_access('mfcs manage', $user);
+  $reviewer = user_access('mfcs review', $user);
+  $requester = user_access('mfcs request', $user);
 
   $items_1 = array();
   $items_2 = array();
@@ -282,6 +281,8 @@ function mfcs_management_page() {
         }
       }
     }
+
+    mfcs_include(8);
 
     $title = '<h3><a href="' . $base_path . 'requests/calendar-0/month">' . "Requests for " . date("F, Y", $month_start) . '</a></h3>';
     $result = mfcs_build_calendar_month_markup($rows, $month_start, $month_stop, $absolute_start, $absolute_stop, $title);

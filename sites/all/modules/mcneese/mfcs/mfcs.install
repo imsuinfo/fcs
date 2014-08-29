@@ -437,6 +437,13 @@ function mfcs_schema() {
         'not null' => FALSE,
         'default' => '',
       ),
+      'date' => array(
+        'description' => $t("Represents the date the field was last changed."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
       'disabled' => array(
         'description' => $t("Boolean designating that the room is disabled. This happens when it is not found in the banner database."),
         'type' => 'int',
@@ -456,7 +463,7 @@ function mfcs_schema() {
     'description' => $t("McNeese Facilities Use Event Banner table. This is for providing local storage of a given banner category."),
     'fields' => array(
       'id' => array(
-        'description' => $t("The primary key used to represent an request."),
+        'description' => $t("The primary key used to represent a building."),
         'type' => 'serial',
         'size' => 'big',
         'unsigned' => TRUE,
@@ -475,6 +482,13 @@ function mfcs_schema() {
         'length' => '63',
         'not null' => FALSE,
         'default' => '',
+      ),
+      'date' => array(
+        'description' => $t("Represents the date the field was last changed."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
       ),
       'disabled' => array(
         'description' => $t("Boolean designating that the room is disabled. This happens when it is not found in the banner database."),
@@ -514,6 +528,13 @@ function mfcs_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
+      'date' => array(
+        'description' => $t("Represents the date the field was last changed."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
       'disabled' => array(
         'description' => $t("Boolean designating that the association is disabled. This happens when it is not found in the banner database."),
         'type' => 'int',
@@ -530,7 +551,7 @@ function mfcs_schema() {
     'description' => $t("McNeese Facilities Use Event Banner table. This is for providing local storage of a given banner category."),
     'fields' => array(
       'id' => array(
-        'description' => $t("The primary key used to represent an request."),
+        'description' => $t("The primary key used to represent a room."),
         'type' => 'serial',
         'size' => 'big',
         'unsigned' => TRUE,
@@ -578,6 +599,13 @@ function mfcs_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
+      'date' => array(
+        'description' => $t("Represents the date the field was last changed."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
       'disabled' => array(
         'description' => $t("Boolean designating that the room is disabled. This happens when it is not found in the banner database."),
         'type' => 'int',
@@ -601,6 +629,183 @@ function mfcs_schema() {
     'unique keys' => array(
       'machine_name' => array('machine_name', 'building'),
     ),
+  );
+
+  $schema['mfcs_banner_event_roles'] = array(
+    'description' => $t("McNeese Facilities Use Event Roles Banner table. This is for providing local storage of a given banner event role table."),
+    'fields' => array(
+      'id' => array(
+        'description' => $t("The primary key used to represent a role."),
+        'type' => 'serial',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'machine_name' => array(
+        'description' => $t("A machine friendly name for the role."),
+        'type' => 'varchar',
+        'length' => '15',
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'date' => array(
+        'description' => $t("Represents the date the field was last changed."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'disabled' => array(
+        'description' => $t("Boolean designating that the room is disabled. This happens when it is not found in the banner database."),
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+    'unique keys' => array(
+      'machine_name' => array('machine_name'),
+    ),
+  );
+
+  $schema['mfcs_banner_event_roles_to_users'] = array(
+    'description' => $t("McNeese Facilities Use Event Roles Banner table. This is for providing local storage of a given banner event role table for individual users."),
+    'fields' => array(
+      'user_id' => array(
+        'banner_id' => $t("Represents the user the role is associated with."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'event_role_id' => array(
+        'description' => $t("Represents the id of the event role associated with the user."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'date' => array(
+        'description' => $t("Represents the date the field was last changed."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'disabled' => array(
+        'description' => $t("Boolean designating that the room is disabled. This happens when it is not found in the banner database."),
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'unique keys' => array(
+      'banner_id_to_role' => array('banner_id', 'event_role_id'),
+    ),
+    'foreign keys' => array(
+      'event_role_id' => array(
+        'table' => 'mfcs_banner_event_roles',
+        'columns' => array('event_role_id' => 'id'),
+      ),
+    ),
+  );
+
+  $schema['mfcs_request_reminders'] = array(
+    'description' => $t("McNeese Facilities Use Reminders table. This represents requests that have had their reminders e-mailed out."),
+    'fields' => array(
+      'request_id' => array(
+        'description' => $t("Foreign key to the primary key in the {mfcs_requests} table."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'date' => array(
+        'description' => $t("Represents the date the reminder was last sent out."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'type' => array(
+        'description' => $t("Represents the reminder type."),
+        'type' => 'int',
+        'size' => 'small',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'interval' => array(
+        'description' => $t("Represents the interval associated with the date."),
+        'type' => 'int',
+        'size' => 'small',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('request_id', 'date', 'type', 'interval'),
+    'foreign keys' => array(
+      'request_id' => array(
+        'table' => 'mfcs_requests',
+        'columns' => array('request_id' => 'id'),
+      ),
+    ),
+  );
+
+  $schema['mfcs_log_emails'] = array(
+    'description' => $t("McNeese Facilities Use e-mail log table. Contains a record of all e-mails sent from this system through this interface."),
+    'fields' => array(
+      'id' => array(
+        'description' => $t("The primary key used to represent the search setting."),
+        'type' => 'serial',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'destination' => array(
+        'description' => $t("The 'to' destination address. 'to' would be used instead of 'destination' if it was not a reserved SQL word."),
+        'type' => 'varchar',
+        'length' => '127',
+        'serialize' => FALSE,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'title' => array(
+        'description' => $t("The title or subject used by the e-mail."),
+        'type' => 'varchar',
+        'length' => '127',
+        'serialize' => FALSE,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'headers' => array(
+        'description' => $t("The array of e-mail headers."),
+        'type' => 'text',
+        'size' => 'big',
+        'serialize' => TRUE,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'body' => array(
+        'description' => $t("The serialized string of the e-mail body."),
+        'type' => 'text',
+        'size' => 'big',
+        'serialize' => TRUE,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'date' => array(
+        'description' => $t("Represents the date the e-mail was sent."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('id'),
   );
 
 
@@ -957,6 +1162,11 @@ function mfcs_install() {
   $table5_foreign = 'mfcs_banner_rooms';
   $table5_foreign_key = 'id';
 
+  $key6_name = 'event_role_id';
+  $key6_foreign = 'event_role_fkey';
+  $table6_foreign = 'mfcs_banner_event_roles';
+  $table6_foreign_key = 'id';
+
   $structure = mfcs_table_install_structure();
 
   db_query('ALTER TABLE {mfcs_request_revisions} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
@@ -967,6 +1177,9 @@ function mfcs_install() {
   db_query('ALTER TABLE {mfcs_banner_building_to_location} ADD CONSTRAINT ' . $key4_foreign . ' FOREIGN KEY (' . $key4_name . ') REFERENCES {' . $table4_foreign . '} (' . $table4_foreign_key . ') ON DELETE CASCADE');
   db_query('ALTER TABLE {mfcs_banner_rooms} ADD CONSTRAINT ' . $key4_foreign . ' FOREIGN KEY (' . $key4_name . ') REFERENCES {' . $table4_foreign . '} (' . $table4_foreign_key . ') ON DELETE CASCADE');
   db_query('ALTER TABLE {mfcs_banner_rooms} ADD CONSTRAINT ' . $key2_foreign_1 . ' FOREIGN KEY (' . $key2_name_1 . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_banner_event_roles_to_users} ADD CONSTRAINT ' . $key6_foreign . ' FOREIGN KEY (' . $key6_name . ') REFERENCES {' . $table6_foreign . '} (' . $table6_foreign_key . ') ON DELETE CASCADE');
+
+  db_query('ALTER TABLE {mfcs_request_reminders} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
 
   foreach ($structure as $structure_name => &$structure_array) {
     $table1_name = 'mfcs_current_' . $structure_name;
@@ -981,6 +1194,11 @@ function mfcs_install() {
   }
 
   db_query('ALTER TABLE {mfcs_review_classifications} ADD CONSTRAINT review_fkey FOREIGN KEY (review_id) REFERENCES {mfcs_field_review_review} (id) ON DELETE CASCADE');
+
+
+  // enable postgresql-specific TOAST support (aka: compression).
+  db_query('ALTER TABLE {mfcs_log_emails} ALTER COLUMN headers SET STORAGE EXTENDED');
+  db_query('ALTER TABLE {mfcs_log_emails} ALTER COLUMN body SET STORAGE EXTENDED');
 
 
   // assign the new mail system as default.
@@ -1011,6 +1229,7 @@ function mfcs_uninstall() {
   $key3_foreign = 'location_fkey';
   $key4_foreign = 'building_fkey';
   $key5_foreign = 'room_fkey';
+  $key6_foreign = 'event_role_fkey';
   $keyR_foreign = 'review_fkey';
 
   $structure = mfcs_table_install_structure();
@@ -1022,6 +1241,8 @@ function mfcs_uninstall() {
   db_query('ALTER TABLE {mfcs_banner_building_to_location} DROP CONSTRAINT IF EXISTS ' . $key4_foreign);
   db_query('ALTER TABLE {mfcs_banner_rooms} DROP CONSTRAINT IF EXISTS ' . $key4_foreign);
   db_query('ALTER TABLE {mfcs_banner_rooms} DROP CONSTRAINT IF EXISTS ' . $key2_foreign_1);
+  db_query('ALTER TABLE {mfcs_banner_event_roles_to_users} DROP CONSTRAINT IF EXISTS ' . $key6_foreign);
+  db_query('ALTER TABLE {mfcs_request_reminders} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
   db_query('ALTER TABLE {mfcs_review_classifications} DROP CONSTRAINT IF EXISTS ' . $keyR_foreign);
 
   foreach ($structure as $structure_name => &$structure_array) {

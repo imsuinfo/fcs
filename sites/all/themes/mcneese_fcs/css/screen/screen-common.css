@@ -45,6 +45,11 @@
   max-width: 924px;
 }
 
+/* workaround: links on opera end up unclickable */
+.mcneese.agent-engine-presto .calendar-month-wrapper > .calendar-month > .calendar-navigation {
+  z-index: 1;
+}
+
 .mcneese .calendar-month-wrapper > .calendar-month > .calendar-navigation > .calendar-navigation-previous {
   position: absolute;
   left: 0px;
@@ -76,6 +81,8 @@
 
 .mcneese .calendar-month-wrapper > .calendar-month > .calendar-body-wrapper > .calendar-body > .calendar-week-wrapper > .calendar-week > .calendar-day-wrapper > .calendar-day {
   min-height: 96px;
+
+  max-width: 132px;
 }
 
 .mcneese .calendar-month-wrapper > .calendar-month > .calendar-body-wrapper > .calendar-body > .calendar-week-wrapper > .calendar-week > .calendar-day-wrapper > .calendar-day > .calendar-item {

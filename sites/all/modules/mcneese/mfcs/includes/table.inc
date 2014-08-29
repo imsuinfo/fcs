@@ -79,6 +79,7 @@ function mfcs_table_structure() {
       'columns' => array('hours', 'days', 'amount'),
       'size' => array('normal', 'normal', 'normal'),
       'storage' => 'currency',
+      'allows_null' => TRUE,
     ),
     'equipment' => array(
       'path' => 'request][requirements][equipment',
@@ -88,24 +89,27 @@ function mfcs_table_structure() {
       'columns' => array('hours', 'days', 'amount'),
       'size' => array('normal', 'normal', 'normal'),
       'storage' => 'currency',
+      'allows_null' => TRUE,
     ),
     'custodial' => array(
       'path' => 'request][requirements][custodial',
       'name' => "Custodial Fees",
       'type' => 'requirements',
       'manual_processing' => TRUE,
-      'columns' => array('hours', 'days', 'amount'),
-      'size' => array('normal', 'normal', 'normal'),
+      'columns' => array('quantity', 'hours', 'days', 'amount'),
+      'size' => array('normal', 'normal', 'normal', 'normal'),
       'storage' => 'currency',
+      'allows_null' => TRUE,
     ),
     'security' => array(
       'path' => 'request][requirements][security',
       'name' => "Security Fees",
       'type' => 'requirements',
       'manual_processing' => TRUE,
-      'columns' => array('hours', 'days', 'amount'),
-      'size' => array('normal', 'normal', 'normal'),
+      'columns' => array('quantity', 'hours', 'days', 'amount'),
+      'size' => array('normal', 'normal', 'normal', 'normal'),
       'storage' => 'currency',
+      'allows_null' => TRUE,
     ),
     'other' => array(
       'name' => "Other Fees",
@@ -113,6 +117,7 @@ function mfcs_table_structure() {
       'type' => 'bool',
       'size' => 'tiny',
       'manual_processing' => TRUE,
+      'allows_null' => TRUE,
     ),
     'waved' => array(
       'name' => "Requirements / Fees Waved (with Presidents Approval)",
@@ -120,6 +125,7 @@ function mfcs_table_structure() {
       'type' => 'bool',
       'size' => 'tiny',
       'manual_processing' => TRUE,
+      'allows_null' => TRUE,
     ),
     'university' => array(
       'name' => "University Fees",
@@ -127,6 +133,7 @@ function mfcs_table_structure() {
       'size' => 'tiny',
       'path' => 'request][requirements][university',
       'manual_processing' => TRUE,
+      'allows_null' => TRUE,
     ),
   );
 
@@ -137,6 +144,7 @@ function mfcs_table_structure() {
       'type' => 'bool',
       'size' => 'tiny',
       'manual_processing' => TRUE,
+      'allows_null' => TRUE,
     ),
     'unaffiliated' => array(
       'name' => "Uniffiliated Insurance",
@@ -144,6 +152,7 @@ function mfcs_table_structure() {
       'type' => 'bool',
       'size' => 'tiny',
       'manual_processing' => TRUE,
+      'allows_null' => TRUE,
     ),
     'provided' => array(
       'name' => "Insurance Has Been Provided",
@@ -151,6 +160,7 @@ function mfcs_table_structure() {
       'type' => 'bool',
       'size' => 'tiny',
       'manual_processing' => TRUE,
+      'allows_null' => TRUE,
     ),
   );
 
@@ -656,7 +666,10 @@ function mfcs_table_presentation($option = NULL) {
         'group' => 2,
         'label' => "Registration",
         'request_type' => array(
-          'hide_link' => array(57),
+          'hide_link' => array(
+            MFCS_REQUEST_TYPE_MEETING,
+            MFCS_REQUEST_TYPE_QUICK_MEETING,
+          ),
         ),
       );
 
@@ -1243,7 +1256,10 @@ function mfcs_table_presentation($option = NULL) {
       'size' => 'large',
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
     'activities' => array(
@@ -1251,7 +1267,10 @@ function mfcs_table_presentation($option = NULL) {
       'size' => 'large',
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
   );
@@ -1264,49 +1283,70 @@ function mfcs_table_presentation($option = NULL) {
       ),
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
     'website' => array(
       'label' => 'Registration Website',
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
     'phone' => array(
       'label' => 'Registration Phone',
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
     'ticket_price' => array(
       'label' => 'Ticket Price',
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
     'ticket_dates' => array(
       'label' => 'Ticket Dates',
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
     'ticket_website' => array(
       'label' => 'Ticket Website',
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
     'ticket_phone' => array(
       'label' => 'Ticket Phone',
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
     'generate_revenue' => array(
@@ -1316,7 +1356,10 @@ function mfcs_table_presentation($option = NULL) {
       ),
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
     'revenue_generated' => array(
@@ -1333,7 +1376,10 @@ function mfcs_table_presentation($option = NULL) {
       ),
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
   );
@@ -1358,7 +1404,10 @@ function mfcs_table_presentation($option = NULL) {
       'size' => 'large',
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
     'standard_blue_chairs' => array(
@@ -1385,7 +1434,10 @@ function mfcs_table_presentation($option = NULL) {
       ),
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
     'portable_stage_configuration' => array(
@@ -1393,7 +1445,10 @@ function mfcs_table_presentation($option = NULL) {
       'size' => 'large',
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
     'security' => array(
@@ -1403,7 +1458,10 @@ function mfcs_table_presentation($option = NULL) {
       ),
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
     'parking_assistance' => array(
@@ -1413,7 +1471,10 @@ function mfcs_table_presentation($option = NULL) {
       ),
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
     'parking_assistance_area' => array(
@@ -1421,7 +1482,10 @@ function mfcs_table_presentation($option = NULL) {
       'size' => 'large',
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
     'road_closures' => array(
@@ -1431,7 +1495,10 @@ function mfcs_table_presentation($option = NULL) {
       ),
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
     'road_closures_details' => array(
@@ -1439,7 +1506,10 @@ function mfcs_table_presentation($option = NULL) {
       'size' => 'large',
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
     'special_requests' => array(
@@ -1449,7 +1519,10 @@ function mfcs_table_presentation($option = NULL) {
       ),
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
     'special_requests_details' => array(
@@ -1457,7 +1530,10 @@ function mfcs_table_presentation($option = NULL) {
       'size' => 'large',
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
   );
@@ -1506,28 +1582,40 @@ function mfcs_table_presentation($option = NULL) {
       ),
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
     'external_audio_person_name' => array(
       'label' => 'Name of Person/Company',
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
     'external_audio_person_email' => array(
       'label' => 'E-mail of Person/Company',
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
     'external_audio_person_phone' => array(
       'label' => 'Phone of Person/Company',
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
     'publicity' => array(
@@ -1570,28 +1658,40 @@ function mfcs_table_presentation($option = NULL) {
       ),
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
     'production_name' => array(
       'label' => 'Production Company or Professional Promoter Name',
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
     'production_email' => array(
       'label' => 'Production Company or Professional Promoter E-mail',
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
     'production_phone' => array(
       'label' => 'Production Company or Professional Promoter Phone',
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
     'printed_material' => array(
@@ -1601,7 +1701,10 @@ function mfcs_table_presentation($option = NULL) {
       ),
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
     'university_logo' => array(
@@ -1611,14 +1714,20 @@ function mfcs_table_presentation($option = NULL) {
       ),
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
     'designing_material' => array(
       'label' => 'Printed Material Designer',
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
     'designing_material_name' => array(
@@ -1635,21 +1744,30 @@ function mfcs_table_presentation($option = NULL) {
       ),
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
     'designing_material_email' => array(
       'label' => 'E-mail of Printed Material Designer',
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
     'designing_material_phone' => array(
       'label' => 'Phone of Printed Material Designer',
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
   );
@@ -1689,7 +1807,10 @@ function mfcs_table_presentation($option = NULL) {
       ),
       'request_type' => array(
         'show' => TRUE,
-        'hide' => array(57),
+        'hide' => array(
+          MFCS_REQUEST_TYPE_MEETING,
+          MFCS_REQUEST_TYPE_QUICK_MEETING,
+        ),
       ),
     ),
   );

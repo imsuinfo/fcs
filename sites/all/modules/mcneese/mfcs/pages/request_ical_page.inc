@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Defines McNeese facilities use request calendar page functions.
+ * Defines McNeese facilities use request ical page functions.
  */
 
 /**
@@ -11,7 +11,7 @@
  */
 
 /**
- * Provides the facilities use request calendar month page.
+ * Provides the facilities use request ical month page.
  *
  * @param int $year
  *   (optional) When specified, represents the year.
@@ -22,7 +22,7 @@
  * @return string
  *   The HTML output representing the page.
  */
-function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
+function mfcs_request_ical_month_0_page($year = NULL, $month = NULL) {
   if (!is_null($year) && !cf_is_integer($year)) {
     cf_error::invalid_integer('year');
 
@@ -42,22 +42,15 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
     drupal_exit();
   }
 
-  if (is_null($year)) {
-    mfcs_add_canonical_headers('requests/calendar-0/month');
-  }
-  elseif (is_null($month)) {
-    mfcs_add_canonical_headers('requests/calendar-0/month/' . $year);
-  }
-  else {
-    mfcs_add_canonical_headers('requests/calendar-0/month/' . $year . '/' . $month);
-  }
-
-
   global $base_path;
+  global $base_url;
 
   $user = cf_current_user();
 
   mfcs_include(4);
+
+  $parameter_year = FALSE;
+  $parameter_month = FALSE;
 
   if (is_null($year) && is_null($month)) {
     $month_start = strtotime('midnight first day of', REQUEST_TIME);
@@ -69,6 +62,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
       $month = date('F', REQUEST_TIME);
     }
     else {
+      $parameter_month = TRUE;
       $month_stamp = strtotime($month);
       $month_name = date('F', $month_stamp);
 
@@ -96,6 +90,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
       $year = date('Y', REQUEST_TIME);
     }
     else {
+      $parameter_year = TRUE;
       $year_stamp = strtotime($month . ' ' . $year);
       $year_name = date('Y', $year_stamp);
 
@@ -181,58 +176,62 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
 
   $results = mfcs_request_load_listing($search, FALSE, 0, 0, $sorting);
 
-  $rows = array();
-  $rows_count = 0;
-  if (!empty($results)) {
-    foreach ($results as $item) {
-      foreach ($item->date as $delta => $date) {
-        if ($date < $absolute_start || $date >= $absolute_stop) {
-          continue;
-        }
+  $ical = FALSE;
+  if ($results !== FALSE) {
+    mfcs_include(8);
 
-        $day = date('j', $date);
-        $month = date('n', $date);
-        $month_day = $month . '-' . $day;
-        if (!isset($rows[$month_day])) {
-          $rows[$month_day] = array();
-        }
+    $ical = mfcs_generate_ical($results);
+  }
 
-        $is_current_month = TRUE;
-        if ($date < $month_start || $date >= $month_stop) {
-          $is_current_month = FALSE;
-        }
+  if ($ical !== FALSE) {
+    $GLOBALS['devel_shutdown'] = FALSE;
 
-        if (!isset($rows[$month_day][$item->id])) {
-          $item_title = check_plain($item->title);
-          $rows[$month_day][$item->id] = array(
-            'href' => $base_path . 'requests/view-0/' . $item->id,
-            'title' => $item_title,
-            'tooltip' => '[' . check_plain($item->location_name) . '] ' . check_plain($item->building_name) . ' ' . check_plain($item->room_name) . ': ' . $item_title,
-            'date' => $date,
-            'month' => $month,
-            'day' => $day,
-          );
-          unset($item_title);
-        }
-      }
+    // make sure to perform output buffer (if possible) to reduce chances of "headers already sent" issues.
+    $ob_level = ob_get_level();
+    for ($i = 0; $i < $ob_level; $i++) {
+      ob_clean();
     }
+    ob_start();
+
+    $filename = 'mcneese-facilities_use.ics';
+    $content_location = $base_url . '/requests/ical-0/month';
+
+    if ($parameter_year) {
+      $filename = 'mcneese-facilities_use-' . $year;
+      $content_location .= '/' . $year;
+
+      if ($parameter_month) {
+        $filename .= '-' . $month;
+        $content_location .= '/' . $month;
+      }
+
+      $filename .= '.ics';
+    }
+
+    header('HTTP/1.1 200 OK', TRUE, 200);
+    header('Content-Type: text/plain');
+    header('Content-Length: ' . strlen($ical));
+    header('Content-Transfer-Encoding: binary');
+    #header('Content-type: text/plain; charset=utf-8');
+    header('Content-type: text/calendar; charset=utf-8');
+    header('Content-Disposition: inline; filename="' . $filename . '"');
+    header('Content-Description: File Transfer');
+    header('Content-Location: ' . $content_location);
+    header('Last-Modified: ' . date('r', REQUEST_TIME));
+    header('Date: ' . date('r', REQUEST_TIME));
+
+    // flush buffer after headers have been processed (to hopefully avoid "headers already sent" issues).
+    ob_end_flush();
+
+    print($ical);
+    exit();
   }
 
-  mfcs_include(8);
-
-  $markup = '';
-  $title = '<h3>' . "Requests for " . date("F, Y", $month_start) . '</h3>';
-  $result = mfcs_build_calendar_month_markup($rows, $month_start, $month_stop, $absolute_start, $absolute_stop, $title);
-  if ($result !== FALSE) {
-    $markup .= $result;
-  }
-  unset($result);
-
-  return $markup;
+  return '';
 }
 
 /**
- * Provides the facilities use request calendar month page.
+ * Provides the facilities use request ical month page.
  *
  * @param int $year
  *   (optional) When specified, represents the year.
@@ -246,7 +245,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
  * @return string
  *   The HTML output representing the page.
  */
-function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NULL) {
+function mfcs_request_ical_day_0_page($year = NULL, $month = NULL, $day = NULL) {
   if (!is_null($year) && !cf_is_integer($year)) {
     cf_error::invalid_integer('year');
 

@@ -29,11 +29,12 @@ function mfcs_request_agreement_0_form($form, &$form_state, $request_id, $pdf = 
   $request = mfcs_load_request_by_id($request_id);
 
   if (empty($request)) {
-    watchdog(MFCS_WATCHDOG_ID, "Unable to find request with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
     drupal_not_found();
     drupal_exit();
     return array();
   }
+
+  mfcs_add_canonical_headers('requests/agreement-0/' . $request_id);
 
   global $base_path;
 
@@ -354,7 +355,6 @@ function mfcs_request_agreement_0_form($form, &$form_state, $request_id, $pdf = 
   return $form;
 }
 
-
 /**
  * Custom submit process for mfcs_request_view_0_page().
  *
@@ -401,11 +401,12 @@ function mfcs_request_agreement_0_pdf($request_id) {
   $request = mfcs_load_request_by_id($request_id);
 
   if (empty($request)) {
-    watchdog(MFCS_WATCHDOG_ID, "Unable to find request with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
     drupal_not_found();
     drupal_exit();
     return array();
   }
+
+  mfcs_add_canonical_headers('requests/agreement-0/' . $request_id . '/pdf');
 
   global $base_path;
 
@@ -439,6 +440,8 @@ function mfcs_request_agreement_0_pdf($request_id) {
   $page['html']['content'] = array(mfcs_request_agreement_0_form($form, $form_state, $request_id, TRUE));
   $renderred = drupal_render($page);
   $html = drupal_render_page($renderred);
+
+  mfcs_include(8);
 
   $result = mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $html, FALSE, $parameters, MFCS_PDF_TYPE_AGREEMENT);
 

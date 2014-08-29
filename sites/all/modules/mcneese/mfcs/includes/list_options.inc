@@ -335,7 +335,7 @@ function mfcs_get_revenue_generated_list_options($option = NULL) {
     $system_column_name = TRUE;
   }
 
-  $options_tree = taxonomy_get_tree(MFCS_VID_REVENUE_GENERATED, 0, NULL, TRUE);
+  $options_tree = taxonomy_get_tree(MFCS_VID_EVENT_REVENUE_GENERATED, 0, NULL, TRUE);
   foreach ($options_tree as $branch) {
     if ($system_column_name) {
       if (!empty($branch->field_system_column_name['und'][0]['value'])) {
@@ -361,7 +361,7 @@ function mfcs_get_revenue_generated_list_options($option = NULL) {
  * @return array
  *   An array of options available.
  */
-function mfcs_get_information_type_list_options($option = NULL) {
+function mfcs_get_request_type_list_options($option = NULL) {
   $options = array();
 
   if ($option == 'select') {
@@ -373,7 +373,7 @@ function mfcs_get_information_type_list_options($option = NULL) {
     $system_column_name = TRUE;
   }
 
-  $options_tree = taxonomy_get_tree(MFCS_VID_EVENT_INFORMATION_TYPE, 0, NULL, TRUE);
+  $options_tree = taxonomy_get_tree(MFCS_VID_EVENT_REQUEST_TYPE, 0, NULL, TRUE);
   foreach ($options_tree as $branch) {
     if ($system_column_name) {
       if (!empty($branch->field_system_column_name['und'][0]['value'])) {

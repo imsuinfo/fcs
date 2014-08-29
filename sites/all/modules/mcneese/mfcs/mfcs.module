@@ -31,8 +31,8 @@ define('MFCS_EVENT_STATUS_CANCELLED', 7);
  define('MFCS_VID_EVENT_STEPS', 19);
  define('MFCS_VID_EVENT_LOCATION', 7);
  define('MFCS_VID_EVENT_AUDIENCE', 9);
- define('MFCS_VID_REVENUE_GENERATED', 15);
- define('MFCS_VID_EVENT_INFORMATION_TYPE', 8);
+ define('MFCS_VID_EVENT_REVENUE_GENERATED', 15);
+ define('MFCS_VID_EVENT_REQUEST_TYPE', 8);
  define('MFCS_VID_EVENT_PUBLICITY_DETAILS', 11);
  define('MFCS_VID_EVENT_DESIGNING_MATERIAL', 16);
  define('MFCS_VID_EVENT_TECHNICAL_EQUIPMENT_DETAILS', 10);
@@ -45,9 +45,6 @@ define('MFCS_EVENT_STATUS_CANCELLED', 7);
  */
  define('MFCS_REVIEW_STEP_CHANGES_REQUIRED', 140);
  define('MFCS_REVIEW_STEP_COMPLETED', 134);
- define('MFCS_REVIEW_STEP_CONFIRM_AND_RESERVE_SERVICES', 121);
- define('MFCS_REVIEW_STEP_CONFIRM_AND_RESERVE_HOUSING', 120);
- define('MFCS_REVIEW_STEP_CONFIRM_AND_RESERVE_VENUE', 119);
  define('MFCS_REVIEW_STEP_MAKE_DECISIONS', 117);
  define('MFCS_REVIEW_STEP_RELEASE_HOLD', 118);
  define('MFCS_REVIEW_STEP_REVIEW', 132);
@@ -108,6 +105,16 @@ define('MFCS_EVENT_STATUS_CANCELLED', 7);
  define('MFCS_OPERATOR_GREATER_THAN', 6);
  define('MFCS_OPERATOR_NOT_EQUAL', 7);
  define('MFCS_OPERATOR_NOT_LIKE', 8);
+ define('MFCS_OPERATOR_IS_NULL', 9);
+ define('MFCS_OPERATOR_IS_NOT_NULL', 10);
+
+/**
+ * Defines table join codes for building search queries.
+ */
+ define('MFCS_JOIN_INNER', 1);
+ define('MFCS_JOIN_LEFT', 2);
+ define('MFCS_JOIN_RIGHT', 3);
+ define('MFCS_JOIN_OUTER', 4);
 
 /**
  * Defines a recursion limit for the search and/or operations.
@@ -138,6 +145,76 @@ define('MFCS_EVENT_STATUS_CANCELLED', 7);
  define('MFCS_PDF_TYPE_REQUEST', 0);
  define('MFCS_PDF_TYPE_AGREEMENT', 1);
 
+/**
+ * Defines e-mail reminder types.
+ */
+ define('MFCS_REMINDER_TYPE_INSURANCE_NOT_PROVIDED', 0);
+
+/**
+ * Defines e-mail reminder intervals.
+ */
+ define('MFCS_REMINDER_INTERVAL_DAY_0', 0);
+ define('MFCS_REMINDER_INTERVAL_DAY_1', 1);
+ define('MFCS_REMINDER_INTERVAL_DAY_2', 2);
+ define('MFCS_REMINDER_INTERVAL_DAY_3', 3);
+ define('MFCS_REMINDER_INTERVAL_DAY_4', 4);
+ define('MFCS_REMINDER_INTERVAL_DAY_5', 5);
+ define('MFCS_REMINDER_INTERVAL_DAY_6', 6);
+ define('MFCS_REMINDER_INTERVAL_DAY_7', 7);
+ define('MFCS_REMINDER_INTERVAL_DAY_8', 8);
+ define('MFCS_REMINDER_INTERVAL_DAY_9', 9);
+ define('MFCS_REMINDER_INTERVAL_DAY_10', 10);
+ define('MFCS_REMINDER_INTERVAL_DAY_11', 11);
+ define('MFCS_REMINDER_INTERVAL_DAY_12', 12);
+ define('MFCS_REMINDER_INTERVAL_DAY_30', 30);
+ define('MFCS_REMINDER_INTERVAL_WEEK_0', 1000);
+ define('MFCS_REMINDER_INTERVAL_WEEK_1', 1001);
+ define('MFCS_REMINDER_INTERVAL_WEEK_2', 1002);
+ define('MFCS_REMINDER_INTERVAL_WEEK_3', 1003);
+ define('MFCS_REMINDER_INTERVAL_WEEK_4', 1004);
+ define('MFCS_REMINDER_INTERVAL_WEEK_5', 1005);
+ define('MFCS_REMINDER_INTERVAL_WEEK_6', 1006);
+ define('MFCS_REMINDER_INTERVAL_WEEK_7', 1007);
+ define('MFCS_REMINDER_INTERVAL_WEEK_8', 1008);
+ define('MFCS_REMINDER_INTERVAL_WEEK_9', 1009);
+ define('MFCS_REMINDER_INTERVAL_WEEK_10', 1010);
+ define('MFCS_REMINDER_INTERVAL_WEEK_11', 1011);
+ define('MFCS_REMINDER_INTERVAL_WEEK_12', 1012);
+
+/**
+ * Defines e-mail priority codes.
+ */
+ define('MFCS_MAIL_PRIORITY_HIGHEST', 1);
+ define('MFCS_MAIL_PRIORITY_HIGH', 2);
+ define('MFCS_MAIL_PRIORITY_NORMAL', 3);
+ define('MFCS_MAIL_PRIORITY_LOW', 4);
+ define('MFCS_MAIL_PRIORITY_LOWEST', 5);
+
+/**
+ * Defines Taxonomy TIDs for review steps.
+ */
+ define('MFCS_REQUEST_TYPE_ATHLETIC', 66);
+ define('MFCS_REQUEST_TYPE_BANQUET', 61);
+ define('MFCS_REQUEST_TYPE_CEREMONY', 64);
+ define('MFCS_REQUEST_TYPE_FAIR', 65);
+ define('MFCS_REQUEST_TYPE_LECTURE', 59);
+ define('MFCS_REQUEST_TYPE_MEETING', 57);
+ define('MFCS_REQUEST_TYPE_OTHER', 67);
+ define('MFCS_REQUEST_TYPE_PERFORMANCE', 58);
+ define('MFCS_REQUEST_TYPE_QUICK_MEETING', 142);
+ define('MFCS_REQUEST_TYPE_RECEPTION', 60);
+ define('MFCS_REQUEST_TYPE_TALENT', 63);
+ define('MFCS_REQUEST_TYPE_WORKSHOP', 62);
+
+/**
+ * Defines Taxonomy TIDs for request classifications.
+ */
+ define('MFCS_REQUEST_AUDIENCE_FACULTY_AND_STAFF', 71);
+ define('MFCS_REQUEST_AUDIENCE_GUESTS_ONLY', 68);
+ define('MFCS_REQUEST_AUDIENCE_STUDENTS_AND_EMPLOYEES', 70);
+ define('MFCS_REQUEST_AUDIENCE_PUBLIC', 72);
+ define('MFCS_REQUEST_AUDIENCE_STUDENTS_ONLY', 69);
+
 
 /**
  * Implements hook_init().
@@ -153,639 +230,26 @@ function mfcs_init() {
  * Implements hook_permission().
  */
 function mfcs_permission() {
-  $permissions = array();
-  $permissions['mfcs administer'] = array(
-    'title' => t("Administer Facilities Use Requests"),
-    'description' => t("Grants permissions to administer requests and workflow."),
-  );
+  mfcs_include(7);
 
-  $permissions['mfcs request'] = array(
-    'title' => t("Request Facilities Use Requests"),
-    'description' => t("Grants permissions to make requests."),
-  );
-
-  $permissions['mfcs review'] = array(
-    'title' => t("Review Facilities Use Requests"),
-    'description' => t("Grants permissions to review requests."),
-  );
-
-  $permissions['mfcs manage'] = array(
-    'title' => t("Manage Facilities Use Requests"),
-    'description' => t("Grants permissions to manage requests."),
-  );
-
-
-  return $permissions;
+  return mfcs_hook_permission();
 }
 
 /**
  * Implements hook_menu().
  */
 function mfcs_menu() {
-  $items = array();
+  mfcs_include(7);
 
-  $items['requests'] = array(
-    'title' => "Requests Dashboard",
-    'description' => "Requests Dashboard",
-    'page callback' => 'mfcs_management_page',
-    'file' => 'management_page.inc',
-    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
-    'access callback' => 'mfcs_management_page_access',
-    'tab_parent' => '',
-    'tab_root' => '',
-  );
-
-  $items['requests/create-0'] = array(
-    'title' => "New Request",
-    'description' => "New Request",
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_request_create_0_form'),
-    'file' => 'request_create_page.inc',
-    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
-    'access callback' => 'mfcs_management_page_request_access',
-    'access arguments' => array('create'),
-    'tab_parent' => 'requests',
-    'tab_root' => 'requests',
-  );
-
-  $items['requests/create-0/%'] = array(
-    'title' => "New Request",
-    'description' => "New Request",
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_request_create_0_form', 2),
-    'file' => 'request_create_page.inc',
-    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
-    'access callback' => 'mfcs_management_page_request_access',
-    'access arguments' => array('create'),
-    'tab_parent' => 'requests',
-    'tab_root' => 'requests',
-  );
-
-  $items['requests/create-0/autocomplete/request_coordinator/email'] = array(
-    'title' => "",
-    'page callback' => 'mfcs_edit_0_autocomplete_request_coordinator_email',
-    'file' => 'autocomplete.inc',
-    'file path' => drupal_get_path('module', 'mfcs') . '/includes',
-    'access callback' => 'mfcs_management_page_request_access',
-    'access arguments' => array('create'),
-    'type' => MENU_CALLBACK,
-  );
-
-  $items['requests/create-0/autocomplete/request_coordinator/name'] = array(
-    'title' => "",
-    'page callback' => 'mfcs_edit_0_autocomplete_request_coordinator_name',
-    'file' => 'autocomplete.inc',
-    'file path' => drupal_get_path('module', 'mfcs') . '/includes',
-    'access callback' => 'mfcs_management_page_request_access',
-    'access arguments' => array('create'),
-    'type' => MENU_CALLBACK,
-  );
-
-  $items['requests/create-0/autocomplete/request_coordinator/phone'] = array(
-    'title' => "",
-    'page callback' => 'mfcs_edit_0_autocomplete_request_coordinator_phone',
-    'file' => 'autocomplete.inc',
-    'file path' => drupal_get_path('module', 'mfcs') . '/includes',
-    'access callback' => 'mfcs_management_page_request_access',
-    'access arguments' => array('create'),
-    'type' => MENU_CALLBACK,
-  );
-
-  // this is provided as a way to have the breadcrumb path simulate the 'view' despite not being in the url path.
-  $items['requests/edit-0/%'] = array(
-    'title' => "View Request",
-    'description' => "Edit Request",
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_request_edit_0_form', 2),
-    'file' => 'request_edit_page.inc',
-    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
-    'access callback' => 'mfcs_management_page_request_access',
-    'access arguments' => array('edit', 2),
-    'tab_parent' => 'requests',
-    'tab_root' => 'requests',
-  );
-
-  $items['requests/edit-0/%/%'] = array(
-    'title' => "Edit Request",
-    'description' => "Edit Request",
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_request_edit_0_form', 2, 3),
-    'file' => 'request_edit_page.inc',
-    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
-    'access callback' => 'mfcs_management_page_request_access',
-    'access arguments' => array('edit', 2),
-    'tab_parent' => 'requests',
-    'tab_root' => 'requests',
-  );
-
-  $items['requests/edit-0/autocomplete/request_coordinator/email'] = array(
-    'title' => "",
-    'page callback' => 'mfcs_edit_0_autocomplete_request_coordinator_email',
-    'file' => 'autocomplete.inc',
-    'file path' => drupal_get_path('module', 'mfcs') . '/includes',
-    'access callback' => 'mfcs_management_page_request_access',
-    'access arguments' => array('edit'),
-    'type' => MENU_CALLBACK,
-  );
-
-  $items['requests/edit-0/autocomplete/request_coordinator/name'] = array(
-    'title' => "",
-    'page callback' => 'mfcs_edit_0_autocomplete_request_coordinator_name',
-    'file' => 'autocomplete.inc',
-    'file path' => drupal_get_path('module', 'mfcs') . '/includes',
-    'access callback' => 'mfcs_management_page_request_access',
-    'access arguments' => array('edit'),
-    'type' => MENU_CALLBACK,
-  );
-
-  $items['requests/edit-0/autocomplete/request_coordinator/phone'] = array(
-    'title' => "",
-    'page callback' => 'mfcs_edit_0_autocomplete_request_coordinator_phone',
-    'file' => 'autocomplete.inc',
-    'file path' => drupal_get_path('module', 'mfcs') . '/includes',
-    'access callback' => 'mfcs_management_page_request_access',
-    'access arguments' => array('edit'),
-    'type' => MENU_CALLBACK,
-  );
-
-  $items['requests/reviewers-0'] = array(
-    'title' => "Manage Reviewers",
-    'description' => "Review Request",
-    'page callback' => 'mfcs_request_reviewers_0_page',
-    'file' => 'request_reviewers_page.inc',
-    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
-    'access callback' => 'mfcs_management_page_request_access',
-    'access arguments' => array('reviewers'),
-    'tab_parent' => 'requests',
-    'tab_root' => 'requests',
-  );
-
-  $items['requests/reviewers-0/list/%/%'] = array(
-    'title' => "List Reviewers",
-    'description' => "List Reviewers",
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_request_reviewers_0_form', 3, 4),
-    'file' => 'request_reviewers_page.inc',
-    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
-    'access callback' => 'mfcs_management_page_request_access',
-    'access arguments' => array('reviewers'),
-    'tab_parent' => 'requests/reviewers-0',
-    'tab_root' => 'requests/reviewers-0',
-  );
-
-  $items['requests/reviewers-0/delete/%'] = array(
-    'title' => "Delete Reviewer",
-    'description' => "Delete Reviewer",
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_request_reviewers_0_delete_form', 3),
-    'file' => 'request_reviewers_page.inc',
-    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
-    'access callback' => 'mfcs_management_page_request_access',
-    'access arguments' => array('reviewers'),
-    'tab_parent' => 'requests/reviewers-0',
-    'tab_root' => 'requests/reviewers-0',
-  );
-
-  $items['requests/reviewers-0/autocomplete/user_id'] = array(
-    'title' => "",
-    'page callback' => 'mfcs_request_reviewers_0_autocomplete_user_id',
-    'file' => 'autocomplete.inc',
-    'file path' => drupal_get_path('module', 'mfcs') . '/includes',
-    'access callback' => 'mfcs_management_page_request_access',
-    'access arguments' => array('reviewers'),
-    'type' => MENU_CALLBACK,
-  );
-
-  $items['requests/reviewers-0/autocomplete/reviewer_classification'] = array(
-    'title' => "",
-    'page callback' => 'mfcs_request_reviewers_0_autocomplete_reviewer_classification',
-    'file' => 'autocomplete.inc',
-    'file path' => drupal_get_path('module', 'mfcs') . '/includes',
-    'access callback' => 'mfcs_management_page_request_access',
-    'access arguments' => array('reviewers'),
-    'type' => MENU_CALLBACK,
-  );
-
-  $items['requests/review-0'] = array(
-    'title' => "Review Requests",
-    'description' => "Review Request",
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_request_review_0_page'),
-    'file' => 'request_review_page.inc',
-    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
-    'access callback' => 'mfcs_management_page_request_access',
-    'access arguments' => array('review'),
-    'tab_parent' => 'requests',
-    'tab_root' => 'requests',
-  );
-
-  $items['requests/review-0/%'] = array(
-    'title' => "Review Requests",
-    'description' => "Review Request",
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_request_review_0_page', 2),
-    'file' => 'request_review_page.inc',
-    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
-    'access callback' => 'mfcs_management_page_request_access',
-    'access arguments' => array('review'),
-    'tab_parent' => 'requests',
-    'tab_root' => 'requests',
-  );
-
-  $items['requests/delete-0/%'] = array(
-    'title' => "Delete Request",
-    'description' => "Delete Request",
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_request_delete_0_form', 2),
-    'file' => 'request_delete_page.inc',
-    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
-    'access callback' => 'mfcs_management_page_request_access',
-    'access arguments' => array('delete', 2),
-    'tab_parent' => 'requests',
-    'tab_root' => 'requests',
-  );
-
-  $items['requests/cancel-0/%'] = array(
-    'title' => "Cancel Request",
-    'description' => "Cancel Request",
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_request_cancel_0_form', 2),
-    'file' => 'request_cancel_page.inc',
-    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
-    'access callback' => 'mfcs_management_page_request_access',
-    'access arguments' => array('cancel', 2),
-    'tab_parent' => 'requests',
-    'tab_root' => 'requests',
-  );
-
-  $items['requests/uncancel-0/%'] = array(
-    'title' => "Cancel Request",
-    'description' => "Uncancel Request",
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_request_uncancel_0_form', 2),
-    'file' => 'request_cancel_page.inc',
-    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
-    'access callback' => 'mfcs_management_page_request_access',
-    'access arguments' => array('uncancel', 2),
-    'tab_parent' => 'requests',
-    'tab_root' => 'requests',
-  );
-
-  $items['requests/list-0'] = array(
-    'title' => "List Requests",
-    'description' => "List Requests",
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_request_list_0_page'),
-    'file' => 'request_list_page.inc',
-    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
-    'access callback' => 'mfcs_management_page_request_access',
-    'access arguments' => array('list'),
-    'tab_parent' => 'requests',
-    'tab_root' => 'requests',
-  );
-
-  $items['requests/calendar-0/month'] = array(
-    'title' => "Request Calendar",
-    'description' => "Request Calendar - Month",
-    'page callback' => 'mfcs_request_calendar_month_0_page',
-    'page arguments' => array(NULL, NULL),
-    'file' => 'request_calendar_page.inc',
-    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
-    'access callback' => 'mfcs_management_page_request_access',
-    'access arguments' => array('list'),
-    'tab_parent' => 'requests',
-    'tab_root' => 'requests',
-  );
-
-  $items['requests/calendar-0/month/%/%'] = array(
-    'title' => "Request Calendar",
-    'description' => "Requests Calendar - Month",
-    'page callback' => 'mfcs_request_calendar_month_0_page',
-    'page arguments' => array(3, 4),
-    'file' => 'request_calendar_page.inc',
-    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
-    'access callback' => 'mfcs_management_page_request_access',
-    'access arguments' => array('list'),
-    'tab_parent' => 'requests',
-    'tab_root' => 'requests',
-  );
-
-  $items['requests/calendar-0/day'] = array(
-    'title' => "Request Calendar",
-    'description' => "Requests Calendar - Day",
-    'page callback' => 'mfcs_request_calendar_day_0_page',
-    'page arguments' => array(),
-    'file' => 'request_calendar_page.inc',
-    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
-    'access callback' => 'mfcs_management_page_request_access',
-    'access arguments' => array('list'),
-    'tab_parent' => 'requests',
-    'tab_root' => 'requests',
-  );
-
-  $items['requests/calendar-0/day/%/%/%'] = array(
-    'title' => "Request Calendar",
-    'description' => "Requests Calendar - Day",
-    'page callback' => 'mfcs_request_calendar_day_0_page',
-    'page arguments' => array(3, 4, 5),
-    'file' => 'request_calendar_page.inc',
-    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
-    'access callback' => 'mfcs_management_page_request_access',
-    'access arguments' => array('list'),
-    'tab_parent' => 'requests',
-    'tab_root' => 'requests',
-  );
-
-  $items['requests/list-0/%'] = array(
-    'title' => "List Requests",
-    'description' => "List Requests",
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_request_list_0_page', 2),
-    'file' => 'request_list_page.inc',
-    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
-    'access callback' => 'mfcs_management_page_request_access',
-    'access arguments' => array('list'),
-    'tab_parent' => 'requests',
-    'tab_root' => 'requests',
-  );
-
-  $items['requests/search-0'] = array(
-    'title' => "Search Requests",
-    'description' => "Search Requests",
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_request_search_0_form'),
-    'file' => 'request_search_page.inc',
-    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
-    'access callback' => 'mfcs_management_page_request_access',
-    'access arguments' => array('search'),
-    'tab_parent' => 'requests',
-    'tab_root' => 'requests',
-  );
-
-  $items['requests/view-0/%'] = array(
-    'title' => "View Request",
-    'description' => "View Request",
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_request_view_0_page', 2),
-    'file' => 'request_view_page.inc',
-    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
-    'access callback' => 'mfcs_management_page_request_access',
-    'access arguments' => array('view', 2),
-    'tab_parent' => 'requests/list-0',
-    'tab_root' => 'requests/list-0',
-  );
-
-  $items['requests/view-0/%/%'] = array(
-    'title' => "View Request",
-    'description' => "View Request",
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_request_view_0_page', 2, 3),
-    'file' => 'request_view_page.inc',
-    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
-    'access callback' => 'mfcs_management_page_request_access',
-    'access arguments' => array('view', 2),
-    'tab_parent' => 'requests/list-0',
-    'tab_root' => 'requests/list-0',
-  );
-
-  $items['requests/pdf-0/%/%'] = array(
-    'title' => "Request PDF",
-    'description' => "Download Request PDF",
-    'page callback' => 'mfcs_request_pdf_0_page',
-    'page arguments' => array(2, 3),
-    'file' => 'request_view_page.inc',
-    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
-    'access callback' => 'mfcs_management_page_request_access',
-    'access arguments' => array('view', 2),
-    'tab_parent' => 'requests/list-0',
-    'tab_root' => 'requests/list-0',
-    'type' => MENU_CALLBACK,
-  );
-
-  $items['requests/history-0/%'] = array(
-    'title' => "Request History",
-    'description' => "Request History",
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_request_history_0_form', 2),
-    'file' => 'request_history_page.inc',
-    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
-    'access callback' => 'mfcs_management_page_request_access',
-    'access arguments' => array('history', 2),
-    'tab_parent' => 'requests',
-    'tab_root' => 'requests',
-  );
-
-  $items['requests/agreement-0/%'] = array(
-    'title' => "Facilities Use Agreement",
-    'description' => "Facilities Use Agreement",
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_request_agreement_0_form', 2),
-    'file' => 'request_agreement_page.inc',
-    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
-    'access callback' => 'mfcs_management_page_request_access',
-    'access arguments' => array('agreement', 2),
-    'tab_parent' => 'requests',
-    'tab_root' => 'requests',
-  );
-
-  $items['requests/agreement-0/%/pdf'] = array(
-    'title' => "Facilities Use Agreement",
-    'description' => "Facilities Use Agreement",
-    'page callback' => 'mfcs_request_agreement_0_pdf',
-    'page arguments' => array(2),
-    'file' => 'request_agreement_page.inc',
-    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
-    'access callback' => 'mfcs_management_page_request_access',
-    'access arguments' => array('agreement', 2),
-    'tab_parent' => 'requests',
-    'tab_root' => 'requests',
-  );
-
-  return $items;
+  return mfcs_hook_menu();
 }
 
 /**
- * Build a month calendar display.
+ * Access callback for facilities use pages.
  *
- * @param array $items
- *   An array of request items to link to.
- * @param int $month_start
- *   Unix timestamp for the start of the month.
- * @param int $month_stop
- *   Unix timestamp for the first day of the next month.
- * @param int $absolute_start
- *   Unix timestamp for the first day of the week in which the first day of
- *   the month may be found.
- * @param int $absolute_stop
- *   Unix timestamp for the last day of the week in which the last day of
- *   the month may be found.
- * @param string $title
- *   An HTML title for describing the calendar.
- * @param string $id
- *   (optional) A unique HTML id to associate with the calendar.
+ * For already loaded requests, use: mfcs_request_access().
  *
- * @return string|bool
- *   The generate HTML markup or FALSE on error.
- */
-function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $absolute_start, $absolute_stop, $title, $id = NULL) {
-  if (!is_array($items)) {
-    cf_error::invalid_array('items');
-    return FALSE;
-  }
-
-  if (!cf_is_integer($month_start)) {
-    cf_error::invalid_integer('month_start');
-    return FALSE;
-  }
-
-  if (!cf_is_integer($month_stop)) {
-    cf_error::invalid_integer('month_stop');
-    return FALSE;
-  }
-
-  if (!cf_is_integer($absolute_start)) {
-    cf_error::invalid_integer('absolute_start');
-    return FALSE;
-  }
-
-  if (!cf_is_integer($absolute_stop)) {
-    cf_error::invalid_integer('absolute_stop');
-    return FALSE;
-  }
-
-  if (!is_string($title)) {
-    cf_error::invalid_string('title');
-    return FALSE;
-  }
-
-  $id_string = "";
-  if (!empty($id)) {
-    if (!is_string($id)) {
-      cf_error::invalid_string('id');
-      return FALSE;
-    }
-
-    $id_string = ' id="' . check_plain($id) . '"';
-  }
-
-  global $base_path;
-
-  $week_start = 0;
-  $week_stop = 6;
-
-  // for ISO-8601.
-  #$week_start = 1;
-  #$week_stop = 7;
-
-  $days_of_week = array(
-    0 => 'Sunday',
-    1 => 'Monday',
-    2 => 'Tuesday',
-    3 => 'Wednesday',
-    4 => 'Thursday',
-    5 => 'Friday',
-    6 => 'Saturday',
-    7 => 'Sunday', // In the case of ISO-8601, Sunday = 7.
-  );
-
-
-  // begin wrappers
-  $markup = '<div' . $id_string . ' class="calendar-month-wrapper"><div class="calendar-month">';
-
-
-  // title
-  $markup .= '<div class="calendar-title">' . $title . '</div>';
-
-
-  // navigation
-  $last_month = strtotime('midnight first day of last month', $month_start);
-  $next_month = strtotime('midnight first day of next month', $month_start);
-
-  $url_base = $base_path . 'requests/calendar-0/month/';
-
-  $last_url = $url_base . date('Y', $last_month) . '/' . date('F', $last_month);
-  $next_url = $url_base . date('Y', $next_month) . '/' . date('F', $next_month);
-
-  $markup .= '<div class="calendar-navigation">';
-  $markup .= '<div class="calendar-navigation-previous">';
-  $markup .= '<a href="' . $last_url . '">Previous</a>';
-  $markup .= '</div>';
-  $markup .= '<div class="calendar-navigation-next">';
-  $markup .= '<a href="' . $next_url . '">Next</a>';
-  $markup .= '</div>';
-  $markup .= '</div>';
-
-
-  // header
-  $markup .= '<div class="calendar-header-wrapper"><div class="calendar-header">';
-  $markup .= '<div class="calendar-week-wrapper week_number-0"><div class="calendar-week week_number-0">';
-  $week_count = $week_start;
-  while ($week_count <= $week_stop) {
-    $markup .= '<div class="calendar-day-wrapper weekday-' . $week_count . '">';
-    $markup .= '<div class="calendar-day weekday-' . $week_count . '">' . $days_of_week[$week_count] . '</div>';
-    $markup .= '</div>';
-    $week_count++;
-  }
-  $markup .= '</div></div></div></div>';
-
-
-  // body
-  $markup .= '<div class="calendar-body-wrapper"><div class="calendar-body">';
-  $current_date = $absolute_start;
-  $week_first = date('W', $current_date);
-  $week_count = $week_start;
-
-  $weeks_processed = array();
-  while ($current_date < $absolute_stop) {
-    $current_week = date('W', $current_date);
-    $current_month = date('n', $current_date);
-    $current_day = date('j', $current_date);
-    $current_month_day = $current_month . '-' . $current_day;
-
-    if ($week_count == $week_start && !isset($weeks_processed[$week_first])) {
-      $markup .= '<div class="calendar-week-wrapper week_number-' . $current_week . '"><div class="calendar-week week_number-' . $current_week . '">';
-      $weeks_processed[$week_first] = TRUE;
-    }
-
-    $current_month = ' month-current';
-    if ($current_date < $month_start) {
-      $current_month = ' month-previous';
-    }
-    elseif ($current_date >= $month_stop) {
-      $current_month = ' month-next';
-    }
-
-    $markup .= '<div class="calendar-day-wrapper weekday-' . $week_count . ' day-' . $current_day . $current_month . '">';
-    $markup .= '<div class="calendar-day weekday-' . $week_count . ' day-' . $current_day . $current_month . '">';
-    $markup .= '<div class="calendar-label">' . $current_day . '</div>';
-    if (!empty($items[$current_month_day])) {
-      foreach ($items[$current_month_day] as $item_id => $item) {
-        $markup .= '<div class="calendar-item"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
-      }
-    }
-    $markup .= '</div></div>';
-
-    $current_date = strtotime('midnight tomorrow', $current_date);
-
-    $week_count++;
-    if ($week_count > $week_stop) {
-      $markup .= '</div></div>';
-
-      $week_first = date('W', $current_date);
-      $week_count = $week_start;
-    }
-  }
-  $markup .= '</div></div>';
-
-
-  // end wrappers
-  $markup .= '</div></div>';
-
-  return $markup;
-}
-
-/**
- * Access callback for facilities use management page.
+ * This static caches the results in 'mfcs_request_access'.
  *
  * @param string $operation
  *   (optional) When specified, performs access check based on operation.
@@ -794,14 +258,44 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
  *   Some operations require this to return TRUE under certain circumstances.
  * @param object $user
  *   (optional) The user object to obtain access for.
+ * @param string $section
+ *   (optional) Check whether or not the user is allowed to perform a certain
+ *   operation for a specific section. This is primarily used for the edit
+ *   pages.
  *
  * @param bool
  *   TRUE on access granted, FALSE otherwise.
+ *
+ * @see: mfcs_request_access()
  */
-function mfcs_management_page_request_access($operation = NULL, $request_id = NULL, $user = NULL) {
+function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user = NULL, $section = NULL) {
   if (is_null($user) || !is_object($user)) {
     $user = cf_current_user();
   }
+
+  // anonymous user is denied access to requests as a whole.
+  if ($user->uid == 0) {
+    return FALSE;
+  }
+
+
+  // use advanced static cache for increased performance.
+  static $mfcs_request_access;
+
+  if (!isset($mfcs_request_access)) {
+    $mfcs_request_access[$operation] = &drupal_static('mfcs_request_access');
+  }
+
+  if (!isset($mfcs_request_access[$operation][$section][$user->uid])) {
+    $mfcs_request_access[$operation][$section][$user->uid] = array();
+  }
+
+  $access = &$mfcs_request_access[$operation][$section][$user->uid];
+
+  if (array_key_exists($request_id, $access)) {
+    return $access[$request_id];
+  }
+
 
   $request_status = array(
     MFCS_EVENT_STATUS_LOCKED,
@@ -813,13 +307,22 @@ function mfcs_management_page_request_access($operation = NULL, $request_id = NU
     MFCS_EVENT_STATUS_CANCELLED,
   );
 
-  $manager = user_access('mfcs manage');
-  $reviewer = user_access('mfcs review');
-  $requester = user_access('mfcs request');
+  $manager = user_access('mfcs manage', $user);
+  $reviewer = user_access('mfcs review', $user);
+  $requester = user_access('mfcs request', $user);
+
 
   if ($operation == 'create') {
     if ($requester) {
-      return TRUE;
+      if (is_null($request_id)) {
+        $access[$request_id] = TRUE;
+        return TRUE;
+      }
+
+      // create operations on a specific request is actually a clone/copy operation.
+      // treat this as a view operation.
+      $access[$request_id] = mfcs_page_request_access('view', $request_id, $user);
+      return $access[$request_id];
     }
   }
   elseif ($operation == 'edit') {
@@ -828,7 +331,53 @@ function mfcs_management_page_request_access($operation = NULL, $request_id = NU
       MFCS_EVENT_STATUS_LOCKED,
     );
 
+    // when quick meeting is enabled, a section is not null, then additional checks are required.
+    $is_quick_meeting = FALSE;
+    if (!is_null($request_id) && !is_null($section) && ($manager || $requester)) {
+      try {
+        $query = db_select('mfcs_requests', 'mer');
+
+        $query->innerjoin('mfcs_current_information', 'mci', 'mer.id = mci.request_id');
+        $query->innerjoin('mfcs_field_information_type', 'mfit', 'mci.request_id = mfit.request_id AND mci.type = mfit.revision AND mfit.delta = 0');
+
+        // $query->countQuery() does not appear to be functioning as expected, so manually count.
+        $query->addExpression('count(mer.id)');
+
+        $query->condition('mer.id', $request_id);
+        $query->condition('mfit.value', MFCS_REQUEST_TYPE_QUICK_MEETING);
+
+        $result = $query->execute()->fetchField();
+
+        if ($result > 0) {
+          $is_quick_meeting = TRUE;
+        }
+      }
+      catch (Exception $ex) {
+        cf_error::on_exception($ex);
+
+        return FALSE;
+      }
+
+      // deny access to sections that are not allowed to be edited for a quick meeting.
+      if ($is_quick_meeting) {
+        $allowed_sections = array(
+          'request',
+          'information',
+          'coordinator',
+          'dates',
+        );
+        if (!in_array($section, $allowed_sections)) {
+          return FALSE;
+        }
+      }
+    }
+
     if ($manager) {
+      if (is_null($request_id)) {
+        $access[$request_id] = TRUE;
+        return TRUE;
+      }
+
       try {
         $query = db_select('mfcs_requests', 'mer');
 
@@ -843,8 +392,12 @@ function mfcs_management_page_request_access($operation = NULL, $request_id = NU
 
         $result = $query->execute()->fetchField();
 
-        if ($result > 0) return TRUE;
+        if ($result > 0) {
+          $access[$request_id] = TRUE;
+          return TRUE;
+        }
 
+        $access[$request_id] = FALSE;
         return FALSE;
       }
       catch (Exception $ex) {
@@ -855,7 +408,8 @@ function mfcs_management_page_request_access($operation = NULL, $request_id = NU
     }
     elseif ($requester) {
       if (is_null($request_id)) {
-        return FALSE;
+        $access[$request_id] = TRUE;
+        return TRUE;
       }
 
       try {
@@ -873,8 +427,12 @@ function mfcs_management_page_request_access($operation = NULL, $request_id = NU
 
         $result = $query->execute()->fetchField();
 
-        if ($result > 0) return TRUE;
+        if ($result > 0) {
+          $access[$request_id] = TRUE;
+          return TRUE;
+        }
 
+        $access[$request_id] = FALSE;
         return FALSE;
       }
       catch (Exception $ex) {
@@ -887,6 +445,7 @@ function mfcs_management_page_request_access($operation = NULL, $request_id = NU
   elseif ($operation == 'view') {
     if ($manager) {
       if (is_null($request_id)) {
+        $access[$request_id] = TRUE;
         return TRUE;
       }
 
@@ -904,8 +463,12 @@ function mfcs_management_page_request_access($operation = NULL, $request_id = NU
 
         $result = $query->execute()->fetchField();
 
-        if ($result > 0) return TRUE;
+        if ($result > 0) {
+          $access[$request_id] = TRUE;
+          return TRUE;
+        }
 
+        $access[$request_id] = FALSE;
         return FALSE;
       }
       catch (Exception $ex) {
@@ -916,14 +479,16 @@ function mfcs_management_page_request_access($operation = NULL, $request_id = NU
     }
     elseif ($reviewer) {
       if (is_null($request_id)) {
+        $access[$request_id] = TRUE;
         return TRUE;
       }
-      else {
-        return mfcs_management_page_request_reviewer_access($user, $request_id, NULL);
-      }
+
+      $access[$request_id] = mfcs_page_request_reviewer_access($user, $request_id, NULL);
+      return $access[$request_id];
     }
     elseif ($requester) {
       if (is_null($request_id)) {
+        $access[$request_id] = TRUE;
         return TRUE;
       }
 
@@ -955,8 +520,12 @@ function mfcs_management_page_request_access($operation = NULL, $request_id = NU
 
         $result = $query->execute()->fetchField();
 
-        if ($result > 0) return TRUE;
+        if ($result > 0) {
+          $access[$request_id] = TRUE;
+          return TRUE;
+        }
 
+        $access[$request_id] = FALSE;
         return FALSE;
       }
       catch (Exception $ex) {
@@ -968,62 +537,84 @@ function mfcs_management_page_request_access($operation = NULL, $request_id = NU
   }
   elseif ($operation == 'list') {
     if ($requester || $reviewer || $manager) {
+      $access[$request_id] = TRUE;
       return TRUE;
     }
   }
   elseif ($operation == 'search') {
     if ($requester || $reviewer || $manager) {
+      $access[$request_id] = TRUE;
       return TRUE;
     }
   }
   elseif ($operation == 'reviewers') {
     if ($manager) {
+      $access[$request_id] = TRUE;
       return TRUE;
     }
   }
   elseif ($operation == 'review') {
     if (is_null($request_id)) {
       if ($reviewer) {
+        $access[$request_id] = TRUE;
         return TRUE;
       }
     }
     else {
-      return mfcs_management_page_request_reviewer_access($user, $request_id, TRUE);
+      $access[$request_id] = mfcs_page_request_reviewer_access($user, $request_id, TRUE);
+      return $access[$request_id];
     }
   }
   elseif ($operation == 'comment') {
     // @todo: currently disabled feature. Enable if such functionality is requested.
+    $access[$request_id] = FALSE;
     return FALSE;
 
     if ($manager) {
+      $access[$request_id] = TRUE;
       return TRUE;
     }
 
     if (!is_null($request_id)) {
-      return mfcs_management_page_request_reviewer_access($user, $request_id, TRUE);
+      $access[$request_id] = mfcs_page_request_reviewer_access($user, $request_id, TRUE);
+      return $access[$request_id];
     }
   }
   elseif ($operation == 'log') {
     if ($manager) {
+      $access[$request_id] = TRUE;
       return TRUE;
     }
 
     if ($reviewer) {
       if (is_null($request_id)) {
+        $access[$request_id] = TRUE;
         return TRUE;
       }
       else {
-        return mfcs_management_page_request_reviewer_access($user, $request_id, NULL);
+        $access[$request_id] = mfcs_page_request_reviewer_access($user, $request_id, NULL);
+        return $access[$request_id];
       }
     }
   }
   elseif ($operation == 'delete') {
     if ($manager) {
+      $access[$request_id] = TRUE;
       return TRUE;
     }
   }
-
   elseif ($operation == 'cancel') {
+    if (is_null($request_id)) {
+      if ($requester || $reviewer || $manager) {
+        $access[$request_id] = TRUE;
+        return TRUE;
+      }
+      else {
+        $access[$request_id] = FALSE;
+        return FALSE;
+      }
+    }
+
     $cancellable_status_normal = array(
       MFCS_EVENT_STATUS_UNLOCKED,
     );
@@ -1052,7 +643,10 @@ function mfcs_management_page_request_access($operation = NULL, $request_id = NU
 
       $result = $query->execute()->fetchField();
 
-      if ($result > 0) return TRUE;
+      if ($result > 0) {
+        $access[$request_id] = TRUE;
+        return TRUE;
+      }
     }
     catch (Exception $ex) {
       cf_error::on_exception($ex);
@@ -1081,7 +675,10 @@ function mfcs_management_page_request_access($operation = NULL, $request_id = NU
 
         $result = $query->execute()->fetchField();
 
-        if ($result > 0) return TRUE;
+        if ($result > 0) {
+          $access[$request_id] = TRUE;
+          return TRUE;
+        }
       }
       catch (Exception $ex) {
         cf_error::on_exception($ex);
@@ -1090,6 +687,17 @@ function mfcs_management_page_request_access($operation = NULL, $request_id = NU
     }
   }
   elseif ($operation == 'uncancel') {
+    if (is_null($request_id)) {
+      if ($requester || $reviewer || $manager) {
+        $access[$request_id] = TRUE;
+        return TRUE;
+      }
+      else {
+        $access[$request_id] = FALSE;
+        return FALSE;
+      }
+    }
+
     $uncancellable_status = array(
       MFCS_EVENT_STATUS_CANCELLED,
     );
@@ -1113,7 +721,10 @@ function mfcs_management_page_request_access($operation = NULL, $request_id = NU
 
       $result = $query->execute()->fetchField();
 
-      if ($result > 0) return TRUE;
+      if ($result > 0) {
+        $access[$request_id] = TRUE;
+        return TRUE;
+      }
     }
     catch (Exception $ex) {
       cf_error::on_exception($ex);
@@ -1135,7 +746,10 @@ function mfcs_management_page_request_access($operation = NULL, $request_id = NU
 
         $result = $query->execute()->fetchField();
 
-        if ($result > 0) return TRUE;
+        if ($result > 0) {
+          $access[$request_id] = TRUE;
+          return TRUE;
+        }
       }
       catch (Exception $ex) {
         cf_error::on_exception($ex);
@@ -1146,17 +760,46 @@ function mfcs_management_page_request_access($operation = NULL, $request_id = NU
   }
   elseif ($operation == 'history') {
     if ($manager) {
-      return TRUE;
+      if (is_null($request_id)) {
+        $access[$request_id] = TRUE;
+        return TRUE;
+      }
+
+      try {
+        $query = db_select('mfcs_requests', 'mer');
+
+        $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
+        $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
+
+        // $query->countQuery() does not appear to be functioning as expected, so manually count.
+        $query->addExpression('count(mer.id)');
+
+        $query->condition('mer.id', $request_id);
+        $query->condition('mfts.value', MFCS_EVENT_STATUS_DELETED, '<>');
+
+        $result = $query->execute()->fetchField();
+
+        if ($result > 0) {
+          $access[$request_id] = TRUE;
+          return TRUE;
+        }
+      }
+      catch (Exception $ex) {
+        cf_error::on_exception($ex);
+
+        return FALSE;
+      }
     }
   }
   elseif ($operation == 'agreement') {
-    if (!$manager && !$requester && !$reviewer) {
+    if (!$requester && !$reviewer && !$manager) {
+      $access[$request_id] = FALSE;
       return FALSE;
     }
 
-    // Agreement functionality requires an request.
     if (is_null($request_id)) {
-      return FALSE;
+      $access[$request_id] = TRUE;
+      return TRUE;
     }
 
     $agreement_request_status = array(
@@ -1194,14 +837,349 @@ function mfcs_management_page_request_access($operation = NULL, $request_id = NU
       $query->condition('mfts.value', $agreement_request_status, 'IN');
       $query->condition('mftsp.value', $agreement_request_step, 'IN');
 
+      // the submitter should be the only non-manager/non-reviewer that can access the agreement.
+      if (!$manager && !$reviewer) {
+        $query->condition('mer.user_id', $user->uid);
+      }
+
       $result = $query->execute()->fetchField();
 
-      if ($result > 0) return TRUE;
+      if ($result > 0) {
+        $access[$request_id] = TRUE;
+        return TRUE;
+      }
     }
     catch (Exception $ex) {
       cf_error::on_exception($ex);
 
       return FALSE;
+    }
+  }
+
+  $access[$request_id] = FALSE;
+  return FALSE;
+}
+
+/**
+ * Check access for already loaded facilities use requests.
+ *
+ * This is used to reduce database calls for when a request is already loaded.
+ * If the request has not yet been loaded, either load it or directly call
+ * mfcs_page_request_access() for access checks.
+ *
+ * This static caches the results in 'mfcs_request_access'.
+ *
+ * @param string $operation
+ *   Operation to perform access check against.
+ * @param array $request
+ *   An already loaded request array to perform access checks against.
+ * @param object $user
+ *   (optional) The user object to obtain access for.
+ * @param string $section
+ *   (optional) Check whether or not the user is allowed to perform a certain
+ *   operation for a specific section. This is primarily used for the edit
+ *   pages.
+ *
+ * @param bool
+ *   TRUE on access granted, FALSE otherwise.
+ *
+ * @see: mfcs_page_request_access()
+ */
+function mfcs_request_access($operation, $request, $user = NULL, $section = NULL) {
+  if (!is_string($operation)) {
+    cf_error::invalid_string('operation');
+    return FALSE;
+  }
+
+  if (!is_array($request)) {
+    cf_error::invalid_array('request');
+    return FALSE;
+  }
+
+  if (is_null($user) || !is_object($user)) {
+    $user = cf_current_user();
+  }
+
+  // anonymous user is denied access to requests as a whole.
+  if ($user->uid == 0) {
+    return FALSE;
+  }
+
+
+  // use advanced static cache for increased performance.
+  static $mfcs_request_access;
+
+  if (!isset($mfcs_request_access)) {
+    $mfcs_request_access[$operation] = &drupal_static('mfcs_request_access');
+  }
+
+  if (!isset($mfcs_request_access[$operation][$section][$user->uid])) {
+    $mfcs_request_access[$operation][$section][$user->uid] = array();
+  }
+
+  $access = &$mfcs_request_access[$operation][$section][$user->uid];
+
+  if (empty($request['mer']['id'][0]->value)) {
+    return FALSE;
+  }
+  $request_id = $request['mer']['id'][0]->value;
+
+  if (array_key_exists($request_id, $access)) {
+    return $access[$request_id];
+  }
+
+  if (!isset($request['top']['status'][0]->value) || !isset($request['top']['step'][0]->value)) {
+    $access[$request_id] = FALSE;
+    return FALSE;
+  }
+
+
+  $request_status = array(
+    MFCS_EVENT_STATUS_LOCKED,
+    MFCS_EVENT_STATUS_UNLOCKED,
+    MFCS_EVENT_STATUS_CLOSED_ACCEPTED,
+    MFCS_EVENT_STATUS_CLOSED_DENIED,
+    MFCS_EVENT_STATUS_CLOSED_UNAVAILABLE,
+    MFCS_EVENT_STATUS_CLOSED_DUE_TO_LOCK,
+    MFCS_EVENT_STATUS_CANCELLED,
+  );
+
+  $manager = user_access('mfcs manage', $user);
+  $reviewer = user_access('mfcs review', $user);
+  $requester = user_access('mfcs request', $user);
+
+  if ($operation == 'create') {
+    if ($request['top']['status'][0]->value == MFCS_EVENT_STATUS_DELETED) {
+      $access[$request_id] = FALSE;
+      return FALSE;
+    }
+
+    // create operations on a specific request is actually a clone/copy operation.
+    // treat this as a view operation.
+    $access[$request_id] = mfcs_request_access('view', $request, $user);
+    return $access[$request_id];
+  }
+  elseif ($operation == 'edit') {
+    if ($request['top']['status'][0]->value == MFCS_EVENT_STATUS_DELETED) {
+      $access[$request_id] = FALSE;
+      return FALSE;
+    }
+
+    $edit_request_status = array(
+      MFCS_EVENT_STATUS_UNLOCKED,
+      MFCS_EVENT_STATUS_LOCKED,
+    );
+
+    // when quick meeting is enabled, a section is not null, then additional checks are required.
+    $is_quick_meeting = FALSE;
+    if (!is_null($request_id) && !is_null($section) && ($manager || $requester)) {
+      if (isset($request['information']['type'][0]->value) && $request['information']['type'][0]->value == MFCS_REQUEST_TYPE_QUICK_MEETING) {
+        $is_quick_meeting = TRUE;
+
+        // deny access to sections that are not allowed to be edited for a quick meeting.
+        $allowed_sections = array(
+          'request',
+          'information',
+          'coordinator',
+          'dates',
+        );
+
+        if (!in_array($section, $allowed_sections)) {
+          return FALSE;
+        }
+      }
+    }
+
+    $valid_status = in_array($request['top']['status'][0]->value, $edit_request_status);
+
+    if ($manager) {
+      $access[$request_id] = $valid_status;
+      return $valid_status;
+    }
+    elseif ($requester) {
+      if ($valid_status) {
+        if (isset($request['mer']['user_id'][0]->value) && $request['mer']['user_id'][0]->value == $user->uid) {
+          $access[$request_id] = TRUE;
+          return TRUE;
+        }
+      }
+    }
+  }
+  elseif ($operation == 'view') {
+    if ($request['top']['status'][0]->value == MFCS_EVENT_STATUS_DELETED) {
+      $access[$request_id] = FALSE;
+      return FALSE;
+    }
+
+    if ($manager) {
+      $access[$request_id] = TRUE;
+      return TRUE;
+    }
+    elseif ($reviewer) {
+      // due to its complexity, the database calling function for reviewer access will be used (@todo: implement a non-db version.).
+      $access[$request_id] = mfcs_page_request_reviewer_access($user, $request_id, NULL);
+      return $access[$request_id];
+    }
+    elseif ($requester) {
+      if ($request['top']['status'][0]->value == MFCS_EVENT_STATUS_CLOSED_ACCEPTED && $request['top']['step'][0]->value == MFCS_REVIEW_STEP_COMPLETED) {
+        // always show completed and accepted requests when there are no restrictions
+        $access[$request_id] = TRUE;
+        return TRUE;
+      }
+      elseif (in_array($request['top']['status'][0]->value, $request_status)) {
+        $access[$request_id] = TRUE;
+        return TRUE;
+      }
+    }
+  }
+  elseif ($operation == 'review') {
+    if ($request['top']['status'][0]->value == MFCS_EVENT_STATUS_DELETED) {
+      $access[$request_id] = FALSE;
+      return FALSE;
+    }
+
+    // due to its complexity, the database calling function for reviewer access will be used (@todo: implement a non-db version.).
+    $access[$request_id] = mfcs_page_request_reviewer_access($user, $request_id, TRUE);
+    return $access[$request_id];
+  }
+  elseif ($operation == 'comment') {
+    if ($request['top']['status'][0]->value == MFCS_EVENT_STATUS_DELETED) {
+      $access[$request_id] = FALSE;
+      return FALSE;
+    }
+
+    // @todo: currently disabled feature. Enable if such functionality is requested.
+    $access[$request_id] = FALSE;
+    return FALSE;
+  }
+  elseif ($operation == 'log') {
+    if ($request['top']['status'][0]->value == MFCS_EVENT_STATUS_DELETED) {
+      $access[$request_id] = FALSE;
+      return FALSE;
+    }
+
+    if ($manager) {
+      $access[$request_id] = TRUE;
+      return TRUE;
+    }
+    elseif ($reviewer) {
+      // due to its complexity, the database calling function for reviewer access will be used (@todo: implement a non-db version.).
+      $access[$request_id] = mfcs_page_request_reviewer_access($user, $request_id, NULL);
+      return $access[$request_id];
+    }
+  }
+  elseif ($operation == 'delete') {
+    if ($request['top']['status'][0]->value == MFCS_EVENT_STATUS_DELETED) {
+      $access[$request_id] = FALSE;
+      return FALSE;
+    }
+
+    if ($manager) {
+      $access[$request_id] = TRUE;
+      return TRUE;
+    }
+  }
+  elseif ($operation == 'cancel') {
+    if ($request['top']['status'][0]->value == MFCS_EVENT_STATUS_DELETED) {
+      $access[$request_id] = FALSE;
+      return FALSE;
+    }
+
+    $cancellable_status_normal = array(
+      MFCS_EVENT_STATUS_UNLOCKED,
+    );
+
+    $cancellable_status_admin = array(
+      MFCS_EVENT_STATUS_LOCKED,
+      MFCS_EVENT_STATUS_UNLOCKED,
+    );
+
+    // if the user is the venue coordinator, then allow them to cancel an request at any point in the process.
+    if ($request['venue_coordinator']['user_id'][0]->value == $user->uid && in_array($request['top']['status'][0]->value, $cancellable_status_admin)) {
+      $access[$request_id] = TRUE;
+      return TRUE;
+    }
+
+    if ($manager) {
+      if (in_array($request['top']['status'][0]->value, $cancellable_status_admin)) {
+        $access[$request_id] = TRUE;
+        return TRUE;
+      }
+    }
+    elseif ($requester) {
+      if ($request['mer']['user_id'][0]->value == $user->uid && in_array($request['top']['status'][0]->value, $cancellable_status_normal)) {
+        $access[$request_id] = TRUE;
+        return TRUE;
+      }
+    }
+  }
+  elseif ($operation == 'uncancel') {
+    if ($request['top']['status'][0]->value == MFCS_EVENT_STATUS_DELETED) {
+      $access[$request_id] = FALSE;
+      return FALSE;
+    }
+
+    $uncancellable_status = array(
+      MFCS_EVENT_STATUS_CANCELLED,
+    );
+
+    // if the user is the venue coordinator, then allow them to uncancel an request at any point in the process.
+    if ($request['venue_coordinator']['user_id'][0]->value == $user->uid && in_array($request['top']['status'][0]->value, $uncancellable_status)) {
+      $access[$request_id] = TRUE;
+      return TRUE;
+    }
+
+    if ($manager) {
+      if (in_array($request['top']['status'][0]->value, $uncancellable_status)) {
+        $access[$request_id] = TRUE;
+        return TRUE;
+      }
+    }
+  }
+  elseif ($operation == 'history') {
+    if ($manager) {
+      $access[$request_id] = TRUE;
+      return TRUE;
+    }
+  }
+  elseif ($operation == 'agreement') {
+    if ($request['top']['status'][0]->value == MFCS_EVENT_STATUS_DELETED) {
+      $access[$request_id] = FALSE;
+      return FALSE;
+    }
+
+    $agreement_request_status = array(
+      MFCS_EVENT_STATUS_LOCKED,
+      MFCS_EVENT_STATUS_CLOSED_ACCEPTED,
+      MFCS_EVENT_STATUS_CLOSED_DENIED,
+      MFCS_EVENT_STATUS_CANCELLED,
+    );
+
+    if ($manager || $reviewer) {
+      $agreement_request_step = array(
+        MFCS_REVIEW_STEP_COMPLETED,
+        MFCS_REVIEW_STEP_MAKE_DECISIONS,
+        MFCS_REVIEW_STEP_REVIEW,
+        MFCS_REVIEW_STEP_REQUIREMENTS,
+      );
+
+      if (in_array($request['top']['status'][0]->value, $agreement_request_status) && in_array($request['top']['step'][0]->value, $agreement_request_step)) {
+        $access[$request_id] = TRUE;
+        return TRUE;
+      }
+    }
+    else {
+      $agreement_request_step = array(
+        MFCS_REVIEW_STEP_COMPLETED,
+      );
+
+      if (in_array($request['top']['status'][0]->value, $agreement_request_status) && in_array($request['top']['step'][0]->value, $agreement_request_step)) {
+        // the submitter should be the only non-manager/non-reviewer that can access the agreement.
+        if ($request['mer']['user_id'][0]->value == $user->uid) {
+          $access[$request_id] = TRUE;
+          return TRUE;
+        }
+      }
     }
   }
 
@@ -1223,7 +1201,7 @@ function mfcs_management_page_request_access($operation = NULL, $request_id = NU
  * @return bool
  *   TRUE on access granted, FALSE otherwise.
  */
-function mfcs_management_page_request_reviewer_access($user, $request_id, $review_restrictions) {
+function mfcs_page_request_reviewer_access($user, $request_id, $review_restrictions) {
   if (!is_object($user)) {
     cf_error::invalid_object('user');
     return FALSE;
@@ -1253,8 +1231,8 @@ function mfcs_management_page_request_reviewer_access($user, $request_id, $revie
     $query->condition('mfts.value', MFCS_EVENT_STATUS_DELETED, '<>');
     $query->condition('mfts.request_id', $request_id);
 
-    $query->innerjoin('mfcs_current_request_coordinator', 'mcec', 'mer.id = mcec.request_id');
-    $query->innerjoin('mfcs_field_request_coordinator_classification', 'mfecc', 'mcec.request_id = mfecc.request_id AND mcec.classification = mfecc.revision AND mfecc.delta = 0');
+    $query->innerjoin('mfcs_current_request_coordinator', 'mcrc', 'mer.id = mcrc.request_id');
+    $query->innerjoin('mfcs_field_request_coordinator_classification', 'mfrcc', 'mcrc.request_id = mfrcc.request_id AND mcrc.classification = mfrcc.revision AND mfrcc.delta = 0');
 
     $query->innerjoin('mfcs_current_venue_coordinator', 'mcvc', 'mer.id = mcvc.request_id');
     $query->innerjoin('mfcs_field_venue_coordinator_user_id', 'mfvcui', 'mcvc.request_id = mfvcui.request_id AND mcvc.user_id = mfvcui.revision AND mfvcui.delta = 0');
@@ -1341,7 +1319,7 @@ function mfcs_management_page_request_reviewer_access($user, $request_id, $revie
 
       $can_review_query->addfield('c_mr_2', 'user_id', 'user_id');
 
-      $can_review_query->where('c_mr_2.request_classification = mfecc.value AND c_mr_2.review_step = mftsp.value');
+      $can_review_query->where('c_mr_2.request_classification = mfrcc.value AND c_mr_2.review_step = mftsp.value');
       $can_review_query->condition('c_mr_2.user_id', $user->uid);
       $can_review_query->condition('c_mr_2.review_step', $show_step, 'IN');
       $can_review_query->condition('c_mr_2.disabled', 0);
@@ -1374,7 +1352,7 @@ function mfcs_management_page_request_reviewer_access($user, $request_id, $revie
 
       $can_review_query->addfield('c_mr_2', 'user_id', 'user_id');
 
-      $can_review_query->where('c_mr_2.request_classification = mfecc.value AND c_mr_2.review_step = mftsp.value');
+      $can_review_query->where('c_mr_2.request_classification = mfrcc.value AND c_mr_2.review_step = mftsp.value');
       $can_review_query->condition('c_mr_2.user_id', $user->uid);
       $can_review_query->condition('c_mr_2.review_step', $show_step, 'IN');
       $can_review_query->condition('c_mr_2.disabled', 0);
@@ -1395,7 +1373,7 @@ function mfcs_management_page_request_reviewer_access($user, $request_id, $revie
 
       $can_review_query->addfield('c_mr_2', 'user_id', 'user_id');
 
-      $can_review_query->where('c_mr_2.request_classification = mfecc.value');
+      $can_review_query->where('c_mr_2.request_classification = mfrcc.value');
       $can_review_query->condition('c_mr_2.user_id', $user->uid);
       $can_review_query->condition('c_mr_2.disabled', 0);
       $can_review_query->distinct();
@@ -1420,16 +1398,31 @@ function mfcs_management_page_request_reviewer_access($user, $request_id, $revie
         MFCS_EVENT_STATUS_CLOSED_ACCEPTED,
       );
 
-      $query->innerjoin('mfcs_current_insurance', 'mci', 'mer.id = mci.request_id');
-      $query->innerjoin('mfcs_field_insurance_contractor', 'mfic', 'mci.request_id = mfic.request_id AND mci.contractor = mfic.revision AND mfic.delta = 0');
-      $query->innerjoin('mfcs_field_insurance_unaffiliated', 'mfiu', 'mci.request_id = mfiu.request_id AND mci.unaffiliated = mfiu.revision AND mfiu.delta = 0');
-      $query->innerjoin('mfcs_field_insurance_provided', 'mfip', 'mci.request_id = mfip.request_id AND mci.provided = mfip.revision AND mfip.delta = 0');
+      $has_insurance_query = db_select('mfcs_current_insurance', 'c_mci_1');
+      $has_insurance_query->leftJoin('mfcs_field_insurance_contractor', 'mfic', 'c_mci_1.request_id = mfic.request_id AND c_mci_1.contractor = mfic.revision AND mfic.delta = 0');
+      $has_insurance_query->leftJoin('mfcs_field_insurance_unaffiliated', 'mfiu', 'c_mci_1.request_id = mfiu.request_id AND c_mci_1.unaffiliated = mfiu.revision AND mfiu.delta = 0');
+      $has_insurance_query->leftJoin('mfcs_field_insurance_provided', 'mfip', 'c_mci_1.request_id = mfip.request_id AND c_mci_1.provided = mfip.revision AND mfip.delta = 0');
+
+      // $query->countQuery() does not appear to be functioning as expected, so manually count.
+      $has_insurance_query->addExpression('count(c_mci_1.request_id)');
+
+      $has_insurance_query->where('mer.id = c_mci_1.request_id');
+
+      $nand = db_and();
+      $nand->not();
+      $nand->condition('mfip.value', 1);
+      $has_insurance_query->condition($nand);
+
+      $another_or = db_or();
+      $another_or->condition('mfic.value', 1);
+      $another_or->condition('mfiu.value', 1);
+      $has_insurance_query->condition($another_or);
 
       $can_review_query = db_select('mfcs_reviewers', 'c_mr_3');
 
       $can_review_query->addfield('c_mr_3', 'user_id', 'user_id');
 
-      $can_review_query->where('c_mr_3.request_classification = mfecc.value');
+      $can_review_query->where('c_mr_3.request_classification = mfrcc.value');
       $can_review_query->condition('c_mr_3.user_id', $user->uid);
       $can_review_query->condition('c_mr_3.review_step', $show_step, 'IN');
       $can_review_query->condition('c_mr_3.reviewer_classification', MFCS_REVIEW_CLASSIFICATION_PURCHASING);
@@ -1440,16 +1433,7 @@ function mfcs_management_page_request_reviewer_access($user, $request_id, $revie
       $and->condition('mfts.value', $show_status_insurance, 'IN');
       $and->condition('mftsp.value', $show_step_insurance, 'IN');
       $and->condition($user->uid, $can_review_query, 'IN');
-
-      $nand = db_and();
-      $nand->not();
-      $nand->condition('mfip.value', 1);
-      $and->condition($nand);
-
-      $another_or = db_or();
-      $another_or->condition('mfic.value', 1);
-      $another_or->condition('mfiu.value', 1);
-      $and->condition($another_or);
+      $and->condition(0, $has_insurance_query, 'NOT IN');
 
       if (is_null($or)) {
         $or = db_or();
@@ -1494,16 +1478,9 @@ function mfcs_management_page_access() {
  * Implements hook_cronapi().
  */
 function mfcs_cronapi() {
-  $items = array();
+  mfcs_include(7);
 
-  $items['mfcs_oracle_recache'] = array(
-    'title' => t("Recreate Oracle Cache"),
-    'callback' => 'mfcs_oracle_recache_cron',
-    'callback arguments' => array(),
-    'enabled' => FALSE,
-  );
-
-  return $items;
+  return mfcs_hook_cronapi();
 }
 
 /**
@@ -1569,6 +1546,29 @@ function mfcs_mail($key, &$message, $params) {
   $message['markup'] = isset($params['markup']) ? array($markup) : array();
   $message['files'] = $files;
   $message['from_address'] = isset($params['from']) ? $params['from'] : $message['from'];
+
+  // assign message priority.
+  if (isset($params['message_priority'])) {
+    if ($params['message_priority'] == MFCS_MAIL_PRIORITY_HIGHEST) {
+      $message['headers']['X-Priority'] = '1 (Highest)';
+      $message['headers']['Importance'] = 'high';
+    }
+    elseif ($params['message_priority'] == MFCS_MAIL_PRIORITY_HIGH) {
+      $message['headers']['X-Priority'] = '2 (High)';
+      $message['headers']['Importance'] = 'high';
+    }
+    elseif ($params['message_priority'] == MFCS_MAIL_PRIORITY_NORMAL) {
+      // @todo: should low be manually specified, such as: 3 (normal) ?
+    }
+    elseif ($params['message_priority'] == MFCS_MAIL_PRIORITY_LOW) {
+      $message['headers']['X-Priority'] = '4 (Low)';
+      $message['headers']['Importance'] = 'low';
+    }
+    elseif ($params['message_priority'] == MFCS_MAIL_PRIORITY_LOWEST) {
+      $message['headers']['X-Priority'] = '5 (Lowest)';
+      $message['headers']['Importance'] = 'low';
+    }
+  }
 }
 
 /**
@@ -1605,6 +1605,12 @@ function mfcs_include($id) {
   }
   elseif ($id == 6) {
     require_once($module_path . '/includes/workflow.inc');
+  }
+  elseif ($id == 7) {
+    require_once($module_path . '/includes/hooks.inc');
+  }
+  elseif ($id == 8) {
+    require_once($module_path . '/includes/output.inc');
   }
 }
 
@@ -1958,34 +1964,18 @@ function mfcs_load_rooms($location = NULL, $building = NULL, $room = NULL, $disa
  *   FALSE is returned on error.
  */
 function mfcs_load_request_user_roles() {
-  $cache_id = __function__;
-  $roles = &drupal_static($cache_id, NULL);
-  if (is_array($roles)) {
-    return $roles;
-  }
+  try {
+    $query = db_select('mfcs_banner_event_roles', 'mber');
+    $query->addField('mber', 'machine_name', 'role');
 
-  if ($cache = cache_get($cache_id)){
-    return $cache->data;
-  }
+    $roles = $query->execute()->fetchAll();
+  } catch (Exception $ex) {
+    $transaction->rollback();
 
-  $columns = array();
-  $rows = (array) mfcs_oracle_select('select distinct role from ucs.msu_event_role');
-
-  // strip out redundant rows provided by oracle.
-  foreach ($rows as $row) {
-    if (is_array($row)) {
-      foreach ($row as $key => $value) {
-        // oracle returns duplicate/redundant data in numeric rows.
-        if (is_numeric($key)) continue;
-
-        $roles[] = $value;
-      }
-    }
+    return FALSE;
   }
 
   if (empty($roles)) return FALSE;
-
-  cache_set($cache_id, $roles, 'cache', CACHE_PERMANENT);
 
   return $roles;
 }
@@ -2059,43 +2049,47 @@ function mfcs_load_request_user_role_mapping() {
  *   FALSE is returned on error.
  */
 function mfcs_load_request_user($banner_id) {
-  $cache_id = __function__;
-  $user = &drupal_static($cache_id, NULL);
-  if (is_array($user)) {
-    return $user;
-  }
-
   if (!is_string($banner_id)) {
     cf_error::invalid_string('banner_id');
 
     return FALSE;
   }
 
-  $user = array();
-  $rows = (array) mfcs_oracle_select('select * from ucs.msu_event_role where id = :banner_id', array('banner_id' => $banner_id));
-
-  // strip out redundant rows provided by oracle.
-  foreach ($rows as $row) {
-    foreach ($row as $key => $value) {
-      // oracle returns duplicate/redundant data in numeric rows.
-      if (is_numeric($key)) continue;
-
-      if ($key == 'role') {
-        if (!array_key_exists('role', $user)) {
-          $user['role'] = array();
-        }
-
-        $user['role'][] = $value;
-      }
-      else {
-        $user[$key] = $value;
-      }
-    }
+  $cache_id = __function__;
+  $user = &drupal_static($cache_id, NULL);
+  if (isset($user[$banner_id]) && is_array($user[$banner_id])) {
+    return $user[$banner_id];
   }
 
-  if (empty($user)) return FALSE;
+  $user[$banner_id] = NULL;
 
-  return $user;
+  try {
+    $query = db_select('mfcs_banner_event_roles_to_users', 'mberu');
+    $query->innerJoin('mfcs_banner_event_roles', 'mber', 'mber.id = mberu.event_role_id');
+    $query->addField('mber', 'machine_name', 'role');
+    $query->condition('mberu.banner_id', $banner_id);
+
+    $rows = $query->execute()->fetchAll();
+
+    if (!empty($rows)) {
+      $user[$banner_id] = array(
+        'id' => $banner_id,
+        'role' => array(),
+      );
+
+      foreach ($rows as $row) {
+        $user[$banner_id]['role'][] = $row->role;
+      }
+    }
+  } catch (Exception $ex) {
+    cf_error::on_exception($ex);
+
+    return FALSE;
+  }
+
+  if (is_null($user[$banner_id])) return FALSE;
+
+  return $user[$banner_id];
 }
 
 /**
@@ -2207,7 +2201,6 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array()) {
     $u = mfcs_load_request_user($user->field_user_banner_id['und'][0]['value']);
 
     if ($u == FALSE) {
-      // @todo: throw watchdog error?
       $u = array();
     }
 
@@ -2390,27 +2383,6 @@ function mfcs_ensure_user_by_email($email, $roles = array()) {
 }
 
 /**
- * Manually trigger cache save or cache reset.
- *
- * The purpose of this is to provide a way to cache all database information.
- * The oracle database at McNeese has scheduled downtime.
- * This system is supposed to operate even when the database is down.
- * Therefore, caching is necessary and needs to be performed prior to downtime.
- *
- * @param bool $save
- *   (optional) When TRUE, caches are saved.
- *   When FALSE, caches are purged.
- */
-function mfcs_force_cache($save = TRUE) {
-  // reset is performed in both cases to ensure that the cache is fresh.
-  cache_clear_all('mfcs_load_request_user_roles', 'cache');
-
-  if ($save) {
-    mfcs_sync_banner_to_local();
-  }
-}
-
-/**
  * Synchronizes the local database with the banner venue information.
  *
  * @return bool
@@ -2425,12 +2397,9 @@ function mfcs_sync_banner_to_local() {
 
   $rows = mfcs_oracle_select('select ' . $select . ' from ucs.msu_venue_detail mvd' . $join);
 
-  // determine columns names by selecting the first
-  if (empty($rows)) {
+  if (empty($rows) || !is_array($rows)) {
     return FALSE;
   }
-
-  $row = array_pop($rows);
 
   mfcs_include(4);
   $request_locations = mfcs_get_request_location_list_options(NULL, TRUE);
@@ -2438,23 +2407,25 @@ function mfcs_sync_banner_to_local() {
   $transaction = db_transaction();
   try {
     // disable all locations, buildings, and rooms such that the ones that are not added back will be disabled.
-    if (is_array($rows) && !empty(($rows))) {
-      $query = db_update('mfcs_banner_locations');
-      $query->fields(array('disabled' => 1));
-      $query->execute();
+    $query = db_update('mfcs_banner_locations');
+    $query->fields(array('disabled' => 1, 'date' => REQUEST_TIME));
+    $query->condition('disabled', 0);
+    $query->execute();
 
-      $query = db_update('mfcs_banner_buildings');
-      $query->fields(array('disabled' => 1));
-      $query->execute();
+    $query = db_update('mfcs_banner_buildings');
+    $query->fields(array('disabled' => 1, 'date' => REQUEST_TIME));
+    $query->condition('disabled', 0);
+    $query->execute();
 
-      $query = db_update('mfcs_banner_rooms');
-      $query->fields(array('disabled' => 1));
-      $query->execute();
+    $query = db_update('mfcs_banner_rooms');
+    $query->fields(array('disabled' => 1, 'date' => REQUEST_TIME));
+    $query->condition('disabled', 0);
+    $query->execute();
 
-      $query = db_update('mfcs_banner_building_to_location');
-      $query->fields(array('disabled' => 1));
-      $query->execute();
-    }
+    $query = db_update('mfcs_banner_building_to_location');
+    $query->fields(array('disabled' => 1, 'date' => REQUEST_TIME));
+    $query->condition('disabled', 0);
+    $query->execute();
 
     foreach ($rows as $row) {
       $location_item = array();
@@ -2539,7 +2510,7 @@ function mfcs_sync_banner_to_local() {
         }
 
         if (!is_object($room_coordinator) && !empty($coordinator_venue_item['email'])) {
-          $room_coordinator = mfcs_ensure_user_by_email($coordinator_venue_item['email'], array('reviewer'));
+          $room_coordinator = mfcs_ensure_user_by_email($coordinator_venue_item['email'], array('reviewer', 'requester'));
         }
 
         if (is_object($room_coordinator)) {
@@ -2555,6 +2526,7 @@ function mfcs_sync_banner_to_local() {
         $query->condition('mbl.machine_name', $location_item['machine_name']);
 
         $location_id = $query->execute()->fetchField();
+        $location_item['date'] = REQUEST_TIME;
 
         if ($location_id > 0) {
           $query = db_update('mfcs_banner_locations');
@@ -2574,6 +2546,7 @@ function mfcs_sync_banner_to_local() {
         $query->condition('mbb.machine_name', $building_item['machine_name']);
 
         $building_id = $query->execute()->fetchField();
+        $building_item['date'] = REQUEST_TIME;
 
         if ($building_id > 0) {
           $query = db_update('mfcs_banner_buildings');
@@ -2588,6 +2561,7 @@ function mfcs_sync_banner_to_local() {
         }
 
         $room_item['building'] = $building_id;
+        $room_item['date'] = REQUEST_TIME;
 
         // add/update the room.
         $query = db_select('mfcs_banner_rooms', 'mbr');
@@ -2613,6 +2587,7 @@ function mfcs_sync_banner_to_local() {
         $location_to_building_item['location'] = $location_id;
         $location_to_building_item['building'] = $building_id;
         $location_to_building_item['disabled'] = 0;
+        $location_to_building_item['date'] = REQUEST_TIME;
 
         $query = db_select('mfcs_banner_building_to_location', 'mbbl');
         $query->addExpression('count(mbbl.building)');
@@ -2645,6 +2620,123 @@ function mfcs_sync_banner_to_local() {
     return FALSE;
   }
 
+
+  $rows = mfcs_oracle_select('select distinct role from ucs.msu_event_role');
+
+  if (!empty($rows) && is_array($rows)) {
+    $transaction = db_transaction();
+    try {
+      $query = db_update('mfcs_banner_event_roles');
+      $query->fields(array('disabled' => 1, 'date' => REQUEST_TIME));
+      $query->condition('disabled', 0);
+      $query->execute();
+
+      foreach ($rows as $row) {
+        if (!is_array($row)) {
+          continue;
+        }
+
+        foreach ($row as $key => $role) {
+          // oracle returns duplicate/redundant data in numeric rows.
+          if (is_numeric($key)) continue;
+
+          // add/update the role.
+          $mfcs_banner_event_roles_item['machine_name'] = $role;
+          $mfcs_banner_event_roles_item['disabled'] = 0;
+          $mfcs_banner_event_roles_item['date'] = REQUEST_TIME;
+
+          $query = db_select('mfcs_banner_event_roles', 'mber');
+          $query->addExpression('count(mber.id)');
+          $query->condition('mber.machine_name', $role);
+
+          $mfcs_banner_event_roles_count = $query->execute()->fetchField();
+
+          if ($mfcs_banner_event_roles_count > 0) {
+            $query = db_update('mfcs_banner_event_roles');
+            $query->fields($mfcs_banner_event_roles_item);
+            $query->condition('machine_name', $role);
+            $query->execute();
+          }
+          else {
+            $query = db_insert('mfcs_banner_event_roles');
+            $query->fields($mfcs_banner_event_roles_item);
+            $query->execute();
+          }
+        }
+      }
+
+      // enforce transaction execution
+      unset($transaction);
+    } catch (Exception $ex) {
+      $transaction->rollback();
+      cf_error::on_exception($ex);
+
+      return FALSE;
+    }
+  }
+
+  $rows = mfcs_oracle_select('select id, role from ucs.msu_event_role');
+
+  if (!empty($rows) && is_array($rows)) {
+    $transaction = db_transaction();
+    try {
+      $query = db_select('mfcs_banner_event_roles', 'mber');
+      $query->addField('mber', 'machine_name', 'role');
+      $query->addField('mber', 'id', 'id');
+
+      $roles_by_name = $query->execute()->fetchAllKeyed();
+
+      $query = db_update('mfcs_banner_event_roles_to_users');
+      $query->fields(array('disabled' => 1, 'date' => REQUEST_TIME));
+      $query->condition('disabled', 0);
+      $query->execute();
+
+      foreach ($rows as $row) {
+        if (!is_array($row)) {
+          continue;
+        }
+
+        if (!isset($roles_by_name[$row['role']])) {
+          continue;
+        }
+
+        // add/update the roles to users.
+        $mfcs_banner_event_roles_item['banner_id'] = $row['id'];
+        $mfcs_banner_event_roles_item['event_role_id'] = $roles_by_name[$row['role']];
+        $mfcs_banner_event_roles_item['disabled'] = 0;
+        $mfcs_banner_event_roles_item['date'] = REQUEST_TIME;
+
+        $query = db_select('mfcs_banner_event_roles_to_users', 'mberu');
+        $query->addExpression('count(mberu.banner_id)');
+        $query->condition('mberu.banner_id', $row['id']);
+        $query->condition('mberu.event_role_id', $roles_by_name[$row['role']]);
+
+        $mfcs_banner_event_roles_count = $query->execute()->fetchField();
+
+        if ($mfcs_banner_event_roles_count > 0) {
+          $query = db_update('mfcs_banner_event_roles_to_users');
+          $query->fields($mfcs_banner_event_roles_item);
+          $query->condition('banner_id', $row['id']);
+          $query->condition('event_role_id', $roles_by_name[$row['role']]);
+          $query->execute();
+        }
+        else {
+          $query = db_insert('mfcs_banner_event_roles_to_users');
+          $query->fields($mfcs_banner_event_roles_item);
+          $query->execute();
+        }
+      }
+
+      // enforce transaction execution
+      unset($transaction);
+    } catch (Exception $ex) {
+      $transaction->rollback();
+      cf_error::on_exception($ex);
+
+      return FALSE;
+    }
+  }
+
   return TRUE;
 }
 
@@ -2654,10 +2746,84 @@ function mfcs_sync_banner_to_local() {
  * This requires the ultimate_cron module to function.
  *
  * @see mfcs_cronapi()
- * @see mfcs_force_cache()
  */
 function mfcs_oracle_recache_cron() {
-  mfcs_force_cache();
+  mfcs_sync_banner_to_local();
+}
+
+/**
+ * Executes the cron queue to send out insurance not provided reminders.
+ *
+ * This requires the ultimate_cron module to function.
+ *
+ * @see mfcs_cronapi()
+ */
+function mfcs_insurance_not_provided_alert_cron() {
+  mfcs_include(6);
+
+  $system_user = user_load(1);
+
+  $parameters = array();
+  $parameters['changed_by'] = $system_user->uid;
+  $parameters['changed_type'] = 'system';
+  $parameters['reminder'] = TRUE;
+  $parameters['reminder_reason'] = 'insurance_provided';
+
+  $processed = array(
+    MFCS_REMINDER_INTERVAL_DAY_30 => array(),
+  );
+
+  $dates = mfcs_request_reminders_get_dates();
+
+  foreach ($processed as $interval => &$processed_values) {
+    if ($interval == MFCS_REMINDER_INTERVAL_DAY_30) {
+      $from = strtotime('+30 days', $dates['today']);
+      $to = strtotime('tomorrow', $from);
+
+      $parameters['message_priority'] = MFCS_MAIL_PRIORITY_HIGH;
+    }
+    else {
+      continue;
+    }
+
+    mfcs_clear_request_reminders(MFCS_REMINDER_TYPE_INSURANCE_NOT_PROVIDED);
+
+    $results = mfcs_get_requests_not_providing_insurance($from, $to);
+    if (!empty($results)) {
+      $sent = array();
+
+      foreach ($results as $result) {
+        if (array_key_exists($result->id, $processed_values)) {
+          continue;
+        }
+
+        $reminders = mfcs_get_request_reminders($dates, MFCS_REMINDER_TYPE_INSURANCE_NOT_PROVIDED, $interval, $result->id);
+
+        // if the reminder has already been sent, do not resend.
+        if (isset($reminders[$interval][$result->id])) {
+          continue;
+        }
+
+        $parameters['reminder_data'] = $result;
+        $parameters['reminder_data']->interval = $interval;
+        mfcs_send_workflow_emails($result->id, $parameters);
+
+        $sent[$result->id] = array(
+          'request_id' => $result->id,
+          'date' => $dates['today'],
+          'type' => MFCS_REMINDER_TYPE_INSURANCE_NOT_PROVIDED,
+          'interval' => $interval,
+        );
+
+        $processed_values[$result->id] = $result->id;
+        unset($parameters['reminder_data']);
+      }
+
+      foreach ($sent as $reminder) {
+        mfcs_save_request_reminders($reminder);
+      }
+    }
+  }
 }
 
 /**
@@ -2920,9 +3086,13 @@ function mfcs_build_request_value_structure($request_id, $field_group, $field_na
   }
 
   // define a prefix to append before the value.
-  $prefix = '';
+  $prefix_span_class = 'item-value-instance ';
+  $prefix_span_class .= 'item-value-instance-' . $field_group . ' ';
+  $prefix_span_class .= 'item-value-instance-' . $field_group . '-' . $field_name . ' ';
+  $prefix_span_class .= 'item-value-instance-' . $field_group . '-' . $field_name . '-' . $delta . ' ';
+  $prefix = '<span class="' . $prefix_span_class . '">';
   if (!empty($presentation['prefix'])) {
-    $prefix = $presentation['prefix'];
+    $prefix .= $presentation['prefix'];
   }
 
   if (isset($options['no_prefix']) && $options['no_prefix']) {
@@ -2934,6 +3104,7 @@ function mfcs_build_request_value_structure($request_id, $field_group, $field_na
   if (!empty($presentation['suffix'])) {
     $suffix = $presentation['suffix'];
   }
+  $suffix .= '</span>';
 
   if (isset($options['no_suffix']) && $options['no_suffix']) {
     $suffix = '';
@@ -3445,24 +3616,37 @@ function mfcs_convert_value_from_database_format($value, $method, $option = arra
  *
  * @param int $request_id
  *   The numeric request id.
- * @param bool $reset
+ * @param bool $reset_action
  *   (optional) If TRUE, the cache for the specified request is reset.
+ *   If FALSE, the cache is reset, but no request is loaded.
  *
  * @return array|bool
  *   An array of values associated with the request id.
  *   FALSE is returned on error.
  *   An empty array is returned when there is no request by that id.
+ *   TRUE is returned when $reset_action is FALSE because there will ne no
+ *   request to return.
  */
-function mfcs_load_request_by_id($request_id, $reset = FALSE) {
+function mfcs_load_request_by_id($request_id, $reset_action = NULL) {
   if (!cf_is_integer($request_id)) {
     cf_error::invalid_integer('request_id');
     return FALSE;
   }
 
+  if (!is_null($reset_action) && !is_bool($reset_action)) {
+    cf_error::invalid_bool('reset_action');
+    return FALSE;
+  }
+
   $cache_id = __function__;
   $cached_requests = &drupal_static($cache_id, NULL);
-  if (!$reset && is_array($cached_requests) && array_key_exists($request_id, $cached_requests)) {
+  if (is_null($reset_action) && is_array($cached_requests) && array_key_exists($request_id, $cached_requests)) {
     return $cached_requests[$request_id];
+  }
+
+  if ($reset_action === FALSE) {
+    unset($cached_requests[$request_id]);
+    return TRUE;
   }
 
   mfcs_include(0);
@@ -3578,6 +3762,11 @@ function mfcs_load_request_by_id($request_id, $reset = FALSE) {
     return FALSE;
   }
 
+  if (empty($request)) {
+    watchdog(MFCS_WATCHDOG_ID, "Unable to find request with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
+    return FALSE;
+  }
+
   $cached_requests[$request_id] = &$request;
 
   return $cached_requests[$request_id];
@@ -3644,15 +3833,15 @@ function mfcs_load_request_by_timestamp($request_id, $revision, $desired_fields 
 
   try {
     $query = db_select('mfcs_requests', 'mer');
-    $query->innerjoin('mfcs_request_revisions', 'merv', 'mer.id = merv.request_id');
+    $query->innerjoin('mfcs_request_revisions', 'mrv', 'mer.id = mrv.request_id');
 
     $query->fields('mer');
-    $query->addField('merv', 'revision', 'revision');
+    $query->addField('mrv', 'revision', 'revision');
 
     $query->condition('id', $request_id);
-    $query->condition('merv.date', $revision);
+    $query->condition('mrv.date', $revision);
 
-    $query->orderBy('merv.date');
+    $query->orderBy('mrv.date');
 
     $results = $query->execute()->fetchAll();
 
@@ -3772,10 +3961,10 @@ function mfcs_load_request_revision_number($request_id, $table_field_name = NULL
 
   if (is_null($table_field_name)) {
     try {
-      $query = db_select('mfcs_request_revisions', 'merv');
-      $query->addfield('merv', 'revision', 'revision');
-      $query->condition('merv.request_id', $request_id);
-      $query->orderBy('merv.revision', 'DESC');
+      $query = db_select('mfcs_request_revisions', 'mrv');
+      $query->addfield('mrv', 'revision', 'revision');
+      $query->condition('mrv.request_id', $request_id);
+      $query->orderBy('mrv.revision', 'DESC');
       $query->range(0, 1);
 
       $field = $query->execute()->fetchfield();
@@ -3936,13 +4125,13 @@ function mfcs_build_table_structure($structure, &$structure_tables, &$structure_
 
   if (array_key_exists('storage', $structure[$table_name][$field_name])) {
     if (!is_string($structure[$table_name][$field_name]['storage']) || empty($structure[$table_name][$field_name]['storage'])) {
-      // @todo: present a watchdog error message here.
+      watchdog(MFCS_WATCHDOG_ID, "Invalid storage structure specification for the field %field_name in the table %table_name. This must be a non-empty string.", array('%field_name' => $field_name, '%table_name' => $table_name), WATCHDOG_ERROR);
       return;
     }
 
     $storage_key = $structure[$table_name][$field_name]['storage'];
     if (!array_key_exists($storage_key, $structure[$table_name][$field_name]) || empty($structure[$table_name][$field_name][$storage_key])) {
-      // @todo: present a watchdog error message here.
+      watchdog(MFCS_WATCHDOG_ID, "The storage key %storage_key was not found in the structure specification for the field %field_name in the table %table_name. This must be a non-empty string.", array('%storage_key' => $storage_key, '%field_name' => $field_name, '%table_name' => $table_name), WATCHDOG_ERROR);
       return;
     }
 
@@ -4357,361 +4546,6 @@ function mfcs_display_room_unavailable_message() {
 }
 
 /**
- * Builds the request pdf and saves it to the local disk.
- *
- * @param int $request_id
- *   The Request ID.
- * @param int $mode
- *   (optional) The page mode used to determine which parts of a page are
- *   processed.
- * @param bool $local
- *   (optional) If TRUE, then the file is saved to the local disk.
- *   If FALSE, then the file is print to stdout.
- * @param int $type
- *   (optional) What the PDF represents, such as a request or an agreement.
- *
- * @return bool
- *   TRUE on success, FALSE otherwise.
- */
-function mfcs_generate_pdf($request_id, $mode = MFCS_VIEW_MODE_DISPLAY, $local = FALSE, $type = MFCS_PDF_TYPE_REQUEST) {
-  $request = mfcs_load_request_by_id($request_id);
-
-  if (empty($request)) {
-    watchdog(MFCS_WATCHDOG_ID, "Unable to find request with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
-    return FALSE;
-  }
-
-  $form = array();
-  $form_state = array();
-
-  $page = array();
-  $page['html'] = array(
-    '#type' => 'container',
-    '#attributes' => array(
-      'id' => 'mfcs-request-view-0-page',
-      'class' => array(
-        'mfcs-request-pdf-0',
-      ),
-    ),
-  );
-
-  $page['html']['content'] = array(mfcs_request_view_0_page($form, $form_state, $request_id, $mode, TRUE));
-  $renderred = drupal_render($page);
-  $html = drupal_render_page($renderred);
-
-  return mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $html, $local, array(), $type);
-}
-
-/**
- * Renders a PDF of a given request using the wkhtmltopdf library.
- *
- * @param int $request_id
- *   The unique identifier for an request.
- * @param bool $local
- *   (optional) If TRUE, then the file is saved to the local disk.
- *   If FALSE, then the file is print to stdout.
- * @param array $parameters
- *   (optional) Change the default behavior on how the page is generated.
- * @param int $type
- *   (optional) What the PDF represents, such as a request or an agreement.
- *
- * @return bool
- *   TRUE on success, FALSE otherwise.
- */
-function mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $html, $local = FALSE, $parameters = array(), $type = MFCS_PDF_TYPE_REQUEST) {
-  $request = mfcs_load_request_by_id($request_id);
-
-  if (empty($request)) {
-    watchdog(MFCS_WATCHDOG_ID, "Unable to find request with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
-    return FALSE;
-  }
-
-  if (!is_string($html)) {
-    cf_error::invalid_string('html');
-    return FALSE;
-  }
-
-  if (!is_bool($local)) {
-    cf_error::invalid_bool('local');
-    return FALSE;
-  }
-
-  if (!is_array($parameters)) {
-    cf_error::invalid_array('parameters');
-    return FALSE;
-  }
-
-  if (!cf_is_integer($type)) {
-    cf_error::invalid_integer('type');
-    return FALSE;
-  }
-
-  $library = libraries_load('phpwkhtmltopdf');
-  if ($library === FALSE || empty($library['loaded'])) {
-    return FALSE;
-  }
-
-  global $base_path;
-
-  // determine the number of directories in the base path so that they can be stripped out properly.
-  $base_path_count = count(explode('/', $base_path));
-  $css_path_0 = $base_path_count;
-  $css_path_1 = $base_path_count + 1;
-  $css_path_2 = $base_path_count + 2;
-  $css_path_3 = $base_path_count + 3;
-
-  // Reconstruct the HTML output.
-  $cf_dom = new cf_dom(TRUE, TRUE, TRUE, $html);
-
-  $meta_tags = $cf_dom->get_body()->getElementsByTagName('meta');
-  $style_tags = $cf_dom->get_body()->getElementsByTagName('style');
-  $link_tags = $cf_dom->get_body()->getElementsByTagName('link');
-  $title_tags = $cf_dom->get_body()->getElementsByTagName('title');
-  $main_tag = $cf_dom->get_dom()->getElementById('mcneese-content-main');
-
-  $head_markup = '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">';
-  $body_markup = '';
-  $css_markup = '';
-
-  // meta tags
-  foreach ($meta_tags as $tag) {
-    $head_markup .= $cf_dom->get_dom()->saveHTML($tag) . "\n";
-  }
-
-  // style tags
-  $head_markup = '';
-  foreach ($style_tags as $tag) {
-    // drupal generates css styles using @import, remove all of these.
-    $matched = array();
-    $matches = preg_match_all('/@import url\("([^"]*)/i', $tag->nodeValue, $matched);
-
-    $media = NULL;
-    if ($tag->hasAttribute('media')) {
-      $media = $tag->getAttribute('media');
-    }
-    if (empty($media)) {
-      $media = 'all';
-    }
-
-    if ($matches > 0) {
-      if ($media == 'all' || $media == 'print,embossed,tv' || $media == 'print') {
-        $match = array_pop($matched);
-
-        foreach ($match as $m) {
-          // skip past css uneeded css
-          if ($media == 'all') {
-            $parts = explode('/', $m);
-            if (!isset($parts[$css_path_1])) {
-              continue;
-            }
-            if ($parts[$css_path_0] == 'system') {
-            }
-
-            if (isset($parts[$css_path_2])) {
-              if ($parts[$css_path_2] == 'mcneese') {
-              }
-              elseif ($parts[$css_path_2] == 'mcneese_fcs') {
-              }
-              elseif ($parts[$css_path_2] == 'mfcs') {
-              }
-              else {
-                continue;
-              }
-            }
-          }
-
-          $fixed_path = preg_replace('/\?.*$/i', '', $m);
-          $parts = explode('/', $fixed_path);
-
-          $bpc = 2;
-          while ($bpc <= $base_path_count) {
-            array_shift($parts);
-            $bpc++;
-          }
-
-          $fixed_path = implode('/', $parts);
-          $content = drupal_load_stylesheet(DRUPAL_ROOT . '/' . $fixed_path);
-
-          if (!empty($content)) {
-            // mPDF does not properly support the > selector.
-            $css_markup .= preg_replace('@ > @i', ' ', $content);
-          }
-
-          unset($content);
-          unset($parts);
-          unset($fixed_path);
-        }
-      }
-    }
-    else {
-      $head_markup .= $cf_dom->get_dom()->saveHTML($tag) . "\n";
-    }
-  }
-
-  if (!empty($css_markup)) {
-    $head_markup .= '<style>' . $css_markup . '</style>';
-  }
-
-  // link tags
-  foreach ($link_tags as $tag) {
-    $head_markup .= $cf_dom->get_dom()->saveHTML($tag) . "\n";
-  }
-
-  // title tags
-  if (empty($parameters['page_title'])) {
-    $page_title = "Facilities Use Request: " . $request['information']['title'][0]->value;
-    $head_markup .= '<title>Request #' . $request_id . ': ' . $request['information']['title'][0]->value . '</title>';
-  }
-  else {
-    $page_title = $parameters['page_title'];
-    $head_markup .= '<title>' . $parameters['page_title'] . '</title>';
-  }
-
-  $body_markup .= $cf_dom->get_dom()->saveHTML($main_tag) . "\n";
-
-  $body_class = 'mcneese mcneese-pdf';
-  $cf = &drupal_static('cf_theme_get_variables', array());
-  if (isset($cf['markup_css']['body']['class'])) {
-    $body_class .= $cf['markup_css']['body']['class'];
-  }
-
-  if (!empty($parameters['body_class']) && is_array($parameters['body_class'])) {
-    $body_class .= ' ' . implode(' ', $parameters['body_class']);
-  }
-
-  $html = '';
-  $html = '<!DOCTYPE html>' . "\n";
-  $html .= '<html lang="en" dir="ltr">' . "\n";
-
-  $html .= '<head>' . $head_markup . '</head>';
-  $html .= '<body class="' . $body_class . '">';
-  $html .= '  <div id="mcneese-page" class="mcneese-page">';
-  $html .= '    <div id="mcneese-page-content" class="mcneese-content full" role="main">';
-  $html .= '    <header class="page-title html_tag-header">';
-  $html .= '      <hgroup class="html_tag-hgroup">';
-  $html .= '        <h1 class="page-title html_tag-heading" role="main">' . $page_title . '</h1>';
-  $html .= '      </hgroup>';
-  $html .= '    </header>';
-  $html .= '    ' . $body_markup;
-  $html .= '    </div>';
-  $html .= '  </div>';
-  $html .= '</body>';
-  $html .= '</html>' . "\n";
-
-  $wkpdf = new WkHtmlToPdf();
-
-  $wk_options = array();
-
-  $wk_options['binPath'] = '/usr/local/bin/wkhtmltopdf';
-  $wk_options['binName'] = 'wkhtmltopdf';
-
-  // when not ignored, the PDF does not get generated.
-  $wk_options['ignoreWarnings'] = TRUE;
-
-  $wrapper = file_stream_wrapper_get_instance_by_scheme('temporary');
-  if (is_object($wrapper)) {
-    $wk_options['tmp'] = $wrapper->getDirectoryPath();
-  }
-
-  // setup the default options
-  $wkpdf->setOptions($wk_options);
-
-  $wkpdf->addPage($html);
-
-  $filename = mfcs_build_filename($request_id, 0, $type);
-
-  if ($local) {
-    // save the file, locally.
-    $temporary_name = drupal_tempnam('temporary://', 'file');
-    $wkpdf->saveAs($temporary_name);
-
-    file_unmanaged_move($temporary_name, 'private://requests/local/' . $filename, FILE_EXISTS_REPLACE);
-  }
-  else {
-    // send to the browser
-    #$result = $wkpdf->send($filename, TRUE);
-
-    // send as a download
-    $result = $wkpdf->send($filename, FALSE);
-  }
-
-  if (!$result) {
-    watchdog(MFCS_WATCHDOG_ID, "Error occured while generating the PDF of request @id: @error", array('@id' => $request_id, '@error' => $wkpdf->getError()), WATCHDOG_ERROR);
-  }
-
-  return TRUE;
-}
-
-/**
- * Builds the PDF filename string for an request.
- *
- * @param int $request_id
- *   The Request ID.
- * @param int $mode
- *   (optional) Determines how the filename is generated:
- *   0 - use the local filename method.
- *   1 - use the BDM filename PDF.
- *   2 - use the BDM filename Meta.
- *   3 - use the Email filename marker.
- * @param int $type
- *   (optional) What the PDF represents, such as a request or an agreement.
- *
- * @return string|false
- *   The built filename string or FALSE on error.
- */
-function mfcs_build_filename($request_id, $mode = MFCS_VIEW_MODE_NORMAL, $type = MFCS_PDF_TYPE_REQUEST) {
-  $request = mfcs_load_request_by_id($request_id);
-
-  if (empty($request)) {
-    watchdog(MFCS_WATCHDOG_ID, "Unable to find request with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
-    return FALSE;
-  }
-
-  if (!cf_is_integer($mode) || $mode < MFCS_VIEW_MODE_NORMAL || $mode > MFCS_VIEW_MODE_OPERATIONS) {
-    cf_error::invalid_integer('mode');
-    return FALSE;
-  }
-
-  if (!cf_is_integer($type)) {
-    cf_error::invalid_integer('type');
-    return FALSE;
-  }
-
-  $name = 'unknown';
-  if ($type == MFCS_PDF_TYPE_REQUEST) {
-    $name = 'request';
-  }
-  elseif ($type == MFCS_PDF_TYPE_AGREEMENT) {
-    $name = 'agreement';
-  }
-
-  $fixed_title = preg_replace('/\W/i', '_', $request['information']['title'][0]->value);
-  $fixed_title = preg_replace('/_+/i', '_', $fixed_title);
-
-  // remove leading and trailing '_'.
-  $fixed_title = preg_replace('/^_+/i', '', $fixed_title);
-  $fixed_title = preg_replace('/_+$/i', '', $fixed_title);
-
-  $extra = "";
-  if ($mode == MFCS_VIEW_MODE_NORMAL) {
-  }
-  elseif ($mode == MFCS_VIEW_MODE_DISPLAY) {
-    $extra = '-display';
-  }
-  elseif ($mode == MFCS_VIEW_MODE_LOG) {
-    $extra = '-log';
-  }
-  elseif ($mode == MFCS_VIEW_MODE_OPERATIONS) {
-    $extra = '-operations';
-  }
-  else {
-    return FALSE;
-  }
-
-  return sprintf("%'010s", $request_id) . '-' . $name . '-' . $fixed_title . $extra . '.pdf';
-}
-
-/**
  * Load a listing of requests.
  *
  * This can be used as a very simple and straightforward search.
@@ -4776,9 +4610,9 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
 
   $user = cf_current_user();
 
-  $manager = user_access('mfcs manage');
-  $reviewer = user_access('mfcs review');
-  $requester = user_access('mfcs request');
+  $manager = user_access('mfcs manage', $user);
+  $reviewer = user_access('mfcs review', $user);
+  $requester = user_access('mfcs request', $user);
 
   $s = 'i';
   $like = 'ILIKE';
@@ -4806,7 +4640,7 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
 
   $status_options = mfcs_get_request_status_list_options();
   $step_options = mfcs_get_request_steps_list_options();
-  $information_type_options = mfcs_get_information_type_list_options();
+  $information_type_options = mfcs_get_request_type_list_options();
 
   // load search options
   if (is_null($search)) {
@@ -5011,8 +4845,8 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
     }
 
     if ($reviewer || $manager) {
-      $query->innerjoin('mfcs_current_request_coordinator', 'mcec', 'mer.id = mcec.request_id');
-      $query->innerjoin('mfcs_field_request_coordinator_classification', 'mfecc', 'mcec.request_id = mfecc.request_id AND mcec.classification = mfecc.revision AND mfecc.delta = 0');
+      $query->innerjoin('mfcs_current_request_coordinator', 'mcrc', 'mer.id = mcrc.request_id');
+      $query->innerjoin('mfcs_field_request_coordinator_classification', 'mfrcc', 'mcrc.request_id = mfrcc.request_id AND mcrc.classification = mfrcc.revision AND mfrcc.delta = 0');
 
       $query->innerjoin('mfcs_current_venue_coordinator', 'mcvc', 'mer.id = mcvc.request_id');
       $query->innerjoin('mfcs_field_venue_coordinator_user_id', 'mfvcui', 'mcvc.request_id = mfvcui.request_id AND mcvc.user_id = mfvcui.revision AND mfvcui.delta = 0');
@@ -5096,7 +4930,7 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
 
         $can_review_query->addfield('c_mr_2', 'user_id', 'user_id');
 
-        $can_review_query->where('c_mr_2.request_classification = mfecc.value AND c_mr_2.review_step = mftsp.value');
+        $can_review_query->where('c_mr_2.request_classification = mfrcc.value AND c_mr_2.review_step = mftsp.value');
         $can_review_query->condition('c_mr_2.user_id', $user->uid);
         $can_review_query->condition('c_mr_2.review_step', $show_step, 'IN');
         $can_review_query->condition('c_mr_2.disabled', 0);
@@ -5130,7 +4964,7 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
 
           $can_review_query->addfield('c_mr_2', 'user_id', 'user_id');
 
-          $can_review_query->where('c_mr_2.request_classification = mfecc.value AND c_mr_2.review_step = mftsp.value');
+          $can_review_query->where('c_mr_2.request_classification = mfrcc.value AND c_mr_2.review_step = mftsp.value');
           $can_review_query->condition('c_mr_2.user_id', $user->uid);
           $can_review_query->condition('c_mr_2.review_step', $show_step, 'IN');
           $can_review_query->condition('c_mr_2.disabled', 0);
@@ -5153,7 +4987,7 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
 
           $can_review_query->addfield('c_mr_2', 'user_id', 'user_id');
 
-          $can_review_query->where('c_mr_2.request_classification = mfecc.value');
+          $can_review_query->where('c_mr_2.request_classification = mfrcc.value');
           $can_review_query->condition('c_mr_2.user_id', $user->uid);
           $can_review_query->condition('c_mr_2.disabled', 0);
           $can_review_query->distinct();
@@ -5518,6 +5352,19 @@ function mfcs_request_process_listing_search_array(&$query, &$operand, &$already
         continue;
       }
 
+      $join = 'innerJoin';
+      if (isset($search_values['join'])) {
+        if ($search_values['join'] == MFCS_JOIN_LEFT) {
+          $join = 'leftJoin';
+        }
+        elseif ($search_values['join'] == MFCS_JOIN_RIGHT) {
+          $join = 'rightJoin';
+        }
+        elseif ($search_values['join'] == MFCS_JOIN_OUTER) {
+          $join = 'outerJoin';
+        }
+      }
+
       $mfcs_current = 'mfcs_current_' . $search_values['group_name'];
       $mfcs_field = 'mfcs_field_' . $search_values['group_name'] . '_' . $search_values['field_name'];
 
@@ -5527,7 +5374,7 @@ function mfcs_request_process_listing_search_array(&$query, &$operand, &$already
 
         $current_alias = $already_joined[$mfcs_current];
 
-        $query->innerjoin($mfcs_current, $current_alias, 'mer.id = ' . $current_alias . '.request_id');
+        $query->$join($mfcs_current, $current_alias, 'mer.id = ' . $current_alias . '.request_id');
       }
       else {
         $current_alias = $already_joined[$mfcs_current];
@@ -5540,10 +5387,10 @@ function mfcs_request_process_listing_search_array(&$query, &$operand, &$already
         $field_alias = $already_joined[$mfcs_field];
 
         if (isset($search_values['multiple']) && $search_values['multiple']) {
-          $query->innerjoin($mfcs_field, $field_alias, $current_alias . '.request_id = ' . $field_alias . '.request_id AND ' . $current_alias . '.' . $search_values['field_name'] . ' = ' . $field_alias . '.revision');
+          $query->$join($mfcs_field, $field_alias, $current_alias . '.request_id = ' . $field_alias . '.request_id AND ' . $current_alias . '.' . $search_values['field_name'] . ' = ' . $field_alias . '.revision');
         }
         else {
-          $query->innerjoin($mfcs_field, $field_alias, $current_alias . '.request_id = ' . $field_alias . '.request_id AND ' . $current_alias . '.' . $search_values['field_name'] . ' = ' . $field_alias . '.revision AND ' . $field_alias . '.delta = 0');
+          $query->$join($mfcs_field, $field_alias, $current_alias . '.request_id = ' . $field_alias . '.request_id AND ' . $current_alias . '.' . $search_values['field_name'] . ' = ' . $field_alias . '.revision AND ' . $field_alias . '.delta = 0');
         }
       }
       else {
@@ -5591,6 +5438,18 @@ function mfcs_request_process_listing_search_array(&$query, &$operand, &$already
           $operator = 'NOT ' . $like;
           $search_string = '%' . db_like($search_values['search']) . '%';
         }
+      }
+      elseif ($search_values['operator'] == MFCS_OPERATOR_IS_NULL) {
+        $operand->isNull($field_alias . '.' . $search_values['column']);
+
+        $found_values = TRUE;
+        continue;
+      }
+      elseif ($search_values['operator'] == MFCS_OPERATOR_IS_NOT_NULL) {
+        $operand->isNotNull($field_alias . '.' . $search_values['column']);
+
+        $found_values = TRUE;
+        continue;
       }
 
       $operand->condition($field_alias . '.' . $search_values['column'], $search_string, $operator);
@@ -5779,18 +5638,14 @@ function mfcs_build_request_table($items, $max_rows, $columns = array('id' => "I
 
   $user = cf_current_user();
 
-  $manager = user_access('mfcs manage');
-  $reviewer = user_access('mfcs review');
-  $requester = user_access('mfcs request');
+  $can_view = mfcs_page_request_access('view', NULL, $user);
+  $can_list = mfcs_page_request_access('list', NULL, $user);
+  $can_search = mfcs_page_request_access('search', NULL, $user);
+  $can_review = mfcs_page_request_access('review', NULL, $user);
 
-  $can_create = mfcs_management_page_request_access('create');
-  $can_edit = mfcs_management_page_request_access('edit');
-  $can_view = mfcs_management_page_request_access('view');
-  $can_list = mfcs_management_page_request_access('list');
-  $can_search = mfcs_management_page_request_access('search');
-  $can_delete = mfcs_management_page_request_access('delete');
-  $can_log = mfcs_management_page_request_access('log');
-  $can_review = mfcs_management_page_request_access('review');
+  $manager = user_access('mfcs manage', $user);
+  $reviewer = user_access('mfcs review', $user);
+  $requester = user_access('mfcs request', $user);
 
 
   $total_results = count($items);
@@ -5803,11 +5658,12 @@ function mfcs_build_request_table($items, $max_rows, $columns = array('id' => "I
       break;
     }
 
-    $can_edit_request = mfcs_management_page_request_access('edit', $item->id, $user);
-    $can_review_request = mfcs_management_page_request_access('review', $item->id, $user);
-    $can_log_request = mfcs_management_page_request_access('log', $item->id, $user);
-    $can_history_request = mfcs_management_page_request_access('history', $item->id, $user);
-    $can_delete_request = mfcs_management_page_request_access('delete', $item->id, $user);
+    $can_create_request = mfcs_page_request_access('create', $item->id, $user);
+    $can_edit_request = mfcs_page_request_access('edit', $item->id, $user);
+    $can_review_request = mfcs_page_request_access('review', $item->id, $user);
+    $can_log_request = mfcs_page_request_access('log', $item->id, $user);
+    $can_history_request = mfcs_page_request_access('history', $item->id, $user);
+    $can_delete_request = mfcs_page_request_access('delete', $item->id, $user);
 
     if (isset($columns['id'])) {
       $row['id'] = $item->id;
@@ -5902,7 +5758,7 @@ function mfcs_build_request_table($items, $max_rows, $columns = array('id' => "I
         $row['operations'] .= '<a href="' . $base_path . 'requests/delete-0/' . $item->id . '" class="operation-link operation-link-delete">Delete</a> ';
       }
 
-      if ($can_create) {
+      if ($can_create_request) {
         $row['operations'] .= '<a href="' . $base_path . 'requests/create-0/' . $item->id . '" class="operation-link operation-link-clone">Copy</a> ';
       }
     }
@@ -6004,7 +5860,6 @@ function mfcs_get_reviewers_yet_to_review($request_id) {
   $request = mfcs_load_request_by_id($request_id);
 
   if (empty($request)) {
-    watchdog(MFCS_WATCHDOG_ID, "Unable to find request with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
     return FALSE;
   }
 
@@ -6069,6 +5924,390 @@ function mfcs_get_reviewers_yet_to_review($request_id) {
   }
 
   return $yet_to_review;
+}
+
+/**
+ * Loads a list of requests that did not provide insurance.
+ *
+ * This only loads requests that require insurance.
+ * This only loads requests that have been accepted.
+ *
+ * @param int|null $date_from
+ *   When specified, a unix timestamp representing a current date to load
+ *   requests within a certain amount of time.
+ *   When not specified, all results are loaded.
+ *   An = is performed on this value when $date_to is null.
+ *   A >= is performed on this value when $date_to is an integer.
+ * @param int|null $date_to
+ *   When specified, a unix timestamp representing a current date to load
+ *   requests within a certain amount of time.
+ *   When not specified, all results are loaded.
+ *   If specified, this requires $date_from to be non-null.
+ *   A < is performed on this value.
+ *
+ * @return array|bool
+ *   An array of requests. FALSE is returned on error.
+ */
+function mfcs_get_requests_not_providing_insurance($date_from = NULL, $date_to = NULL) {
+  if (!is_null($date_from)) {
+    if (!cf_is_integer($date_from)) {
+      cf_error::invalid_integer('date_from');
+      return FALSE;
+    }
+
+    if (!is_null($date_to) && !cf_is_integer($date_to)) {
+      cf_error::invalid_integer('date_to');
+      return FALSE;
+    }
+  }
+
+  $results = array();
+
+  try {
+    $query = db_select('mfcs_requests', 'mer');
+
+    $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
+    $query->innerjoin('mfcs_current_information', 'mci', 'mer.id = mci.request_id');
+    $query->innerjoin('mfcs_current_dates', 'mcd', 'mer.id = mcd.request_id');
+    $query->innerjoin('mfcs_current_insurance', 'mcie', 'mer.id = mci.request_id');
+    $query->innerjoin('mfcs_current_request_coordinator', 'mcrc', 'mer.id = mcrc.request_id');
+
+    $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
+    $query->innerjoin('mfcs_field_top_step', 'mftsp', 'mct.request_id = mftsp.request_id AND mct.step = mftsp.revision AND mftsp.delta = 0');
+
+    $query->innerjoin('mfcs_field_information_title', 'mfit', 'mci.request_id = mfit.request_id AND mci.title = mfit.revision AND mfit.delta = 0');
+
+    $query->innerjoin('mfcs_field_dates_date', 'mfdd', 'mcd.request_id = mfdd.request_id AND mcd.date = mfdd.revision');
+
+    $query->innerjoin('mfcs_field_insurance_contractor', 'mfic', 'mcie.request_id = mfic.request_id AND mcie.contractor = mfic.revision AND mfic.delta = 0');
+    $query->innerjoin('mfcs_field_insurance_unaffiliated', 'mfiu', 'mcie.request_id = mfiu.request_id AND mcie.unaffiliated = mfiu.revision AND mfiu.delta = 0');
+    $query->innerjoin('mfcs_field_insurance_provided', 'mfip', 'mcie.request_id = mfip.request_id AND mcie.provided = mfip.revision AND mfip.delta = 0');
+
+    $query->innerjoin('mfcs_field_request_coordinator_name', 'mfrcn', 'mcrc.request_id = mfrcn.request_id AND mcrc.name = mfrcn.revision AND mfrcn.delta = 0');
+    $query->innerjoin('mfcs_field_request_coordinator_email', 'mfrce', 'mcrc.request_id = mfrce.request_id AND mcrc.email = mfrce.revision AND mfrce.delta = 0');
+
+
+    $query->addField('mer', 'id', 'id');
+    $query->addField('mfit', 'value', 'title');
+    $query->addField('mfdd', 'value', 'date');
+    $query->addField('mfrcn', 'value', 'coordinator_name');
+    $query->addField('mfrce', 'value', 'coordinator_email');
+
+
+    $allowed_status = array(
+      MFCS_EVENT_STATUS_CLOSED_ACCEPTED,
+    );
+
+    $query->condition('mfts.value', $allowed_status, 'IN');
+
+    $allowed_steps = array(
+      MFCS_REVIEW_STEP_COMPLETED,
+    );
+
+    $query->condition('mftsp.value', $allowed_steps, 'IN');
+
+    $or = db_or();
+    $or->condition('mfic.value', 1);
+    $or->condition('mfiu.value', 1);
+    $query->condition($or);
+
+    $nand = db_and();
+    $nand->not();
+    $nand->condition('mfip.value', 1);
+    $query->condition($nand);
+
+    if (!is_null($date_from)) {
+      if (is_null($date_to)) {
+        $query->condition('mfdd.value', $date_from);
+      }
+      else {
+        $query->condition('mfdd.value', $date_from, '>=');
+        $query->condition('mfdd.value', $date_to, '<');
+      }
+    }
+
+
+    $query->orderBy('mfdd.value');
+
+
+    $results = $query->execute()->fetchAll();
+
+    if (empty($results)) {
+      return array();
+    }
+  }
+  catch (Exception $ex) {
+    cf_error::on_exception($ex);
+    return FALSE;
+  }
+
+  return $results;
+}
+
+/**
+ * Determines the current dates for reminders relative to the current day.
+ *
+ * There are a number of problems with the PHP date system that forced me
+ * to write this function.
+ *
+ * The usage of the word 'this' is broken in php's strtotime function.
+ * In regards to weeks, the word 'this' is treated as if it were the word
+ * 'next', except for then the current day is today.
+ *
+ * To get the current day for 'this' week, one must use 'first sunday this
+ * week' and compare the value to 'today'.
+ *
+ * If the value of 'today' is identical to 'this week', then that value can
+ * be used.
+ *
+ * If the value of 'today' is different from 'this week', then take the
+ * _previous_ weeks date!
+ *
+ * strtotime also does not support 'first day of week', which actually gives
+ * the first day of the month!
+ *
+ * strtotime also does not process the word 'of' in the same manner, thus
+ * 'first sunday this week' != 'first sunday of this week'.
+ *
+ * strotime also treats 'last week' and '-1 week' differently, last week might
+ * return monday even when working with sunday.
+ * - This is probably true for 'this week', and 'next week' as well.
+ *
+ * @return array
+ *   An array containing dates relative to today.
+ *   - 'today': contains the current day at 00:00.
+ *   - 'week_day': contains the first day of the current week at 00:00.
+ *   - 'first_day_this_week': contains the proper first day 'this' week at
+ *     00:00.
+ */
+function mfcs_request_reminders_get_dates() {
+  $dates = array();
+
+  $dates['today'] = strtotime('today');
+  $dates['yesterday'] = strtotime('yesterday', $dates['today']);
+  $dates['tomorrow'] = strtotime('tomorrow', $dates['today']);
+
+  $dates['week_day'] = strtotime('first sunday this week');
+  #$dates['week_day'] = strtotime('first monday this week'); // iso-8601
+
+  if ($dates['week_day'] == $dates['today']) {
+    $dates['first_day_this_week'] = $dates['week_day'];
+  }
+  else {
+    $dates['first_day_this_week'] = strtotime('-1 week', $dates['week_day']);
+  }
+
+  return $dates;
+}
+
+/**
+ * Clears the cache for request reminders that are old.
+ *
+ * @param int $type
+ *   The reminder type to clear all old data for.
+ *
+ * @return bool
+ *   TRUE on success, FALSE otherwise.
+ */
+function mfcs_clear_request_reminders($type) {
+  if (!cf_is_integer($type)) {
+    cf_error::invalid_integer('type');
+    return FALSE;
+  }
+
+  $dates = mfcs_request_reminders_get_dates();
+
+  try {
+    $query = db_delete('mfcs_request_reminders');
+
+    $query->condition('type', $type);
+
+    $or = db_or();
+
+    $days_30 = strtotime('-30 days', $dates['today']);
+    $and = db_and();
+    $and->condition('interval', MFCS_REMINDER_INTERVAL_DAY_30);
+    $and->condition('date', $days_30, '<');
+    $or->condition($and);
+
+    $query->condition($or);
+
+    $query->execute();
+  }
+  catch (Exception $ex) {
+    cf_error::on_exception($ex);
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
+/**
+ * Loads the request reminders for a certain reminder type and request.
+ *
+ * @param array $dates
+ *   Should be the dates as defined by mfcs_request_reminders_get_dates().
+ *   Provided as an argument here rather than calling the function for
+ *   performance reasons.
+ * @param int $type
+ *   The reminder type to clear all old data for.
+ * @param int|null $interval
+ *   (optional) When specified, loads reminders only for the specified inteval.
+ * @param int|null $request_id
+ *   (optional) When specified, loads reminders only for the specified request.
+ *
+ * @return array|bool
+ *   An array of reminders or FALSE on failure.
+ *
+ * @see: mfcs_request_reminders_get_dates()
+ */
+function mfcs_get_request_reminders($dates, $type, $interval = NULL, $request_id = NULL) {
+  if (!is_array($dates)) {
+    cf_error::invalid_array('dates');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($type)) {
+    cf_error::invalid_integer('type');
+    return FALSE;
+  }
+
+  if (!is_null($interval) && !cf_is_integer($interval)) {
+    cf_error::invalid_integer('interval');
+    return FALSE;
+  }
+
+  if (!is_null($request_id) && !cf_is_integer($request_id)) {
+    cf_error::invalid_integer('request_id');
+    return FALSE;
+  }
+
+  $results = array(
+    MFCS_REMINDER_INTERVAL_DAY_30 => array(),
+  );
+
+  try {
+    $query = db_select('mfcs_request_reminders', 'mrr');
+
+    $query->fields('mrr');
+    $query->condition('type', $type);
+
+    if (!is_null($request_id)) {
+      $query->condition('request_id', $request_id);
+    }
+
+    // perform separate queries instead of doing a php loop to rebuild the results in the desired structure.
+    // this puts the work onto the database, which is generally more efficient at such tasks at the cost of multiple queries.
+    // when $interval is specified, then only one of these queries is performed.
+
+    if (is_null($interval) || $interval == MFCS_REMINDER_INTERVAL_DAY_30) {
+      $days_30 = strtotime('-30 days', $dates['today']);
+      $query_day_30 = clone $query;
+      $query_day_30->condition('interval', MFCS_REMINDER_INTERVAL_DAY_30);
+      $query_day_30->condition('date', $days_30, '>=');
+      $results[MFCS_REMINDER_INTERVAL_DAY_30] = $query_day_30->execute()->fetchAllAssoc('request_id');
+    }
+  }
+  catch (Exception $ex) {
+    cf_error::on_exception($ex);
+    return FALSE;
+  }
+
+  return $results;
+}
+
+/**
+ * Saves the request reminder into the cache.
+ *
+ * @param array $reminder
+ *   An array containing the reminder values.
+ *
+ * @param bool
+ *   TRUE on success, FALSE otherwise.
+ */
+function mfcs_save_request_reminders($reminder) {
+  if (!is_array($reminder)) {
+    cf_error::invalid_array('reminder');
+    return FALSE;
+  }
+
+  if (!isset($reminder['request_id']) || !cf_is_integer($reminder['request_id'])) {
+    cf_error::invalid_integer('reminder[request_id]');
+    return FALSE;
+  }
+
+  if (!isset($reminder['date']) || !cf_is_integer($reminder['date'])) {
+    cf_error::invalid_integer('reminder[date]');
+    return FALSE;
+  }
+
+  if (!isset($reminder['type']) || !cf_is_integer($reminder['type'])) {
+    cf_error::invalid_integer('reminder[type]');
+    return FALSE;
+  }
+
+  if (!isset($reminder['interval']) || !cf_is_integer($reminder['interval'])) {
+    cf_error::invalid_integer('reminder[interval]');
+    return FALSE;
+  }
+
+  try {
+    $query = db_insert('mfcs_request_reminders');
+
+    $query->fields($reminder);
+    $query->execute();
+  }
+  catch (Exception $ex) {
+    cf_error::on_exception($ex);
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
+/**
+ * Adds canonical and short url links to the http meta and headers.
+ *
+ * @param string $unique_path
+ *   The canonical path used to uniquely identify this page.
+ * @param string $short_path
+ *   (optional) A short version of the unique path. If not specified, then the
+ *   unique path is also specified as the short path.
+ *
+ * @return bool
+ *   TRUE on success, FALSE otherwise.
+ */
+function mfcs_add_canonical_headers($unique_path, $short_path = NULL) {
+  if (!is_string($unique_path)) {
+    cf_error::invalid_string('unique_path');
+    return FALSE;
+  }
+
+  if (!is_null($short_path) && !is_string($short_path)) {
+    cf_error::invalid_string('short_path');
+    return FALSE;
+  }
+
+  if (is_null($short_path)) {
+    $short_path = $unique_path;
+  }
+
+  global $base_path;
+
+  // expose settings as a static variable so that the theme can find and process.
+  $mfcs_canonical = &drupal_static('mfcs_canonical', array());
+
+  $mfcs_canonical[] = array(
+    'rel' => 'canonical',
+    'href' => $base_path . $unique_path,
+  );
+
+  $mfcs_canonical[] = array(
+    'rel' => 'shortlink',
+    'href' => $base_path . $short_path,
+  );
+
+  return TRUE;
 }
 
 /**

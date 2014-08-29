@@ -26,6 +26,8 @@ function mfcs_request_review_0_page($form, &$form_state, $page_number = 0) {
     $page_number = 0;
   }
 
+  mfcs_add_canonical_headers('requests/review-0');
+
   global $base_path;
 
   $rows_per_page = 25;
@@ -38,18 +40,14 @@ function mfcs_request_review_0_page($form, &$form_state, $page_number = 0) {
 
   $user = cf_current_user();
 
-  $can_create = mfcs_management_page_request_access('create');
-  $can_edit = mfcs_management_page_request_access('edit');
-  $can_view = mfcs_management_page_request_access('view');
-  $can_list = mfcs_management_page_request_access('list');
-  $can_search = mfcs_management_page_request_access('search');
-  $can_delete = mfcs_management_page_request_access('delete');
-  $can_log = mfcs_management_page_request_access('log');
-  $can_review = mfcs_management_page_request_access('review');
+  $can_view = mfcs_page_request_access('view', NULL, $user);
+  $can_list = mfcs_page_request_access('list', NULL, $user);
+  $can_search = mfcs_page_request_access('search', NULL, $user);
+  $can_review = mfcs_page_request_access('review', NULL, $user);
 
-  $manager = user_access('mfcs manage');
-  $reviewer = user_access('mfcs review');
-  $requester = user_access('mfcs request');
+  $manager = user_access('mfcs manage', $user);
+  $reviewer = user_access('mfcs review', $user);
+  $requester = user_access('mfcs request', $user);
 
 
   // load sorting information
@@ -92,10 +90,12 @@ function mfcs_request_review_0_page($form, &$form_state, $page_number = 0) {
         break;
       }
 
-      $can_edit_request = mfcs_management_page_request_access('edit', $item->id);
-      $can_review_request = mfcs_management_page_request_access('review', $item->id);
-      $can_log_request = mfcs_management_page_request_access('log', $item->id);
-      $can_history_request = mfcs_management_page_request_access('history', $item->id);
+      $can_create_request = mfcs_page_request_access('create', $item->id, $user);
+      $can_edit_request = mfcs_page_request_access('edit', $item->id, $user);
+      $can_review_request = mfcs_page_request_access('review', $item->id, $user);
+      $can_log_request = mfcs_page_request_access('log', $item->id, $user);
+      $can_history_request = mfcs_page_request_access('history', $item->id, $user);
+      $can_delete_request = mfcs_page_request_access('delete', $item->id, $user);
 
       $row['id'] = $item->id;
       $row['title'] = check_plain($item->title);
@@ -146,7 +146,7 @@ function mfcs_request_review_0_page($form, &$form_state, $page_number = 0) {
         }
       }
       else {
-        // @todo: this is an error, report it.
+        watchdog(MFCS_WATCHDOG_ID, "Failed to load the submitter a user id of %user_id. No submitter name can be provided.", array('%user_id' => $item->user_id), WATCHDOG_WARNING);
         $row['submitter_name'] = '';
       }
 
@@ -172,12 +172,12 @@ function mfcs_request_review_0_page($form, &$form_state, $page_number = 0) {
         $row['operations'] .= '<a href="' . $base_path . 'requests/history-0/' . $item->id . '" class="operation-link operation-link-history">History</a> ';
       }
 
-      if ($can_delete) {
+      if ($can_delete_request) {
         // @todo: implement this.
         #$row['operations'] .= '<a href="' . $base_path . 'requests/delete-0/' . $item->id . '" class="operation-link operation-link-delete">Delete</a> ';
       }
 
-      if ($can_create) {
+      if ($can_create_request) {
         $row['operations'] .= '<a href="' . $base_path . 'requests/create-0/' . $item->id . '" class="operation-link operation-link-clone">Copy</a> ';
       }
 

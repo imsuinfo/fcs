@@ -37,13 +37,20 @@ function mfcs_request_create_0_form($form, &$form_state, $clone_request = NULL) 
 
     $request = mfcs_load_request_by_id($clone_request);
 
-    $can_view = mfcs_management_page_request_access('view', $clone_request);
+    $can_clone = mfcs_page_request_access('create', $clone_request);
 
     // if the request does not exist or the user cannot access the request to copy, fallback to a normal create.
-    if (empty($request) || !$can_view) {
+    if (empty($request) || !$can_clone) {
       $request = NULL;
       $clone_request = NULL;
     }
+  }
+
+  if (is_null($clone_request)) {
+    mfcs_add_canonical_headers('requests/create-0');
+  }
+  else {
+    mfcs_add_canonical_headers('requests/create-0/' . $clone_request);
   }
 
   mfcs_include(1);
@@ -168,7 +175,32 @@ function mfcs_request_create_0_form($form, &$form_state, $clone_request = NULL) 
       );
     }
 
-    if ($step == 'details') {
+    if ($step == 'standard') {
+      $form['request']['next'] = array(
+        '#id' => 'submit-request-next',
+        '#name' => 'submit-request-next',
+        '#type' => 'submit',
+        '#default_value' => t("Continue"),
+        '#states' => array(
+          'invisible' => array(
+            ':input[name="' . $form['form']['parents']['#value']['path'] . 'information][type][0]' . '"]' => array('value' => MFCS_REQUEST_TYPE_QUICK_MEETING),
+          ),
+        ),
+      );
+
+      $form['request']['submit'] = array(
+        '#id' => 'submit-request-submit',
+        '#name' => 'submit-request-submit',
+        '#type' => 'submit',
+        '#default_value' => t("Submit"),
+        '#states' => array(
+          'visible' => array(
+            ':input[name="' . $form['form']['parents']['#value']['path'] . 'information][type][0]' . '"]' => array('value' => MFCS_REQUEST_TYPE_QUICK_MEETING),
+          ),
+        ),
+      );
+    }
+    elseif ($step == 'details') {
       $form['request']['submit'] = array(
         '#id' => 'submit-request-submit',
         '#name' => 'submit-request-submit',
@@ -318,6 +350,17 @@ function mfcs_request_create_0_form_validate($form, &$form_state) {
         unset($form_state['values']['request']['dates']['time_stop'][$clicked_id_part]);
         unset($form_state['values']['request']['dates']['category'][$clicked_id_part]);
       }
+      elseif ($clicked_id == 'submit-request-submit') {
+        if (isset($form_state['values']['request']['information']['type'][0]) && $form_state['values']['request']['information']['type'][0] == MFCS_REQUEST_TYPE_QUICK_MEETING) {
+          if (!empty($form_state['values']['request']['venue_coordinator']['user_id'][0]) && !empty($form['form']['user']['#value']->uid)) {
+            if ($form_state['values']['request']['venue_coordinator']['user_id'][0] == $form['form']['user']['#value']->uid) {
+              $form_state['values']['request']['status'][0] = MFCS_EVENT_STATUS_CLOSED_ACCEPTED;
+              $form_state['values']['request']['step'][0] = MFCS_REVIEW_STEP_COMPLETED;
+              $form_state['rebuild'] = FALSE;
+            }
+          }
+        }
+      }
       else {
         $room = explode('_', $form_state['values']['request']['room'][0], 3);
         $date = $form_state['values']['request']['dates']['date'];
@@ -367,8 +410,32 @@ function mfcs_request_create_0_form_validate($form, &$form_state) {
             mfcs_display_room_unavailable_message();
 
             // force the status to be closed due to room being unavailable on save.
-            $form_state['values']['request']['status'][0] = MFCS_EVENT_STATUS_CLOSED_UNAVAILABLE;
-            $form_state['values']['request']['step'][0] = MFCS_REVIEW_STEP_COMPLETED;
+            if (!isset($form_state['room_unavailable_prior_settings'])) {
+              $form_state['room_unavailable_prior_settings'] = array(
+                'status' => NULL,
+                'step' => NULL,
+              );
+
+              if (isset($form_state['values']['request']['status'])) {
+                $form_state['room_unavailable_prior_settings']['status'] = $form_state['values']['request']['status'][0];
+              }
+
+              if (isset($form_state['values']['request']['step'])) {
+                $form_state['room_unavailable_prior_settings']['step'] = $form_state['values']['request']['step'][0];
+              }
+
+              $form_state['values']['request']['status'][0] = MFCS_EVENT_STATUS_CLOSED_UNAVAILABLE;
+              $form_state['values']['request']['step'][0] = MFCS_REVIEW_STEP_COMPLETED;
+            }
+          }
+          else {
+            // restore status settings in case an available room was selected.
+            if (isset($form_state['room_unavailable_prior_settings'])) {
+              $form_state['values']['request']['status'][0] = $form_state['room_unavailable_prior_settings']['status'];
+              $form_state['values']['request']['step'][0] = $form_state['room_unavailable_prior_settings']['step'];
+
+              unset($form_state['room_unavailable_prior_settings']);
+            }
           }
         }
 

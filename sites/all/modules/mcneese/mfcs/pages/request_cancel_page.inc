@@ -24,13 +24,6 @@
  *   The HTML output representing the page.
  */
 function mfcs_request_cancel_0_form($form, &$form_state, $request_id) {
-  if (!cf_is_integer($request_id)) {
-    cf_error::invalid_integer('request_id');
-    drupal_access_denied();
-    drupal_exit();
-    return array();
-  }
-
   $request = mfcs_load_request_by_id($request_id);
 
   if (empty($request)) {
@@ -39,6 +32,8 @@ function mfcs_request_cancel_0_form($form, &$form_state, $request_id) {
     drupal_exit();
     return array();
   }
+
+  mfcs_add_canonical_headers('requests/cancel-0/' . $request_id);
 
   $form = array();
 
@@ -196,13 +191,6 @@ function mfcs_request_cancel_0_form_submit($form, &$form_state) {
  *   The HTML output representing the page.
  */
 function mfcs_request_uncancel_0_form($form, &$form_state, $request_id) {
-  if (!cf_is_integer($request_id)) {
-    cf_error::invalid_integer('request_id');
-    drupal_access_denied();
-    drupal_exit();
-    return array();
-  }
-
   $request = mfcs_load_request_by_id($request_id);
 
   if (empty($request)) {
@@ -211,6 +199,8 @@ function mfcs_request_uncancel_0_form($form, &$form_state, $request_id) {
     drupal_exit();
     return array();
   }
+
+  mfcs_add_canonical_headers('requests/uncancel-0/' . $request_id);
 
   $form = array();
 

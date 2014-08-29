@@ -17,18 +17,23 @@
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
- * @param int $id
+ * @param int $request_id
  *   The unique identifier for an request.
  *
  * @return string
  *   The HTML output representing the page.
  */
-function mfcs_request_delete_0_form($form, &$form_state, $id) {
-  if (!cf_is_integer($id)) {
+function mfcs_request_delete_0_form($form, &$form_state, $request_id) {
+  drupal_not_found();
+  drupal_exit();
+
+  if (!cf_is_integer($request_id)) {
     drupal_access_denied();
     drupal_exit();
     return array();
   }
+
+  mfcs_add_canonical_headers('requests/delete-0/' . $request_id);
 
   $form = array();
 

@@ -69,7 +69,36 @@ function mfcs_pre_validate_request_fields(&$form, &$form_state, $dont_validate =
     $clicked_id = $form_state['triggering_element']['#id'];
   }
 
-  if ($form_state['values']['form']['step'] == 'location') {
+  $is_quick_meeting = FALSE;
+  // quick meetings can only be used by venue coordinators.
+  if (isset($location_state['information']['type'][0]) && $location_state['information']['type'][0] == MFCS_REQUEST_TYPE_QUICK_MEETING) {
+    $is_quick_meeting = TRUE;
+  }
+
+  if ($form_state['values']['form']['step'] == 'standard') {
+    // quick meetings can only be used by venue coordinators.
+    if ($clicked_id == 'submit-request-submit') {
+      if ($is_quick_meeting) {
+        $can_perform_quick_meetings = FALSE;
+        if (!empty($location_state['venue_coordinator']['user_id'][0]) && !empty($form['form']['user']['#value']->uid)) {
+          $venue_coordinator_id = $location_state['venue_coordinator']['user_id'][0];
+
+          if ($venue_coordinator_id == $form['form']['user']['#value']->uid) {
+            $can_perform_quick_meetings = TRUE;
+          }
+        }
+
+        if ($can_perform_quick_meetings) {
+          mfcs_assign_validation_requirement('information][adviser_approval', $location_form, FALSE);
+
+          // quick meetings are always for invited guests only.
+          $location_form['plans']['audience'][0]['#value'] = MFCS_REQUEST_AUDIENCE_GUESTS_ONLY;
+          $location_state['plans']['audience'][0] = MFCS_REQUEST_AUDIENCE_GUESTS_ONLY;
+        }
+      }
+    }
+  }
+  elseif ($form_state['values']['form']['step'] == 'location') {
   }
   elseif ($form_state['values']['form']['step'] == 'rooms') {
     // always enforce the venue/room coordinator.
@@ -98,19 +127,6 @@ function mfcs_pre_validate_request_fields(&$form, &$form_state, $dont_validate =
     unset($coordinator);
   }
 
-  // condition 0 is for when fields are displayed, only then are they required.
-  if (array_key_exists($clicked_id, $dont_validate)) {
-    if (!empty($form_state['conditionally_required'][0])) {
-      foreach ($form_state['conditionally_required'][0] as &$field) {
-        if (is_string($field)) {
-          mfcs_assign_validation_requirement($field, $location_form, FALSE);
-        }
-      }
-    }
-
-    // @todo: handle conditionally_required[1] fields, which are required only when their dependant fields make them visible based on the '#state' field settings.
-  }
-
   // condition 2 is for student requests.
   if (!empty($form_state['conditionally_required'][2])) {
     $is_required = FALSE;
@@ -122,8 +138,33 @@ function mfcs_pre_validate_request_fields(&$form, &$form_state, $dont_validate =
     }
 
     foreach ($form_state['conditionally_required'][2] as $field) {
-      if (is_string($field)) {
-        mfcs_assign_validation_requirement($field, $location_form, $is_required);
+      if (!is_string($field)) {
+        continue;
+      }
+
+      if ($is_quick_meeting) {
+        if ($field == 'information][adviser_approval') {
+          continue;
+        }
+        elseif ($field == 'information][organization') {
+          continue;
+        }
+      }
+
+      mfcs_assign_validation_requirement($field, $location_form, $is_required);
+    }
+  }
+
+  // condition 0 is for when fields are displayed, only then are they required.
+  // this must be performed after all other conditions so that going backwards is not accidentally restricted by previous conditional requirements.
+  if (array_key_exists($clicked_id, $dont_validate)) {
+    if (!empty($form_state['conditionally_required'][0])) {
+      foreach ($form_state['conditionally_required'][0] as &$field) {
+        if (!is_string($field)) {
+          continue;
+        }
+
+        mfcs_assign_validation_requirement($field, $location_form, FALSE);
       }
     }
   }
@@ -178,13 +219,60 @@ function mfcs_validate_request_fields($form, &$form_state) {
   unset($ps_c);
   unset($ps);
 
+  $clicked_id = '';
+  if (isset($form_state['triggering_element']['#id'])) {
+    $clicked_id = $form_state['triggering_element']['#id'];
+  }
+
   $is_new_request = NULL;
   if (isset($form['form']['new']['#value'])) {
     $is_new_request = $form['form']['new']['#value'];
   }
 
+  $is_quick_meeting = FALSE;
+  if (isset($location_state['information']['type'][0]) && $location_state['information']['type'][0] == MFCS_REQUEST_TYPE_QUICK_MEETING) {
+    $is_quick_meeting = TRUE;
+  }
+
   $passed = TRUE;
   if ($form_state['values']['form']['step'] == 'standard') {
+    $quick_meeting_name = "Quick Meeting";
+    $quick_meeting_term = taxonomy_term_load(MFCS_REQUEST_TYPE_QUICK_MEETING);
+    if (!empty($quick_meeting_term->name)) {
+      $quick_meeting_name = $quick_meeting_term->name;
+    }
+
+    // quick meetings can only be used by venue coordinators.
+    if ($is_quick_meeting) {
+      if ($clicked_id == 'submit-request-next') {
+        form_set_error($clicked_id, t("The form has no additional steps when '@term_name' is used. Use the submit button instead.", array('@term_name' => $quick_meeting_name)));
+      }
+      elseif ($clicked_id == 'submit-request-submit') {
+        $cannot_perform_quick_meetings = TRUE;
+        if (!empty($location_state['venue_coordinator']['user_id'][0]) && !empty($form['form']['user']['#value']->uid)) {
+          $venue_coordinator_id = $location_state['venue_coordinator']['user_id'][0];
+
+          if ($venue_coordinator_id == $form['form']['user']['#value']->uid) {
+            $cannot_perform_quick_meetings = FALSE;
+          }
+        }
+
+        if ($cannot_perform_quick_meetings) {
+          form_set_error($ps_p . '][information][type][0]', t("You are not authorized to utilize a '@term_name'.", array('@term_name' => $quick_meeting_name)));
+        }
+      }
+    }
+    else {
+      $not_custom_section = FALSE;
+      if (isset($form['form']['target_section']) && array_key_exists('$value', $form['form']['target_section']) && !is_null($form['form']['target_section']['#value'])) {
+        $not_custom_section = TRUE;
+      }
+
+      if ($clicked_id == 'submit-request-submit' && $not_custom_section) {
+        form_set_error($clicked_id, t("The form may only be submitted during this step if a '@term_name' is used. Use the continue button instead.", array('@term_name' => $quick_meeting_name)));
+      }
+    }
+
     $date_timestamp = array(0 => NULL);
     $start_timestamp = array(0 => FALSE);
     $stop_timestamp = array(0 => FALSE);
@@ -362,10 +450,6 @@ function mfcs_validate_request_fields($form, &$form_state) {
     foreach ($form_state['conditionally_required'][3] as $field) {
       if (is_array($field)) {
         $result = mfcs_check_range_limits($field, $form, $form_state, $structure);
-
-        if ($result === FALSE) {
-          // @todo: present error.
-        }
       }
     }
   }

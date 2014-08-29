@@ -128,15 +128,11 @@ function mfcs_get_request_section_information() {
 function mfcs_get_request_fields($form, &$form_state) {
   if (!is_array($form)) {
     cf_error::invalid_array('form');
-
-    // @todo: provide an error on the screen using the form markup.
     return array();
   }
 
   if (!is_array($form_state)) {
     cf_error::invalid_array('form_state');
-
-    // @todo: provide an error on the screen using the form markup.
     return array();
   }
 
@@ -198,7 +194,7 @@ function mfcs_get_request_fields($form, &$form_state) {
 
   // Fieldset: Review
   if ($form['form']['step']['#value'] == 'review' && array_key_exists('review', $form['form']['sections']['#value'])) {
-    if (empty($form['form']['request']['#value']['mer']['id'][0]->value) || !mfcs_management_page_request_access('review', $form['form']['request']['#value']['mer']['id'][0]->value)) {
+    if (empty($form['form']['request']['#value']['mer']['id'][0]->value) || !mfcs_page_request_access('review', $form['form']['request']['#value']['mer']['id'][0]->value)) {
       drupal_access_denied();
       drupal_exit();
       return array();
@@ -217,13 +213,11 @@ function mfcs_get_request_fields($form, &$form_state) {
       '#id' => 'section-request-review',
       '#tree' => TRUE,
     );
-
-    mfcs_get_request_field_review_review($form, $form_state, $fields, $request_state, $ps);
   }
 
   // Fieldset: Requirements
   if ($form['form']['step']['#value'] == 'requirements' && array_key_exists('requirements', $form['form']['sections']['#value'])) {
-    if (empty($form['form']['request']['#value']['mer']['id'][0]->value) || !mfcs_management_page_request_access('requirements', $form['form']['request']['#value']['mer']['id'][0]->value)) {
+    if (empty($form['form']['request']['#value']['mer']['id'][0]->value) || !mfcs_page_request_access('requirements', $form['form']['request']['#value']['mer']['id'][0]->value)) {
       drupal_access_denied();
       drupal_exit();
       return array();
@@ -242,8 +236,6 @@ function mfcs_get_request_fields($form, &$form_state) {
       '#id' => 'section-request-requirements',
       '#tree' => TRUE,
     );
-
-    // @todo: implement requirements in the same manner as the review.
   }
 
 
@@ -433,7 +425,7 @@ function mfcs_get_request_fields($form, &$form_state) {
   );
 
   $type_meeting = FALSE;
-  if ($form['form']['information_type']['#value'] == 57) {
+  if ($form['form']['information_type']['#value'] == MFCS_REQUEST_TYPE_MEETING || $form['form']['information_type']['#value'] == MFCS_REQUEST_TYPE_QUICK_MEETING) {
     $type_meeting = TRUE;
   }
 
@@ -486,7 +478,7 @@ function mfcs_get_request_fields($form, &$form_state) {
   );
 
   if ($form['form']['step']['#value'] == 'details' && array_key_exists('registration', $form['form']['sections']['#value'])) {
-    if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+    if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
       $fields['registration'] = array(
         '#id' => 'section-request-registration',
         '#type' => 'fieldset',
@@ -986,53 +978,6 @@ function mfcs_get_request_field_room($form, &$form_state, &$fields, &$request_st
   }
 
   return $values;
-}
-
-/**
- * Process and build a specific form field.
- */
-function mfcs_get_request_field_review_review($form, &$form_state, &$fields, &$request_state, $ps) {
-  if ($form['form']['step']['#value'] != 'standard' || !array_key_exists('review', $form['form']['sections']['#value'])) {
-    return FALSE;
-  }
-
-  // @todo: implement below to provide a custom field for altering the current review state.
-  // @todo: implement special access control to ensure that only users added to the
-  /*
-  $values = array(0 => array('reviewer_id' => 0, 'decision' => 0, 'message' => NULL));
-
-  if (empty($request_state['review']['review'])) {
-    if (isset($form['form']['existing']['#value']['request']['review']['review'])) {
-      $form['form']['review']['review']['#value'] = $form['form']['existing']['#value']['request']['review']['review'];
-    }
-  }
-  else {
-    $values = $request_state['review']['review'];
-  }
-
-  $fields['review'] = array(
-    '#id' => 'field-request-review-review',
-    '#type' => 'container',
-    '#tree' => TRUE,
-    '#attributes' => array(
-      'class' => array(
-        'form-item-wrapper',
-      ),
-    ),
-  );
-
-  foreach ($values as $key => $value) {
-    $fields['review']['review'][$key] = array(
-      '#id' => 'field-request-review-review-' . $key,
-      '#type' => 'value',
-      '#value' => $value,
-    );
-  }
-
-  return $values;
-  */
-
-  return FALSE;
 }
 
 /**
@@ -1947,6 +1892,11 @@ function mfcs_get_request_field_information_attendance($form, &$form_state, &$fi
             'form-item-delta-' . $key,
           ),
         ),
+        '#states' => array(
+          'invisible' => array(
+            ':input[name="' . $form['form']['parents']['#value']['path'] . 'information][type]' . '[' . $key . ']'  . '"]' => array('value' => MFCS_REQUEST_TYPE_QUICK_MEETING),
+          ),
+        ),
       );
 
       if (!empty($form['form']['room_information']['#value']->capacity_normal)) {
@@ -1992,7 +1942,6 @@ function mfcs_get_request_field_information_type($form, &$form_state, &$fields, 
 
   $form_state['conditionally_required'][3][] = &$limits_check;
 
-
   if ($form['form']['step']['#value'] == 'standard' && array_key_exists('information', $form['form']['sections']['#value'])) {
     $fields['information']['type'] = array(
       '#id' => 'field-request-information-type',
@@ -2007,7 +1956,18 @@ function mfcs_get_request_field_information_type($form, &$form_state, &$fields, 
       ),
     );
 
-    $type_options = mfcs_get_information_type_list_options('select');
+    $type_options = mfcs_get_request_type_list_options('select');
+
+    // quick meetings can only be used by venue coordinators.
+    if (!empty($fields['venue_coordinator']['user_id'][0]['#value']) && !empty($form['form']['user']['#value']->uid)) {
+      if ($fields['venue_coordinator']['user_id'][0]['#value'] != $form['form']['user']['#value']->uid) {
+        unset($type_options[MFCS_REQUEST_TYPE_QUICK_MEETING]);
+      }
+    }
+    else {
+      unset($type_options[MFCS_REQUEST_TYPE_QUICK_MEETING]);
+    }
+
 
     foreach ($values as $key => $value) {
       $fields['information']['type'][$key] = array(
@@ -2095,6 +2055,11 @@ function mfcs_get_request_field_information_organization($form, &$form_state, &$
             'form-item-delta-' . $key,
           ),
         ),
+        '#states' => array(
+          'invisible' => array(
+            ':input[name="' . $form['form']['parents']['#value']['path'] . 'information][type]' . '[' . $key . ']'  . '"]' => array('value' => MFCS_REQUEST_TYPE_QUICK_MEETING),
+          ),
+        ),
       );
     }
     krsort($fields['information']['organization']);
@@ -2126,6 +2091,15 @@ function mfcs_get_request_field_information_adviser_approval($form, &$form_state
     $values = $request_state['information']['adviser_approval'];
   }
 
+  $render_field = TRUE;
+  if (isset($form['form']['target_section']['#value']) && $form['form']['target_section']['#value'] == 'information') {
+    // The adviser field is dependent on another that does not appear in the same section..
+    // Don't render the field if the the dependency determines that it must not be renderred.
+    if (!isset($fields['request_coordinator']['classification'][0]['#value']) || $fields['request_coordinator']['classification'][0]['#value'] != MFCS_EVENT_CLASSIFICATION_STUDENT) {
+      $render_field = FALSE;
+    }
+  }
+
   $field_title = "Has your adviser been notified and has approved this request?";
   $limits_check = array(
     'title' => $field_title,
@@ -2138,8 +2112,7 @@ function mfcs_get_request_field_information_adviser_approval($form, &$form_state
 
   $form_state['conditionally_required'][3][] = &$limits_check;
 
-
-  if ($form['form']['step']['#value'] == 'standard' && array_key_exists('information', $form['form']['sections']['#value'])) {
+  if ($render_field && $form['form']['step']['#value'] == 'standard' && array_key_exists('information', $form['form']['sections']['#value'])) {
     $fields['information']['adviser_approval'] = array(
       '#id' => 'field-request-information-adviser_approval',
       '#type' => 'container',
@@ -2149,6 +2122,13 @@ function mfcs_get_request_field_information_adviser_approval($form, &$form_state
           'form-item-wrapper',
           'field-request-item',
           'field-request-item-information-adviser_approval',
+        ),
+      ),
+      // drupal core's 'states' functionality is lacking and fails to provided a way to do combination of and/ors and also setting priority, such as if quick meeting, then don't display ever.
+      // therefore, the entire adviser_approval wrapper is hidden when quick meeting is selected.
+      '#states' => array(
+        'invisible' => array(
+          ':input[name="' . $form['form']['parents']['#value']['path'] . 'information][type][0]' . '"]' => array('value' => MFCS_REQUEST_TYPE_QUICK_MEETING),
         ),
       ),
     );
@@ -2175,6 +2155,7 @@ function mfcs_get_request_field_information_adviser_approval($form, &$form_state
           'invisible' => array(
             'or' => array(
               ':input[name="' . $form['form']['parents']['#value']['path'] . 'request_coordinator][classification]' . '[' . $key . ']'  . '"]' => array('value' => NULL),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . 'information][type]' . '[' . $key . ']'  . '"]' => array('value' => MFCS_REQUEST_TYPE_QUICK_MEETING),
             ),
           ),
         ),
@@ -2207,7 +2188,7 @@ function mfcs_get_request_field_plans_note($form, &$form_state, &$fields, &$requ
   $values = array(0 => NULL);
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value']) && $form['form']['information_type']['#value'] == 57) {
+  if (isset($form['form']['information_type']['#value']) && $form['form']['information_type']['#value'] == MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -2259,7 +2240,7 @@ function mfcs_get_request_field_plans_description($form, &$form_state, &$fields,
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -2332,7 +2313,7 @@ function mfcs_get_request_field_plans_activities($form, &$form_state, &$fields, 
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -2478,7 +2459,7 @@ function mfcs_get_request_field_registration_require($form, &$form_state, &$fiel
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -2554,7 +2535,7 @@ function mfcs_get_request_field_registration_website($form, &$form_state, &$fiel
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -2639,7 +2620,7 @@ function mfcs_get_request_field_registration_phone($form, &$form_state, &$fields
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -2722,7 +2703,7 @@ function mfcs_get_request_field_registration_ticket_price($form, &$form_state, &
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -2807,7 +2788,7 @@ function mfcs_get_request_field_registration_ticket_dates($form, &$form_state, &
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -2891,7 +2872,7 @@ function mfcs_get_request_field_registration_ticket_website($form, &$form_state,
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -2976,7 +2957,7 @@ function mfcs_get_request_field_registration_ticket_phone($form, &$form_state, &
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -3061,7 +3042,7 @@ function mfcs_get_request_field_registration_generate_revenue($form, &$form_stat
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -3137,7 +3118,7 @@ function mfcs_get_request_field_registration_revenue_generated($form, &$form_sta
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -3363,7 +3344,7 @@ function mfcs_get_request_field_setup_other_tables($form, &$form_state, &$fields
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -3577,7 +3558,7 @@ function mfcs_get_request_field_setup_portable_stage($form, &$form_state, &$fiel
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -3653,7 +3634,7 @@ function mfcs_get_request_field_setup_portable_stage_configuration($form, &$form
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -3739,7 +3720,7 @@ function mfcs_get_request_field_setup_security($form, &$form_state, &$fields, &$
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -3815,7 +3796,7 @@ function mfcs_get_request_field_setup_parking_assistance($form, &$form_state, &$
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -3891,7 +3872,7 @@ function mfcs_get_request_field_setup_parking_assistance_area($form, &$form_stat
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -3977,7 +3958,7 @@ function mfcs_get_request_field_setup_road_closures($form, &$form_state, &$field
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -4053,7 +4034,7 @@ function mfcs_get_request_field_setup_road_closures_details($form, &$form_state,
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -4139,7 +4120,7 @@ function mfcs_get_request_field_setup_special_requests($form, &$form_state, &$fi
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -4215,7 +4196,7 @@ function mfcs_get_request_field_setup_special_requests_details($form, &$form_sta
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -4539,7 +4520,7 @@ function mfcs_get_request_field_presentation_external_audio_person($form, &$form
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -4615,7 +4596,7 @@ function mfcs_get_request_field_presentation_external_audio_person_name($form, &
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -4702,7 +4683,7 @@ function mfcs_get_request_field_presentation_external_audio_person_email($form, 
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -4789,7 +4770,7 @@ function mfcs_get_request_field_presentation_external_audio_person_phone($form, 
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -4874,7 +4855,7 @@ function mfcs_get_request_field_presentation_production($form, &$form_state, &$f
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -4950,7 +4931,7 @@ function mfcs_get_request_field_presentation_production_name($form, &$form_state
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -5036,7 +5017,7 @@ function mfcs_get_request_field_presentation_production_email($form, &$form_stat
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -5123,7 +5104,7 @@ function mfcs_get_request_field_presentation_production_phone($form, &$form_stat
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -5359,7 +5340,7 @@ function mfcs_get_request_field_presentation_printed_material($form, &$form_stat
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -5434,7 +5415,7 @@ function mfcs_get_request_field_presentation_university_logo($form, &$form_state
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -5521,7 +5502,7 @@ function mfcs_get_request_field_presentation_designing_material($form, &$form_st
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -5611,7 +5592,7 @@ function mfcs_get_request_field_presentation_designing_material_name($form, &$fo
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -5703,7 +5684,7 @@ function mfcs_get_request_field_presentation_designing_material_email($form, &$f
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -5795,7 +5776,7 @@ function mfcs_get_request_field_presentation_designing_material_phone($form, &$f
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 
@@ -6163,7 +6144,7 @@ function mfcs_get_request_field_services_open_flames($form, &$form_state, &$fiel
   }
 
   $build = FALSE;
-  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != 57) {
+  if (isset($form['form']['information_type']['#value'][0]) && $form['form']['information_type']['#value'][0] != MFCS_REQUEST_TYPE_MEETING) {
     $build = TRUE;
   }
 

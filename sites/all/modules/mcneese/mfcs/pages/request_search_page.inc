@@ -22,9 +22,13 @@
  *   An array containing the generated form.
  */
 function mfcs_request_search_0_form($form, &$form_state) {
-  $manager = user_access('mfcs manage');
-  $reviewer = user_access('mfcs review');
-  $requester = user_access('mfcs request');
+  mfcs_add_canonical_headers('requests/search-0');
+
+  $user = cf_current_user();
+
+  $manager = user_access('mfcs manage', $user);
+  $reviewer = user_access('mfcs review', $user);
+  $requester = user_access('mfcs request', $user);
 
   $form = array();
   $form['form'] = array(
@@ -75,6 +79,7 @@ function mfcs_request_search_0_form($form, &$form_state) {
   mfcs_include(4);
 
   $structure = mfcs_table_structure();
+  $presentation = mfcs_table_presentation();
 
   $possible_targets = array();
   foreach ($structure as $table_name => $table_fields) {
@@ -93,6 +98,11 @@ function mfcs_request_search_0_form($form, &$form_state) {
   $form['form']['structure'] = array(
     '#type' => 'value',
     '#value' => &$structure,
+  );
+
+  $form['form']['presentation'] = array(
+    '#type' => 'value',
+    '#value' => &$presentation,
   );
 
   $form['form']['advanced_search-possible_targets'] = array(
@@ -1235,11 +1245,22 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
     $structure = &$form['form']['structure']['#value'];
   }
 
+  $presentation = array();
+  if (isset($form['form']['presentation']['#value']) && is_array($form['form']['presentation']['#value'])) {
+    $presentation = &$form['form']['presentation']['#value'];
+  }
+
   if (!isset($structure[$table_name][$field_name])) {
     return FALSE;
   }
 
   $field = $structure[$table_name][$field_name];
+
+
+  $field_presentation = array();
+  if (isset($presentation[$table_name][$field_name])) {
+    $field_presentation = $presentation[$table_name][$field_name];
+  }
 
   if (!isset($location['targets'][$target_name])) {
     $location['targets'][$target_name] = array(
@@ -1287,7 +1308,6 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
       MFCS_OPERATOR_LIKE => "Similar To",
       MFCS_OPERATOR_NOT_LIKE => "Not Similar To",
       MFCS_OPERATOR_EQUAL => "Equal To",
-      MFCS_OPERATOR_NOT_EQUAL => "Not Equal To",
     );
 
     $default_value = MFCS_OPERATOR_LIKE;
@@ -1299,6 +1319,11 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
     );
 
     $default_value = MFCS_OPERATOR_EQUAL;
+  }
+
+  if (isset($field['allows_null']) && $field['allows_null']) {
+    $operators[MFCS_OPERATOR_IS_NULL] = "Not Defined / Not Used";
+    $operators[MFCS_OPERATOR_IS_NOT_NULL] = "Defined / Used";
   }
 
   if (isset($state_location[$target_name][$target_delta]['operator'])) {
@@ -1337,6 +1362,22 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
         'search-advanced-target-search',
         'search-advanced-target-' . $target_name . '-search',
         'search-advanced-target-' . $target_name . '-' . $target_delta . '-search',
+      ),
+    ),
+  );
+
+  $location['targets'][$target_name][$target_delta]['search']['#states'] = array(
+    'visible' => array(
+      'or' => array(
+      ),
+    ),
+  );
+
+  $location['targets'][$target_name][$target_delta]['search']['#states'] = array(
+    'invisible' => array(
+      ':input[name="advanced[targets][' . $target_name . '][' . $target_delta . '][operator]"]' => array(
+        array('value' => MFCS_OPERATOR_IS_NULL),
+        array('value' => MFCS_OPERATOR_IS_NOT_NULL),
       ),
     ),
   );
@@ -1385,7 +1426,7 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
     }
     elseif ($table_name == 'information') {
       if ($field_name == 'type') {
-        $location['targets'][$target_name][$target_delta]['search']['#options'] = mfcs_get_information_type_list_options('search');
+        $location['targets'][$target_name][$target_delta]['search']['#options'] = mfcs_get_request_type_list_options('search');
       }
     }
     elseif ($table_name == 'dates') {
@@ -1420,6 +1461,14 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
       ),
     );
 
+    $location['targets'][$target_name][$target_delta]['option']['#states'] = array(
+      'invisible' => array(
+        ':input[name="advanced[targets][' . $target_name . '][' . $target_delta . '][operator]"]' => array(
+          array('value' => MFCS_OPERATOR_IS_NULL),
+          array('value' => MFCS_OPERATOR_IS_NOT_NULL),
+        ),
+      ),
+    );
 
     if (isset($form_state['values']['advanced']['targets'][$target_name][$target_delta]['option'])) {
       if (!isset($form_state['advanced_search-clear']) || !$form_state['advanced_search-clear']) {
@@ -1457,54 +1506,121 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
     unset($location['targets'][$target_name][$target_delta]['search']);
     unset($form['form']['conditionally_required']['#value'][0][$target_name][$target_delta]);
 
-    $location['targets'][$target_name][$target_delta]['hours'] = array(
-      '#id' => 'search-advanced-targets' . $id_extra . '-targets-' . $target_name . '-hours',
-      '#type' => 'textfield',
-      '#size' => 9,
-      '#title' => $field['name'] . " Hours" . ' #' . $target_delta,
-      '#default_value' => NULL,
-      '#required' => FALSE,
-      '#attributes' => array(
-        'class' => array(
-          'search-advanced-target-search',
-          'search-advanced-target-' . $target_name . '-hours',
+    if (isset($field['columns']) && in_array('quantity', $field['columns'])) {
+      $location['targets'][$target_name][$target_delta]['quantity'] = array(
+        '#id' => 'search-advanced-targets' . $id_extra . '-targets-' . $target_name . '-quantity',
+        '#type' => 'textfield',
+        '#size' => 9,
+        '#title' => "Quantity",
+        '#default_value' => NULL,
+        '#required' => FALSE,
+        '#attributes' => array(
+          'class' => array(
+            'search-advanced-target-search',
+            'search-advanced-target-' . $target_name . '-quantity',
+          ),
         ),
-      ),
-    );
+      );
 
+      if (isset($field_presentation['type']) && is_array($field_presentation['type']) && array_key_exists('quantity', $field_presentation['type']) && $field_presentation['type']['quantity'] == 'requirement_personnel') {
+        $location['targets'][$target_name][$target_delta]['quantity']['#title'] = "Personnel";
+      }
+
+      $location['targets'][$target_name][$target_delta]['quantity']['#states'] = array(
+        'invisible' => array(
+          ':input[name="advanced[targets][' . $target_name . '][' . $target_delta . '][operator]"]' => array(
+            array('value' => MFCS_OPERATOR_IS_NULL),
+            array('value' => MFCS_OPERATOR_IS_NOT_NULL),
+          ),
+        ),
+      );
+
+      $form['form']['conditionally_required']['#value'][0][$target_name][] = &$location['targets'][$target_name][$target_delta]['quantity'];
+    }
+
+    if (isset($field['columns']) && in_array('hours', $field['columns'])) {
+      $location['targets'][$target_name][$target_delta]['hours'] = array(
+        '#id' => 'search-advanced-targets' . $id_extra . '-targets-' . $target_name . '-hours',
+        '#type' => 'textfield',
+        '#size' => 9,
+        '#title' => "Hours",
+        '#default_value' => NULL,
+        '#required' => FALSE,
+        '#attributes' => array(
+          'class' => array(
+            'search-advanced-target-search',
+            'search-advanced-target-' . $target_name . '-hours',
+          ),
+        ),
+      );
+
+      $location['targets'][$target_name][$target_delta]['hours']['#states'] = array(
+        'invisible' => array(
+          ':input[name="advanced[targets][' . $target_name . '][' . $target_delta . '][operator]"]' => array(
+            array('value' => MFCS_OPERATOR_IS_NULL),
+            array('value' => MFCS_OPERATOR_IS_NOT_NULL),
+          ),
+        ),
+      );
+
+      $form['form']['conditionally_required']['#value'][0][$target_name][] = &$location['targets'][$target_name][$target_delta]['hours'];
+    }
+
+    if (isset($field['columns']) && in_array('days', $field['columns'])) {
     $location['targets'][$target_name][$target_delta]['days'] = array(
-      '#id' => 'search-advanced-targets' . $id_extra . '-targets-' . $target_name . '-days',
-      '#type' => 'textfield',
-      '#size' => 9,
-      '#title' => $field['name'] . " Days" . ' #' . $target_delta,
-      '#default_value' => NULL,
-      '#required' => FALSE,
-      '#attributes' => array(
-        'class' => array(
-          'search-advanced-target-search',
-          'search-advanced-target-' . $target_name . '-days',
+        '#id' => 'search-advanced-targets' . $id_extra . '-targets-' . $target_name . '-days',
+        '#type' => 'textfield',
+        '#size' => 9,
+        '#title' => "Days",
+        '#default_value' => NULL,
+        '#required' => FALSE,
+        '#attributes' => array(
+          'class' => array(
+            'search-advanced-target-search',
+            'search-advanced-target-' . $target_name . '-days',
+          ),
         ),
-      ),
-    );
+      );
 
-    $location['targets'][$target_name][$target_delta]['amount'] = array(
-      '#id' => 'search-advanced-targets' . $id_extra . '-targets-' . $target_name . '-amount',
-      '#type' => 'textfield',
-      '#size' => 12,
-      '#title' => $field['name'] . " Amount" . ' #' . $target_delta,
-      '#default_value' => NULL,
-      '#required' => FALSE,
-      '#attributes' => array(
-        'class' => array(
-          'search-advanced-target-search',
-          'search-advanced-target-' . $target_name . '-amount',
+      $location['targets'][$target_name][$target_delta]['days']['#states'] = array(
+        'invisible' => array(
+          ':input[name="advanced[targets][' . $target_name . '][' . $target_delta . '][operator]"]' => array(
+            array('value' => MFCS_OPERATOR_IS_NULL),
+            array('value' => MFCS_OPERATOR_IS_NOT_NULL),
+          ),
         ),
-      ),
-    );
+      );
 
-    $form['form']['conditionally_required']['#value'][0][$target_name][] = &$location['targets'][$target_name][$target_delta]['hours'];
-    $form['form']['conditionally_required']['#value'][0][$target_name][] = &$location['targets'][$target_name][$target_delta]['days'];
-    $form['form']['conditionally_required']['#value'][0][$target_name][] = &$location['targets'][$target_name][$target_delta]['amount'];
+      $form['form']['conditionally_required']['#value'][0][$target_name][] = &$location['targets'][$target_name][$target_delta]['days'];
+    }
+
+    if (isset($field['columns']) && in_array('amount', $field['columns'])) {
+      $location['targets'][$target_name][$target_delta]['amount'] = array(
+        '#id' => 'search-advanced-targets' . $id_extra . '-targets-' . $target_name . '-amount',
+        '#type' => 'textfield',
+        '#size' => 12,
+        '#title' => "Amount",
+        '#default_value' => NULL,
+        '#required' => FALSE,
+        '#attributes' => array(
+          'class' => array(
+            'search-advanced-target-search',
+            'search-advanced-target-' . $target_name . '-amount',
+          ),
+        ),
+      );
+
+      $location['targets'][$target_name][$target_delta]['amount']['#states'] = array(
+        'invisible' => array(
+          ':input[name="advanced[targets][' . $target_name . '][' . $target_delta . '][operator]"]' => array(
+            array('value' => MFCS_OPERATOR_IS_NULL),
+            array('value' => MFCS_OPERATOR_IS_NOT_NULL),
+          ),
+        ),
+      );
+
+      $form['form']['conditionally_required']['#value'][0][$target_name][] = &$location['targets'][$target_name][$target_delta]['amount'];
+    }
   }
   elseif ($field['type'] == 'venue_coordinator') {
     $venue_coordinator_options = mfcs_request_get_available_venue_coordinators();
@@ -1703,37 +1819,97 @@ function mfcs_request_search_0_form_build_search_target($structure, $target_name
   if ($field['type'] == 'requirements') {
     $and = array();
 
-    if (!empty($target_values['hours'])) {
-      $target_field_name = 'field_' . $target_name . '-hours-' . $target_delta;
-      $and[$target_field_name]['group_name'] = $table_name;
-      $and[$target_field_name]['field_name'] = $field_name;
-      $and[$target_field_name]['search'] = mfcs_convert_value_to_database_format($target_values['hours'], 'currency');
-      $and[$target_field_name]['column'] = 'hours';
-      $and[$target_field_name]['type'] = $field['type'];
-      $and[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
-      $and[$target_field_name]['operator'] = $operator_value;
+    if (isset($field['columns']) && in_array('quantity', $field['columns'])) {
+      if ($operator_value == MFCS_OPERATOR_IS_NULL || $operator_value == MFCS_OPERATOR_IS_NOT_NULL || $target_values['quantity'] == '0' || !empty($target_values['quantity'])) {
+        $target_field_name = 'field_' . $target_name . '-quantity-' . $target_delta;
+        $and[$target_field_name]['group_name'] = $table_name;
+        $and[$target_field_name]['field_name'] = $field_name;
+        $and[$target_field_name]['search'] = $target_values['quantity'];
+        $and[$target_field_name]['column'] = 'quantity';
+        $and[$target_field_name]['type'] = $field['type'];
+        $and[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
+        $and[$target_field_name]['operator'] = $operator_value;
+
+        if ($operator_value == MFCS_OPERATOR_IS_NULL || $operator_value == MFCS_OPERATOR_IS_NOT_NULL) {
+          $and[$target_field_name]['search'] = NULL;
+          $and[$target_field_name]['join'] = MFCS_JOIN_LEFT;
+        }
+      }
     }
 
-    if (!empty($target_values['days'])) {
-      $target_field_name = 'field_' . $target_name . '-days-' . $target_delta;
-      $and[$target_field_name]['group_name'] = $table_name;
-      $and[$target_field_name]['field_name'] = $field_name;
-      $and[$target_field_name]['search'] = mfcs_convert_value_to_database_format($target_values['days'], 'currency');
-      $and[$target_field_name]['column'] = 'days';
-      $and[$target_field_name]['type'] = $field['type'];
-      $and[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
-      $and[$target_field_name]['operator'] = $operator_value;
+    if (isset($field['columns']) && in_array('hours', $field['columns'])) {
+      if ($operator_value == MFCS_OPERATOR_IS_NULL || $operator_value == MFCS_OPERATOR_IS_NOT_NULL || $target_values['hours'] == '0' || !empty($target_values['hours'])) {
+        $target_field_name = 'field_' . $target_name . '-hours-' . $target_delta;
+        $and[$target_field_name]['group_name'] = $table_name;
+        $and[$target_field_name]['field_name'] = $field_name;
+        $and[$target_field_name]['search'] = NULL;
+        $and[$target_field_name]['column'] = 'hours';
+        $and[$target_field_name]['type'] = $field['type'];
+        $and[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
+        $and[$target_field_name]['operator'] = $operator_value;
+
+        if ($operator_value == MFCS_OPERATOR_IS_NULL || $operator_value == MFCS_OPERATOR_IS_NOT_NULL) {
+          $and[$target_field_name]['search'] = NULL;
+          $and[$target_field_name]['join'] = MFCS_JOIN_LEFT;
+        }
+        elseif ($target_values['hours'] == '0' || !empty($target_values['hours'])) {
+          $and[$target_field_name]['search'] = mfcs_convert_value_to_database_format($target_values['hours'], 'currency');
+
+          if ($and[$target_field_name]['search'] === FALSE) {
+            $and[$target_field_name]['search'] = NULL;
+          }
+        }
+      }
     }
 
-    if (!empty($target_values['amount'])) {
-      $target_field_name = 'field_' . $target_name . '-amount-' . $target_delta;
-      $and[$target_field_name]['group_name'] = $table_name;
-      $and[$target_field_name]['field_name'] = $field_name;
-      $and[$target_field_name]['search'] = mfcs_convert_value_to_database_format($target_values['amount'], 'currency');
-      $and[$target_field_name]['column'] = 'amount';
-      $and[$target_field_name]['type'] = $field['type'];
-      $and[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
-      $and[$target_field_name]['operator'] = $operator_value;
+    if (isset($field['columns']) && in_array('days', $field['columns'])) {
+      if ($operator_value == MFCS_OPERATOR_IS_NULL || $operator_value == MFCS_OPERATOR_IS_NOT_NULL || $target_values['days'] == '0' || !empty($target_values['days'])) {
+        $target_field_name = 'field_' . $target_name . '-days-' . $target_delta;
+        $and[$target_field_name]['group_name'] = $table_name;
+        $and[$target_field_name]['field_name'] = $field_name;
+        $and[$target_field_name]['search'] = NULL;
+        $and[$target_field_name]['column'] = 'days';
+        $and[$target_field_name]['type'] = $field['type'];
+        $and[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
+        $and[$target_field_name]['operator'] = $operator_value;
+
+        if ($operator_value == MFCS_OPERATOR_IS_NULL || $operator_value == MFCS_OPERATOR_IS_NOT_NULL) {
+          $and[$target_field_name]['search'] = NULL;
+          $and[$target_field_name]['join'] = MFCS_JOIN_LEFT;
+        }
+        elseif ($target_values['days'] == '0' || !empty($target_values['days'])) {
+          $and[$target_field_name]['search'] = mfcs_convert_value_to_database_format($target_values['days'], 'currency');
+
+          if ($and[$target_field_name]['search'] === FALSE) {
+            $and[$target_field_name]['search'] = NULL;
+          }
+        }
+      }
+    }
+
+    if (isset($field['columns']) && in_array('amount', $field['columns'])) {
+      if ($operator_value == MFCS_OPERATOR_IS_NULL || $operator_value == MFCS_OPERATOR_IS_NOT_NULL || $target_values['amount'] == '0' || !empty($target_values['amount'])) {
+        $target_field_name = 'field_' . $target_name . '-amount-' . $target_delta;
+        $and[$target_field_name]['group_name'] = $table_name;
+        $and[$target_field_name]['field_name'] = $field_name;
+        $and[$target_field_name]['search'] = NULL;
+        $and[$target_field_name]['column'] = 'amount';
+        $and[$target_field_name]['type'] = $field['type'];
+        $and[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
+        $and[$target_field_name]['operator'] = $operator_value;
+
+        if ($operator_value == MFCS_OPERATOR_IS_NULL || $operator_value == MFCS_OPERATOR_IS_NOT_NULL) {
+          $and[$target_field_name]['search'] = NULL;
+          $and[$target_field_name]['join'] = MFCS_JOIN_LEFT;
+        }
+        elseif ($target_values['amount'] == '0' || !empty($target_values['amount'])) {
+          $and[$target_field_name]['search'] = mfcs_convert_value_to_database_format($target_values['amount'], 'currency');
+
+          if ($and[$target_field_name]['search'] === FALSE) {
+            $and[$target_field_name]['search'] = NULL;
+          }
+        }
+      }
     }
 
     if (!empty($and)) {
@@ -1966,6 +2142,11 @@ function mfcs_request_search_0_form_build_search_target($structure, $target_name
           $search[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
           $search[$target_field_name]['search'] = $search_value;
           $search[$target_field_name]['operator'] = $operator_value;
+
+          if ($operator_value == MFCS_OPERATOR_IS_NULL || $operator_value == MFCS_OPERATOR_IS_NOT_NULL) {
+            $search[$target_field_name]['search'] = NULL;
+            $search[$target_field_name]['join'] = MFCS_JOIN_LEFT;
+          }
         }
       }
       elseif (is_array($search_value)) {
@@ -1981,6 +2162,11 @@ function mfcs_request_search_0_form_build_search_target($structure, $target_name
           $and[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
           $and[$target_field_name]['search'] = $search_value[$term_id];
           $and[$target_field_name]['operator'] = $operator_value;
+
+          if ($operator_value == MFCS_OPERATOR_IS_NULL || $operator_value == MFCS_OPERATOR_IS_NOT_NULL) {
+            $and[$target_field_name]['search'] = NULL;
+            $and[$target_field_name]['join'] = MFCS_JOIN_LEFT;
+          }
         }
 
         if (!empty($and)) {
@@ -2023,6 +2209,11 @@ function mfcs_request_search_0_form_build_search_target($structure, $target_name
       $search[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
       $search[$target_field_name]['operator'] = $operator_value;
       $search[$target_field_name]['search'] = $search_value;
+
+      if ($operator_value == MFCS_OPERATOR_IS_NULL || $operator_value == MFCS_OPERATOR_IS_NOT_NULL) {
+        $search[$target_field_name]['search'] = NULL;
+        $search[$target_field_name]['join'] = MFCS_JOIN_LEFT;
+      }
     }
   }
 

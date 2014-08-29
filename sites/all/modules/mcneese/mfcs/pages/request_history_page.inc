@@ -29,11 +29,12 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
   $request = mfcs_load_request_by_id($request_id);
 
   if (empty($request)) {
-    watchdog(MFCS_WATCHDOG_ID, "Unable to find request with id of @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
     drupal_not_found();
     drupal_exit();
     return array();
   }
+
+  mfcs_add_canonical_headers('requests/history-0/' . $request_id);
 
   global $base_path;
 
@@ -45,9 +46,9 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
 
   $user = cf_current_user();
 
-  $manager = user_access('mfcs manage');
-  $reviewer = user_access('mfcs review');
-  $requester = user_access('mfcs request');
+  $manager = user_access('mfcs manage', $user);
+  $reviewer = user_access('mfcs review', $user);
+  $requester = user_access('mfcs request', $user);
 
   $form = array();
   $form['navigator_top'] = array(
@@ -91,11 +92,11 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
   $step_options = mfcs_get_request_steps_list_options();
 
   try {
-    $query = db_select('mfcs_request_revisions', 'merv');
+    $query = db_select('mfcs_request_revisions', 'mrv');
 
-    $query->fields('merv');
-    $query->condition('merv.request_id', $request_id);
-    $query->orderBy('merv.date', 'DESC');
+    $query->fields('mrv');
+    $query->condition('mrv.request_id', $request_id);
+    $query->orderBy('mrv.date', 'DESC');
     $query->range($start_range, $rows_per_page + 1);
 
     $revisions = $query->execute()->fetchall();
