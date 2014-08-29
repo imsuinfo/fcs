@@ -536,6 +536,7 @@ function cf_theme_generate_headers(array $cf) {
   $supported_link_rel[] = 'alternate';
   $supported_link_rel[] = 'appendix';
   $supported_link_rel[] = 'bookmark';
+  $supported_link_rel[] = 'canonical';
   $supported_link_rel[] = 'chapter';
   $supported_link_rel[] = 'contents';
   $supported_link_rel[] = 'copyright';
@@ -546,6 +547,7 @@ function cf_theme_generate_headers(array $cf) {
   $supported_link_rel[] = 'next';
   $supported_link_rel[] = 'prev';
   $supported_link_rel[] = 'section';
+  $supported_link_rel[] = 'shortlink';
   $supported_link_rel[] = 'start';
   $supported_link_rel[] = 'stylesheet';
   $supported_link_rel[] = 'subsection';
