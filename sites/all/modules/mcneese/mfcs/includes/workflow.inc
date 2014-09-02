@@ -1131,50 +1131,6 @@ function mfcs_workflow_next_step($request_id, $type, $step, $decision, $message,
 }
 
 /**
- * Process the change of an requests status.
- *
- * @param int $request_id
- *   The request id.
- * @param int $status
- *   The new workflow status the request is going to.
- * @param object|null $user
- *   (optional) If specified, the user to log this change as.
- *
- * @return bool
- *   TRUE on success, FALSE otherwise.
- */
-function mfcs_workflow_status_change_alert($request_id, $status, $user = NULL) {
-  $request = mfcs_load_request_by_id($request_id);
-
-  if (empty($request)) {
-    return FALSE;
-  }
-
-  if (!cf_is_integer($status)) {
-    cf_error::invalid_integer('status');
-    return FALSE;
-  }
-
-  if (is_null($user)) {
-    $user = cf_current_user();
-  }
-
-  if (!is_object($user)) {
-    cf_error::invalid_object('user');
-    return FALSE;
-  }
-
-  $parameters = array();
-  $parameters['changed_by'] = $user->uid;
-  $parameters['changed_type'] = 'user';
-  $parameters['status'] = $status;
-
-  mfcs_send_workflow_emails($request_id, $parameters);
-
-  return TRUE;
-}
-
-/**
  * Sends e-mails about certain requests.
  *
  * @param int $request_id
