@@ -1322,7 +1322,6 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
 
       $can_review_query->where('c_mr_2.request_classification = mfrcc.value AND c_mr_2.review_step = mftsp.value');
       $can_review_query->condition('c_mr_2.user_id', $user->uid);
-      $can_review_query->condition('c_mr_2.review_step', $show_step, 'IN');
       $can_review_query->condition('c_mr_2.disabled', 0);
       $can_review_query->distinct();
 
@@ -1333,7 +1332,6 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
 
       $already_reviewed_query->where('mfrr.request_id = mftsp.request_id and mfrr.step = mftsp.value');
       $already_reviewed_query->condition('mfrr.user_id', $user->uid);
-      $already_reviewed_query->condition('mfrr.step', $show_step, 'IN');
       $already_reviewed_query->condition('mfrr.decision', $show_decision, 'IN');
       $already_reviewed_query->distinct();
 
