@@ -54,6 +54,7 @@ define('MFCS_EVENT_STATUS_CANCELLED', 7);
 /**
  * Defines Taxonomy TID for review decisions.
  */
+ define('MFCS_REVIEW_DECISION_MANAGER_RECHECK', -1);
  define('MFCS_REVIEW_DECISION_AMENDMENT', 141);
  define('MFCS_REVIEW_DECISION_APPROVE', 115);
  define('MFCS_REVIEW_DECISION_COMMENT', 113);

@@ -283,6 +283,12 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
     '#default_value' => t("Add Reviewer"),
   );
 
+  $form['reviewer']['recheck'] = array(
+    '#id' => 'submit-reviewer-recheck',
+    '#type' => 'submit',
+    '#default_value' => t("Recheck Requests"),
+  );
+
   return $form;
 }
 
@@ -296,7 +302,7 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
  *
  * @see: mfcs_request_reviewers_0_form()
  */
-function mfcs_request_edit_0_form_pre_validate(&$form, &$form_state) {
+function mfcs_request_reviewers_0_form_pre_validate(&$form, &$form_state) {
   $clicked_id = '';
   if (isset($form_state['triggering_element']['#id'])) {
     $clicked_id = $form_state['triggering_element']['#id'];
@@ -398,6 +404,8 @@ function mfcs_request_reviewers_0_form_validate($form, &$form_state) {
       }
     }
   }
+  elseif ($clicked_id == 'submit-reviewer-recheck') {
+  }
   else {
     form_set_error('', "Unknown submit process detected.");
   }
@@ -479,6 +487,69 @@ function mfcs_request_reviewers_0_form_submit($form, &$form_state) {
 
       $failure = TRUE;
     }
+  }
+  elseif ($clicked_id == 'submit-reviewer-recheck') {
+    mfcs_include(6);
+
+    $classification = $form['form']['request_classification']['#value'];
+    $step = $form['form']['review_step']['#value'];
+
+    try {
+      $query = db_select('mfcs_requests', 'mer');
+      $query->innerjoin('mfcs_current_review', 'mcr', 'mer.id = mcr.request_id');
+
+      $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
+      $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
+      $query->innerjoin('mfcs_field_top_step', 'mftsp', 'mct.request_id = mftsp.request_id AND mct.step = mftsp.revision AND mftsp.delta = 0');
+
+      $query->innerjoin('mfcs_current_request_coordinator', 'mcrc', 'mer.id = mcrc.request_id');
+      $query->innerjoin('mfcs_field_request_coordinator_classification', 'mfrcc', 'mcrc.request_id = mfrcc.request_id AND mcrc.classification = mfrcc.revision AND mfrcc.delta = 0');
+
+      $query->addField('mer', 'id', 'id');
+      $query->addField('mcr', 'review', 'revision');
+
+      $query->condition('mfts.value', MFCS_EVENT_STATUS_LOCKED);
+      $query->condition('mftsp.value', $step);
+      $query->condition('mfrcc.value', $classification);
+
+      $request_ids = $query->execute()->fetchAllKeyed();
+
+      if (!is_array($request_ids) || empty($request_ids)) {
+        drupal_set_message("Recheck process complete.");
+        return TRUE;
+      }
+    }
+    catch (Exception $ex) {
+      cf_error::on_query_execution($ex);
+
+      return FALSE;
+    }
+
+    $checked = mfcs_check_if_requests_are_fully_reviewed($request_ids, $classification, $step);
+
+    if ($checked === FALSE) {
+      form_set_error('form', "An error occurred while trying to submit the recheck the requests. Please contact the support staff.");
+      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to submit the recheck the requests.", array(), WATCHDOG_ERROR);
+
+      $form_state['rebuild'] = TRUE;
+      $form_state['redirect'] = FALSE;
+      $form_state['submitted'] = FALSE;
+      return FALSE;
+    }
+
+    if (is_array($checked)) {
+      foreach ($checked as $request_id => $check) {
+        if ($check === FALSE) {
+          continue;
+        }
+
+        $message = "This request's workflow has changed as a result of a change in the reviewer management settings.";
+
+        mfcs_workflow_next_step($request_id, $classification, $step, MFCS_REVIEW_DECISION_MANAGER_RECHECK, $message, TRUE);
+      }
+    }
+
+    drupal_set_message("Recheck process complete.");
   }
 
   // redirect after submitting.
