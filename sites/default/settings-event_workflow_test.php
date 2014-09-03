@@ -381,7 +381,7 @@ ini_set('session.cookie_lifetime', 432000);
  * - anonymous: Defines the human-readable name of anonymous users.
  * Remove the leading hash signs to enable.
  */
-$conf['site_name'] = 'Event Workflow (test)';
+$conf['site_name'] = 'McNeese Facilities Use System (test)';
 $conf['theme_default'] = 'mcneese_fcs';
 # $conf['anonymous'] = 'Visitor';
 
