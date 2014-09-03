@@ -389,6 +389,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message, $ext
         $query->range(0, 1);
 
         $result = $query->execute()->fetchField();
+
         if ($result !== FALSE) {
           $requirement_latest_value = $result;
         }
@@ -578,7 +579,12 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message, $ext
       }
 
       if (is_null($mfcs_current_requirements[$use])) {
-        $mfcs_current_requirements[$use] = 0;
+        if (is_null($requirements_latest[$use])) {
+          $mfcs_current_requirements[$use] = 0;
+        }
+        else {
+          $mfcs_current_requirements[$use] = $requirements_latest[$use] + 1;
+        }
       }
       else {
         $mfcs_current_requirements[$use]++;

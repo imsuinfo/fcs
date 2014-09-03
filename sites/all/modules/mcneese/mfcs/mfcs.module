@@ -1316,30 +1316,30 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
         MFCS_REVIEW_DECISION_DENY
       );
 
-      $can_review_query = db_select('mfcs_reviewers', 'c_mr_2');
-
-      $can_review_query->addfield('c_mr_2', 'user_id', 'user_id');
-
-      $can_review_query->where('c_mr_2.request_classification = mfrcc.value AND c_mr_2.review_step = mftsp.value');
-      $can_review_query->condition('c_mr_2.user_id', $user->uid);
-      $can_review_query->condition('c_mr_2.disabled', 0);
-      $can_review_query->distinct();
-
       $already_reviewed_query = db_select('mfcs_field_review_review', 'mfrr');
-      $already_reviewed_query->innerjoin('mfcs_current_review', 'mcr', 'mfrr.request_id = mcr.request_id and mfrr.revision = mcr.review');
+      $already_reviewed_query->innerJoin('mfcs_current_review', 'mcr', 'mfrr.request_id = mcr.request_id and mfrr.revision = mcr.review');
+      $already_reviewed_query->innerJoin('mfcs_review_classifications', 'mrc', 'mfrr.id = mrc.review_id');
 
-      $already_reviewed_query->addfield('mfrr', 'step', 'step');
+      $already_reviewed_query->addField('mrc', 'classification', 'classification');
 
-      $already_reviewed_query->where('mfrr.request_id = mftsp.request_id and mfrr.step = mftsp.value');
+      $already_reviewed_query->where('mfrr.request_id = mer.id and mfrr.step = mftsp.value');
       $already_reviewed_query->condition('mfrr.user_id', $user->uid);
       $already_reviewed_query->condition('mfrr.decision', $show_decision, 'IN');
-      $already_reviewed_query->distinct();
+
+      $can_review_query = db_select('mfcs_reviewers', 'c_mr_1');
+
+      $can_review_query->addfield('c_mr_1', 'user_id', 'user_id');
+
+      $can_review_query->where('c_mr_1.request_classification = mfrcc.value AND c_mr_1.review_step = mftsp.value');
+      $can_review_query->condition('c_mr_1.user_id', $user->uid);
+      $can_review_query->condition('c_mr_1.disabled', 0);
+      $can_review_query->condition('c_mr_1.reviewer_classification', $already_reviewed_query, 'NOT IN');
+      $can_review_query->distinct();
 
       $and = db_and();
       $and->condition('mfts.value', $show_status, 'IN');
       $and->condition('mftsp.value', $show_step, 'IN');
       $and->condition($user->uid, $can_review_query, 'IN');
-      $and->condition('mftsp.value', $already_reviewed_query, 'NOT IN');
 
       if (is_null($or)) {
         $or = db_or();
@@ -1347,14 +1347,14 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
       $or->condition($and);
     }
     elseif ($review_restrictions === FALSE) {
-      $can_review_query = db_select('mfcs_reviewers', 'c_mr_2');
+      $can_review_query = db_select('mfcs_reviewers', 'c_mr_1');
 
-      $can_review_query->addfield('c_mr_2', 'user_id', 'user_id');
+      $can_review_query->addfield('c_mr_1', 'user_id', 'user_id');
 
-      $can_review_query->where('c_mr_2.request_classification = mfrcc.value AND c_mr_2.review_step = mftsp.value');
-      $can_review_query->condition('c_mr_2.user_id', $user->uid);
-      $can_review_query->condition('c_mr_2.review_step', $show_step, 'IN');
-      $can_review_query->condition('c_mr_2.disabled', 0);
+      $can_review_query->where('c_mr_1.request_classification = mfrcc.value AND c_mr_1.review_step = mftsp.value');
+      $can_review_query->condition('c_mr_1.user_id', $user->uid);
+      $can_review_query->condition('c_mr_1.review_step', $show_step, 'IN');
+      $can_review_query->condition('c_mr_1.disabled', 0);
       $can_review_query->distinct();
 
       $and = db_and();
@@ -1368,13 +1368,13 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
       $or->condition($and);
     }
     else {
-      $can_review_query = db_select('mfcs_reviewers', 'c_mr_2');
+      $can_review_query = db_select('mfcs_reviewers', 'c_mr_1');
 
-      $can_review_query->addfield('c_mr_2', 'user_id', 'user_id');
+      $can_review_query->addfield('c_mr_1', 'user_id', 'user_id');
 
-      $can_review_query->where('c_mr_2.request_classification = mfrcc.value');
-      $can_review_query->condition('c_mr_2.user_id', $user->uid);
-      $can_review_query->condition('c_mr_2.disabled', 0);
+      $can_review_query->where('c_mr_1.request_classification = mfrcc.value');
+      $can_review_query->condition('c_mr_1.user_id', $user->uid);
+      $can_review_query->condition('c_mr_1.disabled', 0);
       $can_review_query->distinct();
 
       if (is_null($or)) {
@@ -4925,32 +4925,30 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
           MFCS_REVIEW_DECISION_DENY
         );
 
-        $can_review_query = db_select('mfcs_reviewers', 'c_mr_2');
-
-        $can_review_query->addfield('c_mr_2', 'user_id', 'user_id');
-
-        $can_review_query->where('c_mr_2.request_classification = mfrcc.value AND c_mr_2.review_step = mftsp.value');
-        $can_review_query->condition('c_mr_2.user_id', $user->uid);
-        $can_review_query->condition('c_mr_2.review_step', $show_step, 'IN');
-        $can_review_query->condition('c_mr_2.disabled', 0);
-        $can_review_query->distinct();
-
         $already_reviewed_query = db_select('mfcs_field_review_review', 'mfrr');
-        $already_reviewed_query->innerjoin('mfcs_current_review', 'mcr', 'mfrr.request_id = mcr.request_id and mfrr.revision = mcr.review');
+        $already_reviewed_query->innerJoin('mfcs_current_review', 'mcr', 'mfrr.request_id = mcr.request_id and mfrr.revision = mcr.review');
+        $already_reviewed_query->innerJoin('mfcs_review_classifications', 'mrc', 'mfrr.id = mrc.review_id');
 
-        $already_reviewed_query->addfield('mfrr', 'step', 'step');
+        $already_reviewed_query->addField('mrc', 'classification', 'classification');
 
-        $already_reviewed_query->where('mfrr.request_id = mftsp.request_id and mfrr.step = mftsp.value');
+        $already_reviewed_query->where('mfrr.request_id = mer.id and mfrr.step = mftsp.value');
         $already_reviewed_query->condition('mfrr.user_id', $user->uid);
-        $already_reviewed_query->condition('mfrr.step', $show_step, 'IN');
         $already_reviewed_query->condition('mfrr.decision', $show_decision, 'IN');
-        $already_reviewed_query->distinct();
+
+        $can_review_query = db_select('mfcs_reviewers', 'c_mr_1');
+
+        $can_review_query->addfield('c_mr_1', 'user_id', 'user_id');
+
+        $can_review_query->where('c_mr_1.request_classification = mfrcc.value AND c_mr_1.review_step = mftsp.value');
+        $can_review_query->condition('c_mr_1.user_id', $user->uid);
+        $can_review_query->condition('c_mr_1.disabled', 0);
+        $can_review_query->condition('c_mr_1.reviewer_classification', $already_reviewed_query, 'NOT IN');
+        $can_review_query->distinct();
 
         $and = db_and();
         $and->condition('mfts.value', $show_status, 'IN');
         $and->condition('mftsp.value', $show_step, 'IN');
         $and->condition($user->uid, $can_review_query, 'IN');
-        $and->condition('mftsp.value', $already_reviewed_query, 'NOT IN');
 
         if (is_null($or)) {
           $or = db_or();
@@ -4959,14 +4957,14 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
       }
       elseif ($review_restrictions === FALSE) {
         if (!$manager) {
-          $can_review_query = db_select('mfcs_reviewers', 'c_mr_2');
+          $can_review_query = db_select('mfcs_reviewers', 'c_mr_1');
 
-          $can_review_query->addfield('c_mr_2', 'user_id', 'user_id');
+          $can_review_query->addfield('c_mr_1', 'user_id', 'user_id');
 
-          $can_review_query->where('c_mr_2.request_classification = mfrcc.value AND c_mr_2.review_step = mftsp.value');
-          $can_review_query->condition('c_mr_2.user_id', $user->uid);
-          $can_review_query->condition('c_mr_2.review_step', $show_step, 'IN');
-          $can_review_query->condition('c_mr_2.disabled', 0);
+          $can_review_query->where('c_mr_1.request_classification = mfrcc.value AND c_mr_1.review_step = mftsp.value');
+          $can_review_query->condition('c_mr_1.user_id', $user->uid);
+          $can_review_query->condition('c_mr_1.review_step', $show_step, 'IN');
+          $can_review_query->condition('c_mr_1.disabled', 0);
           $can_review_query->distinct();
 
           $and = db_and();
@@ -4982,13 +4980,13 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
       }
       else {
         if (!$manager) {
-          $can_review_query = db_select('mfcs_reviewers', 'c_mr_2');
+          $can_review_query = db_select('mfcs_reviewers', 'c_mr_1');
 
-          $can_review_query->addfield('c_mr_2', 'user_id', 'user_id');
+          $can_review_query->addfield('c_mr_1', 'user_id', 'user_id');
 
-          $can_review_query->where('c_mr_2.request_classification = mfrcc.value');
-          $can_review_query->condition('c_mr_2.user_id', $user->uid);
-          $can_review_query->condition('c_mr_2.disabled', 0);
+          $can_review_query->where('c_mr_1.request_classification = mfrcc.value');
+          $can_review_query->condition('c_mr_1.user_id', $user->uid);
+          $can_review_query->condition('c_mr_1.disabled', 0);
           $can_review_query->distinct();
 
           if (is_null($or)) {
