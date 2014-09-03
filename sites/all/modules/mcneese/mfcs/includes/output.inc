@@ -108,10 +108,11 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
   $last_month = strtotime('midnight first day of last month', $month_start);
   $next_month = strtotime('midnight first day of next month', $month_start);
 
-  $url_base = $base_path . 'requests/calendar-0/month/';
+  $url_base_month = $base_path . 'requests/calendar-0/month/';
+  $url_base_day = $base_path . 'requests/calendar-0/day/';
 
-  $last_url = $url_base . date('Y', $last_month) . '/' . date('F', $last_month);
-  $next_url = $url_base . date('Y', $next_month) . '/' . date('F', $next_month);
+  $last_url = $url_base_month . date('Y', $last_month) . '/' . strtolower(date('F', $last_month));
+  $next_url = $url_base_month . date('Y', $next_month) . '/' . strtolower(date('F', $next_month));
 
   $markup .= '<div class="calendar-navigation">';
   $markup .= '<div class="calendar-navigation-previous">';
@@ -144,8 +145,10 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
 
   $weeks_processed = array();
   while ($current_date < $absolute_stop) {
+    $current_year = date('Y', $current_date);
     $current_week = date('W', $current_date);
     $current_month = date('n', $current_date);
+    $current_month_name = strtolower(date('F', $current_date));
     $current_day = date('j', $current_date);
     $current_month_day = $current_month . '-' . $current_day;
 
@@ -154,17 +157,17 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
       $weeks_processed[$week_first] = TRUE;
     }
 
-    $current_month = ' month-current';
+    $extra_class = ' month-current';
     if ($current_date < $month_start) {
-      $current_month = ' month-previous';
+      $extra_class = ' month-previous';
     }
     elseif ($current_date >= $month_stop) {
-      $current_month = ' month-next';
+      $extra_class = ' month-next';
     }
 
-    $markup .= '<div class="calendar-day-wrapper weekday-' . $week_count . ' day-' . $current_day . $current_month . '">';
-    $markup .= '<div class="calendar-day weekday-' . $week_count . ' day-' . $current_day . $current_month . '">';
-    $markup .= '<div class="calendar-label">' . $current_day . '</div>';
+    $markup .= '<div class="calendar-day-wrapper weekday-' . $week_count . ' day-' . $current_day . ' month-' . $current_month . $extra_class . '">';
+    $markup .= '<div class="calendar-day weekday-' . $week_count . ' day-' . $current_day . ' month-' . $current_month . $extra_class . '">';
+    $markup .= '<div class="calendar-label"><a href="' . $url_base_day . $current_year . '/' . $current_month_name . '/' . $current_day. '">' . $current_day . '</a></div>';
     if (!empty($items[$current_month_day])) {
       foreach ($items[$current_month_day] as $item_id => $item) {
         $markup .= '<div class="calendar-item"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
@@ -182,6 +185,209 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
       $week_count = $week_start;
     }
   }
+  $markup .= '</div></div>';
+
+
+  // end wrappers
+  $markup .= '</div></div>';
+
+  return $markup;
+}
+
+/**
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ */
+function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $id = NULL) {
+  if (!is_array($items)) {
+    cf_error::invalid_array('items');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($day_start)) {
+    cf_error::invalid_integer('day_start');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($day_stop)) {
+    cf_error::invalid_integer('day_stop');
+    return FALSE;
+  }
+
+  if (!is_string($title)) {
+    cf_error::invalid_string('title');
+    return FALSE;
+  }
+
+  $id_string = "";
+  if (!empty($id)) {
+    if (!is_string($id)) {
+      cf_error::invalid_string('id');
+      return FALSE;
+    }
+
+    $id_string = ' id="' . check_plain($id) . '"';
+  }
+
+  global $base_path;
+
+
+
+  // begin wrappers
+  $markup = '<div' . $id_string . ' class="calendar-day-wrapper"><div class="calendar-day">';
+
+
+  // title
+  $markup .= '<div class="calendar-title">' . $title . '</div>';
+
+
+  // navigation
+  $last_day = strtotime('midnight yesterday', $day_start);
+  $next_day = strtotime('midnight tomorrow', $day_start);
+
+  $url_base_day = $base_path . 'requests/calendar-0/day/';
+
+  $last_url = $url_base_day . date('Y', $last_day) . '/' . strtolower(date('F', $last_day)) . '/' . date('d', $last_day);
+  $next_url = $url_base_day . date('Y', $next_day) . '/' . strtolower(date('F', $next_day)) . '/' . date('d', $next_day);
+
+  $markup .= '<div class="calendar-navigation">';
+  $markup .= '<div class="calendar-navigation-previous">';
+  $markup .= '<a href="' . $last_url . '">Previous</a>';
+  $markup .= '</div>';
+  $markup .= '<div class="calendar-navigation-next">';
+  $markup .= '<a href="' . $next_url . '">Next</a>';
+  $markup .= '</div>';
+  $markup .= '</div>';
+
+
+  // header (All Day)
+  $markup .= '<div class="calendar-header-wrapper calendar-all_day"><div class="calendar-header">';
+  $markup .= '<div class="calendar-day-wrapper"><div class="calendar-day">';
+  $markup .= "All Day";
+  $markup .= '</div></div></div></div>';
+
+
+  // body (All Day)
+  $markup .= '<div class="calendar-body-wrapper calendar-all_day"><div class="calendar-body">';
+  if (empty($items['all_day'])) {
+    $markup .= '<div class="calendar-item-wrapper even row-0"><div class="calendar-item">';
+    $markup .= "No requests found.";
+    $markup .= '</div></div>';
+  }
+  else {
+    $row_even = TRUE;
+    $row_count = 0;
+    foreach ($items['all_day'] as $item_id => $item) {
+      $row_class = 'row-' . $row_count . ' ';
+      if ($row_even) {
+        $row_class .= 'even ';
+      }
+      else {
+        $row_class .= 'odd ';
+      }
+
+      $row_class .= 'location-' . $item['location'] . ' ';
+      $row_class .= 'building-' . $item['building'] . ' ';
+      $row_class .= 'room-' . $item['room'] . ' ';
+      $row_class .= 'type-' . $item['type'] . ' ';
+
+      $markup .= '<div class="calendar-item-wrapper ' . $row_class . '"><div class="calendar-item"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div></div>';
+
+      $row_count++;
+      $row_even = !$row_even;
+    }
+  }
+  $markup .= '</div></div>';
+
+
+  // header (Range)
+  $markup .= '<div class="calendar-header-wrapper calendar-range"><div class="calendar-header">';
+  $markup .= '<div class="calendar-time_slot-wrapper"><div class="calendar-time_slot">';
+  $markup .= '<div class="calendar-time_slot-label-wrapper"><div class="calendar-time_slot-label">' . "Time" . '</div></div>';
+  $markup .= '<div class="calendar-time_slot-request-wrapper"><div class="calendar-time_slot-request">' . "Requests" . '</div></div>';
+  $markup .= '</div></div></div></div>';
+
+
+  // body (Range)
+  $markup .= '<div class="calendar-body-wrapper calendar-range"><div class="calendar-body">';
+
+  $row_even = TRUE;
+  $row_count = 0;
+  foreach ($items['range'] as $floor_time => $items) {
+    $row_class = 'row-' . $row_count . ' ';
+    if ($row_even) {
+      $row_class .= 'even ';
+    }
+    else {
+      $row_class .= 'odd ';
+    }
+
+    $markup .= '<div class="calendar-time_slot-wrapper ' . $row_class . '"><div class="calendar-time_slot">';
+    $markup .= '<div class="calendar-time_slot-label-wrapper"><div class="calendar-time_slot-label">' . date("h:i a", $floor_time) . '</div></div>';
+    $markup .= '<div class="calendar-time_slot-request-wrapper"><div class="calendar-time_slot-request">';
+
+    $item_even = TRUE;
+    $item_count = 0;
+    $left_offset = 0;
+    foreach ($items as $item_id => $item) {
+      $item_class = "";
+
+      $item_class = 'row-' . $item_count . ' ';
+      if ($item_even) {
+       $item_class .= 'even ';
+      }
+      else {
+        $item_class .= 'odd ';
+      }
+
+      $item_class .= 'location-' . $item['location'] . ' ';
+      $item_class .= 'building-' . $item['building'] . ' ';
+      $item_class .= 'room-' . $item['room'] . ' ';
+      $item_class .= 'type-' . $item['type'] . ' ';
+
+      // split the time difference into height where each minute is equal to 1 pixel(s).
+      $item_height = (($item['time_stop'] - $item['time_start']) / 60);
+      if ($item_height < 20) {
+        $item_height = 20;
+      }
+
+      // designate the top offset based on when the request starts relative to the top of the hour.
+      $top_offset = ($item['time_start'] - $floor_time) / 60;
+      if ($top_offset < 0) {
+        $top_offset = 0;
+      }
+
+      $item_style = 'style="';
+      $item_style .= ' min-height: ' . $item_height . 'px;';
+      $item_style .= ' top: ' . $top_offset . 'px;';
+      $item_style .= ' left: ' . $left_offset . 'px;';
+      $item_style .= '"';
+
+      $markup .= '<div class="calendar-item-wrapper ' . $item_class . '" ' . $item_style . '><div class="calendar-item">';
+      $markup .= '<a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a>';
+      $markup .= '<div class="calendar-item-time">' . date("h:i a", $item['time_start']) . " to " . date("h:i a", $item['time_stop']) . '</div>';
+      $markup .= '</div></div>';
+
+      $item_count++;
+      $item_even = !$item_even;
+      $left_offset += 30;
+    }
+
+    $markup .= '</div></div></div></div>';
+
+    $row_count++;
+    $row_even = !$row_even;
+  }
+
   $markup .= '</div></div>';
 
 

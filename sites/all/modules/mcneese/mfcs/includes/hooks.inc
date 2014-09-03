@@ -312,7 +312,20 @@ function mfcs_hook_menu() {
     'title' => "Request Calendar",
     'description' => "Request Calendar - Month",
     'page callback' => 'mfcs_request_calendar_month_0_page',
-    'page arguments' => array(NULL, NULL),
+    'page arguments' => array(),
+    'file' => 'request_calendar_page.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('list'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
+
+  $items['requests/calendar-0/month/%'] = array(
+    'title' => "Request Calendar",
+    'description' => "Requests Calendar - Month",
+    'page callback' => 'mfcs_request_calendar_month_0_page',
+    'page arguments' => array(3),
     'file' => 'request_calendar_page.inc',
     'file path' => drupal_get_path('module', 'mfcs') . '/pages',
     'access callback' => 'mfcs_page_request_access',
@@ -339,6 +352,32 @@ function mfcs_hook_menu() {
     'description' => "Requests Calendar - Day",
     'page callback' => 'mfcs_request_calendar_day_0_page',
     'page arguments' => array(),
+    'file' => 'request_calendar_page.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('list'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
+
+  $items['requests/calendar-0/day/%'] = array(
+    'title' => "Request Calendar",
+    'description' => "Requests Calendar - Day",
+    'page callback' => 'mfcs_request_calendar_day_0_page',
+    'page arguments' => array(3),
+    'file' => 'request_calendar_page.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('list'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
+
+  $items['requests/calendar-0/day/%/%'] = array(
+    'title' => "Request Calendar",
+    'description' => "Requests Calendar - Day",
+    'page callback' => 'mfcs_request_calendar_day_0_page',
+    'page arguments' => array(3, 4),
     'file' => 'request_calendar_page.inc',
     'file path' => drupal_get_path('module', 'mfcs') . '/pages',
     'access callback' => 'mfcs_page_request_access',
