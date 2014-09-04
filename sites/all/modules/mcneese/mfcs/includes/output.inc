@@ -349,6 +349,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
         $item_class .= 'odd ';
       }
 
+      $item_class .= 'item-zindex-normal ';
       $item_class .= 'location-' . $item['location'] . ' ';
       $item_class .= 'building-' . $item['building'] . ' ';
       $item_class .= 'room-' . $item['room'] . ' ';
@@ -379,7 +380,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
 
       $item_count++;
       $item_even = !$item_even;
-      $left_offset += 30;
+      $left_offset += 50;
     }
 
     $markup .= '</div></div></div></div>';

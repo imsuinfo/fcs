@@ -209,6 +209,9 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
   }
 
   global $base_path;
+  $module_path = drupal_get_path('module', 'mfcs');
+
+  drupal_add_js($module_path . '/js/calendar-day-zindex.js', array('type' => 'file', 'group' => JS_DEFAULT, 'preprocess' => TRUE));
 
   $user = cf_current_user();
 
