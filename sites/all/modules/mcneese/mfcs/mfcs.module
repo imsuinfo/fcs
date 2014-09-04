@@ -1494,7 +1494,11 @@ function mfcs_mail($key, &$message, $params) {
   $files = array();
 
   if ($key == 'request_alert') {
-    $subject = 'Facilities Use Request: ' . $params['request_id'] . ' - ' . $params['request_title'];
+    if (!empty($params['title_prefix'])) {
+      $subject .= $params['title_prefix'];
+    }
+
+    $subject .= 'Facilities Use Request: ' . $params['request_id'] . ' - ' . $params['request_title'];
 
     if (!empty($params['title_suffix'])) {
       $subject .= ' - ' . $params['title_suffix'];

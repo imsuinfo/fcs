@@ -1794,25 +1794,33 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     }
   }
 
-  if (!empty($email_to)) {
-    // DEBUG: temporarily disable e-mailing to prrequest production accounts from receiving e-mails.
-    //        only allow reserved accounts to receive e-mails
+  // for debugging and testing, add/remove email addresses
+  global $conf;
+
+  $debug_accounts_restrict_mail = FALSE;
+  $debug_accounts_add_mail = array();
+  if (isset($conf['fcs_debugging']) && $conf['fcs_debugging'] && isset($conf['fcs_debugging-email_to-debug']) && $conf['fcs_debugging-email_to-debug']) {
     $debug_accounts = array();
-    $debug_accounts[] = 'kday@mcneese.edu';
-    $debug_accounts[] = 'colleen@mcneese.edu';
-    $debug_accounts[] = 'gfisher@mcneese.edu';
-    $debug_accounts[] = 'stan@mcneese.edu';
-    $debug_accounts[] = 'gbodin@mcneese.edu';
-    $debug_accounts[] = 'shogan@mcneese.edu';
-    $debug_accounts[] = 'rrhoden@mcneese.edu';
-    $debug_accounts[] = 'thomas@mcneese.edu';
-    $debug_accounts[] = 'rfontenot@mcneese.edu';
-    $debug_accounts[] = 'mwhite@mcneese.edu';
-    $debug_accounts[] = 'awoods@mcneese.edu';
-    $debug_accounts[] = 'rspinks@mcneese.edu';
-    $debug_accounts[] = 'bmungai@mcneese.edu';
-    $debug_accounts[] = 'emeche@mcneese.edu';
-    $debug_accounts[] = 'bprejean@mcneese.edu';
+    $debug_accounts_restrict_mail = isset($conf['fcs_debugging-email_to-restrict']) && $conf['fcs_debugging-email_to-restrict'];
+
+    if (isset($conf['fcs_debugging-email_to-add']) && is_array($conf['fcs_debugging-email_to-add'])) {
+      foreach ($conf['fcs_debugging-email_to-add'] as $add_email) {
+        $email_to[$add_email] = $add_email;
+        $debug_accounts[] = $add_email;
+      }
+    }
+
+    if (isset($conf['fcs_debugging-email_to-prefix']) && is_string($conf['fcs_debugging-email_to-prefix'])) {
+      $email_params['title_prefix'] = $conf['fcs_debugging-email_to-prefix'];
+    }
+  }
+
+  if ($debug_accounts_restrict_mail) {
+    if (isset($conf['fcs_debugging-email_to-allow']) && is_array($conf['fcs_debugging-email_to-allow'])) {
+      foreach ($conf['fcs_debugging-email_to-allow'] as $add_email) {
+        $debug_accounts[] = $add_email;
+      }
+    }
 
     foreach ($email_to as $to) {
       if (!in_array($to, $debug_accounts)) {
@@ -1821,6 +1829,11 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
         continue;
       }
 
+      drupal_mail('mfcs', 'request_alert', $to, language_default(), $email_params, $email_from, TRUE);
+    }
+  }
+  else {
+    foreach ($email_to as $to) {
       drupal_mail('mfcs', 'request_alert', $to, language_default(), $email_params, $email_from, TRUE);
     }
   }

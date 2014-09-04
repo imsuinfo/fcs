@@ -685,11 +685,39 @@ unset($env_current_user);
 
 
 /**
- * fcs.mcneese.edu specific names
+ * fcs.mcneese.edu specific names.
  */
 $conf['mfcs_site_url'] = 'thebe.mcneese.edu/event_workflow_test';
 $conf['mfcs_email'] = 'event_workflow@mcneese.edu';
 $conf['mfcs_name'] = 'McNeese Facilities Use System';
+
+/**
+ * fcs.mcneese.edu debugging options.
+ */
+$conf['fcs_debugging'] = TRUE;
+$conf['fcs_debugging-email_to-debug'] = TRUE;
+$conf['fcs_debugging-email_to-restrict'] = TRUE;
+$conf['fcs_debugging-email_to-prefix'] = "(TESTING) ";
+$conf['fcs_debugging-email_to-add'] = array(
+  'kday@mcneese.edu',
+);
+$conf['fcs_debugging-email_to-send_to'] = array(
+  'kday@mcneese.edu',
+  #'colleen@mcneese.edu',
+  #'gfisher@mcneese.edu',
+  #'stan@mcneese.edu',
+  #'gbodin@mcneese.edu',
+  #'shogan@mcneese.edu',
+  #'rrhoden@mcneese.edu',
+  #'thomas@mcneese.edu',
+  #'rfontenot@mcneese.edu',
+  #'mwhite@mcneese.edu',
+  #'awoods@mcneese.edu',
+  #'rspinks@mcneese.edu',
+  #'bmungai@mcneese.edu',
+  #'emeche@mcneese.edu',
+  #'bprejean@mcneese.edu',
+);
 
 
 /**
