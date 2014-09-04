@@ -704,7 +704,7 @@ function mfcs_schema() {
       ),
     ),
     'unique keys' => array(
-      'banner_id_to_role' => array('banner_id', 'event_role_id'),
+      'banner_id_to_role' => array('user_id', 'event_role_id'),
     ),
     'foreign keys' => array(
       'event_role_id' => array(
@@ -1163,7 +1163,7 @@ function mfcs_install() {
   $table5_foreign_key = 'id';
 
   $key6_name = 'event_role_id';
-  $key6_foreign = 'event_role_fkey';
+  $key6_foreign = 'banner_id_to_role_fkey';
   $table6_foreign = 'mfcs_banner_event_roles';
   $table6_foreign_key = 'id';
 
@@ -1229,7 +1229,7 @@ function mfcs_uninstall() {
   $key3_foreign = 'location_fkey';
   $key4_foreign = 'building_fkey';
   $key5_foreign = 'room_fkey';
-  $key6_foreign = 'event_role_fkey';
+  $key6_foreign = 'banner_id_to_role_fkey';
   $keyR_foreign = 'review_fkey';
 
   $structure = mfcs_table_install_structure();
