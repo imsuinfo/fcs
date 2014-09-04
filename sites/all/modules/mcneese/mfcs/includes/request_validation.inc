@@ -235,7 +235,7 @@ function mfcs_validate_request_fields($form, &$form_state) {
   }
 
   $passed = TRUE;
-  if ($form_state['values']['form']['step'] == 'standard') {
+  if ($form_state['values']['form']['step'] == 'standard' || $clicked_id == 'submit-request-submit') {
     $quick_meeting_name = "Quick Meeting";
     $quick_meeting_term = taxonomy_term_load(MFCS_REQUEST_TYPE_QUICK_MEETING);
     if (!empty($quick_meeting_term->name)) {
@@ -331,7 +331,7 @@ function mfcs_validate_request_fields($form, &$form_state) {
           }
         }
 
-        if (!empty($value) && !empty($location_form['dates']['time_start'][$key]['#expected_format']['date'])) {
+        if (!empty($value) && !empty($location_form['dates']['group_dates'][$key]['dates']['time_start'][$key]['#expected_format']['date'])) {
           if (is_string($value)) {
             $start_timestamp[$key] = strtotime($value, $date_timestamp[$key]);
 
@@ -340,7 +340,7 @@ function mfcs_validate_request_fields($form, &$form_state) {
               $passed = FALSE;
             }
             else {
-              $value = date($location_form['dates']['time_start'][$key]['#expected_format']['date'], $start_timestamp[$key]);
+              $value = date($location_form['dates']['group_dates'][$key]['dates']['time_start'][$key]['#expected_format']['date'], $start_timestamp[$key]);
             }
           }
         }
@@ -363,7 +363,7 @@ function mfcs_validate_request_fields($form, &$form_state) {
           }
         }
 
-        if (!empty($value) && !empty($location_form['dates']['time_stop'][$key]['#expected_format']['date'])) {
+        if (!empty($value) && !empty($location_form['dates']['group_dates'][$key]['dates']['time_stop'][$key]['#expected_format']['date'])) {
           if (is_string($value)) {
             $stop_timestamp[$key] = strtotime($value, $date_timestamp[$key]);
 
@@ -372,7 +372,7 @@ function mfcs_validate_request_fields($form, &$form_state) {
               $passed = FALSE;
             }
             else {
-              $value = date($location_form['dates']['time_stop'][$key]['#expected_format']['date'], $stop_timestamp[$key]);
+              $value = date($location_form['dates']['group_dates'][$key]['dates']['time_stop'][$key]['#expected_format']['date'], $stop_timestamp[$key]);
             }
           }
         }
