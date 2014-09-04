@@ -241,6 +241,10 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
   global $base_path;
 
 
+  mfcs_include(4);
+
+  $request_type_options = mfcs_get_request_type_list_options();
+
 
   // begin wrappers
   $markup = '<div' . $id_string . ' class="calendar-day-wrapper"><div class="calendar-day">';
@@ -300,7 +304,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
       $row_class .= 'room-' . $item['room'] . ' ';
       $row_class .= 'type-' . $item['type'] . ' ';
 
-      $markup .= '<div class="calendar-item-wrapper ' . $row_class . '"><div class="calendar-item"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div></div>';
+      $markup .= '<div class="calendar-item-wrapper ' . $row_class . '"><div class="calendar-item"><div class="calendar-item-link-wrapper"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div></div></div>';
 
       $row_count++;
       $row_even = !$row_even;
@@ -337,7 +341,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
 
     $item_even = TRUE;
     $item_count = 0;
-    $left_offset = 0;
+    $left_offset = ($row_even ? 4 : 16);
     foreach ($items as $item_id => $item) {
       $item_class = "";
 
@@ -356,9 +360,20 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
       $item_class .= 'type-' . $item['type'] . ' ';
 
       // split the time difference into height where each minute is equal to 1 pixel(s).
-      $item_height = (($item['time_stop'] - $item['time_start']) / 60);
-      if ($item_height < 20) {
-        $item_height = 20;
+      $item_minutes = (($item['time_stop'] - $item['time_start']) / 60);
+      $item_hours = $item_minutes / 60;
+
+      // each minute should represent (72/60) pixels or 1.2 pixels.
+      $item_height = $item_minutes * 1.2;
+
+      // for each hour add the appropriate margin + padding + border
+      $item_height += 5 * $item_hours;
+
+      // subtract the margin + padding + border.
+      $item_height -= 2;
+
+      if ($item_height < 54) {
+        $item_height = 54;
       }
 
       // designate the top offset based on when the request starts relative to the top of the hour.
@@ -374,13 +389,18 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
       $item_style .= '"';
 
       $markup .= '<div class="calendar-item-wrapper ' . $item_class . '" ' . $item_style . '><div class="calendar-item">';
-      $markup .= '<a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a>';
-      $markup .= '<div class="calendar-item-time">' . date("h:i a", $item['time_start']) . " to " . date("h:i a", $item['time_stop']) . '</div>';
+      $markup .= '<div class="calendar-item-link-wrapper"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
+      $markup .= '<div class="calendar-item-time-wrapper"><div class="calendar-item-time">' . date("h:i a", $item['time_start']) . " to " . date("h:i a", $item['time_stop']) . '</div></div>';
+
+      if (!empty($request_type_options[$item['type']])) {
+        $markup .= '<div class="calendar-item-type-wrapper"><div class="calendar-item-type">' . $request_type_options[$item['type']] . '</div></div>';
+      }
+
       $markup .= '</div></div>';
 
       $item_count++;
       $item_even = !$item_even;
-      $left_offset += 50;
+      $left_offset += 40;
     }
 
     $markup .= '</div></div></div></div>';
