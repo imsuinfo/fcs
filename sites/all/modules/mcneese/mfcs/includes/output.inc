@@ -394,7 +394,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
 
     $left_offset = 0;
     $left_offset_min = 30;
-    $left_offset_max = 148;
+    $left_offset_max = 156;
 
     $left_offset_increment = $left_offset_min;
     if ($item_total > 0) {
