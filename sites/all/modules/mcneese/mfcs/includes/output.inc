@@ -897,7 +897,7 @@ function mfcs_generate_ical($requests, $start, $stop) {
     #$request_revision = $request->revision;
 
     $request_url = $base_url . '/requests/view-0/' . $request->id;
-    $request_zone = '[' . $request->location_name . '] ' . $request->building_name . ' ' . $request->room_name;
+    $request_zone = '[' . $request->id . '] ' . $request->building_name . ' ' . $request->room_name;
 
     $request_description_begin = 'The reserved location is: ' . $request->building_name . ' ' . $request->room_name . "\n";
     $request_description_begin = '  - ' . $request->building_name . ' ' . $request->room_name . "\n";

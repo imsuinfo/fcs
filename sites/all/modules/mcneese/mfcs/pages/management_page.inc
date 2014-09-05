@@ -246,7 +246,7 @@ function mfcs_management_page() {
             $rows[$month_day][$item->id] = array(
               'href' => $base_path . 'requests/view-0/' . $item->id,
               'title' => $item_title,
-              'tooltip' => '[' . check_plain($item->location_name) . '] ' . check_plain($item->building_name) . ' ' . check_plain($item->room_name) . ': ' . $item_title,
+              'tooltip' => '[' . $item->id . '] ' . check_plain($item->building_name) . ' ' . check_plain($item->room_name) . ': ' . $item_title,
               'date' => $date,
               'month' => $month,
               'day' => $day,

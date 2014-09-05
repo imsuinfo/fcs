@@ -117,27 +117,39 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
 
         if (!isset($rows[$month_day][$item->id])) {
           $item_title = check_plain($item->title);
-          $location_name = check_plain($item->location_name);
           $building_name = check_plain($item->building_name);
           $room_name = check_plain($item->room_name);
+
+          $location = (int) $item->location;
+          $building = (int) $item->building;
+          $room = (int) $item->room;
+          $type = (int) $item->type;
 
           $rows[$month_day][$item->id] = array(
             'href' => $base_path . 'requests/view-0/' . $item->id,
             'title' => $item_title,
-            'tooltip' => '[' . $item->id . '] (' . $location_name . ') ' . $building_name . ' ' . $room_name . ': ' . $item_title,
+            'tooltip' => '[' . $item->id . '] ' . $building_name . ' ' . $room_name . ': ' . $item_title,
             'date' => $date,
             'year' => $year,
             'month' => $month,
-            'day' => $day,
-            'location' => $location_name,
-            'building' => $building_name,
-            'room' => $room_name,
+            'day' => date('j', $date),
+            'location' => $location,
+            'building' => $building,
+            'room' => $room,
+            'type' => $type,
+            'building_name' => $building_name,
+            'room_name' => $room_name,
           );
 
           unset($item_title);
           unset($location_name);
           unset($building_name);
           unset($room_name);
+
+          unset($location);
+          unset($building);
+          unset($room);
+          unset($type);
         }
       }
     }
@@ -243,7 +255,6 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
 
         foreach ($item->time_start as $time_delta => $time_start) {
           $item_title = check_plain($item->title);
-          $location_name = check_plain($item->location_name);
           $building_name = check_plain($item->building_name);
           $room_name = check_plain($item->room_name);
 
@@ -260,7 +271,7 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
             $rows['all_day'][$date][$item->id] = array(
               'href' => $base_path . 'requests/view-0/' . $item->id,
               'title' => $item_title,
-              'tooltip' => '[' . $item->id . '] (' . $location_name . ') ' . $building_name . ' ' . $room_name . ': ' . $item_title,
+              'tooltip' => '[' . $item->id . '] ' . $building_name . ' ' . $room_name . ': ' . $item_title,
               'date' => $date,
               'year' => $year,
               'month' => $month,
@@ -269,7 +280,6 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
               'building' => $building,
               'room' => $room,
               'type' => $type,
-              'location_name' => $location_name,
               'building_name' => $building_name,
               'room_name' => $room_name,
             );
@@ -281,7 +291,7 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
             $rows['range'][$time_floor][$item->id] = array(
               'href' => $base_path . 'requests/view-0/' . $item->id,
               'title' => $item_title,
-              'tooltip' => '[' . $item->id . '] (' . $location_name . ') ' . $building_name . ' ' . $room_name . ': ' . $item_title,
+              'tooltip' => '[' . $item->id . '] ' . $building_name . ' ' . $room_name . ': ' . $item_title,
               'date' => $date,
               'year' => $year,
               'month' => $month,
@@ -290,7 +300,6 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
               'building' => $building,
               'room' => $room,
               'type' => $type,
-              'location_name' => $location_name,
               'building_name' => $building_name,
               'room_name' => $room_name,
               'time_start' => $time_start,
