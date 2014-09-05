@@ -989,7 +989,12 @@ function mfcs_generate_ical($requests, $start, $stop) {
         $ical[] = 'CATEGORIES:' . implode(', ', $request_categories);
       }
 
-      $ical[] = 'ORGANIZER;' . 'CN=' . $request->request_coordinator_name . ':MAILTO:' . $request->request_coordinator_email;
+      // According to the specification, organizer can only be used for events shared between multiple users.
+      // While this is the actual case as far as this system is concerned, it is counter-intuitive to have such a specification in an ical file.
+      // The file gets exported and there is no knowledge of whether or not the ical client is sharing this between groups.
+      // Therefore, the ORGANIZER cannot be used because the specification is client-side specific and cannot be determined by the exporter/server.
+      #$ical[] = 'ORGANIZER;' . 'CN=' . $request->request_coordinator_name . ':MAILTO:' . $request->request_coordinator_email;
+
       $ical[] = 'SUMMARY:' . $request->title;
 
       $request_description = $request_description_begin . $dates_text . $request_description_end;
