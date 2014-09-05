@@ -1615,6 +1615,9 @@ function mfcs_include($id) {
   elseif ($id == 8) {
     require_once($module_path . '/includes/output.inc');
   }
+  elseif ($id == 9) {
+    require_once($module_path . '/includes/miscellaneous.inc');
+  }
 }
 
 /**

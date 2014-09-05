@@ -207,32 +207,8 @@ function mfcs_management_page() {
     #  $absolute_stop = $month_stop;
     #}
 
-    $target_field_name = 'field_dates-date-start-0';
-    $search[$target_field_name]['group_name'] = 'dates';
-    $search[$target_field_name]['field_name'] = 'date';
-    $search[$target_field_name]['column'] = 'value';
-    $search[$target_field_name]['search'] = $absolute_start;
-    $search[$target_field_name]['type'] = 'date';
-    $search[$target_field_name]['multiple'] = TRUE;
-    $search[$target_field_name]['operator'] = MFCS_OPERATOR_GREATER_THAN_EQUAL;
-
-    $target_field_name = 'field_dates-date-stop-0';
-    $search[$target_field_name]['group_name'] = 'dates';
-    $search[$target_field_name]['field_name'] = 'date';
-    $search[$target_field_name]['column'] = 'value';
-    $search[$target_field_name]['search'] = $absolute_stop;
-    $search[$target_field_name]['type'] = 'date';
-    $search[$target_field_name]['multiple'] = TRUE;
-    $search[$target_field_name]['operator'] = MFCS_OPERATOR_LESS_THAN;
-
-    $target_field_name = 'field_top-status-0';
-    $search[$target_field_name]['group_name'] = 'top';
-    $search[$target_field_name]['field_name'] = 'status';
-    $search[$target_field_name]['column'] = 'value';
-    $search[$target_field_name]['search'] = MFCS_EVENT_STATUS_CLOSED_ACCEPTED;
-    $search[$target_field_name]['type'] = 'options';
-    $search[$target_field_name]['multiple'] = FALSE;
-    $search[$target_field_name]['operator'] = MFCS_OPERATOR_EQUAL;
+    mfcs_include(9);
+    $search = mfcs_miscellaneous_generate_requests_by_date_search($absolute_start, $absolute_stop);
 
     $sorting = array(
       'order' => 'date',

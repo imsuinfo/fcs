@@ -23,6 +23,7 @@ files[] = includes/table.inc
 files[] = includes/workflow.inc
 files[] = includes/hooks.inc
 files[] = includes/output.inc
+files[] = includes/miscellaneous.inc
 files[] = pages/management_page.inc
 files[] = pages/request_cancel_page.inc
 files[] = pages/request_create_page.inc
