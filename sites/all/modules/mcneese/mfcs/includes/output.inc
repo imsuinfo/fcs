@@ -400,7 +400,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
     if ($item_total > 0) {
       $left_offset_increment = floor(800 / $item_total);
 
-      if ($left_offset_increment < $left_offset_increment) {
+      if ($left_offset_increment < $left_offset_min) {
         $left_offset_increment = $left_offset_min;
       }
       elseif ($left_offset_increment > $left_offset_max) {
