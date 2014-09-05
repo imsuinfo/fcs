@@ -143,7 +143,7 @@ function mfcs_request_cancel_0_form_submit($form, &$form_state) {
 
   mfcs_include(6);
 
-  $cancelled = mfcs_workflow_set_status($request_id, MFCS_EVENT_STATUS_CANCELLED);
+  $cancelled = mfcs_workflow_set_status($request_id, MFCS_REQUEST_STATUS_CANCELLED);
 
   if ($cancelled) {
     $parameters = array();

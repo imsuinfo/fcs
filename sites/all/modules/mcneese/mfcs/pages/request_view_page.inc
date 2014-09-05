@@ -128,9 +128,9 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
 
     // only show operations for states and steps that make sense to.
     $allowed_statuses = array(
-      MFCS_EVENT_STATUS_LOCKED,
-      MFCS_EVENT_STATUS_UNLOCKED,
-      MFCS_EVENT_STATUS_CLOSED_ACCEPTED, // added due to insurance provided exception.
+      MFCS_REQUEST_STATUS_LOCKED,
+      MFCS_REQUEST_STATUS_UNLOCKED,
+      MFCS_REQUEST_STATUS_CLOSED_ACCEPTED, // added due to insurance provided exception.
     );
 
     if (!in_array($status, $allowed_statuses)) {
@@ -983,7 +983,7 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
       $insurance_provided_available = &$form['form']['insurance_provided_available']['#value'];
       $insurance_provided_available_only = &$form['form']['insurance_provided_available_only']['#value'];
       if ($can_review_request && ($step == MFCS_REVIEW_STEP_REVIEW || $step == MFCS_REVIEW_STEP_REQUIREMENTS || $step == MFCS_REVIEW_STEP_MAKE_DECISIONS || $step == MFCS_REVIEW_STEP_COMPLETED)) {
-        if ($status == MFCS_EVENT_STATUS_LOCKED || $status == MFCS_EVENT_STATUS_CLOSED_ACCEPTED) {
+        if ($status == MFCS_REQUEST_STATUS_LOCKED || $status == MFCS_REQUEST_STATUS_CLOSED_ACCEPTED) {
           if (isset($reviewer_classification_all[MFCS_REVIEW_CLASSIFICATION_PURCHASING])) {
             if ((isset($request['insurance']['contractor'][0]->value) && $request['insurance']['contractor'][0]->value == 1) || (isset($request['insurance']['unaffiliated'][0]->value) && $request['insurance']['unaffiliated'][0]->value == 1)) {
               if (isset($request['insurance']['provided'][0]->value) && $request['insurance']['provided'][0]->value != 1) {
@@ -1751,8 +1751,8 @@ function mfcs_request_view_0_page_validate($form, &$form_state) {
 
     // only allow operations for states and steps that make sense to.
     $allowed_statuses = array(
-      MFCS_EVENT_STATUS_LOCKED,
-      MFCS_EVENT_STATUS_UNLOCKED,
+      MFCS_REQUEST_STATUS_LOCKED,
+      MFCS_REQUEST_STATUS_UNLOCKED,
     );
 
     $allowed_steps = array(
@@ -1764,8 +1764,8 @@ function mfcs_request_view_0_page_validate($form, &$form_state) {
 
     if (isset($form['form']['insurance_provided_available']['#value']) && $form['form']['insurance_provided_available']['#value']) {
       $allowed_statuses = array(
-        MFCS_EVENT_STATUS_LOCKED,
-        MFCS_EVENT_STATUS_CLOSED_ACCEPTED,
+        MFCS_REQUEST_STATUS_LOCKED,
+        MFCS_REQUEST_STATUS_CLOSED_ACCEPTED,
       );
 
       $allowed_steps = array(

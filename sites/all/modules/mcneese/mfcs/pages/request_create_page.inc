@@ -354,7 +354,7 @@ function mfcs_request_create_0_form_validate($form, &$form_state) {
         if (isset($form_state['values']['request']['information']['type'][0]) && $form_state['values']['request']['information']['type'][0] == MFCS_REQUEST_TYPE_QUICK_MEETING) {
           if (!empty($form_state['values']['request']['venue_coordinator']['user_id'][0]) && !empty($form['form']['user']['#value']->uid)) {
             if ($form_state['values']['request']['venue_coordinator']['user_id'][0] == $form['form']['user']['#value']->uid) {
-              $form_state['values']['request']['status'][0] = MFCS_EVENT_STATUS_CLOSED_ACCEPTED;
+              $form_state['values']['request']['status'][0] = MFCS_REQUEST_STATUS_CLOSED_ACCEPTED;
               $form_state['values']['request']['step'][0] = MFCS_REVIEW_STEP_COMPLETED;
               $form_state['rebuild'] = FALSE;
             }
@@ -424,7 +424,7 @@ function mfcs_request_create_0_form_validate($form, &$form_state) {
                 $form_state['room_unavailable_prior_settings']['step'] = $form_state['values']['request']['step'][0];
               }
 
-              $form_state['values']['request']['status'][0] = MFCS_EVENT_STATUS_CLOSED_UNAVAILABLE;
+              $form_state['values']['request']['status'][0] = MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE;
               $form_state['values']['request']['step'][0] = MFCS_REVIEW_STEP_COMPLETED;
             }
           }

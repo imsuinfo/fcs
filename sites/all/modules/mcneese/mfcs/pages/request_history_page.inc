@@ -170,7 +170,7 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
             );
 
             $notes_markup = '<div class="history_item-notes">';
-            if ($history['top']['status'][0]->value == MFCS_EVENT_STATUS_CLOSED_UNAVAILABLE || $history['top']['status'][0]->value == MFCS_EVENT_STATUS_CLOSED_DUE_TO_LOCK) {
+            if ($history['top']['status'][0]->value == MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE || $history['top']['status'][0]->value == MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK) {
               $notes_markup .= '<div class="history_item-note">This request has been auto-closed because the room was not available when this request was made.</div>';
             }
             $notes_markup .= '</div>';

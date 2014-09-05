@@ -123,7 +123,7 @@ function mfcs_miscellaneous_determine_current_date($year, $month, $day) {
  *
  * @see: mfcs_request_load_listing()
  */
-function mfcs_miscellaneous_generate_requests_by_date_search($start, $stop, $status = MFCS_EVENT_STATUS_CLOSED_ACCEPTED) {
+function mfcs_miscellaneous_generate_requests_by_date_search($start, $stop, $status = MFCS_REQUEST_STATUS_CLOSED_ACCEPTED) {
   if (!cf_is_integer($start)) {
     cf_error::invalid_integer('start');
     return FALSE;

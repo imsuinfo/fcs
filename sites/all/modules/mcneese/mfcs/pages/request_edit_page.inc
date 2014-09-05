@@ -677,7 +677,7 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
       }
 
       // if the request has been updated while it is in a locked status.
-      if ($status == MFCS_EVENT_STATUS_LOCKED) {
+      if ($status == MFCS_REQUEST_STATUS_LOCKED) {
         $step_revision = $request['current']['top']['step'] + 1;
 
         $mfcs_current_top = array(
@@ -791,7 +791,7 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
       mfcs_include(6);
 
       // send an e-mail to all reviewers that the request step has been reset.
-      if ($status == MFCS_EVENT_STATUS_LOCKED) {
+      if ($status == MFCS_REQUEST_STATUS_LOCKED) {
         $parameters['amendment'] = TRUE;
       }
       else {

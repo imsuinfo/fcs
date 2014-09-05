@@ -508,7 +508,7 @@ function mfcs_request_reviewers_0_form_submit($form, &$form_state) {
       $query->addField('mer', 'id', 'id');
       $query->addField('mcr', 'review', 'revision');
 
-      $query->condition('mfts.value', MFCS_EVENT_STATUS_LOCKED);
+      $query->condition('mfts.value', MFCS_REQUEST_STATUS_LOCKED);
       $query->condition('mftsp.value', $step);
       $query->condition('mfrcc.value', $classification);
 

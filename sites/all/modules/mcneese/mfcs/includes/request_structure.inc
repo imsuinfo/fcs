@@ -651,7 +651,7 @@ function mfcs_get_request_fields($form, &$form_state) {
  * Process and build a specific form field.
  */
 function mfcs_get_request_field_status($form, &$form_state, &$fields, &$request_state, $ps) {
-  $values = array(0 => MFCS_EVENT_STATUS_UNLOCKED);
+  $values = array(0 => MFCS_REQUEST_STATUS_UNLOCKED);
 
   if (empty($request_state['status'])) {
     if (isset($form['form']['existing']['#value']['request']['status'])) {

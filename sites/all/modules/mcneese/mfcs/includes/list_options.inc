@@ -26,17 +26,17 @@ function mfcs_get_request_status_list_options($option = NULL) {
     $options[''] = "- Select -";
   }
 
-  $options[MFCS_EVENT_STATUS_DELETED] = "Deleted";
-  $options[MFCS_EVENT_STATUS_LOCKED] = "Queued (Locked)";
-  $options[MFCS_EVENT_STATUS_UNLOCKED] = "Queued (Unlocked)";
-  $options[MFCS_EVENT_STATUS_CLOSED_ACCEPTED] = "Accepted";
-  $options[MFCS_EVENT_STATUS_CLOSED_DENIED] = "Denied";
-  $options[MFCS_EVENT_STATUS_CLOSED_UNAVAILABLE] = "Room Unavailable";
-  $options[MFCS_EVENT_STATUS_CLOSED_DUE_TO_LOCK] = "Room Unavailable (due to lock)";
-  $options[MFCS_EVENT_STATUS_CANCELLED] = "Cancelled";
+  $options[MFCS_REQUEST_STATUS_DELETED] = "Deleted";
+  $options[MFCS_REQUEST_STATUS_LOCKED] = "Queued (Locked)";
+  $options[MFCS_REQUEST_STATUS_UNLOCKED] = "Queued (Unlocked)";
+  $options[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED] = "Accepted";
+  $options[MFCS_REQUEST_STATUS_CLOSED_DENIED] = "Denied";
+  $options[MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE] = "Room Unavailable";
+  $options[MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK] = "Room Unavailable (due to lock)";
+  $options[MFCS_REQUEST_STATUS_CANCELLED] = "Cancelled";
 
   if ($option == 'search') {
-    unset($options[MFCS_EVENT_STATUS_DELETED]);
+    unset($options[MFCS_REQUEST_STATUS_DELETED]);
   }
 
   asort($options);
