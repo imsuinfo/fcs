@@ -325,6 +325,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
 
         $markup .= '<div class="calendar-item-wrapper ' . $item_class . '" ' . $item_style . '><div class="calendar-item">';
         $markup .= '<div class="calendar-item-link-wrapper"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
+        $markup .= '<div class="calendar-item-location-wrapper"><div class="calendar-item-location">' . $item['building_name'] . ' ' . $item['room_name'] . '</div></div>';
 
         if (!empty($request_type_options[$item['type']])) {
           $markup .= '<div class="calendar-item-type-wrapper"><div class="calendar-item-type">' . $request_type_options[$item['type']] . '</div></div>';
@@ -395,8 +396,8 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
       $item_minutes = (($item['time_stop'] - $item['time_start']) / 60);
       $item_hours = $item_minutes / 60;
 
-      // each minute should represent (72/60) pixels or 1.2 pixels.
-      $item_height = $item_minutes * 1.2;
+      // each minute should represent (90/60) pixels or 1.5 pixels.
+      $item_height = $item_minutes * 1.5;
 
       // for each hour add the appropriate margin + padding + border
       $item_height += 5 * $item_hours;
@@ -423,6 +424,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
       $markup .= '<div class="calendar-item-wrapper ' . $item_class . '" ' . $item_style . '><div class="calendar-item">';
       $markup .= '<div class="calendar-item-link-wrapper"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
       $markup .= '<div class="calendar-item-time-wrapper"><div class="calendar-item-time">' . date("h:i a", $item['time_start']) . " to " . date("h:i a", $item['time_stop']) . '</div></div>';
+      $markup .= '<div class="calendar-item-location-wrapper"><div class="calendar-item-location">' . $item['building_name'] . ' ' . $item['room_name'] . '</div></div>';
 
       if (!empty($request_type_options[$item['type']])) {
         $markup .= '<div class="calendar-item-type-wrapper"><div class="calendar-item-type">' . $request_type_options[$item['type']] . '</div></div>';

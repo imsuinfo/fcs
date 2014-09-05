@@ -319,6 +319,9 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
               'building' => $building,
               'room' => $room,
               'type' => $type,
+              'location_name' => $location_name,
+              'building_name' => $building_name,
+              'room_name' => $room_name,
             );
           }
           else {
@@ -337,6 +340,9 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
               'building' => $building,
               'room' => $room,
               'type' => $type,
+              'location_name' => $location_name,
+              'building_name' => $building_name,
+              'room_name' => $room_name,
               'time_start' => $time_start,
               'time_stop' => $item->time_stop[$time_delta],
             );
