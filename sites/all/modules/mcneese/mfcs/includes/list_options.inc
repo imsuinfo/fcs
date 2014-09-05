@@ -60,7 +60,7 @@ function mfcs_get_request_steps_list_options($option = NULL) {
     $options[''] = "- Select -";
   }
 
-  $options_tree = taxonomy_get_tree(MFCS_VID_EVENT_STEPS, 0, NULL, TRUE);
+  $options_tree = taxonomy_get_tree(MFCS_VID_REQUEST_STEPS, 0, NULL, TRUE);
   foreach ($options_tree as $branch) {
     $options[$branch->tid] = $branch->name;
   }
@@ -95,7 +95,7 @@ function mfcs_get_request_classification_list_options($option = NULL, $user = NU
     $options[''] = "- Select -";
   }
 
-  $options_tree = taxonomy_get_tree(MFCS_VID_EVENT_CLASSIFICATION, 0, NULL, TRUE);
+  $options_tree = taxonomy_get_tree(MFCS_VID_REQUEST_CLASSIFICATION, 0, NULL, TRUE);
 
   if (is_object($user)) {
     foreach ($options_tree as $branch) {
@@ -144,7 +144,7 @@ function mfcs_get_request_location_list_options($option = NULL, $taxonomy = FALS
       $system_column_name = TRUE;
     }
 
-    $options_tree = taxonomy_get_tree(MFCS_VID_EVENT_LOCATION, 0, NULL, TRUE);
+    $options_tree = taxonomy_get_tree(MFCS_VID_REQUEST_LOCATION, 0, NULL, TRUE);
     foreach ($options_tree as $branch) {
       if ($system_column_name) {
         if (!empty($branch->field_system_column_name['und'][0]['value'])) {
@@ -266,7 +266,7 @@ function mfcs_get_dates_category_list_options($option = NULL) {
     $options[''] = "- Select -";
   }
 
-  $options_tree = taxonomy_get_tree(MFCS_VID_EVENT_DATES_CATEGORY, 0, NULL, TRUE);
+  $options_tree = taxonomy_get_tree(MFCS_VID_REQUEST_DATES_CATEGORY, 0, NULL, TRUE);
   foreach ($options_tree as $branch) {
     $options[$branch->tid] = $branch->name;
   }
@@ -297,7 +297,7 @@ function mfcs_get_audience_list_options($option = NULL) {
     $system_column_name = TRUE;
   }
 
-  $options_tree = taxonomy_get_tree(MFCS_VID_EVENT_AUDIENCE, 0, NULL, TRUE);
+  $options_tree = taxonomy_get_tree(MFCS_VID_REQUEST_AUDIENCE, 0, NULL, TRUE);
   foreach ($options_tree as $branch) {
     if ($system_column_name) {
       if (!empty($branch->field_system_column_name['und'][0]['value'])) {
@@ -335,7 +335,7 @@ function mfcs_get_revenue_generated_list_options($option = NULL) {
     $system_column_name = TRUE;
   }
 
-  $options_tree = taxonomy_get_tree(MFCS_VID_EVENT_REVENUE_GENERATED, 0, NULL, TRUE);
+  $options_tree = taxonomy_get_tree(MFCS_VID_REQUEST_REVENUE_GENERATED, 0, NULL, TRUE);
   foreach ($options_tree as $branch) {
     if ($system_column_name) {
       if (!empty($branch->field_system_column_name['und'][0]['value'])) {
@@ -373,7 +373,7 @@ function mfcs_get_request_type_list_options($option = NULL) {
     $system_column_name = TRUE;
   }
 
-  $options_tree = taxonomy_get_tree(MFCS_VID_EVENT_REQUEST_TYPE, 0, NULL, TRUE);
+  $options_tree = taxonomy_get_tree(MFCS_VID_REQUEST_REQUEST_TYPE, 0, NULL, TRUE);
   foreach ($options_tree as $branch) {
     if ($system_column_name) {
       if (!empty($branch->field_system_column_name['und'][0]['value'])) {
@@ -411,7 +411,7 @@ function mfcs_get_publicity_details_list_options($option = NULL) {
     $system_column_name = TRUE;
   }
 
-  $options_tree = taxonomy_get_tree(MFCS_VID_EVENT_PUBLICITY_DETAILS, 0, NULL, TRUE);
+  $options_tree = taxonomy_get_tree(MFCS_VID_REQUEST_PUBLICITY_DETAILS, 0, NULL, TRUE);
   foreach ($options_tree as $branch) {
     if ($system_column_name) {
       if (!empty($branch->field_system_column_name['und'][0]['value'])) {
@@ -449,7 +449,7 @@ function mfcs_get_designing_material_list_options($option = NULL) {
     $system_column_name = TRUE;
   }
 
-  $options_tree = taxonomy_get_tree(MFCS_VID_EVENT_DESIGNING_MATERIAL, 0, NULL, TRUE);
+  $options_tree = taxonomy_get_tree(MFCS_VID_REQUEST_DESIGNING_MATERIAL, 0, NULL, TRUE);
   foreach ($options_tree as $branch) {
     if ($system_column_name) {
       if (!empty($branch->field_system_column_name['und'][0]['value'])) {
@@ -487,7 +487,7 @@ function mfcs_get_technical_equipment_details_list_options($option = NULL) {
     $system_column_name = TRUE;
   }
 
-  $options_tree = taxonomy_get_tree(MFCS_VID_EVENT_TECHNICAL_EQUIPMENT_DETAILS, 0, NULL, TRUE);
+  $options_tree = taxonomy_get_tree(MFCS_VID_REQUEST_TECHNICAL_EQUIPMENT_DETAILS, 0, NULL, TRUE);
   foreach ($options_tree as $branch) {
     if ($system_column_name) {
       if (!empty($branch->field_system_column_name['und'][0]['value'])) {
@@ -527,7 +527,7 @@ function mfcs_get_reviewer_classification_list_options($option = NULL, $include_
     $options[''] = "- Select -";
   }
 
-  $options_tree = taxonomy_get_tree(MFCS_VID_EVENT_REVIEWER_CLASSIFICATION, 0, NULL, TRUE);
+  $options_tree = taxonomy_get_tree(MFCS_VID_REQUEST_REVIEWER_CLASSIFICATION, 0, NULL, TRUE);
   foreach ($options_tree as $branch) {
     $options[$branch->tid] = $branch->name;
   }
@@ -559,7 +559,7 @@ function mfcs_get_reviewer_decision_list_options($option = NULL) {
     $options[''] = "- Select -";
   }
 
-  $options_tree = taxonomy_get_tree(MFCS_VID_EVENT_REVIEWER_DECISION, 0, NULL, TRUE);
+  $options_tree = taxonomy_get_tree(MFCS_VID_REQUEST_REVIEWER_DECISION, 0, NULL, TRUE);
   foreach ($options_tree as $branch) {
     $options[$branch->tid] = $branch->name;
   }
@@ -591,7 +591,7 @@ function mfcs_get_review_step_list_options($option = NULL) {
     $options[''] = "- Select -";
   }
 
-  $options_tree = taxonomy_get_tree(MFCS_VID_EVENT_STEPS, 0, NULL, TRUE);
+  $options_tree = taxonomy_get_tree(MFCS_VID_REQUEST_STEPS, 0, NULL, TRUE);
 
   if ($option == 'object') {
     $unsorted = array();
