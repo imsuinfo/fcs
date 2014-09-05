@@ -920,7 +920,7 @@ function mfcs_generate_ical($requests) {
       else {
         $ical_date['all_day'] = TRUE;
         $ical_date['date_start'] = strtotime('today', $date);
-        $ical_date['date_stop'] = strtotime('tomorrow', $ical_date['day_start']);
+        $ical_date['date_stop'] = strtotime('tomorrow', $ical_date['date_start']);
         $ical_date['start'] = 'DTSTART;VALUE=DATE:' . date($date_format_all_day, $ical_date['date_start']);
         $ical_date['stop'] = 'DTEND;VALUE=DATE:' . date($date_format_all_day, $ical_date['date_stop']);
         $ical_date['text'] = date($date_day_format, $date);
