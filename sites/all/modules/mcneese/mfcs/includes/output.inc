@@ -856,10 +856,9 @@ function mfcs_generate_ical($requests, $start, $stop) {
   $date_format = 'Ymd\THis\Z';
   $date_format_all_day = 'Ymd';
   $date_day_format = 'l, F jS, Y';
-  $date_time_format = 'h:ia';
+  $date_time_format = 'h:i a';
 
-  $original_timezone = date_default_timezone_get();
-  date_default_timezone_set('UTC');
+  $date_timezone_string = date('T');
 
   $ical_eol = "\r\n";
 
@@ -867,6 +866,8 @@ function mfcs_generate_ical($requests, $start, $stop) {
   $ical[] = 'BEGIN:VCALENDAR';
   $ical[] = 'VERSION:2.0';
   $ical[] = 'PRODID:McNeese State University Facilities Use System';
+
+  $original_timezone = date_default_timezone_get();
 
   foreach ($requests as $request) {
     if (empty($request->date)) {
@@ -933,17 +934,23 @@ function mfcs_generate_ical($requests, $start, $stop) {
         $ical_date['all_day'] = FALSE;
         $ical_date['date_start'] = $request->time_start[$delta];
         $ical_date['date_stop'] = $request->time_stop[$delta];
+        $ical_date['text'] = date($date_day_format, $date) . ' from ' . date($date_time_format, $ical_date['date_start']) . ' to ' . date($date_time_format, $ical_date['date_stop']) . ' ' . $date_timezone_string;
+
+        date_default_timezone_set('UTC');
         $ical_date['start'] = 'DTSTART;VALUE=DATE-TIME:' . date($date_format, $ical_date['date_start']);
         $ical_date['stop'] = 'DTEND;VALUE=DATE-TIME:' . date($date_format, $ical_date['date_stop']);
-        $ical_date['text'] = date($date_day_format, $date) . ' from ' . date($date_time_format, $ical_date['date_start']) . ' to ' . date($date_time_format, $ical_date['date_stop']);
+        date_default_timezone_set($original_timezone);
       }
       else {
         $ical_date['all_day'] = TRUE;
         $ical_date['date_start'] = strtotime('today', $date);
         $ical_date['date_stop'] = strtotime('tomorrow', $ical_date['date_start']);
+        $ical_date['text'] = date($date_day_format, $date);
+
+        date_default_timezone_set('UTC');
         $ical_date['start'] = 'DTSTART;VALUE=DATE:' . date($date_format_all_day, $ical_date['date_start']);
         $ical_date['stop'] = 'DTEND;VALUE=DATE:' . date($date_format_all_day, $ical_date['date_stop']);
-        $ical_date['text'] = date($date_day_format, $date);
+        date_default_timezone_set($original_timezone);
       }
 
       $dates_text .= $ical_date['text'] . "\n";
@@ -952,6 +959,9 @@ function mfcs_generate_ical($requests, $start, $stop) {
       $ical_dates[$date] = $ical_date;
       unset($ical_date);
     }
+
+    // The ical dates() will be in UTC format.
+    date_default_timezone_set('UTC');
 
     // process the dates, each date will have its own VEVENT because the VEVENT does not support non-repeating multiple dates!
     // @todo: should I implement a hack to simulate multiple dates by using repeating dates using RRULE?
@@ -1016,10 +1026,14 @@ function mfcs_generate_ical($requests, $start, $stop) {
 
       $ical[] = 'END:VEVENT';
     }
+
+    // restore original timezone so that the non-ical dates can be calculated properly.
+    date_default_timezone_set($original_timezone);
   }
 
   $ical[] = 'END:VCALENDAR';
 
+  // as a failsafe, make sure the original timezone gets set.
   date_default_timezone_set($original_timezone);
 
   if (empty($ical)) {
