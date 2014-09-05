@@ -195,17 +195,23 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
 }
 
 /**
+ * Build a day calendar display.
  *
+ * @param array $items
+ *   An array of request items to link to.
+ * @param int $day_start
+ *   Unix timestamp for the start of the time interval.
+ *   A >= operator is used on this.
+ * @param int $day_stop
+ *   Unix timestamp for the stop of the time interval.
+ *   A < operator is used on this.
+ * @param string $title
+ *   An HTML title for describing the calendar.
+ * @param string $id
+ *   (optional) A unique HTML id to associate with the calendar.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * @return string|bool
+ *   The generate HTML markup or FALSE on error.
  */
 function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $id = NULL) {
   if (!is_array($items)) {
