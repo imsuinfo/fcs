@@ -562,8 +562,10 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
       }
     }
     else {
-      $access[$request_id] = mfcs_page_request_reviewer_access($user, $request_id, TRUE);
-      return $access[$request_id];
+      if ($reviewer) {
+        $access[$request_id] = mfcs_page_request_reviewer_access($user, $request_id, TRUE);
+        return $access[$request_id];
+      }
     }
   }
   elseif ($operation == 'comment') {
