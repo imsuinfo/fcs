@@ -290,7 +290,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
   else {
     $row_even = TRUE;
     $row_count = 0;
-    foreach ($items['all_day'] as $item_id => $item) {
+    foreach ($items['all_day'] as $floor_time => $all_day) {
       $row_class = 'row-' . $row_count . ' ';
       if ($row_even) {
         $row_class .= 'even ';
@@ -299,16 +299,48 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
         $row_class .= 'odd ';
       }
 
-      $row_class .= 'location-' . $item['location'] . ' ';
-      $row_class .= 'building-' . $item['building'] . ' ';
-      $row_class .= 'room-' . $item['room'] . ' ';
-      $row_class .= 'type-' . $item['type'] . ' ';
+      $markup .= '<div class="calendar-time_slot-wrapper ' . $row_class . '"><div class="calendar-time_slot">';
+      $markup .= '<div class="calendar-time_slot-request-wrapper"><div class="calendar-time_slot-request">';
 
-      $markup .= '<div class="calendar-item-wrapper ' . $row_class . '"><div class="calendar-item"><div class="calendar-item-link-wrapper"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div></div></div>';
+      $item_even = TRUE;
+      $item_count = 0;
+      $left_offset = ($row_even ? 4 : 16);
+      foreach ($all_day as $item_id => $item) {
+        $item_class = "";
 
-      $row_count++;
-      $row_even = !$row_even;
+        $item_class = 'row-' . $item_count . ' ';
+        if ($item_even) {
+         $item_class .= 'even ';
+        }
+        else {
+          $item_class .= 'odd ';
+        }
+
+        $item_class .= 'location-' . $item['location'] . ' ';
+        $item_class .= 'building-' . $item['building'] . ' ';
+        $item_class .= 'room-' . $item['room'] . ' ';
+        $item_class .= 'type-' . $item['type'] . ' ';
+
+        $item_style = '';
+
+        $markup .= '<div class="calendar-item-wrapper ' . $item_class . '" ' . $item_style . '><div class="calendar-item">';
+        $markup .= '<div class="calendar-item-link-wrapper"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
+
+        if (!empty($request_type_options[$item['type']])) {
+          $markup .= '<div class="calendar-item-type-wrapper"><div class="calendar-item-type">' . $request_type_options[$item['type']] . '</div></div>';
+        }
+
+        $markup .= '</div></div>';
+
+        $item_count++;
+        $item_even = !$item_even;
+      }
     }
+
+    $markup .= '</div></div></div></div>';
+
+    $row_count++;
+    $row_even = !$row_even;
   }
   $markup .= '</div></div>';
 
@@ -326,7 +358,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
 
   $row_even = TRUE;
   $row_count = 0;
-  foreach ($items['range'] as $floor_time => $items) {
+  foreach ($items['range'] as $floor_time => $range) {
     $row_class = 'row-' . $row_count . ' ';
     if ($row_even) {
       $row_class .= 'even ';
@@ -342,7 +374,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
     $item_even = TRUE;
     $item_count = 0;
     $left_offset = ($row_even ? 4 : 16);
-    foreach ($items as $item_id => $item) {
+    foreach ($range as $item_id => $item) {
       $item_class = "";
 
       $item_class = 'row-' . $item_count . ' ';
