@@ -86,7 +86,7 @@ function mfcs_request_list_0_page($form, &$form_state, $page_number = 0) {
       $rows_count++;
 
       // Rows per page + 1 is loaded so that it can be detected whether or not a 'next' link needs to be provided.
-      if ($rows_count > $total_results) {
+      if ($rows_count > $rows_per_page) {
         break;
       }
 
