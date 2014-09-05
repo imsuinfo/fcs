@@ -4572,11 +4572,16 @@ function mfcs_display_room_unavailable_message() {
  *   (optional) When NULL, no review restrictions are applied.
  *   When FALSE, review view restrictions are applied.
  *   When TRUE, review edit restrictions are applied.
+ * @param array $extra_fields
+ *   (optional) An array of extra fields that should be loaded.
+ *   The array will have a key of the table name and a value of an array.
+ *   The value array will contain an 'alias' string, an 'on' string, a 'join'
+ *   string, and a 'columns' array.
  *
  * @return array|FALSE
  *   An array of all items found or FALSE on error.
  */
-function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 0, $limit = 20, $sorting = array(), $review_restrictions = NULL) {
+function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 0, $limit = 20, $sorting = array(), $review_restrictions = NULL, $extra_fields = array()) {
   if (!is_null($search) && !is_string($search) && !is_array($search)) {
     cf_error::invalid_string('search');
     return FALSE;
@@ -4608,6 +4613,11 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
 
   if (!is_null($review_restrictions) && !is_bool($review_restrictions)) {
     cf_error::invalid_bool('review_restrictions');
+    return FALSE;
+  }
+
+  if (!is_array($extra_fields)) {
+    cf_error::invalid_array('extra_fields');
     return FALSE;
   }
 
@@ -4832,6 +4842,39 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
       $query->addField('mfdtsp', 'value', 'time_stop');
     }
 
+    // add custom fields to the select results as requested by the caller.
+    if (!empty($extra_fields)) {
+      foreach ($extra_fields as $extra_table_name => $extra_values) {
+        if (!array_key_exists('alias', $extra_values) || !array_key_exists('join', $extra_values) || !array_key_exists('columns', $extra_values)) {
+          continue;
+        }
+
+        if (array_key_exists($extra_table_name, $already_joined)) {
+          continue;
+        }
+
+        if ($extra_values['join'] == 'inner') {
+          $query->innerJoin($extra_table_name, $extra_values['alias'], $extra_values['on']);
+        }
+        elseif ($extra_values['join'] == 'left') {
+          $query->leftJoin($extra_table_name, $extra_values['alias'], $extra_values['on']);
+        }
+        elseif ($extra_values['join'] == 'right') {
+          $query->rightJoin($extra_table_name, $extra_values['alias'], $extra_values['on']);
+        }
+
+        $already_joined[$extra_table_name] = $extra_values['alias'];
+        foreach ($extra_values['columns'] as $column_external_name => $column_internal_name) {
+          if (array_key_exists($column_external_name, $already_added)) {
+            continue;
+          }
+
+          $query->addField($extra_values['alias'], $column_internal_name, $column_external_name);
+          $already_added[$column_external_name] = $extra_values['alias'] . '.' . $column_internal_name;
+        }
+      }
+    }
+
     $query->fields('mer');
 
     if (is_array($search)) {
@@ -4848,11 +4891,21 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
     }
 
     if ($reviewer || $manager) {
-      $query->innerjoin('mfcs_current_request_coordinator', 'mcrc', 'mer.id = mcrc.request_id');
-      $query->innerjoin('mfcs_field_request_coordinator_classification', 'mfrcc', 'mcrc.request_id = mfrcc.request_id AND mcrc.classification = mfrcc.revision AND mfrcc.delta = 0');
+      if (!array_key_exists('mfcs_current_request_coordinator', $already_joined)) {
+        $query->innerjoin('mfcs_current_request_coordinator', 'mcrc', 'mer.id = mcrc.request_id');
+      }
 
-      $query->innerjoin('mfcs_current_venue_coordinator', 'mcvc', 'mer.id = mcvc.request_id');
-      $query->innerjoin('mfcs_field_venue_coordinator_user_id', 'mfvcui', 'mcvc.request_id = mfvcui.request_id AND mcvc.user_id = mfvcui.revision AND mfvcui.delta = 0');
+      if (!array_key_exists('mfcs_field_request_coordinator_classification', $already_joined)) {
+        $query->innerjoin('mfcs_field_request_coordinator_classification', 'mfrcc', 'mcrc.request_id = mfrcc.request_id AND mcrc.classification = mfrcc.revision AND mfrcc.delta = 0');
+      }
+
+      if (!array_key_exists('mfcs_current_venue_coordinator', $already_joined)) {
+        $query->innerjoin('mfcs_current_venue_coordinator', 'mcvc', 'mer.id = mcvc.request_id');
+      }
+
+      if (!array_key_exists('mfcs_field_venue_coordinator_user_id', $already_joined)) {
+        $query->innerjoin('mfcs_field_venue_coordinator_user_id', 'mfvcui', 'mcvc.request_id = mfvcui.request_id AND mcvc.user_id = mfvcui.revision AND mfvcui.delta = 0');
+      }
 
       $or = NULL;
 

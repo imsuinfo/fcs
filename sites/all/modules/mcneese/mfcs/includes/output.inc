@@ -899,6 +899,7 @@ function mfcs_generate_ical($requests) {
     $request_description_markup_begin .= '<strong>' . $request_zone . '</strong> is reserved for the following dates:' . "<br>\n";
     $request_description_markup_begin .= '<ul>' . "\n";
 
+    $request_description_markup_end = '';
     $request_description_markup_end .= '</ul>' . "\n";
     $request_description_markup_end .= '</body>' . "\n";
     $request_description_markup_end .= '</html>' . "\n";
@@ -953,7 +954,7 @@ function mfcs_generate_ical($requests) {
         $ical[] = 'CATEGORIES:' . implode(', ', $request_categories);
       }
 
-      #$ical[] = 'ORGANIZER:' . $request_coordinator;
+      $ical[] = 'ORGANIZER;' . 'CN=' . $request->request_coordinator_name . ':MAILTO:' . $request->request_coordinator_email;
       $ical[] = 'SUMMARY:' . $request->title;
 
       $request_description = $request_description_begin . $dates_text . $request_description_end;

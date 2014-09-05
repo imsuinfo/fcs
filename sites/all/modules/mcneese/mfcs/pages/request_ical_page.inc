@@ -174,7 +174,33 @@ function mfcs_request_ical_month_0_page($year = NULL, $month = NULL) {
     'sort' => 'ASC',
   );
 
-  $results = mfcs_request_load_listing($search, FALSE, 0, 0, $sorting);
+  $extra_fields = array();
+  $extra_fields['mfcs_current_request_coordinator'] = array(
+    'alias' => 'mcrc',
+    'join' => 'inner',
+    'on' => 'mer.id = mcrc.request_id',
+    'columns' => array(),
+  );
+
+  $extra_fields['mfcs_field_request_coordinator_name'] = array(
+    'alias' => 'mfrcn',
+    'join' => 'inner',
+    'on' => 'mcrc.request_id = mfrcn.request_id AND mcrc.name = mfrcn.revision AND mfrcn.delta = 0',
+    'columns' => array(
+      'request_coordinator_name' => 'value',
+    ),
+  );
+
+  $extra_fields['mfcs_field_request_coordinator_email'] = array(
+    'alias' => 'mfrce',
+    'join' => 'inner',
+    'on' => 'mcrc.request_id = mfrce.request_id AND mcrc.name = mfrce.revision AND mfrce.delta = 0',
+    'columns' => array(
+      'request_coordinator_email' => 'value',
+    ),
+  );
+
+  $results = mfcs_request_load_listing($search, FALSE, 0, 0, $sorting, NULL, $extra_fields);
 
   $ical = FALSE;
   if ($results !== FALSE) {
