@@ -390,7 +390,25 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
 
     $item_even = TRUE;
     $item_count = 0;
-    $left_offset = ($row_even ? 4 : 16);
+    $item_total = count($range);
+
+    $left_offset = 0;
+    $left_offset_min = 30;
+    $left_offset_max = 148;
+
+    $left_offset_increment = $left_offset_min;
+    if ($item_total > 0) {
+      $left_offset_increment = floor(800 / $item_total);
+
+      if ($left_offset_increment < $left_offset_increment) {
+        $left_offset_increment = $left_offset_min;
+      }
+      elseif ($left_offset_increment > $left_offset_max) {
+        $left_offset_increment = $left_offset_max;
+      }
+    }
+
+
     foreach ($range as $item_id => $item) {
       $item_class = "";
 
@@ -450,7 +468,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
 
       $item_count++;
       $item_even = !$item_even;
-      $left_offset += 40;
+      $left_offset += $left_offset_increment;
     }
 
     $markup .= '</div></div></div></div>';
