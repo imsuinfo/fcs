@@ -47,12 +47,16 @@ function mfcs_request_ical_month_0_page($year = NULL, $month = NULL) {
   mfcs_include(4);
   mfcs_include(9);
 
+  $parameter_year = FALSE;
+  $parameter_month = !is_null($month);
+
   if (is_null($year)) {
     $month_start = strtotime('midnight first day of', REQUEST_TIME);
     $month_end = strtotime('midnight last day of', REQUEST_TIME);
     $month_stop = strtotime('midnight tomorrow', $month_end);
   }
   else {
+    $parameter_year = TRUE;
     $current_date = mfcs_miscellaneous_determine_current_date($year, $month, NULL);
 
     $month_start = strtotime('midnight first day of ' . $current_date['month'] . ' ' . $current_date['year']);
@@ -108,51 +112,51 @@ function mfcs_request_ical_month_0_page($year = NULL, $month = NULL) {
     $ical = mfcs_generate_ical($results, $absolute_start, $absolute_stop);
   }
 
-  if ($ical !== FALSE) {
-    $GLOBALS['devel_shutdown'] = FALSE;
-
-    // make sure to perform output buffer (if possible) to reduce chances of "headers already sent" issues.
-    $ob_level = ob_get_level();
-    for ($i = 0; $i < $ob_level; $i++) {
-      ob_clean();
-    }
-    ob_start();
-
-    $filename = 'mcneese-facilities_use.ics';
-    $content_location = $base_url . '/requests/ical-0/month';
-
-    if ($parameter_year) {
-      $filename = 'mcneese-facilities_use-' . $year;
-      $content_location .= '/' . $year;
-
-      if ($parameter_month) {
-        $filename .= '-' . $month;
-        $content_location .= '/' . $month;
-      }
-
-      $filename .= '.ics';
-    }
-
-    header('HTTP/1.1 200 OK', TRUE, 200);
-    header('Content-Type: text/plain');
-    header('Content-Length: ' . strlen($ical));
-    header('Content-Transfer-Encoding: binary');
-    #header('Content-type: text/plain; charset=utf-8');
-    header('Content-type: text/calendar; charset=utf-8');
-    header('Content-Disposition: inline; filename="' . $filename . '"');
-    header('Content-Description: File Transfer');
-    header('Content-Location: ' . $content_location);
-    header('Last-Modified: ' . date('r', REQUEST_TIME));
-    header('Date: ' . date('r', REQUEST_TIME));
-
-    // flush buffer after headers have been processed (to hopefully avoid "headers already sent" issues).
-    ob_end_flush();
-
-    print($ical);
-    exit();
+  if ($ical === FALSE) {
+    return '';
   }
 
-  return '';
+  $GLOBALS['devel_shutdown'] = FALSE;
+
+  // make sure to perform output buffer (if possible) to reduce chances of "headers already sent" issues.
+  $ob_level = ob_get_level();
+  for ($i = 0; $i < $ob_level; $i++) {
+    ob_clean();
+  }
+  ob_start();
+
+  $filename = 'mcneese-facilities_use.ics';
+  $content_location = $base_url . '/requests/ical-0/day';
+
+  if ($parameter_year) {
+    $filename = 'mcneese-facilities_use-' . $year;
+    $content_location .= '/' . $year;
+
+    if ($parameter_month) {
+      $filename .= '-' . $month;
+      $content_location .= '/' . $month;
+    }
+
+    $filename .= '.ics';
+  }
+
+  header('HTTP/1.1 200 OK', TRUE, 200);
+  header('Content-Type: text/plain');
+  header('Content-Length: ' . strlen($ical));
+  header('Content-Transfer-Encoding: binary');
+  #header('Content-type: text/plain; charset=utf-8');
+  header('Content-type: text/calendar; charset=utf-8');
+  header('Content-Disposition: inline; filename="' . $filename . '"');
+  header('Content-Description: File Transfer');
+  header('Content-Location: ' . $content_location);
+  header('Last-Modified: ' . date('r', REQUEST_TIME));
+  header('Date: ' . date('r', REQUEST_TIME));
+
+  // flush buffer after headers have been processed (to hopefully avoid "headers already sent" issues).
+  ob_end_flush();
+
+  print($ical);
+  exit();
 }
 
 /**
@@ -228,56 +232,56 @@ function mfcs_request_ical_day_0_page($year = NULL, $month = NULL, $day = NULL) 
     $ical = mfcs_generate_ical($results, $day_start, $day_stop);
   }
 
-  if ($ical !== FALSE) {
-    $GLOBALS['devel_shutdown'] = FALSE;
-
-    // make sure to perform output buffer (if possible) to reduce chances of "headers already sent" issues.
-    $ob_level = ob_get_level();
-    for ($i = 0; $i < $ob_level; $i++) {
-      ob_clean();
-    }
-    ob_start();
-
-    $filename = 'mcneese-facilities_use.ics';
-    $content_location = $base_url . '/requests/ical-0/day';
-
-    if ($parameter_year) {
-      $filename = 'mcneese-facilities_use-' . $year;
-      $content_location .= '/' . $year;
-
-      if ($parameter_month) {
-        $filename .= '-' . $month;
-        $content_location .= '/' . $month;
-      }
-
-      if ($parameter_day) {
-        $filename .= '-' . $day;
-        $content_location .= '/' . $day;
-      }
-
-      $filename .= '.ics';
-    }
-
-    header('HTTP/1.1 200 OK', TRUE, 200);
-    header('Content-Type: text/plain');
-    header('Content-Length: ' . strlen($ical));
-    header('Content-Transfer-Encoding: binary');
-    #header('Content-type: text/plain; charset=utf-8');
-    header('Content-type: text/calendar; charset=utf-8');
-    header('Content-Disposition: inline; filename="' . $filename . '"');
-    header('Content-Description: File Transfer');
-    header('Content-Location: ' . $content_location);
-    header('Last-Modified: ' . date('r', REQUEST_TIME));
-    header('Date: ' . date('r', REQUEST_TIME));
-
-    // flush buffer after headers have been processed (to hopefully avoid "headers already sent" issues).
-    ob_end_flush();
-
-    print($ical);
-    exit();
+  if ($ical === FALSE) {
+    return '';
   }
 
-  return '';
+  $GLOBALS['devel_shutdown'] = FALSE;
+
+  // make sure to perform output buffer (if possible) to reduce chances of "headers already sent" issues.
+  $ob_level = ob_get_level();
+  for ($i = 0; $i < $ob_level; $i++) {
+    ob_clean();
+  }
+  ob_start();
+
+  $filename = 'mcneese-facilities_use.ics';
+  $content_location = $base_url . '/requests/ical-0/day';
+
+  if ($parameter_year) {
+    $filename = 'mcneese-facilities_use-' . $year;
+    $content_location .= '/' . $year;
+
+    if ($parameter_month) {
+      $filename .= '-' . $month;
+      $content_location .= '/' . $month;
+    }
+
+    if ($parameter_day) {
+      $filename .= '-' . $day;
+      $content_location .= '/' . $day;
+    }
+
+    $filename .= '.ics';
+  }
+
+  header('HTTP/1.1 200 OK', TRUE, 200);
+  header('Content-Type: text/plain');
+  header('Content-Length: ' . strlen($ical));
+  header('Content-Transfer-Encoding: binary');
+  #header('Content-type: text/plain; charset=utf-8');
+  header('Content-type: text/calendar; charset=utf-8');
+  header('Content-Disposition: inline; filename="' . $filename . '"');
+  header('Content-Description: File Transfer');
+  header('Content-Location: ' . $content_location);
+  header('Last-Modified: ' . date('r', REQUEST_TIME));
+  header('Date: ' . date('r', REQUEST_TIME));
+
+  // flush buffer after headers have been processed (to hopefully avoid "headers already sent" issues).
+  ob_end_flush();
+
+  print($ical);
+  exit();
 }
 
 /**
