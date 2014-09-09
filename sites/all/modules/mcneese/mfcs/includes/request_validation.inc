@@ -335,7 +335,9 @@ function mfcs_validate_request_fields($form, &$form_state) {
           if (is_string($value)) {
             $start_timestamp[$key] = strtotime($value, $date_timestamp[$key]);
 
-            if ($start_timestamp[$key] === FALSE) {
+            $matched = preg_match('@^\s*(\d|\d\d):(\d|\d\d)\s*(pm|am)*\s*$@i', $value);
+
+            if ($start_timestamp[$key] === FALSE || !$matched) {
               form_set_error($ps_p . '][dates][time_start][' . $key, t("'@value' is not a valid start time.", array('@value' => $value)));
               $passed = FALSE;
             }
@@ -367,8 +369,10 @@ function mfcs_validate_request_fields($form, &$form_state) {
           if (is_string($value)) {
             $stop_timestamp[$key] = strtotime($value, $date_timestamp[$key]);
 
-            if ($stop_timestamp[$key] === FALSE) {
-              form_set_error($ps_p . '][dates][time_stop][' . $key, t("'@value' is not a valid start time.", array('@value' => $value)));
+            $matched = preg_match('@^\s*(\d|\d\d):(\d|\d\d)\s*(pm|am)*\s*$@i', $value);
+
+            if ($stop_timestamp[$key] === FALSE || !$matched) {
+              form_set_error($ps_p . '][dates][time_stop][' . $key, t("'@value' is not a valid stop time.", array('@value' => $value)));
               $passed = FALSE;
             }
             else {
