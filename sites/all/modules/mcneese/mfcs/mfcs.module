@@ -5385,7 +5385,7 @@ function mfcs_get_latest_reviews($request_id, $steps = array(), $decisions = arr
  * @see: mfcs_request_load_listing()
  * @see: theme_table()
  */
-function mfcs_build_request_table($items, $max_rows, $columns = array('id' => "ID", 'title' => "Title", 'location' => "Location", 'building' => "Building", 'room' => "Room", 'date' => "Date", 'submitted_on' => "Submitted On", 'operations' => "Operations"), $user = NULL) {
+function mfcs_build_request_table($items, $max_rows, $columns = array('id' => "ID", 'title' => "Title", 'building' => "Building", 'room' => "Room", 'date' => "Date", 'submitted_on' => "Submitted On", 'operations' => "Operations"), $user = NULL) {
   $table = array();
   foreach ($columns as $column_name => $column_title) {
     if ($column_name == 'operations') {
