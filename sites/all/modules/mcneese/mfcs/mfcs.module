@@ -252,20 +252,21 @@ function mfcs_menu() {
  *
  * This static caches the results in 'mfcs_request_access'.
  *
- * @param string $operation
+ * @param null|string $operation
  *   (optional) When specified, performs access check based on operation.
- * @param int $request_id
+ * @param null|int|array $request_id
  *   (optional) When specified, performs access check based the provided id.
- *   Some operations require this to return TRUE under certain circumstances.
- * @param object $user
+ *   Can be an array for 'review'.
+ * @param null|object $user
  *   (optional) The user object to obtain access for.
- * @param string $section
+ * @param null|string $section
  *   (optional) Check whether or not the user is allowed to perform a certain
  *   operation for a specific section. This is primarily used for the edit
  *   pages.
  *
- * @param bool
+ * @param bool|array
  *   TRUE on access granted, FALSE otherwise.
+ *   An array of boolean values is returned when request_id is an array.
  *
  * @see: mfcs_request_access()
  */
@@ -277,6 +278,21 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
   // anonymous user is denied access to requests as a whole.
   if ($user->uid == 0) {
     return FALSE;
+  }
+
+  // allow for request_id to be an array of ids.
+  $processed = array();
+  if (is_array($request_id)) {
+    $request_ids = $request_id;
+
+    // only allow the null array key to be specified by this function.
+    unset($request_ids[NULL]);
+  }
+  elseif (is_null($request_id)) {
+    $request_ids = array(NULL => NULL);
+  }
+  else {
+    $request_ids = array($request_id => $request_id);
   }
 
 
@@ -293,10 +309,27 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
 
   $access = &$mfcs_request_access[$operation][$section][$user->uid];
 
-  if (array_key_exists($request_id, $access)) {
-    return $access[$request_id];
+  if (is_string($request_id)) {
+    if (array_key_exists($request_id, $access)) {
+      return $access[$request_id];
+    }
   }
-
+  elseif (is_array($request_id)) {
+    $request_ids_copy = $request_ids;
+    foreach ($request_ids_copy as $id => $value) {
+      if (array_key_exists($id, $access)) {
+        $processed[$id] = $access[$id];
+        unset($request_ids[$id]);
+      }
+    }
+    unset($request_ids_copy);
+  }
+  elseif (is_null($request_id)) {
+    // the request id is allowed to be NULL.
+  }
+  else {
+    return FALSE;
+  }
 
   $request_status = array(
     MFCS_REQUEST_STATUS_LOCKED,
@@ -308,555 +341,211 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
     MFCS_REQUEST_STATUS_CANCELLED,
   );
 
-  $manager = user_access('mfcs manage', $user);
-  $reviewer = user_access('mfcs review', $user);
-  $requester = user_access('mfcs request', $user);
+  $roles = array(
+    'manager' => user_access('mfcs manage', $user),
+    'reviewer' => user_access('mfcs review', $user),
+    'requester' => user_access('mfcs request', $user),
+  );
 
+  mfcs_include(10);
 
   if ($operation == 'create') {
-    if ($requester) {
-      if (is_null($request_id)) {
-        $access[$request_id] = TRUE;
-        return TRUE;
-      }
+    $operation_result = mfcs_page_request_access_operation_create($request_ids, $processed, $access, $roles, $user);
 
-      // create operations on a specific request is actually a clone/copy operation.
-      // treat this as a view operation.
-      $access[$request_id] = mfcs_page_request_access('view', $request_id, $user);
-      return $access[$request_id];
+    // if something went wrong with the operation check, return FALSE but do not cache.
+    if ($operation_result === FALSE) {
+      return FALSE;
     }
+
+    if (is_array($request_id)) {
+      return $processed;
+    }
+
+    return $processed[$request_id];
   }
   elseif ($operation == 'edit') {
-    $edit_request_status = array(
-      MFCS_REQUEST_STATUS_UNLOCKED,
-      MFCS_REQUEST_STATUS_LOCKED,
-    );
+    $operation_result = mfcs_page_request_access_operation_edit($request_ids, $processed, $access, $roles, $user, $section);
 
-    // when quick meeting is enabled, a section is not null, then additional checks are required.
-    $is_quick_meeting = FALSE;
-    if (!is_null($request_id) && !is_null($section) && ($manager || $requester)) {
-      try {
-        $query = db_select('mfcs_requests', 'mer');
-
-        $query->innerjoin('mfcs_current_information', 'mci', 'mer.id = mci.request_id');
-        $query->innerjoin('mfcs_field_information_type', 'mfit', 'mci.request_id = mfit.request_id AND mci.type = mfit.revision AND mfit.delta = 0');
-
-        // $query->countQuery() does not appear to be functioning as expected, so manually count.
-        $query->addExpression('count(mer.id)');
-
-        $query->condition('mer.id', $request_id);
-        $query->condition('mfit.value', MFCS_REQUEST_TYPE_QUICK_MEETING);
-
-        $result = $query->execute()->fetchField();
-
-        if ($result > 0) {
-          $is_quick_meeting = TRUE;
-        }
-      }
-      catch (Exception $ex) {
-        cf_error::on_exception($ex);
-
-        return FALSE;
-      }
-
-      // deny access to sections that are not allowed to be edited for a quick meeting.
-      if ($is_quick_meeting) {
-        $allowed_sections = array(
-          'request',
-          'information',
-          'coordinator',
-          'dates',
-        );
-        if (!in_array($section, $allowed_sections)) {
-          return FALSE;
-        }
-      }
+    // if something went wrong with the operation check, return FALSE but do not cache.
+    if ($operation_result === FALSE) {
+      return FALSE;
     }
 
-    if ($manager) {
-      if (is_null($request_id)) {
-        $access[$request_id] = TRUE;
-        return TRUE;
-      }
-
-      try {
-        $query = db_select('mfcs_requests', 'mer');
-
-        $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
-        $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
-
-        // $query->countQuery() does not appear to be functioning as expected, so manually count.
-        $query->addExpression('count(mer.id)');
-
-        $query->condition('mer.id', $request_id);
-        $query->condition('mfts.value', $edit_request_status, 'IN');
-
-        $result = $query->execute()->fetchField();
-
-        if ($result > 0) {
-          $access[$request_id] = TRUE;
-          return TRUE;
-        }
-
-        $access[$request_id] = FALSE;
-        return FALSE;
-      }
-      catch (Exception $ex) {
-        cf_error::on_exception($ex);
-
-        return FALSE;
-      }
+    if (is_array($request_id)) {
+      return $processed;
     }
-    elseif ($requester) {
-      if (is_null($request_id)) {
-        $access[$request_id] = TRUE;
-        return TRUE;
-      }
 
-      try {
-        $query = db_select('mfcs_requests', 'mer');
-
-        $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
-        $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
-
-        // $query->countQuery() does not appear to be functioning as expected, so manually count.
-        $query->addExpression('count(mer.id)');
-
-        $query->condition('mer.id', $request_id);
-        $query->condition('mer.user_id', $user->uid);
-        $query->condition('mfts.value', $edit_request_status, 'IN');
-
-        $result = $query->execute()->fetchField();
-
-        if ($result > 0) {
-          $access[$request_id] = TRUE;
-          return TRUE;
-        }
-
-        $access[$request_id] = FALSE;
-        return FALSE;
-      }
-      catch (Exception $ex) {
-        cf_error::on_exception($ex);
-
-        return FALSE;
-      }
-    }
+    return $processed[$request_id];
   }
   elseif ($operation == 'view') {
-    if ($manager) {
-      if (is_null($request_id)) {
-        $access[$request_id] = TRUE;
-        return TRUE;
-      }
+    $operation_result = mfcs_page_request_access_operation_view($request_ids, $processed, $access, $roles, $user);
 
-      try {
-        $query = db_select('mfcs_requests', 'mer');
-
-        $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
-        $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
-
-        // $query->countQuery() does not appear to be functioning as expected, so manually count.
-        $query->addExpression('count(mer.id)');
-
-        $query->condition('mer.id', $request_id);
-        $query->condition('mfts.value', MFCS_REQUEST_STATUS_DELETED, '<>');
-
-        $result = $query->execute()->fetchField();
-
-        if ($result > 0) {
-          $access[$request_id] = TRUE;
-          return TRUE;
-        }
-
-        $access[$request_id] = FALSE;
-        return FALSE;
-      }
-      catch (Exception $ex) {
-        cf_error::on_exception($ex);
-
-        return FALSE;
-      }
+    // if something went wrong with the operation check, return FALSE but do not cache.
+    if ($operation_result === FALSE) {
+      return FALSE;
     }
-    elseif ($reviewer) {
-      if (is_null($request_id)) {
-        $access[$request_id] = TRUE;
-        return TRUE;
-      }
 
-      $access[$request_id] = mfcs_page_request_reviewer_access($user, $request_id, NULL);
-      return $access[$request_id];
+    if (is_array($request_id)) {
+      return $processed;
     }
-    elseif ($requester) {
-      if (is_null($request_id)) {
-        $access[$request_id] = TRUE;
-        return TRUE;
-      }
 
-      try {
-        $query = db_select('mfcs_requests', 'mer');
-
-        $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
-        $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
-        $query->innerjoin('mfcs_field_top_step', 'mftsp', 'mct.request_id = mftsp.request_id AND mct.step = mftsp.revision AND mftsp.delta = 0');
-
-        // $query->countQuery() does not appear to be functioning as expected, so manually count.
-        $query->addExpression('count(mer.id)');
-
-        $or = db_or();
-
-        $and = db_and();
-        $and->condition('mer.user_id', $user->uid);
-        $and->condition('mfts.value', $request_status, 'IN');
-        $or->condition($and);
-
-        // always show completed and accepted requests when there are no restrictions.
-        $and = db_and();
-        $and->condition('mfts.value', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
-        $and->condition('mftsp.value', MFCS_REVIEW_STEP_COMPLETED);
-        $or->condition($and);
-
-        $query->condition('mer.id', $request_id);
-        $query->condition($or);
-
-        $result = $query->execute()->fetchField();
-
-        if ($result > 0) {
-          $access[$request_id] = TRUE;
-          return TRUE;
-        }
-
-        $access[$request_id] = FALSE;
-        return FALSE;
-      }
-      catch (Exception $ex) {
-        cf_error::on_exception($ex);
-
-        return FALSE;
-      }
-    }
+    return $processed[$request_id];
   }
   elseif ($operation == 'list') {
-    if ($requester || $reviewer || $manager) {
+    if ($roles['requester'] || $roles['reviewer'] || $roles['manager']) {
+      if (is_array($request_id)) {
+        foreach ($request_ids as $request_id) {
+          $access[$request_id] = TRUE;
+          $processed[$request_id] = TRUE;
+        }
+
+        return $processed;
+      }
+
       $access[$request_id] = TRUE;
       return TRUE;
     }
   }
   elseif ($operation == 'search') {
-    if ($requester || $reviewer || $manager) {
+    if ($roles['requester'] || $roles['reviewer'] || $roles['manager']) {
+      if (is_array($request_id)) {
+        foreach ($request_ids as $request_id) {
+          $access[$request_id] = TRUE;
+          $processed[$request_id] = TRUE;
+        }
+
+        return $processed;
+      }
+
       $access[$request_id] = TRUE;
       return TRUE;
     }
   }
   elseif ($operation == 'reviewers') {
-    if ($manager) {
+    if ($roles['manager']) {
+      if (is_array($request_id)) {
+        foreach ($request_ids as $request_id) {
+          $access[$request_id] = TRUE;
+          $processed[$request_id] = TRUE;
+        }
+
+        return $processed;
+      }
+
       $access[$request_id] = TRUE;
       return TRUE;
     }
   }
   elseif ($operation == 'review') {
-    if (is_null($request_id)) {
-      if ($reviewer) {
-        $access[$request_id] = TRUE;
-        return TRUE;
-      }
+    $operation_result = mfcs_page_request_access_operation_review($request_ids, $processed, $access, $roles, $user);
+
+    // if something went wrong with the operation check, return FALSE but do not cache.
+    if ($operation_result === FALSE) {
+      return FALSE;
     }
-    else {
-      if ($reviewer) {
-        $access[$request_id] = mfcs_page_request_reviewer_access($user, $request_id, TRUE);
-        return $access[$request_id];
-      }
+
+    if (is_array($request_id)) {
+      return $processed;
     }
+
+    return $processed[$request_id];
   }
   elseif ($operation == 'comment') {
     // @todo: currently disabled feature. Enable if such functionality is requested.
-    $access[$request_id] = FALSE;
-    return FALSE;
-
-    if ($manager) {
-      $access[$request_id] = TRUE;
-      return TRUE;
-    }
-
-    if (!is_null($request_id)) {
-      $access[$request_id] = mfcs_page_request_reviewer_access($user, $request_id, TRUE);
-      return $access[$request_id];
-    }
   }
   elseif ($operation == 'log') {
-    if ($manager) {
-      $access[$request_id] = TRUE;
-      return TRUE;
+    $operation_result = mfcs_page_request_access_operation_log($request_ids, $processed, $access, $roles, $user);
+
+    // if something went wrong with the operation check, return FALSE but do not cache.
+    if ($operation_result === FALSE) {
+      return FALSE;
     }
 
-    if ($reviewer) {
-      if (is_null($request_id)) {
-        $access[$request_id] = TRUE;
-        return TRUE;
-      }
-      else {
-        $access[$request_id] = mfcs_page_request_reviewer_access($user, $request_id, NULL);
-        return $access[$request_id];
-      }
+    if (is_array($request_id)) {
+      return $processed;
     }
+
+    return $processed[$request_id];
   }
   elseif ($operation == 'delete') {
-    if ($manager) {
+    if ($roles['manager']) {
+      if (is_array($request_id)) {
+        foreach ($request_ids as $request_id) {
+          $access[$request_id] = TRUE;
+          $processed[$request_id] = TRUE;
+        }
+
+        return $processed;
+      }
+
       $access[$request_id] = TRUE;
       return TRUE;
     }
   }
   elseif ($operation == 'cancel') {
-    if (is_null($request_id)) {
-      if ($requester || $reviewer || $manager) {
-        $access[$request_id] = TRUE;
-        return TRUE;
-      }
-      else {
-        $access[$request_id] = FALSE;
-        return FALSE;
-      }
-    }
+    $operation_result = mfcs_page_request_access_operation_cancel($request_ids, $processed, $access, $roles, $user);
 
-    $cancellable_status_normal = array(
-      MFCS_REQUEST_STATUS_UNLOCKED,
-    );
-
-    $cancellable_status_admin = array(
-      MFCS_REQUEST_STATUS_LOCKED,
-      MFCS_REQUEST_STATUS_UNLOCKED,
-    );
-
-    // if the user is the venue coordinator, then allow them to cancel an request at any point in the process.
-    try {
-      $query = db_select('mfcs_requests', 'mer');
-
-      $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
-      $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
-
-      $query->innerjoin('mfcs_current_venue_coordinator', 'mcvc', 'mer.id = mcvc.request_id');
-      $query->innerjoin('mfcs_field_venue_coordinator_user_id', 'mfvcui', 'mcvc.request_id = mfvcui.request_id AND mcvc.user_id = mfvcui.revision AND mfvcui.delta = 0');
-
-      // $query->countQuery() does not appear to be functioning as expected, so manually count.
-      $query->addExpression('count(mer.id)');
-
-      $query->condition('mer.id', $request_id);
-      $query->condition('mfts.value', $cancellable_status_admin, 'IN');
-      $query->condition('mfvcui.value', $user->uid);
-
-      $result = $query->execute()->fetchField();
-
-      if ($result > 0) {
-        $access[$request_id] = TRUE;
-        return TRUE;
-      }
-    }
-    catch (Exception $ex) {
-      cf_error::on_exception($ex);
+    // if something went wrong with the operation check, return FALSE but do not cache.
+    if ($operation_result === FALSE) {
       return FALSE;
     }
 
-    if ($manager || $requester) {
-      try {
-        $query = db_select('mfcs_requests', 'mer');
-
-        $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
-        $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
-
-        // $query->countQuery() does not appear to be functioning as expected, so manually count.
-        $query->addExpression('count(mer.id)');
-
-        $query->condition('mer.id', $request_id);
-
-        if ($requester && !$manager) {
-          $query->condition('mer.user_id', $user->uid);
-          $query->condition('mfts.value', $cancellable_status_normal, 'IN');
-        }
-        else {
-          $query->condition('mfts.value', $cancellable_status_admin, 'IN');
-        }
-
-        $result = $query->execute()->fetchField();
-
-        if ($result > 0) {
-          $access[$request_id] = TRUE;
-          return TRUE;
-        }
-      }
-      catch (Exception $ex) {
-        cf_error::on_exception($ex);
-        return FALSE;
-      }
+    if (is_array($request_id)) {
+      return $processed;
     }
+
+    return $processed[$request_id];
   }
   elseif ($operation == 'uncancel') {
-    if (is_null($request_id)) {
-      if ($requester || $reviewer || $manager) {
-        $access[$request_id] = TRUE;
-        return TRUE;
-      }
-      else {
-        $access[$request_id] = FALSE;
-        return FALSE;
-      }
-    }
+    $operation_result = mfcs_page_request_access_operation_uncancel($request_ids, $processed, $access, $roles, $user);
 
-    $uncancellable_status = array(
-      MFCS_REQUEST_STATUS_CANCELLED,
-    );
-
-    // if the user is the venue coordinator, then allow them to cancel an request at any point in the process.
-    try {
-      $query = db_select('mfcs_requests', 'mer');
-
-      $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
-      $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
-
-      $query->innerjoin('mfcs_current_venue_coordinator', 'mcvc', 'mer.id = mcvc.request_id');
-      $query->innerjoin('mfcs_field_venue_coordinator_user_id', 'mfvcui', 'mcvc.request_id = mfvcui.request_id AND mcvc.user_id = mfvcui.revision AND mfvcui.delta = 0');
-
-      // $query->countQuery() does not appear to be functioning as expected, so manually count.
-      $query->addExpression('count(mer.id)');
-
-      $query->condition('mer.id', $request_id);
-      $query->condition('mfts.value', $uncancellable_status, 'IN');
-      $query->condition('mfvcui.value', $user->uid);
-
-      $result = $query->execute()->fetchField();
-
-      if ($result > 0) {
-        $access[$request_id] = TRUE;
-        return TRUE;
-      }
-    }
-    catch (Exception $ex) {
-      cf_error::on_exception($ex);
+    // if something went wrong with the operation check, return FALSE but do not cache.
+    if ($operation_result === FALSE) {
       return FALSE;
     }
 
-    if ($manager) {
-      try {
-        $query = db_select('mfcs_requests', 'mer');
-
-        $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
-        $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
-
-        // $query->countQuery() does not appear to be functioning as expected, so manually count.
-        $query->addExpression('count(mer.id)');
-
-        $query->condition('mer.id', $request_id);
-        $query->condition('mfts.value', $uncancellable_status, 'IN');
-
-        $result = $query->execute()->fetchField();
-
-        if ($result > 0) {
-          $access[$request_id] = TRUE;
-          return TRUE;
-        }
-      }
-      catch (Exception $ex) {
-        cf_error::on_exception($ex);
-
-        return FALSE;
-      }
+    if (is_array($request_id)) {
+      return $processed;
     }
+
+    return $processed[$request_id];
   }
   elseif ($operation == 'history') {
-    if ($manager) {
-      if (is_null($request_id)) {
-        $access[$request_id] = TRUE;
-        return TRUE;
-      }
+    $operation_result = mfcs_page_request_access_operation_history($request_ids, $processed, $access, $roles, $user);
 
-      try {
-        $query = db_select('mfcs_requests', 'mer');
-
-        $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
-        $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
-
-        // $query->countQuery() does not appear to be functioning as expected, so manually count.
-        $query->addExpression('count(mer.id)');
-
-        $query->condition('mer.id', $request_id);
-        $query->condition('mfts.value', MFCS_REQUEST_STATUS_DELETED, '<>');
-
-        $result = $query->execute()->fetchField();
-
-        if ($result > 0) {
-          $access[$request_id] = TRUE;
-          return TRUE;
-        }
-      }
-      catch (Exception $ex) {
-        cf_error::on_exception($ex);
-
-        return FALSE;
-      }
+    // if something went wrong with the operation check, return FALSE but do not cache.
+    if ($operation_result === FALSE) {
+      return FALSE;
     }
+
+    if (is_array($request_id)) {
+      return $processed;
+    }
+
+    return $processed[$request_id];
   }
   elseif ($operation == 'agreement') {
-    if (!$requester && !$reviewer && !$manager) {
+    $operation_result = mfcs_page_request_access_operation_agreement($request_ids, $processed, $access, $roles, $user);
+
+    // if something went wrong with the operation check, return FALSE but do not cache.
+    if ($operation_result === FALSE) {
+      return FALSE;
+    }
+
+    if (is_array($request_id)) {
+      return $processed;
+    }
+
+    return $processed[$request_id];
+  }
+
+  if (is_array($request_id)) {
+    foreach ($request_ids as $request_id) {
       $access[$request_id] = FALSE;
-      return FALSE;
+      $processed[$request_id] = FALSE;
     }
 
-    if (is_null($request_id)) {
-      $access[$request_id] = TRUE;
-      return TRUE;
-    }
-
-    $agreement_request_status = array(
-      MFCS_REQUEST_STATUS_LOCKED,
-      MFCS_REQUEST_STATUS_CLOSED_ACCEPTED,
-      MFCS_REQUEST_STATUS_CLOSED_DENIED,
-      MFCS_REQUEST_STATUS_CANCELLED,
-    );
-
-    if ($manager || $reviewer) {
-      $agreement_request_step = array(
-        MFCS_REVIEW_STEP_COMPLETED,
-        MFCS_REVIEW_STEP_MAKE_DECISIONS,
-        MFCS_REVIEW_STEP_REVIEW,
-        MFCS_REVIEW_STEP_REQUIREMENTS,
-      );
-    }
-    else {
-      $agreement_request_step = array(
-        MFCS_REVIEW_STEP_COMPLETED,
-      );
-    }
-
-    try {
-      $query = db_select('mfcs_requests', 'mer');
-
-      $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
-      $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
-      $query->innerjoin('mfcs_field_top_step', 'mftsp', 'mct.request_id = mftsp.request_id AND mct.step = mftsp.revision AND mftsp.delta = 0');
-
-      // $query->countQuery() does not appear to be functioning as expected, so manually count.
-      $query->addExpression('count(mer.id)');
-
-      $query->condition('mer.id', $request_id);
-      $query->condition('mfts.value', $agreement_request_status, 'IN');
-      $query->condition('mftsp.value', $agreement_request_step, 'IN');
-
-      // the submitter should be the only non-manager/non-reviewer that can access the agreement.
-      if (!$manager && !$reviewer) {
-        $query->condition('mer.user_id', $user->uid);
-      }
-
-      $result = $query->execute()->fetchField();
-
-      if ($result > 0) {
-        $access[$request_id] = TRUE;
-        return TRUE;
-      }
-    }
-    catch (Exception $ex) {
-      cf_error::on_exception($ex);
-
-      return FALSE;
-    }
+    return $processed;
   }
 
   $access[$request_id] = FALSE;
@@ -957,8 +646,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
       return FALSE;
     }
 
-    // create operations on a specific request is actually a clone/copy operation.
-    // treat this as a view operation.
+    // create operations on a specific request is actually a clone/copy operation, which only needs view access to clone/copy.
     $access[$request_id] = mfcs_request_access('view', $request, $user);
     return $access[$request_id];
   }
@@ -1020,8 +708,12 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
     }
     elseif ($reviewer) {
       // due to its complexity, the database calling function for reviewer access will be used (@todo: implement a non-db version.).
-      $access[$request_id] = mfcs_page_request_reviewer_access($user, $request_id, NULL);
-      return $access[$request_id];
+      $review_access = mfcs_page_request_reviewer_access($user, $request_id, NULL);
+
+      if (is_array($review_access) && array_key_exists($request_id, $review_access)) {
+        $access[$request_id] = $review_access[$request_id];
+        return $review_access[$request_id];
+      }
     }
     elseif ($requester) {
       if ($request['top']['status'][0]->value == MFCS_REQUEST_STATUS_CLOSED_ACCEPTED && $request['top']['step'][0]->value == MFCS_REVIEW_STEP_COMPLETED) {
@@ -1036,14 +728,23 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
     }
   }
   elseif ($operation == 'review') {
+    if (!$reviewer) {
+      $access[$request_id] = FALSE;
+      return FALSE;
+    }
+
     if ($request['top']['status'][0]->value == MFCS_REQUEST_STATUS_DELETED) {
       $access[$request_id] = FALSE;
       return FALSE;
     }
 
     // due to its complexity, the database calling function for reviewer access will be used (@todo: implement a non-db version.).
-    $access[$request_id] = mfcs_page_request_reviewer_access($user, $request_id, TRUE);
-    return $access[$request_id];
+    $review_access = mfcs_page_request_reviewer_access($user, $request_id, TRUE);
+
+    if (is_array($review_access) && array_key_exists($request_id, $review_access)) {
+      $access[$request_id] = $review_access[$request_id];
+      return $review_access[$request_id];
+    }
   }
   elseif ($operation == 'comment') {
     if ($request['top']['status'][0]->value == MFCS_REQUEST_STATUS_DELETED) {
@@ -1067,8 +768,12 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
     }
     elseif ($reviewer) {
       // due to its complexity, the database calling function for reviewer access will be used (@todo: implement a non-db version.).
-      $access[$request_id] = mfcs_page_request_reviewer_access($user, $request_id, NULL);
-      return $access[$request_id];
+      $review_access = mfcs_page_request_reviewer_access($user, $request_id, NULL);
+
+      if (is_array($review_access) && array_key_exists($request_id, $review_access)) {
+        $access[$request_id] = $review_access[$request_id];
+        return $review_access[$request_id];
+      }
     }
   }
   elseif ($operation == 'delete') {
@@ -1186,6 +891,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
     }
   }
 
+  $access[$request_id] = FALSE;
   return FALSE;
 }
 
@@ -1194,15 +900,18 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
  *
  * @param object $user
  *   User to check if is a valid reviewer of the given request.
- * @param int $request_id
+ * @param int|array $request_id
  *   ID of the request to check review access for.
+ *   This can be an array of request ids.
+ *   Using multiple ids can improve performance instead of doing a check
+ *   against each individual request id.
  * @param null|bool $review_restrictions
  *   When NULL, no review restrictions are applied.
  *   When FALSE, review view restrictions are applied.
  *   When TRUE, review edit restrictions are applied.
  *
- * @return bool
- *   TRUE on access granted, FALSE otherwise.
+ * @return bool|array
+ *   An array of access grants by access id, FALSE otherwise.
  */
 function mfcs_page_request_reviewer_access($user, $request_id, $review_restrictions) {
   if (!is_object($user)) {
@@ -1211,13 +920,25 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
   }
 
   if (!cf_is_integer($request_id)) {
-    cf_error::invalid_integer('request_id');
-    return FALSE;
+    if (!is_array($request_id) || empty($request_id)) {
+      cf_error::invalid_integer('request_id');
+      return FALSE;
+    }
   }
 
   if (!is_null($review_restrictions) && !is_bool($review_restrictions)) {
     cf_error::invalid_bool('review_restrictions');
     return FALSE;
+  }
+
+  $request_ids = $request_id;
+  if (!is_array($request_id)) {
+    $request_ids = array($request_id);
+  }
+
+  $access = array();
+  foreach ($request_ids as $id) {
+    $access[$id] = FALSE;
   }
 
   try {
@@ -1228,17 +949,17 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
     $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
     $query->innerjoin('mfcs_field_top_step', 'mftsp', 'mct.request_id = mftsp.request_id AND mct.step = mftsp.revision AND mftsp.delta = 0');
 
-    // $query->countQuery() does not appear to be functioning as expected, so manually count.
-    $query->addExpression('count(mer.id)');
-
-    $query->condition('mfts.value', MFCS_REQUEST_STATUS_DELETED, '<>');
-    $query->condition('mfts.request_id', $request_id);
-
     $query->innerjoin('mfcs_current_request_coordinator', 'mcrc', 'mer.id = mcrc.request_id');
     $query->innerjoin('mfcs_field_request_coordinator_classification', 'mfrcc', 'mcrc.request_id = mfrcc.request_id AND mcrc.classification = mfrcc.revision AND mfrcc.delta = 0');
 
     $query->innerjoin('mfcs_current_venue_coordinator', 'mcvc', 'mer.id = mcvc.request_id');
     $query->innerjoin('mfcs_field_venue_coordinator_user_id', 'mfvcui', 'mcvc.request_id = mfvcui.request_id AND mcvc.user_id = mfvcui.revision AND mfvcui.delta = 0');
+
+    $query->addField('mer', 'id', 'id');
+
+    $query->condition('mer.id', array($request_ids), 'IN');
+
+    $query->condition('mfts.value', MFCS_REQUEST_STATUS_DELETED, '<>');
 
     $or = null;
 
@@ -1446,19 +1167,24 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
       $query->condition($or);
     }
 
-    $result = $query->execute()->fetchField();
+    $results = $query->execute()->fetchAllAssoc('id');
+    if (!is_array($results)) {
+      return $access;
+    }
 
-    if ($result > 0) return TRUE;
+    foreach ($access as $id => $value) {
+      $access[$id] = array_key_exists($id, $results);
+    }
 
-    return FALSE;
+    return $access;
   }
   catch (Exception $ex) {
     cf_error::on_query_execution($ex);
 
-    return FALSE;
+    return $access;
   }
 
-  return FALSE;
+  return $access;
 }
 
 /**
@@ -1619,6 +1345,9 @@ function mfcs_include($id) {
   }
   elseif ($id == 9) {
     require_once($module_path . '/includes/miscellaneous.inc');
+  }
+  elseif ($id == 10) {
+    require_once($module_path . '/includes/access.inc');
   }
 }
 
@@ -5688,7 +5417,6 @@ function mfcs_build_request_table($items, $max_rows, $columns = array('id' => "I
   global $base_path;
 
   $rows = array();
-  $total_results = 0;
   $rows_count = 0;
 
   if (empty($items)) {
@@ -5706,8 +5434,39 @@ function mfcs_build_request_table($items, $max_rows, $columns = array('id' => "I
   $reviewer = user_access('mfcs review', $user);
   $requester = user_access('mfcs request', $user);
 
+  $item_ids = array_keys($items);
+  $can_create_requests = mfcs_page_request_access('create', $item_ids, $user);
+  $can_edit_requests = mfcs_page_request_access('edit', $item_ids, $user);
+  $can_review_requests = mfcs_page_request_access('review', $item_ids, $user);
+  $can_log_requests = mfcs_page_request_access('log', $item_ids, $user);
+  $can_history_requests = mfcs_page_request_access('history', $item_ids, $user);
+  $can_delete_requests = mfcs_page_request_access('delete', $item_ids, $user);
 
-  $total_results = count($items);
+  if (!is_array($can_create_requests)) {
+    $can_create_requests = array();
+  }
+
+  if (!is_array($can_edit_requests)) {
+    $can_edit_requests = array();
+  }
+
+  if (!is_array($can_review_requests)) {
+    $can_review_requests = array();
+  }
+
+  if (!is_array($can_log_requests)) {
+    $can_log_requests = array();
+  }
+
+  if (!is_array($can_history_requests)) {
+    $can_history_requests = array();
+  }
+
+  if (!is_array($can_delete_requests)) {
+    $can_delete_requests = array();
+  }
+
+
   foreach ($items as $item) {
     $row = array();
     $rows_count++;
@@ -5716,13 +5475,6 @@ function mfcs_build_request_table($items, $max_rows, $columns = array('id' => "I
     if ($rows_count > $max_rows) {
       break;
     }
-
-    $can_create_request = mfcs_page_request_access('create', $item->id, $user);
-    $can_edit_request = mfcs_page_request_access('edit', $item->id, $user);
-    $can_review_request = mfcs_page_request_access('review', $item->id, $user);
-    $can_log_request = mfcs_page_request_access('log', $item->id, $user);
-    $can_history_request = mfcs_page_request_access('history', $item->id, $user);
-    $can_delete_request = mfcs_page_request_access('delete', $item->id, $user);
 
     if (isset($columns['id'])) {
       $row['id'] = $item->id;
@@ -5797,27 +5549,27 @@ function mfcs_build_request_table($items, $max_rows, $columns = array('id' => "I
 
       $row['operations'] .= '<a href="' . $base_path . 'requests/view-0/' . $item->id . '" class="operation-link operation-link-view">View</a> ';
 
-      if ($can_edit_request) {
+      if (array_key_exists($item->id, $can_edit_requests) && $can_edit_requests[$item->id]) {
         $row['operations'] .= '<a href="' . $base_path . 'requests/edit-0/' . $item->id . '/request" class="operation-link operation-link-edit">Edit</a> ';
       }
 
-      if ($can_review_request) {
+      if (array_key_exists($item->id, $can_review_requests) && $can_review_requests[$item->id]) {
         $row['operations'] .= '<a href="' . $base_path . 'requests/view-0/' . $item->id . '/3" class="operation-link operation-link-review">Review</a> ';
       }
 
-      if ($can_log_request) {
+      if (array_key_exists($item->id, $can_log_requests) && $can_log_requests[$item->id]) {
         $row['operations'] .= '<a href="' . $base_path . 'requests/view-0/' . $item->id . '/2" class="operation-link operation-link-log">Log</a> ';
       }
 
-      if ($can_history_request) {
+      if (array_key_exists($item->id, $can_history_requests) && $can_history_requests[$item->id]) {
         $row['operations'] .= '<a href="' . $base_path . 'requests/history-0/' . $item->id . '" class="operation-link operation-link-history">History</a> ';
       }
 
-      if ($can_delete_request) {
+      if (array_key_exists($item->id, $can_delete_requests) && $can_delete_requests[$item->id]) {
         $row['operations'] .= '<a href="' . $base_path . 'requests/delete-0/' . $item->id . '" class="operation-link operation-link-delete">Delete</a> ';
       }
 
-      if ($can_create_request) {
+      if (array_key_exists($item->id, $can_create_requests) && $can_create_requests[$item->id]) {
         $row['operations'] .= '<a href="' . $base_path . 'requests/create-0/' . $item->id . '" class="operation-link operation-link-clone">Copy</a> ';
       }
     }

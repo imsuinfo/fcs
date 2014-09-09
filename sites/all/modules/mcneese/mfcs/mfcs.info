@@ -15,6 +15,7 @@ dependencies[] = ldap_authentication
 files[] = mfcs.install
 files[] = mfcs.module
 files[] = classes/mail.inc
+files[] = includes/access.inc
 files[] = includes/autocomplete.inc
 files[] = includes/request_structure.inc
 files[] = includes/request_validation.inc

@@ -73,15 +73,48 @@ function mfcs_request_list_0_page($form, &$form_state, $page_number = 0) {
 
   mfcs_include(4);
 
-  $results = mfcs_request_load_listing(NULL, FALSE, $page_number * $rows_per_page, $rows_per_page, $sorting);
+  $items = mfcs_request_load_listing(NULL, FALSE, $page_number * $rows_per_page, $rows_per_page, $sorting);
 
   $rows = array();
   $total_results = 0;
-  if (!empty($results)) {
-    $total_results = count($results);
+  if (!empty($items)) {
+    $item_ids = array_keys($items);
+
+    $can_create_requests = mfcs_page_request_access('create', $item_ids, $user);
+    $can_edit_requests = mfcs_page_request_access('edit', $item_ids, $user);
+    $can_review_requests = mfcs_page_request_access('review', $item_ids, $user);
+    $can_log_requests = mfcs_page_request_access('log', $item_ids, $user);
+    $can_history_requests = mfcs_page_request_access('history', $item_ids, $user);
+    $can_delete_requests = mfcs_page_request_access('delete', $item_ids, $user);
+
+    if (!is_array($can_create_requests)) {
+      $can_create_requests = array();
+    }
+
+    if (!is_array($can_edit_requests)) {
+      $can_edit_requests = array();
+    }
+
+    if (!is_array($can_review_requests)) {
+      $can_review_requests = array();
+    }
+
+    if (!is_array($can_log_requests)) {
+      $can_log_requests = array();
+    }
+
+    if (!is_array($can_history_requests)) {
+      $can_history_requests = array();
+    }
+
+    if (!is_array($can_delete_requests)) {
+      $can_delete_requests = array();
+    }
+
+    $total_results = count($items);
     $rows_count = 0;
 
-    foreach ($results as $item) {
+    foreach ($items as $item) {
       $row = array();
       $rows_count++;
 
@@ -89,12 +122,6 @@ function mfcs_request_list_0_page($form, &$form_state, $page_number = 0) {
       if ($rows_count > $rows_per_page) {
         break;
       }
-
-      $can_edit_request = mfcs_page_request_access('edit', $item->id, $user);
-      $can_review_request = mfcs_page_request_access('review', $item->id, $user);
-      $can_log_request = mfcs_page_request_access('log', $item->id, $user);
-      $can_history_request = mfcs_page_request_access('history', $item->id, $user);
-      $can_delete_request = mfcs_page_request_access('delete', $item->id, $user);
 
       $row['id'] = $item->id;
       $row['title'] = check_plain($item->title);
@@ -161,28 +188,28 @@ function mfcs_request_list_0_page($form, &$form_state, $page_number = 0) {
 
       $row['operations'] .= '<a href="' . $base_path . 'requests/view-0/' . $item->id . '" class="operation-link operation-link-view">View</a> ';
 
-      if ($can_edit_request) {
+      if (array_key_exists($item->id, $can_edit_requests) && $can_edit_requests[$item->id]) {
         $row['operations'] .= '<a href="' . $base_path . 'requests/edit-0/' . $item->id . '/request" class="operation-link operation-link-edit">Edit</a> ';
       }
 
-      if ($can_review_request) {
+      if (array_key_exists($item->id, $can_review_requests) && $can_review_requests[$item->id]) {
         $row['operations'] .= '<a href="' . $base_path . 'requests/view-0/' . $item->id . '/3" class="operation-link operation-link-review">Review</a> ';
       }
 
-      if ($can_log_request) {
+      if (array_key_exists($item->id, $can_log_requests) && $can_log_requests[$item->id]) {
         $row['operations'] .= '<a href="' . $base_path . 'requests/view-0/' . $item->id . '/2" class="operation-link operation-link-log">Log</a> ';
       }
 
-      if ($can_history_request) {
+      if (array_key_exists($item->id, $can_history_requests) && $can_history_requests[$item->id]) {
         $row['operations'] .= '<a href="' . $base_path . 'requests/history-0/' . $item->id . '" class="operation-link operation-link-history">History</a> ';
       }
 
-      if ($can_delete_request) {
+      if (array_key_exists($item->id, $can_delete_requests) && $can_delete_requests[$item->id]) {
         // @todo: implement this.
         #$row['operations'] .= '<a href="' . $base_path . 'requests/delete-0/' . $item->id . '" class="operation-link operation-link-delete">Delete</a> ';
       }
 
-      if ($can_create) {
+      if (array_key_exists($item->id, $can_create_requests) && $can_create_requests[$item->id]) {
         $row['operations'] .= '<a href="' . $base_path . 'requests/create-0/' . $item->id . '" class="operation-link operation-link-clone">Copy</a> ';
       }
 
