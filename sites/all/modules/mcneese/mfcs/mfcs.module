@@ -5401,8 +5401,10 @@ function mfcs_build_request_table($items, $max_rows, $columns = array('id' => "I
   }
 
   $table['attributes'] = array();
+  $table['attributes']['summary'] = "A listing of requests associated by ID.";
   $table['rows'] = array();
   $table['empty'] = t("No requests were found.");
+  $table['caption'] = "Requests";
 
   if (!is_array($items) && $items !== FALSE) {
     cf_error::invalid_array('items');
@@ -5422,8 +5424,6 @@ function mfcs_build_request_table($items, $max_rows, $columns = array('id' => "I
   if (empty($items)) {
     return $table;
   }
-
-  $user = cf_current_user();
 
   $can_view = mfcs_page_request_access('view', NULL, $user);
   $can_list = mfcs_page_request_access('list', NULL, $user);
@@ -5466,6 +5466,11 @@ function mfcs_build_request_table($items, $max_rows, $columns = array('id' => "I
     $can_delete_requests = array();
   }
 
+  $status_options = mfcs_get_request_status_list_options();
+  $step_options = mfcs_get_request_steps_list_options();
+  $location_options = mfcs_get_request_location_list_options();
+  $room_options = mfcs_get_request_room_list_options();
+  $building_options = array();
 
   foreach ($items as $item) {
     $row = array();
@@ -5484,9 +5489,9 @@ function mfcs_build_request_table($items, $max_rows, $columns = array('id' => "I
       $row['title'] = check_plain($item->title);
     }
 
-    $location_options = mfcs_get_request_location_list_options();
-    $building_options = mfcs_get_request_building_list_options($item->location);
-    $room_options = mfcs_get_request_room_list_options();
+    if (!array_key_exists($item->location, $building_options)) {
+      $building_options[$item->location] = mfcs_get_request_building_list_options($item->location);
+    }
 
     if (isset($columns['location'])) {
       $location = "";
@@ -5502,8 +5507,8 @@ function mfcs_build_request_table($items, $max_rows, $columns = array('id' => "I
     if (isset($columns['building'])) {
       $building = "";
       if (!empty($item->building)) {
-        if (isset($building_options[$item->building])) {
-          $building = check_plain($building_options[$item->building]);
+        if (isset($building_options[$item->location][$item->building])) {
+          $building = check_plain($building_options[$item->location][$item->building]);
         }
       }
 
@@ -5537,6 +5542,45 @@ function mfcs_build_request_table($items, $max_rows, $columns = array('id' => "I
           $row['date'] .= ' to ' . check_plain(date("h:ia", $item->time_stop[$delta]));
         }
       }
+    }
+
+    if (isset($columns['status'])) {
+      $row['status'] = $status_options[$item->status];
+    }
+
+    if (isset($columns['step'])) {
+      $row['step'] = $step_options[$item->step];
+    }
+
+    if (isset($columns['submitted_by'])) {
+      $submitter = user_load($item->user_id);
+
+      if (is_object($submitter)) {
+        $name = $submitter->name;
+
+        if (!empty($submitter->field_user_first_name['und'][0]['value'])) {
+          $name = $submitter->field_user_first_name['und'][0]['value'];
+
+          if (!empty($submitter->field_user_last_name['und'][0]['value'])) {
+            $name .= ' ' . $submitter->field_user_last_name['und'][0]['value'];
+          }
+
+          $name .= ' (' . $submitter->name . ')';
+        }
+
+        if ($manager) {
+          $row['submitter_name'] = '<a href="' . $base_path . 'user/' . $submitter->uid . '">' . $name . '</a>';
+        }
+        else {
+          $row['submitter_name'] = $name;
+        }
+      }
+      else {
+        watchdog(MFCS_WATCHDOG_ID, "Failed to load the submitter a user id of %user_id. No submitter name can be provided.", array('%user_id' => $item->user_id), WATCHDOG_WARNING);
+        $row['submitter_name'] = '';
+      }
+
+      unset($submitter);
     }
 
     if (isset($columns['submitted_on'])) {

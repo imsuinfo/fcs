@@ -77,160 +77,21 @@ function mfcs_request_review_0_page($form, &$form_state, $page_number = 0) {
 
   $rows = array();
   $total_results = 0;
-  if (!empty($items)) {
-    $item_ids = array_keys($items);
 
-    $can_create_requests = mfcs_page_request_access('create', $item_ids, $user);
-    $can_edit_requests = mfcs_page_request_access('edit', $item_ids, $user);
-    $can_review_requests = mfcs_page_request_access('review', $item_ids, $user);
-    $can_log_requests = mfcs_page_request_access('log', $item_ids, $user);
-    $can_history_requests = mfcs_page_request_access('history', $item_ids, $user);
-    $can_delete_requests = mfcs_page_request_access('delete', $item_ids, $user);
-
-    if (!is_array($can_create_requests)) {
-      $can_create_requests = array();
-    }
-
-    if (!is_array($can_edit_requests)) {
-      $can_edit_requests = array();
-    }
-
-    if (!is_array($can_review_requests)) {
-      $can_review_requests = array();
-    }
-
-    if (!is_array($can_log_requests)) {
-      $can_log_requests = array();
-    }
-
-    if (!is_array($can_history_requests)) {
-      $can_history_requests = array();
-    }
-
-    if (!is_array($can_delete_requests)) {
-      $can_delete_requests = array();
-    }
-
-    $total_results = count($items);
-    $rows_count = 0;
-
-    foreach ($items as $item) {
-      $row = array();
-      $rows_count++;
-
-      // Rows per page + 1 is loaded so that it can be detected whether or not a 'next' link needs to be provided.
-      if ($rows_count > $rows_per_page) {
-        break;
-      }
-
-      $row['id'] = $item->id;
-      $row['title'] = check_plain($item->title);
-      $row['location'] = check_plain($item->location_name);
-      $row['building'] = check_plain($item->building_name);
-      $row['room'] = check_plain($item->room_name);
-
-      foreach ($item->date as $delta => $date) {
-        if (!isset($row['date'])) {
-          $row['date'] = '';
-        }
-        else {
-          $row['date'] .= '<br>';
-        }
-
-        $row['date'] .= check_plain(date("Y/m/d", $date));
-
-        if (array_key_exists($delta, $item->time_start) && !is_null($item->time_start[$delta]) && array_key_exists($delta, $item->time_stop) && !is_null($item->time_stop[$delta])) {
-          $row['date'] .= ' ' . check_plain(date("h:ia", $item->time_start[$delta]));
-          $row['date'] .= ' to ' . check_plain(date("h:ia", $item->time_stop[$delta]));
-        }
-      }
-
-      $step_options = mfcs_get_request_steps_list_options();
-
-      $row['step'] = $step_options[$item->step];
-
-      $submitter = user_load($item->user_id);
-
-      if (is_object($submitter)) {
-        $name = $submitter->name;
-
-        if (!empty($submitter->field_user_first_name['und'][0]['value'])) {
-          $name = $submitter->field_user_first_name['und'][0]['value'];
-
-          if (!empty($submitter->field_user_last_name['und'][0]['value'])) {
-            $name .= ' ' . $submitter->field_user_last_name['und'][0]['value'];
-          }
-
-          $name .= ' (' . $submitter->name . ')';
-        }
-
-        if ($manager) {
-          $row['submitter_name'] = '<a href="' . $base_path . 'user/' . $submitter->uid . '">' . $name . '</a>';
-        }
-        else {
-          $row['submitter_name'] = $name;
-        }
-      }
-      else {
-        watchdog(MFCS_WATCHDOG_ID, "Failed to load the submitter a user id of %user_id. No submitter name can be provided.", array('%user_id' => $item->user_id), WATCHDOG_WARNING);
-        $row['submitter_name'] = '';
-      }
-
-      $date_stamp = $item->created;
-      $row['created'] = check_plain(date("Y/m/d h:ia", $date_stamp));
-
-      $row['operations'] = '';
-      $row['operations'] .= '<a href="' . $base_path . 'requests/view-0/' . $item->id . '" class="operation-link operation-link-view">View</a> ';
-
-      if (array_key_exists($item->id, $can_edit_requests) && $can_edit_requests[$item->id]) {
-        $row['operations'] .= '<a href="' . $base_path . 'requests/edit-0/' . $item->id . '/request" class="operation-link operation-link-edit">Edit</a> ';
-      }
-
-      if (array_key_exists($item->id, $can_review_requests) && $can_review_requests[$item->id]) {
-        $row['operations'] .= '<a href="' . $base_path . 'requests/view-0/' . $item->id . '/3" class="operation-link operation-link-review">Review</a> ';
-      }
-
-      if (array_key_exists($item->id, $can_log_requests) && $can_log_requests[$item->id]) {
-        $row['operations'] .= '<a href="' . $base_path . 'requests/view-0/' . $item->id . '/2" class="operation-link operation-link-log">Log</a> ';
-      }
-
-      if (array_key_exists($item->id, $can_history_requests) && $can_history_requests[$item->id]) {
-        $row['operations'] .= '<a href="' . $base_path . 'requests/history-0/' . $item->id . '" class="operation-link operation-link-history">History</a> ';
-      }
-
-      if (array_key_exists($item->id, $can_delete_requests) && $can_delete_requests[$item->id]) {
-        // @todo: implement this.
-        #$row['operations'] .= '<a href="' . $base_path . 'requests/delete-0/' . $item->id . '" class="operation-link operation-link-delete">Delete</a> ';
-      }
-
-      if (array_key_exists($item->id, $can_create_requests) && $can_create_requests[$item->id]) {
-        $row['operations'] .= '<a href="' . $base_path . 'requests/create-0/' . $item->id . '" class="operation-link operation-link-clone">Copy</a> ';
-      }
-
-      $rows[$item->id] = $row;
-    }
-  }
-
-  $table = array();
-  $table['caption'] = "Requests";
-  $table['header'] = array(
-    'id' => array('field' => 'id', 'data' => "ID", 'align' => 'center'),
-    'title' => array('field' => 'title', 'data' => "Title", 'align' => 'center'),
-    'location' => array('field' => 'location', 'data' => "Location", 'align' => 'center'),
-    'building' => array('field' => 'building', 'data' => "Building", 'align' => 'center'),
-    'room' => array('field' => 'room', 'data' => "Room", 'align' => 'center'),
-    'date' => array('field' => 'date', 'data' => "Date", 'align' => 'center'),
-    'step' => array('field' => 'step', 'data' => "Step", 'align' => 'center'),
-    'submitted_by' => array('field' => 'submitted_by', 'data' => "Submitted By", 'align' => 'center'),
-    'submitted_on' => array('field' => 'submitted_on', 'data' => "Submitted On", 'sort' => 'desc', 'align' => 'center'),
-    t("Operations"),
+  $columns = array(
+    'id' => "ID",
+    'title' => "Title",
+    'building' => "Building",
+    'room' => "Room",
+    'date' => "Date",
+    'step' => "Step",
+    'submitted_by' => "Submitted By",
+    'submitted_on' => "Submitted On",
+    'operations' => "Operations"
   );
 
-  $table['attributes'] = array();
-  $table['attributes']['summary'] = "A listing of requests associated by ID.";
-
-  $table['rows'] = $rows;
-  $table['empty'] = "There are no requests available for to your account.";
+  $table = mfcs_build_request_table($items, $rows_per_page, $columns);
+  $table['attributes']['class'] = array('mfcs-table-requests', 'mfcs-review_page-table');
 
   $output .= theme('table', $table);
 

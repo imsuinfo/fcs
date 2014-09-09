@@ -214,9 +214,8 @@ function mfcs_request_search_0_form($form, &$form_state) {
     $simple_table['caption'] = t("Simple Search Results");
     $simple_table['header']['submitted_on']['sort'] = 'desc';
 
-    $simple_table['attributes'] = array();
     $simple_table['attributes']['id'] = 'mfcs-management_page-simple_table';
-    $simple_table['attributes']['class'] = array ('mfcs-management_page-simple_table');
+    $simple_table['attributes']['class'] = array ('mfcs-table-requests', 'mfcs-management_page-simple_table');
     $simple_table['attributes']['summary'] = 'A table containing the search results.';
 
     $simple_table['empty'] = t("No requests were found matching your simple search query.");
@@ -406,7 +405,7 @@ function mfcs_request_search_0_form($form, &$form_state) {
     $advanced_table['header']['submitted_on']['sort'] = 'desc';
 
     $advanced_table['attributes']['id'] = 'mfcs-management_page-advanced_table';
-    $advanced_table['attributes']['class'] = array ('mfcs-management_page-advanced_table');
+    $advanced_table['attributes']['class'] = array('mfcs-table-requests', 'mfcs-management_page-advanced_table');
     $advanced_table['attributes']['summary'] = 'A table containing the search results.';
 
     $advanced_table['empty'] = t("No requests were found matching your advanced search query.");
