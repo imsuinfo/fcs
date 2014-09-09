@@ -527,7 +527,12 @@ function mfcs_request_search_0_form_validate($form, &$form_state) {
   elseif ($clicked_id == 'search-simple-submit-clear') {
   }
   elseif ($clicked_id == 'search-advanced-submit-search') {
-    // @todo: validate all fields, this will need to be recursive.
+    $state_location = NULL;
+    if (isset($form_state['values']['advanced']['targets'])) {
+      $state_location = $form_state['values']['advanced']['targets'];
+    }
+
+    mfcs_request_search_0_form_validate_targets($form, $form_state, $state_location, $form_state['advanced_search-chosen_targets'], array('advanced', 'targets'), 0);
   }
   elseif ($clicked_id == 'search-advanced-submit-clear') {
   }
@@ -598,6 +603,256 @@ function mfcs_request_search_0_form_validate($form, &$form_state) {
       form_set_error('', "Internal Error. An unknown submit process has been detected. Please contact the appropriate support staff.");
     }
   }
+}
+
+/**
+ * Recursively walk the values so that they can be individually validated.
+ *
+ * @param array $form
+ *   The form array as defined by drupals form api.
+ * @param array $form_state
+ *   The form state array as defined by drupals form api.
+ * @param array|null $state_location
+ *   Location in the form state array where the target might store its default
+ *   values. If NULL, then there are no current default values.
+ *
+ * @param array $path_array
+ *   An array containing the form_state path array structure.
+ *   This will be converted to a path string and sent to form_set_error() as
+ *   necessary.
+ * @param int $recurse_count
+ *   An integer used to detect and limit the recursion depth.
+ *
+ * @return bool
+ *   TRUE on success, FALSE otherwise.
+ */
+function mfcs_request_search_0_form_validate_targets($form, &$form_state, $state_location, $targets, $path_array, $recurse_count) {
+  if (!is_array($form)) {
+    cf_error::invalid_array('form');
+    return FALSE;
+  }
+
+  if (!is_array($form_state)) {
+    cf_error::invalid_array('form_state');
+    return FALSE;
+  }
+
+  if (!is_array($state_location)) {
+    cf_error::invalid_array('state_location');
+    return FALSE;
+  }
+
+  if (!is_array($targets)) {
+    cf_error::invalid_array('targets');
+    return FALSE;
+  }
+
+  if (!is_array($path_array)) {
+    cf_error::invalid_array('path_array');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($recurse_count)) {
+    cf_error::invalid_integer('recurse_count');
+    return FALSE;
+  }
+
+  if ($recurse_count >= MFCS_MAX_SEARCH_RECURSION) {
+    return FALSE;
+  }
+
+  foreach ($targets as $target_name => $target_values) {
+    if (!is_array($target_values)) continue;
+
+    $target_name_parts = explode('_', $target_name, 2);
+
+    if (count($target_name_parts) == 2 && ($target_name_parts[0] == 'and' || $target_name_parts[0] == 'or')) {
+      $state_location_next = NULL;
+      if (isset($state_location[$target_name]['targets'])) {
+        $state_location_next = $state_location[$target_name]['targets'];
+      }
+
+      $path_array_next = $path_array;
+      $path_array_next[] = $target_name;
+      $path_array_next[] = 'targets';
+
+      mfcs_request_search_0_form_validate_targets($form, $form_state, $state_location_next, $target_values, $path_array_next, $recurse_count + 1);
+
+      unset($state_location_next);
+      unset($path_array_next);
+    }
+    else {
+      foreach ($target_values as $target_delta => $target_human_name) {
+        mfcs_request_search_0_form_validate_target($form, $form_state, $state_location, $target_name, $target_delta, $path_array);
+      }
+    }
+  }
+}
+
+/**
+ * Validate the submitted target values.
+ *
+ * @param array $form
+ *   The form array as defined by drupals form api.
+ * @param array $form_state
+ *   The form state array as defined by drupals form api.
+ * @param array|null $state_location
+ *   Location in the form state array where the target might store its default
+ *   values. If NULL, then there are no current default values.
+ * @param string $target_name
+ *   Name of the field to process and convert into a search field.
+ * @param int $target_delta
+ *   Delta of the field to process and convert into a search field.
+ * @param array $path_array
+ *   An array containing the form_state path array structure.
+ *   This will be converted to a path string and sent to form_set_error() as
+ *   necessary.
+ *
+ * @return bool
+ *   TRUE on success, FALSE otherwise.
+ *
+ * @see: form_set_error()
+ */
+function mfcs_request_search_0_form_validate_target($form, &$form_state, &$state_location, $target_name, $target_delta, $path_array) {
+  if (!is_array($form)) {
+    cf_error::invalid_array('form');
+    return FALSE;
+  }
+
+  if (!is_array($form_state)) {
+    cf_error::invalid_array('form_state');
+    return FALSE;
+  }
+
+  if (!is_array($state_location)) {
+    cf_error::invalid_array('state_location');
+    return FALSE;
+  }
+
+  if (!is_string($target_name)) {
+    cf_error::invalid_string('target_name');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($target_delta)) {
+    cf_error::invalid_integer('target_delta');
+    return FALSE;
+  }
+
+  if (!is_array($path_array)) {
+    cf_error::invalid_array('path_array');
+    return FALSE;
+  }
+
+  $target_name_parts = explode('-', $target_name);
+  if (count($target_name_parts) != 2) {
+    return FALSE;
+  }
+
+  if (empty($target_name_parts[0]) || empty($target_name_parts[1])) {
+    return FALSE;
+  }
+
+  $path_array[] = $target_name;
+  $path_array[] = $target_delta;
+  $path_array[] = 'search';
+
+  $table_name = $target_name_parts[0];
+  $field_name = $target_name_parts[1];
+
+  $structure = array();
+  if (isset($form['form']['structure']['#value']) && is_array($form['form']['structure']['#value'])) {
+    $structure = &$form['form']['structure']['#value'];
+  }
+
+  $presentation = array();
+  if (isset($form['form']['presentation']['#value']) && is_array($form['form']['presentation']['#value'])) {
+    $presentation = &$form['form']['presentation']['#value'];
+  }
+
+  if (!isset($structure[$table_name][$field_name])) {
+    return FALSE;
+  }
+
+  $field = $structure[$table_name][$field_name];
+
+  $field_presentation = array();
+  if (isset($presentation[$table_name][$field_name])) {
+    $field_presentation = $presentation[$table_name][$field_name];
+  }
+
+  $state = $state_location[$target_name][$target_delta];
+
+  if ($field['type'] == 'number') {
+    if (!empty($state['search']) && !cf_is_integer($state['search'])) {
+      form_set_error(implode('][', $path_array), t('@value is not a valid integer.', array('@value' => $state['search'])));
+    }
+  }
+  elseif ($field['type'] == 'date') {
+    if ($state['date_mode'] == 'd') {
+      if (!cf_is_integer($state['search']) || $state['search'] < 1 || $state['search'] > 31) {
+        form_set_error(implode('][', $path_array), t('@value is not a valid day.', array('@value' => $state['search'])));
+      }
+    }
+    elseif ($state['date_mode'] == 'm') {
+      if (cf_is_integer($state['search'])) {
+        if ($state['search'] < 1 || $state['search'] > 12) {
+          form_set_error(implode('][', $path_array), t('@value is not a valid month.', array('@value' => $state['search'])));
+        }
+      }
+      else {
+        $stamp = strtotime($state['search']);
+
+        if ($stamp === FALSE) {
+          form_set_error(implode('][', $path_array), t('@value is not a valid month.', array('@value' => $state['search'])));
+        }
+        else {
+          $month_full = strtolower(date('F', $stamp));
+          $month_short = strtolower(date('M', $stamp));
+          $month_value = strtolower($state['search']);
+
+          if ($month_value != $month_full && $month_value != $month_short) {
+            form_set_error(implode('][', $path_array), t('@value is not a valid month.', array('@value' => $state['search'])));
+          }
+        }
+      }
+    }
+    elseif ($state['date_mode'] == 'y') {
+      if (!cf_is_integer($state['search'])) {
+        form_set_error(implode('][', $path_array), t('@value is not a valid year.', array('@value' => $state['search'])));
+      }
+    }
+    elseif ($state['date_mode'] == 'y/m/d') {
+      $matches = array();
+      $matched = preg_match('@^\s*(\d\d\d\d)\s*/\s*(\d+)\s*/\s*(\d+)\s*$@i', $state['search'], $matches);
+
+      if ($matched) {
+        $date_value_stamp = strtotime($matches[1] . '/' . $matches[2] . '/' . $matches[3]);
+        if ($date_value_stamp === FALSE) {
+          form_set_error(implode('][', $path_array), t('@value is not a valid YYYY/MM/DD date.', array('@value' => $state['search'])));
+        }
+      }
+      else {
+        form_set_error(implode('][', $path_array), t('@value is not a valid YYYY/MM/DD date.', array('@value' => $state['search'])));
+      }
+    }
+    elseif ($state['date_mode'] == 'y/m') {
+      $matches = array();
+      $matched = preg_match('@^\s*(\d\d\d\d)\s*/\s*(\d+)\s*(/\s*\d+)*\s*$@i', $state['search'], $matches);
+
+      if ($matched) {
+        $date_value_stamp = strtotime($matches[1] . '/' . $matches[2] . '/1');
+        if ($date_value_stamp === FALSE) {
+          form_set_error(implode('][', $path_array), t('@value is not a valid YYYY/MM date.', array('@value' => $state['search'])));
+        }
+      }
+      else {
+        form_set_error(implode('][', $path_array), t('@value is not a valid YYYY/MM date.', array('@value' => $state['search'])));
+      }
+    }
+  }
+
+  return TRUE;
 }
 
 /**
@@ -1969,8 +2224,19 @@ function mfcs_request_search_0_form_build_search_target($structure, $target_name
     }
 
     if ($date_mode == 'y') {
-      $timestamp_start = strtotime('midnight first day of january ' . $date_value);
-      $timestamp_stop = strtotime('midnight last day of december ' . $date_value);
+      $date_value_pad = '';
+      if ($date_value < 1000) {
+        $date_value_pad .= '0';
+      }
+      if ($date_value < 100) {
+        $date_value_pad .= '0';
+      }
+      if ($date_value < 10) {
+        $date_value_pad .= '0';
+      }
+
+      $timestamp_start = strtotime('midnight first day of january 1 ' . $date_value_pad . $date_value);
+      $timestamp_stop = strtotime('midnight last day of december 1 ' . $date_value_pad . $date_value);
       $timestamp_stop = strtotime('midnight tomorrow', $timestamp_stop);
 
       if ($operator_value == MFCS_OPERATOR_EQUAL || $operator_value == MFCS_OPERATOR_NOT_EQUAL) {
@@ -2072,8 +2338,8 @@ function mfcs_request_search_0_form_build_search_target($structure, $target_name
         $conjunction_type = NULL;
 
         if ($date_mode == 'y/m') {
-          $timestamp_start = strtotime('midnight first day of', $date_value);
-          $timestamp_stop = strtotime('midnight last day of', $date_value);
+          $timestamp_start = strtotime('midnight first day of ', $date_value);
+          $timestamp_stop = strtotime('midnight last day of ', $date_value);
           $timestamp_stop = strtotime('midnight tomorrow', $timestamp_stop);
 
           $start_op = MFCS_OPERATOR_GREATER_THAN_EQUAL;
