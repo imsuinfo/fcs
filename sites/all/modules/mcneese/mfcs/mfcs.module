@@ -5388,14 +5388,23 @@ function mfcs_get_latest_reviews($request_id, $steps = array(), $decisions = arr
 function mfcs_build_request_table($items, $max_rows, $columns = array('id' => "ID", 'title' => "Title", 'building' => "Building", 'room' => "Room", 'date' => "Date", 'submitted_on' => "Submitted On", 'operations' => "Operations"), $user = NULL) {
   $table = array();
   foreach ($columns as $column_name => $column_title) {
+    $column_class = array();
+
     if ($column_name == 'operations') {
-      $table['header'][] = $column_title;
+      $column_class[] = 'no-print';
+
+      $table['header'][$column_name] = array(
+        'data' => $column_title,
+        'align' => 'center',
+        'class' => $column_class,
+      );
     }
     else {
       $table['header'][$column_name] = array(
         'field' => $column_name,
         'data' => $column_title,
         'align' => 'center',
+        'class' => $column_class,
       );
     }
   }
@@ -5482,11 +5491,17 @@ function mfcs_build_request_table($items, $max_rows, $columns = array('id' => "I
     }
 
     if (isset($columns['id'])) {
-      $row['id'] = $item->id;
+      $row['id'] = array(
+        'data' => $item->id,
+        'class' => 'column-id',
+      );
     }
 
     if (isset($columns['title'])) {
-      $row['title'] = check_plain($item->title);
+      $row['title'] = array(
+        'data' => check_plain($item->title),
+        'class' => 'column-title',
+      );
     }
 
     if (!array_key_exists($item->location, $building_options)) {
@@ -5494,65 +5509,87 @@ function mfcs_build_request_table($items, $max_rows, $columns = array('id' => "I
     }
 
     if (isset($columns['location'])) {
-      $location = "";
+      $row['location'] = array(
+        'data' => '',
+        'class' => 'column-location',
+      );
+
       if (!empty($item->location)) {
         if (isset($location_options[$item->location])) {
-          $location = check_plain($location_options[$item->location]);
+          $row['location']['data'] = check_plain($location_options[$item->location]);
         }
       }
-
-      $row['location'] = $location;
     }
 
     if (isset($columns['building'])) {
-      $building = "";
+      $row['building'] = array(
+        'data' => '',
+        'class' => 'column-building',
+      );
+
       if (!empty($item->building)) {
         if (isset($building_options[$item->location][$item->building])) {
-          $building = check_plain($building_options[$item->location][$item->building]);
+          $row['building']['data'] = check_plain($building_options[$item->location][$item->building]);
         }
       }
-
-      $row['building'] = $building;
     }
 
     if (isset($columns['room'])) {
-      $room = "";
+      $row['room'] = array(
+        'data' => '',
+        'class' => 'column-room',
+      );
+
       if (!empty($item->room)) {
         if (isset($room_options[$item->room])) {
-          $room = check_plain($room_options[$item->room]);
+          $row['room']['data'] = check_plain($room_options[$item->room]);
         }
       }
-
-      $row['room'] = $room;
     }
 
     if (isset($columns['date'])) {
+      $row['date'] = array(
+        'data' => NULL,
+        'class' => 'column-date',
+      );
+
       foreach ($item->date as $delta => $date) {
-        if (!isset($row['date'])) {
-          $row['date'] = '';
+        if (is_null($row['date']['data'])) {
+          $row['date']['data'] = '';
         }
         else {
-          $row['date'] .= '<br>';
+          $row['date']['data'] .= '<br>';
         }
 
-        $row['date'] .= check_plain(date("Y/m/d", $date));
+        $row['date']['data'] .= check_plain(date("Y/m/d", $date));
 
         if (array_key_exists($delta, $item->time_start) && !is_null($item->time_start[$delta]) && array_key_exists($delta, $item->time_stop) && !is_null($item->time_stop[$delta])) {
-          $row['date'] .= ' ' . check_plain(date("h:ia", $item->time_start[$delta]));
-          $row['date'] .= ' to ' . check_plain(date("h:ia", $item->time_stop[$delta]));
+          $row['date']['data'] .= ' ' . check_plain(date("h:ia", $item->time_start[$delta]));
+          $row['date']['data'] .= ' to ' . check_plain(date("h:ia", $item->time_stop[$delta]));
         }
       }
     }
 
     if (isset($columns['status'])) {
-      $row['status'] = $status_options[$item->status];
+      $row['status'] = array(
+        'data' => $status_options[$item->status],
+        'class' => 'column-status',
+      );
     }
 
     if (isset($columns['step'])) {
-      $row['step'] = $step_options[$item->step];
+      $row['step'] = array(
+        'data' => $step_options[$item->step],
+        'class' => 'column-step',
+      );
     }
 
     if (isset($columns['submitted_by'])) {
+      $row['submitted_by'] = array(
+        'data' => '',
+        'class' => 'column-submitted_by',
+      );
+
       $submitter = user_load($item->user_id);
 
       if (is_object($submitter)) {
@@ -5569,10 +5606,10 @@ function mfcs_build_request_table($items, $max_rows, $columns = array('id' => "I
         }
 
         if ($manager) {
-          $row['submitter_name'] = '<a href="' . $base_path . 'user/' . $submitter->uid . '">' . $name . '</a>';
+          $row['submitted_by']['data'] = '<a href="' . $base_path . 'user/' . $submitter->uid . '">' . $name . '</a>';
         }
         else {
-          $row['submitter_name'] = $name;
+          $row['submitted_by']['data'] = $name;
         }
       }
       else {
@@ -5585,36 +5622,45 @@ function mfcs_build_request_table($items, $max_rows, $columns = array('id' => "I
 
     if (isset($columns['submitted_on'])) {
       $date_stamp = $item->created;
-      $row['submitted_on'] = check_plain(date("Y/m/d h:ia", $date_stamp));
+
+      $row['submitted_on'] = array(
+        'data' => check_plain(date("Y/m/d h:ia", $date_stamp)),
+        'class' => 'column-submitted_on',
+      );
     }
 
     if (isset($columns['operations'])) {
-      $row['operations'] = '';
+      $row['operations'] = array(
+        'data' => '',
+        'class' => 'column-operations no-print',
+      );
 
-      $row['operations'] .= '<a href="' . $base_path . 'requests/view-0/' . $item->id . '" class="operation-link operation-link-view">View</a> ';
+      $row['operations']['data'] = '';
+
+      $row['operations']['data'] .= '<a href="' . $base_path . 'requests/view-0/' . $item->id . '" class="operation-link operation-link-view">View</a> ';
 
       if (array_key_exists($item->id, $can_edit_requests) && $can_edit_requests[$item->id]) {
-        $row['operations'] .= '<a href="' . $base_path . 'requests/edit-0/' . $item->id . '/request" class="operation-link operation-link-edit">Edit</a> ';
+        $row['operations']['data'] .= '<a href="' . $base_path . 'requests/edit-0/' . $item->id . '/request" class="operation-link operation-link-edit">Edit</a> ';
       }
 
       if (array_key_exists($item->id, $can_review_requests) && $can_review_requests[$item->id]) {
-        $row['operations'] .= '<a href="' . $base_path . 'requests/view-0/' . $item->id . '/3" class="operation-link operation-link-review">Review</a> ';
+        $row['operations']['data'] .= '<a href="' . $base_path . 'requests/view-0/' . $item->id . '/3" class="operation-link operation-link-review">Review</a> ';
       }
 
       if (array_key_exists($item->id, $can_log_requests) && $can_log_requests[$item->id]) {
-        $row['operations'] .= '<a href="' . $base_path . 'requests/view-0/' . $item->id . '/2" class="operation-link operation-link-log">Log</a> ';
+        $row['operations']['data'] .= '<a href="' . $base_path . 'requests/view-0/' . $item->id . '/2" class="operation-link operation-link-log">Log</a> ';
       }
 
       if (array_key_exists($item->id, $can_history_requests) && $can_history_requests[$item->id]) {
-        $row['operations'] .= '<a href="' . $base_path . 'requests/history-0/' . $item->id . '" class="operation-link operation-link-history">History</a> ';
+        $row['operations']['data'] .= '<a href="' . $base_path . 'requests/history-0/' . $item->id . '" class="operation-link operation-link-history">History</a> ';
       }
 
       if (array_key_exists($item->id, $can_delete_requests) && $can_delete_requests[$item->id]) {
-        $row['operations'] .= '<a href="' . $base_path . 'requests/delete-0/' . $item->id . '" class="operation-link operation-link-delete">Delete</a> ';
+        $row['operations']['data'] .= '<a href="' . $base_path . 'requests/delete-0/' . $item->id . '" class="operation-link operation-link-delete">Delete</a> ';
       }
 
       if (array_key_exists($item->id, $can_create_requests) && $can_create_requests[$item->id]) {
-        $row['operations'] .= '<a href="' . $base_path . 'requests/create-0/' . $item->id . '" class="operation-link operation-link-clone">Copy</a> ';
+        $row['operations']['data'] .= '<a href="' . $base_path . 'requests/create-0/' . $item->id . '" class="operation-link operation-link-clone">Copy</a> ';
       }
     }
 
