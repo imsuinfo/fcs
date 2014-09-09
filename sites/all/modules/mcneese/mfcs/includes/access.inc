@@ -180,7 +180,7 @@ function mfcs_page_request_access_operation_edit(&$request_ids, &$processed, &$a
         $access_results = $query->execute()->fetchAllAssoc('id');
 
         if (is_array($access_results)) {
-          foreach ($request_ids as $id => $value) {
+          foreach ($request_ids as $id) {
             if (array_key_exists($id, $access_results)) {
               $processed[$id] = FALSE;
               unset($request_ids[$id]);
@@ -224,7 +224,7 @@ function mfcs_page_request_access_operation_edit(&$request_ids, &$processed, &$a
       $access_results = $query->execute()->fetchAllAssoc('id');
 
       if (is_array($access_results)) {
-        foreach ($request_ids as $id => $value) {
+        foreach ($request_ids as $id) {
           $processed[$id] = array_key_exists($id, $access_results);
           $access[$id] = $processed[$id];
         }
@@ -350,7 +350,7 @@ function mfcs_page_request_access_operation_view(&$request_ids, &$processed, &$a
       $access_results = $query->execute()->fetchAllAssoc('id');
 
       if (is_array($access_results)) {
-        foreach ($request_ids as $id => $value) {
+        foreach ($request_ids as $id) {
           $processed[$id] = array_key_exists($id, $access_results);
           $access[$id] = $processed[$id];
         }
@@ -705,7 +705,7 @@ function mfcs_page_request_access_operation_cancel(&$request_ids, &$processed, &
       $access_results = $query->execute()->fetchAllAssoc('id');
 
       if (is_array($access_results)) {
-        foreach ($request_ids as $id => $value) {
+        foreach ($request_ids as $id) {
           $processed[$id] = array_key_exists($id, $access_results);
           $access[$id] = $processed[$id];
         }
@@ -844,7 +844,7 @@ function mfcs_page_request_access_operation_uncancel(&$request_ids, &$processed,
       $access_results = $query->execute()->fetchAllAssoc('id');
 
       if (is_array($access_results)) {
-        foreach ($request_ids as $id => $value) {
+        foreach ($request_ids as $id) {
           $processed[$id] = array_key_exists($id, $access_results);
           $access[$id] = $processed[$id];
         }
@@ -941,7 +941,7 @@ function mfcs_page_request_access_operation_history(&$request_ids, &$processed, 
       $access_results = $query->execute()->fetchAllAssoc('id');
 
       if (is_array($access_results)) {
-        foreach ($request_ids as $id => $value) {
+        foreach ($request_ids as $id) {
           $processed[$id] = array_key_exists($id, $access_results);
           $access[$id] = $processed[$id];
         }
@@ -1063,7 +1063,7 @@ function mfcs_page_request_access_operation_agreement(&$request_ids, &$processed
       $access_results = $query->execute()->fetchAllAssoc('id');
 
       if (is_array($access_results)) {
-        foreach ($request_ids as $id => $value) {
+        foreach ($request_ids as $id) {
           $processed[$id] = array_key_exists($id, $access_results);
           $access[$id] = $processed[$id];
         }

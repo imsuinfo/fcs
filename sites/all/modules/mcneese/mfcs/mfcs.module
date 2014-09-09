@@ -283,7 +283,9 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
   // allow for request_id to be an array of ids.
   $processed = array();
   if (is_array($request_id)) {
-    $request_ids = $request_id;
+    foreach ($request_id as $id) {
+      $request_ids[$id] = $id;
+    }
 
     // only allow the null array key to be specified by this function.
     unset($request_ids[NULL]);
@@ -468,6 +470,8 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
     return $processed[$request_id];
   }
   elseif ($operation == 'delete') {
+    // @todo: enable once delete support is implemented.
+    /*
     if ($roles['manager']) {
       if (is_array($request_id)) {
         foreach ($request_ids as $request_id) {
@@ -481,6 +485,7 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
       $access[$request_id] = TRUE;
       return TRUE;
     }
+    */
   }
   elseif ($operation == 'cancel') {
     $operation_result = mfcs_page_request_access_operation_cancel($request_ids, $processed, $access, $roles, $user);
