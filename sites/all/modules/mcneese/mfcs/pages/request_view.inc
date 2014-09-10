@@ -1405,6 +1405,10 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
           '#weight' => 4,
         );
 
+        if (!empty($request['requirements']['waved'][0])) {
+          $form['review']['operations']['presidents_approval']['#default_value'] = $request['requirements']['waved'][0]->value;
+        }
+
         $form['review']['operations']['university_business'] = array(
           '#id' => 'request-review-operations-university_business',
           '#type' => 'checkbox',
@@ -1425,6 +1429,10 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
           ),
           '#weight' => 5,
         );
+
+          if (!empty($request['requirements']['university'][0])) {
+            $form['review']['operations']['university_business']['#default_value'] = $request['requirements']['university'][0]->value;
+          }
       }
 
       $form['review']['operations']['message'] = array(
