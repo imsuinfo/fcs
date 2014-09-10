@@ -1325,10 +1325,10 @@ function mfcs_include($id) {
     require_once($module_path . '/includes/table.inc');
   }
   elseif ($id == 1) {
-    require_once($module_path . '/includes/request_structure.inc');
+    require_once($module_path . '/includes/structure.inc');
   }
   elseif ($id == 2) {
-    require_once($module_path . '/includes/request_validation.inc');
+    require_once($module_path . '/includes/validation.inc');
   }
   elseif ($id == 3) {
     require_once($module_path . '/includes/autocomplete.inc');
