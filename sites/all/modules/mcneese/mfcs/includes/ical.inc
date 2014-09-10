@@ -271,15 +271,15 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
       }
 
       if ($request->category[$delta] == MFCS_EVENT_DATES_CATEGORY_SETUP) {
-        $dates_setup_event_text .= $ical_date['text'] . "\n";
+        $dates_setup_event_text .= '  - ' . $ical_date['text'] . "\n";
         $dates_setup_event_markup .= '<li>' . $ical_date['text'] . '</li>' . "\n";
       }
       elseif ($request->category[$delta] == MFCS_EVENT_DATES_CATEGORY_ACTUAL) {
-        $dates_actual_event_text .= $ical_date['text'] . "\n";
+        $dates_actual_event_text .= '  - ' . $ical_date['text'] . "\n";
         $dates_actual_event_markup .= '<li>' . $ical_date['text'] . '</li>' . "\n";
       }
       elseif ($request->category[$delta] == MFCS_EVENT_DATES_CATEGORY_CLEANUP) {
-        $dates_cleanup_event_text .= $ical_date['text'] . "\n";
+        $dates_cleanup_event_text .= '  - ' . $ical_date['text'] . "\n";
         $dates_cleanup_event_markup .= '<li>' . $ical_date['text'] . '</li>' . "\n";
       }
 
