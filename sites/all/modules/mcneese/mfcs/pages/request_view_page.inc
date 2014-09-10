@@ -75,11 +75,6 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
 
   $venue_coordinator = ($request['venue_coordinator']['user_id'][0]->value == $user->uid);
 
-  $can_view = mfcs_page_request_access('view', NULL, $user);
-  $can_list = mfcs_page_request_access('list', NULL, $user);
-  $can_search = mfcs_page_request_access('search', NULL, $user);
-  $can_review = mfcs_page_request_access('review', NULL, $user);
-
   $can_create_request = mfcs_request_access('create', $request, $user);
   $can_edit_request = mfcs_request_access('edit', $request, $user);
   $can_log_request = mfcs_request_access('log', $request, $user);

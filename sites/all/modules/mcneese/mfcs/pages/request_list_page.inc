@@ -38,19 +38,6 @@ function mfcs_request_list_0_page($form, &$form_state, $page_number = 0) {
 
   $output = &$form['output']['#markup'];
 
-  $user = cf_current_user();
-
-  $can_create = mfcs_page_request_access('create', NULL, $user);
-  $can_view = mfcs_page_request_access('view', NULL, $user);
-  $can_list = mfcs_page_request_access('list', NULL, $user);
-  $can_search = mfcs_page_request_access('search', NULL, $user);
-  $can_review = mfcs_page_request_access('review', NULL, $user);
-
-  $manager = user_access('mfcs manage', $user);
-  $reviewer = user_access('mfcs review', $user);
-  $requester = user_access('mfcs request', $user);
-
-
   // load sorting information
   $sorting = array();
   $order = NULL;

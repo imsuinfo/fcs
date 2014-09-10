@@ -25,14 +25,11 @@ function mfcs_management_page() {
   mfcs_add_canonical_headers('requests');
 
   $can_create = mfcs_page_request_access('create', NULL, $user);
-  $can_view = mfcs_page_request_access('view', NULL, $user);
   $can_list = mfcs_page_request_access('list', NULL, $user);
   $can_search = mfcs_page_request_access('search', NULL, $user);
   $can_review = mfcs_page_request_access('review', NULL, $user);
 
   $manager = user_access('mfcs manage', $user);
-  $reviewer = user_access('mfcs review', $user);
-  $requester = user_access('mfcs request', $user);
 
   $items_1 = array();
   $items_2 = array();
