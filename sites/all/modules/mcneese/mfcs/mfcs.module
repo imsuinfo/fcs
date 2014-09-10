@@ -6167,6 +6167,8 @@ function mfcs_save_request_reminders($reminder) {
 /**
  * Adds canonical and short url links to the http meta and headers.
  *
+ * Will also add the content-location http header via the unique path.
+ *
  * @param string $unique_path
  *   The canonical path used to uniquely identify this page.
  * @param string $short_path
@@ -6205,6 +6207,9 @@ function mfcs_add_canonical_headers($unique_path, $short_path = NULL) {
     'rel' => 'shortlink',
     'href' => $base_path . $short_path,
   );
+
+  // provide content-location http header.
+  drupal_add_http_header('content-location', $base_path . $unique_path, FALSE);
 
   return TRUE;
 }
