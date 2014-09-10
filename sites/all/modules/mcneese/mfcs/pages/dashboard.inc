@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Defines McNeese facilities use management page functions.
+ * Defines McNeese facilities use dashboard page functions.
  */
 
 /**
@@ -11,7 +11,7 @@
  */
 
 /**
- * Provides the facilities use request manage page.
+ * Provides the facilities use request dashboard page.
  *
  * @return string
  *   The HTML output representing the page.
@@ -153,19 +153,19 @@ function mfcs_dashboard_page() {
   $item_list_2 = theme('item_list', array('items' => $items_2, 'type' => 'ul'));
   $item_list_3 = theme('item_list', array('items' => $items_3, 'type' => 'ul'));
 
-  $markup = '<div id="mfcs-management_page-choices" class="mfcs-management_page-choices">';
-  $markup .= '<h3 class="mfcs-management_page-choices-header">Facilities Use and Special Event Request Form</h3>';
+  $markup = '<div id="mfcs-dashboard_page-choices" class="mfcs-dashboard_page-choices">';
+  $markup .= '<h3 class="mfcs-dashboard_page-choices-header">Facilities Use and Special Event Request Form</h3>';
 
   if (!empty($items_1)) {
-    $markup .= '<div class="mfcs-management_page-choices-list_1">' . $item_list_1 . '</div>';
+    $markup .= '<div class="mfcs-dashboard_page-choices-list_1">' . $item_list_1 . '</div>';
   }
 
   if (!empty($items_2)) {
-    $markup .= '<div class="mfcs-management_page-choices-list_2">' . $item_list_2 . '</div>';
+    $markup .= '<div class="mfcs-dashboard_page-choices-list_2">' . $item_list_2 . '</div>';
   }
 
   if (!empty($items_3)) {
-    $markup .= '<div class="mfcs-management_page-choices-list_3">' . $item_list_3 . '</div>';
+    $markup .= '<div class="mfcs-dashboard_page-choices-list_3">' . $item_list_3 . '</div>';
   }
 
   $markup .= '</div>';
