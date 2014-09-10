@@ -399,6 +399,19 @@ function mfcs_hook_menu() {
     'tab_root' => 'requests',
   );
 
+  $items['requests/ical-0/%'] = array(
+    'title' => "Request iCal",
+    'description' => "Request iCal",
+    'page callback' => 'mfcs_request_ical_request_0_page',
+    'page arguments' => array(2),
+    'file' => 'request_ical_page.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('view'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
+
   $items['requests/ical-0/month'] = array(
     'title' => "Request iCal",
     'description' => "Request iCal - Month",

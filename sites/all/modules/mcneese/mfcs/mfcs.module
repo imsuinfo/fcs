@@ -4298,7 +4298,7 @@ function mfcs_display_room_unavailable_message() {
  *
  * @param string|null|array $search
  *   (optional) When not NULL, this is either the string of text to search for.
- *   or an array of possible
+ *   or an array of possible field values.
  * @param bool $sensitive
  *   (optional) TRUE for case sensitive and FALSE otherwise.
  * @param int $start

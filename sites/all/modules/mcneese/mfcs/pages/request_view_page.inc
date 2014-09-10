@@ -182,12 +182,14 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
     $can['history'] = FALSE;
     $can['agreement'] = FALSE;
     $can['clone'] = FALSE;
+    $can['ical'] = FALSE;
   }
   else {
     $can['edit'] = (bool) $can_edit_request;
     $can['history'] = (bool) $can_history_request;
     $can['agreement'] = (bool) $can_agreement_request;
     $can['clone'] = (bool) $can_create_request;
+    $can['ical'] = TRUE;
   }
 
   $page_title = "Facilities Use Request";
@@ -1537,6 +1539,12 @@ function mfcs_request_view_0_page_setup_group_path(&$form, $request_id, $group, 
     }
   }
 
+  if ($show['ical']) {
+    if ($group != 'dates') {
+      $show['ical'] = FALSE;
+    }
+  }
+
   if (array_key_exists('group', $presentation_tables[$group])) {
     $row = (int) $presentation_tables[$group]['group'];
 
@@ -1579,19 +1587,23 @@ function mfcs_request_view_0_page_setup_group_path(&$form, $request_id, $group, 
 
       if ($show_link) {
         if ($show['clone']) {
-          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/create-0/' . $request_id . '" class="section-request-' . $request_id . '-' . $group . '-history section-request-clone no-print" title="'. t("Copy " . $presentation_tables[$group]['label']) . '">Copy</a>';
+          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/create-0/' . $request_id . '" class="section-request-' . $request_id . '-' . $group . '-history section-request-clone no-print" title="'. t("Copy Request") . '">Copy</a>';
         }
 
         if ($show['edit']) {
-          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/edit-0/' . $request_id . '/' . $group . '" class="section-request-' . $request_id . '-' . $group . '-edit section-request-edit no-print" title="'. t("Edit " . $presentation_tables[$group]['label']) . '">Edit</a>';
+          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/edit-0/' . $request_id . '/' . $group . '" class="section-request-' . $request_id . '-' . $group . '-edit section-request-edit no-print" title="'. t("Edit Request") . '">Edit</a>';
         }
 
         if ($show['history']) {
-          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/history-0/' . $request_id . '" class="section-request-' . $request_id . '-' . $group . '-history section-request-history no-print" title="'. t("View History of " . $presentation_tables[$group]['label']) . '">History</a>';
+          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/history-0/' . $request_id . '" class="section-request-' . $request_id . '-' . $group . '-history section-request-history no-print" title="'. t("View History of Request") . '">History</a>';
         }
 
         if ($show['agreement']) {
-          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/agreement-0/' . $request_id . '" class="section-request-' . $request_id . '-' . $group . '-agreement section-request-agreement no-print" title="'. t("View " . $presentation_tables[$group]['label']) . '">Agreement</a>';
+          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/agreement-0/' . $request_id . '" class="section-request-' . $request_id . '-' . $group . '-agreement section-request-agreement no-print" title="'. t("View Request") . '">Agreement</a>';
+        }
+
+        if ($show['ical']) {
+          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/ical-0/' . $request_id . '" class="section-request-' . $request_id . '-' . $group . '-ical section-request-ical no-print" title="'. t("Download iCal of Request") . '">iCal</a>';
         }
       }
 
