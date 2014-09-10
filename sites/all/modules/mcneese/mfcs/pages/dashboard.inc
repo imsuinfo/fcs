@@ -18,7 +18,7 @@
  *
  * @see mfcs_blocks_at_path()
  */
-function mfcs_management_page() {
+function mfcs_dashboard_page() {
   global $base_path;
   $user = cf_current_user();
 

@@ -1198,7 +1198,7 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
  * @param bool
  *   TRUE on access granted, FALSE otherwise.
  */
-function mfcs_management_page_access() {
+function mfcs_dashboard_page_access() {
   if (user_access('mfcs administer') || user_access('mfcs request') || user_access('mfcs review') || user_access('mfcs manage')) {
     return TRUE;
   }

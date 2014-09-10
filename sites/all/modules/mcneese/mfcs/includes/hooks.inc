@@ -51,10 +51,10 @@ function mfcs_hook_menu() {
   $items['requests'] = array(
     'title' => "Requests Dashboard",
     'description' => "Requests Dashboard",
-    'page callback' => 'mfcs_management_page',
-    'file' => 'management.inc',
+    'page callback' => 'mfcs_dashboard_page',
+    'file' => 'dashboard.inc',
     'file path' => drupal_get_path('module', 'mfcs') . '/pages',
-    'access callback' => 'mfcs_management_page_access',
+    'access callback' => 'mfcs_dashboard_page_access',
     'tab_parent' => '',
     'tab_root' => '',
   );
