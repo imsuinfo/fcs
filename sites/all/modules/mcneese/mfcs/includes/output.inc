@@ -1047,29 +1047,29 @@ function mfcs_generate_ical($requests, $start = NULL, $stop = NULL) {
         }
 
         $ical[] = 'BEGIN:VEVENT';
-        $ical[] = 'UID:request-' . $request->id . '-' . $date . '-' . $delta . '@' . $mfcs_site_url;
+        $ical[] = wordwrap('UID:request-' . $request->id . '-' . $date . '-' . $delta . '@' . $mfcs_site_url, 75, $ical_eol . ' ', TRUE);
 
         // DTSTAMP represents the last time the vcal data was changed.
         // This should only happend when the request gets modified, so it will be the same as the last modified date.
-        $ical[] = 'DTSTAMP:' . date($date_format, $request->updated);
-        $ical[] = $ical_date['start'];
-        $ical[] = $ical_date['stop'];
-        $ical[] = 'DTCREATED:' . date($date_format, $request->created);
-        $ical[] = 'LAST-MODIFIED:' . date($date_format, $request->updated);
-        $ical[] = 'LOCATION:' . $request_zone;
-        $ical[] = 'URL:' . $request_url;
+        $ical[] = wordwrap('DTSTAMP:' . date($date_format, $request->updated), 75, $ical_eol . ' ', TRUE);
+        $ical[] = wordwrap($ical_date['start'], 75, $ical_eol . ' ', TRUE);
+        $ical[] = wordwrap($ical_date['stop'], 75, $ical_eol . ' ', TRUE);
+        $ical[] = wordwrap('DTCREATED:' . date($date_format, $request->created), 75, $ical_eol . ' ', TRUE);
+        $ical[] = wordwrap('LAST-MODIFIED:' . date($date_format, $request->updated), 75, $ical_eol . ' ', TRUE);
+        $ical[] = wordwrap('LOCATION:' . $request_zone, 75, $ical_eol . ' ', TRUE);
+        $ical[] = wordwrap('URL:' . $request_url, 75, $ical_eol . ' ', TRUE);
 
         if (!empty($request_categories)) {
-          $ical[] = 'CATEGORIES:' . implode(', ', $request_categories);
+          $ical[] = wordwrap('CATEGORIES:' . implode(', ', $request_categories), 75, $ical_eol . ' ', TRUE);
         }
 
         // According to the specification, organizer can only be used for events shared between multiple users.
         // While this is the actual case as far as this system is concerned, it is counter-intuitive to have such a specification in an ical file.
         // The file gets exported and there is no knowledge of whether or not the ical client is sharing this between groups.
         // Therefore, the ORGANIZER cannot be used because the specification is client-side specific and cannot be determined by the exporter/server.
-        #$ical[] = 'ORGANIZER;' . 'CN=' . $request->request_coordinator_name . ':MAILTO:' . $request->request_coordinator_email;
+        #$ical[] = wordwrap('ORGANIZER;' . 'CN=' . $request->request_coordinator_name . ':MAILTO:' . $request->request_coordinator_email, 75, $ical_eol . ' ', TRUE);
 
-        $ical[] = 'SUMMARY:' . $request->title;
+        $ical[] = wordwrap('SUMMARY:' . $request->title, 75, $ical_eol . ' ', TRUE);
 
         $request_description = $request_description_begin;
 
@@ -1092,7 +1092,7 @@ function mfcs_generate_ical($requests, $start = NULL, $stop = NULL) {
         $request_description .= $request_description_end;
 
         $delimited_description = preg_replace("/\n/", '\n', $request_description);
-        $ical[] = 'DESCRIPTION:' . $delimited_description;
+        $ical[] = wordwrap('DESCRIPTION:' . $delimited_description, 75, $ical_eol . ' ', TRUE);
 
         $request_description_markup = $request_description_markup_begin;
 
@@ -1115,14 +1115,14 @@ function mfcs_generate_ical($requests, $start = NULL, $stop = NULL) {
         $request_description_markup .= $request_description_markup_end;
 
         $request_description_markup = preg_replace("/\n/", '\n', $request_description_markup);
-        $ical[] = 'X-ALT_DESC;FMTTYPE=text/html:' . $request_description_markup;
+        $ical[] = wordwrap('X-ALT_DESC;FMTTYPE=text/html:' . $request_description_markup, 75, $ical_eol . ' ', TRUE);
 
         // SEQUENCE represents the revision number of the vevent.
         // make the sequence represent the requests revision number.
-        $ical[] = 'SEQUENCE:' . $request_revision;
+        $ical[] = wordwrap('SEQUENCE:' . $request_revision, 75, $ical_eol . ' ', TRUE);
 
         // 'STATUS:' with values like: 'TENTATIVE', 'CONFIRMED', 'CANCELLED' can be used if loading current users calendar.
-        $ical[] = 'STATUS:' . 'CONFIRMED';
+        $ical[] = wordwrap('STATUS:' . 'CONFIRMED', 75, $ical_eol . ' ', TRUE);
 
         // 'RESOURCES:' could be added here to designate things like projectors and microphones needed, etc..
 
