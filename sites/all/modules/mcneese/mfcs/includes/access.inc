@@ -350,12 +350,15 @@ function mfcs_page_request_access_operation_view(&$request_ids, &$processed, &$a
       $access_results = $query->execute()->fetchAllAssoc('id');
 
       if (is_array($access_results)) {
-        foreach ($request_ids as $id) {
+        $request_ids_copy = $request_ids;
+        foreach ($request_ids_copy as $id) {
           $processed[$id] = array_key_exists($id, $access_results);
           $access[$id] = $processed[$id];
-        }
 
-        return TRUE;
+          if ($processed[$id] === TRUE) {
+            unset($request_ids[$id]);
+          }
+        }
       }
     }
     catch (Exception $ex) {
@@ -364,7 +367,8 @@ function mfcs_page_request_access_operation_view(&$request_ids, &$processed, &$a
       return FALSE;
     }
   }
-  elseif ($roles['reviewer']) {
+
+  if ($roles['reviewer']) {
     if (array_key_exists(NULL, $request_ids)) {
       $access[NULL] = TRUE;
       $processed[NULL] = TRUE;
