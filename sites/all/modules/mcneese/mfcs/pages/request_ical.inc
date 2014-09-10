@@ -107,9 +107,9 @@ function mfcs_request_ical_month_0_page($year = NULL, $month = NULL) {
 
   $ical = FALSE;
   if ($results !== FALSE) {
-    mfcs_include(8);
+    mfcs_include(11);
 
-    $ical = mfcs_generate_ical($results, $absolute_start, $absolute_stop);
+    $ical = mfcs_ical_generate($results, $absolute_start, $absolute_stop);
   }
 
   if ($ical === FALSE) {
@@ -228,9 +228,9 @@ function mfcs_request_ical_day_0_page($year = NULL, $month = NULL, $day = NULL) 
 
   $ical = FALSE;
   if ($results !== FALSE) {
-    mfcs_include(8);
+    mfcs_include(11);
 
-    $ical = mfcs_generate_ical($results, $day_start, $day_stop);
+    $ical = mfcs_ical_generate($results, $day_start, $day_stop);
   }
 
   if ($ical === FALSE) {
@@ -310,71 +310,13 @@ function mfcs_request_ical_request_0_page($request_id) {
 
   global $base_url;
 
-  mfcs_include(8);
-  mfcs_include(4);
+  mfcs_include(11);
 
   mfcs_add_canonical_headers('requests/ical-0/' . $request_id);
 
-  $request_location_options = mfcs_get_request_location_list_options();
-  $request_building_options = mfcs_get_request_building_list_options();
-  $request_room_options = mfcs_get_request_room_list_options();
+  $requests = mfcs_ical_generate_array_from_id($request_id);
 
-  // rebuild the request object into the expected array format.
-  $requests = array();
-
-  $request_custom = new StdClass();
-  $request_custom->id = $request['mer']['id'][0]->value;
-  $request_custom->created = $request['mer']['created'][0]->value;
-  $request_custom->updated = $request['mer']['updated'][0]->value;
-
-  $request_custom->status = $request['top']['status'][0]->value;
-  $request_custom->step = $request['top']['step'][0]->value;
-
-  $request_custom->classification = $request['request_coordinator']['classification'][0]->value;
-
-  $request_custom->location = $request['top']['location'][0]->value;
-  $request_custom->location_name = $request_location_options[$request_custom->location];
-
-  $request_custom->building = $request['top']['building'][0]->value;
-  $request_custom->building_name = $request_building_options[$request_custom->building];
-
-  $request_custom->room = $request['top']['room'][0]->value;
-  $request_custom->room_name = $request_room_options[$request_custom->room];
-
-  $request_custom->title = $request['information']['title'][0]->value;
-  $request_custom->type = $request['information']['type'][0]->value;
-
-  $request_custom->date = array();
-  $request_custom->time_start = array();
-  $request_custom->time_stop = array();
-  $request_custom->category = array();
-  foreach ($request['dates']['date'] as $key => $value) {
-    $request_custom->date[$key] = $value->value;
-
-    $request_custom->time_start[$key] = NULL;
-    if (isset($request['dates']['time_start'][$key])) {
-      $request_custom->time_start[$key] = $request['dates']['time_start'][$key]->value;
-    }
-
-    $request_custom->time_stop[$key] = NULL;
-    if (isset($request['dates']['time_stop'][$key])) {
-      $request_custom->time_stop[$key] = $request['dates']['time_stop'][$key]->value;
-    }
-
-    $request_custom->category[$key] = NULL;
-    if (isset($request['dates']['category'][$key])) {
-      $request_custom->category[$key] = $request['dates']['category'][$key]->value;
-    }
-  }
-
-  $request_custom->request_coordinator_name = $request['request_coordinator']['name'][0]->value;
-  $request_custom->request_coordinator_email = $request['request_coordinator']['email'][0]->value;
-
-  $requests[$request_id] = $request_custom;
-
-  unset($request_custom);
-
-  $ical = mfcs_generate_ical($requests);
+  $ical = mfcs_ical_generate($requests);
 
   if ($ical === FALSE) {
     drupal_not_found();

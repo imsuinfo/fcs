@@ -1368,6 +1368,9 @@ function mfcs_include($id) {
   elseif ($id == 10) {
     require_once($module_path . '/includes/access.inc');
   }
+  elseif ($id == 11) {
+    require_once($module_path . '/includes/ical.inc');
+  }
 }
 
 /**
