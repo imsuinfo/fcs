@@ -1375,7 +1375,6 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
   // prepare e-mail(s) for sending
   $email_params = array();
   $email_params['request_id'] = $request_id;
-  #$email_params['filename'] = array($filename); // @todo: should files be attached?
   $email_params['from'] = 'facilities_use@fcs.mcneese.edu';
 
   if (isset($parameters['message_priority'])) {
@@ -1660,6 +1659,30 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
 
       foreach ($step_2_reviewers as $r) {
         $email_to[$r->email] = $r->email;
+      }
+
+      mfcs_include(11);
+
+      $requests = mfcs_ical_generate_array_from_id($request_id);
+
+      if (is_array($requests)) {
+        $ical = mfcs_ical_generate($requests);
+
+        if ($ical !== FALSE) {
+          if (!isset($email_params['files'])) {
+            $email_params['files'] = array();
+          }
+
+          $file = array(
+            'type' => 'ical',
+            'mime' => 'text/calendar',
+            'name' => 'mcneese-facilities_use-request-' . $request_id . '.ics',
+            'data' => $ical,
+            'disposition' => 'attachment',
+          );
+
+          $email_params['files'][] = $file;
+        }
       }
     }
     elseif ($status == MFCS_REQUEST_STATUS_CLOSED_DENIED) {

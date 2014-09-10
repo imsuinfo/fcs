@@ -27,7 +27,9 @@ class McNeeseFacilitiesUseMail implements MailSystemInterface {
     $message['headers']['MIME-Version'] = '1.0';
     $message['headers']['X-Mailer'] = 'McNeese Facilities Use System';
     $message['headers']['Date'] = date('r', REQUEST_TIME);
-    $message['headers']['Return-Path'] = $message['from_address'];
+
+    $from_address = filter_var($message['from_address'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW);
+    $message['headers']['Return-Path'] = $from_address;
 
     $message['headers']['Content-Transfer-Encoding'] = '8Bit';
     #$message['headers']['Content-Transfer-Encoding'] = '7Bit';
@@ -72,12 +74,30 @@ class McNeeseFacilitiesUseMail implements MailSystemInterface {
 
     $final_string .= "\n" . '---alt_' . $boundary . "--\n";
 
-    foreach ($message['files'] as $file) {
-      $final_string .= "\n" . '--' . $boundary . "\n";
-      $final_string .= 'Content-Type: ' . $file['type'] . '; name=' . $file['name'] . "\n";
-      $final_string .= 'Content-Disposition: ' . $file['disposition'] . '; filename=' . $file['name'] . "\n";
-      $final_string .= 'Content-Transfer-Encoding: ' . $file['encoding'] . "\n\n";
-      $final_string .=  chunk_split(base64_encode(file_get_contents($file['uri'])));
+    if (array_key_exists('files', $message) && is_array($message['files'])) {
+      foreach ($message['files'] as $file) {
+        if (!is_array($file) || !array_key_exists('mime', $file) || !array_key_exists('name', $file) || !array_key_exists('data', $file)) {
+          continue;
+        }
+
+        $mime = filter_var($file['mime'], FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW);
+        $name = filter_var($file['name'], FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW);
+        $disposition = filter_var($file['disposition'], FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW);
+
+        $mime = preg_replace('/(;|"|\')/', '', $mime);
+        $name = preg_replace('/(;|"|\')/', '', $name);
+        $disposition = preg_replace('/(;|"|\')/', '', $disposition);
+
+        $final_string .= "\n" . '--' . $boundary . "\n";
+        $final_string .= 'Content-Type: ' . $mime . '; name=' . $name . "\n";
+        $final_string .= 'Content-Disposition: ' . $disposition . '; filename=' . $name . "\n";
+        $final_string .= 'Content-Transfer-Encoding: base64' . "\n\n";
+        $final_string .=  chunk_split(base64_encode($file['data']));
+
+        unset($mime);
+        unset($name);
+        unset($disposition);
+      }
     }
 
     $final_string .= "\n" . '--' . $boundary . "--\n";

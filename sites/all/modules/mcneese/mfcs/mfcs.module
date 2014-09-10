@@ -1238,7 +1238,6 @@ function mfcs_mail($key, &$message, $params) {
   $subject = '';
   $body = '';
   $markup = '';
-  $files = array();
 
   if ($key == 'request_alert') {
     if (!empty($params['title_prefix'])) {
@@ -1273,19 +1272,6 @@ function mfcs_mail($key, &$message, $params) {
       $markup .= "<br>\n";
       $markup .= "<em>This e-mail was generated on</em>:\n<ul><li><em>" . date("Y/m/d h:i:s a T", REQUEST_TIME) . "</em></li></ul>\n";
     }
-
-    // add PDF attachment
-    if (!empty($params['filename'])) {
-      foreach ($params['filename'] as $filename) {
-        $files[] = array(
-          'name' => $filename,
-          'type' => 'application/pdf',
-          'disposition' => 'attachment',
-          'encoding' => 'base64',
-          'uri' => 'private://requests/local/' . $filename,
-        );
-      }
-    }
   }
   else {
     return;
@@ -1294,8 +1280,11 @@ function mfcs_mail($key, &$message, $params) {
   $message['subject'] = $subject;
   $message['body'] = array($body);
   $message['markup'] = isset($params['markup']) ? array($markup) : array();
-  $message['files'] = $files;
   $message['from_address'] = isset($params['from']) ? $params['from'] : $message['from'];
+
+  if (!empty($params['files'])) {
+    $message['files'] = $params['files'];
+  }
 
   // assign message priority.
   if (isset($params['message_priority'])) {

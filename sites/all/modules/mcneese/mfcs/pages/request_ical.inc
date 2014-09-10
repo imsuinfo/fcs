@@ -316,6 +316,11 @@ function mfcs_request_ical_request_0_page($request_id) {
 
   $requests = mfcs_ical_generate_array_from_id($request_id);
 
+  if ($requests === FALSE) {
+    drupal_not_found();
+    drupal_exit();
+  }
+
   $ical = mfcs_ical_generate($requests);
 
   if ($ical === FALSE) {
