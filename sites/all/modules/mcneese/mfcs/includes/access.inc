@@ -186,6 +186,12 @@ function mfcs_page_request_access_operation_edit(&$request_ids, &$processed, &$a
               unset($request_ids[$id]);
             }
           }
+          unset($request_ids_copy);
+
+          // looks like all of the requests have been processed, so return.
+          if (empty($request_ids)) {
+            return TRUE;
+          }
         }
         else {
           return FALSE;
@@ -359,6 +365,12 @@ function mfcs_page_request_access_operation_view(&$request_ids, &$processed, &$a
             unset($request_ids[$id]);
           }
         }
+        unset($request_ids_copy);
+      }
+
+      // looks like all of the requests have been processed, so return.
+      if (empty($request_ids)) {
+        return TRUE;
       }
     }
     catch (Exception $ex) {
@@ -680,6 +692,11 @@ function mfcs_page_request_access_operation_cancel(&$request_ids, &$processed, &
         }
       }
       unset($request_ids_copy);
+
+      // looks like all of the requests have been processed, so return.
+      if (empty($request_ids)) {
+        return TRUE;
+      }
     }
   }
   catch (Exception $ex) {
@@ -826,6 +843,11 @@ function mfcs_page_request_access_operation_uncancel(&$request_ids, &$processed,
         }
       }
       unset($request_ids_copy);
+
+      // looks like all of the requests have been processed, so return.
+      if (empty($request_ids)) {
+        return TRUE;
+      }
     }
   }
   catch (Exception $ex) {
