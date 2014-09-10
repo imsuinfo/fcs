@@ -308,6 +308,8 @@ function mfcs_request_ical_request_0_page($request_id) {
   mfcs_include(8);
   mfcs_include(4);
 
+  mfcs_add_canonical_headers('requests/ical-0/' . $request_id);
+
   $request_location_options = mfcs_get_request_location_list_options();
   $request_building_options = mfcs_get_request_building_list_options();
   $request_room_options = mfcs_get_request_room_list_options();
