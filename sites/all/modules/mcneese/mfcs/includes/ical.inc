@@ -305,29 +305,29 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
         }
 
         $ical[] = 'BEGIN:VEVENT';
-        $ical[] = wordwrap('UID:request-' . $request->id . '-' . $date . '-' . $delta . '@' . $mfcs_site_url, 75, $ical_eol . ' ', TRUE);
+        $ical[] = mfcs_ical_wordwrap('UID:request-' . $request->id . '-' . $date . '-' . $delta . '@' . $mfcs_site_url);
 
         // DTSTAMP represents the last time the vcal data was changed.
         // This should only happend when the request gets modified, so it will be the same as the last modified date.
-        $ical[] = wordwrap('DTSTAMP:' . date($date_format, $request->updated), 75, $ical_eol . ' ', TRUE);
-        $ical[] = wordwrap($ical_date['start'], 75, $ical_eol . ' ', TRUE);
-        $ical[] = wordwrap($ical_date['stop'], 75, $ical_eol . ' ', TRUE);
-        $ical[] = wordwrap('DTCREATED:' . date($date_format, $request->created), 75, $ical_eol . ' ', TRUE);
-        $ical[] = wordwrap('LAST-MODIFIED:' . date($date_format, $request->updated), 75, $ical_eol . ' ', TRUE);
-        $ical[] = wordwrap('LOCATION:' . $request_zone, 75, $ical_eol . ' ', TRUE);
-        $ical[] = wordwrap('URL:' . $request_url, 75, $ical_eol . ' ', TRUE);
+        $ical[] = mfcs_ical_wordwrap('DTSTAMP:' . date($date_format, $request->updated));
+        $ical[] = mfcs_ical_wordwrap($ical_date['start']);
+        $ical[] = mfcs_ical_wordwrap($ical_date['stop']);
+        $ical[] = mfcs_ical_wordwrap('DTCREATED:' . date($date_format, $request->created));
+        $ical[] = mfcs_ical_wordwrap('LAST-MODIFIED:' . date($date_format, $request->updated));
+        $ical[] = mfcs_ical_wordwrap('LOCATION:' . $request_zone);
+        $ical[] = mfcs_ical_wordwrap('URL:' . $request_url);
 
         if (!empty($request_categories)) {
-          $ical[] = wordwrap('CATEGORIES:' . implode(', ', $request_categories), 75, $ical_eol . ' ', TRUE);
+          $ical[] = mfcs_ical_wordwrap('CATEGORIES:' . implode(', ', $request_categories));
         }
 
         // According to the specification, organizer can only be used for events shared between multiple users.
         // While this is the actual case as far as this system is concerned, it is counter-intuitive to have such a specification in an ical file.
         // The file gets exported and there is no knowledge of whether or not the ical client is sharing this between groups.
         // Therefore, the ORGANIZER cannot be used because the specification is client-side specific and cannot be determined by the exporter/server.
-        #$ical[] = wordwrap('ORGANIZER;' . 'CN=' . $request->request_coordinator_name . ':MAILTO:' . $request->request_coordinator_email, 75, $ical_eol . ' ', TRUE);
+        #$ical[] = mfcs_ical_wordwrap('ORGANIZER;' . 'CN=' . $request->request_coordinator_name . ':MAILTO:' . $request->request_coordinator_email);
 
-        $ical[] = wordwrap('SUMMARY:' . $request->title, 75, $ical_eol . ' ', TRUE);
+        $ical[] = mfcs_ical_wordwrap('SUMMARY:' . $request->title);
 
         $request_description = $request_description_begin;
 
@@ -350,7 +350,7 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
         $request_description .= $request_description_end;
 
         $delimited_description = preg_replace("/\n/", '\n', $request_description);
-        $ical[] = wordwrap('DESCRIPTION:' . $delimited_description, 75, $ical_eol . ' ', TRUE);
+        $ical[] = mfcs_ical_wordwrap('DESCRIPTION:' . $delimited_description);
 
         $request_description_markup = $request_description_markup_begin;
 
@@ -373,14 +373,14 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
         $request_description_markup .= $request_description_markup_end;
 
         $request_description_markup = preg_replace("/\n/", '\n', $request_description_markup);
-        $ical[] = wordwrap('X-ALT_DESC;FMTTYPE=text/html:' . $request_description_markup, 75, $ical_eol . ' ', TRUE);
+        $ical[] = mfcs_ical_wordwrap('X-ALT_DESC;FMTTYPE=text/html:' . $request_description_markup);
 
         // SEQUENCE represents the revision number of the vevent.
         // make the sequence represent the requests revision number.
-        $ical[] = wordwrap('SEQUENCE:' . $request_revision, 75, $ical_eol . ' ', TRUE);
+        $ical[] = mfcs_ical_wordwrap('SEQUENCE:' . $request_revision);
 
         // 'STATUS:' with values like: 'TENTATIVE', 'CONFIRMED', 'CANCELLED' can be used if loading current users calendar.
-        $ical[] = wordwrap('STATUS:' . 'CONFIRMED', 75, $ical_eol . ' ', TRUE);
+        $ical[] = mfcs_ical_wordwrap('STATUS:' . 'CONFIRMED');
 
         // 'RESOURCES:' could be added here to designate things like projectors and microphones needed, etc..
 
@@ -417,6 +417,38 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
   }
 
   return implode($ical_eol, $ical) . $ical_eol;
+}
+
+/**
+ * Replacement to php's wordwrap() that actuall respects the spaces.
+ *
+ * The PHP function will lose spaces after the truncate location before
+ * starting the next line. This causes content that gets put back togethor
+ * to be missing a space.
+ *
+ * For example 'Hello World' if the wrap was on 5 characters such, then php
+ * Would produce 'Hello\nWorld' instead of the expected 'Hello\n World'.
+ * When the string gets re-attached, it ends up being: 'HelloWorld'.
+ *
+ * @param string $string
+ *   The string to wrap.
+ *
+ * @param string|bool
+ *   The wrapped string or FALSE on error.
+ */
+function mfcs_ical_wordwrap($string) {
+  if (!is_string($string)) {
+    cf_error::invalid_string('string');
+    return FALSE;
+  }
+
+  $array = str_split($string, 75);
+
+  if (!is_array($array)) {
+    return FALSE;
+  }
+
+  return implode("\r\n ", $array);
 }
 
 /**
