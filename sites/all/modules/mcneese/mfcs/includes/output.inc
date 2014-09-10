@@ -897,6 +897,7 @@ function mfcs_generate_ical($requests, $start = NULL, $stop = NULL) {
 
   $request_type_options = mfcs_get_request_type_list_options();
   $request_classification_options = mfcs_get_request_classification_list_options();
+  $dates_categories_options = mfcs_get_dates_category_list_options();
 
   foreach ($requests as $request) {
     if (empty($request->date)) {
@@ -926,12 +927,20 @@ function mfcs_generate_ical($requests, $start = NULL, $stop = NULL) {
 
     $request_description_begin = 'The reserved location is: ' . $request->building_name . ' ' . $request->room_name . "\n";
     $request_description_begin = '  - ' . $request->building_name . ' ' . $request->room_name . "\n";
-    $request_description_begin = 'This location is reserved for the following dates:' . "\n";
     $request_description_end = "\n\n";
     $request_description_end = 'The Request ID is: ' . $request->id . ".\n";
     $request_description_end = "\n";
     $request_description_end .= 'You may view the request at: '  . $request_url. ".\n";
     $request_description_end .= "\n";
+
+    $request_dates_setup_begin = 'The ' . $dates_categories_options[MFCS_EVENT_DATES_CATEGORY_SETUP] . ' takes place on the following dates and times:' . "\n";
+    $request_dates_setup_end = "\n";
+
+    $request_dates_actual_begin = 'This location is reserved for the ' . $dates_categories_options[MFCS_EVENT_DATES_CATEGORY_ACTUAL] . ' takes place on the following dates and times:' . "\n";
+    $request_dates_actual_end = "\n";
+
+    $request_dates_cleanup_begin = 'This location is reserved for the ' . $dates_categories_options[MFCS_EVENT_DATES_CATEGORY_CLEANUP] . ' takes place on the following dates and times:' . "\n";
+    $request_dates_cleanup_end = "\n";
 
     $request_description_markup_begin = '<html>' . "\n";
     $request_description_markup_begin .= '<body>' . "\n";
@@ -939,12 +948,8 @@ function mfcs_generate_ical($requests, $start = NULL, $stop = NULL) {
     $request_description_markup_begin .= '<ul>' . "\n";
     $request_description_markup_begin .= '  <li>' . $request->building_name . ' ' . $request->room_name . "</li>\n";
     $request_description_markup_begin .= '</ul>' . "\n";
-    $request_description_markup_begin .= "<br>\n";
-    $request_description_markup_begin .= 'This location is reserved for the following dates:' . "<br>\n";
-    $request_description_markup_begin .= '<ul>' . "\n";
 
     $request_description_markup_end = '';
-    $request_description_markup_end .= '</ul>' . "\n";
     $request_description_markup_end .= "<br>\n";
     $request_description_markup_end .= '<em>The Request ID is: ' . $request->id . ".</em><br>\n";
     $request_description_markup_end .= "<br>\n";
@@ -952,11 +957,37 @@ function mfcs_generate_ical($requests, $start = NULL, $stop = NULL) {
     $request_description_markup_end .= '</body>' . "\n";
     $request_description_markup_end .= '</html>' . "\n";
 
+    $request_dates_setup_markup_begin = 'The <strong>' . $dates_categories_options[MFCS_EVENT_DATES_CATEGORY_SETUP] . '</strong> takes place on the following dates and times:' . "\n";
+    $request_dates_setup_markup_begin .= '<ul>' . "\n";
+    $request_dates_setup_markup_end = '';
+    $request_dates_setup_markup_end .= '</ul>' . "\n";
+
+    $request_dates_actual_markup_begin = 'The <strong>' . $dates_categories_options[MFCS_EVENT_DATES_CATEGORY_ACTUAL] . '</strong> takes place on the following dates and times:' . "\n";
+    $request_dates_actual_markup_begin .= '<ul>' . "\n";
+    $request_dates_actual_markup_end = '';
+    $request_dates_actual_markup_end .= '</ul>' . "\n";
+
+    $request_dates_cleanup_markup_begin = 'The <strong>' . $dates_categories_options[MFCS_EVENT_DATES_CATEGORY_CLEANUP] . '</strong> takes place on the following dates and times:' . "\n";
+    $request_dates_cleanup_markup_begin .= '<ul>' . "\n";
+    $request_dates_cleanup_markup_end = '';
+    $request_dates_cleanup_markup_end .= '</ul>' . "\n";
+
+
     // preprocess the dates.
-    $dates_text = '';
-    $dates_markup = '';
+    $dates_setup_event_text = '';
+    $dates_setup_event_markup = '';
+    $dates_actual_event_text = '';
+    $dates_actual_event_markup = '';
+    $dates_cleanup_event_text = '';
+    $dates_cleanup_event_markup = '';
+
     $ical_dates = array();
     foreach ($request->date as $delta => $date) {
+      // the category field is required and must be valid.
+      if (!array_key_exists($delta, $request->category) || is_null($request->category[$delta]) || !array_key_exists($request->category[$delta], $dates_categories_options)) {
+        continue;
+      }
+
       $ical_date = array();
       if (array_key_exists($delta, $request->time_start) && !is_null($request->time_start[$delta]) && array_key_exists($delta, $request->time_stop) && !is_null($request->time_stop[$delta])) {
         $ical_date['all_day'] = FALSE;
@@ -981,8 +1012,18 @@ function mfcs_generate_ical($requests, $start = NULL, $stop = NULL) {
         date_default_timezone_set($original_timezone);
       }
 
-      $dates_text .= $ical_date['text'] . "\n";
-      $dates_markup .= '<li>' . $ical_date['text'] . '</li>' . "\n";
+      if ($request->category[$delta] == MFCS_EVENT_DATES_CATEGORY_SETUP) {
+        $dates_setup_event_text .= $ical_date['text'] . "\n";
+        $dates_setup_event_markup .= '<li>' . $ical_date['text'] . '</li>' . "\n";
+      }
+      elseif ($request->category[$delta] == MFCS_EVENT_DATES_CATEGORY_ACTUAL) {
+        $dates_actual_event_text .= $ical_date['text'] . "\n";
+        $dates_actual_event_markup .= '<li>' . $ical_date['text'] . '</li>' . "\n";
+      }
+      elseif ($request->category[$delta] == MFCS_EVENT_DATES_CATEGORY_CLEANUP) {
+        $dates_cleanup_event_text .= $ical_date['text'] . "\n";
+        $dates_cleanup_event_markup .= '<li>' . $ical_date['text'] . '</li>' . "\n";
+      }
 
       $ical_dates[$delta][$date] = $ical_date;
       unset($ical_date);
@@ -1030,11 +1071,49 @@ function mfcs_generate_ical($requests, $start = NULL, $stop = NULL) {
 
         $ical[] = 'SUMMARY:' . $request->title;
 
-        $request_description = $request_description_begin . $dates_text . $request_description_end;
+        $request_description = $request_description_begin;
+
+        $request_description .= $request_dates_actual_begin;
+        $request_description .= $dates_actual_event_text;
+        $request_description .= $request_dates_actual_end;
+
+        if (!empty($dates_setup_text)) {
+          $request_description .= $request_dates_setup_begin;
+          $request_description .= $dates_setup_event_text;
+          $request_description .= $request_dates_setup_end;
+        }
+
+        if (!empty($dates_cleanup_text)) {
+          $request_description .= $request_dates_cleanup_begin;
+          $request_description .= $dates_cleanup_event_text;
+          $request_description .= $request_dates_cleanup_end;
+        }
+
+        $request_description .= $request_description_end;
+
         $delimited_description = preg_replace("/\n/", '\n', $request_description);
         $ical[] = 'DESCRIPTION:' . $delimited_description;
 
-        $request_description_markup = $request_description_markup_begin . $dates_markup . $request_description_markup_end;
+        $request_description_markup = $request_description_markup_begin;
+
+        $request_description_markup .= $request_dates_actual_markup_begin;
+        $request_description_markup .= $dates_actual_event_markup;
+        $request_description_markup .= $request_dates_actual_markup_end;
+
+        if (!empty($dates_setup_event_markup)) {
+          $request_description_markup .= $request_dates_setup_markup_begin;
+          $request_description_markup .= $dates_setup_event_markup;
+          $request_description_markup .= $request_dates_setup_markup_end;
+        }
+
+        if (!empty($dates_cleanup_event_markup)) {
+          $request_description_markup .= $request_dates_cleanup_markup_begin;
+          $request_description_markup .= $dates_cleanup_event_markup;
+          $request_description_markup .= $request_dates_cleanup_markup_end;
+        }
+
+        $request_description_markup .= $request_description_markup_end;
+
         $request_description_markup = preg_replace("/\n/", '\n', $request_description_markup);
         $ical[] = 'X-ALT_DESC;FMTTYPE=text/html:' . $request_description_markup;
 

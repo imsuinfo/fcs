@@ -342,6 +342,7 @@ function mfcs_request_ical_request_0_page($request_id) {
   $request_custom->date = array();
   $request_custom->time_start = array();
   $request_custom->time_stop = array();
+  $request_custom->category = array();
   foreach ($request['dates']['date'] as $key => $value) {
     $request_custom->date[$key] = $value->value;
 
@@ -353,6 +354,11 @@ function mfcs_request_ical_request_0_page($request_id) {
     $request_custom->time_stop[$key] = NULL;
     if (isset($request['dates']['time_stop'][$key])) {
       $request_custom->time_stop[$key] = $request['dates']['time_stop'][$key]->value;
+    }
+
+    $request_custom->category[$key] = NULL;
+    if (isset($request['dates']['category'][$key])) {
+      $request_custom->category[$key] = $request['dates']['category'][$key]->value;
     }
   }
 
