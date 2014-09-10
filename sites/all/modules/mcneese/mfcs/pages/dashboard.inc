@@ -29,8 +29,6 @@ function mfcs_dashboard_page() {
   $can_search = mfcs_page_request_access('search', NULL, $user);
   $can_review = mfcs_page_request_access('review', NULL, $user);
 
-  $manager = user_access('mfcs manage', $user);
-
   $items_1 = array();
   $items_2 = array();
   $items_3 = array();
@@ -97,16 +95,6 @@ function mfcs_dashboard_page() {
       $items_array = &$items_4;
       $items_array_current++;
     }
-  }
-
-  if ($manager) {
-    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/reviewers-0" class="item-link">Manage Reviewers</a></h4>';
-    $help = '<div class="item-description inline-block">Manage what users are allowed to approve/deny requests by request type.</div>';
-    $items_array[] = array(
-      'data' => $link . '<br>' . $help,
-      'class' => array(
-      ),
-    );
   }
 
   if (count($items_array) > 1) {

@@ -59,6 +59,17 @@ function mfcs_hook_menu() {
     'tab_root' => '',
   );
 
+  $items['requests/management'] = array(
+    'title' => "Requests Management",
+    'description' => "Requests Management",
+    'page callback' => 'mfcs_management_page',
+    'file' => 'management.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
+    'access callback' => 'mfcs_management_page_access',
+    'tab_parent' => '',
+    'tab_root' => '',
+  );
+
   $items['requests/create-0'] = array(
     'title' => "New Request",
     'description' => "New Request",

@@ -1207,6 +1207,20 @@ function mfcs_dashboard_page_access() {
 }
 
 /**
+ * Access callback for facilities use management page.
+ *
+ * @param bool
+ *   TRUE on access granted, FALSE otherwise.
+ */
+function mfcs_management_page_access() {
+  if (user_access('mfcs administer') || user_access('mfcs manage')) {
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
+/**
  * Implements hook_cronapi().
  */
 function mfcs_cronapi() {
