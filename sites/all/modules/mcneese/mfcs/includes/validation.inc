@@ -96,6 +96,9 @@ function mfcs_pre_validate_request_fields(&$form, &$form_state, $dont_validate =
           $location_state['plans']['audience'][0] = MFCS_REQUEST_AUDIENCE_GUESTS_ONLY;
         }
       }
+      else {
+        form_set_error('submit-request-submit', "This request cannot be submitted during this step at this time. Try using the Continue button.");
+      }
     }
   }
   elseif ($form_state['values']['form']['step'] == 'location') {
