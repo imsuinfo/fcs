@@ -115,11 +115,12 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
     }
   }
 
+  $step = $request['top']['step'][0]->value;
+  $status = $request['top']['status'][0]->value;
+
   if ($can_review_request || $can_comment_request) {
     // show review operations only if the content is reviewable by the current user.
     $request_classification = $request['request_coordinator']['classification'][0]->value;
-    $step = $request['top']['step'][0]->value;
-    $status = $request['top']['status'][0]->value;
 
     // only show operations for states and steps that make sense to.
     $allowed_statuses = array(
@@ -184,7 +185,7 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
     $can['history'] = (bool) $can_history_request;
     $can['agreement'] = (bool) $can_agreement_request;
     $can['clone'] = (bool) $can_create_request;
-    $can['ical'] = TRUE;
+    $can['ical'] = $status == MFCS_REQUEST_STATUS_CLOSED_ACCEPTED && $step == MFCS_REVIEW_STEP_COMPLETED;
   }
 
   $page_title = "Facilities Use Request";

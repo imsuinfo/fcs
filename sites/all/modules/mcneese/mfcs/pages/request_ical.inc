@@ -303,6 +303,11 @@ function mfcs_request_ical_request_0_page($request_id) {
     drupal_exit();
   }
 
+  if ($request['top']['status'][0]->value !== MFCS_REQUEST_STATUS_CLOSED_ACCEPTED && $request['top']['step'][0]->value !== MFCS_REVIEW_STEP_COMPLETED) {
+    drupal_not_found();
+    drupal_exit();
+  }
+
   global $base_url;
 
   mfcs_include(8);

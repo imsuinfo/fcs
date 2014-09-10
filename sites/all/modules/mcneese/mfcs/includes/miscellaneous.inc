@@ -115,15 +115,18 @@ function mfcs_miscellaneous_determine_current_date($year, $month, $day) {
  *   The unix timestamp the date stops on.
  *   A < operator is used on this.
  * @param int|null $status
- *   The request status id to search for.
+ *   (optional) The request status id to search for.
  *   If NULL, then the status is not included in the search.
+ * @param int|null $step
+ *   (optional) The review step id to search for.
+ *   If NULL, then the step is not included in the search.
  *
  * @return array|bool
  *   An array containing the generated search values.
  *
  * @see: mfcs_request_load_listing()
  */
-function mfcs_miscellaneous_generate_requests_by_date_search($start, $stop, $status = MFCS_REQUEST_STATUS_CLOSED_ACCEPTED) {
+function mfcs_miscellaneous_generate_requests_by_date_search($start, $stop, $status = MFCS_REQUEST_STATUS_CLOSED_ACCEPTED, $step = MFCS_REVIEW_STEP_COMPLETED) {
   if (!cf_is_integer($start)) {
     cf_error::invalid_integer('start');
     return FALSE;
@@ -165,6 +168,17 @@ function mfcs_miscellaneous_generate_requests_by_date_search($start, $stop, $sta
     $search[$target_field_name]['field_name'] = 'status';
     $search[$target_field_name]['column'] = 'value';
     $search[$target_field_name]['search'] = $status;
+    $search[$target_field_name]['type'] = 'options';
+    $search[$target_field_name]['multiple'] = FALSE;
+    $search[$target_field_name]['operator'] = MFCS_OPERATOR_EQUAL;
+  }
+
+  if (!is_null($step)) {
+    $target_field_name = 'field_top-step-0';
+    $search[$target_field_name]['group_name'] = 'top';
+    $search[$target_field_name]['field_name'] = 'step';
+    $search[$target_field_name]['column'] = 'value';
+    $search[$target_field_name]['search'] = $step;
     $search[$target_field_name]['type'] = 'options';
     $search[$target_field_name]['multiple'] = FALSE;
     $search[$target_field_name]['operator'] = MFCS_OPERATOR_EQUAL;
