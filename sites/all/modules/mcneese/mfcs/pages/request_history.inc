@@ -147,17 +147,6 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
 
             $values_name = 'history_item-created-label';
             $form['history'][$fieldset_name][$values_name] = array(
-              '#id' => 'request-' . $request_id . '-history_item-created-label',
-              '#type' => 'container',
-              '#tree' => TRUE,
-              '#attributes' => array(
-                'class' => array(
-                  'history_item-label',
-                ),
-              ),
-            );
-
-            $form['history'][$fieldset_name][$values_name] = array(
               '#id' => $fieldset_id . '-changes_by-' . $user_id,
               '#type' => 'container',
               '#tree' => TRUE,
