@@ -135,10 +135,10 @@ define('MFCS_REQUEST_STATUS_CANCELLED', 7);
 /**
  * Defines standard view modes.
  */
- define('MFCS_VIEW_MODE_NORMAL', 0);
- define('MFCS_VIEW_MODE_DISPLAY', 1);
- define('MFCS_VIEW_MODE_LOG', 2);
- define('MFCS_VIEW_MODE_OPERATIONS', 3);
+ define('MFCS_VIEW_MODE_NORMAL', 'normal');
+ define('MFCS_VIEW_MODE_DISPLAY', 'display');
+ define('MFCS_VIEW_MODE_LOG', 'log');
+ define('MFCS_VIEW_MODE_OPERATIONS', 'operations');
 
 /**
  * Defines PDF types.
@@ -3384,6 +3384,10 @@ function mfcs_convert_value_from_database_format($value, $method, $option = arra
  * @param bool $reset_action
  *   (optional) If TRUE, the cache for the specified request is reset.
  *   If FALSE, the cache is reset, but no request is loaded.
+ *   If NULL, no reset is performed.
+ * @param int|NULL $revision_id
+ *   (optional) If not NULL, this essentially loads all values for a given
+ *   revision.
  *
  * @return array|bool
  *   An array of values associated with the request id.
@@ -3392,7 +3396,7 @@ function mfcs_convert_value_from_database_format($value, $method, $option = arra
  *   TRUE is returned when $reset_action is FALSE because there will ne no
  *   request to return.
  */
-function mfcs_load_request_by_id($request_id, $reset_action = NULL) {
+function mfcs_load_request_by_id($request_id, $reset_action = NULL, $revision_id = NULL) {
   if (!cf_is_integer($request_id)) {
     cf_error::invalid_integer('request_id');
     return FALSE;
@@ -3403,13 +3407,26 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL) {
     return FALSE;
   }
 
+  if (!is_null($revision_id) && !cf_is_integer($revision_id)) {
+    cf_error::invalid_integer('revision_id');
+    return FALSE;
+  }
+
   $cache_id = __function__;
   $cached_requests = &drupal_static($cache_id, NULL);
   if (is_null($reset_action) && is_array($cached_requests) && array_key_exists($request_id, $cached_requests)) {
-    return $cached_requests[$request_id];
+    if (is_null($revision_id)) {
+      if (array_key_exists('latest', $cached_requests[$request_id])) {
+        return $cached_requests[$request_id]['latest'];
+      }
+    }
+    else {
+      if (array_key_exists($revision_id, $cached_requests[$request_id])) {
+        return $cached_requests[$request_id][$revision_id];
+      }
+    }
   }
-
-  if ($reset_action === FALSE) {
+  elseif ($reset_action === FALSE) {
     unset($cached_requests[$request_id]);
     return TRUE;
   }
@@ -3424,6 +3441,12 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL) {
     $query->fields('mer');
     $query->condition('id', $request_id);
 
+    if (!is_null($revision_id)) {
+      $query->innerJoin('mfcs_request_revisions', 'mrr', 'mer.id = mrr.request_id');
+      $query->addField('mrr', 'date', 'revision_date');
+      $query->condition('mrr.revision', $revision_id);
+    }
+
     $results = $query->execute()->fetchAll();
 
     if (empty($results)) {
@@ -3431,6 +3454,7 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL) {
     }
 
     $mer = array_pop($results);
+    $revision_date = NULL;
 
     // manually add the request information and presentation fields.
     if (!isset($request['mer'])) {
@@ -3439,7 +3463,14 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL) {
         $request['mer'][$key] = array(0 => new stdClass());
         $request['mer'][$key][0]->value = $mer->$key;
       }
+
+      if (property_exists($mer, 'revision_date')) {
+        $revision_date = $mer->revision_date;
+        $request['mer']['updated'][0]->value = $revision_date;
+      }
     }
+
+    unset($mer);
 
     foreach ($structure as $table_name => &$fields) {
       $current_table_name = 'mfcs_current_' . $table_name;
@@ -3470,9 +3501,30 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL) {
       }
 
       $request['current'][$table_name] = array();
-      foreach ((array) $current as $current_keys => $current_values) {
-        if ($current_keys == 'request_id') continue;
-        $request['current'][$table_name][$current_keys] = $current_values;
+
+      if (is_null($revision_id)) {
+        foreach ((array) $current as $current_key => $current_values) {
+          if ($current_key == 'request_id') continue;
+
+          $request['current'][$table_name][$current_key] = $current_values;
+        }
+      }
+      else {
+        foreach ((array) $current as $current_key => $current_values) {
+          if ($current_key == 'request_id') continue;
+
+          $query = db_select('mfcs_field_' . $table_name . '_' . $current_key, 'mftc');
+          $query->fields('mftc', array('revision'));
+          $query->condition('mftc.request_id', $request_id);
+          $query->condition('mftc.date', $revision_date, '<=');
+          $query->orderBy('mftc.date', 'DESC');
+          $query->range(0, 1);
+
+          $result = $query->execute()->fetchField();
+
+          $request['current'][$table_name][$current_key] = $result;
+          $current->$current_key = $result;
+        }
       }
 
       foreach ($fields as $field_name => &$field_values) {
@@ -3532,11 +3584,21 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL) {
     return FALSE;
   }
 
-  $cached_requests[$request_id] = &$request;
+  if (!is_null($revision_id)) {
+    if (is_null($revision_date)) {
+      watchdog(MFCS_WATCHDOG_ID, "Unable to find request with id of @request_id and revision id of @revision_id.", array('@request_id' => $request_id, '@revision_id' => $revision_id), WATCHDOG_ERROR);
+      return FALSE;
+    }
 
-  return $cached_requests[$request_id];
+    $cached_requests[$request_id][$revision_id] = &$request;
+
+    return $cached_requests[$request_id][$revision_id];
+  }
+
+  $cached_requests[$request_id]['latest'] = &$request;
+
+  return $cached_requests[$request_id]['latest'];
 }
-
 
 /**
  * Loads request with fields matching a revision timestamp.

@@ -99,12 +99,12 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
     $query->orderBy('mrv.date', 'DESC');
     $query->range($start_range, $rows_per_page + 1);
 
-    $revisions = $query->execute()->fetchall();
+    $revisions = $query->execute()->fetchallAssoc('revision');
 
     $total_results = count($revisions);
 
     if (is_array($revisions)) {
-      foreach ($revisions as $revision) {
+      foreach ($revisions as $revision_id => $revision) {
         $rows_count++;
 
         // $rows_per_page + 1 is loaded so that it can be detected whether or not a 'next' link needs to be provided.
@@ -129,6 +129,10 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
               'history_items',
             ),
           ),
+        );
+
+        $form['history'][$fieldset_name]['history_item-view_revision-link'] = array(
+          '#markup' => '<a href="' . $base_path . 'requests/view-0/' . $request_id . '/' . MFCS_VIEW_MODE_NORMAL . '/' . $revision_id . '" class="history_item-view_revision-link" title="View this Revision">Revison #' . $revision_id . '</a>',
         );
 
         if ($revision->revision == 0) {

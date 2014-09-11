@@ -396,6 +396,9 @@ function mfcs_request_agreement_0_form_submit($form, &$form_state) {
  *
  * @param int $request_id
  *   The unique identifier for an request.
+ *
+ * @return exit
+ *   This function should not return.
  */
 function mfcs_request_agreement_0_pdf($request_id) {
   $request = mfcs_load_request_by_id($request_id);
@@ -443,7 +446,7 @@ function mfcs_request_agreement_0_pdf($request_id) {
 
   mfcs_include(MFCS_INCLUDE_OUTPUT);
 
-  $result = mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $html, FALSE, $parameters, MFCS_PDF_TYPE_AGREEMENT);
+  $result = mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, NULL, $html, FALSE, $parameters, MFCS_PDF_TYPE_AGREEMENT);
 
   if ($result) {
     exit();

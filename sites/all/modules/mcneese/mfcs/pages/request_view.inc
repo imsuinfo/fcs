@@ -21,14 +21,27 @@
  *   The unique identifier for an request.
  * @param int $mode
  *   Specifies the mode that alters how the form is rendered.
+ * @param null|int $revision_id
+ *   (optional) When not NULL, load the request based on the revision number
+ *   instead of the latest revision.
  * @param bool $pdf
  *   (optional) Enable special handling for PDF generation.
  *
  * @return string
  *   The HTML output representing the page.
  */
-function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS_VIEW_MODE_NORMAL, $pdf = FALSE) {
-  $request = mfcs_load_request_by_id($request_id);
+function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS_VIEW_MODE_NORMAL, $revision_id = NULL, $pdf = FALSE) {
+  if (!is_string($mode) || !($mode == MFCS_VIEW_MODE_DISPLAY || $mode == MFCS_VIEW_MODE_LOG || $mode == MFCS_VIEW_MODE_OPERATIONS)) {
+    $mode = MFCS_VIEW_MODE_NORMAL;
+  }
+
+  if (!is_null($revision_id) && !cf_is_integer($revision_id)) {
+    cf_error::invalid_integer('revision_id');
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  $request = mfcs_load_request_by_id($request_id, NULL, $revision_id);
 
   if (empty($request)) {
     drupal_not_found();
@@ -36,18 +49,61 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
     return array();
   }
 
-  if (!is_numeric($mode) || $mode < MFCS_VIEW_MODE_NORMAL || $mode > MFCS_VIEW_MODE_OPERATIONS) {
-    $mode = MFCS_VIEW_MODE_NORMAL;
+  $user = cf_current_user();
+
+  if (is_null($revision_id)) {
+    $can_create_request = mfcs_request_access('create', $request, $user);
+    $can_edit_request = mfcs_request_access('edit', $request, $user);
+    $can_log_request = mfcs_request_access('log', $request, $user);
+    $can_review_request = mfcs_request_access('review', $request, $user);
+    $can_comment_request = mfcs_request_access('comment', $request, $user);
+    $can_history_request = mfcs_request_access('history', $request, $user);
+    $can_agreement_request = mfcs_request_access('agreement', $request, $user);
+    $can_cancel_request = mfcs_request_access('cancel', $request, $user);
+    $can_uncancel_request = mfcs_request_access('uncancel', $request, $user);
   }
   else {
-    $mode = (int) $mode;
+    // perform access checks against the latest version and not the viewed revision.
+    $request_latest = mfcs_load_request_by_id($request_id);
+
+    if (empty($request)) {
+      drupal_not_found();
+      drupal_exit();
+      return array();
+    }
+
+    $can_create_request = mfcs_request_access('create', $request_latest, $user);
+    $can_edit_request = mfcs_request_access('edit', $request_latest, $user);
+    $can_log_request = mfcs_request_access('log', $request_latest, $user);
+    $can_review_request = mfcs_request_access('review', $request_latest, $user);
+    $can_comment_request = mfcs_request_access('comment', $request_latest, $user);
+    $can_history_request = mfcs_request_access('history', $request_latest, $user);
+    $can_agreement_request = mfcs_request_access('agreement', $request_latest, $user);
+    $can_cancel_request = mfcs_request_access('cancel', $request_latest, $user);
+    $can_uncancel_request = mfcs_request_access('uncancel', $request_latest, $user);
+
+    if (!$can_history_request) {
+      drupal_not_found();
+      drupal_exit();
+    }
   }
 
-  if ($mode == MFCS_VIEW_MODE_NORMAL) {
-    mfcs_add_canonical_headers('requests/view-0/' . $request_id . '/' . $mode, 'view-0/' . $request_id);
+  if (empty($request)) {
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  if (is_null($revision_id)) {
+    if ($mode == MFCS_VIEW_MODE_NORMAL) {
+      mfcs_add_canonical_headers('requests/view-0/' . $request_id . '/' . $mode, 'requests/view-0/' . $request_id);
+    }
+    else {
+      mfcs_add_canonical_headers('requests/view-0/' . $request_id . '/' . $mode);
+    }
   }
   else {
-    mfcs_add_canonical_headers('requests/view-0/' . $request_id . '/' . $mode);
+    mfcs_add_canonical_headers('requests/view-0/' . $request_id . '/' . $mode . '/' . $revision_id);
   }
 
   if (!is_bool($pdf)) {
@@ -71,19 +127,7 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
     return mfcs_request_uncancel_0_form($cancel_form, $cancel_form_state, $request_id);
   }
 
-  $user = cf_current_user();
-
   $venue_coordinator = ($request['venue_coordinator']['user_id'][0]->value == $user->uid);
-
-  $can_create_request = mfcs_request_access('create', $request, $user);
-  $can_edit_request = mfcs_request_access('edit', $request, $user);
-  $can_log_request = mfcs_request_access('log', $request, $user);
-  $can_review_request = mfcs_request_access('review', $request, $user);
-  $can_comment_request = mfcs_request_access('comment', $request, $user);
-  $can_history_request = mfcs_request_access('history', $request, $user);
-  $can_agreement_request = mfcs_request_access('agreement', $request, $user);
-  $can_cancel_request = mfcs_request_access('cancel', $request, $user);
-  $can_uncancel_request = mfcs_request_access('uncancel', $request, $user);
 
   $manager = user_access('mfcs manage', $user);
   $reviewer = user_access('mfcs review', $user);
@@ -180,6 +224,13 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
     $can['clone'] = FALSE;
     $can['ical'] = FALSE;
   }
+  elseif (!is_null($revision_id)) {
+    $can['edit'] = FALSE;
+    $can['history'] = (bool) $can_history_request;
+    $can['agreement'] = FALSE;
+    $can['clone'] = FALSE;
+    $can['ical'] = FALSE;
+  }
   else {
     $can['edit'] = (bool) $can_edit_request;
     $can['history'] = (bool) $can_history_request;
@@ -203,6 +254,11 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
   $form['form']['request_id'] = array(
     '#type' => 'value',
     '#value' => $request_id,
+  );
+
+  $form['form']['revision_id'] = array(
+    '#type' => 'value',
+    '#value' => $revision_id,
   );
 
   $form['form']['request'] = array(
@@ -684,7 +740,7 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
         '#weight' => 1000,
       );
 
-      if ($can_cancel_request) {
+      if ($can_cancel_request && is_null($revision_id)) {
         $form['display']['submit']['cancel'] = array(
           '#id' => 'request-display-submit-cancel',
           '#name' => 'request-display-submit-cancel',
@@ -702,7 +758,7 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
           ),
         );
       }
-      elseif ($can_uncancel_request) {
+      elseif ($can_uncancel_request && is_null($revision_id)) {
         $form['display']['submit']['uncancel'] = array(
           '#id' => 'request-display-submit-uncancel',
           '#name' => 'request-display-submit-uncancel',
@@ -831,7 +887,7 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
         '#weight' => 3,
       );
 
-      mfcs_build_reviews_log($form, $form_state, $request_id);
+      mfcs_build_reviews_log($form, $form_state, $request_id, $revision_id);
 
       $form['review']['log']['submit'] = array(
         '#id' => 'request-review-log-submit',
@@ -880,7 +936,7 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
       );
     }
 
-    if ($show_operations && !$pdf) {
+    if ($show_operations && !$pdf && is_null($revision_id)) {
       $decision_options = mfcs_get_reviewer_decision_list_options('review_step');
       $decision_options_all = mfcs_get_reviewer_decision_list_options();
 
@@ -1750,19 +1806,31 @@ function mfcs_request_view_0_page_validate($form, &$form_state) {
   }
   elseif ($clicked_id == 'request-display-submit-cancel') {
     if ($mode != MFCS_VIEW_MODE_NORMAL && $mode != MFCS_VIEW_MODE_DISPLAY) {
-      form_set_error('', "Illegal operation detected.");
+      form_set_error('', "This view mode does not allow cancelling.");
+    }
+
+    if (!is_null($form['form']['revision_id']['#value'])) {
+      form_set_error('', "Revisions can not be cancelled.");
     }
 
     $form_state['cancel_was_clicked'] = TRUE;
   }
   elseif ($clicked_id == 'request-display-submit-uncancel') {
     if ($mode != MFCS_VIEW_MODE_NORMAL && $mode != MFCS_VIEW_MODE_DISPLAY) {
-      form_set_error('', "Illegal operation detected.");
+      form_set_error('', "This view mode does not allow uncancelling.");
+    }
+
+    if (!is_null($form['form']['revision_id']['#value'])) {
+      form_set_error('', "Revisions can not be uncancelled.");
     }
 
     $form_state['uncancel_was_clicked'] = TRUE;
   }
   elseif ($clicked_id == 'request-review-operations-submit-submit') {
+    if (!is_null($form['form']['revision_id']['#value'])) {
+      form_set_error('', "Revisions can not be changed or reviewed.");
+    }
+
     $failure = FALSE;
 
     // only allow operations for states and steps that make sense to.
@@ -2066,9 +2134,18 @@ function mfcs_request_view_0_page_validate($form, &$form_state) {
     }
   }
   elseif ($clicked_id == 'request-cancel-submit-yes' || $clicked_id == 'request-cancel-submit-no') {
+    if (!is_null($form['form']['revision_id']['#value'])) {
+      form_set_error('', "Revisions can not be cancelled.");
+      return;
+    }
+
     $form_state['rebuild'] = FALSE;
   }
-  elseif ($clicked_id == 'request-uncancel-submit-yes' || $clicked_id == 'unrequest-cancel-submit-no') {
+  elseif ($clicked_id == 'request-uncancel-submit-yes' || $clicked_id == 'request-uncancel-submit-no') {
+    if (!is_null($form['form']['revision_id']['#value'])) {
+      form_set_error('', "Revisions can not be uncancelled.");
+    }
+
     $form_state['rebuild'] = FALSE;
   }
 }
@@ -2258,7 +2335,14 @@ function mfcs_request_view_0_page_submit_pdf($form, &$form_state) {
   global $base_path;
 
   $mode = $form['form']['mode']['#value'];
-  $form_state['redirect'] = '/requests/pdf-0/' . $request_id . '/' . $mode;
+  $revision_id = $form['form']['revision_id']['#value'];
+
+  if (is_null($revision_id)) {
+    $form_state['redirect'] = '/requests/pdf-0/' . $request_id . '/' . $mode;
+  }
+  else {
+    $form_state['redirect'] = '/requests/pdf-0/' . $request_id . '/' . $mode . '/' . $revision_id;
+  }
 }
 
 /**
@@ -2269,12 +2353,24 @@ function mfcs_request_view_0_page_submit_pdf($form, &$form_state) {
  * @param int|null $mode
  *   Specifies the mode that alters how the form is rendered.
  *   1: Render only the display part.
+ * @param null|int $revision_id
+ *   (optional) When not NULL, load the request based on the revision number
+ *   instead of the latest revision.
+ *
+ * @return exit
+ *   This function should not return.
  */
-function mfcs_request_pdf_0_page($request_id, $mode) {
+function mfcs_request_pdf_0_page($request_id, $mode, $revision_id = NULL) {
   $page_title = "Facilities Use Request";
   drupal_set_title($page_title);
 
-  $request = mfcs_load_request_by_id($request_id);
+  if (!is_null($revision_id) && !cf_is_integer($revision_id)) {
+    cf_error::invalid_integer('revision_id');
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  $request = mfcs_load_request_by_id($request_id, NULL, $revision_id);
 
   if (empty($request)) {
     drupal_not_found();
@@ -2282,8 +2378,20 @@ function mfcs_request_pdf_0_page($request_id, $mode) {
     return array();
   }
 
+  if (!is_null($revision_id)) {
+    $user = cf_current_user();
+
+    $can_history_request = mfcs_request_access('history', $request, $user);
+
+    if (!$can_history_request) {
+      drupal_not_found();
+      drupal_exit();
+    }
+  }
+
   if (!empty($request['information']['title'][0]->value)) {
     $page_title = "Facilities Use Request: " . $request['information']['title'][0]->value;
+
     drupal_set_title($page_title);
   }
 
@@ -2304,13 +2412,13 @@ function mfcs_request_pdf_0_page($request_id, $mode) {
   // turn off devel shutdown functionality.
   $GLOBALS['devel_shutdown'] = FALSE;
 
-  $page['html']['content'] = array(mfcs_request_view_0_page($form, $form_state, $request_id, $mode, TRUE));
+  $page['html']['content'] = array(mfcs_request_view_0_page($form, $form_state, $request_id, $mode, $revision_id, TRUE));
   $renderred = drupal_render($page);
   $html = drupal_render_page($renderred);
 
   mfcs_include(MFCS_INCLUDE_OUTPUT);
 
-  $result = mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $html);
+  $result = mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $revision_id, $html);
 
   if ($result) {
     exit();
@@ -2331,11 +2439,14 @@ function mfcs_request_pdf_0_page($request_id, $mode) {
  *   The form state array.
  * @param int $request_id
  *   The numeric request id.
+ * @param null|int $revision_id
+ *   (optional) When not NULL, load the request based on the revision number
+ *   instead of the latest revision.
  *
  * @return bool
  *   TRUE on success, FALSE otherwise.
  */
-function mfcs_build_reviews_log(&$form, &$form_state, $request_id) {
+function mfcs_build_reviews_log(&$form, &$form_state, $request_id, $revision_id = NULL) {
   if (!is_array($form)) {
     cf_error::invalid_array('form');
     return FALSE;
@@ -2346,7 +2457,19 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id) {
     return FALSE;
   }
 
-  $request = mfcs_load_request_by_id($request_id);
+  if (!is_null($revision_id) && !cf_is_integer($revision_id)) {
+    cf_error::invalid_integer('revision_id');
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  if (!is_null($revision_id) && !cf_is_integer($revision_id)) {
+    cf_error::invalid_integer('revision_id');
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  $request = mfcs_load_request_by_id($request_id, NULL, $revision_id);
 
   if (empty($request)) {
     return FALSE;
@@ -2360,21 +2483,16 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id) {
 
   $decision_options = mfcs_get_reviewer_decision_list_options();
 
-  // review revisions are neither used nor incremented in the same manner as other fields.
-  // the revision number will not increment when a new review is made.
-  $review_revision = mfcs_load_request_revision_number($request_id, 'mfcs_field_review_review');
-
-  if ($review_revision === FALSE || is_null($review_revision)) {
-    $review_revision = 0;
-  }
-
   try {
     $query = db_select('mfcs_field_review_review', 'mfrr');
 
     $query->fields('mfrr');
 
     $query->condition('mfrr.request_id', $request_id);
-    #$query->condition('mfrr.revision', $review_revision);
+
+    if (!is_null($revision_id) && isset($request['mer']['updated'][0]->value)) {
+      $query->condition('mfrr.date', $request['mer']['updated'][0]->value, '<=');
+    }
 
     $query->orderBy('mfrr.date');
 

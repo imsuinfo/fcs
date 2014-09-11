@@ -541,6 +541,20 @@ function mfcs_hook_menu() {
     'type' => MENU_CALLBACK,
   );
 
+  $items['requests/pdf-0/%/%/%'] = array(
+    'title' => "Request PDF",
+    'description' => "Download Request PDF",
+    'page callback' => 'mfcs_request_pdf_0_page',
+    'page arguments' => array(2, 3, 4),
+    'file' => 'request_view.inc',
+    'file path' => drupal_get_path('module', 'mfcs') . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('view', 2),
+    'tab_parent' => 'requests/list-0',
+    'tab_root' => 'requests/list-0',
+    'type' => MENU_CALLBACK,
+  );
+
   $items['requests/history-0/%'] = array(
     'title' => "Request History",
     'description' => "Request History",
