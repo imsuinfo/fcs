@@ -451,7 +451,7 @@ function mfcs_validate_request_fields($form, &$form_state) {
 
   // condition 3 is for range limiting to provide more graceful errors than what the database would otherwise present.
   if (!empty($form_state['conditionally_required'][3])) {
-    mfcs_include(0);
+    mfcs_include(MFCS_INCLUDE_TABLE);
     $structure = mfcs_table_structure();
 
     foreach ($form_state['conditionally_required'][3] as $field) {

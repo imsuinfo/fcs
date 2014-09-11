@@ -17,7 +17,7 @@
  *  A list of secondary tables and their structure.
  */
 function mfcs_table_structure() {
-  mfcs_include(4);
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
   $structure = array();
   $structure['top'] = array(

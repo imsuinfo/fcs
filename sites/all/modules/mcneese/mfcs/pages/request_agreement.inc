@@ -441,7 +441,7 @@ function mfcs_request_agreement_0_pdf($request_id) {
   $renderred = drupal_render($page);
   $html = drupal_render_page($renderred);
 
-  mfcs_include(8);
+  mfcs_include(MFCS_INCLUDE_OUTPUT);
 
   $result = mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $html, FALSE, $parameters, MFCS_PDF_TYPE_AGREEMENT);
 

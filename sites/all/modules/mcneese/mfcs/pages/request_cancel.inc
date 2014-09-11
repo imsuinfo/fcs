@@ -141,7 +141,7 @@ function mfcs_request_cancel_0_form_submit($form, &$form_state) {
     return;
   }
 
-  mfcs_include(6);
+  mfcs_include(MFCS_INCLUDE_WORKFLOW);
 
   $cancelled = mfcs_workflow_set_status($request_id, MFCS_REQUEST_STATUS_CANCELLED);
 
@@ -308,7 +308,7 @@ function mfcs_request_uncancel_0_form_submit($form, &$form_state) {
     return;
   }
 
-  mfcs_include(6);
+  mfcs_include(MFCS_INCLUDE_WORKFLOW);
 
   $previous = NULL;
   $uncancelled = TRUE;

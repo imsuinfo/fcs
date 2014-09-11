@@ -40,8 +40,8 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
 
   $user = cf_current_user();
 
-  mfcs_include(4);
-  mfcs_include(9);
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+  mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
 
   if (is_null($year)) {
     $month_start = strtotime('midnight first day of', REQUEST_TIME);
@@ -155,7 +155,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
     }
   }
 
-  mfcs_include(8);
+  mfcs_include(MFCS_INCLUDE_OUTPUT);
 
   $markup = '';
   $title = '<h3>' . "Requests for " . date("F, Y", $month_start) . '</h3>';
@@ -203,8 +203,8 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
 
   $user = cf_current_user();
 
-  mfcs_include(4);
-  mfcs_include(9);
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+  mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
 
   if (is_null($year)) {
     $day_start = strtotime('midnight today', REQUEST_TIME);
@@ -321,7 +321,7 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
     }
   }
 
-  mfcs_include(8);
+  mfcs_include(MFCS_INCLUDE_OUTPUT);
 
   $markup = '';
   $title = '<h3>' . "Requests for " . date("F j, Y", $day_start) . '</h3>';

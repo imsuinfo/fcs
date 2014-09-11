@@ -56,7 +56,7 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
 
   // if cancelling the request, return only the cancellation confirmation form.
   if (isset($form_state['cancel_was_clicked'])) {
-    mfcs_include(5);
+    mfcs_include(MFCS_INCLUDE_REQUEST_CANCEL);
 
     $cancel_form = array();
     $cancel_form_state = array();
@@ -64,7 +64,7 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
   }
   // if uncancelling the request, return only the uncancellation confirmation form.
   elseif (isset($form_state['uncancel_was_clicked'])) {
-    mfcs_include(5);
+    mfcs_include(MFCS_INCLUDE_REQUEST_CANCEL);
 
     $cancel_form = array();
     $cancel_form_state = array();
@@ -275,7 +275,7 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
 
     $fields_count = array('top' => 0, 'group' => array());
 
-    mfcs_include(0);
+    mfcs_include(MFCS_INCLUDE_TABLE);
 
     $presentation = mfcs_table_presentation();
     $presentation_tables = mfcs_table_presentation(1);
@@ -301,7 +301,7 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
     $reviews = mfcs_get_latest_reviews($request_id, array(MFCS_REVIEW_STEP_REVIEW, MFCS_REVIEW_STEP_MAKE_DECISIONS), array(MFCS_REVIEW_DECISION_APPROVE, MFCS_REVIEW_DECISION_DENY));
 
     if (!empty($reviews)) {
-      mfcs_include(4);
+      mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
       $classification_options = mfcs_get_reviewer_classification_list_options(NULL, TRUE);
       $preprocessed_decisions = array();
@@ -760,7 +760,7 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
       '#tree' => TRUE,
     );
 
-    mfcs_include(4);
+    mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
     $step_options = mfcs_get_request_steps_list_options();
 
@@ -928,7 +928,7 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
         '#weight' => 0,
       );
 
-      mfcs_include(4);
+      mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
       $reviewer_classification_options = mfcs_get_reviewer_classification_list_options();
 
       $reviewer_conditions = array(
@@ -2097,14 +2097,14 @@ function mfcs_request_view_0_page_submit($form, &$form_state) {
   }
 
   if ($clicked_id == 'request-cancel-submit-yes') {
-    $deleted = mfcs_include(5);
+    $deleted = mfcs_include(MFCS_INCLUDE_REQUEST_CANCEL);
 
     mfcs_request_cancel_0_form_submit($form, $form_state);
 
     return;
   }
   elseif ($clicked_id == 'request-uncancel-submit-yes') {
-    $deleted = mfcs_include(5);
+    $deleted = mfcs_include(MFCS_INCLUDE_REQUEST_CANCEL);
 
     mfcs_request_uncancel_0_form_submit($form, $form_state);
 
@@ -2113,7 +2113,7 @@ function mfcs_request_view_0_page_submit($form, &$form_state) {
   elseif ($clicked_id == 'request-review-operations-submit-submit') {
     $success = TRUE;
 
-    mfcs_include(6);
+    mfcs_include(MFCS_INCLUDE_WORKFLOW);
     $decision = $form_state['values']['review']['operations']['decision'];
     $message = $form_state['values']['review']['operations']['message'];
 
@@ -2308,7 +2308,7 @@ function mfcs_request_pdf_0_page($request_id, $mode) {
   $renderred = drupal_render($page);
   $html = drupal_render_page($renderred);
 
-  mfcs_include(8);
+  mfcs_include(MFCS_INCLUDE_OUTPUT);
 
   $result = mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $html);
 
@@ -2352,11 +2352,11 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id) {
     return FALSE;
   }
 
-  mfcs_include(0);
+  mfcs_include(MFCS_INCLUDE_TABLE);
 
   $presentation = mfcs_table_presentation();
 
-  mfcs_include(4);
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
   $decision_options = mfcs_get_reviewer_decision_list_options();
 

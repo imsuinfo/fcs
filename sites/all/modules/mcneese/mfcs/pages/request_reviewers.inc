@@ -26,7 +26,7 @@ function mfcs_request_reviewers_0_page() {
   $reviewer = user_access('mfcs review', $user);
   $requester = user_access('mfcs request', $user);
 
-  mfcs_include(4);
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
   $request_classifications = mfcs_get_request_classification_list_options();
   $review_steps = mfcs_get_review_step_list_options('object');
@@ -128,7 +128,7 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
   $reviewer = user_access('mfcs review', $user);
   $requester = user_access('mfcs request', $user);
 
-  mfcs_include(4);
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
   $request_classifications = mfcs_get_request_classification_list_options();
   $review_steps = mfcs_get_review_step_list_options();
@@ -489,7 +489,7 @@ function mfcs_request_reviewers_0_form_submit($form, &$form_state) {
     }
   }
   elseif ($clicked_id == 'submit-reviewer-recheck') {
-    mfcs_include(6);
+    mfcs_include(MFCS_INCLUDE_WORKFLOW);
 
     $classification = $form['form']['request_classification']['#value'];
     $step = $form['form']['review_step']['#value'];
@@ -608,7 +608,7 @@ function mfcs_request_reviewers_0_delete_form($form, &$form_state, $id) {
     $user_name = $user->name;
   }
 
-  mfcs_include(4);
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
   $request_classifications = mfcs_get_request_classification_list_options();
 

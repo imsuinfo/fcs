@@ -75,8 +75,8 @@ function mfcs_request_search_0_form($form, &$form_state) {
     }
   }
 
-  mfcs_include(0);
-  mfcs_include(4);
+  mfcs_include(MFCS_INCLUDE_TABLE);
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
   $structure = mfcs_table_structure();
   $presentation = mfcs_table_presentation();
@@ -948,7 +948,7 @@ function mfcs_request_search_0_form_submit($form, &$form_state) {
     $per_page = $form['form']['per_page']['#value'];
     $start = $form['form']['advanced_search-page_number']['#value'] * $per_page;
 
-    mfcs_include(0);
+    mfcs_include(MFCS_INCLUDE_TABLE);
 
     $structure = mfcs_table_structure();
 

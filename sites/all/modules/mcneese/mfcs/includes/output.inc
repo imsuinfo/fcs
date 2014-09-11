@@ -247,7 +247,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
   global $base_path;
 
 
-  mfcs_include(4);
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
   $request_type_options = mfcs_get_request_type_list_options();
 

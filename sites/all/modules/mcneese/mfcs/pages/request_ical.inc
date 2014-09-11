@@ -44,8 +44,8 @@ function mfcs_request_ical_month_0_page($year = NULL, $month = NULL) {
 
   global $base_url;
 
-  mfcs_include(4);
-  mfcs_include(9);
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+  mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
 
   $parameter_year = FALSE;
   $parameter_month = !is_null($month);
@@ -107,7 +107,7 @@ function mfcs_request_ical_month_0_page($year = NULL, $month = NULL) {
 
   $ical = FALSE;
   if ($results !== FALSE) {
-    mfcs_include(11);
+    mfcs_include(MFCS_INCLUDE_ICAL);
 
     $ical = mfcs_ical_generate($results, $absolute_start, $absolute_stop);
   }
@@ -190,7 +190,7 @@ function mfcs_request_ical_day_0_page($year = NULL, $month = NULL, $day = NULL) 
 
   global $base_url;
 
-  mfcs_include(4);
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
   $parameter_year = FALSE;
   $parameter_month = !is_null($month);
@@ -203,7 +203,7 @@ function mfcs_request_ical_day_0_page($year = NULL, $month = NULL, $day = NULL) 
   else {
     $parameter_year = TRUE;
 
-    mfcs_include(9);
+    mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
     $current_date = mfcs_miscellaneous_determine_current_date($year, $month, $day);
 
     $day_start = strtotime('midnight ' . $current_date['month'] . ' ' . $current_date['day'] . ' ' . $current_date['year']);
@@ -228,7 +228,7 @@ function mfcs_request_ical_day_0_page($year = NULL, $month = NULL, $day = NULL) 
 
   $ical = FALSE;
   if ($results !== FALSE) {
-    mfcs_include(11);
+    mfcs_include(MFCS_INCLUDE_ICAL);
 
     $ical = mfcs_ical_generate($results, $day_start, $day_stop);
   }
@@ -310,7 +310,7 @@ function mfcs_request_ical_request_0_page($request_id) {
 
   global $base_url;
 
-  mfcs_include(11);
+  mfcs_include(MFCS_INCLUDE_ICAL);
 
   mfcs_add_canonical_headers('requests/ical-0/' . $request_id);
 

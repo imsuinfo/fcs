@@ -136,7 +136,7 @@ function mfcs_get_request_fields($form, &$form_state) {
     return array();
   }
 
-  mfcs_include(4);
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
   $ps = NULL;
 

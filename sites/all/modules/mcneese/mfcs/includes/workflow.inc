@@ -44,7 +44,7 @@ function mfcs_workflow_set_step($request_id, $step, $user = NULL) {
     return FALSE;
   }
 
-  mfcs_include(4);
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
   $step_options = mfcs_get_review_step_list_options();
 
@@ -1071,7 +1071,7 @@ function mfcs_workflow_next_step($request_id, $type, $step, $decision, $message,
     $reviews = mfcs_get_latest_reviews($request_id, array(MFCS_REVIEW_STEP_REVIEW), array(MFCS_REVIEW_DECISION_APPROVE, MFCS_REVIEW_DECISION_DENY));
 
     if (!empty($reviews)) {
-      mfcs_include(4);
+      mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
       $classification_options = mfcs_get_reviewer_classification_list_options(NULL, TRUE);
       $preprocessed_decisions = array();
@@ -1109,7 +1109,7 @@ function mfcs_workflow_next_step($request_id, $type, $step, $decision, $message,
     mfcs_workflow_set_step($request_id, $new_step, $changed_user);
   }
 
-  mfcs_include(8);
+  mfcs_include(MFCS_INCLUDE_OUTPUT);
 
   $parameters = array();
   $parameters['changed_by'] = $changed_by;
@@ -1661,7 +1661,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
         $email_to[$r->email] = $r->email;
       }
 
-      mfcs_include(11);
+      mfcs_include(MFCS_INCLUDE_ICAL);
 
       $requests = mfcs_ical_generate_array_from_id($request_id);
 

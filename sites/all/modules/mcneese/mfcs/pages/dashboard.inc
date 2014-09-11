@@ -160,7 +160,7 @@ function mfcs_dashboard_page() {
 
 
   if ($can_list) {
-    mfcs_include(4);
+    mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
     $month_start = strtotime('midnight first day of', REQUEST_TIME);
     $month_end = strtotime('midnight last day of', REQUEST_TIME);
@@ -192,7 +192,7 @@ function mfcs_dashboard_page() {
     #  $absolute_stop = $month_stop;
     #}
 
-    mfcs_include(9);
+    mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
     $search = mfcs_miscellaneous_generate_requests_by_date_search($absolute_start, $absolute_stop);
 
     $sorting = array(
@@ -243,7 +243,7 @@ function mfcs_dashboard_page() {
       }
     }
 
-    mfcs_include(8);
+    mfcs_include(MFCS_INCLUDE_OUTPUT);
 
     $title = '<h3><a href="' . $base_path . 'requests/calendar-0/month">' . "Requests for " . date("F, Y", $month_start) . '</a></h3>';
     $result = mfcs_build_calendar_month_markup($rows, $month_start, $month_stop, $absolute_start, $absolute_stop, $title, 'mfcs-calendar-0-month');

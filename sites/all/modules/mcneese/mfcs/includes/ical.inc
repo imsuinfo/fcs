@@ -32,7 +32,7 @@ function mfcs_ical_generate_array_from_id($request_id) {
     return FALSE;
   }
 
-  mfcs_include(4);
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
   $request_location_options = mfcs_get_request_location_list_options();
   $request_building_options = mfcs_get_request_building_list_options();
@@ -151,7 +151,7 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
 
   $original_timezone = date_default_timezone_get();
 
-  mfcs_include(4);
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
   $request_type_options = mfcs_get_request_type_list_options();
   $request_classification_options = mfcs_get_request_classification_list_options();

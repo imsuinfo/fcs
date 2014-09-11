@@ -53,7 +53,7 @@ function mfcs_request_create_0_form($form, &$form_state, $clone_request = NULL) 
     mfcs_add_canonical_headers('requests/create-0/' . $clone_request);
   }
 
-  mfcs_include(1);
+  mfcs_include(MFCS_INCLUDE_STRUCTURE);
 
   if (empty($form_state['values']['form']['step'])) {
     $step = 'agreement';
@@ -257,7 +257,7 @@ function mfcs_request_create_0_form_pre_validate(&$form, &$form_state) {
     $dont_validate[$clicked_id] = TRUE;
   }
 
-  mfcs_include(2);
+  mfcs_include(MFCS_INCLUDE_VALIDATION);
 
   mfcs_pre_validate_request_fields($form, $form_state, $dont_validate);
 }
@@ -305,7 +305,7 @@ function mfcs_request_create_0_form_validate($form, &$form_state) {
   }
 
   if (!array_key_exists($clicked_id, $dont_validate)) {
-    mfcs_include(2);
+    mfcs_include(MFCS_INCLUDE_VALIDATION);
 
     $no_problems = mfcs_validate_request_fields($form, $form_state);
     if (is_null($no_problems)) {
@@ -499,7 +499,7 @@ function mfcs_request_create_0_form_submit($form, &$form_state) {
     'revision' => 0,
   );
 
-  mfcs_include(0);
+  mfcs_include(MFCS_INCLUDE_TABLE);
 
   $structure = mfcs_table_structure();
   $structure_tables = array();
@@ -608,7 +608,7 @@ function mfcs_request_create_0_form_submit($form, &$form_state) {
     return;
   }
   else {
-    mfcs_include(6);
+    mfcs_include(MFCS_INCLUDE_WORKFLOW);
 
     $parameters = array();
     $parameters['changed_by'] = $user->uid;

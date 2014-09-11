@@ -46,7 +46,7 @@ function mfcs_request_edit_0_form($form, &$form_state, $request_id, $target_sect
     drupal_exit();
   }
 
-  mfcs_include(1);
+  mfcs_include(MFCS_INCLUDE_STRUCTURE);
 
   $section_information = mfcs_get_request_section_information();
 
@@ -265,7 +265,7 @@ function mfcs_request_edit_0_form_pre_validate(&$form, &$form_state) {
     $dont_validate[$clicked_id] = TRUE;
   }
 
-  mfcs_include(2);
+  mfcs_include(MFCS_INCLUDE_VALIDATION);
 
   mfcs_pre_validate_request_fields($form, $form_state, $dont_validate);
 }
@@ -363,7 +363,7 @@ function mfcs_request_edit_0_form_validate($form, &$form_state) {
   }
 
   if (!array_key_exists($clicked_id, $dont_validate)) {
-    mfcs_include(2);
+    mfcs_include(MFCS_INCLUDE_VALIDATION);
 
     $no_problems = mfcs_validate_request_fields($form, $form_state);
     if (is_null($no_problems)) {
@@ -581,7 +581,7 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
     'revision' => $request_revision_next,
   );
 
-  mfcs_include(0);
+  mfcs_include(MFCS_INCLUDE_TABLE);
 
   $structure = mfcs_table_structure();
   $structure_tables = array();
@@ -788,7 +788,7 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
       // forcefully clear the request cache so that it can reflect the changes.
       mfcs_load_request_by_id($request_id, FALSE);
 
-      mfcs_include(6);
+      mfcs_include(MFCS_INCLUDE_WORKFLOW);
 
       // send an e-mail to all reviewers that the request step has been reset.
       if ($status == MFCS_REQUEST_STATUS_LOCKED) {

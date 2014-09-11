@@ -216,6 +216,23 @@ define('MFCS_REQUEST_STATUS_CANCELLED', 7);
  define('MFCS_REQUEST_AUDIENCE_PUBLIC', 72);
  define('MFCS_REQUEST_AUDIENCE_STUDENTS_ONLY', 69);
 
+/**
+ * Defines file include codes.
+ */
+define('MFCS_INCLUDE_TABLE', 0);
+define('MFCS_INCLUDE_STRUCTURE', 1);
+define('MFCS_INCLUDE_VALIDATION', 2);
+define('MFCS_INCLUDE_AUTOCOMPLETE', 3);
+define('MFCS_INCLUDE_LIST_OPTIONS', 4);
+define('MFCS_INCLUDE_REQUEST_CANCEL', 5);
+define('MFCS_INCLUDE_WORKFLOW', 6);
+define('MFCS_INCLUDE_HOOKS', 7);
+define('MFCS_INCLUDE_OUTPUT', 8);
+define('MFCS_INCLUDE_MISCELLANEOUS', 9);
+define('MFCS_INCLUDE_ACCESS', 10);
+define('MFCS_INCLUDE_ICAL', 11);
+
+
 
 /**
  * Implements hook_init().
@@ -231,7 +248,7 @@ function mfcs_init() {
  * Implements hook_permission().
  */
 function mfcs_permission() {
-  mfcs_include(7);
+  mfcs_include(MFCS_INCLUDE_HOOKS);
 
   return mfcs_hook_permission();
 }
@@ -240,7 +257,7 @@ function mfcs_permission() {
  * Implements hook_menu().
  */
 function mfcs_menu() {
-  mfcs_include(7);
+  mfcs_include(MFCS_INCLUDE_HOOKS);
 
   return mfcs_hook_menu();
 }
@@ -349,7 +366,7 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
     'requester' => user_access('mfcs request', $user),
   );
 
-  mfcs_include(10);
+  mfcs_include(MFCS_INCLUDE_ACCESS);
 
   if ($operation == 'create') {
     $operation_result = mfcs_page_request_access_operation_create($request_ids, $processed, $access, $roles, $user);
@@ -1224,7 +1241,7 @@ function mfcs_management_page_access() {
  * Implements hook_cronapi().
  */
 function mfcs_cronapi() {
-  mfcs_include(7);
+  mfcs_include(MFCS_INCLUDE_HOOKS);
 
   return mfcs_hook_cronapi();
 }
@@ -1324,40 +1341,40 @@ function mfcs_include($id) {
 
   $module_path = drupal_get_path('module', 'mfcs');
 
-  if ($id == 0) {
+  if ($id == MFCS_INCLUDE_TABLE) {
     require_once($module_path . '/includes/table.inc');
   }
-  elseif ($id == 1) {
+  elseif ($id == MFCS_INCLUDE_STRUCTURE) {
     require_once($module_path . '/includes/structure.inc');
   }
-  elseif ($id == 2) {
+  elseif ($id == MFCS_INCLUDE_VALIDATION) {
     require_once($module_path . '/includes/validation.inc');
   }
-  elseif ($id == 3) {
+  elseif ($id == MFCS_INCLUDE_AUTOCOMPLETE) {
     require_once($module_path . '/includes/autocomplete.inc');
   }
-  elseif ($id == 4) {
+  elseif ($id == MFCS_INCLUDE_LIST_OPTIONS) {
     require_once($module_path . '/includes/list_options.inc');
   }
-  elseif ($id == 5) {
-    require_once($module_path . '/pages/request_cancel_page.inc');
+  elseif ($id == MFCS_INCLUDE_REQUEST_CANCEL) {
+    require_once($module_path . '/pages/request_cancel.inc');
   }
-  elseif ($id == 6) {
+  elseif ($id == MFCS_INCLUDE_WORKFLOW) {
     require_once($module_path . '/includes/workflow.inc');
   }
-  elseif ($id == 7) {
+  elseif ($id == MFCS_INCLUDE_HOOKS) {
     require_once($module_path . '/includes/hooks.inc');
   }
-  elseif ($id == 8) {
+  elseif ($id == MFCS_INCLUDE_OUTPUT) {
     require_once($module_path . '/includes/output.inc');
   }
-  elseif ($id == 9) {
+  elseif ($id == MFCS_INCLUDE_MISCELLANEOUS) {
     require_once($module_path . '/includes/miscellaneous.inc');
   }
-  elseif ($id == 10) {
+  elseif ($id == MFCS_INCLUDE_ACCESS) {
     require_once($module_path . '/includes/access.inc');
   }
-  elseif ($id == 11) {
+  elseif ($id == MFCS_INCLUDE_ICAL) {
     require_once($module_path . '/includes/ical.inc');
   }
 }
@@ -2149,7 +2166,7 @@ function mfcs_sync_banner_to_local() {
     return FALSE;
   }
 
-  mfcs_include(4);
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
   $request_locations = mfcs_get_request_location_list_options(NULL, TRUE);
 
   $transaction = db_transaction();
@@ -2507,7 +2524,7 @@ function mfcs_oracle_recache_cron() {
  * @see mfcs_cronapi()
  */
 function mfcs_insurance_not_provided_alert_cron() {
-  mfcs_include(6);
+  mfcs_include(MFCS_INCLUDE_WORKFLOW);
 
   $system_user = user_load(1);
 
@@ -2998,7 +3015,7 @@ function mfcs_build_request_value_structure($request_id, $field_group, $field_na
         unset($user);
       }
       elseif ($type[$value_name] == 'status') {
-        mfcs_include(4);
+        mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
         $status_options = mfcs_get_request_status_list_options();
 
@@ -3008,7 +3025,7 @@ function mfcs_build_request_value_structure($request_id, $field_group, $field_na
         }
       }
       elseif ($type[$value_name] == 'step') {
-        mfcs_include(4);
+        mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
         $step_options = mfcs_get_request_steps_list_options();
 
@@ -3018,7 +3035,7 @@ function mfcs_build_request_value_structure($request_id, $field_group, $field_na
         }
       }
       elseif ($type[$value_name] == 'location') {
-        mfcs_include(4);
+        mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
         $location_options = mfcs_get_request_location_list_options();
 
@@ -3028,7 +3045,7 @@ function mfcs_build_request_value_structure($request_id, $field_group, $field_na
         }
       }
       elseif ($type[$value_name] == 'building') {
-        mfcs_include(4);
+        mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
         $building_options = mfcs_get_request_building_list_options();
 
@@ -3038,7 +3055,7 @@ function mfcs_build_request_value_structure($request_id, $field_group, $field_na
         }
       }
       elseif ($type[$value_name] == 'room') {
-        mfcs_include(4);
+        mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
         $room_options = mfcs_get_request_room_list_options();
 
@@ -3397,7 +3414,7 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL) {
     return TRUE;
   }
 
-  mfcs_include(0);
+  mfcs_include(MFCS_INCLUDE_TABLE);
 
   $request = array();
   $structure = mfcs_table_structure();
@@ -3557,7 +3574,7 @@ function mfcs_load_request_by_timestamp($request_id, $revision, $desired_fields 
     return FALSE;
   }
 
-  mfcs_include(0);
+  mfcs_include(MFCS_INCLUDE_TABLE);
 
   $request = array();
   $structure = mfcs_table_structure();
@@ -4394,7 +4411,7 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
     }
   }
 
-  mfcs_include(4);
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
   $status_options = mfcs_get_request_status_list_options();
   $step_options = mfcs_get_request_steps_list_options();
@@ -5788,7 +5805,7 @@ function mfcs_get_reviewers_yet_to_review($request_id) {
     return array();
   }
 
-  mfcs_include(4);
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
   $reviewer_classification_options = mfcs_get_reviewer_classification_list_options();
 

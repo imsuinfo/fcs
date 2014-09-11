@@ -81,8 +81,8 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
   $start_range = $page_number * $rows_per_page;
   $rows_count = 0;
 
-  mfcs_include(0);
-  mfcs_include(4);
+  mfcs_include(MFCS_INCLUDE_TABLE);
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
   $structure = mfcs_table_structure();
   $presentation = mfcs_table_presentation();
