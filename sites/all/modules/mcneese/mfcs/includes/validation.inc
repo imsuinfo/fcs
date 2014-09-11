@@ -97,7 +97,10 @@ function mfcs_pre_validate_request_fields(&$form, &$form_state, $dont_validate =
         }
       }
       else {
-        form_set_error('submit-request-submit', "This request cannot be submitted during this step at this time. Try using the Continue button.");
+        // the submit button is not allowed when not in a custom target section.
+        if (isset($form['form']['target_section']) && array_key_exists('$value', $form['form']['target_section']) && !is_null($form['form']['target_section']['#value'])) {
+          form_set_error('submit-request-submit', "This request cannot be submitted during this step at this time. Try using the Continue button.");
+        }
       }
     }
   }
