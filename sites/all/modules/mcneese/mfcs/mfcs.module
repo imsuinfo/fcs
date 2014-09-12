@@ -5475,6 +5475,8 @@ function mfcs_get_latest_reviews($request_id, $steps = array(), $decisions = arr
  *   mfcs_request_load_listing().
  * @param int $max_rows
  *   The number of items allowed to be listed on the table at one time.
+ * @param array|null $columns
+ *   (optional) specify the columns to use. NULL means use default.
  *
  * @return array
  *   A generated table array structure for passing to theme_table().
@@ -5484,7 +5486,39 @@ function mfcs_get_latest_reviews($request_id, $steps = array(), $decisions = arr
  * @see: mfcs_request_load_listing()
  * @see: theme_table()
  */
-function mfcs_build_request_table($items, $max_rows, $columns = array('id' => "ID", 'title' => "Title", 'building' => "Building", 'room' => "Room", 'date' => "Date", 'submitted_on' => "Submitted On", 'operations' => "Operations"), $user = NULL) {
+function mfcs_build_request_table($items, $max_rows, $columns = NULL, $user = NULL, $extra = array()) {
+  if (is_null($columns)) {
+    $columns = array('id' => "ID", 'title' => "Title", 'building' => "Building", 'room' => "Room", 'date' => "Date", 'submitted_on' => "Submitted On", 'operations' => "Operations");
+  }
+
+  if (!is_array($columns)) {
+    cf_error::invalid_array('columns');
+    $table['error'] = TRUE;
+    return $table;
+  }
+
+
+  if (!is_array($items) && $items !== FALSE) {
+    cf_error::invalid_array('items');
+    $table['error'] = TRUE;
+    return $table;
+  }
+
+  if (is_null($user) || !is_object($user)) {
+    $user = cf_current_user();
+  }
+
+  if (!is_array($extra)) {
+    cf_error::invalid_array('extra');
+    $table['error'] = TRUE;
+    return $table;
+  }
+
+  $table_sort = TRUE;
+  if (array_key_exists('table_sort', $extra) && !$extra['table_sort']) {
+    $table_sort = FALSE;
+  }
+
   $table = array();
   foreach ($columns as $column_name => $column_title) {
     $column_class = array();
@@ -5500,11 +5534,14 @@ function mfcs_build_request_table($items, $max_rows, $columns = array('id' => "I
     }
     else {
       $table['header'][$column_name] = array(
-        'field' => $column_name,
         'data' => $column_title,
         'align' => 'center',
         'class' => $column_class,
       );
+
+      if ($table_sort) {
+        $table['header'][$column_name]['field'] = $column_name;
+      }
     }
   }
 
@@ -5513,16 +5550,6 @@ function mfcs_build_request_table($items, $max_rows, $columns = array('id' => "I
   $table['rows'] = array();
   $table['empty'] = t("No requests were found.");
   $table['caption'] = "Requests";
-
-  if (!is_array($items) && $items !== FALSE) {
-    cf_error::invalid_array('items');
-    $table['error'] = TRUE;
-    return $table;
-  }
-
-  if (is_null($user) || !is_object($user)) {
-    $user = cf_current_user();
-  }
 
   global $base_path;
 

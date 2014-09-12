@@ -209,6 +209,10 @@ function mfcs_request_search_0_form($form, &$form_state) {
 
   // populate the search results.
   if (isset($form_state['simple_search-results']) && is_array($form_state['simple_search-results'])) {
+    $request_table_extra = array(
+      'table_sort' => FALSE,
+    );
+    $advanced_table = mfcs_build_request_table($form_state['advanced_search-results'], $form['form']['per_page']['#value'], NULL, NULL, $request_table_extra);
     $simple_table = mfcs_build_request_table($form_state['simple_search-results'], $form['form']['per_page']['#value']);
 
     $simple_table['caption'] = t("Simple Search Results");
@@ -399,7 +403,10 @@ function mfcs_request_search_0_form($form, &$form_state) {
 
   // populate the search results.
   if (isset($form_state['advanced_search-results']) && is_array($form_state['advanced_search-results'])) {
-    $advanced_table = mfcs_build_request_table($form_state['advanced_search-results'], $form['form']['per_page']['#value']);
+    $request_table_extra = array(
+      'table_sort' => FALSE,
+    );
+    $advanced_table = mfcs_build_request_table($form_state['advanced_search-results'], $form['form']['per_page']['#value'], NULL, NULL, $request_table_extra);
 
     $advanced_table['caption'] = t("Advanced Search Results");
     $advanced_table['header']['submitted_on']['sort'] = 'desc';
