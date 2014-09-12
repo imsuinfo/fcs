@@ -300,6 +300,8 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
   // allow for request_id to be an array of ids.
   $processed = array();
   if (is_array($request_id)) {
+    $request_ids = array();
+
     foreach ($request_id as $id) {
       $request_ids[$id] = $id;
     }
@@ -312,6 +314,11 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
   }
   else {
     $request_ids = array($request_id => $request_id);
+  }
+
+  // nothing to check access for.
+  if (empty($request_ids)) {
+    return FALSE;
   }
 
 
