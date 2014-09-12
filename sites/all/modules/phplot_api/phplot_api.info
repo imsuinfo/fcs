@@ -1,0 +1,18 @@
+name = "Phplot API"
+description = "Provides an API for generating graphs using the phplot library."
+package = Statistics
+core = 7.x
+
+dependencies[] = cf (7.x-2.x)
+dependencies[] = libraries (7.x-2.x)
+
+files[] = phplot_api.install
+files[] = phplot_api.module
+files[] = includes/phplot_api_plot.inc
+
+; Information added by drupal.org packaging script on 2013-07-31
+version = "7.x-1.2"
+core = "7.x"
+project = "phplot_api"
+datestamp = "1375306581"
+
