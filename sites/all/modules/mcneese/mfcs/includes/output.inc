@@ -487,59 +487,6 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
 }
 
 /**
- * Builds the request pdf and saves it to the local disk.
- *
- * @param int $request_id
- *   The Request ID.
- * @param bool|int $revision_id
- *   Set to NULL for latest revision. Otherwise this is the number that
- *   represents the revision of the request to load.
- * @param int $mode
- *   (optional) The page mode used to determine which parts of a page are
- *   processed.
- * @param bool $local
- *   (optional) If TRUE, then the file is saved to the local disk.
- *   If FALSE, then the file is print to stdout.
- * @param int $type
- *   (optional) What the PDF represents, such as a request or an agreement.
- *
- * @return bool
- *   TRUE on success, FALSE otherwise.
- */
-function mfcs_generate_pdf($request_id, $revision_id = NULL, $mode = MFCS_VIEW_MODE_DISPLAY, $local = FALSE, $type = MFCS_PDF_TYPE_REQUEST) {
-  if (!is_null($revision_id) && !cf_is_integer($revision_id)) {
-    cf_error::invalid_integer('revision_id');
-    return FALSE;
-  }
-
-  $request = mfcs_load_request_by_id($request_id, NULL, $revision_id);
-
-  if (empty($request)) {
-    return FALSE;
-  }
-
-  $form = array();
-  $form_state = array();
-
-  $page = array();
-  $page['html'] = array(
-    '#type' => 'container',
-    '#attributes' => array(
-      'id' => 'mfcs-request-view-0-page',
-      'class' => array(
-        'mfcs-request-pdf-0',
-      ),
-    ),
-  );
-
-  $page['html']['content'] = array(mfcs_request_view_0_page($form, $form_state, $request_id, $mode, $revision_id, TRUE));
-  $renderred = drupal_render($page);
-  $html = drupal_render_page($renderred);
-
-  return mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $revision_id, $html, $local, array(), $type);
-}
-
-/**
  * Renders a PDF of a given request using the wkhtmltopdf library.
  *
  * @param int $request_id
