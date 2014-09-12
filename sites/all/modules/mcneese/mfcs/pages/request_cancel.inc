@@ -46,6 +46,11 @@ function mfcs_request_cancel_0_form($form, &$form_state, $request_id) {
     '#value' => $request_id,
   );
 
+  $form['form']['revision_id'] = array(
+    '#type' => 'value',
+    '#value' => NULL,
+  );
+
   $form['form']['request'] = array(
     '#type' => 'value',
     '#value' => &$request,
@@ -211,6 +216,11 @@ function mfcs_request_uncancel_0_form($form, &$form_state, $request_id) {
   $form['form']['request_id'] = array(
     '#type' => 'value',
     '#value' => $request_id,
+  );
+
+  $form['form']['revision_id'] = array(
+    '#type' => 'value',
+    '#value' => NULL,
   );
 
   $form['form']['request'] = array(

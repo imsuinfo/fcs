@@ -55,6 +55,11 @@ function mfcs_request_agreement_0_form($form, &$form_state, $request_id, $pdf = 
     '#value' => $request_id,
   );
 
+  $form['form']['revision_id'] = array(
+    '#type' => 'value',
+    '#value' => NULL,
+  );
+
   $form['form']['request'] = array(
     '#type' => 'value',
     '#value' => &$request,
