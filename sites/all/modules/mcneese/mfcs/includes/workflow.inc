@@ -1373,6 +1373,9 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
   }
 
   // prepare e-mail(s) for sending
+  $mfcs_email = variable_get('mfcs_email', 'facilities_use@fcs.mcneese.edu');
+  $mfcs_name = variable_get('mfcs_name', 'McNeese Facilities Use System');
+
   $email_params = array();
   $email_params['request_id'] = $request_id;
   $email_params['from'] = 'facilities_use@fcs.mcneese.edu';
@@ -1381,7 +1384,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     $email_params['message_priority'] = $parameters['message_priority'];
   }
 
-  $email_from = '"McNeese Facilities Use System" <facilities_use@fcs.mcneese.edu>';
+  $email_from = '"' . $mfcs_name . '" <' . $mfcs_email . '>';
 
   $location = mfcs_load_locations($request['top']['location'][0]->value);
   $location_text = '';
