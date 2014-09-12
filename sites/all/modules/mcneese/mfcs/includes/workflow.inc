@@ -1378,7 +1378,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
 
   $email_params = array();
   $email_params['request_id'] = $request_id;
-  $email_params['from'] = 'facilities_use@fcs.mcneese.edu';
+  $email_params['from'] = $mfcs_email;
 
   if (isset($parameters['message_priority'])) {
     $email_params['message_priority'] = $parameters['message_priority'];

@@ -211,6 +211,7 @@ class McNeeseFacilitiesUseMail implements MailSystemInterface {
     try {
       $sig_boundary = 'sig_' . $boundary;
       $fingerprint = $conf['gpg-mail'][$message['from_address']]['fingerprint'];
+
       $gpg->seterrormode(gnupg::ERROR_EXCEPTION);
       $gpg->addsignkey($fingerprint);
       $gpg->setsignmode(gnupg::SIG_MODE_DETACH);
