@@ -13,6 +13,7 @@ dependencies[] = ldap_servers
 dependencies[] = ldap_user
 dependencies[] = ldap_authentication
 dependencies[] = date_popup
+dependencies[] = phpwkhtmltopdf
 
 files[] = mfcs.install
 files[] = mfcs.module
