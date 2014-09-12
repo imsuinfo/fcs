@@ -532,7 +532,12 @@ function mfcs_request_search_0_form_validate($form, &$form_state) {
       $state_location = $form_state['values']['advanced']['targets'];
     }
 
-    mfcs_request_search_0_form_validate_targets($form, $form_state, $state_location, $form_state['advanced_search-chosen_targets'], array('advanced', 'targets'), 0);
+    if (empty($form_state['advanced_search-chosen_targets'])) {
+      form_set_error('search-advanced-submit-search', "You did not specify any targets to search for in the advanced search section.");
+    }
+    else {
+      mfcs_request_search_0_form_validate_targets($form, $form_state, $state_location, $form_state['advanced_search-chosen_targets'], array('advanced', 'targets'), 0);
+    }
   }
   elseif ($clicked_id == 'search-advanced-submit-clear') {
   }
