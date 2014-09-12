@@ -7,10 +7,12 @@ package = McNeese
 dependencies[] = cf (7.x-2.x)
 dependencies[] = cf_error (7.x-2.x)
 dependencies[] = cf_settings (7.x-2.x)
+dependencies[] = cf_theme (7.x-2.x)
 dependencies[] = mcneese_management
 dependencies[] = ldap_servers
 dependencies[] = ldap_user
 dependencies[] = ldap_authentication
+dependencies[] = date_popup
 
 files[] = mfcs.install
 files[] = mfcs.module
