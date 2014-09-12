@@ -667,7 +667,7 @@ $conf['workbench_menu_item_use_normal_path'] = TRUE;
 /**
  *  GNU PG Support
  */
-putenv('GNUPGHOME=/var/www/drupal/fcs/sites/default/gnupg');
+putenv('GNUPGHOME=/var/www/drupal/sandbox/fcs/sites/default');
 $conf['gpg-mail'] = array(
   'facilities_use@sandbox.mcneese.edu' => array(
     'fingerprint' => '75D4F1FD41C485582CD0648E3112BAA0D8BEC67F',
