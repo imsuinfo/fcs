@@ -212,8 +212,7 @@ function mfcs_request_search_0_form($form, &$form_state) {
     $request_table_extra = array(
       'table_sort' => FALSE,
     );
-    $advanced_table = mfcs_build_request_table($form_state['advanced_search-results'], $form['form']['per_page']['#value'], NULL, NULL, $request_table_extra);
-    $simple_table = mfcs_build_request_table($form_state['simple_search-results'], $form['form']['per_page']['#value']);
+    $simple_table = mfcs_build_request_table($form_state['simple_search-results'], $form['form']['per_page']['#value'], NULL, NULL, $request_table_extra);
 
     $simple_table['caption'] = t("Simple Search Results");
     $simple_table['header']['submitted_on']['sort'] = 'desc';
