@@ -5914,11 +5914,11 @@ function mfcs_build_request_table($items, $max_rows, $columns = NULL, $user = NU
       }
 
       if (array_key_exists($item->id, $can_review_requests) && $can_review_requests[$item->id]) {
-        $row['operations']['data'] .= '<a href="' . $base_path . 'requests/view-0/' . $item->id . '/3" class="operation-link operation-link-review">Review</a> ';
+        $row['operations']['data'] .= '<a href="' . $base_path . 'requests/view-0/' . $item->id . '/' . MFCS_VIEW_MODE_OPERATIONS . '" class="operation-link operation-link-review">Review</a> ';
       }
 
       if (array_key_exists($item->id, $can_log_requests) && $can_log_requests[$item->id]) {
-        $row['operations']['data'] .= '<a href="' . $base_path . 'requests/view-0/' . $item->id . '/2" class="operation-link operation-link-log">Log</a> ';
+        $row['operations']['data'] .= '<a href="' . $base_path . 'requests/view-0/' . $item->id . '/' . MFCS_VIEW_MODE_LOG . '" class="operation-link operation-link-log">Log</a> ';
       }
 
       if (array_key_exists($item->id, $can_history_requests) && $can_history_requests[$item->id]) {

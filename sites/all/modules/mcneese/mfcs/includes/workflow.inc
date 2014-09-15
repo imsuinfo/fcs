@@ -1462,7 +1462,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       $email_params['content'] .= $standard_content;
       $email_params['markup'] = "";
       $email_params['markup'] .= "The request has been approved.<br>\n";
-      $email_params['markup'] .= "For more information, view the <a href=" . '"' . $request_view_url . '/2"' . ">review log</a>.<br>\n";
+      $email_params['markup'] .= "For more information, view the <a href=" . '"' . $request_view_url . '/' . MFCS_VIEW_MODE_LOG . '"' . ">review log</a>.<br>\n";
       $email_params['markup'] .= $standard_markup;
 
       if (is_object($venue_coordinator)) {
@@ -1650,7 +1650,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       $email_params['content'] .= $standard_content;
       $email_params['markup'] = "";
       $email_params['markup'] .= "The request has been approved.<br>\n";
-      $email_params['markup'] .= "For more information, view the <a href=" . '"' . $request_view_url . '/2"' . ">review log</a>.<br>\n";
+      $email_params['markup'] .= "For more information, view the <a href=" . '"' . $request_view_url . '/' . MFCS_VIEW_MODE_LOG . '"' . ">review log</a>.<br>\n";
       $email_params['markup'] .= $standard_markup;
 
       $email_to[$request_requester->mail] = $request_requester->mail;
@@ -1696,7 +1696,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       $email_params['content'] .= $standard_content;
       $email_params['markup'] = "";
       $email_params['markup'] .= "The request has been denied.<br>\n";
-      $email_params['markup'] .= "For more information, view the <a href=" . '"' . $request_view_url . '/2"' . ">review log</a>.<br>\n";
+      $email_params['markup'] .= "For more information, view the <a href=" . '"' . $request_view_url . '/' . MFCS_VIEW_MODE_LOG . '"' . ">review log</a>.<br>\n";
       $email_params['markup'] .= $standard_markup;
 
       $email_to[$request_requester->mail] = $request_requester->mail;
