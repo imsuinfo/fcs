@@ -3756,7 +3756,7 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL, $revision_id
  *
  * @param int $request_id
  *   The numeric request id.
- * @param int $revision
+ * @param int $timestamp
  *   Unix Timestamp representing the exact date and time to load.
  * @param array $desired_fields
  *   (optional) An array of field names to load that match the specified date.
@@ -3771,14 +3771,14 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL, $revision_id
  *
  * @see mfcs_table_structure()
  */
-function mfcs_load_request_by_timestamp($request_id, $revision, $desired_fields = array()) {
+function mfcs_load_request_by_timestamp($request_id, $timestamp, $desired_fields = array()) {
   if (!cf_is_integer($request_id)) {
     cf_error::invalid_integer('request_id');
     return FALSE;
   }
 
-  if (!cf_is_integer($revision)) {
-    cf_error::invalid_integer('revision');
+  if (!cf_is_integer($timestamp)) {
+    cf_error::invalid_integer('timestamp');
     return FALSE;
   }
 
@@ -3817,7 +3817,7 @@ function mfcs_load_request_by_timestamp($request_id, $revision, $desired_fields 
     $query->addField('mrv', 'revision', 'revision');
 
     $query->condition('id', $request_id);
-    $query->condition('mrv.date', $revision);
+    $query->condition('mrv.date', $timestamp);
 
     $query->orderBy('mrv.date');
 
@@ -3858,7 +3858,7 @@ function mfcs_load_request_by_timestamp($request_id, $revision, $desired_fields 
 
             $query = db_select($field_table_name, 'mftf');
             $query->condition('mftf.request_id', $request_id);
-            $query->condition('mftf.date', $revision);
+            $query->condition('mftf.date', $timestamp);
             $query->fields('mftf');
 
             $results = $query->execute()->fetchAll();
@@ -3881,7 +3881,7 @@ function mfcs_load_request_by_timestamp($request_id, $revision, $desired_fields 
 
           $query = db_select($field_table_name, 'mftf');
           $query->condition('mftf.request_id', $request_id);
-          $query->condition('mftf.date', $revision);
+          $query->condition('mftf.date', $timestamp);
           $query->fields('mftf');
 
           #$results = $query->execute()->fetchAll();
