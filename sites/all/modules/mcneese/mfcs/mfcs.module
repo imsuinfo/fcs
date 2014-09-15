@@ -3762,8 +3762,6 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL, $revision_id
  *   (optional) An array of field names to load that match the specified date.
  *   These are nested by their table structure. When an empty array is
  *   provided, all values are used.
- * @param bool $reset
- *   (optional) If TRUE, the cache for the specified request is reset.
  *
  * @return array|bool
  *   An array of values associated with the request, date, and fields.
