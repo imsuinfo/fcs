@@ -557,7 +557,7 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
   );
 
   $request_revision = mfcs_load_request_revision_number($request_id);
-  $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . REQUEST_TIME, FALSE);
+  $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . REQUEST_TIME . '_' . $user->uid, FALSE);
 
   if ($request_revision === FALSE) {
     form_set_error('form', "An error occurred while trying to save the request. Please contact the support staff.");
@@ -579,6 +579,7 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
     'request_id' => $request_id,
     'date' => REQUEST_TIME,
     'revision' => $request_revision_next,
+    'user_id' => $user->uid,
   );
 
   mfcs_include(MFCS_INCLUDE_TABLE);

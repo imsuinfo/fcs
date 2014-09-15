@@ -196,6 +196,13 @@ function mfcs_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
+      'user_id' => array(
+        'description' => $t("This is the system id. Represents the user responsible for the revision."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
       'date' => array(
         'description' => $t("Represents the date the request associated with this revision."),
         'type' => 'int',
@@ -205,10 +212,17 @@ function mfcs_schema() {
       ),
     ),
     'primary key' => array('request_id', 'revision'),
+    'unique keys' => array(
+      'revision' => array('request_id', 'revision', 'user_id', 'date'),
+    ),
     'foreign keys' => array(
       'request_id' => array(
         'table' => 'mfcs_requests',
         'columns' => array('request_id' => 'id'),
+      ),
+      'user_id' => array(
+        'table' => 'users',
+        'columns' => array('user_id' => 'uid'),
       ),
     ),
   );
@@ -1170,6 +1184,7 @@ function mfcs_install() {
   $structure = mfcs_table_install_structure();
 
   db_query('ALTER TABLE {mfcs_request_revisions} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
+  db_query('ALTER TABLE {mfcs_request_revisions} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
   db_query('ALTER TABLE {mfcs_reviewers} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE CASCADE');
   db_query('ALTER TABLE {mfcs_search_settings} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE CASCADE');
 
@@ -1235,6 +1250,7 @@ function mfcs_uninstall() {
   $structure = mfcs_table_install_structure();
 
   db_query('ALTER TABLE {mfcs_request_revisions} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
+  db_query('ALTER TABLE {mfcs_request_revisions} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
   db_query('ALTER TABLE {mfcs_reviewers} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
   db_query('ALTER TABLE {mfcs_search_settings} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
   db_query('ALTER TABLE {mfcs_banner_building_to_location} DROP CONSTRAINT IF EXISTS ' . $key3_foreign);

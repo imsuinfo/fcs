@@ -497,6 +497,7 @@ function mfcs_request_create_0_form_submit($form, &$form_state) {
   $mfcs_request_revisions = array(
     'date' => REQUEST_TIME,
     'revision' => 0,
+    'user_id' => $user->uid,
   );
 
   mfcs_include(MFCS_INCLUDE_TABLE);
@@ -548,7 +549,7 @@ function mfcs_request_create_0_form_submit($form, &$form_state) {
     }
   }
 
-  $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . REQUEST_TIME, FALSE);
+  $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . REQUEST_TIME . '_' . $user->uid, FALSE);
 
   $failure = FALSE;
   $transaction = db_transaction();

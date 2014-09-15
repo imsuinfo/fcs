@@ -58,7 +58,7 @@ function mfcs_workflow_set_step($request_id, $step, $user = NULL) {
   );
 
   $request_revision = mfcs_load_request_revision_number($request_id);
-  $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . REQUEST_TIME, FALSE);
+  $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . REQUEST_TIME . '_' . $user->uid, FALSE);
 
   if ($request_revision === FALSE) {
     watchdog(MFCS_WATCHDOG_ID, "Failed to load revision number for request %request_id.", array('%request_id' => $request_id), WATCHDOG_ERROR);
@@ -75,6 +75,7 @@ function mfcs_workflow_set_step($request_id, $step, $user = NULL) {
     'request_id' => $request_id,
     'date' => REQUEST_TIME,
     'revision' => $request_revision_next,
+    'user_id' => $user->uid,
   );
 
   $step_revision = $request['current']['top']['step'] + 1;
@@ -189,7 +190,7 @@ function mfcs_workflow_set_status($request_id, $status, $user = NULL) {
   );
 
   $request_revision = mfcs_load_request_revision_number($request_id);
-  $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . REQUEST_TIME, FALSE);
+  $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . REQUEST_TIME . '_' . $user->uid, FALSE);
 
   if ($request_revision === FALSE) {
     watchdog(MFCS_WATCHDOG_ID, "Failed to load revision number for request %request_id.", array('%request_id' => $request_id), WATCHDOG_ERROR);
@@ -206,6 +207,7 @@ function mfcs_workflow_set_status($request_id, $status, $user = NULL) {
     'request_id' => $request_id,
     'date' => REQUEST_TIME,
     'revision' => $request_revision_next,
+    'user_id' => $user->uid,
   );
 
   $status_revision = $request['current']['top']['status'] + 1;
@@ -342,7 +344,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message, $ext
   );
 
   $request_revision = mfcs_load_request_revision_number($request_id);
-  $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . REQUEST_TIME, FALSE);
+  $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . REQUEST_TIME . '_' . $user->uid, FALSE);
 
   if ($request_revision === FALSE) {
     watchdog(MFCS_WATCHDOG_ID, "Failed to load revision number for request %request_id.", array('%request_id' => $request_id), WATCHDOG_ERROR);
@@ -359,6 +361,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message, $ext
     'request_id' => $request_id,
     'date' => REQUEST_TIME,
     'revision' => $request_revision_next,
+    'user_id' => $user->uid,
   );
 
   $mfcs_current_requirements = array(
