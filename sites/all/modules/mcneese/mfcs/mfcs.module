@@ -263,6 +263,15 @@ function mfcs_menu() {
 }
 
 /**
+ * Implements hook_user_insert().
+ */
+function mfcs_user_insert(&$edit, $account, $category) {
+  mfcs_include(MFCS_INCLUDE_HOOKS);
+
+  return mfcs_hook_user_insert($edit, $account, $category);
+}
+
+/**
  * Access callback for facilities use pages.
  *
  * For already loaded requests, use: mfcs_request_access().
@@ -2524,7 +2533,47 @@ function mfcs_sync_banner_to_local() {
     }
   }
 
-  $rows = mfcs_oracle_select('select id, role from ucs.msu_event_role');
+  return mfcs_sync_banner_to_local_users();
+}
+
+/**
+ * Synchronizes the local database with the banner venue information for users.
+ *
+ * @param null|string $user_id
+ *   (optional) If not NULL, the user id of the user to sync data from.
+ *   When NULL, process all local users.
+ *
+ * @return bool
+ *   TRUE on success, FALSE otherwise.
+ */
+function mfcs_sync_banner_to_local_users($user_id = NULL) {
+  if (!is_null($user_id) && !cf_is_integer($user_id)) {
+    cf_error::invalid_integer('user_id');
+    return FALSE;
+  }
+
+  $banner_id = NULL;
+  if (!is_null($user_id)) {
+    $user = user_load($user_id);
+
+    if (!is_object($user) || !isset($user->field_user_banner_id['und'][0]['value'])) {
+      return FALSE;
+    }
+
+    $banner_id = $user->field_user_banner_id['und'][0]['value'];
+
+    if (empty($banner_id) || !is_numeric($banner_id)) {
+      return FALSE;
+    }
+  }
+
+  if (is_null($banner_id)) {
+    $rows = mfcs_oracle_select('select id, role from ucs.msu_event_role');
+  }
+  else {
+
+    $rows = mfcs_oracle_select('select id, role from ucs.msu_event_role where id = \'' . $banner_id . '\'');
+  }
 
   if (!empty($rows) && is_array($rows)) {
     $transaction = db_transaction();
@@ -2538,6 +2587,11 @@ function mfcs_sync_banner_to_local() {
       $query = db_update('mfcs_banner_event_roles_to_users');
       $query->fields(array('disabled' => 1, 'date' => REQUEST_TIME));
       $query->condition('disabled', 0);
+
+      if (!is_null($banner_id)) {
+        $query->condition('user_id', $user_id);
+      }
+
       $query->execute();
 
       foreach ($rows as $row) {
@@ -2550,11 +2604,13 @@ function mfcs_sync_banner_to_local() {
         }
 
         // add/update the roles to users.
-        $query = db_select('field_data_field_user_banner_id', 'fdfubi');
-        $query->addField('fdfubi', 'entity_id', 'user_id');
-        $query->condition('fdfubi.field_user_banner_id_value', $row['id']);
+        if (is_null($banner_id)) {
+          $query = db_select('field_data_field_user_banner_id', 'fdfubi');
+          $query->addField('fdfubi', 'entity_id', 'user_id');
+          $query->condition('fdfubi.field_user_banner_id_value', $row['id']);
 
-        $user_id = $query->execute()->fetchField();
+          $user_id = $query->execute()->fetchField();
+        }
 
         if ($user_id > 0) {
           $mfcs_banner_event_roles_item['user_id'] = $user_id;
@@ -2562,11 +2618,13 @@ function mfcs_sync_banner_to_local() {
           $mfcs_banner_event_roles_item['disabled'] = 0;
           $mfcs_banner_event_roles_item['date'] = REQUEST_TIME;
 
-          $user_id = $query->execute()->fetchField();
+          if (is_null($banner_id)) {
+            $user_id = $query->execute()->fetchField();
+          }
 
           $query = db_select('mfcs_banner_event_roles_to_users', 'mberu');
           $query->addExpression('count(mberu.user_id)');
-          $query->condition('mberu.user_id', $row['id']);
+          $query->condition('mberu.user_id', $user_id);
           $query->condition('mberu.event_role_id', $roles_by_name[$row['role']]);
 
           $mfcs_banner_event_roles_count = $query->execute()->fetchField();

@@ -621,5 +621,12 @@ function mfcs_hook_cronapi() {
 }
 
 /**
+ * Internal function for hook_user_insert().
+ */
+function mfcs_hook_user_insert(&$edit, $account, $category) {
+  mfcs_sync_banner_to_local_users($account->uid);
+}
+
+/**
  * @} End of '@addtogroup mfcs'.
  */
