@@ -2571,7 +2571,6 @@ function mfcs_sync_banner_to_local_users($user_id = NULL) {
     $rows = mfcs_oracle_select('select id, role from ucs.msu_event_role');
   }
   else {
-
     $rows = mfcs_oracle_select('select id, role from ucs.msu_event_role where id = \'' . $banner_id . '\'');
   }
 
