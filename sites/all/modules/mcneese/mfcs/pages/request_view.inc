@@ -1709,7 +1709,7 @@ function mfcs_request_view_0_page_pre_validate(&$form, &$form_state) {
 
   $request = $form['form']['request']['#value'];
   $request_id = (int) $form['form']['request_id']['#value'];
-  $mode = (int) $form['form']['mode']['#value'];
+  $mode = $form['form']['mode']['#value'];
   $user = cf_current_user();
 
   $request_classification = $request['request_coordinator']['classification'][0]->value;
@@ -1778,7 +1778,7 @@ function mfcs_request_view_0_page_validate($form, &$form_state) {
 
   $request = $form['form']['request']['#value'];
   $request_id = (int) $form['form']['request_id']['#value'];
-  $mode = (int) $form['form']['mode']['#value'];
+  $mode = $form['form']['mode']['#value'];
   $user = cf_current_user();
 
   $can_review_request = mfcs_request_access('review', $request, $user);
@@ -1870,7 +1870,7 @@ function mfcs_request_view_0_page_validate($form, &$form_state) {
       $failure = TRUE;
     }
 
-    if ($mode < MFCS_VIEW_MODE_NORMAL && $mode > MFCS_VIEW_MODE_OPERATIONS) {
+    if (!($mode == MFCS_VIEW_MODE_NORMAL || $mode == MFCS_VIEW_MODE_DISPLAY || $mode == MFCS_VIEW_MODE_LOG || $mode == MFCS_VIEW_MODE_OPERATIONS)) {
       form_set_error('', "Illegal operation detected. Invalid mode selected.");
       $failure = TRUE;
     }
@@ -2286,11 +2286,21 @@ function mfcs_request_view_0_page_submit($form, &$form_state) {
       $form_state['redirect'] = 'requests';
     }
     else {
-      if ($form['form']['mode']['#value'] > 0) {
-        $form_state['redirect'] = 'requests/view-0/' . $request_id . '/' . $form['form']['mode']['#value'];
+      if (empty($form['form']['mode']['#value'])) {
+        $form_state['redirect'] = 'requests/view-0/' . $request_id;
       }
       else {
-        $form_state['redirect'] = 'requests/view-0/' . $request_id;
+        if ($form['form']['mode']['#value'] == MFCS_VIEW_MODE_OPERATIONS) {
+          if (mfcs_page_request_access('review', $request_id)) {
+            $form_state['redirect'] = 'requests/view-0/' . $request_id . '/' . $form['form']['mode']['#value'];
+          }
+          else {
+            $form_state['redirect'] = 'requests/view-0/' . $request_id;
+          }
+        }
+        else {
+          $form_state['redirect'] = 'requests/view-0/' . $request_id . '/' . $form['form']['mode']['#value'];
+        }
       }
     }
   }
