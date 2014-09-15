@@ -2229,10 +2229,18 @@ function mfcs_request_view_0_page_submit($form, &$form_state) {
     if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
       if (isset($form_state['values']['review']['operations']['presidents_approval'])) {
         $extra['requirements']['waved'] = $form_state['values']['review']['operations']['presidents_approval'];
+
+        if ($extra['requirements']['waved'] == 1) {
+          $extra['requirements']['other'] = 0;
+        }
       }
 
       if (isset($form_state['values']['review']['operations']['university_business'])) {
         $extra['requirements']['university'] = $form_state['values']['review']['operations']['university_business'];
+
+        if ($extra['requirements']['university'] == 1) {
+          $extra['requirements']['other'] = 0;
+        }
       }
 
       // when the request type is a quick meeting, then mark this as waved due to university business.
