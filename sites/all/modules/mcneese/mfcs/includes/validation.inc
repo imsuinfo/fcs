@@ -286,7 +286,7 @@ function mfcs_validate_request_fields($form, &$form_state) {
     if (!empty($location_state['dates']['date'])) {
       foreach ($location_state['dates']['date'] as $key => &$value) {
         if (isset($form['form']['existing']['#value']['request']['dates']['date'])) {
-          if (in_array($value, $form['form']['existing']['#value']['request']['dates']['date'])) {
+          if (in_array($key, $form['form']['existing']['#value']['request']['dates']['date'])) {
             // skip values already saved to allow updating requests if they are sufficiently near/past the request date.
             // but only do this when the request is not new.
             if ($is_new_request !== TRUE) {
@@ -328,7 +328,7 @@ function mfcs_validate_request_fields($form, &$form_state) {
         }
 
         if (isset($form['form']['existing']['#value']['request']['dates']['time_start'])) {
-          if (in_array($value, $form['form']['existing']['#value']['request']['dates']['time_start'])) {
+          if (in_array($key, $form['form']['existing']['#value']['request']['dates']['time_start'])) {
             // skip values already saved to allow updating requests if they are sufficiently near/past the request date.
             // but only do this when the request is not new.
             if ($is_new_request !== TRUE) {
@@ -362,7 +362,7 @@ function mfcs_validate_request_fields($form, &$form_state) {
         }
 
         if (isset($form['form']['existing']['#value']['request']['dates']['time_stop'])) {
-          if (in_array($value, $form['form']['existing']['#value']['request']['dates']['time_stop'])) {
+          if (in_array($key, $form['form']['existing']['#value']['request']['dates']['time_stop'])) {
             // skip values already saved to allow updating requests if they are sufficiently near/past the request date.
             // but only do this when the request is not new.
             if ($is_new_request !== TRUE) {
@@ -374,6 +374,15 @@ function mfcs_validate_request_fields($form, &$form_state) {
         if (!empty($value) && !empty($location_form['dates']['group_dates'][$key]['dates']['time_stop'][$key]['#expected_format']['date'])) {
           if (is_string($value)) {
             $stop_timestamp[$key] = strtotime($value, $date_timestamp[$key]);
+
+            // midnight is allowed, but triggers a false failure due to the logic in this function.
+            // when midnight is specified, it ends up being midnight of the current day, which is considered the start of the day.
+            // when a user specifies midnight, they esentially mean the start of the next day.
+            $midnight = strtotime("midnight today", $stop_timestamp[$key]);
+
+            if ($stop_timestamp[$key] == $midnight) {
+              $stop_timestamp[$key] = strtotime('tomorrow', $midnight);
+            }
 
             $matched = preg_match('@^\s*(\d|\d\d):(\d|\d\d)\s*(pm|am)*\s*$@i', $value);
 
@@ -407,7 +416,7 @@ function mfcs_validate_request_fields($form, &$form_state) {
     if (!empty($location_state['dates']['time_start'])) {
       foreach ($location_state['dates']['time_start'] as $key => &$value) {
         if (isset($form['form']['existing']['#value']['request']['dates']['time_start'])) {
-          if (in_array($value, $form['form']['existing']['#value']['request']['dates']['time_start'])) {
+          if (in_array($key, $form['form']['existing']['#value']['request']['dates']['time_start'])) {
             // skip values already saved to allow updating requests if they are sufficiently near/past the request date.
             // but only do this when the request is not new.
             if ($is_new_request !== TRUE) {
