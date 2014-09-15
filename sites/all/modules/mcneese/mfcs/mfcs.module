@@ -1813,6 +1813,73 @@ function mfcs_load_request_user_role_mapping() {
 /**
  * Returns user's information.
  *
+ * This is different from user_load in that this loads user banner information.
+ *
+ * @param integer $user_id
+ *   The user id number uniquely representing some user.
+ *
+ * @return array|bool
+ *   An array containing the user information.
+ *   FALSE is returned on error.
+ */
+function mfcs_load_request_user_by_user_id($user_id) {
+  if (!cf_is_integer($user_id)) {
+    cf_error::invalid_integer('user_id');
+
+    return FALSE;
+  }
+
+  $cache_id = __function__;
+  $user = &drupal_static($cache_id, NULL);
+  if (isset($user[$user_id]) && is_array($user[$user_id])) {
+    return $user[$user_id];
+  }
+
+  $user[$user_id] = NULL;
+
+  try {
+    $query = db_select('mfcs_banner_event_roles_to_users', 'mberu');
+    $query->innerJoin('mfcs_banner_event_roles', 'mber', 'mber.id = mberu.event_role_id');
+    $query->innerJoin('field_data_field_user_banner_id', 'fdfubi', 'mberu.user_id = fdfubi.entity_id');
+
+    $query->addField('mber', 'machine_name', 'role');
+    $query->addField('fdfubi', 'field_user_banner_id_value', 'banner_id');
+
+    $query->condition('mberu.user_id', $user_id);
+
+    $rows = $query->execute()->fetchAll();
+
+    if (!empty($rows)) {
+      $user[$user_id] = array(
+        'id' => NULL,
+        'user_id' => $user_id,
+        'role' => array(),
+      );
+
+      foreach ($rows as $row) {
+        $user[$user_id]['role'][] = $row->role;
+
+        if (is_null($user[$user_id]['id'])) {
+          $user[$user_id]['id'] = $row->banner_id;
+        }
+      }
+    }
+  } catch (Exception $ex) {
+    cf_error::on_exception($ex);
+
+    return FALSE;
+  }
+
+  if (is_null($user[$user_id])) return FALSE;
+
+  return $user[$user_id];
+}
+
+/**
+ * Returns user's information.
+ *
+ * This is different from user_load in that this loads user banner information.
+ *
  * @param string $banner_id
  *   The numeric banner id string uniquely representing some user.
  *
@@ -1820,7 +1887,7 @@ function mfcs_load_request_user_role_mapping() {
  *   An array containing the user information.
  *   FALSE is returned on error.
  */
-function mfcs_load_request_user($banner_id) {
+function mfcs_load_request_user_by_banner_id($banner_id) {
   if (!is_string($banner_id)) {
     cf_error::invalid_string('banner_id');
 
@@ -1838,19 +1905,28 @@ function mfcs_load_request_user($banner_id) {
   try {
     $query = db_select('mfcs_banner_event_roles_to_users', 'mberu');
     $query->innerJoin('mfcs_banner_event_roles', 'mber', 'mber.id = mberu.event_role_id');
+    $query->innerJoin('field_data_field_user_banner_id', 'fdfubi', 'mberu.user_id = fdfubi.entity_id');
+
     $query->addField('mber', 'machine_name', 'role');
-    $query->condition('mberu.banner_id', $banner_id);
+    $query->addField('fdfubi', 'entity_id', 'user_id');
+
+    $query->condition('fdfubi.field_user_banner_id_value', $banner_id);
 
     $rows = $query->execute()->fetchAll();
 
     if (!empty($rows)) {
       $user[$banner_id] = array(
         'id' => $banner_id,
+        'user_id' => NUll,
         'role' => array(),
       );
 
       foreach ($rows as $row) {
         $user[$banner_id]['role'][] = $row->role;
+
+        if (is_null($user[$banner_id]['user_id'])) {
+          $user[$banner_id]['user_id'] = $row->user_id;
+        }
       }
     }
   } catch (Exception $ex) {
@@ -1969,8 +2045,9 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array()) {
     $system_roles[$role->rid] = 'requester';
   }
 
+  // only change user event roles for banner users.
   if (isset($user->field_user_banner_id['und'][0]['value'])) {
-    $u = mfcs_load_request_user($user->field_user_banner_id['und'][0]['value']);
+    $u = mfcs_load_request_user_by_user_id($user->uid);
 
     if ($u == FALSE) {
       $u = array();
@@ -2473,29 +2550,39 @@ function mfcs_sync_banner_to_local() {
         }
 
         // add/update the roles to users.
-        $mfcs_banner_event_roles_item['banner_id'] = $row['id'];
-        $mfcs_banner_event_roles_item['event_role_id'] = $roles_by_name[$row['role']];
-        $mfcs_banner_event_roles_item['disabled'] = 0;
-        $mfcs_banner_event_roles_item['date'] = REQUEST_TIME;
+        $query = db_select('field_data_field_user_banner_id', 'fdfubi');
+        $query->addField('fdfubi', 'entity_id', 'user_id');
+        $query->condition('fdfubi.field_user_banner_id_value', $row['id']);
 
-        $query = db_select('mfcs_banner_event_roles_to_users', 'mberu');
-        $query->addExpression('count(mberu.banner_id)');
-        $query->condition('mberu.banner_id', $row['id']);
-        $query->condition('mberu.event_role_id', $roles_by_name[$row['role']]);
+        $user_id = $query->execute()->fetchField();
 
-        $mfcs_banner_event_roles_count = $query->execute()->fetchField();
+        if ($user_id > 0) {
+          $mfcs_banner_event_roles_item['user_id'] = $user_id;
+          $mfcs_banner_event_roles_item['event_role_id'] = $roles_by_name[$row['role']];
+          $mfcs_banner_event_roles_item['disabled'] = 0;
+          $mfcs_banner_event_roles_item['date'] = REQUEST_TIME;
 
-        if ($mfcs_banner_event_roles_count > 0) {
-          $query = db_update('mfcs_banner_event_roles_to_users');
-          $query->fields($mfcs_banner_event_roles_item);
-          $query->condition('banner_id', $row['id']);
-          $query->condition('event_role_id', $roles_by_name[$row['role']]);
-          $query->execute();
-        }
-        else {
-          $query = db_insert('mfcs_banner_event_roles_to_users');
-          $query->fields($mfcs_banner_event_roles_item);
-          $query->execute();
+          $user_id = $query->execute()->fetchField();
+
+          $query = db_select('mfcs_banner_event_roles_to_users', 'mberu');
+          $query->addExpression('count(mberu.user_id)');
+          $query->condition('mberu.user_id', $row['id']);
+          $query->condition('mberu.event_role_id', $roles_by_name[$row['role']]);
+
+          $mfcs_banner_event_roles_count = $query->execute()->fetchField();
+
+          if ($mfcs_banner_event_roles_count > 0) {
+            $query = db_update('mfcs_banner_event_roles_to_users');
+            $query->fields($mfcs_banner_event_roles_item);
+            $query->condition('user_id', $user_id);
+            $query->condition('event_role_id', $roles_by_name[$row['role']]);
+            $query->execute();
+          }
+          else {
+            $query = db_insert('mfcs_banner_event_roles_to_users');
+            $query->fields($mfcs_banner_event_roles_item);
+            $query->execute();
+          }
         }
       }
 
