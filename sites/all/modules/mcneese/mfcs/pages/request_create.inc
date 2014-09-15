@@ -548,6 +548,8 @@ function mfcs_request_create_0_form_submit($form, &$form_state) {
     }
   }
 
+  $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . REQUEST_TIME, FALSE);
+
   $failure = FALSE;
   $transaction = db_transaction();
 
@@ -565,9 +567,13 @@ function mfcs_request_create_0_form_submit($form, &$form_state) {
 
     $mfcs_request_revisions['request_id'] = $request_id;
 
-    $query = db_insert('mfcs_request_revisions');
-    $query->fields($mfcs_request_revisions);
-    $query->execute();
+    if (!$processed_mfcs_request_revisions) {
+      $query = db_insert('mfcs_request_revisions');
+      $query->fields($mfcs_request_revisions);
+      $query->execute();
+
+      $processed_mfcs_request_revisions = TRUE;
+    }
 
     foreach ($structure_field_tables as $table_name => $fields) {
       foreach ($fields as $delta => $values) {
