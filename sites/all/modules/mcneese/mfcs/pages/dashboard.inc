@@ -50,7 +50,7 @@ function mfcs_dashboard_page() {
   if ($can_list) {
     $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/list-0" class="item-link">List Requests</a></h4>';
     $help = '<div class="item-description inline-block">View a list of requests available to the current user.</div>';
-    $items_1[] = array(
+    $items_array[] = array(
       'data' => $link . '<br>' . $help,
       'class' => array(
       ),
