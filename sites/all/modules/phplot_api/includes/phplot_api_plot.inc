@@ -628,9 +628,10 @@ class phplot_api_plot {
     file_prepare_directory($directory, FILE_MODIFY_PERMISSIONS | FILE_CREATE_DIRECTORY);
 
     if ($file_status == 0) {
+      $new_file = !file_exists($destination);
       $filepath = file_unmanaged_save_data($this->image, $destination, FILE_EXISTS_REPLACE);
 
-      if (!file_exists($filepath)) {
+      if ($new_file) {
         $this->file = new stdClass();
         $this->file->fid = NULL;
         $this->file->uri = $filepath;
