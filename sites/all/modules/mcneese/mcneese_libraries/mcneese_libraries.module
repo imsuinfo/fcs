@@ -17,6 +17,7 @@
 function mcneese_libraries_libraries_info() {
   $libraries = array();
 
+  // cycle2
   $libraries['cycle2'] = array();
   $libraries['cycle2']['name'] = "Cycle 2";
   $libraries['cycle2']['vendor url '] = 'http://jquery.malsup.com/cycle2/';
@@ -41,6 +42,17 @@ function mcneese_libraries_libraries_info() {
     'jquery.cycle2.swipe.js',
     'jquery.cycle2.tile.js',
     'jquery.cycle2.video.js',
+  );
+
+  // d3
+  $libraries['d3'] = array();
+  $libraries['d3']['name'] = "Data-Driven Documents";
+  $libraries['d3']['vendor url '] = 'http://d3js.org/';
+  $libraries['d3']['download url'] = 'http://d3js.org/';
+
+  $libraries['d3']['files'] = array();
+  $libraries['d3']['files']['js'] = array(
+    'd3.js',
   );
 
   return $libraries;
