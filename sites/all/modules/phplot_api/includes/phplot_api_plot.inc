@@ -253,15 +253,15 @@ class phplot_api_plot {
     }
 
     if (isset($this->data['data_label_angle_y'])) {
-      $this->plot->SetXDataLabelAngle($this->data['data_label_angle_y']);
+      $this->plot->SetYDataLabelAngle($this->data['data_label_angle_y']);
     }
 
     if (isset($this->data['data_label_position_y'])) {
-      $this->plot->SetXDataLabelPos($this->data['data_label_position_y']);
+      $this->plot->SetYDataLabelPos($this->data['data_label_position_y']);
     }
 
     if (isset($this->data['data_label_type_y'])) {
-      $this->plot->SetXDataLabelType($this->data['data_label_type_y']);
+      $this->plot->SetYDataLabelType($this->data['data_label_type_y']);
     }
 
     if (isset($this->data['title'])) {
@@ -274,6 +274,14 @@ class phplot_api_plot {
 
     if (isset($this->data['title_font_size'])) {
       $this->plot->SetTitleFontSize($this->data['title_font_size']);
+    }
+
+    if (isset($this->data['title_x'])) {
+      $this->plot->SetXTitle($this->data['title_x']);
+    }
+
+    if (isset($this->data['title_y'])) {
+      $this->plot->SetYTitle($this->data['title_y']);
     }
 
     if (isset($this->data['ttf_path'])) {
@@ -533,27 +541,27 @@ class phplot_api_plot {
     }
 
     if (isset($this->data['tick_anchor_y'])) {
-      $this->plot->SetXTickAnchor($this->data['tick_anchor_y']);
+      $this->plot->SetYTickAnchor($this->data['tick_anchor_y']);
     }
 
     if (isset($this->data['tick_crossing_y'])) {
-      $this->plot->SetXTickCrossing($this->data['tick_crossing_y']);
+      $this->plot->SetYTickCrossing($this->data['tick_crossing_y']);
     }
 
     if (isset($this->data['tick_increment_y'])) {
-      $this->plot->SetXTickIncrement($this->data['tick_increment_y']);
+      $this->plot->SetYTickIncrement($this->data['tick_increment_y']);
     }
 
     if (isset($this->data['tick_label_position_y'])) {
-      $this->plot->SetXTickLabelPos($this->data['tick_label_position_y']);
+      $this->plot->SetYTickLabelPos($this->data['tick_label_position_y']);
     }
 
     if (isset($this->data['tick_length_y'])) {
-      $this->plot->SetXTickLength($this->data['tick_length_y']);
+      $this->plot->SetYTickLength($this->data['tick_length_y']);
     }
 
     if (isset($this->data['tick_position_y'])) {
-      $this->plot->SetXTickPos($this->data['tick_position_y']);
+      $this->plot->SetYTickPos($this->data['tick_position_y']);
     }
 
     // @todo provide a modules_invoke call so that modules that provide their own tweaks can alter the plot object.
