@@ -14,7 +14,6 @@ dependencies[] = ldap_user
 dependencies[] = ldap_authentication
 dependencies[] = date_popup
 dependencies[] = phpwkhtmltopdf
-dependencies[] = phplot_api
 
 files[] = mfcs.install
 files[] = mfcs.module
@@ -46,4 +45,5 @@ files[] = pages/request_list.inc
 files[] = pages/request_reviewers.inc
 files[] = pages/request_review.inc
 files[] = pages/request_search.inc
+files[] = pages/request_statistics.inc
 files[] = pages/request_view.inc

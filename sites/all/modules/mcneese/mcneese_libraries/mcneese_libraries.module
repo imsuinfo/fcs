@@ -50,6 +50,9 @@ function mcneese_libraries_libraries_info() {
   $libraries['d3']['vendor url '] = 'http://d3js.org/';
   $libraries['d3']['download url'] = 'http://d3js.org/';
 
+  // hard-code the version number.
+  $libraries['d3']['version'] = 1;
+
   $libraries['d3']['files'] = array();
   $libraries['d3']['files']['js'] = array(
     'd3.js',

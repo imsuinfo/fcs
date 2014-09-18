@@ -25,6 +25,7 @@ function mfcs_management_page() {
   mfcs_add_canonical_headers('requests/management');
 
   $manager = user_access('mfcs manage', $user);
+  $reviewer = user_access('mfcs review', $user);
 
   $items_1 = array();
   $items_2 = array();
@@ -44,12 +45,25 @@ function mfcs_management_page() {
     );
   }
 
-  if (count($items_array) % 2) {
+  if (count($items_array) > 0) {
     if ($items_array_current == 1) {
       $items_array = &$items_2;
       $items_array_current++;
     }
-    else {
+  }
+
+  if ($manager || $reviewer) {
+    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/statistics-0" class="item-link">Request Statistics</a></h4>';
+    $help = '<div class="item-description inline-block">View statistics for requests on this system that you have access to view.</div>';
+    $items_array[] = array(
+      'data' => $link . '<br>' . $help,
+      'class' => array(
+      ),
+    );
+  }
+
+  if (count($items_array) > 0) {
+    if ($items_array_current == 1) {
       $items_array = &$items_3;
       $items_array_current++;
     }
