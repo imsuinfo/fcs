@@ -842,10 +842,12 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
         $log_page_title_css = 'no-screen no-braille';
       }
 
-      $form['review']['log']['page_title'] = array(
-        '#markup' => '<div id="' . 'request-' . $request_id . '-section-review-log-page_title' . '" class="request-section-review-log-page_title ' . $log_page_title_css . '">' . $page_title . '</div>',
-        '#weight' => 0,
-      );
+      if ($mode == MFCS_VIEW_MODE_NORMAL) {
+        $form['review']['log']['page_title'] = array(
+          '#markup' => '<div id="' . 'request-' . $request_id . '-section-review-log-page_title' . '" class="request-section-review-log-page_title ' . $log_page_title_css . '">' . $page_title . '</div>',
+          '#weight' => 0,
+        );
+      }
 
       if ($pdf) {
         unset($form['review']['log']['#type']);

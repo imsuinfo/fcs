@@ -53,7 +53,9 @@ function mfcs_management_page() {
   }
 
   if ($manager || $reviewer) {
-    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/statistics-0" class="item-link">Request Statistics</a></h4>';
+    $today = strtotime('midnight today');
+    $year = date('Y', $today);
+    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/statistics-0/' . $year . '" class="item-link">Request Statistics</a></h4>';
     $help = '<div class="item-description inline-block">View statistics for requests on this system that you have access to view.</div>';
     $items_array[] = array(
       'data' => $link . '<br>' . $help,
