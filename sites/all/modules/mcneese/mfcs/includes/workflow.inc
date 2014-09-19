@@ -1472,6 +1472,32 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
         $email_to[$venue_coordinator->mail] = $venue_coordinator->mail;
       }
     }
+    elseif ($status == MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK) {
+      $email_params['title_suffix'] = "Unavailable (due to lock)";
+      $email_params['content'] = "";
+      $email_params['content'] .= $changed_by_string . " has created this request, but the request was auto-closed due to an existing lock for the specified room, date, and time.\n";
+      $email_params['content'] .= $standard_content;
+      $email_params['markup'] = "";
+      $email_params['markup'] .= $changed_by_string . " has created this request, but the request was auto-closed due to an existing lock for the specified room, date, and time.<br>\n";
+      $email_params['markup'] .= $standard_markup;
+
+      if (is_object($venue_coordinator)) {
+        $email_to[$venue_coordinator->mail] = $venue_coordinator->mail;
+      }
+    }
+    elseif ($status == MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE) {
+      $email_params['title_suffix'] = "Unavailable";
+      $email_params['content'] = "";
+      $email_params['content'] .= $changed_by_string . " has created this request, but the request was auto-closed due the requested room, date, and time being already reserved.\n";
+      $email_params['content'] .= $standard_content;
+      $email_params['markup'] = "";
+      $email_params['markup'] .= $changed_by_string . " has created this request, but the request was auto-closed due the requested room, date, and time being already reserved.<br>\n";
+      $email_params['markup'] .= $standard_markup;
+
+      if (is_object($venue_coordinator)) {
+        $email_to[$venue_coordinator->mail] = $venue_coordinator->mail;
+      }
+    }
     else {
       $email_params['title_suffix'] = "Requested";
       $email_params['content'] = "";

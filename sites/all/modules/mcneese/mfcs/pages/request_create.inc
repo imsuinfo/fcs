@@ -424,7 +424,15 @@ function mfcs_request_create_0_form_validate($form, &$form_state) {
                 $form_state['room_unavailable_prior_settings']['step'] = $form_state['values']['request']['step'][0];
               }
 
-              $form_state['values']['request']['status'][0] = MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE;
+              $request_using_room = reset($requests_using_room);
+              if (isset($request_using_room->status) && $request_using_room->status == MFCS_REQUEST_STATUS_LOCKED) {
+                $form_state['values']['request']['status'][0] = MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK;
+              }
+              else {
+                $form_state['values']['request']['status'][0] = MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE;
+              }
+              unset($request_using_room);
+
               $form_state['values']['request']['step'][0] = MFCS_REVIEW_STEP_COMPLETED;
             }
           }
@@ -621,6 +629,8 @@ function mfcs_request_create_0_form_submit($form, &$form_state) {
     $parameters['changed_by'] = $user->uid;
     $parameters['changed_type'] = 'user';
     $parameters['new'] = TRUE;
+    $parameters['status'] = $form_state['values']['request']['status'][0];
+    $parameters['step'] = $form_state['values']['request']['step'][0];
     mfcs_send_workflow_emails($request_id, $parameters);
   }
 

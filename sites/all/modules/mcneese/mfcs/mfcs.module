@@ -4415,6 +4415,8 @@ function mfcs_check_room_availability($room, $date, $time_start, $time_stop, $re
     $query->innerjoin('mfcs_field_dates_date', 'mfdd', 'mct.request_id = mfdd.request_id AND mcd.request_id = mfdd.request_id AND mcd.date = mfdd.revision');
 
     $query->addField('mer', 'id', 'request_id');
+    $query->addField('mfts', 'value', 'status');
+    $query->addField('mftsp', 'value', 'step');
     $query->addField('mfdd', 'value', 'date');
     $query->addField('mcd', 'date', 'date_revision');
     $query->addField('mcd', 'time_start', 'time_start_revision');
@@ -4442,7 +4444,7 @@ function mfcs_check_room_availability($room, $date, $time_start, $time_stop, $re
       return array();
     }
 
-    $request_ids = array();
+    $matched_requests = array();
 
     // the results contain all locked requests that have something in the given room during the given date.
     // however, this does not mention the time, so loop through the times and see if they are all valid.
@@ -4484,7 +4486,7 @@ function mfcs_check_room_availability($room, $date, $time_start, $time_stop, $re
       foreach ($date as $key => $value) {
         // all day requests match, they have NULL for start and stop time values.
         if (is_null($time_start[$key]) && is_null($time_stop[$key])) {
-          $request_ids[] = $result->request_id;
+          $matched_requests[] = $result;
         }
 
         $and = db_and();
@@ -4505,7 +4507,7 @@ function mfcs_check_room_availability($room, $date, $time_start, $time_stop, $re
       $matches = $query->execute()->fetchAll();
 
       foreach ($matches as $match) {
-        $request_ids[] = $match->request_id;
+        $matched_requests[] = $result;
       }
     }
   }
@@ -4514,7 +4516,7 @@ function mfcs_check_room_availability($room, $date, $time_start, $time_stop, $re
     return FALSE;
   }
 
-  return $request_ids;
+  return $matched_requests;
 }
 
 /**
