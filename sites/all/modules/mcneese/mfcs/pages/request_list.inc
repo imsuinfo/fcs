@@ -63,7 +63,7 @@ function mfcs_request_list_0_page($form, &$form_state, $page_number = 0) {
   $items = mfcs_request_load_listing(NULL, FALSE, $page_number * $rows_per_page, $rows_per_page, $sorting);
 
   $rows = array();
-  $total_results = 0;
+  $total_results = count($items);
 
   $columns = array(
     'id' => "ID",
