@@ -107,6 +107,7 @@ function mfcs_request_statistics_0_page($year = NULL, $month = NULL, $day = NULL
     $month = strtolower(date('F', $day_start));
     $year = date('Y', $day_start);
     $day = date('d', $day_start);
+
     mfcs_add_canonical_headers('requests/statistics-0/' . $year . '/' . $month . '/' . $day);
     $markup .= '<h3 class="statistics-title-text">' . "Request Statistics for " . $month_name . " " . $day . ", " . $year . ' <span class="statistics-title-text-note">(generated on ' . $now . ')</span></h3>' . "\n";
 
@@ -168,6 +169,12 @@ function mfcs_request_statistics_load_counts($start, $stop) {
 
     // total
     $the_query = clone($query);
+
+    if (!is_null($start)) {
+      $the_query->condition('mer.created', $start, '>=');
+      $the_query->condition('mer.created', $stop, '<');
+    }
+
     $counts['main']['total'] = $the_query->execute()->fetchField();
 
     if (!is_null($start)) {
@@ -206,6 +213,11 @@ function mfcs_request_statistics_load_counts($start, $stop) {
     $query->addExpression('count(mer.id)');
 
     $query->condition('mfts.value', MFCS_REQUEST_STATUS_DELETED, '<>');
+
+    if (!is_null($start)) {
+      $query->condition('mer.created', $start, '>=');
+      $query->condition('mer.created', $stop, '<');
+    }
 
     // status (locked)
     $the_query = clone($query);
@@ -258,6 +270,11 @@ function mfcs_request_statistics_load_counts($start, $stop) {
     $query->addExpression('count(mer.id)');
 
     $query->condition('mfts.value', MFCS_REQUEST_STATUS_DELETED, '<>');
+
+    if (!is_null($start)) {
+      $query->condition('mer.created', $start, '>=');
+      $query->condition('mer.created', $stop, '<');
+    }
 
     // step (changes required)
     $the_query = clone($query);
@@ -315,6 +332,11 @@ function mfcs_request_statistics_load_counts($start, $stop) {
 
     $query->condition('mfts.value', MFCS_REQUEST_STATUS_DELETED, '<>');
 
+    if (!is_null($start)) {
+      $query->condition('mer.created', $start, '>=');
+      $query->condition('mer.created', $stop, '<');
+    }
+
     // classification (student)
     $the_query = clone($query);
     $the_query->condition('mfrcc.value', MFCS_EVENT_CLASSIFICATION_STUDENT);
@@ -361,6 +383,11 @@ function mfcs_request_statistics_load_counts($start, $stop) {
     $query->addExpression('count(mer.id)');
 
     $query->condition('mfts.value', MFCS_REQUEST_STATUS_DELETED, '<>');
+
+    if (!is_null($start)) {
+      $query->condition('mer.created', $start, '>=');
+      $query->condition('mer.created', $stop, '<');
+    }
 
     // type (athletic)
     $the_query = clone($query);
