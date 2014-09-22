@@ -213,7 +213,7 @@
 include_once DRUPAL_ROOT . '/sites/default/passwords.php';
 
 $databases = array (
-  'fcs' =>
+  'fcs2' =>
   array (
     'default' =>
     array (
@@ -301,10 +301,10 @@ unset($dbs);
  * for you.
  */
 if ($_SERVER['SERVER_PORT'] == 443) {
-  $base_url = 'https://thebe.mcneese.edu/event_workflow_test';  // NO trailing slash!
+  $base_url = 'https://wwwdev.mcneese.edu/fcs';  // NO trailing slash!
 }
 else {
-  $base_url = 'http://thebe.mcneese.edu/event_workflow_test';  // NO trailing slash!
+  $base_url = 'http://wwwdev.mcneese.edu/fcs';  // NO trailing slash!
 }
 
 /**
@@ -667,11 +667,11 @@ $conf['workbench_menu_item_use_normal_path'] = TRUE;
 /**
  *  GNU PG Support
  */
-putenv('GNUPGHOME=/var/www/drupal/event_workflow_test/sites/default/gnupg');
+putenv('GNUPGHOME=/var/www/drupal/sandbox/fcs/sites/default/gnupg');
 $conf['gpg-mail'] = array(
-  'event_workflow@mcneese.edu' => array(
-    'fingerprint' => '735D221DC35DC55767F7B30305257680DDEB1921',
-    'short_id' => 'DDEB1921',
+  'facilities_use@wwwdev.mcneese.edu' => array(
+    'fingerprint' => '75D4F1FD41C485582CD0648E3112BAA0D8BEC67F',
+    'short_id' => 'D8BEC67F',
   ),
 );
 
@@ -687,8 +687,8 @@ unset($env_current_user);
 /**
  * fcs.mcneese.edu specific names.
  */
-$conf['mfcs_site_url'] = 'thebe.mcneese.edu/event_workflow_test';
-$conf['mfcs_email'] = 'event_workflow@mcneese.edu';
+$conf['mfcs_site_url'] = 'wwwdev.mcneese.edu/fcs';
+$conf['mfcs_email'] = 'facilities_use@wwwdev.mcneese.edu';
 $conf['mfcs_name'] = 'McNeese Facilities Use System';
 
 /**
