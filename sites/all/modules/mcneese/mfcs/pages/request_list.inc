@@ -80,24 +80,25 @@ function mfcs_request_list_0_page($form, &$form_state, $page_number = 0) {
   $table = mfcs_build_request_table($items, $rows_per_page, $columns);
   $table['attributes']['class'] = array('mfcs-table-requests', 'mfcs-review_page-table');
 
-  $output .= theme('table', $table);
-
-  $output .= '<div class="request-listing-page-navigator no-print">';
+  $navigation = "";
   if ($page_number > 0) {
     if ($page_number == 1) {
-      $output .= '<a href="' . $base_path . 'requests/list-0" class="request-listing-page-choice request-listing-page-previous no-print" title="Previous Page">Prev</a>';
+      $navigation .= '<a href="' . $base_path . 'requests/list-0" class="request-listing-page-choice request-listing-page-previous no-print" title="Previous Page">Prev</a>';
     }
     else {
       $previous_page = $page_number - 1;
-      $output .= '<a href="' . $base_path . 'requests/list-0/' . $previous_page . '" class="request-listing-page-choice request-listing-page-previous no-print" title="Previous Page">Prev</a>';
+      $navigation .= '<a href="' . $base_path . 'requests/list-0/' . $previous_page . '" class="request-listing-page-choice request-listing-page-previous no-print" title="Previous Page">Prev</a>';
     }
   }
 
   if ($total_results > $rows_per_page) {
     $next_page = $page_number + 1;
-    $output .= '<a href="' . $base_path . 'requests/list-0/' . $next_page . '" class="request-listing-page-choice request-listing-page-next no-print" title="Next Page">Next</a>';
+    $navigation .= '<a href="' . $base_path . 'requests/list-0/' . $next_page . '" class="request-listing-page-choice request-listing-page-next no-print" title="Next Page">Next</a>';
   }
-  $output .= '</div>';
+
+  $output .= '<div class="request-listing-page-navigator request-listing-page-navigator-top no-print">' . $navigation . '</div>';
+  $output .= theme('table', $table);
+  $output .= '<div class="request-listing-page-navigator request-listing-page-navigator-bottom no-print">' . $navigation . '</div>';
 
   return $form;
 }
