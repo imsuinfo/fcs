@@ -147,7 +147,7 @@ function mfcs_table_structure() {
       'allows_null' => TRUE,
     ),
     'unaffiliated' => array(
-      'name' => "Uniffiliated Insurance",
+      'name' => "Unaffiliated Insurance",
       'path' => 'request][insurance][unaffiliated',
       'type' => 'bool',
       'size' => 'tiny',
