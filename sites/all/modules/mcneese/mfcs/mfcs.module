@@ -2749,6 +2749,70 @@ function mfcs_insurance_not_provided_alert_cron() {
     }
   }
 }
+/**
+ * Executes the cron queue to cancel requests older than the current day.
+ *
+ * This requires the ultimate_cron module to function.
+ *
+ * @see mfcs_cronapi()
+ */
+function mfcs_autocancel_old_requests_cron() {
+  $status = array(
+    MFCS_REQUEST_STATUS_UNLOCKED,
+    MFCS_REQUEST_STATUS_LOCKED,
+  );
+
+  $date = strtotime('midnight today');
+
+  $unresolved_requests = array();
+
+  try {
+    $query = db_select('mfcs_requests', 'mer');
+
+    $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
+    $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
+
+    $query->innerjoin('mfcs_current_dates', 'mcd', 'mer.id = mcd.request_id');
+    $query->innerjoin('mfcs_field_dates_date', 'mfdd', 'mcd.request_id = mfdd.request_id AND mcd.date = mfdd.revision');
+
+    $query->addField('mer', 'id', 'id');
+
+    $query->condition('mfts.value', $status, 'IN');
+    $query->condition('mfdd.value', $date, '<');
+
+    $query->distinct();
+
+    $unresolved_requests = $query->execute()->fetchAllAssoc('id');
+  }
+  catch (Exception $ex) {
+    cf_error::on_exception($ex);
+
+    return;
+  }
+
+  if (empty($unresolved_requests)) {
+    return;
+  }
+
+  mfcs_include(MFCS_INCLUDE_WORKFLOW);
+
+  foreach ($unresolved_requests as $request_id => $request_object) {
+    $cancelled = mfcs_workflow_set_status($request_id, MFCS_REQUEST_STATUS_CANCELLED);
+
+    if ($cancelled) {
+      $parameters = array();
+      $parameters['changed_by'] = $user->uid;
+      $parameters['changed_type'] = 'user';
+      $parameters['cancelled'] = TRUE;
+      $parameters['auto-cancelled'] = TRUE;
+      $parameters['auto-cancelled-reason'] = "One or more dates associated with the request are now in the past.";
+      mfcs_send_workflow_emails($request_id, $parameters);
+    }
+    else {
+      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to auto-cancel the request: @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
+    }
+  }
+}
 
 /**
  * Generate an array structure for a specific request item.

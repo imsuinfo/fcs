@@ -670,6 +670,13 @@ function mfcs_hook_cronapi() {
     'enabled' => FALSE,
   );
 
+  $items['mfcs_autocancel_old_requests'] = array(
+    'title' => t("Auto-Cancel Old Reqests"),
+    'callback' => 'mfcs_autocancel_old_requests_cron',
+    'callback arguments' => array(),
+    'enabled' => FALSE,
+  );
+
   return $items;
 }
 

@@ -1306,6 +1306,15 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     }
   }
 
+  $is_auto_cancelled = FALSE;
+  if (array_key_exists('auto-cancelled',  $parameters)) {
+    $is_auto_cancelled = $parameters['auto-cancelled'];
+    if (!is_bool($is_cancelled)) {
+      cf_error::invalid_bool('parameters[auto-cancelled]');
+      return FALSE;
+    }
+  }
+
   $is_uncancelled = FALSE;
   if (array_key_exists('uncancelled',  $parameters)) {
     $is_uncancelled = $parameters['uncancelled'];
@@ -1630,15 +1639,29 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       return FALSE;
     }
   }
-  elseif ($is_cancelled || $is_uncancelled || !is_null($status)) {
+  elseif ($is_cancelled || $is_auto_cancelled || $is_uncancelled || !is_null($status)) {
     if ($is_cancelled || $is_uncancelled || $status == MFCS_REQUEST_STATUS_CANCELLED || $status == MFCS_REQUEST_STATUS_DELETED) {
       $email_params['content'] = "";
       $email_params['markup'] = "";
 
-      if ($is_cancelled || $status == MFCS_REQUEST_STATUS_CANCELLED) {
+      if ($is_cancelled || $is_auto_cancelled || $status == MFCS_REQUEST_STATUS_CANCELLED) {
         $email_params['title_suffix'] = "Cancelled";
         $email_params['content'] .= $changed_by_string . " has cancelled the request.\n";
         $email_params['markup'] .= $changed_by_string . " has cancelled the request.<br>\n";
+
+        if ($is_auto_cancelled) {
+          $email_params['title_suffix'] = "Cancelled (Auto)";
+          $email_params['content'] .= "The request was auto-cancelled";
+
+          if (empty($parameters['auto-cancelled-reason'])) {
+            $email_params['content'] .= ".\n";
+            $email_params['markup'] .= ".<br>\n";
+          }
+          else {
+            $email_params['content'] .= " because: " . $parameters['auto-cancelled-reason'] . "\n";
+            $email_params['markup'] .= " because: " . $parameters['auto-cancelled-reason'] . "<br>\n";
+          }
+        }
       }
       elseif ($is_uncancelled) {
         $email_params['title_suffix'] = "Uncancelled";
