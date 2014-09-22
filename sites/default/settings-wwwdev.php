@@ -217,7 +217,7 @@ $databases = array (
   array (
     'default' =>
     array (
-      'database' => 'fcs',
+      'database' => 'fcs2',
       'username' => 'fcs_user',
       'password' => $dbp['fcs_user'],
       'host' => '192.251.101.223',
@@ -244,7 +244,7 @@ $databases = array (
   ),
 );
 
-$databases['default'] = $databases['fcs'];
+$databases['default'] = $databases['fcs2'];
 unset($dbp);
 
 /**
