@@ -694,7 +694,7 @@ $conf['mfcs_name'] = 'McNeese Facilities Use System';
 /**
  * fcs.mcneese.edu debugging options.
  */
-$conf['fcs_debugging'] = TRUE;
+$conf['fcs_debugging'] = FALSE;
 $conf['fcs_debugging-email_to-debug'] = TRUE;
 $conf['fcs_debugging-email_to-restrict'] = TRUE;
 $conf['fcs_debugging-email_to-prefix'] = "(TESTING) ";
