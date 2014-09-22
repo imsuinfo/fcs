@@ -127,6 +127,16 @@ function mfcs_request_search_0_form($form, &$form_state) {
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
     '#tree' => TRUE,
+    '#attributes' => array(
+      'class' => array(
+        'fieldset_print_as_div',
+      ),
+    ),
+    '#legend_attributes' => array(
+      'class' => array(
+        'no_print_links_as_link',
+      ),
+    ),
   );
 
   $form['simple']['text'] = array(
@@ -287,6 +297,16 @@ function mfcs_request_search_0_form($form, &$form_state) {
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
     '#tree' => TRUE,
+    '#attributes' => array(
+      'class' => array(
+        'fieldset_print_as_div',
+      ),
+    ),
+    '#legend_attributes' => array(
+      'class' => array(
+        'no_print_links_as_link',
+      ),
+    ),
   );
 
   $form['advanced']['sensitive'] = array(
@@ -470,6 +490,20 @@ function mfcs_request_search_0_form($form, &$form_state) {
 
     if ($total_results <= $form['form']['per_page']['#value']) {
       unset($form['advanced']['results']['navigation']['next']);
+    }
+  }
+
+  // tweak printing display based on results
+  $is_empty_simple_search = empty($form_state['simple_search-results']);
+  $is_empty_advanced_search = empty($form_state['advanced_search-results']);
+  if ($is_empty_simple_search || $is_empty_advanced_search) {
+    if ($is_empty_simple_search && !$is_empty_advanced_search) {
+      $form['simple']['#legend_attributes']['class'][] = 'no-print';
+      $form['advanced']['#legend_attributes']['class'][] = 'no-print';
+    }
+    elseif (!$is_empty_simple_search && $is_empty_advanced_search) {
+      $form['simple']['#legend_attributes']['class'][] = 'no-print';
+      $form['advanced']['#legend_attributes']['class'][] = 'no-print';
     }
   }
 
