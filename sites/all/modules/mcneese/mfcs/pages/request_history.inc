@@ -136,6 +136,28 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
           '#markup' => '<a href="' . $base_path . 'requests/view-0/' . $request_id . '/' . MFCS_VIEW_MODE_NORMAL . '/' . $revision_id . '" class="history_item-view_revision-link" title="View this Revision">Revison #' . $revision_id . '</a>',
         );
 
+        $deleted_markup = "";
+        if ($history['top']['status'][0]->value == MFCS_REQUEST_STATUS_DELETED) {
+          $deleted_markup = '<div class="history_item-deleted">';
+
+          if (!empty($revision->message)) {
+            $deleted_markup .= '<strong class="deleted-message-title">Message</strong>:' . "<br>\n";
+            $deleted_markup .= check_plain($revision->message) . "<br>\n";
+          }
+
+          if (!empty($revision->signature)) {
+            $deleted_markup .= '<strong class="deleted-signature-title">Signature</strong>:' . "<br>\n";
+            $deleted_markup .= check_plain($revision->signature) . "<br>\n";
+          }
+
+          $deleted_markup .= '</div>';
+
+          $form['history'][$fieldset_name]['history_item-deleted'] = array(
+            '#markup' => $deleted_markup,
+            '#weight' => -1,
+          );
+        }
+
         if ($revision->revision == 0) {
           $processed_values = array();
           $user_id = NULL;

@@ -144,11 +144,14 @@ function mfcs_workflow_set_step($request_id, $step, $user = NULL) {
  *   The new status to assign to the specified request.
  * @param object|null $user
  *   (optional) If specified, the user to log this change as.
+ * @param array $extra
+ *   (optional) Additional information to save. This is used for the revision
+ *   log message and signature.
  *
  * @return bool
  *   TRUE on success, FALSE otherwise.
  */
-function mfcs_workflow_set_status($request_id, $status, $user = NULL) {
+function mfcs_workflow_set_status($request_id, $status, $user = NULL, $extra = array()) {
   $request = mfcs_load_request_by_id($request_id);
 
   if (empty($request)) {
@@ -166,6 +169,11 @@ function mfcs_workflow_set_status($request_id, $status, $user = NULL) {
 
   if (!is_object($user)) {
     cf_error::invalid_object('user');
+    return FALSE;
+  }
+
+  if (!is_array($extra)) {
+    cf_error::invalid_array('extra');
     return FALSE;
   }
 
@@ -210,6 +218,17 @@ function mfcs_workflow_set_status($request_id, $status, $user = NULL) {
     'user_id' => $user->uid,
   );
 
+  $revisions_has_extras = FALSE;
+  if (!empty($extra['revisions']['message'])) {
+    $mfcs_request_revisions['message'] = $extra['revisions']['message'];
+    $revisions_has_extras = TRUE;
+  }
+
+  if (!empty($extra['revisions']['signature'])) {
+    $mfcs_request_revisions['signature'] = $extra['revisions']['signature'];
+    $revisions_has_extras = TRUE;
+  }
+
   $status_revision = $request['current']['top']['status'] + 1;
 
   $mfcs_current_top = array(
@@ -233,7 +252,17 @@ function mfcs_workflow_set_status($request_id, $status, $user = NULL) {
     $query->fields($mfcs_requests);
     $query->execute();
 
-    if (!$processed_mfcs_request_revisions) {
+    if ($processed_mfcs_request_revisions) {
+      if ($revisions_has_extras) {
+        $query = db_update('mfcs_request_revisions');
+        $query->condition('id', $request_id);
+        $query->condition('date', REQUEST_TIME);
+        $query->condition('user_id', $user->uid);
+        $query->fields($mfcs_requests);
+        $query->execute();
+      }
+    }
+    else {
       $query = db_insert('mfcs_request_revisions');
       $query->fields($mfcs_request_revisions);
       $query->execute();
@@ -1350,6 +1379,15 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     }
   }
 
+  $is_deleted = FALSE;
+  if (array_key_exists('deleted',  $parameters)) {
+    $is_deleted = $parameters['deleted'];
+    if (!is_bool($is_deleted)) {
+      cf_error::invalid_bool('parameters[deleted]');
+      return FALSE;
+    }
+  }
+
   $filename = NULL;
   if (array_key_exists('filename',  $parameters)) {
     $filename = $parameters['filename'];
@@ -1639,7 +1677,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       return FALSE;
     }
   }
-  elseif ($is_cancelled || $is_auto_cancelled || $is_uncancelled || !is_null($status)) {
+  elseif ($is_cancelled || $is_auto_cancelled || $is_uncancelled || $is_deleted || !is_null($status)) {
     if ($is_cancelled || $is_uncancelled || $status == MFCS_REQUEST_STATUS_CANCELLED || $status == MFCS_REQUEST_STATUS_DELETED) {
       $email_params['content'] = "";
       $email_params['markup'] = "";
@@ -1668,10 +1706,15 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
         $email_params['content'] .= $changed_by_string . " has uncancelled the request.\n";
         $email_params['markup'] .= $changed_by_string . " has uncancelled the request.<br>\n";
       }
-      elseif ($status == MFCS_REQUEST_STATUS_DELETED) {
+      elseif ($is_deleted || $status == MFCS_REQUEST_STATUS_DELETED) {
         $email_params['title_suffix'] = "Deleted";
         $email_params['content'] .= $changed_by_string . " has deleted the request.\n";
         $email_params['markup'] .= $changed_by_string . " has deleted the request.<br>\n";
+
+        if (!empty($parameters['deleted-message'])) {
+          $email_params['content'] .= "\n" . $parameters['deleted-message'] . "\n";
+          $email_params['markup'] .= "<br>\n" . $parameters['deleted-message'] . "<br>\n";
+        }
       }
 
       $email_params['content'] .= $standard_content;

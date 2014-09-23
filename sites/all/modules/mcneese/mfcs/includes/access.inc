@@ -63,22 +63,7 @@ function mfcs_page_request_access_operation_create(&$request_ids, &$processed, &
     }
 
     // create operations on a specific request is actually a clone/copy operation, which only needs view access to clone/copy.
-    $access_results = mfcs_page_request_access('view', $request_ids, $user);
-
-    if (is_array($access_results)) {
-      foreach ($access_results as $id => $access_result) {
-        $access[$id] = $access_result;
-        $processed[$id] = $access_result;
-      }
-    }
-    else {
-      foreach ($request_ids as $id) {
-        $access[$id] = FALSE;
-        $processed[$id] = FALSE;
-      }
-    }
-
-    return TRUE;
+    return mfcs_page_request_access_operation_view($request_ids, $processed, $access, $roles, $user);
   }
 
   if (array_key_exists(NULL, $request_ids)) {
@@ -962,7 +947,10 @@ function mfcs_page_request_access_operation_history(&$request_ids, &$processed, 
       $query->addField('mer', 'id', 'id');
 
       $query->condition('mer.id', $request_ids, 'IN');
-      $query->condition('mfts.value', MFCS_REQUEST_STATUS_DELETED, '<>');
+
+      if (!$roles['administer']) {
+        $query->condition('mfts.value', MFCS_REQUEST_STATUS_DELETED, '<>');
+      }
 
       $access_results = $query->execute()->fetchAllAssoc('id');
 
@@ -1102,6 +1090,121 @@ function mfcs_page_request_access_operation_agreement(&$request_ids, &$processed
 
       return FALSE;
     }
+  }
+
+  if (array_key_exists(NULL, $request_ids)) {
+    $access[NULL] = FALSE;
+    $processed[NULL] = FALSE;
+    return TRUE;
+  }
+
+  foreach ($request_ids as $request_id) {
+    $access[$request_id] = FALSE;
+    $processed[$request_id] = FALSE;
+  }
+
+  return TRUE;
+}
+
+/**
+ * Perform the access control check for the delete operation.
+ *
+ * @param array $request_ids
+ *   The array of requests ids yet to be processed.
+ * @param array $processed
+ *   The array of already processed request ids and the access results.
+ * @param array $access
+ *   The static variable representing the processed array used to increase
+ *   performance.
+ * @param array roles
+ *   An array of relevant roles associated with access control for requests.
+ * @param object user
+ *   The drupal user object to check access against.
+ *
+ * @return bool
+ *   TRUE on successfull execution, FALSE otherwise.
+ *   The return results do not represent the access control results.
+ */
+function mfcs_page_request_access_operation_delete(&$request_ids, &$processed, &$access, $roles, $user) {
+  if (!is_array($request_ids)) {
+    cf_error::invalid_array('request_ids');
+    return FALSE;
+  }
+
+  if (!is_array($processed)) {
+    cf_error::invalid_array('processed');
+    return FALSE;
+  }
+
+  if (!is_array($access)) {
+    cf_error::invalid_array('access');
+    return FALSE;
+  }
+
+  if (!is_array($roles)) {
+    cf_error::invalid_array('roles');
+    return FALSE;
+  }
+
+  if (!is_object($user)) {
+    cf_error::invalid_object('user');
+    return FALSE;
+  }
+
+  if (!$roles['administer']) {
+    if (array_key_exists(NULL, $request_ids)) {
+      $access[NULL] = FALSE;
+      $processed[NULL] = FALSE;
+      return FALSE;
+    }
+
+    foreach ($request_ids as $request_id) {
+      $access[$request_id] = FALSE;
+      $processed[$request_id] = FALSE;
+    }
+
+    return $request_ids;
+  }
+
+  // deny delete access to already deleted requests.
+  try {
+    $query = db_select('mfcs_requests', 'mer');
+
+    $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
+    $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
+
+    $query->addField('mer', 'id', 'id');
+
+    $query->condition('mer.id', $request_ids, 'IN');
+    $query->condition('mfts.value', MFCS_REQUEST_STATUS_DELETED);
+
+    $access_results = $query->execute()->fetchAllAssoc('id');
+
+    if (is_array($access_results)) {
+      $request_ids_copy = $request_ids;
+      foreach ($request_ids_copy as $id => $value) {
+        if (array_key_exists($id, $access_results)) {
+          $processed[$id] = FALSE;
+          $access[$id] = FALSE;
+          unset($request_ids[$id]);
+        }
+        else {
+          $processed[$id] = TRUE;
+          $access[$id] = TRUE;
+          unset($request_ids[$id]);
+        }
+      }
+      unset($request_ids_copy);
+
+      // looks like all of the requests have been processed, so return.
+      if (empty($request_ids)) {
+        return TRUE;
+      }
+    }
+  }
+  catch (Exception $ex) {
+    cf_error::on_exception($ex);
+    return FALSE;
   }
 
   if (array_key_exists(NULL, $request_ids)) {

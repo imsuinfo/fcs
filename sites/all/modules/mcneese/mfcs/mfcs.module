@@ -380,6 +380,7 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
     'manager' => user_access('mfcs manage', $user),
     'reviewer' => user_access('mfcs review', $user),
     'requester' => user_access('mfcs request', $user),
+    'administer' => user_access('mfcs administer', $user),
   );
 
   mfcs_include(MFCS_INCLUDE_ACCESS);
@@ -503,22 +504,18 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
     return $processed[$request_id];
   }
   elseif ($operation == 'delete') {
-    // @todo: enable once delete support is implemented.
-    /*
-    if ($roles['manager']) {
-      if (is_array($request_id)) {
-        foreach ($request_ids as $request_id) {
-          $access[$request_id] = TRUE;
-          $processed[$request_id] = TRUE;
-        }
+    $operation_result = mfcs_page_request_access_operation_delete($request_ids, $processed, $access, $roles, $user);
 
-        return $processed;
-      }
-
-      $access[$request_id] = TRUE;
-      return TRUE;
+    // if something went wrong with the operation check, return FALSE but do not cache.
+    if ($operation_result === FALSE) {
+      return FALSE;
     }
-    */
+
+    if (is_array($request_id)) {
+      return $processed;
+    }
+
+    return $processed[$request_id];
   }
   elseif ($operation == 'cancel') {
     $operation_result = mfcs_page_request_access_operation_cancel($request_ids, $processed, $access, $roles, $user);
@@ -685,6 +682,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
   $manager = user_access('mfcs manage', $user);
   $reviewer = user_access('mfcs review', $user);
   $requester = user_access('mfcs request', $user);
+  $administer = user_access('mfcs administer', $user);
 
   if ($operation == 'create') {
     if ($request['top']['status'][0]->value == MFCS_REQUEST_STATUS_DELETED) {
@@ -828,9 +826,11 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
       return FALSE;
     }
 
-    if ($manager) {
-      $access[$request_id] = TRUE;
-      return TRUE;
+    if ($operation == 'delete') {
+      if ($roles['administer']) {
+        $access[$request_id] = TRUE;
+        return TRUE;
+      }
     }
   }
   elseif ($operation == 'cancel') {
@@ -891,6 +891,11 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
     }
   }
   elseif ($operation == 'history') {
+    if ($request['top']['status'][0]->value == MFCS_REQUEST_STATUS_DELETED && !$administer) {
+      $access[$request_id] = FALSE;
+      return FALSE;
+    }
+
     if ($manager) {
       $access[$request_id] = TRUE;
       return TRUE;
@@ -3555,7 +3560,7 @@ function mfcs_convert_value_to_database_format($value, $method, $option = array(
  *
  * @param string $value
  *   The date or time string to convert.
-* @param string $method
+ * @param string $method
  *   The method to use for converting.
  * @param string|array $option
  *   (optional) Additional options to pass to the method for conversion.
@@ -3665,9 +3670,11 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL, $revision_id
     $query->condition('id', $request_id);
 
     if (!is_null($revision_id)) {
-      $query->innerJoin('mfcs_request_revisions', 'mrr', 'mer.id = mrr.request_id');
-      $query->addField('mrr', 'date', 'revision_date');
-      $query->condition('mrr.revision', $revision_id);
+      $query->innerJoin('mfcs_request_revisions', 'mrv', 'mer.id = mrv.request_id');
+      $query->addField('mrv', 'revision', 'revision');
+      $query->addField('mrv', 'date', 'revision_date');
+      $query->addField('mrv', 'message', 'revision_message');
+      $query->condition('mrv.revision', $revision_id);
     }
 
     $results = $query->execute()->fetchAll();
@@ -3885,6 +3892,8 @@ function mfcs_load_request_by_timestamp($request_id, $timestamp, $desired_fields
 
     $query->fields('mer');
     $query->addField('mrv', 'revision', 'revision');
+    $query->addField('mrv', 'date', 'revision_date');
+    $query->addField('mrv', 'message', 'revision_message');
 
     $query->condition('id', $request_id);
     $query->condition('mrv.date', $timestamp);
@@ -3897,7 +3906,7 @@ function mfcs_load_request_by_timestamp($request_id, $timestamp, $desired_fields
     $request['mer'] = array();
     if (!empty($results)) {
       foreach ($results as $index => $mer) {
-        foreach (array('id', 'user_id', 'created', 'updated') as $key) {
+        foreach (array('id', 'user_id', 'created', 'updated', 'revision_date', 'revision_message') as $key) {
           if (!isset($request['mer'][$key][$mer->revision])) {
             $request['mer'][$key][$mer->revision] = new stdClass();
           }
@@ -5816,7 +5825,8 @@ function mfcs_build_request_table($items, $max_rows, $columns = NULL, $user = NU
   $can_review_requests = mfcs_page_request_access('review', $item_ids, $user);
   $can_log_requests = mfcs_page_request_access('log', $item_ids, $user);
   $can_history_requests = mfcs_page_request_access('history', $item_ids, $user);
-  $can_delete_requests = mfcs_page_request_access('delete', $item_ids, $user);
+  #$can_delete_requests = mfcs_page_request_access('delete', $item_ids, $user);
+  $can_delete_requests = FALSE;
 
   if (!is_array($can_create_requests)) {
     $can_create_requests = array();

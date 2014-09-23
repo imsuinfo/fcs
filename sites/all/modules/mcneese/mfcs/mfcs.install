@@ -210,6 +210,20 @@ function mfcs_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
+      'message' => array(
+        'description' => $t("Represents a conditionally optional message associated with the revision."),
+        'type' => 'text',
+        'size' => 'big',
+        'serialize' => FALSE,
+        'not null' => FALSE,
+      ),
+      'signature' => array(
+        'description' => $t("Represents a PGP (or similar) signature for the message."),
+        'type' => 'text',
+        'size' => 'big',
+        'serialize' => FALSE,
+        'not null' => FALSE,
+      ),
     ),
     'primary key' => array('request_id', 'revision'),
     'unique keys' => array(

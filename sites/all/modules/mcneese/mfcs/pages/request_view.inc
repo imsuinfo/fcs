@@ -1599,6 +1599,9 @@ function mfcs_request_view_0_page_setup_group_path(&$form, $request_id, $group, 
     if ($group != 'request') {
       $show['clone'] = FALSE;
     }
+    elseif ($request['top']['status'][0]->value == MFCS_REQUEST_STATUS_DELETED) {
+      $show['clone'] = FALSE;
+    }
   }
 
   if ($show['ical']) {
