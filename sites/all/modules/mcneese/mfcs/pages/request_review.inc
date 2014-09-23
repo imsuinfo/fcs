@@ -38,35 +38,6 @@ function mfcs_request_review_0_page($form, &$form_state, $page_number = 0) {
 
   $output = &$form['output']['#markup'];
 
-
-  // load sorting information
-  $sorting = array();
-  $order = NULL;
-  if (isset($_GET['order'])) {
-    $order = strtolower($_GET['order']);
-    $sorting['order'] = $order;
-  }
-
-  $sort = NULL;
-  if (isset($_GET['sort'])) {
-    $sort = strtoupper($_GET['sort']);
-
-    if ($sort != 'ASC' && $sort != 'DESC') {
-      $sort = NULL;
-    }
-    else {
-      $sorting['sort'] = $sort;
-    }
-  }
-
-
-  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
-
-  $items = mfcs_request_load_listing(NULL, FALSE, $page_number * $rows_per_page, $rows_per_page, $sorting, TRUE);
-
-  $rows = array();
-  $total_results = count($items);
-
   $columns = array(
     'id' => "ID",
     'title' => "Title",
@@ -79,6 +50,50 @@ function mfcs_request_review_0_page($form, &$form_state, $page_number = 0) {
     'operations' => "Operations"
   );
 
+
+  // load sorting information
+  $sorting = array();
+  $order = NULL;
+  if (isset($_GET['order'])) {
+    $order = strtolower($_GET['order']);
+    $sorting['order'] = $order;
+
+    if (array_key_exists($order, $columns)) {
+      $url_extras = 'order=' . $columns[$order];
+    }
+  }
+
+  $sort = NULL;
+  if (isset($_GET['sort'])) {
+    $sort = strtoupper($_GET['sort']);
+
+    if ($sort != 'ASC' && $sort != 'DESC') {
+      $sort = NULL;
+    }
+    else {
+      $sorting['sort'] = $sort;
+
+      if (is_null($url_extras)) {
+        $url_extras = 'sort=' . $_GET['sort'];
+      }
+      else {
+        $url_extras = 'sort=' . $_GET['sort'] . '&' . $url_extras;
+      }
+    }
+  }
+
+  if (!empty($url_extras)) {
+    $url_extras = '?' . $url_extras;
+  }
+
+
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+
+  $items = mfcs_request_load_listing(NULL, FALSE, $page_number * $rows_per_page, $rows_per_page, $sorting, TRUE);
+
+  $rows = array();
+  $total_results = count($items);
+
   $table = mfcs_build_request_table($items, $rows_per_page, $columns);
   $table['attributes']['class'] = array('mfcs-table-requests', 'mfcs-review_page-table');
 
@@ -87,17 +102,17 @@ function mfcs_request_review_0_page($form, &$form_state, $page_number = 0) {
   $output .= '<div class="request-listing-page-navigator">';
   if ($page_number > 0) {
     if ($page_number == 1) {
-      $output .= '<a href="' . $base_path . 'requests/review-0" class="request-listing-page-choice request-listing-page-previous" title="Previous Page">Prev</a>';
+      $output .= '<a href="' . $base_path . 'requests/review-0' . $url_extras . '" class="request-listing-page-choice request-listing-page-previous" title="Previous Page">Prev</a>';
     }
     else {
       $previous_page = $page_number - 1;
-      $output .= '<a href="' . $base_path . 'requests/review-0/' . $previous_page . '" class="request-listing-page-choice request-listing-page-previous" title="Previous Page">Prev</a>';
+      $output .= '<a href="' . $base_path . 'requests/review-0/' . $previous_page . $url_extras . '" class="request-listing-page-choice request-listing-page-previous" title="Previous Page">Prev</a>';
     }
   }
 
   if ($total_results > $rows_per_page) {
     $next_page = $page_number + 1;
-    $output .= '<a href="' . $base_path . 'requests/review-0/' . $next_page . '" class="request-listing-page-choice request-listing-page-next" title="Next Page">Next</a>';
+    $output .= '<a href="' . $base_path . 'requests/review-0/' . $next_page . $url_extras . '" class="request-listing-page-choice request-listing-page-next" title="Next Page">Next</a>';
   }
   $output .= '</div>';
 
