@@ -144,12 +144,12 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
 
           if (!empty($revision->message)) {
             $deleted_markup .= '<strong class="deleted-message-title">Message</strong>:' . "<br>\n";
-            $deleted_markup .= check_plain($revision->message) . "<br>\n";
+            $deleted_markup .= '<pre class="history_item-message-preserved">' . $revision->message . "</pre>\n";
           }
 
           if (!empty($revision->signature)) {
             $deleted_markup .= '<strong class="deleted-signature-title">Signature</strong>:' . "<br>\n";
-            $deleted_markup .= check_plain($revision->signature) . "<br>\n";
+            $deleted_markup .= '<pre class="history_item-signature-preserved">' . $revision->signature . "</pre>\n";
           }
 
           $deleted_markup .= '</div>';
