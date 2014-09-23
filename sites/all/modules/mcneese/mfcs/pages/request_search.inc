@@ -835,7 +835,25 @@ function mfcs_request_search_0_form_validate_target($form, &$form_state, &$state
   }
   elseif ($field['type'] == 'date') {
     if ($state['date_mode'] == 'd') {
-      if (!cf_is_integer($state['search']) || $state['search'] < 1 || $state['search'] > 31) {
+      if (!cf_is_integer($state['search'])) {
+        $search_date = strtolower($state['search']);
+        $search_day = FALSE;
+
+        if ($search_date == 'today' || $search_date == 'yesterday' || $search_date == 'tomorrow') {
+          $search_day = strtotime($search_date);
+        }
+
+        if ($search_day === FALSE) {
+          form_set_error(implode('][', $path_array), t('@value is not a valid day.', array('@value' => $state['search'])));
+        }
+        else {
+          $state['search'] = date('d', $search_day);
+        }
+
+        unset($search_date);
+        unset($search_day);
+      }
+      elseif ($state['search'] < 1 || $state['search'] > 31) {
         form_set_error(implode('][', $path_array), t('@value is not a valid day.', array('@value' => $state['search'])));
       }
     }
