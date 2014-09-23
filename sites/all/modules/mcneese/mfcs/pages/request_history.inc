@@ -132,9 +132,11 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
           ),
         );
 
-        $form['history'][$fieldset_name]['history_item-view_revision-link'] = array(
-          '#markup' => '<a href="' . $base_path . 'requests/view-0/' . $request_id . '/' . MFCS_VIEW_MODE_NORMAL . '/' . $revision_id . '" class="history_item-view_revision-link" title="View this Revision">Revison #' . $revision_id . '</a>',
-        );
+        if ($request['top']['status'][0]->value != MFCS_REQUEST_STATUS_DELETED) {
+          $form['history'][$fieldset_name]['history_item-view_revision-link'] = array(
+            '#markup' => '<a href="' . $base_path . 'requests/view-0/' . $request_id . '/' . MFCS_VIEW_MODE_NORMAL . '/' . $revision_id . '" class="history_item-view_revision-link" title="View this Revision">Revision #' . $revision_id . '</a>',
+          );
+        }
 
         $deleted_markup = "";
         if ($history['top']['status'][0]->value == MFCS_REQUEST_STATUS_DELETED) {
