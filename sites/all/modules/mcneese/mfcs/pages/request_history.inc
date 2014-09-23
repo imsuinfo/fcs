@@ -139,7 +139,7 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
         }
 
         $deleted_markup = "";
-        if ($history['top']['status'][0]->value == MFCS_REQUEST_STATUS_DELETED) {
+        if ($request['top']['status'][0]->value == MFCS_REQUEST_STATUS_DELETED) {
           $deleted_markup = '<div class="history_item-deleted">';
 
           if (!empty($revision->message)) {
