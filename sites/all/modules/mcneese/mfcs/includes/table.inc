@@ -20,6 +20,25 @@ function mfcs_table_structure() {
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
   $structure = array();
+  $structure['mer'] = array(
+    'created' => array(
+      'path' => 'request][created',
+      'name' => "Created On",
+      'type' => 'timestamp',
+      'size' => 'big',
+      'storage' => 'date_popup',
+      'manual_processing' => TRUE,
+    ),
+    'updated' => array(
+      'path' => 'request][updated',
+      'name' => "Updated On",
+      'type' => 'timestamp',
+      'size' => 'big',
+      'storage' => 'date_popup',
+      'manual_processing' => TRUE,
+    ),
+  );
+
   $structure['top'] = array(
     'status' => array(
       'path' => 'request][status',

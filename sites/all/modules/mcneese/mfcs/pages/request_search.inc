@@ -833,7 +833,7 @@ function mfcs_request_search_0_form_validate_target($form, &$form_state, &$state
       form_set_error(implode('][', $path_array), t('@value is not a valid integer.', array('@value' => $state['search'])));
     }
   }
-  elseif ($field['type'] == 'date') {
+  elseif ($field['type'] == 'date' || $field['type'] == 'timestamp') {
     if ($state['date_mode'] == 'd') {
       if (!cf_is_integer($state['search'])) {
         $search_date = strtolower($state['search']);
@@ -1608,7 +1608,7 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
     ),
   );
 
-  if ($field['type'] == 'number' || $field['type'] == 'date') {
+  if ($field['type'] == 'number' || $field['type'] == 'date' || $field['type'] == 'timestamp') {
     $operators = array(
       MFCS_OPERATOR_LESS_THAN => "Less Than",
       MFCS_OPERATOR_LESS_THAN_EQUAL => "Less Than or Equal To",
@@ -1948,7 +1948,7 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
     $location['targets'][$target_name][$target_delta]['search']['#type'] = 'select';
     $location['targets'][$target_name][$target_delta]['search']['#options'] = $venue_coordinator_options;
   }
-  elseif ($field['type'] == 'date') {
+  elseif ($field['type'] == 'date' || $field['type'] == 'timestamp') {
     $location['targets'][$target_name][$target_delta]['search']['#type'] = 'textfield';
     $location['targets'][$target_name][$target_delta]['search']['#size'] = 20;
 
@@ -1973,6 +1973,11 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
         ),
       ),
     );
+
+    if ($field['type'] == 'timestamp') {
+      unset($location['targets'][$target_name][$target_delta]['date_mode']['#options']['m']);
+      unset($location['targets'][$target_name][$target_delta]['date_mode']['#options']['d']);
+    }
 
     $form['form']['conditionally_required']['#value'][0][$target_name][] = &$location['targets'][$target_name][$target_delta]['date_mode'];
   }
@@ -2233,7 +2238,7 @@ function mfcs_request_search_0_form_build_search_target($structure, $target_name
       $search['and_' . $target_delta . '_field'] = $and;
     }
   }
-  elseif ($field['type'] == 'date') {
+  elseif ($field['type'] == 'date' || $field['type'] == 'timestamp') {
     $column_name = 'value';
 
     $date_mode = 'y/m/d';
