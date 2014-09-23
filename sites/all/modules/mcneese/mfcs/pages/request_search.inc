@@ -835,13 +835,14 @@ function mfcs_request_search_0_form_validate_target($form, &$form_state, &$state
   }
   elseif ($field['type'] == 'date' || $field['type'] == 'timestamp') {
     if ($state['date_mode'] == 'd') {
-      if (!cf_is_integer($state['search'])) {
-        $search_date = strtolower($state['search']);
-        $search_day = FALSE;
-
-        if ($search_date == 'today' || $search_date == 'yesterday' || $search_date == 'tomorrow') {
-          $search_day = strtotime($search_date);
+      if (cf_is_integer($state['search'])) {
+        if ($state['search'] < 1 || $state['search'] > 31) {
+          form_set_error(implode('][', $path_array), t('@value is not a valid day.', array('@value' => $state['search'])));
         }
+      }
+      else {
+        $search_date = trim(strtolower($state['search']));
+        $search_day = strtotime($search_date);
 
         if ($search_day === FALSE) {
           form_set_error(implode('][', $path_array), t('@value is not a valid day.', array('@value' => $state['search'])));
@@ -852,9 +853,6 @@ function mfcs_request_search_0_form_validate_target($form, &$form_state, &$state
 
         unset($search_date);
         unset($search_day);
-      }
-      elseif ($state['search'] < 1 || $state['search'] > 31) {
-        form_set_error(implode('][', $path_array), t('@value is not a valid day.', array('@value' => $state['search'])));
       }
     }
     elseif ($state['date_mode'] == 'm') {
@@ -870,9 +868,9 @@ function mfcs_request_search_0_form_validate_target($form, &$form_state, &$state
           form_set_error(implode('][', $path_array), t('@value is not a valid month.', array('@value' => $state['search'])));
         }
         else {
-          $month_full = strtolower(date('F', $stamp));
-          $month_short = strtolower(date('M', $stamp));
-          $month_value = strtolower($state['search']);
+          $month_full = trim(strtolower(date('F', $stamp)));
+          $month_short = trim(strtolower(date('M', $stamp)));
+          $month_value = trim(strtolower($state['search']));
 
           if ($month_value != $month_full && $month_value != $month_short) {
             form_set_error(implode('][', $path_array), t('@value is not a valid month.', array('@value' => $state['search'])));
@@ -882,7 +880,18 @@ function mfcs_request_search_0_form_validate_target($form, &$form_state, &$state
     }
     elseif ($state['date_mode'] == 'y') {
       if (!cf_is_integer($state['search'])) {
-        form_set_error(implode('][', $path_array), t('@value is not a valid year.', array('@value' => $state['search'])));
+        $search_date = trim(strtolower($state['search']));
+        $search_year = strtotime($search_date);
+
+        if ($search_day === FALSE) {
+          form_set_error(implode('][', $path_array), t('@value is not a valid year.', array('@value' => $state['search'])));
+        }
+        else {
+          $state['search'] = date('Y', $search_year);
+        }
+
+        unset($search_date);
+        unset($search_year);
       }
     }
     elseif ($state['date_mode'] == 'y/m/d') {
@@ -896,7 +905,18 @@ function mfcs_request_search_0_form_validate_target($form, &$form_state, &$state
         }
       }
       else {
-        form_set_error(implode('][', $path_array), t('@value is not a valid YYYY/MM/DD date.', array('@value' => $state['search'])));
+        $search_date = trim(strtolower($state['search']));
+        $search_day = strtotime($search_date);
+
+        if ($search_day === FALSE) {
+          form_set_error(implode('][', $path_array), t('@value is not a valid YYYY/MM/DD date.', array('@value' => $state['search'])));
+        }
+        else {
+          $state['search'] = date('Y/m/d', $search_day);
+        }
+
+        unset($search_date);
+        unset($search_day);
       }
     }
     elseif ($state['date_mode'] == 'y/m') {
@@ -910,7 +930,18 @@ function mfcs_request_search_0_form_validate_target($form, &$form_state, &$state
         }
       }
       else {
-        form_set_error(implode('][', $path_array), t('@value is not a valid YYYY/MM date.', array('@value' => $state['search'])));
+        $search_date = trim(strtolower($state['search']));
+        $search_day = strtotime($search_date);
+
+        if ($search_day === FALSE) {
+          form_set_error(implode('][', $path_array), t('@value is not a valid YYYY/MM date.', array('@value' => $state['search'])));
+        }
+        else {
+          $state['search'] = date('Y/m', $search_day);
+        }
+
+        unset($search_date);
+        unset($search_day);
       }
     }
   }
