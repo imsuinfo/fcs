@@ -5389,7 +5389,9 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
 
       $found = array();
       foreach ($ordered as $key => $fields) {
-        $found = array_merge($found, $fields);
+        foreach ($fields as $field_key => $field) {
+          $found[$field_key] = $field;
+        }
       }
     }
   }
