@@ -78,7 +78,7 @@ function mfcs_request_search_0_form($form, &$form_state) {
   mfcs_include(MFCS_INCLUDE_TABLE);
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
-  $structure = mfcs_table_structure();
+  $structure = mfcs_table_structure(TRUE);
   $presentation = mfcs_table_presentation();
 
   $possible_targets = array();
@@ -1044,7 +1044,7 @@ function mfcs_request_search_0_form_submit($form, &$form_state) {
 
     mfcs_include(MFCS_INCLUDE_TABLE);
 
-    $structure = mfcs_table_structure();
+    $structure = mfcs_table_structure(TRUE);
 
     if (empty($form_state['values']['advanced']['targets'])) {
       $form_state['advanced_search-results'] = array();

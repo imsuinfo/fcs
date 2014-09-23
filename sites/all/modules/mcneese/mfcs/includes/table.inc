@@ -13,31 +13,41 @@
 /**
  * Returns a list of secondary tables and their structure.
  *
+ * @param bool $include_mer
+ *   (optional) Provided as a means to allow for utilizing the mfcs_requests
+ *   table that is generally referred to as mer.
+ *   This is optional to prevent problems with code not expecting the mer
+ *   expecting the mer table to exist can continue to function without
+ *   further alterations to the code.
+ *
  * @return array
  *  A list of secondary tables and their structure.
  */
-function mfcs_table_structure() {
+function mfcs_table_structure($include_mer = FALSE) {
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
   $structure = array();
-  $structure['mer'] = array(
-    'created' => array(
-      'path' => 'request][created',
-      'name' => "Created On",
-      'type' => 'timestamp',
-      'size' => 'big',
-      'storage' => 'date_popup',
-      'manual_processing' => TRUE,
-    ),
-    'updated' => array(
-      'path' => 'request][updated',
-      'name' => "Updated On",
-      'type' => 'timestamp',
-      'size' => 'big',
-      'storage' => 'date_popup',
-      'manual_processing' => TRUE,
-    ),
-  );
+
+  if ($include_mer) {
+    $structure['mer'] = array(
+      'created' => array(
+        'path' => 'request][created',
+        'name' => "Created On",
+        'type' => 'timestamp',
+        'size' => 'big',
+        'storage' => 'date_popup',
+        'manual_processing' => TRUE,
+      ),
+      'updated' => array(
+        'path' => 'request][updated',
+        'name' => "Updated On",
+        'type' => 'timestamp',
+        'size' => 'big',
+        'storage' => 'date_popup',
+        'manual_processing' => TRUE,
+      ),
+    );
+  }
 
   $structure['top'] = array(
     'status' => array(
