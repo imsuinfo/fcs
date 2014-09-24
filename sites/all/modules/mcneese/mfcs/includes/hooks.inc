@@ -425,6 +425,32 @@ function mfcs_hook_menu() {
     'tab_root' => 'requests',
   );
 
+  $items['requests/ical-0/year'] = array(
+    'title' => "Request iCal",
+    'description' => "Request iCal - Year",
+    'page callback' => 'mfcs_request_ical_year_0_page',
+    'page arguments' => array(NULL, NULL),
+    'file' => 'request_ical.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('list'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
+
+  $items['requests/ical-0/year/%'] = array(
+    'title' => "Request iCal",
+    'description' => "Requests iCal - Year",
+    'page callback' => 'mfcs_request_ical_year_0_page',
+    'page arguments' => array(3, 4),
+    'file' => 'request_ical.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('list'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
+
   $items['requests/ical-0/month'] = array(
     'title' => "Request iCal",
     'description' => "Request iCal - Month",

@@ -15,6 +15,106 @@
  *
  * @param int $year
  *   (optional) When specified, represents the year.
+ *
+ * @return string
+ *   The HTML output representing the page.
+ */
+function mfcs_request_ical_year_0_page($year = NULL) {
+  if (!is_null($year) && !cf_is_integer($year)) {
+    cf_error::invalid_integer('year');
+
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  global $base_url;
+
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+  mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
+
+  $parameter_year = FALSE;
+
+  if (is_null($year)) {
+    $year_start = strtotime('midnight first day of January', REQUEST_TIME);
+    $year_end = strtotime('midnight last day of December', REQUEST_TIME);
+    $year_stop = strtotime('midnight tomorrow', $year_end);
+  }
+  else {
+    $parameter_year = TRUE;
+    $current_date = mfcs_miscellaneous_determine_current_date($year, NULL, NULL);
+
+    $year_start = strtotime('midnight first day of January ' . $current_date['year']);
+    $year_end = strtotime('midnight last day of December ' . $current_date['year']);
+    $year_stop = strtotime('midnight tomorrow', $year_end);
+  }
+
+  $year = date('Y', $year_start);
+  mfcs_add_canonical_headers('requests/ical-0/year/' . $year);
+
+  $search = mfcs_miscellaneous_generate_requests_by_date_search($year_start, $year_stop);
+
+  $sorting = array(
+    'order' => 'date',
+    'sort' => 'ASC',
+  );
+
+  $extra_fields = mfcs_request_ical_generate_extra_fields();
+
+  $results = mfcs_request_load_listing($search, FALSE, 0, 0, $sorting, NULL, $extra_fields);
+
+  $ical = FALSE;
+  if ($results !== FALSE) {
+    mfcs_include(MFCS_INCLUDE_ICAL);
+
+    $ical = mfcs_ical_generate($results, $year_start, $year_stop);
+  }
+
+  if ($ical === FALSE) {
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  $GLOBALS['devel_shutdown'] = FALSE;
+
+  // make sure to perform output buffer (if possible) to reduce chances of "headers already sent" issues.
+  $ob_level = ob_get_level();
+  for ($i = 0; $i < $ob_level; $i++) {
+    ob_clean();
+  }
+  ob_start();
+
+  $filename = 'mcneese-facilities_use.ics';
+  $content_location = $base_url . '/requests/ical-0/year';
+
+  if ($parameter_year) {
+    $filename = 'mcneese-facilities_use-' . $year . '.ics';
+    $content_location .= '/' . $year;
+  }
+
+  header('HTTP/1.1 200 OK', TRUE, 200);
+  header('Content-Type: text/plain');
+  header('Content-Length: ' . strlen($ical));
+  header('Content-Transfer-Encoding: binary');
+  #header('Content-type: text/plain; charset=utf-8');
+  header('Content-type: text/calendar; charset=utf-8');
+  header('Content-Disposition: inline; filename="' . $filename . '"');
+  header('Content-Description: File Transfer');
+  header('Content-Location: ' . $content_location);
+  header('Last-Modified: ' . date('r', REQUEST_TIME));
+  header('Date: ' . date('r', REQUEST_TIME));
+
+  // flush buffer after headers have been processed (to hopefully avoid "headers already sent" issues).
+  ob_end_flush();
+
+  print($ical);
+  exit();
+}
+
+/**
+ * Provides the facilities use request ical month page.
+ *
+ * @param int $year
+ *   (optional) When specified, represents the year.
  * @param string $month
  *   (optional) When specified, represents the month.
  *   Causes $year to be required.
