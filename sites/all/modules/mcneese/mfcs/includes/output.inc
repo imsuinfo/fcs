@@ -267,9 +267,11 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
 
   $request_type_options = mfcs_get_request_type_list_options();
 
+  // begin wrappers (main)
+  $markup = '<div' . $id_string . ' class="calendar-day-wrapper">';
 
   // begin wrappers (All Day)
-  $markup = '<div' . $id_string . ' class="calendar-day-wrapper"><div class="calendar-day calendar-all_day">';
+  $markup .= '<div class="calendar-day calendar-all_day">';
 
 
   // title (All Day)
@@ -368,11 +370,11 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
   $markup .= '</div></div>';
 
   // end wrappers (All Day)
-  $markup .= '</div></div>';
+  $markup .= '</div>';
 
 
   // begin wrappers (Range)
-  $markup .= '<div' . $id_string . ' class="calendar-day-wrapper"><div class="calendar-day calendar-range">';
+  $markup .= '<div class="calendar-day calendar-range">';
 
   // title (Range)
   $markup .= '<div class="calendar-title element-invisible">' . $title . '</div>';
@@ -493,6 +495,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
     $row_even = !$row_even;
   }
 
+  // end body (Range)
   $markup .= '</div></div>';
 
 
@@ -514,7 +517,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
   $markup .= '</div>' . "\n";
 
 
-  // end wrappers (Range Wrapper)
+  // end wrappers (main)
   $markup .= '</div>';
 
   return $markup;
