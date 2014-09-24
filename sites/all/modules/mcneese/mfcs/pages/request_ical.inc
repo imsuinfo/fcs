@@ -227,7 +227,7 @@ function mfcs_request_ical_month_0_page($year = NULL, $month = NULL) {
   ob_start();
 
   $filename = 'mcneese-facilities_use.ics';
-  $content_location = $base_url . '/requests/ical-0/day';
+  $content_location = $base_url . '/requests/ical-0/month';
 
   if ($parameter_year) {
     $filename = 'mcneese-facilities_use-' . $year;
