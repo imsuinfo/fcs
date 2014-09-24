@@ -4712,17 +4712,17 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
     }
   }
 
-  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
-
-  $status_options = mfcs_get_request_status_list_options();
-  $step_options = mfcs_get_request_steps_list_options();
-  $information_type_options = mfcs_get_request_type_list_options();
-
   // load search options
   if (is_null($search)) {
     // nothing to do
   }
   elseif (is_string($search)) {
+    mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+
+    $status_options = mfcs_get_request_status_list_options();
+    $step_options = mfcs_get_request_steps_list_options();
+    $information_type_options = mfcs_get_request_type_list_options();
+
     $fixed_text = preg_replace('/(\s)/i', ' ', $search);
     $fixed_text = preg_replace('/\s\s*/i', ' ', $fixed_text);
 
@@ -4803,21 +4803,24 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
 
     $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
     $query->innerjoin('mfcs_current_information', 'mci', 'mer.id = mci.request_id');
-    $query->innerjoin('mfcs_current_dates', 'mcd', 'mer.id = mcd.request_id');
 
     $already_joined['mfcs_current_top'] = 'mct';
     $already_joined['mfcs_current_information'] = 'mci';
-    $already_joined['mfcs_current_dates'] = 'mcd';
 
     $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
-    $query->innerjoin('mfcs_field_top_step', 'mftsp', 'mct.request_id = mftsp.request_id AND mct.step = mftsp.revision AND mftsp.delta = 0');
     $query->innerjoin('mfcs_field_top_location', 'mftl', 'mct.request_id = mftl.request_id AND mct.location = mftl.revision AND mftl.delta = 0');
     $query->innerjoin('mfcs_field_top_room', 'mftr', 'mct.request_id = mftr.request_id AND mct.room = mftr.revision AND mftr.delta = 0');
 
     $already_joined['mfcs_field_top_status'] = 'mfts';
-    $already_joined['mfcs_field_top_step'] = 'mftsp';
     $already_joined['mfcs_field_top_location'] = 'mftl';
     $already_joined['mfcs_field_top_room'] = 'mftr';
+
+    // request step is only required when review_restrictions are non-null.
+    if (!is_null($review_restrictions)) {
+      $query->innerjoin('mfcs_field_top_step', 'mftsp', 'mct.request_id = mftsp.request_id AND mct.step = mftsp.revision AND mftsp.delta = 0');
+
+      $already_joined['mfcs_field_top_step'] = 'mftsp';
+    }
 
     $query->innerjoin('mfcs_banner_rooms', 'mbr', 'mftr.value = mbr.id');
     $query->innerjoin('mfcs_banner_buildings', 'mbb', 'mbr.building = mbb.id');
@@ -4833,47 +4836,43 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
     $already_joined['mfcs_field_information_title'] = 'mfit';
     $already_joined['mfcs_field_information_type'] = 'mfitp';
 
-    if (is_null($search)) {
-      $query->innerjoin('mfcs_field_dates_date', 'mfdd', 'mcd.request_id = mfdd.request_id AND mcd.date = mfdd.revision AND mfdd.delta = 0');
-      $query->innerjoin('mfcs_field_dates_time_start', 'mfdts', 'mcd.request_id = mfdts.request_id AND mcd.time_start = mfdts.revision AND mfdts.delta = 0');
-      $query->innerjoin('mfcs_field_dates_time_stop', 'mfdtsp', 'mcd.request_id = mfdtsp.request_id AND mcd.time_stop = mfdtsp.revision AND mfdtsp.delta = 0');
-      $query->innerjoin('mfcs_field_dates_category', 'mfdc', 'mcd.request_id = mfdc.request_id AND mcd.category = mfdc.revision AND mfdc.delta = 0');
-    }
-    else {
+    // when using simple search, include a few additional textarea fields.
+    if (is_string($search)) {
       $query->distinct();
+
+      $query->innerjoin('mfcs_current_dates', 'mcd', 'mer.id = mcd.request_id');
+
+      $already_joined['mfcs_current_dates'] = 'mcd';
 
       $query->innerjoin('mfcs_field_dates_date', 'mfdd', 'mcd.request_id = mfdd.request_id AND mcd.date = mfdd.revision');
       $query->innerjoin('mfcs_field_dates_time_start', 'mfdts', 'mcd.request_id = mfdts.request_id AND mcd.time_start = mfdts.revision');
       $query->innerjoin('mfcs_field_dates_time_stop', 'mfdtsp', 'mcd.request_id = mfdtsp.request_id AND mcd.time_stop = mfdtsp.revision');
       $query->innerjoin('mfcs_field_dates_category', 'mfdc', 'mcd.request_id = mfdc.request_id AND mcd.category = mfdc.revision AND mfdc.delta = 0');
 
-      // when using simple search, include a few additional textarea fields.
-      if (is_string($search)) {
-        $query->innerjoin('mfcs_field_top_additional', 'mfta', 'mct.request_id = mfta.request_id AND mct.additional = mfta.revision AND mfta.delta = 0');
-        $query->innerjoin('mfcs_field_information_organization', 'mfio', 'mci.request_id = mfio.request_id AND mci.organization = mfio.revision AND mfta.delta = 0');
+      $already_joined['mfcs_field_dates_date'] = 'mfdd';
+      $already_joined['mfcs_field_dates_time_start'] = 'mfdts';
+      $already_joined['mfcs_field_dates_time_stop'] = 'mfdtsp';
+      $already_joined['mfcs_field_dates_category'] = 'mfdc';
 
-        $already_joined['mfcs_field_top_additional'] = 'mfta';
-        $already_joined['mfcs_field_information_organization'] = 'mfio';
+      $already_added['date'] = 'mfdd.value';
+      $already_added['time_start'] = 'mfdts.value';
+      $already_added['time_stop'] = 'mfdtsp.value';
+      $already_added['category'] = 'mfdc.value';
 
-        $query->innerjoin('mfcs_current_plans', 'mcp', 'mer.id = mcp.request_id');
-        $query->innerjoin('mfcs_field_plans_activities', 'mfpa', 'mcp.request_id = mfpa.request_id AND mcp.activities = mfpa.revision AND mfpa.delta = 0');
-        $query->innerjoin('mfcs_field_plans_description', 'mfpd', 'mcp.request_id = mfpd.request_id AND mcp.description = mfpd.revision AND mfpd.delta = 0');
+      $query->innerjoin('mfcs_field_top_additional', 'mfta', 'mct.request_id = mfta.request_id AND mct.additional = mfta.revision AND mfta.delta = 0');
+      $query->innerjoin('mfcs_field_information_organization', 'mfio', 'mci.request_id = mfio.request_id AND mci.organization = mfio.revision AND mfta.delta = 0');
 
-        $already_joined['mfcs_current_plans'] = 'mcp';
-        $already_joined['mfcs_field_plans_activities'] = 'mfpa';
-        $already_joined['mfcs_field_plans_description'] = 'mfpd';
-      }
+      $already_joined['mfcs_field_top_additional'] = 'mfta';
+      $already_joined['mfcs_field_information_organization'] = 'mfio';
+
+      $query->innerjoin('mfcs_current_plans', 'mcp', 'mer.id = mcp.request_id');
+      $query->innerjoin('mfcs_field_plans_activities', 'mfpa', 'mcp.request_id = mfpa.request_id AND mcp.activities = mfpa.revision AND mfpa.delta = 0');
+      $query->innerjoin('mfcs_field_plans_description', 'mfpd', 'mcp.request_id = mfpd.request_id AND mcp.description = mfpd.revision AND mfpd.delta = 0');
+
+      $already_joined['mfcs_current_plans'] = 'mcp';
+      $already_joined['mfcs_field_plans_activities'] = 'mfpa';
+      $already_joined['mfcs_field_plans_description'] = 'mfpd';
     }
-
-    $already_joined['mfcs_field_dates_date'] = 'mfdd';
-    $already_joined['mfcs_field_dates_time_start'] = 'mfdts';
-    $already_joined['mfcs_field_dates_time_stop'] = 'mfdtsp';
-    $already_joined['mfcs_field_dates_category'] = 'mfdc';
-
-    $already_added['date'] = 'mfdd.value';
-    $already_added['time_start'] = 'mfdts.value';
-    $already_added['time_stop'] = 'mfdtsp.value';
-    $already_added['category'] = 'mfdc.value';
 
     if ($count) {
       $query->addExpression('count(mer.id)');
@@ -4912,17 +4911,23 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
 
     if (!$count) {
       $query->addField('mfts', 'value', 'status');
-      $query->addField('mftsp', 'value', 'step');
+
+      if (!is_null($review_restrictions)) {
+        $query->addField('mftsp', 'value', 'step');
+      }
     }
 
     $already_added['status'] = 'mfts.value';
-    $already_added['step'] = 'mftsp.value';
+
+    if (!is_null($review_restrictions)) {
+      $already_added['step'] = 'mftsp.value';
+    }
 
     if (is_null($search) && !$count) {
-      $query->addField('mfdd', 'value', 'date');
-      $query->addField('mfdts', 'value', 'time_start');
-      $query->addField('mfdtsp', 'value', 'time_stop');
-      $query->addField('mfdc', 'value', 'category');
+      #$query->addField('mfdd', 'value', 'date');
+      #$query->addField('mfdts', 'value', 'time_start');
+      #$query->addField('mfdtsp', 'value', 'time_stop');
+      #$query->addField('mfdc', 'value', 'category');
     }
 
     // add custom fields to the select results as requested by the caller.
@@ -5134,13 +5139,12 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
         }
       }
 
-      // always show completed and accepted requests when there are no restrictions.
+      // always show accepted requests when there are no restrictions.
       if (is_null($review_restrictions)) {
         // if there are no conditions, then don't add any!
         if (!is_null($or)) {
           $and = db_and();
           $and->condition('mfts.value', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
-          $and->condition('mftsp.value', MFCS_REVIEW_STEP_COMPLETED);
 
           $or->condition($and);
         }
@@ -5151,11 +5155,10 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
       }
     }
     elseif ($requester) {
-      // always show completed and accepted requests when there are no restrictions.
+      // always show accepted requests when there are no restrictions.
       if (is_null($review_restrictions)) {
         $and = db_and();
         $and->condition('mfts.value', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
-        $and->condition('mftsp.value', MFCS_REVIEW_STEP_COMPLETED);
 
         $or = db_or();
         $or->condition($and);
@@ -5244,7 +5247,7 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
         $or->condition('mfts.value', $status, 'IN');
       }
 
-      if (!empty($steps)) {
+      if (!empty($steps) && array_key_exists('step', $already_added)) {
         $or->condition('mftsp.value', $steps, 'IN');
       }
 
