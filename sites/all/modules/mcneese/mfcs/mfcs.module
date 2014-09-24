@@ -5365,17 +5365,7 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
   if (!is_null($order)) {
     $ordered = array();
 
-    if ($order == 'status') {
-      foreach ($found as $request_id => $field) {
-        $ordered[$status_options[$field->status]][$field->id] = $field;
-      }
-    }
-    elseif ($order == 'step') {
-      foreach ($found as $request_id => $field) {
-        $ordered[$step_options[$field->step]][$field->id] = $field;
-      }
-    }
-    elseif ($order == 'date' && isset($date_order['start'])) {
+    if ($order == 'date' && isset($date_order['start'])) {
       $ordered = $date_order['start'];
     }
 
