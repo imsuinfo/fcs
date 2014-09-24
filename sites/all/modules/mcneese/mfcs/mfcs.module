@@ -3265,7 +3265,7 @@ function mfcs_build_request_value_structure($request_id, $field_group, $field_na
       elseif ($type[$value_name] == 'location') {
         mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
-        $location_options = mfcs_get_request_location_list_options(NULL, TRUE);
+        $location_options = mfcs_get_request_location_list_options(NULL, FALSE, TRUE);
 
         if (isset($location_options[$value->$value_name])) {
           $markup .= $location_options[$value->$value_name];
@@ -5843,7 +5843,7 @@ function mfcs_build_request_table($items, $max_rows, $columns = NULL, $user = NU
 
   $status_options = mfcs_get_request_status_list_options();
   $step_options = mfcs_get_request_steps_list_options();
-  $location_options = mfcs_get_request_location_list_options(NULL, TRUE);
+  $location_options = mfcs_get_request_location_list_options(NULL, FALSE, TRUE);
   $room_options = mfcs_get_request_room_list_options(NULL, NULL, TRUE);
   $building_options = array();
 
