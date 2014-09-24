@@ -127,11 +127,13 @@ function mfcs_get_request_classification_list_options($option = NULL, $user = NU
  * @param bool $taxonomy
  *   (optional) When TRUE, will load the taxonomy term data. When FALSE will
  *   load the {mfcs_banner_locations} data.
+ * @param bool $disabled
+ *   (optional) When TRUE, load disabled rooms in addition to existing rooms.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_request_location_list_options($option = NULL, $taxonomy = FALSE) {
+function mfcs_get_request_location_list_options($option = NULL, $taxonomy = FALSE, $disabled = FALSE) {
   $options = array();
 
   if ($option == 'select') {
@@ -164,7 +166,7 @@ function mfcs_get_request_location_list_options($option = NULL, $taxonomy = FALS
     asort($options);
   }
   else {
-    $locations = mfcs_load_locations();
+    $locations = mfcs_load_locations(NULL, $disabled);
 
     if (is_array($locations)) {
       foreach ($locations as $location) {
@@ -183,18 +185,20 @@ function mfcs_get_request_location_list_options($option = NULL, $taxonomy = FALS
  *   (optional) When not NULL, select options based on provided location.
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
+ * @param bool $disabled
+ *   (optional) When TRUE, load disabled rooms in addition to existing rooms.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_request_building_list_options($location = NULL, $option = NULL) {
+function mfcs_get_request_building_list_options($location = NULL, $option = NULL, $disabled = FALSE) {
   $options = array();
 
   if ($option == 'select') {
     $options[''] = "- Select -";
   }
 
-  $buildings = mfcs_load_buildings($location);
+  $buildings = mfcs_load_buildings($location, NULL, $disabled);
 
   foreach ($buildings as &$building) {
     $options[$building->building_id] = $building->building_name;
@@ -212,14 +216,16 @@ function mfcs_get_request_building_list_options($location = NULL, $option = NULL
  *   (optional) When not NULL, select options based on provided location.
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
+ * @param bool $disabled
+ *   (optional) When TRUE, load disabled rooms in addition to existing rooms.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_request_room_list_options($location = NULL, $option = NULL) {
+function mfcs_get_request_room_list_options($location = NULL, $option = NULL, $disabled = FALSE) {
   $options = array();
 
-  $rooms = mfcs_load_rooms($location);
+  $rooms = mfcs_load_rooms($location, NULL, NULL, $disabled);
 
   if ($option == 'special') {
     foreach ($rooms as $room) {

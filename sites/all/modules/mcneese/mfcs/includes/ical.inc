@@ -34,9 +34,9 @@ function mfcs_ical_generate_array_from_id($request_id) {
 
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
-  $request_location_options = mfcs_get_request_location_list_options();
-  $request_building_options = mfcs_get_request_building_list_options();
-  $request_room_options = mfcs_get_request_room_list_options();
+  $request_location_options = mfcs_get_request_location_list_options(NULL, TRUE);
+  $request_building_options = mfcs_get_request_building_list_options(NULL, NULL, TRUE);
+  $request_room_options = mfcs_get_request_room_list_options(NULL, NULL, TRUE);
 
   // rebuild the request object into the expected array format.
   $requests = array();

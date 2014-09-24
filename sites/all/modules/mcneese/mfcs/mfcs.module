@@ -3265,7 +3265,7 @@ function mfcs_build_request_value_structure($request_id, $field_group, $field_na
       elseif ($type[$value_name] == 'location') {
         mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
-        $location_options = mfcs_get_request_location_list_options();
+        $location_options = mfcs_get_request_location_list_options(NULL, TRUE);
 
         if (isset($location_options[$value->$value_name])) {
           $markup .= $location_options[$value->$value_name];
@@ -3275,7 +3275,7 @@ function mfcs_build_request_value_structure($request_id, $field_group, $field_na
       elseif ($type[$value_name] == 'building') {
         mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
-        $building_options = mfcs_get_request_building_list_options();
+        $building_options = mfcs_get_request_building_list_options(NULL, NULL, TRUE);
 
         if (isset($building_options[$value->$value_name])) {
           $markup .= $building_options[$value->$value_name];
@@ -3285,7 +3285,7 @@ function mfcs_build_request_value_structure($request_id, $field_group, $field_na
       elseif ($type[$value_name] == 'room') {
         mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
-        $room_options = mfcs_get_request_room_list_options();
+        $room_options = mfcs_get_request_room_list_options(NULL, NULL, TRUE);
 
         if (isset($room_options[$value->$value_name])) {
           $markup .= $room_options[$value->$value_name];
@@ -5843,8 +5843,8 @@ function mfcs_build_request_table($items, $max_rows, $columns = NULL, $user = NU
 
   $status_options = mfcs_get_request_status_list_options();
   $step_options = mfcs_get_request_steps_list_options();
-  $location_options = mfcs_get_request_location_list_options();
-  $room_options = mfcs_get_request_room_list_options();
+  $location_options = mfcs_get_request_location_list_options(NULL, TRUE);
+  $room_options = mfcs_get_request_room_list_options(NULL, NULL, TRUE);
   $building_options = array();
 
   foreach ($items as $item) {
@@ -5871,7 +5871,7 @@ function mfcs_build_request_table($items, $max_rows, $columns = NULL, $user = NU
     }
 
     if (!array_key_exists($item->location, $building_options)) {
-      $building_options[$item->location] = mfcs_get_request_building_list_options($item->location);
+      $building_options[$item->location] = mfcs_get_request_building_list_options($item->location, NULL, TRUE);
     }
 
     if (isset($columns['location'])) {
