@@ -188,8 +188,24 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
   $markup .= '</div></div>';
 
 
-  // end wrappers
-  $markup .= '</div></div>';
+  // end wrappers (calendar-month)
+  $markup .= '</div>';
+
+
+  // iCal links
+  $year = date('Y', $month_start);
+  $month = date('F', $month_start);
+  $markup .= '<div class="calendar-ical-links no-print">' . "\n";
+  $markup .= '<h3 class="calendar-ical-title">iCal Download Options</h3>' . "\n";
+  $markup .= '  <ul class="calendar-ical-links-list">' . "\n";
+  $markup .= '    <li class="calendar-ical-links-list-item calendar-ical-links-list-item-month"><div class="calendar-ical-links-list-item-label">Month:</div> <a href="' . $base_path . 'requests/ical-0/month/' . $year . '/' . $month . '" title="Download iCal for the month of ' . $month . ' ' . $year . '">' . $month . ' ' . $year . '</a></li>' . "\n";
+  $markup .= '    <li class="calendar-ical-links-list-item calendar-ical-links-list-item-year"><div class="calendar-ical-links-list-item-label">Year:</div> <a href="' . $base_path . 'requests/ical-0/year/' . $year . '" title="Download iCal for the year ' . $year . '">' . $year . '</a></li>' . "\n";
+  $markup .= '  </ul>' . "\n";
+  $markup .= '</div>' . "\n";
+
+
+  // end wrapper (calendar-month-wrapper)
+  $markup .= '</div>';
 
   return $markup;
 }
@@ -481,7 +497,25 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
 
 
   // end wrappers (Range)
-  $markup .= '</div></div>';
+  $markup .= '</div>';
+
+
+  // iCal links
+  $year = date('Y', $day_start);
+  $month = date('F', $day_start);
+  $day = date('d', $day_start);
+  $markup .= '<div class="calendar-ical-links no-print">' . "\n";
+  $markup .= '<h3 class="calendar-ical-title">iCal Download Options</h3>' . "\n";
+  $markup .= '  <ul class="calendar-ical-links-list">' . "\n";
+  $markup .= '    <li class="calendar-ical-links-list-item calendar-ical-links-list-item-day"><div class="calendar-ical-links-list-item-label">Day:</div> <a href="' . $base_path . 'requests/ical-0/day/' . $year . '/' . $month . '/' . $day . '" title="Download iCal for ' . $month . ' ' . $day . ', ' . $year . '">' . $month . ' ' . $day . ', ' . $year . '</a></li>' . "\n";
+  $markup .= '    <li class="calendar-ical-links-list-item calendar-ical-links-list-item-month"><div class="calendar-ical-links-list-item-label">Month:</div> <a href="' . $base_path . 'requests/ical-0/month/' . $year . '/' . $month . '" title="Download iCal for the month of ' . $month . ' ' . $year . '">' . $month . ' ' . $year . '</a></li>' . "\n";
+  $markup .= '    <li class="calendar-ical-links-list-item calendar-ical-links-list-item-year"><div class="calendar-ical-links-list-item-label">Year:</div> <a href="' . $base_path . 'requests/ical-0/year/' . $year . '" title="Download iCal for the year ' . $year . '">' . $year . '</a></li>' . "\n";
+  $markup .= '  </ul>' . "\n";
+  $markup .= '</div>' . "\n";
+
+
+  // end wrappers (Range Wrapper)
+  $markup .= '</div>';
 
   return $markup;
 }
