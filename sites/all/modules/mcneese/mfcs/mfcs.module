@@ -5291,59 +5291,62 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
       return $result;
     }
 
-    $results = $query->execute()->fetchAll();
+    $found = $query->execute()->fetchAllAssoc('id');
 
+    $result_ids = array();
     $date_order = array();
-    foreach ($results as $result) {
-      if (array_key_exists($result->id, $found)) {
-        continue;
-      }
-      else {
-        $found[$result->id] = $result;
-      }
+    if (is_array($found)) {
+      $result_ids = array_keys($found);
+    }
 
-      // fetch all available dates:
+    // fetch all available dates.
+    if (!empty($result_ids)) {
       $sub_query = db_select('mfcs_current_dates', 'mcd');
       $sub_query->innerjoin('mfcs_field_dates_date', 'mfdd', 'mcd.request_id = mfdd.request_id AND mcd.date = mfdd.revision');
       $sub_query->leftjoin('mfcs_field_dates_time_start', 'mfdts', 'mcd.request_id = mfdts.request_id AND mcd.time_start = mfdts.revision AND mfdd.delta = mfdts.delta');
       $sub_query->leftjoin('mfcs_field_dates_time_stop', 'mfdtsp', 'mcd.request_id = mfdtsp.request_id AND mcd.time_stop = mfdtsp.revision AND mfdts.delta = mfdtsp.delta');
       $sub_query->leftjoin('mfcs_field_dates_category', 'mfdc', 'mcd.request_id = mfdc.request_id AND mcd.category = mfdc.revision AND mfdts.delta = mfdc.delta');
 
+      $sub_query->addField('mfdd', 'request_id', 'id');
       $sub_query->addField('mfdd', 'value', 'date');
       $sub_query->addField('mfdd', 'delta', 'delta');
       $sub_query->addField('mfdts', 'value', 'time_start');
       $sub_query->addField('mfdtsp', 'value', 'time_stop');
       $sub_query->addField('mfdc', 'value', 'category');
 
-      $sub_query->condition('mfdd.request_id', $result->id);
+      $sub_query->condition('mfdd.request_id', $result_ids, 'IN');
 
       $sub_query->orderBy('date', 'ASC');
       $sub_query->orderBy('time_start', 'ASC');
 
       $sub_results = $sub_query->execute()->fetchAll();
 
-      $found[$result->id]->date = array();
-      $found[$result->id]->time_start = array();
-      $found[$result->id]->time_stop = array();
-      $found[$result->id]->category = array();
-
       foreach ($sub_results as $delta => $sub_result) {
-        $found[$result->id]->date[$sub_result->delta] = $sub_result->date;
-        $found[$result->id]->time_start[$sub_result->delta] = $sub_result->time_start;
-        $found[$result->id]->time_stop[$sub_result->delta] = $sub_result->time_stop;
-        $found[$result->id]->category[$sub_result->delta] = $sub_result->category;
+        if (!array_key_exists($sub_result->id, $found)) {
+          $found[$sub_result->id]->date = array();
+          $found[$sub_result->id]->time_start = array();
+          $found[$sub_result->id]->time_stop = array();
+          $found[$sub_result->id]->category = array();
+        }
+
+        $found[$sub_result->id]->date[$sub_result->delta] = $sub_result->date;
+        $found[$sub_result->id]->time_start[$sub_result->delta] = $sub_result->time_start;
+        $found[$sub_result->id]->time_stop[$sub_result->delta] = $sub_result->time_stop;
+        $found[$sub_result->id]->category[$sub_result->delta] = $sub_result->category;
 
         if (is_null($sub_result->time_start)) {
-          if (!isset($date_order['start'][$sub_result->date][$result->id])) {
-            $date_order['start'][$sub_result->date][$result->id] = $found[$result->id];
+          if (!isset($date_order['start'][$sub_result->date][$sub_result->id])) {
+            $date_order['start'][$sub_result->date][$sub_result->id] = $found[$sub_result->id];
           }
         }
         else {
-          if (!isset($date_order['start'][$sub_result->time_start][$result->id])) {
-            $date_order['start'][$sub_result->time_start][$result->id] = $found[$result->id];
+          if (!isset($date_order['start'][$sub_result->time_start][$sub_result->id])) {
+            $date_order['start'][$sub_result->time_start][$sub_result->id] = $found[$sub_result->id];
           }
         }
       }
+
+      unset($sub_results);
     }
   }
   catch (Exception $ex) {
