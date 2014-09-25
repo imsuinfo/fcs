@@ -2799,14 +2799,17 @@ function mfcs_autocancel_old_requests_cron() {
     return;
   }
 
+  // cron jobs are considered to have been executed by the admin account as far as logs are concerned.
+  $system_user = user_load(1);
+
   mfcs_include(MFCS_INCLUDE_WORKFLOW);
 
   foreach ($unresolved_requests as $request_id => $request_object) {
-    $cancelled = mfcs_workflow_set_status($request_id, MFCS_REQUEST_STATUS_CANCELLED);
+    $cancelled = mfcs_workflow_set_status($request_id, MFCS_REQUEST_STATUS_CANCELLED, $system_user);
 
     if ($cancelled) {
       $parameters = array();
-      $parameters['changed_by'] = $user->uid;
+      $parameters['changed_by'] = $system_user->uid;
       $parameters['changed_type'] = 'user';
       $parameters['cancelled'] = TRUE;
       $parameters['auto-cancelled'] = TRUE;
