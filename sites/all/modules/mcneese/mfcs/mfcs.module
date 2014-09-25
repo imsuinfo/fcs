@@ -5294,12 +5294,16 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
       return $result;
     }
 
-    $found = $query->execute()->fetchAllAssoc('id');
+    $results = $query->execute()->fetchAllAssoc('id');
+
+    if (is_null($order) || $order != 'date') {
+      $found = $results;
+    }
 
     $result_ids = array();
     $date_order = array();
-    if (is_array($found)) {
-      $result_ids = array_keys($found);
+    if (is_array($results)) {
+      $result_ids = array_keys($results);
     }
 
     // fetch all available dates.
@@ -5326,6 +5330,7 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
 
       foreach ($sub_results as $delta => $sub_result) {
         if (!array_key_exists($sub_result->id, $found)) {
+          $found[$sub_result->id] = $results[$sub_result->id];
           $found[$sub_result->id]->date = array();
           $found[$sub_result->id]->time_start = array();
           $found[$sub_result->id]->time_stop = array();
