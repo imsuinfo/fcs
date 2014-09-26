@@ -344,7 +344,7 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
 
   $access = &$mfcs_request_access[$operation][$section][$user->uid];
 
-  if (is_string($request_id)) {
+  if (is_string($request_id) || is_numeric($request_id)) {
     if (array_key_exists($request_id, $access)) {
       return $access[$request_id];
     }
