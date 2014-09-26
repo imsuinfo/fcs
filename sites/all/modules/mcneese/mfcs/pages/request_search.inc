@@ -569,7 +569,7 @@ function mfcs_request_search_0_form_validate($form, &$form_state) {
   elseif ($clicked_id == 'search-advanced-submit-search') {
     $state_location = NULL;
     if (isset($form_state['values']['advanced']['targets'])) {
-      $state_location = $form_state['values']['advanced']['targets'];
+      $state_location = &$form_state['values']['advanced']['targets'];
     }
 
     if (empty($form_state['advanced_search-chosen_targets'])) {
@@ -660,7 +660,6 @@ function mfcs_request_search_0_form_validate($form, &$form_state) {
  * @param array|null $state_location
  *   Location in the form state array where the target might store its default
  *   values. If NULL, then there are no current default values.
- *
  * @param array $path_array
  *   An array containing the form_state path array structure.
  *   This will be converted to a path string and sent to form_set_error() as
@@ -671,7 +670,7 @@ function mfcs_request_search_0_form_validate($form, &$form_state) {
  * @return bool
  *   TRUE on success, FALSE otherwise.
  */
-function mfcs_request_search_0_form_validate_targets($form, &$form_state, $state_location, $targets, $path_array, $recurse_count) {
+function mfcs_request_search_0_form_validate_targets($form, &$form_state, &$state_location, $targets, $path_array, $recurse_count) {
   if (!is_array($form)) {
     cf_error::invalid_array('form');
     return FALSE;
@@ -714,7 +713,7 @@ function mfcs_request_search_0_form_validate_targets($form, &$form_state, $state
     if (count($target_name_parts) == 2 && ($target_name_parts[0] == 'and' || $target_name_parts[0] == 'or')) {
       $state_location_next = NULL;
       if (isset($state_location[$target_name]['targets'])) {
-        $state_location_next = $state_location[$target_name]['targets'];
+        $state_location_next = &$state_location[$target_name]['targets'];
       }
 
       $path_array_next = $path_array;
@@ -826,7 +825,7 @@ function mfcs_request_search_0_form_validate_target($form, &$form_state, &$state
     $field_presentation = $presentation[$table_name][$field_name];
   }
 
-  $state = $state_location[$target_name][$target_delta];
+  $state = &$state_location[$target_name][$target_delta];
 
   if ($field['type'] == 'number') {
     if (!empty($state['search']) && !cf_is_integer($state['search'])) {
@@ -868,13 +867,7 @@ function mfcs_request_search_0_form_validate_target($form, &$form_state, &$state
           form_set_error(implode('][', $path_array), t('@value is not a valid month.', array('@value' => $state['search'])));
         }
         else {
-          $month_full = trim(strtolower(date('F', $stamp)));
-          $month_short = trim(strtolower(date('M', $stamp)));
-          $month_value = trim(strtolower($state['search']));
-
-          if ($month_value != $month_full && $month_value != $month_short) {
-            form_set_error(implode('][', $path_array), t('@value is not a valid month.', array('@value' => $state['search'])));
-          }
+          $state['search'] = trim(strtolower(date('F', $stamp)));
         }
       }
     }
@@ -931,17 +924,17 @@ function mfcs_request_search_0_form_validate_target($form, &$form_state, &$state
       }
       else {
         $search_date = trim(strtolower($state['search']));
-        $search_day = strtotime($search_date);
+        $search_month = strtotime($search_date);
 
-        if ($search_day === FALSE) {
+        if ($search_month === FALSE) {
           form_set_error(implode('][', $path_array), t('@value is not a valid YYYY/MM date.', array('@value' => $state['search'])));
         }
         else {
-          $state['search'] = date('Y/m', $search_day);
+          $state['search'] = date('Y/m', $search_month);
         }
 
         unset($search_date);
-        unset($search_day);
+        unset($search_month);
       }
     }
   }
@@ -2490,15 +2483,65 @@ function mfcs_request_search_0_form_build_search_target($structure, $target_name
       }
     }
     else {
-      $target_field_name = 'field_' . $target_name . '-' . $target_delta;
-      $search[$target_field_name] = array();
-      $search[$target_field_name]['group_name'] = $table_name;
-      $search[$target_field_name]['field_name'] = $field_name;
-      $search[$target_field_name]['column'] = $column_name;
-      $search[$target_field_name]['type'] = $field['type'];
-      $search[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
-      $search[$target_field_name]['operator'] = $operator_value;
-      $search[$target_field_name]['search'] = $date_value;
+      if ($date_mode == 'y/m/d') {
+        $timestamp_start = strtotime('midnight today', $date_value);
+        $timestamp_stop = strtotime('midnight tomorrow', $timestamp_start);
+
+        if ($operator_value == MFCS_OPERATOR_LESS_THAN) {
+          $date_value = $timestamp_start;
+        }
+        elseif ($operator_value == MFCS_OPERATOR_LESS_THAN_EQUAL) {
+          $date_value = $timestamp_stop;
+          $operator_value = MFCS_OPERATOR_LESS_THAN;
+        }
+        elseif ($operator_value == MFCS_OPERATOR_GREATER_THAN) {
+          $date_value = $timestamp_stop;
+          $operator_value = MFCS_OPERATOR_GREATER_THAN_EQUAL;
+        }
+        elseif ($operator_value == MFCS_OPERATOR_GREATER_THAN_EQUAL) {
+          $date_value = $timestamp_start;
+        }
+
+        $target_field_name = 'field_' . $target_name . '-' . $target_delta;
+        $search[$target_field_name] = array();
+        $search[$target_field_name]['group_name'] = $table_name;
+        $search[$target_field_name]['field_name'] = $field_name;
+        $search[$target_field_name]['column'] = $column_name;
+        $search[$target_field_name]['type'] = $field['type'];
+        $search[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
+        $search[$target_field_name]['operator'] = $operator_value;
+        $search[$target_field_name]['search'] = $date_value;
+      }
+      elseif ($date_mode == 'y/m') {
+        $timestamp_start = strtotime('midnight first day of ', $date_value);
+        $timestamp_stop = strtotime('midnight last day of ', $date_value);
+        $timestamp_stop = strtotime('midnight tomorrow', $timestamp_stop);
+
+        if ($operator_value == MFCS_OPERATOR_LESS_THAN) {
+          $date_value = $timestamp_start;
+        }
+        elseif ($operator_value == MFCS_OPERATOR_LESS_THAN_EQUAL) {
+          $date_value = $timestamp_stop;
+          $operator_value = MFCS_OPERATOR_LESS_THAN;
+        }
+        elseif ($operator_value == MFCS_OPERATOR_GREATER_THAN) {
+          $date_value = $timestamp_stop;
+          $operator_value = MFCS_OPERATOR_GREATER_THAN_EQUAL;
+        }
+        elseif ($operator_value == MFCS_OPERATOR_GREATER_THAN_EQUAL) {
+          $date_value = $timestamp_start;
+        }
+
+        $target_field_name = 'field_' . $target_name . '-' . $target_delta;
+        $search[$target_field_name] = array();
+        $search[$target_field_name]['group_name'] = $table_name;
+        $search[$target_field_name]['field_name'] = $field_name;
+        $search[$target_field_name]['column'] = $column_name;
+        $search[$target_field_name]['type'] = $field['type'];
+        $search[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
+        $search[$target_field_name]['operator'] = $operator_value;
+        $search[$target_field_name]['search'] = $date_value;
+      }
     }
   }
   elseif (isset($field['columns']) && is_array($field['columns'])) {
