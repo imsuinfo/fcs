@@ -5276,6 +5276,17 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
         }
         elseif ($order == 'date') {
           // dates are sorted later on, outside of the query.
+
+          if (array_key_exists('mfcs_field_dates_date', $already_joined) && array_key_exists('mfcs_field_dates_time_start', $already_joined)) {
+            $query->orderBy($already_joined['mfcs_field_dates_date'] . '.value', is_null($sort) ? 'ASC' : $sort);
+            $query->orderBy($already_joined['mfcs_field_dates_time_start'] . '.value', is_null($sort) ? 'ASC' : $sort);
+          }
+          else {
+            $query->innerJoin('mfcs_view_dates_asc_distinct', 'mvdad', 'mer.id = mvdad.request_id');
+
+            $query->orderBy('mvdad.date', is_null($sort) ? 'ASC' : $sort);
+            $query->orderBy('mvdad.time_start', is_null($sort) ? 'ASC' : $sort);
+          }
         }
         elseif ($order == 'submitted by') {
           $query->orderBy('user_id', is_null($sort) ? 'ASC' : $sort);
