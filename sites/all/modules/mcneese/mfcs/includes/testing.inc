@@ -124,7 +124,7 @@ function mfcs_testing_clone_request($request_id, $custom_title = NULL, $custom_d
  * @see: mfcs_testing_clone_request()
  */
 function mfcs_testing_generate_dates_and_times() {
-  $dates_and_types = array();
+  $dates_and_times = array();
 
   $date = rand(1, 62);
 
@@ -144,15 +144,15 @@ function mfcs_testing_generate_dates_and_times() {
     $time_stop = rand(1, 23 - $time_start_24);
   }
 
-  $dates_and_types['date'] = strtotime('+' . $date . ' days');
-  $dates_and_types['time_start'] = strtotime($time_start . ':00' . $am_pm, $dates_and_types['date']);
-  $dates_and_types['time_stop'] = strtotime('+' . $time_stop . ' hours', $dates_and_types['time_start']);
+  $dates_and_times['date'] = strtotime('+' . $date . ' days');
+  $dates_and_times['time_start'] = strtotime($time_start . ':00' . $am_pm, $dates_and_times['date']);
+  $dates_and_times['time_stop'] = strtotime('+' . $time_stop . ' hours', $dates_and_times['time_start']);
 
-  $dates_and_types['format_date'] = date('Y/m/d', $dates_and_types['date']);
-  $dates_and_types['format_time_start'] = date('h:ia', $dates_and_types['time_start']);
-  $dates_and_types['format_time_stop'] = date('h:ia', $dates_and_types['time_stop']);
+  $dates_and_times['format_date'] = date('Y/m/d', $dates_and_times['date']);
+  $dates_and_times['format_time_start'] = date('h:ia', $dates_and_times['time_start']);
+  $dates_and_times['format_time_stop'] = date('h:ia', $dates_and_times['time_stop']);
 
-  return $dates_and_types;
+  return $dates_and_times;
 }
 
 /**
