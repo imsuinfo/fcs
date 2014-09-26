@@ -100,6 +100,7 @@ function mfcs_pre_validate_request_fields(&$form, &$form_state, $dont_validate =
         // the submit button is not allowed when not in a custom target section.
         if (isset($form['form']['target_section']) && array_key_exists('$value', $form['form']['target_section']) && !is_null($form['form']['target_section']['#value'])) {
           form_set_error('submit-request-submit', "This request cannot be submitted during this step at this time. Try using the Continue button.");
+          $passed = FALSE;
         }
       }
     }
@@ -131,6 +132,38 @@ function mfcs_pre_validate_request_fields(&$form, &$form_state, $dont_validate =
     }
 
     unset($coordinator);
+  }
+  elseif ($form_state['values']['form']['step'] == 'clone') {
+    if ($form_state['programmed'] !== TRUE) {
+      form_set_error('', "Illegal operation detected. The clone step cannot be performed non-programmatically");
+      $passed = FALSE;
+    }
+    else {
+      // always enforce the venue/room coordinator.
+      if (isset($location_state['venue_coordinator']['user_id'][0])) {
+        $location_state['venue_coordinator']['user_id'][0] = NULL;
+      }
+
+      if (!empty($form_state['values']['request']['room'][0]) && isset($form_state['values']['request']['room'][0])) {
+        $form['form']['room_information']['#value'] = mfcs_load_rooms(NULL, NULL, $form_state['values']['request']['room'][0]);
+      }
+
+      $coordinator = NULL;
+      if (isset($form['form']['room_information']['#value']->coordinator_id)) {
+        $coordinator = user_load($form['form']['room_information']['#value']->coordinator_id);
+      }
+
+      if (!is_object($coordinator)) {
+        $coordinator = user_load(MFCS_REVIEW_CLASSIFICATION_FAILSAFE_COORDINATOR);
+      }
+
+      // override field settings with the proper attributes.
+      if (is_object($coordinator)) {
+        $location_state['venue_coordinator']['user_id'][0] = $coordinator->uid;
+      }
+
+      unset($coordinator);
+    }
   }
 
   // condition 2 is for student requests.
