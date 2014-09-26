@@ -41,7 +41,6 @@ function mfcs_hook_permission() {
   return $permissions;
 }
 
-
 /**
  * Internal function for hook_permission.
  */

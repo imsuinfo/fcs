@@ -476,6 +476,9 @@ function mfcs_request_create_0_form_validate($form, &$form_state) {
         $form_state['rebuild'] = FALSE;
       }
     }
+    elseif ($form_state['values']['form']['step'] == 'clone') {
+      $form_state['rebuild'] = FALSE;
+    }
   }
 }
 
