@@ -883,7 +883,7 @@ function mfcs_request_search_0_form_validate_target($form, &$form_state, &$state
         $search_date = trim(strtolower($state['search']));
         $search_year = strtotime($search_date);
 
-        if ($search_day === FALSE) {
+        if ($search_year === FALSE) {
           form_set_error(implode('][', $path_array), t('@value is not a valid year.', array('@value' => $state['search'])));
         }
         else {
