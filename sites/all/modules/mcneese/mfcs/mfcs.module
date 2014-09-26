@@ -358,6 +358,11 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
       }
     }
     unset($request_ids_copy);
+
+    // if all of the requests have been processed, then return.
+    if (empty($request_ids)) {
+      return $processed;
+    }
   }
   elseif (is_null($request_id)) {
     // the request id is allowed to be NULL.
