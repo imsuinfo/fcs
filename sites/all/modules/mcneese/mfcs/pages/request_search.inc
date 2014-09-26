@@ -2420,57 +2420,73 @@ function mfcs_request_search_0_form_build_search_target($structure, $target_name
       $search[$target_field_name]['search'] = $date_value;
     }
     elseif ($operator_value == MFCS_OPERATOR_EQUAL || $operator_value == MFCS_OPERATOR_NOT_EQUAL) {
+      $conjunction = array();
+      $conjunction_type = NULL;
+
       if ($date_mode == 'y/m/d') {
-        $timestamp = strtotime($date_value);
-        $target_field_name = 'field_' . $target_name . '-' . $target_delta;
-        $search[$target_field_name] = array();
-        $search[$target_field_name]['group_name'] = $table_name;
-        $search[$target_field_name]['field_name'] = $field_name;
-        $search[$target_field_name]['column'] = $column_name;
-        $search[$target_field_name]['type'] = $field['type'];
-        $search[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
-        $search[$target_field_name]['operator'] = $operator_value;
-        $search[$target_field_name]['search'] = $timestamp;
+        $timestamp_start = strtotime('midnight today ', $date_value);
+        $timestamp_stop = strtotime('midnight tomorrow', $timestamp_start);
+
+        $start_op = MFCS_OPERATOR_GREATER_THAN_EQUAL;
+        $stop_op = MFCS_OPERATOR_LESS_THAN;
+
+        $conjunction_type = 'and';
+        if ($operator_value == MFCS_OPERATOR_NOT_EQUAL) {
+          $conjunction_type = 'nand';
+        }
+
+        $target_field_name = 'field_' . $target_name . '-start-' . $target_delta;
+        $conjunction[$target_field_name]['group_name'] = $table_name;
+        $conjunction[$target_field_name]['field_name'] = $field_name;
+        $conjunction[$target_field_name]['column'] = $column_name;
+        $conjunction[$target_field_name]['search'] = $timestamp_start;
+        $conjunction[$target_field_name]['type'] = $field['type'];
+        $conjunction[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
+        $conjunction[$target_field_name]['operator'] = $start_op;
+
+        $target_field_name = 'field_' . $target_name . '-stop-' . $target_delta;
+        $conjunction[$target_field_name]['group_name'] = $table_name;
+        $conjunction[$target_field_name]['field_name'] = $field_name;
+        $conjunction[$target_field_name]['column'] = $column_name;
+        $conjunction[$target_field_name]['search'] = $timestamp_stop;
+        $conjunction[$target_field_name]['type'] = $field['type'];
+        $conjunction[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
+        $conjunction[$target_field_name]['operator'] = $stop_op;
       }
-      else {
-        $conjunction = array();
-        $conjunction_type = NULL;
+      elseif ($date_mode == 'y/m') {
+        $timestamp_start = strtotime('midnight first day of ', $date_value);
+        $timestamp_stop = strtotime('midnight last day of ', $date_value);
+        $timestamp_stop = strtotime('midnight tomorrow', $timestamp_stop);
 
-        if ($date_mode == 'y/m') {
-          $timestamp_start = strtotime('midnight first day of ', $date_value);
-          $timestamp_stop = strtotime('midnight last day of ', $date_value);
-          $timestamp_stop = strtotime('midnight tomorrow', $timestamp_stop);
+        $start_op = MFCS_OPERATOR_GREATER_THAN_EQUAL;
+        $stop_op = MFCS_OPERATOR_LESS_THAN;
 
-          $start_op = MFCS_OPERATOR_GREATER_THAN_EQUAL;
-          $stop_op = MFCS_OPERATOR_LESS_THAN;
-
-          $conjunction_type = 'and';
-          if ($operator_value == MFCS_OPERATOR_NOT_EQUAL) {
-            $conjunction_type = 'nand';
-          }
-
-          $target_field_name = 'field_' . $target_name . '-start-' . $target_delta;
-          $conjunction[$target_field_name]['group_name'] = $table_name;
-          $conjunction[$target_field_name]['field_name'] = $field_name;
-          $conjunction[$target_field_name]['column'] = $column_name;
-          $conjunction[$target_field_name]['search'] = $timestamp_start;
-          $conjunction[$target_field_name]['type'] = $field['type'];
-          $conjunction[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
-          $conjunction[$target_field_name]['operator'] = $start_op;
-
-          $target_field_name = 'field_' . $target_name . '-stop-' . $target_delta;
-          $conjunction[$target_field_name]['group_name'] = $table_name;
-          $conjunction[$target_field_name]['field_name'] = $field_name;
-          $conjunction[$target_field_name]['column'] = $column_name;
-          $conjunction[$target_field_name]['search'] = $timestamp_stop;
-          $conjunction[$target_field_name]['type'] = $field['type'];
-          $conjunction[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
-          $conjunction[$target_field_name]['operator'] = $stop_op;
+        $conjunction_type = 'and';
+        if ($operator_value == MFCS_OPERATOR_NOT_EQUAL) {
+          $conjunction_type = 'nand';
         }
 
-        if (!empty($conjunction)) {
-          $search[$conjunction_type . '_' . $target_delta . '_field'] = $conjunction;
-        }
+        $target_field_name = 'field_' . $target_name . '-start-' . $target_delta;
+        $conjunction[$target_field_name]['group_name'] = $table_name;
+        $conjunction[$target_field_name]['field_name'] = $field_name;
+        $conjunction[$target_field_name]['column'] = $column_name;
+        $conjunction[$target_field_name]['search'] = $timestamp_start;
+        $conjunction[$target_field_name]['type'] = $field['type'];
+        $conjunction[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
+        $conjunction[$target_field_name]['operator'] = $start_op;
+
+        $target_field_name = 'field_' . $target_name . '-stop-' . $target_delta;
+        $conjunction[$target_field_name]['group_name'] = $table_name;
+        $conjunction[$target_field_name]['field_name'] = $field_name;
+        $conjunction[$target_field_name]['column'] = $column_name;
+        $conjunction[$target_field_name]['search'] = $timestamp_stop;
+        $conjunction[$target_field_name]['type'] = $field['type'];
+        $conjunction[$target_field_name]['multiple'] = isset($field['multiple']) ? $field['multiple'] : FALSE;
+        $conjunction[$target_field_name]['operator'] = $stop_op;
+      }
+
+      if (!empty($conjunction)) {
+        $search[$conjunction_type . '_' . $target_delta . '_field'] = $conjunction;
       }
     }
     else {
