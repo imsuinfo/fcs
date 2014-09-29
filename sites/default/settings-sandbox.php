@@ -700,10 +700,10 @@ $conf['fcs_debugging-email_to-debug'] = TRUE;
 $conf['fcs_debugging-email_to-restrict'] = TRUE;
 $conf['fcs_debugging-email_to-prefix'] = "(TESTING) ";
 $conf['fcs_debugging-email_to-add'] = array(
-  'kday@mcneese.edu',
+  #'kday@mcneese.edu',
 );
 $conf['fcs_debugging-email_to-send_to'] = array(
-  'kday@mcneese.edu',
+  #'kday@mcneese.edu',
   #'colleen@mcneese.edu',
   #'gfisher@mcneese.edu',
   #'stan@mcneese.edu',
