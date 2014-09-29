@@ -1430,6 +1430,8 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
   $email_params['request_id'] = $request_id;
   $email_params['from'] = $mfcs_email;
 
+  $email_to = array();
+
   if (isset($parameters['message_priority'])) {
     $email_params['message_priority'] = $parameters['message_priority'];
   }
