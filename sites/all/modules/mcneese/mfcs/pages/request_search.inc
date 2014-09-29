@@ -976,6 +976,8 @@ function mfcs_request_search_0_form_submit($form, &$form_state) {
     unset($form_state['simple_search-search']);
     unset($form_state['values']['simple']['text']);
     unset($form_state['input']['simple']['text']);
+
+    $form_state['simple_search-page_number'] = 0;
   }
   elseif ($clicked_id == 'search-simple-results-navigation-previous') {
     $previous_page = $form['form']['simple_search-page_number']['#value'] - 1;
@@ -1059,6 +1061,8 @@ function mfcs_request_search_0_form_submit($form, &$form_state) {
     unset($form_state['advanced_search-search']);
     unset($form_state['values']['advanced']);
     unset($form_state['input']['advanced']);
+
+    $form_state['advanced_search-page_number'] = 0;
   }
   elseif ($clicked_id == 'search-advanced-submit-reset') {
     unset($form_state['advanced_search-results']);
@@ -1067,6 +1071,8 @@ function mfcs_request_search_0_form_submit($form, &$form_state) {
 
     unset($form_state['values']['advanced']['targets']);
     unset($form_state['advanced_search-chosen_targets']);
+
+    $form_state['advanced_search-page_number'] = 0;
   }
   elseif ($clicked_id == 'search-advanced-search-controls-manage-new-submit-save') {
     if (isset($form_state['values']['advanced']['search']['controls']['manage']['new']['human_name']) && isset($form_state['advanced_search-chosen_targets'])) {
