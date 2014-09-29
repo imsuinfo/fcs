@@ -82,7 +82,7 @@ function mfcs_testing_clone_request($request_id, $custom_title = NULL, $custom_d
     $id = 'mfcs_request_create_0_form';
 
     $state = array();
-    $state['build_info']['args'] = array('3');
+    $state['build_info']['args'] = array($request_id);
     $state['no_cache'] = TRUE;
     $state['values']['form']['step'] = 'clone';
 
