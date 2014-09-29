@@ -4750,78 +4750,11 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
     // nothing to do
   }
   elseif (is_string($search)) {
-    mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
-
-    $status_options = mfcs_get_request_status_list_options();
-    $step_options = mfcs_get_request_steps_list_options();
-    $information_type_options = mfcs_get_request_type_list_options();
-
     $fixed_text = preg_replace('/(\s)/i', ' ', $search);
-    $fixed_text = preg_replace('/\s\s*/i', ' ', $fixed_text);
-
-    $search_parts = explode(' ', $fixed_text);
-
-    // remove empty search parts.
-    $remove = array();
-    foreach ($search_parts as $key => $search_part) {
-      if (empty($search_part) && !is_numeric($search_part)) {
-        $remove[$key] = $key;
-      }
-    }
-
-    foreach ($remove as $key) {
-      unset($search_parts[$key]);
-    }
-    unset($remove);
 
     // don't search when there is nothing to search for.
-    if (empty($search_parts)) {
+    if (empty($fixed_text)) {
       return array();
-    }
-
-    // quote all except the '*' operator, but preg_quote will change '*'.
-    $preg_parts = array();
-    foreach ($search_parts as $search_key => $search_part) {
-      $preg_part_pieces = explode('*', $search_part);
-
-      if (count($preg_part_pieces) == 1) {
-        $preg_parts[$search_key] = $search_part;
-        continue;
-      }
-
-      $preg_part_pieces_fixed = array();
-      foreach ($preg_part_pieces as $preg_part_pieces_key => $preg_part_piece) {
-        $preg_part_pieces_fixed[$preg_part_pieces_key] = preg_quote($preg_part_piece, '/');
-      }
-
-      $preg_parts[$search_key] = '\b' . implode('.*', $preg_part_pieces_fixed) . '\b';
-    }
-
-    $status = array();
-    foreach ($preg_parts as $search_part) {
-      foreach ($status_options as $key => $option) {
-        if (preg_match('/' . $search_part . '/' . $s, $option)) {
-          $status[$key] = $key;
-        }
-      }
-    }
-
-    $steps = array();
-    foreach ($preg_parts as $search_part) {
-      foreach ($step_options as $key => $option) {
-        if (preg_match('/' . $search_part . '/' . $s, $option)) {
-          $steps[$key] = $key;
-        }
-      }
-    }
-
-    $information_type = array();
-    foreach ($preg_parts as $search_part) {
-      foreach ($information_type_options as $key => $option) {
-        if (preg_match('/' . $search_part . '/' . $s, $option)) {
-          $information_type[$key] = $key;
-        }
-      }
     }
   }
 
@@ -5201,79 +5134,31 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
     if (!is_null($search) && is_string($search)) {
       $or = db_or();
 
-      foreach ($search_parts as $search_part) {
-        $search_part_pieces = explode('*', $search_part);
+      $like_part = db_like($fixed_text);
 
-        if (count($search_part_pieces) == 1) {
-          $or->condition('mfit.value', db_like($search_part), $like);
-          $or->condition('mfit.value', '%' . db_like($search_part) . '%', $like);
+      $or->condition('mfit.value', $like_part, $like);
+      $or->condition('mfit.value', '%' . $like_part . '%', $like);
 
-          $or->condition('mfio.value', db_like($search_part), $like);
-          $or->condition('mfio.value', '%' . db_like($search_part) . '%', $like);
+      $or->condition('mfio.value', $like_part, $like);
+      $or->condition('mfio.value', '%' . $like_part . '%', $like);
 
-          $or->condition('mfta.value', db_like($search_part), $like);
-          $or->condition('mfta.value', '%' . db_like($search_part) . '%', $like);
+      $or->condition('mfta.value', $like_part, $like);
+      $or->condition('mfta.value', '%' . $like_part . '%', $like);
 
-          $or->condition('mfpa.value', db_like($search_part), $like);
-          $or->condition('mfpa.value', '%' . db_like($search_part) . '%', $like);
+      $or->condition('mfpa.value', $like_part, $like);
+      $or->condition('mfpa.value', '%' . $like_part . '%', $like);
 
-          $or->condition('mfpd.value', db_like($search_part), $like);
-          $or->condition('mfpd.value', '%' . db_like($search_part) . '%', $like);
+      $or->condition('mfpd.value', $like_part, $like);
+      $or->condition('mfpd.value', '%' . $like_part . '%', $like);
 
-          $or->condition('mbl.human_name', db_like($search_part), $like);
-          $or->condition('mbl.human_name', '%' . db_like($search_part) . '%', $like);
+      $or->condition('mbl.human_name', $like_part, $like);
+      $or->condition('mbl.human_name', '%' . $like_part . '%', $like);
 
-          $or->condition('mbb.human_name', db_like($search_part), $like);
-          $or->condition('mbb.human_name', '%' . db_like($search_part) . '%', $like);
+      $or->condition('mbb.human_name', $like_part, $like);
+      $or->condition('mbb.human_name', '%' . $like_part . '%', $like);
 
-          $or->condition('mbr.human_name', db_like($search_part), $like);
-          $or->condition('mbr.human_name', '%' . db_like($search_part) . '%', $like);
-
-          continue;
-        }
-
-        $search_part_pieces_fixed = array();
-        foreach ($preg_part_pieces as $preg_part_pieces_key => $preg_part_piece) {
-          $search_part_pieces_fixed[$preg_part_pieces_key] = db_like($preg_part_piece);
-        }
-
-        $search_part_pieces_combined = implode('%', $search_part_pieces_fixed);
-        $or->condition('mfit.value', $search_part_pieces_combined, $like);
-        $or->condition('mfit.value', '%' . $search_part_pieces_combined . '%', $like);
-
-        $or->condition('mfio.value', $search_part_pieces_combined, $like);
-        $or->condition('mfio.value', '%' . $search_part_pieces_combined . '%', $like);
-
-        $or->condition('mfta.value', $search_part_pieces_combined, $like);
-        $or->condition('mfta.value', '%' . $search_part_pieces_combined . '%', $like);
-
-        $or->condition('mfpa.value', $search_part_pieces_combined, $like);
-        $or->condition('mfpa.value', '%' . $search_part_pieces_combined . '%', $like);
-
-        $or->condition('mfpd.value', $search_part_pieces_combined, $like);
-        $or->condition('mfpd.value', '%' . $search_part_pieces_combined . '%', $like);
-
-        $or->condition('mbl.human_name', $search_part_pieces_combined, $like);
-        $or->condition('mbl.human_name', '%' . $search_part_pieces_combined . '%', $like);
-
-        $or->condition('mbb.human_name', $search_part_pieces_combined, $like);
-        $or->condition('mbb.human_name', '%' . $search_part_pieces_combined . '%', $like);
-
-        $or->condition('mbr.human_name', $search_part_pieces_combined, $like);
-        $or->condition('mbr.human_name', '%' . $search_part_pieces_combined . '%', $like);
-      }
-
-      if (!empty($status)) {
-        $or->condition('mfts.value', $status, 'IN');
-      }
-
-      if (!empty($steps) && array_key_exists('step', $already_added)) {
-        $or->condition('mftsp.value', $steps, 'IN');
-      }
-
-      if (!empty($information_type)) {
-        $or->condition('mfitp.value', $information_type, 'IN');
-      }
+      $or->condition('mbr.human_name', $like_part, $like);
+      $or->condition('mbr.human_name', '%' . $like_part . '%', $like);
 
       $query->condition($or);
     }
