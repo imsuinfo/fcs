@@ -575,6 +575,9 @@ function mfcs_request_create_0_form_submit($form, &$form_state) {
       return FALSE;
     }
 
+    // save the request id so that a programmatic caller can determine the request_id.
+    $form_state['created_request_id'] = $request_id;
+
     $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . REQUEST_TIME . '_' . $user->uid . '_' . $request_id, FALSE);
 
     $mfcs_request_revisions['request_id'] = $request_id;
