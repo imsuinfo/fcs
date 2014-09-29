@@ -54,6 +54,7 @@ function mfcs_request_review_0_page($form, &$form_state, $page_number = 0) {
   // load sorting information
   $sorting = array();
   $order = NULL;
+  $url_extras = '';
   if (isset($_GET['order'])) {
     $order = strtolower($_GET['order']);
     $sorting['order'] = $order;
