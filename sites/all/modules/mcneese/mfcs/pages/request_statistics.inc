@@ -992,7 +992,14 @@ function mfcs_request_statistics_render_chart(&$options) {
       continue;
     }
 
-    $options['rows'][$key]['percent'] = sprintf('%01.0f', ($row['total'] / $options['total']) * 100);
+    $percent = ($row['total'] / $options['total']) * 100;
+    if (floor($percent) == $percent) {
+      $options['rows'][$key]['percent'] = sprintf('%01.0f', $percent);
+    }
+    else {
+      $options['rows'][$key]['percent'] = sprintf('%01.3f', $percent);
+    }
+
     $total_rows++;
   }
 
