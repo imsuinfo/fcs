@@ -560,8 +560,6 @@ function mfcs_request_create_0_form_submit($form, &$form_state) {
     }
   }
 
-  $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . REQUEST_TIME . '_' . $user->uid, FALSE);
-
   $failure = FALSE;
   $transaction = db_transaction();
 
@@ -576,6 +574,8 @@ function mfcs_request_create_0_form_submit($form, &$form_state) {
       $transaction->rollback();
       return FALSE;
     }
+
+    $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . REQUEST_TIME . '_' . $user->uid . '_' . $request_id, FALSE);
 
     $mfcs_request_revisions['request_id'] = $request_id;
 
