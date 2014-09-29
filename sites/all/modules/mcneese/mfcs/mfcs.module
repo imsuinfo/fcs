@@ -3623,8 +3623,8 @@ function mfcs_convert_value_from_database_format($value, $method, $option = arra
 /**
  * Loads an request by its ID.
  *
- * @param int $request_id
- *   The numeric request id.
+ * @param int|null $request_id
+ *   The numeric request id. Can be null when $reset_action is FALSE.
  * @param bool $reset_action
  *   (optional) If TRUE, the cache for the specified request is reset.
  *   If FALSE, the cache is reset, but no request is loaded.
@@ -3642,8 +3642,10 @@ function mfcs_convert_value_from_database_format($value, $method, $option = arra
  */
 function mfcs_load_request_by_id($request_id, $reset_action = NULL, $revision_id = NULL) {
   if (!cf_is_integer($request_id)) {
-    cf_error::invalid_integer('request_id');
-    return FALSE;
+    if (!($reset_action === FALSE && is_null($request_id))) {
+      cf_error::invalid_integer('request_id');
+      return FALSE;
+    }
   }
 
   if (!is_null($reset_action) && !is_bool($reset_action)) {
@@ -3657,8 +3659,8 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL, $revision_id
   }
 
   $cache_id = __function__;
-  $cached_requests = &drupal_static($cache_id, NULL);
-  if (is_null($reset_action) && is_array($cached_requests) && array_key_exists($request_id, $cached_requests)) {
+  $cached_requests = &drupal_static($cache_id, array());
+  if (is_null($reset_action) && array_key_exists($request_id, $cached_requests)) {
     if (is_null($revision_id)) {
       if (array_key_exists('latest', $cached_requests[$request_id])) {
         return $cached_requests[$request_id]['latest'];
@@ -3671,8 +3673,23 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL, $revision_id
     }
   }
   elseif ($reset_action === FALSE) {
-    unset($cached_requests[$request_id]);
+    if (is_null($request_id)) {
+      $cached_requests = array();
+    }
+    else {
+      unset($cached_requests[$request_id]);
+    }
+
     return TRUE;
+  }
+
+  // caching these results can use a lot of memory, so put a hard limit on caching at most 3 at a time.
+  if (is_array($cached_requests) && count($cached_requests) > 3) {
+    $cached_requests = array();
+  }
+  // the 'latest' array takes up an array key, so this will have a hard limit of "4" that ends up representing "3".
+  elseif (array_key_exists($request_id, $cached_requests) && count($cached_requests[$request_id]) > 4) {
+    $cached_requests[$request_id] = array();
   }
 
   mfcs_include(MFCS_INCLUDE_TABLE);
