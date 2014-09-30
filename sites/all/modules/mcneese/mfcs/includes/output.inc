@@ -257,15 +257,22 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
       return FALSE;
     }
 
-    $id_string = ' id="' . check_plain($id) . '"';
+    $id = check_plain($id);
+    $id_string = ' id="' . $id . '"';
   }
 
   global $base_path;
 
+  $module_path = drupal_get_path('module', 'mfcs');
 
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
   $request_type_options = mfcs_get_request_type_list_options();
+
+  // prepare the inline CSS markup
+  $css_screen = '';
+  $css_portrait = '@media (orientation:portrait) {';
+  $css_landscape = '@media (orientation:landscape) {';
 
   // begin wrappers (main)
   $markup = '<div' . $id_string . ' class="calendar-day-wrapper">';
@@ -345,9 +352,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
         $item_class .= 'room-' . $item['room'] . ' ';
         $item_class .= 'type-' . $item['type'] . ' ';
 
-        $item_style = '';
-
-        $markup .= '<div class="calendar-item-wrapper ' . $item_class . '" ' . $item_style . '><div class="calendar-item">';
+        $markup .= '<div class="calendar-item-wrapper ' . $item_class . '"><div class="calendar-item">';
         $markup .= '<div class="calendar-item-link-wrapper"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
         $markup .= '<div class="calendar-item-location-wrapper"><div class="calendar-item-location">' . $item['building_name'] . ' ' . $item['room_name'] . '</div></div>';
 
@@ -391,6 +396,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
   // body (Range)
   $markup .= '<div class="calendar-body-wrapper calendar-range"><div class="calendar-body">';
 
+  $populated = array();
   $row_even = TRUE;
   $row_count = 0;
   foreach ($items['range'] as $floor_time => $range) {
@@ -406,17 +412,24 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
     $markup .= '<div class="calendar-time_slot-label-wrapper"><div class="calendar-time_slot-label">' . date("h:i a", $floor_time) . '</div></div>';
     $markup .= '<div class="calendar-time_slot-request-wrapper"><div class="calendar-time_slot-request">';
 
+    if (!array_key_exists($floor_time, $populated)) {
+      $populated[$floor_time] = array();
+    }
+
     $item_even = TRUE;
     $item_count = 0;
-    $item_total = count($range);
+    $item_total = count($populated[$floor_time]) + count($range);
+    $item_width = 178;
 
     $left_offset = 0;
     $left_offset_min = 30;
-    $left_offset_max = 156;
+    $left_offset_max = 186;
 
     $left_offset_increment = $left_offset_min;
+    $left_offset_increment_portrait = $left_offset_min;
     if ($item_total > 0) {
-      $left_offset_increment = floor(800 / $item_total);
+      $left_offset_increment = floor(790 / $item_total);
+      $left_offset_increment_portrait = floor(590 / $item_total);
 
       if ($left_offset_increment < $left_offset_min) {
         $left_offset_increment = $left_offset_min;
@@ -424,10 +437,56 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
       elseif ($left_offset_increment > $left_offset_max) {
         $left_offset_increment = $left_offset_max;
       }
+
+      if ($left_offset_increment_portrait < $left_offset_min) {
+        $left_offset_increment_portrait = $left_offset_min;
+      }
+      elseif ($left_offset_increment_portrait > $left_offset_max) {
+        $left_offset_increment_portrait = $left_offset_max;
+      }
     }
 
 
     foreach ($range as $item_id => $item) {
+      $time = strtotime('+1 hours', $floor_time);
+      $stuck_slot = NULL;
+      do {
+        if (!array_key_exists($time, $populated)) {
+          $populated[$time] = array();
+        }
+
+        if (is_null($stuck_slot)) {
+          $max_position = count($populated[$time]);
+          for ($i = 0; $i <= $max_position; $i++) {
+            if (!isset($populated[$time][$i])) {
+              $populated[$time][$i] = $item_id;
+              $stuck_slot = $i;
+              break;
+            }
+          }
+          unset($max_position);
+          unset($i);
+        }
+        else {
+          $i = 0;
+          while ($i < $stuck_slot) {
+            if (!array_key_exists($i, $populated[$time])) {
+              $populated[$time][$i] = NULL;
+            }
+
+            $i++;
+          }
+
+          $populated[$time][$stuck_slot] = $item_id;
+          unset($i);
+        }
+
+        $time = strtotime('+1 hours', $time);
+      } while ($item['time_stop'] > $time);
+
+      $left_offset = $left_offset_increment * $stuck_slot;
+      $left_offset_portrait = $left_offset_increment_portrait * $stuck_slot;
+
       $item_class = "";
 
       $item_class = 'row-' . $item_count . ' ';
@@ -461,19 +520,54 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
         $item_height = 54;
       }
 
+      // when there are more than 30 characters, shrink the box size by the expected line height of 15 pixels.
+      if (strlen($item['title']) > 30) {
+        $item_height -= 15;
+      }
+
       // designate the top offset based on when the request starts relative to the top of the hour.
       $top_offset = ($item['time_start'] - $floor_time) / 60;
       if ($top_offset < 0) {
         $top_offset = 0;
       }
 
-      $item_style = 'style="';
-      $item_style .= ' min-height: ' . $item_height . 'px;';
-      $item_style .= ' top: ' . $top_offset . 'px;';
-      $item_style .= ' left: ' . $left_offset . 'px;';
-      $item_style .= '"';
+      if (is_null($id)) {
+        $item_id = 'calendar-item-' . $item_id;
+        $item_id_parent = '';
+      }
+      else {
+        $item_id = $id . '-calendar-item-' . $item_id;
+        $item_id_parent = '#' . $id . ' ';
+      }
 
-      $markup .= '<div class="calendar-item-wrapper ' . $item_class . '" ' . $item_style . '><div class="calendar-item">';
+      $css_screen .= $item_id_parent . '#' . $item_id . ' {' . "\n";
+      $css_screen .= ' top: ' . $top_offset . 'px;' . "\n";
+      $css_screen .= ' left: ' . $left_offset . 'px;' . "\n";
+      $css_screen .= ' min-height: ' . $item_height . 'px;' . "\n";
+      $css_screen .= ' width: ' . $item_width . 'px;' . "\n";
+      $css_screen .= ' min-width: ' . $item_width . 'px;' . "\n";
+      $css_screen .= ' max-width: ' . $item_width . 'px;' . "\n";
+      $css_screen .= '}' . "\n";
+
+      $css_portrait .= $item_id_parent . '#' . $item_id . ' {' . "\n";
+      $css_portrait .= ' top: ' . $top_offset . 'px;' . "\n";
+      $css_portrait .= ' left: ' . $left_offset_portrait . 'px;' . "\n";
+      $css_portrait .= ' min-height: ' . $item_height . 'px;' . "\n";
+      $css_portrait .= ' width: ' . $item_width . 'px;' . "\n";
+      $css_portrait .= ' min-width: ' . $item_width . 'px;' . "\n";
+      $css_portrait .= ' max-width: ' . $item_width . 'px;' . "\n";
+      $css_portrait .= '}' . "\n";
+
+      $css_landscape .= $item_id_parent . '#' . $item_id . ' {' . "\n";
+      $css_landscape .= ' top: ' . $top_offset . 'px;' . "\n";
+      $css_landscape .= ' left: ' . $left_offset . 'px;' . "\n";
+      $css_landscape .= ' min-height: ' . $item_height . 'px;' . "\n";
+      $css_landscape .= ' width: ' . $item_width . 'px;' . "\n";
+      $css_landscape .= ' min-width: ' . $item_width . 'px;' . "\n";
+      $css_landscape .= ' max-width: ' . $item_width . 'px;' . "\n";
+      $css_landscape .= '}' . "\n";
+
+      $markup .= '<div id="' . $item_id . '" class="calendar-item-wrapper ' . $item_class . '"><div class="calendar-item">';
       $markup .= '<div class="calendar-item-link-wrapper"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
       $markup .= '<div class="calendar-item-time-wrapper"><div class="calendar-item-time">' . date("h:i a", $item['time_start']) . " to " . date("h:i a", $item['time_stop']) . '</div></div>';
       $markup .= '<div class="calendar-item-location-wrapper"><div class="calendar-item-location">' . $item['building_name'] . ' ' . $item['room_name'] . '</div></div>';
@@ -486,7 +580,6 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
 
       $item_count++;
       $item_even = !$item_even;
-      $left_offset += $left_offset_increment;
     }
 
     $markup .= '</div></div></div></div>';
@@ -519,6 +612,14 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
 
   // end wrappers (main)
   $markup .= '</div>';
+
+  // add the inline css
+  $css_portrait .= '}';
+  $css_landscape .= '}';
+
+  drupal_add_css($css_screen, array('type' => 'inline', 'group' => CSS_DEFAULT, 'media' => 'screen', 'preprocess' => FALSE));
+  drupal_add_css($css_portrait, array('type' => 'inline', 'group' => CSS_DEFAULT, 'media' => 'print', 'preprocess' => FALSE));
+  drupal_add_css($css_landscape, array('type' => 'inline', 'group' => CSS_DEFAULT, 'media' => 'print', 'preprocess' => FALSE));
 
   return $markup;
 }
