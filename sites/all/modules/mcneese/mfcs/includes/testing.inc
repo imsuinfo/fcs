@@ -18,10 +18,10 @@
  * @param string $custom_title
  *   (optional) When specified, will replace the cloned requests title with
  *   this string.
- * @param array $custom_dates
+ * @param array|null $custom_dates
  *   (optional) When specified, will replace the cloned requests dates with
  *   the values in this array.
- * @param array $custom_time_start
+ * @param array|null $custom_time_start
  *   (optional) When specified, will replace the cloned requests time_start
  *   with the values in this array.
  * @param array $custom_time_stop
@@ -90,10 +90,12 @@ function mfcs_testing_clone_request($request_id, $custom_title = NULL, $custom_d
 
     if (!is_null($custom_time_start)) {
       $state['values']['request']['dates']['time_start'] = $custom_time_start;
+      $state['complete form']['form']['existing']['#value']['request']['dates']['time_start'] = $custom_time_start;
     }
 
     if (!is_null($custom_time_stop)) {
       $state['values']['request']['dates']['time_stop'] = $custom_time_stop;
+      $state['complete form']['form']['existing']['#value']['request']['dates']['time_start'] = $custom_time_stop;
     }
 
     drupal_form_submit($id, $state);
@@ -453,6 +455,7 @@ function mfcs_testing_generate_dates_and_times() {
 
   $time_start_24 = rand(0, 23);
   $time_stop = 1;
+  $time_short = rand(0, 1);
 
   $am_pm = 'pm';
   $time_start = $time_start_24;
@@ -463,8 +466,16 @@ function mfcs_testing_generate_dates_and_times() {
     $time_start = $time_start_24 - 12;
   }
 
-  if ($time_start_24 < 23) {
-    $time_stop = rand(1, 23 - $time_start_24);
+  if ($time_short == 0) {
+    $time_short = rand(1,4);
+    if ($time_short + $time_start_24 < 23) {
+      $time_stop = $time_short;
+    }
+  }
+  else {
+    if ($time_start_24 < 23) {
+      $time_stop = rand(1, 23 - $time_start_24);
+    }
   }
 
   $dates_and_times['date'] = strtotime('+' . $date . ' days');
