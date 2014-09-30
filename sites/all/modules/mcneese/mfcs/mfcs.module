@@ -3887,6 +3887,8 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL, $revision_id
  *   The numeric request id.
  * @param int $timestamp
  *   Unix Timestamp representing the exact date and time to load.
+ * @param int $revision_user_id
+ *   The user id of the user responsible for the revision at a given timestamp.
  * @param array $desired_fields
  *   (optional) An array of field names to load that match the specified date.
  *   These are nested by their table structure. When an empty array is
@@ -3898,7 +3900,7 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL, $revision_id
  *
  * @see mfcs_table_structure()
  */
-function mfcs_load_request_by_timestamp($request_id, $timestamp, $desired_fields = array()) {
+function mfcs_load_request_by_timestamp($request_id, $timestamp, $revision_user_id, $desired_fields = array()) {
   if (!cf_is_integer($request_id)) {
     cf_error::invalid_integer('request_id');
     return FALSE;
@@ -3906,6 +3908,11 @@ function mfcs_load_request_by_timestamp($request_id, $timestamp, $desired_fields
 
   if (!cf_is_integer($timestamp)) {
     cf_error::invalid_integer('timestamp');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($revision_user_id)) {
+    cf_error::invalid_integer('revision_user_id');
     return FALSE;
   }
 
@@ -3947,6 +3954,7 @@ function mfcs_load_request_by_timestamp($request_id, $timestamp, $desired_fields
 
     $query->condition('id', $request_id);
     $query->condition('mrv.date', $timestamp);
+    $query->condition('mrv.user_id', $revision_user_id);
 
     $query->orderBy('mrv.date');
 
@@ -3988,6 +3996,7 @@ function mfcs_load_request_by_timestamp($request_id, $timestamp, $desired_fields
             $query = db_select($field_table_name, 'mftf');
             $query->condition('mftf.request_id', $request_id);
             $query->condition('mftf.date', $timestamp);
+            $query->condition('mftf.user_id', $revision_user_id);
             $query->fields('mftf');
 
             $results = $query->execute()->fetchAll();
@@ -4011,6 +4020,7 @@ function mfcs_load_request_by_timestamp($request_id, $timestamp, $desired_fields
           $query = db_select($field_table_name, 'mftf');
           $query->condition('mftf.request_id', $request_id);
           $query->condition('mftf.date', $timestamp);
+          $query->condition('mftf.user_id', $revision_user_id);
           $query->fields('mftf');
 
           #$results = $query->execute()->fetchAll();

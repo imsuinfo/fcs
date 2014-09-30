@@ -113,7 +113,7 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
           break;
         }
 
-        $history = mfcs_load_request_by_timestamp($request_id, $revision->date);
+        $history = mfcs_load_request_by_timestamp($request_id, $revision->date, $revision->user_id);
         $date = date("Y/m/d h:i:s a", $revision->date);
 
         $fieldset_id = 'request-' . $request_id . '-history_items-' . $revision->date . '-' . $revision_id;

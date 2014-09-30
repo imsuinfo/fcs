@@ -2593,7 +2593,7 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id, $revision_id 
       $message = $review->message;
       $date = $review->date;
 
-      $changelog = mfcs_load_request_by_timestamp($request_id, $date, $changelog_fields);
+      $changelog = mfcs_load_request_by_timestamp($request_id, $date, $user_id, $changelog_fields);
 
       if (!array_key_exists($user_id, $users)) {
         $users[$user_id] = user_load($user_id);
