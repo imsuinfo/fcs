@@ -41,8 +41,8 @@ function mfcs_request_reviewers_0_autocomplete_user_id($string) {
 
   try {
     $query = db_select('users', 'u');
-    $query->innerjoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id AND u.uid = fdfufn.entity_id AND fdfufn.delta = 0');
-    $query->innerjoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id AND u.uid = fdfuln.entity_id AND fdfufn.entity_id = fdfuln.entity_id AND fdfuln.delta = 0');
+    $query->innerJoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id AND u.uid = fdfufn.entity_id AND fdfufn.delta = 0');
+    $query->innerJoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id AND u.uid = fdfuln.entity_id AND fdfufn.entity_id = fdfuln.entity_id AND fdfuln.delta = 0');
 
     $query->addField('u', 'uid', 'user_id');
     $query->addField('u', 'name', 'name');
@@ -325,7 +325,7 @@ function mfcs_edit_0_autocomplete_request_coordinator_phone($string) {
   try {
     $query = mfcs_autocomplete_build_request_coordinator_query();
 
-    $query->innerjoin('field_data_field_user_phone_number', 'fdfupn', 'u.uid = fdfupn.entity_id AND fdfupn.delta = 0');
+    $query->innerJoin('field_data_field_user_phone_number', 'fdfupn', 'u.uid = fdfupn.entity_id AND fdfupn.delta = 0');
     $query->addField('fdfupn', 'field_user_phone_number_value', 'phone_number');
 
     $db_string = db_like($string);
@@ -387,8 +387,8 @@ function mfcs_edit_0_autocomplete_request_coordinator_phone($string) {
  */
 function mfcs_autocomplete_build_request_coordinator_query() {
   $query = db_select('users', 'u');
-  $query->innerjoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id AND u.uid = fdfufn.entity_id AND fdfufn.delta = 0');
-  $query->innerjoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id AND u.uid = fdfuln.entity_id AND fdfufn.entity_id = fdfuln.entity_id AND fdfuln.delta = 0');
+  $query->innerJoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id AND u.uid = fdfufn.entity_id AND fdfufn.delta = 0');
+  $query->innerJoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id AND u.uid = fdfuln.entity_id AND fdfufn.entity_id = fdfuln.entity_id AND fdfuln.delta = 0');
 
   $query->addField('u', 'uid', 'user_id');
   $query->addField('u', 'name', 'name');

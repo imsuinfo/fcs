@@ -2035,7 +2035,7 @@ function mfcs_check_if_requests_are_fully_reviewed($request_ids, $classification
     $total_reviews = 0;
     try {
       $query = db_select('mfcs_field_review_review', 'mfrr');
-      $query->innerjoin('mfcs_review_classifications', 'mrc', 'mfrr.id = mrc.review_id');
+      $query->innerJoin('mfcs_review_classifications', 'mrc', 'mfrr.id = mrc.review_id');
 
       $query->addField('mrc', 'classification', 'classification');
 

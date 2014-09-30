@@ -154,8 +154,8 @@ function mfcs_page_request_access_operation_edit(&$request_ids, &$processed, &$a
       try {
         $query = db_select('mfcs_requests', 'mer');
 
-        $query->innerjoin('mfcs_current_information', 'mci', 'mer.id = mci.request_id');
-        $query->innerjoin('mfcs_field_information_type', 'mfit', 'mci.request_id = mfit.request_id AND mci.type = mfit.revision AND mfit.delta = 0');
+        $query->innerJoin('mfcs_current_information', 'mci', 'mer.id = mci.request_id');
+        $query->innerJoin('mfcs_field_information_type', 'mfit', 'mci.request_id = mfit.request_id AND mci.type = mfit.revision AND mfit.delta = 0');
 
         $query->addField('mer', 'id', 'id');
 
@@ -200,8 +200,8 @@ function mfcs_page_request_access_operation_edit(&$request_ids, &$processed, &$a
     try {
       $query = db_select('mfcs_requests', 'mer');
 
-      $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
-      $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
+      $query->innerJoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
+      $query->innerJoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
 
       $query->addField('mer', 'id', 'id');
 
@@ -309,15 +309,15 @@ function mfcs_page_request_access_operation_view(&$request_ids, &$processed, &$a
     try {
       $query = db_select('mfcs_requests', 'mer');
 
-      $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
-      $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
+      $query->innerJoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
+      $query->innerJoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
 
       $query->addField('mer', 'id', 'id');
 
       $query->condition('mer.id', $request_ids, 'IN');
 
       if ($roles['requester'] && !$roles['manager']) {
-        $query->innerjoin('mfcs_field_top_step', 'mftsp', 'mct.request_id = mftsp.request_id AND mct.step = mftsp.revision AND mftsp.delta = 0');
+        $query->innerJoin('mfcs_field_top_step', 'mftsp', 'mct.request_id = mftsp.request_id AND mct.step = mftsp.revision AND mftsp.delta = 0');
 
         $or = db_or();
 
@@ -653,11 +653,11 @@ function mfcs_page_request_access_operation_cancel(&$request_ids, &$processed, &
   try {
     $query = db_select('mfcs_requests', 'mer');
 
-    $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
-    $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
+    $query->innerJoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
+    $query->innerJoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
 
-    $query->innerjoin('mfcs_current_venue_coordinator', 'mcvc', 'mer.id = mcvc.request_id');
-    $query->innerjoin('mfcs_field_venue_coordinator_user_id', 'mfvcui', 'mcvc.request_id = mfvcui.request_id AND mcvc.user_id = mfvcui.revision AND mfvcui.delta = 0');
+    $query->innerJoin('mfcs_current_venue_coordinator', 'mcvc', 'mer.id = mcvc.request_id');
+    $query->innerJoin('mfcs_field_venue_coordinator_user_id', 'mfvcui', 'mcvc.request_id = mfvcui.request_id AND mcvc.user_id = mfvcui.revision AND mfvcui.delta = 0');
 
     $query->addField('mer', 'id', 'id');
 
@@ -693,8 +693,8 @@ function mfcs_page_request_access_operation_cancel(&$request_ids, &$processed, &
     try {
       $query = db_select('mfcs_requests', 'mer');
 
-      $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
-      $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
+      $query->innerJoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
+      $query->innerJoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
 
       $query->addField('mer', 'id', 'id');
 
@@ -804,11 +804,11 @@ function mfcs_page_request_access_operation_uncancel(&$request_ids, &$processed,
   try {
     $query = db_select('mfcs_requests', 'mer');
 
-    $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
-    $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
+    $query->innerJoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
+    $query->innerJoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
 
-    $query->innerjoin('mfcs_current_venue_coordinator', 'mcvc', 'mer.id = mcvc.request_id');
-    $query->innerjoin('mfcs_field_venue_coordinator_user_id', 'mfvcui', 'mcvc.request_id = mfvcui.request_id AND mcvc.user_id = mfvcui.revision AND mfvcui.delta = 0');
+    $query->innerJoin('mfcs_current_venue_coordinator', 'mcvc', 'mer.id = mcvc.request_id');
+    $query->innerJoin('mfcs_field_venue_coordinator_user_id', 'mfvcui', 'mcvc.request_id = mfvcui.request_id AND mcvc.user_id = mfvcui.revision AND mfvcui.delta = 0');
 
     $query->addField('mer', 'id', 'id');
 
@@ -844,8 +844,8 @@ function mfcs_page_request_access_operation_uncancel(&$request_ids, &$processed,
     try {
       $query = db_select('mfcs_requests', 'mer');
 
-      $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
-      $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
+      $query->innerJoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
+      $query->innerJoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
 
       $query->addField('mer', 'id', 'id');
 
@@ -941,8 +941,8 @@ function mfcs_page_request_access_operation_history(&$request_ids, &$processed, 
     try {
       $query = db_select('mfcs_requests', 'mer');
 
-      $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
-      $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
+      $query->innerJoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
+      $query->innerJoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
 
       $query->addField('mer', 'id', 'id');
 
@@ -1059,9 +1059,9 @@ function mfcs_page_request_access_operation_agreement(&$request_ids, &$processed
     try {
       $query = db_select('mfcs_requests', 'mer');
 
-      $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
-      $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
-      $query->innerjoin('mfcs_field_top_step', 'mftsp', 'mct.request_id = mftsp.request_id AND mct.step = mftsp.revision AND mftsp.delta = 0');
+      $query->innerJoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
+      $query->innerJoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
+      $query->innerJoin('mfcs_field_top_step', 'mftsp', 'mct.request_id = mftsp.request_id AND mct.step = mftsp.revision AND mftsp.delta = 0');
 
       $query->addField('mer', 'id', 'id');
 
@@ -1170,8 +1170,8 @@ function mfcs_page_request_access_operation_delete(&$request_ids, &$processed, &
   try {
     $query = db_select('mfcs_requests', 'mer');
 
-    $query->innerjoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
-    $query->innerjoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
+    $query->innerJoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
+    $query->innerJoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
 
     $query->addField('mer', 'id', 'id');
 
