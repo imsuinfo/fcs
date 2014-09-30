@@ -32,11 +32,13 @@ function mfcs_request_ical_year_0_page($year = NULL) {
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
   mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
 
+  $instance = mfcs_instance();
+
   $parameter_year = FALSE;
 
   if (is_null($year)) {
-    $year_start = strtotime('midnight first day of January', REQUEST_TIME);
-    $year_end = strtotime('midnight last day of December', REQUEST_TIME);
+    $year_start = strtotime('midnight first day of January', $instance);
+    $year_end = strtotime('midnight last day of December', $instance);
     $year_stop = strtotime('midnight tomorrow', $year_end);
   }
   else {
@@ -100,8 +102,8 @@ function mfcs_request_ical_year_0_page($year = NULL) {
   header('Content-Disposition: inline; filename="' . $filename . '"');
   header('Content-Description: File Transfer');
   header('Content-Location: ' . $content_location);
-  header('Last-Modified: ' . date('r', REQUEST_TIME));
-  header('Date: ' . date('r', REQUEST_TIME));
+  header('Last-Modified: ' . date('r', $instance));
+  header('Date: ' . date('r', $instance));
 
   // flush buffer after headers have been processed (to hopefully avoid "headers already sent" issues).
   ob_end_flush();
@@ -147,12 +149,14 @@ function mfcs_request_ical_month_0_page($year = NULL, $month = NULL) {
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
   mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
 
+  $instance = mfcs_instance();
+
   $parameter_year = FALSE;
   $parameter_month = !is_null($month);
 
   if (is_null($year)) {
-    $month_start = strtotime('midnight first day of', REQUEST_TIME);
-    $month_end = strtotime('midnight last day of', REQUEST_TIME);
+    $month_start = strtotime('midnight first day of', $instance);
+    $month_end = strtotime('midnight last day of', $instance);
     $month_stop = strtotime('midnight tomorrow', $month_end);
   }
   else {
@@ -250,8 +254,8 @@ function mfcs_request_ical_month_0_page($year = NULL, $month = NULL) {
   header('Content-Disposition: inline; filename="' . $filename . '"');
   header('Content-Description: File Transfer');
   header('Content-Location: ' . $content_location);
-  header('Last-Modified: ' . date('r', REQUEST_TIME));
-  header('Date: ' . date('r', REQUEST_TIME));
+  header('Last-Modified: ' . date('r', $instance));
+  header('Date: ' . date('r', $instance));
 
   // flush buffer after headers have been processed (to hopefully avoid "headers already sent" issues).
   ob_end_flush();
@@ -292,12 +296,14 @@ function mfcs_request_ical_day_0_page($year = NULL, $month = NULL, $day = NULL) 
 
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
+  $instance = mfcs_instance();
+
   $parameter_year = FALSE;
   $parameter_month = !is_null($month);
   $parameter_day = !is_null($day);
 
   if (is_null($year)) {
-    $day_start = strtotime('midnight today', REQUEST_TIME);
+    $day_start = strtotime('midnight today', $instance);
     $day_stop = strtotime('midnight tomorrow', $day_start);
   }
   else {
@@ -376,8 +382,8 @@ function mfcs_request_ical_day_0_page($year = NULL, $month = NULL, $day = NULL) 
   header('Content-Disposition: inline; filename="' . $filename . '"');
   header('Content-Description: File Transfer');
   header('Content-Location: ' . $content_location);
-  header('Last-Modified: ' . date('r', REQUEST_TIME));
-  header('Date: ' . date('r', REQUEST_TIME));
+  header('Last-Modified: ' . date('r', $instance));
+  header('Date: ' . date('r', $instance));
 
   // flush buffer after headers have been processed (to hopefully avoid "headers already sent" issues).
   ob_end_flush();
@@ -411,6 +417,8 @@ function mfcs_request_ical_request_0_page($request_id) {
   global $base_url;
 
   mfcs_include(MFCS_INCLUDE_ICAL);
+
+  $instance = mfcs_instance();
 
   mfcs_add_canonical_headers('requests/ical-0/' . $request_id);
 
@@ -449,8 +457,8 @@ function mfcs_request_ical_request_0_page($request_id) {
   header('Content-Disposition: inline; filename="' . $filename . '"');
   header('Content-Description: File Transfer');
   header('Content-Location: ' . $content_location);
-  header('Last-Modified: ' . date('r', REQUEST_TIME));
-  header('Date: ' . date('r', REQUEST_TIME));
+  header('Last-Modified: ' . date('r', $instance));
+  header('Date: ' . date('r', $instance));
 
   // flush buffer after headers have been processed (to hopefully avoid "headers already sent" issues).
   ob_end_flush();

@@ -162,8 +162,10 @@ function mfcs_dashboard_page() {
   if ($can_list) {
     mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
-    $month_start = strtotime('midnight first day of', REQUEST_TIME);
-    $month_end = strtotime('midnight last day of', REQUEST_TIME);
+    $instance = mfcs_instance();
+
+    $month_start = strtotime('midnight first day of', $instance);
+    $month_end = strtotime('midnight last day of', $instance);
     $month_stop = strtotime('midnight tomorrow', $month_end);
 
     // determine the begin and end weeks for the month.

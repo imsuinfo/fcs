@@ -552,12 +552,14 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
     'user_id' => $user->uid,
   );
 
+  $instance = mfcs_instance();
+
   $mfcs_requests = array(
-    'updated' => REQUEST_TIME,
+    'updated' => $instance,
   );
 
   $request_revision = mfcs_load_request_revision_number($request_id);
-  $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . REQUEST_TIME . '_' . $user->uid . '_' . $request_id, FALSE);
+  $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . $instance . '_' . $user->uid . '_' . $request_id, FALSE);
 
   if ($request_revision === FALSE) {
     form_set_error('form', "An error occurred while trying to save the request. Please contact the support staff.");
@@ -577,7 +579,7 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
 
   $mfcs_request_revisions = array(
     'request_id' => $request_id,
-    'date' => REQUEST_TIME,
+    'date' => $instance,
     'revision' => $request_revision_next,
     'user_id' => $user->uid,
   );
@@ -690,7 +692,7 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
           'revision' => $step_revision,
           'delta' => 0,
           'user_id' => $user->uid,
-          'date' => REQUEST_TIME,
+          'date' => $instance,
           'value' => MFCS_REVIEW_STEP_VENUE_AVAILABLE,
         );
 
@@ -721,7 +723,7 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
           'revision' => $review_revision,
           'delta' => 0,
           'user_id' => $user->uid,
-          'date' => REQUEST_TIME,
+          'date' => $instance,
           'step' => $step,
           'decision' => MFCS_REVIEW_DECISION_AMENDMENT,
           'message' => '',

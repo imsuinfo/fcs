@@ -43,9 +43,11 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
   mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
 
+  $instance = mfcs_instance();
+
   if (is_null($year)) {
-    $month_start = strtotime('midnight first day of', REQUEST_TIME);
-    $month_end = strtotime('midnight last day of', REQUEST_TIME);
+    $month_start = strtotime('midnight first day of', $instance);
+    $month_end = strtotime('midnight last day of', $instance);
     $month_stop = strtotime('midnight tomorrow', $month_end);
   }
   else {
@@ -206,8 +208,10 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
   mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
 
+  $instance = mfcs_instance();
+
   if (is_null($year)) {
-    $day_start = strtotime('midnight today', REQUEST_TIME);
+    $day_start = strtotime('midnight today', $instance);
     $day_stop = strtotime('midnight tomorrow', $day_start);
   }
   else {

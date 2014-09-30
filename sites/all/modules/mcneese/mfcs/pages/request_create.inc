@@ -499,14 +499,16 @@ function mfcs_request_create_0_form_submit($form, &$form_state) {
     'user_id' => $user->uid,
   );
 
+  $instance = mfcs_instance();
+
   $mfcs_requests = array(
     'user_id' => (int) $user_data['user_id'],
-    'created' => REQUEST_TIME,
-    'updated' => REQUEST_TIME,
+    'created' => $instance,
+    'updated' => $instance,
   );
 
   $mfcs_request_revisions = array(
-    'date' => REQUEST_TIME,
+    'date' => $instance,
     'revision' => 0,
     'user_id' => $user->uid,
   );
@@ -578,7 +580,7 @@ function mfcs_request_create_0_form_submit($form, &$form_state) {
     // save the request id so that a programmatic caller can determine the request_id.
     $form_state['created_request_id'] = $request_id;
 
-    $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . REQUEST_TIME . '_' . $user->uid . '_' . $request_id, FALSE);
+    $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . $instance . '_' . $user->uid . '_' . $request_id, FALSE);
 
     $mfcs_request_revisions['request_id'] = $request_id;
 

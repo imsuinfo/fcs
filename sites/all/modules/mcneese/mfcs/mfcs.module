@@ -1294,6 +1294,8 @@ function mfcs_mail($key, &$message, $params) {
   $markup = '';
 
   if ($key == 'request_alert') {
+    $instance = mfcs_instance();
+
     if (!empty($params['title_prefix'])) {
       $subject .= $params['title_prefix'];
     }
@@ -1314,7 +1316,7 @@ function mfcs_mail($key, &$message, $params) {
     $body .= "Request URL:\n - " . $request_url . "\n\n";
 
     $body .= "\n";
-    $body .= "This e-mail was generated on:\n - " . date("Y/m/d h:i:s a T", REQUEST_TIME) . "\n";
+    $body .= "This e-mail was generated on:\n - " . date("Y/m/d h:i:s a T", $instance) . "\n";
 
 
     if (isset($params['markup'])) {
@@ -1324,7 +1326,7 @@ function mfcs_mail($key, &$message, $params) {
       $markup .= "<strong>Request URL</strong>:\n<ul><li><a href=" . '"' . $request_url . '"' . ">" . $request_url . "</a></li></ul>\n<br>\n";
 
       $markup .= "<br>\n";
-      $markup .= "<em>This e-mail was generated on</em>:\n<ul><li><em>" . date("Y/m/d h:i:s a T", REQUEST_TIME) . "</em></li></ul>\n";
+      $markup .= "<em>This e-mail was generated on</em>:\n<ul><li><em>" . date("Y/m/d h:i:s a T", $instance) . "</em></li></ul>\n";
     }
   }
   else {
@@ -2292,26 +2294,28 @@ function mfcs_sync_banner_to_local() {
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
   $request_locations = mfcs_get_request_location_list_options(NULL, TRUE);
 
+  $instance = mfcs_instance();
+
   $transaction = db_transaction();
   try {
     // disable all locations, buildings, and rooms such that the ones that are not added back will be disabled.
     $query = db_update('mfcs_banner_locations');
-    $query->fields(array('disabled' => 1, 'date' => REQUEST_TIME));
+    $query->fields(array('disabled' => 1, 'date' => $instance));
     $query->condition('disabled', 0);
     $query->execute();
 
     $query = db_update('mfcs_banner_buildings');
-    $query->fields(array('disabled' => 1, 'date' => REQUEST_TIME));
+    $query->fields(array('disabled' => 1, 'date' => $instance));
     $query->condition('disabled', 0);
     $query->execute();
 
     $query = db_update('mfcs_banner_rooms');
-    $query->fields(array('disabled' => 1, 'date' => REQUEST_TIME));
+    $query->fields(array('disabled' => 1, 'date' => $instance));
     $query->condition('disabled', 0);
     $query->execute();
 
     $query = db_update('mfcs_banner_building_to_location');
-    $query->fields(array('disabled' => 1, 'date' => REQUEST_TIME));
+    $query->fields(array('disabled' => 1, 'date' => $instance));
     $query->condition('disabled', 0);
     $query->execute();
 
@@ -2414,7 +2418,7 @@ function mfcs_sync_banner_to_local() {
         $query->condition('mbl.machine_name', $location_item['machine_name']);
 
         $location_id = $query->execute()->fetchField();
-        $location_item['date'] = REQUEST_TIME;
+        $location_item['date'] = $instance;
 
         if ($location_id > 0) {
           $query = db_update('mfcs_banner_locations');
@@ -2434,7 +2438,7 @@ function mfcs_sync_banner_to_local() {
         $query->condition('mbb.machine_name', $building_item['machine_name']);
 
         $building_id = $query->execute()->fetchField();
-        $building_item['date'] = REQUEST_TIME;
+        $building_item['date'] = $instance;
 
         if ($building_id > 0) {
           $query = db_update('mfcs_banner_buildings');
@@ -2449,7 +2453,7 @@ function mfcs_sync_banner_to_local() {
         }
 
         $room_item['building'] = $building_id;
-        $room_item['date'] = REQUEST_TIME;
+        $room_item['date'] = $instance;
 
         // add/update the room.
         $query = db_select('mfcs_banner_rooms', 'mbr');
@@ -2475,7 +2479,7 @@ function mfcs_sync_banner_to_local() {
         $location_to_building_item['location'] = $location_id;
         $location_to_building_item['building'] = $building_id;
         $location_to_building_item['disabled'] = 0;
-        $location_to_building_item['date'] = REQUEST_TIME;
+        $location_to_building_item['date'] = $instance;
 
         $query = db_select('mfcs_banner_building_to_location', 'mbbl');
         $query->addExpression('count(mbbl.building)');
@@ -2515,7 +2519,7 @@ function mfcs_sync_banner_to_local() {
     $transaction = db_transaction();
     try {
       $query = db_update('mfcs_banner_event_roles');
-      $query->fields(array('disabled' => 1, 'date' => REQUEST_TIME));
+      $query->fields(array('disabled' => 1, 'date' => $instance));
       $query->condition('disabled', 0);
       $query->execute();
 
@@ -2531,7 +2535,7 @@ function mfcs_sync_banner_to_local() {
           // add/update the role.
           $mfcs_banner_event_roles_item['machine_name'] = $role;
           $mfcs_banner_event_roles_item['disabled'] = 0;
-          $mfcs_banner_event_roles_item['date'] = REQUEST_TIME;
+          $mfcs_banner_event_roles_item['date'] = $instance;
 
           $query = db_select('mfcs_banner_event_roles', 'mber');
           $query->addExpression('count(mber.id)');
@@ -2597,6 +2601,8 @@ function mfcs_sync_banner_to_local_users($user_id = NULL) {
     }
   }
 
+  $instance = mfcs_instance();
+
   if (is_null($banner_id)) {
     $rows = mfcs_oracle_select('select id, role from ucs.msu_event_role');
   }
@@ -2614,7 +2620,7 @@ function mfcs_sync_banner_to_local_users($user_id = NULL) {
       $roles_by_name = $query->execute()->fetchAllKeyed();
 
       $query = db_update('mfcs_banner_event_roles_to_users');
-      $query->fields(array('disabled' => 1, 'date' => REQUEST_TIME));
+      $query->fields(array('disabled' => 1, 'date' => $instance));
       $query->condition('disabled', 0);
 
       if (!is_null($banner_id)) {
@@ -2645,7 +2651,7 @@ function mfcs_sync_banner_to_local_users($user_id = NULL) {
           $mfcs_banner_event_roles_item['user_id'] = $user_id;
           $mfcs_banner_event_roles_item['event_role_id'] = $roles_by_name[$row['role']];
           $mfcs_banner_event_roles_item['disabled'] = 0;
-          $mfcs_banner_event_roles_item['date'] = REQUEST_TIME;
+          $mfcs_banner_event_roles_item['date'] = $instance;
 
           if (is_null($banner_id)) {
             $user_id = $query->execute()->fetchField();
@@ -2750,6 +2756,9 @@ function mfcs_insurance_not_provided_alert_cron() {
           continue;
         }
 
+        // create a new instance for every reminder e-mail.
+        mfcs_instance(TRUE);
+
         $parameters['reminder_data'] = $result;
         $parameters['reminder_data']->interval = $interval;
         mfcs_send_workflow_emails($result->id, $parameters);
@@ -2766,6 +2775,7 @@ function mfcs_insurance_not_provided_alert_cron() {
       }
 
       foreach ($sent as $reminder) {
+
         mfcs_save_request_reminders($reminder);
       }
     }
@@ -2822,6 +2832,9 @@ function mfcs_autocancel_old_requests_cron() {
   mfcs_include(MFCS_INCLUDE_WORKFLOW);
 
   foreach ($unresolved_requests as $request_id => $request_object) {
+    // create a new instance for every unresolved request.
+    mfcs_instance(TRUE);
+
     $cancelled = mfcs_workflow_set_status($request_id, MFCS_REQUEST_STATUS_CANCELLED, $system_user);
 
     if ($cancelled) {
@@ -4192,6 +4205,8 @@ function mfcs_load_user_by_banner_id($banner_id, $reset = FALSE) {
  * @see mfcs_load_request_by_id()
  */
 function mfcs_build_table_structure($structure, &$structure_tables, &$structure_field_tables, $table_name, $field_name, $db_table, $db_table_field, $user_data, $values, $form_state, $request = NULL) {
+  $instance = mfcs_instance();
+
   if (is_null($request)) {
     $request_id = NULL;
     $revision = 0;
@@ -4257,7 +4272,7 @@ function mfcs_build_table_structure($structure, &$structure_tables, &$structure_
 
           $structure_field_tables[$db_table_field][$delta] = array();
           $structure_field_tables[$db_table_field][$delta]['user_id'] = $user_data['user_id'];
-          $structure_field_tables[$db_table_field][$delta]['date'] = REQUEST_TIME;
+          $structure_field_tables[$db_table_field][$delta]['date'] = $instance;
           $structure_field_tables[$db_table_field][$delta]['delta'] = $delta;
           $structure_field_tables[$db_table_field][$delta]['revision'] = $revision;
 
@@ -4279,7 +4294,7 @@ function mfcs_build_table_structure($structure, &$structure_tables, &$structure_
       foreach ($values as $delta => $value) {
         $structure_field_tables[$db_table_field][$delta] = array();
         $structure_field_tables[$db_table_field][$delta]['user_id'] = $user_data['user_id'];
-        $structure_field_tables[$db_table_field][$delta]['date'] = REQUEST_TIME;
+        $structure_field_tables[$db_table_field][$delta]['date'] = $instance;
         $structure_field_tables[$db_table_field][$delta]['delta'] = $delta;
         $structure_field_tables[$db_table_field][$delta]['revision'] = $revision;
 
@@ -4347,7 +4362,7 @@ function mfcs_build_table_structure($structure, &$structure_tables, &$structure_
     foreach ($values as $delta => $value) {
       $structure_field_tables[$db_table_field][$delta] = array();
       $structure_field_tables[$db_table_field][$delta]['user_id'] = $user_data['user_id'];
-      $structure_field_tables[$db_table_field][$delta]['date'] = REQUEST_TIME;
+      $structure_field_tables[$db_table_field][$delta]['date'] = $instance;
       $structure_field_tables[$db_table_field][$delta]['delta'] = $delta;
       $structure_field_tables[$db_table_field][$delta]['revision'] = $revision;
 
@@ -6521,6 +6536,32 @@ function mfcs_add_canonical_headers($unique_path, $short_path = NULL) {
   drupal_add_http_header('content-location', $base_path . $unique_path, FALSE);
 
   return TRUE;
+}
+
+/**
+ * Load a unix timestamp instance.
+ *
+ * This functions similar to REQUEST_TIME, except it is updatable within a
+ * single script execution. This is necessary when performing multiple tasks
+ * that are not grouped togethor.
+ *
+ * @param bool $reset
+ *   (optional) When TRUE, will reset the instance to the current timestamp.
+ *
+ * @return int
+ *   The instance timestamp.
+ */
+function mfcs_instance($reset = FALSE) {
+  $instance = &drupal_static(__function__, NULL);
+
+  if (is_null($instance)) {
+    $instance = REQUEST_TIME;
+  }
+  elseif ($reset === TRUE) {
+    $instance = strtotime('now');
+  }
+
+  return $instance;
 }
 
 /**

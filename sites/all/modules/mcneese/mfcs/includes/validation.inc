@@ -227,6 +227,8 @@ function mfcs_validate_request_fields($form, &$form_state) {
   $location_form = &$form;
   $location_state = &$form_state['values'];
 
+  $instance = mfcs_instance();
+
   $ps_c = $form['form']['parents']['#value']['structure'];
   $ps_p = NULL;
   while (!empty($ps_c)) {
@@ -342,12 +344,12 @@ function mfcs_validate_request_fields($form, &$form_state) {
 
           // request time and date time may have same day, but different times, so only compare day.
           $date_string = date("Y/m/d", $date_timestamp[$key]);
-          $request_string = date("Y/m/d", REQUEST_TIME);
+          $request_string = date("Y/m/d", $instance);
 
           if ($date_string == $request_string) {
             form_set_error($ps_p . '][dates][date][' . $key . '][date', t("The date '@date' is too soon, the request process takes time.", array('@date' => $value)));
           }
-          elseif ($date_timestamp[$key] < REQUEST_TIME) {
+          elseif ($date_timestamp[$key] < $instance) {
             form_set_error($ps_p . '][dates][date][' . $key . '][date', t("The date '@date' is in the past and cannot be used.", array('@date' => $value)));
           }
         }

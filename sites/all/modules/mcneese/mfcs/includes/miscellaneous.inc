@@ -48,10 +48,12 @@ function mfcs_miscellaneous_determine_current_date($year, $month, $day) {
 
   $current_date = array();
 
+  $instance = mfcs_instance();
+
 
   // process month & day
   if (is_null($month)) {
-    $month_stamp = strtotime('midnight first day of this month', REQUEST_TIME);
+    $month_stamp = strtotime('midnight first day of this month', $instance);
     $current_date['day'] = date('d', $month_stamp);
     $current_date['day_stamp'] = $month_stamp;
   }

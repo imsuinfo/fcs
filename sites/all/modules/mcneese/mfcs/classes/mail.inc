@@ -22,11 +22,12 @@ class McNeeseFacilitiesUseMail implements MailSystemInterface {
     $boundary = NULL;
     $final_string = '';
 
+    $instance = mfcs_instance();
 
     // override any pre-defined headers.
     $message['headers']['MIME-Version'] = '1.0';
     $message['headers']['X-Mailer'] = 'McNeese Facilities Use System';
-    $message['headers']['Date'] = date('r', REQUEST_TIME);
+    $message['headers']['Date'] = date('r', $instance);
 
     $from_address = filter_var($message['from_address'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW);
     $message['headers']['Return-Path'] = $from_address;
@@ -40,7 +41,7 @@ class McNeeseFacilitiesUseMail implements MailSystemInterface {
 
     $message['headers']['Message-ID'] = '<';
     $message['headers']['Message-ID'] .= drupal_random_key(12);
-    $message['headers']['Message-ID'] .= '.' . REQUEST_TIME;
+    $message['headers']['Message-ID'] .= '.' . $instance;
     $message['headers']['Message-ID'] .= '@';
     $message['headers']['Message-ID'] .= 'mfcs';
     $message['headers']['Message-ID'] .= '>';
@@ -345,12 +346,14 @@ class McNeeseFacilitiesUseMail implements MailSystemInterface {
    *   A message array, as described in hook_mail_alter().
    */
   private function log_email($message) {
+    $instance = mfcs_instance();
+
     $fields = array(
       'destination' => $message['to'],
       'title' => $message['subject'],
       'headers' => serialize($message['headers']),
       'body' => serialize($message['body']),
-      'date' => REQUEST_TIME,
+      'date' => $instance,
     );
 
     $transaction = db_transaction();

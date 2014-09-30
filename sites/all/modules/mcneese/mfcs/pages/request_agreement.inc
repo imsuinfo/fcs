@@ -103,7 +103,8 @@ function mfcs_request_agreement_0_form($form, &$form_state, $request_id, $pdf = 
 
   // failsafe to current date.
   if (is_null($review_date)) {
-    $review_date = REQUEST_TIME;
+    $instance = mfcs_instance();
+    $review_date = $instance;
   }
 
   $markup .= '<div class="agreement-header-date">';

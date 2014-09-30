@@ -53,12 +53,14 @@ function mfcs_workflow_set_step($request_id, $step, $user = NULL) {
     return FALSE;
   }
 
+  $instance = mfcs_instance();
+
   $mfcs_requests = array(
-    'updated' => REQUEST_TIME,
+    'updated' => $instance,
   );
 
   $request_revision = mfcs_load_request_revision_number($request_id);
-  $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . REQUEST_TIME . '_' . $user->uid . '_' . $request_id, FALSE);
+  $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . $instance . '_' . $user->uid . '_' . $request_id, FALSE);
 
   if ($request_revision === FALSE) {
     watchdog(MFCS_WATCHDOG_ID, "Failed to load revision number for request %request_id.", array('%request_id' => $request_id), WATCHDOG_ERROR);
@@ -73,7 +75,7 @@ function mfcs_workflow_set_step($request_id, $step, $user = NULL) {
 
   $mfcs_request_revisions = array(
     'request_id' => $request_id,
-    'date' => REQUEST_TIME,
+    'date' => $instance,
     'revision' => $request_revision_next,
     'user_id' => $user->uid,
   );
@@ -89,7 +91,7 @@ function mfcs_workflow_set_step($request_id, $step, $user = NULL) {
     'revision' => $step_revision,
     'delta' => 0,
     'user_id' => $user->uid,
-    'date' => REQUEST_TIME,
+    'date' => $instance,
     'value' => $step,
   );
 
@@ -193,12 +195,14 @@ function mfcs_workflow_set_status($request_id, $status, $user = NULL, $extra = a
     return FALSE;
   }
 
+  $instance = mfcs_instance();
+
   $mfcs_requests = array(
-    'updated' => REQUEST_TIME,
+    'updated' => $instance,
   );
 
   $request_revision = mfcs_load_request_revision_number($request_id);
-  $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . REQUEST_TIME . '_' . $user->uid . '_' . $request_id, FALSE);
+  $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . $instance . '_' . $user->uid . '_' . $request_id, FALSE);
 
   if ($request_revision === FALSE) {
     watchdog(MFCS_WATCHDOG_ID, "Failed to load revision number for request %request_id.", array('%request_id' => $request_id), WATCHDOG_ERROR);
@@ -213,7 +217,7 @@ function mfcs_workflow_set_status($request_id, $status, $user = NULL, $extra = a
 
   $mfcs_request_revisions = array(
     'request_id' => $request_id,
-    'date' => REQUEST_TIME,
+    'date' => $instance,
     'revision' => $request_revision_next,
     'user_id' => $user->uid,
   );
@@ -240,7 +244,7 @@ function mfcs_workflow_set_status($request_id, $status, $user = NULL, $extra = a
     'revision' => $status_revision,
     'delta' => 0,
     'user_id' => $user->uid,
-    'date' => REQUEST_TIME,
+    'date' => $instance,
     'value' => $status,
   );
 
@@ -256,7 +260,7 @@ function mfcs_workflow_set_status($request_id, $status, $user = NULL, $extra = a
       if ($revisions_has_extras) {
         $query = db_update('mfcs_request_revisions');
         $query->condition('id', $request_id);
-        $query->condition('date', REQUEST_TIME);
+        $query->condition('date', $instance);
         $query->condition('user_id', $user->uid);
         $query->fields($mfcs_requests);
         $query->execute();
@@ -339,6 +343,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message, $ext
     return FALSE;
   }
 
+  $instance = mfcs_instance();
 
   $send_email = TRUE;
   if (isset($extra['send_email']) && $extra['send_email'] === FALSE) {
@@ -369,11 +374,11 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message, $ext
   );
 
   $mfcs_requests = array(
-    'updated' => REQUEST_TIME,
+    'updated' => $instance,
   );
 
   $request_revision = mfcs_load_request_revision_number($request_id);
-  $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . REQUEST_TIME . '_' . $user->uid . '_' . $request_id, FALSE);
+  $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . $instance . '_' . $user->uid . '_' . $request_id, FALSE);
 
   if ($request_revision === FALSE) {
     watchdog(MFCS_WATCHDOG_ID, "Failed to load revision number for request %request_id.", array('%request_id' => $request_id), WATCHDOG_ERROR);
@@ -388,7 +393,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message, $ext
 
   $mfcs_request_revisions = array(
     'request_id' => $request_id,
-    'date' => REQUEST_TIME,
+    'date' => $instance,
     'revision' => $request_revision_next,
     'user_id' => $user->uid,
   );
@@ -494,7 +499,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message, $ext
     'revision' => $review_revision,
     'delta' => 0,
     'user_id' => $user->uid,
-    'date' => REQUEST_TIME,
+    'date' => $instance,
     'step' => $step,
     'decision' => $decision,
     'message' => $message,
@@ -523,7 +528,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message, $ext
       'revision' => $mfcs_current_requirements['other'],
       'delta' => 0,
       'user_id' => $user->uid,
-      'date' => REQUEST_TIME,
+      'date' => $instance,
       'value' => $other_requirement,
     );
   }
@@ -627,7 +632,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message, $ext
         'revision' => $mfcs_current_requirements[$use],
         'delta' => 0,
         'user_id' => $user->uid,
-        'date' => REQUEST_TIME,
+        'date' => $instance,
         'quantity' => $requirements['quantity'],
         'hours' => $requirements['hours'],
         'days' => $requirements['days'],
@@ -691,7 +696,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message, $ext
           'revision' => $mfcs_current_insurance['contractor'],
           'delta' => 0,
           'user_id' => $user->uid,
-          'date' => REQUEST_TIME,
+          'date' => $instance,
           'value' => $contractor_insurance,
         );
       }
@@ -714,7 +719,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message, $ext
           'revision' => $mfcs_current_insurance['unaffiliated'],
           'delta' => 0,
           'user_id' => $user->uid,
-          'date' => REQUEST_TIME,
+          'date' => $instance,
           'value' => $unaffiliated_insurance,
         );
       }
@@ -757,7 +762,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message, $ext
           'revision' => $mfcs_current_insurance['provided'],
           'delta' => 0,
           'user_id' => $user->uid,
-          'date' => REQUEST_TIME,
+          'date' => $instance,
           'value' => $provided_insurance,
         );
       }
@@ -787,7 +792,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message, $ext
       'revision' => $mfcs_current_requirements['waved'],
       'delta' => 0,
       'user_id' => $user->uid,
-      'date' => REQUEST_TIME,
+      'date' => $instance,
       'value' => $requirements_waved,
     );
 
@@ -813,7 +818,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message, $ext
       'revision' => $mfcs_current_requirements['university'],
       'delta' => 0,
       'user_id' => $user->uid,
-      'date' => REQUEST_TIME,
+      'date' => $instance,
       'value' => $requirements_university,
     );
   }
@@ -1226,6 +1231,8 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     cf_error::invalid_string('parameters[changed_type]');
     return FALSE;
   }
+
+  $instance = mfcs_instance();
 
   $reviewer = NULL;
   $changed_by = NULL;
@@ -1650,7 +1657,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       $remaining_content = '';
       $remaining_markup = '';
 
-      $current_date = date('l, F jS, Y', REQUEST_TIME);
+      $current_date = date('l, F jS, Y', $instance);
       if (isset($parameters['reminder_data']->interval)) {
         if ($parameters['reminder_data']->interval == MFCS_REMINDER_INTERVAL_DAY_30) {
           $remaining_content = "\nThis is the 30-day reminder e-mail submitted on: " . $current_date . ".\n";
