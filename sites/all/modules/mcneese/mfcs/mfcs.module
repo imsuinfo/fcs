@@ -3210,7 +3210,7 @@ function mfcs_build_request_value_structure($request_id, $field_group, $field_na
       }
       elseif ($type[$value_name] == 'timestamp') {
         if (!array_key_exists($value_name, $display)) {
-          $display[$value_name] = 'Y/m/d h:ia';
+          $display[$value_name] = 'Y/m/d h:i a';
         }
 
         if ($display[$value_name] == 'stamp') {
@@ -5871,8 +5871,8 @@ function mfcs_build_request_table($items, $max_rows, $columns = NULL, $user = NU
         $row['date']['data'] .= check_plain(date("Y/m/d", $date));
 
         if (array_key_exists($delta, $item->time_start) && !is_null($item->time_start[$delta]) && array_key_exists($delta, $item->time_stop) && !is_null($item->time_stop[$delta])) {
-          $row['date']['data'] .= ' ' . check_plain(date("h:ia", $item->time_start[$delta]));
-          $row['date']['data'] .= ' to ' . check_plain(date("h:ia", $item->time_stop[$delta]));
+          $row['date']['data'] .= ' ' . check_plain(date("h:i a", $item->time_start[$delta]));
+          $row['date']['data'] .= ' to ' . check_plain(date("h:i a", $item->time_stop[$delta]));
         }
       }
     }
@@ -5931,7 +5931,7 @@ function mfcs_build_request_table($items, $max_rows, $columns = NULL, $user = NU
       $date_stamp = $item->created;
 
       $row['submitted_on'] = array(
-        'data' => check_plain(date("Y/m/d h:ia", $date_stamp)),
+        'data' => check_plain(date("Y/m/d h:i a", $date_stamp)),
         'class' => 'column-submitted_on',
       );
     }
