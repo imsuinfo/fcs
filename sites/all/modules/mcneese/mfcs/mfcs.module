@@ -3223,7 +3223,7 @@ function mfcs_build_request_value_structure($request_id, $field_group, $field_na
       }
       elseif ($type[$value_name] == 'timestamp') {
         if (!array_key_exists($value_name, $display)) {
-          $display[$value_name] = 'Y/m/d h:i a';
+          $display[$value_name] = 'Y/m/d h:ia';
         }
 
         if ($display[$value_name] == 'stamp') {
@@ -3231,6 +3231,82 @@ function mfcs_build_request_value_structure($request_id, $field_group, $field_na
         }
         else {
           $markup .= check_plain(date($display[$value_name], $value->$value_name));
+        }
+
+        $length += strlen($value->$value_name);
+      }
+      elseif ($type[$value_name] == 'timestamp_linked_month') {
+        if (!array_key_exists($value_name, $display)) {
+          $display[$value_name] = 'Y/m/d';
+        }
+
+        if ($display[$value_name] == 'stamp') {
+          $markup .= check_plain($value->$value_name);
+        }
+        else {
+          $s_year = date('Y', $value->$value_name);
+          $s_month = date('F', $value->$value_name);
+          $s_title = $s_month . " " . $s_year;
+
+          $markup .= '<a href="' . $base_path . 'requests/calendar-0/month/' . $s_year . '/' . $s_month .'" title="' . $s_title . '">' . check_plain(date($display[$value_name], $value->$value_name)) . '</a>';
+
+          unset($s_year);
+          unset($s_month);
+          unset($s_title);
+        }
+
+        $length += strlen($value->$value_name);
+      }
+      elseif ($type[$value_name] == 'timestamp_linked_day') {
+        if (!array_key_exists($value_name, $display)) {
+          $display[$value_name] = 'Y/m/d';
+        }
+
+        if ($display[$value_name] == 'stamp') {
+          $markup .= check_plain($value->$value_name);
+        }
+        else {
+          $s_year = date('Y', $value->$value_name);
+          $s_month = date('F', $value->$value_name);
+          $s_day = date('d', $value->$value_name);
+          $s_title = $s_month . ", " . $s_day . ", " . $s_year;
+
+          $markup .= '<a href="' . $base_path . 'requests/calendar-0/day/' . $s_year . '/' . $s_month . '/' . $s_day .'" title="' . $s_title . '">' . check_plain(date($display[$value_name], $value->$value_name)) . '</a>';
+
+          unset($s_year);
+          unset($s_month);
+          unset($s_day);
+          unset($s_title);
+        }
+
+        $length += strlen($value->$value_name);
+      }
+      elseif ($type[$value_name] == 'timestamp_linked_hour') {
+        if (!array_key_exists($value_name, $display)) {
+          $display[$value_name] = 'h:ia';
+        }
+
+        if ($display[$value_name] == 'stamp') {
+          $markup .= check_plain($value->$value_name);
+        }
+        else {
+          $s_year = date('Y', $value->$value_name);
+          $s_month = date('F', $value->$value_name);
+          $s_day = date('d', $value->$value_name);
+          $s_hour = date('h', $value->$value_name);
+          $s_ampm = date('a', $value->$value_name);
+          $s_title = $s_month . ", " . $s_day . ", " . $s_year . " at " . $s_hour . ':00' . $s_ampm;
+          $s_id = 'time_slot-' . $s_hour . '_00' . $s_ampm;
+
+          $markup .= '<a href="' . $base_path . 'requests/calendar-0/day/' . $s_year . '/' . $s_month . '/' . $s_day . '#' . $s_id .'" title="' . $s_title . '">' . check_plain(date($display[$value_name], $value->$value_name)) . '</a>';
+
+          unset($s_year);
+          unset($s_month);
+          unset($s_day);
+          unset($s_hour);
+          unset($s_ampm);
+          unset($s_title);
+          unset($s_id);
         }
 
         $length += strlen($value->$value_name);

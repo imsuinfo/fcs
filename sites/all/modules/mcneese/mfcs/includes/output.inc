@@ -408,7 +408,9 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
       $row_class .= 'odd ';
     }
 
-    $markup .= '<div class="calendar-time_slot-wrapper ' . $row_class . '"><div class="calendar-time_slot">';
+    $time_slot_id = 'time_slot-' . date('h_00a', $floor_time);
+
+    $markup .= '<div id="' . $time_slot_id . '"class="calendar-time_slot-wrapper ' . $row_class . '"><div class="calendar-time_slot">';
     $markup .= '<div class="calendar-time_slot-label-wrapper"><div class="calendar-time_slot-label">' . date("h:i a", $floor_time) . '</div></div>';
     $markup .= '<div class="calendar-time_slot-request-wrapper"><div class="calendar-time_slot-request">';
 

@@ -320,7 +320,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     }
 
     $form['display']['groups'] = array(
-      '#prefix' => '<div id="request-' . $request_id . '-field_groups" class="request-field_groups mode-' . $mode . '">',
+      '#prefix' => '<div id="request-' . $request_id . '-field_groups" class="request-field_groups mode-' . $mode . ' no_print_links_as_link">',
       '#suffix' => '</div>',
     );
 

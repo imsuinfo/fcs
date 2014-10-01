@@ -762,7 +762,7 @@ function mfcs_table_presentation($option = NULL) {
         'value' => 'timestamp',
       ),
       'display' => array(
-        'value' => 'Y/m/d h:ia',
+        'value' => 'Y/m/d h:i:sa',
       ),
       'request_type' => array(
         'show' => TRUE,
@@ -792,7 +792,7 @@ function mfcs_table_presentation($option = NULL) {
         'value' => 'timestamp',
       ),
       'display' => array(
-        'value' => 'Y/m/d h:ia',
+        'value' => 'Y/m/d h:i:sa',
       ),
       'request_type' => array(
         'show' => TRUE,
@@ -1054,7 +1054,7 @@ function mfcs_table_presentation($option = NULL) {
     'date' => array(
       'label' => 'Date',
       'type' => array(
-        'value' => 'timestamp',
+        'value' => 'timestamp_linked_day',
       ),
       'display' => array(
         'value' => 'Y/m/d',
@@ -1071,7 +1071,7 @@ function mfcs_table_presentation($option = NULL) {
     'time_start' => array(
       'label' => 'Start Time',
       'type' => array(
-        'value' => 'timestamp',
+        'value' => 'timestamp_linked_hour',
       ),
       'display' => array(
         'value' => 'h:ia',
@@ -1088,7 +1088,7 @@ function mfcs_table_presentation($option = NULL) {
     'time_stop' => array(
       'label' => 'Stop Time',
       'type' => array(
-        'value' => 'timestamp',
+        'value' => 'timestamp_linked_hour',
       ),
       'display' => array(
         'value' => 'h:ia',
