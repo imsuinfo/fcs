@@ -665,6 +665,12 @@ $conf['workbench_menu_item_use_normal_path'] = TRUE;
 
 
 /**
+ * Disable HTML 5 tools chrome frame header
+ */
+$conf['html5_tools_add_chrome_frame_header'] = 0;
+
+
+/**
  *  GNU PG Support
  */
 putenv('GNUPGHOME=/var/www/drupal/fcs/sites/default/gnupg');
