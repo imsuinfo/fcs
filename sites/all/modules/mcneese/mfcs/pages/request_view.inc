@@ -2425,7 +2425,7 @@ function mfcs_request_pdf_0_page($request_id, $mode, $revision_id = NULL) {
   $page['html'] = array(
     '#type' => 'container',
     '#attributes' => array(
-      'id' => 'mfcs-request-view-0-page',
+      'id' => 'mfcs-request-view-0-form',
       'class' => array(
         'mfcs-request-pdf-0',
       ),
