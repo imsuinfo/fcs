@@ -1042,7 +1042,7 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
       $already_reviewed_query = db_select('mfcs_field_review_review', 'mfrr');
       $already_reviewed_query->innerJoin('mfcs_current_review', 'mcr', 'mfrr.request_id = mcr.request_id and mfrr.revision = mcr.review');
 
-      $already_reviewed_query->addfield('mfrr', 'step', 'step');
+      $already_reviewed_query->addField('mfrr', 'step', 'step');
 
       $already_reviewed_query->where('mfrr.request_id = mftsp.request_id');
       $already_reviewed_query->condition('mfrr.user_id', $user->uid);
@@ -1110,7 +1110,7 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
 
       $can_review_query = db_select('mfcs_reviewers', 'c_mr_1');
 
-      $can_review_query->addfield('c_mr_1', 'user_id', 'user_id');
+      $can_review_query->addField('c_mr_1', 'user_id', 'user_id');
 
       $can_review_query->where('c_mr_1.request_classification = mfrcc.value AND c_mr_1.review_step = mftsp.value');
       $can_review_query->condition('c_mr_1.user_id', $user->uid);
@@ -1131,7 +1131,7 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
     elseif ($review_restrictions === FALSE) {
       $can_review_query = db_select('mfcs_reviewers', 'c_mr_1');
 
-      $can_review_query->addfield('c_mr_1', 'user_id', 'user_id');
+      $can_review_query->addField('c_mr_1', 'user_id', 'user_id');
 
       $can_review_query->where('c_mr_1.request_classification = mfrcc.value AND c_mr_1.review_step = mftsp.value');
       $can_review_query->condition('c_mr_1.user_id', $user->uid);
@@ -1152,7 +1152,7 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
     else {
       $can_review_query = db_select('mfcs_reviewers', 'c_mr_1');
 
-      $can_review_query->addfield('c_mr_1', 'user_id', 'user_id');
+      $can_review_query->addField('c_mr_1', 'user_id', 'user_id');
 
       $can_review_query->where('c_mr_1.request_classification = mfrcc.value');
       $can_review_query->condition('c_mr_1.user_id', $user->uid);
@@ -1201,7 +1201,7 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
 
       $can_review_query = db_select('mfcs_reviewers', 'c_mr_3');
 
-      $can_review_query->addfield('c_mr_3', 'user_id', 'user_id');
+      $can_review_query->addField('c_mr_3', 'user_id', 'user_id');
 
       $can_review_query->where('c_mr_3.request_classification = mfrcc.value');
       $can_review_query->condition('c_mr_3.user_id', $user->uid);
@@ -4079,7 +4079,7 @@ function mfcs_load_request_revision_number($request_id, $table_field_name = NULL
   if (is_null($table_field_name)) {
     try {
       $query = db_select('mfcs_request_revisions', 'mrv');
-      $query->addfield('mrv', 'revision', 'revision');
+      $query->addField('mrv', 'revision', 'revision');
       $query->condition('mrv.request_id', $request_id);
       $query->orderBy('mrv.revision', 'DESC');
       $query->range(0, 1);
@@ -4997,7 +4997,7 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
         $already_reviewed_query = db_select('mfcs_field_review_review', 'mfrr');
         $already_reviewed_query->innerJoin('mfcs_current_review', 'mcr', 'mfrr.request_id = mcr.request_id and mfrr.revision = mcr.review');
 
-        $already_reviewed_query->addfield('mfrr', 'step', 'step');
+        $already_reviewed_query->addField('mfrr', 'step', 'step');
 
         $already_reviewed_query->where('mfrr.request_id = mftsp.request_id');
         $already_reviewed_query->condition('mfrr.user_id', $user->uid);
@@ -5062,7 +5062,7 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
 
         $can_review_query = db_select('mfcs_reviewers', 'c_mr_1');
 
-        $can_review_query->addfield('c_mr_1', 'user_id', 'user_id');
+        $can_review_query->addField('c_mr_1', 'user_id', 'user_id');
 
         $can_review_query->where('c_mr_1.request_classification = mfrcc.value AND c_mr_1.review_step = mftsp.value');
         $can_review_query->condition('c_mr_1.user_id', $user->uid);
@@ -5084,7 +5084,7 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
         if (!$manager) {
           $can_review_query = db_select('mfcs_reviewers', 'c_mr_1');
 
-          $can_review_query->addfield('c_mr_1', 'user_id', 'user_id');
+          $can_review_query->addField('c_mr_1', 'user_id', 'user_id');
 
           $can_review_query->where('c_mr_1.request_classification = mfrcc.value AND c_mr_1.review_step = mftsp.value');
           $can_review_query->condition('c_mr_1.user_id', $user->uid);
@@ -5107,7 +5107,7 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
         if (!$manager) {
           $can_review_query = db_select('mfcs_reviewers', 'c_mr_1');
 
-          $can_review_query->addfield('c_mr_1', 'user_id', 'user_id');
+          $can_review_query->addField('c_mr_1', 'user_id', 'user_id');
 
           $can_review_query->where('c_mr_1.request_classification = mfrcc.value');
           $can_review_query->condition('c_mr_1.user_id', $user->uid);
@@ -5631,7 +5631,7 @@ function mfcs_get_latest_reviews($request_id, $steps = array(), $decisions = arr
     $query->addField('mfrr', 'date', 'date');
     $query->addField('mfrr', 'step', 'step');
     $query->addField('mfrr', 'decision', 'decision');
-    $query->addfield('mrc', 'classification', 'classification');
+    $query->addField('mrc', 'classification', 'classification');
 
     $query->condition('mfrr.request_id', $request_id);
 
