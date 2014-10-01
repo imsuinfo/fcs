@@ -24,13 +24,13 @@
  * @param null|int $revision_id
  *   (optional) When not NULL, load the request based on the revision number
  *   instead of the latest revision.
- * @param bool $pdf
- *   (optional) Enable special handling for PDF generation.
+ * @param bool $contained
+ *   (optional) Enable special handling for PDF and print generation.
  *
  * @return string
  *   The HTML output representing the page.
  */
-function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS_VIEW_MODE_NORMAL, $revision_id = NULL, $pdf = FALSE) {
+function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS_VIEW_MODE_NORMAL, $revision_id = NULL, $contained = FALSE) {
   if (!is_string($mode) || !($mode == MFCS_VIEW_MODE_DISPLAY || $mode == MFCS_VIEW_MODE_LOG || $mode == MFCS_VIEW_MODE_OPERATIONS)) {
     $mode = MFCS_VIEW_MODE_NORMAL;
   }
@@ -106,8 +106,8 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     mfcs_add_canonical_headers('requests/view-0/' . $request_id . '/' . $mode . '/' . $revision_id);
   }
 
-  if (!is_bool($pdf)) {
-    $pdf = FALSE;
+  if (!is_bool($contained)) {
+    $contained = FALSE;
   }
 
   // if cancelling the request, return only the cancellation confirmation form.
@@ -217,7 +217,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     'agreement' => FALSE,
   );
 
-  if ($pdf) {
+  if ($contained) {
     $can['edit'] = FALSE;
     $can['history'] = FALSE;
     $can['agreement'] = FALSE;
@@ -271,9 +271,9 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     '#value' => $mode,
   );
 
-  $form['form']['pdf'] = array(
+  $form['form']['contained'] = array(
     '#type' => 'value',
-    '#value' => $pdf,
+    '#value' => $contained,
   );
 
   $form['form']['user'] = array(
@@ -310,7 +310,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
       '#tree' => TRUE,
     );
 
-    if ($pdf) {
+    if ($contained) {
       unset($form['display']['#type']);
       unset($form['display']['#collapsible']);
       unset($form['display']['#collapsed']);
@@ -725,7 +725,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
       }
     }
 
-    if (!$pdf) {
+    if (!$contained) {
       $form['display']['submit'] = array(
         '#id' => 'request-display-submit',
         '#type' => 'container',
@@ -838,7 +838,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
       );
 
       $log_page_title_css = '';
-      if (!$pdf) {
+      if (!$contained) {
         $log_page_title_css = 'no-screen no-braille';
       }
 
@@ -849,7 +849,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         );
       }
 
-      if ($pdf) {
+      if ($contained) {
         unset($form['review']['log']['#type']);
         unset($form['review']['log']['#collapsible']);
         unset($form['review']['log']['#collapsed']);
@@ -938,7 +938,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
       );
     }
 
-    if ($show_operations && !$pdf && is_null($revision_id)) {
+    if ($show_operations && !$contained && is_null($revision_id)) {
       $decision_options = mfcs_get_reviewer_decision_list_options('review_step');
       $decision_options_all = mfcs_get_reviewer_decision_list_options();
 
@@ -958,7 +958,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         '#tree' => TRUE,
       );
 
-      if ($pdf) {
+      if ($contained) {
         unset($form['review']['operations']['#type']);
         unset($form['review']['operations']['#collapsible']);
         unset($form['review']['operations']['#collapsed']);
@@ -2412,6 +2412,18 @@ function mfcs_request_pdf_0_page($request_id, $mode, $revision_id = NULL) {
     }
   }
 
+  if (is_null($revision_id)) {
+    if ($mode == MFCS_VIEW_MODE_NORMAL) {
+      mfcs_add_canonical_headers('requests/pdf-0/' . $request_id . '/' . $mode, 'requests/pdf-0/' . $request_id);
+    }
+    else {
+      mfcs_add_canonical_headers('requests/pdf-0/' . $request_id . '/' . $mode);
+    }
+  }
+  else {
+    mfcs_add_canonical_headers('requests/pdf-0/' . $request_id . '/' . $mode . '/' . $revision_id);
+  }
+
   if (!empty($request['information']['title'][0]->value)) {
     $page_title = "Facilities Use Request: " . $request['information']['title'][0]->value;
 
@@ -2441,16 +2453,128 @@ function mfcs_request_pdf_0_page($request_id, $mode, $revision_id = NULL) {
 
   mfcs_include(MFCS_INCLUDE_OUTPUT);
 
-  $result = mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $revision_id, $html);
+  $parameters = array(
+    'page_title' => "Facilities Use Request: " . $request['information']['title'][0]->value,
+    'title' => 'Request #' . $request_id . ': ' . $request['information']['title'][0]->value,
+  );
+
+  $contained = mfcs_output_print_page_view($html, $parameters);
+
+  if (!is_string($contained)) {
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  $result = mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $revision_id, $contained);
 
   if ($result) {
     exit();
   }
-  else {
+
+  drupal_not_found();
+  drupal_exit();
+}
+
+/**
+ * Renders a self-contained/printrable view of a given request.
+ *
+ * @param int $request_id
+ *   The unique identifier for an request.
+ * @param int|null $mode
+ *   Specifies the mode that alters how the form is rendered.
+ *   1: Render only the display part.
+ * @param null|int $revision_id
+ *   (optional) When not NULL, load the request based on the revision number
+ *   instead of the latest revision.
+ *
+ * @return exit
+ *   This function should not return.
+ */
+function mfcs_request_print_0_page($request_id, $mode, $revision_id = NULL) {
+  $page_title = "Facilities Use Request";
+  drupal_set_title($page_title);
+
+  if (!is_null($revision_id) && !cf_is_integer($revision_id)) {
+    cf_error::invalid_integer('revision_id');
     drupal_not_found();
     drupal_exit();
-    return array();
   }
+
+  $request = mfcs_load_request_by_id($request_id, NULL, $revision_id);
+
+  if (empty($request)) {
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  if (!is_null($revision_id)) {
+    $user = cf_current_user();
+
+    $can_history_request = mfcs_request_access('history', $request, $user);
+
+    if (!$can_history_request) {
+      drupal_not_found();
+      drupal_exit();
+    }
+  }
+
+  if (is_null($revision_id)) {
+    if ($mode == MFCS_VIEW_MODE_NORMAL) {
+      mfcs_add_canonical_headers('requests/print-0/' . $request_id . '/' . $mode, 'requests/print-0/' . $request_id);
+    }
+    else {
+      mfcs_add_canonical_headers('requests/print-0/' . $request_id . '/' . $mode);
+    }
+  }
+  else {
+    mfcs_add_canonical_headers('requests/print-0/' . $request_id . '/' . $mode . '/' . $revision_id);
+  }
+
+  if (!empty($request['information']['title'][0]->value)) {
+    $page_title = "Facilities Use Request: " . $request['information']['title'][0]->value;
+
+    drupal_set_title($page_title);
+  }
+
+  $form = array();
+  $form_state = array();
+
+  $page = array();
+  $page['html'] = array(
+    '#type' => 'container',
+    '#attributes' => array(
+      'id' => 'mfcs-request-view-0-form',
+      'class' => array(
+        'mfcs-request-print-0',
+      ),
+    ),
+  );
+
+  // turn off devel shutdown functionality.
+  $GLOBALS['devel_shutdown'] = FALSE;
+
+  $page['html']['content'] = array(mfcs_request_view_0_form($form, $form_state, $request_id, $mode, $revision_id, TRUE));
+  $renderred = drupal_render($page);
+  $html = drupal_render_page($renderred);
+
+  mfcs_include(MFCS_INCLUDE_OUTPUT);
+
+  $parameters = array(
+    'page_title' => "Facilities Use Request: " . $request['information']['title'][0]->value,
+    'title' => 'Request #' . $request_id . ': ' . $request['information']['title'][0]->value,
+    'all_media' => TRUE,
+  );
+
+  $contained = mfcs_output_print_page_view($html, $parameters);
+
+  if (is_string($contained)) {
+    drupal_send_headers();
+    print($contained);
+    exit();
+  }
+
+  drupal_not_found();
+  drupal_exit();
 }
 
 /**

@@ -554,6 +554,20 @@ function mfcs_hook_menu() {
     'tab_root' => 'requests/list-0',
   );
 
+  $items['requests/pdf-0/%'] = array(
+    'title' => "Request PDF",
+    'description' => "Download Request PDF",
+    'page callback' => 'mfcs_request_pdf_0_page',
+    'page arguments' => array(2),
+    'file' => 'request_view.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('view', 2),
+    'tab_parent' => 'requests/list-0',
+    'tab_root' => 'requests/list-0',
+    'type' => MENU_CALLBACK,
+  );
+
   $items['requests/pdf-0/%/%'] = array(
     'title' => "Request PDF",
     'description' => "Download Request PDF",
@@ -572,6 +586,48 @@ function mfcs_hook_menu() {
     'title' => "Request PDF",
     'description' => "Download Request PDF",
     'page callback' => 'mfcs_request_pdf_0_page',
+    'page arguments' => array(2, 3, 4),
+    'file' => 'request_view.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('view', 2),
+    'tab_parent' => 'requests/list-0',
+    'tab_root' => 'requests/list-0',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['requests/print-0/%'] = array(
+    'title' => "Printable Request",
+    'description' => "Self-contained/Printable Request",
+    'page callback' => 'mfcs_request_print_0_page',
+    'page arguments' => array(2),
+    'file' => 'request_view.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('view', 2),
+    'tab_parent' => 'requests/list-0',
+    'tab_root' => 'requests/list-0',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['requests/print-0/%/%'] = array(
+    'title' => "Printable Request",
+    'description' => "Self-contained/Printable Request",
+    'page callback' => 'mfcs_request_print_0_page',
+    'page arguments' => array(2, 3),
+    'file' => 'request_view.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('view', 2),
+    'tab_parent' => 'requests/list-0',
+    'tab_root' => 'requests/list-0',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['requests/print-0/%/%/%'] = array(
+    'title' => "Printable Request",
+    'description' => "Self-contained/Printable Request",
+    'page callback' => 'mfcs_request_print_0_page',
     'page arguments' => array(2, 3, 4),
     'file' => 'request_view.inc',
     'file path' => $module_path . '/pages',

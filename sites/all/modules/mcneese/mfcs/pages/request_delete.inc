@@ -61,7 +61,7 @@ function mfcs_request_delete_0_form($form, &$form_state, $request_id) {
     '#value' => 0,
   );
 
-  $form['form']['pdf'] = array(
+  $form['form']['contained'] = array(
     '#type' => 'value',
     '#value' => FALSE,
   );

@@ -624,61 +624,26 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
   return $markup;
 }
 
+
 /**
- * Renders a PDF of a given request using the wkhtmltopdf library.
+ * Renders HTML for a self-contained request view page useful for printing.
  *
- * @param int $request_id
- *   The unique identifier for an request.
- * @param bool|int $revision_id
- *   Set to NULL for latest revision. Otherwise this is the number that
- *   represents the revision of the request to load.
  * @param string $html
  *   The HTML markup to convert to a PDF.
- * @param bool $local
- *   (optional) If TRUE, then the file is saved to the local disk.
- *   If FALSE, then the file is print to stdout.
  * @param array $parameters
  *   (optional) Change the default behavior on how the page is generated.
- * @param int $type
- *   (optional) What the PDF represents, such as a request or an agreement.
  *
- * @return bool
- *   TRUE on success, FALSE otherwise.
+ * @return string|bool
+ *   Renderred markup on success, FALSE otherwise.
  */
-function mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $revision_id, $html, $local = FALSE, $parameters = array(), $type = MFCS_PDF_TYPE_REQUEST) {
-  if (!is_null($revision_id) && !cf_is_integer($revision_id)) {
-    cf_error::invalid_integer('revision_id');
-    return FALSE;
-  }
-
-  $request = mfcs_load_request_by_id($request_id, NULL, $revision_id);
-
-  if (empty($request)) {
-    return FALSE;
-  }
-
+function mfcs_output_print_page_view($html, $parameters = array()) {
   if (!is_string($html)) {
     cf_error::invalid_string('html');
     return FALSE;
   }
 
-  if (!is_bool($local)) {
-    cf_error::invalid_bool('local');
-    return FALSE;
-  }
-
   if (!is_array($parameters)) {
     cf_error::invalid_array('parameters');
-    return FALSE;
-  }
-
-  if (!cf_is_integer($type)) {
-    cf_error::invalid_integer('type');
-    return FALSE;
-  }
-
-  $library = libraries_load('phpwkhtmltopdf');
-  if ($library === FALSE || empty($library['loaded'])) {
     return FALSE;
   }
 
@@ -764,8 +729,7 @@ function mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $revision_id, $h
           $content = drupal_load_stylesheet(DRUPAL_ROOT . '/' . $fixed_path);
 
           if (!empty($content)) {
-            // mPDF does not properly support the > selector.
-            $css_markup .= preg_replace('@ > @i', ' ', $content);
+            $css_markup .= $content;
           }
 
           unset($content);
@@ -790,17 +754,27 @@ function mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $revision_id, $h
 
   // title tags
   if (empty($parameters['page_title'])) {
-    $page_title = "Facilities Use Request: " . $request['information']['title'][0]->value;
-    $head_markup .= '<title>Request #' . $request_id . ': ' . $request['information']['title'][0]->value . '</title>';
+    $page_title = "Facilities Use Request";
   }
   else {
     $page_title = $parameters['page_title'];
-    $head_markup .= '<title>' . $parameters['page_title'] . '</title>';
+  }
+
+  if (empty($parameters['title'])) {
+    if (empty($parameters['page_title'])) {
+      $head_markup .= '<title>Request</title>';
+    }
+    else {
+      $head_markup .= '<title>' . $page_title . '</title>';
+    }
+  }
+  else {
+    $head_markup .= '<title>' . $parameters['title'] . '</title>';
   }
 
   $body_markup .= $cf_dom->get_dom()->saveHTML($main_tag) . "\n";
 
-  $body_class = 'mcneese mcneese-pdf';
+  $body_class = 'mcneese';
   $cf = &drupal_static('cf_theme_get_variables', array());
   if (isset($cf['markup_css']['body']['class'])) {
     $body_class .= $cf['markup_css']['body']['class'];
@@ -827,6 +801,61 @@ function mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $revision_id, $h
   $html .= '  </div>';
   $html .= '</body>';
   $html .= '</html>' . "\n";
+
+  return $html;
+}
+
+/**
+ * Renders a PDF of a given request using the wkhtmltopdf library.
+ *
+ * @param int $request_id
+ *   The request id, which is used to generate the filename.
+ * @param int $revision_id
+ *   The revision id, which is used to generate the filename.
+ * @param string $html
+ *   The HTML markup to convert to a PDF. Recommend converting the markup
+ *   using mfcs_output_print_page_view().
+ * @param bool $local
+ *   (optional) If TRUE, then the file is saved to the local disk.
+ *   If FALSE, then the file is print to stdout.
+ * @param int $type
+ *   (optional) What the PDF represents, such as a request or an agreement.
+ *
+ * @return bool
+ *   TRUE on success, FALSE otherwise.
+ *
+ * @see: mfcs_output_print_page_view()
+ */
+function mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $revision_id, $html, $local = FALSE, $type = MFCS_PDF_TYPE_REQUEST) {
+  if (!cf_is_integer($request_id)) {
+    cf_error::invalid_integer('request_id');
+    return FALSE;
+  }
+
+  if (!is_null($revision_id) && !cf_is_integer($revision_id)) {
+    cf_error::invalid_integer('revision_id');
+    return FALSE;
+  }
+
+  if (!is_string($html)) {
+    cf_error::invalid_string('html');
+    return FALSE;
+  }
+
+  if (!is_bool($local)) {
+    cf_error::invalid_bool('local');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($type)) {
+    cf_error::invalid_integer('type');
+    return FALSE;
+  }
+
+  $library = libraries_load('phpwkhtmltopdf');
+  if ($library === FALSE || empty($library['loaded'])) {
+    return FALSE;
+  }
 
   $wkpdf = new WkHtmlToPdf();
 
@@ -858,6 +887,8 @@ function mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $revision_id, $h
     file_unmanaged_move($temporary_name, 'private://requests/local/' . $filename, FILE_EXISTS_REPLACE);
   }
   else {
+    drupal_send_headers();
+
     // send to the browser
     #$result = $wkpdf->send($filename, TRUE);
 
@@ -867,6 +898,7 @@ function mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $revision_id, $h
 
   if (!$result) {
     watchdog(MFCS_WATCHDOG_ID, "Error occured while generating the PDF of request @id: @error", array('@id' => $request_id, '@error' => $wkpdf->getError()), WATCHDOG_ERROR);
+    return FALSE;
   }
 
   return TRUE;

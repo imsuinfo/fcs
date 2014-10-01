@@ -19,13 +19,13 @@
  *   The form state array as defined by drupals form api
  * @param int $request_id
  *   The unique identifier for an request.
- * @param bool $pdf
- *   (optional) When TRUE, the page is presented as a PDF.
+ * @param bool $contained
+ *   (optional) When TRUE, the page is self-contained, asuch as with a PDF.
  *
  * @return string
  *   The HTML output representing the page.
  */
-function mfcs_request_agreement_0_form($form, &$form_state, $request_id, $pdf = FALSE) {
+function mfcs_request_agreement_0_form($form, &$form_state, $request_id, $contained = FALSE) {
   $request = mfcs_load_request_by_id($request_id);
 
   if (empty($request)) {
@@ -65,9 +65,9 @@ function mfcs_request_agreement_0_form($form, &$form_state, $request_id, $pdf = 
     '#value' => &$request,
   );
 
-  $form['form']['pdf'] = array(
+  $form['form']['contained'] = array(
     '#type' => 'value',
-    '#value' => $pdf,
+    '#value' => $contained,
   );
 
   $form['agreement'] = array(
@@ -330,7 +330,7 @@ function mfcs_request_agreement_0_form($form, &$form_state, $request_id, $pdf = 
 
 
   // download button.
-  if (!$pdf) {
+  if (!$contained) {
     $form['submit'] = array(
       '#id' => 'agreement-submit',
       '#type' => 'container',
@@ -417,17 +417,11 @@ function mfcs_request_agreement_0_pdf($request_id) {
 
   mfcs_add_canonical_headers('requests/agreement-0/' . $request_id . '/pdf');
 
-  global $base_path;
-
-  $parameters = array();
-
   $page_title = "Facilities Use Agreement";
   if (!empty($request['information']['title'][0]->value)) {
     $page_title = "Facilities Use Agreement: " . $request['information']['title'][0]->value;
   }
   drupal_set_title($page_title);
-
-  $parameters['page_title'] = $page_title;
 
   $form = array();
   $form_state = array();
@@ -452,16 +446,26 @@ function mfcs_request_agreement_0_pdf($request_id) {
 
   mfcs_include(MFCS_INCLUDE_OUTPUT);
 
-  $result = mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, NULL, $html, FALSE, $parameters, MFCS_PDF_TYPE_AGREEMENT);
+  $parameters = array(
+    'page_title' => $page_title,
+    'title' => $page_title,
+  );
+
+  $contained = mfcs_output_print_page_view($html, $parameters);
+
+  if (!is_string($contained)) {
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  $result = mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, NULL, $contained, FALSE, MFCS_PDF_TYPE_AGREEMENT);
 
   if ($result) {
     exit();
   }
-  else {
-    drupal_not_found();
-    drupal_exit();
-    return array();
-  }
+
+  drupal_not_found();
+  drupal_exit();
 }
 
 /**
