@@ -132,8 +132,8 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
 
   global $base_url;
 
-  $mfcs_site_url = variable_get('mfcs_site_url', 'fcs.mcneese.edu');
-  $mfcs_name = variable_get('mfcs_name', 'McNeese Facilities Use System');
+  $fcs_site_url = variable_get('fcs_site_url', 'fcs.mcneese.edu');
+  $fcs_name = variable_get('fcs_name', 'McNeese Facilities Use System');
 
   $date_format = 'Ymd\THis\Z';
   $date_format_all_day = 'Ymd';
@@ -147,7 +147,7 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
   $ical = array();
   $ical[] = 'BEGIN:VCALENDAR';
   $ical[] = 'VERSION:2.0';
-  $ical[] = 'PRODID:McNeese State University Facilities Use System';
+  $ical[] = 'PRODID:' . $fcs_name;
 
   $original_timezone = date_default_timezone_get();
 
@@ -305,7 +305,7 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
         }
 
         $ical[] = 'BEGIN:VEVENT';
-        $ical[] = mfcs_ical_wordwrap('UID:request-' . $request->id . '-' . $date . '-' . $delta . '@' . $mfcs_site_url);
+        $ical[] = mfcs_ical_wordwrap('UID:request-' . $request->id . '-' . $date . '-' . $delta . '@' . $fcs_site_url);
 
         // DTSTAMP represents the last time the vcal data was changed.
         // This should only happend when the request gets modified, so it will be the same as the last modified date.

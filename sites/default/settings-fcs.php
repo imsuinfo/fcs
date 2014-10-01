@@ -687,9 +687,9 @@ unset($env_current_user);
 /**
  * fcs.mcneese.edu specific names.
  */
-$conf['mfcs_site_url'] = 'fcs.mcneese.edu';
-$conf['mfcs_email'] = 'facilities_use@fcs.mcneese.edu';
-$conf['mfcs_name'] = 'McNeese Facilities Use System';
+$conf['fcs_site_url'] = 'fcs.mcneese.edu';
+$conf['fcs_email'] = 'facilities_use@fcs.mcneese.edu';
+$conf['fcs_name'] = 'McNeese Facilities Use System';
 
 /**
  * fcs.mcneese.edu debugging options.
