@@ -108,7 +108,6 @@ class McNeeseFacilitiesUseMail implements MailSystemInterface {
 
     // process GNU PGP keys.
     $this->gpg_sign($message, $boundary);
-    #$this->gpg_sign_manually($message, $boundary);
 
 
     // save the e-mail to the log.
