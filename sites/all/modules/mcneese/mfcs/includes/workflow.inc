@@ -1924,32 +1924,29 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     }
   }
 
-  // for debugging and testing, add/remove email addresses
+  // for testing, add/remove email addresses
   global $conf;
 
-  $debug_accounts_restrict_mail = FALSE;
-  $debug_accounts_add_mail = array();
-  if (isset($conf['fcs_debugging']) && $conf['fcs_debugging'] && isset($conf['fcs_debugging-email_to-debug']) && $conf['fcs_debugging-email_to-debug']) {
-    $debug_accounts = array();
-    $debug_accounts_restrict_mail = isset($conf['fcs_debugging-email_to-restrict']) && $conf['fcs_debugging-email_to-restrict'];
+  $testing = isset($conf['fcs_testing']) && $conf['fcs_testing'];
+  $testing_email = isset($conf['fcs_testing-email_to-debug']) && $conf['fcs_testing-email_to-debug'];
 
-    if (isset($conf['fcs_debugging-email_to-add']) && is_array($conf['fcs_debugging-email_to-add'])) {
-      foreach ($conf['fcs_debugging-email_to-add'] as $add_email) {
+  if ($testing && $testing_email) {
+    if (isset($conf['fcs_testing-email_to-add']) && is_array($conf['fcs_testing-email_to-add'])) {
+      foreach ($conf['fcs_testing-email_to-add'] as $add_email) {
         $email_to[$add_email] = $add_email;
-        $debug_accounts[] = $add_email;
+        $debug_accounts[$add_email] = $add_email;
       }
     }
 
-    if (isset($conf['fcs_debugging-email_to-prefix']) && is_string($conf['fcs_debugging-email_to-prefix'])) {
-      $email_params['title_prefix'] = $conf['fcs_debugging-email_to-prefix'];
-    }
-  }
-
-  if ($debug_accounts_restrict_mail) {
-    if (isset($conf['fcs_debugging-email_to-allow']) && is_array($conf['fcs_debugging-email_to-allow'])) {
-      foreach ($conf['fcs_debugging-email_to-allow'] as $add_email) {
-        $debug_accounts[] = $add_email;
+    if (isset($conf['fcs_testing-email_to-remove']) && is_array($conf['fcs_testing-email_to-remove'])) {
+      foreach ($conf['fcs_testing-email_to-remove'] as $remove_email) {
+        unset($email_to[$remove_email]);
+        $debug_accounts[$add_email] = $add_email;
       }
+    }
+
+    if (isset($conf['fcs_testing-email_to-prefix']) && is_string($conf['fcs_testing-email_to-prefix'])) {
+      $email_params['title_prefix'] = $conf['fcs_testing-email_to-prefix'];
     }
 
     foreach ($email_to as $to) {

@@ -695,14 +695,9 @@ $conf['mfcs_name'] = 'McNeese Facilities Use System';
  * fcs.mcneese.edu debugging options.
  */
 $conf['fcs_testing'] = TRUE;
-$conf['fcs_debugging'] = TRUE;
-$conf['fcs_debugging-email_to-debug'] = TRUE;
-$conf['fcs_debugging-email_to-restrict'] = TRUE;
-$conf['fcs_debugging-email_to-prefix'] = "(TESTING) ";
-$conf['fcs_debugging-email_to-add'] = array(
-  #'kday@mcneese.edu',
-);
-$conf['fcs_debugging-email_to-send_to'] = array(
+$conf['fcs_testing-email_to-debug'] = TRUE;
+$conf['fcs_testing-email_to-prefix'] = "(TESTING) ";
+$conf['fcs_testing-email_to-add'] = array(
   #'kday@mcneese.edu',
   #'colleen@mcneese.edu',
   #'gfisher@mcneese.edu',
@@ -718,6 +713,10 @@ $conf['fcs_debugging-email_to-send_to'] = array(
   #'bmungai@mcneese.edu',
   #'emeche@mcneese.edu',
   #'bprejean@mcneese.edu',
+);
+$conf['fcs_testing-email_to-remove'] = array(
+  'no-reply@mcneese.edu',
+  'facilities_use@sandbox.mcneese.edu',
 );
 
 
