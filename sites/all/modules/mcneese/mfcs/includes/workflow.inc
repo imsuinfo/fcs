@@ -1931,6 +1931,8 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
   $testing_email = isset($conf['fcs_testing-email_to-debug']) && $conf['fcs_testing-email_to-debug'];
 
   if ($testing && $testing_email) {
+    $debug_accounts = array();
+
     if (isset($conf['fcs_testing-email_to-add']) && is_array($conf['fcs_testing-email_to-add'])) {
       foreach ($conf['fcs_testing-email_to-add'] as $add_email) {
         $email_to[$add_email] = $add_email;
