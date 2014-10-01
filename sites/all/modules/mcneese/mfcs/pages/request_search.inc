@@ -86,7 +86,7 @@ function mfcs_request_search_0_form($form, &$form_state) {
     foreach ($table_fields as $field_name => $field_values) {
       if (empty($field_values['name'])) continue;
 
-      // @todo: adding the advanced search of the review logs will be very complicated, so implement it when more time is available.
+      // The advanced search of the review logs is not implemented at this time, so skip.
       if ($table_name == 'review') continue;
 
       $possible_targets[$table_name . '-' . $field_name] = $field_values['name'];

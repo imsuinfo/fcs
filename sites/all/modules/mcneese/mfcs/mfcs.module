@@ -759,7 +759,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
       return TRUE;
     }
     elseif ($reviewer) {
-      // due to its complexity, the database calling function for reviewer access will be used (@todo: implement a non-db version.).
+      // due to its complexity, the database calling function for reviewer access will be used.
       $review_access = mfcs_page_request_reviewer_access($user, $request_id, NULL);
 
       if (is_array($review_access) && array_key_exists($request_id, $review_access)) {
@@ -790,7 +790,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
       return FALSE;
     }
 
-    // due to its complexity, the database calling function for reviewer access will be used (@todo: implement a non-db version.).
+    // due to its complexity, the database calling function for reviewer access will be used.
     $review_access = mfcs_page_request_reviewer_access($user, $request_id, TRUE);
 
     if (is_array($review_access) && array_key_exists($request_id, $review_access)) {
@@ -819,7 +819,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
       return TRUE;
     }
     elseif ($reviewer) {
-      // due to its complexity, the database calling function for reviewer access will be used (@todo: implement a non-db version.).
+      // due to its complexity, the database calling function for reviewer access will be used.
       $review_access = mfcs_page_request_reviewer_access($user, $request_id, NULL);
 
       if (is_array($review_access) && array_key_exists($request_id, $review_access)) {

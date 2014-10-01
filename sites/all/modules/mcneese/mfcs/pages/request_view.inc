@@ -2607,7 +2607,7 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id, $revision_id 
 
       $user_name = '';
       if (is_null($users[$user_id])) {
-        // @todo: this is an error, throw a watchdog message.
+        watchdog(MFCS_WATCHDOG_ID, "Failed to load the user id of %user_id for request %request_id review log dated %date.", array('%user_id' => $user_id, '%request_id' => $request_id, '%date' => date("Y/m/d h:i:s a", $date)), WATCHDOG_ERROR);
         continue;
       }
 

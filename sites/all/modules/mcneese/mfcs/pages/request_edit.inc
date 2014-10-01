@@ -73,7 +73,6 @@ function mfcs_request_edit_0_form($form, &$form_state, $request_id, $target_sect
   }
 
   if ($step == 'cancel') {
-    // @todo: perform a normal redirect to some previous page up the path tree.
     return array();
   }
 
