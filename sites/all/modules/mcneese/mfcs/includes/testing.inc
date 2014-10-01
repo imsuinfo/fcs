@@ -210,7 +210,7 @@ function mfcs_testing_review_request_venue_available($request_id, $decision = MF
   try {
     $user = user_load($request['venue_coordinator']['user_id'][0]->value);
 
-    $id = 'mfcs_request_view_0_page';
+    $id = 'mfcs_request_view_0_form';
 
 
     // assign the requirements.
@@ -311,7 +311,7 @@ function mfcs_testing_review_request_review($request_id, $decision = MFCS_REVIEW
   $original_user = $user;
 
   try {
-    $id = 'mfcs_request_view_0_page';
+    $id = 'mfcs_request_view_0_form';
 
     $processed = array();
 
@@ -391,7 +391,7 @@ function mfcs_testing_review_request_make_decisions($request_id, $decision = MFC
   $original_user = $user;
 
   try {
-    $id = 'mfcs_request_view_0_page';
+    $id = 'mfcs_request_view_0_form';
 
     $user = user_load($request['venue_coordinator']['user_id'][0]->value);
 

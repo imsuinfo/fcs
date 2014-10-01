@@ -30,7 +30,7 @@
  * @return string
  *   The HTML output representing the page.
  */
-function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS_VIEW_MODE_NORMAL, $revision_id = NULL, $pdf = FALSE) {
+function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS_VIEW_MODE_NORMAL, $revision_id = NULL, $pdf = FALSE) {
   if (!is_string($mode) || !($mode == MFCS_VIEW_MODE_DISPLAY || $mode == MFCS_VIEW_MODE_LOG || $mode == MFCS_VIEW_MODE_OPERATIONS)) {
     $mode = MFCS_VIEW_MODE_NORMAL;
   }
@@ -345,7 +345,7 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
         $can_for_section['edit'] = mfcs_request_access('edit', $request, $user, $field_group);
       }
 
-      mfcs_request_view_0_page_setup_group_path($form, $request_id, $field_group, $presentation_tables, $can_for_section, $request);
+      mfcs_request_view_0_form_setup_group_path($form, $request_id, $field_group, $presentation_tables, $can_for_section, $request);
 
       unset($can_for_section);
     }
@@ -455,7 +455,7 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
 
       $row = NULL;
       if (isset($presentation_tables[$field_group])) {
-        $row = mfcs_request_view_0_page_setup_group_path($form, $request_id, $field_group, $presentation_tables, $can, $request);
+        $row = mfcs_request_view_0_form_setup_group_path($form, $request_id, $field_group, $presentation_tables, $can, $request);
       }
 
       if (!array_key_exists($field_group, $form['groups'])) {
@@ -518,7 +518,7 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
 
             $custom_row = NULL;
             if (isset($presentation_tables[$group])) {
-              $custom_row = mfcs_request_view_0_page_setup_group_path($form, $request_id, $group, $presentation_tables, $can, $request);
+              $custom_row = mfcs_request_view_0_form_setup_group_path($form, $request_id, $group, $presentation_tables, $can, $request);
             }
 
             if (is_null($custom_row)) {
@@ -805,7 +805,7 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
           ),
         ),
         '#submit' => array(
-          'mfcs_request_view_0_page_submit_pdf',
+          'mfcs_request_view_0_form_submit_pdf',
         ),
       );
     }
@@ -933,7 +933,7 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
           ),
         ),
         '#submit' => array(
-          'mfcs_request_view_0_page_submit_pdf',
+          'mfcs_request_view_0_form_submit_pdf',
         ),
       );
     }
@@ -1563,9 +1563,9 @@ function mfcs_request_view_0_page($form, &$form_state, $request_id, $mode = MFCS
  *   The row number or NULL when there is no valid row.
  *   FALSE is returned for in
  *
- * @see: mfcs_request_view_0_page()
+ * @see: mfcs_request_view_0_form()
  */
-function mfcs_request_view_0_page_setup_group_path(&$form, $request_id, $group, $presentation_tables, $show, $request) {
+function mfcs_request_view_0_form_setup_group_path(&$form, $request_id, $group, $presentation_tables, $show, $request) {
   $row = NULL;
   $group_path = &$form['display']['groups'];
   $request_type = $request['information']['type'][0]->value;
@@ -1688,16 +1688,16 @@ function mfcs_request_view_0_page_setup_group_path(&$form, $request_id, $group, 
 }
 
 /**
- * Pre-Validation for mfcs_request_view_0_page().
+ * Pre-Validation for mfcs_request_view_0_form().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mfcs_request_view_0_page()
+ * @see: mfcs_request_view_0_form()
  */
-function mfcs_request_view_0_page_pre_validate(&$form, &$form_state) {
+function mfcs_request_view_0_form_pre_validate(&$form, &$form_state) {
   $clicked_id = '';
   if (isset($form_state['triggering_element']['#id'])) {
     $clicked_id = $form_state['triggering_element']['#id'];
@@ -1764,16 +1764,16 @@ function mfcs_request_view_0_page_pre_validate(&$form, &$form_state) {
 }
 
 /**
- * Validation for mfcs_request_view_0_page().
+ * Validation for mfcs_request_view_0_form().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mfcs_request_view_0_page()
+ * @see: mfcs_request_view_0_form()
  */
-function mfcs_request_view_0_page_validate($form, &$form_state) {
+function mfcs_request_view_0_form_validate($form, &$form_state) {
   $clicked_id = '';
   if (isset($form_state['triggering_element']['#id'])) {
     $clicked_id = $form_state['triggering_element']['#id'];
@@ -2156,16 +2156,16 @@ function mfcs_request_view_0_page_validate($form, &$form_state) {
 }
 
 /**
- * Submit process for mfcs_request_view_0_page().
+ * Submit process for mfcs_request_view_0_form().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mfcs_request_view_0_page()
+ * @see: mfcs_request_view_0_form()
  */
-function mfcs_request_view_0_page_submit($form, &$form_state) {
+function mfcs_request_view_0_form_submit($form, &$form_state) {
   $user = cf_current_user();
 
   $request_id = NULL;
@@ -2323,7 +2323,7 @@ function mfcs_request_view_0_page_submit($form, &$form_state) {
 }
 
 /**
- * Custom submit process for mfcs_request_view_0_page().
+ * Custom submit process for mfcs_request_view_0_form().
  *
  * Used for generating a print PDF.
  *
@@ -2332,9 +2332,9 @@ function mfcs_request_view_0_page_submit($form, &$form_state) {
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mfcs_request_view_0_page()
+ * @see: mfcs_request_view_0_form()
  */
-function mfcs_request_view_0_page_submit_pdf($form, &$form_state) {
+function mfcs_request_view_0_form_submit_pdf($form, &$form_state) {
   $user = cf_current_user();
 
   $clicked_id = '';
@@ -2435,7 +2435,7 @@ function mfcs_request_pdf_0_page($request_id, $mode, $revision_id = NULL) {
   // turn off devel shutdown functionality.
   $GLOBALS['devel_shutdown'] = FALSE;
 
-  $page['html']['content'] = array(mfcs_request_view_0_page($form, $form_state, $request_id, $mode, $revision_id, TRUE));
+  $page['html']['content'] = array(mfcs_request_view_0_form($form, $form_state, $request_id, $mode, $revision_id, TRUE));
   $renderred = drupal_render($page);
   $html = drupal_render_page($renderred);
 

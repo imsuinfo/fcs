@@ -362,7 +362,7 @@ function mfcs_request_agreement_0_form($form, &$form_state, $request_id, $pdf = 
 }
 
 /**
- * Custom submit process for mfcs_request_view_0_page().
+ * Custom submit process for mfcs_request_view_0_form().
  *
  * Used for generating a print PDF.
  *
@@ -371,7 +371,7 @@ function mfcs_request_agreement_0_form($form, &$form_state, $request_id, $pdf = 
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mfcs_request_view_0_page()
+ * @see: mfcs_request_view_0_form()
  */
 function mfcs_request_agreement_0_form_submit($form, &$form_state) {
   $clicked_id = '';
