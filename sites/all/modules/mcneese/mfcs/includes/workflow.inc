@@ -1941,7 +1941,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     if (isset($conf['fcs_testing-email_to-remove']) && is_array($conf['fcs_testing-email_to-remove'])) {
       foreach ($conf['fcs_testing-email_to-remove'] as $remove_email) {
         unset($email_to[$remove_email]);
-        $debug_accounts[$add_email] = $add_email;
+        unset($debug_accounts[$remove_email]);
       }
     }
 
