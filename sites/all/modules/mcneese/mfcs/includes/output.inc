@@ -632,6 +632,8 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
  * @param bool|int $revision_id
  *   Set to NULL for latest revision. Otherwise this is the number that
  *   represents the revision of the request to load.
+ * @param string $html
+ *   The HTML markup to convert to a PDF.
  * @param bool $local
  *   (optional) If TRUE, then the file is saved to the local disk.
  *   If FALSE, then the file is print to stdout.
@@ -808,7 +810,6 @@ function mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $revision_id, $h
     $body_class .= ' ' . implode(' ', $parameters['body_class']);
   }
 
-  $html = '';
   $html = '<!DOCTYPE html>' . "\n";
   $html .= '<html lang="en" dir="ltr">' . "\n";
 
