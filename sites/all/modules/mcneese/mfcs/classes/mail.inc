@@ -24,9 +24,11 @@ class McNeeseFacilitiesUseMail implements MailSystemInterface {
 
     $instance = mfcs_instance();
 
+    $fcs_name = variable_get('fcs_name', 'McNeese Facilities Use System');
+
     // override any pre-defined headers.
     $message['headers']['MIME-Version'] = '1.0';
-    $message['headers']['X-Mailer'] = 'McNeese Facilities Use System';
+    $message['headers']['X-Mailer'] = $fcs_name;
     $message['headers']['Date'] = date('r', $instance);
 
     $from_address = filter_var($message['from_address'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW);
@@ -58,7 +60,7 @@ class McNeeseFacilitiesUseMail implements MailSystemInterface {
     $final_string .= "\n" . '---alt_' . $boundary . "\n";
     $final_string .= 'Content-Type: text/plain; charset=UTF-8' . "\n";
     $final_string .= 'Content-Transfer-Encoding: quoted-printable' . "\n";
-    $final_string .= 'Content-Description: McNeese Facilities Use System - Message - Plain Text' . "\n\n";
+    $final_string .= 'Content-Description: ' . $fcs_name . ' - Message - Plain Text' . "\n\n";
 
     if (!empty($message['body'])) {
       $final_string .= quoted_printable_encode(implode('', $message['body']));
@@ -67,7 +69,7 @@ class McNeeseFacilitiesUseMail implements MailSystemInterface {
     $final_string .= "\n" . '---alt_' . $boundary . "\n";
     $final_string .= 'Content-Type: text/html; charset=UTF-8' . "\n";
     $final_string .= 'Content-Transfer-Encoding: quoted-printable' . "\n";
-    $final_string .= 'Content-Description: McNeese Facilities Use System - Message - HTML Text' . "\n\n";
+    $final_string .= 'Content-Description: ' . $fcs_name . ' - Message - HTML Text' . "\n\n";
 
     if (!empty($message['markup'])) {
       $final_string .= quoted_printable_encode(implode('', $message['markup']));

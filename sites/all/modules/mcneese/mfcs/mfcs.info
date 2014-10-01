@@ -1,5 +1,5 @@
 name = McNeese Module - Facilities Use
-description = "Provides Workflow specific module functionality for the Facilities Use System."
+description = "Provides Workflow specific module functionality for the McNeese Facilities Use System."
 core = 7.x
 php = 5.3
 package = McNeese
