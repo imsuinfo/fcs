@@ -1241,8 +1241,8 @@ function mfcs_install() {
   db_query('CREATE VIEW {mfcs_view_dates_asc} AS' . $views_query . ' ORDER BY mfdd.value ASC, mfdts.value ASC');
   db_query('CREATE VIEW {mfcs_view_dates_desc} AS' . $views_query . ' ORDER BY mfdd.value DESC, mfdts.value DESC');
 
-  db_query('CREATE VIEW {mfcs_view_dates_asc_distinct} AS SELECT DISTINCT ON (request_id) * FROM {mfcs_view_dates_asc}' );
-  db_query('CREATE VIEW {mfcs_view_dates_desc_distinct} AS SELECT DISTINCT ON (request_id) * FROM {mfcs_view_dates_desc}' );
+  db_query('CREATE VIEW {mfcs_view_dates_asc_distinct} AS SELECT DISTINCT ON (request_id) * FROM {mfcs_view_dates_asc}');
+  db_query('CREATE VIEW {mfcs_view_dates_desc_distinct} AS SELECT DISTINCT ON (request_id) * FROM {mfcs_view_dates_desc}');
 
 
   // assign the new mail system as default.
@@ -1277,6 +1277,12 @@ function mfcs_uninstall() {
   $keyR_foreign = 'review_fkey';
 
   $structure = mfcs_table_install_structure();
+
+  db_query('DROP VIEW {mfcs_view_dates_asc}');
+  db_query('DROP VIEW {mfcs_view_dates_desc}');
+
+  db_query('DROP VIEW {mfcs_view_dates_asc_distinct}');
+  db_query('DROP VIEW {mfcs_view_dates_desc_distinct}');
 
   db_query('ALTER TABLE {mfcs_request_revisions} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
   db_query('ALTER TABLE {mfcs_request_revisions} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
