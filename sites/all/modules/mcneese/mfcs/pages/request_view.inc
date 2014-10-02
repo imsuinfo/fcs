@@ -2762,8 +2762,24 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id, $revision_id 
         $reviewer_classification = ' as <strong class="review-item-label-text-row-reviewer_classification">'. $reviewer_classification . '</strong>';
       }
 
-      $user_name .= $users[$user_id]->field_user_first_name['und'][0]['value'];
-      $user_name .= ' ' . $users[$user_id]->field_user_last_name['und'][0]['value'];
+      if ($user_id == 1) {
+        $user_name .= "System";
+      }
+      else {
+        if (isset($users[$user_id]->field_user_first_name['und'][0]['value'])) {
+          $user_name .= $users[$user_id]->field_user_first_name['und'][0]['value'];
+
+          if (isset($users[$user_id]->field_user_last_name['und'][0]['value'])) {
+            $user_name .= ' ' . $users[$user_id]->field_user_last_name['und'][0]['value'];
+          }
+        }
+        elseif (isset($users[$user_id]->field_user_last_name['und'][0]['value'])) {
+          $user_name .= ' ' . $users[$user_id]->field_user_last_name['und'][0]['value'];
+        }
+        else {
+          $user_name .= $users[$user_id]->name;
+        }
+      }
 
       $user_name_markup = '<strong class="review-item-label-text-row-user">';
       $user_name_markup .= $user_name;
