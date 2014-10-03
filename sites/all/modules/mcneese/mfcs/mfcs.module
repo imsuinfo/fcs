@@ -1000,6 +1000,53 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
     $access[$id] = FALSE;
   }
 
+  $reviewer_classifications = array();
+  $reviewer_steps = array();
+  $reviewer_settings = mfcs_get_reviewers(array('mr.user_id' => $user->uid));
+  if (is_array($reviewer_settings)) {
+    foreach ($reviewer_settings as $reviewer_setting) {
+      $reviewer_classifications[$reviewer_setting->reviewer_classification] = $reviewer_setting->reviewer_classification;
+      $reviewer_steps[$reviewer_setting->review_step] = $reviewer_setting->review_step;
+    }
+  }
+  unset($reviewer_settings);
+
+  $show_status_venue_coordinator = array(
+    MFCS_REQUEST_STATUS_LOCKED,
+    MFCS_REQUEST_STATUS_UNLOCKED,
+  );
+
+  $show_step_venue_coordinator = array(
+    MFCS_REVIEW_STEP_VENUE_AVAILABLE,
+    MFCS_REVIEW_STEP_MAKE_DECISIONS,
+  );
+
+  $show_status_reviewer = array(
+    MFCS_REQUEST_STATUS_LOCKED,
+  );
+
+  $show_step_reviewer = array(
+    MFCS_REVIEW_STEP_REVIEW,
+    MFCS_REVIEW_STEP_REQUIREMENTS,
+  );
+
+  $show_decision = array(
+    MFCS_REVIEW_DECISION_APPROVE,
+    MFCS_REVIEW_DECISION_DENY,
+  );
+
+  $show_step_insurance = array(
+    MFCS_REVIEW_STEP_REVIEW,
+    MFCS_REVIEW_STEP_REQUIREMENTS,
+    MFCS_REVIEW_STEP_MAKE_DECISIONS,
+    MFCS_REVIEW_STEP_COMPLETED,
+  );
+
+  $show_status_insurance = array(
+    MFCS_REQUEST_STATUS_LOCKED,
+    MFCS_REQUEST_STATUS_CLOSED_ACCEPTED,
+  );
+
   try {
     $query = db_select('mfcs_requests', 'mer');
 
@@ -1022,50 +1069,109 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
 
     $or = null;
 
-    $show_status = array(
-      MFCS_REQUEST_STATUS_LOCKED,
-      MFCS_REQUEST_STATUS_UNLOCKED,
-    );
-
-    $show_step = array(
-      MFCS_REVIEW_STEP_VENUE_AVAILABLE,
-      MFCS_REVIEW_STEP_MAKE_DECISIONS,
-    );
-
-    // process venue coordinator access.
     if ($review_restrictions === TRUE) {
-      $show_decision = array(
-        MFCS_REVIEW_DECISION_APPROVE,
-        MFCS_REVIEW_DECISION_DENY,
-      );
-
-      $already_reviewed_query = db_select('mfcs_field_review_review', 'mfrr');
-      $already_reviewed_query->innerJoin('mfcs_current_review', 'mcr', 'mfrr.request_id = mcr.request_id and mfrr.revision = mcr.review');
-
-      $already_reviewed_query->addField('mfrr', 'step', 'step');
-
-      $already_reviewed_query->where('mfrr.request_id = mftsp.request_id');
-      $already_reviewed_query->condition('mfrr.user_id', $user->uid);
-      $already_reviewed_query->condition('mfrr.step', $show_step, 'IN');
-      $already_reviewed_query->condition('mfrr.decision', $show_decision, 'IN');
-      $already_reviewed_query->distinct();
-
-      $and = db_and();
-      $and->condition('mfts.value', $show_status, 'IN');
-      $and->condition('mftsp.value', $show_step, 'IN');
-      $and->condition('mftsp.value', $already_reviewed_query, 'NOT IN');
-      $and->condition('mfvcui.value', $user->uid);
-
       if (is_null($or)) {
         $or = db_or();
       }
+
+      // process venue coordinator access.
+      $already_venue_coordinated_query = db_select('mfcs_reviewed', 'mrd_vc');
+      $already_venue_coordinated_query->addField('mrd_vc', 'request_id', 'request_id');
+      $already_venue_coordinated_query->where('mrd_vc.request_id = mftsp.request_id');
+      $already_venue_coordinated_query->condition('mrd_vc.classification', MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR);
+
+      $and = db_and();
+      $and->condition('mfts.value', $show_status_venue_coordinator, 'IN');
+      $and->condition('mftsp.value', $show_step_venue_coordinator, 'IN');
+      $and->condition('mftsp.request_id', $already_venue_coordinated_query, 'NOT IN');
+      $and->condition('mfvcui.value', $user->uid);
+
       $or->condition($and);
+
+      // process review access.
+      if (empty($reviewer_classifications)) {
+        // if the 'reviewer' has no reviewer classifications, then they cannot review, remove all requests associated with reviewer steps.
+        $and->condition('mftsp.value', $show_step_reviewer, 'NOT IN');
+
+        $or->condition($and);
+      }
+      else {
+        $already_reviewed_query = db_select('mfcs_reviewers', 'mr_r');
+        $already_reviewed_query->innerJoin('mfcs_reviewed', 'mrd_r', 'mr_r.reviewer_classification = mrd_r.classification');
+        $already_reviewed_query->addField('mrd_r', 'request_id', 'request_id');
+        $already_reviewed_query->where('mr_r.request_classification = mfrcc.value AND mr_r.review_step = mftsp.value');
+        $already_reviewed_query->condition('mr_r.user_id', $user->uid);
+        $already_reviewed_query->condition('mr_r.disabled', 0);
+
+        $and = db_and();
+        $and->condition('mfts.value', $show_status_reviewer, 'IN');
+        $and->condition('mftsp.value', $show_step_reviewer, 'IN');
+        $and->condition('mftsp.value', $reviewer_steps, 'IN');
+        $and->condition('mftsp.request_id', $already_reviewed_query, 'NOT IN');
+
+        $or->condition($and);
+
+        // special case reviewer access: insurance provided
+        /*
+        $has_insurance_query = db_select('mfcs_current_insurance', 'c_mci_1');
+        $has_insurance_query->leftJoin('mfcs_field_insurance_contractor', 'mfic', 'c_mci_1.request_id = mfic.request_id AND c_mci_1.contractor = mfic.revision AND mfic.delta = 0');
+        $has_insurance_query->leftJoin('mfcs_field_insurance_unaffiliated', 'mfiu', 'c_mci_1.request_id = mfiu.request_id AND c_mci_1.unaffiliated = mfiu.revision AND mfiu.delta = 0');
+        $has_insurance_query->leftJoin('mfcs_field_insurance_provided', 'mfip', 'c_mci_1.request_id = mfip.request_id AND c_mci_1.provided = mfip.revision AND mfip.delta = 0');
+
+        // $query->countQuery() does not appear to be functioning as expected, so manually count.
+        $has_insurance_query->addExpression('count(c_mci_1.request_id)');
+
+        $has_insurance_query->where('mer.id = c_mci_1.request_id');
+
+        $nand = db_and();
+        $nand->not();
+        $nand->condition('mfip.value', 1);
+        $has_insurance_query->condition($nand);
+
+        $another_or = db_or();
+        $another_or->condition('mfic.value', 1);
+        $another_or->condition('mfiu.value', 1);
+        $has_insurance_query->condition($another_or);
+
+        $can_review_query = db_select('mfcs_reviewers', 'c_mr_3');
+
+        $can_review_query->addField('c_mr_3', 'user_id', 'user_id');
+
+        $can_review_query->where('c_mr_3.request_classification = mfrcc.value');
+        $can_review_query->condition('c_mr_3.user_id', $user->uid);
+        $can_review_query->condition('c_mr_3.review_step', $show_step_reviewer, 'IN');
+        $can_review_query->condition('c_mr_3.reviewer_classification', MFCS_REVIEW_CLASSIFICATION_PURCHASING);
+        $can_review_query->condition('c_mr_3.disabled', 0);
+        $can_review_query->distinct();
+
+        $and = db_and();
+        $and->condition('mfts.value', $show_status_insurance, 'IN');
+        $and->condition('mftsp.value', $show_step_insurance, 'IN');
+        $and->condition($user->uid, $can_review_query, 'IN');
+        $and->condition(0, $has_insurance_query, 'NOT IN');
+
+        $or->condition($and);
+        */
+      }
     }
     elseif ($review_restrictions === FALSE) {
       if (is_null($or)) {
         $or = db_or();
       }
+
+      // always show accepted requests.
+      $or->condition('mfts.value', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
+
+      // process venue coordinator access.
       $or->condition('mfvcui.value', $user->uid);
+
+      // process review access.
+      if (!empty($reviewer_steps)) {
+        $and = db_and();
+        $and->condition('mftsp.value', $reviewer_steps, 'IN');
+
+        $or->condition($and);
+      }
     }
     else {
       if (is_null($or)) {
@@ -1078,148 +1184,16 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
       $and->condition('mftsp.value', MFCS_REVIEW_STEP_COMPLETED);
       $or->condition($and);
 
-      $or->condition('mer.user_id', $user->uid);
+      // process venue coordinator access.
       $or->condition('mfvcui.value', $user->uid);
-    }
 
-    // process review access.
-    $show_status = array(
-      MFCS_REQUEST_STATUS_LOCKED,
-    );
-
-    $show_step = array(
-      MFCS_REVIEW_STEP_REVIEW,
-      MFCS_REVIEW_STEP_REQUIREMENTS,
-    );
-
-    if ($review_restrictions === TRUE) {
-      $show_decision = array(
-        MFCS_REVIEW_DECISION_APPROVE,
-        MFCS_REVIEW_DECISION_DENY
-      );
-
-      $already_reviewed_query = db_select('mfcs_field_review_review', 'mfrr');
-      $already_reviewed_query->innerJoin('mfcs_current_review', 'mcr', 'mfrr.request_id = mcr.request_id and mfrr.revision = mcr.review');
-      $already_reviewed_query->innerJoin('mfcs_review_classifications', 'mrc', 'mfrr.id = mrc.review_id');
-
-      $already_reviewed_query->addField('mrc', 'classification', 'classification');
-
-      $already_reviewed_query->where('mfrr.request_id = mer.id and mfrr.step = mftsp.value');
-      $already_reviewed_query->condition('mfrr.user_id', $user->uid);
-      $already_reviewed_query->condition('mfrr.decision', $show_decision, 'IN');
-
-      $can_review_query = db_select('mfcs_reviewers', 'c_mr_1');
-
-      $can_review_query->addField('c_mr_1', 'user_id', 'user_id');
-
-      $can_review_query->where('c_mr_1.request_classification = mfrcc.value AND c_mr_1.review_step = mftsp.value');
-      $can_review_query->condition('c_mr_1.user_id', $user->uid);
-      $can_review_query->condition('c_mr_1.disabled', 0);
-      $can_review_query->condition('c_mr_1.reviewer_classification', $already_reviewed_query, 'NOT IN');
-      $can_review_query->distinct();
-
-      $and = db_and();
-      $and->condition('mfts.value', $show_status, 'IN');
-      $and->condition('mftsp.value', $show_step, 'IN');
-      $and->condition($user->uid, $can_review_query, 'IN');
-
-      if (is_null($or)) {
-        $or = db_or();
+      // process reviewer access.
+      if (!empty($reviewer_steps)) {
+        $and = db_and();
+        $and->condition('mfts.value', MFCS_REQUEST_STATUS_LOCKED);
+        $and->condition('mftsp.value', $show_step_reviewer, 'IN');
+        $or->condition($and);
       }
-      $or->condition($and);
-    }
-    elseif ($review_restrictions === FALSE) {
-      $can_review_query = db_select('mfcs_reviewers', 'c_mr_1');
-
-      $can_review_query->addField('c_mr_1', 'user_id', 'user_id');
-
-      $can_review_query->where('c_mr_1.request_classification = mfrcc.value AND c_mr_1.review_step = mftsp.value');
-      $can_review_query->condition('c_mr_1.user_id', $user->uid);
-      $can_review_query->condition('c_mr_1.review_step', $show_step, 'IN');
-      $can_review_query->condition('c_mr_1.disabled', 0);
-      $can_review_query->distinct();
-
-      $and = db_and();
-      $and->condition('mfts.value', $show_status, 'IN');
-      $and->condition('mftsp.value', $show_step, 'IN');
-      $and->condition($user->uid, $can_review_query, 'IN');
-
-      if (is_null($or)) {
-        $or = db_or();
-      }
-      $or->condition($and);
-    }
-    else {
-      $can_review_query = db_select('mfcs_reviewers', 'c_mr_1');
-
-      $can_review_query->addField('c_mr_1', 'user_id', 'user_id');
-
-      $can_review_query->where('c_mr_1.request_classification = mfrcc.value');
-      $can_review_query->condition('c_mr_1.user_id', $user->uid);
-      $can_review_query->condition('c_mr_1.disabled', 0);
-      $can_review_query->distinct();
-
-      if (is_null($or)) {
-        $or = db_or();
-      }
-      $or->condition($user->uid, $can_review_query, 'IN');
-    }
-
-    // special case reviewer access: insurance provided
-    if ($review_restrictions === TRUE) {
-      $show_step_insurance = array(
-        MFCS_REVIEW_STEP_REVIEW,
-        MFCS_REVIEW_STEP_REQUIREMENTS,
-        MFCS_REVIEW_STEP_MAKE_DECISIONS,
-        MFCS_REVIEW_STEP_COMPLETED,
-      );
-
-      $show_status_insurance = array(
-        MFCS_REQUEST_STATUS_LOCKED,
-        MFCS_REQUEST_STATUS_CLOSED_ACCEPTED,
-      );
-
-      $has_insurance_query = db_select('mfcs_current_insurance', 'c_mci_1');
-      $has_insurance_query->leftJoin('mfcs_field_insurance_contractor', 'mfic', 'c_mci_1.request_id = mfic.request_id AND c_mci_1.contractor = mfic.revision AND mfic.delta = 0');
-      $has_insurance_query->leftJoin('mfcs_field_insurance_unaffiliated', 'mfiu', 'c_mci_1.request_id = mfiu.request_id AND c_mci_1.unaffiliated = mfiu.revision AND mfiu.delta = 0');
-      $has_insurance_query->leftJoin('mfcs_field_insurance_provided', 'mfip', 'c_mci_1.request_id = mfip.request_id AND c_mci_1.provided = mfip.revision AND mfip.delta = 0');
-
-      // $query->countQuery() does not appear to be functioning as expected, so manually count.
-      $has_insurance_query->addExpression('count(c_mci_1.request_id)');
-
-      $has_insurance_query->where('mer.id = c_mci_1.request_id');
-
-      $nand = db_and();
-      $nand->not();
-      $nand->condition('mfip.value', 1);
-      $has_insurance_query->condition($nand);
-
-      $another_or = db_or();
-      $another_or->condition('mfic.value', 1);
-      $another_or->condition('mfiu.value', 1);
-      $has_insurance_query->condition($another_or);
-
-      $can_review_query = db_select('mfcs_reviewers', 'c_mr_3');
-
-      $can_review_query->addField('c_mr_3', 'user_id', 'user_id');
-
-      $can_review_query->where('c_mr_3.request_classification = mfrcc.value');
-      $can_review_query->condition('c_mr_3.user_id', $user->uid);
-      $can_review_query->condition('c_mr_3.review_step', $show_step, 'IN');
-      $can_review_query->condition('c_mr_3.reviewer_classification', MFCS_REVIEW_CLASSIFICATION_PURCHASING);
-      $can_review_query->condition('c_mr_3.disabled', 0);
-      $can_review_query->distinct();
-
-      $and = db_and();
-      $and->condition('mfts.value', $show_status_insurance, 'IN');
-      $and->condition('mftsp.value', $show_step_insurance, 'IN');
-      $and->condition($user->uid, $can_review_query, 'IN');
-      $and->condition(0, $has_insurance_query, 'NOT IN');
-
-      if (is_null($or)) {
-        $or = db_or();
-      }
-      $or->condition($and);
     }
 
     if (!is_null($or)) {
@@ -4863,6 +4837,43 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
     }
   }
 
+  $show_status_venue_coordinator = array(
+    MFCS_REQUEST_STATUS_LOCKED,
+    MFCS_REQUEST_STATUS_UNLOCKED,
+  );
+
+  $show_step_venue_coordinator = array(
+    MFCS_REVIEW_STEP_VENUE_AVAILABLE,
+    MFCS_REVIEW_STEP_MAKE_DECISIONS,
+  );
+
+  $show_status_reviewer = array(
+    MFCS_REQUEST_STATUS_LOCKED,
+  );
+
+  $show_step_reviewer = array(
+    MFCS_REVIEW_STEP_REVIEW,
+    MFCS_REVIEW_STEP_REQUIREMENTS,
+  );
+
+  $show_decision = array(
+    MFCS_REVIEW_DECISION_APPROVE,
+    MFCS_REVIEW_DECISION_DENY,
+  );
+
+  if (is_null($review_restrictions)) {
+    $reviewer_classifications = array();
+    $reviewer_steps = array();
+    $reviewer_settings = mfcs_get_reviewers(array('mr.user_id' => $user->uid));
+    if (is_array($reviewer_settings)) {
+      foreach ($reviewer_settings as $reviewer_setting) {
+        $reviewer_classifications[$reviewer_setting->reviewer_classification] = $reviewer_setting->reviewer_classification;
+        $reviewer_steps[$reviewer_setting->review_step] = $reviewer_setting->review_step;
+      }
+    }
+    unset($reviewer_settings);
+  }
+
   $already_joined_count = 0;
   $already_joined = array();
 
@@ -5053,147 +5064,65 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
 
       $or = NULL;
 
-      // process venue coordinator access.
-      $show_status = array(
-        MFCS_REQUEST_STATUS_LOCKED,
-        MFCS_REQUEST_STATUS_UNLOCKED,
-      );
-
-      $show_step = array(
-        MFCS_REVIEW_STEP_VENUE_AVAILABLE,
-        MFCS_REVIEW_STEP_MAKE_DECISIONS
-      );
-
       if ($review_restrictions === TRUE) {
-        $show_decision = array(
-          MFCS_REVIEW_DECISION_APPROVE,
-          MFCS_REVIEW_DECISION_DENY
-        );
+        if (is_null($or)) {
+          $or = db_or();
+        }
 
-        $already_reviewed_query = db_select('mfcs_field_review_review', 'mfrr');
-        $already_reviewed_query->innerJoin('mfcs_current_review', 'mcr', 'mfrr.request_id = mcr.request_id and mfrr.revision = mcr.review');
-
-        $already_reviewed_query->addField('mfrr', 'step', 'step');
-
-        $already_reviewed_query->where('mfrr.request_id = mftsp.request_id');
-        $already_reviewed_query->condition('mfrr.user_id', $user->uid);
-        $already_reviewed_query->condition('mfrr.step', $show_step, 'IN');
-        $already_reviewed_query->condition('mfrr.decision', $show_decision, 'IN');
-        $already_reviewed_query->distinct();
+        // process venue coordinator access.
+        $already_venue_coordinated_query = db_select('mfcs_reviewed', 'mrd_vc');
+        $already_venue_coordinated_query->addField('mrd_vc', 'request_id', 'request_id');
+        $already_venue_coordinated_query->where('mrd_vc.request_id = mftsp.request_id');
+        $already_venue_coordinated_query->condition('mrd_vc.classification', MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR);
 
         $and = db_and();
-        $and->condition('mfts.value', $show_status, 'IN');
-        $and->condition('mftsp.value', $show_step, 'IN');
-        $and->condition('mftsp.value', $already_reviewed_query, 'NOT IN');
+        $and->condition('mfts.value', $show_status_venue_coordinator, 'IN');
+        $and->condition('mftsp.value', $show_step_venue_coordinator, 'IN');
+        $and->condition('mftsp.request_id', $already_venue_coordinated_query, 'NOT IN');
         $and->condition('mfvcui.value', $user->uid);
 
-        if (is_null($or)) {
-          $or = db_or();
-        }
         $or->condition($and);
-      }
-      elseif ($review_restrictions === FALSE) {
-        if (!$manager) {
-          if (is_null($or)) {
-            $or = db_or();
-          }
-          $or->condition('mfvcui.value', $user->uid);
-        }
-      }
-      else {
-        if (!$manager) {
-          if (is_null($or)) {
-            $or = db_or();
-          }
-          $or->condition('mer.user_id', $user->uid);
-          $or->condition('mfvcui.value', $user->uid);
-        }
-      }
 
-      // process reviewer access.
-      $show_status = array(
-        MFCS_REQUEST_STATUS_LOCKED,
-      );
-
-      $show_step = array(
-        MFCS_REVIEW_STEP_REVIEW,
-        MFCS_REVIEW_STEP_REQUIREMENTS,
-      );
-
-      if ($review_restrictions === TRUE) {
-        $show_decision = array(
-          MFCS_REVIEW_DECISION_APPROVE,
-          MFCS_REVIEW_DECISION_DENY
-        );
-
-        $already_reviewed_query = db_select('mfcs_field_review_review', 'mfrr');
-        $already_reviewed_query->innerJoin('mfcs_current_review', 'mcr', 'mfrr.request_id = mcr.request_id and mfrr.revision = mcr.review');
-        $already_reviewed_query->innerJoin('mfcs_review_classifications', 'mrc', 'mfrr.id = mrc.review_id');
-
-        $already_reviewed_query->addField('mrc', 'classification', 'classification');
-
-        $already_reviewed_query->where('mfrr.request_id = mer.id and mfrr.step = mftsp.value');
-        $already_reviewed_query->condition('mfrr.user_id', $user->uid);
-        $already_reviewed_query->condition('mfrr.decision', $show_decision, 'IN');
-
-        $can_review_query = db_select('mfcs_reviewers', 'c_mr_1');
-
-        $can_review_query->addField('c_mr_1', 'user_id', 'user_id');
-
-        $can_review_query->where('c_mr_1.request_classification = mfrcc.value AND c_mr_1.review_step = mftsp.value');
-        $can_review_query->condition('c_mr_1.user_id', $user->uid);
-        $can_review_query->condition('c_mr_1.disabled', 0);
-        $can_review_query->condition('c_mr_1.reviewer_classification', $already_reviewed_query, 'NOT IN');
-        $can_review_query->distinct();
-
-        $and = db_and();
-        $and->condition('mfts.value', $show_status, 'IN');
-        $and->condition('mftsp.value', $show_step, 'IN');
-        $and->condition($user->uid, $can_review_query, 'IN');
-
-        if (is_null($or)) {
-          $or = db_or();
-        }
-        $or->condition($and);
-      }
-      elseif ($review_restrictions === FALSE) {
-        if (!$manager) {
-          $can_review_query = db_select('mfcs_reviewers', 'c_mr_1');
-
-          $can_review_query->addField('c_mr_1', 'user_id', 'user_id');
-
-          $can_review_query->where('c_mr_1.request_classification = mfrcc.value AND c_mr_1.review_step = mftsp.value');
-          $can_review_query->condition('c_mr_1.user_id', $user->uid);
-          $can_review_query->condition('c_mr_1.review_step', $show_step, 'IN');
-          $can_review_query->condition('c_mr_1.disabled', 0);
-          $can_review_query->distinct();
+        // process review access.
+        if (!empty($reviewer_classifications)) {
+          $already_reviewed_query = db_select('mfcs_reviewers', 'mr_r');
+          $already_reviewed_query->innerJoin('mfcs_reviewed', 'mrd_r', 'mr_r.reviewer_classification = mrd_r.classification');
+          $already_reviewed_query->addField('mrd_r', 'request_id', 'request_id');
+          $already_reviewed_query->where('mr_r.request_classification = mfrcc.value AND mr_r.review_step = mftsp.value');
+          $already_reviewed_query->condition('mr_r.user_id', $user->uid);
+          $already_reviewed_query->condition('mr_r.disabled', 0);
 
           $and = db_and();
-          $and->condition('mfts.value', $show_status, 'IN');
-          $and->condition('mftsp.value', $show_step, 'IN');
-          $and->condition($user->uid, $can_review_query, 'IN');
+          $and->condition('mfts.value', $show_status_reviewer, 'IN');
+          $and->condition('mftsp.value', $show_step_reviewer, 'IN');
+          $and->condition('mftsp.value', $reviewer_steps, 'IN');
+          $and->condition('mftsp.request_id', $already_reviewed_query, 'NOT IN');
 
-          if (is_null($or)) {
-            $or = db_or();
-          }
           $or->condition($and);
         }
       }
-      else {
+      elseif ($review_restrictions === FALSE) {
         if (!$manager) {
-          $can_review_query = db_select('mfcs_reviewers', 'c_mr_1');
-
-          $can_review_query->addField('c_mr_1', 'user_id', 'user_id');
-
-          $can_review_query->where('c_mr_1.request_classification = mfrcc.value');
-          $can_review_query->condition('c_mr_1.user_id', $user->uid);
-          $can_review_query->condition('c_mr_1.disabled', 0);
-          $can_review_query->distinct();
-
           if (is_null($or)) {
             $or = db_or();
           }
-          $or->condition($user->uid, $can_review_query, 'IN');
+
+          // always show completed and accepted requests when there are no restrictions.
+          $and = db_and();
+          $and->condition('mfts.value', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
+          $and->condition('mftsp.value', MFCS_REVIEW_STEP_COMPLETED);
+          $or->condition($and);
+
+          // process venue coordinator access.
+          $or->condition('mfvcui.value', $user->uid);
+
+          // process reviewer access.
+          if (!empty($reviewer_steps)) {
+            $and = db_and();
+            $and->condition('mfts.value', MFCS_REQUEST_STATUS_LOCKED);
+            $and->condition('mftsp.value', $show_step_reviewer, 'IN');
+            $or->condition($and);
+          }
         }
       }
 

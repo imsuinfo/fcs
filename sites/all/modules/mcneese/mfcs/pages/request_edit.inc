@@ -704,6 +704,10 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
         $query->fields($mfcs_current_top);
         $query->execute();
 
+        $query = db_delete('mfcs_reviewed');
+        $query->condition('request_id', $request_id);
+        $query->execute();
+
         $review_revision = mfcs_load_request_revision_number($request_id, 'mfcs_field_review_review');
 
         if ($review_revision === FALSE || is_null($review_revision)) {

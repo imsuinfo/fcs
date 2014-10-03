@@ -121,6 +121,10 @@ function mfcs_workflow_set_step($request_id, $step, $user = NULL) {
     $query->fields($mfcs_current_top);
     $query->execute();
 
+    $query = db_delete('mfcs_reviewed');
+    $query->condition('request_id', $request_id);
+    $query->execute();
+
     // enforce transaction execution
     unset($transaction);
   }
@@ -852,6 +856,19 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message, $ext
       $query = db_insert('mfcs_review_classifications');
       $query->fields($mfcs_review_classifications);
       $query->execute();
+
+      $mfcs_reviewed = array(
+        'request_id' => $request_id,
+        'classification' => $reviewer_classification,
+      );
+
+      if ($decision == MFCS_REVIEW_DECISION_APPROVE || $decision == MFCS_REVIEW_DECISION_DENY) {
+        $query = db_insert('mfcs_reviewed');
+        $query->fields($mfcs_reviewed);
+        $query->execute();
+      }
+
+      unset($mfcs_review_classifications);
     }
 
     if ($decision == MFCS_REVIEW_DECISION_REQUIREMENT && ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE || $step == MFCS_REVIEW_STEP_REVIEW  || $step == MFCS_REVIEW_STEP_REQUIREMENTS || $step == MFCS_REVIEW_STEP_MAKE_DECISIONS || $step == MFCS_REVIEW_STEP_COMPLETED)) {

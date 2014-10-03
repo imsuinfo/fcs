@@ -300,6 +300,33 @@ function mfcs_schema() {
     ),
   );
 
+  $schema['mfcs_reviewed'] = array(
+    'description' => $t("McNeese Facilities Use maintains a log of currently review requests that are open for review for the currently active review step."),
+    'fields' => array(
+      'request_id' => array(
+        'description' => $t("Foreign key to the primary key in the {mfcs_requests} table."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'classification' => array(
+        'description' => $t("The reviewer classification."),
+        'type' => 'int',
+        'size' => 'medium',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('request_id', 'reviewer_classification'),
+    'foreign keys' => array(
+      'request_id' => array(
+        'table' => 'mfcs_requests',
+        'columns' => array('request_id' => 'id'),
+      ),
+    ),
+  );
+
   $schema['mfcs_review_classifications'] = array(
     'description' => $t("McNeese Facilities Use Requests field table representing a users classifications associated with a given review."),
     'fields' => array(
