@@ -612,6 +612,11 @@ $conf['update_check_frequency'] = 32;
  **/
 $conf['clean_url'] = TRUE;
 
+/**
+ * Temporary directory
+ **/
+$conf['file_temporary_path'] = '/var/www/webfiles/temporary/sandbox-fcs';
+
 
 /**
  * Assign php.ini variables based on  uid, role, or ip address.
