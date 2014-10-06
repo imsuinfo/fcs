@@ -200,8 +200,8 @@ function mcneese_front_page_embed_featured() {
       $return_array['markup'] .= '<div class="mcneese-front_page-featured-image-overlay-description">' . $image_attributes['data-cycle-desc'] . '</div>';
       $return_array['markup'] .= '</div>';
 
-      $return_array['markup'] .= '    <div id="mcneese-front_page-featured-image-previous" class="mcneese-front_page-featured-image-prevnext noscript" style="display: none;">Previous</div>';
-      $return_array['markup'] .= '    <div id="mcneese-front_page-featured-image-next" class="mcneese-front_page-featured-image-prevnext noscript" style="display: none;">Next</div>';
+      $return_array['markup'] .= '    <div id="mcneese-front_page-featured-image-previous" class="mcneese-front_page-featured-image-prevnext noscript">Previous</div>';
+      $return_array['markup'] .= '    <div id="mcneese-front_page-featured-image-next" class="mcneese-front_page-featured-image-prevnext noscript">Next</div>';
     }
 
     $count++;
@@ -563,6 +563,10 @@ function mcneese_front_page_embed_events($highlight) {
     $body = NULL;
     $nid = NULL;
 
+    if ($count > 0 && property_exists($result, 'field_event_image_fid')) {
+      $image = file_load((int)$result->field_event_image_fid);
+    }
+
     if (empty($result->field_title_short)) {
       $title = check_plain($result->title);
     }
@@ -578,14 +582,24 @@ function mcneese_front_page_embed_events($highlight) {
     $nid = (int) $result->nid;
 
     if (empty($result->body_summary)) {
-      $body = text_summary($result->body_value, 'custom_formatters_text_only');
+      $body = check_markup($result->body_value, 'full_html');
+
+      if (is_object($image)) {
+        $body = truncate_utf8($body, 400, TRUE, FALSE, 200);
+      }
+      else {
+        $body = truncate_utf8($body, 600, TRUE, FALSE, 300);
+      }
     }
     else {
       $body = check_markup($result->body_summary, 'full_html');
-    }
 
-    if ($count > 0 && property_exists($result, 'field_event_image_fid')) {
-      $image = file_load((int)$result->field_event_image_fid);
+      if (is_object($image)) {
+        $body = truncate_utf8($body, 400, TRUE, FALSE, 200);
+      }
+      else {
+        $body = truncate_utf8($body, 600, TRUE, FALSE, 300);
+      }
     }
 
     if (is_object($image)) {
@@ -774,6 +788,10 @@ function mcneese_front_page_embed_spotlight() {
     $body = NULL;
     $nid = NULL;
 
+    if (property_exists($result, 'field_spotlight_image_fid')) {
+      $image = file_load((int)$result->field_spotlight_image_fid);
+    }
+
     if (empty($result->field_title_short)) {
       $title = check_plain($result->title);
     }
@@ -789,14 +807,24 @@ function mcneese_front_page_embed_spotlight() {
     $nid = (int) $result->nid;
 
     if (empty($result->body_summary)) {
-      $body = text_summary($result->body_value, 'custom_formatters_text_only');
+      $body = check_markup($result->body_value, 'full_html');
+
+      if (is_object($image)) {
+        $body = truncate_utf8($body, 120, TRUE, FALSE, 60);
+      }
+      else {
+        $body = truncate_utf8($body, 240, TRUE, FALSE, 120);
+      }
     }
     else {
       $body = check_markup($result->body_summary, 'full_html');
-    }
 
-    if (property_exists($result, 'field_spotlight_image_fid')) {
-      $image = file_load((int)$result->field_spotlight_image_fid);
+      if (is_object($image)) {
+        $body = truncate_utf8($body, 120, TRUE, FALSE, 60);
+      }
+      else {
+        $body = truncate_utf8($body, 240, TRUE, FALSE, 120);
+      }
     }
 
     if (is_object($image)) {
@@ -860,6 +888,7 @@ function mcneese_front_page_embed_spotlight() {
     $return_array['markup'] .= '      <a class="mcneese-front_page-spotlight-event-body-more" href="' . $base_path . 'node/' . $nid . '" title="Read More on: ' . $title . '">...more</a>';
     $return_array['markup'] .= '    </div>';
     $return_array['markup'] .= '  </div>';
+
     $return_array['markup'] .= '</div>';
 
     $count++;

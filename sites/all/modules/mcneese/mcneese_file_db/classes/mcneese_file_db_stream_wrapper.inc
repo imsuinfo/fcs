@@ -870,7 +870,7 @@ abstract class mcneese_file_db_stream_wrapper implements DrupalStreamWrapperInte
         if (is_null($this->file_meta)) {
           $this->tmp_fid = $parts[1];
 
-          return FALSE;
+          return TRUE;
         }
 
         $this->tmp_checksum = $this->file_meta->checksum;

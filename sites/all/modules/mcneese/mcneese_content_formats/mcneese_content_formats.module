@@ -414,6 +414,33 @@ function mcneese_content_formats_alter_dom(&$text, $operations) {
             $tag->setAttribute('href', $processed);
             $altered = TRUE;
           }
+
+          // prohibit empty tags and improper links
+          $href = $tag->getAttribute('href');
+          if (empty($href)) {
+            $change_tags[] = array('tag' => $tag, 'type' => 'span');
+
+            $class = 'fake_link improper_link';
+            if ($tag->hasAttribute('class')) {
+              $class = $tag->getAttribute('class') . ' fake_link improper_link';
+            }
+
+            $tag->setAttribute('class', $class);
+            $altered = TRUE;
+          }
+          unset($href);
+        }
+        else {
+          // prohibit empty tags and improper links
+          $change_tags[] = array('tag' => $tag, 'type' => 'span');
+
+          $class = 'fake_link improper_link';
+          if ($tag->hasAttribute('class')) {
+            $class = $tag->getAttribute('class') . ' fake_link improper_link';
+          }
+
+          $tag->setAttribute('class', $class);
+          $altered = TRUE;
         }
       }
       elseif ($tag->tagName == 'img') {

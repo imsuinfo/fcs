@@ -133,6 +133,7 @@ function mcneese_content_sitemap_main() {
     print('  </sitemap>' . "\n");
   }
 
+/*
   $url = $base_url . $base_path . 'sitemap/media/';
   for ($i = 0; $i < $media_pages; $i++) {
     print('  <sitemap>' . "\n");
@@ -140,6 +141,7 @@ function mcneese_content_sitemap_main() {
     print('    <lastmod>' . date('c', $media_last_updated) . '</lastmod>' . "\n");
     print('  </sitemap>' . "\n");
   }
+*/
 
   print('</sitemapindex>' . "\n");
   drupal_exit();

@@ -122,7 +122,7 @@ function mcneese_management_schema() {
     ),
     'primary key' => array('id'),
     'unique keys' => array(
-      'source' => array('machine_name'),
+      'machine_name' => array('machine_name'),
     ),
   );
 
@@ -277,7 +277,7 @@ function mcneese_management_update_7101() {
     ),
     'primary key' => array('id'),
     'unique keys' => array(
-      'source' => array('machine_name'),
+      'machine_name' => array('machine_name'),
     ),
   );
 
