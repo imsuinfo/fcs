@@ -1005,16 +1005,7 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
     $access[$id] = FALSE;
   }
 
-  $reviewer_classifications = array();
-  $reviewer_steps = array();
-  $reviewer_settings = mfcs_get_reviewers(array('mr.user_id' => $user->uid));
-  if (is_array($reviewer_settings)) {
-    foreach ($reviewer_settings as $reviewer_setting) {
-      $reviewer_classifications[$reviewer_setting->reviewer_classification] = $reviewer_setting->reviewer_classification;
-      $reviewer_steps[$reviewer_setting->review_step] = $reviewer_setting->review_step;
-    }
-  }
-  unset($reviewer_settings);
+  $reviewer_settings = mfcs_get_reviewer_settings_by_user_id($user->uid);
 
   $show_status_venue_coordinator = array(
     MFCS_REQUEST_STATUS_LOCKED,
@@ -1094,7 +1085,7 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
       $or->condition($and);
 
       // process review access.
-      if (empty($reviewer_classifications)) {
+      if (empty($reviewer_settings['classifications'])) {
         // if the 'reviewer' has no reviewer classifications, then they cannot review, remove all requests associated with reviewer steps.
         $and->condition('mftsp.value', $show_step_reviewer, 'NOT IN');
 
@@ -1111,13 +1102,13 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
         $and = db_and();
         $and->condition('mfts.value', $show_status_reviewer, 'IN');
         $and->condition('mftsp.value', $show_step_reviewer, 'IN');
-        $and->condition('mftsp.value', $reviewer_steps, 'IN');
+        $and->condition('mftsp.value', $reviewer_settings['steps'], 'IN');
         $and->condition('mftsp.request_id', $already_reviewed_query, 'NOT IN');
 
         $or->condition($and);
 
         // special case reviewer access: insurance provided
-        if (array_key_exists(MFCS_REVIEW_CLASSIFICATION_PURCHASING, $reviewer_classifications)) {
+        if (array_key_exists(MFCS_REVIEW_CLASSIFICATION_PURCHASING, $reviewer_settings['classifications'])) {
           $has_insurance_query = db_select('mfcs_current_insurance', 'mci_ip');
           $has_insurance_query->leftJoin('mfcs_field_insurance_contractor', 'mfic', 'mci_ip.request_id = mfic.request_id AND mci_ip.contractor = mfic.revision AND mfic.delta = 0');
           $has_insurance_query->leftJoin('mfcs_field_insurance_unaffiliated', 'mfiu', 'mci_ip.request_id = mfiu.request_id AND mci_ip.unaffiliated = mfiu.revision AND mfiu.delta = 0');
@@ -1159,9 +1150,9 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
       $or->condition('mfvcui.value', $user->uid);
 
       // process review access.
-      if (!empty($reviewer_steps)) {
+      if (!empty($reviewer_settings['steps'])) {
         $and = db_and();
-        $and->condition('mftsp.value', $reviewer_steps, 'IN');
+        $and->condition('mftsp.value', $reviewer_settings['steps'], 'IN');
 
         $or->condition($and);
       }
@@ -1181,7 +1172,7 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
       $or->condition('mfvcui.value', $user->uid);
 
       // process reviewer access.
-      if (!empty($reviewer_steps)) {
+      if (!empty($reviewer_settings['steps'])) {
         $and = db_and();
         $and->condition('mfts.value', MFCS_REQUEST_STATUS_LOCKED);
         $and->condition('mftsp.value', $show_step_reviewer, 'IN');
@@ -4530,6 +4521,49 @@ function mfcs_get_reviewers($conditions = array(), $join = FALSE, $sort = array(
 }
 
 /**
+ * Returns the reviewer settings for the given drupal user.
+ *
+ * @param int $user_id
+ *   The drupal user id.
+ *
+ * @return array|false
+ *   An array containing the the reviewer classifications, and the
+ *   reviewer steps.
+ *   FALSE is returned on error.
+ */
+function mfcs_get_reviewer_settings_by_user_id($user_id) {
+  if (!cf_is_integer($user_id)) {
+    cf_error::invalid_integer('user_id');
+    return FALSE;
+  }
+
+  $static_settings = &drupal_static(__FUNCTION__);
+
+  if (isset($static_settings[$user_id])) {
+    return $static_settings[$user_id];
+  }
+
+  $results = mfcs_get_reviewers(array('mr.user_id' => $user_id));
+
+  if (!is_array($results)) {
+    return FALSE;
+  }
+
+  $settings = array(
+    'classifications' => array(),
+    'steps' => array(),
+  );
+
+  foreach ($results as $result) {
+    $settings['classifications'][$result->reviewer_classification] = $result->reviewer_classification;
+    $settings['steps'][$result->review_step] = $result->review_step;
+  }
+
+  $static_settings[$user_id] = $settings;
+  return $settings;
+}
+
+/**
  * Checks to see if the given room is available at the given times.
  *
  * For the dates and times to work properly, it is expected that:
@@ -4853,16 +4887,13 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
   );
 
   if ($review_restrictions != MFCS_REVIEW_RESTRICTION_NONE) {
-    $reviewer_classifications = array();
-    $reviewer_steps = array();
-    $reviewer_settings = mfcs_get_reviewers(array('mr.user_id' => $user->uid));
-    if (is_array($reviewer_settings)) {
-      foreach ($reviewer_settings as $reviewer_setting) {
-        $reviewer_classifications[$reviewer_setting->reviewer_classification] = $reviewer_setting->reviewer_classification;
-        $reviewer_steps[$reviewer_setting->review_step] = $reviewer_setting->review_step;
-      }
-    }
-    unset($reviewer_settings);
+    $reviewer_settings = mfcs_get_reviewer_settings_by_user_id($user->uid);
+  }
+  else {
+    $reviewer_settings = array(
+      'classifications' => array(),
+      'steps' => array(),
+    );
   }
 
   $already_joined_count = 0;
@@ -5075,7 +5106,7 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
         $or->condition($and);
 
         // process review access.
-        if (!empty($reviewer_classifications)) {
+        if (!empty($reviewer_settings['classifications'])) {
           $already_reviewed_query = db_select('mfcs_reviewers', 'mr_r');
           $already_reviewed_query->innerJoin('mfcs_reviewed', 'mrd_r', 'mr_r.reviewer_classification = mrd_r.classification');
           $already_reviewed_query->addField('mrd_r', 'request_id', 'request_id');
@@ -5086,7 +5117,7 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
           $and = db_and();
           $and->condition('mfts.value', $show_status_reviewer, 'IN');
           $and->condition('mftsp.value', $show_step_reviewer, 'IN');
-          $and->condition('mftsp.value', $reviewer_steps, 'IN');
+          $and->condition('mftsp.value', $reviewer_settings['steps'], 'IN');
           $and->condition('mftsp.request_id', $already_reviewed_query, 'NOT IN');
 
           $or->condition($and);
@@ -5108,7 +5139,7 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
           $or->condition('mfvcui.value', $user->uid);
 
           // process reviewer access.
-          if (!empty($reviewer_steps)) {
+          if (!empty($reviewer_settings['steps'])) {
             $and = db_and();
             $and->condition('mfts.value', MFCS_REQUEST_STATUS_LOCKED);
             $and->condition('mftsp.value', $show_step_reviewer, 'IN');
