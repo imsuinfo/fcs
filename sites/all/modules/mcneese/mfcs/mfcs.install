@@ -1271,11 +1271,11 @@ function mfcs_install() {
   db_query('ALTER TABLE {mfcs_log_emails} ALTER COLUMN headers SET STORAGE EXTENDED');
   db_query('ALTER TABLE {mfcs_log_emails} ALTER COLUMN body SET STORAGE EXTENDED');
 
-  db_query('CREATE VIEW {mfcs_view_dates_asc_distinct} AS SELECT DISTINCT ON (request_id) * FROM {mfcs_view_dates_asc}');
-  db_query('CREATE VIEW {mfcs_view_dates_desc_distinct} AS SELECT DISTINCT ON (request_id) * FROM {mfcs_view_dates_desc}');
-
   db_query('CREATE VIEW {mfcs_view_dates_asc} AS' . $view_query . ' ORDER BY mfdd.value ASC, mfdts.value ASC');
   db_query('CREATE VIEW {mfcs_view_dates_desc} AS' . $view_query . ' ORDER BY mfdd.value DESC, mfdts.value DESC');
+
+  db_query('CREATE VIEW {mfcs_view_dates_asc_distinct} AS SELECT DISTINCT ON (request_id) * FROM {mfcs_view_dates_asc}');
+  db_query('CREATE VIEW {mfcs_view_dates_desc_distinct} AS SELECT DISTINCT ON (request_id) * FROM {mfcs_view_dates_desc}');
 
 
   // create a views to simplify time based sorting.
@@ -1320,6 +1320,12 @@ function mfcs_uninstall() {
 
   $structure = mfcs_table_install_structure();
 
+  db_query('DROP VIEW {mfcs_view_dates_asc_distinct}');
+  db_query('DROP VIEW {mfcs_view_dates_desc_distinct}');
+
+  db_query('DROP VIEW {mfcs_view_dates_asc}');
+  db_query('DROP VIEW {mfcs_view_dates_desc}');
+
   db_query('ALTER TABLE {mfcs_request_revisions} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
   db_query('ALTER TABLE {mfcs_request_revisions} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
   db_query('ALTER TABLE {mfcs_reviewers} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
@@ -1332,12 +1338,6 @@ function mfcs_uninstall() {
   db_query('ALTER TABLE {mfcs_banner_event_roles_to_users} DROP CONSTRAINT IF EXISTS ' . $key6_foreign);
   db_query('ALTER TABLE {mfcs_request_reminders} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
   db_query('ALTER TABLE {mfcs_review_classifications} DROP CONSTRAINT IF EXISTS ' . $keyR_foreign);
-
-  db_query('DROP VIEW {mfcs_view_dates_asc}');
-  db_query('DROP VIEW {mfcs_view_dates_desc}');
-
-  db_query('DROP VIEW {mfcs_view_dates_asc_distinct}');
-  db_query('DROP VIEW {mfcs_view_dates_desc_distinct}');
 
   foreach ($structure as $structure_name => &$structure_array) {
     $table_name = 'mfcs_current_' . $structure_name;
