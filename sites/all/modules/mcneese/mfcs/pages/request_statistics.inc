@@ -475,7 +475,6 @@ function mfcs_request_statistics_render_request_classification($counts, $classif
     'text_description' => 'A bar chart representing the number of requests for each classification they belong to. There are a total of ' . $counts['main']['total'] . 'requests.',
     'text_x' => "Requests",
     'text_y' => "Classifications",
-    'chart_width' => 400,
     'chart_height' => 220,
     'line_start_x' => 75,
     'line_start_y' => 25,
@@ -512,12 +511,14 @@ function mfcs_request_statistics_render_request_classification($counts, $classif
 
   $chart_markup = mfcs_request_statistics_render_chart($options);
 
+  $width = 450;
+  $svg_options = ' version="1.1" viewBox="0 0 ' . $options['chart_width'] . ' ' . $options['chart_height'] . '" preserveAspectRatio="yes" xmlns="http://www.w3.org/2000/svg"';
+
 
   // render the markup
   $markup = '<div class="statistics-block statistics-block-main">' . "\n";
-
   $markup .= '<div class="statistics-block-chart">' . "\n";
-  $markup .= '  <svg class="statistics-block-chart-main" title="Requests by Classification" width="' . $options['chart_width'] . '" height="' . $options['chart_height'] . '">' . $chart_markup . '</svg>' . "\n";
+  $markup .= '  <svg class="statistics-block-chart-main" title="Requests by Classification" width="' . $width . '"' . $svg_options . '>' . $chart_markup . '</svg>' . "\n";
   $markup .= '</div>' . "\n";
 
   $markup .= '<div class="statistics-block-text">' . "\n";
@@ -578,7 +579,6 @@ function mfcs_request_statistics_render_request_type($counts, $type_options) {
     'text_description' => 'A bar chart representing the number of requests for each type they belong to.',
     'text_x' => "Requests",
     'text_y' => "Type",
-    'chart_width' => 400,
     'chart_height' => 220,
     'line_start_x' => 90,
     'line_start_y' => 25,
@@ -671,6 +671,9 @@ function mfcs_request_statistics_render_request_type($counts, $type_options) {
 
   $chart_markup = mfcs_request_statistics_render_chart($options);
 
+  $width = 450;
+  $svg_options = ' version="1.1" viewBox="0 0 ' . $options['chart_width'] . ' ' . $options['chart_height'] . '" preserveAspectRatio="yes" xmlns="http://www.w3.org/2000/svg"';
+
   // render the markup
   $markup = '<div class="statistics-block statistics-block-request_type">' . "\n";
 
@@ -691,7 +694,7 @@ function mfcs_request_statistics_render_request_type($counts, $type_options) {
   $markup .= '</div>' . "\n"; // statistics-block-text
 
   $markup .= '<div class="statistics-block-chart">' . "\n";
-  $markup .= '  <svg class="statistics-block-chart-request_type" title="Requests by Type" width="' . $options['chart_width'] . '" height="' . $options['chart_height'] . '">' . $chart_markup . '</svg>' . "\n";
+  $markup .= '  <svg class="statistics-block-chart-request_type" title="Requests by Type" width="' . $width . '"' . $svg_options . '>' . $chart_markup . '</svg>' . "\n";
   $markup .= '</div>' . "\n";
 
   $markup .= '</div>' . "\n"; // statistics-block
@@ -738,7 +741,6 @@ function mfcs_request_statistics_render_request_step($counts, $step_options) {
     'text_description' => 'A bar chart representing the number of requests for each step they are currently in.',
     'text_x' => "Requests",
     'text_y' => "Step",
-    'chart_width' => 400,
     'chart_height' => 220,
     'line_start_x' => 120,
     'line_start_y' => 25,
@@ -800,11 +802,14 @@ function mfcs_request_statistics_render_request_step($counts, $step_options) {
 
   $chart_markup = mfcs_request_statistics_render_chart($options);
 
+  $width = 450;
+  $svg_options = ' version="1.1" viewBox="0 0 ' . $options['chart_width'] . ' ' . $options['chart_height'] . '" preserveAspectRatio="yes" xmlns="http://www.w3.org/2000/svg"';
+
   // render the markup
   $markup = '<div class="statistics-block statistics-block-request_step">' . "\n";
 
   $markup .= '<div class="statistics-block-chart">' . "\n";
-  $markup .= '  <svg class="statistics-block-chart-request_step" title="Requests by Step" width="' . $options['chart_width'] . '" height="' . $options['chart_height'] . '">' . $chart_markup . '</svg>' . "\n";
+  $markup .= '  <svg class="statistics-block-chart-request_step" title="Requests by Step" width="' . $width . '"' . $svg_options . '>' . $chart_markup . '</svg>' . "\n";
   $markup .= '</div>' . "\n"; // statistics-block-chart
 
   $markup .= '<div class="statistics-block-text">' . "\n";
@@ -861,7 +866,6 @@ function mfcs_request_statistics_render_request_status($counts, $status_options)
     'text_description' => 'A bar chart representing the number of requests based on their current status.',
     'text_x' => "Requests",
     'text_y' => "Status",
-    'chart_width' => 400,
     'chart_height' => 220,
     'line_start_x' => 120,
     'line_start_y' => 25,
@@ -920,6 +924,9 @@ function mfcs_request_statistics_render_request_status($counts, $status_options)
 
   $chart_markup = mfcs_request_statistics_render_chart($options);
 
+  $width = 450;
+  $svg_options = ' version="1.1" viewBox="0 0 ' . $options['chart_width'] . ' ' . $options['chart_height'] . '" preserveAspectRatio="yes" xmlns="http://www.w3.org/2000/svg"';
+
   // render the markup
   $markup = '<div class="statistics-block statistics-block-request_step">' . "\n";
 
@@ -934,7 +941,7 @@ function mfcs_request_statistics_render_request_status($counts, $status_options)
   $markup .= '</div>' . "\n"; // statistics-block-text
 
   $markup .= '<div class="statistics-block-chart">' . "\n";
-  $markup .= '  <svg class="statistics-block-chart-request_status" title="Requests by Status" width="' . $options['chart_width'] . '" height="' . $options['chart_height'] . '">' . $chart_markup . '</svg>' . "\n";
+  $markup .= '  <svg class="statistics-block-chart-request_status" title="Requests by Status" width="' . $width . '"' . $svg_options . '>' . $chart_markup . '</svg>' . "\n";
   $markup .= '</div>' . "\n"; // statistics-block-chart
 
   $markup .= '</div>' . "\n"; // statistics-block
@@ -993,21 +1000,21 @@ function mfcs_request_statistics_render_chart(&$options) {
   }
 
   $increment_value = 1;
-  $increment_width = 17;
+  $increment_width = 15;
   if ($highest < 5) {
-    $increment_width = 60;
+    $increment_width = 56;
     $increment_split = 5;
   }
   elseif ($highest < 100) {
-    $increment_width = 33;
+    $increment_width = 31;
     $increment_split = 9;
   }
   elseif ($highest < 1000) {
-    $increment_width = 37;
+    $increment_width = 35;
     $increment_split = 8;
   }
   else {
-    $increment_width = 42;
+    $increment_width = 40;
     $increment_split = 7;
   }
 
@@ -1015,15 +1022,19 @@ function mfcs_request_statistics_render_chart(&$options) {
     $increment_value = ceil($highest / $increment_split);
   }
 
-  $row_increment_y = 30;
+  $row_increment_y = 25;
 
   $row_padding_x = 0;
-  $row_padding_y = 10;
+  $row_padding_y = 7;
 
   $options['chart_width'] = $options['line_start_x'] + (($increment_width + $row_padding_x) * ($increment_split + 1));
   $options['chart_height'] = $total_rows * ($row_increment_y + $row_padding_y) + 60;
 
-  $text_x_x_offset = ($options['chart_width'] / 2);
+  // add additional pixels to the width to reduce occurances of truncated numbers.
+  $unpadded_width = $options['chart_width'];
+  $options['chart_width'] += 12;
+
+  $text_x_x_offset = ($unpadded_width / 2);
   $text_x_y_offset = $options['line_start_y'] + (($row_increment_y + $row_padding_y) * $total_rows) + 30;
 
 
@@ -1065,7 +1076,7 @@ function mfcs_request_statistics_render_chart(&$options) {
   $x1 = $options['line_start_x'];
   $y1 = $options['line_start_y'] + $row_padding_y;
   $y2 = $y1 + 10;
-  $bar_height = 20;
+  $bar_height = 16;
 
   foreach ($options['rows'] as $row) {
     $bar_width = ($row['total'] * $increment_width) / $increment_value;
