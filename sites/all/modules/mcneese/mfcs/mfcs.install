@@ -332,7 +332,7 @@ function mfcs_schema() {
         'not null' => TRUE,
       ),
     ),
-    'primary key' => array('request_id', 'reviewer_classification'),
+    'primary key' => array('request_id', 'classification'),
     'foreign keys' => array(
       'request_id' => array(
         'table' => 'mfcs_requests',
