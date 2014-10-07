@@ -90,7 +90,7 @@ function mfcs_request_review_0_page($form, &$form_state, $page_number = 0) {
 
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
-  $items = mfcs_request_load_listing(NULL, FALSE, $page_number * $rows_per_page, $rows_per_page, $sorting, TRUE);
+  $items = mfcs_request_load_listing(NULL, FALSE, $page_number * $rows_per_page, $rows_per_page, $sorting, MFCS_REVIEW_RESTRICTION_REVIEW);
 
   $rows = array();
   $total_results = count($items);

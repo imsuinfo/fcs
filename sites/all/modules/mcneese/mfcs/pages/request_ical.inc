@@ -62,7 +62,7 @@ function mfcs_request_ical_year_0_page($year = NULL) {
 
   $extra_fields = mfcs_request_ical_generate_extra_fields();
 
-  $results = mfcs_request_load_listing($search, FALSE, 0, 0, $sorting, NULL, $extra_fields);
+  $results = mfcs_request_load_listing($search, FALSE, 0, 0, $sorting, MFCS_REVIEW_RESTRICTION_NONE, $extra_fields);
 
   $ical = FALSE;
   if ($results !== FALSE) {
@@ -207,7 +207,7 @@ function mfcs_request_ical_month_0_page($year = NULL, $month = NULL) {
 
   $extra_fields = mfcs_request_ical_generate_extra_fields();
 
-  $results = mfcs_request_load_listing($search, FALSE, 0, 0, $sorting, NULL, $extra_fields);
+  $results = mfcs_request_load_listing($search, FALSE, 0, 0, $sorting, MFCS_REVIEW_RESTRICTION_NONE, $extra_fields);
 
   $ical = FALSE;
   if ($results !== FALSE) {
@@ -330,7 +330,7 @@ function mfcs_request_ical_day_0_page($year = NULL, $month = NULL, $day = NULL) 
 
   $extra_fields = mfcs_request_ical_generate_extra_fields();
 
-  $results = mfcs_request_load_listing($search, FALSE, 0, 0, $sorting, NULL, $extra_fields);
+  $results = mfcs_request_load_listing($search, FALSE, 0, 0, $sorting, MFCS_REVIEW_RESTRICTION_NONE, $extra_fields);
 
   $ical = FALSE;
   if ($results !== FALSE) {

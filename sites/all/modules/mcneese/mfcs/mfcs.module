@@ -235,6 +235,13 @@ define('MFCS_INCLUDE_REQUEST_CREATE', 12);
 define('MFCS_INCLUDE_REQUEST_VIEW', 13);
 define('MFCS_INCLUDE_TESTING', 14);
 
+/**
+ * Defines review restrictions.
+ */
+define('MFCS_REVIEW_RESTRICTION_NONE', 0);
+define('MFCS_REVIEW_RESTRICTION_VIEW', 1);
+define('MFCS_REVIEW_RESTRICTION_REVIEW', 2);
+
 
 
 /**
@@ -760,7 +767,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
     }
     elseif ($reviewer) {
       // due to its complexity, the database calling function for reviewer access will be used.
-      $review_access = mfcs_page_request_reviewer_access($user, $request_id, NULL);
+      $review_access = mfcs_page_request_reviewer_access($user, $request_id, MFCS_REVIEW_RESTRICTION_NONE);
 
       if (is_array($review_access) && array_key_exists($request_id, $review_access)) {
         $access[$request_id] = $review_access[$request_id];
@@ -791,7 +798,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
     }
 
     // due to its complexity, the database calling function for reviewer access will be used.
-    $review_access = mfcs_page_request_reviewer_access($user, $request_id, TRUE);
+    $review_access = mfcs_page_request_reviewer_access($user, $request_id, MFCS_REVIEW_RESTRICTION_REVIEW);
 
     if (is_array($review_access) && array_key_exists($request_id, $review_access)) {
       $access[$request_id] = $review_access[$request_id];
@@ -820,7 +827,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
     }
     elseif ($reviewer) {
       // due to its complexity, the database calling function for reviewer access will be used.
-      $review_access = mfcs_page_request_reviewer_access($user, $request_id, NULL);
+      $review_access = mfcs_page_request_reviewer_access($user, $request_id, MFCS_REVIEW_RESTRICTION_NONE);
 
       if (is_array($review_access) && array_key_exists($request_id, $review_access)) {
         $access[$request_id] = $review_access[$request_id];
@@ -964,10 +971,8 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
  *   This can be an array of request ids.
  *   Using multiple ids can improve performance instead of doing a check
  *   against each individual request id.
- * @param null|bool $review_restrictions
- *   When NULL, no review restrictions are applied.
- *   When FALSE, review view restrictions are applied.
- *   When TRUE, review edit restrictions are applied.
+ * @param int $review_restrictions
+ *   The review restrictions to use.
  *
  * @return bool|array
  *   An array of access grants by access id, FALSE otherwise.
@@ -985,8 +990,8 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
     }
   }
 
-  if (!is_null($review_restrictions) && !is_bool($review_restrictions)) {
-    cf_error::invalid_bool('review_restrictions');
+  if (!cf_is_integer($review_restrictions)) {
+    cf_error::invalid_integer('review_restrictions');
     return FALSE;
   }
 
@@ -1069,7 +1074,7 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
 
     $or = null;
 
-    if ($review_restrictions === TRUE) {
+    if ($review_restrictions == MFCS_REVIEW_RESTRICTION_REVIEW) {
       if (is_null($or)) {
         $or = db_or();
       }
@@ -1154,7 +1159,7 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
         */
       }
     }
-    elseif ($review_restrictions === FALSE) {
+    elseif ($review_restrictions == MFCS_REVIEW_RESTRICTION_VIEW) {
       if (is_null($or)) {
         $or = db_or();
       }
@@ -4737,10 +4742,8 @@ function mfcs_display_room_unavailable_message() {
  *   If -1 is provided, then this will become a count query instead of a listing.
  * @param array $sorting
  *   (optional) Table sort options.
- * @param null|bool $review_restrictions
- *   (optional) When NULL, no review restrictions are applied.
- *   When FALSE, review view restrictions are applied.
- *   When TRUE, review edit restrictions are applied.
+ * @param int $review_restrictions
+ *   (optional) The review restrictions to use.
  * @param array $extra_fields
  *   (optional) An array of extra fields that should be loaded.
  *   The array will have a key of the table name and a value of an array.
@@ -4750,7 +4753,7 @@ function mfcs_display_room_unavailable_message() {
  * @return array|FALSE
  *   An array of all items found or FALSE on error.
  */
-function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 0, $limit = 20, $sorting = array(), $review_restrictions = NULL, $extra_fields = array()) {
+function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 0, $limit = 20, $sorting = array(), $review_restrictions = MFCS_REVIEW_RESTRICTION_NONE, $extra_fields = array()) {
   if (!is_null($search) && !is_string($search) && !is_array($search)) {
     cf_error::invalid_string('search');
     return FALSE;
@@ -4780,8 +4783,8 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
     return FALSE;
   }
 
-  if (!is_null($review_restrictions) && !is_bool($review_restrictions)) {
-    cf_error::invalid_bool('review_restrictions');
+  if (!cf_is_integer($review_restrictions)) {
+    cf_error::invalid_integer('review_restrictions');
     return FALSE;
   }
 
@@ -4861,7 +4864,7 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
     MFCS_REVIEW_DECISION_DENY,
   );
 
-  if (is_null($review_restrictions)) {
+  if ($review_restrictions == MFCS_REVIEW_RESTRICTION_NONE) {
     $reviewer_classifications = array();
     $reviewer_steps = array();
     $reviewer_settings = mfcs_get_reviewers(array('mr.user_id' => $user->uid));
@@ -4897,8 +4900,8 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
     $already_joined['mfcs_field_top_location'] = 'mftl';
     $already_joined['mfcs_field_top_room'] = 'mftr';
 
-    // request step is only required when review_restrictions are non-null.
-    if (!is_null($review_restrictions)) {
+    // request step is only required when review_restrictions are used.
+    if ($review_restrictions != MFCS_REVIEW_RESTRICTION_NONE) {
       $query->innerJoin('mfcs_field_top_step', 'mftsp', 'mct.request_id = mftsp.request_id AND mct.step = mftsp.revision AND mftsp.delta = 0');
 
       $already_joined['mfcs_field_top_step'] = 'mftsp';
@@ -4977,7 +4980,7 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
 
       $query->addField('mfts', 'value', 'status');
 
-      if (!is_null($review_restrictions)) {
+      if ($review_restrictions != MFCS_REVIEW_RESTRICTION_NONE) {
         $query->addField('mftsp', 'value', 'step');
       }
     }
@@ -4995,7 +4998,7 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
 
     $already_added['status'] = 'mfts.value';
 
-    if (!is_null($review_restrictions)) {
+    if ($review_restrictions != MFCS_REVIEW_RESTRICTION_NONE) {
       $already_added['step'] = 'mftsp.value';
     }
 
@@ -5064,7 +5067,7 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
 
       $or = NULL;
 
-      if ($review_restrictions === TRUE) {
+      if ($review_restrictions == MFCS_REVIEW_RESTRICTION_REVIEW) {
         if (is_null($or)) {
           $or = db_or();
         }
@@ -5101,7 +5104,7 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
           $or->condition($and);
         }
       }
-      elseif ($review_restrictions === FALSE) {
+      elseif ($review_restrictions == MFCS_REVIEW_RESTRICTION_VIEW) {
         if (!$manager) {
           if (is_null($or)) {
             $or = db_or();
@@ -5127,7 +5130,7 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
       }
 
       // always show accepted requests when there are no restrictions.
-      if (is_null($review_restrictions)) {
+      if ($review_restrictions == MFCS_REVIEW_RESTRICTION_NONE) {
         // if there are no conditions, then don't add any!
         if (!is_null($or)) {
           $and = db_and();
@@ -5143,7 +5146,7 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
     }
     elseif ($requester) {
       // always show accepted requests when there are no restrictions.
-      if (is_null($review_restrictions)) {
+      if ($review_restrictions == MFCS_REVIEW_RESTRICTION_NONE) {
         $and = db_and();
         $and->condition('mfts.value', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
 

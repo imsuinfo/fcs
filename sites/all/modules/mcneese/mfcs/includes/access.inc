@@ -372,7 +372,7 @@ function mfcs_page_request_access_operation_view(&$request_ids, &$processed, &$a
       return TRUE;
     }
 
-    $review_access = mfcs_page_request_reviewer_access($user, $request_ids, NULL);
+    $review_access = mfcs_page_request_reviewer_access($user, $request_ids, MFCS_REVIEW_RESTRICTION_NONE);
 
     if (is_array($review_access)) {
       foreach ($request_ids as $id) {
@@ -456,7 +456,7 @@ function mfcs_page_request_access_operation_review(&$request_ids, &$processed, &
       return TRUE;
     }
 
-    $review_access = mfcs_page_request_reviewer_access($user, $request_ids, TRUE);
+    $review_access = mfcs_page_request_reviewer_access($user, $request_ids, MFCS_REVIEW_RESTRICTION_REVIEW);
 
     if (is_array($review_access)) {
       foreach ($request_ids as $id) {
@@ -555,7 +555,7 @@ function mfcs_page_request_access_operation_log(&$request_ids, &$processed, &$ac
       return TRUE;
     }
 
-    $review_access = mfcs_page_request_reviewer_access($user, $request_ids, NULL);
+    $review_access = mfcs_page_request_reviewer_access($user, $request_ids, MFCS_REVIEW_RESTRICTION_NONE);
 
     if (is_array($review_access)) {
       foreach ($request_ids as $id) {
