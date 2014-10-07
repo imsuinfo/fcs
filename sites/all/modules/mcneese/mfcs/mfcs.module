@@ -4864,7 +4864,7 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
     MFCS_REVIEW_DECISION_DENY,
   );
 
-  if ($review_restrictions == MFCS_REVIEW_RESTRICTION_NONE) {
+  if ($review_restrictions != MFCS_REVIEW_RESTRICTION_NONE) {
     $reviewer_classifications = array();
     $reviewer_steps = array();
     $reviewer_settings = mfcs_get_reviewers(array('mr.user_id' => $user->uid));
