@@ -1271,6 +1271,12 @@ function mfcs_install() {
   db_query('ALTER TABLE {mfcs_log_emails} ALTER COLUMN headers SET STORAGE EXTENDED');
   db_query('ALTER TABLE {mfcs_log_emails} ALTER COLUMN body SET STORAGE EXTENDED');
 
+  db_query('CREATE VIEW {mfcs_view_dates_asc_distinct} AS SELECT DISTINCT ON (request_id) * FROM {mfcs_view_dates_asc}');
+  db_query('CREATE VIEW {mfcs_view_dates_desc_distinct} AS SELECT DISTINCT ON (request_id) * FROM {mfcs_view_dates_desc}');
+
+  db_query('CREATE VIEW {mfcs_view_dates_asc} AS' . $view_query . ' ORDER BY mfdd.value ASC, mfdts.value ASC');
+  db_query('CREATE VIEW {mfcs_view_dates_desc} AS' . $view_query . ' ORDER BY mfdd.value DESC, mfdts.value DESC');
+
 
   // create a views to simplify time based sorting.
   $view_query = ' SELECT mcd.request_id AS request_id, mfdd.delta AS delta, mfdd.value AS date, mfdd.value_month AS value_month, mfdd.value_day AS value_day, mfdts.value AS time_start, mfdtsp.value AS time_stop, mfdc.value AS category';
@@ -1279,12 +1285,6 @@ function mfcs_install() {
   $view_query .= ' INNER JOIN {mfcs_field_dates_time_start} mfdts ON mcd.request_id = mfdts.request_id AND mcd.time_start = mfdts.revision AND mfdd.delta = mfdts.delta';
   $view_query .= ' INNER JOIN {mfcs_field_dates_time_stop} mfdtsp ON mcd.request_id = mfdtsp.request_id AND mcd.time_stop = mfdtsp.revision AND mfdd.delta = mfdtsp.delta';
   $view_query .= ' INNER JOIN {mfcs_field_dates_category} mfdc ON mcd.request_id = mfdc.request_id AND mcd.category = mfdc.revision AND mfdd.delta = mfdc.delta';
-
-  db_query('CREATE VIEW {mfcs_view_dates_asc} AS' . $view_query . ' ORDER BY mfdd.value ASC, mfdts.value ASC');
-  db_query('CREATE VIEW {mfcs_view_dates_desc} AS' . $view_query . ' ORDER BY mfdd.value DESC, mfdts.value DESC');
-
-  db_query('CREATE VIEW {mfcs_view_dates_asc_distinct} AS SELECT DISTINCT ON (request_id) * FROM {mfcs_view_dates_asc}');
-  db_query('CREATE VIEW {mfcs_view_dates_desc_distinct} AS SELECT DISTINCT ON (request_id) * FROM {mfcs_view_dates_desc}');
 
 
   // assign the new mail system as default.
@@ -1320,12 +1320,6 @@ function mfcs_uninstall() {
 
   $structure = mfcs_table_install_structure();
 
-  db_query('DROP VIEW {mfcs_view_dates_asc}');
-  db_query('DROP VIEW {mfcs_view_dates_desc}');
-
-  db_query('DROP VIEW {mfcs_view_dates_asc_distinct}');
-  db_query('DROP VIEW {mfcs_view_dates_desc_distinct}');
-
   db_query('ALTER TABLE {mfcs_request_revisions} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
   db_query('ALTER TABLE {mfcs_request_revisions} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
   db_query('ALTER TABLE {mfcs_reviewers} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
@@ -1338,6 +1332,12 @@ function mfcs_uninstall() {
   db_query('ALTER TABLE {mfcs_banner_event_roles_to_users} DROP CONSTRAINT IF EXISTS ' . $key6_foreign);
   db_query('ALTER TABLE {mfcs_request_reminders} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
   db_query('ALTER TABLE {mfcs_review_classifications} DROP CONSTRAINT IF EXISTS ' . $keyR_foreign);
+
+  db_query('DROP VIEW {mfcs_view_dates_asc}');
+  db_query('DROP VIEW {mfcs_view_dates_desc}');
+
+  db_query('DROP VIEW {mfcs_view_dates_asc_distinct}');
+  db_query('DROP VIEW {mfcs_view_dates_desc_distinct}');
 
   foreach ($structure as $structure_name => &$structure_array) {
     $table_name = 'mfcs_current_' . $structure_name;
