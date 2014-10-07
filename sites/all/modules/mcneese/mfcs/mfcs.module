@@ -4985,6 +4985,9 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
       }
     }
 
+    $already_added['status'] = 'mer.status';
+    $already_added['step'] = 'mer.step';
+
     $already_added['title'] = 'mfit.value';
     $already_added['type'] = 'mfitp.value';
 
