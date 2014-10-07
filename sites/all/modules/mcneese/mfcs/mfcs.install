@@ -1280,8 +1280,8 @@ function mfcs_install() {
   $view_query .= ' INNER JOIN {mfcs_field_dates_time_stop} mfdtsp ON mcd.request_id = mfdtsp.request_id AND mcd.time_stop = mfdtsp.revision AND mfdd.delta = mfdtsp.delta';
   $view_query .= ' INNER JOIN {mfcs_field_dates_category} mfdc ON mcd.request_id = mfdc.request_id AND mcd.category = mfdc.revision AND mfdd.delta = mfdc.delta';
 
-  db_query('CREATE VIEW {mfcs_view_dates_asc} AS' . $views_query . ' ORDER BY mfdd.value ASC, mfdts.value ASC');
-  db_query('CREATE VIEW {mfcs_view_dates_desc} AS' . $views_query . ' ORDER BY mfdd.value DESC, mfdts.value DESC');
+  db_query('CREATE VIEW {mfcs_view_dates_asc} AS' . $view_query . ' ORDER BY mfdd.value ASC, mfdts.value ASC');
+  db_query('CREATE VIEW {mfcs_view_dates_desc} AS' . $view_query . ' ORDER BY mfdd.value DESC, mfdts.value DESC');
 
   db_query('CREATE VIEW {mfcs_view_dates_asc_distinct} AS SELECT DISTINCT ON (request_id) * FROM {mfcs_view_dates_asc}');
   db_query('CREATE VIEW {mfcs_view_dates_desc_distinct} AS SELECT DISTINCT ON (request_id) * FROM {mfcs_view_dates_desc}');
