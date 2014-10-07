@@ -1117,46 +1117,34 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
         $or->condition($and);
 
         // special case reviewer access: insurance provided
-        /*
-        $has_insurance_query = db_select('mfcs_current_insurance', 'c_mci_1');
-        $has_insurance_query->leftJoin('mfcs_field_insurance_contractor', 'mfic', 'c_mci_1.request_id = mfic.request_id AND c_mci_1.contractor = mfic.revision AND mfic.delta = 0');
-        $has_insurance_query->leftJoin('mfcs_field_insurance_unaffiliated', 'mfiu', 'c_mci_1.request_id = mfiu.request_id AND c_mci_1.unaffiliated = mfiu.revision AND mfiu.delta = 0');
-        $has_insurance_query->leftJoin('mfcs_field_insurance_provided', 'mfip', 'c_mci_1.request_id = mfip.request_id AND c_mci_1.provided = mfip.revision AND mfip.delta = 0');
+        if (array_key_exists(MFCS_REVIEW_CLASSIFICATION_PURCHASING, $reviewer_classifications)) {
+          $has_insurance_query = db_select('mfcs_current_insurance', 'mci_ip');
+          $has_insurance_query->leftJoin('mfcs_field_insurance_contractor', 'mfic', 'mci_ip.request_id = mfic.request_id AND mci_ip.contractor = mfic.revision AND mfic.delta = 0');
+          $has_insurance_query->leftJoin('mfcs_field_insurance_unaffiliated', 'mfiu', 'mci_ip.request_id = mfiu.request_id AND mci_ip.unaffiliated = mfiu.revision AND mfiu.delta = 0');
+          $has_insurance_query->leftJoin('mfcs_field_insurance_provided', 'mfip', 'mci_ip.request_id = mfip.request_id AND mci_ip.provided = mfip.revision AND mfip.delta = 0');
 
-        // $query->countQuery() does not appear to be functioning as expected, so manually count.
-        $has_insurance_query->addExpression('count(c_mci_1.request_id)');
+          // $query->countQuery() does not appear to be functioning as expected, so manually count.
+          $has_insurance_query->addExpression('count(mci_ip.request_id)');
 
-        $has_insurance_query->where('mer.id = c_mci_1.request_id');
+          $has_insurance_query->where('mer.id = mci_ip.request_id');
 
-        $nand = db_and();
-        $nand->not();
-        $nand->condition('mfip.value', 1);
-        $has_insurance_query->condition($nand);
+          $nand = db_and();
+          $nand->not();
+          $nand->condition('mfip.value', 1);
+          $has_insurance_query->condition($nand);
 
-        $another_or = db_or();
-        $another_or->condition('mfic.value', 1);
-        $another_or->condition('mfiu.value', 1);
-        $has_insurance_query->condition($another_or);
+          $another_or = db_or();
+          $another_or->condition('mfic.value', 1);
+          $another_or->condition('mfiu.value', 1);
+          $has_insurance_query->condition($another_or);
 
-        $can_review_query = db_select('mfcs_reviewers', 'c_mr_3');
+          $and = db_and();
+          $and->condition('mfts.value', $show_status_insurance, 'IN');
+          $and->condition('mftsp.value', $show_step_insurance, 'IN');
+          $and->condition(0, $has_insurance_query, 'NOT IN');
 
-        $can_review_query->addField('c_mr_3', 'user_id', 'user_id');
-
-        $can_review_query->where('c_mr_3.request_classification = mfrcc.value');
-        $can_review_query->condition('c_mr_3.user_id', $user->uid);
-        $can_review_query->condition('c_mr_3.review_step', $show_step_reviewer, 'IN');
-        $can_review_query->condition('c_mr_3.reviewer_classification', MFCS_REVIEW_CLASSIFICATION_PURCHASING);
-        $can_review_query->condition('c_mr_3.disabled', 0);
-        $can_review_query->distinct();
-
-        $and = db_and();
-        $and->condition('mfts.value', $show_status_insurance, 'IN');
-        $and->condition('mftsp.value', $show_step_insurance, 'IN');
-        $and->condition($user->uid, $can_review_query, 'IN');
-        $and->condition(0, $has_insurance_query, 'NOT IN');
-
-        $or->condition($and);
-        */
+          $or->condition($and);
+        }
       }
     }
     elseif ($review_restrictions == MFCS_REVIEW_RESTRICTION_VIEW) {
