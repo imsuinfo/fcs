@@ -57,6 +57,7 @@ function mfcs_workflow_set_step($request_id, $step, $user = NULL) {
 
   $mfcs_requests = array(
     'updated' => $instance,
+    'step' => $step,
   );
 
   $request_revision = mfcs_load_request_revision_number($request_id);
@@ -203,6 +204,7 @@ function mfcs_workflow_set_status($request_id, $status, $user = NULL, $extra = a
 
   $mfcs_requests = array(
     'updated' => $instance,
+    'status' => $status,
   );
 
   $request_revision = mfcs_load_request_revision_number($request_id);
@@ -379,6 +381,8 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message, $ext
 
   $mfcs_requests = array(
     'updated' => $instance,
+    'status' => $status,
+    'step' => $step,
   );
 
   $request_revision = mfcs_load_request_revision_number($request_id);

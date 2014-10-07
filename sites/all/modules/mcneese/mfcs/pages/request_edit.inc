@@ -555,6 +555,8 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
 
   $mfcs_requests = array(
     'updated' => $instance,
+    'status' =>  $status,
+    'step' => $step,
   );
 
   $request_revision = mfcs_load_request_revision_number($request_id);

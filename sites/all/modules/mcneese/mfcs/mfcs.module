@@ -1046,11 +1046,6 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
   try {
     $query = db_select('mfcs_requests', 'mer');
 
-    $query->innerJoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
-
-    $query->innerJoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
-    $query->innerJoin('mfcs_field_top_step', 'mftsp', 'mct.request_id = mftsp.request_id AND mct.step = mftsp.revision AND mftsp.delta = 0');
-
     $query->innerJoin('mfcs_current_request_coordinator', 'mcrc', 'mer.id = mcrc.request_id');
     $query->innerJoin('mfcs_field_request_coordinator_classification', 'mfrcc', 'mcrc.request_id = mfrcc.request_id AND mcrc.classification = mfrcc.revision AND mfrcc.delta = 0');
 
@@ -1061,7 +1056,7 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
 
     $query->condition('mer.id', array($request_ids), 'IN');
 
-    $query->condition('mfts.value', MFCS_REQUEST_STATUS_DELETED, '<>');
+    $query->condition('mer.status', MFCS_REQUEST_STATUS_DELETED, '<>');
 
     $or = null;
 
@@ -1073,13 +1068,13 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
       // process venue coordinator access.
       $already_venue_coordinated_query = db_select('mfcs_reviewed', 'mrd_vc');
       $already_venue_coordinated_query->addField('mrd_vc', 'request_id', 'request_id');
-      $already_venue_coordinated_query->where('mrd_vc.request_id = mftsp.request_id');
+      $already_venue_coordinated_query->where('mrd_vc.request_id = mer.id');
       $already_venue_coordinated_query->condition('mrd_vc.classification', MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR);
 
       $and = db_and();
-      $and->condition('mfts.value', $show_status_venue_coordinator, 'IN');
-      $and->condition('mftsp.value', $show_step_venue_coordinator, 'IN');
-      $and->condition('mftsp.request_id', $already_venue_coordinated_query, 'NOT IN');
+      $and->condition('mer.status', $show_status_venue_coordinator, 'IN');
+      $and->condition('mer.step', $show_step_venue_coordinator, 'IN');
+      $and->condition('mer.id', $already_venue_coordinated_query, 'NOT IN');
       $and->condition('mfvcui.value', $user->uid);
 
       $or->condition($and);
@@ -1087,7 +1082,7 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
       // process review access.
       if (empty($reviewer_settings['classifications'])) {
         // if the 'reviewer' has no reviewer classifications, then they cannot review, remove all requests associated with reviewer steps.
-        $and->condition('mftsp.value', $show_step_reviewer, 'NOT IN');
+        $and->condition('mer.step', $show_step_reviewer, 'NOT IN');
 
         $or->condition($and);
       }
@@ -1095,15 +1090,15 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
         $already_reviewed_query = db_select('mfcs_reviewers', 'mr_r');
         $already_reviewed_query->innerJoin('mfcs_reviewed', 'mrd_r', 'mr_r.reviewer_classification = mrd_r.classification');
         $already_reviewed_query->addField('mrd_r', 'request_id', 'request_id');
-        $already_reviewed_query->where('mr_r.request_classification = mfrcc.value AND mr_r.review_step = mftsp.value');
+        $already_reviewed_query->where('mr_r.request_classification = mfrcc.value AND mr_r.review_step = mer.step');
         $already_reviewed_query->condition('mr_r.user_id', $user->uid);
         $already_reviewed_query->condition('mr_r.disabled', 0);
 
         $and = db_and();
-        $and->condition('mfts.value', $show_status_reviewer, 'IN');
-        $and->condition('mftsp.value', $show_step_reviewer, 'IN');
-        $and->condition('mftsp.value', $reviewer_settings['steps'], 'IN');
-        $and->condition('mftsp.request_id', $already_reviewed_query, 'NOT IN');
+        $and->condition('mer.status', $show_status_reviewer, 'IN');
+        $and->condition('mer.step', $show_step_reviewer, 'IN');
+        $and->condition('mer.step', $reviewer_settings['steps'], 'IN');
+        $and->condition('mer.id', $already_reviewed_query, 'NOT IN');
 
         $or->condition($and);
 
@@ -1130,8 +1125,8 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
           $has_insurance_query->condition($another_or);
 
           $and = db_and();
-          $and->condition('mfts.value', $show_status_insurance, 'IN');
-          $and->condition('mftsp.value', $show_step_insurance, 'IN');
+          $and->condition('mer.status', $show_status_insurance, 'IN');
+          $and->condition('mer.step', $show_step_insurance, 'IN');
           $and->condition(0, $has_insurance_query, 'NOT IN');
 
           $or->condition($and);
@@ -1144,7 +1139,7 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
       }
 
       // always show accepted requests.
-      $or->condition('mfts.value', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
+      $or->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
 
       // process venue coordinator access.
       $or->condition('mfvcui.value', $user->uid);
@@ -1152,7 +1147,7 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
       // process review access.
       if (!empty($reviewer_settings['steps'])) {
         $and = db_and();
-        $and->condition('mftsp.value', $reviewer_settings['steps'], 'IN');
+        $and->condition('mer.step', $reviewer_settings['steps'], 'IN');
 
         $or->condition($and);
       }
@@ -1164,8 +1159,8 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
 
       // always show completed and accepted requests when there are no restrictions.
       $and = db_and();
-      $and->condition('mfts.value', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
-      $and->condition('mftsp.value', MFCS_REVIEW_STEP_COMPLETED);
+      $and->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
+      $and->condition('mer.step', MFCS_REVIEW_STEP_COMPLETED);
       $or->condition($and);
 
       // process venue coordinator access.
@@ -1174,8 +1169,8 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
       // process reviewer access.
       if (!empty($reviewer_settings['steps'])) {
         $and = db_and();
-        $and->condition('mfts.value', MFCS_REQUEST_STATUS_LOCKED);
-        $and->condition('mftsp.value', $show_step_reviewer, 'IN');
+        $and->condition('mer.status', MFCS_REQUEST_STATUS_LOCKED);
+        $and->condition('mer.step', $show_step_reviewer, 'IN');
         $or->condition($and);
       }
     }
@@ -2759,15 +2754,12 @@ function mfcs_autocancel_old_requests_cron() {
   try {
     $query = db_select('mfcs_requests', 'mer');
 
-    $query->innerJoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
-    $query->innerJoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
-
     $query->innerJoin('mfcs_current_dates', 'mcd', 'mer.id = mcd.request_id');
     $query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mcd.request_id = mfdd.request_id AND mcd.date = mfdd.revision');
 
     $query->addField('mer', 'id', 'id');
 
-    $query->condition('mfts.value', $status, 'IN');
+    $query->condition('mer.status', $status, 'IN');
     $query->condition('mfdd.value', $date, '<');
 
     $query->distinct();
@@ -4620,15 +4612,13 @@ function mfcs_check_room_availability($room, $date, $time_start, $time_stop, $re
     $query->innerJoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
     $query->innerJoin('mfcs_current_dates', 'mcd', 'mer.id = mcd.request_id AND mct.request_id = mcd.request_id');
 
-    $query->innerJoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mcd.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
-    $query->innerJoin('mfcs_field_top_step', 'mftsp', 'mct.request_id = mftsp.request_id AND mcd.request_id = mftsp.request_id AND mct.step = mftsp.revision AND mftsp.delta = 0');
     $query->innerJoin('mfcs_field_top_room', 'mftr', 'mct.request_id = mftr.request_id AND mcd.request_id = mftr.request_id AND mct.room = mftr.revision AND mftr.delta = 0');
 
     $query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mct.request_id = mfdd.request_id AND mcd.request_id = mfdd.request_id AND mcd.date = mfdd.revision');
 
     $query->addField('mer', 'id', 'request_id');
-    $query->addField('mfts', 'value', 'status');
-    $query->addField('mftsp', 'value', 'step');
+    $query->addField('mer', 'status', 'status');
+    $query->addField('mer', 'step', 'step');
     $query->addField('mfdd', 'value', 'date');
     $query->addField('mcd', 'date', 'date_revision');
     $query->addField('mcd', 'time_start', 'time_start_revision');
@@ -4641,7 +4631,7 @@ function mfcs_check_room_availability($room, $date, $time_start, $time_stop, $re
       MFCS_REQUEST_STATUS_CLOSED_ACCEPTED,
     );
 
-    $query->condition('mfts.value', $statuses, 'IN');
+    $query->condition('mer.status', $statuses, 'IN');
     $query->condition('mftr.value', $room);
     $query->condition('mfdd.value', $date, 'IN');
 
@@ -4911,20 +4901,11 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
     $already_joined['mfcs_current_top'] = 'mct';
     $already_joined['mfcs_current_information'] = 'mci';
 
-    $query->innerJoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
     $query->innerJoin('mfcs_field_top_location', 'mftl', 'mct.request_id = mftl.request_id AND mct.location = mftl.revision AND mftl.delta = 0');
     $query->innerJoin('mfcs_field_top_room', 'mftr', 'mct.request_id = mftr.request_id AND mct.room = mftr.revision AND mftr.delta = 0');
 
-    $already_joined['mfcs_field_top_status'] = 'mfts';
     $already_joined['mfcs_field_top_location'] = 'mftl';
     $already_joined['mfcs_field_top_room'] = 'mftr';
-
-    // request step is only required when review_restrictions are used.
-    if ($review_restrictions != MFCS_REVIEW_RESTRICTION_NONE) {
-      $query->innerJoin('mfcs_field_top_step', 'mftsp', 'mct.request_id = mftsp.request_id AND mct.step = mftsp.revision AND mftsp.delta = 0');
-
-      $already_joined['mfcs_field_top_step'] = 'mftsp';
-    }
 
     $query->innerJoin('mfcs_banner_rooms', 'mbr', 'mftr.value = mbr.id');
     $query->innerJoin('mfcs_banner_buildings', 'mbb', 'mbr.building = mbb.id');
@@ -4997,10 +4978,10 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
       $query->addField('mbb', 'human_name', 'building_name');
       $query->addField('mbl', 'human_name', 'location_name');
 
-      $query->addField('mfts', 'value', 'status');
+      $query->addField('mer', 'status', 'status');
 
       if ($review_restrictions != MFCS_REVIEW_RESTRICTION_NONE) {
-        $query->addField('mftsp', 'value', 'step');
+        $query->addField('mer', 'step', 'step');
       }
     }
 
@@ -5014,12 +4995,6 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
     $already_added['room_name'] = 'mbr.human_name';
     $already_added['building_name'] = 'mbb.human_name';
     $already_added['location_name'] = 'mbl.human_name';
-
-    $already_added['status'] = 'mfts.value';
-
-    if ($review_restrictions != MFCS_REVIEW_RESTRICTION_NONE) {
-      $already_added['step'] = 'mftsp.value';
-    }
 
     // add custom fields to the select results as requested by the caller.
     if (!empty($extra_fields) && !$count) {
@@ -5094,13 +5069,13 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
         // process venue coordinator access.
         $already_venue_coordinated_query = db_select('mfcs_reviewed', 'mrd_vc');
         $already_venue_coordinated_query->addField('mrd_vc', 'request_id', 'request_id');
-        $already_venue_coordinated_query->where('mrd_vc.request_id = mftsp.request_id');
+        $already_venue_coordinated_query->where('mrd_vc.request_id = mer.id');
         $already_venue_coordinated_query->condition('mrd_vc.classification', MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR);
 
         $and = db_and();
-        $and->condition('mfts.value', $show_status_venue_coordinator, 'IN');
-        $and->condition('mftsp.value', $show_step_venue_coordinator, 'IN');
-        $and->condition('mftsp.request_id', $already_venue_coordinated_query, 'NOT IN');
+        $and->condition('mer.status', $show_status_venue_coordinator, 'IN');
+        $and->condition('mer.step', $show_step_venue_coordinator, 'IN');
+        $and->condition('mer.id', $already_venue_coordinated_query, 'NOT IN');
         $and->condition('mfvcui.value', $user->uid);
 
         $or->condition($and);
@@ -5110,15 +5085,15 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
           $already_reviewed_query = db_select('mfcs_reviewers', 'mr_r');
           $already_reviewed_query->innerJoin('mfcs_reviewed', 'mrd_r', 'mr_r.reviewer_classification = mrd_r.classification');
           $already_reviewed_query->addField('mrd_r', 'request_id', 'request_id');
-          $already_reviewed_query->where('mr_r.request_classification = mfrcc.value AND mr_r.review_step = mftsp.value');
+          $already_reviewed_query->where('mr_r.request_classification = mfrcc.value AND mr_r.review_step = mer.step');
           $already_reviewed_query->condition('mr_r.user_id', $user->uid);
           $already_reviewed_query->condition('mr_r.disabled', 0);
 
           $and = db_and();
-          $and->condition('mfts.value', $show_status_reviewer, 'IN');
-          $and->condition('mftsp.value', $show_step_reviewer, 'IN');
-          $and->condition('mftsp.value', $reviewer_settings['steps'], 'IN');
-          $and->condition('mftsp.request_id', $already_reviewed_query, 'NOT IN');
+          $and->condition('mer.status', $show_status_reviewer, 'IN');
+          $and->condition('mer.step', $show_step_reviewer, 'IN');
+          $and->condition('mer.step', $reviewer_settings['steps'], 'IN');
+          $and->condition('mer.id', $already_reviewed_query, 'NOT IN');
 
           $or->condition($and);
         }
@@ -5131,8 +5106,8 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
 
           // always show completed and accepted requests when there are no restrictions.
           $and = db_and();
-          $and->condition('mfts.value', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
-          $and->condition('mftsp.value', MFCS_REVIEW_STEP_COMPLETED);
+          $and->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
+          $and->condition('mer.step', MFCS_REVIEW_STEP_COMPLETED);
           $or->condition($and);
 
           // process venue coordinator access.
@@ -5141,8 +5116,8 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
           // process reviewer access.
           if (!empty($reviewer_settings['steps'])) {
             $and = db_and();
-            $and->condition('mfts.value', MFCS_REQUEST_STATUS_LOCKED);
-            $and->condition('mftsp.value', $show_step_reviewer, 'IN');
+            $and->condition('mer.status', MFCS_REQUEST_STATUS_LOCKED);
+            $and->condition('mer.step', $show_step_reviewer, 'IN');
             $or->condition($and);
           }
         }
@@ -5153,7 +5128,7 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
         // if there are no conditions, then don't add any!
         if (!is_null($or)) {
           $and = db_and();
-          $and->condition('mfts.value', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
+          $and->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
 
           $or->condition($and);
         }
@@ -5167,7 +5142,7 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
       // always show accepted requests when there are no restrictions.
       if ($review_restrictions == MFCS_REVIEW_RESTRICTION_NONE) {
         $and = db_and();
-        $and->condition('mfts.value', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
+        $and->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
 
         $or = db_or();
         $or->condition($and);
@@ -5185,7 +5160,7 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
     }
 
     // do not include deleted requests.
-    $query->condition('mfts.value', MFCS_REQUEST_STATUS_DELETED, '<>');
+    $query->condition('mer.status', MFCS_REQUEST_STATUS_DELETED, '<>');
 
     if (!is_null($search) && is_string($search)) {
       $or = db_or();
@@ -6232,9 +6207,6 @@ function mfcs_get_requests_not_providing_insurance($date_from = NULL, $date_to =
     $query->innerJoin('mfcs_current_insurance', 'mcie', 'mer.id = mci.request_id');
     $query->innerJoin('mfcs_current_request_coordinator', 'mcrc', 'mer.id = mcrc.request_id');
 
-    $query->innerJoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
-    $query->innerJoin('mfcs_field_top_step', 'mftsp', 'mct.request_id = mftsp.request_id AND mct.step = mftsp.revision AND mftsp.delta = 0');
-
     $query->innerJoin('mfcs_field_information_title', 'mfit', 'mci.request_id = mfit.request_id AND mci.title = mfit.revision AND mfit.delta = 0');
 
     $query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mcd.request_id = mfdd.request_id AND mcd.date = mfdd.revision');
@@ -6258,13 +6230,13 @@ function mfcs_get_requests_not_providing_insurance($date_from = NULL, $date_to =
       MFCS_REQUEST_STATUS_CLOSED_ACCEPTED,
     );
 
-    $query->condition('mfts.value', $allowed_status, 'IN');
+    $query->condition('mer.status', $allowed_status, 'IN');
 
     $allowed_steps = array(
       MFCS_REVIEW_STEP_COMPLETED,
     );
 
-    $query->condition('mftsp.value', $allowed_steps, 'IN');
+    $query->condition('mer.step', $allowed_steps, 'IN');
 
     $or = db_or();
     $or->condition('mfic.value', 1);

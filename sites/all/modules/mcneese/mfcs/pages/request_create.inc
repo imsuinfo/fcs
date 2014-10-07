@@ -505,6 +505,8 @@ function mfcs_request_create_0_form_submit($form, &$form_state) {
     'user_id' => (int) $user_data['user_id'],
     'created' => $instance,
     'updated' => $instance,
+    'status' =>  $form_state['values']['request']['status'][0],
+    'step' => $form_state['values']['request']['step'][0],
   );
 
   $mfcs_request_revisions = array(

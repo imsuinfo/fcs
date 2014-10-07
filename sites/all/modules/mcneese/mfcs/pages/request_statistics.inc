@@ -162,12 +162,9 @@ function mfcs_request_statistics_load_counts($start, $stop) {
   try {
     $query = db_select('mfcs_requests', 'mer');
 
-    $query->innerJoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
-    $query->innerJoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
-
     $query->addExpression('count(mer.id)');
 
-    $query->condition('mfts.value', MFCS_REQUEST_STATUS_DELETED, '<>');
+    $query->condition('mer.status', MFCS_REQUEST_STATUS_DELETED, '<>');
 
     // total
     $the_query = clone($query);
@@ -193,12 +190,9 @@ function mfcs_request_statistics_load_counts($start, $stop) {
 
     $query = db_select('mfcs_requests', 'mer');
 
-    $query->innerJoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
-    $query->innerJoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
-
     $query->addExpression('count(mer.id)');
 
-    $query->condition('mfts.value', MFCS_REQUEST_STATUS_DELETED, '<>');
+    $query->condition('mer.status', MFCS_REQUEST_STATUS_DELETED, '<>');
 
     if (!is_null($start)) {
       $query->condition('mer.created', $start, '>=');
@@ -207,37 +201,37 @@ function mfcs_request_statistics_load_counts($start, $stop) {
 
     // status (locked)
     $the_query = clone($query);
-    $the_query->condition('mfts.value', MFCS_REQUEST_STATUS_LOCKED);
+    $the_query->condition('mer.status', MFCS_REQUEST_STATUS_LOCKED);
     $counts['status']['locked'] = $the_query->execute()->fetchField();
 
     // status (unlocked)
     $the_query = clone($query);
-    $the_query->condition('mfts.value', MFCS_REQUEST_STATUS_UNLOCKED);
+    $the_query->condition('mer.status', MFCS_REQUEST_STATUS_UNLOCKED);
     $counts['status']['unlocked'] = $the_query->execute()->fetchField();
 
     // status (closed, accepted)
     $the_query = clone($query);
-    $the_query->condition('mfts.value', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
+    $the_query->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
     $counts['status']['accepted'] = $the_query->execute()->fetchField();
 
     // status (closed, denied)
     $the_query = clone($query);
-    $the_query->condition('mfts.value', MFCS_REQUEST_STATUS_CLOSED_DENIED);
+    $the_query->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_DENIED);
     $counts['status']['denied'] = $the_query->execute()->fetchField();
 
     // status (closed, unavailable)
     $the_query = clone($query);
-    $the_query->condition('mfts.value', MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE);
+    $the_query->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE);
     $counts['status']['unavailable'] = $the_query->execute()->fetchField();
 
     // status (closed, due to lock)
     $the_query = clone($query);
-    $the_query->condition('mfts.value', MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK);
+    $the_query->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK);
     $counts['status']['due_to_lock'] = $the_query->execute()->fetchField();
 
     // status (cancelled)
     $the_query = clone($query);
-    $the_query->condition('mfts.value', MFCS_REQUEST_STATUS_CANCELLED);
+    $the_query->condition('mer.status', MFCS_REQUEST_STATUS_CANCELLED);
     $counts['status']['cancelled'] = $the_query->execute()->fetchField();
 
 
@@ -254,13 +248,9 @@ function mfcs_request_statistics_load_counts($start, $stop) {
 
     $query = db_select('mfcs_requests', 'mer');
 
-    $query->innerJoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
-    $query->innerJoin('mfcs_field_top_step', 'mftsp', 'mct.request_id = mftsp.request_id AND mct.step = mftsp.revision AND mftsp.delta = 0');
-    $query->innerJoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
-
     $query->addExpression('count(mer.id)');
 
-    $query->condition('mfts.value', MFCS_REQUEST_STATUS_DELETED, '<>');
+    $query->condition('mer.status', MFCS_REQUEST_STATUS_DELETED, '<>');
 
     if (!is_null($start)) {
       $query->condition('mer.created', $start, '>=');
@@ -269,37 +259,37 @@ function mfcs_request_statistics_load_counts($start, $stop) {
 
     // step (changes required)
     $the_query = clone($query);
-    $the_query->condition('mftsp.value', MFCS_REVIEW_STEP_CHANGES_REQUIRED);
+    $the_query->condition('mer.step', MFCS_REVIEW_STEP_CHANGES_REQUIRED);
     $counts['step']['changes_required'] = $the_query->execute()->fetchField();
 
     // step (completed)
     $the_query = clone($query);
-    $the_query->condition('mftsp.value', MFCS_REVIEW_STEP_COMPLETED);
+    $the_query->condition('mer.step', MFCS_REVIEW_STEP_COMPLETED);
     $counts['step']['completed'] = $the_query->execute()->fetchField();
 
     // step (make decisions)
     $the_query = clone($query);
-    $the_query->condition('mftsp.value', MFCS_REVIEW_STEP_MAKE_DECISIONS);
+    $the_query->condition('mer.step', MFCS_REVIEW_STEP_MAKE_DECISIONS);
     $counts['step']['make_decisions'] = $the_query->execute()->fetchField();
 
     // step (release hold)
     $the_query = clone($query);
-    $the_query->condition('mftsp.value', MFCS_REVIEW_STEP_RELEASE_HOLD);
+    $the_query->condition('mer.step', MFCS_REVIEW_STEP_RELEASE_HOLD);
     $counts['step']['release_hold'] = $the_query->execute()->fetchField();
 
     // step (review)
     $the_query = clone($query);
-    $the_query->condition('mftsp.value', MFCS_REVIEW_STEP_REVIEW);
+    $the_query->condition('mer.step', MFCS_REVIEW_STEP_REVIEW);
     $counts['step']['review'] = $the_query->execute()->fetchField();
 
     // step (requirements)
     $the_query = clone($query);
-    $the_query->condition('mftsp.value', MFCS_REVIEW_STEP_REQUIREMENTS);
+    $the_query->condition('mer.step', MFCS_REVIEW_STEP_REQUIREMENTS);
     $counts['step']['requirements'] = $the_query->execute()->fetchField();
 
     // step (venue available)
     $the_query = clone($query);
-    $the_query->condition('mftsp.value', MFCS_REVIEW_STEP_VENUE_AVAILABLE);
+    $the_query->condition('mer.step', MFCS_REVIEW_STEP_VENUE_AVAILABLE);
     $counts['step']['venue_available'] = $the_query->execute()->fetchField();
 
 
@@ -313,15 +303,12 @@ function mfcs_request_statistics_load_counts($start, $stop) {
 
     $query = db_select('mfcs_requests', 'mer');
 
-    $query->innerJoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
-    $query->innerJoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
-
     $query->innerJoin('mfcs_current_request_coordinator', 'mcrc', 'mer.id = mcrc.request_id');
     $query->innerJoin('mfcs_field_request_coordinator_classification', 'mfrcc', 'mcrc.request_id = mfrcc.request_id AND mcrc.classification = mfrcc.revision AND mfrcc.delta = 0');
 
     $query->addExpression('count(mer.id)');
 
-    $query->condition('mfts.value', MFCS_REQUEST_STATUS_DELETED, '<>');
+    $query->condition('mer.status', MFCS_REQUEST_STATUS_DELETED, '<>');
 
     if (!is_null($start)) {
       $query->condition('mer.created', $start, '>=');
@@ -365,15 +352,13 @@ function mfcs_request_statistics_load_counts($start, $stop) {
     );
 
     $query = db_select('mfcs_requests', 'mer');
-    $query->innerJoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
-    $query->innerJoin('mfcs_field_top_status', 'mfts', 'mct.request_id = mfts.request_id AND mct.status = mfts.revision AND mfts.delta = 0');
 
     $query->innerJoin('mfcs_current_information', 'mci', 'mer.id = mci.request_id');
     $query->innerJoin('mfcs_field_information_type', 'mfit', 'mci.request_id = mfit.request_id AND mci.type = mfit.revision AND mfit.delta = 0');
 
     $query->addExpression('count(mer.id)');
 
-    $query->condition('mfts.value', MFCS_REQUEST_STATUS_DELETED, '<>');
+    $query->condition('mer.status', MFCS_REQUEST_STATUS_DELETED, '<>');
 
     if (!is_null($start)) {
       $query->condition('mer.created', $start, '>=');
