@@ -1408,11 +1408,15 @@ function mfcs_oracle_select($query, $arguments = array()) {
   }
 
   $results = array();
+  $options = array();
+  if (isset($arguments['options']) && is_array($arguments['options'])) {
+    $options = $arguments['options'];
+  }
 
   try {
     $conn = Database::getConnection('default', 'oracle');
 
-    $results = (array) $conn->oracleQuery($query, $arguments)->fetchAll();
+    $results = (array) $conn->oracleQuery($query, $arguments, $options)->fetchAll();
   } catch (Exception $ex) {
     cf_error::on_exception($ex);
 
