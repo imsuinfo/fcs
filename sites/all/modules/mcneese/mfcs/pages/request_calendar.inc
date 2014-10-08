@@ -90,6 +90,11 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
 
   $search = mfcs_miscellaneous_generate_requests_by_date_search($absolute_start, $absolute_stop);
 
+  $determined = mfcs_miscellaneous_determine_filters();
+  foreach ($determined['filters'] as $filter_key => $filter) {
+    $search[$filter_key] = $filter;
+  }
+
   $sorting = array(
     'order' => 'date',
     'sort' => 'ASC',
@@ -161,7 +166,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
 
   $markup = '';
   $title = '<h3>' . "Requests for " . date("F, Y", $month_start) . '</h3>';
-  $result = mfcs_build_calendar_month_markup($rows, $month_start, $month_stop, $absolute_start, $absolute_stop, $title, 'mfcs-calendar-0-month');
+  $result = mfcs_build_calendar_month_markup($rows, $month_start, $month_stop, $absolute_start, $absolute_stop, $title, 'mfcs-calendar-0-month', $determined);
   if ($result !== FALSE) {
     $markup .= $result;
   }
@@ -228,6 +233,11 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
   mfcs_add_canonical_headers('requests/calendar-0/day/' . $year . '/' . $month . '/' . $day);
 
   $search = mfcs_miscellaneous_generate_requests_by_date_search($day_start, $day_stop);
+
+  $determined = mfcs_miscellaneous_determine_filters();
+  foreach ($determined['filters'] as $filter_key => $filter) {
+    $search[$filter_key] = $filter;
+  }
 
   $sorting = array(
     'order' => 'date',
@@ -329,7 +339,8 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
 
   $markup = '';
   $title = '<h3>' . "Requests for " . date("F j, Y", $day_start) . '</h3>';
-  $result = mfcs_build_calendar_day_markup($rows, $day_start, $day_stop, $title, 'mfcs-calendar-0-day');
+
+  $result = mfcs_build_calendar_day_markup($rows, $day_start, $day_stop, $title, 'mfcs-calendar-0-day', $determined);
   if ($result !== FALSE) {
     $markup .= $result;
   }

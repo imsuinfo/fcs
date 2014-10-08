@@ -108,6 +108,8 @@ define('MFCS_REQUEST_STATUS_CANCELLED', 7);
  define('MFCS_OPERATOR_NOT_LIKE', 8);
  define('MFCS_OPERATOR_IS_NULL', 9);
  define('MFCS_OPERATOR_IS_NOT_NULL', 10);
+ define('MFCS_OPERATOR_IS_IN', 11);
+ define('MFCS_OPERATOR_IS_NOT_IN', 12);
 
 /**
  * Defines table join codes for building search queries.
@@ -5554,6 +5556,12 @@ function mfcs_request_process_listing_search_array(&$query, &$operand, &$already
 
         $found_values = TRUE;
         continue;
+      }
+      elseif ($search_values['operator'] == MFCS_OPERATOR_IS_IN) {
+        $operator = 'IN';
+      }
+      elseif ($search_values['operator'] == MFCS_OPERATOR_IS_NOT_IN) {
+        $operator = 'NOT IN';
       }
 
       $operand->condition($field_alias . '.' . $search_values['column'], $search_string, $operator);

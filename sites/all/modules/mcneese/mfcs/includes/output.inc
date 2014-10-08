@@ -30,11 +30,14 @@
  *   An HTML title for describing the calendar.
  * @param string $id
  *   (optional) A unique HTML id to associate with the calendar.
+ * @param null|array $determined
+ *   (optional) An array of filters used for generating the filter links.
+ *   If NULL, then filter links will no be processed/added.
  *
  * @return string|bool
  *   The generate HTML markup or FALSE on error.
  */
-function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $absolute_start, $absolute_stop, $title, $id = NULL) {
+function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $absolute_start, $absolute_stop, $title, $id = NULL, $determined = array()) {
   if (!is_array($items)) {
     cf_error::invalid_array('items');
     return FALSE;
@@ -73,6 +76,11 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
     }
 
     $id_string = ' id="' . check_plain($id) . '"';
+  }
+
+  if (!is_null($determined) && !is_array($determined)) {
+    cf_error::invalid_array('determined');
+    return FALSE;
   }
 
   global $base_path;
@@ -192,16 +200,15 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
   $markup .= '</div>';
 
 
-  // iCal links
-  $year = date('Y', $month_start);
-  $month = date('F', $month_start);
-  $markup .= '<div class="calendar-ical-links no-print">' . "\n";
-  $markup .= '<h3 class="calendar-ical-title">iCal Download Options</h3>' . "\n";
-  $markup .= '  <ul class="calendar-ical-links-list">' . "\n";
-  $markup .= '    <li class="calendar-ical-links-list-item calendar-ical-links-list-item-month"><div class="calendar-ical-links-list-item-label">Month:</div> <a href="' . $base_path . 'requests/ical-0/month/' . $year . '/' . $month . '" title="Download iCal for the month of ' . $month . ' ' . $year . '">' . $month . ' ' . $year . '</a></li>' . "\n";
-  $markup .= '    <li class="calendar-ical-links-list-item calendar-ical-links-list-item-year"><div class="calendar-ical-links-list-item-label">Year:</div> <a href="' . $base_path . 'requests/ical-0/year/' . $year . '" title="Download iCal for the year ' . $year . '">' . $year . '</a></li>' . "\n";
-  $markup .= '  </ul>' . "\n";
-  $markup .= '</div>' . "\n";
+  // calendar links
+  $markup .= '<div class="calendar-links-wrapper no-print">' . "\n";
+  $markup .= mfcs_build_calendar_ical_links_markup($month_start, TRUE, TRUE, FALSE);
+
+  if (!is_null($determined)) {
+    $markup .= mfcs_build_determined_filters_markup($determined);
+  }
+
+  $markup .= '</div>' . "\n"; // calendar-links
 
 
   // end wrapper (calendar-month-wrapper)
@@ -225,11 +232,14 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
  *   An HTML title for describing the calendar.
  * @param string $id
  *   (optional) A unique HTML id to associate with the calendar.
+ * @param null|array $determined
+ *   (optional) An array of filters used for generating the filter links.
+ *   If NULL, then filter links will no be processed/added.
  *
  * @return string|bool
  *   The generate HTML markup or FALSE on error.
  */
-function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $id = NULL) {
+function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $id = NULL, $determined = array()) {
   if (!is_array($items)) {
     cf_error::invalid_array('items');
     return FALSE;
@@ -259,6 +269,11 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
 
     $id = check_plain($id);
     $id_string = ' id="' . $id . '"';
+  }
+
+  if (!is_null($determined) && !is_array($determined)) {
+    cf_error::invalid_array('determined');
+    return FALSE;
   }
 
   global $base_path;
@@ -598,18 +613,15 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
   $markup .= '</div>';
 
 
-  // iCal links
-  $year = date('Y', $day_start);
-  $month = date('F', $day_start);
-  $day = date('d', $day_start);
-  $markup .= '<div class="calendar-ical-links no-print">' . "\n";
-  $markup .= '<h3 class="calendar-ical-title">iCal Download Options</h3>' . "\n";
-  $markup .= '  <ul class="calendar-ical-links-list">' . "\n";
-  $markup .= '    <li class="calendar-ical-links-list-item calendar-ical-links-list-item-day"><div class="calendar-ical-links-list-item-label">Day:</div> <a href="' . $base_path . 'requests/ical-0/day/' . $year . '/' . $month . '/' . $day . '" title="Download iCal for ' . $month . ' ' . $day . ', ' . $year . '">' . $month . ' ' . $day . ', ' . $year . '</a></li>' . "\n";
-  $markup .= '    <li class="calendar-ical-links-list-item calendar-ical-links-list-item-month"><div class="calendar-ical-links-list-item-label">Month:</div> <a href="' . $base_path . 'requests/ical-0/month/' . $year . '/' . $month . '" title="Download iCal for the month of ' . $month . ' ' . $year . '">' . $month . ' ' . $year . '</a></li>' . "\n";
-  $markup .= '    <li class="calendar-ical-links-list-item calendar-ical-links-list-item-year"><div class="calendar-ical-links-list-item-label">Year:</div> <a href="' . $base_path . 'requests/ical-0/year/' . $year . '" title="Download iCal for the year ' . $year . '">' . $year . '</a></li>' . "\n";
-  $markup .= '  </ul>' . "\n";
-  $markup .= '</div>' . "\n";
+  // calendar links
+  $markup .= '<div class="calendar-links-wrapper no-print">' . "\n";
+  $markup .= mfcs_build_calendar_ical_links_markup($day_start);
+
+  if (!is_null($determined)) {
+    $markup .= mfcs_build_determined_filters_markup($determined);
+  }
+
+  $markup .= '</div>' . "\n"; // calendar-links
 
 
   // end wrappers (main)
@@ -626,6 +638,264 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
   return $markup;
 }
 
+/**
+ * Build a list of links that change the url path to apply a filter.
+ *
+ * @param int $date_start
+ *   The time start unix timestamp.
+ * @param bool $year
+ *   (optional) If TRUE, show year, FALSE hide year.
+ * @param bool $month
+ *   (optional) If TRUE, show month, FALSE hide month.
+ * @param bool $day
+ *   (optional) If TRUE, show day, FALSE hide day.
+ * @param string|null $id
+ *   (optional) The HTML id attribute to use.
+ *
+ * @return string|bool
+ *   The generate HTML markup or FALSE on error.
+ */
+function mfcs_build_calendar_ical_links_markup($date_start, $year = TRUE, $month = TRUE, $day = TRUE, $id = NULL) {
+  if (!cf_is_integer($date_start)) {
+    cf_error::invalid_integer('date_start');
+    return FALSE;
+  }
+
+  if (!is_bool($year)) {
+    cf_error::invalid_bool('year');
+    return FALSE;
+  }
+
+  if (!is_bool($month)) {
+    cf_error::invalid_bool('month');
+    return FALSE;
+  }
+
+  if (!is_bool($day)) {
+    cf_error::invalid_bool('day');
+    return FALSE;
+  }
+
+  if (!is_null($id) && !is_string($id)) {
+    cf_error::invalid_string('id');
+    return FALSE;
+  }
+
+  global $base_path;
+
+  if (!empty($id)) {
+    $id = ' id="' . $id . '"';
+  }
+
+  $markup = '<div' . $id . ' class="calendar-links ical">' . "\n";
+  $markup .= '<h3 class="calendar-links-title ical">iCal Download Options</h3>' . "\n";
+  $markup .= '<ul class="calendar-links-list ical">' . "\n";
+
+  if ($day) {
+    $day = date('d', $date_start);
+    $markup .= '<li class="calendar-links-list-item item-day ical">';
+    $markup .= '<div class="calendar-links-list-item-label item-day item-label ical">Day:</div> ';
+    $markup .= '<a href="' . $base_path . 'requests/ical-0/day/' . $year . '/' . $month . '/' . $day . '" title="Download iCal for ' . $month . ' ' . $day . ', ' . $year . '" class="calendar-links-list-item-link item-day ical item-link">' . $month . ' ' . $day . ', ' . $year . '</a>';
+    $markup .= '</li>' . "\n";
+  }
+
+  if ($month) {
+    $month = date('F', $date_start);
+    $markup .= '<li class="calendar-links-list-item item-month ical">';
+    $markup .= '<div class="calendar-links-list-item-label item-month item-label ical">Month:</div> ';
+    $markup .= '<a href="' . $base_path . 'requests/ical-0/month/' . $year . '/' . $month . '" title="Download iCal for the month of ' . $month . ' ' . $year . '" class="calendar-links-list-item-link item-month ical item-link">' . $month . ' ' . $year . '</a>';
+    $markup .= '</li>' . "\n";
+  }
+
+  if ($year) {
+    $year = date('Y', $date_start);
+    $markup .= '<li class="calendar-links-list-item item-year ical">';
+    $markup .= '<div class="calendar-links-list-item-label item-year item-label ical">Year:</div> ';
+    $markup .= '<a href="' . $base_path . 'requests/ical-0/year/' . $year . '" title="Download iCal for the year ' . $year . '" class="calendar-links-list-item-link item-year ical item-link">' . $year . '</a>';
+    $markup .= '</li>' . "\n";
+  }
+
+  $markup .= '</ul>' . "\n";
+  $markup .= '</div>' . "\n";
+
+  return $markup;
+}
+
+/**
+ * Build a list of links that change the url path to apply a filter.
+ *
+ * @param array $determined
+ *   An array of filters used for generating the filter links.
+ * @param string|null $id
+ *   The HTML id attribute to use.
+ *
+ * @return string|bool
+ *   The generate HTML markup or FALSE on error.
+ */
+function mfcs_build_determined_filters_markup($determined, $id = NULL) {
+  if (!is_array($determined)) {
+    cf_error::invalid_array('determined');
+    return FALSE;
+  }
+
+  if (!is_null($id) && !is_string($id)) {
+    cf_error::invalid_string('id');
+    return FALSE;
+  }
+
+  global $base_path;
+
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+
+  $request_type_options = mfcs_get_request_type_list_options();
+  $request_classification_options = mfcs_get_request_classification_list_options();
+
+  $type_id = NULL;
+  $classifications_id = NULL;
+  if (!empty($id)) {
+    $type_id = ' id="' . $id . '-types"';
+    $classifications_id = ' id="' . $id . '-classifications"';
+  }
+
+  // classifications
+  $markup = '<div' . $id . ' class="calendar-links filter_classifications">' . "\n";
+  $markup .= '<h3 class="calendar-links-title filter_classifications">Filter by Classification</h3>' . "\n";
+  $markup .= '  <ul class="calendar-links-list filter_classifications">' . "\n";
+
+  foreach ($request_classification_options as $classification_id => $classification) {
+    $current_get = $determined['get'];
+    $link_cg = $base_path . $_GET['q'];
+
+    if (isset($determined['get']['classifications'][$classification_id])) {
+      unset($current_get['classifications'][$classification_id]);
+      $link_action_css = 'link-remove';
+      $link_action_text = 'Remove Filter: ';
+    }
+    else {
+      $current_get['classifications'][$classification_id] = $classification_id;
+      $link_action_css = 'link-add';
+      $link_action_text = 'Add Filter: ';
+    }
+
+    if (empty($current_get['classifications'])) {
+      unset($current_get['classifications']);
+    }
+    else {
+      $current_get['classifications'] = implode(',', $current_get['classifications']);
+    }
+
+    if (empty($current_get['types'])) {
+      unset($current_get['types']);
+    }
+    else {
+      $current_get['types'] = implode(',', $current_get['types']);
+    }
+
+    if (empty($current_get['types'])) {
+      unset($current_get['types']);
+    }
+
+    $first = TRUE;
+    if (!empty($current_get)) {
+      $link_cg .= '?';
+
+      foreach ($current_get as $cg_key => $cg) {
+        if ($first) {
+          $first = FALSE;
+        }
+        else {
+          $link_cg .= '&';
+        }
+
+        if ($cg_key == 'classifications') {
+          $link_cg .= $cg_key . '=' . $cg;
+        }
+        elseif ($cg_key == 'types') {
+          $link_cg .= $cg_key . '=' . $cg;
+        }
+        else {
+          $link_cg .= urlencode($cg_key) . '=' . urlencode($cg);
+        }
+      }
+    }
+
+    $markup .= '<li' . $id . ' class="calendar-links-list-item item-' . $classification_id . ' filter_classifications">' . "\n";
+    $markup .= '<a href="' . $link_cg . '" class="calendar-links-list-item-link item-' . $classification_id . ' item-link ' . $link_action_css . ' filter_classifications" title="' . $link_action_text . $classification . '">' . $link_action_text . $classification . '</a>' . "\n";
+    $markup .= '</li>' . "\n";
+  }
+
+  $markup .= '</ul>' . "\n";
+  $markup .= '</div>' . "\n";
+
+
+  // types
+  $markup .= '<div' . $id . ' class="calendar-links filter_types">' . "\n";
+  $markup .= '<h3 class="calendar-links-title filter_types">Filter by Type</h3>' . "\n";
+  $markup .= '  <ul class="calendar-links-list filter_types">' . "\n";
+
+  foreach ($request_type_options as $type_id => $type) {
+    $current_get = $determined['get'];
+    $link_cg = $base_path . $_GET['q'];
+
+    if (isset($determined['get']['types'][$type_id])) {
+      unset($current_get['types'][$type_id]);
+      $link_action_css = 'link-remove';
+      $link_action_text = 'Remove Filter: ';
+    }
+    else {
+      $current_get['types'][$type_id] = $type_id;
+      $link_action_css = 'link-add';
+      $link_action_text = 'Add Filter: ';
+    }
+
+    if (empty($current_get['classifications'])) {
+      unset($current_get['classifications']);
+    }
+    else {
+      $current_get['classifications'] = implode(',', $current_get['classifications']);
+    }
+
+    if (empty($current_get['types'])) {
+      unset($current_get['types']);
+    }
+    else {
+      $current_get['types'] = implode(',', $current_get['types']);
+    }
+
+    $first = TRUE;
+    if (!empty($current_get)) {
+      $link_cg .= '?';
+
+      foreach ($current_get as $cg_key => $cg) {
+        if ($first) {
+          $first = FALSE;
+        }
+        else {
+          $link_cg .= '&';
+        }
+
+        if ($cg_key == 'classifications') {
+          $link_cg .= $cg_key . '=' . $cg;
+        }
+        elseif ($cg_key == 'types') {
+          $link_cg .= $cg_key . '=' . $cg;
+        }
+        else {
+          $link_cg .= urlencode($cg_key) . '=' . urlencode($cg);
+        }
+      }
+    }
+
+    $markup .= '<li' . $id . ' class="calendar-links-list-item item-' . $type_id . ' filter_types">' . "\n";
+    $markup .= '<a href="' . $link_cg . '" class="calendar-links-list-item-link item-' . $type_id . ' item-link ' . $link_action_css . ' filter_types" title="' . $link_action_text . $type . '">' . $link_action_text . $type . '</a>' . "\n";
+    $markup .= '</li>' . "\n";
+  }
+
+  $markup .= '</ul>' . "\n";
+  $markup .= '</div>' . "\n";
+
+  return $markup;
+}
 
 /**
  * Renders HTML for a self-contained request view page useful for printing.

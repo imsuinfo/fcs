@@ -190,5 +190,64 @@ function mfcs_miscellaneous_generate_requests_by_date_search($start, $stop, $sta
 }
 
 /**
+ * Identify the filters passed to the url and generate database filters.
+ *
+ * @return array
+ *   An array of filters.
+ */
+function mfcs_miscellaneous_determine_filters() {
+  $determined = array(
+    'get' => array(),
+    'filters' => array(),
+  );
+
+  if (isset($_REQUEST['types'])) {
+    $types_array = explode(',', strtolower($_GET['types']));
+
+    $types = array();
+    foreach ($types_array as $type) {
+      if (cf_is_integer($type)) {
+        $types[$type] = $type;
+      }
+    }
+    unset($types_array);
+    $determined['get']['types'] = $types;
+
+    $target_field_name = 'field_information-type-0';
+    $determined['filters'][$target_field_name]['group_name'] = 'information';
+    $determined['filters'][$target_field_name]['field_name'] = 'type';
+    $determined['filters'][$target_field_name]['column'] = 'value';
+    $determined['filters'][$target_field_name]['search'] = $types;
+    $determined['filters'][$target_field_name]['type'] = 'number';
+    $determined['filters'][$target_field_name]['multiple'] = FALSE;
+    $determined['filters'][$target_field_name]['operator'] = MFCS_OPERATOR_IS_IN;
+  }
+
+  if (isset($_REQUEST['classifications'])) {
+    $classifications_array = explode(',', strtolower($_GET['classifications']));
+
+    $classifications = array();
+    foreach ($classifications_array as $classification) {
+      if (cf_is_integer($classification)) {
+        $classifications[$classification] = $classification;
+      }
+    }
+    unset($classifications_array);
+    $determined['get']['classifications'] = $classifications;
+
+    $target_field_name = 'field_request_coordinator-classification-0';
+    $determined['filters'][$target_field_name]['group_name'] = 'request_coordinator';
+    $determined['filters'][$target_field_name]['field_name'] = 'classification';
+    $determined['filters'][$target_field_name]['column'] = 'value';
+    $determined['filters'][$target_field_name]['search'] = $classifications;
+    $determined['filters'][$target_field_name]['type'] = 'number';
+    $determined['filters'][$target_field_name]['multiple'] = FALSE;
+    $determined['filters'][$target_field_name]['operator'] = MFCS_OPERATOR_IS_IN;
+  }
+
+  return $determined;
+}
+
+/**
  * @} End of '@addtogroup mfcs'.
  */
