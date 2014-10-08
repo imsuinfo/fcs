@@ -4901,6 +4901,10 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
   try {
     $query = db_select('mfcs_requests', 'mer');
 
+    $already_joined['mfcs_requests'] = 'mer';
+    $already_joined['mfcs_field_top_status'] = NULL;
+    $already_joined['mfcs_field_top_step'] = NULL;
+
     $query->innerJoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
     $query->innerJoin('mfcs_current_information', 'mci', 'mer.id = mci.request_id');
 

@@ -166,7 +166,7 @@ function mfcs_miscellaneous_generate_requests_by_date_search($start, $stop, $sta
 
   if (!is_null($status)) {
     $target_field_name = 'field_top-status-0';
-    $search[$target_field_name]['group_name'] = 'top';
+    $search[$target_field_name]['group_name'] = 'mer';
     $search[$target_field_name]['field_name'] = 'status';
     $search[$target_field_name]['column'] = 'value';
     $search[$target_field_name]['search'] = $status;
@@ -177,7 +177,7 @@ function mfcs_miscellaneous_generate_requests_by_date_search($start, $stop, $sta
 
   if (!is_null($step)) {
     $target_field_name = 'field_top-step-0';
-    $search[$target_field_name]['group_name'] = 'top';
+    $search[$target_field_name]['group_name'] = 'mer';
     $search[$target_field_name]['field_name'] = 'step';
     $search[$target_field_name]['column'] = 'value';
     $search[$target_field_name]['search'] = $step;
