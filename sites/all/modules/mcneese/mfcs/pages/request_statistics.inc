@@ -303,9 +303,6 @@ function mfcs_request_statistics_load_counts($start, $stop) {
 
     $query = db_select('mfcs_requests', 'mer');
 
-    $query->innerJoin('mfcs_current', 'mc', 'mer.id = mc.request_id');
-    $query->innerJoin('mfcs_field_request_coordinator_classification', 'mfrcc', 'mc.request_id = mfrcc.request_id AND mc.request_coordinator_classification = mfrcc.revision AND mfrcc.delta = 0');
-
     $query->addExpression('count(mer.id)');
 
     $query->condition('mer.status', MFCS_REQUEST_STATUS_DELETED, '<>');
@@ -317,22 +314,22 @@ function mfcs_request_statistics_load_counts($start, $stop) {
 
     // classification (student)
     $the_query = clone($query);
-    $the_query->condition('mfrcc.value', MFCS_EVENT_CLASSIFICATION_STUDENT);
+    $the_query->condition('mer.classification', MFCS_EVENT_CLASSIFICATION_STUDENT);
     $counts['classification']['student'] = $the_query->execute()->fetchField();
 
     // classification (camps)
     $the_query = clone($query);
-    $the_query->condition('mfrcc.value', MFCS_EVENT_CLASSIFICATION_CAMPS);
+    $the_query->condition('mer.classification', MFCS_EVENT_CLASSIFICATION_CAMPS);
     $counts['classification']['camps'] = $the_query->execute()->fetchField();
 
     // classification (faculty)
     $the_query = clone($query);
-    $the_query->condition('mfrcc.value', MFCS_EVENT_CLASSIFICATION_FACULTY);
+    $the_query->condition('mer.classification', MFCS_EVENT_CLASSIFICATION_FACULTY);
     $counts['classification']['faculty'] = $the_query->execute()->fetchField();
 
     // classification (external)
     $the_query = clone($query);
-    $the_query->condition('mfrcc.value', MFCS_EVENT_CLASSIFICATION_EXTERNAL);
+    $the_query->condition('mer.classification', MFCS_EVENT_CLASSIFICATION_EXTERNAL);
     $counts['classification']['external'] = $the_query->execute()->fetchField();
 
 
@@ -353,9 +350,6 @@ function mfcs_request_statistics_load_counts($start, $stop) {
 
     $query = db_select('mfcs_requests', 'mer');
 
-    $query->innerJoin('mfcs_current', 'mc', 'mer.id = mc.request_id');
-    $query->innerJoin('mfcs_field_information_type', 'mfit', 'mc.request_id = mfit.request_id AND mc.information_type = mfit.revision AND mfit.delta = 0');
-
     $query->addExpression('count(mer.id)');
 
     $query->condition('mer.status', MFCS_REQUEST_STATUS_DELETED, '<>');
@@ -367,62 +361,62 @@ function mfcs_request_statistics_load_counts($start, $stop) {
 
     // type (athletic)
     $the_query = clone($query);
-    $the_query->condition('mfit.value', MFCS_REQUEST_TYPE_ATHLETIC);
+    $the_query->condition('mer.type', MFCS_REQUEST_TYPE_ATHLETIC);
     $counts['type']['athletic'] = $the_query->execute()->fetchField();
 
     // type (banquet)
     $the_query = clone($query);
-    $the_query->condition('mfit.value', MFCS_REQUEST_TYPE_BANQUET);
+    $the_query->condition('mer.type', MFCS_REQUEST_TYPE_BANQUET);
     $counts['type']['banquet'] = $the_query->execute()->fetchField();
 
     // type (ceremony)
     $the_query = clone($query);
-    $the_query->condition('mfit.value', MFCS_REQUEST_TYPE_CEREMONY);
+    $the_query->condition('mer.type', MFCS_REQUEST_TYPE_CEREMONY);
     $counts['type']['ceremony'] = $the_query->execute()->fetchField();
 
     // type (fair)
     $the_query = clone($query);
-    $the_query->condition('mfit.value', MFCS_REQUEST_TYPE_FAIR);
+    $the_query->condition('mer.type', MFCS_REQUEST_TYPE_FAIR);
     $counts['type']['fair'] = $the_query->execute()->fetchField();
 
     // type (lecture)
     $the_query = clone($query);
-    $the_query->condition('mfit.value', MFCS_REQUEST_TYPE_LECTURE);
+    $the_query->condition('mer.type', MFCS_REQUEST_TYPE_LECTURE);
     $counts['type']['lecture'] = $the_query->execute()->fetchField();
 
     // type (meeting)
     $the_query = clone($query);
-    $the_query->condition('mfit.value', MFCS_REQUEST_TYPE_MEETING);
+    $the_query->condition('mer.type', MFCS_REQUEST_TYPE_MEETING);
     $counts['type']['meeting'] = $the_query->execute()->fetchField();
 
     // type (other)
     $the_query = clone($query);
-    $the_query->condition('mfit.value', MFCS_REQUEST_TYPE_OTHER);
+    $the_query->condition('mer.type', MFCS_REQUEST_TYPE_OTHER);
     $counts['type']['other'] = $the_query->execute()->fetchField();
 
     // type (performance)
     $the_query = clone($query);
-    $the_query->condition('mfit.value', MFCS_REQUEST_TYPE_PERFORMANCE);
+    $the_query->condition('mer.type', MFCS_REQUEST_TYPE_PERFORMANCE);
     $counts['type']['performance'] = $the_query->execute()->fetchField();
 
     // type (quick_meeting)
     $the_query = clone($query);
-    $the_query->condition('mfit.value', MFCS_REQUEST_TYPE_QUICK_MEETING);
+    $the_query->condition('mer.type', MFCS_REQUEST_TYPE_QUICK_MEETING);
     $counts['type']['quick_meeting'] = $the_query->execute()->fetchField();
 
     // type (reception)
     $the_query = clone($query);
-    $the_query->condition('mfit.value', MFCS_REQUEST_TYPE_RECEPTION);
+    $the_query->condition('mer.type', MFCS_REQUEST_TYPE_RECEPTION);
     $counts['type']['reception'] = $the_query->execute()->fetchField();
 
     // type (talent)
     $the_query = clone($query);
-    $the_query->condition('mfit.value', MFCS_REQUEST_TYPE_TALENT);
+    $the_query->condition('mer.type', MFCS_REQUEST_TYPE_TALENT);
     $counts['type']['talent'] = $the_query->execute()->fetchField();
 
     // type (workshop)
     $the_query = clone($query);
-    $the_query->condition('mfit.value', MFCS_REQUEST_TYPE_WORKSHOP);
+    $the_query->condition('mer.type', MFCS_REQUEST_TYPE_WORKSHOP);
     $counts['type']['workshop'] = $the_query->execute()->fetchField();
   }
   catch (Exception $ex) {

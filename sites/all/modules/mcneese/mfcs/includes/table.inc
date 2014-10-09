@@ -60,6 +60,55 @@ function mfcs_table_structure($include_mer = FALSE) {
         'size' => 'normal',
         'manual_processing' => TRUE,
       ),
+      'classification' => array(
+        'path' => 'request][request_coordinator][classification',
+        'name' => "Request Coordinator Classification",
+        'type' => 'options',
+        'size' => 'normal',
+        'manual_processing' => TRUE,
+      ),
+      'type' => array(
+        'path' => 'request][information][type',
+        'name' => "Type",
+        'type' => 'options',
+        'size' => 'normal',
+        'manual_processing' => TRUE,
+      ),
+      'location' => array(
+        'path' => 'request][location',
+        'name' => "Location",
+        'type' => 'options',
+        'size' => 'big',
+        'manual_processing' => TRUE,
+      ),
+      'building' => array(
+        'path' => 'request][building',
+        'name' => "Building",
+        'type' => 'options',
+        'size' => 'big',
+        'manual_processing' => TRUE,
+      ),
+      'room' => array(
+        'path' => 'request][room',
+        'name' => "Room",
+        'type' => 'options',
+        'size' => 'big',
+        'manual_processing' => TRUE,
+      ),
+      'venue_coordinator' => array(
+        'path' => 'request][venue_coordinator][user_id',
+        'name' => "Venue Coordinator",
+        'type' => 'venue_coordinator',
+        'size' => 'normal',
+        'manual_processing' => TRUE,
+      ),
+      'title' => array(
+        'path' => 'request][information][title',
+        'name' => "Title",
+        'type' => 'text',
+        'size' => 255,
+        'manual_processing' => TRUE,
+      ),
     );
   }
 
@@ -69,30 +118,35 @@ function mfcs_table_structure($include_mer = FALSE) {
       'name' => "Status",
       'type' => 'options',
       'size' => 'small',
+      'hide_from_search' => TRUE,
     ),
     'step' => array(
       'path' => 'request][step',
       'name' => "Step",
       'type' => 'options',
       'size' => 'normal',
+      'hide_from_search' => TRUE,
     ),
     'location' => array(
       'path' => 'request][location',
       'name' => "Location",
       'type' => 'options',
       'size' => 'big',
+      'hide_from_search' => TRUE,
     ),
     'building' => array(
       'path' => 'request][building',
       'name' => "Building",
       'type' => 'options',
       'size' => 'big',
+      'hide_from_search' => TRUE,
     ),
     'room' => array(
       'path' => 'request][room',
       'name' => "Room",
       'type' => 'options',
       'size' => 'big',
+      'hide_from_search' => TRUE,
     ),
     'additional' => array(
       'path' => 'request][additional',
@@ -250,6 +304,7 @@ function mfcs_table_structure($include_mer = FALSE) {
       'name' => "Venue Coordinator",
       'type' => 'venue_coordinator',
       'size' => 'normal',
+      'hide_from_search' => TRUE,
     ),
   );
 
@@ -286,6 +341,7 @@ function mfcs_table_structure($include_mer = FALSE) {
       'name' => "Title",
       'type' => 'text',
       'size' => 255,
+      'hide_from_search' => TRUE,
     ),
     'attendance' => array(
       'path' => 'request][information][attendance',
@@ -298,6 +354,7 @@ function mfcs_table_structure($include_mer = FALSE) {
       'name' => "Type",
       'type' => 'options',
       'size' => 'normal',
+      'hide_from_search' => TRUE,
     ),
     'organization' => array(
       'path' => 'request][information][organization',

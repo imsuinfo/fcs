@@ -379,8 +379,6 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message, $ext
 
   $mfcs_requests = array(
     'updated' => $instance,
-    'status' => $status,
-    'step' => $step,
   );
 
   $request_revision = mfcs_load_request_revision_number($request_id);

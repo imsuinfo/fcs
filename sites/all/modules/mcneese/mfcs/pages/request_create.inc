@@ -507,6 +507,13 @@ function mfcs_request_create_0_form_submit($form, &$form_state) {
     'updated' => $instance,
     'status' =>  $form_state['values']['request']['status'][0],
     'step' => $form_state['values']['request']['step'][0],
+    'type' =>  $form_state['values']['request']['information']['type'][0],
+    'classification' => $form_state['values']['request']['request_coordinator']['classification'][0],
+    'location' =>  $form_state['values']['request']['location'][0],
+    'building' => $form_state['values']['request']['building'][0],
+    'room' => $form_state['values']['request']['room'][0],
+    'venue_coordinator' => $form_state['values']['request']['venue_coordinator']['user_id'][0],
+    'title' => $form_state['values']['request']['information']['title'][0],
   );
 
   $mfcs_request_revisions = array(

@@ -86,6 +86,10 @@ function mfcs_request_search_0_form($form, &$form_state) {
     foreach ($table_fields as $field_name => $field_values) {
       if (empty($field_values['name'])) continue;
 
+      if (array_key_exists('hide_from_search', $field_values) && $field_values['hide_from_search']) {
+        continue;
+      }
+
       // The advanced search of the review logs is not implemented at this time, so skip.
       if ($table_name == 'review') continue;
 
@@ -1754,7 +1758,30 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
   elseif ($field['type'] == 'options') {
     $location['targets'][$target_name][$target_delta]['search']['#type'] = 'select';
 
-    if ($table_name == 'top') {
+    if ($table_name == 'mer') {
+      if ($field_name == 'status') {
+        $location['targets'][$target_name][$target_delta]['search']['#options'] = mfcs_get_request_status_list_options('search');
+      }
+      elseif ($field_name == 'step') {
+        $location['targets'][$target_name][$target_delta]['search']['#options'] = mfcs_get_request_steps_list_options('search');
+      }
+      elseif ($field_name == 'location') {
+        $location['targets'][$target_name][$target_delta]['search']['#options'] = mfcs_get_request_location_list_options('search');
+      }
+      elseif ($field_name == 'building') {
+        $location['targets'][$target_name][$target_delta]['search']['#options'] = mfcs_get_request_building_list_options(NULL, 'search');
+      }
+      elseif ($field_name == 'room') {
+        $location['targets'][$target_name][$target_delta]['search']['#options'] = mfcs_get_request_room_list_options(NULL, 'search');
+      }
+      elseif ($field_name == 'type') {
+        $location['targets'][$target_name][$target_delta]['search']['#options'] = mfcs_get_request_type_list_options('search');
+      }
+      elseif ($field_name == 'classification') {
+        $location['targets'][$target_name][$target_delta]['search']['#options'] = mfcs_get_request_classification_list_options('search');
+      }
+    }
+    elseif ($table_name == 'top') {
       if ($field_name == 'status') {
         $location['targets'][$target_name][$target_delta]['search']['#options'] = mfcs_get_request_status_list_options('search');
       }

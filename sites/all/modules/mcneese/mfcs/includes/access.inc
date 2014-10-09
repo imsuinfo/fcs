@@ -154,13 +154,10 @@ function mfcs_page_request_access_operation_edit(&$request_ids, &$processed, &$a
       try {
         $query = db_select('mfcs_requests', 'mer');
 
-        $query->innerJoin('mfcs_current', 'mc', 'mer.id = mc.request_id');
-        $query->innerJoin('mfcs_field_information_type', 'mfit', 'mc.request_id = mfit.request_id AND mc.information_type = mfit.revision AND mfit.delta = 0');
-
         $query->addField('mer', 'id', 'id');
 
         $query->condition('mer.id', $request_ids, 'IN');
-        $query->condition('mfit.value', MFCS_REQUEST_TYPE_QUICK_MEETING);
+        $query->condition('mer.type', MFCS_REQUEST_TYPE_QUICK_MEETING);
 
         $access_results = $query->execute()->fetchAllAssoc('id');
 
@@ -645,14 +642,11 @@ function mfcs_page_request_access_operation_cancel(&$request_ids, &$processed, &
   try {
     $query = db_select('mfcs_requests', 'mer');
 
-    $query->innerJoin('mfcs_current', 'mc', 'mer.id = mc.request_id');
-    $query->innerJoin('mfcs_field_venue_coordinator_user_id', 'mfvcui', 'mc.request_id = mfvcui.request_id AND mc.venue_coordinator_user_id = mfvcui.revision AND mfvcui.delta = 0');
-
     $query->addField('mer', 'id', 'id');
 
     $query->condition('mer.id', $request_ids, 'IN');
     $query->condition('mer.status', $cancellable_status_admin, 'IN');
-    $query->condition('mfvcui.value', $user->uid);
+    $query->condition('mer.venue_coordinator', $user->uid);
 
     $access_results = $query->execute()->fetchAllAssoc('id');
 
@@ -790,14 +784,11 @@ function mfcs_page_request_access_operation_uncancel(&$request_ids, &$processed,
   try {
     $query = db_select('mfcs_requests', 'mer');
 
-    $query->innerJoin('mfcs_current', 'mc', 'mer.id = mc.request_id');
-    $query->innerJoin('mfcs_field_venue_coordinator_user_id', 'mfvcui', 'mc.request_id = mfvcui.request_id AND mc.venue_coordinator_user_id = mfvcui.revision AND mfvcui.delta = 0');
-
     $query->addField('mer', 'id', 'id');
 
     $query->condition('mer.id', $request_ids, 'IN');
     $query->condition('mer.status', $uncancellable_status, 'IN');
-    $query->condition('mfvcui.value', $user->uid);
+    $query->condition('mer.venue_coordinator', $user->uid);
 
     $access_results = $query->execute()->fetchAllAssoc('id');
 
