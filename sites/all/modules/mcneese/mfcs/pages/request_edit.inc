@@ -389,7 +389,7 @@ function mfcs_request_edit_0_form_validate($form, &$form_state) {
         }
         elseif ($clicked_id == 'submit-request-add-date') {
           $next_date = count($form_state['values']['request']['dates']['date']);
-          $form_state['values']['request']['group_dates']['dates']['date'][$next_date] = NULL;
+          $form_state['values']['request']['dates']['date'][$next_date] = NULL;
           $form_state['values']['request']['dates']['time_start'][$next_date] = NULL;
           $form_state['values']['request']['dates']['time_stop'][$next_date] = NULL;
           $form_state['values']['request']['dates']['category'][$next_date] = NULL;
