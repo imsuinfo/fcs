@@ -849,10 +849,8 @@ function mfcs_get_request_field_location($form, &$form_state, &$fields, &$reques
  */
 function mfcs_get_request_field_building($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
-  if (!empty($request_state['building'])) {
-    if (isset($form['form']['room_information']['#value']->building_id)) {
-      $values[0] = $form['form']['room_information']['#value']->building_id;
-    }
+  if (isset($form['form']['room_information']['#value']->building_id)) {
+    $values[0] = $form['form']['room_information']['#value']->building_id;
   }
 
   $limits_check = array(

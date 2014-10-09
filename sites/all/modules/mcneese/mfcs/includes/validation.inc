@@ -314,6 +314,17 @@ function mfcs_validate_request_fields($form, &$form_state) {
       }
     }
 
+    // confirm the availability of the room, building, and location.
+    if (empty($location_state['location'][0]) || empty($location_state['building'][0]) || empty($location_state['room'][0])) {
+      form_set_error('', t("The request room, building, or location has not been specified."));
+    }
+    else {
+      $room = mfcs_load_rooms($location_state['location'][0], $location_state['building'][0], $location_state['room'][0]);
+      if ($room === FALSE) {
+        form_set_error('', t("The request room/building/location cannot be selected at this time. Please try another room, building, or location."));
+      }
+    }
+
     $date_timestamp = array(0 => NULL);
     $start_timestamp = array(0 => FALSE);
     $stop_timestamp = array(0 => FALSE);
