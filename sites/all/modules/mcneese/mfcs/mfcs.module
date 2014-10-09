@@ -1663,6 +1663,10 @@ function mfcs_load_rooms($location = NULL, $building = NULL, $room = NULL, $disa
     $query = db_select('mfcs_banner_rooms', 'mbr');
     $query->innerJoin('mfcs_banner_buildings', 'mbb', 'mbr.building = mbb.id');
 
+    if (!is_null($room)) {
+      $query->condition('mbr.id', $room);
+    }
+
     if (!is_null($location)) {
       $query->innerJoin('mfcs_banner_building_to_location', 'mbbl', 'mbb.id = mbbl.building AND mbr.building = mbbl.building');
       $query->innerJoin('mfcs_banner_locations', 'mbl', 'mbbl.location = mbl.id');
@@ -1705,6 +1709,7 @@ function mfcs_load_rooms($location = NULL, $building = NULL, $room = NULL, $disa
     $query->orderBy('mbr.machine_name');
 
     $items = $query->execute()->fetchAllAssoc('room_id');
+
     if (is_null($room)) {
       return $items;
     }
