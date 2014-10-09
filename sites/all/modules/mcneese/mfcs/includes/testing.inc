@@ -27,11 +27,14 @@
  * @param array $custom_time_stop
  *   (optional) When specified, will replace the cloned requests time_stop with
  *   the values in this array.
+ * @param array $custom_category
+ *   (optional) When specified, will replace the cloned requests category with
+ *   the values in this array.
  *
  * @return int|bool
  *   Created request id on success, FALSE otherwise.
  */
-function mfcs_testing_clone_request($request_id, $custom_title = NULL, $custom_dates = NULL, $custom_time_start = NULL, $custom_time_stop = NULL) {
+function mfcs_testing_clone_request($request_id, $custom_title = NULL, $custom_dates = NULL, $custom_time_start = NULL, $custom_time_stop = NULL, $custom_category = NULL) {
   if (mfcs_testing_is_enabled() === FALSE) {
     return FALSE;
   }
@@ -59,6 +62,11 @@ function mfcs_testing_clone_request($request_id, $custom_title = NULL, $custom_d
 
   if (!is_null($custom_time_stop) && !is_array($custom_time_stop)) {
     cf_error::invalid_array('custom_time_stop');
+    return FALSE;
+  }
+
+  if (!is_null($custom_category) && !is_array($custom_category)) {
+    cf_error::invalid_array('custom_category');
     return FALSE;
   }
 
@@ -97,6 +105,10 @@ function mfcs_testing_clone_request($request_id, $custom_title = NULL, $custom_d
     if (!is_null($custom_time_stop)) {
       $state['values']['request']['dates']['time_stop'] = $custom_time_stop;
       $state['complete form']['form']['existing']['#value']['request']['dates']['time_start'] = $custom_time_stop;
+    }
+
+    if (!is_null($custom_category)) {
+      $state['values']['request']['dates']['category'] = $custom_category;
     }
 
     drupal_form_submit($id, $state);
@@ -453,6 +465,20 @@ function mfcs_testing_generate_dates_and_times() {
   $dates_and_times = array();
 
   $date = rand(1, 62);
+  $category = rand(1, 9);
+
+  if ($category < 6) {
+    $category = MFCS_EVENT_DATES_CATEGORY_ACTUAL;
+    $format_category = "Event / Meeting";
+  }
+  elseif ($category < 8) {
+    $category = MFCS_EVENT_DATES_CATEGORY_SETUP;
+    $format_category = "Rehearsal / Setup";
+  }
+  else {
+    $category = MFCS_EVENT_DATES_CATEGORY_CLEANUP;
+    $format_category = "Cleanup / Breakdown";
+  }
 
   $time_start_24 = rand(0, 23);
   $time_stop = 1;
@@ -482,10 +508,12 @@ function mfcs_testing_generate_dates_and_times() {
   $dates_and_times['date'] = strtotime('+' . $date . ' days');
   $dates_and_times['time_start'] = strtotime($time_start . ':00' . $am_pm, $dates_and_times['date']);
   $dates_and_times['time_stop'] = strtotime('+' . $time_stop . ' hours', $dates_and_times['time_start']);
+  $dates_and_times['category'] = $category;
 
   $dates_and_times['format_date'] = date('Y/m/d', $dates_and_times['date']);
   $dates_and_times['format_time_start'] = date('h:ia', $dates_and_times['time_start']);
   $dates_and_times['format_time_stop'] = date('h:ia', $dates_and_times['time_stop']);
+  $dates_and_times['format_category'] = $format_category;
 
   return $dates_and_times;
 }
