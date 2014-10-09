@@ -46,6 +46,20 @@ function mfcs_table_structure($include_mer = FALSE) {
         'storage' => 'date_popup',
         'manual_processing' => TRUE,
       ),
+      'status' => array(
+        'path' => 'request][status',
+        'name' => "Status",
+        'type' => 'options',
+        'size' => 'small',
+        'manual_processing' => TRUE,
+      ),
+      'step' => array(
+        'path' => 'request][step',
+        'name' => "Step",
+        'type' => 'options',
+        'size' => 'normal',
+        'manual_processing' => TRUE,
+      ),
     );
   }
 
