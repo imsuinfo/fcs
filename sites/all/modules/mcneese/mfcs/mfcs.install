@@ -878,6 +878,30 @@ function mfcs_schema() {
   );
 
 
+  // create the mapping table that maps the latest request.
+  // to greatly reduce the number of joins, all current field revisions are merged into a single table.
+  $current_table_name = 'mfcs_current';
+  $schema[$current_table_name] = array(
+    'description' => $t("McNeese Facilities Use Requests field table representing the current (active) revisions for fields."),
+    'fields' => array(
+      'request_id' => array(
+        'description' => $t("Foreign key to the primary key in the {mfcs_requests} table."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+      ),
+    ),
+    'primary key' => array('request_id'),
+    'foreign keys' => array(
+      'request_id' => array(
+        'table' => 'mfcs_requests',
+        'columns' => array('request_id' => 'id'),
+      ),
+    ),
+  );
+
+
   // create the secondary tables associated with the table mfcs_requests.
   $structure = mfcs_table_install_structure();
 
@@ -1154,29 +1178,7 @@ function mfcs_schema() {
       }
     }
 
-    // create the mapping table that maps the latest request.
-    // to greatly reduce the number of joins, all current field revisions are merged into a single table.
-    $current_table_name = 'mfcs_current';
-    $schema[$current_table_name] = array(
-      'description' => $t("McNeese Facilities Use Requests field table representing the current (active) revisions for fields."),
-      'fields' => array(
-        'request_id' => array(
-          'description' => $t("Foreign key to the primary key in the {mfcs_requests} table."),
-          'type' => 'int',
-          'size' => 'big',
-          'unsigned' => TRUE,
-          'not null' => FALSE,
-        ),
-      ),
-      'primary key' => array('request_id'),
-      'foreign keys' => array(
-        'request_id' => array(
-          'table' => 'mfcs_requests',
-          'columns' => array('request_id' => 'id'),
-        ),
-      ),
-    );
-
+    // populate the mapping table fields.
     foreach ($structure_array as $field_name => &$field_type) {
       $field_table_name = 'mfcs_field_' . $structure_name . '_' . $field_name;
 
@@ -1186,13 +1188,6 @@ function mfcs_schema() {
         'size' => 'big',
         'unsigned' => TRUE,
         'not null' => FALSE,
-      );
-
-      $schema[$current_table_name]['foreign keys'][$structure_name . '_' . $field_name] = array(
-        $field_name => array(
-          'table' => $field_table_name,
-          'columns' => array($field_name => 'revision'),
-        ),
       );
     }
   }
