@@ -477,17 +477,17 @@ function mfcs_request_ical_request_0_page($request_id) {
  */
 function mfcs_request_ical_generate_extra_fields() {
   $extra_fields = array();
-  $extra_fields['mfcs_current_request_coordinator'] = array(
-    'alias' => 'mcrc',
+  $extra_fields['mfcs_current'] = array(
+    'alias' => 'mc',
     'join' => 'inner',
-    'on' => 'mer.id = mcrc.request_id',
+    'on' => 'mer.id = mc.request_id',
     'columns' => array(),
   );
 
   $extra_fields['mfcs_field_request_coordinator_name'] = array(
     'alias' => 'mfrcn',
     'join' => 'inner',
-    'on' => 'mcrc.request_id = mfrcn.request_id AND mcrc.name = mfrcn.revision AND mfrcn.delta = 0',
+    'on' => 'mc.request_id = mfrcn.request_id AND mc.request_coordinator_name = mfrcn.revision AND mfrcn.delta = 0',
     'columns' => array(
       'request_coordinator_name' => 'value',
     ),
@@ -496,7 +496,7 @@ function mfcs_request_ical_generate_extra_fields() {
   $extra_fields['mfcs_field_request_coordinator_email'] = array(
     'alias' => 'mfrce',
     'join' => 'inner',
-    'on' => 'mcrc.request_id = mfrce.request_id AND mcrc.name = mfrce.revision AND mfrce.delta = 0',
+    'on' => 'mc.request_id = mfrce.request_id AND mc.request_coordinator_email = mfrce.revision AND mfrce.delta = 0',
     'columns' => array(
       'request_coordinator_email' => 'value',
     ),

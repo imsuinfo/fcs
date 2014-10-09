@@ -303,8 +303,8 @@ function mfcs_request_statistics_load_counts($start, $stop) {
 
     $query = db_select('mfcs_requests', 'mer');
 
-    $query->innerJoin('mfcs_current_request_coordinator', 'mcrc', 'mer.id = mcrc.request_id');
-    $query->innerJoin('mfcs_field_request_coordinator_classification', 'mfrcc', 'mcrc.request_id = mfrcc.request_id AND mcrc.classification = mfrcc.revision AND mfrcc.delta = 0');
+    $query->innerJoin('mfcs_current', 'mc', 'mer.id = mc.request_id');
+    $query->innerJoin('mfcs_field_request_coordinator_classification', 'mfrcc', 'mc.request_id = mfrcc.request_id AND mc.request_coordinator_classification = mfrcc.revision AND mfrcc.delta = 0');
 
     $query->addExpression('count(mer.id)');
 
@@ -353,8 +353,8 @@ function mfcs_request_statistics_load_counts($start, $stop) {
 
     $query = db_select('mfcs_requests', 'mer');
 
-    $query->innerJoin('mfcs_current_information', 'mci', 'mer.id = mci.request_id');
-    $query->innerJoin('mfcs_field_information_type', 'mfit', 'mci.request_id = mfit.request_id AND mci.type = mfit.revision AND mfit.delta = 0');
+    $query->innerJoin('mfcs_current', 'mc', 'mer.id = mc.request_id');
+    $query->innerJoin('mfcs_field_information_type', 'mfit', 'mc.request_id = mfit.request_id AND mc.information_type = mfit.revision AND mfit.delta = 0');
 
     $query->addExpression('count(mer.id)');
 

@@ -154,8 +154,8 @@ function mfcs_page_request_access_operation_edit(&$request_ids, &$processed, &$a
       try {
         $query = db_select('mfcs_requests', 'mer');
 
-        $query->innerJoin('mfcs_current_information', 'mci', 'mer.id = mci.request_id');
-        $query->innerJoin('mfcs_field_information_type', 'mfit', 'mci.request_id = mfit.request_id AND mci.type = mfit.revision AND mfit.delta = 0');
+        $query->innerJoin('mfcs_current', 'mc', 'mer.id = mc.request_id');
+        $query->innerJoin('mfcs_field_information_type', 'mfit', 'mc.request_id = mfit.request_id AND mc.information_type = mfit.revision AND mfit.delta = 0');
 
         $query->addField('mer', 'id', 'id');
 
@@ -645,8 +645,8 @@ function mfcs_page_request_access_operation_cancel(&$request_ids, &$processed, &
   try {
     $query = db_select('mfcs_requests', 'mer');
 
-    $query->innerJoin('mfcs_current_venue_coordinator', 'mcvc', 'mer.id = mcvc.request_id');
-    $query->innerJoin('mfcs_field_venue_coordinator_user_id', 'mfvcui', 'mcvc.request_id = mfvcui.request_id AND mcvc.user_id = mfvcui.revision AND mfvcui.delta = 0');
+    $query->innerJoin('mfcs_current', 'mc', 'mer.id = mc.request_id');
+    $query->innerJoin('mfcs_field_venue_coordinator_user_id', 'mfvcui', 'mc.request_id = mfvcui.request_id AND mc.venue_coordinator_user_id = mfvcui.revision AND mfvcui.delta = 0');
 
     $query->addField('mer', 'id', 'id');
 
@@ -790,8 +790,8 @@ function mfcs_page_request_access_operation_uncancel(&$request_ids, &$processed,
   try {
     $query = db_select('mfcs_requests', 'mer');
 
-    $query->innerJoin('mfcs_current_venue_coordinator', 'mcvc', 'mer.id = mcvc.request_id');
-    $query->innerJoin('mfcs_field_venue_coordinator_user_id', 'mfvcui', 'mcvc.request_id = mfvcui.request_id AND mcvc.user_id = mfvcui.revision AND mfvcui.delta = 0');
+    $query->innerJoin('mfcs_current', 'mc', 'mer.id = mc.request_id');
+    $query->innerJoin('mfcs_field_venue_coordinator_user_id', 'mfvcui', 'mc.request_id = mfvcui.request_id AND mc.venue_coordinator_user_id = mfvcui.revision AND mfvcui.delta = 0');
 
     $query->addField('mer', 'id', 'id');
 

@@ -496,13 +496,12 @@ function mfcs_request_reviewers_0_form_submit($form, &$form_state) {
 
     try {
       $query = db_select('mfcs_requests', 'mer');
-      $query->innerJoin('mfcs_current_review', 'mcr', 'mer.id = mcr.request_id');
 
-      $query->innerJoin('mfcs_current_request_coordinator', 'mcrc', 'mer.id = mcrc.request_id');
-      $query->innerJoin('mfcs_field_request_coordinator_classification', 'mfrcc', 'mcrc.request_id = mfrcc.request_id AND mcrc.classification = mfrcc.revision AND mfrcc.delta = 0');
+      $query->innerJoin('mfcs_current', 'mc', 'mer.id = mc.request_id');
+      $query->innerJoin('mfcs_field_request_coordinator_classification', 'mfrcc', 'mc.request_id = mfrcc.request_id AND mc.request_coordinator_classification = mfrcc.revision AND mfrcc.delta = 0');
 
       $query->addField('mer', 'id', 'id');
-      $query->addField('mcr', 'review', 'revision');
+      $query->addField('mc', 'review_review', 'revision');
 
       $query->condition('mer.status', MFCS_REQUEST_STATUS_LOCKED);
       $query->condition('mer.step', $step);

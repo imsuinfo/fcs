@@ -1048,16 +1048,13 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
   try {
     $query = db_select('mfcs_requests', 'mer');
 
-    $query->innerJoin('mfcs_current_request_coordinator', 'mcrc', 'mer.id = mcrc.request_id');
-    $query->innerJoin('mfcs_field_request_coordinator_classification', 'mfrcc', 'mcrc.request_id = mfrcc.request_id AND mcrc.classification = mfrcc.revision AND mfrcc.delta = 0');
-
-    $query->innerJoin('mfcs_current_venue_coordinator', 'mcvc', 'mer.id = mcvc.request_id');
-    $query->innerJoin('mfcs_field_venue_coordinator_user_id', 'mfvcui', 'mcvc.request_id = mfvcui.request_id AND mcvc.user_id = mfvcui.revision AND mfvcui.delta = 0');
+    $query->innerJoin('mfcs_current', 'mc', 'mer.id = mc.request_id');
+    $query->innerJoin('mfcs_field_request_coordinator_classification', 'mfrcc', 'mc.request_id = mfrcc.request_id AND mc.request_coordinator_classification = mfrcc.revision AND mfrcc.delta = 0');
+    $query->innerJoin('mfcs_field_venue_coordinator_user_id', 'mfvcui', 'mc.request_id = mfvcui.request_id AND mc.venue_coordinator_user_id = mfvcui.revision AND mfvcui.delta = 0');
 
     $query->addField('mer', 'id', 'id');
 
     $query->condition('mer.id', array($request_ids), 'IN');
-
     $query->condition('mer.status', MFCS_REQUEST_STATUS_DELETED, '<>');
 
     $or = null;
@@ -1106,15 +1103,15 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
 
         // special case reviewer access: insurance provided
         if (array_key_exists(MFCS_REVIEW_CLASSIFICATION_PURCHASING, $reviewer_settings['classifications'])) {
-          $has_insurance_query = db_select('mfcs_current_insurance', 'mci_ip');
-          $has_insurance_query->leftJoin('mfcs_field_insurance_contractor', 'mfic', 'mci_ip.request_id = mfic.request_id AND mci_ip.contractor = mfic.revision AND mfic.delta = 0');
-          $has_insurance_query->leftJoin('mfcs_field_insurance_unaffiliated', 'mfiu', 'mci_ip.request_id = mfiu.request_id AND mci_ip.unaffiliated = mfiu.revision AND mfiu.delta = 0');
-          $has_insurance_query->leftJoin('mfcs_field_insurance_provided', 'mfip', 'mci_ip.request_id = mfip.request_id AND mci_ip.provided = mfip.revision AND mfip.delta = 0');
+          $has_insurance_query = db_select('mfcs_current', 'mc');
+          $has_insurance_query->leftJoin('mfcs_field_insurance_contractor', 'mfic', 'mc.request_id = mfic.request_id AND mc.insurance_contractor = mfic.revision AND mfic.delta = 0');
+          $has_insurance_query->leftJoin('mfcs_field_insurance_unaffiliated', 'mfiu', 'mc.request_id = mfiu.request_id AND mc.insurance_unaffiliated = mfiu.revision AND mfiu.delta = 0');
+          $has_insurance_query->leftJoin('mfcs_field_insurance_provided', 'mfip', 'mc.request_id = mfip.request_id AND mc.insurance_provided = mfip.revision AND mfip.delta = 0');
 
           // $query->countQuery() does not appear to be functioning as expected, so manually count.
-          $has_insurance_query->addExpression('count(mci_ip.request_id)');
+          $has_insurance_query->addExpression('count(mc.request_id)');
 
-          $has_insurance_query->where('mer.id = mci_ip.request_id');
+          $has_insurance_query->where('mer.id = mc.request_id');
 
           $nand = db_and();
           $nand->not();
@@ -2760,8 +2757,8 @@ function mfcs_autocancel_old_requests_cron() {
   try {
     $query = db_select('mfcs_requests', 'mer');
 
-    $query->innerJoin('mfcs_current_dates', 'mcd', 'mer.id = mcd.request_id');
-    $query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mcd.request_id = mfdd.request_id AND mcd.date = mfdd.revision');
+    $query->innerJoin('mfcs_current', 'mc', 'mer.id = mc.request_id');
+    $query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mc.request_id = mfdd.request_id AND mc.dates_date = mfdd.revision');
 
     $query->addField('mer', 'id', 'id');
 
@@ -3784,69 +3781,65 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL, $revision_id
 
     unset($mer);
 
-    foreach ($structure as $table_name => &$fields) {
-      $current_table_name = 'mfcs_current_' . $table_name;
+    $query = db_select('mfcs_current', 'mc');
+    $query->condition('mc.request_id', $request_id);
+    $query->fields('mc');
 
+    $current = $query->execute()->fetchObject();
+    $request['current'] = array();
+
+    if (!is_object($current)) {
+      return FALSE;
+    }
+
+    foreach ($structure as $table_name => &$fields) {
       if (!array_key_exists($table_name, $request)) {
         $request[$table_name] = array();
       }
 
-      $query = db_select($current_table_name, 'mctn');
-      $query->condition('mctn.request_id', $request_id);
-      $query->fields('mctn');
-
-      $results = $query->execute()->fetchAll();
-
-      if (empty($results)) {
-        unset($current);
-        unset($executed);
-        unset($query);
-
-        continue;
+      if (!array_key_exists($table_name, $request['current'])) {
+        $request['current'][$table_name] = array();
       }
 
-      $current = array_pop($results);
-
-      // build a list of current tables so that revision ids may be processed at any point.
-      if (!isset($request['current'])) {
-        $request['current'] = array();
-      }
-
-      $request['current'][$table_name] = array();
-
-      if (is_null($revision_id)) {
-        foreach ((array) $current as $current_key => $current_values) {
-          if ($current_key == 'request_id') continue;
-
-          $request['current'][$table_name][$current_key] = $current_values;
+      foreach ($fields as $field_name => &$field_values) {
+        $current_name = $table_name . '_' . $field_name;
+        if (is_null($revision_id)) {
+          if (property_exists($current, $current_name)) {
+            $request['current'][$table_name][$field_name] = $current->$current_name;
+          }
         }
-      }
-      else {
-        foreach ((array) $current as $current_key => $current_values) {
-          if ($current_key == 'request_id') continue;
+        else {
+          if (property_exists($current, $current_name)) {
+            $request['current'][$table_name][$field_name] = $current->$current_name;
+          }
 
-          $query = db_select('mfcs_field_' . $table_name . '_' . $current_key, 'mftc');
-          $query->fields('mftc', array('revision'));
-          $query->condition('mftc.request_id', $request_id);
-          $query->condition('mftc.date', $revision_date, '<=');
-          $query->orderBy('mftc.date', 'DESC');
+          $query = db_select('mfcs_field_' . $current_name, 'mftf');
+          $query->addField('mftf', 'revision', 'revision');
+          $query->condition('mftf.request_id', $request_id);
+          $query->condition('mftf.date', $revision_date, '<=');
+          $query->orderBy('mftf.date', 'DESC');
           $query->range(0, 1);
 
           $result = $query->execute()->fetchField();
 
-          $request['current'][$table_name][$current_key] = $result;
-          $current->$current_key = $result;
+          if ($result !== FALSE) {
+            $request['current'][$table_name][$field_name] = $result;
+            $current->$current_name = $result;
+          }
         }
-      }
 
-      foreach ($fields as $field_name => &$field_values) {
         if (isset($structure[$table_name][$field_name]['storage']) && $structure[$table_name][$field_name]['storage'] == 'alternate' && array_key_exists('alternate', $structure[$table_name][$field_name])) {
           foreach ($structure[$table_name][$field_name]['alternate'] as $alternate_name => &$alternate_data) {
             $field_table_name = 'mfcs_field_' . $table_name . '_' . $alternate_name;
+            $current_name = $table_name . '_' . $alternate_name;
+
+            if (property_exists($current, $current_name)) {
+              $request['current'][$table_name][$field_name] = $current->$current_name;
+            }
 
             $query = db_select($field_table_name, 'mftf');
             $query->condition('mftf.request_id', $request_id);
-            $query->condition('mftf.revision', $current->$alternate_name);
+            $query->condition('mftf.revision', $current->$current_name);
             $query->fields('mftf');
 
             $results = $query->execute()->fetchAll();
@@ -3860,11 +3853,11 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL, $revision_id
           }
         }
         else {
-          $field_table_name = 'mfcs_field_' . $table_name . '_' . $field_name;
+          $field_table_name = 'mfcs_field_' . $current_name;
 
           $query = db_select($field_table_name, 'mftf');
           $query->condition('mftf.request_id', $request_id);
-          $query->condition('mftf.revision', $current->$field_name);
+          $query->condition('mftf.revision', $current->$current_name);
           $query->fields('mftf');
 
           $results = $query->execute()->fetchAll();
@@ -3881,7 +3874,6 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL, $revision_id
         unset($query);
       }
 
-      unset($current);
       unset($results);
       unset($query);
     }
@@ -4006,16 +3998,10 @@ function mfcs_load_request_by_timestamp($request_id, $timestamp, $revision_user_
       }
     }
 
+    $request['current'] = array();
     foreach ($structure as $table_name => &$fields) {
-      $current_table_name = 'mfcs_current_' . $table_name;
-
       if (!array_key_exists($table_name, $request)) {
         $request[$table_name] = array();
-      }
-
-      // build a list of current tables so that revision ids may be processed at any point.
-      if (!isset($request['current'])) {
-        $request['current'] = array();
       }
 
       $request['current'][$table_name] = array();
@@ -4055,9 +4041,7 @@ function mfcs_load_request_by_timestamp($request_id, $timestamp, $revision_user_
           $query->condition('mftf.user_id', $revision_user_id);
           $query->fields('mftf');
 
-          #$results = $query->execute()->fetchAll();
-          $executed = $query->execute();
-          $results = $executed->fetchAll();
+          $results = $query->execute()->fetchAll();
 
           if (empty($results)) {
             $request[$table_name][$field_name] = array();
@@ -4220,16 +4204,14 @@ function mfcs_load_user_by_banner_id($banner_id, $reset = FALSE) {
  *
  * @param array $structure
  *   Describes how the secondary tables are populated and processed.
- * @param array $structure_tables
- *   A collection of 'current' tables to create or update.
+ * @param array $structure_current
+ *   The 'current' table with the fields to be updated.
  * @param array $structure_field_tables
  *   A collection of 'field' tables to create or update.
  * @param string $table_name
  *   Name of the current table being processed.
  * @param string $field_name
  *   Name of the current field being processed.
- * @param string $db_table
- *   The name of the 'current' table as defined the SQL database.
  * @param string $db_table_field
  *   The name of the 'field' table as defined the SQL database.
  * @param array $user_data
@@ -4246,7 +4228,7 @@ function mfcs_load_user_by_banner_id($banner_id, $reset = FALSE) {
  * @see mfcs_table_structure()
  * @see mfcs_load_request_by_id()
  */
-function mfcs_build_table_structure($structure, &$structure_tables, &$structure_field_tables, $table_name, $field_name, $db_table, $db_table_field, $user_data, $values, $form_state, $request = NULL) {
+function mfcs_build_table_structure($structure, &$structure_current, &$structure_field_tables, $table_name, $field_name, $db_table_field, $user_data, $values, $form_state, $request = NULL) {
   $instance = mfcs_instance();
 
   if (is_null($request)) {
@@ -4255,7 +4237,6 @@ function mfcs_build_table_structure($structure, &$structure_tables, &$structure_
   }
   else {
     $request_id = $request['mer']['id'][0]->value;
-    $structure_tables[$db_table]['request_id'] = $request_id;
 
     $revision = mfcs_load_request_revision_number($request_id, $db_table_field);
     if ($revision === FALSE) {
@@ -4288,7 +4269,7 @@ function mfcs_build_table_structure($structure, &$structure_tables, &$structure_
 
     // alternate is used for handling fields that are stored in multiple separate tables.
     if ($storage_key == 'alternate') {
-      unset($structure_tables[$db_table][$field_name]);
+      unset($structure_current[$table_name . '_' . $field_name]);
       unset($structure_field_tables[$db_table_field]);
 
       foreach ($values as $delta => $value) {
@@ -4326,12 +4307,12 @@ function mfcs_build_table_structure($structure, &$structure_tables, &$structure_
             $structure_field_tables[$db_table_field][$delta]['request_id'] = $request_id;
           }
 
-          $structure_tables[$db_table][$alternate_name] = $revision;
+          $structure_current[$table_name . '_' . $alternate_name] = $revision;
         }
       }
     }
     else {
-      $structure_tables[$db_table][$field_name] = $revision;
+      $structure_current[$table_name . '_' . $field_name] = $revision;
 
       foreach ($values as $delta => $value) {
         $structure_field_tables[$db_table_field][$delta] = array();
@@ -4399,7 +4380,7 @@ function mfcs_build_table_structure($structure, &$structure_tables, &$structure_
     }
   }
   else {
-    $structure_tables[$db_table][$field_name] = $revision;
+    $structure_current[$table_name . '_' . $field_name] = $revision;
 
     foreach ($values as $delta => $value) {
       $structure_field_tables[$db_table_field][$delta] = array();
@@ -4615,20 +4596,17 @@ function mfcs_check_room_availability($room, $date, $time_start, $time_stop, $re
   try {
     $query = db_select('mfcs_requests', 'mer');
 
-    $query->innerJoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
-    $query->innerJoin('mfcs_current_dates', 'mcd', 'mer.id = mcd.request_id AND mct.request_id = mcd.request_id');
-
-    $query->innerJoin('mfcs_field_top_room', 'mftr', 'mct.request_id = mftr.request_id AND mcd.request_id = mftr.request_id AND mct.room = mftr.revision AND mftr.delta = 0');
-
-    $query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mct.request_id = mfdd.request_id AND mcd.request_id = mfdd.request_id AND mcd.date = mfdd.revision');
+    $query->innerJoin('mfcs_current', 'mc', 'mer.id = mc.request_id');
+    $query->innerJoin('mfcs_field_top_room', 'mftr', 'mc.request_id = mftr.request_id AND mc.top_room = mftr.revision AND mftr.delta = 0');
+    $query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mc.request_id = mfdd.request_id AND mc.dates_date = mfdd.revision');
 
     $query->addField('mer', 'id', 'request_id');
     $query->addField('mer', 'status', 'status');
     $query->addField('mer', 'step', 'step');
     $query->addField('mfdd', 'value', 'date');
-    $query->addField('mcd', 'date', 'date_revision');
-    $query->addField('mcd', 'time_start', 'time_start_revision');
-    $query->addField('mcd', 'time_stop', 'time_stop_revision');
+    $query->addField('mc', 'dates_date', 'date_revision');
+    $query->addField('mc', 'dates_time_start', 'time_start_revision');
+    $query->addField('mc', 'dates_time_stop', 'time_stop_revision');
 
     $query->distinct();
 
@@ -4900,19 +4878,15 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
   $found = array();
   try {
     $query = db_select('mfcs_requests', 'mer');
+    $query->innerJoin('mfcs_current', 'mc', 'mer.id = mc.request_id');
 
     $already_joined['mfcs_requests'] = 'mer';
+    $already_joined['mfcs_current'] = 'mc';
     $already_joined['mfcs_field_top_status'] = NULL;
     $already_joined['mfcs_field_top_step'] = NULL;
 
-    $query->innerJoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
-    $query->innerJoin('mfcs_current_information', 'mci', 'mer.id = mci.request_id');
-
-    $already_joined['mfcs_current_top'] = 'mct';
-    $already_joined['mfcs_current_information'] = 'mci';
-
-    $query->innerJoin('mfcs_field_top_location', 'mftl', 'mct.request_id = mftl.request_id AND mct.location = mftl.revision AND mftl.delta = 0');
-    $query->innerJoin('mfcs_field_top_room', 'mftr', 'mct.request_id = mftr.request_id AND mct.room = mftr.revision AND mftr.delta = 0');
+    $query->innerJoin('mfcs_field_top_location', 'mftl', 'mc.request_id = mftl.request_id AND mc.top_location = mftl.revision AND mftl.delta = 0');
+    $query->innerJoin('mfcs_field_top_room', 'mftr', 'mc.request_id = mftr.request_id AND mc.top_room = mftr.revision AND mftr.delta = 0');
 
     $already_joined['mfcs_field_top_location'] = 'mftl';
     $already_joined['mfcs_field_top_room'] = 'mftr';
@@ -4925,8 +4899,8 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
     $already_joined['mfcs_banner_buildings'] = 'mbb';
     $already_joined['mfcs_banner_locations'] = 'mbl';
 
-    $query->innerJoin('mfcs_field_information_title', 'mfit', 'mci.request_id = mfit.request_id AND mci.title = mfit.revision AND mfit.delta = 0');
-    $query->innerJoin('mfcs_field_information_type', 'mfitp', 'mci.request_id = mfitp.request_id AND mci.type = mfitp.revision AND mfitp.delta = 0');
+    $query->innerJoin('mfcs_field_information_title', 'mfit', 'mc.request_id = mfit.request_id AND mc.information_title = mfit.revision AND mfit.delta = 0');
+    $query->innerJoin('mfcs_field_information_type', 'mfitp', 'mc.request_id = mfitp.request_id AND mc.information_type = mfitp.revision AND mfitp.delta = 0');
 
     $already_joined['mfcs_field_information_title'] = 'mfit';
     $already_joined['mfcs_field_information_type'] = 'mfitp';
@@ -4935,14 +4909,10 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
     if (is_string($search)) {
       $query->distinct();
 
-      $query->innerJoin('mfcs_current_dates', 'mcd', 'mer.id = mcd.request_id');
-
-      $already_joined['mfcs_current_dates'] = 'mcd';
-
-      $query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mcd.request_id = mfdd.request_id AND mcd.date = mfdd.revision');
-      $query->innerJoin('mfcs_field_dates_time_start', 'mfdts', 'mcd.request_id = mfdts.request_id AND mcd.time_start = mfdts.revision');
-      $query->innerJoin('mfcs_field_dates_time_stop', 'mfdtsp', 'mcd.request_id = mfdtsp.request_id AND mcd.time_stop = mfdtsp.revision');
-      $query->innerJoin('mfcs_field_dates_category', 'mfdc', 'mcd.request_id = mfdc.request_id AND mcd.category = mfdc.revision AND mfdc.delta = 0');
+      $query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mc.request_id = mfdd.request_id AND mc.dates_date = mfdd.revision');
+      $query->innerJoin('mfcs_field_dates_time_start', 'mfdts', 'mc.request_id = mfdts.request_id AND mc.dates_time_start = mfdts.revision');
+      $query->innerJoin('mfcs_field_dates_time_stop', 'mfdtsp', 'mc.request_id = mfdtsp.request_id AND mc.dates_time_stop = mfdtsp.revision');
+      $query->innerJoin('mfcs_field_dates_category', 'mfdc', 'mc.request_id = mfdc.request_id AND mc.dates_category = mfdc.revision AND mfdc.delta = 0');
 
       $already_joined['mfcs_field_dates_date'] = 'mfdd';
       $already_joined['mfcs_field_dates_time_start'] = 'mfdts';
@@ -4954,17 +4924,15 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
       $already_added['time_stop'] = 'mfdtsp.value';
       $already_added['category'] = 'mfdc.value';
 
-      $query->innerJoin('mfcs_field_top_additional', 'mfta', 'mct.request_id = mfta.request_id AND mct.additional = mfta.revision AND mfta.delta = 0');
-      $query->innerJoin('mfcs_field_information_organization', 'mfio', 'mci.request_id = mfio.request_id AND mci.organization = mfio.revision AND mfta.delta = 0');
+      $query->innerJoin('mfcs_field_top_additional', 'mfta', 'mc.request_id = mfta.request_id AND mc.top_additional = mfta.revision AND mfta.delta = 0');
+      $query->innerJoin('mfcs_field_information_organization', 'mfio', 'mc.request_id = mfio.request_id AND mc.information_organization = mfio.revision AND mfta.delta = 0');
 
       $already_joined['mfcs_field_top_additional'] = 'mfta';
       $already_joined['mfcs_field_information_organization'] = 'mfio';
 
-      $query->innerJoin('mfcs_current_plans', 'mcp', 'mer.id = mcp.request_id');
-      $query->innerJoin('mfcs_field_plans_activities', 'mfpa', 'mcp.request_id = mfpa.request_id AND mcp.activities = mfpa.revision AND mfpa.delta = 0');
-      $query->innerJoin('mfcs_field_plans_description', 'mfpd', 'mcp.request_id = mfpd.request_id AND mcp.description = mfpd.revision AND mfpd.delta = 0');
+      $query->innerJoin('mfcs_field_plans_activities', 'mfpa', 'mc.request_id = mfpa.request_id AND mc.plans_activities = mfpa.revision AND mfpa.delta = 0');
+      $query->innerJoin('mfcs_field_plans_description', 'mfpd', 'mc.request_id = mfpd.request_id AND mc.plans_description = mfpd.revision AND mfpd.delta = 0');
 
-      $already_joined['mfcs_current_plans'] = 'mcp';
       $already_joined['mfcs_field_plans_activities'] = 'mfpa';
       $already_joined['mfcs_field_plans_description'] = 'mfpd';
     }
@@ -4993,6 +4961,11 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
       if ($review_restrictions != MFCS_REVIEW_RESTRICTION_NONE) {
         $query->addField('mer', 'step', 'step');
       }
+
+      $query->addField('mc', 'dates_date', 'current_date');
+      $query->addField('mc', 'dates_time_start', 'current_time_start');
+      $query->addField('mc', 'dates_time_stop', 'current_time_stop');
+      $query->addField('mc', 'dates_category', 'current_category');
     }
 
     $already_added['status'] = 'mer.status';
@@ -5008,6 +4981,11 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
     $already_added['room_name'] = 'mbr.human_name';
     $already_added['building_name'] = 'mbb.human_name';
     $already_added['location_name'] = 'mbl.human_name';
+
+    $already_added['current_date'] = 'mc.dates_date';
+    $already_added['current_time_start'] = 'mc.dates_time_start';
+    $already_added['current_time_stop'] = 'mc.dates_time_stop';
+    $already_added['current_category'] = 'mc.dates_category';
 
     // add custom fields to the select results as requested by the caller.
     if (!empty($extra_fields) && !$count) {
@@ -5056,20 +5034,12 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
     }
 
     if ($reviewer || $manager) {
-      if (!array_key_exists('mfcs_current_request_coordinator', $already_joined)) {
-        $query->innerJoin('mfcs_current_request_coordinator', 'mcrc', 'mer.id = mcrc.request_id');
-      }
-
       if (!array_key_exists('mfcs_field_request_coordinator_classification', $already_joined)) {
-        $query->innerJoin('mfcs_field_request_coordinator_classification', 'mfrcc', 'mcrc.request_id = mfrcc.request_id AND mcrc.classification = mfrcc.revision AND mfrcc.delta = 0');
-      }
-
-      if (!array_key_exists('mfcs_current_venue_coordinator', $already_joined)) {
-        $query->innerJoin('mfcs_current_venue_coordinator', 'mcvc', 'mer.id = mcvc.request_id');
+        $query->innerJoin('mfcs_field_request_coordinator_classification', 'mfrcc', 'mc.request_id = mfrcc.request_id AND mc.request_coordinator_classification = mfrcc.revision AND mfrcc.delta = 0');
       }
 
       if (!array_key_exists('mfcs_field_venue_coordinator_user_id', $already_joined)) {
-        $query->innerJoin('mfcs_field_venue_coordinator_user_id', 'mfvcui', 'mcvc.request_id = mfvcui.request_id AND mcvc.user_id = mfvcui.revision AND mfvcui.delta = 0');
+        $query->innerJoin('mfcs_field_venue_coordinator_user_id', 'mfvcui', 'mc.request_id = mfvcui.request_id AND mc.venue_coordinator_user_id = mfvcui.revision AND mfvcui.delta = 0');
       }
 
       $or = NULL;
@@ -5270,19 +5240,14 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
       $found = $results;
     }
 
-    $result_ids = array();
-    $date_order = array();
-    if (is_array($results)) {
-      $result_ids = array_keys($results);
-    }
-
     // fetch all available dates.
-    if (!empty($result_ids)) {
-      $sub_query = db_select('mfcs_current_dates', 'mcd');
-      $sub_query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mcd.request_id = mfdd.request_id AND mcd.date = mfdd.revision');
-      $sub_query->leftjoin('mfcs_field_dates_time_start', 'mfdts', 'mcd.request_id = mfdts.request_id AND mcd.time_start = mfdts.revision AND mfdd.delta = mfdts.delta');
-      $sub_query->leftjoin('mfcs_field_dates_time_stop', 'mfdtsp', 'mcd.request_id = mfdtsp.request_id AND mcd.time_stop = mfdtsp.revision AND mfdts.delta = mfdtsp.delta');
-      $sub_query->leftjoin('mfcs_field_dates_category', 'mfdc', 'mcd.request_id = mfdc.request_id AND mcd.category = mfdc.revision AND mfdts.delta = mfdc.delta');
+    $date_order = array();
+    if (!empty($results)) {
+      $sub_query = db_select('mfcs_current', 'mc');
+      $sub_query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mc.request_id = mfdd.request_id AND mc.dates_date = mfdd.revision');
+      $sub_query->innerJoin('mfcs_field_dates_time_start', 'mfdts', 'mc.request_id = mfdts.request_id AND mc.dates_time_start = mfdts.revision AND mfdd.delta = mfdts.delta');
+      $sub_query->innerJoin('mfcs_field_dates_time_stop', 'mfdtsp', 'mc.request_id = mfdtsp.request_id AND mc.dates_time_stop = mfdtsp.revision AND mfdts.delta = mfdtsp.delta');
+      $sub_query->innerJoin('mfcs_field_dates_category', 'mfdc', 'mc.request_id = mfdc.request_id AND mc.dates_category = mfdc.revision AND mfdts.delta = mfdc.delta');
 
       $sub_query->addField('mfdd', 'request_id', 'id');
       $sub_query->addField('mfdd', 'value', 'date');
@@ -5291,7 +5256,7 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
       $sub_query->addField('mfdtsp', 'value', 'time_stop');
       $sub_query->addField('mfdc', 'value', 'category');
 
-      $sub_query->condition('mfdd.request_id', $result_ids, 'IN');
+      $sub_query->condition('mfdd.request_id', array_keys($results), 'IN');
 
       $sub_query->orderBy('date', 'ASC');
       $sub_query->orderBy('time_start', 'ASC');
@@ -5478,20 +5443,7 @@ function mfcs_request_process_listing_search_array(&$query, &$operand, &$already
         $search_values['column'] = $search_values['field_name'];
       }
       else {
-        $mfcs_current = 'mfcs_current_' . $search_values['group_name'];
         $mfcs_field = 'mfcs_field_' . $search_values['group_name'] . '_' . $search_values['field_name'];
-
-        if (!array_key_exists($mfcs_current, $already_joined)) {
-          $already_joined[$mfcs_current] = 'mc_c_' . $already_joined_count;
-          $already_joined_count++;
-
-          $current_alias = $already_joined[$mfcs_current];
-
-          $query->$join($mfcs_current, $current_alias, 'mer.id = ' . $current_alias . '.request_id');
-        }
-        else {
-          $current_alias = $already_joined[$mfcs_current];
-        }
 
         if (!array_key_exists($mfcs_field, $already_joined)) {
           $already_joined[$mfcs_field] = 'mfg_c_' . $already_joined_count;
@@ -5500,10 +5452,10 @@ function mfcs_request_process_listing_search_array(&$query, &$operand, &$already
           $field_alias = $already_joined[$mfcs_field];
 
           if (isset($search_values['multiple']) && $search_values['multiple']) {
-            $query->$join($mfcs_field, $field_alias, $current_alias . '.request_id = ' . $field_alias . '.request_id AND ' . $current_alias . '.' . $search_values['field_name'] . ' = ' . $field_alias . '.revision');
+            $query->$join($mfcs_field, $field_alias, 'mc.request_id = ' . $field_alias . '.request_id AND mc.' . $search_values['group_name'] . '_' . $search_values['field_name'] . ' = ' . $field_alias . '.revision');
           }
           else {
-            $query->$join($mfcs_field, $field_alias, $current_alias . '.request_id = ' . $field_alias . '.request_id AND ' . $current_alias . '.' . $search_values['field_name'] . ' = ' . $field_alias . '.revision AND ' . $field_alias . '.delta = 0');
+            $query->$join($mfcs_field, $field_alias, 'mc.request_id = ' . $field_alias . '.request_id AND mc.' . $search_values['group_name'] . '_' . $search_values['field_name'] . ' = ' . $field_alias . '.revision AND ' . $field_alias . '.delta = 0');
           }
         }
         else {
@@ -5645,7 +5597,7 @@ function mfcs_get_latest_reviews($request_id, $steps = array(), $decisions = arr
     $query = db_select('mfcs_field_review_review', 'mfrr');
 
     $query->innerJoin('mfcs_review_classifications', 'mrc', 'mfrr.id = mrc.review_id');
-    $query->innerJoin('mfcs_current_review', 'mcr', 'mfrr.request_id = mcr.request_id and mfrr.revision = mcr.review');
+    $query->innerJoin('mfcs_current', 'mc', 'mfrr.request_id = mc.request_id and mfrr.revision = mc.review_review');
 
     $query->addField('mfrr', 'id', 'id');
     $query->addField('mfrr', 'user_id', 'user_id');
@@ -6149,7 +6101,7 @@ function mfcs_get_reviewers_yet_to_review($request_id) {
 
   try {
     $query = db_select('mfcs_field_review_review', 'mfrr');
-    $query->innerJoin('mfcs_current_review', 'mcr', 'mfrr.request_id = mcr.request_id and mfrr.revision = mcr.review');
+    $query->innerJoin('mfcs_current', 'mc', 'mfrr.request_id = mc.request_id and mfrr.revision = mc.review_review');
 
     $query->addField('mfrr', 'user_id', 'user_id');
 
@@ -6220,22 +6172,18 @@ function mfcs_get_requests_not_providing_insurance($date_from = NULL, $date_to =
   try {
     $query = db_select('mfcs_requests', 'mer');
 
-    $query->innerJoin('mfcs_current_top', 'mct', 'mer.id = mct.request_id');
-    $query->innerJoin('mfcs_current_information', 'mci', 'mer.id = mci.request_id');
-    $query->innerJoin('mfcs_current_dates', 'mcd', 'mer.id = mcd.request_id');
-    $query->innerJoin('mfcs_current_insurance', 'mcie', 'mer.id = mci.request_id');
-    $query->innerJoin('mfcs_current_request_coordinator', 'mcrc', 'mer.id = mcrc.request_id');
+    $query->innerJoin('mfcs_current', 'mc', 'mer.id = mc.request_id');
 
-    $query->innerJoin('mfcs_field_information_title', 'mfit', 'mci.request_id = mfit.request_id AND mci.title = mfit.revision AND mfit.delta = 0');
+    $query->innerJoin('mfcs_field_information_title', 'mfit', 'mc.request_id = mfit.request_id AND mc.information_title = mfit.revision AND mfit.delta = 0');
 
-    $query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mcd.request_id = mfdd.request_id AND mcd.date = mfdd.revision');
+    $query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mc.request_id = mfdd.request_id AND mc.dates_date = mfdd.revision');
 
-    $query->innerJoin('mfcs_field_insurance_contractor', 'mfic', 'mcie.request_id = mfic.request_id AND mcie.contractor = mfic.revision AND mfic.delta = 0');
-    $query->innerJoin('mfcs_field_insurance_unaffiliated', 'mfiu', 'mcie.request_id = mfiu.request_id AND mcie.unaffiliated = mfiu.revision AND mfiu.delta = 0');
-    $query->innerJoin('mfcs_field_insurance_provided', 'mfip', 'mcie.request_id = mfip.request_id AND mcie.provided = mfip.revision AND mfip.delta = 0');
+    $query->innerJoin('mfcs_field_insurance_contractor', 'mfic', 'mc.request_id = mfic.request_id AND mc.insurance_contractor = mfic.revision AND mfic.delta = 0');
+    $query->innerJoin('mfcs_field_insurance_unaffiliated', 'mfiu', 'mc.request_id = mfiu.request_id AND mc.insurance_unaffiliated = mfiu.revision AND mfiu.delta = 0');
+    $query->innerJoin('mfcs_field_insurance_provided', 'mfip', 'mc.request_id = mfip.request_id AND mc.insurance_provided = mfip.revision AND mfip.delta = 0');
 
-    $query->innerJoin('mfcs_field_request_coordinator_name', 'mfrcn', 'mcrc.request_id = mfrcn.request_id AND mcrc.name = mfrcn.revision AND mfrcn.delta = 0');
-    $query->innerJoin('mfcs_field_request_coordinator_email', 'mfrce', 'mcrc.request_id = mfrce.request_id AND mcrc.email = mfrce.revision AND mfrce.delta = 0');
+    $query->innerJoin('mfcs_field_request_coordinator_name', 'mfrcn', 'mc.request_id = mfrcn.request_id AND mc.request_coordinatorname = mfrcn.revision AND mfrcn.delta = 0');
+    $query->innerJoin('mfcs_field_request_coordinator_email', 'mfrce', 'mc.request_id = mfrce.request_id AND mc.request_coordinatoremail = mfrce.revision AND mfrce.delta = 0');
 
 
     $query->addField('mer', 'id', 'id');

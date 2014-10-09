@@ -588,12 +588,10 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
   mfcs_include(MFCS_INCLUDE_TABLE);
 
   $structure = mfcs_table_structure();
-  $structure_tables = array();
+  $structure_current = array();
   $structure_field_tables = array();
 
   foreach ($structure as $table_name => &$fields) {
-    $db_table = 'mfcs_current_' . $table_name;
-
     foreach ($fields as $field_name => &$field_values) {
       // manual processing fields must not be auto-populated through the normal form submit process.
       if (array_key_exists('manual_processing', $field_values) && $field_values['manual_processing']) {
@@ -636,13 +634,9 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
         continue;
       }
 
-      if (!array_key_exists($db_table, $structure_tables)) {
-        $structure_tables[$db_table] = array();
-      }
-
       $db_table_field = 'mfcs_field_' . $table_name . '_' . $field_name;
 
-      mfcs_build_table_structure($structure, $structure_tables, $structure_field_tables, $table_name, $field_name, $db_table, $db_table_field, $user_data, $current_new, $form_state, $request);
+      mfcs_build_table_structure($structure, $structure_current, $structure_field_tables, $table_name, $field_name, $db_table_field, $user_data, $current_new, $form_state, $request);
     }
   }
 
@@ -673,20 +667,10 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
         }
       }
 
-      foreach ($structure_tables as $table_name => $fields) {
-        $query = db_update($table_name);
-        $query->condition('request_id', $request_id);
-        $query->fields($fields);
-        $query->execute();
-      }
-
-      // if the request has been updated while it is in a locked status.
+      // if the request has been updated while it is in a locked status, the review log must be reset/restarted.
       if ($status == MFCS_REQUEST_STATUS_LOCKED) {
         $step_revision = $request['current']['top']['step'] + 1;
-
-        $mfcs_current_top = array(
-          'step' => $step_revision,
-        );
+        $structure_current['top_step'] = $step_revision;
 
         $mfcs_field_top_step = array(
           'request_id' => $request_id,
@@ -699,11 +683,6 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
 
         $query = db_insert('mfcs_field_top_step');
         $query->fields($mfcs_field_top_step);
-        $query->execute();
-
-        $query = db_update('mfcs_current_top');
-        $query->condition('request_id', $request_id);
-        $query->fields($mfcs_current_top);
         $query->execute();
 
         $query = db_delete('mfcs_reviewed');
@@ -719,9 +698,7 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
           $review_revision++;
         }
 
-        $mfcs_current_review = array(
-          'review' => $review_revision,
-        );
+        $structure_current['review_review'] = $review_revision;
 
         $mfcs_field_review_review = array(
           'request_id' => $request_id,
@@ -738,39 +715,24 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
         $query->fields($mfcs_field_review_review);
         $query->execute();
 
-        $query = db_update('mfcs_current_review');
-        $query->condition('request_id', $request_id);
-        $query->fields($mfcs_current_review);
-        $query->execute();
+        $mfcs_current['requirements_facilities'] = NULL;
+        $mfcs_current['requirements_equipment'] = NULL;
+        $mfcs_current['requirements_custodial'] = NULL;
+        $mfcs_current['requirements_security'] = NULL;
+        $mfcs_current['requirements_other'] = NULL;
+        $mfcs_current['requirements_waved'] = NULL;
+        $mfcs_current['requirements_university'] = NULL;
 
-        $mfcs_current_requirements = array(
-          'request_id' => $request_id,
-          'facilities' => NULL,
-          'equipment' => NULL,
-          'custodial' => NULL,
-          'security' => NULL,
-          'other' => NULL,
-          'waved' => NULL,
-          'university' => NULL,
-        );
-
-        $mfcs_current_insurance = array(
-          'request_id' => $request_id,
-          'contractor' => NULL,
-          'unaffiliated' => NULL,
-          'provided' => NULL,
-        );
-
-        $query = db_update('mfcs_current_requirements');
-        $query->condition('request_id', $request_id);
-        $query->fields($mfcs_current_requirements);
-        $query->execute();
-
-        $query = db_update('mfcs_current_insurance');
-        $query->condition('request_id', $request_id);
-        $query->fields($mfcs_current_insurance);
-        $query->execute();
+        $mfcs_current['insurance_contractor'] = NULL;
+        $mfcs_current['insurance_unaffiliated'] = NULL;
+        $mfcs_current['insurance_provided'] = NULL;
       }
+
+      // update the current revisions table.
+      $query = db_update('mfcs_current');
+      $query->condition('request_id', $request_id);
+      $query->fields($structure_current);
+      $query->execute();
 
       // enforce transaction execution
       unset($transaction);
