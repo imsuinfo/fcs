@@ -77,6 +77,7 @@ function mfcs_testing_clone_request($request_id, $custom_title = NULL, $custom_d
     $state['build_info']['args'] = array($request_id);
     $state['no_cache'] = TRUE;
     $state['values']['form']['step'] = 'clone';
+    $state['triggering_element']['#id'] = 'submit-request-submit';
 
     $form = drupal_build_form($id, $state);
 
