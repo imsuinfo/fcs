@@ -224,7 +224,7 @@ $databases = array (
       'port' => '5092',
       'driver' => 'pgsql',
       'prefix' => '',
-      'transactions' => TRUE
+      'transactions' => TRUE,
     ),
   ),
   'oracle' =>
