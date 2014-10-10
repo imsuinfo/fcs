@@ -6180,8 +6180,8 @@ function mfcs_get_requests_not_providing_insurance($date_from = NULL, $date_to =
     $query->innerJoin('mfcs_field_insurance_unaffiliated', 'mfiu', 'mc.request_id = mfiu.request_id AND mc.insurance_unaffiliated = mfiu.revision AND mfiu.delta = 0');
     $query->innerJoin('mfcs_field_insurance_provided', 'mfip', 'mc.request_id = mfip.request_id AND mc.insurance_provided = mfip.revision AND mfip.delta = 0');
 
-    $query->innerJoin('mfcs_field_request_coordinator_name', 'mfrcn', 'mc.request_id = mfrcn.request_id AND mc.request_coordinatorname = mfrcn.revision AND mfrcn.delta = 0');
-    $query->innerJoin('mfcs_field_request_coordinator_email', 'mfrce', 'mc.request_id = mfrce.request_id AND mc.request_coordinatoremail = mfrce.revision AND mfrce.delta = 0');
+    $query->innerJoin('mfcs_field_request_coordinator_name', 'mfrcn', 'mc.request_id = mfrcn.request_id AND mc.request_coordinator_name = mfrcn.revision AND mfrcn.delta = 0');
+    $query->innerJoin('mfcs_field_request_coordinator_email', 'mfrce', 'mc.request_id = mfrce.request_id AND mc.request_coordinator_email = mfrce.revision AND mfrce.delta = 0');
 
 
     $query->addField('mer', 'id', 'id');
