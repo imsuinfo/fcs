@@ -729,8 +729,8 @@ function mfcs_hook_menu() {
   );
 
   $items['requests/email_log-0'] = array(
-    'title' => "Request E-mail Log",
-    'description' => "Request E-mail Log",
+    'title' => "E-mail Logs",
+    'description' => "E-mail Logs",
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_email_log_0_form'),
     'file' => 'request_email_log.inc',
@@ -742,8 +742,8 @@ function mfcs_hook_menu() {
   );
 
   $items['requests/email_log-0/%'] = array(
-    'title' => "Request E-mail Log",
-    'description' => "Request E-mail Log",
+    'title' => "E-mail Logs",
+    'description' => "E-mail Logs",
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_email_log_0_form', 2),
     'file' => 'request_email_log.inc',
@@ -755,8 +755,8 @@ function mfcs_hook_menu() {
   );
 
   $items['requests/email_log-0/view/%'] = array(
-    'title' => "Request E-mail Log",
-    'description' => "Request E-mail Log",
+    'title' => "E-mail Logs",
+    'description' => "E-mail Logs",
     'page callback' => 'mfcs_request_email_log_0_view_page',
     'page arguments' => array(3),
     'file' => 'request_email_log.inc',

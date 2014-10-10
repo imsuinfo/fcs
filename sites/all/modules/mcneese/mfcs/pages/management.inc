@@ -77,8 +77,8 @@ function mfcs_management_page() {
       $items_array = &$items_1;
     }
 
-    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/email_log-0" class="item-link">Request E-mail Log</a></h4>';
-    $help = '<div class="item-description inline-block">View logs of e-mails sent out for requests.</div>';
+    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/email_log-0" class="item-link">E-mail Logs</a></h4>';
+    $help = '<div class="item-description inline-block">View the e-mails sent by this system.</div>';
     $items_array[] = array(
       'data' => $link . '<br>' . $help,
       'class' => array(
