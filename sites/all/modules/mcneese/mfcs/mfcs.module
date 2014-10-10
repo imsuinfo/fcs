@@ -2315,6 +2315,7 @@ function mfcs_sync_banner_to_local() {
           }
           elseif ($key == 'room_desc') {
             $room_item['human_name'] = $v;
+            $room_item['disabled'] = 0;
 
             // Banner stores other things inside of the room number, so if it actually is a number, store it in the human name, which contains the description.
             if (isset($room_item['machine_name']) && cf_is_integer($room_item['machine_name'])) {
