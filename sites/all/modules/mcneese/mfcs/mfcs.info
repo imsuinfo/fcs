@@ -42,6 +42,7 @@ files[] = pages/request_cancel.inc
 files[] = pages/request_create.inc
 files[] = pages/request_delete.inc
 files[] = pages/request_edit.inc
+files[] = pages/request_email_log.inc
 files[] = pages/request_history.inc
 files[] = pages/request_ical.inc
 files[] = pages/request_list.inc

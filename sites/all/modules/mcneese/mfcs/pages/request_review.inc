@@ -98,6 +98,9 @@ function mfcs_request_review_0_page($form, &$form_state, $page_number = 0) {
   $table = mfcs_build_request_table($items, $rows_per_page, $columns);
   $table['attributes']['class'] = array('mfcs-table-requests', 'mfcs-review_page-table');
 
+  if (is_null($order) && isset($table['header']['id'])) {
+    $table['header']['id']['sort'] = 'DESC';
+  }
 
   $navigation = "";
   if ($page_number > 0) {

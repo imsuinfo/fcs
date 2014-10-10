@@ -598,6 +598,14 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
       }
     }
   }
+  elseif ($operation == 'email_log') {
+    if (is_null($request_id)) {
+      if ($roles['manager'] || $roles['administer']) {
+        $access[$request_id] = TRUE;
+        return TRUE;
+      }
+    }
+  }
 
   if (is_array($request_id)) {
     foreach ($request_ids as $request_id) {
@@ -5167,7 +5175,7 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
 
     if (!$count) {
       if (is_null($order)) {
-        $query->orderBy('created', 'DESC');
+        $query->orderBy('id', 'DESC');
       }
       else {
         if ($order == 'id') {
