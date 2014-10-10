@@ -5103,11 +5103,9 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
       // always show accepted requests when there are no restrictions.
       if ($review_restrictions == MFCS_REVIEW_RESTRICTION_NONE) {
         // if there are no conditions, then don't add any!
-        if (is_null($or)) {
-          $or = db_or();
+        if (!is_null($or)) {
+          $or->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
         }
-
-        $or->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
       }
 
       if (!is_null($or)) {
