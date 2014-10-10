@@ -342,7 +342,7 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
   mfcs_include(MFCS_INCLUDE_OUTPUT);
 
   $markup = '';
-  $title = '<h3>' . "Requests for " . date("F j, Y", $day_start) . '</h3>';
+  $title = '<h3>' . "Requests for " . '<a href="' . $base_path . 'requests/calendar-0/month/' . date("Y/F", $day_start) . '" title="Requests for ' . date("F, Y", $day_start) . '">' . date("F", $day_start) . '</a> ' . date("j, Y", $day_start) . '</h3>';
 
   $result = mfcs_build_calendar_day_markup($rows, $day_start, $day_stop, $title, 'mfcs-calendar-0-day', $determined);
   if ($result !== FALSE) {
