@@ -268,6 +268,10 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
         }
 
         foreach ($item->time_start as $time_delta => $time_start) {
+          if (!is_null($time_start) && ($time_start < $day_start || $time_start >= $day_stop)) {
+            continue;
+          }
+
           $item_title = check_plain($item->title);
           $building_name = check_plain($item->building_name);
           $room_name = check_plain($item->room_name);
