@@ -4882,14 +4882,14 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
 
     $already_joined['mfcs_requests'] = 'mer';
     $already_joined['mfcs_current'] = 'mc';
-    $already_joined['mfcs_field_top_status'] = NULL;
-    $already_joined['mfcs_field_top_step'] = NULL;
-    $already_joined['mfcs_field_top_location'] = NULL;
-    $already_joined['mfcs_field_top_building'] = NULL;
-    $already_joined['mfcs_field_top_room'] = NULL;
-    $already_joined['mfcs_field_information_type'] = NULL;
-    $already_joined['mfcs_field_request_coordinator_classification'] = NULL;
-    $already_joined['mfcs_field_information_title'] = NULL;
+    $already_joined['mfcs_field_top_status'] = 'mer';
+    $already_joined['mfcs_field_top_step'] = 'mer';
+    $already_joined['mfcs_field_top_location'] = 'mer';
+    $already_joined['mfcs_field_top_building'] = 'mer';
+    $already_joined['mfcs_field_top_room'] = 'mer';
+    $already_joined['mfcs_field_information_type'] = 'mer';
+    $already_joined['mfcs_field_request_coordinator_classification'] = 'mer';
+    $already_joined['mfcs_field_information_title'] = 'mer';
 
     $query->innerJoin('mfcs_banner_rooms', 'mbr', 'mer.room = mbr.id');
     $query->innerJoin('mfcs_banner_buildings', 'mbb', 'mbr.building = mbb.id');
@@ -5027,8 +5027,6 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
     }
 
     if ($reviewer || $manager) {
-
-
       $or = NULL;
 
       if ($review_restrictions == MFCS_REVIEW_RESTRICTION_REVIEW) {
@@ -5096,12 +5094,11 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
       // always show accepted requests when there are no restrictions.
       if ($review_restrictions == MFCS_REVIEW_RESTRICTION_NONE) {
         // if there are no conditions, then don't add any!
-        if (!is_null($or)) {
-          $and = db_and();
-          $and->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
-
-          $or->condition($and);
+        if (is_null($or)) {
+          $or = db_or();
         }
+
+        $or->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
       }
 
       if (!is_null($or)) {
@@ -5111,11 +5108,8 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
     elseif ($requester) {
       // always show accepted requests when there are no restrictions.
       if ($review_restrictions == MFCS_REVIEW_RESTRICTION_NONE) {
-        $and = db_and();
-        $and->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
-
         $or = db_or();
-        $or->condition($and);
+        $or->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
         $or->condition('mer.user_id', $user->uid);
 
         $query->condition($or);
@@ -5432,7 +5426,14 @@ function mfcs_request_process_listing_search_array(&$query, &$operand, &$already
       else {
         $mfcs_field = 'mfcs_field_' . $search_values['group_name'] . '_' . $search_values['field_name'];
 
-        if (!array_key_exists($mfcs_field, $already_joined)) {
+        if (array_key_exists($mfcs_field, $already_joined)) {
+          $field_alias = $already_joined[$mfcs_field];
+
+          if ($field_alias == 'mer') {
+            $search_values['column'] = $search_values['field_name'];
+          }
+        }
+        else {
           $already_joined[$mfcs_field] = 'mfg_c_' . $already_joined_count;
           $already_joined_count++;
 
@@ -5444,9 +5445,6 @@ function mfcs_request_process_listing_search_array(&$query, &$operand, &$already
           else {
             $query->$join($mfcs_field, $field_alias, 'mc.request_id = ' . $field_alias . '.request_id AND mc.' . $search_values['group_name'] . '_' . $search_values['field_name'] . ' = ' . $field_alias . '.revision AND ' . $field_alias . '.delta = 0');
           }
-        }
-        else {
-          $field_alias = $already_joined[$mfcs_field];
         }
 
         if (!array_key_exists($search_values['field_name'], $already_added)) {
