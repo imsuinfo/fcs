@@ -1659,6 +1659,7 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
       MFCS_OPERATOR_LIKE => "Similar To",
       MFCS_OPERATOR_NOT_LIKE => "Not Similar To",
       MFCS_OPERATOR_EQUAL => "Equal To",
+      MFCS_OPERATOR_NOT_EQUAL => "Not Equal To",
     );
 
     $default_value = MFCS_OPERATOR_LIKE;
