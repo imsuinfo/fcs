@@ -215,14 +215,17 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
 
 
   // calendar links
-  $markup .= '<div class="calendar-links-wrapper no-print">' . "\n";
+  $markup .= '<div id="mfcs-links_and_filters" class="links_and_filters-wrapper no-print">' . "\n";
+
+  $markup .= '<div class="links_and_filters filter-group filter-group-1">' . "\n";
   $markup .= mfcs_build_calendar_ical_links_markup($month_start, TRUE, TRUE, FALSE);
+  $markup .= '</div>' . "\n"; // filter-group-1
 
   if (!is_null($determined)) {
     $markup .= mfcs_build_determined_filters_markup($determined);
   }
 
-  $markup .= '</div>' . "\n"; // calendar-links
+  $markup .= '</div>' . "\n"; // #mfcs-links_and_filters
 
 
   // end wrapper (calendar-month-wrapper)
@@ -642,14 +645,16 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
 
 
   // calendar links
-  $markup .= '<div class="calendar-links-wrapper no-print">' . "\n";
+  $markup .= '<div id="mfcs-links_and_filters" class="links_and_filters-wrapper no-print">' . "\n";
+  $markup .= '<div class="links_and_filters links_and_filters-group group-1">' . "\n";
   $markup .= mfcs_build_calendar_ical_links_markup($day_start);
+  $markup .= '</div>' . "\n";
 
   if (!is_null($determined)) {
     $markup .= mfcs_build_determined_filters_markup($determined);
   }
 
-  $markup .= '</div>' . "\n"; // calendar-links
+  $markup .= '</div>' . "\n"; // #mfcs-links_and_filters
 
 
   // end wrappers (main)
@@ -715,9 +720,9 @@ function mfcs_build_calendar_ical_links_markup($date_start, $year = TRUE, $month
     $id = ' id="' . $id . '"';
   }
 
-  $markup = '<div' . $id . ' class="calendar-links ical">' . "\n";
-  $markup .= '<h3 class="calendar-links-title ical">iCal Download Options</h3>' . "\n";
-  $markup .= '<ul class="calendar-links-list ical">' . "\n";
+  $markup = '<div' . $id . ' class="links_and_filters ical">' . "\n";
+  $markup .= '<h3 class="links_and_filters-title ical">iCal Download Options</h3>' . "\n";
+  $markup .= '<ul class="links_and_filters-list ical">' . "\n";
 
   if ($year) {
     $year = date('Y', $date_start);
@@ -728,21 +733,21 @@ function mfcs_build_calendar_ical_links_markup($date_start, $year = TRUE, $month
       if ($day) {
         $day = date('d', $date_start);
 
-        $markup .= '<li class="calendar-links-list-item item-day ical">';
-        $markup .= '<div class="calendar-links-list-item-label item-day item-label ical">Day:</div> ';
-        $markup .= '<a href="' . $base_path . 'requests/ical-0/day/' . $year . '/' . $month . '/' . $day . '" title="Download iCal for ' . $month . ' ' . $day . ', ' . $year . '" class="calendar-links-list-item-link item-day ical item-link">' . $month . ' ' . $day . ', ' . $year . '</a>';
+        $markup .= '<li class="links_and_filters-list-item item-day ical">';
+        $markup .= '<div class="links_and_filters-list-item-label item-day item-label ical">Day:</div> ';
+        $markup .= '<a href="' . $base_path . 'requests/ical-0/day/' . $year . '/' . $month . '/' . $day . '" title="Download iCal for ' . $month . ' ' . $day . ', ' . $year . '" class="links_and_filters-list-item-link item-day ical item-link">' . $month . ' ' . $day . ', ' . $year . '</a>';
         $markup .= '</li>' . "\n";
       }
 
-      $markup .= '<li class="calendar-links-list-item item-month ical">';
-      $markup .= '<div class="calendar-links-list-item-label item-month item-label ical">Month:</div> ';
-      $markup .= '<a href="' . $base_path . 'requests/ical-0/month/' . $year . '/' . $month . '" title="Download iCal for the month of ' . $month . ' ' . $year . '" class="calendar-links-list-item-link item-month ical item-link">' . $month . ' ' . $year . '</a>';
+      $markup .= '<li class="links_and_filters-list-item item-month ical">';
+      $markup .= '<div class="links_and_filters-list-item-label item-month item-label ical">Month:</div> ';
+      $markup .= '<a href="' . $base_path . 'requests/ical-0/month/' . $year . '/' . $month . '" title="Download iCal for the month of ' . $month . ' ' . $year . '" class="links_and_filters-list-item-link item-month ical item-link">' . $month . ' ' . $year . '</a>';
       $markup .= '</li>' . "\n";
     }
 
-    $markup .= '<li class="calendar-links-list-item item-year ical">';
-    $markup .= '<div class="calendar-links-list-item-label item-year item-label ical">Year:</div> ';
-    $markup .= '<a href="' . $base_path . 'requests/ical-0/year/' . $year . '" title="Download iCal for the year ' . $year . '" class="calendar-links-list-item-link item-year ical item-link">' . $year . '</a>';
+    $markup .= '<li class="links_and_filters-list-item item-year ical">';
+    $markup .= '<div class="links_and_filters-list-item-label item-year item-label ical">Year:</div> ';
+    $markup .= '<a href="' . $base_path . 'requests/ical-0/year/' . $year . '" title="Download iCal for the year ' . $year . '" class="links_and_filters-list-item-link item-year ical item-link">' . $year . '</a>';
     $markup .= '</li>' . "\n";
   }
 
@@ -810,9 +815,10 @@ function mfcs_build_determined_filters_markup($determined, $id = NULL) {
 
 
   // classifications
-  $markup = '<div' . $id . ' class="calendar-links filter_classifications">' . "\n";
-  $markup .= '<h3 class="calendar-links-title filter_classifications">Filter by Classification</h3>' . "\n";
-  $markup .= '  <ul class="calendar-links-list filter_classifications">' . "\n";
+  $markup = '<div class="links_and_filters links_and_filters-group group-2">' . "\n";
+  $markup .= '<div' . $id . ' class="links_and_filters filter_classifications">' . "\n";
+  $markup .= '<h3 class="links_and_filters-title filter_classifications">Filter by Classification</h3>' . "\n";
+  $markup .= '  <ul class="links_and_filters-list filter_classifications">' . "\n";
 
   foreach ($request_classification_options as $classification_id => $classification) {
     $current_get = array();
@@ -880,8 +886,8 @@ function mfcs_build_determined_filters_markup($determined, $id = NULL) {
       $link_cg .= $url_arguments_remaining;
     }
 
-    $markup .= '<li' . $id . ' class="calendar-links-list-item item-' . $classification_id . ' filter_classifications">' . "\n";
-    $markup .= '<a href="' . $link_cg . '" class="calendar-links-list-item-link item-' . $classification_id . ' item-link ' . $link_action_css . ' filter_classifications" title="' . $link_action_text . $classification . '">' . $link_action_text . $classification . '</a>' . "\n";
+    $markup .= '<li' . $id . ' class="links_and_filters-list-item item-' . $classification_id . ' filter_classifications">' . "\n";
+    $markup .= '<a href="' . $link_cg . '" class="links_and_filters-list-item-link item-' . $classification_id . ' item-link ' . $link_action_css . ' filter_classifications" title="' . $link_action_text . $classification . '">' . $link_action_text . $classification . '</a>' . "\n";
     $markup .= '</li>' . "\n";
   }
 
@@ -890,9 +896,9 @@ function mfcs_build_determined_filters_markup($determined, $id = NULL) {
 
 
   // types
-  $markup .= '<div' . $id . ' class="calendar-links filter_types">' . "\n";
-  $markup .= '<h3 class="calendar-links-title filter_types">Filter by Type</h3>' . "\n";
-  $markup .= '  <ul class="calendar-links-list filter_types">' . "\n";
+  $markup .= '<div' . $id . ' class="links_and_filters filter_types">' . "\n";
+  $markup .= '<h3 class="links_and_filters-title filter_types">Filter by Type</h3>' . "\n";
+  $markup .= '  <ul class="links_and_filters-list filter_types">' . "\n";
 
   foreach ($request_type_options as $type_id => $type) {
     $current_get = array();
@@ -960,19 +966,22 @@ function mfcs_build_determined_filters_markup($determined, $id = NULL) {
       $link_cg .= $url_arguments_remaining;
     }
 
-    $markup .= '<li' . $id . ' class="calendar-links-list-item item-' . $type_id . ' filter_types">' . "\n";
-    $markup .= '<a href="' . $link_cg . '" class="calendar-links-list-item-link item-' . $type_id . ' item-link ' . $link_action_css . ' filter_types" title="' . $link_action_text . $type . '">' . $link_action_text . $type . '</a>' . "\n";
+    $markup .= '<li' . $id . ' class="links_and_filters-list-item item-' . $type_id . ' filter_types">' . "\n";
+    $markup .= '<a href="' . $link_cg . '" class="links_and_filters-list-item-link item-' . $type_id . ' item-link ' . $link_action_css . ' filter_types" title="' . $link_action_text . $type . '">' . $link_action_text . $type . '</a>' . "\n";
     $markup .= '</li>' . "\n";
   }
 
   $markup .= '</ul>' . "\n";
   $markup .= '</div>' . "\n";
 
+  $markup .= '</div>' . "\n"; // links_and_filters-group group-2
+
 
   // buildings
-  $markup .= '<div' . $id . ' class="calendar-links filter_buildings">' . "\n";
-  $markup .= '<h3 class="calendar-links-title filter_buildings">Filter by Building</h3>' . "\n";
-  $markup .= '  <ul class="calendar-links-list filter_buildings">' . "\n";
+  $markup .= '<div class="links_and_filters links_and_filters-group group-3">' . "\n";
+  $markup .= '<div' . $id . ' class="links_and_filters filter_buildings">' . "\n";
+  $markup .= '<h3 class="links_and_filters-title filter_buildings">Filter by Building</h3>' . "\n";
+  $markup .= '  <ul class="links_and_filters-list filter_buildings">' . "\n";
 
   foreach ($building_list_options as $building_id => $building) {
     $current_get = array();
@@ -1040,13 +1049,15 @@ function mfcs_build_determined_filters_markup($determined, $id = NULL) {
       $link_cg .= $url_arguments_remaining;
     }
 
-    $markup .= '<li' . $id . ' class="calendar-links-list-item item-' . $type_id . ' filter_types">' . "\n";
-    $markup .= '<a href="' . $link_cg . '" class="calendar-links-list-item-link item-' . $type_id . ' item-link ' . $link_action_css . ' filter_types" title="' . $link_action_text . $building . '">' . $link_action_text . $building . '</a>' . "\n";
+    $markup .= '<li' . $id . ' class="links_and_filters-list-item item-' . $type_id . ' filter_types">' . "\n";
+    $markup .= '<a href="' . $link_cg . '" class="links_and_filters-list-item-link item-' . $type_id . ' item-link ' . $link_action_css . ' filter_types" title="' . $link_action_text . $building . '">' . $link_action_text . $building . '</a>' . "\n";
     $markup .= '</li>' . "\n";
   }
 
   $markup .= '</ul>' . "\n";
   $markup .= '</div>' . "\n";
+
+  $markup .= '</div>' . "\n"; // links_and_filters-group group-3
 
   return $markup;
 }
