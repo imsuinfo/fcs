@@ -122,6 +122,20 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
   $last_url = $url_base_month . date('Y', $last_month) . '/' . strtolower(date('F', $last_month));
   $next_url = $url_base_month . date('Y', $next_month) . '/' . strtolower(date('F', $next_month));
 
+  if (!empty($determined['combined'])) {
+    $last_url .= '?' . $determined['combined'];
+    $next_url .= '?' . $determined['combined'];
+
+    if (!empty($determined['remaining'])) {
+      $last_url .= '&' . $determined['remaining'];
+      $next_url .= '&' . $determined['remaining'];
+    }
+  }
+  elseif (!empty($determined['remaining'])) {
+    $last_url .= '?' . $determined['remaining'];
+    $next_url .= '?' . $determined['remaining'];
+  }
+
   $markup .= '<div class="calendar-navigation">';
   $markup .= '<div class="calendar-navigation-previous">';
   $markup .= '<a href="' . $last_url . '">Previous</a>';
@@ -308,6 +322,20 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
 
   $last_url = $url_base_day . date('Y', $last_day) . '/' . strtolower(date('F', $last_day)) . '/' . date('d', $last_day);
   $next_url = $url_base_day . date('Y', $next_day) . '/' . strtolower(date('F', $next_day)) . '/' . date('d', $next_day);
+
+  if (!empty($determined['combined'])) {
+    $last_url .= '?' . $determined['combined'];
+    $next_url .= '?' . $determined['combined'];
+
+    if (!empty($determined['remaining'])) {
+      $last_url .= '&' . $determined['remaining'];
+      $next_url .= '&' . $determined['remaining'];
+    }
+  }
+  elseif (!empty($determined['remaining'])) {
+    $last_url .= '?' . $determined['remaining'];
+    $next_url .= '?' . $determined['remaining'];
+  }
 
   $markup .= '<div class="calendar-navigation">';
   $markup .= '<div class="calendar-navigation-previous">';
@@ -752,6 +780,7 @@ function mfcs_build_determined_filters_markup($determined, $id = NULL) {
 
   $request_type_options = mfcs_get_request_type_list_options();
   $request_classification_options = mfcs_get_request_classification_list_options();
+  $building_list_options = mfcs_get_request_building_list_options();
 
   $type_id = NULL;
   $classifications_id = NULL;
@@ -760,66 +789,95 @@ function mfcs_build_determined_filters_markup($determined, $id = NULL) {
     $classifications_id = ' id="' . $id . '-classifications"';
   }
 
+
+  // build the url arguments outside of the loop to avoid repitition.
+  $url_arguments_classifications = '';
+  if (!empty($determined['get']['classifications'])) {
+    $url_arguments_classifications = 'classifications=' . implode(',', $determined['get']['classifications']);
+  }
+
+  $url_arguments_types = '';
+  if (!empty($determined['get']['types'])) {
+    $url_arguments_types = 'types=' . implode(',', $determined['get']['types']);
+  }
+
+  $url_arguments_buildings = '';
+  if (!empty($determined['get']['buildings'])) {
+    $url_arguments_buildings = 'buildings=' . implode(',', $determined['get']['buildings']);
+  }
+
+  $url_arguments_remaining = $determined['remaining'];
+
+
   // classifications
   $markup = '<div' . $id . ' class="calendar-links filter_classifications">' . "\n";
   $markup .= '<h3 class="calendar-links-title filter_classifications">Filter by Classification</h3>' . "\n";
   $markup .= '  <ul class="calendar-links-list filter_classifications">' . "\n";
 
   foreach ($request_classification_options as $classification_id => $classification) {
-    $current_get = $determined['get'];
+    $current_get = array();
+    if (!empty($determined['get']['classifications'])) {
+      $current_get = $determined['get']['classifications'];
+    }
+
     $link_cg = $base_path . $_GET['q'];
 
     if (isset($determined['get']['classifications'][$classification_id])) {
-      unset($current_get['classifications'][$classification_id]);
+      unset($current_get[$classification_id]);
       $link_action_css = 'link-remove';
-      $link_action_text = 'Remove Filter: ';
+      $link_action_text = 'Unfilter: ';
     }
     else {
-      $current_get['classifications'][$classification_id] = $classification_id;
+      $current_get[$classification_id] = $classification_id;
       $link_action_css = 'link-add';
-      $link_action_text = 'Add Filter: ';
-    }
-
-    if (empty($current_get['classifications'])) {
-      unset($current_get['classifications']);
-    }
-    else {
-      $current_get['classifications'] = implode(',', $current_get['classifications']);
-    }
-
-    if (empty($current_get['types'])) {
-      unset($current_get['types']);
-    }
-    else {
-      $current_get['types'] = implode(',', $current_get['types']);
-    }
-
-    if (empty($current_get['types'])) {
-      unset($current_get['types']);
+      $link_action_text = 'Filter: ';
     }
 
     $first = TRUE;
+    $link_cg .= '?';
+
     if (!empty($current_get)) {
-      $link_cg .= '?';
-
-      foreach ($current_get as $cg_key => $cg) {
-        if ($first) {
-          $first = FALSE;
-        }
-        else {
-          $link_cg .= '&';
-        }
-
-        if ($cg_key == 'classifications') {
-          $link_cg .= $cg_key . '=' . $cg;
-        }
-        elseif ($cg_key == 'types') {
-          $link_cg .= $cg_key . '=' . $cg;
-        }
-        else {
-          $link_cg .= urlencode($cg_key) . '=' . urlencode($cg);
-        }
+      if ($first) {
+        $first = FALSE;
       }
+      else {
+        $link_cg .= '&';
+      }
+
+      $link_cg .= 'classifications=' . urlencode(implode(',', $current_get));
+    }
+
+    if (!empty($url_arguments_types)) {
+      if ($first) {
+        $first = FALSE;
+      }
+      else {
+        $link_cg .= '&';
+      }
+
+      $link_cg .= $url_arguments_types;
+    }
+
+    if (!empty($url_arguments_buildings)) {
+      if ($first) {
+        $first = FALSE;
+      }
+      else {
+        $link_cg .= '&';
+      }
+
+      $link_cg .= $url_arguments_buildings;
+    }
+
+    if (!empty($url_arguments_remaining)) {
+      if ($first) {
+        $first = FALSE;
+      }
+      else {
+        $link_cg .= '&';
+      }
+
+      $link_cg .= $url_arguments_remaining;
     }
 
     $markup .= '<li' . $id . ' class="calendar-links-list-item item-' . $classification_id . ' filter_classifications">' . "\n";
@@ -837,60 +895,153 @@ function mfcs_build_determined_filters_markup($determined, $id = NULL) {
   $markup .= '  <ul class="calendar-links-list filter_types">' . "\n";
 
   foreach ($request_type_options as $type_id => $type) {
-    $current_get = $determined['get'];
+    $current_get = array();
+    if (!empty($determined['get']['types'])) {
+      $current_get = $determined['get']['types'];
+    }
+
     $link_cg = $base_path . $_GET['q'];
 
     if (isset($determined['get']['types'][$type_id])) {
-      unset($current_get['types'][$type_id]);
+      unset($current_get[$type_id]);
       $link_action_css = 'link-remove';
-      $link_action_text = 'Remove Filter: ';
+      $link_action_text = 'Unfilter: ';
     }
     else {
-      $current_get['types'][$type_id] = $type_id;
+      $current_get[$type_id] = $type_id;
       $link_action_css = 'link-add';
-      $link_action_text = 'Add Filter: ';
-    }
-
-    if (empty($current_get['classifications'])) {
-      unset($current_get['classifications']);
-    }
-    else {
-      $current_get['classifications'] = implode(',', $current_get['classifications']);
-    }
-
-    if (empty($current_get['types'])) {
-      unset($current_get['types']);
-    }
-    else {
-      $current_get['types'] = implode(',', $current_get['types']);
+      $link_action_text = 'Filter: ';
     }
 
     $first = TRUE;
-    if (!empty($current_get)) {
-      $link_cg .= '?';
+    $link_cg .= '?';
 
-      foreach ($current_get as $cg_key => $cg) {
-        if ($first) {
-          $first = FALSE;
-        }
-        else {
-          $link_cg .= '&';
-        }
-
-        if ($cg_key == 'classifications') {
-          $link_cg .= $cg_key . '=' . $cg;
-        }
-        elseif ($cg_key == 'types') {
-          $link_cg .= $cg_key . '=' . $cg;
-        }
-        else {
-          $link_cg .= urlencode($cg_key) . '=' . urlencode($cg);
-        }
+    if (!empty($url_arguments_classifications)) {
+      if ($first) {
+        $first = FALSE;
       }
+      else {
+        $link_cg .= '&';
+      }
+
+      $link_cg .= $url_arguments_classifications;
+    }
+
+    if (!empty($current_get)) {
+      if ($first) {
+        $first = FALSE;
+      }
+      else {
+        $link_cg .= '&';
+      }
+
+      $link_cg .= 'types=' . urlencode(implode(',', $current_get));
+    }
+
+    if (!empty($url_arguments_buildings)) {
+      if ($first) {
+        $first = FALSE;
+      }
+      else {
+        $link_cg .= '&';
+      }
+
+      $link_cg .= $url_arguments_buildings;
+    }
+
+    if (!empty($url_arguments_remaining)) {
+      if ($first) {
+        $first = FALSE;
+      }
+      else {
+        $link_cg .= '&';
+      }
+
+      $link_cg .= $url_arguments_remaining;
     }
 
     $markup .= '<li' . $id . ' class="calendar-links-list-item item-' . $type_id . ' filter_types">' . "\n";
     $markup .= '<a href="' . $link_cg . '" class="calendar-links-list-item-link item-' . $type_id . ' item-link ' . $link_action_css . ' filter_types" title="' . $link_action_text . $type . '">' . $link_action_text . $type . '</a>' . "\n";
+    $markup .= '</li>' . "\n";
+  }
+
+  $markup .= '</ul>' . "\n";
+  $markup .= '</div>' . "\n";
+
+
+  // buildings
+  $markup .= '<div' . $id . ' class="calendar-links filter_buildings">' . "\n";
+  $markup .= '<h3 class="calendar-links-title filter_buildings">Filter by Building</h3>' . "\n";
+  $markup .= '  <ul class="calendar-links-list filter_buildings">' . "\n";
+
+  foreach ($building_list_options as $building_id => $building) {
+    $current_get = array();
+    if (!empty($determined['get']['buildings'])) {
+      $current_get = $determined['get']['buildings'];
+    }
+
+    $link_cg = $base_path . $_GET['q'];
+
+    if (isset($determined['get']['buildings'][$building_id])) {
+      unset($current_get[$building_id]);
+      $link_action_css = 'link-remove';
+      $link_action_text = 'Unfilter: ';
+    }
+    else {
+      $current_get[$building_id] = $building_id;
+      $link_action_css = 'link-add';
+      $link_action_text = 'Filter: ';
+    }
+
+    $first = TRUE;
+    $link_cg .= '?';
+
+    if (!empty($url_arguments_classifications)) {
+      if ($first) {
+        $first = FALSE;
+      }
+      else {
+        $link_cg .= '&';
+      }
+
+      $link_cg .= $url_arguments_classifications;
+    }
+
+    if (!empty($url_arguments_types)) {
+      if ($first) {
+        $first = FALSE;
+      }
+      else {
+        $link_cg .= '&';
+      }
+
+      $link_cg .= $url_arguments_types;
+    }
+
+    if (!empty($current_get)) {
+      if ($first) {
+        $first = FALSE;
+      }
+      else {
+        $link_cg .= '&';
+      }
+
+      $link_cg .= 'buildings=' . urlencode(implode(',', $current_get));
+    }
+
+    if (!empty($url_arguments_remaining)) {
+      if ($first) {
+        $first = FALSE;
+      }
+      else {
+        $link_cg .= '&';
+      }
+
+      $link_cg .= $url_arguments_remaining;
+    }
+
+    $markup .= '<li' . $id . ' class="calendar-links-list-item item-' . $type_id . ' filter_types">' . "\n";
+    $markup .= '<a href="' . $link_cg . '" class="calendar-links-list-item-link item-' . $type_id . ' item-link ' . $link_action_css . ' filter_types" title="' . $link_action_text . $building . '">' . $link_action_text . $building . '</a>' . "\n";
     $markup .= '</li>' . "\n";
   }
 
