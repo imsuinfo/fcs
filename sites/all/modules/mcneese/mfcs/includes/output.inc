@@ -350,7 +350,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
 
       $item_even = TRUE;
       $item_count = 0;
-      $left_offset = ($row_even ? 4 : 16);
+      $left_offset = 0;
       foreach ($all_day as $item_id => $item) {
         $item_class = "";
 
@@ -439,7 +439,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
     $item_width = 178;
 
     $left_offset = 0;
-    $left_offset_min = 30;
+    $left_offset_min = 20;
     $left_offset_max = 186;
 
     $left_offset_increment = $left_offset_min;
