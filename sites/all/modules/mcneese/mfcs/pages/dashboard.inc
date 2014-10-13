@@ -197,12 +197,20 @@ function mfcs_dashboard_page() {
     mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
     $search = mfcs_miscellaneous_generate_requests_by_date_search($absolute_start, $absolute_stop);
 
-    $sorting = array(
-      'order' => 'date',
-      'sort' => 'ASC',
-    );
 
-    $results = mfcs_request_load_listing($search, FALSE, 0, 0, $sorting);
+    // load rooms and buildings separately to avoid performing joining on tables.
+    $rooms = mfcs_load_rooms();
+    $buildings = mfcs_load_buildings();
+
+    if (!is_array($rooms)) {
+      $rooms = array();
+    }
+
+    if (!is_array($buildings)) {
+      $buildings = array();
+    }
+
+    $results = mfcs_request_load_listing($search, FALSE, 0, 0);
 
     $rows = array();
     $rows_count = 0;
@@ -229,11 +237,21 @@ function mfcs_dashboard_page() {
             $rows[$month_day][$item->id]['time_start'][] = array('start' => $item->time_start, 'stop' => $item->time_stop);
           }
           else {
+            $room_name = '';
+            if (array_key_exists($item->room, $rooms)) {
+              $room_name = check_plain($rooms[$item->room]->room_name);
+            }
+
+            $building_name = '';
+            if (array_key_exists($item->building, $buildings)) {
+              $building_name = check_plain($buildings[$item->building]->building_name);
+            }
+
             $item_title = check_plain($item->title);
             $rows[$month_day][$item->id] = array(
               'href' => $base_path . 'requests/view-0/' . $item->id,
               'title' => $item_title,
-              'tooltip' => '[' . $item->id . '] ' . check_plain($item->building_name) . ' ' . check_plain($item->room_name) . ': ' . $item_title,
+              'tooltip' => '[' . $item->id . '] ' . $building_name . ' ' . $room_name . ': ' . $item_title,
               'date' => $date,
               'month' => $month,
               'day' => $day,

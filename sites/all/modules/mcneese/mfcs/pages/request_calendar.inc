@@ -100,6 +100,18 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
     'sort' => 'ASC',
   );
 
+  // load rooms and buildings separately to avoid performing joining on tables.
+  $rooms = mfcs_load_rooms();
+  $buildings = mfcs_load_buildings();
+
+  if (!is_array($rooms)) {
+    $rooms = array();
+  }
+
+  if (!is_array($buildings)) {
+    $buildings = array();
+  }
+
   $results = mfcs_request_load_listing($search, FALSE, 0, 0, $sorting);
 
   $rows = array();
@@ -124,8 +136,16 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
 
         if (!isset($rows[$month_day][$item->id])) {
           $item_title = check_plain($item->title);
-          $building_name = check_plain($item->building_name);
-          $room_name = check_plain($item->room_name);
+
+          $room_name = '';
+          if (array_key_exists($item->room, $rooms)) {
+            $room_name = check_plain($rooms[$item->room]->room_name);
+          }
+
+          $building_name = '';
+          if (array_key_exists($item->building, $buildings)) {
+            $building_name = check_plain($buildings[$item->building]->building_name);
+          }
 
           $location = (int) $item->location;
           $building = (int) $item->building;
@@ -147,16 +167,6 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
             'building_name' => $building_name,
             'room_name' => $room_name,
           );
-
-          unset($item_title);
-          unset($location_name);
-          unset($building_name);
-          unset($room_name);
-
-          unset($location);
-          unset($building);
-          unset($room);
-          unset($type);
         }
       }
     }
@@ -244,6 +254,18 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
     'sort' => 'ASC',
   );
 
+  // load rooms and buildings separately to avoid performing joining on tables.
+  $rooms = mfcs_load_rooms();
+  $buildings = mfcs_load_buildings();
+
+  if (!is_array($rooms)) {
+    $rooms = array();
+  }
+
+  if (!is_array($buildings)) {
+    $buildings = array();
+  }
+
   $results = mfcs_request_load_listing($search, FALSE, 0, 0, $sorting);
 
   $rows = array(
@@ -273,8 +295,16 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
           }
 
           $item_title = check_plain($item->title);
-          $building_name = check_plain($item->building_name);
-          $room_name = check_plain($item->room_name);
+
+          $room_name = '';
+          if (array_key_exists($item->room, $rooms)) {
+            $room_name = check_plain($rooms[$item->room]->room_name);
+          }
+
+          $building_name = '';
+          if (array_key_exists($item->building, $buildings)) {
+            $building_name = check_plain($buildings[$item->building]->building_name);
+          }
 
           $location = (int) $item->location;
           $building = (int) $item->building;
@@ -324,16 +354,6 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
               'time_stop' => $item->time_stop[$time_delta],
             );
           }
-
-          unset($item_title);
-          unset($location_name);
-          unset($building_name);
-          unset($room_name);
-
-          unset($location);
-          unset($building);
-          unset($room);
-          unset($type);
         }
       }
     }
