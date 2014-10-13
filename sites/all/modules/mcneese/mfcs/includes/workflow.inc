@@ -1980,7 +1980,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     foreach ($email_to as $to) {
       if (!in_array($to, $debug_accounts)) {
         drupal_set_message(t("Warning: not sending mail to @to while testing the system.", array('@to' => $to)), 'warning');
-        watchdog('debug', "Warning: not sending mail to @to while testing the system.", array('@to' => $to), WATCHDOG_WARNING);
+        #watchdog('debug', "Warning: not sending mail to @to while testing the system.", array('@to' => $to), WATCHDOG_WARNING);
         continue;
       }
 
