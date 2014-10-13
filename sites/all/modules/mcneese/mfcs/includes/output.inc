@@ -217,7 +217,7 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
   // calendar links
   $markup .= '<div id="mfcs-links_and_filters" class="links_and_filters-wrapper no-print">' . "\n";
 
-  $markup .= '<div class="links_and_filters filter-group filter-group-1">' . "\n";
+  $markup .= '<div class="links_and_filters links_and_filters-group group-1">' . "\n";
   $markup .= mfcs_build_calendar_ical_links_markup($month_start, TRUE, TRUE, FALSE);
   $markup .= '</div>' . "\n"; // filter-group-1
 
