@@ -205,8 +205,6 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
               unset($item_title);
             }
           }
-
-
         }
       }
     }
