@@ -119,64 +119,99 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
     $buildings = array();
   }
 
-  $results = mfcs_request_load_listing($search, FALSE, 0, 0, $sorting);
-
   $rows = array();
-  if (!empty($results)) {
-    foreach ($results as $item) {
-      foreach ($item->date as $delta => $date) {
-        if ($date < $absolute_start || $date >= $absolute_stop) {
-          continue;
-        }
+  $rows_count = 0;
+  $rows_per_day = 12;
+  $current_date = $absolute_start;
+  while ($current_date < $absolute_stop) {
+    $next_date = strtotime('+1 days', $current_date);
 
-        $day = date('j', $date);
-        $month = date('n', $date);
-        $month_day = $month . '-' . $day;
-        if (!isset($rows[$month_day])) {
-          $rows[$month_day] = array();
-        }
+    $search['field_dates-date-start-0']['search'] = $current_date;
+    $search['field_dates-date-stop-0']['search'] = $next_date;
 
-        $is_current_month = TRUE;
-        if ($date < $month_start || $date >= $month_stop) {
-          $is_current_month = FALSE;
-        }
+    $results = mfcs_request_load_listing($search, FALSE, 0, $rows_per_day);
 
-        if (!isset($rows[$month_day][$item->id])) {
-          $item_title = check_plain($item->title);
-
-          $room_name = '';
-          if (array_key_exists($item->room, $rooms)) {
-            $room_name = check_plain($rooms[$item->room]->room_name);
+    if (!empty($results)) {
+      foreach ($results as $item) {
+        foreach ($item->date as $delta => $date) {
+          if ($date < $current_date || $date >= $next_date) {
+            continue;
           }
 
-          $building_name = '';
-          if (array_key_exists($item->building, $buildings)) {
-            $building_name = check_plain($buildings[$item->building]->building_name);
+          $year = date('Y', $date);
+          $day = date('j', $date);
+          $month = date('n', $date);
+          $month_day = $month . '-' . $day;
+          if (!isset($rows[$month_day])) {
+            $rows[$month_day] = array();
           }
 
-          $location = (int) $item->location;
-          $building = (int) $item->building;
-          $room = (int) $item->room;
-          $type = (int) $item->type;
+          if (isset($rows[$month_day][$item->id])) {
+            $rows[$month_day][$item->id]['time_start'][] = array('start' => $item->time_start, 'stop' => $item->time_stop);
+          }
+          else {
+            $room_name = '';
+            if (array_key_exists($item->room, $rooms)) {
+              $room_name = check_plain($rooms[$item->room]->room_name);
+            }
 
-          $rows[$month_day][$item->id] = array(
-            'href' => $base_path . 'requests/view-0/' . $item->id . $url_arguments,
-            'title' => $item_title,
-            'tooltip' => '[' . $item->id . '] ' . $building_name . ' ' . $room_name . ': ' . $item_title,
-            'date' => $date,
-            'year' => $year,
-            'month' => $month,
-            'day' => date('j', $date),
-            'location' => $location,
-            'building' => $building,
-            'room' => $room,
-            'type' => $type,
-            'building_name' => $building_name,
-            'room_name' => $room_name,
-          );
+            $building_name = '';
+            if (array_key_exists($item->building, $buildings)) {
+              $building_name = check_plain($buildings[$item->building]->building_name);
+            }
+
+            $month_day_count = count($rows[$month_day]);
+            if ($month_day_count == $rows_per_day) {
+              $month_name = date('F', $date);
+              $month_name_lower = strtolower($month_name);
+
+              $rows[$month_day][$item->id] = array(
+                'href' => $base_path . 'requests/calendar-0/day/' . $year . '/' . $month_name_lower . '/' . $day . $url_arguments,
+                'title' => '. . .',
+                'tooltip' => 'View more requests on ' . $month_name . ' ' . $day . ', ' . $year,
+                'date' => $date,
+                'month' => $month,
+                'day' => $day,
+                'times' => NULL,
+              );
+
+              unset($year);
+              unset($month_name);
+              unset($month_name_lower);
+            }
+            else {
+              $item_title = check_plain($item->title);
+
+              $location = (int) $item->location;
+              $building = (int) $item->building;
+              $room = (int) $item->room;
+              $type = (int) $item->type;
+
+              $rows[$month_day][$item->id] = array(
+                'href' => $base_path . 'requests/view-0/' . $item->id . $url_arguments,
+                'title' => $item_title,
+                'tooltip' => '[' . $item->id . '] ' . $building_name . ' ' . $room_name . ': ' . $item_title,
+                'date' => $date,
+                'year' => $year,
+                'month' => $month,
+                'day' => date('j', $date),
+                'location' => $location,
+                'building' => $building,
+                'room' => $room,
+                'type' => $type,
+                'building_name' => $building_name,
+                'room_name' => $room_name,
+              );
+              unset($item_title);
+            }
+          }
+
+
         }
       }
     }
+
+    $current_date = $next_date;
   }
 
   mfcs_include(MFCS_INCLUDE_OUTPUT);
