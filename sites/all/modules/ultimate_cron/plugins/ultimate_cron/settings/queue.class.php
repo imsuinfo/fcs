@@ -100,7 +100,7 @@ class UltimateCronQueueSettings extends UltimateCronTaggedSettings {
     $items = 0;
     do {
       if ($job->getSignal('kill')) {
-        watchdog('ultimate_cron', 'kill signal received', array(), WATCHDOG_INFO);
+        watchdog('ultimate_cron', 'kill signal received', array(), WATCHDOG_NOTICE);
         break;
       }
 
@@ -352,7 +352,7 @@ class UltimateCronQueueSettings extends UltimateCronTaggedSettings {
           '@items' => $items,
           '@boundary' => ($thread - 1) * $settings['queue']['threshold'],
           '@threshold' => $settings['queue']['threshold'],
-        ), WATCHDOG_INFO);
+        ), WATCHDOG_DEBUG);
         $log_entry->finish();
         $job->dont_log = TRUE;
         $job->setStatus($new_status);

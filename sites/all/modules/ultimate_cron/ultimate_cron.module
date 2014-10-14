@@ -919,7 +919,7 @@ function ultimate_cron_cron_queue_info() {
       try {
         if ($debug['4']['function'] == 'install_finished') {
           // Looks like drupal_cron_run() was called unexpectedly.
-          watchdog('ultimate_cron', 'Running cron in compatibility mode during site install.', array(), WATCHDOG_INFO);
+          watchdog('ultimate_cron', 'Running cron in compatibility mode during site install.', array(), WATCHDOG_DEBUG);
         }
         else {
           // Looks like drupal_cron_run() was called unexpectedly.
@@ -927,7 +927,7 @@ function ultimate_cron_cron_queue_info() {
             '@function' => $debug['4']['function'],
             '@line' => $debug['3']['line'],
             '@file' => $debug['3']['file'],
-          ), WATCHDOG_WARNING);
+          ), WATCHDOG_DEBUG);
         }
 
         ultimate_cron_cron_run_compatibility();

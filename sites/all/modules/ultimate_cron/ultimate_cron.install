@@ -907,7 +907,7 @@ function ultimate_cron_update_7200() {
 
   $crontab = _ultimate_cron_plugin_load('scheduler', 'crontab');
   $crontab->settings['rules'] = array(variable_get('ultimate_cron_rule', '*/10+@ * * * *'));
-  $crontab->settings['catch_up'] = variable_get('ultimate_cron_catch_up', 300);
+  $crontab->settings['catch_up'] = variable_get('ultimate_cron_catch_up', 86400);
   $crontab->setSettings();
 
   $database = _ultimate_cron_plugin_load('logger', 'database');

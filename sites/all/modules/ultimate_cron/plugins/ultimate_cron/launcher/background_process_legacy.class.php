@@ -47,7 +47,7 @@ class UltimateCronBackgroundProcessLegacyLauncher extends UltimateCronLauncher {
       $process = background_process_get_process('uc-ultimate_cron_plugin_launcher_background_process_legacy_cleanup');
       if ($process && $process->start + variable_get('background_process_cleanup_age', BACKGROUND_PROCESS_CLEANUP_AGE) < time()) {
         $log_entry = $job->resumeLog($lock_id);
-        $log_entry->log('bgpl_launcher', 'Self unlocking stale lock', array(), WATCHDOG_ERROR);
+        $log_entry->log('bgpl_launcher', 'Self unlocking stale lock', array(), WATCHDOG_NOTICE);
         $log_entry->finish();
         $job->sendSignal('background_process_legacy_dont_log');
         $job->unlock($lock_id);
@@ -744,7 +744,7 @@ class UltimateCronBackgroundProcessLegacyLauncher extends UltimateCronLauncher {
           }
 
           if ($job->getSignal('end_daemonize')) {
-            watchdog('bgpl_launcher', 'end daemonize signal received', array(), WATCHDOG_INFO);
+            watchdog('bgpl_launcher', 'end daemonize signal received', array(), WATCHDOG_NOTICE);
             $keepalive = FALSE;
             break;
           }

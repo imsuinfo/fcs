@@ -117,7 +117,10 @@ class UltimateCronSerialLauncher extends UltimateCronLauncher {
       '#type' => 'select',
       '#default_value' => $values['thread'],
       '#options' => $options,
-      '#description' => t('Which thread to run in when invoking with ?thread=N. Note: This setting only has an effect when cron is run through cron.php with an argument ?thread=N or through Drush with --options=thread=N.'),
+      '#description' => t('Which thread to run jobs in.') . "<br/>" .
+      t('<strong>Any</strong>: Just use any available thread') . "<br/>" .
+      t('<strong>Fixed</strong>: Only run in one specific thread. The maximum number of threads is spread across the jobs.') . "<br/>" .
+      t('<strong>1-?</strong>: Only run when a specific thread is invoked. This setting only has an effect when cron is run through cron.php with an argument ?thread=N or through Drush with --options=thread=N.'),
       '#fallback' => TRUE,
       '#required' => TRUE,
       '#weight' => 2,
@@ -296,7 +299,7 @@ class UltimateCronSerialLauncher extends UltimateCronLauncher {
 
     if ($thread = intval(self::getGlobalOption('thread'))) {
       if ($thread < 1 || $thread > $settings['max_threads']) {
-        watchdog('serial_launcher', "Invalid thread available for starting launch thread", array(), WATCHDOG_WARNING);
+        watchdog('serial_launcher', "Invalid thread available for starting launch thread", array(), WATCHDOG_ERROR);
         return;
       }
 

@@ -186,7 +186,7 @@ class ultimate_cron_job_ctools_export_ui extends ctools_export_ui {
         '@name' => $item->name,
         '@username' => $username,
         '@uid' => $user->uid,
-      ), WATCHDOG_WARNING);
+      ), WATCHDOG_NOTICE);
       $log_entry->finish();
     }
 

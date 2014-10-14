@@ -511,7 +511,7 @@ function drush_ultimate_cron_cron_unlock($name = NULL) {
       '@name' => $job->name,
       '@username' => $user->name,
       '@uid' => $user->uid,
-    ), WATCHDOG_WARNING);
+    ), WATCHDOG_NOTICE);
     $log_entry->finish();
 
     drush_print(dt('Cron job @name unlocked', array('@name' => $name)));
