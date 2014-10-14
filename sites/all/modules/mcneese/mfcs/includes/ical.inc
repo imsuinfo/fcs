@@ -156,6 +156,9 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
   $request_type_options = mfcs_get_request_type_list_options();
   $request_classification_options = mfcs_get_request_classification_list_options();
   $dates_categories_options = mfcs_get_dates_category_list_options();
+  $location_options = mfcs_get_request_location_list_options(NULL, FALSE, TRUE);
+  $room_options = mfcs_get_request_room_list_options(NULL, NULL, TRUE);
+  $building_options = mfcs_get_request_building_list_options(NULL, NULL, TRUE);
 
   foreach ($requests as $request) {
     if (empty($request->date)) {
@@ -181,10 +184,10 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
     #$request_revision = $request->revision;
 
     $request_url = $base_url . '/requests/view-0/' . $request->id;
-    $request_zone = $request->building_name . ' ' . $request->room_name;
+    $request_zone = $building_options[$request->building] . ' ' . $room_options[$request->room];
 
-    $request_description_begin = 'The reserved location is: ' . $request->building_name . ' ' . $request->room_name . "\n";
-    $request_description_begin = '  - ' . $request->building_name . ' ' . $request->room_name . "\n";
+    $request_description_begin = 'The reserved location is: ' . $building_options[$request->building] . ' ' . $room_options[$request->room] . "\n";
+    $request_description_begin = '  - ' . $building_options[$request->building] . ' ' . $room_options[$request->room] . "\n";
     $request_description_end = "\n\n";
     $request_description_end = 'The Request ID is: ' . $request->id . ".\n";
     $request_description_end = "\n";
@@ -204,7 +207,7 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
     $request_description_markup_begin .= '<body>' . "\n";
     $request_description_markup_begin .= 'The reserved location is: ' . "<br>\n";
     $request_description_markup_begin .= '<ul>' . "\n";
-    $request_description_markup_begin .= '  <li>' . $request->building_name . ' ' . $request->room_name . "</li>\n";
+    $request_description_markup_begin .= '  <li>' . $building_options[$request->building] . ' ' . $room_options[$request->room] . "</li>\n";
     $request_description_markup_begin .= '</ul>' . "\n";
 
     $request_description_markup_end = '';
