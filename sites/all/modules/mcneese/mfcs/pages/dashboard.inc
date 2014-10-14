@@ -228,7 +228,7 @@ function mfcs_dashboard_page() {
 
     $rows = array();
     $rows_count = 0;
-    $rows_per_day = 3;
+    $rows_per_day = 5;
     $current_date = $absolute_start;
     while ($current_date < $absolute_stop) {
       $next_date = strtotime('+1 days', $current_date);
