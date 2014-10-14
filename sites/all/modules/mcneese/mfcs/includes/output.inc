@@ -802,9 +802,12 @@ function mfcs_build_determined_filters_markup($id = NULL) {
     }
 
     $first = TRUE;
-    $link_cg .= '?';
+    $add_qmark = TRUE;
 
     if (!empty($current_get)) {
+      $link_cg .= '?';
+      $add_qmark = FALSE;
+
       if ($first) {
         $first = FALSE;
       }
@@ -816,6 +819,11 @@ function mfcs_build_determined_filters_markup($id = NULL) {
     }
 
     if (!empty($url_arguments_types)) {
+      if ($add_qmark) {
+        $link_cg .= '?';
+        $add_qmark = FALSE;
+      }
+
       if ($first) {
         $first = FALSE;
       }
@@ -827,6 +835,11 @@ function mfcs_build_determined_filters_markup($id = NULL) {
     }
 
     if (!empty($url_arguments_buildings)) {
+      if ($add_qmark) {
+        $link_cg .= '?';
+        $add_qmark = FALSE;
+      }
+
       if ($first) {
         $first = FALSE;
       }
@@ -838,6 +851,11 @@ function mfcs_build_determined_filters_markup($id = NULL) {
     }
 
     if (!empty($url_arguments_remaining)) {
+      if (!$added_qmark) {
+        $link_cg .= '?';
+        $added_qmark = TRUE;
+      }
+
       if ($first) {
         $first = FALSE;
       }
@@ -882,9 +900,12 @@ function mfcs_build_determined_filters_markup($id = NULL) {
     }
 
     $first = TRUE;
-    $link_cg .= '?';
+    $add_qmark = TRUE;
 
     if (!empty($url_arguments_classifications)) {
+      $link_cg .= '?';
+      $add_qmark = FALSE;
+
       if ($first) {
         $first = FALSE;
       }
@@ -896,6 +917,11 @@ function mfcs_build_determined_filters_markup($id = NULL) {
     }
 
     if (!empty($current_get)) {
+      if ($add_qmark) {
+        $link_cg .= '?';
+        $add_qmark = FALSE;
+      }
+
       if ($first) {
         $first = FALSE;
       }
@@ -907,6 +933,11 @@ function mfcs_build_determined_filters_markup($id = NULL) {
     }
 
     if (!empty($url_arguments_buildings)) {
+      if ($add_qmark) {
+        $link_cg .= '?';
+        $add_qmark = FALSE;
+      }
+
       if ($first) {
         $first = FALSE;
       }
@@ -918,6 +949,11 @@ function mfcs_build_determined_filters_markup($id = NULL) {
     }
 
     if (!empty($url_arguments_remaining)) {
+      if ($add_qmark) {
+        $link_cg .= '?';
+        $add_qmark = FALSE;
+      }
+
       if ($first) {
         $first = FALSE;
       }
@@ -965,9 +1001,12 @@ function mfcs_build_determined_filters_markup($id = NULL) {
     }
 
     $first = TRUE;
-    $link_cg .= '?';
+    $add_qmark = TRUE;
 
     if (!empty($url_arguments_classifications)) {
+      $link_cg .= '?';
+      $add_qmark = FALSE;
+
       if ($first) {
         $first = FALSE;
       }
@@ -979,6 +1018,11 @@ function mfcs_build_determined_filters_markup($id = NULL) {
     }
 
     if (!empty($url_arguments_types)) {
+      if ($add_qmark) {
+        $link_cg .= '?';
+        $add_qmark = FALSE;
+      }
+
       if ($first) {
         $first = FALSE;
       }
@@ -990,6 +1034,11 @@ function mfcs_build_determined_filters_markup($id = NULL) {
     }
 
     if (!empty($current_get)) {
+      if ($add_qmark) {
+        $link_cg .= '?';
+        $add_qmark = FALSE;
+      }
+
       if ($first) {
         $first = FALSE;
       }
@@ -1001,6 +1050,11 @@ function mfcs_build_determined_filters_markup($id = NULL) {
     }
 
     if (!empty($url_arguments_remaining)) {
+      if ($add_qmark) {
+        $link_cg .= '?';
+        $add_qmark = FALSE;
+      }
+
       if ($first) {
         $first = FALSE;
       }
