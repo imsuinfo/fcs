@@ -120,8 +120,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
   }
 
   $rows = array();
-  $rows_count = 0;
-  $rows_per_day = 12;
+  $rows_per_day = 0;
   $current_date = $absolute_start;
   while ($current_date < $absolute_stop) {
     $next_date = strtotime('+1 days', $current_date);
@@ -161,7 +160,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
             }
 
             $month_day_count = count($rows[$month_day]);
-            if ($month_day_count == $rows_per_day) {
+            if ($rows_per_day > 0 && $month_day_count == $rows_per_day) {
               $month_name = date('F', $date);
               $month_name_lower = strtolower($month_name);
 
