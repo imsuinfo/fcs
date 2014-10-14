@@ -648,10 +648,10 @@ function mfcs_request_create_0_form_submit($form, &$form_state) {
   // redirect after submitting.
   if (empty($form_state['values']['redirect_to'])) {
     if (empty($request_id)) {
-      $form_state['redirect'] = 'requests';
+      $form_state['redirect'] = mfcs_build_redirect_array('requests');
     }
     else {
-      $form_state['redirect'] = 'requests/view-0/' . $request_id;
+      $form_state['redirect'] = mfcs_build_redirect_array('requests/view-0/' . $request_id);
     }
   }
   else {

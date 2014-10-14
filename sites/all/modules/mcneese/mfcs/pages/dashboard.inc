@@ -20,7 +20,13 @@
  */
 function mfcs_dashboard_page() {
   global $base_path;
+  global $mfcs_determined;
   $user = cf_current_user();
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
 
   mfcs_add_canonical_headers('requests');
 
@@ -38,7 +44,7 @@ function mfcs_dashboard_page() {
   $items_array_current = 1;
 
   if ($can_create) {
-    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/create-0" class="item-link">New Request</a></h4>';
+    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/create-0' . $url_arguments . '" class="item-link">New Request</a></h4>';
     $help = '<div class="item-description inline-block">Make a request to use the facilities or host special events at McNeese State University or related facilities.</div>';
     $items_array[] = array(
       'data' => $link . '<br>' . $help,
@@ -48,7 +54,7 @@ function mfcs_dashboard_page() {
   }
 
   if ($can_list) {
-    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/list-0" class="item-link">List Requests</a></h4>';
+    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/list-0' . $url_arguments . '" class="item-link">List Requests</a></h4>';
     $help = '<div class="item-description inline-block">View a list of requests available to the current user.</div>';
     $items_array[] = array(
       'data' => $link . '<br>' . $help,
@@ -73,7 +79,7 @@ function mfcs_dashboard_page() {
   }
 
   if ($can_review) {
-    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/review-0" class="item-link">Review Requests</a></h4>';
+    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/review-0' . $url_arguments . '" class="item-link">Review Requests</a></h4>';
     $help = '<div class="item-description inline-block">Manage requests the current user is allowed to review.</div>';
     $items_array[] = array(
       'data' => $link . '<br>' . $help,
@@ -113,7 +119,7 @@ function mfcs_dashboard_page() {
   }
 
   if ($can_search) {
-    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/search-0" class="item-link">Search Requests</a></h4>';
+    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/search-0' . $url_arguments . '" class="item-link">Search Requests</a></h4>';
     $help = '<div class="item-description inline-block">Use advanced search tools to help locate and find one or more requests.</div>';
     $items_array[] = array(
       'data' => $link . '<br>' . $help,
@@ -197,6 +203,16 @@ function mfcs_dashboard_page() {
     mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
     $search = mfcs_miscellaneous_generate_requests_by_date_search($absolute_start, $absolute_stop);
 
+    if (!empty($mfcs_determined['filters'])) {
+      foreach ($mfcs_determined['filters'] as $filter_key => $filter) {
+        $search[$filter_key] = $filter;
+      }
+    }
+
+    $url_arguments = '';
+    if (!empty($mfcs_determined['complete'])) {
+      $url_arguments .= '?' . $mfcs_determined['complete'];
+    }
 
     // load rooms and buildings separately to avoid performing joining on tables.
     $rooms = mfcs_load_rooms();
@@ -249,7 +265,7 @@ function mfcs_dashboard_page() {
 
             $item_title = check_plain($item->title);
             $rows[$month_day][$item->id] = array(
-              'href' => $base_path . 'requests/view-0/' . $item->id,
+              'href' => $base_path . 'requests/view-0/' . $item->id . $url_arguments,
               'title' => $item_title,
               'tooltip' => '[' . $item->id . '] ' . $building_name . ' ' . $room_name . ': ' . $item_title,
               'date' => $date,
@@ -265,8 +281,8 @@ function mfcs_dashboard_page() {
 
     mfcs_include(MFCS_INCLUDE_OUTPUT);
 
-    $title = '<h3><a href="' . $base_path . 'requests/calendar-0/month">' . "Requests for " . date("F, Y", $month_start) . '</a></h3>';
-    $result = mfcs_build_calendar_month_markup($rows, $month_start, $month_stop, $absolute_start, $absolute_stop, $title, 'mfcs-calendar-0-month', NULL);
+    $title = '<h3><a href="' . $base_path . 'requests/calendar-0/month' . $url_arguments . '">' . "Requests for " . date("F, Y", $month_start) . '</a></h3>';
+    $result = mfcs_build_calendar_month_markup($rows, $month_start, $month_stop, $absolute_start, $absolute_stop, $title, 'mfcs-calendar-0-month');
     if ($result !== FALSE) {
       $markup .= $result;
     }

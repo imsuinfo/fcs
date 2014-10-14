@@ -37,6 +37,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
 
 
   global $base_path;
+  global $mfcs_determined;
 
   $user = cf_current_user();
 
@@ -90,9 +91,15 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
 
   $search = mfcs_miscellaneous_generate_requests_by_date_search($absolute_start, $absolute_stop);
 
-  $determined = mfcs_miscellaneous_determine_filters();
-  foreach ($determined['filters'] as $filter_key => $filter) {
-    $search[$filter_key] = $filter;
+  if (!empty($mfcs_determined['filters'])) {
+    foreach ($mfcs_determined['filters'] as $filter_key => $filter) {
+      $search[$filter_key] = $filter;
+    }
+  }
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
   $sorting = array(
@@ -153,7 +160,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
           $type = (int) $item->type;
 
           $rows[$month_day][$item->id] = array(
-            'href' => $base_path . 'requests/view-0/' . $item->id,
+            'href' => $base_path . 'requests/view-0/' . $item->id . $url_arguments,
             'title' => $item_title,
             'tooltip' => '[' . $item->id . '] ' . $building_name . ' ' . $room_name . ': ' . $item_title,
             'date' => $date,
@@ -176,7 +183,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
 
   $markup = '';
   $title = '<h3>' . "Requests for " . date("F, Y", $month_start) . '</h3>';
-  $result = mfcs_build_calendar_month_markup($rows, $month_start, $month_stop, $absolute_start, $absolute_stop, $title, 'mfcs-calendar-0-month', $determined);
+  $result = mfcs_build_calendar_month_markup($rows, $month_start, $month_stop, $absolute_start, $absolute_stop, $title, 'mfcs-calendar-0-month');
   if ($result !== FALSE) {
     $markup .= $result;
   }
@@ -214,6 +221,7 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
   }
 
   global $base_path;
+  global $mfcs_determined;
   $module_path = drupal_get_path('module', 'mfcs');
 
   drupal_add_js($module_path . '/js/calendar-day-zindex.js', array('type' => 'file', 'group' => JS_DEFAULT, 'preprocess' => TRUE));
@@ -244,9 +252,15 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
 
   $search = mfcs_miscellaneous_generate_requests_by_date_search($day_start, $day_stop);
 
-  $determined = mfcs_miscellaneous_determine_filters();
-  foreach ($determined['filters'] as $filter_key => $filter) {
-    $search[$filter_key] = $filter;
+  if (!empty($mfcs_determined['filters'])) {
+    foreach ($mfcs_determined['filters'] as $filter_key => $filter) {
+      $search[$filter_key] = $filter;
+    }
+  }
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
   $sorting = array(
@@ -317,7 +331,7 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
             }
 
             $rows['all_day'][$date][$item->id] = array(
-              'href' => $base_path . 'requests/view-0/' . $item->id,
+              'href' => $base_path . 'requests/view-0/' . $item->id . $url_arguments,
               'title' => $item_title,
               'tooltip' => '[' . $item->id . '] ' . $building_name . ' ' . $room_name . ': ' . $item_title,
               'date' => $date,
@@ -337,7 +351,7 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
             $time_floor = $time_start - ($time_start % 3600);
 
             $rows['range'][$time_floor][$item->id] = array(
-              'href' => $base_path . 'requests/view-0/' . $item->id,
+              'href' => $base_path . 'requests/view-0/' . $item->id . $url_arguments,
               'title' => $item_title,
               'tooltip' => '[' . $item->id . '] ' . $building_name . ' ' . $room_name . ': ' . $item_title,
               'date' => $date,
@@ -361,22 +375,10 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
 
   mfcs_include(MFCS_INCLUDE_OUTPUT);
 
-  $url_arguments = '';
-  if (!empty($determined['combined'])) {
-    $url_arguments .= '?' . $determined['combined'];
-
-    if (!empty($determined['remaining'])) {
-      $url_arguments .= '&' . $determined['remaining'];
-    }
-  }
-  elseif (!empty($determined['remaining'])) {
-    $url_arguments .= '?' . $determined['remaining'];
-  }
-
   $markup = '';
   $title = '<h3>' . "Requests for " . '<a href="' . $base_path . 'requests/calendar-0/month/' . date("Y/F", $day_start) . $url_arguments . '" title="Requests for ' . date("F, Y", $day_start) . '">' . date("F", $day_start) . '</a> ' . date("j, Y", $day_start) . '</h3>';
 
-  $result = mfcs_build_calendar_day_markup($rows, $day_start, $day_stop, $title, 'mfcs-calendar-0-day', $determined);
+  $result = mfcs_build_calendar_day_markup($rows, $day_start, $day_stop, $title, 'mfcs-calendar-0-day');
   if ($result !== FALSE) {
     $markup .= $result;
   }

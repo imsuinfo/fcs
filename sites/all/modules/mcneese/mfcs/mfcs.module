@@ -254,6 +254,8 @@ function mfcs_init() {
   $module_path = drupal_get_path('module', 'mfcs');
 
   drupal_add_js($module_path . '/js/printing-fieldsets.js', array('type' => 'file', 'group' => JS_DEFAULT, 'preprocess' => TRUE));
+
+  mfcs_determine_url_arguments();
 }
 
 /**
@@ -333,8 +335,11 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
   elseif (is_null($request_id)) {
     $request_ids = array(NULL => NULL);
   }
-  else {
+  elseif (cf_is_integer($request_id)) {
     $request_ids = array($request_id => $request_id);
+  }
+  else {
+    return FALSE;
   }
 
   // nothing to check access for.
@@ -3120,6 +3125,12 @@ function mfcs_build_request_value_structure($request_id, $field_group, $field_na
   }
 
   global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
 
   $id = 'field-request-' . $request_id . '-item-' . $field_group . '-' . $field_name . '-' . $delta . '-value';
 
@@ -3219,7 +3230,7 @@ function mfcs_build_request_value_structure($request_id, $field_group, $field_na
           $s_month = date('F', $value->$value_name);
           $s_title = $s_month . " " . $s_year;
 
-          $markup .= '<a href="' . $base_path . 'requests/calendar-0/month/' . $s_year . '/' . $s_month .'" title="' . $s_title . '">' . check_plain(date($display[$value_name], $value->$value_name)) . '</a>';
+          $markup .= '<a href="' . $base_path . 'requests/calendar-0/month/' . $s_year . '/' . $s_month . $url_arguments .'" title="' . $s_title . '">' . check_plain(date($display[$value_name], $value->$value_name)) . '</a>';
 
           unset($s_year);
           unset($s_month);
@@ -3242,7 +3253,7 @@ function mfcs_build_request_value_structure($request_id, $field_group, $field_na
           $s_day = date('d', $value->$value_name);
           $s_title = $s_month . ", " . $s_day . ", " . $s_year;
 
-          $markup .= '<a href="' . $base_path . 'requests/calendar-0/day/' . $s_year . '/' . $s_month . '/' . $s_day .'" title="' . $s_title . '">' . check_plain(date($display[$value_name], $value->$value_name)) . '</a>';
+          $markup .= '<a href="' . $base_path . 'requests/calendar-0/day/' . $s_year . '/' . $s_month . '/' . $s_day . $url_arguments .'" title="' . $s_title . '">' . check_plain(date($display[$value_name], $value->$value_name)) . '</a>';
 
           unset($s_year);
           unset($s_month);
@@ -3269,7 +3280,7 @@ function mfcs_build_request_value_structure($request_id, $field_group, $field_na
           $s_title = $s_month . ", " . $s_day . ", " . $s_year . " at " . $s_hour . ':00' . $s_ampm;
           $s_id = 'time_slot-' . $s_hour . '_00' . $s_ampm;
 
-          $markup .= '<a href="' . $base_path . 'requests/calendar-0/day/' . $s_year . '/' . $s_month . '/' . $s_day . '#' . $s_id .'" title="' . $s_title . '">' . check_plain(date($display[$value_name], $value->$value_name)) . '</a>';
+          $markup .= '<a href="' . $base_path . 'requests/calendar-0/day/' . $s_year . '/' . $s_month . '/' . $s_day . $url_arguments . '#' . $s_id .'" title="' . $s_title . '">' . check_plain(date($display[$value_name], $value->$value_name)) . '</a>';
 
           unset($s_year);
           unset($s_month);
@@ -3311,7 +3322,7 @@ function mfcs_build_request_value_structure($request_id, $field_group, $field_na
           }
 
           if ($display[$value_name] == 'account_name') {
-            $markup .= '<a href="' . $base_path . 'user/' . $user->uid . '">' . $user_name . '</a>';
+            $markup .= '<a href="' . $base_path . 'user/' . $user->uid . $url_arguments . '">' . $user_name . '</a>';
             $length += strlen($user_name);
           }
           elseif ($display[$value_name] != 'pass' && property_exists($user, $display)) {
@@ -5713,6 +5724,12 @@ function mfcs_build_request_table($items, $max_rows, $columns = NULL, $user = NU
   $table['caption'] = "Requests";
 
   global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
 
   $rows = array();
   $rows_count = 0;
@@ -5892,7 +5909,7 @@ function mfcs_build_request_table($items, $max_rows, $columns = NULL, $user = NU
         }
 
         if ($manager) {
-          $row['submitted_by']['data'] = '<a href="' . $base_path . 'user/' . $submitter->uid . '">' . $name . '</a>';
+          $row['submitted_by']['data'] = '<a href="' . $base_path . 'user/' . $submitter->uid . $url_arguments . '">' . $name . '</a>';
         }
         else {
           $row['submitted_by']['data'] = $name;
@@ -5923,30 +5940,30 @@ function mfcs_build_request_table($items, $max_rows, $columns = NULL, $user = NU
 
       $row['operations']['data'] = '';
 
-      $row['operations']['data'] .= '<a href="' . $base_path . 'requests/view-0/' . $item->id . '" class="operation-link operation-link-view">View</a> ';
+      $row['operations']['data'] .= '<a href="' . $base_path . 'requests/view-0/' . $item->id . $url_arguments . '" class="operation-link operation-link-view">View</a> ';
 
       if (array_key_exists($item->id, $can_edit_requests) && $can_edit_requests[$item->id]) {
-        $row['operations']['data'] .= '<a href="' . $base_path . 'requests/edit-0/' . $item->id . '/request" class="operation-link operation-link-edit">Edit</a> ';
+        $row['operations']['data'] .= '<a href="' . $base_path . 'requests/edit-0/' . $item->id . '/request' . $url_arguments . '" class="operation-link operation-link-edit">Edit</a> ';
       }
 
       if (array_key_exists($item->id, $can_review_requests) && $can_review_requests[$item->id]) {
-        $row['operations']['data'] .= '<a href="' . $base_path . 'requests/view-0/' . $item->id . '/' . MFCS_VIEW_MODE_OPERATIONS . '" class="operation-link operation-link-review">Review</a> ';
+        $row['operations']['data'] .= '<a href="' . $base_path . 'requests/view-0/' . $item->id . '/' . MFCS_VIEW_MODE_OPERATIONS . $url_arguments . '" class="operation-link operation-link-review">Review</a> ';
       }
 
       if (array_key_exists($item->id, $can_log_requests) && $can_log_requests[$item->id]) {
-        $row['operations']['data'] .= '<a href="' . $base_path . 'requests/view-0/' . $item->id . '/' . MFCS_VIEW_MODE_LOG . '" class="operation-link operation-link-log">Log</a> ';
+        $row['operations']['data'] .= '<a href="' . $base_path . 'requests/view-0/' . $item->id . '/' . MFCS_VIEW_MODE_LOG . $url_arguments . '" class="operation-link operation-link-log">Log</a> ';
       }
 
       if (array_key_exists($item->id, $can_history_requests) && $can_history_requests[$item->id]) {
-        $row['operations']['data'] .= '<a href="' . $base_path . 'requests/history-0/' . $item->id . '" class="operation-link operation-link-history">History</a> ';
+        $row['operations']['data'] .= '<a href="' . $base_path . 'requests/history-0/' . $item->id . $url_arguments . '" class="operation-link operation-link-history">History</a> ';
       }
 
       if (array_key_exists($item->id, $can_delete_requests) && $can_delete_requests[$item->id]) {
-        $row['operations']['data'] .= '<a href="' . $base_path . 'requests/delete-0/' . $item->id . '" class="operation-link operation-link-delete">Delete</a> ';
+        $row['operations']['data'] .= '<a href="' . $base_path . 'requests/delete-0/' . $item->id . $url_arguments . '" class="operation-link operation-link-delete">Delete</a> ';
       }
 
       if (array_key_exists($item->id, $can_create_requests) && $can_create_requests[$item->id]) {
-        $row['operations']['data'] .= '<a href="' . $base_path . 'requests/create-0/' . $item->id . '" class="operation-link operation-link-clone">Copy</a> ';
+        $row['operations']['data'] .= '<a href="' . $base_path . 'requests/create-0/' . $item->id . $url_arguments . '" class="operation-link operation-link-clone">Copy</a> ';
       }
     }
 
@@ -6517,6 +6534,195 @@ function mfcs_instance($reset = FALSE) {
   }
 
   return $instance;
+}
+
+/**
+ * Identify the filters passed to the url and generate database filters.
+ *
+ * The arguments are processed and stored in the global $mfcs_determined.
+ */
+function mfcs_determine_url_arguments() {
+  global $mfcs_determined;
+
+  $mfcs_determined = array(
+    'get' => array(),
+    'filters' => array(),
+    'redirect' => array(),
+    'combined' => '',
+    'remaining' => '',
+    'complete' => '',
+  );
+
+  if (!empty($_GET)) {
+    $first = TRUE;
+    foreach ($_GET as $request_name => $request_value) {
+      $lower_name = strtolower($request_name);
+
+      if ($lower_name == 'types') {
+        $mfcs_determined['redirect'][$lower_name] = $request_value;
+
+        $lower_value = strtolower($request_value);
+        $types_array = explode(',', $lower_value);
+
+        if ($first) {
+          $first = FALSE;
+        }
+        else {
+          $mfcs_determined['combined'] .= '&';
+        }
+        $mfcs_determined['combined'] .= urlencode($lower_name) . '=' . urlencode($lower_value);
+
+        $types = array();
+        foreach ($types_array as $type) {
+          if (cf_is_integer($type)) {
+            $types[$type] = $type;
+          }
+        }
+        unset($types_array);
+        $mfcs_determined['get']['types'] = $types;
+
+        $target_field_name = 'field_information-type-0';
+        $mfcs_determined['filters'][$target_field_name]['group_name'] = 'information';
+        $mfcs_determined['filters'][$target_field_name]['field_name'] = 'type';
+        $mfcs_determined['filters'][$target_field_name]['column'] = 'value';
+        $mfcs_determined['filters'][$target_field_name]['search'] = $types;
+        $mfcs_determined['filters'][$target_field_name]['type'] = 'number';
+        $mfcs_determined['filters'][$target_field_name]['multiple'] = FALSE;
+        $mfcs_determined['filters'][$target_field_name]['operator'] = MFCS_OPERATOR_IS_IN;
+      }
+      elseif ($lower_name == 'classifications') {
+        $mfcs_determined['redirect'][$lower_name] = $request_value;
+
+        $lower_value = strtolower($request_value);
+        $classifications_array = explode(',', $lower_value);
+
+        if ($first) {
+          $first = FALSE;
+        }
+        else {
+          $mfcs_determined['combined'] .= '&';
+        }
+        $mfcs_determined['combined'] .= urlencode($lower_name) . '=' . urlencode($lower_value);
+
+        $classifications = array();
+        foreach ($classifications_array as $classification) {
+          if (cf_is_integer($classification)) {
+            $classifications[$classification] = $classification;
+          }
+        }
+        unset($classifications_array);
+        $mfcs_determined['get']['classifications'] = $classifications;
+
+        $target_field_name = 'field_request_coordinator-classification-0';
+        $mfcs_determined['filters'][$target_field_name]['group_name'] = 'request_coordinator';
+        $mfcs_determined['filters'][$target_field_name]['field_name'] = 'classification';
+        $mfcs_determined['filters'][$target_field_name]['column'] = 'value';
+        $mfcs_determined['filters'][$target_field_name]['search'] = $classifications;
+        $mfcs_determined['filters'][$target_field_name]['type'] = 'number';
+        $mfcs_determined['filters'][$target_field_name]['multiple'] = FALSE;
+        $mfcs_determined['filters'][$target_field_name]['operator'] = MFCS_OPERATOR_IS_IN;
+      }
+      elseif ($lower_name == 'buildings') {
+        $mfcs_determined['redirect'][$lower_name] = $request_value;
+
+        $lower_value = strtolower($request_value);
+        $buildings_array = explode(',', $lower_value);
+
+        if ($first) {
+          $first = FALSE;
+        }
+        else {
+          $mfcs_determined['combined'] .= '&';
+        }
+        $mfcs_determined['combined'] .= urlencode($lower_name) . '=' . urlencode($lower_value);
+
+        $buildings = array();
+        foreach ($buildings_array as $building) {
+          if (cf_is_integer($building)) {
+            $buildings[$building] = $building;
+          }
+        }
+        unset($buildings_array);
+        $mfcs_determined['get']['buildings'] = $buildings;
+
+        $target_field_name = 'field_top-building-0';
+        $mfcs_determined['filters'][$target_field_name]['group_name'] = 'mer';
+        $mfcs_determined['filters'][$target_field_name]['field_name'] = 'building';
+        $mfcs_determined['filters'][$target_field_name]['column'] = 'value';
+        $mfcs_determined['filters'][$target_field_name]['search'] = $buildings;
+        $mfcs_determined['filters'][$target_field_name]['type'] = 'number';
+        $mfcs_determined['filters'][$target_field_name]['multiple'] = FALSE;
+        $mfcs_determined['filters'][$target_field_name]['operator'] = MFCS_OPERATOR_IS_IN;
+      }
+      elseif ($lower_name == 'q') {
+        // drupal uses 'q' for the url path, so ignore it.
+        continue;
+      }
+      elseif ($lower_name == 'sort' || $lower_name == 'order' || $lower_name == 'destination') {
+        // these are not intended to be carried along, globally.
+        continue;
+      }
+      elseif (is_string($request_value)) {
+        $mfcs_determined['redirect'][$lower_name] = $request_value;
+
+        if (!isset($mfcs_determined['get']['remaining'])) {
+          $mfcs_determined['get']['remaining'] = array();
+        }
+
+        $mfcs_determined['get']['remaining'][$request_name] = $request_value;
+      }
+    }
+
+    $mfcs_determined['complete'] .= $mfcs_determined['combined'];
+  }
+
+  // handle converting the remaining values
+  if (!empty($mfcs_determined['get']['remaining'])) {
+    $first = TRUE;
+    foreach ($mfcs_determined['get']['remaining'] as $remaining_key => $remaining_value) {
+      if ($first) {
+        $first = FALSE;
+
+        if (!empty($mfcs_determined['complete'])) {
+          $mfcs_determined['complete'] .= '&';
+        }
+      }
+      else {
+        $mfcs_determined['remaining'] .= '&';
+      }
+
+      $mfcs_determined['remaining'] .= urlencode($remaining_key) . '=' . urlencode($remaining_value);
+    }
+
+    $mfcs_determined['complete'] .= $mfcs_determined['remaining'];
+  }
+}
+
+/**
+ * Builds a redirect array that contains the appropriate url arguments.
+ *
+ * @param string $path
+ *   The url path to redirect to.
+ * @param string|null $fragment
+ *   (optional) The url 'fragment', without the leading '#'.
+ *
+ * @return array|bool
+ *   The generated array for form state redirect or FALSE on error.
+ */
+function mfcs_build_redirect_array($path, $fragment = NULL) {
+  if (!is_string($path)) {
+    cf_error::invalid_string('path');
+    return FALSE;
+  }
+
+  if (!is_null($fragment) && !is_string($fragment)) {
+    cf_error::invalid_string('fragments');
+    return FALSE;
+  }
+
+  global $mfcs_determined;
+
+  return array($path, array('query' => $mfcs_determined['redirect'], 'fragment' => $fragment));
 }
 
 /**

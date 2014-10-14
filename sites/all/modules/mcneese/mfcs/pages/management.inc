@@ -20,6 +20,13 @@
  */
 function mfcs_management_page() {
   global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
   $user = cf_current_user();
 
   mfcs_add_canonical_headers('requests/management');
@@ -35,7 +42,7 @@ function mfcs_management_page() {
   $items_array_current = 0;
 
   if ($manager) {
-    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/reviewers-0" class="item-link">Manage Reviewers</a></h4>';
+    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/reviewers-0' . $url_arguments . '" class="item-link">Manage Reviewers</a></h4>';
     $help = '<div class="item-description inline-block">Manage what users are allowed to approve/deny requests by request type.</div>';
     $items_array[] = array(
       'data' => $link . '<br>' . $help,
@@ -57,7 +64,7 @@ function mfcs_management_page() {
 
     $today = strtotime('midnight today');
     $year = date('Y', $today);
-    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/statistics-0/' . $year . '" class="item-link">Request Statistics</a></h4>';
+    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/statistics-0/' . $year . $url_arguments . '" class="item-link">Request Statistics</a></h4>';
     $help = '<div class="item-description inline-block">View statistics for requests on this system that you have access to view.</div>';
     $items_array[] = array(
       'data' => $link . '<br>' . $help,
@@ -77,7 +84,7 @@ function mfcs_management_page() {
       $items_array = &$items_1;
     }
 
-    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/email_log-0" class="item-link">E-mail Logs</a></h4>';
+    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/email_log-0' . $url_arguments . '" class="item-link">E-mail Logs</a></h4>';
     $help = '<div class="item-description inline-block">View the e-mails sent by this system.</div>';
     $items_array[] = array(
       'data' => $link . '<br>' . $help,

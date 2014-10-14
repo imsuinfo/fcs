@@ -383,10 +383,10 @@ function mfcs_request_agreement_0_form_submit($form, &$form_state) {
 
   if (($clicked_id != 'agreement-submit-download') || empty($request_id)) {
     if (empty($request_id)) {
-      $form_state['redirect'] = 'requests';
+      $form_state['redirect'] = mfcs_build_redirect_array('requests');
     }
     else {
-      $form_state['redirect'] = 'requests/view-0/' . $request_id;
+      $form_state['redirect'] = mfcs_build_redirect_array('requests/view-0/' . $request_id);
     }
 
     return;
@@ -394,7 +394,7 @@ function mfcs_request_agreement_0_form_submit($form, &$form_state) {
 
   global $base_path;
 
-  $form_state['redirect'] = '/requests/agreement-0/' . $request_id . '/pdf';
+  $form_state['redirect'] = mfcs_build_redirect_array('/requests/agreement-0/' . $request_id . '/pdf');
 }
 
 /**

@@ -1566,6 +1566,13 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
  * @see: mfcs_request_view_0_form()
  */
 function mfcs_request_view_0_form_setup_group_path(&$form, $request_id, $group, $presentation_tables, $show, $request) {
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
   $row = NULL;
   $group_path = &$form['display']['groups'];
   $request_type = $request['information']['type'][0]->value;
@@ -1652,23 +1659,23 @@ function mfcs_request_view_0_form_setup_group_path(&$form, $request_id, $group, 
 
       if ($show_link) {
         if ($show['clone']) {
-          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/create-0/' . $request_id . '" class="section-request-' . $request_id . '-' . $group . '-history section-request-clone no-print" title="'. t("Copy Request") . '">Copy</a>';
+          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/create-0/' . $request_id . $url_arguments . '" class="section-request-' . $request_id . '-' . $group . '-history section-request-clone no-print" title="'. t("Copy Request") . '">Copy</a>';
         }
 
         if ($show['edit']) {
-          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/edit-0/' . $request_id . '/' . $group . '" class="section-request-' . $request_id . '-' . $group . '-edit section-request-edit no-print" title="'. t("Edit Request") . '">Edit</a>';
+          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/edit-0/' . $request_id . '/' . $group . $url_arguments . '" class="section-request-' . $request_id . '-' . $group . '-edit section-request-edit no-print" title="'. t("Edit Request") . '">Edit</a>';
         }
 
         if ($show['history']) {
-          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/history-0/' . $request_id . '" class="section-request-' . $request_id . '-' . $group . '-history section-request-history no-print" title="'. t("View History of Request") . '">History</a>';
+          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/history-0/' . $request_id . $url_arguments . '" class="section-request-' . $request_id . '-' . $group . '-history section-request-history no-print" title="'. t("View History of Request") . '">History</a>';
         }
 
         if ($show['agreement']) {
-          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/agreement-0/' . $request_id . '" class="section-request-' . $request_id . '-' . $group . '-agreement section-request-agreement no-print" title="'. t("View Request") . '">Agreement</a>';
+          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/agreement-0/' . $request_id . $url_arguments . '" class="section-request-' . $request_id . '-' . $group . '-agreement section-request-agreement no-print" title="'. t("View Request") . '">Agreement</a>';
         }
 
         if ($show['ical']) {
-          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/ical-0/' . $request_id . '" class="section-request-' . $request_id . '-' . $group . '-ical section-request-ical no-print" title="'. t("Download iCal of Request") . '">iCal</a>';
+          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/ical-0/' . $request_id . $url_arguments . '" class="section-request-' . $request_id . '-' . $group . '-ical section-request-ical no-print" title="'. t("Download iCal of Request") . '">iCal</a>';
         }
       }
 
@@ -2166,6 +2173,13 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
  * @see: mfcs_request_view_0_form()
  */
 function mfcs_request_view_0_form_submit($form, &$form_state) {
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
   $user = cf_current_user();
 
   $request_id = NULL;
@@ -2296,23 +2310,23 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
   // redirect after submitting.
   if (empty($form_state['values']['redirect_to'])) {
     if (empty($request_id)) {
-      $form_state['redirect'] = 'requests';
+      $form_state['redirect'] = mfcs_build_redirect_array('requests');
     }
     else {
       if (empty($form['form']['mode']['#value'])) {
-        $form_state['redirect'] = 'requests/view-0/' . $request_id;
+        $form_state['redirect'] = mfcs_build_redirect_array('requests/view-0/' . $request_id);
       }
       else {
         if ($form['form']['mode']['#value'] == MFCS_VIEW_MODE_OPERATIONS) {
           if (mfcs_page_request_access('review', $request_id)) {
-            $form_state['redirect'] = 'requests/view-0/' . $request_id . '/' . $form['form']['mode']['#value'];
+            $form_state['redirect'] = mfcs_build_redirect_array('requests/view-0/' . $request_id . '/' . $form['form']['mode']['#value']);
           }
           else {
-            $form_state['redirect'] = 'requests/view-0/' . $request_id;
+            $form_state['redirect'] = mfcs_build_redirect_array('requests/view-0/' . $request_id);
           }
         }
         else {
-          $form_state['redirect'] = 'requests/view-0/' . $request_id . '/' . $form['form']['mode']['#value'];
+          $form_state['redirect'] = mfcs_build_redirect_array('requests/view-0/' . $request_id . '/' . $form['form']['mode']['#value']);
         }
       }
     }
@@ -2335,6 +2349,13 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
  * @see: mfcs_request_view_0_form()
  */
 function mfcs_request_view_0_form_submit_pdf($form, &$form_state) {
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
   $user = cf_current_user();
 
   $clicked_id = '';
@@ -2346,10 +2367,10 @@ function mfcs_request_view_0_form_submit_pdf($form, &$form_state) {
 
   if (($clicked_id != 'request-display-submit-download' && $clicked_id != 'request-review-log-submit-download') || empty($request_id)) {
     if (empty($request_id)) {
-      $form_state['redirect'] = 'requests';
+      $form_state['redirect'] = mfcs_build_redirect_array('requests');
     }
     else {
-      $form_state['redirect'] = 'requests/view-0/' . $request_id;
+      $form_state['redirect'] = mfcs_build_redirect_array('requests/view-0/' . $request_id);
     }
 
     return;
@@ -2361,10 +2382,10 @@ function mfcs_request_view_0_form_submit_pdf($form, &$form_state) {
   $revision_id = $form['form']['revision_id']['#value'];
 
   if (is_null($revision_id)) {
-    $form_state['redirect'] = '/requests/pdf-0/' . $request_id . '/' . $mode;
+    $form_state['redirect'] = mfcs_build_redirect_array('/requests/pdf-0/' . $request_id . '/' . $mode);
   }
   else {
-    $form_state['redirect'] = '/requests/pdf-0/' . $request_id . '/' . $mode . '/' . $revision_id;
+    $form_state['redirect'] = mfcs_build_redirect_array('/requests/pdf-0/' . $request_id . '/' . $mode . '/' . $revision_id);
   }
 }
 

@@ -20,6 +20,13 @@ function mfcs_request_reviewers_0_page() {
   mfcs_add_canonical_headers('requests/reviewers-0');
 
   global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
   $user = cf_current_user();
 
   $manager = user_access('mfcs manage', $user);
@@ -58,7 +65,7 @@ function mfcs_request_reviewers_0_page() {
         continue;
       }
 
-      $link = '<a id="mfcs-manage_reviewers-manage-' . $classification_id . '-link-' . $review_step_id .'" href="' . $base_path . 'requests/reviewers-0/list/' . $classification_id . '/' . $review_step_id . '" class="item-link mfcs-manage_reviewers-manage-link">' . $review_step_object->name . ' Step</a>';
+      $link = '<a id="mfcs-manage_reviewers-manage-' . $classification_id . '-link-' . $review_step_id .'" href="' . $base_path . 'requests/reviewers-0/list/' . $classification_id . '/' . $review_step_id . $url_arguments . '" class="item-link mfcs-manage_reviewers-manage-link">' . $review_step_object->name . ' Step</a>';
       $items[] = array(
         'data' => $link,
         'class' => array(
@@ -120,6 +127,13 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
   mfcs_add_canonical_headers('requests/reviewers-0/list/' . $classification . '/' . $review_step);
 
   global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
   $user = cf_current_user();
 
   $form = array();
@@ -204,11 +218,11 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
     }
 
     $user_id = $reviewer->user_id;
-    $row['name'] = '<a href="' . $base_path . 'user/' . $user_id . '" class="user-link">' . check_plain($reviewer->name) . '</a>';
+    $row['name'] = '<a href="' . $base_path . 'user/' . $user_id . $url_arguments . '" class="user-link">' . check_plain($reviewer->name) . '</a>';
     $row['first_name'] = check_plain($reviewer->first_name);
     $row['last_name'] = check_plain($reviewer->last_name);
 
-    $row['operations'] = '<a href="' . $base_path . 'requests/reviewers-0/delete/' . $id . '" class="operation-link operation-link-delete">Delete</a>';
+    $row['operations'] = '<a href="' . $base_path . 'requests/reviewers-0/delete/' . $id . $url_arguments . '" class="operation-link operation-link-delete">Delete</a>';
 
     $rows[] = $row;
   }
@@ -422,6 +436,13 @@ function mfcs_request_reviewers_0_form_validate($form, &$form_state) {
  * @see: mfcs_request_reviewers_0_form()
  */
 function mfcs_request_reviewers_0_form_submit($form, &$form_state) {
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
   $clicked_id = '';
   if (isset($form_state['triggering_element']['#id'])) {
     $clicked_id = $form_state['triggering_element']['#id'];
@@ -549,10 +570,10 @@ function mfcs_request_reviewers_0_form_submit($form, &$form_state) {
   // redirect after submitting.
   if (empty($form_state['values']['redirect_to'])) {
     if (empty($form['form']['request_classification']['#value']) || empty($form['form']['review_step']['#value'])) {
-      $form_state['redirect'] = 'requests/reviewers-0';
+      $form_state['redirect'] = mfcs_build_redirect_array('requests/reviewers-0');
     }
     else {
-      $form_state['redirect'] = 'requests/reviewers-0/list/' . $form['form']['request_classification']['#value'] . '/' . $form['form']['review_step']['#value'];
+      $form_state['redirect'] = mfcs_build_redirect_array('requests/reviewers-0/list/' . $form['form']['request_classification']['#value'] . '/' . $form['form']['review_step']['#value']);
     }
   }
   else {
@@ -685,6 +706,12 @@ function mfcs_request_reviewers_0_delete_form_validate($form, &$form_state) {
  * @see: mfcs_request_reviewers_0_delete_form()
  */
 function mfcs_request_reviewers_0_delete_form_submit($form, &$form_state) {
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
 
   $transaction = db_transaction();
   try {
@@ -701,10 +728,10 @@ function mfcs_request_reviewers_0_delete_form_submit($form, &$form_state) {
   // redirect after submitting.
   if (empty($form_state['values']['redirect_to'])) {
     if (empty($form['form']['request_classification']['#value']) || empty($form['form']['review_step']['#value'])) {
-      $form_state['redirect'] = 'requests/reviewers-0';
+      $form_state['redirect'] = mfcs_build_redirect_array('requests/reviewers-0');
     }
     else {
-      $form_state['redirect'] = 'requests/reviewers-0/list/' . $form['form']['request_classification']['#value'] . '/' . $form['form']['review_step']['#value'];
+      $form_state['redirect'] = mfcs_build_redirect_array('requests/reviewers-0/list/' . $form['form']['request_classification']['#value'] . '/' . $form['form']['review_step']['#value']);
     }
   }
   else {

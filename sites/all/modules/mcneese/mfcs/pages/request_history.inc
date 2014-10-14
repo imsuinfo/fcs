@@ -37,6 +37,12 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
   mfcs_add_canonical_headers('requests/history-0/' . $request_id);
 
   global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
 
   $page_title = "Request History";
   if (!empty($request['information']['title'][0]->value)) {
@@ -134,7 +140,7 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
 
         if ($request['top']['status'][0]->value != MFCS_REQUEST_STATUS_DELETED) {
           $form['history'][$fieldset_name]['history_item-view_revision-link'] = array(
-            '#markup' => '<a href="' . $base_path . 'requests/view-0/' . $request_id . '/' . MFCS_VIEW_MODE_NORMAL . '/' . $revision_id . '" class="history_item-view_revision-link" title="View this Revision">Revision #' . $revision_id . '</a>',
+            '#markup' => '<a href="' . $base_path . 'requests/view-0/' . $request_id . '/' . MFCS_VIEW_MODE_NORMAL . '/' . $revision_id . $url_arguments . '" class="history_item-view_revision-link" title="View this Revision">Revision #' . $revision_id . '</a>',
           );
         }
 
@@ -438,17 +444,17 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
 
     if ($page_number > 0) {
       if ($page_number == 1) {
-        $output .= '<a href="' . $base_path . 'requests/history-0/' . $request_id . '" class="request-history-page-choice request-history-page-previous" title="Previous Page">Prev</a>';
+        $output .= '<a href="' . $base_path . 'requests/history-0/' . $request_id . $url_arguments . '" class="request-history-page-choice request-history-page-previous" title="Previous Page">Prev</a>';
       }
       else {
         $previous_page = $page_number - 1;
-        $output .= '<a href="' . $base_path . 'requests/history-0/' . $request_id . '/' . $previous_page . '" class="request-history-page-choice request-history-page-previous" title="Previous Page">Prev</a>';
+        $output .= '<a href="' . $base_path . 'requests/history-0/' . $request_id . '/' . $previous_page . $url_arguments . '" class="request-history-page-choice request-history-page-previous" title="Previous Page">Prev</a>';
       }
     }
 
     if ($total_results > $rows_per_page) {
       $next_page = $page_number + 1;
-      $output .= '<a href="' . $base_path . 'requests/history-0/' . $request_id . '/' . $next_page . '" class="request-history-page-choice request-history-page-next" title="Next Page">Next</a>';
+      $output .= '<a href="' . $base_path . 'requests/history-0/' . $request_id . '/' . $next_page . $url_arguments . '" class="request-history-page-choice request-history-page-next" title="Next Page">Next</a>';
     }
 
     $form['navigator_bottom']['markup'] = $form['navigator_top']['markup'];

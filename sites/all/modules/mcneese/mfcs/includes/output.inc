@@ -30,14 +30,11 @@
  *   An HTML title for describing the calendar.
  * @param string $id
  *   (optional) A unique HTML id to associate with the calendar.
- * @param null|array $determined
- *   (optional) An array of filters used for generating the filter links.
- *   If NULL, then filter links will no be processed/added.
  *
  * @return string|bool
  *   The generate HTML markup or FALSE on error.
  */
-function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $absolute_start, $absolute_stop, $title, $id = NULL, $determined = array()) {
+function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $absolute_start, $absolute_stop, $title, $id = NULL) {
   if (!is_array($items)) {
     cf_error::invalid_array('items');
     return FALSE;
@@ -78,12 +75,13 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
     $id_string = ' id="' . check_plain($id) . '"';
   }
 
-  if (!is_null($determined) && !is_array($determined)) {
-    cf_error::invalid_array('determined');
-    return FALSE;
-  }
-
   global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
 
   $week_start = 0;
   $week_stop = 6;
@@ -119,22 +117,8 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
   $url_base_month = $base_path . 'requests/calendar-0/month/';
   $url_base_day = $base_path . 'requests/calendar-0/day/';
 
-  $last_url = $url_base_month . date('Y', $last_month) . '/' . strtolower(date('F', $last_month));
-  $next_url = $url_base_month . date('Y', $next_month) . '/' . strtolower(date('F', $next_month));
-
-  if (!empty($determined['combined'])) {
-    $last_url .= '?' . $determined['combined'];
-    $next_url .= '?' . $determined['combined'];
-
-    if (!empty($determined['remaining'])) {
-      $last_url .= '&' . $determined['remaining'];
-      $next_url .= '&' . $determined['remaining'];
-    }
-  }
-  elseif (!empty($determined['remaining'])) {
-    $last_url .= '?' . $determined['remaining'];
-    $next_url .= '?' . $determined['remaining'];
-  }
+  $last_url = $url_base_month . date('Y', $last_month) . '/' . strtolower(date('F', $last_month)) . $url_arguments;
+  $next_url = $url_base_month . date('Y', $next_month) . '/' . strtolower(date('F', $next_month)) . $url_arguments;
 
   $markup .= '<div class="calendar-navigation">';
   $markup .= '<div class="calendar-navigation-previous">';
@@ -189,7 +173,7 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
 
     $markup .= '<div class="calendar-day-wrapper weekday-' . $week_count . ' day-' . $current_day . ' month-' . $current_month . $extra_class . '">';
     $markup .= '<div class="calendar-day weekday-' . $week_count . ' day-' . $current_day . ' month-' . $current_month . $extra_class . '">';
-    $markup .= '<div class="calendar-label"><a href="' . $url_base_day . $current_year . '/' . $current_month_name . '/' . $current_day. '">' . $current_day . '</a></div>';
+    $markup .= '<div class="calendar-label"><a href="' . $url_base_day . $current_year . '/' . $current_month_name . '/' . $current_day . $url_arguments. '">' . $current_day . '</a></div>';
     if (!empty($items[$current_month_day])) {
       foreach ($items[$current_month_day] as $item_id => $item) {
         $markup .= '<div class="calendar-item"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
@@ -221,10 +205,7 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
   $markup .= mfcs_build_calendar_ical_links_markup($month_start, TRUE, TRUE, FALSE);
   $markup .= '</div>' . "\n"; // filter-group-1
 
-  if (!is_null($determined)) {
-    $markup .= mfcs_build_determined_filters_markup($determined);
-  }
-
+  $markup .= mfcs_build_determined_filters_markup();
   $markup .= '</div>' . "\n"; // #mfcs-links_and_filters
 
 
@@ -249,14 +230,11 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
  *   An HTML title for describing the calendar.
  * @param string $id
  *   (optional) A unique HTML id to associate with the calendar.
- * @param null|array $determined
- *   (optional) An array of filters used for generating the filter links.
- *   If NULL, then filter links will no be processed/added.
  *
  * @return string|bool
  *   The generate HTML markup or FALSE on error.
  */
-function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $id = NULL, $determined = array()) {
+function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $id = NULL) {
   if (!is_array($items)) {
     cf_error::invalid_array('items');
     return FALSE;
@@ -288,12 +266,13 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
     $id_string = ' id="' . $id . '"';
   }
 
-  if (!is_null($determined) && !is_array($determined)) {
-    cf_error::invalid_array('determined');
-    return FALSE;
-  }
-
   global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
 
   $module_path = drupal_get_path('module', 'mfcs');
 
@@ -323,22 +302,8 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
 
   $url_base_day = $base_path . 'requests/calendar-0/day/';
 
-  $last_url = $url_base_day . date('Y', $last_day) . '/' . strtolower(date('F', $last_day)) . '/' . date('d', $last_day);
-  $next_url = $url_base_day . date('Y', $next_day) . '/' . strtolower(date('F', $next_day)) . '/' . date('d', $next_day);
-
-  if (!empty($determined['combined'])) {
-    $last_url .= '?' . $determined['combined'];
-    $next_url .= '?' . $determined['combined'];
-
-    if (!empty($determined['remaining'])) {
-      $last_url .= '&' . $determined['remaining'];
-      $next_url .= '&' . $determined['remaining'];
-    }
-  }
-  elseif (!empty($determined['remaining'])) {
-    $last_url .= '?' . $determined['remaining'];
-    $next_url .= '?' . $determined['remaining'];
-  }
+  $last_url = $url_base_day . date('Y', $last_day) . '/' . strtolower(date('F', $last_day)) . '/' . date('d', $last_day) . $url_arguments;
+  $next_url = $url_base_day . date('Y', $next_day) . '/' . strtolower(date('F', $next_day)) . '/' . date('d', $next_day) . $url_arguments;
 
   $markup .= '<div class="calendar-navigation">';
   $markup .= '<div class="calendar-navigation-previous">';
@@ -650,10 +615,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
   $markup .= mfcs_build_calendar_ical_links_markup($day_start);
   $markup .= '</div>' . "\n";
 
-  if (!is_null($determined)) {
-    $markup .= mfcs_build_determined_filters_markup($determined);
-  }
-
+  $markup .= mfcs_build_determined_filters_markup();
   $markup .= '</div>' . "\n"; // #mfcs-links_and_filters
 
 
@@ -715,6 +677,12 @@ function mfcs_build_calendar_ical_links_markup($date_start, $year = TRUE, $month
   }
 
   global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
 
   if (!empty($id)) {
     $id = ' id="' . $id . '"';
@@ -735,19 +703,19 @@ function mfcs_build_calendar_ical_links_markup($date_start, $year = TRUE, $month
 
         $markup .= '<li class="links_and_filters-list-item item-day ical">';
         $markup .= '<div class="links_and_filters-list-item-label item-day item-label ical">Day:</div> ';
-        $markup .= '<a href="' . $base_path . 'requests/ical-0/day/' . $year . '/' . $month . '/' . $day . '" title="Download iCal for ' . $month . ' ' . $day . ', ' . $year . '" class="links_and_filters-list-item-link item-day ical item-link">' . $month . ' ' . $day . ', ' . $year . '</a>';
+        $markup .= '<a href="' . $base_path . 'requests/ical-0/day/' . $year . '/' . $month . '/' . $day . $url_arguments . '" title="Download iCal for ' . $month . ' ' . $day . ', ' . $year . '" class="links_and_filters-list-item-link item-day ical item-link">' . $month . ' ' . $day . ', ' . $year . '</a>';
         $markup .= '</li>' . "\n";
       }
 
       $markup .= '<li class="links_and_filters-list-item item-month ical">';
       $markup .= '<div class="links_and_filters-list-item-label item-month item-label ical">Month:</div> ';
-      $markup .= '<a href="' . $base_path . 'requests/ical-0/month/' . $year . '/' . $month . '" title="Download iCal for the month of ' . $month . ' ' . $year . '" class="links_and_filters-list-item-link item-month ical item-link">' . $month . ' ' . $year . '</a>';
+      $markup .= '<a href="' . $base_path . 'requests/ical-0/month/' . $year . '/' . $month . $url_arguments . '" title="Download iCal for the month of ' . $month . ' ' . $year . '" class="links_and_filters-list-item-link item-month ical item-link">' . $month . ' ' . $year . '</a>';
       $markup .= '</li>' . "\n";
     }
 
     $markup .= '<li class="links_and_filters-list-item item-year ical">';
     $markup .= '<div class="links_and_filters-list-item-label item-year item-label ical">Year:</div> ';
-    $markup .= '<a href="' . $base_path . 'requests/ical-0/year/' . $year . '" title="Download iCal for the year ' . $year . '" class="links_and_filters-list-item-link item-year ical item-link">' . $year . '</a>';
+    $markup .= '<a href="' . $base_path . 'requests/ical-0/year/' . $year . $url_arguments . '" title="Download iCal for the year ' . $year . '" class="links_and_filters-list-item-link item-year ical item-link">' . $year . '</a>';
     $markup .= '</li>' . "\n";
   }
 
@@ -760,26 +728,20 @@ function mfcs_build_calendar_ical_links_markup($date_start, $year = TRUE, $month
 /**
  * Build a list of links that change the url path to apply a filter.
  *
- * @param array $determined
- *   An array of filters used for generating the filter links.
  * @param string|null $id
  *   The HTML id attribute to use.
  *
  * @return string|bool
  *   The generate HTML markup or FALSE on error.
  */
-function mfcs_build_determined_filters_markup($determined, $id = NULL) {
-  if (!is_array($determined)) {
-    cf_error::invalid_array('determined');
-    return FALSE;
-  }
-
+function mfcs_build_determined_filters_markup($id = NULL) {
   if (!is_null($id) && !is_string($id)) {
     cf_error::invalid_string('id');
     return FALSE;
   }
 
   global $base_path;
+  global $mfcs_determined;
 
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
@@ -797,21 +759,21 @@ function mfcs_build_determined_filters_markup($determined, $id = NULL) {
 
   // build the url arguments outside of the loop to avoid repitition.
   $url_arguments_classifications = '';
-  if (!empty($determined['get']['classifications'])) {
-    $url_arguments_classifications = 'classifications=' . implode(',', $determined['get']['classifications']);
+  if (!empty($mfcs_determined['get']['classifications'])) {
+    $url_arguments_classifications = 'classifications=' . implode(',', $mfcs_determined['get']['classifications']);
   }
 
   $url_arguments_types = '';
-  if (!empty($determined['get']['types'])) {
-    $url_arguments_types = 'types=' . implode(',', $determined['get']['types']);
+  if (!empty($mfcs_determined['get']['types'])) {
+    $url_arguments_types = 'types=' . implode(',', $mfcs_determined['get']['types']);
   }
 
   $url_arguments_buildings = '';
-  if (!empty($determined['get']['buildings'])) {
-    $url_arguments_buildings = 'buildings=' . implode(',', $determined['get']['buildings']);
+  if (!empty($mfcs_determined['get']['buildings'])) {
+    $url_arguments_buildings = 'buildings=' . implode(',', $mfcs_determined['get']['buildings']);
   }
 
-  $url_arguments_remaining = $determined['remaining'];
+  $url_arguments_remaining = $mfcs_determined['remaining'];
 
 
   // classifications
@@ -822,13 +784,13 @@ function mfcs_build_determined_filters_markup($determined, $id = NULL) {
 
   foreach ($request_classification_options as $classification_id => $classification) {
     $current_get = array();
-    if (!empty($determined['get']['classifications'])) {
-      $current_get = $determined['get']['classifications'];
+    if (!empty($mfcs_determined['get']['classifications'])) {
+      $current_get = $mfcs_determined['get']['classifications'];
     }
 
     $link_cg = $base_path . $_GET['q'];
 
-    if (isset($determined['get']['classifications'][$classification_id])) {
+    if (isset($mfcs_determined['get']['classifications'][$classification_id])) {
       unset($current_get[$classification_id]);
       $link_action_css = 'link-remove';
       $link_action_text = 'Unfilter: ';
@@ -902,13 +864,13 @@ function mfcs_build_determined_filters_markup($determined, $id = NULL) {
 
   foreach ($request_type_options as $type_id => $type) {
     $current_get = array();
-    if (!empty($determined['get']['types'])) {
-      $current_get = $determined['get']['types'];
+    if (!empty($mfcs_determined['get']['types'])) {
+      $current_get = $mfcs_determined['get']['types'];
     }
 
     $link_cg = $base_path . $_GET['q'];
 
-    if (isset($determined['get']['types'][$type_id])) {
+    if (isset($mfcs_determined['get']['types'][$type_id])) {
       unset($current_get[$type_id]);
       $link_action_css = 'link-remove';
       $link_action_text = 'Unfilter: ';
@@ -985,13 +947,13 @@ function mfcs_build_determined_filters_markup($determined, $id = NULL) {
 
   foreach ($building_list_options as $building_id => $building) {
     $current_get = array();
-    if (!empty($determined['get']['buildings'])) {
-      $current_get = $determined['get']['buildings'];
+    if (!empty($mfcs_determined['get']['buildings'])) {
+      $current_get = $mfcs_determined['get']['buildings'];
     }
 
     $link_cg = $base_path . $_GET['q'];
 
-    if (isset($determined['get']['buildings'][$building_id])) {
+    if (isset($mfcs_determined['get']['buildings'][$building_id])) {
       unset($current_get[$building_id]);
       $link_action_css = 'link-remove';
       $link_action_text = 'Unfilter: ';

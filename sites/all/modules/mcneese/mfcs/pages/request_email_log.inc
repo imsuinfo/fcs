@@ -47,6 +47,13 @@ function mfcs_request_email_log_0_form($form, &$form_state, $page_number = 0) {
   mfcs_add_canonical_headers('requests/email_log-0');
 
   global $base_path;
+  static $mfcs_current;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
 
   $form = array();
   $form['output'] = array('#markup' => '');
@@ -186,7 +193,7 @@ function mfcs_request_email_log_0_form($form, &$form_state, $page_number = 0) {
       );
 
       $row['operations'] = array(
-        'data' => '<a href="' . $base_path . 'requests/email_log-0/view/' . $log->id . '">View</a>',
+        'data' => '<a href="' . $base_path . 'requests/email_log-0/view/' . $log->id . $url_arguments . '">View</a>',
         'class' => 'column-operations no-print',
       );
 
@@ -198,17 +205,17 @@ function mfcs_request_email_log_0_form($form, &$form_state, $page_number = 0) {
   $navigation = "";
   if ($page_number > 0) {
     if ($page_number == 1) {
-      $navigation .= '<a href="' . $base_path . 'requests/email_log-0" class="request-email_log-page-choice request-email_log-page-previous no-print" title="Previous Page">Prev</a>';
+      $navigation .= '<a href="' . $base_path . 'requests/email_log-0' . $url_arguments . '" class="request-email_log-page-choice request-email_log-page-previous no-print" title="Previous Page">Prev</a>';
     }
     else {
       $previous_page = $page_number - 1;
-      $navigation .= '<a href="' . $base_path . 'requests/email_log-0/' . $previous_page . '" class="request-email_log-page-choice request-email_log-page-previous no-print" title="Previous Page">Prev</a>';
+      $navigation .= '<a href="' . $base_path . 'requests/email_log-0/' . $previous_page  . $url_arguments. '" class="request-email_log-page-choice request-email_log-page-previous no-print" title="Previous Page">Prev</a>';
     }
   }
 
   if ($total_results > $rows_per_page) {
     $next_page = $page_number + 1;
-    $navigation .= '<a href="' . $base_path . 'requests/email_log-0/' . $next_page . '" class="request-email_log-page-choice request-email_log-page-next no-print" title="Next Page">Next</a>';
+    $navigation .= '<a href="' . $base_path . 'requests/email_log-0/' . $next_page . $url_arguments . '" class="request-email_log-page-choice request-email_log-page-next no-print" title="Next Page">Next</a>';
   }
 
   $output = '';

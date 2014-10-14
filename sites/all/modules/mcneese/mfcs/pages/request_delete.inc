@@ -152,6 +152,13 @@ function mfcs_request_delete_0_form_validate($form, &$form_state) {
  * @see: mfcs_request_delete_0_form()
  */
 function mfcs_request_delete_0_form_submit($form, &$form_state) {
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
   $user = cf_current_user();
 
   $clicked_id = '';
@@ -164,10 +171,10 @@ function mfcs_request_delete_0_form_submit($form, &$form_state) {
   if ($clicked_id == 'request-delete-submit-no') {
     if (empty($form_state['values']['redirect_to'])) {
       if (empty($request_id)) {
-        $form_state['redirect'] = 'requests';
+        $form_state['redirect'] = mfcs_build_redirect_array('requests');
       }
       else {
-        $form_state['redirect'] = 'requests/view-0/' . $request_id;
+        $form_state['redirect'] = mfcs_build_redirect_array('requests/view-0/' . $request_id);
       }
     }
     else {
@@ -211,10 +218,10 @@ function mfcs_request_delete_0_form_submit($form, &$form_state) {
   // redirect after submitting.
   if (empty($form_state['values']['redirect_to'])) {
     if (empty($request_id)) {
-      $form_state['redirect'] = 'requests';
+      $form_state['redirect'] = mfcs_build_redirect_array('requests');
     }
     else {
-      $form_state['redirect'] = 'requests/list-0';
+      $form_state['redirect'] = mfcs_build_redirect_array('requests/list-0');
     }
   }
   else {
