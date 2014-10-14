@@ -6542,6 +6542,7 @@ function mfcs_instance($reset = FALSE) {
  * The arguments are processed and stored in the global $mfcs_determined.
  */
 function mfcs_determine_url_arguments() {
+  global $user;
   global $mfcs_determined;
 
   $mfcs_determined = array(
@@ -6552,6 +6553,11 @@ function mfcs_determine_url_arguments() {
     'remaining' => '',
     'complete' => '',
   );
+
+  // deny access to this functionality to the anonymous user.
+  if ($user->uid == 0) {
+    return;
+  }
 
   if (!empty($_GET)) {
     $first = TRUE;
