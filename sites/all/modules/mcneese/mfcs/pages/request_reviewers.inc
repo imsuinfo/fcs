@@ -684,7 +684,7 @@ function mfcs_request_reviewers_0_delete_form($form, &$form_state, $id) {
  * @see: mfcs_request_reviewers_0_delete_form()
  */
 function mfcs_request_reviewers_0_delete_form_validate($form, &$form_state) {
-  $reviewers = mfcs_get_reviewers(array('mr.id' => $form['form']['id']['#value']));
+  $reviewers = mfcs_get_reviewers(array('mr.id' => $form['form']['id']['#value']), 'mr.disabled' => 0);
   $reviewer = NULL;
   if (!empty($reviewers)) {
     $reviewer = array_pop($reviewers);
