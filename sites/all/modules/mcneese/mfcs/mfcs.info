@@ -46,6 +46,7 @@ files[] = pages/request_email_log.inc
 files[] = pages/request_history.inc
 files[] = pages/request_ical.inc
 files[] = pages/request_list.inc
+files[] = pages/request_proxy.inc
 files[] = pages/request_reviewers.inc
 files[] = pages/request_review.inc
 files[] = pages/request_search.inc

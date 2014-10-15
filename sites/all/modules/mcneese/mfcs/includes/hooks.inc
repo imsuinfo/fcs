@@ -184,6 +184,42 @@ function mfcs_hook_menu() {
     'type' => MENU_CALLBACK,
   );
 
+  $items['requests/proxy-0'] = array(
+    'title' => "Manage Proxies",
+    'description' => "List users who are able to proxy as a venue coordinator.",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_proxy_0_form'),
+    'file' => 'request_proxy.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('proxy'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
+
+  $items['requests/proxy-0/delete/%'] = array(
+    'title' => "Delete Proxy",
+    'description' => "Delete a proxy",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_proxy_0_delete_form', 3),
+    'file' => 'request_proxy.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('proxy'),
+    'tab_parent' => 'requests/proxy-0',
+    'tab_root' => 'requests/proxy-0',
+  );
+
+  $items['requests/proxy-0/autocomplete/user_id'] = array(
+    'title' => "",
+    'page callback' => 'mfcs_autocomplete_user_id',
+    'file' => 'autocomplete.inc',
+    'file path' => $module_path . '/includes',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('reviewers'),
+    'type' => MENU_CALLBACK,
+  );
+
   $items['requests/reviewers-0'] = array(
     'title' => "Manage Reviewers",
     'description' => "Review Request",
@@ -224,7 +260,7 @@ function mfcs_hook_menu() {
 
   $items['requests/reviewers-0/autocomplete/user_id'] = array(
     'title' => "",
-    'page callback' => 'mfcs_request_reviewers_0_autocomplete_user_id',
+    'page callback' => 'mfcs_autocomplete_user_id',
     'file' => 'autocomplete.inc',
     'file path' => $module_path . '/includes',
     'access callback' => 'mfcs_page_request_access',

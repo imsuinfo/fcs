@@ -638,6 +638,13 @@ function mfcs_page_request_access_operation_cancel(&$request_ids, &$processed, &
     MFCS_REQUEST_STATUS_UNLOCKED,
   );
 
+  $proxies = mfcs_get_proxy_venue_coordinator($user->uid);
+  $venue_coordinator_ids = array();
+  if (!empty($proxies)) {
+    $venue_coordinator_ids = $proxies;
+  }
+  $venue_coordinator_ids[$user->uid] = $user->uid;
+
   // if the user is the venue coordinator, then allow them to cancel a request at any point in the process.
   try {
     $query = db_select('mfcs_requests', 'mer');
@@ -646,7 +653,7 @@ function mfcs_page_request_access_operation_cancel(&$request_ids, &$processed, &
 
     $query->condition('mer.id', $request_ids, 'IN');
     $query->condition('mer.status', $cancellable_status_admin, 'IN');
-    $query->condition('mer.venue_coordinator', $user->uid);
+    $query->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
 
     $access_results = $query->execute()->fetchAllAssoc('id');
 
@@ -780,6 +787,13 @@ function mfcs_page_request_access_operation_uncancel(&$request_ids, &$processed,
     MFCS_REQUEST_STATUS_CANCELLED,
   );
 
+  $proxies = mfcs_get_proxy_venue_coordinator($user->uid);
+  $venue_coordinator_ids = array();
+  if (!empty($proxies)) {
+    $venue_coordinator_ids = $proxies;
+  }
+  $venue_coordinator_ids[$user->uid] = $user->uid;
+
   // if the user is the venue coordinator, then allow them to uncancel a request at any point in the process.
   try {
     $query = db_select('mfcs_requests', 'mer');
@@ -788,7 +802,7 @@ function mfcs_page_request_access_operation_uncancel(&$request_ids, &$processed,
 
     $query->condition('mer.id', $request_ids, 'IN');
     $query->condition('mer.status', $uncancellable_status, 'IN');
-    $query->condition('mer.venue_coordinator', $user->uid);
+    $query->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
 
     $access_results = $query->execute()->fetchAllAssoc('id');
 

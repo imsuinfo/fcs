@@ -551,6 +551,14 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message, $ext
     'mr.disabled' => 0,
   );
 
+  $proxies = mfcs_get_proxy_venue_coordinator($user->uid);
+  $venue_coordinator_ids = array();
+  if (!empty($proxies)) {
+    $venue_coordinator_ids = $proxies;
+  }
+  $venue_coordinator_ids[$user->uid] = $user->uid;
+
+
   $reviewer_classifications = array();
   $reviewer_classifications_all = array();
   $reviewers = mfcs_get_reviewers($reviewer_conditions, TRUE);
@@ -569,6 +577,10 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message, $ext
   if ($venue_coordinator_id == $user->uid) {
     $reviewer_classifications[MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR] = MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR;
     $reviewer_classifications_all[MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR] = MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR;
+  }
+  elseif (in_array($venue_coordinator_id, $venue_coordinator_ids)) {
+    $reviewer_classifications[MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR_PROXY] = MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR_PROXY;
+    $reviewer_classifications_all[MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR_PROXY] = MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR_PROXY;
   }
 
   if ($decision == MFCS_REVIEW_DECISION_REQUIREMENT && ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE || $step == MFCS_REVIEW_STEP_REVIEW  || $step == MFCS_REVIEW_STEP_REQUIREMENTS || $step == MFCS_REVIEW_STEP_MAKE_DECISIONS || $step == MFCS_REVIEW_STEP_COMPLETED)) {

@@ -127,7 +127,14 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     return mfcs_request_uncancel_0_form($cancel_form, $cancel_form_state, $request_id);
   }
 
-  $venue_coordinator = ($request['venue_coordinator']['user_id'][0]->value == $user->uid);
+  $proxies = mfcs_get_proxy_venue_coordinator($user->uid);
+  $venue_coordinator_ids = array();
+  if (!empty($proxies)) {
+    $venue_coordinator_ids = $proxies;
+  }
+  $venue_coordinator_ids[$user->uid] = $user->uid;
+
+  $venue_coordinator = (in_array($request['venue_coordinator']['user_id'][0]->value, $venue_coordinator_ids));
 
   $manager = user_access('mfcs manage', $user);
   $reviewer = user_access('mfcs review', $user);
@@ -1053,8 +1060,15 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
       // the venue coordinator must be reported as venue coordinator when not reviewing.
       if ($venue_coordinator) {
         if (empty($reviewer_classification) || ($step != MFCS_REVIEW_STEP_REVIEW && $step != MFCS_REVIEW_STEP_REQUIREMENTS)) {
-          $reviewer_classification[MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR] = "Venue Coordinator";
-          $reviewer_classification_all[MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR] = "Venue Coordinator";
+
+          if ($request['venue_coordinator']['user_id'][0]->value == $user->uid) {
+            $reviewer_classification[MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR] = "Venue Coordinator";
+            $reviewer_classification_all[MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR] = "Venue Coordinator";
+          }
+          else {
+            $reviewer_classification[MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR_PROXY] = "Venue Coordinator (Proxy)";
+            $reviewer_classification_all[MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR_PROXY] = "Venue Coordinator (Proxy)";
+          }
         }
       }
 
@@ -2683,6 +2697,9 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id, $revision_id 
               if ($review_classification->classification == MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR) {
                 continue;
               }
+              elseif ($review_classification->classification == MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR_PROXY) {
+                continue;
+              }
               elseif ($review_classification->classification == MFCS_REVIEW_CLASSIFICATION_SYSTEM_ADMINISTRATOR) {
                 continue;
               }
@@ -2767,6 +2784,9 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id, $revision_id 
 
         if ($classification == MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR) {
           $reviewer_classification .= "Venue Coordinator";
+        }
+        elseif ($classification == MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR_PROXY) {
+          $reviewer_classification .= "Venue Coordinator (Proxy)";
         }
         elseif ($classification == MFCS_REVIEW_CLASSIFICATION_MANAGER) {
           $reviewer_classification .= "Manager";

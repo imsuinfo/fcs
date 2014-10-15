@@ -52,10 +52,12 @@ function mfcs_management_page() {
   }
 
   if ($manager || $reviewer) {
-    if (count($items_1) % 2 == 0) {
+    $c_1 = count($items_1);
+    $c_2 = count($items_2);
+    if ($c_1 == $c_2) {
       $items_array = &$items_1;
     }
-    elseif (count($items_2) % 2 == 0) {
+    elseif ($c_1 > $c_2) {
       $items_array = &$items_2;
     }
     else {
@@ -73,11 +75,35 @@ function mfcs_management_page() {
     );
   }
 
-  if ($manager || $administer) {
-    if (count($items_1) % 2 == 0) {
+  if ($manager) {
+    $c_1 = count($items_1);
+    $c_2 = count($items_2);
+    if ($c_1 == $c_2) {
       $items_array = &$items_1;
     }
-    elseif (count($items_2) % 2 == 0) {
+    elseif ($c_1 > $c_2) {
+      $items_array = &$items_2;
+    }
+    else {
+      $items_array = &$items_1;
+    }
+
+    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/proxy-0' . $url_arguments . '" class="item-link">Manage Proxies</a></h4>';
+    $help = '<div class="item-description inline-block">Manage which venue coordinators a given user is allowed to proxy as.</div>';
+    $items_array[] = array(
+      'data' => $link . '<br>' . $help,
+      'class' => array(
+      ),
+    );
+  }
+
+  if ($manager || $administer) {
+    $c_1 = count($items_1);
+    $c_2 = count($items_2);
+    if ($c_1 == $c_2) {
+      $items_array = &$items_1;
+    }
+    elseif ($c_1 > $c_2) {
       $items_array = &$items_2;
     }
     else {

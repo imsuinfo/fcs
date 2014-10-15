@@ -363,6 +363,55 @@ function mfcs_schema() {
     ),
   );
 
+  $schema['mfcs_proxy_venue_coordinator'] = array(
+    'description' => $t("McNeese Facilities Use allowing one user to proxy as another for the purposes of venue coordinator."),
+    'fields' => array(
+      'id' => array(
+        'description' => $t("The primary key used to represent an reviewer."),
+        'type' => 'serial',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'user_id' => array(
+        'description' => $t("This is the system id. Represents the user who created the request."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'proxy_id' => array(
+        'description' => $t("This is the system id. Represents the user who created the request."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'disabled' => array(
+        'description' => $t("Boolean designating that the account is disabled. This is used as a soft-delete to prevent loss of records."),
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+    'unique keys' => array(
+      'reviewer' => array('user_id', 'proxy_id'),
+    ),
+    'foreign keys' => array(
+      'user_id' => array(
+        'table' => 'users',
+        'columns' => array('user_id' => 'uid'),
+      ),
+      'proxy_id' => array(
+        'table' => 'users',
+        'columns' => array('user_id' => 'uid'),
+      ),
+    ),
+  );
+
   $schema['mfcs_reviewed'] = array(
     'description' => $t("McNeese Facilities Use maintains a log of currently review requests that are open for review for the currently active review step."),
     'fields' => array(
@@ -1258,6 +1307,8 @@ function mfcs_install() {
   $key2_foreign = 'user_id_fkey';
   $key2_name_1 = 'coordinator_id';
   $key2_foreign_1 = 'coordinator_id_fkey';
+  $key2_name_2 = 'proxy_id';
+  $key2_foreign_2 = 'proxy_id_fkey';
   $table2_foreign = 'users';
   $table2_foreign_key = 'uid';
 
@@ -1286,9 +1337,11 @@ function mfcs_install() {
   db_query('ALTER TABLE {mfcs_current} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
   db_query('ALTER TABLE {mfcs_request_revisions} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
   db_query('ALTER TABLE {mfcs_request_revisions} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
-  db_query('ALTER TABLE {mfcs_reviewers} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE CASCADE');
+  db_query('ALTER TABLE {mfcs_reviewers} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
   db_query('ALTER TABLE {mfcs_search_settings} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE CASCADE');
   db_query('ALTER TABLE {mfcs_reviewed} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
+  db_query('ALTER TABLE {mfcs_proxy_venue_coordinator} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_proxy_venue_coordinator} ADD CONSTRAINT ' . $key2_foreign_2 . ' FOREIGN KEY (' . $key2_name_2 . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
 
   db_query('ALTER TABLE {mfcs_banner_building_to_location} ADD CONSTRAINT ' . $key3_foreign . ' FOREIGN KEY (' . $key3_name . ') REFERENCES {' . $table3_foreign . '} (' . $table3_foreign_key . ') ON DELETE CASCADE');
   db_query('ALTER TABLE {mfcs_banner_building_to_location} ADD CONSTRAINT ' . $key4_foreign . ' FOREIGN KEY (' . $key4_name . ') REFERENCES {' . $table4_foreign . '} (' . $table4_foreign_key . ') ON DELETE CASCADE');
@@ -1346,6 +1399,7 @@ function mfcs_uninstall() {
   $key1_foreign = 'request_id_fkey';
   $key2_foreign = 'user_id_fkey';
   $key2_foreign_1 = 'coordinator_id_fkey';
+  $key2_foreign_2 = 'proxy_id_fkey';
   $key3_foreign = 'location_fkey';
   $key4_foreign = 'building_fkey';
   $key5_foreign = 'room_fkey';
@@ -1366,6 +1420,8 @@ function mfcs_uninstall() {
   db_query('ALTER TABLE {mfcs_reviewers} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
   db_query('ALTER TABLE {mfcs_search_settings} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
   db_query('ALTER TABLE {mfcs_reviewed} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
+  db_query('ALTER TABLE {mfcs_proxy_venue_coordinator} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
+  db_query('ALTER TABLE {mfcs_proxy_venue_coordinator} DROP CONSTRAINT IF EXISTS ' . $key2_foreign_2);
   db_query('ALTER TABLE {mfcs_banner_building_to_location} DROP CONSTRAINT IF EXISTS ' . $key3_foreign);
   db_query('ALTER TABLE {mfcs_banner_building_to_location} DROP CONSTRAINT IF EXISTS ' . $key4_foreign);
   db_query('ALTER TABLE {mfcs_banner_rooms} DROP CONSTRAINT IF EXISTS ' . $key4_foreign);

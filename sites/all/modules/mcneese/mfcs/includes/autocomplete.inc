@@ -21,7 +21,7 @@
  * @return array
  *   An array of string matches.
  */
-function mfcs_request_reviewers_0_autocomplete_user_id($string) {
+function mfcs_autocomplete_user_id($string) {
   if (function_exists('devel_menu')) {
     $GLOBALS['devel_shutdown'] = FALSE;
   }
