@@ -472,6 +472,7 @@ function mfcs_request_statistics_render_request_classification($counts, $classif
     'chart_height' => 220,
     'line_start_x' => 75,
     'line_start_y' => 25,
+    'name' => 'classification',
   );
 
   $options['rows']['student'] = array(
@@ -511,8 +512,8 @@ function mfcs_request_statistics_render_request_classification($counts, $classif
 
   // render the markup
   $markup = '<div class="statistics-block statistics-block-main">' . "\n";
-  $markup .= '<div class="statistics-block-chart">' . "\n";
-  $markup .= '  <svg class="statistics-block-chart-main" title="Requests by Classification" width="' . $width . '"' . $svg_options . '>' . $chart_markup . '</svg>' . "\n";
+  $markup .= '<div id="' . 'mfcs-statistics-' . $options['name'] . '-wrapper" class="statistics-block-chart">' . "\n";
+  $markup .= '  <svg id="' . 'mfcs-statistics-' . $options['name'] . '" class="statistics-block-chart-main" title="Requests by Classification" width="' . $width . '"' . $svg_options . '>' . $chart_markup . '</svg>' . "\n";
   $markup .= '</div>' . "\n";
 
   $markup .= '<div class="statistics-block-text">' . "\n";
@@ -576,6 +577,7 @@ function mfcs_request_statistics_render_request_type($counts, $type_options) {
     'chart_height' => 220,
     'line_start_x' => 90,
     'line_start_y' => 25,
+    'name' => 'type',
   );
 
   $options['rows']['athletic'] = array(
@@ -687,8 +689,8 @@ function mfcs_request_statistics_render_request_type($counts, $type_options) {
   $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['workshop'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_WORKSHOP] . "</strong> (<em>" . $options['rows']['workshop']['percent'] . '%</em> of requests). ' . "</div>\n";
   $markup .= '</div>' . "\n"; // statistics-block-text
 
-  $markup .= '<div class="statistics-block-chart">' . "\n";
-  $markup .= '  <svg class="statistics-block-chart-request_type" title="Requests by Type" width="' . $width . '"' . $svg_options . '>' . $chart_markup . '</svg>' . "\n";
+  $markup .= '<div id="' . 'mfcs-statistics-' . $options['name'] . '-wrapper" class="statistics-block-chart">' . "\n";
+  $markup .= '  <svg id="' . 'mfcs-statistics-' . $options['name'] . '" class="statistics-block-chart-request_type" title="Requests by Type" width="' . $width . '"' . $svg_options . '>' . $chart_markup . '</svg>' . "\n";
   $markup .= '</div>' . "\n";
 
   $markup .= '</div>' . "\n"; // statistics-block
@@ -738,6 +740,7 @@ function mfcs_request_statistics_render_request_step($counts, $step_options) {
     'chart_height' => 220,
     'line_start_x' => 120,
     'line_start_y' => 25,
+    'name' => 'step',
   );
 
   // currently this is not used so do not expose it to the user.
@@ -802,8 +805,8 @@ function mfcs_request_statistics_render_request_step($counts, $step_options) {
   // render the markup
   $markup = '<div class="statistics-block statistics-block-request_step">' . "\n";
 
-  $markup .= '<div class="statistics-block-chart">' . "\n";
-  $markup .= '  <svg class="statistics-block-chart-request_step" title="Requests by Step" width="' . $width . '"' . $svg_options . '>' . $chart_markup . '</svg>' . "\n";
+  $markup .= '<div id="' . 'mfcs-statistics-' . $options['name'] . '-wrapper" class="statistics-block-chart">' . "\n";
+  $markup .= '  <svg id="' . 'mfcs-statistics-' . $options['name'] . '" class="statistics-block-chart-request_step" title="Requests by Step" width="' . $width . '"' . $svg_options . '>' . $chart_markup . '</svg>' . "\n";
   $markup .= '</div>' . "\n"; // statistics-block-chart
 
   $markup .= '<div class="statistics-block-text">' . "\n";
@@ -863,6 +866,7 @@ function mfcs_request_statistics_render_request_status($counts, $status_options)
     'chart_height' => 220,
     'line_start_x' => 120,
     'line_start_y' => 25,
+    'name' => 'status',
   );
 
   $options['rows']['locked'] = array(
@@ -934,8 +938,8 @@ function mfcs_request_statistics_render_request_status($counts, $status_options)
   $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['cancelled'] . "</em> <strong>" . $status_options[MFCS_REQUEST_STATUS_CANCELLED] . "</strong> (<em>" . $options['rows']['cancelled']['percent'] . '%</em> of requests). ' . "</div>\n";
   $markup .= '</div>' . "\n"; // statistics-block-text
 
-  $markup .= '<div class="statistics-block-chart">' . "\n";
-  $markup .= '  <svg class="statistics-block-chart-request_status" title="Requests by Status" width="' . $width . '"' . $svg_options . '>' . $chart_markup . '</svg>' . "\n";
+  $markup .= '<div id="' . 'mfcs-statistics-' . $options['name'] . '-wrapper" class="statistics-block-chart">' . "\n";
+  $markup .= '  <svg id="' . 'mfcs-statistics-' . $options['name'] . '" class="statistics-block-chart-request_status" title="Requests by Status" width="' . $width . '"' . $svg_options . '>' . $chart_markup . '</svg>' . "\n";
   $markup .= '</div>' . "\n"; // statistics-block-chart
 
   $markup .= '</div>' . "\n"; // statistics-block
@@ -1072,7 +1076,12 @@ function mfcs_request_statistics_render_chart(&$options) {
   $y2 = $y1 + 10;
   $bar_height = 16;
 
-  foreach ($options['rows'] as $row) {
+  $row_name = '';
+  if (!empty($options['name'])) {
+    $row_name .= '-' . $options['name'];
+  }
+
+  foreach ($options['rows'] as $row_number => $row) {
     $bar_width = ($row['total'] * $increment_width) / $increment_value;
 
     $label_font_size = 12;
@@ -1082,7 +1091,7 @@ function mfcs_request_statistics_render_chart(&$options) {
       $y2_offset -= 4;
     }
 
-    $chart_markup .= '<g id="mfcs-statistics-block-main-bar-student">' . "\n";
+    $chart_markup .= '<g id="mfcs-statistics' . $row_name . '-bar-' . $row_number . '" class="row-bar">' . "\n";
     $chart_markup .= '  <title>' . $row['text'] . ': ' . $row['total'] . ' (' . $row['percent'] . '%)' . '</title>' . "\n";
     $chart_markup .= '  <text font-size="' . $label_font_size . '" x="0" y="' . $y2_offset . '" style="line-height: 12px;">' . $row['label'] . '</text>' . "\n";
 
