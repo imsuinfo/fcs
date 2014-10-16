@@ -1483,20 +1483,21 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
 
   $email_from = '"' . $fcs_name . '" <' . $fcs_email . '>';
 
-  $location = mfcs_load_locations($request['top']['location'][0]->value);
   $location_text = '';
+  $room_text = '';
+  $building_text = '';
+
+  $location = mfcs_load_locations($request['top']['location'][0]->value);
 
   if (is_object($location)) {
     $location_text = $location->location_name;
   }
 
   $room = mfcs_load_rooms(NULL, NULL, $request['top']['room'][0]->value);
-  $room_text = '';
 
   if (is_object($room)) {
     $room_text = $room->room_name;
     $building = mfcs_load_buildings(NULL, $room->building_id);
-    $building_text = '';
 
     if (is_object($building)) {
       $building_text = $building->building_name;
