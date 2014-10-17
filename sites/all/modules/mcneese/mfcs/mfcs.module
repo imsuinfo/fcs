@@ -6783,7 +6783,7 @@ function mfcs_determine_url_arguments() {
         else {
           $mfcs_determined['combined'] .= '&';
         }
-        $mfcs_determined['combined'] .= urlencode($lower_name) . '=' . urlencode($lower_value);
+        $mfcs_determined['combined'] .= $lower_name . '=' . $lower_value;
 
         $types = array();
         foreach ($types_array as $type) {
@@ -6815,7 +6815,7 @@ function mfcs_determine_url_arguments() {
         else {
           $mfcs_determined['combined'] .= '&';
         }
-        $mfcs_determined['combined'] .= urlencode($lower_name) . '=' . urlencode($lower_value);
+        $mfcs_determined['combined'] .= $lower_name . '=' . $lower_value;
 
         $classifications = array();
         foreach ($classifications_array as $classification) {
@@ -6847,7 +6847,7 @@ function mfcs_determine_url_arguments() {
         else {
           $mfcs_determined['combined'] .= '&';
         }
-        $mfcs_determined['combined'] .= urlencode($lower_name) . '=' . urlencode($lower_value);
+        $mfcs_determined['combined'] .= $lower_name . '=' . $lower_value;
 
         $buildings = array();
         foreach ($buildings_array as $building) {
