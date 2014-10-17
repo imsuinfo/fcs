@@ -815,7 +815,7 @@ function mfcs_build_determined_filters_markup($id = NULL) {
         $link_cg .= '&';
       }
 
-      $link_cg .= 'classifications=' . urlencode(implode(',', $current_get));
+      $link_cg .= 'classifications=' . implode(',', $current_get);
     }
 
     if (!empty($url_arguments_types)) {
@@ -929,7 +929,7 @@ function mfcs_build_determined_filters_markup($id = NULL) {
         $link_cg .= '&';
       }
 
-      $link_cg .= 'types=' . urlencode(implode(',', $current_get));
+      $link_cg .= 'types=' . implode(',', $current_get);
     }
 
     if (!empty($url_arguments_buildings)) {
@@ -1046,7 +1046,7 @@ function mfcs_build_determined_filters_markup($id = NULL) {
         $link_cg .= '&';
       }
 
-      $link_cg .= 'buildings=' . urlencode(implode(',', $current_get));
+      $link_cg .= 'buildings=' . implode(',', $current_get);
     }
 
     if (!empty($url_arguments_remaining)) {
