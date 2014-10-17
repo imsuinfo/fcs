@@ -5145,21 +5145,6 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
 
       $already_joined['mfcs_field_plans_activities'] = 'mfpa';
       $already_joined['mfcs_field_plans_description'] = 'mfpd';
-
-      if (!array_key_exists('mfcs_banner_rooms', $already_joined)) {
-        $query->innerJoin('mfcs_banner_rooms', 'mbr', 'mer.room = mbr.id');
-        $already_joined['mfcs_banner_rooms'] = 'mbr';
-      }
-
-      if (!array_key_exists('mfcs_banner_buildings', $already_joined)) {
-        $query->innerJoin('mfcs_banner_buildings', 'mbb', 'mer.building = mbb.id');
-        $already_joined['mfcs_banner_buildings'] = 'mbb';
-      }
-
-      if (!array_key_exists('mfcs_banner_locations', $already_joined)) {
-        $query->innerJoin('mfcs_banner_locations', 'mbl', 'mer.location = mbl.id');
-        $already_joined['mfcs_banner_locations'] = 'mbl';
-      }
     }
 
     if ($count) {
@@ -5195,23 +5180,6 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
       elseif ($order == 'location') {
         $query->addField('mbl', 'human_name', 'location_name');
         $already_added['location_name'] = 'mbl.human_name';
-      }
-
-      if (is_string($search)) {
-        if (!array_key_exists('room_name', $already_added)) {
-          $query->addField('mbr', 'human_name', 'room_name');
-          $already_added['room_name'] = 'mbr.human_name';
-        }
-
-        if (!array_key_exists('building_name', $already_added)) {
-          $query->addField('mbb', 'human_name', 'building_name');
-          $already_added['building_name'] = 'mbb.human_name';
-        }
-
-        if (!array_key_exists('location_name', $already_added)) {
-          $query->addField('mbl', 'human_name', 'location_name');
-          $already_added['location_name'] = 'mbl.human_name';
-        }
       }
     }
 
@@ -5403,15 +5371,6 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
 
       $or->condition('mfpd.value', $like_part, $like);
       $or->condition('mfpd.value', '%' . $like_part . '%', $like);
-
-      $or->condition('mbl.human_name', $like_part, $like);
-      $or->condition('mbl.human_name', '%' . $like_part . '%', $like);
-
-      $or->condition('mbb.human_name', $like_part, $like);
-      $or->condition('mbb.human_name', '%' . $like_part . '%', $like);
-
-      $or->condition('mbr.human_name', $like_part, $like);
-      $or->condition('mbr.human_name', '%' . $like_part . '%', $like);
 
       $query->condition($or);
     }
