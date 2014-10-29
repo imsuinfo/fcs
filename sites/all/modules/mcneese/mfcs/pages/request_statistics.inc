@@ -507,13 +507,14 @@ function mfcs_request_statistics_render_request_classification($counts, $classif
   $chart_markup = mfcs_request_statistics_render_chart($options);
 
   $width = 450;
-  $svg_options = ' version="1.1" viewBox="0 0 ' . $options['chart_width'] . ' ' . $options['chart_height'] . '" preserveAspectRatio="yes" xmlns="http://www.w3.org/2000/svg"';
+  $height = 207;
+  $svg_options = ' version="1.1" viewBox="0 0 ' . $options['chart_width'] . ' ' . $options['chart_height'] . '" preserveAspectRatio="xMaxYMax meet" xmlns="http://www.w3.org/2000/svg"';
 
 
   // render the markup
   $markup = '<div class="statistics-block statistics-block-main">' . "\n";
   $markup .= '<div id="' . 'mfcs-statistics-' . $options['name'] . '-wrapper" class="statistics-block-chart">' . "\n";
-  $markup .= '  <svg id="' . 'mfcs-statistics-' . $options['name'] . '" class="statistics-block-chart-main" title="Requests by Classification" width="' . $width . '"' . $svg_options . '>' . $chart_markup . '</svg>' . "\n";
+  $markup .= '  <svg id="' . 'mfcs-statistics-' . $options['name'] . '" class="statistics-block-chart-main" title="Requests by Classification" width="' . $width . '" height="' . $height . '"' . $svg_options . '>' . $chart_markup . '</svg>' . "\n";
   $markup .= '</div>' . "\n";
 
   $markup .= '<div class="statistics-block-text">' . "\n";
@@ -668,7 +669,8 @@ function mfcs_request_statistics_render_request_type($counts, $type_options) {
   $chart_markup = mfcs_request_statistics_render_chart($options);
 
   $width = 450;
-  $svg_options = ' version="1.1" viewBox="0 0 ' . $options['chart_width'] . ' ' . $options['chart_height'] . '" preserveAspectRatio="yes" xmlns="http://www.w3.org/2000/svg"';
+  $height = 472;
+  $svg_options = ' version="1.1" viewBox="0 0 ' . $options['chart_width'] . ' ' . $options['chart_height'] . '" preserveAspectRatio="xMaxYMax meet" xmlns="http://www.w3.org/2000/svg"';
 
   // render the markup
   $markup = '<div class="statistics-block statistics-block-request_type">' . "\n";
@@ -690,7 +692,7 @@ function mfcs_request_statistics_render_request_type($counts, $type_options) {
   $markup .= '</div>' . "\n"; // statistics-block-text
 
   $markup .= '<div id="' . 'mfcs-statistics-' . $options['name'] . '-wrapper" class="statistics-block-chart">' . "\n";
-  $markup .= '  <svg id="' . 'mfcs-statistics-' . $options['name'] . '" class="statistics-block-chart-request_type" title="Requests by Type" width="' . $width . '"' . $svg_options . '>' . $chart_markup . '</svg>' . "\n";
+  $markup .= '  <svg id="' . 'mfcs-statistics-' . $options['name'] . '" class="statistics-block-chart-request_type" title="Requests by Type" width="' . $width . '" height="' . $height . '"' . $svg_options . '>' . $chart_markup . '</svg>' . "\n";
   $markup .= '</div>' . "\n";
 
   $markup .= '</div>' . "\n"; // statistics-block
@@ -800,13 +802,14 @@ function mfcs_request_statistics_render_request_step($counts, $step_options) {
   $chart_markup = mfcs_request_statistics_render_chart($options);
 
   $width = 450;
-  $svg_options = ' version="1.1" viewBox="0 0 ' . $options['chart_width'] . ' ' . $options['chart_height'] . '" preserveAspectRatio="yes" xmlns="http://www.w3.org/2000/svg"';
+  $height = 218;
+  $svg_options = ' version="1.1" viewBox="0 0 ' . $options['chart_width'] . ' ' . $options['chart_height'] . '" preserveAspectRatio="xMaxYMax meet" xmlns="http://www.w3.org/2000/svg"';
 
   // render the markup
   $markup = '<div class="statistics-block statistics-block-request_step">' . "\n";
 
   $markup .= '<div id="' . 'mfcs-statistics-' . $options['name'] . '-wrapper" class="statistics-block-chart">' . "\n";
-  $markup .= '  <svg id="' . 'mfcs-statistics-' . $options['name'] . '" class="statistics-block-chart-request_step" title="Requests by Step" width="' . $width . '"' . $svg_options . '>' . $chart_markup . '</svg>' . "\n";
+  $markup .= '  <svg id="' . 'mfcs-statistics-' . $options['name'] . '" class="statistics-block-chart-request_step" title="Requests by Step" width="' . $width . '" height="' . $height . '"' . $svg_options . '>' . $chart_markup . '</svg>' . "\n";
   $markup .= '</div>' . "\n"; // statistics-block-chart
 
   $markup .= '<div class="statistics-block-text">' . "\n";
@@ -923,7 +926,8 @@ function mfcs_request_statistics_render_request_status($counts, $status_options)
   $chart_markup = mfcs_request_statistics_render_chart($options);
 
   $width = 450;
-  $svg_options = ' version="1.1" viewBox="0 0 ' . $options['chart_width'] . ' ' . $options['chart_height'] . '" preserveAspectRatio="yes" xmlns="http://www.w3.org/2000/svg"';
+  $height = 282;
+  $svg_options = ' version="1.1" viewBox="0 0 ' . $options['chart_width'] . ' ' . $options['chart_height'] . '" preserveAspectRatio="xMaxYMax meet" xmlns="http://www.w3.org/2000/svg"';
 
   // render the markup
   $markup = '<div class="statistics-block statistics-block-request_step">' . "\n";
@@ -939,7 +943,7 @@ function mfcs_request_statistics_render_request_status($counts, $status_options)
   $markup .= '</div>' . "\n"; // statistics-block-text
 
   $markup .= '<div id="' . 'mfcs-statistics-' . $options['name'] . '-wrapper" class="statistics-block-chart">' . "\n";
-  $markup .= '  <svg id="' . 'mfcs-statistics-' . $options['name'] . '" class="statistics-block-chart-request_status" title="Requests by Status" width="' . $width . '"' . $svg_options . '>' . $chart_markup . '</svg>' . "\n";
+  $markup .= '  <svg id="' . 'mfcs-statistics-' . $options['name'] . '" class="statistics-block-chart-request_status" title="Requests by Status" width="' . $width . '" height="' . $height . '"' . $svg_options . '>' . $chart_markup . '</svg>' . "\n";
   $markup .= '</div>' . "\n"; // statistics-block-chart
 
   $markup .= '</div>' . "\n"; // statistics-block
