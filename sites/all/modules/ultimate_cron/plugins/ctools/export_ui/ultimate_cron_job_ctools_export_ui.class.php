@@ -207,7 +207,7 @@ class ultimate_cron_job_ctools_export_ui extends ctools_export_ui {
     $header = array(
       t('Started'),
       t('Duration'),
-      t('User'),
+      t('Launched by'),
       t('Initial message'),
       t('Message'),
       t('Status'),
