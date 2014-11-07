@@ -327,7 +327,7 @@ function _field_invoke_multiple($op, $entity_type, $entities, &$a = NULL, &$b = 
         // Unless a language suggestion is provided we iterate on all the
         // available languages.
         $available_languages = field_available_languages($entity_type, $field);
-        $language = !empty($options['language'][$id]) ? $options['language'][$id] : $options['language'];
+        $language = is_array($options['language']) && !empty($options['language'][$id]) ? $options['language'][$id] : $options['language'];
         $languages = _field_language_suggestion($available_languages, $language, $field_name);
         foreach ($languages as $langcode) {
           if (property_exists($entity, $field_name)){
