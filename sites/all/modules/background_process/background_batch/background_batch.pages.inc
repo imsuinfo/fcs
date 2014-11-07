@@ -103,7 +103,7 @@ function background_batch_page() {
     case 'start':
       return _background_batch_page_start();
     case 'do':
-      return _background_batch_page_do_js();
+      return _background_batch_page_do_nojs();
     case 'do_nojs':
       return _background_batch_page_do_nojs();
     case 'finished':
@@ -163,94 +163,7 @@ function _background_batch_initiate($process = NULL) {
 
 function _background_batch_page_start() {
   _background_batch_initiate();
-  if (isset($_COOKIE['has_js']) && $_COOKIE['has_js']) {
-    return _background_batch_page_progress_js();
-  }
-  else {
-    return _background_batch_page_do_nojs();
-  }
-}
-
-/**
- * Batch processing page with JavaScript support.
- */
-function _background_batch_page_progress_js() {
-  require_once('includes/batch.inc');
-
-  $batch = batch_get();
-
-  $current_set = _batch_current_set();
-  drupal_set_title($current_set['title'], PASS_THROUGH);
-
-  // Merge required query parameters for batch processing into those provided by
-  // batch_set() or hook_batch_alter().
-  $batch['url_options']['query']['id'] = $batch['id'];
-
-  $js_setting['batch'] = array();
-  $js_setting['batch']['errorMessage'] =  $current_set['error_message'] . '<br />' . $batch['error_message'];
-  // Check wether ETA information should be shown.
-  if (variable_get('background_batch_show_eta', BACKGROUND_BATCH_PROCESS_ETA)) {
-    $js_setting['batch']['initMessage'] = 'ETA: ' . t('N/A') . '<br/>' . $current_set['init_message'];
-  }
-  else {
-    $js_setting['batch']['initMessage'] = $current_set['init_message'];
-  }
-  $js_setting['batch']['uri'] = url($batch['url'], $batch['url_options']);
-  $js_setting['batch']['delay'] = variable_get('background_batch_delay', BACKGROUND_BATCH_DELAY);
-
-  drupal_add_js($js_setting, 'setting');
-  drupal_add_library('background_batch', 'background-process.batch');
-
-  return '<div id="progress"></div>';
-}
-
-/**
- * Do one pass of execution and inform back the browser about progression
- * (used for JavaScript-mode only).
- */
-function _background_batch_page_do_js() {
-  // HTTP POST required.
-  if ($_SERVER['REQUEST_METHOD'] != 'POST') {
-    drupal_set_message(t('HTTP POST is required.'), 'error');
-    drupal_set_title(t('Error'));
-    return '';
-  }
-
-  $batch = &batch_get();
-  $id = $batch['id'];
-
-  drupal_save_session(FALSE);
-
-  $percentage = t('N/A');
-  $message = '';
-
-  if ($progress = progress_get_progress('_background_batch:' . $id)) {
-    $percentage = $progress->progress * 100;
-    $message = $progress->message;
-    progress_estimate_completion($progress);
-    // Check wether ETA information should be shown.
-    if (variable_get('background_batch_show_eta', BACKGROUND_BATCH_PROCESS_ETA)) {
-      $message = "ETA: " . ($progress->estimate ? format_date((int)$progress->estimate, 'large') : t('N/A')) . "<br/>$message";
-    }
-    else {
-      $js_setting['batch']['initMessage'] = $message;
-    }
-  }
-
-  if ($batch['sets'][$batch['current_set']]['count'] == 0) {
-    // The background process has self-destructed, and the batch job is done.
-    $percentage = 100;
-    $message = '';
-  }
-  elseif ($process = background_process_get_process('background_batch:' . $id)) {
-    _background_batch_initiate($process);
-  }
-  else {
-    // Not running ... and stale?
-    _background_batch_initiate();
-  }
-
-  drupal_json_output(array('status' => TRUE, 'percentage' => sprintf("%.02f", $percentage), 'message' => $message));
+  return _background_batch_page_do_nojs();
 }
 
 /**
