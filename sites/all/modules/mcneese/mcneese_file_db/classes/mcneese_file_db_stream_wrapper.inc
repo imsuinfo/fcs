@@ -779,19 +779,41 @@ abstract class mcneese_file_db_stream_wrapper implements DrupalStreamWrapperInte
         if (!isset($parts[3])) {
           return FALSE;
         }
-        elseif ($parts[3] == $this->get_external()) {
-          $parts = array_slice($parts, 4);
+        elseif ($parts[3] == $this->get_external() && isset($parts[4])) {
+          if (empty($parts[4])) {
+            return FALSE;
+          }
+
+          // the path_by_* may conflict with the get_external, so preserve the get_external to ensure that the conflict doesn't happen.
+          // For example '/f/f/1' would become '/f/1' and later code would remove the '/f/' because it is the get_external.
+          if ($parts[4] == $this->get_path_by_hash() || $parts[4] == $this->get_path_by_id() || $parts[4] == $this->get_path_by_fid()) {
+            $parts = array_slice($parts, 4);
+
+            $this->tmp_by = $parts[0];
+            $this->image_style_by = $parts[0];
+            $this->image_style_id = $parts[1];
+          }
+          elseif (is_numeric($parts[4])) {
+            $parts = array_slice($parts, 3);
+
+            $this->tmp_by = $parts[0];
+            $this->image_style_by = $parts[0];
+            $this->image_style_id = $parts[1];
+          }
+          else {
+            return FALSE;
+          }
         }
-        elseif ($parts[3] == $this->get_path_by_hash() || $parts[3] == $this->get_path_by_id || $parts[3] == $this->get_path_by_fid()) {
+        elseif ($parts[3] == $this->get_path_by_hash() || $parts[3] == $this->get_path_by_id() || $parts[3] == $this->get_path_by_fid()) {
           $parts = array_slice($parts, 3);
+
+          $this->tmp_by = $parts[0];
+          $this->image_style_by = $parts[0];
+          $this->image_style_id = $parts[1];
         }
         else {
           return FALSE;
         }
-
-        $this->tmp_by = $parts[0];
-        $this->image_style_by = $parts[0];
-        $this->image_style_id = $parts[1];
       }
       else {
         $this->tmp_by = $parts[0];
@@ -810,6 +832,7 @@ abstract class mcneese_file_db_stream_wrapper implements DrupalStreamWrapperInte
 
       if ($parts[0] == $this->get_path_by_hash() && !empty($parts[1])) {
         if (is_null($this->file_meta)) {
+          // because the data is stored by checksum, the file_meta load can be skipped to improve performance.
           $this->tmp_checksum = $parts[1];
 
           if (!empty($parts[2])) {
@@ -839,6 +862,7 @@ abstract class mcneese_file_db_stream_wrapper implements DrupalStreamWrapperInte
 
       if ($parts[0] == $this->get_path_by_id() && !empty($parts[1])) {
         if (is_null($this->file_meta)) {
+          // because the data is stored by id, the file_meta load can be skipped to improve performance.
           $this->tmp_id = $parts[1];
 
           if (!empty($parts[2])) {
@@ -868,9 +892,7 @@ abstract class mcneese_file_db_stream_wrapper implements DrupalStreamWrapperInte
 
       if ($parts[0] == $this->get_path_by_fid() && !empty($parts[1])) {
         if (is_null($this->file_meta)) {
-          $this->tmp_fid = $parts[1];
-
-          return TRUE;
+          $this->load_file_meta_by_fid($parts[1]);
         }
 
         $this->tmp_checksum = $this->file_meta->checksum;

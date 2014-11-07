@@ -541,7 +541,7 @@ function mcneese_functions_embed_job_opportunity_listing($opportunity) {
       cf_error::on_query_execution($e);
     }
 
-    throw $e;
+    return FALSE;
   }
 
   if (empty($all)) {
@@ -573,6 +573,174 @@ function mcneese_functions_embed_job_opportunity_listing($opportunity) {
   }
 
   return TRUE;
+}
+
+/**
+ * Generates and prints the A to Z index.
+ *
+ * This is far faster and cleaner than using the views module view.
+ *
+ * @param string $type
+ *   One of: 'content', 'group', or 'webform'.
+ * @param string $filter
+ *   (optional) A string representing the title to filter by.
+ *   This is expected to be the first letter (thus the A to Z).
+ * @param int $page
+ *   (optional) The pager position.
+ * @param int $limit
+ *   (optional) The total number of rows to load.
+ * @param int $pager_id
+ *   (optional) The id to use for the pager.
+ *
+ * @return string|bool
+ *   The generated string or FALSE on error.
+ */
+function mcneese_functions_build_a_to_z_listing_content($type, $filter = NULL, $page = 0, $limit = 15, $pager_id = 0) {
+  if ($type != 'content' && $type != 'group' && $type != 'webform') {
+    cf_error::invalid_string('type');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($page)) {
+    cf_error::invalid_integer('page');
+    return FALSE;
+  }
+
+  if (!is_null($filter) && !is_string($filter)) {
+    cf_error::invalid_string('filter');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($limit)) {
+    cf_error::invalid_integer('limit');
+    return FALSE;
+  }
+
+  if ($page < 0) $page = 0;
+  if ($limit < 0) $limit = 0;
+
+  $start = $page * $limit;
+
+  try {
+    $query = db_select('node', 'n');
+    $query->leftJoin('killfile_nodes', 'kn', 'n.nid = kn.nid');
+    $query->innerJoin('workbench_moderation_node_history', 'wmnh', 'wmnh.nid = n.nid AND wmnh.vid = n.vid');
+    $query->innerJoin('field_data_field_group', 'fdfg', 'n.nid = fdfg.entity_id AND fdfg.deleted = 0');
+    $query->innerJoin('taxonomy_term_data', 'ttd', 'fdfg.field_group_tid = ttd.tid');
+
+    $query->isNull('kn.timestamp');
+    $query->condition('wmnh.published', 1);
+    $query->condition('fdfg.field_group_tid', 428, '<>'); // do not include the "Index" group.
+    $query->condition('n.status', 1);
+
+    if ($type == 'content') {
+      $query->condition('n.type', array('document', 'event', 'ie_policy', 'page', 'poster', 'side_panel', 'webform'), 'IN');
+    }
+    elseif ($type == 'group') {
+      $query->innerJoin('field_data_field_group_representative', 'fdfgr', 'n.nid = fdfgr.entity_id');
+      $query->condition('fdfgr.field_group_representative_value', 1);
+    }
+    elseif ($type == 'webform') {
+      $query->condition('n.type', 'webform');
+    }
+
+    if (!is_null($filter) && strlen($filter) > 0) {
+      $query->condition('n.title', db_like($filter) . '%', 'ILIKE');
+    }
+
+    $count_query = clone($query);
+    $count_query->addExpression('count(n.nid)');
+    $total = $count_query->execute()->fetchField();
+
+    $query->addField('n', 'nid', 'node_id');
+    $query->addField('n', 'vid', 'revision_id');
+    $query->addField('n', 'title', 'title');
+    $query->addField('fdfg', 'field_group_tid', 'field_group_tid');
+    $query->addField('ttd', 'name', 'field_group_name');
+
+    $query->range($start, $limit);
+    $query->orderBy('n.title', 'ASC');
+
+    $executed = $query->execute();
+    $all = $executed->fetchAll();
+
+    $output = '<div id="mcneese-a_to_z_listing-' . $type . '" class="a_to_z_listing-wrapper a_to_z_listing-wrapper-' . $type . '">' . "\n";
+
+    if (empty($all)) {
+      if ($type == 'webform') {
+        $output .= "No web forms were found.\n";
+      }
+
+      $output .= '</div>' . "\n";
+      return $output;
+    }
+
+    $output .= '<ul class="a_to_z_listing-list a_to_z_listing-list-' . $type . '">' . "\n";
+
+    if ($type == 'content') {
+      foreach ($all as $item) {
+        $output .= '<li class="a_to_z_listing-item group-' . $item->field_group_tid . '">' . "\n";
+        $output .= '<a href="/node/' . $item->node_id . '" class="item-title">' . $item->title . '</a>';
+        $output .= '<div class="item-group">' . $item->field_group_name . '</div>';
+
+        // The dates are fetched individually here instead of using a join to avoid having > 1 row per unique id.
+        $subquery = db_select('field_data_field_event_datetime', 'fdfed');
+        $subquery->condition('fdfed.entity_id', $item->node_id);
+        $subquery->condition('fdfed.revision_id', $item->revision_id);
+        $subquery->addField('fdfed', 'field_event_datetime_value', 'field_event_datetime_from');
+        $subquery->addField('fdfed', 'field_event_datetime_value2', 'field_event_datetime_to');
+        $subquery->orderBy('fdfed.field_event_datetime_value', 'ASC');
+
+        $dates = $subquery->execute()->fetchAll();
+        if (!empty($dates[0]->field_event_datetime_from)) {
+          $from_stamp = strtotime($dates[0]->field_event_datetime_from);
+          $date = date('F j, Y', $from_stamp);
+          $from = date('H:ia', $from_stamp);
+
+          if (!empty($dates[0]->field_event_datetime_to)) {
+            $to_stamp = strtotime($dates[0]->field_event_datetime_to);
+            $to = date('H:ia', $to_stamp);
+
+            if ($from_stamp < $to_stamp) {
+              $output .= '<div class="item-event_datetime">' . $date . ' ' . $from . ' to ' . $to . '</div>';
+            }
+            else {
+              $output .= '<div class="item-event_datetime">' . $date . '</div>';
+            }
+          }
+          else {
+            $output .= '<div class="item-event_datetime">' . $date . '</div>';
+          }
+        }
+
+        $output .= '</li>' . "\n";
+      }
+    }
+    else {
+      foreach ($all as $item) {
+        $output .= '<li class="a_to_z_listing-item group-' . $item->field_group_tid . ' margin-bottom-5">' . "\n";
+        $output .= '<a href="/node/' . $item->node_id . '" class="item-title">' . $item->title . '</a>';
+        $output .= '<div class="item-group">' . $item->field_group_name . '</div>';
+        $output .= '</li>' . "\n";
+      }
+    }
+
+    $output .= '</ul>' . "\n";
+  }
+  catch (Exception $e) {
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
+    }
+
+    return FALSE;
+  }
+
+  pager_default_initialize($total, $limit, $pager_id);
+  $output .= theme('pager');
+
+  $output .= '</div>' . "\n";
+
+  return $output;
 }
 
 /**

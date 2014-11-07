@@ -1,0 +1,9 @@
+name = McNeese Module - Third Party
+description = "A collection of third-party stuff used on the website as required by certain users."
+core = 7.x
+php = 5.3
+package = McNeese
+
+files[] = mcneese_third_party.module
+files[] = js/facebook-connect.js
+files[] = js/facebook-connect-legacy.js

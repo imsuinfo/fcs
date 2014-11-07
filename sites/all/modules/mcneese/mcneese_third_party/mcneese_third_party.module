@@ -1,0 +1,69 @@
+<?php
+
+/**
+ * @file
+ * McNeese State University Third-party module.
+ */
+
+/**
+ * @defgroup mcneese_third_party McNeese Third-Party
+ * @{
+ * Provides Third-party functionality to drupal 7.
+ */
+
+/**
+ * Use a local copy of facebooks javascript API.
+ *
+ * This was required by the "bookstore" frontpage.
+ *
+ * The facebook js is from:
+ * - https://connect.facebook.net/en_US/all.js
+ * - https://github.com/facebookarchive/connect-js
+ */
+function mcneese_third_party_add_facebook_connect_js() {
+  $module_path = drupal_get_path('module', 'mcneese_third_party');
+
+  drupal_add_js($module_path . '/js/facebook-connect.js', array('type' => 'file', 'group' => JS_DEFAULT, 'preprocess' => TRUE));
+}
+
+/**
+ * Use a local copy of facebooks javascript API (legacy)
+ *
+ * This was required by the "bookstore" frontpage.
+ * This file is questionable given that its SSL certificate reports failures.
+ *
+ * The facebook js is from:
+ * - http://static.ak.connect.facebook.com/connect.php/en_US
+ */
+function mcneese_third_party_add_facebook_connect_legacy_js() {
+  $module_path = drupal_get_path('module', 'mcneese_third_party');
+
+  drupal_add_js($module_path . '/js/facebook-connect-legacy.js', array('type' => 'file', 'group' => JS_DEFAULT, 'preprocess' => TRUE));
+}
+
+/**
+ * Initialize the appropriate facbook javascript.
+ *
+ * This must be called after mcneese_third_party_add_facebook_connect_js().
+ *
+ * @param string $id
+ *   The unique facebook init string.
+ *
+ * @see: mcneese_third_party_add_facebook_connect_js()
+ */
+function mcneese_third_party_do_facebook_connect_js($id) {
+  if (!is_string($id)) {
+    if (class_exists('cf_error')) {
+      cf_error::invalid_string('id');
+    }
+    return;
+  }
+
+  $init_js = 'FB.init("' . $id . '");';
+
+  drupal_add_js($init_js, array('type' => 'inline', 'preprocess' => FALSE));
+}
+
+/**
+ * @} End of '@defgroup mcneese_third_party McNeese Third-Party'.
+ */
