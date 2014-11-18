@@ -98,11 +98,14 @@ function mfcs_request_reviewers_0_page() {
  *   This is not the reviewer classification.
  * @param int $review_step
  *   Number representing the request review step.
+ * @param int $page_number
+ *   (optional) When there are more than a certain number of rows,
+ *   this represent the page number for a given sequence of rows.
  *
  * @return string
  *   The HTML output representing the page.
  */
-function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $review_step) {
+function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $review_step, $page_number = 0) {
   if (!cf_is_integer($classification)) {
     cf_error::invalid_integer('classification');
     drupal_not_found();
@@ -117,6 +120,10 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
     return array();
   }
 
+  if (!cf_is_integer($page_number)) {
+    $page_number = 0;
+  }
+
   // these are automatically the venue coordinator, therefore skip them.
   if ($review_step == MFCS_REVIEW_STEP_VENUE_AVAILABLE || $review_step == MFCS_REVIEW_STEP_MAKE_DECISIONS) {
     drupal_not_found();
@@ -124,7 +131,7 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
     return array();
   }
 
-  mfcs_add_canonical_headers('requests/reviewers-0/list/' . $classification . '/' . $review_step);
+  mfcs_add_canonical_headers('requests/reviewers-0/list/' . $classification . '/' . $review_step . '/' . $page_number);
 
   global $base_path;
   global $mfcs_determined;
@@ -219,12 +226,27 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
     }
   }
 
-  $reviewers_returned = mfcs_get_reviewers(array('mr.request_classification' => $classification, 'mr.review_step' => $review_step, 'mr.disabled' => 0), array('sort' => $sorting, 'join' => TRUE));
+  $rows_per_page = 10;
+  $options = array(
+    'sort' => $sorting,
+    'join' => TRUE,
+    'start' => $page_number * $rows_per_page,
+    'limit' => $rows_per_page,
+    'count' => TRUE,
+  );
+
+  $reviewers_returned = mfcs_get_reviewers(array('mr.request_classification' => $classification, 'mr.review_step' => $review_step, 'mr.disabled' => 0), $options);
   $reviewers = array();
   if (isset($reviewers_returned['results']) && is_array($reviewers_returned['results'])) {
     $reviewers = $reviewers_returned['results'];
   }
-  unset($reviewers_returned);
+
+  // do not provide pages when the page number would bring the user beyond the available items.
+  if ($options['start'] >= $reviewers_returned['count']) {
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
 
   $rows = array();
   foreach ($reviewers as $reviewer) {
@@ -309,14 +331,14 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
     'order' => $order_column,
     #'stateSave' => TRUE,
     'lengthMenu' => array(
-      5 => '5',
+      10 => '10',
       20 => '20',
       40 => '40',
       80 => '80',
       -1 => '"All"',
     ),
     'serverSide' => TRUE,
-    'ajax' => "'" . $base_path . "requests/reviewers-0/ajax/list/" . $classification . "/" . $review_step . "'",
+    'ajax' => "'" . $base_path . 'requests/reviewers-0/ajax/list/' . $classification . '/' . $review_step . "'",
     'deferRender' => TRUE,
     'columns' => array(
       array('name' => 'id', 'className' => 'column-id'),
@@ -326,9 +348,43 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
       array('name' => 'last_name', 'className' => 'column-last_name'),
       array('name' => 'operations', 'className' => 'column-operations'),
     ),
+    'displayStart' => $page_number * $rows_per_page,
   );
 
-  $form['reviewers_list']['#markup'] = mcneese_libraries_theme_table($reviewers_list, $datatable_settings);
+  $navigation_top = '';
+  $navigation_bottom = '';
+  if ($page_number > 0) {
+    if ($page_number == 1) {
+      $navigation_top .= '<a href="' . $base_path . 'requests/reviewers-0/list/' . $classification . "/" . $review_step . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+      $navigation_bottom .= '<a href="' . $base_path . 'requests/reviewers-0/list/' . $classification . "/" . $review_step . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+    }
+    else {
+      $previous_page = $page_number - 1;
+      $navigation_top .= '<a href="' . $base_path . 'requests/reviewers-0/list/' . $classification . "/" . $review_step . '/' . $previous_page . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+      $navigation_bottom .= '<a href="' . $base_path . 'requests/reviewers-0/list/' . $classification . "/" . $review_step . '/' . $previous_page . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+    }
+  }
+
+  $navigation_start = ($page_number * $rows_per_page) + 1;
+  $navigation_total = ($page_number * $rows_per_page) + $rows_per_page;
+
+  if ($navigation_total > $reviewers_returned['count']) {
+    $navigation_total = $reviewers_returned['count'];
+  }
+
+  $navigation_bottom .= '<div class="table_listing-comment">' . "\n";
+  $navigation_bottom .= "Showing " . $navigation_start . " to " . $navigation_total . " of " . $reviewers_returned['count'] . " entries.\n";
+  $navigation_bottom .= '</div>' . "\n";
+
+  if ($reviewers_returned['count'] > $rows_per_page) {
+    $next_page = $page_number + 1;
+    $navigation_top .= '<a href="' . $base_path . 'requests/reviewers-0/list/' . $classification . "/" . $review_step . '/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
+    $navigation_bottom .= '<a href="' . $base_path . 'requests/reviewers-0/list/' . $classification . "/" . $review_step . '/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
+  }
+
+  $form['reviewers_list']['#markup'] = '<div class="table_listing-navigator table_listing-navigator-top no-print">' . $navigation_top . '</div>';
+  $form['reviewers_list']['#markup'] .= mcneese_libraries_theme_table($reviewers_list, $datatable_settings);
+  $form['reviewers_list']['#markup'] .= '<div class="table_listing-navigator table_listing-navigator-bottom">' . $navigation_bottom . '</div>';
 
   $form['reviewer'] = array(
     '#id' => 'reviewers-reviewer',

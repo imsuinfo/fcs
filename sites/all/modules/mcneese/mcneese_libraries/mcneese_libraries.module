@@ -154,7 +154,11 @@ function mcneese_libraries_theme_table($variables, $datatable_settings = array()
       $direct_settings = array(
         'visible',
         'targets',
+      );
+
+      $integer_settings = array(
         'displayLength',
+        'displayStart',
       );
 
       $datatable_js = '(function ($) {' . "\n";
@@ -179,6 +183,12 @@ function mcneese_libraries_theme_table($variables, $datatable_settings = array()
       foreach ($direct_settings as $direct_setting) {
         if (array_key_exists($direct_setting, $datatable_settings) && is_string($datatable_settings[$direct_setting])) {
           $datatable_js_settings[] = '"' . $direct_setting . '": ' . $datatable_settings[$direct_setting];
+        }
+      }
+
+      foreach ($integer_settings as $integer_setting) {
+        if (array_key_exists($integer_setting, $datatable_settings) && is_int($datatable_settings[$integer_setting])) {
+          $datatable_js_settings[] = '"' . $integer_setting . '": ' . $datatable_settings[$integer_setting];
         }
       }
 
@@ -355,7 +365,7 @@ function mcneese_libraries_theme_table($variables, $datatable_settings = array()
 
       $datatable_js .= '})(jQuery);' . "\n";
 
-      $script_markup = '<script class="element-invisible">' . $datatable_js . '</script>' . "\n";
+      $script_markup = '<script class="element-invisible" style="display: none;">' . $datatable_js . '</script>' . "\n";
     }
   }
 

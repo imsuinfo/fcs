@@ -95,11 +95,13 @@ function mfcs_ajax_reviewers_0_list($classification, $review_step) {
   if (isset($_GET['search']['value']) && is_string($_GET['search']['value']) && !empty($_GET['search']['value'])) {
     $search = TRUE;
 
+    $regex_safe_search = preg_quote($_GET['search']['value'], '/');
+
     // search through the already loaded lists, the database stores the values as integers and not strings.
     $limit_reviewer_classifications = array();
 
     foreach ($reviewer_classifications as $key => $value) {
-      if (preg_match('/' . $_GET['search']['value'] . '/i', $value) > 0) {
+      if (preg_match('/' . $regex_safe_search . '/i', $value) > 0) {
         $limit_reviewer_classifications[$key] = $key;
       }
     }

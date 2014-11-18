@@ -245,6 +245,19 @@ function mfcs_hook_menu() {
     'tab_root' => 'requests/reviewers-0',
   );
 
+  $items['requests/reviewers-0/list/%/%/%'] = array(
+    'title' => "List Reviewers",
+    'description' => "List Reviewers",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_reviewers_0_form', 3, 4, 5),
+    'file' => 'request_reviewers.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('reviewers'),
+    'tab_parent' => 'requests/reviewers-0',
+    'tab_root' => 'requests/reviewers-0',
+  );
+
   $items['requests/reviewers-0/ajax/list/%/%'] = array(
     'title' => "",
     'page callback' => 'mfcs_ajax_reviewers_0_list',
