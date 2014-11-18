@@ -1,0 +1,51 @@
+<?php
+
+/**
+ * @file
+ * McNeese State University Tokens module.
+ */
+
+/**
+ * @defgroup mcneese_tokens McNeese Tokens
+ * @{
+ * Provides custom token support for drupal 7.
+
+/**
+ * Implements hook_widget_form_alter().
+ */
+function mcneese_tokens_field_widget_form_alter(&$element, &$form_state, $context) {
+  if(!isset($element['#type']) && function_exists('token_field_widget_form_alter')) {
+    mcneese_tokens_field_widget_form_nested_apply_tokens($element, $form_state, $context);
+  }
+}
+
+/**
+ * Recursive function to apply tokens on individual fields.
+ *
+ * @param array $element
+ *   The form element array.
+ * @param array $form_state
+ *   The form state.
+ * @param aray $context
+ *   Data and settings specific to the widget.
+ *
+ * @see: https://www.drupal.org/node/1796024
+ * @see: token_field_widget_form_alter()
+ */
+function mcneese_tokens_field_widget_form_nested_apply_tokens(&$element, &$form_state, $context) {
+  if(isset($element['#type'])) {
+    // @todo: add an option to enable/disable token replacement on default values.
+    // enable token replacement for default_values.
+    if (!empty($element['#default_value']) && is_string($element['#default_value'])) {
+      $element['#default_value'] = filter_xss_admin(token_replace($element['#default_value']));
+    }
+    return;
+  }
+  foreach(element_children($element) as $key) {
+    mcneese_tokens_field_widget_form_nested_apply_tokens($element[$key], $form_state, $context);
+  }
+}
+
+/**
+ * @} End of '@defgroup mcneese_tokens McNeese Tokens'.
+ */

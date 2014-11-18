@@ -66,7 +66,7 @@ function mfcs_request_proxy_0_form($form, &$form_state) {
       $sorting['id'] = is_null($sort) ? 'DESC' : $sort;
     }
     elseif ($order == 'account') {
-      $sorting['account'] = is_null($sort) ? 'DESC' : $sort;
+      $sorting['name'] = is_null($sort) ? 'DESC' : $sort;
     }
     elseif ($order == 'first name') {
       $sorting['first_name'] = is_null($sort) ? 'DESC' : $sort;

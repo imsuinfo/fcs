@@ -89,9 +89,6 @@ function mfcs_autocomplete_user_id($string) {
  *
  * @param string $string
  *   A string to match node titles against.
- *
- * @return array
- *   An array of string matches.
  */
 function mfcs_request_reviewers_0_autocomplete_reviewer_classification($string) {
   if (function_exists('devel_menu')) {
@@ -148,9 +145,6 @@ function mfcs_request_reviewers_0_autocomplete_reviewer_classification($string) 
  *
  * @param string $string
  *   A string to match node titles against.
- *
- * @return array
- *   An array of string matches.
  */
 function mfcs_edit_0_autocomplete_request_coordinator_name($string) {
   if (function_exists('devel_menu')) {
@@ -225,9 +219,6 @@ function mfcs_edit_0_autocomplete_request_coordinator_name($string) {
  *
  * @param string $string
  *   A string to match node titles against.
- *
- * @return array
- *   An array of string matches.
  */
 function mfcs_edit_0_autocomplete_request_coordinator_email($string) {
   if (function_exists('devel_menu')) {
@@ -300,9 +291,6 @@ function mfcs_edit_0_autocomplete_request_coordinator_email($string) {
  *
  * @param string $string
  *   A string to match node titles against.
- *
- * @return array
- *   An array of string matches.
  */
 function mfcs_edit_0_autocomplete_request_coordinator_phone($string) {
   if (function_exists('devel_menu')) {

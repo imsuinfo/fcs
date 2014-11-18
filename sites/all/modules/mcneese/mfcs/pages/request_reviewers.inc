@@ -169,6 +169,7 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
   }
 
   $sort = NULL;
+  $order_column = NULL;
   if (isset($_GET['sort'])) {
     $sort = strtoupper($_GET['sort']);
 
@@ -177,52 +178,91 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
     }
   }
 
+  $class_id = '';
+  $class_classification = '';
+  $class_account = '';
+  $class_first_name = '';
+  $class_last_name = '';
+  $class_operations = '';
+
   $sorting = array();
   if (is_null($order)) {
     $sorting['reviewer_classification_name'] = 'ASC';
+    $order_column = 1;
+    $class_classification = 'sorting_1';
   }
   else {
     if ($order == 'id') {
       $sorting['id'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = 0;
+      $class_id = 'sorting_1';
     }
     elseif ($order == 'reviewer classification') {
       $sorting['reviewer_classification_name'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = 1;
+      $class_classification = 'sorting_1';
     }
     elseif ($order == 'account') {
-      $sorting['account'] = is_null($sort) ? 'DESC' : $sort;
+      $sorting['name'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = 2;
+      $class_account = 'sorting_1';
     }
     elseif ($order == 'first name') {
       $sorting['first_name'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = 3;
+      $class_first_name = 'sorting_1';
     }
     elseif ($order == 'last name') {
       $sorting['last_name'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = 4;
+      $class_last_name = 'sorting_1';
     }
   }
 
-  $reviewers = mfcs_get_reviewers(array('mr.request_classification' => $classification, 'mr.review_step' => $review_step, 'mr.disabled' => 0), TRUE, $sorting);
-
-  if (!is_array($reviewers)) {
-    $reviewers = array();
+  $reviewers_returned = mfcs_get_reviewers(array('mr.request_classification' => $classification, 'mr.review_step' => $review_step, 'mr.disabled' => 0), array('sort' => $sorting, 'join' => TRUE));
+  $reviewers = array();
+  if (isset($reviewers_returned['results']) && is_array($reviewers_returned['results'])) {
+    $reviewers = $reviewers_returned['results'];
   }
+  unset($reviewers_returned);
 
   $rows = array();
   foreach ($reviewers as $reviewer) {
     $row = array();
 
-    $id = $reviewer->id;
-    $row['user_id'] = $id;
-    $row['reviewer_classification'] = '';
+    $row['user_id'] = array(
+      'data' => $reviewer->id,
+      'class' => $class_id,
+    );
+
+    $row['reviewer_classification'] = array(
+      'data' => '',
+      'class' => $class_classification,
+    );
 
     if (isset($reviewer_classifications[$reviewer->reviewer_classification])) {
-      $row['reviewer_classification'] = $reviewer_classifications[$reviewer->reviewer_classification];
+      $row['reviewer_classification']['data'] = $reviewer_classifications[$reviewer->reviewer_classification];
     }
 
-    $user_id = $reviewer->user_id;
-    $row['name'] = '<a href="' . $base_path . 'user/' . $user_id . $url_arguments . '" class="user-link">' . check_plain($reviewer->name) . '</a>' . ' <span class="user-id">(id: ' .  $reviewer->user_id . ')</span>';
-    $row['first_name'] = check_plain($reviewer->first_name);
-    $row['last_name'] = check_plain($reviewer->last_name);
+    $row['name'] = array(
+      'data' => '<a href="' . $base_path . 'user/' . $reviewer->user_id . $url_arguments . '" class="user-link">' . check_plain($reviewer->name) . '</a>' . ' <span class="user-id">(id: ' .  $reviewer->user_id . ')</span>',
+      'class' => $class_id,
+    );
 
-    $row['operations'] = '<a href="' . $base_path . 'requests/reviewers-0/delete/' . $id . $url_arguments . '" class="operation-link operation-link-delete">Delete</a>';
+    $row['first_name'] = array(
+      'data' => check_plain($reviewer->first_name),
+      'class' => $class_first_name,
+    );
+
+    $row['last_name'] = array(
+      'data' => check_plain($reviewer->last_name),
+      'class' => $class_last_name,
+    );
+
+    $row['operations'] = array(
+      'data' => '<a href="' . $base_path . 'requests/reviewers-0/delete/' . $reviewer->id . $url_arguments . '" class="operation-link operation-link-delete">Delete</a>',
+      'class' => $class_operations,
+    );
 
     $rows[] = $row;
   }
@@ -250,14 +290,45 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
 
   $reviewers_list['attributes'] = array();
   $reviewers_list['attributes']['id'] = 'mfcs-reviewers_form-reviewers_list';
-  $reviewers_list['attributes']['class'] = array ('mfcs-reviewers_form-reviewers_list');
+  $reviewers_list['attributes']['class'] = array(
+    'no_default',
+    'mfcs-reviewers_form-reviewers_list',
+    'display',
+    'hover',
+    'order-column',
+    'stripe',
+    'cell-border',
+  );
   $reviewers_list['attributes']['summary'] = 'All users who are considered reviewers for the given request classification.';
 
   $reviewers_list['rows'] = $rows;
   $reviewers_list['empty'] = t("There are no users assigned to review this request classsification.");
 
-  $form['reviewers_list']['#markup'] = theme('table', $reviewers_list);
+  $datatable_settings = array(
+    'sort' => strtolower($sort),
+    'order' => $order_column,
+    #'stateSave' => TRUE,
+    'lengthMenu' => array(
+      5 => '5',
+      20 => '20',
+      40 => '40',
+      80 => '80',
+      -1 => '"All"',
+    ),
+    'serverSide' => TRUE,
+    'ajax' => "'" . $base_path . "requests/reviewers-0/ajax/list/" . $classification . "/" . $review_step . "'",
+    'deferRender' => TRUE,
+    'columns' => array(
+      array('name' => 'id', 'className' => 'column-id'),
+      array('name' => 'review_classification', 'className' => 'column-review_classification'),
+      array('name' => 'account', 'className' => 'column-account'),
+      array('name' => 'first_name', 'className' => 'column-first_name'),
+      array('name' => 'last_name', 'className' => 'column-last_name'),
+      array('name' => 'operations', 'className' => 'column-operations'),
+    ),
+  );
 
+  $form['reviewers_list']['#markup'] = mcneese_libraries_theme_table($reviewers_list, $datatable_settings);
 
   $form['reviewer'] = array(
     '#id' => 'reviewers-reviewer',
@@ -411,7 +482,12 @@ function mfcs_request_reviewers_0_form_validate($form, &$form_state) {
         'mr.disabled' => 0,
       );
 
-      $reviewers = mfcs_get_reviewers($conditions);
+      $reviewers_returned = mfcs_get_reviewers($conditions);
+      $reviewers = array();
+      if (isset($reviewers_returned['results']) && is_array($reviewers_returned['results'])) {
+        $reviewers = $reviewers_returned['results'];
+      }
+      unset($reviewers_returned);
 
       if (count($reviewers) > 0) {
         form_set_error('reviewer][user_id', "The specified user already exists with the specified reviewer classification.");
@@ -602,7 +678,13 @@ function mfcs_request_reviewers_0_delete_form($form, &$form_state, $id) {
     return array();
   }
 
-  $reviewers = mfcs_get_reviewers(array('mr.id' => $id));
+  $reviewers_returned = mfcs_get_reviewers(array('mr.id' => $id));
+  $reviewers = array();
+  if (isset($reviewers_returned['results']) && is_array($reviewers_returned['results'])) {
+    $reviewers = $reviewers_returned['results'];
+  }
+  unset($reviewers_returned);
+
   $reviewer = NULL;
   if (!empty($reviewers)) {
     $reviewer = array_pop($reviewers);
@@ -684,7 +766,13 @@ function mfcs_request_reviewers_0_delete_form($form, &$form_state, $id) {
  * @see: mfcs_request_reviewers_0_delete_form()
  */
 function mfcs_request_reviewers_0_delete_form_validate($form, &$form_state) {
-  $reviewers = mfcs_get_reviewers(array('mr.id' => $form['form']['id']['#value'], 'mr.disabled' => 0));
+  $reviewers_returned = mfcs_get_reviewers(array('mr.id' => $form['form']['id']['#value'], 'mr.disabled' => 0));
+  $reviewers = array();
+  if (isset($reviewers_returned['results']) && is_array($reviewers_returned['results'])) {
+    $reviewers = $reviewers_returned['results'];
+  }
+  unset($reviewers_returned);
+
   $reviewer = NULL;
   if (!empty($reviewers)) {
     $reviewer = array_pop($reviewers);

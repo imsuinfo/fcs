@@ -245,6 +245,19 @@ function mfcs_hook_menu() {
     'tab_root' => 'requests/reviewers-0',
   );
 
+  $items['requests/reviewers-0/ajax/list/%/%'] = array(
+    'title' => "",
+    'page callback' => 'mfcs_ajax_reviewers_0_list',
+    'page arguments' => array(4, 5),
+    'file' => 'ajax.inc',
+    'file path' => $module_path . '/includes',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('reviewers'),
+    'type' => MENU_CALLBACK,
+    'tab_parent' => 'requests/reviewers-0',
+    'tab_root' => 'requests/reviewers-0',
+  );
+
   $items['requests/reviewers-0/delete/%'] = array(
     'title' => "Delete Reviewer",
     'description' => "Delete Reviewer",

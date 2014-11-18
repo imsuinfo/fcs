@@ -561,10 +561,12 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message, $ext
 
   $reviewer_classifications = array();
   $reviewer_classifications_all = array();
-  $reviewers = mfcs_get_reviewers($reviewer_conditions, TRUE);
-  if (!is_array($reviewers)) {
-    $reviewers = array();
+  $reviewers_returned = mfcs_get_reviewers($reviewer_conditions, array('join' => TRUE));
+  $reviewers = array();
+  if (isset($reviewers_returned['results']) && is_array($reviewers_returned['results'])) {
+    $reviewers = $reviewers_returned['results'];
   }
+  unset($reviewers_returned);
 
   foreach ($reviewers as $reviewer) {
     if (isset($reviewer->review_step) && $reviewer->review_step == $step) {
@@ -1451,7 +1453,13 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
   // load appropriate reviewers in their own categories.
   $venue_coordinator = user_load($request['venue_coordinator']['user_id'][0]->value);
 
-  $reviewers = mfcs_get_reviewers(array('mr.request_classification' => $request['request_coordinator']['classification'][0]->value, 'mr.review_step' => MFCS_REVIEW_STEP_REVIEW, 'mr.disabled' => 0), TRUE);
+  $reviewers_returned = mfcs_get_reviewers(array('mr.request_classification' => $request['request_coordinator']['classification'][0]->value, 'mr.review_step' => MFCS_REVIEW_STEP_REVIEW, 'mr.disabled' => 0), array('join' => TRUE));
+  $reviewers = array();
+  if (isset($reviewers_returned['results']) && is_array($reviewers_returned['results'])) {
+    $reviewers = $reviewers_returned['results'];
+  }
+  unset($reviewers_returned);
+
   $step_1_reviewers = array();
   if (!empty($reviewers)) {
     foreach ($reviewers as $r) {
@@ -1459,7 +1467,13 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     }
   }
 
-  $reviewers = mfcs_get_reviewers(array('mr.request_classification' => $request['request_coordinator']['classification'][0]->value, 'mr.review_step' => MFCS_REVIEW_STEP_REQUIREMENTS, 'mr.disabled' => 0), TRUE);
+  $reviewers_returned = mfcs_get_reviewers(array('mr.request_classification' => $request['request_coordinator']['classification'][0]->value, 'mr.review_step' => MFCS_REVIEW_STEP_REQUIREMENTS, 'mr.disabled' => 0), array('join' => TRUE));
+  $reviewers = array();
+  if (isset($reviewers_returned['results']) && is_array($reviewers_returned['results'])) {
+    $reviewers = $reviewers_returned['results'];
+  }
+  unset($reviewers_returned);
+
   $step_2_reviewers = array();
   if (!empty($reviewers)) {
     foreach ($reviewers as $r) {
@@ -2049,7 +2063,12 @@ function mfcs_check_if_requests_are_fully_reviewed($request_ids, $classification
     return FALSE;
   }
 
-  $reviewers = mfcs_get_reviewers(array('mr.request_classification' => $classification, 'mr.review_step' => $step, 'mr.disabled' => 0));
+  $reviewers_returned = mfcs_get_reviewers(array('mr.request_classification' => $classification, 'mr.review_step' => $step, 'mr.disabled' => 0));
+  $reviewers = array();
+  if (isset($reviewers_returned['results']) && is_array($reviewers_returned['results'])) {
+    $reviewers = $reviewers_returned['results'];
+  }
+  unset($reviewers_returned);
 
   $required_reviews = 0;
   $reviewers_steps_by_classification = array();

@@ -21,6 +21,7 @@ files[] = mfcs.module
 files[] = classes/mail.inc
 files[] = includes/access.inc
 files[] = includes/autocomplete.inc
+files[] = includes/ajax.inc
 files[] = includes/hooks.inc
 files[] = includes/ical.inc
 files[] = includes/list_options.inc

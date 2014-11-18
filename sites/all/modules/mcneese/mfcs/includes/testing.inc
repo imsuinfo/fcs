@@ -312,7 +312,13 @@ function mfcs_testing_review_request_review($request_id, $decision = MFCS_REVIEW
     'mr.disabled' => 0,
   );
 
-  $reviewers = mfcs_get_reviewers($conditions);
+  $reviewers_returned = mfcs_get_reviewers($conditions);
+  $reviewers = array();
+  if (isset($reviewers_returned['results']) && is_array($reviewers_returned['results'])) {
+    $reviewers = $reviewers_returned['results'];
+  }
+  unset($reviewers_returned);
+
   if (empty($reviewers)) {
     return FALSE;
   }

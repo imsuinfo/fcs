@@ -4462,36 +4462,88 @@ function mfcs_build_table_structure($structure, &$structure_current, &$structure
  *   - 'mr.request_classification': request classification.
  *   - 'mr.review_step': request review step.
  *   - 'mr.reviewer_classification': reviewer classification.
- * @param bool $join
- *   (optional) When TRUE, the drupal user table is joined to the reviewers table.
- *   Only select portions of the user table is joined.
- *   This also joins custom field tables for user first and last name.
- * @param array $sort
- *   (optional) When specified, representings the database sorting.
+ *   The each key may be an array such as:
+ *     - array('value' => '1%', 'operator' => 'LIKE')
+ *     - array('value' => array(0, 1, 3), 'operator' => 'IN')
+ *     - array('value' => 1, '=>')
+ *   This also supports a single-depth/non-recursive and/or grouping in the
+ *   following format: 'and_{unique_id}', 'or_{unique_id}' where {unique_id}
+ *   is some arbitrary string or number to ensure that the row is unique.
+ * @param array $options
+ *   (optional) When specified, representing an array containing:
+ *     'join': When TRUE, the drupal user table is joined to the reviewers
+ *             table. Only select portions of the user table is joined. This
+ *             also joins custom field tables for user first and last name.
+ *     'start': The starting location.
+ *     'limit': The number of rows to select, aka: length.
+ *     'count': If TRUE, an unfiltered count query is processed.
+ *     'results': If FALSE, the main query is not performed.
+ *     'search': A special-case/reserved variable for simplified searching.
+ *     'sort': When specified, representing the database sorting.
  *
  * @return array|false
- *   An array of database objects representing the reviewers.
+ *   An array of containing the following:
+ *   - 'results': database objects representing the reviewers.
+ *   - 'count': total results loaded before a range limit is applied.
  *   FALSE is returned on error.
  */
-function mfcs_get_reviewers($conditions = array(), $join = FALSE, $sort = array()) {
+function mfcs_get_reviewers($conditions = array(), $options = array()) {
   if (!is_array($conditions)) {
     cf_error::invalid_array('conditions');
     return FALSE;
   }
-
-  if (!is_bool($join)) {
-    cf_error::invalid_bool('join');
+  if (!is_array($options)) {
+    cf_error::invalid_array('options');
     return FALSE;
   }
 
-  if (!is_array($sort)) {
-    cf_error::invalid_sort('sort');
-    return FALSE;
+  $join = NULL;
+  if (isset($options['join']) && is_bool($options['join'])) {
+    $join = $options['join'];
+  }
+
+  $start = NULL;
+  if (isset($options['start']) && is_numeric($options['start'])) {
+    $start = $options['start'];
+  }
+
+  $limit = NULL;
+  if (isset($options['limit']) && is_numeric($options['limit'])) {
+    $limit = $options['limit'];
+  }
+
+  $count = FALSE;
+  if (isset($options['count']) && is_bool($options['count'])) {
+    $count = $options['count'];
+  }
+
+  $sort = FALSE;
+  if (isset($options['sort']) && is_array($options['sort'])) {
+    $sort = $options['sort'];
+  }
+
+  $results = FALSE;
+  $results = TRUE;
+  if (isset($options['results']) && is_bool($options['results'])) {
+    $results = $options['results'];
+
+    if (!$results) {
+      $results = array();
+    }
+  }
+
+  $return = array(
+    'results' => NULL,
+    'count' => NULL,
+  );
+
+  $search = NULL;
+  if (isset($options['search'])) {
+    $search = $options['search'];
   }
 
   try {
     $query = db_select('mfcs_reviewers', 'mr');
-    $query->fields('mr');
 
     if ($join) {
       $query->innerJoin('users', 'u', 'u.uid = mr.user_id');
@@ -4502,7 +4554,81 @@ function mfcs_get_reviewers($conditions = array(), $join = FALSE, $sort = array(
       $query->innerJoin('taxonomy_term_data', 'ttd1', 'ttd1.vid = 1 AND mr.request_classification = ttd1.tid');
       $query->innerJoin('taxonomy_term_data', 'ttd2', 'ttd2.vid = 19 AND mr.review_step = ttd2.tid');
       $query->innerJoin('taxonomy_term_data', 'ttd3', 'ttd3.vid = 17 AND mr.reviewer_classification = ttd3.tid');
+    }
 
+    if (!empty($conditions)) {
+      foreach ($conditions as $condition_id => $condition) {
+        // check to see if the condition_id is an and or an or operation.
+        $ci_parts = explode('_', $condition_id, 2);
+
+        if (isset($ci_parts[0]) && $ci_parts[0] == 'or') {
+          if (empty($ci_parts[0])) continue;
+
+          $or = db_or();
+          foreach ($condition as $subcondition_id => $subcondition) {
+            if (is_array($subcondition)) {
+              if (isset($subcondition['value']) && isset($subcondition['operator'])) {
+                if (isset($subcondition['expression']) && $subcondition['expression']) {
+                  $or->where($subcondition_id . ' ' . $subcondition['operator'] . ' :value', array(':value' => $subcondition['value']));
+                }
+                else {
+                  $or->condition($subcondition_id, $subcondition['value'], $subcondition['operator']);
+                }
+              }
+            }
+            else {
+              $or->condition($subcondition_id, $subcondition);
+            }
+          }
+
+          $query->condition($or);
+        }
+        elseif (isset($ci_parts[0]) && $ci_parts[0] == 'and') {
+          if (empty($ci_parts[0])) continue;
+
+          $and = db_and();
+          foreach ($condition as $subcondition_id => $subcondition) {
+            if (is_array($subcondition)) {
+              if (isset($subcondition['value']) && isset($subcondition['operator'])) {
+                if (isset($subcondition['expression']) && $subcondition['expression']) {
+                  $and->where($subcondition_id . ' ' . $subcondition['operator'] . ' :value', array(':value' => $subcondition['value']));
+                }
+                else {
+                  $and->condition($subcondition_id, $subcondition['value'], $subcondition['operator']);
+                }
+              }
+            }
+            else {
+              $and->condition($subcondition_id, $subcondition);
+            }
+          }
+
+          $query->condition($and);
+        }
+        elseif (is_array($condition)) {
+          if (isset($condition['value']) && isset($condition['operator'])) {
+            if (isset($condition['expression']) && $condition['expression']) {
+              $query->where($condition_id . ' ' . $condition['operator'] . ' :value', array(':value' => $condition['value']));
+            }
+            else {
+              $query->condition($condition_id, $condition['value'], $condition['operator']);
+            }
+          }
+        }
+        else {
+          $query->condition($condition_id, $condition);
+        }
+      }
+    }
+
+    if ($count) {
+      $count_query = clone($query);
+      $count_query->addExpression('count(mr.id)');
+    }
+
+    $query->fields('mr');
+
+    if ($join) {
       $query->addField('u', 'name', 'name');
       $query->addField('u', 'created', 'created');
       $query->addField('u', 'status', 'status');
@@ -4517,10 +4643,8 @@ function mfcs_get_reviewers($conditions = array(), $join = FALSE, $sort = array(
       $query->addField('ttd3', 'name', 'reviewer_classification_name');
     }
 
-    if (!empty($conditions)) {
-      foreach ($conditions as $condition_id => $condition) {
-        $query->condition($condition_id, $condition);
-      }
+    if (!is_null($start) || !is_null($limit)) {
+      $query->range($start, $limit);
     }
 
     if (!empty($sort)) {
@@ -4529,7 +4653,13 @@ function mfcs_get_reviewers($conditions = array(), $join = FALSE, $sort = array(
       }
     }
 
-    $results = $query->execute()->fetchAll();
+    if ($count) {
+      $return['count'] = $count_query->execute()->fetchField();
+    }
+
+    if ($results) {
+      $return['results'] = $query->execute()->fetchAll();
+    }
   }
   catch (Exception $ex) {
     cf_error::on_query_execution($ex);
@@ -4537,11 +4667,7 @@ function mfcs_get_reviewers($conditions = array(), $join = FALSE, $sort = array(
     return FALSE;
   }
 
-  if (is_array($results)) {
-    return $results;
-  }
-
-  return FALSE;
+  return $return;
 }
 
 /**
@@ -4751,20 +4877,24 @@ function mfcs_get_reviewer_settings_by_user_id($user_id) {
     return $static_settings[$user_id];
   }
 
-  $results = mfcs_get_reviewers(array('mr.user_id' => $user_id));
-
-  if (!is_array($results)) {
+  $reviewers_returned = mfcs_get_reviewers(array('mr.user_id' => $user_id));
+  $reviewers = array();
+  if (isset($reviewers_returned['results']) && is_array($reviewers_returned['results'])) {
+    $reviewers = $reviewers_returned['results'];
+  }
+  else {
     return FALSE;
   }
+  unset($reviewers_returned);
 
   $settings = array(
     'classifications' => array(),
     'steps' => array(),
   );
 
-  foreach ($results as $result) {
-    $settings['classifications'][$result->reviewer_classification] = $result->reviewer_classification;
-    $settings['steps'][$result->review_step] = $result->review_step;
+  foreach ($reviewers as $reviewer) {
+    $settings['classifications'][$reviewer->reviewer_classification] = $reviewer->reviewer_classification;
+    $settings['steps'][$reviewer->review_step] = $reviewer->review_step;
   }
 
   $static_settings[$user_id] = $settings;
@@ -6239,7 +6369,13 @@ function mfcs_get_reviewers_yet_to_review($request_id) {
     'mr.disabled' => 0,
   );
 
-  $reviewers = mfcs_get_reviewers($conditions);
+  $reviewers_returned = mfcs_get_reviewers($conditions);
+  $reviewers = array();
+  if (isset($reviewers_returned['results']) && is_array($reviewers_returned['results'])) {
+    $reviewers = $reviewers_returned['results'];
+  }
+  unset($reviewers_returned);
+
   if (empty($reviewers)) {
     return array();
   }
