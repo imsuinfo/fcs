@@ -71,10 +71,12 @@ function mcneese_libraries_libraries_info() {
   $libraries['datatables']['files']['js'] = array(
     'media/js/jquery.dataTables.js',
     'extensions/ColVis/js/dataTables.colVis.js',
+    'extensions/KeyTable/js/dataTables.keyTable.js',
   );
   $libraries['datatables']['files']['css'] = array(
     'media/css/jquery.dataTables.css',
     'extensions/ColVis/css/dataTables.colVis.css',
+    'extensions/KeyTable/css/dataTables.KeyTable.css',
   );
 
   return $libraries;
@@ -166,8 +168,18 @@ function mcneese_libraries_theme_table($variables, $datatable_settings = array()
         'tabIndex',
       );
 
+      $inline_array_settings = array(
+        'columns',
+        'columnDefs',
+      );
+
+      $array_settings = array(
+        'oColVis',
+      );
+
       $datatable_js = '(function ($) {' . "\n";
-      $datatable_js .= '  $(\'#' . $id . '\').DataTable( {' . "\n";
+      $datatable_js .= '$(document).ready( function () {' . "\n";
+      $datatable_js .= '  var table = $(\'#' . $id . '\').DataTable( {' . "\n";
 
       $datatable_js_settings = array();
 
@@ -229,91 +241,71 @@ function mcneese_libraries_theme_table($variables, $datatable_settings = array()
         }
       }
 
-      if (array_key_exists('columnDefs', $datatable_settings) && is_array($datatable_settings['columnDefs'])) {
-        $js_settings = array();
-        foreach ($datatable_settings['columnDefs'] as $key => $value) {
-          if (is_array($value)) {
-            $d_j_s = array();
-            foreach ($value as $k => $v) {
-              if ($k == 'targets') {
-                if (is_array($v)) {
-                  $d_j_s[] = '[ ' . implode(', ', $v) . ' ]';
+      foreach ($inline_array_settings as $inline_array_setting) {
+        if (array_key_exists($inline_array_setting, $datatable_settings) && is_array($datatable_settings[$inline_array_setting])) {
+          $js_settings = array();
+          foreach ($datatable_settings[$inline_array_setting] as $key => $value) {
+            if (is_array($value)) {
+              $d_j_s = array();
+              foreach ($value as $k => $v) {
+                if ($v == 'targets' && $inline_array_setting == 'columnDefs') {
+                  if (is_array($v)) {
+                    $d_j_s[] = '[ ' . implode(', ', $v) . ' ]';
+                  }
+                }
+                elseif (is_string($v)) {
+                  $d_j_s[] = '"' . $k . '": "' . $v . '"';
+                }
+                elseif (is_bool($v)) {
+                  $d_j_s[] = '"' . $k . '": ' . ($v ? 'true' : 'false');
+                }
+                elseif (is_int($v)) {
+                  $d_j_s[] = '"' . $k . '": ' . $v;
                 }
               }
-              elseif (is_string($v)) {
-                $d_j_s[] = '"' . $k . '": "' . $v . '"';
-              }
-              elseif (is_bool($v)) {
-                $d_j_s[] = '"' . $k . '": ' . ($v ? 'true' : 'false');
-              }
-              elseif (is_int($v)) {
-                $d_j_s[] = '"' . $k . '": ' . $v;
+
+              if (!empty($d_j_s)) {
+                $js_settings[] = '{ ' . implode(', ', $d_j_s) . ' }';
               }
             }
-
-            if (!empty($d_j_s)) {
-              $js_settings[] = '{ ' . implode(', ', $d_j_s) . ' }';
+            elseif (is_string($value)) {
+              $js_settings[] = '"' . $key . '": "' . $value . '"';
+            }
+            elseif (is_bool($value)) {
+              $js_settings[] = '"' . $key . '": ' . ($value ? 'true' : 'false');
+            }
+            elseif (is_int($value)) {
+              $js_settings[] = '"' . $key . '": ' . $value;
+            }
+            elseif (is_null($value)) {
+              $js_settings[] = 'null';
             }
           }
-          elseif (is_string($value)) {
-            $js_settings[] = '"' . $key . '": "' . $value . '"';
-          }
-          elseif (is_bool($value)) {
-            $js_settings[] = '"' . $key . '": ' . ($value ? 'true' : 'false');
-          }
-          elseif (is_int($value)) {
-            $js_settings[] = '"' . $key . '": ' . $value;
-          }
-          elseif (is_null($value)) {
-            $js_settings[] = 'null';
-          }
-        }
 
-        if (!empty($js_settings)) {
-          $datatable_js_settings[] = 'columnDefs: [ ' . "\n" . implode(', ', $js_settings) . "\n" . ' ]';
-        }
+          if (!empty($js_settings)) {
+            $datatable_js_settings[] = $inline_array_setting . ': [ ' . "\n" . implode(', ', $js_settings) . "\n" . ' ]';
+          }
 
-        unset($js_settings);
+          unset($js_settings);
+        }
       }
 
-      if (array_key_exists('columns', $datatable_settings) && is_array($datatable_settings['columns'])) {
-        $js_settings = array();
-        foreach ($datatable_settings['columns'] as $key => $value) {
-          if (is_array($value)) {
-            $d_j_s = array();
-            foreach ($value as $k => $v) {
-              if (is_string($v)) {
-                $d_j_s[] = '"' . $k . '": "' . $v . '"';
-              }
-              elseif (is_bool($v)) {
-                $d_j_s[] = '"' . $k . '": ' . ($v ? 'true' : 'false');
-              }
-              elseif (is_int($v)) {
-                $d_j_s[] = '"' . $k . '": ' . $v;
-              }
-            }
+      foreach ($array_settings as $array_setting) {
+        if (!array_key_exists($array_setting, $datatable_settings) || !is_array($datatable_settings[$array_setting])) {
+          continue;
+        }
 
-            if (!empty($d_j_s)) {
-              $js_settings[] = '{ ' . implode(', ', $d_j_s) . ' }';
-            }
-          }
-          elseif (is_string($value)) {
-            $js_settings[] = '"' . $key . '": "' . $value . '"';
-          }
-          elseif (is_bool($value)) {
+        $js_settings = array();
+        foreach ($datatable_settings[$array_setting] as $key => $value) {
+          if (is_bool($value)) {
             $js_settings[] = '"' . $key . '": ' . ($value ? 'true' : 'false');
           }
-          elseif (is_int($value)) {
+          else {
             $js_settings[] = '"' . $key . '": ' . $value;
-          }
-          elseif (is_null($value)) {
-            $js_settings[] = 'null';
           }
         }
 
-        if (!empty($js_settings)) {
-          $datatable_js_settings[] = 'columns: [ ' . "\n" . implode(', ', $js_settings) . "\n" . ' ]';
-        }
+        $datatable_js_settings[] = '"' . $array_setting . '": {' . "\n" . implode(', ', $js_settings) . "\n}\n";
 
         unset($js_settings);
       }
@@ -358,8 +350,13 @@ function mcneese_libraries_theme_table($variables, $datatable_settings = array()
         unset($js_setting);
       }
 
-      $datatable_js .= implode(",\n", $datatable_js_settings);
-      $datatable_js .= '} );' . "\n";
+      $datatable_js .= implode(",\n", $datatable_js_settings) . "\n";
+      $datatable_js .= '} );' . "\n\n";
+
+
+      if (array_key_exists('KeyTable', $datatable_settings) && $datatable_settings['KeyTable'] === TRUE) {
+        $datatable_js .= '$.fn.dataTable.KeyTable( table );' . "\n";
+      }
 
 
       // catch all for all remaining js, including advanced js.
@@ -368,9 +365,10 @@ function mcneese_libraries_theme_table($variables, $datatable_settings = array()
       }
 
 
+      $datatable_js .= '});' . "\n";
       $datatable_js .= '})(jQuery);' . "\n";
 
-      $script_markup = '<script class="element-invisible" style="display: none;">' . $datatable_js . '</script>' . "\n";
+      drupal_add_js($datatable_js, array('type' => 'inline', 'cache' => FALSE, 'preprocess' => FALSE));
     }
   }
 

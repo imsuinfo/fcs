@@ -352,6 +352,10 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
     'displayStart' => $page_number * $rows_per_page,
     'pageLength' => $rows_per_page,
     'dom' => 'lfCrtip',
+    'KeyTable' => TRUE,
+    'oColVis' => array(
+      'buttonText' => '"Show / Hide"',
+    ),
   );
 
   $navigation_top = '';
