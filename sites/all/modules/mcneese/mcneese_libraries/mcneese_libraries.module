@@ -70,10 +70,11 @@ function mcneese_libraries_libraries_info() {
   $libraries['datatables']['files'] = array();
   $libraries['datatables']['files']['js'] = array(
     'media/js/jquery.dataTables.js',
-    #'media/js/jquery.dataTables.min.js',
+    'extensions/ColVis/js/dataTables.colVis.js',
   );
   $libraries['datatables']['files']['css'] = array(
     'media/css/jquery.dataTables.css',
+    'extensions/ColVis/css/dataTables.colVis.css',
   );
 
   return $libraries;
