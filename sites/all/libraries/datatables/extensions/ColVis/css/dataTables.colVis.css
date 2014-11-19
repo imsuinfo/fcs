@@ -3,7 +3,7 @@
  * ColVis styles
  */
 div.ColVis {
-	float: right;
+	float: left;
 	padding: 0px 5px;
 }
 
@@ -17,7 +17,6 @@ button.ColVis_Button {
 button.ColVis_Button,
 ul.ColVis_collection li {
 	position: relative;
-	margin: 3px;
 	padding: 3px 4px;
 	border: 1px solid #999999;
 	font-size: 11px;
@@ -32,6 +31,7 @@ ul.ColVis_collection li {
 
 ul.ColVis_collection li {
 	overflow: hidden;
+	margin: 3px;
 }
 
 .ColVis_Button:hover,
