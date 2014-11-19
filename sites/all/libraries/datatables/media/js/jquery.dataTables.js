@@ -4207,8 +4207,6 @@
 				}
 			}
 	
-			table.style.width = _fnStringToCss( tmpTable.css('width') );
-	
 			// Finished with the table - ditch it
 			tmpTable.remove();
 		}
