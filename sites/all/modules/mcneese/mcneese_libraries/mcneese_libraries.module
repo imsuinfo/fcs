@@ -149,6 +149,7 @@ function mcneese_libraries_theme_table($variables, $datatable_settings = array()
         'pagingType',
         'scrollX',
         'scrollY',
+        'dom',
       );
 
       $direct_settings = array(
@@ -159,6 +160,9 @@ function mcneese_libraries_theme_table($variables, $datatable_settings = array()
       $integer_settings = array(
         'displayLength',
         'displayStart',
+        'pageLength',
+        'searchDelay',
+        'tabIndex',
       );
 
       $datatable_js = '(function ($) {' . "\n";

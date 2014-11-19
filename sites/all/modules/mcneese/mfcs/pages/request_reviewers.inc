@@ -331,6 +331,7 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
     'order' => $order_column,
     #'stateSave' => TRUE,
     'lengthMenu' => array(
+       5 => '5',
       10 => '10',
       20 => '20',
       40 => '40',
@@ -349,6 +350,7 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
       array('name' => 'operations', 'className' => 'column-operations'),
     ),
     'displayStart' => $page_number * $rows_per_page,
+    'pageLength' => $rows_per_page,
   );
 
   $navigation_top = '';
