@@ -48,7 +48,8 @@ button.ColVis_Button:active {
 
 ul.ColVis_collection {
 	list-style: none;
-	width: 150px;
+	min-width: 100px;
+	max-width: 240px;
 	padding: 4px 4px 2px 4px;
 	margin: 0;
 	border: 1px solid #cccccc;
