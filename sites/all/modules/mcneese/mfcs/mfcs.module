@@ -278,6 +278,15 @@ function mfcs_menu() {
 }
 
 /**
+ * Implements hook_user_login().
+ */
+function mfcs_user_login(&$edit, $account, $category) {
+  mfcs_include(MFCS_INCLUDE_HOOKS);
+
+  return mfcs_hook_user_login($edit, $account, $category);
+}
+
+/**
  * Implements hook_user_insert().
  */
 function mfcs_user_insert(&$edit, $account, $category) {

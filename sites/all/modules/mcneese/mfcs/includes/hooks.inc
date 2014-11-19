@@ -863,6 +863,13 @@ function mfcs_hook_cronapi() {
 }
 
 /**
+ * Internal function for hook_user_login().
+ */
+function mfcs_hook_user_login(&$edit, $account, $category) {
+  mfcs_synchronize_user_settings();
+}
+
+/**
  * Internal function for hook_user_insert().
  */
 function mfcs_hook_user_insert(&$edit, $account, $category) {
