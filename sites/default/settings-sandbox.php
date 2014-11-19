@@ -363,6 +363,7 @@ ini_set('session.cookie_lifetime', 432000);
  * with a leading dot, as per RFC 2109.
  */
 $cookie_domain = '.sandbox.mcneese.edu';
+ini_set('session.cookie_path', '/fcs/');
 
 /**
  * Variable overrides:
