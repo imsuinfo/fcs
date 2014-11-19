@@ -678,7 +678,6 @@ ColVis.prototype = {
 			} )
 		.css( {
 			'display': 'none',
-			'opacity': 0,
 			'position': ! this.s.bCssPosition ?
 				'absolute' :
 				''
@@ -720,7 +719,6 @@ ColVis.prototype = {
 
 		var background = $('<div></div>')
 			.addClass( 'ColVis_collectionBackground' )
-			.css( 'opacity', 0 )
 			.click( function () {
 				that._fnCollectionHide.call( that, null, null );
 			} );
@@ -764,7 +762,6 @@ ColVis.prototype = {
 
 		$(nHidden).css( {
 			'display': 'block',
-			'opacity': 0
 		} );
 
 		nBackground.style.bottom ='0px';
@@ -776,23 +773,8 @@ ColVis.prototype = {
 		oStyle.top = oPos.top+"px";
 		oStyle.left = iDivX+"px";
 
-		document.body.appendChild( nBackground );
 		document.body.appendChild( nHidden );
 		document.body.appendChild( this.dom.catcher );
-
-		/* This results in a very small delay for the end user but it allows the animation to be
-		 * much smoother. If you don't want the animation, then the setTimeout can be removed
-		 */
-		$(nHidden).animate({"opacity": 1}, that.s.iOverlayFade);
-		$(nBackground).animate({"opacity": 0.1}, that.s.iOverlayFade, 'linear', function () {
-			/* In IE6 if you set the checked attribute of a hidden checkbox, then this is not visually
-			 * reflected. As such, we need to do it here, once it is visible. Unbelievable.
-			 */
-			if ( $.browser && $.browser.msie && $.browser.version == "6.0" )
-			{
-				that._fnDrawCallback();
-			}
-		});
 
 		/* Visual corrections to try and keep the collection visible */
 		if ( !this.s.bCssPosition )
@@ -831,14 +813,9 @@ ColVis.prototype = {
 		{
 			this.s.hidden = true;
 
-			$(this.dom.collection).animate({"opacity": 0}, that.s.iOverlayFade, function (e) {
-				this.style.display = "none";
-			} );
+			this.dom.collection.style.display = "none";
 
-			$(this.dom.background).animate({"opacity": 0}, that.s.iOverlayFade, function (e) {
-				document.body.removeChild( that.dom.background );
-				document.body.removeChild( that.dom.catcher );
-			} );
+			document.body.removeChild( that.dom.catcher );
 		}
 	},
 
