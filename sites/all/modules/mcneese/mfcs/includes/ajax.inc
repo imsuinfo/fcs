@@ -132,12 +132,15 @@ function mfcs_ajax_reviewers_0_list($classification, $review_step) {
       $sorting['reviewer_classification_name'] = $order_direction;
     }
     elseif ($order_column == 2) {
-      $sorting['name'] = $order_direction;
+      $sorting['user_id'] = $order_direction;
     }
     elseif ($order_column == 3) {
-      $sorting['first_name'] = $order_direction;
+      $sorting['account'] = $order_direction;
     }
     elseif ($order_column == 4) {
+      $sorting['first_name'] = $order_direction;
+    }
+    elseif ($order_column == 5) {
       $sorting['last_name'] = $order_direction;
     }
   }
@@ -170,6 +173,12 @@ function mfcs_ajax_reviewers_0_list($classification, $review_step) {
     }
 
     $conditions['or_1']['text(mr.id)'] = array(
+      'operator' => 'ILIKE',
+      'value' => '%' . db_like($_GET['search']['value']) . '%',
+      'expression' => TRUE,
+    );
+
+    $conditions['or_1']['text(u.uid)'] = array(
       'operator' => 'ILIKE',
       'value' => '%' . db_like($_GET['search']['value']) . '%',
       'expression' => TRUE,
@@ -238,11 +247,12 @@ function mfcs_ajax_reviewers_0_list($classification, $review_step) {
         $row[1] = $reviewer_classifications[$reviewer->reviewer_classification];
       }
 
-      $row[2] = '<a href="' . $base_path . 'user/' . $reviewer->user_id . $url_arguments . '" class="user-link">' . check_plain($reviewer->name) . '</a>' . ' <span class="user-id">(id: ' .  $reviewer->user_id . ')</span>';
-      $row[3] = check_plain($reviewer->first_name);
-      $row[4] = check_plain($reviewer->last_name);
+      $row[2] = $reviewer->user_id;
+      $row[3] = '<a href="' . $base_path . 'user/' . $reviewer->user_id . $url_arguments . '" class="user-link">' . check_plain($reviewer->name) . '</a>';
+      $row[4] = check_plain($reviewer->first_name);
+      $row[5] = check_plain($reviewer->last_name);
 
-      $row[5] = '<a href="' . $base_path . 'requests/reviewers-0/delete/' . $reviewer->id . $url_arguments . '" class="operation-link operation-link-delete">Delete</a>';
+      $row[6] = '<a href="' . $base_path . 'requests/reviewers-0/delete/' . $reviewer->id . $url_arguments . '" class="operation-link operation-link-delete">Delete</a>';
 
       $response['data'][] = $row;
     }

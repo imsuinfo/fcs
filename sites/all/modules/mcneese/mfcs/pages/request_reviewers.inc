@@ -209,19 +209,24 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
       $order_column = 1;
       $class_classification = 'sorting_1';
     }
-    elseif ($order == 'account') {
-      $sorting['name'] = is_null($sort) ? 'DESC' : $sort;
+    elseif ($order == 'account_id') {
+      $sorting['account'] = is_null($sort) ? 'DESC' : $sort;
       $order_column = 2;
+      $class_account = 'sorting_1';
+    }
+    elseif ($order == 'account') {
+      $sorting['account'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = 3;
       $class_account = 'sorting_1';
     }
     elseif ($order == 'first name') {
       $sorting['first_name'] = is_null($sort) ? 'DESC' : $sort;
-      $order_column = 3;
+      $order_column = 4;
       $class_first_name = 'sorting_1';
     }
     elseif ($order == 'last name') {
       $sorting['last_name'] = is_null($sort) ? 'DESC' : $sort;
-      $order_column = 4;
+      $order_column = 5;
       $class_last_name = 'sorting_1';
     }
   }
@@ -266,8 +271,13 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
       $row['reviewer_classification']['data'] = $reviewer_classifications[$reviewer->reviewer_classification];
     }
 
-    $row['name'] = array(
-      'data' => '<a href="' . $base_path . 'user/' . $reviewer->user_id . $url_arguments . '" class="user-link">' . check_plain($reviewer->name) . '</a>' . ' <span class="user-id">(id: ' .  $reviewer->user_id . ')</span>',
+    $row['account_id'] = array(
+      'data' => $reviewer->user_id,
+      'class' => $class_id . ' no-script-hidden',
+    );
+
+    $row['account'] = array(
+      'data' => '<a href="' . $base_path . 'user/' . $reviewer->user_id . $url_arguments . '" class="user-link">' . check_plain($reviewer->name) . '</a>' . ' <span class="user-id script-hidden">(id: ' .  $reviewer->user_id . ')</span>',
       'class' => $class_id,
     );
 
@@ -304,6 +314,7 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
   $reviewers_list['header'] = array(
     'id' => array('field' => 'id', 'data' => "ID", 'align' => 'center'),
     'reviewer_classification' => array('field' => 'reviewer_classification', 'data' => "Reviewer Classification", 'align' => 'center', 'sort' => 'asc'),
+    'account_id' => array('field' => 'account_id', 'data' => "Account ID", 'align' => 'center', 'class' => array('no-script-hidden')),
     'account' => array('field' => 'account', 'data' => "Account", 'align' => 'center'),
     'first_name' => array('field' => 'first_name', 'data' => "First Name", 'align' => 'center'),
     'last_name' => array('field' => 'last_name', 'data' => "Last Name", 'align' => 'center'),
@@ -344,6 +355,7 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
     'columns' => array(
       array('name' => 'id', 'className' => 'column-id'),
       array('name' => 'review_classification', 'className' => 'column-review_classification'),
+      array('name' => 'account_id', 'className' => 'column-account_id', 'visible' => FALSE),
       array('name' => 'account', 'className' => 'column-account'),
       array('name' => 'first_name', 'className' => 'column-first_name'),
       array('name' => 'last_name', 'className' => 'column-last_name'),
