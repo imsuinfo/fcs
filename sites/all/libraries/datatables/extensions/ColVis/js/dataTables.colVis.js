@@ -673,8 +673,8 @@ ColVis.prototype = {
 	{
 		return $('<ul />', {
 				'class': !this.s.dt.bJUI ?
-					"ColVis_collection" :
-					"ColVis_collection ui-buttonset ui-buttonset-multi"
+					"dataTables ColVis_collection" :
+					"dataTables ColVis_collection ui-buttonset ui-buttonset-multi"
 			} )
 		.css( {
 			'display': 'none',
@@ -696,7 +696,7 @@ ColVis.prototype = {
 		var
 			that = this,
 			nCatcher = document.createElement('div');
-		nCatcher.className = "ColVis_catcher";
+		nCatcher.className = "dataTables ColVis_catcher";
 
 		$(nCatcher).click( function () {
 			that._fnCollectionHide.call( that, null, null );
