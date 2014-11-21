@@ -4501,6 +4501,7 @@ function mfcs_get_reviewers($conditions = array(), $options = array()) {
     cf_error::invalid_array('conditions');
     return FALSE;
   }
+
   if (!is_array($options)) {
     cf_error::invalid_array('options');
     return FALSE;
@@ -4531,20 +4532,19 @@ function mfcs_get_reviewers($conditions = array(), $options = array()) {
     $sort = $options['sort'];
   }
 
-  $results = FALSE;
   $results = TRUE;
   if (isset($options['results']) && is_bool($options['results'])) {
     $results = $options['results'];
-
-    if (!$results) {
-      $results = array();
-    }
   }
 
   $return = array(
     'results' => NULL,
     'count' => NULL,
   );
+
+  if (!$results) {
+    $return['results'] = array();
+  }
 
   $search = NULL;
   if (isset($options['search'])) {
@@ -4688,36 +4688,88 @@ function mfcs_get_reviewers($conditions = array(), $options = array()) {
  *   - 'mpvc.user_id': user id (uid).
  *   - 'mpvc.proxy_id': user id (uid).
  *   - 'mpvc.disabled': disabled boolean.
- * @param bool $join
- *   (optional) When TRUE, the drupal user table is joined to the reviewers table.
- *   Only select portions of the user table is joined.
- *   This also joins custom field tables for user first and last name.
- * @param array $sort
- *   (optional) When specified, representings the database sorting.
+ *   The each key may be an array such as:
+ *     - array('value' => '1%', 'operator' => 'LIKE')
+ *     - array('value' => array(0, 1, 3), 'operator' => 'IN')
+ *     - array('value' => 1, '=>')
+ *   This also supports a single-depth/non-recursive and/or grouping in the
+ *   following format: 'and_{unique_id}', 'or_{unique_id}' where {unique_id}
+ *   is some arbitrary string or number to ensure that the row is unique.
+ * @param array $options
+ *   (optional) When specified, representing an array containing:
+ *     'join': When TRUE, the drupal user table is joined to the reviewers
+ *             table. Only select portions of the user table is joined. This
+ *             also joins custom field tables for user first and last name.
+ *     'start': The starting location.
+ *     'limit': The number of rows to select, aka: length.
+ *     'count': If TRUE, an unfiltered count query is processed.
+ *     'results': If FALSE, the main query is not performed.
+ *     'search': A special-case/reserved variable for simplified searching.
+ *     'sort': When specified, representing the database sorting.
  *
  * @return array|false
- *   An array of database objects representing the proxies.
+ *   An array of containing the following:
+ *   - 'results': database objects representing the proxy venue coordinators.
+ *   - 'count': total results loaded before a range limit is applied.
  *   FALSE is returned on error.
  */
-function mfcs_get_proxy_venue_coordinators($conditions = array(), $join = FALSE, $sort = array()) {
+function mfcs_get_proxy_venue_coordinators($conditions = array(), $options = array()) {
   if (!is_array($conditions)) {
     cf_error::invalid_array('conditions');
     return FALSE;
   }
 
-  if (!is_bool($join)) {
-    cf_error::invalid_bool('join');
+  if (!is_array($options)) {
+    cf_error::invalid_array('options');
     return FALSE;
   }
 
-  if (!is_array($sort)) {
-    cf_error::invalid_sort('sort');
-    return FALSE;
+  $join = NULL;
+  if (isset($options['join']) && is_bool($options['join'])) {
+    $join = $options['join'];
+  }
+
+  $start = NULL;
+  if (isset($options['start']) && is_numeric($options['start'])) {
+    $start = $options['start'];
+  }
+
+  $limit = NULL;
+  if (isset($options['limit']) && is_numeric($options['limit'])) {
+    $limit = $options['limit'];
+  }
+
+  $count = FALSE;
+  if (isset($options['count']) && is_bool($options['count'])) {
+    $count = $options['count'];
+  }
+
+  $sort = FALSE;
+  if (isset($options['sort']) && is_array($options['sort'])) {
+    $sort = $options['sort'];
+  }
+
+  $results = TRUE;
+  if (isset($options['results']) && is_bool($options['results'])) {
+    $results = $options['results'];
+  }
+
+  $return = array(
+    'results' => NULL,
+    'count' => NULL,
+  );
+
+  if (!$results) {
+    $return['results'] = array();
+  }
+
+  $search = NULL;
+  if (isset($options['search'])) {
+    $search = $options['search'];
   }
 
   try {
     $query = db_select('mfcs_proxy_venue_coordinator', 'mpvc');
-    $query->fields('mpvc');
 
     if ($join) {
       $query->innerJoin('users', 'u', 'mpvc.user_id = u.uid');
@@ -4725,6 +4777,85 @@ function mfcs_get_proxy_venue_coordinators($conditions = array(), $join = FALSE,
       $query->innerJoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id AND fdfuln.delta = 0');
       $query->innerJoin('field_data_field_user_banner_id', 'fdfubi', 'u.uid = fdfubi.entity_id AND fdfubi.delta = 0');
 
+      $query->innerJoin('users', 'pu', 'mpvc.proxy_id = pu.uid');
+      $query->innerJoin('field_data_field_user_first_name', 'pfdfufn', 'pu.uid = pfdfufn.entity_id AND pfdfufn.delta = 0');
+      $query->innerJoin('field_data_field_user_last_name', 'pfdfuln', 'pu.uid = pfdfuln.entity_id AND pfdfuln.delta = 0');
+      $query->innerJoin('field_data_field_user_banner_id', 'pfdfubi', 'pu.uid = pfdfubi.entity_id AND pfdfubi.delta = 0');
+    }
+
+    if (!empty($conditions)) {
+      foreach ($conditions as $condition_id => $condition) {
+        // check to see if the condition_id is an and or an or operation.
+        $ci_parts = explode('_', $condition_id, 2);
+
+        if (isset($ci_parts[0]) && $ci_parts[0] == 'or') {
+          if (empty($ci_parts[0])) continue;
+
+          $or = db_or();
+          foreach ($condition as $subcondition_id => $subcondition) {
+            if (is_array($subcondition)) {
+              if (isset($subcondition['value']) && isset($subcondition['operator'])) {
+                if (isset($subcondition['expression']) && $subcondition['expression']) {
+                  $or->where($subcondition_id . ' ' . $subcondition['operator'] . ' :value', array(':value' => $subcondition['value']));
+                }
+                else {
+                  $or->condition($subcondition_id, $subcondition['value'], $subcondition['operator']);
+                }
+              }
+            }
+            else {
+              $or->condition($subcondition_id, $subcondition);
+            }
+          }
+
+          $query->condition($or);
+        }
+        elseif (isset($ci_parts[0]) && $ci_parts[0] == 'and') {
+          if (empty($ci_parts[0])) continue;
+
+          $and = db_and();
+          foreach ($condition as $subcondition_id => $subcondition) {
+            if (is_array($subcondition)) {
+              if (isset($subcondition['value']) && isset($subcondition['operator'])) {
+                if (isset($subcondition['expression']) && $subcondition['expression']) {
+                  $and->where($subcondition_id . ' ' . $subcondition['operator'] . ' :value', array(':value' => $subcondition['value']));
+                }
+                else {
+                  $and->condition($subcondition_id, $subcondition['value'], $subcondition['operator']);
+                }
+              }
+            }
+            else {
+              $and->condition($subcondition_id, $subcondition);
+            }
+          }
+
+          $query->condition($and);
+        }
+        elseif (is_array($condition)) {
+          if (isset($condition['value']) && isset($condition['operator'])) {
+            if (isset($condition['expression']) && $condition['expression']) {
+              $query->where($condition_id . ' ' . $condition['operator'] . ' :value', array(':value' => $condition['value']));
+            }
+            else {
+              $query->condition($condition_id, $condition['value'], $condition['operator']);
+            }
+          }
+        }
+        else {
+          $query->condition($condition_id, $condition);
+        }
+      }
+    }
+
+    if ($count) {
+      $count_query = clone($query);
+      $count_query->addExpression('count(mpvc.id)');
+    }
+
+    $query->fields('mpvc');
+
+    if ($join) {
       $query->addField('u', 'name', 'name');
       $query->addField('u', 'created', 'created');
       $query->addField('u', 'status', 'status');
@@ -4733,12 +4864,19 @@ function mfcs_get_proxy_venue_coordinators($conditions = array(), $join = FALSE,
       $query->addField('fdfufn', 'field_user_first_name_value', 'first_name');
       $query->addField('fdfuln', 'field_user_last_name_value', 'last_name');
       $query->addField('fdfubi', 'field_user_banner_id_value', 'banner_id');
+
+      $query->addField('pu', 'name', 'proxy_name');
+      $query->addField('pu', 'created', 'proxy_created');
+      $query->addField('pu', 'status', 'proxy_status');
+      $query->addField('pu', 'mail', 'proxy_email');
+
+      $query->addField('pfdfufn', 'field_user_first_name_value', 'proxy_first_name');
+      $query->addField('pfdfuln', 'field_user_last_name_value', 'proxy_last_name');
+      $query->addField('pfdfubi', 'field_user_banner_id_value', 'proxy_banner_id');
     }
 
-    if (!empty($conditions)) {
-      foreach ($conditions as $condition_id => $condition) {
-        $query->condition($condition_id, $condition);
-      }
+    if (!is_null($start) || !is_null($limit)) {
+      $query->range($start, $limit);
     }
 
     if (!empty($sort)) {
@@ -4747,7 +4885,13 @@ function mfcs_get_proxy_venue_coordinators($conditions = array(), $join = FALSE,
       }
     }
 
-    $results = $query->execute()->fetchAll();
+    if ($count) {
+      $return['count'] = $count_query->execute()->fetchField();
+    }
+
+    if ($results) {
+      $return['results'] = $query->execute()->fetchAll();
+    }
   }
   catch (Exception $ex) {
     cf_error::on_query_execution($ex);
@@ -4755,11 +4899,7 @@ function mfcs_get_proxy_venue_coordinators($conditions = array(), $join = FALSE,
     return FALSE;
   }
 
-  if (is_array($results)) {
-    return $results;
-  }
-
-  return FALSE;
+  return $return;
 }
 
 /**
@@ -4792,7 +4932,11 @@ function mfcs_get_proxy_venue_coordinator($proxy_id) {
     return $proxies[$proxy_id];
   }
 
-  $proxys = mfcs_get_proxy_venue_coordinators(array('mpvc.proxy_id' => $proxy_id, 'mpvc.disabled' => 0));
+  $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.proxy_id' => $proxy_id, 'mpvc.disabled' => 0));
+  $proxys = FALSE;
+  if (isset($proxies_returned['results']) && is_array($proxies_returned['results'])) {
+    $proxys = $proxies_returned['results'];
+  }
 
   if ($proxys === FALSE) {
     return FALSE;

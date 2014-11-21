@@ -17,12 +17,15 @@
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
+ * @param int $page_number
+ *   (optional) When there are more than a certain number of rows,
+ *   this represent the page number for a given sequence of rows.
  *
  * @return string
  *   The HTML output representing the page.
  */
-function mfcs_request_proxy_0_form($form, &$form_state) {
-  mfcs_add_canonical_headers('requests/proxy-0');
+function mfcs_request_proxy_0_form($form, &$form_state, $page_number = 0) {
+  mfcs_add_canonical_headers('requests/proxy-0/' . $page_number);
 
   global $base_path;
   global $mfcs_determined;
@@ -30,6 +33,10 @@ function mfcs_request_proxy_0_form($form, &$form_state) {
   $url_arguments = '';
   if (!empty($mfcs_determined['complete'])) {
     $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  if (!cf_is_integer($page_number)) {
+    $page_number = 0;
   }
 
   $user = cf_current_user();
@@ -57,51 +64,146 @@ function mfcs_request_proxy_0_form($form, &$form_state) {
     }
   }
 
+  $class_id = '';
+  $class_proxy_account_id = 'no-script-hidden script-hidden ';
+  $class_proxy_account = '';
+  $class_proxy_first_name = '';
+  $class_proxy_last_name = '';
+  $class_account_id = 'no-script-hidden script-hidden ';
+  $class_account = '';
+  $class_first_name = '';
+  $class_last_name = '';
+  $class_operations = '';
+
   $sorting = array();
   if (is_null($order)) {
     $sorting['id'] = 'ASC';
+    $order_column = 0;
+    $class_id .= 'sorting_1 ';
   }
   else {
     if ($order == 'id') {
       $sorting['id'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = 0;
+      $class_id .= 'sorting_1 ';
+    }
+    elseif ($order == 'proxy account id') {
+      $sorting['proxy_account_id'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = 1;
+      $class_proxy_account_id .= 'sorting_1 ';
+    }
+    elseif ($order == 'proxy account') {
+      $sorting['proxy_account'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = 2;
+      $class_proxy_account .= 'sorting_1 ';
+    }
+    elseif ($order == 'proxy first name') {
+      $sorting['proxy_first_name'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = 3;
+      $class_proxy_first_name .= 'sorting_1 ';
+    }
+    elseif ($order == 'proxy last name') {
+      $sorting['proxy_last_name'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = 4;
+      $class_proxy_last_name .= 'sorting_1 ';
+    }
+    elseif ($order == 'account id') {
+      $sorting['account_id'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = 5;
+      $class_account_id .= 'sorting_1 ';
     }
     elseif ($order == 'account') {
-      $sorting['name'] = is_null($sort) ? 'DESC' : $sort;
+      $sorting['account'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = 6;
+      $class_account .= 'sorting_1 ';
     }
     elseif ($order == 'first name') {
       $sorting['first_name'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = 7;
+      $class_first_name .= 'sorting_1 ';
     }
     elseif ($order == 'last name') {
       $sorting['last_name'] = is_null($sort) ? 'DESC' : $sort;
-    }
-    elseif ($order == 'proxy_account') {
-      $sorting['proxy_account'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = 8;
+      $class_last_name .= 'sorting_1 ';
     }
   }
 
-  $proxies = mfcs_get_proxy_venue_coordinators(array('mpvc.disabled' => 0), TRUE, $sorting);
+  $rows_per_page = 10;
+  $options = array(
+    'sort' => $sorting,
+    'join' => TRUE,
+    'start' => $page_number * $rows_per_page,
+    'limit' => $rows_per_page,
+    'count' => TRUE,
+  );
 
-  if (!is_array($proxies)) {
-    $proxies = array();
+  $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.disabled' => 0), $options);
+  $proxies = array();
+  if (isset($proxies_returned['results']) && is_array($proxies_returned['results'])) {
+    $proxies = $proxies_returned['results'];
+  }
+
+  // do not provide pages when the page number would bring the user beyond the available items.
+  if ($options['start'] >= $proxies_returned['count']) {
+    drupal_not_found();
+    drupal_exit();
+    return array();
   }
 
   $rows = array();
   foreach ($proxies as $proxy) {
     $row = array();
 
-    $proxy_user = mfcs_get_user_information($proxy->proxy_id);
+    $row['id'] = array(
+      'data' => $proxy->id,
+      'class' => $class_id,
+    );
 
-    if ($proxy_user === FALSE) continue;
+    $row['proxy_account_id'] = array(
+      'data' => $proxy->proxy_id,
+      'class' => $class_proxy_account_id,
+    );
 
-    $row['id'] = $proxy->id;
-    $row['proxy_account'] = '<a href="' . $base_path . 'user/' . $proxy->proxy_id . $url_arguments . '" class="user-link">' . check_plain($proxy_user->name) . '</a>' . ' <span class="user-id">(id: ' .  $proxy->proxy_id . ')</span>';
-    $row['proxy_first_name'] = check_plain($proxy_user->first_name);
-    $row['proxy_last_name'] = check_plain($proxy_user->last_name);
-    $row['account'] = '<a href="' . $base_path . 'user/' . $proxy->user_id . $url_arguments . '" class="user-link">' . check_plain($proxy->name) . '</a>' . ' <span class="user-id">(id: ' .  $proxy->user_id . ')</span>';
-    $row['first_name'] = check_plain($proxy->first_name);
-    $row['last_name'] = check_plain($proxy->last_name);
+    $row['proxy_account'] = array(
+      'data' => '<a href="' . $base_path . 'user/' . $proxy->proxy_id . $url_arguments . '" class="user-link">' . check_plain($proxy->proxy_name) . '</a>' . ' <span class="user-id script-hidden">(id: ' .  $proxy->proxy_id . ')</span>',
+      'class' => $class_proxy_account,
+    );
 
-    $row['operations'] = '<a href="' . $base_path . 'requests/proxy-0/delete/' . $proxy->id . $url_arguments . '" class="operation-link operation-link-delete">Delete</a>';
+    $row['proxy_first_name'] = array(
+      'data' => check_plain($proxy->proxy_first_name),
+      'class' => $class_proxy_first_name,
+    );
+
+    $row['proxy_last_name'] = array(
+      'data' => check_plain($proxy->proxy_last_name),
+      'class' => $class_proxy_last_name,
+    );
+
+    $row['account_id'] = array(
+      'data' => $proxy->user_id,
+      'class' => $class_account_id,
+    );
+
+    $row['account'] = array(
+      'data' => '<a href="' . $base_path . 'user/' . $proxy->user_id . $url_arguments . '" class="user-link">' . check_plain($proxy->name) . '</a>' . ' <span class="user-id script-hidden">(id: ' .  $proxy->user_id . ')</span>',
+      'class' => $class_account,
+    );
+
+    $row['first_name'] = array(
+      'data' => check_plain($proxy->first_name),
+      'class' => $class_first_name,
+    );
+
+    $row['last_name'] = array(
+      'data' => check_plain($proxy->last_name),
+      'class' => $class_last_name,
+    );
+
+    $row['operations'] = array(
+      'data' => '<a href="' . $base_path . 'requests/proxy-0/delete/' . $proxy->id . $url_arguments . '" class="operation-link operation-link-delete">Delete</a>',
+      'class' => $class_operations,
+    );
 
     $rows[] = $row;
   }
@@ -110,9 +212,11 @@ function mfcs_request_proxy_0_form($form, &$form_state) {
   $proxy_list['caption'] = t("Venue Coordinator Proxies");
   $proxy_list['header'] = array(
     'id' => array('field' => 'id', 'data' => "ID", 'align' => 'center'),
+    'proxy_account_id' => array('field' => 'proxy_account_id', 'data' => "Proxy Account ID", 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
     'proxy_account' => array('field' => 'proxy_account', 'data' => "Proxy Account", 'align' => 'center'),
     'proxy_first_name' => array('field' => 'proxy_first_name', 'data' => "Proxy First Name", 'align' => 'center'),
     'proxy_last_name' => array('field' => 'proxy_last_name', 'data' => "Proxy Last Name", 'align' => 'center'),
+    'account_id' => array('field' => 'account_id', 'data' => "Account ID", 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
     'account' => array('field' => 'account', 'data' => "Account", 'align' => 'center'),
     'first_name' => array('field' => 'first_name', 'data' => "First Name", 'align' => 'center'),
     'last_name' => array('field' => 'last_name', 'data' => "Last Name", 'align' => 'center'),
@@ -121,14 +225,92 @@ function mfcs_request_proxy_0_form($form, &$form_state) {
 
   $proxy_list['attributes'] = array();
   $proxy_list['attributes']['id'] = 'mfcs-proxy_form';
-  $proxy_list['attributes']['class'] = array ('mfcs-proxy_form');
+  $proxy_list['attributes']['class'] = array(
+    'no_default',
+    'mfcs-proxy_form',
+    'display',
+    'hover',
+    'order-column',
+    'stripe',
+    'cell-border',
+  );
   $proxy_list['attributes']['summary'] = 'Collection of users who are allowed to proxy as another user.';
 
   $proxy_list['rows'] = $rows;
   $proxy_list['empty'] = t("There are no users assigned to proxy as a venue coordinator.");
 
-  $form['proxy_list']['#markup'] = theme('table', $proxy_list);
+  $datatable_settings = array(
+    'sort' => strtolower($sort),
+    'order' => $order_column,
+    #'stateSave' => TRUE,
+    'lengthMenu' => array(
+       5 => '5',
+      10 => '10',
+      20 => '20',
+      40 => '40',
+      80 => '80',
+      -1 => '"All"',
+    ),
+    'processing' => TRUE,
+    'serverSide' => TRUE,
+    'ajax' => "'" . $base_path . 'requests/proxy-0/ajax' . "'",
+    'deferRender' => TRUE,
+    'columns' => array(
+      array('name' => 'id', 'className' => 'column-id'),
+      array('name' => 'proxy_account_id', 'className' => 'column-proxy_account_id', 'visible' => FALSE),
+      array('name' => 'proxy_account', 'className' => 'column-proxy_account'),
+      array('name' => 'proxy_first_name', 'className' => 'column-proxy_first_name'),
+      array('name' => 'proxy_last_name', 'className' => 'column-proxy_last_name'),
+      array('name' => 'account_id', 'className' => 'column-account_id', 'visible' => FALSE),
+      array('name' => 'account', 'className' => 'column-account'),
+      array('name' => 'first_name', 'className' => 'column-first_name'),
+      array('name' => 'last_name', 'className' => 'column-last_name'),
+      array('name' => 'operations', 'className' => 'column-operations'),
+    ),
+    'displayStart' => $options['start'],
+    'pageLength' => $rows_per_page,
+    'dom' => 'lfCrtip',
+    'KeyTable' => TRUE,
+    'oColVis' => array(
+      'buttonText' => '"Show / Hide"',
+    ),
+  );
 
+  $form['proxy_list']['#markup'] = theme('table', $proxy_list);
+  $navigation_top = '';
+  $navigation_bottom = '';
+  if ($page_number > 0) {
+    if ($page_number == 1) {
+      $navigation_top .= '<a href="' . $base_path . 'requests/proxy-0' . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+      $navigation_bottom .= '<a href="' . $base_path . 'requests/proxy-0' . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+    }
+    else {
+      $previous_page = $page_number - 1;
+      $navigation_top .= '<a href="' . $base_path . 'requests/proxy-0/' . $previous_page . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+      $navigation_bottom .= '<a href="' . $base_path . 'requests/proxy-0/' . $previous_page . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+    }
+  }
+
+  $navigation_start = $options['start'] + 1;
+  $navigation_total = $options['start'] + $rows_per_page;
+
+  if ($navigation_total > $proxies_returned['count']) {
+    $navigation_total = $proxies_returned['count'];
+  }
+
+  $navigation_bottom .= '<div class="table_listing-comment">' . "\n";
+  $navigation_bottom .= "Showing " . $navigation_start . " to " . $navigation_total . " of " . $proxies_returned['count'] . " entries.\n";
+  $navigation_bottom .= '</div>' . "\n";
+
+  if ($proxies_returned['count'] > ($options['start'] + $rows_per_page)) {
+    $next_page = $page_number + 1;
+    $navigation_top .= '<a href="' . $base_path . 'requests/proxy-0/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
+    $navigation_bottom .= '<a href="' . $base_path . 'requests/proxy-0/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
+  }
+
+  $form['proxy_list']['#markup'] = '<div class="table_listing-navigator table_listing-navigator-top no-print">' . $navigation_top . '</div>';
+  $form['proxy_list']['#markup'] .= mcneese_libraries_theme_table($proxy_list, $datatable_settings);
+  $form['proxy_list']['#markup'] .= '<div class="table_listing-navigator table_listing-navigator-bottom">' . $navigation_bottom . '</div>';
 
   $form['proxy'] = array(
     '#id' => 'proxy',
@@ -229,10 +411,9 @@ function mfcs_request_proxy_0_form_validate($form, &$form_state) {
       }
     }
 
-    $existing = mfcs_get_proxy_venue_coordinators(array('mpvc.proxy_id' => $proxy_id, 'mpvc.user_id' => $user_id, 'mpvc.disabled' => 0));
-
-    if (!empty($existing)) {
-      form_set_error('proxy][proxy_id', "This proxy is already assigned to the specified user");
+    $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.proxy_id' => $proxy_id, 'mpvc.user_id' => $user_id, 'mpvc.disabled' => 0));
+    if (!empty($proxies_returned['results'])) {
+      form_set_error('proxy][proxy_id', "This proxy is already assigned to the specified user.");
     }
   }
   else {
@@ -415,10 +596,11 @@ function mfcs_request_proxy_0_delete_form($form, &$form_state, $id) {
  * @see: mfcs_request_proxy_0_delete_form()
  */
 function mfcs_request_proxy_0_delete_form_validate($form, &$form_state) {
-  $existing = mfcs_get_proxy_venue_coordinators(array('mpvc.id' => $form['form']['id']['#value'], 'mpvc.disabled' => 0));
+  $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.id' => $form['form']['id']['#value'], 'mpvc.disabled' => 0));
+
   $proxy = NULL;
-  if (!empty($existing)) {
-    $proxy = array_pop($existing);
+  if (!empty($proxies_returned['results'])) {
+    $proxy = array_pop($proxies_returned['results']);
   }
 
   if (!is_object($proxy)) {

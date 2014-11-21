@@ -197,6 +197,31 @@ function mfcs_hook_menu() {
     'tab_root' => 'requests',
   );
 
+  $items['requests/proxy-0/%'] = array(
+    'title' => "Manage Proxies",
+    'description' => "List users who are able to proxy as a venue coordinator.",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_proxy_0_form', 2),
+    'file' => 'request_proxy.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('proxy'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
+
+  $items['requests/proxy-0/ajax'] = array(
+    'title' => "Manage Proxies",
+    'description' => "List users who are able to proxy as a venue coordinator.",
+    'page callback' => 'mfcs_ajax_proxy_0_list',
+    'file' => 'ajax.inc',
+    'file path' => $module_path . '/includes',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('proxy'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
+
   $items['requests/proxy-0/delete/%'] = array(
     'title' => "Delete Proxy",
     'description' => "Delete a proxy",

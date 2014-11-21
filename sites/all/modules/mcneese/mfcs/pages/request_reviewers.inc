@@ -187,6 +187,7 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
 
   $class_id = '';
   $class_classification = '';
+  $class_account_id = 'no-script-hidden ';
   $class_account = '';
   $class_first_name = '';
   $class_last_name = '';
@@ -207,27 +208,27 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
     elseif ($order == 'reviewer classification') {
       $sorting['reviewer_classification_name'] = is_null($sort) ? 'DESC' : $sort;
       $order_column = 1;
-      $class_classification = 'sorting_1';
+      $class_classification .= 'sorting_1 ';
     }
-    elseif ($order == 'account_id') {
-      $sorting['account'] = is_null($sort) ? 'DESC' : $sort;
+    elseif ($order == 'account id') {
+      $sorting['user_id'] = is_null($sort) ? 'DESC' : $sort;
       $order_column = 2;
-      $class_account = 'sorting_1';
+      $class_account_id .= 'sorting_1 ';
     }
     elseif ($order == 'account') {
-      $sorting['account'] = is_null($sort) ? 'DESC' : $sort;
+      $sorting['name'] = is_null($sort) ? 'DESC' : $sort;
       $order_column = 3;
-      $class_account = 'sorting_1';
+      $class_account .= 'sorting_1 ';
     }
     elseif ($order == 'first name') {
       $sorting['first_name'] = is_null($sort) ? 'DESC' : $sort;
       $order_column = 4;
-      $class_first_name = 'sorting_1';
+      $class_first_name .= 'sorting_1 ';
     }
     elseif ($order == 'last name') {
       $sorting['last_name'] = is_null($sort) ? 'DESC' : $sort;
       $order_column = 5;
-      $class_last_name = 'sorting_1';
+      $class_last_name .= 'sorting_1 ';
     }
   }
 
@@ -257,7 +258,7 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
   foreach ($reviewers as $reviewer) {
     $row = array();
 
-    $row['user_id'] = array(
+    $row['id'] = array(
       'data' => $reviewer->id,
       'class' => $class_id,
     );
@@ -273,12 +274,12 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
 
     $row['account_id'] = array(
       'data' => $reviewer->user_id,
-      'class' => $class_id . ' no-script-hidden',
+      'class' => $class_account_id,
     );
 
     $row['account'] = array(
       'data' => '<a href="' . $base_path . 'user/' . $reviewer->user_id . $url_arguments . '" class="user-link">' . check_plain($reviewer->name) . '</a>' . ' <span class="user-id script-hidden">(id: ' .  $reviewer->user_id . ')</span>',
-      'class' => $class_id,
+      'class' => $class_account,
     );
 
     $row['first_name'] = array(
@@ -349,6 +350,7 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
       80 => '80',
       -1 => '"All"',
     ),
+    'processing' => TRUE,
     'serverSide' => TRUE,
     'ajax' => "'" . $base_path . 'requests/reviewers-0/ajax/list/' . $classification . '/' . $review_step . "'",
     'deferRender' => TRUE,
@@ -361,7 +363,7 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
       array('name' => 'last_name', 'className' => 'column-last_name'),
       array('name' => 'operations', 'className' => 'column-operations'),
     ),
-    'displayStart' => $page_number * $rows_per_page,
+    'displayStart' => $options['start'],
     'pageLength' => $rows_per_page,
     'dom' => 'lfCrtip',
     'KeyTable' => TRUE,
@@ -384,8 +386,8 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
     }
   }
 
-  $navigation_start = ($page_number * $rows_per_page) + 1;
-  $navigation_total = ($page_number * $rows_per_page) + $rows_per_page;
+  $navigation_start = $options['start'] + 1;
+  $navigation_total = $options['start'] + $rows_per_page;
 
   if ($navigation_total > $reviewers_returned['count']) {
     $navigation_total = $reviewers_returned['count'];
@@ -395,7 +397,7 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
   $navigation_bottom .= "Showing " . $navigation_start . " to " . $navigation_total . " of " . $reviewers_returned['count'] . " entries.\n";
   $navigation_bottom .= '</div>' . "\n";
 
-  if ($reviewers_returned['count'] > $rows_per_page) {
+  if ($reviewers_returned['count'] > ($options['start'] + $rows_per_page)) {
     $next_page = $page_number + 1;
     $navigation_top .= '<a href="' . $base_path . 'requests/reviewers-0/list/' . $classification . "/" . $review_step . '/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
     $navigation_bottom .= '<a href="' . $base_path . 'requests/reviewers-0/list/' . $classification . "/" . $review_step . '/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';

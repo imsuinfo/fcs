@@ -248,7 +248,7 @@ function mcneese_libraries_theme_table($variables, $datatable_settings = array()
             if (is_array($value)) {
               $d_j_s = array();
               foreach ($value as $k => $v) {
-                if ($v == 'targets' && $inline_array_setting == 'columnDefs') {
+                if ($k == 'targets' && $inline_array_setting == 'columnDefs') {
                   if (is_array($v)) {
                     $d_j_s[] = '[ ' . implode(', ', $v) . ' ]';
                   }
@@ -363,6 +363,11 @@ function mcneese_libraries_theme_table($variables, $datatable_settings = array()
       if (array_key_exists('custom_js', $datatable_settings)) {
         $datatable_js .= $datatable_settings['custom_js'];
       }
+
+
+      // hidden columns are expected to have 'script-hidden' class name added to them.
+      // remove this from the datatable on load so that the columns can be dynamically unhidden as needed.
+      $datatable_js .= 'table.columns(\'.script-hidden\').header().to$().removeClass(\'script-hidden\');';
 
 
       $datatable_js .= '});' . "\n";

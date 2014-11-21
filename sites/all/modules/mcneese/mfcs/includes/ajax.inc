@@ -11,7 +11,7 @@
  */
 
 /**
- * Ajax function call.
+ * Ajax function call for loading reviewers list datatable.
  *
  * @param int $classification
  *   Number representing the request classification.
@@ -189,11 +189,6 @@ function mfcs_ajax_reviewers_0_list($classification, $review_step) {
       'value' => '%' . db_like($_GET['search']['value']) . '%',
     );
 
-    $conditions['or_1']['u.mail'] = array(
-      'operator' => 'ILIKE',
-      'value' => '%' . db_like($_GET['search']['value']) . '%',
-    );
-
     $conditions['or_1']['fdfufn.field_user_first_name_value'] = array(
       'operator' => 'ILIKE',
       'value' => '%' . db_like($_GET['search']['value']) . '%',
@@ -253,6 +248,238 @@ function mfcs_ajax_reviewers_0_list($classification, $review_step) {
       $row[5] = check_plain($reviewer->last_name);
 
       $row[6] = '<a href="' . $base_path . 'requests/reviewers-0/delete/' . $reviewer->id . $url_arguments . '" class="operation-link operation-link-delete">Delete</a>';
+
+      $response['data'][] = $row;
+    }
+  }
+
+  drupal_json_output($response);
+  exit();
+}
+
+/**
+ * Ajax function call for loading proxy list datatable.
+ */
+function mfcs_ajax_proxy_0_list() {
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  $response = array();
+
+  if (function_exists('devel_menu')) {
+    $GLOBALS['devel_shutdown'] = FALSE;
+  }
+
+  // load ajax/json request settings.
+  $draw = 1;
+  if (isset($_GET['draw'])) {
+    $draw += (int) $_GET['draw'];
+  }
+
+  $columns = NULL;
+  if (isset($_GET['columns']) && is_array($_GET['columns'])) {
+    $columns = $_GET['columns'];
+  }
+
+  $order = NULL;
+  if (isset($_GET['order']) && is_array($_GET['order'])) {
+    $order = $_GET['order'];
+  }
+
+  $options = array(
+    'join' => TRUE,
+    'start' => 0,
+    'limit' => NULL,
+    'count' => TRUE,
+  );
+
+  if (isset($_GET['start']) && is_numeric($_GET['start'])) {
+    $options['start'] = (int) $_GET['start'];
+  }
+
+  if (isset($_GET['length']) && is_numeric($_GET['length'])) {
+    $options['limit'] = (int) $_GET['length'];
+  }
+
+  // drupal SQL does not support having no limit while having a start.
+  // when limit is set to select aka (aka: -1), then do not specify a start.
+  if ($options['limit'] < 0) {
+    $options['start'] = NULL;
+    $options['limit'] = NULL;
+  }
+
+  $search = FALSE;
+  if (isset($_GET['search']['value']) && is_string($_GET['search']['value']) && !empty($_GET['search']['value'])) {
+    $search = TRUE;
+  }
+
+  $timestamp = REQUEST_TIME;
+  if (isset($_GET['_']) && is_array($_GET['_'])) {
+    $timestamp = $_GET['_'];
+  }
+
+  // build ajax/json response data.
+  $response = array(
+    'draw' => $draw,
+  );
+
+  $sorting = array();
+  if (!isset($order[0]['column'])) {
+    $sorting['id'] = 'ASC';
+  }
+  else {
+    $order_column = (int) $order[0]['column'];
+    $order_direction = isset($order[0]['dir']) && is_string($order[0]['dir']) ? strtoupper($order[0]['dir']) : 'DESC';
+
+    if ($order_column == 0) {
+      $sorting['id'] = $order_direction;
+    }
+    elseif ($order_column == 1) {
+      $sorting['proxy_id'] = $order_direction;
+    }
+    elseif ($order_column == 2) {
+      $sorting['proxy_name'] = $order_direction;
+    }
+    elseif ($order_column == 3) {
+      $sorting['proxy_first_name'] = $order_direction;
+    }
+    elseif ($order_column == 4) {
+      $sorting['proxy_last_name'] = $order_direction;
+    }
+    elseif ($order_column == 5) {
+      $sorting['user_id'] = $order_direction;
+    }
+    elseif ($order_column == 6) {
+      $sorting['name'] = $order_direction;
+    }
+    elseif ($order_column == 7) {
+      $sorting['first_name'] = $order_direction;
+    }
+    elseif ($order_column == 8) {
+      $sorting['last_name'] = $order_direction;
+    }
+  }
+
+  // always provide the unique id in the ordering to guarantee consistency in range results.
+  if (!isset($sorting['id'])) {
+    $sorting['id'] = 'DESC';
+  }
+
+  if (!empty($sorting)) {
+    $options['sort'] = $sorting;
+  }
+
+  $conditions = array(
+    'mpvc.disabled' => 0,
+  );
+
+  if ($search) {
+    $count_conditions = $conditions;
+    $count_options = $options;
+
+    $conditions['or_1'] = array();
+
+    $conditions['or_1']['text(mpvc.id)'] = array(
+      'operator' => 'ILIKE',
+      'value' => '%' . db_like($_GET['search']['value']) . '%',
+      'expression' => TRUE,
+    );
+
+    $conditions['or_1']['text(mpvc.proxy_id)'] = array(
+      'operator' => 'ILIKE',
+      'value' => '%' . db_like($_GET['search']['value']) . '%',
+      'expression' => TRUE,
+    );
+
+    $conditions['or_1']['pu.name'] = array(
+      'operator' => 'ILIKE',
+      'value' => '%' . db_like($_GET['search']['value']) . '%',
+    );
+
+    $conditions['or_1']['pfdfufn.field_user_first_name_value'] = array(
+      'operator' => 'ILIKE',
+      'value' => '%' . db_like($_GET['search']['value']) . '%',
+    );
+
+    $conditions['or_1']['pfdfuln.field_user_last_name_value'] = array(
+      'operator' => 'ILIKE',
+      'value' => '%' . db_like($_GET['search']['value']) . '%',
+    );
+
+    $conditions['or_1']['text(mpvc.user_id)'] = array(
+      'operator' => 'ILIKE',
+      'value' => '%' . db_like($_GET['search']['value']) . '%',
+      'expression' => TRUE,
+    );
+
+    $conditions['or_1']['u.name'] = array(
+      'operator' => 'ILIKE',
+      'value' => '%' . db_like($_GET['search']['value']) . '%',
+    );
+
+    $conditions['or_1']['fdfufn.field_user_first_name_value'] = array(
+      'operator' => 'ILIKE',
+      'value' => '%' . db_like($_GET['search']['value']) . '%',
+    );
+
+    $conditions['or_1']['fdfuln.field_user_last_name_value'] = array(
+      'operator' => 'ILIKE',
+      'value' => '%' . db_like($_GET['search']['value']) . '%',
+    );
+
+    $count_options['returned'] = FALSE;
+    $proxies_returned = mfcs_get_proxy_venue_coordinators($count_conditions, $count_options);
+    $proxies_total = 0;
+    if (array_key_exists('count', $proxies_returned)) {
+      $proxies_total = $proxies_returned['count'];
+    }
+
+    $proxies_returned = mfcs_get_proxy_venue_coordinators($conditions, $options);
+    $proxies = array();
+    if (isset($proxies_returned['results']) && is_array($proxies_returned['results'])) {
+      $proxies = $proxies_returned['results'];
+    }
+
+    $response['recordsTotal'] = $proxies_total;
+    $response['recordsFiltered'] = $proxies_returned['count'];
+  }
+  else {
+    $proxies_returned = mfcs_get_proxy_venue_coordinators($conditions, $options);
+    $proxies = array();
+    if (isset($proxies_returned['results']) && is_array($proxies_returned['results'])) {
+      $proxies = $proxies_returned['results'];
+    }
+
+    $response['recordsTotal'] = $proxies_returned['count'];
+    $response['recordsFiltered'] = $proxies_returned['count'];
+  }
+
+  if (!is_array($proxies)) {
+    drupal_json_output($response);
+    exit();
+  }
+
+  $response['data'] = array();
+  if (!empty($proxies)) {
+    foreach ($proxies as $proxy) {
+      $row = array();
+
+      $row[0] = $proxy->id;
+      $row[1] = $proxy->proxy_id;
+      $row[2] = '<a href="' . $base_path . 'user/' . $proxy->proxy_id . $url_arguments . '" class="user-link">' . check_plain($proxy->proxy_name) . '</a>';
+      $row[3] = check_plain($proxy->proxy_first_name);
+      $row[4] = check_plain($proxy->proxy_last_name);
+      $row[5] = $proxy->user_id;
+      $row[6] = '<a href="' . $base_path . 'user/' . $proxy->user_id . $url_arguments . '" class="user-link">' . check_plain($proxy->name) . '</a>';
+      $row[7] = check_plain($proxy->first_name);
+      $row[8] = check_plain($proxy->last_name);
+
+      $row[9] = '<a href="' . $base_path . 'requests/proxy-0/delete/' . $proxy->id . $url_arguments . '" class="operation-link operation-link-delete">Delete</a>';
 
       $response['data'][] = $row;
     }
