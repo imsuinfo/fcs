@@ -43,10 +43,6 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = 0) {
 
   $form = array();
 
-  $manager = user_access('mfcs manage', $user);
-  $reviewer = user_access('mfcs review', $user);
-  $requester = user_access('mfcs request', $user);
-
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
   // load sorting information
@@ -145,7 +141,7 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = 0) {
   }
 
   // do not provide pages when the page number would bring the user beyond the available items.
-  if ($options['start'] >= $proxies_returned['count']) {
+  if ($proxies_returned['count'] > 0 && $options['start'] >= $proxies_returned['count']) {
     drupal_not_found();
     drupal_exit();
     return array();
@@ -315,7 +311,7 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = 0) {
   $form['proxy'] = array(
     '#id' => 'proxy',
     '#type' => 'fieldset',
-    '#title' => 'Add Reviewer',
+    '#title' => 'Add Proxy',
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
     '#tree' => TRUE,
@@ -532,10 +528,10 @@ function mfcs_request_proxy_0_delete_form($form, &$form_state, $id) {
     return array();
   }
 
-  $proxys = mfcs_get_proxy_venue_coordinators(array('mpvc.id' => $id));
+  $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.id' => $id));
   $proxy = NULL;
-  if (!empty($proxys)) {
-    $proxy = array_pop($proxys);
+  if (!empty($proxies_returned['results'])) {
+    $proxy = array_pop($proxies_returned['results']);
   }
 
   if (!is_object($proxy)) {
