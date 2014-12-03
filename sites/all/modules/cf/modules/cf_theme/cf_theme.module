@@ -208,53 +208,25 @@ function cf_theme_get_variables(array &$variables) {
   }
 
   $node_object = NULL;
-  $node_main = NULL;
   $node_id_matches = array();
   if (preg_match('@^node/(\d+)(/.*|$|\?.*|#.*)@', current_path(), $node_id_matches)) {
     if (!empty($node_id_matches[1])) {
-      $node_main = node_load($node_id_matches[1]);
       $revision_id_matches = array();
 
-      if (!empty($node_id_matches[2]) && preg_match('@^/(revisions|accessibility)/(\d+)(/.*|$|\?.*|#.*)@', $node_id_matches[2], $revision_id_matches)) {
-        if (!empty($revision_id_matches[2])) {
-          $node_object = node_load($node_id_matches[1], $revision_id_matches[2]);
+      if (!empty($node_id_matches[2]) && preg_match('@^/revisions/(\d+)(/.*|$|\?.*|#.*)@', $node_id_matches[2], $revision_id_matches)) {
+        if (!empty($revision_id_matches[1])) {
+          $node_object = node_load($node_id_matches[1], $revision_id_matches[1]);
         }
         else {
-          if (function_exists('workbench_moderation_node_current_load')) {
-            $node_object = workbench_moderation_node_current_load($node_main);
-
-            if (!is_object($node_object)) {
-              $node_object = $node_main;
-            }
-          }
-          else {
-            $node_object = node_load($node_id_matches[1]);
-          }
+          $node_object = node_load($node_id_matches[1]);
         }
       }
       else {
-        if (function_exists('workbench_moderation_node_current_load') && preg_match('@^/(draft|edit|moderation)(/.*|$|\?.*|#.*)@', $node_id_matches[2])) {
-          $node_object = workbench_moderation_node_current_load($node_main);
-
-          if (!is_object($node_object)) {
-            $node_object = $node_main;
-          }
-        }
-        else if (function_exists('workbench_moderation_node_live_load')) {
-          $node_object = workbench_moderation_node_live_load($node_main);
-
-          if (!is_object($node_object)) {
-            $node_object = $node_main;
-          }
-        }
-        else {
-          $node_object = $node_main;
-        }
+        $node_object = node_load($node_id_matches[1]);
       }
     }
   }
   unset($node_id_matches);
-  unset($node_main);
 
   if (is_object($node_object)) {
     if (property_exists($node_object, 'nid') && !empty($node_object->nid)) {

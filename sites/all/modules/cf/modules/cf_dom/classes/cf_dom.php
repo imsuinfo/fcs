@@ -13,7 +13,6 @@
 
 class cf_dom {
   const PREFIX = 'cf';
-  const DOCTYPE = '<!DOCTYPE html>';
   const CONTENT_PREFIX = '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body>';
   const CONTENT_POSTFIX = '</body>';
 
@@ -413,9 +412,9 @@ class cf_dom {
    * @param DOMNode $element
    *   The object to convert to markup text.
    * @param bool $preserve_children
-   *   (optional) If TRUE, children are preserved.
-   *   If FALSE, children are lost.
-   *   Defaults to TRUE.
+   *   (optional) If TRUE, children are re-attached to the parent node to
+   *   preserved their location in the markup.
+   *   If FALSE, the children remain attached to the removed element.
    *
    * @return bool
    *   The removed element on success, FALSE otherwise.
@@ -453,9 +452,9 @@ class cf_dom {
    *   If FALSE, operate on head element.
    *   This defaults to TRUE.
    * @param bool $preserve_children
-   *   (optional) If TRUE, children are preserved.
-   *   If FALSE, children are lost.
-   *   Defaults to TRUE.
+   *   (optional) If TRUE, children are re-attached to the parent node to
+   *   preserved their location in the markup.
+   *   If FALSE, the children remain attached to the removed element.
    *
    * @return bool
    *   TRUE on success, FALSE otherwise.
@@ -623,9 +622,9 @@ class cf_dom {
    * @param DOMNode $element
    *   The object to convert to markup text.
    * @param bool $preserve_children
-   *   (optional) If TRUE, children are preserved.
-   *   If FALSE, children are lost.
-   *   Defaults to TRUE.
+   *   (optional) If TRUE, children are re-attached to the parent node to
+   *   preserved their location in the markup.
+   *   If FALSE, the children remain attached to the removed element.
    *
    * @return bool
    *   The removed element on success, FALSE otherwise.
@@ -673,9 +672,9 @@ class cf_dom {
    * @param DOMNode $parent
    *   The object to operate on.
    * @param bool $preserve_children
-   *   (optional) If TRUE, children are preserved.
-   *   If FALSE, children are lost.
-   *   Defaults to TRUE.
+   *   (optional) If TRUE, children are re-attached to the parent node to
+   *   preserved their location in the markup.
+   *   If FALSE, the children remain attached to the removed element.
    *
    * @return bool
    *   TRUE on success, FALSE otherwise.
