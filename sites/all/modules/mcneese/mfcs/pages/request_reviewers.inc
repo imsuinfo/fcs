@@ -191,7 +191,7 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
   $class_account = '';
   $class_first_name = '';
   $class_last_name = '';
-  $class_operations = '';
+  $class_operations = 'no-print ';
 
   $sorting = array();
   if (is_null($order)) {
@@ -319,7 +319,7 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
     'account' => array('field' => 'account', 'data' => "Account", 'align' => 'center'),
     'first_name' => array('field' => 'first_name', 'data' => "First Name", 'align' => 'center'),
     'last_name' => array('field' => 'last_name', 'data' => "Last Name", 'align' => 'center'),
-    t("Operations"),
+    'operations' => array('data' => "Operations", 'align' => 'center', 'class' => array('no-print')),
   );
 
   $reviewers_list['attributes'] = array();
@@ -361,7 +361,7 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
       array('name' => 'account', 'className' => 'column-account'),
       array('name' => 'first_name', 'className' => 'column-first_name'),
       array('name' => 'last_name', 'className' => 'column-last_name'),
-      array('name' => 'operations', 'className' => 'column-operations'),
+      array('name' => 'operations', 'className' => 'column-operations no-print'),
     ),
     'displayStart' => $options['start'],
     'pageLength' => $rows_per_page,
