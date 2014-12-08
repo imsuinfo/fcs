@@ -851,9 +851,9 @@ function mfcs_build_determined_filters_markup($id = NULL) {
     }
 
     if (!empty($url_arguments_remaining)) {
-      if (!$added_qmark) {
+      if (!$add_qmark) {
         $link_cg .= '?';
-        $added_qmark = TRUE;
+        $add_qmark = TRUE;
       }
 
       if ($first) {
