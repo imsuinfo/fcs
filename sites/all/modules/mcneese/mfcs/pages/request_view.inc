@@ -1002,10 +1002,12 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         'mr.disabled' => 0,
       );
 
-      $reviewers = mfcs_get_reviewers($reviewer_conditions, TRUE);
-      if (!is_array($reviewers)) {
-        $reviewers = array();
+      $reviewers_returned = mfcs_get_reviewers($reviewer_conditions);
+      $reviewers = array();
+      if (isset($reviewers_returned['results']) && is_array($reviewers_returned['results'])) {
+        $reviewers = $reviewers_returned['results'];
       }
+      unset($reviewers_returned);
 
       $form['review']['operations']['as_reviewer']['#markup'] = '<div class="request-section-review-operations-as_reviewer">';
 

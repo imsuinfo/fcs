@@ -103,7 +103,12 @@ function mfcs_request_review_0_page($form, &$form_state, $page_number = 0) {
 
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
-  $items = mfcs_request_load_listing(NULL, FALSE, $page_number * $rows_per_page, $rows_per_page, $sorting, MFCS_REVIEW_RESTRICTION_REVIEW);
+  $items_returned = mfcs_request_load_listing(array(), array('start' => $page_number * $rows_per_page, 'limit' => $rows_per_page, 'sort' => $sort, 'order' => $order, 'review_restrictions' => MFCS_REVIEW_RESTRICTION_REVIEW));
+
+  $items = array();
+  if (isset($items_returned['results']) && is_array($items_returned['results'])) {
+    $items = $items_returned['results'];
+  }
 
   $rows = array();
   $total_results = count($items);

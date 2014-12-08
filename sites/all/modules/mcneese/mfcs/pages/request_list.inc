@@ -40,9 +40,6 @@ function mfcs_request_list_0_form($form, &$form_state, $page_number = 0) {
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
-  $rows_per_page = 25;
-  $start_range = $page_number * $rows_per_page;
-
   $form = array();
   $form['output'] = array('#markup' => '');
 
@@ -61,51 +58,117 @@ function mfcs_request_list_0_form($form, &$form_state, $page_number = 0) {
   );
 
   // load sorting information
-  $url_extras = NULL;
-  $sorting = array();
   $order = NULL;
   if (isset($_GET['order'])) {
     $order = strtolower($_GET['order']);
-    $sorting['order'] = $order;
-
-    if (array_key_exists($order, $columns)) {
-      $url_extras = 'order=' . $columns[$order];
-    }
   }
 
   $sort = NULL;
+  $order_column = NULL;
   if (isset($_GET['sort'])) {
     $sort = strtoupper($_GET['sort']);
 
     if ($sort != 'ASC' && $sort != 'DESC') {
       $sort = NULL;
     }
-    else {
-      $sorting['sort'] = $sort;
-
-      if (is_null($url_extras)) {
-        $url_extras = 'sort=' . $_GET['sort'];
-      }
-      else {
-        $url_extras = 'sort=' . $_GET['sort'] . '&' . $url_extras;
-      }
-    }
   }
 
-  if (empty($url_arguments)) {
-    if (!empty($url_extras)) {
-      $url_arguments = '?' . $url_extras;
-    }
+  $class_id = '';
+  $class_title = '';
+  $class_building = '';
+  $class_room = '';
+  $class_date = '';
+  $class_status = '';
+  $class_step = 'no-script-hidden ';
+  $class_submitted_by = '';
+  $class_submitted_on = '';
+  $class_operations = 'no-print ';
+
+  $sorting = array();
+  if (is_null($order)) {
+    $sorting['id'] = 'DESC';
+    $order_column = 0;
+    $class_title .= 'sorting_1 ';
   }
   else {
-    if (!empty($url_extras)) {
-      $url_arguments .= '&' . $url_extras;
+    if ($order == 'id') {
+      $sorting['id'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = 0;
+      $class_id .= 'sorting_1 ';
+    }
+    elseif ($order == 'title') {
+      $sorting['title'] = is_null($sort) ? 'ASC' : $sort;
+      $order_column = 1;
+      $class_title .= 'sorting_1 ';
+    }
+    elseif ($order == 'building') {
+      $sorting['building'] = is_null($sort) ? 'ASC' : $sort;
+      $order_column = 2;
+      $class_building .= 'sorting_1 ';
+    }
+    elseif ($order == 'room') {
+      $sorting['room'] = is_null($sort) ? 'ASC' : $sort;
+      $order_column = 3;
+      $class_room .= 'sorting_1 ';
+    }
+    elseif ($order == 'date') {
+      $sorting['date'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = 4;
+      $class_date .= 'sorting_1 ';
+    }
+    elseif ($order == 'status') {
+      $sorting['status'] = is_null($sort) ? 'ASC' : $sort;
+      $order_column = 5;
+      $class_status .= 'sorting_1 ';
+    }
+    elseif ($order == 'step') {
+      $sorting['step'] = is_null($sort) ? 'ASC' : $sort;
+      $order_column = 6;
+      $class_step .= 'sorting_1 ';
+    }
+    elseif ($order == 'submitted by') {
+      $sorting['submitted_by'] = is_null($sort) ? 'ASC' : $sort;
+      $order_column = 7;
+      $class_submitted_by .= 'sorting_1 ';
+    }
+    elseif ($order == 'submitted on') {
+      $sorting['submitted_on'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = 8;
+      $class_submitted_on .= 'sorting_1 ';
     }
   }
+
+  $rows_per_page = 25;
+  $options = array(
+    'sort' => $sorting,
+    'join' => TRUE,
+    'start' => $page_number * $rows_per_page,
+    'limit' => $rows_per_page,
+    'count' => TRUE,
+  );
+
 
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
-  $items = mfcs_request_load_listing(NULL, FALSE, $page_number * $rows_per_page, $rows_per_page, $sorting);
+  $items_returned = mfcs_request_load_listing(array(), array('start' => $options['start'], 'limit' => $rows_per_page, 'sort' => $sort, 'order' => $order));
+
+  $count = 0;
+  if (isset($items_returned['count'])) {
+    $count = $items_returned['count'];
+  }
+
+  // do not provide pages when the page number would bring the user beyond the available items.
+  if ($options['start'] > $count) {
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  $items = array();
+  if (isset($items_returned['results']) && is_array($items_returned['results'])) {
+    $items = $items_returned['results'];
+  }
+
 
   $rows = array();
   $total_results = count($items);

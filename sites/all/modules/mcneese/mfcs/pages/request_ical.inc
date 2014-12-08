@@ -55,20 +55,26 @@ function mfcs_request_ical_year_0_page($year = NULL) {
 
   $search = mfcs_miscellaneous_generate_requests_by_date_search($year_start, $year_stop);
 
-  $sorting = array(
-    'order' => 'date',
-    'sort' => 'ASC',
-  );
+  $sort = 'ASC';
+  $order = 'date';
 
   $extra_fields = mfcs_request_ical_generate_extra_fields();
 
-  $results = mfcs_request_load_listing($search, FALSE, 0, 0, $sorting, MFCS_REVIEW_RESTRICTION_NONE, $extra_fields);
+  $items_returned = mfcs_request_load_listing(array(), array('search' => $search, 'limit' => 0, 'sort' => $sort, 'order' => $order, 'extra_fields' => $extra_fields));
+
+  $items = array();
+  if (isset($items_returned['results']) && is_array($items_returned['results'])) {
+    $items = $items_returned['results'];
+  }
+  elseif ($items_returned === FALSE) {
+    $items = FALSE;
+  }
 
   $ical = FALSE;
-  if ($results !== FALSE) {
+  if ($items !== FALSE) {
     mfcs_include(MFCS_INCLUDE_ICAL);
 
-    $ical = mfcs_ical_generate($results, $year_start, $year_stop);
+    $ical = mfcs_ical_generate($items, $year_start, $year_stop);
   }
 
   if ($ical === FALSE) {
@@ -200,20 +206,26 @@ function mfcs_request_ical_month_0_page($year = NULL, $month = NULL) {
 
   $search = mfcs_miscellaneous_generate_requests_by_date_search($absolute_start, $absolute_stop);
 
-  $sorting = array(
-    'order' => 'date',
-    'sort' => 'ASC',
-  );
+  $sort = 'ASC';
+  $order = 'date';
 
   $extra_fields = mfcs_request_ical_generate_extra_fields();
 
-  $results = mfcs_request_load_listing($search, FALSE, 0, 0, $sorting, MFCS_REVIEW_RESTRICTION_NONE, $extra_fields);
+  $items_returned = mfcs_request_load_listing(array(), array('search' => $search, 'limit' => 0, 'sort' => $sort, 'order' => $order, 'extra_fields' => $extra_fields));
+
+  $items = array();
+  if (isset($items_returned['results']) && is_array($items_returned['results'])) {
+    $items = $items_returned['results'];
+  }
+  elseif ($items_returned === FALSE) {
+    $items = FALSE;
+  }
 
   $ical = FALSE;
-  if ($results !== FALSE) {
+  if ($items !== FALSE) {
     mfcs_include(MFCS_INCLUDE_ICAL);
 
-    $ical = mfcs_ical_generate($results, $absolute_start, $absolute_stop);
+    $ical = mfcs_ical_generate($items, $absolute_start, $absolute_stop);
   }
 
   if ($ical === FALSE) {
@@ -323,20 +335,26 @@ function mfcs_request_ical_day_0_page($year = NULL, $month = NULL, $day = NULL) 
 
   $search = mfcs_miscellaneous_generate_requests_by_date_search($day_start, $day_stop);
 
-  $sorting = array(
-    'order' => 'date',
-    'sort' => 'ASC',
-  );
+  $sort = 'ASC';
+  $order = 'date';
 
   $extra_fields = mfcs_request_ical_generate_extra_fields();
 
-  $results = mfcs_request_load_listing($search, FALSE, 0, 0, $sorting, MFCS_REVIEW_RESTRICTION_NONE, $extra_fields);
+  $items_returned = mfcs_request_load_listing(array(), array('search' => $search, 'limit' => 0, 'sort' => $sort, 'order' => $order, 'extra_fields' => $extra_fields));
+
+  $items = array();
+  if (isset($items_returned['results']) && is_array($items_returned['results'])) {
+    $items = $items_returned['results'];
+  }
+  elseif ($items_returned === FALSE) {
+    $items = FALSE;
+  }
 
   $ical = FALSE;
-  if ($results !== FALSE) {
+  if ($items !== FALSE) {
     mfcs_include(MFCS_INCLUDE_ICAL);
 
-    $ical = mfcs_ical_generate($results, $day_start, $day_stop);
+    $ical = mfcs_ical_generate($items, $day_start, $day_stop);
   }
 
   if ($ical === FALSE) {

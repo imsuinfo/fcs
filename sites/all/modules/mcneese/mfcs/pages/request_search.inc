@@ -978,12 +978,29 @@ function mfcs_request_search_0_form_submit($form, &$form_state) {
     $per_page = $form['form']['per_page']['#value'];
     $start = $form['form']['simple_search-page_number']['#value'] * $per_page;
 
-    $form_state['simple_search-results'] = mfcs_request_load_listing($search, $sensitive, $start, $per_page);
+    $items_returned = mfcs_request_load_listing(array(), array('search' => $search, 'sensitive' => $sensitive, 'start' => $start, 'limit' => $per_page));
+
+    $items = array();
+    $count = NULL;
+    if (isset($items_returned['results']) && is_array($items_returned['results'])) {
+      $items = $items_returned['results'];
+
+      if (isset($items_returned['count'])) {
+        $count = $items_returned['count'];
+      }
+    }
+    else {
+      $items = FALSE;
+    }
+
+    $form_state['simple_search-results'] = $items;
+    $form_state['simple_search-count'] = $count;
     $form_state['simple_search-search'] = $search;
     $form_state['simple_search-sensitive'] = $sensitive;
   }
   elseif ($clicked_id == 'search-simple-submit-clear') {
     unset($form_state['simple_search-results']);
+    unset($form_state['simple_search-count']);
     unset($form_state['simple_search-search']);
     unset($form_state['values']['simple']['text']);
     unset($form_state['input']['simple']['text']);
@@ -998,7 +1015,23 @@ function mfcs_request_search_0_form_submit($form, &$form_state) {
     $per_page = $form['form']['per_page']['#value'];
     $start = $previous_page * $per_page;
 
-    $form_state['simple_search-results'] = mfcs_request_load_listing($search, $sensitive, $start, $per_page);
+    $items_returned = mfcs_request_load_listing(array(), array('search' => $search, 'sensitive' => $sensitive, 'start' => $start, 'limit' => $per_page));
+
+    $items = array();
+    $count = NULL;
+    if (isset($items_returned['results']) && is_array($items_returned['results'])) {
+      $items = $items_returned['results'];
+
+      if (isset($items_returned['count'])) {
+        $count = $items_returned['count'];
+      }
+    }
+    else {
+      $items = FALSE;
+    }
+
+    $form_state['simple_search-results'] = $items;
+    $form_state['simple_search-count'] = $count;
     $form_state['simple_search-page_number'] = $previous_page;
     $form_state['simple_search-search'] = $search;
     $form_state['simple_search-sensitive'] = $sensitive;
@@ -1011,7 +1044,23 @@ function mfcs_request_search_0_form_submit($form, &$form_state) {
     $per_page = $form['form']['per_page']['#value'];
     $start = $next_page * $per_page;
 
-    $form_state['simple_search-results'] = mfcs_request_load_listing($search, $sensitive, $start, $per_page);
+    $items_returned = mfcs_request_load_listing(array(), array('search' => $search, 'sensitive' => $sensitive, 'start' => $start, 'limit' => $per_page));
+
+    $items = array();
+    $count = NULL;
+    if (isset($items_returned['results']) && is_array($items_returned['results'])) {
+      $items = $items_returned['results'];
+
+      if (isset($items_returned['count'])) {
+        $count = $items_returned['count'];
+      }
+    }
+    else {
+      $items = FALSE;
+    }
+
+    $form_state['simple_search-results'] = $items;
+    $form_state['simple_search-count'] = $count;
     $form_state['simple_search-page_number'] = $next_page;
     $form_state['simple_search-search'] = $search;
     $form_state['simple_search-sensitive'] = $sensitive;
@@ -1024,7 +1073,23 @@ function mfcs_request_search_0_form_submit($form, &$form_state) {
     $per_page = $form['form']['per_page']['#value'];
     $start = $previous_page * $per_page;
 
-    $form_state['advanced_search-results'] = mfcs_request_load_listing($search, $sensitive, $start, $per_page);
+    $items_returned = mfcs_request_load_listing(array(), array('search' => $search, 'sensitive' => $sensitive, 'start' => $start, 'limit' => $per_page));
+
+    $items = array();
+    $count = NULL;
+    if (isset($items_returned['results']) && is_array($items_returned['results'])) {
+      $items = $items_returned['results'];
+
+      if (isset($items_returned['count'])) {
+        $count = $items_returned['count'];
+      }
+    }
+    else {
+      $items = FALSE;
+    }
+
+    $form_state['advanced_search-results'] = $items;
+    $form_state['advanced_search-count'] = $count;
     $form_state['advanced_search-page_number'] = $previous_page;
     $form_state['advanced_search-search'] = $search;
     $form_state['advanced_search-sensitive'] = $sensitive;
@@ -1037,7 +1102,23 @@ function mfcs_request_search_0_form_submit($form, &$form_state) {
     $per_page = $form['form']['per_page']['#value'];
     $start = $next_page * $per_page;
 
-    $form_state['advanced_search-results'] = mfcs_request_load_listing($search, $sensitive, $start, $per_page);
+    $items_returned = mfcs_request_load_listing(array(), array('search' => $search, 'sensitive' => $sensitive, 'start' => $start, 'limit' => $per_page));
+
+    $items = array();
+    $count = NULL;
+    if (isset($items_returned['results']) && is_array($items_returned['results'])) {
+      $items = $items_returned['results'];
+
+      if (isset($items_returned['count'])) {
+        $count = $items_returned['count'];
+      }
+    }
+    else {
+      $items = FALSE;
+    }
+
+    $form_state['advanced_search-results'] = $items;
+    $form_state['advanced_search-count'] = $count;
     $form_state['advanced_search-page_number'] = $next_page;
     $form_state['advanced_search-search'] = $search;
     $form_state['advanced_search-sensitive'] = $sensitive;
@@ -1054,6 +1135,7 @@ function mfcs_request_search_0_form_submit($form, &$form_state) {
 
     if (empty($form_state['values']['advanced']['targets'])) {
       $form_state['advanced_search-results'] = array();
+      $form_state['advanced_search-count'] = NULL;
       $form_state['advanced_search-search'] = array();
       $form_state['advanced_search-sensitive'] = $sensitive;
     }
@@ -1061,7 +1143,23 @@ function mfcs_request_search_0_form_submit($form, &$form_state) {
       $search = mfcs_request_search_0_form_build_search_targets($structure, $form_state['values']['advanced']['targets'], 0);
 
       if (is_array($search)) {
-        $form_state['advanced_search-results'] = mfcs_request_load_listing($search, $sensitive, $start, $per_page);
+        $items_returned = mfcs_request_load_listing(array(), array('search' => $search, 'sensitive' => $sensitive, 'start' => $start, 'limit' => $per_page));
+
+        $items = array();
+        $count = NULL;
+        if (isset($items_returned['results']) && is_array($items_returned['results'])) {
+          $items = $items_returned['results'];
+
+          if (isset($items_returned['count'])) {
+            $count = $items_returned['count'];
+          }
+        }
+        else {
+          $items = FALSE;
+        }
+
+        $form_state['advanced_search-results'] = $items;
+        $form_state['advanced_search-count'] = $count;
         $form_state['advanced_search-search'] = $search;
         $form_state['advanced_search-sensitive'] = $sensitive;
       }
@@ -1069,6 +1167,7 @@ function mfcs_request_search_0_form_submit($form, &$form_state) {
   }
   elseif ($clicked_id == 'search-advanced-submit-clear') {
     unset($form_state['advanced_search-results']);
+    unset($form_state['advanced_search-count']);
     unset($form_state['advanced_search-search']);
     unset($form_state['values']['advanced']);
     unset($form_state['input']['advanced']);
@@ -1077,6 +1176,7 @@ function mfcs_request_search_0_form_submit($form, &$form_state) {
   }
   elseif ($clicked_id == 'search-advanced-submit-reset') {
     unset($form_state['advanced_search-results']);
+    unset($form_state['advanced_search-count']);
     unset($form_state['advanced_search-search']);
     $form_state['advanced_search-clear'] = TRUE;
 

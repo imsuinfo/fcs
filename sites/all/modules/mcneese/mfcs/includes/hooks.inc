@@ -355,6 +355,19 @@ function mfcs_hook_menu() {
     'tab_root' => 'requests',
   );
 
+  $items['requests/review-0/ajax'] = array(
+    'title' => "",
+    'page callback' => 'mfcs_ajax_review_0',
+    'page arguments' => array(),
+    'file' => 'ajax.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('review'),
+    'type' => MENU_CALLBACK,
+    'tab_parent' => 'requests/review-0',
+    'tab_root' => 'requests/review-0',
+  );
+
   $items['requests/delete-0/%'] = array(
     'title' => "Delete Request",
     'description' => "Delete Request",
@@ -602,6 +615,19 @@ function mfcs_hook_menu() {
     'tab_root' => 'requests',
   );
 
+  $items['requests/list-0/ajax'] = array(
+    'title' => "",
+    'page callback' => 'mfcs_ajax_list_0',
+    'page arguments' => array(),
+    'file' => 'ajax.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('list'),
+    'type' => MENU_CALLBACK,
+    'tab_parent' => 'requests/list-0',
+    'tab_root' => 'requests/list-0',
+  );
+
   $items['requests/search-0'] = array(
     'title' => "Search Requests",
     'description' => "Search Requests",
@@ -613,6 +639,32 @@ function mfcs_hook_menu() {
     'access arguments' => array('search'),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
+  );
+
+  $items['requests/search-0/ajax/simple/%'] = array(
+    'title' => "",
+    'page callback' => 'mfcs_ajax_search_simple_0',
+    'page arguments' => array(4),
+    'file' => 'ajax.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('search'),
+    'type' => MENU_CALLBACK,
+    'tab_parent' => 'requests/search-0',
+    'tab_root' => 'requests/search-0',
+  );
+
+  $items['requests/search-0/ajax/advanced/%'] = array(
+    'title' => "",
+    'page callback' => 'mfcs_ajax_search_simple_0',
+    'page arguments' => array(4),
+    'file' => 'ajax.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('search'),
+    'type' => MENU_CALLBACK,
+    'tab_parent' => 'requests/search-0',
+    'tab_root' => 'requests/search-0',
   );
 
   $items['requests/view-0/%'] = array(

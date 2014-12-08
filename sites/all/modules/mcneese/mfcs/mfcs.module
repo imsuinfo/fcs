@@ -5233,71 +5233,126 @@ function mfcs_display_room_unavailable_message() {
  *
  * This can be used as a very simple and straightforward search.
  *
- * This will load a total results of $limit +1 to communicate when a given
- * result set has more results than the limit. This should help with
- * implementing next and previous options.
+ * @param array $conditions
+ *   An array containing select conditions, such as:
+ *   - 'mr.id': reviewer id.
+ *   - 'mr.user_id': user id (uid).
+ *   - 'mr.request_classification': request classification.
+ *   - 'mr.review_step': request review step.
+ *   - 'mr.reviewer_classification': reviewer classification.
+ *   The each key may be an array such as:
+ *     - array('value' => '1%', 'operator' => 'LIKE')
+ *     - array('value' => array(0, 1, 3), 'operator' => 'IN')
+ *     - array('value' => 1, '=>')
+ *   This also supports recursive and/or grouping in the following format:
+ *   'and_{unique_id}', 'or_{unique_id}' where {unique_id} is some arbitrary
+ *    string or number to ensure that the row is unique.
+ * @param array $options
+ *   (optional) When specified, representing an array containing:
+ *     'join': When TRUE, the drupal user table is joined to the reviewers
+ *             table. Only select portions of the user table is joined. This
+ *             also joins custom field tables for user first and last name.
+ *     'start': The starting location.
+ *     'limit': The number of rows to select, aka: length. If -1 is provided,
+ *              then this will become a count query instead of a listing.
+ *     'count': If TRUE, an unfiltered count query is processed.
+ *     'results': If FALSE, the main query is not performed.
+ *     'search': A special-case/reserved variable for simplified searching.
+ *               When not NULL, this is either the string of text to search for
+ *               or an array of possible field values.
+ *     'sort': When specified, represents the database sorting.
+ *     'order': When specified, represents the sorting order, 'asc' or 'desc'.
+ *     'sensitive': TRUE for case sensitive and FALSE otherwise.
+ *     'review_restrictions': The review restrictions to use.
+ *     'extra_fields': An array of extra fields that should be loaded.
+ *                     The array will have a key of the table name and a value
+ *                     of an array. The value array will contain an 'alias'
+ *                     string, an 'on' string, a 'join' string, and a 'columns'
+ *                     array.
  *
- * @param string|null|array $search
- *   (optional) When not NULL, this is either the string of text to search for.
- *   or an array of possible field values.
- * @param bool $sensitive
- *   (optional) TRUE for case sensitive and FALSE otherwise.
- * @param int $start
- *   (optional) The starting range.
- * @param bool $limit
- *   (optional) The total number of search results to load.
- *   If -1 is provided, then this will become a count query instead of a listing.
- * @param array $sorting
- *   (optional) Table sort options.
- * @param int $review_restrictions
- *   (optional) The review restrictions to use.
- * @param array $extra_fields
- *   (optional) An array of extra fields that should be loaded.
- *   The array will have a key of the table name and a value of an array.
- *   The value array will contain an 'alias' string, an 'on' string, a 'join'
- *   string, and a 'columns' array.
- *
- * @return array|FALSE
- *   An array of all items found or FALSE on error.
+ * @return array|false
+ *   An array of containing the following:
+ *   - 'results': database objects representing the items.
+ *   - 'count': total results loaded before a range limit is applied.
+ *   FALSE is returned on error.
  */
-function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 0, $limit = 20, $sorting = array(), $review_restrictions = MFCS_REVIEW_RESTRICTION_NONE, $extra_fields = array()) {
-  if (!is_null($search) && !is_string($search) && !is_array($search)) {
-    cf_error::invalid_string('search');
+function mfcs_request_load_listing($conditions = array(), $options = array()) {
+  if (!is_array($conditions)) {
+    cf_error::invalid_array('conditions');
     return FALSE;
   }
 
-  if (is_array($search) && empty($search)) {
-    $search = NULL;
-  }
-
-  if (!is_bool($sensitive)) {
-    cf_error::invalid_bool('sensitive');
+  if (!is_array($options)) {
+    cf_error::invalid_array('options');
     return FALSE;
   }
 
-  if (!cf_is_integer($start) || $start < 0) {
-    cf_error::invalid_integer('start');
-    return FALSE;
+  $join = NULL;
+  if (isset($options['join']) && is_bool($options['join'])) {
+    $join = $options['join'];
   }
 
-  if (!cf_is_integer($limit) || $limit < -1) {
-    cf_error::invalid_integer('limit');
-    return FALSE;
+  $start = 0;
+  if (isset($options['start']) && is_numeric($options['start']) && $start >= 0) {
+    $start = $options['start'];
   }
 
-  if (!is_array($sorting)) {
-    cf_error::invalid_array('sorting');
-    return FALSE;
+  $limit = 20;
+  if (isset($options['limit']) && is_numeric($options['limit']) && $limit >= -1) {
+    $limit = $options['limit'];
   }
 
-  if (!cf_is_integer($review_restrictions)) {
-    cf_error::invalid_integer('review_restrictions');
-    return FALSE;
+  $count = FALSE;
+  if (isset($options['count']) && is_bool($options['count'])) {
+    $count = $options['count'];
   }
 
-  if (!is_array($extra_fields)) {
-    cf_error::invalid_array('extra_fields');
-    return FALSE;
+  $sort = NULL;
+  if (isset($options['sort']) && is_array($options['sort'])) {
+    $sort = $options['sort'];
+  }
+
+  $order = NULL;
+  if (isset($options['order']) && is_array($options['order'])) {
+    $order = $options['order'];
+  }
+
+  $results = TRUE;
+  if (isset($options['results']) && is_bool($options['results'])) {
+    $results = $options['results'];
+  }
+
+  $return = array(
+    'results' => NULL,
+    'count' => NULL,
+  );
+
+  if (!$results) {
+    $return['results'] = array();
+  }
+
+  $search = NULL;
+  if (isset($options['search']) && (is_string($options['search']) || is_array($options['search']))) {
+    $search = $options['search'];
+
+    if (is_array($search) && empty($search)) {
+      $search = NULL;
+    }
+  }
+
+  $sensitive = FALSE;
+  if (isset($options['sensitive']) && is_bool($options['sensitive'])) {
+    $sensitive = $options['sensitive'];
+  }
+
+  $review_restrictions = MFCS_REVIEW_RESTRICTION_NONE;
+  if (isset($options['review_restrictions'])) {
+    $review_restrictions = $options['review_restrictions'];
+  }
+
+  $extra_fields = array();
+  if (isset($options['extra_fields']) && is_array($options['extra_fields'])) {
+    $extra_fields = $options['extra_fields'];
   }
 
   $count = FALSE;
@@ -5319,20 +5374,6 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
     $like = 'LIKE';
   }
 
-  // load sorting information
-  $order = NULL;
-  if (isset($sorting['order'])) {
-    $order = strtolower($sorting['order']);
-  }
-
-  $sort = NULL;
-  if (isset($sorting['sort'])) {
-    $sort = strtoupper($sorting['sort']);
-
-    if ($sort != 'ASC' && $sort != 'DESC') {
-      $sort = NULL;
-    }
-  }
 
   // load search options
   if (is_null($search)) {
@@ -5343,7 +5384,7 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
 
     // don't search when there is nothing to search for.
     if (empty($fixed_text)) {
-      return array();
+      return $return;
     }
   }
 
@@ -5701,7 +5742,7 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
 
 
     if ($count) {
-      $result = $query->execute()->fetchField();
+      $return['results'] = $query->execute()->fetchField();
 
       return $result;
     }
@@ -5754,7 +5795,8 @@ function mfcs_request_load_listing($search = NULL, $sensitive = FALSE, $start = 
     return FALSE;
   }
 
-  return $found;
+  $return['results'] = $found;
+  return $return;
 }
 
 /**

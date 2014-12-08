@@ -197,16 +197,16 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
   if (is_null($order)) {
     $sorting['reviewer_classification_name'] = 'ASC';
     $order_column = 1;
-    $class_classification = 'sorting_1';
+    $class_classification .= 'sorting_1 ';
   }
   else {
     if ($order == 'id') {
       $sorting['id'] = is_null($sort) ? 'DESC' : $sort;
       $order_column = 0;
-      $class_id = 'sorting_1';
+      $class_id .= 'sorting_1 ';
     }
     elseif ($order == 'reviewer classification') {
-      $sorting['reviewer_classification_name'] = is_null($sort) ? 'DESC' : $sort;
+      $sorting['reviewer_classification_name'] = is_null($sort) ? 'ASC' : $sort;
       $order_column = 1;
       $class_classification .= 'sorting_1 ';
     }
@@ -216,17 +216,17 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
       $class_account_id .= 'sorting_1 ';
     }
     elseif ($order == 'account') {
-      $sorting['name'] = is_null($sort) ? 'DESC' : $sort;
+      $sorting['name'] = is_null($sort) ? 'ASC' : $sort;
       $order_column = 3;
       $class_account .= 'sorting_1 ';
     }
     elseif ($order == 'first name') {
-      $sorting['first_name'] = is_null($sort) ? 'DESC' : $sort;
+      $sorting['first_name'] = is_null($sort) ? 'ASC' : $sort;
       $order_column = 4;
       $class_first_name .= 'sorting_1 ';
     }
     elseif ($order == 'last name') {
-      $sorting['last_name'] = is_null($sort) ? 'DESC' : $sort;
+      $sorting['last_name'] = is_null($sort) ? 'ASC' : $sort;
       $order_column = 5;
       $class_last_name .= 'sorting_1 ';
     }

@@ -236,10 +236,15 @@ function mfcs_dashboard_page() {
       $search['field_dates-date-start-0']['search'] = $current_date;
       $search['field_dates-date-stop-0']['search'] = $next_date;
 
-      $results = mfcs_request_load_listing($search, FALSE, 0, $rows_per_day);
+      $items_returned = mfcs_request_load_listing(array(), array('search' => $search, 'limit' => $rows_per_day));
 
-      if (!empty($results)) {
-        foreach ($results as $item) {
+      $items = array();
+      if (isset($items_returned['results']) && is_array($items_returned['results'])) {
+        $items = $items_returned['results'];
+      }
+
+      if (!empty($items)) {
+        foreach ($items as $item) {
           foreach ($item->date as $delta => $date) {
             if ($date < $current_date || $date >= $next_date) {
               continue;

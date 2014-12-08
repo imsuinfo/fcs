@@ -102,10 +102,8 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
-  $sorting = array(
-    'order' => 'date',
-    'sort' => 'ASC',
-  );
+  $sort = 'ASC';
+  $order = 'date';
 
   // load rooms and buildings separately to avoid performing joining on tables.
   $rooms = mfcs_load_rooms();
@@ -128,10 +126,15 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
     $search['field_dates-date-start-0']['search'] = $current_date;
     $search['field_dates-date-stop-0']['search'] = $next_date;
 
-    $results = mfcs_request_load_listing($search, FALSE, 0, $rows_per_day);
+    $items_returned = mfcs_request_load_listing(array(), array('search' => $search, 'limit' => $rows_per_day));
 
-    if (!empty($results)) {
-      foreach ($results as $item) {
+    $items = array();
+    if (isset($items_returned['results']) && is_array($items_returned['results'])) {
+      $items = $items_returned['results'];
+    }
+
+    if (!empty($items)) {
+      foreach ($items as $item) {
         foreach ($item->date as $delta => $date) {
           if ($date < $current_date || $date >= $next_date) {
             continue;
@@ -295,10 +298,8 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
-  $sorting = array(
-    'order' => 'date',
-    'sort' => 'ASC',
-  );
+  $sort = 'ASC';
+  $order = 'date';
 
   // load rooms and buildings separately to avoid performing joining on tables.
   $rooms = mfcs_load_rooms();
@@ -312,7 +313,12 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
     $buildings = array();
   }
 
-  $results = mfcs_request_load_listing($search, FALSE, 0, 0, $sorting);
+  $items_returned = mfcs_request_load_listing(array(), array('search' => $search, 'limit' => 0, 'sort' => $sort, 'order' => $order));
+
+  $items = array();
+  if (isset($items_returned['results']) && is_array($items_returned['results'])) {
+    $items = $items_returned['results'];
+  }
 
   $rows = array(
     'all_day' => array(),
@@ -328,8 +334,8 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
     $current_time = strtotime($range_interval, $current_time);
   } while ($current_time < $day_stop);
 
-  if (!empty($results)) {
-    foreach ($results as $item) {
+  if (!empty($items)) {
+    foreach ($items as $item) {
       foreach ($item->date as $delta => $date) {
         if ($date < $day_start || $date >= $day_stop) {
           continue;
