@@ -175,6 +175,7 @@ function mcneese_libraries_theme_table($variables, $datatable_settings = array()
 
       $array_settings = array(
         'oColVis',
+        'oLanguage',
       );
 
       $datatable_js = '(function ($) {' . "\n";
@@ -241,6 +242,28 @@ function mcneese_libraries_theme_table($variables, $datatable_settings = array()
         }
       }
 
+      if (array_key_exists('order', $datatable_settings)) {
+        if (is_array($datatable_settings['order'])) {
+          $js_settings = array();
+          foreach ($datatable_settings['order'] as $key => $value) {
+            if (!is_numeric($key)) continue;
+
+            if ($value == 'asc' || $value == 'desc') {
+              $js_settings[] = '[ ' . intval($key) . ', "' . $value . '" ]';
+            }
+          }
+
+          if (count($js_settings) == 1) {
+            $datatable_js_settings[] = 'order: ' . "\n" . implode(', ', $js_settings) . "\n";
+          }
+          else {
+            $datatable_js_settings[] = 'order: [' . "\n" . implode(', ', $js_settings) . "\n]\n";
+          }
+
+          unset($js_settings);
+        }
+      }
+
       foreach ($inline_array_settings as $inline_array_setting) {
         if (array_key_exists($inline_array_setting, $datatable_settings) && is_array($datatable_settings[$inline_array_setting])) {
           $js_settings = array();
@@ -250,7 +273,7 @@ function mcneese_libraries_theme_table($variables, $datatable_settings = array()
               foreach ($value as $k => $v) {
                 if ($k == 'targets' && $inline_array_setting == 'columnDefs') {
                   if (is_array($v)) {
-                    $d_j_s[] = '[ ' . implode(', ', $v) . ' ]';
+                    $d_j_s[] = '"' . $k . '": [ ' . implode(', ', $v) . ' ]';
                   }
                 }
                 elseif (is_string($v)) {

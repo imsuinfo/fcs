@@ -55,12 +55,13 @@ function mfcs_request_ical_year_0_page($year = NULL) {
 
   $search = mfcs_miscellaneous_generate_requests_by_date_search($year_start, $year_stop);
 
-  $sort = 'ASC';
-  $order = 'date';
+  $options = array(
+    'limit' => 0,
+    'sort' => array('date' => 'ASC'),
+    'extra_fields' => mfcs_request_ical_generate_extra_fields(),
+  );
 
-  $extra_fields = mfcs_request_ical_generate_extra_fields();
-
-  $items_returned = mfcs_request_load_listing(array(), array('search' => $search, 'limit' => 0, 'sort' => $sort, 'order' => $order, 'extra_fields' => $extra_fields));
+  $items_returned = mfcs_request_load_listing($search, $options);
 
   $items = array();
   if (isset($items_returned['results']) && is_array($items_returned['results'])) {
@@ -206,12 +207,13 @@ function mfcs_request_ical_month_0_page($year = NULL, $month = NULL) {
 
   $search = mfcs_miscellaneous_generate_requests_by_date_search($absolute_start, $absolute_stop);
 
-  $sort = 'ASC';
-  $order = 'date';
+  $options = array(
+    'limit' => 0,
+    'sort' => array('date' => 'ASC'),
+    'extra_fields' => mfcs_request_ical_generate_extra_fields(),
+  );
 
-  $extra_fields = mfcs_request_ical_generate_extra_fields();
-
-  $items_returned = mfcs_request_load_listing(array(), array('search' => $search, 'limit' => 0, 'sort' => $sort, 'order' => $order, 'extra_fields' => $extra_fields));
+  $items_returned = mfcs_request_load_listing($search, $options);
 
   $items = array();
   if (isset($items_returned['results']) && is_array($items_returned['results'])) {
@@ -335,12 +337,13 @@ function mfcs_request_ical_day_0_page($year = NULL, $month = NULL, $day = NULL) 
 
   $search = mfcs_miscellaneous_generate_requests_by_date_search($day_start, $day_stop);
 
-  $sort = 'ASC';
-  $order = 'date';
+  $options = array(
+    'limit' => 0,
+    'sort' => array('date' => 'ASC'),
+    'extra_fields' => mfcs_request_ical_generate_extra_fields(),
+  );
 
-  $extra_fields = mfcs_request_ical_generate_extra_fields();
-
-  $items_returned = mfcs_request_load_listing(array(), array('search' => $search, 'limit' => 0, 'sort' => $sort, 'order' => $order, 'extra_fields' => $extra_fields));
+  $items_returned = mfcs_request_load_listing($search, $options);
 
   $items = array();
   if (isset($items_returned['results']) && is_array($items_returned['results'])) {

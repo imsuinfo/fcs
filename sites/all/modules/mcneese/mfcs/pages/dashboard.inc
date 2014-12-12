@@ -228,7 +228,6 @@ function mfcs_dashboard_page() {
 
     $rows = array();
     $rows_count = 0;
-    $rows_per_day = 5;
     $current_date = $absolute_start;
     while ($current_date < $absolute_stop) {
       $next_date = strtotime('+1 days', $current_date);
@@ -236,7 +235,12 @@ function mfcs_dashboard_page() {
       $search['field_dates-date-start-0']['search'] = $current_date;
       $search['field_dates-date-stop-0']['search'] = $next_date;
 
-      $items_returned = mfcs_request_load_listing(array(), array('search' => $search, 'limit' => $rows_per_day));
+      $options = array(
+        'limit' => 5,
+        'sort' => array('date' => 'ASC'),
+      );
+
+      $items_returned = mfcs_request_load_listing($search, $options);
 
       $items = array();
       if (isset($items_returned['results']) && is_array($items_returned['results'])) {
@@ -273,7 +277,7 @@ function mfcs_dashboard_page() {
               }
 
               $month_day_count = count($rows[$month_day]);
-              if ($month_day_count == $rows_per_day) {
+              if ($options['limit'] > 0 && $month_day_count == $options['limit']) {
                 $year = date('Y', $date);
                 $month_name = date('F', $date);
                 $month_name_lower = strtolower($month_name);

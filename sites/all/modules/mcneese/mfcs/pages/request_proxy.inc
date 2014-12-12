@@ -74,53 +74,53 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = 0) {
   $sorting = array();
   if (is_null($order)) {
     $sorting['id'] = 'ASC';
-    $order_column = 0;
+    $order_column = array(0 => strtolower($sorting['id']));
     $class_id .= 'sorting_1 ';
   }
   else {
     if ($order == 'id') {
       $sorting['id'] = is_null($sort) ? 'DESC' : $sort;
-      $order_column = 0;
+      $order_column = array(0 => strtolower($sorting[$order]));
       $class_id .= 'sorting_1 ';
     }
     elseif ($order == 'proxy account id') {
       $sorting['proxy_account_id'] = is_null($sort) ? 'DESC' : $sort;
-      $order_column = 1;
+      $order_column = array(1 => strtolower($sorting[$order]));
       $class_proxy_account_id .= 'sorting_1 ';
     }
     elseif ($order == 'proxy account') {
       $sorting['proxy_account'] = is_null($sort) ? 'DESC' : $sort;
-      $order_column = 2;
+      $order_column = array(2 => strtolower($sorting[$order]));
       $class_proxy_account .= 'sorting_1 ';
     }
     elseif ($order == 'proxy first name') {
       $sorting['proxy_first_name'] = is_null($sort) ? 'DESC' : $sort;
-      $order_column = 3;
+      $order_column = array(3 => strtolower($sorting[$order]));
       $class_proxy_first_name .= 'sorting_1 ';
     }
     elseif ($order == 'proxy last name') {
       $sorting['proxy_last_name'] = is_null($sort) ? 'DESC' : $sort;
-      $order_column = 4;
+      $order_column = array(4 => strtolower($sorting[$order]));
       $class_proxy_last_name .= 'sorting_1 ';
     }
     elseif ($order == 'account id') {
       $sorting['account_id'] = is_null($sort) ? 'DESC' : $sort;
-      $order_column = 5;
+      $order_column = array(5 => strtolower($sorting[$order]));
       $class_account_id .= 'sorting_1 ';
     }
     elseif ($order == 'account') {
       $sorting['account'] = is_null($sort) ? 'DESC' : $sort;
-      $order_column = 6;
+      $order_column = array(6 => strtolower($sorting[$order]));
       $class_account .= 'sorting_1 ';
     }
     elseif ($order == 'first name') {
       $sorting['first_name'] = is_null($sort) ? 'DESC' : $sort;
-      $order_column = 7;
+      $order_column = array(7 => strtolower($sorting[$order]));
       $class_first_name .= 'sorting_1 ';
     }
     elseif ($order == 'last name') {
       $sorting['last_name'] = is_null($sort) ? 'DESC' : $sort;
-      $order_column = 8;
+      $order_column = array(8 => strtolower($sorting[$order]));
       $class_last_name .= 'sorting_1 ';
     }
   }
@@ -236,7 +236,6 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = 0) {
   $proxy_list['empty'] = t("There are no users assigned to proxy as a venue coordinator.");
 
   $datatable_settings = array(
-    'sort' => strtolower($sort),
     'order' => $order_column,
     #'stateSave' => TRUE,
     'lengthMenu' => array(
@@ -266,13 +265,16 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = 0) {
     'displayStart' => $options['start'],
     'pageLength' => $rows_per_page,
     'dom' => 'lfCrtip',
-    'KeyTable' => TRUE,
+    'KeyTable' => FALSE,
     'oColVis' => array(
       'buttonText' => '"Show / Hide"',
     ),
+    'oLanguage' => array(
+      'sSearch' => '"Filter: "',
+    ),
+    'searchDelay' => 1200,
   );
 
-  $form['proxy_list']['#markup'] = theme('table', $proxy_list);
   $navigation_top = '';
   $navigation_bottom = '';
   if ($page_number > 0) {

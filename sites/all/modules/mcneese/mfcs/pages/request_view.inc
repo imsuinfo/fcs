@@ -2694,25 +2694,6 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id, $revision_id 
         $review->reviewer_classifications = array();
         if (is_array($review_classifications)) {
           foreach ($review_classifications as $review_classification) {
-            // some classifications are not allowed in certain steps.
-            if ($review->step == MFCS_REVIEW_STEP_REVIEW || $review->step == MFCS_REVIEW_STEP_REQUIREMENTS) {
-              if ($review_classification->classification == MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR) {
-                continue;
-              }
-              elseif ($review_classification->classification == MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR_PROXY) {
-                continue;
-              }
-              elseif ($review_classification->classification == MFCS_REVIEW_CLASSIFICATION_SYSTEM_ADMINISTRATOR) {
-                continue;
-              }
-              elseif ($review_classification->classification == MFCS_REVIEW_CLASSIFICATION_MANAGER) {
-                continue;
-              }
-              elseif ($review_classification->classification == MFCS_REVIEW_CLASSIFICATION_FAILSAFE_COORDINATOR) {
-                continue;
-              }
-            }
-
             $review->reviewer_classifications[$review_classification->classification] = $review_classification->classification;
           }
         }

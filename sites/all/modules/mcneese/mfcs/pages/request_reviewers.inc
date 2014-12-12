@@ -196,38 +196,38 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
   $sorting = array();
   if (is_null($order)) {
     $sorting['reviewer_classification_name'] = 'ASC';
-    $order_column = 1;
+    $order_column = array(1 => strtolower($sorting['reviewer_classification_name']));
     $class_classification .= 'sorting_1 ';
   }
   else {
     if ($order == 'id') {
       $sorting['id'] = is_null($sort) ? 'DESC' : $sort;
-      $order_column = 0;
+      $order_column = array(0 => strtolower($sorting[$order]));
       $class_id .= 'sorting_1 ';
     }
     elseif ($order == 'reviewer classification') {
       $sorting['reviewer_classification_name'] = is_null($sort) ? 'ASC' : $sort;
-      $order_column = 1;
+      $order_column = array(1 => strtolower($sorting[$order]));
       $class_classification .= 'sorting_1 ';
     }
     elseif ($order == 'account id') {
       $sorting['user_id'] = is_null($sort) ? 'DESC' : $sort;
-      $order_column = 2;
+      $order_column = array(2 => strtolower($sorting[$order]));
       $class_account_id .= 'sorting_1 ';
     }
     elseif ($order == 'account') {
       $sorting['name'] = is_null($sort) ? 'ASC' : $sort;
-      $order_column = 3;
+      $order_column = array(3 => strtolower($sorting[$order]));
       $class_account .= 'sorting_1 ';
     }
     elseif ($order == 'first name') {
       $sorting['first_name'] = is_null($sort) ? 'ASC' : $sort;
-      $order_column = 4;
+      $order_column = array(4 => strtolower($sorting[$order]));
       $class_first_name .= 'sorting_1 ';
     }
     elseif ($order == 'last name') {
       $sorting['last_name'] = is_null($sort) ? 'ASC' : $sort;
-      $order_column = 5;
+      $order_column = array(5 => strtolower($sorting[$order]));
       $class_last_name .= 'sorting_1 ';
     }
   }
@@ -366,10 +366,14 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
     'displayStart' => $options['start'],
     'pageLength' => $rows_per_page,
     'dom' => 'lfCrtip',
-    'KeyTable' => TRUE,
+    'KeyTable' => FALSE,
     'oColVis' => array(
       'buttonText' => '"Show / Hide"',
     ),
+    'oLanguage' => array(
+      'sSearch' => '"Filter: "',
+    ),
+    'searchDelay' => 1200,
   );
 
   $navigation_top = '';

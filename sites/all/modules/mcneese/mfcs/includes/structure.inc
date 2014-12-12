@@ -1956,13 +1956,20 @@ function mfcs_get_request_field_information_type($form, &$form_state, &$fields, 
 
     $type_options = mfcs_get_request_type_list_options('select');
 
-    // quick meetings can only be used by venue coordinators.
-    if (!empty($fields['venue_coordinator']['user_id'][0]['#value']) && !empty($form['form']['user']['#value']->uid)) {
-      if ($fields['venue_coordinator']['user_id'][0]['#value'] != $form['form']['user']['#value']->uid) {
-        unset($type_options[MFCS_REQUEST_TYPE_QUICK_MEETING]);
+
+    // quick meetings can only be used by venue coordinators and their proxies.
+    $venue_coordinator_ids = array();
+    if (!empty($form['form']['user']['#value']->uid)) {
+      $proxies = mfcs_get_proxy_venue_coordinator($form['form']['user']['#value']->uid);
+      if (!empty($proxies)) {
+        $venue_coordinator_ids = $proxies;
       }
+
+      $venue_coordinator_ids[$form['form']['user']['#value']->uid] = $form['form']['user']['#value']->uid;
+      unset($proxies);
     }
-    else {
+
+    if (empty($fields['venue_coordinator']['user_id'][0]['#value']) || !in_array($fields['venue_coordinator']['user_id'][0]['#value'], $venue_coordinator_ids)) {
       unset($type_options[MFCS_REQUEST_TYPE_QUICK_MEETING]);
     }
 

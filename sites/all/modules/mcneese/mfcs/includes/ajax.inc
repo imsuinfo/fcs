@@ -52,11 +52,9 @@ function mfcs_ajax_setup_request_settings() {
     $options['limit'] = (int) $_GET['length'];
   }
 
-  // drupal SQL does not support having no limit while having a start.
-  // when limit is set to select aka (aka: -1), then do not specify a start.
+  // A length of -1 means all values, set limit to 0 which means all values.
   if ($options['limit'] < 0) {
-    $options['start'] = NULL;
-    $options['limit'] = NULL;
+    $options['limit'] = 0;
   }
 
   $timestamp = REQUEST_TIME;
@@ -152,7 +150,7 @@ function mfcs_ajax_reviewers_0_list($classification, $review_step) {
       $sorting['user_id'] = $order_direction;
     }
     elseif ($order_column == 3) {
-      $sorting['account'] = $order_direction;
+      $sorting['u.name'] = $order_direction;
     }
     elseif ($order_column == 4) {
       $sorting['first_name'] = $order_direction;
@@ -467,17 +465,37 @@ function mfcs_ajax_proxy_0_list() {
 }
 
 /**
- * Ajax function call for loading reviewers list datatable.
- *
- * @param int $classification
- *   Number representing the request classification.
- *   This is not the reviewer classification.
- * @param int $review_step
- *   Number representing the request review step.
+ * Ajax function call for loading request review list datatables.
  */
 function mfcs_ajax_list_0() {
+  mfcs_ajax_listing_0();
+}
+
+/**
+ * Ajax function call for loading request review list datatables.
+ */
+function mfcs_ajax_review_0() {
+  $options = array(
+    'review_restrictions' => MFCS_REVIEW_RESTRICTION_REVIEW,
+  );
+
+  mfcs_ajax_listing_0($options);
+}
+
+/**
+ * Ajax function call for loading request list datatables.
+ *
+ * @param array $override_options
+ *   (optional) An array containing the operations to override.
+ */
+function mfcs_ajax_listing_0($override_options = array()) {
   global $base_path;
   global $mfcs_determined;
+
+  if (!is_array($override_options)) {
+    cf_error::invalid_array('override_options');
+    $override_options = array();
+  }
 
   $url_arguments = '';
   if (!empty($mfcs_determined['complete'])) {
@@ -490,20 +508,59 @@ function mfcs_ajax_list_0() {
     $GLOBALS['devel_shutdown'] = FALSE;
   }
 
-  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+  $user = cf_current_user();
 
-  $request_classifications = mfcs_get_request_classification_list_options();
-  $review_steps = mfcs_get_review_step_list_options();
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
 
   // load ajax/json request settings.
   list($draw, $columns, $order, $options, $timestamp) = mfcs_ajax_setup_request_settings();
 
-  // @todo: resume programming below.
+  foreach ($override_options as $override_option_name => $override_option_value) {
+    $options[$override_option_name] = $override_option_value;
+  }
+
   $search = FALSE;
-  #if (isset($_GET['search']['value']) && is_string($_GET['search']['value']) && !empty($_GET['search']['value'])) {
-  #  $search = TRUE;
-  #}
+  if (isset($_GET['search']['value']) && is_string($_GET['search']['value']) && !empty($_GET['search']['value'])) {
+    $search = TRUE;
+
+    // search through the already loaded lists, the database stores the values as integers and not strings.
+    $regex_safe_search = preg_quote($_GET['search']['value'], '/');
+
+    $status_options = mfcs_get_request_status_list_options();
+    $step_options = mfcs_get_request_steps_list_options();
+
+    $room_options = mfcs_get_request_room_list_options(NULL, NULL, TRUE);
+    $building_options = mfcs_get_request_building_list_options(NULL, NULL, TRUE);
+
+    $limit_status = array();
+    foreach ($status_options as $key => $value) {
+      if (preg_match('/' . $regex_safe_search . '/i', $value) > 0) {
+        $limit_status[$key] = $key;
+      }
+    }
+
+    $limit_step = array();
+    foreach ($step_options as $key => $value) {
+      if (preg_match('/' . $regex_safe_search . '/i', $value) > 0) {
+        $limit_step[$key] = $key;
+      }
+    }
+
+    $limit_room = array();
+    foreach ($room_options as $key => $value) {
+      if (preg_match('/' . $regex_safe_search . '/i', $value) > 0) {
+        $limit_room[$key] = $key;
+      }
+    }
+
+    $limit_building = array();
+    foreach ($building_options as $key => $value) {
+      if (preg_match('/' . $regex_safe_search . '/i', $value) > 0) {
+        $limit_building[$key] = $key;
+      }
+    }
+  }
 
   // build ajax/json response data.
   $response = array(
@@ -512,29 +569,43 @@ function mfcs_ajax_list_0() {
 
   $sorting = array();
   if (!isset($order[0]['column'])) {
-    $sorting['reviewer_classification_name'] = 'ASC';
+    $sorting['id'] = 'DESC';
   }
   else {
     $order_column = (int) $order[0]['column'];
     $order_direction = isset($order[0]['dir']) && is_string($order[0]['dir']) ? strtoupper($order[0]['dir']) : 'DESC';
 
-    if ($order_column == 0) {
-      $sorting['id'] = $order_direction;
-    }
-    elseif ($order_column == 1) {
-      $sorting['reviewer_classification_name'] = $order_direction;
-    }
-    elseif ($order_column == 2) {
-      $sorting['user_id'] = $order_direction;
-    }
-    elseif ($order_column == 3) {
-      $sorting['account'] = $order_direction;
-    }
-    elseif ($order_column == 4) {
-      $sorting['first_name'] = $order_direction;
-    }
-    elseif ($order_column == 5) {
-      $sorting['last_name'] = $order_direction;
+    if ($order_direction == 'ASC' || $order_direction == 'DESC') {
+      if ($order_column == 0) {
+        $sorting['id'] = $order_direction;
+      }
+      elseif ($order_column == 1) {
+        $sorting['title'] = $order_direction;
+      }
+      elseif ($order_column == 2) {
+        $sorting['building'] = $order_direction;
+      }
+      elseif ($order_column == 3) {
+        $sorting['room'] = $order_direction;
+      }
+      elseif ($order_column == 4) {
+        $sorting['date'] = $order_direction;
+      }
+      elseif ($order_column == 5) {
+        $sorting['status'] = $order_direction;
+      }
+      elseif ($order_column == 6) {
+        $sorting['step'] = $order_direction;
+      }
+      elseif ($order_column == 7) {
+        $sorting['submitted_by_id'] = $order_direction;
+      }
+      elseif ($order_column == 8) {
+        $sorting['submitted_by_name'] = $order_direction;
+      }
+      elseif ($order_column == 9) {
+        $sorting['created'] = $order_direction;
+      }
     }
   }
 
@@ -543,108 +614,139 @@ function mfcs_ajax_list_0() {
     $sorting['id'] = 'DESC';
   }
 
-  if (!empty($sorting)) {
-    $options['sort'] = $sorting;
-  }
+  $options['sort'] = $sorting;
 
-  $conditions = array(
-    'mr.request_classification' => $classification,
-    'mr.review_step' => $review_step,
-    'mr.disabled' => 0,
-  );
+  $conditions = array();
 
   if ($search) {
     $count_conditions = $conditions;
     $count_options = $options;
 
     $conditions['or_1'] = array();
-    if (!empty($limit_reviewer_classifications)) {
-      $conditions['or_1']['mr.reviewer_classification'] = array(
-        'operator' => 'IN',
-        'value' => $limit_reviewer_classifications,
+
+    $conditions['or_1']['value_id'] = array(
+      'field' => 'text(mer.id)',
+      'operator' => MFCS_OPERATOR_LIKE,
+      'search' => $_GET['search']['value'],
+      'expression' => TRUE,
+    );
+
+    $conditions['or_1']['value_title'] = array(
+      'field' => 'mer.title',
+      'operator' => MFCS_OPERATOR_LIKE,
+      'search' => $_GET['search']['value'],
+    );
+
+    if (!empty($limit_building)) {
+      $conditions['or_1']['value_building'] = array(
+        'field' => 'mer.building',
+        'operator' => MFCS_OPERATOR_IS_IN,
+        'search' => $limit_building,
       );
     }
 
-    $conditions['or_1']['text(mr.id)'] = array(
-      'operator' => 'ILIKE',
-      'value' => '%' . db_like($_GET['search']['value']) . '%',
+    if (!empty($limit_room)) {
+      $conditions['or_1']['value_room'] = array(
+        'field' => 'mer.room',
+        'operator' => MFCS_OPERATOR_IS_IN,
+        'search' => $limit_room,
+      );
+    }
+
+    if (!empty($limit_status)) {
+      $conditions['or_1']['value_status'] = array(
+        'field' => 'mer.status',
+        'operator' => MFCS_OPERATOR_IS_IN,
+        'search' => $limit_status,
+      );
+    }
+
+    // Commented out because this is confusing because the date format will not match.
+    #$conditions['or_1']['value_date'] = array(
+    #  'field' => 'text(to_timestamp(mer.created))',
+    #  'operator' => MFCS_OPERATOR_LIKE,
+    #  'search' => $_GET['search']['value'],
+    #  'expression' => TRUE,
+    #);
+
+    if (!empty($limit_status)) {
+      $conditions['or_1']['value_status'] = array(
+        'field' => 'mer.status',
+        'operator' => MFCS_OPERATOR_IS_IN,
+        'search' => $limit_status,
+      );
+    }
+
+    if (!empty($limit_step)) {
+      $conditions['or_1']['value_step'] = array(
+        'field' => 'mer.step',
+        'operator' => MFCS_OPERATOR_IS_IN,
+        'search' => $limit_step,
+      );
+    }
+
+    $conditions['or_1']['value_submitted_by_id'] = array(
+      'field' => 'text(mer.user_id)',
+      'operator' => MFCS_OPERATOR_LIKE,
+      'search' => $_GET['search']['value'],
       'expression' => TRUE,
     );
 
-    $conditions['or_1']['text(u.uid)'] = array(
-      'operator' => 'ILIKE',
-      'value' => '%' . db_like($_GET['search']['value']) . '%',
-      'expression' => TRUE,
-    );
-
-    $conditions['or_1']['u.name'] = array(
-      'operator' => 'ILIKE',
-      'value' => '%' . db_like($_GET['search']['value']) . '%',
-    );
-
-    $conditions['or_1']['fdfufn.field_user_first_name_value'] = array(
-      'operator' => 'ILIKE',
-      'value' => '%' . db_like($_GET['search']['value']) . '%',
-    );
-
-    $conditions['or_1']['fdfuln.field_user_last_name_value'] = array(
-      'operator' => 'ILIKE',
-      'value' => '%' . db_like($_GET['search']['value']) . '%',
+    $conditions['or_1']['value_submitted_by_name'] = array(
+      'field' => 'sb_u.name',
+      'operator' => MFCS_OPERATOR_LIKE,
+      'search' => $_GET['search']['value'],
     );
 
     $count_options['returned'] = FALSE;
-    $reviewers_returned = mfcs_get_reviewers($count_conditions, $count_options);
-    $reviewers_total = 0;
-    if (array_key_exists('count', $reviewers_returned)) {
-      $reviewers_total = $reviewers_returned['count'];
+    $items_returned = mfcs_request_load_listing($count_conditions, $count_options);
+    $items_total = 0;
+    if (array_key_exists('count', $items_returned)) {
+      $items_total = $items_returned['count'];
     }
 
-    $reviewers_returned = mfcs_get_reviewers($conditions, $options);
-    $reviewers = array();
-    if (isset($reviewers_returned['results']) && is_array($reviewers_returned['results'])) {
-      $reviewers = $reviewers_returned['results'];
+    $items_returned = mfcs_request_load_listing($conditions, $options);
+    $items = array();
+    if (isset($items_returned['results']) && is_array($items_returned['results'])) {
+      $items = $items_returned['results'];
     }
 
-    $response['recordsTotal'] = $reviewers_total;
-    $response['recordsFiltered'] = $reviewers_returned['count'];
+    $response['recordsTotal'] = $items_total;
+    $response['recordsFiltered'] = $items_returned['count'];
   }
   else {
-    $reviewers_returned = mfcs_get_reviewers($conditions, $options);
-    $reviewers = array();
-    if (isset($reviewers_returned['results']) && is_array($reviewers_returned['results'])) {
-      $reviewers = $reviewers_returned['results'];
+    $items_returned = mfcs_request_load_listing($conditions, $options);
+
+    $items = array();
+    if (isset($items_returned['results']) && is_array($items_returned['results'])) {
+      $items = $items_returned['results'];
     }
 
-    $response['recordsTotal'] = $reviewers_returned['count'];
-    $response['recordsFiltered'] = $reviewers_returned['count'];
+    $response['recordsTotal'] = $items_returned['count'];
+    $response['recordsFiltered'] = $items_returned['count'];
   }
 
-  if (!is_array($reviewers)) {
+  if (!is_array($items)) {
     drupal_json_output($response);
     exit();
   }
 
   $response['data'] = array();
-  if (!empty($reviewers)) {
-    foreach ($reviewers as $reviewer) {
-      $row = array();
 
-      $row[0] = $reviewer->id;
-
-      if (isset($reviewer_classifications[$reviewer->reviewer_classification])) {
-        $row[1] = $reviewer_classifications[$reviewer->reviewer_classification];
-      }
-
-      $row[2] = $reviewer->user_id;
-      $row[3] = '<a href="' . $base_path . 'user/' . $reviewer->user_id . $url_arguments . '" class="user-link">' . check_plain($reviewer->name) . '</a>';
-      $row[4] = check_plain($reviewer->first_name);
-      $row[5] = check_plain($reviewer->last_name);
-
-      $row[6] = '<a href="' . $base_path . 'requests/reviewers-0/delete/' . $reviewer->id . $url_arguments . '" class="operation-link operation-link-delete">Delete</a>';
-
-      $response['data'][] = $row;
-    }
+  if (empty($items)) {
+    drupal_json_output($response);
+    exit();
   }
+
+  mfcs_include(MFCS_INCLUDE_REQUEST_LIST);
+  $columns = mfcs_request_list_0_columns();
+
+  $rows = mfcs_build_request_ajax_table_process_rows($items, $columns, $user, TRUE);
+
+  if (is_array($rows)) {
+    $response['data'] = $rows;
+  }
+  unset($rows);
 
   drupal_json_output($response);
   exit();

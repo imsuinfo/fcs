@@ -102,9 +102,6 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
-  $sort = 'ASC';
-  $order = 'date';
-
   // load rooms and buildings separately to avoid performing joining on tables.
   $rooms = mfcs_load_rooms();
   $buildings = mfcs_load_buildings();
@@ -118,7 +115,6 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
   }
 
   $rows = array();
-  $rows_per_day = 0;
   $current_date = $absolute_start;
   while ($current_date < $absolute_stop) {
     $next_date = strtotime('+1 days', $current_date);
@@ -126,7 +122,12 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
     $search['field_dates-date-start-0']['search'] = $current_date;
     $search['field_dates-date-stop-0']['search'] = $next_date;
 
-    $items_returned = mfcs_request_load_listing(array(), array('search' => $search, 'limit' => $rows_per_day));
+    $options = array(
+      'limit' => 0,
+      'sort' => array('date' => 'ASC'),
+    );
+
+    $items_returned = mfcs_request_load_listing($search, $options);
 
     $items = array();
     if (isset($items_returned['results']) && is_array($items_returned['results'])) {
@@ -163,7 +164,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
             }
 
             $month_day_count = count($rows[$month_day]);
-            if ($rows_per_day > 0 && $month_day_count == $rows_per_day) {
+            if ($options['limit'] > 0 && $month_day_count == $options['limit']) {
               $month_name = date('F', $date);
               $month_name_lower = strtolower($month_name);
 
@@ -298,9 +299,6 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
-  $sort = 'ASC';
-  $order = 'date';
-
   // load rooms and buildings separately to avoid performing joining on tables.
   $rooms = mfcs_load_rooms();
   $buildings = mfcs_load_buildings();
@@ -313,7 +311,12 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
     $buildings = array();
   }
 
-  $items_returned = mfcs_request_load_listing(array(), array('search' => $search, 'limit' => 0, 'sort' => $sort, 'order' => $order));
+  $options = array(
+    'limit' => 0,
+    'sort' => array('date' => 'ASC'),
+  );
+
+  $items_returned = mfcs_request_load_listing($search, $options);
 
   $items = array();
   if (isset($items_returned['results']) && is_array($items_returned['results'])) {

@@ -1353,6 +1353,14 @@ function mfcs_install() {
 
   db_query('ALTER TABLE {mfcs_review_classifications} ADD CONSTRAINT review_fkey FOREIGN KEY (review_id) REFERENCES {mfcs_field_review_review} (id) ON DELETE CASCADE');
 
+  foreach ($structure as $structure_name => &$structure_array) {
+    foreach ($structure_array as $field_name => &$field_type) {
+      $field_table1_name = 'mfcs_field_' . $structure_name . '_' . $field_name;
+
+      db_query('ALTER TABLE {' . $field_table1_name . '} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
+    }
+  }
+
 
   // enable postgresql-specific TOAST support (aka: compression).
   db_query('ALTER TABLE {mfcs_log_emails} ALTER COLUMN headers SET STORAGE EXTENDED');
@@ -1429,4 +1437,13 @@ function mfcs_uninstall() {
   db_query('ALTER TABLE {mfcs_banner_event_roles_to_users} DROP CONSTRAINT IF EXISTS ' . $key6_foreign);
   db_query('ALTER TABLE {mfcs_request_reminders} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
   db_query('ALTER TABLE {mfcs_review_classifications} DROP CONSTRAINT IF EXISTS ' . $keyR_foreign);
+  db_query('ALTER TABLE {mfcs_field_review_review} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
+
+  foreach ($structure as $structure_name => &$structure_array) {
+    foreach ($structure_array as $field_name => &$field_type) {
+      $field_table_name = 'mfcs_field_' . $structure_name . '_' . $field_name;
+
+      db_query('ALTER TABLE {' . $field_table_name . '} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
+    }
+  }
 }

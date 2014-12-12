@@ -10,15 +10,20 @@
  * @{
  */
 
- /**
+
+/**
  * Provides the facilities use request review page.
  *
+ * @param array $form
+ *   The form array as defined by drupals form api.
+ * @param array $form_state
+ *   The form state array as defined by drupals form api.
  * @param int $page_number
  *   (optional) When there are more than a certain number of rows,
  *   this represent the page number for a given sequence of rows.
  *
- * @return string
- *   The HTML output representing the page.
+ * @return array
+ *   An array containing the generated form.
  */
 function mfcs_request_review_0_page($form, &$form_state, $page_number = 0) {
   if (!cf_is_integer($page_number)) {
@@ -26,7 +31,7 @@ function mfcs_request_review_0_page($form, &$form_state, $page_number = 0) {
     $page_number = 0;
   }
 
-  mfcs_add_canonical_headers('requests/review-0');
+  mfcs_add_canonical_headers('requests/review-0/' . $page_number);
 
   global $base_path;
   global $mfcs_determined;
@@ -36,111 +41,258 @@ function mfcs_request_review_0_page($form, &$form_state, $page_number = 0) {
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
-  $rows_per_page = 25;
-  $start_range = $page_number * $rows_per_page;
-
   $form = array();
   $form['output'] = array('#markup' => '');
 
   $output = &$form['output']['#markup'];
 
-  $columns = array(
-    'id' => "ID",
-    'title' => "Title",
-    'building' => "Building",
-    'room' => "Room",
-    'date' => "Date",
-    'step' => "Step",
-    'submitted_by' => "Submitted By",
-    'submitted_on' => "Submitted On",
-    'operations' => "Operations"
-  );
-
-
   // load sorting information
-  $sorting = array();
   $order = NULL;
-  $url_extras = '';
   if (isset($_GET['order'])) {
     $order = strtolower($_GET['order']);
-    $sorting['order'] = $order;
-
-    if (array_key_exists($order, $columns)) {
-      $url_extras = 'order=' . $columns[$order];
-    }
   }
 
   $sort = NULL;
+  $columns_default = NULL;
   if (isset($_GET['sort'])) {
     $sort = strtoupper($_GET['sort']);
 
     if ($sort != 'ASC' && $sort != 'DESC') {
       $sort = NULL;
-    }
-    else {
-      $sorting['sort'] = $sort;
-
-      if (is_null($url_extras)) {
-        $url_extras = 'sort=' . $_GET['sort'];
-      }
-      else {
-        $url_extras = 'sort=' . $_GET['sort'] . '&' . $url_extras;
-      }
+      $order = NULL;
     }
   }
 
-  if (empty($url_arguments)) {
-    if (!empty($url_extras)) {
-      $url_arguments = '?' . $url_extras;
-    }
+  $columns = mfcs_request_review_0_columns();
+
+  $sorting = array();
+  if (is_null($order)) {
+    $sorting['id'] = 'DESC';
+    $columns_default = array(0 => strtolower($sorting['id']));
+    $columns['id']['class'][] = 'sorting_1';
   }
   else {
-    if (!empty($url_extras)) {
-      $url_arguments .= '&' . $url_extras;
+    if ($order == 'id') {
+      $sorting[$order] = is_null($sort) ? 'DESC' : $sort;
+      $columns_default = array(0 => strtolower($sorting[$order]));
+      $columns[$order]['class'][] = 'sorting_1';
     }
+    elseif ($order == 'title') {
+      $sorting[$order] = is_null($sort) ? 'ASC' : $sort;
+      $columns_default = array(1 => strtolower($sorting[$order]));
+      $columns[$order]['class'][] = 'sorting_1';
+    }
+    elseif ($order == 'building') {
+      $sorting[$order] = is_null($sort) ? 'ASC' : $sort;
+      $columns_default = array(2 => strtolower($sorting[$order]));
+      $columns[$order]['class'][] = 'sorting_1';
+    }
+    elseif ($order == 'room') {
+      $sorting[$order] = is_null($sort) ? 'ASC' : $sort;
+      $columns_default = array(3 => strtolower($sorting[$order]));
+      $columns[$order]['class'][] = 'sorting_1';
+    }
+    elseif ($order == 'date') {
+      $sorting[$order] = is_null($sort) ? 'DESC' : $sort;
+      $columns_default = array(4 => strtolower($sorting[$order]));
+      $columns[$order]['class'][] = 'sorting_1';
+    }
+    elseif ($order == 'status') {
+      $sorting[$order] = is_null($sort) ? 'ASC' : $sort;
+      $columns_default = array(5 => strtolower($sorting[$order]));
+      $columns[$order]['class'][] = 'sorting_1';
+    }
+    elseif ($order == 'step') {
+      $sorting[$order] = is_null($sort) ? 'ASC' : $sort;
+      $columns_default = array(6 => strtolower($sorting[$order]));
+      $columns[$order]['class'][] = 'sorting_1';
+    }
+    elseif ($order == 'submitted by') {
+      $sorting[$order] = is_null($sort) ? 'ASC' : $sort;
+      $columns_default = array(7 => strtolower($sorting[$order]));
+      $columns[$order]['class'][] = 'sorting_1';
+    }
+    elseif ($order == 'submitter name') {
+      $sorting[$order] = is_null($sort) ? 'ASC' : $sort;
+      $columns_default = array(8 => strtolower($sorting[$order]));
+      $columns[$order]['class'][] = 'sorting_1';
+    }
+    elseif ($order == 'submitted on') {
+      $sorting[$order] = is_null($sort) ? 'DESC' : $sort;
+      $columns_default = array(9 => strtolower($sorting[$order]));
+      $columns[$order]['class'][] = 'sorting_1';
+    }
+  }
+
+  $rows_per_page = 25;
+  $conditions = array();
+  $options = array(
+    'join' => TRUE,
+    'start' => $page_number * $rows_per_page,
+    'limit' => $rows_per_page,
+    'count' => TRUE,
+    'review_restrictions' => MFCS_REVIEW_RESTRICTION_REVIEW,
+  );
+
+  if (!is_null($order)) {
+    $options['sort'] = $sorting;
   }
 
 
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
-  $items_returned = mfcs_request_load_listing(array(), array('start' => $page_number * $rows_per_page, 'limit' => $rows_per_page, 'sort' => $sort, 'order' => $order, 'review_restrictions' => MFCS_REVIEW_RESTRICTION_REVIEW));
+  $items_returned = mfcs_request_load_listing($conditions, $options);
 
-  $items = array();
-  if (isset($items_returned['results']) && is_array($items_returned['results'])) {
-    $items = $items_returned['results'];
+  $count = 0;
+  if (isset($items_returned['count'])) {
+    $count = $items_returned['count'];
   }
 
-  $rows = array();
-  $total_results = count($items);
-
-  $table = mfcs_build_request_table($items, $rows_per_page, $columns);
-  $table['attributes']['class'] = array('mfcs-table-requests', 'mfcs-review_page-table');
-
-  if (is_null($order) && isset($table['header']['id'])) {
-    $table['header']['id']['sort'] = 'DESC';
+  // do not provide pages when the page number would bring the user beyond the available items.
+  if ($count > 0 && $options['start'] >= $count) {
+    drupal_not_found();
+    drupal_exit();
+    return array();
   }
 
-  $navigation = "";
+  $options['columns'] = $columns;
+  $options['columns_default'] = $columns_default;
+
+  $options['ajax_path'] = "'" . $base_path . 'requests/review-0/ajax' . "'";
+
+  $table = mfcs_build_request_ajax_table($items_returned, $conditions, $options);
+  $table['attributes']['class'][] = 'mfcs-table-requests';
+  $table['attributes']['class'][] = 'mfcs-review_page-table';
+  $table['attributes']['id'] = 'mfcs-list_0-requests';
+
+  $navigation_top = '';
+  $navigation_bottom = '';
   if ($page_number > 0) {
     if ($page_number == 1) {
-      $navigation .= '<a href="' . $base_path . 'requests/review-0' . $url_arguments . '" class="request-listing-page-choice request-listing-page-previous no-print" title="Previous Page">Prev</a>';
+      $navigation_top .= '<a href="' . $base_path . 'requests/review-0' . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+      $navigation_bottom .= '<a href="' . $base_path . 'requests/review-0' . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
     }
     else {
       $previous_page = $page_number - 1;
-      $navigation .= '<a href="' . $base_path . 'requests/review-0/' . $previous_page . $url_arguments . '" class="request-listing-page-choice request-listing-page-previous no-print" title="Previous Page">Prev</a>';
+      $navigation_top .= '<a href="' . $base_path . 'requests/review-0/' . $previous_page . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+      $navigation_bottom .= '<a href="' . $base_path . 'requests/review-0/' . $previous_page . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
     }
   }
 
-  if ($total_results > $rows_per_page) {
-    $next_page = $page_number + 1;
-    $navigation .= '<a href="' . $base_path . 'requests/review-0/' . $next_page . $url_arguments . '" class="request-listing-page-choice request-listing-page-next no-print" title="Next Page">Next</a>';
+  $navigation_start = $options['start'] + 1;
+  $navigation_total = $options['start'] + $rows_per_page;
+
+  if ($navigation_total > $count) {
+    $navigation_total = $count;
   }
 
-  $output .= '<div class="request-listing-page-navigator request-listing-page-navigator-top no-print">' . $navigation . '</div>';
-  $output .= theme('table', $table);
-  $output .= '<div class="request-listing-page-navigator request-listing-page-navigator-bottom no-print">' . $navigation . '</div>';
+  $navigation_bottom .= '<div class="table_listing-comment">' . "\n";
+  $navigation_bottom .= "Showing " . $navigation_start . " to " . $navigation_total . " of " . $count . " entries.\n";
+  $navigation_bottom .= '</div>' . "\n";
+
+  if ($count > ($options['start'] + $rows_per_page)) {
+    $next_page = $page_number + 1;
+    $navigation_top .= '<a href="' . $base_path . 'requests/review-0/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
+    $navigation_bottom .= '<a href="' . $base_path . 'requests/review-0/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
+  }
+
+  $output = '<div class="table_listing-navigator table_listing-navigator-top no-print">' . $navigation_top . '</div>';
+  $output .= mcneese_libraries_theme_table($table, $table['datatable_settings']);
+  $output .= '<div class="table_listing-navigator table_listing-navigator-bottom">' . $navigation_bottom . '</div>';
 
   return $form;
+}
+
+/**
+ * Returns an array of columns for the request review list.
+ *
+ * @return array
+ *   An array of columns for the request review list.
+ */
+function mfcs_request_review_0_columns() {
+  return array(
+    'id' => array(
+      'id' => 0,
+      'column' => 'id',
+      'name' => "ID",
+      'class' => array('column-id'),
+      'sanitize' => FALSE,
+      'align' => 'center',
+    ),
+    'title' => array(
+      'id' => 1,
+      'column' => 'title',
+      'name' => "Title",
+      'class' => array('column-title'),
+      'align' => 'center',
+    ),
+    'building' => array(
+      'id' => 2,
+      'column' => 'building',
+      'name' => "Building",
+      'class' => array('column-building'),
+      'align' => 'center',
+    ),
+    'room' => array(
+      'id' => 3,
+      'column' => 'room',
+      'name' => "Room",
+      'class' => array('column-room'),
+      'align' => 'center',
+    ),
+    'date' => array(
+      'id' => 4,
+      'column' => 'date',
+      'name' => "Date",
+      'class' => array('column-date'),
+      'align' => 'center',
+    ),
+    'status' => array(
+      'id' => 5,
+      'column' => 'status',
+      'name' => "Status",
+      'class' => array('column-status', 'no-script-hidden'),
+      'align' => 'center',
+      'visible' => FALSE,
+    ),
+    'step' => array(
+      'id' => 6,
+      'column' => 'step',
+      'name' => "Step",
+      'class' => array('column-step'),
+      'align' => 'center',
+    ),
+    'submitted_by_id' => array(
+      'id' => 7,
+      'column' => 'user_id',
+      'name' => "Submitted By ID",
+      'class' => array('column-submitted_by_id', 'no-script-hidden'),
+      'sanitize' => FALSE,
+      'visible' => FALSE,
+      'align' => 'center',
+    ),
+    'submitted_by' => array(
+      'id' => 8,
+      'column' => 'user_id',
+      'name' => "Submitted By",
+      'class' => array('column-submitted_by'),
+      'align' => 'center',
+    ),
+    'submitted_on' => array(
+      'id' => 9,
+      'column' => 'created',
+      'name' => "Submitted On",
+      'class' => array('column-submitted_on'),
+      'align' => 'center',
+    ),
+    'operations' => array(
+      'id' => 10,
+      'column' => NULL,
+      'name' => "Operations",
+      'class' => array('column-operations', 'no-print'),
+      'align' => 'center',
+    ),
+  );
 }
 
 /**

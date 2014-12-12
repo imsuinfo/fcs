@@ -77,9 +77,11 @@ define('MFCS_REQUEST_STATUS_CANCELLED', 7);
  define('MFCS_REVIEW_CLASSIFICATION_STUDENT_SERVICES', 101);
  define('MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR', 112);
  define('MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR_PROXY', 144);
+
+ // these are not classifications, they are user ids.
  define('MFCS_REVIEW_CLASSIFICATION_SYSTEM_ADMINISTRATOR', 1);
  define('MFCS_REVIEW_CLASSIFICATION_MANAGER', 2);
- define('MFCS_REVIEW_CLASSIFICATION_FAILSAFE_COORDINATOR', 45);
+ define('MFCS_REVIEW_CLASSIFICATION_FAILSAFE_COORDINATOR', 45); // @fixme: this is a hardcoded id to shogan.
 
 /**
  * Defines Taxonomy TIDs for request classifications.
@@ -103,14 +105,18 @@ define('MFCS_REQUEST_STATUS_CANCELLED', 7);
  define('MFCS_OPERATOR_LESS_THAN_EQUAL', 2);
  define('MFCS_OPERATOR_EQUAL', 3);
  define('MFCS_OPERATOR_LIKE', 4);
- define('MFCS_OPERATOR_GREATER_THAN_EQUAL', 5);
- define('MFCS_OPERATOR_GREATER_THAN', 6);
- define('MFCS_OPERATOR_NOT_EQUAL', 7);
- define('MFCS_OPERATOR_NOT_LIKE', 8);
- define('MFCS_OPERATOR_IS_NULL', 9);
- define('MFCS_OPERATOR_IS_NOT_NULL', 10);
- define('MFCS_OPERATOR_IS_IN', 11);
- define('MFCS_OPERATOR_IS_NOT_IN', 12);
+ define('MFCS_OPERATOR_SLIKE', 5);
+ define('MFCS_OPERATOR_ILIKE', 6);
+ define('MFCS_OPERATOR_GREATER_THAN_EQUAL', 7);
+ define('MFCS_OPERATOR_GREATER_THAN', 8);
+ define('MFCS_OPERATOR_NOT_EQUAL', 9);
+ define('MFCS_OPERATOR_NOT_LIKE', 10);
+ define('MFCS_OPERATOR_NOT_SLIKE', 11);
+ define('MFCS_OPERATOR_NOT_ILIKE', 12);
+ define('MFCS_OPERATOR_IS_NULL', 13);
+ define('MFCS_OPERATOR_IS_NOT_NULL', 14);
+ define('MFCS_OPERATOR_IS_IN', 15);
+ define('MFCS_OPERATOR_IS_NOT_IN', 16);
 
 /**
  * Defines table join codes for building search queries.
@@ -236,7 +242,8 @@ define('MFCS_INCLUDE_ICAL', 10);
 define('MFCS_INCLUDE_REQUEST_CANCEL', 11);
 define('MFCS_INCLUDE_REQUEST_CREATE', 12);
 define('MFCS_INCLUDE_REQUEST_VIEW', 13);
-define('MFCS_INCLUDE_TESTING', 14);
+define('MFCS_INCLUDE_REQUEST_LIST', 14);
+define('MFCS_INCLUDE_TESTING', 15);
 
 /**
  * Defines review restrictions.
@@ -1115,9 +1122,7 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
       // process review access.
       if (empty($reviewer_settings['classifications'])) {
         // if the 'reviewer' has no reviewer classifications, then they cannot review, remove all requests associated with reviewer steps.
-        $and->condition('mer.step', $show_step_reviewer, 'NOT IN');
-
-        $or->condition($and);
+        $query->condition('mer.step', $show_step_reviewer, 'NOT IN');
       }
       else {
         $already_reviewed_query = db_select('mfcs_reviewers', 'mr_r');
@@ -1130,9 +1135,19 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
         $and = db_and();
         $and->condition('mer.status', $show_status_reviewer, 'IN');
         $and->condition('mer.step', $show_step_reviewer, 'IN');
-        $and->condition('mer.step', $reviewer_settings['steps'], 'IN');
         $and->condition('mer.id', $already_reviewed_query, 'NOT IN');
 
+        $sub_or = db_or();
+        foreach ($reviewer_settings['for_step'] as $for_step => $step_classifications) {
+          $sub_and = db_and();
+          $sub_and->condition('mer.step', $for_step);
+          $sub_and->condition('mer.classification', $step_classifications, 'IN');
+
+          $sub_or->condition($sub_and);
+          unset($sub_and);
+        }
+
+        $and->condition($sub_or);
         $or->condition($and);
 
         // special case reviewer access: insurance provided
@@ -1407,6 +1422,9 @@ function mfcs_include($id) {
   }
   elseif ($id == MFCS_INCLUDE_REQUEST_VIEW) {
     require_once($module_path . '/pages/request_view.inc');
+  }
+  elseif ($id == MFCS_INCLUDE_REQUEST_LIST) {
+    require_once($module_path . '/pages/request_list.inc');
   }
   elseif ($id == MFCS_INCLUDE_TESTING) {
     require_once($module_path . '/includes/testing.inc');
@@ -4578,7 +4596,8 @@ function mfcs_get_reviewers($conditions = array(), $options = array()) {
             if (is_array($subcondition)) {
               if (isset($subcondition['value']) && isset($subcondition['operator'])) {
                 if (isset($subcondition['expression']) && $subcondition['expression']) {
-                  $or->where($subcondition_id . ' ' . $subcondition['operator'] . ' :value', array(':value' => $subcondition['value']));
+                  $placeholder = ':mfcs_db_condition_placeholder_' . $query->nextPlaceholder();
+                  $or->where($subcondition_id . ' ' . $subcondition['operator'] . ' ' . $placeholder, array($placeholder => $subcondition['value']));
                 }
                 else {
                   $or->condition($subcondition_id, $subcondition['value'], $subcondition['operator']);
@@ -4600,7 +4619,8 @@ function mfcs_get_reviewers($conditions = array(), $options = array()) {
             if (is_array($subcondition)) {
               if (isset($subcondition['value']) && isset($subcondition['operator'])) {
                 if (isset($subcondition['expression']) && $subcondition['expression']) {
-                  $and->where($subcondition_id . ' ' . $subcondition['operator'] . ' :value', array(':value' => $subcondition['value']));
+                  $placeholder = ':mfcs_db_condition_placeholder_' . $query->nextPlaceholder();
+                  $and->where($subcondition_id . ' ' . $subcondition['operator'] . ' ' . $placeholder, array($placeholder => $subcondition['value']));
                 }
                 else {
                   $and->condition($subcondition_id, $subcondition['value'], $subcondition['operator']);
@@ -4617,7 +4637,8 @@ function mfcs_get_reviewers($conditions = array(), $options = array()) {
         elseif (is_array($condition)) {
           if (isset($condition['value']) && isset($condition['operator'])) {
             if (isset($condition['expression']) && $condition['expression']) {
-              $query->where($condition_id . ' ' . $condition['operator'] . ' :value', array(':value' => $condition['value']));
+              $placeholder = ':mfcs_db_condition_placeholder_' . $query->nextPlaceholder();
+              $query->where($condition_id . ' ' . $condition['operator'] . ' ' . $placeholder, array($placeholder => $condition['value']));
             }
             else {
               $query->condition($condition_id, $condition['value'], $condition['operator']);
@@ -4796,7 +4817,8 @@ function mfcs_get_proxy_venue_coordinators($conditions = array(), $options = arr
             if (is_array($subcondition)) {
               if (isset($subcondition['value']) && isset($subcondition['operator'])) {
                 if (isset($subcondition['expression']) && $subcondition['expression']) {
-                  $or->where($subcondition_id . ' ' . $subcondition['operator'] . ' :value', array(':value' => $subcondition['value']));
+                  $placeholder = ':mfcs_db_condition_placeholder_' . $query->nextPlaceholder();
+                  $or->where($subcondition_id . ' ' . $subcondition['operator'] . ' ' . $placeholder, array($placeholder => $subcondition['value']));
                 }
                 else {
                   $or->condition($subcondition_id, $subcondition['value'], $subcondition['operator']);
@@ -4818,7 +4840,8 @@ function mfcs_get_proxy_venue_coordinators($conditions = array(), $options = arr
             if (is_array($subcondition)) {
               if (isset($subcondition['value']) && isset($subcondition['operator'])) {
                 if (isset($subcondition['expression']) && $subcondition['expression']) {
-                  $and->where($subcondition_id . ' ' . $subcondition['operator'] . ' :value', array(':value' => $subcondition['value']));
+                  $placeholder = ':mfcs_db_condition_placeholder_' . $query->nextPlaceholder();
+                  $and->where($subcondition_id . ' ' . $subcondition['operator'] . ' ' . $placeholder, array($placeholder => $subcondition['value']));
                 }
                 else {
                   $and->condition($subcondition_id, $subcondition['value'], $subcondition['operator']);
@@ -4835,7 +4858,8 @@ function mfcs_get_proxy_venue_coordinators($conditions = array(), $options = arr
         elseif (is_array($condition)) {
           if (isset($condition['value']) && isset($condition['operator'])) {
             if (isset($condition['expression']) && $condition['expression']) {
-              $query->where($condition_id . ' ' . $condition['operator'] . ' :value', array(':value' => $condition['value']));
+              $placeholder = ':mfcs_db_condition_placeholder_' . $query->nextPlaceholder();
+              $query->where($condition_id . ' ' . $condition['operator'] . ' ' . $placeholder, array($placeholder => $condition['value']));
             }
             else {
               $query->condition($condition_id, $condition['value'], $condition['operator']);
@@ -5012,16 +5036,26 @@ function mfcs_get_user_information($user_id) {
  *
  * @param int $user_id
  *   The drupal user id.
+ * @param bool|null $disabled
+ *   (optional) When TRUE, will included disabled reviewer settings.
  *
  * @return array|false
- *   An array containing the the reviewer classifications, and the
- *   reviewer steps.
+ *   An array containing:
+ *   - 'classifications': reviewer classifications array.
+ *   - 'steps': request steps array.
+ *   - 'for_steps': array keyed by request steps containing each associated
+ *                  request classification (not reviewer classification).
  *   FALSE is returned on error.
  */
-function mfcs_get_reviewer_settings_by_user_id($user_id) {
+function mfcs_get_reviewer_settings_by_user_id($user_id, $disabled = FALSE) {
   if (!cf_is_integer($user_id)) {
     cf_error::invalid_integer('user_id');
     return FALSE;
+  }
+
+  if (!is_bool($disabled)) {
+    cf_error::invalid_bool('disabled');
+    $disabled = FALSE;
   }
 
   $static_settings = &drupal_static(__FUNCTION__);
@@ -5030,7 +5064,15 @@ function mfcs_get_reviewer_settings_by_user_id($user_id) {
     return $static_settings[$user_id];
   }
 
-  $reviewers_returned = mfcs_get_reviewers(array('mr.user_id' => $user_id));
+  $options = array(
+    'mr.user_id' => $user_id,
+  );
+
+  if ($disabled === FALSE) {
+    $options['mr.disabled'] = 0;
+  }
+
+  $reviewers_returned = mfcs_get_reviewers($options);
   $reviewers = array();
   if (isset($reviewers_returned['results']) && is_array($reviewers_returned['results'])) {
     $reviewers = $reviewers_returned['results'];
@@ -5043,11 +5085,18 @@ function mfcs_get_reviewer_settings_by_user_id($user_id) {
   $settings = array(
     'classifications' => array(),
     'steps' => array(),
+    'for_step' => array(),
   );
 
   foreach ($reviewers as $reviewer) {
     $settings['classifications'][$reviewer->reviewer_classification] = $reviewer->reviewer_classification;
     $settings['steps'][$reviewer->review_step] = $reviewer->review_step;
+
+    // provides 'request classifications' (and not 'review classifications') information on a per step basis.
+    if (!array_key_exists($reviewer->review_step, $settings['for_step'])) {
+      $settings['for_step'][$reviewer->review_step] = array();
+    }
+    $settings['for_step'][$reviewer->review_step][$reviewer->request_classification] = $reviewer->request_classification;
   }
 
   $static_settings[$user_id] = $settings;
@@ -5244,24 +5293,23 @@ function mfcs_display_room_unavailable_message() {
  *     - array('value' => '1%', 'operator' => 'LIKE')
  *     - array('value' => array(0, 1, 3), 'operator' => 'IN')
  *     - array('value' => 1, '=>')
- *   This also supports recursive and/or grouping in the following format:
+ *   This also supports a recursive and/or grouping in the following format:
  *   'and_{unique_id}', 'or_{unique_id}' where {unique_id} is some arbitrary
- *    string or number to ensure that the row is unique.
+ *   string or number to ensure that the row is unique.
  * @param array $options
  *   (optional) When specified, representing an array containing:
- *     'join': When TRUE, the drupal user table is joined to the reviewers
- *             table. Only select portions of the user table is joined. This
+ *     'join': When TRUE, the drupal user table is joined for the table.
+ *             Only select portions of the user table is joined. This
  *             also joins custom field tables for user first and last name.
+ *             This is only joined to the submitter table column.
  *     'start': The starting location.
- *     'limit': The number of rows to select, aka: length. If -1 is provided,
- *              then this will become a count query instead of a listing.
+ *     'limit': The number of rows to select, aka: length.
  *     'count': If TRUE, an unfiltered count query is processed.
  *     'results': If FALSE, the main query is not performed.
  *     'search': A special-case/reserved variable for simplified searching.
  *               When not NULL, this is either the string of text to search for
  *               or an array of possible field values.
- *     'sort': When specified, represents the database sorting.
- *     'order': When specified, represents the sorting order, 'asc' or 'desc'.
+ *     'sort': An array of database sorting columns and their sort orders.
  *     'sensitive': TRUE for case sensitive and FALSE otherwise.
  *     'review_restrictions': The review restrictions to use.
  *     'extra_fields': An array of extra fields that should be loaded.
@@ -5298,23 +5346,18 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
   }
 
   $limit = 20;
-  if (isset($options['limit']) && is_numeric($options['limit']) && $limit >= -1) {
+  if (isset($options['limit']) && is_numeric($options['limit']) && $limit >= 0) {
     $limit = $options['limit'];
   }
 
   $count = FALSE;
   if (isset($options['count']) && is_bool($options['count'])) {
-    $count = $options['count'];
+    $count = (bool) $options['count'];
   }
 
   $sort = NULL;
   if (isset($options['sort']) && is_array($options['sort'])) {
     $sort = $options['sort'];
-  }
-
-  $order = NULL;
-  if (isset($options['order']) && is_array($options['order'])) {
-    $order = $options['order'];
   }
 
   $results = TRUE;
@@ -5332,12 +5375,8 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
   }
 
   $search = NULL;
-  if (isset($options['search']) && (is_string($options['search']) || is_array($options['search']))) {
+  if (isset($options['search']) && is_string($options['search'])) {
     $search = $options['search'];
-
-    if (is_array($search) && empty($search)) {
-      $search = NULL;
-    }
   }
 
   $sensitive = FALSE;
@@ -5355,12 +5394,6 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
     $extra_fields = $options['extra_fields'];
   }
 
-  $count = FALSE;
-  if ($limit == -1) {
-    $count = TRUE;
-    $limit = 0;
-  }
-
   $user = cf_current_user();
 
   $manager = user_access('mfcs manage', $user);
@@ -5376,10 +5409,7 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
 
 
   // load search options
-  if (is_null($search)) {
-    // nothing to do
-  }
-  elseif (is_string($search)) {
+  if (is_string($search)) {
     $fixed_text = preg_replace('/(\s)/i', ' ', $search);
 
     // don't search when there is nothing to search for.
@@ -5429,6 +5459,7 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
 
   $found = array();
   try {
+    $outermost_and = NULL;
     $query = db_select('mfcs_requests', 'mer');
     $query->innerJoin('mfcs_current', 'mc', 'mer.id = mc.request_id');
 
@@ -5443,17 +5474,14 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
     $already_joined['mfcs_field_request_coordinator_classification'] = 'mer';
     $already_joined['mfcs_field_information_title'] = 'mer';
 
-    if ($order == 'room') {
-      $query->innerJoin('mfcs_banner_rooms', 'mbr', 'mer.room = mbr.id');
-      $already_joined['mfcs_banner_rooms'] = 'mbr';
-    }
-    elseif ($order == 'building') {
-      $query->innerJoin('mfcs_banner_buildings', 'mbb', 'mer.building = mbb.id');
-      $already_joined['mfcs_banner_buildings'] = 'mbb';
-    }
-    elseif ($order == 'location') {
-      $query->innerJoin('mfcs_banner_locations', 'mbl', 'mer.location = mbl.id');
-      $already_joined['mfcs_banner_locations'] = 'mbl';
+    if ($join) {
+      $query->leftJoin('users', 'sb_u', 'mer.user_id = sb_u.uid');
+      $query->leftJoin('field_data_field_user_first_name', 'sb_fdfufn', 'sb_u.uid = sb_fdfufn.entity_id AND sb_fdfufn.delta = 0');
+      $query->leftJoin('field_data_field_user_last_name', 'sb_fdfuln', 'sb_u.uid = sb_fdfuln.entity_id AND sb_fdfuln.delta = 0');
+
+      $already_joined['submitted_by-users'] = 'sb_u';
+      $already_joined['submitted_by-field_data_field_user_first_name'] = 'sb_fdfufn';
+      $already_joined['submitted_by-field_data_field_user_last_name'] = 'sb_fdfuln';
     }
 
     // when using simple search, include a few additional textarea fields.
@@ -5472,40 +5500,39 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
     }
 
     if ($count) {
-      $query->addExpression('count(mer.id)');
+      $count_query = clone($query);
+      $count_query->addExpression('count(mer.id)');
     }
-    else {
-      $query->addField('mer', 'id', 'id');
-      $query->addField('mer', 'user_id', 'user_id');
-      $query->addField('mer', 'created', 'created');
-      $query->addField('mer', 'updated', 'updated');
 
-      $query->addField('mer', 'status', 'status');
-      $query->addField('mer', 'step', 'step');
+    $query->addField('mer', 'id', 'id');
+    $query->addField('mer', 'user_id', 'user_id');
+    $query->addField('mer', 'created', 'created');
+    $query->addField('mer', 'updated', 'updated');
 
-      $query->addField('mer', 'title', 'title');
-      $query->addField('mer', 'type', 'type');
-      $query->addField('mer', 'classification', 'classification');
+    if ($join) {
+      $query->addField('sb_u', 'name', 'submitted_by_name');
 
-      $query->addField('mer', 'location', 'location');
-      $query->addField('mer', 'building', 'building');
-      $query->addField('mer', 'room', 'room');
+      $query->addField('sb_fdfufn', 'field_user_first_name_value', 'submitted_by_first_name');
+      $query->addField('sb_fdfuln', 'field_user_last_name_value', 'submitted_by_last_name');
 
-      $query->addField('mer', 'venue_coordinator', 'venue_coordinator');
+      $already_added['submitted_by_name'] = 'sb_u.name';
 
-      if ($order == 'room') {
-        $query->addField('mbr', 'human_name', 'room_name');
-        $already_added['room_name'] = 'mbr.human_name';
-      }
-      elseif ($order == 'building') {
-        $query->addField('mbb', 'human_name', 'building_name');
-        $already_added['building_name'] = 'mbb.human_name';
-      }
-      elseif ($order == 'location') {
-        $query->addField('mbl', 'human_name', 'location_name');
-        $already_added['location_name'] = 'mbl.human_name';
-      }
+      $already_added['submitted_by_first_name'] = 'sb_fdfufn.submitted_by_first_name';
+      $already_added['submitted_by_last_name'] = 'sb_fdfuln.submitted_by_last_name';
     }
+
+    $query->addField('mer', 'status', 'status');
+    $query->addField('mer', 'step', 'step');
+
+    $query->addField('mer', 'title', 'title');
+    $query->addField('mer', 'type', 'type');
+    $query->addField('mer', 'classification', 'classification');
+
+    $query->addField('mer', 'location', 'location');
+    $query->addField('mer', 'building', 'building');
+    $query->addField('mer', 'room', 'room');
+
+    $query->addField('mer', 'venue_coordinator', 'venue_coordinator');
 
     $already_added['id'] = 'mer.id';
     $already_added['user_id'] = 'mer.user_id';
@@ -5526,7 +5553,7 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
     $already_added['current_category'] = 'mc.dates_category';
 
     // add custom fields to the select results as requested by the caller.
-    if (!empty($extra_fields) && !$count) {
+    if (!empty($extra_fields)) {
       foreach ($extra_fields as $extra_table_name => $extra_values) {
         if (!array_key_exists('alias', $extra_values) || !array_key_exists('join', $extra_values) || !array_key_exists('columns', $extra_values)) {
           continue;
@@ -5538,12 +5565,24 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
 
         if ($extra_values['join'] == 'inner') {
           $query->innerJoin($extra_table_name, $extra_values['alias'], $extra_values['on']);
+
+          if ($count) {
+            $count_query->innerJoin($extra_table_name, $extra_values['alias'], $extra_values['on']);
+          }
         }
         elseif ($extra_values['join'] == 'left') {
           $query->leftJoin($extra_table_name, $extra_values['alias'], $extra_values['on']);
+
+          if ($count) {
+            $count_query->leftJoin($extra_table_name, $extra_values['alias'], $extra_values['on']);
+          }
         }
         elseif ($extra_values['join'] == 'right') {
           $query->rightJoin($extra_table_name, $extra_values['alias'], $extra_values['on']);
+
+          if ($count) {
+            $count_query->rightJoin($extra_table_name, $extra_values['alias'], $extra_values['on']);
+          }
         }
 
         $already_joined[$extra_table_name] = $extra_values['alias'];
@@ -5558,17 +5597,20 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
       }
     }
 
-    if (is_array($search)) {
+    if (is_null($search) && !empty($conditions)) {
       $operand = db_and();
-      $result = mfcs_request_process_listing_search_array($query, $operand, $already_joined, $already_joined_count, $already_added, $search, 1, $like);
+      $result = mfcs_request_process_listing_search_array($query, $operand, $already_joined, $already_joined_count, $already_added, $conditions, 1, $like);
 
       if ($result) {
-        $query->condition($operand);
+        if (is_null($outermost_and)) {
+          $outermost_and = db_and();
+        }
+        $outermost_and->condition($operand);
       }
     }
 
     if ($limit > 0) {
-      $query->range($start, $limit + 1);
+      $query->range($start, $limit);
     }
 
     if ($reviewer || $manager) {
@@ -5652,7 +5694,10 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
       }
 
       if (!is_null($or)) {
-        $query->condition($or);
+        if (is_null($outermost_and)) {
+          $outermost_and = db_and();
+        }
+        $outermost_and->condition($or);
       }
     }
     elseif ($requester) {
@@ -5662,10 +5707,16 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
         $or->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
         $or->condition('mer.user_id', $user->uid);
 
-        $query->condition($or);
+        if (is_null($outermost_and)) {
+          $outermost_and = db_and();
+        }
+        $outermost_and->condition($or);
       }
       else {
-        $query->condition('mer.user_id', $user->uid);
+        if (is_null($outermost_and)) {
+          $outermost_and = db_and();
+        }
+        $outermost_and->condition('mer.user_id', $user->uid);
       }
     }
     else {
@@ -5674,9 +5725,17 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
     }
 
     // do not include deleted requests.
-    $query->condition('mer.status', MFCS_REQUEST_STATUS_DELETED, '<>');
+    if (is_null($outermost_and)) {
+      $outermost_and = db_and();
+    }
+    $outermost_and->condition('mer.status', MFCS_REQUEST_STATUS_DELETED, '<>');
 
-    if (!is_null($search) && is_string($search)) {
+    $query->condition($outermost_and);
+    if ($count) {
+      $count_query->condition($outermost_and);
+    }
+
+    if (is_string($search)) {
       $or = db_or();
 
       $like_part = db_like($fixed_text);
@@ -5697,96 +5756,122 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
       $or->condition('mfpd.value', '%' . $like_part . '%', $like);
 
       $query->condition($or);
-    }
 
-    if (!$count) {
-      if (is_null($order)) {
-        $query->orderBy('id', 'DESC');
-      }
-      else {
-        if ($order == 'id') {
-          $query->orderBy('mer.id', is_null($sort) ? 'DESC' : $sort);
-        }
-        elseif ($order == 'title') {
-          $query->orderBy('title', is_null($sort) ? 'ASC' : $sort);
-        }
-        elseif ($order == 'status') {
-          $query->orderBy('status', is_null($sort) ? 'ASC' : $sort);
-        }
-        elseif ($order == 'step') {
-          $query->orderBy('step', is_null($sort) ? 'ASC' : $sort);
-        }
-        elseif ($order == 'location') {
-          $query->orderBy('location_name', is_null($sort) ? 'ASC' : $sort);
-        }
-        elseif ($order == 'building') {
-          $query->orderBy('building_name', is_null($sort) ? 'ASC' : $sort);
-        }
-        elseif ($order == 'room') {
-          $query->orderBy('room_name', is_null($sort) ? 'ASC' : $sort);
-        }
-        elseif ($order == 'date') {
-          $query->innerJoin('mfcs_view_dates_asc_distinct', 'mvdad', 'mer.id = mvdad.request_id');
-
-          $query->orderBy('mvdad.date', is_null($sort) ? 'ASC' : $sort);
-          $query->orderBy('mvdad.time_start', is_null($sort) ? 'ASC' : $sort);
-        }
-        elseif ($order == 'submitted by') {
-          $query->orderBy('user_id', is_null($sort) ? 'ASC' : $sort);
-        }
-        elseif ($order == 'submitted on') {
-          $query->orderBy('created', is_null($sort) ? 'DESC' : $sort);
-        }
+      if ($count) {
+        $count_query->condition($or);
       }
     }
 
+    if (is_null($sort)) {
+      $query->orderBy('mer.id', 'DESC');
+    }
+    else {
+      if (!empty($sort)) {
+        foreach ($sort as $sort_name => $sort_value) {
+          if ($sort_name == 'id') {
+            $query->orderBy('mer.id', is_null($sort_value) ? 'DESC' : $sort_value);
+          }
+          elseif ($sort_name == 'title') {
+            $query->orderBy('mer.title', is_null($sort_value) ? 'ASC' : $sort_value);
+          }
+          elseif ($sort_name == 'status') {
+            $query->orderBy('mer.status', is_null($sort_value) ? 'ASC' : $sort_value);
+          }
+          elseif ($sort_name == 'step') {
+            $query->orderBy('mer.step', is_null($sort_value) ? 'ASC' : $sort_value);
+          }
+          elseif ($sort_name == 'location') {
+            if (!array_key_exists('mfcs_banner_locations', $already_joined)) {
+              $query->innerJoin('mfcs_banner_locations', 'mbl', 'mer.location = mbl.id');
+              $already_joined['mfcs_banner_locations'] = 'mbl';
+            }
+
+            $query->orderBy('mbl.human_name', is_null($sort_value) ? 'ASC' : $sort_value);
+          }
+          elseif ($sort_name == 'building') {
+            if (!array_key_exists('mfcs_banner_buildings', $already_joined)) {
+              $query->innerJoin('mfcs_banner_buildings', 'mbb', 'mer.building = mbb.id');
+              $already_joined['mfcs_banner_buildings'] = 'mbb';
+            }
+
+            $query->orderBy('mbb.human_name', is_null($sort_value) ? 'ASC' : $sort_value);
+          }
+          elseif ($sort_name == 'room') {
+            if (!array_key_exists('mfcs_banner_rooms', $already_joined)) {
+              $query->innerJoin('mfcs_banner_rooms', 'mbr', 'mer.room = mbr.id');
+              $already_joined['mfcs_banner_rooms'] = 'mbr';
+            }
+
+            $query->orderBy('mbr.human_name', is_null($sort_value) ? 'ASC' : $sort_value);
+          }
+          elseif ($sort_name == 'date') {
+            if (!array_key_exists('mfcs_view_dates_asc_distinct', $already_joined)) {
+              $query->innerJoin('mfcs_view_dates_asc_distinct', 'mvdad', 'mer.id = mvdad.request_id');
+              $already_joined['mfcs_view_dates_asc_distinct'] = 'mvdad';
+            }
+
+            $query->orderBy('mvdad.date', is_null($sort_value) ? 'ASC' : $sort_value);
+            $query->orderBy('mvdad.time_start', is_null($sort_value) ? 'ASC' : $sort_value);
+          }
+          elseif ($sort_name == 'submitted by') {
+            $query->orderBy('mer.user_id', is_null($sort_value) ? 'ASC' : $sort_value);
+          }
+          elseif ($sort_name == 'submitted on') {
+            $query->orderBy('mer.created', is_null($sort_value) ? 'DESC' : $sort_value);
+          }
+          elseif (!empty($sort_name)) {
+            $query->orderBy($sort_name, $sort_value);
+          }
+        }
+      }
+    }
 
     if ($count) {
-      $return['results'] = $query->execute()->fetchField();
-
-      return $result;
+      $return['count'] = $count_query->execute()->fetchField();
     }
 
-    $found = $query->execute()->fetchAllAssoc('id');
+    if ($results) {
+      $found = $query->execute()->fetchAllAssoc('id');
 
-    // fetch all available dates.
-    $date_order = array();
-    if (!empty($found)) {
-      $sub_query = db_select('mfcs_current', 'mc');
-      $sub_query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mc.request_id = mfdd.request_id AND mc.dates_date = mfdd.revision');
-      $sub_query->innerJoin('mfcs_field_dates_time_start', 'mfdts', 'mc.request_id = mfdts.request_id AND mc.dates_time_start = mfdts.revision AND mfdd.delta = mfdts.delta');
-      $sub_query->innerJoin('mfcs_field_dates_time_stop', 'mfdtsp', 'mc.request_id = mfdtsp.request_id AND mc.dates_time_stop = mfdtsp.revision AND mfdts.delta = mfdtsp.delta');
-      $sub_query->innerJoin('mfcs_field_dates_category', 'mfdc', 'mc.request_id = mfdc.request_id AND mc.dates_category = mfdc.revision AND mfdts.delta = mfdc.delta');
+      // fetch all available dates.
+      $date_order = array();
+      if (!empty($found)) {
+        $sub_query = db_select('mfcs_current', 'mc');
+        $sub_query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mc.request_id = mfdd.request_id AND mc.dates_date = mfdd.revision');
+        $sub_query->innerJoin('mfcs_field_dates_time_start', 'mfdts', 'mc.request_id = mfdts.request_id AND mc.dates_time_start = mfdts.revision AND mfdd.delta = mfdts.delta');
+        $sub_query->innerJoin('mfcs_field_dates_time_stop', 'mfdtsp', 'mc.request_id = mfdtsp.request_id AND mc.dates_time_stop = mfdtsp.revision AND mfdts.delta = mfdtsp.delta');
+        $sub_query->innerJoin('mfcs_field_dates_category', 'mfdc', 'mc.request_id = mfdc.request_id AND mc.dates_category = mfdc.revision AND mfdts.delta = mfdc.delta');
 
-      $sub_query->addField('mfdd', 'request_id', 'id');
-      $sub_query->addField('mfdd', 'value', 'date');
-      $sub_query->addField('mfdd', 'delta', 'delta');
-      $sub_query->addField('mfdts', 'value', 'time_start');
-      $sub_query->addField('mfdtsp', 'value', 'time_stop');
-      $sub_query->addField('mfdc', 'value', 'category');
+        $sub_query->addField('mfdd', 'request_id', 'id');
+        $sub_query->addField('mfdd', 'value', 'date');
+        $sub_query->addField('mfdd', 'delta', 'delta');
+        $sub_query->addField('mfdts', 'value', 'time_start');
+        $sub_query->addField('mfdtsp', 'value', 'time_stop');
+        $sub_query->addField('mfdc', 'value', 'category');
 
-      $sub_query->condition('mfdd.request_id', array_keys($found), 'IN');
+        $sub_query->condition('mfdd.request_id', array_keys($found), 'IN');
 
-      $sub_results = $sub_query->execute()->fetchAll();
+        $sub_results = $sub_query->execute()->fetchAll();
 
-      $initialized_date = array();
-      foreach ($sub_results as $delta => $sub_result) {
-        if (!array_key_exists($sub_result->id, $initialized_date)) {
-          $found[$sub_result->id]->date = array();
-          $found[$sub_result->id]->time_start = array();
-          $found[$sub_result->id]->time_stop = array();
-          $found[$sub_result->id]->category = array();
+        $initialized_date = array();
+        foreach ($sub_results as $delta => $sub_result) {
+          if (!array_key_exists($sub_result->id, $initialized_date)) {
+            $found[$sub_result->id]->date = array();
+            $found[$sub_result->id]->time_start = array();
+            $found[$sub_result->id]->time_stop = array();
+            $found[$sub_result->id]->category = array();
 
-          $initialized_date[$sub_result->id] = $sub_result->id;
+            $initialized_date[$sub_result->id] = $sub_result->id;
+          }
+
+          $found[$sub_result->id]->date[$sub_result->delta] = $sub_result->date;
+          $found[$sub_result->id]->time_start[$sub_result->delta] = $sub_result->time_start;
+          $found[$sub_result->id]->time_stop[$sub_result->delta] = $sub_result->time_stop;
+          $found[$sub_result->id]->category[$sub_result->delta] = $sub_result->category;
         }
 
-        $found[$sub_result->id]->date[$sub_result->delta] = $sub_result->date;
-        $found[$sub_result->id]->time_start[$sub_result->delta] = $sub_result->time_start;
-        $found[$sub_result->id]->time_stop[$sub_result->delta] = $sub_result->time_stop;
-        $found[$sub_result->id]->category[$sub_result->delta] = $sub_result->category;
+        unset($sub_results);
       }
-
-      unset($sub_results);
     }
   }
   catch (Exception $ex) {
@@ -5795,7 +5880,11 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
     return FALSE;
   }
 
-  $return['results'] = $found;
+
+  if ($results) {
+    $return['results'] = $found;
+  }
+
   return $return;
 }
 
@@ -5871,6 +5960,7 @@ function mfcs_request_process_listing_search_array(&$query, &$operand, &$already
   // process the inner fields, can be either a 'field_+', 'or_+', 'and_+', 'nor_+', or 'nand_+'.
   foreach ($search as $search_operand_or_field => $search_values) {
     $search_op = explode('_', $search_operand_or_field, 2);
+    $expression_count = 0;
 
     if (count($search_op) != 2) {
       // not valid, just skip.
@@ -5883,17 +5973,12 @@ function mfcs_request_process_listing_search_array(&$query, &$operand, &$already
     }
 
     if ($search_op[0] == 'field') {
-      if (empty($search_values['group_name'])) {
+      if (!array_key_exists('search', $search_values)) {
         // not valid, just skip.
         continue;
       }
 
-      if (empty($search_values['field_name'])) {
-        // not valid, just skip.
-        continue;
-      }
-
-      if (empty($search_values['column'])) {
+      if (empty($search_values['group_name']) || empty($search_values['field_name']) || empty($search_values['column'])) {
         // not valid, just skip.
         continue;
       }
@@ -5965,6 +6050,24 @@ function mfcs_request_process_listing_search_array(&$query, &$operand, &$already
           $search_string = '%' . db_like($search_values['search']) . '%';
         }
       }
+      elseif ($search_values['operator'] == MFCS_OPERATOR_SLIKE) {
+        if ($search_string == "") {
+          $operator = '=';
+        }
+        else {
+          $operator = 'LIKE';
+          $search_string = '%' . db_like($search_values['search']) . '%';
+        }
+      }
+      elseif ($search_values['operator'] == MFCS_OPERATOR_ILIKE) {
+        if ($search_string == "") {
+          $operator = '=';
+        }
+        else {
+          $operator = 'ILIKE';
+          $search_string = '%' . db_like($search_values['search']) . '%';
+        }
+      }
       elseif ($search_values['operator'] == MFCS_OPERATOR_GREATER_THAN_EQUAL) {
         $operator = '>=';
       }
@@ -5976,10 +6079,28 @@ function mfcs_request_process_listing_search_array(&$query, &$operand, &$already
       }
       elseif ($search_values['operator'] == MFCS_OPERATOR_NOT_LIKE) {
         if ($search_string == "") {
-          $operator = '=';
+          $operator = '<>';
         }
         else {
           $operator = 'NOT ' . $like;
+          $search_string = '%' . db_like($search_values['search']) . '%';
+        }
+      }
+      elseif ($search_values['operator'] == MFCS_OPERATOR_NOT_SLIKE) {
+        if ($search_string == "") {
+          $operator = '<>';
+        }
+        else {
+          $operator = 'NOT LIKE';
+          $search_string = '%' . db_like($search_values['search']) . '%';
+        }
+      }
+      elseif ($search_values['operator'] == MFCS_OPERATOR_NOT_ILIKE) {
+        if ($search_string == "") {
+          $operator = '<>';
+        }
+        else {
+          $operator = 'NOT ILIKE';
           $search_string = '%' . db_like($search_values['search']) . '%';
         }
       }
@@ -6007,6 +6128,147 @@ function mfcs_request_process_listing_search_array(&$query, &$operand, &$already
       $found_values = TRUE;
       continue;
     }
+    elseif ($search_op[0] == 'value') {
+      if (!array_key_exists('search', $search_values)) {
+        // not valid, just skip.
+        continue;
+      }
+
+      $expression = FALSE;
+      if (isset($search_values['expression']) && is_bool($search_values['expression'])) {
+        $expression = $search_values['expression'];
+      }
+
+      if (empty($search_values['field'])) {
+        // not valid, just skip.
+        continue;
+      }
+
+      $field = $search_values['field'];
+
+      $operator = '=';
+      $search_string = $search_values['search'];
+      if ($search_values['operator'] == MFCS_OPERATOR_LESS_THAN) {
+        $operator = '<';
+      }
+      elseif ($search_values['operator'] == MFCS_OPERATOR_LESS_THAN_EQUAL) {
+        $operator = '<=';
+      }
+      elseif ($search_values['operator'] == MFCS_OPERATOR_EQUAL) {
+        $operator = '=';
+      }
+      elseif ($search_values['operator'] == MFCS_OPERATOR_LIKE) {
+        if ($search_string == "") {
+          $operator = '=';
+        }
+        else {
+          $operator = $like;
+          $search_string = '%' . db_like($search_values['search']) . '%';
+        }
+      }
+      elseif ($search_values['operator'] == MFCS_OPERATOR_SLIKE) {
+        if ($search_string == "") {
+          $operator = '=';
+        }
+        else {
+          $operator = 'LIKE';
+          $search_string = '%' . db_like($search_values['search']) . '%';
+        }
+      }
+      elseif ($search_values['operator'] == MFCS_OPERATOR_ILIKE) {
+        if ($search_string == "") {
+          $operator = '=';
+        }
+        else {
+          $operator = 'ILIKE';
+          $search_string = '%' . db_like($search_values['search']) . '%';
+        }
+      }
+      elseif ($search_values['operator'] == MFCS_OPERATOR_GREATER_THAN_EQUAL) {
+        $operator = '>=';
+      }
+      elseif ($search_values['operator'] == MFCS_OPERATOR_GREATER_THAN) {
+        $operator = '>';
+      }
+      elseif ($search_values['operator'] == MFCS_OPERATOR_NOT_EQUAL) {
+        $operator = '<>';
+      }
+      elseif ($search_values['operator'] == MFCS_OPERATOR_NOT_LIKE) {
+        if ($search_string == "") {
+          $operator = '<>';
+        }
+        else {
+          $operator = 'NOT ' . $like;
+          $search_string = '%' . db_like($search_values['search']) . '%';
+        }
+      }
+      elseif ($search_values['operator'] == MFCS_OPERATOR_NOT_SLIKE) {
+        if ($search_string == "") {
+          $operator = '<>';
+        }
+        else {
+          $operator = 'NOT LIKE';
+          $search_string = '%' . db_like($search_values['search']) . '%';
+        }
+      }
+      elseif ($search_values['operator'] == MFCS_OPERATOR_NOT_ILIKE) {
+        if ($search_string == "") {
+          $operator = '<>';
+        }
+        else {
+          $operator = 'NOT ILIKE';
+          $search_string = '%' . db_like($search_values['search']) . '%';
+        }
+      }
+      elseif ($search_values['operator'] == MFCS_OPERATOR_IS_NULL) {
+        if ($expression) {
+          // not supported.
+          continue;
+        }
+        else {
+          $operand->isNull($field);
+        }
+
+        $found_values = TRUE;
+        continue;
+      }
+      elseif ($search_values['operator'] == MFCS_OPERATOR_IS_NOT_NULL) {
+        if ($expression) {
+          // not supported.
+          continue;
+        }
+        else {
+          $operand->isNotNull($field);
+        }
+
+        $found_values = TRUE;
+        continue;
+      }
+      elseif ($search_values['operator'] == MFCS_OPERATOR_IS_IN) {
+        $operator = 'IN';
+      }
+      elseif ($search_values['operator'] == MFCS_OPERATOR_IS_NOT_IN) {
+        $operator = 'NOT IN';
+      }
+
+      if ($expression) {
+        // Use of "$query->nextPlaceholder();" here seems does not work as espected. Counter is not the same?!
+        // a unique id is appended to the placeholder to help ensure that there are no uniqueness issues.
+        $placeholder_unique = drupal_random_key(4);
+        $placeholder_unique = str_replace('-', '_', $placeholder_unique);
+        $placeholder = ':mfcs_expression_' . $recurse_count . '_' . $search_operand_or_field . '_' . $expression_count . '_' . $placeholder_unique;
+        $operand->where($field . ' ' . $operator . ' ' . $placeholder, array($placeholder => $search_string));
+        $expression_count++;
+      }
+      else {
+        // If "$query->nextPlaceholder();" is not manually specified here, then for some reason placeholders disappear/get-overridden.
+        $query->nextPlaceholder();
+        $operand->condition($field, $search_string, $operator);
+      }
+
+      $found_values = TRUE;
+      continue;
+    }
     elseif ($search_op[0] == 'or') {
       $inner_operand = db_or();
     }
@@ -6020,10 +6282,6 @@ function mfcs_request_process_listing_search_array(&$query, &$operand, &$already
     elseif ($search_op[0] == 'nand') {
       $inner_operand = db_and();
       $inner_operand->not();
-    }
-    else {
-      // not valid, just skip.
-      continue;
     }
 
     $next_count = $recurse_count + 1;
@@ -6097,7 +6355,7 @@ function mfcs_get_latest_reviews($request_id, $steps = array(), $decisions = arr
     // some classifications are only allowed in certain steps.
     $and = db_and();
     $and->condition('mfrr.step', array(MFCS_REVIEW_STEP_REVIEW, MFCS_REVIEW_STEP_REQUIREMENTS), 'IN');
-    $and->condition('mrc.classification', array(MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR, MFCS_REVIEW_CLASSIFICATION_SYSTEM_ADMINISTRATOR, MFCS_REVIEW_CLASSIFICATION_MANAGER, MFCS_REVIEW_CLASSIFICATION_FAILSAFE_COORDINATOR), 'IN');
+    $and->condition('mrc.classification', array(MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR, MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR_PROXY), 'IN');
     $and->not();
     $query->condition($and);
 
@@ -6140,11 +6398,15 @@ function mfcs_get_latest_reviews($request_id, $steps = array(), $decisions = arr
  *   The number of items allowed to be listed on the table at one time.
  * @param array|null $columns
  *   (optional) specify the columns to use. NULL means use default.
+ * @param object|null $user
+ *   (optional) The user to populate access control based data.
+ * @param array|null $extra
+ *   (optional) Additional information.
  *
  * @return array
  *   A generated table array structure for passing to theme_table().
  *   Additional keys are added to the table structure:
- *   - 'error': TRUE on success, FALSE on error.
+ *   - 'error': TRUE on error, FALSE on when there is no error.
  *
  * @see: mfcs_request_load_listing()
  * @see: theme_table()
@@ -6465,6 +6727,544 @@ function mfcs_build_request_table($items, $max_rows, $columns = NULL, $user = NU
   $table['error'] = FALSE;
 
   return $table;
+}
+
+/**
+ * Builds an ajax table listing of requests.
+ *
+ * @param array $items_returned
+ *   The return array from mfcs_request_load_listing() containing both the
+ *   results and the count.
+ * @param array $conditions
+ *   The conditions that were passed to mfcs_request_load_listing().
+ * @param array $options
+ *   The options that were passed to mfcs_request_load_listing(). This expects
+ *   to have additional information added specific to this function, such as:
+ *   'columns': an array containing the column information.
+ *   'columns_default': An array of integers representing the column with the
+ *    default order and the values being either 'asc' or 'desc'.
+ * @param object|null $user
+ *   (optional) The user to populate access control based data.
+ *
+ * @return array
+ *   A generated table array structure for passing to theme_table().
+ *   Additional keys are added to the table structure:
+ *   - 'error': TRUE on error, FALSE on when there is no error.
+ *
+ * @see: mfcs_request_load_listing()
+ * @see: mfcs_build_request_ajax_table()
+ * @see: theme_table()
+ */
+function mfcs_build_request_ajax_table($items_returned, $conditions, $options, $user = NULL) {
+  if (!is_array($items_returned) && $items_returned !== FALSE) {
+    cf_error::invalid_array('items_returned');
+    return array('error' => TRUE);
+  }
+
+  if (!is_array($conditions)) {
+    cf_error::invalid_array('conditions');
+    return array('error' => TRUE);
+  }
+
+  if (!is_array($options)) {
+    cf_error::invalid_array('options');
+    return array('error' => TRUE);
+  }
+
+  if (is_null($user)) {
+    $user = cf_current_user();
+  }
+
+  if (!is_object($user)) {
+    cf_error::invalid_object('user');
+    return array('error' => TRUE);
+  }
+
+  $table = array();
+  $table['attributes'] = array(
+    'class' => array(
+      'no_default',
+      'display',
+      'hover',
+      'order-column',
+      'stripe',
+      'cell-border',
+    ),
+  );
+  $table['headers'] = array();
+  $table['rows'] = array();
+  $table['empty'] = t("No requests were found.");
+  $table['caption'] = "Requests";
+
+  $columns = array(
+    'id' => array(
+      'column' => 'id',
+      'name' => "ID",
+      'class' => 'column-id ',
+      'sanitize' => FALSE,
+      'align' => 'center',
+    ),
+    'title' => array(
+      'column' => 'title',
+      'name' => "Title",
+      'class' => 'column-title ',
+      'align' => 'center',
+    ),
+    'building' => array(
+      'column' => 'building',
+      'name' => "Building",
+      'class' => 'column-building ',
+      'align' => 'center',
+    ),
+    'room' => array(
+      'column' => 'room',
+      'name' => "Room",
+      'class' => 'column-room ',
+      'align' => 'center',
+    ),
+    'date' => array(
+      'column' => 'date',
+      'name' => "Date",
+      'class' => 'column-date ',
+      'align' => 'center',
+    ),
+    'submitted_on' => array(
+      'column' => 'submitted_on',
+      'name' => "Submitted On",
+      'class' => 'column-submitted_on ',
+      'align' => 'center',
+    ),
+    'operations' => array(
+      'column' => NULL,
+      'name' => "Operations",
+      'class' => 'column-operations no-print ',
+      'align' => 'center',
+    ),
+  );
+
+  if (isset($options['columns']) && is_array($options['columns'])) {
+    $columns = $options['columns'];
+  }
+
+  $columns_default = array(0 => 'desc');
+  if (isset($options['columns_default'])) {
+    if (is_numeric($options['columns_default'])) {
+      $columns_default = (int) $options['columns_default'];
+    }
+    elseif (is_array($options['columns_default'])) {
+      $columns_default = array();
+      foreach ($options['columns_default'] as $sort_column => $sort_direction) {
+        if (!is_numeric($sort_column)) continue;
+
+        if ($sort_direction == 'asc' || $sort_direction == 'desc') {
+          $columns_default[$sort_column] = $sort_direction;
+        }
+      }
+    }
+  }
+
+  $rows = array();
+  $rows_count = 0;
+
+  $items = array();
+  if (isset($items_returned['results']) && is_array($items_returned['results'])) {
+    $items = $items_returned['results'];
+  }
+
+  $item_ids = array_keys($items);
+  $can_create_requests = mfcs_page_request_access('create', $item_ids, $user);
+  $can_edit_requests = mfcs_page_request_access('edit', $item_ids, $user);
+  $can_review_requests = mfcs_page_request_access('review', $item_ids, $user);
+  $can_log_requests = mfcs_page_request_access('log', $item_ids, $user);
+  $can_history_requests = mfcs_page_request_access('history', $item_ids, $user);
+  #$can_delete_requests = mfcs_page_request_access('delete', $item_ids, $user);
+  $can_delete_requests = FALSE;
+
+  if (!is_array($can_create_requests)) {
+    $can_create_requests = array();
+  }
+
+  if (!is_array($can_edit_requests)) {
+    $can_edit_requests = array();
+  }
+
+  if (!is_array($can_review_requests)) {
+    $can_review_requests = array();
+  }
+
+  if (!is_array($can_log_requests)) {
+    $can_log_requests = array();
+  }
+
+  if (!is_array($can_history_requests)) {
+    $can_history_requests = array();
+  }
+
+  if (!is_array($can_delete_requests)) {
+    $can_delete_requests = array();
+  }
+
+  $status_options = mfcs_get_request_status_list_options();
+  $step_options = mfcs_get_request_steps_list_options();
+  $location_options = mfcs_get_request_location_list_options(NULL, FALSE, TRUE);
+  $room_options = mfcs_get_request_room_list_options(NULL, NULL, TRUE);
+  $building_options = array();
+
+
+  // populate the table headers.
+  $table['header'] = array();
+  foreach ($columns as $column_id => $column) {
+    $table['header'][$column_id] = array(
+      'field' => $column_id,
+      'data' => isset($column['name']) ? $column['name'] : '',
+      'align' => isset($column['align']) ? $column['align'] : '',
+      'class' => isset($column['class']) ? $column['class'] : '',
+    );
+
+    if (array_key_exists('field', $column) && is_null($column['field'])) {
+      unset($table['header'][$column_id]['field']);
+    }
+  }
+
+
+  // populate the table rows.
+  $table['rows'] = mfcs_build_request_ajax_table_process_rows($items, $columns, $user);
+
+
+  // populate the datatable settings.
+  $table['datatable_settings'] = array(
+    'order' => $columns_default,
+    'columns' => array(),
+    #'stateSave' => TRUE,
+    'lengthMenu' => array(
+      10 => '10',
+      25 => '25',
+      50 => '50',
+      75 => '75',
+      100 => '100',
+      -1 => '"All"',
+    ),
+    'processing' => FALSE,
+    'serverSide' => FALSE,
+    'deferRender' => TRUE,
+    'displayStart' => isset($options['start']) ? $options['start'] : 0,
+    'pageLength' => isset($options['limit']) ? $options['limit'] : 20,
+    'dom' => 'lfCrtip',
+    'KeyTable' => FALSE,
+    'oColVis' => array(
+      'buttonText' => '"Show / Hide"',
+    ),
+    'oLanguage' => array(
+      'sSearch' => '"Filter: "',
+    ),
+    'searchDelay' => 1200,
+  );
+
+  foreach ($columns as $column_id => $column) {
+    $table['datatable_settings']['columns'][$column_id] = array(
+      'name' => $column_id,
+      'className' => 'column-' . $column_id,
+    );
+
+    if (array_key_exists('visible', $column) && $column['visible'] === FALSE) {
+      $table['datatable_settings']['columns'][$column_id]['visible'] = FALSE;
+    }
+  }
+
+  if (array_key_exists('ajax_path', $options) && is_string($options['ajax_path']) && !empty($options['ajax_path'])) {
+    $table['datatable_settings']['ajax'] = $options['ajax_path'];
+    $table['datatable_settings']['processing'] = TRUE;
+    $table['datatable_settings']['serverSide'] = TRUE;
+  }
+
+
+  $table['error'] = FALSE;
+  return $table;
+}
+
+/**
+ * Formats an array of table rows for request listings.
+ *
+ * @param array $items
+ *   List of items returned by mfcs_request_load_listing().
+ * @param array $columns
+ *   List of column properties and settings that tell the function
+ *   what item database columns to use.
+ * @param object|null $user
+ *   (optional) The user object to check access controls against.
+ *   If NULL, then the current user is used.
+ * @param bool $ajax
+ *   (optional) When TRUE, will format the returned rows in an ajax friendly
+ *   structure. When FALSE, will format the returned rows in a drupal friendly
+ *   structure.
+ *
+ * @return array|bool
+ *   An array of rows formatted for use in functions like theme_table() or
+ *   mfcs_build_request_ajax_table().
+ *   FALSE is returned on error.
+ *
+ * @see: mfcs_build_request_ajax_table_process()
+ * @see: mfcs_request_load_listing()
+ * @see: mfcs_build_request_ajax_table()
+ * @see: theme_table()
+ */
+function mfcs_build_request_ajax_table_process_rows($items, $columns, $user = NULL, $ajax = FALSE) {
+  if (!is_array($items)) {
+    cf_error::invalid_array('items');
+    return FALSE;
+  }
+
+  if (is_null($user)) {
+    $user = cf_current_user();
+  }
+
+  if (!is_object($user)) {
+    cf_error::invalid_object($user);
+    return FALSE;
+  }
+
+  if (!is_bool($ajax)) {
+    cf_error::invalid_bool($ajax);
+    return FALSE;
+  }
+
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  $item_ids = array_keys($items);
+
+  $manager = user_access('mfcs manage', $user);
+
+  $can_create_requests = mfcs_page_request_access('create', $item_ids, $user);
+  $can_edit_requests = mfcs_page_request_access('edit', $item_ids, $user);
+  $can_review_requests = mfcs_page_request_access('review', $item_ids, $user);
+  $can_log_requests = mfcs_page_request_access('log', $item_ids, $user);
+  $can_history_requests = mfcs_page_request_access('history', $item_ids, $user);
+  #$can_delete_requests = mfcs_page_request_access('delete', $item_ids, $user);
+  $can_delete_requests = FALSE;
+
+  if (!is_array($can_create_requests)) {
+    $can_create_requests = array();
+  }
+
+  if (!is_array($can_edit_requests)) {
+    $can_edit_requests = array();
+  }
+
+  if (!is_array($can_review_requests)) {
+    $can_review_requests = array();
+  }
+
+  if (!is_array($can_log_requests)) {
+    $can_log_requests = array();
+  }
+
+  if (!is_array($can_history_requests)) {
+    $can_history_requests = array();
+  }
+
+  if (!is_array($can_delete_requests)) {
+    $can_delete_requests = array();
+  }
+
+  $status_options = mfcs_get_request_status_list_options();
+  $step_options = mfcs_get_request_steps_list_options();
+  $location_options = mfcs_get_request_location_list_options(NULL, FALSE, TRUE);
+  $room_options = mfcs_get_request_room_list_options(NULL, NULL, TRUE);
+  $building_options = array();
+
+
+  $rows = array();
+  foreach ($items as $item) {
+    $row = array();
+
+    if (!array_key_exists($item->location, $building_options)) {
+      $building_options[$item->location] = mfcs_get_request_building_list_options($item->location, NULL, TRUE);
+    }
+
+    foreach ($columns as $column_id => $column) {
+      if (is_null($column['column'])) {
+        if ($column_id == 'operations') {
+          $data = '<a href="' . $base_path . 'requests/view-0/' . $item->id . $url_arguments . '" class="operation-link operation-link-view">View</a> ';
+
+          if (array_key_exists($item->id, $can_edit_requests) && $can_edit_requests[$item->id]) {
+            $data .= '<a href="' . $base_path . 'requests/edit-0/' . $item->id . '/request' . $url_arguments . '" class="operation-link operation-link-edit">Edit</a> ';
+          }
+
+          if (array_key_exists($item->id, $can_review_requests) && $can_review_requests[$item->id]) {
+            $data .= '<a href="' . $base_path . 'requests/view-0/' . $item->id . '/' . MFCS_VIEW_MODE_OPERATIONS . $url_arguments . '" class="operation-link operation-link-review">Review</a> ';
+          }
+
+          if (array_key_exists($item->id, $can_log_requests) && $can_log_requests[$item->id]) {
+            $data .= '<a href="' . $base_path . 'requests/view-0/' . $item->id . '/' . MFCS_VIEW_MODE_LOG . $url_arguments . '" class="operation-link operation-link-log">Log</a> ';
+          }
+
+          if (array_key_exists($item->id, $can_history_requests) && $can_history_requests[$item->id]) {
+            $data .= '<a href="' . $base_path . 'requests/history-0/' . $item->id . $url_arguments . '" class="operation-link operation-link-history">History</a> ';
+          }
+
+          if (array_key_exists($item->id, $can_delete_requests) && $can_delete_requests[$item->id]) {
+            $data .= '<a href="' . $base_path . 'requests/delete-0/' . $item->id . $url_arguments . '" class="operation-link operation-link-delete">Delete</a> ';
+          }
+
+          if (array_key_exists($item->id, $can_create_requests) && $can_create_requests[$item->id]) {
+            $data .= '<a href="' . $base_path . 'requests/create-0/' . $item->id . $url_arguments . '" class="operation-link operation-link-clone">Copy</a> ';
+          }
+
+          if ($ajax) {
+            $row[$column['id']] = $data;
+          }
+          else {
+            $row['operations'] = array(
+              'data' => $data,
+              'class' => is_array($column['class']) ? $column['class'] : array(),
+            );
+          }
+        }
+      }
+      elseif (is_string($column['column']) && property_exists($item, $column['column'])) {
+        $data = property_exists($item, $column['column']) ? $item->$column['column'] : '';
+
+        // a number of the database columns are expected and required to be available.
+        // these columns are handled differently, such as being converted from an integer to a string.
+        if ($column['column'] == 'location') {
+          if (!empty($item->location)) {
+            if (isset($location_options[$item->location])) {
+              $data = check_plain($location_options[$item->location]);
+            }
+          }
+        }
+        elseif ($column['column'] == 'building') {
+          if (!empty($item->building)) {
+            if (isset($building_options[$item->location][$item->building])) {
+              $data = check_plain($building_options[$item->location][$item->building]);
+            }
+          }
+        }
+        elseif ($column['column'] == 'room') {
+          if (!empty($item->room)) {
+            if (isset($room_options[$item->room])) {
+              $data = check_plain($room_options[$item->room]);
+            }
+          }
+        }
+        elseif ($column['column'] == 'date') {
+          $data = NULL;
+
+          if (isset($item->date) && is_array($item->date)) {
+            foreach ($item->date as $delta => $date) {
+              if (is_null($data)) {
+                $data = '';
+              }
+              else {
+                $data .= '<br>';
+              }
+
+              $data .= check_plain(date("Y/m/d", $date));
+
+              if (array_key_exists($delta, $item->time_start) && !is_null($item->time_start[$delta]) && array_key_exists($delta, $item->time_stop) && !is_null($item->time_stop[$delta])) {
+                $data .= ' ' . check_plain(date("h:i a", $item->time_start[$delta]));
+                $data .= ' to ' . check_plain(date("h:i a", $item->time_stop[$delta]));
+              }
+            }
+          }
+          else {
+            $data = '';
+          }
+        }
+        elseif ($column['column'] == 'status') {
+          if (isset($status_options[$item->status])) {
+            $data = check_plain($status_options[$item->status]);
+          }
+        }
+        elseif ($column['column'] == 'step') {
+          if (isset($step_options[$item->step])) {
+            $data = check_plain($step_options[$item->step]);
+          }
+        }
+        elseif ($column_id == 'submitted_by') {
+          $data = '';
+
+          if (empty($item->submitted_by_name)) {
+            $submitter = user_load($item->user_id);
+
+            if (is_object($submitter)) {
+              $name = $submitter->name;
+
+              if (!empty($submitter->field_user_first_name['und'][0]['value'])) {
+                $name = $submitter->field_user_first_name['und'][0]['value'];
+
+                if (!empty($submitter->field_user_last_name['und'][0]['value'])) {
+                  $name .= ' ' . $submitter->field_user_last_name['und'][0]['value'];
+                }
+
+                $name .= ' (' . $submitter->name . ')';
+              }
+            }
+            else {
+              watchdog(MFCS_WATCHDOG_ID, "Failed to load the submitter a user id of %user_id. No submitter name can be provided.", array('%user_id' => $item->user_id), WATCHDOG_WARNING);
+            }
+
+            unset($submitter);
+          }
+          else {
+            $name = $item->submitted_by_name;
+
+            if (!empty($item->submitted_by_first_name) && !empty($item->submitted_by_last_name)) {
+              $name = $item->submitted_by_first_name . ' ' . $item->submitted_by_last_name . ' (' . $item->submitted_by_name . ')';
+            }
+          }
+
+          if ($manager) {
+            $data = '<a href="' . $base_path . 'user/' . $item->user_id . $url_arguments . '">' . $name . '</a>';
+          }
+          else {
+            $data = $name;
+          }
+        }
+        elseif ($column['column'] == 'created') {
+          $data = check_plain(date("Y/m/d h:i a", $item->created));
+        }
+        elseif ($column['column'] == 'updated') {
+          $data = check_plain(date("Y/m/d h:i a", $item->updated));
+        }
+        elseif (!array_key_exists('sanitize', $column) || $column['sanitize'] === FALSE) {
+          $data = property_exists($item, $column['column']) ? check_plain($item->$column['column']) : '';
+        }
+        else {
+          continue;
+        }
+
+        if ($ajax) {
+          $row[$column['id']] = $data;
+        }
+        else {
+          $row[$column_id] = array(
+            'data' => $data,
+            'class' => is_array($column['class']) ? $column['class'] : array(),
+          );
+
+          if (array_key_exists('visible', $column) && $column['visible'] === FALSE) {
+            $row[$column_id]['class'][] = 'script-hidden';
+          }
+        }
+      }
+    }
+
+    if ($ajax) {
+      $rows[] = $row;
+    }
+    else {
+      $rows[$item->id] = $row;
+    }
+  }
+
+  return $rows;
 }
 
 /**
@@ -7183,6 +7983,11 @@ function mfcs_determine_url_arguments() {
   if (!empty($mfcs_determined['get']['remaining'])) {
     $first = TRUE;
     foreach ($mfcs_determined['get']['remaining'] as $remaining_key => $remaining_value) {
+      // ignore arguments added by datatables.
+      if ($remaining_key == 'draw' || $remaining_key == 'start' || $remaining_key == 'length' || $remaining_key == '_') {
+        continue;
+      }
+
       if ($first) {
         $first = FALSE;
 
