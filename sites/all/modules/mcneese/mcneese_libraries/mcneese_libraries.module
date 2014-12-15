@@ -79,6 +79,25 @@ function mcneese_libraries_libraries_info() {
     'extensions/KeyTable/css/dataTables.KeyTable.css',
   );
 
+  // fullcalendar
+  $libraries['fullcalendar'] = array();
+  $libraries['fullcalendar']['name'] = "FullCalendar";
+  $libraries['fullcalendar']['vendor url '] = 'http://fullcalendar.io';
+  $libraries['fullcalendar']['download url'] = 'http://fullcalendar.io/download/';
+
+  // hard-code the version number.
+  $libraries['fullcalendar']['version'] = 2;
+
+  $libraries['fullcalendar']['files'] = array();
+  $libraries['fullcalendar']['files']['js'] = array(
+    'lib/moment.min.js',
+    'fullcalendar.js',
+  );
+  $libraries['fullcalendar']['files']['css'] = array(
+    'fullcalendar.css',
+    'fullcalendar.print.css',
+  );
+
   return $libraries;
 }
 
