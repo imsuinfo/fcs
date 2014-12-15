@@ -1053,7 +1053,7 @@ function mfcs_get_request_field_dates_date($form, &$form_state, &$fields, &$requ
     $delta_id = '-delta_' . $delta;
   }
 
-  $field_title = "Date of Request";
+  $field_title = "Request Date";
   $limits_check = array(
     'title' => $field_title,
     'field' => 'date',
