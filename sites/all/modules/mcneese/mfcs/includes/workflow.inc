@@ -1588,6 +1588,18 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       if (is_object($venue_coordinator)) {
         $email_to[$venue_coordinator->mail] = $venue_coordinator->mail;
       }
+
+      // also send e-mails to the venue coordinator proxies.
+      $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.user_id' => $venue_coordinator->uid, 'mpvc.disabled' => 0));
+      if (!empty($proxies_returned['results'])) {
+        foreach ($proxies_returned['results'] as $proxy_returned) {
+          $proxy = user_load($proxy_returned->proxy_id);
+
+          if (is_object($proxy)) {
+            $email_to[$proxy->mail] = $proxy->mail;
+          }
+        }
+      }
     }
     elseif ($status == MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK) {
       $email_params['title_suffix'] = "Unavailable (due to lock)";
@@ -1600,6 +1612,18 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
 
       if (is_object($venue_coordinator)) {
         $email_to[$venue_coordinator->mail] = $venue_coordinator->mail;
+      }
+
+      // also send e-mails to the venue coordinator proxies.
+      $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.user_id' => $venue_coordinator->uid, 'mpvc.disabled' => 0));
+      if (!empty($proxies_returned['results'])) {
+        foreach ($proxies_returned['results'] as $proxy_returned) {
+          $proxy = user_load($proxy_returned->proxy_id);
+
+          if (is_object($proxy)) {
+            $email_to[$proxy->mail] = $proxy->mail;
+          }
+        }
       }
     }
     elseif ($status == MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE) {
@@ -1614,6 +1638,18 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       if (is_object($venue_coordinator)) {
         $email_to[$venue_coordinator->mail] = $venue_coordinator->mail;
       }
+
+      // also send e-mails to the venue coordinator proxies.
+      $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.user_id' => $venue_coordinator->uid, 'mpvc.disabled' => 0));
+      if (!empty($proxies_returned['results'])) {
+        foreach ($proxies_returned['results'] as $proxy_returned) {
+          $proxy = user_load($proxy_returned->proxy_id);
+
+          if (is_object($proxy)) {
+            $email_to[$proxy->mail] = $proxy->mail;
+          }
+        }
+      }
     }
     else {
       $email_params['title_suffix'] = "Requested";
@@ -1626,6 +1662,18 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
 
       if (is_object($venue_coordinator)) {
         $email_to[$venue_coordinator->mail] = $venue_coordinator->mail;
+      }
+
+      // also send e-mails to the venue coordinator proxies.
+      $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.user_id' => $venue_coordinator->uid, 'mpvc.disabled' => 0));
+      if (!empty($proxies_returned['results'])) {
+        foreach ($proxies_returned['results'] as $proxy_returned) {
+          $proxy = user_load($proxy_returned->proxy_id);
+
+          if (is_object($proxy)) {
+            $email_to[$proxy->mail] = $proxy->mail;
+          }
+        }
       }
     }
   }
@@ -1642,6 +1690,18 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     if ($status == MFCS_REQUEST_STATUS_LOCKED || $status == MFCS_REQUEST_STATUS_UNLOCKED) {
       if (is_object($venue_coordinator)) {
         $email_to[$venue_coordinator->mail] = $venue_coordinator->mail;
+      }
+
+      // also send e-mails to the venue coordinator proxies.
+      $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.user_id' => $venue_coordinator->uid, 'mpvc.disabled' => 0));
+      if (!empty($proxies_returned['results'])) {
+        foreach ($proxies_returned['results'] as $proxy_returned) {
+          $proxy = user_load($proxy_returned->proxy_id);
+
+          if (is_object($proxy)) {
+            $email_to[$proxy->mail] = $proxy->mail;
+          }
+        }
       }
 
       if ($request['top']['step'][0]->value == MFCS_REVIEW_STEP_REVIEW) {
@@ -1674,6 +1734,18 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
         $email_to[$venue_coordinator->mail] = $venue_coordinator->mail;
       }
 
+      // also send e-mails to the venue coordinator proxies.
+      $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.user_id' => $venue_coordinator->uid, 'mpvc.disabled' => 0));
+      if (!empty($proxies_returned['results'])) {
+        foreach ($proxies_returned['results'] as $proxy_returned) {
+          $proxy = user_load($proxy_returned->proxy_id);
+
+          if (is_object($proxy)) {
+            $email_to[$proxy->mail] = $proxy->mail;
+          }
+        }
+      }
+
       foreach ($step_1_reviewers as $r) {
         $email_to[$r->email] = $r->email;
       }
@@ -1698,6 +1770,18 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
 
     if (is_object($venue_coordinator)) {
       $email_to[$venue_coordinator->mail] = $venue_coordinator->mail;
+    }
+
+    // also send e-mails to the venue coordinator proxies.
+    $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.user_id' => $venue_coordinator->uid, 'mpvc.disabled' => 0));
+    if (!empty($proxies_returned['results'])) {
+      foreach ($proxies_returned['results'] as $proxy_returned) {
+        $proxy = user_load($proxy_returned->proxy_id);
+
+        if (is_object($proxy)) {
+          $email_to[$proxy->mail] = $proxy->mail;
+        }
+      }
     }
 
     foreach ($step_1_reviewers as $r) {
@@ -1794,6 +1878,18 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
 
       if (is_object($venue_coordinator)) {
         $email_to[$venue_coordinator->mail] = $venue_coordinator->mail;
+      }
+
+      // also send e-mails to the venue coordinator proxies.
+      $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.user_id' => $venue_coordinator->uid, 'mpvc.disabled' => 0));
+      if (!empty($proxies_returned['results'])) {
+        foreach ($proxies_returned['results'] as $proxy_returned) {
+          $proxy = user_load($proxy_returned->proxy_id);
+
+          if (is_object($proxy)) {
+            $email_to[$proxy->mail] = $proxy->mail;
+          }
+        }
       }
 
       if ($status != MFCS_REQUEST_STATUS_DELETED) {
@@ -1955,6 +2051,18 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       if (is_object($venue_coordinator)) {
         $email_to[$venue_coordinator->mail] = $venue_coordinator->mail;
       }
+
+      // also send e-mails to the venue coordinator proxies.
+      $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.user_id' => $venue_coordinator->uid, 'mpvc.disabled' => 0));
+      if (!empty($proxies_returned['results'])) {
+        foreach ($proxies_returned['results'] as $proxy_returned) {
+          $proxy = user_load($proxy_returned->proxy_id);
+
+          if (is_object($proxy)) {
+            $email_to[$proxy->mail] = $proxy->mail;
+          }
+        }
+      }
     }
   }
   elseif ($is_comment) {
@@ -1973,6 +2081,18 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
 
       if (is_object($venue_coordinator)) {
         $email_to[$venue_coordinator->mail] = $venue_coordinator->mail;
+      }
+
+      // also send e-mails to the venue coordinator proxies.
+      $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.user_id' => $venue_coordinator->uid, 'mpvc.disabled' => 0));
+      if (!empty($proxies_returned['results'])) {
+        foreach ($proxies_returned['results'] as $proxy_returned) {
+          $proxy = user_load($proxy_returned->proxy_id);
+
+          if (is_object($proxy)) {
+            $email_to[$proxy->mail] = $proxy->mail;
+          }
+        }
       }
 
       foreach ($step_1_reviewers as $r) {
