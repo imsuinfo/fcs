@@ -5786,7 +5786,7 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
               $already_joined['mfcs_banner_locations'] = 'mbl';
             }
 
-            $query->orderBy('mbl.human_name', is_null($sort_value) ? 'ASC' : $sort_value);
+            $query->orderBy($already_joined['mfcs_banner_locations'] . '.human_name', is_null($sort_value) ? 'ASC' : $sort_value);
           }
           elseif ($sort_name == 'building') {
             if (!array_key_exists('mfcs_banner_buildings', $already_joined)) {
@@ -5794,7 +5794,7 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
               $already_joined['mfcs_banner_buildings'] = 'mbb';
             }
 
-            $query->orderBy('mbb.human_name', is_null($sort_value) ? 'ASC' : $sort_value);
+            $query->orderBy($already_joined['mfcs_banner_buildings'] . '.human_name', is_null($sort_value) ? 'ASC' : $sort_value);
           }
           elseif ($sort_name == 'room') {
             if (!array_key_exists('mfcs_banner_rooms', $already_joined)) {
@@ -5802,16 +5802,21 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
               $already_joined['mfcs_banner_rooms'] = 'mbr';
             }
 
-            $query->orderBy('mbr.human_name', is_null($sort_value) ? 'ASC' : $sort_value);
+            $query->orderBy($already_joined['mfcs_banner_rooms'] . '.human_name', is_null($sort_value) ? 'ASC' : $sort_value);
           }
           elseif ($sort_name == 'date') {
-            if (!array_key_exists('mfcs_view_dates_asc_distinct', $already_joined)) {
-              $query->innerJoin('mfcs_view_dates_asc_distinct', 'mvdad', 'mer.id = mvdad.request_id');
-              $already_joined['mfcs_view_dates_asc_distinct'] = 'mvdad';
+            if (!array_key_exists('mfcs_field_dates_date', $already_joined)) {
+              $query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mc.request_id = mfdd.request_id AND mc.dates_date = mfdd.revision');
+              $already_joined['mfcs_field_dates_date'] = 'mfdd';
             }
 
-            $query->orderBy('mvdad.date', is_null($sort_value) ? 'ASC' : $sort_value);
-            $query->orderBy('mvdad.time_start', is_null($sort_value) ? 'ASC' : $sort_value);
+            if (!array_key_exists('mfcs_field_dates_time_start', $already_joined)) {
+              $query->leftJoin('mfcs_field_dates_time_start', 'mfdts', 'mc.request_id = mfdts.request_id AND mc.dates_time_start = mfdts.revision');
+              $already_joined['mfcs_field_dates_time_start'] = 'mfdts';
+            }
+
+            $query->orderBy($already_joined['mfcs_field_dates_date'] . '.value', is_null($sort_value) ? 'ASC' : $sort_value);
+            $query->orderBy($already_joined['mfcs_field_dates_time_start'] . '.value', is_null($sort_value) ? 'ASC' : $sort_value);
           }
           elseif ($sort_name == 'submitted by') {
             $query->orderBy('mer.user_id', is_null($sort_value) ? 'ASC' : $sort_value);
