@@ -176,7 +176,7 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
     $markup .= '<div class="calendar-label"><a href="' . $url_base_day . $current_year . '/' . $current_month_name . '/' . $current_day . $url_arguments. '">' . $current_day . '</a></div>';
     if (!empty($items[$current_month_day])) {
       foreach ($items[$current_month_day] as $item_id => $item) {
-        $markup .= '<div class="calendar-item"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
+        $markup .= '<div class="calendar-item location-' . $item['location'] . ' building-' . $item['building'] . ' room-' . $item['room'] . ' type-' . $item['type'] . ' year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
       }
     }
     $markup .= '</div></div>';
