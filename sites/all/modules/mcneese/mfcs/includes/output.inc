@@ -126,14 +126,22 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
   $url_base_day = $base_path . 'requests/calendar-0/day/';
 
   $last_url = $url_base_month . date('Y', $last_month) . '/' . strtolower(date('F', $last_month)) . $url_arguments;
+  $this_url = $url_base_month . $url_arguments;
   $next_url = $url_base_month . date('Y', $next_month) . '/' . strtolower(date('F', $next_month)) . $url_arguments;
 
   $markup .= '<div class="calendar-navigation">';
   $markup .= '<div class="calendar-navigation-previous">';
-  $markup .= '<a href="' . $last_url . '">Previous</a>';
+  $markup .= '<a href="' . $last_url . '" title="Go to ' . date('F Y', $last_month) . '">Previous</a>';
   $markup .= '</div>';
+
+  if (date("Y/m", REQUEST_TIME) != date("Y/m", $month_start)) {
+    $markup .= '<div class="calendar-navigation-this">';
+    $markup .= '<a href="' . $this_url . '" title="Go to Current Month">This Month</a>';
+    $markup .= '</div>';
+  }
+
   $markup .= '<div class="calendar-navigation-next">';
-  $markup .= '<a href="' . $next_url . '">Next</a>';
+  $markup .= '<a href="' . $next_url . '" title="Go to ' . date('F Y', $next_month) . '">Next</a>';
   $markup .= '</div>';
   $markup .= '</div>';
 
@@ -334,14 +342,22 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
   $url_base_day = $base_path . 'requests/calendar-0/day/';
 
   $last_url = $url_base_day . date('Y', $last_day) . '/' . strtolower(date('F', $last_day)) . '/' . date('d', $last_day) . $url_arguments;
+  $this_url = $url_base_day . $url_arguments;
   $next_url = $url_base_day . date('Y', $next_day) . '/' . strtolower(date('F', $next_day)) . '/' . date('d', $next_day) . $url_arguments;
 
   $markup .= '<div class="calendar-navigation">';
   $markup .= '<div class="calendar-navigation-previous">';
-  $markup .= '<a href="' . $last_url . '">Previous</a>';
+  $markup .= '<a href="' . $last_url . '" title="Go to ' . date('F d, Y', $last_day) . '">Previous</a>';
   $markup .= '</div>';
+
+  if (date("Y/m/d", REQUEST_TIME) != date("Y/m/d", $day_start)) {
+    $markup .= '<div class="calendar-navigation-this">';
+    $markup .= '<a href="' . $this_url . '" title="Go to Current Day">Today</a>';
+    $markup .= '</div>';
+  }
+
   $markup .= '<div class="calendar-navigation-next">';
-  $markup .= '<a href="' . $next_url . '">Next</a>';
+  $markup .= '<a href="' . $next_url . '" title="Go to ' . date('F d, Y', $next_day) . '">Next</a>';
   $markup .= '</div>';
   $markup .= '</div>';
 
