@@ -30,11 +30,14 @@
  *   An HTML title for describing the calendar.
  * @param string $id
  *   (optional) A unique HTML id to associate with the calendar.
+ * @param int|null $max_items
+ *   (optional) Maximum number of items to display before a 'more' links is
+ *   added. A value of NULL means no maximum limit.
  *
  * @return string|bool
  *   The generate HTML markup or FALSE on error.
  */
-function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $absolute_start, $absolute_stop, $title, $id = NULL) {
+function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $absolute_start, $absolute_stop, $title, $id = NULL, $max_items = NULL) {
   if (!is_array($items)) {
     cf_error::invalid_array('items');
     return FALSE;
@@ -73,6 +76,11 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
     }
 
     $id_string = ' id="' . check_plain($id) . '"';
+  }
+
+  if (!is_null($max_items) && !cf_is_integer($max_items)) {
+    cf_error::invalid_integer('max_items');
+    $max_items = NULL;
   }
 
   global $base_path;
@@ -149,6 +157,10 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
   $week_first = date('W', $current_date);
   $week_count = $week_start;
 
+  $this_year = date('Y', REQUEST_TIME);
+  $this_month = date('n', REQUEST_TIME);
+  $this_day = date('j', REQUEST_TIME);
+
   $weeks_processed = array();
   while ($current_date < $absolute_stop) {
     $current_year = date('Y', $current_date);
@@ -171,12 +183,31 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
       $extra_class = ' month-next';
     }
 
+    if ($current_year == $this_year && $current_month == $this_month && $current_day == $this_day) {
+      $extra_class .= ' today';
+    }
+
     $markup .= '<div class="calendar-day-wrapper weekday-' . $week_count . ' day-' . $current_day . ' month-' . $current_month . $extra_class . '">';
     $markup .= '<div class="calendar-day weekday-' . $week_count . ' day-' . $current_day . ' month-' . $current_month . $extra_class . '">';
     $markup .= '<div class="calendar-label"><a href="' . $url_base_day . $current_year . '/' . $current_month_name . '/' . $current_day . $url_arguments. '">' . $current_day . '</a></div>';
     if (!empty($items[$current_month_day])) {
-      foreach ($items[$current_month_day] as $item_id => $item) {
-        $markup .= '<div class="calendar-item location-' . $item['location'] . ' building-' . $item['building'] . ' room-' . $item['room'] . ' type-' . $item['type'] . ' year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
+      $items_count = 0;
+      if (is_null($max_items)) {
+        foreach ($items[$current_month_day] as $item_id => $item) {
+          $markup .= '<div class="calendar-item location-' . $item['location'] . ' building-' . $item['building'] . ' room-' . $item['room'] . ' type-' . $item['type'] . ' year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
+        }
+      }
+      else {
+        $items_count = 0;
+        foreach ($items[$current_month_day] as $item_id => $item) {
+          $markup .= '<div class="calendar-item location-' . $item['location'] . ' building-' . $item['building'] . ' room-' . $item['room'] . ' type-' . $item['type'] . ' year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
+
+          $items_count++;
+          if ($items_count == $max_items) {
+            $markup .= '<div class="calendar-item item-more year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '"><a class="calendar-item-link" href="' . $url_base_day . $current_year . '/' . $current_month_name . '/' . $current_day . $url_arguments . '" title="View more.">More...</a></div>';
+            break;
+          }
+        }
       }
     }
     $markup .= '</div></div>';
