@@ -379,6 +379,15 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
       $item_count = 0;
       $left_offset = 0;
       foreach ($all_day as $item_id => $item) {
+        if (is_null($id)) {
+          $item_id_string = 'calendar-item-' . $item_id;
+          $item_id_parent = '';
+        }
+        else {
+          $item_id_string = $id . '-calendar-item-' . $item_id;
+          $item_id_parent = '#' . $id . ' ';
+        }
+
         $item_class = "";
 
         $item_class = 'row-' . $item_count . ' ';
@@ -394,9 +403,11 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
         $item_class .= 'room-' . $item['room'] . ' ';
         $item_class .= 'type-' . $item['type'] . ' ';
 
-        $markup .= '<div class="calendar-item-wrapper ' . $item_class . '"><div class="calendar-item">';
+        $markup .= '<div id="' . $item_id_string . '"  class="calendar-item-wrapper ' . $item_class . '"><div class="calendar-item">';
         $markup .= '<div class="calendar-item-link-wrapper"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
         $markup .= '<div class="calendar-item-location-wrapper"><div class="calendar-item-location">' . $item['building_name'] . ' ' . $item['room_name'] . '</div></div>';
+
+        $markup .= '<div class="calendar-item-id-wrapper"><div class="calendar-item-id">' . $item_id . '</div></div>';
 
         if (!empty($request_type_options[$item['type']])) {
           $markup .= '<div class="calendar-item-type-wrapper"><div class="calendar-item-type">' . $request_type_options[$item['type']] . '</div></div>';
@@ -576,15 +587,15 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
       }
 
       if (is_null($id)) {
-        $item_id = 'calendar-item-' . $item_id;
+        $item_id_string = 'calendar-item-' . $item_id;
         $item_id_parent = '';
       }
       else {
-        $item_id = $id . '-calendar-item-' . $item_id;
+        $item_id_string = $id . '-calendar-item-' . $item_id;
         $item_id_parent = '#' . $id . ' ';
       }
 
-      $css_screen .= $item_id_parent . '#' . $item_id . ' {' . "\n";
+      $css_screen .= $item_id_parent . '#' . $item_id_string . ' {' . "\n";
       $css_screen .= ' top: ' . $top_offset . 'px;' . "\n";
       $css_screen .= ' left: ' . $left_offset . 'px;' . "\n";
       $css_screen .= ' min-height: ' . $item_height . 'px;' . "\n";
@@ -593,7 +604,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
       $css_screen .= ' max-width: ' . $item_width . 'px;' . "\n";
       $css_screen .= '}' . "\n";
 
-      $css_portrait .= $item_id_parent . '#' . $item_id . ' {' . "\n";
+      $css_portrait .= $item_id_parent . '#' . $item_id_string . ' {' . "\n";
       $css_portrait .= ' top: ' . $top_offset . 'px;' . "\n";
       $css_portrait .= ' left: ' . $left_offset_portrait . 'px;' . "\n";
       $css_portrait .= ' min-height: ' . $item_height . 'px;' . "\n";
@@ -602,7 +613,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
       $css_portrait .= ' max-width: ' . $item_width . 'px;' . "\n";
       $css_portrait .= '}' . "\n";
 
-      $css_landscape .= $item_id_parent . '#' . $item_id . ' {' . "\n";
+      $css_landscape .= $item_id_parent . '#' . $item_id_string . ' {' . "\n";
       $css_landscape .= ' top: ' . $top_offset . 'px;' . "\n";
       $css_landscape .= ' left: ' . $left_offset . 'px;' . "\n";
       $css_landscape .= ' min-height: ' . $item_height . 'px;' . "\n";
@@ -611,10 +622,12 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
       $css_landscape .= ' max-width: ' . $item_width . 'px;' . "\n";
       $css_landscape .= '}' . "\n";
 
-      $markup .= '<div id="' . $item_id . '" class="calendar-item-wrapper ' . $item_class . '"><div class="calendar-item">';
+      $markup .= '<div id="' . $item_id_string . '" class="calendar-item-wrapper ' . $item_class . '"><div class="calendar-item">';
       $markup .= '<div class="calendar-item-link-wrapper"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
       $markup .= '<div class="calendar-item-time-wrapper"><div class="calendar-item-time">' . date("h:i a", $item['time_start']) . " to " . date("h:i a", $item['time_stop']) . '</div></div>';
       $markup .= '<div class="calendar-item-location-wrapper"><div class="calendar-item-location">' . $item['building_name'] . ' ' . $item['room_name'] . '</div></div>';
+
+      $markup .= '<div class="calendar-item-id-wrapper"><div class="calendar-item-id">' . $item_id . '</div></div>';
 
       if (!empty($request_type_options[$item['type']])) {
         $markup .= '<div class="calendar-item-type-wrapper"><div class="calendar-item-type">' . $request_type_options[$item['type']] . '</div></div>';
