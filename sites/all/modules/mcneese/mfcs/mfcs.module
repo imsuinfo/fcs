@@ -6971,6 +6971,10 @@ function mfcs_build_request_ajax_table($items_returned, $conditions, $options, $
       'className' => 'column-' . $column_id,
     );
 
+    if ($column_id == 'operations') {
+      $table['datatable_settings']['columns'][$column_id]['className'] .= ' no-print';
+    }
+
     if (array_key_exists('visible', $column) && $column['visible'] === FALSE) {
       $table['datatable_settings']['columns'][$column_id]['visible'] = FALSE;
     }
