@@ -409,6 +409,7 @@ function mfcs_ajax_proxy_0_list() {
 
     $count_options['returned'] = FALSE;
     $proxies_returned = mfcs_get_proxy_venue_coordinators($count_conditions, $count_options);
+
     $proxies_total = 0;
     if (array_key_exists('count', $proxies_returned)) {
       $proxies_total = $proxies_returned['count'];
@@ -425,13 +426,19 @@ function mfcs_ajax_proxy_0_list() {
   }
   else {
     $proxies_returned = mfcs_get_proxy_venue_coordinators($conditions, $options);
+
+    $proxies_total = 0;
+    if (array_key_exists('count', $proxies_returned)) {
+      $proxies_total = $proxies_returned['count'];
+    }
+
     $proxies = array();
     if (isset($proxies_returned['results']) && is_array($proxies_returned['results'])) {
       $proxies = $proxies_returned['results'];
     }
 
-    $response['recordsTotal'] = $proxies_returned['count'];
-    $response['recordsFiltered'] = $proxies_returned['count'];
+    $response['recordsTotal'] = $proxies_total;
+    $response['recordsFiltered'] = $proxies_total;
   }
 
   if (!is_array($proxies)) {

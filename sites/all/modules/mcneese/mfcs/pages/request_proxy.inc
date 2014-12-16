@@ -135,13 +135,19 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = 0) {
   );
 
   $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.disabled' => 0), $options);
+
+  $proxies_total = 0;
+  if (array_key_exists('count', $proxies_returned)) {
+    $proxies_total = $proxies_returned['count'];
+  }
+
   $proxies = array();
   if (isset($proxies_returned['results']) && is_array($proxies_returned['results'])) {
     $proxies = $proxies_returned['results'];
   }
 
   // do not provide pages when the page number would bring the user beyond the available items.
-  if ($proxies_returned['count'] > 0 && $options['start'] >= $proxies_returned['count']) {
+  if ($proxies_total > 0 && $options['start'] >= $proxies_total) {
     drupal_not_found();
     drupal_exit();
     return array();
@@ -292,15 +298,15 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = 0) {
   $navigation_start = $options['start'] + 1;
   $navigation_total = $options['start'] + $rows_per_page;
 
-  if ($navigation_total > $proxies_returned['count']) {
-    $navigation_total = $proxies_returned['count'];
+  if ($navigation_total > $proxies_total) {
+    $navigation_total = $proxies_total;
   }
 
   $navigation_bottom .= '<div class="table_listing-comment">' . "\n";
-  $navigation_bottom .= "Showing " . $navigation_start . " to " . $navigation_total . " of " . $proxies_returned['count'] . " entries.\n";
+  $navigation_bottom .= "Showing " . $navigation_start . " to " . $navigation_total . " of " . $proxies_total . " entries.\n";
   $navigation_bottom .= '</div>' . "\n";
 
-  if ($proxies_returned['count'] > ($options['start'] + $rows_per_page)) {
+  if ($proxies_total > ($options['start'] + $rows_per_page)) {
     $next_page = $page_number + 1;
     $navigation_top .= '<a href="' . $base_path . 'requests/proxy-0/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
     $navigation_bottom .= '<a href="' . $base_path . 'requests/proxy-0/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
