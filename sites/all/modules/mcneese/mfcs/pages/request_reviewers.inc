@@ -248,7 +248,7 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
   }
 
   // do not provide pages when the page number would bring the user beyond the available items.
-  if ($options['start'] >= $reviewers_returned['count']) {
+  if ($reviewers_returned['count'] > 0 && $options['start'] >= $reviewers_returned['count']) {
     drupal_not_found();
     drupal_exit();
     return array();
