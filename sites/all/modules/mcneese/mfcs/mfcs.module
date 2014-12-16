@@ -1530,6 +1530,11 @@ function mfcs_load_locations($location = NULL, $disabled = FALSE) {
     $query->addField('mbl', 'id', 'location_id');
     $query->addField('mbl', 'human_name', 'location_name');
 
+    if ($disabled) {
+      $query->addField('mbl', 'disabled', 'disabled');
+      $query->addField('mbl', 'date', 'date');
+    }
+
     $query->orderBy('mbl.human_name');
 
     $items = $query->execute()->fetchAllAssoc('location_id');
@@ -1633,6 +1638,12 @@ function mfcs_load_buildings($location = NULL, $building = NULL, $disabled = FAL
     $query->addField('mbb', 'id', 'building_id');
     $query->addField('mbb', 'machine_name', 'building_code');
     $query->addField('mbb', 'human_name', 'building_name');
+
+    if ($disabled) {
+      $query->addField('mbb', 'disabled', 'disabled');
+      $query->addField('mbb', 'date', 'date');
+    }
+
     $query->orderBy('mbb.human_name');
 
     $items = $query->execute()->fetchAllAssoc('building_id');
@@ -1755,6 +1766,11 @@ function mfcs_load_rooms($location = NULL, $building = NULL, $room = NULL, $disa
     $query->addField('mbr', 'coordinator_id', 'coordinator_id');
     $query->addField('mbr', 'capacity_normal', 'capacity_normal');
     $query->addField('mbr', 'capacity_max', 'capacity_max');
+
+    if ($disabled) {
+      $query->addField('mbr', 'disabled', 'disabled');
+      $query->addField('mbr', 'date', 'date');
+    }
 
     $query->addField('mbb', 'id', 'building_id');
     $query->addField('mbb', 'machine_name', 'building_code');
