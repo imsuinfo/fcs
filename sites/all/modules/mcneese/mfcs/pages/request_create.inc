@@ -358,6 +358,20 @@ function mfcs_request_create_0_form_validate($form, &$form_state) {
               $form_state['values']['request']['step'][0] = MFCS_REVIEW_STEP_COMPLETED;
               $form_state['rebuild'] = FALSE;
             }
+            else {
+              $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.user_id' => $form_state['values']['request']['venue_coordinator']['user_id'][0], 'mpvc.disabled' => 0));
+              if (empty($proxies_returned['results'])) {
+                form_set_error('request][information][type][0', "You are not authorized to create a quick meeting.");
+              }
+              else {
+                $form_state['values']['request']['status'][0] = MFCS_REQUEST_STATUS_CLOSED_ACCEPTED;
+                $form_state['values']['request']['step'][0] = MFCS_REVIEW_STEP_COMPLETED;
+                $form_state['rebuild'] = FALSE;
+              }
+            }
+          }
+          else {
+            form_set_error('request][information][type][0', "An internal error occured while trying to determine the venue coordinator for this request. Please contact the support staff.");
           }
         }
       }
