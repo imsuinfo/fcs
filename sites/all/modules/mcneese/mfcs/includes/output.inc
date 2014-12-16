@@ -134,7 +134,8 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
   $markup .= '<a href="' . $last_url . '" title="Go to ' . date('F Y', $last_month) . '">Previous</a>';
   $markup .= '</div>';
 
-  if (date("Y/m", REQUEST_TIME) != date("Y/m", $month_start)) {
+  $instance = mfcs_instance();
+  if (date("Y/m", $instance) != date("Y/m", $month_start)) {
     $markup .= '<div class="calendar-navigation-this">';
     $markup .= '<a href="' . $this_url . '" title="Go to Current Month">This Month</a>';
     $markup .= '</div>';
@@ -165,9 +166,9 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
   $week_first = date('W', $current_date);
   $week_count = $week_start;
 
-  $this_year = date('Y', REQUEST_TIME);
-  $this_month = date('n', REQUEST_TIME);
-  $this_day = date('j', REQUEST_TIME);
+  $this_year = date('Y', $instance);
+  $this_month = date('n', $instance);
+  $this_day = date('j', $instance);
 
   $weeks_processed = array();
   while ($current_date < $absolute_stop) {
@@ -350,7 +351,8 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
   $markup .= '<a href="' . $last_url . '" title="Go to ' . date('F d, Y', $last_day) . '">Previous</a>';
   $markup .= '</div>';
 
-  if (date("Y/m/d", REQUEST_TIME) != date("Y/m/d", $day_start)) {
+  $instance = mfcs_instance();
+  if (date("Y/m/d", $instance) != date("Y/m/d", $day_start)) {
     $markup .= '<div class="calendar-navigation-this">';
     $markup .= '<a href="' . $this_url . '" title="Go to Current Day">Today</a>';
     $markup .= '</div>';

@@ -57,7 +57,7 @@ function mfcs_ajax_setup_request_settings() {
     $options['limit'] = 0;
   }
 
-  $timestamp = REQUEST_TIME;
+  $timestamp = mfcs_instance();
   if (isset($_GET['_']) && is_array($_GET['_'])) {
     $timestamp = $_GET['_'];
   }
