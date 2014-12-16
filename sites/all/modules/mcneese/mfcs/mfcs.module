@@ -2605,6 +2605,11 @@ function mfcs_sync_banner_to_local() {
     }
   }
 
+  $result = mfcs_sync_banner_to_local_classes();
+  if ($result === FALSE) {
+    return FALSE;
+  }
+
   return mfcs_sync_banner_to_local_users();
 }
 
@@ -2725,6 +2730,139 @@ function mfcs_sync_banner_to_local_users($user_id = NULL) {
 
       return FALSE;
     }
+  }
+
+  return TRUE;
+}
+
+/**
+ * Synchronizes the local database with the banner information for classes.
+ *
+ * For performance reasons, the table 'mfcs_banner_classes' does not store the
+ * disabled/enabled status and date. Instead, on sync all entries are deleted
+ * and then fully restored.
+ *
+ * @return bool
+ *   TRUE on success, FALSE otherwise.
+ */
+function mfcs_sync_banner_to_local_classes() {
+  $instance = mfcs_instance();
+
+  $year = date("Y");
+  $year_next = $year + 1;
+  $year_stamp = strtotime("midnight Jan 1, " . $year);
+
+  $buildings = mfcs_load_rooms();
+  $rooms = mfcs_load_rooms();
+
+  if (empty($buildings) || empty($rooms)) {
+    // if there are no buildings or no rooms, then there can be no classes.
+    return TRUE;
+  }
+
+  $rooms_list = array();
+  foreach ($rooms as $room) {
+    $rooms_list[$room->room_id] = $room->room_number;
+  }
+
+
+  $classes_query = 'select ssrmeet_start_date, ssrmeet_end_date, ssrmeet_begin_time, ssrmeet_end_time, ';
+  $classes_query .= 'ssrmeet_bldg_code, ssrmeet_room_code, ssrmeet_mon_day, ssrmeet_tue_day, ';
+  $classes_query .= 'ssrmeet_wed_day, ssrmeet_thu_day, ssrmeet_fri_day, ssrmeet_sat_day, ssrmeet_sun_day ';
+  $classes_query .= 'from ssvmeet sm ';
+
+  $classes_query .= 'where (ssrmeet_term_code like \'' . $year . '%\' or ssrmeet_term_code like \'' . $year_next . '%\')';
+  $classes_query .= 'and not ssrmeet_begin_time is NULL ';
+  $classes_query .= 'and not ssrmeet_end_time is NULL ';
+
+  $classes_query .= 'and ssrmeet_bldg_code in (';
+  $count = 0;
+  $buildings_total = count($buildings);
+  $buildings_list = array();
+  foreach ($buildings as $building) {
+    $buildings_list[$building->building_id] = $building->building_code;
+
+    $classes_query .= '\'' . $building->building_code . '\'';
+    $count++;
+
+    if ($count < $buildings_total) {
+      $classes_query .= ', ';
+    }
+  }
+  $classes_query .= ') ';
+  $classes_query .= 'order by ssrmeet_start_date asc';
+
+  $classes = mfcs_oracle_select($classes_query);
+
+  $banner_to_local_weekdays = array(
+    'sunday' => 'ssrmeet_sun_day',
+    'monday' => 'ssrmeet_mon_day',
+    'tuesday' => 'ssrmeet_tue_day',
+    'wednesday' => 'ssrmeet_wed_day',
+    'thursday' => 'ssrmeet_thu_day',
+    'friday' => 'ssrmeet_fri_day',
+    'saturday' => 'ssrmeet_sat_day',
+  );
+
+
+  $transaction = db_transaction();
+  try {
+    // permanently remove all classes and restart the sequence.
+    $query = db_delete('mfcs_banner_classes');
+    $query->execute();
+
+    db_query('ALTER SEQUENCE {mfcs_banner_classes_id_seq} RESTART');
+
+    // process all of the classes and add new reservations or remove the 'deleted' status to existing reservations.
+    if (!empty($classes)) {
+      foreach ($classes as $class) {
+        $start_stamp = strtotime($class['ssrmeet_start_date']);
+        $stop_stamp = strtotime($class['ssrmeet_end_date']);
+
+        $start_time_string = implode(':', str_split($class['ssrmeet_begin_time'], 2));
+        $stop_time_string = implode(':', str_split($class['ssrmeet_end_time'], 2));
+
+        $class_room = array_search($class['ssrmeet_room_code'], $rooms_list);
+        if ($class_room === FALSE) {
+          continue;
+        }
+
+        $class_base = array(
+          'room' => $class_room,
+        );
+
+        foreach ($banner_to_local_weekdays as $weekday => $banner_weekday) {
+          if (!empty($class[$banner_weekday])) {
+            $stamp_day = strtotime("this " . $weekday, $start_stamp);
+
+            while ($stamp_day <= $stop_stamp) {
+              $stamp_day_string = date("Y/m/d ", $stamp_day);
+              $stamp_time_start = strtotime($stamp_day_string . $start_time_string);
+              $stamp_time_stop = strtotime($stamp_day_string . $stop_time_string);
+
+              $class_fields = $class_base;
+              $class_fields['reserved_day'] = $stamp_day;
+              $class_fields['reserved_time_start'] = $stamp_time_start;
+              $class_fields['reserved_time_stop'] = $stamp_time_stop;
+
+              $query = db_insert('mfcs_banner_classes');
+              $query->fields($class_fields);
+              $query->execute();
+
+              $stamp_day = strtotime("next " . $weekday, $stamp_day);
+            }
+          }
+        }
+      }
+    }
+
+    // enforce transaction execution
+    unset($transaction);
+  } catch (Exception $ex) {
+    $transaction->rollback();
+    cf_error::on_exception($ex);
+
+    return FALSE;
   }
 
   return TRUE;
@@ -5144,14 +5282,14 @@ function mfcs_get_reviewer_settings_by_user_id($user_id, $disabled = FALSE) {
  *   An array containing any requests currently using the room at the specified date and time.
  *   FALSE on error.
  */
-function mfcs_check_room_availability($room, $date, $time_start, $time_stop, $request_id = NULL) {
+function mfcs_check_room_availability($room, $dates, $time_start, $time_stop, $request_id = NULL) {
   if (!is_string($room) || empty($room)) {
     cf_error::invalid_string('room');
     return FALSE;
   }
 
-  if (!is_array($date) || empty($date)) {
-    cf_error::invalid_array('date');
+  if (!is_array($dates) || empty($dates)) {
+    cf_error::invalid_array('dates');
     return FALSE;
   }
 
@@ -5170,6 +5308,7 @@ function mfcs_check_room_availability($room, $date, $time_start, $time_stop, $re
     return FALSE;
   }
 
+  $matched_requests = array();
   try {
     $query = db_select('mfcs_requests', 'mer');
 
@@ -5193,7 +5332,7 @@ function mfcs_check_room_availability($room, $date, $time_start, $time_stop, $re
 
     $query->condition('mer.status', $statuses, 'IN');
     $query->condition('mer.room', $room);
-    $query->condition('mfdd.value', $date, 'IN');
+    $query->condition('mfdd.value', $dates, 'IN');
 
     if (!is_null($request_id)) {
       $query->condition('mer.id', $request_id, '<>');
@@ -5201,76 +5340,123 @@ function mfcs_check_room_availability($room, $date, $time_start, $time_stop, $re
 
     $results = $query->execute()->fetchAll();
 
-    // no rooms in use.
-    if (empty($results)) {
-      return array();
-    }
+    // when rooms are in use, check the individual times.
+    if (!empty($results)) {
+      // the results contain all locked requests that have something in the given room during the given date.
+      // however, this does not mention the time, so loop through the times and see if they are all valid.
+      foreach ($results as $result) {
+        $query = db_select('mfcs_field_dates_date', 'mfdd');
 
-    $matched_requests = array();
+        $query->innerJoin('mfcs_field_dates_time_start', 'mfdts', 'mfdd.request_id = mfdts.request_id AND mfdd.delta = mfdts.delta');
+        $query->innerJoin('mfcs_field_dates_time_stop', 'mfdtsp', 'mfdd.request_id = mfdtsp.request_id AND mfdd.delta = mfdtsp.delta');
 
-    // the results contain all locked requests that have something in the given room during the given date.
-    // however, this does not mention the time, so loop through the times and see if they are all valid.
-    foreach ($results as $result) {
-      $query = db_select('mfcs_field_dates_date', 'mfdd');
+        $query->addField('mfdd', 'request_id', 'request_id');
+        $query->addField('mfdd', 'revision', 'revision');
+        $query->addField('mfdd', 'delta', 'delta');
+        $query->addField('mfdd', 'value', 'date');
+        $query->addField('mfdts', 'value', 'time_start');
+        $query->addField('mfdtsp', 'value', 'time_stop');
 
-      $query->innerJoin('mfcs_field_dates_time_start', 'mfdts', 'mfdd.request_id = mfdts.request_id AND mfdd.delta = mfdts.delta');
-      $query->innerJoin('mfcs_field_dates_time_stop', 'mfdtsp', 'mfdd.request_id = mfdtsp.request_id AND mfdd.delta = mfdtsp.delta');
+        $query->condition('mfdd.request_id', $result->request_id);
+        $query->condition('mfdts.request_id', $result->request_id);
+        $query->condition('mfdtsp.request_id', $result->request_id);
 
-      $query->addField('mfdd', 'request_id', 'request_id');
-      $query->addField('mfdd', 'revision', 'revision');
-      $query->addField('mfdd', 'delta', 'delta');
-      $query->addField('mfdd', 'value', 'date');
-      $query->addField('mfdts', 'value', 'time_start');
-      $query->addField('mfdtsp', 'value', 'time_stop');
+        $query->condition('mfdd.revision', $result->date_revision);
+        $query->condition('mfdts.revision', $result->time_start_revision);
+        $query->condition('mfdtsp.revision', $result->time_stop_revision);
 
-      $query->condition('mfdd.request_id', $result->request_id);
-      $query->condition('mfdts.request_id', $result->request_id);
-      $query->condition('mfdtsp.request_id', $result->request_id);
-
-      $query->condition('mfdd.revision', $result->date_revision);
-      $query->condition('mfdts.revision', $result->time_start_revision);
-      $query->condition('mfdtsp.revision', $result->time_stop_revision);
-
-      if (!is_null($request_id)) {
-        $query->condition('mfdd.request_id', $request_id, '<>');
-      }
-
-      $or = db_or();
-
-      // all day requests match, they have NULL for start and stop time values.
-      $and = db_and();
-      $and->condition('mfdd.value', $date, 'IN');
-      $and->isNull('mfdts.value');
-      $and->isNull('mfdtsp.value');
-
-      $or->condition($and);
-
-      foreach ($date as $key => $value) {
-        // all day requests match, they have NULL for start and stop time values.
-        if (is_null($time_start[$key]) && is_null($time_stop[$key])) {
-          $matched_requests[] = $result;
+        if (!is_null($request_id)) {
+          $query->condition('mfdd.request_id', $request_id, '<>');
         }
 
+        $or = db_or();
+
+        // all day requests match, they have NULL for start and stop time values.
         $and = db_and();
-        $and->condition('mfdd.value', $value);
-        $and->condition('mfdts.value', $time_start[$key], '<=');
-        $and->condition('mfdtsp.value', $time_start[$key], '>');
+        $and->condition('mfdd.value', $dates, 'IN');
+        $and->isNull('mfdts.value');
+        $and->isNull('mfdtsp.value');
+
         $or->condition($and);
 
-        $and = db_and();
-        $and->condition('mfdd.value', $value);
-        $and->condition('mfdts.value', $time_stop[$key], '<');
-        $and->condition('mfdtsp.value', $time_stop[$key], '>=');
-        $or->condition($and);
+        foreach ($dates as $key => $value) {
+          // all day requests match, they have NULL for start and stop time values.
+          if (is_null($time_start[$key]) && is_null($time_stop[$key])) {
+            $matched_requests[] = $result;
+          }
+
+          $and = db_and();
+          $and->condition('mfdd.value', $value);
+          $and->condition('mfdts.value', $time_start[$key], '<=');
+          $and->condition('mfdtsp.value', $time_start[$key], '>');
+          $or->condition($and);
+
+          $and = db_and();
+          $and->condition('mfdd.value', $value);
+          $and->condition('mfdts.value', $time_stop[$key], '<');
+          $and->condition('mfdtsp.value', $time_stop[$key], '>=');
+          $or->condition($and);
+
+          $and = db_and();
+          $and->condition('mfdd.value', $value);
+          $and->condition('mfdts.value', $time_start[$key], '>');
+          $and->condition('mfdtsp.value', $time_start[$key], '>');
+          $and->condition('mfdts.value', $time_stop[$key], '<');
+          $and->condition('mfdtsp.value', $time_stop[$key], '<');
+          $or->condition($and);
+        }
+
+        $query->condition($or);
+
+        $matches = $query->execute()->fetchAll();
+        foreach ($matches as $match) {
+          $result->time_start = $match->time_start;
+          $result->time_stop = $match->time_stop;
+          $matched_requests[] = $result;
+        }
+      }
+    }
+
+
+    // check to see if classes (in banner) have reserved the room.
+    $query = db_select('mfcs_banner_classes', 'mbc');
+    $query->fields('mbc');
+    $query->condition('mbc.room', $room);
+
+    $or = db_or();
+    foreach ($dates as $key => $value) {
+      // all day requests match, they have NULL for start and stop time values.
+      if (is_null($time_start[$key]) && is_null($time_stop[$key])) {
+        $or->condition('mbc.reserved_day', $value);
+        continue;
       }
 
-      $query->condition($or);
+      $and = db_and();
+      $and->condition('mbc.reserved_day', $value);
+      $and->condition('mbc.reserved_time_start', $time_start[$key], '<=');
+      $and->condition('mbc.reserved_time_stop', $time_start[$key], '>');
+      $or->condition($and);
 
-      $matches = $query->execute()->fetchAll();
+      $and = db_and();
+      $and->condition('mbc.reserved_day', $value);
+      $and->condition('mbc.reserved_time_start', $time_stop[$key], '<');
+      $and->condition('mbc.reserved_time_stop', $time_stop[$key], '>=');
+      $or->condition($and);
 
-      foreach ($matches as $match) {
-        $matched_requests[] = $result;
-      }
+      $and = db_and();
+      $and->condition('mbc.reserved_day', $value);
+      $and->condition('mbc.reserved_time_start', $time_start[$key], '>');
+      $and->condition('mbc.reserved_time_stop', $time_start[$key], '>');
+      $and->condition('mbc.reserved_time_start', $time_stop[$key], '<');
+      $and->condition('mbc.reserved_time_stop', $time_stop[$key], '<');
+      $or->condition($and);
+    }
+
+    $query->condition($or);
+
+    $results = $query->execute()->fetchAll();
+    foreach ($results as $result) {
+      $matched_requests[] = $result;
     }
   }
   catch (Exception $ex) {
@@ -5284,11 +5470,26 @@ function mfcs_check_room_availability($room, $date, $time_start, $time_stop, $re
 /**
  * Prints a warning message about the room being unavailable.
  *
+ * @param array $dates
+ *   An array of dates that the room is unavailable for.
+ *
  * @see mfcs_check_room_availability()
  */
-function mfcs_display_room_unavailable_message() {
+function mfcs_display_room_unavailable_message($dates) {
+  if (!is_array($dates)) {
+    cf_error::invalid_array('dates');
+    $dates = array();
+  }
+
   $unavailable_message = '';
-  $unavailable_message .= '<span class="uppercase">Warning</span>: The specified room is currently unavailable. ';
+  $unavailable_message .= '<span class="uppercase">Warning</span>: The specified room is currently unavailable for the following dates: ';
+
+  $unavailable_message .= '<ul>';
+  foreach ($dates as $date) {
+    $unavailable_message .= '<li>' . $date . '</li>';
+  }
+  $unavailable_message .= '</ul>';
+
   $unavailable_message .= 'You may still submit this request and your request attempt will still be logged. ';
   drupal_set_message($unavailable_message, 'warning');
 }

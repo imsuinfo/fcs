@@ -450,7 +450,25 @@ function mfcs_request_edit_0_form_validate($form, &$form_state) {
               form_set_error('', "An internal error occurred while checking the room for availability. Please contact the support staff.");
             }
             elseif (!empty($requests_using_room)) {
-              mfcs_display_room_unavailable_message();
+              $problematic_dates = array();
+              foreach ($requests_using_room as $request_using_room) {
+                if (isset($request_using_room->date)) {
+                  if (isset($request_using_room->time_start)) {
+                    $problematic_date = date("Y/m/d", $request_using_room->date) . " from " . date("h:ia", $request_using_room->time_start) . " to " . date("h:ia", $request_using_room->time_stop) . '.';
+                    $problematic_dates[$problematic_date] = $problematic_date;
+                  }
+                  else {
+                    $problematic_date = date("Y/m/d", $request_using_room->date) . " (all day).";
+                    $problematic_dates[$problematic_date] = $problematic_date;
+                  }
+                }
+                elseif (isset($request_using_room->reserved_day)) {
+                  $problematic_date = date("Y/m/d", $request_using_room->reserved_day) . " from " . date("h:ia", $request_using_room->reserved_time_start) . " to " . date("h:ia", $request_using_room->reserved_time_stop) . '.';
+                  $problematic_dates[$problematic_date] = $problematic_date;
+                }
+              }
+              ksort($problematic_dates)
+              mfcs_display_room_unavailable_message($problematic_dates);
             }
           }
 

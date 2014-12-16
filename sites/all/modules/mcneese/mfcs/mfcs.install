@@ -725,7 +725,7 @@ function mfcs_schema() {
         'not null' => TRUE,
       ),
       'machine_name' => array(
-        'description' => $t("A machine friendly name for the location category."),
+        'description' => $t("A machine friendly name for the room."),
         'type' => 'varchar',
         'length' => '15',
         'not null' => FALSE,
@@ -791,6 +791,61 @@ function mfcs_schema() {
       'coordinator_id' => array(
         'table' => 'users',
         'columns' => array('coordinator_id' => 'uid'),
+      ),
+    ),
+    'unique keys' => array(
+      'machine_name' => array('machine_name', 'building'),
+    ),
+  );
+
+  $schema['mfcs_banner_classes'] = array(
+    'description' => $t("McNeese Facilities Use Event Banner table. This is for providing local storage of rooms that have been reserved for/by classes."),
+    'fields' => array(
+      'id' => array(
+        'description' => $t("The primary key used to represent a room."),
+        'type' => 'serial',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'room' => array(
+        'description' => $t("Foreign key to the {mfcs_banner_roomns} table."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'reserved_day' => array(
+        'description' => $t("A timtestamp representing the date when the room was reserved."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'reserved_time_start' => array(
+        'description' => $t("A timtestamp representing the start time when the room was reserved. Set to NULL for all day."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'reserved_time_stop' => array(
+        'description' => $t("A timtestamp representing the stop time when the room was reserved. Set to NULL for all day."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('id'),
+    'foreign keys' => array(
+      'building' => array(
+        'table' => 'mfcs_banner_buildings',
+        'columns' => array('building' => 'id'),
+      ),
+      'room' => array(
+        'table' => 'mfcs_banner_rooms',
+        'columns' => array('room' => 'id'),
       ),
     ),
     'unique keys' => array(
@@ -1347,6 +1402,7 @@ function mfcs_install() {
   db_query('ALTER TABLE {mfcs_banner_building_to_location} ADD CONSTRAINT ' . $key4_foreign . ' FOREIGN KEY (' . $key4_name . ') REFERENCES {' . $table4_foreign . '} (' . $table4_foreign_key . ') ON DELETE CASCADE');
   db_query('ALTER TABLE {mfcs_banner_rooms} ADD CONSTRAINT ' . $key4_foreign . ' FOREIGN KEY (' . $key4_name . ') REFERENCES {' . $table4_foreign . '} (' . $table4_foreign_key . ') ON DELETE CASCADE');
   db_query('ALTER TABLE {mfcs_banner_rooms} ADD CONSTRAINT ' . $key2_foreign_1 . ' FOREIGN KEY (' . $key2_name_1 . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_banner_classes} ADD CONSTRAINT ' . $key5_foreign . ' FOREIGN KEY (' . $key5_name . ') REFERENCES {' . $table5_foreign . '} (' . $table5_foreign_key . ') ON DELETE CASCADE');
   db_query('ALTER TABLE {mfcs_banner_event_roles_to_users} ADD CONSTRAINT ' . $key6_foreign . ' FOREIGN KEY (' . $key6_name . ') REFERENCES {' . $table6_foreign . '} (' . $table6_foreign_key . ') ON DELETE CASCADE');
 
   db_query('ALTER TABLE {mfcs_request_reminders} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
@@ -1434,6 +1490,7 @@ function mfcs_uninstall() {
   db_query('ALTER TABLE {mfcs_banner_building_to_location} DROP CONSTRAINT IF EXISTS ' . $key4_foreign);
   db_query('ALTER TABLE {mfcs_banner_rooms} DROP CONSTRAINT IF EXISTS ' . $key4_foreign);
   db_query('ALTER TABLE {mfcs_banner_rooms} DROP CONSTRAINT IF EXISTS ' . $key2_foreign_1);
+  db_query('ALTER TABLE {mfcs_banner_classes} DROP CONSTRAINT IF EXISTS ' . $key5_foreign);
   db_query('ALTER TABLE {mfcs_banner_event_roles_to_users} DROP CONSTRAINT IF EXISTS ' . $key6_foreign);
   db_query('ALTER TABLE {mfcs_request_reminders} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
   db_query('ALTER TABLE {mfcs_review_classifications} DROP CONSTRAINT IF EXISTS ' . $keyR_foreign);
