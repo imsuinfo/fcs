@@ -13,6 +13,7 @@
 
 class cf_dom {
   const PREFIX = 'cf';
+  const DOCTYPE = '<!DOCTYPE html>';
   const CONTENT_PREFIX = '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body>';
   const CONTENT_POSTFIX = '</body>';
 
