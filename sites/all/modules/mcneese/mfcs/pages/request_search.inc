@@ -625,6 +625,12 @@ function mfcs_request_search_0_form_validate($form, &$form_state) {
     if (empty($form_state['values']['simple']['text']) && !is_numeric($form_state['values']['simple']['text'])) {
       form_set_error('simple][text', "You must supply some text to search for.");
     }
+    else {
+      $search_string = preg_replace('/(\s)/i', ' ', $form_state['values']['simple']['text']);
+      if (empty($search_string)) {
+        form_set_error('simple][text', "You must supply some text to search for.");
+      }
+    }
   }
   elseif ($clicked_id == 'search-simple-submit-clear') {
   }
@@ -1032,9 +1038,12 @@ function mfcs_request_search_0_form_submit($form, &$form_state) {
   if ($clicked_id == 'search-simple-submit-search') {
     $conditions = array();
     $options = $form['form']['list_options']['#value'];
-    $options['search'] = $form_state['values']['simple']['text'];
+    $options['search'] = preg_replace('/(\s)/i', ' ', $form_state['values']['simple']['text']);
     $options['sensitive'] = (bool) $form_state['values']['simple']['sensitive'];
     $options['start'] = $form['form']['simple_search-page_number']['#value'] * $form['form']['per_page']['#value'];
+
+
+    mfcs_request_search_0_simple_search_preprocess($conditions, $options);
 
     $items_returned = mfcs_request_load_listing($conditions, $options);
 
@@ -1524,6 +1533,203 @@ function mfcs_request_search_0_form_submit($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
   $form_state['redirect'] = FALSE;
   $form_state['submitted'] = TRUE;
+}
+
+/**
+ * Preprocess the simple search data.
+ *
+ * This will search through lists, the database stores the values as integers
+ * and not strings. It will then populate the appropriate options and
+ * conditions variables to search by those numeric ids.
+ *
+ * @param array $conditions
+ *   An array of conditions containing what to search for.
+ * @param array $options
+ *   An array of options to be passed to the load listing function.
+ *
+ * @return bool
+ *   TRUE on success, FALSE otherwise.
+ *
+ * @see: mfcs_request_load_listing()
+ */
+function mfcs_request_search_0_simple_search_preprocess(&$conditions, &$options) {
+  if (!is_array($conditions)) {
+    cf_error::invalid_array($conditions);
+    return FALSE;
+  }
+
+  if (!is_array($options)) {
+    cf_error::invalid_array($options);
+    return FALSE;
+  }
+
+
+  // search through the listings.
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+
+  $regex_safe_search = preg_quote($options['search'], '/');
+
+  $type_options = mfcs_get_request_type_list_options();
+  $status_options = mfcs_get_request_status_list_options();
+  $step_options = mfcs_get_request_steps_list_options();
+
+  $room_options = mfcs_get_request_room_list_options(NULL, NULL, TRUE);
+  $building_options = mfcs_get_request_building_list_options(NULL, NULL, TRUE);
+
+  $limit_type = array();
+  foreach ($type_options as $key => $value) {
+    if (preg_match('/' . $regex_safe_search . '/i', $value) > 0) {
+      $limit_type[$key] = $key;
+    }
+  }
+
+  $limit_status = array();
+  foreach ($status_options as $key => $value) {
+    if (preg_match('/' . $regex_safe_search . '/i', $value) > 0) {
+      $limit_status[$key] = $key;
+    }
+  }
+
+  $limit_step = array();
+  foreach ($step_options as $key => $value) {
+    if (preg_match('/' . $regex_safe_search . '/i', $value) > 0) {
+      $limit_step[$key] = $key;
+    }
+  }
+
+  $limit_room = array();
+  foreach ($room_options as $key => $value) {
+    if (preg_match('/' . $regex_safe_search . '/i', $value) > 0) {
+      $limit_room[$key] = $key;
+    }
+  }
+
+  $limit_building = array();
+  foreach ($building_options as $key => $value) {
+    if (preg_match('/' . $regex_safe_search . '/i', $value) > 0) {
+      $limit_building[$key] = $key;
+    }
+  }
+
+
+  // build the search conditions
+  $conditions['or_1'] = array();
+
+  $conditions['or_1']['value_id'] = array(
+    'field' => 'text(mer.id)',
+    'operator' => MFCS_OPERATOR_LIKE,
+    'search' => $options['search'],
+    'expression' => TRUE,
+  );
+
+  $conditions['or_1']['value_title'] = array(
+    'field' => 'mer.title',
+    'operator' => MFCS_OPERATOR_LIKE,
+    'search' => $options['search'],
+  );
+
+  if (!empty($limit_building)) {
+    $conditions['or_1']['value_building'] = array(
+      'field' => 'mer.building',
+      'operator' => MFCS_OPERATOR_IS_IN,
+      'search' => $limit_building,
+    );
+  }
+
+  if (!empty($limit_room)) {
+    $conditions['or_1']['value_room'] = array(
+      'field' => 'mer.room',
+      'operator' => MFCS_OPERATOR_IS_IN,
+      'search' => $limit_room,
+    );
+  }
+
+  if (!empty($limit_type)) {
+    $conditions['or_1']['value_type'] = array(
+      'field' => 'mer.type',
+      'operator' => MFCS_OPERATOR_IS_IN,
+      'search' => $limit_type,
+    );
+  }
+
+  // Commented out because this is confusing because the date format will not match.
+  #$conditions['or_1']['value_date'] = array(
+  #  'field' => 'text(to_timestamp(mer.created))',
+  #  'operator' => MFCS_OPERATOR_LIKE,
+  #  'search' => $options['search'],
+  #  'expression' => TRUE,
+  #);
+
+  if (!empty($limit_status)) {
+    $conditions['or_1']['value_status'] = array(
+      'field' => 'mer.status',
+      'operator' => MFCS_OPERATOR_IS_IN,
+      'search' => $limit_status,
+    );
+  }
+
+  if (!empty($limit_step)) {
+    $conditions['or_1']['value_step'] = array(
+      'field' => 'mer.step',
+      'operator' => MFCS_OPERATOR_IS_IN,
+      'search' => $limit_step,
+    );
+  }
+
+  $conditions['or_1']['value_submitted_by_id'] = array(
+    'field' => 'text(mer.user_id)',
+    'operator' => MFCS_OPERATOR_LIKE,
+    'search' => $options['search'],
+    'expression' => TRUE,
+  );
+
+  $conditions['or_1']['value_submitted_by_name'] = array(
+    'field' => 'sb_u.name',
+    'operator' => MFCS_OPERATOR_LIKE,
+    'search' => $options['search'],
+  );
+
+  $conditions['or_1']['field_information-organization-0'] = array(
+    'group_name' => 'information',
+    'field_name' => 'organization',
+    'column' => 'value',
+    'search' => $options['search'],
+    'type' => 'text',
+    'multiple' => FALSE,
+    'operator' => MFCS_OPERATOR_LIKE,
+  );
+
+  $conditions['or_1']['field_top-additional-0'] = array(
+    'group_name' => 'top',
+    'field_name' => 'additional',
+    'column' => 'value',
+    'search' => $options['search'],
+    'type' => 'text',
+    'multiple' => FALSE,
+    'operator' => MFCS_OPERATOR_LIKE,
+  );
+
+  $conditions['or_1']['field_plans-activities-0'] = array(
+    'group_name' => 'plans',
+    'field_name' => 'activities',
+    'column' => 'value',
+    'search' => $options['search'],
+    'type' => 'text',
+    'multiple' => FALSE,
+    'operator' => MFCS_OPERATOR_LIKE,
+  );
+
+  $conditions['or_1']['field_plans-description-0'] = array(
+    'group_name' => 'plans',
+    'field_name' => 'description',
+    'column' => 'value',
+    'search' => $options['search'],
+    'type' => 'text',
+    'multiple' => FALSE,
+    'operator' => MFCS_OPERATOR_LIKE,
+  );
+
+  return TRUE;
 }
 
 /**

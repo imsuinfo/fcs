@@ -5523,9 +5523,6 @@ function mfcs_display_room_unavailable_message($dates) {
  *     'limit': The number of rows to select, aka: length.
  *     'count': If TRUE, an unfiltered count query is processed.
  *     'results': If FALSE, the main query is not performed.
- *     'search': A special-case/reserved variable for simplified searching.
- *               When not NULL, this is either the string of text to search for
- *               or an array of possible field values.
  *     'sort': An array of database sorting columns and their sort orders.
  *     'sensitive': TRUE for case sensitive and FALSE otherwise.
  *     'review_restrictions': The review restrictions to use.
@@ -5591,11 +5588,6 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
     $return['results'] = array();
   }
 
-  $search = NULL;
-  if (isset($options['search']) && is_string($options['search'])) {
-    $search = $options['search'];
-  }
-
   $sensitive = FALSE;
   if (isset($options['sensitive']) && is_bool($options['sensitive'])) {
     $sensitive = $options['sensitive'];
@@ -5622,17 +5614,6 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
   if ($sensitive) {
     $s = '';
     $like = 'LIKE';
-  }
-
-
-  // load search options
-  if (is_string($search)) {
-    $fixed_text = preg_replace('/(\s)/i', ' ', $search);
-
-    // don't search when there is nothing to search for.
-    if (empty($fixed_text)) {
-      return $return;
-    }
   }
 
   $show_status_venue_coordinator = array(
@@ -5701,21 +5682,7 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
       $already_joined['submitted_by-field_data_field_user_last_name'] = 'sb_fdfuln';
     }
 
-    // when using simple search, include a few additional textarea fields.
-    if (is_string($search)) {
-      $query->innerJoin('mfcs_field_top_additional', 'mfta', 'mc.request_id = mfta.request_id AND mc.top_additional = mfta.revision AND mfta.delta = 0');
-      $query->innerJoin('mfcs_field_information_organization', 'mfio', 'mc.request_id = mfio.request_id AND mc.information_organization = mfio.revision AND mfta.delta = 0');
-
-      $already_joined['mfcs_field_top_additional'] = 'mfta';
-      $already_joined['mfcs_field_information_organization'] = 'mfio';
-
-      $query->innerJoin('mfcs_field_plans_activities', 'mfpa', 'mc.request_id = mfpa.request_id AND mc.plans_activities = mfpa.revision AND mfpa.delta = 0');
-      $query->innerJoin('mfcs_field_plans_description', 'mfpd', 'mc.request_id = mfpd.request_id AND mc.plans_description = mfpd.revision AND mfpd.delta = 0');
-
-      $already_joined['mfcs_field_plans_activities'] = 'mfpa';
-      $already_joined['mfcs_field_plans_description'] = 'mfpd';
-    }
-
+    $count_query = NULL;
     if ($count) {
       $count_query = clone($query);
       $count_query->addExpression('count(mer.id)');
@@ -5814,9 +5781,9 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
       }
     }
 
-    if (is_null($search) && !empty($conditions)) {
+    if (!empty($conditions)) {
       $operand = db_and();
-      $result = mfcs_request_process_listing_search_array($query, $operand, $already_joined, $already_joined_count, $already_added, $conditions, 1, $like);
+      $result = mfcs_request_process_listing_search_array($query, $count_query, $operand, $already_joined, $already_joined_count, $already_added, $conditions, 1, $like);
 
       if ($result) {
         if (is_null($outermost_and)) {
@@ -5950,33 +5917,6 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
     $query->condition($outermost_and);
     if ($count) {
       $count_query->condition($outermost_and);
-    }
-
-    if (is_string($search)) {
-      $or = db_or();
-
-      $like_part = db_like($fixed_text);
-
-      $or->condition('mer.title', $like_part, $like);
-      $or->condition('mer.title', '%' . $like_part . '%', $like);
-
-      $or->condition('mfio.value', $like_part, $like);
-      $or->condition('mfio.value', '%' . $like_part . '%', $like);
-
-      $or->condition('mfta.value', $like_part, $like);
-      $or->condition('mfta.value', '%' . $like_part . '%', $like);
-
-      $or->condition('mfpa.value', $like_part, $like);
-      $or->condition('mfpa.value', '%' . $like_part . '%', $like);
-
-      $or->condition('mfpd.value', $like_part, $like);
-      $or->condition('mfpd.value', '%' . $like_part . '%', $like);
-
-      $query->condition($or);
-
-      if ($count) {
-        $count_query->condition($or);
-      }
     }
 
     if (is_null($sort)) {
@@ -6113,8 +6053,10 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
 /**
  * Recursively append search conditions for loading a list of requests.
  *
- * @param object $query
- *   The query object.
+ * @param object|null $query
+ *   The query object. Set to null if not using.
+ * @param object|null $count_query
+ *   The query object for the count query. Set to null if not using.
  * @param object $operand
  *   The query operand, such as and, or or for processing the conditions.
  * @param array $already_joined
@@ -6133,9 +6075,14 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
  *
  * @see mfcs_request_load_listing()
  */
-function mfcs_request_process_listing_search_array(&$query, &$operand, &$already_joined, &$already_joined_count, &$already_added, $search, $recurse_count, $like) {
-  if (!is_object($query)) {
+function mfcs_request_process_listing_search_array(&$query, &$count_query, &$operand, &$already_joined, &$already_joined_count, &$already_added, $search, $recurse_count, $like) {
+  if (!is_null($query) && !is_object($query)) {
     cf_error::invalid_object('query');
+    return FALSE;
+  }
+
+  if (!is_null($count_query) && !is_object($count_query)) {
+    cf_error::invalid_object('count_query');
     return FALSE;
   }
 
@@ -6240,15 +6187,18 @@ function mfcs_request_process_listing_search_array(&$query, &$operand, &$already
           $field_alias = $already_joined[$mfcs_field];
 
           if (isset($search_values['multiple']) && $search_values['multiple']) {
-            $query->$join($mfcs_field, $field_alias, 'mc.request_id = ' . $field_alias . '.request_id AND mc.' . $search_values['group_name'] . '_' . $search_values['field_name'] . ' = ' . $field_alias . '.revision');
+            if (!is_null($query)) $query->$join($mfcs_field, $field_alias, 'mc.request_id = ' . $field_alias . '.request_id AND mc.' . $search_values['group_name'] . '_' . $search_values['field_name'] . ' = ' . $field_alias . '.revision');
+            if (!is_null($count_query)) $count_query->$join($mfcs_field, $field_alias, 'mc.request_id = ' . $field_alias . '.request_id AND mc.' . $search_values['group_name'] . '_' . $search_values['field_name'] . ' = ' . $field_alias . '.revision');
           }
           else {
-            $query->$join($mfcs_field, $field_alias, 'mc.request_id = ' . $field_alias . '.request_id AND mc.' . $search_values['group_name'] . '_' . $search_values['field_name'] . ' = ' . $field_alias . '.revision AND ' . $field_alias . '.delta = 0');
+            if (!is_null($query)) $query->$join($mfcs_field, $field_alias, 'mc.request_id = ' . $field_alias . '.request_id AND mc.' . $search_values['group_name'] . '_' . $search_values['field_name'] . ' = ' . $field_alias . '.revision AND ' . $field_alias . '.delta = 0');
+            if (!is_null($count_query)) $count_query->$join($mfcs_field, $field_alias, 'mc.request_id = ' . $field_alias . '.request_id AND mc.' . $search_values['group_name'] . '_' . $search_values['field_name'] . ' = ' . $field_alias . '.revision AND ' . $field_alias . '.delta = 0');
           }
         }
 
         if (!array_key_exists($search_values['field_name'], $already_added)) {
-          $query->addField($field_alias, $search_values['column'], $search_values['group_name'] . '_' . $search_values['field_name']);
+          if (!is_null($query)) $query->addField($field_alias, $search_values['column'], $search_values['group_name'] . '_' . $search_values['field_name']);
+          // note: count_query should not add fields.
         }
       }
 
@@ -6474,17 +6424,12 @@ function mfcs_request_process_listing_search_array(&$query, &$operand, &$already
       }
 
       if ($expression) {
-        // Use of "$query->nextPlaceholder();" here seems does not work as espected. Counter is not the same?!
-        // a unique id is appended to the placeholder to help ensure that there are no uniqueness issues.
-        $placeholder_unique = drupal_random_key(4);
-        $placeholder_unique = str_replace('-', '_', $placeholder_unique);
-        $placeholder = ':mfcs_expression_' . $recurse_count . '_' . $search_operand_or_field . '_' . $expression_count . '_' . $placeholder_unique;
+        // The count_query and query may have different placeholder orderings, so create a custom placeholder counter.
+        $placeholder = ':mfcs_expression_' . $recurse_count . '_' . $search_operand_or_field . '_' . $expression_count;
         $operand->where($field . ' ' . $operator . ' ' . $placeholder, array($placeholder => $search_string));
         $expression_count++;
       }
       else {
-        // If "$query->nextPlaceholder();" is not manually specified here, then for some reason placeholders disappear/get-overridden.
-        $query->nextPlaceholder();
         $operand->condition($field, $search_string, $operator);
       }
 
@@ -6507,7 +6452,7 @@ function mfcs_request_process_listing_search_array(&$query, &$operand, &$already
     }
 
     $next_count = $recurse_count + 1;
-    $result = mfcs_request_process_listing_search_array($query, $inner_operand, $already_joined, $already_joined_count, $already_added, $search_values, $next_count, $like);
+    $result = mfcs_request_process_listing_search_array($query, $count_query, $inner_operand, $already_joined, $already_joined_count, $already_added, $search_values, $next_count, $like);
 
     if ($result) {
       $operand->condition($inner_operand);
