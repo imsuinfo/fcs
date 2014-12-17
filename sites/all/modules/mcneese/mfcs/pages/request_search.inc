@@ -253,7 +253,7 @@ function mfcs_request_search_0_form($form, &$form_state) {
     $simple_table['datatable_settings']['columnDefs'] = array(
       array(
         'visible' => FALSE,
-        'targets' => array(5, 6, 7, 8),
+        'targets' => array(1, 6, 7, 8, 9),
       ),
     );
 
@@ -475,7 +475,7 @@ function mfcs_request_search_0_form($form, &$form_state) {
     $advanced_table['datatable_settings']['columnDefs'] = array(
       array(
         'visible' => FALSE,
-        'targets' => array(5, 6, 7, 8),
+        'targets' => array(1, 6, 7, 8, 9),
       ),
     );
 
@@ -3310,50 +3310,57 @@ function mfcs_request_search_0_columns() {
       'sanitize' => FALSE,
       'align' => 'center',
     ),
-    'title' => array(
+    'type' => array(
       'id' => 1,
+      'column' => 'type',
+      'name' => "Type",
+      'class' => array('column-type', 'no-script-hidden'),
+      'align' => 'center',
+    ),
+    'title' => array(
+      'id' => 2,
       'column' => 'title',
       'name' => "Title",
       'class' => array('column-title'),
       'align' => 'center',
     ),
     'building' => array(
-      'id' => 2,
+      'id' => 3,
       'column' => 'building',
       'name' => "Building",
       'class' => array('column-building'),
       'align' => 'center',
     ),
     'room' => array(
-      'id' => 3,
+      'id' => 4,
       'column' => 'room',
       'name' => "Room",
       'class' => array('column-room'),
       'align' => 'center',
     ),
     'date' => array(
-      'id' => 4,
+      'id' => 5,
       'column' => 'date',
       'name' => "Date",
       'class' => array('column-date'),
       'align' => 'center',
     ),
     'status' => array(
-      'id' => 5,
+      'id' => 6,
       'column' => 'status',
       'name' => "Status",
       'class' => array('column-status', 'no-script-hidden'),
       'align' => 'center',
     ),
     'step' => array(
-      'id' => 6,
+      'id' => 7,
       'column' => 'step',
       'name' => "Step",
       'class' => array('column-step', 'no-script-hidden'),
       'align' => 'center',
     ),
     'submitted_by_id' => array(
-      'id' => 7,
+      'id' => 8,
       'column' => 'user_id',
       'name' => "Submitted By ID",
       'class' => array('column-submitted_by_id', 'no-script-hidden'),
@@ -3361,21 +3368,21 @@ function mfcs_request_search_0_columns() {
       'align' => 'center',
     ),
     'submitted_by' => array(
-      'id' => 8,
+      'id' => 9,
       'column' => 'user_id',
       'name' => "Submitted By",
       'class' => array('column-submitted_by', 'no-script-hidden'),
       'align' => 'center',
     ),
     'submitted_on' => array(
-      'id' => 9,
+      'id' => 10,
       'column' => 'created',
       'name' => "Submitted On",
       'class' => array('column-submitted_on'),
       'align' => 'center',
     ),
     'operations' => array(
-      'id' => 10,
+      'id' => 11,
       'column' => NULL,
       'name' => "Operations",
       'class' => array('column-operations', 'no-print'),
