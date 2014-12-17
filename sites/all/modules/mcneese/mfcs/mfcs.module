@@ -7128,14 +7128,19 @@ function mfcs_build_request_ajax_table($items_returned, $conditions, $options, $
   );
 
   foreach ($columns as $column_id => $column) {
-    $table['datatable_settings']['columns'][$column_id] = array(
-      'name' => $column_id,
-      'className' => 'column-' . $column_id,
-    );
+    $table['datatable_settings']['columns'][$column_id] = $column;
+
+    if (!array_key_exists('class', $table['datatable_settings']['columns'][$column_id])) {
+      $table['datatable_settings']['columns'][$column_id]['class'] = array();
+    }
+
+    $table['datatable_settings']['columns'][$column_id]['class'][] = 'column-' . $column_id;
 
     if ($column_id == 'operations') {
-      $table['datatable_settings']['columns'][$column_id]['className'] .= ' no-print';
+      $table['datatable_settings']['columns'][$column_id]['class'][] = 'no-print';
     }
+
+    $table['datatable_settings']['columns'][$column_id]['className'] = implode(' ', $table['datatable_settings']['columns'][$column_id]['class']);
 
     if (array_key_exists('visible', $column) && $column['visible'] === FALSE) {
       $table['datatable_settings']['columns'][$column_id]['visible'] = FALSE;

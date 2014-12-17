@@ -303,6 +303,8 @@ function mfcs_request_list_0_columns() {
       'name' => "Operations",
       'class' => array('column-operations', 'no-print'),
       'align' => 'center',
+      'searchable' => FALSE,
+      'orderable' => FALSE,
     ),
   );
 }
