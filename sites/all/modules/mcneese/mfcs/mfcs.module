@@ -7298,6 +7298,7 @@ function mfcs_build_request_ajax_table_process_rows($items, $columns, $user = NU
     $can_delete_requests = array();
   }
 
+  $type_options = mfcs_get_request_type_list_options();
   $status_options = mfcs_get_request_status_list_options();
   $step_options = mfcs_get_request_steps_list_options();
   $location_options = mfcs_get_request_location_list_options(NULL, FALSE, TRUE);
@@ -7401,6 +7402,11 @@ function mfcs_build_request_ajax_table_process_rows($items, $columns, $user = NU
           }
           else {
             $data = '';
+          }
+        }
+        elseif ($column['column'] == 'type') {
+          if (isset($type_options[$item->type])) {
+            $data = check_plain($type_options[$item->type]);
           }
         }
         elseif ($column['column'] == 'status') {

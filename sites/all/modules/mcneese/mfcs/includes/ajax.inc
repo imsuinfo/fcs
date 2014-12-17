@@ -534,11 +534,19 @@ function mfcs_ajax_listing_0($override_options = array()) {
     // search through the already loaded lists, the database stores the values as integers and not strings.
     $regex_safe_search = preg_quote($_GET['search']['value'], '/');
 
+    $type_options = mfcs_get_request_type_list_options();
     $status_options = mfcs_get_request_status_list_options();
     $step_options = mfcs_get_request_steps_list_options();
 
     $room_options = mfcs_get_request_room_list_options(NULL, NULL, TRUE);
     $building_options = mfcs_get_request_building_list_options(NULL, NULL, TRUE);
+
+    $limit_type = array();
+    foreach ($type_options as $key => $value) {
+      if (preg_match('/' . $regex_safe_search . '/i', $value) > 0) {
+        $limit_type[$key] = $key;
+      }
+    }
 
     $limit_status = array();
     foreach ($status_options as $key => $value) {
@@ -587,30 +595,33 @@ function mfcs_ajax_listing_0($override_options = array()) {
         $sorting['id'] = $order_direction;
       }
       elseif ($order_column == 1) {
-        $sorting['title'] = $order_direction;
+        $sorting['type'] = $order_direction;
       }
       elseif ($order_column == 2) {
-        $sorting['building'] = $order_direction;
+        $sorting['title'] = $order_direction;
       }
       elseif ($order_column == 3) {
-        $sorting['room'] = $order_direction;
+        $sorting['building'] = $order_direction;
       }
       elseif ($order_column == 4) {
-        $sorting['date'] = $order_direction;
+        $sorting['room'] = $order_direction;
       }
       elseif ($order_column == 5) {
-        $sorting['status'] = $order_direction;
+        $sorting['date'] = $order_direction;
       }
       elseif ($order_column == 6) {
-        $sorting['step'] = $order_direction;
+        $sorting['status'] = $order_direction;
       }
       elseif ($order_column == 7) {
-        $sorting['submitted_by_id'] = $order_direction;
+        $sorting['step'] = $order_direction;
       }
       elseif ($order_column == 8) {
-        $sorting['submitted_by_name'] = $order_direction;
+        $sorting['submitted_by_id'] = $order_direction;
       }
       elseif ($order_column == 9) {
+        $sorting['submitted_by_name'] = $order_direction;
+      }
+      elseif ($order_column == 10) {
         $sorting['created'] = $order_direction;
       }
     }
@@ -660,11 +671,11 @@ function mfcs_ajax_listing_0($override_options = array()) {
       );
     }
 
-    if (!empty($limit_status)) {
-      $conditions['or_1']['value_status'] = array(
-        'field' => 'mer.status',
+    if (!empty($limit_type)) {
+      $conditions['or_1']['value_type'] = array(
+        'field' => 'mer.type',
         'operator' => MFCS_OPERATOR_IS_IN,
-        'search' => $limit_status,
+        'search' => $limit_type,
       );
     }
 

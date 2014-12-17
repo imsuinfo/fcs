@@ -77,49 +77,54 @@ function mfcs_request_review_0_page($form, &$form_state, $page_number = 0) {
       $columns_default = array(0 => strtolower($sorting[$order]));
       $columns[$order]['class'][] = 'sorting_1';
     }
-    elseif ($order == 'title') {
+    elseif ($order == 'type') {
       $sorting[$order] = is_null($sort) ? 'ASC' : $sort;
       $columns_default = array(1 => strtolower($sorting[$order]));
       $columns[$order]['class'][] = 'sorting_1';
     }
-    elseif ($order == 'building') {
+    elseif ($order == 'title') {
       $sorting[$order] = is_null($sort) ? 'ASC' : $sort;
       $columns_default = array(2 => strtolower($sorting[$order]));
       $columns[$order]['class'][] = 'sorting_1';
     }
-    elseif ($order == 'room') {
+    elseif ($order == 'building') {
       $sorting[$order] = is_null($sort) ? 'ASC' : $sort;
       $columns_default = array(3 => strtolower($sorting[$order]));
       $columns[$order]['class'][] = 'sorting_1';
     }
+    elseif ($order == 'room') {
+      $sorting[$order] = is_null($sort) ? 'ASC' : $sort;
+      $columns_default = array(4 => strtolower($sorting[$order]));
+      $columns[$order]['class'][] = 'sorting_1';
+    }
     elseif ($order == 'date') {
       $sorting[$order] = is_null($sort) ? 'DESC' : $sort;
-      $columns_default = array(4 => strtolower($sorting[$order]));
+      $columns_default = array(5 => strtolower($sorting[$order]));
       $columns[$order]['class'][] = 'sorting_1';
     }
     elseif ($order == 'status') {
       $sorting[$order] = is_null($sort) ? 'ASC' : $sort;
-      $columns_default = array(5 => strtolower($sorting[$order]));
+      $columns_default = array(6 => strtolower($sorting[$order]));
       $columns[$order]['class'][] = 'sorting_1';
     }
     elseif ($order == 'step') {
       $sorting[$order] = is_null($sort) ? 'ASC' : $sort;
-      $columns_default = array(6 => strtolower($sorting[$order]));
+      $columns_default = array(7 => strtolower($sorting[$order]));
       $columns[$order]['class'][] = 'sorting_1';
     }
     elseif ($order == 'submitted by') {
       $sorting[$order] = is_null($sort) ? 'ASC' : $sort;
-      $columns_default = array(7 => strtolower($sorting[$order]));
+      $columns_default = array(8 => strtolower($sorting[$order]));
       $columns[$order]['class'][] = 'sorting_1';
     }
     elseif ($order == 'submitter name') {
       $sorting[$order] = is_null($sort) ? 'ASC' : $sort;
-      $columns_default = array(8 => strtolower($sorting[$order]));
+      $columns_default = array(9 => strtolower($sorting[$order]));
       $columns[$order]['class'][] = 'sorting_1';
     }
     elseif ($order == 'submitted on') {
       $sorting[$order] = is_null($sort) ? 'DESC' : $sort;
-      $columns_default = array(9 => strtolower($sorting[$order]));
+      $columns_default = array(10 => strtolower($sorting[$order]));
       $columns[$order]['class'][] = 'sorting_1';
     }
   }
@@ -219,36 +224,44 @@ function mfcs_request_review_0_columns() {
       'sanitize' => FALSE,
       'align' => 'center',
     ),
-    'title' => array(
+    'type' => array(
       'id' => 1,
+      'column' => 'type',
+      'name' => "Type",
+      'class' => array('column-type', 'no-script-hidden'),
+      'align' => 'center',
+      'visible' => FALSE,
+    ),
+    'title' => array(
+      'id' => 2,
       'column' => 'title',
       'name' => "Title",
       'class' => array('column-title'),
       'align' => 'center',
     ),
     'building' => array(
-      'id' => 2,
+      'id' => 3,
       'column' => 'building',
       'name' => "Building",
       'class' => array('column-building'),
       'align' => 'center',
     ),
     'room' => array(
-      'id' => 3,
+      'id' => 4,
       'column' => 'room',
       'name' => "Room",
       'class' => array('column-room'),
       'align' => 'center',
     ),
     'date' => array(
-      'id' => 4,
+      'id' => 5,
       'column' => 'date',
       'name' => "Date",
       'class' => array('column-date'),
       'align' => 'center',
     ),
     'status' => array(
-      'id' => 5,
+      'id' => 6,
       'column' => 'status',
       'name' => "Status",
       'class' => array('column-status', 'no-script-hidden'),
@@ -256,14 +269,14 @@ function mfcs_request_review_0_columns() {
       'visible' => FALSE,
     ),
     'step' => array(
-      'id' => 6,
+      'id' => 7,
       'column' => 'step',
       'name' => "Step",
       'class' => array('column-step'),
       'align' => 'center',
     ),
     'submitted_by_id' => array(
-      'id' => 7,
+      'id' => 8,
       'column' => 'user_id',
       'name' => "Submitted By ID",
       'class' => array('column-submitted_by_id', 'no-script-hidden'),
@@ -272,21 +285,21 @@ function mfcs_request_review_0_columns() {
       'align' => 'center',
     ),
     'submitted_by' => array(
-      'id' => 8,
+      'id' => 9,
       'column' => 'user_id',
       'name' => "Submitted By",
       'class' => array('column-submitted_by'),
       'align' => 'center',
     ),
     'submitted_on' => array(
-      'id' => 9,
+      'id' => 10,
       'column' => 'created',
       'name' => "Submitted On",
       'class' => array('column-submitted_on'),
       'align' => 'center',
     ),
     'operations' => array(
-      'id' => 10,
+      'id' => 11,
       'column' => NULL,
       'name' => "Operations",
       'class' => array('column-operations', 'no-print'),
