@@ -467,7 +467,7 @@ function mfcs_request_edit_0_form_validate($form, &$form_state) {
                   $problematic_dates[$problematic_date] = $problematic_date;
                 }
               }
-              ksort($problematic_dates)
+              ksort($problematic_dates);
               mfcs_display_room_unavailable_message($problematic_dates);
             }
           }
