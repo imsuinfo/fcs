@@ -250,6 +250,12 @@ function mfcs_request_search_0_form($form, &$form_state) {
 
     $simple_table = mfcs_build_request_ajax_table($items_returned, array(), $form['form']['list_options']['#value']);
     $simple_table['datatable_settings']['dom'] = 'Crt';
+    $simple_table['datatable_settings']['columnDefs'] = array(
+      array(
+        'visible' => FALSE,
+        'targets' => array(1, 6, 7, 8, 9),
+      ),
+    );
 
     $simple_table['caption'] = t("Simple Search Results");
 
@@ -3516,7 +3522,7 @@ function mfcs_request_search_0_columns() {
       'name' => "Type",
       'class' => array('column-type', 'no-script-hidden'),
       'align' => 'center',
-      'visible' => FALSE,
+      #'visible' => FALSE,
     ),
     'title' => array(
       'id' => 2,
@@ -3552,7 +3558,7 @@ function mfcs_request_search_0_columns() {
       'name' => "Status",
       'class' => array('column-status', 'no-script-hidden'),
       'align' => 'center',
-      'visible' => FALSE,
+      #'visible' => FALSE,
     ),
     'step' => array(
       'id' => 7,
@@ -3560,7 +3566,7 @@ function mfcs_request_search_0_columns() {
       'name' => "Step",
       'class' => array('column-step', 'no-script-hidden'),
       'align' => 'center',
-      'visible' => FALSE,
+      #'visible' => FALSE,
     ),
     'submitted_by_id' => array(
       'id' => 8,
@@ -3569,7 +3575,7 @@ function mfcs_request_search_0_columns() {
       'class' => array('column-submitted_by_id', 'no-script-hidden'),
       'sanitize' => FALSE,
       'align' => 'center',
-      'visible' => FALSE,
+      #'visible' => FALSE,
     ),
     'submitted_by' => array(
       'id' => 9,
@@ -3577,7 +3583,7 @@ function mfcs_request_search_0_columns() {
       'name' => "Submitted By",
       'class' => array('column-submitted_by', 'no-script-hidden'),
       'align' => 'center',
-      'visible' => FALSE,
+      #'visible' => FALSE,
     ),
     'submitted_on' => array(
       'id' => 10,
