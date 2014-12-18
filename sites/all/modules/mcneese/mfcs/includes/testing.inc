@@ -470,7 +470,7 @@ function mfcs_testing_is_enabled() {
 function mfcs_testing_generate_dates_and_times() {
   $dates_and_times = array();
 
-  $date = rand(1, 62);
+  $days = rand(1, 62);
   $category = rand(1, 9);
 
   if ($category < 6) {
@@ -486,32 +486,30 @@ function mfcs_testing_generate_dates_and_times() {
     $format_category = "Cleanup / Breakdown";
   }
 
-  $time_start_24 = rand(0, 23);
+  $time_start_24 = rand(0, 22);
   $time_stop = 1;
-  $time_short = rand(0, 1);
+  $time_short = rand(0, 2);
 
   $am_pm = 'pm';
   $time_start = $time_start_24;
-  if ($time_start_24 < 11) {
+  if ($time_start_24 < 12) {
     $am_pm = 'am';
   }
   elseif ($time_start_24 > 12) {
     $time_start = $time_start_24 - 12;
   }
 
-  if ($time_short == 0) {
-    $time_short = rand(1,4);
-    if ($time_short + $time_start_24 < 23) {
+  if ($time_short < 2) {
+    $time_short = rand(1, 4);
+    if ($time_short + $time_start_24 < 24) {
       $time_stop = $time_short;
     }
   }
   else {
-    if ($time_start_24 < 23) {
-      $time_stop = rand(1, 23 - $time_start_24);
-    }
+    $time_stop = rand(1, 23 - $time_start_24);
   }
 
-  $dates_and_times['date'] = strtotime('+' . $date . ' days');
+  $dates_and_times['date'] = strtotime('+' . $days . ' days');
   $dates_and_times['time_start'] = strtotime($time_start . ':00' . $am_pm, $dates_and_times['date']);
   $dates_and_times['time_stop'] = strtotime('+' . $time_stop . ' hours', $dates_and_times['time_start']);
   $dates_and_times['category'] = $category;

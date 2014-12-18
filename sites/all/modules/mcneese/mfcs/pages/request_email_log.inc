@@ -495,8 +495,6 @@ function mfcs_request_email_log_0_view_page($log_id) {
         $body_part = preg_replace("@^\n+@", '', $body_part);
         $body_part = preg_replace("@\n+$@", '', $body_part);
 
-        $text = quoted_printable_decode($body_part);
-
         // body fieldset
         $fieldset = array(
           '#id' => 'email_log-' . $log->id . '-section-body-' . $delta,
@@ -512,8 +510,8 @@ function mfcs_request_email_log_0_view_page($log_id) {
         );
 
         $fieldset['#children'] .= '<div class="email_log-body"><pre>' . "\n";
-        if (is_string($text)) {
-          $fieldset['#children'] .= check_plain($text) . "\n";
+        if (is_string($body_part)) {
+          $fieldset['#children'] .= check_plain($body_part) . "\n";
         }
         $fieldset['#children'] .= '</pre></div>' . "\n";
 

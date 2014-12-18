@@ -344,71 +344,65 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
           continue;
         }
 
-        foreach ($item->time_start as $time_delta => $time_start) {
-          if (!is_null($time_start) && ($time_start < $day_start || $time_start >= $day_stop)) {
-            continue;
+        $item_title = check_plain($item->title);
+
+        $room_name = '';
+        if (array_key_exists($item->room, $rooms)) {
+          $room_name = check_plain($rooms[$item->room]->room_name);
+        }
+
+        $building_name = '';
+        if (array_key_exists($item->building, $buildings)) {
+          $building_name = check_plain($buildings[$item->building]->building_name);
+        }
+
+        $location = (int) $item->location;
+        $building = (int) $item->building;
+        $room = (int) $item->room;
+        $type = (int) $item->type;
+
+        if (is_null($item->time_start[$delta])) {
+          if (!isset($rows['all_day'][$date])) {
+            $rows['all_day'][$date] = array();
           }
 
-          $item_title = check_plain($item->title);
+          $rows['all_day'][$date][$item->id] = array(
+            'href' => $base_path . 'requests/view-0/' . $item->id . $url_arguments,
+            'title' => $item_title,
+            'tooltip' => '[' . $item->id . '] ' . $building_name . ' ' . $room_name . ': ' . $item_title,
+            'date' => $date,
+            'year' => $year,
+            'month' => $month,
+            'day' => date('j', $date),
+            'location' => $location,
+            'building' => $building,
+            'room' => $room,
+            'type' => $type,
+            'building_name' => $building_name,
+            'room_name' => $room_name,
+          );
+        }
+        else {
+          // floor() to nearest hour.
+          $time_floor = $item->time_start[$delta] - ($item->time_start[$delta] % 3600);
 
-          $room_name = '';
-          if (array_key_exists($item->room, $rooms)) {
-            $room_name = check_plain($rooms[$item->room]->room_name);
-          }
-
-          $building_name = '';
-          if (array_key_exists($item->building, $buildings)) {
-            $building_name = check_plain($buildings[$item->building]->building_name);
-          }
-
-          $location = (int) $item->location;
-          $building = (int) $item->building;
-          $room = (int) $item->room;
-          $type = (int) $item->type;
-
-          if (is_null($time_start)) {
-            if (!isset($rows['all_day'][$date])) {
-              $rows['all_day'][$date] = array();
-            }
-
-            $rows['all_day'][$date][$item->id] = array(
-              'href' => $base_path . 'requests/view-0/' . $item->id . $url_arguments,
-              'title' => $item_title,
-              'tooltip' => '[' . $item->id . '] ' . $building_name . ' ' . $room_name . ': ' . $item_title,
-              'date' => $date,
-              'year' => $year,
-              'month' => $month,
-              'day' => date('j', $date),
-              'location' => $location,
-              'building' => $building,
-              'room' => $room,
-              'type' => $type,
-              'building_name' => $building_name,
-              'room_name' => $room_name,
-            );
-          }
-          else {
-            // floor() to nearest hour.
-            $time_floor = $time_start - ($time_start % 3600);
-
-            $rows['range'][$time_floor][$item->id] = array(
-              'href' => $base_path . 'requests/view-0/' . $item->id . $url_arguments,
-              'title' => $item_title,
-              'tooltip' => '[' . $item->id . '] ' . $building_name . ' ' . $room_name . ': ' . $item_title,
-              'date' => $date,
-              'year' => $year,
-              'month' => $month,
-              'day' => date('j', $date),
-              'location' => $location,
-              'building' => $building,
-              'room' => $room,
-              'type' => $type,
-              'building_name' => $building_name,
-              'room_name' => $room_name,
-              'time_start' => $time_start,
-              'time_stop' => $item->time_stop[$time_delta],
-            );
-          }
+          $rows['range'][$time_floor][$item->id] = array(
+            'href' => $base_path . 'requests/view-0/' . $item->id . $url_arguments,
+            'title' => $item_title,
+            'tooltip' => '[' . $item->id . '] ' . $building_name . ' ' . $room_name . ': ' . $item_title,
+            'date' => $date,
+            'year' => $year,
+            'month' => $month,
+            'day' => date('j', $date),
+            'location' => $location,
+            'building' => $building,
+            'room' => $room,
+            'type' => $type,
+            'building_name' => $building_name,
+            'room_name' => $room_name,
+            'time_start' => $item->time_start[$delta],
+            'time_stop' => $item->time_stop[$delta],
+          );
         }
       }
     }
