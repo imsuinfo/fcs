@@ -950,7 +950,10 @@ function mfcs_table_presentation($option = NULL) {
     ),
     'additional' => array(
       'label' => 'Additional Information or Questions to Campus Officials',
-      'size' => 'small',
+      'size' => 'large',
+      'type' => array(
+        'value' => 'text_lined',
+      ),
       'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
@@ -1354,6 +1357,9 @@ function mfcs_table_presentation($option = NULL) {
     'description' => array(
       'label' => 'Description/Purpose',
       'size' => 'large',
+      'type' => array(
+        'value' => 'text_lined',
+      ),
       'request_type' => array(
         'show' => TRUE,
         'hide' => array(
@@ -1365,6 +1371,9 @@ function mfcs_table_presentation($option = NULL) {
     'activities' => array(
       'label' => 'Planned Activities',
       'size' => 'large',
+      'type' => array(
+        'value' => 'text_lined',
+      ),
       'request_type' => array(
         'show' => TRUE,
         'hide' => array(
@@ -1502,6 +1511,9 @@ function mfcs_table_presentation($option = NULL) {
     'other_tables' => array(
       'label' => 'Description and Quantity of Other Tables',
       'size' => 'large',
+      'type' => array(
+        'value' => 'text_lined',
+      ),
       'request_type' => array(
         'show' => TRUE,
         'hide' => array(
@@ -1543,6 +1555,9 @@ function mfcs_table_presentation($option = NULL) {
     'portable_stage_configuration' => array(
       'label' => 'Portable Stage Configuration',
       'size' => 'large',
+      'type' => array(
+        'value' => 'text_lined',
+      ),
       'request_type' => array(
         'show' => TRUE,
         'hide' => array(
@@ -1580,6 +1595,9 @@ function mfcs_table_presentation($option = NULL) {
     'parking_assistance_area' => array(
       'label' => 'Parking Assistance or Restriction Explanation',
       'size' => 'large',
+      'type' => array(
+        'value' => 'text_lined',
+      ),
       'request_type' => array(
         'show' => TRUE,
         'hide' => array(
@@ -1604,6 +1622,9 @@ function mfcs_table_presentation($option = NULL) {
     'road_closures_details' => array(
       'label' => 'Road Closures or Barricades Explanation',
       'size' => 'large',
+      'type' => array(
+        'value' => 'text_lined',
+      ),
       'request_type' => array(
         'show' => TRUE,
         'hide' => array(
@@ -1628,6 +1649,9 @@ function mfcs_table_presentation($option = NULL) {
     'special_requests_details' => array(
       'label' => 'Special Requests Explanation',
       'size' => 'large',
+      'type' => array(
+        'value' => 'text_lined',
+      ),
       'request_type' => array(
         'show' => TRUE,
         'hide' => array(

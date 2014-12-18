@@ -3400,6 +3400,11 @@ function mfcs_build_request_value_structure($request_id, $field_group, $field_na
 
         $length += strlen($value->$value_name);
       }
+      elseif ($type[$value_name] == 'text_lined') {
+        $markup .= preg_replace("/\n/", "<br>\n", check_plain($value->$value_name));
+
+        $length += strlen($value->$value_name);
+      }
       elseif ($type[$value_name] == 'timestamp') {
         if (!array_key_exists($value_name, $display)) {
           $display[$value_name] = 'Y/m/d h:ia';
