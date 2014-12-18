@@ -4532,6 +4532,12 @@ function mfcs_build_table_structure($structure, &$structure_current, &$structure
 
           if (isset($alternate_values[$alternate_data['key']]) && (is_numeric($alternate_values[$alternate_data['key']]) || !empty($alternate_values[$alternate_data['key']]))) {
             $structure_field_tables[$db_table_field][$delta]['value'] = $alternate_values[$alternate_data['key']];
+
+            // fix_lines works by stripping out all carriage returns and replacing them with a single newline.
+            if (array_key_exists('fix_lines', $structure[$table_name][$field_name]) && $structure[$table_name][$field_name]['fix_lines']) {
+              $structure_field_tables[$db_table_field][$delta]['value'] = preg_replace("/\r\n/", "\n", $structure_field_tables[$db_table_field][$delta]['value']);
+              $structure_field_tables[$db_table_field][$delta]['value'] = preg_replace("/\r/", "\n", $structure_field_tables[$db_table_field][$delta]['value']);
+            }
           }
 
           if (!is_null($request_id)) {
@@ -4563,6 +4569,12 @@ function mfcs_build_table_structure($structure, &$structure_current, &$structure
 
         if ($storage_values !== FALSE && !is_null($storage_values)) {
           $structure_field_tables[$db_table_field][$delta]['value'] = $storage_values;
+
+          // fix_lines works by stripping out all carriage returns and replacing them with a single newline.
+          if (array_key_exists('fix_lines', $structure[$table_name][$field_name]) && $structure[$table_name][$field_name]['fix_lines']) {
+            $structure_field_tables[$db_table_field][$delta]['value'] = preg_replace("/\r\n/", "\n", $structure_field_tables[$db_table_field][$delta]['value']);
+            $structure_field_tables[$db_table_field][$delta]['value'] = preg_replace("/\r/", "\n", $structure_field_tables[$db_table_field][$delta]['value']);
+          }
         }
 
         if (isset($structure[$table_name][$field_name]['type'])) {
@@ -4633,6 +4645,12 @@ function mfcs_build_table_structure($structure, &$structure_current, &$structure
       }
       elseif (is_numeric($value) || !empty($value)) {
         $structure_field_tables[$db_table_field][$delta]['value'] = $value;
+
+        // fix_lines works by stripping out all carriage returns and replacing them with a single newline.
+        if (array_key_exists('fix_lines', $structure[$table_name][$field_name]) && $structure[$table_name][$field_name]['fix_lines']) {
+          $structure_field_tables[$db_table_field][$delta]['value'] = preg_replace("/\r\n/", "\n", $structure_field_tables[$db_table_field][$delta]['value']);
+          $structure_field_tables[$db_table_field][$delta]['value'] = preg_replace("/\r/", "\n", $structure_field_tables[$db_table_field][$delta]['value']);
+        }
       }
     }
   }
