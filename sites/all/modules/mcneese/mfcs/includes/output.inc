@@ -268,13 +268,15 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
  *   A < operator is used on this.
  * @param string $title
  *   An HTML title for describing the calendar.
+ * @param int $page_number
+ *   The page_number to use.
  * @param string $id
  *   (optional) A unique HTML id to associate with the calendar.
  *
  * @return string|bool
  *   The generate HTML markup or FALSE on error.
  */
-function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $id = NULL) {
+function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $page_number, $id = NULL) {
   if (!is_array($items)) {
     cf_error::invalid_array('items');
     return FALSE;
@@ -292,6 +294,11 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
 
   if (!is_string($title)) {
     cf_error::invalid_string('title');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($page_number)) {
+    cf_error::invalid_integer('page_number');
     return FALSE;
   }
 
@@ -319,6 +326,16 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
   $request_type_options = mfcs_get_request_type_list_options();
+
+  // Set range at 1-hour intervals.
+  $range_interval = 3600; // 3600 = 1 hour
+  $range_height = 90; // 90px = 1 hour
+  $range_width = 196; // 196px
+  $range_difference = 40; // 3600 / 90 = 40, unit of time per pixel.
+
+  $slots_per_page = 4;
+  $slots_min = $slots_per_page * $page_number;
+  $slots_max = $slots_min + $slots_per_page;
 
   // prepare the inline CSS markup
   $css_screen = '';
@@ -421,7 +438,14 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
         $item_class .= 'room-' . $item['room'] . ' ';
         $item_class .= 'type-' . $item['type'] . ' ';
 
-        $markup .= '<div id="' . $item_id_string . '"  class="calendar-item-wrapper ' . $item_class . '"><div class="calendar-item">';
+        $item_style = '';
+        $item_style .= 'box-sizing: border-box; ';
+        $item_style .= 'width: ' . $range_width . 'px; ';
+        $item_style .= 'min-width: ' . $range_width . 'px; ';
+        $item_style .= 'max-width: ' . $range_width . 'px; ';
+        $item_style .= 'border: 2px outset;';
+
+        $markup .= '<div id="' . $item_id_string . '"  class="calendar-item-wrapper ' . $item_class . '" style="' . $item_style . '"><div class="calendar-item">';
         $markup .= '<div class="calendar-item-link-wrapper"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
         $markup .= '<div class="calendar-item-location-wrapper"><div class="calendar-item-location">' . $item['building_name'] . ' ' . $item['room_name'] . '</div></div>';
 
@@ -449,6 +473,32 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
   $markup .= '</div>';
 
 
+  // begin page links (Range)
+  $markup .= '<nav class="calendar-day calendar-range_links">' . "\n";
+  $markup .= '<header class="calendar-range_links-header element-invisible"><hgroup><h2 class="calendar-range_links-header-2">Page Selection</h2></hgroup></header>' . "\n";
+  $markup .= '<ul class="calendar-day calendar-range_links-pages">' . "\n";
+
+  $slots_page = 0;
+  $slots_count = 0;
+  do {
+    $page_url = $url_base_day . date('Y', $last_day) . '/' . strtolower(date('F', $last_day)) . '/' . date('d', $day_start) . '/' . $slots_page . $url_arguments;
+
+    $class_active_page = '';
+    if ($slots_page == $page_number) {
+      $markup .= '<li class="calendar-range_links-page page-' . $slots_page . '"><div class="calendar-range_links-page-link page-' . $slots_page . ' current_page" title="Currently Viewing Requests on Page ' . ($slots_page + 1) . '">Page #' . ($slots_page + 1) . '</div></li>' . "\n";
+    }
+    else {
+      $markup .= '<li class="calendar-range_links-page page-' . $slots_page . '"><a href="' . $page_url . '" class="calendar-range_links-page-link page-' . $slots_page . '" title="View Requests on Page ' . ($slots_page + 1) . '">Page #' . ($slots_page + 1) . '</a></li>' . "\n";
+    }
+
+    $slots_count += $slots_per_page;
+    $slots_page++;
+  } while ($slots_count < $items['slots_max']);
+
+  // end page links (Range)
+  $markup .= '</ul></nav>' . "\n";
+
+
   // begin wrappers (Range)
   $markup .= '<div class="calendar-day calendar-range">';
 
@@ -470,193 +520,136 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
   $populated = array();
   $row_even = TRUE;
   $row_count = 0;
-  foreach ($items['range'] as $floor_time => $range) {
-    $row_class = 'row-' . $row_count . ' ';
+  foreach ($items['range'] as $floor_time => $slots) {
+    $row_id = 'time_slot-' . date('h_00a', $floor_time);
+    $row_class = array(
+      'calendar-time_slot-wrapper',
+      'row-' . $row_count,
+    );
+
     if ($row_even) {
-      $row_class .= 'even ';
+      $row_class[] = 'even';
     }
     else {
-      $row_class .= 'odd ';
+      $row_class[] = 'odd';
     }
 
-    $time_slot_id = 'time_slot-' . date('h_00a', $floor_time);
-
-    $markup .= '<div id="' . $time_slot_id . '"class="calendar-time_slot-wrapper ' . $row_class . '"><div class="calendar-time_slot">';
+    // begin range row.
+    $markup .= '<div id="' . $row_id . '" class="' . implode(' ', $row_class) . '">';
+    $markup .= '<div class="calendar-time_slot">';
     $markup .= '<div class="calendar-time_slot-label-wrapper"><div class="calendar-time_slot-label">' . date("h:i a", $floor_time) . '</div></div>';
-    $markup .= '<div class="calendar-time_slot-request-wrapper"><div class="calendar-time_slot-request">';
+    $markup .= '<div class="calendar-time_slot-request-wrapper">';
+    $markup .= '<div class="calendar-time_slot-request">';
 
-    if (!array_key_exists($floor_time, $populated)) {
-      $populated[$floor_time] = array();
-    }
-
-    $item_even = TRUE;
-    $item_count = 0;
-    $item_total = count($populated[$floor_time]) + count($range);
-    $item_width = 178;
-
-    $left_offset = 0;
-    $left_offset_min = 20;
-    $left_offset_max = 186;
-
-    $left_offset_increment = $left_offset_min;
-    $left_offset_increment_portrait = $left_offset_min;
-    if ($item_total > 0) {
-      $left_offset_increment = floor(790 / $item_total);
-      $left_offset_increment_portrait = floor(590 / $item_total);
-
-      if ($left_offset_increment < $left_offset_min) {
-        $left_offset_increment = $left_offset_min;
+    foreach ($slots as $slot => $range) {
+      // only process slots used by the current page.
+      if ($slot < $slots_min) {
+        continue;
       }
-      elseif ($left_offset_increment > $left_offset_max) {
-        $left_offset_increment = $left_offset_max;
+      elseif ($slot >= $slots_max) {
+        break;
       }
 
-      if ($left_offset_increment_portrait < $left_offset_min) {
-        $left_offset_increment_portrait = $left_offset_min;
-      }
-      elseif ($left_offset_increment_portrait > $left_offset_max) {
-        $left_offset_increment_portrait = $left_offset_max;
-      }
-    }
-
-
-    foreach ($range as $item_id => $item) {
-      $time = strtotime('+1 hours', $floor_time);
-      $stuck_slot = NULL;
-      do {
-        if (!array_key_exists($time, $populated)) {
-          $populated[$time] = array();
+      foreach ($range as $item_id => $item) {
+        $item_id_string = 'calendar-item-' . $item_id . '-slot-' . $slot;
+        if (!is_null($id)) {
+          $item_id_string = $id . '-calendar-item-' . $item_id . '-slot-' . $slot;
         }
 
-        if (is_null($stuck_slot)) {
-          $max_position = count($populated[$time]);
-          for ($i = 0; $i <= $max_position; $i++) {
-            if (!isset($populated[$time][$i])) {
-              $populated[$time][$i] = $item_id;
-              $stuck_slot = $i;
-              break;
-            }
+        $item_class = array(
+          'item-zindex-normal',
+          'location-' . $item['location'],
+          'building-' . $item['building'],
+          'room-' . $item['room'],
+          'type-' . $item['type'],
+          'slot-' . $slot,
+        );
+        $item_style = array(
+          'box-sizing: border-box;',
+          'max-height: ' . $range_height . 'px;',
+          'width: ' . $range_width . 'px;',
+          'min-width: ' . $range_width . 'px;',
+          'max-width: ' . $range_width . 'px;',
+          'margin-top: 0px;',
+          'margin-bottom: 0px;',
+          'margin-right: 3px;',
+          'z-index: ' . $item['z-index'] . ';',
+        );
+
+        $margin_left = 0;
+        $slot_count = $slot - 1;
+        while ($slot_count >= $slots_min) {
+          if (empty($slots[$slot_count])) {
+            $margin_left += $range_width + 6; // the +6 is for the margins.
           }
-          unset($max_position);
-          unset($i);
+          else {
+            break;
+          }
+
+          $slot_count--;
+        }
+
+        if ($margin_left > 0) {
+          $margin_left += 3; // add the 3 left margin pixels.
+          $item_style[] = 'margin-left: ' . $margin_left . 'px;';
         }
         else {
-          $i = 0;
-          while ($i < $stuck_slot) {
-            if (!array_key_exists($i, $populated[$time])) {
-              $populated[$time][$i] = NULL;
-            }
-
-            $i++;
-          }
-
-          $populated[$time][$stuck_slot] = $item_id;
-          unset($i);
+          $item_style[] = 'margin-left: 3px;';
         }
 
-        $time = strtotime('+1 hours', $time);
-      } while ($item['time_stop'] > $time);
+        $item_text = '';
+        if ($item['slot_start'] || $item['slot_stop']) {
+          if ($item['slot_start']) {
+            $item_class[] = 'slot-start';
 
-      $left_offset = $left_offset_increment * $stuck_slot;
-      $left_offset_portrait = $left_offset_increment_portrait * $stuck_slot;
+            $item_height_min = 69;
+            $item_margin_top = floor($item['offset_start'] / $range_difference);
 
-      $item_class = "";
+            if ($item_margin_top + $item_height_min > $range_height) {
+              $item_margin_top = $range_height - $item_height_min;
+            }
 
-      $item_class = 'row-' . $item_count . ' ';
-      if ($item_even) {
-       $item_class .= 'even ';
+            $item_height = $range_height - $item_margin_top;
+            $item_style[] = 'margin-top: ' . $item_margin_top . 'px;';
+            $item_style[] = 'height: ' . $item_height . 'px;';
+            $item_style[] = 'min-height: ' . $item_height_min . 'px;';
+
+            $item_text .= '<div class="calendar-item-link-wrapper"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
+            $item_text .= '<div class="calendar-item-time-wrapper"><div class="calendar-item-time">' . date("h:i a", $item['time_start']) . " to " . date("h:i a", $item['time_stop']) . '</div></div>';
+            $item_text .= '<div class="calendar-item-location-wrapper"><div class="calendar-item-location">' . $item['building_name'] . ' ' . $item['room_name'] . '</div></div>';
+          }
+
+          if ($item['slot_stop']) {
+            $item_class[] = 'slot-stop';
+
+            $item_height_min = 21;
+            $item_height = $range_height - $item['offset_stop'];
+            $item_margin_bottom = $range_height - $item_height;
+            $item_style[] = 'margin-bottom: ' . $item_margin_bottom . 'px;';
+            $item_style[] = 'height: ' . $item_height . 'px;';
+            $item_style[] = 'min-height: ' . $item_height_min . 'px;';
+
+            $item_text .= '<div class="calendar-item-id-wrapper"><div class="calendar-item-id">' . $item_id . '</div></div>';
+
+            if (!empty($request_type_options[$item['type']])) {
+              $item_text .= '<div class="calendar-item-type-wrapper"><div class="calendar-item-type">' . $request_type_options[$item['type']] . '</div></div>';
+            }
+          }
+        }
+        else {
+          $item_class[] = 'slot-continue';
+
+          $item_style[] = 'height: ' . $range_height . 'px;';
+          $item_style[] = 'min-height: ' . $range_height . 'px;';
+        }
+
+        $markup .= '<div id="' . $item_id_string . '" class="calendar-item-wrapper ' . implode(' ', $item_class) . '" style="' . implode(' ', $item_style) . '"><div class="calendar-item">';
+        $markup .= $item_text;
+        $markup .= '</div></div>';
       }
-      else {
-        $item_class .= 'odd ';
-      }
-
-      $item_class .= 'item-zindex-normal ';
-      $item_class .= 'location-' . $item['location'] . ' ';
-      $item_class .= 'building-' . $item['building'] . ' ';
-      $item_class .= 'room-' . $item['room'] . ' ';
-      $item_class .= 'type-' . $item['type'] . ' ';
-
-      // split the time difference into height where each minute is equal to 1 pixel(s).
-      $item_minutes = (($item['time_stop'] - $item['time_start']) / 60);
-      $item_hours = $item_minutes / 60;
-
-      // each minute should represent (90/60) pixels or 1.5 pixels.
-      $item_height = $item_minutes * 1.5;
-
-      // for each hour add the appropriate margin + padding + border
-      $item_height += 5 * $item_hours;
-
-      // subtract the margin + padding + border.
-      $item_height -= 2;
-
-      if ($item_height < 54) {
-        $item_height = 54;
-      }
-
-      // when there are more than 30 characters, shrink the box size by the expected line height of 15 pixels.
-      if (strlen($item['title']) > 30) {
-        $item_height -= 15;
-      }
-
-      // designate the top offset based on when the request starts relative to the top of the hour.
-      $top_offset = ($item['time_start'] - $floor_time) / 60;
-      if ($top_offset < 0) {
-        $top_offset = 0;
-      }
-
-      if (is_null($id)) {
-        $item_id_string = 'calendar-item-' . $item_id;
-        $item_id_parent = '';
-      }
-      else {
-        $item_id_string = $id . '-calendar-item-' . $item_id;
-        $item_id_parent = '#' . $id . ' ';
-      }
-
-      $css_screen .= $item_id_parent . '#' . $item_id_string . ' {' . "\n";
-      $css_screen .= ' top: ' . $top_offset . 'px;' . "\n";
-      $css_screen .= ' left: ' . $left_offset . 'px;' . "\n";
-      $css_screen .= ' min-height: ' . $item_height . 'px;' . "\n";
-      $css_screen .= ' width: ' . $item_width . 'px;' . "\n";
-      $css_screen .= ' min-width: ' . $item_width . 'px;' . "\n";
-      $css_screen .= ' max-width: ' . $item_width . 'px;' . "\n";
-      $css_screen .= '}' . "\n";
-
-      $css_portrait .= $item_id_parent . '#' . $item_id_string . ' {' . "\n";
-      $css_portrait .= ' top: ' . $top_offset . 'px;' . "\n";
-      $css_portrait .= ' left: ' . $left_offset_portrait . 'px;' . "\n";
-      $css_portrait .= ' min-height: ' . $item_height . 'px;' . "\n";
-      $css_portrait .= ' width: ' . $item_width . 'px;' . "\n";
-      $css_portrait .= ' min-width: ' . $item_width . 'px;' . "\n";
-      $css_portrait .= ' max-width: ' . $item_width . 'px;' . "\n";
-      $css_portrait .= '}' . "\n";
-
-      $css_landscape .= $item_id_parent . '#' . $item_id_string . ' {' . "\n";
-      $css_landscape .= ' top: ' . $top_offset . 'px;' . "\n";
-      $css_landscape .= ' left: ' . $left_offset . 'px;' . "\n";
-      $css_landscape .= ' min-height: ' . $item_height . 'px;' . "\n";
-      $css_landscape .= ' width: ' . $item_width . 'px;' . "\n";
-      $css_landscape .= ' min-width: ' . $item_width . 'px;' . "\n";
-      $css_landscape .= ' max-width: ' . $item_width . 'px;' . "\n";
-      $css_landscape .= '}' . "\n";
-
-      $markup .= '<div id="' . $item_id_string . '" class="calendar-item-wrapper ' . $item_class . '"><div class="calendar-item">';
-      $markup .= '<div class="calendar-item-link-wrapper"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
-      $markup .= '<div class="calendar-item-time-wrapper"><div class="calendar-item-time">' . date("h:i a", $item['time_start']) . " to " . date("h:i a", $item['time_stop']) . '</div></div>';
-      $markup .= '<div class="calendar-item-location-wrapper"><div class="calendar-item-location">' . $item['building_name'] . ' ' . $item['room_name'] . '</div></div>';
-
-      $markup .= '<div class="calendar-item-id-wrapper"><div class="calendar-item-id">' . $item_id . '</div></div>';
-
-      if (!empty($request_type_options[$item['type']])) {
-        $markup .= '<div class="calendar-item-type-wrapper"><div class="calendar-item-type">' . $request_type_options[$item['type']] . '</div></div>';
-      }
-
-      $markup .= '</div></div>';
-
-      $item_count++;
-      $item_even = !$item_even;
     }
 
+    // end range row.
     $markup .= '</div></div></div></div>';
 
     $row_count++;

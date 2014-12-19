@@ -239,11 +239,14 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
  * @param string $day
  *   (optional) When specified, represents the day.
  *   Causes $year and $month to be required.
+ * @param int $page_number
+ *   (optional) The page number. Requests are broken up into different pages
+ *   to better handle large numbers of requests per time slot.
  *
  * @return string
  *   The HTML output representing the page.
  */
-function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NULL) {
+function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NULL, $page_number = 0) {
   if (!is_null($year) && !cf_is_integer($year)) {
     cf_error::invalid_integer('year');
 
@@ -256,11 +259,12 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
     drupal_exit();
   }
 
+  if (!cf_is_integer($page_number) || $page_number < 0) {
+    $page_number = 0;
+  }
+
   global $base_path;
   global $mfcs_determined;
-  $module_path = drupal_get_path('module', 'mfcs');
-
-  drupal_add_js($module_path . '/js/calendar-day-zindex.js', array('type' => 'file', 'group' => JS_DEFAULT, 'preprocess' => TRUE));
 
   $user = cf_current_user();
 
@@ -326,16 +330,20 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
   $rows = array(
     'all_day' => array(),
     'range' => array(),
+    'slots_max' => 0,
   );
 
-  // pre-populate range at 1-hour intevals
-  $range_interval = "+1 hours";
+  // Set range at 1-hour intervals.
+  $range_interval = 3600; // 3600 = +1 hour
 
   $current_time = $day_start;
-  do {
+  while ($current_time < $day_stop) {
     $rows['range'][$current_time] = array();
-    $current_time = strtotime($range_interval, $current_time);
-  } while ($current_time < $day_stop);
+    $current_time += $range_interval;
+  }
+  unset($current_time);
+
+  $processed_items = array();
 
   if (!empty($items)) {
     foreach ($items as $item) {
@@ -367,6 +375,7 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
           }
 
           $rows['all_day'][$date][$item->id] = array(
+            'id' => $item->id,
             'href' => $base_path . 'requests/view-0/' . $item->id . $url_arguments,
             'title' => $item_title,
             'tooltip' => '[' . $item->id . '] ' . $building_name . ' ' . $room_name . ': ' . $item_title,
@@ -383,37 +392,103 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
           );
         }
         else {
-          // floor() to nearest hour.
-          $time_floor = $item->time_start[$delta] - ($item->time_start[$delta] % 3600);
+          // floor() and ceil() to nearest hours.
+          $time_offset_start = $item->time_start[$delta] % $range_interval;
+          $time_offset_stop = $item->time_stop[$delta] % $range_interval;
+          $time_floor = $item->time_start[$delta] - $time_offset_start;
+          $time_ceiling = $item->time_stop[$delta] - $time_offset_stop;
+          if ($time_offset_stop > 0) {
+            $time_ceiling += $range_interval;
+          }
+          $time_zindex = 100 + (int) date("G", $time_floor);
 
-          $rows['range'][$time_floor][$item->id] = array(
-            'href' => $base_path . 'requests/view-0/' . $item->id . $url_arguments,
-            'title' => $item_title,
-            'tooltip' => '[' . $item->id . '] ' . $building_name . ' ' . $room_name . ': ' . $item_title,
-            'date' => $date,
-            'year' => $year,
-            'month' => $month,
-            'day' => date('j', $date),
-            'location' => $location,
-            'building' => $building,
-            'room' => $room,
-            'type' => $type,
-            'building_name' => $building_name,
-            'room_name' => $room_name,
-            'time_start' => $item->time_start[$delta],
-            'time_stop' => $item->time_stop[$delta],
-          );
+          // @fixme: Filter out overlapping times. This needs to be fixed so that the use case can never happen. (result of a bug on insert, not checking to see if multiple dates overlap.)
+          if (isset($processed_items[$item->id][$time_floor])) {
+            continue;
+          }
+
+          // preprocess the slots in an attempt to find the leftmost slot that is available for all date slots.
+          $time_slot = 0;
+          do {
+            $time_slot_found = TRUE;
+            $time_count = $time_floor;
+            while ($time_count < $time_ceiling) {
+              while (!empty($rows['range'][$time_count][$time_slot])) {
+                $time_slot_found = FALSE;
+                break;
+              }
+
+              $time_count += $range_interval;
+            }
+
+            if ($time_slot_found) {
+              break;
+            }
+
+            $time_slot++;
+          } while (TRUE);
+
+          $time_count = $time_floor;
+          while ($time_count < $time_ceiling) {
+            $processed_items[$item->id][$time_count] = $time_slot;
+
+            $rows['range'][$time_count][$time_slot][$item->id] = array(
+              'id' => $item->id,
+              'href' => $base_path . 'requests/view-0/' . $item->id . $url_arguments,
+              'title' => $item_title,
+              'tooltip' => '[' . $item->id . '] ' . $building_name . ' ' . $room_name . ': ' . $item_title,
+              'date' => $date,
+              'year' => $year,
+              'month' => $month,
+              'day' => date('j', $date),
+              'location' => $location,
+              'building' => $building,
+              'room' => $room,
+              'type' => $type,
+              'building_name' => $building_name,
+              'room_name' => $room_name,
+              'time_start' => $item->time_start[$delta],
+              'time_stop' => $item->time_stop[$delta],
+              'slot_start' => FALSE,
+              'slot_stop' => FALSE,
+              'offset_start' => 0,
+              'offset_stop' => 0,
+              'z-index' => $time_zindex,
+            );
+
+            if ($time_count == $time_floor) {
+              $rows['range'][$time_count][$time_slot][$item->id]['slot_start'] = TRUE;
+              $rows['range'][$time_count][$time_slot][$item->id]['offset_start'] = $time_offset_start;
+            }
+
+            if (($time_count + $range_interval) == $time_ceiling) {
+              $rows['range'][$time_count][$time_slot][$item->id]['slot_stop'] = TRUE;
+              $rows['range'][$time_count][$time_slot][$item->id]['offset_stop'] = $time_offset_stop;
+            }
+
+            $time_count += $range_interval;
+          }
+
+          $slots_max = count($rows['range'][$time_floor]);
+          if ($rows['slots_max'] < $slots_max) {
+            $rows['slots_max'] = $slots_max;
+          }
         }
       }
     }
   }
 
+  foreach ($rows['range'] as $time_floor => &$time_slots) {
+    ksort($time_slots);
+  }
+
+
   mfcs_include(MFCS_INCLUDE_OUTPUT);
 
   $markup = '';
-  $title = '<h3>' . "Requests for " . '<a href="' . $base_path . 'requests/calendar-0/month/' . date("Y/F", $day_start) . $url_arguments . '" title="Requests for ' . date("F, Y", $day_start) . '">' . date("F", $day_start) . '</a> ' . date("j, Y", $day_start) . '</h3>';
+  $title = '<h3>' . "Requests for " . '<a href="' . $base_path . 'requests/calendar-0/month/' . date("Y/F", $day_start) . $url_arguments . '" title="Requests for ' . date("F, Y", $day_start) . '">' . date("F", $day_start) . '</a> ' . date("j, Y", $day_start) . ' (Page #' . ($page_number + 1) . ')</h3>';
 
-  $result = mfcs_build_calendar_day_markup($rows, $day_start, $day_stop, $title, 'mfcs-calendar-0-day');
+  $result = mfcs_build_calendar_day_markup($rows, $day_start, $day_stop, $title, $page_number, 'mfcs-calendar-0-day');
   if ($result !== FALSE) {
     $markup .= $result;
   }

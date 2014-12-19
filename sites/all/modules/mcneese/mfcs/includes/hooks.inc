@@ -511,6 +511,19 @@ function mfcs_hook_menu() {
     'tab_root' => 'requests',
   );
 
+  $items['requests/calendar-0/day/%/%/%/%'] = array(
+    'title' => "Request Calendar",
+    'description' => "Requests Calendar - Day",
+    'page callback' => 'mfcs_request_calendar_day_0_page',
+    'page arguments' => array(3, 4, 5, 6),
+    'file' => 'request_calendar.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('list'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
+
   $items['requests/ical-0/%'] = array(
     'title' => "Request iCal",
     'description' => "Request iCal",
