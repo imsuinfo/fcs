@@ -111,10 +111,6 @@ class ultimate_cron_job_ctools_export_ui extends ctools_export_ui {
       unset($allowed_operations['export']);
     }
 
-    if (variable_get('maintenance_mode', 0)) {
-      unset($allowed_operations['run']);
-    }
-
     $item->build_operations_alter($allowed_operations);
 
     $default_sort = array(
