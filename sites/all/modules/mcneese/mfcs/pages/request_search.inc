@@ -1186,7 +1186,6 @@ function mfcs_request_search_0_form_submit($form, &$form_state) {
     $form_state['advanced_search-results'] = $items;
     $form_state['advanced_search-count'] = $count;
     $form_state['advanced_search-page_number'] = $next_page;
-    $form_state['advanced_search-search'] = $search;
     $form_state['advanced_search-sensitive'] = $options['sensitive'];
   }
   elseif ($clicked_id == 'search-advanced-submit-search') {
