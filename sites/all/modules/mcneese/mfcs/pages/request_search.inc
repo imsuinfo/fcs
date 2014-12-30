@@ -1042,7 +1042,6 @@ function mfcs_request_search_0_form_submit($form, &$form_state) {
     $options['sensitive'] = (bool) $form_state['values']['simple']['sensitive'];
     $options['start'] = $form['form']['simple_search-page_number']['#value'] * $form['form']['per_page']['#value'];
 
-
     mfcs_request_search_0_simple_search_preprocess($conditions, $options);
 
     $items_returned = mfcs_request_load_listing($conditions, $options);
@@ -1083,6 +1082,8 @@ function mfcs_request_search_0_form_submit($form, &$form_state) {
     $options['sensitive'] = (bool) $form_state['values']['simple']['sensitive'];
     $options['start'] = $previous_page * $form['form']['per_page']['#value'];
 
+    mfcs_request_search_0_simple_search_preprocess($conditions, $options);
+
     $items_returned = mfcs_request_load_listing($conditions, $options);
 
     $items = array();
@@ -1101,8 +1102,6 @@ function mfcs_request_search_0_form_submit($form, &$form_state) {
     $form_state['simple_search-results'] = $items;
     $form_state['simple_search-count'] = $count;
     $form_state['simple_search-page_number'] = $previous_page;
-    $form_state['simple_search-search'] = $options['search'];
-    $form_state['simple_search-sensitive'] = $options['sensitive'];
   }
   elseif ($clicked_id == 'search-simple-results-navigation-next') {
     $next_page = $form['form']['simple_search-page_number']['#value'] + 1;
@@ -1112,6 +1111,8 @@ function mfcs_request_search_0_form_submit($form, &$form_state) {
     $options['search'] = $form_state['simple_search-search'];
     $options['sensitive'] = (bool) $form_state['values']['simple']['sensitive'];
     $options['start'] = $next_page * $form['form']['per_page']['#value'];
+
+    mfcs_request_search_0_simple_search_preprocess($conditions, $options);
 
     $items_returned = mfcs_request_load_listing($conditions, $options);
 
@@ -1131,8 +1132,6 @@ function mfcs_request_search_0_form_submit($form, &$form_state) {
     $form_state['simple_search-results'] = $items;
     $form_state['simple_search-count'] = $count;
     $form_state['simple_search-page_number'] = $next_page;
-    $form_state['simple_search-search'] = $options['search'];
-    $form_state['simple_search-sensitive'] = $options['sensitive'];
   }
   elseif ($clicked_id == 'search-advanced-results-navigation-previous') {
     $previous_page = $form['form']['advanced_search-page_number']['#value'] - 1;
@@ -1159,7 +1158,6 @@ function mfcs_request_search_0_form_submit($form, &$form_state) {
     $form_state['advanced_search-results'] = $items;
     $form_state['advanced_search-count'] = $count;
     $form_state['advanced_search-page_number'] = $previous_page;
-    $form_state['advanced_search-sensitive'] = $options['sensitive'];
   }
   elseif ($clicked_id == 'search-advanced-results-navigation-next') {
     $next_page = $form['form']['advanced_search-page_number']['#value'] + 1;
@@ -1186,7 +1184,6 @@ function mfcs_request_search_0_form_submit($form, &$form_state) {
     $form_state['advanced_search-results'] = $items;
     $form_state['advanced_search-count'] = $count;
     $form_state['advanced_search-page_number'] = $next_page;
-    $form_state['advanced_search-sensitive'] = $options['sensitive'];
   }
   elseif ($clicked_id == 'search-advanced-submit-search') {
     $sensitive = (bool) $form_state['values']['advanced']['sensitive'];
