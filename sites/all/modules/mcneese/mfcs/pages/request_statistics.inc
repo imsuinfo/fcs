@@ -52,6 +52,8 @@ function mfcs_request_statistics_0_page($year = NULL, $month = NULL, $day = NULL
     drupal_exit();
   }
 
+  global $base_path;
+
   $user = cf_current_user();
 
   mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
@@ -65,6 +67,7 @@ function mfcs_request_statistics_0_page($year = NULL, $month = NULL, $day = NULL
 
     $year_start = strtotime('midnight january 1,  ' . $current_date['year']);
     $year_stop = strtotime('next year', $year_start);
+    $year_last = strtotime('previous year', $year_start);
     $month_start = strtotime('midnight ' . $current_date['month'] . ' 1,  ' . $current_date['year']);
     $month_stop = strtotime('next month', $month_start);
     $day_start = strtotime('midnight ' . $current_date['month'] . ' ' . $current_date['day'] . ' ' . $current_date['year']);
@@ -72,6 +75,19 @@ function mfcs_request_statistics_0_page($year = NULL, $month = NULL, $day = NULL
 
     $month_name = date('F', $month_start);
   }
+  else {
+    $instance = mfcs_instance();
+    $year = date('Y', $instance);
+    $year_start = strtotime('midnight january 1, ' . $year);
+    $year_stop = strtotime('next year', $year_start);
+    $year_last = strtotime('previous year', $year_start);
+
+    $month = NULL;
+    $day = NULL;
+  }
+
+  $string_year_previous = date('Y', $year_last);
+  $string_year_next = date('Y', $year_stop);
 
   $status_options = mfcs_get_request_status_list_options();
   $steps_options = mfcs_get_request_steps_list_options();
@@ -81,23 +97,23 @@ function mfcs_request_statistics_0_page($year = NULL, $month = NULL, $day = NULL
   $now = date("Y/m/d h:i:s a");
 
   $markup = '<div id="mfcs-statistics-page" class="statistics-page">' . "\n";
-  $markup .= '<div class="statistics-title">' . "\n";
-  if (is_null($year)) {
-    mfcs_add_canonical_headers('requests/statistics-0');
-    $markup .= '<h3 class="statistics-title-text">' . 'Request Statistics <span class="statistics-title-text-note">(generated on ' . $now . ')</span></h3>' . "\n";
 
-    $counts = mfcs_request_statistics_load_counts(NULL, NULL);
-  }
-  elseif (is_null($month)) {
-    $year = date('Y', $day_start);
+  // next/prev years
+  $markup .= '<div class="statistics-navigation position-relative no-print clear">' . "\n";
+  $markup .= '  <a href="' . $base_path . 'requests/statistics-0/' . $string_year_previous . '" class="statistics-navigation-link link-previous inline-block" title="Statistics for ' . $string_year_previous . '">Prev</a>' . "\n";
+  $markup .= '  <a href="' . $base_path . 'requests/statistics-0/' . $string_year_next . '" class="statistics-navigation-link link-previous inline-block float-right" title="Statistics for for ' . $string_year_next . '">Next</a>' . "\n";
+  $markup .= '</div>' . "\n";
+
+  $markup .= '<div class="statistics-title">' . "\n";
+  if (is_null($month)) {
     mfcs_add_canonical_headers('requests/statistics-0/' . $year);
     $markup .= '<h3 class="statistics-title-text">' . "Request Statistics for the year " . $year . ' <span class="statistics-title-text-note">(generated on ' . $now . ')</span></h3>' . "\n";
 
     $counts = mfcs_request_statistics_load_counts($year_start, $year_stop);
   }
   elseif (is_null($day)) {
-    $month = strtolower(date('F', $day_start));
-    $year = date('Y', $day_start);
+    $month = strtolower(date('F', $month_start));
+    $year = date('Y', $month_start);
     mfcs_add_canonical_headers('requests/statistics-0/' . $year . '/' . $month);
     $markup .= '<h3 class="statistics-title-text">' . "Request Statistics for " . $month_name . " " . $year . ' <span class="statistics-title-text-note">(generated on ' . $now . ')</span></h3>' . "\n";
 
