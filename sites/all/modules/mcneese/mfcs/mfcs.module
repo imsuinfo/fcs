@@ -2428,7 +2428,7 @@ function mfcs_sync_banner_to_local() {
         // add the room and venue coordinators.
         $room_coordinator = NULL;
         if (!empty($coordinator_room_item['email'])) {
-          $room_coordinator = mfcs_ensure_user_by_email($coordinator_room_item['email'], array('reviewer'));
+          $room_coordinator = mfcs_ensure_user_by_email($coordinator_room_item['email'], array('reviewer', 'requester'));
         }
 
         if (!is_object($room_coordinator) && !empty($coordinator_venue_item['email'])) {
