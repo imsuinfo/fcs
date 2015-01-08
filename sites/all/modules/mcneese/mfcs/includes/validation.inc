@@ -130,7 +130,7 @@ function mfcs_pre_validate_request_fields(&$form, &$form_state, $dont_validate =
     }
 
     if (!is_object($coordinator)) {
-      $coordinator = user_load(MFCS_REVIEW_CLASSIFICATION_FAILSAFE_COORDINATOR);
+      $coordinator = user_load(MFCS_REVIEWER_CLASSIFICATION_FAILSAFE_COORDINATOR);
     }
 
     // override field settings with the proper attributes.
@@ -161,7 +161,7 @@ function mfcs_pre_validate_request_fields(&$form, &$form_state, $dont_validate =
       }
 
       if (!is_object($coordinator)) {
-        $coordinator = user_load(MFCS_REVIEW_CLASSIFICATION_FAILSAFE_COORDINATOR);
+        $coordinator = user_load(MFCS_REVIEWER_CLASSIFICATION_FAILSAFE_COORDINATOR);
       }
 
       // override field settings with the proper attributes.

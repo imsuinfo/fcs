@@ -539,9 +539,9 @@ function mfcs_get_reviewer_classification_list_options($option = NULL, $include_
   }
 
   if ($include_hidden) {
-    $options[MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR] = "Venue Coordinator";
-    $options[MFCS_REVIEW_CLASSIFICATION_SYSTEM_ADMINISTRATOR] = "System Administrator";
-    $options[MFCS_REVIEW_CLASSIFICATION_MANAGER] = "Manager";
+    $options[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR] = "Venue Coordinator";
+    $options[MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR] = "System Administrator";
+    $options[MFCS_REVIEWER_CLASSIFICATION_MANAGER] = "Manager";
   }
 
   asort($options);

@@ -1030,7 +1030,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
       if ($can_comment_request) {
         if (empty($reviewer_classification)) {
           if ($manager) {
-            $reviewer_classification[MFCS_REVIEW_CLASSIFICATION_MANAGER] = 'Manager';
+            $reviewer_classification[MFCS_REVIEWER_CLASSIFICATION_MANAGER] = 'Manager';
           }
         }
       }
@@ -1049,7 +1049,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
       $insurance_provided_available_only = &$form['form']['insurance_provided_available_only']['#value'];
       if ($can_review_request && ($step == MFCS_REVIEW_STEP_REVIEW || $step == MFCS_REVIEW_STEP_REQUIREMENTS || $step == MFCS_REVIEW_STEP_MAKE_DECISIONS || $step == MFCS_REVIEW_STEP_COMPLETED)) {
         if ($status == MFCS_REQUEST_STATUS_LOCKED || $status == MFCS_REQUEST_STATUS_CLOSED_ACCEPTED) {
-          if (isset($reviewer_classification_all[MFCS_REVIEW_CLASSIFICATION_PURCHASING])) {
+          if (isset($reviewer_classification_all[MFCS_REVIEWER_CLASSIFICATION_PURCHASING])) {
             if ((isset($request['insurance']['contractor'][0]->value) && $request['insurance']['contractor'][0]->value == 1) || (isset($request['insurance']['unaffiliated'][0]->value) && $request['insurance']['unaffiliated'][0]->value == 1)) {
               if (isset($request['insurance']['provided'][0]->value) && $request['insurance']['provided'][0]->value != 1) {
                 $insurance_provided_available = TRUE;
@@ -1064,12 +1064,12 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         if (empty($reviewer_classification) || ($step != MFCS_REVIEW_STEP_REVIEW && $step != MFCS_REVIEW_STEP_REQUIREMENTS)) {
 
           if ($request['venue_coordinator']['user_id'][0]->value == $user->uid) {
-            $reviewer_classification[MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR] = "Venue Coordinator";
-            $reviewer_classification_all[MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR] = "Venue Coordinator";
+            $reviewer_classification[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR] = "Venue Coordinator";
+            $reviewer_classification_all[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR] = "Venue Coordinator";
           }
           else {
-            $reviewer_classification[MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR_PROXY] = "Venue Coordinator (Proxy)";
-            $reviewer_classification_all[MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR_PROXY] = "Venue Coordinator (Proxy)";
+            $reviewer_classification[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY] = "Venue Coordinator (Proxy)";
+            $reviewer_classification_all[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY] = "Venue Coordinator (Proxy)";
           }
         }
       }
@@ -1097,7 +1097,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
             $decision_options[MFCS_REVIEW_DECISION_COMMENT] = $decision_options_all[MFCS_REVIEW_DECISION_COMMENT];
           }
 
-          $reviewer_classification[MFCS_REVIEW_CLASSIFICATION_PURCHASING] = $reviewer_classification_all[MFCS_REVIEW_CLASSIFICATION_PURCHASING];
+          $reviewer_classification[MFCS_REVIEWER_CLASSIFICATION_PURCHASING] = $reviewer_classification_all[MFCS_REVIEWER_CLASSIFICATION_PURCHASING];
           $insurance_provided_available_only = TRUE;
         }
       }
@@ -1166,15 +1166,15 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         }
         else {
           foreach ($reviewers as $reviewer) {
-            if ($reviewer->reviewer_classification == MFCS_REVIEW_CLASSIFICATION_FACILITIES) {
+            if ($reviewer->reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_FACILITIES) {
               $uses['custodial'] = "Custodial";
               $form['form']['requirements-custodial']['#value'] = TRUE;
             }
-            elseif ($reviewer->reviewer_classification == MFCS_REVIEW_CLASSIFICATION_SECURITY) {
+            elseif ($reviewer->reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_SECURITY) {
               $uses['security'] = "Security";
               $form['form']['requirements-security']['#value'] = TRUE;
             }
-            elseif ($reviewer->reviewer_classification == MFCS_REVIEW_CLASSIFICATION_PURCHASING) {
+            elseif ($reviewer->reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_PURCHASING) {
               $insurance_requirement = TRUE;
               $form['form']['requirements-insurance']['#value'] = TRUE;
             }
@@ -2765,16 +2765,16 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id, $revision_id 
           $reviewer_classification .= ', ';
         }
 
-        if ($classification == MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR) {
+        if ($classification == MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR) {
           $reviewer_classification .= "Venue Coordinator";
         }
-        elseif ($classification == MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR_PROXY) {
+        elseif ($classification == MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY) {
           $reviewer_classification .= "Venue Coordinator (Proxy)";
         }
-        elseif ($classification == MFCS_REVIEW_CLASSIFICATION_MANAGER) {
+        elseif ($classification == MFCS_REVIEWER_CLASSIFICATION_MANAGER) {
           $reviewer_classification .= "Manager";
         }
-        elseif ($classification == MFCS_REVIEW_CLASSIFICATION_SYSTEM_ADMINISTRATOR) {
+        elseif ($classification == MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR) {
           $reviewer_classification .= "System Administrator";
         }
         else {

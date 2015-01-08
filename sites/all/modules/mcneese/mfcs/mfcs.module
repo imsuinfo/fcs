@@ -65,24 +65,24 @@ define('MFCS_REQUEST_STATUS_CANCELLED', 7);
 /**
  * Defines Taxonomy TIDs for review classifications.
  */
- define('MFCS_REVIEW_CLASSIFICATION_ADMINISTRATIVE_ACCOUNTING', 105);
- define('MFCS_REVIEW_CLASSIFICATION_EVENT_COORDINATOR', 99);
- define('MFCS_REVIEW_CLASSIFICATION_FACILITIES', 104);
- define('MFCS_REVIEW_CLASSIFICATION_FACULTY_ADVISOR', 100);
- define('MFCS_REVIEW_CLASSIFICATION_FOOD_SERVICES', 108);
- define('MFCS_REVIEW_CLASSIFICATION_HOUSING', 107);
- define('MFCS_REVIEW_CLASSIFICATION_MAINTENANCE', 103);
- define('MFCS_REVIEW_CLASSIFICATION_PURCHASING', 106);
- define('MFCS_REVIEW_CLASSIFICATION_SECURITY', 102);
- define('MFCS_REVIEW_CLASSIFICATION_STUDENT_ORGANIZATIONS', 145);
- define('MFCS_REVIEW_CLASSIFICATION_UNIVERSITY_SERVICES', 101);
- define('MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR', 112);
- define('MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR_PROXY', 144);
+ define('MFCS_REVIEWER_CLASSIFICATION_ADMINISTRATIVE_ACCOUNTING', 105);
+ define('MFCS_REVIEWER_CLASSIFICATION_EVENT_COORDINATOR', 99);
+ define('MFCS_REVIEWER_CLASSIFICATION_FACILITIES', 104);
+ define('MFCS_REVIEWER_CLASSIFICATION_FACULTY_ADVISOR', 100);
+ define('MFCS_REVIEWER_CLASSIFICATION_FOOD_SERVICES', 108);
+ define('MFCS_REVIEWER_CLASSIFICATION_HOUSING', 107);
+ define('MFCS_REVIEWER_CLASSIFICATION_MAINTENANCE', 103);
+ define('MFCS_REVIEWER_CLASSIFICATION_PURCHASING', 106);
+ define('MFCS_REVIEWER_CLASSIFICATION_SECURITY', 102);
+ define('MFCS_REVIEWER_CLASSIFICATION_STUDENT_ORGANIZATIONS', 145);
+ define('MFCS_REVIEWER_CLASSIFICATION_UNIVERSITY_SERVICES', 101);
+ define('MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR', 112);
+ define('MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY', 144);
 
  // these are not classifications, they are user ids.
- define('MFCS_REVIEW_CLASSIFICATION_SYSTEM_ADMINISTRATOR', 1);
- define('MFCS_REVIEW_CLASSIFICATION_MANAGER', 2);
- define('MFCS_REVIEW_CLASSIFICATION_FAILSAFE_COORDINATOR', 45); // @fixme: this is a hardcoded id to shogan.
+ define('MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR', 1);
+ define('MFCS_REVIEWER_CLASSIFICATION_MANAGER', 2);
+ define('MFCS_REVIEWER_CLASSIFICATION_FAILSAFE_COORDINATOR', 45); // @fixme: this is a hardcoded id to shogan.
 
 /**
  * Defines Taxonomy TIDs for request classifications.
@@ -1110,7 +1110,7 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
       $already_venue_coordinated_query = db_select('mfcs_reviewed', 'mrd_vc');
       $already_venue_coordinated_query->addField('mrd_vc', 'request_id', 'request_id');
       $already_venue_coordinated_query->where('mrd_vc.request_id = mer.id');
-      $already_venue_coordinated_query->condition('mrd_vc.classification', MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR);
+      $already_venue_coordinated_query->condition('mrd_vc.classification', MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR);
 
       $and = db_and();
       $and->condition('mer.status', $show_status_venue_coordinator, 'IN');
@@ -1152,7 +1152,7 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
         $or->condition($and);
 
         // special case reviewer access: insurance provided
-        if (array_key_exists(MFCS_REVIEW_CLASSIFICATION_PURCHASING, $reviewer_settings['classifications'])) {
+        if (array_key_exists(MFCS_REVIEWER_CLASSIFICATION_PURCHASING, $reviewer_settings['classifications'])) {
           $has_insurance_query = db_select('mfcs_current', 'mc');
           $has_insurance_query->leftJoin('mfcs_field_insurance_contractor', 'mfic', 'mc.request_id = mfic.request_id AND mc.insurance_contractor = mfic.revision AND mfic.delta = 0');
           $has_insurance_query->leftJoin('mfcs_field_insurance_unaffiliated', 'mfiu', 'mc.request_id = mfiu.request_id AND mc.insurance_unaffiliated = mfiu.revision AND mfiu.delta = 0');
@@ -5840,7 +5840,7 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
         $already_venue_coordinated_query = db_select('mfcs_reviewed', 'mrd_vc');
         $already_venue_coordinated_query->addField('mrd_vc', 'request_id', 'request_id');
         $already_venue_coordinated_query->where('mrd_vc.request_id = mer.id');
-        $already_venue_coordinated_query->condition('mrd_vc.classification', MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR);
+        $already_venue_coordinated_query->condition('mrd_vc.classification', MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR);
 
         $and = db_and();
         $and->condition('mer.status', $show_status_venue_coordinator, 'IN');
@@ -6546,7 +6546,7 @@ function mfcs_get_latest_reviews($request_id, $steps = array(), $decisions = arr
     // some classifications are only allowed in certain steps.
     $and = db_and();
     $and->condition('mfrr.step', array(MFCS_REVIEW_STEP_REVIEW, MFCS_REVIEW_STEP_REQUIREMENTS), 'IN');
-    $and->condition('mrc.classification', array(MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR, MFCS_REVIEW_CLASSIFICATION_VENUE_COORDINATOR_PROXY), 'IN');
+    $and->condition('mrc.classification', array(MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR, MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY), 'IN');
     $and->not();
     $query->condition($and);
 
