@@ -2109,7 +2109,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
   global $conf;
 
   $testing = isset($conf['fcs_testing']) && $conf['fcs_testing'];
-  $testing_email = isset($conf['fcs_testing-email_to-debug']) && $conf['fcs_testing-email_to-debug'];
+  $debugging_email = isset($conf['fcs_testing-email_to-debug']) && $conf['fcs_testing-email_to-debug'];
 
   // when testing, but not debugging, then prepend the testing prefix to e-mails to distinguish between production and non-production e-mails.
   if ($testing) {
@@ -2118,7 +2118,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     }
   }
 
-  if ($testing && $testing_email) {
+  if ($testing && $debugging_email) {
     $debug_accounts = array();
 
     if (isset($conf['fcs_testing-email_to-add']) && is_array($conf['fcs_testing-email_to-add'])) {
