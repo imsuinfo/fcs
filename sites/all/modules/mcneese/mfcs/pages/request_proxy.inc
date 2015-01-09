@@ -331,10 +331,11 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = 0) {
     '#default_value' => '',
     '#title' => 'User',
     '#description' => t("This is the user who is going to be proxied as."),
-    '#size' => 96,
+    '#size' => 72,
     '#autocomplete_path' => 'requests/proxy-0/autocomplete/user_id',
     '#required' => TRUE,
   );
+
 
   $form['proxy']['proxy_id'] = array(
     '#id' => 'proxy-proxy_id',
@@ -342,9 +343,18 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = 0) {
     '#default_value' => '',
     '#title' => 'Proxy',
     '#description' => t("This is the user who doing the proxying."),
-    '#size' => 96,
+    '#size' => 72,
     '#autocomplete_path' => 'requests/proxy-0/autocomplete/user_id',
     '#required' => TRUE,
+  );
+
+  $form['proxy']['new_user'] = array(
+    '#id' => 'proxy-new_user',
+    '#type' => 'checkbox',
+    '#default_value' => FALSE,
+    '#title' => 'New User',
+    '#description' => t("Create a new user based on the supplied username."),
+    '#required' => FALSE,
   );
 
   $form['proxy']['add'] = array(
@@ -373,16 +383,53 @@ function mfcs_request_proxy_0_form_validate($form, &$form_state) {
   }
 
   if ($clicked_id == 'submit-proxy-add') {
+    $new_user = FALSE;
+    if (cf_is_integer($form_state['values']['proxy']['new_user'])) {
+      $new_user = (bool) $form_state['values']['proxy']['new_user'];
+    }
+
     $proxy_id = NULL;
     if (cf_is_integer($form_state['values']['proxy']['proxy_id'])) {
       $proxy_id = $form_state['values']['proxy']['proxy_id'];
     }
     else {
-      $matches = array();
-      $matched = preg_match('@\[id:\s*(\d+)\].*@', $form_state['values']['proxy']['proxy_id'], $matches);
+      if ($new_user) {
+        $form_state['values']['proxy']['proxy_id'] = preg_replace('@\s*\[id:\s*(\d+)\].*@', '', $form_state['values']['proxy']['proxy_id']);
+        $user_name = preg_replace('/@(mcneese\.edu|student\.mcneese\.edu)\s*$/i', '', $form_state['values']['proxy']['proxy_id']);
+        $user_name = strtolower($user_name);
 
-      if ($matched && !empty($matches[1])) {
-        $proxy_id = $matches[1];
+        $matches = array();
+        $matched = preg_match('/^(\d|\w)+$/', $user_name, $matches);
+
+        if ($matched) {
+          $user_name = $matches[0];
+
+          $already_exists = user_load_by_name($user_name);
+          if (is_object($already_exists)) {
+            form_set_error('proxy][proxy_id', "Cannot create the specified user. The user already exists.");
+            return;
+          }
+        }
+        else {
+          form_set_error('proxy][proxy_id', "Cannot create the specified user. Only valid McNeese Portal or McNeese E-mail accounts may be specified.");
+          return;
+        }
+
+        $ldap_user = ldap_servers_get_user_ldap_data($user_name);
+        if ($ldap_user === FALSE) {
+          form_set_error('proxy][proxy_id', "Cannot create the specified user. Only valid McNeese Portal or McNeese E-mail accounts may be specified.");
+          return;
+        }
+
+        $form_state['user_name'] = $user_name;
+      }
+      else {
+        $matches = array();
+        $matched = preg_match('@\[id:\s*(\d+)\].*@', $form_state['values']['proxy']['proxy_id'], $matches);
+
+        if ($matched && !empty($matches[1])) {
+          $proxy_id = $matches[1];
+        }
       }
     }
 
@@ -407,11 +454,16 @@ function mfcs_request_proxy_0_form_validate($form, &$form_state) {
       }
     }
 
-    if (!is_null($user_id)) {
+    if (is_null($user_id)) {
+      if (!$new_user) {
+        form_set_error('proxy][user_id', "An invalid User has been specified. Please select a valid User or select the New User checkbox to createa new user account.");
+      }
+    }
+    else {
       $user = user_load($user_id);
 
       if (!is_object($user)) {
-        form_set_error('proxy][user_id', "An invalid User has been specified. Please select a valid User.");
+        form_set_error('proxy][user_id', "An invalid User has been specified. Please select a valid User or select the New User checkbox to create a new user account.");
       }
     }
 
@@ -437,6 +489,7 @@ function mfcs_request_proxy_0_form_validate($form, &$form_state) {
  */
 function mfcs_request_proxy_0_form_submit($form, &$form_state) {
   global $mfcs_determined;
+  $user = cf_current_user();
 
   $url_arguments = '';
   if (!empty($mfcs_determined['complete'])) {
@@ -449,7 +502,38 @@ function mfcs_request_proxy_0_form_submit($form, &$form_state) {
   }
 
   if ($clicked_id == 'submit-proxy-add') {
-    $values = array();
+    if (cf_is_integer($form_state['values']['proxy']['new_user'])) {
+      $create_new_user = (bool) $form_state['values']['proxy']['new_user'];
+
+      if ($create_new_user && !empty($form_state['user_name'])) {
+        if (preg_match('/@student\.mcneese\.edu/i', $form_state['values']['proxy']['proxy_id'])) {
+          $new_user = mfcs_ensure_user_by_email($form_state['user_name'] . '@student.mcneese.edu', array('reviewer', 'requester'));
+          watchdog(MFCS_WATCHDOG_ID, "The student account '%proxy_user' was created as a proxy for '%user_id' by '%name' ('%uid').", array('%proxy_user' => $form_state['user_name'], '%user_id' => $form_state['values']['proxy']['user_id'], '%name' => $user->name, '%uid' => $user->uid), WATCHDOG_NOTICE);
+        }
+        else {
+          $new_user = mfcs_ensure_user_by_email($form_state['user_name'] . '@mcneese.edu', array('reviewer', 'requester'));
+        }
+
+        if (!is_object($new_user)) {
+          form_set_error('form', "An error occurred while trying to create the proxy user's account. Please contact the support staff.");
+          watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to create the proxy user's account '%proxy_user'.", array('%proxy_user' => $form_state['user_name']), WATCHDOG_ERROR);
+
+          $form_state['rebuild'] = TRUE;
+          $form_state['redirect'] = FALSE;
+          $form_state['submitted'] = FALSE;
+
+          return;
+        }
+
+        // save the uid of the newly created user so that it can be added as the proxy.
+        $form_state['values']['proxy']['proxy_id'] = $new_user->uid;
+      }
+    }
+
+    $values = array(
+      'user_id' => NULL,
+      'proxy_id' => NULL,
+    );
 
     if (cf_is_integer($form_state['values']['proxy']['proxy_id'])) {
       $values['proxy_id'] = $form_state['values']['proxy']['proxy_id'];
@@ -475,7 +559,6 @@ function mfcs_request_proxy_0_form_submit($form, &$form_state) {
       }
     }
 
-    $failure = FALSE;
     $transaction = db_transaction();
     try {
       $query = db_select('mfcs_proxy_venue_coordinator', 'mpvc');
@@ -502,7 +585,14 @@ function mfcs_request_proxy_0_form_submit($form, &$form_state) {
       $transaction->rollback();
       cf_error::on_query_execution($ex);
 
-      $failure = TRUE;
+      form_set_error('form', "An error occurred while trying to add the proxy user. Please contact the support staff.");
+      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to create the proxy user '%proxy_id' to proxy as '%user_id'.", array('%proxy_id' => $values['proxy_id'], '%user_id' => $values['user_id']), WATCHDOG_ERROR);
+
+      $form_state['rebuild'] = TRUE;
+      $form_state['redirect'] = FALSE;
+      $form_state['submitted'] = FALSE;
+
+      return;
     }
   }
 
