@@ -127,14 +127,16 @@ function mfcs_request_create_0_form($form, &$form_state, $clone_request = NULL) 
     unset($request_fields['insurance']);
   }
 
-  $statement_markup = 'McNeese State University is happy to provide facilities and resources to our Students, Employees, and the Community to further educational, cultural, and recreational initiatives through requests held on campus.<br>';
-  $statement_markup .= '<br>';
-  $statement_markup .= 'All activities, meetings, or requests, excluding scheduled academic classes, must be scheduled through the Facilities Use and Special Event Request form. The following questionnaire assists campus officials in not only scheduling campus facilities or maintaining a master calendar; it allows better service through inter-departmental communication and collaboration enhancing the excellence of McNeese.<br>';
-  $statement_markup .= '<br>';
-  $statement_markup .= 'The questionnaire is designed according to the University\'s <a href="http://www.mcneese.edu/node/3217">Facility Use Policy</a>. Any activity scheduled on behalf of the University, regardless of venue, must be submitted.<br>';
-  $statement_markup .= '<br>';
+  $statement_markup = 'McNeese State University is happy to provide facilities and resources to our Students, Employees, and the Community to further educational, cultural, and recreational initiatives through requests held on campus.' . "<br>\n";
+  $statement_markup .= "<br>\n";
+  $statement_markup .= 'All activities, meetings, or requests, excluding scheduled academic classes, must be scheduled through the Facilities Use and Special Event Request form. The following questionnaire assists campus officials in not only scheduling campus facilities or maintaining a master calendar; it allows better service through inter-departmental communication and collaboration enhancing the excellence of McNeese.' . "<br>\n";
+  $statement_markup .= "<br>\n";
+  $statement_markup .= 'The questionnaire is designed according to the University\'s <a href="http://www.mcneese.edu/node/3217">Facility Use Policy</a>. Any activity scheduled on behalf of the University, regardless of venue, must be submitted.' . "<br>\n";
+  $statement_markup .= "<br>\n";
+  $statement_markup .= 'If you are only making a request for a <em>Table Reservation</em> in the <em>New Ranch</em> or in the <em>Quad</em>, then you should instead use the <a href="http://www.mcneese.edu/studentunion/student_union_reservations">Table Request Form</a>.' . "<br>\n";
+  $statement_markup .= "<br>\n";
   $statement_markup .= 'Confirmation and approval of the submitted request must be received before any publicity is scheduled.';
-  $statement_markup .= '<br>';
+  $statement_markup .= "<br>\n";
 
   if ($step == 'agreement') {
     $form['agreement']['statement'] = array(
