@@ -605,6 +605,7 @@ function mfcs_request_reviewers_0_form_submit($form, &$form_state) {
     $clicked_id = $form_state['triggering_element']['#id'];
   }
 
+  $failure = FALSE;
   if ($clicked_id == 'submit-reviewer-add') {
     $values = array();
     $values['request_classification'] = $form['form']['request_classification']['#value'];
@@ -634,7 +635,6 @@ function mfcs_request_reviewers_0_form_submit($form, &$form_state) {
       }
     }
 
-    $failure = FALSE;
     $transaction = db_transaction();
     try {
       $query = db_select('mfcs_reviewers', 'mr');
@@ -672,6 +672,7 @@ function mfcs_request_reviewers_0_form_submit($form, &$form_state) {
     $classification = $form['form']['request_classification']['#value'];
     $step = $form['form']['review_step']['#value'];
 
+    $transaction = db_transaction();
     try {
       $query = db_select('mfcs_requests', 'mer');
 
@@ -692,16 +693,20 @@ function mfcs_request_reviewers_0_form_submit($form, &$form_state) {
       }
     }
     catch (Exception $ex) {
+      $transaction->rollback();
       cf_error::on_query_execution($ex);
 
-      return FALSE;
+      $failure = TRUE;
     }
 
-    $checked = mfcs_check_if_requests_are_fully_reviewed($request_ids, $classification, $step);
+    $checked = FALSE;
+    if (!$failure) {
+      $checked = mfcs_check_if_requests_are_fully_reviewed($request_ids, $classification, $step);
+    }
 
     if ($checked === FALSE) {
-      form_set_error('form', "An error occurred while trying to submit the recheck the requests. Please contact the support staff.");
-      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to submit the recheck the requests.", array(), WATCHDOG_ERROR);
+      form_set_error('form', "An error occurred while trying to recheck the requests. Please contact the support staff.");
+      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to recheck the requests.", array(), WATCHDOG_ERROR);
 
       $form_state['rebuild'] = TRUE;
       $form_state['redirect'] = FALSE;
@@ -892,6 +897,14 @@ function mfcs_request_reviewers_0_delete_form_submit($form, &$form_state) {
   catch (Exception $ex) {
     $transaction->rollback();
     cf_error::on_query_execution($ex);
+
+    form_set_error('form', "An error occurred while trying to delete the reviewer. Please contact the support staff.");
+    watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to delete the reviewer '%reviewer_id'.", array('%reviewer_id' => $form['form']['id']['#value']), WATCHDOG_ERROR);
+
+    $form_state['rebuild'] = TRUE;
+    $form_state['redirect'] = FALSE;
+    $form_state['submitted'] = FALSE;
+    return;
   }
 
   // redirect after submitting.
