@@ -2761,11 +2761,6 @@ function mfcs_sync_banner_to_local_classes() {
     return TRUE;
   }
 
-  $rooms_list = array();
-  foreach ($rooms as $room) {
-    $rooms_list[$room->room_id] = $room->room_number;
-  }
-
 
   $classes_query = 'select ssrmeet_start_date, ssrmeet_end_date, ssrmeet_begin_time, ssrmeet_end_time, ';
   $classes_query .= 'ssrmeet_bldg_code, ssrmeet_room_code, ssrmeet_mon_day, ssrmeet_tue_day, ';
@@ -2823,7 +2818,16 @@ function mfcs_sync_banner_to_local_classes() {
         $start_time_string = implode(':', str_split($class['ssrmeet_begin_time'], 2));
         $stop_time_string = implode(':', str_split($class['ssrmeet_end_time'], 2));
 
-        $class_room = array_search($class['ssrmeet_room_code'], $rooms_list);
+        // search the system by both building code and room code.
+        $class_room = FALSE;
+        foreach ($rooms as $room) {
+          if ($class['ssrmeet_room_code'] != $room->room_number) continue;
+
+          if ($class['ssrmeet_bldg_code'] == $room->building_code) {
+            $class_room = $room->room_id;
+             break;
+          }
+        }
         if ($class_room === FALSE) {
           continue;
         }
