@@ -148,7 +148,14 @@ function mfcs_dashboard_page() {
   $item_list_3 = theme('item_list', array('items' => $items_3, 'type' => 'ul'));
 
   $markup = '<div id="mfcs-dashboard_page-choices" class="mfcs-dashboard_page-choices">';
-  $markup .= '<h3 class="mfcs-dashboard_page-choices-header">Facilities Use and Special Event Request Form</h3>';
+
+  if (!$can_create && !$can_list && !$can_search && !$can_review) {
+    $markup .= '<h3 class="item-link-wrapper inline-block">Insufficient Access</h3>';
+    $markup .= '<div class="item-description inline-block">You lack sufficient access to perform any actions on this website. If you believe this is in error, then please contact the support staff through the proper channels.</div>';
+  }
+  else {
+    $markup .= '<h3 class="mfcs-dashboard_page-choices-header">Facilities Use and Special Event Request Form</h3>';
+  }
 
   if (!empty($items_1)) {
     $markup .= '<div class="mfcs-dashboard_page-choices-list_1">' . $item_list_1 . '</div>';

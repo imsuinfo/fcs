@@ -421,7 +421,27 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
     'reviewer' => user_access('mfcs review', $user),
     'requester' => user_access('mfcs request', $user),
     'administer' => user_access('mfcs administer', $user),
+
+    // @fixme: these roles are hardcoded, implement a more dynamic approach.
+    'role_administer' => array_search('administer', $user->roles),
+    'role_manager' => array_search('manager', $user->roles),
+    'role_reviewer' => array_search('reviewer', $user->roles),
+    'role_requester' => array_search('requester', $user->roles),
+    'role_student' => array_search('student role', $user->roles),
+    'role_camp' => array_search('camp role', $user->roles),
+    'role_employee' => array_search('employee role', $user->roles),
+    'role_external' => array_search('external role', $user->roles),
   );
+
+  // Access will only be granted to administrators, managers, and requestors.
+  if (!$roles['role_administer'] && !$roles['role_manager'] && !$roles['role_reviewer'] && !$roles['role_requester']) {
+    return FALSE;
+  }
+
+  // Deny access to requesters and reviewers who do not have a student, camp, employee, or external role.
+  if (($roles['role_reviewer'] || $roles['role_requester']) && !$roles['role_student'] && !$roles['role_camp'] && !$roles['role_employee'] && !$roles['role_external']) {
+    return FALSE;
+  }
 
   mfcs_include(MFCS_INCLUDE_ACCESS);
 
@@ -735,10 +755,32 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
     MFCS_REQUEST_STATUS_CANCELLED,
   );
 
-  $manager = user_access('mfcs manage', $user);
-  $reviewer = user_access('mfcs review', $user);
-  $requester = user_access('mfcs request', $user);
-  $administer = user_access('mfcs administer', $user);
+  $roles = array(
+    'manager' => user_access('mfcs manage', $user),
+    'reviewer' => user_access('mfcs review', $user),
+    'requester' => user_access('mfcs request', $user),
+    'administer' => user_access('mfcs administer', $user),
+
+    // @fixme: these roles are hardcoded, implement a more dynamic approach.
+    'role_administer' => array_search('administer', $user->roles),
+    'role_manager' => array_search('manager', $user->roles),
+    'role_reviewer' => array_search('reviewer', $user->roles),
+    'role_requester' => array_search('requester', $user->roles),
+    'role_student' => array_search('student role', $user->roles),
+    'role_camp' => array_search('camp role', $user->roles),
+    'role_employee' => array_search('employee role', $user->roles),
+    'role_external' => array_search('external role', $user->roles),
+  );
+
+  // Access will only be granted to administrators, managers, and requestors.
+  if (!$roles['role_administer'] && !$roles['role_manager'] && !$roles['role_reviewer'] && !$roles['role_requester']) {
+    return FALSE;
+  }
+
+  // Deny access to requesters and reviewers who do not have a student, camp, employee, or external role.
+  if (($roles['role_reviewer'] || $roles['role_requester']) && !$roles['role_student'] && !$roles['role_camp'] && !$roles['role_employee'] && !$roles['role_external']) {
+    return FALSE;
+  }
 
   if ($operation == 'create') {
     if ($request['top']['status'][0]->value == MFCS_REQUEST_STATUS_DELETED) {
@@ -763,7 +805,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
 
     // when quick meeting is enabled, a section is not null, then additional checks are required.
     $is_quick_meeting = FALSE;
-    if (!is_null($request_id) && !is_null($section) && ($manager || $requester)) {
+    if (!is_null($request_id) && !is_null($section) && ($roles['manager'] || $roles['requester'])) {
       if (isset($request['information']['type'][0]->value) && $request['information']['type'][0]->value == MFCS_REQUEST_TYPE_QUICK_MEETING) {
         $is_quick_meeting = TRUE;
 
@@ -783,11 +825,11 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
 
     $valid_status = in_array($request['top']['status'][0]->value, $edit_request_status);
 
-    if ($manager) {
+    if ($roles['manager']) {
       $access[$request_id] = $valid_status;
       return $valid_status;
     }
-    elseif ($requester) {
+    elseif ($roles['requester']) {
       if ($valid_status) {
         if (isset($request['mer']['user_id'][0]->value) && $request['mer']['user_id'][0]->value == $user->uid) {
           $access[$request_id] = TRUE;
@@ -802,11 +844,11 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
       return FALSE;
     }
 
-    if ($manager) {
+    if ($roles['manager']) {
       $access[$request_id] = TRUE;
       return TRUE;
     }
-    elseif ($reviewer) {
+    elseif ($roles['reviewer']) {
       // due to its complexity, the database calling function for reviewer access will be used.
       $review_access = mfcs_page_request_reviewer_access($user, $request_id, MFCS_REVIEW_RESTRICTION_NONE);
 
@@ -815,7 +857,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
         return $review_access[$request_id];
       }
     }
-    elseif ($requester) {
+    elseif ($roles['requester']) {
       if ($request['top']['status'][0]->value == MFCS_REQUEST_STATUS_CLOSED_ACCEPTED && $request['top']['step'][0]->value == MFCS_REVIEW_STEP_COMPLETED) {
         // always show completed and accepted requests when there are no restrictions
         $access[$request_id] = TRUE;
@@ -828,7 +870,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
     }
   }
   elseif ($operation == 'review') {
-    if (!$reviewer) {
+    if (!$roles['reviewer']) {
       $access[$request_id] = FALSE;
       return FALSE;
     }
@@ -862,11 +904,11 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
       return FALSE;
     }
 
-    if ($manager) {
+    if ($roles['manager']) {
       $access[$request_id] = TRUE;
       return TRUE;
     }
-    elseif ($reviewer) {
+    elseif ($roles['reviewer']) {
       // due to its complexity, the database calling function for reviewer access will be used.
       $review_access = mfcs_page_request_reviewer_access($user, $request_id, MFCS_REVIEW_RESTRICTION_NONE);
 
@@ -910,13 +952,13 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
       return TRUE;
     }
 
-    if ($manager) {
+    if ($roles['manager']) {
       if (in_array($request['top']['status'][0]->value, $cancellable_status_admin)) {
         $access[$request_id] = TRUE;
         return TRUE;
       }
     }
-    elseif ($requester) {
+    elseif ($roles['requester']) {
       if ($request['mer']['user_id'][0]->value == $user->uid && in_array($request['top']['status'][0]->value, $cancellable_status_normal)) {
         $access[$request_id] = TRUE;
         return TRUE;
@@ -939,7 +981,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
       return TRUE;
     }
 
-    if ($manager) {
+    if ($roles['manager']) {
       if (in_array($request['top']['status'][0]->value, $uncancellable_status)) {
         $access[$request_id] = TRUE;
         return TRUE;
@@ -947,12 +989,12 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
     }
   }
   elseif ($operation == 'history') {
-    if ($request['top']['status'][0]->value == MFCS_REQUEST_STATUS_DELETED && !$administer) {
+    if ($request['top']['status'][0]->value == MFCS_REQUEST_STATUS_DELETED && !$roles['administer']) {
       $access[$request_id] = FALSE;
       return FALSE;
     }
 
-    if ($manager) {
+    if ($roles['manager']) {
       $access[$request_id] = TRUE;
       return TRUE;
     }
@@ -970,7 +1012,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
       MFCS_REQUEST_STATUS_CANCELLED,
     );
 
-    if ($manager || $reviewer) {
+    if ($roles['manager'] || $roles['reviewer']) {
       $agreement_request_step = array(
         MFCS_REVIEW_STEP_COMPLETED,
         MFCS_REVIEW_STEP_MAKE_DECISIONS,
