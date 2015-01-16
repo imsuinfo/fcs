@@ -955,29 +955,25 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
       return FALSE;
     }
 
-    $cancellable_status_normal = array(
-      MFCS_REQUEST_STATUS_UNLOCKED,
-    );
-
-    $cancellable_status_admin = array(
+    $cancellable_status = array(
       MFCS_REQUEST_STATUS_LOCKED,
       MFCS_REQUEST_STATUS_UNLOCKED,
     );
 
     // if the user is the venue coordinator, then allow them to cancel an request at any point in the process.
-    if ($request['venue_coordinator']['user_id'][0]->value == $user->uid && in_array($request['top']['status'][0]->value, $cancellable_status_admin)) {
+    if ($request['venue_coordinator']['user_id'][0]->value == $user->uid && in_array($request['top']['status'][0]->value, $cancellable_status)) {
       $access[$request_id] = TRUE;
       return TRUE;
     }
 
     if ($roles['manager']) {
-      if (in_array($request['top']['status'][0]->value, $cancellable_status_admin)) {
+      if (in_array($request['top']['status'][0]->value, $cancellable_status)) {
         $access[$request_id] = TRUE;
         return TRUE;
       }
     }
     elseif ($roles['requester']) {
-      if ($request['mer']['user_id'][0]->value == $user->uid && in_array($request['top']['status'][0]->value, $cancellable_status_normal)) {
+      if ($request['mer']['user_id'][0]->value == $user->uid && in_array($request['top']['status'][0]->value, $cancellable_status)) {
         $access[$request_id] = TRUE;
         return TRUE;
       }
