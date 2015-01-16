@@ -731,6 +731,17 @@ $conf['fcs_testing-email_to-remove'] = array(
   'facilities_use@sandbox.mcneese.edu',
 );
 
+$conf['fcs_banner_roles'] = array(
+  'student' => 'student roke',
+  'camp' => 'camp role',
+  'employee' => 'employee role',
+  'external' => 'external role',
+);
+
+$conf['fcs_no_auto_block_accounts'] = array(
+  'kday',
+);
+
 
 /**
  * Additional file_db variables.
