@@ -252,6 +252,7 @@ define('MFCS_INCLUDE_TESTING', 15);
 define('MFCS_REVIEW_RESTRICTION_NONE', 0);
 define('MFCS_REVIEW_RESTRICTION_VIEW', 1);
 define('MFCS_REVIEW_RESTRICTION_REVIEW', 2);
+define('MFCS_REVIEW_RESTRICTION_COMMENT', 3);
 
 
 
@@ -547,7 +548,18 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
     return $processed[$request_id];
   }
   elseif ($operation == 'comment') {
-    // @todo: currently disabled feature. Enable if such functionality is requested.
+    $operation_result = mfcs_page_request_access_operation_comment($request_ids, $processed, $access, $roles, $user);
+
+    // if something went wrong with the operation check, return FALSE but do not cache.
+    if ($operation_result === FALSE) {
+      return FALSE;
+    }
+
+    if (is_array($request_id)) {
+      return $processed;
+    }
+
+    return $processed[$request_id];
   }
   elseif ($operation == 'log') {
     $operation_result = mfcs_page_request_access_operation_log($request_ids, $processed, $access, $roles, $user);
@@ -744,7 +756,6 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
     return FALSE;
   }
 
-
   $request_status = array(
     MFCS_REQUEST_STATUS_LOCKED,
     MFCS_REQUEST_STATUS_UNLOCKED,
@@ -889,14 +900,29 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
     }
   }
   elseif ($operation == 'comment') {
+    if (!$roles['reviewer'] && !$roles['manager'] && !$roles['administer']) {
+      $access[$request_id] = FALSE;
+      return FALSE;
+    }
+
     if ($request['top']['status'][0]->value == MFCS_REQUEST_STATUS_DELETED) {
       $access[$request_id] = FALSE;
       return FALSE;
     }
 
-    // @todo: currently disabled feature. Enable if such functionality is requested.
-    $access[$request_id] = FALSE;
-    return FALSE;
+    // managers should always be able to comment.
+    if ($roles['manager'] || $roles['administer']) {
+      $access[$request_id] = TRUE;
+      return TRUE;
+    }
+
+    // due to its complexity, the database calling function for reviewer access will be used.
+    $comment_access = mfcs_page_request_reviewer_access($user, $request_id, MFCS_REVIEW_RESTRICTION_COMMENT);
+
+    if (is_array($comment_access) && array_key_exists($request_id, $comment_access)) {
+      $access[$request_id] = $comment_access[$request_id];
+      return $comment_access[$request_id];
+    }
   }
   elseif ($operation == 'log') {
     if ($request['top']['status'][0]->value == MFCS_REQUEST_STATUS_DELETED) {
@@ -910,11 +936,11 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
     }
     elseif ($roles['reviewer']) {
       // due to its complexity, the database calling function for reviewer access will be used.
-      $review_access = mfcs_page_request_reviewer_access($user, $request_id, MFCS_REVIEW_RESTRICTION_NONE);
+      $log_access = mfcs_page_request_reviewer_access($user, $request_id, MFCS_REVIEW_RESTRICTION_NONE);
 
-      if (is_array($review_access) && array_key_exists($request_id, $review_access)) {
-        $access[$request_id] = $review_access[$request_id];
-        return $review_access[$request_id];
+      if (is_array($log_access) && array_key_exists($request_id, $log_access)) {
+        $access[$request_id] = $log_access[$request_id];
+        return $log_access[$request_id];
       }
     }
   }
@@ -1241,6 +1267,24 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
         $and->condition('mer.step', $reviewer_settings['steps'], 'IN');
 
         $or->condition($and);
+      }
+    }
+    elseif ($review_restrictions == MFCS_REVIEW_RESTRICTION_COMMENT) {
+      if (is_null($or)) {
+        $or = db_or();
+      }
+
+      // allow venue coordinator for the request access to comment.
+      $or->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
+
+      // allow reviewer access to comment if they are allowed to review the request at some point.
+      foreach ($reviewer_settings['for_step'] as $for_step => $step_classifications) {
+        $sub_and = db_and();
+        $sub_and->condition('mer.step', $for_step);
+        $sub_and->condition('mer.classification', $step_classifications, 'IN');
+
+        $or->condition($sub_and);
+        unset($sub_and);
       }
     }
     else {
@@ -8372,6 +8416,87 @@ function mfcs_build_redirect_array($path, $fragment = NULL) {
   global $mfcs_determined;
 
   return array($path, array('query' => $mfcs_determined['redirect'], 'fragment' => $fragment));
+}
+
+/**
+ * Returns whether or not the specified user has manage access.
+ *
+ * Unlike user_access() this does not require the entire drupal object.
+ * Only the user id is necessary, which increases performance and uses less
+ * memory.
+ *
+ * @param bool $reset
+ *   (optional) When TRUE, will reset the instance to the current timestamp.
+ *
+ * @return bool
+ *   TRUE if the user is a manager, FALSE otherwise.
+ */
+function mfcs_user_can_manage($user_id) {
+  static $can_manage;
+  $can_manage = &drupal_static(__function__, array());
+
+  if (!array_key_exists($user_id, $can_manage)) {
+    try {
+      $query = db_select('users', 'u');
+      $query->innerJoin('users_roles', 'ur', 'u.uid = ur.uid');
+      $query->innerJoin('role_permission', 'rp', 'ur.rid = rp.rid');
+
+      $query->condition('u.uid', $user_id);
+      $query->condition('rp.permission', 'mfcs manage');
+      $query->range(0, 1);
+
+      $results = $query->execute()->fetchAll();
+
+      $can_manage[$user_id] = !empty($results);
+    }
+    catch (Exception $ex) {
+      cf_error::on_exception($ex);
+      return FALSE;
+    }
+
+  }
+
+  return $can_manage[$user_id];
+}
+
+/**
+ * Returns whether or not the specified user has administration access.
+ *
+ * Unlike user_access() this does not require the entire drupal object.
+ * Only the user id is necessary, which increases performance and uses less
+ * memory.
+ *
+ * @param bool $reset
+ *   (optional) When TRUE, will reset the instance to the current timestamp.
+ *
+ * @return bool
+ *   TRUE if the user is an administrator, FALSE otherwise.
+ */
+function mfcs_user_can_administer($user_id) {
+  static $can_administer;
+  $can_administer = &drupal_static(__function__, array());
+
+  if (!array_key_exists($user_id, $can_administer)) {
+    try {
+      $query = db_select('users', 'u');
+      $query->innerJoin('users_roles', 'ur', 'u.uid = ur.uid');
+
+      $query->condition('u.uid', $user_id);
+      $query->condition('ur.rid', 3); // @fixme: this is a hardcoded value for the 'administer' role, might need to find a dynamic way to implement this.
+      $query->range(0, 1);
+
+      $results = $query->execute()->fetchAll();
+
+      $can_administer[$user_id] = !empty($results);
+    }
+    catch (Exception $ex) {
+      cf_error::on_exception($ex);
+      return FALSE;
+    }
+
+  }
+
+  return $can_administer[$user_id];
 }
 
 /**

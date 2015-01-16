@@ -478,6 +478,97 @@ function mfcs_page_request_access_operation_review(&$request_ids, &$processed, &
 }
 
 /**
+ * Perform the access control check for the comment operation.
+ *
+ * @param array $request_ids
+ *   The array of requests ids yet to be processed.
+ * @param array $processed
+ *   The array of already processed request ids and the access results.
+ * @param array $access
+ *   The static variable representing the processed array used to increase
+ *   performance.
+ * @param array roles
+ *   An array of relevant roles associated with access control for requests.
+ * @param object user
+ *   The drupal user object to check access against.
+ *
+ * @return bool
+ *   TRUE on successfull execution, FALSE otherwise.
+ *   The return results do not represent the access control results.
+ */
+function mfcs_page_request_access_operation_comment(&$request_ids, &$processed, &$access, $roles, $user) {
+  if (!is_array($request_ids)) {
+    cf_error::invalid_array('request_ids');
+    return FALSE;
+  }
+
+  if (!is_array($processed)) {
+    cf_error::invalid_array('processed');
+    return FALSE;
+  }
+
+  if (!is_array($access)) {
+    cf_error::invalid_array('access');
+    return FALSE;
+  }
+
+  if (!is_array($roles)) {
+    cf_error::invalid_array('roles');
+    return FALSE;
+  }
+
+  if (!is_object($user)) {
+    cf_error::invalid_object('user');
+    return FALSE;
+  }
+
+  if ($roles['reviewer'] || $roles['manager'] || $roles['administer']) {
+    if (array_key_exists(NULL, $request_ids)) {
+      $access[NULL] = TRUE;
+      $processed[NULL] = TRUE;
+      return TRUE;
+    }
+
+    // managers should always be able to comment.
+    if ($roles['manager'] || $roles['administer']) {
+      $processed[$id] = TRUE;
+      $access[$id] = TRUE;
+      return TRUE;
+    }
+
+    $review_access = mfcs_page_request_reviewer_access($user, $request_ids, MFCS_REVIEW_RESTRICTION_COMMENT);
+
+    if (is_array($review_access)) {
+      foreach ($request_ids as $id) {
+        $processed[$id] = array_key_exists($id, $review_access) && $review_access[$id];
+        $access[$id] = $processed[$id];
+      }
+    }
+    else {
+      foreach ($request_ids as $id) {
+        $processed[$id] = FALSE;
+        $access[$id] = FALSE;
+      }
+    }
+
+    return TRUE;
+  }
+
+  if (array_key_exists(NULL, $request_ids)) {
+    $access[NULL] = FALSE;
+    $processed[NULL] = FALSE;
+    return TRUE;
+  }
+
+  foreach ($request_ids as $request_id) {
+    $access[$request_id] = FALSE;
+    $processed[$request_id] = FALSE;
+  }
+
+  return TRUE;
+}
+
+/**
  * Perform the access control check for the log operation.
  *
  * @param array $request_ids

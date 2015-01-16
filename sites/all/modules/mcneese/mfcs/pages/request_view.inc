@@ -136,6 +136,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
   $venue_coordinator = (in_array($request['venue_coordinator']['user_id'][0]->value, $venue_coordinator_ids));
 
+  $administer = user_access('mfcs administer', $user);
   $manager = user_access('mfcs manage', $user);
   $reviewer = user_access('mfcs review', $user);
   $requester = user_access('mfcs request', $user);
@@ -180,7 +181,8 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
       MFCS_REQUEST_STATUS_CLOSED_ACCEPTED, // added due to insurance provided exception.
     );
 
-    if (!in_array($status, $allowed_statuses)) {
+
+    if (!$can_comment_request && !in_array($status, $allowed_statuses)) {
       $show_operations = FALSE;
 
       if ($mode == MFCS_VIEW_MODE_OPERATIONS) {
@@ -198,7 +200,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
       MFCS_REVIEW_STEP_COMPLETED, // added due to insurance provided exception.
     );
 
-    if (!in_array($step, $allowed_steps)) {
+    if (!$can_comment_request && !in_array($step, $allowed_steps)) {
       $show_operations = FALSE;
 
       if ($mode == MFCS_VIEW_MODE_OPERATIONS) {
@@ -1027,9 +1029,12 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         $reviewer_classification_all[$reviewer->reviewer_classification] = $reviewer_classification_options[$reviewer->reviewer_classification];
       }
 
-      if ($can_comment_request) {
-        if (empty($reviewer_classification)) {
-          if ($manager) {
+      if ($can_comment_request && !$can_review_request) {
+        if (empty($reviewer_classification) && empty($venue_coordinator)) {
+          if ($administer) {
+            $reviewer_classification[MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR] = 'Administrator';
+          }
+          elseif ($manager) {
             $reviewer_classification[MFCS_REVIEWER_CLASSIFICATION_MANAGER] = 'Manager';
           }
         }
@@ -1888,14 +1893,19 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
       );
     }
 
-    if (!in_array($status, $allowed_statuses)) {
-      form_set_error('', "Illegal operation detected. Operations cannot be performed for the request's current status.");
-      $failure = TRUE;
+    if ($can_comment_request && $decision == MFCS_REVIEW_DECISION_COMMENT) {
+      // if there are any cases where a comment cannot be posted, then is the place to add the restriction.
     }
+    else {
+      if (!in_array($status, $allowed_statuses)) {
+        form_set_error('', "Illegal operation detected. Operations cannot be performed for the request's current status.");
+        $failure = TRUE;
+      }
 
-    if (!in_array($step, $allowed_steps)) {
-      form_set_error('', "Illegal operation detected. Operations cannot be performed for the request's current step.");
-      $failure = TRUE;
+      if (!in_array($step, $allowed_steps)) {
+        form_set_error('', "Illegal operation detected. Operations cannot be performed for the request's current step.");
+        $failure = TRUE;
+      }
     }
 
     if (!($mode == MFCS_VIEW_MODE_NORMAL || $mode == MFCS_VIEW_MODE_DISPLAY || $mode == MFCS_VIEW_MODE_LOG || $mode == MFCS_VIEW_MODE_OPERATIONS)) {
@@ -2261,7 +2271,10 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
       }
     }
 
-    if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
+    if ($decision == MFCS_REVIEW_DECISION_COMMENT) {
+      // comments do not need to be processed on a per step basis, so skip the $step conditions below.
+    }
+    elseif ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
       if (isset($form_state['values']['review']['operations']['presidents_approval'])) {
         $extra['requirements']['waved'] = $form_state['values']['review']['operations']['presidents_approval'];
 
@@ -2301,7 +2314,12 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
     }
 
     if ($success) {
-      drupal_set_message("Your review or comment has been recieved.");
+      if ($decision == MFCS_REVIEW_DECISION_COMMENT) {
+        drupal_set_message("Your comment has been recieved.");
+      }
+      else {
+        drupal_set_message("Your review has been recieved.");
+      }
     }
     else {
       form_set_error('form', "An error occurred while trying to submit the request review. Please contact the support staff.");
@@ -2738,6 +2756,9 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id, $revision_id 
       $message = $review->message;
       $date = $review->date;
 
+      $user_can_administer = mfcs_user_can_administer($user_id);
+      $user_can_manage = mfcs_user_can_manage($user_id);
+
       $changelog = mfcs_load_request_by_timestamp($request_id, $date, $user_id, $changelog_fields);
 
       if (!array_key_exists($user_id, $users)) {
@@ -2779,6 +2800,15 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id, $revision_id 
         }
         else {
           $reviewer_classification .= $reviewer_classification_options[$classification];
+        }
+      }
+
+      if (is_null($reviewer_classification)) {
+        if ($user_can_administer) {
+          $reviewer_classification = "Administrator";
+        }
+        elseif ($user_can_manage) {
+          $reviewer_classification = "Manager";
         }
       }
 

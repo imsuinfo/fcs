@@ -560,9 +560,11 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message, $ext
   );
 
   if ($step == MFCS_REVIEW_STEP_REVIEW || $step == MFCS_REVIEW_STEP_REQUIREMENTS) {
-    // remove classifications not allowed in these steps.
-    unset($reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR]);
-    unset($reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY]);
+    // remove classifications not allowed in these steps, unless they are for a comment.
+    if ($decision != MFCS_REVIEW_DECISION_COMMENT) {
+      unset($reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR]);
+      unset($reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY]);
+    }
   }
 
   $mfcs_field_requirements = array();
@@ -2066,42 +2068,40 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     }
   }
   elseif ($is_comment) {
-    if ($request['top']['status'][0]->value == MFCS_REQUEST_STATUS_LOCKED || $request['top']['status'][0]->value == MFCS_REQUEST_STATUS_UNLOCKED) {
-      $email_params['title_suffix'] = "Comment";
-      $email_params['content'] = "";
-      $email_params['content'] .= $changed_by_string . " has made the following comment:\n";
-      $email_params['content'] .= "\n";
-      $email_params['content'] .= $message . "\n";
-      $email_params['content'] .= $standard_content;
-      $email_params['markup'] = "";
-      $email_params['markup'] .= '<em>' . $changed_by_string . "</em> has made the following <em>comment</em>:<br>\n";
-      $email_params['markup'] .= "<br>\n";
-      $email_params['markup'] .= $message . "<br>\n";
-      $email_params['markup'] .= $standard_markup;
+    $email_params['title_suffix'] = "Comment";
+    $email_params['content'] = "";
+    $email_params['content'] .= $changed_by_string . " has made the following comment:\n";
+    $email_params['content'] .= "\n";
+    $email_params['content'] .= $message . "\n";
+    $email_params['content'] .= $standard_content;
+    $email_params['markup'] = "";
+    $email_params['markup'] .= '<em>' . $changed_by_string . "</em> has made the following <em>comment</em>:<br>\n";
+    $email_params['markup'] .= "<br>\n";
+    $email_params['markup'] .= $message . "<br>\n";
+    $email_params['markup'] .= $standard_markup;
 
-      if (is_object($venue_coordinator)) {
-        $email_to[$venue_coordinator->mail] = $venue_coordinator->mail;
-      }
+    if (is_object($venue_coordinator)) {
+      $email_to[$venue_coordinator->mail] = $venue_coordinator->mail;
+    }
 
-      // also send e-mails to the venue coordinator proxies.
-      $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.user_id' => $venue_coordinator->uid, 'mpvc.disabled' => 0));
-      if (!empty($proxies_returned['results'])) {
-        foreach ($proxies_returned['results'] as $proxy_returned) {
-          $proxy = user_load($proxy_returned->proxy_id);
+    // also send e-mails to the venue coordinator proxies.
+    $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.user_id' => $venue_coordinator->uid, 'mpvc.disabled' => 0));
+    if (!empty($proxies_returned['results'])) {
+      foreach ($proxies_returned['results'] as $proxy_returned) {
+        $proxy = user_load($proxy_returned->proxy_id);
 
-          if (is_object($proxy)) {
-            $email_to[$proxy->mail] = $proxy->mail;
-          }
+        if (is_object($proxy)) {
+          $email_to[$proxy->mail] = $proxy->mail;
         }
       }
+    }
 
-      foreach ($step_1_reviewers as $r) {
-        $email_to[$r->email] = $r->email;
-      }
+    foreach ($step_1_reviewers as $r) {
+      $email_to[$r->email] = $r->email;
+    }
 
-      foreach ($step_2_reviewers as $r) {
-        $email_to[$r->email] = $r->email;
-      }
+    foreach ($step_2_reviewers as $r) {
+      $email_to[$r->email] = $r->email;
     }
   }
 
