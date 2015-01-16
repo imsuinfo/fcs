@@ -949,6 +949,13 @@ function mfcs_hook_cronapi() {
     'enabled' => FALSE,
   );
 
+  $items['mfcs_auto_block_accounts'] = array(
+    'title' => t("Auto-Block Accounts"),
+    'callback' => 'mfcs_auto_block_accounts_cron',
+    'callback arguments' => array(),
+    'enabled' => FALSE,
+  );
+
   return $items;
 }
 

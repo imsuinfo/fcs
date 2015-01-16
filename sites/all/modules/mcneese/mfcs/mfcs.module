@@ -3073,6 +3073,95 @@ function mfcs_autocancel_old_requests_cron() {
 }
 
 /**
+ * Executes the cron queue to block accounts lacking the proper banner roles.
+ *
+ * An exception to this are the accounts defined in the settings array
+ * 'fcs_no_auto_block_accounts'.
+ *
+ * @see mfcs_cronapi()
+ */
+function mfcs_auto_block_accounts_cron() {
+  global $conf;
+
+  $no_auto_block_accounts = array();
+  if (isset($conf['fcs_no_auto_block_accounts']) && is_array($conf['fcs_no_auto_block_accounts'])) {
+    $no_auto_block_accounts = $conf['fcs_no_auto_block_accounts'];
+  }
+
+  $banner_roles = array();
+  if (isset($conf['fcs_banner_roles']) && is_array($conf['fcs_banner_roles'])) {
+    $banner_roles = $conf['fcs_banner_roles'];
+  }
+
+  // the variable should not be empty, but if it is return so that no roles ever get disabled.
+  if (empty($banner_roles)) {
+    cf_error::invalid_variable('fcs_banner_roles', "The 'fcs_banner_roles' array is not properly defined or is empty");
+    return;
+  }
+
+  // append other roles to block, such as administrator
+  $banner_roles['administrator'] = 'administrator';
+
+  $transaction = db_transaction();
+  try {
+    $query = db_select('users', 'u');
+    $query->addField('u', 'uid', 'user_id');
+    $query->addField('u', 'name', 'user_name');
+
+    $query->condition('u.name', $no_auto_block_accounts, 'NOT IN');
+
+    // do not process anonymous
+    $query->condition('u.uid', 0, '<>');
+
+    // do not process system admin account
+    $query->condition('u.uid', 1, '<>');
+
+    // only check enabled accounts
+    $query->condition('u.status', 1);
+
+    $users = $query->execute()->fetchAll();
+
+    if (empty($users)) return;
+
+    // using user_load() is not the most efficient way, but it works and functions like mfcs_synchronize_user_settings() expect a user object.
+    foreach ($users as $u) {
+      // first synchronize the users setting
+      $user = user_load($u->user_id);
+      if (!is_object($user)) continue;
+
+      mfcs_synchronize_user_settings($user);
+
+      // once the user is synchronized, check their roles and block account as necessary.
+      $block_user = TRUE;
+      foreach ($banner_roles as $banner_role) {
+        if (array_search($banner_role, $user->roles) !== FALSE) {
+          $block_user = FALSE;
+          break;
+        }
+      }
+
+      // if the user does not have the appropriate banner roles, then block that user.
+      if ($block_user) {
+        watchdog(MFCS_WATCHDOG_ID, "Auto-blocking the user @user (@user_id) and removing all existing roles, reason: Not in appropriate banner groups or local admin groups.", array('@user' => $user->name, '@user_id' => $user->uid), WATCHDOG_INFO);
+
+        $block_query = db_update('users');
+        $block_query->fields(array('status' => 0));
+        $block_query->condition('uid', $user->uid);
+        $block_query->execute();
+
+        $delete_query = db_delete('users_roles');
+        $delete_query->condition('uid', $user->uid);
+        $delete_query->execute();
+      }
+    }
+  }
+  catch (Exception $ex) {
+    $transaction->rollback();
+    cf_error::on_query_execution($ex);
+  }
+}
+
+/**
  * Generate an array structure for a specific request item.
  *
  * @param int $request_id
