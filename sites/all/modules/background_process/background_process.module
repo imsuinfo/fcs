@@ -245,9 +245,6 @@ function background_process_service_group_round_robin($service_group) {
  * Access handler for service call
  */
 function background_process_service_access($handle, $token) {
-  // Setup service
-  ignore_user_abort(TRUE);
-
   // Damn those slashes!
   $handle = rawurldecode($handle);
   $token = rawurldecode($token);
@@ -280,6 +277,7 @@ function background_process_service_access($handle, $token) {
   else {
     $user = drupal_anonymous_user();
   }
+
   return TRUE;
 }
 

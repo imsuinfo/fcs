@@ -221,7 +221,9 @@ function _background_batch_page_do_nojs() {
   }
   else {
     // Not running ... and stale?
-    _background_batch_initiate();
+    // This could be an indication that the operation has been interrupted/failed.
+    drupal_json_output(array('status' => FALSE));
+    drupal_exit();
   }
 
   if ($percentage == 100) {
