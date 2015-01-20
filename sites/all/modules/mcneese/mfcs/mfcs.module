@@ -82,6 +82,7 @@ define('MFCS_REQUEST_STATUS_CANCELLED', 7);
  // these are not taxonomy-created classifications, they are instead unique ids.
  define('MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR', 1);
  define('MFCS_REVIEWER_CLASSIFICATION_MANAGER', 2);
+ define('MFCS_REVIEWER_CLASSIFICATION_REQUESTER', 3);
 
 /**
  * Defines Taxonomy TIDs for request classifications.
