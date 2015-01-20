@@ -423,6 +423,7 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
     'role_camp' => array_search('camp role', $user->roles),
     'role_employee' => array_search('employee role', $user->roles),
     'role_external' => array_search('external role', $user->roles),
+    'bannerless_exception' => array_search('bannerless exception', $user->roles),
   );
 
   // Access will only be granted to administrators, managers, and requestors.
@@ -431,7 +432,7 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
   }
 
   // Deny access to requesters and reviewers who do not have a student, camp, employee, or external role.
-  if (($roles['reviewer'] || $roles['requester']) && !$roles['role_student'] && !$roles['role_camp'] && !$roles['role_employee'] && !$roles['role_external']) {
+  if (($roles['reviewer'] || $roles['requester']) && !$roles['role_student'] && !$roles['role_camp'] && !$roles['role_employee'] && !$roles['role_external'] && !$roles['bannerless_exception']) {
     return FALSE;
   }
 
@@ -3134,8 +3135,11 @@ function mfcs_auto_block_accounts_cron() {
     return;
   }
 
-  // append other roles to block, such as administrator
+  // do not block administrator roles.
   $banner_roles['administrator'] = 'administrator';
+
+  // do not block bannerless exception roles.
+  $banner_roles['bannerless exception'] = 'bannerless exception';
 
   $transaction = db_transaction();
   try {
