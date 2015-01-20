@@ -779,6 +779,12 @@ function ultimate_cron_hook_info_alter(&$hooks) {
  * for maximum compatibility with core.
  */
 function ultimate_cron_init() {
+  // do not "prepare" session for users that cannot run cron.
+  $client_ip = ip_address();
+  if (!user_access('run cron jobs') && $client_ip != '127.0.0.1') {
+    return;
+  }
+
   if (!variable_get('ultimate_cron_bypass_transactional_safe_connection')) {
     $info = Database::getConnectionInfo('default');
     Database::addConnectionInfo('default', 'ultimate_cron', $info['default']);
@@ -1573,6 +1579,12 @@ function ultimate_cron_run_scheduled($set_message = TRUE) {
  * Run all launchers.
  */
 function ultimate_cron_run_launchers($launchers = NULL) {
+  // do not launch cron jobs if not authorized and not localhost
+  $client_ip = ip_address();
+  if (!user_access('run cron jobs') && $client_ip != '127.0.0.1') {
+    return;
+  }
+
   _ultimate_cron_variable_save('cron_last', time());
 
   $launcher_jobs = array();
