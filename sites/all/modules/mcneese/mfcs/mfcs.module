@@ -79,10 +79,9 @@ define('MFCS_REQUEST_STATUS_CANCELLED', 7);
  define('MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR', 112);
  define('MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY', 144);
 
- // these are not classifications, they are user ids.
+ // these are not taxonomy-created classifications, they are instead unique ids.
  define('MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR', 1);
  define('MFCS_REVIEWER_CLASSIFICATION_MANAGER', 2);
- define('MFCS_REVIEWER_CLASSIFICATION_FAILSAFE_COORDINATOR', 45); // @fixme: this is a hardcoded id to shogan.
 
 /**
  * Defines Taxonomy TIDs for request classifications.
@@ -131,11 +130,6 @@ define('MFCS_REQUEST_STATUS_CANCELLED', 7);
  * Defines a recursion limit for the search and/or operations.
  */
  define('MFCS_MAX_SEARCH_RECURSION', 3);
-
-/**
- * Defines a failsafe coordinator id to use.
- */
- define('MFCS_FAILSAFE_COORDINATOR_ID', 45);
 
 /**
  * Defines a standardized string for consiting watchdog error reporting.
@@ -2514,7 +2508,15 @@ function mfcs_sync_banner_to_local() {
           $room_item['coordinator_id'] = $room_coordinator->uid;
         }
         else {
-          $room_item['coordinator_id'] = MFCS_FAILSAFE_COORDINATOR_ID;
+          global $conf;
+
+          if (empty($conf['fcs_failsafe_coordinator']) || !is_integer($conf['fcs_failsafe_coordinator'])) {
+            watchdog(MFCS_WATCHDOG_ID, "Failed to load 'fcs_failsafe_coordinator' settings. Your settings.php does not contain the failsafe coordinator user id.", array(), WATCHDOG_CRITICAL);
+            $room_item['coordinator_id'] = 1; // as a last resort fall back to the default drupal admin account.
+          }
+          else {
+            $room_item['coordinator_id'] = $conf['fcs_failsafe_coordinator'];
+          }
         }
 
         // add/update the location.

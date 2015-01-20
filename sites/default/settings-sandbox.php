@@ -702,6 +702,7 @@ unset($env_current_user);
 $conf['fcs_site_url'] = 'sandbox.mcneese.edu/fcs';
 $conf['fcs_email'] = 'facilities_use@sandbox.mcneese.edu';
 $conf['fcs_name'] = 'McNeese Facilities Use System';
+$conf['fcs_failsafe_coordinator'] = 45;
 
 /**
  * fcs.mcneese.edu debugging options.

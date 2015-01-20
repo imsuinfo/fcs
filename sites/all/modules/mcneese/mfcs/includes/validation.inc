@@ -130,7 +130,15 @@ function mfcs_pre_validate_request_fields(&$form, &$form_state, $dont_validate =
     }
 
     if (!is_object($coordinator)) {
-      $coordinator = user_load(MFCS_REVIEWER_CLASSIFICATION_FAILSAFE_COORDINATOR);
+      global $conf;
+
+      if (empty($conf['fcs_failsafe_coordinator']) || !is_integer($conf['fcs_failsafe_coordinator'])) {
+        watchdog(MFCS_WATCHDOG_ID, "Failed to load 'fcs_failsafe_coordinator' settings. Your settings.php does not contain the failsafe coordinator user id.", array(), WATCHDOG_CRITICAL);
+        $coordinator = user_load(1); // as a last resort fall back to the default drupal admin account.
+      }
+      else {
+        $coordinator = user_load($conf['fcs_failsafe_coordinator']);
+      }
     }
 
     // override field settings with the proper attributes.
@@ -161,7 +169,15 @@ function mfcs_pre_validate_request_fields(&$form, &$form_state, $dont_validate =
       }
 
       if (!is_object($coordinator)) {
-        $coordinator = user_load(MFCS_REVIEWER_CLASSIFICATION_FAILSAFE_COORDINATOR);
+        global $conf;
+
+        if (empty($conf['fcs_failsafe_coordinator']) || !is_integer($conf['fcs_failsafe_coordinator'])) {
+          watchdog(MFCS_WATCHDOG_ID, "Failed to load 'fcs_failsafe_coordinator' settings. Your settings.php does not contain the failsafe coordinator user id.", array(), WATCHDOG_CRITICAL);
+          $coordinator = user_load(1); // as a last resort fall back to the default drupal admin account.
+        }
+        else {
+          $coordinator = user_load($conf['fcs_failsafe_coordinator']);
+        }
       }
 
       // override field settings with the proper attributes.
