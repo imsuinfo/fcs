@@ -150,8 +150,8 @@ function mfcs_dashboard_page() {
   $markup = '<div id="mfcs-dashboard_page-choices" class="mfcs-dashboard_page-choices">';
 
   if (!$can_create && !$can_list && !$can_search && !$can_review) {
-    $markup .= '<h3 class="item-link-wrapper inline-block">Insufficient Access</h3>';
-    $markup .= '<div class="item-description inline-block">You lack sufficient access to perform any actions on this website. If you believe this is in error, then please contact the support staff through the proper channels.</div>';
+    $markup .= '<h3 class="mfcs-dashboard_page-choices-header">Insufficient Access</h3>';
+    $markup .= '<div>You lack sufficient access to perform any actions on this website. If you believe this is in error, then please contact the support staff through the proper channels.</div>';
   }
   else {
     $markup .= '<h3 class="mfcs-dashboard_page-choices-header">Facilities Use and Special Event Request Form</h3>';
