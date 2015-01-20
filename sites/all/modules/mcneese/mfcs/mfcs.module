@@ -769,6 +769,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
     'role_camp' => array_search('camp role', $user->roles),
     'role_employee' => array_search('employee role', $user->roles),
     'role_external' => array_search('external role', $user->roles),
+    'bannerless_exception' => array_search('bannerless exception', $user->roles),
   );
 
   // Access will only be granted to administrators, managers, and requestors.
@@ -777,7 +778,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
   }
 
   // Deny access to requesters and reviewers who do not have a student, camp, employee, or external role.
-  if (($roles['reviewer'] || $roles['requester']) && !$roles['role_student'] && !$roles['role_camp'] && !$roles['role_employee'] && !$roles['role_external']) {
+  if (($roles['reviewer'] || $roles['requester']) && !$roles['role_student'] && !$roles['role_camp'] && !$roles['role_employee'] && !$roles['role_external'] && !$roles['bannerless_exception']) {
     return FALSE;
   }
 
