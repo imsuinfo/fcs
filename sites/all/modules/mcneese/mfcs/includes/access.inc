@@ -720,13 +720,10 @@ function mfcs_page_request_access_operation_cancel(&$request_ids, &$processed, &
     }
   }
 
-  $cancellable_status_normal = array(
-    MFCS_REQUEST_STATUS_UNLOCKED,
-  );
-
-  $cancellable_status_admin = array(
+  $cancellable_status = array(
     MFCS_REQUEST_STATUS_LOCKED,
     MFCS_REQUEST_STATUS_UNLOCKED,
+    MFCS_REQUEST_STATUS_CLOSED_ACCEPTED,
   );
 
   $proxies = mfcs_get_proxy_venue_coordinator($user->uid);
@@ -743,7 +740,7 @@ function mfcs_page_request_access_operation_cancel(&$request_ids, &$processed, &
     $query->addField('mer', 'id', 'id');
 
     $query->condition('mer.id', $request_ids, 'IN');
-    $query->condition('mer.status', $cancellable_status_admin, 'IN');
+    $query->condition('mer.status', $cancellable_status, 'IN');
     $query->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
 
     $access_results = $query->execute()->fetchAllAssoc('id');
@@ -780,10 +777,10 @@ function mfcs_page_request_access_operation_cancel(&$request_ids, &$processed, &
 
       if ($roles['requester'] && !$roles['manager']) {
         $query->condition('mer.user_id', $user->uid);
-        $query->condition('mer.status', $cancellable_status_normal, 'IN');
+        $query->condition('mer.status', $cancellable_status, 'IN');
       }
       else {
-        $query->condition('mer.status', $cancellable_status_admin, 'IN');
+        $query->condition('mer.status', $cancellable_status, 'IN');
       }
 
       $access_results = $query->execute()->fetchAllAssoc('id');
