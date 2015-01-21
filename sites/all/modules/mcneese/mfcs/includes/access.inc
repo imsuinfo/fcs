@@ -733,6 +733,8 @@ function mfcs_page_request_access_operation_cancel(&$request_ids, &$processed, &
   }
   $venue_coordinator_ids[$user->uid] = $user->uid;
 
+  $today = strtotime('midnight today', mfcs_instance());
+
   // if the user is the venue coordinator, then allow them to cancel a request at any point in the process.
   try {
     $query = db_select('mfcs_requests', 'mer');
@@ -742,6 +744,10 @@ function mfcs_page_request_access_operation_cancel(&$request_ids, &$processed, &
     $query->condition('mer.id', $request_ids, 'IN');
     $query->condition('mer.status', $cancellable_status, 'IN');
     $query->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
+
+    // see: mfcs_request_is_still_upcoming().
+    $query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mer.id = mfdd.request_id');
+    $query->condition('mfdd.value', $today, '>=');
 
     $access_results = $query->execute()->fetchAllAssoc('id');
 
@@ -782,6 +788,10 @@ function mfcs_page_request_access_operation_cancel(&$request_ids, &$processed, &
       else {
         $query->condition('mer.status', $cancellable_status, 'IN');
       }
+
+      // see: mfcs_request_is_still_upcoming().
+      $query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mer.id = mfdd.request_id');
+      $query->condition('mfdd.value', $today, '>=');
 
       $access_results = $query->execute()->fetchAllAssoc('id');
 
@@ -882,6 +892,8 @@ function mfcs_page_request_access_operation_uncancel(&$request_ids, &$processed,
   }
   $venue_coordinator_ids[$user->uid] = $user->uid;
 
+  $today = strtotime('midnight today', mfcs_instance());
+
   // if the user is the venue coordinator, then allow them to uncancel a request at any point in the process.
   try {
     $query = db_select('mfcs_requests', 'mer');
@@ -891,6 +903,10 @@ function mfcs_page_request_access_operation_uncancel(&$request_ids, &$processed,
     $query->condition('mer.id', $request_ids, 'IN');
     $query->condition('mer.status', $uncancellable_status, 'IN');
     $query->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
+
+    // see: mfcs_request_is_still_upcoming().
+    $query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mer.id = mfdd.request_id');
+    $query->condition('mfdd.value', $today, '>=');
 
     $access_results = $query->execute()->fetchAllAssoc('id');
 
@@ -924,6 +940,10 @@ function mfcs_page_request_access_operation_uncancel(&$request_ids, &$processed,
 
       $query->condition('mer.id', $request_ids, 'IN');
       $query->condition('mer.status', $uncancellable_status, 'IN');
+
+      // see: mfcs_request_is_still_upcoming().
+      $query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mer.id = mfdd.request_id');
+      $query->condition('mfdd.value', $today, '>=');
 
       $access_results = $query->execute()->fetchAllAssoc('id');
 

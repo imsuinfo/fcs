@@ -970,6 +970,12 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
       return FALSE;
     }
 
+    // do not allow cancelling requests that have no upcoming dates.
+    if (!mfcs_request_is_still_upcoming($request_id)) {
+      $access[$request_id] = FALSE;
+      return FALSE;
+    }
+
     // if the user is the venue coordinator, then allow them to cancel an request at any point in the process.
     if (array_key_exists($request['venue_coordinator']['user_id'][0]->value, $venue_coordinator_ids)) {
       $access[$request_id] = TRUE;
@@ -996,6 +1002,12 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
     );
 
     if (!in_array($request['top']['status'][0]->value, $uncancellable_status)) {
+      $access[$request_id] = FALSE;
+      return FALSE;
+    }
+
+    // do not allow uncancelling requests that have no upcoming dates.
+    if (!mfcs_request_is_still_upcoming($request_id)) {
       $access[$request_id] = FALSE;
       return FALSE;
     }
@@ -8507,6 +8519,47 @@ function mfcs_user_can_administer($user_id) {
   }
 
   return $can_administer[$user_id];
+}
+
+/**
+ * Returns TRUE if the given request dates have not come to pass.
+ *
+ * To keep queries as simple as possible, this operates on a per-day basis.
+ * Change this to a per minute basis if this becomes a problem.
+ *
+ * This does not check to see if a request by the specified id exists.
+ *
+ * @param int $request_id
+ *   The request id integer.
+ *
+ * @return bool
+ *   TRUE when the request has upcoming dates.
+ *   FALSE on error or when the request has no upcoming dates.
+ */
+function mfcs_request_is_still_upcoming($request_id) {
+  if (!cf_is_integer($request_id)) {
+    cf_error::invalid_integer('request_id');
+    return FALSE;
+  }
+
+  $today = strtotime('midnight today', mfcs_instance());
+
+  try {
+    $query = db_select('mfcs_field_dates_date', 'mfdd');
+    $query->addExpression('count(mfdd.request_id)');
+
+    $query->condition('mfdd.request_id', $request_id);
+    $query->condition('mfdd.value', $today, '>=');
+
+    $upcoming_dates = $query->execute()->fetchField();
+    return $upcoming_dates > 0;
+  }
+  catch (Exception $ex) {
+    cf_error::on_exception($ex);
+    return FALSE;
+  }
+
+  return FALSE;
 }
 
 /**
