@@ -2818,6 +2818,7 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id, $revision_id 
 
       if ($user_id == 1) {
         $user_name .= "System";
+        $reviewer_classification = "";
       }
       else {
         if (isset($users[$user_id]->field_user_first_name['und'][0]['value'])) {
@@ -2886,6 +2887,15 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id, $revision_id 
       }
       elseif ($decision == MFCS_REVIEW_DECISION_APPROVE && $type == MFCS_REQUEST_TYPE_QUICK_MEETING) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has designated that the <strong class="review-item-label-text-row-decision">Venue is Available</strong>, <strong class="review-item-label-text-row-decision">Confirmed</strong>, and <strong class="review-item-label-text-row-decision">Reserved</strong>' . $reviewer_classification . '.';
+      }
+      elseif ($decision == MFCS_REVIEW_DECISION_CLOSED) {
+        $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">Closed</strong> the request' . $reviewer_classification . '.';
+      }
+      elseif ($decision == MFCS_REVIEW_DECISION_CANCELLED) {
+        $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">Cancelled</strong> the request' . $reviewer_classification . '.';
+      }
+      elseif ($decision == MFCS_REVIEW_DECISION_UNCANCELLED) {
+        $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">Uncancelled</strong> the request' . $reviewer_classification . '.';
       }
       else {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' chose to <strong class="review-item-label-text-row-decision">' . $decision_options[$decision] . '</strong> the request' . $reviewer_classification . '.';

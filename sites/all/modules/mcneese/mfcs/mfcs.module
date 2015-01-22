@@ -62,6 +62,11 @@ define('MFCS_REQUEST_STATUS_CANCELLED', 7);
  define('MFCS_REVIEW_DECISION_WAVE', 135);
  define('MFCS_REVIEW_DECISION_REQUIREMENT', 136);
 
+ // These are hidden/reserved and are used to populate the review log when certain operations have been performed.
+ define('MFCS_REVIEW_DECISION_CLOSED', 1);
+ define('MFCS_REVIEW_DECISION_CANCELLED', 2);
+ define('MFCS_REVIEW_DECISION_UNCANCELLED', 3);
+
 /**
  * Defines Taxonomy TIDs for review classifications.
  */
@@ -3121,6 +3126,8 @@ function mfcs_autocancel_old_requests_cron() {
     $cancelled = mfcs_workflow_set_status($request_id, MFCS_REQUEST_STATUS_CANCELLED, $system_user);
 
     if ($cancelled) {
+      mfcs_workflow_step_review($request_id, $system_user, MFCS_REVIEW_DECISION_CANCELLED);
+
       $parameters = array();
       $parameters['changed_by'] = $system_user->uid;
       $parameters['changed_type'] = 'user';

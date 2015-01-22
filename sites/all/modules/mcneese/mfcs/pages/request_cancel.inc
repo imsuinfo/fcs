@@ -151,6 +151,8 @@ function mfcs_request_cancel_0_form_submit($form, &$form_state) {
   $cancelled = mfcs_workflow_set_status($request_id, MFCS_REQUEST_STATUS_CANCELLED);
 
   if ($cancelled) {
+    mfcs_workflow_step_review($request_id, $user, MFCS_REVIEW_DECISION_CANCELLED);
+
     $parameters = array();
     $parameters['changed_by'] = $user->uid;
     $parameters['changed_type'] = 'user';
@@ -350,6 +352,8 @@ function mfcs_request_uncancel_0_form_submit($form, &$form_state) {
   }
 
   if ($uncancelled) {
+    mfcs_workflow_step_review($request_id, $user, MFCS_REVIEW_DECISION_UNCANCELLED);
+
     $parameters = array();
     $parameters['changed_by'] = $user->uid;
     $parameters['changed_type'] = 'user';

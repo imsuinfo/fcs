@@ -313,14 +313,14 @@ function mfcs_workflow_set_status($request_id, $status, $user = NULL, $extra = a
  * @param int $decision
  *   The facilities use decision.
  * @param string $message
- *   The facilities use decision message.
+ *   (optional) The facilities use decision message.
  * @param array $extra
  *   (optional) Additional fields that are specific to the individual step.
  *
  * @return bool
  *   TRUE on success, FALSE otherwise.
  */
-function mfcs_workflow_step_review($request_id, $user, $decision, $message, $extra = array()) {
+function mfcs_workflow_step_review($request_id, $user, $decision, $message = "", $extra = array()) {
   if (!is_object($user)) {
     cf_error::invalid_integer('user');
     return FALSE;
@@ -560,8 +560,8 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message, $ext
   );
 
   if ($step == MFCS_REVIEW_STEP_REVIEW || $step == MFCS_REVIEW_STEP_REQUIREMENTS) {
-    // remove classifications not allowed in these steps, unless they are for a comment.
-    if ($decision != MFCS_REVIEW_DECISION_COMMENT) {
+    // remove classifications not allowed in these steps, unless they are for a comment or a message for the review log.
+    if ($decision != MFCS_REVIEW_DECISION_COMMENT && $decision != MFCS_REVIEW_DECISION_CANCELLED && $decision != MFCS_REVIEW_DECISION_UNCANCELLED && $decision != MFCS_REVIEW_DECISION_CLOSED) {
       unset($reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR]);
       unset($reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY]);
     }
@@ -1003,7 +1003,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message, $ext
 
     return TRUE;
   }
-  elseif ($decision == MFCS_REVIEW_DECISION_WAVE || ($decision == MFCS_REVIEW_DECISION_REQUIREMENT && !$insurance_provided_exception)) {
+  elseif ($decision == MFCS_REVIEW_DECISION_WAVE || $decision = MFCS_REVIEW_DECISION_CANCELLED || $decision == MFCS_REVIEW_DECISION_UNCANCELLED || $decision = MFCS_REVIEW_DECISION_CLOSED || ($decision == MFCS_REVIEW_DECISION_REQUIREMENT && !$insurance_provided_exception)) {
     // do not send an e-mail.
     return TRUE;
   }
@@ -1194,6 +1194,10 @@ function mfcs_workflow_next_step($request_id, $type, $step, $decision, $message,
 
   if (!is_null($new_step)) {
     mfcs_workflow_set_step($request_id, $new_step, $changed_user);
+
+    #if ($new_step == MFCS_REVIEW_STEP_COMPLETED && $type != MFCS_REQUEST_TYPE_QUICK_MEETING) {
+    #  mfcs_workflow_step_review($request_id, $changed_user, MFCS_REVIEW_DECISION_CLOSED);
+    #}
   }
 
   mfcs_include(MFCS_INCLUDE_OUTPUT);
@@ -1576,6 +1580,8 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
         'send_email' => FALSE,
       );
       mfcs_workflow_step_review($request_id, $request_requester, MFCS_REVIEW_DECISION_APPROVE, "", $extra);
+
+      #mfcs_workflow_step_review($request_id, $request_requester, MFCS_REVIEW_DECISION_CLOSED);
 
       $email_params['title_suffix'] = "Approved";
       $email_params['content'] = "";
