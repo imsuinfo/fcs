@@ -724,6 +724,9 @@ function mfcs_page_request_access_operation_cancel(&$request_ids, &$processed, &
     MFCS_REQUEST_STATUS_LOCKED,
     MFCS_REQUEST_STATUS_UNLOCKED,
     MFCS_REQUEST_STATUS_CLOSED_ACCEPTED,
+    MFCS_REQUEST_STATUS_CLOSED_DENIED,
+    MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE,
+    MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK,
   );
 
   $proxies = mfcs_get_proxy_venue_coordinator($user->uid);
