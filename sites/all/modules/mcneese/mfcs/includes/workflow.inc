@@ -451,7 +451,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
     'requirements_custodial' => NULL,
     'requirements_security' => NULL,
     'requirements_other' => NULL,
-    'requirements_waved' => NULL,
+    'requirements_waived' => NULL,
     'requirements_university' => NULL,
   );
 
@@ -461,7 +461,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
     'custodial' => NULL,
     'security' => NULL,
     'other' => NULL,
-    'waved' => NULL,
+    'waived' => NULL,
     'university' => NULL,
   );
 
@@ -807,30 +807,30 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
   }
 
   if (($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE || $is_quick_meeting) && ($decision == MFCS_REVIEW_DECISION_WAVE || $decision == MFCS_REVIEW_DECISION_REQUIREMENT)) {
-    $requirements_waved = 0;
-    if (isset($extra['requirements']['waved'])) {
-      $requirements_waved = $extra['requirements']['waved'];
+    $requirements_waived = 0;
+    if (isset($extra['requirements']['waived'])) {
+      $requirements_waived = $extra['requirements']['waived'];
     }
 
-    if (is_null($mfcs_current_requirements['requirements_waved'])) {
-      if (is_null($requirements_latest['waved'])) {
-        $mfcs_current_requirements['requirements_waved'] = 0;
+    if (is_null($mfcs_current_requirements['requirements_waived'])) {
+      if (is_null($requirements_latest['waived'])) {
+        $mfcs_current_requirements['requirements_waived'] = 0;
       }
       else {
-        $mfcs_current_requirements['requirements_waved'] = $requirements_latest['waved'] + 1;
+        $mfcs_current_requirements['requirements_waived'] = $requirements_latest['waived'] + 1;
       }
     }
     else {
-      $mfcs_current_requirements['requirements_waved']++;
+      $mfcs_current_requirements['requirements_waived']++;
     }
 
-    $mfcs_field_requirements['waved'] = array(
+    $mfcs_field_requirements['waived'] = array(
       'request_id' => $request_id,
-      'revision' => $mfcs_current_requirements['requirements_waved'],
+      'revision' => $mfcs_current_requirements['requirements_waived'],
       'delta' => 0,
       'user_id' => $user->uid,
       'date' => $instance,
-      'value' => $requirements_waved,
+      'value' => $requirements_waived,
     );
 
     $requirements_university = 0;
@@ -956,8 +956,8 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
       $query->fields($mfcs_field_requirements['other']);
       $query->execute();
 
-      $query = db_insert('mfcs_field_requirements_waved');
-      $query->fields($mfcs_field_requirements['waved']);
+      $query = db_insert('mfcs_field_requirements_waived');
+      $query->fields($mfcs_field_requirements['waived']);
       $query->execute();
 
       $query = db_insert('mfcs_field_requirements_university');
@@ -1572,7 +1572,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     if ($type == MFCS_REQUEST_TYPE_QUICK_MEETING && $venue_coordinator->uid == $request_requester->uid) {
       $extra = array(
         'send_email' => FALSE,
-        'requirements' => array('other' => 0, 'waved' => 0, 'university' => 1),
+        'requirements' => array('other' => 0, 'waived' => 0, 'university' => 1),
       );
       mfcs_workflow_step_review($request_id, $request_requester, MFCS_REVIEW_DECISION_REQUIREMENT, "", $extra);
 

@@ -217,9 +217,9 @@ function mfcs_table_structure($include_mer = FALSE) {
       'manual_processing' => TRUE,
       'allows_null' => TRUE,
     ),
-    'waved' => array(
-      'name' => "Requirements / Fees Waved (with Presidents Approval)",
-      'path' => 'request][requirements][waved',
+    'waived' => array(
+      'name' => "Requirements / Fees Waived (with Presidents Approval)",
+      'path' => 'request][requirements][waived',
       'type' => 'bool',
       'size' => 'tiny',
       'manual_processing' => TRUE,
@@ -1060,8 +1060,8 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => FALSE,
       ),
     ),
-    'waved' => array(
-      'label' => 'Requirements / Fees Waved',
+    'waived' => array(
+      'label' => 'Requirements / Fees Waived',
       'type' => array(
         'value' => 'boolean',
       ),

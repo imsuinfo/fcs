@@ -1484,8 +1484,8 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           '#weight' => 4,
         );
 
-        if (!empty($request['requirements']['waved'][0])) {
-          $form['review']['operations']['presidents_approval']['#default_value'] = $request['requirements']['waved'][0]->value;
+        if (!empty($request['requirements']['waived'][0])) {
+          $form['review']['operations']['presidents_approval']['#default_value'] = $request['requirements']['waived'][0]->value;
         }
 
         $form['review']['operations']['university_business'] = array(
@@ -1757,16 +1757,16 @@ function mfcs_request_view_0_form_pre_validate(&$form, &$form_state) {
   $unrequire_usage_fields = TRUE;
   if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
     if ($decision == MFCS_REVIEW_DECISION_REQUIREMENT) {
-      $requirements_waved = FALSE;
+      $requirements_waived = FALSE;
       if (isset($form_state['values']['review']['operations']['presidents_approval']) && $form_state['values']['review']['operations']['presidents_approval'] == 1) {
-        $requirements_waved = TRUE;
+        $requirements_waived = TRUE;
       }
 
       if (isset($form_state['values']['review']['operations']['university_business']) && $form_state['values']['review']['operations']['university_business'] == 1) {
-        $requirements_waved = TRUE;
+        $requirements_waived = TRUE;
       }
 
-      $unrequire_usage_fields = $requirements_waved;
+      $unrequire_usage_fields = $requirements_waived;
     }
   }
 
@@ -1929,7 +1929,7 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
       }
     }
 
-    // A request was made to have the requirements waved options be displayed with the requirements to avoid confusion.
+    // A request was made to have the requirements waived options be displayed with the requirements to avoid confusion.
     // To do this without changing the underlining design, when the requirement is specified with a wave checked, then convert the decision to a wave.
     if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE && $decision == MFCS_REVIEW_DECISION_REQUIREMENT) {
       if (isset($form_state['values']['review']['operations']['presidents_approval']) && $form_state['values']['review']['operations']['presidents_approval'] == 1) {
@@ -1944,8 +1944,8 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
 
     $requirements_required = TRUE;
     if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
-      if (isset($request['requirements']['waved'][0]->value)) {
-        if ($request['requirements']['waved'][0]->value == 1) {
+      if (isset($request['requirements']['waived'][0]->value)) {
+        if ($request['requirements']['waived'][0]->value == 1) {
           $requirements_required = FALSE;
         }
       }
@@ -2076,8 +2076,8 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
       $requirements_not_supplied = TRUE;
 
       if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
-        if (isset($request['requirements']['waved'][0]->value)) {
-          if ($request['requirements']['waved'][0]->value) {
+        if (isset($request['requirements']['waived'][0]->value)) {
+          if ($request['requirements']['waived'][0]->value) {
             $requirements_not_supplied = FALSE;
           }
         }
@@ -2094,7 +2094,7 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
       }
 
       if ($requirements_not_supplied) {
-        form_set_error('review][operations][decision', t("The request cannot be approved until the requirements are either specified or waved."));
+        form_set_error('review][operations][decision', t("The request cannot be approved until the requirements are either specified or waived."));
       }
     }
 
@@ -2276,9 +2276,9 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
     }
     elseif ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
       if (isset($form_state['values']['review']['operations']['presidents_approval'])) {
-        $extra['requirements']['waved'] = $form_state['values']['review']['operations']['presidents_approval'];
+        $extra['requirements']['waived'] = $form_state['values']['review']['operations']['presidents_approval'];
 
-        if ($extra['requirements']['waved'] == 1) {
+        if ($extra['requirements']['waived'] == 1) {
           $extra['requirements']['other'] = 0;
         }
       }
@@ -2291,13 +2291,13 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
         }
       }
 
-      // when the request type is a quick meeting, then mark this as waved due to university business.
+      // when the request type is a quick meeting, then mark this as waived due to university business.
       if ($type == MFCS_REQUEST_TYPE_QUICK_MEETING) {
         $form_state['values']['review']['operations']['university_business'] = 1;
         unset($extra['requirements']);
         $requirements_extra = array(
           'send_email' => FALSE,
-          'requirements' => array('other' => 0, 'waved' => 0, 'university' => 1),
+          'requirements' => array('other' => 0, 'waived' => 0, 'university' => 1),
         );
 
         $success = mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], MFCS_REVIEW_DECISION_REQUIREMENT, "", $requirements_extra);
@@ -2315,10 +2315,10 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
 
     if ($success) {
       if ($decision == MFCS_REVIEW_DECISION_COMMENT) {
-        drupal_set_message("Your comment has been recieved.");
+        drupal_set_message("Your comment has been received.");
       }
       else {
-        drupal_set_message("Your review has been recieved.");
+        drupal_set_message("Your review has been received.");
       }
     }
     else {
@@ -2732,7 +2732,7 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id, $revision_id 
     'custodial',
     'security',
     'other',
-    'waved',
+    'waived',
     'university',
   );
   $changelog_fields['insurance'] = array(
@@ -2874,7 +2874,7 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id, $revision_id 
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has designated the <strong class="review-item-label-text-row-decision">' . $decision_options[$decision] . '</strong>' . $reviewer_classification . '.';
       }
       elseif (($review_step == MFCS_REVIEW_STEP_REVIEW || $review_step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) && $decision == MFCS_REVIEW_DECISION_WAVE) {
-        $markup .= $user_name_markup . ' ' . $user_id_markup . ' has waved the <strong class="review-item-label-text-row-decision">' . $decision_options[MFCS_REVIEW_DECISION_REQUIREMENT] . '</strong> ' . $reviewer_classification . '.';
+        $markup .= $user_name_markup . ' ' . $user_id_markup . ' has waived the <strong class="review-item-label-text-row-decision">' . $decision_options[MFCS_REVIEW_DECISION_REQUIREMENT] . '</strong> ' . $reviewer_classification . '.';
       }
       elseif ($review_step == MFCS_REVIEW_STEP_REQUIREMENTS && $decision == MFCS_REVIEW_DECISION_APPROVE) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has accepted the <strong class="review-item-label-text-row-decision">' . $review_step_options[$review_step] . '</strong>' . $reviewer_classification . '.';
@@ -2987,19 +2987,19 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id, $revision_id 
           $message .= '</div>';
         }
 
-        if (!empty($changelog['requirements']['waved'])) {
-          $message .= '<div class="review-item-message-requirements-waved review-item-message-requirements review-item-message-requirements">';
-          $message .= '<div class="item-label">Waved with Presidents Approval:</div> ';
+        if (!empty($changelog['requirements']['waived'])) {
+          $message .= '<div class="review-item-message-requirements-waived review-item-message-requirements review-item-message-requirements">';
+          $message .= '<div class="item-label">Waived with Presidents Approval:</div> ';
 
           // always display the boolean when displayed in the review log.
-          foreach ($presentation['requirements']['waved']['display'] as &$value) {
+          foreach ($presentation['requirements']['waived']['display'] as &$value) {
             if ($value == 'when_true' || $value == 'when_false') {
               $value = 'raw';
             }
           }
 
-          $value = reset($changelog['requirements']['waved']);
-          $value_markup = mfcs_build_request_value_structure($request_id, 'requirements', 'waved', 0, $value, $presentation['requirements']['waved'], $changelog);
+          $value = reset($changelog['requirements']['waived']);
+          $value_markup = mfcs_build_request_value_structure($request_id, 'requirements', 'waived', 0, $value, $presentation['requirements']['waived'], $changelog);
 
           if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
             $message .= drupal_render($value_markup);

@@ -32,7 +32,7 @@ function mfcs_table_install_structure() {
     'security' => array('quantity' => 'unsigned', 'hours' => 'unsigned', 'days' => 'unsigned', 'amount' => 'unsigned'),
     'custodial' => array('quantity' => 'unsigned', 'hours' => 'unsigned', 'days' => 'unsigned', 'amount' => 'unsigned'),
     'other' => 'unsigned_tiny',
-    'waved' => 'unsigned_tiny',
+    'waived' => 'unsigned_tiny',
     'university' => 'unsigned_tiny',
   );
 
