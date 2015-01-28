@@ -285,7 +285,7 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
                         $custom_message .= ' the request was <strong class="review-decision">' . "Closed" . '</strong>. ';
                       }
-                      elseif ($value->decision == #MFCS_REVIEW_DECISION_AMENDMENT) {
+                      elseif ($value->decision == MFCS_REVIEW_DECISION_AMENDMENT) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
                         $custom_message .= ' the request was <strong class="review-decision">' . "Amended" . '</strong>. ';
                       }
