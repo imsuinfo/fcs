@@ -1200,6 +1200,8 @@ function mfcs_workflow_next_step($request_id, $type, $step, $decision, $message,
     #}
   }
 
+
+  // send out e-mails.
   mfcs_include(MFCS_INCLUDE_OUTPUT);
 
   $parameters = array();
