@@ -488,7 +488,7 @@ function mfcs_table_structure($include_mer = FALSE) {
     ),
     'standard_blue_chairs' => array(
       'path' => 'request][setup][standard_blue_chairs',
-      'name' => "Standard Blue Chairs",
+      'name' => "Standard Chairs", // renamed "Blue Chairs" to "Chairs" as per fcs-22.
       'type' => 'number',
       'size' => 'normal',
     ),
@@ -1531,7 +1531,7 @@ function mfcs_table_presentation($option = NULL) {
       ),
     ),
     'standard_blue_chairs' => array(
-      'label' => 'Quantity of Blue Chairs',
+      'label' => 'Quantity of Chairs', // renamed "Blue Chairs" to "Chairs" as per fcs-22.
       'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,

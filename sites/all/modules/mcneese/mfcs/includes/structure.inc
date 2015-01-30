@@ -3422,7 +3422,7 @@ function mfcs_get_request_field_setup_standard_blue_chairs($form, &$form_state, 
     $values = $request_state['setup']['standard_blue_chairs'];
   }
 
-  $field_title = "How Many Standard Blue Chairs Will You Need?";
+  $field_title = "How Many Standard Chairs Will You Need?"; // renamed "Blue Chairs" to "Chairs" as per fcs-22.
   $limits_check = array(
     'title' => $field_title,
     'field' => 'standard_blue_chairs',
