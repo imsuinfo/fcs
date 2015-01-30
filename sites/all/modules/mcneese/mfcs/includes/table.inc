@@ -104,7 +104,7 @@ function mfcs_table_structure($include_mer = FALSE) {
       ),
       'title' => array(
         'path' => 'request][information][title',
-        'name' => "Title",
+        'name' => "Request Name", // renamed from "Request Title" to "Request Name" as per fcs-23.
         'type' => 'text',
         'size' => 255,
         'manual_processing' => TRUE,
@@ -339,7 +339,7 @@ function mfcs_table_structure($include_mer = FALSE) {
   $structure['information'] = array(
     'title' => array(
       'path' => 'request][information][title',
-      'name' => "Title",
+      'name' => "Request Name", // renamed from "Request Title" to "Request Name" as per fcs-23.
       'type' => 'text',
       'size' => 255,
       'hide_from_search' => TRUE,
@@ -1300,7 +1300,7 @@ function mfcs_table_presentation($option = NULL) {
 
   $presentation['information'] = array(
     'title' => array(
-      'label' => 'Request Title',
+      'label' => 'Request Name', // renamed from "Request Title" to "Request Name" as per fcs-23.
       'weight' => 1,
       'request_type' => array(
         'show' => TRUE,

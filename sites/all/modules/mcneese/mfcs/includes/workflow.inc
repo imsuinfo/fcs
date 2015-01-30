@@ -1534,7 +1534,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
 
   $standard_content = "\n\n";
   $standard_content .= "Request ID:\n - " . $request_id . "\n\n";
-  $standard_content .= "Request Title:\n - " . $request['information']['title'][0]->value . "\n\n";
+  $standard_content .= "Request Name:\n - " . $request['information']['title'][0]->value . "\n\n"; // renamed from title to "Request Name" as per fcs-23.
   $standard_content .= "Location:\n - " . $location_text . "\n\n";
   $standard_content .= "Building:\n - " . $building_text . "\n\n";
   $standard_content .= "Room:\n - " . $room_text . "\n\n";
@@ -1542,7 +1542,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
 
   $standard_markup = "<br>\n<br>\n";
   $standard_markup .= "<strong>Request ID</strong>:\n<ul><li>" . $request_id . "</li></ul>\n<br>\n";
-  $standard_markup .= "<strong>Request Title</strong>:\n<ul><li>" . $request['information']['title'][0]->value . "</li></ul>\n<br>\n";
+  $standard_markup .= "<strong>Request Name</strong>:\n<ul><li>" . $request['information']['title'][0]->value . "</li></ul>\n<br>\n"; // renamed from title to "Request Name" as per fcs-23.
   $standard_markup .= "<strong>Location</strong>:\n<ul><li>" . $location_text . "</li></ul>\n<br>\n";
   $standard_markup .= "<strong>Building</strong>:\n<ul><li>" . $building_text . "</li></ul>\n<br>\n";
   $standard_markup .= "<strong>Room</strong>:\n<ul><li>" . $room_text . "</li></ul>\n<br>\n";

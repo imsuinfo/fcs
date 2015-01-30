@@ -1778,7 +1778,7 @@ function mfcs_get_request_field_information_title($form, &$form_state, &$fields,
     $values = $request_state['information']['title'];
   }
 
-  $field_title = "Request Title";
+  $field_title = "Request Name"; // renamed from title to "Request Name" as per fcs-23.
   $limits_check = array(
     'title' => $field_title,
     'field' => 'title',
@@ -1820,6 +1820,7 @@ function mfcs_get_request_field_information_title($form, &$form_state, &$fields,
             'form-item-delta-' . $key,
           ),
         ),
+        '#description' => t("The Name of the Event or Meeting."),
       );
     }
     krsort($fields['information']['title']);
