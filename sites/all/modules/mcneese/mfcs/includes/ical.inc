@@ -194,13 +194,13 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
     $request_description_end .= 'You may view the request at: '  . $request_url. ".\n";
     $request_description_end .= "\n";
 
-    $request_dates_setup_begin = 'The ' . $dates_categories_options[MFCS_EVENT_DATES_CATEGORY_SETUP] . ' takes place on the following dates and times:' . "\n";
+    $request_dates_setup_begin = 'The ' . $dates_categories_options[MFCS_REQUEST_DATES_CATEGORY_SETUP] . ' takes place on the following dates and times:' . "\n";
     $request_dates_setup_end = "\n";
 
-    $request_dates_actual_begin = 'This location is reserved for the ' . $dates_categories_options[MFCS_EVENT_DATES_CATEGORY_ACTUAL] . ' takes place on the following dates and times:' . "\n";
+    $request_dates_actual_begin = 'This location is reserved for the ' . $dates_categories_options[MFCS_REQUEST_DATES_CATEGORY_ACTUAL] . ' takes place on the following dates and times:' . "\n";
     $request_dates_actual_end = "\n";
 
-    $request_dates_cleanup_begin = 'This location is reserved for the ' . $dates_categories_options[MFCS_EVENT_DATES_CATEGORY_CLEANUP] . ' takes place on the following dates and times:' . "\n";
+    $request_dates_cleanup_begin = 'This location is reserved for the ' . $dates_categories_options[MFCS_REQUEST_DATES_CATEGORY_CLEANUP] . ' takes place on the following dates and times:' . "\n";
     $request_dates_cleanup_end = "\n";
 
     $request_description_markup_begin = '<html>' . "\n";
@@ -218,17 +218,17 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
     $request_description_markup_end .= '</body>' . "\n";
     $request_description_markup_end .= '</html>' . "\n";
 
-    $request_dates_setup_markup_begin = 'The <strong>' . $dates_categories_options[MFCS_EVENT_DATES_CATEGORY_SETUP] . '</strong> takes place on the following dates and times:' . "\n";
+    $request_dates_setup_markup_begin = 'The <strong>' . $dates_categories_options[MFCS_REQUEST_DATES_CATEGORY_SETUP] . '</strong> takes place on the following dates and times:' . "\n";
     $request_dates_setup_markup_begin .= '<ul>' . "\n";
     $request_dates_setup_markup_end = '';
     $request_dates_setup_markup_end .= '</ul>' . "\n";
 
-    $request_dates_actual_markup_begin = 'The <strong>' . $dates_categories_options[MFCS_EVENT_DATES_CATEGORY_ACTUAL] . '</strong> takes place on the following dates and times:' . "\n";
+    $request_dates_actual_markup_begin = 'The <strong>' . $dates_categories_options[MFCS_REQUEST_DATES_CATEGORY_ACTUAL] . '</strong> takes place on the following dates and times:' . "\n";
     $request_dates_actual_markup_begin .= '<ul>' . "\n";
     $request_dates_actual_markup_end = '';
     $request_dates_actual_markup_end .= '</ul>' . "\n";
 
-    $request_dates_cleanup_markup_begin = 'The <strong>' . $dates_categories_options[MFCS_EVENT_DATES_CATEGORY_CLEANUP] . '</strong> takes place on the following dates and times:' . "\n";
+    $request_dates_cleanup_markup_begin = 'The <strong>' . $dates_categories_options[MFCS_REQUEST_DATES_CATEGORY_CLEANUP] . '</strong> takes place on the following dates and times:' . "\n";
     $request_dates_cleanup_markup_begin .= '<ul>' . "\n";
     $request_dates_cleanup_markup_end = '';
     $request_dates_cleanup_markup_end .= '</ul>' . "\n";
@@ -273,15 +273,15 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
         date_default_timezone_set($original_timezone);
       }
 
-      if ($request->category[$delta] == MFCS_EVENT_DATES_CATEGORY_SETUP) {
+      if ($request->category[$delta] == MFCS_REQUEST_DATES_CATEGORY_SETUP) {
         $dates_setup_event_text .= '  - ' . $ical_date['text'] . "\n";
         $dates_setup_event_markup .= '<li>' . $ical_date['text'] . '</li>' . "\n";
       }
-      elseif ($request->category[$delta] == MFCS_EVENT_DATES_CATEGORY_ACTUAL) {
+      elseif ($request->category[$delta] == MFCS_REQUEST_DATES_CATEGORY_ACTUAL) {
         $dates_actual_event_text .= '  - ' . $ical_date['text'] . "\n";
         $dates_actual_event_markup .= '<li>' . $ical_date['text'] . '</li>' . "\n";
       }
-      elseif ($request->category[$delta] == MFCS_EVENT_DATES_CATEGORY_CLEANUP) {
+      elseif ($request->category[$delta] == MFCS_REQUEST_DATES_CATEGORY_CLEANUP) {
         $dates_cleanup_event_text .= '  - ' . $ical_date['text'] . "\n";
         $dates_cleanup_event_markup .= '<li>' . $ical_date['text'] . '</li>' . "\n";
       }

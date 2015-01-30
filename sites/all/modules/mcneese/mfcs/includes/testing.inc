@@ -474,15 +474,15 @@ function mfcs_testing_generate_dates_and_times() {
   $category = rand(1, 9);
 
   if ($category < 6) {
-    $category = MFCS_EVENT_DATES_CATEGORY_ACTUAL;
+    $category = MFCS_REQUEST_DATES_CATEGORY_ACTUAL;
     $format_category = "Event / Meeting";
   }
   elseif ($category < 8) {
-    $category = MFCS_EVENT_DATES_CATEGORY_SETUP;
+    $category = MFCS_REQUEST_DATES_CATEGORY_SETUP;
     $format_category = "Rehearsal / Setup";
   }
   else {
-    $category = MFCS_EVENT_DATES_CATEGORY_CLEANUP;
+    $category = MFCS_REQUEST_DATES_CATEGORY_CLEANUP;
     $format_category = "Cleanup / Breakdown";
   }
 

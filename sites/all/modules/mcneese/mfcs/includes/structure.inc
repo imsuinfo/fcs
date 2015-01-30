@@ -2101,7 +2101,7 @@ function mfcs_get_request_field_information_adviser_approval($form, &$form_state
   if (isset($form['form']['target_section']['#value']) && $form['form']['target_section']['#value'] == 'information') {
     // The adviser field is dependent on another that does not appear in the same section..
     // Don't render the field if the the dependency determines that it must not be renderred.
-    if (!isset($fields['request_coordinator']['classification'][0]['#value']) || $fields['request_coordinator']['classification'][0]['#value'] != MFCS_EVENT_CLASSIFICATION_STUDENT) {
+    if (!isset($fields['request_coordinator']['classification'][0]['#value']) || $fields['request_coordinator']['classification'][0]['#value'] != MFCS_REQUEST_CLASSIFICATION_STUDENT) {
       $render_field = FALSE;
     }
   }

@@ -194,7 +194,7 @@ function mfcs_pre_validate_request_fields(&$form, &$form_state, $dont_validate =
     $is_required = FALSE;
 
     if (isset($location_state['request_coordinator']['classification']) && array_key_exists(0, $location_state['request_coordinator']['classification'])) {
-      if ($location_state['request_coordinator']['classification'][0] == MFCS_EVENT_CLASSIFICATION_STUDENT) {
+      if ($location_state['request_coordinator']['classification'][0] == MFCS_REQUEST_CLASSIFICATION_STUDENT) {
         $is_required = TRUE;
       }
     }
@@ -515,7 +515,7 @@ function mfcs_validate_request_fields($form, &$form_state) {
     $no_actual_request = TRUE;
     if (!empty($location_state['dates']['category'])) {
       foreach ($location_state['dates']['category'] as $key => &$value) {
-        if ($value == MFCS_EVENT_DATES_CATEGORY_ACTUAL) {
+        if ($value == MFCS_REQUEST_DATES_CATEGORY_ACTUAL) {
           $no_actual_request = FALSE;
           break;
         }
