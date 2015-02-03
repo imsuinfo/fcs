@@ -1171,7 +1171,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         }
         else {
           foreach ($reviewers as $reviewer) {
-            if ($reviewer->reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_FACILITIES) {
+            if ($reviewer->reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_FACILITIES_CUSTODIAL || $reviewer->reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_CUSTODIAL) {
               $uses['custodial'] = "Custodial";
               $form['form']['requirements-custodial']['#value'] = TRUE;
             }

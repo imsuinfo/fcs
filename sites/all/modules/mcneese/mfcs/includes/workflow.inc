@@ -604,7 +604,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
       }
     }
     elseif ($step == MFCS_REVIEW_STEP_REVIEW) {
-      if (isset($reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_FACILITIES])) {
+      if (isset($reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_FACILITIES_CUSTODIAL]) || isset($reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_CUSTODIAL])) {
         $uses['custodial'] = 'custodial';
       }
 
