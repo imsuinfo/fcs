@@ -6264,6 +6264,7 @@ function mfcs_get_request_field_additional($form, &$form_state, &$fields, &$requ
             'form-item-delta-' . $key,
           ),
         ),
+        '#description_before' => "Please use this comment box to provide University Police with details about reserving spaces in parking lots and/or when buildings need to be opened/closed for weekend and after-hours events.",
       );
     }
     krsort($fields['additional']);
