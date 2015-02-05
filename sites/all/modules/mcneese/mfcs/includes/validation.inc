@@ -424,7 +424,15 @@ function mfcs_validate_request_fields($form, &$form_state) {
               $passed = FALSE;
             }
             else {
-              $value = date($location_form['dates']['group_dates'][$key]['dates']['time_start'][$key]['#expected_format']['date'], $start_timestamp[$key]);
+              $matched = preg_match('/(pm|am)\s*$/i', $value);
+
+              if (!$matched) {
+                form_set_error($ps_p . '][dates][time_start][' . $key, t("'@value' is missing a valid 'am' or 'pm'. Please specify either am or pm at the end of the start time.", array('@value' => $value)));
+                $passed = FALSE;
+              }
+              else {
+                $value = date($location_form['dates']['group_dates'][$key]['dates']['time_start'][$key]['#expected_format']['date'], $start_timestamp[$key]);
+              }
             }
           }
         }
@@ -467,7 +475,15 @@ function mfcs_validate_request_fields($form, &$form_state) {
               $passed = FALSE;
             }
             else {
-              $value = date($location_form['dates']['group_dates'][$key]['dates']['time_stop'][$key]['#expected_format']['date'], $stop_timestamp[$key]);
+              $matched = preg_match('/(pm|am)\s*$/i', $value);
+
+              if (!$matched) {
+                form_set_error($ps_p . '][dates][time_stop][' . $key, t("'@value' is missing a valid 'am' or 'pm'. Please specify either am or pm at the end of the stop time.", array('@value' => $value)));
+                $passed = FALSE;
+              }
+              else {
+                $value = date($location_form['dates']['group_dates'][$key]['dates']['time_stop'][$key]['#expected_format']['date'], $stop_timestamp[$key]);
+              }
             }
           }
         }
