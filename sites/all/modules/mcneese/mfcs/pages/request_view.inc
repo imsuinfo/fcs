@@ -1151,6 +1151,16 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           '#value' => FALSE,
         );
 
+        $form['form']['requirements-maintenance'] = array(
+          '#type' => 'value',
+          '#value' => FALSE,
+        );
+
+        $form['form']['requirements-grounds'] = array(
+          '#type' => 'value',
+          '#value' => FALSE,
+        );
+
         $form['form']['requirements-security'] = array(
           '#type' => 'value',
           '#value' => FALSE,
@@ -1175,6 +1185,14 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
               $uses['custodial'] = "Custodial";
               $form['form']['requirements-custodial']['#value'] = TRUE;
             }
+            elseif ($reviewer->reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_MAINTENANCE) {
+              $uses['maintenance'] = "Maintenance";
+              $form['form']['requirements-maintenance']['#value'] = TRUE;
+            }
+            elseif ($reviewer->reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_FACILITIES) {
+              $uses['grounds'] = "Grounds";
+              $form['form']['requirements-grounds']['#value'] = TRUE;
+            }
             elseif ($reviewer->reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_SECURITY) {
               $uses['security'] = "Security";
               $form['form']['requirements-security']['#value'] = TRUE;
@@ -1192,11 +1210,11 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           $form['review']['operations']['decision']['#options'] = $decision_options;
         }
 
-        $requirements_amount_defaults = array('custodial' => '18.50', 'security' => '30.00');
-        $uses_personnel = array('custodial', 'security');
-        $uses_hours = array('custodial', 'security');
-        $uses_requirements = array('facilities' => TRUE, 'equipment' => FALSE, 'custodial' => TRUE, 'security' => TRUE);
-        $uses_review = array('facilities' => FALSE, 'equipment' => FALSE, 'custodial' => TRUE, 'security' => TRUE);
+        $requirements_amount_defaults = array('custodial' => '18.50', 'maintenance' => '18.50', 'grounds' => '18.50', 'security' => '30.00');
+        $uses_personnel = array('custodial', 'maintenance', 'grounds', 'security');
+        $uses_hours = array('custodial', 'maintenance', 'grounds', 'security');
+        $uses_requirements = array('facilities' => TRUE, 'equipment' => FALSE, 'custodial' => TRUE, 'maintenance' => TRUE, 'grounds' => TRUE, 'security' => TRUE);
+        $uses_review = array('facilities' => FALSE, 'equipment' => FALSE, 'custodial' => TRUE, 'maintenance' => TRUE, 'grounds' => TRUE, 'security' => TRUE);
         foreach ($uses as $use_name => $use_title) {
           if ($uses_review[$use_name] && $step != MFCS_REVIEW_STEP_REVIEW) {
             continue;
@@ -2044,6 +2062,56 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
         }
       }
 
+      if (array_key_exists('maintenance', $requirements) && !empty($requirements['maintenance']['amount'])) {
+        $matches = array();
+        $matched = preg_match('/^(\d+|\d+\.\d|\d+\.\d\d)$/i', $requirements['maintenance']['amount'], $matches);
+
+        if (!$matched) {
+          form_set_error('review][operations][requirements][maintenance][amount', t("@maintenance is not a valid maintenance requirement amount. Use only numbers and two decimal places. Do not provide a dollar sign.", array('@maintenance' => $requirements['maintenance']['amount'])));
+          $failure = TRUE;
+        }
+
+        if (isset($requirements['maintenance']['quantity']) && intval($requirements['maintenance']['quantity']) != $requirements['maintenance']['quantity']) {
+          form_set_error('review][operations][requirements][maintenance][quantity', t("@quantity is not an allowed number. Use only numbers without decimal places.", array('@quantity' => $requirements['maintenance']['quantity'])));
+          $failure = TRUE;
+        }
+
+        if (isset($requirements['maintenance']['hours']) && !cf_is_integer($requirements['maintenance']['hours'])) {
+          form_set_error('review][operations][requirements][maintenance][hours', t("@hours is not an valid number. Use only numbers.", array('@hours' => $requirements['maintenance']['hours'])));
+          $failure = TRUE;
+        }
+
+        if (isset($requirements['maintenance']['days']) && intval($requirements['maintenance']['days']) != $requirements['maintenance']['days']) {
+          form_set_error('review][operations][requirements][maintenance][days', t("@days is not an allowed number. Use only numbers without decimal places.", array('@days' => $requirements['maintenance']['days'])));
+          $failure = TRUE;
+        }
+      }
+
+      if (array_key_exists('grounds', $requirements) && !empty($requirements['grounds']['amount'])) {
+        $matches = array();
+        $matched = preg_match('/^(\d+|\d+\.\d|\d+\.\d\d)$/i', $requirements['grounds']['amount'], $matches);
+
+        if (!$matched) {
+          form_set_error('review][operations][requirements][grounds][amount', t("@grounds is not a valid grounds requirement amount. Use only numbers and two decimal places. Do not provide a dollar sign.", array('@grounds' => $requirements['grounds']['amount'])));
+          $failure = TRUE;
+        }
+
+        if (isset($requirements['grounds']['quantity']) && intval($requirements['grounds']['quantity']) != $requirements['grounds']['quantity']) {
+          form_set_error('review][operations][requirements][grounds][quantity', t("@quantity is not an allowed number. Use only numbers without decimal places.", array('@quantity' => $requirements['grounds']['quantity'])));
+          $failure = TRUE;
+        }
+
+        if (isset($requirements['grounds']['hours']) && !cf_is_integer($requirements['grounds']['hours'])) {
+          form_set_error('review][operations][requirements][grounds][hours', t("@hours is not an valid number. Use only numbers.", array('@hours' => $requirements['grounds']['hours'])));
+          $failure = TRUE;
+        }
+
+        if (isset($requirements['grounds']['days']) && intval($requirements['grounds']['days']) != $requirements['grounds']['days']) {
+          form_set_error('review][operations][requirements][grounds][days', t("@days is not an allowed number. Use only numbers without decimal places.", array('@days' => $requirements['grounds']['days'])));
+          $failure = TRUE;
+        }
+      }
+
       if (array_key_exists('security', $requirements) && !empty($requirements['security']['amount'])) {
         $matches = array();
         $matched = preg_match('/^(\d+|\d+\.\d|\d+\.\d\d)$/i', $requirements['security']['amount'], $matches);
@@ -2113,23 +2181,46 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
         $custodial_requirements_required = $form['form']['requirements-custodial']['#value'];
       }
 
+      $maintenance_requirements_required = FALSE;
+      if (isset($form['form']['requirements-maintenance']['#value'])) {
+        $maintenance_requirements_required = $form['form']['requirements-maintenance']['#value'];
+      }
+
+      $grounds_requirements_required = FALSE;
+      if (isset($form['form']['requirements-grounds']['#value'])) {
+        $grounds_requirements_required = $form['form']['requirements-grounds']['#value'];
+      }
+
       $security_requirements_required = FALSE;
-      if (isset($form['form']['requirements-custodial']['#value'])) {
+      if (isset($form['form']['requirements-security']['#value'])) {
         $security_requirements_required = $form['form']['requirements-security']['#value'];
       }
 
       $insurance_requirements_required = FALSE;
-      if (isset($form['form']['requirements-custodial']['#value'])) {
+      if (isset($form['form']['requirements-insurance']['#value'])) {
         $insurance_requirements_required = $form['form']['requirements-insurance']['#value'];
       }
 
-      if (!$custodial_requirements_required && !$security_requirements_required && !$insurance_requirements_required) {
+      if (!$custodial_requirements_required && !$maintenance_requirements_required && !$grounds_requirements_required && !$security_requirements_required && !$insurance_requirements_required) {
         $requirements_not_supplied = FALSE;
         $requirements_exist = FALSE;
       }
 
+      // @fixme: the logic of these functions does not seem correct. Should it be !isset(...->amount)?
       if (isset($form['review']['operations']['requirements']['custodial'])) {
         if (isset($request['requirements']['custodial'][0]->amount)) {
+          $requirements_not_supplied = FALSE;
+        }
+      }
+
+      if (isset($form['review']['operations']['requirements']['maintenance'])) {
+        if (isset($request['requirements']['maintenance'][0]->amount)) {
+          $requirements_not_supplied = FALSE;
+        }
+      }
+
+      if (isset($form['review']['operations']['requirements']['grounds'])) {
+        if (isset($request['requirements']['grounds'][0]->amount)) {
           $requirements_not_supplied = FALSE;
         }
       }
@@ -2730,6 +2821,8 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id, $revision_id 
     'facilities',
     'equipment',
     'custodial',
+    'maintenance',
+    'grounds',
     'security',
     'other',
     'waived',
@@ -2959,6 +3052,32 @@ function mfcs_build_reviews_log(&$form, &$form_state, $request_id, $revision_id 
 
         $value = reset($changelog['requirements']['custodial']);
         $value_markup = mfcs_build_request_value_structure($request_id, 'requirements', 'custodial', 0, $value, $presentation['requirements']['custodial'], $changelog);
+
+        if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
+          $message .= drupal_render($value_markup);
+        }
+        $message .= '</div>';
+      }
+
+      if (!empty($changelog['requirements']['maintenance'])) {
+        $message .= '<div class="review-item-message-requirements-maintenance review-item-message-requirements review-item-message-requirements">';
+        $message .= '<div class="item-label">Maintenance Fees:</div> ';
+
+        $value = reset($changelog['requirements']['maintenance']);
+        $value_markup = mfcs_build_request_value_structure($request_id, 'requirements', 'maintenance', 0, $value, $presentation['requirements']['maintenance'], $changelog);
+
+        if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
+          $message .= drupal_render($value_markup);
+        }
+        $message .= '</div>';
+      }
+
+      if (!empty($changelog['requirements']['grounds'])) {
+        $message .= '<div class="review-item-message-requirements-grounds review-item-message-requirements review-item-message-requirements">';
+        $message .= '<div class="item-label">Grounds Fees:</div> ';
+
+        $value = reset($changelog['requirements']['grounds']);
+        $value_markup = mfcs_build_request_value_structure($request_id, 'requirements', 'grounds', 0, $value, $presentation['requirements']['grounds'], $changelog);
 
         if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
           $message .= drupal_render($value_markup);

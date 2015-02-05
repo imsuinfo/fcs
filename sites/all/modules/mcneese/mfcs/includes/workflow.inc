@@ -449,6 +449,8 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
     'requirements_facilities' => NULL,
     'requirements_equipment' => NULL,
     'requirements_custodial' => NULL,
+    'requirements_maintenance' => NULL,
+    'requirements_grounds' => NULL,
     'requirements_security' => NULL,
     'requirements_other' => NULL,
     'requirements_waived' => NULL,
@@ -459,6 +461,8 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
     'facilities' => NULL,
     'equipment' => NULL,
     'custodial' => NULL,
+    'maintenance' => NULL,
+    'grounds' => NULL,
     'security' => NULL,
     'other' => NULL,
     'waived' => NULL,
@@ -606,6 +610,14 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
     elseif ($step == MFCS_REVIEW_STEP_REVIEW) {
       if (isset($reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_FACILITIES_CUSTODIAL]) || isset($reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_CUSTODIAL])) {
         $uses['custodial'] = 'custodial';
+      }
+
+      if (isset($reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_MAINTENANCE])) {
+        $uses['maintenance'] = 'maintenance';
+      }
+
+      if (isset($reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_FACILITIES])) {
+        $uses['grounds'] = 'grounds';
       }
 
       if (isset($reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_SECURITY])) {

@@ -165,6 +165,26 @@ function mfcs_request_agreement_0_form($form, &$form_state, $request_id, $contai
     'name' => "Custodial",
   );
 
+  $requirements['maintenance'] = array(
+    'calculate' => array(
+      'quantity' => 'quantity',
+      'hours' => 'hours',
+      'days' => 'days',
+      'amount' => 'amount',
+    ),
+    'name' => "Maintenance",
+  );
+
+  $requirements['grounds'] = array(
+    'calculate' => array(
+      'quantity' => 'quantity',
+      'hours' => 'hours',
+      'days' => 'days',
+      'amount' => 'amount',
+    ),
+    'name' => "Grounds",
+  );
+
   $requirements['security'] = array(
     'calculate' => array(
       'quantity' => 'quantity',
