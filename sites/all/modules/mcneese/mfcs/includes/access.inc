@@ -361,7 +361,7 @@ function mfcs_page_request_access_operation_view(&$request_ids, &$processed, &$a
       return TRUE;
     }
 
-    $review_access = mfcs_page_request_reviewer_access($user, $request_ids, MFCS_REVIEW_RESTRICTION_NONE);
+    $review_access = mfcs_page_request_reviewer_access($user, $request_ids, MFCS_REVIEW_RESTRICTION_VIEW);
 
     if (is_array($review_access)) {
       foreach ($request_ids as $id) {

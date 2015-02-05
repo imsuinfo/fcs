@@ -864,7 +864,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
     }
     elseif ($roles['reviewer']) {
       // due to its complexity, the database calling function for reviewer access will be used.
-      $review_access = mfcs_page_request_reviewer_access($user, $request_id, MFCS_REVIEW_RESTRICTION_NONE);
+      $review_access = mfcs_page_request_reviewer_access($user, $request_id, MFCS_REVIEW_RESTRICTION_VIEW);
 
       if (is_array($review_access) && array_key_exists($request_id, $review_access)) {
         $access[$request_id] = $review_access[$request_id];
@@ -913,18 +913,19 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
       return FALSE;
     }
 
-    // managers should always be able to comment.
+    // managers and administration should always be able to comment.
     if ($roles['manager'] || $roles['administer']) {
       $access[$request_id] = TRUE;
       return TRUE;
     }
+    elseif ($roles['reviewer']) {
+      // due to its complexity, the database calling function for reviewer access will be used.
+      $comment_access = mfcs_page_request_reviewer_access($user, $request_id, MFCS_REVIEW_RESTRICTION_COMMENT);
 
-    // due to its complexity, the database calling function for reviewer access will be used.
-    $comment_access = mfcs_page_request_reviewer_access($user, $request_id, MFCS_REVIEW_RESTRICTION_COMMENT);
-
-    if (is_array($comment_access) && array_key_exists($request_id, $comment_access)) {
-      $access[$request_id] = $comment_access[$request_id];
-      return $comment_access[$request_id];
+      if (is_array($comment_access) && array_key_exists($request_id, $comment_access)) {
+        $access[$request_id] = $comment_access[$request_id];
+        return $comment_access[$request_id];
+      }
     }
   }
   elseif ($operation == 'log') {
@@ -939,7 +940,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
     }
     elseif ($roles['reviewer']) {
       // due to its complexity, the database calling function for reviewer access will be used.
-      $log_access = mfcs_page_request_reviewer_access($user, $request_id, MFCS_REVIEW_RESTRICTION_NONE);
+      $log_access = mfcs_page_request_reviewer_access($user, $request_id, MFCS_REVIEW_RESTRICTION_VIEW);
 
       if (is_array($log_access) && array_key_exists($request_id, $log_access)) {
         $access[$request_id] = $log_access[$request_id];
@@ -1147,7 +1148,19 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
     MFCS_REVIEW_STEP_MAKE_DECISIONS,
   );
 
+  // if the reviewer is associated with the requests classification, then allow access when in these statuses.
   $show_status_reviewer = array(
+    MFCS_REQUEST_STATUS_UNLOCKED,
+    MFCS_REQUEST_STATUS_LOCKED,
+    MFCS_REQUEST_STATUS_CLOSED_ACCEPTED,
+    MFCS_REQUEST_STATUS_CLOSED_DENIED,
+    MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE,
+    MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK,
+    MFCS_REQUEST_STATUS_CANCELLED,
+  );
+
+  // if the reviewer is associated with the requests and the request is in one of these status, then the reviewer can review.
+  $show_status_reviewer_review = array(
     MFCS_REQUEST_STATUS_LOCKED,
   );
 
@@ -1179,6 +1192,8 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
     $venue_coordinator_ids = $proxies;
   }
   $venue_coordinator_ids[$user->uid] = $user->uid;
+
+  $reviewer_settings = mfcs_get_reviewer_settings_by_user_id($user->uid);
 
   try {
     $query = db_select('mfcs_requests', 'mer');
@@ -1223,7 +1238,7 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
         $already_reviewed_query->condition('mr_r.disabled', 0);
 
         $and = db_and();
-        $and->condition('mer.status', $show_status_reviewer, 'IN');
+        $and->condition('mer.status', $show_status_reviewer_review, 'IN');
         $and->condition('mer.step', $show_step_reviewer, 'IN');
         $and->condition('mer.id', $already_reviewed_query, 'NOT IN');
 
@@ -1241,7 +1256,7 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
         $or->condition($and);
 
         // special case reviewer access: insurance provided
-        if (array_key_exists(MFCS_REVIEWER_CLASSIFICATION_PURCHASING, $reviewer_settings['classifications'])) {
+        if (array_key_exists(MFCS_REVIEWER_CLASSIFICATION_PURCHASING, $reviewer_settings['request_classifications'])) {
           $has_insurance_query = db_select('mfcs_current', 'mc');
           $has_insurance_query->leftJoin('mfcs_field_insurance_contractor', 'mfic', 'mc.request_id = mfic.request_id AND mc.insurance_contractor = mfic.revision AND mfic.delta = 0');
           $has_insurance_query->leftJoin('mfcs_field_insurance_unaffiliated', 'mfiu', 'mc.request_id = mfiu.request_id AND mc.insurance_unaffiliated = mfiu.revision AND mfiu.delta = 0');
@@ -1279,13 +1294,14 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
       // always show accepted requests.
       $or->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
 
-      // process venue coordinator access.
+      // always allow venue coordinator access. to view.
       $or->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
 
-      // process review access.
-      if (!empty($reviewer_settings['steps'])) {
+      // allow reviewer access to view if they are allowed to review the request at some point.
+      if (!empty($reviewer_settings['request_classifications'])) {
         $and = db_and();
-        $and->condition('mer.step', $reviewer_settings['steps'], 'IN');
+        $and->condition('mer.classification', $reviewer_settings['request_classifications'], 'IN');
+        $and->condition('mer.status', $show_status_reviewer, 'IN');
 
         $or->condition($and);
       }
@@ -1299,36 +1315,37 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
       $or->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
 
       // allow reviewer access to comment if they are allowed to review the request at some point.
-      foreach ($reviewer_settings['for_step'] as $for_step => $step_classifications) {
-        $sub_and = db_and();
-        $sub_and->condition('mer.step', $for_step);
-        $sub_and->condition('mer.classification', $step_classifications, 'IN');
+      if (!empty($reviewer_settings['request_classifications'])) {
+        $and = db_and();
+        $and->condition('mer.classification', $reviewer_settings['request_classifications'], 'IN');
+        $and->condition('mer.status', $show_status_reviewer, 'IN');
 
-        $or->condition($sub_and);
-        unset($sub_and);
+        $or->condition($and);
       }
     }
-    else {
+    elseif ($review_restrictions == MFCS_REVIEW_RESTRICTION_NONE) {
       if (is_null($or)) {
         $or = db_or();
       }
 
       // always show completed and accepted requests when there are no restrictions.
-      $and = db_and();
-      $and->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
-      $and->condition('mer.step', MFCS_REVIEW_STEP_COMPLETED);
-      $or->condition($and);
+      $or->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
 
-      // process venue coordinator access.
+      // always allow venue coordinator access.
       $or->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
 
-      // process reviewer access.
-      if (!empty($reviewer_settings['steps'])) {
+      // allow reviewer access if they are allowed to review the request at some point.
+      if (!empty($reviewer_settings['request_classifications'])) {
         $and = db_and();
-        $and->condition('mer.status', MFCS_REQUEST_STATUS_LOCKED);
-        $and->condition('mer.step', $show_step_reviewer, 'IN');
+        $and->condition('mer.classification', $reviewer_settings['request_classifications'], 'IN');
+        $and->condition('mer.status', $show_status_reviewer, 'IN');
+
         $or->condition($and);
       }
+    }
+    else {
+      // no access should be allowed for unknown review_restrictions.
+      return $access;
     }
 
     if (!is_null($or)) {
@@ -5436,6 +5453,8 @@ function mfcs_get_user_information($user_id) {
  *   - 'steps': request steps array.
  *   - 'for_steps': array keyed by request steps containing each associated
  *                  request classification (not reviewer classification).
+ *   - 'request_classifications': classifications of requests the user is
+ *     allowed to review.
  *   FALSE is returned on error.
  */
 function mfcs_get_reviewer_settings_by_user_id($user_id, $disabled = FALSE) {
@@ -5477,11 +5496,13 @@ function mfcs_get_reviewer_settings_by_user_id($user_id, $disabled = FALSE) {
     'classifications' => array(),
     'steps' => array(),
     'for_step' => array(),
+    'request_classifications' => array(),
   );
 
   foreach ($reviewers as $reviewer) {
     $settings['classifications'][$reviewer->reviewer_classification] = $reviewer->reviewer_classification;
     $settings['steps'][$reviewer->review_step] = $reviewer->review_step;
+    $settings['request_classifications'][$reviewer->request_classification] = $reviewer->request_classification;
 
     // provides 'request classifications' (and not 'review classifications') information on a per step basis.
     if (!array_key_exists($reviewer->review_step, $settings['for_step'])) {
