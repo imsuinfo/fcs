@@ -1136,8 +1136,6 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
     $access[$id] = FALSE;
   }
 
-  $reviewer_settings = mfcs_get_reviewer_settings_by_user_id($user->uid);
-
   $show_status_venue_coordinator = array(
     MFCS_REQUEST_STATUS_LOCKED,
     MFCS_REQUEST_STATUS_UNLOCKED,
