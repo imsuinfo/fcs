@@ -891,7 +891,7 @@ function mfcs_schema() {
     'description' => $t("McNeese Facilities Use Event Roles Banner table. This is for providing local storage of a given banner event role table for individual users."),
     'fields' => array(
       'user_id' => array(
-        'banner_id' => $t("Represents the user the role is associated with."),
+        'description' => $t("Represents the user the role is associated with."),
         'type' => 'int',
         'size' => 'big',
         'unsigned' => TRUE,
@@ -976,7 +976,7 @@ function mfcs_schema() {
     'description' => $t("McNeese Facilities Use e-mail log table. Contains a record of all e-mails sent from this system through this interface."),
     'fields' => array(
       'id' => array(
-        'description' => $t("The primary key used to represent the search setting."),
+        'description' => $t("The primary key used to represent the log entry."),
         'type' => 'serial',
         'size' => 'big',
         'unsigned' => TRUE,
