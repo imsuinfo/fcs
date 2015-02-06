@@ -612,6 +612,8 @@ function mfcs_request_troubleshoot_0_mer_cache_synchronize($transaction, $user =
       );
 
       $request_revision = mfcs_load_request_revision_number($request_id);
+      $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . $instance . '_' . $user->uid . '_' . $request_id, FALSE);
+
       if ($request_revision === FALSE) {
         $transaction->rollback();
         watchdog(MFCS_WATCHDOG_ID, "Failed to load revision number for request %request_id.", array('%request_id' => $request_id), WATCHDOG_ERROR);
@@ -631,9 +633,13 @@ function mfcs_request_troubleshoot_0_mer_cache_synchronize($transaction, $user =
         $fields_revisions['signature'] = $signature;
       }
 
-      $query = db_insert('mfcs_request_revisions');
-      $query->fields($fields_revisions);
-      $query->execute();
+      if (!$processed_mfcs_request_revisions) {
+        $query = db_insert('mfcs_request_revisions');
+        $query->fields($fields_revisions);
+        $query->execute();
+
+        $processed_mfcs_request_revisions = TRUE;
+      }
     }
   }
   catch (Exception $ex) {
