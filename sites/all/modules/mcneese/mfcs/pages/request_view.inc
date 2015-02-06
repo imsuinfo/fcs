@@ -18,7 +18,7 @@
  * @param array $form_state
  *   The form state array as defined by drupals form api
  * @param int $request_id
- *   The unique identifier for an request.
+ *   The unique identifier for a request.
  * @param int $mode
  *   Specifies the mode that alters how the form is rendered.
  * @param null|int $revision_id
@@ -2518,7 +2518,7 @@ function mfcs_request_view_0_form_submit_pdf($form, &$form_state) {
  * Renders a PDF of a given request.
  *
  * @param int $request_id
- *   The unique identifier for an request.
+ *   The unique identifier for a request.
  * @param int|null $mode
  *   Specifies the mode that alters how the form is rendered.
  *   1: Render only the display part.
@@ -2625,7 +2625,7 @@ function mfcs_request_pdf_0_page($request_id, $mode, $revision_id = NULL) {
  * Renders a self-contained/printrable view of a given request.
  *
  * @param int $request_id
- *   The unique identifier for an request.
+ *   The unique identifier for a request.
  * @param int|null $mode
  *   Specifies the mode that alters how the form is rendered.
  *   1: Render only the display part.

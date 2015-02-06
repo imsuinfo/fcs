@@ -18,7 +18,7 @@
  * @param array $form_state
  *   The form state array as defined by drupals form api
  * @param int $request_id
- *   The unique identifier for an request.
+ *   The unique identifier for a request.
  *
  * @return string
  *   The HTML output representing the page.
@@ -192,7 +192,7 @@ function mfcs_request_cancel_0_form_submit($form, &$form_state) {
  * @param array $form_state
  *   The form state array as defined by drupals form api
  * @param int $request_id
- *   The unique identifier for an request.
+ *   The unique identifier for a request.
  *
  * @return string
  *   The HTML output representing the page.
