@@ -919,6 +919,19 @@ function mfcs_hook_menu() {
     'tab_root' => 'requests/email_log-0',
   );
 
+  $items['requests/troubleshoot-0'] = array(
+    'title' => "Troubleshooting",
+    'description' => "Troubleshoot problems on the system using pre-built tools.",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_troubleshoot_0_form'),
+    'file' => 'request_troubleshoot.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('troubleshoot'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
+
   return $items;
 }
 

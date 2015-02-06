@@ -256,6 +256,14 @@ define('MFCS_REVIEW_RESTRICTION_VIEW', 1);
 define('MFCS_REVIEW_RESTRICTION_REVIEW', 2);
 define('MFCS_REVIEW_RESTRICTION_COMMENT', 3);
 
+/**
+ * Defines troubleshoot codes
+ */
+define('MFCS_TROUBLESHOOT_NONE', 0);
+define('MFCS_TROUBLESHOOT_REQUESTS_REVIEW_RECHECK', 1);
+define('MFCS_TROUBLESHOOT_MER_CACHE_SYNCHRONIZE', 2);
+define('MFCS_TROUBLESHOOT_BANNER_CACHE_SYNCHRONIZE', 3);
+
 
 
 /**
@@ -661,6 +669,14 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
     }
   }
   elseif ($operation == 'proxy') {
+    if (is_null($request_id)) {
+      if ($roles['manager'] || $roles['administer']) {
+        $access[$request_id] = TRUE;
+        return TRUE;
+      }
+    }
+  }
+  elseif ($operation == 'troubleshoot') {
     if (is_null($request_id)) {
       if ($roles['manager'] || $roles['administer']) {
         $access[$request_id] = TRUE;
@@ -2427,10 +2443,25 @@ function mfcs_ensure_user_by_email($email, $roles = array()) {
 /**
  * Synchronizes the local database with the banner venue information.
  *
+ * @param object|null $transaction
+ *   (optional) If not NULL, then a transaction object created by the
+ *   caller.
+ * @param object|null $user
+ *   (optional) The user object or NULL for the current user.
+ *
  * @return bool
  *   TRUE on success, FALSE otherwise.
  */
-function mfcs_sync_banner_to_local() {
+function mfcs_sync_banner_to_local($transaction = NULL, $user = NULL) {
+  if (is_null($user)) {
+    $user = cd_current_user();
+  }
+
+  if (!is_object($user)) {
+    cf_error::invalid_object('user');
+    return FALSE;
+  }
+
   $join = ' inner join ucs.msu_venue_list mvl on (mvl.category = mvd.category and mvl.building_code = mvd.building_code and mvl.room_number = mvd.room_number)';
 
   $select = 'mvd.*';
@@ -2448,7 +2479,10 @@ function mfcs_sync_banner_to_local() {
 
   $instance = mfcs_instance();
 
-  $transaction = db_transaction();
+  if (!is_object($transaction)) {
+    $transaction = db_transaction();
+  }
+
   try {
     // disable all locations, buildings, and rooms such that the ones that are not added back will be disabled.
     $query = db_update('mfcs_banner_locations');
@@ -8588,6 +8622,55 @@ function mfcs_request_is_still_upcoming($request_id) {
   catch (Exception $ex) {
     cf_error::on_exception($ex);
     return FALSE;
+  }
+
+  return FALSE;
+}
+
+/**
+ * Sign the message us GNU PG.
+ *
+ * @param string $message
+ *   A string to sign.
+ * @param $content_type
+ *   (optional) The content type to use, such as: 'multipart/mixed'.
+ *
+ * @param string|false
+ *   Signature string on success, FALSE otherwise.
+ */
+function mfcs_gpg_sign($message) {
+  global $conf;
+
+  if (empty($conf['fcs_email']) || empty($message)) {
+    return FALSE;
+  }
+
+  if (!class_exists('gnupg') || !isset($conf['gpg-mail'][$conf['fcs_email']]['fingerprint'])) {
+    return FALSE;
+  }
+
+  if (!is_string($conf['gpg-mail'][$conf['fcs_email']]['fingerprint'])) {
+    return FALSE;
+  }
+
+  $gpg = new gnupg();
+  if (!is_object($gpg)) {
+    return FALSE;
+  }
+
+  try {
+    $fingerprint = $conf['gpg-mail'][$conf['fcs_email']]['fingerprint'];
+
+    $gpg->seterrormode(gnupg::ERROR_EXCEPTION);
+    $gpg->addsignkey($fingerprint);
+    $gpg->setsignmode(gnupg::SIG_MODE_DETACH);
+    $gpg->setarmor(1);
+
+    return $gpg->sign($message);
+    #$valid = $gpg->verify($message, $signature);
+  }
+  catch (Exception $ex) {
+    watchdog(MFCS_WATCHDOG_ID, "Failed to sign PGP key: @key, reason: @reason", array('@key' => $fingerprint, '@reason' => $ex->getMessage()), WATCHDOG_ERROR);
   }
 
   return FALSE;

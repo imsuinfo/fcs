@@ -1025,6 +1025,47 @@ function mfcs_schema() {
     'primary key' => array('id'),
   );
 
+  $schema['mfcs_log_troubleshoot'] = array(
+    'description' => $t("McNeese Facilities Use troubleshoot log table. Contains a record of all troubleshoot actions performed."),
+    'fields' => array(
+      'id' => array(
+        'description' => $t("The primary key used to represent the log entry."),
+        'type' => 'serial',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'code' => array(
+        'description' => $t("This is the troubleshoot code id."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'user_id' => array(
+        'description' => $t("This is the system id. Represents the user associated with the log entry."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'date' => array(
+        'description' => $t("Represents the date the action was performed."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('id'),
+    'foreign keys' => array(
+      'user_id' => array(
+        'table' => 'users',
+        'columns' => array('user_id' => 'uid'),
+      ),
+    ),
+  );
+
 
   // create the mapping table that maps the latest request.
   // to greatly reduce the number of joins, all current field revisions are merged into a single table.
@@ -1404,6 +1445,8 @@ function mfcs_install() {
 
   db_query('ALTER TABLE {mfcs_review_classifications} ADD CONSTRAINT review_fkey FOREIGN KEY (review_id) REFERENCES {mfcs_field_review_review} (id) ON DELETE CASCADE');
 
+  db_query('ALTER TABLE {mfcs_log_troubleshoot} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
+
   foreach ($structure as $structure_name => &$structure_array) {
     foreach ($structure_array as $field_name => &$field_type) {
       $field_table1_name = 'mfcs_field_' . $structure_name . '_' . $field_name;
@@ -1490,6 +1533,7 @@ function mfcs_uninstall() {
   db_query('ALTER TABLE {mfcs_request_reminders} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
   db_query('ALTER TABLE {mfcs_review_classifications} DROP CONSTRAINT IF EXISTS ' . $keyR_foreign);
   db_query('ALTER TABLE {mfcs_field_review_review} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
+  db_query('ALTER TABLE {mfcs_log_troubleshoot} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
 
   foreach ($structure as $structure_name => &$structure_array) {
     foreach ($structure_array as $field_name => &$field_type) {
