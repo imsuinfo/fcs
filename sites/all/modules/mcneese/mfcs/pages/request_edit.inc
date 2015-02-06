@@ -713,6 +713,16 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
           'value' => MFCS_REVIEW_STEP_VENUE_AVAILABLE,
         );
 
+        $mfcs_requests = array(
+          'step' => MFCS_REVIEW_STEP_VENUE_AVAILABLE,
+          'updated' => $instance,
+        );
+
+        $query = db_update('mfcs_requests');
+        $query->fields($mfcs_requests);
+        $query->condition('id', $request_id);
+        $query->execute();
+
         $query = db_insert('mfcs_field_top_step');
         $query->fields($mfcs_field_top_step);
         $query->execute();
