@@ -2020,6 +2020,114 @@ function mfcs_load_request_user_role_mapping() {
 }
 
 /**
+ * Returns user's basic information.
+ *
+ * This is different from user_load in that it loads a small set of fields.
+ * This includes some hardcoded fields that are expected to be created via
+ * the drupal field api frontend.
+ *
+ * Information loaded is:
+ * - 'user_id': the users id.
+ * - 'name': user's system/login name.
+ * - 'email': user's e-mail address.
+ * - 'status': user's enabled/disabled status.
+ * - 'first_name': user's first name (custom field).
+ * - 'last_name': user's last name (custom field).
+ * - 'banner_id': user's banner id (custom field).
+ *
+ * @param integer $user_id
+ *   The user id number uniquely representing some user.
+ *
+ * @return array|bool
+ *   An array containing the user information.
+ *   FALSE is returned on error.
+ */
+function mfcs_load_basic_user_settings_by_user_id($user_id) {
+  if (!cf_is_integer($user_id)) {
+    cf_error::invalid_integer('user_id');
+
+    return FALSE;
+  }
+
+  $cache_id = __function__;
+  $user = &drupal_static($cache_id, NULL);
+  if (isset($user[$user_id]) && is_array($user[$user_id])) {
+    return $user[$user_id];
+  }
+
+  $user[$user_id] = NULL;
+
+  try {
+    $query = db_select('users', 'u');
+    $query->leftJoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id AND fdfufn.delta = 0');
+    $query->leftJoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id AND fdfuln.delta = 0');
+    $query->leftJoin('field_data_field_user_banner_id', 'fdfubi', 'u.uid = fdfubi.entity_id AND fdfubi.delta = 0');
+
+    $query->addField('u', 'name', 'name');
+    $query->addField('u', 'mail', 'email');
+    $query->addField('u', 'status', 'status');
+
+    $query->addField('fdfufn', 'field_user_first_name_value', 'first_name');
+    $query->addField('fdfuln', 'field_user_last_name_value', 'last_name');
+    $query->addField('fdfubi', 'field_user_banner_id_value', 'banner_id');
+
+    $query->condition('u.uid', $user_id);
+
+    $query->range(0, 1);
+
+    $rows = $query->execute()->fetchAll();
+
+    if (!empty($rows) && is_array($rows)) {
+      $user[$user_id] = array(
+        'user_id' => $user_id,
+        'name' => '',
+        'email' => '',
+        'status' => '',
+        'first_name' => '',
+        'last_name' => '',
+        'banner_id' => '',
+      );
+
+      foreach ($rows as $row) {
+        if (property_exists($row, 'name') && !is_null($row->name)) {
+          $user[$user_id]['name'] = $row->name;
+        }
+
+        if (property_exists($row, 'email') && !is_null($row->email)) {
+          $user[$user_id]['email'] = $row->email;
+        }
+
+        if (property_exists($row, 'status') && !is_null($row->status)) {
+          $user[$user_id]['status'] = $row->status;
+        }
+
+        if (property_exists($row, 'first_name') && !is_null($row->first_name)) {
+          $user[$user_id]['first_name'] = $row->first_name;
+        }
+
+        if (property_exists($row, 'last_name') && !is_null($row->last_name)) {
+          $user[$user_id]['last_name'] = $row->last_name;
+        }
+
+        if (property_exists($row, 'banner_id') && !is_null($row->banner_id)) {
+          $user[$user_id]['banner_id'] = $row->banner_id;
+        }
+
+        break;
+      }
+    }
+  } catch (Exception $ex) {
+    cf_error::on_exception($ex);
+
+    return FALSE;
+  }
+
+  if (is_null($user[$user_id])) return FALSE;
+
+  return $user[$user_id];
+}
+
+/**
  * Returns user's information.
  *
  * This is different from user_load in that this loads user banner information.
@@ -7862,6 +7970,7 @@ function mfcs_get_requests_current_review_decisions($request_ids, $classificatio
   unset($reviewers_returned);
 
   $required_reviewers_classifications = array();
+  $reviewers_by_classification = array();
   foreach ($reviewers as $reviewer) {
     if (!array_key_exists($reviewer->reviewer_classification, $required_reviewers_classifications)) {
       // never count venue coordinator or the proxy reviewer classifications.
@@ -7870,6 +7979,10 @@ function mfcs_get_requests_current_review_decisions($request_ids, $classificatio
       }
 
       $required_reviewers_classifications[$reviewer->reviewer_classification] = $reviewer_classification_options[$reviewer->reviewer_classification];
+
+      if (!isset($reviewers_by_classification[$reviewer->reviewer_classification][$reviewer->user_id])) {
+        $reviewers_by_classification[$reviewer->reviewer_classification][$reviewer->user_id] = $reviewer->user_id;
+      }
     }
   }
 
@@ -7898,6 +8011,7 @@ function mfcs_get_requests_current_review_decisions($request_ids, $classificatio
       'total' => $total_required,
       'completed' => array(),
       'needed' => $required_reviewers_classifications,
+      'reviewers' => $reviewers_by_classification,
     );
 
     try {
@@ -7909,6 +8023,7 @@ function mfcs_get_requests_current_review_decisions($request_ids, $classificatio
       $query->innerJoin('mfcs_review_classifications', 'mrc', 'mfrr.id = mrc.review_id');
 
       $query->addField('mrc', 'classification', 'classification');
+      $query->addField('mfrr', 'user_id', 'user_id');
 
       $query->condition('mfrr.request_id', $request_id);
       if (!is_null($review_revision)) {

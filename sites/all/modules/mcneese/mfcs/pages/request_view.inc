@@ -881,15 +881,49 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         }
 
         if (!empty($yet_to_review)) {
-          $yet_to_review_markup .= '<div id="request-' . $request_id . '-section-review-log-yet_to_review" class="request-section-review-log-yet_to_review">';
-          $yet_to_review_markup .= '<div class="request-section-review-log-yet_to_review-label">Reviewer classifications that have not yet reviewed:</div>';
-          $yet_to_review_markup .= '<ul class="request-section-review-log-yet_to_review-list">';
+          $module_path = drupal_get_path('module', 'mfcs');
+          drupal_add_js($module_path . '/js/request_view-reviewers.js', array('type' => 'file', 'group' => JS_DEFAULT, 'preprocess' => TRUE));
+
+          $yet_to_review_markup .= '<div id="request-' . $request_id . '-section-review-log-yet_to_review" class="request-section-review-log-yet_to_review">' . "\n";
+          $yet_to_review_markup .= '<div class="yet_to_review-label">Reviewer classifications that have not yet reviewed:</div>' . "\n";
+          $yet_to_review_markup .= '<ul class="yet_to_review-list">' . "\n";
 
           foreach ($yet_to_review as $classification_id => $classification_name) {
-            $yet_to_review_markup .= '<li class="request-section-review-log-yet_to_review-list_item">' . $classification_name . '</li>';
+            $yet_to_review_markup .= '<li class="yet_to_review-list_item">' . "\n";
+            $yet_to_review_markup .= $classification_name . "\n";
+
+            // create a javascript based users list to easily display the users associated with the given classification.
+            $yet_to_review_markup .= '<div class="details_list inline" title="View list of users associated with this reviewer classification.">' . "\n";
+            $yet_to_review_markup .= '<span class="no-script-hidden no-print details_list-label label-' . $classification_id . '">(<span class="details_list-link link-' . $classification_id . ' inline fake_link">Details</span>)</span>';
+            $yet_to_review_markup .= '<ul class="script-hidden details_list-item item-' . $classification_id . '">' . "\n";
+            if (!empty($decisions[$request_id]['reviewers'][$classification_id])) {
+              foreach ($decisions[$request_id]['reviewers'][$classification_id] as $user_id) {
+                $basic_user_settings = mfcs_load_basic_user_settings_by_user_id($user_id);
+                if ($basic_user_settings === FALSE) {
+                  continue;
+                }
+
+                $yet_to_review_markup .= '<li class="details_list-user">' . "\n";
+                if (empty($basic_user_settings['first_name']) || empty($basic_user_settings['last_name'])) {
+                  $yet_to_review_markup .= '<span class="details_list-user_name">' . $basic_user_settings['name'] . '</span>' . "\n";
+                }
+                else {
+                  $yet_to_review_markup .= '<span class="details_list-user_name">' . "\n";
+                  $yet_to_review_markup .= $basic_user_settings['first_name'] . ' ' . $basic_user_settings['last_name'] . "\n";
+                  $yet_to_review_markup .= '</span>' . "\n";
+                }
+                $yet_to_review_markup .= '<span class="details_list-user_id">(id: ' . $user_id . ')</span>' . "\n";
+                $yet_to_review_markup .= '</li>' . "\n";
+              }
+            }
+
+            $yet_to_review_markup .= '</ul>' . "\n";
+            $yet_to_review_markup .= '</div>' . "\n";
+            $yet_to_review_markup .= '</li>' . "\n";
           }
 
-          $yet_to_review_markup .= '</ul>';
+          $yet_to_review_markup .= '</ul>' . "\n";
+          $yet_to_review_markup .= '</div>' . "\n";
         }
       }
 
@@ -899,8 +933,8 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
       );
 
       $form['review']['log']['history'] = array(
-        '#prefix' => '<div id="request-' . $request_id . '-section-review-log-history" class="request-section-review-log-history mode-' . $mode . '">',
-        '#suffix' => '</div>',
+        '#prefix' => '<div id="request-' . $request_id . '-section-review-log-history" class="request-section-review-log-history mode-' . $mode . '">' . "\n",
+        '#suffix' => '</div>' . "\n",
         '#weight' => 3,
       );
 

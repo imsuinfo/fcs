@@ -35,6 +35,7 @@ files[] = includes/testing.inc
 files[] = js/image-locations.js
 files[] = js/printing-fieldsets.js
 files[] = js/calendar-day-zindex.js
+files[] = js/request_view-reviewers.js
 files[] = pages/dashboard.inc
 files[] = pages/management.inc
 files[] = pages/request_agreement.inc
