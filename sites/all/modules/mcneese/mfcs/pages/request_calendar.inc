@@ -35,6 +35,35 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
     drupal_exit();
   }
 
+  if (!is_null($month) && !is_string($month)) {
+    cf_error::invalid_string('month');
+
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  $valid_month_names = array(
+    'january',
+    'februrary',
+    'march',
+    'april',
+    'may',
+    'june',
+    'july',
+    'august',
+    'september',
+    'october',
+    'november',
+    'december',
+  );
+
+  if (!in_array(strtolower($month), $valid_month_names)) {
+    cf_error::invalid_variable('month', "Must be a valid month name.");
+
+    drupal_not_found();
+    drupal_exit();
+  }
+
 
   global $base_path;
   global $mfcs_determined;
@@ -259,8 +288,51 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
     drupal_exit();
   }
 
+  if (!is_null($month) && !is_string($month)) {
+    cf_error::invalid_string('month');
+
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  if (!is_null($day) && !cf_is_integer($day)) {
+    cf_error::invalid_integer('day');
+
+    drupal_not_found();
+    drupal_exit();
+  }
+
   if (!cf_is_integer($page_number) || $page_number < 0) {
     $page_number = 0;
+  }
+
+  $valid_month_names = array(
+    'january',
+    'februrary',
+    'march',
+    'april',
+    'may',
+    'june',
+    'july',
+    'august',
+    'september',
+    'october',
+    'november',
+    'december',
+  );
+
+  if (!in_array(strtolower($month), $valid_month_names)) {
+    cf_error::invalid_variable('month', "Must be a valid month name.");
+
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  if (!is_null($day) && ($day < 1 || $day > 31)) {
+    cf_error::invalid_variable('month', "Must be a valid day number.");
+
+    drupal_not_found();
+    drupal_exit();
   }
 
   global $base_path;
