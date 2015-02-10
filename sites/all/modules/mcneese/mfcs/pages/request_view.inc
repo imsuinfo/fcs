@@ -866,19 +866,31 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         '#weight' => 1,
       );
 
-      $reviewers_yet_to_review = mfcs_get_reviewers_yet_to_review($request_id);
+      $decisions = mfcs_get_requests_current_review_decisions(array($request_id => NULL), $request['request_coordinator']['classification'][0]->value, $request['top']['step'][0]->value);
 
       $yet_to_review_markup = '';
-      if (!empty($reviewers_yet_to_review)) {
-        $yet_to_review_markup .= '<div id="request-' . $request_id . '-section-review-log-yet_to_review" class="request-section-review-log-yet_to_review">';
-        $yet_to_review_markup .= '<div class="request-section-review-log-yet_to_review-label">Reviewer classifications that have not yet reviewed:</div>';
-        $yet_to_review_markup .= '<ul class="request-section-review-log-yet_to_review-list">';
+      if (!empty($decisions[$request_id]) && is_array($decisions[$request_id])) {
+        // preprocess and generate a list of reviewer classifications that have not yet reviewed.
+        $yet_to_review = array();
+        foreach ($decisions[$request_id]['needed'] as $classification_id => $classification_name) {
+          if (array_key_exists($classification_id, $decisions[$request_id]['completed'])) {
+            continue;
+          }
 
-        foreach ($reviewers_yet_to_review as $yet_to_review_classification) {
-          $yet_to_review_markup .= '<li class="request-section-review-log-yet_to_review-list_item">' . $yet_to_review_classification . '</li>';
+          $yet_to_review[$classification_id] = $classification_name;
         }
 
-        $yet_to_review_markup .= '</ul>';
+        if (!empty($yet_to_review)) {
+          $yet_to_review_markup .= '<div id="request-' . $request_id . '-section-review-log-yet_to_review" class="request-section-review-log-yet_to_review">';
+          $yet_to_review_markup .= '<div class="request-section-review-log-yet_to_review-label">Reviewer classifications that have not yet reviewed:</div>';
+          $yet_to_review_markup .= '<ul class="request-section-review-log-yet_to_review-list">';
+
+          foreach ($yet_to_review as $classification_id => $classification_name) {
+            $yet_to_review_markup .= '<li class="request-section-review-log-yet_to_review-list_item">' . $classification_name . '</li>';
+          }
+
+          $yet_to_review_markup .= '</ul>';
+        }
       }
 
       $form['review']['log']['yet_to_review'] = array(

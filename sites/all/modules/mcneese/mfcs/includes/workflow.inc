@@ -1022,18 +1022,18 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
 
   // continue to next step only if at least 1 of each reviewer classification has submitted a reply.
   if ($step == MFCS_REVIEW_STEP_REVIEW || $step == MFCS_REVIEW_STEP_REQUIREMENTS) {
-    $checked = mfcs_check_if_requests_are_fully_reviewed(array($request_id => $review_revision), $classification, $step);
+    $decisions = mfcs_get_requests_current_review_decisions(array($request_id => $review_revision), $classification, $step);
 
-    if (is_bool($checked)) {
-      return $checked;
+    if (is_bool($decisions)) {
+      return $decisions;
     }
 
-    if (!array_key_exists($request_id, $checked)) {
+    if (!array_key_exists($request_id, $decisions)) {
       return FALSE;
     }
 
     // When FALSE, then there are not enough reviews to continue.
-    if ($checked[$request_id] === FALSE) {
+    if ($decisions[$request_id]['current'] < $decisions[$request_id]['total']) {
       return TRUE;
     }
   }
@@ -2172,116 +2172,6 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
   }
 
   return TRUE;
-}
-
-/**
- * Check whether to at least 1 of each reviewer classification has reviewed.
- *
- * @param array $request_ids
- *   An array of request ids to check.
- *   The array should be keyed by request id with a value of the request the
- *   revision.
- * @param int $classification
- *   The requests current classification.
- * @param int $step
- *   The requests current step.
- *
- * @param array|bool.
- *   The array is be keyed by request id and the value is a boolean designating
- *   whether the request is fully reviewed or not.
- *   TRUE is returned when there are no requests to validate (when requests_ids
- *   is NULL).
- *   FALSE is returned on error.
- */
-function mfcs_check_if_requests_are_fully_reviewed($request_ids, $classification, $step) {
-  if (!is_array($request_ids) || empty($request_ids)) {
-    cf_error::invalid_array('request_ids');
-    return FALSE;
-  }
-
-  if (!cf_is_integer($classification)) {
-    cf_error::invalid_integer('classification');
-    return FALSE;
-  }
-
-  if (!cf_is_integer($step)) {
-    cf_error::invalid_integer('step');
-    return FALSE;
-  }
-
-  // do not operate on steps that cannot be normally reviewed.
-  if ($step != MFCS_REVIEW_STEP_REVIEW && $step != MFCS_REVIEW_STEP_REQUIREMENTS) {
-    return FALSE;
-  }
-
-  $reviewers_returned = mfcs_get_reviewers(array('mr.request_classification' => $classification, 'mr.review_step' => $step, 'mr.disabled' => 0));
-  $reviewers = array();
-  if (isset($reviewers_returned['results']) && is_array($reviewers_returned['results'])) {
-    $reviewers = $reviewers_returned['results'];
-  }
-  unset($reviewers_returned);
-
-  $required_reviews = 0;
-  $reviewers_steps_by_classification = array();
-  foreach ($reviewers as $reviewer) {
-    if (!array_key_exists($reviewer->reviewer_classification, $reviewers_steps_by_classification)) {
-      if ($reviewer->reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR) {
-        continue;
-      }
-
-      $reviewers_steps_by_classification[$reviewer->reviewer_classification] = $reviewer->reviewer_classification;
-    }
-  }
-  $required_reviews = count($reviewers_steps_by_classification);
-
-  $review_decisions = array(
-    MFCS_REVIEW_DECISION_DENY,
-    MFCS_REVIEW_DECISION_APPROVE,
-  );
-
-  $checked = array();
-  foreach ($request_ids as $request_id => $request_revision) {
-    if (array_key_exists($request_id, $checked)) {
-      continue;
-    }
-
-    $checked[$request_id] = FALSE;
-
-    $total_reviews = 0;
-    try {
-      $query = db_select('mfcs_field_review_review', 'mfrr');
-      $query->innerJoin('mfcs_review_classifications', 'mrc', 'mfrr.id = mrc.review_id');
-
-      $query->addField('mrc', 'classification', 'classification');
-
-      $query->condition('mfrr.request_id', $request_id);
-      $query->condition('mfrr.revision', $request_revision);
-      $query->condition('mfrr.decision', $review_decisions, 'IN');
-
-      $query->condition('mrc.classification', $reviewers_steps_by_classification, 'IN');
-      $query->distinct();
-
-      $reviews = $query->execute()->fetchAll();
-      if ($reviews === FALSE) {
-        watchdog(MFCS_WATCHDOG_ID, "Failed to load reviewer classification count for request %request_id (revision: %request_revision) with classification %classification on step %step. Assuming total is 0.", array('%request_id' => $request_id, '%request_revision' => $request_revision, '%classification' => $classification, '%step' => $step), WATCHDOG_ERROR);
-        $total_reviews = 0;
-      }
-      else {
-        $total_reviews = count($reviews);
-      }
-    }
-    catch (Exception $ex) {
-      cf_error::on_query_execution($ex);
-
-      return FALSE;
-    }
-
-    if ($total_reviews >= $required_reviews) {
-      $checked[$request_id] = TRUE;
-    }
-  }
-
-  return $checked;
 }
 
 /**

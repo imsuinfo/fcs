@@ -699,12 +699,12 @@ function mfcs_request_reviewers_0_form_submit($form, &$form_state) {
       $failure = TRUE;
     }
 
-    $checked = FALSE;
+    $decisions = FALSE;
     if (!$failure) {
-      $checked = mfcs_check_if_requests_are_fully_reviewed($request_ids, $classification, $step);
+      $decisions = mfcs_get_requests_current_review_decisions($request_ids, $classification, $step);
     }
 
-    if ($checked === FALSE) {
+    if ($decisions === FALSE) {
       form_set_error('form', "An error occurred while trying to recheck the requests. Please contact the support staff.");
       watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to recheck the requests.", array(), WATCHDOG_ERROR);
 
@@ -714,9 +714,9 @@ function mfcs_request_reviewers_0_form_submit($form, &$form_state) {
       return FALSE;
     }
 
-    if (is_array($checked)) {
-      foreach ($checked as $request_id => $check) {
-        if ($check === FALSE) {
+    if (is_array($decisions)) {
+      foreach ($decisions as $request_id => $decision) {
+        if ($decision['current'] < $decision['total']) {
           continue;
         }
 

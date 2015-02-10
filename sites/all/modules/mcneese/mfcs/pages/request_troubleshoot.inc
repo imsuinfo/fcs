@@ -360,9 +360,9 @@ function mfcs_request_troubleshoot_0_request_review_recheck($transaction, $user 
           continue;
         }
 
-        $checked = mfcs_check_if_requests_are_fully_reviewed($request_ids, $classification, $step);
+        $decisions = mfcs_get_requests_current_review_decisions($request_ids, $classification, $step);
 
-        if ($checked === FALSE) {
+        if ($decisions === FALSE) {
           $transaction->rollback();
 
           form_set_error('form', "An error occurred while trying to recheck the requests. Please contact the support staff.");
@@ -371,9 +371,9 @@ function mfcs_request_troubleshoot_0_request_review_recheck($transaction, $user 
           return FALSE;
         }
 
-        if (is_array($checked)) {
-          foreach ($checked as $request_id => $check) {
-            if ($check === FALSE) {
+        if (is_array($decisions)) {
+          foreach ($decisions as $request_id => $decision) {
+            if ($decision['current'] < $decision['total']) {
               continue;
             }
 

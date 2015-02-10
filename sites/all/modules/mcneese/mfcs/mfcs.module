@@ -7812,91 +7812,133 @@ function mfcs_request_get_available_venue_coordinators() {
 }
 
 /**
- * Loads a list of reviewers who have yet to review the given request.
+ * Gets the current review decisions and the total for the given requests.
  *
- * This only applies to the current active review state.
+ * @param array $request_ids
+ *   An array of request ids to check.
+ *   The array should be keyed by request id with a value being defined as the
+ *   revision number. The value may also be NULL, in which case the current
+ *   revision is used.
+ * @param int $classification
+ *   The requests current classification.
+ * @param int $step
+ *   The requests current step.
  *
- * @param int $request_id
- *   The request id of the request to operate on.
- *
- * @return array|bool
- *   An array of reviewers, with their reviewer classifications, who have not
- *   yet reviewed the given request. FALSE is returned on error.
+ * @param array|bool.
+ *   The array is be keyed by request id and the value is an array:
+ *   'current': an array of reviews
+ *   FALSE is returned on error.
  */
-function mfcs_get_reviewers_yet_to_review($request_id) {
-  $request = mfcs_load_request_by_id($request_id);
-
-  if (empty($request)) {
+function mfcs_get_requests_current_review_decisions($request_ids, $classification, $step) {
+  if (!is_array($request_ids) || empty($request_ids)) {
+    cf_error::invalid_array('request_ids');
     return FALSE;
   }
 
-  $conditions = array(
-    'mr.request_classification' => $request['request_coordinator']['classification'][0]->value,
-    'mr.review_step' => $request['top']['step'][0]->value,
-    'mr.disabled' => 0,
-  );
-
-  $reviewers_returned = mfcs_get_reviewers($conditions);
-  $reviewers = array();
-  if (isset($reviewers_returned['results']) && is_array($reviewers_returned['results'])) {
-    $reviewers = $reviewers_returned['results'];
+  if (!cf_is_integer($classification)) {
+    cf_error::invalid_integer('classification');
+    return FALSE;
   }
-  unset($reviewers_returned);
 
-  if (empty($reviewers)) {
-    return array();
+  if (!cf_is_integer($step)) {
+    cf_error::invalid_integer('step');
+    return FALSE;
+  }
+
+  // do not operate on steps that cannot be normally reviewed.
+  if ($step != MFCS_REVIEW_STEP_REVIEW && $step != MFCS_REVIEW_STEP_REQUIREMENTS) {
+    return FALSE;
   }
 
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
   $reviewer_classification_options = mfcs_get_reviewer_classification_list_options();
 
-  $review_classifications = array();
-  $reviewer_ids = array();
-  $yet_to_review = array();
+  $reviewers_returned = mfcs_get_reviewers(array('mr.request_classification' => $classification, 'mr.review_step' => $step, 'mr.disabled' => 0));
+  $reviewers = array();
+  if (isset($reviewers_returned['results']) && is_array($reviewers_returned['results'])) {
+    $reviewers = $reviewers_returned['results'];
+  }
+  unset($reviewers_returned);
 
+  $required_reviewers_classifications = array();
   foreach ($reviewers as $reviewer) {
-    if (!isset($review_classifications[$reviewer->user_id])) {
-      $review_classifications[$reviewer->user_id] = array();
+    if (!array_key_exists($reviewer->reviewer_classification, $required_reviewers_classifications)) {
+      // never count venue coordinator or the proxy reviewer classifications.
+      if ($reviewer->reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR || $reviewer->reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY) {
+        continue;
+      }
+
+      $required_reviewers_classifications[$reviewer->reviewer_classification] = $reviewer_classification_options[$reviewer->reviewer_classification];
+    }
+  }
+
+  $total_required = count($required_reviewers_classifications);
+  $required_reviewers_classifications_ids = array_keys($required_reviewers_classifications);
+
+  $review_decisions = array(
+    MFCS_REVIEW_DECISION_DENY,
+    MFCS_REVIEW_DECISION_APPROVE,
+  );
+
+  $decisions = array();
+  foreach ($request_ids as $request_id => $review_revision) {
+    if (array_key_exists($request_id, $decisions)) {
+      continue;
     }
 
-    $review_classifications[$reviewer->user_id][$reviewer->reviewer_classification] = $reviewer->reviewer_classification;
-    $reviewer_ids[$reviewer->user_id] = $reviewer->user_id;
-    $yet_to_review[$reviewer->reviewer_classification] = $reviewer_classification_options[$reviewer->reviewer_classification];
-  }
-  unset($reviewers);
+    // require a valid integer be used for the revision number.
+    if (!is_null($review_revision) && (!cf_is_integer($review_revision) || $review_revision < 0)) {
+      watchdog(MFCS_WATCHDOG_ID, "Failed to load reviewer classification count for request %request_id (revision: %review_revision) does not have a valid revision number (and is not NULL).", array('%request_id' => $request_id, '%review_revision' => $review_revision), WATCHDOG_ERROR);
+      continue;
+    }
 
-  try {
-    $query = db_select('mfcs_field_review_review', 'mfrr');
-    $query->innerJoin('mfcs_current', 'mc', 'mfrr.request_id = mc.request_id and mfrr.revision = mc.review_review');
+    $decisions[$request_id] = array(
+      'current' => 0,
+      'total' => $total_required,
+      'completed' => array(),
+      'needed' => $required_reviewers_classifications,
+    );
 
-    $query->addField('mfrr', 'user_id', 'user_id');
+    try {
+      $query = db_select('mfcs_field_review_review', 'mfrr');
 
-    $query->condition('mfrr.request_id', $request_id);
-    $query->condition('mfrr.step', $request['top']['step'][0]->value);
-    $query->condition('mfrr.user_id', $reviewer_ids, 'IN');
-    $query->condition('mfrr.decision', array(MFCS_REVIEW_DECISION_APPROVE, MFCS_REVIEW_DECISION_DENY), 'IN');
-    $query->distinct();
+      if (is_null($review_revision)) {
+        $query->innerJoin('mfcs_current', 'mc', 'mfrr.request_id = mc.request_id and mfrr.revision = mc.review_review');
+      }
+      $query->innerJoin('mfcs_review_classifications', 'mrc', 'mfrr.id = mrc.review_id');
 
-    $results = $query->execute()->fetchAll();
+      $query->addField('mrc', 'classification', 'classification');
 
-    if (!empty($results)) {
-      foreach ($results as $result) {
-        if (array_key_exists($result->user_id, $review_classifications)) {
-          foreach ($review_classifications[$result->user_id] as $review_classification) {
-            unset($yet_to_review[$review_classification]);
-          }
+      $query->condition('mfrr.request_id', $request_id);
+      if (!is_null($review_revision)) {
+        $query->condition('mfrr.revision', $review_revision);
+      }
+      $query->condition('mfrr.decision', $review_decisions, 'IN');
+      $query->condition('mrc.classification', $required_reviewers_classifications_ids, 'IN');
+      $query->distinct();
+
+      $reviews = $query->execute()->fetchAll();
+
+      if ($reviews === FALSE) {
+        watchdog(MFCS_WATCHDOG_ID, "Failed to load reviewer classification count for request %request_id (review revision: %review_revision) with classification %classification on step %step. Assuming current reviewed is 0.", array('%request_id' => $request_id, '%review_revision' => (is_null($review_revision) ? 'NULL' : $review_revision), '%classification' => $classification, '%step' => $step), WATCHDOG_ERROR);
+      }
+      else {
+        foreach ($reviews as $review) {
+          $decisions[$request_id]['completed'][$review->classification] = $reviewer_classification_options[$review->classification];
         }
+
+        $decisions[$request_id]['current'] = count($decisions[$request_id]['completed']);
       }
     }
-  }
-  catch (Exception $ex) {
-    cf_error::on_query_execution($ex);
+    catch (Exception $ex) {
+      cf_error::on_query_execution($ex);
 
-    return FALSE;
+      return FALSE;
+    }
   }
 
-  return $yet_to_review;
+  return $decisions;
 }
 
 /**
