@@ -4181,7 +4181,7 @@ function mfcs_convert_value_from_database_format($value, $method, $option = arra
  *   request to return.
  */
 function mfcs_load_request_by_id($request_id, $reset_action = NULL, $revision_id = NULL) {
-  if (!cf_is_integer($request_id)) {
+  if (!cf_is_integer($request_id) || $request_id < 0) {
     if (!($reset_action === FALSE && is_null($request_id))) {
       cf_error::invalid_integer('request_id');
       return FALSE;
@@ -4193,7 +4193,7 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL, $revision_id
     return FALSE;
   }
 
-  if (!is_null($revision_id) && !cf_is_integer($revision_id)) {
+  if (!is_null($revision_id) && (!cf_is_integer($revision_id) || $revision_id < 0)) {
     cf_error::invalid_integer('revision_id');
     return FALSE;
   }
@@ -4419,7 +4419,7 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL, $revision_id
  * @see mfcs_table_structure()
  */
 function mfcs_load_request_by_timestamp($request_id, $timestamp, $revision_user_id, $desired_fields = array()) {
-  if (!cf_is_integer($request_id)) {
+  if (!cf_is_integer($request_id) || $request_id < 0) {
     cf_error::invalid_integer('request_id');
     return FALSE;
   }

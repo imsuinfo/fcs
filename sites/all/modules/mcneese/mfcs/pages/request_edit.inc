@@ -32,8 +32,8 @@ function mfcs_request_edit_0_form($form, &$form_state, $request_id, $target_sect
     return '';
   }
 
-  if (!cf_is_integer($request_id)) {
-    cf_error::invalid_integer('request_id');
+  if (!is_null($target_section) && !is_string($target_section)) {
+    cf_error::invalid_string('target_section');
     drupal_not_found();
     drupal_exit();
   }

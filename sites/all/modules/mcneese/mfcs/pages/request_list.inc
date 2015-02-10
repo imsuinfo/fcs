@@ -26,7 +26,7 @@
  *   An array containing the generated form.
  */
 function mfcs_request_list_0_form($form, &$form_state, $page_number = 0) {
-  if (!cf_is_integer($page_number)) {
+  if (!cf_is_integer($page_number) || $page_number < 0) {
     // because this is a url argument passed as a variable, just force a 0 for invalid paths.
     $page_number = 0;
   }

@@ -35,12 +35,6 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     $mode = MFCS_VIEW_MODE_NORMAL;
   }
 
-  if (!is_null($revision_id) && !cf_is_integer($revision_id)) {
-    cf_error::invalid_integer('revision_id');
-    drupal_not_found();
-    drupal_exit();
-  }
-
   $request = mfcs_load_request_by_id($request_id, NULL, $revision_id);
 
   if (empty($request)) {

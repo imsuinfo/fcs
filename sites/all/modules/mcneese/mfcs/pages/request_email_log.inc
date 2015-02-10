@@ -39,7 +39,7 @@ function mfcs_request_email_log_0_form($form, &$form_state, $page_number = 0) {
     drupal_exit();
   }
 
-  if (!cf_is_integer($page_number)) {
+  if (!cf_is_integer($page_number) || $page_number < 0) {
     // because this is a url argument passed as a variable, just force a 0 for invalid paths.
     $page_number = 0;
   }
@@ -242,7 +242,7 @@ function mfcs_request_email_log_0_form($form, &$form_state, $page_number = 0) {
  *   The HTML output representing the page.
  */
 function mfcs_request_email_log_0_view_page($log_id) {
-  if (!cf_is_integer($log_id)) {
+  if (!cf_is_integer($log_id) || $log_id < 0) {
     cf_error::invalid_integer('log_id');
 
     drupal_not_found();

@@ -25,8 +25,6 @@
  *   The HTML output representing the page.
  */
 function mfcs_request_proxy_0_form($form, &$form_state, $page_number = 0) {
-  mfcs_add_canonical_headers('requests/proxy-0/' . $page_number);
-
   global $base_path;
   global $mfcs_determined;
 
@@ -35,9 +33,11 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = 0) {
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
-  if (!cf_is_integer($page_number)) {
+  if (!cf_is_integer($page_number) || $page_number < 0) {
     $page_number = 0;
   }
+
+  mfcs_add_canonical_headers('requests/proxy-0/' . $page_number);
 
   $user = cf_current_user();
 
@@ -619,7 +619,7 @@ function mfcs_request_proxy_0_form_submit($form, &$form_state) {
  *   The HTML output representing the page.
  */
 function mfcs_request_proxy_0_delete_form($form, &$form_state, $id) {
-  if (!cf_is_integer($id)) {
+  if (!cf_is_integer($id) || $id < 0) {
     cf_error::invalid_integer('id');
     drupal_not_found();
     drupal_exit();
