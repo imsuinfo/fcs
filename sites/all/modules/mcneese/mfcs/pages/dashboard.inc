@@ -174,6 +174,7 @@ function mfcs_dashboard_page() {
 
   if ($can_list) {
     mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+    mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
 
     $instance = mfcs_instance();
 
@@ -207,7 +208,6 @@ function mfcs_dashboard_page() {
     #  $absolute_stop = $month_stop;
     #}
 
-    mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
     $search = mfcs_miscellaneous_generate_requests_by_date_search($absolute_start, $absolute_stop);
 
     if (!empty($mfcs_determined['filters'])) {
@@ -234,7 +234,6 @@ function mfcs_dashboard_page() {
     }
 
     $rows = array();
-    $rows_count = 0;
     $current_date = $absolute_start;
     while ($current_date < $absolute_stop) {
       $next_date = strtotime('+1 days', $current_date);
@@ -245,6 +244,7 @@ function mfcs_dashboard_page() {
       $options = array(
         'limit' => 4,
         'sort' => array('date' => 'ASC'),
+        'distinct_id' => TRUE,
       );
 
       $items_returned = mfcs_request_load_listing($search, $options);

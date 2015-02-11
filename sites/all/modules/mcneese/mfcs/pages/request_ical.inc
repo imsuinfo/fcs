@@ -66,6 +66,7 @@ function mfcs_request_ical_year_0_page($year = NULL) {
     'limit' => 0,
     'sort' => array('date' => 'ASC'),
     'extra_fields' => mfcs_request_ical_generate_extra_fields(),
+    'distinct_id' => TRUE,
   );
 
   $items_returned = mfcs_request_load_listing($search, $options);
@@ -225,6 +226,7 @@ function mfcs_request_ical_month_0_page($year = NULL, $month = NULL) {
     'limit' => 0,
     'sort' => array('date' => 'ASC'),
     'extra_fields' => mfcs_request_ical_generate_extra_fields(),
+    'distinct_id' => TRUE,
   );
 
   $items_returned = mfcs_request_load_listing($search, $options);
@@ -362,6 +364,7 @@ function mfcs_request_ical_day_0_page($year = NULL, $month = NULL, $day = NULL) 
     'limit' => 0,
     'sort' => array('date' => 'ASC'),
     'extra_fields' => mfcs_request_ical_generate_extra_fields(),
+    'distinct_id' => TRUE,
   );
 
   $items_returned = mfcs_request_load_listing($search, $options);

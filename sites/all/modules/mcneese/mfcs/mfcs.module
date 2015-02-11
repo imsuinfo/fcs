@@ -5929,6 +5929,9 @@ function mfcs_display_room_unavailable_message($dates) {
  *                     of an array. The value array will contain an 'alias'
  *                     string, an 'on' string, a 'join' string, and a 'columns'
  *                     array.
+ *     'distinct': Process the entire query as distinct.
+ *     'distinct_id': Custom option to load mer.id as distinct. This overrides
+ *                    'distinct' when TRUE.
  *
  * @return array|false
  *   An array of containing the following:
@@ -5975,6 +5978,19 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
   $results = TRUE;
   if (isset($options['results']) && is_bool($options['results'])) {
     $results = $options['results'];
+  }
+
+  $distinct = FALSE;
+  if (isset($options['distinct']) && is_bool($options['distinct'])) {
+    $distinct = (bool) $options['distinct'];
+  }
+
+  $distinct_id = FALSE;
+  if (isset($options['distinct_id']) && is_bool($options['distinct_id'])) {
+    $distinct_id = (bool) $options['distinct_id'];
+    if ($distinct_id) {
+      $distinct = FALSE;
+    }
   }
 
   $return = array(
@@ -6086,7 +6102,17 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
       $count_query->addExpression('count(mer.id)');
     }
 
-    $query->addField('mer', 'id', 'id');
+    if ($distinct) {
+      $query->distinct();
+    }
+
+    if ($distinct_id) {
+      $query->distinct('mer.id');
+    }
+    else {
+      $query->addField('mer', 'id', 'id');
+    }
+
     $query->addField('mer', 'user_id', 'user_id');
     $query->addField('mer', 'created', 'created');
     $query->addField('mer', 'updated', 'updated');

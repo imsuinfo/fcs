@@ -154,6 +154,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
     $options = array(
       'limit' => 0,
       'sort' => array('date' => 'ASC'),
+      'distinct_id' => TRUE,
     );
 
     $items_returned = mfcs_request_load_listing($search, $options);
@@ -390,6 +391,7 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
   $options = array(
     'limit' => 0,
     'sort' => array('date' => 'ASC'),
+    'distinct_id' => TRUE,
   );
 
   $items_returned = mfcs_request_load_listing($search, $options);

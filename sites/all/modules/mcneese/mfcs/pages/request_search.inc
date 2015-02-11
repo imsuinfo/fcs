@@ -1208,6 +1208,7 @@ function mfcs_request_search_0_form_submit($form, &$form_state) {
         $options = $form['form']['list_options']['#value'];
         $options['sensitive'] = $sensitive;
         $options['start'] = $start;
+        $options['distinct_id'] = TRUE;
 
         $items_returned = mfcs_request_load_listing($search, $options);
 
