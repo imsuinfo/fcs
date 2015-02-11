@@ -16,47 +16,30 @@
  */
 function mcneese_block_block_view_alter(&$data, $block) {
   try {
-    $query = db_select('mcneese_html5_options_semantic', 'mhos');
-
-    $query->innerjoin('mcneese_block',  'mb', 'mb.semantic = mhos.id');
+    $query = db_select('mcneese_block', 'mb');
+    $query->leftJoin('mcneese_html5_options_semantic', 'mhos', 'mb.semantic = mhos.id');
+    $query->addField('mb', 'heading', 'heading');
     $query->addField('mhos', 'machine_name', 'semantic');
-    $query->fields('mb', array('heading'));
     $query->condition('module', $block->module);
     $query->condition('delta', $block->delta);
-  }
-  catch (Exception $e) {
-    cf_error::on_exception($e);
 
-    return;
-  }
-
-  try {
     $result = $query->execute()->fetchObject();
 
     if (is_object($result)) {
       $data['semantic'] = $result->semantic;
       $data['heading'] = $result->heading;
+
+      if (empty($data['semantic'])) {
+        $data['semantic'] = 'none';
+      }
     }
     else {
-      $query = db_select('mcneese_block', 'mb');
-      $query->fields('mb', array('heading'));
-      $query->condition('module', $block->module);
-      $query->condition('delta', $block->delta);
-
-      $result = $query->execute()->fetchObject();
-
-      if (is_object($result)) {
-        $data['semantic'] = 'none';
-        $data['heading'] = $result->heading;
-      }
-      else {
-        $data['semantic'] = 'ignore';
-        $data['heading'] = 2;
-      }
+      $data['semantic'] = 'ignore';
+      $data['heading'] = 2;
     }
   }
   catch (Exception $e) {
-    cf_error::on_query_execution($e);
+    cf_error::on_exception($e);
 
     return;
   }
