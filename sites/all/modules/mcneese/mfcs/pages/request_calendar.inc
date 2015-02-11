@@ -44,7 +44,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
 
   $valid_month_names = array(
     'january',
-    'februrary',
+    'february',
     'march',
     'april',
     'may',
@@ -57,7 +57,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
     'december',
   );
 
-  if (!in_array(strtolower($month), $valid_month_names)) {
+  if (!is_null($month) && !in_array(strtolower($month), $valid_month_names)) {
     cf_error::invalid_variable('month', "Must be a valid month name.");
 
     drupal_not_found();
