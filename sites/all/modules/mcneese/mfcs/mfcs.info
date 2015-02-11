@@ -14,7 +14,6 @@ dependencies[] = ldap_user
 dependencies[] = ldap_authentication
 dependencies[] = date_popup
 dependencies[] = phpwkhtmltopdf
-dependencies[] = ultimate_cron
 
 files[] = mfcs.install
 files[] = mfcs.module
