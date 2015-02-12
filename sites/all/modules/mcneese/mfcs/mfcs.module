@@ -6605,8 +6605,10 @@ function mfcs_request_process_listing_search_array(&$query, &$count_query, &$ope
           }
         }
         else {
-          $already_joined[$mfcs_field] = 'mfg_c_' . $already_joined_count;
-          $already_joined_count++;
+          if (!array_key_exists($mfcs_field, $already_joined)) {
+            $already_joined[$mfcs_field] = 'mfg_c_' . $already_joined_count;
+            $already_joined_count++;
+          }
 
           $field_alias = $already_joined[$mfcs_field];
 
