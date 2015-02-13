@@ -18,6 +18,7 @@ sites/default/gnupg
 favicon.ico
 access_denied
 not_found
+service_unavailable
 
 # Ignore Mac Files
 ._*
