@@ -6344,22 +6344,52 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
     }
 
     if (is_null($sort)) {
-      $query->orderBy('mer.id', 'DESC');
+      // when a query is distinct, the order by values must be defined in the select columns.
+      if ($distinct || $distinct_id) {
+        $query->orderBy('id' , 'DESC');
+      }
+      else {
+        $query->orderBy('mer.id', 'DESC');
+      }
     }
     else {
       if (!empty($sort)) {
         foreach ($sort as $sort_name => $sort_value) {
           if ($sort_name == 'id') {
-            $query->orderBy('mer.id', is_null($sort_value) ? 'DESC' : $sort_value);
+            // when a query is distinct, the order by values must be defined in the select columns.
+            if ($distinct || $distinct_id) {
+              $query->orderBy('id' , is_null($sort_value) ? 'ASC' : $sort_value);
+            }
+            else {
+              $query->orderBy('mer.id', is_null($sort_value) ? 'ASC' : $sort_value);
+            }
           }
           elseif ($sort_name == 'title') {
-            $query->orderBy('mer.title', is_null($sort_value) ? 'ASC' : $sort_value);
+            // when a query is distinct, the order by values must be defined in the select columns.
+            if ($distinct || $distinct_id) {
+              $query->orderBy('title' , is_null($sort_value) ? 'ASC' : $sort_value);
+            }
+            else {
+              $query->orderBy('mer.title', is_null($sort_value) ? 'ASC' : $sort_value);
+            }
           }
           elseif ($sort_name == 'status') {
-            $query->orderBy('mer.status', is_null($sort_value) ? 'ASC' : $sort_value);
+            // when a query is distinct, the order by values must be defined in the select columns.
+            if ($distinct || $distinct_id) {
+              $query->orderBy('status' , is_null($sort_value) ? 'ASC' : $sort_value);
+            }
+            else {
+              $query->orderBy('mer.status', is_null($sort_value) ? 'ASC' : $sort_value);
+            }
           }
           elseif ($sort_name == 'step') {
-            $query->orderBy('mer.step', is_null($sort_value) ? 'ASC' : $sort_value);
+            // when a query is distinct, the order by values must be defined in the select columns.
+            if ($distinct || $distinct_id) {
+              $query->orderBy('step' , is_null($sort_value) ? 'ASC' : $sort_value);
+            }
+            else {
+              $query->orderBy('mer.step', is_null($sort_value) ? 'ASC' : $sort_value);
+            }
           }
           elseif ($sort_name == 'location') {
             if (!array_key_exists('mfcs_banner_locations', $already_joined)) {
@@ -6367,7 +6397,22 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
               $already_joined['mfcs_banner_locations'] = 'mbl';
             }
 
-            $query->orderBy($already_joined['mfcs_banner_locations'] . '.human_name', is_null($sort_value) ? 'ASC' : $sort_value);
+            // when a query is distinct, the order by values must be defined in the select columns.
+            if ($distinct || $distinct_id) {
+              $existing_alias = array_search($already_joined['mfcs_banner_locations'] . '.human_name', $already_added);
+              if ($existing_alias === FALSE) {
+                $query->addField($already_joined['mfcs_banner_locations'], 'human_name', 'banner_locations_human_name');
+                $already_added['banner_locations_human_name'] = $already_joined['mfcs_banner_locations'] . '.human_name';
+
+                $query->orderBy('banner_locations_human_name', is_null($sort_value) ? 'ASC' : $sort_value);
+              }
+              else {
+                $query->orderBy($existing_alias, is_null($sort_value) ? 'ASC' : $sort_value);
+              }
+            }
+            else {
+              $query->orderBy($already_joined['mfcs_banner_locations'] . '.human_name', is_null($sort_value) ? 'ASC' : $sort_value);
+            }
           }
           elseif ($sort_name == 'building') {
             if (!array_key_exists('mfcs_banner_buildings', $already_joined)) {
@@ -6375,7 +6420,22 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
               $already_joined['mfcs_banner_buildings'] = 'mbb';
             }
 
-            $query->orderBy($already_joined['mfcs_banner_buildings'] . '.human_name', is_null($sort_value) ? 'ASC' : $sort_value);
+            // when a query is distinct, the order by values must be defined in the select columns.
+            if ($distinct || $distinct_id) {
+              $existing_alias = array_search($already_joined['mfcs_banner_buildings'] . '.human_name', $already_added);
+              if ($existing_alias === FALSE) {
+                $query->addField($already_joined['mfcs_banner_buildings'], 'human_name', 'banner_buildings_human_name');
+                $already_added['banner_buildings_human_name'] = $already_joined['mfcs_banner_buildings'] . '.human_name';
+
+                $query->orderBy('banner_buildings_human_name', is_null($sort_value) ? 'ASC' : $sort_value);
+              }
+              else {
+                $query->orderBy($existing_alias, is_null($sort_value) ? 'ASC' : $sort_value);
+              }
+            }
+            else {
+              $query->orderBy($already_joined['mfcs_banner_buildings'] . '.human_name', is_null($sort_value) ? 'ASC' : $sort_value);
+            }
           }
           elseif ($sort_name == 'room') {
             if (!array_key_exists('mfcs_banner_rooms', $already_joined)) {
@@ -6383,7 +6443,22 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
               $already_joined['mfcs_banner_rooms'] = 'mbr';
             }
 
-            $query->orderBy($already_joined['mfcs_banner_rooms'] . '.human_name', is_null($sort_value) ? 'ASC' : $sort_value);
+            // when a query is distinct, the order by values must be defined in the select columns.
+            if ($distinct || $distinct_id) {
+              $existing_alias = array_search($already_joined['mfcs_banner_rooms'] . '.human_name', $already_added);
+              if ($existing_alias === FALSE) {
+                $query->addField($already_joined['mfcs_banner_rooms'], 'human_name', 'banner_rooms_human_name');
+                $already_added['banner_rooms_human_name'] = $already_joined['mfcs_banner_rooms'] . '.human_name';
+
+                $query->orderBy('banner_rooms_human_name' , is_null($sort_value) ? 'ASC' : $sort_value);
+              }
+              else {
+                $query->orderBy($existing_alias, is_null($sort_value) ? 'ASC' : $sort_value);
+              }
+            }
+            else {
+              $query->orderBy($already_joined['mfcs_banner_rooms'] . '.human_name', is_null($sort_value) ? 'ASC' : $sort_value);
+            }
           }
           elseif ($sort_name == 'date') {
             if (!array_key_exists('mfcs_field_dates_date', $already_joined)) {
@@ -6396,17 +6471,67 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
               $already_joined['mfcs_field_dates_time_start'] = 'mfdts';
             }
 
-            $query->orderBy($already_joined['mfcs_field_dates_date'] . '.value', is_null($sort_value) ? 'ASC' : $sort_value);
-            $query->orderBy($already_joined['mfcs_field_dates_time_start'] . '.value', is_null($sort_value) ? 'ASC' : $sort_value);
+            // when a query is distinct, the order by values must be defined in the select columns.
+            if ($distinct || $distinct_id) {
+              $existing_alias = array_search($already_joined['mfcs_field_dates_date'] . '.value', $already_added);
+              if ($existing_alias === FALSE) {
+                $query->addField($already_joined['mfcs_field_dates_date'], 'value', 'dates_date_value');
+                $already_added['dates_date_value'] = $already_joined['mfcs_field_dates_date'] . '.value';
+
+                $query->orderBy('dates_date_value', is_null($sort_value) ? 'ASC' : $sort_value);
+              }
+              else {
+                $query->orderBy($existing_alias, is_null($sort_value) ? 'ASC' : $sort_value);
+              }
+
+              $existing_alias = array_search($already_joined['mfcs_field_dates_time_start'] . '.value', $already_added);
+              if ($existing_alias === FALSE) {
+                $query->addField($already_joined['mfcs_field_dates_time_start'], 'value', 'dates_time_start');
+                $already_added['dates_time_start'] = $already_joined['mfcs_field_dates_time_start'] . '.value';
+
+                $query->orderBy('dates_time_start', is_null($sort_value) ? 'ASC' : $sort_value);
+              }
+              else {
+                $query->orderBy($existing_alias, is_null($sort_value) ? 'ASC' : $sort_value);
+              }
+            }
+            else {
+              $query->orderBy($already_joined['mfcs_field_dates_date'] . '.value', is_null($sort_value) ? 'ASC' : $sort_value);
+              $query->orderBy($already_joined['mfcs_field_dates_time_start'] . '.value', is_null($sort_value) ? 'ASC' : $sort_value);
+            }
           }
           elseif ($sort_name == 'submitted by') {
-            $query->orderBy('mer.user_id', is_null($sort_value) ? 'ASC' : $sort_value);
+            // when a query is distinct, the order by values must be defined in the select columns.
+            if ($distinct || $distinct_id) {
+              $query->orderBy('user_id' , is_null($sort_value) ? 'ASC' : $sort_value);
+            }
+            else {
+              $query->orderBy('mer.user_id', is_null($sort_value) ? 'ASC' : $sort_value);
+            }
           }
           elseif ($sort_name == 'submitted on') {
-            $query->orderBy('mer.created', is_null($sort_value) ? 'DESC' : $sort_value);
+            // when a query is distinct, the order by values must be defined in the select columns.
+            if ($distinct || $distinct_id) {
+              $query->orderBy('created' , is_null($sort_value) ? 'DESC' : $sort_value);
+            }
+            else {
+              $query->orderBy('mer.created', is_null($sort_value) ? 'DESC' : $sort_value);
+            }
           }
           elseif (!empty($sort_name)) {
-            $query->orderBy($sort_name, $sort_value);
+            // when a query is distinct, the order by values must be defined in the select columns.
+            if ($distinct || $distinct_id) {
+              $existing_alias = array_search($sort_name . '.human_name', $already_added);
+              if ($existing_alias === FALSE) {
+                $query->orderBy($sort_name, $sort_value);
+              }
+              else {
+                $query->orderBy($existing_alias, $sort_value);
+              }
+            }
+            else {
+              $query->orderBy($sort_name, $sort_value);
+            }
           }
         }
       }
