@@ -985,7 +985,7 @@ function mfcs_schema() {
       'destination' => array(
         'description' => $t("The 'to' destination address. 'to' would be used instead of 'destination' if it was not a reserved SQL word."),
         'type' => 'varchar',
-        'length' => '127',
+        'length' => '255',
         'serialize' => FALSE,
         'not null' => TRUE,
         'default' => '',
@@ -993,7 +993,7 @@ function mfcs_schema() {
       'title' => array(
         'description' => $t("The title or subject used by the e-mail."),
         'type' => 'varchar',
-        'length' => '127',
+        'length' => '384',
         'serialize' => FALSE,
         'not null' => TRUE,
         'default' => '',

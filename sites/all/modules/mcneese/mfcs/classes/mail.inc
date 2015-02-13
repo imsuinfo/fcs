@@ -149,7 +149,7 @@ class McNeeseFacilitiesUseMail implements MailSystemInterface {
 
 
     // Prepare mail commands.
-    $mail_subject = mime_header_encode($message['subject']);
+    $mail_subject = mime_header_encode(substr($message['subject'], 0, MFCS_EMAIL_MAX_SUBJECT_LENGTH));
 
     // For headers, PHP's API suggests that we use CRLF normally,
     // but some MTAs incorrectly replace LF with CRLF. See #234403.
@@ -160,8 +160,8 @@ class McNeeseFacilitiesUseMail implements MailSystemInterface {
       // is used to set the Return-Path. There is no space between -f and
       // the value of the return path.
       $mail_result = @mail(
-        $message['to'],
-        $mail_subject,
+        substr($message['to'], 0, MFCS_EMAIL_MAX_DESTINATION_LENGTH),
+        substr($mail_subject, 0, MFCS_EMAIL_MAX_SUBJECT_LENGTH),
         $message['body'],
         $mail_headers,
         '-f' . $message['Return-Path']
@@ -172,8 +172,8 @@ class McNeeseFacilitiesUseMail implements MailSystemInterface {
       // allowed if safe_mode is enabled. Passing any value throws a PHP
       // warning and makes mail() return FALSE.
       $mail_result = @mail(
-        $message['to'],
-        $mail_subject,
+        substr($message['to'], 0, MFCS_EMAIL_MAX_DESTINATION_LENGTH),
+        substr($mail_subject, 0, MFCS_EMAIL_MAX_SUBJECT_LENGTH),
         $message['body'],
         $mail_headers
       );
@@ -263,8 +263,8 @@ class McNeeseFacilitiesUseMail implements MailSystemInterface {
     $instance = mfcs_instance();
 
     $fields = array(
-      'destination' => $message['to'],
-      'title' => $message['subject'],
+      'destination' => substr($message['to'], 0, MFCS_EMAIL_MAX_DESTINATION_LENGTH),
+      'title' => substr($message['subject'], 0, MFCS_EMAIL_MAX_SUBJECT_LENGTH),
       'headers' => serialize($message['headers']),
       'body' => serialize($message['body']),
       'date' => $instance,
