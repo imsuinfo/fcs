@@ -523,21 +523,21 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
               'room_name' => $room_name,
               'time_start' => $item->time_start[$delta],
               'time_stop' => $item->time_stop[$delta],
+              'time_floor' => $time_floor,
+              'time_ceiling' => $time_ceiling,
               'slot_start' => FALSE,
               'slot_stop' => FALSE,
-              'offset_start' => 0,
-              'offset_stop' => 0,
+              'offset_start' => $time_offset_start,
+              'offset_stop' => $time_offset_stop,
               'z-index' => $time_zindex,
             );
 
             if ($time_count == $time_floor) {
               $rows['range'][$time_count][$time_slot][$item->id]['slot_start'] = TRUE;
-              $rows['range'][$time_count][$time_slot][$item->id]['offset_start'] = $time_offset_start;
             }
 
             if (($time_count + $range_interval) == $time_ceiling) {
               $rows['range'][$time_count][$time_slot][$item->id]['slot_stop'] = TRUE;
-              $rows['range'][$time_count][$time_slot][$item->id]['offset_stop'] = $time_offset_stop;
             }
 
             $time_count += $range_interval;
