@@ -309,7 +309,7 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
 
   $valid_month_names = array(
     'january',
-    'februrary',
+    'february',
     'march',
     'april',
     'may',
