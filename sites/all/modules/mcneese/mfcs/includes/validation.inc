@@ -360,6 +360,9 @@ function mfcs_validate_request_fields($form, &$form_state) {
     $stop_timestamp = array(0 => FALSE);
 
     if (!empty($location_state['dates']['date'])) {
+      $all_day = array();
+      $partial_day = array();
+
       foreach ($location_state['dates']['date'] as $key => &$value) {
         if (isset($form['form']['existing']['#value']['request']['dates']['date'])) {
           if (in_array($key, $form['form']['existing']['#value']['request']['dates']['date'])) {
@@ -393,6 +396,25 @@ function mfcs_validate_request_fields($form, &$form_state) {
           elseif ($date_timestamp[$key] < $instance) {
             form_set_error($ps_p . '][dates][date][' . $key . '][date', t("The date '@date' is in the past and cannot be used.", array('@date' => $value)));
           }
+        }
+
+        // prevent invalid all-day/partial-day date combinations from being used.
+        if (!is_null($date_timestamp[$key])) {
+          if (empty($location_state['dates']['time_start'][$key])) {
+            $all_day[$date_timestamp[$key]] = $key;
+          }
+          else {
+            $partial_day[$date_timestamp[$key]] = $key;
+          }
+        }
+      }
+
+      // detect and report errors for invalid date combinations.
+      foreach ($all_day as $datestamp => $key) {
+        if (array_key_exists($datestamp, $partial_day)) {
+          $date_string = date("Y/m/d", $datestamp);
+          form_set_error($ps_p . '][dates][date][' . $key . '][date', t("The date '@date' is set to all day, but there are also partial day times in use for that same day. Please use either all day or partial day times but not both.", array('@date' => $date_string)));
+          $passed = FALSE;
         }
       }
     }
@@ -491,6 +513,8 @@ function mfcs_validate_request_fields($form, &$form_state) {
     }
 
     if (!empty($start_timestamp)) {
+      $specified_times = array();
+
       foreach ($start_timestamp as $key => &$value) {
         if ($start_timestamp[$key] !== FALSE && $stop_timestamp[$key] !== FALSE) {
           if ($stop_timestamp[$key] < $start_timestamp[$key]) {
@@ -500,6 +524,26 @@ function mfcs_validate_request_fields($form, &$form_state) {
           elseif ($stop_timestamp[$key] == $start_timestamp[$key]) {
             form_set_error($ps_p . '][dates][time_stop][' . $key, "The stop time cannot be the same as the start time.");
             $passed = FALSE;
+          }
+
+          // make sure start and stop timestamps do not overlap.
+          if ($passed) {
+            foreach ($specified_times as $specified_time_start => $specified_time_stop) {
+              if (($start_timestamp[$key] >= $specified_time_start && $start_timestamp[$key] < $specified_time_stop) || ($specified_time_start >= $start_timestamp[$key] && $specified_time_start < $stop_timestamp[$key])) {
+                $start_time_string = date($location_form['dates']['group_dates'][$key]['dates']['time_start'][$key]['#expected_format']['date'], $start_timestamp[$key]);
+                $stop_time_string = date($location_form['dates']['group_dates'][$key]['dates']['time_stop'][$key]['#expected_format']['date'], $stop_timestamp[$key]);
+
+                $start_existing_string = date($location_form['dates']['group_dates'][$key]['dates']['time_start'][$key]['#expected_format']['date'], $specified_time_start);
+                $stop_existing_string = date($location_form['dates']['group_dates'][$key]['dates']['time_stop'][$key]['#expected_format']['date'], $specified_time_stop);
+                form_set_error($ps_p . '][dates][time_start][' . $key, t("The time range '@start_time' to '@stop_time' overlaps with the specified time range of '@start_existing' to '@stop_existing'.", array('@start_time' => $start_time_string, '@stop_time' => $stop_time_string, '@start_existing' => $start_existing_string, '@stop_existing' => $stop_existing_string)));
+                $passed = FALSE;
+                break;
+              }
+            }
+          }
+
+          if ($passed) {
+            $specified_times[$start_timestamp[$key]] = $stop_timestamp[$key];
           }
         }
       }
