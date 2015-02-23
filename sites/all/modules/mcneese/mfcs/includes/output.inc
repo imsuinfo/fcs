@@ -523,6 +523,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
 
   $slots_page = 0;
   $slots_count = 0;
+  $slots_minimum = $page_number * $slots_per_page;
   do {
     $page_url = $url_base_day . date('Y', $last_day) . '/' . strtolower(date('F', $last_day)) . '/' . date('d', $day_start) . '/' . $slots_page . $url_arguments;
 
@@ -537,6 +538,9 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
     $slots_count += $slots_per_page;
     $slots_page++;
   } while ($slots_count < $items['slots_max']);
+
+  // setup page_url to be used in the prev/next links later on.
+  $page_url = $url_base_day . date('Y', $last_day) . '/' . strtolower(date('F', $last_day)) . '/' . date('d', $day_start) . '/';
 
   // end page links (Range)
   $markup .= '</ul></nav>' . "\n";
@@ -564,6 +568,8 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
   $row_even = TRUE;
   $row_count = 0;
   foreach ($items['range'] as $floor_time => $slots) {
+    $slots_total = count($slots);
+
     $row_id = 'time_slot-' . date('h_00a', $floor_time);
     $row_class = array(
       'calendar-time_slot-wrapper',
@@ -580,7 +586,32 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
     // begin range row.
     $markup .= '<div id="' . $row_id . '" class="' . implode(' ', $row_class) . '">';
     $markup .= '<div class="calendar-time_slot">';
-    $markup .= '<div class="calendar-time_slot-label-wrapper"><div class="calendar-time_slot-label">' . date("h:i a", $floor_time) . '</div></div>';
+
+    $markup .= '<div class="calendar-time_slot-label-wrapper">';
+    $markup .= '<div class="calendar-time_slot-label">' . date("h:i a", $floor_time) . '</div>';
+
+    $display_prev = $page_number > 0 && $slots_total > 0;
+    $display_next = ($slots_total - $slots_minimum) > $slots_per_page;
+    if ($display_prev || $display_next) {
+      $markup .= '<div class="calendar-time_slot-links-wrapper no-print">';
+
+      if ($display_prev) {
+        $markup .= '<a href="' . $page_url . ($page_number - 1) . $url_arguments . '#' . $row_id . '" class="calendar-time_slot-link calendar-time_slot-links-previous" title="There are more requests on the previous page for this time slot."><< Previous</a>';
+      }
+
+      if ($display_next) {
+        $markup .= '<a href="' . $page_url . ($page_number + 1) . $url_arguments . '#' . $row_id . '" class="calendar-time_slot-link calendar-time_slot-links-next" title="There are more requests on the next page for this time slot.">Next >></a>';
+      }
+
+      $markup .= '</div>';
+    }
+
+    unset($display_prev);
+    unset($display_next);
+    unset($slots_total);
+
+    $markup .= '</div>';
+
     $markup .= '<div class="calendar-time_slot-request-wrapper">';
     $markup .= '<div class="calendar-time_slot-request">';
 
@@ -768,7 +799,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
             $item_times = date("h:i a", $item['time_start']) . " to " . date("h:i a", $item['time_stop']);
 
             $item_text .= '<div class="calendar-item-link-wrapper"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
-            $item_text .= '<div class="calendar-item-time-wrapper"><div class="calendar-item-time" title="Times: ' . $item_times . '">' . $item_times . '</div></div>';
+            $item_text .= '<div class="calendar-item-time-wrapper"><div class="calendar-item-time" title="Time: ' . $item_times . '">' . $item_times . '</div></div>';
             $item_text .= '<div class="calendar-item-location-wrapper"><div class="calendar-item-location" title="Location: ' . $item['building_name'] . ' ' . $item['room_name'] . '">' . $item['building_name'] . ' ' . $item['room_name'] . '</div></div>';
 
             unset($item_times);
