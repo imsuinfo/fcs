@@ -765,9 +765,13 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
               }
             }
 
+            $item_times = date("h:i a", $item['time_start']) . " to " . date("h:i a", $item['time_stop']);
+
             $item_text .= '<div class="calendar-item-link-wrapper"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
-            $item_text .= '<div class="calendar-item-time-wrapper"><div class="calendar-item-time">' . date("h:i a", $item['time_start']) . " to " . date("h:i a", $item['time_stop']) . '</div></div>';
-            $item_text .= '<div class="calendar-item-location-wrapper"><div class="calendar-item-location">' . $item['building_name'] . ' ' . $item['room_name'] . '</div></div>';
+            $item_text .= '<div class="calendar-item-time-wrapper"><div class="calendar-item-time" title="Times: ' . $item_times . '">' . $item_times . '</div></div>';
+            $item_text .= '<div class="calendar-item-location-wrapper"><div class="calendar-item-location" title="Location: ' . $item['building_name'] . ' ' . $item['room_name'] . '">' . $item['building_name'] . ' ' . $item['room_name'] . '</div></div>';
+
+            unset($item_times);
           }
 
           if ($item['slot_stop']) {
@@ -786,11 +790,13 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
             $item_style_landscape['height'] = $item_style_screen['height'];
             $item_style_landscape['min-height'] = $item_style_screen['min-height'];
 
-            $item_text .= '<div class="calendar-item-id-wrapper"><div class="calendar-item-id">' . $item_id . '</div></div>';
+            $item_text .= '<div class="calendar-item-footer-wrapper">';
+            $item_text .= '<div class="calendar-item-id-wrapper"><div class="calendar-item-id" title="Request ID: ' . $item_id . '">' . $item_id . '</div></div>';
 
             if (!empty($request_type_options[$item['type']])) {
-              $item_text .= '<div class="calendar-item-type-wrapper"><div class="calendar-item-type">' . $request_type_options[$item['type']] . '</div></div>';
+              $item_text .= '<div class="calendar-item-type-wrapper"><div class="calendar-item-type" title="Request Type: ' . $request_type_options[$item['type']] . '">' . $request_type_options[$item['type']] . '</div></div>';
             }
+            $item_text .= '</div>';
           }
         }
         else {
