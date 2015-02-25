@@ -270,6 +270,11 @@ define('MFCS_TROUBLESHOOT_BANNER_CACHE_SYNCHRONIZE', 3);
 define('MFCS_EMAIL_MAX_SUBJECT_LENGTH', 384);
 define('MFCS_EMAIL_MAX_DESTINATION_LENGTH', 255);
 
+/**
+ * Define a default range (in seconds) for nearby requests.
+ */
+define('MFCS_NEARBY_REQUESTS_RANGE_SECONDS', 1800);
+
 
 /**
  * Implements hook_init().

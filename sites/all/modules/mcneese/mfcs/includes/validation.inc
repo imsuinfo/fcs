@@ -247,6 +247,8 @@ function mfcs_pre_validate_request_fields(&$form, &$form_state, $dont_validate =
  *   NULL is returned when unable to traverse the form or form state.
  */
 function mfcs_validate_request_fields($form, &$form_state) {
+  global $base_path;
+
   $location_form = &$form;
   $location_state = &$form_state['values'];
 
@@ -513,7 +515,13 @@ function mfcs_validate_request_fields($form, &$form_state) {
     }
 
     if (!empty($start_timestamp)) {
+      mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
+
       $specified_times = array();
+      $nearby = array(
+        'before' => array(),
+        'after' => array(),
+      );
 
       foreach ($start_timestamp as $key => &$value) {
         if ($start_timestamp[$key] !== FALSE && $stop_timestamp[$key] !== FALSE) {
@@ -545,6 +553,42 @@ function mfcs_validate_request_fields($form, &$form_state) {
           if ($passed) {
             $specified_times[$start_timestamp[$key]] = $stop_timestamp[$key];
           }
+
+          // check to see if the times have any requests appearing immediately before or immediately after and present a warning.
+          if ($room !== FALSE) {
+            $nearby_requests = mfcs_miscellaneous_nearby_requests($start_timestamp[$key], $stop_timestamp[$key], $location_state['room'][0]);
+
+            if (is_array($nearby_requests)) {
+              foreach ($nearby_requests['before'] as $before_id => $before_title) {
+                $nearby['before'][$start_timestamp[$key]][$before_id] = $before_title;
+              }
+
+              foreach ($nearby_requests['after'] as $after_id => $after_title) {
+                $nearby['after'][$stop_timestamp[$key]][$after_id] = $after_title;
+              }
+            }
+          }
+        }
+      }
+
+      // scan through each nearby request and report a warning.
+      if (!empty($room)) {
+        $minutes_range = floor(MFCS_NEARBY_REQUESTS_RANGE_SECONDS / 60);
+
+        foreach ($nearby['before'] as $nearby_time => $nearby_value) {
+          foreach ($nearby_value as $before_id => $before_title) {
+            drupal_set_message('<em>' . $room->building_name . " " . $room->room_name . "</em> has the following meeting within " . $minutes_range . " minutes before " . date("Y/m/d h:i a", $nearby_time) . ': <ul><li><a href="' . $base_path . 'requests/view-0/' . $before_id . '">' . $before_title . '</a></li></ul>', 'warning');
+          }
+        }
+
+        foreach ($nearby['after'] as $nearby_time => $nearby_value) {
+          foreach ($nearby_value as $after_id => $after_title) {
+            drupal_set_message('<em>' . $room->building_name . " " . $room->room_name . "</em> has the following meeting within " . $minutes_range . " minutes after " . date("Y/m/d h:i a", $nearby_time) . ': <ul><li><a href="' . $base_path . 'requests/view-0/' . $after_id . '">' . $after_title . '</a></li></ul>', 'warning');
+          }
+        }
+
+        if (!empty($nearby['before']) || !empty($nearby['after'])) {
+          drupal_set_message("<strong>Please be aware that there may be complications and the room may not be available or clean without adequate time between events or meetings.</strong>", 'warning');
         }
       }
     }

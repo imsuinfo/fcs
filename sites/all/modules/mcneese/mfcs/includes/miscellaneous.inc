@@ -190,5 +190,131 @@ function mfcs_miscellaneous_generate_requests_by_date_search($start, $stop, $sta
 }
 
 /**
+ * Load all requests that have dates within a certain range of the timestamps.
+ *
+ * This function will not search for conflicting dates. It only searches for
+ * times that begin or end near the specified timestamps.
+ *
+ * @param int $timestamp_start
+ *   The timestamp in which to start at.
+ * @param int $timestamp_stop
+ *   The timestamp in which to end at.
+ * @param int $room
+ *   The unique id for the room being selected.
+ * @param int|array $status
+ *   (optional) The status code to limit search results by. Can be an array of
+ *   status codes.
+ * @param int $nearby_range_seconds
+ *   (optional) The range (in seconds) of requests that are within the
+ *   specified range.
+ *
+ * @return array|false
+ *   An array containing:
+ *   - 'before': Requests that appear immediately before specified time.
+ *   - 'after': Requests that appear immediately after specified time.
+ *   False is returned on error.
+ */
+function mfcs_miscellaneous_nearby_requests($timestamp_start, $timestamp_stop, $room, $status = MFCS_REQUEST_STATUS_CLOSED_ACCEPTED, $nearby_range_seconds = MFCS_NEARBY_REQUESTS_RANGE_SECONDS) {
+  if (!cf_is_integer($timestamp_start)) {
+    cf_error::invalid_integer('timestamp_start');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($timestamp_stop)) {
+    cf_error::invalid_integer('timestamp_stop');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($room)) {
+    cf_error::invalid_integer('room');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($status) && !is_array($status)) {
+    cf_error::invalid_integer('status');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($nearby_range_seconds)) {
+    cf_error::invalid_integer('nearby_range_seconds');
+    return FALSE;
+  }
+
+  $nearby_events = array(
+    'before' => array(),
+    'after' => array(),
+  );
+
+  try {
+    // the start range must look at stop values to find nearby ranges.
+    $query = db_select('mfcs_requests', 'mer');
+    $query->innerJoin('mfcs_current', 'mc', 'mer.id = mc.request_id');
+    $query->innerJoin('mfcs_field_dates_time_stop', 'mfdtsp', 'mc.request_id = mfdtsp.request_id AND mc.dates_time_start = mfdtsp.revision');
+
+    $range_start = strtotime('-' . $nearby_range_seconds . ' seconds', $timestamp_start);
+    $range_stop = $timestamp_start;
+
+    $query->condition('mfdtsp.value', $range_start, '>=');
+    $query->condition('mfdtsp.value', $range_stop, '<=');
+    $query->condition('mer.room', $room);
+
+    if (is_array($status)) {
+      $query->condition('mer.status', $status, 'IN');
+    }
+    else {
+      $query->condition('mer.status', $status);
+    }
+
+    $query->addField('mer', 'id', 'id');
+    $query->addField('mer', 'title', 'title');
+
+    $results = $query->execute()->fetchAllKeyed();
+    if (is_array($results)) {
+      $nearby_events['before'] = $results;
+    }
+    else {
+      watchdog(MFCS_WATCHDOG_ID, "An error occured while searching for nearby requests in room @room with status @status and range of @range seconds before @time.", array('@time' => date('Y/m/d h:i:s a', $timestamp_start), '@room' => $room, '@status' => $status, '@range' => $nearby_range_seconds), WATCHDOG_WARNING);
+    }
+
+    // the stop range must look at start values to find nearby ranges.
+    $query = db_select('mfcs_requests', 'mer');
+    $query->innerJoin('mfcs_current', 'mc', 'mer.id = mc.request_id');
+    $query->innerJoin('mfcs_field_dates_time_start', 'mfdts', 'mc.request_id = mfdts.request_id AND mc.dates_time_start = mfdts.revision');
+
+    $range_start = $timestamp_stop;
+    $range_stop = strtotime('+' . $nearby_range_seconds . ' seconds', $timestamp_stop);
+
+    $query->condition('mfdts.value', $range_start, '>=');
+    $query->condition('mfdts.value', $range_stop, '<=');
+    $query->condition('mer.room', $room);
+
+    if (is_array($status)) {
+      $query->condition('mer.status', $status, 'IN');
+    }
+    else {
+      $query->condition('mer.status', $status);
+    }
+
+    $query->addField('mer', 'id', 'id');
+    $query->addField('mer', 'title', 'title');
+
+    $results = $query->execute()->fetchAllKeyed();
+    if (is_array($results)) {
+      $nearby_events['after'] = $results;
+    }
+    else {
+      watchdog(MFCS_WATCHDOG_ID, "An error occured while searching for nearby requests in room @room with status @status and range of @range seconds after @time.", array('@time' => date('Y/m/d h:i:s a', $timestamp_stop), '@room' => $room, '@status' => $status, '@range' => $nearby_range_seconds), WATCHDOG_WARNING);
+    }
+  } catch (Exception $ex) {
+    cf_error::on_exception($ex);
+    watchdog(MFCS_WATCHDOG_ID, "While searching for nearby requests in room @room with status @status and range of @range seconds before @before or after @after, the following error eoccured: @error.", array('@before' => date('Y/m/d h:i:s a', $timestamp_start), '@after' => date('Y/m/d h:i:s a', $timestamp_stop), '@room' => $room, '@status' => $status, '@range' => $nearby_range_seconds, '@error' => $ex->getMessage()), WATCHDOG_ERROR);
+
+    return FALSE;
+  }
+
+  return $nearby_events;
+}
+
+/**
  * @} End of '@addtogroup mfcs'.
  */
