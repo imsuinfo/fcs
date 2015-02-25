@@ -728,6 +728,9 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
       }
     }
 
+    unset($key);
+    unset($value);
+
     if (!$contained) {
       $form['display']['submit'] = array(
         '#id' => 'request-display-submit',
@@ -1640,7 +1643,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
  *
  * @return int|null
  *   The row number or NULL when there is no valid row.
- *   FALSE is returned for in
+ *   FALSE is returned for invalid rows.
  *
  * @see: mfcs_request_view_0_form()
  */
@@ -1696,6 +1699,7 @@ function mfcs_request_view_0_form_setup_group_path(&$form, $request_id, $group, 
     }
   }
 
+  // create the group, using the numeric row id if available.
   if (array_key_exists('group', $presentation_tables[$group])) {
     $row = (int) $presentation_tables[$group]['group'];
 
@@ -1718,6 +1722,7 @@ function mfcs_request_view_0_form_setup_group_path(&$form, $request_id, $group, 
     $group_path = &$form['display']['groups'][$row];
   }
 
+  // create the group if there is no specified row id using default weights.
   if (!array_key_exists($group, $group_path)) {
     $group_path[$group] = array(
       '#prefix' => '',
