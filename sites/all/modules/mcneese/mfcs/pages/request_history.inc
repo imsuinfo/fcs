@@ -89,6 +89,7 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
 
   mfcs_include(MFCS_INCLUDE_TABLE);
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+  mfcs_include(MFCS_INCLUDE_VIEW);
 
   $structure = mfcs_table_structure();
   $presentation = mfcs_table_presentation();
@@ -333,7 +334,7 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
                         'print_delta_for_multiple' => TRUE,
                       );
 
-                      $value_array = mfcs_build_request_value_structure($request_id, $group_name, $field_name, $key, $value, $presentation[$group_name][$field_name], $history, $options);
+                      $value_array = mfcs_view_build_request_value_structure($request_id, $group_name, $field_name, $key, $value, $presentation[$group_name][$field_name], $history, $options);
 
                       if (is_array($value_array) && !isset($value_array['no_values'])) {
                         $processed_values[$value->user_id]['fields'][$group_name][$field_name][$key] = $value_array;
@@ -390,7 +391,7 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
                       'print_delta_for_multiple' => TRUE,
                     );
 
-                    $value_array = mfcs_build_request_value_structure($request_id, $group_name, $field_name, $key, $value, $presentation[$group_name][$field_name], $history, $options);
+                    $value_array = mfcs_view_build_request_value_structure($request_id, $group_name, $field_name, $key, $value, $presentation[$group_name][$field_name], $history, $options);
 
                     if (is_array($value_array) && !isset($value_array['no_values'])) {
                       $processed_values[$value->user_id]['fields'][$group_name][$field_name][$key] = $value_array;
