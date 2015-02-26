@@ -1397,6 +1397,21 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           }
         }
 
+        // adding a container works arounds drupals lack of support for '#states' with '#markup' fields.
+        $form['review']['operations']['requirements']['description'] = array(
+          '#type' => 'container',
+          '#states' => $states,
+          '#attributes' => array(
+            'class' => array(
+              'requirements-description-wrapper',
+            ),
+          ),
+        );
+
+        $form['review']['operations']['requirements']['description']['markup'] = array(
+          '#markup' => '<div class="requirements-description description"><strong class="requirements-description-statement-1">Use Fees totals auto-calculated by the system.</strong> Do not provide the total value in the amount field. Instead, provide the amount using the appropriate per-hour/per-day/per-personnel cost.</div>',
+        );
+
         if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
           if ($venue_coordinator) {
             $form['review']['operations']['requirements']['other'] = array(
