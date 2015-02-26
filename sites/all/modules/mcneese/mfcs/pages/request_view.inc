@@ -350,7 +350,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         $can_for_section['edit'] = mfcs_request_access('edit', $request, $user, $field_group);
       }
 
-      mfcs_request_view_0_form_setup_group_path($form, $request_id, $field_group, $presentation_tables, $can_for_section, $request);
+      mfcs_view_setup_group_path($form, $request_id, $field_group, $presentation_tables, $can_for_section, $request);
 
       unset($can_for_section);
     }
@@ -460,7 +460,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
       $row = NULL;
       if (isset($presentation_tables[$field_group])) {
-        $row = mfcs_request_view_0_form_setup_group_path($form, $request_id, $field_group, $presentation_tables, $can, $request);
+        $row = mfcs_view_setup_group_path($form, $request_id, $field_group, $presentation_tables, $can, $request);
       }
 
       if (!array_key_exists($field_group, $form['groups'])) {
@@ -523,7 +523,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
             $custom_row = NULL;
             if (isset($presentation_tables[$group])) {
-              $custom_row = mfcs_request_view_0_form_setup_group_path($form, $request_id, $group, $presentation_tables, $can, $request);
+              $custom_row = mfcs_view_setup_group_path($form, $request_id, $group, $presentation_tables, $can, $request);
             }
 
             if (is_null($custom_row)) {
@@ -820,6 +820,8 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
   }
 
   if ($show_log || $show_operations) {
+    mfcs_include(MFCS_INCLUDE_VIEW);
+
     $form['review'] = array(
       '#tree' => TRUE,
     );
@@ -1218,33 +1220,66 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
         $uses = array();
         $insurance_requirement = FALSE;
+        $uses_as_manager = array();
         if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
           if ($venue_coordinator) {
             $uses['facilities'] = "Facilities";
             $uses['equipment'] = "Additional Equipment";
           }
+          elseif ($manager) {
+            $uses['facilities'] = "Facilities";
+            $uses['equipment'] = "Additional Equipment";
+
+            $uses_as_manager['facilities'] = "Facitilies Fees";
+            $uses_as_manager['equipment'] = "Equipment Fees";
+          }
         }
         else {
+          if ($manager) {
+            $uses['custodial'] = "Custodial";
+            $uses['maintenance'] = "Maintenance";
+            $uses['grounds'] = "Grounds";
+            $uses['security'] = "Security";
+            $insurance_requirement = TRUE;
+
+            $form['form']['requirements-custodial']['#value'] = FALSE;
+            $form['form']['requirements-maintenance']['#value'] = FALSE;
+            $form['form']['requirements-grounds']['#value'] = FALSE;
+            $form['form']['requirements-security']['#value'] = FALSE;
+            $form['form']['requirements-insurance']['#value'] = FALSE;
+
+            $uses_as_manager['custodial'] = "Custodial Fees";
+            $uses_as_manager['maintenance'] = "Maintenance Fees";
+            $uses_as_manager['grounds'] = "Grounds Fees";
+            $uses_as_manager['security'] = "Security Fees";
+            $uses_as_manager['insurance'] = "Insurance Fees";
+          }
+
           foreach ($reviewers as $reviewer) {
             if ($reviewer->reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_FACILITIES_CUSTODIAL || $reviewer->reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_CUSTODIAL) {
               $uses['custodial'] = "Custodial";
               $form['form']['requirements-custodial']['#value'] = TRUE;
+              unset($uses_as_manager['custodial']);
             }
             elseif ($reviewer->reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_MAINTENANCE) {
               $uses['maintenance'] = "Maintenance";
               $form['form']['requirements-maintenance']['#value'] = TRUE;
+              unset($uses_as_manager['maintenance']);
             }
             elseif ($reviewer->reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_FACILITIES) {
               $uses['grounds'] = "Grounds";
               $form['form']['requirements-grounds']['#value'] = TRUE;
+              unset($uses_as_manager['grounds']);
             }
             elseif ($reviewer->reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_SECURITY) {
               $uses['security'] = "Security";
               $form['form']['requirements-security']['#value'] = TRUE;
+              unset($uses_as_manager['security']);
             }
             elseif ($reviewer->reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_PURCHASING) {
               $insurance_requirement = TRUE;
               $form['form']['requirements-insurance']['#value'] = TRUE;
+              unset($uses_as_manager['insurance']);
             }
           }
         }
@@ -1322,6 +1357,11 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
               '#states' => $states,
             );
 
+            // do not require this field when used as a manager.
+            if (array_key_exists($use_name, $uses_as_manager)) {
+              $form['review']['operations']['requirements'][$use_name]['quantity']['#required'] = FALSE;
+            }
+
             if (!empty($request['requirements'][$use_name][0])) {
               $form['review']['operations']['requirements'][$use_name]['quantity']['#default_value'] = $request['requirements'][$use_name][0]->quantity;
             }
@@ -1344,6 +1384,11 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
               ),
               '#states' => $states,
             );
+
+            // do not require this field when used as a manager.
+            if (array_key_exists($use_name, $uses_as_manager)) {
+              $form['review']['operations']['requirements'][$use_name]['hours']['#required'] = FALSE;
+            }
 
             if (!empty($request['requirements'][$use_name][0])) {
               $form['review']['operations']['requirements'][$use_name]['hours']['#default_value'] = mfcs_convert_value_from_database_format($request['requirements'][$use_name][0]->hours, 'currency');
@@ -1368,6 +1413,11 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
             '#states' => $states,
           );
 
+          // do not require this field when used as a manager.
+          if (array_key_exists($use_name, $uses_as_manager)) {
+            $form['review']['operations']['requirements'][$use_name]['days']['#required'] = FALSE;
+          }
+
           if (!empty($request['requirements'][$use_name][0])) {
             $form['review']['operations']['requirements'][$use_name]['days']['#default_value'] = mfcs_convert_value_from_database_format($request['requirements'][$use_name][0]->days, 'currency');
           }
@@ -1375,7 +1425,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           $form['review']['operations']['requirements'][$use_name]['amount'] = array(
             '#id' => 'request-review-operations-requirements-' . $use_name . '-amount',
             '#type' => 'textfield',
-            '#title' => '<span class="element-invisible">' . $use_title . ' Fee </span>Amount',
+            '#title' => '<span class="element-invisible">' . $use_title . ' Fee</span> Amount',
             '#default_value' => NULL,
             '#size' => 16,
             '#required' => $uses_requirements[$use_name],
@@ -1388,6 +1438,11 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
             ),
             '#states' => $states,
           );
+
+          // do not require this field when used as a manager.
+          if (array_key_exists($use_name, $uses_as_manager)) {
+            $form['review']['operations']['requirements'][$use_name]['amount']['#required'] = FALSE;
+          }
 
           if (!empty($request['requirements'][$use_name][0])) {
             $form['review']['operations']['requirements'][$use_name]['amount']['#default_value'] = mfcs_convert_value_from_database_format($request['requirements'][$use_name][0]->amount, 'currency');
@@ -1409,11 +1464,45 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         );
 
         $form['review']['operations']['requirements']['description']['markup'] = array(
-          '#markup' => '<div class="requirements-description description"><strong class="requirements-description-statement-1">Use Fees totals auto-calculated by the system.</strong> Do not provide the total value in the amount field. Instead, provide the amount using the appropriate per-hour/per-day/per-personnel cost.</div>',
+          '#markup' => '<div class="requirements-description"><strong class="requirements-description-statement-1">Use Fees totals auto-calculated by the system.</strong> Do not provide the total value in the amount field. Instead, provide the amount using the appropriate per-hour/per-day/per-personnel cost.</div>',
         );
 
+        // add as_manager information to communicate the requirements that are added solely because they are provided because the user is a manager.
+        // these requirement would otherwise not be available.
+        if (!empty($uses_as_manager)) {
+          // adding a container works arounds drupals lack of support for '#states' with '#markup' fields.
+          $form['review']['operations']['requirements']['as_manager'] = array(
+            '#type' => 'container',
+            '#states' => $states,
+            '#attributes' => array(
+              'class' => array(
+                'requirements-as_manager-wrapper',
+              ),
+            ),
+          );
+
+          $as_manager_markup = '<div class="requirements-as_manager">' . "\n";
+          $as_manager_markup .= '<strong class="requirements-as_manager-explanation">The following requirements are made available solely because you have manager access:</strong>' . "<br>\n";
+          $as_manager_markup .= '<ul class="requirements-as_manager-items">' . "\n";
+
+          foreach ($uses_as_manager as $use_as_manager_key => $use_as_manager_value) {
+            $as_manager_markup .= '<li class="requirements-as_manager-item item-' . $use_as_manager_key . '">' . $use_as_manager_value . '</li>' . "\n";
+          }
+          unset($use_as_manager_key);
+          unset($use_as_manager_value);
+
+          $as_manager_markup .= '</ul>' . "\n";
+          $as_manager_markup .= '</div>' . "\n";
+
+          $form['review']['operations']['requirements']['as_manager']['markup'] = array(
+            '#markup' => $as_manager_markup,
+          );
+        }
+
+
+
         if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
-          if ($venue_coordinator) {
+          if ($venue_coordinator || $manager) {
             $form['review']['operations']['requirements']['other'] = array(
               '#id' => 'request-review-operations-requirements-other',
               '#type' => 'checkbox',
@@ -1639,161 +1728,6 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 }
 
 /**
- * Create the group path presentation structure.
- *
- * @param array $form
- *   The form array as defined by drupals form api.
- * @param int $request_id
- *   The request id.
- * @param string $group
- *   The group name.
- * @param array $presentation_tables
- *   An array of tables defining how the presentation is to be built.
- * @param array $show
- *   An array containing the following keys:
- *   'edit': When TRUE, the edit link will be shown in the group header.
- *   'history': When TRUE, the history link is made visible.
- * @param array $request
- *   The request settings array.
- *
- * @return int|null
- *   The row number or NULL when there is no valid row.
- *   FALSE is returned for invalid rows.
- *
- * @see: mfcs_request_view_0_form()
- */
-function mfcs_request_view_0_form_setup_group_path(&$form, $request_id, $group, $presentation_tables, $show, $request) {
-  global $mfcs_determined;
-
-  $url_arguments = '';
-  if (!empty($mfcs_determined['complete'])) {
-    $url_arguments .= '?' . $mfcs_determined['complete'];
-  }
-
-  $row = NULL;
-  $group_path = &$form['display']['groups'];
-  $request_type = $request['information']['type'][0]->value;
-
-  $show_link = TRUE;
-  if (isset($presentation_tables[$group]['request_type']['hide_link']) && is_array($presentation_tables[$group]['request_type']['hide_link'])) {
-    if (in_array($request_type, $presentation_tables[$group]['request_type']['hide_link'])) {
-      $show_link = FALSE;
-    }
-  }
-
-  if ($show['edit']) {
-    if (array_key_exists('editable', $presentation_tables[$group])) {
-      $show['edit'] = $presentation_tables[$group]['editable'];
-    }
-  }
-
-  if ($show['history']) {
-    if ($group != 'request') {
-      $show['history'] = FALSE;
-    }
-  }
-
-  if ($show['agreement']) {
-    if ($group != 'request') {
-      $show['agreement'] = FALSE;
-    }
-  }
-
-  if ($show['clone']) {
-    if ($group != 'request') {
-      $show['clone'] = FALSE;
-    }
-    elseif ($request['top']['status'][0]->value == MFCS_REQUEST_STATUS_DELETED) {
-      $show['clone'] = FALSE;
-    }
-  }
-
-  if ($show['ical']) {
-    if ($group != 'dates') {
-      $show['ical'] = FALSE;
-    }
-  }
-
-  // create the group, using the numeric row id if available.
-  if (array_key_exists('group', $presentation_tables[$group])) {
-    $row = (int) $presentation_tables[$group]['group'];
-
-    if (!array_key_exists($row, $group_path)) {
-      $form['display']['groups'][$row] = array(
-        '#prefix' => '',
-        '#suffix' => '',
-        '#weight' => $row,
-        '#attributes' => array(
-          'id' => 'section-request-' . $request_id . '-group-' . $row,
-          'class' => array(
-            'group',
-            'group-' . $row,
-          ),
-        ),
-        '#extra_prefix' => '',
-      );
-    }
-
-    $group_path = &$form['display']['groups'][$row];
-  }
-
-  // create the group if there is no specified row id using default weights.
-  if (!array_key_exists($group, $group_path)) {
-    $group_path[$group] = array(
-      '#prefix' => '',
-      '#suffix' => '',
-      '#weight' => 0,
-      '#attributes' => array(
-        'id' => 'section-request-' . $request_id . '-' . $group,
-        'class' => array(
-          'section-request',
-          'section-request-' . $group,
-        ),
-      ),
-      '#extra_prefix' => '',
-    );
-
-    if (isset($presentation_tables[$group]['label'])) {
-      $group_path[$group]['#extra_prefix'] .= '<div class="section-request-' . $request_id . '-' . $group . '-label-wrapper section-request-label-wrapper">';
-
-      if ($show_link) {
-        if ($show['clone']) {
-          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/create-0/' . $request_id . $url_arguments . '" class="section-request-' . $request_id . '-' . $group . '-history section-request-clone no-print" title="'. t("Copy Request") . '">Copy</a>';
-        }
-
-        if ($show['edit']) {
-          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/edit-0/' . $request_id . '/' . $group . $url_arguments . '" class="section-request-' . $request_id . '-' . $group . '-edit section-request-edit no-print" title="'. t("Edit Request") . '">Edit</a>';
-        }
-
-        if ($show['history']) {
-          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/history-0/' . $request_id . $url_arguments . '" class="section-request-' . $request_id . '-' . $group . '-history section-request-history no-print" title="'. t("View History of Request") . '">History</a>';
-        }
-
-        if ($show['agreement']) {
-          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/agreement-0/' . $request_id . $url_arguments . '" class="section-request-' . $request_id . '-' . $group . '-agreement section-request-agreement no-print" title="'. t("View Request") . '">Agreement</a>';
-        }
-
-        if ($show['ical']) {
-          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/ical-0/' . $request_id . $url_arguments . '" class="section-request-' . $request_id . '-' . $group . '-ical section-request-ical no-print" title="'. t("Download iCal of Request") . '">iCal</a>';
-        }
-      }
-
-      $group_path[$group]['#extra_prefix'] .= '<h2 id="section-request-' . $request_id . '-' . $group . '-label" class="section-request-label section-request-' . $group . '-label">';
-      $group_path[$group]['#extra_prefix'] .= $presentation_tables[$group]['label'];
-      $group_path[$group]['#extra_prefix'] .= '</h2>';
-
-      $group_path[$group]['#extra_prefix'] .= '</div>';
-    }
-
-    if (isset($presentation_tables[$group]['weight'])) {
-      $group_path[$group]['#weight'] = $presentation_tables[$group]['weight'];
-    }
-  }
-
-  return $row;
-}
-
-/**
  * Pre-Validation for mfcs_request_view_0_form().
  *
  * @param array $form
@@ -1833,7 +1767,7 @@ function mfcs_request_view_0_form_pre_validate(&$form, &$form_state) {
   }
 
   $unrequire_usage_fields = TRUE;
-  if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
+  if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE || $step == MFCS_REVIEW_STEP_REVIEW || $step == MFCS_REVIEW_STEP_REQUIREMENTS || $step == MFCS_REVIEW_STEP_MAKE_DECISIONS) {
     if ($decision == MFCS_REVIEW_DECISION_REQUIREMENT) {
       $requirements_waived = FALSE;
       if (isset($form_state['values']['review']['operations']['presidents_approval']) && $form_state['values']['review']['operations']['presidents_approval'] == 1) {
@@ -2174,12 +2108,12 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
       }
 
       $requirements_names = array(
-        'facilities' => array('human_name' => "Facilities Fees", 'amount' => TRUE, 'hours' => FALSE, 'days' => TRUE, 'personnel' => FALSE),
-        'equipment' => array('human_name' => "Equipment Fees", 'amount' => TRUE, 'hours' => FALSE, 'days' => TRUE, 'personnel' => FALSE),
-        'custodial' => array('human_name' => "Custodial Fees", 'amount' => TRUE, 'hours' => TRUE, 'days' => TRUE, 'personnel' => TRUE),
-        'maintenance' => array('human_name' => "Maintenance Fees", 'amount' => TRUE, 'hours' => TRUE, 'days' => TRUE, 'personnel' => TRUE),
-        'grounds' => array('human_name' => "Grounds Fees", 'amount' => TRUE, 'hours' => TRUE, 'days' => TRUE, 'personnel' => TRUE),
-        'security' => array('human_name' => "Security Fees", 'amount' => TRUE, 'hours' => TRUE, 'days' => TRUE, 'personnel' => TRUE),
+        'facilities' => array('human_name' => "Facilities Fees", 'amount' => TRUE, 'hours' => FALSE, 'days' => TRUE, 'quantity' => FALSE),
+        'equipment' => array('human_name' => "Equipment Fees", 'amount' => TRUE, 'hours' => FALSE, 'days' => TRUE, 'quantity' => FALSE),
+        'custodial' => array('human_name' => "Custodial Fees", 'amount' => TRUE, 'hours' => TRUE, 'days' => TRUE, 'quantity' => TRUE),
+        'maintenance' => array('human_name' => "Maintenance Fees", 'amount' => TRUE, 'hours' => TRUE, 'days' => TRUE, 'quantity' => TRUE),
+        'grounds' => array('human_name' => "Grounds Fees", 'amount' => TRUE, 'hours' => TRUE, 'days' => TRUE, 'quantity' => TRUE),
+        'security' => array('human_name' => "Security Fees", 'amount' => TRUE, 'hours' => TRUE, 'days' => TRUE, 'quantity' => TRUE),
       );
 
       foreach ($requirements_names as $requirement_machine_name => $requirement) {
@@ -2187,7 +2121,7 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
           continue;
         }
 
-        if ($requirement['amount']) {
+        if ($requirement['amount'] && isset($requirements[$requirement_machine_name]['amount']) && (!empty($requirements[$requirement_machine_name]['amount']) || cf_is_integer($requirements[$requirement_machine_name]['amount']))) {
           $matches = array();
           $matched = preg_match('/^(\d+|\d+\.\d|\d+\.\d\d)$/i', $requirements[$requirement_machine_name]['amount'], $matches);
 
@@ -2210,7 +2144,7 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
           }
         }
 
-        if ($requirement['hours']) {
+        if ($requirement['hours'] && isset($requirements[$requirement_machine_name]['hours']) && (!empty($requirements[$requirement_machine_name]['hours']) || cf_is_integer($requirements[$requirement_machine_name]['hours']))) {
           $matches = array();
           $matched = preg_match('/^(\d+|\d+\.\d|\d+\.\d\d)$/i', $requirements[$requirement_machine_name]['hours'], $matches);
 
@@ -2233,29 +2167,25 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
           }
         }
 
-        if ($requirement['days']) {
-          if (isset($requirements[$requirement_machine_name]['days'])) {
-            if (intval($requirements[$requirement_machine_name]['days']) != $requirements[$requirement_machine_name]['days']) {
-              form_set_error('review][operations][requirements][' . $requirement_machine_name . '][days', t("The " . $requirement['human_name'] . " days '@days' is not an allowed number. Use only numbers without decimal places.", array('@days' => $requirements[$requirement_machine_name]['days'])));
-              $failure = TRUE;
-            }
-            elseif ($requirements[$requirement_machine_name]['days'] <= 0) {
-              form_set_error('review][operations][requirements][' . $requirement_machine_name . '][days', t("The " . $requirement['human_name'] . " days '@days' must be greater than 0.", array('@days' => $requirements[$requirement_machine_name]['days'])));
-              $failure = TRUE;
-            }
+        if ($requirement['days'] && isset($requirements[$requirement_machine_name]['days']) && (!empty($requirements[$requirement_machine_name]['days']) || cf_is_integer($requirements[$requirement_machine_name]['days']))) {
+          if (intval($requirements[$requirement_machine_name]['days']) != $requirements[$requirement_machine_name]['days']) {
+            form_set_error('review][operations][requirements][' . $requirement_machine_name . '][days', t("The " . $requirement['human_name'] . " days '@days' is not an allowed number. Use only numbers without decimal places.", array('@days' => $requirements[$requirement_machine_name]['days'])));
+            $failure = TRUE;
+          }
+          elseif ($requirements[$requirement_machine_name]['days'] <= 0) {
+            form_set_error('review][operations][requirements][' . $requirement_machine_name . '][days', t("The " . $requirement['human_name'] . " days '@days' must be greater than 0.", array('@days' => $requirements[$requirement_machine_name]['days'])));
+            $failure = TRUE;
           }
         }
 
-        if ($requirement['personnel']) {
-          if (isset($requirements[$requirement_machine_name]['personnel'])) {
-            if (intval($requirements[$requirement_machine_name]['personnel']) != $requirements[$requirement_machine_name]['personnel']) {
-              form_set_error('review][operations][requirements][' . $requirement_machine_name . '][personnel', t("The " . $requirement['human_name'] . " personnel '@personnel' is not an allowed number. Use only numbers without decimal places.", array('@personnel' => $requirements[$requirement_machine_name]['personnel'])));
-              $failure = TRUE;
-            }
-            elseif ($requirements[$requirement_machine_name]['personnel'] <= 0) {
-              form_set_error('review][operations][requirements][' . $requirement_machine_name . '][personnel', t("The " . $requirement['human_name'] . " personnel '@personnel' must be greater than 0.", array('@personnel' => $requirements[$requirement_machine_name]['personnel'])));
-              $failure = TRUE;
-            }
+        if ($requirement['quantity'] && isset($requirements[$requirement_machine_name]['quantity']) && (!empty($requirements[$requirement_machine_name]['quantity']) || cf_is_integer($requirements[$requirement_machine_name]['quantity']))) {
+          if (intval($requirements[$requirement_machine_name]['quantity']) != $requirements[$requirement_machine_name]['quantity']) {
+            form_set_error('review][operations][requirements][' . $requirement_machine_name . '][quantity', t("The " . $requirement['human_name'] . " personnel '@quantity' is not an allowed number. Use only numbers without decimal places.", array('@quantity' => $requirements[$requirement_machine_name]['quantity'])));
+            $failure = TRUE;
+          }
+          elseif ($requirements[$requirement_machine_name]['quantity'] <= 0) {
+            form_set_error('review][operations][requirements][' . $requirement_machine_name . '][quantity', t("The " . $requirement['human_name'] . " personnel '@quantity' must be greater than 0.", array('@quantity' => $requirements[$requirement_machine_name]['quantity'])));
+            $failure = TRUE;
           }
         }
       }
@@ -2406,6 +2336,121 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
     }
 
     if ($success) {
+      // walk through each requirement and only apply it if values change for a given requirement group.
+      $requirements_form = array();
+      if (isset($form['review']['operations']['requirements'])) {
+        $requirements_form = $form['review']['operations']['requirements'];
+      }
+
+      $requirements_state = array();
+      if (isset($form_state['values']['review']['operations']['requirements'])) {
+        $requirements_state = $form_state['values']['review']['operations']['requirements'];
+      }
+
+      $requirements_fields = array(
+        'facilities' => array('amount' => TRUE, 'hours' => FALSE, 'days' => TRUE, 'quantity' => FALSE),
+        'equipment' => array('amount' => TRUE, 'hours' => FALSE, 'days' => TRUE, 'quantity' => FALSE),
+        'custodial' => array('amount' => TRUE, 'hours' => TRUE, 'days' => TRUE, 'quantity' => TRUE),
+        'maintenance' => array('amount' => TRUE, 'hours' => TRUE, 'days' => TRUE, 'quantity' => TRUE),
+        'grounds' => array('amount' => TRUE, 'hours' => TRUE, 'days' => TRUE, 'quantity' => TRUE),
+        'security' => array('amount' => TRUE, 'hours' => TRUE, 'days' => TRUE, 'quantity' => TRUE),
+      );
+
+      $changes_requirements = array(
+        'facilities' => array('detected' => FALSE),
+        'equipment' => array('detected' => FALSE),
+        'custodial' => array('detected' => FALSE),
+        'maintenance' => array('detected' => FALSE),
+        'grounds' => array('detected' => FALSE),
+        'security' => array('detected' => FALSE),
+      );
+
+      $changes_insurance = array(
+        'provided' => array('detected' => FALSE),
+        'contractor' => array('detected' => FALSE),
+        'unaffiliated' => array('detected' => FALSE),
+      );
+
+      $any_requirements_changes_made = FALSE;
+
+      // process requirements changes.
+      foreach ($changes_requirements as $requirements_field => &$changes) {
+        if (!isset($requirements_form[$requirements_field]) || !isset($requirements_state[$requirements_field])) {
+          continue;
+        }
+
+        foreach ($requirements_fields[$requirements_field] as $requirements_part_key => $requirements_part_value) {
+          if (!$requirements_part_value || !isset($requirements_state[$requirements_field][$requirements_part_key])) {
+            continue;
+          }
+
+          $value_length = strlen(trim($requirements_state[$requirements_field][$requirements_part_key]));
+          if ($value_length == 0) {
+            if (strlen(trim(($requirements_form[$requirements_field][$requirements_part_key]['#default_value']))) != $value_length) {
+              $changes['detected'] = NULL;
+              break;
+            }
+          }
+          elseif ($requirements_form[$requirements_field][$requirements_part_key]['#default_value'] != $requirements_state[$requirements_field][$requirements_part_key]) {
+            $changes['detected'] = TRUE;
+            $any_requirements_changes_made = TRUE;
+            break;
+          }
+          unset($value_length);
+        }
+      }
+
+      // remove requirements fields that have no changes detected from the "save" variable.
+      foreach ($changes_requirements as $requirement_name => $requirements_change) {
+        if (array_key_exists($requirement_name, $extra['requirements'])) {
+          if ($requirements_change['detected'] === FALSE) {
+            unset($extra['requirements'][$requirement_name]);
+          }
+          elseif (is_null($requirements_change['detected'])) {
+            $extra['requirements'][$requirement_name] = NULL;
+            $any_requirements_changes_made = TRUE;
+          }
+        }
+      }
+
+      // process insurance changes.
+      foreach ($changes_insurance as $insurance_field => &$changes) {
+        if (!isset($requirements_form[$insurance_field]) || !isset($requirements_state[$insurance_field])) {
+          continue;
+        }
+
+        if (isset($requirements_form['insurance'][$insurance_field])) {
+          if ($requirements_form['insurance'][$insurance_field]['#default_value'] != $requirements_state[$insurance_field]) {
+            $changes['detected'] = TRUE;
+
+            $any_requirements_changes_made = TRUE;
+          }
+        }
+      }
+
+      // remove insurance fields that have no changes detected from the "save" variable.
+      foreach ($changes_insurance as $insurance_name => $insurance_change) {
+        if (array_key_exists($insurance_name, $extra['insurance'])) {
+          if ($insurance_change['detected'] === FALSE) {
+            unset($extra[$insurance_name]);
+          }
+          elseif (is_null($insurance_change['detected'])) {
+            $extra[$insurance_name] = NULL;
+          }
+        }
+      }
+
+      if ($decision == MFCS_REVIEW_DECISION_REQUIREMENT && !$any_requirements_changes_made) {
+        form_set_error('form', "Requirements decision has been selected, but no changes have been made. If you only wish to leave a comment, then select comment.");
+        watchdog(MFCS_WATCHDOG_ID, "Requirements decision has been selected, but no changes have been made.", array(), WATCHDOG_ERROR);
+
+        $form_state['rebuild'] = TRUE;
+        $form_state['redirect'] = FALSE;
+        $form_state['submitted'] = FALSE;
+
+        return;
+      }
+
       $success = mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], $decision, $message, $extra);
     }
 

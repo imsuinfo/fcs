@@ -347,6 +347,8 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
     return FALSE;
   }
 
+  $manager = user_access('mfcs manage', $user);
+
   $instance = mfcs_instance();
 
   $send_email = TRUE;
@@ -589,6 +591,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
     else {
       $mfcs_current_requirements['requirements_other']++;
     }
+
     $mfcs_field_requirements['other'] = array(
       'request_id' => $request_id,
       'revision' => $mfcs_current_requirements['requirements_other'],
@@ -601,27 +604,53 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
 
   if ($decision == MFCS_REVIEW_DECISION_REQUIREMENT && ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE || $step == MFCS_REVIEW_STEP_REVIEW || $step == MFCS_REVIEW_STEP_REQUIREMENTS || $step == MFCS_REVIEW_STEP_MAKE_DECISIONS || $step == MFCS_REVIEW_STEP_COMPLETED)) {
     $uses = array();
+    $uses_as_manager = array();
     if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
-      if ($is_effective_venue_coordinator && $type != MFCS_REQUEST_TYPE_QUICK_MEETING) {
-        $uses['facilities'] = 'facilities';
-        $uses['equipment'] = 'equipment';
+      if ($type != MFCS_REQUEST_TYPE_QUICK_MEETING) {
+        if ($is_effective_venue_coordinator) {
+          $uses['facilities'] = MFCS_REVIEWER_CLASSIFICATION_FACILITIES;
+          $uses['equipment'] = MFCS_REVIEWER_CLASSIFICATION_FACILITIES; // @fixme: create an equipment classification
+        }
+        elseif ($manager) {
+          $uses['facilities'] = MFCS_REVIEWER_CLASSIFICATION_FACILITIES;
+          $uses['equipment'] = MFCS_REVIEWER_CLASSIFICATION_FACILITIES; // @fixme: create an equipment classification
+
+          $uses_as_manager['facilities'] = MFCS_REVIEWER_CLASSIFICATION_FACILITIES;
+          $uses_as_manager['equipment'] = MFCS_REVIEWER_CLASSIFICATION_FACILITIES; // @fixme: create an equipment classification
+        }
       }
     }
     elseif ($step == MFCS_REVIEW_STEP_REVIEW) {
+      if ($manager) {
+        $uses['custodial'] = MFCS_REVIEWER_CLASSIFICATION_CUSTODIAL;
+        $uses['maintenance'] = MFCS_REVIEWER_CLASSIFICATION_MAINTENANCE;
+        $uses['grounds'] = MFCS_REVIEWER_CLASSIFICATION_FACILITIES; // @fixme: create a grounds classification
+        $uses['security'] = MFCS_REVIEWER_CLASSIFICATION_SECURITY;
+
+        $uses_as_manager['custodial'] = MFCS_REVIEWER_CLASSIFICATION_CUSTODIAL;
+        $uses_as_manager['maintenance'] = MFCS_REVIEWER_CLASSIFICATION_MAINTENANCE;
+        $uses_as_manager['grounds'] = MFCS_REVIEWER_CLASSIFICATION_FACILITIES; // @fixme: create a grounds classification
+        $uses_as_manager['security'] = MFCS_REVIEWER_CLASSIFICATION_SECURITY;
+      }
+
       if (isset($reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_FACILITIES_CUSTODIAL]) || isset($reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_CUSTODIAL])) {
-        $uses['custodial'] = 'custodial';
+        $uses['custodial'] = MFCS_REVIEWER_CLASSIFICATION_CUSTODIAL;
+        unset($uses_as_manager['custodial']);
       }
 
       if (isset($reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_MAINTENANCE])) {
-        $uses['maintenance'] = 'maintenance';
+        $uses['maintenance'] = MFCS_REVIEWER_CLASSIFICATION_MAINTENANCE;
+        unset($uses_as_manager['maintenance']);
       }
 
       if (isset($reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_FACILITIES])) {
-        $uses['grounds'] = 'grounds';
+        $uses['grounds'] = MFCS_REVIEWER_CLASSIFICATION_FACILITIES; // @fixme: create an grounds classification
+        unset($uses_as_manager['grounds']);
       }
 
       if (isset($reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_SECURITY])) {
-        $uses['security'] = 'security';
+        $uses['security'] = MFCS_REVIEWER_CLASSIFICATION_SECURITY;
+        unset($uses_as_manager['security']);
       }
     }
 
@@ -629,37 +658,66 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
       if ($step == MFCS_REVIEW_STEP_REVIEW) {
         $insurance_requirements = TRUE;
       }
-
-      $insurance_provided_exception = TRUE;
-      $reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_PURCHASING] = MFCS_REVIEWER_CLASSIFICATION_PURCHASING;
+      else {
+        $insurance_provided_exception = TRUE;
+        $reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_PURCHASING] = MFCS_REVIEWER_CLASSIFICATION_PURCHASING;
+      }
+    }
+    elseif ($manager) {
+      if ($step == MFCS_REVIEW_STEP_REVIEW) {
+        $insurance_requirements = TRUE;
+      }
+      else {
+        $insurance_provided_exception = TRUE;
+      }
     }
 
-    foreach ($uses as $use) {
-      $requirements = array('quantity' => 0, 'hours' => 0, 'days' => 0, 'amount' => 0);
+    foreach ($uses as $use => $use_id) {
+      if (!isset($extra['requirements']) || !array_key_exists($use, $extra['requirements'])) {
+        unset($uses_as_manager[$use]);
 
-      if (!empty($extra['requirements'][$use]['quantity'])) {
-        $requirements['quantity'] = $extra['requirements'][$use]['quantity'];
-      }
-
-      if (!empty($extra['requirements'][$use]['hours'])) {
-        $hours = mfcs_convert_value_to_database_format($extra['requirements'][$use]['hours'], 'currency');
-        if ($hours !== FALSE) {
-          $requirements['hours'] = $hours;
+        // @fixme: at the moment, handle the duplicate cases, which will be removed once the duplicates are made distinct.
+        if ($use == 'facilities' || $use == 'equipment' || $use == 'grounds') {
+          if (!isset($uses_as_manager['facilities']) && !isset($uses_as_manager['equipment']) && !isset($uses_as_manager['grounds'])) {
+            unset($reviewer_classifications[$use_id]);
+          }
         }
-      }
-
-      if (!empty($extra['requirements'][$use]['days'])) {
-        $days = mfcs_convert_value_to_database_format($extra['requirements'][$use]['days'], 'currency');
-        if ($days !== FALSE) {
-          $requirements['days'] = $days;
+        else {
+          unset($reviewer_classifications[$use_id]);
         }
+        continue;
       }
 
-      if (!empty($extra['requirements'][$use]['amount'])) {
-        $amount = mfcs_convert_value_to_database_format($extra['requirements'][$use]['amount'], 'currency');
+      if (is_null($extra['requirements'][$use])) {
+        $requirements = array('quantity' => NULL, 'hours' => NULL, 'days' => NULL, 'amount' => NULL);
+      }
+      else {
+        $requirements = array('quantity' => 0, 'hours' => 0, 'days' => 0, 'amount' => 0);
 
-        if ($amount !== FALSE) {
-          $requirements['amount'] = $amount;
+        if (!empty($extra['requirements'][$use]['quantity'])) {
+          $requirements['quantity'] = $extra['requirements'][$use]['quantity'];
+        }
+
+        if (!empty($extra['requirements'][$use]['hours'])) {
+          $hours = mfcs_convert_value_to_database_format($extra['requirements'][$use]['hours'], 'currency');
+          if ($hours !== FALSE) {
+            $requirements['hours'] = $hours;
+          }
+        }
+
+        if (!empty($extra['requirements'][$use]['days'])) {
+          $days = mfcs_convert_value_to_database_format($extra['requirements'][$use]['days'], 'currency');
+          if ($days !== FALSE) {
+            $requirements['days'] = $days;
+          }
+        }
+
+        if (!empty($extra['requirements'][$use]['amount'])) {
+          $amount = mfcs_convert_value_to_database_format($extra['requirements'][$use]['amount'], 'currency');
+
+          if ($amount !== FALSE) {
+            $requirements['amount'] = $amount;
+          }
         }
       }
 
@@ -682,13 +740,25 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
         'delta' => 0,
         'user_id' => $user->uid,
         'date' => $instance,
-        'quantity' => $requirements['quantity'],
-        'hours' => $requirements['hours'],
-        'days' => $requirements['days'],
-        'amount' => $requirements['amount'],
       );
 
+      foreach (array('quantity', 'hours', 'days', 'amount') as $use_column) {
+        if (!is_null($requirements[$use_column])) {
+          $mfcs_field_requirements[$use][$use_column] = $requirements[$use_column];
+        }
+      }
+      unset($use_column);
       unset($requirements);
+    }
+
+    if ($manager && !empty($uses_as_manager)) {
+      if (count($uses_as_manager) == count($uses)) {
+        $reviewer_classifications = array();
+        $reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_MANAGER] = MFCS_REVIEWER_CLASSIFICATION_MANAGER;
+      }
+      else {
+        $reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_MANAGER] = MFCS_REVIEWER_CLASSIFICATION_MANAGER;
+      }
     }
 
     if ($insurance_requirements) {
@@ -740,6 +810,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
         else {
           $mfcs_current_insurance['insurance_contractor']++;
         }
+
         $mfcs_field_insurance_contractor = array(
           'request_id' => $request_id,
           'revision' => $mfcs_current_insurance['insurance_contractor'],

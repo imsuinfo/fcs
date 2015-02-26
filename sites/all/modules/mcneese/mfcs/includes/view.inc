@@ -10,6 +10,163 @@
  * @{
  */
 
+
+
+/**
+ * Create the group path presentation structure.
+ *
+ * @param array $form
+ *   The form array as defined by drupals form api.
+ * @param int $request_id
+ *   The request id.
+ * @param string $group
+ *   The group name.
+ * @param array $presentation_tables
+ *   An array of tables defining how the presentation is to be built.
+ * @param array $show
+ *   An array containing the following keys:
+ *   'edit': When TRUE, the edit link will be shown in the group header.
+ *   'history': When TRUE, the history link is made visible.
+ * @param array $request
+ *   The request settings array.
+ *
+ * @return int|null
+ *   The row number or NULL when there is no valid row.
+ *   FALSE is returned for invalid rows.
+ *
+ * @see: mfcs_request_view_0_form()
+ */
+function mfcs_view_setup_group_path(&$form, $request_id, $group, $presentation_tables, $show, $request) {
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  $row = NULL;
+  $group_path = &$form['display']['groups'];
+  $request_type = $request['information']['type'][0]->value;
+
+  $show_link = TRUE;
+  if (isset($presentation_tables[$group]['request_type']['hide_link']) && is_array($presentation_tables[$group]['request_type']['hide_link'])) {
+    if (in_array($request_type, $presentation_tables[$group]['request_type']['hide_link'])) {
+      $show_link = FALSE;
+    }
+  }
+
+  if ($show['edit']) {
+    if (array_key_exists('editable', $presentation_tables[$group])) {
+      $show['edit'] = $presentation_tables[$group]['editable'];
+    }
+  }
+
+  if ($show['history']) {
+    if ($group != 'request') {
+      $show['history'] = FALSE;
+    }
+  }
+
+  if ($show['agreement']) {
+    if ($group != 'request') {
+      $show['agreement'] = FALSE;
+    }
+  }
+
+  if ($show['clone']) {
+    if ($group != 'request') {
+      $show['clone'] = FALSE;
+    }
+    elseif ($request['top']['status'][0]->value == MFCS_REQUEST_STATUS_DELETED) {
+      $show['clone'] = FALSE;
+    }
+  }
+
+  if ($show['ical']) {
+    if ($group != 'dates') {
+      $show['ical'] = FALSE;
+    }
+  }
+
+  // create the group, using the numeric row id if available.
+  if (array_key_exists('group', $presentation_tables[$group])) {
+    $row = (int) $presentation_tables[$group]['group'];
+
+    if (!array_key_exists($row, $group_path)) {
+      $form['display']['groups'][$row] = array(
+        '#prefix' => '',
+        '#suffix' => '',
+        '#weight' => $row,
+        '#attributes' => array(
+          'id' => 'section-request-' . $request_id . '-group-' . $row,
+          'class' => array(
+            'group',
+            'group-' . $row,
+          ),
+        ),
+        '#extra_prefix' => '',
+      );
+    }
+
+    $group_path = &$form['display']['groups'][$row];
+  }
+
+  // create the group if there is no specified row id using default weights.
+  if (!array_key_exists($group, $group_path)) {
+    $group_path[$group] = array(
+      '#prefix' => '',
+      '#suffix' => '',
+      '#weight' => 0,
+      '#attributes' => array(
+        'id' => 'section-request-' . $request_id . '-' . $group,
+        'class' => array(
+          'section-request',
+          'section-request-' . $group,
+        ),
+      ),
+      '#extra_prefix' => '',
+    );
+
+    if (isset($presentation_tables[$group]['label'])) {
+      $group_path[$group]['#extra_prefix'] .= '<div class="section-request-' . $request_id . '-' . $group . '-label-wrapper section-request-label-wrapper">';
+
+      if ($show_link) {
+        if ($show['clone']) {
+          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/create-0/' . $request_id . $url_arguments . '" class="section-request-' . $request_id . '-' . $group . '-history section-request-clone no-print" title="'. t("Copy Request") . '">Copy</a>';
+        }
+
+        if ($show['edit']) {
+          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/edit-0/' . $request_id . '/' . $group . $url_arguments . '" class="section-request-' . $request_id . '-' . $group . '-edit section-request-edit no-print" title="'. t("Edit Request") . '">Edit</a>';
+        }
+
+        if ($show['history']) {
+          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/history-0/' . $request_id . $url_arguments . '" class="section-request-' . $request_id . '-' . $group . '-history section-request-history no-print" title="'. t("View History of Request") . '">History</a>';
+        }
+
+        if ($show['agreement']) {
+          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/agreement-0/' . $request_id . $url_arguments . '" class="section-request-' . $request_id . '-' . $group . '-agreement section-request-agreement no-print" title="'. t("View Request") . '">Agreement</a>';
+        }
+
+        if ($show['ical']) {
+          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/ical-0/' . $request_id . $url_arguments . '" class="section-request-' . $request_id . '-' . $group . '-ical section-request-ical no-print" title="'. t("Download iCal of Request") . '">iCal</a>';
+        }
+      }
+
+      $group_path[$group]['#extra_prefix'] .= '<h2 id="section-request-' . $request_id . '-' . $group . '-label" class="section-request-label section-request-' . $group . '-label">';
+      $group_path[$group]['#extra_prefix'] .= $presentation_tables[$group]['label'];
+      $group_path[$group]['#extra_prefix'] .= '</h2>';
+
+      $group_path[$group]['#extra_prefix'] .= '</div>';
+    }
+
+    if (isset($presentation_tables[$group]['weight'])) {
+      $group_path[$group]['#weight'] = $presentation_tables[$group]['weight'];
+    }
+  }
+
+  return $row;
+}
+
 /**
  * Generate an array structure for a specific request item.
  *

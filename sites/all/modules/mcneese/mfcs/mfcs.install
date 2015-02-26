@@ -27,12 +27,12 @@ function mfcs_table_install_structure() {
   );
 
   $structure['requirements'] = array(
-    'facilities' => array('quantity' => 'unsigned', 'hours' => 'unsigned', 'days' => 'unsigned', 'amount' => 'unsigned'),
-    'equipment' => array('quantity' => 'unsigned', 'hours' => 'unsigned', 'days' => 'unsigned', 'amount' => 'unsigned'),
-    'security' => array('quantity' => 'unsigned', 'hours' => 'unsigned', 'days' => 'unsigned', 'amount' => 'unsigned'),
-    'custodial' => array('quantity' => 'unsigned', 'hours' => 'unsigned', 'days' => 'unsigned', 'amount' => 'unsigned'),
-    'maintenance' => array('quantity' => 'unsigned', 'hours' => 'unsigned', 'days' => 'unsigned', 'amount' => 'unsigned'),
-    'grounds' => array('quantity' => 'unsigned', 'hours' => 'unsigned', 'days' => 'unsigned', 'amount' => 'unsigned'),
+    'facilities' => array('quantity' => 'requirement', 'hours' => 'requirement', 'days' => 'requirement', 'amount' => 'requirement'),
+    'equipment' => array('quantity' => 'requirement', 'hours' => 'requirement', 'days' => 'requirement', 'amount' => 'requirement'),
+    'security' => array('quantity' => 'requirement', 'hours' => 'requirement', 'days' => 'requirement', 'amount' => 'requirement'),
+    'custodial' => array('quantity' => 'requirement', 'hours' => 'requirement', 'days' => 'requirement', 'amount' => 'requirement'),
+    'maintenance' => array('quantity' => 'requirement', 'hours' => 'requirement', 'days' => 'requirement', 'amount' => 'requirement'),
+    'grounds' => array('quantity' => 'requirement', 'hours' => 'requirement', 'days' => 'requirement', 'amount' => 'requirement'),
     'other' => 'unsigned_tiny',
     'waived' => 'unsigned_tiny',
     'university' => 'unsigned_tiny',
@@ -1363,6 +1363,14 @@ function mfcs_schema() {
           else {
             $schema[$table_name]['primary key'][] = $name;
           }
+        }
+        elseif ($type == 'requirement') {
+          $schema[$table_name]['fields'][$name] = array(
+            'type' => 'int',
+            'size' => 'normal',
+            'not null' => FALSE,
+            'unsigned' => TRUE,
+          );
         }
       }
     }
