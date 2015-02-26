@@ -1310,7 +1310,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
               '#title' => '<span class="element-invisible">' . $use_title . ' Fee </span>Personnel',
               '#default_value' => NULL,
               '#size' => 16,
-              '#min' => 0,
+              '#min' => 1,
               '#required' => $uses_requirements[$use_name],
               '#attributes' => array(
                 'class' => array(
@@ -1334,7 +1334,6 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
               '#title' => '<span class="element-invisible">' . $use_title . ' Fee </span>Hours',
               '#default_value' => NULL,
               '#size' => 16,
-              '#min' => 0,
               '#required' => $uses_requirements[$use_name],
               '#attributes' => array(
                 'class' => array(
@@ -1356,7 +1355,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
             '#type' => 'numberfield',
             '#title' => '<span class="element-invisible">' . $use_title . ' Fee </span>Days',
             '#default_value' => NULL,
-            '#min' => 0,
+            '#min' => 1,
             '#size' => 16,
             '#required' => $uses_requirements[$use_name],
             '#attributes' => array(
@@ -1379,7 +1378,6 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
             '#title' => '<span class="element-invisible">' . $use_title . ' Fee </span>Amount',
             '#default_value' => NULL,
             '#size' => 16,
-            '#min' => 0,
             '#required' => $uses_requirements[$use_name],
             '#attributes' => array(
               'class' => array(
@@ -1930,6 +1928,7 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
     }
 
     $failure = FALSE;
+    $check_requirements = FALSE;
 
     // only allow operations for states and steps that make sense to.
     $allowed_statuses = array(
@@ -2005,6 +2004,9 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
         $form_state['values']['review']['operations']['decision'] = MFCS_REVIEW_DECISION_WAVE;
         $decision = MFCS_REVIEW_DECISION_WAVE;
       }
+      else {
+        $check_requirements = TRUE;
+      }
     }
 
     $requirements_required = TRUE;
@@ -2029,162 +2031,7 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
     }
 
     if ($step == MFCS_REVIEW_STEP_REVIEW && $decision == MFCS_REVIEW_DECISION_REQUIREMENT && $requirements_required) {
-      $requirements = array();
-      if (isset($form_state['values']['review']['operations']['requirements'])) {
-        $requirements = $form_state['values']['review']['operations']['requirements'];
-      }
-
-      if (array_key_exists('facilities', $requirements) && !empty($requirements['facilities']['amount'])) {
-        $matches = array();
-        $matched = preg_match('/^(\d+|\d+\.\d|\d+\.\d\d)$/i', $requirements['facilities']['amount'], $matches);
-
-        if (!$matched) {
-          form_set_error('review][operations][requirements][facilities][amount', t("@facilities_requirement is not a valid facilities requirement amount. Use only numbers and two decimal places. Do not provide a dollar sign.", array('@facilities' => $requirements['facilities']['amount'])));
-          $failure = TRUE;
-        }
-
-        if (isset($requirements['facilities']['quantity']) && intval($requirements['facilities']['quantity']) != $requirements['facilities']['quantity']) {
-          form_set_error('review][operations][requirements][facilities][quantity', t("@quantity is not an allowed number. Use only numbers without decimal places.", array('@quantity' => $requirements['facilities']['quantity'])));
-          $failure = TRUE;
-        }
-
-        if (isset($requirements['facilities']['hours']) && !cf_is_integer($requirements['facilities']['hours'])) {
-          form_set_error('review][operations][requirements][facilities][hours', t("@hours is not an valid number. Use only numbers.", array('@hours' => $requirements['facilities']['hours'])));
-          $failure = TRUE;
-        }
-
-        if (isset($requirements['facilities']['days']) && intval($requirements['facilities']['days']) != $requirements['facilities']['days']) {
-          form_set_error('review][operations][requirements][facilities][days', t("@days is not an allowed number. Use only numbers without decimal places.", array('@days' => $requirements['facilities']['days'])));
-          $failure = TRUE;
-        }
-      }
-
-      if (array_key_exists('equipment', $requirements) && !empty($requirements['equipment']['amount'])) {
-        $matches = array();
-        $matched = preg_match('/^(\d+|\d+\.\d|\d+\.\d\d)$/i', $requirements['equipment']['amount'], $matches);
-
-        if (!$matched) {
-          form_set_error('review][operations][requirements][equipment][amount', t("@equipment is not a valid additional equipment requirement. Use only numbers and two decimal places. Do not provide a dollar sign.", array('@equipment' => $requirements['equipment']['amount'])));
-          $failure = TRUE;
-        }
-
-        if (isset($requirements['equipment']['quantity']) && intval($requirements['equipment']['quantity']) != $requirements['equipment']['quantity']) {
-          form_set_error('review][operations][requirements][equipment][quantity', t("@quantity is not an allowed number. Use only numbers without decimal places.", array('@quantity' => $requirements['equipment']['quantity'])));
-          $failure = TRUE;
-        }
-
-        if (isset($requirements['equipment']['hours']) && !cf_is_integer($requirements['equipment']['hours'])) {
-          form_set_error('review][operations][requirements][equipment][hours', t("@hours is not an valid number. Use only numbers.", array('@hours' => $requirements['equipment']['hours'])));
-          $failure = TRUE;
-        }
-
-        if (isset($requirements['equipment']['days']) && intval($requirements['equipment']['days']) != $requirements['equipment']['days']) {
-          form_set_error('review][operations][requirements][equipment][days', t("@days is not an allowed number. Use only numbers without decimal places.", array('@days' => $requirements['equipment']['days'])));
-          $failure = TRUE;
-        }
-      }
-
-      if (array_key_exists('custodial', $requirements) && !empty($requirements['custodial']['amount'])) {
-        $matches = array();
-        $matched = preg_match('/^(\d+|\d+\.\d|\d+\.\d\d)$/i', $requirements['custodial']['amount'], $matches);
-
-        if (!$matched) {
-          form_set_error('review][operations][requirements][custodial][amount', t("@custodial is not a valid custodial requirement amount. Use only numbers and two decimal places. Do not provide a dollar sign.", array('@custodial' => $requirements['custodial']['amount'])));
-          $failure = TRUE;
-        }
-
-        if (isset($requirements['custodial']['quantity']) && intval($requirements['custodial']['quantity']) != $requirements['custodial']['quantity']) {
-          form_set_error('review][operations][requirements][custodial][quantity', t("@quantity is not an allowed number. Use only numbers without decimal places.", array('@quantity' => $requirements['custodial']['quantity'])));
-          $failure = TRUE;
-        }
-
-        if (isset($requirements['custodial']['hours']) && !cf_is_integer($requirements['custodial']['hours'])) {
-          form_set_error('review][operations][requirements][custodial][hours', t("@hours is not an valid number. Use only numbers.", array('@hours' => $requirements['custodial']['hours'])));
-          $failure = TRUE;
-        }
-
-        if (isset($requirements['custodial']['days']) && intval($requirements['custodial']['days']) != $requirements['custodial']['days']) {
-          form_set_error('review][operations][requirements][custodial][days', t("@days is not an allowed number. Use only numbers without decimal places.", array('@days' => $requirements['custodial']['days'])));
-          $failure = TRUE;
-        }
-      }
-
-      if (array_key_exists('maintenance', $requirements) && !empty($requirements['maintenance']['amount'])) {
-        $matches = array();
-        $matched = preg_match('/^(\d+|\d+\.\d|\d+\.\d\d)$/i', $requirements['maintenance']['amount'], $matches);
-
-        if (!$matched) {
-          form_set_error('review][operations][requirements][maintenance][amount', t("@maintenance is not a valid maintenance requirement amount. Use only numbers and two decimal places. Do not provide a dollar sign.", array('@maintenance' => $requirements['maintenance']['amount'])));
-          $failure = TRUE;
-        }
-
-        if (isset($requirements['maintenance']['quantity']) && intval($requirements['maintenance']['quantity']) != $requirements['maintenance']['quantity']) {
-          form_set_error('review][operations][requirements][maintenance][quantity', t("@quantity is not an allowed number. Use only numbers without decimal places.", array('@quantity' => $requirements['maintenance']['quantity'])));
-          $failure = TRUE;
-        }
-
-        if (isset($requirements['maintenance']['hours']) && !cf_is_integer($requirements['maintenance']['hours'])) {
-          form_set_error('review][operations][requirements][maintenance][hours', t("@hours is not an valid number. Use only numbers.", array('@hours' => $requirements['maintenance']['hours'])));
-          $failure = TRUE;
-        }
-
-        if (isset($requirements['maintenance']['days']) && intval($requirements['maintenance']['days']) != $requirements['maintenance']['days']) {
-          form_set_error('review][operations][requirements][maintenance][days', t("@days is not an allowed number. Use only numbers without decimal places.", array('@days' => $requirements['maintenance']['days'])));
-          $failure = TRUE;
-        }
-      }
-
-      if (array_key_exists('grounds', $requirements) && !empty($requirements['grounds']['amount'])) {
-        $matches = array();
-        $matched = preg_match('/^(\d+|\d+\.\d|\d+\.\d\d)$/i', $requirements['grounds']['amount'], $matches);
-
-        if (!$matched) {
-          form_set_error('review][operations][requirements][grounds][amount', t("@grounds is not a valid grounds requirement amount. Use only numbers and two decimal places. Do not provide a dollar sign.", array('@grounds' => $requirements['grounds']['amount'])));
-          $failure = TRUE;
-        }
-
-        if (isset($requirements['grounds']['quantity']) && intval($requirements['grounds']['quantity']) != $requirements['grounds']['quantity']) {
-          form_set_error('review][operations][requirements][grounds][quantity', t("@quantity is not an allowed number. Use only numbers without decimal places.", array('@quantity' => $requirements['grounds']['quantity'])));
-          $failure = TRUE;
-        }
-
-        if (isset($requirements['grounds']['hours']) && !cf_is_integer($requirements['grounds']['hours'])) {
-          form_set_error('review][operations][requirements][grounds][hours', t("@hours is not an valid number. Use only numbers.", array('@hours' => $requirements['grounds']['hours'])));
-          $failure = TRUE;
-        }
-
-        if (isset($requirements['grounds']['days']) && intval($requirements['grounds']['days']) != $requirements['grounds']['days']) {
-          form_set_error('review][operations][requirements][grounds][days', t("@days is not an allowed number. Use only numbers without decimal places.", array('@days' => $requirements['grounds']['days'])));
-          $failure = TRUE;
-        }
-      }
-
-      if (array_key_exists('security', $requirements) && !empty($requirements['security']['amount'])) {
-        $matches = array();
-        $matched = preg_match('/^(\d+|\d+\.\d|\d+\.\d\d)$/i', $requirements['security']['amount'], $matches);
-
-        if (!$matched) {
-          form_set_error('review][operations][requirements][security][amount', t("@security is not a valid security requirement amount. Use only numbers and two decimal places. Do not provide a dollar sign.", array('@security' => $requirements['security']['amount'])));
-          $failure = TRUE;
-        }
-
-        if (isset($requirements['security']['quantity']) && intval($requirements['security']['quantity']) != $requirements['security']['quantity']) {
-          form_set_error('review][operations][requirements][security][quantity', t("@quantity is not an allowed number. Use only numbers without decimal places.", array('@quantity' => $requirements['security']['quantity'])));
-          $failure = TRUE;
-        }
-
-        if (isset($requirements['security']['hours']) && !cf_is_integer($requirements['security']['hours'])) {
-          form_set_error('review][operations][requirements][security][hours', t("@hours is not an valid number. Use only numbers.", array('@hours' => $requirements['security']['hours'])));
-          $failure = TRUE;
-        }
-
-        if (isset($requirements['security']['days']) && intval($requirements['security']['days']) != $requirements['security']['days']) {
-          form_set_error('review][operations][requirements][security][days', t("@days is not an allowed number. Use only numbers without decimal places.", array('@days' => $requirements['security']['days'])));
-          $failure = TRUE;
-        }
-      }
-
-      unset($requirements);
+      $check_requirements = TRUE;
     }
 
     if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE && $decision == MFCS_REVIEW_DECISION_APPROVE && $type != MFCS_REQUEST_TYPE_QUICK_MEETING) {
@@ -2303,6 +2150,102 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
           $form_state['autowave'] = TRUE;
         }
       }
+    }
+
+    if ($check_requirements) {
+      $requirements = array();
+      if (isset($form_state['values']['review']['operations']['requirements'])) {
+        $requirements = $form_state['values']['review']['operations']['requirements'];
+      }
+
+      $requirements_names = array(
+        'facilities' => array('human_name' => "Facilities Fees", 'amount' => TRUE, 'hours' => FALSE, 'days' => TRUE, 'personnel' => FALSE),
+        'equipment' => array('human_name' => "Equipment Fees", 'amount' => TRUE, 'hours' => FALSE, 'days' => TRUE, 'personnel' => FALSE),
+        'custodial' => array('human_name' => "Custodial Fees", 'amount' => TRUE, 'hours' => TRUE, 'days' => TRUE, 'personnel' => TRUE),
+        'maintenance' => array('human_name' => "Maintenance Fees", 'amount' => TRUE, 'hours' => TRUE, 'days' => TRUE, 'personnel' => TRUE),
+        'grounds' => array('human_name' => "Grounds Fees", 'amount' => TRUE, 'hours' => TRUE, 'days' => TRUE, 'personnel' => TRUE),
+        'security' => array('human_name' => "Security Fees", 'amount' => TRUE, 'hours' => TRUE, 'days' => TRUE, 'personnel' => TRUE),
+      );
+
+      foreach ($requirements_names as $requirement_machine_name => $requirement) {
+        if (!array_key_exists($requirement_machine_name, $requirements)) {
+          continue;
+        }
+
+        if ($requirement['amount']) {
+          $matches = array();
+          $matched = preg_match('/^(\d+|\d+\.\d|\d+\.\d\d)$/i', $requirements[$requirement_machine_name]['amount'], $matches);
+
+          if (!$matched) {
+            form_set_error('review][operations][requirements][' . $requirement_machine_name . '][amount', t("@requirement is not a valid " . $requirement['human_name'] . " requirement amount. Use only numbers and two decimal places. Do not provide a dollar sign.", array('@requirement' => $requirements[$requirement_machine_name]['amount'])));
+            $failure = TRUE;
+          }
+          else {
+            $amount = (real) $requirements[$requirement_machine_name]['amount'];
+            if ($amount <= 0) {
+              form_set_error('review][operations][requirements][' . $requirement_machine_name . '][amount', t("The " . $requirement['human_name'] . " amount '@amount' must have a value greater than 0.", array('@amount' => $amount)));
+              $failure = TRUE;
+            }
+            else {
+              // save the value as a real instead of an integer or string.
+              $requirements[$requirement_machine_name]['amount'] = $amount;
+            }
+
+            unset($amount);
+          }
+        }
+
+        if ($requirement['hours']) {
+          $matches = array();
+          $matched = preg_match('/^(\d+|\d+\.\d|\d+\.\d\d)$/i', $requirements[$requirement_machine_name]['hours'], $matches);
+
+          if (!$matched) {
+            form_set_error('review][operations][requirements][' . $requirement_machine_name . '][hours', t("@requirement is not a valid " . $requirement['human_name'] . " requirement hours. Use only numbers and two decimal places. Do not provide a dollar sign.", array('@requirement' => $requirements[$requirement_machine_name]['hours'])));
+            $failure = TRUE;
+          }
+          else {
+            $hours = (real) $requirements[$requirement_machine_name]['hours'];
+            if ($hours <= 0) {
+              form_set_error('review][operations][requirements][' . $requirement_machine_name . '][hours', t("The " . $requirement['human_name'] . " hours '@hours' must have a value greater than 0.", array('@hours' => $hours)));
+              $failure = TRUE;
+            }
+            else {
+              // save the value as a real instead of an integer or string.
+              $requirements[$requirement_machine_name]['hours'] = $hours;
+            }
+
+            unset($hours);
+          }
+        }
+
+        if ($requirement['days']) {
+          if (isset($requirements[$requirement_machine_name]['days'])) {
+            if (intval($requirements[$requirement_machine_name]['days']) != $requirements[$requirement_machine_name]['days']) {
+              form_set_error('review][operations][requirements][' . $requirement_machine_name . '][days', t("The " . $requirement['human_name'] . " days '@days' is not an allowed number. Use only numbers without decimal places.", array('@days' => $requirements[$requirement_machine_name]['days'])));
+              $failure = TRUE;
+            }
+            elseif ($requirements[$requirement_machine_name]['days'] <= 0) {
+              form_set_error('review][operations][requirements][' . $requirement_machine_name . '][days', t("The " . $requirement['human_name'] . " days '@days' must be greater than 0.", array('@days' => $requirements[$requirement_machine_name]['days'])));
+              $failure = TRUE;
+            }
+          }
+        }
+
+        if ($requirement['personnel']) {
+          if (isset($requirements[$requirement_machine_name]['personnel'])) {
+            if (intval($requirements[$requirement_machine_name]['personnel']) != $requirements[$requirement_machine_name]['personnel']) {
+              form_set_error('review][operations][requirements][' . $requirement_machine_name . '][personnel', t("The " . $requirement['human_name'] . " personnel '@personnel' is not an allowed number. Use only numbers without decimal places.", array('@personnel' => $requirements[$requirement_machine_name]['personnel'])));
+              $failure = TRUE;
+            }
+            elseif ($requirements[$requirement_machine_name]['personnel'] <= 0) {
+              form_set_error('review][operations][requirements][' . $requirement_machine_name . '][personnel', t("The " . $requirement['human_name'] . " personnel '@personnel' must be greater than 0.", array('@personnel' => $requirements[$requirement_machine_name]['personnel'])));
+              $failure = TRUE;
+            }
+          }
+        }
+      }
+
+      unset($requirements);
     }
 
     if (!$failure) {
