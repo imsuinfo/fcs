@@ -1175,8 +1175,27 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
         $message .= '</div>';
       }
 
+      // pre-process fee waving so that related changes are not displayed in the log.
+      // this is done to help keep the log clean.
+      $fees_are_not_waved = TRUE;
+      if (!empty($changelog['requirements']['waived'])) {
+        $value = reset($changelog['requirements']['waived']);
+        if ($value) {
+          $fees_are_not_waved = FALSE;
+        }
+        unset($value);
+      }
+
+      if (!empty($changelog['requirements']['university'])) {
+        $value = reset($changelog['requirements']['university']);
+        if ($value) {
+          $fees_are_not_waved = FALSE;
+        }
+        unset($value);
+      }
+
       if ($review_step == MFCS_REVIEW_STEP_VENUE_AVAILABLE && ($decision == MFCS_REVIEW_DECISION_REQUIREMENT || $decision == MFCS_REVIEW_DECISION_WAVE) && $type != MFCS_REQUEST_TYPE_QUICK_MEETING ) {
-        if (!empty($changelog['requirements']['facilities'])) {
+        if ($fees_are_not_waved && !empty($changelog['requirements']['facilities'])) {
           $message .= '<div class="review-item-message-requirements-facilities review-item-message-requirements review-item-message-requirements">';
           $message .= '<div class="item-label">Facilities Fees:</div> ';
 
@@ -1189,7 +1208,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
           $message .= '</div>';
         }
 
-        if (!empty($changelog['requirements']['equipment'])) {
+        if ($fees_are_not_waved && !empty($changelog['requirements']['equipment'])) {
           $message .= '<div class="review-item-message-requirements-equipment review-item-message-requirements review-item-message-requirements">';
           $message .= '<div class="item-label">Additional Equipment Fees:</div> ';
 
@@ -1203,7 +1222,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
         }
       }
 
-      if (!empty($changelog['requirements']['security'])) {
+      if ($fees_are_not_waved && !empty($changelog['requirements']['security'])) {
         $message .= '<div class="review-item-message-requirements-security review-item-message-requirements review-item-message-requirements">';
         $message .= '<div class="item-label">Security Fees:</div> ';
 
@@ -1216,7 +1235,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
         $message .= '</div>';
       }
 
-      if (!empty($changelog['requirements']['custodial'])) {
+      if ($fees_are_not_waved && !empty($changelog['requirements']['custodial'])) {
         $message .= '<div class="review-item-message-requirements-custodial review-item-message-requirements review-item-message-requirements">';
         $message .= '<div class="item-label">Custodial Fees:</div> ';
 
@@ -1229,7 +1248,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
         $message .= '</div>';
       }
 
-      if (!empty($changelog['requirements']['maintenance'])) {
+      if ($fees_are_not_waved && !empty($changelog['requirements']['maintenance'])) {
         $message .= '<div class="review-item-message-requirements-maintenance review-item-message-requirements review-item-message-requirements">';
         $message .= '<div class="item-label">Maintenance Fees:</div> ';
 
@@ -1242,7 +1261,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
         $message .= '</div>';
       }
 
-      if (!empty($changelog['requirements']['grounds'])) {
+      if ($fees_are_not_waved && !empty($changelog['requirements']['grounds'])) {
         $message .= '<div class="review-item-message-requirements-grounds review-item-message-requirements review-item-message-requirements">';
         $message .= '<div class="item-label">Grounds Fees:</div> ';
 
@@ -1256,7 +1275,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
       }
 
       if ($review_step == MFCS_REVIEW_STEP_VENUE_AVAILABLE && ($decision == MFCS_REVIEW_DECISION_REQUIREMENT || $decision == MFCS_REVIEW_DECISION_WAVE) || ($type == MFCS_REQUEST_TYPE_QUICK_MEETING && $decision == MFCS_REVIEW_DECISION_REQUIREMENT)) {
-        if (!empty($changelog['requirements']['other'])) {
+        if ($fees_are_not_waved && !empty($changelog['requirements']['other'])) {
           $message .= '<div class="review-item-message-requirements-other review-item-message-requirements review-item-message-requirements">';
           $message .= '<div class="item-label">Other Fees:</div> ';
 

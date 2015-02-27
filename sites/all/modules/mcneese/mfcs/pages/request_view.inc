@@ -1444,7 +1444,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
             $form['review']['operations']['requirements'][$use_name]['amount']['#required'] = FALSE;
           }
 
-          if (!empty($request['requirements'][$use_name][0])) {
+          if (!empty($request['requirements'][$use_name][0]) && strlen($request['requirements'][$use_name][0]->amount) > 0) {
             $form['review']['operations']['requirements'][$use_name]['amount']['#default_value'] = mfcs_convert_value_from_database_format($request['requirements'][$use_name][0]->amount, 'currency');
           }
           elseif (isset($requirements_amount_defaults[$use_name])) {
@@ -1498,8 +1498,6 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
             '#markup' => $as_manager_markup,
           );
         }
-
-
 
         if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
           if ($venue_coordinator || $manager) {
@@ -1674,9 +1672,9 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           '#weight' => 5,
         );
 
-          if (!empty($request['requirements']['university'][0])) {
-            $form['review']['operations']['university_business']['#default_value'] = $request['requirements']['university'][0]->value;
-          }
+        if (!empty($request['requirements']['university'][0])) {
+          $form['review']['operations']['university_business']['#default_value'] = $request['requirements']['university'][0]->value;
+        }
       }
 
       $form['review']['operations']['message'] = array(
@@ -1767,14 +1765,33 @@ function mfcs_request_view_0_form_pre_validate(&$form, &$form_state) {
   }
 
   $unrequire_usage_fields = TRUE;
-  if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE || $step == MFCS_REVIEW_STEP_REVIEW || $step == MFCS_REVIEW_STEP_REQUIREMENTS || $step == MFCS_REVIEW_STEP_MAKE_DECISIONS) {
-    if ($decision == MFCS_REVIEW_DECISION_REQUIREMENT) {
+  if ($decision == MFCS_REVIEW_DECISION_REQUIREMENT) {
+    if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
       $requirements_waived = FALSE;
       if (isset($form_state['values']['review']['operations']['presidents_approval']) && $form_state['values']['review']['operations']['presidents_approval'] == 1) {
         $requirements_waived = TRUE;
       }
+      elseif (isset($form_state['values']['review']['operations']['university_business']) && $form_state['values']['review']['operations']['university_business'] == 1) {
+        $requirements_waived = TRUE;
+      }
+      else {
+        if (isset($form_state['values']['review']['operations']['presidents_approval']) && $form_state['values']['review']['operations']['presidents_approval'] == 1) {
+          $requirements_waived = TRUE;
+        }
+        elseif (isset($form_state['values']['review']['operations']['presidents_approval']) && $form_state['values']['review']['operations']['presidents_approval'] == 1) {
+          $requirements_waived = TRUE;
+        }
+      }
 
-      if (isset($form_state['values']['review']['operations']['university_business']) && $form_state['values']['review']['operations']['university_business'] == 1) {
+      $unrequire_usage_fields = $requirements_waived;
+    }
+    else {
+      $requirements_waived = FALSE;
+
+      if (isset($form_state['values']['review']['operations']['presidents_approval']) && $form_state['values']['review']['operations']['presidents_approval'] == 1) {
+        $requirements_waived = TRUE;
+      }
+      elseif (isset($form_state['values']['review']['operations']['presidents_approval']) && $form_state['values']['review']['operations']['presidents_approval'] == 1) {
         $requirements_waived = TRUE;
       }
 
@@ -1927,11 +1944,10 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
     }
     elseif (!$can_review_request) {
       if ($decision == MFCS_REVIEW_DECISION_COMMENT) {
-        if ($can_comment_request) {
-          unset($form_state['values']['review']['operations']['requirements']);
-          unset($form_state['values']['review']['operations']['insurance']);
-        }
-        else {
+        unset($form_state['values']['review']['operations']['requirements']);
+        unset($form_state['values']['review']['operations']['insurance']);
+
+        if (!$can_comment_request) {
           form_set_error('', "Illegal operation detected. Unauthorized access attempt.");
           $failure = TRUE;
         }
@@ -1944,162 +1960,74 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
 
     // A request was made to have the requirements waived options be displayed with the requirements to avoid confusion.
     // To do this without changing the underlining design, when the requirement is specified with a wave checked, then convert the decision to a wave.
-    if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE && $decision == MFCS_REVIEW_DECISION_REQUIREMENT) {
-      if (isset($form_state['values']['review']['operations']['presidents_approval']) && $form_state['values']['review']['operations']['presidents_approval'] == 1) {
-        $form_state['values']['review']['operations']['decision'] = MFCS_REVIEW_DECISION_WAVE;
-        $decision = MFCS_REVIEW_DECISION_WAVE;
+    // @todo: remove the Wave Decision entirely.
+    $requirements_waived = FALSE;
+    if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
+      if ($decision == MFCS_REVIEW_DECISION_REQUIREMENT) {
+        if (isset($form_state['values']['review']['operations']['presidents_approval']) && $form_state['values']['review']['operations']['presidents_approval'] == 1) {
+          $form_state['values']['review']['operations']['decision'] = MFCS_REVIEW_DECISION_WAVE;
+          $decision = MFCS_REVIEW_DECISION_WAVE;
+          $requirements_waived = TRUE;
+        }
+
+        if (isset($form_state['values']['review']['operations']['university_business']) && $form_state['values']['review']['operations']['university_business'] == 1) {
+          if ($requirements_waived) {
+            form_set_error('review][operations][university_business', t("The system does not allow both @presidents_approval and @university_business to be selected at the same time. Choose one or the other (They both wave fees).", array('@presidents_approval' => '"Approved by the President"', '@university_business' => '"Strictly University Business"')));
+            $failure = TRUE;
+          }
+          else {
+            $form_state['values']['review']['operations']['decision'] = MFCS_REVIEW_DECISION_WAVE;
+            $decision = MFCS_REVIEW_DECISION_WAVE;
+            $requirements_waived = TRUE;
+          }
+        }
       }
-      elseif (isset($form_state['values']['review']['operations']['university_business']) && $form_state['values']['review']['operations']['university_business'] == 1) {
-        $form_state['values']['review']['operations']['decision'] = MFCS_REVIEW_DECISION_WAVE;
-        $decision = MFCS_REVIEW_DECISION_WAVE;
-      }
-      else {
+      elseif ($decision != MFCS_REVIEW_DECISION_COMMENT) {
         $check_requirements = TRUE;
       }
     }
 
-    $requirements_required = TRUE;
+    // The requirements values should be removed when they are not needed.
+    if ($requirements_waived || ($decision != MFCS_REVIEW_DECISION_REQUIREMENT && $decision != MFCS_REVIEW_DECISION_WAVE)) {
+      unset($form_state['values']['review']['operations']['requirements']);
+    }
+
     if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
-      if (isset($request['requirements']['waived'][0]->value)) {
-        if ($request['requirements']['waived'][0]->value == 1) {
-          $requirements_required = FALSE;
-        }
-      }
+      if ($decision == MFCS_REVIEW_DECISION_APPROVE && $type != MFCS_REQUEST_TYPE_QUICK_MEETING) {
+        $requirements_not_supplied = TRUE;
 
-      if (isset($request['requirements']['university'][0]->value)) {
-        if ($request['requirements']['university'][0]->value == 1) {
-          $requirements_required = FALSE;
+        if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
+          // @todo: convert 'waived' to 'presidents_approval' and 'university' to 'university_business'.
+          if (isset($request['requirements']['waived'][0]) && property_exists($request['requirements']['waived'][0], 'value')) {
+            if ($request['requirements']['waived'][0]->value) {
+              $requirements_not_supplied = FALSE;
+            }
+          }
+
+          if (isset($request['requirements']['university'][0]) && property_exists($request['requirements']['university'][0], 'value')) {
+            if ($request['requirements']['university'][0]->value) {
+              $requirements_not_supplied = FALSE;
+            }
+          }
+        }
+
+        if (isset($request['requirements']['facilities'][0]) && property_exists($request['requirements']['facilities'][0], 'days') && !empty($request['requirements']['facilities'][0]->days)) {
+          $requirements_not_supplied = FALSE;
+        }
+
+        if ($requirements_not_supplied) {
+          form_set_error('review][operations][decision', t("The request cannot be approved until the requirements are either specified or waived."));
+          $failure = TRUE;
         }
       }
     }
 
-    if (!$requirements_required) {
-      if (isset($form_state['values']['review']['operations']['requirements'])) {
-        unset($form_state['values']['review']['operations']['requirements']);
-      }
-    }
-
-    if ($step == MFCS_REVIEW_STEP_REVIEW && $decision == MFCS_REVIEW_DECISION_REQUIREMENT && $requirements_required) {
+    if ($decision == MFCS_REVIEW_DECISION_REQUIREMENT && !$requirements_waived) {
       $check_requirements = TRUE;
     }
 
-    if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE && $decision == MFCS_REVIEW_DECISION_APPROVE && $type != MFCS_REQUEST_TYPE_QUICK_MEETING) {
-      $requirements_not_supplied = TRUE;
-
-      if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
-        if (isset($request['requirements']['waived'][0]->value)) {
-          if ($request['requirements']['waived'][0]->value) {
-            $requirements_not_supplied = FALSE;
-          }
-        }
-
-        if (isset($request['requirements']['university'][0]->value)) {
-          if ($request['requirements']['university'][0]->value) {
-            $requirements_not_supplied = FALSE;
-          }
-        }
-      }
-
-      if (isset($request['requirements']['facilities'][0]->days)) {
-        $requirements_not_supplied = FALSE;
-      }
-
-      if ($requirements_not_supplied) {
-        form_set_error('review][operations][decision', t("The request cannot be approved until the requirements are either specified or waived."));
-      }
-    }
-
-    // autowave will be set to TRUE if and only if a reviewer has not specified a WAVE yet, but still APPROVED.
+    // @fixme: is autowave valid anymore?
     $form_state['autowave'] = FALSE;
-
-    if ($step == MFCS_REVIEW_STEP_REVIEW && $decision == MFCS_REVIEW_DECISION_APPROVE) {
-      $requirements_not_supplied = TRUE;
-      $requirements_exist = TRUE;
-
-      $insurance_contractor_required = FALSE;
-      $insurance_unaffiliated_required = FALSE;
-
-      $custodial_requirements_required = FALSE;
-      if (isset($form['form']['requirements-custodial']['#value'])) {
-        $custodial_requirements_required = $form['form']['requirements-custodial']['#value'];
-      }
-
-      $maintenance_requirements_required = FALSE;
-      if (isset($form['form']['requirements-maintenance']['#value'])) {
-        $maintenance_requirements_required = $form['form']['requirements-maintenance']['#value'];
-      }
-
-      $grounds_requirements_required = FALSE;
-      if (isset($form['form']['requirements-grounds']['#value'])) {
-        $grounds_requirements_required = $form['form']['requirements-grounds']['#value'];
-      }
-
-      $security_requirements_required = FALSE;
-      if (isset($form['form']['requirements-security']['#value'])) {
-        $security_requirements_required = $form['form']['requirements-security']['#value'];
-      }
-
-      $insurance_requirements_required = FALSE;
-      if (isset($form['form']['requirements-insurance']['#value'])) {
-        $insurance_requirements_required = $form['form']['requirements-insurance']['#value'];
-      }
-
-      if (!$custodial_requirements_required && !$maintenance_requirements_required && !$grounds_requirements_required && !$security_requirements_required && !$insurance_requirements_required) {
-        $requirements_not_supplied = FALSE;
-        $requirements_exist = FALSE;
-      }
-
-      // @fixme: the logic of these functions does not seem correct. Should it be !isset(...->amount)?
-      if (isset($form['review']['operations']['requirements']['custodial'])) {
-        if (isset($request['requirements']['custodial'][0]->amount)) {
-          $requirements_not_supplied = FALSE;
-        }
-      }
-
-      if (isset($form['review']['operations']['requirements']['maintenance'])) {
-        if (isset($request['requirements']['maintenance'][0]->amount)) {
-          $requirements_not_supplied = FALSE;
-        }
-      }
-
-      if (isset($form['review']['operations']['requirements']['grounds'])) {
-        if (isset($request['requirements']['grounds'][0]->amount)) {
-          $requirements_not_supplied = FALSE;
-        }
-      }
-
-      if (isset($form['review']['operations']['requirements']['security'])) {
-        if (isset($request['requirements']['security'][0]->amount)) {
-          $requirements_not_supplied = FALSE;
-        }
-      }
-
-      if (isset($form['review']['operations']['insurance']['contractor'])) {
-        if (isset($request['insurance']['contractor'][0]->value)) {
-          $requirements_not_supplied = FALSE;
-
-          if ($request['insurance']['unaffiliated'][0]->value) {
-            $insurance_contractor_required = TRUE;
-          }
-        }
-      }
-
-      if (isset($form['review']['operations']['insurance']['unaffiliated'])) {
-        if (isset($request['insurance']['unaffiliated'][0]->value)) {
-          $requirements_not_supplied = FALSE;
-
-          if ($request['insurance']['unaffiliated'][0]->value) {
-            $insurance_unaffiliated_required = TRUE;
-          }
-        }
-      }
-
-      if ($step == MFCS_REVIEW_STEP_REVIEW && $requirements_exist) {
-        if ($requirements_not_supplied) {
-          $form_state['autowave'] = TRUE;
-        }
-      }
-    }
 
     if ($check_requirements) {
       $requirements = array();
@@ -2108,84 +2036,68 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
       }
 
       $requirements_names = array(
-        'facilities' => array('human_name' => "Facilities Fees", 'amount' => TRUE, 'hours' => FALSE, 'days' => TRUE, 'quantity' => FALSE),
-        'equipment' => array('human_name' => "Equipment Fees", 'amount' => TRUE, 'hours' => FALSE, 'days' => TRUE, 'quantity' => FALSE),
-        'custodial' => array('human_name' => "Custodial Fees", 'amount' => TRUE, 'hours' => TRUE, 'days' => TRUE, 'quantity' => TRUE),
-        'maintenance' => array('human_name' => "Maintenance Fees", 'amount' => TRUE, 'hours' => TRUE, 'days' => TRUE, 'quantity' => TRUE),
-        'grounds' => array('human_name' => "Grounds Fees", 'amount' => TRUE, 'hours' => TRUE, 'days' => TRUE, 'quantity' => TRUE),
-        'security' => array('human_name' => "Security Fees", 'amount' => TRUE, 'hours' => TRUE, 'days' => TRUE, 'quantity' => TRUE),
+        'facilities' => array('human_name' => "Facilities Fee", 'amount' => TRUE, 'hours' => FALSE, 'days' => TRUE, 'quantity' => FALSE),
+        'equipment' => array('human_name' => "Equipment Fee", 'amount' => TRUE, 'hours' => FALSE, 'days' => TRUE, 'quantity' => FALSE),
+        'custodial' => array('human_name' => "Custodial Fee", 'amount' => TRUE, 'hours' => TRUE, 'days' => TRUE, 'quantity' => TRUE),
+        'maintenance' => array('human_name' => "Maintenance Fee", 'amount' => TRUE, 'hours' => TRUE, 'days' => TRUE, 'quantity' => TRUE),
+        'grounds' => array('human_name' => "Grounds Fee", 'amount' => TRUE, 'hours' => TRUE, 'days' => TRUE, 'quantity' => TRUE),
+        'security' => array('human_name' => "Security Fee", 'amount' => TRUE, 'hours' => TRUE, 'days' => TRUE, 'quantity' => TRUE),
       );
 
-      foreach ($requirements_names as $requirement_machine_name => $requirement) {
-        if (!array_key_exists($requirement_machine_name, $requirements)) {
+      $requirements_real = array(
+        'amount' => array('error_message' => "The :human_name '@number' is not a valid @number_name. It must be a number greater than 0 (with at most 2 decimal places). Do not provide a dollar sign."),
+        'hours' => array('error_message' => "The :human_name '@number' is not a valid @number_name. It must be a number greater than 0 (with at most 2 decimal places)."),
+      );
+
+      $requirements_integer = array(
+        'days' => array(),
+        'quantity' => array(),
+      );
+
+      foreach ($requirements_names as $requirements_machine_name => $requirements_settings) {
+        if (!array_key_exists($requirements_machine_name, $requirements)) {
           continue;
         }
 
-        if ($requirement['amount'] && isset($requirements[$requirement_machine_name]['amount']) && (!empty($requirements[$requirement_machine_name]['amount']) || cf_is_integer($requirements[$requirement_machine_name]['amount']))) {
-          $matches = array();
-          $matched = preg_match('/^(\d+|\d+\.\d|\d+\.\d\d)$/i', $requirements[$requirement_machine_name]['amount'], $matches);
+        foreach ($requirements_real as $requirements_real_name => $requirements_real_value) {
+          if ($requirements_settings[$requirements_real_name] && isset($requirements[$requirements_machine_name][$requirements_real_name]) && (!empty($requirements[$requirements_machine_name][$requirements_real_name]) || cf_is_integer($requirements[$requirements_machine_name][$requirements_real_name]))) {
+            $matches = array();
+            $matched = preg_match('/^(\d+|\d+\.\d|\d+\.\d\d)$/i', $requirements[$requirements_machine_name][$requirements_real_name], $matches);
 
-          if (!$matched) {
-            form_set_error('review][operations][requirements][' . $requirement_machine_name . '][amount', t("@requirement is not a valid " . $requirement['human_name'] . " requirement amount. Use only numbers and two decimal places. Do not provide a dollar sign.", array('@requirement' => $requirements[$requirement_machine_name]['amount'])));
-            $failure = TRUE;
-          }
-          else {
-            $amount = (real) $requirements[$requirement_machine_name]['amount'];
-            if ($amount <= 0) {
-              form_set_error('review][operations][requirements][' . $requirement_machine_name . '][amount', t("The " . $requirement['human_name'] . " amount '@amount' must have a value greater than 0.", array('@amount' => $amount)));
+            if (!$matched) {
+              form_set_error('review][operations][requirements][' . $requirements_machine_name . '][' . $requirements_real_name, t($requirements_real_value['error_message'], array(':human_name' => $requirements_settings['human_name'], '@number' => $requirements[$requirements_machine_name][$requirements_real_name], '@number_name' => $requirements_real_name)));
               $failure = TRUE;
             }
             else {
-              // save the value as a real instead of an integer or string.
-              $requirements[$requirement_machine_name]['amount'] = $amount;
-            }
+              $number = (real) $requirements[$requirements_machine_name][$requirements_real_name];
+              if ($number <= 0) {
+                form_set_error('review][operations][requirements][' . $requirements_machine_name . '][' . $requirements_real_name, t($requirements_real_value['error_message'], array(':human_name' => $requirements_settings['human_name'], '@number' => $number, '@number_name' => $requirements_real_name)));
+                $failure = TRUE;
+              }
+              else {
+                // save the value as a real instead of an integer or string.
+                $requirements[$requirements_machine_name][$requirements_real_name] = $number;
+              }
 
-            unset($amount);
+              unset($number);
+            }
           }
         }
 
-        if ($requirement['hours'] && isset($requirements[$requirement_machine_name]['hours']) && (!empty($requirements[$requirement_machine_name]['hours']) || cf_is_integer($requirements[$requirement_machine_name]['hours']))) {
-          $matches = array();
-          $matched = preg_match('/^(\d+|\d+\.\d|\d+\.\d\d)$/i', $requirements[$requirement_machine_name]['hours'], $matches);
+        foreach ($requirements_integer as $requirements_integer_name => $requirements_integer_value) {
+          if ($requirements_settings[$requirements_integer_name] && isset($requirements[$requirements_machine_name][$requirements_integer_name]) && (!empty($requirements[$requirements_machine_name][$requirements_integer_name]) || cf_is_integer($requirements[$requirements_machine_name][$requirements_integer_name]))) {
+            $number = intval($requirements[$requirements_machine_name][$requirements_integer_name]);
 
-          if (!$matched) {
-            form_set_error('review][operations][requirements][' . $requirement_machine_name . '][hours', t("@requirement is not a valid " . $requirement['human_name'] . " requirement hours. Use only numbers and two decimal places. Do not provide a dollar sign.", array('@requirement' => $requirements[$requirement_machine_name]['hours'])));
-            $failure = TRUE;
-          }
-          else {
-            $hours = (real) $requirements[$requirement_machine_name]['hours'];
-            if ($hours <= 0) {
-              form_set_error('review][operations][requirements][' . $requirement_machine_name . '][hours', t("The " . $requirement['human_name'] . " hours '@hours' must have a value greater than 0.", array('@hours' => $hours)));
+            if (!preg_match('/^\d+$/i', $requirements[$requirements_machine_name][$requirements_integer_name])) {
+              form_set_error('review][operations][requirements][' . $requirements_machine_name . '][' . $requirements_integer_name, t("The :human_name '@number' is not a valid @number_name. It is not an allowed number. Use only numbers without decimal places.", array(':human_name' => $requirements_settings['human_name'], '@number' => $requirements[$requirements_machine_name][$requirements_integer_name], '@number_name' => $requirements_integer_name)));
               $failure = TRUE;
             }
-            else {
-              // save the value as a real instead of an integer or string.
-              $requirements[$requirement_machine_name]['hours'] = $hours;
+            elseif ($number <= 0) {
+              form_set_error('review][operations][requirements][' . $requirements_machine_name . '][' . $requirements_integer_name, t("The :human_name '@number' is not a valid @number_name. It must be greater than 0.", array(':human_name' => $requirements_settings['human_name'], '@number' => $number, '@number_name' => $requirements_integer_name)));
+              $failure = TRUE;
             }
 
-            unset($hours);
-          }
-        }
-
-        if ($requirement['days'] && isset($requirements[$requirement_machine_name]['days']) && (!empty($requirements[$requirement_machine_name]['days']) || cf_is_integer($requirements[$requirement_machine_name]['days']))) {
-          if (intval($requirements[$requirement_machine_name]['days']) != $requirements[$requirement_machine_name]['days']) {
-            form_set_error('review][operations][requirements][' . $requirement_machine_name . '][days', t("The " . $requirement['human_name'] . " days '@days' is not an allowed number. Use only numbers without decimal places.", array('@days' => $requirements[$requirement_machine_name]['days'])));
-            $failure = TRUE;
-          }
-          elseif ($requirements[$requirement_machine_name]['days'] <= 0) {
-            form_set_error('review][operations][requirements][' . $requirement_machine_name . '][days', t("The " . $requirement['human_name'] . " days '@days' must be greater than 0.", array('@days' => $requirements[$requirement_machine_name]['days'])));
-            $failure = TRUE;
-          }
-        }
-
-        if ($requirement['quantity'] && isset($requirements[$requirement_machine_name]['quantity']) && (!empty($requirements[$requirement_machine_name]['quantity']) || cf_is_integer($requirements[$requirement_machine_name]['quantity']))) {
-          if (intval($requirements[$requirement_machine_name]['quantity']) != $requirements[$requirement_machine_name]['quantity']) {
-            form_set_error('review][operations][requirements][' . $requirement_machine_name . '][quantity', t("The " . $requirement['human_name'] . " personnel '@quantity' is not an allowed number. Use only numbers without decimal places.", array('@quantity' => $requirements[$requirement_machine_name]['quantity'])));
-            $failure = TRUE;
-          }
-          elseif ($requirements[$requirement_machine_name]['quantity'] <= 0) {
-            form_set_error('review][operations][requirements][' . $requirement_machine_name . '][quantity', t("The " . $requirement['human_name'] . " personnel '@quantity' must be greater than 0.", array('@quantity' => $requirements[$requirement_machine_name]['quantity'])));
-            $failure = TRUE;
+            unset($number);
           }
         }
       }
@@ -2331,6 +2243,7 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
     }
     elseif ($step == MFCS_REVIEW_STEP_REVIEW) {
       if (isset($form_state['autowave']) && $form_state['autowave']) {
+        // @todo: this might be a valid use of MFCS_REVIEW_DECISION_WAVE. If 'autowave' is removed, then this is no longer necessary.
         $success = mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], MFCS_REVIEW_DECISION_WAVE, "", array('send_email' => FALSE));
       }
     }
@@ -2345,6 +2258,16 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
       $requirements_state = array();
       if (isset($form_state['values']['review']['operations']['requirements'])) {
         $requirements_state = $form_state['values']['review']['operations']['requirements'];
+      }
+
+      $operations_form = array();
+      if (isset($form['review']['operations'])) {
+        $operations_form = $form['review']['operations'];
+      }
+
+      $operations_state = array();
+      if (isset($form_state['values']['review']['operations'])) {
+        $operations_state = $form_state['values']['review']['operations'];
       }
 
       $requirements_fields = array(
@@ -2365,6 +2288,12 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
         'security' => array('detected' => FALSE),
       );
 
+      $changes_waived = array(
+        'waived' => array('detected' => FALSE),
+        'university' => array('detected' => FALSE),
+        'other' => array('detected' => FALSE),
+      );
+
       $changes_insurance = array(
         'provided' => array('detected' => FALSE),
         'contractor' => array('detected' => FALSE),
@@ -2380,7 +2309,7 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
         }
 
         foreach ($requirements_fields[$requirements_field] as $requirements_part_key => $requirements_part_value) {
-          if (!$requirements_part_value || !isset($requirements_state[$requirements_field][$requirements_part_key])) {
+          if (!$requirements_part_value || !isset($requirements_state[$requirements_field][$requirements_part_key]) || !isset($requirements_form[$requirements_field][$requirements_part_key])) {
             continue;
           }
 
@@ -2400,12 +2329,13 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
         }
       }
 
-      // remove requirements fields that have no changes detected from the "save" variable.
       foreach ($changes_requirements as $requirement_name => $requirements_change) {
-        if (array_key_exists($requirement_name, $extra['requirements'])) {
+        if (isset($extra['requirements']) && array_key_exists($requirement_name, $extra['requirements'])) {
+          // remove requirements fields that have no changes detected from the "save" variable.
           if ($requirements_change['detected'] === FALSE) {
             unset($extra['requirements'][$requirement_name]);
           }
+          // if any requirements fields has a null detected, set the entire group to null.
           elseif (is_null($requirements_change['detected'])) {
             $extra['requirements'][$requirement_name] = NULL;
             $any_requirements_changes_made = TRUE;
@@ -2413,24 +2343,59 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
         }
       }
 
+      // process waived changes.
+      // @todo: perform the necessary work to convert this to their proper names, such as 'presidents_approval', or 'university_business' to be more consistent.
+      if (isset($requirements_form['other']) && isset($requirements_state['other'])) {
+        if ($requirements_form['other']['#default_value'] != $requirements_state['other']) {
+          $changes_waived['other']['detected'] = TRUE;
+
+          $any_requirements_changes_made = TRUE;
+        }
+      }
+
+      if (isset($operations_form['presidents_approval']) && isset($operations_state['presidents_approval'])) {
+        if ($operations_form['presidents_approval']['#default_value'] != $operations_state['presidents_approval']) {
+          $changes_waived['waived']['detected'] = TRUE;
+
+          $any_requirements_changes_made = TRUE;
+        }
+      }
+      if (isset($operations_form['university_business']) && isset($operations_state['university_business'])) {
+        if ($operations_form['university_business']['#default_value'] != $operations_state['university_business']) {
+          $changes_waived['university']['detected'] = TRUE;
+
+          $any_requirements_changes_made = TRUE;
+        }
+      }
+
+      // remove waived fields that have no changes detected from the "save" variable.
+      foreach ($changes_waived as $waived_name => $waived_change) {
+        if (isset($extra['requirements']) && array_key_exists($waived_name, $extra['requirements'])) {
+          if ($waived_change['detected'] === FALSE) {
+            unset($extra['requirements'][$waived_name]);
+          }
+          elseif (is_null($waived_change['detected'])) {
+            $extra['requirements'][$waived_name] = NULL;
+          }
+        }
+      }
+
       // process insurance changes.
       foreach ($changes_insurance as $insurance_field => &$changes) {
-        if (!isset($requirements_form[$insurance_field]) || !isset($requirements_state[$insurance_field])) {
+        if (!isset($requirements_form[$insurance_field]) || !isset($requirements_state[$insurance_field]) || !isset($requirements_form['insurance'][$insurance_field])) {
           continue;
         }
 
-        if (isset($requirements_form['insurance'][$insurance_field])) {
-          if ($requirements_form['insurance'][$insurance_field]['#default_value'] != $requirements_state[$insurance_field]) {
-            $changes['detected'] = TRUE;
+        if ($requirements_form['insurance'][$insurance_field]['#default_value'] != $requirements_state[$insurance_field]) {
+          $changes['detected'] = TRUE;
 
-            $any_requirements_changes_made = TRUE;
-          }
+          $any_requirements_changes_made = TRUE;
         }
       }
 
       // remove insurance fields that have no changes detected from the "save" variable.
       foreach ($changes_insurance as $insurance_name => $insurance_change) {
-        if (array_key_exists($insurance_name, $extra['insurance'])) {
+        if (isset($extra['insurance']) && array_key_exists($insurance_name, $extra['insurance'])) {
           if ($insurance_change['detected'] === FALSE) {
             unset($extra[$insurance_name]);
           }
@@ -2440,9 +2405,9 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
         }
       }
 
-      if ($decision == MFCS_REVIEW_DECISION_REQUIREMENT && !$any_requirements_changes_made) {
-        form_set_error('form', "Requirements decision has been selected, but no changes have been made. If you only wish to leave a comment, then select comment.");
-        watchdog(MFCS_WATCHDOG_ID, "Requirements decision has been selected, but no changes have been made.", array(), WATCHDOG_ERROR);
+      if (($decision == MFCS_REVIEW_DECISION_REQUIREMENT || $decision == MFCS_REVIEW_DECISION_WAVE) && !$any_requirements_changes_made) {
+        form_set_error('review][operations][decision', "The Requirements decision has been selected, but no changes have been made. If you only wish to leave a comment, then select the Comment instead of Requirements.");
+        watchdog(MFCS_WATCHDOG_ID, "The Requirements decision has been selected, but no changes have been made.", array(), WATCHDOG_ERROR);
 
         $form_state['rebuild'] = TRUE;
         $form_state['redirect'] = FALSE;

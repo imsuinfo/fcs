@@ -574,37 +574,118 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
   }
 
   $mfcs_field_requirements = array();
-  if (($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE && ($decision == MFCS_REVIEW_DECISION_REQUIREMENT || $decision == MFCS_REVIEW_DECISION_WAVE)) || ($is_quick_meeting && $decision == MFCS_REVIEW_DECISION_REQUIREMENT)) {
-    $other_requirement = 0;
+  $requirements_waived_save = FALSE;
+  $requirements_university_save = FALSE;
+  $requirements_other_save = FALSE;
+  if (($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE || $is_quick_meeting) && ($decision == MFCS_REVIEW_DECISION_WAVE || $decision == MFCS_REVIEW_DECISION_REQUIREMENT)) {
+    $requirements_waived = NULL;
+    if (isset($extra['requirements']['waived'])) {
+      $requirements_waived = $extra['requirements']['waived'];
+      $requirements_waived_save = TRUE;
+    }
+
+    if (is_null($mfcs_current_requirements['requirements_waived'])) {
+      if (is_null($requirements_latest['waived'])) {
+        $mfcs_current_requirements['requirements_waived'] = 0;
+        $requirements_waived_save = TRUE;
+      }
+      elseif ($requirements_waived_save) {
+        $mfcs_current_requirements['requirements_waived'] = $requirements_latest['waived'] + 1;
+      }
+    }
+    elseif ($requirements_waived_save) {
+      $mfcs_current_requirements['requirements_waived']++;
+    }
+
+    if ($requirements_waived_save) {
+      $mfcs_field_requirements['waived'] = array(
+        'request_id' => $request_id,
+        'revision' => $mfcs_current_requirements['requirements_waived'],
+        'delta' => 0,
+        'user_id' => $user->uid,
+        'date' => $instance,
+        'value' => $requirements_waived,
+      );
+    }
+
+    $requirements_university = NULL;
+    if (isset($extra['requirements']['university'])) {
+      $requirements_university = $extra['requirements']['university'];
+      $requirements_university_save = TRUE;
+    }
+
+    if (is_null($mfcs_current_requirements['requirements_university'])) {
+      if (is_null($requirements_latest['university'])) {
+        $mfcs_current_requirements['requirements_university'] = 0;
+        $requirements_university_save = TRUE;
+      }
+      elseif ($requirements_university_save) {
+        $mfcs_current_requirements['requirements_university'] = $requirements_latest['university'] + 1;
+      }
+    }
+    elseif ($requirements_university_save) {
+      $mfcs_current_requirements['requirements_university']++;
+    }
+
+    if ($requirements_university_save) {
+      $mfcs_field_requirements['university'] = array(
+        'request_id' => $request_id,
+        'revision' => $mfcs_current_requirements['requirements_university'],
+        'delta' => 0,
+        'user_id' => $user->uid,
+        'date' => $instance,
+        'value' => $requirements_university,
+      );
+    }
+
+    $requirements_other = NULL;
     if (isset($extra['requirements']['other'])) {
-      $other_requirement = $extra['requirements']['other'];
+      $requirements_other = $extra['requirements']['other'];
+      $requirements_other_save = TRUE;
+
+      // do not save the 'other' value when requirements are waved or reset if 'other' is already saved.
+      if (($requirements_university_save && $requirements_waived) || ($requirements_university_save && $requirements_university)) {
+        $requirements_other = NULL;
+      }
     }
 
     if (is_null($mfcs_current_requirements['requirements_other'])) {
       if (is_null($requirements_latest['other'])) {
-        $mfcs_current_requirements['requirements_other'] = 0;
+        if (is_null($requirements_other)) {
+          $requirements_other_save = FALSE;
+        }
+        else {
+          $mfcs_current_requirements['requirements_other'] = 0;
+          $requirements_other_save = TRUE;
+        }
       }
-      else {
+      elseif ($requirements_other_save) {
         $mfcs_current_requirements['requirements_other'] = $requirements_latest['other'] + 1;
       }
     }
-    else {
+    elseif ($requirements_other_save) {
       $mfcs_current_requirements['requirements_other']++;
     }
 
-    $mfcs_field_requirements['other'] = array(
-      'request_id' => $request_id,
-      'revision' => $mfcs_current_requirements['requirements_other'],
-      'delta' => 0,
-      'user_id' => $user->uid,
-      'date' => $instance,
-      'value' => $other_requirement,
-    );
+    if ($requirements_other_save) {
+      $mfcs_field_requirements['other'] = array(
+        'request_id' => $request_id,
+        'revision' => $mfcs_current_requirements['requirements_other'],
+        'delta' => 0,
+        'user_id' => $user->uid,
+        'date' => $instance,
+      );
+
+      if (!is_null($requirements_other)) {
+        $mfcs_field_requirements['other']['value'] = $requirements_other;
+      }
+    }
   }
 
-  if ($decision == MFCS_REVIEW_DECISION_REQUIREMENT && ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE || $step == MFCS_REVIEW_STEP_REVIEW || $step == MFCS_REVIEW_STEP_REQUIREMENTS || $step == MFCS_REVIEW_STEP_MAKE_DECISIONS || $step == MFCS_REVIEW_STEP_COMPLETED)) {
+  if (($decision == MFCS_REVIEW_DECISION_WAVE || $decision == MFCS_REVIEW_DECISION_REQUIREMENT) && ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE || $step == MFCS_REVIEW_STEP_REVIEW || $step == MFCS_REVIEW_STEP_REQUIREMENTS || $step == MFCS_REVIEW_STEP_MAKE_DECISIONS || $step == MFCS_REVIEW_STEP_COMPLETED)) {
     $uses = array();
     $uses_as_manager = array();
+
     if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
       if ($type != MFCS_REQUEST_TYPE_QUICK_MEETING) {
         if ($is_effective_venue_coordinator) {
@@ -672,8 +753,17 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
       }
     }
 
+    // when waiving fees, automatically reset all use fees, by assigning ID as NULL to prevent them from being utilized as a reviewer_classification.
+    if (($requirements_university_save && $requirements_waived) || ($requirements_university_save && $requirements_university)) {
+      foreach (array('facilities', 'equipment', 'custodial', 'maintenance', 'grounds', 'security', 'other') as $use) {
+        if (!array_key_exists($use, $uses)) {
+          $uses[$use] = NULL;
+        }
+      }
+    }
+
     foreach ($uses as $use => $use_id) {
-      if (!isset($extra['requirements']) || !array_key_exists($use, $extra['requirements'])) {
+      if (!is_null($use_id) && (!isset($extra['requirements']) || !array_key_exists($use, $extra['requirements']))) {
         unset($uses_as_manager[$use]);
 
         // @fixme: at the moment, handle the duplicate cases, which will be removed once the duplicates are made distinct.
@@ -685,10 +775,21 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
         else {
           unset($reviewer_classifications[$use_id]);
         }
-        continue;
+
+        if (!($requirements_university_save && $requirements_waived) && !($requirements_university_save && $requirements_university)) {
+          continue;
+        }
       }
 
-      if (is_null($extra['requirements'][$use])) {
+      if (is_null($use_id)) {
+        if (($requirements_university_save && $requirements_waived) || ($requirements_university_save && $requirements_university)) {
+          $requirements = array('quantity' => NULL, 'hours' => NULL, 'days' => NULL, 'amount' => NULL);
+        }
+        else {
+          continue;
+        }
+      }
+      elseif (($requirements_university_save && $requirements_waived) || ($requirements_university_save && $requirements_university) || is_null($extra['requirements'][$use])) {
         $requirements = array('quantity' => NULL, 'hours' => NULL, 'days' => NULL, 'amount' => NULL);
       }
       else {
@@ -722,6 +823,12 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
       }
 
       $use_name = 'requirements_' . $use;
+
+      // if the use fees are not set, then do not reset them when waiving fees.
+      if (is_null($use_id) && is_null($mfcs_current_requirements[$use_name]) && is_null($requirements_latest[$use])) {
+        continue;
+      }
+
       if (is_null($mfcs_current_requirements[$use_name])) {
         if (is_null($requirements_latest[$use])) {
           $mfcs_current_requirements[$use_name] = 0;
@@ -834,6 +941,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
         else {
           $mfcs_current_insurance['insurance_unaffiliated']++;
         }
+
         $mfcs_field_insurance_unaffiliated = array(
           'request_id' => $request_id,
           'revision' => $mfcs_current_insurance['insurance_unaffiliated'],
@@ -889,60 +997,6 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
     }
   }
 
-  if (($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE || $is_quick_meeting) && ($decision == MFCS_REVIEW_DECISION_WAVE || $decision == MFCS_REVIEW_DECISION_REQUIREMENT)) {
-    $requirements_waived = 0;
-    if (isset($extra['requirements']['waived'])) {
-      $requirements_waived = $extra['requirements']['waived'];
-    }
-
-    if (is_null($mfcs_current_requirements['requirements_waived'])) {
-      if (is_null($requirements_latest['waived'])) {
-        $mfcs_current_requirements['requirements_waived'] = 0;
-      }
-      else {
-        $mfcs_current_requirements['requirements_waived'] = $requirements_latest['waived'] + 1;
-      }
-    }
-    else {
-      $mfcs_current_requirements['requirements_waived']++;
-    }
-
-    $mfcs_field_requirements['waived'] = array(
-      'request_id' => $request_id,
-      'revision' => $mfcs_current_requirements['requirements_waived'],
-      'delta' => 0,
-      'user_id' => $user->uid,
-      'date' => $instance,
-      'value' => $requirements_waived,
-    );
-
-    $requirements_university = 0;
-    if (isset($extra['requirements']['university'])) {
-      $requirements_university = $extra['requirements']['university'];
-    }
-
-    if (is_null($mfcs_current_requirements['requirements_university'])) {
-      if (is_null($requirements_latest['university'])) {
-        $mfcs_current_requirements['requirements_university'] = 0;
-      }
-      else {
-        $mfcs_current_requirements['requirements_university'] = $requirements_latest['university'] + 1;
-      }
-    }
-    else {
-      $mfcs_current_requirements['requirements_university']++;
-    }
-
-    $mfcs_field_requirements['university'] = array(
-      'request_id' => $request_id,
-      'revision' => $mfcs_current_requirements['requirements_university'],
-      'delta' => 0,
-      'user_id' => $user->uid,
-      'date' => $instance,
-      'value' => $requirements_university,
-    );
-  }
-
   $failure = FALSE;
   $transaction = db_transaction();
 
@@ -987,7 +1041,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
       unset($mfcs_review_classifications);
     }
 
-    if ($decision == MFCS_REVIEW_DECISION_REQUIREMENT && ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE || $step == MFCS_REVIEW_STEP_REVIEW  || $step == MFCS_REVIEW_STEP_REQUIREMENTS || $step == MFCS_REVIEW_STEP_MAKE_DECISIONS || $step == MFCS_REVIEW_STEP_COMPLETED)) {
+    if (($decision == MFCS_REVIEW_DECISION_WAVE || $decision == MFCS_REVIEW_DECISION_REQUIREMENT) && ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE || $step == MFCS_REVIEW_STEP_REVIEW  || $step == MFCS_REVIEW_STEP_REQUIREMENTS || $step == MFCS_REVIEW_STEP_MAKE_DECISIONS || $step == MFCS_REVIEW_STEP_COMPLETED)) {
       foreach ($mfcs_field_requirements as $use => $fields) {
         $query = db_insert('mfcs_field_requirements_' . $use);
         $query->fields($fields);
@@ -1034,23 +1088,31 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
         $query->execute();
       }
     }
-    elseif ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE && $decision == MFCS_REVIEW_DECISION_WAVE) {
-      $query = db_insert('mfcs_field_requirements_other');
-      $query->fields($mfcs_field_requirements['other']);
-      $query->execute();
+    elseif ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE && ($decision == MFCS_REVIEW_DECISION_WAVE || $decision == MFCS_REVIEW_DECISION_REQUIREMENT)) {
+      if ($requirements_other_save) {
+        $query = db_insert('mfcs_field_requirements_other');
+        $query->fields($mfcs_field_requirements['other']);
+        $query->execute();
+      }
 
-      $query = db_insert('mfcs_field_requirements_waived');
-      $query->fields($mfcs_field_requirements['waived']);
-      $query->execute();
+      if ($requirements_waived_save) {
+        $query = db_insert('mfcs_field_requirements_waived');
+        $query->fields($mfcs_field_requirements['waived']);
+        $query->execute();
+      }
 
-      $query = db_insert('mfcs_field_requirements_university');
-      $query->fields($mfcs_field_requirements['university']);
-      $query->execute();
+      if ($requirements_university_save) {
+        $query = db_insert('mfcs_field_requirements_university');
+        $query->fields($mfcs_field_requirements['university']);
+        $query->execute();
+      }
 
-      $query = db_update('mfcs_current');
-      $query->condition('request_id', $request_id);
-      $query->fields($mfcs_current_requirements);
-      $query->execute();
+      if ($requirements_other_save || $requirements_waived_save || $requirements_university_save) {
+        $query = db_update('mfcs_current');
+        $query->condition('request_id', $request_id);
+        $query->fields($mfcs_current_requirements);
+        $query->execute();
+      }
     }
 
     // enforce transaction execution
