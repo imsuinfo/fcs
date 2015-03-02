@@ -284,7 +284,7 @@ function mfcs_dashboard_page() {
               }
 
               $month_day_count = count($rows[$month_day]);
-              if ($options['limit'] > 0 && $month_day_count == $options['limit']) {
+              if (array_key_exists('limit', $options) && $options['limit'] > 0 && $month_day_count == $options['limit']) {
                 $year = date('Y', $date);
                 $month_name = date('F', $date);
                 $month_name_lower = strtolower($month_name);
