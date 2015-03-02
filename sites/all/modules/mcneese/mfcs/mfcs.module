@@ -5397,7 +5397,7 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
     }
 
     if ($distinct_id) {
-      $query->distinct('mer.id');
+      $query->distinct(array('field' => 'mer.id', 'alias' => 'id'));
     }
     else {
       $query->addField('mer', 'id', 'id');
@@ -5634,8 +5634,9 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
     }
 
     if (is_null($sort)) {
-      // when a query is distinct, the order by values must be defined in the select columns.
+      // default to sorting/ordering by request id.
       if ($distinct || $distinct_id) {
+        // when a query is distinct, the order by values must be defined in the select columns.
         $query->orderBy('id' , 'DESC');
       }
       else {
@@ -5644,6 +5645,12 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
     }
     else {
       if (!empty($sort)) {
+        // When selecting distinct on a specific column/alias, it must be specified in order by if order by is used.
+        // And distinct field must be the first column to be ordered by.
+        if ($distinct_id) {
+          $query->orderBy('id' , 'DESC');
+        }
+
         foreach ($sort as $sort_name => $sort_value) {
           if ($sort_name == 'id') {
             // when a query is distinct, the order by values must be defined in the select columns.
