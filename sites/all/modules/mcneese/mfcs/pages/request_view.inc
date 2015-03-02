@@ -2315,15 +2315,22 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
 
           $value_length = strlen(trim($requirements_state[$requirements_field][$requirements_part_key]));
           if ($value_length == 0) {
-            if (strlen(trim(($requirements_form[$requirements_field][$requirements_part_key]['#default_value']))) != $value_length) {
+            if (array_key_exists('#default_value', $requirements_form[$requirements_field][$requirements_part_key]) && !is_null($requirements_form[$requirements_field][$requirements_part_key]['#default_value'])) {
+              if (strlen(trim(($requirements_form[$requirements_field][$requirements_part_key]['#default_value']))) != $value_length) {
+                $changes['detected'] = NULL;
+                $any_requirements_changes_made = TRUE;
+                break;
+              }
+            }
+            else {
               $changes['detected'] = NULL;
+              $any_requirements_changes_made = TRUE;
               break;
             }
           }
           elseif ($requirements_form[$requirements_field][$requirements_part_key]['#default_value'] != $requirements_state[$requirements_field][$requirements_part_key]) {
             $changes['detected'] = TRUE;
             $any_requirements_changes_made = TRUE;
-            break;
           }
           unset($value_length);
         }
@@ -2338,7 +2345,6 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
           // if any requirements fields has a null detected, set the entire group to null.
           elseif (is_null($requirements_change['detected'])) {
             $extra['requirements'][$requirement_name] = NULL;
-            $any_requirements_changes_made = TRUE;
           }
         }
       }
