@@ -1464,7 +1464,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         );
 
         $form['review']['operations']['requirements']['description']['markup'] = array(
-          '#markup' => '<div class="requirements-description"><strong class="requirements-description-statement-1">Use Fees totals auto-calculated by the system.</strong> Do not provide the total value in the amount field. Instead, provide the amount using the appropriate per-hour/per-day/per-personnel cost.</div>',
+          '#markup' => '<div class="requirements-description"><strong class="requirements-description-statement-1">Use Fees totals are auto-calculated by the system.</strong> Do not provide the total value in the amount field. Instead, provide the amount using the appropriate per-hour/per-day/per-personnel cost.</div>',
         );
 
         // add as_manager information to communicate the requirements that are added solely because they are provided because the user is a manager.
