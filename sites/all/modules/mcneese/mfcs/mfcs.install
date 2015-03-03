@@ -1429,6 +1429,11 @@ function mfcs_schema() {
 
 /**
  * Implementation of hook_install().
+ *
+ * All tables should have have ownership changed from the drupal user account
+ * to the database admin (usually postgres).
+ *
+ * This will significantly enhance security.
  */
 function mfcs_install() {
   // drupal does not support automatically assigning foreign key relations, so this must be manually performed.
@@ -1468,6 +1473,7 @@ function mfcs_install() {
 
   $structure = mfcs_table_install_structure();
 
+  db_query('ALTER TABLE {requests} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
   db_query('ALTER TABLE {mfcs_current} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
   db_query('ALTER TABLE {mfcs_request_revisions} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
   db_query('ALTER TABLE {mfcs_request_revisions} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
@@ -1528,6 +1534,9 @@ function mfcs_install() {
 
 /**
  * Implementation of hook_uninstall().
+ *
+ * All tables will have to have ownership changed back to the drupal database
+ * user account prior to uninstallation or access denied errors will occur.
  */
 function mfcs_uninstall() {
   // restore the mail system default.
@@ -1560,6 +1569,7 @@ function mfcs_uninstall() {
   db_query('DROP VIEW {mfcs_view_dates_asc}');
   db_query('DROP VIEW {mfcs_view_dates_desc}');
 
+  db_query('ALTER TABLE {mfcs_requests} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
   db_query('ALTER TABLE {mfcs_current} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
   db_query('ALTER TABLE {mfcs_request_revisions} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
   db_query('ALTER TABLE {mfcs_request_revisions} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
