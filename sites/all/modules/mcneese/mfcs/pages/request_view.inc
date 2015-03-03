@@ -1295,16 +1295,17 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         $uses_hours = array('custodial', 'maintenance', 'grounds', 'security');
         $uses_requirements = array('facilities' => TRUE, 'equipment' => FALSE, 'custodial' => TRUE, 'maintenance' => TRUE, 'grounds' => TRUE, 'security' => TRUE);
         $uses_review = array('facilities' => FALSE, 'equipment' => FALSE, 'custodial' => TRUE, 'maintenance' => TRUE, 'grounds' => TRUE, 'security' => TRUE);
+
+        $states = array(
+          'visible' => array(
+            ':input[name="review[operations][decision]"]' => array('value' => MFCS_REVIEW_DECISION_REQUIREMENT),
+          ),
+        );
+
         foreach ($uses as $use_name => $use_title) {
           if ($uses_review[$use_name] && $step != MFCS_REVIEW_STEP_REVIEW) {
             continue;
           }
-
-          $states = array(
-            'visible' => array(
-              ':input[name="review[operations][decision]"]' => array('value' => MFCS_REVIEW_DECISION_REQUIREMENT),
-            ),
-          );
 
           if (!$uses_review[$use_name] && $step != MFCS_REVIEW_STEP_REVIEW) {
             $states = array(
