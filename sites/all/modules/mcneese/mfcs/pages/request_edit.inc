@@ -310,7 +310,6 @@ function mfcs_request_edit_0_form_validate($form, &$form_state) {
   }
 
   $can_edit_request = mfcs_request_access('edit', $request, $user);
-  $can_cancel_request = mfcs_request_access('cancel', $request, $user);
 
   if (!$can_edit_request) {
     form_set_error('', "Illegal operation detected. Unauthorized access attempt.");
@@ -318,11 +317,6 @@ function mfcs_request_edit_0_form_validate($form, &$form_state) {
   }
 
   if ($clicked_id == 'submit-request-cancel') {
-    if (!$can_cancel_request) {
-      form_set_error('', "Illegal operation detected. Unauthorized access attempt.");
-      $no_problems = FALSE;
-    }
-
     if (isset($form_state['ajax'])) {
       // ajax method of cancelling.
       $form_state['values']['form']['step'] = 'cancel';
