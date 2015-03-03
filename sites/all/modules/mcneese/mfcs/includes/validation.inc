@@ -25,6 +25,21 @@
  *   NULL is returned when unable to traverse the form or form state.
  */
 function mfcs_pre_validate_request_fields(&$form, &$form_state, $dont_validate = array()) {
+  if (!is_array($form)) {
+    cf_error::invalid_array('form');
+    return NULL;
+  }
+
+  if (!is_array($form_state)) {
+    cf_error::invalid_array('form_state');
+    return NULL;
+  }
+
+  if (!is_array($dont_validate)) {
+    cf_error::invalid_array('dont_validate');
+    return NULL;
+  }
+
   $location_form = &$form;
   $location_state = &$form_state['values'];
 
@@ -247,6 +262,16 @@ function mfcs_pre_validate_request_fields(&$form, &$form_state, $dont_validate =
  *   NULL is returned when unable to traverse the form or form state.
  */
 function mfcs_validate_request_fields($form, &$form_state) {
+  if (!is_array($form)) {
+    cf_error::invalid_array('form');
+    return NULL;
+  }
+
+  if (!is_array($form_state)) {
+    cf_error::invalid_array('form_state');
+    return NULL;
+  }
+
   global $base_path;
 
   $location_form = &$form;
@@ -369,7 +394,7 @@ function mfcs_validate_request_fields($form, &$form_state) {
 
 
     // validate the dates.
-    $dates_passed = mfcs_validate_request_fields_dates($form, $form_state, $ps_p, $location_form, $location_state);
+    $dates_passed = mfcs_validate_request_fields_dates($form, $form_state, $ps_p, $location_form, $location_state, $room);
     $passed = $passed && $dates_passed;
     unset($dates_passed);
   }
@@ -404,14 +429,47 @@ function mfcs_validate_request_fields($form, &$form_state) {
  * @param array $location_state
  *  A location within the form state where the specific fields are to be
  *   processed.
+ * @param array|bool $room
+ *   An array or boolean as returned by mfcs_load_rooms().
  *
  * @return bool|NULL
  *   TRUE on no failures, FALSE otherwise.
  *   NULL is returned when unable to traverse the form or form state.
  *
  * @see: mfcs_validate_request_fields()
+ * @see: mfcs_load_rooms()
  */
-function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_prefix, &$location_form, &$location_state) {
+function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_prefix, &$location_form, &$location_state, $room) {
+  if (!is_array($form)) {
+    cf_error::invalid_array('form');
+    return NULL;
+  }
+
+  if (!is_array($form_state)) {
+    cf_error::invalid_array('form_state');
+    return NULL;
+  }
+
+  if (!is_string($path_string_prefix)) {
+    cf_error::invalid_string('path_string_prefix');
+    return NULL;
+  }
+
+  if (!is_array($location_form)) {
+    cf_error::invalid_array('location_form');
+    return NULL;
+  }
+
+  if (!is_array($location_state)) {
+    cf_error::invalid_array('location_state');
+    return NULL;
+  }
+
+  if (!is_array($room) && !is_bool($room)) {
+    cf_error::invalid_array('room');
+    return NULL;
+  }
+
   global $base_path;
 
   $clicked_id = '';
