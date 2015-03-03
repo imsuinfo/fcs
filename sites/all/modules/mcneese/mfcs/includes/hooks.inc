@@ -55,7 +55,6 @@ function mfcs_hook_menu() {
     'page callback' => 'mfcs_dashboard_page',
     'file' => 'dashboard.inc',
     'file path' => $module_path . '/pages',
-    'access callback' => 'mfcs_dashboard_page_access',
     'tab_parent' => '',
     'tab_root' => '',
   );
@@ -983,7 +982,55 @@ function mfcs_hook_user_login(&$edit, $account, $category) {
  * Internal function for hook_user_insert().
  */
 function mfcs_hook_user_insert(&$edit, $account, $category) {
-  mfcs_sync_banner_to_local_users($account->uid);
+  $result = mfcs_sync_banner_to_local_users($account->uid);
+
+  $instance = mfcs_instance();
+
+  $mfcs_users = mfcs_load_users($account->uid);
+  $has_problem = NULL;
+  $problem = MFCS_USER_PROBLEM_NONE;
+
+  if (is_array($mfcs_users) && !empty($mfcs_users[$user->uid]) && is_object($mfcs_users[$user->uid])) {
+    $has_problem = ($mfcs_users[$user->uid]->problem & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) == MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE;
+  }
+
+  try {
+    if ($result) {
+      if ($has_problem === TRUE) {
+        // When the mfcs_users table only contains this problem, just delete the entry entirely.
+        if ($mfcs_users[$user->uid]->problem == MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) {
+          $query = db_delete('mfcs_users');
+          $query->condition('user_id', $user->uid);
+          $query->execute();
+        }
+        // otherwise, the entry should be updated to remove the problem flag.
+        else {
+          $query = db_update('mfcs_users');
+          $query->condition('user_id', $user->uid);
+          $query->fields(array('problems' => $mfcs_users[$user->uid]->problem - MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE, 'date' => $instance));
+          $query->execute();
+        }
+      }
+    }
+    else {
+      // When an entry already exits in the mfcs_users table but does not have the problems flag set, then update it.
+      if ($has_problem === FALSE) {
+        $query = db_update('mfcs_users');
+        $query->condition('user_id', $user->uid);
+        $query->fields(array('problems' => $mfcs_users[$user->uid]->problem + MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE, 'date' => $instance));
+        $query->execute();
+      }
+      // otherwise, when there is no entry in the mfcs_users table, add a new row with the problem flag set.
+      elseif (is_null($has_problem)) {
+        $query = db_insert('mfcs_users');
+        $query->fields(array('user_id' => $user->uid, 'problems' => MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE, 'date' => $instance));
+        $query->execute();
+      }
+    }
+  }
+  catch (Exception $ex) {
+    cf_error::on_query_exception($ex);
+  }
 }
 
 /**

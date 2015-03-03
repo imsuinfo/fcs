@@ -429,7 +429,7 @@ function mfcs_validate_request_fields($form, &$form_state) {
  * @param array $location_state
  *  A location within the form state where the specific fields are to be
  *   processed.
- * @param array|bool $room
+ * @param array|object|bool $room
  *   An array or boolean as returned by mfcs_load_rooms().
  *
  * @return bool|NULL
@@ -465,8 +465,8 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
     return NULL;
   }
 
-  if (!is_array($room) && !is_bool($room)) {
-    cf_error::invalid_array('room');
+  if (!is_array($room) && !is_object($room) && !is_bool($room)) {
+    cf_error::invalid_variable('room', "Must be a valid array, object, or boolean." );
     return NULL;
   }
 

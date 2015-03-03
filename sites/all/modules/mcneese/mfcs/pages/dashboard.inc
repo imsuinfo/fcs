@@ -15,8 +15,6 @@
  *
  * @return string
  *   The HTML output representing the page.
- *
- * @see mfcs_blocks_at_path()
  */
 function mfcs_dashboard_page() {
   global $base_path;
@@ -29,6 +27,21 @@ function mfcs_dashboard_page() {
   }
 
   mfcs_add_canonical_headers('requests');
+
+  // access check is performed here instead of via the hook_menu() so that different responses may be provided based on access control situations.
+  $user_account_new_banner_access_problem = FALSE;
+  if (mfcs_dashboard_page_access() === FALSE) {
+    $mfcs_users = mfcs_load_users($user->uid);
+
+    if (is_array($mfcs_users) && !empty($mfcs_users[$user->uid]) && is_object($mfcs_users[$user->uid]) && ($mfcs_users[$user->uid]->problem & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) == MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) {
+      $user_account_new_banner_access_problem = FALSE;
+    }
+    else {
+      drupal_access_denied();
+      drupal_exit();
+      return FALSE;
+    }
+  }
 
   $can_create = mfcs_page_request_access('create', NULL, $user);
   $can_list = mfcs_page_request_access('list', NULL, $user);
@@ -147,29 +160,46 @@ function mfcs_dashboard_page() {
   $item_list_2 = theme('item_list', array('items' => $items_2, 'type' => 'ul'));
   $item_list_3 = theme('item_list', array('items' => $items_3, 'type' => 'ul'));
 
-  $markup = '<div id="mfcs-dashboard_page-choices" class="mfcs-dashboard_page-choices">';
+  $markup = '<div id="mfcs-dashboard_page-choices" class="mfcs-dashboard_page-choices">' . "\n";
 
   if (!$can_create && !$can_list && !$can_search && !$can_review) {
-    $markup .= '<h3 class="mfcs-dashboard_page-choices-header">Insufficient Access</h3>';
-    $markup .= '<div>You lack sufficient access to perform any actions on this website. If you believe this is in error, then please contact the support staff through the proper channels.</div>';
+    $markup .= '<h3 class="mfcs-dashboard_page-choices-header">Insufficient Access</h3>' . "\n";
+
+    $markup .= '<div>' . "\n";
+    $markup .= 'You lack sufficient access to view or interact with the content on this website.<br>' . "\n";
+    $markup .= '<br>' . "\n";
+
+    if ($user_account_new_banner_access_problem) {
+      $markup .= 'The system has detected that there were problems creating your account.<br>' . "\n";
+      $markup .= 'This <em>account creation process</em> relies on additional technology that may be unavailable between 4:00am and 5:30am.<br>' . "\n";
+      $markup .= '<br>' . "\n";
+      $markup .= '<strong>Please try re-logging in before 4:00am or after 5:30am for your account to be properly created.</strong><br>' . "\n";
+      $markup .= '<br>' . "\n";
+      $markup .= 'Once your account is properly created, you can log in at any time to access the system.<br>' . "\n";
+    }
+    else {
+      $markup .= 'If you believe this is in error, then please contact the support staff through the proper channels.' . "\n";
+    }
+
+    $markup .= '</div>' . "\n";
   }
   else {
-    $markup .= '<h3 class="mfcs-dashboard_page-choices-header">Facilities Use and Special Event Request Form</h3>';
+    $markup .= '<h3 class="mfcs-dashboard_page-choices-header">Facilities Use and Special Event Request System</h3>' . "\n";
   }
 
   if (!empty($items_1)) {
-    $markup .= '<div class="mfcs-dashboard_page-choices-list_1">' . $item_list_1 . '</div>';
+    $markup .= '<div class="mfcs-dashboard_page-choices-list_1">' . $item_list_1 . '</div>' . "\n";
   }
 
   if (!empty($items_2)) {
-    $markup .= '<div class="mfcs-dashboard_page-choices-list_2">' . $item_list_2 . '</div>';
+    $markup .= '<div class="mfcs-dashboard_page-choices-list_2">' . $item_list_2 . '</div>' . "\n";
   }
 
   if (!empty($items_3)) {
-    $markup .= '<div class="mfcs-dashboard_page-choices-list_3">' . $item_list_3 . '</div>';
+    $markup .= '<div class="mfcs-dashboard_page-choices-list_3">' . $item_list_3 . '</div>' . "\n";
   }
 
-  $markup .= '</div>';
+  $markup .= '</div>' . "\n";
 
 
   if ($can_list) {

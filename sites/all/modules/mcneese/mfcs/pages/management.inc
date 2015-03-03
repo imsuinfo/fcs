@@ -15,8 +15,6 @@
  *
  * @return string
  *   The HTML output representing the page.
- *
- * @see mfcs_blocks_at_path()
  */
 function mfcs_management_page() {
   global $base_path;
