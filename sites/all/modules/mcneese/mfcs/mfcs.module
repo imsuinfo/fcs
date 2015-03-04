@@ -2004,12 +2004,24 @@ function mfcs_load_request_user_roles() {
  *   FALSE is returned on error.
  */
 function mfcs_load_users($user_ids) {
-  if (!is_array($user_ids) && !cf_is_integer($user_ids)) {
+  if (is_array($user_ids)) {
+    if (empty($user_ids)) {
+      cf_error::invalid_variable('user_ids', "No user ids have been specified.");
+      return FALSE;
+    }
+  }
+  elseif (cf_is_integer($user_ids)) {
+    if ($user_ids < 0) {
+      cf_error::invalid_variable('user_ids', "The user id must not be negative.");
+      return FALSE;
+    }
+  }
+  else {
     cf_error::invalid_variable('user_ids', "Must be an array of integers or a single integer.");
     return FALSE;
   }
 
-  $user_ids = array();
+  $users = array();
   try {
     $query = db_select('mfcs_users', 'mu');
 
@@ -2024,16 +2036,12 @@ function mfcs_load_users($user_ids) {
       $query->condition('mu.user_id', $user_ids);
     }
 
-    $query->addField('mbb', 'id', 'building_id');
-    $query->addField('mbb', 'machine_name', 'building_code');
-    $query->addField('mbb', 'human_name', 'building_name');
-
     $query->orderBy('mu.user_id');
 
-    $user_ids = $query->execute()->fetchAllAssoc('user_id');
+    $users = $query->execute()->fetchAllAssoc('user_id');
 
-    if (is_array($user_ids) && !empty($user_ids)) {
-      return $user_ids;
+    if (is_array($users) && !empty($users)) {
+      return $users;
     }
   }
   catch (Exception $ex) {
