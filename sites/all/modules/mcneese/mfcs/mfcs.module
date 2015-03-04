@@ -2004,7 +2004,7 @@ function mfcs_load_request_user_roles() {
  *   FALSE is returned on error.
  */
 function mfcs_load_users($user_ids) {
-  if (!is_array($location) && !cf_is_integer($location)) {
+  if (!is_array($user_ids) && !cf_is_integer($user_ids)) {
     cf_error::invalid_variable('user_ids', "Must be an array of integers or a single integer.");
     return FALSE;
   }
