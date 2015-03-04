@@ -137,16 +137,15 @@ function mfcs_management_page() {
     );
   }
 
-  $item_list_1 = theme('item_list', array('items' => $items_1, 'type' => 'ul'));
-  $item_list_2 = theme('item_list', array('items' => $items_2, 'type' => 'ul'));
-
   $markup = '<div id="mfcs-management_page-choices" class="mfcs-management_page-choices">';
 
   if (!empty($items_1)) {
+    $item_list_1 = theme('item_list', array('items' => $items_1, 'type' => 'ul'));
     $markup .= '<div class="mfcs-management_page-choices-list_1">' . $item_list_1 . '</div>';
   }
 
   if (!empty($items_2)) {
+    $item_list_2 = theme('item_list', array('items' => $items_2, 'type' => 'ul'));
     $markup .= '<div class="mfcs-management_page-choices-list_2">' . $item_list_2 . '</div>';
   }
 
