@@ -979,6 +979,70 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
   );
+
+  $items['requests/problems-0'] = array(
+    'title' => "Manage Problems",
+    'description' => "Manage problems detected by the system.",
+    'page callback' => 'mfcs_management_problems_page',
+    'page arguments' => array(),
+    'file' => 'request_problems.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('problems'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
+
+  $items['requests/problems-0/users'] = array(
+    'title' => "User Problems",
+    'description' => "View a list of users with problems that the system has detected.",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_problems_0_users_form'),
+    'file' => 'request_problems.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('problems'),
+    'tab_parent' => 'requests/problems-0',
+    'tab_root' => 'requests/problems-0',
+  );
+
+  $items['requests/problems-0/users/ajax'] = array(
+    'title' => "User Problems",
+    'description' => "View a list of users with problems that the system has detected.",
+    'page callback' => 'mfcs_ajax_problems_0_users_list',
+    'file' => 'ajax.inc',
+    'file path' => $module_path . '/includes',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('problems'),
+    'tab_parent' => 'requests/problems-0',
+    'tab_root' => 'requests/problems-0',
+  );
+
+  $items['requests/problems-0/users/%'] = array(
+    'title' => "User Problems",
+    'description' => "View a list of users with problems that the system has detected.",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_problems_0_users_form', 3),
+    'file' => 'request_problems.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('problems'),
+    'tab_parent' => 'requests/problems-0',
+    'tab_root' => 'requests/problems-0',
+  );
+
+  $items['requests/problems-0/users/user/%'] = array(
+    'title' => "User Problems",
+    'description' => "Manage problems detected by the system that are specific to a single user.",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_problems_0_user_form', 4),
+    'file' => 'request_problems.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('problems'),
+    'tab_parent' => 'requests/problems-0/users',
+    'tab_root' => 'requests/problems-0/users',
+  );
 }
 
 /**
@@ -1031,52 +1095,24 @@ function mfcs_hook_user_login(&$edit, $account, $category) {
 function mfcs_hook_user_insert(&$edit, $account, $category) {
   $result = mfcs_sync_banner_to_local_users($account->uid);
 
-  $instance = mfcs_instance();
-
-  $mfcs_users = mfcs_load_users($account->uid);
-  $has_problem = NULL;
-  $problem = MFCS_USER_PROBLEM_NONE;
-
-  if (is_array($mfcs_users) && !empty($mfcs_users[$user->uid]) && is_object($mfcs_users[$user->uid])) {
-    $has_problem = ($mfcs_users[$user->uid]->problem & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) == MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE;
-  }
-
-  try {
-    if ($result) {
-      if ($has_problem === TRUE) {
-        // When the mfcs_users table only contains this problem, just delete the entry entirely.
-        if ($mfcs_users[$user->uid]->problem == MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) {
-          $query = db_delete('mfcs_users');
-          $query->condition('user_id', $user->uid);
-          $query->execute();
-        }
-        // otherwise, the entry should be updated to remove the problem flag.
-        else {
-          $query = db_update('mfcs_users');
-          $query->condition('user_id', $user->uid);
-          $query->fields(array('problems' => $mfcs_users[$user->uid]->problem - MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE, 'date' => $instance));
-          $query->execute();
-        }
-      }
+  // account synchronization failed, so assign the appropriate problem flag.
+  if ($result === FALSE) {
+    // if the user does not have a valid banner id, then there is nothing to syncrhonize to.
+    // do not flag this as a problem.
+    $user = user_load($account->uid);
+    if (is_object($user) && empty($user->field_user_banner_id['und'][0]['value'])) {
+      return;
     }
-    else {
-      // When an entry already exits in the mfcs_users table but does not have the problems flag set, then update it.
-      if ($has_problem === FALSE) {
-        $query = db_update('mfcs_users');
-        $query->condition('user_id', $user->uid);
-        $query->fields(array('problems' => $mfcs_users[$user->uid]->problem + MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE, 'date' => $instance));
-        $query->execute();
-      }
-      // otherwise, when there is no entry in the mfcs_users table, add a new row with the problem flag set.
-      elseif (is_null($has_problem)) {
-        $query = db_insert('mfcs_users');
-        $query->fields(array('user_id' => $user->uid, 'problems' => MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE, 'date' => $instance));
-        $query->execute();
-      }
+
+    $mfcs_users = mfcs_load_users($account->uid);
+
+    $problems = MFCS_USER_PROBLEM_NONE + MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE;
+    if (isset($mfcs_users[$account->uid])) {
+      $problems = $mfcs_users[$account->uid]->problems;
+      $problems += MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE;
     }
-  }
-  catch (Exception $ex) {
-    cf_error::on_query_exception($ex);
+
+    mfcs_save_user($account->uid, array('problems' => $problems));
   }
 }
 

@@ -248,6 +248,7 @@ define('MFCS_INCLUDE_REQUEST_VIEW', 13);
 define('MFCS_INCLUDE_REQUEST_LIST', 14);
 define('MFCS_INCLUDE_TESTING', 15);
 define('MFCS_INCLUDE_VIEW', 16);
+define('MFCS_INCLUDE_MANAGEMENT', 17);
 
 /**
  * Defines review restrictions.
@@ -702,6 +703,14 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
     }
   }
   elseif ($operation == 'troubleshoot') {
+    if (is_null($request_id)) {
+      if ($roles['manager'] || $roles['administer']) {
+        $access[$request_id] = TRUE;
+        return TRUE;
+      }
+    }
+  }
+  elseif ($operation == 'problems') {
     if (is_null($request_id)) {
       if ($roles['manager'] || $roles['administer']) {
         $access[$request_id] = TRUE;
@@ -1596,6 +1605,9 @@ function mfcs_include($id) {
   elseif ($id == MFCS_INCLUDE_VIEW) {
     require_once($module_path . '/includes/view.inc');
   }
+  elseif ($id == MFCS_INCLUDE_MANAGEMENT) {
+    require_once($module_path . '/includes/management.inc');
+  }
 }
 
 /**
@@ -1997,13 +2009,19 @@ function mfcs_load_request_user_roles() {
  *
  * @param int|array $user_ids
  *   The user id or an array of user ids.
+ * @param bool $join
+ *   (optional) When TRUE, will join additional relevant tables.
+ * @param bool $deleted
+ *   (optional) When FALSE, will join the users table and only load users with
+ *   a status > 0. When TRUE, no restrictions are applied and users table is
+ *   not loaded (unless $join = TRUE).
  *
  * @return array|false
  *   An array of objects containing the mfcs-specific user fields.
  *
  *   FALSE is returned on error.
  */
-function mfcs_load_users($user_ids) {
+function mfcs_load_users($user_ids, $join = FALSE, $deleted = FALSE) {
   if (is_array($user_ids)) {
     if (empty($user_ids)) {
       cf_error::invalid_variable('user_ids', "No user ids have been specified.");
@@ -2018,6 +2036,16 @@ function mfcs_load_users($user_ids) {
   }
   else {
     cf_error::invalid_variable('user_ids', "Must be an array of integers or a single integer.");
+    return FALSE;
+  }
+
+  if (!is_bool($join)) {
+    cf_error::invalid_bool('join');
+    return FALSE;
+  }
+
+  if (!is_bool($deleted)) {
+    cf_error::invalid_bool('deleted');
     return FALSE;
   }
 
@@ -2036,6 +2064,11 @@ function mfcs_load_users($user_ids) {
       $query->condition('mu.user_id', $user_ids);
     }
 
+    if ($deleted === FALSE) {
+      $query->innerJoin('users', 'u', 'mu.user_id = u.uid');
+      $query->condition('u.status', 0, '>');
+    }
+
     $query->orderBy('mu.user_id');
 
     $users = $query->execute()->fetchAllAssoc('user_id');
@@ -2051,6 +2084,96 @@ function mfcs_load_users($user_ids) {
   }
 
   return FALSE;
+}
+
+/**
+ * Saves mfcs-specific user data for a single user.
+ *
+ * @param int $user_id
+ *   The user id of the user to load.
+ * @param array $data
+ *   An array of user data to save.
+ *   Each field will be the fields to save/update.
+ *   The 'date' field will be updated by this function.
+ *
+ * @return bool
+ *   TRUE is returned when the user exists and the data has been updated.
+ *   Otherwise, FALSE is returned.
+ */
+function mfcs_save_user($user_id, $data) {
+  if (!cf_is_integer($user_id)) {
+    cf_error::invalid_integer('user_id');
+    return FALSE;
+  }
+
+  if (!is_array($data) || empty($data)) {
+    cf_error::invalid_array('data');
+    return FALSE;
+  }
+
+  // ensure only this function assignes the date and user_id, overriding any existing values.
+  $data['date'] = mfcs_instance();
+  $data['user_id'] = $user_id;
+
+  $transaction = db_transaction();
+
+  try {
+
+    $query = db_select('users', 'u');
+    $query->condition('u.uid', $user_id);
+    $query->addExpression('count(u.uid)');
+
+    $user_exists = $query->execute()->fetchField();
+
+    if ($user_exists == 0) {
+      unset($transaction);
+      return FALSE;
+    }
+
+    // at this time only the 'problems' field exists, so if the problems is set to none, just delete the entry.
+    if (array_key_exists('problems', $data) && $data['problems'] == MFCS_USER_PROBLEM_NONE) {
+      $query = db_delete('mfcs_users');
+      $query->condition('user_id', $user_id);
+      $query->execute();
+
+      // enforce transaction execution
+      unset($transaction);
+      return TRUE;
+    }
+
+    $do_insert = FALSE;
+    $query = db_select('mfcs_users', 'mu');
+    $query->condition('mu.user_id', $user_id);
+    $query->addExpression('count(mu.user_id)');
+
+    $user_exists = $query->execute()->fetchField();
+
+    if ($user_exists == 0) {
+      $do_insert = TRUE;
+    }
+
+    if ($do_insert) {
+      $query = db_insert('mfcs_users');
+    }
+    else {
+      $query = db_update('mfcs_users');
+      $query->condition('user_id', $user_id);
+    }
+
+    $query->fields($data);
+    $query->execute();
+
+    // enforce transaction execution
+    unset($transaction);
+  }
+  catch (Exception $ex) {
+    $transaction->rollback();
+    cf_error::on_query_execution($ex);
+
+    return FALSE;
+  }
+
+  return TRUE;
 }
 
 /**
@@ -2403,6 +2526,23 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array()) {
     return TRUE;
   }
 
+  $mfcs_users = mfcs_load_users($user->uid);
+  $problems = MFCS_USER_PROBLEM_NONE;
+  if (isset($mfcs_users[$user->uid])) {
+    $problems = $mfcs_users[$user->uid]->problems;
+  }
+
+  // if banner was unavailable when the users account was first created, then attempt a banner sync for that user.
+  if (($problems * MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE > 0)) {
+    $result = mfcs_sync_banner_to_local_users($user->uid);
+
+    if ($result === TRUE) {
+      $problems -= MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE;
+
+      mfcs_save_user($user->uid, array('problems' => $problems));
+    }
+  }
+
   $mappings = mfcs_load_request_user_role_mapping();
 
   // unset all system role information associated with oracle.
@@ -2475,7 +2615,31 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array()) {
     // Note: the system used to refer to requests as events, but because this is a drupal field, 'event' cannot be changed to 'request' in this explicit case.
     $edit = array('field_user_event_roles' => array('und' => $request_roles), 'roles' => $system_roles);
 
-    if (user_save($user, $edit)) return TRUE;
+    if (user_save($user, $edit)) {
+      // check to see if the user has any synchronization problem flags set and unset them.
+      if ($problems != MFCS_USER_PROBLEM_NONE) {
+        $update = FALSE;
+
+        if (($problems & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) > 0) {
+          $update = TRUE;
+          $problems -= MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE;
+        }
+
+        if ($update) {
+          mfcs_save_user($user->uid, array('problems' => $problems));
+        }
+      }
+
+      return TRUE;
+    }
+
+    // account synchronization failed, so assign the problem flag.
+    // this is done here instead of at the FALSE below to ensure that non-banner accounts to not get this problem flag.
+    if (($problems & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) == 0) {
+      $problems += MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE;
+
+      mfcs_save_user($user->uid, array('problems' => $problems));
+    }
   }
 
   return FALSE;
@@ -2981,7 +3145,7 @@ function mfcs_sync_banner_to_local($transaction = NULL, $user = NULL) {
 /**
  * Synchronizes the local database with the banner venue information for users.
  *
- * @param null|string $user_id
+ * @param null|int $user_id
  *   (optional) If not NULL, the user id of the user to sync data from.
  *   When NULL, process all local users.
  *
@@ -5306,6 +5470,8 @@ function mfcs_display_room_unavailable_message($dates) {
  *   - 'results': database objects representing the items.
  *   - 'count': total results loaded before a range limit is applied.
  *   FALSE is returned on error.
+ *
+ * @see: mfcs_request_process_query_search_array()
  */
 function mfcs_request_load_listing($conditions = array(), $options = array()) {
   if (!is_array($conditions)) {
@@ -5575,7 +5741,7 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
 
     if (!empty($conditions)) {
       $operand = db_and();
-      $result = mfcs_request_process_listing_search_array($query, $count_query, $operand, $already_joined, $already_joined_count, $already_added, $conditions, 1, $like);
+      $result = mfcs_request_process_query_search_array($query, $count_query, $operand, $already_joined, $already_joined_count, $already_added, $conditions, 1, $like);
 
       if ($result) {
         if (is_null($outermost_and)) {
@@ -5726,13 +5892,22 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
         // When selecting distinct on a specific column/alias, it must be specified in order by if order by is used.
         // And distinct field must be the first column to be ordered by.
         if ($distinct_id) {
-          $query->orderBy('id' , 'DESC');
+          if (array_key_exists('id', $sort) && !empty($sort['id'])) {
+            $query->orderBy('id' , $sort['id']);
+          }
+          else {
+            $query->orderBy('id' , 'DESC');
+          }
         }
+
 
         foreach ($sort as $sort_name => $sort_value) {
           if ($sort_name == 'id') {
             // when a query is distinct, the order by values must be defined in the select columns.
-            if ($distinct || $distinct_id) {
+            if  ($distinct_id) {
+              continue;
+            }
+            elseif ($distinct) {
               $query->orderBy('id' , is_null($sort_value) ? 'ASC' : $sort_value);
             }
             else {
@@ -5975,7 +6150,7 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
 }
 
 /**
- * Recursively append search conditions for loading a list of requests.
+ * Recursively append search conditions for to a given query.
  *
  * @param object|null $query
  *   The query object. Set to null if not using.
@@ -5990,16 +6165,19 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
  * @param array $already_added
  *   An array of field names that have already been added as select parameters
  *   for the query object.
+ * @param array $conditions
+ *   The collection of search conditions.
+ * @param int $recurse_count
+ *   A number representing the number of executions this function has within
+ *   itself, including the very first call (should start at 1).
  * @param string $like
  *   The appropriate SQL like or ilike string for sensitive and insensitive.
  *
  * @param bool
  *   TRUE when a valid field is found and added to the $operand and FALSE
  *   otherwise.
- *
- * @see mfcs_request_load_listing()
  */
-function mfcs_request_process_listing_search_array(&$query, &$count_query, &$operand, &$already_joined, &$already_joined_count, &$already_added, $search, $recurse_count, $like) {
+function mfcs_request_process_query_search_array(&$query, &$count_query, &$operand, &$already_joined, &$already_joined_count, &$already_added, $conditions, $recurse_count, $like) {
   if (!is_null($query) && !is_object($query)) {
     cf_error::invalid_object('query');
     return FALSE;
@@ -6015,8 +6193,8 @@ function mfcs_request_process_listing_search_array(&$query, &$count_query, &$ope
     return FALSE;
   }
 
-  if (!is_array($search)) {
-    cf_error::invalid_array('search');
+  if (!is_array($conditions)) {
+    cf_error::invalid_array('conditions');
     return FALSE;
   }
 
@@ -6040,6 +6218,11 @@ function mfcs_request_process_listing_search_array(&$query, &$count_query, &$ope
     return FALSE;
   }
 
+  if (!cf_is_integer($recurse_count)) {
+    cf_error::invalid_integer('recurse_count');
+    return FALSE;
+  }
+
   if (!is_string($like)) {
     cf_error::invalid_string('like');
     return FALSE;
@@ -6049,11 +6232,11 @@ function mfcs_request_process_listing_search_array(&$query, &$count_query, &$ope
     return FALSE;
   }
   $found_values = FALSE;
+  $expression_count = 0;
 
   // process the inner fields, can be either a 'field_+', 'or_+', 'and_+', 'nor_+', or 'nand_+'.
-  foreach ($search as $search_operand_or_field => $search_values) {
+  foreach ($conditions as $search_operand_or_field => $search_values) {
     $search_op = explode('_', $search_operand_or_field, 2);
-    $expression_count = 0;
 
     if (count($search_op) != 2) {
       // not valid, just skip.
@@ -6232,14 +6415,14 @@ function mfcs_request_process_listing_search_array(&$query, &$count_query, &$ope
         continue;
       }
 
-      $expression = FALSE;
-      if (isset($search_values['expression']) && is_bool($search_values['expression'])) {
-        $expression = $search_values['expression'];
-      }
-
       if (empty($search_values['field'])) {
         // not valid, just skip.
         continue;
+      }
+
+      $expression = FALSE;
+      if (array_key_exists('expression', $search_values) && is_bool($search_values['expression'])) {
+        $expression = $search_values['expression'];
       }
 
       $field = $search_values['field'];
@@ -6378,7 +6561,7 @@ function mfcs_request_process_listing_search_array(&$query, &$count_query, &$ope
     }
 
     $next_count = $recurse_count + 1;
-    $result = mfcs_request_process_listing_search_array($query, $count_query, $inner_operand, $already_joined, $already_joined_count, $already_added, $search_values, $next_count, $like);
+    $result = mfcs_request_process_query_search_array($query, $count_query, $inner_operand, $already_joined, $already_joined_count, $already_added, $search_values, $next_count, $like);
 
     if ($result) {
       $operand->condition($inner_operand);

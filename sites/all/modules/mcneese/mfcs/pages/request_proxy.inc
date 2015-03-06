@@ -123,6 +123,11 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = 0) {
       $order_column = array(8 => strtolower($sorting[$order]));
       $class_last_name .= 'sorting_1 ';
     }
+    else {
+      $sorting['id'] = 'ASC';
+      $order_column = array(0 => strtolower($sorting['id']));
+      $class_id .= 'sorting_1 ';
+    }
   }
 
   $rows_per_page = 10;
@@ -242,6 +247,7 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = 0) {
   $proxy_list['empty'] = t("There are no users assigned to proxy as a venue coordinator.");
 
   $datatable_settings = array(
+    'sort' => strtolower($sort),
     'order' => $order_column,
     #'stateSave' => TRUE,
     'lengthMenu' => array(
@@ -257,16 +263,16 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = 0) {
     'ajax' => "'" . $base_path . 'requests/proxy-0/ajax' . "'",
     'deferRender' => TRUE,
     'columns' => array(
-      array('name' => 'id', 'className' => 'column-id'),
-      array('name' => 'proxy_account_id', 'className' => 'column-proxy_account_id', 'visible' => FALSE),
-      array('name' => 'proxy_account', 'className' => 'column-proxy_account'),
-      array('name' => 'proxy_first_name', 'className' => 'column-proxy_first_name'),
-      array('name' => 'proxy_last_name', 'className' => 'column-proxy_last_name'),
-      array('name' => 'account_id', 'className' => 'column-account_id', 'visible' => FALSE),
-      array('name' => 'account', 'className' => 'column-account'),
-      array('name' => 'first_name', 'className' => 'column-first_name'),
-      array('name' => 'last_name', 'className' => 'column-last_name'),
-      array('name' => 'operations', 'className' => 'column-operations no-print'),
+      array('id' => 0, 'column' => 'id', 'name' => "ID", 'className' => 'column-id', 'sanitize' => FALSE),
+      array('id' => 1, 'column' => 'proxy_account_id', 'name' => "Proxy Account ID", 'className' => 'column-proxy_account_id', 'sanitize' => FALSE, 'visible' => FALSE),
+      array('id' => 2, 'column' => 'proxy_account', 'name' => "Proxy Account", 'className' => 'column-proxy_account'),
+      array('id' => 3, 'column' => 'proxy_first_name', 'name' => "Proxy First Name", 'className' => 'column-proxy_first_name'),
+      array('id' => 4, 'column' => 'proxy_last_name', 'name' => "Proxy Last Name", 'className' => 'column-proxy_last_name'),
+      array('id' => 5, 'column' => 'account_id', 'name' => "Account ID", 'className' => 'column-account_id', 'sanitize' => FALSE, 'visible' => FALSE),
+      array('id' => 6, 'column' => 'account', 'name' => "Account", 'className' => 'column-account'),
+      array('id' => 7, 'column' => 'first_name', 'name' => "First Name", 'className' => 'column-first_name'),
+      array('id' => 8, 'column' => 'last_name', 'name' => "Last Name", 'className' => 'column-last_name'),
+      array('id' => 9, 'column' => NULL, 'name' => "Operations", 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
     ),
     'displayStart' => $options['start'],
     'pageLength' => $rows_per_page,

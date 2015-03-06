@@ -2590,11 +2590,11 @@ function mfcs_get_request_field_registration_website($form, &$form_state, &$fiel
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[require]' . '[' . $key . ']'  . '"]' => array('value' => NULL),
             ),
           ),
-          '#attributes' => array(
-            'class' => array(
-              'form-item-delta',
-              'form-item-delta-' . $key,
-            ),
+        ),
+        '#attributes' => array(
+          'class' => array(
+            'form-item-delta',
+            'form-item-delta-' . $key,
           ),
         ),
       );

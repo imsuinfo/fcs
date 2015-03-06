@@ -771,5 +771,250 @@ function mfcs_ajax_listing_0($override_options = array()) {
 }
 
 /**
+ * Ajax function call for loading users problem list datatable.
+ */
+function mfcs_ajax_problems_0_users_list() {
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  $response = array();
+
+  if (function_exists('devel_menu')) {
+    $GLOBALS['devel_shutdown'] = FALSE;
+  }
+
+  mfcs_include(MFCS_INCLUDE_MANAGEMENT);
+
+  // load ajax/json request settings.
+  list($draw, $columns, $order, $options, $timestamp) = mfcs_ajax_setup_request_settings();
+
+  $search = FALSE;
+  if (isset($_GET['search']['value']) && is_string($_GET['search']['value']) && !empty($_GET['search']['value'])) {
+    $search = TRUE;
+  }
+
+  // build ajax/json response data.
+  $response = array(
+    'draw' => $draw,
+  );
+
+  $sorting = array();
+  if (!isset($order[0]['column'])) {
+    $sorting['user_id'] = 'ASC';
+  }
+  else {
+    $order_column = (int) $order[0]['column'];
+    $order_direction = isset($order[0]['dir']) && is_string($order[0]['dir']) ? strtoupper($order[0]['dir']) : 'DESC';
+
+    if ($order_column == 0) {
+      $sorting['user_id'] = $order_direction;
+    }
+    elseif ($order_column == 1) {
+      $sorting['name'] = $order_direction;
+    }
+    elseif ($order_column == 2) {
+      $sorting['first_name'] = $order_direction;
+    }
+    elseif ($order_column == 3) {
+      $sorting['last_name'] = $order_direction;
+    }
+    elseif ($order_column == 4 || $order_column == 5 || $order_column == 6) {
+      $sorting['problems'] = $order_direction;
+    }
+    elseif ($order_column == 7) {
+      $sorting['date'] = $order_direction;
+    }
+  }
+
+  // always provide the unique id in the ordering to guarantee consistency in range results.
+  if (!isset($sorting['user_id'])) {
+    $sorting['user_id'] = 'DESC';
+  }
+
+  if (!empty($sorting)) {
+    $options['sort'] = $sorting;
+  }
+
+  $options['join'] = TRUE;
+
+  $conditions = array(
+    'u.status' => 1,
+  );
+
+  $conditions['and_0']['value_only_problems'] = array(
+    'field' => 'mu.problems',
+    'operator' => MFCS_OPERATOR_NOT_EQUAL,
+    'search' => MFCS_USER_PROBLEM_NONE,
+  );
+
+  $taxonomy_problems = mfcs_management_get_problems_taxonomy();
+  $problems_mask = 0;
+
+  if ($search) {
+    $count_conditions = $conditions;
+    $count_options = $options;
+
+    $conditions['or_1'] = array();
+
+    $conditions['or_1']['value_user_id'] = array(
+      'field' => 'text(mu.user_id)',
+      'operator' => MFCS_OPERATOR_LIKE,
+      'search' => $_GET['search']['value'],
+      'expression' => TRUE,
+    );
+
+    $conditions['or_1']['value_name'] = array(
+      'field' => 'u.name',
+      'operator' => MFCS_OPERATOR_LIKE,
+      'search' => $_GET['search']['value'],
+    );
+
+    $conditions['or_1']['value_field_user_first_name_value'] = array(
+      'field' => 'fdfufn.field_user_first_name_value',
+      'operator' => MFCS_OPERATOR_LIKE,
+      'search' => $_GET['search']['value'],
+    );
+
+    $conditions['or_1']['value_field_user_last_name_value'] = array(
+      'field' => 'fdfuln.field_user_last_name_value',
+      'operator' => MFCS_OPERATOR_LIKE,
+      'search' => $_GET['search']['value'],
+    );
+
+    $regex_safe_search = preg_quote($_GET['search']['value'], '/');
+    foreach ($taxonomy_problems as $problem_id => $problem_label) {
+      if (preg_match('/' . $regex_safe_search . '/i', $problem_label) > 0) {
+        $problems_mask += $problem_id;
+      }
+    }
+    unset($regex_safe_search);
+
+    if ($problems_mask > 0) {
+      $conditions['or_1']['value_problems'] = array(
+        'field' => '(mu.problems & ' . $problems_mask . ')',
+        'operator' => MFCS_OPERATOR_GREATER_THAN,
+        'search' => 0,
+        'expression' => TRUE,
+      );
+    }
+
+    // Commented out because this is confusing because the date format will not match.
+    #$conditions['or_1']['value_date'] = array(
+    #  'field' => 'text(to_timestamp(mu.date))',
+    #  'operator' => MFCS_OPERATOR_LIKE,
+    #  'search' => $_GET['search']['value'],
+    #  'expression' => TRUE,
+    #);
+
+    $count_options['returned'] = FALSE;
+    $problems_returned = mfcs_management_search_users($count_conditions, $count_options);
+
+    $problems_total = 0;
+    if (array_key_exists('count', $problems_returned)) {
+      $problems_total = $problems_returned['count'];
+    }
+
+    $problems_returned = mfcs_management_search_users($conditions, $options);
+    $problems = array();
+    if (isset($problems_returned['results']) && is_array($problems_returned['results'])) {
+      $problems = $problems_returned['results'];
+    }
+
+    $response['recordsTotal'] = $problems_total;
+    $response['recordsFiltered'] = $problems_returned['count'];
+  }
+  else {
+    $problems_returned = mfcs_management_search_users($conditions, $options);
+
+    $problems_total = 0;
+    if (array_key_exists('count', $problems_returned)) {
+      $problems_total = $problems_returned['count'];
+    }
+
+    $problems = array();
+    if (isset($problems_returned['results']) && is_array($problems_returned['results'])) {
+      $problems = $problems_returned['results'];
+    }
+
+    $response['recordsTotal'] = $problems_total;
+    $response['recordsFiltered'] = $problems_total;
+  }
+
+  if (!is_array($problems)) {
+    drupal_json_output($response);
+    exit();
+  }
+
+  $response['data'] = array();
+  if (!empty($problems)) {
+    foreach ($problems as $problem) {
+      $row = array();
+
+      $row[0] = '' . $problem->user_id;
+      $row[1] = '<a href="' . $base_path . 'user/' . $problem->user_id . $url_arguments . '" class="user-link">' . check_plain($problem->name) . '</a>';
+      $row[2] = check_plain($problem->first_name);
+      $row[3] = check_plain($problem->last_name);
+
+      $row[4] = NULL;
+      foreach (array(MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_LOGIN_PROBLEMS_MULTIPLE) as $taxonomy_id) {
+        if (($problem->problems & $taxonomy_id) > 0) {
+          if (is_null($row[4])) {
+            $row[4] = '';
+          }
+          else {
+            $row[4] .= ', ';
+          }
+
+          $row[4] .= $taxonomy_problems[$taxonomy_id];
+        }
+      }
+
+      $row[5] = NULL;
+      foreach (array(MFCS_USER_PROBLEM_FORM_ERROR_USER, MFCS_USER_PROBLEM_FORM_ERROR_USER) as $taxonomy_id) {
+        if (($problem->problems & $taxonomy_id) > 0) {
+          if (is_null($row[5])) {
+            $row[5] = '';
+          }
+          else {
+            $row[5] .= ', ';
+          }
+
+          $row[5] .= $taxonomy_problems[$taxonomy_id];
+        }
+      }
+
+      $row[6] = NULL;
+      foreach (array(MFCS_USER_PROBLEM_SYSTEM, MFCS_USER_PROBLEM_MFCS) as $taxonomy_id) {
+        if (($problem->problems & $taxonomy_id) > 0) {
+          if (is_null($row[6])) {
+            $row[6] = '';
+          }
+          else {
+            $row[6] .= ', ';
+          }
+
+          $row[6] .= $taxonomy_problems[$taxonomy_id];
+        }
+      }
+
+      unset($taxonomy_id);
+
+      $row[7] = check_plain(date("Y/m/d h:i:s a", $problem->date));
+      $row[8] = '<a href="' . $base_path . 'requests/problems-0/users/user/' . $problem->user_id . $url_arguments . '" class="operation-link operation-link-view">View</a>';
+
+      $response['data'][] = $row;
+    }
+  }
+
+  drupal_json_output($response);
+  exit();
+}
+
+/**
  * @} End of '@addtogroup mfcs'.
  */

@@ -230,6 +230,11 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
       $order_column = array(5 => strtolower($sorting[$order]));
       $class_last_name .= 'sorting_1 ';
     }
+    else {
+      $sorting['id'] = 'ASC';
+      $order_column = array(0 => strtolower($sorting['id']));
+      $class_id .= 'sorting_1 ';
+    }
   }
 
   $rows_per_page = 10;
@@ -355,13 +360,13 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
     'ajax' => "'" . $base_path . 'requests/reviewers-0/ajax/list/' . $classification . '/' . $review_step . "'",
     'deferRender' => TRUE,
     'columns' => array(
-      array('name' => 'id', 'className' => 'column-id'),
-      array('name' => 'review_classification', 'className' => 'column-review_classification'),
-      array('name' => 'account_id', 'className' => 'column-account_id', 'visible' => FALSE),
-      array('name' => 'account', 'className' => 'column-account'),
-      array('name' => 'first_name', 'className' => 'column-first_name'),
-      array('name' => 'last_name', 'className' => 'column-last_name'),
-      array('name' => 'operations', 'className' => 'column-operations no-print'),
+      array('id' => 0, 'column' => 'id', 'name' => "ID", 'className' => 'column-id', 'sanitize' => FALSE),
+      array('id' => 1, 'column' => 'review_classification', 'name' => "Review Classification", 'className' => 'column-review_classification'),
+      array('id' => 2, 'column' => 'account_id', 'name' => "Account ID", 'className' => 'column-account_id', 'sanitize' => FALSE, 'visible' => FALSE),
+      array('id' => 3, 'column' => 'account', 'name' => "Account", 'className' => 'column-account'),
+      array('id' => 4, 'column' => 'first_name', 'name' => "First Name", 'className' => 'column-first_name'),
+      array('id' => 5, 'column' => 'last_name', 'name' => "Last Name", 'className' => 'column-last_name'),
+      array('id' => 6, 'column' => NULL, 'name' => "Operations", 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
     ),
     'displayStart' => $options['start'],
     'pageLength' => $rows_per_page,
