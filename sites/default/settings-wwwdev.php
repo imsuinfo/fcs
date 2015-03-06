@@ -753,6 +753,12 @@ $conf['image_style_default_scheme'] = 'public';
 $conf['phplot_api_default_scheme'] = 'public';
 
 
+/**
+ *  Static registry support
+ */
+include_once DRUPAL_ROOT . '/sites/default/registry-fcs.php';
+
+
 // enable all errors
 error_reporting(E_ALL | E_STRICT);
 ini_set('display_errors', TRUE);
