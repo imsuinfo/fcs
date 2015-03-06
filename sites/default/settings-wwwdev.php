@@ -745,6 +745,32 @@ $conf['fcs_no_auto_block_accounts'] = array(
 
 
 /**
+ * Static mcneese_block settings.
+ */
+$conf['mcneese_block_static'] = array(
+  'enabled' => TRUE,
+  'default' => array(
+    'semantic' => 'ignore',
+    'heading' => 2,
+  ),
+  'block' => array(
+    'system' => array(
+      'main' => array(
+        'semantic' => 'none',
+        'heading' => 2,
+      ),
+    ),
+    'user' => array(
+      'login' => array(
+        'semantic' => 'section',
+        'heading' => 2,
+      ),
+    ),
+  )
+);
+
+
+/**
  * Additional file_db variables.
  */
 #$conf['file_db_server_id'] = 6;
