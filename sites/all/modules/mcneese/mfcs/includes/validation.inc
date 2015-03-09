@@ -495,6 +495,12 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
   $start_timestamp = array(0 => FALSE);
   $stop_timestamp = array(0 => FALSE);
 
+  // quick meetings can only be used by venue coordinators.
+  $is_quick_meeting = FALSE;
+  if (isset($location_state['information']['type'][0]) && $location_state['information']['type'][0] == MFCS_REQUEST_TYPE_QUICK_MEETING) {
+    $is_quick_meeting = TRUE;
+  }
+
   if (!empty($location_state['dates']['date'])) {
     $all_day = array();
     $partial_day = array();
@@ -527,8 +533,11 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
         $request_string = date("Y/m/d", $instance);
 
         if ($date_string == $request_string) {
-          form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t("The date '@date' is too soon, the request process takes time.", array('@date' => $value)));
-          $passed = FALSE;
+          // Quick Meetings allow same day requests.
+          if (!$is_quick_meeting) {
+            form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t("The date '@date' is too soon, the request process takes time.", array('@date' => $value)));
+            $passed = FALSE;
+          }
         }
         elseif ($date_timestamp[$key] < $instance) {
           form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t("The date '@date' is in the past and cannot be used.", array('@date' => $value)));
