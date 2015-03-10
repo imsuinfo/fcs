@@ -10,7 +10,6 @@
  * @{
  */
 
-
 /**
  * Provides the facilities use request review page.
  *

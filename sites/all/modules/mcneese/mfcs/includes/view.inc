@@ -10,8 +10,6 @@
  * @{
  */
 
-
-
 /**
  * Create the group path presentation structure.
  *
