@@ -180,11 +180,20 @@ function mfcs_management_search_users($conditions = array(), $options = array())
     $query->addField('mu', 'problems', 'problems');
     $query->addField('mu', 'date', 'date');
 
+    $already_added['user_id'] = 'mu.user_id';
+    $already_added['problems'] = 'mu.problems';
+    $already_added['date'] = 'mu.date';
+
     if ($join) {
       $query->addField('u', 'name', 'name');
       $query->addField('u', 'mail', 'email');
       $query->addField('fdfufn', 'field_user_first_name_value', 'first_name');
       $query->addField('fdfuln', 'field_user_last_name_value', 'last_name');
+
+      $already_added['name'] = 'u.name';
+      $already_added['email'] = 'u.mail';
+      $already_added['first_name'] = 'fdfufn.first_name';
+      $already_added['last_name'] = 'fdfuln.last_name';
     }
 
     // add custom fields to the select results as requested by the caller.
