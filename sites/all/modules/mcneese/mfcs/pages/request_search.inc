@@ -22,7 +22,26 @@
  *   An array containing the generated form.
  */
 function mfcs_request_search_0_form($form, &$form_state) {
+  if (!is_array($form)) {
+    cf_error::invalid_array('form');
+
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  if (!is_array($form_state)) {
+    cf_error::invalid_array('form_state');
+
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
   mfcs_add_canonical_headers('requests/search-0');
+
+  $page_title = "Search Requests";
+  drupal_set_title($page_title);
 
   $user = cf_current_user();
 

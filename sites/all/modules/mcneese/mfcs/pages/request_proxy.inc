@@ -25,6 +25,22 @@
  *   The HTML output representing the page.
  */
 function mfcs_request_proxy_0_form($form, &$form_state, $page_number = 0) {
+  if (!is_array($form)) {
+    cf_error::invalid_array('form');
+
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  if (!is_array($form_state)) {
+    cf_error::invalid_array('form_state');
+
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
   global $base_path;
   global $mfcs_determined;
 
@@ -38,6 +54,9 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = 0) {
   }
 
   mfcs_add_canonical_headers('requests/proxy-0/' . $page_number);
+
+  $page_title = "Facilities Use Proxies";
+  drupal_set_title($page_title);
 
   $user = cf_current_user();
 
@@ -260,7 +279,7 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = 0) {
     ),
     'processing' => TRUE,
     'serverSide' => TRUE,
-    'ajax' => "'" . $base_path . 'requests/proxy-0/ajax' . "'",
+    'ajax' => "'" . $base_path . 'requests/proxy-0/ajax' . $url_arguments . "'",
     'deferRender' => TRUE,
     'columns' => array(
       array('id' => 0, 'column' => 'id', 'name' => "ID", 'className' => 'column-id', 'sanitize' => FALSE),
@@ -625,6 +644,22 @@ function mfcs_request_proxy_0_form_submit($form, &$form_state) {
  *   The HTML output representing the page.
  */
 function mfcs_request_proxy_0_delete_form($form, &$form_state, $id) {
+  if (!is_array($form)) {
+    cf_error::invalid_array('form');
+
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  if (!is_array($form_state)) {
+    cf_error::invalid_array('form_state');
+
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
   if (!cf_is_integer($id) || $id < 0) {
     cf_error::invalid_integer('id');
     drupal_not_found();
@@ -644,6 +679,13 @@ function mfcs_request_proxy_0_delete_form($form, &$form_state, $id) {
     return array();
   }
 
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
   mfcs_add_canonical_headers('requests/proxy-0/delete/' . $id);
 
   $proxy_user = user_load($proxy->proxy_id);
@@ -660,6 +702,9 @@ function mfcs_request_proxy_0_delete_form($form, &$form_state, $id) {
     $user_name = $user->name;
   }
 
+  $page_title = "Facilities Use Proxies Delete: " . $proxy_name . " (id: " . $proxy->proxy_id . ") proxied as " . $user_name . " (id: " . $proxy->user_id . ")";
+  drupal_set_title($page_title);
+
   $form['form'] = array(
     '#tree' => TRUE,
   );
@@ -670,10 +715,10 @@ function mfcs_request_proxy_0_delete_form($form, &$form_state, $id) {
   );
 
   if (empty($form_state['values']['redirect_to'])) {
-    $destination = 'requests/proxy-0';
+    $destination = 'requests/proxy-0' . $url_arguments;
   }
   else {
-    $destination = $form_state['values']['redirect_to'];
+    $destination = $form_state['values']['redirect_to'] . $url_arguments;
   }
 
   return confirm_form($form,

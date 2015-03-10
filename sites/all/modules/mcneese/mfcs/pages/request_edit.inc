@@ -26,6 +26,22 @@
  *   The HTML output representing the page.
  */
 function mfcs_request_edit_0_form($form, &$form_state, $request_id, $target_section = NULL) {
+  if (!is_array($form)) {
+    cf_error::invalid_array('form');
+
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  if (!is_array($form_state)) {
+    cf_error::invalid_array('form_state');
+
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
   // force the page to load the view page when only the id is specified.
   if (is_null($target_section)) {
     drupal_goto('requests/view-0/' . $request_id, array('query' => drupal_get_query_parameters()));
@@ -62,6 +78,12 @@ function mfcs_request_edit_0_form($form, &$form_state, $request_id, $target_sect
   else {
     mfcs_add_canonical_headers('requests/edit-0/' . $request_id . '/' . $target_section);
   }
+
+  $page_title = "Edit Request";
+  if (!empty($request['information']['title'][0]->value)) {
+    $page_title = "Edit Request: " . $request['information']['title'][0]->value;
+  }
+  drupal_set_title($page_title);
 
   $form = array();
 

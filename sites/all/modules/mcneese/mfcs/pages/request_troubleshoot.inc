@@ -26,6 +26,30 @@
  *   The HTML output representing the page.
  */
 function mfcs_request_troubleshoot_0_form($form, &$form_state, $request_id = NULL) {
+  if (!is_array($form)) {
+    cf_error::invalid_array('form');
+
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  if (!is_array($form_state)) {
+    cf_error::invalid_array('form_state');
+
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
   if (is_null($request_id)) {
     mfcs_add_canonical_headers('requests/troubleshoot');
   }
@@ -39,14 +63,6 @@ function mfcs_request_troubleshoot_0_form($form, &$form_state, $request_id = NUL
     }
 
     mfcs_add_canonical_headers('requests/troubleshoot-0/' . $request_id);
-  }
-
-  global $base_path;
-  global $mfcs_determined;
-
-  $url_arguments = '';
-  if (!empty($mfcs_determined['complete'])) {
-    $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
   $page_title = "Facilities Use Troubleshooting Tools";

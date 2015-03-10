@@ -73,7 +73,21 @@ function mfcs_management_problems_page() {
  * @param array $form_state
  *   The form state array as defined by drupals form api
  */
-function mfcs_request_problems_0_users_form($form, $form_state, $page_number = 0) {
+function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 0) {
+  if (!is_array($form)) {
+    cf_error::invalid_array('form');
+
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  if (!is_array($form_state)) {
+    cf_error::invalid_array('form_state');
+
+    drupal_not_found();
+    drupal_exit();
+  }
+
   global $base_path;
   global $mfcs_determined;
 
@@ -87,6 +101,10 @@ function mfcs_request_problems_0_users_form($form, $form_state, $page_number = 0
   }
 
   mfcs_add_canonical_headers('requests/problems-0/users/' . $page_number);
+
+  $page_title = "Facilities Use Problems";
+  drupal_set_title($page_title);
+
 
   $user = cf_current_user();
 
@@ -350,7 +368,7 @@ function mfcs_request_problems_0_users_form($form, $form_state, $page_number = 0
     ),
     'processing' => TRUE,
     'serverSide' => TRUE,
-    'ajax' => "'" . $base_path . 'requests/problems-0/users/ajax' . "'",
+    'ajax' => "'" . $base_path . 'requests/problems-0/users/ajax' . $url_arguments . "'",
     'deferRender' => TRUE,
     'columns' => array(
       array('id' => 0, 'column' => 'account_id', 'name' => "Account ID", 'className' => 'column-account_id', 'sanitize' => FALSE, 'visible' => FALSE),
@@ -471,15 +489,7 @@ function mfcs_request_problems_0_users_form_submit($form, &$form_state) {
  * @param array $form_state
  *   The form state array as defined by drupals form api
  */
-function mfcs_request_problems_0_user_form($form, $form_state, $problem_user_id = NULL) {
-  global $base_path;
-  global $mfcs_determined;
-
-  $url_arguments = '';
-  if (!empty($mfcs_determined['complete'])) {
-    $url_arguments .= '?' . $mfcs_determined['complete'];
-  }
-
+function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id = NULL) {
   if (!cf_is_integer($problem_user_id) || $problem_user_id < 0) {
     drupal_not_found();
     drupal_exit();
@@ -497,6 +507,14 @@ function mfcs_request_problems_0_user_form($form, $form_state, $problem_user_id 
   unset($mfcs_users);
   $problem_user = user_load($problem_user_id);
 
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
   mfcs_add_canonical_headers('requests/problems-0/users/user/' . $problem_user_id);
 
   $user_name = $problem_user->name;
@@ -504,7 +522,9 @@ function mfcs_request_problems_0_user_form($form, $form_state, $problem_user_id 
     $user_name = $problem_user->field_user_first_name['und'][0]['safe_value'] . ' ' . $problem_user->field_user_last_name['und'][0]['safe_value'];
   }
 
-  drupal_set_title("Problems for " . $user_name . ' (id: ' . $problem_user_id . ')');
+  $page_title = "Facilities Use Problems: " . $user_name . "(id: " . $problem_user_id . ")";
+  drupal_set_title($page_title);
+
 
   $form = array();
 

@@ -26,6 +26,22 @@
  *   The HTML output representing the page.
  */
 function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_number = 0, $group = NULL, $field = NULL) {
+  if (!is_array($form)) {
+    cf_error::invalid_array('form');
+
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  if (!is_array($form_state)) {
+    cf_error::invalid_array('form_state');
+
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
   $request = mfcs_load_request_by_id($request_id);
 
   if (empty($request)) {
@@ -34,8 +50,6 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
     return array();
   }
 
-  mfcs_add_canonical_headers('requests/history-0/' . $request_id);
-
   global $base_path;
   global $mfcs_determined;
 
@@ -43,6 +57,9 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
   if (!empty($mfcs_determined['complete'])) {
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
+
+  mfcs_add_canonical_headers('requests/history-0/' . $request_id);
+
 
   $page_title = "Request History";
   if (!empty($request['information']['title'][0]->value)) {

@@ -26,6 +26,22 @@
  *   The HTML output representing the page.
  */
 function mfcs_request_agreement_0_form($form, &$form_state, $request_id, $contained = FALSE) {
+  if (!is_array($form)) {
+    cf_error::invalid_array('form');
+
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  if (!is_array($form_state)) {
+    cf_error::invalid_array('form_state');
+
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
   $request = mfcs_load_request_by_id($request_id);
 
   if (empty($request)) {
@@ -34,9 +50,9 @@ function mfcs_request_agreement_0_form($form, &$form_state, $request_id, $contai
     return array();
   }
 
-  mfcs_add_canonical_headers('requests/agreement-0/' . $request_id);
-
   global $base_path;
+
+  mfcs_add_canonical_headers('requests/agreement-0/' . $request_id);
 
   $page_title = "Facilities Use Agreement";
   if (!empty($request['information']['title'][0]->value)) {
@@ -411,8 +427,6 @@ function mfcs_request_agreement_0_form_submit($form, &$form_state) {
 
     return;
   }
-
-  global $base_path;
 
   $form_state['redirect'] = mfcs_build_redirect_array('/requests/agreement-0/' . $request_id . '/pdf');
 }

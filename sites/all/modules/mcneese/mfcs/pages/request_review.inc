@@ -25,12 +25,21 @@
  *   An array containing the generated form.
  */
 function mfcs_request_review_0_page($form, &$form_state, $page_number = 0) {
-  if (!cf_is_integer($page_number) || $page_number < 0) {
-    // because this is a url argument passed as a variable, just force a 0 for invalid paths.
-    $page_number = 0;
+  if (!is_array($form)) {
+    cf_error::invalid_array('form');
+
+    drupal_not_found();
+    drupal_exit();
+    return array();
   }
 
-  mfcs_add_canonical_headers('requests/review-0/' . $page_number);
+  if (!is_array($form_state)) {
+    cf_error::invalid_array('form_state');
+
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
 
   global $base_path;
   global $mfcs_determined;
@@ -39,6 +48,15 @@ function mfcs_request_review_0_page($form, &$form_state, $page_number = 0) {
   if (!empty($mfcs_determined['complete'])) {
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
+
+  if (!cf_is_integer($page_number) || $page_number < 0) {
+    $page_number = 0;
+  }
+
+  mfcs_add_canonical_headers('requests/review-0/' . $page_number);
+
+  $page_title = "Facilities Use Reviewable Requests";
+  drupal_set_title($page_title);
 
   $form = array();
   $form['output'] = array('#markup' => '');

@@ -27,6 +27,9 @@ function mfcs_request_reviewers_0_page() {
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
+  $page_title = "Manage Reviewers";
+  drupal_set_title($page_title);
+
   $user = cf_current_user();
 
   $manager = user_access('mfcs manage', $user);
@@ -106,6 +109,22 @@ function mfcs_request_reviewers_0_page() {
  *   The HTML output representing the page.
  */
 function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $review_step, $page_number = 0) {
+  if (!is_array($form)) {
+    cf_error::invalid_array('form');
+
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  if (!is_array($form_state)) {
+    cf_error::invalid_array('form_state');
+
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
   if (!cf_is_integer($classification) || $classification < 0) {
     cf_error::invalid_integer('classification');
     drupal_not_found();
@@ -120,18 +139,12 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
     return array();
   }
 
-  if (!cf_is_integer($page_number) || $page_number < 0) {
-    $page_number = 0;
-  }
-
   // these are automatically the venue coordinator, therefore skip them.
   if ($review_step == MFCS_REVIEW_STEP_VENUE_AVAILABLE || $review_step == MFCS_REVIEW_STEP_MAKE_DECISIONS) {
     drupal_not_found();
     drupal_exit();
     return array();
   }
-
-  mfcs_add_canonical_headers('requests/reviewers-0/list/' . $classification . '/' . $review_step . '/' . $page_number);
 
   global $base_path;
   global $mfcs_determined;
@@ -140,6 +153,12 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
   if (!empty($mfcs_determined['complete'])) {
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
+
+  if (!cf_is_integer($page_number) || $page_number < 0) {
+    $page_number = 0;
+  }
+
+  mfcs_add_canonical_headers('requests/reviewers-0/list/' . $classification . '/' . $review_step . '/' . $page_number);
 
   $user = cf_current_user();
 
@@ -155,6 +174,9 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
   $review_steps = mfcs_get_review_step_list_options();
   $reviewer_classifications = mfcs_get_reviewer_classification_list_options();
   $reviewer_classifications_list = mfcs_get_reviewer_classification_list_options('select');
+
+  $page_title = "Reviewers for Step: " . $review_steps[$review_step];
+  drupal_set_title($page_title);
 
   if (!array_key_exists($classification, $request_classifications)) {
     drupal_not_found();
@@ -357,7 +379,7 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
     ),
     'processing' => TRUE,
     'serverSide' => TRUE,
-    'ajax' => "'" . $base_path . 'requests/reviewers-0/ajax/list/' . $classification . '/' . $review_step . "'",
+    'ajax' => "'" . $base_path . 'requests/reviewers-0/ajax/list/' . $classification . '/' . $review_step . $url_arguments . "'",
     'deferRender' => TRUE,
     'columns' => array(
       array('id' => 0, 'column' => 'id', 'name' => "ID", 'className' => 'column-id', 'sanitize' => FALSE),
@@ -762,6 +784,22 @@ function mfcs_request_reviewers_0_form_submit($form, &$form_state) {
  *   The HTML output representing the page.
  */
 function mfcs_request_reviewers_0_delete_form($form, &$form_state, $id) {
+  if (!is_array($form)) {
+    cf_error::invalid_array('form');
+
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  if (!is_array($form_state)) {
+    cf_error::invalid_array('form_state');
+
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
   if (!cf_is_integer($id) || $id < 0) {
     cf_error::invalid_integer('id');
     drupal_not_found();
@@ -785,6 +823,13 @@ function mfcs_request_reviewers_0_delete_form($form, &$form_state, $id) {
     drupal_not_found();
     drupal_exit();
     return array();
+  }
+
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
   mfcs_add_canonical_headers('requests/reviewers-0/delete/' . $id);
@@ -827,10 +872,10 @@ function mfcs_request_reviewers_0_delete_form($form, &$form_state, $id) {
 
   if (empty($form_state['values']['redirect_to'])) {
     if (empty($reviewer->request_classification)) {
-      $destination = 'requests/reviewers-0';
+      $destination = 'requests/reviewers-0' . $url_arguments;
     }
     else {
-      $destination = 'requests/reviewers-0/list/' . $reviewer->request_classification;
+      $destination = 'requests/reviewers-0/list/' . $reviewer->request_classification . $url_arguments;
     }
   }
   else {

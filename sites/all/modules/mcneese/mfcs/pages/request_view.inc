@@ -31,6 +31,22 @@
  *   The HTML output representing the page.
  */
 function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS_VIEW_MODE_NORMAL, $revision_id = NULL, $contained = FALSE) {
+  if (!is_array($form)) {
+    cf_error::invalid_array('form');
+
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  if (!is_array($form_state)) {
+    cf_error::invalid_array('form_state');
+
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
   if (!is_string($mode) || !($mode == MFCS_VIEW_MODE_DISPLAY || $mode == MFCS_VIEW_MODE_LOG || $mode == MFCS_VIEW_MODE_OPERATIONS)) {
     $mode = MFCS_VIEW_MODE_NORMAL;
   }
@@ -99,6 +115,32 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
   else {
     mfcs_add_canonical_headers('requests/view-0/' . $request_id . '/' . $mode . '/' . $revision_id);
   }
+
+    if (!is_string($mode) || !($mode == MFCS_VIEW_MODE_DISPLAY || $mode == MFCS_VIEW_MODE_LOG || $mode == MFCS_VIEW_MODE_OPERATIONS)) {
+    $mode = MFCS_VIEW_MODE_NORMAL;
+  }
+
+  $page_title = "Facilities Use Request";
+  if (!empty($request['information']['title'][0]->value)) {
+    $page_title = "Facilities Use Request: " . $request['information']['title'][0]->value;
+  }
+
+  if ($contained === FALSE) {
+    if ($mode == MFCS_VIEW_MODE_LOG) {
+      $page_title = "Request Review Log";
+      if (!empty($request['information']['title'][0]->value)) {
+        $page_title = "Request Review Log: " . $request['information']['title'][0]->value;
+      }
+    }
+    elseif ($mode == MFCS_VIEW_MODE_OPERATIONS) {
+      $page_title = "Request Review Operations";
+      if (!empty($request['information']['title'][0]->value)) {
+        $page_title = "Request Review Operations: " . $request['information']['title'][0]->value;
+      }
+    }
+  }
+
+  drupal_set_title($page_title);
 
   if (!is_bool($contained)) {
     $contained = FALSE;
@@ -241,12 +283,6 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     $can['clone'] = (bool) $can_create_request;
     $can['ical'] = $status == MFCS_REQUEST_STATUS_CLOSED_ACCEPTED && $step == MFCS_REVIEW_STEP_COMPLETED;
   }
-
-  $page_title = "Facilities Use Request";
-  if (!empty($request['information']['title'][0]->value)) {
-    $page_title = "Facilities Use Request: " . $request['information']['title'][0]->value;
-  }
-  drupal_set_title($page_title);
 
 
   $form = array();
@@ -2522,8 +2558,6 @@ function mfcs_request_view_0_form_submit_pdf($form, &$form_state) {
 
     return;
   }
-
-  global $base_path;
 
   $mode = $form['form']['mode']['#value'];
   $revision_id = $form['form']['revision_id']['#value'];

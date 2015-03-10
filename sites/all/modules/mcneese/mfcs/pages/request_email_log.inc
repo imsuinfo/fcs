@@ -30,6 +30,7 @@ function mfcs_request_email_log_0_form($form, &$form_state, $page_number = 0) {
 
     drupal_not_found();
     drupal_exit();
+    return array();
   }
 
   if (!is_array($form_state)) {
@@ -37,23 +38,25 @@ function mfcs_request_email_log_0_form($form, &$form_state, $page_number = 0) {
 
     drupal_not_found();
     drupal_exit();
+    return array();
   }
-
-  if (!cf_is_integer($page_number) || $page_number < 0) {
-    // because this is a url argument passed as a variable, just force a 0 for invalid paths.
-    $page_number = 0;
-  }
-
-  mfcs_add_canonical_headers('requests/email_log-0');
 
   global $base_path;
-  static $mfcs_current;
+  global $mfcs_determined;
 
   $url_arguments = '';
   if (!empty($mfcs_determined['complete'])) {
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
+  if (!cf_is_integer($page_number) || $page_number < 0) {
+    $page_number = 0;
+  }
+
+  mfcs_add_canonical_headers('requests/email_log-0/' . $page_number);
+
+  $page_title = "E-mail Log";
+  drupal_set_title($page_title);
 
   $form = array();
   $form['output'] = array('#markup' => '');

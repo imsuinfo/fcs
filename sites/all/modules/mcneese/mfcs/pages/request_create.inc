@@ -25,6 +25,22 @@
  *   An array containing the generated form.
  */
 function mfcs_request_create_0_form($form, &$form_state, $clone_request = NULL) {
+  if (!is_array($form)) {
+    cf_error::invalid_array('form');
+
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  if (!is_array($form_state)) {
+    cf_error::invalid_array('form_state');
+
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
   $form = array();
 
   $request = NULL;
@@ -52,6 +68,12 @@ function mfcs_request_create_0_form($form, &$form_state, $clone_request = NULL) 
   else {
     mfcs_add_canonical_headers('requests/create-0/' . $clone_request);
   }
+
+  $page_title = "New Request";
+  if (!empty($request['information']['title'][0]->value)) {
+    $page_title = "Copy Request: " . $request['information']['title'][0]->value;
+  }
+  drupal_set_title($page_title);
 
   mfcs_include(MFCS_INCLUDE_STRUCTURE);
 
