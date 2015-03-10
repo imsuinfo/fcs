@@ -968,7 +968,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/troubleshoot-0'] = array(
-    'title' => "Troubleshooting",
+    'title' => "Troubleshooting Tools",
     'description' => "Troubleshoot problems on the system using pre-built tools.",
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_troubleshoot_0_form'),

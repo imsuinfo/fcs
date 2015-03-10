@@ -49,7 +49,7 @@ function mfcs_request_troubleshoot_0_form($form, &$form_state, $request_id = NUL
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
-  $page_title = "Facilities Use Troubleshooting";
+  $page_title = "Facilities Use Troubleshooting Tools";
   drupal_set_title($page_title);
 
   $module_path = drupal_get_path('module', 'mfcs');
