@@ -161,7 +161,7 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = 0) {
   $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.disabled' => 0), $options);
 
   $proxies_total = 0;
-  if (array_key_exists('count', $proxies_returned)) {
+  if (is_array($proxies_returned) && array_key_exists('count', $proxies_returned)) {
     $proxies_total = $proxies_returned['count'];
   }
 

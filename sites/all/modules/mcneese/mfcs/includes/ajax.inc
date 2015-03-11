@@ -217,7 +217,7 @@ function mfcs_ajax_reviewers_0_list($classification, $review_step) {
     $count_options['returned'] = FALSE;
     $reviewers_returned = mfcs_get_reviewers($count_conditions, $count_options);
     $reviewers_total = 0;
-    if (array_key_exists('count', $reviewers_returned)) {
+    if (is_array($reviewers_returned) && array_key_exists('count', $reviewers_returned)) {
       $reviewers_total = $reviewers_returned['count'];
     }
 
@@ -411,7 +411,7 @@ function mfcs_ajax_proxy_0_list() {
     $proxies_returned = mfcs_get_proxy_venue_coordinators($count_conditions, $count_options);
 
     $proxies_total = 0;
-    if (array_key_exists('count', $proxies_returned)) {
+    if (is_array($proxies_returned) && array_key_exists('count', $proxies_returned)) {
       $proxies_total = $proxies_returned['count'];
     }
 
@@ -428,7 +428,7 @@ function mfcs_ajax_proxy_0_list() {
     $proxies_returned = mfcs_get_proxy_venue_coordinators($conditions, $options);
 
     $proxies_total = 0;
-    if (array_key_exists('count', $proxies_returned)) {
+    if (is_array($proxies_returned) && array_key_exists('count', $proxies_returned)) {
       $proxies_total = $proxies_returned['count'];
     }
 
@@ -719,7 +719,7 @@ function mfcs_ajax_listing_0($override_options = array()) {
     $count_options['returned'] = FALSE;
     $items_returned = mfcs_request_load_listing($count_conditions, $count_options);
     $items_total = 0;
-    if (array_key_exists('count', $items_returned)) {
+    if (is_array($items_returned) && array_key_exists('count', $items_returned)) {
       $items_total = $items_returned['count'];
     }
 
@@ -915,7 +915,7 @@ function mfcs_ajax_problems_0_users_list() {
     $problems_returned = mfcs_management_search_users($count_conditions, $count_options);
 
     $problems_total = 0;
-    if (array_key_exists('count', $problems_returned)) {
+    if (is_array($problems_returned) && array_key_exists('count', $problems_returned)) {
       $problems_total = $problems_returned['count'];
     }
 
@@ -932,7 +932,7 @@ function mfcs_ajax_problems_0_users_list() {
     $problems_returned = mfcs_management_search_users($conditions, $options);
 
     $problems_total = 0;
-    if (array_key_exists('count', $problems_returned)) {
+    if (is_array($problems_returned) && array_key_exists('count', $problems_returned)) {
       $problems_total = $problems_returned['count'];
     }
 
@@ -1131,7 +1131,7 @@ function mfcs_ajax_email_log_0_list() {
     $email_logs_returned = mfcs_management_search_table($table_name, $table_alias, $primary_key, $count_conditions, $count_options);
 
     $email_logs_total = 0;
-    if (array_key_exists('count', $email_logs_returned)) {
+    if (is_array($email_logs_returned) && array_key_exists('count', $email_logs_returned)) {
       $email_logs_total = $email_logs_returned['count'];
     }
 

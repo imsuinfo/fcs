@@ -209,7 +209,7 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
   $problems_returned = mfcs_management_search_users($conditions, $options);
 
   $problems_total = 0;
-  if (array_key_exists('count', $problems_returned)) {
+  if (is_array($problems_returned) && array_key_exists('count', $problems_returned)) {
     $problems_total = $problems_returned['count'];
   }
 
