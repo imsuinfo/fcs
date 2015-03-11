@@ -180,7 +180,7 @@ function mfcs_request_review_0_page($form, &$form_state, $page_number = 0) {
   $options['columns'] = $columns;
   $options['columns_default'] = $columns_default;
 
-  $options['ajax_path'] = "'" . $base_path . 'requests/review-0/ajax' . "'";
+  $options['ajax_path'] = "'" . $base_path . 'requests/review-0/ajax' . $url_arguments . "'";
 
   $table = mfcs_build_request_ajax_table($items_returned, $conditions, $options);
   $table['attributes']['class'][] = 'mfcs-table-requests';
