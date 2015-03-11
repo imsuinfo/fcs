@@ -1182,7 +1182,7 @@ function mfcs_ajax_email_log_0_list() {
       }
 
       $row[3] = check_plain($email_log->title);
-      $row[4] = '<a href="' . $base_path . 'requests/email_logs-0/view/' . $email_log->id . $url_arguments . '" class="operation-link operation-link-view">View</a>';
+      $row[4] = '<a href="' . $base_path . 'requests/email_log-0/view/' . $email_log->id . $url_arguments . '" class="operation-link operation-link-view">View</a>';
 
       $response['data'][] = $row;
     }
