@@ -58,28 +58,14 @@ function mfcs_request_email_log_0_form($form, &$form_state, $page_number = 0) {
   $page_title = "E-mail Log";
   drupal_set_title($page_title);
 
-  $form = array();
-  $form['output'] = array('#markup' => '');
+  $user = cf_current_user();
 
-  $output = &$form['output']['#markup'];
-
-  $rows_per_page = 25;
-  $start_range = $page_number * $rows_per_page;
-
-  $columns = array(
-    'id' => "ID",
-    'date' => "Date",
-    'destination' => "Destination",
-    'Title' => "Title",
-    'operations' => "Operations",
-  );
+  mfcs_include(MFCS_INCLUDE_MANAGEMENT);
 
   // load sorting information
-  $sorting = array();
   $order = NULL;
   if (isset($_GET['order'])) {
     $order = strtolower($_GET['order']);
-    $sorting['order'] = $order;
   }
 
   $sort = NULL;
@@ -89,142 +75,231 @@ function mfcs_request_email_log_0_form($form, &$form_state, $page_number = 0) {
     if ($sort != 'ASC' && $sort != 'DESC') {
       $sort = NULL;
     }
-    else {
-      $sorting['sort'] = $sort;
-    }
   }
 
-  $logs = array();
-  try {
-    $query = db_select('mfcs_log_emails', 'mle');
-    $query->addField('mle', 'id', 'id');
-    $query->addField('mle', 'date', 'date');
-    $query->addField('mle', 'destination', 'destination');
-    $query->addField('mle', 'title', 'title');
-    $query->range($start_range, $rows_per_page + 1);
+  $class_id = '';
+  $class_date = '';
+  $class_destination = '';
+  $class_title = '';
+  $class_operations = 'no-print ';
 
-    if (is_null($order)) {
-      $query->orderBy('id', 'DESC');
-    }
-    else {
-      if ($order == 'id') {
-        $query->orderBy('id', is_null($sort) ? 'DESC' : $sort);
-      }
-      elseif ($order == 'date') {
-        $query->orderBy('date', is_null($sort) ? 'ASC' : $sort);
-      }
-      elseif ($order == 'destination') {
-        $query->orderBy('destination', is_null($sort) ? 'ASC' : $sort);
-      }
-      elseif ($order == 'title') {
-        $query->orderBy('title', is_null($sort) ? 'ASC' : $sort);
-      }
-    }
 
-    $logs = $query->execute()->fetchAll();
-  } catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  $sorting = array();
+  if (is_null($order)) {
+    $sorting['id'] = 'DESC';
+    $order_column = array(0 => strtolower($sorting['id']));
+    $class_id .= 'sorting_1 ';
   }
-
-  $table = array();
-  foreach ($columns as $column_name => $column_title) {
-    $column_class = array();
-
-    if ($column_name == 'operations') {
-      $column_class[] = 'no-print';
-
-      $table['header'][$column_name] = array(
-        'data' => $column_title,
-        'align' => 'center',
-        'class' => $column_class,
-      );
+  else {
+    if ($order == 'id') {
+      $sorting['id'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = array(0 => strtolower($sorting[$order]));
+      $class_id .= 'sorting_1 ';
+    }
+    elseif ($order == 'date') {
+      $sorting['date'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = array(1 => strtolower($sorting[$order]));
+      $class_date .= 'sorting_1 ';
+    }
+    elseif ($order == 'destination') {
+      $sorting['destination'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = array(2 => strtolower($sorting[$order]));
+      $class_destination .= 'sorting_1 ';
+    }
+    elseif ($order == 'title') {
+      $sorting['title'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = array(3 => strtolower($sorting[$order]));
+      $class_title .= 'sorting_1 ';
     }
     else {
-      $table['header'][$column_name] = array(
-        'data' => $column_title,
-        'align' => 'center',
-        'class' => $column_class,
-      );
-
-      $table['header'][$column_name]['field'] = $column_name;
+      $sorting['id'] = 'DESC';
+      $order_column = array(0 => strtolower($sorting['id']));
+      $class_id .= 'sorting_1 ';
     }
   }
 
-  if (is_null($order) && isset($table['header']['id'])) {
-    $table['header']['id']['sort'] = 'DESC';
+  $rows_per_page = 20;
+  $options = array(
+    'sort' => $sorting,
+    'start' => $page_number * $rows_per_page,
+    'limit' => $rows_per_page,
+    'count' => TRUE,
+  );
+
+  $options['extra_fields']['users'] = array(
+    'alias' => 'u',
+    'join' => 'left',
+    'on' => 'mle.destination = u.mail',
+    'columns' => array(
+      'user_id' => 'uid',
+    ),
+  );
+
+  $conditions = array();
+
+  $table_name = 'mfcs_log_emails';
+  $table_alias = 'mle';
+  $primary_key = 'id';
+
+  $email_logs_returned = mfcs_management_search_table($table_name, $table_alias, $primary_key, $conditions, $options);
+
+  $email_logs_total = 0;
+  if (is_array($email_logs_returned) && array_key_exists('count', $email_logs_returned)) {
+    $email_logs_total = $email_logs_returned['count'];
   }
 
-  $table['attributes'] = array();
-  $table['attributes']['summary'] = "A listing of e-mails sent by this system.";
-  $table['attributes']['class'] = array('mfcs-table-email_logs');
-  $table['rows'] = array();
-  $table['empty'] = t("No e-mails were found.");
-  $table['caption'] = "E-mail Logs";
+  $email_logs = array();
+  if (isset($email_logs_returned['results']) && is_array($email_logs_returned['results'])) {
+    $email_logs = $email_logs_returned['results'];
+  }
 
-  $total_results = 0;
+  // do not provide pages when the page number would bring the user beyond the available items.
+  if ($email_logs_total > 0 && $options['start'] >= $email_logs_total) {
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
 
-  if (!empty($logs)) {
-    $total_results = count($logs);
+  $rows = array();
+  foreach ($email_logs as $id => $email_log) {
+    $row = array();
 
-    // the select query loads rows_per_page+1 to determine if the 'next' link should appear.
-    // do not process this extra row if it exists.
-    if ($total_results > $rows_per_page) {
-      array_pop($logs);
-    }
 
-    foreach ($logs as $log) {
-      $row = array();
+    $row['id'] = array(
+      'data' => (int) $email_log->id,
+      'class' => $class_id,
+    );
 
-      $row['id'] = array(
-        'data' => $log->id,
-        'class' => 'column-id',
-      );
+    $row['date'] = array(
+      'data' => check_plain(date("Y/m/d h:i:s a", $email_log->date)),
+      'class' => $class_date,
+    );
 
-      $row['date'] = array(
-        'data' => date("Y/m/d h:i:s a", $log->date),
-        'class' => 'column-date',
-      );
-
+    if (empty($email_log->user_id)) {
       $row['destination'] = array(
-        'data' => check_plain($log->destination),
-        'class' => 'column-destination',
+        'data' => check_plain($email_log->destination),
+        'class' => $class_destination,
       );
-
-      $row['title'] = array(
-        'data' => check_plain($log->title),
-        'class' => 'column-title',
-      );
-
-      $row['operations'] = array(
-        'data' => '<a href="' . $base_path . 'requests/email_log-0/view/' . $log->id . $url_arguments . '">View</a>',
-        'class' => 'column-operations no-print',
-      );
-
-      $table['rows'][] = $row;
     }
+    else {
+      $row['destination'] = array(
+        'data' => '<a href="' . $base_path . 'user/' . $email_log->user_id . $url_arguments . '" class="user-link">' . check_plain($email_log->destination) . '</a>',
+        'class' => $class_destination,
+      );
+    }
+
+    $row['title'] = array(
+      'data' => check_plain($email_log->title),
+      'class' => $class_title,
+    );
+
+    $row['operations'] = array(
+      'data' => '<a href="' . $base_path . 'requests/email_log-0/view/' . $email_log->id . $url_arguments . '" class="operation-link operation-link-view">View</a>',
+      'class' => $class_operations,
+    );
+
+    $rows[] = $row;
   }
 
 
-  $navigation = "";
+  $email_log_list = array();
+  $email_log_list['caption'] = t("E-mail Log");
+  $email_log_list['header'] = array(
+    'id' => array('field' => 'id', 'data' => "ID", 'align' => 'center'),
+    'date' => array('field' => 'date', 'data' => "Date", 'align' => 'center'),
+    'destination' => array('field' => 'destination', 'data' => "Destination", 'align' => 'center'),
+    'title' => array('field' => 'title', 'data' => "Title", 'align' => 'center'),
+    'operations' => array('data' => "Operations", 'align' => 'center', 'class' => array('no-print')),
+  );
+
+  $email_log_list['attributes'] = array();
+  $email_log_list['attributes']['id'] = 'mfcs-email_log_form';
+  $email_log_list['attributes']['class'] = array(
+    'no_default',
+    'mfcs-email_log_form',
+    'display',
+    'hover',
+    'order-column',
+    'stripe',
+    'cell-border',
+  );
+  $email_log_list['attributes']['summary'] = 'Log of e-mails sent out by the system.';
+
+  $email_log_list['rows'] = $rows;
+  $email_log_list['empty'] = t("This system has sent no e-mails.");
+
+  $datatable_settings = array(
+    'sort' => strtolower($sort),
+    'order' => $order_column,
+    #'stateSave' => TRUE,
+    'lengthMenu' => array(
+       5 => '5',
+      10 => '10',
+      20 => '20',
+      40 => '40',
+      80 => '80',
+      -1 => '"All"',
+    ),
+    'processing' => TRUE,
+    'serverSide' => TRUE,
+    'ajax' => "'" . $base_path . 'requests/email_log-0/ajax' . $url_arguments . "'",
+    'deferRender' => TRUE,
+    'columns' => array(
+      array('id' => 0, 'column' => 'id', 'name' => "ID", 'className' => 'column-id', 'sanitize' => FALSE),
+      array('id' => 1, 'column' => 'date', 'name' => "Date", 'className' => 'column-date'),
+      array('id' => 2, 'column' => 'destination', 'name' => "Destination", 'className' => 'column-destination'),
+      array('id' => 3, 'column' => 'title', 'name' => "Title", 'className' => 'column-title'),
+      array('id' => 4, 'column' => NULL, 'name' => "Operations", 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
+    ),
+    'displayStart' => $options['start'],
+    'pageLength' => $rows_per_page,
+    'dom' => 'lfCrtip',
+    'KeyTable' => FALSE,
+    'oColVis' => array(
+      'buttonText' => '"Show / Hide"',
+    ),
+    'oLanguage' => array(
+      'sSearch' => '"Filter: "',
+    ),
+    'searchDelay' => 1200,
+  );
+
+  $navigation_top = '';
+  $navigation_bottom = '';
   if ($page_number > 0) {
     if ($page_number == 1) {
-      $navigation .= '<a href="' . $base_path . 'requests/email_log-0' . $url_arguments . '" class="request-email_log-page-choice request-email_log-page-previous no-print" title="Previous Page">Prev</a>';
+      $navigation_top .= '<a href="' . $base_path . 'requests/email_log-0' . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+      $navigation_bottom .= '<a href="' . $base_path . 'requests/email_log-0' . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
     }
     else {
       $previous_page = $page_number - 1;
-      $navigation .= '<a href="' . $base_path . 'requests/email_log-0/' . $previous_page  . $url_arguments. '" class="request-email_log-page-choice request-email_log-page-previous no-print" title="Previous Page">Prev</a>';
+      $navigation_top .= '<a href="' . $base_path . 'requests/email_log-0/' . $previous_page . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+      $navigation_bottom .= '<a href="' . $base_path . 'requests/email_log-0/' . $previous_page . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
     }
   }
 
-  if ($total_results > $rows_per_page) {
-    $next_page = $page_number + 1;
-    $navigation .= '<a href="' . $base_path . 'requests/email_log-0/' . $next_page . $url_arguments . '" class="request-email_log-page-choice request-email_log-page-next no-print" title="Next Page">Next</a>';
+  $navigation_start = $options['start'] + 1;
+  $navigation_total = $options['start'] + $rows_per_page;
+
+  if ($navigation_total > $email_logs_total) {
+    $navigation_total = $email_logs_total;
   }
 
-  $output = '';
-  $output .= '<div class="request-email_log-page-navigator request-email_log-page-navigator-top no-print">' . $navigation . '</div>';
-  $output .= theme('table', $table);
-  $output .= '<div class="request-email_log-page-navigator request-email_log-page-navigator-bottom no-print">' . $navigation . '</div>';
+  $navigation_bottom .= '<div class="table_listing-comment">' . "\n";
+  $navigation_bottom .= "Showing " . $navigation_start . " to " . $navigation_total . " of " . $email_logs_total . " entries.\n";
+  $navigation_bottom .= '</div>' . "\n";
+
+  if ($email_logs_total > ($options['start'] + $rows_per_page)) {
+    $next_page = $page_number + 1;
+    $navigation_top .= '<a href="' . $base_path . 'requests/email_log-0/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
+    $navigation_bottom .= '<a href="' . $base_path . 'requests/email_log-0/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
+  }
+
+  $form = array();
+
+  $form['email_log_list']['#markup'] = '<div class="table_listing-navigator table_listing-navigator-top no-print">' . $navigation_top . '</div>';
+  $form['email_log_list']['#markup'] .= mcneese_libraries_theme_table($email_log_list, $datatable_settings);
+  $form['email_log_list']['#markup'] .= '<div class="table_listing-navigator table_listing-navigator-bottom">' . $navigation_bottom . '</div>';
 
   return $form;
 }

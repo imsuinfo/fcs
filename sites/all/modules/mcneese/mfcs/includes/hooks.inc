@@ -941,6 +941,18 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'tab_root' => 'requests',
   );
 
+  $items['requests/email_log-0/ajax'] = array(
+    'title' => "E-mail Logs",
+    'description' => "E-mail Logs",
+    'page callback' => 'mfcs_ajax_email_log_0_list',
+    'file' => 'ajax.inc',
+    'file path' => $module_path . '/includes',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('email_log'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
+
   $items['requests/email_log-0/%'] = array(
     'title' => "E-mail Logs",
     'description' => "E-mail Logs",

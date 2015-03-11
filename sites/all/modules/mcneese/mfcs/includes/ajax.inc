@@ -1016,5 +1016,182 @@ function mfcs_ajax_problems_0_users_list() {
 }
 
 /**
+ * Ajax function call for loading users problem list datatable.
+ */
+function mfcs_ajax_email_log_0_list() {
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  $response = array();
+
+  if (function_exists('devel_menu')) {
+    $GLOBALS['devel_shutdown'] = FALSE;
+  }
+
+  mfcs_include(MFCS_INCLUDE_MANAGEMENT);
+
+  // load ajax/json request settings.
+  list($draw, $columns, $order, $options, $timestamp) = mfcs_ajax_setup_request_settings();
+
+  $search = FALSE;
+  if (isset($_GET['search']['value']) && is_string($_GET['search']['value']) && !empty($_GET['search']['value'])) {
+    $search = TRUE;
+  }
+
+  // build ajax/json response data.
+  $response = array(
+    'draw' => $draw,
+  );
+
+  $sorting = array();
+  if (!isset($order[0]['column'])) {
+    $sorting['user_id'] = 'ASC';
+  }
+  else {
+    $order_column = (int) $order[0]['column'];
+    $order_direction = isset($order[0]['dir']) && is_string($order[0]['dir']) ? strtoupper($order[0]['dir']) : 'DESC';
+
+    if ($order_column == 0) {
+      $sorting['id'] = $order_direction;
+    }
+    elseif ($order_column == 1) {
+      $sorting['date'] = $order_direction;
+    }
+    elseif ($order_column == 2) {
+      $sorting['destination'] = $order_direction;
+    }
+    elseif ($order_column == 3) {
+      $sorting['title'] = $order_direction;
+    }
+  }
+
+  // always provide the unique id in the ordering to guarantee consistency in range results.
+  if (!isset($sorting['id'])) {
+    $sorting['id'] = 'DESC';
+  }
+
+  if (!empty($sorting)) {
+    $options['sort'] = $sorting;
+  }
+
+  $options['extra_fields']['users'] = array(
+    'alias' => 'u',
+    'join' => 'left',
+    'on' => 'mle.destination = u.mail',
+    'columns' => array(
+      'user_id' => 'uid',
+    ),
+  );
+
+  $conditions = array();
+
+  $table_name = 'mfcs_log_emails';
+  $table_alias = 'mle';
+  $primary_key = 'id';
+
+  if ($search) {
+    $count_conditions = $conditions;
+    $count_options = $options;
+
+    $conditions['or_1'] = array();
+
+    $conditions['or_1']['value_id'] = array(
+      'field' => 'text(' . $table_alias . '.id)',
+      'operator' => MFCS_OPERATOR_LIKE,
+      'search' => $_GET['search']['value'],
+      'expression' => TRUE,
+    );
+
+    // Commented out because this is confusing because the date format will not match.
+    #$conditions['or_1']['value_date'] = array(
+    #  'field' => 'text(to_timestamp(' . $table_alias . '.date))',
+    #  'operator' => MFCS_OPERATOR_LIKE,
+    #  'search' => $_GET['search']['value'],
+    #  'expression' => TRUE,
+    #);
+
+    $conditions['or_1']['value_destination'] = array(
+      'field' => $table_alias . '.destination',
+      'operator' => MFCS_OPERATOR_LIKE,
+      'search' => $_GET['search']['value'],
+    );
+
+    $conditions['or_1']['value_title'] = array(
+      'field' => $table_alias . '.title',
+      'operator' => MFCS_OPERATOR_LIKE,
+      'search' => $_GET['search']['value'],
+    );
+
+    $count_options['returned'] = FALSE;
+    $email_logs_returned = mfcs_management_search_table($table_name, $table_alias, $primary_key, $count_conditions, $count_options);
+
+    $email_logs_total = 0;
+    if (array_key_exists('count', $email_logs_returned)) {
+      $email_logs_total = $email_logs_returned['count'];
+    }
+
+    $email_logs_returned = mfcs_management_search_table($table_name, $table_alias, $primary_key, $conditions, $options);
+    $email_logs = array();
+    if (isset($email_logs_returned['results']) && is_array($email_logs_returned['results'])) {
+      $email_logs = $email_logs_returned['results'];
+    }
+
+    $response['recordsTotal'] = $email_logs_total;
+    $response['recordsFiltered'] = $email_logs_returned['count'];
+  }
+  else {
+    $email_logs_returned = mfcs_management_search_table($table_name, $table_alias, $primary_key, $conditions, $options);
+
+    $email_logs_total = 0;
+    if (is_array($email_logs_returned) && array_key_exists('count', $email_logs_returned)) {
+      $email_logs_total = $email_logs_returned['count'];
+    }
+
+    $email_logs = array();
+    if (isset($email_logs_returned['results']) && is_array($email_logs_returned['results'])) {
+      $email_logs = $email_logs_returned['results'];
+    }
+
+    $response['recordsTotal'] = $email_logs_total;
+    $response['recordsFiltered'] = $email_logs_total;
+  }
+
+  if (!is_array($email_logs)) {
+    drupal_json_output($response);
+    exit();
+  }
+
+  $response['data'] = array();
+  if (!empty($email_logs)) {
+    foreach ($email_logs as $email_log) {
+      $row = array();
+
+      $row[0] = '' . $email_log->id;
+      $row[1] = check_plain(date("Y/m/d h:i:s a", $email_log->date));
+
+      if (empty($email_log->user_id)) {
+        $row[2] = check_plain($email_log->destination);
+      }
+      else {
+        $row[2] = '<a href="' . $base_path . 'user/' . $email_log->user_id . $url_arguments . '" class="user-link">' . check_plain($email_log->destination) . '</a>';
+      }
+
+      $row[3] = check_plain($email_log->title);
+      $row[4] = '<a href="' . $base_path . 'requests/email_logs-0/view/' . $email_log->id . $url_arguments . '" class="operation-link operation-link-view">View</a>';
+
+      $response['data'][] = $row;
+    }
+  }
+
+  drupal_json_output($response);
+  exit();
+}
+
+/**
  * @} End of '@addtogroup mfcs'.
  */
