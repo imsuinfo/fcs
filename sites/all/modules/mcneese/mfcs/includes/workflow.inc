@@ -2264,7 +2264,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
   $testing = isset($conf['fcs_testing']) && $conf['fcs_testing'];
   $debugging_email = isset($conf['fcs_testing-email_to-debug']) && $conf['fcs_testing-email_to-debug'];
 
-  // when testing, but not debugging, then prepend the testing prefix to e-mails to distinguish between production and non-production e-mails.
+  // when testing, prepend the testing prefix to e-mails to distinguish between production and non-production e-mails.
   if ($testing) {
     if (isset($conf['fcs_testing-email_to-prefix']) && is_string($conf['fcs_testing-email_to-prefix'])) {
       $email_params['title_prefix'] = $conf['fcs_testing-email_to-prefix'];

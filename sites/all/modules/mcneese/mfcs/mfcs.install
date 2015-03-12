@@ -1014,6 +1014,21 @@ function mfcs_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
+      'code' => array(
+        'description' => $t("Represents codes associated with the e-mail action, such as resending an e-mail."),
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'user_id' => array(
+        'description' => $t("This is the system user id. Represents the user associated with the log entry."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
       'date' => array(
         'description' => $t("Represents the date the e-mail was sent."),
         'type' => 'int',
@@ -1023,6 +1038,12 @@ function mfcs_schema() {
       ),
     ),
     'primary key' => array('id'),
+    'foreign keys' => array(
+      'user_id' => array(
+        'table' => 'users',
+        'columns' => array('user_id' => 'uid'),
+      ),
+    ),
   );
 
   $schema['mfcs_log_troubleshoot'] = array(
@@ -1043,7 +1064,7 @@ function mfcs_schema() {
         'not null' => TRUE,
       ),
       'user_id' => array(
-        'description' => $t("This is the system id. Represents the user associated with the log entry."),
+        'description' => $t("This is the system user id. Represents the user associated with the log entry."),
         'type' => 'int',
         'size' => 'big',
         'unsigned' => TRUE,
@@ -1495,6 +1516,7 @@ function mfcs_install() {
   db_query('ALTER TABLE {mfcs_review_classifications} ADD CONSTRAINT review_fkey FOREIGN KEY (review_id) REFERENCES {mfcs_field_review_review} (id) ON DELETE CASCADE');
 
   db_query('ALTER TABLE {mfcs_log_troubleshoot} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_log_emails} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
   db_query('ALTER TABLE {mfcs_users} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
 
   foreach ($structure as $structure_name => &$structure_array) {
@@ -1588,6 +1610,7 @@ function mfcs_uninstall() {
   db_query('ALTER TABLE {mfcs_review_classifications} DROP CONSTRAINT IF EXISTS ' . $keyR_foreign);
   db_query('ALTER TABLE {mfcs_field_review_review} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
   db_query('ALTER TABLE {mfcs_log_troubleshoot} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
+  db_query('ALTER TABLE {mfcs_log_emails} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
   db_query('ALTER TABLE {mfcs_users} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
 
   foreach ($structure as $structure_name => &$structure_array) {

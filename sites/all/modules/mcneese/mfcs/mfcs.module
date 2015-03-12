@@ -277,7 +277,6 @@ define('MFCS_EMAIL_MAX_DESTINATION_LENGTH', 255);
  */
 define('MFCS_NEARBY_REQUESTS_RANGE_SECONDS', 1800);
 
-
 /**
  * Defines a series of bitwise values for designating problems a particular user is having.
  */
@@ -290,6 +289,13 @@ define('MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE', 8);
 define('MFCS_USER_PROBLEM_ACCOUNT_LOGIN_PROBLEMS_MULTIPLE', 16);
 define('MFCS_USER_PROBLEM_FORM_ERROR_USER', 32);
 define('MFCS_USER_PROBLEM_FORM_ERROR_SYSTEM', 64);
+
+/**
+ * Define codes that represent what the e-mail represents.
+ */
+define('MFCS_EMAIL_CODE_NORMAL', 0);
+define('MFCS_EMAIL_CODE_RESEND', 1);
+define('MFCS_EMAIL_CODE_FORWARD', 2);
 
 
 /**
@@ -687,6 +693,14 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
     }
   }
   elseif ($operation == 'email_log') {
+    if (is_null($request_id)) {
+      if ($roles['manager'] || $roles['administer']) {
+        $access[$request_id] = TRUE;
+        return TRUE;
+      }
+    }
+  }
+  elseif ($operation == 'email_log-resend') {
     if (is_null($request_id)) {
       if ($roles['manager'] || $roles['administer']) {
         $access[$request_id] = TRUE;

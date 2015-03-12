@@ -161,7 +161,7 @@ class McNeeseFacilitiesUseMail implements MailSystemInterface {
       // the value of the return path.
       $mail_result = @mail(
         substr($message['to'], 0, MFCS_EMAIL_MAX_DESTINATION_LENGTH),
-        substr($mail_subject, 0, MFCS_EMAIL_MAX_SUBJECT_LENGTH),
+        $mail_subject,
         $message['body'],
         $mail_headers,
         '-f' . $message['Return-Path']
@@ -173,7 +173,7 @@ class McNeeseFacilitiesUseMail implements MailSystemInterface {
       // warning and makes mail() return FALSE.
       $mail_result = @mail(
         substr($message['to'], 0, MFCS_EMAIL_MAX_DESTINATION_LENGTH),
-        substr($mail_subject, 0, MFCS_EMAIL_MAX_SUBJECT_LENGTH),
+        $mail_subject,
         $message['body'],
         $mail_headers
       );
@@ -262,11 +262,19 @@ class McNeeseFacilitiesUseMail implements MailSystemInterface {
   private function log_email($message) {
     $instance = mfcs_instance();
 
+    $user = cf_current_user();
+    $user_id = 0;
+    if (isset($user->uid)) {
+      $user_id = $user->uid;
+    }
+
     $fields = array(
       'destination' => substr($message['to'], 0, MFCS_EMAIL_MAX_DESTINATION_LENGTH),
       'title' => substr($message['subject'], 0, MFCS_EMAIL_MAX_SUBJECT_LENGTH),
       'headers' => serialize($message['headers']),
       'body' => serialize($message['body']),
+      'code' => MFCS_EMAIL_CODE_NORMAL,
+      'user_id' => $user_id,
       'date' => $instance,
     );
 

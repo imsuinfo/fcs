@@ -1060,13 +1060,22 @@ function mfcs_ajax_email_log_0_list() {
       $sorting['id'] = $order_direction;
     }
     elseif ($order_column == 1) {
-      $sorting['date'] = $order_direction;
+      $sorting['user_id'] = $order_direction;
     }
     elseif ($order_column == 2) {
-      $sorting['destination'] = $order_direction;
+      $sorting['name'] = $order_direction;
     }
     elseif ($order_column == 3) {
+      $sorting['date'] = $order_direction;
+    }
+    elseif ($order_column == 4) {
+      $sorting['destination'] = $order_direction;
+    }
+    elseif ($order_column == 5) {
       $sorting['title'] = $order_direction;
+    }
+    elseif ($order_column == 6) {
+      $sorting['code'] = $order_direction;
     }
   }
 
@@ -1079,12 +1088,31 @@ function mfcs_ajax_email_log_0_list() {
     $options['sort'] = $sorting;
   }
 
+  $options['fields'] = array(
+    'id' => 'id',
+    'destination' => 'destination',
+    'title' => 'title',
+    'user_id' => 'user_id',
+    'date' => 'date',
+    'code' => 'code',
+  );
+
   $options['extra_fields']['users'] = array(
     'alias' => 'u',
-    'join' => 'left',
-    'on' => 'mle.destination = u.mail',
+    'join' => 'inner',
+    'on' => 'mle.user_id = u.uid',
     'columns' => array(
       'user_id' => 'uid',
+      'name' => 'name',
+    ),
+  );
+
+  $options['extra_fields2']['users'] = array(
+    'alias' => 'd_u',
+    'join' => 'left',
+    'on' => 'mle.destination = d_u.mail',
+    'columns' => array(
+      'destination_user_id' => 'uid',
     ),
   );
 
@@ -1095,6 +1123,8 @@ function mfcs_ajax_email_log_0_list() {
   $primary_key = 'id';
 
   if ($search) {
+    $regex_safe_search = preg_quote($_GET['search']['value'], '/');
+
     $count_conditions = $conditions;
     $count_options = $options;
 
@@ -1105,6 +1135,19 @@ function mfcs_ajax_email_log_0_list() {
       'operator' => MFCS_OPERATOR_LIKE,
       'search' => $_GET['search']['value'],
       'expression' => TRUE,
+    );
+
+    $conditions['or_1']['value_user_id'] = array(
+      'field' => 'text(mle.user_id)',
+      'operator' => MFCS_OPERATOR_LIKE,
+      'search' => $_GET['search']['value'],
+      'expression' => TRUE,
+    );
+
+    $conditions['or_1']['value_name'] = array(
+      'field' => 'u.name',
+      'operator' => MFCS_OPERATOR_LIKE,
+      'search' => $_GET['search']['value'],
     );
 
     // Commented out because this is confusing because the date format will not match.
@@ -1126,6 +1169,25 @@ function mfcs_ajax_email_log_0_list() {
       'operator' => MFCS_OPERATOR_LIKE,
       'search' => $_GET['search']['value'],
     );
+
+    $limit_email_codes = NULL;
+    if (preg_match('/' . $regex_safe_search . '/i', 'normal') > 0) {
+      $limit_email_codes = MFCS_EMAIL_CODE_NORMAL;
+    }
+    elseif (preg_match('/' . $regex_safe_search . '/i', 're-send') > 0) {
+      $limit_email_codes = MFCS_EMAIL_CODE_RESEND;
+    }
+    elseif (preg_match('/' . $regex_safe_search . '/i', 'forward') > 0) {
+      $limit_email_codes = MFCS_EMAIL_CODE_FORWARD;
+    }
+
+    if (!is_null($limit_email_codes)) {
+      $conditions['or_1']['value_code'] = array(
+        'field' => $table_alias . '.code',
+        'operator' => MFCS_OPERATOR_EQUAL,
+        'search' => $limit_email_codes,
+      );
+    }
 
     $count_options['returned'] = FALSE;
     $email_logs_returned = mfcs_management_search_table($table_name, $table_alias, $primary_key, $count_conditions, $count_options);
@@ -1166,23 +1228,40 @@ function mfcs_ajax_email_log_0_list() {
     exit();
   }
 
+  $may_resend_log = mfcs_page_request_access('email_log-resend');
+
   $response['data'] = array();
   if (!empty($email_logs)) {
     foreach ($email_logs as $email_log) {
       $row = array();
 
       $row[0] = '' . $email_log->id;
-      $row[1] = check_plain(date("Y/m/d h:i:s a", $email_log->date));
+      $row[1] = '' . $email_log->user_id;
+      $row[2] = '<a href="' . $base_path . 'user/' . $email_log->user_id . $url_arguments . '" class="user-link">' . check_plain($email_log->name) . '</a>';
+      $row[3] = check_plain(date("Y/m/d h:i:s a", $email_log->date));
 
       if (empty($email_log->user_id)) {
-        $row[2] = check_plain($email_log->destination);
+        $row[4] = check_plain($email_log->destination);
       }
       else {
-        $row[2] = '<a href="' . $base_path . 'user/' . $email_log->user_id . $url_arguments . '" class="user-link">' . check_plain($email_log->destination) . '</a>';
+        $row[4] = '<a href="' . $base_path . 'user/' . $email_log->user_id . $url_arguments . '" class="user-link">' . check_plain($email_log->destination) . '</a>';
       }
 
-      $row[3] = check_plain($email_log->title);
-      $row[4] = '<a href="' . $base_path . 'requests/email_log-0/view/' . $email_log->id . $url_arguments . '" class="operation-link operation-link-view">View</a>';
+      $row[5] = check_plain($email_log->title);
+
+      $row[6] = "Normal";
+      if ($email_log->code == MFCS_EMAIL_CODE_RESEND) {
+        $row[6] = "Re-sent";
+      }
+      elseif ($email_log->code == MFCS_EMAIL_CODE_FORWARD) {
+        $row[6] = "Forwarded";
+      }
+
+      $row[7] = '<a href="' . $base_path . 'requests/email_log-0/view/' . $email_log->id . $url_arguments . '" class="operation-link operation-link-view">View</a>';
+
+      if ($may_resend_log) {
+        $row[7] .= ' <a href="' . $base_path . 'requests/email_log-0/resend/' . $email_log->id . $url_arguments . '" class="operation-link operation-link-resend">Re-send</a>';
+      }
 
       $response['data'][] = $row;
     }
