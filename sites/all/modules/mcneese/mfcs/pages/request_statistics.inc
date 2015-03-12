@@ -52,6 +52,47 @@ function mfcs_request_statistics_0_page($year = NULL, $month = NULL, $day = NULL
     drupal_exit();
   }
 
+  $valid_month_names = array(
+    1 => 'january',
+    2 => 'february',
+    3 => 'march',
+    4 => 'april',
+    5 => 'may',
+    6 => 'june',
+    7 => 'july',
+    8 => 'august',
+    9 => 'september',
+    10 => 'october',
+    11 => 'november',
+    12 => 'december',
+  );
+
+  if (!is_null($month)) {
+    if (cf_is_integer($month)) {
+      if (!array_key_exists($month, $valid_month_names)) {
+        drupal_not_found();
+        drupal_exit();
+      }
+
+      $month = $valid_month_names[$month];
+    }
+    elseif (is_string($month)) {
+      if (!in_array($month, $valid_month_names)) {
+        drupal_not_found();
+        drupal_exit();
+      }
+    }
+    else {
+      drupal_not_found();
+      drupal_exit();
+    }
+  }
+
+  if (!is_null($day) && (!cf_is_integer($day) || $day < 1 || $day > 31)) {
+    drupal_not_found();
+    drupal_exit();
+  }
+
   global $base_path;
 
   $user = cf_current_user();
@@ -59,21 +100,30 @@ function mfcs_request_statistics_0_page($year = NULL, $month = NULL, $day = NULL
   mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
-  $current_date = NULL;
   $day_start = NULL;
   $day_stop = NULL;
   if (!is_null($year)) {
-    $current_date = mfcs_miscellaneous_determine_current_date($year, $month, $day);
-
-    $year_start = strtotime('midnight january 1,  ' . $current_date['year']);
+    $year_start = strtotime('midnight january 1,  ' . $year);
     $year_stop = strtotime('next year', $year_start);
     $year_last = strtotime('previous year', $year_start);
-    $month_start = strtotime('midnight ' . $current_date['month'] . ' 1,  ' . $current_date['year']);
-    $month_stop = strtotime('next month', $month_start);
-    $day_start = strtotime('midnight ' . $current_date['month'] . ' ' . $current_date['day'] . ' ' . $current_date['year']);
-    $day_stop = strtotime('midnight tomorrow', $day_start);
 
-    $month_name = date('F', $month_start);
+    if (is_null($month)) {
+      // nothing to do.
+    }
+    elseif (is_null($day)) {
+      $month_start = strtotime('midnight ' . $month . ' 1,  ' . $year);
+      $month_stop = strtotime('next month', $month_start);
+      $month_name = date('F', $month_start);
+    }
+    else {
+      $month_start = strtotime('midnight ' . $month . ' 1,  ' . $year);
+      $month_stop = strtotime('next month', $month_start);
+      $month_name = date('F', $month_start);
+
+      $day_start = strtotime('midnight ' . $month . ' ' . $day . ' ' . $year);
+      $day_stop = strtotime('midnight tomorrow', $day_start);
+    }
+
   }
   else {
     $instance = mfcs_instance();
@@ -86,8 +136,42 @@ function mfcs_request_statistics_0_page($year = NULL, $month = NULL, $day = NULL
     $day = NULL;
   }
 
-  $string_year_previous = date('Y', $year_last);
-  $string_year_next = date('Y', $year_stop);
+  if (is_null($year) || is_null($month)) {
+    $previous = $year_last;
+    $next = $year_stop;
+
+    $path_previous = date('Y', $previous);
+    $path_next = date('Y', $next);
+
+    $string_previous = date('Y', $previous);
+    $string_next = date('Y', $next);
+  }
+  elseif (is_null($day)) {
+    $previous = strtotime('previous month', $month_start);
+    $next = $month_stop;
+
+    $month_name_previous = date('F', $previous);
+    $month_name_next = date('F', $next);
+
+    $path_previous = date('Y', $previous) . '/' . strtolower($month_name_previous);
+    $path_next = date('Y', $next) . '/' . strtolower($month_name_next);
+
+    $string_previous = $month_name_previous . ' ' . date('Y', $previous);
+    $string_next = $month_name_next . ' ' . date('Y', $next);
+  }
+  else {
+    $previous = strtotime('previous day', $day_start);
+    $next = $day_stop;
+
+    $month_name_previous = date('F', $previous);
+    $month_name_next = date('F', $next);
+
+    $path_previous = date('Y', $previous) . '/' . strtolower($month_name_previous) . '/' . date('d', $previous);
+    $path_next = date('Y', $next) . '/' . strtolower($month_name_next) . '/' . date('d', $next);
+
+    $string_previous = $month_name_previous . ' ' . date('d', $previous) . ', ' . date('Y', $previous);
+    $string_next = $month_name_next . ' ' . date('d', $next) . ', ' . date('Y', $next);
+  }
 
   $status_options = mfcs_get_request_status_list_options();
   $steps_options = mfcs_get_request_steps_list_options();
@@ -100,8 +184,8 @@ function mfcs_request_statistics_0_page($year = NULL, $month = NULL, $day = NULL
 
   // next/prev years
   $markup .= '<div class="statistics-navigation position-relative no-print clear">' . "\n";
-  $markup .= '  <a href="' . $base_path . 'requests/statistics-0/' . $string_year_previous . '" class="statistics-navigation-link link-previous inline-block" title="Statistics for ' . $string_year_previous . '">Prev</a>' . "\n";
-  $markup .= '  <a href="' . $base_path . 'requests/statistics-0/' . $string_year_next . '" class="statistics-navigation-link link-previous inline-block float-right" title="Statistics for for ' . $string_year_next . '">Next</a>' . "\n";
+  $markup .= '  <a href="' . $base_path . 'requests/statistics-0/' . $path_previous . '" class="statistics-navigation-link link-previous inline-block" title="Statistics for ' . $string_previous . '">Prev</a>' . "\n";
+  $markup .= '  <a href="' . $base_path . 'requests/statistics-0/' . $path_next . '" class="statistics-navigation-link link-previous inline-block float-right" title="Statistics for for ' . $string_next . '">Next</a>' . "\n";
   $markup .= '</div>' . "\n";
 
   $markup .= '<div class="statistics-title">' . "\n";
