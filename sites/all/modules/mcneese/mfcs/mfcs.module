@@ -473,7 +473,7 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
     'bannerless_exception' => array_search('bannerless exception', $user->roles),
   );
 
-  // Access will only be granted to administrators, managers, and requestors.
+  // Access will only be granted to administrators, managers, and requesters.
   if (!$roles['administer'] && !$roles['manager'] && !$roles['reviewer'] && !$roles['requester']) {
     return FALSE;
   }
@@ -851,7 +851,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
     'bannerless_exception' => array_search('bannerless exception', $user->roles),
   );
 
-  // Access will only be granted to administrators, managers, and requestors.
+  // Access will only be granted to administrators, managers, and requesters.
   if (!$roles['administer'] && !$roles['manager'] && !$roles['reviewer'] && !$roles['requester']) {
     return FALSE;
   }
