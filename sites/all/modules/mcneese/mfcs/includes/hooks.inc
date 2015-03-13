@@ -54,6 +54,8 @@ function mfcs_hook_menu() {
 
   mfcs_hook_menu_management($items, $module_path);
 
+  mfcs_hook_menu_help($items, $module_path);
+
   return $items;
 }
 
@@ -1081,6 +1083,127 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'tab_parent' => 'requests/problems-0/users',
     'tab_root' => 'requests/problems-0/users',
   );
+}
+
+/**
+ * hook_menu() entries related to help.
+ *
+ * @param array $items
+ *   An array of menu items.
+ * @param string $module_path
+ *   The filesystem path to the module.
+ */
+function mfcs_hook_menu_help(&$items, $module_path) {
+  $items['requests/help-0'] = array(
+    'title' => "Help",
+    'description' => "Online Documentation",
+    'page callback' => 'mfcs_help_0_page',
+    'page arguments' => array(),
+    'file' => 'help.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('help'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
+
+  $items['requests/help-0/%'] = array(
+    'title' => "Help",
+    'description' => "Online Documentation",
+    'page callback' => 'mfcs_help_0_page',
+    'page arguments' => array(2),
+    'file' => 'help.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('help'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
+
+  $items['requests/help-0/%/%'] = array(
+    'title' => "Help",
+    'description' => "Online Documentation",
+    'page callback' => 'mfcs_help_0_page',
+    'page arguments' => array(2, 3),
+    'file' => 'help.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('help'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
+
+  $items['requests/help-0/%/%/%'] = array(
+    'title' => "Help",
+    'description' => "Online Documentation",
+    'page callback' => 'mfcs_help_0_page',
+    'page arguments' => array(2, 3, 4),
+    'file' => 'help.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('help'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
+
+  // @todo: provide custom pdf downloading for help pages
+  /*
+  $items['requests/pdf-0/help'] = array(
+    'title' => "Help PDF",
+    'description' => "Download Help PDF",
+    'page callback' => 'mfcs_help_0_pdf_page',
+    'page arguments' => array(),
+    'file' => 'help.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('help'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['requests/pdf-0/help/%'] = array(
+    'title' => "Help PDF",
+    'description' => "Download Help PDF",
+    'page callback' => 'mfcs_help_0_pdf_page',
+    'page arguments' => array(3),
+    'file' => 'help.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('help'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['requests/pdf-0/help/%/%'] = array(
+    'title' => "Help PDF",
+    'description' => "Download Help PDF",
+    'page callback' => 'mfcs_help_0_pdf_page',
+    'page arguments' => array(3, 4),
+    'file' => 'help.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('help'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['requests/pdf-0/help/%/%/%'] = array(
+    'title' => "Help PDF",
+    'description' => "Download Help PDF",
+    'page callback' => 'mfcs_help_0_pdf_page',
+    'page arguments' => array(3, 4, 5),
+    'file' => 'help.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('help'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+    'type' => MENU_CALLBACK,
+  );
+  */
 }
 
 /**

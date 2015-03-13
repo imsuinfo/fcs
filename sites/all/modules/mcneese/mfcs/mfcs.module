@@ -732,6 +732,14 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
       }
     }
   }
+  elseif ($operation == 'help') {
+    if (is_null($request_id)) {
+      if ($user->uid > 0) {
+        $access[$request_id] = TRUE;
+        return TRUE;
+      }
+    }
+  }
 
   if (is_array($request_id)) {
     foreach ($request_ids as $request_id) {
