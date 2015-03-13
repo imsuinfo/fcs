@@ -57,7 +57,7 @@ function mfcs_dashboard_page() {
   $items_array_current = 1;
 
   if ($can_create) {
-    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/create-0' . $url_arguments . '" class="item-link">New Request</a></h4>';
+    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/create-0' . $url_arguments . '" class="item-link">Create Request</a></h4>';
     $help = '<div class="item-description inline-block">Make a request to use the facilities or host special events at McNeese State University or related facilities.</div>';
     $items_array[] = array(
       'data' => $link . '<br>' . $help,

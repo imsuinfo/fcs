@@ -69,7 +69,7 @@ function mfcs_request_create_0_form($form, &$form_state, $clone_request = NULL) 
     mfcs_add_canonical_headers('requests/create-0/' . $clone_request);
   }
 
-  $page_title = "New Request";
+  $page_title = "Create Request";
   if (!empty($request['information']['title'][0]->value)) {
     $page_title = "Copy Request: " . $request['information']['title'][0]->value;
   }

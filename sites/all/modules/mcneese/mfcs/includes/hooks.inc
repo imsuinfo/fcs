@@ -78,8 +78,8 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   );
 
   $items['requests/create-0'] = array(
-    'title' => "New Request",
-    'description' => "New Request",
+    'title' => "Create Request",
+    'description' => "Create Request",
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_create_0_form'),
     'file' => 'request_create.inc',
@@ -91,8 +91,8 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   );
 
   $items['requests/create-0/%'] = array(
-    'title' => "New Request",
-    'description' => "New Request",
+    'title' => "Create Request",
+    'description' => "Create Request",
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_create_0_form', 2),
     'file' => 'request_create.inc',
