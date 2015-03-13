@@ -122,12 +122,12 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
   $last_month = strtotime('midnight first day of last month', $month_start);
   $next_month = strtotime('midnight first day of next month', $month_start);
 
-  $url_base_month = $base_path . 'requests/calendar-0/month/';
-  $url_base_day = $base_path . 'requests/calendar-0/day/';
+  $url_base_month = $base_path . 'requests/calendar-0/month';
+  $url_base_day = $base_path . 'requests/calendar-0/day';
 
-  $last_url = $url_base_month . date('Y', $last_month) . '/' . strtolower(date('F', $last_month)) . $url_arguments;
+  $last_url = $url_base_month . '/' . date('Y', $last_month) . '/' . strtolower(date('F', $last_month)) . $url_arguments;
   $this_url = $url_base_month . $url_arguments;
-  $next_url = $url_base_month . date('Y', $next_month) . '/' . strtolower(date('F', $next_month)) . $url_arguments;
+  $next_url = $url_base_month . '/' . date('Y', $next_month) . '/' . strtolower(date('F', $next_month)) . $url_arguments;
 
   $markup .= '<div class="calendar-navigation">';
   $markup .= '<div class="calendar-navigation-previous">';
@@ -198,7 +198,7 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
 
     $markup .= '<div class="calendar-day-wrapper weekday-' . $week_count . ' day-' . $current_day . ' month-' . $current_month . $extra_class . '">';
     $markup .= '<div class="calendar-day weekday-' . $week_count . ' day-' . $current_day . ' month-' . $current_month . $extra_class . '">';
-    $markup .= '<div class="calendar-label"><a href="' . $url_base_day . $current_year . '/' . $current_month_name . '/' . $current_day . $url_arguments. '">' . $current_day . '</a></div>';
+    $markup .= '<div class="calendar-label"><a href="' . $url_base_day . '/' . $current_year . '/' . $current_month_name . '/' . $current_day . $url_arguments. '">' . $current_day . '</a></div>';
     if (!empty($items[$current_month_day])) {
       $items_count = 0;
       if (is_null($max_items)) {
@@ -213,7 +213,7 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
 
           $items_count++;
           if ($items_count == $max_items) {
-            $markup .= '<div class="calendar-item item-more year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '"><a class="calendar-item-link" href="' . $url_base_day . $current_year . '/' . $current_month_name . '/' . $current_day . $url_arguments . '" title="View more.">More...</a></div>';
+            $markup .= '<div class="calendar-item item-more year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '"><a class="calendar-item-link" href="' . $url_base_day . '/' . $current_year . '/' . $current_month_name . '/' . $current_day . $url_arguments . '" title="View more.">More...</a></div>';
             break;
           }
         }
@@ -378,11 +378,11 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
   $last_day = strtotime('midnight yesterday', $day_start);
   $next_day = strtotime('midnight tomorrow', $day_start);
 
-  $url_base_day = $base_path . 'requests/calendar-0/day/';
+  $url_base_day = $base_path . 'requests/calendar-0/day';
 
-  $last_url = $url_base_day . date('Y', $last_day) . '/' . strtolower(date('F', $last_day)) . '/' . date('d', $last_day) . $url_arguments;
+  $last_url = $url_base_day . '/' . date('Y', $last_day) . '/' . strtolower(date('F', $last_day)) . '/' . date('d', $last_day) . $url_arguments;
   $this_url = $url_base_day . $url_arguments;
-  $next_url = $url_base_day . date('Y', $next_day) . '/' . strtolower(date('F', $next_day)) . '/' . date('d', $next_day) . $url_arguments;
+  $next_url = $url_base_day . '/' . date('Y', $next_day) . '/' . strtolower(date('F', $next_day)) . '/' . date('d', $next_day) . $url_arguments;
 
   $markup .= '<div class="calendar-navigation">';
   $markup .= '<div class="calendar-navigation-previous">';
@@ -525,7 +525,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
   $slots_count = 0;
   $slots_minimum = $page_number * $slots_per_page;
   do {
-    $page_url = $url_base_day . date('Y', $last_day) . '/' . strtolower(date('F', $last_day)) . '/' . date('d', $day_start) . '/' . $slots_page . $url_arguments;
+    $page_url = $url_base_day . '/' . date('Y', $last_day) . '/' . strtolower(date('F', $last_day)) . '/' . date('d', $day_start) . '/' . $slots_page . $url_arguments;
 
     $class_active_page = '';
     if ($slots_page == $page_number) {
@@ -540,7 +540,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
   } while ($slots_count < $items['slots_max']);
 
   // setup page_url to be used in the prev/next links later on.
-  $page_url = $url_base_day . date('Y', $last_day) . '/' . strtolower(date('F', $last_day)) . '/' . date('d', $day_start) . '/';
+  $page_url = $url_base_day . '/' . date('Y', $last_day) . '/' . strtolower(date('F', $last_day)) . '/' . date('d', $day_start) . '/';
 
   // end page links (Range)
   $markup .= '</ul></nav>' . "\n";

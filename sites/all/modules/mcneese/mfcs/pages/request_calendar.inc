@@ -42,28 +42,52 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
     drupal_exit();
   }
 
+  $instance = mfcs_instance();
+
+  if (is_null($year)) {
+    $year = date('Y', $instance);
+    $month = strtolower(date('F', $instance));
+  }
+  elseif (is_null($month)) {
+    $month = 'january';
+  }
+
   $valid_month_names = array(
-    'january',
-    'february',
-    'march',
-    'april',
-    'may',
-    'june',
-    'july',
-    'august',
-    'september',
-    'october',
-    'november',
-    'december',
+    1 => 'january',
+    2 => 'february',
+    3 => 'march',
+    4 => 'april',
+    5 => 'may',
+    6 => 'june',
+    7 => 'july',
+    8 => 'august',
+    9 => 'september',
+    10 => 'october',
+    11 => 'november',
+    12 => 'december',
   );
 
   if (!is_null($month) && !in_array(strtolower($month), $valid_month_names)) {
-    cf_error::invalid_variable('month', "Must be a valid month name.");
+    if (strlen($month) < 3 && cf_is_integer($month)) {
+      $month = (int) $month;
 
-    drupal_not_found();
-    drupal_exit();
+      if (array_key_exists($month, $valid_month_names)) {
+        $month = $valid_month_names[$month];
+      }
+      else {
+        cf_error::invalid_variable('month', "Must be a valid month name.");
+
+        drupal_not_found();
+        drupal_exit();
+      }
+    }
+    else {
+      cf_error::invalid_variable('month', "Must be a valid month name.");
+
+      drupal_not_found();
+      drupal_exit();
+    }
   }
-
 
   global $base_path;
   global $mfcs_determined;
@@ -72,8 +96,6 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
 
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
   mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
-
-  $instance = mfcs_instance();
 
   if (is_null($year)) {
     $month_start = strtotime('midnight first day of', $instance);
@@ -307,26 +329,56 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
     $page_number = 0;
   }
 
+  $instance = mfcs_instance();
+
+  if (is_null($year)) {
+    $year = date('Y', $instance);
+    $month = strtolower(date('F', $instance));
+    $day = date('d', $instance);
+  }
+  elseif (is_null($month)) {
+    $month = 'january';
+    $day = 1;
+  }
+  elseif (is_null($day)) {
+    $day = 1;
+  }
+
   $valid_month_names = array(
-    'january',
-    'february',
-    'march',
-    'april',
-    'may',
-    'june',
-    'july',
-    'august',
-    'september',
-    'october',
-    'november',
-    'december',
+    1 => 'january',
+    2 => 'february',
+    3 => 'march',
+    4 => 'april',
+    5 => 'may',
+    6 => 'june',
+    7 => 'july',
+    8 => 'august',
+    9 => 'september',
+    10 => 'october',
+    11 => 'november',
+    12 => 'december',
   );
 
-  if (!in_array(strtolower($month), $valid_month_names)) {
-    cf_error::invalid_variable('month', "Must be a valid month name.");
+  if (!is_null($month) && !in_array(strtolower($month), $valid_month_names)) {
+    if (strlen($month) < 3 && cf_is_integer($month)) {
+      $month = (int) $month;
 
-    drupal_not_found();
-    drupal_exit();
+      if (array_key_exists($month, $valid_month_names)) {
+        $month = $valid_month_names[$month];
+      }
+      else {
+        cf_error::invalid_variable('month', "Must be a valid month name.");
+
+        drupal_not_found();
+        drupal_exit();
+      }
+    }
+    else {
+      cf_error::invalid_variable('month', "Must be a valid month name.");
+
+      drupal_not_found();
+      drupal_exit();
+    }
   }
 
   if (!is_null($day) && ($day < 1 || $day > 31)) {
@@ -343,8 +395,6 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
 
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
   mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
-
-  $instance = mfcs_instance();
 
   if (is_null($year)) {
     $day_start = strtotime('midnight today', $instance);
