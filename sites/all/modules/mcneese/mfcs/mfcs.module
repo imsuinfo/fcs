@@ -410,17 +410,17 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
 
 
   // use advanced static cache for increased performance.
-  static $mfcs_request_access;
+  static $mfcs_request_access_static;
 
-  if (!isset($mfcs_request_access)) {
-    $mfcs_request_access[$operation] = &drupal_static('mfcs_request_access');
+  if (!isset($mfcs_request_access_static)) {
+    $mfcs_request_access_static[$operation] = &drupal_static('mfcs_request_access');
   }
 
-  if (!isset($mfcs_request_access[$operation][$section][$user->uid])) {
-    $mfcs_request_access[$operation][$section][$user->uid] = array();
+  if (!isset($mfcs_request_access_static[$operation][$section][$user->uid])) {
+    $mfcs_request_access_static[$operation][$section][$user->uid] = array();
   }
 
-  $access = &$mfcs_request_access[$operation][$section][$user->uid];
+  $access = &$mfcs_request_access_static[$operation][$section][$user->uid];
 
   if (is_string($request_id) || is_numeric($request_id)) {
     if (array_key_exists($request_id, $access)) {
@@ -761,7 +761,7 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
  * If the request has not yet been loaded, either load it or directly call
  * mfcs_page_request_access() for access checks.
  *
- * This static caches the results in 'mfcs_request_access'.
+ * This static caches the results in 'mfcs_request_access_static'.
  *
  * @param string $operation
  *   Operation to perform access check against.
@@ -801,17 +801,17 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
 
 
   // use advanced static cache for increased performance.
-  static $mfcs_request_access;
+  static $mfcs_request_access_static;
 
-  if (!isset($mfcs_request_access)) {
-    $mfcs_request_access[$operation] = &drupal_static('mfcs_request_access');
+  if (!isset($mfcs_request_access_static)) {
+    $mfcs_request_access_static[$operation] = &drupal_static('mfcs_request_access');
   }
 
-  if (!isset($mfcs_request_access[$operation][$section][$user->uid])) {
-    $mfcs_request_access[$operation][$section][$user->uid] = array();
+  if (!isset($mfcs_request_access_static[$operation][$section][$user->uid])) {
+    $mfcs_request_access_static[$operation][$section][$user->uid] = array();
   }
 
-  $access = &$mfcs_request_access[$operation][$section][$user->uid];
+  $access = &$mfcs_request_access_static[$operation][$section][$user->uid];
 
   if (empty($request['mer']['id'][0]->value)) {
     return FALSE;
@@ -851,7 +851,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
     'bannerless_exception' => array_search('bannerless exception', $user->roles),
   );
 
-  // Access will only be granted to administrators, managers, and requesters.
+  // Access will only be granted to administrators, managers, reviewers, and requesters.
   if (!$roles['administer'] && !$roles['manager'] && !$roles['reviewer'] && !$roles['requester']) {
     return FALSE;
   }
@@ -890,38 +890,48 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
     );
 
     // when quick meeting is enabled, a section is not null, then additional checks are required.
-    $is_quick_meeting = FALSE;
-    if (!is_null($request_id) && !is_null($section) && ($roles['manager'] || $roles['requester'])) {
+    if (!is_null($request_id) && !is_null($section) && ($roles['manager'] || $roles['requester'] || $roles['reviewer'])) {
       if (isset($request['information']['type'][0]->value) && $request['information']['type'][0]->value == MFCS_REQUEST_TYPE_QUICK_MEETING) {
-        $is_quick_meeting = TRUE;
-
         // deny access to sections that are not allowed to be edited for a quick meeting.
-        $allowed_sections = array(
+        $allowed_sections_quick_meeting = array(
           'request',
           'information',
           'coordinator',
           'dates',
         );
 
-        if (!in_array($section, $allowed_sections)) {
+        if (!in_array($section, $allowed_sections_quick_meeting)) {
           return FALSE;
         }
       }
     }
 
-    $valid_status = in_array($request['top']['status'][0]->value, $edit_request_status);
+    if (!in_array($request['top']['status'][0]->value, $edit_request_status)) {
+      $access[$request_id] = FALSE;
+      return FALSE;
+    }
 
     if ($roles['manager']) {
-      $access[$request_id] = $valid_status;
-      return $valid_status;
+      $access[$request_id] = TRUE;
+      return TRUE;
     }
-    elseif ($roles['requester']) {
-      if ($valid_status) {
+    elseif ($roles['requester'] || $roles['reviewer']) {
+      if ($roles['requester']) {
         if (isset($request['mer']['user_id'][0]->value) && $request['mer']['user_id'][0]->value == $user->uid) {
           $access[$request_id] = TRUE;
           return TRUE;
         }
       }
+
+      if ($roles['reviewer']) {
+        if (isset($request['venue_coordinator']['user_id'][0]->value) && $request['venue_coordinator']['user_id'][0]->value == $user->uid) {
+          $access[$request_id] = TRUE;
+          return TRUE;
+        }
+      }
+
+      $access[$request_id] = FALSE;
+      return FALSE;
     }
   }
   elseif ($operation == 'view') {

@@ -138,56 +138,7 @@ function mfcs_page_request_access_operation_edit(&$request_ids, &$processed, &$a
     MFCS_REQUEST_STATUS_LOCKED,
   );
 
-
-  // when quick meeting is enabled, a section is not null, then additional checks are required.
-  if (!array_key_exists(NULL, $request_ids) && !is_null($section) && ($roles['manager'] || $roles['requester'])) {
-
-    // deny access to sections that are not allowed to be edited for a quick meeting.
-    $allowed_sections = array(
-      'request',
-      'information',
-      'coordinator',
-      'dates',
-    );
-
-    if (!array_key_exists($section, $allowed_sections)) {
-      try {
-        $query = db_select('mfcs_requests', 'mer');
-
-        $query->addField('mer', 'id', 'id');
-
-        $query->condition('mer.id', $request_ids, 'IN');
-        $query->condition('mer.type', MFCS_REQUEST_TYPE_QUICK_MEETING);
-
-        $access_results = $query->execute()->fetchAllAssoc('id');
-
-        if (is_array($access_results)) {
-          foreach ($request_ids as $id) {
-            if (array_key_exists($id, $access_results)) {
-              $processed[$id] = FALSE;
-              unset($request_ids[$id]);
-            }
-          }
-          unset($request_ids_copy);
-
-          // looks like all of the requests have been processed, so return.
-          if (empty($request_ids)) {
-            return TRUE;
-          }
-        }
-        else {
-          return FALSE;
-        }
-      }
-      catch (Exception $ex) {
-        cf_error::on_exception($ex);
-
-        return FALSE;
-      }
-    }
-  }
-
-  if ($roles['manager'] || $roles['requester']) {
+  if ($roles['manager'] || $roles['requester'] || $roles['reviewer']) {
     if (array_key_exists(NULL, $request_ids)) {
       $access[NULL] = TRUE;
       $processed[NULL] = TRUE;
@@ -199,19 +150,58 @@ function mfcs_page_request_access_operation_edit(&$request_ids, &$processed, &$a
 
       $query->addField('mer', 'id', 'id');
 
+      // load type field when section is not NULL so that it can be tested for quick meeting status.
+      if (!is_null($section)) {
+        $query->addField('mer', 'type', 'type');
+      }
+
       $query->condition('mer.id', $request_ids, 'IN');
       $query->condition('mer.status', $edit_request_status, 'IN');
 
       if ($roles['requester'] && !$roles['manager']) {
-        $query->condition('mer.user_id', $user->uid);
+        if ($roles['reviewer']) {
+          $or = db_or();
+          $or->condition('mer.venue_coordinator', $user->uid);
+          $or->condition('mer.user_id', $user->uid);
+          $query->condition($or);
+        }
+        else {
+          $query->condition('mer.user_id', $user->uid);
+        }
+      }
+      elseif ($roles['reviewer']) {
+        $query->condition('mer.venue_coordinator', $user->uid);
       }
 
       $access_results = $query->execute()->fetchAllAssoc('id');
 
       if (is_array($access_results)) {
-        foreach ($request_ids as $id) {
-          $processed[$id] = array_key_exists($id, $access_results);
-          $access[$id] = $processed[$id];
+        if (is_null($section)) {
+          foreach ($request_ids as $id) {
+            $processed[$id] = array_key_exists($id, $access_results);
+            $access[$id] = $processed[$id];
+          }
+        }
+        else {
+          // deny access to sections that are not allowed to be edited for a quick meeting.
+          $allowed_sections_quick_meeting = array(
+            'request',
+            'information',
+            'coordinator',
+            'dates',
+          );
+
+          $section_restricted_quick_meeting = !(array_key_exists($section, $allowed_sections_quick_meeting));
+          foreach ($request_ids as $id) {
+            $processed[$id] = array_key_exists($id, $access_results);
+            $access[$id] = $processed[$id];
+
+            if ($processed[$id] && $access_results[$id]->type == MFCS_REQUEST_TYPE_QUICK_MEETING) {
+              if ($section_restricted_quick_meeting) {
+                $access[$id] = FALSE;
+              }
+            }
+          }
         }
 
         return TRUE;
