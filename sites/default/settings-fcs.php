@@ -677,6 +677,23 @@ $conf['html5_tools_add_chrome_frame_header'] = 0;
 
 
 /**
+ * Ldap blacklisting.
+ */
+$conf['ldap_user_blacklist']['mcneese_ldap']= array(
+  #'names' => array(
+  #),
+  'regex' => array(
+    '/^(other|test|oth|om)-.*$/i',
+  ),
+  #'attribute' => array(
+  #),
+  'no-attribute' => array(
+    'employeenumber',
+  ),
+);
+
+
+/**
  *  GNU PG Support
  */
 putenv('GNUPGHOME=/var/www/drupal/fcs/sites/default/gnupg');
