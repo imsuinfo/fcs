@@ -384,6 +384,52 @@ function _ldap_authentication_user_login_authenticate_validate(&$form_state, $re
    *
    */
   if (!$drupal_account_exists) {
+    $ldap_user_blacklist = variable_get('ldap_user_blacklist', array());
+    if (isset($ldap_user_blacklist[$ldap_server_authenticated_on->sid]) && is_array($ldap_user_blacklist[$ldap_server_authenticated_on->sid])) {
+      $bl = $ldap_user_blacklist[$ldap_server_authenticated_on->sid];
+      if (isset($bl['names']) && is_array($bl['names'])) {
+        if (in_array($drupal_accountname, $bl['names'])) {
+          watchdog('ldap_user', 'Failed to create  %drupal_accountname on logon, blacklisted by name.', $watchdog_tokens, WATCHDOG_ERROR);
+          form_set_error('name', 'Sorry, unrecognized username or password.');
+          return;
+        }
+      }
+
+      if (isset($bl['regex']) && is_array($bl['regex'])) {
+        foreach ($bl['regex'] as $regex) {
+          if (preg_match($regex, $drupal_accountname)) {
+            $watchdog_tokens['%regex'] = $regex;
+            watchdog('ldap_user', 'Failed to create  %drupal_accountname on logon, blacklisted by regex of %regex.', $watchdog_tokens, WATCHDOG_ERROR);
+            form_set_error('name', 'Sorry, unrecognized username or password.');
+            return;
+          }
+        }
+      }
+
+      if (isset($bl['attribute']) && is_array($bl['attribute'])) {
+        foreach ($ldap_user_blacklist[$ldap_server_authenticated_on->sid]['attribute'] as $attribute) {
+          if (array_key_exists($attribute, $ldap_user['attr'])) {
+            $watchdog_tokens['%attribute'] = $attribute;
+            watchdog('ldap_user', 'Failed to create  %drupal_accountname on logon, blacklisted by attribute of %attribute.', $watchdog_tokens, WATCHDOG_ERROR);
+            form_set_error('name', 'Sorry, unrecognized username or password.');
+            return;
+          }
+        }
+      }
+
+      if (isset($bl['no-attribute']) && is_array($bl['no-attribute'])) {
+        foreach ($bl['no-attribute'] as $attribute) {
+          if (!array_key_exists($attribute, $ldap_user['attr'])) {
+            $watchdog_tokens['%attribute'] = $attribute;
+            watchdog('ldap_user', 'Failed to create  %drupal_accountname on logon, blacklisted by no-attribute of %attribute.', $watchdog_tokens, WATCHDOG_ERROR);
+            form_set_error('name', 'Sorry, unrecognized username or password.');
+            return;
+          }
+        }
+      }
+
+      unset($bl);
+    }
 
     // VI.C.1 Do not provision Drupal account if another account has same email.
     if ($account_with_same_email = user_load_by_mail($ldap_user['mail'])) {
