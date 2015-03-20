@@ -821,6 +821,7 @@ function mfcs_page_request_access_operation_cancel(&$request_ids, &$processed, &
       MFCS_REQUEST_STATUS_UNLOCKED,
       MFCS_REQUEST_STATUS_LOCKED,
       MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK,
+      MFCS_REQUEST_STATUS_CLOSED_ACCEPTED,
     );
 
     try {

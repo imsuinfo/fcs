@@ -1072,6 +1072,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
         MFCS_REQUEST_STATUS_UNLOCKED,
         MFCS_REQUEST_STATUS_LOCKED,
         MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK,
+        MFCS_REQUEST_STATUS_CLOSED_ACCEPTED,
       );
 
       if (in_array($request['top']['status'][0]->value, $cancellable_status)) {
