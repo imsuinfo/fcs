@@ -158,19 +158,21 @@ function mfcs_page_request_access_operation_edit(&$request_ids, &$processed, &$a
       $query->condition('mer.id', $request_ids, 'IN');
       $query->condition('mer.status', $edit_request_status, 'IN');
 
-      if ($roles['requester'] && !$roles['manager']) {
-        if ($roles['reviewer']) {
-          $or = db_or();
-          $or->condition('mer.venue_coordinator', $user->uid);
-          $or->condition('mer.user_id', $user->uid);
-          $query->condition($or);
+      if (!$roles['manager']) {
+        if ($roles['requester']) {
+          if ($roles['reviewer']) {
+            $or = db_or();
+            $or->condition('mer.venue_coordinator', $user->uid);
+            $or->condition('mer.user_id', $user->uid);
+            $query->condition($or);
+          }
+          else {
+            $query->condition('mer.user_id', $user->uid);
+          }
         }
-        else {
-          $query->condition('mer.user_id', $user->uid);
+        elseif ($roles['reviewer']) {
+          $query->condition('mer.venue_coordinator', $user->uid);
         }
-      }
-      elseif ($roles['reviewer']) {
-        $query->condition('mer.venue_coordinator', $user->uid);
       }
 
       $access_results = $query->execute()->fetchAllAssoc('id');
