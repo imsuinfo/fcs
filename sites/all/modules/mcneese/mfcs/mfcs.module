@@ -1049,39 +1049,38 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
       return FALSE;
     }
 
-    $cancellable_status = array(
-      MFCS_REQUEST_STATUS_LOCKED,
-      MFCS_REQUEST_STATUS_UNLOCKED,
-      MFCS_REQUEST_STATUS_CLOSED_ACCEPTED,
+    $not_cancellable_status = array(
+      MFCS_REQUEST_STATUS_DELETED,
+      MFCS_REQUEST_STATUS_CANCELLED,
       MFCS_REQUEST_STATUS_CLOSED_DENIED,
       MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE,
-      MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK,
     );
 
-    if (!in_array($request['top']['status'][0]->value, $cancellable_status)) {
+    // no matter who the user is, if the request has one of these status', then do not allow cancelling.
+    if (in_array($request['top']['status'][0]->value, $not_cancellable_status)) {
       $access[$request_id] = FALSE;
       return FALSE;
     }
 
-    // do not allow cancelling requests that have no upcoming dates.
-    if (!mfcs_request_is_still_upcoming($request_id)) {
+    if ($roles['manager'] || array_key_exists($request['venue_coordinator']['user_id'][0]->value, $venue_coordinator_ids)) {
+      $access[$request_id] = TRUE;
+      return TRUE;
+    }
+
+    if ($roles['requester'] && $request['mer']['user_id'][0]->value == $user->uid) {
+      $cancellable_status = array(
+        MFCS_REQUEST_STATUS_UNLOCKED,
+        MFCS_REQUEST_STATUS_LOCKED,
+        MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK,
+      );
+
+      if (in_array($request['top']['status'][0]->value, $cancellable_status)) {
+        $access[$request_id] = TRUE;
+        return TRUE;
+      }
+
       $access[$request_id] = FALSE;
       return FALSE;
-    }
-
-    // if the user is the venue coordinator, then allow them to cancel an request at any point in the process.
-    if (array_key_exists($request['venue_coordinator']['user_id'][0]->value, $venue_coordinator_ids)) {
-      $access[$request_id] = TRUE;
-      return TRUE;
-    }
-
-    if ($roles['manager']) {
-      $access[$request_id] = TRUE;
-      return TRUE;
-    }
-    elseif ($roles['requester'] && $request['mer']['user_id'][0]->value == $user->uid) {
-      $access[$request_id] = TRUE;
-      return TRUE;
     }
   }
   elseif ($operation == 'uncancel') {
@@ -1099,23 +1098,10 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
       return FALSE;
     }
 
-    // do not allow uncancelling requests that have no upcoming dates.
-    if (!mfcs_request_is_still_upcoming($request_id)) {
-      $access[$request_id] = FALSE;
-      return FALSE;
-    }
-
-    // if the user is the venue coordinator, then allow them to uncancel an request at any point in the process.
-    if (array_key_exists($request['venue_coordinator']['user_id'][0]->value, $venue_coordinator_ids)) {
+    // managers and venue coordinators can uncancel an request at any point in the process.
+    if ($roles['manager'] || array_key_exists($request['venue_coordinator']['user_id'][0]->value, $venue_coordinator_ids)) {
       $access[$request_id] = TRUE;
       return TRUE;
-    }
-
-    if ($roles['manager']) {
-      if (in_array($request['top']['status'][0]->value, $uncancellable_status)) {
-        $access[$request_id] = TRUE;
-        return TRUE;
-      }
     }
   }
   elseif ($operation == 'history') {

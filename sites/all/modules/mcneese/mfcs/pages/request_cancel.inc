@@ -93,7 +93,9 @@ function mfcs_request_cancel_0_form($form, &$form_state, $request_id) {
   );
   $form['message']['#markup'] .= '<h3>Are you sure wou want to cancel the request?</h3> ';
   $form['message']['#markup'] .= '<div>';
-  $form['message']['#markup'] .= 'Cancelling the form will remove your request from the queue. ';
+  $form['message']['#markup'] .= 'By cancelling this request you agree to forfeit the time slots that you have requested. You cannot undo this action. ' . "<br>\n";
+  $form['message']['#markup'] .= "<br>\n";
+  $form['message']['#markup'] .= 'Are you certain you want to cancel? ';
   $form['message']['#markup'] .= '</div>';
 
   $form['display']['submit'] = array(

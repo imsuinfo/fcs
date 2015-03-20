@@ -710,15 +710,68 @@ function mfcs_page_request_access_operation_cancel(&$request_ids, &$processed, &
     }
   }
 
-  $cancellable_status = array(
-    MFCS_REQUEST_STATUS_LOCKED,
-    MFCS_REQUEST_STATUS_UNLOCKED,
-    MFCS_REQUEST_STATUS_CLOSED_ACCEPTED,
+  $not_cancellable_status = array(
+    MFCS_REQUEST_STATUS_DELETED,
+    MFCS_REQUEST_STATUS_CANCELLED,
     MFCS_REQUEST_STATUS_CLOSED_DENIED,
     MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE,
-    MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK,
   );
 
+  // always grant managers cancel access.
+  if ($roles['manager']) {
+    try {
+      $query = db_select('mfcs_requests', 'mer');
+
+      $query->addField('mer', 'id', 'id');
+
+      $query->condition('mer.id', $request_ids, 'IN');
+
+      $nand = db_and();
+      $nand->not();
+      $nand->condition('mer.status', $not_cancellable_status, 'IN');
+      $query->condition($nand);
+
+      $access_results = $query->execute()->fetchAllAssoc('id');
+
+      if (is_array($access_results)) {
+        $request_ids_copy = $request_ids;
+        foreach ($request_ids_copy as $id => $value) {
+          if (array_key_exists($id, $access_results)) {
+            $processed[$id] = TRUE;
+            $access[$id] = TRUE;
+            unset($request_ids[$id]);
+          }
+        }
+        unset($request_ids_copy);
+
+        // looks like all of the requests have been processed, so return.
+        if (empty($request_ids)) {
+          return TRUE;
+        }
+      }
+    }
+    catch (Exception $ex) {
+      cf_error::on_exception($ex);
+      return FALSE;
+    }
+
+    // a manager has more access than a venue coordinator (and requester), so if they cannot access it, then no one can.
+    // improve performance by returning instead of doing more database calls.
+    if (array_key_exists(NULL, $request_ids)) {
+      $access[NULL] = FALSE;
+      $processed[NULL] = FALSE;
+      return TRUE;
+    }
+
+    foreach ($request_ids as $request_id) {
+      $access[$request_id] = FALSE;
+      $processed[$request_id] = FALSE;
+    }
+
+    return TRUE;
+  }
+
+  // allow the venue coordinators to cancel a request at any point in the process.
   $proxies = mfcs_get_proxy_venue_coordinator($user->uid);
   $venue_coordinator_ids = array();
   if (!empty($proxies)) {
@@ -726,21 +779,18 @@ function mfcs_page_request_access_operation_cancel(&$request_ids, &$processed, &
   }
   $venue_coordinator_ids[$user->uid] = $user->uid;
 
-  $today = strtotime('midnight today', mfcs_instance());
-
-  // if the user is the venue coordinator, then allow them to cancel a request at any point in the process.
   try {
     $query = db_select('mfcs_requests', 'mer');
 
     $query->addField('mer', 'id', 'id');
 
     $query->condition('mer.id', $request_ids, 'IN');
-    $query->condition('mer.status', $cancellable_status, 'IN');
     $query->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
 
-    // see: mfcs_request_is_still_upcoming().
-    $query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mer.id = mfdd.request_id');
-    $query->condition('mfdd.value', $today, '>=');
+    $nand = db_and();
+    $nand->not();
+    $nand->condition('mer.status', $not_cancellable_status, 'IN');
+    $query->condition($nand);
 
     $access_results = $query->execute()->fetchAllAssoc('id');
 
@@ -766,25 +816,21 @@ function mfcs_page_request_access_operation_cancel(&$request_ids, &$processed, &
     return FALSE;
   }
 
-  if ($roles['requester'] || $roles['manager']) {
+  if ($roles['requester']) {
+    $cancellable_status = array(
+      MFCS_REQUEST_STATUS_UNLOCKED,
+      MFCS_REQUEST_STATUS_LOCKED,
+      MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK,
+    );
+
     try {
       $query = db_select('mfcs_requests', 'mer');
 
       $query->addField('mer', 'id', 'id');
 
       $query->condition('mer.id', $request_ids, 'IN');
-
-      if ($roles['requester'] && !$roles['manager']) {
-        $query->condition('mer.user_id', $user->uid);
-        $query->condition('mer.status', $cancellable_status, 'IN');
-      }
-      else {
-        $query->condition('mer.status', $cancellable_status, 'IN');
-      }
-
-      // see: mfcs_request_is_still_upcoming().
-      $query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mer.id = mfdd.request_id');
-      $query->condition('mfdd.value', $today, '>=');
+      $query->condition('mer.user_id', $user->uid);
+      $query->condition('mer.status', $cancellable_status, 'IN');
 
       $access_results = $query->execute()->fetchAllAssoc('id');
 
@@ -865,7 +911,6 @@ function mfcs_page_request_access_operation_uncancel(&$request_ids, &$processed,
     return FALSE;
   }
 
-
   if ($roles['requester'] || $roles['reviewer'] || $roles['manager']) {
     if (array_key_exists(NULL, $request_ids)) {
       $access[NULL] = TRUE;
@@ -878,6 +923,56 @@ function mfcs_page_request_access_operation_uncancel(&$request_ids, &$processed,
     MFCS_REQUEST_STATUS_CANCELLED,
   );
 
+  // always grant managers uncancel access.
+  if ($roles['manager']) {
+    try {
+      $query = db_select('mfcs_requests', 'mer');
+
+      $query->addField('mer', 'id', 'id');
+
+      $query->condition('mer.id', $request_ids, 'IN');
+      $query->condition('mer.status', $uncancellable_status, 'IN');
+
+      $access_results = $query->execute()->fetchAllAssoc('id');
+
+      if (is_array($access_results)) {
+        $request_ids_copy = $request_ids;
+        foreach ($request_ids_copy as $id => $value) {
+          if (array_key_exists($id, $access_results)) {
+            $processed[$id] = TRUE;
+            $access[$id] = TRUE;
+            unset($request_ids[$id]);
+          }
+        }
+        unset($request_ids_copy);
+
+        // looks like all of the requests have been processed, so return.
+        if (empty($request_ids)) {
+          return TRUE;
+        }
+      }
+    }
+    catch (Exception $ex) {
+      cf_error::on_exception($ex);
+      return FALSE;
+    }
+
+    // a manager has more access than a venue coordinator (and requester), so if they cannot access it, then no one can.
+    // improve performance by returning instead of doing more database calls.
+    if (array_key_exists(NULL, $request_ids)) {
+      $access[NULL] = FALSE;
+      $processed[NULL] = FALSE;
+      return TRUE;
+    }
+
+    foreach ($request_ids as $request_id) {
+      $access[$request_id] = FALSE;
+      $processed[$request_id] = FALSE;
+    }
+
+    return TRUE;
+  }
+
   $proxies = mfcs_get_proxy_venue_coordinator($user->uid);
   $venue_coordinator_ids = array();
   if (!empty($proxies)) {
@@ -885,9 +980,7 @@ function mfcs_page_request_access_operation_uncancel(&$request_ids, &$processed,
   }
   $venue_coordinator_ids[$user->uid] = $user->uid;
 
-  $today = strtotime('midnight today', mfcs_instance());
-
-  // if the user is the venue coordinator, then allow them to uncancel a request at any point in the process.
+  // allow venue coordinators to uncancel a request at any point in the process.
   try {
     $query = db_select('mfcs_requests', 'mer');
 
@@ -896,10 +989,6 @@ function mfcs_page_request_access_operation_uncancel(&$request_ids, &$processed,
     $query->condition('mer.id', $request_ids, 'IN');
     $query->condition('mer.status', $uncancellable_status, 'IN');
     $query->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
-
-    // see: mfcs_request_is_still_upcoming().
-    $query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mer.id = mfdd.request_id');
-    $query->condition('mfdd.value', $today, '>=');
 
     $access_results = $query->execute()->fetchAllAssoc('id');
 
@@ -923,39 +1012,6 @@ function mfcs_page_request_access_operation_uncancel(&$request_ids, &$processed,
   catch (Exception $ex) {
     cf_error::on_exception($ex);
     return FALSE;
-  }
-
-  if ($roles['manager']) {
-    try {
-      $query = db_select('mfcs_requests', 'mer');
-
-      $query->addField('mer', 'id', 'id');
-
-      $query->condition('mer.id', $request_ids, 'IN');
-      $query->condition('mer.status', $uncancellable_status, 'IN');
-
-      // see: mfcs_request_is_still_upcoming().
-      $query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mer.id = mfdd.request_id');
-      $query->condition('mfdd.value', $today, '>=');
-
-      $access_results = $query->execute()->fetchAllAssoc('id');
-
-      if (is_array($access_results)) {
-        foreach ($request_ids as $id) {
-          $processed[$id] = array_key_exists($id, $access_results);
-          $access[$id] = $processed[$id];
-        }
-
-        return TRUE;
-      }
-    }
-    catch (Exception $ex) {
-      cf_error::on_exception($ex);
-
-      return FALSE;
-    }
-
-    return TRUE;
   }
 
   if (array_key_exists(NULL, $request_ids)) {
