@@ -3354,7 +3354,9 @@ function mfcs_sync_banner_to_local_classes() {
     $query = db_delete('mfcs_banner_classes');
     $query->execute();
 
-    db_query('ALTER SEQUENCE {mfcs_banner_classes_id_seq} RESTART');
+    // do not restart the sequence, instead make sure the sequence has 'cycle' such that this restart can be avoided.
+    // the restart is impossible because postgresql only allows the owner to restart the sequence and providing such an owner is to be avoided.
+    #db_query('ALTER SEQUENCE {mfcs_banner_classes_id_seq} RESTART');
 
     // process all of the classes and add new reservations or remove the 'deleted' status to existing reservations.
     if (!empty($classes)) {
