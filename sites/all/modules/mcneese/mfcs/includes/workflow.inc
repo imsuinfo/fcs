@@ -405,7 +405,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
   }
 
   $is_quick_meeting = FALSE;
-  if ($type == MFCS_REQUEST_TYPE_QUICK_MEETING && $is_effective_venue_coordinator) {
+  if ($type == MFCS_REQUEST_TYPE_QUICK_MEETING && ($is_effective_venue_coordinator || $manager)) {
     $is_quick_meeting = TRUE;
   }
 
@@ -1716,7 +1716,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
   if ($is_new) {
     $type = $request['information']['type'][0]->value;
 
-    if ($type == MFCS_REQUEST_TYPE_QUICK_MEETING && $venue_coordinator->uid == $request_requester->uid) {
+    if ($type == MFCS_REQUEST_TYPE_QUICK_MEETING && ($venue_coordinator->uid == $request_requester->uid || user_access('mfcs manage', $request_requester))) {
       $extra = array(
         'send_email' => FALSE,
         'requirements' => array('other' => 0, 'waived' => 0, 'university' => 1),

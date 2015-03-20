@@ -376,7 +376,12 @@ function mfcs_request_create_0_form_validate($form, &$form_state) {
       }
       elseif ($clicked_id == 'submit-request-submit') {
         if (isset($form_state['values']['request']['information']['type'][0]) && $form_state['values']['request']['information']['type'][0] == MFCS_REQUEST_TYPE_QUICK_MEETING) {
-          if (!empty($form_state['values']['request']['venue_coordinator']['user_id'][0]) && !empty($form['form']['user']['#value']->uid)) {
+          if (!empty($form['form']['user']['#value']) && user_access('mfcs manage', $form['form']['user']['#value'])) {
+            $form_state['values']['request']['status'][0] = MFCS_REQUEST_STATUS_CLOSED_ACCEPTED;
+            $form_state['values']['request']['step'][0] = MFCS_REVIEW_STEP_COMPLETED;
+            $form_state['rebuild'] = FALSE;
+          }
+          elseif (!empty($form_state['values']['request']['venue_coordinator']['user_id'][0]) && !empty($form['form']['user']['#value']->uid)) {
             if ($form_state['values']['request']['venue_coordinator']['user_id'][0] == $form['form']['user']['#value']->uid) {
               $form_state['values']['request']['status'][0] = MFCS_REQUEST_STATUS_CLOSED_ACCEPTED;
               $form_state['values']['request']['step'][0] = MFCS_REVIEW_STEP_COMPLETED;
@@ -395,7 +400,7 @@ function mfcs_request_create_0_form_validate($form, &$form_state) {
             }
           }
           else {
-            form_set_error('request][information][type][0', "An internal error occured while trying to determine the venue coordinator for this request. Please contact the support staff.");
+            form_set_error('request][information][type][0', "An internal error occured while trying to validating the submit process for a quick meeting. Please contact the support staff.");
           }
         }
       }
