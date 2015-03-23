@@ -1258,12 +1258,13 @@ function mfcs_hook_user_insert(&$edit, $account, $category) {
 
   // account synchronization failed, so assign the appropriate problem flag.
   if ($result === FALSE) {
-    // if the user does not have a valid banner id, then there is nothing to syncrhonize to.
+    // if the user does not have a valid banner id, then there is nothing to synchronize to.
     // do not flag this as a problem.
-    $user = user_load($account->uid);
-    if (is_object($user) && empty($user->field_user_banner_id['und'][0]['value'])) {
-      return;
-    }
+    // @fixme: commented out at this time as I suspect this might be preventing login problems from being logged.
+    #$user = user_load($account->uid);
+    #if (is_object($user) && empty($user->field_user_banner_id['und'][0]['value'])) {
+    #  return;
+    #}
 
     $mfcs_users = mfcs_load_users($account->uid);
 
