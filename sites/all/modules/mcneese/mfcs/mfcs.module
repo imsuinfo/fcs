@@ -2551,9 +2551,14 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array()) {
     $problems = $mfcs_users[$user->uid]->problems;
   }
 
+  $banner_id = NULL;
+  if (!empty($user->field_user_banner_id['und'][0]['value']) && is_numeric($user->field_user_banner_id['und'][0]['value'])) {
+    $banner_id = $user->field_user_banner_id['und'][0]['value'];
+  }
+
   // if banner was unavailable when the users account was first created, then attempt a banner sync for that user.
-  if (($problems * MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE > 0)) {
-    $result = mfcs_sync_banner_to_local_users($user->uid);
+  if (($problems & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) > 0) {
+    $result = mfcs_sync_banner_to_local_users($user->uid, $banner_id);
 
     if ($result === TRUE) {
       $problems -= MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE;
@@ -2614,7 +2619,7 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array()) {
   }
 
   // only change user event roles for banner users.
-  if (isset($user->field_user_banner_id['und'][0]['value'])) {
+  if (!is_null($banner_id)) {
     $u = mfcs_load_request_user_by_user_id($user->uid);
 
     if ($u == FALSE) {
@@ -3167,18 +3172,25 @@ function mfcs_sync_banner_to_local($transaction = NULL, $user = NULL) {
  * @param null|int $user_id
  *   (optional) If not NULL, the user id of the user to sync data from.
  *   When NULL, process all local users.
+ * @param null|numeric $banner_id
+ *   (optional) If not NULL, the banner id to load.
+ *   When NULL, the banner id is auto-loaded from the user account.
  *
  * @return bool
  *   TRUE on success, FALSE otherwise.
  */
-function mfcs_sync_banner_to_local_users($user_id = NULL) {
+function mfcs_sync_banner_to_local_users($user_id = NULL, $banner_id = NULL) {
   if (!is_null($user_id) && !cf_is_integer($user_id)) {
     cf_error::invalid_integer('user_id');
     return FALSE;
   }
 
-  $banner_id = NULL;
-  if (!is_null($user_id)) {
+  if (!is_null($banner_id) && !is_numeric($banner_id)) {
+    cf_error::invalid_numeric('banner_id');
+    return FALSE;
+  }
+
+  if (!is_null($user_id) && is_null($banner_id)) {
     $user = user_load($user_id);
 
     if (!is_object($user) || !isset($user->field_user_banner_id['und'][0]['value'])) {
@@ -3190,6 +3202,8 @@ function mfcs_sync_banner_to_local_users($user_id = NULL) {
     if (empty($banner_id) || !is_numeric($banner_id)) {
       return FALSE;
     }
+
+    unset($user);
   }
 
   $instance = mfcs_instance();
@@ -3199,6 +3213,11 @@ function mfcs_sync_banner_to_local_users($user_id = NULL) {
   }
   else {
     $rows = mfcs_oracle_select('select id, role from ucs.msu_event_role where id = \'' . $banner_id . '\'');
+  }
+
+  // failed to connect to oracle database.
+  if ($rows === FALSE) {
+    return FALSE;
   }
 
   if (!empty($rows) && is_array($rows)) {

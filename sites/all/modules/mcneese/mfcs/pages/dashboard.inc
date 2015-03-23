@@ -33,7 +33,7 @@ function mfcs_dashboard_page() {
   if (mfcs_dashboard_page_access() === FALSE) {
     $mfcs_users = mfcs_load_users($user->uid);
 
-    if (is_array($mfcs_users) && !empty($mfcs_users[$user->uid]) && is_object($mfcs_users[$user->uid]) && ($mfcs_users[$user->uid]->problem & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) == MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) {
+    if (is_array($mfcs_users) && !empty($mfcs_users[$user->uid]) && is_object($mfcs_users[$user->uid]) && ($mfcs_users[$user->uid]->problem & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) > 0) {
       $user_account_new_banner_access_problem = FALSE;
     }
     else {
