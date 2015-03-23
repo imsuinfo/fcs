@@ -1216,7 +1216,6 @@ class LdapUserConf {
       $edit['mail'] = isset($edit['mail']) ? $edit['mail'] : $ldap_user['mail'];
       if (!isset($edit['pass'])) {
         $edit['pass'] = user_password(20);
-        watchdog('ldap_user', '20 character random password generated for the %username account that has been created.', array('%username' => $drupal_username), WATCHDOG_INFO);
       }
       $edit['init'] = isset($edit['init']) ? $edit['init'] : $edit['mail'];
       $edit['status'] = isset($edit['status']) ? $edit['status'] : 1;
