@@ -24,7 +24,6 @@ Disallow: /misc/
 Disallow: /modules/
 Disallow: /themes/
 # Files
-Disallow: /update.php
 # Paths (clean URLs)
 Disallow: /admin/
 Disallow: /comment/reply/
