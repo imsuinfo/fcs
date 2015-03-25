@@ -799,7 +799,9 @@ $conf['phplot_api_default_scheme'] = 'public';
 /**
  *  Static registry support
  */
-include_once DRUPAL_ROOT . '/sites/default/registry-fcs.php';
+if (file_exists(DRUPAL_ROOT . '/sites/default/registry-fcs.php')) {
+  include_once DRUPAL_ROOT . '/sites/default/registry-fcs.php';
+}
 
 
 // enable all errors
