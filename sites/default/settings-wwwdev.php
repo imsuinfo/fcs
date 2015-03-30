@@ -53,6 +53,13 @@
  */
 
 /**
+ * Make sure DRUPAL_ROOT is always defined.
+ */
+if (!defined('DRUPAL_ROOT')) {
+  define('DRUPAL_ROOT', '/var/www/drupal/wwwdev/fcs');
+}
+
+/**
  * Database settings:
  *
  * The $databases array specifies the database connection or
