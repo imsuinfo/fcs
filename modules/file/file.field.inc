@@ -252,6 +252,12 @@ function file_field_insert($entity_type, $entity, $field, $instance, $langcode, 
  * Checks for files that have been removed from the object.
  */
 function file_field_update($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  // Check whether the field is defined on the object.
+  if (!isset($entity->{$field['field_name']})) {
+    // We cannot check for removed files if the field is not defined.
+    return;
+  }
+
   list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
 
   // On new revisions, all files are considered to be a new usage and no
@@ -813,7 +819,7 @@ function theme_file_widget($variables) {
   $output = '';
 
   // The "form-managed-file" class is required for proper Ajax functionality.
-  $output .= '<div class="file-widget form-managed-file clearfix">';
+  $output .= '<div class="file-widget form-managed-file">';
   if ($element['fid']['#value'] != 0) {
     // Add the file size after the file name.
     $element['filename']['#markup'] .= ' <span class="file-size">(' . format_size($element['#file']->filesize) . ')</span> ';
