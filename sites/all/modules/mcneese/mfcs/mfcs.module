@@ -5047,11 +5047,13 @@ function mfcs_get_proxy_venue_coordinators($conditions = array(), $options = arr
 }
 
 /**
- * Loads the proxy information for a single user.
+ * Loads the venue coordiantors the user can proxy as.
  *
  * This is a wrapper to mfcs_get_proxy_venue_coordinators() that will cache
  * the information. Use this for functions that cache would be a benefit to,
  * such as access control functions.
+ *
+ * Do not confuse this with mfcs_get_venue_coordinator_proxy().
  *
  * @param int $proxy_id
  *   The user id to obtain proxy information from. This is the proxy user id
@@ -5063,6 +5065,7 @@ function mfcs_get_proxy_venue_coordinators($conditions = array(), $options = arr
  *   FALSE is returned on error.
  *
  * @see mfcs_get_proxy_venue_coordinators()
+ * @see mfcs_get_venue_coordinator_proxy()
  */
 function mfcs_get_proxy_venue_coordinator($proxy_id) {
   if (!cf_is_integer($proxy_id)) {
@@ -5095,6 +5098,60 @@ function mfcs_get_proxy_venue_coordinator($proxy_id) {
   }
 
   return $proxies[$proxy_id];
+}
+
+/**
+ * Loads the users who can proxy as the venue coordinator.
+ *
+ * This is a wrapper to mfcs_get_proxy_venue_coordinators() that will cache
+ * the information. Use this for functions that cache would be a benefit to,
+ * such as access control functions.
+ *
+ * Do not confuse this with mfcs_get_proxy_venue_coordinator().
+ *
+ * @param int $venue_coordinator_id
+ *   The user id to obtain proxy information from. This is who to proxy as and
+ *   not the proxy user.
+ *
+ * @return array|bool
+ *   An array of user ids that can proxy as the venue_coordinator_id.
+ *
+ *   FALSE is returned on error.
+ *
+ * @see mfcs_get_proxy_venue_coordinators()
+ * @see mfcs_get_proxy_venue_coordinator()
+ */
+function mfcs_get_venue_coordinator_proxy($venue_coordinator_id) {
+  if (!cf_is_integer($venue_coordinator_id)) {
+    cf_error::invalid_integer('venue_coordinator_id');
+    return FALSE;
+  }
+
+  $proxies = &drupal_static(__function__, array());
+
+  if (array_key_exists($venue_coordinator_id, $proxies)) {
+    return $proxies[$venue_coordinator_id];
+  }
+
+  $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.user_id' => $venue_coordinator_id, 'mpvc.disabled' => 0));
+  $proxys = FALSE;
+  if (isset($proxies_returned['results']) && is_array($proxies_returned['results'])) {
+    $proxys = $proxies_returned['results'];
+  }
+
+  if ($proxys === FALSE) {
+    return FALSE;
+  }
+
+  $proxies[$venue_coordinator_id] = array();
+
+  if (!empty($proxys)) {
+    foreach ($proxys as $proxy) {
+      $proxies[$venue_coordinator_id][$proxy->proxy_id] = $proxy->proxy_id;
+    }
+  }
+
+  return $proxies[$venue_coordinator_id];
 }
 
 /**
@@ -7777,6 +7834,7 @@ function mfcs_get_requests_current_review_decisions($request_ids, $classificatio
       $query->addField('mfrr', 'user_id', 'user_id');
 
       $query->condition('mfrr.request_id', $request_id);
+      $query->condition('mfrr.step', $step);
       if (!is_null($review_revision)) {
         $query->condition('mfrr.revision', $review_revision);
       }
