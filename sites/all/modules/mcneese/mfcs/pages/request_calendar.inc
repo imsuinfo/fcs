@@ -188,6 +188,11 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
 
     if (!empty($items)) {
       foreach ($items as $item) {
+        if (!isset($item->date)) {
+          watchdog(MFCS_WATCHDOG_ID, "Unable to find 'date' property in for item, skipping. item = @item.", array('@item' => print_r($item, TRUE)), WATCHDOG_ERROR);
+          continue;
+        }
+
         foreach ($item->date as $delta => $date) {
           if ($date < $current_date || $date >= $next_date) {
             continue;
