@@ -5,7 +5,7 @@
  * This class is a slim wrapper around wkhtmltopdf.
  *
  * @author Michael Härtl <haertl.mike@gmail.com>
- * @version 1.2.5
+ * @version 1.2.6
  * @license http://www.opensource.org/licenses/MIT
  */
 class WkHtmlToPdf
@@ -207,7 +207,7 @@ class WkHtmlToPdf
     {
         if ($this->binPath===null) {
             if ($this->getIsWindows()) {
-                return '';
+                $this->binPath = trim(shell_exec('where '.$this->binName));
             } else {
                 $this->binPath = trim(shell_exec('which '.$this->binName));
             }
@@ -284,7 +284,7 @@ class WkHtmlToPdf
             $command .= $this->renderOptions($object);
         }
 
-        return $command.' '.$filename;
+        return $command.' '.$this->escape($filename);
     }
 
     /**

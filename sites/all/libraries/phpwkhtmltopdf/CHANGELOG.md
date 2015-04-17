@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.2.6
+
+ * Issue #54: Add binary autodetection for windows
+ * Issue #47: Add escaping to temp files to improve behavior on windows
+
 ## 1.2.5
 
  * Issue #46: Add 'ignoreWarnings' option
