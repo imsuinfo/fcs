@@ -1511,7 +1511,7 @@ function _filter_xss_split($m, $store = FALSE) {
     return '&lt;';
   }
 
-  if (!preg_match('%^<\s*(/\s*)?([a-zA-Z0-9]+)([^>]*)>?|(<!--.*?-->)$%', $string, $matches)) {
+  if (!preg_match('%^<\s*(/\s*)?([a-zA-Z0-9\-]+)([^>]*)>?|(<!--.*?-->)$%', $string, $matches)) {
     // Seriously malformed.
     return '';
   }
@@ -2624,6 +2624,8 @@ function drupal_deliver_page($page_callback_result, $default_delivery_callback =
  * @see drupal_deliver_page()
  */
 function drupal_deliver_html_page($page_callback_result) {
+  global $user;
+
   // Emit the correct charset HTTP header, but not if the page callback
   // result is NULL, since that likely indicates that it printed something
   // in which case, no further headers may be sent, and not if code running
@@ -2644,8 +2646,93 @@ function drupal_deliver_html_page($page_callback_result) {
         // Print a 404 page.
         drupal_add_http_header('Status', '404 Not Found', FALSE, 404);
         drupal_send_headers();
-
         watchdog('page not found', check_plain($_GET['q']), NULL, WATCHDOG_WARNING);
+
+        $error_document_file_403 = variable_get('error_document_file_404', '/var/www/error_documents/4xx/404.html');
+        $error_document_custom_menu_1_logged_in = variable_get('error_document_custom_menu_1_logged_in', NULL);
+        $error_document_custom_menu_2_logged_in = variable_get('error_document_custom_menu_2_logged_in', NULL);
+        $error_document_load_blocks = variable_get('error_document_load_blocks', FALSE);
+
+        if (file_exists($error_document_file_403)) {
+          $page = array();
+          $block = "";
+
+          if ($error_document_load_blocks) {
+            $page['menus'] = block_get_blocks_by_region('menus');
+            $page['asides'] = block_get_blocks_by_region('asides');
+
+            if (!empty($page['menus']['workbench_menu_workbench_menu_block']['#markup'])) {
+              $block .= $page['menus']['workbench_menu_workbench_menu_block']['#markup'];
+            }
+
+            if (!empty($page['asides'])) {
+              foreach ($page['asides'] as $aside) {
+                if (!empty($aside['#markup'])) {
+                  $block .= $aside['#markup'];
+                }
+              }
+            }
+          }
+          unset($page);
+
+          $page = file_get_contents($error_document_file_403);
+
+          if ($user->uid > 0) {
+            $page = str_replace(' is-anonymous ', ' is-logged_in ', $page);
+
+            if (is_string($error_document_custom_menu_1_logged_in)) {
+              $page = preg_replace('|<!--\(begin-header-menu-1\)-->.*<!--\(end-header-menu-1\)-->|is', '<!--(begin-header-menu-1)-->' . $error_document_custom_menu_1_logged_in . '<!--(end-header-menu-1)-->', $page);
+            }
+
+            if (is_string($error_document_custom_menu_2_logged_in)) {
+              $page = preg_replace('|<!--\(begin-header-menu-2\)-->.*<!--\(end-header-menu-2\)-->|is', '<!--(begin-header-menu-2)-->' . $error_document_custom_menu_2_logged_in . '<!--(end-header-menu-2)-->', $page);
+            }
+
+            if (function_exists('_toolbar_is_collapsed') && user_access('access toolbar', $user)) {
+              $toolbar_view = toolbar_view();
+              $toolbar_view['#pre_render'] = array(
+                'toolbar_pre_render',
+              );
+
+              if (function_exists('shortcut_toolbar_pre_render')) {
+                $toolbar_view['#pre_render'][] = 'shortcut_toolbar_pre_render';
+              }
+              $toolbar = drupal_render($toolbar_view);
+              $page = str_replace('<!--(begin-page_top)-->', "<!--(begin-page_top)-->\n" . $toolbar, $page);
+              unset($toolbar);
+              unset($toolbar_view);
+            }
+          }
+
+          if (function_exists('cf_theme_get_variables')) {
+            $cf = & drupal_static('cf_theme_get_variables', array());
+
+            if (empty($cf)) {
+              cf_theme_get_variables($cf);
+            }
+
+            $page = str_replace(' is-using_database ', ' ', $page);
+            $page = str_replace(' is-anonymous ', ' ', $page);
+            $page = str_replace(' is-logged_in ', ' ', $page);
+            $page = str_replace(' is-html5 ', ' ', $page);
+            $page = str_replace(' is-fixed_width ', ' ', $page);
+            $page = str_replace(' is-flex_width ', ' ', $page);
+            $page = preg_replace('/ at-[^ ]* /i', ' ', $page);
+            $markup_css = isset($cf['markup_css']['body']['class']) ? $cf['markup_css']['body']['class'] : '';
+            $markup_css = str_replace(' is-expanded ', ' ', $markup_css);
+            $markup_css = str_replace(' is-collapsed ', ' ', $markup_css);
+            $page = str_replace('<body class="mcneese ', '<body class="mcneese ' . $markup_css . ' ', $page);
+          }
+
+          if (!empty($block)) {
+            $page = str_replace('class="mcneese-content full', 'class="mcneese-content split', $page);
+            $page = str_replace('<div id="mcneese-content-main', '<div class="column-1 relative expanded html_tag-div" id="mcneese-page-side">' . $block . "</div>\n" . '<div id="mcneese-content-main"', $page);
+          }
+          unset($block);
+
+          print($page);
+          break;
+        }
 
         // Custom 404 handler.
         drupal_set_title('Page Not Found', PASS_THROUGH);
@@ -2668,6 +2755,107 @@ function drupal_deliver_html_page($page_callback_result) {
         drupal_send_headers();
         watchdog('access denied', check_plain($_GET['q']), NULL, WATCHDOG_WARNING);
 
+        $error_document_file_403 = variable_get('error_document_file_403', '/var/www/error_documents/4xx/403.html');
+        $error_document_custom_menu_1_logged_in = variable_get('error_document_custom_menu_1_logged_in', NULL);
+        $error_document_custom_menu_2_logged_in = variable_get('error_document_custom_menu_2_logged_in', NULL);
+        $error_document_load_blocks = variable_get('error_document_load_blocks', FALSE);
+
+        if (file_exists($error_document_file_403)) {
+          $page = array();
+          $block = "";
+
+          if ($error_document_load_blocks) {
+            $page['menus'] = block_get_blocks_by_region('menus');
+            $page['asides'] = block_get_blocks_by_region('asides');
+
+            if (!empty($page['menus']['workbench_menu_workbench_menu_block']['#markup'])) {
+              $block .= $page['menus']['workbench_menu_workbench_menu_block']['#markup'];
+            }
+
+            if (!empty($page['asides'])) {
+              foreach ($page['asides'] as $aside) {
+                if (!empty($aside['#markup'])) {
+                  $block .= $aside['#markup'];
+                }
+              }
+            }
+          }
+          unset($page);
+
+          $page = file_get_contents($error_document_file_403);
+
+          if ($user->uid > 0) {
+            $page = str_replace(' is-anonymous ', ' is-logged_in ', $page);
+
+            if (is_string($error_document_custom_menu_1_logged_in)) {
+              $page = preg_replace('|<!--\(begin-header-menu-1\)-->.*<!--\(end-header-menu-1\)-->|is', '<!--(begin-header-menu-1)-->' . $error_document_custom_menu_1_logged_in . '<!--(end-header-menu-1)-->', $page);
+            }
+
+            if (is_string($error_document_custom_menu_2_logged_in)) {
+             $page = preg_replace('|<!--\(begin-header-menu-2\)-->.*<!--\(end-header-menu-2\)-->|is', '<!--(begin-header-menu-2)-->' . $error_document_custom_menu_2_logged_in . '<!--(end-header-menu-2)-->', $page);
+            }
+
+            if (function_exists('_toolbar_is_collapsed') && user_access('access toolbar', $user)) {
+              $toolbar_view = toolbar_view();
+              $toolbar_view['#pre_render'] = array(
+                'toolbar_pre_render',
+              );
+
+              if (function_exists('shortcut_toolbar_pre_render')) {
+                $toolbar_view['#pre_render'][] = 'shortcut_toolbar_pre_render';
+              }
+              $toolbar = drupal_render($toolbar_view);
+              $page = str_replace('<!--(begin-page_top)-->', "<!--(begin-page_top)-->\n" . $toolbar, $page);
+              unset($toolbar);
+              unset($toolbar_view);
+            }
+          }
+
+          if (function_exists('cf_theme_get_variables')) {
+            $cf = & drupal_static('cf_theme_get_variables', array());
+
+            if (empty($cf)) {
+              cf_theme_get_variables($cf);
+            }
+
+            $page = str_replace(' is-using_database ', ' ', $page);
+            $page = str_replace(' is-anonymous ', ' ', $page);
+            $page = str_replace(' is-logged_in ', ' ', $page);
+            $page = str_replace(' is-html5 ', ' ', $page);
+            $page = str_replace(' is-fixed_width ', ' ', $page);
+            $page = str_replace(' is-flex_width ', ' ', $page);
+            $page = preg_replace('/ at-[^ ]* /i', ' ', $page);
+            $markup_css = isset($cf['markup_css']['body']['class']) ? $cf['markup_css']['body']['class'] : '';
+            $markup_css = str_replace(' is-expanded ', ' ', $markup_css);
+            $markup_css = str_replace(' is-collapsed ', ' ', $markup_css);
+            $page = str_replace('<body class="mcneese ', '<body class="mcneese ' . $markup_css . ' ', $page);
+          }
+
+          if (!empty($block)) {
+            $page = str_replace('class="mcneese-content full', 'class="mcneese-content split', $page);
+            $page = str_replace('<div id="mcneese-content-main', '<div class="column-1 relative expanded html_tag-div" id="mcneese-page-side">' . $block . "</div>\n" . '<div id="mcneese-content-main', $page);
+          }
+          unset($block);
+
+          if ($user->uid > 0) {
+            $page = str_replace('<!--(replace-login-form)-->', "<br>\n" . 'If you are already logged in, then you probably have followed an outdated link to an obsolete page.<br>' . "\n", $page);
+          }
+          elseif ($error_document_load_blocks) {
+            $content = block_get_blocks_by_region('content');
+            if (!empty($content['user_login'])) {
+              $login = drupal_render($content);
+              if (!empty($login)) {
+                $page = str_replace('<!--(replace-login-form)-->', $login, $page);
+              }
+              unset($login);
+            }
+            unset($content);
+          }
+
+          print($page);
+          break;
+        }
+
         // Custom 403 handler.
         drupal_set_title('Access Denied', PASS_THROUGH);
         $return = '<br>';
@@ -2687,8 +2875,46 @@ function drupal_deliver_html_page($page_callback_result) {
 
       case MENU_SITE_OFFLINE:
         // Print a 503 page.
+        $error_document_file_503 = variable_get('error_document_file_503', '/var/www/error_documents/5xx/503.html');
+        $emergency_mode = variable_get('emergency_mode', FALSE);
+
+        if ($emergency_mode == 0 && file_exists($error_document_file_503)) {
+          drupal_add_http_header('Status', '503 Service Unavailable', FALSE, 503);
+          drupal_send_headers();
+
+          $page = file_get_contents($error_document_file_503);
+
+          if (function_exists('cf_theme_get_variables')) {
+            try {
+              $cf = & drupal_static('cf_theme_get_variables', array());
+
+              if (empty($cf)) {
+                cf_theme_get_variables($cf);
+              }
+
+              $page = str_replace(' is-using_database ', ' ', $page);
+              $page = str_replace(' is-anonymous ', ' ', $page);
+              $page = str_replace(' is-logged_in ', ' ', $page);
+              $page = str_replace(' is-html5 ', ' ', $page);
+              $page = str_replace(' is-fixed_width ', ' ', $page);
+              $page = str_replace(' is-flex_width ', ' ', $page);
+              $page = preg_replace('/ at-[^ ]* /i', ' ', $page);
+              $markup_css = isset($cf['markup_css']['body']['class']) ? $cf['markup_css']['body']['class'] : '';
+              $markup_css = str_replace(' is-expanded ', ' ', $markup_css);
+              $markup_css = str_replace(' is-collapsed ', ' ', $markup_css);
+              $page = str_replace('<body class="mcneese ', '<body class="mcneese ' . $markup_css . ' ', $page);
+            }
+            catch (Exception $ex) {
+              // if the code is currently being modified, then errors could occur, so attempt to silently ignore them.
+            }
+          }
+
+          print($page);
+          break;
+        }
+
         drupal_maintenance_theme();
-        drupal_add_http_header('Status', '503 Service unavailable', FALSE, 503);
+        drupal_add_http_header('Status', '503 Service Unavailable', FALSE, 503);
         drupal_send_headers();
         drupal_set_title(t('Website Currently Unavailable'));
         print theme('maintenance_page', array('content' => filter_xss_admin(variable_get('maintenance_mode_message',
@@ -3783,7 +4009,7 @@ function drupal_load_stylesheet_content($contents, $optimize = FALSE) {
 
   // Replaces @import commands with the actual stylesheet content.
   // This happens recursively but omits external files.
-  $contents = preg_replace_callback('/@import\s*(?:url\(\s*)?[\'"]?(?![a-z]+:)([^\'"\()]+)[\'"]?\s*\)?\s*;/', '_drupal_load_stylesheet', $contents);
+  $contents = preg_replace_callback('/@import\s*(?:url\(\s*)?[\'"]?(?![a-z]+:)(?!\/\/)([^\'"\()]+)[\'"]?\s*\)?\s*;/', '_drupal_load_stylesheet', $contents);
   return $contents;
 }
 
@@ -7123,6 +7349,23 @@ function _drupal_schema_initialize(&$schema, $module, $remove_descriptions = TRU
 }
 
 /**
+ * Retrieves the type for every field in a table schema.
+ *
+ * @param $table
+ *   The name of the table from which to retrieve type information.
+ *
+ * @return
+ *   An array of types, keyed by field name.
+ */
+function drupal_schema_field_types($table) {
+  $table_schema = drupal_get_schema($table);
+  foreach ($table_schema['fields'] as $field_name => $field_info) {
+    $field_types[$field_name] = isset($field_info['type']) ? $field_info['type'] : NULL;
+  }
+  return $field_types;
+}
+
+/**
  * Retrieves a list of fields from a table schema.
  *
  * The returned list is suitable for use in an SQL query.
@@ -7746,6 +7989,7 @@ function entity_get_info($entity_type = NULL) {
         // Prepare entity schema fields SQL info for
         // DrupalEntityControllerInterface::buildQuery().
         if (isset($entity_info[$name]['base table'])) {
+          $entity_info[$name]['base table field types'] = drupal_schema_field_types($entity_info[$name]['base table']);
           $entity_info[$name]['schema_fields_sql']['base table'] = drupal_schema_fields_sql($entity_info[$name]['base table']);
           if (isset($entity_info[$name]['revision table'])) {
             $entity_info[$name]['schema_fields_sql']['revision table'] = drupal_schema_fields_sql($entity_info[$name]['revision table']);
