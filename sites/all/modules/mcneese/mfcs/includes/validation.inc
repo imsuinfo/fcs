@@ -84,6 +84,11 @@ function mfcs_pre_validate_request_fields(&$form, &$form_state, $dont_validate =
     $clicked_id = $form_state['triggering_element']['#id'];
   }
 
+  $is_new_request = NULL;
+  if (isset($form['form']['new']['#value'])) {
+    $is_new_request = $form['form']['new']['#value'];
+  }
+
   $is_quick_meeting = FALSE;
   // quick meetings can only be used by venue coordinators.
   if (isset($location_state['information']['type'][0]) && $location_state['information']['type'][0] == MFCS_REQUEST_TYPE_QUICK_MEETING) {
@@ -118,9 +123,12 @@ function mfcs_pre_validate_request_fields(&$form, &$form_state, $dont_validate =
         if ($can_perform_quick_meetings) {
           mfcs_assign_validation_requirement('information][adviser_approval', $location_form, FALSE);
 
-          // quick meetings are always for invited guests only.
-          $location_form['plans']['audience'][0]['#value'] = MFCS_REQUEST_AUDIENCE_GUESTS_ONLY;
-          $location_state['plans']['audience'][0] = MFCS_REQUEST_AUDIENCE_GUESTS_ONLY;
+          // quick meetings are always for invited guests only, but only if they are new requests.
+          // existing request may be converted into quick meetings, in which case leave the eisting 'audience' value alone.
+          if ($is_new_request) {
+            $location_form['plans']['audience'][0]['#value'] = MFCS_REQUEST_AUDIENCE_GUESTS_ONLY;
+            $location_state['plans']['audience'][0] = MFCS_REQUEST_AUDIENCE_GUESTS_ONLY;
+          }
         }
       }
       else {
