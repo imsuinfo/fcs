@@ -1002,6 +1002,11 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
     'provided',
   );
 
+  $nearest_fields = array();
+  $nearest_fields['information'] = array(
+    'type',
+  );
+
   $users = array();
   $reviewers = array();
   $has_log = FALSE;
@@ -1021,6 +1026,11 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
       $user_can_manage = mfcs_user_can_manage($user_id);
 
       $changelog = mfcs_load_request_by_timestamp($request_id, $date, $user_id, $changelog_fields);
+      $nearest = mfcs_load_request_by_timestamp($request_id, $date, NULL, $nearest_fields, TRUE, FALSE);
+
+      if (!empty($nearest['information']['type'][0]->value)) {
+        $type = $nearest['information']['type'][0]->value;
+      }
 
       if (!array_key_exists($user_id, $users)) {
         $users[$user_id] = user_load($user_id);
@@ -1192,7 +1202,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
         unset($value);
       }
 
-      if ($review_step == MFCS_REVIEW_STEP_VENUE_AVAILABLE && ($decision == MFCS_REVIEW_DECISION_REQUIREMENT || $decision == MFCS_REVIEW_DECISION_WAVE) && $type != MFCS_REQUEST_TYPE_QUICK_MEETING ) {
+      if ($review_step == MFCS_REVIEW_STEP_VENUE_AVAILABLE && ($decision == MFCS_REVIEW_DECISION_REQUIREMENT || $decision == MFCS_REVIEW_DECISION_WAVE) && $type != MFCS_REQUEST_TYPE_QUICK_MEETING) {
         if ($fees_are_not_waved && !empty($changelog['requirements']['facilities'])) {
           $message .= '<div class="review-item-message-requirements-facilities review-item-message-requirements review-item-message-requirements">';
           $message .= '<div class="item-label">Facilities Fees:</div> ';

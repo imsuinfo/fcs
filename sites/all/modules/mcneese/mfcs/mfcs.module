@@ -4085,12 +4085,17 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL, $revision_id
  *   The numeric request id.
  * @param int $timestamp
  *   Unix Timestamp representing the exact date and time to load.
- * @param int $revision_user_id
+ * @param int|null $revision_user_id
  *   The user id of the user responsible for the revision at a given timestamp.
+ *   This is ignored when nearest = TRUE and in such a case may be null.
+ *   When nearest is FALSE, this must not be NULL.
  * @param array $desired_fields
  *   (optional) An array of field names to load that match the specified date.
  *   These are nested by their table structure. When an empty array is
  *   provided, all values are used.
+ * @param bool $nearest
+ *   (optional) When TRUE, will load either the values by the specified
+ *   timestamp or the revision immediately closest to the timestamp.
  *
  * @return array|bool
  *   An array of values associated with the request, date, and fields.
@@ -4098,7 +4103,7 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL, $revision_id
  *
  * @see mfcs_table_structure()
  */
-function mfcs_load_request_by_timestamp($request_id, $timestamp, $revision_user_id, $desired_fields = array()) {
+function mfcs_load_request_by_timestamp($request_id, $timestamp, $revision_user_id, $desired_fields = array(), $nearest = FALSE) {
   if (!cf_is_integer($request_id) || $request_id < 0) {
     cf_error::invalid_integer('request_id');
     return FALSE;
@@ -4109,13 +4114,24 @@ function mfcs_load_request_by_timestamp($request_id, $timestamp, $revision_user_
     return FALSE;
   }
 
-  if (!cf_is_integer($revision_user_id)) {
+  if (!is_null($revision_user_id) && !cf_is_integer($revision_user_id)) {
     cf_error::invalid_integer('revision_user_id');
     return FALSE;
   }
 
   if (!is_array($desired_fields)) {
     cf_error::invalid_array('desired_fields');
+    return FALSE;
+  }
+
+  if (!is_bool($nearest)) {
+    cf_error::invalid_bool('nearest');
+    return FALSE;
+  }
+
+  // revision_user_id cannot be NULL when nearest is FALSE.
+  if (is_null($revision_user_id) && !$nearest) {
+    cf_error::invalid_integer('revision_user_id');
     return FALSE;
   }
 
@@ -4132,46 +4148,20 @@ function mfcs_load_request_by_timestamp($request_id, $timestamp, $revision_user_
         continue;
       }
 
-      foreach ($fields as $field_name => &$field_values) {
-        if (!array_key_exists($field_name, $desired_fields)) {
-          unset($structure[$field_name]);
-          continue;
+      // if $fields is empty, then allow all fields.
+      // otherwise, only allow fields defined in $fields.
+      if (!empty($fields)) {
+        foreach ($fields as $field_name => &$field_values) {
+          if (!in_array($field_name, $desired_fields[$table_name])) {
+            unset($structure[$table_name][$field_name]);
+            continue;
+          }
         }
       }
     }
   }
 
   try {
-    $query = db_select('mfcs_requests', 'mer');
-    $query->innerJoin('mfcs_request_revisions', 'mrv', 'mer.id = mrv.request_id');
-
-    $query->fields('mer');
-    $query->addField('mrv', 'revision', 'revision');
-    $query->addField('mrv', 'date', 'revision_date');
-    $query->addField('mrv', 'message', 'revision_message');
-
-    $query->condition('id', $request_id);
-    $query->condition('mrv.date', $timestamp);
-    $query->condition('mrv.user_id', $revision_user_id);
-
-    $query->orderBy('mrv.date');
-
-    $results = $query->execute()->fetchAll();
-
-    // manually add the request information and presentation fields.
-    $request['mer'] = array();
-    if (!empty($results)) {
-      foreach ($results as $index => $mer) {
-        foreach (array('id', 'user_id', 'created', 'updated', 'revision_date', 'revision_message') as $key) {
-          if (!isset($request['mer'][$key][$mer->revision])) {
-            $request['mer'][$key][$mer->revision] = new stdClass();
-          }
-
-          $request['mer'][$key][$mer->revision]->value = $mer->$key;
-        }
-      }
-    }
-
     $request['current'] = array();
     foreach ($structure as $table_name => &$fields) {
       if (!array_key_exists($table_name, $request)) {
@@ -4187,9 +4177,22 @@ function mfcs_load_request_by_timestamp($request_id, $timestamp, $revision_user_
 
             $query = db_select($field_table_name, 'mftf');
             $query->condition('mftf.request_id', $request_id);
-            $query->condition('mftf.date', $timestamp);
-            $query->condition('mftf.user_id', $revision_user_id);
+
+            if (!is_null($revision_user_id)) {
+              $query->condition('mftf.user_id', $revision_user_id);
+            }
+
             $query->fields('mftf');
+
+            if ($nearest) {
+              $query->condition('mftf.date', $timestamp, '<=');
+              $query->range(0, 1);
+              $query->orderby('mftf.revision', 'DESC');
+            }
+            else {
+              $query->condition('mftf.date', $timestamp);
+              $query->condition('mftf.user_id', $revision_user_id);
+            }
 
             $results = $query->execute()->fetchAll();
 
@@ -4211,9 +4214,17 @@ function mfcs_load_request_by_timestamp($request_id, $timestamp, $revision_user_
 
           $query = db_select($field_table_name, 'mftf');
           $query->condition('mftf.request_id', $request_id);
-          $query->condition('mftf.date', $timestamp);
-          $query->condition('mftf.user_id', $revision_user_id);
           $query->fields('mftf');
+
+          if ($nearest) {
+            $query->condition('mftf.date', $timestamp, '<=');
+            $query->range(0, 1);
+            $query->orderby('mftf.revision', 'DESC');
+          }
+          else {
+            $query->condition('mftf.date', $timestamp);
+            $query->condition('mftf.user_id', $revision_user_id);
+          }
 
           $results = $query->execute()->fetchAll();
 
@@ -4233,9 +4244,6 @@ function mfcs_load_request_by_timestamp($request_id, $timestamp, $revision_user_
         unset($results);
         unset($query);
       }
-
-      unset($results);
-      unset($query);
     }
   }
   catch (Exception $ex) {
