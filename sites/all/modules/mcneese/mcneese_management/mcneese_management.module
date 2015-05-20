@@ -606,11 +606,6 @@ function mcneese_management_autocomplete_nid($string) {
     $query = db_select('node', 'n');
     $query->fields('n', array('nid', 'title'));
 
-    if (function_exists('killfile_menu')) {
-      $query->leftjoin('killfile_nodes', 'kn', 'kn.nid = n.nid');
-      $query->isNull('kn.nid');
-    }
-
     $query->condition('title', db_like($string) . '%', 'ILIKE');
     $query->orderBy('title');
     $query->range(0, 10);
@@ -630,11 +625,6 @@ function mcneese_management_autocomplete_nid($string) {
     if ($matched < 10) {
       $query = db_select('node', 'n');
       $query->fields('n', array('nid', 'title'));
-
-      if (function_exists('killfile_menu')) {
-        $query->leftjoin('killfile_nodes', 'kn', 'kn.nid = n.nid');
-        $query->isNull('kn.nid');
-      }
 
       if (!empty($nids)) {
         $query->condition('n.nid', $nids, 'NOT IN');

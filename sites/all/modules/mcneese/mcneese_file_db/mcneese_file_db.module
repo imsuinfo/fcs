@@ -445,8 +445,8 @@ function mcneese_file_db_load_file($by = '', $arg1 = '', $arg2 = '', $arg3 = '',
     $if_none_match = '';
 
     if (isset($_SERVER['HTTP_IF_NONE_MATCH'])) {
-      $if_none_match = substr($_SERVER['HTTP_IF_NONE_MATCH'], 1);
-      $if_none_match = substr($if_none_match, 0, -1);
+      $if_none_match = preg_replace('/^"/i', '', $_SERVER['HTTP_IF_NONE_MATCH']);
+      $if_none_match = preg_replace('/"$/i', '', $if_none_match);
     }
 
     if (isset($_SERVER['HTTP_RANGE'])) {
@@ -548,7 +548,6 @@ function mcneese_file_db_load_file($by = '', $arg1 = '', $arg2 = '', $arg3 = '',
     unset($matched);
   }
 
-
   if ($by == MCNEESE_FILE_DB_PATH_BY_ID) {
     // $arg1 = id
     // $arg2 = custom filename
@@ -556,8 +555,8 @@ function mcneese_file_db_load_file($by = '', $arg1 = '', $arg2 = '', $arg3 = '',
     $if_none_match = '';
 
     if (isset($_SERVER['HTTP_IF_NONE_MATCH'])) {
-      $if_none_match = substr($_SERVER['HTTP_IF_NONE_MATCH'], 1);
-      $if_none_match = substr($if_none_match, 0, -1);
+      $if_none_match = preg_replace('/^"/i', '', $_SERVER['HTTP_IF_NONE_MATCH']);
+      $if_none_match = preg_replace('/"$/i', '', $if_none_match);
     }
 
     if (!empty($arg1)) {
@@ -599,8 +598,7 @@ function mcneese_file_db_load_file($by = '', $arg1 = '', $arg2 = '', $arg3 = '',
     // prevent devel_shutdown from being called.
     $GLOBALS['devel_shutdown'] = FALSE;
 
-    $mimetype =$file_meta->mimetype;
-
+    $mimetype = $file_meta->mimetype;
     if (empty($arg2)) {
       $filename = $file_meta->filename;
 
@@ -639,7 +637,11 @@ function mcneese_file_db_load_file($by = '', $arg1 = '', $arg2 = '', $arg3 = '',
       $short_location .= '/' . substr($file_meta->checksum, 0, MCNEESE_FILE_DB_SHORT_SUM_SIZE);
 
       $content_location = $short_location . '/';
-      $content_location .= $file_meta->filename . '.' . $file_meta->extension;
+      $content_location .= $file_meta->filename;
+
+      if (strlen($file_meta->extension) > 0) {
+        $content_location .= '.' . $file_meta->extension;
+      }
 
       if ($not_modified) {
         header('HTTP/1.1 304 Not Modified', TRUE, 304);
@@ -719,7 +721,12 @@ function mcneese_file_db_load_file($by = '', $arg1 = '', $arg2 = '', $arg3 = '',
       $short_location .= '/' . substr($file_meta->checksum, 0, MCNEESE_FILE_DB_SHORT_SUM_SIZE);
 
       $content_location = $short_location . '/';
-      $content_location .= $file_meta->filename . '.' . $file_meta->extension;
+      $content_location .= $file_meta->filename;
+
+      if (strlen($file_meta->extension) > 0) {
+        $content_location .= '.' . $file_meta->extension;
+      }
+
       $content_location .= '.' . MCNEESE_FILE_DB_PATH_BY_HASH_SUM_EXTENSION;
 
       $data = $file_meta->checksum . '  ' . $filename;

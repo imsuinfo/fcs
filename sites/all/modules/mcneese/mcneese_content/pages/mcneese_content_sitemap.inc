@@ -56,11 +56,6 @@ function mcneese_content_sitemap_main() {
     $query = db_select('node', 'n');
     $query->fields('n', array('nid', 'changed'));
 
-    if (function_exists('killfile_menu')) {
-      $query->leftJoin('killfile_nodes', 'kn', 'n.nid = kn.nid');
-      $query->isNull('kn.nid');
-    }
-
     $query->condition('n.status', 1);
     $query->orderBy('n.changed', 'DESC');
 
@@ -170,11 +165,6 @@ function mcneese_content_sitemap_group_node($offset) {
     $query = db_select('node', 'n');
     $query->fields('n', array('nid', 'changed'));
 
-    if (function_exists('killfile_menu')) {
-      $query->leftJoin('killfile_nodes', 'kn', 'n.nid = kn.nid');
-      $query->isNull('kn.nid');
-    }
-
     $query->condition('n.status', 1);
     $query->orderBy('n.nid');
     $query->range($offset_value, MCNEESE_CONTENT_SITEMAP_NODE_MAX);
@@ -196,11 +186,6 @@ function mcneese_content_sitemap_group_node($offset) {
       $query->innerJoin('workbench_moderation_node_history', 'wmnh', 'n.nid = wmnh.nid AND n.vid = wmnh.vid AND wmnh.published = 1');
       $query->fields('n', array('nid'));
       $query->fields('wmnh', array('stamp'));
-
-      if (function_exists('killfile_menu')) {
-        $query->leftJoin('killfile_nodes', 'kn', 'n.nid = kn.nid');
-        $query->isNull('kn.nid');
-      }
 
       $query->orderBy('n.nid');
       $query->condition('n.status', 1);

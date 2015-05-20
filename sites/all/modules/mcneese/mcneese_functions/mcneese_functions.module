@@ -623,12 +623,10 @@ function mcneese_functions_build_a_to_z_listing_content($type, $filter = NULL, $
 
   try {
     $query = db_select('node', 'n');
-    $query->leftJoin('killfile_nodes', 'kn', 'n.nid = kn.nid');
     $query->innerJoin('workbench_moderation_node_history', 'wmnh', 'wmnh.nid = n.nid AND wmnh.vid = n.vid');
     $query->innerJoin('field_data_field_group', 'fdfg', 'n.nid = fdfg.entity_id AND fdfg.deleted = 0');
     $query->innerJoin('taxonomy_term_data', 'ttd', 'fdfg.field_group_tid = ttd.tid');
 
-    $query->isNull('kn.timestamp');
     $query->condition('wmnh.published', 1);
     $query->condition('fdfg.field_group_tid', 428, '<>'); // do not include the "Index" group.
     $query->condition('n.status', 1);
