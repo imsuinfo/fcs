@@ -672,8 +672,8 @@ function mcneese_file_db_load_file($by = '', $arg1 = '', $arg2 = '', $arg3 = '',
       header('Content-Description: File Transfer');
       header('ETag: "' . MCNEESE_FILE_DB_PATH_BY_HASH_ALGORITHM . '://' . $file_meta->checksum . '"');
       header('Accept-Ranges: bytes');
-      header('Last-Modified: ' . date('r', strtotime($file_meta->timestamp)));
-      header('Date: ' . date('r', REQUEST_TIME));
+      header('Last-Modified: ' . gmdate(DATE_RFC7231, strtotime($file_meta->timestamp)));
+      header('Date: ' . gmdate(DATE_RFC7231, REQUEST_TIME));
 
       // flush buffer after headers have been processed (to hopefully avoid "headers already sent" issues).
       ob_end_flush();
@@ -731,8 +731,8 @@ function mcneese_file_db_load_file($by = '', $arg1 = '', $arg2 = '', $arg3 = '',
       header('Content-Disposition: inline; filename="' . $filename . '.' . MCNEESE_FILE_DB_PATH_BY_HASH_SUM_EXTENSION . '"');
       header('Content-Description: File Transfer');
       header('Content-Location: ' . $content_location);
-      header('Last-Modified: ' . date('r', strtotime($file_meta->timestamp)));
-      header('Date: ' . date('r', REQUEST_TIME));
+      header('Last-Modified: ' . gmdate(DATE_RFC7231, strtotime($file_meta->timestamp)));
+      header('Date: ' . gmdate(DATE_RFC7231, REQUEST_TIME));
 
       // flush buffer after headers have been processed (to hopefully avoid "headers already sent" issues).
       ob_end_flush();
@@ -872,9 +872,9 @@ function mcneese_file_db_print_image_style($file_uri) {
     header('Content-Description: File Transfer');
     header('ETag: "' . MCNEESE_FILE_DB_PATH_BY_HASH_ALGORITHM . '://' . $checksum . '"');
     header('Accept-Ranges: bytes');
-    header('Last-Modified: ' . date('r', $modified));
-    header('Expires: ' . date('r', strtotime('+14 days', REQUEST_TIME)));
-    header('Date: ' . date('r', REQUEST_TIME));
+    header('Last-Modified: ' . gmdate(DATE_RFC7231, $modified));
+    header('Expires: ' . gmdate(DATE_RFC7231, strtotime('+14 days', REQUEST_TIME)));
+    header('Date: ' . gmdate(DATE_RFC7231, REQUEST_TIME));
 
 
     readfile($file_uri);

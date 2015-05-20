@@ -117,8 +117,8 @@ function mfcs_request_ical_year_0_page($year = NULL) {
   header('Content-Disposition: inline; filename="' . $filename . '"');
   header('Content-Description: File Transfer');
   header('Content-Location: ' . $content_location);
-  header('Last-Modified: ' . date('r', $instance));
-  header('Date: ' . date('r', $instance));
+  header('Last-Modified: ' . gmdate(DATE_RFC7231, $instance));
+  header('Date: ' . gmdate(DATE_RFC7231, $instance));
 
   // flush buffer after headers have been processed (to hopefully avoid "headers already sent" issues).
   ob_end_flush();
@@ -284,8 +284,8 @@ function mfcs_request_ical_month_0_page($year = NULL, $month = NULL) {
   header('Content-Disposition: inline; filename="' . $filename . '"');
   header('Content-Description: File Transfer');
   header('Content-Location: ' . $content_location);
-  header('Last-Modified: ' . date('r', $instance));
-  header('Date: ' . date('r', $instance));
+  header('Last-Modified: ' . gmdate(DATE_RFC7231, $instance));
+  header('Date: ' . gmdate(DATE_RFC7231, $instance));
 
   // flush buffer after headers have been processed (to hopefully avoid "headers already sent" issues).
   ob_end_flush();
@@ -427,8 +427,8 @@ function mfcs_request_ical_day_0_page($year = NULL, $month = NULL, $day = NULL) 
   header('Content-Disposition: inline; filename="' . $filename . '"');
   header('Content-Description: File Transfer');
   header('Content-Location: ' . $content_location);
-  header('Last-Modified: ' . date('r', $instance));
-  header('Date: ' . date('r', $instance));
+  header('Last-Modified: ' . gmdate(DATE_RFC7231, $instance));
+  header('Date: ' . gmdate(DATE_RFC7231, $instance));
 
   // flush buffer after headers have been processed (to hopefully avoid "headers already sent" issues).
   ob_end_flush();
@@ -503,8 +503,8 @@ function mfcs_request_ical_request_0_page($request_id) {
   header('Content-Disposition: inline; filename="' . $filename . '"');
   header('Content-Description: File Transfer');
   header('Content-Location: ' . $content_location);
-  header('Last-Modified: ' . date('r', $instance));
-  header('Date: ' . date('r', $instance));
+  header('Last-Modified: ' . gmdate(DATE_RFC7231, $instance));
+  header('Date: ' . gmdate(DATE_RFC7231, $instance));
 
   // flush buffer after headers have been processed (to hopefully avoid "headers already sent" issues).
   ob_end_flush();
