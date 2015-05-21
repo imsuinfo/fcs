@@ -667,15 +667,23 @@ function mcneese_file_db_load_file($by = '', $arg1 = '', $arg2 = '', $arg3 = '',
         header('Content-Length: ' . $filesize);
       }
 
-      header('Content-Type: ' . $mimetype);
-      header('Content-Location: ' . $content_location);
+      header('Content-Type: ' . mime_header_encode($mimetype));
+      header('Content-Location: ' . mime_header_encode($content_location));
       header('Content-Transfer-Encoding: binary');
-      header('Content-Disposition: inline; filename="' . $filename . '"');
+      header('Content-Disposition: inline; filename="' . mime_header_encode($filename) . '"');
       header('Content-Description: File Transfer');
       header('ETag: "' . MCNEESE_FILE_DB_PATH_BY_HASH_ALGORITHM . '://' . $file_meta->checksum . '"');
       header('Accept-Ranges: bytes');
       header('Last-Modified: ' . gmdate(DATE_RFC7231, strtotime($file_meta->timestamp)));
       header('Date: ' . gmdate(DATE_RFC7231, REQUEST_TIME));
+      header('Link: <' . mime_header_encode($short_location) . '>; rel="shortlink", <' . mime_header_encode($content_location) . '>; rel="canonical"');
+
+      if (mcneese_file_db_unrestricted_stream_wrapper::ASSOCIATION == $association) {
+        header('Cache-Control: public');
+      }
+      elseif (mcneese_file_db_restricted_stream_wrapper::ASSOCIATION == $association) {
+        header('Cache-Control: private');
+      }
 
       // flush buffer after headers have been processed (to hopefully avoid "headers already sent" issues).
       ob_end_flush();
@@ -735,11 +743,19 @@ function mcneese_file_db_load_file($by = '', $arg1 = '', $arg2 = '', $arg3 = '',
       header('Content-Type: text/plain');
       header('Content-Length: ' . strlen($data));
       header('Content-Transfer-Encoding: binary');
-      header('Content-Disposition: inline; filename="' . $filename . '.' . MCNEESE_FILE_DB_PATH_BY_HASH_SUM_EXTENSION . '"');
+      header('Content-Disposition: inline; filename="' . mime_header_encode($filename) . '.' . MCNEESE_FILE_DB_PATH_BY_HASH_SUM_EXTENSION . '"');
       header('Content-Description: File Transfer');
-      header('Content-Location: ' . $content_location);
+      header('Content-Location: ' . mime_header_encode($content_location));
       header('Last-Modified: ' . gmdate(DATE_RFC7231, strtotime($file_meta->timestamp)));
       header('Date: ' . gmdate(DATE_RFC7231, REQUEST_TIME));
+      header('Link: <' . mime_header_encode($short_location) . '>; rel="shortlink", <' . mime_header_encode($content_location) . '>; rel="canonical"');
+
+      if (mcneese_file_db_unrestricted_stream_wrapper::ASSOCIATION == $association) {
+        header('Cache-Control: public');
+      }
+      elseif (mcneese_file_db_restricted_stream_wrapper::ASSOCIATION == $association) {
+        header('Cache-Control: private');
+      }
 
       // flush buffer after headers have been processed (to hopefully avoid "headers already sent" issues).
       ob_end_flush();
@@ -882,7 +898,7 @@ function mcneese_file_db_print_image_style($file_uri) {
     header('Last-Modified: ' . gmdate(DATE_RFC7231, $modified));
     header('Expires: ' . gmdate(DATE_RFC7231, strtotime('+14 days', REQUEST_TIME)));
     header('Date: ' . gmdate(DATE_RFC7231, REQUEST_TIME));
-
+    header('Cache-Control: public');
 
     readfile($file_uri);
     exit();
@@ -1101,10 +1117,11 @@ function mcneese_file_db_file_download($uri) {
   $headers = file_get_content_headers($file);
 
   if ($scheme == mcneese_file_db_unrestricted_stream_wrapper::SCHEME) {
-    $headers['Cache-Control'] = 'Public';
+    $headers['Cache-Control'] = 'public';
   }
   else {
     // @todo: for scheme == mcneese_file_db_restricted_stream_wrapper::SCHEME, perform access checks here (-1 is returned on access denied).
+    $headers['Cache-Control'] = 'private';
   }
 
   return $headers;
