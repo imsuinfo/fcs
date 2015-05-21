@@ -1040,7 +1040,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
         }
       }
 
-      $markup = '<div class="review-item review-item-' . $row. '">';
+      $markup = '<div id="request-' . $request_id . '-section-review-log-history-item-' . $row . '" class="review-item review-item-' . $row. '">';
 
       $user_name = '';
       if (is_null($users[$user_id])) {
