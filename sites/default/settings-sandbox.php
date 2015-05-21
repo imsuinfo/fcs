@@ -822,6 +822,27 @@ $conf['error_document_custom_menu_1_logged_in'] = '<nav class="menu html_tag-nav
 $conf['error_document_load_blocks'] = TRUE;
 
 
+/**
+ * Custom Page Headers
+ */
+#$conf['default_headers-public'] = array(
+#  'Cache-Control' => 'public',
+#  'Expires' => gmdate(DATE_RFC7231, strtotime('+20 minutes', REQUEST_TIME)),
+#);
+
+#$conf['default_headers-private'] = array(
+#  'cache-control' => 'private, must-revalidate',
+#);
+
+$conf['default_headers-form'] = array(
+  'cache-control' => 'private, must-revalidate',
+);
+
+#$conf['default_headers-last_modified'] = FALSE;
+#$conf['default_headers-cache_control'] = FALSE;
+#$conf['default_headers-expires'] = FALSE;
+
+
 // enable all errors
 error_reporting(E_ALL | E_STRICT);
 ini_set('display_errors', TRUE);
