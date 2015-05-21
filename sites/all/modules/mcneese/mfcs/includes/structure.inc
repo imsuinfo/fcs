@@ -1673,8 +1673,18 @@ function mfcs_get_request_field_request_coordinator_classification($form, &$form
 
   $classification = mfcs_determine_user_classification($state, $user);
 
-  if (isset($request_state['request_coordinator']) && array_key_exists('classification', $request_state['request_coordinator'])) {
+  if (isset($request_state['request_coordinator']) && array_key_exists('classification', $request_state['request_coordinator']) && !empty($request_state['request_coordinator']['classification'][0])) {
     $values = $request_state['request_coordinator']['classification'];
+
+    // if the user's classifications change while on the form, existing saved data between states must be reset.
+    if (!empty($classification['options']) && is_array($classification['options'])) {
+      foreach ($request_state['request_coordinator']['classification'] as $key => $value) {
+        if (!array_key_exists($value, $classification['options'])) {
+          $values = array(0 => $classification['value']);
+          break;
+        }
+      }
+    }
   }
   else {
     $values = array(0 => $classification['value']);

@@ -403,6 +403,11 @@ function mfcs_request_create_0_form_validate($form, &$form_state) {
             form_set_error('request][information][type][0', "An internal error occured while trying to validating the submit process for a quick meeting. Please contact the support staff.");
           }
         }
+
+        // this can happen when the coordinators classifications change while the user is using the form.
+        if (empty($form_state['values']['request']['request_coordinator']['classification'][0]) || !is_numeric($form_state['values']['request']['request_coordinator']['classification'][0])) {
+          form_set_error('request][request_coordinator][classification][0', "No request coordinator classification has been specified.");
+        }
       }
       else {
         $room = explode('_', $form_state['values']['request']['room'][0], 3);
