@@ -201,12 +201,8 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
         if ($revision->revision == 0) {
           $processed_values = array();
           $user_id = NULL;
-          if (!empty($history['mer']['user_id'])) {
-            $user_id = reset($history['mer']['user_id']);
-
-            if (is_object($user_id) && !empty($user_id->value) && cf_is_integer($user_id->value)) {
-              $user_id = $user_id->value;
-            }
+          if (!empty($revision->user_id)) {
+            $user_id = $revision->user_id;
           }
 
           if (!is_null($user_id)) {
