@@ -8247,8 +8247,11 @@ function mfcs_add_canonical_headers($unique_path, $short_path = NULL) {
     'href' => $base_path . $short_path,
   );
 
+  $link = '<' . $base_path . $short_path . '>; rel="shortlink", <' . $base_path . $unique_path . '>; rel="canonical"';
+
   // provide content-location http header.
   drupal_add_http_header('content-location', $base_path . $unique_path, FALSE);
+  drupal_add_http_header('link', $link, FALSE);
 
   return TRUE;
 }
