@@ -2367,8 +2367,13 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
         }
       }
 
+      $is_new_request = NULL;
+      if (isset($form['form']['new']['#value'])) {
+        $is_new_request = $form['form']['new']['#value'];
+      }
+
       // when the request type is a quick meeting, then mark this as waived due to university business.
-      if ($type == MFCS_REQUEST_TYPE_QUICK_MEETING) {
+      if ($type == MFCS_REQUEST_TYPE_QUICK_MEETING && $is_new_request) {
         $form_state['values']['review']['operations']['university_business'] = 1;
         unset($extra['requirements']);
         $requirements_extra = array(
@@ -2376,7 +2381,7 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
           'requirements' => array('other' => 0, 'waived' => 0, 'university' => 1),
         );
 
-        $success = mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], MFCS_REVIEW_DECISION_REQUIREMENT, "", $requirements_extra);
+        $success = mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], MFCS_REVIEW_DECISION_REQUIREMENT, "The system has auto-waved the fees because the request is a Quick Meeting.", $requirements_extra);
       }
     }
     elseif ($step == MFCS_REVIEW_STEP_REVIEW) {
