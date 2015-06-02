@@ -2521,28 +2521,9 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array()) {
     return FALSE;
   }
 
-  // a collection of user ids who should not have their roles changed.
-  $whitelist = array();
-
-  // skip special-case ldapless user.
-  $whitelist[8] = 8;
-
-  // kday
-  $whitelist[6] = 6;
-
-  // gfisher
-  $whitelist[19] = 19;
-
-  // colleen
-  $whitelist[22] = 22;
-
-  // gbodin
-  $whitelist[23] = 23;
-
-  // shogan
-  $whitelist[45] = 45;
-
-  if (array_key_exists($user->uid, $whitelist)) {
+  // check to see if the user is in the synchronize whitelist and if so, return from this function.
+  global $conf;
+  if (isset($conf['fcs_synchronize_whitelist']) && is_array($conf['fcs_synchronize_whitelist']) && in_array($user->uid, $conf['fcs_synchronize_whitelist'])) {
     return TRUE;
   }
 
