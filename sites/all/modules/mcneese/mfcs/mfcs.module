@@ -289,6 +289,7 @@ define('MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE', 8);
 define('MFCS_USER_PROBLEM_ACCOUNT_LOGIN_PROBLEMS_MULTIPLE', 16);
 define('MFCS_USER_PROBLEM_FORM_ERROR_USER', 32);
 define('MFCS_USER_PROBLEM_FORM_ERROR_SYSTEM', 64);
+define('MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED', 128);
 
 /**
  * Define codes that represent what the e-mail represents.
@@ -2621,7 +2622,6 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array()) {
   // only change user event roles for banner users.
   if (!is_null($banner_id)) {
     $u = mfcs_load_request_user_by_user_id($user->uid);
-
     if ($u == FALSE) {
       $u = array();
     }
@@ -2632,6 +2632,47 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array()) {
         if (isset($mappings[$role]['tid'])) {
           $request_roles[] = array('tid' => $mappings[$role]['tid']);
           $system_roles[$mappings[$role]['rid']] = $mappings[$role]['role'];
+        }
+      }
+    }
+
+    // if the (non-admin) user is a venue or room coordinator, then add/remove reviewer role as necessary.
+    // warning: the 'reviewer', 'manager', etc.. role names are assumed to be define in the system.
+    $reviewer_role_id = user_role_load_by_name('reviewer');
+    $manager_role_id = user_role_load_by_name('manager');
+    $administrator_role_id = user_role_load_by_name('administrator');
+    $bannerless_exception_role_id = user_role_load_by_name('bannerless exception');
+
+    // do not alter reviewer role settings for users with 'manager', 'administrator', or 'bannerless_exception' roles.
+    $process_reviewer_role = TRUE;
+    if (array_key_exists($manager_role_id->rid, $system_roles)) {
+      $process_reviewer_role = FALSE;
+    }
+    elseif (array_key_exists($administrator_role_id->rid, $system_roles)) {
+      $process_reviewer_role = FALSE;
+    }
+    elseif (array_key_exists($bannerless_exception_role_id->rid, $system_roles)) {
+      $process_reviewer_role = FALSE;
+    }
+
+    if ($process_reviewer_role) {
+      $all_coordinators = mfcs_load_room_coordinators(NULL, TRUE);
+      if (array_key_exists($user->uid, $all_coordinators)) {
+        if (!array_key_exists($reviewer_role_id->rid, $system_roles)) {
+          $system_roles[$reviewer_role_id->rid] = 'reviewer';
+        }
+      }
+      else {
+        if (array_key_exists($reviewer_role_id->rid, $system_roles)) {
+          unset($system_roles[$reviewer_role_id->rid]);
+        }
+        elseif (in_array('reviewer', $roles)) {
+          // the function arguments are trying to assign 'reviewer' role to a user who has no venue or room to review.
+          // do not allow this and provide a watchdog warning for reference.
+          watchdog(MFCS_WATCHDOG_ID, "The user '%user_name' (%user_id) is not being granted reviewer access as requested because the user is not assigned as either a venue or room coordinator in the banner database.", array('%user_name' => $user->name, '%user_id' => $user->uid), WATCHDOG_WARNING);
+
+          $problems += MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED;
+          mfcs_save_user($user->uid, array('problems' => $problems));
         }
       }
     }
@@ -8651,6 +8692,63 @@ function mfcs_gpg_sign($message) {
   }
 
   return FALSE;
+}
+
+/**
+ * Returns a list of venue coordinators associated with a given room.
+ *
+ * @param integer|null $room_id
+ *   (optional) A room ID to limit the listing to.
+ * @param bool $coordinators_only
+ *   (optional) Do not return room ids, only coordinators.
+ *
+ * @return array|bool
+ *   When $coordinators_only is FALSE, an array containing the venue
+ *   coordinator ids with the room ids as the array keys.
+ *   When $coordinators_only is TRUE, an array containing a distinct set of
+ *   venue coordinator ids with the keys being the coordinator id as well.
+ *   FALSE is returned on error.
+ */
+function mfcs_load_room_coordinators($room_id = NULL, $coordinators_only = FALSE) {
+  if (!is_null($room_id) && !cf_is_integer($room_id)) {
+    cf_error::invalid_integer('room_id');
+
+    return FALSE;
+  }
+
+  if (!is_bool($coordinators_only)) {
+    cf_error::invalid_bool('coordinators_only');
+
+    return FALSE;
+  }
+
+  $rows = array();
+  try {
+    $query = db_select('mfcs_banner_rooms', 'mbr');
+
+    if (!is_null($room_id)) {
+      $query->condition('mbr.room_id', $room_id);
+    }
+
+    if ($coordinators_only) {
+      $query->addField('mbr', 'coordinator_id', 'coordinator_id');
+      $query->distinct();
+
+      $rows = $query->execute()->fetchAllKeyed(0, 0);
+    }
+    else {
+      $query->addField('mbr', 'id', 'id');
+      $query->addField('mbr', 'coordinator_id', 'coordinator_id');
+
+      $rows = $query->execute()->fetchAllKeyed();
+    }
+  } catch (Exception $ex) {
+    cf_error::on_exception($ex);
+
+    return FALSE;
+  }
+
+  return $rows;
 }
 
 /**
