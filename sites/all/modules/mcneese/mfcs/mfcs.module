@@ -2637,8 +2637,14 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array()) {
     }
 
     if ($process_reviewer_role) {
+      $assigned_as_reviewer = FALSE;
+      $reviewers = mfcs_get_reviewers(array('mr.user_id' => $user->uid, 'mr.disabled' => 0));
+      if (!empty($reviewers['results'])) {
+        $assigned_as_reviewer = TRUE;
+      }
+
       $all_coordinators = mfcs_load_room_coordinators(NULL, TRUE);
-      if (array_key_exists($user->uid, $all_coordinators)) {
+      if (array_key_exists($user->uid, $all_coordinators) || $assigned_as_reviewer) {
         if (!array_key_exists($reviewer_role_id->rid, $system_roles)) {
           $system_roles[$reviewer_role_id->rid] = 'reviewer';
         }
