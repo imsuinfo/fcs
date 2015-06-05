@@ -81,106 +81,246 @@ function cf_theme_get_variables(array &$variables) {
   }
 
   // set the user agent
-  if (function_exists('get_browser') && !empty($_SERVER['HTTP_USER_AGENT'])) {
-    $browser_details = get_browser(NULL, TRUE);
-
+  if (!empty($_SERVER['HTTP_USER_AGENT'])) {
     $cf['agent']['raw'] = $_SERVER['HTTP_USER_AGENT'];
 
-    if (!empty($cf['agent']['raw'])) {
-      // Gecko
-      $matches = array();
-      $result = preg_match('/ Gecko\b/i', $cf['agent']['raw'], $matches);
-      if ($result > 0) {
-        $cf['agent']['engine'] = 'gecko';
-      }
+    $agent_matches = array();
+    $agent_matched = preg_match('/^[^(]*\(([^)]*)\)(.*)$/i', $cf['agent']['raw'], $agent_matches);
 
-      // webkit
-      $matches = array();
-      $result = preg_match('/ AppleWebKit\b/i', $cf['agent']['raw'], $matches);
-      if ($result > 0) {
-        $cf['agent']['engine'] = 'webkit';
-      }
-    }
+    if (isset($agent_matches[1])) {
+      $agent_pieces = explode(';', $agent_matches[1]);
 
-    if (!empty($browser_details['browser'])) {
-      if ($browser_details['browser'] != 'Default Browser') {
-        $cf['agent']['machine_name'] = strtolower($browser_details['browser']);
-        $cf['agent']['human_name'] = $browser_details['browser'];
-      }
-    }
+      if (!empty($agent_pieces)) {
+        foreach ($agent_pieces as $agent_piece) {
+          $pieces = explode('/', $agent_piece);
 
-    if (!empty($browser_details['majorver'])) {
-      $cf['agent']['major_version'] = $browser_details['majorver'];
-    }
-
-    switch ($cf['agent']['machine_name']) {
-      case 'firefox':
-        if ($cf['agent']['major_version'] < 3) {
-          $cf['is']['unsupported'] = TRUE;
-        }
-        $cf['agent']['human_name'] = 'Firefox';
-        $cf['agent']['engine'] = 'gecko';
-        break;
-      case 'mozilla':
-        $cf['agent']['human_name'] = 'Mozilla';
-        $cf['agent']['engine'] = 'gecko';
-        break;
-      case 'ie':
-        $cf['agent']['human_name'] = 'Internet Explorer';
-        $cf['agent']['engine'] = 'trident';
-        break;
-      case 'opera':
-        $cf['agent']['human_name'] = 'Opera';
-        $cf['agent']['engine'] = 'presto';
-        break;
-      case 'chrome':
-        $cf['agent']['human_name'] = 'Google Chrome';
-        $cf['agent']['engine'] = 'webkit';
-        break;
-      default:
-        if (!empty($cf['agent']['raw'])) {
-          $matches = array();
-          $result = preg_match('/ Midori\b/i', $cf['agent']['raw'], $matches);
-
-          if ($result > 0) {
-            $cf['agent']['machine_name'] = 'midori';
-            $cf['agent']['human_name'] = 'Midori';
-            $cf['agent']['engine'] = 'webkit';
+          // ignore unknown structure.
+          if (count($pieces) > 2) {
+            continue;
           }
 
-          if ($result == 0) {
-            $matches = array();
-            $result = preg_match('/ Konqueror\b/i', $cf['agent']['raw'], $matches);
+          if (isset($pieces[1])) {
+            $lower_piece_1 = trim(strtolower($pieces[0]));
+            $lower_piece_2 = trim(strtolower($pieces[1]));
 
-            if ($result > 0) {
-              $cf['agent']['machine_name'] = 'konqueror';
-              $cf['agent']['human_name'] = 'Konqueror';
+            if ($lower_piece_1 == 'trident') {
+              $cf['agent']['engine'] = 'trident';
+              $cf['agent']['engine_version'] = (int) preg_replace('/\..*$/i', '', $lower_piece_2);
+
+              $cf['agent']['machine_name'] = 'ie';
+              $cf['agent']['human_name'] = 'Internet Explorer';
+            }
+            elseif ($lower_piece_1 == 'gecko') {
               $cf['agent']['engine'] = 'gecko';
+              $cf['agent']['engine_version'] = (int) preg_replace('/\..*$/i', '', $lower_piece_2);
+            }
+            elseif ($lower_piece_1 == 'presto') {
+              $cf['agent']['engine'] = 'presto';
+              $cf['agent']['engine_version'] = (int) preg_replace('/\..*$/i', '', $lower_piece_2);
             }
           }
+          else {
+            $lower_piece_1 = trim(strtolower($pieces[0]));
+            if (preg_match('/^msie \d/i', $lower_piece_1)) {
+              $lower_piece_2 = preg_replace('/^msie /i', '', $lower_piece_1);
 
-          if ($result == 0) {
-            $matches = array();
-            $result = preg_match('/ Ephiphany\b/i', $cf['agent']['raw'], $matches);
-
-            if ($result > 0) {
-              $cf['agent']['machine_name'] = 'ephiphany';
-              $cf['agent']['human_name'] = 'Ephiphany';
-              $cf['agent']['engine'] = 'gecko';
+              $cf['agent']['machine_name'] = 'ie';
+              $cf['agent']['human_name'] = 'Internet Explorer';
+              $cf['agent']['major_version'] = (int) preg_replace('/\..*$/i', '', $lower_piece_2);
             }
-          }
-
-          // both ephiphany and konqueror have gecko AND webkit variants, try to detect webkit ones
-          if ($cf['agent']['machine_name'] == 'ephiphany' || $cf['agent']['machine_name'] == 'konqueror') {
-            $matches = array();
-            $result = preg_match('/ KHTML\b/i', $cf['agent']['raw'], $matches);
-            if ($result > 0) {
+            elseif (strstr('midori', $lower_piece_1)) {
+              $cf['agent']['machine_name'] = 'midori';
+              $cf['agent']['human_name'] = 'Midori';
               $cf['agent']['engine'] = 'webkit';
             }
           }
         }
-        break;
+      }
     }
+
+    if (isset($agent_matches[2])) {
+      $agent_pieces = explode(' ', $agent_matches[2]);
+
+      if (!empty($agent_pieces)) {
+        foreach ($agent_pieces as $agent_piece) {
+          $pieces = explode('/', $agent_piece);
+
+          // ignore unknown structure.
+          if (count($pieces) > 3) {
+            continue;
+          }
+
+          if (isset($pieces[1])) {
+            $lower_piece_1 = trim(strtolower($pieces[0]));
+            $lower_piece_2 = trim(strtolower($pieces[1]));
+
+            if ($lower_piece_1 == 'applewebkit') {
+              $cf['agent']['engine'] = 'webkit';
+              $cf['agent']['engine_version'] = $lower_piece_2;
+              $cf['agent']['major_version'] = (int) preg_replace('/\..*$/i', '', $lower_piece_2);
+            }
+            elseif ($lower_piece_1 == 'safari') {
+              // safari is used in a lot of places that is not safari, so use safari only if it is the only agent detected.
+              if ($cf['agent']['machine_name'] == 'unknown') {
+                $cf['agent']['machine_name'] = 'safari';
+                $cf['agent']['human_name'] = 'Safari';
+                $cf['agent']['major_version'] = (int) preg_replace('/\..*$/i', '', $lower_piece_2);
+
+                if ($cf['agent']['engine'] == 'unknown') {
+                  $cf['agent']['engine'] = 'webkit';
+                }
+              }
+            }
+            elseif ($lower_piece_1 == 'firefox') {
+              $cf['agent']['machine_name'] = 'firefox';
+              $cf['agent']['human_name'] = 'Firefox';
+              $cf['agent']['major_version'] = (int) preg_replace('/\..*$/i', '', $lower_piece_2);
+              $cf['agent']['engine'] = 'gecko';
+            }
+            elseif ($lower_piece_1 == 'seamonkey') {
+              $cf['agent']['machine_name'] = 'seamonkey';
+              $cf['agent']['human_name'] = 'Seamonkey';
+              $cf['agent']['major_version'] = (int) preg_replace('/\..*$/i', '', $lower_piece_2);
+              $cf['agent']['engine'] = 'gecko';
+            }
+            elseif ($lower_piece_1 == 'chrome') {
+              // the newer internet explorer uses safari/webkit based agent names, assign chrome conditionally.
+              if ($cf['agent']['machine_name'] == 'unknown' || $cf['agent']['machine_name'] == 'safari') {
+                $cf['agent']['machine_name'] = 'chrome';
+                $cf['agent']['human_name'] = 'Google Chrome';
+                $cf['agent']['major_version'] = (int) preg_replace('/\..*$/i', '', $lower_piece_2);
+              }
+            }
+            elseif ($lower_piece_1 == 'chromium') {
+              $cf['agent']['machine_name'] = 'chrome';
+              $cf['agent']['human_name'] = 'Google Chrome';
+              $cf['agent']['major_version'] = (int) preg_replace('/\..*$/i', '', $lower_piece_2);
+            }
+            elseif ($lower_piece_1 == 'ephiphany') {
+              $cf['agent']['machine_name'] = 'ephiphany';
+              $cf['agent']['human_name'] = 'Ephiphany';
+              $cf['agent']['major_version'] = (int) preg_replace('/\..*$/i', '', $lower_piece_2);
+
+              if ($cf['agent']['engine'] == 'unknown') {
+                $cf['agent']['engine'] = 'gecko';
+              }
+            }
+            elseif ($lower_piece_1 == 'konqueror') {
+              $cf['agent']['machine_name'] = 'konqueror';
+              $cf['agent']['human_name'] = 'Konqueror';
+              $cf['agent']['major_version'] = (int) preg_replace('/\..*$/i', '', $lower_piece_2);
+
+              if ($cf['agent']['engine'] == 'unknown') {
+                $cf['agent']['engine'] = 'gecko';
+              }
+            }
+            elseif ($lower_piece_1 == 'khtml') {
+              $cf['agent']['machine_name'] = 'konqueror';
+              $cf['agent']['human_name'] = 'Konqueror';
+              $cf['agent']['major_version'] = (int) preg_replace('/\..*$/i', '', $lower_piece_2);
+            }
+            elseif ($lower_piece_1 == 'opr') {
+              $cf['agent']['machine_name'] = 'opera';
+              $cf['agent']['human_name'] = 'Opera';
+              $cf['agent']['major_version'] = (int) preg_replace('/\..*$/i', '', $lower_piece_2);
+
+              if ($cf['agent']['engine'] == 'unknown') {
+                $cf['agent']['engine'] = 'presto';
+              }
+            }
+            elseif ($lower_piece_1 == 'edge') {
+              $cf['agent']['machine_name'] = 'ie';
+              $cf['agent']['human_name'] = 'Internet Explorer';
+              $cf['agent']['major_version'] = (int) preg_replace('/\..*$/i', '', $lower_piece_2);
+              $cf['agent']['is_ie_edge'] = TRUE;
+            }
+          }
+          elseif (isset($pieces[0])) {
+            $lower_piece_1 = trim(strtolower($pieces[0]));
+
+            if ($lower_piece_1 == 'opera') {
+              $cf['agent']['machine_name'] = 'opera';
+              $cf['agent']['human_name'] = 'Opera';
+
+              if ($cf['agent']['engine'] == 'unknown') {
+                $cf['agent']['engine'] = 'presto';
+              }
+            }
+            elseif ($lower_piece_1 == '(khtml,') {
+              // khtml is used in a lot of places that is not safari, so use only when necessary.
+              if ($cf['agent']['engine'] == 'unknown' || $cf['agent']['machine_name'] == 'ephiphany' || $cf['agent']['machine_name'] == 'konqueror') {
+                $cf['agent']['engine'] = 'webkit';
+              }
+
+              if ($cf['agent']['machine_name'] == 'unknown') {
+                $cf['agent']['machine_name'] = 'safari';
+                $cf['agent']['human_name'] = 'Safari';
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // attempt to determine internet explorer versions if not already found.
+    if ($cf['agent']['engine'] == 'trident' && ($cf['agent']['machine_name'] == 'unknown' || ($cf['agent']['machine_name'] == 'ie' && $cf['agent']['major_version'] == 'unknown'))) {
+      $cf['agent']['machine_name'] = 'ie';
+      $cf['agent']['human_name'] = 'Internet Explorer';
+
+      if (isset($cf['agent']['is_ie_edge'])) {
+        $cf['agent']['major_version'] = 12;
+      }
+      elseif ($cf['agent']['engine_version'] == 7) {
+        $cf['agent']['major_version'] = 11;
+      }
+      elseif ($cf['agent']['engine_version'] == 6) {
+        $cf['agent']['major_version'] = 10;
+      }
+      elseif ($cf['agent']['engine_version'] == 5) {
+        $cf['agent']['major_version'] = 9;
+      }
+      elseif ($cf['agent']['engine_version'] == 4) {
+        $cf['agent']['major_version'] = 8;
+      }
+    }
+
+    // detect internet explorers compatibility mode (for old versions) where possible to allow clients to better handle.
+    if ($cf['agent']['machine_name'] == 'ie') {
+      $cf['agent']['ie_compatibility'] = FALSE;
+
+      if ($cf['agent']['major_version'] <= 8) {
+        if ($cf['agent']['major_version'] == 7) {
+          if ($cf['agent']['engine'] == 'trident') {
+            $cf['agent']['ie_compatibility'] = TRUE;
+          }
+        }
+      }
+
+      // alter the (faked) agent version to properly reflect the current browser.
+      if ($cf['agent']['ie_compatibility'] && isset($cf['agent']['engine_version'])) {
+        if (isset($cf['agent']['is_ie_edge'])) {
+          $cf['agent']['major_version'] = 12;
+        }
+        elseif ($cf['agent']['engine_version'] == 7) {
+          $cf['agent']['major_version'] = 11;
+        }
+        elseif ($cf['agent']['engine_version'] == 6) {
+          $cf['agent']['major_version'] = 10;
+        }
+        elseif ($cf['agent']['engine_version'] == 5) {
+          $cf['agent']['major_version'] = 9;
+        }
+        elseif ($cf['agent']['engine_version'] == 4) {
+          $cf['agent']['major_version'] = 8;
+        }
+        elseif (preg_match("/; EIE10;/i", $cf['agent']['raw']) > 0) {
+          $cf['agent']['major_version'] = 10;
+        }
+      }
+    }
+
+    // added later on to allow for compatibility mode tests to be properly processed.
+    $cf['agent']['engine'] = 'trident';
   }
 
   // set frontpage defaults
@@ -532,7 +672,7 @@ function cf_theme_generate_headers(array $cf) {
 
     $output .= '<link';
 
-    foreach (array('charset', 'href', 'hreflang', 'media', 'rel', 'target', 'type') as $type) {
+    foreach (array('charset', 'href', 'hreflang', 'media', 'rel', 'target', 'type', 'title') as $type) {
       if ($type == 'rel') {
         if (empty($link['rel'])) {
           if (!empty($link['rev']) && in_array($link['rev'], $supported_link_rel)) {

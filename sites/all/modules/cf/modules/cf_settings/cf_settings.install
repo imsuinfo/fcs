@@ -117,10 +117,17 @@ function cf_settings_install() {
   cf_settings_register('precision', 'php_ini', 'drupal');
   cf_settings_register('max_execution_time', 'php_ini', 'drupal');
   cf_settings_register('max_file_uploads', 'php_ini', 'drupal');
+  cf_settings_register('max_input_time', 'php_ini', 'drupal');
   cf_settings_register('upload_max_filesize', 'php_ini', 'drupal');
+  cf_settings_register('upload_tmp_dir', 'php_ini', 'drupal');
+  cf_settings_register('file_uploads', 'php_ini', 'drupal');
   cf_settings_register('display_errors', 'php_ini', 'drupal');
   cf_settings_register('error_reporting', 'php_ini', 'drupal');
   cf_settings_register('html_errors', 'php_ini', 'drupal');
+  cf_settings_register('include_path', 'php_ini', 'drupal');
+  cf_settings_register('sendmail_from', 'php_ini', 'drupal');
+  cf_settings_register('sendmail_path', 'php_ini', 'drupal');
+  cf_settings_register('doc_root', 'php_ini', 'drupal');
 
 
   // register cf_settings settings
@@ -192,4 +199,20 @@ function cf_settings_install() {
 function cf_settings_update_7200() {
   drupal_install_schema('cf_settings');
   cf_settings_install();
+}
+
+/**
+ * Register the following php variables so that they can be assigned via role_php_ini and similar.
+ *
+ * max_input_time, upload_max_filesize, upload_tmp_dir, file_uploads, include_path, sendmail_from, sendmail_path, doc_root.
+ */
+function cf_settings_update_7201() {
+  cf_settings_register('max_input_time', 'php_ini', 'drupal');
+  cf_settings_register('upload_max_filesize', 'php_ini', 'drupal');
+  cf_settings_register('upload_tmp_dir', 'php_ini', 'drupal');
+  cf_settings_register('file_uploads', 'php_ini', 'drupal');
+  cf_settings_register('include_path', 'php_ini', 'drupal');
+  cf_settings_register('sendmail_from', 'php_ini', 'drupal');
+  cf_settings_register('sendmail_path', 'php_ini', 'drupal');
+  cf_settings_register('doc_root', 'php_ini', 'drupal');
 }
