@@ -317,10 +317,10 @@ function cf_theme_get_variables(array &$variables) {
           $cf['agent']['major_version'] = 10;
         }
       }
-    }
 
-    // added later on to allow for compatibility mode tests to be properly processed.
-    $cf['agent']['engine'] = 'trident';
+      // added later on to allow for compatibility mode tests to be properly processed.
+      $cf['agent']['engine'] = 'trident';
+    }
   }
 
   // set frontpage defaults
