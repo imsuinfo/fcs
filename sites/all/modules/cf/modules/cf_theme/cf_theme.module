@@ -119,19 +119,22 @@ function cf_theme_get_variables(array &$variables) {
               $cf['agent']['engine_version'] = (int) preg_replace('/\..*$/i', '', $lower_piece_2);
             }
           }
-          else {
+          elseif (isset($pieces[0])) {
             $lower_piece_1 = trim(strtolower($pieces[0]));
-            if (preg_match('/^msie \d/i', $lower_piece_1)) {
-              $lower_piece_2 = preg_replace('/^msie /i', '', $lower_piece_1);
 
-              $cf['agent']['machine_name'] = 'ie';
-              $cf['agent']['human_name'] = 'Internet Explorer';
-              $cf['agent']['major_version'] = (int) preg_replace('/\..*$/i', '', $lower_piece_2);
-            }
-            elseif (strstr('midori', $lower_piece_1)) {
-              $cf['agent']['machine_name'] = 'midori';
-              $cf['agent']['human_name'] = 'Midori';
-              $cf['agent']['engine'] = 'webkit';
+            if (!empty($lower_piece_1)) {
+              if (preg_match('/^msie \d/i', $lower_piece_1)) {
+                $lower_piece_2 = preg_replace('/^msie /i', '', $lower_piece_1);
+
+                $cf['agent']['machine_name'] = 'ie';
+                $cf['agent']['human_name'] = 'Internet Explorer';
+                $cf['agent']['major_version'] = (int) preg_replace('/\..*$/i', '', $lower_piece_2);
+              }
+              elseif (strpos($lower_piece_1, 'midori')) {
+                $cf['agent']['machine_name'] = 'midori';
+                $cf['agent']['human_name'] = 'Midori';
+                $cf['agent']['engine'] = 'webkit';
+              }
             }
           }
         }
@@ -196,8 +199,8 @@ function cf_theme_get_variables(array &$variables) {
               $cf['agent']['human_name'] = 'Google Chrome';
               $cf['agent']['major_version'] = (int) preg_replace('/\..*$/i', '', $lower_piece_2);
             }
-            elseif ($lower_piece_1 == 'ephiphany') {
-              $cf['agent']['machine_name'] = 'ephiphany';
+            elseif ($lower_piece_1 == 'epiphany') {
+              $cf['agent']['machine_name'] = 'epiphany';
               $cf['agent']['human_name'] = 'Ephiphany';
               $cf['agent']['major_version'] = (int) preg_replace('/\..*$/i', '', $lower_piece_2);
 
@@ -234,6 +237,11 @@ function cf_theme_get_variables(array &$variables) {
               $cf['agent']['major_version'] = (int) preg_replace('/\..*$/i', '', $lower_piece_2);
               $cf['agent']['is_ie_edge'] = TRUE;
             }
+            elseif ($lower_piece_1 == 'midori') {
+              $cf['agent']['machine_name'] = 'midori';
+              $cf['agent']['human_name'] = 'Midori';
+              $cf['agent']['major_version'] = (int) preg_replace('/\..*$/i', '', $lower_piece_2);
+            }
           }
           elseif (isset($pieces[0])) {
             $lower_piece_1 = trim(strtolower($pieces[0]));
@@ -248,7 +256,7 @@ function cf_theme_get_variables(array &$variables) {
             }
             elseif ($lower_piece_1 == '(khtml,') {
               // khtml is used in a lot of places that is not safari, so use only when necessary.
-              if ($cf['agent']['engine'] == 'unknown' || $cf['agent']['machine_name'] == 'ephiphany' || $cf['agent']['machine_name'] == 'konqueror') {
+              if ($cf['agent']['engine'] == 'unknown' || $cf['agent']['machine_name'] == 'epiphany' || $cf['agent']['machine_name'] == 'konqueror') {
                 $cf['agent']['engine'] = 'webkit';
               }
 
