@@ -350,14 +350,25 @@ function image_imagemagick_get_info(stdClass $image) {
   $data = NULL;
 
   if (file_exists($image->source)) {
-    $data = getimagesize($image->source);
+    $size = filesize($image->source);
+
+    if ($size > 0) {
+      $data = @getimagesize($image->source);
+    }
   }
 
   if (empty($data)) {
     $realpath = drupal_realpath($image->source);
 
-    if (file_exists($realpath) || !stream_is_local($image->source)) {
-      $data = getimagesize($realpath);
+    if (file_exists($realpath)) {
+      $size = filesize($realpath);
+
+      if ($size > 0) {
+        $data = @getimagesize($realpath);
+      }
+    }
+    elseif (!stream_is_local($image->source)) {
+      $data = @getimagesize($realpath);
     }
   }
 
