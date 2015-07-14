@@ -2398,6 +2398,7 @@ function mfcs_load_request_user_by_user_id($user_id) {
     $query->addField('fdfubi', 'field_user_banner_id_value', 'banner_id');
 
     $query->condition('mberu.user_id', $user_id);
+    $query->condition('mberu.disabled', 0);
 
     $rows = $query->execute()->fetchAll();
 
