@@ -139,7 +139,7 @@ function mfcs_request_troubleshoot_0_form($form, &$form_state, $request_id = NUL
   $markup .= '<div class="code-description">' . "\n";
   $markup .= 'The requests cache exist to significantly increase the performance of the system when there are a large number of requests on the system. This requests cache is only loosely connected to the actual data, and therefore, the possibility exists that (due to bugs) this cache can become out of sync.' . "<br>\n";
   $markup .= "<br>\n";
-  $markup .= 'Using this troubleshoot will force a re-synchronization of all cacheed request data.' . "<br>\n";
+  $markup .= 'Using this troubleshoot will force a re-synchronization of all cached request data.' . "<br>\n";
   $markup .= '</div>';
   $form['form'][$code]['pre_markup'] = array(
     '#type' => 'markup',
