@@ -1,0 +1,186 @@
+<?php
+
+/**
+ * @file
+ * McNeese State University Feeds module.
+ */
+
+/**
+ * @defgroup mcneese_feeds McNeese Feeds
+ * @{
+ * Provides user functionality and changes to drupal 7.
+ */
+
+ define('MCNEESE_FEEDS_GROUPING', ',');
+
+/**
+ * Implements hook_menu().
+ */
+function mcneese_feeds_menu() {
+  global $conf;
+  $items = array();
+
+  $items['rss/feed'] = array(
+    'title' => "RSS Feeds",
+    'description' => "A listing of RSS feeds available on this website.",
+    'page callback' => 'mcneese_feeds_rss_listing',
+    'file' => 'rss_listing.inc',
+    'file path' => drupal_get_path('module', 'mcneese_feeds') . '/pages',
+    'access callback' => 'user_access',
+    'access arguments' => array('access content'),
+    'tab_parent' => 'rss/feed',
+  );
+
+  return $items;
+}
+
+/**
+ * Exits with HTTP 304 if a specified etag is found in the poage cache.
+ *
+ * This improves performance by allowing client side to use a cached page and
+ * avoid transmitting further data between the client and the server.
+ *
+ * @param string $feed_url
+ *   The url of the feed to search for in the cache.
+ *
+ * @return bool
+ *   On success, this function exists and does not return.
+ *   If nothing went wrong, but the no match was made, then TRUE is returned.
+ *   On failure, this function returns FALSE;
+ */
+function mcneese_feeds_process_if_none_match($feed_url) {
+  if (!is_string($feed_url)) {
+    cf_error::invalid_string('feed_url');
+    return FALSE;
+  }
+
+  // support client side caching.
+  $matched_catch = FALSE;
+  $if_none_match = '';
+  if (isset($_SERVER['HTTP_IF_NONE_MATCH'])) {
+    $if_none_match = preg_replace('/^"/i', '', $_SERVER['HTTP_IF_NONE_MATCH']);
+    $if_none_match = preg_replace('/"$/i', '', $if_none_match);
+
+    $if_none_match = preg_replace('@^sha256://@i', '', $if_none_match);
+
+    if ($cache = cache_get('feed:' . $feed_url . '/' . $if_none_match, 'cache_page')){
+      $ob_level = ob_get_level();
+      for ($i = 0; $i < $ob_level; $i++) {
+        ob_clean();
+      }
+      ob_start();
+      header('HTTP/1.1 304 Not Modified', TRUE, 304);
+      ob_end_flush();
+      exit();
+    }
+  }
+
+  return TRUE;
+}
+
+/**
+ * Saves the output to the cache so that it may be used for client side caching.
+ *
+ * @param string $feed_url
+ *   The url of the feed to search for in the cache.
+ * @param string $output
+ *   The complete/generated feed output page.
+ *
+ * @see: mcneese_feeds_process_if_none_match()
+ */
+function mcneese_feeds_save_cache($feed_url, $output) {
+  if (!is_string($feed_url)) {
+    cf_error::invalid_string('feed_url');
+    return FALSE;
+  }
+
+  if (!is_string($output)) {
+    cf_error::invalid_string('output');
+    return FALSE;
+  }
+
+   // Because an RSS Feed is to be returned, completely bypass drupals themeing exiting code.
+  // Generate custom headers, output the custom data, and exit.
+  $checksum = hash('sha256', $output);
+
+  // use the checksum as the cache_id.
+  // because the client is expected to cache the page, no data needs to actually be cached.
+  $cache_expire = new DateTime("+20 minutes");
+  cache_set('feed:' . $feed_url . '/' . $checksum, NULL, 'cache_page', $cache_expire->getTimestamp());
+
+  return $checksum;
+}
+
+/**
+ * Sends the feed output to the client.
+ *
+ * This function exits and does not return on both success and failure.
+ * On failure, page not found is presented.
+ *
+ * @param string $feed_url
+ *   The url of the feed to search for in the cache.
+ * @param string $output
+ *   The complete/generated feed output page.
+ * @param string|null $checksum
+ *   (optional) The checksum
+ */
+function mcneese_feeds_send_output($feed_url, $output, $checksum = NULL) {
+  if (!is_string($feed_url)) {
+    cf_error::invalid_string('feed_url');
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  if (!is_string($output)) {
+    cf_error::invalid_string('output');
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  if (!is_null($checksum) && !is_string($checksum)) {
+    cf_error::invalid_string('checksum');
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  // prevent devel module from doing anything on exit.
+  $GLOBALS['devel_shutdown'] = FALSE;
+
+  // make sure to perform output buffer (if possible) to reduce chances of "headers already sent" issues.
+  $ob_level = ob_get_level();
+  for ($i = 0; $i < $ob_level; $i++) {
+    ob_clean();
+  }
+  ob_start();
+
+  header('HTTP/1.1 200 OK', TRUE, 200);
+
+  // use already defined cache-control settings, with 'public' as a failsafe.
+  $headers = &drupal_static('drupal_http_headers', array());
+  if (isset($headers['cache-control']['value'])) {
+    header('Cache-Control: ' . $headers['cache-control']['value']);
+  }
+  else {
+    header('Cache-Control: public');
+  }
+
+  header('Content-Length: ' . strlen($output));
+  //header('Content-Type: application/rss+xml; charset=utf-8');
+  header('Content-Type: application/xml; charset=utf-8');
+  header('Content-Location: ' . $feed_url);
+  header('Last-Modified: ' . gmdate(DATE_RFC7231, REQUEST_TIME));
+  header('Date: ' . gmdate(DATE_RFC7231, REQUEST_TIME));
+
+  if (!is_null($checksum)) {
+    header('ETag: ' . '"sha256://' . $checksum . '"');
+  }
+
+  ob_end_flush();
+
+  print($output);
+  exit();
+}
+
+/**
+ * @} End of '@defgroup mcneese_feeds McNeese Feeds'.
+ */

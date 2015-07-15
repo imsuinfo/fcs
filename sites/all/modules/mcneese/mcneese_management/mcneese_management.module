@@ -1499,6 +1499,7 @@ function mcneese_management_template_build_form(&$form) {
   $supported_attributes[] = 'cardinality';
   $supported_attributes[] = 'cols';
   $supported_attributes[] = 'default_value';
+  $supported_attributes[] = 'default_value_replace';
   $supported_attributes[] = 'empty_value';
   $supported_attributes[] = 'empty_option';
   $supported_attributes[] = 'has_alt';
@@ -1660,6 +1661,7 @@ function mcneese_management_template_build_form(&$form) {
     $field = array();
     $fields = array('#tree' => TRUE);
     $ti_default = FALSE;
+    $ti_default_value_replace = NULL;
     $serialized = FALSE;
     $manual_cardinality = FALSE;
     $has_alt = FALSE;
@@ -1680,6 +1682,15 @@ function mcneese_management_template_build_form(&$form) {
       }
       elseif ($attribute == 'default_value') {
         $ti_default = TRUE;
+      }
+      elseif ($attribute == 'default_value_replace') {
+        $replace_tmp = $ti_tag->getAttribute('default_value_replace');
+
+        if ($replace_tmp == "current_date") {
+          $ti_default_value_replace = $replace_tmp;
+        }
+
+        unset($replace_tmp);
       }
       elseif ($attribute == 'has_alt') {
         $has_alt = $ti_tag->getAttribute('has_alt');
@@ -1712,6 +1723,16 @@ function mcneese_management_template_build_form(&$form) {
         else {
           $default_value = $ti_tag->getAttribute('default_value');
           $attribute_value = $default_value;
+
+          if ($ti_default_value_replace == 'current_date') {
+            $attribute_value = date($default_value, REQUEST_TIME);
+            if ($attribute_value === FALSE) {
+              $attribute_value = $default_value;
+            }
+            else {
+              $default_value = $attribute_value;
+            }
+          }
 
           if ($ti_type == 'text_format' || $ti_type == 'textarea') {
             $default_value =  array();
@@ -2123,7 +2144,11 @@ function mcneese_management_template_process_form_state($form, &$form_state) {
 
       if (empty($name)) continue;
 
-      $target_inputs[$name] = $found_tag;
+      if (!isset($target_inputs[$name])) {
+        $target_inputs[$name] = array();
+      }
+
+      $target_inputs[$name][] = $found_tag;
 
       if ($target_multiple) {
         // when the target tag's cardinality > 1, only a single template input is allowed.
@@ -2216,13 +2241,15 @@ function mcneese_management_template_process_form_state($form, &$form_state) {
       unset($current_start);
     }
     else {
-      foreach ($target_inputs as $input_name => &$input_tag) {
-        if ($target_cardinality == 0) {
-          $status = mcneese_management_template_process_template_input_tag($form, $form_state, $target_tag, $target_tag_key, $input_tag, $input_name, $template_fields, $template_values);
-        }
-        else {
-          for ($cardinality_count = 0; $cardinality_count < $target_cardinality; $cardinality_count++) {
-            $status = mcneese_management_template_process_template_input_tag($form, $form_state, $target_tag, $target_tag_key, $input_tag, $input_name, $template_fields, $template_values, $cardinality_count);
+      foreach ($target_inputs as $input_name => &$input_tags) {
+        foreach ($input_tags as $input_tags_key => &$input_tag) {
+          if ($target_cardinality == 0) {
+            $status = mcneese_management_template_process_template_input_tag($form, $form_state, $target_tag, $target_tag_key, $input_tag, $input_name, $template_fields, $template_values);
+          }
+          else {
+            for ($cardinality_count = 0; $cardinality_count < $target_cardinality; $cardinality_count++) {
+              $status = mcneese_management_template_process_template_input_tag($form, $form_state, $target_tag, $target_tag_key, $input_tag, $input_name, $template_fields, $template_values, $cardinality_count);
+            }
           }
         }
       }
@@ -2517,6 +2544,12 @@ function mcneese_management_template_process_template_if($form, &$form_state, $t
     if (!is_numeric($left_value)) return FALSE;
     return $left_value != $right_value;
   }
+  elseif ($type == 'true') {
+    return $right_value === TRUE || $right_value == 1;
+  }
+  elseif ($type == 'false') {
+    return $right_value === FALSE || $right_value == 0;
+  }
 
   return FALSE;
 }
@@ -2552,7 +2585,7 @@ function mcneese_management_template_process_template_if($form, &$form_state, $t
  *
  * @see mcneese_management_template_process_form_state()
  */
-function mcneese_management_template_process_template_input_tag($form, &$form_state, $target_tag, $target_tag_key, $input_tag, $input_name, &$template_fields, &$template_values, $location = NULL) {
+function mcneese_management_template_process_template_input_tag($form, &$form_state, $target_tag, $target_tag_key, &$input_tag, $input_name, &$template_fields, &$template_values, $location = NULL) {
   if (!is_array($form)) {
     if (class_exists('cf_error')) {
       cf_error::invalid_array('form');
@@ -2732,11 +2765,16 @@ function mcneese_management_template_process_template_input_tag($form, &$form_st
 
       $new_tag = $form['targets_dom']['#value']->get_dom()->importNode($new_dom->get_body(), TRUE);
       $parent->insertBefore($new_tag, $input_tag);
+
+      unset($new_dom);
+      unset($new_tag);
     }
     else {
       $text = new DOMText();
       $text->appendData($field_value);
       $parent->insertBefore($text, $input_tag);
+
+      unset($text);
     }
 
     $parent = $input_tag->parentNode;

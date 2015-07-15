@@ -234,6 +234,8 @@ function mcneese_management_templates_manage_edit_form($form, &$form_state, $tem
   $help_input_markup .= '<li><strong>serialized</strong>: When set to "1", loads and processes the default_value as a serialized string.</li>';
   $help_input_markup .= '<li><strong>has_alt</strong>: Provide a custom alt textfield for targets that support special alt text handling.</li>';
   $help_input_markup .= '<li><strong>has_title</strong>: Provide a custom title textfield for targets that support special title text handling.</li>';
+  $help_input_markup .= '<li><strong>default_value</strong>: Provide a default value, for now forms. This is made more dynamic by default_value_replace.</li>';
+  $help_input_markup .= '<li><strong>default_value_replace</strong>: Provide custom processing for the default value, currently only current_date is supported (default_value is now treated as an argument to PHP\'s date() function).</li>';
   $help_input_markup .= '</ul>';
   $help_input_markup .= '<br>';
   $help_input_markup .= "The following Template Input types are supported:" . '<br>';
@@ -314,6 +316,8 @@ function mcneese_management_templates_manage_edit_form($form, &$form_state, $tem
   $help_if_markup .= '<li><strong>&lt;=</strong>: Check if the target (and the key) is less than or equal to the contents of the value attribute.</li>';
   $help_if_markup .= '<li><strong>==</strong>: Check if the target (and the key) is equal to the contents of the value attribute.</li>';
   $help_if_markup .= '<li><strong>!=</strong>: Check if the target (and the key) is not equal to the contents of the value attribute.</li>';
+  $help_if_markup .= '<li><strong>true</strong>: Check if the target (and the key) evaluates to TRUE (as a boolean value, or as a 1).</li>';
+  $help_if_markup .= '<li><strong>false</strong>: Check if the target (and the key) evaluates to FALSE (as a boolean value, or as a 0).</li>';
   $help_if_markup .= '</ul>';
   $help_if_markup .= '<br>';
   $help_if_markup .= 'Template If conditions do not support cardinality and are not currently input type aware at this time. You must specify the appropriate data location using the key attribute.';

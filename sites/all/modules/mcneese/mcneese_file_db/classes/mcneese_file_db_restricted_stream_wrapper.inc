@@ -679,6 +679,8 @@ class mcneese_file_db_restricted_stream_wrapper extends mcneese_file_db_stream_w
    * Implements get_mimetype().
    */
   public function get_mimetype() {
+    $guess_mimetype = FALSE;
+
     if (!empty($this->image_style_uri)) {
       $wrapper = file_stream_wrapper_get_instance_by_uri($this->image_style_uri);
 
@@ -686,11 +688,29 @@ class mcneese_file_db_restricted_stream_wrapper extends mcneese_file_db_stream_w
         return $wrapper->getMimeType($this->image_style_uri);
       }
 
+      $guess_mimetype = TRUE;
+    }
+    elseif (empty($this->file_meta) || empty($this->file_meta->mimetype)) {
+      $guess_mimetype = TRUE;
+    }
+
+    if ($guess_mimetype) {
+      if (!empty($this->tmp_filename)) {
+        $filename_parts = explode('.', $this->tmp_filename);
+
+        if (count($filename_parts) > 1) {
+          include_once DRUPAL_ROOT . '/includes/file.mimetypes.inc';
+          return file_get_mimetype($this->stream_fname);
+        }
+      }
+
       return 'application/octet-stream';
     }
 
-    if (empty($this->file_meta->mimetype)) {
-      return 'application/octet-stream';
+    // attempt to avoid '$this->file_meta->mimetype' when possible.
+    if ($this->file_meta->mimetype == 'application/octet-stream') {
+      include_once DRUPAL_ROOT . '/includes/file.mimetypes.inc';
+      return file_get_mimetype($this->file_meta->filename . '.' . $this->file_meta->extension);
     }
 
     return $this->file_meta->mimetype;

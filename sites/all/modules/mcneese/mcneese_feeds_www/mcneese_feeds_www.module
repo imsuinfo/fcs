@@ -1,0 +1,192 @@
+<?php
+
+/**
+ * @file
+ * McNeese State University Feeds - www.mcneese.edu module.
+ */
+
+/**
+ * @defgroup mcneese_feeds McNeese Feeds
+ * @{
+ * Provides user functionality and changes to drupal 7.
+ */
+
+define('MCNEESE_FEEDS_WWW_VOCABULARY_GROUP', 3);
+define('MCNEESE_FEEDS_WWW_VOCABULARY_GROUP_POLICE', 199);
+define('MCNEESE_FEEDS_WWW_NODE_TYPE_POLICE', 'university_police_complaint_log');
+define('MCNEESE_FEEDS_WWW_FEED_LIMIT', 40);
+define('MCNEESE_FEEDS_WWW_FEED_TEASER_LIMIT', 800);
+
+
+/**
+ * Implements hook_menu().
+ */
+function mcneese_feeds_www_menu() {
+  global $conf;
+  $items = array();
+
+  $items['rss/feed/all'] = array(
+    'title' => "McNeese State University - RSS Feed - All",
+    'description' => "An RSS feed for all content on McNeese State University's website.",
+    'page callback' => 'mcneese_feeds_www_rss_all',
+    'file' => 'rss_all.inc',
+    'file path' => drupal_get_path('module', 'mcneese_feeds_www') . '/pages',
+    'access callback' => 'user_access',
+    'access arguments' => array('access content'),
+    'tab_parent' => 'rss/feed',
+  );
+
+  $items['rss/feed/all/%'] = array(
+    'title' => "McNeese State University - RSS Feed - All",
+    'description' => "An RSS feed for all content on McNeese State University's website.",
+    'page callback' => 'mcneese_feeds_www_rss_all',
+    'page arguments' => array(3),
+    'file' => 'rss_all.inc',
+    'file path' => drupal_get_path('module', 'mcneese_feeds_www') . '/pages',
+    'access callback' => 'user_access',
+    'access arguments' => array('access content'),
+    'tab_parent' => 'rss/feed',
+  );
+
+  $items['rss/feed/group/%'] = array(
+    'title' => "McNeese State University - RSS Feed - Group",
+    'description' => "An RSS feed for all content associated with a specified group on McNeese State University's website.",
+    'page callback' => 'mcneese_feeds_www_rss_group',
+    'page arguments' => array(3),
+    'file' => 'rss_group.inc',
+    'file path' => drupal_get_path('module', 'mcneese_feeds_www') . '/pages',
+    'access callback' => 'user_access',
+    'access arguments' => array('access content'),
+    'tab_parent' => 'rss/feed',
+  );
+
+  $items['rss/feed/news'] = array(
+    'title' => "McNeese State University - RSS Feed - News",
+    'description' => "An RSS feed for news on McNeese State University's website.",
+    'page callback' => 'mcneese_feeds_www_rss_news',
+    'file' => 'rss_news.inc',
+    'file path' => drupal_get_path('module', 'mcneese_feeds_www') . '/pages',
+    'access callback' => 'user_access',
+    'access arguments' => array('access content'),
+    'tab_parent' => 'rss/feed',
+  );
+
+  $items['rss/feed/lagniappe'] = array(
+    'title' => "McNeese State University - RSS Feed - Lagniappe",
+    'description' => "An RSS feed for lagniappe on McNeese State University's website.",
+    'page callback' => 'mcneese_feeds_www_rss_lagniappe',
+    'file' => 'rss_lagniappe.inc',
+    'file path' => drupal_get_path('module', 'mcneese_feeds_www') . '/pages',
+    'access callback' => 'user_access',
+    'access arguments' => array('access content'),
+    'tab_parent' => 'rss/feed',
+  );
+
+  $items['rss/feed/spotlight'] = array(
+    'title' => "McNeese State University - RSS Feed - Spotlight",
+    'description' => "An RSS feed for spotlight on McNeese State University's website.",
+    'page callback' => 'mcneese_feeds_www_rss_spotlight',
+    'file' => 'rss_spotlight.inc',
+    'file path' => drupal_get_path('module', 'mcneese_feeds_www') . '/pages',
+    'access callback' => 'user_access',
+    'access arguments' => array('access content'),
+    'tab_parent' => 'rss/feed',
+  );
+
+  $items['rss/feed/featured'] = array(
+    'title' => "McNeese State University - RSS Feed - Featured",
+    'description' => "An RSS feed for featured on McNeese State University's website.",
+    'page callback' => 'mcneese_feeds_www_rss_featured',
+    'file' => 'rss_featured.inc',
+    'file path' => drupal_get_path('module', 'mcneese_feeds_www') . '/pages',
+    'access callback' => 'user_access',
+    'access arguments' => array('access content'),
+    'tab_parent' => 'rss/feed',
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_mcneese_feeds_rss_listing().
+ */
+function mcneese_feeds_www_mcneese_feeds_rss_listing_alter(&$rss_feeds) {
+  $rss_feeds['mcneese_feeds_www-all'] = array(
+    'name' => "McNeese State University - RSS Feed - All",
+    'path' => 'rss/feed/all',
+    'description' => "An RSS feed for all content on McNeese State University's website. May be filtered by type.<br><br>Multiple values may be provided using a comma (,) as a separator.",
+  );
+
+  $rss_feeds['mcneese_feeds_www-category'] = array(
+    'name' => "McNeese State University - RSS Feed - Category",
+    'path' => 'rss/feed/group',
+    'description' => "An RSS feed for all content on McNeese State University's website associated with the specified group/category.<br><br>Multiple values may be provided using a comma (,) as a separator.",
+    'no_link' => TRUE,
+  );
+}
+
+/**
+ * Strips the HTML node header block from content.
+ *
+ * When a h1 tag exists, strip out the element-invisible header to avoid
+ * duplicate titles being displayed within the feed markup.
+ *
+ * @param string $text
+ *   The text to process.
+ *
+ * @return string
+ *   The processed text or the unprocessed text on error.
+ */
+function mcneese_feeds_www_strip_invisible_node_header_on_h1($text) {
+  $dom = new cf_dom(TRUE, TRUE, TRUE, $text);
+
+  $body = $dom->get_body();
+  if (is_null($body)) {
+    return $text;
+  }
+
+  $h1_tags = $body->getElementsByTagName('h1');
+
+  // no h1 tags detected, so no changes need to be made.
+  if (!is_object($h1_tags) || $h1_tags->length < 1) {
+    return $text;
+  }
+  unset($h1_tags);
+
+  // strip the h2 tag that has 'node-header' and 'element-invisible' as a class name, with '<section>' as a parent tag.
+  $header_tags = $body->getElementsByTagName('header');
+  $remove_tags = array();
+
+  foreach ($header_tags as $tag) {
+    if (gettype($tag) != 'DOMElement' && is_subclass_of($tag, 'DOMElement')) {
+      continue;
+    }
+
+    if (!$tag->hasAttribute('class')) {
+      continue;
+    }
+
+    $class = $tag->getAttribute('class');
+
+    $classes = explode(' ', $class);
+    if (in_array('node-header', $classes)) {
+      if (in_array('element-invisible', $classes)) {
+        $remove_tags[] = &$tag;
+      }
+    }
+  }
+
+  if (!empty($remove_tags)) {
+    foreach ($remove_tags as $tag) {
+      $removed = $dom->remove_element($tag, FALSE);
+    }
+
+    return $dom->get_markup();
+  }
+
+  return $text;
+}
+
+/**
+ * @} End of '@defgroup mcneese_feeds McNeese Feeds - www.mcneese.edu'.
+ */
