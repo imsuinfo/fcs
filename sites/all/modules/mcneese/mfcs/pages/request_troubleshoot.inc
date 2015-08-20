@@ -177,9 +177,9 @@ function mfcs_request_troubleshoot_0_form($form, &$form_state, $request_id = NUL
 
   $markup = '<h2 class="code-title">#' . MFCS_TROUBLESHOOT_BANNER_CACHE_SYNCHRONIZE . ': Banner Cache Synchronize</h2>' . "\n";
   $markup .= '<div class="code-description">' . "\n";
-  $markup .= 'The banner data is cached locally to allow for this system to operate even when banner is unavailable. This cache is usually re-synchronized once a day.' . "<br>\n";
+  $markup .= 'The banner data is cached locally to allow for this system to operate even when banner is unavailable. This cache is usually auto-re-synchronized once a day.' . "<br>\n";
   $markup .= "<br>\n";
-  $markup .= 'Using this troubleshoot will force a re-synchronization of all banner cache data if the system can connect to the banner database.' . "<br>\n";
+  $markup .= 'Using this troubleshoot will force a re-synchronization of all banner cache data (including banner role cache), if the system can connect to the banner database.' . "<br>\n";
   $markup .= '<strong class="code-warning warning">This may take up to 15 minutes.</strong>' . "<br>\n";
   $markup .= '</div>';
   $form['form'][$code]['pre_markup'] = array(
@@ -192,6 +192,46 @@ function mfcs_request_troubleshoot_0_form($form, &$form_state, $request_id = NUL
     '#name' => 'troubleshoot-' . $code . '-submit',
     '#type' => 'submit',
     '#default_value' => t("Re-synchronize Banner Cache"),
+  );
+
+  $markup = '<hr class="code-separator">';
+  $form['form'][$code]['post_markup'] = array(
+    '#type' => 'markup',
+    '#markup' => $markup,
+  );
+
+
+  // Banner Role Cache Synchronize
+  $code = 'code_' . MFCS_TROUBLESHOOT_BANNER_ROLE_SYNCHRONIZE;
+  $form['form'][$code] = array(
+    '#id' => 'field-troubleshoot-' . $code,
+    '#type' => 'container',
+    '#tree' => TRUE,
+    '#attributes' => array(
+      'class' => array(
+        'form-item-wrapper',
+        'troubleshoot-code',
+        'troubleshoot-' . $code,
+      ),
+    ),
+  );
+
+  $markup = '<h2 class="code-title">#' . MFCS_TROUBLESHOOT_BANNER_ROLE_SYNCHRONIZE . ': Banner Role Cache Synchronize</h2>' . "\n";
+  $markup .= '<div class="code-description">' . "\n";
+  $markup .= 'The banner role is cached locally in a separate manner than the other banner data. This cache is usually auto-re-synchronized once a day.' . "<br>\n";
+  $markup .= "<br>\n";
+  $markup .= 'Using this troubleshoot will force a re-synchronization of <strong>only</strong> the banner role cache data, if the system can connect to the banner database.' . "<br>\n";
+  $markup .= '</div>';
+  $form['form'][$code]['pre_markup'] = array(
+    '#type' => 'markup',
+    '#markup' => $markup,
+  );
+
+  $form['form'][$code]['button'] = array(
+    '#id' => 'troubleshoot-' . $code . '-submit',
+    '#name' => 'troubleshoot-' . $code . '-submit',
+    '#type' => 'submit',
+    '#default_value' => t("Re-synchronize Banner Role Cache"),
   );
 
   $markup = '<hr class="code-separator">';
@@ -229,6 +269,9 @@ function mfcs_request_troubleshoot_0_form_validate($form, &$form_state) {
   elseif ($clicked_id == 'troubleshoot-code_' . MFCS_TROUBLESHOOT_BANNER_CACHE_SYNCHRONIZE . '-submit') {
     // no validation necessary
   }
+  elseif ($clicked_id == 'troubleshoot-code_' . MFCS_TROUBLESHOOT_BANNER_ROLE_SYNCHRONIZE . '-submit') {
+    // no validation necessary
+  }
   else {
     form_set_error('', "Unknown submit process detected.");
   }
@@ -259,6 +302,9 @@ function mfcs_request_troubleshoot_0_form_submit($form, &$form_state) {
   }
   elseif ($clicked_id == 'troubleshoot-code_' . MFCS_TROUBLESHOOT_BANNER_CACHE_SYNCHRONIZE . '-submit') {
     $code = MFCS_TROUBLESHOOT_BANNER_CACHE_SYNCHRONIZE;
+  }
+  elseif ($clicked_id == 'troubleshoot-code_' . MFCS_TROUBLESHOOT_BANNER_ROLE_SYNCHRONIZE . '-submit') {
+    $code = MFCS_TROUBLESHOOT_BANNER_ROLE_SYNCHRONIZE;
   }
   else {
     // do nothing for invalid submits.
@@ -296,6 +342,10 @@ function mfcs_request_troubleshoot_0_form_submit($form, &$form_state) {
     elseif ($code == MFCS_TROUBLESHOOT_BANNER_CACHE_SYNCHRONIZE) {
       $label = "Re-synchronize banner cache";
       $result = mfcs_sync_banner_to_local($transaction, $user);
+    }
+    elseif ($code == MFCS_TROUBLESHOOT_BANNER_ROLE_SYNCHRONIZE) {
+      $label = "Re-synchronize banner role cache";
+      $result = mfcs_sync_banner_to_local_users();
     }
 
     $time_stop = microtime(TRUE);

@@ -265,6 +265,7 @@ define('MFCS_TROUBLESHOOT_NONE', 0);
 define('MFCS_TROUBLESHOOT_REQUESTS_REVIEW_RECHECK', 1);
 define('MFCS_TROUBLESHOOT_MER_CACHE_SYNCHRONIZE', 2);
 define('MFCS_TROUBLESHOOT_BANNER_CACHE_SYNCHRONIZE', 3);
+define('MFCS_TROUBLESHOOT_BANNER_ROLE_SYNCHRONIZE', 4);
 
 /**
  * Defines some hard-limits.
@@ -3204,6 +3205,10 @@ function mfcs_sync_banner_to_local($transaction = NULL, $user = NULL) {
  * @param null|numeric $banner_id
  *   (optional) If not NULL, the banner id to load.
  *   When NULL, the banner id is auto-loaded from the user account.
+ * @param bool $assign
+ *   (optional) The data gets cached, but that does not been the cached data
+ *   gets applied to each local user. Set this to TRUE to traverse each user
+ *   in the system and update and save all role information.
  *
  * @return bool
  *   TRUE on success, FALSE otherwise.
