@@ -332,6 +332,7 @@ function ldap_servers_test_form_submit($form, &$form_state) {
 
     list($has_errors, $more_results, $ldap_user) = ldap_servers_test_user_mapping($values['testing_drupal_username'], $ldap_server);
 
+    ksort($ldap_user['attr']);
     $tokens = ($ldap_user && isset($ldap_user['attr'])) ? ldap_servers_token_tokenize_entry($ldap_user['attr'], 'all') : array();
     foreach ($tokens as $key => $value) {
       $results_tables['tokens'][] = array($key, $value);
