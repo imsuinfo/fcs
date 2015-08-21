@@ -234,7 +234,7 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
     $additional_operations = '';
 
     $problem_account = NULL;
-    foreach (array(MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_LOGIN_PROBLEMS_MULTIPLE, MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED) as $taxonomy_id) {
+    foreach (array(MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_LOGIN_PROBLEMS_MULTIPLE, MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED, MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES) as $taxonomy_id) {
       if (($problem->problems & $taxonomy_id) > 0) {
         if ($taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE || $taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) {
           $additional_operations .= ' <a href="' . $base_path . 'requests/problems-0/users/resynchronize/' . $problem->user_id . $url_arguments . '" class="operation-link operation-link-resynchronize" title="Re-Synchronize the user\'s settings.">Re-Sync</a>';
@@ -512,6 +512,7 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
   unset($mfcs_users);
   $problem_user = user_load($problem_user_id);
 
+  global $user;
   global $base_path;
   global $mfcs_determined;
 
@@ -527,8 +528,16 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
     $user_name = $problem_user->field_user_first_name['und'][0]['safe_value'] . ' ' . $problem_user->field_user_last_name['und'][0]['safe_value'];
   }
 
+  $banner_id = NULL;
+  if (!empty($problem_user->field_user_banner_id['und'][0]['value']) && is_numeric($problem_user->field_user_banner_id['und'][0]['value'])) {
+    $banner_id = $problem_user->field_user_banner_id['und'][0]['value'];
+  }
+
   $page_title = "Facilities Use Problems: " . $user_name . "(id: " . $problem_user_id . ")";
   drupal_set_title($page_title);
+
+  $user_is_manager = user_access('mfcs manage', $user);
+  $user_is_administer = user_access('mfcs administer', $user);
 
 
   $form = array();
@@ -635,6 +644,16 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
       'custom_action' => TRUE,
       'custom_action-message' => "Re-process Reviewer Role."
     ),
+    MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES => array(
+      'label' => "Old/Duplicate Account",
+      'explanation' =>
+        "This flag gets set when a user has logged in and the <strong>LDAP</strong> has the <strong>isDuplicate</strong> flag set to <strong>TRUE</strong> and there is no primary account (or this is not the primary account).<br>\n" .
+        "<br>\n" .
+        "A specific account must be manually assigned by an administer to designate which account is the primary account.<br>\n",
+        "Only the primary account will be allowed access to this system.<br>\n",
+      'resettable' => FALSE,
+      'custom_action' => FALSE,
+    ),
     MFCS_USER_PROBLEM_FORM_ERROR_USER => array(
       'label' => "Facilities Use Form Problems",
       'explanation' =>
@@ -724,6 +743,26 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
       $form['problems'][$problem_id]['explanation'] = array(
         '#markup' => '<div class="problem-explanation problem-explanation-' . $problem_id . '">' . $problem_settings['explanation'] . '</div>' . "\n",
       );
+
+      // jira ticket: fcs-58.
+      if ($problem_id == MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES) {
+        $all_accounts = mfcs_users_load_all_users_with_banner_id($banner_id);
+        if (!empty($all_accounts)) {
+          $form['problems'][$problem_id]['explanation']['#markup'] .= "<br>\n";
+          $form['problems'][$problem_id]['explanation']['#markup'] .= "The following accounts have the same banner id";
+
+          if ($user_is_manager || $user_is_administer) {
+            $form['problems'][$problem_id]['explanation']['#markup'] .= " (<strong>" . check_plain($banner_id) . "</strong>)";
+          }
+
+          $form['problems'][$problem_id]['explanation']['#markup'] .= ":\n<ul>\n";
+
+          foreach ($all_accounts as $account_id => $account_name) {
+            $form['problems'][$problem_id]['explanation']['#markup'] .= '<li><a href="' . $base_path . 'user/' . $account_id . $url_arguments . '">' . $account_name . '</a></li>' . "\n";
+          }
+          $form['problems'][$problem_id]['explanation']['#markup'] .= "</ul>\n<br>\n";
+        }
+      }
     }
   }
 
@@ -1001,6 +1040,33 @@ function mfcs_request_problems_0_users_resynchronize($user_id) {
   $markup .= '</div>' . "\n";
 
   return $markup;
+}
+
+/**
+ * Return an array of user names who have the given banner id.
+ *
+ * jira ticket: fcs-58.
+ *
+ * @param string $banner_id
+ *   The banner id string.
+ *
+ * @return array
+ *   An array with the user ids as the key and the user names as the value.
+ */
+function mfcs_users_load_all_users_with_banner_id($banner_id) {
+  if (!is_string($banner_id) && !is_numeric($banner_id)) {
+    return array();
+  }
+
+  $names = array();
+
+  $query = db_query('select u.uid as uid, u.name as name from field_data_field_user_banner_id fdfubi inner join users u on fdfubi.entity_id = u.uid where field_user_banner_id_value = :banner_id', array(':banner_id' => $banner_id));
+  $results = $query->fetchAll();
+  foreach ($results as $result) {
+    $names[$result->uid] = $result->name;
+  }
+
+  return $names;
 }
 
 /**

@@ -726,6 +726,7 @@ function mfcs_management_get_problems_taxonomy() {
   $labels[MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE] = "Banner Unavailable on Login";
   $labels[MFCS_USER_PROBLEM_ACCOUNT_LOGIN_PROBLEMS_MULTIPLE] = "Multiple Login Attempt Problems";
   $labels[MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED] = "Unable to Assign/Unassign Reviewer Role";
+  $labels[MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES] = "Old/Duplicate Account";
   $labels[MFCS_USER_PROBLEM_FORM_ERROR_USER] = "Core System Form Errors";
   $labels[MFCS_USER_PROBLEM_FORM_ERROR_USER] = "Facilities Use Form Errors";
 

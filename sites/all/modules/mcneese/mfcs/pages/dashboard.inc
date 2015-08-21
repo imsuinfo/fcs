@@ -163,6 +163,7 @@ function mfcs_dashboard_page() {
   $markup = '<div id="mfcs-dashboard_page-choices" class="mfcs-dashboard_page-choices">' . "\n";
 
   if (!$can_create && !$can_list && !$can_search && !$can_review) {
+    watchdog('insufficient access', "The user :user_name (:user_id) does not have sufficient access to use the system.", array(':user_name' => $user->name, ':user_id' => $user->uid), WATCHDOG_NOTICE);
     $markup .= '<h3 class="mfcs-dashboard_page-choices-header">Insufficient Access</h3>' . "\n";
 
     $markup .= '<div>' . "\n";
