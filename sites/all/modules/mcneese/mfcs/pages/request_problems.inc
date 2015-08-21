@@ -651,7 +651,7 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
         "<br>\n" .
         "A specific account must be manually assigned by an administer to designate which account is the primary account.<br>\n",
         "Only the primary account will be allowed access to this system.<br>\n",
-      'resettable' => FALSE,
+      'resettable' => TRUE,
       'custom_action' => FALSE,
     ),
     MFCS_USER_PROBLEM_FORM_ERROR_USER => array(
