@@ -70,13 +70,19 @@ function mcneese_libraries_libraries_info() {
   $libraries['datatables']['files'] = array();
   $libraries['datatables']['files']['js'] = array(
     'media/js/jquery.dataTables.js',
+    'media/js/dataTables.jqueryui.js',
     'extensions/ColVis/js/dataTables.colVis.js',
+    'extensions/buttons/js/buttons.colVis.js',
     'extensions/KeyTable/js/dataTables.keyTable.js',
+    'extensions/ColReorder/js/dataTables.colReorder.js',
   );
   $libraries['datatables']['files']['css'] = array(
     'media/css/jquery.dataTables.css',
+    'media/css/dataTables.jqueryui.css',
     'extensions/ColVis/css/dataTables.colVis.css',
+    'extensions/Buttons/css/buttons.dataTables.css',
     'extensions/KeyTable/css/dataTables.KeyTable.css',
+    'extensions/ColReorder/css/dataTables.colReorder.css',
   );
 
   // fullcalendar
@@ -139,6 +145,11 @@ function mcneese_libraries_theme_table($variables, $datatable_settings = array()
   $order = NULL;
   if (!empty($datatable_settings['order'])) {
     $order = $datatable_settings['order'];
+  }
+
+  $buttons = NULL;
+  if (!empty($datatable_settings['buttons'])) {
+    $buttons = $datatable_settings['buttons'];
   }
 
   $script_markup = '';
@@ -237,6 +248,12 @@ function mcneese_libraries_theme_table($variables, $datatable_settings = array()
         }
         elseif (is_string($order)) {
           $datatable_js_settings[] = '"order": [[ "' . $order . '", "' . $sort . '" ]]';
+        }
+      }
+
+      if (!is_null($buttons)) {
+        if (is_array($buttons)) {
+          $datatable_js_settings[] = 'buttons: [ ' . "'" . implode(', ', $buttons) . "'" . ' ]';
         }
       }
 
