@@ -70,7 +70,6 @@ function mcneese_libraries_libraries_info() {
   $libraries['datatables']['files'] = array();
   $libraries['datatables']['files']['js'] = array(
     'media/js/jquery.dataTables.js',
-    'media/js/dataTables.jqueryui.js',
     'extensions/ColVis/js/dataTables.colVis.js',
     'extensions/buttons/js/buttons.colVis.js',
     'extensions/KeyTable/js/dataTables.keyTable.js',
@@ -78,7 +77,6 @@ function mcneese_libraries_libraries_info() {
   );
   $libraries['datatables']['files']['css'] = array(
     'media/css/jquery.dataTables.css',
-    'media/css/dataTables.jqueryui.css',
     'extensions/ColVis/css/dataTables.colVis.css',
     'extensions/Buttons/css/buttons.dataTables.css',
     'extensions/KeyTable/css/dataTables.KeyTable.css',
