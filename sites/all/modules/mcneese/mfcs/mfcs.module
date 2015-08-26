@@ -2572,6 +2572,16 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $allow_r
     }
   }
 
+  // ticket: fcs-60, if there is only 1 user when isDuplicate is set, then assign that as primary.
+  $assign_primary = FALSE;
+  if (!$is_primary && !is_null($banner_id)) {
+    $associated_users = mfcs_users_load_banner_id_to_user_id($banner_id);
+    if (isset($associated_users['user']) && count($associated_users['user']) < 2) {
+      $is_primary = TRUE;
+      $assign_primary = TRUE;
+    }
+  }
+
   if ($is_duplicate && $is_primary === FALSE) {
     $problems = $problems | MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES;
   }
@@ -2776,6 +2786,10 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $allow_r
 
     // Note: the system used to refer to requests as events, but because this is a drupal field, 'event' cannot be changed to 'request' in this explicit case.
     $edit = array('field_user_event_roles' => array('und' => $request_roles), 'roles' => $system_roles);
+
+    if ($assign_primary) {
+      $edit['field_user_primary_account']['und'][0]['value'] = 1;
+    }
 
     if (user_save($user, $edit)) {
       // check to see if the user has any synchronization problem flags set and unset them.
