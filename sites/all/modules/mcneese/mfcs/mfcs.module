@@ -2551,6 +2551,7 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $allow_r
 
   $is_duplicate = FALSE;
   $is_primary = TRUE;
+  $assign_primary = FALSE;
   if (!empty($user->field_user_ldap_duplicate['und'][0]['value']) && is_string($user->field_user_ldap_duplicate['und'][0]['value'])) {
     $is_duplicate = strtolower($user->field_user_ldap_duplicate['und'][0]['value']);
     if ($is_duplicate == 'true') {
@@ -2562,7 +2563,7 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $allow_r
     }
   }
 
-  if ($is_duplicate && !empty($user->field_user_primary_account['und'][0]['value']) && is_string($user->field_user_primary_account['und'][0]['value'])) {
+  if (!empty($user->field_user_primary_account['und'][0]['value']) && is_string($user->field_user_primary_account['und'][0]['value'])) {
     $is_primary = strtolower($user->field_user_primary_account['und'][0]['value']);
     if ($is_primary == '0' || $is_primary == 'no') {
       $is_primary = FALSE;
@@ -2571,9 +2572,15 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $allow_r
       $is_primary = TRUE;
     }
   }
+  elseif (!$is_duplicate) {
+    $assign_primary = TRUE;
+  }
+
+  if (!$is_primary && !$is_duplicate) {
+    $assign_primary = TRUE;
+  }
 
   // ticket: fcs-60, if there is only 1 user when isDuplicate is set, then assign that as primary.
-  $assign_primary = FALSE;
   if (!$is_primary && !is_null($banner_id)) {
     $associated_users = mfcs_users_load_banner_id_to_user_id($banner_id);
     if (isset($associated_users['user']) && count($associated_users['user']) < 2) {
@@ -3381,6 +3388,8 @@ function mfcs_sync_banner_to_local_users($user_id = NULL, $banner_id = NULL) {
     return FALSE;
   }
 
+  $current_user_id = $user_id;
+
   if (!empty($rows) && is_array($rows)) {
     $transaction = db_transaction();
     try {
@@ -3409,25 +3418,38 @@ function mfcs_sync_banner_to_local_users($user_id = NULL, $banner_id = NULL) {
           continue;
         }
 
+        if (is_null($user_id)) {
+          $current_user_id = NULL;
+        }
+
         // add/update the roles to users.
         if (is_null($banner_id)) {
           if (isset($banner_ids_to_user_ids['banner'][$row['id']]['user_id'])) {
-            $user_id = $banner_ids_to_user_ids['banner'][$row['id']]['user_id'];
+            $current_user_id = $banner_ids_to_user_ids['banner'][$row['id']]['user_id'];
+          }
+          elseif (isset($banner_ids_to_user_ids['banner'][$row['id']]) && !array_key_exists('user_id', $banner_ids_to_user_ids['banner'][$row['id']])) {
+            // if the 'primary account' flag is not set, but exactly 1 account exists, then assume it is the primary account.
+            if (!empty($banner_ids_to_user_ids['banner'][$row['id']]['others']) && count($banner_ids_to_user_ids['banner'][$row['id']]['others']) == 1) {
+              $first = reset($banner_ids_to_user_ids['banner'][$row['id']]['others']);
+              if (isset($first['user_id'])) {
+                $current_user_id = $first['user_id'];
+              }
+            }
           }
         }
 
-        if (!($user_id > 0)) {
+        if (!($current_user_id > 0)) {
           continue;
         }
 
-        $mfcs_banner_event_roles_item['user_id'] = $user_id;
+        $mfcs_banner_event_roles_item['user_id'] = $current_user_id;
         $mfcs_banner_event_roles_item['event_role_id'] = $roles_by_name[$row['role']];
         $mfcs_banner_event_roles_item['disabled'] = 0;
         $mfcs_banner_event_roles_item['date'] = $instance;
 
         $query = db_select('mfcs_banner_event_roles_to_users', 'mberu');
         $query->addExpression('count(mberu.user_id)');
-        $query->condition('mberu.user_id', $user_id);
+        $query->condition('mberu.user_id', $current_user_id);
         $query->condition('mberu.event_role_id', $roles_by_name[$row['role']]);
 
         $mfcs_banner_event_roles_count = $query->execute()->fetchField();
@@ -3435,7 +3457,7 @@ function mfcs_sync_banner_to_local_users($user_id = NULL, $banner_id = NULL) {
         if ($mfcs_banner_event_roles_count > 0) {
           $query = db_update('mfcs_banner_event_roles_to_users');
           $query->fields($mfcs_banner_event_roles_item);
-          $query->condition('user_id', $user_id);
+          $query->condition('user_id', $current_user_id);
           $query->condition('event_role_id', $roles_by_name[$row['role']]);
           $query->execute();
         }
