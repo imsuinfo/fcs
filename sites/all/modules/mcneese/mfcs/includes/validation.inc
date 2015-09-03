@@ -412,10 +412,21 @@ function mfcs_validate_request_fields($form, &$form_state) {
     }
 
 
+    // only validate dates when editing a form that has the date fields.
+    $validate_dates = TRUE;
+    if (isset($form['form']['target_section']['#value']) && $form['form']['target_section']['#value'] != 'request' && $form['form']['target_section']['#value'] != 'dates') {
+      if ($form_state['values']['form']['step'] == 'standard') {
+        $validate_dates = FALSE;
+      }
+    }
+
     // validate the dates.
-    $dates_passed = mfcs_validate_request_fields_dates($form, $form_state, $ps_p, $location_form, $location_state, $room);
-    $passed = $passed && $dates_passed;
-    unset($dates_passed);
+    if ($validate_dates) {
+      $dates_passed = mfcs_validate_request_fields_dates($form, $form_state, $ps_p, $location_form, $location_state, $room);
+      $passed = $passed && $dates_passed;
+      unset($dates_passed);
+    }
+    unset($validate_dates);
   }
 
 
