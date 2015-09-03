@@ -3004,7 +3004,7 @@ function mfcs_ensure_user_by_email($email, $roles = array()) {
  */
 function mfcs_sync_banner_to_local($transaction = NULL, $user = NULL) {
   if (is_null($user)) {
-    $user = cd_current_user();
+    $user = cf_current_user();
   }
 
   if (!is_object($user)) {
