@@ -1088,6 +1088,7 @@ function mfcs_get_request_field_dates_date($form, &$form_state, &$fields, &$requ
         '#default_value' => $value,
         '#date_format' => "Y/m/d",
         '#date_label_position' => 'invisible',
+        '#date_year_range' => '0:+4',
         '#expected_format' => array('date' => "Y/m/d"),
         '#required' => TRUE,
         '#weight' => 0,
