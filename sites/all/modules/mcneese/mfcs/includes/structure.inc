@@ -1671,7 +1671,13 @@ function mfcs_get_request_field_request_coordinator_classification($form, &$form
     $state = $request_state['request_coordinator'];
   }
 
-  $classification = mfcs_determine_user_classification($state, $user);
+  // for exiting requests (when editing a request), if current editor is not part of the requestor's classification, make sure the old state remains.
+  $old_classification = NULL;
+  if (isset($form['form']['new']['#value']) && $form['form']['new']['#value'] === FALSE && isset($state['classification'])) {
+    $old_classification = (int) reset($state['classification']);
+  }
+
+  $classification = mfcs_determine_user_classification($state, $user, $old_classification);
 
   if (isset($request_state['request_coordinator']) && array_key_exists('classification', $request_state['request_coordinator']) && !empty($request_state['request_coordinator']['classification'][0])) {
     $values = $request_state['request_coordinator']['classification'];
@@ -6306,6 +6312,9 @@ function mfcs_get_request_field_additional($form, &$form_state, &$fields, &$requ
  * @param object|null $user
  *   (optional) The loaded user object for the user to load the classification
  *   for. When NULL, returns all options available.
+ * @param int|null $old_classification
+ *   (optional) Require that the old classification exists, even if the user is
+ *   not granted access to the classification.
  *
  * @return array
  *   An array with the following keys:
@@ -6313,7 +6322,7 @@ function mfcs_get_request_field_additional($form, &$form_state, &$fields, &$requ
  *   - options: all available select list options.
  *   - value: the default value to use.
  */
-function mfcs_determine_user_classification($state = array(), $user = NULL) {
+function mfcs_determine_user_classification($state = array(), $user = NULL, $old_classification = NULL) {
   $information = array();
   $information['count'] = 0;
   $information['options'] = array();
@@ -6330,8 +6339,23 @@ function mfcs_determine_user_classification($state = array(), $user = NULL) {
     return $information;
   }
 
+  if (!is_null($old_classification) && !is_int($old_classification)) {
+    cf_error::invalid_integer('old_classification');
+
+    return $information;
+  }
+
   $information['options'] = mfcs_get_request_classification_list_options(NULL, $user);
   $information['count'] = count($information['options']);
+
+  if (!is_null($old_classification) && !array_key_exists($old_classification, $information['options'])) {
+    $all_options = mfcs_get_request_classification_list_options(NULL);
+
+    if (isset($all_options[$old_classification])) {
+      $information['options'][$old_classification] = $all_options[$old_classification];
+      $information['count']++;
+    }
+  }
 
   if ($information['count'] == 1) {
     $classification_keys = array_keys($information['options']);
