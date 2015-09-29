@@ -359,6 +359,7 @@ function image_imagemagick_get_info(stdClass $image) {
 
   if (empty($data)) {
     $realpath = drupal_realpath($image->source);
+    $stream_is_not_local = FALSE;
 
     if (file_exists($realpath)) {
       $size = filesize($realpath);
@@ -369,6 +370,35 @@ function image_imagemagick_get_info(stdClass $image) {
     }
     elseif (!stream_is_local($image->source)) {
       $data = @getimagesize($realpath);
+      $stream_is_not_local = TRUE;
+    }
+
+    // Many tools may still generate invalid jpeg images, try to identify and resolve an issue with invalid jpeg images, the hard way.
+    if (empty($data)) {
+      if ($stream_is_not_local) {
+        $filepath = drupal_tempnam('temporary://', 'imagemagick');
+        if (empty($filepath)) return FALSE;
+
+        $filepath = drupal_realpath($filepath);
+        copy($image->source, $filepath);
+      }
+      else {
+        $filepath = $realpath;
+      }
+
+      $output = exec('identify ' . escapeshellarg($filepath));
+      preg_match('/([0-9]*)x([0-9]*)\+[0-9]*\+[0-9]/', $output, $matches);
+      if(count($matches) == 3){
+        $data = array();
+        $data[0] = $matches[1];
+        $data[1] = $matches[2];
+        $data['mime'] = '';
+        $data['extension'] = '';
+      }
+
+      if ($stream_is_not_local && file_exists($filepath)) {
+        unlink($filepath);
+      }
     }
   }
 
