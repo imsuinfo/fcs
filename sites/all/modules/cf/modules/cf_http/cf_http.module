@@ -62,8 +62,16 @@ function cf_http_init() {
  * @see: cf_http_get_webpage()
  * @see: fsockopen()
  */
-function cf_http_get_response($server, $path, $port = 80, $headers = "Accept-Encoding: deflate\r\n", $timeout = 8, $buffer = 8192) {
+function cf_http_get_response($server, $path, $port = 80, $headers = NULL, $timeout = 8, $buffer = 8192) {
   $results = array('connected' => FALSE, 'response' => '', 'is_local' => FALSE, 'socket_error' => array('code' => 0, 'message' => NULL));
+
+  if (is_null($headers)) {
+    $headers = "Accept: text/html,application/xhtml+xml\r\n";
+    $headers .= "Accept-Encoding: deflate\r\n";
+    $headers .= "Accept-Language: en-US,en;q=0.8\r\n";
+    $headers .= "User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:40.0) Gecko/20100101 Firefox/40.0\r\n";
+    $headers .= "DNT: 1\r\n";
+  }
 
   if (cf_is_empty_or_non_string('server', $server, WATCHDOG_ERROR)) {
     return $results;
@@ -222,7 +230,38 @@ function cf_http_unchunk_response($document) {
     $check = trim($tmp);
   } while (!empty($check));
 
+  $results['unchunked'] = TRUE;
   unset($tmp);
+  return $results;
+}
+
+/**
+ * Ungzip http content.
+ *
+ * @param string $document
+ *   An string representing an html document.
+ *
+ * @return array
+ *   An array containing the ungzip status and ungzipped string.
+ *   The array keys:
+ *   - ungzipped: A boolean with TRUE representing that the document string was
+ *   successfully ungzipped, FALSE otherwise.
+ *   - document: The complete (ungzipped) html document.
+ *
+ * @see: cf_http_get_webpage()
+ */
+function cf_http_ungzip_response($document, $gzipped = FALSE) {
+  $results = array('ungzipped' => FALSE, 'document' => '');
+
+  if (empty($document)) return $results;
+
+  $decoded = gzdecode($document);
+  if ($decoded === FALSE) {
+    return $results;
+  }
+
+  $results['document'] = $decoded;
+  $results['ungzipped'] = TRUE;
   return $results;
 }
 
@@ -277,10 +316,27 @@ function cf_http_parse_response($http_response) {
     $results['http_error'] = cf_http_headers_errors($results['headers']);
   }
 
-  if (in_array('Transfer-Coding: chunked', $results['headers'])) {
-    $result = cf_http_unchunk_response($results['document']);
+  $chunked = FALSE;
+  $gzipped = FALSE;
+  foreach ($results['headers'] as $header) {
+    $lheader = strtolower($header);
+    if ($gzipped === FALSE && strpos($lheader, 'content-encoding: gzip') !== FALSE) {
+      $gzipped = TRUE;
+    }
+    elseif ($chunked === FALSE && strpos($lheader, 'transfer-coding: chunked') !== FALSE) {
+      $chunked = TRUE;
+    }
+  }
 
+  if ($chunked) {
+    $result = cf_http_unchunk_response($results['document']);
     if ($result['unchunked']) {
+      $results['document'] = $result['document'];
+    }
+  }
+  elseif ($gzipped) {
+    $result = cf_http_ungzip_response($results['document']);
+    if ($result['ungzipped']) {
       $results['document'] = $result['document'];
     }
   }
@@ -615,12 +671,12 @@ function cf_adjust_url($url, $server, $relative_path, $scheme = 'http', $suffix 
  *   - headers: The http header from the httpd response.
  *   - document: The complete html document from the http response.
  */
-function cf_http_get_webpage($server, $path, $port = 80, $headers = "Accept-Encoding: deflate\r\n", $timeout = 8, $buffer = 8192) {
+function cf_http_get_webpage($server, $path, $port = 80, $headers = NULL, $timeout = 8, $buffer = 8192) {
   $results = array('read' => FALSE, 'headers' => '', 'document' => '', 'http_error' => array('error_code' => 0, 'key' => '', 'value' => ''), 'socket_error' => array('code' => 0, 'message' => NULL));
 
   $result = cf_http_get_response($server, $path, $port, $headers, $timeout, $buffer);
 
-  if (isset($results['socket_error'])) {
+  if (isset($result['socket_error'])) {
     $results['socket_error'] = $result['socket_error'];
   }
 
