@@ -56,6 +56,9 @@ CKEDITOR.stylesSet.add( 'default',
 	{ name : 'Cited Work'		, element : 'cite' },
 	{ name : 'Inline Quotation'	, element : 'q' },
 
+        { name : 'Uppercase'    , element : 'span', styles : { 'text-transform' : 'uppercase' } },
+        { name : 'Lowercase'    , element : 'span', styles : { 'text-transform' : 'lowercase' } },
+
 	{ name : 'Language: RTL'	, element : 'span', attributes : { 'dir' : 'rtl' } },
 	{ name : 'Language: LTR'	, element : 'span', attributes : { 'dir' : 'ltr' } },
 
