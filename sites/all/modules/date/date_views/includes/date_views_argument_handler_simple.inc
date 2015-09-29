@@ -7,11 +7,13 @@
 /**
  * Date API argument handler.
  */
+// @codingStandardsIgnoreStart
 class date_views_argument_handler_simple extends views_handler_argument_date {
 
   /**
-   * Get granularity and use it to create the formula and a format
-   * for the results.
+   * Get granularity.
+   *
+   * Use it to create the formula and a format for the results.
    */
   function init(&$view, &$options) {
     parent::init($view, $options);
@@ -29,12 +31,14 @@ class date_views_argument_handler_simple extends views_handler_argument_date {
       $this->date_handler->local_timezone = date_get_timezone($field['settings']['tz_handling']);
     }
     $this->date_handler->granularity = $this->options['granularity'];
-    // This value needs to be initialized so it exists even if the query doesn't run.
+    // This value needs to be initialized so
+    // it exists even if the query doesn't run.
     $this->date_handler->placeholders = array();
 
     $this->format = $this->date_handler->views_formats($this->date_handler->granularity, 'display');
     $this->sql_format = $this->date_handler->views_formats($this->date_handler->granularity, 'sql');
-    // $this->arg_format is the format the parent date handler will use to create a default argument.
+    // $this->arg_format is the format the parent date
+    // handler will use to create a default argument.
     $this->arg_format = $this->format();
 
     // Identify the base table for this field.
@@ -43,6 +47,9 @@ class date_views_argument_handler_simple extends views_handler_argument_date {
 
   }
 
+  /**
+   * {@inheritdoc}
+   */
   function format() {
     if (!empty($this->options['granularity'])) {
       return $this->date_handler->views_formats($this->options['granularity']);
@@ -53,8 +60,9 @@ class date_views_argument_handler_simple extends views_handler_argument_date {
   }
 
   /**
-   * Set the empty argument value to the current date,
-   * formatted appropriately for this argument.
+   * Set the empty argument value to the current date.
+   *
+   * Formatted appropriately for this argument.
    */
   function get_default_argument($raw = FALSE) {
     $is_default = FALSE;
@@ -85,13 +93,13 @@ class date_views_argument_handler_simple extends views_handler_argument_date {
     $options = parent::option_definition();
     $options['year_range'] = array('default' => '-3:+3');
     $options['granularity'] = array('default' => 'month');
+    $options['granularity_reset'] = array('default' => FALSE);
     $options['default_argument_type']['default'] = 'date';
     $options['add_delta'] = array('default' => '');
     $options['use_fromto'] = array('default' => '');
     $options['title_format'] = array('default' => '');
     $options['title_format_custom'] = array('default' => '');
     $options['break_phrase'] = array('default' => FALSE, 'bool' => TRUE);
-    // @todo: add 'not' option for break_phrase.
     return $options;
   }
 
@@ -118,7 +126,9 @@ class date_views_argument_handler_simple extends views_handler_argument_date {
       '#attributes' => array('class' => array('dependent-options')),
       '#states' => array(
         'visible' => array(
-          ':input[name="options[default_action]"]' => array('value' => 'summary')
+          ':input[name="options[default_action]"]' => array(
+            'value' => 'summary',
+          ),
         ),
       ),
     );
@@ -131,21 +141,35 @@ class date_views_argument_handler_simple extends views_handler_argument_date {
       '#attributes' => array('class' => array('dependent-options')),
       '#states' => array(
         'visible' => array(
-          ':input[name="options[title_format]"]' => array('value' => 'custom')
+          ':input[name="options[title_format]"]' => array(
+            'value' => 'custom',
+          ),
         ),
       ),
     );
 
+    // Get default granularity options
     $options = $this->date_handler->date_parts();
-    unset($options['second'], $options['minute']);
-    $options += array('week' => t('Week', array(), array('context' => 'datetime')));
+    // Add the 'week' option.
+    $options += array(
+      'week' => t('Week', array(), array(
+        'context' => 'datetime',
+      )),
+    );
+
     $form['granularity'] = array(
       '#title' => t('Granularity'),
       '#type' => 'radios',
       '#options' => $options,
       '#default_value' => $this->options['granularity'],
-      '#multiple' => TRUE,
       '#description' => t("Select the type of date value to be used in defaults, summaries, and navigation. For example, a granularity of 'month' will set the default date to the current month, summarize by month in summary views, and link to the next and previous month when using date navigation."),
+    );
+
+    $form['granularity_reset'] = array(
+      '#title' => t('Use granularity from argument value'),
+      '#type' => 'checkbox',
+      '#default_value' => $this->options['granularity_reset'],
+      '#description' => t("If the granularity of argument value is different from selected, use it from argument value."),
     );
 
     $form['year_range'] = array(
@@ -174,7 +198,7 @@ class date_views_argument_handler_simple extends views_handler_argument_date {
       '#default_value' => $this->options['add_delta'],
       '#options' => array('' => t('No'), 'yes' => t('Yes')),
       '#description' => t('Add an identifier to the view to show which multiple value date fields meet the filter criteria. Note: This option may introduce duplicate values into the view. Required when using multiple value fields in a Calendar or any time you want the node view of multiple value dates to display only the values that match the view filters.'),
-      // Only let mere mortals tweak this setting for multi-value fields
+      // Only let mere mortals tweak this setting for multi-value fields.
       '#access' => $access,
     );
 
@@ -188,10 +212,13 @@ class date_views_argument_handler_simple extends views_handler_argument_date {
     );
   }
 
+  /**
+   * {@inheritdoc}
+   */
   function options_validate(&$form, &$form_state) {
     // It is very important to call the parent function here:
     parent::options_validate($form, $form_state);
-    if (!preg_match('/^(?:\-[0-9]{1,4}|[0-9]{4}):(?:[\+|\-][0-9]{1,4}|[0-9]{4})$/', $form_state['values']['options']['year_range'])) {
+    if (!preg_match('/^(?:\-[0-9]{1,4}|[0-9]{4}):(?:[\+\-][0-9]{1,4}|[0-9]{4})$/', $form_state['values']['options']['year_range'])) {
       form_error($form['year_range'], t('Date year range must be in the format -9:+9, 2005:2010, -9:2010, or 2005:+9'));
     }
   }
@@ -220,14 +247,15 @@ class date_views_argument_handler_simple extends views_handler_argument_date {
     $this->fix_arguments();
     $range = $this->date_handler->arg_range($this->argument);
     return date_format_date($range[0], 'custom', $format);
- }
+  }
 
   /**
-   * Provide the argument to use to link from the summary to the next level;
-   * this will be called once per row of a summary, and used as part of
+   * Provide the argument to use to link from the summary to the next level.
+   *
+   * This will be called once per row of a summary, and used as part of
    * $view->get_url().
    *
-   * @param $data
+   * @param object $data
    *   The query results for the row.
    */
   function summary_argument($data) {
@@ -245,10 +273,11 @@ class date_views_argument_handler_simple extends views_handler_argument_date {
    */
   function summary_query() {
 
-    // @TODO The summary values are computed by the database. Unless the database has
-    // built-in timezone handling it will use a fixed offset, which will not be
-    // right for all dates. The only way I can see to make this work right is to
-    // store the offset for each date in the database so it can be added to the base
+    // @TODO The summary values are computed by the database.
+    // Unless the database has built-in timezone handling it will use
+    // a fixed offset, which will not be right for all dates.
+    // The only way I can see to make this work right is to store the offset
+    // for each date in the database so it can be added to the base
     // date value before the database formats the result. Because this is a huge
     // architectural change, it won't go in until we start a new branch.
     $this->formula = $this->date_handler->sql_format($this->sql_format, $this->date_handler->sql_field("***table***.$this->real_field"));
@@ -256,7 +285,8 @@ class date_views_argument_handler_simple extends views_handler_argument_date {
     // Now that our table is secure, get our formula.
     $formula = $this->get_formula();
 
-    // Add the field, give it an alias that does NOT match the actual field name or grouping won't work right.
+    // Add the field, give it an alias that does NOT match the actual
+    // field name or grouping won't work right.
     $this->base_alias = $this->name_alias = $this->query->add_field(NULL, $formula, $this->field . '_summary');
     $this->query->set_count_field(NULL, $formula, $this->field);
 
@@ -265,10 +295,10 @@ class date_views_argument_handler_simple extends views_handler_argument_date {
 
   /**
    * Inject a test for valid date range before the regular query.
+   *
    * Override the parent query to be able to control the $group.
    */
   function query($group_by = FALSE) {
-
     // @TODO Not doing anything with $group_by yet, need to figure out what has to be done.
 
     if ($this->date_forbid()) {
@@ -279,61 +309,59 @@ class date_views_argument_handler_simple extends views_handler_argument_date {
     $group = !empty($this->options['date_group']) ? $this->options['date_group'] : 0;
 
     foreach ($this->arguments as $key => &$argument) {
-      // See if we need to reset granularity based on an argument value.
-      // Make sure we don't try to reset to some bogus value if someone has typed in an unexpected argument.
-      $granularity = $this->date_handler->arg_granularity($argument);
-      if (!empty($granularity)) {
-        $this->date_handler->granularity = $granularity;
-        $this->format = $this->date_handler->views_formats($this->date_handler->granularity, 'display');
-        $this->sql_format = $this->date_handler->views_formats($this->date_handler->granularity, 'sql');
-      }
-      $this->granularity = $this->date_handler->granularity;
-      $this->ensure_my_table();
+    // See if we need to reset granularity based on an argument value.
+    // Make sure we don't try to reset to some bogus value if someone has typed in an unexpected argument.
+    $granularity = $this->date_handler->arg_granularity($argument);
+    if (!empty($granularity)) {
+      $this->date_handler->granularity = $granularity;
+      $this->format = $this->date_handler->views_formats($this->date_handler->granularity, 'display');
+      $this->sql_format = $this->date_handler->views_formats($this->date_handler->granularity, 'sql');
+    }
+    $this->granularity = $this->date_handler->granularity;
+    $this->ensure_my_table();
 
-      // If requested, add the delta field to the view so we can later find the value that matched our query.
-      if (!empty($this->options['add_delta']) && (substr($this->real_field, -6) == '_value' || substr($this->real_field, -7) == '_value2')) {
-        $this->query->add_field($this->table_alias, 'delta');
-        $real_field_name = str_replace(array('_value', '_value2'), '', $this->real_field);
-        $this->query->add_field($this->table_alias, 'entity_id', 'date_id_' . $real_field_name);
-        $this->query->add_field($this->table_alias, 'delta', 'date_delta_' . $real_field_name);
-      }
+    // If requested, add the delta field to the view so we can later find the value that matched our query.
+    if (!empty($this->options['add_delta']) && (substr($this->real_field, -6) == '_value' || substr($this->real_field, -7) == '_value2')) {
+      $this->query->add_field($this->table_alias, 'delta');
+      $real_field_name = str_replace(array('_value', '_value2'), '', $this->real_field);
+      $this->query->add_field($this->table_alias, 'entity_id', 'date_id_' . $real_field_name);
+      $this->query->add_field($this->table_alias, 'delta', 'date_delta_' . $real_field_name);
+    }
 
-      $format = $this->date_handler->granularity == 'week' ? DATE_FORMAT_DATETIME : $this->sql_format;
-      $view_min = date_format($this->min_dates[$key], $format);
-      $view_max = date_format($this->max_dates[$key], $format);
-      $view_min_placeholder = $this->placeholder();
-      $view_max_placeholder = $this->placeholder();
-      $this->date_handler->placeholders = array($view_min_placeholder => $view_min, $view_max_placeholder => $view_max);
+    $format = $this->date_handler->granularity == 'week' ? DATE_FORMAT_DATETIME : $this->sql_format;
+    $view_min = date_format($this->min_dates[$key], $format);
+    $view_max = date_format($this->max_dates[$key], $format);
+    $view_min_placeholder = $this->placeholder();
+    $view_max_placeholder = $this->placeholder();
+    $this->date_handler->placeholders = array($view_min_placeholder => $view_min, $view_max_placeholder => $view_max);
 
-      // Are we comparing this field only or the Start/End date range to the view criteria?
-      if (!empty($this->options['use_fromto'])) {
+    // Are we comparing this field only or the Start/End date range to the view criteria?
+    if (!empty($this->options['use_fromto'])) {
 
-        // The simple case, match the field to the view range.
-        $field = $this->date_handler->sql_field($this->table_alias . '.' . $this->real_field, NULL, $this->min_dates[$key]);
-        $field = $this->date_handler->sql_format($format, $field);
-        $expressions[] = array("$field >= $view_min_placeholder AND $field <= $view_max_placeholder", array($view_min_placeholder => $view_min, $view_max_placeholder => $view_max));
-        $this->query->add_where_expression($group, "$field >= $view_min_placeholder AND $field <= $view_max_placeholder", array($view_min_placeholder => $view_min, $view_max_placeholder => $view_max), $this->operator);
-      }
-      else {
+      // The simple case, match the field to the view range.
+      $field = $this->date_handler->sql_field($this->table_alias . '.' . $this->real_field, NULL, $this->min_dates[$key]);
+      $field = $this->date_handler->sql_format($format, $field);
+      $this->query->add_where_expression($group, "$field >= $view_min_placeholder AND $field <= $view_max_placeholder", array($view_min_placeholder => $view_min, $view_max_placeholder => $view_max), $this->operator);
+    }
+    else {
 
-        // Look for the intersection of the range of the date field with the range of the view.
-        // Get the Start/End values for this field. Retrieve using the original table name.
-        // Swap the current table name (adjusted for relationships) into the query.
-        // @TODO We may be able to use Views substitutions here, investigate that later.
-        $fields = date_views_fields($this->base_table);
-        $fields = $fields['name'];
-        $fromto = $fields[$this->original_table . '.' . $this->real_field]['fromto'];
+      // Look for the intersection of the range of the date field with the range of the view.
+      // Get the Start/End values for this field. Retrieve using the original table name.
+      // Swap the current table name (adjusted for relationships) into the query.
+      // @TODO We may be able to use Views substitutions here, investigate that later.
+      $fields = date_views_fields($this->base_table);
+      $fields = $fields['name'];
+      $fromto = $fields[$this->original_table . '.' . $this->real_field]['fromto'];
 
-        $value_min = str_replace($this->original_table, $this->table_alias, $fromto[0]);
-        $value_max = str_replace($this->original_table, $this->table_alias, $fromto[1]);
-        $field_min = $this->date_handler->sql_field($value_min, NULL, $this->min_dates[$key]);
-        $field_min = $this->date_handler->sql_format($format, $field_min);
-        $field_max = $this->date_handler->sql_field($value_max, NULL, $this->max_dates[$key]);
-        $field_max = $this->date_handler->sql_format($format, $field_max);
+      $value_min = str_replace($this->original_table, $this->table_alias, $fromto[0]);
+      $value_max = str_replace($this->original_table, $this->table_alias, $fromto[1]);
+      $field_min = $this->date_handler->sql_field($value_min, NULL, $this->min_dates[$key]);
+      $field_min = $this->date_handler->sql_format($format, $field_min);
+      $field_max = $this->date_handler->sql_field($value_max, NULL, $this->max_dates[$key]);
+      $field_max = $this->date_handler->sql_format($format, $field_max);
 
-        $expressions[] = array("$field_max >= $view_min_placeholder AND $field_min <= $view_max_placeholder", array($view_min_placeholder => $view_min, $view_max_placeholder => $view_max));
-        $this->query->add_where_expression($group, "$field_max >= $view_min_placeholder AND $field_min <= $view_max_placeholder", array($view_min_placeholder => $view_min, $view_max_placeholder => $view_max), $this->operator);
-      }
+      $this->query->add_where_expression($group, "$field_max >= $view_min_placeholder AND $field_min <= $view_max_placeholder", array($view_min_placeholder => $view_min, $view_max_placeholder => $view_max), $this->operator);
+    }
     }
   }
 
@@ -361,7 +389,10 @@ class date_views_argument_handler_simple extends views_handler_argument_date {
   }
 
   /**
-   * Add a callback to determine if we have moved outside the valid date range for this argument.
+   * Add a callback.
+   *
+   * To determine if we have moved outside
+   * the valid date range for this argument.
    */
   function date_forbid() {
     if (empty($this->argument)) {
@@ -465,3 +496,4 @@ class date_views_argument_handler_simple extends views_handler_argument_date {
     return $handler;
   }
 }
+// @codingStandardsIgnoreEnd
