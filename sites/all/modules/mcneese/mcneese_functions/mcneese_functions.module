@@ -234,7 +234,7 @@ function mcneese_functions_embed_network_services_traffic($url_path, $cache_id =
   if (empty($markup)) {
     $webpage = cf_http_get_webpage($server_name, $url_path . '/index.html');
 
-    if ($webpage['read'] === TRUE && $webpage['http_error']['error_code'] == 0){
+    if ($webpage['read'] === TRUE && $webpage['http_error']['error_code'] == 0 && $webpage['socket_error']['code'] == 0){
       $document = cf_http_split_response($webpage['document']);
       $body = $document['dom']->get_body();
       cf_http_adjust_urls($document['dom'], $server_name, $url_path);
@@ -395,6 +395,9 @@ function mcneese_functions_embed_network_services_traffic($url_path, $cache_id =
     else {
       $markup = "An error occurred while loading the page." . '<br>';
       $error_detected = TRUE;
+      $save_to_cache = FALSE;
+
+      watchdog('ns_mcneese_edu-cache', "Failed to connect to ns.mcneese.edu, http error array = :http_error_array, socket error array = :socket_error_array", array(':http_error_array' => print_r($webpage['http_error'], TRUE), ':socket_error_array' => print_r($webpage['socket_error'], TRUE)), WATCHDOG_ERROR);
 
       if (isset($webpage['http_error']['error_code']) && $webpage['http_error']['error_code'] != 0){
         $markup .= "Error Code = " . check_plain($webpage['http_error']['error_code']) . '<br>';
@@ -442,12 +445,9 @@ function mcneese_functions_embed_ntas_widget($cache_id = NULL, $cache_expire = '
   global $is_https;
 
   if (empty($markup)) {
-    $headers = "Accept-Encoding: deflate\r\n";
-    $headers .= "Accept-Language: en-US,en;q=0.8\r\n";
-    $headers .= "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.110 Safari/537.36\r\n";
-    $webpage = cf_http_get_webpage($server_name, $url_path, $port, $headers);
+    $webpage = cf_http_get_webpage($server_name, $url_path, $port);
 
-    if ($webpage['read'] === TRUE && $webpage['http_error']['error_code'] == 0){
+    if ($webpage['read'] === TRUE && $webpage['http_error']['error_code'] == 0 && $webpage['socket_error']['code'] == 0){
       $document = cf_http_split_response($webpage['document']);
       $body = $document['dom']->get_body();
       cf_http_adjust_urls($document['dom'], $server_name, $url_path);
@@ -486,6 +486,9 @@ function mcneese_functions_embed_ntas_widget($cache_id = NULL, $cache_expire = '
     else {
       $markup = "An error occurred while loading the NTAS widget. <a href='https://www.dhs.gov/ntas/'>Try visiting the widget directly</a>." . '<br>';
       $error_detected = TRUE;
+      $save_to_cache = FALSE;
+
+      watchdog('ntas_widget', "Failed to connect to ntas widget, http error array = :http_error_array, socket error array = :socket_error_array", array(':http_error_array' => print_r($webpage['http_error'], TRUE), ':socket_error_array' => print_r($webpage['socket_error'], TRUE)), WATCHDOG_ERROR);
 
       if (isset($webpage['http_error']['error_code']) && $webpage['http_error']['error_code'] != 0){
         $markup .= "Error Code = " . check_plain($webpage['http_error']['error_code']) . '<br>';

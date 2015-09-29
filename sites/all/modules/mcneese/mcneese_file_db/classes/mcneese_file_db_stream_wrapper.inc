@@ -1104,6 +1104,7 @@ abstract class mcneese_file_db_stream_wrapper implements DrupalStreamWrapperInte
     }
 
     if (!$image = image_load($this->uri)) {
+      watchdog('image', "Failed to load the image uri: '%uri' for the image source uri: '%image_source_uri'", array('%uri' => $this->uri, '%image_source_uri' => $image_source_uri), WATCHDOG_ERROR);
       return FALSE;
     }
 
