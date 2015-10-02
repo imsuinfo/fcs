@@ -111,11 +111,15 @@ function mfcs_miscellaneous_determine_current_date($year, $month, $day) {
  * a listing of requests.
  *
  * @param int $start
- *   The unix timestamp the date starts on.
+ *   (optional) The unix timestamp the date starts on.
  *   A >= operator is used on this.
+ *   If NULL, then the start is not included in the search.
+ *   One of $start or $stop is required.
  * @param int $stop
- *   The unix timestamp the date stops on.
+ *   (optional) The unix timestamp the date stops on.
  *   A < operator is used on this.
+ *   If NULL, then the start is not included in the search.
+ *   One of $start or $stop is required.
  * @param int|null $status
  *   (optional) The request status id to search for.
  *   If NULL, then the status is not included in the search.
@@ -128,14 +132,19 @@ function mfcs_miscellaneous_determine_current_date($year, $month, $day) {
  *
  * @see: mfcs_request_load_listing()
  */
-function mfcs_miscellaneous_generate_requests_by_date_search($start, $stop, $status = MFCS_REQUEST_STATUS_CLOSED_ACCEPTED, $step = MFCS_REVIEW_STEP_COMPLETED) {
-  if (!cf_is_integer($start)) {
+function mfcs_miscellaneous_generate_requests_by_date_search($start = NULL, $stop = NULL, $status = MFCS_REQUEST_STATUS_CLOSED_ACCEPTED, $step = MFCS_REVIEW_STEP_COMPLETED) {
+  if (!is_null($start) && !cf_is_integer($start)) {
     cf_error::invalid_integer('start');
     return FALSE;
   }
 
-  if (!cf_is_integer($stop)) {
+  if (!is_null($stop) && !cf_is_integer($stop)) {
     cf_error::invalid_integer('stop');
+    return FALSE;
+  }
+
+  if (is_null($start) && is_null($stop)) {
+    cf_error::invalid_integer('start');
     return FALSE;
   }
 
@@ -146,23 +155,27 @@ function mfcs_miscellaneous_generate_requests_by_date_search($start, $stop, $sta
 
   $search = array();
 
-  $target_field_name = 'field_dates-date-start-0';
-  $search[$target_field_name]['group_name'] = 'dates';
-  $search[$target_field_name]['field_name'] = 'date';
-  $search[$target_field_name]['column'] = 'value';
-  $search[$target_field_name]['search'] = $start;
-  $search[$target_field_name]['type'] = 'date';
-  $search[$target_field_name]['multiple'] = TRUE;
-  $search[$target_field_name]['operator'] = MFCS_OPERATOR_GREATER_THAN_EQUAL;
+  if (!is_null($start)) {
+    $target_field_name = 'field_dates-date-start-0';
+    $search[$target_field_name]['group_name'] = 'dates';
+    $search[$target_field_name]['field_name'] = 'date';
+    $search[$target_field_name]['column'] = 'value';
+    $search[$target_field_name]['search'] = $start;
+    $search[$target_field_name]['type'] = 'date';
+    $search[$target_field_name]['multiple'] = TRUE;
+    $search[$target_field_name]['operator'] = MFCS_OPERATOR_GREATER_THAN_EQUAL;
+  }
 
-  $target_field_name = 'field_dates-date-stop-0';
-  $search[$target_field_name]['group_name'] = 'dates';
-  $search[$target_field_name]['field_name'] = 'date';
-  $search[$target_field_name]['column'] = 'value';
-  $search[$target_field_name]['search'] = $stop;
-  $search[$target_field_name]['type'] = 'date';
-  $search[$target_field_name]['multiple'] = TRUE;
-  $search[$target_field_name]['operator'] = MFCS_OPERATOR_LESS_THAN;
+  if (!is_null($stop)) {
+    $target_field_name = 'field_dates-date-stop-0';
+    $search[$target_field_name]['group_name'] = 'dates';
+    $search[$target_field_name]['field_name'] = 'date';
+    $search[$target_field_name]['column'] = 'value';
+    $search[$target_field_name]['search'] = $stop;
+    $search[$target_field_name]['type'] = 'date';
+    $search[$target_field_name]['multiple'] = TRUE;
+    $search[$target_field_name]['operator'] = MFCS_OPERATOR_LESS_THAN;
+  }
 
   if (!is_null($status)) {
     $target_field_name = 'field_top-status-0';
