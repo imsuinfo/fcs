@@ -1,0 +1,19 @@
+name = McNeese Module - Feeds - fcs.mcneese.edu
+description = "Provides feeds specific functionality, such as RSS, that are specific to fcs.mcneese.edu"
+core = 7.x
+php = 5.3
+package = McNeese
+
+# project is not hosted on drupal.org, so manual versioning is needed.
+version = "7.x-1.0"
+
+dependencies[] = cf (7.x-2.x)
+dependencies[] = cf_error (7.x-2.x)
+dependencies[] = mcneese_feeds
+dependencies[] = mfcs
+
+files[] = pages/rss_room.inc
+files[] = pages/rss_building.inc
+files[] = pages/rss_location.inc
+files[] = mcneese_feeds_fcs.module
+files[] = mcneese_feeds_fcs.module
