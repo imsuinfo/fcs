@@ -14,6 +14,20 @@
  define('MCNEESE_FEEDS_GROUPING', ',');
 
 /**
+ * Implements hook_permission().
+ */
+function mcneese_feeds_permission() {
+  $permissions = array();
+
+  $permissions['mcneese feeds access listings'] = array(
+    'title' => t("McNeese Feed - Access Listing"),
+    'description' => t("Grants access to view the McNeese RSS feed listing."),
+  );
+
+  return $permissions;
+}
+
+/**
  * Implements hook_menu().
  */
 function mcneese_feeds_menu() {
@@ -27,7 +41,7 @@ function mcneese_feeds_menu() {
     'file' => 'rss_listing.inc',
     'file path' => drupal_get_path('module', 'mcneese_feeds') . '/pages',
     'access callback' => 'user_access',
-    'access arguments' => array('access content'),
+    'access arguments' => array('mcneese feeds access listings'),
     'tab_parent' => 'rss/feed',
   );
 
