@@ -6477,53 +6477,57 @@ function mfcs_get_request_existing_values($request) {
         }
       }
       else {
-        $current = array(0 => NULL);
+        $current = array();
 
         if (!empty($request[$structure_group][$field_name])) {
           foreach ($request[$structure_group][$field_name] as $field_key => $field_object) {
             if (empty($field_structure['columns'])) {
               if (property_exists($field_object, 'value')) {
-                $current[$field_key] = $field_object->value;
+                $current[$field_object->delta] = $field_object->value;
 
                 if (array_key_exists('storage', $field_structure) && is_string($field_structure['storage']) && !empty($field_structure['storage'])) {
                   $storage_method = $field_structure['storage'];
 
                   if (array_key_exists($storage_method, $field_structure) && is_array($field_structure[$storage_method])) {
-                    $converted = mfcs_convert_value_from_database_format($current[$field_key], $storage_method, $field_structure[$storage_method]);
+                    $converted = mfcs_convert_value_from_database_format($current[$field_object->delta], $storage_method, $field_structure[$storage_method]);
 
                     if ($converted !== FALSE) {
-                      $current[$field_key] = $converted;
+                      $current[$field_object->delta] = $converted;
                     }
                   }
                 }
               }
               else {
-                $current[$field_key] = NULL;
+                $current[$field_object->delta] = NULL;
               }
             }
             else {
-              $current[$field_key] = array();
+              $current[$field_object->delta] = array();
 
               foreach ($field_structure['columns'] as $column_id => $column_name) {
-                $current[$field_key][$column_id] = NULL;
+                $current[$field_object->delta][$column_id] = NULL;
 
                 if (property_exists($field_object, $column_name)) {
-                  $current[$field_key][$column_id] = $field_object->$column_name;
+                  $current[$field_object->delta][$column_id] = $field_object->$column_name;
 
                   if (array_key_exists('storage', $field_structure) && is_string($field_structure['storage']) && !empty($field_structure['storage'])) {
                     $storage_method = $field_structure['storage'];
 
                     if (array_key_exists($storage_method, $field_structure) && is_array($field_structure[$storage_method])) {
-                      $converted = mfcs_convert_value_from_database_format($current[$field_key][$column_id], $storage_method, $field_structure[$storage_method]);
+                      $converted = mfcs_convert_value_from_database_format($current[$field_object->delta][$column_id], $storage_method, $field_structure[$storage_method]);
 
                       if ($converted !== FALSE) {
-                        $current[$field_key][$column_id] = $converted;
+                        $current[$field_object->delta][$column_id] = $converted;
                       }
                     }
                   }
                 }
               }
             }
+          }
+
+          if (empty($current)) {
+            $current[0] = NULL;
           }
         }
       }
