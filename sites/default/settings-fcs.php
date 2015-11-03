@@ -726,7 +726,7 @@ unset($env_current_user);
 $conf['fcs_site_url'] = 'fcs.mcneese.edu';
 $conf['fcs_email'] = 'facilities_use@fcs.mcneese.edu';
 $conf['fcs_name'] = 'McNeese Facilities Use System';
-$conf['fcs_failsafe_coordinator'] = 45;
+$conf['fcs_failsafe_coordinator'] = 23; // gbodin
 
 /**
  * fcs.mcneese.edu debugging options.
