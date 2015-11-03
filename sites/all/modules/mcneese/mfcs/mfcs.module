@@ -1564,6 +1564,40 @@ function mfcs_mail($key, &$message, $params) {
 }
 
 /**
+ * Implements hook_user_update().
+ */
+function mfcs_user_update(&$edit, $user, $category) {
+  if (!array_key_exists('status', $edit) || !isset($edit['original']->status) || !isset($user->uid)) {
+    return;
+  }
+
+  // if the status has changed, perform a user problem check.
+  if ($edit['status'] != $edit['original']->status) {
+    $disabled_with_active = mfcs_disabled_users_with_active_content($user->uid);
+
+    $mfcs_users = mfcs_load_users($user->uid);
+
+    $problems = MFCS_USER_PROBLEM_NONE;
+    if (isset($mfcs_users[$user->uid])) {
+      $problems = $mfcs_users[$user->uid]->problems;
+    }
+
+    if ($disabled_with_active) {
+      if (($problems & MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE) == 0) {
+        $problems = ($problems | MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE);
+        mfcs_save_user($user->uid, array('problems' => $problems));
+      }
+    }
+    else {
+      if (($problems & MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE) > 0) {
+        $problems -= MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE;
+        mfcs_save_user($user->uid, array('problems' => $problems));
+      }
+    }
+  }
+}
+
+/**
  * Helper function to load files related to this project.
  *
  * @param int $id
@@ -8961,7 +8995,7 @@ function mfcs_users_load_banner_id_to_user_id($banner_id = NULL) {
 /**
  * Obtain a list of disabled accounts that are assigned to active content.
  *
- * @param int|null $user
+ * @param int|null $user_id
  *   (optional) When an integer, represents the user id for a single user to load.
  *   When NULL, all users will be loaded.
  *
@@ -8969,9 +9003,9 @@ function mfcs_users_load_banner_id_to_user_id($banner_id = NULL) {
  *   An array of users who have active content.
  *   FALSE is returned on error.
  */
-function mfcs_disabled_users_with_active_content($user = NULL) {
-  if (!is_null($user) && !cf_is_integer($user)) {
-    cf_error::invalid_integer('user');
+function mfcs_disabled_users_with_active_content($user_id = NULL) {
+  if (!is_null($user_id) && !cf_is_integer($user_id)) {
+    cf_error::invalid_integer('user_id');
     return FALSE;
   }
 
@@ -8986,6 +9020,10 @@ function mfcs_disabled_users_with_active_content($user = NULL) {
 
     $query->condition('mer.status', array(MFCS_REQUEST_STATUS_LOCKED, MFCS_REQUEST_STATUS_UNLOCKED), 'IN');
     $query->condition('u.status', 0);
+
+    if (!is_null($user_id)) {
+      $query->condition('u.uid', $user_id);
+    }
 
     $results = $query->execute()->fetchAll();
     if (is_array($results)) {
@@ -9008,14 +9046,14 @@ function mfcs_disabled_users_with_active_content($user = NULL) {
  * @see: mfcs_disabled_users_with_active_content()
  */
 function mfcs_search_for_and_mark_disabled_users_with_active_content() {
-  $user_ids = mfcs_disabled_users_with_active_content();
+  $disabled_user_ids = mfcs_disabled_users_with_active_content();
 
   // do not bother with error reporting, just exit if a non-array is returned.
-  if (!is_array($user_ids)) {
+  if (!is_array($disabled_user_ids)) {
     return;
   }
 
-  foreach ($user_ids as $user_id) {
+  foreach ($disabled_user_ids as $user_id) {
     $mfcs_users = mfcs_load_users($user_id);
 
     $problems = MFCS_USER_PROBLEM_NONE;
@@ -9023,9 +9061,40 @@ function mfcs_search_for_and_mark_disabled_users_with_active_content() {
       $problems = $mfcs_users[$user->uid]->problems;
     }
 
-    $problems = ($problems | MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE);
+    if (($problems & MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE) == 0) {
+      $problems = ($problems | MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE);
+      mfcs_save_user($user_id, array('problems' => $problems));
+    }
+  }
 
-    mfcs_save_user($user_id, array('problems' => $problems));
+
+  // look for users who have been disabled, but were re-enabled at some point.
+  mfcs_include(MFCS_INCLUDE_MANAGEMENT);
+
+  $options = array(
+    'include_disabled' => TRUE,
+  );
+
+  $conditions = array();
+  $conditions['value_only_problems'] = array(
+    'field' => 'mu.problems',
+    'operator' => MFCS_OPERATOR_NOT_EQUAL,
+    'search' => MFCS_USER_PROBLEM_NONE,
+  );
+
+  $problems_returned = mfcs_management_search_users($conditions, $options);
+  if (isset($problems_returned['results']) && is_array($problems_returned['results'])) {
+    foreach ($problems_returned['results'] as $result) {
+      // skip accounts that have already been marked as disabled, leaving only accounts that are now enabled.
+      if (array_key_exists($result->user_id, $disabled_user_ids)) {
+        continue;
+      }
+
+      if (($result->problems & MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE) > 0) {
+        $result->problems -= MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE;
+        mfcs_save_user($result->user_id, array('problems' => $result->problems));
+      }
+    }
   }
 }
 
