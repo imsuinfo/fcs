@@ -428,6 +428,7 @@ function mfcs_management_search_table($table_name, $table_alias, $primary_key, $
  *     'distinct': Process the entire query as distinct.
  *     'distinct_id': Custom option to load mer.id as distinct. This overrides
  *                    'distinct' when TRUE.
+ *     'include_disabled': When TRUE will not limit the results to only enabled accounts.
  *
  * @return array|false
  *   An array of objects containing the mfcs-specific user fields.
@@ -488,6 +489,11 @@ function mfcs_management_search_users($conditions = array(), $options = array())
     if ($distinct_id) {
       $distinct = FALSE;
     }
+  }
+
+  $enabled_accounts_only = TRUE;
+  if (isset($options['include_disabled']) && is_bool($options['include_disabled'])) {
+    $enabled_accounts_only = !($options['include_disabled']);
   }
 
   $return = array(
@@ -644,7 +650,10 @@ function mfcs_management_search_users($conditions = array(), $options = array())
     if (is_null($outermost_and)) {
       $outermost_and = db_and();
     }
-    $outermost_and->condition('u.status', 0, '<>');
+
+    if ($enabled_accounts_only) {
+      $outermost_and->condition('u.status', 0, '<>');
+    }
 
     $query->condition($outermost_and);
     if ($count) {
@@ -727,6 +736,7 @@ function mfcs_management_get_problems_taxonomy() {
   $labels[MFCS_USER_PROBLEM_ACCOUNT_LOGIN_PROBLEMS_MULTIPLE] = "Multiple Login Attempt Problems";
   $labels[MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED] = "Unable to Assign/Unassign Reviewer Role";
   $labels[MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES] = "Old/Duplicate Account";
+  $labels[MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE] = "Disabled Account in Use";
   $labels[MFCS_USER_PROBLEM_FORM_ERROR_USER] = "Core System Form Errors";
   $labels[MFCS_USER_PROBLEM_FORM_ERROR_USER] = "Facilities Use Form Errors";
 

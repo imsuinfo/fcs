@@ -486,18 +486,25 @@ function mfcs_ajax_review_0() {
     'review_restrictions' => MFCS_REVIEW_RESTRICTION_REVIEW,
   );
 
-  mfcs_ajax_listing_0($options);
+  mfcs_ajax_listing_0(array(), $options);
 }
 
 /**
  * Ajax function call for loading request list datatables.
  *
+ * @param array $custom_conditions
+ *   (optional) An array containing additional conditions to use.
  * @param array $override_options
  *   (optional) An array containing the operations to override.
  */
-function mfcs_ajax_listing_0($override_options = array()) {
+function mfcs_ajax_listing_0($custom_conditions = array(), $override_options = array()) {
   global $base_path;
   global $mfcs_determined;
+
+  if (!is_array($custom_conditions)) {
+    cf_error::invalid_array('custom_conditions');
+    $custom_conditions = array();
+  }
 
   if (!is_array($override_options)) {
     cf_error::invalid_array('override_options');
@@ -634,7 +641,7 @@ function mfcs_ajax_listing_0($override_options = array()) {
 
   $options['sort'] = $sorting;
 
-  $conditions = array();
+  $conditions = $custom_conditions;
 
   if ($search) {
     $count_conditions = $conditions;
@@ -841,6 +848,7 @@ function mfcs_ajax_problems_0_users_list() {
   }
 
   $options['join'] = TRUE;
+  $options['include_disabled'] = TRUE;
 
   $conditions = array(
     'u.status' => 1,
@@ -963,10 +971,14 @@ function mfcs_ajax_problems_0_users_list() {
       $row[3] = check_plain($problem->last_name);
 
       $row[4] = NULL;
-      foreach (array(MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_LOGIN_PROBLEMS_MULTIPLE, MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED, MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES) as $taxonomy_id) {
+      foreach (array(MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_LOGIN_PROBLEMS_MULTIPLE, MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED, MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES, MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE) as $taxonomy_id) {
         if (($problem->problems & $taxonomy_id) > 0) {
           if ($taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE || $taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) {
             $additional_operations .= ' <a href="' . $base_path . 'requests/problems-0/users/resynchronize/' . $problem->user_id . $url_arguments . '" class="operation-link operation-link-resynchronize" title="Re-Synchronize the user\'s settings.">Re-Sync</a>';
+          }
+
+          if ($taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE) {
+            $additional_operations .= " <a href=\"" . $base_path . 'requests/problems-0/users/disabled_in_use/' . $problem->user_id . "\">Requests</a>";
           }
 
           if (is_null($row[4])) {
@@ -1275,6 +1287,48 @@ function mfcs_ajax_email_log_0_list() {
 
   drupal_json_output($response);
   exit();
+}
+
+/**
+ * Ajax function call for loading request review list datatables.
+ */
+function mfcs_ajax_problems_0_disabled_in_use($user_id) {
+  if (!cf_is_integer($user_id)) {
+    drupal_json_output(array());
+    exit();
+  }
+
+  $conditions = array();
+  $conditions['value_status'] = array(
+    'field' => 'mer.status',
+    'operator' => MFCS_OPERATOR_IS_IN,
+    'search' => array(MFCS_REQUEST_STATUS_LOCKED, MFCS_REQUEST_STATUS_UNLOCKED),
+  );
+
+  $conditions['value_venue_coordinator'] = array(
+    'field' => 'mer.venue_coordinator',
+    'operator' => MFCS_OPERATOR_EQUAL,
+    'search' => $user_id,
+  );
+
+  $conditions['value_problem_venue_coordinator_status'] = array(
+    'field' => 'u.status',
+    'operator' => MFCS_OPERATOR_EQUAL,
+    'search' => 0,
+  );
+
+
+  $options = array();
+  $options['extra_fields']['users'] = array(
+    'alias' => 'u',
+    'join' => 'inner',
+    'on' => 'mer.venue_coordinator = u.uid',
+    'columns' => array(
+      'venue_coordinator_status' => 'status',
+    ),
+  );
+
+  mfcs_ajax_listing_0($conditions, $options);
 }
 
 /**

@@ -1096,6 +1096,45 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'tab_parent' => 'requests/problems-0/users',
     'tab_root' => 'requests/problems-0/users',
   );
+
+  $items['requests/problems-0/users/disabled_in_use/%'] = array(
+    'title' => "User Problems - Disabled Account in Use",
+    'description' => "Display open requests that are associated with a given disabled user.",
+    'page callback' => 'mfcs_request_problems_0_users_disabled_in_use',
+    'page arguments' => array(4),
+    'file' => 'request_problems.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('problems'),
+    'tab_parent' => 'requests/problems-0/users',
+    'tab_root' => 'requests/problems-0/users',
+  );
+
+  $items['requests/problems-0/users/disabled_in_use/%/%'] = array(
+    'title' => "User Problems - Disabled Account in Use",
+    'description' => "Display open requests that are associated with a given disabled user.",
+    'page callback' => 'mfcs_request_problems_0_users_disabled_in_use',
+    'page arguments' => array(4, 5),
+    'file' => 'request_problems.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('problems'),
+    'tab_parent' => 'requests/problems-0/users',
+    'tab_root' => 'requests/problems-0/users',
+  );
+
+  $items['requests/problems-0/users/disabled_in_use/ajax/%'] = array(
+    'title' => "",
+    'page callback' => 'mfcs_ajax_problems_0_disabled_in_use',
+    'page arguments' => array(5),
+    'file' => 'ajax.inc',
+    'file path' => $module_path . '/includes',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('problems'),
+    'type' => MENU_CALLBACK,
+    'tab_parent' => 'requests/problems-0/users',
+    'tab_root' => 'requests/problems-0/users',
+  );
 }
 
 /**

@@ -197,6 +197,7 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
     'start' => $page_number * $rows_per_page,
     'limit' => $rows_per_page,
     'count' => TRUE,
+    'include_disabled' => TRUE,
   );
 
   $conditions = array();
@@ -234,10 +235,14 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
     $additional_operations = '';
 
     $problem_account = NULL;
-    foreach (array(MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_LOGIN_PROBLEMS_MULTIPLE, MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED, MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES) as $taxonomy_id) {
+    foreach (array(MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_LOGIN_PROBLEMS_MULTIPLE, MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED, MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES, MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE) as $taxonomy_id) {
       if (($problem->problems & $taxonomy_id) > 0) {
         if ($taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE || $taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) {
           $additional_operations .= ' <a href="' . $base_path . 'requests/problems-0/users/resynchronize/' . $problem->user_id . $url_arguments . '" class="operation-link operation-link-resynchronize" title="Re-Synchronize the user\'s settings.">Re-Sync</a>';
+        }
+
+        if ($taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE) {
+          $additional_operations .= " <a href=\"" . $base_path . 'requests/problems-0/users/disabled_in_use/' . $problem->user_id . "\">Requests</a>";
         }
 
         if (is_null($problem_account)) {
@@ -501,7 +506,7 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
     return array();
   }
 
-  $mfcs_users = mfcs_load_users($problem_user_id);
+  $mfcs_users = mfcs_load_users($problem_user_id, FALSE, TRUE);
   if (!is_array($mfcs_users) || !array_key_exists($problem_user_id, $mfcs_users)) {
     drupal_not_found();
     drupal_exit();
@@ -672,6 +677,28 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
         "This flag refers to the drupal core form functionality and not the facilities use specific functionality.<br>\n" .
         "<br>\n" .
         "This system currently does not provide the details of these problems, but in the future it may.<br>\n",
+      'resettable' => TRUE,
+      'custom_action' => FALSE,
+    ),
+    MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE => array(
+      'label' => "Deleted/Disabled User Assigned Requests",
+      'resettable' => TRUE,
+      'custom_action' => FALSE,
+      'explanation' =>
+        "This flag gets set when a deleted or disabled user account is assigned as a venue coordinator or similar access roles.<br>\n" .
+        "<br>\n" .
+        $base_path .
+        "<br>\n" .
+        "Requests will need to be re-assigned.<br>\n",
+    ),
+    MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE => array(
+      'label' => "Deleted/Disabled User Assigned Requests",
+      'explanation' =>
+        "This flag gets set when a deleted or disabled user account is assigned as a venue coordinator or similar access roles.<br>\n" .
+        "<br>\n" .
+        "This is generally casued when an account is deleted but <a href=\"" . $base_path . 'requests/problems-0/users/disabled_in_use/' . $problem_user_id . "\">active or on-going requests have not been re-assigned</a>.<br>\n" .
+        "<br>\n" .
+        "Requests will need to be re-assigned.<br>\n",
       'resettable' => TRUE,
       'custom_action' => FALSE,
     ),
@@ -994,7 +1021,7 @@ function mfcs_request_problems_0_user_form_submit($form, &$form_state) {
 /**
  * Re-synchronize user settings for a given user page.
  *
- * This page auto-returns
+ * This page auto-returns.
  *
  * @para int $user_id
  *   Id of the user to resynchronize
@@ -1040,6 +1067,243 @@ function mfcs_request_problems_0_users_resynchronize($user_id) {
   $markup .= '</div>' . "\n";
 
   return $markup;
+}
+
+/**
+ * A list of requests associated with a disabled user account.
+ *
+ * Enable accounts will return 404 for this page.
+ *
+ * This does not include closed or cancelled requests.
+ *
+ * @param int $user_id
+ *   Id of the disabled user.
+ * @param int $page_number
+ *   (optional) When there are more than a certain number of rows,
+ *   this represent the page number for a given sequence of rows.
+ *
+ * @return markup
+ *   The HTML markup representing the page to be renderred.
+ */
+function mfcs_request_problems_0_users_disabled_in_use($user_id, $page_number = 0) {
+  if (!cf_is_integer($user_id)) {
+    cf_error::invalid_integer('user_id');
+
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  $user = user_load($user_id);
+  if (!is_object($user) || $user->status != 0) {
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  if (!cf_is_integer($page_number) || $page_number < 0) {
+    $page_number = 0;
+  }
+
+  mfcs_add_canonical_headers('requests/problems-0/users/disabled_in_use/' . $user_id);
+
+  $page_title = "Facilities Use Problems - Disabled Account In Use - " . $user->name;
+  drupal_set_title($page_title);
+
+
+  // load sorting information
+  $order = NULL;
+  if (isset($_GET['order'])) {
+    $order = strtolower($_GET['order']);
+  }
+
+  $sort = NULL;
+  $columns_default = NULL;
+  if (isset($_GET['sort'])) {
+    $sort = strtoupper($_GET['sort']);
+
+    if ($sort != 'ASC' && $sort != 'DESC') {
+      $sort = NULL;
+      $order = NULL;
+    }
+  }
+
+  mfcs_include(MFCS_INCLUDE_REQUEST_LIST);
+  $columns = mfcs_request_list_0_columns();
+
+  $sorting = array();
+  if (is_null($order)) {
+    $sorting['id'] = 'DESC';
+    $columns_default = array(0 => strtolower($sorting['id']));
+    $columns['id']['class'][] = 'sorting_1';
+  }
+  else {
+    if ($order == 'id') {
+      $sorting[$order] = is_null($sort) ? 'DESC' : $sort;
+      $columns_default = array(0 => strtolower($sorting[$order]));
+      $columns[$order]['class'][] = 'sorting_1';
+    }
+    elseif ($order == 'type') {
+      $sorting[$order] = is_null($sort) ? 'ASC' : $sort;
+      $columns_default = array(1 => strtolower($sorting[$order]));
+      $columns[$order]['class'][] = 'sorting_1';
+    }
+    elseif ($order == 'title') {
+      $sorting[$order] = is_null($sort) ? 'ASC' : $sort;
+      $columns_default = array(2 => strtolower($sorting[$order]));
+      $columns[$order]['class'][] = 'sorting_1';
+    }
+    elseif ($order == 'building') {
+      $sorting[$order] = is_null($sort) ? 'ASC' : $sort;
+      $columns_default = array(3 => strtolower($sorting[$order]));
+      $columns[$order]['class'][] = 'sorting_1';
+    }
+    elseif ($order == 'room') {
+      $sorting[$order] = is_null($sort) ? 'ASC' : $sort;
+      $columns_default = array(4 => strtolower($sorting[$order]));
+      $columns[$order]['class'][] = 'sorting_1';
+    }
+    elseif ($order == 'date') {
+      $sorting[$order] = is_null($sort) ? 'DESC' : $sort;
+      $columns_default = array(5 => strtolower($sorting[$order]));
+      $columns[$order]['class'][] = 'sorting_1';
+    }
+    elseif ($order == 'status') {
+      $sorting[$order] = is_null($sort) ? 'ASC' : $sort;
+      $columns_default = array(6 => strtolower($sorting[$order]));
+      $columns[$order]['class'][] = 'sorting_1';
+    }
+    elseif ($order == 'step') {
+      $sorting[$order] = is_null($sort) ? 'ASC' : $sort;
+      $columns_default = array(7 => strtolower($sorting[$order]));
+      $columns[$order]['class'][] = 'sorting_1';
+    }
+    elseif ($order == 'submitted by') {
+      $sorting[$order] = is_null($sort) ? 'ASC' : $sort;
+      $columns_default = array(8 => strtolower($sorting[$order]));
+      $columns[$order]['class'][] = 'sorting_1';
+    }
+    elseif ($order == 'submitter name') {
+      $sorting[$order] = is_null($sort) ? 'ASC' : $sort;
+      $columns_default = array(9 => strtolower($sorting[$order]));
+      $columns[$order]['class'][] = 'sorting_1';
+    }
+    elseif ($order == 'submitted on') {
+      $sorting[$order] = is_null($sort) ? 'DESC' : $sort;
+      $columns_default = array(10 => strtolower($sorting[$order]));
+      $columns[$order]['class'][] = 'sorting_1';
+    }
+  }
+
+  $rows_per_page = 25;
+  $conditions = array();
+  $options = array(
+    'join' => TRUE,
+    'start' => $page_number * $rows_per_page,
+    'limit' => $rows_per_page,
+    'count' => TRUE,
+    'extra_fields' => array(),
+  );
+
+  if (!is_null($order)) {
+    $options['sort'] = $sorting;
+  }
+
+  $options['extra_fields']['users'] = array(
+    'alias' => 'u',
+    'join' => 'inner',
+    'on' => 'mer.venue_coordinator = u.uid',
+    'columns' => array(
+      'venue_coordinator_status' => 'status',
+    ),
+  );
+
+  $conditions['value_problem_status'] = array(
+    'field' => 'mer.status',
+    'operator' => MFCS_OPERATOR_IS_IN,
+    'search' => array(MFCS_REQUEST_STATUS_LOCKED, MFCS_REQUEST_STATUS_UNLOCKED),
+  );
+
+  $conditions['value_problem_venue_coordinator'] = array(
+    'field' => 'mer.venue_coordinator',
+    'operator' => MFCS_OPERATOR_EQUAL,
+    'search' => $user_id,
+  );
+
+  $conditions['value_problem_venue_coordinator_status'] = array(
+    'field' => 'u.status',
+    'operator' => MFCS_OPERATOR_EQUAL,
+    'search' => 0,
+  );
+
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+
+  $items_returned = mfcs_request_load_listing($conditions, $options);
+
+  $count = 0;
+  if (isset($items_returned['count'])) {
+    $count = $items_returned['count'];
+  }
+
+  // do not provide pages when the page number would bring the user beyond the available items.
+  if ($count > 0 && $options['start'] >= $count) {
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  $options['columns'] = $columns;
+  $options['columns_default'] = $columns_default;
+
+  $options['ajax_path'] = "'" . $base_path . 'requests/problems-0/users/disabled_in_use/ajax/' . $user_id . $url_arguments . "'";
+
+  $table = mfcs_build_request_ajax_table($items_returned, $conditions, $options);
+  $table['attributes']['class'][] = 'mfcs-table-requests';
+  $table['attributes']['class'][] = 'mfcs-table-problems-disabled_in_use';
+  $table['attributes']['id'] = 'mfcs-problems_0-disabled_in_use';
+
+  $navigation_top = '';
+  $navigation_bottom = '';
+  if ($page_number > 0) {
+    if ($page_number == 1) {
+      $navigation_top .= '<a href="' . $base_path . 'requests/problems-0/users/disabled_in_use' . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+      $navigation_bottom .= '<a href="' . $base_path . 'requests/problems-0/users/disabled_in_use' . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+    }
+    else {
+      $previous_page = $page_number - 1;
+      $navigation_top .= '<a href="' . $base_path . 'requests/problems-0/users/disabled_in_use/' . $previous_page . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+      $navigation_bottom .= '<a href="' . $base_path . 'requests/problems-0/users/disabled_in_use/' . $previous_page . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+    }
+  }
+
+  $navigation_start = $options['start'] + 1;
+  $navigation_total = $options['start'] + $rows_per_page;
+
+  if ($navigation_total > $count) {
+    $navigation_total = $count;
+  }
+
+  $navigation_bottom .= '<div class="table_listing-comment">' . "\n";
+  $navigation_bottom .= "Showing " . $navigation_start . " to " . $navigation_total . " of " . $count . " entries.\n";
+  $navigation_bottom .= '</div>' . "\n";
+
+  if ($count > ($options['start'] + $rows_per_page)) {
+    $next_page = $page_number + 1;
+    $navigation_top .= '<a href="' . $base_path . 'requests/problems-0/users/disabled_in_use/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
+    $navigation_bottom .= '<a href="' . $base_path . 'requests/problems-0/users/disabled_in_use/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
+  }
+
+  $output = '<div class="table_listing-navigator table_listing-navigator-top no-print">' . $navigation_top . '</div>';
+  $output .= mcneese_libraries_theme_table($table, $table['datatable_settings']);
+  $output .= '<div class="table_listing-navigator table_listing-navigator-bottom">' . $navigation_bottom . '</div>';
+
+  return $output;
 }
 
 /**

@@ -292,6 +292,7 @@ define('MFCS_USER_PROBLEM_FORM_ERROR_USER', 32);
 define('MFCS_USER_PROBLEM_FORM_ERROR_SYSTEM', 64);
 define('MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED', 128);
 define('MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES', 256);
+define('MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE', 512);
 
 /**
  * Define codes that represent what the e-mail represents.
@@ -2140,7 +2141,6 @@ function mfcs_save_user($user_id, $data) {
   $transaction = db_transaction();
 
   try {
-
     $query = db_select('users', 'u');
     $query->condition('u.uid', $user_id);
     $query->addExpression('count(u.uid)');
@@ -2169,7 +2169,6 @@ function mfcs_save_user($user_id, $data) {
     $query->addExpression('count(mu.user_id)');
 
     $user_exists = $query->execute()->fetchField();
-
     if ($user_exists == 0) {
       $do_insert = TRUE;
     }
@@ -3344,6 +3343,8 @@ function mfcs_sync_banner_to_local($transaction = NULL, $user = NULL) {
  *
  * @return bool
  *   TRUE on success, FALSE otherwise.
+ *
+ * @see: mfcs_search_for_and_mark_disabled_users_with_active_content()
  */
 function mfcs_sync_banner_to_local_users($user_id = NULL, $banner_id = NULL) {
   if (!is_null($user_id) && !cf_is_integer($user_id)) {
@@ -3477,6 +3478,9 @@ function mfcs_sync_banner_to_local_users($user_id = NULL, $banner_id = NULL) {
       return FALSE;
     }
   }
+
+  // once banner sync is complete, check for disabled accounts.
+  mfcs_search_for_and_mark_disabled_users_with_active_content();
 
   return TRUE;
 }
@@ -6518,7 +6522,7 @@ function mfcs_request_process_query_search_array(&$query, &$count_query, &$opera
   $found_values = FALSE;
   $expression_count = 0;
 
-  // process the inner fields, can be either a 'field_+', 'or_+', 'and_+', 'nor_+', or 'nand_+'.
+  // process the inner fields, can be either a 'value_+', 'field_+', 'or_+', 'and_+', 'nor_+', or 'nand_+'.
   foreach ($conditions as $search_operand_or_field => $search_values) {
     $search_op = explode('_', $search_operand_or_field, 2);
 
@@ -8952,6 +8956,77 @@ function mfcs_users_load_banner_id_to_user_id($banner_id = NULL) {
   }
 
   return $list;
+}
+
+/**
+ * Obtain a list of disabled accounts that are assigned to active content.
+ *
+ * @param int|null $user
+ *   (optional) When an integer, represents the user id for a single user to load.
+ *   When NULL, all users will be loaded.
+ *
+ * @return bool|array
+ *   An array of users who have active content.
+ *   FALSE is returned on error.
+ */
+function mfcs_disabled_users_with_active_content($user = NULL) {
+  if (!is_null($user) && !cf_is_integer($user)) {
+    cf_error::invalid_integer('user');
+    return FALSE;
+  }
+
+  //select mer.* from mfcs_requests mer where mer.venue_coordinator = 51 and (mer.status = 1 or status = 2) order by id, venue_coordinator;
+  $rows = array();
+  try {
+    $query = db_select('mfcs_requests', 'mer');
+    $query->innerJoin('users', 'u', 'mer.venue_coordinator = u.uid');
+
+    $query->addField('mer', 'venue_coordinator', 'venue_coordinator');
+    $query->distinct();
+
+    $query->condition('mer.status', array(MFCS_REQUEST_STATUS_LOCKED, MFCS_REQUEST_STATUS_UNLOCKED), 'IN');
+    $query->condition('u.status', 0);
+
+    $results = $query->execute()->fetchAll();
+    if (is_array($results)) {
+      foreach ($results as $result) {
+        $rows[$result->venue_coordinator] = $result->venue_coordinator;
+      }
+    }
+  } catch (Exception $ex) {
+    cf_error::on_exception($ex);
+
+    return FALSE;
+  }
+
+  return $rows;
+}
+
+/**
+ * Search through database for users and store the appropriate user problem settings.
+ *
+ * @see: mfcs_disabled_users_with_active_content()
+ */
+function mfcs_search_for_and_mark_disabled_users_with_active_content() {
+  $user_ids = mfcs_disabled_users_with_active_content();
+
+  // do not bother with error reporting, just exit if a non-array is returned.
+  if (!is_array($user_ids)) {
+    return;
+  }
+
+  foreach ($user_ids as $user_id) {
+    $mfcs_users = mfcs_load_users($user_id);
+
+    $problems = MFCS_USER_PROBLEM_NONE;
+    if (isset($mfcs_users[$user->uid])) {
+      $problems = $mfcs_users[$user->uid]->problems;
+    }
+
+    $problems = ($problems | MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE);
+
+    mfcs_save_user($user_id, array('problems' => $problems));
+  }
 }
 
 /**
