@@ -534,9 +534,9 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
   elseif ($operation == 'list') {
     if ($roles['requester'] || $roles['reviewer'] || $roles['manager']) {
       if (is_array($request_id)) {
-        foreach ($request_ids as $request_id) {
-          $access[$request_id] = TRUE;
-          $processed[$request_id] = TRUE;
+        foreach ($request_ids as $id) {
+          $access[$id] = TRUE;
+          $processed[$id] = TRUE;
         }
 
         return $processed;
@@ -549,9 +549,9 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
   elseif ($operation == 'search') {
     if ($roles['requester'] || $roles['reviewer'] || $roles['manager']) {
       if (is_array($request_id)) {
-        foreach ($request_ids as $request_id) {
-          $access[$request_id] = TRUE;
-          $processed[$request_id] = TRUE;
+        foreach ($request_ids as $id) {
+          $access[$id] = TRUE;
+          $processed[$id] = TRUE;
         }
 
         return $processed;
@@ -564,9 +564,9 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
   elseif ($operation == 'reviewers') {
     if ($roles['manager']) {
       if (is_array($request_id)) {
-        foreach ($request_ids as $request_id) {
-          $access[$request_id] = TRUE;
-          $processed[$request_id] = TRUE;
+        foreach ($request_ids as $id) {
+          $access[$id] = TRUE;
+          $processed[$id] = TRUE;
         }
 
         return $processed;
@@ -746,9 +746,9 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
   }
 
   if (is_array($request_id)) {
-    foreach ($request_ids as $request_id) {
-      $access[$request_id] = FALSE;
-      $processed[$request_id] = FALSE;
+    foreach ($request_ids as $id) {
+      $access[$id] = FALSE;
+      $processed[$id] = FALSE;
     }
 
     return $processed;
