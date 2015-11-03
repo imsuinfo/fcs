@@ -860,3 +860,6 @@ ini_set('display_startup_errors', TRUE);
 // manually turn on maintenance mode
 #$conf['maintenance_mode'] = TRUE;
 
+// turn off opcache for this site.
+#ini_set('opcache.enable', FALSE);
+#ini_set('opcache.enable_cli', FALSE);
