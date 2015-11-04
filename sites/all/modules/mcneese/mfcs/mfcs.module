@@ -66,6 +66,7 @@ define('MFCS_REQUEST_STATUS_CANCELLED', 7);
  define('MFCS_REVIEW_DECISION_CLOSED', 1);
  define('MFCS_REVIEW_DECISION_CANCELLED', 2);
  define('MFCS_REVIEW_DECISION_UNCANCELLED', 3);
+ define('MFCS_REVIEW_DECISION_REASSIGNED', 4);
 
 /**
  * Defines Taxonomy TIDs for review classifications.
@@ -246,6 +247,7 @@ define('MFCS_INCLUDE_REQUEST_CANCEL', 11);
 define('MFCS_INCLUDE_REQUEST_CREATE', 12);
 define('MFCS_INCLUDE_REQUEST_VIEW', 13);
 define('MFCS_INCLUDE_REQUEST_LIST', 14);
+define('MFCS_INCLUDE_REQUEST_REASSIGN', 18);
 define('MFCS_INCLUDE_TESTING', 15);
 define('MFCS_INCLUDE_VIEW', 16);
 define('MFCS_INCLUDE_MANAGEMENT', 17);
@@ -648,6 +650,20 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
   }
   elseif ($operation == 'uncancel') {
     $operation_result = mfcs_page_request_access_operation_uncancel($request_ids, $processed, $access, $roles, $user);
+
+    // if something went wrong with the operation check, return FALSE but do not cache.
+    if ($operation_result === FALSE) {
+      return FALSE;
+    }
+
+    if (is_array($request_id)) {
+      return $processed;
+    }
+
+    return $processed[$request_id];
+  }
+  elseif ($operation == 'reassign') {
+    $operation_result = mfcs_page_request_access_operation_reassign($request_ids, $processed, $access, $roles, $user);
 
     // if something went wrong with the operation check, return FALSE but do not cache.
     if ($operation_result === FALSE) {
@@ -1105,6 +1121,28 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
 
     // managers and venue coordinators can uncancel an request at any point in the process.
     if ($roles['manager'] || array_key_exists($request['venue_coordinator']['user_id'][0]->value, $venue_coordinator_ids)) {
+      $access[$request_id] = TRUE;
+      return TRUE;
+    }
+  }
+  elseif ($operation == 'reassign') {
+    if ($request['top']['status'][0]->value == MFCS_REQUEST_STATUS_DELETED) {
+      $access[$request_id] = FALSE;
+      return FALSE;
+    }
+
+    $reassignable_status = array(
+      MFCS_REQUEST_STATUS_LOCKED,
+      MFCS_REQUEST_STATUS_UNLOCKED,
+    );
+
+    // no matter who the user is, if the request is not one of these status', then do not allow re-assignment.
+    if (!in_array($request['top']['status'][0]->value, $reassignable_status)) {
+      $access[$request_id] = FALSE;
+      return FALSE;
+    }
+
+    if ($roles['manager']) {
       $access[$request_id] = TRUE;
       return TRUE;
     }
@@ -1646,6 +1684,9 @@ function mfcs_include($id) {
   }
   elseif ($id == MFCS_INCLUDE_REQUEST_CANCEL) {
     require_once($module_path . '/pages/request_cancel.inc');
+  }
+  elseif ($id == MFCS_INCLUDE_REQUEST_REASSIGN) {
+    require_once($module_path . '/pages/request_reassign.inc');
   }
   elseif ($id == MFCS_INCLUDE_REQUEST_CREATE) {
     require_once($module_path . '/pages/request_create.inc');
@@ -2304,6 +2345,7 @@ function mfcs_load_request_user_role_mapping() {
  * - 'first_name': user's first name (custom field).
  * - 'last_name': user's last name (custom field).
  * - 'banner_id': user's banner id (custom field).
+ * - 'phone_number': user's phone number (custom field).
  *
  * @param integer $user_id
  *   The user id number uniquely representing some user.
@@ -2332,6 +2374,7 @@ function mfcs_load_basic_user_settings_by_user_id($user_id) {
     $query->leftJoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id AND fdfufn.delta = 0');
     $query->leftJoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id AND fdfuln.delta = 0');
     $query->leftJoin('field_data_field_user_banner_id', 'fdfubi', 'u.uid = fdfubi.entity_id AND fdfubi.delta = 0');
+    $query->leftJoin('field_data_field_user_phone_number', 'fdfupn', 'u.uid = fdfupn.entity_id AND fdfupn.delta = 0');
 
     $query->addField('u', 'name', 'name');
     $query->addField('u', 'mail', 'email');
@@ -2340,6 +2383,7 @@ function mfcs_load_basic_user_settings_by_user_id($user_id) {
     $query->addField('fdfufn', 'field_user_first_name_value', 'first_name');
     $query->addField('fdfuln', 'field_user_last_name_value', 'last_name');
     $query->addField('fdfubi', 'field_user_banner_id_value', 'banner_id');
+    $query->addField('fdfupn', 'field_user_phone_number_value', 'phone_number');
 
     $query->condition('u.uid', $user_id);
 
@@ -2356,6 +2400,7 @@ function mfcs_load_basic_user_settings_by_user_id($user_id) {
         'first_name' => '',
         'last_name' => '',
         'banner_id' => '',
+        'phone_number' => '',
       );
 
       foreach ($rows as $row) {
@@ -2381,6 +2426,10 @@ function mfcs_load_basic_user_settings_by_user_id($user_id) {
 
         if (property_exists($row, 'banner_id') && !is_null($row->banner_id)) {
           $user[$user_id]['banner_id'] = $row->banner_id;
+        }
+
+        if (property_exists($row, 'phone_number') && !is_null($row->phone_number)) {
+          $user[$user_id]['phone_number'] = $row->phone_number;
         }
 
         break;
@@ -9057,8 +9106,8 @@ function mfcs_search_for_and_mark_disabled_users_with_active_content() {
     $mfcs_users = mfcs_load_users($user_id);
 
     $problems = MFCS_USER_PROBLEM_NONE;
-    if (isset($mfcs_users[$user->uid])) {
-      $problems = $mfcs_users[$user->uid]->problems;
+    if (isset($mfcs_users[$user_id])) {
+      $problems = $mfcs_users[$user_id]->problems;
     }
 
     if (($problems & MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE) == 0) {

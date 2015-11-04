@@ -304,6 +304,158 @@ function mfcs_workflow_set_status($request_id, $status, $user = NULL, $extra = a
 }
 
 /**
+ * Assign a new venue coordinator to a given request.
+ *
+ * @param int $request_id
+ *   The id of the given request.
+ * @param int $venue_coordinator_id
+ *   The new venue coordinator id to assign to the request.
+ * @param object|null $user
+ *   (optional) If specified, the user to log this change as.
+ * @param array $extra
+ *   (optional) Additional information to save. This is used for the revision
+ *   log message and signature.
+ *
+ * @return bool
+ *   TRUE on success, FALSE otherwise.
+ */
+function mfcs_workflow_set_venue_coordinator($request_id, $venue_coordinator_id, $user = NULL, $extra = array()) {
+  $request = mfcs_load_request_by_id($request_id);
+
+  if (empty($request)) {
+    return FALSE;
+  }
+
+  if (!cf_is_integer($venue_coordinator_id)) {
+    cf_error::invalid_integer('venue_coordinator_id');
+    return FALSE;
+  }
+
+  if (is_null($user)) {
+    $user = cf_current_user();
+  }
+
+  if (!is_object($user)) {
+    cf_error::invalid_object('user');
+    return FALSE;
+  }
+
+  if (!is_array($extra)) {
+    cf_error::invalid_array('extra');
+    return FALSE;
+  }
+
+  $venue_coordinator = mfcs_load_basic_user_settings_by_user_id($venue_coordinator_id);
+  if (!is_array($venue_coordinator)) {
+    watchdog(MFCS_WATCHDOG_ID, "%venue_coordinator is not a valid user id.", array('%venue_coordinator' => $venue_coordinator), WATCHDOG_ERROR);
+    return FALSE;
+  }
+
+  $instance = mfcs_instance();
+
+  $mfcs_requests = array(
+    'updated' => $instance,
+    'venue_coordinator' => $venue_coordinator_id,
+  );
+
+  $request_revision = mfcs_load_request_revision_number($request_id);
+  $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . $instance . '_' . $user->uid . '_' . $request_id, FALSE);
+
+  if ($request_revision === FALSE) {
+    watchdog(MFCS_WATCHDOG_ID, "Failed to load revision number for request %request_id.", array('%request_id' => $request_id), WATCHDOG_ERROR);
+    return FALSE;
+  }
+  elseif (is_null($request_revision)) {
+    $request_revision_next = 0;
+  }
+  else {
+    $request_revision_next = $request_revision + 1;
+  }
+
+  $mfcs_request_revisions = array(
+    'request_id' => $request_id,
+    'date' => $instance,
+    'revision' => $request_revision_next,
+    'user_id' => $user->uid,
+  );
+
+  $revisions_has_extras = FALSE;
+  if (!empty($extra['revisions']['message'])) {
+    $mfcs_request_revisions['message'] = $extra['revisions']['message'];
+    $revisions_has_extras = TRUE;
+  }
+
+  if (!empty($extra['revisions']['signature'])) {
+    $mfcs_request_revisions['signature'] = $extra['revisions']['signature'];
+    $revisions_has_extras = TRUE;
+  }
+
+  $venue_coordinator_id_revision = $request['current']['venue_coordinator']['user_id'] + 1;
+
+  $mfcs_current = array(
+    'venue_coordinator_user_id' => $venue_coordinator_id_revision,
+  );
+
+  $mfcs_field_venue_coordinator_user_id = array(
+    'request_id' => $request_id,
+    'revision' => $request_revision_next,
+    'delta' => 0,
+    'user_id' => $user->uid,
+    'date' => $instance,
+    'value' => $venue_coordinator_id,
+  );
+
+  $transaction = db_transaction();
+  try {
+    $query = db_update('mfcs_requests');
+    $query->condition('id', $request_id);
+    $query->fields($mfcs_requests);
+    $query->execute();
+
+    if ($processed_mfcs_request_revisions) {
+      if ($revisions_has_extras) {
+        $query = db_update('mfcs_request_revisions');
+        $query->condition('id', $request_id);
+        $query->condition('date', $instance);
+        $query->condition('user_id', $user->uid);
+        $query->fields($mfcs_request_revisions);
+        $query->execute();
+      }
+    }
+    else {
+      $query = db_insert('mfcs_request_revisions');
+      $query->fields($mfcs_request_revisions);
+      $query->execute();
+
+      $processed_mfcs_request_revisions = TRUE;
+    }
+
+    $query = db_insert('mfcs_field_venue_coordinator_user_id');
+    $query->fields($mfcs_field_venue_coordinator_user_id);
+    $query->execute();
+
+    $query = db_update('mfcs_current');
+    $query->condition('request_id', $request_id);
+    $query->fields($mfcs_current);
+    $query->execute();
+
+    // enforce transaction execution
+    unset($transaction);
+  }
+  catch (Exception $ex) {
+    $transaction->rollback();
+    cf_error::on_query_execution($ex);
+
+    return FALSE;
+  }
+
+  // reset the cached request object
+  mfcs_load_request_by_id($request_id, FALSE);
+
+  return TRUE;
+}
+
+/**
  * Trigger the next step.
  *
  * @param int $request_id
@@ -567,7 +719,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
 
   if ($step == MFCS_REVIEW_STEP_REVIEW || $step == MFCS_REVIEW_STEP_REQUIREMENTS) {
     // remove classifications not allowed in these steps, unless they are for a comment or a message for the review log.
-    if ($decision != MFCS_REVIEW_DECISION_COMMENT && $decision != MFCS_REVIEW_DECISION_CANCELLED && $decision != MFCS_REVIEW_DECISION_UNCANCELLED && $decision != MFCS_REVIEW_DECISION_CLOSED) {
+    if ($decision != MFCS_REVIEW_DECISION_COMMENT && $decision != MFCS_REVIEW_DECISION_CANCELLED && $decision != MFCS_REVIEW_DECISION_UNCANCELLED && $decision != MFCS_REVIEW_DECISION_CLOSED && $decision != MFCS_REVIEW_DECISION_REASSIGNED) {
       unset($reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR]);
       unset($reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY]);
     }
@@ -1148,7 +1300,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
 
     return TRUE;
   }
-  elseif ($decision == MFCS_REVIEW_DECISION_WAVE || $decision == MFCS_REVIEW_DECISION_CANCELLED || $decision == MFCS_REVIEW_DECISION_UNCANCELLED || $decision == MFCS_REVIEW_DECISION_CLOSED || ($decision == MFCS_REVIEW_DECISION_REQUIREMENT && !$insurance_provided_exception)) {
+  elseif ($decision == MFCS_REVIEW_DECISION_WAVE || $decision == MFCS_REVIEW_DECISION_CANCELLED || $decision == MFCS_REVIEW_DECISION_UNCANCELLED || $decision == MFCS_REVIEW_DECISION_CLOSED || ($decision == MFCS_REVIEW_DECISION_REQUIREMENT && !$insurance_provided_exception) || $decision == MFCS_REVIEW_DECISION_REASSIGNED) {
     // do not send an e-mail and do not progress to the next step.
     return TRUE;
   }
@@ -1394,6 +1546,10 @@ function mfcs_workflow_next_step($request_id, $type, $step, $decision, $message,
  *     cancelled.
  *   - uncancelled: A boolean representing whether or not the request is
  *     uncancelled.
+ *   - reassigned: A boolean representing whether or not the request is
+ *     re-assigned to a new venue coordinator.
+ *   - reassigned_from: user id of the old venue coordinator.
+ *   - reassigned_to: user id of the new venue coordinator.
  *   - amended: A boolean representing whether or not the request is an
  *     amendment.
  *   - insurance_provided: A boolean representing whether or not to send a
@@ -1405,8 +1561,9 @@ function mfcs_workflow_next_step($request_id, $type, $step, $decision, $message,
  *   - reminder_data: An array of values needed by a particular reminder
  *     reason.
  *
- *   The keys: 'new', 'update', 'step', 'status', 'cancelled', and
- *   'uncancelled', 'amendment', 'reminder' are mutually exclusive.
+ *   The keys: 'new', 'update', 'step', 'status', 'cancelled',
+ *   'uncancelled', 'amendment', 'reminder', and 'reassigned' are mutually
+ *   exclusive.
  *
  * @return bool
  *   TRUE on success, FALSE otherwise.
@@ -1559,6 +1716,32 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       cf_error::invalid_bool('parameters[uncancelled]');
       return FALSE;
     }
+  }
+
+  $is_reassigned = FALSE;
+  $reassigned_from = NULL;
+  $reassigned_to = NULL;
+  if (array_key_exists('reassigned',  $parameters)) {
+    $is_reassigned = $parameters['reassigned'];
+    if (!is_bool($is_reassigned)) {
+      cf_error::invalid_bool('parameters[reassigned]');
+      return FALSE;
+    }
+  }
+
+  if ($is_reassigned) {
+    if (!array_key_exists('reassigned_from',  $parameters) || !cf_is_integer($parameters['reassigned_from'])) {
+      cf_error::invalid_bool('parameters[reassigned_from]');
+      return FALSE;
+    }
+
+    if (!array_key_exists('reassigned_to',  $parameters) || !cf_is_integer($parameters['reassigned_to'])) {
+      cf_error::invalid_bool('parameters[reassigned_to]');
+      return FALSE;
+    }
+
+    $reassigned_from = $parameters['reassigned_from'];
+    $reassigned_to = $parameters['reassigned_to'];
   }
 
   $is_insurance_provided = FALSE;
@@ -1986,8 +2169,8 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       return FALSE;
     }
   }
-  elseif ($is_cancelled || $is_auto_cancelled || $is_uncancelled || $is_deleted || !is_null($status)) {
-    if ($is_cancelled || $is_uncancelled || $status == MFCS_REQUEST_STATUS_CANCELLED || $status == MFCS_REQUEST_STATUS_DELETED) {
+  elseif ($is_cancelled || $is_auto_cancelled || $is_uncancelled || $is_reassigned || $is_deleted || !is_null($status)) {
+    if ($is_cancelled || $is_uncancelled || $is_reassigned || $status == MFCS_REQUEST_STATUS_CANCELLED || $status == MFCS_REQUEST_STATUS_DELETED) {
       $email_params['content'] = "";
       $email_params['markup'] = "";
 
@@ -2014,6 +2197,24 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
         $email_params['title_suffix'] = "Uncancelled";
         $email_params['content'] .= $changed_by_string . " has uncancelled the request.\n";
         $email_params['markup'] .= $changed_by_string . " has uncancelled the request.<br>\n";
+      }
+      elseif ($is_reassigned) {
+        $reassigned_from_user = mfcs_load_basic_user_settings_by_user_id($reassigned_from);
+        $reassigned_to_user = mfcs_load_basic_user_settings_by_user_id($reassigned_to);
+
+        $reassigned_from_user_name = $reassigned_from_user['name'];
+        if (!empty($reassigned_from_user['first_name']) && !empty($reassigned_from_user['last_name'])) {
+          $reassigned_from_user_name = $reassigned_from_user['first_name'] . ' ' . $reassigned_from_user['last_name'];
+        }
+
+        $reassigned_to_user_name = $reassigned_to_user['name'];
+        if (!empty($reassigned_to_user['first_name']) && !empty($reassigned_to_user['last_name'])) {
+          $reassigned_to_user_name = $reassigned_to_user['first_name'] . ' ' . $reassigned_to_user['last_name'];
+        }
+
+        $email_params['title_suffix'] = "Re-Assigned";
+        $email_params['content'] .= $changed_by_string . " has re-assigned the venue coordinator of the request from " . $reassigned_from_user_name . " [id: " . $reassigned_from . "] to " . $reassigned_to_user_name . " [id: " . $reassigned_to . "].\n";
+        $email_params['markup'] .= $changed_by_string . " has re-assigned the venue coordinator of the request from <strong>" . $reassigned_from_user_name . "</strong> <sup>[id: " . $reassigned_from . "]</sup> to <strong>" . $reassigned_to_user_name . "</strong> <sup>[id: " . $reassigned_to . "]</sup>.<br>\n";
       }
       elseif ($is_deleted || $status == MFCS_REQUEST_STATUS_DELETED) {
         $email_params['title_suffix'] = "Deleted";

@@ -71,6 +71,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     $can_agreement_request = mfcs_request_access('agreement', $request, $user);
     $can_cancel_request = mfcs_request_access('cancel', $request, $user);
     $can_uncancel_request = mfcs_request_access('uncancel', $request, $user);
+    $can_reassign_request = mfcs_request_access('reassign', $request, $user);
   }
   else {
     // perform access checks against the latest version and not the viewed revision.
@@ -91,6 +92,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     $can_agreement_request = mfcs_request_access('agreement', $request_latest, $user);
     $can_cancel_request = mfcs_request_access('cancel', $request_latest, $user);
     $can_uncancel_request = mfcs_request_access('uncancel', $request_latest, $user);
+    $can_reassign_request = mfcs_request_access('reassign', $request_latest, $user);
 
     if (!$can_history_request) {
       drupal_not_found();
@@ -162,6 +164,13 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     $cancel_form_state = array();
     return mfcs_request_uncancel_0_form($cancel_form, $cancel_form_state, $request_id);
   }
+  elseif (isset($form_state['reassign_was_clicked'])) {
+    mfcs_include(MFCS_INCLUDE_REQUEST_REASSIGN);
+
+    $cancel_form = array();
+    $cancel_form_state = array();
+    return mfcs_request_reassign_0_form($cancel_form, $cancel_form_state, $request_id);
+  }
 
   $proxies = mfcs_get_proxy_venue_coordinator($user->uid);
   $venue_coordinator_ids = array();
@@ -187,10 +196,12 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
   elseif ($mode == MFCS_VIEW_MODE_LOG) {
     $show_display = FALSE;
     $show_operations = FALSE;
+    $can_reassign_request = FALSE;
   }
   elseif ($mode == MFCS_VIEW_MODE_OPERATIONS) {
     $show_display = FALSE;
     $show_log = FALSE;
+    $can_reassign_request = FALSE;
   }
 
   if (!$can_log_request) {
@@ -200,6 +211,46 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
       drupal_access_denied();
       drupal_exit();
       return array();
+    }
+  }
+
+  if ($can_reassign_request && is_null($revision_id)) {
+    if ($show_display) {
+      if (mfcs_disabled_users_with_active_content($request['venue_coordinator']['user_id'][0]->value)) {
+        $user_venue_coordinator = mfcs_load_basic_user_settings_by_user_id($request['venue_coordinator']['user_id'][0]->value);
+
+        if (!empty($user_venue_coordinator['name'])) {
+          global $base_path;
+
+          if (!empty($user_venue_coordinator['first_name']) && !empty($user_venue_coordinator['last_name'])) {
+            if ($manager || $administer) {
+              $user_venue_coordinator_name = '<a href="' . $base_path . 'user/' . $request['venue_coordinator']['user_id'][0]->value . '" title="User ID: ' . $request['venue_coordinator']['user_id'][0]->value .'">' . $user_venue_coordinator['first_name'] . ' ' . $user_venue_coordinator['last_name'] . '</a>';
+            }
+            else {
+              $user_venue_coordinator_name = $user_venue_coordinator['first_name'] . ' ' . $user_venue_coordinator['last_name'];
+            }
+          }
+          else {
+            if ($manager || $administer) {
+              $user_venue_coordinator_name = '<a href="' . $base_path . 'user/' . $request['venue_coordinator']['user_id'][0]->value . '" title="User ID: ' . $request['venue_coordinator']['user_id'][0]->value .'">' . $user_venue_coordinator['name'] . '</a>';
+            }
+            else {
+              $user_venue_coordinator_name = $user_venue_coordinator['name'];
+            }
+          }
+
+          drupal_set_message("Warning: The Venue Coordinator (" . $user_venue_coordinator_name . ") assigned to this request no longer has access to this system.", 'warning', FALSE);
+        }
+        else {
+          drupal_set_message("Warning: The Venue Coordinator assigned to this request no longer has access to this system.", 'warning', FALSE);
+        }
+      }
+      else {
+        $can_reassign_request = FALSE;
+      }
+    }
+    else {
+      $can_reassign_request = FALSE;
     }
   }
 
@@ -852,6 +903,25 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           'mfcs_request_view_0_form_submit_pdf',
         ),
       );
+
+      if ($can_reassign_request && is_null($revision_id)) {
+        $form['display']['submit']['reassign'] = array(
+          '#id' => 'request-display-submit-reassign',
+          '#name' => 'request-display-submit-reassign',
+          '#type' => 'submit',
+          '#default_value' => t("Re-Assign"),
+          '#attributes' => array(
+            'class' => array(
+              'no-print',
+              'request-display-submit-reassign',
+              'mode-' . $mode,
+            ),
+          ),
+          '#submit' => array(
+            'mfcs_request_reassign_0_form_submit',
+          ),
+        );
+      }
     }
   }
 
@@ -971,7 +1041,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
                     $yet_to_review_markup .= $basic_user_settings['first_name'] . ' ' . $basic_user_settings['last_name'] . "\n";
                     $yet_to_review_markup .= '</span>' . "\n";
                   }
-                  $yet_to_review_markup .= '<span class="details_list-user_id">(id: ' . $user_id . ')</span>' . "\n";
+                  $yet_to_review_markup .= ' <span class="details_list-user_id">[id: ' . $user_id . ']</span>' . "\n";
                   $yet_to_review_markup .= '</li>' . "\n";
                 }
               }
@@ -1011,7 +1081,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
                 $yet_to_review_markup .= $basic_user_settings['first_name'] . ' ' . $basic_user_settings['last_name'] . "\n";
                 $yet_to_review_markup .= '</span>' . "\n";
               }
-              $yet_to_review_markup .= '<span class="details_list-user_id">(id: ' . $request['venue_coordinator']['user_id'][0]->value . ')</span>' . "\n";
+              $yet_to_review_markup .= ' <span class="details_list-user_id">[id: ' . $request['venue_coordinator']['user_id'][0]->value . ']</span>' . "\n";
               $yet_to_review_markup .= '</li>' . "\n";
               $yet_to_review_markup .= '</ul>' . "\n";
               $yet_to_review_markup .= '</div>' . "\n";
@@ -1053,7 +1123,8 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
                   $yet_to_review_markup .= $basic_user_settings['first_name'] . ' ' . $basic_user_settings['last_name'] . "\n";
                   $yet_to_review_markup .= '</span>' . "\n";
                 }
-                $yet_to_review_markup .= '<span class="details_list-user_id">(id: ' . $proxy_id . ')</span>' . "\n";
+
+                $yet_to_review_markup .= ' <span class="details_list-user_id">[id: ' . $proxy_id . ']</span>' . "\n";
                 $yet_to_review_markup .= '</li>' . "\n";
               }
 
@@ -2026,6 +2097,17 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
 
     $form_state['uncancel_was_clicked'] = TRUE;
   }
+  elseif ($clicked_id == 'request-display-submit-reassign') {
+    if ($mode != MFCS_VIEW_MODE_NORMAL && $mode != MFCS_VIEW_MODE_DISPLAY) {
+      form_set_error('', "This view mode does not allow re-assignment.");
+    }
+
+    if (!is_null($form['form']['revision_id']['#value'])) {
+      form_set_error('', "Revisions can not be re-assigned.");
+    }
+
+    $form_state['reassign_was_clicked'] = TRUE;
+  }
   elseif ($clicked_id == 'request-review-operations-submit-submit') {
     if (!is_null($form['form']['revision_id']['#value'])) {
       form_set_error('', "Revisions can not be changed or reviewed.");
@@ -2262,6 +2344,26 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
 
     $form_state['rebuild'] = FALSE;
   }
+  elseif ($clicked_id == 'request-reassign-submit-yes' || $clicked_id == 'request-reassign-submit-no') {
+    if (!is_null($form['form']['revision_id']['#value'])) {
+      form_set_error('', "Revisions can not be Re-assigned.");
+      return;
+    }
+
+    if ($clicked_id == 'request-reassign-submit-yes') {
+      if (!isset($form['form']['old_coordinator_id']['#value']) || !isset($form['form']['new_coordinator_id']['#value'])) {
+        form_set_error('', 'Cannot submit, key information is missing.');
+        return;
+      }
+
+      if ($form['form']['old_coordinator_id']['#value'] == $form['form']['new_coordinator_id']['#value']) {
+        form_set_error('', 'The new coordinator would be the same as the old one. Either the Banner Database Cache is out of sync or the Venue Coordinator for this Room has not been updated in the Banner Database.');
+        return;
+      }
+    }
+
+    $form_state['rebuild'] = FALSE;
+  }
 }
 
 /**
@@ -2305,6 +2407,13 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
     $deleted = mfcs_include(MFCS_INCLUDE_REQUEST_CANCEL);
 
     mfcs_request_uncancel_0_form_submit($form, $form_state);
+
+    return;
+  }
+  elseif ($clicked_id == 'request-reassign-submit-yes') {
+    $deleted = mfcs_include(MFCS_INCLUDE_REQUEST_REASSIGN);
+
+    mfcs_request_reassign_0_form_submit($form, $form_state);
 
     return;
   }

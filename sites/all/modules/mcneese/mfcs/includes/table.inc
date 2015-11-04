@@ -1265,10 +1265,17 @@ function mfcs_table_presentation($option = NULL) {
 
   $presentation['venue_coordinator'] = array(
     'user_id' => array(
+      'label' => 'Venue Coordinator',
       'split' => array(
         'name' => 'venue_coordinator',
         'phone' => 'venue_coordinator',
         'email' => 'venue_coordinator',
+      ),
+      'type' => array(
+        'value' => 'venue_coordinator',
+      ),
+      'display' => array(
+        'value' => 'user_id',
       ),
     ),
     'name' => array(

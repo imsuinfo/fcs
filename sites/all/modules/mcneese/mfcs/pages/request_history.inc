@@ -115,6 +115,11 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
   $status_options = mfcs_get_request_status_list_options();
   $step_options = mfcs_get_request_steps_list_options();
 
+  // The venue coordinator user id is a 'split' structure and does not normally get displayed.
+  // Manually change the behavior such that the Venue Coordinator Name will be properly presented.
+  $presentation['venue_coordinator']['user_id']['group'] = 'coordinator';
+  $presentation_tables['coordinator']['label'] = "Venue Coordinator";
+
   try {
     $query = db_select('mfcs_request_revisions', 'mrv');
 
@@ -309,6 +314,10 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
                       elseif ($value->decision == MFCS_REVIEW_DECISION_UNCANCELLED) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
                         $custom_message .= ' the request was <strong class="review-decision">' . "Uncancelled" . '</strong>. ';
+                      }
+                      elseif ($value->decision == MFCS_REVIEW_DECISION_REASSIGNED) {
+                        $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
+                        $custom_message .= ' the request\'s Venue Coordinator has been <strong class="review-decision">' . "Re-Assigned" . '</strong>. ';
                       }
                       elseif ($value->decision == MFCS_REVIEW_DECISION_CLOSED) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
@@ -578,7 +587,7 @@ function mfcs_request_history_0_form_build_updater_name($user_id, &$processed_va
     }
 
     if (is_null($updater_name)) {
-      $updater_name = "Unknown User (id: " . check_plain($user_data->value) . ")";
+      $updater_name = "Unknown User [id: " . check_plain($user_data->value) . "]";
     }
 
     $processed_values[$user_id] = array(

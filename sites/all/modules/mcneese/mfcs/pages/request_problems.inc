@@ -292,7 +292,7 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
     );
 
     $row['account'] = array(
-      'data' => '<a href="' . $base_path . 'user/' . $problem->user_id . $url_arguments . '" class="user-link">' . check_plain($problem->name) . '</a>' . ' <span class="user-id script-hidden">(id: ' .  $problem->user_id . ')</span>',
+      'data' => '<a href="' . $base_path . 'user/' . $problem->user_id . $url_arguments . '" class="user-link">' . check_plain($problem->name) . '</a>' . ' <span class="user-id script-hidden">[id: ' .  $problem->user_id . ']</span>',
       'class' => $class_name,
     );
 
@@ -538,7 +538,7 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
     $banner_id = $problem_user->field_user_banner_id['und'][0]['value'];
   }
 
-  $page_title = "Facilities Use Problems: " . $user_name . "(id: " . $problem_user_id . ")";
+  $page_title = "Facilities Use Problems: " . $user_name . " [id: " . $problem_user_id . "]";
   drupal_set_title($page_title);
 
   $user_is_manager = user_access('mfcs manage', $user);

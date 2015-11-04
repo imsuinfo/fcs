@@ -231,6 +231,19 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
     'tab_root' => 'requests',
   );
 
+  $items['requests/reassign-0/%'] = array(
+    'title' => "Re-Assign Request",
+    'description' => "Re-Assign Request",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_reassign_0_form', 2),
+    'file' => 'request_reassign.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('reassign', 2),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
+
   $items['requests/view-0/%'] = array(
     'title' => "View Request",
     'description' => "View Request",

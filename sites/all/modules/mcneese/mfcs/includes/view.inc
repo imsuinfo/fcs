@@ -456,10 +456,7 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
     }
   }
 
-  $venue_coordinator = NULL;
-  if (!empty($request['venue_coordinator']['user_id'][0]->value)) {
-    $venue_coordinator = user_load($request['venue_coordinator']['user_id'][0]->value);
-  }
+  $users = array();
 
   global $base_path;
   global $mfcs_determined;
@@ -646,25 +643,31 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
         unset($term);
       }
       elseif ($type[$value_name] == 'user_id') {
-        $user = user_load($value->$value_name);
+        if (!isset($users[$value->$value_name])) {
+          $users[$value->$value_name] = mfcs_load_basic_user_settings_by_user_id($value->$value_name);
 
-        if (is_object($user)){
+          if (!is_array($users[$value->$value_name])) {
+            unset($users[$value->$value_name]);
+          }
+        }
+
+        if (!empty($users[$value->$value_name])){
           if (!array_key_exists($value_name, $display)) {
             $display[$value_name] = 'name';
           }
 
-          $user_name = check_plain($user->name);
+          $user_name = check_plain($users[$value->$value_name]['name']);
 
-          if (!empty($user->field_user_last_name['und'][0]['value'])) {
-            $user_name = check_plain($user->field_user_last_name['und'][0]['value']) . ', ';
+          if (!empty($users[$value->$value_name]['last_name'])) {
+            $user_name = check_plain($users[$value->$value_name]['last_name']) . ', ';
           }
 
-          if (!empty($user->field_user_first_name['und'][0]['value'])) {
-            $user_name .= check_plain($user->field_user_first_name['und'][0]['value']);
+          if (!empty($users[$value->$value_name]['first_name'])) {
+            $user_name .= check_plain($users[$value->$value_name]['first_name']);
           }
 
           if ($display[$value_name] == 'account_name') {
-            $markup .= '<a href="' . $base_path . 'user/' . $user->uid . $url_arguments . '">' . $user_name . '</a>';
+            $markup .= '<a href="' . $base_path . 'user/' . $users[$value->$value_name]['user_id'] . $url_arguments . '">' . $user_name . '</a>';
             $length += strlen($user_name);
           }
           elseif ($display[$value_name] != 'pass' && property_exists($user, $display)) {
@@ -672,8 +675,6 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
             $length += strlen($user->$display[$value_name]);
           }
         }
-
-        unset($user);
       }
       elseif ($type[$value_name] == 'status') {
         mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
@@ -821,35 +822,65 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
         }
       }
       elseif ($type[$value_name] == 'venue_coordinator') {
+        if (!isset($users[$value->$value_name])) {
+          $users[$value->$value_name] = mfcs_load_basic_user_settings_by_user_id($value->$value_name);
+
+          if (!is_array($users[$value->$value_name])) {
+            unset($users[$value->$value_name]);
+          }
+        }
+
         if ($display[$value_name] == 'name') {
           $processed_markup = '';
 
           $first_name = FALSE;
-          if (!empty($venue_coordinator->field_user_last_name['und'][0]['safe_value'])) {
+          if (!empty($users[$value->$value_name]['last_name'])) {
             $first_name = TRUE;
-            $processed_markup .= $venue_coordinator->field_user_last_name['und'][0]['safe_value'];
+            $processed_markup .= check_plain($users[$value->$value_name]['last_name']);
           }
 
-          if (!empty($venue_coordinator->field_user_first_name['und'][0]['safe_value'])) {
+          if (!empty($users[$value->$value_name]['first_name'])) {
             if ($first_name) {
               $processed_markup .=  ', ';
             }
 
-            $processed_markup .= $venue_coordinator->field_user_first_name['und'][0]['safe_value'];
+            $processed_markup .= check_plain($users[$value->$value_name]['first_name']);
           }
 
           $markup .= $processed_markup;
           $length += strlen($processed_markup);
         }
         elseif ($display[$value_name] == 'email') {
-          $markup .= $venue_coordinator->mail;
-          $length += strlen($venue_coordinator->mail);
+          $markup .= check_plain($users[$value->$value_name]['email']);
+          $length += strlen(check_plain($users[$value->$value_name]['email']));
         }
         elseif ($display[$value_name] == 'phone') {
-          if (!empty($venue_coordinator->field_user_phone_number['und'][0]['safe_value'])) {
-            $markup .= $venue_coordinator->field_user_phone_number['und'][0]['safe_value'];
-            $length += strlen($venue_coordinator->field_user_phone_number['und'][0]['safe_value']);
+          if (!empty($users[$value->$value_name]['phone_number'])) {
+            $markup .= check_plain($users[$value->$value_name]['phone_number']);
+            $length += strlen(check_plain($users[$value->$value_name]['phone_number']));
           }
+        }
+        elseif ($display[$value_name] == 'user_id') {
+          $processed_markup = '';
+
+          $first_name = FALSE;
+          if (!empty($users[$value->$value_name]['last_name'])) {
+            $first_name = TRUE;
+            $processed_markup .= check_plain($users[$value->$value_name]['last_name']);
+          }
+
+          if (!empty($users[$value->$value_name]['first_name'])) {
+            if ($first_name) {
+              $processed_markup .=  ', ';
+            }
+
+            $processed_markup .= check_plain($users[$value->$value_name]['first_name']);
+          }
+
+          $processed_markup .= ' <sup class="item-extra-user-user_id" title="User ID: ' . $value->$value_name . '">[id: ' . $value->$value_name . ']' . '</sup>';
+
+          $markup .= $processed_markup;
+          $length += strlen($processed_markup);
         }
       }
       elseif ($type[$value_name] == 'review_decision') {
@@ -1033,9 +1064,9 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
       }
 
       if (!array_key_exists($user_id, $users)) {
-        $users[$user_id] = user_load($user_id);
+        $users[$user_id] = mfcs_load_basic_user_settings_by_user_id($user_id);
 
-        if (!is_object($users[$user_id])) {
+        if (!is_array($users[$user_id])) {
           $users[$user_id] = NULL;
         }
       }
@@ -1092,18 +1123,18 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
         $reviewer_classification = "";
       }
       else {
-        if (isset($users[$user_id]->field_user_first_name['und'][0]['value'])) {
-          $user_name .= $users[$user_id]->field_user_first_name['und'][0]['value'];
+        if (isset($users[$user_id]['first_name'])) {
+          $user_name .= $users[$user_id]['first_name'];
 
-          if (isset($users[$user_id]->field_user_last_name['und'][0]['value'])) {
-            $user_name .= ' ' . $users[$user_id]->field_user_last_name['und'][0]['value'];
+          if (isset($users[$user_id]['last_name'])) {
+            $user_name .= ' ' . $users[$user_id]['last_name'];
           }
         }
-        elseif (isset($users[$user_id]->field_user_last_name['und'][0]['value'])) {
-          $user_name .= ' ' . $users[$user_id]->field_user_last_name['und'][0]['value'];
+        elseif (isset($users[$user_id]['last_name'])) {
+          $user_name .= ' ' . $users[$user_id]['last_name'];
         }
         else {
-          $user_name .= $users[$user_id]->name;
+          $user_name .= $users[$user_id]['name'];
         }
       }
 
@@ -1168,8 +1199,16 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
       elseif ($decision == MFCS_REVIEW_DECISION_UNCANCELLED) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">Uncancelled</strong> the request' . $reviewer_classification . '.';
       }
+      elseif ($decision == MFCS_REVIEW_DECISION_REASSIGNED) {
+        $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">Re-Assigned</strong> the request' . $reviewer_classification . '.';
+      }
       else {
-        $markup .= $user_name_markup . ' ' . $user_id_markup . ' chose to <strong class="review-item-label-text-row-decision">' . $decision_options[$decision] . '</strong> the request' . $reviewer_classification . '.';
+        if (isset($decision_options[$decision])) {
+          $markup .= $user_name_markup . ' ' . $user_id_markup . ' chose to <strong class="review-item-label-text-row-decision">' . $decision_options[$decision] . '</strong> the request' . $reviewer_classification . '.';
+        }
+        else {
+          $markup .= $user_name_markup . ' ' . $user_id_markup . ' performed an <strong class="review-item-label-text-row-decision">Unknown Operation</strong> on the request' . $reviewer_classification . '.';
+        }
       }
       $markup .= '</div></h3>';
       $markup .= '<div class="review-item-label-date">' . date("Y/m/d h:i:s a", $date) . "</div>";
