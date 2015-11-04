@@ -174,7 +174,7 @@ function mfcs_request_reassign_0_form($form, &$form_state, $request_id) {
     $form['message']['#markup'] .= "<br>\n";
   }
   else {
-    $form['message']['#markup'] .= '<h3>Are you sure wou want to re-assign the request?</h3> ';
+    $form['message']['#markup'] .= '<h3>Are you sure you want to re-assign the request?</h3> ';
     $form['message']['#markup'] .= '<div>';
     $form['message']['#markup'] .= 'If this request has an out dated Venue Coordinator, then it will be re-assigned to the correct, updated, Venue Coordinator. ' . "<br>\n";
     $form['message']['#markup'] .= "<br>\n";
