@@ -266,7 +266,7 @@ function mfcs_workflow_set_status($request_id, $status, $user = NULL, $extra = a
         $query->condition('id', $request_id);
         $query->condition('date', $instance);
         $query->condition('user_id', $user->uid);
-        $query->fields($mfcs_requests);
+        $query->fields($mfcs_request_revisions);
         $query->execute();
       }
     }
