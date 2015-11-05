@@ -398,7 +398,7 @@ function mfcs_workflow_set_venue_coordinator($request_id, $venue_coordinator_id,
 
   $mfcs_field_venue_coordinator_user_id = array(
     'request_id' => $request_id,
-    'revision' => $request_revision_next,
+    'revision' => $venue_coordinator_id_revision,
     'delta' => 0,
     'user_id' => $user->uid,
     'date' => $instance,
