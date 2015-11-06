@@ -2262,8 +2262,8 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
         }
 
         $email_params['title_suffix'] = "Re-Assigned";
-        $email_params['content'] .= $changed_by_string . " has re-assigned the venue coordinator of the request from " . $reassigned_from_user_name . " [id: " . $reassigned_from . "] to " . $reassigned_to_user_name . " [id: " . $reassigned_to . "].\n";
-        $email_params['markup'] .= $changed_by_string . " has re-assigned the venue coordinator of the request from <strong>" . $reassigned_from_user_name . "</strong> <sup>[id: " . $reassigned_from . "]</sup> to <strong>" . $reassigned_to_user_name . "</strong> <sup>[id: " . $reassigned_to . "]</sup>.<br>\n";
+        $email_params['content'] .= $changed_by_string . " has re-assigned the venue coordinator from " . $reassigned_from_user_name . " [id: " . $reassigned_from . "] to " . $reassigned_to_user_name . " [id: " . $reassigned_to . "].\n";
+        $email_params['markup'] .= $changed_by_string . " has re-assigned the venue coordinator from <strong>" . $reassigned_from_user_name . "</strong> <sup>[id: " . $reassigned_from . "]</sup> to <strong>" . $reassigned_to_user_name . "</strong> <sup>[id: " . $reassigned_to . "]</sup>.<br>\n";
       }
       elseif ($is_deleted || $status == MFCS_REQUEST_STATUS_DELETED) {
         $email_params['title_suffix'] = "Deleted";
