@@ -1286,27 +1286,27 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
     return FALSE;
   }
 
-  if (isset($request['venue_coordinator']['user_id'][0]->value)) {
+  if (!isset($request['venue_coordinator']['user_id'][0]->value)) {
     watchdog(MFCS_WATCHDOG_ID, "%request_id is missing the venue coordinator, cannot continue processing workflow changes.", array('%request_id' => $request_id), WATCHDOG_CRITICAL);
     return FALSE;
   }
 
-  if (isset($request['request_coordinator']['classification'][0]->value)) {
+  if (!isset($request['request_coordinator']['classification'][0]->value)) {
     watchdog(MFCS_WATCHDOG_ID, "%request_id is missing the coordinator classification, cannot continue processing workflow changes.", array('%request_id' => $request_id), WATCHDOG_CRITICAL);
     return FALSE;
   }
 
-  if (isset($request['top']['status'][0]->value)) {
+  if (!isset($request['top']['status'][0]->value)) {
     watchdog(MFCS_WATCHDOG_ID, "%request_id is missing the status, cannot continue processing workflow changes.", array('%request_id' => $request_id), WATCHDOG_CRITICAL);
     return FALSE;
   }
 
-  if (isset($request['top']['step'][0]->value)) {
+  if (!isset($request['top']['step'][0]->value)) {
     watchdog(MFCS_WATCHDOG_ID, "%request_id is missing the step, cannot continue processing workflow changes.", array('%request_id' => $request_id), WATCHDOG_CRITICAL);
     return FALSE;
   }
 
-  if (isset($request['information']['type'][0]->value)) {
+  if (!isset($request['information']['type'][0]->value)) {
     watchdog(MFCS_WATCHDOG_ID, "%request_id is missing the type, cannot continue processing workflow changes.", array('%request_id' => $request_id), WATCHDOG_CRITICAL);
     return FALSE;
   }
