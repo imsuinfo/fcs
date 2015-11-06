@@ -1894,20 +1894,26 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
   $room_text = '';
   $building_text = '';
 
-  $location = mfcs_load_locations($request['top']['location'][0]->value);
+  $location = mfcs_load_locations($request['top']['location'][0]->value, TRUE);
 
   if (is_object($location)) {
     $location_text = $location->location_name;
   }
+  else {
+    watchdog(MFCS_WATCHDOG_ID, "Could not load the location for %request_id , the location value is: %value.", array('%request_id' => $request_id, '%value' => $request['top']['location'][0]->value), WATCHDOG_WARNING);
+  }
 
-  $room = mfcs_load_rooms(NULL, NULL, $request['top']['room'][0]->value);
+  $room = mfcs_load_rooms(NULL, NULL, $request['top']['room'][0]->value, TRUE);
 
   if (is_object($room)) {
     $room_text = $room->room_name;
-    $building = mfcs_load_buildings(NULL, $room->building_id);
+    $building = mfcs_load_buildings(NULL, $room->building_id, TRUE);
 
     if (is_object($building)) {
       $building_text = $building->building_name;
+    }
+    else {
+      watchdog(MFCS_WATCHDOG_ID, "Could not load the room and building information for %request_id , the room value is: %value.", array('%request_id' => $request_id, '%value' => $request['top']['room'][0]->value), WATCHDOG_WARNING);
     }
   }
 
