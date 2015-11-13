@@ -55,7 +55,8 @@ function mcneese_feeds_www_rss_featured() {
     //$query->orderBy('wmnh.stamp', 'desc');
     $query->orderBy('n.changed', 'desc');
 
-    $query->range(0, MCNEESE_FEEDS_WWW_FEED_LIMIT);
+    // only support 6 feeds for featured content, to be consistent with front page.
+    $query->range(0, 6);
 
     $results = $query->execute()->fetchAllAssoc('nid');
 

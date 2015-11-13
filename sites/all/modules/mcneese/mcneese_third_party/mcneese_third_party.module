@@ -17,13 +17,15 @@
  * This was required by the "bookstore" frontpage.
  *
  * The facebook js is from:
- * - https://connect.facebook.net/en_US/all.js
+ * - https://connect.facebook.net/en_US/sdk.js
+ * - https://connect.facebook.net/en_US/all.js (old)
  * - https://github.com/facebookarchive/connect-js
  */
 function mcneese_third_party_add_facebook_connect_js() {
   $module_path = drupal_get_path('module', 'mcneese_third_party');
 
-  drupal_add_js($module_path . '/js/facebook-connect.js', array('type' => 'file', 'group' => JS_DEFAULT, 'preprocess' => TRUE));
+  //drupal_add_js($module_path . '/js/facebook-connect-all.js', array('type' => 'file', 'group' => JS_DEFAULT, 'preprocess' => TRUE));
+  drupal_add_js($module_path . '/js/facebook-connect-sdk.js', array('type' => 'file', 'group' => JS_DEFAULT, 'preprocess' => TRUE));
 }
 
 /**
@@ -50,6 +52,8 @@ function mcneese_third_party_add_facebook_connect_legacy_js() {
  *   The unique facebook init string.
  *
  * @see: mcneese_third_party_add_facebook_connect_js()
+ * @see: https://developers.facebook.com/docs/javascript/quickstart/v2.5
+ * @see: https://developers.facebook.com/docs/javascript/examples
  */
 function mcneese_third_party_do_facebook_connect_js($id) {
   if (!is_string($id)) {
@@ -59,7 +63,14 @@ function mcneese_third_party_do_facebook_connect_js($id) {
     return;
   }
 
-  $init_js = 'FB.init("' . $id . '");';
+  //$init_js = 'FB.init("' . $id . '");';
+  $init_js = 'window.fbAsyncInit = function() {';
+  $init_js .= '  FB.init({';
+  $init_js .= '    appId : \'' . $id . '\',';
+  $init_js .= '    xfbml : true,';
+  $init_js .= '    version : \'v2.4\'';
+  $init_js .= '  });';
+  $init_js .= '};';
 
   drupal_add_js($init_js, array('type' => 'inline', 'preprocess' => FALSE));
 }

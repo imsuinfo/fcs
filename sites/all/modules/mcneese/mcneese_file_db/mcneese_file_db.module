@@ -179,6 +179,8 @@ function mcneese_file_db_get_server_id() {
  *    - extension: Perform a like test against the filesextension.
  *    - mimetype: Perform a like test against the filesmimetype.
  *    - checksum: Perform a like test against the checksum.
+ *    - id: Perform a like test against the id (internal id).
+ *    - file_id: Perform a like test against the file_id (drupals file id)
  *    - timestamp: An array of:
  *      - operation: one of '>', '>=', '<', '<=', '<>', '=='.
  *      - stamp: timestamp to compare against.
@@ -284,6 +286,18 @@ function mcneese_file_db_load_available_files($conditions = array()) {
 
         $and .= ' mfdf.id = :id';
         $arguments[':id'] = $conditions['id'];
+      }
+
+      if (!empty($conditions['file_id'])) {
+        if (is_null($and)) {
+          $and = '';
+        }
+        else {
+          $and .= ' AND';
+        }
+
+        $and .= ' mfda.file_id = :file_id';
+        $arguments[':file_id'] = $conditions['file_id'];
       }
 
       if (isset($conditions['timestamp']['operation']) && isset($conditions['timestamp']['stamp'])) {
@@ -1210,6 +1224,38 @@ function mcneese_file_db_check_existence($checksum, $association) {
 
     throw $e;
   }
+}
+
+/**
+ * Get the name of a file based on a given unique id.
+ *
+ * @param string $id
+ *   The unique id as specified by the path_id method.
+ * @param string $checksum
+ *   The full checksum string to check.
+ * @param int $method
+ *   (optional) The path by id method.
+ *
+ * @return bool|string
+ *   The filename is returned on success, FALSE otherwise.
+ */
+function mcneese_file_db_get_filename($id, $association, $method = MCNEESE_FILE_DB_PATH_BY_HASH) {
+  if ($method == MCNEESE_FILE_DB_PATH_BY_HASH) {
+    $loaded = mcneese_file_db_load_available_files(array('checksum' => $id, 'association' => $association));
+  }
+  elseif ($method == MCNEESE_FILE_DB_PATH_BY_ID) {
+    $loaded = mcneese_file_db_load_available_files(array('id' => $id, 'association' => $association));
+  }
+  elseif ($method == MCNEESE_FILE_DB_PATH_BY_FID) {
+    $loaded = mcneese_file_db_load_available_files(array('file_id' => $id, 'association' => $association));
+  }
+  else {
+    return FALSE;
+  }
+
+  if (empty($loaded)) return FALSE;
+
+  return $loaded;
 }
 
 /**
