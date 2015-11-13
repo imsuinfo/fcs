@@ -353,6 +353,24 @@ function mfcs_user_insert(&$edit, $account, $category) {
 }
 
 /**
+ * Implements hook_user_presave().
+ */
+function mfcs_user_presave(&$edit, $account, $category) {
+  mfcs_include(MFCS_INCLUDE_HOOKS);
+
+  return mfcs_hook_user_presave($edit, $account, $category);
+}
+
+/**
+ * Implements hook_user_update().
+ */
+function mfcs_user_update(&$edit, $account, $category) {
+  mfcs_include(MFCS_INCLUDE_HOOKS);
+
+  return mfcs_hook_user_update($edit, $account, $category);
+}
+
+/**
  * Access callback for facilities use pages.
  *
  * For already loaded requests, use: mfcs_request_access().
@@ -1602,40 +1620,6 @@ function mfcs_mail($key, &$message, $params) {
 }
 
 /**
- * Implements hook_user_update().
- */
-function mfcs_user_update(&$edit, $user, $category) {
-  if (!array_key_exists('status', $edit) || !isset($edit['original']->status) || !isset($user->uid)) {
-    return;
-  }
-
-  // if the status has changed, perform a user problem check.
-  if ($edit['status'] != $edit['original']->status) {
-    $disabled_with_active = mfcs_disabled_users_with_active_content($user->uid);
-
-    $mfcs_users = mfcs_load_users($user->uid);
-
-    $problems = MFCS_USER_PROBLEM_NONE;
-    if (isset($mfcs_users[$user->uid])) {
-      $problems = $mfcs_users[$user->uid]->problems;
-    }
-
-    if ($disabled_with_active) {
-      if (($problems & MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE) == 0) {
-        $problems = ($problems | MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE);
-        mfcs_save_user($user->uid, array('problems' => $problems));
-      }
-    }
-    else {
-      if (($problems & MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE) > 0) {
-        $problems -= MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE;
-        mfcs_save_user($user->uid, array('problems' => $problems));
-      }
-    }
-  }
-}
-
-/**
  * Helper function to load files related to this project.
  *
  * @param int $id
@@ -2483,6 +2467,7 @@ function mfcs_load_request_user_by_user_id($user_id) {
 
     $query->condition('mberu.user_id', $user_id);
     $query->condition('mberu.disabled', 0);
+    $query->condition('fdfubi.entity_type', 'user');
 
     $rows = $query->execute()->fetchAll();
 
@@ -2587,14 +2572,15 @@ function mfcs_load_request_user_by_banner_id($banner_id) {
  *   (optional) Additional roles to assign the user to.
  *   Providing this will override the auto-assign role as requester.
  *   This is an array of role names and not role ids.
- * @param bool $allow_recurse
- *   (optional) Allow any possible recursive function calls to
- *   mfcs_synchronize_user_settings().
+ * @param bool $check_for_multiple_accounts
+ *   (optional) If TRUE, then additional checks and banner synchronization is attempted to ensure that the user is or is not a primary account.
+ *   When TRUE, this will make additional calls to mfcs_synchronize_user_settings().
+ *   If FALSE, do not perform this check.
  *
  * @return bool
  *   TRUE on success, FALSE otherwise.
  */
-function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $allow_recurse = TRUE) {
+function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $check_for_multiple_accounts = TRUE) {
   if (is_null($user)) {
     $user = cf_current_user();
   }
@@ -2609,8 +2595,8 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $allow_r
     return FALSE;
   }
 
-  if (!is_bool($allow_recurse)) {
-    cf_error::invalid_bool('allow_recurse');
+  if (!is_bool($check_for_multiple_accounts)) {
+    cf_error::invalid_object('check_for_multiple_accounts');
     return FALSE;
   }
 
@@ -2686,6 +2672,145 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $allow_r
     }
   }
 
+  // only change user event roles for banner users.
+  if (!is_null($banner_id)) {
+    if ($check_for_multiple_accounts) {
+      // jira ticket: fcs-58, check to see if users multiple accounts with the same banner id exist and if so force one to be the primary.
+      $all_users = mfcs_users_load_banner_id_to_user_id($banner_id);
+
+      if (!empty($all_users['banner'][$banner_id]['others'])) {
+        foreach ($all_users['banner'][$banner_id]['others'] as $others) {
+          $other_user = user_load($others['user_id']);
+          mfcs_synchronize_user_settings($other_user, array(), FALSE);
+          unset($other_user);
+        }
+      }
+
+      // update the primary account as well.
+      if (isset($all_users['banner'][$banner_id]['user_id']) && $all_users['banner'][$banner_id]['user_id'] != $user->uid) {
+        // force banner sync when dealing with a non-primary account.
+        mfcs_sync_banner_to_local_users(NULL, $banner_id);
+
+        $primary_user = user_load($all_users['banner'][$banner_id]['user_id']);
+        mfcs_synchronize_user_settings($primary_user, array(), FALSE);
+        unset($primary_user);
+
+        // make sure that all reviewer roles associated with the current user are assigned to the primary user and not the others.
+        try {
+          $query_string = 'with existing_ids as (select id from mfcs_reviewers where user_id = :primary_id) ';
+          $query_string .= 'update mfcs_reviewers set user_id = :primary_id where user_id = :other_id and id not in (select * from existing_ids)';
+          $query = db_query($query_string, array(':primary_id' => $all_users['banner'][$banner_id]['user_id'], ':other_id' => $user->uid));
+          unset($query_string);
+
+          $query_string = 'with existing_ids as (select id from mfcs_proxy_venue_coordinator where user_id = :primary_id) ';
+          $query_string .= 'update mfcs_proxy_venue_coordinator set user_id = :primary_id where user_id = :other_id and id not in (select * from existing_ids)';
+          $query = db_query($query_string, array(':primary_id' => $all_users['banner'][$banner_id]['user_id'], ':other_id' => $user->uid));
+          unset($query_string);
+
+          $query_string = 'with existing_ids as (select id from mfcs_proxy_venue_coordinator where proxy_id = :primary_id) ';
+          $query_string .= 'update mfcs_proxy_venue_coordinator set proxy_id = :primary_id where proxy_id = :other_id and id not in (select * from existing_ids)';
+          $query = db_query($query_string, array(':primary_id' => $all_users['banner'][$banner_id]['user_id'], ':other_id' => $user->uid));
+          unset($query_string);
+        }
+        catch (Exception $ex) {
+          cf_error::on_query_execution($ex);
+
+          return FALSE;
+        }
+
+        // the function calls itself and will call user_save() as necessary, return here and prevent duplicate executions.
+        return TRUE;
+      }
+    }
+
+    if ($is_primary) {
+      // roles are only synced for primary accounts, but the saved state may not yet be updated, so force the status when processing the user banner roles.
+      $user->field_user_primary_account['und'][0]['value'] = 1;
+
+      $edit = mfcs_process_user_banner_roles($user, $problems, TRUE, $roles);
+    }
+
+    if (!is_array($edit)) {
+      $edit = array();
+    }
+
+    if ($assign_primary) {
+      $edit['field_user_primary_account']['und'][0]['value'] = 1;
+    }
+
+    if (user_save($user, $edit)) {
+      // check to see if the user has any synchronization problem flags set and unset them.
+      if ($problems != MFCS_USER_PROBLEM_NONE) {
+        $update = TRUE;
+        if (isset($mfcs_users[$user->uid]->problems)) {
+          $update = $problems != $mfcs_users[$user->uid]->problems;
+        }
+
+        if (($problems & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) > 0) {
+          $update = TRUE;
+          $problems -= MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE;
+        }
+
+        if ($update) {
+          mfcs_save_user($user->uid, array('problems' => $problems));
+        }
+      }
+
+      return TRUE;
+    }
+
+    // account synchronization failed, so assign the problem flag.
+    // this is done here instead of at the FALSE below to ensure that non-banner accounts to not get this problem flag.
+    if (($problems & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) == 0) {
+      $problems += MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE;
+
+      mfcs_save_user($user->uid, array('problems' => $problems));
+    }
+  }
+
+  return FALSE;
+}
+
+/**
+ * Given a user object, the user settings will be updated.
+ *
+ * @param object $user
+ *   The user object to process.
+ * @param int $problems
+ *   An integer representing existing problems, set to MFCS_USER_PROBLEM_NONE.
+ *   This will be altered so that the caller can discover and handle encountered problems.
+ * @param array $roles
+ *   (optional) Additional roles to assign the user to.
+ *   Providing this will override the auto-assign role as requester.
+ *   This is an array of role names and not role ids.
+ *
+ * @return bool|array
+ *   An array containing the changed fields, to be merged with a function such as mfcs_hook_user_presave().
+ *   FALSE is returned on error.
+ *
+ * @see: mfcs_hook_user_presave()
+ */
+function mfcs_process_user_banner_roles($user, &$problems, $roles = array()) {
+  if (!is_object($user)) {
+    cf_error::invalid_object('user');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($problems)) {
+    cf_error::invalid_object('problems');
+    return FALSE;
+  }
+
+  if (!is_array($roles)) {
+    cf_error::invalid_array('roles');
+    return FALSE;
+  }
+
+  $banner_id = NULL;
+  if (!empty($user->field_user_banner_id['und'][0]['value']) && is_numeric($user->field_user_banner_id['und'][0]['value'])) {
+    $banner_id = $user->field_user_banner_id['und'][0]['value'];
+  }
+
   $mappings = mfcs_load_request_user_role_mapping();
 
   // unset all system role information associated with oracle.
@@ -2738,51 +2863,18 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $allow_r
     unset($role);
   }
 
+  $edit = array();
+
   // only change user event roles for banner users.
   if (!is_null($banner_id)) {
-    // jira ticket: fcs-58, check to see if users multiple accounts with the same banner id exist and if so force one to be the primary.
-    if ($allow_recurse && !is_null($banner_id)) {
-      $all_users = mfcs_users_load_banner_id_to_user_id($banner_id);
-
-      if (!empty($all_users['banner'][$banner_id]['others'])) {
-        foreach ($all_users['banner'][$banner_id]['others'] as $others) {
-          $other_user = user_load($others['user_id']);
-          mfcs_synchronize_user_settings($other_user, array(), FALSE);
-          unset($other_user);
-        }
+    $is_primary = TRUE;
+    if (!empty($user->field_user_primary_account['und'][0]['value']) && is_string($user->field_user_primary_account['und'][0]['value'])) {
+      $is_primary = strtolower($user->field_user_primary_account['und'][0]['value']);
+      if ($is_primary == '0' || $is_primary == 'no') {
+        $is_primary = FALSE;
       }
-
-      // update the primary account as well.
-      if (isset($all_users['banner'][$banner_id]['user_id']) && $all_users['banner'][$banner_id]['user_id'] != $user->uid) {
-        // force banner sync when dealing with a non-primary account.
-        mfcs_sync_banner_to_local_users(NULL, $banner_id);
-
-        $primary_user = user_load($all_users['banner'][$banner_id]['user_id']);
-        mfcs_synchronize_user_settings($primary_user, array(), FALSE);
-        unset($primary_user);
-
-        // make sure that all reviewer roles associated with the current user are assigned to the primary user and not the others.
-        try {
-          $query_string = 'with existing_ids as (select id from mfcs_reviewers where user_id = :primary_id) ';
-          $query_string .= 'update mfcs_reviewers set user_id = :primary_id where user_id = :other_id and id not in (select * from existing_ids)';
-          $query = db_query($query_string, array(':primary_id' => $all_users['banner'][$banner_id]['user_id'], ':other_id' => $user->uid));
-          unset($query_string);
-
-          $query_string = 'with existing_ids as (select id from mfcs_proxy_venue_coordinator where user_id = :primary_id) ';
-          $query_string .= 'update mfcs_proxy_venue_coordinator set user_id = :primary_id where user_id = :other_id and id not in (select * from existing_ids)';
-          $query = db_query($query_string, array(':primary_id' => $all_users['banner'][$banner_id]['user_id'], ':other_id' => $user->uid));
-          unset($query_string);
-
-          $query_string = 'with existing_ids as (select id from mfcs_proxy_venue_coordinator where proxy_id = :primary_id) ';
-          $query_string .= 'update mfcs_proxy_venue_coordinator set proxy_id = :primary_id where proxy_id = :other_id and id not in (select * from existing_ids)';
-          $query = db_query($query_string, array(':primary_id' => $all_users['banner'][$banner_id]['user_id'], ':other_id' => $user->uid));
-          unset($query_string);
-        }
-        catch (Exception $ex) {
-          cf_error::on_query_execution($ex);
-
-          return FALSE;
-        }
+      else {
+        $is_primary = TRUE;
       }
     }
 
@@ -2875,42 +2967,9 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $allow_r
 
     // Note: the system used to refer to requests as events, but because this is a drupal field, 'event' cannot be changed to 'request' in this explicit case.
     $edit = array('field_user_event_roles' => array('und' => $request_roles), 'roles' => $system_roles);
-
-    if ($assign_primary) {
-      $edit['field_user_primary_account']['und'][0]['value'] = 1;
-    }
-
-    if (user_save($user, $edit)) {
-      // check to see if the user has any synchronization problem flags set and unset them.
-      if ($problems != MFCS_USER_PROBLEM_NONE) {
-        $update = TRUE;
-        if (isset($mfcs_users[$user->uid]->problems)) {
-          $update = $problems != $mfcs_users[$user->uid]->problems;
-        }
-
-        if (($problems & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) > 0) {
-          $update = TRUE;
-          $problems -= MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE;
-        }
-
-        if ($update) {
-          mfcs_save_user($user->uid, array('problems' => $problems));
-        }
-      }
-
-      return TRUE;
-    }
-
-    // account synchronization failed, so assign the problem flag.
-    // this is done here instead of at the FALSE below to ensure that non-banner accounts to not get this problem flag.
-    if (($problems & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) == 0) {
-      $problems += MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE;
-
-      mfcs_save_user($user->uid, array('problems' => $problems));
-    }
   }
 
-  return FALSE;
+  return $edit;
 }
 
 /**

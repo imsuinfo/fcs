@@ -1343,5 +1343,51 @@ function mfcs_hook_user_insert(&$edit, $account, $category) {
 }
 
 /**
+ * Internal function for hook_user_presave().
+ */
+function mfcs_hook_user_presave(&$edit, $account, $category) {
+  $problems = MFCS_USER_PROBLEM_NONE;
+  $changes = mfcs_process_user_banner_roles($account, $problems);
+
+  if (is_array($changes)) {
+    $edit = array_merge($edit, $changes);
+  }
+}
+
+/**
+ * Internal function for hook_user_update().
+ */
+function mfcs_hook_user_update(&$edit, $account, $category) {
+  if (!array_key_exists('status', $edit) || !isset($edit['original']->status) || !isset($account->uid)) {
+    return;
+  }
+
+  // if the status has changed, perform a user problem check.
+  if ($edit['status'] != $edit['original']->status) {
+    $disabled_with_active = mfcs_disabled_users_with_active_content($account->uid);
+
+    $mfcs_users = mfcs_load_users($account->uid);
+
+    $problems = MFCS_USER_PROBLEM_NONE;
+    if (isset($mfcs_users[$account->uid])) {
+      $problems = $mfcs_users[$account->uid]->problems;
+    }
+
+    if ($disabled_with_active) {
+      if (($problems & MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE) == 0) {
+        $problems = ($problems | MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE);
+        mfcs_save_user($account->uid, array('problems' => $problems));
+      }
+    }
+    else {
+      if (($problems & MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE) > 0) {
+        $problems -= MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE;
+        mfcs_save_user($account->uid, array('problems' => $problems));
+      }
+    }
+  }
+}
+
+/**
  * @} End of '@addtogroup mfcs'.
  */
