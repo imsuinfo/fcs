@@ -2727,7 +2727,7 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $check_f
       // roles are only synced for primary accounts, but the saved state may not yet be updated, so force the status when processing the user banner roles.
       $user->field_user_primary_account['und'][0]['value'] = 1;
 
-      $edit = mfcs_process_user_banner_roles($user, $problems, TRUE, $roles);
+      $edit = mfcs_process_user_banner_roles($user, $problems, $roles);
     }
 
     if (!is_array($edit)) {
