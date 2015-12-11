@@ -147,7 +147,7 @@ function mcneese_management_templates_use_list_page($template_id) {
   try {
     $query = db_select('mcneese_management_template_node', 'mmtn');
     $query->join('node', 'n', 'mmtn.node_id = n.nid');
-    $query->join('field_data_field_group', 'fdfg', 'mmtn.node_id = fdfg.entity_id');
+    $query->join('field_data_field_group', 'fdfg', 'mmtn.node_id = fdfg.entity_id and fdfg.entity_type = \'node\'');
     $query->join('taxonomy_term_data', 'ttd', 'fdfg.field_group_tid = ttd.tid');
     $query->fields('mmtn', array('node_id'));
     $query->fields('n', array('title'));

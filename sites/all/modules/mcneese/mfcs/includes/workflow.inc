@@ -460,7 +460,7 @@ function mfcs_workflow_set_venue_coordinator($request_id, $venue_coordinator_id,
  *
  * @param int $request_id
  *   The request id.
- * @param object $reviewer
+ * @param object $user
  *   The reviewer.
  * @param int $decision
  *   The facilities use decision.
@@ -474,7 +474,7 @@ function mfcs_workflow_set_venue_coordinator($request_id, $venue_coordinator_id,
  */
 function mfcs_workflow_step_review($request_id, $user, $decision, $message = "", $extra = array()) {
   if (!is_object($user)) {
-    cf_error::invalid_integer('user');
+    cf_error::invalid_object('user');
     return FALSE;
   }
 
@@ -1959,12 +1959,13 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
         'send_email' => FALSE,
         'requirements' => array('other' => 0, 'waived' => 0, 'university' => 1),
       );
-      mfcs_workflow_step_review($request_id, $request_requester, MFCS_REVIEW_DECISION_REQUIREMENT, "", $extra);
+      $request_requester_object = user_load($request_requester['user_id']);
+      mfcs_workflow_step_review($request_id, $request_requester_object, MFCS_REVIEW_DECISION_REQUIREMENT, "", $extra);
 
       $extra = array(
         'send_email' => FALSE,
       );
-      mfcs_workflow_step_review($request_id, $request_requester, MFCS_REVIEW_DECISION_APPROVE, "", $extra);
+      mfcs_workflow_step_review($request_id, $request_requester_object, MFCS_REVIEW_DECISION_APPROVE, "", $extra);
 
       #mfcs_workflow_step_review($request_id, $request_requester, MFCS_REVIEW_DECISION_CLOSED);
 
