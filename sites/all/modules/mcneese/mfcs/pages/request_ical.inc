@@ -110,7 +110,15 @@ function mfcs_request_ical_year_0_page($year = NULL) {
 
   header('HTTP/1.1 200 OK', TRUE, 200);
   header('Content-Type: text/plain');
-  header('Content-Length: ' . strlen($ical));
+
+  // if available, use drupal_bytes_in_string() to protect from potentialy multibyte issues.
+  if (function_exists('drupal_bytes_in_string')) {
+    header('Content-Length: ' . drupal_bytes_in_string($ical));
+  }
+  else {
+    header('Content-Length: ' . strlen($ical));
+  }
+
   header('Content-Transfer-Encoding: binary');
   #header('Content-type: text/plain; charset=utf-8');
   header('Content-type: text/calendar; charset=utf-8');
@@ -277,7 +285,15 @@ function mfcs_request_ical_month_0_page($year = NULL, $month = NULL) {
 
   header('HTTP/1.1 200 OK', TRUE, 200);
   header('Content-Type: text/plain');
-  header('Content-Length: ' . strlen($ical));
+
+  // if available, use drupal_bytes_in_string() to protect from potentialy multibyte issues.
+  if (function_exists('drupal_bytes_in_string')) {
+    header('Content-Length: ' . drupal_bytes_in_string($ical));
+  }
+  else {
+    header('Content-Length: ' . strlen($ical));
+  }
+
   header('Content-Transfer-Encoding: binary');
   #header('Content-type: text/plain; charset=utf-8');
   header('Content-type: text/calendar; charset=utf-8');
@@ -420,7 +436,15 @@ function mfcs_request_ical_day_0_page($year = NULL, $month = NULL, $day = NULL) 
 
   header('HTTP/1.1 200 OK', TRUE, 200);
   header('Content-Type: text/plain');
-  header('Content-Length: ' . strlen($ical));
+
+  // if available, use drupal_bytes_in_string() to protect from potentialy multibyte issues.
+  if (function_exists('drupal_bytes_in_string')) {
+    header('Content-Length: ' . drupal_bytes_in_string($ical));
+  }
+  else {
+    header('Content-Length: ' . strlen($ical));
+  }
+
   header('Content-Transfer-Encoding: binary');
   #header('Content-type: text/plain; charset=utf-8');
   header('Content-type: text/calendar; charset=utf-8');
@@ -496,7 +520,15 @@ function mfcs_request_ical_request_0_page($request_id) {
 
   header('HTTP/1.1 200 OK', TRUE, 200);
   header('Content-Type: text/plain');
-  header('Content-Length: ' . strlen($ical));
+
+  // if available, use drupal_bytes_in_string() to protect from potentialy multibyte issues.
+  if (function_exists('drupal_bytes_in_string')) {
+    header('Content-Length: ' . drupal_bytes_in_string($ical));
+  }
+  else {
+    header('Content-Length: ' . strlen($ical));
+  }
+
   header('Content-Transfer-Encoding: binary');
   #header('Content-type: text/plain; charset=utf-8');
   header('Content-type: text/calendar; charset=utf-8');

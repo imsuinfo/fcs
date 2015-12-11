@@ -529,7 +529,7 @@ function mcneese_functions_embed_job_opportunity_listing($opportunity) {
   try {
     $query = db_select('mcneese_management_template_node', 'mmtn');
     $query->innerJoin('node', 'n', 'mmtn.node_id = n.nid');
-    $query->innerJoin('field_data_field_group', 'fdfg', 'mmtn.node_id = fdfg.entity_id');
+    $query->innerJoin('field_data_field_group', 'fdfg', 'mmtn.node_id = fdfg.entity_id and fdfg.entity_type = \'node\'');
     $query->fields('mmtn');
     $query->fields('n', array('title'));
     $query->condition('field_group_tid', $opportunity);
@@ -627,7 +627,7 @@ function mcneese_functions_build_a_to_z_listing_content($type, $filter = NULL, $
   try {
     $query = db_select('node', 'n');
     $query->innerJoin('workbench_moderation_node_history', 'wmnh', 'wmnh.nid = n.nid AND wmnh.vid = n.vid');
-    $query->innerJoin('field_data_field_group', 'fdfg', 'n.nid = fdfg.entity_id AND fdfg.deleted = 0');
+    $query->innerJoin('field_data_field_group', 'fdfg', 'n.nid = fdfg.entity_id and fdfg.entity_type = \'node\' AND fdfg.deleted = 0');
     $query->innerJoin('taxonomy_term_data', 'ttd', 'fdfg.field_group_tid = ttd.tid');
 
     $query->condition('wmnh.published', 1);
@@ -638,7 +638,7 @@ function mcneese_functions_build_a_to_z_listing_content($type, $filter = NULL, $
       $query->condition('n.type', array('document', 'event', 'ie_policy', 'page', 'poster', 'side_panel', 'webform'), 'IN');
     }
     elseif ($type == 'group') {
-      $query->innerJoin('field_data_field_group_representative', 'fdfgr', 'n.nid = fdfgr.entity_id');
+      $query->innerJoin('field_data_field_group_representative', 'fdfgr', 'n.nid = fdfgr.entity_id and fdfgr.entity_type = \'node\'');
       $query->condition('fdfgr.field_group_representative_value', 1);
     }
     elseif ($type == 'webform') {
@@ -688,6 +688,7 @@ function mcneese_functions_build_a_to_z_listing_content($type, $filter = NULL, $
         $subquery = db_select('field_data_field_event_datetime', 'fdfed');
         $subquery->condition('fdfed.entity_id', $item->node_id);
         $subquery->condition('fdfed.revision_id', $item->revision_id);
+        $subquery->condition('fdfed.entity_type', 'node');
         $subquery->addField('fdfed', 'field_event_datetime_value', 'field_event_datetime_from');
         $subquery->addField('fdfed', 'field_event_datetime_value2', 'field_event_datetime_to');
         $subquery->orderBy('fdfed.field_event_datetime_value', 'ASC');
