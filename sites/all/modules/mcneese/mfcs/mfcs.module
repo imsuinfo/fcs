@@ -2814,10 +2814,13 @@ function mfcs_process_user_banner_roles($user, &$problems, $roles = array()) {
   $mappings = mfcs_load_request_user_role_mapping();
 
   // unset all system role information associated with oracle.
-  $system_roles = (array) $user->roles;
-  foreach ($mappings as $mapping) {
-    if (array_key_exists($mapping['rid'], $system_roles)) {
-      unset($system_roles[$mapping['rid']]);
+  $system_roles = array();
+  if (property_exists($user, 'roles')) {
+    $system_roles = (array) $user->roles;
+    foreach ($mappings as $mapping) {
+      if (array_key_exists($mapping['rid'], $system_roles)) {
+        unset($system_roles[$mapping['rid']]);
+      }
     }
   }
 
