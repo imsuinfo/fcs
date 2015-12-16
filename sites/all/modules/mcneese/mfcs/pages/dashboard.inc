@@ -169,6 +169,9 @@ function mfcs_dashboard_page() {
     $markup .= '<div>' . "\n";
     $markup .= 'You lack sufficient access to view or interact with the content on this website.<br>' . "\n";
     $markup .= '<br>' . "\n";
+    $markup .= '<strong>Have you registered for the current or upcoming semester?</strong>.<br>' . "\n";
+    $markup .= 'Between semesters, students who have not regestered for the next semester may not have access to the system until they have completed their registration.<br>' . "\n";
+    $markup .= '<br>' . "\n";
 
     if ($user_account_new_banner_access_problem) {
       $markup .= 'The system has detected that there were problems creating your account.<br>' . "\n";
