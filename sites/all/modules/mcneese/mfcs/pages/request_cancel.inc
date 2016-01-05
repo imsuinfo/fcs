@@ -510,9 +510,9 @@ function mfcs_request_cancelling_0_form($form, &$form_state, $request_id) {
   $form['message'] = array(
     '#markup' => '',
   );
-  $form['message']['#markup'] .= '<h3>Which requests would you like to cancel or uncancel?</h3> ';
+  $form['message']['#markup'] .= '<h3>Which dates would you like to cancel or uncancel?</h3> ';
   $form['message']['#markup'] .= '<div>';
-  $form['message']['#markup'] .= 'Once a request is cancelled, that request may no longer be available for uncancelling if another request takes up the time slot.' . "<br>\n";
+  $form['message']['#markup'] .= 'Once a date is cancelled, that request may no longer be available for uncancelling if another request takes up the time slot.' . "<br>\n";
   $form['message']['#markup'] .= '</div>';
 
   $form['dates'] = array(
