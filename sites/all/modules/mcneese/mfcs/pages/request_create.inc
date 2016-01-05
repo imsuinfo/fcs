@@ -411,6 +411,7 @@ function mfcs_request_create_0_form_validate($form, &$form_state) {
       }
       else {
         $room = explode('_', $form_state['values']['request']['room'][0], 3);
+        $room = (int) $room[0];
         $date = $form_state['values']['request']['dates']['date'];
         $time_start = $form_state['values']['request']['dates']['time_start'];
         $time_stop = $form_state['values']['request']['dates']['time_stop'];
@@ -449,7 +450,7 @@ function mfcs_request_create_0_form_validate($form, &$form_state) {
         }
 
         if (!empty($date)) {
-          $requests_using_room = mfcs_check_room_availability($room[0], $date, $time_start, $time_stop);
+          $requests_using_room = mfcs_check_room_availability($room, $date, $time_start, $time_stop);
 
           if ($requests_using_room === FALSE) {
             form_set_error('', "An internal error occurred while checking the room for availability. Please contact the support staff.");

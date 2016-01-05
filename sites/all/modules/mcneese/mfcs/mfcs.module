@@ -5628,8 +5628,8 @@ function mfcs_get_reviewer_settings_by_user_id($user_id, $disabled = FALSE) {
  * - date values have their time reset to 0 (aka: 12:00:00am).
  * - time values have their dates set to the same day as the date value.
  *
- * @param string $room
- *   The room string.
+ * @param int $room
+ *   The room id.
  * @param array $dates
  *   An array containing the date values.
  * @param array $time_start
@@ -5646,8 +5646,8 @@ function mfcs_get_reviewer_settings_by_user_id($user_id, $disabled = FALSE) {
  *   FALSE on error.
  */
 function mfcs_check_room_availability($room, $dates, $time_start, $time_stop, $request_id = NULL) {
-  if (!is_string($room) || empty($room)) {
-    cf_error::invalid_string('room');
+  if (!is_int($room)) {
+    cf_error::invalid_integer('room');
     return FALSE;
   }
 
