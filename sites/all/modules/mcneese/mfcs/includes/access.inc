@@ -870,6 +870,153 @@ function mfcs_page_request_access_operation_cancel(&$request_ids, &$processed, &
 }
 
 /**
+ * Perform the access control check for the cancelling operation.
+ *
+ * Do not confuse this with the cancel/uncancel functionality.
+ * This operates only on published requests and only for requests whose individual dates may be cancelled or uncancelled.
+ * It does not cancel or uncancel a request as a whole, but instead operates on inidivudal dates.
+ *
+ * @param array $request_ids
+ *   The array of requests ids yet to be processed.
+ * @param array $processed
+ *   The array of already processed request ids and the access results.
+ * @param array $access
+ *   The static variable representing the processed array used to increase
+ *   performance.
+ * @param array roles
+ *   An array of relevant roles associated with access control for requests.
+ * @param object user
+ *   The drupal user object to check access against.
+ *
+ * @return bool
+ *   TRUE on successfull execution, FALSE otherwise.
+ *   The return results do not represent the access control results.
+ */
+function mfcs_page_request_access_operation_cancelling(&$request_ids, &$processed, &$access, $roles, $user) {
+  if (!is_array($request_ids)) {
+    cf_error::invalid_array('request_ids');
+    return FALSE;
+  }
+
+  if (!is_array($processed)) {
+    cf_error::invalid_array('processed');
+    return FALSE;
+  }
+
+  if (!is_array($access)) {
+    cf_error::invalid_array('access');
+    return FALSE;
+  }
+
+  if (!is_array($roles)) {
+    cf_error::invalid_array('roles');
+    return FALSE;
+  }
+
+  if (!is_object($user)) {
+    cf_error::invalid_object('user');
+    return FALSE;
+  }
+
+  if ($roles['administer'] || $roles['manager'] || $roles['reviewer']) {
+    if (array_key_exists(NULL, $request_ids)) {
+      $access[NULL] = TRUE;
+      $processed[NULL] = TRUE;
+      return TRUE;
+    }
+  }
+  else {
+    if (array_key_exists(NULL, $request_ids)) {
+      $access[NULL] = FALSE;
+      $processed[NULL] = FALSE;
+      return FALSE;
+    }
+    else {
+      $access[$request_id] = FALSE;
+      $processed[$request_id] = FALSE;
+      return FALSE;
+    }
+  }
+
+  // allow the venue coordinators to cancel a request at any point in the process.
+  $proxies = mfcs_get_proxy_venue_coordinator($user->uid);
+  $venue_coordinator_ids = array();
+  if (!empty($proxies)) {
+    $venue_coordinator_ids = $proxies;
+  }
+  $venue_coordinator_ids[$user->uid] = $user->uid;
+
+  $instance = mfcs_instance();
+  try {
+    $query = db_select('mfcs_requests', 'mer');
+
+    $query->addField('mer', 'id', 'id');
+
+    $query->condition('mer.id', $request_ids, 'IN');
+
+    if (!$roles['administer'] && !$roles['manager']) {
+      $query->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
+    }
+
+    $query->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
+    $query->condition('mer.step', MFCS_REVIEW_STEP_COMPLETED);
+
+    // make sure the request has at least 1 date in the future.
+    $subquery = db_select('mfcs_current', 'mc');
+    $subquery->innerJoin('mfcs_field_dates_date', 'mfdd', 'mc.request_id = mfdd.request_id and mc.dates_date = mfdd.revision');
+    $subquery->leftJoin('mfcs_field_dates_time_start', 'mfdts', 'mfdd.request_id = mfdts.request_id and mfdd.revision = mfdts.revision and mfdd.delta = mfdts.delta');
+
+    $subquery->addField('mc', 'request_id', 'request_id');
+
+    $subquery->condition('mc.request_id', $request_ids, 'IN');
+    $subquery->condition('mfdd.value', $instance, '>');
+
+    $subor = db_or();
+    $subor->isNull('mfdts.value');
+    $subor->condition('mfdts.value', $instance, '>');
+    $subquery->condition($subor);
+
+    $query->condition('mer.id', $subquery, 'IN');
+
+    $access_results = $query->execute()->fetchAllAssoc('id');
+
+    if (is_array($access_results)) {
+      $request_ids_copy = $request_ids;
+      foreach ($request_ids_copy as $id => $value) {
+        if (array_key_exists($id, $access_results)) {
+          $processed[$id] = TRUE;
+          $access[$id] = TRUE;
+          unset($request_ids[$id]);
+        }
+      }
+      unset($request_ids_copy);
+
+      // looks like all of the requests have been processed, so return.
+      if (empty($request_ids)) {
+        return TRUE;
+      }
+    }
+  }
+  catch (Exception $ex) {
+    cf_error::on_exception($ex);
+    return FALSE;
+  }
+
+  if (array_key_exists(NULL, $request_ids)) {
+    $access[NULL] = FALSE;
+    $processed[NULL] = FALSE;
+    return TRUE;
+  }
+
+  foreach ($request_ids as $request_id) {
+    $access[$request_id] = FALSE;
+    $processed[$request_id] = FALSE;
+  }
+
+  return TRUE;
+}
+
+/**
  * Perform the access control check for the uncancel operation.
  *
  * @param array $request_ids

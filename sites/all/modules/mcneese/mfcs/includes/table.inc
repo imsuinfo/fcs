@@ -1211,6 +1211,7 @@ function mfcs_table_presentation($option = NULL) {
       'collate_order' => 1,
       'collate_into' => TRUE,
       'multiple' => TRUE,
+      'cancellable' => TRUE,
     ),
     'time_start' => array(
       'label' => 'Start Time',

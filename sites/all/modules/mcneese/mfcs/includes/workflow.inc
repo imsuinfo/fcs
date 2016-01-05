@@ -1617,6 +1617,8 @@ function mfcs_workflow_next_step($request_id, $type, $step, $decision, $message,
  *   - new: A boolean representing whether or not this is new.
  *   - update: A boolean representing whether or not this is updated.
  *   - comment: A boolean representing whether or not this is a comment.
+ *   - cancelling: An array of individual dates cancelled or uncancelled, with
+ *     two keys containg string values: 'content' and 'markup'.
  *   - cancelled: A boolean representing whether or not the request is
  *     cancelled.
  *   - uncancelled: A boolean representing whether or not the request is
@@ -1636,7 +1638,7 @@ function mfcs_workflow_next_step($request_id, $type, $step, $decision, $message,
  *   - reminder_data: An array of values needed by a particular reminder
  *     reason.
  *
- *   The keys: 'new', 'update', 'step', 'status', 'cancelled',
+ *   The keys: 'new', 'update', 'step', 'status', 'cancelling', 'cancelled',
  *   'uncancelled', 'amendment', 'reminder', and 'reassigned' are mutually
  *   exclusive.
  *
@@ -1763,6 +1765,28 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     if (!is_bool($is_amendment)) {
       cf_error::invalid_bool('parameters[amendment]');
       return FALSE;
+    }
+  }
+
+  $is_cancelling = FALSE;
+  if (array_key_exists('cancelling',  $parameters)) {
+    if (!is_array($parameters['cancelling'])) {
+      cf_error::invalid_array('parameters[cancelling]');
+      return FALSE;
+    }
+
+    if (!array_key_exists('content', $parameters['cancelling']) && !array_key_exists('content', $parameters['cancelling']) && !is_string($parameters['cancelling']['content'])) {
+      cf_error::invalid_bool('parameters[cancelling][content]');
+      return FALSE;
+    }
+
+    if (!array_key_exists('markup', $parameters['cancelling']) && !array_key_exists('markup', $parameters['cancelling']) && !is_string($parameters['cancelling']['markup'])) {
+      cf_error::invalid_bool('parameters[cancelling][markup]');
+      return FALSE;
+    }
+
+    if (!empty($parameters['cancelling'])) {
+      $is_cancelling = TRUE;
     }
   }
 
@@ -1979,7 +2003,13 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
 
   foreach ($request['dates']['date'] as $key => $date) {
     $standard_content .= " - " . date("Y/m/d", $date->value);
-    $standard_markup .= "<ul><li>" . date("Y/m/d", $date->value);
+    $standard_markup .= "<ul><li>";
+
+    if ($date->cancelled == 1) {
+      $standard_markup .= "<strike>";
+    }
+
+    $standard_markup .= date("Y/m/d", $date->value);
 
     if (!is_null($request['dates']['time_start'][$key]->value)) {
       $standard_content .= " " . date("h:ia", $request['dates']['time_start'][$key]->value);
@@ -1987,6 +2017,11 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
 
       $standard_markup .= " " . date("h:ia", $request['dates']['time_start'][$key]->value);
       $standard_markup .= " to " . date("h:ia", $request['dates']['time_stop'][$key]->value);
+    }
+
+    if ($date->cancelled == 1) {
+      $standard_content .= " (cancelled) ";
+      $standard_markup .= "</strike> (<strong>cancelled</strong>)";
     }
 
     $standard_content .= "\n";
@@ -2273,8 +2308,8 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       return FALSE;
     }
   }
-  elseif ($is_cancelled || $is_auto_cancelled || $is_uncancelled || $is_reassigned || $is_deleted || !is_null($status)) {
-    if ($is_cancelled || $is_uncancelled || $is_reassigned || $status === MFCS_REQUEST_STATUS_CANCELLED || $status === MFCS_REQUEST_STATUS_DELETED) {
+  elseif ($is_cancelling || $is_cancelled || $is_auto_cancelled || $is_uncancelled || $is_reassigned || $is_deleted || !is_null($status)) {
+    if ($is_cancelling || $is_cancelled || $is_uncancelled || $is_reassigned || $status === MFCS_REQUEST_STATUS_CANCELLED || $status === MFCS_REQUEST_STATUS_DELETED) {
       $email_params['content'] = "";
       $email_params['markup'] = "";
 
@@ -2329,6 +2364,14 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
           $email_params['content'] .= "\n" . $parameters['deleted-message'] . "\n";
           $email_params['markup'] .= "<br>\n" . $parameters['deleted-message'] . "<br>\n";
         }
+      }
+      elseif ($is_cancelling) {
+        $email_params['title_suffix'] = "Cancelling";
+        $email_params['content'] .= $changed_by_string . " has cancelled or uncancelled specific dates associated with the request.\n";
+        $email_params['markup'] .= $changed_by_string . " has cancelled or uncancelled specific dates associated with the request.<br>\n";
+
+        $email_params['content'] .= $parameters['cancelling']['content'];
+        $email_params['markup'] .= $parameters['cancelling']['markup'];
       }
 
       $email_params['content'] .= $standard_content;

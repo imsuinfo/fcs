@@ -86,6 +86,12 @@ function mfcs_view_setup_group_path(&$form, $request_id, $group, $presentation_t
     }
   }
 
+  if ($show['cancelling']) {
+    if ($group != 'dates') {
+      $show['cancelling'] = FALSE;
+    }
+  }
+
   // create the group, using the numeric row id if available.
   if (array_key_exists('group', $presentation_tables[$group])) {
     $row = (int) $presentation_tables[$group]['group'];
@@ -147,6 +153,11 @@ function mfcs_view_setup_group_path(&$form, $request_id, $group, $presentation_t
 
         if ($show['ical']) {
           $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/ical-0/' . $request_id . $url_arguments . '" class="section-request-' . $request_id . '-' . $group . '-ical section-request-ical no-print" title="'. t("Download iCal of Request") . '">iCal</a>';
+        }
+
+        if ($show['cancelling']) {
+          // this cancel is exclusively for cancelling individual dates.
+          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/cancelling-0/' . $request_id . $url_arguments . '" class="section-request-' . $request_id . '-' . $group . '-cancel section-request-cancel no-print" title="'. t("Cancel or Uncancel Individual Dates") . '">Cancelling</a>';
         }
       }
 
@@ -359,6 +370,7 @@ function mfcs_view_build_request_item_structure($request_id, $field_group, $fiel
  *   - 'no_suffix': If TRUE, don't show suffix.
  *   - 'print_delta_for_multiple': If TRUE, prepend the delta to the value for
  *      fields that have #multiple set to TRUE.
+ *   - 'history': If TRUE, handle specific deviations relevant to history presentation.
  *
  * @return array|bool
  *   The built array.
@@ -456,6 +468,11 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
     }
   }
 
+  $options_history = FALSE;
+  if (isset($options['history']) && is_bool($options['history'])) {
+    $options_history = $options['history'];
+  }
+
   $users = array();
 
   global $base_path;
@@ -473,6 +490,8 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
   $no_values = TRUE;
 
   foreach ($value_names as $value_name) {
+    $cancelled = NULL;
+
     if ($combined) {
       if (!isset($output['value']['markup']['#markup'])) {
         $output['value'] = array(
@@ -531,6 +550,29 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
       $length = &$output['value']['markup']['#length'];
     }
 
+    if (property_exists($value, 'cancelled') && $value->cancelled == 1 && !array_key_exists('cancelled', $output[$value_name])) {
+      if ($options_history) {
+        $output[$value_name][] = array(
+          'cancelled' => array(
+            '#type' => 'markup',
+            '#markup' => ' <span class="item-value-instance-cancelled ' . 'item-value-instance-' . $field_group . '-' . $field_name . '-cancelled">(<strong>Cancelled</strong>)</span>',
+          ),
+        );
+
+      }
+      else {
+        $cancelled = array(
+          'cancelled' => array(
+            '#type' => 'markup',
+            '#markup' => '<span class="item-value-instance-cancelled ' . 'item-value-instance-' . $field_group . '-' . $field_name . '-cancelled">(Cancelled)</span> ',
+          ),
+        );
+
+        $output[$value_name] = array_merge($cancelled, $output[$value_name]);
+      }
+      $output[$value_name]['#attributes']['class'][] = 'item-cancelled';
+    }
+
     if (property_exists($value, $value_name) && (is_numeric($value->$value_name) || !empty($value->$value_name))) {
       if ($type[$value_name] == 'string' || $type[$value_name] == 'text') {
         $markup .= check_plain($value->$value_name);
@@ -569,7 +611,7 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
           $s_month = date('F', $value->$value_name);
           $s_title = $s_month . " " . $s_year;
 
-          $markup .= '<a href="' . $base_path . 'requests/calendar-0/month/' . $s_year . '/' . $s_month . $url_arguments .'" title="' . $s_title . '">' . check_plain(date($display[$value_name], $value->$value_name)) . '</a>';
+          $markup .= '<a href="' . $base_path . 'requests/calendar-0/month/' . $s_year . '/' . $s_month . $url_arguments .'" title="' . $s_title . '" class="item-link">' . check_plain(date($display[$value_name], $value->$value_name)) . '</a>';
 
           unset($s_year);
           unset($s_month);
@@ -592,7 +634,7 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
           $s_day = date('d', $value->$value_name);
           $s_title = $s_month . ", " . $s_day . ", " . $s_year;
 
-          $markup .= '<a href="' . $base_path . 'requests/calendar-0/day/' . $s_year . '/' . $s_month . '/' . $s_day . $url_arguments .'" title="' . $s_title . '">' . check_plain(date($display[$value_name], $value->$value_name)) . '</a>';
+          $markup .= '<a href="' . $base_path . 'requests/calendar-0/day/' . $s_year . '/' . $s_month . '/' . $s_day . $url_arguments .'" title="' . $s_title . '" class="item-link">' . check_plain(date($display[$value_name], $value->$value_name)) . '</a>';
 
           unset($s_year);
           unset($s_month);
@@ -619,7 +661,7 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
           $s_title = $s_month . ", " . $s_day . ", " . $s_year . " at " . $s_hour . ':00' . $s_ampm;
           $s_id = 'time_slot-' . $s_hour . '_00' . $s_ampm;
 
-          $markup .= '<a href="' . $base_path . 'requests/calendar-0/day/' . $s_year . '/' . $s_month . '/' . $s_day . $url_arguments . '#' . $s_id .'" title="' . $s_title . '">' . check_plain(date($display[$value_name], $value->$value_name)) . '</a>';
+          $markup .= '<a href="' . $base_path . 'requests/calendar-0/day/' . $s_year . '/' . $s_month . '/' . $s_day . $url_arguments . '#' . $s_id .'" title="' . $s_title . '" class="item-link">' . check_plain(date($display[$value_name], $value->$value_name)) . '</a>';
 
           unset($s_year);
           unset($s_month);
@@ -667,7 +709,7 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
           }
 
           if ($display[$value_name] == 'account_name') {
-            $markup .= '<a href="' . $base_path . 'user/' . $users[$value->$value_name]['user_id'] . $url_arguments . '">' . $user_name . '</a>';
+            $markup .= '<a href="' . $base_path . 'user/' . $users[$value->$value_name]['user_id'] . $url_arguments . '" class="item-link">' . $user_name . '</a>';
             $length += strlen($user_name);
           }
           elseif ($display[$value_name] != 'pass' && property_exists($user, $display)) {

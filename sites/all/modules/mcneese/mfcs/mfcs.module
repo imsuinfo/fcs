@@ -303,6 +303,14 @@ define('MFCS_EMAIL_CODE_NORMAL', 0);
 define('MFCS_EMAIL_CODE_RESEND', 1);
 define('MFCS_EMAIL_CODE_FORWARD', 2);
 
+/**
+ * Define codes used to designate cancelling and uncancelling individual dates and times.
+ */
+define('MFCS_CANCELLING_NOTHING', 0);
+define('MFCS_CANCELLING_CANCEL', 1);
+define('MFCS_CANCELLING_UNCANCEL', 2);
+define('MFCS_CANCELLING_UNAVAILABLE', 3);
+
 
 /**
  * Implements hook_init().
@@ -668,6 +676,20 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
   }
   elseif ($operation == 'uncancel') {
     $operation_result = mfcs_page_request_access_operation_uncancel($request_ids, $processed, $access, $roles, $user);
+
+    // if something went wrong with the operation check, return FALSE but do not cache.
+    if ($operation_result === FALSE) {
+      return FALSE;
+    }
+
+    if (is_array($request_id)) {
+      return $processed;
+    }
+
+    return $processed[$request_id];
+  }
+  elseif ($operation == 'cancelling') {
+    $operation_result = mfcs_page_request_access_operation_cancelling($request_ids, $processed, $access, $roles, $user);
 
     // if something went wrong with the operation check, return FALSE but do not cache.
     if ($operation_result === FALSE) {
@@ -1141,6 +1163,38 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
     if ($roles['manager'] || array_key_exists($request['venue_coordinator']['user_id'][0]->value, $venue_coordinator_ids)) {
       $access[$request_id] = TRUE;
       return TRUE;
+    }
+  }
+  elseif ($operation == 'cancelling') {
+    if ($request['top']['status'][0]->value == MFCS_REQUEST_STATUS_DELETED) {
+      $access[$request_id] = FALSE;
+      return FALSE;
+    }
+
+    // no matter who the user is, if the request has is not accepted and completed, then cancelling functionality is unneeded and not allowed.
+    if ($request['top']['status'][0]->value != MFCS_REQUEST_STATUS_CLOSED_ACCEPTED || $request['top']['step'][0]->value != MFCS_REVIEW_STEP_COMPLETED) {
+      $access[$request_id] = FALSE;
+      return FALSE;
+    }
+
+    // must be either an administer, a manager, or a venue coordinator to cancel.
+    if (!$roles['administer'] && !$roles['manager'] && !($roles['reviewer'] && array_key_exists($request['venue_coordinator']['user_id'][0]->value, $venue_coordinator_ids))) {
+      $access[$request_id] = FALSE;
+      return FALSE;
+    }
+
+    $instance = mfcs_instance();
+    foreach ($request['dates']['date'] as $key => $date) {
+      // if a single date (all day, or date and time) is in the future, then cancelling is allowed.
+      if ($date->value > $instance) {
+        $access[$request_id] = TRUE;
+        return TRUE;
+      }
+
+      if (isset($request['dates']['time_start'][$key]->value) && !is_null($request['dates']['time_start'][$key]->value) && $request['dates']['time_start'][$key]->value > $instance) {
+        $access[$request_id] = TRUE;
+        return TRUE;
+      }
     }
   }
   elseif ($operation == 'reassign') {
@@ -3885,6 +3939,7 @@ function mfcs_autocancel_old_requests_cron() {
 
     $query->condition('mer.status', $status, 'IN');
     $query->condition('mfdd.value', $date, '<');
+    $query->condition('mfdd.cancelled', 1, '<>'); // using <> for backwards compatibility where mfdd.cancelled may be NULL.
 
     $query->distinct();
 
@@ -5696,12 +5751,14 @@ function mfcs_check_room_availability($room, $dates, $time_start, $time_stop, $r
     $query->condition('mer.status', $statuses, 'IN');
     $query->condition('mer.room', $room);
     $query->condition('mfdd.value', $dates, 'IN');
+    $query->condition('mfdd.cancelled', 1, '<>'); // using <> for backwards compatibility where mfdd.cancelled may be NULL.
 
     if (!is_null($request_id)) {
       $query->condition('mer.id', $request_id, '<>');
     }
 
     $results = $query->execute()->fetchAll();
+
 
     // when rooms are in use, check the individual times.
     if (!empty($results)) {
@@ -5724,6 +5781,8 @@ function mfcs_check_room_availability($room, $dates, $time_start, $time_stop, $r
         $query->condition('mfdts.request_id', $result->request_id);
         $query->condition('mfdtsp.request_id', $result->request_id);
 
+        $query->condition('mfdd.cancelled', 1, '<>'); // using <> for backwards compatibility where mfdd.cancelled may be NULL.
+
         $query->condition('mfdd.revision', $result->date_revision);
         $query->condition('mfdts.revision', $result->time_start_revision);
         $query->condition('mfdtsp.revision', $result->time_stop_revision);
@@ -5737,6 +5796,7 @@ function mfcs_check_room_availability($room, $dates, $time_start, $time_stop, $r
         // all day requests match, they have NULL for start and stop time values.
         $and = db_and();
         $and->condition('mfdd.value', $dates, 'IN');
+        $and->condition('mfdd.cancelled', 1, '<>'); // using <> for backwards compatibility where mfdd.cancelled may be NULL.
         $and->isNull('mfdts.value');
         $and->isNull('mfdtsp.value');
 
@@ -5750,18 +5810,21 @@ function mfcs_check_room_availability($room, $dates, $time_start, $time_stop, $r
 
           $and = db_and();
           $and->condition('mfdd.value', $value);
+          $and->condition('mfdd.cancelled', 1, '<>'); // using <> for backwards compatibility where mfdd.cancelled may be NULL.
           $and->condition('mfdts.value', $time_start[$key], '<=');
           $and->condition('mfdtsp.value', $time_start[$key], '>');
           $or->condition($and);
 
           $and = db_and();
           $and->condition('mfdd.value', $value);
+          $and->condition('mfdd.cancelled', 1, '<>'); // using <> for backwards compatibility where mfdd.cancelled may be NULL.
           $and->condition('mfdts.value', $time_stop[$key], '<');
           $and->condition('mfdtsp.value', $time_stop[$key], '>=');
           $or->condition($and);
 
           $and = db_and();
           $and->condition('mfdd.value', $value);
+          $and->condition('mfdd.cancelled', 1, '<>'); // using <> for backwards compatibility where mfdd.cancelled may be NULL.
           $and->condition('mfdts.value', $time_start[$key], '>');
           $and->condition('mfdtsp.value', $time_start[$key], '>');
           $and->condition('mfdts.value', $time_stop[$key], '<');
@@ -5897,6 +5960,9 @@ function mfcs_display_room_unavailable_message($dates) {
  *     'distinct': Process the entire query as distinct.
  *     'distinct_id': Custom option to load mer.id as distinct. This overrides
  *                    'distinct' when TRUE.
+ *     'cancelled': When TRUE, individual dates that are cancelled will be shown.
+ *                  This only affects requests that have not been cancelled as
+ *                  a whole but whose individual dates may have been.
  *
  * @return array|false
  *   An array of containing the following:
@@ -5957,6 +6023,14 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
     $distinct_id = (bool) $options['distinct_id'];
     if ($distinct_id) {
       $distinct = FALSE;
+    }
+  }
+
+  $cancelled = FALSE;
+  if (isset($options['cancelled']) && is_bool($options['cancelled'])) {
+    $cancelled = (bool) $options['cancelled'];
+    if ($cancelled) {
+      $cancelled = FALSE;
     }
   }
 
@@ -6445,7 +6519,14 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
           }
           elseif ($sort_name == 'date') {
             if (!array_key_exists('mfcs_field_dates_date', $already_joined)) {
-              $query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mc.request_id = mfdd.request_id AND mc.dates_date = mfdd.revision');
+              if ($cancelled) {
+                $query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mc.request_id = mfdd.request_id AND mc.dates_date = mfdd.revision');
+              }
+              else {
+                // using <> for backwards compatibility where mfdd.cancelled may be NULL.
+                $query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mc.request_id = mfdd.request_id AND mc.dates_date = mfdd.revision and mfdd.cancelled <> 1');
+              }
+
               $already_joined['mfcs_field_dates_date'] = 'mfdd';
             }
 
@@ -6544,6 +6625,10 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
         $sub_query->addField('mfdc', 'value', 'category');
 
         $sub_query->condition('mfdd.request_id', array_keys($found), 'IN');
+
+        if (!$cancelled) {
+          $sub_query->condition('mfdd.cancelled', 1, '<>'); // using <> for backwards compatibility where mfdd.cancelled may be NULL.
+        }
 
         $sub_results = $sub_query->execute()->fetchAll();
 
@@ -8256,6 +8341,7 @@ function mfcs_get_requests_not_providing_insurance($date_from = NULL, $date_to =
     $query->addField('mer', 'id', 'id');
     $query->addField('mer', 'title', 'title');
     $query->addField('mfdd', 'value', 'date');
+    $query->condition('mfdd.cancelled', 1, '<>'); // using <> for backwards compatibility where mfdd.cancelled may be NULL.
     $query->addField('mfrcn', 'value', 'coordinator_name');
     $query->addField('mfrce', 'value', 'coordinator_email');
 
@@ -8920,6 +9006,7 @@ function mfcs_request_is_still_upcoming($request_id) {
 
     $query->condition('mfdd.request_id', $request_id);
     $query->condition('mfdd.value', $today, '>=');
+    $query->condition('mfdd.cancelled', 1, '<>'); // using <> for backwards compatibility where mfdd.cancelled may be NULL.
 
     $upcoming_dates = $query->execute()->fetchField();
     return $upcoming_dates > 0;

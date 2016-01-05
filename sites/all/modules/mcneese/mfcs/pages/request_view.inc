@@ -72,6 +72,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     $can_cancel_request = mfcs_request_access('cancel', $request, $user);
     $can_uncancel_request = mfcs_request_access('uncancel', $request, $user);
     $can_reassign_request = mfcs_request_access('reassign', $request, $user);
+    $can_cancelling_request = mfcs_request_access('cancelling', $request, $user);
   }
   else {
     // perform access checks against the latest version and not the viewed revision.
@@ -93,6 +94,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     $can_cancel_request = mfcs_request_access('cancel', $request_latest, $user);
     $can_uncancel_request = mfcs_request_access('uncancel', $request_latest, $user);
     $can_reassign_request = mfcs_request_access('reassign', $request_latest, $user);
+    $can_cancelling_request = mfcs_request_access('cancelling', $request_latest, $user);
 
     if (!$can_history_request) {
       drupal_not_found();
@@ -319,6 +321,8 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     'edit' => FALSE,
     'history' => FALSE,
     'agreement' => FALSE,
+    'cancel' => FALSE,
+    'uncancel' => FALSE,
   );
 
   if ($contained) {
@@ -327,6 +331,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     $can['agreement'] = FALSE;
     $can['clone'] = FALSE;
     $can['ical'] = FALSE;
+    $can['cancelling'] = FALSE;
   }
   elseif (!is_null($revision_id)) {
     $can['edit'] = FALSE;
@@ -334,6 +339,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     $can['agreement'] = FALSE;
     $can['clone'] = FALSE;
     $can['ical'] = FALSE;
+    $can['cancelling'] = FALSE;
   }
   else {
     $can['edit'] = (bool) $can_edit_request;
@@ -341,6 +347,12 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     $can['agreement'] = (bool) $can_agreement_request;
     $can['clone'] = (bool) $can_create_request;
     $can['ical'] = $status === MFCS_REQUEST_STATUS_CLOSED_ACCEPTED && $step === MFCS_REVIEW_STEP_COMPLETED;
+    $can['cancelling'] = (bool) $can_cancelling_request;
+
+    if ($can['cancelling'] && count($request['dates']['date']) == 1) {
+      // hide/prevent cancelling when there is only one date.
+      $can['cancelling'] = FALSE;
+    }
   }
 
 

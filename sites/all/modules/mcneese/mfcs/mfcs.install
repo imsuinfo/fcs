@@ -45,7 +45,7 @@ function mfcs_table_install_structure() {
   );
 
   $structure['dates'] = array(
-    'date' => 'date',
+    'date' => 'date_cancellable',
     'time_start' => 'time',
     'time_stop' => 'time',
     'category' => 'unsigned',
@@ -1364,6 +1364,39 @@ function mfcs_schema() {
             'size' => 'small',
             'not null' => FALSE,
             'unsigned' => FALSE,
+          );
+        }
+        elseif ($type == 'date_cancellable') {
+          $schema[$table_name]['fields'][$name] = array(
+            'type' => 'int',
+            'size' => 'big',
+            'not null' => FALSE,
+            'unsigned' => FALSE,
+          );
+
+          // Lose some storage space to gain simplified querying based on generalized times.
+          $schema[$table_name]['fields'][$name . '_month'] = array(
+            'type' => 'int',
+            'size' => 'small',
+            'not null' => FALSE,
+            'unsigned' => FALSE,
+          );
+
+          // Lose some storage space to gain simplified querying based on generalized times.
+          $schema[$table_name]['fields'][$name . '_day'] = array(
+            'type' => 'int',
+            'size' => 'small',
+            'not null' => FALSE,
+            'unsigned' => FALSE,
+          );
+
+          // designate that the given date was cancelled.
+          $schema[$table_name]['fields']['cancelled'] = array(
+            'type' => 'int',
+            'size' => 'tiny',
+            'default' => 0,
+            'not null' => FALSE,
+            'unsigned' => TRUE,
           );
         }
         elseif ($type == 'time') {
