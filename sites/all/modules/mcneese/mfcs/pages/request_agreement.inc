@@ -108,7 +108,7 @@ function mfcs_request_agreement_0_form($form, &$form_state, $request_id, $contai
   reset($request['review']['review']);
   $review_date = NULL;
   foreach ($request['review']['review'] as $review) {
-    if ($review->step != MFCS_REVIEW_STEP_REVIEW) {
+    if ($review->step !== MFCS_REVIEW_STEP_REVIEW) {
       continue;
     }
 

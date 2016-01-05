@@ -491,7 +491,7 @@ function mfcs_request_create_0_form_validate($form, &$form_state) {
               }
 
               $request_using_room = reset($requests_using_room);
-              if (isset($request_using_room->status) && $request_using_room->status == MFCS_REQUEST_STATUS_LOCKED) {
+              if (isset($request_using_room->status) && $request_using_room->status === MFCS_REQUEST_STATUS_LOCKED) {
                 $form_state['values']['request']['status'][0] = MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK;
               }
               else {

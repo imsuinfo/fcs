@@ -709,7 +709,7 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
       }
 
       // if the request has been updated while it is in a locked status, the review log must be reset/restarted.
-      if ($status == MFCS_REQUEST_STATUS_LOCKED) {
+      if ($status === MFCS_REQUEST_STATUS_LOCKED) {
         $step_revision = $request['current']['top']['step'] + 1;
         $structure_current['top_step'] = $step_revision;
 
@@ -812,7 +812,7 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
       mfcs_include(MFCS_INCLUDE_WORKFLOW);
 
       // send an e-mail to all reviewers that the request step has been reset.
-      if ($status == MFCS_REQUEST_STATUS_LOCKED) {
+      if ($status === MFCS_REQUEST_STATUS_LOCKED) {
         $parameters['amendment'] = TRUE;
       }
       else {

@@ -204,7 +204,7 @@ function mfcs_testing_review_request_venue_available($request_id, $decision = MF
     return FALSE;
   }
 
-  if ($decision != MFCS_REVIEW_DECISION_APPROVE && $decision != MFCS_REVIEW_DECISION_DENY) {
+  if ($decision !== MFCS_REVIEW_DECISION_APPROVE && $decision !== MFCS_REVIEW_DECISION_DENY) {
     cf_error::invalid_integer('decision');
     return FALSE;
   }
@@ -301,7 +301,7 @@ function mfcs_testing_review_request_review($request_id, $decision = MFCS_REVIEW
     return FALSE;
   }
 
-  if ($decision != MFCS_REVIEW_DECISION_APPROVE && $decision != MFCS_REVIEW_DECISION_DENY) {
+  if ($decision !== MFCS_REVIEW_DECISION_APPROVE && $decision !== MFCS_REVIEW_DECISION_DENY) {
     cf_error::invalid_integer('decision');
     return FALSE;
   }
@@ -398,7 +398,7 @@ function mfcs_testing_review_request_make_decisions($request_id, $decision = MFC
     return FALSE;
   }
 
-  if ($decision != MFCS_REVIEW_DECISION_APPROVE && $decision != MFCS_REVIEW_DECISION_DENY) {
+  if ($decision !== MFCS_REVIEW_DECISION_APPROVE && $decision !== MFCS_REVIEW_DECISION_DENY) {
     cf_error::invalid_integer('decision');
     return FALSE;
   }

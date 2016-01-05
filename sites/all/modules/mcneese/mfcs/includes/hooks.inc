@@ -219,7 +219,7 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   );
 
   $items['requests/uncancel-0/%'] = array(
-    'title' => "Cancel Request",
+    'title' => "Uncancel Request",
     'description' => "Uncancel Request",
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_uncancel_0_form', 2),

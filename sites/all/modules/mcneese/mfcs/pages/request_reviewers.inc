@@ -140,7 +140,7 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
   }
 
   // these are automatically the venue coordinator, therefore skip them.
-  if ($review_step == MFCS_REVIEW_STEP_VENUE_AVAILABLE || $review_step == MFCS_REVIEW_STEP_MAKE_DECISIONS) {
+  if ($review_step === MFCS_REVIEW_STEP_VENUE_AVAILABLE || $review_step === MFCS_REVIEW_STEP_MAKE_DECISIONS) {
     drupal_not_found();
     drupal_exit();
     return array();
@@ -698,6 +698,14 @@ function mfcs_request_reviewers_0_form_submit($form, &$form_state) {
 
     $classification = $form['form']['request_classification']['#value'];
     $step = $form['form']['review_step']['#value'];
+
+    if (is_string($classification)) {
+      $classification = (int) $classification;
+    }
+
+    if (is_string($step)) {
+      $step = (int) $step;
+    }
 
     $transaction = db_transaction();
     try {

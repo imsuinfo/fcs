@@ -257,6 +257,14 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
   $step = $request['top']['step'][0]->value;
   $status = $request['top']['status'][0]->value;
 
+  if (is_string($step)) {
+    $step = (int) $step;
+  }
+
+  if (is_string($status)) {
+    $status = (int) $status;
+  }
+
   if ($can_review_request || $can_comment_request) {
     // show review operations only if the content is reviewable by the current user.
     $request_classification = $request['request_coordinator']['classification'][0]->value;
@@ -332,7 +340,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     $can['history'] = (bool) $can_history_request;
     $can['agreement'] = (bool) $can_agreement_request;
     $can['clone'] = (bool) $can_create_request;
-    $can['ical'] = $status == MFCS_REQUEST_STATUS_CLOSED_ACCEPTED && $step == MFCS_REVIEW_STEP_COMPLETED;
+    $can['ical'] = $status === MFCS_REQUEST_STATUS_CLOSED_ACCEPTED && $step === MFCS_REVIEW_STEP_COMPLETED;
   }
 
 
@@ -1277,7 +1285,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           continue;
         }
 
-        if (isset($reviewer->review_step) && $reviewer->review_step == $step) {
+        if (isset($reviewer->review_step) && $reviewer->review_step === $step) {
           $reviewer_classification[$reviewer->reviewer_classification] = $reviewer_classification_options[$reviewer->reviewer_classification];
         }
 
@@ -1307,8 +1315,8 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
       $insurance_provided_available = &$form['form']['insurance_provided_available']['#value'];
       $insurance_provided_available_only = &$form['form']['insurance_provided_available_only']['#value'];
-      if ($can_review_request && ($step == MFCS_REVIEW_STEP_REVIEW || $step == MFCS_REVIEW_STEP_REQUIREMENTS || $step == MFCS_REVIEW_STEP_MAKE_DECISIONS || $step == MFCS_REVIEW_STEP_COMPLETED)) {
-        if ($status == MFCS_REQUEST_STATUS_LOCKED || $status == MFCS_REQUEST_STATUS_CLOSED_ACCEPTED) {
+      if ($can_review_request && ($step === MFCS_REVIEW_STEP_REVIEW || $step === MFCS_REVIEW_STEP_REQUIREMENTS || $step === MFCS_REVIEW_STEP_MAKE_DECISIONS || $step === MFCS_REVIEW_STEP_COMPLETED)) {
+        if ($status === MFCS_REQUEST_STATUS_LOCKED || $status === MFCS_REQUEST_STATUS_CLOSED_ACCEPTED) {
           if (isset($reviewer_classification_all[MFCS_REVIEWER_CLASSIFICATION_PURCHASING])) {
             if ((isset($request['insurance']['contractor'][0]->value) && $request['insurance']['contractor'][0]->value == 1) || (isset($request['insurance']['unaffiliated'][0]->value) && $request['insurance']['unaffiliated'][0]->value == 1)) {
               if (isset($request['insurance']['provided'][0]->value) && $request['insurance']['provided'][0]->value != 1) {
@@ -1321,7 +1329,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
       // the venue coordinator must be reported as venue coordinator when not reviewing.
       if ($venue_coordinator) {
-        if (empty($reviewer_classification) || ($step != MFCS_REVIEW_STEP_REVIEW && $step != MFCS_REVIEW_STEP_REQUIREMENTS)) {
+        if (empty($reviewer_classification) || ($step !== MFCS_REVIEW_STEP_REVIEW && $step !== MFCS_REVIEW_STEP_REQUIREMENTS)) {
 
           if ($request['venue_coordinator']['user_id'][0]->value == $user->uid) {
             $reviewer_classification[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR] = "Venue Coordinator";
@@ -1348,7 +1356,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
       if ($insurance_provided_available) {
         $decision_options[MFCS_REVIEW_DECISION_REQUIREMENT] = $decision_options_all[MFCS_REVIEW_DECISION_REQUIREMENT];
 
-        if ($step != MFCS_REVIEW_STEP_REVIEW) {
+        if ($step !== MFCS_REVIEW_STEP_REVIEW) {
           $decision_options = array(
             MFCS_REVIEW_DECISION_REQUIREMENT => $decision_options_all[MFCS_REVIEW_DECISION_REQUIREMENT]
           );
@@ -1361,7 +1369,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           $insurance_provided_available_only = TRUE;
         }
       }
-      elseif ($step != MFCS_REVIEW_STEP_VENUE_AVAILABLE && $step != MFCS_REVIEW_STEP_REVIEW) {
+      elseif ($step !== MFCS_REVIEW_STEP_VENUE_AVAILABLE && $step !== MFCS_REVIEW_STEP_REVIEW) {
         unset($decision_options[MFCS_REVIEW_DECISION_REQUIREMENT]);
       }
 
@@ -1395,7 +1403,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         '#weight' => 1,
       );
 
-      if ($can_review_request && ($step == MFCS_REVIEW_STEP_REVIEW || $step == MFCS_REVIEW_STEP_VENUE_AVAILABLE || $insurance_provided_available)) {
+      if ($can_review_request && ($step === MFCS_REVIEW_STEP_REVIEW || $step === MFCS_REVIEW_STEP_VENUE_AVAILABLE || $insurance_provided_available)) {
         $form['review']['operations']['requirements'] = array(
           '#tree' => TRUE,
           '#weight' => 2,
@@ -1429,7 +1437,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         $uses = array();
         $insurance_requirement = FALSE;
         $uses_as_manager = array();
-        if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
+        if ($step === MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
           if ($venue_coordinator) {
             $uses['facilities'] = "Facilities";
             $uses['equipment'] = "Additional Equipment";
@@ -1511,11 +1519,11 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         );
 
         foreach ($uses as $use_name => $use_title) {
-          if ($uses_review[$use_name] && $step != MFCS_REVIEW_STEP_REVIEW) {
+          if ($uses_review[$use_name] && $step !== MFCS_REVIEW_STEP_REVIEW) {
             continue;
           }
 
-          if (!$uses_review[$use_name] && $step != MFCS_REVIEW_STEP_REVIEW) {
+          if (!$uses_review[$use_name] && $step !== MFCS_REVIEW_STEP_REVIEW) {
             $states = array(
               'visible' => array(
                 ':input[name="review[operations][decision]"]' => array('value' => MFCS_REVIEW_DECISION_REQUIREMENT),
@@ -1708,7 +1716,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           );
         }
 
-        if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
+        if ($step === MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
           if ($venue_coordinator || $manager) {
             $form['review']['operations']['requirements']['other'] = array(
               '#id' => 'request-review-operations-requirements-other',
@@ -1749,7 +1757,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           '#weight' => 3,
         );
 
-        if ($insurance_requirement && ($step == MFCS_REVIEW_STEP_REVIEW || $insurance_provided_available)) {
+        if ($insurance_requirement && ($step === MFCS_REVIEW_STEP_REVIEW || $insurance_provided_available)) {
 
           if (!$insurance_provided_available_only) {
             // contractor insurance
@@ -1834,7 +1842,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         }
       }
 
-      if ($can_review_request && $step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
+      if ($can_review_request && $step === MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
         $form['review']['operations']['presidents_approval'] = array(
           '#id' => 'request-review-operations-presidents_approval',
           '#type' => 'checkbox',
@@ -1968,14 +1976,30 @@ function mfcs_request_view_0_form_pre_validate(&$form, &$form_state) {
   $step = $request['top']['step'][0]->value;
   $status = $request['top']['status'][0]->value;
 
+  if (is_string($request_classification)) {
+    $request_classification = (int) $request_classification;
+  }
+
+  if (is_string($step)) {
+    $step = (int) $step;
+  }
+
+  if (is_string($status)) {
+    $status = (int) $status;
+  }
+
   $decision = NULL;
   if (isset($form_state['values']['review']['operations']['decision'])) {
     $decision = $form_state['values']['review']['operations']['decision'];
+
+    if (is_string($decision)) {
+      $decision = (int) $decision;
+    }
   }
 
   $unrequire_usage_fields = TRUE;
-  if ($decision == MFCS_REVIEW_DECISION_REQUIREMENT) {
-    if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
+  if ($decision === MFCS_REVIEW_DECISION_REQUIREMENT) {
+    if ($step === MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
       $requirements_waived = FALSE;
       if (isset($form_state['values']['review']['operations']['presidents_approval']) && $form_state['values']['review']['operations']['presidents_approval'] == 1) {
         $requirements_waived = TRUE;
@@ -2064,9 +2088,29 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
   $status = $request['top']['status'][0]->value;
   $type = $request['information']['type'][0]->value;
 
+  if (is_string($request_classification)) {
+    $request_classification = (int) $request_classification;
+  }
+
+  if (is_string($step)) {
+    $step = (int) $step;
+  }
+
+  if (is_string($status)) {
+    $status = (int) $status;
+  }
+
+  if (is_string($type)) {
+    $type = (int) $type;
+  }
+
   $decision = NULL;
   if (isset($form_state['values']['review']['operations']['decision'])) {
     $decision = $form_state['values']['review']['operations']['decision'];
+
+    if (is_string($decision)) {
+      $decision = (int) $decision;
+    }
   }
 
   if ($clicked_id == 'request-display-submit-print' || $clicked_id == 'request-review-log-submit-print') {
@@ -2143,7 +2187,7 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
       );
     }
 
-    if ($can_comment_request && $decision == MFCS_REVIEW_DECISION_COMMENT) {
+    if ($can_comment_request && $decision === MFCS_REVIEW_DECISION_COMMENT) {
       // if there are any cases where a comment cannot be posted, then is the place to add the restriction.
     }
     else {
@@ -2163,7 +2207,7 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
       $failure = TRUE;
     }
     elseif (!$can_review_request) {
-      if ($decision == MFCS_REVIEW_DECISION_COMMENT) {
+      if ($decision === MFCS_REVIEW_DECISION_COMMENT) {
         unset($form_state['values']['review']['operations']['requirements']);
         unset($form_state['values']['review']['operations']['insurance']);
 
@@ -2182,8 +2226,8 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
     // To do this without changing the underlining design, when the requirement is specified with a wave checked, then convert the decision to a wave.
     // @todo: remove the Wave Decision entirely.
     $requirements_waived = FALSE;
-    if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
-      if ($decision == MFCS_REVIEW_DECISION_REQUIREMENT) {
+    if ($step === MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
+      if ($decision === MFCS_REVIEW_DECISION_REQUIREMENT) {
         if (isset($form_state['values']['review']['operations']['presidents_approval']) && $form_state['values']['review']['operations']['presidents_approval'] == 1) {
           $form_state['values']['review']['operations']['decision'] = MFCS_REVIEW_DECISION_WAVE;
           $decision = MFCS_REVIEW_DECISION_WAVE;
@@ -2202,21 +2246,21 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
           }
         }
       }
-      elseif ($decision != MFCS_REVIEW_DECISION_COMMENT) {
+      elseif ($decision !== MFCS_REVIEW_DECISION_COMMENT) {
         $check_requirements = TRUE;
       }
     }
 
     // The requirements values should be removed when they are not needed.
-    if ($requirements_waived || ($decision != MFCS_REVIEW_DECISION_REQUIREMENT && $decision != MFCS_REVIEW_DECISION_WAVE)) {
+    if ($requirements_waived || ($decision !== MFCS_REVIEW_DECISION_REQUIREMENT && $decision !== MFCS_REVIEW_DECISION_WAVE)) {
       unset($form_state['values']['review']['operations']['requirements']);
     }
 
-    if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
-      if ($decision == MFCS_REVIEW_DECISION_APPROVE && $type != MFCS_REQUEST_TYPE_QUICK_MEETING) {
+    if ($step === MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
+      if ($decision === MFCS_REVIEW_DECISION_APPROVE && $type !== MFCS_REQUEST_TYPE_QUICK_MEETING) {
         $requirements_not_supplied = TRUE;
 
-        if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
+        if ($step === MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
           // @todo: convert 'waived' to 'presidents_approval' and 'university' to 'university_business'.
           if (isset($request['requirements']['waived'][0]) && property_exists($request['requirements']['waived'][0], 'value')) {
             if ($request['requirements']['waived'][0]->value) {
@@ -2242,7 +2286,7 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
       }
     }
 
-    if ($decision == MFCS_REVIEW_DECISION_REQUIREMENT && !$requirements_waived) {
+    if ($decision === MFCS_REVIEW_DECISION_REQUIREMENT && !$requirements_waived) {
       $check_requirements = TRUE;
     }
 
@@ -2430,13 +2474,29 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
     $step = $request['top']['step'][0]->value;
     $type = $request['information']['type'][0]->value;
 
+    if (is_string($decision)) {
+      $decision = (int) $decision;
+    }
+
+    if (is_string($request_classification)) {
+      $request_classification = (int) $request_classification;
+    }
+
+    if (is_string($step)) {
+      $step = (int) $step;
+    }
+
+    if (is_string($type)) {
+      $type = (int) $type;
+    }
+
     $insurance_provided_available = FALSE;
     if (isset($form['form']['insurance_provided_available']['#value'])) {
       $insurance_provided_available = (bool) $form['form']['insurance_provided_available']['#value'];
     }
 
     $extra = array();
-    if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE || $step == MFCS_REVIEW_STEP_REVIEW) {
+    if ($step === MFCS_REVIEW_STEP_VENUE_AVAILABLE || $step === MFCS_REVIEW_STEP_REVIEW) {
       if (isset($form_state['values']['review']['operations']['requirements'])) {
         $extra['requirements'] = $form_state['values']['review']['operations']['requirements'];
       }
@@ -2456,10 +2516,10 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
       }
     }
 
-    if ($decision == MFCS_REVIEW_DECISION_COMMENT) {
+    if ($decision === MFCS_REVIEW_DECISION_COMMENT) {
       // comments do not need to be processed on a per step basis, so skip the $step conditions below.
     }
-    elseif ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
+    elseif ($step === MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
       if (isset($form_state['values']['review']['operations']['presidents_approval'])) {
         $extra['requirements']['waived'] = $form_state['values']['review']['operations']['presidents_approval'];
 
@@ -2482,7 +2542,7 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
       }
 
       // when the request type is a quick meeting, then mark this as waived due to university business.
-      if ($type == MFCS_REQUEST_TYPE_QUICK_MEETING && $is_new_request) {
+      if ($type === MFCS_REQUEST_TYPE_QUICK_MEETING && $is_new_request) {
         $form_state['values']['review']['operations']['university_business'] = 1;
         unset($extra['requirements']);
         $requirements_extra = array(
@@ -2493,7 +2553,7 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
         $success = mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], MFCS_REVIEW_DECISION_REQUIREMENT, "The system has auto-waved the fees because the request is a Quick Meeting.", $requirements_extra);
       }
     }
-    elseif ($step == MFCS_REVIEW_STEP_REVIEW) {
+    elseif ($step === MFCS_REVIEW_STEP_REVIEW) {
       if (isset($form_state['autowave']) && $form_state['autowave']) {
         // @todo: this might be a valid use of MFCS_REVIEW_DECISION_WAVE. If 'autowave' is removed, then this is no longer necessary.
         $success = mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], MFCS_REVIEW_DECISION_WAVE, "", array('send_email' => FALSE));
@@ -2663,7 +2723,7 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
         }
       }
 
-      if (($decision == MFCS_REVIEW_DECISION_REQUIREMENT || $decision == MFCS_REVIEW_DECISION_WAVE) && !$any_requirements_changes_made) {
+      if (($decision === MFCS_REVIEW_DECISION_REQUIREMENT || $decision === MFCS_REVIEW_DECISION_WAVE) && !$any_requirements_changes_made) {
         form_set_error('review][operations][decision', "The Requirements decision has been selected, but no changes have been made. If you only wish to leave a comment, then select the Comment instead of Requirements.");
         watchdog(MFCS_WATCHDOG_ID, "The Requirements decision has been selected, but no changes have been made.", array(), WATCHDOG_ERROR);
 
@@ -2678,7 +2738,7 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
     }
 
     if ($success) {
-      if ($decision == MFCS_REVIEW_DECISION_COMMENT) {
+      if ($decision === MFCS_REVIEW_DECISION_COMMENT) {
         drupal_set_message("Your comment has been received.");
       }
       else {
@@ -2697,7 +2757,7 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
     }
 
     // change to the request view page on submit for these decisions to prrequest potential access denied messages following the submit process.
-    if ($decision == MFCS_REVIEW_DECISION_APPROVE || $decision == MFCS_REVIEW_DECISION_DENY) {
+    if ($decision === MFCS_REVIEW_DECISION_APPROVE || $decision === MFCS_REVIEW_DECISION_DENY) {
       $form_state['values']['redirect_to'] = 'requests/view-0/' .  $request_id;
     }
     elseif (isset($form['form']['insurance_provided_available']['#value']) && $form['form']['insurance_provided_available']['#value']) {

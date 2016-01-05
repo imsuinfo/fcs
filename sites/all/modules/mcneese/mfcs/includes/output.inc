@@ -1677,10 +1677,10 @@ function mfcs_build_filename($request_id, $revision_id = NULL, $mode = MFCS_VIEW
   }
 
   $name = 'unknown';
-  if ($type == MFCS_PDF_TYPE_REQUEST) {
+  if ($type === MFCS_PDF_TYPE_REQUEST) {
     $name = 'request';
   }
-  elseif ($type == MFCS_PDF_TYPE_AGREEMENT) {
+  elseif ($type === MFCS_PDF_TYPE_AGREEMENT) {
     $name = 'agreement';
   }
 
