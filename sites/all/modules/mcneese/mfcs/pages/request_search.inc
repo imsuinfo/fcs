@@ -1639,6 +1639,7 @@ function mfcs_request_search_0_simple_search_preprocess(&$conditions, &$options)
     }
   }
 
+  $limit_date = strtotime($options['search']);
 
   // build the search conditions
   $conditions['or_1'] = array();
@@ -1677,6 +1678,26 @@ function mfcs_request_search_0_simple_search_preprocess(&$conditions, &$options)
       'field' => 'mer.type',
       'operator' => MFCS_OPERATOR_IS_IN,
       'search' => $limit_type,
+    );
+  }
+
+  if ($limit_date !== FALSE) {
+    $conditions['or_1']['and_1'] = array();
+    $conditions['or_1']['and_1']['field_dates-date-0'] = array(
+      'group_name' => 'dates',
+      'field_name' => 'date',
+      'column' => 'value',
+      'search' => strtotime('midnight today', $limit_date),
+      'multiple' => TRUE,
+      'operator' => MFCS_OPERATOR_EQUAL,
+    );
+    $conditions['or_1']['and_1']['field_dates-date-1'] = array(
+      'group_name' => 'dates',
+      'field_name' => 'date',
+      'column' => 'cancelled',
+      'search' => 0,
+      'multiple' => TRUE,
+      'operator' => MFCS_OPERATOR_EQUAL,
     );
   }
 
