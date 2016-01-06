@@ -151,7 +151,23 @@ CKEDITOR.config.font_names =
 	'Tahoma/Tahoma, Geneva, sans-serif;' +
 	'Times New Roman/Times New Roman, Times, serif;' +
 	'Trebuchet MS/Trebuchet MS, Helvetica, sans-serif;' +
-	'Verdana/Verdana, Geneva, sans-serif';
+	'Verdana/Verdana, Geneva, sans-serif;' +
+	'Oswald Regular;' +
+	'Indie Flower;' +
+	'Open Sans;' +
+	'Amatic SC;' +
+	'Architects Daughter;' +
+	'Coming Soon;' +
+	'Courgette;' +
+	'Covered By Your Grace;' +
+	'Cutive Mono;' +
+	'Dancing Script;' +
+	'Great Vibes;' +
+	'Kaushan Script;' +
+	'Pacifico;' +
+	'Pinyon Script;' +
+	'Shadows Into Light;' +
+	'Source Code Pro';
 
 /**
  * The text to be displayed in the Font combo is none of the available values
