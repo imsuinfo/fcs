@@ -2408,7 +2408,7 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
     $location['targets'][$target_name][$target_delta]['search']['#type'] = 'select';
     $location['targets'][$target_name][$target_delta]['search']['#options'] = $venue_coordinator_options;
   }
-  elseif ($field['type'] == 'date' || $field['type'] == 'timestamp') {
+  elseif ($field['type'] == 'date' || $field['type'] == 'date_cancelling' || $field['type'] == 'timestamp') {
     $location['targets'][$target_name][$target_delta]['search']['#type'] = 'textfield';
     $location['targets'][$target_name][$target_delta]['search']['#size'] = 20;
 
@@ -2437,6 +2437,40 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
     if ($field['type'] == 'timestamp') {
       unset($location['targets'][$target_name][$target_delta]['date_mode']['#options']['m']);
       unset($location['targets'][$target_name][$target_delta]['date_mode']['#options']['d']);
+    }
+
+    if (isset($field['cancelling']) && $field['cancelling']) {
+      // for administers, managers, and reviewers only.
+      $user = cf_current_user();
+      $administer = user_access('mfcs administer', $user);
+      $manager = user_access('mfcs manage', $user);
+      $reviewer = user_access('mfcs review', $user);
+
+      if ($administer || $manager || $reviewer) {
+        $default_value = 0;
+        if (isset($state_location[$target_name][$target_delta]['date_mode'])) {
+          if (isset($form_state['advanced_search-clear']) && $form_state['advanced_search-clear']) {
+            $default_value = $state_location[$target_name][$target_delta]['date_mode'];
+          }
+        }
+        $location['targets'][$target_name][$target_delta]['date_cancelling'] = array(
+          '#id' => 'search-advanced-targets' . $id_extra . '-targets-' . $target_name . '-' . $target_delta . '-date_cancelling',
+          '#title' => "Cancelling",
+          '#type' => 'select',
+          '#default_value' => $default_value,
+          '#options' => array(0 => "Disclude Cancelled", 1 => "Include Cancelled", 2 => "Cancelled Only"),
+          '#required' => TRUE,
+          '#attributes' => array(
+            'class' => array(
+              'search-advanced-target-date_cancelling',
+              'search-advanced-target-' . $target_name . '-date_cancelling',
+              'search-advanced-target-' . $target_name . '-' . $target_delta . '-date_cancelling',
+            ),
+          ),
+        );
+      }
+
+      $form['form']['conditionally_required']['#value'][0][$target_name][] = &$location['targets'][$target_name][$target_delta]['date_cancelling'];
     }
 
     $form['form']['conditionally_required']['#value'][0][$target_name][] = &$location['targets'][$target_name][$target_delta]['date_mode'];
@@ -2978,6 +3012,34 @@ function mfcs_request_search_0_form_build_search_target($structure, $target_name
         $search[$target_field_name]['operator'] = $operator_value;
         $search[$target_field_name]['search'] = $date_value;
       }
+    }
+
+    if (isset($field['cancelling']) && $field['cancelling']) {
+      $date_cancellable = 0;
+      if (isset($target_values['date_cancelling'])) {
+        if ($target_values['date_cancelling'] == 0) {
+          $date_cancellable = 0;
+        }
+        elseif ($target_values['date_cancelling'] == 2) {
+          $date_cancellable = 1;
+        }
+        else {
+          $date_cancellable = NULL;
+        }
+      }
+
+      if (!is_null($date_cancellable)) {
+        $target_field_name = 'field_' . $target_name . '-' . $target_delta . '-cancellable';
+        $search[$target_field_name] = array();
+        $search[$target_field_name]['group_name'] = $table_name;
+        $search[$target_field_name]['field_name'] = $field_name;
+        $search[$target_field_name]['column'] = 'cancelled';
+        $search[$target_field_name]['type'] = 'bool';
+        $search[$target_field_name]['multiple'] = FALSE;
+        $search[$target_field_name]['operator'] = '=';
+        $search[$target_field_name]['search'] = $date_cancellable;
+      }
+      unset($date_cancellable);
     }
   }
   elseif (isset($field['columns']) && is_array($field['columns'])) {

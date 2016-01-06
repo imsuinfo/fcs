@@ -291,6 +291,7 @@ function mfcs_table_structure($include_mer = FALSE) {
       'storage' => 'date_popup',
       'date_popup' => array('view' => 'Y/m/d'),
       'multiple' => TRUE,
+      'cancelling' => TRUE,
     ),
     'time_start' => array(
       'path' => 'request][dates][time_start',
