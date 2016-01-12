@@ -235,7 +235,7 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
     $additional_operations = '';
 
     $problem_account = NULL;
-    foreach (array(MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_LOGIN_PROBLEMS_MULTIPLE, MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED, MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES, MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE) as $taxonomy_id) {
+    foreach (array(MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_LOGIN_PROBLEMS_MULTIPLE, MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED, MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES, MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE, MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) as $taxonomy_id) {
       if (($problem->problems & $taxonomy_id) > 0) {
         if ($taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE || $taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) {
           $additional_operations .= ' <a href="' . $base_path . 'requests/problems-0/users/resynchronize/' . $problem->user_id . $url_arguments . '" class="operation-link operation-link-resynchronize" title="Re-Synchronize the user\'s settings.">Re-Sync</a>';
@@ -535,7 +535,7 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
 
   $banner_id = NULL;
   if (!empty($problem_user->field_user_banner_id['und'][0]['value']) && is_numeric($problem_user->field_user_banner_id['und'][0]['value'])) {
-    $banner_id = $problem_user->field_user_banner_id['und'][0]['value'];
+    $banner_id = (int) $problem_user->field_user_banner_id['und'][0]['value'];
   }
 
   $page_title = "Facilities Use Problems: " . $user_name . " [id: " . $problem_user_id . "]";
@@ -546,7 +546,6 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
 
 
   $form = array();
-
   $form['values'] = array(
     '#tree' => TRUE,
   );
@@ -570,7 +569,7 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
   $message .= "This page provides details of the problems and the ability to reset the problem flags for each of these problems.<br>\n";
   $message .= "Some of these problems can be reset, others cannot.<br>\n";
   $message .= "<br>\n";
-  $message .= "The user's information and problem flags were last updated on: <strong>" . date("Y/m/d h:i:s a", $mfcs_user->date) . "</strong>.<br>\n";
+  $message .= "The <a href=\"" . $base_path . 'user/' . $problem_user_id . "\" title=\"View Profile for " . $user_name . " (id #" . $problem_user_id . ")\">user's information</a> and problem flags were last updated on: <strong>" . date("Y/m/d h:i:s a", $mfcs_user->date) . "</strong>.<br>\n";
   $message .= "<br>\n";
 
   $form['message'] = array(
@@ -682,17 +681,6 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
     ),
     MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE => array(
       'label' => "Deleted/Disabled User Assigned Requests",
-      'resettable' => TRUE,
-      'custom_action' => FALSE,
-      'explanation' =>
-        "This flag gets set when a deleted or disabled user account is assigned as a venue coordinator or similar access roles.<br>\n" .
-        "<br>\n" .
-        $base_path .
-        "<br>\n" .
-        "Requests will need to be re-assigned.<br>\n",
-    ),
-    MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE => array(
-      'label' => "Deleted/Disabled User Assigned Requests",
       'explanation' =>
         "This flag gets set when a deleted or disabled user account is assigned as a venue coordinator or similar access roles.<br>\n" .
         "<br>\n" .
@@ -700,6 +688,15 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
         "<br>\n" .
         "Requests will need to be re-assigned.<br>\n",
       'resettable' => TRUE,
+      'custom_action' => FALSE,
+    ),
+    MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID => array(
+      'label' => "Invalid Banner ID Assigned to User",
+      'explanation' =>
+        "This flag gets set when a user has a banner id that is unknown to the system.<br>\n" .
+        "<br>\n" .
+        "The user either needs to have their banner id fixed, removed, or the account should be disabled.<br>\n",
+      'resettable' => FALSE,
       'custom_action' => FALSE,
     ),
   );
@@ -1311,20 +1308,22 @@ function mfcs_request_problems_0_users_disabled_in_use($user_id, $page_number = 
  *
  * jira ticket: fcs-58.
  *
- * @param string $banner_id
- *   The banner id string.
+ * @param int $banner_id
+ *   The banner id integer.
  *
  * @return array
  *   An array with the user ids as the key and the user names as the value.
  */
 function mfcs_users_load_all_users_with_banner_id($banner_id) {
-  if (!is_string($banner_id) && !is_numeric($banner_id)) {
+  if (!cf_is_integer($banner_id)) {
     return array();
   }
 
+  $banner_id_string = mfcs_banner_id_int_to_string($banner_id);
+
   $names = array();
 
-  $query = db_query('select u.uid as uid, u.name as name from field_data_field_user_banner_id fdfubi inner join users u on fdfubi.entity_id = u.uid where field_user_banner_id_value = :banner_id', array(':banner_id' => $banner_id));
+  $query = db_query('select u.uid as uid, u.name as name from field_data_field_user_banner_id fdfubi inner join users u on fdfubi.entity_id = u.uid where field_user_banner_id_value = :banner_id', array(':banner_id' => $banner_id_string));
   $results = $query->fetchAll();
   foreach ($results as $result) {
     $names[$result->uid] = $result->name;

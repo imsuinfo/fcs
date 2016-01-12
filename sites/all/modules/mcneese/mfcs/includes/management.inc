@@ -737,6 +737,7 @@ function mfcs_management_get_problems_taxonomy() {
   $labels[MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED] = "Unable to Assign/Unassign Reviewer Role";
   $labels[MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES] = "Old/Duplicate Account";
   $labels[MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE] = "Disabled Account in Use";
+  $labels[MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID] = "Invalid Banner ID";
   $labels[MFCS_USER_PROBLEM_FORM_ERROR_USER] = "Core System Form Errors";
   $labels[MFCS_USER_PROBLEM_FORM_ERROR_USER] = "Facilities Use Form Errors";
 
