@@ -1183,10 +1183,12 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
       return FALSE;
     }
 
-    // must be either an administer, a manager, or a venue coordinator to cancel.
+    // must be either an administer, a manager, a venue coordinator, or a requester for the specific request to perform cancelling.
     if (!$roles['administer'] && !$roles['manager'] && !($roles['reviewer'] && array_key_exists($request['venue_coordinator']['user_id'][0]->value, $venue_coordinator_ids))) {
-      $access[$request_id] = FALSE;
-      return FALSE;
+      if (!$roles['requester'] || $request['mer']['user_id'][0]->value != $user->uid) {
+        $access[$request_id] = FALSE;
+        return FALSE;
+      }
     }
 
     $instance = mfcs_instance();

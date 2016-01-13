@@ -918,7 +918,7 @@ function mfcs_page_request_access_operation_cancelling(&$request_ids, &$processe
     return FALSE;
   }
 
-  if ($roles['administer'] || $roles['manager'] || $roles['reviewer']) {
+  if ($roles['administer'] || $roles['manager'] || $roles['reviewer'] || $roles['requester']) {
     if (array_key_exists(NULL, $request_ids)) {
       $access[NULL] = TRUE;
       $processed[NULL] = TRUE;
@@ -955,7 +955,19 @@ function mfcs_page_request_access_operation_cancelling(&$request_ids, &$processe
     $query->condition('mer.id', $request_ids, 'IN');
 
     if (!$roles['administer'] && !$roles['manager']) {
-      $query->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
+      if ($roles['requestor'] && $roles['reviewer']) {
+        $or = db_or();
+        $or->condition('mer.user_id', $user->uid);
+        $or->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
+        $query->condition($or);
+        unset($or);
+      }
+      elseif ($roles['reviewer']) {
+        $query->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
+      }
+      elseif ($roles['requestor']) {
+        $query->condition('mer.user_id', $user->uid);
+      }
     }
 
     $query->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
