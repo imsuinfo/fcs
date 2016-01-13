@@ -3193,8 +3193,8 @@ function mfcs_process_user_banner_roles($user, &$problems, $settings = array()) 
 
     $all_coordinators = mfcs_load_room_coordinators(NULL, TRUE);
     if (array_key_exists($primary_account_id, $all_coordinators) || $assigned_as_reviewer) {
-      if (!array_key_exists($reviewer_role_id->rid, $processed_roles)) {
-        $processed_roles[$reviewer_role_id->rid] = 'reviewer';
+      if (!array_key_exists($reviewer_role->rid, $processed_roles)) {
+        $processed_roles[$reviewer_role->rid] = 'reviewer';
       }
     }
     elseif (!$can_proxy) {
