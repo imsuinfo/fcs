@@ -2814,8 +2814,8 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $append_
         $problems_new = $problems_new | MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE;
       }
 
-      if ($problems_original != $new_problems) {
-        mfcs_save_user($user->uid, array('problems' => $new_problems));
+      if ($problems_original != $problems_new) {
+        mfcs_save_user($user->uid, array('problems' => $problems_new));
       }
 
       return FALSE;
@@ -2886,8 +2886,8 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $append_
           $problems_new = $problems_new | MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE;
         }
 
-        if ($problems != $new_problems) {
-          mfcs_save_user($user->uid, array('problems' => $new_problems));
+        if ($problems != $problems_new) {
+          mfcs_save_user($user->uid, array('problems' => $problems_new));
         }
 
         return FALSE;
@@ -2915,8 +2915,8 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $append_
         $problems_new = $problems_new | MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE;
       }
 
-      if ($problems_original != $new_problems) {
-        mfcs_save_user($user->uid, array('problems' => $new_problems));
+      if ($problems_original != $problems_new) {
+        mfcs_save_user($user->uid, array('problems' => $problems_new));
       }
 
       return FALSE;
@@ -2930,8 +2930,8 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $append_
     unset($mfcs_users);
   }
 
-  if ($problems_original != $new_problems) {
-    mfcs_save_user($user->uid, array('problems' => $new_problems));
+  if ($problems_original != $problems_new) {
+    mfcs_save_user($user->uid, array('problems' => $problems_new));
   }
 
   return TRUE;
