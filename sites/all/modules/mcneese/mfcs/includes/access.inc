@@ -955,7 +955,7 @@ function mfcs_page_request_access_operation_cancelling(&$request_ids, &$processe
     $query->condition('mer.id', $request_ids, 'IN');
 
     if (!$roles['administer'] && !$roles['manager']) {
-      if ($roles['requestor'] && $roles['reviewer']) {
+      if ($roles['requester'] && $roles['reviewer']) {
         $or = db_or();
         $or->condition('mer.user_id', $user->uid);
         $or->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
@@ -965,7 +965,7 @@ function mfcs_page_request_access_operation_cancelling(&$request_ids, &$processe
       elseif ($roles['reviewer']) {
         $query->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
       }
-      elseif ($roles['requestor']) {
+      elseif ($roles['requester']) {
         $query->condition('mer.user_id', $user->uid);
       }
     }
