@@ -515,14 +515,12 @@ function mfcs_ical_sanitize_text($string) {
  *
  * This will be updated as necessary, the first iteration will just focus on the buildings.
  *
- * @param int $location
- *   The location code.
  * @param int $building
  *   The building code.
  * @param int $room
  *   The room code.
  */
-function mfcs_ical_geo_coordinates($location, $building, $room) {
+function mfcs_ical_geo_coordinates($building, $room) {
   // default to coordinates that are in general the center of mcneese university campus.
   $longitude = 30.180565;
   $latitude = -93.216738;
