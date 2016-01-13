@@ -1338,6 +1338,43 @@ function mfcs_hook_user_login(&$edit, $account, $category) {
   }
 
   mfcs_synchronize_user_settings();
+
+
+  // trigger a save update if the users roles should be changed according to mfcs_process_user_banner_roles().
+  $settings = array(
+    'banner_id' => NULL,
+    'primary' => $account->uid,
+  );
+
+  if (array_key_exists('status', $edit)) {
+    $settings['status'] = (int) $edit['status'];
+  }
+
+  if (!isset($edit['field_user_banner_id']['und']) && isset($account->field_user_banner_id['und'][0]) && array_key_exists('value', $account->field_user_banner_id['und'][0])) {
+    if (is_numeric($account->field_user_banner_id['und'][0]['value'])) {
+      $settings['banner_id'] = (int) $account->field_user_banner_id['und'][0]['value'];
+    }
+  }
+
+  $problems = MFCS_USER_PROBLEM_NONE;
+  $changes = mfcs_process_user_banner_roles($account, $problems, $settings);
+  if (is_array($changes)) {
+    if (count($account->roles) != count($changes['roles'])) {
+      user_save($account);
+    }
+    else {
+      $difference = array_diff($account->roles, $changes['roles']);
+      if (!empty($difference)) {
+        user_save($account);
+      }
+      else {
+        $difference = array_diff($changes['roles'], $account->roles);
+        if (!empty($difference)) {
+          user_save($account);
+        }
+      }
+    }
+  }
 }
 
 /**
