@@ -131,6 +131,12 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
   }
 
   global $base_url;
+  global $conf;
+
+  $user = cf_current_user();
+  $manager = user_access('mfcs manage', $user);
+  $reviewer = user_access('mfcs review', $user);
+  $requester = user_access('mfcs request', $user);
 
   $fcs_site_url = variable_get('fcs_site_url', 'fcs.mcneese.edu');
   $fcs_name = variable_get('fcs_name', 'McNeese Facilities Use System');
@@ -176,7 +182,9 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
 
     if (isset($request->classification) && isset($request_classification_options[$request->classification])) {
       $request_classification = $request_classification_options[$request->classification];
-      $request_categories[] = $request_classification;
+
+      // see: https://tools.ietf.org/html/rfc5545#section-3.8.1.2
+      $request_categories[] = mfcs_ical_sanitize_text($request_classification);
     }
 
 
@@ -256,9 +264,10 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
         $ical_date['date_stop'] = $request->time_stop[$delta];
         $ical_date['text'] = date($date_day_format, $date) . ' from ' . date($date_time_format, $ical_date['date_start']) . ' to ' . date($date_time_format, $ical_date['date_stop']) . ' ' . $date_timezone_string;
 
+        // see: https://tools.ietf.org/html/rfc5545#section-3.8.2
         date_default_timezone_set('UTC');
-        $ical_date['start'] = 'DTSTART;VALUE=DATE-TIME:' . date($date_format, $ical_date['date_start']);
-        $ical_date['stop'] = 'DTEND;VALUE=DATE-TIME:' . date($date_format, $ical_date['date_stop']);
+        $ical_date['start'] = 'DTSTART:' . date($date_format, $ical_date['date_start']);
+        $ical_date['stop'] = 'DTEND:' . date($date_format, $ical_date['date_stop']);
         date_default_timezone_set($original_timezone);
       }
       else {
@@ -267,6 +276,7 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
         $ical_date['date_stop'] = strtotime('tomorrow', $ical_date['date_start']);
         $ical_date['text'] = date($date_day_format, $date);
 
+        // see: https://tools.ietf.org/html/rfc5545#section-3.8.2
         date_default_timezone_set('UTC');
         $ical_date['start'] = 'DTSTART;VALUE=DATE:' . date($date_format_all_day, $ical_date['date_start']);
         $ical_date['stop'] = 'DTEND;VALUE=DATE:' . date($date_format_all_day, $ical_date['date_stop']);
@@ -315,22 +325,44 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
         $ical[] = mfcs_ical_wordwrap('DTSTAMP:' . date($date_format, $request->updated));
         $ical[] = mfcs_ical_wordwrap($ical_date['start']);
         $ical[] = mfcs_ical_wordwrap($ical_date['stop']);
-        $ical[] = mfcs_ical_wordwrap('DTCREATED:' . date($date_format, $request->created));
+        $ical[] = mfcs_ical_wordwrap('CREATED:' . date($date_format, $request->created));
         $ical[] = mfcs_ical_wordwrap('LAST-MODIFIED:' . date($date_format, $request->updated));
-        $ical[] = mfcs_ical_wordwrap('LOCATION:' . $request_zone);
-        $ical[] = mfcs_ical_wordwrap('URL:' . $request_url);
+        $ical[] = mfcs_ical_wordwrap('LOCATION:' . mfcs_ical_sanitize_text($request_zone));
+        $ical[] = mfcs_ical_wordwrap('GEO:' . mfcs_ical_geo_coordinates($request->building, $request->room));
+
+
+        // see: https://tools.ietf.org/html/rfc5545#section-3.3.13
+        $ical[] = mfcs_ical_wordwrap('URI:' . $request_url);
+
+        // see: https://tools.ietf.org/html/rfc5545#section-3.8.4.6
+        $ical[] = mfcs_ical_wordwrap('URL:' . $base_path . 'requests/ical-0/' . $item->id);
+
+        // see: https://tools.ietf.org/html/rfc5545#section-3.8.4.3
+        $requestee = user_load($request->user_id);
+        $requestee_user_name = $user->name;
+        if (isset($requestee->field_user_first_name['und'][0]['value']) && isset($requestee->field_user_last_name['und'][0]['value'])) {
+          $requestee_user_name = mfcs_ical_sanitize_text($requestee->field_user_first_name['und'][0]['value']) . ' ' . mfcs_ical_sanitize_text($requestee->field_user_last_name['und'][0]['value']);
+        }
+        $requestee_text = $requestee_user_name;
+        if (!empty($requestee->mail)) {
+          $requestee_text = 'mailto:' . mfcs_ical_sanitize_text($requestee->mail);
+        }
+        $organizer_sent_by = NULL;
+        if (!empty($conf['fcs_email'])) {
+          $organizer_sent_by = ';SENT-BY="mailto:' . $conf['fcs_email'] . '"';
+        }
+        $ical[] = mfcs_ical_wordwrap('ORGANIZER' . $organizer_sent_by . ';CN=' . mfcs_ical_sanitize_text($requestee_user_name) . ':' . $requestee_text);
 
         if (!empty($request_categories)) {
           $ical[] = mfcs_ical_wordwrap('CATEGORIES:' . implode(', ', $request_categories));
         }
 
-        // According to the specification, organizer can only be used for events shared between multiple users.
-        // While this is the actual case as far as this system is concerned, it is counter-intuitive to have such a specification in an ical file.
-        // The file gets exported and there is no knowledge of whether or not the ical client is sharing this between groups.
-        // Therefore, the ORGANIZER cannot be used because the specification is client-side specific and cannot be determined by the exporter/server.
-        #$ical[] = mfcs_ical_wordwrap('ORGANIZER;' . 'CN=' . $request->request_coordinator_name . ':MAILTO:' . $request->request_coordinator_email);
+        // see: https://tools.ietf.org/html/rfc5545#section-3.8.4.2
+        $ical[] = mfcs_ical_wordwrap('CONTACT:' . mfcs_ical_sanitize_text($request->request_coordinator_name . ', ' . $request->request_coordinator_email));
 
-        $ical[] = mfcs_ical_wordwrap('SUMMARY:' . $request->title);
+        // see: https://tools.ietf.org/html/rfc5545#section-3.8.1.12
+        $ical[] = mfcs_ical_wordwrap('SUMMARY:' . mfcs_ical_sanitize_text($request->title));
+        unset($summary);
 
         $request_description = $request_description_begin;
 
@@ -352,8 +384,8 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
 
         $request_description .= $request_description_end;
 
-        $delimited_description = preg_replace("/\n/", '\n', $request_description);
-        $ical[] = mfcs_ical_wordwrap('DESCRIPTION:' . $delimited_description);
+        // see: https://tools.ietf.org/html/rfc5545#section-3.3.11
+        $ical[] = mfcs_ical_wordwrap('DESCRIPTION:' . mfcs_ical_sanitize_text($request_description));
 
         $request_description_markup = $request_description_markup_begin;
 
@@ -375,17 +407,18 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
 
         $request_description_markup .= $request_description_markup_end;
 
-        $request_description_markup = preg_replace("/\n/", '\n', $request_description_markup);
-        $ical[] = mfcs_ical_wordwrap('X-ALT_DESC;FMTTYPE=text/html:' . $request_description_markup);
+        $ical[] = mfcs_ical_wordwrap('X-ALT_DESC;FMTTYPE=text/html:' . mfcs_ical_sanitize_text($request_description_markup));
 
         // SEQUENCE represents the revision number of the vevent.
         // make the sequence represent the requests revision number.
         $ical[] = mfcs_ical_wordwrap('SEQUENCE:' . $request_revision);
 
         // 'STATUS:' with values like: 'TENTATIVE', 'CONFIRMED', 'CANCELLED' can be used if loading current users calendar.
+        // see: https://tools.ietf.org/html/rfc5545#section-3.8.1.11
         $ical[] = mfcs_ical_wordwrap('STATUS:' . 'CONFIRMED');
 
         // 'RESOURCES:' could be added here to designate things like projectors and microphones needed, etc..
+        // see: https://tools.ietf.org/html/rfc5545#section-3.8.1.10
 
         // Can be set to either PUBLIC or PRIVATE, requests are generally public.
         $ical[] = 'CLASS:PUBLIC';
@@ -399,7 +432,13 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
           $ical[] = 'X-MICROSOFT-CDO-ALLDAYEVENT:FALSE';
         }
 
+        // this is mentioned on wikipedia as a non-standard all-day flag.
+        if ($ical_date['all_day']) {
+          $ical[] = 'X-FUNAMBOL-ALLDAY:1';
+        }
+
         // Tells systems that this should be visible on busy searches.
+        // see: https://tools.ietf.org/html/rfc5545#section-3.8.2.7
         $ical[] = 'TRANSP:OPAQUE';
 
         $ical[] = 'END:VEVENT';
@@ -452,6 +491,179 @@ function mfcs_ical_wordwrap($string) {
   }
 
   return implode("\r\n ", $array);
+}
+
+/**
+ * Sanitizes the ical string based on the 'text' rules.
+ *
+ * text = *(TSAFE-CHAR / ":" / DQUOTE / ESCAPED-CHAR)
+ * ESCAPED_CHAR = ("\\" / "\;" / "\," / "\N" / "\n")
+ *
+ * @see: https://tools.ietf.org/html/rfc5545#section-3.11
+ */
+function mfcs_ical_sanitize_text($string) {
+  $delimited = preg_replace('/(\\\|,|;)/', '\\\\\1', $string);
+  $delimited = preg_replace("/\n/", '\n', $delimited);
+
+  return $delimited;
+}
+
+/**
+ * A static/hardcoded function for generating geo coordinates.
+ *
+ * This is hardcoded as a quick and temporary solution.
+ *
+ * This will be updated as necessary, the first iteration will just focus on the buildings.
+ *
+ * @param int $location
+ *   The location code.
+ * @param int $building
+ *   The building code.
+ * @param int $room
+ *   The room code.
+ */
+function mfcs_ical_geo_coordinates($location, $building, $room) {
+  // default to coordinates that are in general the center of mcneese university campus.
+  $longitude = 30.180565;
+  $latitude = -93.216738;
+
+  if ($building == 1) {
+    // band building
+    $longitude = 30.183013;
+    $latitude = -93.217221
+  }
+  elseif ($building == 2) {
+    // burton business center
+    $longitude = 30.181112;
+    $latitude = -93.216588;
+  }
+  elseif ($building == 3) {
+    // bulber auditorium
+    $longitude = 30.181780;
+    $latitude = -93.217157;
+  }
+  elseif ($building == 4) {
+    // burton hall
+    $longitude = 30.177350;
+    $latitude = -93.217952;
+  }
+  elseif ($building == 5) {
+    // burton memorial coliseum
+    $longitude = 30.137096;
+    $latitude = -93.211616;
+  }
+  elseif ($building == 6) {
+    // dolan memorial athletic complex
+    $longitude = 30.174457;
+    $latitude = -93.210092;
+  }
+  elseif ($building == 7) {
+    // h c drew hall
+    $longitude = 30.178166;
+    $latitude = -93.215495;
+  }
+  elseif ($building == 8) {
+    // farrar hall
+    $longitude = 30.180732;
+    $latitude = -93.215687;
+  }
+  elseif ($building == 9) {
+    // frasch hall
+    $longitude = 30.179195;
+    $latitude = -93.217759;
+    // the annex is: 30.179603, -93.217512
+  }
+  elseif ($building == 10) {
+    // gayle hall
+    $longitude = 30.177549;
+    $latitude = -93.219118;
+  }
+  elseif ($building == 11) {
+    // memorial gymnasium
+    $longitude = 30.181263;
+    $latitude = -93.215506;
+  }
+  elseif ($building == 12) {
+    // holbrook student union
+    $longitude = 30.179121;
+    $latitude = -93.215871;
+  }
+  elseif ($building == 13) {
+    // juliet hardtner hall
+    $longitude = 30.182781;
+    $latitude = -93.214442;
+  }
+  elseif ($building == 14) {
+    // kaufman hall
+    $longitude = 30.180695;
+    $latitude = -93.217865;
+  }
+  elseif ($building == 15) {
+    // kirkman hall
+    $longitude = 30.178054;
+    $latitude = -93.216279;
+  }
+  elseif ($building == 16) {
+    // outdoor venues
+    $longitude = 30.173755;
+    $latitude = -93.211994;
+  }
+  elseif ($building == 17) {
+    // recreation complex
+    $longitude = 30.182234;
+    $latitude = -93.215344;
+  }
+  elseif ($building == 18) {
+    // swla econ & enterpreneurial center
+    $longitude = 30.180173;
+    $latitude = -93.220213;
+  }
+  elseif ($building == 19) {
+    // shearman fine arts center
+    $longitude = 30.182280;
+    $latitude = -93.217318;
+  }
+  elseif ($building == 20) {
+    // shearman fine arts addition
+    $longitude = 30.182902;
+    $latitude = -93.217908;
+  }
+  elseif ($building == 21) {
+    // stream alumni center
+    $longitude = 30.175663;
+    $latitude = -93.213601;
+  }
+  elseif ($building == 22) {
+    // student union annex
+    $longitude = 30.179988;
+    $latitude = -93.216753;
+  }
+  elseif ($building == 23) {
+    // mcneese farm (coordinates are a guess)
+    $longitude = 30.183934;
+    $latitude = -93.172316;
+  }
+  elseif ($building == 24) {
+    // special use for FCS
+  }
+  elseif ($building == 25) {
+    // gayle hall annex
+    $longitude = 30.177920;
+    $latitude = -93.219537;
+  }
+  elseif ($building == 26) {
+    // calendar
+  }
+  elseif ($building == 27) {
+    // bookstore
+    $longitude = 30.179362;
+    $latitude = -93.217319;
+  }
+  elseif ($building == 28) {
+    // holiday
+  }
+
+  return '' . $longitude . ';' . $latitude;
 }
 
 /**
