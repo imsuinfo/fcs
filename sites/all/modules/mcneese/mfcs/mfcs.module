@@ -2842,17 +2842,19 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $append_
       }
     }
 
-    $account_mfcs_information = mfcs_load_users($accounts, FALSE, TRUE);
-    foreach ($accounts as $account_id) {
-      $account_problems = MFCS_USER_PROBLEM_NONE;
-      if (isset($account_mfcs_information[$account_id])) {
-        $account_problems = $account_mfcs_information[$account_id]->problems;
-      }
+    if (!empty($accounts)) {
+      $account_mfcs_information = mfcs_load_users($accounts, FALSE, TRUE);
+      foreach ($accounts as $account_id) {
+        $account_problems = MFCS_USER_PROBLEM_NONE;
+        if (isset($account_mfcs_information[$account_id])) {
+          $account_problems = $account_mfcs_information[$account_id]->problems;
+        }
 
-      if (($account_problems & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) > 0 || ($account_problems & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) > 0) {
-        $account = user_load($account_id);
-        mfcs_synchronize_user_settings($account, $user_roles, FALSE, FALSE);
-        unset($account);
+        if (($account_problems & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) > 0 || ($account_problems & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) > 0) {
+          $account = user_load($account_id);
+          mfcs_synchronize_user_settings($account, $user_roles, FALSE, FALSE);
+          unset($account);
+        }
       }
     }
   }
