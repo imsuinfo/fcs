@@ -657,11 +657,16 @@ function mfcs_request_cancelling_0_form_validate($form, &$form_state) {
     $room = (int) $room;
   }
 
+  $total_dates = count($form_state['values']['dates']);
+  $cancelling_dates = 0;
+  $cancelled_dates = 0;
+
   $changes = FALSE;
   foreach ($form_state['values']['dates'] as $key => $operation) {
     if ($operation['select'] == MFCS_CANCELLING_CANCEL) {
+      $cancelling_dates++;
       $changes = TRUE;
-      break;
+      continue;
     }
     elseif ($operation['select'] == MFCS_CANCELLING_UNCANCEL) {
       $requests_using_room = mfcs_check_room_availability($room, array($form['form']['request']['#value']['dates']['date'][$key]->value), array($form['form']['request']['#value']['dates']['time_start'][$key]->value), array($form['form']['request']['#value']['dates']['time_stop'][$key]->value));
@@ -679,11 +684,20 @@ function mfcs_request_cancelling_0_form_validate($form, &$form_state) {
       }
 
       $changes = TRUE;
-      break;
+      continue;
+    }
+    elseif (isset($form['form']['request']['#value']['dates']['date'][$key]->cancelled) && $form['form']['request']['#value']['dates']['date'][$key]->cancelled == 1) {
+      // keep a count of already cancelled dates so that the total number of dates cancelled and to be cancelled may be properly checked.
+      $cancelled_dates++;
     }
   }
 
-  if (!$changes) {
+  if ($changes) {
+    if (($cancelling_dates + $cancelled_dates) == $total_dates) {
+      form_set_error('form', "Cannot cancel all dates. If you want to cancel every date, then you must cancel the entire request and not any individual dates/times.");
+    }
+  }
+  else {
     form_set_error('form', "Unable to submit, no changes have been designated.");
   }
 }
