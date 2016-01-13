@@ -530,7 +530,7 @@ function mfcs_ical_geo_coordinates($location, $building, $room) {
   if ($building == 1) {
     // band building
     $longitude = 30.183013;
-    $latitude = -93.217221
+    $latitude = -93.217221;
   }
   elseif ($building == 2) {
     // burton business center
