@@ -2750,7 +2750,7 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $append_
 
 
   // Determine how many accounts (with same banner id) are assigned as primary.
-  if ($is_primary !== TRUE && !is_null($banner_id)) {
+  if ($ldap_primary !== TRUE && !is_null($banner_id)) {
     $associated_users = mfcs_users_load_banner_id_to_user_id($banner_id);
     $total_primary = 0;
     $total_accounts = 0;
