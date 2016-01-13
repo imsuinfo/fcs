@@ -287,43 +287,50 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
                       $decision_options = mfcs_get_reviewer_decision_list_options();
                       $custom_message = "";
 
-                      if ($value->decision === MFCS_REVIEW_DECISION_AMENDMENT) {
+                      if (is_string($value->decision)) {
+                        $decision = (int) $value->decision;
+                      }
+                      else {
+                        $decision = $value->decision;
+                      }
+
+                      if ($decision === MFCS_REVIEW_DECISION_AMENDMENT) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
                         $custom_message .= 'the request information was amended and therefore the review process was restarted. ';
                       }
-                      elseif ($value->decision === MFCS_REVIEW_DECISION_APPROVE || $value->decision === MFCS_REVIEW_DECISION_DENY) {
+                      elseif ($decision === MFCS_REVIEW_DECISION_APPROVE || $decision === MFCS_REVIEW_DECISION_DENY) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
-                        $custom_message .= 'made a decision of <strong class="review-decision">' . $decision_options[$value->decision] . '</strong>. ';
+                        $custom_message .= 'made a decision of <strong class="review-decision">' . $decision_options[$decision] . '</strong>. ';
                       }
-                      elseif ($value->decision === MFCS_REVIEW_DECISION_COMMENT) {
+                      elseif ($decision === MFCS_REVIEW_DECISION_COMMENT) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
-                        $custom_message .= 'added a <strong class="review-decision">' . $decision_options[$value->decision] . '</strong>. ';
+                        $custom_message .= 'added a <strong class="review-decision">' . $decision_options[$decision] . '</strong>. ';
                       }
-                      elseif ($value->decision === MFCS_REVIEW_DECISION_WAVE) {
+                      elseif ($decision === MFCS_REVIEW_DECISION_WAVE) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
-                        $custom_message .= 'decided to <strong class="review-decision">' . $decision_options[$value->decision] . '</strong> the requirements. ';
+                        $custom_message .= 'decided to <strong class="review-decision">' . $decision_options[$decision] . '</strong> the requirements. ';
                       }
-                      elseif ($value->decision === MFCS_REVIEW_DECISION_REQUIREMENT) {
+                      elseif ($decision === MFCS_REVIEW_DECISION_REQUIREMENT) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
-                        $custom_message .= 'assigned a <strong class="review-decision">' . $decision_options[$value->decision] . '</strong>. ';
+                        $custom_message .= 'assigned a <strong class="review-decision">' . $decision_options[$decision] . '</strong>. ';
                       }
-                      elseif ($value->decision === MFCS_REVIEW_DECISION_CANCELLED) {
+                      elseif ($decision === MFCS_REVIEW_DECISION_CANCELLED) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
                         $custom_message .= ' the request was <strong class="review-decision">' . "Cancelled" . '</strong>. ';
                       }
-                      elseif ($value->decision === MFCS_REVIEW_DECISION_UNCANCELLED) {
+                      elseif ($decision === MFCS_REVIEW_DECISION_UNCANCELLED) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
                         $custom_message .= ' the request was <strong class="review-decision">' . "Uncancelled" . '</strong>. ';
                       }
-                      elseif ($value->decision === MFCS_REVIEW_DECISION_REASSIGNED) {
+                      elseif ($decision === MFCS_REVIEW_DECISION_REASSIGNED) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
                         $custom_message .= ' the request\'s Venue Coordinator has been <strong class="review-decision">' . "Re-Assigned" . '</strong>. ';
                       }
-                      elseif ($value->decision === MFCS_REVIEW_DECISION_CLOSED) {
+                      elseif ($decision === MFCS_REVIEW_DECISION_CLOSED) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
                         $custom_message .= ' the request was <strong class="review-decision">' . "Closed" . '</strong>. ';
                       }
-                      elseif ($value->decision === MFCS_REVIEW_DECISION_AMENDMENT) {
+                      elseif ($decision === MFCS_REVIEW_DECISION_AMENDMENT) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
                         $custom_message .= ' the request was <strong class="review-decision">' . "Amended" . '</strong>. ';
                       }
@@ -331,6 +338,8 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
                       $processed_values[$value->user_id]['fields'][$group_name][$field_name][$key] = array(
                         '#markup' => '<div class="item-value">' . $custom_message . '</div>',
                       );
+
+                      unset($decision);
                     }
                   }
                   elseif ($group_name == 'requirements') {

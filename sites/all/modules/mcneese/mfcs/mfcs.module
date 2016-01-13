@@ -8371,6 +8371,10 @@ function mfcs_get_requests_current_review_decisions($request_ids, $classificatio
     return FALSE;
   }
 
+  if (is_string($step)) {
+    $step = (int) $step;
+  }
+
   // do not operate on steps that cannot be normally reviewed.
   if ($step !== MFCS_REVIEW_STEP_REVIEW && $step !== MFCS_REVIEW_STEP_REQUIREMENTS) {
     return FALSE;

@@ -42,6 +42,10 @@ function mfcs_request_agreement_0_form($form, &$form_state, $request_id, $contai
     return array();
   }
 
+  if (is_string($request_id)) {
+    $resuest_id = (int) $request_id;
+  }
+
   $request = mfcs_load_request_by_id($request_id);
 
   if (empty($request)) {
@@ -108,8 +112,15 @@ function mfcs_request_agreement_0_form($form, &$form_state, $request_id, $contai
   reset($request['review']['review']);
   $review_date = NULL;
   foreach ($request['review']['review'] as $review) {
-    if ($review->step !== MFCS_REVIEW_STEP_REVIEW) {
-      continue;
+    if (is_string($review->step)) {
+      if (((int) $review->step) !== MFCS_REVIEW_STEP_REVIEW) {
+        continue;
+      }
+    }
+    else {
+      if ($review->step !== MFCS_REVIEW_STEP_REVIEW) {
+        continue;
+      }
     }
 
     if ($review_date < $review->date) {

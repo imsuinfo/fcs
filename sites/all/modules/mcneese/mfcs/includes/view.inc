@@ -1099,8 +1099,20 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
       $message = $review->message;
       $date = $review->date;
 
+      if (is_string($user_id)) {
+        $user_id = (int) $user_id;
+      }
+
       if (is_string($review_step)) {
         $review_step = (int) $review_step;
+      }
+
+      if (is_string($decision)) {
+        $decision = (int) $decision;
+      }
+
+      if (is_string($date)) {
+        $date = (int) $date;
       }
 
       $user_can_administer = mfcs_user_can_administer($user_id);
