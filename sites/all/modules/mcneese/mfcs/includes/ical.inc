@@ -46,6 +46,8 @@ function mfcs_ical_generate_array_from_id($request_id) {
   $request_custom->created = $request['mer']['created'][0]->value;
   $request_custom->updated = $request['mer']['updated'][0]->value;
 
+  $request_custom->user_id = $request['mer']['user_id'][0]->value;
+
   $request_custom->status = $request['top']['status'][0]->value;
   $request_custom->step = $request['top']['step'][0]->value;
 
@@ -335,23 +337,23 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
         $ical[] = mfcs_ical_wordwrap('URI:' . $request_url);
 
         // see: https://tools.ietf.org/html/rfc5545#section-3.8.4.6
-        $ical[] = mfcs_ical_wordwrap('URL:' . $base_path . 'requests/ical-0/' . $item->id);
+        $ical[] = mfcs_ical_wordwrap('URL:' . $base_url . 'requests/ical-0/' . $request->id);
 
         // see: https://tools.ietf.org/html/rfc5545#section-3.8.4.3
-        $requestee = user_load($request->user_id);
-        $requestee_user_name = $user->name;
-        if (isset($requestee->field_user_first_name['und'][0]['value']) && isset($requestee->field_user_last_name['und'][0]['value'])) {
-          $requestee_user_name = mfcs_ical_sanitize_text($requestee->field_user_first_name['und'][0]['value']) . ' ' . mfcs_ical_sanitize_text($requestee->field_user_last_name['und'][0]['value']);
+        $requester = user_load($request->user_id);
+        $requester_user_name = $user->name;
+        if (isset($requester->field_user_first_name['und'][0]['value']) && isset($requester->field_user_last_name['und'][0]['value'])) {
+          $requester_user_name = mfcs_ical_sanitize_text($requester->field_user_first_name['und'][0]['value']) . ' ' . mfcs_ical_sanitize_text($requester->field_user_last_name['und'][0]['value']);
         }
-        $requestee_text = $requestee_user_name;
-        if (!empty($requestee->mail)) {
-          $requestee_text = 'mailto:' . mfcs_ical_sanitize_text($requestee->mail);
+        $requester_text = $requester_user_name;
+        if (!empty($requester->mail)) {
+          $requester_text = 'mailto:' . mfcs_ical_sanitize_text($requester->mail);
         }
         $organizer_sent_by = NULL;
         if (!empty($conf['fcs_email'])) {
           $organizer_sent_by = ';SENT-BY="mailto:' . $conf['fcs_email'] . '"';
         }
-        $ical[] = mfcs_ical_wordwrap('ORGANIZER' . $organizer_sent_by . ';CN=' . mfcs_ical_sanitize_text($requestee_user_name) . ':' . $requestee_text);
+        $ical[] = mfcs_ical_wordwrap('ORGANIZER' . $organizer_sent_by . ';CN=' . mfcs_ical_sanitize_text($requester_user_name) . ':' . $requester_text);
 
         if (!empty($request_categories)) {
           $ical[] = mfcs_ical_wordwrap('CATEGORIES:' . implode(', ', $request_categories));
