@@ -3215,7 +3215,29 @@ function mfcs_process_user_banner_roles($user, &$problems, $settings = array()) 
   }
 
   // Note: the system used to refer to requests as events, but because this is a drupal field, 'event' cannot be easily changed to 'request' in this explicit case.
-  return array('field_user_event_roles' => array('und' => $banner_roles), 'roles' => $processed_roles);
+  $results = array('field_user_event_roles' => array('und' => $banner_roles), 'roles' => $processed_roles);
+
+  // auto-lock or auto-unlock accounts without any banner roles, but only when banner can be refreshed.
+  if (($problems & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) == 0 || ($problems & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) == 0) {
+    if ($user->status == 0) {
+      if (!empty($banner_roles)) {
+        // auto-unlock account.
+        $results['status'] = 1;
+
+        watchdog(MFCS_WATCHDOG_ID, "The user '%user_name' (%user_id, %primary_id) has had the account enabled/unlocked due to regaining sufficient banner roles.", array('%user_name' => $user->name, '%user_id' => $user->uid, '%primary_id' => $primary_account_id), WATCHDOG_NOTICE);
+      }
+    }
+    else {
+      if (empty($banner_roles)) {
+        // auto-lock account.
+        $results['status'] = 0;
+
+        watchdog(MFCS_WATCHDOG_ID, "The user '%user_name' (%user_id, %primary_id) has had the account disabled/locked due to insufficient banner roles.", array('%user_name' => $user->name, '%user_id' => $user->uid, '%primary_id' => $primary_account_id), WATCHDOG_NOTICE);
+      }
+    }
+  }
+
+  return $results;
 }
 
 /**

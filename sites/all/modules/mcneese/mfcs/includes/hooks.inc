@@ -1507,6 +1507,10 @@ function mfcs_hook_user_presave(&$edit, $account, $category) {
     }
 
     $edit['field_user_event_roles'] = $changes['field_user_event_roles'];
+
+    if (array_key_exists('status', $changes)) {
+      $edit['status'] = $changes['status'];
+    }
   }
 
   if ($problems != $problems_original) {
