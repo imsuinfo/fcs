@@ -944,6 +944,9 @@ function mfcs_request_problems_0_user_form_submit($form, &$form_state) {
         $administrator_role_id = user_role_load_by_name('administrator');
         $bannerless_exception_role_id = user_role_load_by_name('bannerless exception');
 
+        $changes_made = FALSE;
+        $system_roles = (array) $form['values']['problem_user']['#value']->roles;
+
         // do not alter reviewer role settings for users with 'manager', 'administrator', or 'bannerless_exception' roles.
         $process_reviewer_role = TRUE;
         if (array_key_exists($manager_role_id->rid, $system_roles)) {
@@ -955,9 +958,6 @@ function mfcs_request_problems_0_user_form_submit($form, &$form_state) {
         elseif (array_key_exists($bannerless_exception_role_id->rid, $system_roles)) {
           $process_reviewer_role = FALSE;
         }
-
-        $changes_made = FALSE;
-        $system_roles = (array) $form['values']['problem_user']['#value']->roles;
 
         if ($process_reviewer_role) {
           $all_coordinators = mfcs_load_room_coordinators(NULL, TRUE);
