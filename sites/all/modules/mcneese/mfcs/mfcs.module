@@ -3001,6 +3001,11 @@ function mfcs_process_user_banner_roles($user, &$problems, $settings = array()) 
     $banner_id = (int) $user->field_user_banner_id['und'][0]['value'];
   }
 
+  $already_executed = &drupal_static(__FUNCTION__, NULL);
+  if (is_array($already_executed) && array_key_exists($user->uid, $already_executed)) {
+    return $already_executed[$user->uid];
+  }
+
   $primary_account_id = NULL;
   if (array_key_exists('primary', $settings)) {
     if (cf_is_integer($settings['primary'])) {
@@ -3085,6 +3090,7 @@ function mfcs_process_user_banner_roles($user, &$problems, $settings = array()) 
 
   if (array_key_exists($bannerless_exception_role->rid, $processed_roles)) {
     // if the user is defined as being an exception to operate as if it is bannerless, then do so.
+    $already_executed[$user->uid] = TRUE;
     return TRUE;
   }
 
@@ -3102,6 +3108,7 @@ function mfcs_process_user_banner_roles($user, &$problems, $settings = array()) 
   }
   elseif (array_key_exists($administrator_role->rid, $processed_roles)) {
     // administrators are not auto-managed.
+    $already_executed[$user->uid] = TRUE;
     return TRUE;
   }
 
@@ -3117,6 +3124,7 @@ function mfcs_process_user_banner_roles($user, &$problems, $settings = array()) 
       $problems = $problems | MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
     }
 
+    $already_executed[$user->uid] = FALSE;
     return FALSE;
   }
 
@@ -3126,6 +3134,7 @@ function mfcs_process_user_banner_roles($user, &$problems, $settings = array()) 
 
   if ($is_manager) {
     // managers are not auto-managed once their banner id is confirmed to be valid.
+    $already_executed[$user->uid] = TRUE;
     return TRUE;
   }
 
@@ -3237,6 +3246,7 @@ function mfcs_process_user_banner_roles($user, &$problems, $settings = array()) 
     }
   }
 
+  $already_executed[$user->uid] = $results;
   return $results;
 }
 
