@@ -3745,8 +3745,6 @@ function mfcs_sync_banner_to_local_users($user_id = NULL, $banner_id = NULL) {
     return FALSE;
   }
 
-  $banner_id_string = mfcs_banner_id_int_to_string($banner_id);
-
   if (!is_null($user_id) && is_null($banner_id)) {
     $user = user_load($user_id);
 
@@ -3771,6 +3769,7 @@ function mfcs_sync_banner_to_local_users($user_id = NULL, $banner_id = NULL) {
     $rows = mfcs_oracle_select('select id, role from ucs.msu_event_role');
   }
   else {
+    $banner_id_string = mfcs_banner_id_int_to_string($banner_id);
     $rows = mfcs_oracle_select('select id, role from ucs.msu_event_role where id = \'' . $banner_id_string . '\'');
   }
 
@@ -9343,12 +9342,11 @@ function mfcs_users_load_banner_id_to_user_id($banner_id = NULL) {
     return $list;
   }
 
-  $banner_id_string = mfcs_banner_id_int_to_string($banner_id);
-
   if (is_null($banner_id)) {
     $query = db_query('select u.uid as user_id, u.name as name, fdfubi.field_user_banner_id_value as banner_id, fdfupa.field_user_primary_account_value as primary_account from field_data_field_user_banner_id fdfubi inner join users u on fdfubi.entity_id = u.uid left join field_data_field_user_primary_account fdfupa on u.uid = fdfupa.entity_id order by u.uid');
   }
   else {
+    $banner_id_string = mfcs_banner_id_int_to_string($banner_id);
     $query = db_query('select u.uid as user_id, u.name as name, fdfubi.field_user_banner_id_value as banner_id, fdfupa.field_user_primary_account_value as primary_account from field_data_field_user_banner_id fdfubi inner join users u on fdfubi.entity_id = u.uid left join field_data_field_user_primary_account fdfupa on u.uid = fdfupa.entity_id where field_user_banner_id_value = :banner_id order by u.uid', array(':banner_id' => $banner_id_string));
   }
 
