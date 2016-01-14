@@ -2698,7 +2698,7 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $append_
   }
   unset($bannerless_exception_role_id);
 
-  // load the mfcs user-specifc problem data as a baseline to make changes to.
+  // load the mfcs user-specific problem data as a baseline to make changes to.
   $mfcs_users = mfcs_load_users($user->uid, FALSE, ($user->status == 0));
   $problems_original = MFCS_USER_PROBLEM_NONE;
   if (isset($mfcs_users[$user->uid])) {
