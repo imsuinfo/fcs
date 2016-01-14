@@ -768,12 +768,6 @@ $conf['fcs_no_auto_block_accounts'] = array(
 );
 
 $conf['fcs_synchronize_whitelist'] = array(
-  6, // kday
-  8, // ldapless
-  19, // gfisher
-  22, // colleen
-  23, // gbodin
-  45, // shogan
 );
 
 
