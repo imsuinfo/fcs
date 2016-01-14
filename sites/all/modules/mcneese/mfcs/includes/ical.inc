@@ -42,49 +42,49 @@ function mfcs_ical_generate_array_from_id($request_id) {
   $requests = array();
 
   $request_custom = new StdClass();
-  $request_custom->id = $request['mer']['id'][0]->value;
-  $request_custom->created = $request['mer']['created'][0]->value;
-  $request_custom->updated = $request['mer']['updated'][0]->value;
+  $request_custom->id = (int) $request['mer']['id'][0]->value;
+  $request_custom->created = (int) $request['mer']['created'][0]->value;
+  $request_custom->updated = (int) $request['mer']['updated'][0]->value;
 
-  $request_custom->user_id = $request['mer']['user_id'][0]->value;
+  $request_custom->user_id = (int) $request['mer']['user_id'][0]->value;
 
-  $request_custom->status = $request['top']['status'][0]->value;
-  $request_custom->step = $request['top']['step'][0]->value;
+  $request_custom->status = (int) $request['top']['status'][0]->value;
+  $request_custom->step = (int) $request['top']['step'][0]->value;
 
-  $request_custom->classification = $request['request_coordinator']['classification'][0]->value;
+  $request_custom->classification = (int) $request['request_coordinator']['classification'][0]->value;
 
-  $request_custom->location = $request['top']['location'][0]->value;
+  $request_custom->location = (int) $request['top']['location'][0]->value;
   $request_custom->location_name = $request_location_options[$request_custom->location];
 
-  $request_custom->building = $request['top']['building'][0]->value;
+  $request_custom->building = (int) $request['top']['building'][0]->value;
   $request_custom->building_name = $request_building_options[$request_custom->building];
 
-  $request_custom->room = $request['top']['room'][0]->value;
+  $request_custom->room = (int) $request['top']['room'][0]->value;
   $request_custom->room_name = $request_room_options[$request_custom->room];
 
   $request_custom->title = $request['information']['title'][0]->value;
-  $request_custom->type = $request['information']['type'][0]->value;
+  $request_custom->type = (int) $request['information']['type'][0]->value;
 
   $request_custom->date = array();
   $request_custom->time_start = array();
   $request_custom->time_stop = array();
   $request_custom->category = array();
   foreach ($request['dates']['date'] as $key => $value) {
-    $request_custom->date[$key] = $value->value;
+    $request_custom->date[$key] = (int) $value->value;
 
     $request_custom->time_start[$key] = NULL;
     if (isset($request['dates']['time_start'][$key])) {
-      $request_custom->time_start[$key] = $request['dates']['time_start'][$key]->value;
+      $request_custom->time_start[$key] = (int) $request['dates']['time_start'][$key]->value;
     }
 
     $request_custom->time_stop[$key] = NULL;
     if (isset($request['dates']['time_stop'][$key])) {
-      $request_custom->time_stop[$key] = $request['dates']['time_stop'][$key]->value;
+      $request_custom->time_stop[$key] = (int) $request['dates']['time_stop'][$key]->value;
     }
 
     $request_custom->category[$key] = NULL;
     if (isset($request['dates']['category'][$key])) {
-      $request_custom->category[$key] = $request['dates']['category'][$key]->value;
+      $request_custom->category[$key] = (int) $request['dates']['category'][$key]->value;
     }
   }
 
