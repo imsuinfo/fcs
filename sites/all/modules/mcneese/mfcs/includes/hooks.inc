@@ -1507,11 +1507,35 @@ function mfcs_hook_user_presave(&$edit, $account, $category) {
     }
 
     $edit['field_user_event_roles'] = $changes['field_user_event_roles'];
-
     if (array_key_exists('status', $changes)) {
       $edit['status'] = $changes['status'];
     }
+
+
+    // if status has changed, and the account is disabled, then unset all roles.
+    if (isset($edit['status'])) {
+      if ($account->status != $edit['status']) {
+        if (array_key_exists('status', $edit)) {
+          if ($edit['status'] == 0) {
+            foreach ($edit['roles'] as &$role_value) {
+              $role_value = 0;
+            }
+          }
+        }
+        elseif ($account->status == 0) {
+          foreach ($edit['roles'] as &$role_value) {
+            $role_value = 0;
+          }
+        }
+      }
+    }
+    elseif ($account->status == 0) {
+      foreach ($edit['roles'] as &$role_value) {
+        $role_value = 0;
+      }
+    }
   }
+
 
   if ($problems != $problems_original) {
     mfcs_save_user($account->uid, array('problems' => $problems));
