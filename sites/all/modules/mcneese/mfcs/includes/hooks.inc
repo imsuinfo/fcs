@@ -1324,53 +1324,53 @@ function mfcs_hook_cronapi() {
 /**
  * Internal function for hook_user_login().
  */
-function mfcs_hook_user_login(&$edit, $account, $category) {
-  // if the user does not have a valid banner id, then there is nothing to synchronize to.
-  if (empty($account->field_user_banner_id['und'][0]['value']) || !is_numeric($account->field_user_banner_id['und'][0]['value'])) {
+function mfcs_hook_user_login(&$edit, $user, $category) {
+  if (!is_object($user)) {
     return;
   }
 
-  $roles = (array) $account->roles;
+  // if the user does not have a valid banner id, then there is nothing to synchronize to.
+  if (empty($user->field_user_banner_id['und'][0]['value']) || !is_numeric($user->field_user_banner_id['und'][0]['value'])) {
+    return;
+  }
+
+  $roles = (array) $user->roles;
   $bannerless_exception_role_id = user_role_load_by_name('bannerless exception');
   if (array_key_exists($bannerless_exception_role_id->rid, $roles)) {
     // do not sync to banner for bannerless-exception.
     return;
   }
-
   mfcs_synchronize_user_settings();
 
 
   // trigger a save update if the users roles should be changed according to mfcs_process_user_banner_roles().
   $settings = array(
     'banner_id' => NULL,
-    'primary' => $account->uid,
+    'primary' => (int) $user->uid,
+    'status' => (int) $user->status,
   );
 
-  if (array_key_exists('status', $edit)) {
-    $settings['status'] = (int) $edit['status'];
-  }
-
-  if (!isset($edit['field_user_banner_id']['und']) && isset($account->field_user_banner_id['und'][0]) && array_key_exists('value', $account->field_user_banner_id['und'][0])) {
-    if (is_numeric($account->field_user_banner_id['und'][0]['value'])) {
-      $settings['banner_id'] = (int) $account->field_user_banner_id['und'][0]['value'];
+  if (isset($user->field_user_banner_id['und'][0]) && array_key_exists('value', $user->field_user_banner_id['und'][0])) {
+    if (is_numeric($user->field_user_banner_id['und'][0]['value'])) {
+      $settings['banner_id'] = (int) $user->field_user_banner_id['und'][0]['value'];
     }
   }
 
   $problems = MFCS_USER_PROBLEM_NONE;
-  $changes = mfcs_process_user_banner_roles($account, $problems, $settings);
+  $changes = mfcs_process_user_banner_roles($user, $problems, $settings);
   if (is_array($changes)) {
-    if (count($account->roles) != count($changes['roles'])) {
-      user_save($account);
+    if (count($user->roles) != count($changes['roles'])) {
+      user_save($user);
     }
     else {
-      $difference = array_diff($account->roles, $changes['roles']);
+      $difference = array_diff($user->roles, $changes['roles']);
       if (!empty($difference)) {
-        user_save($account);
+        user_save($user);
       }
       else {
-        $difference = array_diff($changes['roles'], $account->roles);
+        $difference = array_diff($changes['roles'], $user->roles);
         if (!empty($difference)) {
-          user_save($account);
+          user_save($user);
         }
       }
     }
