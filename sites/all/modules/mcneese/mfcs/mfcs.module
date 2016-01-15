@@ -2678,6 +2678,16 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $append_
     return TRUE;
   }
 
+
+  // only execute function once per user account per execution.
+  if (!is_null($user)) {
+    $already_executed = &drupal_static(__FUNCTION__, NULL);
+    if (is_array($already_executed) && array_key_exists($user->uid, $already_executed)) {
+      return $already_executed[$user->uid];
+    }
+  }
+
+
   $original_roles = (array) $user->roles;
   if ($append_roles) {
     $user_roles = $original_roles;
@@ -2694,6 +2704,9 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $append_
   $bannerless_exception_role = user_role_load_by_name('bannerless exception');
   if (array_key_exists($bannerless_exception_role->rid, $user_roles) || array_key_exists($bannerless_exception_role->rid, $roles)) {
     // if the user has the bannerless exception role assigned, then do not synchronize anything.
+    if (!is_null($user)) {
+      $already_executed[$user->uid] = TRUE;
+    }
     return TRUE;
   }
   unset($bannerless_exception_role_id);
@@ -2719,6 +2732,9 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $append_
 
   if (is_null($banner_id)) {
     // banner id is necessary for synchronization, if this account has no banner id, then there is nothing to do.
+    if (!is_null($user)) {
+      $already_executed[$user->uid] = TRUE;
+    }
     return TRUE;
   }
 
@@ -2820,6 +2836,9 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $append_
         mfcs_save_user($user->uid, array('problems' => $problems_new));
       }
 
+      if (!is_null($user)) {
+        $already_executed[$user->uid] = FALSE;
+      }
       return FALSE;
     }
   }
@@ -2894,6 +2913,9 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $append_
           mfcs_save_user($user->uid, array('problems' => $problems_new));
         }
 
+        if (!is_null($user)) {
+          $already_executed[$user->uid] = FALSE;
+        }
         return FALSE;
       }
     }
@@ -2923,6 +2945,9 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $append_
         mfcs_save_user($user->uid, array('problems' => $problems_new));
       }
 
+      if (!is_null($user)) {
+        $already_executed[$user->uid] = FALSE;
+      }
       return FALSE;
     }
 
@@ -2938,6 +2963,9 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $append_
     mfcs_save_user($user->uid, array('problems' => $problems_new));
   }
 
+  if (!is_null($user)) {
+    $already_executed[$user->uid] = FALSE;
+  }
   return TRUE;
 }
 
