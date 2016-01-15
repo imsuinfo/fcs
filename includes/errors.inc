@@ -189,6 +189,7 @@ function _drupal_log_error($error, $fatal = FALSE) {
       $messages = drupal_get_messages();
       if (is_array($messages) && !empty($messages)) {
         $renderred_messages = theme('status_messages', array('messages' => $messages));
+        $renderred_messages = preg_replace('|<header class="html_tag-header messages-header">|is', '<header class="html_tag-header messages-header element-invisible">', $renderred_messages);
         $page = preg_replace('|<!--\(begin-page-main\)-->|is', '<!--(begin-page-main)-->' . "\n" . print_r($renderred_messages, TRUE), $page);
         unset($renderred_messages);
       }

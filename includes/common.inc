@@ -2688,6 +2688,7 @@ function drupal_deliver_html_page($page_callback_result) {
           $messages = drupal_get_messages();
           if (is_array($messages) && !empty($messages)) {
             $renderred_messages = theme('status_messages', array('messages' => $messages));
+            $renderred_messages = preg_replace('|<header class="html_tag-header messages-header">|is', '<header class="html_tag-header messages-header element-invisible">', $renderred_messages);
             $page = preg_replace('|<!--\(begin-page-main\)-->|is', '<!--(begin-page-main)-->' . "\n" . print_r($renderred_messages, TRUE), $page);
             unset($renderred_messages);
           }
@@ -2751,9 +2752,23 @@ function drupal_deliver_html_page($page_callback_result) {
           break;
         }
 
+        // get all drupal messages and present them to the user.
+        $messages = drupal_get_messages();
+        $renderred_messages = NULL;
+        if (is_array($messages) && !empty($messages)) {
+          $renderred_messages = theme('status_messages', array('messages' => $messages));
+          $renderred_messages = preg_replace('|<header class="html_tag-header messages-header">|is', '<header class="html_tag-header messages-header element-invisible">', $renderred_messages);
+        }
+        unset($messages);
+
         // Custom 404 handler.
         drupal_set_title('Page Not Found', PASS_THROUGH);
         $return = '<br>';
+
+        if (!is_null($renderred_messages)) {
+          $return .= $renderred_messages;
+        }
+
         $return .= '<h1 style="text-align: center;">Oops!</h1>';
         $return .= '<h2 style="text-align: center;">This page is no longer available (404).</h2>';
         $return .= '<div style="text-align: center;"><br>';
@@ -2805,6 +2820,7 @@ function drupal_deliver_html_page($page_callback_result) {
           $messages = drupal_get_messages();
           if (is_array($messages) && !empty($messages)) {
             $renderred_messages = theme('status_messages', array('messages' => $messages));
+            $renderred_messages = preg_replace('|<header class="html_tag-header messages-header">|is', '<header class="html_tag-header messages-header element-invisible">', $renderred_messages);
             $page = preg_replace('|<!--\(begin-page-main\)-->|is', '<!--(begin-page-main)-->' . "\n" . print_r($renderred_messages, TRUE), $page);
             unset($renderred_messages);
           }
@@ -2892,9 +2908,23 @@ function drupal_deliver_html_page($page_callback_result) {
           break;
         }
 
+        // get all drupal messages and present them to the user.
+        $messages = drupal_get_messages();
+        $renderred_messages = NULL;
+        if (is_array($messages) && !empty($messages)) {
+          $renderred_messages = theme('status_messages', array('messages' => $messages));
+          $renderred_messages = preg_replace('|<header class="html_tag-header messages-header">|is', '<header class="html_tag-header messages-header element-invisible">', $renderred_messages);
+        }
+        unset($messages);
+
         // Custom 403 handler.
         drupal_set_title('Access Denied', PASS_THROUGH);
         $return = '<br>';
+
+        if (!is_null($renderred_messages)) {
+          $return .= $renderred_messages;
+        }
+
         $return .= '<h1 style="text-align: center;">Oops!</h1>';
         $return .= '<h2 style="text-align: center;">This page is restricted (403).</h2>';
         $return .= '<div style="text-align: center;"><br>';
@@ -2925,6 +2955,7 @@ function drupal_deliver_html_page($page_callback_result) {
           $messages = drupal_get_messages();
           if (is_array($messages) && !empty($messages)) {
             $renderred_messages = theme('status_messages', array('messages' => $messages));
+            $renderred_messages = preg_replace('|<header class="html_tag-header messages-header">|is', '<header class="html_tag-header messages-header element-invisible">', $renderred_messages);
             $page = preg_replace('|<!--\(begin-page-main\)-->|is', '<!--(begin-page-main)-->' . "\n" . print_r($renderred_messages, TRUE), $page);
             unset($renderred_messages);
           }
