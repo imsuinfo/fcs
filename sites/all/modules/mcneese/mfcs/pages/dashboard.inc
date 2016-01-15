@@ -32,14 +32,8 @@ function mfcs_dashboard_page() {
   $user_account_new_banner_access_problem = FALSE;
   if (mfcs_dashboard_page_access() === FALSE) {
     $mfcs_users = mfcs_load_users($user->uid);
-
-    if (is_array($mfcs_users) && !empty($mfcs_users[$user->uid]) && is_object($mfcs_users[$user->uid]) && ($mfcs_users[$user->uid]->problem & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) != 0) {
+    if (is_array($mfcs_users) && !empty($mfcs_users[$user->uid]) && is_object($mfcs_users[$user->uid]) && property_exists($mfcs_users[$user->uid], 'problems') && ($mfcs_users[$user->uid]->problems & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) != 0) {
       $user_account_new_banner_access_problem = TRUE;
-    }
-    else {
-      drupal_access_denied();
-      drupal_exit();
-      return FALSE;
     }
   }
 
