@@ -384,6 +384,37 @@ function mfcs_user_update(&$edit, $account, $category) {
   return mfcs_hook_user_update($edit, $account, $category);
 }
 
+
+/**
+ * Access callback for facilities use dashboard page.
+ *
+ * @param null|string $operation
+ *   (optional) When specified, performs access check based on operation.
+ * @param null|int|array $request_id
+ *   (optional) When specified, performs access check based the provided id.
+ *   Can be an array for 'review'.
+ * @param null|object $user
+ *   (optional) The user object to obtain access for.
+ * @param null|string $section
+ *   (optional) Check whether or not the user is allowed to perform a certain
+ *   operation for a specific section. This is primarily used for the edit
+ *   pages.
+ *
+ * @param bool|array
+ *   TRUE on access granted, FALSE otherwise.
+ *   An array of boolean values is returned when request_id is an array.
+ */
+function mfcs_page_dashboard_access() {
+  $user = cf_current_user();
+
+  // Manually deny access here because drupals callback is being explicitly blocked.
+  if (!is_object($user) || $user->uid == 0 || $user->status == 0) {
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
 /**
  * Access callback for facilities use pages.
  *

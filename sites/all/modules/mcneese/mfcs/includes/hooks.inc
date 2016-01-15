@@ -76,7 +76,7 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
     'file path' => $module_path . '/pages',
     'tab_parent' => '',
     'tab_root' => '',
-    'access callback' => TRUE, // prevent drupals access callback from being called.
+    'access callback' => 'mfcs_page_dashboard_access', // prevent drupals access callback from being called.
   );
 
   $items['requests/create-0'] = array(
