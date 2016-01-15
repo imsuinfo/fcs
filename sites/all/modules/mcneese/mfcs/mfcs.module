@@ -4555,11 +4555,12 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL, $revision_id
     $query->fields('mer');
     $query->condition('id', $request_id);
 
+    $query->innerJoin('mfcs_request_revisions', 'mrv', 'mer.id = mrv.request_id');
+    $query->addField('mrv', 'revision', 'revision');
+    $query->addField('mrv', 'date', 'revision_date');
+    $query->addField('mrv', 'message', 'revision_message');
+
     if (!is_null($revision_id)) {
-      $query->innerJoin('mfcs_request_revisions', 'mrv', 'mer.id = mrv.request_id');
-      $query->addField('mrv', 'revision', 'revision');
-      $query->addField('mrv', 'date', 'revision_date');
-      $query->addField('mrv', 'message', 'revision_message');
       $query->condition('mrv.revision', $revision_id);
     }
 
@@ -4575,7 +4576,7 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL, $revision_id
     // manually add the request information and presentation fields.
     if (!isset($request['mer'])) {
       $request['mer'] = array();
-      foreach (array('id', 'user_id', 'created', 'updated') as $key) {
+      foreach (array('id', 'user_id', 'created', 'updated', 'revision', 'revision_message') as $key) {
         $request['mer'][$key] = array(0 => new stdClass());
         $request['mer'][$key][0]->value = $mer->$key;
       }

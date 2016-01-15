@@ -45,6 +45,7 @@ function mfcs_ical_generate_array_from_id($request_id) {
   $request_custom->id = (int) $request['mer']['id'][0]->value;
   $request_custom->created = (int) $request['mer']['created'][0]->value;
   $request_custom->updated = (int) $request['mer']['updated'][0]->value;
+  $request_custom->revision = (int) $request['mer']['revision'][0]->value;
 
   $request_custom->user_id = (int) $request['mer']['user_id'][0]->value;
 
@@ -190,8 +191,7 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
     }
 
 
-    $request_revision = 0;
-    #$request_revision = $request->revision;
+    $request_revision = $request->revision;
 
     $request_url = $base_url . '/requests/view-0/' . $request->id;
     $request_zone = $building_options[$request->building] . ' ' . $room_options[$request->room];
