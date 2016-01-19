@@ -191,7 +191,10 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
     }
 
 
-    $request_revision = $request->revision;
+    $request_revision = 0;
+    if (property_exists($request, 'revision')) {
+      $request_revision = $request->revision;
+    }
 
     $request_url = $base_url . '/requests/view-0/' . $request->id;
     $request_zone = $building_options[$request->building] . ' ' . $room_options[$request->room];
