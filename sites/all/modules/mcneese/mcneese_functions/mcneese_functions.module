@@ -659,7 +659,9 @@ function mcneese_functions_build_a_to_z_listing_content($type, $filter = NULL, $
     $query->addField('fdfg', 'field_group_tid', 'field_group_tid');
     $query->addField('ttd', 'name', 'field_group_name');
 
-    $query->range($start, $limit);
+    if ($limit > 0) {
+      $query->range($start, $limit);
+    }
     $query->orderBy('n.title', 'ASC');
 
     $executed = $query->execute();
@@ -739,6 +741,102 @@ function mcneese_functions_build_a_to_z_listing_content($type, $filter = NULL, $
 
   pager_default_initialize($total, $limit, $pager_id);
   $output .= theme('pager');
+
+  $output .= '</div>' . "\n";
+
+  return $output;
+}
+
+/**
+ * Generates and prints a list of policies.
+ *
+ * @note: This uses the 'page_theme', but does not have to.
+ * @note: mcneese_functions_build_a_to_z_listing_content() is a good example.
+ *
+ * @param int $page
+ *   (optional) The pager position.
+ * @param int $limit
+ *   (optional) The total number of rows to load.
+ *   A limit of 0 shows all values.
+ * @param int $pager_id
+ *   (optional) The id to use for the pager.
+ *
+ * @return string|bool
+ *   The generated string or FALSE on error.
+ */
+function mcneese_functions_build_policy_content($page = 0, $limit = 15) {
+  if (!cf_is_integer($page)) {
+    cf_error::invalid_integer('page');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($limit)) {
+    cf_error::invalid_integer('limit');
+    return FALSE;
+  }
+
+  if ($page < 0) $page = 0;
+  if ($limit < 0) $limit = 0;
+
+  $start = $page * $limit;
+
+  // name of the policy type in the drupal database.
+  $node_type = 'ie_policy';
+
+  if ($page < 0) $page = 0;
+  if ($limit < 0) $limit = 0;
+
+  $start = $page * $limit;
+
+  try {
+    $query = db_select('node', 'n');
+    $query->innerJoin('workbench_moderation_node_history', 'wmnh', 'wmnh.nid = n.nid AND wmnh.vid = n.vid');
+
+    $query->condition('wmnh.published', 1);
+    $query->condition('n.status', 1);
+
+    $query->condition('n.type', $node_type);
+
+    $count_query = clone($query);
+    $count_query->addExpression('count(n.nid)');
+    $total = $count_query->execute()->fetchField();
+
+    $query->addField('n', 'nid', 'node_id');
+    $query->addField('n', 'vid', 'revision_id');
+    $query->addField('n', 'title', 'title');
+
+    if ($limit > 0) {
+      $query->range($start, $limit);
+    }
+
+    $query->orderBy('n.title', 'ASC');
+
+    $executed = $query->execute();
+    $all = $executed->fetchAll();
+
+    $output = '<div id="mcneese-policy_listing" class="mcneese-policy_listing-wrapper">' . "\n";
+
+    if (empty($all)) {
+      $output .= '</div>' . "\n";
+      return $output;
+    }
+
+    $output .= '<ul class="policy-list">' . "\n";
+    foreach ($all as $item) {
+      $output .= '<li class="policy-item margin-bottom-5">' . "\n";
+      $output .= '<a href="/node/' . $item->node_id . '" class="item-title">' . $item->title . '</a>';
+      $output .= '</li>' . "\n";
+    }
+
+    $output .= '</ul>' . "\n";
+  }
+  catch (Exception $e) {
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
+    }
+
+    return FALSE;
+  }
 
   $output .= '</div>' . "\n";
 
