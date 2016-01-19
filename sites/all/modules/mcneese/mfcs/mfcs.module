@@ -5369,9 +5369,9 @@ function mfcs_get_reviewers($conditions = array(), $options = array()) {
 
     if ($join) {
       $query->innerJoin('users', 'u', 'u.uid = mr.user_id');
-      $query->innerJoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id AND fdfufn.delta = 0');
-      $query->innerJoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id AND fdfuln.delta = 0');
-      $query->innerJoin('field_data_field_user_banner_id', 'fdfubi', 'u.uid = fdfubi.entity_id AND fdfubi.delta = 0');
+      $query->leftJoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id AND fdfufn.delta = 0');
+      $query->leftJoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id AND fdfuln.delta = 0');
+      $query->leftJoin('field_data_field_user_banner_id', 'fdfubi', 'u.uid = fdfubi.entity_id AND fdfubi.delta = 0');
 
       $query->innerJoin('taxonomy_term_data', 'ttd1', 'ttd1.vid = 1 AND mr.request_classification = ttd1.tid');
       $query->innerJoin('taxonomy_term_data', 'ttd2', 'ttd2.vid = 19 AND mr.review_step = ttd2.tid');
@@ -5589,14 +5589,14 @@ function mfcs_get_proxy_venue_coordinators($conditions = array(), $options = arr
 
     if ($join) {
       $query->innerJoin('users', 'u', 'mpvc.user_id = u.uid');
-      $query->innerJoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id AND fdfufn.delta = 0');
-      $query->innerJoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id AND fdfuln.delta = 0');
-      $query->innerJoin('field_data_field_user_banner_id', 'fdfubi', 'u.uid = fdfubi.entity_id AND fdfubi.delta = 0');
+      $query->leftJoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id AND fdfufn.delta = 0');
+      $query->leftJoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id AND fdfuln.delta = 0');
+      $query->leftJoin('field_data_field_user_banner_id', 'fdfubi', 'u.uid = fdfubi.entity_id AND fdfubi.delta = 0');
 
       $query->innerJoin('users', 'pu', 'mpvc.proxy_id = pu.uid');
-      $query->innerJoin('field_data_field_user_first_name', 'pfdfufn', 'pu.uid = pfdfufn.entity_id AND pfdfufn.delta = 0');
-      $query->innerJoin('field_data_field_user_last_name', 'pfdfuln', 'pu.uid = pfdfuln.entity_id AND pfdfuln.delta = 0');
-      $query->innerJoin('field_data_field_user_banner_id', 'pfdfubi', 'pu.uid = pfdfubi.entity_id AND pfdfubi.delta = 0');
+      $query->leftJoin('field_data_field_user_first_name', 'pfdfufn', 'pu.uid = pfdfufn.entity_id AND pfdfufn.delta = 0');
+      $query->leftJoin('field_data_field_user_last_name', 'pfdfuln', 'pu.uid = pfdfuln.entity_id AND pfdfuln.delta = 0');
+      $query->leftJoin('field_data_field_user_banner_id', 'pfdfubi', 'pu.uid = pfdfubi.entity_id AND pfdfubi.delta = 0');
     }
 
     if (!empty($conditions)) {
@@ -5851,9 +5851,9 @@ function mfcs_get_user_information($user_id) {
 
   try {
     $query = db_select('users', 'u');
-    $query->innerJoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id AND fdfufn.delta = 0');
-    $query->innerJoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id AND fdfuln.delta = 0');
-    $query->innerJoin('field_data_field_user_banner_id', 'fdfubi', 'u.uid = fdfubi.entity_id AND fdfubi.delta = 0');
+    $query->leftJoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id AND fdfufn.delta = 0');
+    $query->leftJoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id AND fdfuln.delta = 0');
+    $query->leftJoin('field_data_field_user_banner_id', 'fdfubi', 'u.uid = fdfubi.entity_id AND fdfubi.delta = 0');
 
     $query->addField('u', 'name', 'name');
     $query->addField('u', 'created', 'created');
@@ -8374,8 +8374,8 @@ function mfcs_request_get_available_venue_coordinators() {
 
   try {
     $query = db_select('users', 'u');
-    $query->innerJoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id AND u.uid = fdfufn.entity_id AND fdfufn.delta = 0');
-    $query->innerJoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id AND u.uid = fdfuln.entity_id AND fdfufn.entity_id = fdfuln.entity_id AND fdfuln.delta = 0');
+    $query->leftJoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id AND u.uid = fdfufn.entity_id AND fdfufn.delta = 0');
+    $query->leftJoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id AND u.uid = fdfuln.entity_id AND fdfufn.entity_id = fdfuln.entity_id AND fdfuln.delta = 0');
 
     $query->addField('u', 'uid', 'user_id');
     $query->addField('u', 'name', 'name');
