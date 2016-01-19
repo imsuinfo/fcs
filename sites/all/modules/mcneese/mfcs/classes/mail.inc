@@ -25,6 +25,8 @@ class McNeeseFacilitiesUseMail implements MailSystemInterface {
     $instance = mfcs_instance();
 
     $fcs_name = variable_get('fcs_name', 'McNeese Facilities Use System');
+    $fcs_site_url = variable_get('fcs_site_url', 'fcs.mcneese.edu');
+    $reply_to = variable_get('reply_to', 'no_reply@fcs.mcneese.edu');
 
     // override any pre-defined headers.
     $message['headers']['MIME-Version'] = '1.0';
@@ -33,6 +35,10 @@ class McNeeseFacilitiesUseMail implements MailSystemInterface {
 
     $from_address = filter_var($message['from_address'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW);
     $message['headers']['Return-Path'] = $from_address;
+
+    if (!empty($reply_to) && is_string($reply_to)) {
+      $message['headers']['Reply-To'] = $reply_to;
+    }
 
     $message['headers']['Content-Transfer-Encoding'] = '8Bit';
     #$message['headers']['Content-Transfer-Encoding'] = '7Bit';
