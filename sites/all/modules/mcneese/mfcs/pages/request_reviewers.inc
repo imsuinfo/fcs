@@ -303,8 +303,8 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
       'class' => $class_classification,
     );
 
-    if (isset($reviewer_classifications[$reviewer->reviewer_classification])) {
-      $row['reviewer_classification']['data'] = $reviewer_classifications[$reviewer->reviewer_classification];
+    if (isset($reviewer_classifications[(int) $reviewer->reviewer_classification])) {
+      $row['reviewer_classification']['data'] = $reviewer_classifications[(int) $reviewer->reviewer_classification];
     }
 
     $row['account_id'] = array(
@@ -862,8 +862,8 @@ function mfcs_request_reviewers_0_delete_form($form, &$form_state, $id) {
   $request_classifications = mfcs_get_request_classification_list_options();
 
   $request_classification = '';
-  if (isset($request_classifications[$reviewer->request_classification])) {
-    $request_classification = $request_classifications[$reviewer->request_classification];
+  if (isset($request_classifications[(int) $reviewer->request_classification])) {
+    $request_classification = $request_classifications[(int) $reviewer->request_classification];
   }
 
   $form['form'] = array(
@@ -899,7 +899,7 @@ function mfcs_request_reviewers_0_delete_form($form, &$form_state, $id) {
   }
 
   return confirm_form($form,
-    t("Are you sure you want to delete the account %user (%id) from being a %request_classification reviewer?", array('%user' => $user_name, '%id' => $reviewer->user_id, '%request_classification' => $request_classification)),
+    t("Are you sure you want to delete the account %user (%id) from being a %request_classification reviewer?", array('%user' => $user_name, '%id' => (int) $reviewer->user_id, '%request_classification' => $request_classification)),
     $destination,
     t("This action cannot be undone."),
     t("Delete"),

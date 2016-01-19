@@ -5944,15 +5944,15 @@ function mfcs_get_reviewer_settings_by_user_id($user_id, $disabled = FALSE) {
   );
 
   foreach ($reviewers as $reviewer) {
-    $settings['classifications'][$reviewer->reviewer_classification] = $reviewer->reviewer_classification;
-    $settings['steps'][$reviewer->review_step] = $reviewer->review_step;
-    $settings['request_classifications'][$reviewer->request_classification] = $reviewer->request_classification;
+    $settings['classifications'][(int) $reviewer->reviewer_classification] = (int) $reviewer->reviewer_classification;
+    $settings['steps'][(int) $reviewer->review_step] = (int) $reviewer->review_step;
+    $settings['request_classifications'][(int) $reviewer->request_classification] = (int) $reviewer->request_classification;
 
     // provides 'request classifications' (and not 'review classifications') information on a per step basis.
-    if (!array_key_exists($reviewer->review_step, $settings['for_step'])) {
-      $settings['for_step'][$reviewer->review_step] = array();
+    if (!array_key_exists((int) $reviewer->review_step, $settings['for_step'])) {
+      $settings['for_step'][(int) $reviewer->review_step] = array();
     }
-    $settings['for_step'][$reviewer->review_step][$reviewer->request_classification] = $reviewer->request_classification;
+    $settings['for_step'][(int) $reviewer->review_step][(int) $reviewer->request_classification] = (int) $reviewer->request_classification;
   }
 
   $static_settings[$user_id] = $settings;
@@ -8490,17 +8490,17 @@ function mfcs_get_requests_current_review_decisions($request_ids, $classificatio
   $reviewers_by_classification = array();
   foreach ($reviewers as $reviewer) {
     // regardless of classification requirements, always provide all reviewers by classification.
-    if (!isset($reviewers_by_classification[$reviewer->reviewer_classification][$reviewer->user_id])) {
-      $reviewers_by_classification[$reviewer->reviewer_classification][$reviewer->user_id] = $reviewer->user_id;
+    if (!isset($reviewers_by_classification[(int) $reviewer->reviewer_classification][(int) $reviewer->user_id])) {
+      $reviewers_by_classification[(int) $reviewer->reviewer_classification][(int) $reviewer->user_id] = (int) $reviewer->user_id;
     }
 
-    if (!array_key_exists($reviewer->reviewer_classification, $required_reviewers_classifications)) {
+    if (!array_key_exists((int) $reviewer->reviewer_classification, $required_reviewers_classifications)) {
       // never count venue coordinator or the proxy reviewer classifications.
-      if ($reviewer->reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR || $reviewer->reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY) {
+      if (((int) $reviewer->reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR) || ((int) $reviewer->reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY)) {
         continue;
       }
 
-      $required_reviewers_classifications[$reviewer->reviewer_classification] = $reviewer_classification_options[$reviewer->reviewer_classification];
+      $required_reviewers_classifications[(int) $reviewer->reviewer_classification] = $reviewer_classification_options[(int) $reviewer->reviewer_classification];
     }
   }
 

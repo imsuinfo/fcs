@@ -1292,16 +1292,27 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
       // determine the reviewers classifications.
       $reviewer_classification = array();
       $reviewer_classification_all = array();
-      foreach ($reviewers as $reviewer) {
-        if (!isset($reviewer->reviewer_classification)) {
+      foreach ($reviewers as $reviewers_reviewer) {
+        // ensure that all classifications and steps are cast to integers.
+        if (property_exists($reviewers_reviewer, 'reviewer_classification')) {
+          $reviewers_reviewer->reviewer_classification = (int) $reviewers_reviewer->reviewer_classification;
+        }
+
+        if (property_exists($reviewers_reviewer, 'review_step')) {
+          $reviewers_reviewer->review_step = (int) $reviewers_reviewer->review_step;
+        }
+
+        if (!isset($reviewers_reviewer->reviewer_classification)) {
           continue;
         }
 
-        if (isset($reviewer->review_step) && $reviewer->review_step === $step) {
-          $reviewer_classification[$reviewer->reviewer_classification] = $reviewer_classification_options[$reviewer->reviewer_classification];
+        if (isset($reviewers_reviewer->review_step)) {
+          if ($reviewers_reviewer->review_step === $step) {
+            $reviewer_classification[$reviewers_reviewer->reviewer_classification] = $reviewer_classification_options[$reviewers_reviewer->reviewer_classification];
+          }
         }
 
-        $reviewer_classification_all[$reviewer->reviewer_classification] = $reviewer_classification_options[$reviewer->reviewer_classification];
+        $reviewer_classification_all[$reviewers_reviewer->reviewer_classification] = $reviewer_classification_options[$reviewers_reviewer->reviewer_classification];
       }
 
       if ($can_comment_request && !$can_review_request) {
@@ -1483,28 +1494,28 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
             $uses_as_manager['insurance'] = "Insurance Fees";
           }
 
-          foreach ($reviewers as $reviewer) {
-            if ($reviewer->reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_FACILITIES_CUSTODIAL || $reviewer->reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_CUSTODIAL) {
+          foreach ($reviewers as $reviewers_reviewer) {
+            if ($reviewers_reviewer->reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_FACILITIES_CUSTODIAL || $reviewers_reviewer->reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_CUSTODIAL) {
               $uses['custodial'] = "Custodial";
               $form['form']['requirements-custodial']['#value'] = TRUE;
               unset($uses_as_manager['custodial']);
             }
-            elseif ($reviewer->reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_MAINTENANCE) {
+            elseif ($reviewers_reviewer->reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_MAINTENANCE) {
               $uses['maintenance'] = "Maintenance";
               $form['form']['requirements-maintenance']['#value'] = TRUE;
               unset($uses_as_manager['maintenance']);
             }
-            elseif ($reviewer->reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_FACILITIES) {
+            elseif ($reviewers_reviewer->reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_FACILITIES) {
               $uses['grounds'] = "Grounds";
               $form['form']['requirements-grounds']['#value'] = TRUE;
               unset($uses_as_manager['grounds']);
             }
-            elseif ($reviewer->reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_SECURITY) {
+            elseif ($reviewers_reviewer->reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_SECURITY) {
               $uses['security'] = "Security";
               $form['form']['requirements-security']['#value'] = TRUE;
               unset($uses_as_manager['security']);
             }
-            elseif ($reviewer->reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_PURCHASING) {
+            elseif ($reviewers_reviewer->reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_PURCHASING) {
               $insurance_requirement = TRUE;
               $form['form']['requirements-insurance']['#value'] = TRUE;
               unset($uses_as_manager['insurance']);
