@@ -334,10 +334,12 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
 
 
         // see: https://tools.ietf.org/html/rfc5545#section-3.3.13
-        $ical[] = mfcs_ical_wordwrap('URI:' . $request_url);
-
         // see: https://tools.ietf.org/html/rfc5545#section-3.8.4.6
-        $ical[] = mfcs_ical_wordwrap('URL:' . $base_url . '/requests/ical-0/' . $request->id);
+        // warning: Standard states "hen a property parameter value is a URI value type, the URI MUST be specified as a quoted-string value.", but adding quotes will cause validation failure.
+        //          Furthermore, later in the documentation, their own examples for the URL type does not use double quotes.
+        //          The standard is therefore inconsistent with itself.
+        //          Double quotes will not be used at this time.
+        $ical[] = mfcs_ical_wordwrap('URL;VALUE=URI:' . $request_url . ':' . $base_url . '/requests/ical-0/' . $request->id);
 
         // see: https://tools.ietf.org/html/rfc5545#section-3.8.4.3
         $requester = user_load($request->user_id);
