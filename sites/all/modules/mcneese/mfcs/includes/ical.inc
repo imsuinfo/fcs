@@ -343,6 +343,7 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
         //          The standard is therefore inconsistent with itself.
         //          Double quotes will not be used at this time.
         $ical[] = mfcs_ical_wordwrap('URL;VALUE=URI:' . $request_url . ':' . $base_url . '/requests/ical-0/' . $request->id);
+        #$ical[] = mfcs_ical_wordwrap('URL:' . $base_url . '/requests/ical-0/' . $request->id);
 
         // see: https://tools.ietf.org/html/rfc5545#section-3.8.4.3
         $requester = user_load($request->user_id);
