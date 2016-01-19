@@ -2627,7 +2627,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
           $proxy = mfcs_load_basic_user_settings_by_user_id($proxy_returned->proxy_id);
 
           if (is_array($proxy)) {
-            $email_to[$proxy['email']] = $proxy['smail'];
+            $email_to[$proxy['email']] = $proxy['email'];
           }
         }
       }
