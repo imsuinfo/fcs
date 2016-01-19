@@ -337,7 +337,7 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
         $ical[] = mfcs_ical_wordwrap('URI:' . $request_url);
 
         // see: https://tools.ietf.org/html/rfc5545#section-3.8.4.6
-        $ical[] = mfcs_ical_wordwrap('URL:' . $base_url . 'requests/ical-0/' . $request->id);
+        $ical[] = mfcs_ical_wordwrap('URL:' . $base_url . '/requests/ical-0/' . $request->id);
 
         // see: https://tools.ietf.org/html/rfc5545#section-3.8.4.3
         $requester = user_load($request->user_id);
