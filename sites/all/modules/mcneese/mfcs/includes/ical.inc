@@ -74,17 +74,17 @@ function mfcs_ical_generate_array_from_id($request_id) {
     $request_custom->date[$key] = (int) $value->value;
 
     $request_custom->time_start[$key] = NULL;
-    if (isset($request['dates']['time_start'][$key])) {
+    if (isset($request['dates']['time_start'][$key]) && property_exists($request['dates']['time_start'][$key], 'value') && !is_null($request['dates']['time_start'][$key]->value)) {
       $request_custom->time_start[$key] = (int) $request['dates']['time_start'][$key]->value;
     }
 
     $request_custom->time_stop[$key] = NULL;
-    if (isset($request['dates']['time_stop'][$key])) {
+    if (isset($request['dates']['time_stop'][$key]) && property_exists($request['dates']['time_stop'][$key], 'value') && !is_null($request['dates']['time_stop'][$key]->value)) {
       $request_custom->time_stop[$key] = (int) $request['dates']['time_stop'][$key]->value;
     }
 
     $request_custom->category[$key] = NULL;
-    if (isset($request['dates']['category'][$key])) {
+    if (isset($request['dates']['category'][$key]) && property_exists($request['dates']['category'][$key], 'value') && !is_null($request['dates']['category'][$key]->value)) {
       $request_custom->category[$key] = (int) $request['dates']['category'][$key]->value;
     }
   }
