@@ -1696,10 +1696,10 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
         $changed_by_string .= ' ' . $changed_by->field_user_last_name['und'][0]['value'];
       }
 
-      $changed_by_string .= " (user id: " . $changed_by->uid . ")";
+      $changed_by_string .= " [id: " . $changed_by->uid . "]";
     }
     else {
-      $changed_by_string .= $changed_by->name . " (user id: " . $changed_by->uid . ")";
+      $changed_by_string .= $changed_by->name . " [id: " . $changed_by->uid . "]";
     }
   }
 
