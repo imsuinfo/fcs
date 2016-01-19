@@ -267,7 +267,7 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
     }
   }
 
-  $rows_per_page = 10;
+  $rows_per_page = 20;
   $options = array(
     'sort' => $sorting,
     'join' => TRUE,
