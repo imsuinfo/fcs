@@ -274,6 +274,14 @@ class McNeeseFacilitiesUseMail implements MailSystemInterface {
       $user_id = $user->uid;
     }
 
+    // When using anoynmous account, check to see if effective system id is enabled.
+    if ($user_id == 0) {
+      $system_id_enabled = mfcs_using_effective_system_id();
+      if ($system_id_enabled) {
+        $user_id = 1;
+      }
+    }
+
     $fields = array(
       'destination' => substr($message['to'], 0, MFCS_EMAIL_MAX_DESTINATION_LENGTH),
       'title' => substr($message['subject'], 0, MFCS_EMAIL_MAX_SUBJECT_LENGTH),
