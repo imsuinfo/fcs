@@ -555,11 +555,28 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
   unset($reviewers_returned);
 
   foreach ($reviewers as $reviewer) {
-    if (isset($reviewer->review_step) && $reviewer->review_step === $step) {
-      $reviewer_classifications[$reviewer->reviewer_classification] = $reviewer->reviewer_classification;
+    if (is_string($reviewer->reviewer_classification)) {
+      $reviewer_classification = (int) $reviewer->reviewer_classification;
+    }
+    else {
+      $reviewer_classification = $reviewer->reviewer_classification;
     }
 
-    $reviewer_classifications_all[$reviewer->reviewer_classification] = $reviewer->reviewer_classification;
+    $review_step = NULL;
+    if (isset($reviewer->review_step)) {
+      if (is_string($reviewer->review_step)) {
+        $review_step = (int) $reviewer->review_step;
+      }
+      else {
+        $review_step = $reviewer->review_step;
+      }
+    }
+
+    if ($review_step === $step) {
+      $reviewer_classifications[$reviewer_classification] = $reviewer_classification;
+    }
+
+    $reviewer_classifications_all[$reviewer_classification] = $reviewer_classification;
   }
 
   $proxies = mfcs_get_proxy_venue_coordinator($user->uid);
