@@ -150,6 +150,7 @@ function mfcs_request_email_log_0_form($form, &$form_state, $page_number = 0) {
       'date' => 'date',
       'code' => 'code',
     ),
+    'associative' => FALSE,
   );
 
   $options['extra_fields']['users'] = array(

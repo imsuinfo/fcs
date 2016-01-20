@@ -1106,6 +1106,9 @@ function mfcs_ajax_email_log_0_list() {
     $options['sort'] = $sorting;
   }
 
+  // disable associative loading of results.
+  $options['associative'] = FALSE;
+
   $options['fields'] = array(
     'id' => 'id',
     'destination' => 'destination',

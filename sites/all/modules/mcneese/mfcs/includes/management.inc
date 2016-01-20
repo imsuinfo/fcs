@@ -61,6 +61,8 @@
  *     'distinct': Process the entire query as distinct.
  *     'distinct_id': Custom option to load mer.id as distinct. This overrides
  *                    'distinct' when TRUE.
+ *     'associative': When TRUE (default), performs a fetchAllAssoc() against the primary key.
+ *                    When FALSE, performs a fetchAll().
  *
  * @return array|false
  *   An array of objects containing the mfcs-specific user fields.
@@ -136,6 +138,11 @@ function mfcs_management_search_table($table_name, $table_alias, $primary_key, $
     if ($distinct_id) {
       $distinct = FALSE;
     }
+  }
+
+  $associative = TRUE;
+  if (isset($options['associative']) && is_bool($options['associative'])) {
+    $associative = (bool) $options['associative'];
   }
 
   $return = array(
@@ -379,7 +386,12 @@ function mfcs_management_search_table($table_name, $table_alias, $primary_key, $
     }
 
     if ($results) {
-      $return['results'] = $query->execute()->fetchAllAssoc($primary_key);
+      if ($associative) {
+        $return['results'] = $query->execute()->fetchAllAssoc($primary_key);
+      }
+      else {
+        $return['results'] = $query->execute()->fetchAll();
+      }
     }
   }
   catch (Exception $ex) {
