@@ -267,10 +267,8 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     $status = (int) $status;
   }
 
-  if ($can_review_request || $can_comment_request) {
-    // show review operations only if the content is reviewable by the current user.
-    $request_classification = $request['request_coordinator']['classification'][0]->value;
 
+  if ($can_review_request || $can_comment_request) {
     // only show operations for states and steps that make sense to.
     $allowed_statuses = array(
       MFCS_REQUEST_STATUS_LOCKED,
@@ -400,8 +398,16 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     return $form;
   }
 
+  // show review operations only if the content is reviewable by the current user.
   $request_classification = $request['request_coordinator']['classification'][0]->value;
+  if (is_string($request_classification)) {
+    $request_classification = (int) $request_classification;
+  }
+
   $request_type = $request['information']['type'][0]->value;
+  if (is_string($request_type)) {
+    $request_type = (int) $request_type;
+  }
 
   if ($show_display) {
     mfcs_include(MFCS_INCLUDE_VIEW);
@@ -1295,11 +1301,15 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
       foreach ($reviewers as $reviewers_reviewer) {
         // ensure that all classifications and steps are cast to integers.
         if (property_exists($reviewers_reviewer, 'reviewer_classification')) {
-          $reviewers_reviewer->reviewer_classification = (int) $reviewers_reviewer->reviewer_classification;
+          if (is_string($reviewers_reviewer->reviewer_classification)) {
+            $reviewer_classification = (int) $reviewers_reviewer->reviewer_classification;
+          }
         }
 
         if (property_exists($reviewers_reviewer, 'review_step')) {
-          $reviewers_reviewer->review_step = (int) $reviewers_reviewer->review_step;
+          if (is_string($reviewers_reviewer->review_step)) {
+            $reviewers_reviewer->review_step = (int) $reviewers_reviewer->review_step;
+          }
         }
 
         if (!isset($reviewers_reviewer->reviewer_classification)) {

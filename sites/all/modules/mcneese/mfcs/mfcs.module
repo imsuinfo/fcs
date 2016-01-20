@@ -5944,15 +5944,30 @@ function mfcs_get_reviewer_settings_by_user_id($user_id, $disabled = FALSE) {
   );
 
   foreach ($reviewers as $reviewer) {
-    $settings['classifications'][(int) $reviewer->reviewer_classification] = (int) $reviewer->reviewer_classification;
-    $settings['steps'][(int) $reviewer->review_step] = (int) $reviewer->review_step;
-    $settings['request_classifications'][(int) $reviewer->request_classification] = (int) $reviewer->request_classification;
+    if (is_string($reviewer->reviewer_classification)) {
+      $reviewer_classification = (int) $reviewer->reviewer_classification;
+    }
+    else {
+      $reviewer_classification = $reviewer->reviewer_classification;
+    }
+
+    $reviewer_review_step = NULL;
+    if (isset($reviewer->review_step) && is_string($reviewer->review_step)) {
+      $reviewer_review_step = (int) $reviewer->review_step;
+    }
+    else {
+      $reviewer_review_step = $reviewer->review_step;
+    }
+
+    $settings['classifications'][$reviewer_classification] = $reviewer_classification;
+    $settings['steps'][$reviewer_review_step] = $reviewer_review_step;
+    $settings['request_classifications'][$reviewer_classification] = $reviewer_classification;
 
     // provides 'request classifications' (and not 'review classifications') information on a per step basis.
-    if (!array_key_exists((int) $reviewer->review_step, $settings['for_step'])) {
-      $settings['for_step'][(int) $reviewer->review_step] = array();
+    if (!array_key_exists($reviewer_review_step, $settings['for_step'])) {
+      $settings['for_step'][$reviewer_review_step] = array();
     }
-    $settings['for_step'][(int) $reviewer->review_step][(int) $reviewer->request_classification] = (int) $reviewer->request_classification;
+    $settings['for_step'][$reviewer_review_step][$reviewer_classification] = $reviewer_classification;
   }
 
   $static_settings[$user_id] = $settings;

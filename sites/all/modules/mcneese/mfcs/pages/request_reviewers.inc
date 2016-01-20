@@ -303,8 +303,15 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
       'class' => $class_classification,
     );
 
-    if (isset($reviewer_classifications[(int) $reviewer->reviewer_classification])) {
-      $row['reviewer_classification']['data'] = $reviewer_classifications[(int) $reviewer->reviewer_classification];
+    if (is_string($reviewer_classification = $reviewer->reviewer_classification)) {
+      $reviewer_classification = (int) $reviewer->reviewer_classification;
+    }
+    else {
+      $reviewer_classification = $reviewer->reviewer_classification;
+    }
+
+    if (isset($reviewer_classifications[$reviewer_classification])) {
+      $row['reviewer_classification']['data'] = $reviewer_classifications[$reviewer_classification];
     }
 
     $row['account_id'] = array(
@@ -334,6 +341,7 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
 
     $rows[] = $row;
   }
+  unset($reviewer_classification);
 
   $form['form']['request_classification'] = array(
     '#type' => 'value',
@@ -860,10 +868,24 @@ function mfcs_request_reviewers_0_delete_form($form, &$form_state, $id) {
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
   $request_classifications = mfcs_get_request_classification_list_options();
-
   $request_classification = '';
-  if (isset($request_classifications[(int) $reviewer->request_classification])) {
-    $request_classification = $request_classifications[(int) $reviewer->request_classification];
+  if (is_string($reviewer->request_classification)) {
+    $reviewer_request_classification = (int) $reviewer->request_classification;
+  }
+  else {
+    $reviewer_request_classification = $reviewer->request_classification;
+  }
+
+  if (is_string($reviewer->review_step)) {
+    $reviewer_step = (int) $reviewer->review_step;
+  }
+  else {
+    $reviewer_step = $reviewer->review_step;
+  }
+
+  $request_classification_name = "";
+  if (isset($request_classifications[$reviewer_request_classification])) {
+    $request_classification_name = $request_classifications[$reviewer_request_classification];
   }
 
   $form['form'] = array(
@@ -877,21 +899,21 @@ function mfcs_request_reviewers_0_delete_form($form, &$form_state, $id) {
 
   $form['form']['request_classification'] = array(
     '#type' => 'value',
-    '#value' => (int) $reviewer->request_classification,
+    '#value' => $reviewer_request_classification,
   );
 
   $form['form']['review_step'] = array(
     '#type' => 'value',
-    '#value' => (int) $reviewer->review_step,
+    '#value' => $reviewer_step,
   );
 
 
   if (empty($form_state['values']['redirect_to'])) {
-    if (empty($reviewer->request_classification)) {
+    if (empty($reviewer_request_classification)) {
       $destination = 'requests/reviewers-0' . $url_arguments;
     }
     else {
-      $destination = 'requests/reviewers-0/list/' . $reviewer->request_classification . $url_arguments;
+      $destination = 'requests/reviewers-0/list/' . $reviewer_request_classification . $url_arguments;
     }
   }
   else {
@@ -899,7 +921,7 @@ function mfcs_request_reviewers_0_delete_form($form, &$form_state, $id) {
   }
 
   return confirm_form($form,
-    t("Are you sure you want to delete the account %user (%id) from being a %request_classification reviewer?", array('%user' => $user_name, '%id' => (int) $reviewer->user_id, '%request_classification' => $request_classification)),
+    t("Are you sure you want to delete the account %user (%id) from being a %request_classification_name reviewer?", array('%user' => $user_name, '%id' => $reviewer->user_id, '%request_classification_name' => $request_classification_name)),
     $destination,
     t("This action cannot be undone."),
     t("Delete"),
