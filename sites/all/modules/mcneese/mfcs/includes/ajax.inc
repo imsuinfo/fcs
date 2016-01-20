@@ -1258,11 +1258,11 @@ function mfcs_ajax_email_log_0_list() {
       $row[2] = '<a href="' . $base_path . 'user/' . $email_log->user_id . $url_arguments . '" class="user-link">' . check_plain($email_log->name) . '</a>';
       $row[3] = check_plain(date("Y/m/d h:i:s a", $email_log->date));
 
-      if (empty($email_log->user_id)) {
+      if (empty($email_log->destination_user_id)) {
         $row[4] = check_plain($email_log->destination);
       }
       else {
-        $row[4] = '<a href="' . $base_path . 'user/' . $email_log->user_id . $url_arguments . '" class="user-link">' . check_plain($email_log->destination) . '</a>';
+        $row[4] = '<a href="' . $base_path . 'user/' . $email_log->destination_user_id . $url_arguments . '" class="user-link">' . check_plain($email_log->destination) . '</a>';
       }
 
       $row[5] = check_plain($email_log->title);
