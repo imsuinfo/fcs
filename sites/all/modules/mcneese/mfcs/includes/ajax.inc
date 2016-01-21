@@ -1333,6 +1333,225 @@ function mfcs_ajax_problems_0_disabled_in_use($user_id) {
 
   mfcs_ajax_listing_0($conditions, $options);
 }
+/**
+ * Ajax function call for loading users problem list datatable.
+ */
+function mfcs_ajax_synchronize_0_form() {
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  $response = array();
+
+  if (function_exists('devel_menu')) {
+    $GLOBALS['devel_shutdown'] = FALSE;
+  }
+
+  mfcs_include(MFCS_INCLUDE_MANAGEMENT);
+
+  // load ajax/json request settings.
+  list($draw, $columns, $order, $options, $timestamp) = mfcs_ajax_setup_request_settings();
+
+  $search = FALSE;
+  if (isset($_GET['search']['value']) && is_string($_GET['search']['value']) && !empty($_GET['search']['value'])) {
+    $search = TRUE;
+  }
+
+  // build ajax/json response data.
+  $response = array(
+    'draw' => $draw,
+  );
+
+  $sorting = array();
+  if (!isset($order[0]['column'])) {
+    $sorting['user_id'] = 'ASC';
+  }
+  else {
+    $order_column = (int) $order[0]['column'];
+    $order_direction = isset($order[0]['dir']) && is_string($order[0]['dir']) ? strtoupper($order[0]['dir']) : 'DESC';
+
+    if ($order_column == 0) {
+      $sorting['id'] = $order_direction;
+    }
+    elseif ($order_column == 1) {
+      $sorting['user_id'] = $order_direction;
+    }
+    elseif ($order_column == 2) {
+      $sorting['name'] = $order_direction;
+    }
+    elseif ($order_column == 3) {
+      $sorting['created'] = $order_direction;
+    }
+    elseif ($order_column == 4) {
+      $sorting['updated'] = $order_direction;
+    }
+    elseif ($order_column == 5) {
+      $sorting['password'] = $order_direction;
+    }
+    elseif ($order_column == 6) {
+      $sorting['type'] = $order_direction;
+    }
+  }
+
+  // always provide the unique id in the ordering to guarantee consistency in range results.
+  if (!isset($sorting['id'])) {
+    $sorting['id'] = 'DESC';
+  }
+
+  if (!empty($sorting)) {
+    $options['sort'] = $sorting;
+  }
+
+  // disable associative loading of results.
+  $options['associative'] = FALSE;
+
+  $options['fields'] = array(
+    'id' => 'id',
+    'user_id' => 'user_id',
+    'created' => 'created',
+    'updated' => 'updated',
+    'password' => 'password',
+    'type' => 'type',
+  );
+
+  $options['extra_fields']['users'] = array(
+    'alias' => 'u',
+    'join' => 'inner',
+    'on' => 'ms.user_id = u.uid',
+    'columns' => array(
+      'user_id' => 'uid',
+      'name' => 'name',
+    ),
+  );
+
+  $conditions = array();
+
+  $table_name = 'mfcs_synchronize';
+  $table_alias = 'ms';
+  $primary_key = 'id';
+
+  if ($search) {
+    $regex_safe_search = preg_quote($_GET['search']['value'], '/');
+
+    $count_conditions = $conditions;
+    $count_options = $options;
+
+    $conditions['or_1'] = array();
+    $conditions['or_1']['value_id'] = array(
+      'field' => 'text(' . $table_alias . '.id)',
+      'operator' => MFCS_OPERATOR_LIKE,
+      'search' => $_GET['search']['value'],
+      'expression' => TRUE,
+    );
+
+    $conditions['or_1']['value_user_id'] = array(
+      'field' => 'text(ms.user_id)',
+      'operator' => MFCS_OPERATOR_LIKE,
+      'search' => $_GET['search']['value'],
+      'expression' => TRUE,
+    );
+
+    $conditions['or_1']['value_name'] = array(
+      'field' => 'u.name',
+      'operator' => MFCS_OPERATOR_LIKE,
+      'search' => $_GET['search']['value'],
+    );
+
+    // Commented out because this is confusing because the date format will not match.
+    #$conditions['or_1']['value_date'] = array(
+    #  'field' => 'text(to_timestamp(' . $table_alias . '.date))',
+    #  'operator' => MFCS_OPERATOR_LIKE,
+    #  'search' => $_GET['search']['value'],
+    #  'expression' => TRUE,
+    #);
+
+    $conditions['or_1']['value_password'] = array(
+      'field' => $table_alias . '.password',
+      'operator' => MFCS_OPERATOR_LIKE,
+      'search' => $_GET['search']['value'],
+    );
+
+    $limit_types = NULL;
+    if (preg_match('/' . $regex_safe_search . '/i', 'ical') > 0) {
+      $limit_types = MFCS_SYNCHRONIZE_TYPE_ICAL;
+    }
+
+    if (!is_null($limit_types)) {
+      $conditions['or_1']['value_type'] = array(
+        'field' => $table_alias . '.type',
+        'operator' => MFCS_OPERATOR_EQUAL,
+        'search' => $limit_types,
+      );
+    }
+
+    $count_options['returned'] = FALSE;
+    $returned = mfcs_management_search_table($table_name, $table_alias, $primary_key, $count_conditions, $count_options);
+
+    $returned_total = 0;
+    if (is_array($returned) && array_key_exists('count', $returned)) {
+      $returned_total = $returned['count'];
+    }
+
+    $returned = mfcs_management_search_table($table_name, $table_alias, $primary_key, $conditions, $options);
+    $items = array();
+    if (isset($returned['results']) && is_array($returned['results'])) {
+      $items = $returned['results'];
+    }
+
+    $response['recordsTotal'] = $returned_total;
+    $response['recordsFiltered'] = $returned['count'];
+  }
+  else {
+    $returned = mfcs_management_search_table($table_name, $table_alias, $primary_key, $conditions, $options);
+
+    $returned_total = 0;
+    if (is_array($returned) && array_key_exists('count', $returned)) {
+      $returned_total = $returned['count'];
+    }
+
+    $items = array();
+    if (isset($returned['results']) && is_array($returned['results'])) {
+      $items = $returned['results'];
+    }
+
+    $response['recordsTotal'] = $returned_total;
+    $response['recordsFiltered'] = $returned_total;
+  }
+
+  if (!is_array($items)) {
+    drupal_json_output($response);
+    exit();
+  }
+
+  $response['data'] = array();
+  if (!empty($items)) {
+    foreach ($items as $item) {
+      $row = array();
+      $row[0] = '' . $item->id;
+      $row[1] = '' . $item->user_id;
+      $row[2] = '<a href="' . $base_path . 'user/' . $item->user_id . $url_arguments . '" class="user-link">' . check_plain($item->name) . '</a>';
+      $row[3] = check_plain(date("Y/m/d h:i:s a", $item->created));
+      $row[4] = check_plain(date("Y/m/d h:i:s a", $item->updated));
+      $row[5] = check_plain($item->password);
+      $row[6] = "Unknown";
+      $row[7] = "";
+
+      if ($item->type == MFCS_SYNCHRONIZE_TYPE_ICAL) {
+        $row[6] = "iCal";
+        $row[7] .= ' <a href="' . $base_path . 'requests/synchronize-0/ical/' . rawurlencode($item->password) . $url_arguments . '" class="operation-link operation-link-view" title="Synchronization URL">Link</a>';
+      }
+
+      $response['data'][] = $row;
+    }
+  }
+
+  drupal_json_output($response);
+  exit();
+}
 
 /**
  * @} End of '@addtogroup mfcs'.

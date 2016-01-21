@@ -248,6 +248,7 @@ define('MFCS_INCLUDE_REQUEST_CREATE', 12);
 define('MFCS_INCLUDE_REQUEST_VIEW', 13);
 define('MFCS_INCLUDE_REQUEST_LIST', 14);
 define('MFCS_INCLUDE_REQUEST_REASSIGN', 18);
+define('MFCS_INCLUDE_REQUEST_ICAL', 19);
 define('MFCS_INCLUDE_TESTING', 15);
 define('MFCS_INCLUDE_VIEW', 16);
 define('MFCS_INCLUDE_MANAGEMENT', 17);
@@ -316,6 +317,19 @@ define('MFCS_CANCELLING_UNAVAILABLE', 3);
  * Banner ID constants.
  */
 define('MFCS_BANNER_ID_LENGTH', 9);
+
+/**
+ * Defines synchronize types.
+ */
+define('MFCS_SYNCHRONIZE_TYPE_NONE', 0);
+define('MFCS_SYNCHRONIZE_TYPE_ICAL', 1);
+
+/**
+ * Simulated user accounts.
+ */
+define('MFCS_USER_ANONYMOUS', 0);
+define('MFCS_USER_SYSTEM', 1);
+define('MFCS_USER_REQUEST', -1);
 
 
 /**
@@ -848,6 +862,100 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
   }
 
   $access[$request_id] = FALSE;
+  return FALSE;
+}
+
+/**
+ * Access callback for facilities use synchronize related operations.
+ *
+ * This is a simple access check and is not cached like the other access checks.
+ *
+ * @param int|null $type
+ *   (optional) When NULL, access to synchronize page is checked.
+ *   When not NULL, access to a specific synchronize type is checked.
+ * @param string|null $password
+ *   (optional) When NULL, this is ignored unless required by the given type.
+ *   When not NULL, a string representing the code needed to grant access to the synchronization option.
+ * @param int|null $user_id
+ *   (optional) When NULL, the id of the current user is used.
+ *   When not NULL, the provided user id is used.
+ *
+ * @param return bool
+ *   TRUE on granted, FALSE otherwise.
+ */
+function mfcs_synchronize_request_access($type = NULL, $password = NULL, $user_id = NULL) {
+  if (!is_null($type) && !cf_is_integer($type)) {
+    cf_error::invalid_integer('type');
+    return FALSE;
+  }
+
+  if (!is_null($password) && (!is_string($password) || empty($password))) {
+    cf_error::invalid_string('password');
+    return FALSE;
+  }
+
+  if (is_null($user_id)) {
+    $user = cf_current_user();
+  }
+  else {
+    $user = user_load($user_id);
+  }
+
+  if (!is_object($user)) {
+    cf_error::invalid_integer('user_id');
+    return FALSE;
+  }
+
+  if (is_null($type)) {
+    if (user_access('mfcs manage', $user)) {
+      return TRUE;
+    }
+
+    if (user_access('mfcs administer', $user)) {
+      return TRUE;
+    }
+  }
+  elseif ($type == MFCS_SYNCHRONIZE_TYPE_ICAL) {
+    if (is_null($password)) {
+      return FALSE;
+    }
+
+    if (!isset($_SERVER['REMOTE_ADDR']) || empty($_SERVER['REMOTE_ADDR'])) {
+      return FALSE;
+    }
+
+    // require HTTPS for validity.
+    if (!isset($_SERVER['HTTPS'])) {
+      return FALSE;
+    }
+
+    try {
+      $query = db_select('mfcs_synchronize', 'ms');
+      $query->addField('ms', 'address', 'address');
+      $query->condition('type', MFCS_SYNCHRONIZE_TYPE_ICAL);
+      $query->condition('password', $password);
+
+      $results = $query->execute()->fetchAll();
+
+      if (empty($results) && is_object($results)) {
+        return FALSE;
+      }
+
+      $result = array_pop($results);
+
+      if (isset($result->address)) {
+        $ip_client = trim($_SERVER['REMOTE_ADDR']);
+        $ip_valid = trim($result->address);
+
+        return $ip_client == $ip_valid;
+      }
+    } catch (Exception $ex) {
+      cf_error::on_query_execution($ex);
+
+      return FALSE;
+    }
+  }
+
   return FALSE;
 }
 
@@ -1766,6 +1874,9 @@ function mfcs_include($id) {
   elseif ($id == MFCS_INCLUDE_REQUEST_REASSIGN) {
     require_once($module_path . '/pages/request_reassign.inc');
   }
+  elseif ($id == MFCS_INCLUDE_REQUEST_ICAL) {
+    require_once($module_path . '/pages/request_ical.inc');
+  }
   elseif ($id == MFCS_INCLUDE_REQUEST_CREATE) {
     require_once($module_path . '/pages/request_create.inc');
   }
@@ -1774,6 +1885,9 @@ function mfcs_include($id) {
   }
   elseif ($id == MFCS_INCLUDE_REQUEST_LIST) {
     require_once($module_path . '/pages/request_list.inc');
+  }
+  elseif ($id == MFCS_INCLUDE_REQUEST_ICAL) {
+    require_once($module_path . '/pages/request_ical.inc');
   }
   elseif ($id == MFCS_INCLUDE_TESTING) {
     require_once($module_path . '/includes/testing.inc');
@@ -6279,6 +6393,7 @@ function mfcs_display_room_unavailable_message($dates) {
  *     'cancelled': When TRUE, individual dates that are cancelled will be shown.
  *                  This only affects requests that have not been cancelled as
  *                  a whole but whose individual dates may have been.
+ *     'user_id': When defined and an integer, represents the user id of the user to load the listing as.
  *
  * @return array|false
  *   An array of containing the following:
@@ -6350,6 +6465,11 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
     }
   }
 
+  $user_id = NULL;
+  if (isset($options['user_id']) && cf_is_integer($options['user_id'])) {
+    $user_id = (int) $options['user_id'];
+  }
+
   $return = array(
     'results' => NULL,
     'count' => NULL,
@@ -6374,11 +6494,28 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
     $extra_fields = $options['extra_fields'];
   }
 
-  $user = cf_current_user();
+  if (is_null($user_id)) {
+    $user = cf_current_user();
+  }
+  elseif ($user_id >= 0) {
+    $user = user_load($user_id);
+  }
+  else {
+    $user = user_load(0);
+  }
 
-  $manager = user_access('mfcs manage', $user);
-  $reviewer = user_access('mfcs review', $user);
-  $requester = user_access('mfcs request', $user);
+  $manager = FALSE;
+  $reviewer = FALSE;
+  $requester = FALSE;
+  if ($user_id === MFCS_USER_REQUEST) {
+    // this is a sumulated user accoutn and must be handled as a special case.
+    $requester = TRUE;
+  }
+  else {
+    $manager = user_access('mfcs manage', $user);
+    $reviewer = user_access('mfcs review', $user);
+    $requester = user_access('mfcs request', $user);
+  }
 
   $s = 'i';
   $like = 'ILIKE';
@@ -6411,7 +6548,7 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
     MFCS_REVIEW_DECISION_DENY,
   );
 
-  if ($review_restrictions != MFCS_REVIEW_RESTRICTION_NONE) {
+  if ($review_restrictions != MFCS_REVIEW_RESTRICTION_NONE && $user_id !== MFCS_USER_REQUEST) {
     $reviewer_settings = mfcs_get_reviewer_settings_by_user_id($user->uid);
   }
   else {

@@ -1123,6 +1123,70 @@ function mfcs_schema() {
   );
 
 
+  $schema['mfcs_synchronize'] = array(
+    'description' => $t("McNeese Facilities Use synchronize table."),
+    'fields' => array(
+      'id' => array(
+        'description' => $t("The primary key used to represent the synchronize entry."),
+        'type' => 'serial',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'type' => array(
+        'description' => $t("Represents the current type of the request."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'user_id' => array(
+        'description' => $t("This is the id of the user who created this entry."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'password' => array(
+        'description' => $t("Represents the code associated with the user account."),
+        'type' => 'varchar',
+        'length' => '64',
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'created' => array(
+        'description' => $t("Represents the row was created."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'updated' => array(
+        'description' => $t("Represents the row was last updated."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'disabled' => array(
+        'description' => $t("Boolean designating that the synchronization code is disabled. This is used as a soft-delete to prevent loss of records."),
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+    'foreign keys' => array(
+      'user_id' => array(
+        'table' => 'users',
+        'columns' => array('user_id' => 'uid'),
+      ),
+    ),
+  );
+
+
   // create the mapping table that maps the latest request.
   // to greatly reduce the number of joins, all current field revisions are merged into a single table.
   $current_table_name = 'mfcs_current';
