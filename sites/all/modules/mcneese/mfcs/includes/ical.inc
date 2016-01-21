@@ -136,11 +136,6 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
   global $base_url;
   global $conf;
 
-  $user = cf_current_user();
-  $manager = user_access('mfcs manage', $user);
-  $reviewer = user_access('mfcs review', $user);
-  $requester = user_access('mfcs request', $user);
-
   $fcs_site_url = variable_get('fcs_site_url', 'fcs.mcneese.edu');
   $fcs_name = variable_get('fcs_name', 'McNeese Facilities Use System');
 
@@ -347,7 +342,7 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
 
         // see: https://tools.ietf.org/html/rfc5545#section-3.8.4.3
         $requester = user_load($request->user_id);
-        $requester_user_name = $user->name;
+        $requester_user_name = $requester->name;
         if (isset($requester->field_user_first_name['und'][0]['value']) && isset($requester->field_user_last_name['und'][0]['value'])) {
           $requester_user_name = mfcs_ical_sanitize_text($requester->field_user_first_name['und'][0]['value']) . ' ' . mfcs_ical_sanitize_text($requester->field_user_last_name['und'][0]['value']);
         }
