@@ -90,12 +90,13 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = 0) 
   $class_updated = '';
   $class_password = '';
   $class_type = '';
+  $class_address = '';
   $class_operations = 'no-print ';
 
 
   $sorting = array();
   if (is_null($order)) {
-    $sorting['id'] = 'DESC';
+    $sorting['id'] = 'ASC';
     $order_column = array(0 => strtolower($sorting['id']));
     $class_id .= 'sorting_1 ';
   }
@@ -135,8 +136,13 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = 0) 
       $order_column = array(6 => strtolower($sorting[$order]));
       $class_type .= 'sorting_1 ';
     }
+    elseif ($order == 'address') {
+      $sorting['address'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = array(7 => strtolower($sorting[$order]));
+      $class_address .= 'sorting_1 ';
+    }
     else {
-      $sorting['id'] = 'DESC';
+      $sorting['id'] = 'ASC';
       $order_column = array(0 => strtolower($sorting['id']));
       $class_id .= 'sorting_1 ';
     }
@@ -155,6 +161,7 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = 0) 
       'updated' => 'updated',
       'password' => 'password',
       'type' => 'type',
+      'address' => 'address',
     ),
     'associative' => FALSE,
   );
@@ -233,6 +240,11 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = 0) 
       'class' => $class_type,
     );
 
+    $row['address'] = array(
+      'data' => check_plain($item->address),
+      'class' => $class_address,
+    );
+
     $row['operations'] = array(
       'data' => '',
       'class' => $class_operations,
@@ -253,10 +265,11 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = 0) 
     'id' => array('field' => 'id', 'data' => "ID", 'align' => 'center'),
     'account_id' => array('field' => 'user_id', 'data' => "Account ID", 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
     'account' => array('field' => 'name', 'data' => "Account", 'align' => 'center', 'class' => array('script-hidden')),
-    'created' => array('field' => 'created', 'data' => "Created", 'align' => 'center'),
-    'updated' => array('field' => 'updated', 'data' => "Updated", 'align' => 'center'),
+    'created' => array('field' => 'created', 'data' => "Created", 'align' => 'center', 'class' => array('script-hidden')),
+    'updated' => array('field' => 'updated', 'data' => "Updated", 'align' => 'center', 'class' => array('script-hidden')),
     'password' => array('field' => 'password', 'data' => "Password", 'align' => 'center'),
     'type' => array('field' => 'type', 'data' => "Type", 'align' => 'center'),
+    'address' => array('field' => 'address', 'data' => "Address", 'align' => 'center'),
     'operations' => array('data' => "Operations", 'align' => 'center', 'class' => array('no-print')),
   );
 
@@ -296,11 +309,12 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = 0) 
       array('id' => 0, 'column' => 'id', 'name' => "ID", 'className' => 'column-id', 'sanitize' => FALSE),
       array('id' => 1, 'column' => 'account_id', 'name' => "Account ID", 'className' => 'column-account_id', 'sanitize' => FALSE, 'visible' => FALSE),
       array('id' => 2, 'column' => 'account', 'name' => "Account", 'className' => 'column-account', 'visible' => FALSE),
-      array('id' => 3, 'column' => 'created', 'name' => "Created", 'className' => 'column-created'),
-      array('id' => 4, 'column' => 'updated', 'name' => "Updated", 'className' => 'column-updated'),
+      array('id' => 3, 'column' => 'created', 'name' => "Created", 'className' => 'column-created', 'visible' => FALSE),
+      array('id' => 4, 'column' => 'updated', 'name' => "Updated", 'className' => 'column-updated', 'visible' => FALSE),
       array('id' => 5, 'column' => 'password', 'name' => "Password", 'className' => 'column-password'),
       array('id' => 6, 'column' => 'type', 'name' => "Type", 'className' => 'column-type'),
-      array('id' => 7, 'column' => NULL, 'name' => "Operations", 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
+      array('id' => 7, 'column' => 'address', 'name' => "Address", 'className' => 'column-address'),
+      array('id' => 8, 'column' => NULL, 'name' => "Operations", 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
     ),
     'displayStart' => $options['start'],
     'pageLength' => $rows_per_page,
@@ -351,6 +365,10 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = 0) 
   $form['synchronize_list']['#markup'] = '<div class="table_listing-navigator table_listing-navigator-top no-print">' . $navigation_top . '</div>';
   $form['synchronize_list']['#markup'] .= mcneese_libraries_theme_table($synchronize_list, $datatable_settings);
   $form['synchronize_list']['#markup'] .= '<div class="table_listing-navigator table_listing-navigator-bottom">' . $navigation_bottom . '</div>';
+  $form['synchronize_list']['#markup'] .=  '<br><div>';
+  $form['synchronize_list']['#markup'] .=  "The <strong>iCal</strong> synchronize process is intended to be used by <strong>zimbra calendar</strong> for processing only the approved requests from the current day forward. ";
+  $form['synchronize_list']['#markup'] .=  "Other ip addresses may be added for exceptional, testing, or training purposes. ";
+  $form['synchronize_list']['#markup'] .=  '</div>';
 
   return $form;
 }

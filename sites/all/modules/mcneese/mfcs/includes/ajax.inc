@@ -1368,7 +1368,7 @@ function mfcs_ajax_synchronize_0_form() {
 
   $sorting = array();
   if (!isset($order[0]['column'])) {
-    $sorting['user_id'] = 'ASC';
+    $sorting['id'] = 'ASC';
   }
   else {
     $order_column = (int) $order[0]['column'];
@@ -1395,11 +1395,14 @@ function mfcs_ajax_synchronize_0_form() {
     elseif ($order_column == 6) {
       $sorting['type'] = $order_direction;
     }
+    elseif ($order_column == 7) {
+      $sorting['address'] = $order_direction;
+    }
   }
 
   // always provide the unique id in the ordering to guarantee consistency in range results.
   if (!isset($sorting['id'])) {
-    $sorting['id'] = 'DESC';
+    $sorting['id'] = 'ASC';
   }
 
   if (!empty($sorting)) {
@@ -1416,6 +1419,7 @@ function mfcs_ajax_synchronize_0_form() {
     'updated' => 'updated',
     'password' => 'password',
     'type' => 'type',
+    'address' => 'address',
   );
 
   $options['extra_fields']['users'] = array(
@@ -1488,6 +1492,12 @@ function mfcs_ajax_synchronize_0_form() {
       );
     }
 
+    $conditions['or_1']['value_address'] = array(
+      'field' => $table_alias . '.address',
+      'operator' => MFCS_OPERATOR_LIKE,
+      'search' => $_GET['search']['value'],
+    );
+
     $count_options['returned'] = FALSE;
     $returned = mfcs_management_search_table($table_name, $table_alias, $primary_key, $count_conditions, $count_options);
 
@@ -1538,11 +1548,12 @@ function mfcs_ajax_synchronize_0_form() {
       $row[4] = check_plain(date("Y/m/d h:i:s a", $item->updated));
       $row[5] = check_plain($item->password);
       $row[6] = "Unknown";
-      $row[7] = "";
+      $row[7] = check_plain($item->address);
+      $row[8] = "";
 
       if ($item->type == MFCS_SYNCHRONIZE_TYPE_ICAL) {
         $row[6] = "iCal";
-        $row[7] .= ' <a href="' . $base_path . 'requests/synchronize-0/ical/' . rawurlencode($item->password) . $url_arguments . '" class="operation-link operation-link-view" title="Synchronization URL">Link</a>';
+        $row[8] .= ' <a href="' . $base_path . 'requests/synchronize-0/ical/' . rawurlencode($item->password) . $url_arguments . '" class="operation-link operation-link-view" title="Synchronization URL">Link</a>';
       }
 
       $response['data'][] = $row;
