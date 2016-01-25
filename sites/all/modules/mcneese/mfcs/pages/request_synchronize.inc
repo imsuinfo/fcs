@@ -412,7 +412,7 @@ function mfcs_request_synchronize_0_ical_page($password, $custom = NULL) {
   mfcs_add_canonical_headers('requests/synchronize-0/' . $password);
 
   $instance = mfcs_instance();
-  $min_date = $instance;
+  $min_date = strtotime('midnight today', $instance);
 
   global $base_url;
   global $mfcs_determined;
