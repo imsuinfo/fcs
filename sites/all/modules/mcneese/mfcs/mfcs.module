@@ -23,6 +23,7 @@ define('MFCS_REQUEST_STATUS_CLOSED_DENIED', 4);
 define('MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE', 5);
 define('MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK', 6);
 define('MFCS_REQUEST_STATUS_CANCELLED', 7);
+define('MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED', 8);
 
 /**
  * Defines Taxonomy VIDs.
@@ -314,6 +315,14 @@ define('MFCS_CANCELLING_UNCANCEL', 2);
 define('MFCS_CANCELLING_UNAVAILABLE', 3);
 
 /**
+ * Define codes representing how to load a listings cancelled content.
+ */
+define('MFCS_LOAD_CANCELLED_NONE', 0);
+define('MFCS_LOAD_CANCELLED_INDIVIDUAL', 1);
+define('MFCS_LOAD_CANCELLED_REQUEST', 2);
+define('MFCS_LOAD_CANCELLED_ALL', 3);
+
+/**
  * Banner ID constants.
  */
 define('MFCS_BANNER_ID_LENGTH', 9);
@@ -540,6 +549,7 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
     MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE,
     MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK,
     MFCS_REQUEST_STATUS_CANCELLED,
+    MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED,
   );
 
   $roles = array(
@@ -941,13 +951,16 @@ function mfcs_synchronize_request_access($type = NULL, $password = NULL, $user_i
         return FALSE;
       }
 
-      $result = array_pop($results);
+      $ip_client = trim($_SERVER['REMOTE_ADDR']);
+      foreach ($results as $result) {
+        if (!isset($result->address)) {
+          continue;
+        }
 
-      if (isset($result->address)) {
-        $ip_client = trim($_SERVER['REMOTE_ADDR']);
         $ip_valid = trim($result->address);
-
-        return $ip_client == $ip_valid;
+        if ($ip_client == $ip_valid) {
+          return TRUE;
+        }
       }
     } catch (Exception $ex) {
       cf_error::on_query_execution($ex);
@@ -1040,6 +1053,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
     MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE,
     MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK,
     MFCS_REQUEST_STATUS_CANCELLED,
+    MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED,
   );
 
   $roles = array(
@@ -1257,6 +1271,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
     $not_cancellable_status = array(
       MFCS_REQUEST_STATUS_DELETED,
       MFCS_REQUEST_STATUS_CANCELLED,
+      MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED,
       MFCS_REQUEST_STATUS_CLOSED_DENIED,
       MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE,
     );
@@ -1297,6 +1312,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
 
     $uncancellable_status = array(
       MFCS_REQUEST_STATUS_CANCELLED,
+      MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED,
     );
 
     if (!in_array($request['top']['status'][0]->value, $uncancellable_status)) {
@@ -1388,6 +1404,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
       MFCS_REQUEST_STATUS_CLOSED_ACCEPTED,
       MFCS_REQUEST_STATUS_CLOSED_DENIED,
       MFCS_REQUEST_STATUS_CANCELLED,
+      MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED,
     );
 
     if ($roles['manager'] || $roles['reviewer']) {
@@ -1485,6 +1502,7 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
     MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE,
     MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK,
     MFCS_REQUEST_STATUS_CANCELLED,
+    MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED,
   );
 
   // if the reviewer is associated with the requests and the request is in one of these status, then the reviewer can review.
@@ -1512,6 +1530,7 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
   $show_status_insurance = array(
     MFCS_REQUEST_STATUS_LOCKED,
     MFCS_REQUEST_STATUS_CLOSED_ACCEPTED,
+    MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED,
   );
 
   $proxies = mfcs_get_proxy_venue_coordinator($user->uid);
@@ -1622,6 +1641,9 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
       // always show accepted requests.
       $or->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
 
+      // accepted but cancelled requests need to be visible for telling clients that the request was cancelled.
+      $or->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED);
+
       // always allow venue coordinator access. to view.
       $or->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
 
@@ -1658,6 +1680,9 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
 
       // always show completed and accepted requests when there are no restrictions.
       $or->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
+
+      // accepted but cancelled requests need to be visible for telling clients that the request was cancelled.
+      $or->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED);
 
       // always allow venue coordinator access.
       $or->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
@@ -6390,9 +6415,10 @@ function mfcs_display_room_unavailable_message($dates) {
  *     'distinct': Process the entire query as distinct.
  *     'distinct_id': Custom option to load mer.id as distinct. This overrides
  *                    'distinct' when TRUE.
- *     'cancelled': When TRUE, individual dates that are cancelled will be shown.
- *                  This only affects requests that have not been cancelled as
- *                  a whole but whose individual dates may have been.
+ *     'cancelled': When not set or set to MFCS_LOAD_CANCELLED_NONE, no cancelled requests or individual dates are loaded.
+ *                  When MFCS_LOAD_CANCELLED_INDIVIDUAL, individual dates associated with a request are loaded.
+ *                  When MFCS_LOAD_CANCELLED_REQUEST, requests that are cancelled are loaded.
+ *                  When MFCS_LOAD_CANCELLED_ALL, both individual dates and requests that are cancelled are loaded.
  *     'user_id': When defined and an integer, represents the user id of the user to load the listing as.
  *
  * @return array|false
@@ -6457,11 +6483,14 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
     }
   }
 
-  $cancelled = FALSE;
-  if (isset($options['cancelled']) && is_bool($options['cancelled'])) {
-    $cancelled = (bool) $options['cancelled'];
-    if ($cancelled) {
-      $cancelled = FALSE;
+  $cancelled = MFCS_LOAD_CANCELLED_NONE;
+  if (isset($options['cancelled']) && cf_is_integer($options['cancelled'])) {
+    switch ($options['cancelled']) {
+      case MFCS_LOAD_CANCELLED_INDIVIDUAL:
+      case MFCS_LOAD_CANCELLED_REQUEST:
+      case MFCS_LOAD_CANCELLED_ALL:
+        $cancelled = (int) $options['cancelled'];
+        break;
     }
   }
 
@@ -6770,8 +6799,18 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
 
           // always show completed and accepted requests when there are no restrictions.
           $and = db_and();
-          $and->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
+          if ($cancelled === MFCS_LOAD_CANCELLED_REQUEST || $cancelled === MFCS_LOAD_CANCELLED_ALL) {
+            $subor = db_or();
+            $subor->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
+            $subor->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED);
+            $and->condition($subor);
+            unset($subor);
+          }
+          else {
+            $and->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
+          }
           $and->condition('mer.step', MFCS_REVIEW_STEP_COMPLETED);
+
           $or->condition($and);
 
           // process venue coordinator access.
@@ -6786,12 +6825,24 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
           }
         }
       }
-
       // always show accepted requests when there are no restrictions.
-      if ($review_restrictions == MFCS_REVIEW_RESTRICTION_NONE) {
+      elseif ($review_restrictions == MFCS_REVIEW_RESTRICTION_NONE) {
         // if there are no conditions, then don't add any!
         if (!is_null($or)) {
-          $or->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
+          $and = db_and();
+          if ($cancelled === MFCS_LOAD_CANCELLED_REQUEST || $cancelled === MFCS_LOAD_CANCELLED_ALL) {
+            $subor = db_or();
+            $subor->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
+            $subor->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED);
+            $and->condition($subor);
+            unset($subor);
+          }
+          else {
+            $and->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
+          }
+          $and->condition('mer.step', MFCS_REVIEW_STEP_COMPLETED);
+          $or->condition($and);
+          unset($and);
         }
       }
 
@@ -6803,11 +6854,36 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
       }
     }
     elseif ($requester) {
+      $or = NULL;
+
       // always show accepted requests when there are no restrictions.
       if ($review_restrictions == MFCS_REVIEW_RESTRICTION_NONE) {
-        $or = db_or();
-        $or->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
-        $or->condition('mer.user_id', $user->uid);
+        if (is_null($or)) {
+          $or = db_or();
+        }
+
+        // show cancelled requests that were once approved, if requested to do so.
+        if ($cancelled === MFCS_LOAD_CANCELLED_REQUEST || $cancelled === MFCS_LOAD_CANCELLED_ALL) {
+          if (is_null($or)) {
+            $or = db_or();
+          }
+
+          $and = db_and();
+          $and->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED);
+          $and->condition('mer.step', MFCS_REVIEW_STEP_COMPLETED);
+          $or->condition($and);
+          unset($and);
+        }
+
+        $and = db_and();
+        $and->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
+        $and->condition('mer.step', MFCS_REVIEW_STEP_COMPLETED);
+        $or->condition($and);
+        unset($and);
+
+        if ($user->uid > 0) {
+          $or->condition('mer.user_id', $user->uid);
+        }
 
         if (is_null($outermost_and)) {
           $outermost_and = db_and();
@@ -6815,10 +6891,12 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
         $outermost_and->condition($or);
       }
       else {
-        if (is_null($outermost_and)) {
-          $outermost_and = db_and();
+        if ($user->uid > 0) {
+          if (is_null($outermost_and)) {
+            $outermost_and = db_and();
+          }
+          $outermost_and->condition('mer.user_id', $user->uid);
         }
-        $outermost_and->condition('mer.user_id', $user->uid);
       }
     }
     else {
@@ -6972,7 +7050,7 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
           }
           elseif ($sort_name == 'date') {
             if (!array_key_exists('mfcs_field_dates_date', $already_joined)) {
-              if ($cancelled) {
+              if ($cancelled == MFCS_LOAD_CANCELLED_INDIVIDUAL || $cancelled == MFCS_LOAD_CANCELLED_ALL) {
                 $query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mc.request_id = mfdd.request_id AND mc.dates_date = mfdd.revision');
               }
               else {
@@ -7076,10 +7154,11 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
         $sub_query->addField('mfdts', 'value', 'time_start');
         $sub_query->addField('mfdtsp', 'value', 'time_stop');
         $sub_query->addField('mfdc', 'value', 'category');
+        $sub_query->addField('mfdd', 'cancelled', 'cancelled');
 
         $sub_query->condition('mfdd.request_id', array_keys($found), 'IN');
 
-        if (!$cancelled) {
+        if ($cancelled != MFCS_LOAD_CANCELLED_INDIVIDUAL && $cancelled != MFCS_LOAD_CANCELLED_ALL) {
           $sub_query->condition('mfdd.cancelled', 1, '<>'); // using <> for backwards compatibility where mfdd.cancelled may be NULL.
         }
 
@@ -7092,6 +7171,7 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
             $found[$sub_result->id]->time_start = array();
             $found[$sub_result->id]->time_stop = array();
             $found[$sub_result->id]->category = array();
+            $found[$sub_result->id]->cancelled = array();
 
             $initialized_date[$sub_result->id] = $sub_result->id;
           }
@@ -7100,6 +7180,7 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
           $found[$sub_result->id]->time_start[$sub_result->delta] = $sub_result->time_start;
           $found[$sub_result->id]->time_stop[$sub_result->delta] = $sub_result->time_stop;
           $found[$sub_result->id]->category[$sub_result->delta] = $sub_result->category;
+          $found[$sub_result->id]->cancelled[$sub_result->delta] = $sub_result->cancelled;
         }
 
         unset($sub_results);

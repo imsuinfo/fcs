@@ -172,7 +172,12 @@ function mfcs_request_cancel_0_form_submit($form, &$form_state) {
 
   mfcs_include(MFCS_INCLUDE_WORKFLOW);
 
-  $cancelled = mfcs_workflow_set_status($request_id, MFCS_REQUEST_STATUS_CANCELLED);
+  if ($form['form']['request']['top']['status'][0]->value == MFCS_REQUEST_STATUS_CLOSED_ACCEPTED) {
+    $cancelled = mfcs_workflow_set_status($request_id, MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED);
+  }
+  else {
+    $cancelled = mfcs_workflow_set_status($request_id, MFCS_REQUEST_STATUS_CANCELLED);
+  }
 
   if ($cancelled) {
     mfcs_workflow_step_review($request_id, $user, MFCS_REVIEW_DECISION_CANCELLED);

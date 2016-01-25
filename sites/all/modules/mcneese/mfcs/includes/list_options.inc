@@ -34,6 +34,7 @@ function mfcs_get_request_status_list_options($option = NULL) {
   $options[MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE] = "Room Unavailable";
   $options[MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK] = "Room Unavailable (due to lock)";
   $options[MFCS_REQUEST_STATUS_CANCELLED] = "Cancelled";
+  $options[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED] = "Accepted (Cancelled)";
 
   if ($option == 'search') {
     unset($options[MFCS_REQUEST_STATUS_DELETED]);

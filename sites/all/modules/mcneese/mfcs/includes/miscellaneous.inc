@@ -148,8 +148,13 @@ function mfcs_miscellaneous_generate_requests_by_date_search($start = NULL, $sto
     return FALSE;
   }
 
-  if (!cf_is_integer($status)) {
+  if (!is_null($status) && !cf_is_integer($status)) {
     cf_error::invalid_integer('status');
+    return FALSE;
+  }
+
+  if (!is_null($step) && !cf_is_integer($step)) {
+    cf_error::invalid_integer('step');
     return FALSE;
   }
 

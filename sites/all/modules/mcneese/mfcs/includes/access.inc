@@ -283,6 +283,7 @@ function mfcs_page_request_access_operation_view(&$request_ids, &$processed, &$a
     MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE,
     MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK,
     MFCS_REQUEST_STATUS_CANCELLED,
+    MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED,
   );
 
   if ($roles['manager'] || $roles['requester']) {
@@ -715,6 +716,7 @@ function mfcs_page_request_access_operation_cancel(&$request_ids, &$processed, &
   $not_cancellable_status = array(
     MFCS_REQUEST_STATUS_DELETED,
     MFCS_REQUEST_STATUS_CANCELLED,
+    MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED,
     MFCS_REQUEST_STATUS_CLOSED_DENIED,
     MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE,
   );
@@ -1083,6 +1085,7 @@ function mfcs_page_request_access_operation_uncancel(&$request_ids, &$processed,
 
   $uncancellable_status = array(
     MFCS_REQUEST_STATUS_CANCELLED,
+    MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED,
   );
 
   // always grant managers uncancel access.
@@ -1442,6 +1445,7 @@ function mfcs_page_request_access_operation_agreement(&$request_ids, &$processed
     MFCS_REQUEST_STATUS_CLOSED_ACCEPTED,
     MFCS_REQUEST_STATUS_CLOSED_DENIED,
     MFCS_REQUEST_STATUS_CANCELLED,
+    MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED,
   );
 
   $agreement_request_step = array(

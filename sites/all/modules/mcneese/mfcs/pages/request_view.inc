@@ -344,8 +344,12 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     $can['history'] = (bool) $can_history_request;
     $can['agreement'] = (bool) $can_agreement_request;
     $can['clone'] = (bool) $can_create_request;
-    $can['ical'] = $status === MFCS_REQUEST_STATUS_CLOSED_ACCEPTED && $step === MFCS_REVIEW_STEP_COMPLETED;
+    $can['ical'] = FALSE;
     $can['cancelling'] = (bool) $can_cancelling_request;
+
+    if (($status === MFCS_REQUEST_STATUS_CLOSED_ACCEPTED || $status === MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED) && $step === MFCS_REVIEW_STEP_COMPLETED) {
+      $can['ical'] = TRUE;
+    }
 
     if ($can['cancelling'] && count($request['dates']['date']) == 1) {
       // hide/prevent cancelling when there is only one date.

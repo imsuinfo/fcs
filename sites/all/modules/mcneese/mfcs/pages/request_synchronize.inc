@@ -376,31 +376,72 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = 0) 
 /**
  * Renders the iCal sync content.
  *
- * On valid pages, this generates an iCal feed from the current moment in time and forward.
+ * On valid pages, this generates an iCal feed.
  *
  * @param string $password
  *   The password needed to be granted anonymous access to the public iCal information.
  *   This may be used in the future to control what information gets loaded.
+ * @param string|null $custom
+ *   When NULL, requests for the current moment in time and forward are loaded.
+ *   When 'all', requests for the past, present, and future are loaded.
  */
-function mfcs_request_synchronize_0_ical_page($password) {
+function mfcs_request_synchronize_0_ical_page($password, $custom = NULL) {
   if (!is_string($password) || empty($password)) {
     cf_error::invalid_string('password');
     return;
   }
 
+  if (!is_null($custom) && !is_string($custom)) {
+    cf_error::invalid_string('custom');
+    return;
+  }
+
+  switch($custom) {
+    case NULL:
+    case 'all':
+      break;
+    default:
+      drupal_access_denied();
+      drupal_exit();
+      return;
+  }
+
   mfcs_include(MFCS_INCLUDE_REQUEST_ICAL);
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
-  mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
 
   mfcs_add_canonical_headers('requests/synchronize-0/' . $password);
 
   $instance = mfcs_instance();
+  $min_date = $instance;
 
   global $base_url;
   global $mfcs_determined;
 
   $instance = mfcs_instance();
-  $search = mfcs_miscellaneous_generate_requests_by_date_search($instance);
+
+  $search = array();
+  if ($custom == 'all') {
+    $min_date = NULL;
+  }
+  else {
+    $target_field_name = 'field_dates-date-start-0';
+    $search[$target_field_name]['group_name'] = 'dates';
+    $search[$target_field_name]['field_name'] = 'date';
+    $search[$target_field_name]['column'] = 'value';
+    $search[$target_field_name]['search'] = $instance;
+    $search[$target_field_name]['type'] = 'date';
+    $search[$target_field_name]['multiple'] = TRUE;
+    $search[$target_field_name]['operator'] = MFCS_OPERATOR_GREATER_THAN_EQUAL;
+
+    $target_field_name = 'field_dates-date-stop-0';
+    $search[$target_field_name]['group_name'] = 'dates';
+    $search[$target_field_name]['field_name'] = 'date';
+    $search[$target_field_name]['column'] = 'value';
+    $search[$target_field_name]['search'] = $instance;
+    $search[$target_field_name]['type'] = 'date';
+    $search[$target_field_name]['multiple'] = TRUE;
+    $search[$target_field_name]['operator'] = MFCS_OPERATOR_GREATER_THAN_EQUAL;
+  }
 
   if (!empty($mfcs_determined['filters'])) {
     foreach ($mfcs_determined['filters'] as $filter_key => $filter) {
@@ -414,6 +455,7 @@ function mfcs_request_synchronize_0_ical_page($password) {
     'extra_fields' => mfcs_request_ical_generate_extra_fields(),
     'distinct_id' => TRUE,
     'user_id' => MFCS_USER_REQUEST,
+    'cancelled' => MFCS_LOAD_CANCELLED_ALL,
   );
 
   $items_returned = mfcs_request_load_listing($search, $options);
@@ -430,7 +472,7 @@ function mfcs_request_synchronize_0_ical_page($password) {
   if ($items !== FALSE) {
     mfcs_include(MFCS_INCLUDE_ICAL);
 
-    $ical = mfcs_ical_generate($items, $instance);
+    $ical = mfcs_ical_generate($items, $min_date);
   }
 
   if ($ical === FALSE) {
@@ -452,15 +494,7 @@ function mfcs_request_synchronize_0_ical_page($password) {
 
   header('HTTP/1.1 200 OK', TRUE, 200);
   header('Content-Type: text/plain');
-
-  // if available, use drupal_bytes_in_string() to protect from potentialy multibyte issues.
-  if (function_exists('drupal_bytes_in_string')) {
-    header('Content-Length: ' . drupal_bytes_in_string($ical));
-  }
-  else {
-    header('Content-Length: ' . strlen($ical));
-  }
-
+  header('Content-Length: ' . $ical['length']);
   header('Content-Transfer-Encoding: binary');
   #header('Content-type: text/plain; charset=utf-8');
   header('Content-type: text/calendar; charset=utf-8');
@@ -473,7 +507,11 @@ function mfcs_request_synchronize_0_ical_page($password) {
   // flush buffer after headers have been processed (to hopefully avoid "headers already sent" issues).
   ob_end_flush();
 
-  print($ical);
+  foreach ($ical['content'] as $content) {
+    print($content);
+  }
+
+  unset($ical);
   exit();
 }
 

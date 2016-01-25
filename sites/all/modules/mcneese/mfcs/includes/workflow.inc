@@ -192,6 +192,7 @@ function mfcs_workflow_set_status($request_id, $status, $user = NULL, $extra = a
     MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE,
     MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK,
     MFCS_REQUEST_STATUS_CANCELLED,
+    MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED,
   );
 
   if (!in_array($status, $status_options)) {
@@ -2326,11 +2327,11 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     }
   }
   elseif ($is_cancelling || $is_cancelled || $is_auto_cancelled || $is_uncancelled || $is_reassigned || $is_deleted || !is_null($status)) {
-    if ($is_cancelling || $is_cancelled || $is_uncancelled || $is_reassigned || $status === MFCS_REQUEST_STATUS_CANCELLED || $status === MFCS_REQUEST_STATUS_DELETED) {
+    if ($is_cancelling || $is_cancelled || $is_uncancelled || $is_reassigned || $status === MFCS_REQUEST_STATUS_CANCELLED || $status === MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED || $status === MFCS_REQUEST_STATUS_DELETED) {
       $email_params['content'] = "";
       $email_params['markup'] = "";
 
-      if ($is_cancelled || $is_auto_cancelled || $status === MFCS_REQUEST_STATUS_CANCELLED) {
+      if ($is_cancelled || $is_auto_cancelled || $status === MFCS_REQUEST_STATUS_CANCELLED || $status === MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED) {
         $email_params['title_suffix'] = "Cancelled";
         $email_params['content'] .= $changed_by_string . " has cancelled the request.\n";
         $email_params['markup'] .= $changed_by_string . " has cancelled the request.<br>\n";

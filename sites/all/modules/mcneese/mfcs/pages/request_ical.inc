@@ -67,6 +67,7 @@ function mfcs_request_ical_year_0_page($year = NULL) {
     'sort' => array('date' => 'ASC'),
     'extra_fields' => mfcs_request_ical_generate_extra_fields(),
     'distinct_id' => TRUE,
+    'cancelled' => MFCS_LOAD_CANCELLED_ALL,
   );
 
   $items_returned = mfcs_request_load_listing($search, $options);
@@ -110,15 +111,7 @@ function mfcs_request_ical_year_0_page($year = NULL) {
 
   header('HTTP/1.1 200 OK', TRUE, 200);
   header('Content-Type: text/plain');
-
-  // if available, use drupal_bytes_in_string() to protect from potentialy multibyte issues.
-  if (function_exists('drupal_bytes_in_string')) {
-    header('Content-Length: ' . drupal_bytes_in_string($ical));
-  }
-  else {
-    header('Content-Length: ' . strlen($ical));
-  }
-
+  header('Content-Length: ' . $ical['length']);
   header('Content-Transfer-Encoding: binary');
   #header('Content-type: text/plain; charset=utf-8');
   header('Content-type: text/calendar; charset=utf-8');
@@ -131,7 +124,11 @@ function mfcs_request_ical_year_0_page($year = NULL) {
   // flush buffer after headers have been processed (to hopefully avoid "headers already sent" issues).
   ob_end_flush();
 
-  print($ical);
+  foreach ($ical['content'] as $content) {
+    print($content);
+  }
+
+  unset($ical);
   exit();
 }
 
@@ -235,6 +232,7 @@ function mfcs_request_ical_month_0_page($year = NULL, $month = NULL) {
     'sort' => array('date' => 'ASC'),
     'extra_fields' => mfcs_request_ical_generate_extra_fields(),
     'distinct_id' => TRUE,
+    'cancelled' => MFCS_LOAD_CANCELLED_ALL,
   );
 
   $items_returned = mfcs_request_load_listing($search, $options);
@@ -285,15 +283,7 @@ function mfcs_request_ical_month_0_page($year = NULL, $month = NULL) {
 
   header('HTTP/1.1 200 OK', TRUE, 200);
   header('Content-Type: text/plain');
-
-  // if available, use drupal_bytes_in_string() to protect from potentialy multibyte issues.
-  if (function_exists('drupal_bytes_in_string')) {
-    header('Content-Length: ' . drupal_bytes_in_string($ical));
-  }
-  else {
-    header('Content-Length: ' . strlen($ical));
-  }
-
+  header('Content-Length: ' . $ical['length']);
   header('Content-Transfer-Encoding: binary');
   #header('Content-type: text/plain; charset=utf-8');
   header('Content-type: text/calendar; charset=utf-8');
@@ -306,7 +296,11 @@ function mfcs_request_ical_month_0_page($year = NULL, $month = NULL) {
   // flush buffer after headers have been processed (to hopefully avoid "headers already sent" issues).
   ob_end_flush();
 
-  print($ical);
+  foreach ($ical['content'] as $content) {
+    print($content);
+  }
+
+  unset($ical);
   exit();
 }
 
@@ -381,6 +375,7 @@ function mfcs_request_ical_day_0_page($year = NULL, $month = NULL, $day = NULL) 
     'sort' => array('date' => 'ASC'),
     'extra_fields' => mfcs_request_ical_generate_extra_fields(),
     'distinct_id' => TRUE,
+    'cancelled' => MFCS_LOAD_CANCELLED_ALL,
   );
 
   $items_returned = mfcs_request_load_listing($search, $options);
@@ -436,15 +431,7 @@ function mfcs_request_ical_day_0_page($year = NULL, $month = NULL, $day = NULL) 
 
   header('HTTP/1.1 200 OK', TRUE, 200);
   header('Content-Type: text/plain');
-
-  // if available, use drupal_bytes_in_string() to protect from potentialy multibyte issues.
-  if (function_exists('drupal_bytes_in_string')) {
-    header('Content-Length: ' . drupal_bytes_in_string($ical));
-  }
-  else {
-    header('Content-Length: ' . strlen($ical));
-  }
-
+  header('Content-Length: ' . $ical['length']);
   header('Content-Transfer-Encoding: binary');
   #header('Content-type: text/plain; charset=utf-8');
   header('Content-type: text/calendar; charset=utf-8');
@@ -457,12 +444,16 @@ function mfcs_request_ical_day_0_page($year = NULL, $month = NULL, $day = NULL) 
   // flush buffer after headers have been processed (to hopefully avoid "headers already sent" issues).
   ob_end_flush();
 
-  print($ical);
+  foreach ($ical['content'] as $content) {
+    print($content);
+  }
+
+  unset($ical);
   exit();
 }
 
 /**
- * Provides the facilities use request ical month page.
+ * Provides the facilities use request ical page for a single request.
  *
  * @param int $request_id
  *   The request id to load the ical dates for.
@@ -520,15 +511,7 @@ function mfcs_request_ical_request_0_page($request_id) {
 
   header('HTTP/1.1 200 OK', TRUE, 200);
   header('Content-Type: text/plain');
-
-  // if available, use drupal_bytes_in_string() to protect from potentialy multibyte issues.
-  if (function_exists('drupal_bytes_in_string')) {
-    header('Content-Length: ' . drupal_bytes_in_string($ical));
-  }
-  else {
-    header('Content-Length: ' . strlen($ical));
-  }
-
+  header('Content-Length: ' . $ical['length']);
   header('Content-Transfer-Encoding: binary');
   #header('Content-type: text/plain; charset=utf-8');
   header('Content-type: text/calendar; charset=utf-8');
@@ -541,7 +524,11 @@ function mfcs_request_ical_request_0_page($request_id) {
   // flush buffer after headers have been processed (to hopefully avoid "headers already sent" issues).
   ob_end_flush();
 
-  print($ical);
+  foreach ($ical['content'] as $content) {
+    print($content);
+  }
+
+  unset($ical);
   exit();
 }
 

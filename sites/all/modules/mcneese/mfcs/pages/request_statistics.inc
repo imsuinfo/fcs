@@ -286,6 +286,7 @@ function mfcs_request_statistics_load_counts($start, $stop) {
       'unavailable' => NULL,
       'due_to_lock' => NULL,
       'cancelled' => NULL,
+      'accepted_cancelled' => NULL,
     );
 
     $query = db_select('mfcs_requests', 'mer');
@@ -333,6 +334,11 @@ function mfcs_request_statistics_load_counts($start, $stop) {
     $the_query = clone($query);
     $the_query->condition('mer.status', MFCS_REQUEST_STATUS_CANCELLED);
     $counts['status']['cancelled'] = $the_query->execute()->fetchField();
+
+    // status (accepted, but cancelled)
+    $the_query = clone($query);
+    $the_query->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED);
+    $counts['status']['accepted_cancelled'] = $the_query->execute()->fetchField();
 
 
     // step
@@ -1022,6 +1028,13 @@ function mfcs_request_statistics_render_request_status($counts, $status_options)
     'color' => '#c47508',
   );
 
+  $options['rows']['accepted_cancelled'] = array(
+    'total' => $counts['status']['accepted_cancelled'],
+    'text' => $status_options[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED],
+    'label' => $status_options[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED],
+    'color' => '#a6c408',
+  );
+
 
   $chart_markup = mfcs_request_statistics_render_chart($options);
 
@@ -1040,6 +1053,7 @@ function mfcs_request_statistics_render_request_status($counts, $status_options)
   $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['unavailable'] . "</em> <strong>" . $status_options[MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE] . "</strong> (<em>" . $options['rows']['unavailable']['percent'] . '%</em> of requests). ' . "</div>\n";
   $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['due_to_lock'] . "</em> <strong>" . $status_options[MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK] . "</strong> (<em>" . $options['rows']['due_to_lock']['percent'] . '%</em> of requests). ' . "</div>\n";
   $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['cancelled'] . "</em> <strong>" . $status_options[MFCS_REQUEST_STATUS_CANCELLED] . "</strong> (<em>" . $options['rows']['cancelled']['percent'] . '%</em> of requests). ' . "</div>\n";
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['accepted_cancelled'] . "</em> <strong>" . $status_options[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED] . "</strong> (<em>" . $options['rows']['accepted_cancelled']['percent'] . '%</em> of requests). ' . "</div>\n";
   $markup .= '</div>' . "\n"; // statistics-block-text
 
   $markup .= '<div id="' . 'mfcs-statistics-' . $options['name'] . '-wrapper" class="statistics-block-chart">' . "\n";

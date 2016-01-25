@@ -73,6 +73,11 @@ function mfcs_ical_generate_array_from_id($request_id) {
   foreach ($request['dates']['date'] as $key => $value) {
     $request_custom->date[$key] = (int) $value->value;
 
+    $request_custom->cancelled[$key] = FALSE;
+    if ($value->cancelled == 1) {
+      $request_custom->cancelled[$key] = TRUE;
+    }
+
     $request_custom->time_start[$key] = NULL;
     if (isset($request['dates']['time_start'][$key]) && property_exists($request['dates']['time_start'][$key], 'value') && !is_null($request['dates']['time_start'][$key]->value)) {
       $request_custom->time_start[$key] = (int) $request['dates']['time_start'][$key]->value;
@@ -112,8 +117,11 @@ function mfcs_ical_generate_array_from_id($request_id) {
  *   (optional) A unix timestamp representing a current date to load.
  *   A < is performed on this value.
  *
- * @return string|bool
- *   The generated ical string or FALSE on error.
+ * @return array|bool
+ *   An array containing:
+ *   - content: a string containing the ical string.
+ *   - length: the 8-byte length of the ical string.
+ *   FALSE is returned on error.
  *
  * @see: mfcs_request_load_listing()
  */
@@ -149,9 +157,9 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
   $ical_eol = "\r\n";
 
   $ical = array();
-  $ical[] = 'BEGIN:VCALENDAR';
-  $ical[] = 'VERSION:2.0';
-  $ical[] = 'PRODID:' . $fcs_name;
+  mfcs_ical_populate_array($ical, 'BEGIN:VCALENDAR');
+  mfcs_ical_populate_array($ical, 'VERSION:2.0');
+  mfcs_ical_populate_array($ical, 'PRODID:' . $fcs_name);
 
   $original_timezone = date_default_timezone_get();
 
@@ -194,8 +202,15 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
     $request_url = $base_url . '/requests/view-0/' . $request->id;
     $request_zone = $building_options[$request->building] . ' ' . $room_options[$request->room];
 
-    $request_description_begin = 'The reserved location is: ' . $building_options[$request->building] . ' ' . $room_options[$request->room] . "\n";
-    $request_description_begin = '  - ' . $building_options[$request->building] . ' ' . $room_options[$request->room] . "\n";
+    $request_description_begin = '';
+
+    if ($request->status === MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED) {
+      $request_description_begin .= 'This reservation is cancelled.' . "\n\n";
+    }
+
+    $request_description_begin .= 'The reserved location is: ' . "\n";
+    $request_description_begin .= '  - ' . $building_options[$request->building] . ' ' . $room_options[$request->room] . "\n";
+
     $request_description_end = "\n\n";
     $request_description_end = 'The Request ID is: ' . $request->id . ".\n";
     $request_description_end = "\n";
@@ -213,6 +228,11 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
 
     $request_description_markup_begin = '<html>' . "\n";
     $request_description_markup_begin .= '<body>' . "\n";
+
+    if ($request->status === MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED) {
+      $request_description_markup_begin .= '<strong>This reservation is cancelled</strong>.' . "<br>\n<br>\n";
+    }
+
     $request_description_markup_begin .= 'The reserved location is: ' . "<br>\n";
     $request_description_markup_begin .= '<ul>' . "\n";
     $request_description_markup_begin .= '  <li>' . $building_options[$request->building] . ' ' . $room_options[$request->room] . "</li>\n";
@@ -283,6 +303,8 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
         date_default_timezone_set($original_timezone);
       }
 
+      $ical_date['cancelled'] = $request->cancelled[$delta];
+
       if ($request->category[$delta] == MFCS_REQUEST_DATES_CATEGORY_SETUP) {
         $dates_setup_event_text .= '  - ' . $ical_date['text'] . "\n";
         $dates_setup_event_markup .= '<li>' . $ical_date['text'] . '</li>' . "\n";
@@ -317,28 +339,28 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
           continue;
         }
 
-        $ical[] = 'BEGIN:VEVENT';
-        $ical[] = mfcs_ical_wordwrap('UID:request-' . $request->id . '-' . $date . '-' . $delta . '@' . $fcs_site_url);
+        mfcs_ical_populate_array($ical, 'BEGIN:VEVENT');
+        mfcs_ical_populate_array($ical, mfcs_ical_wordwrap('UID:request-' . $request->id . '-' . $date . '-' . $delta . '@' . $fcs_site_url));
 
         // DTSTAMP represents the last time the vcal data was changed.
         // This should only happend when the request gets modified, so it will be the same as the last modified date.
-        $ical[] = mfcs_ical_wordwrap('DTSTAMP:' . date($date_format, $request->updated));
-        $ical[] = mfcs_ical_wordwrap($ical_date['start']);
-        $ical[] = mfcs_ical_wordwrap($ical_date['stop']);
-        $ical[] = mfcs_ical_wordwrap('CREATED:' . date($date_format, $request->created));
-        $ical[] = mfcs_ical_wordwrap('LAST-MODIFIED:' . date($date_format, $request->updated));
-        $ical[] = mfcs_ical_wordwrap('LOCATION:' . mfcs_ical_sanitize_text($request_zone));
-        $ical[] = mfcs_ical_wordwrap('GEO:' . mfcs_ical_geo_coordinates($request->building, $request->room));
+        mfcs_ical_populate_array($ical, mfcs_ical_wordwrap('DTSTAMP:' . date($date_format, $request->updated)));
+        mfcs_ical_populate_array($ical, mfcs_ical_wordwrap($ical_date['start']));
+        mfcs_ical_populate_array($ical, mfcs_ical_wordwrap($ical_date['stop']));
+        mfcs_ical_populate_array($ical, mfcs_ical_wordwrap('CREATED:' . date($date_format, $request->created)));
+        mfcs_ical_populate_array($ical, mfcs_ical_wordwrap('LAST-MODIFIED:' . date($date_format, $request->updated)));
+        mfcs_ical_populate_array($ical, mfcs_ical_wordwrap('LOCATION:' . mfcs_ical_sanitize_text($request_zone)));
+        mfcs_ical_populate_array($ical, mfcs_ical_wordwrap('GEO:' . mfcs_ical_geo_coordinates($request->building, $request->room)));
 
 
         // see: https://tools.ietf.org/html/rfc5545#section-3.3.13
         // see: https://tools.ietf.org/html/rfc5545#section-3.8.4.6
-        // warning: Standard states "hen a property parameter value is a URI value type, the URI MUST be specified as a quoted-string value.", but adding quotes will cause validation failure.
+        // warning: Standard states "When a property parameter value is a URI value type, the URI MUST be specified as a quoted-string value.", but adding quotes will cause validation failure.
         //          Furthermore, later in the documentation, their own examples for the URL type does not use double quotes.
         //          The standard is therefore inconsistent with itself.
         //          Double quotes will not be used at this time.
-        $ical[] = mfcs_ical_wordwrap('URL;VALUE=URI:' . $request_url);
-        #$ical[] = mfcs_ical_wordwrap('URL:' . $base_url . '/requests/ical-0/' . $request->id);
+        mfcs_ical_populate_array($ical, mfcs_ical_wordwrap('URL;VALUE=URI:' . $request_url));
+        #mfcs_ical_populate_array($ical, mfcs_ical_wordwrap('URL:' . $base_url . '/requests/ical-0/' . $request->id));
 
         // see: https://tools.ietf.org/html/rfc5545#section-3.8.4.3
         $requester = user_load($request->user_id);
@@ -354,17 +376,17 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
         if (!empty($conf['fcs_email'])) {
           $organizer_sent_by = ';SENT-BY="mailto:' . $conf['fcs_email'] . '"';
         }
-        $ical[] = mfcs_ical_wordwrap('ORGANIZER' . $organizer_sent_by . ';CN=' . mfcs_ical_sanitize_text($requester_user_name) . ':' . $requester_text);
+        mfcs_ical_populate_array($ical, mfcs_ical_wordwrap('ORGANIZER' . $organizer_sent_by . ';CN=' . mfcs_ical_sanitize_text($requester_user_name) . ':' . $requester_text));
 
         if (!empty($request_categories)) {
-          $ical[] = mfcs_ical_wordwrap('CATEGORIES:' . implode(', ', $request_categories));
+          mfcs_ical_populate_array($ical, mfcs_ical_wordwrap('CATEGORIES:' . implode(', ', $request_categories)));
         }
 
         // see: https://tools.ietf.org/html/rfc5545#section-3.8.4.2
-        $ical[] = mfcs_ical_wordwrap('CONTACT:' . mfcs_ical_sanitize_text($request->request_coordinator_name . ', ' . $request->request_coordinator_email));
+        mfcs_ical_populate_array($ical, mfcs_ical_wordwrap('CONTACT:' . mfcs_ical_sanitize_text($request->request_coordinator_name . ', ' . $request->request_coordinator_email)));
 
         // see: https://tools.ietf.org/html/rfc5545#section-3.8.1.12
-        $ical[] = mfcs_ical_wordwrap('SUMMARY:' . mfcs_ical_sanitize_text($request->title));
+        mfcs_ical_populate_array($ical, mfcs_ical_wordwrap('SUMMARY:' . mfcs_ical_sanitize_text($request->title)));
         unset($summary);
 
         $request_description = $request_description_begin;
@@ -388,7 +410,7 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
         $request_description .= $request_description_end;
 
         // see: https://tools.ietf.org/html/rfc5545#section-3.3.11
-        $ical[] = mfcs_ical_wordwrap('DESCRIPTION:' . mfcs_ical_sanitize_text($request_description));
+        mfcs_ical_populate_array($ical, mfcs_ical_wordwrap('DESCRIPTION:' . mfcs_ical_sanitize_text($request_description)));
 
         $request_description_markup = $request_description_markup_begin;
 
@@ -410,41 +432,46 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
 
         $request_description_markup .= $request_description_markup_end;
 
-        $ical[] = mfcs_ical_wordwrap('X-ALT_DESC;FMTTYPE=text/html:' . mfcs_ical_sanitize_text($request_description_markup));
+        mfcs_ical_populate_array($ical, mfcs_ical_wordwrap('X-ALT_DESC;FMTTYPE=text/html:' . mfcs_ical_sanitize_text($request_description_markup)));
 
         // SEQUENCE represents the revision number of the vevent.
         // make the sequence represent the requests revision number.
-        $ical[] = mfcs_ical_wordwrap('SEQUENCE:' . $request_revision);
+        mfcs_ical_populate_array($ical, mfcs_ical_wordwrap('SEQUENCE:' . $request_revision));
 
         // 'STATUS:' with values like: 'TENTATIVE', 'CONFIRMED', 'CANCELLED' can be used if loading current users calendar.
         // see: https://tools.ietf.org/html/rfc5545#section-3.8.1.11
-        $ical[] = mfcs_ical_wordwrap('STATUS:' . 'CONFIRMED');
+        if ($request->status === MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED || $ical_date['cancelled']) {
+          mfcs_ical_populate_array($ical, mfcs_ical_wordwrap('STATUS:' . 'CANCELLED'));
+        }
+        else {
+          mfcs_ical_populate_array($ical, mfcs_ical_wordwrap('STATUS:' . 'CONFIRMED'));
+        }
 
         // 'RESOURCES:' could be added here to designate things like projectors and microphones needed, etc..
         // see: https://tools.ietf.org/html/rfc5545#section-3.8.1.10
 
         // Can be set to either PUBLIC or PRIVATE, requests are generally public.
-        $ical[] = 'CLASS:PUBLIC';
+        mfcs_ical_populate_array($ical, 'CLASS:PUBLIC');
 
         // the following are fields added by Zimbra, so add these to make things more compatible with non-standard products.
-        $ical[] = 'X-MICROSOFT-CDO-INTENDEDSTATUS:BUSY';
+        mfcs_ical_populate_array($ical, 'X-MICROSOFT-CDO-INTENDEDSTATUS:BUSY');
         if ($ical_date['all_day']) {
-          $ical[] = 'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE';
+          mfcs_ical_populate_array($ical, 'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE');
         }
         else {
-          $ical[] = 'X-MICROSOFT-CDO-ALLDAYEVENT:FALSE';
+          mfcs_ical_populate_array($ical, 'X-MICROSOFT-CDO-ALLDAYEVENT:FALSE');
         }
 
         // this is mentioned on wikipedia as a non-standard all-day flag.
         if ($ical_date['all_day']) {
-          $ical[] = 'X-FUNAMBOL-ALLDAY:1';
+          mfcs_ical_populate_array($ical, 'X-FUNAMBOL-ALLDAY:1');
         }
 
         // Tells systems that this should be visible on busy searches.
         // see: https://tools.ietf.org/html/rfc5545#section-3.8.2.7
-        $ical[] = 'TRANSP:OPAQUE';
+        mfcs_ical_populate_array($ical, 'TRANSP:OPAQUE');
 
-        $ical[] = 'END:VEVENT';
+        mfcs_ical_populate_array($ical, 'END:VEVENT');
       }
     }
 
@@ -452,16 +479,51 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
     date_default_timezone_set($original_timezone);
   }
 
-  $ical[] = 'END:VCALENDAR';
+  mfcs_ical_populate_array($ical, 'END:VCALENDAR');
 
   // as a failsafe, make sure the original timezone gets set.
   date_default_timezone_set($original_timezone);
 
-  if (empty($ical)) {
-    return '';
+  // return the resulting string as an array and expect the client to process the results.
+  return $ical;
+}
+
+/**
+ * The given string will be counted and appended to the ical array.
+ *
+ * Previously, return implode($ical_eol, $ical) . $ical_eol was used to generate the ical.
+ * This turned out to be an enormous resource hog.
+ *
+ * @param array $ical
+ *   The array to append the string to.
+ * @param string $string
+ *   The string to append.
+ *
+ * @param bool
+ *   TRUE on success, FALSE otherwise.
+ */
+function mfcs_ical_populate_array(&$ical, $string) {
+  if (!is_array($ical)) {
+    cf_error::invalid_array('ical');
+    return FALSE;
   }
 
-  return implode($ical_eol, $ical) . $ical_eol;
+  if (!is_string($string)) {
+    cf_error::invalid_string('string');
+    return FALSE;
+  }
+
+  if (!array_key_exists('length', $ical)) {
+    $ical['length'] = 0;
+  }
+
+  if (!array_key_exists('content', $ical)) {
+    $ical['content'] = '';
+  }
+
+  $ical['length'] += strlen($string) + 2;
+  $ical['content'][] = $string . "\r\n";
+  return TRUE;
 }
 
 /**
