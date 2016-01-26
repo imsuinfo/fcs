@@ -4395,14 +4395,15 @@ function mfcs_autocancel_old_requests_cron() {
     $cancelled = mfcs_workflow_set_status($request_id, MFCS_REQUEST_STATUS_CANCELLED, $system_user);
 
     if ($cancelled) {
-      mfcs_workflow_step_review($request_id, $system_user, MFCS_REVIEW_DECISION_CANCELLED);
+      $message = "One or more dates associated with the request are now in the past.";
+      mfcs_workflow_step_review($request_id, $system_user, MFCS_REVIEW_DECISION_CANCELLED, $message);
 
       $parameters = array();
       $parameters['changed_by'] = $system_user->uid;
       $parameters['changed_type'] = 'user';
       $parameters['cancelled'] = TRUE;
       $parameters['auto-cancelled'] = TRUE;
-      $parameters['auto-cancelled-reason'] = "One or more dates associated with the request are now in the past.";
+      $parameters['auto-cancelled-reason'] = $message;
       mfcs_send_workflow_emails($request_id, $parameters);
     }
     else {
