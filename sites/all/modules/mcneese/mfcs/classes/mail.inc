@@ -89,6 +89,11 @@ class McNeeseFacilitiesUseMail implements MailSystemInterface {
           continue;
         }
 
+        if (!isset($file['data'])) {
+          watchdog(MFCS_WATCHDOG_ID, "Error detected in file process of e-mail generation. Not sending file. File Information = %file.", array('%file' => print_r($file, TRUE)), WATCHDOG_ERROR);
+          continue;
+        }
+
         $mime = filter_var($file['mime'], FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW);
         $name = filter_var($file['name'], FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW);
         $disposition = filter_var($file['disposition'], FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW);
