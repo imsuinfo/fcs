@@ -2693,6 +2693,10 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       $email_to[$r->email] = $r->email;
     }
   }
+  else {
+    watchdog(MFCS_WATCHDOG_ID, "Exception detected in workflow e-mail process. Not sending e-mail. Request ID = %request_id, Parameters = %parameters.", array('%request_id' => $request_id, '%parameters' => print_r($parameters, TRUE)), WATCHDOG_WARNING);
+    return FALSE;
+  }
 
   // for testing, add/remove email addresses
   global $conf;
