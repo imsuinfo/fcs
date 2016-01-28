@@ -2645,6 +2645,16 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
         $requirements_state = $form_state['values']['review']['operations']['requirements'];
       }
 
+      $insurance_form = array();
+      if (isset($form['review']['operations']['insurance'])) {
+        $insurance_form = $form['review']['operations']['insurance'];
+      }
+
+      $insurance_state = array();
+      if (isset($form_state['values']['review']['operations']['insurance'])) {
+        $insurance_state = $form_state['values']['review']['operations']['insurance'];
+      }
+
       $operations_form = array();
       if (isset($form['review']['operations'])) {
         $operations_form = $form['review']['operations'];
@@ -2773,11 +2783,11 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
 
       // process insurance changes.
       foreach ($changes_insurance as $insurance_field => &$changes) {
-        if (!isset($requirements_form[$insurance_field]) || !isset($requirements_state[$insurance_field]) || !isset($requirements_form['insurance'][$insurance_field])) {
+        if (!isset($insurance_form[$insurance_field]) || !isset($insurance_state[$insurance_field])) {
           continue;
         }
 
-        if ($requirements_form['insurance'][$insurance_field]['#default_value'] != $requirements_state[$insurance_field]) {
+        if ($insurance_form[$insurance_field]['#default_value'] != $insurance_state[$insurance_field]) {
           $changes['detected'] = TRUE;
 
           $any_requirements_changes_made = TRUE;
