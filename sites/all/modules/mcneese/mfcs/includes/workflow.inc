@@ -2478,9 +2478,14 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
             'type' => 'ical',
             'mime' => 'text/calendar',
             'name' => 'mcneese-facilities_use-request-' . $request_id . '.ics',
-            'data' => $ical,
+            'data' => '',
             'disposition' => 'attachment',
           );
+
+          foreach ($ical['content'] as $ical_value) {
+            $file['data'] .= $ical_value;
+          }
+          unset($ical_value);
 
           $email_params['files'][] = $file;
         }
