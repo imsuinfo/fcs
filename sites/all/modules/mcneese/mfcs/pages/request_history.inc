@@ -342,7 +342,7 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
                       unset($decision);
                     }
                   }
-                  elseif ($group_name == 'requirements') {
+                  elseif ($group_name == 'requirements' || $group_name == 'insurance') {
                     if (isset($presentation[$group_name][$field_name])) {
                       // always display the boolean when displayed in the history log.
                       if (!empty($presentation[$group_name][$field_name]['type'])) {

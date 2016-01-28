@@ -1070,6 +1070,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
     'university',
   );
   $changelog_fields['insurance'] = array(
+    'contractor',
     'insurance',
     'unaffiliated',
     'provided',
