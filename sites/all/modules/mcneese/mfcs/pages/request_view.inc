@@ -21,7 +21,7 @@
  *   The unique identifier for a request.
  * @param int $mode
  *   Specifies the mode that alters how the form is rendered.
- * @param null|int $revision_id
+ * @param null|int $use_revision
  *   (optional) When not NULL, load the request based on the revision number
  *   instead of the latest revision.
  * @param bool $contained
@@ -30,7 +30,7 @@
  * @return string
  *   The HTML output representing the page.
  */
-function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS_VIEW_MODE_NORMAL, $revision_id = NULL, $contained = FALSE) {
+function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS_VIEW_MODE_NORMAL, $use_revision = NULL, $contained = FALSE) {
   if (!is_array($form)) {
     cf_error::invalid_array('form');
 
@@ -51,7 +51,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     $mode = MFCS_VIEW_MODE_NORMAL;
   }
 
-  $request = mfcs_load_request_by_id($request_id, NULL, $revision_id);
+  $request = mfcs_load_request_by_id($request_id, NULL, $use_revision);
 
   if (empty($request)) {
     drupal_not_found();
@@ -61,7 +61,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
   $user = cf_current_user();
 
-  if (is_null($revision_id)) {
+  if (is_null($use_revision)) {
     $can_create_request = mfcs_request_access('create', $request, $user);
     $can_edit_request = mfcs_request_access('edit', $request, $user);
     $can_log_request = mfcs_request_access('log', $request, $user);
@@ -108,7 +108,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     return array();
   }
 
-  if (is_null($revision_id)) {
+  if (is_null($use_revision)) {
     if ($mode == MFCS_VIEW_MODE_NORMAL) {
       mfcs_add_canonical_headers('requests/view-0/' . $request_id . '/' . $mode, 'requests/view-0/' . $request_id);
     }
@@ -117,7 +117,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     }
   }
   else {
-    mfcs_add_canonical_headers('requests/view-0/' . $request_id . '/' . $mode . '/' . $revision_id);
+    mfcs_add_canonical_headers('requests/view-0/' . $request_id . '/' . $mode . '/' . $use_revision);
   }
 
     if (!is_string($mode) || !($mode == MFCS_VIEW_MODE_DISPLAY || $mode == MFCS_VIEW_MODE_LOG || $mode == MFCS_VIEW_MODE_OPERATIONS)) {
@@ -216,7 +216,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     }
   }
 
-  if ($can_reassign_request && is_null($revision_id)) {
+  if ($can_reassign_request && is_null($use_revision)) {
     if ($show_display) {
       if (mfcs_disabled_users_with_active_content($request['venue_coordinator']['user_id'][0]->value)) {
         $user_venue_coordinator = mfcs_load_basic_user_settings_by_user_id($request['venue_coordinator']['user_id'][0]->value);
@@ -331,7 +331,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     $can['ical'] = FALSE;
     $can['cancelling'] = FALSE;
   }
-  elseif (!is_null($revision_id)) {
+  elseif (!is_null($use_revision)) {
     $can['edit'] = FALSE;
     $can['history'] = (bool) $can_history_request;
     $can['agreement'] = FALSE;
@@ -370,7 +370,16 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
   $form['form']['revision_id'] = array(
     '#type' => 'value',
-    '#value' => $revision_id,
+    '#value' => $use_revision,
+  );
+
+  if (is_null($use_revision)) {
+    $form['form']['revision_id']['#value'] = $request['mer']['revision'][0]->value;
+  }
+
+  $form['form']['use_revision'] = array(
+    '#type' => 'value',
+    '#value' => $use_revision,
   );
 
   $form['form']['request'] = array(
@@ -887,7 +896,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         '#weight' => 1000,
       );
 
-      if ($can_cancel_request && is_null($revision_id)) {
+      if ($can_cancel_request && is_null($use_revision)) {
         $form['display']['submit']['cancel'] = array(
           '#id' => 'request-display-submit-cancel',
           '#name' => 'request-display-submit-cancel',
@@ -905,7 +914,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           ),
         );
       }
-      elseif ($can_uncancel_request && is_null($revision_id)) {
+      elseif ($can_uncancel_request && is_null($use_revision)) {
         $form['display']['submit']['uncancel'] = array(
           '#id' => 'request-display-submit-uncancel',
           '#name' => 'request-display-submit-uncancel',
@@ -956,7 +965,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         ),
       );
 
-      if ($can_reassign_request && is_null($revision_id)) {
+      if ($can_reassign_request && is_null($use_revision)) {
         $form['display']['submit']['reassign'] = array(
           '#id' => 'request-display-submit-reassign',
           '#name' => 'request-display-submit-reassign',
@@ -983,6 +992,18 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     $form['review'] = array(
       '#tree' => TRUE,
     );
+
+    $form['review']['revision'] = array(
+      '#type' => 'hidden',
+      '#value' => (int) $request['mer']['revision'][0]->value,
+    );
+
+    // When a form is submitted, the current data at generation time is stored in the form_state array.
+    // Read the value and if it exists assign it instead of the value from the form.
+    // This allows for detecting changes since the last time the page was loaded.
+    if (isset($form_state['input']['review']['revision'])) {
+      $form['review']['revision']['#value'] = (int) $form_state['input']['review']['revision'];
+    }
 
     mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
@@ -1205,7 +1226,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         '#weight' => 3,
       );
 
-      mfcs_view_build_reviews_log($form, $form_state, $request_id, $revision_id);
+      mfcs_view_build_reviews_log($form, $form_state, $request_id, $use_revision);
 
       $form['review']['log']['submit'] = array(
         '#id' => 'request-review-log-submit',
@@ -1254,7 +1275,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
       );
     }
 
-    if ($show_operations && !$contained && is_null($revision_id)) {
+    if ($show_operations && !$contained && is_null($use_revision)) {
       $decision_options = mfcs_get_reviewer_decision_list_options('review_step');
       $decision_options_all = mfcs_get_reviewer_decision_list_options();
 
@@ -2196,6 +2217,15 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
     $type = (int) $type;
   }
 
+  $latest_revision = (int) mfcs_load_request_revision_number($request_id);
+  if ($form['review']['revision']['#value'] != $latest_revision) {
+    drupal_set_message("Warning: the request has changed since you last loaded this page. This page is out of date and has been reloaded. No changes have been made.", 'warning');
+    watchdog(MFCS_WATCHDOG_ID, "The user '%user_name' (%user_id) attempted to review a request using a stale page", array('%user_name' => $user->name, '%user_id' => $user->uid), WATCHDOG_WARNING);
+    return;
+  }
+  unset($previous_revision_id);
+  unset($current_revision_id);
+
   $decision = NULL;
   if (isset($form_state['values']['review']['operations']['decision'])) {
     $decision = $form_state['values']['review']['operations']['decision'];
@@ -2216,7 +2246,7 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
       form_set_error('', "This view mode does not allow cancelling.");
     }
 
-    if (!is_null($form['form']['revision_id']['#value'])) {
+    if (!is_null($form['form']['use_revision']['#value'])) {
       form_set_error('', "Revisions can not be cancelled.");
     }
 
@@ -2227,7 +2257,7 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
       form_set_error('', "This view mode does not allow uncancelling.");
     }
 
-    if (!is_null($form['form']['revision_id']['#value'])) {
+    if (!is_null($form['form']['use_revision']['#value'])) {
       form_set_error('', "Revisions can not be uncancelled.");
     }
 
@@ -2238,14 +2268,14 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
       form_set_error('', "This view mode does not allow re-assignment.");
     }
 
-    if (!is_null($form['form']['revision_id']['#value'])) {
+    if (!is_null($form['form']['use_revision']['#value'])) {
       form_set_error('', "Revisions can not be re-assigned.");
     }
 
     $form_state['reassign_was_clicked'] = TRUE;
   }
   elseif ($clicked_id == 'request-review-operations-submit-submit') {
-    if (!is_null($form['form']['revision_id']['#value'])) {
+    if (!is_null($form['form']['use_revision']['#value'])) {
       form_set_error('', "Revisions can not be changed or reviewed.");
     }
 
@@ -2466,7 +2496,7 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
     }
   }
   elseif ($clicked_id == 'request-cancel-submit-yes' || $clicked_id == 'request-cancel-submit-no') {
-    if (!is_null($form['form']['revision_id']['#value'])) {
+    if (!is_null($form['form']['use_revision']['#value'])) {
       form_set_error('', "Revisions can not be cancelled.");
       return;
     }
@@ -2474,14 +2504,14 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
     $form_state['rebuild'] = FALSE;
   }
   elseif ($clicked_id == 'request-uncancel-submit-yes' || $clicked_id == 'request-uncancel-submit-no') {
-    if (!is_null($form['form']['revision_id']['#value'])) {
+    if (!is_null($form['form']['use_revision']['#value'])) {
       form_set_error('', "Revisions can not be uncancelled.");
     }
 
     $form_state['rebuild'] = FALSE;
   }
   elseif ($clicked_id == 'request-reassign-submit-yes' || $clicked_id == 'request-reassign-submit-no') {
-    if (!is_null($form['form']['revision_id']['#value'])) {
+    if (!is_null($form['form']['use_revision']['#value'])) {
       form_set_error('', "Revisions can not be Re-assigned.");
       return;
     }
@@ -2942,13 +2972,13 @@ function mfcs_request_view_0_form_submit_pdf($form, &$form_state) {
   }
 
   $mode = $form['form']['mode']['#value'];
-  $revision_id = $form['form']['revision_id']['#value'];
+  $use_revision = $form['form']['use_revision']['#value'];
 
-  if (is_null($revision_id)) {
+  if (is_null($use_revision)) {
     $form_state['redirect'] = mfcs_build_redirect_array('/requests/pdf-0/' . $request_id . '/' . $mode);
   }
   else {
-    $form_state['redirect'] = mfcs_build_redirect_array('/requests/pdf-0/' . $request_id . '/' . $mode . '/' . $revision_id);
+    $form_state['redirect'] = mfcs_build_redirect_array('/requests/pdf-0/' . $request_id . '/' . $mode . '/' . $use_revision);
   }
 }
 
