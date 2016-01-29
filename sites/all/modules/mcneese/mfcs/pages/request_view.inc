@@ -490,9 +490,6 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
       $reviews_step = array();
       if (isset($reviews[MFCS_REVIEW_STEP_REVIEW])) {
         $reviews_step = $reviews[MFCS_REVIEW_STEP_REVIEW];
-        if (is_string($reviews_step)) {
-          $reviews_step = (int) $reviews_step;
-        }
       }
 
       if (!empty($reviews_step)) {
@@ -534,9 +531,6 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
       $decision_step = array();
       if (isset($reviews[MFCS_REVIEW_STEP_MAKE_DECISIONS])) {
         $decision_step = $reviews[MFCS_REVIEW_STEP_MAKE_DECISIONS];
-        if (is_string($decision_step)) {
-          $decision_step = (int) $decision_step;
-        }
       }
 
       if (!empty($decision_step)) {
