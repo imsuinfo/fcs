@@ -1577,17 +1577,30 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
         $query->condition('mer.step', $show_step_reviewer, 'NOT IN');
       }
       else {
-        $already_reviewed_query = db_select('mfcs_reviewers', 'mr_r');
-        $already_reviewed_query->innerJoin('mfcs_reviewed', 'mrd_r', 'mr_r.reviewer_classification = mrd_r.classification');
-        $already_reviewed_query->addField('mrd_r', 'request_id', 'request_id');
-        $already_reviewed_query->where('mr_r.request_classification = mer.classification AND mr_r.review_step = mer.step');
-        $already_reviewed_query->condition('mr_r.user_id', $user->uid);
-        $already_reviewed_query->condition('mr_r.disabled', 0);
-
         $and = db_and();
         $and->condition('mer.status', $show_status_reviewer_review, 'IN');
         $and->condition('mer.step', $show_step_reviewer, 'IN');
-        $and->condition('mer.id', $already_reviewed_query, 'NOT IN');
+
+        // check each and every single reviewer classification separately.
+        // while this is more expensive, this allows for reviewing when some (but not all) of the classifications have not yet reviewed.
+        // example:
+        // - user 1, with roles A, B and C, has reviewed request Z.
+        // - user 2, with roles B, C, and D, wants to review request Z.
+        // - user 2 should still be allowed to review as D, but not as B or C.
+        $reviewed_or = db_or();
+        foreach ($reviewer_settings['classifications'] as $reviewer_classification) {
+          $already_reviewed_query = db_select('mfcs_reviewers', 'mr_r');
+          $already_reviewed_query->innerJoin('mfcs_reviewed', 'mrd_r', 'mr_r.reviewer_classification = mrd_r.classification');
+          $already_reviewed_query->addField('mrd_r', 'request_id', 'request_id');
+          $already_reviewed_query->where('mr_r.request_classification = mer.classification AND mr_r.review_step = mer.step');
+          $already_reviewed_query->condition('mr_r.user_id', $user->uid);
+          $already_reviewed_query->condition('mr_r.disabled', 0);
+          $already_reviewed_query->condition('mrd_r.classification', $reviewer_classification);
+          $reviewed_or->condition('mer.id', $already_reviewed_query, 'NOT IN');
+          unset($already_reviewed_query);
+        }
+        $and->condition($reviewed_or);
+        unset($reviewed_or);
 
         $sub_or = db_or();
         foreach ($reviewer_settings['for_step'] as $for_step => $step_classifications) {
@@ -1706,7 +1719,6 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
     }
 
     $results = $query->execute()->fetchAllAssoc('id');
-
     if (!is_array($results)) {
       return $access;
     }
@@ -9896,6 +9908,64 @@ function mfcs_using_effective_system_id() {
   }
 
   return $static;
+}
+
+/**
+ * Returns classifications that have already reviewed the request as for the given step.
+ *
+ * @param int $request_id
+ *   The integer representing the request.
+ * @param array $reviewer_classifications
+ *   An array of all reviewer classifications to check if they have been reviewed.
+ *
+ * @return array|bool
+ *   An array containing the following:
+ *   'reviewed': An array of classifications that have already been reviewed (from provided list).
+ *   'available': An array of classifications that have not yet been reviewed (from provided list).
+ *   FALSE is returned on error.
+ */
+function mfcs_get_request_already_reviewed_as_classifications($request_id, $reviewer_classifications) {
+  if (!cf_is_integer($request_id)) {
+    cf_error::invalid_integer('request_id');
+    return FALSE;
+  }
+
+  if (!is_array($reviewer_classifications) || empty($reviewer_classifications)) {
+    cf_error::invalid_array('reviewer_classifications');
+    return FALSE;
+  }
+
+  $return = array(
+    'reviewed' => array(),
+    'available' => array(),
+  );
+
+  foreach ($reviewer_classifications as $classification) {
+    $return['available'][(int) $classification] = (int) $classification;
+  }
+
+  try {
+    $query = db_select('mfcs_reviewed', 'mrd_r');
+    $query->addField('mrd_r', 'classification', 'classification');
+    $query->condition('mrd_r.request_id', $request_id);
+    $query->condition('mrd_r.classification', $return['available'], 'IN');
+
+    $results = $query->execute()->fetchAll();
+    if (!empty($results)) {
+      foreach ($results as $result) {
+        $classification = (int) $result->classification;
+        $return['reviewed'][$classification] = $classification;
+        unset($return['available'][$classification]);
+      }
+    }
+  }
+  catch (Exception $ex) {
+    cf_error::on_exception($ex);
+
+    return FALSE;
+  }
+
+  return $return;
 }
 
 /**

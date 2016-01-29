@@ -393,6 +393,11 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     '#value' => $user,
   );
 
+  $form['form']['already_reviewed_as'] = array(
+    '#type' => 'value',
+    '#value' => array(),
+  );
+
   if (!isset($request['information']['type'][0]->value) || !cf_is_integer($request['information']['type'][0]->value)) {
     cf_error::invalid_integer('request[information][type][0]->value');
     $form['message'] = array(
@@ -1351,6 +1356,21 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
         $reviewer_classifications_all[$reviewer_classification] = $reviewer_classification_options[$reviewer_classification];
       }
+      unset($reviewers_reviewer);
+
+      // remove all classifications that may have been reviewed already.
+      if (!empty($reviewer_classifications)) {
+        $form['form']['already_reviewed_as']['#value'] = mfcs_get_request_already_reviewed_as_classifications($request_id, array_keys($reviewer_classifications));
+        if (isset($form['form']['already_reviewed_as']['#value']['reviewed'])) {
+          foreach ($form['form']['already_reviewed_as']['#value']['reviewed'] as $reviewer_classification) {
+            unset($reviewer_classifications[$reviewer_classification]);
+          }
+          unset($reviewer_classification);
+        }
+        else {
+          $form['form']['already_reviewed_as']['#value'] = array();
+        }
+      }
 
       if ($can_comment_request && !$can_review_request) {
         if (empty($reviewer_classifications) && empty($venue_coordinator)) {
@@ -1430,6 +1450,9 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         }
       }
       elseif ($step !== MFCS_REVIEW_STEP_VENUE_AVAILABLE && $step !== MFCS_REVIEW_STEP_REVIEW) {
+        unset($decision_options[MFCS_REVIEW_DECISION_REQUIREMENT]);
+      }
+      elseif (empty($reviewer_classifications)) {
         unset($decision_options[MFCS_REVIEW_DECISION_REQUIREMENT]);
       }
 
@@ -2557,6 +2580,11 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
       $type = (int) $type;
     }
 
+    $already_reviewed_as = NULL;
+    if (!empty($form['form']['already_reviewed_as']['#value']['available']) && is_array($form['form']['already_reviewed_as']['#value']['available'])) {
+      $already_reviewed_as = $form['form']['already_reviewed_as']['#value']['available'];
+    }
+
     $insurance_provided_available = FALSE;
     if (isset($form['form']['insurance_provided_available']['#value'])) {
       $insurance_provided_available = (bool) $form['form']['insurance_provided_available']['#value'];
@@ -2617,13 +2645,13 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
           'requirements' => array('other' => 0, 'waived' => 0, 'university' => 1),
         );
 
-        $success = mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], MFCS_REVIEW_DECISION_REQUIREMENT, "The system has auto-waved the fees because the request is a Quick Meeting.", $requirements_extra);
+        $success = mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], MFCS_REVIEW_DECISION_REQUIREMENT, "The system has auto-waved the fees because the request is a Quick Meeting.", $requirements_extra, $already_reviewed_as);
       }
     }
     elseif ($step === MFCS_REVIEW_STEP_REVIEW) {
       if (isset($form_state['autowave']) && $form_state['autowave']) {
         // @todo: this might be a valid use of MFCS_REVIEW_DECISION_WAVE. If 'autowave' is removed, then this is no longer necessary.
-        $success = mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], MFCS_REVIEW_DECISION_WAVE, "", array('send_email' => FALSE));
+        $success = mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], MFCS_REVIEW_DECISION_WAVE, "", array('send_email' => FALSE), $already_reviewed_as);
       }
     }
 
@@ -2811,7 +2839,7 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
         return;
       }
 
-      $success = mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], $decision, $message, $extra);
+      $success = mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], $decision, $message, $extra, $already_reviewed_as);
     }
 
     if ($success) {

@@ -469,11 +469,15 @@ function mfcs_workflow_set_venue_coordinator($request_id, $venue_coordinator_id,
  *   (optional) The facilities use decision message.
  * @param array $extra
  *   (optional) Additional fields that are specific to the individual step.
+ * @param array|null $as
+ *   (optional) Provide a specific set of reviewer classifications to use.
+ *   Only classifications assigned to the user are allowed (others are silently ignored).
+ *   Other special cases, such as manager, might override this.
  *
  * @return bool
  *   TRUE on success, FALSE otherwise.
  */
-function mfcs_workflow_step_review($request_id, $user, $decision, $message = "", $extra = array()) {
+function mfcs_workflow_step_review($request_id, $user, $decision, $message = "", $extra = array(), $as = NULL) {
   if (!is_object($user)) {
     cf_error::invalid_object('user');
     return FALSE;
@@ -492,6 +496,16 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
   if (!is_array($extra)) {
     cf_error::invalid_array('extra');
     return FALSE;
+  }
+
+  if (!is_null($as) && !is_array($as)) {
+    cf_error::invalid_array('as');
+    return FALSE;
+  }
+
+  // $as must be a populated array.
+  if (is_array($as) && empty($as)) {
+    $as = NULL;
   }
 
   $request = mfcs_load_request_by_id($request_id);
@@ -578,6 +592,21 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
     }
 
     $reviewer_classifications_all[$reviewer_classification] = $reviewer_classification;
+  }
+
+  // the classifications in $as will be used if and only if those classifications are valid.
+  if (!empty($as)) {
+    $classifications_to_use = array();
+    foreach ($as as $a) {
+      if (array_key_exists($a, $reviewer_classifications)) {
+        $classifications_to_use[$a] = $reviewer_classifications[$a];
+      }
+    }
+
+    if (!empty($classifications_to_use)) {
+      $reviewer_classifications = $classifications_to_use;
+    }
+    unset($classifications_to_use);
   }
 
   $proxies = mfcs_get_proxy_venue_coordinator($user->uid);
