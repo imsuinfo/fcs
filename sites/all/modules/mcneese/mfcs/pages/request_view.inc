@@ -2091,17 +2091,19 @@ function mfcs_request_view_0_form_pre_validate(&$form, &$form_state) {
   if ($decision === MFCS_REVIEW_DECISION_REQUIREMENT) {
     if ($step === MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
       $requirements_waived = FALSE;
-      if (isset($form_state['values']['review']['operations']['presidents_approval']) && $form_state['values']['review']['operations']['presidents_approval'] == 1) {
-        $requirements_waived = TRUE;
-      }
-      elseif (isset($form_state['values']['review']['operations']['university_business']) && $form_state['values']['review']['operations']['university_business'] == 1) {
-        $requirements_waived = TRUE;
-      }
-      else {
+      if (isset($form_state['values']['review']['operations']['presidents_approval']) || isset($form_state['values']['review']['operations']['presidents_approval'])) {
         if (isset($form_state['values']['review']['operations']['presidents_approval']) && $form_state['values']['review']['operations']['presidents_approval'] == 1) {
           $requirements_waived = TRUE;
         }
-        elseif (isset($form_state['values']['review']['operations']['presidents_approval']) && $form_state['values']['review']['operations']['presidents_approval'] == 1) {
+        elseif (isset($form_state['values']['review']['operations']['university_business']) && $form_state['values']['review']['operations']['university_business'] == 1) {
+          $requirements_waived = TRUE;
+        }
+      }
+      else {
+        if (isset($form['form']['request']['#value']['requirements']['waived'][0]->value) && $form['form']['request']['#value']['requirements']['waived'][0]->value == 1) {
+          $requirements_waived = TRUE;
+        }
+        elseif (isset($form['form']['request']['#value']['requirements']['university'][0]->value) && $form['form']['request']['#value']['requirements']['university'][0]->value == 1) {
           $requirements_waived = TRUE;
         }
       }
@@ -2111,10 +2113,10 @@ function mfcs_request_view_0_form_pre_validate(&$form, &$form_state) {
     else {
       $requirements_waived = FALSE;
 
-      if (isset($form_state['values']['review']['operations']['presidents_approval']) && $form_state['values']['review']['operations']['presidents_approval'] == 1) {
+      if (isset($form['form']['request']['#value']['requirements']['waived'][0]->value) && $form['form']['request']['#value']['requirements']['waived'][0]->value == 1) {
         $requirements_waived = TRUE;
       }
-      elseif (isset($form_state['values']['review']['operations']['presidents_approval']) && $form_state['values']['review']['operations']['presidents_approval'] == 1) {
+      elseif (isset($form['form']['request']['#value']['requirements']['university'][0]->value) && $form['form']['request']['#value']['requirements']['university'][0]->value == 1) {
         $requirements_waived = TRUE;
       }
 
