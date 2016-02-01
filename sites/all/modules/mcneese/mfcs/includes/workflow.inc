@@ -2031,6 +2031,9 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       watchdog(MFCS_WATCHDOG_ID, "Could not load the room and building information for %request_id , the room value is: %value.", array('%request_id' => $request_id, '%value' => $request['top']['room'][0]->value), WATCHDOG_WARNING);
     }
   }
+  else {
+    watchdog(MFCS_WATCHDOG_ID, "Could not load the room for %request_id , the room value is: %value.", array('%request_id' => $request_id, '%value' => $request['top']['room'][0]->value), WATCHDOG_WARNING);
+  }
 
   $standard_content = "\n\n";
   $standard_content .= "Request ID:\n - " . $request_id . "\n\n";
