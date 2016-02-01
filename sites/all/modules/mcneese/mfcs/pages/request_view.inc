@@ -2219,9 +2219,25 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
 
   $latest_revision = (int) mfcs_load_request_revision_number($request_id);
   if ($form['review']['revision']['#value'] != $latest_revision) {
-    drupal_set_message("Warning: the request has changed since you last loaded this page. This page is out of date and has been reloaded. No changes have been made.", 'warning');
-    watchdog(MFCS_WATCHDOG_ID, "The user '%user_name' (%user_id) attempted to review a request using a stale page", array('%user_name' => $user->name, '%user_id' => $user->uid), WATCHDOG_WARNING);
-    return;
+    // check to see if the old revision and the new revision are on different states.
+    $request_previous = mfcs_load_request_by_id($request_id, NULL, $form['review']['revision']['#value']);
+    $request_latest = mfcs_load_request_by_id($request_id, NULL, $latest_revision);
+
+    $step_previous = $request_previous['top']['step'][0]->value;
+    $step_latest = $request_latest['top']['step'][0]->value;
+
+    if (is_string($step_previous)) {
+      $step_previous = (int) $step_previous;
+    }
+    if (is_string($step_latest)) {
+      $step_latest = (int) $step_latest;
+    }
+
+    if ($step_latest !== $step_previous) {
+      drupal_set_message("Warning: the request has changed since you last loaded this page. This page is out of date and has been reloaded. No changes have been made.", 'warning');
+      watchdog(MFCS_WATCHDOG_ID, "The user '%user_name' (%user_id) attempted to review a request using a stale page", array('%user_name' => $user->name, '%user_id' => $user->uid), WATCHDOG_WARNING);
+      return;
+    }
   }
   unset($previous_revision_id);
   unset($current_revision_id);
