@@ -920,14 +920,77 @@ function mfcs_page_request_access_operation_cancelling(&$request_ids, &$processe
     return FALSE;
   }
 
-  if ($roles['administer'] || $roles['manager'] || $roles['reviewer'] || $roles['requester']) {
+  global $conf;
+
+
+  // support manually disabling of accounts based on specific roles.
+  $disable_cancelling_for = array();
+  if (isset($conf['disable_cancelling_for']) && is_array($conf['disable_cancelling_for'])) {
+    $disable_cancelling_for = $conf['disable_cancelling_for'];
+  }
+
+  if (!isset($disable_cancelling_for['reviewer']) || !is_bool($disable_cancelling_for['reviewer'])) {
+    $disable_cancelling_for['reviewer'] = FALSE;
+  }
+
+  if (!isset($disable_cancelling_for['requester']) || !is_bool($disable_cancelling_for['requester'])) {
+    $disable_cancelling_for['requester'] = FALSE;
+  }
+
+
+  if ($roles['administer'] || $roles['manager']) {
     if (array_key_exists(NULL, $request_ids)) {
       $access[NULL] = TRUE;
       $processed[NULL] = TRUE;
       return TRUE;
     }
   }
+  elseif ($roles['reviewer']) {
+    if (array_key_exists(NULL, $request_ids)) {
+      if ($disable_cancelling_for['reviewer']) {
+        // also check for requester access.
+        if (!$roles['requester'] || $disable_cancelling_for['requester']) {
+          $access[NULL] = FALSE;
+          $processed[NULL] = FALSE;
+          return FALSE;
+        }
+      }
+      else {
+        $access[NULL] = TRUE;
+        $processed[NULL] = TRUE;
+        return TRUE;
+      }
+    }
+    elseif ($disable_cancelling_for['reviewer']) {
+      // also check for requester access.
+      if (!$roles['requester'] || $disable_cancelling_for['requester']) {
+        $access[NULL] = FALSE;
+        $processed[NULL] = FALSE;
+        return FALSE;
+      }
+    }
+  }
+  elseif ($roles['requester']) {
+    if (array_key_exists(NULL, $request_ids)) {
+      if ($disable_cancelling_for['requester']) {
+        $access[NULL] = FALSE;
+        $processed[NULL] = FALSE;
+        return FALSE;
+      }
+      else {
+        $access[NULL] = TRUE;
+        $processed[NULL] = TRUE;
+        return TRUE;
+      }
+    }
+    elseif ($disable_cancelling_for['requester']) {
+      $access[$request_id] = FALSE;
+      $processed[$request_id] = FALSE;
+      return FALSE;
+    }
+  }
   else {
+    // deny access for all other accounts.
     if (array_key_exists(NULL, $request_ids)) {
       $access[NULL] = FALSE;
       $processed[NULL] = FALSE;

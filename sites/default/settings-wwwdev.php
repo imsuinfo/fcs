@@ -847,6 +847,11 @@ $conf['default_headers-form'] = array(
 #$conf['default_headers-cache_control'] = FALSE;
 #$conf['default_headers-expires'] = FALSE;
 
+$conf['disable_cancelling_for'] = array(
+  'reviewer' => FALSE,
+  'requester' => TRUE,
+);
+
 
 // enable all errors
 error_reporting(E_ALL | E_STRICT);
