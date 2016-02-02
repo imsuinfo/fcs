@@ -2021,11 +2021,13 @@ function mfcs_load_locations($location = NULL, $disabled = FALSE) {
     if (array_key_exists($location, $items)) {
       return $items[$location];
     }
-
-    return FALSE;
   }
 
-  $items = array();
+  // don't override cached items.
+  if (is_null($items)) {
+    $items = array();
+  }
+
   try {
     $query = db_select('mfcs_banner_locations', 'mbl');
 
@@ -2043,13 +2045,23 @@ function mfcs_load_locations($location = NULL, $disabled = FALSE) {
 
     $query->orderBy('mbl.human_name');
 
-    $items = $query->execute()->fetchAllAssoc('location_id');
+    $results = $query->execute()->fetchAllAssoc('location_id');
+
+    if (!empty($results)) {
+      foreach ($results as $lid => $l) {
+        $items[$lid] = $l;
+      }
+    }
 
     if (is_null($location)) {
       return $items;
     }
-    elseif (array_key_exists($location, $items)) {
+
+    if (array_key_exists($location, $items)) {
       return $items[$location];
+    }
+    else {
+      $items[$location] = FALSE;
     }
   }
   catch (Exception $ex) {
@@ -2112,11 +2124,13 @@ function mfcs_load_buildings($location = NULL, $building = NULL, $disabled = FAL
     if (array_key_exists($building, $items)) {
       return $items[$building];
     }
-
-    return FALSE;
   }
 
-  $items = array();
+  // don't override cached items.
+  if (is_null($items)) {
+    $items = array();
+  }
+
   try {
     $query = db_select('mfcs_banner_buildings', 'mbb');
 
@@ -2152,13 +2166,23 @@ function mfcs_load_buildings($location = NULL, $building = NULL, $disabled = FAL
 
     $query->orderBy('mbb.human_name');
 
-    $items = $query->execute()->fetchAllAssoc('building_id');
+    $results = $query->execute()->fetchAllAssoc('building_id');
+
+    if (!empty($results)) {
+      foreach ($results as $bid => $b) {
+        $items[$bid] = $b;
+      }
+    }
 
     if (is_null($building)) {
       return $items;
     }
-    elseif (array_key_exists($building, $items)) {
+
+    if (array_key_exists($building, $items)) {
       return $items[$building];
+    }
+    else {
+      $items[$building] = FALSE;
     }
   }
   catch (Exception $ex) {
