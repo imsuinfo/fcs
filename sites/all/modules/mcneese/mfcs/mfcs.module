@@ -2227,11 +2227,13 @@ function mfcs_load_rooms($location = NULL, $building = NULL, $room = NULL, $disa
     if (array_key_exists($room, $items)) {
       return $items[$room];
     }
-
-    return FALSE;
   }
 
-  $items = array();
+  // don't override cached items.
+  if (is_null($items)) {
+    $items = array();
+  }
+
   try {
     $query = db_select('mfcs_banner_rooms', 'mbr');
     $query->innerJoin('mfcs_banner_buildings', 'mbb', 'mbr.building = mbb.id');
@@ -2286,13 +2288,23 @@ function mfcs_load_rooms($location = NULL, $building = NULL, $room = NULL, $disa
     $query->orderBy('mbr.human_name');
     $query->orderBy('mbr.machine_name');
 
-    $items = $query->execute()->fetchAllAssoc('room_id');
+    $results = $query->execute()->fetchAllAssoc('room_id');
+
+    if (!empty($results)) {
+      foreach ($results as $rid => $r) {
+        $items[$rid] = $r;
+      }
+    }
 
     if (is_null($room)) {
       return $items;
     }
-    elseif (array_key_exists($room, $items)) {
+
+    if (array_key_exists($room, $items)) {
       return $items[$room];
+    }
+    else {
+      $items[$room] = FALSE;
     }
   }
   catch (Exception $ex) {
