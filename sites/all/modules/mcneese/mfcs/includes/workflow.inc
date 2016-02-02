@@ -2032,7 +2032,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     }
   }
   else {
-    watchdog(MFCS_WATCHDOG_ID, "Could not load the room for %request_id , the room value is: %value.", array('%request_id' => $request_id, '%value' => $request['top']['room'][0]->value), WATCHDOG_WARNING);
+    watchdog(MFCS_WATCHDOG_ID, "Could not load the room for request %request_id, the location code is: '%location', the building code is: '%building', the room code is: '%room'.", array('%request_id' => $request_id, '%location' => $request['top']['location'][0]->value, '%building' => $request['top']['building'][0]->value, '%room' => $request['top']['room'][0]->value), WATCHDOG_WARNING);
   }
 
   $standard_content = "\n\n";
