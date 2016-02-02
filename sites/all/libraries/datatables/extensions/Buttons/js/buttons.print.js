@@ -3,8 +3,38 @@
  * 2015 SpryMedia Ltd - datatables.net/license
  */
 
-(function($, DataTable) {
-"use strict";
+(function( factory ){
+	if ( typeof define === 'function' && define.amd ) {
+		// AMD
+		define( ['jquery', 'datatables.net', 'datatables.net-buttons'], function ( $ ) {
+			return factory( $, window, document );
+		} );
+	}
+	else if ( typeof exports === 'object' ) {
+		// CommonJS
+		module.exports = function (root, $) {
+			if ( ! root ) {
+				root = window;
+			}
+
+			if ( ! $ || ! $.fn.dataTable ) {
+				$ = require('datatables.net')(root, $).$;
+			}
+
+			if ( ! $.fn.dataTable.Buttons ) {
+				require('datatables.net-buttons')(root, $);
+			}
+
+			return factory( $, root, root.document );
+		};
+	}
+	else {
+		// Browser
+		factory( jQuery, window, document );
+	}
+}(function( $, window, document, undefined ) {
+'use strict';
+var DataTable = $.fn.dataTable;
 
 
 var _link = document.createElement( 'a' );
@@ -13,17 +43,27 @@ var _link = document.createElement( 'a' );
  * Convert a `link` tag's URL from a relative to an absolute address so it will
  * work correctly in the popup window which has no base URL.
  *
- * @param  {interger} i  Counter from jQuery - ignore
  * @param  {node}     el Element to convert
  */
-var _relToAbs = function( i, el ) {
+var _relToAbs = function( el ) {
 	var url;
+	var clone = $(el).clone()[0];
+	var linkHost;
 
-	if ( el.nodeName.toLowerCase() === 'link' ) {
-		_link.href = el.href;
+	if ( clone.nodeName.toLowerCase() === 'link' ) {
+		_link.href = clone.href;
+		linkHost = _link.host;
 
-		el.href = _link.protocol+"//"+_link.host+_link.pathname+_link.search;
+		// IE doesn't have a trailing slash on the host
+		// Chrome has it on the pathname
+		if ( linkHost.indexOf('/') === -1 && _link.pathname.indexOf('/') !== 0) {
+			linkHost += '/';
+		}
+
+		clone.href = _link.protocol+"//"+linkHost+_link.pathname+_link.search;
 	}
+
+	return clone.outerHTML;
 };
 
 
@@ -67,19 +107,25 @@ DataTable.ext.buttons.print = {
 		var win = window.open( '', '' );
 		var title = config.title.replace( '*', $('title').text() );
 
+		win.document.close();
+
 		// Inject the title and also a copy of the style and link tags from this
-		// document so the table can retain its base styling.
-		$(win.document.head)
-			.append( '<title>'+title+'</title>' )
-			.append(
-				$('style, link').clone().each( _relToAbs )
-			);
+		// document so the table can retain its base styling. Note that we have
+		// to use string manipulation as IE won't allow elements to be created
+		// in the host document and then appended to the new window.
+		var head = '<title>'+title+'</title>';
+		$('style, link').each( function () {
+			head += _relToAbs( this );
+		} );
+
+		$(win.document.head).html( head );
 
 		// Inject the table and other surrounding information
-		$(win.document.body)
-			.append( '<h1>'+title+'</h1>' )
-			.append( '<div>'+config.message+'</div>' )
-			.append( html );
+		$(win.document.body).html(
+			'<h1>'+title+'</h1>'+
+			'<div>'+config.message+'</div>'+
+			html
+		);
 
 		if ( config.customize ) {
 			config.customize( win );
@@ -109,4 +155,5 @@ DataTable.ext.buttons.print = {
 };
 
 
-})(jQuery, jQuery.fn.dataTable);
+return DataTable.Buttons;
+}));
