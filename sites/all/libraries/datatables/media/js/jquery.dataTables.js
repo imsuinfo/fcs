@@ -4332,8 +4332,6 @@
 				columns[ visibleColumns[i] ].sWidth = _fnStringToCss( bounding - border );
 			}
 	
-			table.style.width = _fnStringToCss( total );
-	
 			// Finished with the table - ditch it
 			holder.remove();
 		}
