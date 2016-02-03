@@ -214,7 +214,7 @@ function mfcs_ajax_reviewers_0_list($classification, $review_step) {
       'value' => '%' . db_like($_GET['search']['value']) . '%',
     );
 
-    $count_options['returned'] = FALSE;
+    $count_options['results'] = FALSE;
     $reviewers_returned = mfcs_get_reviewers($count_conditions, $count_options);
     $reviewers_total = 0;
     if (is_array($reviewers_returned) && array_key_exists('count', $reviewers_returned)) {
@@ -407,7 +407,7 @@ function mfcs_ajax_proxy_0_list() {
       'value' => '%' . db_like($_GET['search']['value']) . '%',
     );
 
-    $count_options['returned'] = FALSE;
+    $count_options['results'] = FALSE;
     $proxies_returned = mfcs_get_proxy_venue_coordinators($count_conditions, $count_options);
 
     $proxies_total = 0;
@@ -723,7 +723,7 @@ function mfcs_ajax_listing_0($custom_conditions = array(), $override_options = a
       'search' => $_GET['search']['value'],
     );
 
-    $count_options['returned'] = FALSE;
+    $count_options['results'] = FALSE;
     $items_returned = mfcs_request_load_listing($count_conditions, $count_options);
     $items_total = 0;
     if (is_array($items_returned) && array_key_exists('count', $items_returned)) {
@@ -919,7 +919,7 @@ function mfcs_ajax_problems_0_users_list() {
     #  'expression' => TRUE,
     #);
 
-    $count_options['returned'] = FALSE;
+    $count_options['results'] = FALSE;
     $problems_returned = mfcs_management_search_users($count_conditions, $count_options);
 
     $problems_total = 0;
@@ -1210,7 +1210,7 @@ function mfcs_ajax_email_log_0_list() {
       );
     }
 
-    $count_options['returned'] = FALSE;
+    $count_options['results'] = FALSE;
     $email_logs_returned = mfcs_management_search_table($table_name, $table_alias, $primary_key, $count_conditions, $count_options);
 
     $email_logs_total = 0;
@@ -1499,7 +1499,7 @@ function mfcs_ajax_synchronize_0_form() {
       'search' => $_GET['search']['value'],
     );
 
-    $count_options['returned'] = FALSE;
+    $count_options['results'] = FALSE;
     $returned = mfcs_management_search_table($table_name, $table_alias, $primary_key, $count_conditions, $count_options);
 
     $returned_total = 0;
