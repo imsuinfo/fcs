@@ -72,6 +72,8 @@ function mcneese_libraries_libraries_info() {
     'media/js/jquery.dataTables.js',
     'extensions/ColVis/js/dataTables.colVis.js',
     'extensions/Buttons/js/buttons.colVis.js',
+    'extensions/Buttons/js/buttons.html5.js',
+    'extensions/Buttons/js/buttons.print.js',
     'extensions/KeyTable/js/dataTables.keyTable.js',
     'extensions/ColReorder/js/dataTables.colReorder.js',
   );
@@ -251,7 +253,42 @@ function mcneese_libraries_theme_table($variables, $datatable_settings = array()
 
       if (!is_null($buttons)) {
         if (is_array($buttons)) {
-          $datatable_js_settings[] = 'buttons: [ ' . "'" . implode(', ', $buttons) . "'" . ' ]';
+          // buttons may have individual options.
+          $buttons_string = NULL;
+          foreach ($buttons as $button_name => $button_value) {
+            if (is_string($button_value)) {
+              if (!is_null($buttons_string)) {
+                $buttons_string .= ', ' . "\n";
+              }
+
+              $buttons_string .= "'" . $button_value . "'";
+            }
+            elseif (is_array($button_value)) {
+              if (!is_null($buttons_string)) {
+                $buttons_string .= ', ' . "\n";
+              }
+
+              $buttons_option_string = NULL;
+              foreach ($button_value as $button_option_name => $button_option_value) {
+                if (!is_null($buttons_option_string)) {
+                  $buttons_option_string .= ', ' . "\n";
+                }
+
+                // expect button_option_value to be anything (allow caller to define function, etc..) so quotes must be added by the caller.
+                $buttons_option_string .= $button_option_name . ': ' . $button_option_value;
+              }
+              unset($button_option_name);
+              unset($button_option_value);
+
+              $buttons_string .= '{' . "\n" . $buttons_option_string . "\n" .'}';
+              unset($buttons_option_string);
+            }
+          }
+          unset($button_name);
+          unset($button_value);
+
+          $datatable_js_settings[] = 'buttons: [ ' . $buttons_string . ' ]';
+          unset($buttons_string);
         }
       }
 
