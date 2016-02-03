@@ -852,6 +852,8 @@ $conf['disable_cancelling_for'] = array(
   'requester' => TRUE,
 );
 
+$conf['no_js_fallback'] = FALSE;
+
 
 // enable all errors
 error_reporting(E_ALL | E_STRICT);

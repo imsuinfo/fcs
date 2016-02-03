@@ -41,12 +41,18 @@ function mfcs_request_email_log_0_form($form, &$form_state, $page_number = 0) {
     return array();
   }
 
+  global $conf;
   global $base_path;
   global $mfcs_determined;
 
   $url_arguments = '';
   if (!empty($mfcs_determined['complete'])) {
     $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  $no_js_fallback = TRUE;
+  if (isset($conf['no_js_fallback']) && is_bool($conf['no_js_fallback'])) {
+    $no_js_fallback = $conf['no_js_fallback'];
   }
 
   if (!cf_is_integer($page_number) || $page_number < 0) {
@@ -172,6 +178,11 @@ function mfcs_request_email_log_0_form($form, &$form_state, $page_number = 0) {
     ),
   );
 
+  // do not load listing on first pass (improves performance at cost of no support for no-js.).
+  if ($no_js_fallback === FALSE) {
+    $options['results'] = FALSE;
+  }
+
   $conditions = array();
 
   $table_name = 'mfcs_log_emails';
@@ -196,6 +207,9 @@ function mfcs_request_email_log_0_form($form, &$form_state, $page_number = 0) {
     drupal_exit();
     return array();
   }
+
+  // Results is needed and therefore must not be FALSE, unsetting it will default to TRUE.
+  unset($options['results']);
 
   $may_resend_log = mfcs_page_request_access('email_log-resend');
 

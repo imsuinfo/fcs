@@ -88,12 +88,18 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
     drupal_exit();
   }
 
+  global $conf;
   global $base_path;
   global $mfcs_determined;
 
   $url_arguments = '';
   if (!empty($mfcs_determined['complete'])) {
     $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  $no_js_fallback = TRUE;
+  if (isset($conf['no_js_fallback']) && is_bool($conf['no_js_fallback'])) {
+    $no_js_fallback = $conf['no_js_fallback'];
   }
 
   if (!cf_is_integer($page_number) || $page_number < 0) {
@@ -200,6 +206,11 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
     'include_disabled' => TRUE,
   );
 
+  // do not load listing on first pass (improves performance at cost of no support for no-js.).
+  if ($no_js_fallback === FALSE) {
+    $options['results'] = FALSE;
+  }
+
   $conditions = array();
   $conditions['and_0']['value_only_problems'] = array(
     'field' => 'mu.problems',
@@ -225,6 +236,9 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
     drupal_exit();
     return array();
   }
+
+  // Results is needed and therefore must not be FALSE, unsetting it will default to TRUE.
+  unset($options['results']);
 
   $taxonomy_problems = mfcs_management_get_problems_taxonomy();
   $problems_mask = 0;
@@ -1096,12 +1110,18 @@ function mfcs_request_problems_0_users_disabled_in_use($user_id, $page_number = 
     drupal_exit();
   }
 
+  global $conf;
   global $base_path;
   global $mfcs_determined;
 
   $url_arguments = '';
   if (!empty($mfcs_determined['complete'])) {
     $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  $no_js_fallback = TRUE;
+  if (isset($conf['no_js_fallback']) && is_bool($conf['no_js_fallback'])) {
+    $no_js_fallback = $conf['no_js_fallback'];
   }
 
   if (!cf_is_integer($page_number) || $page_number < 0) {
@@ -1212,6 +1232,11 @@ function mfcs_request_problems_0_users_disabled_in_use($user_id, $page_number = 
     $options['sort'] = $sorting;
   }
 
+  // do not load listing on first pass (improves performance at cost of no support for no-js.).
+  if ($no_js_fallback === FALSE) {
+    $options['results'] = FALSE;
+  }
+
   $options['extra_fields']['users'] = array(
     'alias' => 'u',
     'join' => 'inner',
@@ -1254,6 +1279,9 @@ function mfcs_request_problems_0_users_disabled_in_use($user_id, $page_number = 
     drupal_exit();
     return array();
   }
+
+  // Results is needed and therefore must not be FALSE, unsetting it will default to TRUE.
+  unset($options['results']);
 
   $options['columns'] = $columns;
   $options['columns_default'] = $columns_default;
