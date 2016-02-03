@@ -1333,6 +1333,7 @@ function mfcs_ajax_problems_0_disabled_in_use($user_id) {
 
   mfcs_ajax_listing_0($conditions, $options);
 }
+
 /**
  * Ajax function call for loading users problem list datatable.
  */
