@@ -194,7 +194,13 @@ function mfcs_management_search_table($table_name, $table_alias, $primary_key, $
     $count_query = NULL;
     if ($count) {
       $count_query = clone($query);
-      $count_query->addExpression('count(' . $table_alias . '.' . $primary_key . ')');
+
+      if ($distinct_id) {
+        $count_query->addExpression('count(distinct ' . $table_alias . '.' . $primary_key . ')');
+      }
+      else {
+        $count_query->addExpression('count(' . $table_alias . '.' . $primary_key . ')');
+      }
     }
 
     if ($distinct) {
@@ -562,7 +568,13 @@ function mfcs_management_search_users($conditions = array(), $options = array())
     $count_query = NULL;
     if ($count) {
       $count_query = clone($query);
-      $count_query->addExpression('count(mu.user_id)');
+
+      if ($distinct_id) {
+        $count_query->addExpression('count(distinct mu.user_id)');
+      }
+      else {
+        $count_query->addExpression('count(mu.user_id)');
+      }
     }
 
     if ($distinct) {

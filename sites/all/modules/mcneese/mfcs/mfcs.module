@@ -6703,7 +6703,13 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
     $count_query = NULL;
     if ($count) {
       $count_query = clone($query);
-      $count_query->addExpression('count(mer.id)');
+
+      if ($distinct_id) {
+        $count_query->addExpression('count(distinct mer.id)');
+      }
+      else {
+        $count_query->addExpression('count(mer.id)');
+      }
     }
 
     if ($distinct) {
