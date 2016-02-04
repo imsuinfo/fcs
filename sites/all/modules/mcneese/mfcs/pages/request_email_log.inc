@@ -157,6 +157,7 @@ function mfcs_request_email_log_0_form($form, &$form_state, $page_number = 0) {
       'code' => 'code',
     ),
     'associative' => FALSE,
+    'distinct_id' => TRUE,
   );
 
   $options['extra_fields']['users'] = array(
