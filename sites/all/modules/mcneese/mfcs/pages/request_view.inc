@@ -2218,7 +2218,7 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
   }
 
   $latest_revision = (int) mfcs_load_request_revision_number($request_id);
-  if ($form['review']['revision']['#value'] != $latest_revision) {
+  if (isset($form['review']['revision']['#value']) && $form['review']['revision']['#value'] != $latest_revision) {
     // check to see if the old revision and the new revision are on different states.
     $request_previous = mfcs_load_request_by_id($request_id, NULL, $form['review']['revision']['#value']);
     $request_latest = mfcs_load_request_by_id($request_id, NULL, $latest_revision);
