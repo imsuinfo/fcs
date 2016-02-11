@@ -736,11 +736,11 @@ $conf['fcs_testing'] = TRUE;
 $conf['fcs_testing-email_to-debug'] = TRUE;
 $conf['fcs_testing-email_to-prefix'] = "(TESTING) ";
 $conf['fcs_testing-email_to-add'] = array(
-  'kday@mcneese.edu',
+  #'kday@mcneese.edu',
   #'colleen@mcneese.edu',
   #'gfisher@mcneese.edu',
   #'stan@mcneese.edu',
-  'gbodin@mcneese.edu',
+  #'gbodin@mcneese.edu',
   #'shogan@mcneese.edu',
   #'rrhoden@mcneese.edu',
   #'thomas@mcneese.edu',
