@@ -813,18 +813,33 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
       mfcs_include(MFCS_INCLUDE_WORKFLOW);
 
       $parameters = array();
-
-      // send an e-mail to all reviewers that the request step has been reset.
-      if ($status === MFCS_REQUEST_STATUS_LOCKED) {
-        $parameters['amendment'] = TRUE;
-      }
-      else {
-        $parameters['update'] = TRUE;
-      }
-
       $parameters['changed_by'] = $user->uid;
       $parameters['changed_type'] = 'user';
-      mfcs_send_workflow_emails($request_id, $parameters);
+      $parameters['status'] = $status;
+      $parameters['step'] = $step;
+
+
+      // when switching the type to a quick meeting, do not send out update e-mails.
+      $to_quick_meeting = NULL;
+      if (isset($form_state['values']['request']['information']['type'][0])) {
+        $to_quick_meeting = $form_state['values']['request']['information']['type'][0];
+        if (is_string($to_quick_meeting)) {
+          $to_quick_meeting = (int) $to_quick_meeting;
+        }
+      }
+
+      if ($status === MFCS_REQUEST_STATUS_LOCKED) {
+        // do not send e-mail when the previous step is already set to venue available.
+        if ($step !== MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
+          $parameters['amendment'] = TRUE;
+          mfcs_send_workflow_emails($request_id, $parameters);
+        }
+      }
+      elseif ($status === MFCS_REQUEST_STATUS_UNLOCKED) {
+        // send emails when the request has been updated.
+        $parameters['update'] = TRUE;
+        mfcs_send_workflow_emails($request_id, $parameters);
+      }
     }
   }
 
