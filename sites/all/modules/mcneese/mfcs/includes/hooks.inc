@@ -1482,6 +1482,12 @@ function mfcs_hook_user_insert(&$edit, $account, $category) {
  * Internal function for hook_user_presave().
  */
 function mfcs_hook_user_presave(&$edit, $account, $category) {
+  if (!is_object($account)) {
+    // for new accounts, the object will not be defined and therefore no user id exist during the user presave function.
+    // nothing can be done yet.
+    return;
+  }
+
   $roles = array();
   foreach ($account->roles as $role_id => $role_value) {
     $roles[$role_id] = $role_id;
