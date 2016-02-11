@@ -172,7 +172,7 @@ function mfcs_request_cancel_0_form_submit($form, &$form_state) {
 
   mfcs_include(MFCS_INCLUDE_WORKFLOW);
 
-  if ($form['form']['request']['top']['status'][0]->value == MFCS_REQUEST_STATUS_CLOSED_ACCEPTED) {
+  if (isset($form['form']['request']['top']['status'][0]->value) && $form['form']['request']['top']['status'][0]->value == MFCS_REQUEST_STATUS_CLOSED_ACCEPTED) {
     $cancelled = mfcs_workflow_set_status($request_id, MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED);
   }
   else {
