@@ -812,6 +812,8 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
 
       mfcs_include(MFCS_INCLUDE_WORKFLOW);
 
+      $parameters = array();
+
       // send an e-mail to all reviewers that the request step has been reset.
       if ($status === MFCS_REQUEST_STATUS_LOCKED) {
         $parameters['amendment'] = TRUE;
@@ -820,7 +822,6 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
         $parameters['update'] = TRUE;
       }
 
-      $parameters = array();
       $parameters['changed_by'] = $user->uid;
       $parameters['changed_type'] = 'user';
       mfcs_send_workflow_emails($request_id, $parameters);
