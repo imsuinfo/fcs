@@ -2262,7 +2262,7 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
       form_set_error('', "This view mode does not allow cancelling.");
     }
 
-    if (!is_null($form['form']['use_revision']['#value'])) {
+    if (isset($form['form']['use_revision']['#value']) && !is_null($form['form']['use_revision']['#value'])) {
       form_set_error('', "Revisions can not be cancelled.");
     }
 
@@ -2273,7 +2273,7 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
       form_set_error('', "This view mode does not allow uncancelling.");
     }
 
-    if (!is_null($form['form']['use_revision']['#value'])) {
+    if (isset($form['form']['use_revision']['#value']) && !is_null($form['form']['use_revision']['#value'])) {
       form_set_error('', "Revisions can not be uncancelled.");
     }
 
@@ -2284,14 +2284,14 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
       form_set_error('', "This view mode does not allow re-assignment.");
     }
 
-    if (!is_null($form['form']['use_revision']['#value'])) {
+    if (isset($form['form']['use_revision']['#value']) && !is_null($form['form']['use_revision']['#value'])) {
       form_set_error('', "Revisions can not be re-assigned.");
     }
 
     $form_state['reassign_was_clicked'] = TRUE;
   }
   elseif ($clicked_id == 'request-review-operations-submit-submit') {
-    if (!is_null($form['form']['use_revision']['#value'])) {
+    if (isset($form['form']['use_revision']['#value']) && !is_null($form['form']['use_revision']['#value'])) {
       form_set_error('', "Revisions can not be changed or reviewed.");
     }
 
@@ -2512,7 +2512,7 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
     }
   }
   elseif ($clicked_id == 'request-cancel-submit-yes' || $clicked_id == 'request-cancel-submit-no') {
-    if (!is_null($form['form']['use_revision']['#value'])) {
+    if (isset($form['form']['use_revision']['#value']) && !is_null($form['form']['use_revision']['#value'])) {
       form_set_error('', "Revisions can not be cancelled.");
       return;
     }
@@ -2520,14 +2520,14 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
     $form_state['rebuild'] = FALSE;
   }
   elseif ($clicked_id == 'request-uncancel-submit-yes' || $clicked_id == 'request-uncancel-submit-no') {
-    if (!is_null($form['form']['use_revision']['#value'])) {
+    if (isset($form['form']['use_revision']['#value']) && !is_null($form['form']['use_revision']['#value'])) {
       form_set_error('', "Revisions can not be uncancelled.");
     }
 
     $form_state['rebuild'] = FALSE;
   }
   elseif ($clicked_id == 'request-reassign-submit-yes' || $clicked_id == 'request-reassign-submit-no') {
-    if (!is_null($form['form']['use_revision']['#value'])) {
+    if (isset($form['form']['use_revision']['#value']) && !is_null($form['form']['use_revision']['#value'])) {
       form_set_error('', "Revisions can not be Re-assigned.");
       return;
     }
@@ -2988,7 +2988,11 @@ function mfcs_request_view_0_form_submit_pdf($form, &$form_state) {
   }
 
   $mode = $form['form']['mode']['#value'];
-  $use_revision = $form['form']['use_revision']['#value'];
+
+  $use_revision = NULL;
+  if (isset($form['form']['use_revision']['#value'])) {
+    $use_revision = $form['form']['use_revision']['#value'];
+  }
 
   if (is_null($use_revision)) {
     $form_state['redirect'] = mfcs_build_redirect_array('/requests/pdf-0/' . $request_id . '/' . $mode);
