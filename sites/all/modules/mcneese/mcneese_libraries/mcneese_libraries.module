@@ -74,6 +74,7 @@ function mcneese_libraries_libraries_info() {
     'extensions/Buttons/js/buttons.colVis.js',
     'extensions/Buttons/js/buttons.html5.js',
     'extensions/Buttons/js/buttons.print.js',
+    'extensions/Buttons/js/dataTables.buttons.js',
     'extensions/KeyTable/js/dataTables.keyTable.js',
     'extensions/ColReorder/js/dataTables.colReorder.js',
   );
@@ -287,7 +288,7 @@ function mcneese_libraries_theme_table($variables, $datatable_settings = array()
           unset($button_name);
           unset($button_value);
 
-          $datatable_js_settings[] = 'buttons: [ ' . $buttons_string . ' ]';
+          $datatable_js_settings[] = '"buttons": [ ' . $buttons_string . ' ]';
           unset($buttons_string);
         }
       }
