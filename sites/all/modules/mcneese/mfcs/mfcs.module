@@ -6618,7 +6618,7 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
   $reviewer = FALSE;
   $requester = FALSE;
   if ($user_id === MFCS_USER_REQUEST) {
-    // this is a sumulated user accoutn and must be handled as a special case.
+    // this is a simulated user account and must be handled as a special case.
     $requester = TRUE;
   }
   else {
