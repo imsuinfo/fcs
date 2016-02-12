@@ -724,7 +724,7 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
         $status_options = mfcs_get_request_status_list_options();
 
         if (isset($status_options[$value->$value_name])) {
-          $markup .= $status_options[$value->$value_name];
+          $markup .= '<span title="The request was accepted but has since been cancelled.">' . $status_options[$value->$value_name] . '</span>';
           $length += strlen($value->$value_name);
         }
       }
