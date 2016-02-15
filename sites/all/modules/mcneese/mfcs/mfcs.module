@@ -8281,6 +8281,11 @@ function mfcs_build_request_ajax_table($items_returned, $conditions, $options, $
     ),
   );
 
+  $rowId = '0';
+  if (isset($options['rowId']) && (is_string($options['rowId']) || is_null($options['rowId']))) {
+    $rowId = $options['rowId'];
+  }
+
   if (isset($options['columns']) && is_array($options['columns'])) {
     $columns = $options['columns'];
   }
@@ -8390,6 +8395,7 @@ function mfcs_build_request_ajax_table($items_returned, $conditions, $options, $
     'pageLength' => isset($options['limit']) ? $options['limit'] : 20,
     'dom' => 'lfCrtip',
     'KeyTable' => FALSE,
+    'rowId' => '0',
     'oColVis' => array(
       'buttonText' => '"Show / Hide"',
     ),
@@ -8398,6 +8404,11 @@ function mfcs_build_request_ajax_table($items_returned, $conditions, $options, $
     ),
     'searchDelay' => 1200,
   );
+
+  // see: https://datatables.net/reference/option/rowId
+  if (!is_null($rowId)) {
+    $table['datatable_settings']['rowId'] = $rowId;
+  }
 
   foreach ($columns as $column_id => $column) {
     $table['datatable_settings']['columns'][$column_id] = $column;

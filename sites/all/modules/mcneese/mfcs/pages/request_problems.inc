@@ -423,6 +423,7 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
     'pageLength' => $rows_per_page,
     'dom' => 'lfCrtip',
     'KeyTable' => FALSE,
+    'rowId' => '0',
     'oColVis' => array(
       'buttonText' => '"Show / Hide"',
     ),

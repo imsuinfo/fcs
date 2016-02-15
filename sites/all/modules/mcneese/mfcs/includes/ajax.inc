@@ -42,6 +42,7 @@ function mfcs_ajax_setup_request_settings() {
     'start' => 0,
     'limit' => NULL,
     'count' => TRUE,
+    'rowId' => '0',
   );
 
   if (isset($_GET['start']) && is_numeric($_GET['start'])) {
