@@ -61,6 +61,26 @@ function mfcs_request_list_0_form($form, &$form_state, $page_number = 0) {
 
   mfcs_add_canonical_headers('requests/list-0/' . $page_number);
 
+  $user = cf_current_user();
+
+  $manager = FALSE;
+  $reviewer = FALSE;
+  $requester = FALSE;
+  if ($user->uid === MFCS_USER_REQUEST) {
+    // this is a simulated user account and must be handled as a special case.
+    $requester = TRUE;
+  }
+  else {
+    $manager = user_access('mfcs manage', $user);
+    $reviewer = user_access('mfcs review', $user);
+    $requester = user_access('mfcs request', $user);
+  }
+
+  $show_my_request_only_default = FALSE;
+  if ($requester && !($manager || $reviewer)) {
+    $show_my_request_only_default = TRUE;
+  }
+
   $page_title = "Facilities Use Requests";
   drupal_set_title($page_title);
 
@@ -159,6 +179,7 @@ function mfcs_request_list_0_form($form, &$form_state, $page_number = 0) {
     'start' => $page_number * $rows_per_page,
     'limit' => $rows_per_page,
     'count' => TRUE,
+    'only_requester' => $show_my_request_only_default,
   );
 
   if (!is_null($order)) {

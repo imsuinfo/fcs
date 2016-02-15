@@ -6501,6 +6501,7 @@ function mfcs_display_room_unavailable_message($dates) {
  *                  When MFCS_LOAD_CANCELLED_REQUEST, requests that are cancelled are loaded.
  *                  When MFCS_LOAD_CANCELLED_ALL, both individual dates and requests that are cancelled are loaded.
  *     'user_id': When defined and an integer, represents the user id of the user to load the listing as.
+ *     'only_requester': When defined an a boolean, represents that only requests whose requester is the current user xor the user specified by 'user_id'.
  *
  * @return array|false
  *   An array of containing the following:
@@ -6578,6 +6579,11 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
   $user_id = NULL;
   if (isset($options['user_id']) && cf_is_integer($options['user_id'])) {
     $user_id = (int) $options['user_id'];
+  }
+
+  $only_requester = NULL;
+  if (isset($options['only_requester']) && is_bool($options['only_requester'])) {
+    $only_requester = $options['only_requester'];
   }
 
   $return = array(
@@ -6939,6 +6945,15 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
         }
         $outermost_and->condition($or);
       }
+
+      // only show requests for the current user xor the specified user.
+      if (is_bool($only_requester) && $only_requester) {
+        if (is_null($outermost_and)) {
+          $outermost_and = db_and();
+        }
+
+        $outermost_and->condition('mer.user_id', $user->uid);
+      }
     }
     elseif ($requester) {
       $or = NULL;
@@ -6984,6 +6999,15 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
           }
           $outermost_and->condition('mer.user_id', $user->uid);
         }
+      }
+
+      // only show requests for the current user xor the specified user.
+      if (is_bool($only_requester) && $only_requester) {
+        if (is_null($outermost_and)) {
+          $outermost_and = db_and();
+        }
+
+        $outermost_and->condition('mer.user_id', $user->uid);
       }
     }
     else {
@@ -8399,6 +8423,50 @@ function mfcs_build_request_ajax_table($items_returned, $conditions, $options, $
     $table['datatable_settings']['ajax'] = $options['ajax_path'];
     $table['datatable_settings']['processing'] = TRUE;
     $table['datatable_settings']['serverSide'] = TRUE;
+
+    if (isset($options['only_requester']) && is_bool($options['only_requester'])) {
+      $ajax_path = str_replace("'", '', $options['ajax_path']);
+
+      $showing_my_requests = "function (e, dt, node, config) {" . "\n";
+      $showing_my_requests .= "  var data = dt.ajax.params();" . "\n";
+      $showing_my_requests .= "  var url = dt.ajax.url();" . "\n";
+
+      $showing_my_requests .= "  if (url == '" . $ajax_path . "/my_requests') {" . "\n";
+      $showing_my_requests .= "    dt.ajax.url('" . $ajax_path . "/all_requests');" . "\n";
+      $showing_my_requests .= "    dt.buttons('.datatable-showing_requests').text('Show My Requests');" . "\n";
+      $showing_my_requests .= "  }" . "\n";
+      $showing_my_requests .= "  else if (url == '" . $ajax_path . "/all_requests') {" . "\n";
+      $showing_my_requests .= "    dt.ajax.url('" . $ajax_path . "/my_requests');" . "\n";
+      $showing_my_requests .= "    dt.buttons('.datatable-showing_requests').text('Show All Requests');" . "\n";
+      $showing_my_requests .= "  }" . "\n";
+      $showing_my_requests .= "  else {" . "\n";
+
+      if ($options['only_requester']) {
+        $showing_my_requests .= "    dt.ajax.url('" . $ajax_path . "/all_requests');" . "\n";
+        $showing_my_requests .= "    dt.buttons('.datatable-showing_requests').text('Show My Requests');" . "\n";
+      }
+      else {
+        $showing_my_requests .= "    dt.ajax.url('" . $ajax_path . "/my_requests');" . "\n";
+        $showing_my_requests .= "    dt.buttons('.datatable-showing_requests').text('Show All Requests');" . "\n";
+      }
+
+      $showing_my_requests .= "  }" . "\n";
+      $showing_my_requests .= "  dt.ajax.reload();" . "\n";
+      $showing_my_requests .= "}" . "\n";
+
+      $table['datatable_settings']['dom'] = 'lfCBrtip';
+      $table['datatable_settings']['buttons'] = array();
+      $table['datatable_settings']['buttons']['Show Requests'] = array(
+        'text' => "'Show All Requests'",
+        'action' => $showing_my_requests,
+        'className' => "'datatable-showing_requests'",
+      );
+      unset($showing_my_requests);
+
+      if ($options['only_requester'] === FALSE) {
+        $table['datatable_settings']['buttons']['Show Requests']['text'] = "'Show My Requests'";
+      }
+    }
   }
 
 

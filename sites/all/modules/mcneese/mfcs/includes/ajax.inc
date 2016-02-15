@@ -474,10 +474,42 @@ function mfcs_ajax_proxy_0_list() {
 }
 
 /**
- * Ajax function call for loading request review list datatables.
+ * Ajax function call for loading request list datatables.
+ *
+ * @param string|int $argument_1
+ *   Some string or number to send as the first argument.
  */
-function mfcs_ajax_list_0() {
-  mfcs_ajax_listing_0();
+function mfcs_ajax_list_0($argument_1 = NULL) {
+  $manager = FALSE;
+  $reviewer = FALSE;
+  $requester = FALSE;
+  if ($user_id === MFCS_USER_REQUEST) {
+    // this is a simulated user account and must be handled as a special case.
+    $requester = TRUE;
+  }
+  else {
+    $manager = user_access('mfcs manage', $user);
+    $reviewer = user_access('mfcs review', $user);
+    $requester = user_access('mfcs request', $user);
+  }
+
+  $show_my_request_only_default = FALSE;
+  if ($requester && !($manager || $reviewer)) {
+    $show_my_request_only_default = TRUE;
+  }
+
+  $options = array();
+  if ($argument_1 == 'my_requests') {
+    $options['only_requester'] = TRUE;
+  }
+  elseif ($argument_1 == 'all_requests') {
+    $options['only_requester'] = FALSE;
+  }
+  else {
+    $options['only_requester'] = $show_my_request_only_default;
+  }
+
+  mfcs_ajax_listing_0(array(), $options);
 }
 
 /**

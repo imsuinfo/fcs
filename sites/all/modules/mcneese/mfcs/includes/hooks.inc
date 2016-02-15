@@ -532,6 +532,19 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
     'tab_root' => 'requests/list-0',
   );
 
+  $items['requests/list-0/ajax/%'] = array(
+    'title' => "",
+    'page callback' => 'mfcs_ajax_list_0',
+    'page arguments' => array(3),
+    'file' => 'ajax.inc',
+    'file path' => $module_path . '/includes',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('list'),
+    'type' => MENU_CALLBACK,
+    'tab_parent' => 'requests/list-0',
+    'tab_root' => 'requests/list-0',
+  );
+
   $items['requests/calendar-0/month'] = array(
     'title' => "Request Calendar",
     'description' => "Request Calendar - Month",
