@@ -177,6 +177,7 @@ function mcneese_libraries_theme_table($variables, $datatable_settings = array()
         'searching',
         'serverSide',
         'stateSave',
+        'select',
       );
 
       $string_settings = array(
@@ -184,6 +185,8 @@ function mcneese_libraries_theme_table($variables, $datatable_settings = array()
         'scrollX',
         'scrollY',
         'dom',
+        'rowId',
+        'select',
       );
 
       $direct_settings = array(
@@ -207,6 +210,7 @@ function mcneese_libraries_theme_table($variables, $datatable_settings = array()
       $array_settings = array(
         'oColVis',
         'oLanguage',
+        'select',
       );
 
       $datatable_js = '(function ($) {' . "\n";
