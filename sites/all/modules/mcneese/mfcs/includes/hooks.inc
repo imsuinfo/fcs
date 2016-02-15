@@ -1482,7 +1482,7 @@ function mfcs_hook_user_insert(&$edit, $account, $category) {
  * Internal function for hook_user_presave().
  */
 function mfcs_hook_user_presave(&$edit, $account, $category) {
-  if (!is_object($account)) {
+  if (!is_object($account) && property_exists($account, 'uid')) {
     // for new accounts, the object will not be defined and therefore no user id exist during the user presave function.
     // nothing can be done yet.
     return;
