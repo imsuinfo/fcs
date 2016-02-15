@@ -101,14 +101,14 @@ function mfcs_request_reviewers_0_page() {
  *   This is not the reviewer classification.
  * @param int $review_step
  *   Number representing the request review step.
- * @param int $page_number
+ * @param int|null $page_number
  *   (optional) When there are more than a certain number of rows,
  *   this represent the page number for a given sequence of rows.
  *
  * @return string
  *   The HTML output representing the page.
  */
-function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $review_step, $page_number = 0) {
+function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $review_step, $page_number = NULL) {
   if (!is_array($form)) {
     cf_error::invalid_array('form');
 
@@ -143,8 +143,18 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
     $review_step = (int) $review_step;
   }
 
+  $auto_page_number = FALSE;
+  if (is_null($page_number)) {
+    $auto_page_number = TRUE;
+    $page_number = 0;
+  }
+
   if (is_string($page_number)) {
     $page_number = (int) $page_number;
+  }
+
+  if ($page_number < 0 || !is_int($page_number)) {
+    $page_number = 0;
   }
 
   // these are automatically the venue coordinator, therefore skip them.
@@ -283,7 +293,7 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
   );
 
   // do not load listing on first pass (improves performance at cost of no support for no-js.).
-  if ($no_js_fallback === FALSE) {
+  if ($no_js_fallback === FALSE && $auto_page_number) {
     $options['results'] = FALSE;
   }
 
@@ -294,10 +304,15 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
   }
 
   // do not provide pages when the page number would bring the user beyond the available items.
-  if ($reviewers_returned['count'] > 0 && $options['start'] >= $reviewers_returned['count']) {
+  if ($reviewers_returned['count'] > 0 && $options['start'] >= $reviewers_returned['count'] || $reviewers_returned['count'] == 0 && $options['start'] > $reviewers_returned['count']) {
     drupal_not_found();
     drupal_exit();
     return array();
+  }
+
+  // do not show count values when no fallback is available.
+  if ($no_js_fallback === FALSE && $auto_page_number) {
+    $count = 0;
   }
 
   // Results is needed and therefore must not be FALSE, unsetting it will default to TRUE.
@@ -449,6 +464,10 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
 
   $navigation_start = $options['start'] + 1;
   $navigation_total = $options['start'] + $rows_per_page;
+
+  if ($navigation_total == 0) {
+    $navigation_start = 0;
+  }
 
   if ($navigation_total > $reviewers_returned['count']) {
     $navigation_total = $reviewers_returned['count'];

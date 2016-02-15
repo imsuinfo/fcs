@@ -72,8 +72,11 @@ function mfcs_management_problems_page() {
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
+ * @param int|null $page_number
+ *   (optional) When there are more than a certain number of rows,
+ *   this represent the page number for a given sequence of rows.
  */
-function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 0) {
+function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = NULL) {
   if (!is_array($form)) {
     cf_error::invalid_array('form');
 
@@ -100,6 +103,12 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
   $no_js_fallback = TRUE;
   if (isset($conf['no_js_fallback']) && is_bool($conf['no_js_fallback'])) {
     $no_js_fallback = $conf['no_js_fallback'];
+  }
+
+  $auto_page_number = FALSE;
+  if (is_null($page_number)) {
+    $auto_page_number = TRUE;
+    $page_number = 0;
   }
 
   if (!cf_is_integer($page_number) || $page_number < 0) {
@@ -207,7 +216,7 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
   );
 
   // do not load listing on first pass (improves performance at cost of no support for no-js.).
-  if ($no_js_fallback === FALSE) {
+  if ($no_js_fallback === FALSE && $auto_page_number) {
     $options['results'] = FALSE;
   }
 
@@ -231,10 +240,15 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
   }
 
   // do not provide pages when the page number would bring the user beyond the available items.
-  if ($problems_total > 0 && $options['start'] >= $problems_total) {
+  if ($problems_total > 0 && $options['start'] >= $problems_total || $problems_total == 0 && $options['start'] > $problems_total) {
     drupal_not_found();
     drupal_exit();
     return array();
+  }
+
+  // do not show count values when no fallback is available.
+  if ($no_js_fallback === FALSE && $auto_page_number) {
+    $count = 0;
   }
 
   // Results is needed and therefore must not be FALSE, unsetting it will default to TRUE.
@@ -434,6 +448,10 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
 
   $navigation_start = $options['start'] + 1;
   $navigation_total = $options['start'] + $rows_per_page;
+
+  if ($problems_total == 0) {
+    $navigation_start = 0;
+  }
 
   if ($navigation_total > $problems_total) {
     $navigation_total = $problems_total;
@@ -1089,14 +1107,14 @@ function mfcs_request_problems_0_users_resynchronize($user_id) {
  *
  * @param int $user_id
  *   Id of the disabled user.
- * @param int $page_number
+ * @param int|null $page_number
  *   (optional) When there are more than a certain number of rows,
  *   this represent the page number for a given sequence of rows.
  *
  * @return markup
  *   The HTML markup representing the page to be renderred.
  */
-function mfcs_request_problems_0_users_disabled_in_use($user_id, $page_number = 0) {
+function mfcs_request_problems_0_users_disabled_in_use($user_id, $page_number = NULL) {
   if (!cf_is_integer($user_id)) {
     cf_error::invalid_integer('user_id');
 
@@ -1122,6 +1140,12 @@ function mfcs_request_problems_0_users_disabled_in_use($user_id, $page_number = 
   $no_js_fallback = TRUE;
   if (isset($conf['no_js_fallback']) && is_bool($conf['no_js_fallback'])) {
     $no_js_fallback = $conf['no_js_fallback'];
+  }
+
+  $auto_page_number = FALSE;
+  if (is_null($page_number)) {
+    $auto_page_number = TRUE;
+    $page_number = 0;
   }
 
   if (!cf_is_integer($page_number) || $page_number < 0) {
@@ -1233,7 +1257,7 @@ function mfcs_request_problems_0_users_disabled_in_use($user_id, $page_number = 
   }
 
   // do not load listing on first pass (improves performance at cost of no support for no-js.).
-  if ($no_js_fallback === FALSE) {
+  if ($no_js_fallback === FALSE && $auto_page_number) {
     $options['results'] = FALSE;
   }
 
@@ -1274,10 +1298,15 @@ function mfcs_request_problems_0_users_disabled_in_use($user_id, $page_number = 
   }
 
   // do not provide pages when the page number would bring the user beyond the available items.
-  if ($count > 0 && $options['start'] >= $count) {
+  if ($count > 0 && $options['start'] >= $count || $count == 0 && $options['start'] > $count) {
     drupal_not_found();
     drupal_exit();
     return array();
+  }
+
+  // do not show count values when no fallback is available.
+  if ($no_js_fallback === FALSE && $auto_page_number) {
+    $count = 0;
   }
 
   // Results is needed and therefore must not be FALSE, unsetting it will default to TRUE.
@@ -1309,6 +1338,10 @@ function mfcs_request_problems_0_users_disabled_in_use($user_id, $page_number = 
 
   $navigation_start = $options['start'] + 1;
   $navigation_total = $options['start'] + $rows_per_page;
+
+  if ($count == 0) {
+    $navigation_start = 0;
+  }
 
   if ($navigation_total > $count) {
     $navigation_total = $count;
