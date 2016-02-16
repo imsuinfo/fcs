@@ -8506,6 +8506,7 @@ function mfcs_build_request_ajax_table($items_returned, $conditions, $options, $
       'sSearch' => '"Filter: "',
     ),
     'searchDelay' => 1200,
+    'pagingType' => 'input',
   );
 
   // see: https://datatables.net/reference/option/rowId

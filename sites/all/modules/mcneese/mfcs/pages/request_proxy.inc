@@ -329,6 +329,7 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = NULL) {
       'sSearch' => '"Filter: "',
     ),
     'searchDelay' => 1200,
+    'pagingType' => 'input',
   );
 
   $navigation_top = '';
