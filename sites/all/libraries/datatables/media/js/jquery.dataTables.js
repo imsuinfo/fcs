@@ -4395,7 +4395,6 @@
 			}
 			else {
 				last = now;
-				fn.apply( that, args );
 			}
 		};
 	}
