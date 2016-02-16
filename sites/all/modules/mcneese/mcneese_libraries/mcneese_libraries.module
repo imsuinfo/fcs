@@ -200,11 +200,13 @@ function mcneese_libraries_theme_table($variables, $datatable_settings = array()
         'pageLength',
         'searchDelay',
         'tabIndex',
+        'deferLoading',
       );
 
       $inline_array_settings = array(
         'columns',
         'columnDefs',
+        'deferLoading',
       );
 
       $array_settings = array(
