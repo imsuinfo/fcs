@@ -222,7 +222,8 @@ function mfcs_ajax_reviewers_0_list($classification, $review_step) {
       $reviewers_total = $reviewers_returned['count'];
     }
 
-    $options['count'] = FALSE;
+    // count cannot be disabled here, otherewise the recordsFiltered results would be undefined or inaccurate when an SQL limit is applied.
+    #$options['count'] = FALSE;
     $reviewers_returned = mfcs_get_reviewers($conditions, $options);
     $reviewers = array();
     if (isset($reviewers_returned['results']) && is_array($reviewers_returned['results'])) {
@@ -417,7 +418,8 @@ function mfcs_ajax_proxy_0_list() {
       $proxies_total = $proxies_returned['count'];
     }
 
-    $options['count'] = FALSE;
+    // count cannot be disabled here, otherewise the recordsFiltered results would be undefined or inaccurate when an SQL limit is applied.
+    #$options['count'] = FALSE;
     $proxies_returned = mfcs_get_proxy_venue_coordinators($conditions, $options);
     $proxies = array();
     if (isset($proxies_returned['results']) && is_array($proxies_returned['results'])) {
@@ -765,7 +767,8 @@ function mfcs_ajax_listing_0($custom_conditions = array(), $override_options = a
       $items_total = $items_returned['count'];
     }
 
-    $options['count'] = FALSE;
+    // count cannot be disabled here, otherewise the recordsFiltered results would be undefined or inaccurate when an SQL limit is applied.
+    #$options['count'] = FALSE;
     $items_returned = mfcs_request_load_listing($conditions, $options);
     $items = array();
     if (isset($items_returned['results']) && is_array($items_returned['results'])) {
@@ -963,7 +966,8 @@ function mfcs_ajax_problems_0_users_list() {
       $problems_total = $problems_returned['count'];
     }
 
-    $options['count'] = FALSE;
+    // count cannot be disabled here, otherewise the recordsFiltered results would be undefined or inaccurate when an SQL limit is applied.
+    #$options['count'] = FALSE;
     $problems_returned = mfcs_management_search_users($conditions, $options);
     $problems = array();
     if (isset($problems_returned['results']) && is_array($problems_returned['results'])) {
@@ -1257,7 +1261,8 @@ function mfcs_ajax_email_log_0_list() {
       $email_logs_total = $email_logs_returned['count'];
     }
 
-    $options['count'] = FALSE;
+    // count cannot be disabled here, otherewise the recordsFiltered results would be undefined or inaccurate when an SQL limit is applied.
+    #$options['count'] = FALSE;
     $email_logs_returned = mfcs_management_search_table($table_name, $table_alias, $primary_key, $conditions, $options);
     $email_logs = array();
     if (isset($email_logs_returned['results']) && is_array($email_logs_returned['results'])) {
@@ -1547,7 +1552,8 @@ function mfcs_ajax_synchronize_0_form() {
       $returned_total = $returned['count'];
     }
 
-    $options['count'] = FALSE;
+    // count cannot be disabled here, otherewise the recordsFiltered results would be undefined or inaccurate when an SQL limit is applied.
+    #$options['count'] = FALSE;
     $returned = mfcs_management_search_table($table_name, $table_alias, $primary_key, $conditions, $options);
     $items = array();
     if (isset($returned['results']) && is_array($returned['results'])) {
