@@ -451,3 +451,8 @@ table.dataTable td {
     margin-top: 0.5em;
   }
 }
+.dataTables_wrapper .dataTables_filter > label {
+  display: inline-block;
+
+  margin: 0px 0.5em;
+}

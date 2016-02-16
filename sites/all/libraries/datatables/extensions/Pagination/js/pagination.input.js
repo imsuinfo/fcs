@@ -86,11 +86,16 @@
 			nInput.className = paginateInputClassName;
 
 			if (oSettings.sTableId !== '') {
-				nPaging.setAttribute('id', oSettings.sTableId + '_' + paginateClassName);
-				nFirst.setAttribute('id', oSettings.sTableId + '_' + firstClassName);
-				nPrevious.setAttribute('id', oSettings.sTableId + '_' + previousClassName);
-				nNext.setAttribute('id', oSettings.sTableId + '_' + nextClassName);
-				nLast.setAttribute('id', oSettings.sTableId + '_' + lastClassName);
+				nPaging.setAttribute('id', oSettings.sTableId + '-' + paginateClassName);
+				nFirst.setAttribute('id', oSettings.sTableId + '-' + firstClassName);
+				nPrevious.setAttribute('id', oSettings.sTableId + '-' + previousClassName);
+				nNext.setAttribute('id', oSettings.sTableId + '-' + nextClassName);
+				nLast.setAttribute('id', oSettings.sTableId + '-' + lastClassName);
+				nInput.setAttribute('id', oSettings.sTableId + '-' + paginateInputClassName);
+
+				nPage = document.createElement('label');
+				nPage.className = paginatePageClassName;
+				nPage.setAttribute('for', oSettings.sTableId + '-' + paginateInputClassName);
 			}
 
 			nInput.type = 'text';

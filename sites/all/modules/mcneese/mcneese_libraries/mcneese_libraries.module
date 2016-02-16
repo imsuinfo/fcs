@@ -85,6 +85,7 @@ function mcneese_libraries_libraries_info() {
     'extensions/Buttons/css/buttons.dataTables.css',
     'extensions/KeyTable/css/dataTables.KeyTable.css',
     'extensions/ColReorder/css/dataTables.colReorder.css',
+    'extensions/Pagination/css/pagination.input.css',
   );
 
   // fullcalendar

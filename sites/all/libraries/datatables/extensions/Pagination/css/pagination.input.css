@@ -1,0 +1,5 @@
+.dataTables_wrapper .dataTables_paginate > .paginate_page {
+  display: inline-block;
+
+  margin: 0px 0.5em;
+}
