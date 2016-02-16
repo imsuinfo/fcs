@@ -230,7 +230,7 @@ function mfcs_ajax_reviewers_0_list($classification, $review_step) {
     }
 
     $response['recordsTotal'] = $reviewers_total;
-    $response['recordsFiltered'] = $reviewers_returned['count'];
+    $response['recordsFiltered'] = count($reviewers);
   }
   else {
     $reviewers_returned = mfcs_get_reviewers($conditions, $options);
@@ -425,7 +425,7 @@ function mfcs_ajax_proxy_0_list() {
     }
 
     $response['recordsTotal'] = $proxies_total;
-    $response['recordsFiltered'] = $proxies_returned['count'];
+    $response['recordsFiltered'] = count($proxies);
   }
   else {
     $proxies_returned = mfcs_get_proxy_venue_coordinators($conditions, $options);
@@ -773,7 +773,7 @@ function mfcs_ajax_listing_0($custom_conditions = array(), $override_options = a
     }
 
     $response['recordsTotal'] = $items_total;
-    $response['recordsFiltered'] = $items_returned['count'];
+    $response['recordsFiltered'] = count($items);
   }
   else {
     $items_returned = mfcs_request_load_listing($conditions, $options);
@@ -971,7 +971,7 @@ function mfcs_ajax_problems_0_users_list() {
     }
 
     $response['recordsTotal'] = $problems_total;
-    $response['recordsFiltered'] = $problems_returned['count'];
+    $response['recordsFiltered'] = count($problems);
   }
   else {
     $problems_returned = mfcs_management_search_users($conditions, $options);
@@ -1265,7 +1265,7 @@ function mfcs_ajax_email_log_0_list() {
     }
 
     $response['recordsTotal'] = $email_logs_total;
-    $response['recordsFiltered'] = $email_logs_returned['count'];
+    $response['recordsFiltered'] = count($email_logs);
   }
   else {
     $email_logs_returned = mfcs_management_search_table($table_name, $table_alias, $primary_key, $conditions, $options);
@@ -1555,7 +1555,7 @@ function mfcs_ajax_synchronize_0_form() {
     }
 
     $response['recordsTotal'] = $returned_total;
-    $response['recordsFiltered'] = $returned['count'];
+    $response['recordsFiltered'] = count($items);
   }
   else {
     $returned = mfcs_management_search_table($table_name, $table_alias, $primary_key, $conditions, $options);
