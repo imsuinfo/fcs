@@ -8436,28 +8436,38 @@ function mfcs_build_request_ajax_table($items_returned, $conditions, $options, $
     $table['datatable_settings']['serverSide'] = TRUE;
 
     if (isset($options['only_requester']) && is_bool($options['only_requester'])) {
-      $ajax_path = str_replace("'", '', $options['ajax_path']);
+      $url_options = array();
+      $ajax_path = preg_replace("/'/", '', $options['ajax_path']);
+      preg_match('/\?[^?]*$/', $ajax_path, $url_options);
+      $ajax_path = preg_replace('/\?[^?]*$/', '', $ajax_path);
+
+      if (isset($url_options[0])) {
+        $url_options = $url_options[0];
+      }
+      else {
+        $url_options = '';
+      }
 
       $showing_my_requests = "function (e, dt, node, config) {" . "\n";
       $showing_my_requests .= "  var data = dt.ajax.params();" . "\n";
       $showing_my_requests .= "  var url = dt.ajax.url();" . "\n";
 
-      $showing_my_requests .= "  if (url == '" . $ajax_path . "/my_requests') {" . "\n";
-      $showing_my_requests .= "    dt.ajax.url('" . $ajax_path . "/all_requests');" . "\n";
+      $showing_my_requests .= "  if (url == '" . $ajax_path . "/my_requests' || url == '" . $ajax_path . "/my_requests" . $url_options . "') {" . "\n";
+      $showing_my_requests .= "    dt.ajax.url('" . $ajax_path . "/all_requests" . $url_options . "');" . "\n";
       $showing_my_requests .= "    dt.buttons('.datatable-showing_requests').text('Show My Requests');" . "\n";
       $showing_my_requests .= "  }" . "\n";
-      $showing_my_requests .= "  else if (url == '" . $ajax_path . "/all_requests') {" . "\n";
-      $showing_my_requests .= "    dt.ajax.url('" . $ajax_path . "/my_requests');" . "\n";
+      $showing_my_requests .= "  else if (url == '" . $ajax_path . "/all_requests' || url == '" . $ajax_path . "/all_requests" . $url_options . "') {" . "\n";
+      $showing_my_requests .= "    dt.ajax.url('" . $ajax_path . "/my_requests" . $url_options . "');" . "\n";
       $showing_my_requests .= "    dt.buttons('.datatable-showing_requests').text('Show All Requests');" . "\n";
       $showing_my_requests .= "  }" . "\n";
       $showing_my_requests .= "  else {" . "\n";
 
       if ($options['only_requester']) {
-        $showing_my_requests .= "    dt.ajax.url('" . $ajax_path . "/all_requests');" . "\n";
+        $showing_my_requests .= "    dt.ajax.url('" . $ajax_path . "/all_requests" . $url_options . "');" . "\n";
         $showing_my_requests .= "    dt.buttons('.datatable-showing_requests').text('Show My Requests');" . "\n";
       }
       else {
-        $showing_my_requests .= "    dt.ajax.url('" . $ajax_path . "/my_requests');" . "\n";
+        $showing_my_requests .= "    dt.ajax.url('" . $ajax_path . "/my_requests" . $url_options . "');" . "\n";
         $showing_my_requests .= "    dt.buttons('.datatable-showing_requests').text('Show All Requests');" . "\n";
       }
 
