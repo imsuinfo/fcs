@@ -77,6 +77,7 @@ function mcneese_libraries_libraries_info() {
     'extensions/Buttons/js/dataTables.buttons.js',
     'extensions/KeyTable/js/dataTables.keyTable.js',
     'extensions/ColReorder/js/dataTables.colReorder.js',
+    'extensions/Pagination/js/pagination.input.js',
   );
   $libraries['datatables']['files']['css'] = array(
     'media/css/jquery.dataTables.css',
