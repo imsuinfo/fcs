@@ -2570,6 +2570,109 @@ function mfcs_save_user($user_id, $data) {
 }
 
 /**
+ * Returns a list of users based on search criteria.
+ *
+ * @param string $search
+ *   The string to search for in the user name, e-mail, first name, or last name.
+ * @param bool $wildcard
+ *   (optional) When TRUE, wildcard markers will be prepended and appended..
+ * @param bool $sensitive
+ *   (optional) When TRUE, case-sensitiveness on the names will be applied.
+ * @param bool $deleted
+ *   (optional) When TRUE, search will included deleted/disabled accounts.
+ *
+ * @return array|false
+ *   An array of objects containing the mfcs-specific user fields.
+ *
+ *   FALSE is returned on error.
+ */
+function mfcs_search_users($search, $wildcard = TRUE, $sensitive = FALSE, $deleted = FALSE) {
+  if (!is_string($search)) {
+    cf_error::invalid_string('search');
+    return FALSE;
+  }
+
+  if (!is_bool($wildcard)) {
+    cf_error::invalid_bool('wildcard');
+    return FALSE;
+  }
+
+  if (!is_bool($sensitive)) {
+    cf_error::invalid_bool('sensitive');
+    return FALSE;
+  }
+
+  if (!is_bool($deleted)) {
+    cf_error::invalid_bool('deleted');
+    return FALSE;
+  }
+
+  $users = array();
+  try {
+    $query = db_select('users', 'u');
+    $query->leftJoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id');
+    $query->leftJoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id');
+
+    $query->addField('u', 'uid', 'user_id');
+    $query->addField('u', 'name', 'name');
+    $query->addField('u', 'mail', 'email');
+    $query->addField('fdfufn', 'field_user_first_name_value', 'name_first');
+    $query->addField('fdfuln', 'field_user_last_name_value', 'name_last');
+
+    if ($deleted === FALSE) {
+      $query->condition('u.status', 0, '>');
+    }
+
+    $or = db_or();
+
+    $search_string = $search;
+    if ($wildcard) {
+      if ($sensitive) {
+        $or->condition('u.name', '%' . db_like($search) . '%', 'LIKE');
+        $or->condition('u.mail', '%' . db_like($search) . '%', 'LIKE');
+        $or->condition('fdfufn.field_user_first_name_value', '%' . db_like($search) . '%', 'LIKE');
+        $or->condition('fdfuln.field_user_last_name_value', '%' . db_like($search) . '%', 'LIKE');
+      }
+      else {
+        $or->condition('u.name', '%' . db_like($search) . '%', 'ILIKE');
+        $or->condition('u.mail', '%' . db_like($search) . '%', 'ILIKE');
+        $or->condition('fdfufn.field_user_first_name_value', '%' . db_like($search) . '%', 'ILIKE');
+        $or->condition('fdfuln.field_user_last_name_value', '%' . db_like($search) . '%', 'ILIKE');
+      }
+    }
+    elseif ($sensitive) {
+      $or->condition('u.name', db_like($search), 'LIKE');
+      $or->condition('u.mail', db_like($search), 'LIKE');
+      $or->condition('fdfufn.field_user_first_name_value', db_like($search), 'LIKE');
+      $or->condition('fdfuln.field_user_last_name_value', db_like($search), 'LIKE');
+    }
+    else {
+      $or->condition('u.name', $search);
+      $or->condition('u.mail', $search);
+      $or->condition('fdfufn.field_user_first_name_value', $search);
+      $or->condition('fdfuln.field_user_last_name_value', $search);
+    }
+
+    $query->condition($or);
+
+    $query->orderBy('u.uid');
+
+    $users = $query->execute()->fetchAllAssoc('user_id');
+
+    if (is_array($users) && !empty($users)) {
+      return $users;
+    }
+  }
+  catch (Exception $ex) {
+    cf_error::on_query_execution($ex);
+
+    return FALSE;
+  }
+
+  return FALSE;
+}
+
+/**
  * Returns an array containg mapping information for oracle.
  *
  * Use this to map drupal request role taxonomy terms with the oracle roles.
