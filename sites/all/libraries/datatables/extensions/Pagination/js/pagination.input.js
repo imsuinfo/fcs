@@ -141,33 +141,62 @@
 				}
 			});
 
-			$(nInput).keyup(function (e) {
-				// 38 = up arrow, 39 = right arrow
-				if (e.which === 38 || e.which === 39) {
-					this.value++;
-				}
-				// 37 = left arrow, 40 = down arrow
-				else if ((e.which === 37 || e.which === 40) && this.value > 1) {
-					this.value--;
-				}
+      var pager_frequency = 1200;
+      var pager_last;
+      var pager_timer;
 
-				if (this.value === '' || this.value.match(/[^0-9]/)) {
-					/* Nothing entered or non-numeric character */
-					this.value = this.value.replace(/[^\d]/g, ''); // don't even allow anything but digits
-					return;
-				}
+      function processPager(e) {
+        var
+          that = this,
+          now  = +new Date();
 
-				var iNewStart = oSettings._iDisplayLength * (this.value - 1);
-				if (iNewStart < 0) {
-					iNewStart = 0;
-				}
-				if (iNewStart >= oSettings.fnRecordsDisplay()) {
-					iNewStart = (Math.ceil((oSettings.fnRecordsDisplay() - 1) / oSettings._iDisplayLength) - 1) * oSettings._iDisplayLength;
-				}
+        if ( pager_last && now < pager_last + pager_frequency ) {
+          clearTimeout( pager_timer );
 
-				oSettings._iDisplayStart = iNewStart;
-				fnCallbackDraw(oSettings);
-			});
+          pager_timer = setTimeout( function () {
+            pager_last = undefined;
+
+            // 37 = left arrow, 38 = up arrow, 39 = right arrow, 40 = down arrow
+            if (e.which === 38 || e.which === 39 || (e.which === 37 || e.which === 40)) {
+              // ignore the arrows.
+              return;
+            }
+
+            if (that.value === '' || that.value.match(/[^0-9]/)) {
+              /* Nothing entered or non-numeric character */
+              that.value = that.value.replace(/[^\d]/g, ''); // don't even allow anything but digits
+              return;
+            }
+
+            var iNewStart = oSettings._iDisplayLength * (that.value - 1);
+            if (iNewStart < 0) {
+              iNewStart = 0;
+            }
+            if (iNewStart >= oSettings.fnRecordsDisplay()) {
+              iNewStart = (Math.ceil((oSettings.fnRecordsDisplay() - 1) / oSettings._iDisplayLength) - 1) * oSettings._iDisplayLength;
+            }
+
+            oSettings._iDisplayStart = iNewStart;
+            fnCallbackDraw(oSettings);
+          }, pager_frequency );
+        }
+        else {
+          pager_last = now;
+        }
+      }
+
+      $(nInput)
+        .bind(
+          'keyup.DT input.DT paste.DT cut.DT',
+          processPager
+        )
+        .bind( 'keypress.DT', function(e) {
+          /* Prevent form submission */
+          if ( e.keyCode == 13 ) {
+            return false;
+          }
+        } )
+        .attr('aria-controls', oSettings.sTableId);
 
 			// Take the brutal approach to cancelling text selection.
 			$('span', nPaging).bind('mousedown', function () { return false; });
