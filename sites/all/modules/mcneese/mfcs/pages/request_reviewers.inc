@@ -443,7 +443,7 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
       'buttonText' => '"Show / Hide"',
     ),
     'oLanguage' => array(
-      'sSearch' => '"Filter: "',
+      'sSearch' => '"Filter"',
     ),
     'searchDelay' => 1200,
     'pagingType' => 'input',

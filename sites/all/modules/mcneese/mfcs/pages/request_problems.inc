@@ -428,7 +428,7 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
       'buttonText' => '"Show / Hide"',
     ),
     'oLanguage' => array(
-      'sSearch' => '"Filter: "',
+      'sSearch' => '"Filter"',
     ),
     'searchDelay' => 1200,
     'pagingType' => 'input',

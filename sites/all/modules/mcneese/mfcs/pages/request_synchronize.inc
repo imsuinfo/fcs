@@ -349,7 +349,7 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = NUL
       'buttonText' => '"Show / Hide"',
     ),
     'oLanguage' => array(
-      'sSearch' => '"Filter: "',
+      'sSearch' => '"Filter"',
     ),
     'searchDelay' => 1200,
     'pagingType' => 'input',

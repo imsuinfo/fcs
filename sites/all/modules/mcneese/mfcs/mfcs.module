@@ -8503,7 +8503,7 @@ function mfcs_build_request_ajax_table($items_returned, $conditions, $options, $
       'buttonText' => '"Show / Hide"',
     ),
     'oLanguage' => array(
-      'sSearch' => '"Filter: "',
+      'sSearch' => '"Filter"',
     ),
     'searchDelay' => 1200,
     'pagingType' => 'input',
