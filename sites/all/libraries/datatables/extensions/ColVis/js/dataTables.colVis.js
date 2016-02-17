@@ -254,6 +254,7 @@ ColVis.prototype = {
 		this.dom.wrapper.className = "ColVis";
 
 		this.dom.button = $( '<button />', {
+				'aria-controls': this.s.dt.sTableId,
 				'class': !this.s.dt.bJUI ?
 					"ColVis_Button ColVis_MasterButton" :
 					"ColVis_Button ColVis_MasterButton ui-button ui-state-default"
