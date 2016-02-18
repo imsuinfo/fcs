@@ -920,7 +920,7 @@ function mfcs_request_problems_0_user_form_submit($form, &$form_state) {
   foreach ($form['values']['problem_list']['#value'] as $problem_id => $problem_settings) {
     if ($problem_settings['resettable'] && array_key_exists($problem_id, $actions) && array_key_exists('reset', $actions[$problem_id])) {
       if ($actions[$problem_id]['reset'] == 1) {
-        if (($problems & $problem_id) > 0) {
+        if (($problems & $problem_id) != 0) {
           $problems -= $problem_id;
         }
         $perform_reset = TRUE;
@@ -956,7 +956,7 @@ function mfcs_request_problems_0_user_form_submit($form, &$form_state) {
         if (!empty($form['values']['problem_user']['#value']->field_user_banner_id['und'][0]['value']) && is_numeric($form['values']['problem_user']['#value']->field_user_banner_id['und'][0]['value'])) {
           $result = mfcs_synchronize_user_settings($form['values']['problem_user']['#value']);
           if ($result === TRUE) {
-            if (($problems & $custom_action_id) > 0) {
+            if (($problems & $custom_action_id) != 0) {
               $problems -= $custom_action_id;
               mfcs_save_user($form['values']['problem_user']['#value']->uid, array('problems' => $problems));
             }
@@ -1019,14 +1019,14 @@ function mfcs_request_problems_0_user_form_submit($form, &$form_state) {
             $form_state['submitted'] = FALSE;
           }
           else {
-            if (($problems & $custom_action_id) > 0) {
+            if (($problems & $custom_action_id) != 0) {
               $problems -= $custom_action_id;
               mfcs_save_user($form['values']['problem_user']['#value']->uid, array('problems' => $problems));
             }
           }
         }
         else {
-          if (($problems & $custom_action_id) > 0) {
+          if (($problems & $custom_action_id) != 0) {
             $problems -= $custom_action_id;
             mfcs_save_user($form['values']['problem_user']['#value']->uid, array('problems' => $problems));
           }

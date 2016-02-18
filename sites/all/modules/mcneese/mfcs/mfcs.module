@@ -3503,7 +3503,7 @@ function mfcs_process_user_banner_roles($user, &$problems, $settings = array()) 
   if (mfcs_load_request_user_by_banner_id($banner_id) === FALSE) {
     if ($user_status == 0) {
       // disabled accounts should not report invalid banner ids.
-      if (($problems & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) > 0) {
+      if (($problems & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) != 0) {
         $problems = $problems - MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
       }
     }
@@ -3614,7 +3614,7 @@ function mfcs_process_user_banner_roles($user, &$problems, $settings = array()) 
   $results = array('field_user_event_roles' => array('und' => $banner_roles), 'roles' => $processed_roles);
 
   // auto-lock or auto-unlock accounts without any banner roles, but only when banner can be refreshed.
-  if (($problems & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) == 0 || ($problems & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) == 0) {
+  if (($problems & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) == 0 && ($problems & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) == 0) {
     if ($user->status == 0) {
       if (!empty($banner_roles)) {
         // auto-unlock account.
