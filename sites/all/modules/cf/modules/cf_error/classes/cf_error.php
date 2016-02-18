@@ -443,6 +443,8 @@ class cf_error {
    * @param int $severity
    *   (optional) The severity of the message, as per RFC 3164. Possible values
    *   are WATCHDOG_ERROR, WATCHDOG_WARNING, etc.
+   * @param bool $silent
+   *   (optional) When TRUE, prevent drupal_set_message() from reporting the error.
    *
    * @return cf_error_code
    *   A object containing the processed error, with specified backtrace.
@@ -450,7 +452,7 @@ class cf_error {
    * @see: watchdog()
    * @see: watchdog_severity_levels()
    */
-  public static function on_query_execution($exception, $severity = WATCHDOG_ERROR) {
+  public static function on_query_execution($exception, $severity = WATCHDOG_ERROR, $silent = FALSE) {
     $error = new cf_error_code;
 
     if (is_object($exception)) {
@@ -473,10 +475,14 @@ class cf_error {
       $query_arguments = "";
     }
 
+    if (!is_bool($silent)) {
+      $silent = FALSE;
+    }
+
     $error->set_severity($severity);
     $error->set_type('sql');
     self::p_load_backtrace($error);
-    self::p_on_query_execution($error, $exception_message, $query_string, $query_arguments);
+    self::p_on_query_execution($error, $exception_message, $query_string, $query_arguments, $silent);
 
     return $error;
   }
@@ -489,6 +495,8 @@ class cf_error {
    * @param int $severity
    *   (optional) The severity of the message, as per RFC 3164. Possible values
    *   are WATCHDOG_ERROR, WATCHDOG_WARNING, etc.
+   * @param bool $silent
+   *   (optional) When TRUE, prevent drupal_set_message() from reporting the error.
    *
    * @return cf_error_code
    *   A object containing the processed error, with specified backtrace.
@@ -496,7 +504,7 @@ class cf_error {
    * @see: watchdog()
    * @see: watchdog_severity_levels()
    */
-  public static function on_exception($exception, $severity = WATCHDOG_ERROR) {
+  public static function on_exception($exception, $severity = WATCHDOG_ERROR, $silent = FALSE) {
     $error = new cf_error_code;
 
     if (is_object($exception)) {
@@ -515,10 +523,14 @@ class cf_error {
       $exception_message = "";
     }
 
+    if (!is_bool($silent)) {
+      $silent = FALSE;
+    }
+
     $error->set_severity($severity);
     $error->set_type('php');
     self::p_load_backtrace($error);
-    self::p_on_exception($error, $exception_message);
+    self::p_on_exception($error, $exception_message, $silent);
 
     return $error;
   }
@@ -1344,9 +1356,11 @@ class cf_error {
    * @param string $query_arguments
    *   The arguments passed to the sql query.
    *   This gives more information than the exception message.
+   * @param bool $silent
+   *   When FALSE, drupal_set_message() will not be called.
    */
-  private static function p_on_query_execution(cf_error_code $error, $exception_message, $query_string, $query_arguments) {
-    self::p_print_message($error, "Query Exception: %cf_error-exception_message.", array('%cf_error-exception_message' => $exception_message, '%cf_error-query_string' => $query_string, '%cf_error-query_arguments' => $query_arguments), " SQL Query = %cf_error-query_string. SQL Arguments = %cf_error-query_arguments.");
+  private static function p_on_query_execution(cf_error_code $error, $exception_message, $query_string, $query_arguments, $silent = FALSE) {
+    self::p_print_message($error, "Query Exception: %cf_error-exception_message.", array('%cf_error-exception_message' => $exception_message, '%cf_error-query_string' => $query_string, '%cf_error-query_arguments' => $query_arguments), " SQL Query = %cf_error-query_string. SQL Arguments = %cf_error-query_arguments.", $silent);
   }
 
   /**
@@ -1356,9 +1370,11 @@ class cf_error {
    *   The error code class object associated with the error.
    * @param string $exception_message
    *   The message reported by the exception.
+   * @param bool $silent
+   *   When FALSE, drupal_set_message() will not be called.
    */
-  private static function p_on_exception(cf_error_code $error, $exception_message) {
-    self::p_print_message($error, "Exception: %cf_error-exception_message.", array('%cf_error-exception_message' => $exception_message));
+  private static function p_on_exception(cf_error_code $error, $exception_message, $silent = FALSE) {
+    self::p_print_message($error, "Exception: %cf_error-exception_message.", array('%cf_error-exception_message' => $exception_message), "", $silent);
   }
 
   /**
@@ -1477,14 +1493,16 @@ class cf_error {
    * @param string $additional
    *   (optional) Additional information to present only in the watchdog logs.
    *    This does not get displayed via drupal_set_message().
+   * @param bool $asilent
+   *   (optional) When TRUE, drupal_set_message() will not be called.
    *
    * @see drupal_set_message()
    * @see watchdog()
    * @see watchdog_severity_levels()
    */
-  private static function p_print_message(cf_error_code $error, $message, array $variables_array, $additional = "") {
+  private static function p_print_message(cf_error_code $error, $message, array $variables_array, $additional = "", $silent = FALSE) {
 
-    if (function_exists('user_access')) {
+    if (function_exists('user_access') && $silent === FALSE) {
       switch ($error->get_severity()) {
         case WATCHDOG_EMERGENCY:
           if (user_access('view cf emergency messages')) {
