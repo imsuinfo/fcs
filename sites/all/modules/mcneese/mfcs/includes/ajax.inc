@@ -477,10 +477,12 @@ function mfcs_ajax_proxy_0_list() {
  *   Some string or number to send as the first argument.
  */
 function mfcs_ajax_list_0($argument_1 = NULL) {
+  $user = cf_current_user();
+
   $manager = FALSE;
   $reviewer = FALSE;
   $requester = FALSE;
-  if ($user_id === MFCS_USER_REQUEST) {
+  if ($user->uid === MFCS_USER_REQUEST) {
     // this is a simulated user account and must be handled as a special case.
     $requester = TRUE;
   }
