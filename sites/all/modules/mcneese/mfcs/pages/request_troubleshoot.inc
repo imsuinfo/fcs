@@ -341,11 +341,11 @@ function mfcs_request_troubleshoot_0_form_submit($form, &$form_state) {
     }
     elseif ($code == MFCS_TROUBLESHOOT_BANNER_CACHE_SYNCHRONIZE) {
       $label = "Re-synchronize banner cache";
-      $result = mfcs_sync_banner_to_local($transaction, $user);
+      $result = mfcs_sync_banner_to_local($transaction, $user, TRUE);
     }
     elseif ($code == MFCS_TROUBLESHOOT_BANNER_ROLE_SYNCHRONIZE) {
       $label = "Re-synchronize banner role cache";
-      $result = mfcs_sync_banner_to_local_users();
+      $result = mfcs_sync_banner_to_local_users(NULL, NULL, TRUE);
     }
 
     $time_stop = microtime(TRUE);
