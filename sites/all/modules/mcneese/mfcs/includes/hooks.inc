@@ -1438,17 +1438,18 @@ function mfcs_hook_user_login(&$edit, $user, $category) {
 
   $problems = MFCS_USER_PROBLEM_NONE;
   $changes = mfcs_process_user_banner_roles($user, $problems, $settings);
+  $changes_roles = array_keys($changes['roles']);
   if (is_array($changes)) {
-    if (count($user->roles) != count($changes['roles'])) {
+    if (count($user->roles) != count($changes_roles)) {
       user_save($user);
     }
     else {
-      $difference = array_diff($user->roles, $changes['roles']);
+      $difference = array_diff($user->roles, $changes_roles);
       if (!empty($difference)) {
         user_save($user);
       }
       else {
-        $difference = array_diff($changes['roles'], $user->roles);
+        $difference = array_diff($changes_roles, $user->roles);
         if (!empty($difference)) {
           user_save($user);
         }
