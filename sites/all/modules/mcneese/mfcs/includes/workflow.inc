@@ -1942,7 +1942,11 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
   $request_view_url = $base_url . '/requests/view-0/' . $request_id;
 
   $request_requester = mfcs_load_basic_user_settings_by_user_id($requester_id);
-  if (!is_array($request_requester)) {
+  $request_requester_object = FALSE;
+  if (is_array($request_requester)) {
+    $request_requester_object = user_load($request_requester['user_id']);
+  }
+  else {
     watchdog(MFCS_WATCHDOG_ID, "%request_requester is not a valid user id.", array('%request_requester' => $requester_id), WATCHDOG_ERROR);
 
     // temporary fallback (@todo: implement proper fallback).
@@ -2090,12 +2094,11 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       $type = (int) $type;
     }
 
-    if ($type === MFCS_REQUEST_TYPE_QUICK_MEETING && ($venue_coordinator['user_id'] == $request_requester['user_id'] || user_access('mfcs manage', $request_requester))) {
+    if ($type === MFCS_REQUEST_TYPE_QUICK_MEETING && ($venue_coordinator['user_id'] == $request_requester['user_id'] || (is_object($request_requester_object) && user_access('mfcs manage', $request_requester_object)))) {
       $extra = array(
         'send_email' => FALSE,
         'requirements' => array('other' => 0, 'waived' => 0, 'university' => 1),
       );
-      $request_requester_object = user_load($request_requester['user_id']);
       mfcs_workflow_step_review($request_id, $request_requester_object, MFCS_REVIEW_DECISION_REQUIREMENT, "", $extra);
 
       $extra = array(
