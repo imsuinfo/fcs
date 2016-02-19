@@ -3256,9 +3256,16 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $append_
     if (!empty($accounts)) {
       $transaction = db_transaction();
       try {
-        $query = db_query('update mfcs_reviewers set user_id = :primary_id where user_id IN :account_ids', array(':primary_id' => $user->uid, ':account_id' => $accounts));
-        $query = db_query('update mfcs_proxy_venue_coordinator set user_id = :primary_id where user_id IN :account_ids', array(':primary_id' => $user->uid, ':account_id' => $accounts));
-        $query = db_query('update mfcs_proxy_venue_coordinator set proxy_id = :primary_id where proxy_id IN :account_ids', array(':primary_id' => $user->uid, ':account_id' => $accounts));
+        if (count($accounts) == 1) {
+          $query = db_query('update mfcs_reviewers set user_id = :primary_id where user_id = :account_id', array(':primary_id' => $user->uid, ':account_id' => reset($accounts)));
+          $query = db_query('update mfcs_proxy_venue_coordinator set user_id = :primary_id where user_id = :account_id', array(':primary_id' => $user->uid, ':account_id' => reset($accounts)));
+          $query = db_query('update mfcs_proxy_venue_coordinator set proxy_id = :primary_id where proxy_id = :account_id', array(':primary_id' => $user->uid, ':account_id' => reset($accounts)));
+        }
+        else {
+          $query = db_query('update mfcs_reviewers set user_id = :primary_id where user_id IN :account_ids', array(':primary_id' => $user->uid, ':account_ids' => $accounts));
+          $query = db_query('update mfcs_proxy_venue_coordinator set user_id = :primary_id where user_id IN :account_ids', array(':primary_id' => $user->uid, ':account_ids' => $accounts));
+          $query = db_query('update mfcs_proxy_venue_coordinator set proxy_id = :primary_id where proxy_id IN :account_ids', array(':primary_id' => $user->uid, ':account_ids' => $accounts));
+        }
 
         unset($transaction);
       }
@@ -3271,7 +3278,7 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $append_
           $problems_new = $problems_new | MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE;
         }
 
-        if ($problems != $problems_new) {
+        if ($problems_original != $problems_new) {
           mfcs_save_user($user->uid, array('problems' => $problems_new));
         }
 
