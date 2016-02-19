@@ -3206,17 +3206,19 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $append_
 
   // handle all appropriate banner refreshes.
   if ($refresh_banner) {
-    // if banner was unavailable when the users account was first created, then attempt a banner sync for that user.
-    if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) > 0 || ($problems_original & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) > 0) {
-      $result = mfcs_sync_banner_to_local_users($user->uid, $banner_id);
+    $result = mfcs_sync_banner_to_local_users($user->uid, $banner_id);
+    if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) != 0 || ($problems_original & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) != 0 || ($problems_original & MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) != 0) {
       if ($result === TRUE) {
-
-        if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) > 0) {
+        if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) != 0) {
           $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE;
         }
 
-        if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) > 0) {
+        if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) != 0) {
           $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE;
+        }
+
+        if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) != 0) {
+          $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS;
         }
       }
     }
@@ -3229,7 +3231,7 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $append_
           $account_problems = $account_mfcs_information[$account_id]->problems;
         }
 
-        if (($account_problems & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) > 0 || ($account_problems & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) > 0) {
+        if (($account_problems & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) != 0 || ($account_problems & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) != 0 || ($problems_original & MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) != 0) {
           $account = user_load($account_id);
           mfcs_synchronize_user_settings($account, $user_roles, FALSE, FALSE);
           unset($account);
@@ -10152,7 +10154,7 @@ function mfcs_search_for_and_mark_disabled_users_with_active_content() {
         continue;
       }
 
-      if (($result->problems & MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE) > 0) {
+      if (($result->problems & MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE) != 0) {
         $result->problems -= MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE;
         mfcs_save_user($result->user_id, array('problems' => $result->problems));
       }
