@@ -610,6 +610,53 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
     '#markup' => '<div class="problem-message">' . $message . '</div>' . "\n",
   );
 
+  $form['banner_information'] = array(
+    '#markup' => "Banner Information",
+    '#id' => 'banner_information-fieldset',
+    '#type' => 'fieldset',
+    '#title' => "Banner Information",
+    '#tree' => TRUE,
+    '#attributes' => array(
+      'class' => array(
+        'banner_information-fieldset',
+      ),
+    ),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+
+  $form['banner_information']['details'] = array(
+    '#markup' => '',
+  );
+
+  if (isset($problem_user->field_user_banner_id['und']['0']['value'])) {
+    try {
+      $event_roles = mfcs_oracle_select('select * from ucs.msu_event_role where id = :banner_id', array('banner_id' => $problem_user->field_user_banner_id['und']['0']['value']));
+
+      if (is_array($event_roles)) {
+        $form['banner_information']['details']['#markup'] .= '<strong>Banner Roles</strong>:' . "\n";
+        $form['banner_information']['details']['#markup'] .= '<ul>' . "\n";
+
+        if (!empty($event_roles)) {
+          foreach ($event_roles as $event_role) {
+            $form['banner_information']['details']['#markup'] .= '<li>' . $event_role['role'] . '</li>' . "\n";
+          }
+        }
+
+        $form['banner_information']['details']['#markup'] .= '</ul>' . "\n";
+      }
+      else {
+        $form['banner_information']['details']['#markup'] .= 'Banner information is currently unavailable.';
+      }
+    }
+    catch (Exception $ex) {
+      $form['banner_information']['details']['#markup'] .= 'Banner information is currently unavailable.';
+    }
+  }
+  else {
+    $form['banner_information']['details']['#markup'] .= 'User has no banner id.';
+  }
+
   $form['problems'] = array(
     '#tree' => TRUE,
   );
