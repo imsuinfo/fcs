@@ -573,8 +573,10 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
   }
 
   // Deny access to requesters and reviewers who do not have a student, camp, employee, or external role.
-  if (($roles['reviewer'] || $roles['requester']) && !$roles['role_student'] && !$roles['role_camp'] && !$roles['role_employee'] && !$roles['role_external'] && !$roles['bannerless_exception']) {
-    return FALSE;
+  if (!$roles['administer'] && !$roles['manager']) {
+    if (($roles['reviewer'] || $roles['requester']) && !$roles['role_student'] && !$roles['role_camp'] && !$roles['role_employee'] && !$roles['role_external'] && !$roles['bannerless_exception']) {
+      return FALSE;
+    }
   }
 
   mfcs_include(MFCS_INCLUDE_ACCESS);
@@ -1079,8 +1081,10 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
   }
 
   // Deny access to requesters and reviewers who do not have a student, camp, employee, or external role.
-  if (($roles['reviewer'] || $roles['requester']) && !$roles['role_student'] && !$roles['role_camp'] && !$roles['role_employee'] && !$roles['role_external'] && !$roles['bannerless_exception']) {
-    return FALSE;
+  if (!$roles['administer'] && !$roles['manager']) {
+    if (($roles['reviewer'] || $roles['requester']) && !$roles['role_student'] && !$roles['role_camp'] && !$roles['role_employee'] && !$roles['role_external'] && !$roles['bannerless_exception']) {
+      return FALSE;
+    }
   }
 
   $proxies = mfcs_get_proxy_venue_coordinator($user->uid);
