@@ -298,6 +298,7 @@ define('MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED', 128);
 define('MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES', 256);
 define('MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE', 512);
 define('MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID', 1024);
+define('MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS', 2048);
 
 /**
  * Define codes that represent what the e-mail represents.
@@ -3610,11 +3611,15 @@ function mfcs_process_user_banner_roles($user, &$problems, $settings = array()) 
     }
   }
 
-  // Note: the system used to refer to requests as events, but because this is a drupal field, 'event' cannot be easily changed to 'request' in this explicit case.
-  $results = array('field_user_event_roles' => array('und' => $banner_roles), 'roles' => $processed_roles);
+  $results = array();
 
   // auto-lock or auto-unlock accounts without any banner roles, but only when banner can be refreshed.
-  if (($problems & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) == 0 && ($problems & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) == 0) {
+  if (($problems & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) == 0 && ($problems & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) == 0 && ($problems & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) == 0) {
+    // If the user has banner roles, then make sure MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS is no longer set.
+    if (!empty($banner_roles) && ($problems & MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) != 0) {
+      $problems -= MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS;
+    }
+
     if ($user->status == 0) {
       if (!empty($banner_roles)) {
         // auto-unlock account.
@@ -3632,6 +3637,10 @@ function mfcs_process_user_banner_roles($user, &$problems, $settings = array()) 
       }
     }
   }
+
+  // Note: the system used to refer to requests as events, but because this is a drupal field, 'event' cannot be easily changed to 'request' in this explicit case.
+  $results['field_user_event_roles'] = array('und' => $banner_roles);
+  $results['roles'] = $processed_roles;
 
   $already_executed[$user->uid] = $results;
   return $results;

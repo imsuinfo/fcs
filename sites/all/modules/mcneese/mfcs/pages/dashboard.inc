@@ -180,6 +180,21 @@ function mfcs_dashboard_page() {
     }
 
     $markup .= '</div>' . "\n";
+
+    if ($user->status != 0) {
+      $mfcs_users = mfcs_load_users($user->uid);
+      if (is_array($mfcs_users) && !empty($mfcs_users[$user->uid]) && is_object($mfcs_users[$user->uid]) && property_exists($mfcs_users[$user->uid], 'problems')) {
+
+        // only assign no access problem flag when the user account has not been flagged as unable to sync with banner.
+        if (($mfcs_users[$user->uid]->problems & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) == 0 && ($mfcs_users[$user->uid]->problems & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) == 0 && ($mfcs_users[$user->uid]->problems & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) == 0) {
+          $mfcs_users[$user->uid]->problems = $mfcs_users[$user->uid]->problems | MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS;
+          mfcs_save_user($user->uid, array('problems' => $mfcs_users[$user->uid]->problems));
+        }
+      }
+      else {
+        mfcs_save_user($user->uid, array('problems' => MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS));
+      }
+    }
   }
   else {
     $markup .= '<h3 class="mfcs-dashboard_page-choices-header">Facilities Use and Special Event Request System</h3>' . "\n";

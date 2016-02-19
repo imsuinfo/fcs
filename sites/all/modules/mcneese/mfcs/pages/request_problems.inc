@@ -263,9 +263,9 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
     $additional_operations = '';
 
     $problem_account = NULL;
-    foreach (array(MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_LOGIN_PROBLEMS_MULTIPLE, MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED, MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES, MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE, MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) as $taxonomy_id) {
+    foreach (array(MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_LOGIN_PROBLEMS_MULTIPLE, MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED, MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES, MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE, MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID, MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) as $taxonomy_id) {
       if (($problem->problems & $taxonomy_id) > 0) {
-        if ($taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE || $taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) {
+        if ($taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE || $taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE || $taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) {
           $additional_operations .= ' <a href="' . $base_path . 'requests/problems-0/users/resynchronize/' . $problem->user_id . $url_arguments . '" class="operation-link operation-link-resynchronize" title="Re-Synchronize the user\'s settings.">Re-Sync</a>';
         }
 
@@ -731,6 +731,17 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
         "<br>\n" .
         "The user either needs to have their banner id fixed, removed, or the account should be disabled.<br>\n",
       'resettable' => FALSE,
+      'custom_action' => FALSE,
+    ),
+    MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS => array(
+      'label' => "Insufficient Banner Access",
+      'explanation' =>
+        "This flag gets set when a user logs into the system but has not been granted any banner roles to perform any actions, but the account is still technically enabled/unlocked.<br>\n" .
+        "<br>\n" .
+        "Either the account needs to be manually disabled/locked or the account needs to have its banner roles fixed.<br>\n",
+        "<br>\n" .
+        "This may also be triggered if a new user tries to login while banner is down and there is no locally cached data associated with the new account to properly assign its banner roles.<br>\n",
+      'resettable' => TRUE,
       'custom_action' => FALSE,
     ),
   );
