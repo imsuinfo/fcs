@@ -630,6 +630,8 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
   );
 
   if (isset($problem_user->field_user_banner_id['und']['0']['value'])) {
+    $form['banner_information']['details']['#markup'] .= '<strong>Banner ID</strong>: ' . $problem_user->field_user_banner_id['und']['0']['safe_value'] . "<br>\n";
+
     try {
       $event_roles = mfcs_oracle_select('select * from ucs.msu_event_role where id = :banner_id', array('banner_id' => $problem_user->field_user_banner_id['und']['0']['value']));
 
