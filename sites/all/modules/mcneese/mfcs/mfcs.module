@@ -10003,7 +10003,7 @@ function mfcs_load_room_coordinators($room_id = NULL, $coordinators_only = FALSE
  * jira ticket: fcs-58.
  *
  * @param null|int $banner_id
- *   The banner id string. If Null, then load all users on system.
+ *   (optional) The banner id string. If Null, then load all users on system.
  *
  * @return array
  *   An array with the banner ids and user ids.
@@ -10027,9 +10027,13 @@ function mfcs_users_load_banner_id_to_user_id($banner_id = NULL) {
   }
 
   $results = $query->fetchAll();
+  if (!is_array($results)) {
+    return $list;
+  }
+
   foreach ($results as $result) {
     $is_primary = TRUE;
-    if (isset($result->primary_account) && $result->primary_account == 0) {
+    if (!isset($result->primary_account) || $result->primary_account == 0) {
       $is_primary = FALSE;
     }
 
