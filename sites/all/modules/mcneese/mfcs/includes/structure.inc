@@ -571,6 +571,7 @@ function mfcs_get_request_fields($form, &$form_state) {
 
   // mising: external_audio_person  // if (!$meeting_request) {
   mfcs_get_request_field_presentation_technical_equipment($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_presentation_technical_equipment_note($form, $form_state, $fields, $request_state, $ps);
   mfcs_get_request_field_presentation_technical_equipment_details($form, $form_state, $fields, $request_state, $ps);
   mfcs_get_request_field_presentation_technical_equipment_microphone($form, $form_state, $fields, $request_state, $ps);
   mfcs_get_request_field_presentation_external_audio_person($form, $form_state, $fields, $request_state, $ps);
@@ -4363,6 +4364,63 @@ function mfcs_get_request_field_presentation_technical_equipment($form, &$form_s
         '#value' => $value,
       );
     }
+  }
+
+  return $values;
+}
+
+/**
+ * Process and build a specific form field.
+ */
+function mfcs_get_request_field_presentation_technical_equipment_note($form, &$form_state, &$fields, &$request_state, $ps) {
+  $values = array(0 => NULL);
+
+  if ($form['form']['step']['#value'] == 'details' && array_key_exists('presentation', $form['form']['sections']['#value'])) {
+    $fields['presentation']['technical_equipment_note'] = array(
+      '#id' => 'field-request-presentation-technical_equipment_note',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-request-item',
+          'field-request-item-presentation-technical_equipment_note',
+        ),
+      ),
+    );
+
+    $fields['presentation']['technical_equipment_note'][0] = array(
+      '#id' => 'field-request-presentation-technical_equipment_note-0',
+      '#type' => 'container',
+      '#states' => array(
+        'visible' => array(
+          ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[technical_equipment][0]' . '"]' => array('value' => 1),
+        ),
+        'invisible' => array(
+          'or' => array(
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[technical_equipment][0]' . '"]' => array('value' => 0),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[technical_equipment][0]' . '"]' => array('value' => NULL),
+          ),
+        ),
+      ),
+      '#attributes' => array(
+        'class' => array(
+          'form-item-delta',
+          'form-item-delta-0',
+        ),
+      ),
+    );
+
+    $fields['presentation']['technical_equipment_note'][0]['markup'] = array(
+      '#markup' => '',
+    );
+
+    $fields['presentation']['technical_equipment_note'][0]['markup']['#markup'] .= '<div id="mfcs-markup-request-presentation-technical_equipment_note" class="markup-request">';
+    $fields['presentation']['technical_equipment_note'][0]['markup']['#markup'] .= 'The technology you requested may or may not be available for this venue. ';
+    #$fields['presentation']['technical_equipment_note'][0]['markup']['#markup'] .= '<em><a href="https://www.mcneese.edu/node/5506">You may also be required to complete an additional request form to secure the item(s).</a></em> ';
+    $fields['presentation']['technical_equipment_note'][0]['markup']['#markup'] .= '<em>You may also be required to complete an additional request form to secure the item(s).</em> ';
+    $fields['presentation']['technical_equipment_note'][0]['markup']['#markup'] .= 'Communicate with the venue coordinator to confirm your technical requests. ';
+    $fields['presentation']['technical_equipment_note'][0]['markup']['#markup'] .= '</div>';
   }
 
   return $values;
