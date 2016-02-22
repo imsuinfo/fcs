@@ -439,13 +439,13 @@ function mcneese_functions_embed_ntas_widget($cache_id = NULL, $cache_expire = '
 
   $server_name = 'www.dhs.gov';
   $url_path = '/ntas';
-  $port = 80;
+  $port = 443;
   $error_detected = FALSE;
 
   global $is_https;
 
   if (empty($markup)) {
-    $webpage = cf_http_get_webpage($server_name, $url_path, $port);
+    $webpage = cf_http_get_webpage($server_name, $url_path, $port, NULL, 8, 8192, TRUE);
 
     if ($webpage['read'] === TRUE && $webpage['http_error']['error_code'] == 0 && $webpage['socket_error']['code'] == 0){
       $document = cf_http_split_response($webpage['document']);
