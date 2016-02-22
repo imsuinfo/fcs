@@ -637,7 +637,7 @@ function mfcs_get_request_fields($form, &$form_state) {
       '#markup' => '',
     );
 
-    $fields['message']['#markup'] .= '<div id="markup-request-message" class="markup-request">';
+    $fields['message']['#markup'] .= '<div id="mfcs-markup-request-message" class="markup-request">';
     $fields['message']['#markup'] .= 'Once your request has been approved appropriate campus personnel, you will be emailed with the outcome. ';
     $fields['message']['#markup'] .= 'If the request receives approval, you will also receive an itemized detail of any and all charges that will be assessed to you. ';
     $fields['message']['#markup'] .= 'You must agree and accept the terms offered for the venue to be reserved. ';
@@ -2247,7 +2247,7 @@ function mfcs_get_request_field_plans_note($form, &$form_state, &$fields, &$requ
       '#markup' => '',
     );
 
-    $fields['plans']['note'][0]['markup']['#markup'] .= '<div id="markup-request-plans-note" class="markup-request">';
+    $fields['plans']['note'][0]['markup']['#markup'] .= '<div id="mfcs-markup-request-plans-note" class="markup-request">';
     $fields['plans']['note'][0]['markup']['#markup'] .= '*Please note a specified drawing of setup requests is required to complete the reservation. ';
     $fields['plans']['note'][0]['markup']['#markup'] .= 'The reserving office will provide a venue layout form for setup submission. ';
     $fields['plans']['note'][0]['markup']['#markup'] .= '</div>';
@@ -6151,7 +6151,7 @@ function mfcs_get_request_field_services_alcohol_note($form, &$form_state, &$fie
       '#markup' => '',
     );
 
-    $fields['services']['alcohol_note'][0]['markup']['#markup'] .= '<div id="markup-request-services-alcohol_note" class="markup-request">';
+    $fields['services']['alcohol_note'][0]['markup']['#markup'] .= '<div id="mfcs-markup-request-services-alcohol_note" class="markup-request">';
     $fields['services']['alcohol_note'][0]['markup']['#markup'] .= 'A formal written request must be submitted to the President for approval of any alcohol served on campus and may require police officer presence at your request for an additional requirement. ';
     $fields['services']['alcohol_note'][0]['markup']['#markup'] .= 'Contact the President\'s Office at ext. 5556 for more information. ';
     $fields['services']['alcohol_note'][0]['markup']['#markup'] .= '</div>';
