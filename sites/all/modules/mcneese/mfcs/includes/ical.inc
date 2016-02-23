@@ -587,146 +587,146 @@ function mfcs_ical_sanitize_text($string) {
  */
 function mfcs_ical_geo_coordinates($building, $room) {
   // default to coordinates that are in general the center of mcneese university campus.
-  $longitude = 30.180565;
-  $latitude = -93.216738;
+  $latitude = 30.180565;
+  $longitude = -93.216738;
 
   if ($building == 1) {
     // band building
-    $longitude = 30.183013;
-    $latitude = -93.217221;
+    $latitude = 30.183013;
+    $longitude = -93.217221;
   }
   elseif ($building == 2) {
     // burton business center
-    $longitude = 30.181112;
-    $latitude = -93.216588;
+    $latitude = 30.181112;
+    $longitude = -93.216588;
   }
   elseif ($building == 3) {
     // bulber auditorium
-    $longitude = 30.181780;
-    $latitude = -93.217157;
+    $latitude = 30.181780;
+    $longitude = -93.217157;
   }
   elseif ($building == 4) {
     // burton hall
-    $longitude = 30.177350;
-    $latitude = -93.217952;
+    $latitude = 30.177350;
+    $longitude = -93.217952;
   }
   elseif ($building == 5) {
     // burton memorial coliseum
-    $longitude = 30.137096;
-    $latitude = -93.211616;
+    $latitude = 30.137096;
+    $longitude = -93.211616;
   }
   elseif ($building == 6) {
     // dolan memorial athletic complex
-    $longitude = 30.174457;
-    $latitude = -93.210092;
+    $latitude = 30.174457;
+    $longitude = -93.210092;
   }
   elseif ($building == 7) {
     // h c drew hall
-    $longitude = 30.178166;
-    $latitude = -93.215495;
+    $latitude = 30.178166;
+    $longitude = -93.215495;
   }
   elseif ($building == 8) {
     // farrar hall
-    $longitude = 30.180732;
-    $latitude = -93.215687;
+    $latitude = 30.180732;
+    $longitude = -93.215687;
   }
   elseif ($building == 9) {
     // frasch hall
-    $longitude = 30.179195;
-    $latitude = -93.217759;
+    $latitude = 30.179195;
+    $longitude = -93.217759;
     // the annex is: 30.179603, -93.217512
   }
   elseif ($building == 10) {
     // gayle hall
-    $longitude = 30.177549;
-    $latitude = -93.219118;
+    $latitude = 30.177549;
+    $longitude = -93.219118;
   }
   elseif ($building == 11) {
     // memorial gymnasium
-    $longitude = 30.181263;
-    $latitude = -93.215506;
+    $latitude = 30.181263;
+    $longitude = -93.215506;
   }
   elseif ($building == 12) {
     // holbrook student union
-    $longitude = 30.179121;
-    $latitude = -93.215871;
+    $latitude = 30.179121;
+    $longitude = -93.215871;
   }
   elseif ($building == 13) {
     // juliet hardtner hall
-    $longitude = 30.182781;
-    $latitude = -93.214442;
+    $latitude = 30.182781;
+    $longitude = -93.214442;
   }
   elseif ($building == 14) {
     // kaufman hall
-    $longitude = 30.180695;
-    $latitude = -93.217865;
+    $latitude = 30.180695;
+    $longitude = -93.217865;
   }
   elseif ($building == 15) {
     // kirkman hall
-    $longitude = 30.178054;
-    $latitude = -93.216279;
+    $latitude = 30.178054;
+    $longitude = -93.216279;
   }
   elseif ($building == 16) {
     // outdoor venues
-    $longitude = 30.173755;
-    $latitude = -93.211994;
+    $latitude = 30.173755;
+    $longitude = -93.211994;
   }
   elseif ($building == 17) {
     // recreation complex
-    $longitude = 30.182234;
-    $latitude = -93.215344;
+    $latitude = 30.182234;
+    $longitude = -93.215344;
   }
   elseif ($building == 18) {
     // swla econ & enterpreneurial center
-    $longitude = 30.180173;
-    $latitude = -93.220213;
+    $latitude = 30.180173;
+    $longitude = -93.220213;
   }
   elseif ($building == 19) {
     // shearman fine arts center
-    $longitude = 30.182280;
-    $latitude = -93.217318;
+    $latitude = 30.182280;
+    $longitude = -93.217318;
   }
   elseif ($building == 20) {
     // shearman fine arts addition
-    $longitude = 30.182902;
-    $latitude = -93.217908;
+    $latitude = 30.182902;
+    $longitude = -93.217908;
   }
   elseif ($building == 21) {
     // stream alumni center
-    $longitude = 30.175663;
-    $latitude = -93.213601;
+    $latitude = 30.175663;
+    $longitude = -93.213601;
   }
   elseif ($building == 22) {
     // student union annex
-    $longitude = 30.179988;
-    $latitude = -93.216753;
+    $latitude = 30.179988;
+    $longitude = -93.216753;
   }
   elseif ($building == 23) {
     // mcneese farm (coordinates are a guess)
-    $longitude = 30.183934;
-    $latitude = -93.172316;
+    $latitude = 30.183934;
+    $longitude = -93.172316;
   }
   elseif ($building == 24) {
     // special use for FCS
   }
   elseif ($building == 25) {
     // gayle hall annex
-    $longitude = 30.177920;
-    $latitude = -93.219537;
+    $latitude = 30.177920;
+    $longitude = -93.219537;
   }
   elseif ($building == 26) {
     // calendar
   }
   elseif ($building == 27) {
     // bookstore
-    $longitude = 30.179362;
-    $latitude = -93.217319;
+    $latitude = 30.179362;
+    $longitude = -93.217319;
   }
   elseif ($building == 28) {
     // holiday
   }
 
-  return '' . $longitude . ';' . $latitude;
+  return '' . $latitude . ';' . $longitude;
 }
 
 /**
