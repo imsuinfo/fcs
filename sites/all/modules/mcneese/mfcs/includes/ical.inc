@@ -161,6 +161,11 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
   mfcs_ical_populate_array($ical, 'VERSION:2.0');
   mfcs_ical_populate_array($ical, 'PRODID:' . $fcs_name);
 
+  // see: https://tools.ietf.org/html/rfc5545#section-3.7.2
+  // see: https://tools.ietf.org/html/rfc5546#section-3.2
+  // use method 'publish' to prevent calendar tools from treating this as an invitation.
+  mfcs_ical_populate_array($ical, 'METHOD:PUBLISH');
+
   $original_timezone = date_default_timezone_get();
 
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
@@ -351,11 +356,6 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
         mfcs_ical_populate_array($ical, mfcs_ical_wordwrap('LAST-MODIFIED:' . date($date_format, $request->updated)));
         mfcs_ical_populate_array($ical, mfcs_ical_wordwrap('LOCATION:' . mfcs_ical_sanitize_text($request_zone)));
         mfcs_ical_populate_array($ical, mfcs_ical_wordwrap('GEO:' . mfcs_ical_geo_coordinates($request->building, $request->room)));
-
-        // see: https://tools.ietf.org/html/rfc5545#section-3.7.2
-        // see: https://tools.ietf.org/html/rfc5546#section-3.2
-        // use method 'publish' to prevent calendar tools from treating this as an invitation.
-        mfcs_ical_populate_array($ical, 'METHOD:PUBLISH');
 
 
         // see: https://tools.ietf.org/html/rfc5545#section-3.3.13

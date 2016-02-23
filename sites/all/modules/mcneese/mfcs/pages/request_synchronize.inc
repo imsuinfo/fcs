@@ -523,7 +523,7 @@ function mfcs_request_synchronize_0_ical_page($password, $custom = NULL) {
   $content_location = $base_url . '/synchronize-0';
 
   header('HTTP/1.1 200 OK', TRUE, 200);
-  header('Content-Type: text/plain');
+  header('Content-Type: text/calendar; method="PUBLISH"; component="VEVENT"');
   header('Content-Length: ' . $ical['length']);
   header('Content-Transfer-Encoding: binary');
   #header('Content-type: text/plain; charset=utf-8');

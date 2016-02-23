@@ -110,7 +110,7 @@ function mfcs_request_ical_year_0_page($year = NULL) {
   }
 
   header('HTTP/1.1 200 OK', TRUE, 200);
-  header('Content-Type: text/plain');
+  header('Content-Type: text/calendar; method="PUBLISH"; component="VEVENT"');
   header('Content-Length: ' . $ical['length']);
   header('Content-Transfer-Encoding: binary');
   #header('Content-type: text/plain; charset=utf-8');
@@ -282,7 +282,7 @@ function mfcs_request_ical_month_0_page($year = NULL, $month = NULL) {
   }
 
   header('HTTP/1.1 200 OK', TRUE, 200);
-  header('Content-Type: text/plain');
+  header('Content-Type: text/calendar; method="PUBLISH"; component="VEVENT"');
   header('Content-Length: ' . $ical['length']);
   header('Content-Transfer-Encoding: binary');
   #header('Content-type: text/plain; charset=utf-8');
@@ -430,7 +430,7 @@ function mfcs_request_ical_day_0_page($year = NULL, $month = NULL, $day = NULL) 
   }
 
   header('HTTP/1.1 200 OK', TRUE, 200);
-  header('Content-Type: text/plain');
+  header('Content-Type: text/calendar; method="PUBLISH"; component="VEVENT"');
   header('Content-Length: ' . $ical['length']);
   header('Content-Transfer-Encoding: binary');
   #header('Content-type: text/plain; charset=utf-8');
@@ -510,7 +510,7 @@ function mfcs_request_ical_request_0_page($request_id) {
   $content_location = $base_url . '/requests/ical-0/' . $request_id;
 
   header('HTTP/1.1 200 OK', TRUE, 200);
-  header('Content-Type: text/plain');
+  header('Content-Type: text/calendar; method="PUBLISH"; component="VEVENT"');
   header('Content-Length: ' . $ical['length']);
   header('Content-Transfer-Encoding: binary');
   #header('Content-type: text/plain; charset=utf-8');
