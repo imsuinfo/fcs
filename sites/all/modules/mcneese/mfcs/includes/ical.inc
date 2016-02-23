@@ -352,6 +352,11 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
         mfcs_ical_populate_array($ical, mfcs_ical_wordwrap('LOCATION:' . mfcs_ical_sanitize_text($request_zone)));
         mfcs_ical_populate_array($ical, mfcs_ical_wordwrap('GEO:' . mfcs_ical_geo_coordinates($request->building, $request->room)));
 
+        // see: https://tools.ietf.org/html/rfc5545#section-3.7.2
+        // see: https://tools.ietf.org/html/rfc5546#section-3.2
+        // use method 'publish' to prevent calendar tools from treating this as an invitation.
+        mfcs_ical_populate_array($ical, 'METHOD:PUBLISH');
+
 
         // see: https://tools.ietf.org/html/rfc5545#section-3.3.13
         // see: https://tools.ietf.org/html/rfc5545#section-3.8.4.6
