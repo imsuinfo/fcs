@@ -41,7 +41,7 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = NUL
   }
 
   // require that page number be only an integer.
-  if (!cf_is_integer($page_number)) {
+  if (!is_null($page_number) && !cf_is_integer($page_number)) {
     drupal_not_found();
     drupal_exit();
     return array();
