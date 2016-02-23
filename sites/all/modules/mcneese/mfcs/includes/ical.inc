@@ -607,8 +607,8 @@ function mfcs_ical_geo_coordinates($building, $room) {
   }
   elseif ($building == 3) {
     // bulber auditorium
-    $latitude = 30.181780;
-    $longitude = -93.217157;
+    $latitude = 30.181770;
+    $longitude = -93.217253;
   }
   elseif ($building == 4) {
     // burton hall
@@ -622,13 +622,13 @@ function mfcs_ical_geo_coordinates($building, $room) {
   }
   elseif ($building == 6) {
     // dolan memorial athletic complex
-    $latitude = 30.174457;
-    $longitude = -93.210092;
+    $latitude = 30.174471;
+    $longitude = -93.210316;
   }
   elseif ($building == 7) {
     // h c drew hall
-    $latitude = 30.178166;
-    $longitude = -93.215495;
+    $latitude = 30.178189;
+    $longitude = -93.215443;
   }
   elseif ($building == 8) {
     // farrar hall
@@ -643,8 +643,8 @@ function mfcs_ical_geo_coordinates($building, $room) {
   }
   elseif ($building == 10) {
     // gayle hall
-    $latitude = 30.177549;
-    $longitude = -93.219118;
+    $latitude = 30.177624;
+    $longitude = -93.219179;
   }
   elseif ($building == 11) {
     // memorial gymnasium
@@ -653,8 +653,8 @@ function mfcs_ical_geo_coordinates($building, $room) {
   }
   elseif ($building == 12) {
     // holbrook student union
-    $latitude = 30.179121;
-    $longitude = -93.215871;
+    $latitude = 30.179212;
+    $longitude = -93.216329;
   }
   elseif ($building == 13) {
     // juliet hardtner hall
@@ -663,13 +663,13 @@ function mfcs_ical_geo_coordinates($building, $room) {
   }
   elseif ($building == 14) {
     // kaufman hall
-    $latitude = 30.180695;
-    $longitude = -93.217865;
+    $latitude = 30.180504;
+    $longitude = -93.217858;
   }
   elseif ($building == 15) {
     // kirkman hall
-    $latitude = 30.178054;
-    $longitude = -93.216279;
+    $latitude = 30.178094;
+    $longitude = -93.216151;
   }
   elseif ($building == 16) {
     // outdoor venues
@@ -678,8 +678,8 @@ function mfcs_ical_geo_coordinates($building, $room) {
   }
   elseif ($building == 17) {
     // recreation complex
-    $latitude = 30.182234;
-    $longitude = -93.215344;
+    $latitude = 30.181770;
+    $longitude = -93.215327;
   }
   elseif ($building == 18) {
     // swla econ & enterpreneurial center
@@ -693,18 +693,18 @@ function mfcs_ical_geo_coordinates($building, $room) {
   }
   elseif ($building == 20) {
     // shearman fine arts addition
-    $latitude = 30.182902;
-    $longitude = -93.217908;
+    $latitude = 30.182709;
+    $longitude = -93.217927;
   }
   elseif ($building == 21) {
     // stream alumni center
-    $latitude = 30.175663;
-    $longitude = -93.213601;
+    $latitude = 30.175705;
+    $longitude = -93.213576;
   }
   elseif ($building == 22) {
     // student union annex
-    $latitude = 30.179988;
-    $longitude = -93.216753;
+    $latitude = 30.179758;
+    $longitude = -93.216768;
   }
   elseif ($building == 23) {
     // mcneese farm (coordinates are a guess)
@@ -716,16 +716,16 @@ function mfcs_ical_geo_coordinates($building, $room) {
   }
   elseif ($building == 25) {
     // gayle hall annex
-    $latitude = 30.177920;
-    $longitude = -93.219537;
+    $latitude = 30.177885;
+    $longitude = -93.21961;
   }
   elseif ($building == 26) {
     // calendar
   }
   elseif ($building == 27) {
     // bookstore
-    $latitude = 30.179362;
-    $longitude = -93.217319;
+    $latitude = 30.179392;
+    $longitude = -93.217071;
   }
   elseif ($building == 28) {
     // holiday
