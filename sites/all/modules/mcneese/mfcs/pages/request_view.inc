@@ -2387,6 +2387,58 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
       elseif ($decision !== MFCS_REVIEW_DECISION_COMMENT) {
         $check_requirements = TRUE;
       }
+
+      // ticket: fcs-77.
+      // make sure the request cannot be acted on when there already is a locked request.
+      if ($decision === MFCS_REVIEW_DECISION_APPROVE || $decision === MFCS_REVIEW_DECISION_WAVE || $decision === MFCS_REVIEW_DECISION_REQUIREMENT) {
+        $room = (int) $request['top']['room'][0]->value;
+
+        $all_dates = array();
+        $all_time_start = array();
+        $all_time_stop = array();
+        foreach ($request['dates']['date'] as $date_delta => $date_value) {
+          $all_dates[$date_delta] = $request['dates']['date'][$date_delta]->value;
+          $all_time_start[$date_delta] = $request['dates']['time_start'][$date_delta]->value;
+          $all_time_stop[$date_delta] = $request['dates']['time_stop'][$date_delta]->value;
+        }
+
+        $requests_using_room = mfcs_check_room_availability($room, $all_dates, $all_time_start, $all_time_stop, $request_id);
+        unset($all_dates);
+        unset($all_time_start);
+        unset($all_time_stop);
+
+        if ($requests_using_room === FALSE) {
+          form_set_error('', "An internal error occurred while checking the room for availability. Please contact the support staff.");
+        }
+        elseif (!empty($requests_using_room)) {
+          $problematic_dates = array();
+          foreach ($requests_using_room as $request_using_room) {
+            if (isset($request_using_room->date)) {
+              if (isset($request_using_room->time_start)) {
+                $problematic_date = date("Y/m/d", $request_using_room->date) . " from " . date("h:ia", $request_using_room->time_start) . " to " . date("h:ia", $request_using_room->time_stop) . '.';
+                $problematic_dates[$problematic_date] = $problematic_date;
+              }
+              else {
+                $problematic_date = date("Y/m/d", $request_using_room->date) . " (all day).";
+                $problematic_dates[$problematic_date] = $problematic_date;
+              }
+            }
+            elseif (isset($request_using_room->reserved_day)) {
+              $problematic_date = date("Y/m/d", $request_using_room->reserved_day) . " from " . date("h:ia", $request_using_room->reserved_time_start) . " to " . date("h:ia", $request_using_room->reserved_time_stop) . '.';
+              $problematic_dates[$problematic_date] = $problematic_date;
+            }
+          }
+          ksort($problematic_dates);
+
+          $unavailable_message = "Cannot continue. The room is unavailable for the following dates:<br>\n";
+          $unavailable_message .= '<ul>' . "\n";
+          foreach ($problematic_dates as $date) {
+            $unavailable_message .= '<li>' . $date . '</li>' . "\n";
+          }
+          $unavailable_message .= '</ul>' . "\n";
+          form_set_error('review[operations][decision', $unavailable_message);
+        }
+      }
     }
 
     // The requirements values should be removed when they are not needed.
