@@ -2436,7 +2436,7 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
             $unavailable_message .= '<li>' . $date . '</li>' . "\n";
           }
           $unavailable_message .= '</ul>' . "\n";
-          form_set_error('review[operations][decision', $unavailable_message);
+          form_set_error('review][operations][decision', $unavailable_message);
         }
       }
     }
