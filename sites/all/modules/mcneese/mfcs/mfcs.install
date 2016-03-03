@@ -1738,6 +1738,9 @@ function mfcs_install() {
   db_query('ALTER TABLE {mfcs_log_emails} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
   db_query('ALTER TABLE {mfcs_users} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
 
+  db_query('ALTER TABLE {mfcs_synchronize} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
+  db_query('ALTER TABLE {mfcs_log_troubleshoot} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
+
   foreach ($structure as $structure_name => &$structure_array) {
     foreach ($structure_array as $field_name => &$field_type) {
       $field_table1_name = 'mfcs_field_' . $structure_name . '_' . $field_name;
@@ -1831,6 +1834,8 @@ function mfcs_uninstall() {
   db_query('ALTER TABLE {mfcs_log_troubleshoot} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
   db_query('ALTER TABLE {mfcs_log_emails} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
   db_query('ALTER TABLE {mfcs_users} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
+  db_query('ALTER TABLE {mfcs_synchronize} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
+  db_query('ALTER TABLE {mfcs_log_troubleshoot} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
 
   foreach ($structure as $structure_name => &$structure_array) {
     foreach ($structure_array as $field_name => &$field_type) {
