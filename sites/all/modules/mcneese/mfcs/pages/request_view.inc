@@ -1505,7 +1505,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
         if (!empty($holidays)) {
           $form['review']['operations']['warnings']['#markup'] .= '<div class="warning-holidays">' . "\n";
-          $form['review']['operations']['warnings']['#markup'] .= '<div class="warning-holidays-title">This request is associated with the following holidays:</div>' . "\n";
+          $form['review']['operations']['warnings']['#markup'] .= '<div class="warning-holidays-title">This request is scheduled on the same dates as the following:</div>' . "\n";
           $form['review']['operations']['warnings']['#markup'] .= '<ul class="warning-holidays-list">' . "\n";
           foreach ($holidays as $holiday) {
             $form['review']['operations']['warnings']['#markup'] .= '<li class="warning-holidays-list-item">' . t("<strong>@holiday</strong> on: <em>@date</em>.", array('@date' => date('l, F j, Y', $holiday->date), '@holiday' => $holiday->title)) . '</li>' . "\n";
