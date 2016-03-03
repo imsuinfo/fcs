@@ -531,7 +531,6 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
     $is_quick_meeting = TRUE;
   }
 
-  //@todo: $holidays
   $holidays = array();
 
   if (!empty($location_state['dates']['date'])) {
@@ -568,12 +567,12 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
         if ($date_string == $request_string) {
           // Quick Meetings allow same day requests.
           if (!$is_quick_meeting) {
-            form_set_error($path_string_prefix . '][dates][date][' . $key . '][date]', t("The date '@date' is too soon, the request process takes time.", array('@date' => $value)));
+            form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t("The date '@date' is too soon, the request process takes time.", array('@date' => $value)));
             $passed = FALSE;
           }
         }
         elseif ($date_timestamp[$key] < $instance) {
-          form_set_error($path_string_prefix . '][dates][date][' . $key . '][date]', t("The date '@date' is in the past and cannot be used.", array('@date' => $value)));
+          form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t("The date '@date' is in the past and cannot be used.", array('@date' => $value)));
           $passed = FALSE;
         }
       }
