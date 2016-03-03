@@ -531,6 +531,9 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
     $is_quick_meeting = TRUE;
   }
 
+  //@todo: $holidays
+  $holidays = array();
+
   if (!empty($location_state['dates']['date'])) {
     $all_day = array();
     $partial_day = array();
@@ -565,13 +568,33 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
         if ($date_string == $request_string) {
           // Quick Meetings allow same day requests.
           if (!$is_quick_meeting) {
-            form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t("The date '@date' is too soon, the request process takes time.", array('@date' => $value)));
+            form_set_error($path_string_prefix . '][dates][date][' . $key . '][date]', t("The date '@date' is too soon, the request process takes time.", array('@date' => $value)));
             $passed = FALSE;
           }
         }
         elseif ($date_timestamp[$key] < $instance) {
-          form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t("The date '@date' is in the past and cannot be used.", array('@date' => $value)));
+          form_set_error($path_string_prefix . '][dates][date][' . $key . '][date]', t("The date '@date' is in the past and cannot be used.", array('@date' => $value)));
           $passed = FALSE;
+        }
+      }
+
+      // check for holidays.
+      if (!is_null($date_timestamp[$key]) && $date_timestamp[$key] !== FALSE) {
+        $day_start = strtotime('midnight today', $date_timestamp[$key]);
+
+        if (!array_key_exists($day_start, $holidays)) {
+          $holidays[$day_start] = mfcs_get_holidays((int) date('Y', $day_start), $day_start);
+
+          if ($holidays[$day_start] === FALSE) {
+            watchdog(MFCS_WATCHDOG_ID, "Failed to load holidays for year @year and timestamp @timestamp (based on @date).", array('@year' => (int) date('Y', $day_start), '@timestamp' => $day_start, '@date' => $start_timestamp[$key]));
+            unset($holidays[$day_start]);
+          }
+        }
+
+        if (!empty($holidays[$day_start])) {
+          $holiday = reset($holidays[$day_start]);
+          form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t("<strong>@date</strong> is not available because of: <strong>@holiday</strong>.", array('@date' => date('l, F j, Y', $holiday->date), '@holiday' => $holiday->title)));
+          unset($holiday);
         }
       }
 
@@ -590,7 +613,7 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
     foreach ($all_day as $datestamp => $key) {
       if (array_key_exists($datestamp, $partial_day)) {
         $date_string = date("Y/m/d", $datestamp);
-        form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t("The date '@date' is set to all day, but there are also partial day times in use for that same day. Please use either all day or partial day times but not both.", array('@date' => $date_string)));
+        form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t("<strong>@date</strong> is set to all day, but there are also partial day times in use for that same day. Please use either all day or partial day times but not both.", array('@date' => $date_string)));
         $passed = FALSE;
       }
     }

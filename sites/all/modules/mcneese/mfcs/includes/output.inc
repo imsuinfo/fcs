@@ -203,7 +203,12 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
       $items_count = 0;
       if (is_null($max_items)) {
         foreach ($items[$current_month_day] as $item_id => $item) {
-          $markup .= '<div class="calendar-item location-' . $item['location'] . ' building-' . $item['building'] . ' room-' . $item['room'] . ' type-' . $item['type'] . ' year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
+          if ($item['is'] == 'holiday') {
+            $markup .= '<div class="strong calendar-item calendar-holiday year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</div>';
+          }
+          else {
+            $markup .= '<div class="calendar-item location-' . $item['location'] . ' building-' . $item['building'] . ' room-' . $item['room'] . ' type-' . $item['type'] . ' year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
+          }
         }
       }
       else {
@@ -454,10 +459,15 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
           $item_class .= 'odd ';
         }
 
-        $item_class .= 'location-' . $item['location'] . ' ';
-        $item_class .= 'building-' . $item['building'] . ' ';
-        $item_class .= 'room-' . $item['room'] . ' ';
-        $item_class .= 'type-' . $item['type'] . ' ';
+        if ($item['is'] == 'holiday') {
+          $item_class .= 'type-holiday ';
+        }
+        else {
+          $item_class .= 'location-' . $item['location'] . ' ';
+          $item_class .= 'building-' . $item['building'] . ' ';
+          $item_class .= 'room-' . $item['room'] . ' ';
+          $item_class .= 'type-' . $item['type'] . ' ';
+        }
 
         $item_style = array(
           'box-sizing' => 'box-sizing: border-box;',
@@ -489,15 +499,20 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
         $css_landscape .= "\n" . $id_string_css_name . ' #' . $item_id_string . " {\n  " . implode("\n  ", $item_style_landscape) . "\n}\n";
 
         $markup .= '<div id="' . $item_id_string . '"  class="calendar-item-wrapper ' . $item_class . '""><div class="calendar-item">';
-        $markup .= '<div class="calendar-item-link-wrapper"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
-        $markup .= '<div class="calendar-item-location-wrapper"><div class="calendar-item-location">' . $item['building_name'] . ' ' . $item['room_name'] . '</div></div>';
-
-        $markup .= '<div class="calendar-item-id-wrapper"><div class="calendar-item-id">' . $item_id . '</div></div>';
-
-        if (!empty($request_type_options[$item['type']])) {
-          $markup .= '<div class="calendar-item-type-wrapper"><div class="calendar-item-type">' . $request_type_options[$item['type']] . '</div></div>';
+        if ($item['is'] == 'holiday') {
+          $markup .= '<div class="calendar-item-link-wrapper" title="' . $item['tooltip'] . '">' . $item['title'] . '</div>';
+          $markup .= '<div class="calendar-item-description-wrapper"><div class="calendar-item-description">' . $item['description'] . '</div></div>';
         }
+        else {
+          $markup .= '<div class="calendar-item-link-wrapper"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
+          $markup .= '<div class="calendar-item-location-wrapper"><div class="calendar-item-location">' . $item['building_name'] . ' ' . $item['room_name'] . '</div></div>';
 
+          $markup .= '<div class="calendar-item-id-wrapper"><div class="calendar-item-id">' . $item_id . '</div></div>';
+
+          if (!empty($request_type_options[$item['type']])) {
+            $markup .= '<div class="calendar-item-type-wrapper"><div class="calendar-item-type">' . $request_type_options[$item['type']] . '</div></div>';
+          }
+        }
         $markup .= '</div></div>';
 
         $item_count++;

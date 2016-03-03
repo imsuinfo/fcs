@@ -976,6 +976,87 @@ function mfcs_synchronize_request_access($type = NULL, $password = NULL, $user_i
 }
 
 /**
+ * Access callback for facilities use holiday related operations.
+ *
+ * This is a simple access check and is not cached like the other access checks.
+ *
+ * @param int|null $type
+ *   (optional) When NULL, access to holiday management page is checked.
+ *   When not NULL, access to a specific holiday id is checked.
+ * @param int|null $user_id
+ *   (optional) When NULL, the id of the current user is used.
+ *   When not NULL, the provided user id is used.
+ * @param bool|null $enabled
+ *   (optional) When TRUE, only enabled holidays are allowed.
+ *   When FALSE, not enabled holidays are allowed.
+ *
+ * @param return bool
+ *   TRUE on granted, FALSE otherwise.
+ */
+function mfcs_holiday_request_access($id = NULL, $user_id = NULL, $enabled = TRUE) {
+  if (!is_null($id) && !cf_is_integer($id)) {
+    cf_error::invalid_integer('id');
+    return FALSE;
+  }
+
+  if (is_null($user_id)) {
+    $user = cf_current_user();
+  }
+  else {
+    $user = user_load($user_id);
+  }
+
+  if (!is_object($user)) {
+    cf_error::invalid_integer('user_id');
+    return FALSE;
+  }
+
+  if (!is_null($enabled) && !is_bool($enabled)) {
+    cf_error::invalid_bool('enabled');
+    return FALSE;
+  }
+
+  // only allow managers and administers to do anything with holidays.
+  if (!user_access('mfcs manage', $user) && !user_access('mfcs administer', $user)) {
+    return FALSE;
+  }
+
+  if (is_null($id)) {
+    return TRUE;
+  }
+  else {
+    try {
+      $query = db_select('mfcs_holiday', 'mh');
+      $query->addField('mh', 'id', 'id');
+
+      if (!is_null($id)) {
+        $query->condition('id', $id);
+      }
+
+      if ($enabled) {
+        $query->condition('enabled', 1);
+      }
+
+      // prohibit access to soft-deleted rows.
+      $query->condition('disabled', 0);
+
+      $results = $query->execute()->fetchAll();
+      if (empty($results)) {
+        return FALSE;
+      }
+
+      return TRUE;
+    } catch (Exception $ex) {
+      cf_error::on_query_execution($ex);
+
+      return FALSE;
+    }
+  }
+
+  return FALSE;
+}
+
+/**
  * Check access for already loaded facilities use requests.
  *
  * This is used to reduce database calls for when a request is already loaded.
@@ -10287,6 +10368,185 @@ function mfcs_get_request_already_reviewed_as_classifications($request_id, $revi
   }
 
   return $return;
+}
+
+/**
+ * Returns a list of holidays for the given year, month, day.
+ *
+ * @param int $year
+ *   The year the holiday belongs under.
+ * @param int|null $timestamp_start
+ *   (optional) The timestamp start range.
+ *   If the stop range is NULL and this is an integer, then only the specific specified timestamp is loaded.
+ * @param int|null $timestamp_stop
+ *   (optional) The timestamp stop range.
+ *   If NULL, then this value is ignored.
+ * @param bool|null $enabled
+ *   (optional) When TRUE, only load holidays when the enabled column is 1.
+ *   When FALSE, only load holidays when the enabled column is 0.
+ *   When NULL, ignore this column.
+ * @param bool|null $deleted
+ *   (optional) When TRUE, only load holidays when the disabled column is 1.
+ *   When FALSE, only load holidays when the disabled column is 0.
+ *   When NULL, ignore this column.
+ *
+ * @return array|bool
+ *   An array of holidays.
+ *   FALSE is returned on error.
+ */
+function mfcs_get_holidays($year, $timestamp_start = NULL, $timestamp_stop = NULL, $enabled = TRUE, $deleted = FALSE) {
+  if (!cf_is_integer($year)) {
+    cf_error::invalid_integer('year');
+    return FALSE;
+  }
+
+  if (!is_null($timestamp_start) && !cf_is_integer($timestamp_start)) {
+    cf_error::invalid_integer('timestamp_start');
+    return FALSE;
+  }
+
+  if (!is_null($timestamp_stop) && !cf_is_integer($timestamp_stop)) {
+    cf_error::invalid_integer('timestamp_stop');
+    return FALSE;
+  }
+
+  if (!is_null($enabled) && !is_bool($enabled)) {
+    cf_error::invalid_bool('enabled');
+    return FALSE;
+  }
+
+  if (!is_null($deleted) && !is_bool($deleted)) {
+    cf_error::invalid_bool('deleted');
+    return FALSE;
+  }
+
+  try {
+    $query = db_select('mfcs_holiday', 'mh');
+    $query->addField('mh', 'id', 'id');
+    $query->addField('mh', 'date', 'date');
+    $query->addField('mh', 'title', 'title');
+    $query->addField('mh', 'description', 'description');
+    $query->addField('mh', 'enabled', 'enabled');
+    $query->addField('mh', 'disabled', 'disabled');
+    $query->addField('mh', 'created', 'created');
+    $query->addField('mh', 'updated', 'updated');
+
+    $query->condition('mh.year', $year);
+
+    if ($enabled === TRUE) {
+      $query->condition('mh.enabled', 1);
+    }
+    elseif ($enabled === FALSE) {
+      $query->condition('mh.enabled', 0);
+    }
+
+    if ($deleted === TRUE) {
+      $query->condition('mh.disabled', 1);
+    }
+    elseif ($deleted === FALSE) {
+      $query->condition('mh.disabled', 0);
+    }
+
+    if (!is_null($timestamp_start)) {
+      // only process values on a per day-to-day basis by setting the timestamps to midnight for each day.
+      $timestamp_start_midnight = strtotime('midnight today', $timestamp_start);
+
+      if (is_null($timestamp_stop)) {
+        $query->condition('mh.date', $timestamp_start_midnight);
+      }
+      else {
+        // only process values on a per day-to-day basis by setting the timestamps to midnight for each day.
+        $timestamp_stop_midnight = strtotime('midnight today', $timestamp_stop);
+
+        $query->condition('mh.date', $timestamp_start_midnight, '>=');
+        $query->condition('mh.date', $timestamp_stop_midnight, '<');
+      }
+    }
+
+    $query->orderBy('mh.date');
+
+    $results = $query->execute()->fetchAllAssoc('id');
+  }
+  catch (Exception $ex) {
+    cf_error::on_exception($ex);
+
+    return FALSE;
+  }
+
+  return $results;
+}
+
+/**
+ * Returns a list of holidays for the given year, month, day.
+ *
+ * @param int $id
+ *   The id of the holiday to load.
+ * @param bool|null $enabled
+ *   (optional) When TRUE, only load holidays when the enabled column is 1.
+ *   When FALSE, only load holidays when the enabled column is 0.
+ *   When NULL, ignore this column.
+ * @param bool|null $deleted
+ *   (optional) When TRUE, only load holidays when the disabled column is 1.
+ *   When FALSE, only load holidays when the disabled column is 0.
+ *   When NULL, ignore this column.
+ *
+ * @return array|bool
+ *   An array of holidays.
+ *   FALSE is returned on error.
+ */
+function mfcs_get_holiday($id, $enabled = TRUE, $deleted = FALSE) {
+  if (!cf_is_integer($id)) {
+    cf_error::invalid_integer('id');
+    return FALSE;
+  }
+
+  if (!is_null($enabled) && !is_bool($enabled)) {
+    cf_error::invalid_bool('enabled');
+    return FALSE;
+  }
+
+  if (!is_null($deleted) && !is_bool($deleted)) {
+    cf_error::invalid_bool('deleted');
+    return FALSE;
+  }
+
+  try {
+    $query = db_select('mfcs_holiday', 'mh');
+    $query->addField('mh', 'id', 'id');
+    $query->addField('mh', 'year', 'year');
+    $query->addField('mh', 'date', 'date');
+    $query->addField('mh', 'title', 'title');
+    $query->addField('mh', 'description', 'description');
+    $query->addField('mh', 'enabled', 'enabled');
+    $query->addField('mh', 'disabled', 'disabled');
+    $query->addField('mh', 'created', 'created');
+    $query->addField('mh', 'updated', 'updated');
+
+    $query->condition('mh.id', $id);
+
+    if ($enabled === TRUE) {
+      $query->condition('mh.enabled', 1);
+    }
+    elseif ($enabled === FALSE) {
+      $query->condition('mh.enabled', 0);
+    }
+
+    if ($deleted === TRUE) {
+      $query->condition('mh.disabled', 1);
+    }
+    elseif ($deleted === FALSE) {
+      $query->condition('mh.disabled', 0);
+    }
+
+    $results = $query->execute()->fetchObject();
+  }
+  catch (Exception $ex) {
+    cf_error::on_exception($ex);
+
+    return FALSE;
+  }
+
+  return $results;
 }
 
 /**

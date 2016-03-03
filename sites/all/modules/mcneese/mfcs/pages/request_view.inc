@@ -2396,10 +2396,13 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
         $all_dates = array();
         $all_time_start = array();
         $all_time_stop = array();
+        $all_holidays = array();
         foreach ($request['dates']['date'] as $date_delta => $date_value) {
           $all_dates[$date_delta] = $request['dates']['date'][$date_delta]->value;
           $all_time_start[$date_delta] = $request['dates']['time_start'][$date_delta]->value;
           $all_time_stop[$date_delta] = $request['dates']['time_stop'][$date_delta]->value;
+
+          $all_holidays = mfcs_get_holidays((int) date('Y', $request['dates']['date'][$date_delta]->value), $request['dates']['date'][$date_delta]->value);
         }
 
         $requests_using_room = mfcs_check_room_availability($room, $all_dates, $all_time_start, $all_time_stop, $request_id);
@@ -2438,6 +2441,16 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
           $unavailable_message .= '</ul>' . "\n";
           form_set_error('review][operations][decision', $unavailable_message);
         }
+
+        // check for holidays.
+        if (!empty($all_holidays)) {
+          $holiday = reset($all_holidays);
+          if (is_object($holiday)) {
+            form_set_error('review][operations][decision', t("<strong>@date</strong> is not available because of: <strong>@holiday</strong>.", array('@date' => date('l, F j, Y', $holiday->date), '@holiday' => $holiday->title)));
+          }
+          unset($holiday);
+        }
+        unset($all_holidays);
       }
     }
 

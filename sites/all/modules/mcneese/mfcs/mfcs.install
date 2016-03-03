@@ -1087,6 +1087,55 @@ function mfcs_schema() {
     ),
   );
 
+  $schema['mfcs_log_holiday'] = array(
+    'description' => $t("McNeese Facilities Use troubleshoot log table. Contains a record of all holiday actions performed."),
+    'fields' => array(
+      'id' => array(
+        'description' => $t("The primary key used to represent the log entry."),
+        'type' => 'serial',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'holiday_id' => array(
+        'description' => $t("This is the holiday id."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'user_id' => array(
+        'description' => $t("This is the system user id. Represents the user associated with the log entry."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'date' => array(
+        'description' => $t("Represents the date the action was performed."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'change' => array(
+        'description' => $t("A description of the changes made."),
+        'type' => 'text',
+        'size' => 'big',
+        'serialize' => TRUE,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('id'),
+    'foreign keys' => array(
+      'user_id' => array(
+        'table' => 'users',
+        'columns' => array('user_id' => 'uid'),
+      ),
+    ),
+  );
+
   $schema['mfcs_users'] = array(
     'description' => $t("McNeese Facilities Use Users table. This represents custom settings or exceptional cases involved with users."),
     'fields' => array(
@@ -1184,6 +1233,79 @@ function mfcs_schema() {
         'columns' => array('user_id' => 'uid'),
       ),
     ),
+  );
+
+
+  $schema['mfcs_holiday'] = array(
+    'description' => $t("McNeese Facilities Use holiday dates table."),
+    'fields' => array(
+      'id' => array(
+        'description' => $t("The primary key used to represent the ical import entry."),
+        'type' => 'serial',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'year' => array(
+        'description' => $t("Represents the year associated with the entry."),
+        'type' => 'int',
+        'size' => 'small',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'date' => array(
+        'description' => $t("Represents the date associated with the entry."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'title' => array(
+        'description' => $t("Represents the title of the entry."),
+        'type' => 'varchar',
+        'size' => '255',
+        'serialize' => TRUE,
+        'not null' => TRUE,
+      ),
+      'description' => array(
+        'description' => $t("Represents the description of the entry."),
+        'type' => 'varchar',
+        'size' => '255',
+        'serialize' => TRUE,
+        'not null' => TRUE,
+      ),
+      'enabled' => array(
+        'description' => $t("Boolean designating that the entry is enable. This is used to enable/disable entries from appear on calendard and restricting requests."),
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'disabled' => array(
+        'description' => $t("Boolean designating that the entry is disabled. This is used as a soft-delete to prevent loss of records."),
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'created' => array(
+        'description' => $t("Represents the row was created."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'updated' => array(
+        'description' => $t("Represents the row was last updated."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('id'),
   );
 
 

@@ -1241,6 +1241,90 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'tab_root' => 'requests',
     'type' => MENU_CALLBACK,
   );
+
+  $items['requests/holiday/year-0'] = array(
+    'title' => "Holidays",
+    'description' => "Holidays.",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_holiday_0_form'),
+    'file' => 'request_holiday.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_holiday_request_access',
+    'access arguments' => array(),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['requests/holiday/year-0/%'] = array(
+    'title' => "Holidays",
+    'description' => "Holidays.",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_holiday_0_form', 3),
+    'file' => 'request_holiday.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_holiday_request_access',
+    'access arguments' => array(),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['requests/holiday/year-0/%/edit'] = array(
+    'title' => "Create Holidays",
+    'description' => "Holidays.",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_holiday_0_edit_form', 3),
+    'file' => 'request_holiday.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_holiday_request_access',
+    'access arguments' => array(),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['requests/holiday/year-0/%/edit/%'] = array(
+    'title' => "Edit Holidays",
+    'description' => "Holidays.",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_holiday_0_edit_form', 3, 5),
+    'file' => 'request_holiday.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_holiday_request_access',
+    'access arguments' => array(),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['requests/holiday/year-0/%/delete/%'] = array(
+    'title' => "Delete Holidays",
+    'description' => "Holidays.",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_holiday_0_delete_form', 3, 5),
+    'file' => 'request_holiday.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_holiday_request_access',
+    'access arguments' => array(5, NULL, FALSE),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['requests/holiday/year-0/%/view/%'] = array(
+    'title' => "Holidays",
+    'description' => "Holidays.",
+    'page callback' => 'mfcs_request_holiday_0_page',
+    'page arguments' => array(3, 5),
+    'file' => 'request_holiday.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_holiday_request_access',
+    'access arguments' => array(5, NULL, NULL),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+    'type' => MENU_CALLBACK,
+  );
 }
 
 /**
