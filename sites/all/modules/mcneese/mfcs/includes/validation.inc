@@ -592,7 +592,8 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
 
         if (!empty($holidays[$day_start])) {
           $holiday = reset($holidays[$day_start]);
-          form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t("<strong>@date</strong> is not available because of: <strong>@holiday</strong>.", array('@date' => date('l, F j, Y', $holiday->date), '@holiday' => $holiday->title)));
+          #form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t("<strong>@date</strong> is not available because of: <strong>@holiday</strong>.", array('@date' => date('l, F j, Y', $holiday->date), '@holiday' => $holiday->title)));
+          drupal_set_message(t("Warning: <strong>@date</strong> may not available because of: <strong>@holiday</strong>.", array('@date' => date('l, F j, Y', $holiday->date), '@holiday' => $holiday->title)), 'warning');
           unset($holiday);
         }
       }

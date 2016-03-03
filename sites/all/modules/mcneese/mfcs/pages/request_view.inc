@@ -1491,6 +1491,30 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         );
       }
 
+      $form['review']['operations']['warnings'] = array(
+        '#type' => 'markup',
+        '#markup' => "",
+      );
+
+      // Display warning messages if the user can make a decision.
+      if ($can_review_request && !empty($reviewer_classifications) && ($step === MFCS_REVIEW_STEP_VENUE_AVAILABLE || $step === MFCS_REVIEW_STEP_REVIEW || $step === MFCS_REVIEW_STEP_REQUIREMENTS || $step === MFCS_REVIEW_STEP_MAKE_DECISIONS)) {
+        $holidays = array();
+        foreach ($request['dates']['date'] as $date_delta => $date_value) {
+          $holidays = mfcs_get_holidays((int) date('Y', $request['dates']['date'][$date_delta]->value), $request['dates']['date'][$date_delta]->value);
+        }
+
+        if (!empty($holidays)) {
+          $form['review']['operations']['warnings']['#markup'] .= '<div class="warning-holidays">' . "\n";
+          $form['review']['operations']['warnings']['#markup'] .= '<div class="warning-holidays-title">This request is associated with the following holidays:</div>' . "\n";
+          $form['review']['operations']['warnings']['#markup'] .= '<ul class="warning-holidays-list">' . "\n";
+          foreach ($holidays as $holiday) {
+            $form['review']['operations']['warnings']['#markup'] .= '<li class="warning-holidays-list-item">' . t("<strong>@holiday</strong> on: <em>@date</em>.", array('@date' => date('l, F j, Y', $holiday->date), '@holiday' => $holiday->title)) . '</li>' . "\n";
+          }
+          $form['review']['operations']['warnings']['#markup'] .= '</ul>' . "\n";
+          $form['review']['operations']['warnings']['#markup'] .= '</div>' . "\n";
+        }
+      }
+
       $form['review']['operations']['decision'] = array(
         '#id' => 'request-review-operations-decision',
         '#type' => 'select',
@@ -2446,7 +2470,8 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
         if (!empty($all_holidays)) {
           $holiday = reset($all_holidays);
           if (is_object($holiday)) {
-            form_set_error('review][operations][decision', t("<strong>@date</strong> is not available because of: <strong>@holiday</strong>.", array('@date' => date('l, F j, Y', $holiday->date), '@holiday' => $holiday->title)));
+            #form_set_error('review][operations][decision', t("<strong>@date</strong> is not available because of: <strong>@holiday</strong>.", array('@date' => date('l, F j, Y', $holiday->date), '@holiday' => $holiday->title)));
+            drupal_set_message(t("Warning: <strong>@date</strong> may not available because of: <strong>@holiday</strong>.", array('@date' => date('l, F j, Y', $holiday->date), '@holiday' => $holiday->title)), 'warning');
           }
           unset($holiday);
         }
