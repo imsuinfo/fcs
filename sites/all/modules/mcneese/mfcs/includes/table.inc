@@ -862,7 +862,7 @@ function mfcs_table_presentation($option = NULL) {
         'value' => 'timestamp',
       ),
       'display' => array(
-        'value' => 'Y/m/d h:i:sa',
+        'value' => 'l, F j, Y h:i:sa',
       ),
       'request_type' => array(
         'show' => TRUE,
@@ -892,7 +892,7 @@ function mfcs_table_presentation($option = NULL) {
         'value' => 'timestamp',
       ),
       'display' => array(
-        'value' => 'Y/m/d h:i:sa',
+        'value' => 'l, F j, Y h:i:sa',
       ),
       'request_type' => array(
         'show' => TRUE,
