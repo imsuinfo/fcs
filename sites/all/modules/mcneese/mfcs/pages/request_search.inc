@@ -1592,6 +1592,19 @@ function mfcs_request_search_0_simple_search_preprocess(&$conditions, &$options)
   }
 
 
+  // access control is used for allowing searching via 'deleted' list options.
+  $user = cf_current_user();
+  $administer = user_access('mfcs administer', $user);
+  $manager = user_access('mfcs manage', $user);
+  $reviewer = user_access('mfcs review', $user);
+  $requester = user_access('mfcs request', $user);
+
+  $is_admin_or_manager = FALSE;
+  if ($administer || $manager) {
+    $is_admin_or_manager = TRUE;
+  }
+
+
   // search through the listings.
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
@@ -1601,8 +1614,8 @@ function mfcs_request_search_0_simple_search_preprocess(&$conditions, &$options)
   $status_options = mfcs_get_request_status_list_options();
   $step_options = mfcs_get_request_steps_list_options();
 
-  $room_options = mfcs_get_request_room_list_options(NULL, NULL, TRUE);
-  $building_options = mfcs_get_request_building_list_options(NULL, NULL, TRUE);
+  $room_options = mfcs_get_request_room_list_options(NULL, NULL, $is_admin_or_manager);
+  $building_options = mfcs_get_request_building_list_options(NULL, NULL, $is_admin_or_manager);
 
   $limit_type = array();
   foreach ($type_options as $key => $value) {
@@ -2028,6 +2041,20 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
     return FALSE;
   }
 
+
+  // access control is used for allowing searching via 'deleted' list options.
+  $user = cf_current_user();
+  $administer = user_access('mfcs administer', $user);
+  $manager = user_access('mfcs manage', $user);
+  $reviewer = user_access('mfcs review', $user);
+  $requester = user_access('mfcs request', $user);
+
+  $is_admin_or_manager = FALSE;
+  if ($administer || $manager) {
+    $is_admin_or_manager = TRUE;
+  }
+
+
   $field = $structure[$table_name][$field_name];
 
 
@@ -2190,13 +2217,13 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
         $location['targets'][$target_name][$target_delta]['search']['#options'] = mfcs_get_request_steps_list_options('search');
       }
       elseif ($field_name == 'location') {
-        $location['targets'][$target_name][$target_delta]['search']['#options'] = mfcs_get_request_location_list_options('search');
+        $location['targets'][$target_name][$target_delta]['search']['#options'] = mfcs_get_request_location_list_options('search', FALSE, $is_admin_or_manager);
       }
       elseif ($field_name == 'building') {
-        $location['targets'][$target_name][$target_delta]['search']['#options'] = mfcs_get_request_building_list_options(NULL, 'search');
+        $location['targets'][$target_name][$target_delta]['search']['#options'] = mfcs_get_request_building_list_options(NULL, 'search', $is_admin_or_manager);
       }
       elseif ($field_name == 'room') {
-        $location['targets'][$target_name][$target_delta]['search']['#options'] = mfcs_get_request_room_list_options(NULL, 'search');
+        $location['targets'][$target_name][$target_delta]['search']['#options'] = mfcs_get_request_room_list_options(NULL, 'search', $is_admin_or_manager);
       }
       elseif ($field_name == 'type') {
         $location['targets'][$target_name][$target_delta]['search']['#options'] = mfcs_get_request_type_list_options('search');
@@ -2213,13 +2240,13 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
         $location['targets'][$target_name][$target_delta]['search']['#options'] = mfcs_get_request_steps_list_options('search');
       }
       elseif ($field_name == 'location') {
-        $location['targets'][$target_name][$target_delta]['search']['#options'] = mfcs_get_request_location_list_options('search');
+        $location['targets'][$target_name][$target_delta]['search']['#options'] = mfcs_get_request_location_list_options('search', FALSE, $is_admin_or_manager);
       }
       elseif ($field_name == 'building') {
-        $location['targets'][$target_name][$target_delta]['search']['#options'] = mfcs_get_request_building_list_options(NULL, 'search');
+        $location['targets'][$target_name][$target_delta]['search']['#options'] = mfcs_get_request_building_list_options(NULL, 'search', $is_admin_or_manager);
       }
       elseif ($field_name == 'room') {
-        $location['targets'][$target_name][$target_delta]['search']['#options'] = mfcs_get_request_room_list_options(NULL, 'search');
+        $location['targets'][$target_name][$target_delta]['search']['#options'] = mfcs_get_request_room_list_options(NULL, 'search', $is_admin_or_manager);
       }
     }
     elseif ($table_name == 'information') {
