@@ -310,7 +310,7 @@ function mfcs_request_holiday_0_page($year, $id) {
   $title = check_plain($holiday->title);
   $description = check_plain($holiday->description);
 
-  drupal_set_title($date_long . ": " . $title);
+  drupal_set_title($date_long . ": " . $holiday->title);
 
   $markup = '<div id="mfcs-holiday_page-view" class="mfcs-holiday_page-view">' . "\n";
   $markup .= '<div class="mfcs-holiday_page-title"><strong>' . $title . '</strong> is a holiday, break, or office closure for McNeese State University on: <strong>' . $date_long . '</strong>.</div>' . "\n";
@@ -852,7 +852,7 @@ function mfcs_request_holiday_0_delete_form($form, &$form_state, $year, $holiday
 
   mfcs_add_canonical_headers('requests/holiday/delete-0/' . $holiday_id);
 
-  $page_title = "Delete Holiday: " . check_plain($holiday->title) . ' (' . date('l, F j, Y', $holiday->date) . ')';
+  $page_title = "Delete Holiday: " . $holiday->title . ' (' . date('l, F j, Y', $holiday->date) . ')';
 
   drupal_set_title($page_title);
 
