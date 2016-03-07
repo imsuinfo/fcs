@@ -48,6 +48,8 @@ function cf_http_init() {
  *  (optional) Socket open and stream timeout when connecting to remove host, in seconds.
  * @param $buffer
  *  (optional) Buffer size to use when reading from the socket, in bytes.
+ * @param bool $ssl
+ *  (optional) When TRUE, ssl is enabled, port likely should be set to 443.
  *
  * @return array
  *   An array containing the connection status and return http response.
@@ -62,7 +64,7 @@ function cf_http_init() {
  * @see: cf_http_get_webpage()
  * @see: fsockopen()
  */
-function cf_http_get_response($server, $path, $port = 80, $headers = NULL, $timeout = 8, $buffer = 8192) {
+function cf_http_get_response($server, $path, $port = 80, $headers = NULL, $timeout = 8, $buffer = 8192, $ssl = FALSE) {
   $results = array('connected' => FALSE, 'response' => '', 'is_local' => FALSE, 'socket_error' => array('code' => 0, 'message' => NULL));
 
   if (is_null($headers)) {
@@ -94,7 +96,16 @@ function cf_http_get_response($server, $path, $port = 80, $headers = NULL, $time
     return $results;
   }
 
-  $fp = fsockopen($server, $port, $errno, $errstr, $timeout);
+  if (!is_bool($ssl)) {
+    $ssl = FALSE;
+  }
+
+  if ($ssl) {
+    $fp = fsockopen('tls://' . $server, $port, $errno, $errstr, $timeout);
+  }
+  else {
+    $fp = fsockopen($server, $port, $errno, $errstr, $timeout);
+  }
 
   if ($errno != 0) {
     $results['socket_error']['code'] = $errno;
@@ -662,6 +673,8 @@ function cf_adjust_url($url, $server, $relative_path, $scheme = 'http', $suffix 
  *  (optional) Socket open and stream timeout when connecting to remove host, in seconds.
  * @param $buffer
  *  (optional) Buffer size to use when reading from the socket, in bytes.
+ * @param bool $ssl
+ *  (optional) When TRUE, ssl is enabled, port likely should be set to 443.
  *
  * @return array
  *   An array containing the connection status and return http response.
@@ -671,10 +684,14 @@ function cf_adjust_url($url, $server, $relative_path, $scheme = 'http', $suffix 
  *   - headers: The http header from the httpd response.
  *   - document: The complete html document from the http response.
  */
-function cf_http_get_webpage($server, $path, $port = 80, $headers = NULL, $timeout = 8, $buffer = 8192) {
+function cf_http_get_webpage($server, $path, $port = 80, $headers = NULL, $timeout = 8, $buffer = 8192, $ssl = FALSE) {
   $results = array('read' => FALSE, 'headers' => '', 'document' => '', 'http_error' => array('error_code' => 0, 'key' => '', 'value' => ''), 'socket_error' => array('code' => 0, 'message' => NULL));
 
-  $result = cf_http_get_response($server, $path, $port, $headers, $timeout, $buffer);
+  if (!is_bool($ssl)) {
+    $ssl = FALSE;
+  }
+
+  $result = cf_http_get_response($server, $path, $port, $headers, $timeout, $buffer, $ssl);
 
   if (isset($result['socket_error'])) {
     $results['socket_error'] = $result['socket_error'];
