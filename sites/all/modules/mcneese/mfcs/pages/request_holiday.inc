@@ -425,7 +425,7 @@ function mfcs_request_holiday_0_edit_form($form, &$form_state, $year, $holiday_i
   if (is_object($holiday)) {
     mfcs_add_canonical_headers('requests/holiday/year-0/' . $year . '/edit/' . $holiday_id);
 
-    $page_title = "Edit " . $year . " Holiday: " . check_plain($holiday->title) . ' (' . date('l, F j, Y', $holiday->date) . ')';
+    $page_title = "Edit " . $year . " Holiday: " . $holiday->title . ' (' . date('l, F j, Y', $holiday->date) . ')';
   }
   else {
     mfcs_add_canonical_headers('requests/holiday/year-0/' . $year . '/edit');
