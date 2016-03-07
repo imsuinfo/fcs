@@ -677,6 +677,13 @@ function drupal_goto($path = '', array $options = array(), $http_response_code =
     $options['fragment'] = $destination['fragment'];
   }
 
+  // In some cases modules call drupal_goto(current_path()). We need to ensure
+  // that such a redirect is not to an external URL.
+  if ($path === current_path() && empty($options['external']) && url_is_external($path)) {
+    // Force url() to generate a non-external URL.
+    $options['external'] = FALSE;
+  }
+
   drupal_alter('drupal_goto', $path, $options, $http_response_code);
 
   // The 'Location' HTTP header must be absolute.
@@ -906,7 +913,7 @@ function drupal_http_request($url, array $options = array()) {
   // or PUT request. Some non-standard servers get confused by Content-Length in
   // at least HEAD/GET requests, and Squid always requires Content-Length in
   // POST/PUT requests.
-  $content_length = drupal_bytes_in_string($options['data']);
+  $content_length = strlen($options['data']);
   if ($content_length > 0 || $options['method'] == 'POST' || $options['method'] == 'PUT') {
     $options['headers']['Content-Length'] = $content_length;
   }
@@ -2209,20 +2216,8 @@ function url($path = NULL, array $options = array()) {
     'prefix' => ''
   );
 
-  // A duplicate of the code from url_is_external() to avoid needing another
-  // function call, since performance inside url() is critical.
   if (!isset($options['external'])) {
-    // Return an external link if $path contains an allowed absolute URL. Avoid
-    // calling drupal_strip_dangerous_protocols() if there is any slash (/),
-    // hash (#) or question_mark (?) before the colon (:) occurrence - if any -
-    // as this would clearly mean it is not a URL. If the path starts with 2
-    // slashes then it is always considered an external URL without an explicit
-    // protocol part.
-    $colonpos = strpos($path, ':');
-    $options['external'] = (strpos($path, '//') === 0)
-      || ($colonpos !== FALSE
-        && !preg_match('![/?#]!', substr($path, 0, $colonpos))
-        && drupal_strip_dangerous_protocols($path) == $path);
+    $options['external'] = url_is_external($path);
   }
 
   // Preserve the original path before altering or aliasing.
@@ -2352,12 +2347,18 @@ function url($path = NULL, array $options = array()) {
  */
 function url_is_external($path) {
   $colonpos = strpos($path, ':');
-  // Avoid calling drupal_strip_dangerous_protocols() if there is any slash (/),
-  // hash (#) or question_mark (?) before the colon (:) occurrence - if any - as
-  // this would clearly mean it is not a URL. If the path starts with 2 slashes
-  // then it is always considered an external URL without an explicit protocol
-  // part.
+  // Some browsers treat \ as / so normalize to forward slashes.
+  $path = str_replace('\\', '/', $path);
+  // If the path starts with 2 slashes then it is always considered an external
+  // URL without an explicit protocol part.
   return (strpos($path, '//') === 0)
+    // Leading control characters may be ignored or mishandled by browsers, so
+    // assume such a path may lead to an external location. The \p{C} character
+    // class matches all UTF-8 control, unassigned, and private characters.
+    || (preg_match('/^\p{C}/u', $path) !== 0)
+    // Avoid calling drupal_strip_dangerous_protocols() if there is any slash
+    // (/), hash (#) or question_mark (?) before the colon (:) occurrence - if
+    // any - as this would clearly mean it is not a URL.
     || ($colonpos !== FALSE
       && !preg_match('![/?#]!', substr($path, 0, $colonpos))
       && drupal_strip_dangerous_protocols($path) == $path);
@@ -8716,64 +8717,4 @@ function drupal_get_filetransfer_info() {
     uasort($info, 'drupal_sort_weight');
   }
   return $info;
-}
-
-/**
- * Calculate the 8-bit length (octet) of some string.
- *
- * This is distint from an strlen() in that it does not count characters, it only counts bytes.
- *
- * RFC 7230 describes the content-length as referring to the count based on every 8-bits, which is a single octet.
- * Using strlen() could be incorrect because of the php setting: mbstring.func_overload.
- * Using mb_strlen() would be incorrect because it contains mixed lengths.
- * Using drupal_strlen() would be incorrect because it counts multibyte and even ignores some UTF-8 bytes when counting.
- *
- * @param string $string
- *   The PHP string to count the number of bytes of.
- *
- * The solution is to break apart the string into 8-bit chunks and then calculate the length using mb_strcut().
- * This may be expensive depending on the size of the data and ideally should only be called once.
- *
- * @return int|bool
- *   Total number of octals on success, FALSE otherwise.
- *
- * @see: https://tools.ietf.org/html/rfc7230#section-3.3.2
- * @see: mb_strcut()
- */
-function drupal_bytes_in_string($string) {
-  // if only dealing with ASCII, then it is safe to use PHP's strlen() function.
-  if (mb_detect_encoding($string) == 'ASCII') {
-    return strlen($string);
-  }
-
-  $total = 0;
-  $length = strlen($string);
-  $character = 0;
-  $cut_size = 0;
-
-  // Use a hard limit of the maximum character size to 32-bits (which is a max cut_size of 4).
-  for (; $character < $length; $character++) {
-    $piece = NULL;
-    $cut_size = 1;
-    for (; $cut_size < 4; $cut_size++) {
-      $piece = mb_strcut($string, $total, $cut_size);
-
-      if (strlen($piece) != 0) {
-        break;
-      }
-    }
-
-    if ($cut_size > 4) {
-      break;
-    }
-
-    $total += $cut_size;
-  }
-
-  if ($cut_size >= 4) {
-    // failed to process properly, so fallback to strlen() as a failsafe.
-    return strlen($string);
-  }
-
-  return $total;
 }

@@ -967,6 +967,8 @@ function user_search_access() {
  */
 function user_search_execute($keys = NULL, $conditions = NULL) {
   $find = array();
+  // Escape for LIKE matching.
+  $keys = db_like($keys);
   // Replace wildcards with MySQL/PostgreSQL wildcards.
   $keys = preg_replace('!\*+!', '%', $keys);
   $query = db_select('users')->extend('PagerDefault');
@@ -976,13 +978,13 @@ function user_search_execute($keys = NULL, $conditions = NULL) {
     // and they don't need to be restricted to only active users.
     $query->fields('users', array('mail'));
     $query->condition(db_or()->
-      condition('name', '%' . db_like($keys) . '%', 'ILIKE')->
-      condition('mail', '%' . db_like($keys) . '%', 'ILIKE'));
+      condition('name', '%' . $keys . '%', 'ILIKE')->
+      condition('mail', '%' . $keys . '%', 'ILIKE'));
   }
   else {
     // Regular users can only search via usernames, and we do not show them
     // blocked accounts.
-    $query->condition('name', '%' . db_like($keys) . '%', 'ILIKE')
+    $query->condition('name', '%' . $keys . '%', 'ILIKE')
       ->condition('status', 1);
   }
   $uids = $query
@@ -1306,10 +1308,12 @@ function user_user_presave(&$edit, $account, $category) {
     elseif (!empty($edit['picture_delete'])) {
       $edit['picture'] = NULL;
     }
-    // Prepare user roles.
-    if (isset($edit['roles'])) {
-      $edit['roles'] = array_filter($edit['roles']);
-    }
+  }
+
+  // Filter out roles with empty values to avoid granting extra roles when
+  // processing custom form submissions.
+  if (isset($edit['roles'])) {
+    $edit['roles'] = array_filter($edit['roles']);
   }
 
   // Move account cancellation information into $user->data.
@@ -2237,7 +2241,8 @@ function user_login_final_validate($form, &$form_state) {
     }
     else {
       form_set_error('name', 'Sorry, unrecognized username or password.');
-      watchdog('user', 'Login attempt failed for %user.', array('%user' => $form_state['values']['name']));
+      $user_name = isset($form_state['input']['name']) ? $form_state['input']['name'] : NULL;
+      watchdog('user', 'Login attempt failed for %user.', array('%user' => $user_name));
     }
   }
   elseif (isset($form_state['flood_control_user_identifier'])) {
@@ -3674,12 +3679,7 @@ function user_form_process_password_confirm($element) {
   );
 
   $element['#attached']['js'][] = drupal_get_path('module', 'user') . '/user.js';
-  // Ensure settings are only added once per page.
-  static $already_added = FALSE;
-  if (!$already_added) {
-    $already_added = TRUE;
-    $element['#attached']['js'][] = array('data' => $js_settings, 'type' => 'setting');
-  }
+  $element['#attached']['js'][] = array('data' => $js_settings, 'type' => 'setting');
 
   return $element;
 }
