@@ -313,7 +313,7 @@ function mfcs_request_holiday_0_page($year, $id) {
   drupal_set_title($date_long . ": " . $title);
 
   $markup = '<div id="mfcs-holiday_page-view" class="mfcs-holiday_page-view">' . "\n";
-  $markup .= '<div class="mfcs-holiday_page-title"><strong>' . $title . '</strong> is a holiday for McNeese State University on: <strong>' . $date_long . '</strong>.</div>' . "\n";
+  $markup .= '<div class="mfcs-holiday_page-title"><strong>' . $title . '</strong> is a holiday, break, or office closure for McNeese State University on: <strong>' . $date_long . '</strong>.</div>' . "\n";
   $markup .= "<br>\n";
   $markup .= '<div class="mfcs-holiday_page-description">' . $description . '</div>' . "\n";
 
