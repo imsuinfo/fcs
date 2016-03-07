@@ -326,7 +326,7 @@ function mfcs_request_holiday_0_page($year, $id) {
     $markup .= '<br class="no-print">' . "\n";
     $markup .= '<div class="holiday_page-operations no-print">' . "\n";
     $markup .= '<a href="' . $base_path . 'requests/holiday/year-0/' . $year . '/edit/' . $holiday->id . '" class="operation-edit inline-block margin-10 float-left">Edit the holiday.</a> ' . "\n";
-    $markup .= '<a href="' . $base_path . 'requests/holiday/delete-0/' . $holiday->id . '" class="operation-delete inline-block margin-10 float-right">Delete the holiday.</a>' . "\n";
+    $markup .= '<a href="' . $base_path . 'requests/holiday/year-0/' . $year . '/delete/' . $holiday->id . '" class="operation-delete inline-block margin-10 float-right">Delete the holiday.</a>' . "\n";
     $markup .= "</div>\n";
     $markup .= '<br class="clear">' . "\n";
   }
@@ -850,7 +850,8 @@ function mfcs_request_holiday_0_delete_form($form, &$form_state, $year, $holiday
     drupal_exit();
   }
 
-  mfcs_add_canonical_headers('requests/holiday/delete-0/' . $holiday_id);
+  $year = date('Y', $holiday->date);
+  mfcs_add_canonical_headers('requests/holiday/year-0/' . $year . '/delete/' . $holiday_id);
 
   $page_title = "Delete Holiday: " . $holiday->title . ' (' . date('l, F j, Y', $holiday->date) . ')';
 
