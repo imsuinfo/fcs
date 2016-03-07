@@ -168,7 +168,28 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
   $rows = array();
   $current_date = $absolute_start;
 
-  $holidays = mfcs_get_holidays($year, $month_start, $month_stop);
+  $holidays = mfcs_get_holidays($year, $absolute_start, $absolute_stop);
+
+  // Holidays are setup on a per-year basis.
+  // If absolute_start is a previous or next year, additional function calls are required.
+  $year_start = strtotime('midnight january 1 ' . $year);
+  $year_stop = strtotime('next year', $year_start);
+  if ($absolute_start < $year_start) {
+    $holidays_previous = mfcs_get_holidays($year - 1, $absolute_start, $year_start);
+    if (is_array($holidays_previous)) {
+      foreach ($holidays_previous as $holiday_key => $holiday_value) {
+        $holidays[$holiday_key] = $holiday_value;
+      }
+    }
+  }
+  if ($absolute_stop > $year_stop) {
+    $holidays_next = mfcs_get_holidays($year + 1, $year_stop, $absolute_stop);
+    if (is_array($holidays_next)) {
+      foreach ($holidays_next as $holiday_key => $holiday_value) {
+        $holidays[$holiday_key] = $holiday_value;
+      }
+    }
+  }
 
   foreach ($holidays as $holiday) {
     $day = date('j', $holiday->date);
