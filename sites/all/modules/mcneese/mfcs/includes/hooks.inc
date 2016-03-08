@@ -1591,6 +1591,13 @@ function mfcs_hook_user_presave(&$edit, $account, $category) {
     return;
   }
 
+  if (isset($edit['field_user_primary_account']['und'][0]) && isset($account->field_user_primary_account['und'][0])) {
+    if (!empty(array_diff($edit['field_user_primary_account']['und'][0], $account->field_user_primary_account['und'][0]))) {
+      // re-synchronize account information following change.
+      $result = mfcs_sync_banner_to_local_users($account->uid, $account->field_user_banner_id['und'][0]['value']);
+    }
+  }
+
   $roles = array();
   foreach ($account->roles as $role_id => $role_value) {
     $roles[$role_id] = $role_id;
