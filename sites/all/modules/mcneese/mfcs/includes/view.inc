@@ -436,6 +436,16 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
     $value_names = (array) $presentation['value_names'];
   }
 
+  $user = cf_current_user();
+  $manager = FALSE;
+  $reviewer = FALSE;
+  $requester = FALSE;
+  if (is_object($user)) {
+    $manager = user_access('mfcs manage', $user);
+    $reviewer = user_access('mfcs review', $user);
+    $requester = user_access('mfcs request', $user);
+  }
+
   // define a prefix to append before the value.
   $prefix_span_class = 'item-value-instance ';
   $prefix_span_class .= 'item-value-instance-' . $field_group . ' ';
@@ -700,18 +710,26 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
             $display[$value_name] = 'name';
           }
 
-          $user_name = check_plain($users[$value->$value_name]['name']);
-
-          if (!empty($users[$value->$value_name]['last_name'])) {
-            $user_name = check_plain($users[$value->$value_name]['last_name']) . ', ';
-          }
-
-          if (!empty($users[$value->$value_name]['first_name'])) {
-            $user_name .= check_plain($users[$value->$value_name]['first_name']);
-          }
-
           if ($display[$value_name] == 'account_name') {
-            $markup .= '<a href="' . $base_path . 'user/' . $users[$value->$value_name]['user_id'] . $url_arguments . '" class="item-link">' . $user_name . '</a>';
+            $user_name = check_plain($users[$value->$value_name]['name']);
+            $user_title = $user_name . ' (uid: ' . $value->$value_name . ')';
+
+            if (!empty($users[$value->$value_name]['last_name'])) {
+              $user_name = check_plain($users[$value->$value_name]['last_name']) . ', ';
+            }
+
+            if (!empty($users[$value->$value_name]['first_name'])) {
+              $user_name .= check_plain($users[$value->$value_name]['first_name']);
+              $user_title = check_plain($users[$value->$value_name]['first_name'] . ' ' . $users[$value->$value_name]['last_name']) . ' (uid: ' . $value->$value_name . ')';
+            }
+
+            // only show link to user account for reviewers and managers.
+            if ($reviewer || $manager) {
+              $markup .= '<a href="' . $base_path . 'user/' . $users[$value->$value_name]['user_id'] . $url_arguments . '" class="item-link" title="' . $user_title . '">' . $user_name . '</a>';
+            }
+            else {
+              $markup .= $user_name;
+            }
             $length += strlen($user_name);
           }
           elseif ($display[$value_name] != 'pass' && property_exists($user, $display)) {
@@ -881,24 +899,27 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
         }
 
         if ($display[$value_name] == 'name') {
-          $processed_markup = '';
+          $user_name = check_plain($users[$value->$value_name]['name']);
+          $user_title = $user_name . ' (uid: ' . $value->$value_name . ')';
 
-          $first_name = FALSE;
           if (!empty($users[$value->$value_name]['last_name'])) {
-            $first_name = TRUE;
-            $processed_markup .= check_plain($users[$value->$value_name]['last_name']);
+            $user_name = check_plain($users[$value->$value_name]['last_name']) . ', ';
           }
 
           if (!empty($users[$value->$value_name]['first_name'])) {
-            if ($first_name) {
-              $processed_markup .=  ', ';
-            }
-
-            $processed_markup .= check_plain($users[$value->$value_name]['first_name']);
+            $user_name .= check_plain($users[$value->$value_name]['first_name']);
+            $user_title = check_plain($users[$value->$value_name]['first_name'] . ' ' . $users[$value->$value_name]['last_name']) . ' (uid: ' . $value->$value_name . ')';
           }
 
-          $markup .= $processed_markup;
-          $length += strlen($processed_markup);
+          // only show link to user account for reviewers and managers.
+          if ($reviewer || $manager) {
+            $markup .= '<a href="' . $base_path . 'user/' . $users[$value->$value_name]['user_id'] . $url_arguments . '" class="item-link" title="' . $user_title . '">' . $user_name . '</a>';
+          }
+          else {
+            $markup .= $user_name;
+          }
+
+          $length += strlen($user_name);
         }
         elseif ($display[$value_name] == 'email') {
           $markup .= check_plain($users[$value->$value_name]['email']);
