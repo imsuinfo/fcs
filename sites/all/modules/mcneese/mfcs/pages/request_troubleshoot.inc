@@ -111,6 +111,11 @@ function mfcs_request_troubleshoot_0_form($form, &$form_state, $request_id = NUL
     '#name' => 'troubleshoot-' . $code . '-submit',
     '#type' => 'submit',
     '#default_value' => t("Re-check all Requests Reviews"),
+    '#attributes' => array(
+      'class' => array(
+        'no-print',
+      ),
+    ),
   );
 
   $markup = '<hr class="code-separator">';
@@ -151,6 +156,11 @@ function mfcs_request_troubleshoot_0_form($form, &$form_state, $request_id = NUL
     '#name' => 'troubleshoot-' . $code . '-submit',
     '#type' => 'submit',
     '#default_value' => t("Re-synchronize Requests Cache"),
+    '#attributes' => array(
+      'class' => array(
+        'no-print',
+      ),
+    ),
   );
 
   $markup = '<hr class="code-separator">';
@@ -192,6 +202,11 @@ function mfcs_request_troubleshoot_0_form($form, &$form_state, $request_id = NUL
     '#name' => 'troubleshoot-' . $code . '-submit',
     '#type' => 'submit',
     '#default_value' => t("Re-synchronize Banner Cache"),
+    '#attributes' => array(
+      'class' => array(
+        'no-print',
+      ),
+    ),
   );
 
   $markup = '<hr class="code-separator">';
@@ -232,6 +247,11 @@ function mfcs_request_troubleshoot_0_form($form, &$form_state, $request_id = NUL
     '#name' => 'troubleshoot-' . $code . '-submit',
     '#type' => 'submit',
     '#default_value' => t("Re-synchronize Banner Role Cache"),
+    '#attributes' => array(
+      'class' => array(
+        'no-print',
+      ),
+    ),
   );
 
   $markup = '<hr class="code-separator">';
