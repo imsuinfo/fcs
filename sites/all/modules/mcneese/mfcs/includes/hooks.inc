@@ -1086,6 +1086,42 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'tab_root' => 'requests',
   );
 
+  $items['requests/troubleshoot-0/locations'] = array(
+    'title' => "Troubleshooting Tools - Locations",
+    'description' => "A listing of locations available on the system with details.",
+    'page callback' => 'mfcs_request_troubleshoot_0_locations_page',
+    'file' => 'request_troubleshoot.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('troubleshoot'),
+    'tab_parent' => 'requests/troubleshoot-0',
+    'tab_root' => 'requests/troubleshoot-0',
+  );
+
+  $items['requests/troubleshoot-0/buildings'] = array(
+    'title' => "Troubleshooting Tools - Buildings",
+    'description' => "A listing of buildings available on the system with details.",
+    'page callback' => 'mfcs_request_troubleshoot_0_buildings_page',
+    'file' => 'request_troubleshoot.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('troubleshoot'),
+    'tab_parent' => 'requests/troubleshoot-0',
+    'tab_root' => 'requests/troubleshoot-0',
+  );
+
+  $items['requests/troubleshoot-0/rooms'] = array(
+    'title' => "Troubleshooting Tools - Rooms",
+    'description' => "A listing of rooms available on the system with details.",
+    'page callback' => 'mfcs_request_troubleshoot_0_rooms_page',
+    'file' => 'request_troubleshoot.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('troubleshoot'),
+    'tab_parent' => 'requests/troubleshoot-0',
+    'tab_root' => 'requests/troubleshoot-0',
+  );
+
   $items['requests/problems-0'] = array(
     'title' => "Manage Problems",
     'description' => "Manage problems detected by the system.",
@@ -1200,6 +1236,70 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'type' => MENU_CALLBACK,
     'tab_parent' => 'requests/problems-0/users',
     'tab_root' => 'requests/problems-0/users',
+  );
+
+  $items['requests/problems-0/requests'] = array(
+    'title' => "Request Problems",
+    'description' => "View a list of requests with problems that the system has detected.",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_problems_0_requests_form'),
+    'file' => 'request_problems.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('problems'),
+    'tab_parent' => 'requests/problems-0',
+    'tab_root' => 'requests/problems-0',
+  );
+
+  $items['requests/problems-0/requests/ajax'] = array(
+    'title' => "Request Problems",
+    'description' => "View a list of requests with problems that the system has detected.",
+    'page callback' => 'mfcs_ajax_problems_0_requests_list',
+    'file' => 'ajax.inc',
+    'file path' => $module_path . '/includes',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('problems'),
+    'tab_parent' => 'requests/problems-0',
+    'tab_root' => 'requests/problems-0',
+  );
+
+  $items['requests/problems-0/requests/ajax/%'] = array(
+    'title' => "Request Problems",
+    'description' => "View a list of requests with problems that the system has detected.",
+    'page callback' => 'mfcs_ajax_problems_0_requests_list',
+    'page arguments' => array(4),
+    'file' => 'ajax.inc',
+    'file path' => $module_path . '/includes',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('problems'),
+    'tab_parent' => 'requests/problems-0',
+    'tab_root' => 'requests/problems-0',
+  );
+
+  $items['requests/problems-0/requests/request/%'] = array(
+    'title' => "Request Problems",
+    'description' => "Manage problems detected by the system that are specific to a single request.",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_problems_0_request_form', 4),
+    'file' => 'request_problems.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('problems'),
+    'tab_parent' => 'requests/problems-0/requests',
+    'tab_root' => 'requests/problems-0/requests',
+  );
+
+  $items['requests/problems-0/requests/request/%/recheck'] = array(
+    'title' => "Request Problems",
+    'description' => "Re-check a single problem for a single request.",
+    'page callback' => 'mfcs_request_problems_0_request_recheck',
+    'page arguments' => array(4),
+    'file' => 'request_problems.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('problems'),
+    'tab_parent' => 'requests/problems-0/requests',
+    'tab_root' => 'requests/problems-0/requests',
   );
 
   $items['requests/synchronize-0'] = array(
@@ -1478,6 +1578,13 @@ function mfcs_hook_cronapi() {
   $items['mfcs_auto_block_accounts'] = array(
     'title' => t("Auto-Block Accounts"),
     'callback' => 'mfcs_auto_block_accounts_cron',
+    'callback arguments' => array(),
+    'enabled' => FALSE,
+  );
+
+  $items['mfcs_check_for_problems_requests'] = array(
+    'title' => t("Check for Problems - Requests"),
+    'callback' => 'mfcs_check_for_problems_requests_cron',
     'callback arguments' => array(),
     'enabled' => FALSE,
   );

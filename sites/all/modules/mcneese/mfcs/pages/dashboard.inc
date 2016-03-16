@@ -110,21 +110,6 @@ function mfcs_dashboard_page() {
     }
   }
 
-  if (count($items_array) > 1) {
-    if ($items_array_current == 1) {
-      $items_array = &$items_2;
-      $items_array_current++;
-    }
-    elseif ($items_array_current == 2) {
-      $items_array = &$items_3;
-      $items_array_current++;
-    }
-    elseif ($items_array_current == 3) {
-      $items_array = &$items_4;
-      $items_array_current++;
-    }
-  }
-
   if ($can_search) {
     $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/search-0' . $url_arguments . '" class="item-link">Search Requests</a></h4>';
     $help = '<div class="item-description inline-block">Use advanced search tools to help locate and find one or more requests.</div>';

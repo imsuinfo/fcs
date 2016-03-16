@@ -627,5 +627,96 @@ function mfcs_get_review_step_list_options($option = NULL) {
 }
 
 /**
+ * Returns an array of request problem code names.
+ *
+ * @param string|null $option
+ *   (optional) A string designating how the list will be populated.
+ *
+ * @return array
+ *   An array of options available.
+ */
+function mfcs_get_request_problems_list_options($option = NULL) {
+  $options = array();
+
+  if ($option == 'select') {
+    $options[''] = "- Select -";
+  }
+
+  $options[MFCS_REQUEST_PROBLEM_NONE] = 'None';
+  $options[MFCS_REQUEST_PROBLEM_CONFLICT] = 'Conflict';
+  $options[MFCS_REQUEST_PROBLEM_STALE] = 'Stale';
+  $options[MFCS_REQUEST_PROBLEM_STUCK] = 'Stuck';
+  $options[MFCS_REQUEST_PROBLEM_BLOCKED] = 'Blocked';
+  $options[MFCS_REQUEST_PROBLEM_COORDINATOR] = 'Coordinator Invalid';
+  $options[MFCS_REQUEST_PROBLEM_REQUESTER] = 'Requester Invalid';
+  $options[MFCS_REQUEST_PROBLEM_ROOM] = 'Room Invalid';
+  $options[MFCS_REQUEST_PROBLEM_BUILDING] = 'Building Invalid';
+  $options[MFCS_REQUEST_PROBLEM_LOCATION] = 'Location Invalid';
+  $options[MFCS_REQUEST_PROBLEM_CACHE_REQUEST] = 'Cache Invalid';
+
+  asort($options);
+
+  return $options;
+}
+
+/**
+ * Returns an array of request problem log code names.
+ *
+ * @param string|null $option
+ *   (optional) A string designating how the list will be populated.
+ * @param string|null $type
+ *   (optional) A string designating a specific type to process, such as:
+ *   - 'request'
+ *
+ * @return array
+ *   An array of options available.
+ */
+function mfcs_get_log_problems_list_options($option = NULL, $type = NULL) {
+  $options = array();
+
+  if ($option == 'select') {
+    $options[''] = "- Select -";
+  }
+
+  if ($type == 'requests') {
+    $options[MFCS_LOG_PROBLEMS_NONE] = 'None';
+    $options[MFCS_LOG_PROBLEMS_IGNORE] = 'Ignore';
+    $options[MFCS_LOG_PROBLEMS_UNIGNORE] = 'Unignore';
+    $options[MFCS_LOG_PROBLEMS_RECHECK] = 'Re-Check';
+    $options[MFCS_LOG_PROBLEMS_REASSIGN_VENUE_COORDINATOR] = 'Re-assign Venue Coordinator';
+    $options[MFCS_LOG_PROBLEMS_REASSIGN_REQUESTER] = 'Re-assign Requester';
+    $options[MFCS_LOG_PROBLEMS_REASSIGN_REBUILD_CACHE] = 'Rebuild Cache';
+  }
+  elseif ($type == 'basic') {
+    $options[MFCS_LOG_PROBLEMS_NONE] = 'None';
+    $options[MFCS_LOG_PROBLEMS_INSERT] = 'Insert';
+    $options[MFCS_LOG_PROBLEMS_UPDATE] = 'Update';
+    $options[MFCS_LOG_PROBLEMS_DELETE] = 'Delete';
+    $options[MFCS_LOG_PROBLEMS_RESYNC] = 'Re-Synchronize';
+    $options[MFCS_LOG_PROBLEMS_IGNORE] = 'Ignore';
+    $options[MFCS_LOG_PROBLEMS_UNIGNORE] = 'Unignore';
+    $options[MFCS_LOG_PROBLEMS_RECHECK] = 'Re-Check';
+  }
+  else {
+    $options[MFCS_LOG_PROBLEMS_NONE] = 'None';
+    $options[MFCS_LOG_PROBLEMS_INSERT] = 'Insert';
+    $options[MFCS_LOG_PROBLEMS_UPDATE] = 'Update';
+    $options[MFCS_LOG_PROBLEMS_DELETE] = 'Delete';
+    $options[MFCS_LOG_PROBLEMS_RESYNC] = 'Re-Synchronize';
+    $options[MFCS_LOG_PROBLEMS_IGNORE] = 'Ignore';
+    $options[MFCS_LOG_PROBLEMS_UNIGNORE] = 'Unignore';
+    $options[MFCS_LOG_PROBLEMS_RECHECK] = 'Re-Check';
+    $options[MFCS_LOG_PROBLEMS_REASSIGN_VENUE_COORDINATOR] = 'Re-assign Venue Coordinator';
+    $options[MFCS_LOG_PROBLEMS_REASSIGN_REQUESTER] = 'Re-assign Requester';
+    $options[MFCS_LOG_PROBLEMS_REASSIGN_REBUILD_CACHE] = 'Rebuild Cache';
+  }
+
+  asort($options);
+
+  return $options;
+}
+
+
+/**
  * @} End of '@addtogroup mfcs'.
  */

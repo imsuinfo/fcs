@@ -102,6 +102,14 @@ define('MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED', 8);
  define('MFCS_REQUEST_CLASSIFICATION_EXTERNAL', 4);
 
 /**
+ * Defines Taxonomy TIDs for user classifications.
+ */
+ define('MFCS_USER_CLASSIFICATION_STUDENT', 87);
+ define('MFCS_USER_CLASSIFICATION_CAMPS', 88);
+ define('MFCS_USER_CLASSIFICATION_FACULTY', 89);
+ define('MFCS_USER_CLASSIFICATION_EXTERNAL', 90);
+
+/**
  * Defines Taxonomy TIDs for request dates categories.
  */
  define('MFCS_REQUEST_DATES_CATEGORY_ACTUAL', 137);
@@ -270,6 +278,22 @@ define('MFCS_TROUBLESHOOT_REQUESTS_REVIEW_RECHECK', 1);
 define('MFCS_TROUBLESHOOT_MER_CACHE_SYNCHRONIZE', 2);
 define('MFCS_TROUBLESHOOT_BANNER_CACHE_SYNCHRONIZE', 3);
 define('MFCS_TROUBLESHOOT_BANNER_ROLE_SYNCHRONIZE', 4);
+define('MFCS_TROUBLESHOOT_BANNER_INFORMATION', 5);
+
+/**
+ * Defines problems log codes.
+ */
+define('MFCS_LOG_PROBLEMS_NONE', 0);
+define('MFCS_LOG_PROBLEMS_INSERT', 1);
+define('MFCS_LOG_PROBLEMS_UPDATE', 2);
+define('MFCS_LOG_PROBLEMS_DELETE', 3);
+define('MFCS_LOG_PROBLEMS_RESYNC', 4);
+define('MFCS_LOG_PROBLEMS_IGNORE', 5);
+define('MFCS_LOG_PROBLEMS_UNIGNORE', 6);
+define('MFCS_LOG_PROBLEMS_RECHECK', 7);
+define('MFCS_LOG_PROBLEMS_REASSIGN_VENUE_COORDINATOR', 8);
+define('MFCS_LOG_PROBLEMS_REASSIGN_REQUESTER', 9);
+define('MFCS_LOG_PROBLEMS_REASSIGN_REBUILD_CACHE', 10);
 
 /**
  * Defines some hard-limits.
@@ -299,6 +323,21 @@ define('MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES', 256);
 define('MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE', 512);
 define('MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID', 1024);
 define('MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS', 2048);
+
+/**
+ * Defines a series of request problems.
+ */
+define('MFCS_REQUEST_PROBLEM_NONE', 0);
+define('MFCS_REQUEST_PROBLEM_CONFLICT', 1); // multiple requests with the same date and time.
+define('MFCS_REQUEST_PROBLEM_STALE', 2); // request is past its date and time and is considered stale (or lost).
+define('MFCS_REQUEST_PROBLEM_STUCK', 3); // the request is stuck in its current state or step and cannot continue.
+define('MFCS_REQUEST_PROBLEM_BLOCKED', 4); // the request is blocked by another request from continuing (similar to both stuck and conflict).
+define('MFCS_REQUEST_PROBLEM_COORDINATOR', 5); // coordinator no longer exists, is disabled, or is otherwise invalid.
+define('MFCS_REQUEST_PROBLEM_REQUESTER', 6); // requestor no longer exists, is disabled, or is otherwise invalid.
+define('MFCS_REQUEST_PROBLEM_ROOM', 7); // room no longer exists, is disabled, or is otherwise invalid.
+define('MFCS_REQUEST_PROBLEM_BUILDING', 8); // building no longer exists, is disabled, or is otherwise invalid.
+define('MFCS_REQUEST_PROBLEM_LOCATION', 9); // location no longer exists, is disabled, or is otherwise invalid.
+define('MFCS_REQUEST_PROBLEM_CACHE_REQUEST', 10); // The mfcs_requests caches are inconsistend with the mfcs_current data.
 
 /**
  * Define codes that represent what the e-mail represents.
@@ -4794,6 +4833,52 @@ function mfcs_auto_block_accounts_cron() {
   catch (Exception $ex) {
     if (is_object($transaction)) $transaction->rollback();
     cf_error::on_query_execution($ex);
+  }
+}
+
+/**
+ * Executes the cron queue to scan requests looking for known problem situations.
+ *
+ * @see mfcs_cronapi()
+ * @see: mfcs_miscellaneous_check_requests()
+ */
+function mfcs_check_for_problems_requests_cron() {
+  mfcs_set_using_effective_system_id();
+
+  mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
+
+  $problems = mfcs_miscellaneous_check_requests();
+
+  if (!empty($problems)) {
+    $transaction = db_transaction();
+    try {
+      foreach ($problems as $problem) {
+        // check to see if the problem has already been reported.
+        $query = db_select('mfcs_problems_requests', 'mpr');
+
+        $query->addExpression('count(mpr.id)');
+
+        $query->condition('mpr.request_id', $problem['request_id']);
+        $query->condition('mpr.problem', $problem['problem']);
+        $query->countQuery();
+
+        $results = $query->execute()->fetchField();
+
+        if (empty($results)) {
+          $query = db_insert('mfcs_problems_requests');
+          $query->fields($problem);
+          $query->execute();
+        }
+      }
+      unset($problem);
+
+      // enforce transaction execution.
+      unset($transaction);
+    }
+    catch (Exception $ex) {
+      if (is_object($transaction)) $transaction->rollback();
+      cf_error::on_query_execution($ex);
+    }
   }
 }
 

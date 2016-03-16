@@ -29,24 +29,28 @@ function mfcs_management_problems_page() {
 
   mfcs_add_canonical_headers('requests/problems-0');
 
-  $manager = user_access('mfcs manage', $user);
-  $administer = user_access('mfcs administer', $user);
-
   $items_1 = array();
   $items_2 = array();
 
   $items_array = &$items_1;
-  $items_array_current = 0;
 
-  if ($manager) {
-    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/problems-0/users' . $url_arguments . '" class="item-link">User Problems</a></h4>';
-    $help = '<div class="item-description inline-block">Manage what users are allowed to approve/deny requests by request type.</div>';
-    $items_array[] = array(
-      'data' => $link . '<br>' . $help,
-      'class' => array(
-      ),
-    );
-  }
+  $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/problems-0/users' . $url_arguments . '" class="item-link">User Problems</a></h4>';
+  $help = '<div class="item-description inline-block">Access a list of user accounts in which problems have been detected.</div>';
+  $items_array[] = array(
+    'data' => $link . '<br>' . $help,
+    'class' => array(
+    ),
+  );
+
+  $items_array = &$items_2;
+
+  $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/problems-0/requests' . $url_arguments . '" class="item-link">Request Problems</a></h4>';
+  $help = '<div class="item-description inline-block">Access a list of requests in which problems have been detected.</div>';
+  $items_array[] = array(
+    'data' => $link . '<br>' . $help,
+    'class' => array(
+    ),
+  );
 
   $markup = '<div id="mfcs-management_page-choices" class="mfcs-management_page-choices">';
 
@@ -117,7 +121,7 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
 
   mfcs_add_canonical_headers('requests/problems-0/users/' . $page_number);
 
-  $page_title = "Facilities Use Problems";
+  $page_title = "Facilities Use Problems - Users";
   drupal_set_title($page_title);
 
 
@@ -205,7 +209,7 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
     }
   }
 
-  $rows_per_page = 20;
+  $rows_per_page = 40;
   $options = array(
     'sort' => $sorting,
     'join' => TRUE,
@@ -1000,7 +1004,7 @@ function mfcs_request_problems_0_user_form_submit($form, &$form_state) {
 
     if ($results === FALSE) {
       form_set_error('form', "An error occurred while trying to reset the user problem flags. Please contact the support staff.");
-      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to reset the user problem flags, user: @user_id, problems: @problem_code.", array('@user_id' => $form['values']['mfcs_user']['#value']->user_id, $problems), WATCHDOG_ERROR);
+      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to reset the user problem flags, user: @user_id, problems: @problems.", array('@user_id' => $form['values']['mfcs_user']['#value']->user_id, '@problems' => print_r($problems, TRUE)), WATCHDOG_ERROR);
 
       $form_state['rebuild'] = TRUE;
       $form_state['redirect'] = FALSE;
@@ -1023,7 +1027,7 @@ function mfcs_request_problems_0_user_form_submit($form, &$form_state) {
           }
           else {
             form_set_error('form', "An error occurred while trying to synchronize the user settings. Please contact the support staff.");
-            watchdog(MFCS_WATCHDOG_ID, "An error occurred while trying to synchronize the user settings, user: @user_id, problems: @problem_code.", array('@user_id' => $form['values']['mfcs_user']['#value']->user_id, $problems), WATCHDOG_ERROR);
+            watchdog(MFCS_WATCHDOG_ID, "An error occurred while trying to synchronize the user settings, user: @user_id, problems: @problems.", array('@user_id' => $form['values']['mfcs_user']['#value']->user_id, '@problems' => print_r($problems, TRUE)), WATCHDOG_ERROR);
 
             $form_state['rebuild'] = TRUE;
             $form_state['redirect'] = FALSE;
@@ -1072,7 +1076,7 @@ function mfcs_request_problems_0_user_form_submit($form, &$form_state) {
         if ($changes_made) {
           if (!user_save($form['values']['problem_user']['#value'],  array('roles' => $system_roles))) {
             form_set_error('form', "An error occurred while trying to re-assign or re-unassign the manager role. Please contact the support staff.");
-            watchdog(MFCS_WATCHDOG_ID, "An error occurred while trying to re-assign or re-unassign the manager role, user: @user_id, problems: @problem_code.", array('@user_id' => $form['values']['mfcs_user']['#value']->user_id, $problems), WATCHDOG_ERROR);
+            watchdog(MFCS_WATCHDOG_ID, "An error occurred while trying to re-assign or re-unassign the manager role, user: @user_id, problems: @problems.", array('@user_id' => $form['values']['mfcs_user']['#value']->user_id, '@problems' => print_r($problems, TRUE)), WATCHDOG_ERROR);
 
             $form_state['rebuild'] = TRUE;
             $form_state['redirect'] = FALSE;
@@ -1114,7 +1118,7 @@ function mfcs_request_problems_0_user_form_submit($form, &$form_state) {
  *
  * This page auto-returns.
  *
- * @para int $user_id
+ * @param int $user_id
  *   Id of the user to resynchronize
  */
 function mfcs_request_problems_0_users_resynchronize($user_id) {
@@ -1453,6 +1457,1262 @@ function mfcs_users_load_all_users_with_banner_id($banner_id) {
   }
 
   return $names;
+}
+
+/**
+ * View and manage problems associated with a specific user.
+ *
+ * @param array $form
+ *   The form array as defined by drupals form api.
+ * @param array $form_state
+ *   The form state array as defined by drupals form api
+ * @param int|null $page_number
+ *   (optional) When there are more than a certain number of rows,
+ *   this represent the page number for a given sequence of rows.
+ */
+function mfcs_request_problems_0_requests_form($form, &$form_state, $page_number = NULL) {
+  if (!is_array($form)) {
+    cf_error::invalid_array('form');
+
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  if (!is_array($form_state)) {
+    cf_error::invalid_array('form_state');
+
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  global $conf;
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  $no_js_fallback = TRUE;
+  if (isset($conf['no_js_fallback']) && is_bool($conf['no_js_fallback'])) {
+    $no_js_fallback = $conf['no_js_fallback'];
+  }
+
+  $auto_page_number = FALSE;
+  if (is_null($page_number)) {
+    $auto_page_number = TRUE;
+    $page_number = 0;
+  }
+
+  if (!cf_is_integer($page_number) || $page_number < 0) {
+    $page_number = 0;
+  }
+
+  mfcs_add_canonical_headers('requests/problems-0/requests/' . $page_number);
+
+  $page_title = "Facilities Use Problems - Requests";
+  drupal_set_title($page_title);
+
+
+  $user = cf_current_user();
+
+  mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+
+  $request_problems_by_id = mfcs_get_request_problems_list_options();
+
+  // load sorting information
+  $order = NULL;
+  if (isset($_GET['order'])) {
+    $order = strtolower($_GET['order']);
+  }
+
+  $sort = NULL;
+  if (isset($_GET['sort'])) {
+    $sort = strtoupper($_GET['sort']);
+
+    if ($sort != 'ASC' && $sort != 'DESC') {
+      $sort = NULL;
+    }
+  }
+
+  $class_id = ' ';
+  $class_problem = '';
+  $class_request_id = '';
+  $class_date = '';
+  $class_reason = '';
+  $class_ignore = 'no-script-hidden script-hidden';
+  $class_operations = 'no-print ';
+
+  $sorting = array();
+  if (is_null($order)) {
+    $sorting['id'] = 'ASC';
+    $order_column = array(0 => strtolower($sorting['id']));
+    $class_id .= 'sorting_1 ';
+  }
+  else {
+    if ($order == 'id') {
+      $sorting['id'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = array(0 => strtolower($sorting[$order]));
+      $class_id .= 'sorting_1 ';
+    }
+    elseif ($order == 'problem') {
+      $sorting['problem'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = array(1 => strtolower($sorting[$order]));
+      $class_problem .= 'sorting_1 ';
+    }
+    elseif ($order == 'request id') {
+      $sorting['request_id'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = array(2 => strtolower($sorting[$order]));
+      $class_request_id .= 'sorting_1 ';
+    }
+    elseif ($order == 'date') {
+      $sorting['date'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = array(3 => strtolower($sorting[$order]));
+      $class_date .= 'sorting_1 ';
+    }
+    elseif ($order == 'reason') {
+      $sorting['reason'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = array(4 => strtolower($sorting[$order]));
+      $class_reason .= 'sorting_1 ';
+    }
+    elseif ($order == 'ignore') {
+      $sorting['ignore'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = array(5 => strtolower($sorting[$order]));
+      $class_ignore .= 'sorting_1 ';
+    }
+    else {
+      $sorting['id'] = 'ASC';
+      $order_column = array(0 => strtolower($sorting['id']));
+      $class_id .= 'sorting_1 ';
+    }
+  }
+
+  $rows_per_page = 40;
+  $options = array(
+    'sort' => $sorting,
+    'start' => $page_number * $rows_per_page,
+    'limit' => $rows_per_page,
+    'count' => TRUE,
+    'include_ignored' => FALSE,
+  );
+
+  // do not load listing on first pass (improves performance at cost of no support for no-js.).
+  if ($no_js_fallback === FALSE && $auto_page_number) {
+    $options['results'] = FALSE;
+  }
+
+  $conditions = array();
+
+  $problems_returned = mfcs_miscellaneous_problems_request_search($conditions, $options);
+
+  $problems_total = 0;
+  if (is_array($problems_returned) && array_key_exists('count', $problems_returned)) {
+    $problems_total = $problems_returned['count'];
+  }
+
+  $problems = array();
+  if (isset($problems_returned['results']) && is_array($problems_returned['results'])) {
+    $problems = $problems_returned['results'];
+  }
+
+  // do not provide pages when the page number would bring the user beyond the available items.
+  if ($problems_total > 0 && $options['start'] >= $problems_total || $problems_total == 0 && $options['start'] > $problems_total) {
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  // do not show count values when no fallback is available.
+  if ($no_js_fallback === FALSE && $auto_page_number) {
+    $count = 0;
+  }
+
+  // Results is needed and therefore must not be FALSE, unsetting it will default to TRUE.
+  unset($options['results']);
+
+  $rows = array();
+  foreach ($problems as $id => $problem) {
+    $row = array();
+    $additional_operations = '';
+
+    $row['id'] = array(
+      'data' => '' . (int) $problem->id,
+      'class' => $class_id,
+    );
+
+    $row['problem'] = array(
+      'data' => '',
+      'class' => $class_problem,
+    );
+
+    if (array_key_exists($problem->problem,  $request_problems_by_id)) {
+      $row['problem']['data'] = $request_problems_by_id[$problem->problem];
+    }
+    else {
+      $row['problem']['data'] = 'Unknown Code';
+    }
+
+    $row['request_id'] = array(
+      'data' => '' . (int) $problem->request_id,
+      'class' => $class_request_id,
+    );
+
+    $row['date'] = array(
+      'data' => check_plain(date("Y/m/d h:i:s a", $problem->date)),
+      'class' => $class_date,
+    );
+
+    $row['reason'] = array(
+      'data' => (isset($problem->reason) ? check_plain($problem->reason) : ''),
+      'class' => $class_reason,
+    );
+
+    $row['ignore'] = array(
+      'data' => (isset($problem->ignore) && $problem->ignore == 1 ? 'Yes' : 'No'),
+      'class' => $class_ignore,
+    );
+
+    $row['operations'] = array(
+      'data' => '<a href="' . $base_path . 'requests/problems-0/requests/request/' . $problem->id . $url_arguments . '" class="operation-link operation-link-details">Details</a>',
+      'class' => $class_operations,
+    );
+
+    $row['operations']['data'] .= ' <a href="' . $base_path . 'requests/view-0/' . $problem->request_id . $url_arguments . '" class="operation-link operation-link-request">Request</a>';
+    $row['operations']['data'] .= ' <a href="' . $base_path . 'requests/problems-0/requests/request/' . $problem->id . '/recheck' . $url_arguments . '" class="operation-link operation-link-recheck white-space-nowrap">Re-Check</a>';
+
+    $rows[] = $row;
+  }
+
+  $problem_list = array();
+  $problem_list['caption'] = t("Request Problems");
+  $problem_list['header'] = array(
+    'id' => array('field' => 'id', 'data' => "ID", 'align' => 'center'),
+    'problem' => array('field' => 'problem', 'data' => "Problem", 'align' => 'center'),
+    'request_id' => array('field' => 'request_id', 'data' => "Request ID", 'align' => 'center'),
+    'date' => array('field' => 'date', 'data' => "Date", 'align' => 'center'),
+    'reason' => array('field' => 'reason', 'data' => "Reason", 'align' => 'center'),
+    'ignore' => array('field' => 'ignore', 'data' => "Ignore", 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
+    'operations' => array('data' => "Operations", 'align' => 'center', 'class' => array('no-print')),
+  );
+
+  $problem_list['attributes'] = array();
+  $problem_list['attributes']['id'] = 'mfcs-problem_form';
+  $problem_list['attributes']['class'] = array(
+    'no_default',
+    'mfcs-problem_form',
+    'display',
+    'hover',
+    'order-column',
+    'stripe',
+    'cell-border',
+  );
+  $problem_list['attributes']['summary'] = 'Collection of requests in which the system has detected problems with.';
+
+  $problem_list['rows'] = $rows;
+  $problem_list['empty'] = t("There are no requests with problems detected by the system.");
+
+  $datatable_settings = array(
+    'sort' => strtolower($sort),
+    'order' => $order_column,
+    #'stateSave' => TRUE,
+    'lengthMenu' => array(
+       5 => '5',
+      10 => '10',
+      20 => '20',
+      40 => '40',
+      80 => '80',
+      -1 => '"All"',
+    ),
+    'processing' => TRUE,
+    'serverSide' => TRUE,
+    'ajax' => "'" . $base_path . 'requests/problems-0/requests/ajax' . $url_arguments . "'",
+    'deferRender' => TRUE,
+    'columns' => array(
+      array('id' => 0, 'column' => 'id', 'name' => "ID", 'className' => 'column-id'),
+      array('id' => 1, 'column' => 'problem', 'name' => "Problem", 'className' => 'column-problem'),
+      array('id' => 2, 'column' => 'request_id', 'name' => "Request ID", 'className' => 'column-request_id'),
+      array('id' => 3, 'column' => 'date', 'name' => "Date", 'className' => 'column-date'),
+      array('id' => 4, 'column' => 'reason', 'name' => "Reason", 'className' => 'column-reason'),
+      array('id' => 5, 'column' => 'ignore', 'name' => "Ignore", 'className' => 'column-ignore', 'sanitize' => FALSE, 'visible' => FALSE),
+      array('id' => 6, 'column' => NULL, 'name' => "Operations", 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
+    ),
+    'displayStart' => $options['start'],
+    'pageLength' => $rows_per_page,
+    'dom' => 'lfCrtip',
+    'KeyTable' => FALSE,
+    'rowId' => '0',
+    'oColVis' => array(
+      'buttonText' => '"Show / Hide"',
+    ),
+    'oLanguage' => array(
+      'sSearch' => '"Filter"',
+    ),
+    'searchDelay' => 1200,
+    'pagingType' => 'input',
+  );
+
+  $ajax_path = $base_path . 'requests/problems-0/requests/ajax';
+
+  $including_ignored = "function (e, dt, node, config) {" . "\n";
+  $including_ignored .= "  var data = dt.ajax.params();" . "\n";
+  $including_ignored .= "  var url = dt.ajax.url();" . "\n";
+
+  $including_ignored .= "  if (url == '" . $ajax_path . "/show_ignored' || url == '" . $ajax_path . "/show_ignored" . $url_arguments . "') {" . "\n";
+  $including_ignored .= "    dt.ajax.url('" . $ajax_path . "/hide_ignored" . $url_arguments . "');" . "\n";
+  $including_ignored .= "    dt.buttons('.datatable-including_ignored').text('Show Ignored Problems');" . "\n";
+  $including_ignored .= "  }" . "\n";
+  $including_ignored .= "  else if (url == '" . $ajax_path . "/hide_ignored' || url == '" . $ajax_path . "/hide_ignored" . $url_arguments . "') {" . "\n";
+  $including_ignored .= "    dt.ajax.url('" . $ajax_path . "/show_ignored" . $url_arguments . "');" . "\n";
+  $including_ignored .= "    dt.buttons('.datatable-including_ignored').text('Hide Ignored Problems');" . "\n";
+  $including_ignored .= "  }" . "\n";
+  $including_ignored .= "  else {" . "\n";
+  $including_ignored .= "    dt.ajax.url('" . $ajax_path . "/show_ignored" . $url_arguments . "');" . "\n";
+  $including_ignored .= "    dt.buttons('.datatable-including_ignored').text('Hide Ignored Problems');" . "\n";
+  $including_ignored .= "  }" . "\n";
+
+  $including_ignored .= "  dt.ajax.reload();" . "\n";
+  $including_ignored .= "}" . "\n";
+
+  $datatable_settings['dom'] = 'lfCBrtip';
+  $datatable_settings['buttons'] = array();
+  $datatable_settings['buttons']['Include Ignored'] = array(
+    'text' => "'Show Ignored Problems'",
+    'action' => $including_ignored,
+    'className' => "'datatable-including_ignored'",
+  );
+  unset($including_ignored);
+
+  $navigation_top = '';
+  $navigation_bottom = '';
+  if ($page_number > 0) {
+    if ($page_number == 1) {
+      $navigation_top .= '<a href="' . $base_path . 'requests/problems-0/requests' . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+      $navigation_bottom .= '<a href="' . $base_path . 'requests/problems-0/requests' . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+    }
+    else {
+      $previous_page = $page_number - 1;
+      $navigation_top .= '<a href="' . $base_path . 'requests/problems-0/requests/' . $previous_page . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+      $navigation_bottom .= '<a href="' . $base_path . 'requests/problems-0/requests/' . $previous_page . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+    }
+  }
+
+  $navigation_start = $options['start'] + 1;
+  $navigation_total = $options['start'] + $rows_per_page;
+
+  if ($problems_total == 0) {
+    $navigation_start = 0;
+  }
+
+  if ($navigation_total > $problems_total) {
+    $navigation_total = $problems_total;
+  }
+
+  $navigation_bottom .= '<div class="table_listing-comment">' . "\n";
+  $navigation_bottom .= "Showing " . $navigation_start . " to " . $navigation_total . " of " . $problems_total . " entries.\n";
+  $navigation_bottom .= '</div>' . "\n";
+
+  if ($problems_total > ($options['start'] + $rows_per_page)) {
+    $next_page = $page_number + 1;
+    $navigation_top .= '<a href="' . $base_path . 'requests/problems-0/requests/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
+    $navigation_bottom .= '<a href="' . $base_path . 'requests/problems-0/requests/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
+  }
+
+  $form = array();
+
+  $form['problem_list']['#markup'] = '<div class="table_listing-navigator table_listing-navigator-top no-print">' . $navigation_top . '</div>';
+  $form['problem_list']['#markup'] .= mcneese_libraries_theme_table($problem_list, $datatable_settings);
+  $form['problem_list']['#markup'] .= '<div class="table_listing-navigator table_listing-navigator-bottom">' . $navigation_bottom . '</div>';
+
+  return $form;
+}
+
+/**
+ * Validation for mfcs_request_problems_0_requests_form().
+ *
+ * @param array $form
+ *   The form array as defined by drupals form api.
+ * @param array $form_state
+ *   The form state array as defined by drupals form api
+ *
+ * @see: mfcs_request_problems_0_requests_form()
+ */
+function mfcs_request_problems_0_requests_form_validate($form, &$form_state) {
+  form_set_error('', "Currently this form has nothing to submit.");
+}
+
+/**
+ * Submit for mfcs_request_problems_0_requests_form().
+ *
+ * @param array $form
+ *   The form array as defined by drupals form api.
+ * @param array $form_state
+ *   The form state array as defined by drupals form api
+ *
+ * @see: mfcs_request_problems_0_requests_form()
+ */
+function mfcs_request_problems_0_requests_form_submit($form, &$form_state) {
+  global $mfcs_determined;
+  $user = cf_current_user();
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  $clicked_id = '';
+  if (isset($form_state['triggering_element']['#id'])) {
+    $clicked_id = $form_state['triggering_element']['#id'];
+  }
+
+  // redirect after submitting.
+  if (empty($form_state['values']['redirect_to'])) {
+    $form_state['redirect'] = mfcs_build_redirect_array('requests/problems-0/requests');
+  }
+  else {
+    $form_state['redirect'] = $form_state['values']['redirect_to'];
+  }
+}
+
+/**
+ * View and manage problems associated with a specific request.
+ *
+ * @param array $form
+ *   The form array as defined by drupals form api.
+ * @param array $form_state
+ *   The form state array as defined by drupals form api
+ * @param int $problem_id
+ *   The id of the request problem to load.
+ */
+function mfcs_request_problems_0_request_form($form, &$form_state, $problem_id) {
+  if (!cf_is_integer($problem_id) || $problem_id < 0) {
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  $problem_id = (int) $problem_id;
+
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+
+  mfcs_add_canonical_headers('requests/problems-0/requests/request/' . $problem_id);
+
+  $problem_results = mfcs_miscellaneous_problems_request_load($problem_id, TRUE);
+  if (empty($problem_results)) {
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  $problem = array_pop($problem_results);
+  unset($problem_results);
+
+  $request_problems_by_id = mfcs_get_request_problems_list_options();
+
+  $problem_code_name = 'Unknown';
+  if (array_key_exists($problem->problem, $request_problems_by_id)) {
+    $problem_code_name = $request_problems_by_id[$problem->problem];
+  }
+
+  $page_title = "Facilities Use Problems - Request Problem: " . $problem_id . " (" . $problem_code_name . " Problem)";
+  drupal_set_title($page_title);
+
+  $user = cf_current_user();
+
+  $form['form'] = array(
+    '#tree' => TRUE,
+  );
+
+  $form['form']['problem'] = array(
+    '#type' => 'value',
+    '#value' => $problem,
+  );
+
+  $form['form']['problem_id'] = array(
+    '#type' => 'value',
+    '#value' => $problem_id,
+  );
+
+  $form['markup'] = array(
+    '#type' => 'markup',
+    '#markup' => '',
+  );
+
+  $form['actions'] = array(
+    '#tree' => TRUE,
+  );
+
+  $form['actions']['action'] = array(
+    '#type' => 'select',
+    '#title' => "Actions",
+    '#default_value' => NULL,
+    '#options' => array(
+      NULL => "- Select Action -",
+      'recheck' => "Re-Check Problem",
+    ),
+    '#required' => FALSE,
+    '#attributes' => array(
+      'class' => array(
+        'no-print',
+      ),
+    ),
+  );
+
+  $form['submit'] = array(
+    '#id' => 'request_problems-submit',
+    '#type' => 'container',
+    '#tree' => TRUE,
+    '#attributes' => array(
+      'class' => array(
+        'no-print',
+        'request_problems-submit',
+      ),
+    ),
+  );
+
+  $form['submit']['back'] = array(
+    '#id' => 'request_problems-submit-back',
+    '#name' => 'request_problems-submit-back',
+    '#type' => 'submit',
+    '#default_value' => t("Back"),
+    '#attributes' => array(
+      'class' => array(
+        'no-print',
+        'request_problems-submit-back',
+      ),
+    ),
+  );
+
+  $form['submit']['submit'] = array(
+    '#id' => 'request_problems-submit-submit',
+    '#name' => 'request_problems-submit-submit',
+    '#type' => 'submit',
+    '#default_value' => t("Submit"),
+    '#attributes' => array(
+      'class' => array(
+        'no-print',
+        'request_problems-submit-submit',
+      ),
+    ),
+  );
+
+  if ($problem->ignore == 1) {
+    $form['actions']['action']['#options']['unignore'] = "Unignore Problem";
+  }
+  else {
+    $form['actions']['action']['#options']['ignore'] = "Ignore Problem";
+  }
+
+
+  $form['markup']['#markup'] .= '<div class="request_problem-summary">' . "\n";
+  $form['markup']['#markup'] .= '  <div class="request_problem-summary_row"><span class="request_problem-summary_row-label label-id">Problem ID:</span> <span class="request_problem-summary_row-value value-id">' . $problem_id . "</span></div>\n";
+  $form['markup']['#markup'] .= '  <div class="request_problem-summary_row"><span class="request_problem-summary_row-label label-request_id">Request ID:</span> <span class="request_problem-summary_row-value value-request_id"><a href="' . $base_path . 'requests/view-0/' . $problem->request_id . $url_arguments . '" class="operation-link operation-link-request" title="View Request ' . $problem->request_id . '">' . $problem->request_id . "</a></span></div>\n";
+  $form['markup']['#markup'] .= '  <div class="request_problem-summary_row"><span class="request_problem-summary_row-label label-problem">Problem:</span> <span class="request_problem-summary_row-value value-problem">' . $problem_code_name . "</span></div>\n";
+  $form['markup']['#markup'] .= '  <div class="request_problem-summary_row"><span class="request_problem-summary_row-label label-date_detected">Date Detected:</span> <span class="request_problem-summary_row-value value-date_detected">' . date("l, F j, Y h:i:s a", $problem->date) . "</span></div>\n";
+  $form['markup']['#markup'] .= '  <div class="request_problem-summary_row"><span class="request_problem-summary_row-label label-ignored">Ignored:</span> <span class="request_problem-summary_row-value value-ignored">' . (isset($problem->ignore) && $problem->ignore == 1 ? "Yes" : "No") . "</span></div>\n";
+  $form['markup']['#markup'] .= '  <div class="request_problem-summary_row"><span class="request_problem-summary_row-label label-reason">Reason:</span> <span class="request_problem-summary_row-value value-reason">' . (isset($problem->reason) ? $problem->reason : '') . "</span></div>\n";
+  $form['markup']['#markup'] .= '</div>' . "\n";
+
+  $form['markup']['#markup'] .= "<br>\n";
+
+  $form['markup']['#markup'] .= 'This problem is catagorized as a <strong>' . $problem_code_name . '</strong> problem.<br>' . "\n";
+  $form['markup']['#markup'] .= "<br>\n";
+
+  if ($problem->problem == MFCS_REQUEST_PROBLEM_CONFLICT) {
+    $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where one or more requests are scheduled on the same day and time at the same location, building, and room.' . "<br>\n";
+    $form['markup']['#markup'] .= "<br>\n";
+
+    $details = unserialize($problem->details);
+
+    $form['markup']['#markup'] .= '<a href="' . $base_path . 'requests/view-0/' . $problem->request_id . $url_arguments . '" class="request_problem-extra-conflict-link" title="View Request ' . $problem->request_id . '">Request ' . $problem->request_id . '</a> is in conflict with the following requests:' . "\n";
+    $form['markup']['#markup'] .= '<ul class="request_problem-extra-conflict-items">' . "\n";
+    foreach ($details as $detail) {
+      $form['markup']['#markup'] .= '<li class="request_problem-extra-conflict-item"><a href="' . $base_path . 'requests/view-0/' . $detail . $url_arguments . '" class="request_problem-extra-conflict-item-link" title="View Request ' . $detail . '">Request ' . $detail . '</a></li>' . "\n";
+    }
+    $form['markup']['#markup'] .= '</ul>' . "\n";
+    $form['markup']['#markup'] .= "<br>\n";
+  }
+  elseif ($problem->problem == MFCS_REQUEST_PROBLEM_STALE) {
+    $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where a request has all of its scheduled dates in the past but is still open for review.' . "<br>\n";
+    $form['markup']['#markup'] .= 'Stale requests should likely be cancelled.' . "<br>\n";
+    $form['markup']['#markup'] .= "<br>\n";
+  }
+  elseif ($problem->problem == MFCS_REQUEST_PROBLEM_STUCK) {
+    $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where the request is somehow being prevented from progressing in the review process when it otherwise should be able to do so.' . "<br>\n";
+    $form['markup']['#markup'] .= 'This could happen when a reviewer position is altered during the review process.' . "<br>\n";
+    $form['markup']['#markup'] .= 'This could happen when a venue coordinator account is no longer valid and must be re-assigned.' . "<br>\n";
+    $form['markup']['#markup'] .= "<br>\n";
+  }
+  elseif ($problem->problem == MFCS_REQUEST_PROBLEM_BLOCKED) {
+    $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where a request is being prevented from progressing further in the review process.' . "<br>\n";
+    $form['markup']['#markup'] .= 'This generally applies when multiple requests are made for the same date and time (only one request will make it into the review process and the others will be stuck).' . "<br>\n";
+    $form['markup']['#markup'] .= 'Stuck requests should be cancelled at the venue coordinators discretion.' . "<br>\n";
+    $form['markup']['#markup'] .= "<br>\n";
+  }
+  elseif ($problem->problem == MFCS_REQUEST_PROBLEM_COORDINATOR) {
+    $form['actions']['action']['#options']['reassign_venue_coordinator'] = "Re-Assign Venue Coordinator";
+
+    $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where the venue coordinator assigned to a request no longer exists, is disabled, or is otherwise invalid.' . "<br>\n";
+    $form['markup']['#markup'] .= "<br>\n";
+
+    $form['markup']['#markup'] .= 'The <strong>' . $form['actions']['action']['#options']['reassign_venue_coordinator'] . ' </strong> action will attempt to auto-reassign the venue coordinator.' . "<br>\n";
+    $form['markup']['#markup'] .= "The re-assigmment functionality only refreshes the banner information.<br>\n";
+    $form['markup']['#markup'] .= "If that information has not changed for the venue coordinator, then this will do nothing.<br>\n";
+    $form['markup']['#markup'] .= "<br>\n";
+  }
+  elseif ($problem->problem == MFCS_REQUEST_PROBLEM_REQUESTER) {
+    $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where the requester assigned to a request no longer exists, is disabled, or is otherwise invalid.' . "<br>\n";
+    $form['markup']['#markup'] .= 'The requester is the account used to create the request and is viewable under the <em>created by</em> section of the request.' . "<br>\n";
+    $form['markup']['#markup'] .= "<br>\n";
+  }
+  elseif ($problem->problem == MFCS_REQUEST_PROBLEM_ROOM) {
+    $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where the room assigned to a request no longer exists, is disabled, or is otherwise invalid.' . "<br>\n";
+    $form['markup']['#markup'] .= "<br>\n";
+  }
+  elseif ($problem->problem == MFCS_REQUEST_PROBLEM_BUILDING) {
+    $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where the building assigned to a request no longer exists, is disabled, or is otherwise invalid.' . "<br>\n";
+    $form['markup']['#markup'] .= "<br>\n";
+  }
+  elseif ($problem->problem == MFCS_REQUEST_PROBLEM_LOCATION) {
+    $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where the location assigned to a request no longer exists, is disabled, or is otherwise invalid.' . "<br>\n";
+    $form['markup']['#markup'] .= "<br>\n";
+  }
+  elseif ($problem->problem == MFCS_REQUEST_PROBLEM_CACHE_REQUEST) {
+    $form['actions']['action']['#options']['rebuild_request_cache'] = "Rebuild Request Cache";
+
+    $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where internal database cache is inconsistent with the stored values.' . "<br>\n";
+    $form['markup']['#markup'] .= 'This issue will cause inconsistencies with the values associated with the request.' . "<br>\n";
+    $form['markup']['#markup'] .= "<br>\n";
+    $form['markup']['#markup'] .= 'The <strong>' . $form['actions']['action']['#options']['rebuild_request_cache'] . '</strong> action should fix this issue by rebuilding the cache associated with the specific request.' . "<br>\n";
+    $form['markup']['#markup'] .= "<br>\n";
+  }
+
+  return $form;
+}
+
+/**
+ * Validation for mfcs_request_problems_0_request_form().
+ *
+ * @param array $form
+ *   The form array as defined by drupals form api.
+ * @param array $form_state
+ *   The form state array as defined by drupals form api
+ *
+ * @see: mfcs_request_problems_0_request_form()
+ */
+function mfcs_request_problems_0_request_form_validate($form, &$form_state) {
+  $clicked_id = '';
+  if (isset($form_state['triggering_element']['#id'])) {
+    $clicked_id = $form_state['triggering_element']['#id'];
+  }
+
+  if ($clicked_id == 'request_problems-submit-back') {
+    // no processing necessary here.
+    return;
+  }
+
+  if (!isset($form['form']['problem_id']['#value'])) {
+    // should never happen.
+    $user = cf_current_user();
+    form_set_error('', "Invalid problem data detected, cannot continue.");
+    watchdog(MFCS_WATCHDOG_ID, "Unable to submit request problems form because the problem id is missing or invalid, user: @user_id.", array('@user_id' => $user->uid), WATCHDOG_ERROR);
+    return;
+  }
+
+  if (!isset($form['form']['problem']['#value']) || !is_object($form['form']['problem']['#value'])) {
+    // should never happen.
+    $user = cf_current_user();
+    form_set_error('', "Invalid problem data detected, cannot continue.");
+    watchdog(MFCS_WATCHDOG_ID, "Unable to submit request problems form because the problem object is missing or invalid, user: @user_id, problem_id: @problem_id.", array('@user_id' => $user->uid, '@problem_id' => $form['form']['problem_id']), WATCHDOG_ERROR);
+    return;
+  }
+
+  global $conf;
+  global $base_path;
+
+  $do_something = FALSE;
+
+  if (isset($form_state['values']['actions']['action'])) {
+    $request_problems_by_id = mfcs_get_request_problems_list_options();
+    if (array_key_exists($form['form']['problem']['#value']->problem, $request_problems_by_id) && $form['form']['problem']['#value']->problem != MFCS_REQUEST_PROBLEM_NONE) {
+      if ($form_state['values']['actions']['action'] == 'recheck') {
+        $do_something = TRUE;
+      }
+      elseif ($form_state['values']['actions']['action'] == 'reassign_venue_coordinator') {
+        $do_something = TRUE;
+
+        $request = mfcs_load_request_by_id($form['form']['problem']['#value']->request_id);
+        if (isset($request['venue_coordinator']['user_id'][0]->value)) {
+          mfcs_include(MFCS_INCLUDE_WORKFLOW);
+
+          if (empty($conf['fcs_failsafe_coordinator']) || !is_integer($conf['fcs_failsafe_coordinator'])) {
+            watchdog(MFCS_WATCHDOG_ID, "Failed to load 'fcs_failsafe_coordinator' settings. Your settings.php does not contain the failsafe coordinator user id.", array(), WATCHDOG_CRITICAL);
+            $new_coordinator_id = 1; // as a last resort fall back to the default drupal admin account.
+          }
+          else {
+            $new_coordinator_id = $conf['fcs_failsafe_coordinator'];
+          }
+
+          $extra_text = '';
+          if (isset($request['top']['room'][0]->value)) {
+            $room_information = mfcs_load_rooms(NULL, NULL, $request['top']['room'][0]->value);
+            if (isset($room_information->coordinator_id)) {
+              $new_coordinator_id = $room_information->coordinator_id;
+            }
+            $extra_text .= " Room Information: " . $room_information->room_name . " (" . $room_information->room_number . "). Building Information: " . $room_information->building_name . " (" . $room_information->building_code . ").";
+          }
+
+          $coordinator = user_load($room_information->coordinator_id);
+          $extra_text .= ' Coordinator Information: <a href="' . $base_path . 'user/' . $room_information->coordinator_id . '" title="View user account">' . $coordinator->field_user_first_name['und'][0]['safe_value'] . ' ' . $coordinator->field_user_last_name['und'][0]['safe_value'] . '</a>.';
+
+          if ($new_coordinator_id == $request['venue_coordinator']['user_id'][0]->value) {
+            form_set_error('actions][action', "Unable to re-assign venue coordinator, the banner information remains the same." . $extra_text);
+          }
+        }
+      }
+      elseif ($form_state['values']['actions']['action'] == 'rebuild_request_cache') {
+        if ($form['form']['problem']['#value']->problem == MFCS_REQUEST_PROBLEM_CACHE_REQUEST) {
+          $do_something = TRUE;
+        }
+        else {
+          form_set_error('actions][action', "Cache will only be re-built for a problem with a cache request problem code." . $extra_text);
+        }
+      }
+      elseif ($form_state['values']['actions']['action'] == 'ignore') {
+        if ($form['form']['problem']['#value']->ignore == 1) {
+          form_set_error('actions][action', "This request is already being ignored.");
+        }
+        else {
+          $do_something = TRUE;
+        }
+      }
+      elseif ($form_state['values']['actions']['action'] == 'unignore') {
+        if ($form['form']['problem']['#value']->ignore == 0) {
+          form_set_error('actions][action', "This request is already not being ignored.");
+        }
+        else {
+          $do_something = TRUE;
+        }
+      }
+    }
+    else {
+      form_set_error('', "An invalid problem code was specified, cannot continue.");
+      watchdog(MFCS_WATCHDOG_ID, "Unable to submit request problems form because the problem code invalid, user: @user_id, problem_id: @problem_id, problem: @problem.", array('@user_id' => $user->uid, $form['form']['problem_id'], '@problem' => $form['form']['problem']['#value']->problem), WATCHDOG_ERROR);
+    }
+  }
+
+  if (!$do_something) {
+    form_set_error('', "You have not specified any action to perform.");
+    return;
+  }
+}
+
+/**
+ * Submit for mfcs_request_problems_0_request_form().
+ *
+ * @param array $form
+ *   The form array as defined by drupals form api.
+ * @param array $form_state
+ *   The form state array as defined by drupals form api
+ *
+ * @see: mfcs_request_problems_0_request_form()
+ */
+function mfcs_request_problems_0_request_form_submit($form, &$form_state) {
+  global $conf;
+  global $mfcs_determined;
+  $user = cf_current_user();
+
+  $instance = mfcs_instance();
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  $clicked_id = '';
+  if (isset($form_state['triggering_element']['#id'])) {
+    $clicked_id = $form_state['triggering_element']['#id'];
+  }
+
+  $return_to_problem_page = TRUE;
+
+  if ($clicked_id == 'request_problems-submit-back') {
+    $return_to_problem_page = FALSE;
+  }
+  elseif ($form_state['values']['actions']['action'] == 'recheck') {
+    $recheck_result = mfcs_request_problems_0_request_perform_recheck($form['form']['problem']['#value']->request_id, $form['form']['problem']['#value']->problem);
+    if ($recheck_result === TRUE) {
+      $return_to_problem_page = FALSE;
+    }
+
+    // note: re-check function already writes to the log, so there should be no manual log entry query here.
+  }
+  elseif ($form_state['values']['actions']['action'] == 'reassign_venue_coordinator') {
+    mfcs_include(MFCS_INCLUDE_WORKFLOW);
+
+    $failure = TRUE;
+    $request = mfcs_load_request_by_id($form['form']['problem']['#value']->request_id);
+    if (isset($request['mer']['id'][0]->value) && isset($request['venue_coordinator']['user_id'][0]->value)) {
+      $old_coordinator_id = $request['venue_coordinator']['user_id'][0]->value;
+
+      if (empty($conf['fcs_failsafe_coordinator']) || !is_integer($conf['fcs_failsafe_coordinator'])) {
+        $new_coordinator_id = 1; // as a last resort fall back to the default drupal admin account.
+      }
+      else {
+        $new_coordinator_id = $conf['fcs_failsafe_coordinator'];
+      }
+
+      if (isset($request['top']['room'][0]->value)) {
+        $room_information = mfcs_load_rooms(NULL, NULL, $request['top']['room'][0]->value);
+        if (isset($room_information->coordinator_id)) {
+          $new_coordinator_id = $room_information->coordinator_id;
+        }
+      }
+
+      $old_coordinator = user_load($old_coordinator_id);
+      $old_coordinator_name = $old_coordinator->name;
+      if (!empty($old_coordinator['field_user_first_name']['und'][0]['safe_value']) && !empty($old_coordinator['field_user_last_name']['und'][0]['safe_value'])) {
+        $old_coordinator_name = $old_coordinator['field_user_first_name']['und'][0]['safe_value'] . ' ' . $old_coordinator['field_user_last_name']['und'][0]['safe_value'];
+      }
+
+      $new_coordinator = user_load($new_coordinator_id);
+      $new_coordinator_name = $new_coordinator->name;
+      if (!empty($new_coordinator['field_user_first_name']['und'][0]['safe_value']) && !empty($new_coordinator['field_user_last_name']['und'][0]['safe_value'])) {
+        $new_coordinator_name = $new_coordinator['field_user_first_name']['und'][0]['safe_value'] . ' ' . $new_coordinator['field_user_last_name']['und'][0]['safe_value'];
+      }
+
+      $extra = array();
+      if (!empty($form['form']['old_coordinator_name']['#value']) && !empty($form['form']['new_coordinator_name']['#value'])) {
+        $extra['revisions']['message'] = "The Venue Coordinator has been changed from " . $old_coordinator_name . " [id: " . $old_coordinator_id . "] to " . $new_coordinator_name . " [id: " . $new_coordinator_id . "].";
+      }
+
+      $reassigned = mfcs_workflow_set_venue_coordinator($request['mer']['id'][0]->value, $new_coordinator_id, NULL, $extra);
+      if ($reassigned) {
+        $failure = FALSE;
+      }
+    }
+
+    $transaction = db_transaction();
+    try {
+      $fields = array(
+        'code' => MFCS_LOG_PROBLEMS_REASSIGN_VENUE_COORDINATOR,
+        'request_id' => $form['form']['problem']['#value']->request_id,
+        'user_id' => $user->uid,
+        'date' => $instance,
+      );
+
+      $query = db_insert('mfcs_log_problems_requests');
+      $query->fields($fields);
+      $query->execute();
+
+      // enforce transaction execution.
+      unset($transaction);
+    }
+    catch (Exception $ex) {
+      $transaction->rollback();
+      cf_error::on_query_execution($ex);
+    }
+
+    if ($failure) {
+      form_set_error('form', "An error occurred while trying to re-assign the request. Please contact the support staff.");
+      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to re-assign the request: @request_id.", array('@request_id' => $form['form']['problem']['#value']->request_id), WATCHDOG_ERROR);
+
+      $form_state['rebuild'] = TRUE;
+      $form_state['redirect'] = FALSE;
+      $form_state['submitted'] = FALSE;
+
+      return;
+    }
+    else {
+      $return_to_problem_page = FALSE;
+
+      mfcs_workflow_step_review($form['form']['problem']['#value']->request_id, $user, MFCS_REVIEW_DECISION_REASSIGNED, $extra['revisions']['message']);
+
+      $parameters = array();
+      $parameters['changed_by'] = $user->uid;
+      $parameters['changed_type'] = 'user';
+      $parameters['reassigned'] = TRUE;
+      $parameters['reassigned_from'] = $old_coordinator_id;
+      $parameters['reassigned_to'] = $new_coordinator_id;
+      mfcs_send_workflow_emails($form['form']['problem']['#value']->request_id, $parameters);
+    }
+  }
+  elseif ($form_state['values']['actions']['action'] == 'rebuild_request_cache') {
+    $recached = mfcs_request_problem_0_request_perform_recache($form['form']['problem']['#value']->request_id);
+
+    $transaction = db_transaction();
+    try {
+      $fields = array(
+        'code' => MFCS_LOG_PROBLEMS_REASSIGN_REBUILD_CACHE,
+        'request_id' => $form['form']['problem']['#value']->request_id,
+        'user_id' => $user->uid,
+        'date' => $instance,
+      );
+
+      $query = db_insert('mfcs_log_problems_requests');
+      $query->fields($fields);
+      $query->execute();
+
+      // enforce transaction execution.
+      unset($transaction);
+    }
+    catch (Exception $ex) {
+      $transaction->rollback();
+      cf_error::on_query_execution($ex);
+    }
+
+    // once the cache is rebuilt, re-check the request to ensure the problem is corrected.
+    if ($recached) {
+      $recheck_result = mfcs_request_problems_0_request_perform_recheck($form['form']['problem']['#value']->request_id, $form['form']['problem']['#value']->problem);
+      if ($recheck_result === TRUE) {
+        $return_to_problem_page = FALSE;
+      }
+    }
+    else {
+      form_set_error('form', "An error occurred while trying to re-cache the request. Please contact the support staff.");
+      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to re-cache the request: @request_id.", array('@request_id' => $form['form']['problem']['#value']->request_id), WATCHDOG_ERROR);
+
+      $form_state['rebuild'] = TRUE;
+      $form_state['redirect'] = FALSE;
+      $form_state['submitted'] = FALSE;
+
+      return;
+    }
+  }
+  elseif ($form_state['values']['actions']['action'] == 'ignore') {
+    $transaction = db_transaction();
+    try {
+      $fields = array(
+        'code' => MFCS_LOG_PROBLEMS_IGNORE,
+        'request_id' => $form['form']['problem']['#value']->request_id,
+        'user_id' => $user->uid,
+        'date' => $instance,
+      );
+
+      $query = db_insert('mfcs_log_problems_requests');
+      $query->fields($fields);
+      $query->execute();
+
+      // enforce transaction execution.
+      unset($transaction);
+    }
+    catch (Exception $ex) {
+      $transaction->rollback();
+      cf_error::on_query_execution($ex);
+    }
+
+    $transaction = db_transaction();
+    try {
+      $query = db_update('mfcs_problems_requests');
+      $query->condition('id', $form['form']['problem']['#value']->id);
+      $query->fields(array('ignore' => 1));
+      $query->execute();
+
+      // enforce transaction execution.
+      unset($transaction);
+    }
+    catch (Exception $ex) {
+      $transaction->rollback();
+      cf_error::on_query_execution($ex);
+
+      form_set_error('form', "An error occurred while trying to ignore the request. Please contact the support staff.");
+      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to ignore the problem: @problem_id.", array('@problem_id' => $form['form']['problem']['#value']->id), WATCHDOG_ERROR);
+
+      $form_state['rebuild'] = TRUE;
+      $form_state['redirect'] = FALSE;
+      $form_state['submitted'] = FALSE;
+
+      return;
+    }
+  }
+  elseif ($form_state['values']['actions']['action'] == 'unignore') {
+    $transaction = db_transaction();
+    try {
+      $fields = array(
+        'code' => MFCS_LOG_PROBLEMS_UNIGNORE,
+        'request_id' => $form['form']['problem']['#value']->request_id,
+        'user_id' => $user->uid,
+        'date' => $instance,
+      );
+
+      $query = db_insert('mfcs_log_problems_requests');
+      $query->fields($fields);
+      $query->execute();
+
+      // enforce transaction execution.
+      unset($transaction);
+    }
+    catch (Exception $ex) {
+      $transaction->rollback();
+      cf_error::on_query_execution($ex);
+    }
+
+    $transaction = db_transaction();
+    try {
+      $query = db_update('mfcs_problems_requests');
+      $query->condition('id', $form['form']['problem']['#value']->id);
+      $query->fields(array('ignore' => 0));
+      $query->execute();
+
+      // enforce transaction execution.
+      unset($transaction);
+    }
+    catch (Exception $ex) {
+      $transaction->rollback();
+      cf_error::on_query_execution($ex);
+
+      form_set_error('form', "An error occurred while trying to unignore the request. Please contact the support staff.");
+      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to unignore the problem: @problem_id.", array('@problem_id' => $form['form']['problem']['#value']->id), WATCHDOG_ERROR);
+
+      $form_state['rebuild'] = TRUE;
+      $form_state['redirect'] = FALSE;
+      $form_state['submitted'] = FALSE;
+
+      return;
+    }
+  }
+
+  // don't redirect on error.
+  if ($form_state['submitted'] === FALSE) {
+    return;
+  }
+
+  // redirect after submitting.
+  if (empty($form_state['values']['redirect_to'])) {
+    if ($return_to_problem_page) {
+      $form_state['redirect'] = mfcs_build_redirect_array('requests/problems-0/requests/request/' . $form['form']['problem']['#value']->id);
+    }
+    else {
+      $form_state['redirect'] = mfcs_build_redirect_array('requests/problems-0/requests');
+    }
+  }
+  else {
+    $form_state['redirect'] = $form_state['values']['redirect_to'];
+  }
+}
+
+/**
+ * Re-synchronize a specific problem detected for a request.
+ *
+ * This page auto-returns.
+ *
+ * @param int $problem_id
+ *   Id of the problem to re-check.
+ *
+ * @see: mfcs_request_problems_0_request_perform_recheck()
+ */
+function mfcs_request_problems_0_request_recheck($problem_id) {
+  if (!cf_is_integer($problem_id)) {
+    cf_error::invalid_integer('problem_id');
+
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  mfcs_add_canonical_headers('requests/problems-0/requests/request/' . $problem_id . '/recheck');
+
+  $page_title = "Facilities Use Problems - Re-Check Problem";
+  drupal_set_title($page_title);
+
+  mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
+
+  $problem_results = mfcs_miscellaneous_problems_request_load($problem_id, TRUE);
+  if (empty($problem_results)) {
+    $result = FALSE;
+  }
+  else {
+    $problem = array_pop($problem_results);
+    $result = mfcs_request_problems_0_request_perform_recheck($problem->request_id, $problem->problem);
+  }
+
+  if ($result !== FALSE) {
+    $redirect_array = mfcs_build_redirect_array('requests/problems-0/requests');
+
+    drupal_goto('requests/problems-0/requests', array('query' => drupal_get_query_parameters()));
+    return '';
+  }
+
+  $markup = '<div>' . "\n";
+  $markup .= 'Failed to re-check problem.<br>' . "\n";
+  $markup .= 'You may go back to the <a href="' . $base_path . 'requests/problems-0/requests">request problems management page</a>.' . "\n";
+  $markup .= '</div>' . "\n";
+
+  return $markup;
+}
+
+/**
+ * Given a request and problem code, re-performs the appropriate check.
+ *
+ * This will remove any existing entries in the request problems database if the problem fails.
+ * This assumes that the problem was previously detected and does not auto-add the problem back.
+ *
+ * @param int $request_id
+ *   The id of the request to perform re-check for problems.
+ * @param int $problem_code
+ *   The code of the specific problem to re-check.
+ *
+ * @param bool|null
+ *   TRUE on success.
+ *   NULL is returned when the problem still exists, but there was no problem in the re-check process.
+ *   FALSE is returned on failure.
+ */
+function mfcs_request_problems_0_request_perform_recheck($request_id, $problem_code) {
+  if (!cf_is_integer($request_id)) {
+    cf_error::invalid_integer('request_id');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($problem_code)) {
+    cf_error::invalid_integer('problem_code');
+    return FALSE;
+  }
+
+  mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
+
+  $user = cf_current_user();
+  $instance = mfcs_instance();
+
+  $transaction = db_transaction();
+  try {
+    $fields = array(
+      'code' => MFCS_LOG_PROBLEMS_RECHECK,
+      'request_id' => $request_id,
+      'user_id' => $user->uid,
+      'date' => $instance,
+    );
+
+    $query = db_insert('mfcs_log_problems_requests');
+    $query->fields($fields);
+    $query->execute();
+
+    // enforce transaction execution.
+    unset($transaction);
+  }
+  catch (Exception $ex) {
+    $transaction->rollback();
+    cf_error::on_query_execution($ex);
+  }
+
+  $results = mfcs_miscellaneous_check_requests($request_id, $problem_code);
+  if ($results === FALSE) {
+    return FALSE;
+  }
+
+  // when the results are empty, then the problem no longer exists and can be removed from the database.
+  if (empty($results)) {
+    $transaction = db_transaction();
+    try {
+      $return_to_problem_page = FALSE;
+      $query = db_delete('mfcs_problems_requests');
+
+      $query->condition('request_id', $request_id);
+      $query->condition('problem', $problem_code);
+
+      $query->execute();
+
+      // enforce transaction execution.
+      unset($transaction);
+    }
+    catch (Exception $ex) {
+      $transaction->rollback();
+      cf_error::on_query_execution($ex);
+
+      return FALSE;
+    }
+  }
+  else {
+    return NULL;
+  }
+
+  return TRUE;
+}
+
+/**
+ * Rebuild the requests cache table.
+ *
+ * The main table mfcs_requests essentially contains cached data.
+ * Should something happen for that cached data to become inconsistent, this can be used to manually re-sync the cache.
+ *
+ * @param int $request_id
+ *   The id of the request to recache.
+ *
+ * @param bool
+ *   TRUE on success, FALSE otherwise.
+ */
+function mfcs_request_problem_0_request_perform_recache($request_id) {
+  if (!cf_is_integer($request_id)) {
+    cf_error::invalid_integer('request_id');
+    return FALSE;
+  }
+
+  try {
+    $query = db_select('mfcs_current', 'mc');
+    $query->innerJoin('mfcs_field_top_status', 'mfts', 'mc.request_id = mfts.request_id and mc.top_status = mfts.revision');
+    $query->innerJoin('mfcs_field_top_step', 'mftsp', 'mc.request_id = mftsp.request_id and mc.top_step = mftsp.revision');
+    $query->innerJoin('mfcs_field_information_type', 'mfit', 'mc.request_id = mfit.request_id and mc.information_type = mfit.revision');
+    $query->innerJoin('mfcs_field_request_coordinator_classification', 'mfrcc', 'mc.request_id = mfrcc.request_id and mc.request_coordinator_classification = mfrcc.revision');
+    $query->innerJoin('mfcs_field_top_location', 'mftl', 'mc.request_id = mftl.request_id and mc.top_location = mftl.revision');
+    $query->innerJoin('mfcs_field_top_building', 'mftb', 'mc.request_id = mftb.request_id and mc.top_building = mftb.revision');
+    $query->innerJoin('mfcs_field_top_room', 'mftr', 'mc.request_id = mftr.request_id and mc.top_building = mftr.revision');
+    $query->innerJoin('mfcs_field_venue_coordinator_user_id', 'mfvcui', 'mc.request_id = mfvcui.request_id and mc.venue_coordinator_user_id = mfvcui.revision');
+    $query->innerJoin('mfcs_field_information_title', 'mfite', 'mc.request_id = mfite.request_id and mc.information_title = mfite.revision');
+
+    $query->addField('mfts', 'value', 'status');
+    $query->addField('mftsp', 'value', 'step');
+    $query->addField('mfit', 'value', 'type');
+    $query->addField('mfrcc', 'value', 'classification');
+    $query->addField('mftl', 'value', 'location');
+    $query->addField('mftb', 'value', 'building');
+    $query->addField('mftr', 'value', 'room');
+    $query->addField('mfvcui', 'value', 'venue_coordinator');
+    $query->addField('mfite', 'value', 'title');
+
+    $query->condition('mc.request_id', $request_id);
+
+    $latest = $query->execute()->fetchObject();
+
+    if (!is_object($latest)) {
+      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to perform a recache on the request: @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
+      return FALSE;
+    }
+
+    $query = db_update('mfcs_requests');
+    $query->fields((array)$latest);
+    $query->condition('id', $request_id);
+    $query->execute();
+  }
+  catch (Exception $ex) {
+    cf_error::on_query_execution($ex);
+
+    return FALSE;
+  }
+
+  return TRUE;
 }
 
 /**

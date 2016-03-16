@@ -1080,6 +1080,248 @@ function mfcs_ajax_problems_0_users_list() {
 }
 
 /**
+ * Ajax function call for loading requests problem list datatable.
+ *
+ * @param string|int $argument_1
+ *   Some string or number to send as the first argument.
+ */
+function mfcs_ajax_problems_0_requests_list($argument_1 = NULL) {
+  global $base_path;
+  global $mfcs_determined;
+
+  $include_ignored = FALSE;
+  if (is_null($argument_1)) {
+    // nothing to do.
+  }
+  elseif ($argument_1 == 'show_ignored') {
+    $include_ignored = TRUE;
+  }
+  elseif ($argument_1 == 'hide_ignored') {
+    $include_ignored = FALSE;
+  }
+  else {
+    // @fixme: not sure what the best way to handle errors like this should be.
+    drupal_json_output('');
+    exit();
+  }
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  $response = array();
+
+  if (function_exists('devel_menu')) {
+    $GLOBALS['devel_shutdown'] = FALSE;
+  }
+
+  mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+
+  $request_problems_by_id = mfcs_get_request_problems_list_options();
+
+  // load ajax/json request settings.
+  list($draw, $columns, $order, $options, $timestamp) = mfcs_ajax_setup_request_settings();
+
+  $options['include_ignored'] = $include_ignored;
+
+  $search = FALSE;
+  if (isset($_GET['search']['value']) && is_string($_GET['search']['value']) && !empty($_GET['search']['value'])) {
+    $search = TRUE;
+
+    // search through the already loaded lists, the database stores the values as integers and not strings.
+    $regex_safe_search = preg_quote($_GET['search']['value'], '/');
+
+    $limit_problem = array();
+    $limit_problem_unknown = FALSE;
+    foreach ($request_problems_by_id as $key => $value) {
+      if (preg_match('/' . $regex_safe_search . '/i', $value) > 0) {
+        $limit_problem[$key] = $key;
+      }
+      elseif (preg_match('/' . $regex_safe_search . '/i', 'Unknown Code') > 0) {
+        $limit_problem_unknown = TRUE;
+      }
+    }
+  }
+
+  // build ajax/json response data.
+  $response = array(
+    'draw' => $draw,
+  );
+
+  $sorting = array();
+  if (!isset($order[0]['column'])) {
+    $sorting['id'] = 'ASC';
+  }
+  else {
+    $order_column = (int) $order[0]['column'];
+    $order_direction = isset($order[0]['dir']) && is_string($order[0]['dir']) ? strtoupper($order[0]['dir']) : 'DESC';
+
+    if ($order_column == 0) {
+      $sorting['id'] = $order_direction;
+    }
+    elseif ($order_column == 1) {
+      $sorting['problem'] = $order_direction;
+    }
+    elseif ($order_column == 2) {
+      $sorting['request_id'] = $order_direction;
+    }
+    elseif ($order_column == 3) {
+      $sorting['date'] = $order_direction;
+    }
+    elseif ($order_column == 4) {
+      $sorting['reason'] = $order_direction;
+    }
+    elseif ($order_column == 5) {
+      $sorting['ignore'] = $order_direction;
+    }
+    elseif ($order_column == 6) {
+      $sorting['date'] = $order_direction;
+    }
+  }
+
+  // always provide the unique id in the ordering to guarantee consistency in range results.
+  if (!isset($sorting['id'])) {
+    $sorting['id'] = 'DESC';
+  }
+
+  if (!empty($sorting)) {
+    $options['sort'] = $sorting;
+  }
+
+  $conditions = array();
+
+  if ($search) {
+    $count_conditions = $conditions;
+    $count_options = $options;
+
+    $conditions['or_1'] = array();
+    $conditions['or_1']['value_id'] = array(
+      'field' => 'text(mpr.id)',
+      'operator' => MFCS_OPERATOR_LIKE,
+      'search' => $_GET['search']['value'],
+      'expression' => TRUE,
+    );
+    $conditions['or_1']['value_request_id'] = array(
+      'field' => 'text(mpr.request_id)',
+      'operator' => MFCS_OPERATOR_LIKE,
+      'search' => $_GET['search']['value'],
+      'expression' => TRUE,
+    );
+
+    if (!empty($limit_problem)) {
+      $conditions['or_1']['value_problem'] = array(
+        'field' => 'mpr.problem',
+        'operator' => MFCS_OPERATOR_IS_IN,
+        'search' => $limit_problem,
+      );
+    }
+
+    if ($limit_problem_unknown) {
+      $conditions['or_1']['and_1'] = array();
+      $conditions['or_1']['and_1']['value_problem_unknown_1'] = array(
+        'field' => 'mpr.problem',
+        'operator' => MFCS_OPERATOR_LESS_THAN_EQUAL,
+        'search' => MFCS_REQUEST_PROBLEM_NONE,
+      );
+      $conditions['or_1']['and_1']['value_problem_unknown_2'] = array(
+        'field' => 'mpr.problem',
+        'operator' => MFCS_OPERATOR_GREATER_THAN,
+        'search' => MFCS_REQUEST_PROBLEM_CACHE_REQUEST,
+      );
+    }
+
+    $regex_safe_search = preg_quote($_GET['search']['value'], '/');
+    $conditions['or_1']['value_reason'] = array(
+      'field' => 'text(mpr.reason)',
+      'operator' => MFCS_OPERATOR_ILIKE,
+      'search' => $regex_safe_search,
+      'expression' => TRUE,
+    );
+
+    // Commented out because this is confusing because the date format will not match.
+    #$conditions['or_1']['value_date'] = array(
+    #  'field' => 'text(to_timestamp(mu.date))',
+    #  'operator' => MFCS_OPERATOR_LIKE,
+    #  'search' => $_GET['search']['value'],
+    #  'expression' => TRUE,
+    #);
+
+    $count_options['results'] = FALSE;
+    $problems_returned = mfcs_miscellaneous_problems_request_search($count_conditions, $count_options);
+
+    $problems_total = 0;
+    if (is_array($problems_returned) && array_key_exists('count', $problems_returned)) {
+      $problems_total = $problems_returned['count'];
+    }
+
+    // count cannot be disabled here, otherewise the recordsFiltered results would be undefined or inaccurate when an SQL limit is applied.
+    #$options['count'] = FALSE;
+    $problems_returned = mfcs_miscellaneous_problems_request_search($conditions, $options);
+    $problems = array();
+    if (isset($problems_returned['results']) && is_array($problems_returned['results'])) {
+      $problems = $problems_returned['results'];
+    }
+
+    $response['recordsTotal'] = $problems_total;
+    $response['recordsFiltered'] = $problems_returned['count'];
+  }
+  else {
+    $problems_returned = mfcs_miscellaneous_problems_request_search($conditions, $options);
+
+    $problems_total = 0;
+    if (is_array($problems_returned) && array_key_exists('count', $problems_returned)) {
+      $problems_total = $problems_returned['count'];
+    }
+
+    $problems = array();
+    if (isset($problems_returned['results']) && is_array($problems_returned['results'])) {
+      $problems = $problems_returned['results'];
+    }
+
+    $response['recordsTotal'] = $problems_total;
+    $response['recordsFiltered'] = $problems_total;
+  }
+
+  if (!is_array($problems)) {
+    drupal_json_output($response);
+    exit();
+  }
+
+  $response['data'] = array();
+  if (!empty($problems)) {
+    foreach ($problems as $problem) {
+      $row = array();
+
+      $additional_operations = '';
+
+      if (array_key_exists($problem->problem,  $request_problems_by_id)) {
+        $problem_id = $request_problems_by_id[$problem->problem];
+      }
+      else {
+        $problem_id = 'Unknown Code';
+      }
+
+      $row[0] = '' . $problem->id;
+      $row[1] = $problem_id;
+      $row[2] = '' . $problem->request_id;
+      $row[3] = check_plain(date("Y/m/d h:i:s a", $problem->date));
+      $row[4] = (isset($problem->reason) ? check_plain($problem->reason) : '');
+      $row[5] = (isset($problem->ignore) && $problem->ignore == 1 ? 'Yes' : 'No');
+      $row[6] = '<a href="' . $base_path . 'requests/problems-0/requests/request/' . $problem->id . $url_arguments . '" class="operation-link operation-link-details">Details</a>';
+      $row[6] .= ' <a href="' . $base_path . 'requests/view-0/' . $problem->request_id . $url_arguments . '" class="operation-link operation-link-request">Request</a>';
+      $row[6] .= ' <a href="' . $base_path . 'requests/problems-0/requests/request/' . $problem->id . '/recheck' . $url_arguments . '" class="operation-link operation-link-recheck white-space-nowrap">Re-Check</a>';
+
+      $response['data'][] = $row;
+    }
+  }
+
+  drupal_json_output($response);
+  exit();
+}
+
+/**
  * Ajax function call for loading users problem list datatable.
  */
 function mfcs_ajax_email_log_0_list() {
