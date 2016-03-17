@@ -2085,13 +2085,19 @@ function mfcs_request_problems_0_request_form($form, &$form_state, $problem_id) 
   elseif ($problem->problem == MFCS_REQUEST_PROBLEM_ROOM) {
     $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where the room assigned to a request no longer exists, is disabled, or is otherwise invalid.' . "<br>\n";
     $form['markup']['#markup'] .= "<br>\n";
+    $form['markup']['#markup'] .= 'You can may want to <a href="' . $base_path . 'requests/troubleshoot-0/rooms' . $url_arguments . '">look at the listing of rooms according to the local banner information</a>.' . "<br>\n";
+    $form['markup']['#markup'] .= "<br>\n";
   }
   elseif ($problem->problem == MFCS_REQUEST_PROBLEM_BUILDING) {
     $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where the building assigned to a request no longer exists, is disabled, or is otherwise invalid.' . "<br>\n";
     $form['markup']['#markup'] .= "<br>\n";
+    $form['markup']['#markup'] .= 'You can may want to <a href="' . $base_path . 'requests/troubleshoot-0/buildings' . $url_arguments . '">look at the listing of buildings according to the local banner information</a>.' . "<br>\n";
+    $form['markup']['#markup'] .= "<br>\n";
   }
   elseif ($problem->problem == MFCS_REQUEST_PROBLEM_LOCATION) {
     $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where the location assigned to a request no longer exists, is disabled, or is otherwise invalid.' . "<br>\n";
+    $form['markup']['#markup'] .= "<br>\n";
+    $form['markup']['#markup'] .= 'You can may want to <a href="' . $base_path . 'requests/troubleshoot-0/locations' . $url_arguments . '">look at the listing of locations according to the local banner information</a>.' . "<br>\n";
     $form['markup']['#markup'] .= "<br>\n";
   }
   elseif ($problem->problem == MFCS_REQUEST_PROBLEM_CACHE_REQUEST) {
