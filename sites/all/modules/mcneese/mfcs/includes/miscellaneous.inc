@@ -857,6 +857,8 @@ function mfcs_miscellaneous_check_requests_requester($request_id = NULL) {
  *
  * These requests should be considered for MFCS_REQUEST_PROBLEM_ROOM.
  *
+ * Requests in the past, cancelled, or otherwise closed requests are not checked.
+ *
  * @param int|null $request_id
  *   (optional) If specified, check for conflicts against the specified request.
  *
@@ -875,6 +877,7 @@ function mfcs_miscellaneous_check_requests_room($request_id = NULL) {
     return FALSE;
   }
 
+  $instance = mfcs_instance();
   $requests = array();
 
   try {
@@ -887,6 +890,7 @@ function mfcs_miscellaneous_check_requests_room($request_id = NULL) {
 
     $query->addField('mer', 'id', 'id');
     $query->addField('mer', 'title', 'title');
+    $query->addField('mer', 'status', 'status');
 
     $query->addField('mer', 'location', 'location_id');
     $query->addField('mbl', 'machine_name', 'location_machine_name');
@@ -933,6 +937,40 @@ function mfcs_miscellaneous_check_requests_room($request_id = NULL) {
 
     if (!empty($results)) {
       foreach ($results as $result) {
+        // do not report closed as accepted requests that do not have any dates in the present or future.
+        if (!is_null($result->status) && $result->status == MFCS_REQUEST_STATUS_CLOSED_ACCEPTED) {
+          $closed_accepted_query = db_select('mfcs_current', 'mc');
+          $closed_accepted_query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mc.request_id = mfdd.request_id and mc.dates_date = mfdd.revision');
+          $closed_accepted_query->leftJoin('mfcs_field_dates_time_stop', 'mfdtsp', 'mc.request_id = mfdtsp.request_id and mc.dates_time_stop = mfdtsp.revision and mfdd.delta = mfdtsp.delta');
+
+          $closed_accepted_query->addField('mc', 'request_id', 'id');
+
+          $closed_accepted_query->condition('mc.request_id', $result->id);
+          $closed_accepted_query->condition('mfdd.cancelled', 0);
+
+          $or = db_or();
+          $or->condition('mfdd.value', $instance, '>=');
+
+          $and = db_and();
+          $and->condition('mfdtsp.value', NULL, 'is not null');
+          $and->condition('mfdtsp.value', $instance, '>=');
+          $or->condition($and);
+
+          $closed_accepted_query->condition($or);
+
+          $closed_accepted_query->range(0, 1);
+
+          $future = $closed_accepted_query->execute()->fetchField();
+
+          unset($closed_accepted_query);
+
+          if (empty($future)) {
+            unset($future);
+            continue;
+          }
+          unset($future);
+        }
+
         $requests[$result->id] = array(
           'id' => $result->id,
           'title' => $result->title,
@@ -977,6 +1015,8 @@ function mfcs_miscellaneous_check_requests_room($request_id = NULL) {
  *
  * These requests should be considered for MFCS_REQUEST_PROBLEM_BUILDING.
  *
+ * Requests in the past, cancelled, or otherwise closed requests are not checked.
+ *
  * @param int|null $request_id
  *   (optional) If specified, check for conflicts against the specified request.
  *
@@ -995,6 +1035,7 @@ function mfcs_miscellaneous_check_requests_building($request_id = NULL) {
     return FALSE;
   }
 
+  $instance = mfcs_instance();
   $requests = array();
 
   try {
@@ -1006,6 +1047,7 @@ function mfcs_miscellaneous_check_requests_building($request_id = NULL) {
 
     $query->addField('mer', 'id', 'id');
     $query->addField('mer', 'title', 'title');
+    $query->addField('mer', 'status', 'status');
 
     $query->addField('mer', 'location', 'location_id');
     $query->addField('mbl', 'machine_name', 'location_machine_name');
@@ -1047,6 +1089,40 @@ function mfcs_miscellaneous_check_requests_building($request_id = NULL) {
 
     if (!empty($results)) {
       foreach ($results as $result) {
+        // do not report closed as accepted requests that do not have any dates in the present or future.
+        if (!is_null($result->status) && $result->status == MFCS_REQUEST_STATUS_CLOSED_ACCEPTED) {
+          $closed_accepted_query = db_select('mfcs_current', 'mc');
+          $closed_accepted_query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mc.request_id = mfdd.request_id and mc.dates_date = mfdd.revision');
+          $closed_accepted_query->leftJoin('mfcs_field_dates_time_stop', 'mfdtsp', 'mc.request_id = mfdtsp.request_id and mc.dates_time_stop = mfdtsp.revision and mfdd.delta = mfdtsp.delta');
+
+          $closed_accepted_query->addField('mc', 'request_id', 'id');
+
+          $closed_accepted_query->condition('mc.request_id', $result->id);
+          $closed_accepted_query->condition('mfdd.cancelled', 0);
+
+          $or = db_or();
+          $or->condition('mfdd.value', $instance, '>=');
+
+          $and = db_and();
+          $and->condition('mfdtsp.value', NULL, 'is not null');
+          $and->condition('mfdtsp.value', $instance, '>=');
+          $or->condition($and);
+
+          $closed_accepted_query->condition($or);
+
+          $closed_accepted_query->range(0, 1);
+
+          $future = $closed_accepted_query->execute()->fetchField();
+
+          unset($closed_accepted_query);
+
+          if (empty($future)) {
+            unset($future);
+            continue;
+          }
+          unset($future);
+        }
+
         $requests[$result->id] = array(
           'id' => $result->id,
           'title' => $result->title,
@@ -1085,6 +1161,8 @@ function mfcs_miscellaneous_check_requests_building($request_id = NULL) {
  *
  * These requests should be considered for MFCS_REQUEST_PROBLEM_LOCATION.
  *
+ * Requests in the past, cancelled, or otherwise closed requests are not checked.
+ *
  * @param int|null $request_id
  *   (optional) If specified, check for conflicts against the specified request.
  *
@@ -1103,6 +1181,7 @@ function mfcs_miscellaneous_check_requests_location($request_id = NULL) {
     return FALSE;
   }
 
+  $instance = mfcs_instance();
   $requests = array();
 
   try {
@@ -1113,6 +1192,7 @@ function mfcs_miscellaneous_check_requests_location($request_id = NULL) {
 
     $query->addField('mer', 'id', 'id');
     $query->addField('mer', 'title', 'title');
+    $query->addField('mer', 'status', 'status');
 
     $query->addField('mftl', 'value', 'location_id');
     $query->addField('mbl', 'machine_name', 'location_machine_name');
@@ -1149,6 +1229,40 @@ function mfcs_miscellaneous_check_requests_location($request_id = NULL) {
 
     if (!empty($results)) {
       foreach ($results as $result) {
+        // do not report closed as accepted requests that do not have any dates in the present or future.
+        if (!is_null($result->status) && $result->status == MFCS_REQUEST_STATUS_CLOSED_ACCEPTED) {
+          $closed_accepted_query = db_select('mfcs_current', 'mc');
+          $closed_accepted_query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mc.request_id = mfdd.request_id and mc.dates_date = mfdd.revision');
+          $closed_accepted_query->leftJoin('mfcs_field_dates_time_stop', 'mfdtsp', 'mc.request_id = mfdtsp.request_id and mc.dates_time_stop = mfdtsp.revision and mfdd.delta = mfdtsp.delta');
+
+          $closed_accepted_query->addField('mc', 'request_id', 'id');
+
+          $closed_accepted_query->condition('mc.request_id', $result->id);
+          $closed_accepted_query->condition('mfdd.cancelled', 0);
+
+          $or = db_or();
+          $or->condition('mfdd.value', $instance, '>=');
+
+          $and = db_and();
+          $and->condition('mfdtsp.value', NULL, 'is not null');
+          $and->condition('mfdtsp.value', $instance, '>=');
+          $or->condition($and);
+
+          $closed_accepted_query->condition($or);
+
+          $closed_accepted_query->range(0, 1);
+
+          $future = $closed_accepted_query->execute()->fetchField();
+
+          unset($closed_accepted_query);
+
+          if (empty($future)) {
+            unset($future);
+            continue;
+          }
+          unset($future);
+        }
+
         $requests[$result->id] = array(
           'id' => $result->id,
           'title' => $result->title,
