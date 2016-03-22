@@ -289,6 +289,10 @@ function mfcs_request_reassign_0_form_submit($form, &$form_state) {
     $parameters['reassigned_from'] = $form['form']['old_coordinator_id']['#value'];
     $parameters['reassigned_to'] = $form['form']['new_coordinator_id']['#value'];
     mfcs_send_workflow_emails($request_id, $parameters);
+
+    // perform check against this request to see if new problems are detected or existing problems are resolved.
+    mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
+    mfcs_mischellaneous_check_requests_for_problems($request_id);
   }
   else {
     form_set_error('form', "An error occurred while trying to re-assign the request. Please contact the support staff.");

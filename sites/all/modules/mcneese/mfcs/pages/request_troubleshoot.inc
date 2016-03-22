@@ -460,8 +460,10 @@ function mfcs_request_troubleshoot_0_form_submit($form, &$form_state) {
       $result = mfcs_sync_banner_to_local_users(NULL, NULL, TRUE);
     }
     elseif ($code == MFCS_TROUBLESHOOT_REQUESTS_PROBLEM_CHECK) {
+      mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
+
       $label = "Check requests for problems";
-      $result = mfcs_check_requests_for_problems();
+      $result = mfcs_mischellaneous_check_requests_for_problems();
     }
 
 

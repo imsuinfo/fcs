@@ -2986,6 +2986,12 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
       }
       else {
         drupal_set_message("Your review has been received.");
+
+        if (($type == MFCS_REQUEST_TYPE_QUICK_MEETING || $step == MFCS_REVIEW_STEP_MAKE_DECISIONS) && ($decision === MFCS_REVIEW_DECISION_APPROVE || $decision === MFCS_REVIEW_DECISION_DENY)) {
+          // perform check against this request to see if new problems are detected or existing problems are resolved.
+          mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
+          mfcs_mischellaneous_check_requests_for_problems($request_id);
+        }
       }
     }
     else {

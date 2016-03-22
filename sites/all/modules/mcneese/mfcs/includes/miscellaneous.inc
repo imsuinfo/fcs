@@ -1981,5 +1981,101 @@ function mfcs_miscellaneous_problems_request_search($conditions = array(), $opti
 }
 
 /**
+ * Checks all requests for problems and then reports them.
+ *
+ * @param null|int $request_id
+ *   If not NULL, then only perform checks against the specified request.
+ *   If NULL, then perform checks against all requests.
+ *
+ * @return bool
+ *   TRUE on success, FALSE otherwise.
+ *
+ * @see: mfcs_miscellaneous_check_requests()
+ */
+function mfcs_mischellaneous_check_requests_for_problems($request_id = NULL) {
+  if (!is_null($request_id) && !cf_is_integer($request_id)) {
+    cf_error::invalid_integer('request_id');
+    return FALSE;
+  }
+
+  // load already detected problems to see if they can be removed if there are no longer any problems.
+  $existing_problems = array();
+  try {
+    $query = db_select('mfcs_problems_requests', 'mpr');
+
+    $query->addField('mpr', 'id', 'id');
+    $query->addField('mpr', 'problem', 'problem');
+    $query->addField('mpr', 'request_id', 'request_id');
+
+    if (!is_null($request_id)) {
+      $query->condition('mpr.request_id', $request_id);
+    }
+
+    $results = $query->execute()->fetchAll();
+    if (is_array($results)) {
+      foreach ($results as $result) {
+        $existing_problems[$result->request_id][$result->problem] = $result->id;
+      }
+      unset($result);
+    }
+    unset($results);
+  }
+  catch (Exception $ex) {
+    cf_error::on_query_execution($ex);
+  }
+
+  $problems = mfcs_miscellaneous_check_requests($request_id);
+  $transaction = db_transaction();
+  try {
+    if (!empty($problems)) {
+      foreach ($problems as $problem) {
+        if (isset($existing_problems[$problem['request_id']][$problem['problem']])) {
+          // remove problem so that remaining existing problems can be detected as resolved.
+          unset($existing_problems[$problem['request_id']][$problem['problem']]);
+          if (empty($existing_problems[$problem['request_id']])) {
+            unset($existing_problems[$problem['request_id']]);
+          }
+        }
+        else {
+          $query = db_insert('mfcs_problems_requests');
+          $query->fields($problem);
+          $query->execute();
+        }
+      }
+      unset($problem);
+      unset($problems);
+    }
+
+    // all problems remaining in the existing_problems variable were no longer detected and are therefore resolved.
+    if (!empty($existing_problems)) {
+      foreach ($existing_problems as $problems) {
+        if (empty($problems)) {
+          continue;
+        }
+
+        foreach ($problems as $problem_id) {
+          $query = db_delete('mfcs_problems_requests');
+          $query->condition('id', $problem_id);
+          $query->execute();
+        }
+        unset($problem_id);
+      }
+      unset($problems);
+    }
+
+    // enforce transaction execution.
+    unset($transaction);
+  }
+  catch (Exception $ex) {
+    if (is_object($transaction)) $transaction->rollback();
+    cf_error::on_query_execution($ex);
+
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
+/**
  * @} End of '@addtogroup mfcs'.
  */
