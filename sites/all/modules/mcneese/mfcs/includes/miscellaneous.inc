@@ -1380,8 +1380,6 @@ function mfcs_miscellaneous_check_requests($request_id = NULL, $problem_code = N
     $problem_code = (int) $problem_code;
   }
 
-  mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
-
   $instance = mfcs_instance();
   $problems = array();
 

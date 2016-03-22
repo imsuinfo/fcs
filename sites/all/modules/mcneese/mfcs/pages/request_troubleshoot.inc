@@ -300,6 +300,52 @@ function mfcs_request_troubleshoot_0_form($form, &$form_state, $request_id = NUL
     '#markup' => $markup,
   );
 
+
+  // Requests Review Recheck
+  $code = 'code_' . MFCS_TROUBLESHOOT_REQUESTS_PROBLEM_CHECK;
+  $form['form'][$code] = array(
+    '#id' => 'field-troubleshoot-' . $code,
+    '#type' => 'container',
+    '#tree' => TRUE,
+    '#attributes' => array(
+      'class' => array(
+        'form-item-wrapper',
+        'troubleshoot-code',
+        'troubleshoot-' . $code,
+      ),
+    ),
+  );
+
+  $markup = '<h2 class="code-title">#' . MFCS_TROUBLESHOOT_REQUESTS_PROBLEM_CHECK . ': Requests Problem Check</h2>' . "\n";
+  $markup .= '<div class="code-description">' . "\n";
+  $markup .= 'Requests are periodically checked for problems, such as date conflicts or deleted rooms.' . "<br>\n";
+  $markup .= "<br>\n";
+  $markup .= 'Using this troubleshoot will perform integrity checks on requests.' . "<br>\n";
+  $markup .= 'Problems are displaed under the <a href="' . $base_path . 'requests/problems-0/requests">Manage Request Problems</a> page.' . "<br>\n";
+  $markup .= '</div>';
+  $form['form'][$code]['pre_markup'] = array(
+    '#type' => 'markup',
+    '#markup' => $markup,
+  );
+
+  $form['form'][$code]['button'] = array(
+    '#id' => 'troubleshoot-' . $code . '-submit',
+    '#name' => 'troubleshoot-' . $code . '-submit',
+    '#type' => 'submit',
+    '#default_value' => t("Check Requests for Problems"),
+    '#attributes' => array(
+      'class' => array(
+        'no-print',
+      ),
+    ),
+  );
+
+  $markup = '<hr class="code-separator">';
+  $form['form'][$code]['post_markup'] = array(
+    '#type' => 'markup',
+    '#markup' => $markup,
+  );
+
   return $form;
 }
 
@@ -330,6 +376,9 @@ function mfcs_request_troubleshoot_0_form_validate($form, &$form_state) {
     // no validation necessary
   }
   elseif ($clicked_id == 'troubleshoot-code_' . MFCS_TROUBLESHOOT_BANNER_ROLE_SYNCHRONIZE . '-submit') {
+    // no validation necessary
+  }
+  elseif ($clicked_id == 'troubleshoot-code_' . MFCS_TROUBLESHOOT_REQUESTS_PROBLEM_CHECK . '-submit') {
     // no validation necessary
   }
   else {
@@ -365,6 +414,9 @@ function mfcs_request_troubleshoot_0_form_submit($form, &$form_state) {
   }
   elseif ($clicked_id == 'troubleshoot-code_' . MFCS_TROUBLESHOOT_BANNER_ROLE_SYNCHRONIZE . '-submit') {
     $code = MFCS_TROUBLESHOOT_BANNER_ROLE_SYNCHRONIZE;
+  }
+  elseif ($clicked_id == 'troubleshoot-code_' . MFCS_TROUBLESHOOT_REQUESTS_PROBLEM_CHECK . '-submit') {
+    $code = MFCS_TROUBLESHOOT_REQUESTS_PROBLEM_CHECK;
   }
   else {
     // do nothing for invalid submits.
@@ -407,6 +459,11 @@ function mfcs_request_troubleshoot_0_form_submit($form, &$form_state) {
       $label = "Re-synchronize banner role cache";
       $result = mfcs_sync_banner_to_local_users(NULL, NULL, TRUE);
     }
+    elseif ($code == MFCS_TROUBLESHOOT_REQUESTS_PROBLEM_CHECK) {
+      $label = "Check requests for problems";
+      $result = mfcs_check_requests_for_problems();
+    }
+
 
     $time_stop = microtime(TRUE);
     $time_elapsed = $time_stop - $time_start;
@@ -432,11 +489,7 @@ function mfcs_request_troubleshoot_0_form_submit($form, &$form_state) {
   } catch (Exception $ex) {
     $transaction->rollback();
     cf_error::on_exception($ex);
-
-    return FALSE;
   }
-
-  return $result;
 }
 
 /**

@@ -279,6 +279,7 @@ define('MFCS_TROUBLESHOOT_MER_CACHE_SYNCHRONIZE', 2);
 define('MFCS_TROUBLESHOOT_BANNER_CACHE_SYNCHRONIZE', 3);
 define('MFCS_TROUBLESHOOT_BANNER_ROLE_SYNCHRONIZE', 4);
 define('MFCS_TROUBLESHOOT_BANNER_INFORMATION', 5);
+define('MFCS_TROUBLESHOOT_REQUESTS_PROBLEM_CHECK', 6);
 
 /**
  * Defines problems log codes.
@@ -4839,12 +4840,23 @@ function mfcs_auto_block_accounts_cron() {
 /**
  * Executes the cron queue to scan requests looking for known problem situations.
  *
- * @see mfcs_cronapi()
- * @see: mfcs_miscellaneous_check_requests()
+ * @see: mfcs_cronapi()
+ * @see: mfcs_check_requests_for_problems()
  */
 function mfcs_check_for_problems_requests_cron() {
   mfcs_set_using_effective_system_id();
+  mfcs_check_requests_for_problems();
+}
 
+/**
+ * Checks all requests for problems and then reports them.
+ *
+ * @return bool
+ *   TRUE on success, FALSE otherwise.
+ *
+ * @see: mfcs_miscellaneous_check_requests()
+ */
+function mfcs_check_requests_for_problems() {
   mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
 
   $problems = mfcs_miscellaneous_check_requests();
@@ -4878,8 +4890,12 @@ function mfcs_check_for_problems_requests_cron() {
     catch (Exception $ex) {
       if (is_object($transaction)) $transaction->rollback();
       cf_error::on_query_execution($ex);
+
+      return FALSE;
     }
   }
+
+  return TRUE;
 }
 
 /***
