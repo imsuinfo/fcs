@@ -1267,6 +1267,9 @@ function mfcs_schema() {
       ),
     ),
     'primary key' => array('id'),
+    'unique keys' => array(
+      'request_id_problem' => array('request_id', 'problem'),
+    ),
     'foreign keys' => array(
       'request_id' => array(
         'table' => 'mfcs_requests',
