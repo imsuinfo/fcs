@@ -304,7 +304,10 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = NULL) {
     ),
     'processing' => TRUE,
     'serverSide' => TRUE,
-    'ajax' => "'" . $base_path . 'requests/proxy-0/ajax' . $url_arguments . "'",
+    'ajax' => array(
+      'url' => "'" . $base_path . 'requests/proxy-0/ajax' . $url_arguments . "'",
+      'type' => "'POST'",
+    ),
     'deferRender' => TRUE,
     'columns' => array(
       array('id' => 0, 'column' => 'id', 'name' => "ID", 'className' => 'column-id', 'sanitize' => FALSE),

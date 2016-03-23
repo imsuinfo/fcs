@@ -410,7 +410,10 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
     ),
     'processing' => TRUE,
     'serverSide' => TRUE,
-    'ajax' => "'" . $base_path . 'requests/problems-0/users/ajax' . $url_arguments . "'",
+    'ajax' => array(
+      'url' => "'" . $base_path . 'requests/problems-0/users/ajax' . $url_arguments . "'",
+      'type' => "'POST'",
+    ),
     'deferRender' => TRUE,
     'columns' => array(
       array('id' => 0, 'column' => 'account_id', 'name' => "Account ID", 'className' => 'column-account_id', 'sanitize' => FALSE, 'visible' => FALSE),
@@ -1727,7 +1730,10 @@ function mfcs_request_problems_0_requests_form($form, &$form_state, $page_number
     ),
     'processing' => TRUE,
     'serverSide' => TRUE,
-    'ajax' => "'" . $base_path . 'requests/problems-0/requests/ajax' . $url_arguments . "'",
+    'ajax' => array(
+      'url' => "'" . $base_path . 'requests/problems-0/requests/ajax' . $url_arguments . "'",
+      'type' => "'POST'",
+    ),
     'deferRender' => TRUE,
     'columns' => array(
       array('id' => 0, 'column' => 'id', 'name' => "ID", 'className' => 'column-id'),

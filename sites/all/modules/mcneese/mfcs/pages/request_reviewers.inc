@@ -424,7 +424,10 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
     ),
     'processing' => TRUE,
     'serverSide' => TRUE,
-    'ajax' => "'" . $base_path . 'requests/reviewers-0/ajax/list/' . $classification . '/' . $review_step . $url_arguments . "'",
+    'ajax' => array(
+      'url' => "'" . $base_path . 'requests/reviewers-0/ajax/list/' . $classification . '/' . $review_step . $url_arguments . "'",
+      'type' => "'POST'",
+    ),
     'deferRender' => TRUE,
     'columns' => array(
       array('id' => 0, 'column' => 'id', 'name' => "ID", 'className' => 'column-id', 'sanitize' => FALSE),

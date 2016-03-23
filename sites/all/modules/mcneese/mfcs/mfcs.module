@@ -8696,7 +8696,11 @@ function mfcs_build_request_ajax_table($items_returned, $conditions, $options, $
   }
 
   if (array_key_exists('ajax_path', $options) && is_string($options['ajax_path']) && !empty($options['ajax_path'])) {
-    $table['datatable_settings']['ajax'] = $options['ajax_path'];
+    $table['datatable_settings']['ajax'] = array(
+      'url' => $options['ajax_path'],
+      'type' => "'POST'",
+    );
+
     $table['datatable_settings']['processing'] = TRUE;
     $table['datatable_settings']['serverSide'] = TRUE;
 

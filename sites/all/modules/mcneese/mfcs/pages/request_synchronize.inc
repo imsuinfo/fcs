@@ -328,7 +328,10 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = NUL
     ),
     'processing' => TRUE,
     'serverSide' => TRUE,
-    'ajax' => "'" . $base_path . 'requests/synchronize-0/ajax' . $url_arguments . "'",
+    'ajax' => array(
+      'url' => "'" . $base_path . 'requests/synchronize-0/ajax' . $url_arguments . "'",
+      'type' => "'POST'",
+    ),
     'deferRender' => TRUE,
     'columns' => array(
       array('id' => 0, 'column' => 'id', 'name' => "ID", 'className' => 'column-id', 'sanitize' => FALSE),

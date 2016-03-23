@@ -13,6 +13,9 @@
 /**
  * Ajax initialization function used to prepare request variables.
  *
+ * @param bool $post_method
+ *   When TRUE, the setup script expects and utilizes HTTP Post instead of HTTP Get.
+ *
  * @return array
  *   An array of variables in the following order:
  *   - draw: draw setting.
@@ -20,21 +23,45 @@
  *   - order: table order settings.
  *   - options: table options.
  *   - timestamp: timestamp variable.
+ *   - post_method: the post method used.
  */
-function mfcs_ajax_setup_request_settings() {
+function mfcs_ajax_setup_request_settings($post_method = TRUE) {
+  if (!is_bool($post_method)) {
+    cf_error::invalid_bool('post_method');
+
+    // force post method on invalid variable instead of returning.
+    $post_method = TRUE;
+  }
+
   $draw = 1;
-  if (isset($_GET['draw'])) {
-    $draw += (int) $_GET['draw'];
-  }
-
   $columns = NULL;
-  if (isset($_GET['columns']) && is_array($_GET['columns'])) {
-    $columns = $_GET['columns'];
-  }
-
   $order = NULL;
-  if (isset($_GET['order']) && is_array($_GET['order'])) {
-    $order = $_GET['order'];
+
+  if ($post_method) {
+    if (isset($_POST['draw'])) {
+      $draw += (int) $_POST['draw'];
+    }
+
+    if (isset($_POST['columns']) && is_array($_POST['columns'])) {
+      $columns = $_POST['columns'];
+    }
+
+    if (isset($_POST['order']) && is_array($_POST['order'])) {
+      $order = $_POST['order'];
+    }
+  }
+  else {
+    if (isset($_GET['draw'])) {
+      $draw += (int) $_GET['draw'];
+    }
+
+    if (isset($_GET['columns']) && is_array($_GET['columns'])) {
+      $columns = $_GET['columns'];
+    }
+
+    if (isset($_GET['order']) && is_array($_GET['order'])) {
+      $order = $_GET['order'];
+    }
   }
 
   $options = array(
@@ -45,12 +72,33 @@ function mfcs_ajax_setup_request_settings() {
     'rowId' => '0',
   );
 
-  if (isset($_GET['start']) && is_numeric($_GET['start'])) {
-    $options['start'] = (int) $_GET['start'];
-  }
+  $timestamp = mfcs_instance();
 
-  if (isset($_GET['length']) && is_numeric($_GET['length'])) {
-    $options['limit'] = (int) $_GET['length'];
+  if ($post_method) {
+    if (isset($_POST['start']) && is_numeric($_POST['start'])) {
+      $options['start'] = (int) $_POST['start'];
+    }
+
+    if (isset($_POST['length']) && is_numeric($_POST['length'])) {
+      $options['limit'] = (int) $_POST['length'];
+    }
+
+    if (isset($_POST['_']) && is_array($_POST['_'])) {
+      $timestamp = $_POST['_'];
+    }
+  }
+  else {
+    if (isset($_GET['start']) && is_numeric($_GET['start'])) {
+      $options['start'] = (int) $_GET['start'];
+    }
+
+    if (isset($_GET['length']) && is_numeric($_GET['length'])) {
+      $options['limit'] = (int) $_GET['length'];
+    }
+
+    if (isset($_GET['_']) && is_array($_GET['_'])) {
+      $timestamp = $_GET['_'];
+    }
   }
 
   // A length of -1 means all values, set limit to 0 which means all values.
@@ -58,12 +106,7 @@ function mfcs_ajax_setup_request_settings() {
     $options['limit'] = 0;
   }
 
-  $timestamp = mfcs_instance();
-  if (isset($_GET['_']) && is_array($_GET['_'])) {
-    $timestamp = $_GET['_'];
-  }
-
-  return array($draw, $columns, $order, $options, $timestamp);
+  return array($draw, $columns, $order, $options, $timestamp, $post_method);
 }
 
 /**
@@ -109,15 +152,22 @@ function mfcs_ajax_reviewers_0_list($classification, $review_step) {
 
 
   // load ajax/json request settings.
-  list($draw, $columns, $order, $options, $timestamp) = mfcs_ajax_setup_request_settings();
+  list($draw, $columns, $order, $options, $timestamp, $post_method) = mfcs_ajax_setup_request_settings();
+
+  if ($post_method) {
+    $get_post = &$_POST;
+  }
+  else {
+    $get_post = &$_GET;
+  }
 
   $search = FALSE;
   $limit_reviewer_classifications = NULL;
   $user_ids = array();
-  if (isset($_GET['search']['value']) && is_string($_GET['search']['value']) && !empty($_GET['search']['value'])) {
+  if (isset($get_post['search']['value']) && is_string($get_post['search']['value']) && !empty($get_post['search']['value'])) {
     $search = TRUE;
 
-    $regex_safe_search = preg_quote($_GET['search']['value'], '/');
+    $regex_safe_search = preg_quote($get_post['search']['value'], '/');
 
     // search through the already loaded lists, the database stores the values as integers and not strings.
     $limit_reviewer_classifications = array();
@@ -130,7 +180,7 @@ function mfcs_ajax_reviewers_0_list($classification, $review_step) {
 
     // find a list of user ids to search for to avoid additional inner joins on an already complex SQL query..
     // Exception Case: user problems list must support disabled/deleted accounts.
-    $found_users = mfcs_search_users($_GET['search']['value'], TRUE, FALSE, TRUE);
+    $found_users = mfcs_search_users($get_post['search']['value'], TRUE, FALSE, TRUE);
     if (is_array($found_users)) {
       $user_ids = array_keys($found_users);
       unset($found_users);
@@ -199,13 +249,13 @@ function mfcs_ajax_reviewers_0_list($classification, $review_step) {
 
     $conditions['or_1']['text(mr.id)'] = array(
       'operator' => 'ILIKE',
-      'value' => '%' . db_like($_GET['search']['value']) . '%',
+      'value' => '%' . db_like($get_post['search']['value']) . '%',
       'expression' => TRUE,
     );
 
     $conditions['or_1']['text(u.uid)'] = array(
       'operator' => 'ILIKE',
-      'value' => '%' . db_like($_GET['search']['value']) . '%',
+      'value' => '%' . db_like($get_post['search']['value']) . '%',
       'expression' => TRUE,
     );
 
@@ -296,16 +346,23 @@ function mfcs_ajax_proxy_0_list() {
   }
 
   // load ajax/json request settings.
-  list($draw, $columns, $order, $options, $timestamp) = mfcs_ajax_setup_request_settings();
+  list($draw, $columns, $order, $options, $timestamp, $post_method) = mfcs_ajax_setup_request_settings();
+
+  if ($post_method) {
+    $get_post = &$_POST;
+  }
+  else {
+    $get_post = &$_GET;
+  }
 
   $search = FALSE;
   $user_ids = array();
-  if (isset($_GET['search']['value']) && is_string($_GET['search']['value']) && !empty($_GET['search']['value'])) {
+  if (isset($get_post['search']['value']) && is_string($get_post['search']['value']) && !empty($get_post['search']['value'])) {
     $search = TRUE;
 
     // find a list of user ids to search for to avoid additional inner joins on an already complex SQL query..
     // Exception Case: user problems list must support disabled/deleted accounts.
-    $found_users = mfcs_search_users($_GET['search']['value'], TRUE, FALSE, TRUE);
+    $found_users = mfcs_search_users($get_post['search']['value'], TRUE, FALSE, TRUE);
     if (is_array($found_users)) {
       $user_ids = array_keys($found_users);
       unset($found_users);
@@ -375,19 +432,19 @@ function mfcs_ajax_proxy_0_list() {
 
     $conditions['or_1']['text(mpvc.id)'] = array(
       'operator' => 'ILIKE',
-      'value' => '%' . db_like($_GET['search']['value']) . '%',
+      'value' => '%' . db_like($get_post['search']['value']) . '%',
       'expression' => TRUE,
     );
 
     $conditions['or_1']['text(mpvc.proxy_id)'] = array(
       'operator' => 'ILIKE',
-      'value' => '%' . db_like($_GET['search']['value']) . '%',
+      'value' => '%' . db_like($get_post['search']['value']) . '%',
       'expression' => TRUE,
     );
 
     $conditions['or_1']['text(mpvc.user_id)'] = array(
       'operator' => 'ILIKE',
-      'value' => '%' . db_like($_GET['search']['value']) . '%',
+      'value' => '%' . db_like($get_post['search']['value']) . '%',
       'expression' => TRUE,
     );
 
@@ -561,7 +618,14 @@ function mfcs_ajax_listing_0($custom_conditions = array(), $override_options = a
 
 
   // load ajax/json request settings.
-  list($draw, $columns, $order, $options, $timestamp) = mfcs_ajax_setup_request_settings();
+  list($draw, $columns, $order, $options, $timestamp, $post_method) = mfcs_ajax_setup_request_settings();
+
+  if ($post_method) {
+    $get_post = &$_POST;
+  }
+  else {
+    $get_post = &$_GET;
+  }
 
   foreach ($override_options as $override_option_name => $override_option_value) {
     $options[$override_option_name] = $override_option_value;
@@ -569,11 +633,11 @@ function mfcs_ajax_listing_0($custom_conditions = array(), $override_options = a
 
   $search = FALSE;
   $user_ids = array();
-  if (isset($_GET['search']['value']) && is_string($_GET['search']['value']) && !empty($_GET['search']['value'])) {
+  if (isset($get_post['search']['value']) && is_string($get_post['search']['value']) && !empty($get_post['search']['value'])) {
     $search = TRUE;
 
     // search through the already loaded lists, the database stores the values as integers and not strings.
-    $regex_safe_search = preg_quote($_GET['search']['value'], '/');
+    $regex_safe_search = preg_quote($get_post['search']['value'], '/');
 
     $type_options = mfcs_get_request_type_list_options();
     $status_options = mfcs_get_request_status_list_options();
@@ -618,7 +682,7 @@ function mfcs_ajax_listing_0($custom_conditions = array(), $override_options = a
     }
 
     // find a list of user ids to search for to avoid additional inner joins on an already complex SQL query..
-    $found_users = mfcs_search_users($_GET['search']['value']);
+    $found_users = mfcs_search_users($get_post['search']['value']);
     if (is_array($found_users)) {
       $user_ids = array_keys($found_users);
       unset($found_users);
@@ -693,14 +757,14 @@ function mfcs_ajax_listing_0($custom_conditions = array(), $override_options = a
     $conditions['or_1']['value_id'] = array(
       'field' => 'text(mer.id)',
       'operator' => MFCS_OPERATOR_LIKE,
-      'search' => $_GET['search']['value'],
+      'search' => $get_post['search']['value'],
       'expression' => TRUE,
     );
 
     $conditions['or_1']['value_title'] = array(
       'field' => 'mer.title',
       'operator' => MFCS_OPERATOR_LIKE,
-      'search' => $_GET['search']['value'],
+      'search' => $get_post['search']['value'],
     );
 
     if (!empty($limit_building)) {
@@ -731,7 +795,7 @@ function mfcs_ajax_listing_0($custom_conditions = array(), $override_options = a
     #$conditions['or_1']['value_date'] = array(
     #  'field' => 'text(to_timestamp(mer.created))',
     #  'operator' => MFCS_OPERATOR_LIKE,
-    #  'search' => $_GET['search']['value'],
+    #  'search' => $get_post['search']['value'],
     #  'expression' => TRUE,
     #);
 
@@ -754,7 +818,7 @@ function mfcs_ajax_listing_0($custom_conditions = array(), $override_options = a
     $conditions['or_1']['value_submitted_by_id'] = array(
       'field' => 'text(mer.user_id)',
       'operator' => MFCS_OPERATOR_LIKE,
-      'search' => $_GET['search']['value'],
+      'search' => $get_post['search']['value'],
       'expression' => TRUE,
     );
 
@@ -843,16 +907,23 @@ function mfcs_ajax_problems_0_users_list() {
   mfcs_include(MFCS_INCLUDE_MANAGEMENT);
 
   // load ajax/json request settings.
-  list($draw, $columns, $order, $options, $timestamp) = mfcs_ajax_setup_request_settings();
+  list($draw, $columns, $order, $options, $timestamp, $post_method) = mfcs_ajax_setup_request_settings();
+
+  if ($post_method) {
+    $get_post = &$_POST;
+  }
+  else {
+    $get_post = &$_GET;
+  }
 
   $search = FALSE;
   $user_ids = array();
-  if (isset($_GET['search']['value']) && is_string($_GET['search']['value']) && !empty($_GET['search']['value'])) {
+  if (isset($get_post['search']['value']) && is_string($get_post['search']['value']) && !empty($get_post['search']['value'])) {
     $search = TRUE;
 
     // find a list of user ids to search for to avoid additional inner joins on an already complex SQL query..
     // Exception Case: user problems list must support disabled/deleted accounts.
-    $found_users = mfcs_search_users($_GET['search']['value'], TRUE, FALSE, TRUE);
+    $found_users = mfcs_search_users($get_post['search']['value'], TRUE, FALSE, TRUE);
     if (is_array($found_users)) {
       $user_ids = array_keys($found_users);
       unset($found_users);
@@ -926,7 +997,7 @@ function mfcs_ajax_problems_0_users_list() {
     $conditions['or_1']['value_user_id'] = array(
       'field' => 'text(mu.user_id)',
       'operator' => MFCS_OPERATOR_LIKE,
-      'search' => $_GET['search']['value'],
+      'search' => $get_post['search']['value'],
       'expression' => TRUE,
     );
 
@@ -938,7 +1009,7 @@ function mfcs_ajax_problems_0_users_list() {
       );
     }
 
-    $regex_safe_search = preg_quote($_GET['search']['value'], '/');
+    $regex_safe_search = preg_quote($get_post['search']['value'], '/');
     foreach ($taxonomy_problems as $problem_id => $problem_label) {
       if (preg_match('/' . $regex_safe_search . '/i', $problem_label) > 0) {
         $problems_mask += $problem_id;
@@ -959,7 +1030,7 @@ function mfcs_ajax_problems_0_users_list() {
     #$conditions['or_1']['value_date'] = array(
     #  'field' => 'text(to_timestamp(mu.date))',
     #  'operator' => MFCS_OPERATOR_LIKE,
-    #  'search' => $_GET['search']['value'],
+    #  'search' => $get_post['search']['value'],
     #  'expression' => TRUE,
     #);
 
@@ -1122,16 +1193,23 @@ function mfcs_ajax_problems_0_requests_list($argument_1 = NULL) {
   $request_problems_by_id = mfcs_get_request_problems_list_options();
 
   // load ajax/json request settings.
-  list($draw, $columns, $order, $options, $timestamp) = mfcs_ajax_setup_request_settings();
+  list($draw, $columns, $order, $options, $timestamp, $post_method) = mfcs_ajax_setup_request_settings();
+
+  if ($post_method) {
+    $get_post = &$_POST;
+  }
+  else {
+    $get_post = &$_GET;
+  }
 
   $options['include_ignored'] = $include_ignored;
 
   $search = FALSE;
-  if (isset($_GET['search']['value']) && is_string($_GET['search']['value']) && !empty($_GET['search']['value'])) {
+  if (isset($get_post['search']['value']) && is_string($get_post['search']['value']) && !empty($get_post['search']['value'])) {
     $search = TRUE;
 
     // search through the already loaded lists, the database stores the values as integers and not strings.
-    $regex_safe_search = preg_quote($_GET['search']['value'], '/');
+    $regex_safe_search = preg_quote($get_post['search']['value'], '/');
 
     $limit_problem = array();
     $limit_problem_unknown = FALSE;
@@ -1200,13 +1278,13 @@ function mfcs_ajax_problems_0_requests_list($argument_1 = NULL) {
     $conditions['or_1']['value_id'] = array(
       'field' => 'text(mpr.id)',
       'operator' => MFCS_OPERATOR_LIKE,
-      'search' => $_GET['search']['value'],
+      'search' => $get_post['search']['value'],
       'expression' => TRUE,
     );
     $conditions['or_1']['value_request_id'] = array(
       'field' => 'text(mpr.request_id)',
       'operator' => MFCS_OPERATOR_LIKE,
-      'search' => $_GET['search']['value'],
+      'search' => $get_post['search']['value'],
       'expression' => TRUE,
     );
 
@@ -1232,7 +1310,7 @@ function mfcs_ajax_problems_0_requests_list($argument_1 = NULL) {
       );
     }
 
-    $regex_safe_search = preg_quote($_GET['search']['value'], '/');
+    $regex_safe_search = preg_quote($get_post['search']['value'], '/');
     $conditions['or_1']['value_reason'] = array(
       'field' => 'text(mpr.reason)',
       'operator' => MFCS_OPERATOR_ILIKE,
@@ -1244,7 +1322,7 @@ function mfcs_ajax_problems_0_requests_list($argument_1 = NULL) {
     #$conditions['or_1']['value_date'] = array(
     #  'field' => 'text(to_timestamp(mu.date))',
     #  'operator' => MFCS_OPERATOR_LIKE,
-    #  'search' => $_GET['search']['value'],
+    #  'search' => $get_post['search']['value'],
     #  'expression' => TRUE,
     #);
 
@@ -1342,15 +1420,22 @@ function mfcs_ajax_email_log_0_list() {
   mfcs_include(MFCS_INCLUDE_MANAGEMENT);
 
   // load ajax/json request settings.
-  list($draw, $columns, $order, $options, $timestamp) = mfcs_ajax_setup_request_settings();
+  list($draw, $columns, $order, $options, $timestamp, $post_method) = mfcs_ajax_setup_request_settings();
+
+  if ($post_method) {
+    $get_post = &$_POST;
+  }
+  else {
+    $get_post = &$_GET;
+  }
 
   $search = FALSE;
   $user_ids = array();
-  if (isset($_GET['search']['value']) && is_string($_GET['search']['value']) && !empty($_GET['search']['value'])) {
+  if (isset($get_post['search']['value']) && is_string($get_post['search']['value']) && !empty($get_post['search']['value'])) {
     $search = TRUE;
 
     // find a list of user ids to search for to avoid additional inner joins on an already complex SQL query..
-    $found_users = mfcs_search_users($_GET['search']['value']);
+    $found_users = mfcs_search_users($get_post['search']['value']);
     if (is_array($found_users)) {
       $user_ids = array_keys($found_users);
       unset($found_users);
@@ -1442,7 +1527,7 @@ function mfcs_ajax_email_log_0_list() {
   $primary_key = 'id';
 
   if ($search) {
-    $regex_safe_search = preg_quote($_GET['search']['value'], '/');
+    $regex_safe_search = preg_quote($get_post['search']['value'], '/');
 
     $count_conditions = $conditions;
     $count_options = $options;
@@ -1452,14 +1537,14 @@ function mfcs_ajax_email_log_0_list() {
     $conditions['or_1']['value_id'] = array(
       'field' => 'text(' . $table_alias . '.id)',
       'operator' => MFCS_OPERATOR_LIKE,
-      'search' => $_GET['search']['value'],
+      'search' => $get_post['search']['value'],
       'expression' => TRUE,
     );
 
     $conditions['or_1']['value_user_id'] = array(
       'field' => 'text(mle.user_id)',
       'operator' => MFCS_OPERATOR_LIKE,
-      'search' => $_GET['search']['value'],
+      'search' => $get_post['search']['value'],
       'expression' => TRUE,
     );
 
@@ -1467,20 +1552,20 @@ function mfcs_ajax_email_log_0_list() {
     #$conditions['or_1']['value_date'] = array(
     #  'field' => 'text(to_timestamp(' . $table_alias . '.date))',
     #  'operator' => MFCS_OPERATOR_LIKE,
-    #  'search' => $_GET['search']['value'],
+    #  'search' => $get_post['search']['value'],
     #  'expression' => TRUE,
     #);
 
     $conditions['or_1']['value_destination'] = array(
       'field' => $table_alias . '.destination',
       'operator' => MFCS_OPERATOR_LIKE,
-      'search' => $_GET['search']['value'],
+      'search' => $get_post['search']['value'],
     );
 
     $conditions['or_1']['value_title'] = array(
       'field' => $table_alias . '.title',
       'operator' => MFCS_OPERATOR_LIKE,
-      'search' => $_GET['search']['value'],
+      'search' => $get_post['search']['value'],
     );
 
     if (!empty($user_ids)) {
@@ -1657,15 +1742,22 @@ function mfcs_ajax_synchronize_0_form() {
   mfcs_include(MFCS_INCLUDE_MANAGEMENT);
 
   // load ajax/json request settings.
-  list($draw, $columns, $order, $options, $timestamp) = mfcs_ajax_setup_request_settings();
+  list($draw, $columns, $order, $options, $timestamp, $post_method) = mfcs_ajax_setup_request_settings();
+
+  if ($post_method) {
+    $get_post = &$_POST;
+  }
+  else {
+    $get_post = &$_GET;
+  }
 
   $search = FALSE;
   $user_ids = array();
-  if (isset($_GET['search']['value']) && is_string($_GET['search']['value']) && !empty($_GET['search']['value'])) {
+  if (isset($get_post['search']['value']) && is_string($get_post['search']['value']) && !empty($get_post['search']['value'])) {
     $search = TRUE;
 
     // find a list of user ids to search for to avoid additional inner joins on an already complex SQL query..
-    $found_users = mfcs_search_users($_GET['search']['value']);
+    $found_users = mfcs_search_users($get_post['search']['value']);
     if (is_array($found_users)) {
       $user_ids = array_keys($found_users);
       unset($found_users);
@@ -1750,7 +1842,7 @@ function mfcs_ajax_synchronize_0_form() {
   $primary_key = 'id';
 
   if ($search) {
-    $regex_safe_search = preg_quote($_GET['search']['value'], '/');
+    $regex_safe_search = preg_quote($get_post['search']['value'], '/');
 
     $count_conditions = $conditions;
     $count_options = $options;
@@ -1759,14 +1851,14 @@ function mfcs_ajax_synchronize_0_form() {
     $conditions['or_1']['value_id'] = array(
       'field' => 'text(' . $table_alias . '.id)',
       'operator' => MFCS_OPERATOR_LIKE,
-      'search' => $_GET['search']['value'],
+      'search' => $get_post['search']['value'],
       'expression' => TRUE,
     );
 
     $conditions['or_1']['value_user_id'] = array(
       'field' => 'text(ms.user_id)',
       'operator' => MFCS_OPERATOR_LIKE,
-      'search' => $_GET['search']['value'],
+      'search' => $get_post['search']['value'],
       'expression' => TRUE,
     );
 
@@ -1774,14 +1866,14 @@ function mfcs_ajax_synchronize_0_form() {
     #$conditions['or_1']['value_date'] = array(
     #  'field' => 'text(to_timestamp(' . $table_alias . '.date))',
     #  'operator' => MFCS_OPERATOR_LIKE,
-    #  'search' => $_GET['search']['value'],
+    #  'search' => $get_post['search']['value'],
     #  'expression' => TRUE,
     #);
 
     $conditions['or_1']['value_password'] = array(
       'field' => $table_alias . '.password',
       'operator' => MFCS_OPERATOR_LIKE,
-      'search' => $_GET['search']['value'],
+      'search' => $get_post['search']['value'],
     );
 
     $limit_types = NULL;
@@ -1800,7 +1892,7 @@ function mfcs_ajax_synchronize_0_form() {
     $conditions['or_1']['value_address'] = array(
       'field' => $table_alias . '.address',
       'operator' => MFCS_OPERATOR_LIKE,
-      'search' => $_GET['search']['value'],
+      'search' => $get_post['search']['value'],
     );
 
     if (!empty($user_ids)) {
