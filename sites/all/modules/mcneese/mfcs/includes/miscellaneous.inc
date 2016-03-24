@@ -361,7 +361,7 @@ function mfcs_miscellaneous_check_requests_conflict($request_id = NULL) {
   $instance = mfcs_instance();
 
   try {
-    // drupal api does not support with statements, so use a manually created query string for this test.
+    // drupal api does not support WITH statements, so use a manually created query string for this test.
     $sql_with = 'with requests as (';
     $sql_with .= 'select mer.id, mer.title, mer.location, mer.building, mer.room, mfdd.delta as delta, mfdd.value as date, mfdts.value as time_start, mfdtsp.value as time_stop';
     $sql_with .= ', mbl.machine_name as location_machine_name, mbl.human_name as location_human_name, mbl.date as location_date, mbl.disabled as location_disabled';
