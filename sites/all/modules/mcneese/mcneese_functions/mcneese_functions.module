@@ -422,8 +422,11 @@ function mcneese_functions_embed_network_services_traffic($url_path, $cache_id =
  * @param string $cache_expire
  *   (optional) How long till the cache will expire using DateTime format.
  *   This defaults to '+1 minutes'.
+ * @param bool $return
+ *   (optional) When FALSE, output to the screen.
+ *   When TRUE, return output to caller.
  */
-function mcneese_functions_embed_ntas_widget($cache_id = NULL, $cache_expire = '+1 minutes') {
+function mcneese_functions_embed_ntas_widget($cache_id = NULL, $cache_expire = '+1 minutes', $return = FALSE) {
   $markup = '';
   $save_to_cache = FALSE;
 
@@ -499,6 +502,10 @@ function mcneese_functions_embed_ntas_widget($cache_id = NULL, $cache_expire = '
       $reset_cache_interval = new DateTime($cache_expire);
       cache_set($cache_id, $markup, 'cache_page', $reset_cache_interval->getTimestamp());
     }
+  }
+
+  if ($return === TRUE) {
+    return $markup;
   }
 
   print($markup);

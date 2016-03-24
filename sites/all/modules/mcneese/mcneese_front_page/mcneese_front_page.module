@@ -400,7 +400,10 @@ function mcneese_front_page_embed_highlight() {
   $attributes['class'][] = 'mcneese-front_page-highlight';
 
   if (is_object($result)) {
-    $image = file_load((int)$result->field_hightlight_image_fid);
+    $image = NULL;
+    if (property_exists($result, 'field_hightlight_image_fid')) {
+      $image = file_load((int)$result->field_hightlight_image_fid);
+    }
 
     $link_attributes = array();
     $link_attributes['href'] = $base_path . 'node/' . (int) $result->nid;
@@ -408,17 +411,24 @@ function mcneese_front_page_embed_highlight() {
     $link_attributes['class'][] = 'mcneese-front_page-highlight-link';
 
     $image_attributes = array();
-    $image_attributes['src'] = image_style_url('highlight', $image->uri);
     $image_attributes['class'] = array();
     $image_attributes['class'][] = 'mcneese-front_page-highlight-image';
     $image_attributes['width'] = 585;
     $image_attributes['height'] = 200;
 
+    if (is_object($image)) {
+      $image_attributes['src'] = image_style_url('highlight', $image->uri);
+    }
+    else {
+      // provide manual fallback if no image is provided in the field_hightlight_image_fid field.
+      $image_attributes['src'] = image_style_url('highlight', 'dbu://c/9e1b0324');
+    }
+
     if (property_exists($result, 'field_hightlight_image_alt')) {
       $image_attributes['alt'] = $result->field_hightlight_image_alt;
     }
 
-    if (empty($image_attributes['alt'])) {
+    if (is_object($image) && empty($image_attributes['alt'])) {
       $image_attributes['alt'] = $image->alt;
     }
 
