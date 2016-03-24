@@ -378,7 +378,7 @@ function mfcs_miscellaneous_check_requests_conflict($request_id = NULL) {
 
     $sql_on_1 = 'r.time_start is null and r2.time_start is null and r.date = r2.date';
     $sql_on_2 = 'r.time_start is null and r2.time_start is not null and r.date >= r2.time_start and r.date < r2.time_stop';
-    $sql_on_3 = 'r.time_start is not null and r2.time_start is not null and ((r.time_start >= r2.time_start and r.time_start < r2.time_stop) or (r.time_stop >= r2.time_start and r.time_stop < r2.time_stop))';
+    $sql_on_3 = 'r.time_start is not null and r2.time_start is not null and ((r.time_start >= r2.time_start and r.time_start < r2.time_stop) or (r.time_stop > r2.time_start and r.time_stop <= r2.time_stop))';
     $sql_on_4 = 'r.time_start is not null and r2.time_start is null and r2.date >= r.time_start and r2.date < r.time_stop';
 
     $sql_main = 'select r.*, r2.id as conflict_id, r2.title as conflict_title, r2.date as conflict_date, r2.time_start as conflict_time_start, r2.time_stop as conflict_time_stop, r2.delta as conflict_delta';
