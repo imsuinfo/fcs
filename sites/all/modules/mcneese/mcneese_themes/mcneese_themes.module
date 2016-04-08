@@ -140,7 +140,7 @@ function theme_items_list($vars) {
  *   - attributes: tag attributes array.
  */
 function theme_list_item($vars) {
-  return '<li' . drupal_attributes($vars['attributes']) . '>' . $vars['markup'] . '</li>' . "\n";
+  return '<li' . drupal_attributes($vars['attributes']) . '>' . $vars['markup'] . '</li>';
 }
 
 /**
@@ -167,10 +167,10 @@ function mcneese_themes_table($variables) {
     $variables['attributes']['class'][] = 'sticky-enabled';
   }
 
-  $output = '<table' . drupal_attributes($variables['attributes']) . '>' . "\n";
+  $output = '<table' . drupal_attributes($variables['attributes']) . '>';
 
   if (isset($variables['caption'])) {
-    $output .= '<caption>' . $variables['caption'] . '</caption>' . "\n";
+    $output .= '<caption>' . $variables['caption'] . '</caption>';
   }
 
   // Format the table columns:
@@ -200,10 +200,10 @@ function mcneese_themes_table($variables) {
         foreach ($cols as $col) {
           $output .= ' <col' . drupal_attributes($col) . '>';
         }
-        $output .= ' </colgroup>' . "\n";
+        $output .= ' </colgroup>';
       }
       else {
-        $output .= ' <colgroup' . drupal_attributes($variables['attributes']) . '>' . "\n";
+        $output .= ' <colgroup' . drupal_attributes($variables['attributes']) . '>';
       }
     }
   }
@@ -239,7 +239,7 @@ function mcneese_themes_table($variables) {
       $output .= _theme_table_cell($cell, TRUE);
     }
     // Using ternary operator to close the tags based on whether or not there are rows
-    $output .= (count($variables['rows']) ? '</tr></thead>' : '</tr>')  . "\n";
+    $output .= (count($variables['rows']) ? '</tr></thead>' : '</tr>') ;
   }
   else {
     $ts = array();
@@ -247,7 +247,7 @@ function mcneese_themes_table($variables) {
 
   // Format the table rows:
   if (count($variables['rows'])) {
-    $output .= '<tbody>' . "\n";
+    $output .= '<tbody>';
     $flip = array(
       'even' => 'odd',
       'odd' => 'even',
@@ -286,14 +286,14 @@ function mcneese_themes_table($variables) {
           $cell = tablesort_cell($cell, $variables['header'], $ts, $i++);
           $output .= _theme_table_cell($cell);
         }
-        $output .= '</tr>' . "\n";
+        $output .= '</tr>';
       }
     }
 
-    $output .= '</tbody>' . "\n";
+    $output .= '</tbody>';
   }
 
-  $output .= '</table>' . "\n";
+  $output .= '</table>';
   return $output;
 }
 

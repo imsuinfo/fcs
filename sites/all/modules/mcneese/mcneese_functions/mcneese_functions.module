@@ -426,7 +426,7 @@ function mcneese_functions_embed_network_services_traffic($url_path, $cache_id =
  *   (optional) When FALSE, output to the screen.
  *   When TRUE, return output to caller.
  */
-function mcneese_functions_embed_ntas_widget($cache_id = NULL, $cache_expire = '+1 minutes', $return = FALSE) {
+function mcneese_functions_embed_ntas_widget($cache_id = NULL, $cache_expire = '+5 minutes', $return = FALSE) {
   $markup = '';
   $save_to_cache = FALSE;
 
@@ -448,7 +448,7 @@ function mcneese_functions_embed_ntas_widget($cache_id = NULL, $cache_expire = '
   global $is_https;
 
   if (empty($markup)) {
-    $webpage = cf_http_get_webpage($server_name, $url_path, $port, NULL, 8, 8192, TRUE);
+    $webpage = cf_http_get_webpage($server_name, $url_path, $port, NULL, 1, 8192, TRUE);
 
     if ($webpage['read'] === TRUE && $webpage['http_error']['error_code'] == 0 && $webpage['socket_error']['code'] == 0){
       $document = cf_http_split_response($webpage['document']);
@@ -558,9 +558,9 @@ function mcneese_functions_embed_job_opportunity_listing($opportunity) {
     return FALSE;
   }
   else {
-    print('<ul>' . "\n");
+    print('<ul>');
     foreach ($all as $job) {
-      print('<li>' . "\n");
+      print('<li>');
       print('<a href="' . base_path() . 'node/' . $job->node_id . '">' . $job->title . '</a>');
       print(' - ');
 
@@ -577,9 +577,9 @@ function mcneese_functions_embed_job_opportunity_listing($opportunity) {
         print("no positions available");
       }
 
-      print('</li>' . "\n");
+      print('</li>');
     }
-    print('</ul>' . "\n");
+    print('</ul>');
   }
 
   return TRUE;
@@ -674,22 +674,22 @@ function mcneese_functions_build_a_to_z_listing_content($type, $filter = NULL, $
     $executed = $query->execute();
     $all = $executed->fetchAll();
 
-    $output = '<div id="mcneese-a_to_z_listing-' . $type . '" class="a_to_z_listing-wrapper a_to_z_listing-wrapper-' . $type . '">' . "\n";
+    $output = '<div id="mcneese-a_to_z_listing-' . $type . '" class="a_to_z_listing-wrapper a_to_z_listing-wrapper-' . $type . '">';
 
     if (empty($all)) {
       if ($type == 'webform') {
         $output .= "No web forms were found.\n";
       }
 
-      $output .= '</div>' . "\n";
+      $output .= '</div>';
       return $output;
     }
 
-    $output .= '<ul class="a_to_z_listing-list a_to_z_listing-list-' . $type . '">' . "\n";
+    $output .= '<ul class="a_to_z_listing-list a_to_z_listing-list-' . $type . '">';
 
     if ($type == 'content') {
       foreach ($all as $item) {
-        $output .= '<li class="a_to_z_listing-item group-' . $item->field_group_tid . '">' . "\n";
+        $output .= '<li class="a_to_z_listing-item group-' . $item->field_group_tid . '">';
         $output .= '<a href="/node/' . $item->node_id . '" class="item-title">' . $item->title . '</a>';
         $output .= '<div class="item-group">' . $item->field_group_name . '</div>';
 
@@ -724,19 +724,19 @@ function mcneese_functions_build_a_to_z_listing_content($type, $filter = NULL, $
           }
         }
 
-        $output .= '</li>' . "\n";
+        $output .= '</li>';
       }
     }
     else {
       foreach ($all as $item) {
-        $output .= '<li class="a_to_z_listing-item group-' . $item->field_group_tid . ' margin-bottom-5">' . "\n";
+        $output .= '<li class="a_to_z_listing-item group-' . $item->field_group_tid . ' margin-bottom-5">';
         $output .= '<a href="/node/' . $item->node_id . '" class="item-title">' . $item->title . '</a>';
         $output .= '<div class="item-group">' . $item->field_group_name . '</div>';
-        $output .= '</li>' . "\n";
+        $output .= '</li>';
       }
     }
 
-    $output .= '</ul>' . "\n";
+    $output .= '</ul>';
   }
   catch (Exception $e) {
     if (class_exists('cf_error')) {
@@ -749,7 +749,7 @@ function mcneese_functions_build_a_to_z_listing_content($type, $filter = NULL, $
   pager_default_initialize($total, $limit, $pager_id);
   $output .= theme('pager');
 
-  $output .= '</div>' . "\n";
+  $output .= '</div>';
 
   return $output;
 }
@@ -821,21 +821,21 @@ function mcneese_functions_build_policy_content($page = 0, $limit = 15) {
     $executed = $query->execute();
     $all = $executed->fetchAll();
 
-    $output = '<div id="mcneese-policy_listing" class="mcneese-policy_listing-wrapper">' . "\n";
+    $output = '<div id="mcneese-policy_listing" class="mcneese-policy_listing-wrapper">';
 
     if (empty($all)) {
-      $output .= '</div>' . "\n";
+      $output .= '</div>';
       return $output;
     }
 
-    $output .= '<ul class="policy-list">' . "\n";
+    $output .= '<ul class="policy-list">';
     foreach ($all as $item) {
-      $output .= '<li class="policy-item margin-bottom-5">' . "\n";
+      $output .= '<li class="policy-item margin-bottom-5">';
       $output .= '<a href="/node/' . $item->node_id . '" class="item-title">' . $item->title . '</a>';
-      $output .= '</li>' . "\n";
+      $output .= '</li>';
     }
 
-    $output .= '</ul>' . "\n";
+    $output .= '</ul>';
   }
   catch (Exception $e) {
     if (class_exists('cf_error')) {
@@ -845,7 +845,7 @@ function mcneese_functions_build_policy_content($page = 0, $limit = 15) {
     return FALSE;
   }
 
-  $output .= '</div>' . "\n";
+  $output .= '</div>';
 
   return $output;
 }
