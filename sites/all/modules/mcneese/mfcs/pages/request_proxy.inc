@@ -372,7 +372,7 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = NULL) {
 
   $form['proxy_list']['#markup'] = '<div class="table_listing-navigator table_listing-navigator-top no-print">' . $navigation_top . '</div>';
   $form['proxy_list']['#markup'] .= mcneese_libraries_theme_table($proxy_list, $datatable_settings);
-  $form['proxy_list']['#markup'] .= '<div class="table_listing-navigator table_listing-navigator-bottom">' . $navigation_bottom . '</div>';
+  #$form['proxy_list']['#markup'] .= '<div class="table_listing-navigator table_listing-navigator-bottom">' . $navigation_bottom . '</div>';
 
   $form['proxy'] = array(
     '#id' => 'proxy',

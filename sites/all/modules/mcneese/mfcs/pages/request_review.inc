@@ -248,7 +248,7 @@ function mfcs_request_review_0_page($form, &$form_state, $page_number = NULL) {
 
   $output = '<div class="table_listing-navigator table_listing-navigator-top no-print">' . $navigation_top . '</div>';
   $output .= mcneese_libraries_theme_table($table, $table['datatable_settings']);
-  $output .= '<div class="table_listing-navigator table_listing-navigator-bottom">' . $navigation_bottom . '</div>';
+  #$output .= '<div class="table_listing-navigator table_listing-navigator-bottom">' . $navigation_bottom . '</div>';
 
   return $form;
 }

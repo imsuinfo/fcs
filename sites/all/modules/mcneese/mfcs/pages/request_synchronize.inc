@@ -397,7 +397,7 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = NUL
 
   $form['synchronize_list']['#markup'] = '<div class="table_listing-navigator table_listing-navigator-top no-print">' . $navigation_top . '</div>';
   $form['synchronize_list']['#markup'] .= mcneese_libraries_theme_table($synchronize_list, $datatable_settings);
-  $form['synchronize_list']['#markup'] .= '<div class="table_listing-navigator table_listing-navigator-bottom">' . $navigation_bottom . '</div>';
+  #$form['synchronize_list']['#markup'] .= '<div class="table_listing-navigator table_listing-navigator-bottom">' . $navigation_bottom . '</div>';
   $form['synchronize_list']['#markup'] .=  '<br><div>';
   $form['synchronize_list']['#markup'] .=  "The <strong>iCal</strong> synchronize process is intended to be used by <strong>zimbra calendar</strong> for processing only the approved requests from the current day forward. ";
   $form['synchronize_list']['#markup'] .=  "Other ip addresses may be added for exceptional, testing, or training purposes. ";

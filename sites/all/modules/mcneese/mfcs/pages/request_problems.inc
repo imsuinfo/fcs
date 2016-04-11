@@ -480,7 +480,7 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
 
   $form['problem_list']['#markup'] = '<div class="table_listing-navigator table_listing-navigator-top no-print">' . $navigation_top . '</div>';
   $form['problem_list']['#markup'] .= mcneese_libraries_theme_table($problem_list, $datatable_settings);
-  $form['problem_list']['#markup'] .= '<div class="table_listing-navigator table_listing-navigator-bottom">' . $navigation_bottom . '</div>';
+  #$form['problem_list']['#markup'] .= '<div class="table_listing-navigator table_listing-navigator-bottom">' . $navigation_bottom . '</div>';
 
   return $form;
 }
@@ -1428,7 +1428,7 @@ function mfcs_request_problems_0_users_disabled_in_use($user_id, $page_number = 
 
   $output = '<div class="table_listing-navigator table_listing-navigator-top no-print">' . $navigation_top . '</div>';
   $output .= mcneese_libraries_theme_table($table, $table['datatable_settings']);
-  $output .= '<div class="table_listing-navigator table_listing-navigator-bottom">' . $navigation_bottom . '</div>';
+  #$output .= '<div class="table_listing-navigator table_listing-navigator-bottom">' . $navigation_bottom . '</div>';
 
   return $output;
 }
@@ -1829,7 +1829,7 @@ function mfcs_request_problems_0_requests_form($form, &$form_state, $page_number
 
   $form['problem_list']['#markup'] = '<div class="table_listing-navigator table_listing-navigator-top no-print">' . $navigation_top . '</div>';
   $form['problem_list']['#markup'] .= mcneese_libraries_theme_table($problem_list, $datatable_settings);
-  $form['problem_list']['#markup'] .= '<div class="table_listing-navigator table_listing-navigator-bottom">' . $navigation_bottom . '</div>';
+  #$form['problem_list']['#markup'] .= '<div class="table_listing-navigator table_listing-navigator-bottom">' . $navigation_bottom . '</div>';
 
   return $form;
 }

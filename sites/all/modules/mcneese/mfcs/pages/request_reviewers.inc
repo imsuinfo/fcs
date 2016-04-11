@@ -489,7 +489,7 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
 
   $form['reviewers_list']['#markup'] = '<div class="table_listing-navigator table_listing-navigator-top no-print">' . $navigation_top . '</div>';
   $form['reviewers_list']['#markup'] .= mcneese_libraries_theme_table($reviewers_list, $datatable_settings);
-  $form['reviewers_list']['#markup'] .= '<div class="table_listing-navigator table_listing-navigator-bottom">' . $navigation_bottom . '</div>';
+  #$form['reviewers_list']['#markup'] .= '<div class="table_listing-navigator table_listing-navigator-bottom">' . $navigation_bottom . '</div>';
 
   $form['reviewer'] = array(
     '#id' => 'reviewers-reviewer',

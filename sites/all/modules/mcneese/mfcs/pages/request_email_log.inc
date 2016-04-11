@@ -403,7 +403,7 @@ function mfcs_request_email_log_0_form($form, &$form_state, $page_number = NULL)
 
   $form['email_log_list']['#markup'] = '<div class="table_listing-navigator table_listing-navigator-top no-print">' . $navigation_top . '</div>';
   $form['email_log_list']['#markup'] .= mcneese_libraries_theme_table($email_log_list, $datatable_settings);
-  $form['email_log_list']['#markup'] .= '<div class="table_listing-navigator table_listing-navigator-bottom">' . $navigation_bottom . '</div>';
+  #$form['email_log_list']['#markup'] .= '<div class="table_listing-navigator table_listing-navigator-bottom">' . $navigation_bottom . '</div>';
 
   return $form;
 }
