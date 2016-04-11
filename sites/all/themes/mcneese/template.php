@@ -354,6 +354,9 @@ function mcneese_preprocess_page(&$vars) {
     mcneese_initialize_variables($vars);
   }
 
+  // define the bulletin default settings.
+  $vars['mcneese_bulletin_mode'] = 2; // mode 1 was used from original design as a sub-theme, so mode 2 represents operating as a hard-coded value.
+
   $cf['page']['tags'] = array();
 
   if (!isset($cf['data']['page'])) {
@@ -534,7 +537,7 @@ function mcneese_preprocess_page(&$vars) {
   $attributes['id'] = 'mcneese-bulletin';
   $attributes['class'] = array();
   $attributes['class'][] = 'noscript';
-  $attributes['title'] = t("Bulleting");
+  $attributes['title'] = t("Bulletin");
 
   if ($cf['is']['html5']) {
     $attributes['class'][] = $bulletin_sticky;
