@@ -84,9 +84,9 @@
 .mcneese.is-fixed_width #mcneese-page,
 .mcneese.is-fixed_width #mcneese-bottom,
 .mcneese.is-fixed_width > .dev-query {
-  width: 960px;
-  min-width: 960px;
-  max-width: 960px;
+  width: 970px;
+  min-width: 970px;
+  max-width: 970px;
 
   margin-left: auto;
   margin-right: auto;
@@ -95,9 +95,9 @@
 .mcneese.is-fixed_width #mcneese-skip_nav:active,
 .mcneese.is-fixed_width #mcneese-skip_nav:focus,
 .mcneese.is-fixed_width #mcneese-skip_nav:hover {
-  width: 960px;
-  min-width: 960px;
-  max-width: 960px;
+  width: 970px;
+  min-width: 970px;
+  max-width: 970px;
 
   margin-left: auto;
   margin-right: auto;
