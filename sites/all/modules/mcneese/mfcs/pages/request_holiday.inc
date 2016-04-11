@@ -547,6 +547,28 @@ function mfcs_request_holiday_0_edit_form($form, &$form_state, $year, $holiday_i
 }
 
 /**
+ * Pre-Validate process for mfcs_request_holiday_0_edit_form().
+ *
+ * @param array $form
+ *   The form array as defined by drupals form api.
+ * @param array $form_state
+ *   The form state array as defined by drupals form api
+ *
+ * @see: mfcs_request_holiday_0_edit_form()
+ */
+function mfcs_request_holiday_0_edit_form_pre_validate(&$form, &$form_state) {
+  $clicked_id = '';
+  if (isset($form_state['triggering_element']['#id'])) {
+    $clicked_id = $form_state['triggering_element']['#id'];
+  }
+
+  if ($clicked_id == 'mfcs-holiday-edit-submit-cancel') {
+    $form['holiday']['title']['#required'] = FALSE;
+    $form['holiday']['date']['#required'] = FALSE;
+  }
+}
+
+/**
  * Validate process for mfcs_request_holiday_0_edit_form().
  *
  * @param array $form
@@ -619,7 +641,7 @@ function mfcs_request_holiday_0_edit_form_submit($form, &$form_state) {
         $form_state['redirect'] = mfcs_build_redirect_array('requests/holiday/year-0/' . $holiday->year . '/view/' . $holiday->id);
       }
       else {
-        $form_state['redirect'] = mfcs_build_redirect_array('requests/holiday/year-0/' . $holiday->year);
+        $form_state['redirect'] = mfcs_build_redirect_array('requests/holiday/year-0/' . $form['form']['year']['#value']);
       }
     }
     else {
