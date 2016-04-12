@@ -1005,10 +1005,8 @@
 }
 
 .mcneese #mcneese-bulletin-wrapper-inner.additional {
-  display: table-row;
-
   background-image: url(../../images/bulletin-background.png);
-  background-repeat: repeat;
+  background-repeat: repeat-x;
   background-attachment: scroll;
   background-color: rgba(0, 0, 0, 0);
   background-clip: border-box;
@@ -1059,7 +1057,7 @@
 /*** Bulletin - No Additional ***/
 .mcneese #mcneese-bulletin-wrapper-inner.no_additional {
   background-image: url(../../images/bulletin-background-small.png);
-  background-repeat: repeat;
+  background-repeat: repeat-x;
   background-attachment: scroll;
   background-color: rgba(0, 0, 0, 0);
   background-clip: border-box;
