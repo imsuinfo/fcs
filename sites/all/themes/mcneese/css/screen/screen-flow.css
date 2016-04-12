@@ -980,21 +980,33 @@
 /*** Bulletin ***/
 .mcneese #mcneese-bulletin-wrapper-outer {
   position: relative;
-}
 
-.mcneese #mcneese-bulletin-wrapper-outer .down-arrow {
-  bottom: -15px;
-  left: 39px;
-  position: absolute;
-  z-index: 9;
+  color: #000000;
+  background-color: #ffffff;
 }
 
 .mcneese #mcneese-bulletin-wrapper {
-  background-color: #ffffff;
   margin-bottom: 15px;
 }
 
+.mcneese #mcneese-bulletin-page_title > .page-title > .html_tag-hgroup > .page-title {
+  margin: 4px 20px;
+}
+
+
+
+/*** Bulletin - Additional ***/
+.mcneese #mcneese-bulletin-wrapper-outer.additional .down-arrow {
+  position: absolute;
+  bottom: -15px;
+  left: 39px;
+
+  z-index: 9;
+}
+
 .mcneese #mcneese-bulletin-wrapper-inner.additional {
+  display: table-row;
+
   background-image: url(../../images/bulletin-background.png);
   background-repeat: repeat;
   background-attachment: scroll;
@@ -1010,6 +1022,11 @@
   overflow: hidden;
 }
 
+.mcneese #mcneese-bulletin-page_title.additional,
+.mcneese #mcneese-bulletin-content.additional {
+  display: table-cell;
+}
+
 .mcneese #mcneese-bulletin-page_title.additional {
   width: 260px;
   min-width: 260px;
@@ -1019,14 +1036,6 @@
   word-wrap: break-word;
 }
 
-.mcneese #mcneese-bulletin-page_title.no_additional {
-  padding: 10px 0px;
-}
-
-.mcneese #mcneese-bulletin-page_title > .page-title > .html_tag-hgroup > .page-title {
-  margin: 4px 20px;
-}
-
 .mcneese #mcneese-bulletin-content.additional {
   width: 100%;
   min-width: 700px;
@@ -1034,4 +1043,30 @@
 
   overflow: visible;
   word-wrap: break-word;
+}
+
+.mcneese #mcneese-bulletin-content.additional > #mcneese-bulletin > .bulletin-wrapper {
+  color: #383838;
+
+  margin-top: 30px;
+
+  padding: 10px 20px;
+  border-left: 1px solid #dcdcdc;
+}
+
+
+
+/*** Bulletin - No Additional ***/
+.mcneese #mcneese-bulletin-wrapper-inner.no_additional {
+  background-image: url(../../images/bulletin-background-small.png);
+  background-repeat: repeat;
+  background-attachment: scroll;
+  background-color: rgba(0, 0, 0, 0);
+  background-clip: border-box;
+  background-origin: padding-box;
+  background-size: auto auto;
+}
+
+.mcneese #mcneese-bulletin-page_title.no_additional {
+  padding: 10px 0px;
 }
