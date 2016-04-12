@@ -1039,6 +1039,8 @@
   min-width: 700px;
   max-width: 100%;
 
+  line-height: 22.5px;
+
   overflow: visible;
   word-wrap: break-word;
 }
