@@ -724,7 +724,7 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
       'custom_action' => FALSE,
     ),
     MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED => array(
-      'label' => "Unable to Assign Reviewer Role",
+      'label' => "Unable to Assign Reviewer/Venue-Coordinator Role",
       'explanation' =>
         "This flag gets set when an attempt is made to assign or unassign the reviewer role to a user when there is no reference to that use as a venue coordinator or room coordinator.<br>\n" .
         "<br>\n" .
@@ -736,7 +736,7 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
         "Administrators, managers, and users without banner ids should not get this error.<br>\n",
       'resettable' => TRUE,
       'custom_action' => TRUE,
-      'custom_action-message' => "Re-process Reviewer Role."
+      'custom_action-message' => "Re-process Reviewer/Venue-Coordinator Role."
     ),
     MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES => array(
       'label' => "Old/Duplicate Account",
