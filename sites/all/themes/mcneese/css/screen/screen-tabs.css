@@ -59,6 +59,10 @@
   margin-right: 6px;
 }
 
+.mcneese #mcneese-tabs.relative > .navigation_list > .tab > .sub_tabs > .navigation_list > .tab {
+  margin-right: 4px;
+}
+
 .mcneese #mcneese-tabs.relative > .navigation_list > .tab:last-of-type {
   margin-right: 0px;
 }
