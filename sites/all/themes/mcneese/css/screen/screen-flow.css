@@ -19,8 +19,6 @@
 }
 
 .mcneese #mcneese-page {
-  min-height: 600px;
-
   padding: 0px 5px 5px 5px;
 
   border-bottom-left-radius: 10px;
@@ -30,6 +28,8 @@
 .mcneese #mcneese-page-content {
   color: #000000;
   background-color: #ffffff;
+
+  min-height: 400px;
 }
 
 .mcneese #mcneese-bottom {
