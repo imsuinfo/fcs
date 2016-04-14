@@ -963,6 +963,14 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
           $markup .= "Denied";
           $length += strlen("Denied");
         }
+        elseif ($value->$value_name == MFCS_REVIEW_DECISION_ISSUES) {
+          $markup .= "Issues";
+          $length += strlen("Issues");
+        }
+        elseif ($value->$value_name == MFCS_REVIEW_DECISION_ISSUES_NONE) {
+          $markup .= "No Issues";
+          $length += strlen("No Issues");
+        }
       }
 
       if (!is_numeric($markup) && empty($markup)) {
@@ -990,8 +998,6 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
 
   return $output;
 }
-
-
 
 /**
  * Build the review log display.
@@ -1248,7 +1254,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
       if ($decision === MFCS_REVIEW_DECISION_AMENDMENT) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">' . "Amended" . '</strong> the request' . $reviewer_classification . '.';
       }
-      elseif ($review_step === MFCS_REVIEW_STEP_VENUE_AVAILABLE && $decision === MFCS_REVIEW_DECISION_APPROVE) {
+      elseif ($review_step === MFCS_REVIEW_STEP_VENUE_AVAILABLE && $decision === MFCS_REVIEW_DECISION_AVAILABLE) {
         if ($type === MFCS_REQUEST_TYPE_QUICK_MEETING) {
           $markup .= $user_name_markup . ' ' . $user_id_markup . ' has designated that the <strong class="review-item-label-text-row-decision">Venue is Available</strong>, <strong class="review-item-label-text-row-decision">Confirmed</strong>, and <strong class="review-item-label-text-row-decision">Reserved</strong>' . $reviewer_classification . '.';
         }
@@ -1256,13 +1262,21 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
           $markup .= $user_name_markup . ' ' . $user_id_markup . ' has designated that the <strong class="review-item-label-text-row-decision">Venue is Available</strong>' . $reviewer_classification . '.';
         }
       }
-      elseif ($review_step === MFCS_REVIEW_STEP_VENUE_AVAILABLE && $decision === MFCS_REVIEW_DECISION_DENY) {
+      elseif ($review_step === MFCS_REVIEW_STEP_VENUE_AVAILABLE && $decision === MFCS_REVIEW_DECISION_UNAVAILABLE) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has designated that the <strong class="review-item-label-text-row-decision">Venue is Unavailable</strong>' . $reviewer_classification . '.';
       }
       elseif ($review_step === MFCS_REVIEW_STEP_MAKE_DECISIONS && $decision === MFCS_REVIEW_DECISION_APPROVE) {
+        // as of fcs-79, this is provided for archival purposes in that requests prior to the change may involve this.
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">Confirmed and Reserved</strong> the request' . $reviewer_classification . "";
       }
       elseif ($review_step === MFCS_REVIEW_STEP_MAKE_DECISIONS && $decision === MFCS_REVIEW_DECISION_DENY) {
+        // as of fcs-79, this is provided for archival purposes in that requests prior to the change may involve this.
+        $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">Denied</strong> the request' . $reviewer_classification . '.';
+      }
+      elseif ($review_step === MFCS_REVIEW_STEP_REQUIREMENTS && $decision === MFCS_REVIEW_DECISION_APPROVE) {
+        $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">Confirmed and Reserved</strong> the request' . $reviewer_classification . "";
+      }
+      elseif ($review_step === MFCS_REVIEW_STEP_REQUIREMENTS && $decision === MFCS_REVIEW_DECISION_DENY) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">Denied</strong> the request' . $reviewer_classification . '.';
       }
       elseif ($decision === MFCS_REVIEW_DECISION_COMMENT) {
@@ -1274,16 +1288,16 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
       elseif (($review_step === MFCS_REVIEW_STEP_REVIEW || $review_step === MFCS_REVIEW_STEP_VENUE_AVAILABLE) && $decision === MFCS_REVIEW_DECISION_WAVE) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has waived the <strong class="review-item-label-text-row-decision">' . $decision_options[MFCS_REVIEW_DECISION_REQUIREMENT] . '</strong> ' . $reviewer_classification . '.';
       }
-      elseif ($review_step === MFCS_REVIEW_STEP_REQUIREMENTS && $decision === MFCS_REVIEW_DECISION_APPROVE) {
-        $markup .= $user_name_markup . ' ' . $user_id_markup . ' has accepted the <strong class="review-item-label-text-row-decision">' . $review_step_options[$review_step] . '</strong>' . $reviewer_classification . '.';
+      elseif ($review_step === MFCS_REVIEW_STEP_REVIEW && $decision === MFCS_REVIEW_DECISION_ISSUES) {
+        $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">Issues</strong> with the request' . $reviewer_classification . '.';
       }
-      elseif ($review_step === MFCS_REVIEW_STEP_REQUIREMENTS && $decision === MFCS_REVIEW_DECISION_DENY) {
-        $markup .= $user_name_markup . ' ' . $user_id_markup . ' has denied the <strong class="review-item-label-text-row-decision">' . $review_step_options[$review_step] . '</strong>' . $reviewer_classification . '.';
+      elseif ($review_step === MFCS_REVIEW_STEP_REVIEW && $decision === MFCS_REVIEW_DECISION_ISSUES_NONE) {
+        $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">No Issues</strong> with the request' . $reviewer_classification . '.';
       }
       elseif ($decision === MFCS_REVIEW_DECISION_REQUIREMENT) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' assigned the <strong class="review-item-label-text-row-decision">' . $decision_options[$decision] . '</strong> for the request' . $reviewer_classification . '.';
       }
-      elseif ($decision === MFCS_REVIEW_DECISION_APPROVE && $type === MFCS_REQUEST_TYPE_QUICK_MEETING) {
+      elseif ($decision === MFCS_REVIEW_DECISION_AVAILABLE && $type === MFCS_REQUEST_TYPE_QUICK_MEETING) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has designated that the <strong class="review-item-label-text-row-decision">Venue is Available</strong>, <strong class="review-item-label-text-row-decision">Confirmed</strong>, and <strong class="review-item-label-text-row-decision">Reserved</strong>' . $reviewer_classification . '.';
       }
       elseif ($decision === MFCS_REVIEW_DECISION_CLOSED) {

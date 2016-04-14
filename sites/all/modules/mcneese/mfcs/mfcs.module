@@ -59,9 +59,26 @@ define('MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED', 8);
  define('MFCS_REVIEW_DECISION_AMENDMENT', 141);
  define('MFCS_REVIEW_DECISION_APPROVE', 115);
  define('MFCS_REVIEW_DECISION_COMMENT', 113);
+ define('MFCS_REVIEW_DECISION_COMMENT_ALL', 152);
  define('MFCS_REVIEW_DECISION_DENY', 114);
  define('MFCS_REVIEW_DECISION_WAVE', 135);
  define('MFCS_REVIEW_DECISION_REQUIREMENT', 136);
+ define('MFCS_REVIEW_DECISION_AVAILABLE', 148);
+ define('MFCS_REVIEW_DECISION_UNAVAILABLE', 149);
+ define('MFCS_REVIEW_DECISION_ISSUES', 150);
+ define('MFCS_REVIEW_DECISION_ISSUES_NONE', 151);
+
+ /**
+ * Defines restrictions review decisions.
+ */
+ define('MFCS_RESTRICTION_DECISION_NONE', 0);
+ define('MFCS_RESTRICTION_DECISION_REQUESTER', 1);
+ define('MFCS_RESTRICTION_DECISION_VENUE_COORDINATOR', 2);
+ define('MFCS_RESTRICTION_DECISION_REVIEWER', 3);
+ define('MFCS_RESTRICTION_DECISION_APPROVER', 4);
+ define('MFCS_RESTRICTION_DECISION_MANAGER', 5);
+ define('MFCS_RESTRICTION_DECISION_ADMINISTER', 6);
+ define('MFCS_RESTRICTION_DECISION_COMMENT_ONLY', 7);
 
  // These are hidden/reserved and are used to populate the review log when certain operations have been performed.
  define('MFCS_REVIEW_DECISION_CLOSED', 1);
@@ -709,6 +726,21 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
     }
   }
   elseif ($operation == 'review') {
+    // managers are always allowed to review.
+    if ($roles['manager']) {
+      if (is_array($request_id)) {
+        foreach ($request_ids as $id) {
+          $access[$id] = TRUE;
+          $processed[$id] = TRUE;
+        }
+
+        return $processed;
+      }
+
+      $access[$request_id] = TRUE;
+      return TRUE;
+    }
+
     $operation_result = mfcs_page_request_access_operation_review($request_ids, $processed, $access, $roles, $user);
 
     // if something went wrong with the operation check, return FALSE but do not cache.
@@ -1323,6 +1355,12 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
       return FALSE;
     }
 
+    // managers are always allowed to review.
+    if ($roles['manager']) {
+      $access[$request_id] = TRUE;
+      return TRUE;
+    }
+
     // due to its complexity, the database calling function for reviewer access will be used.
     $review_access = mfcs_page_request_reviewer_access($user, $request_id, MFCS_REVIEW_RESTRICTION_REVIEW);
 
@@ -1568,7 +1606,6 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
     if ($roles['manager'] || $roles['reviewer']) {
       $agreement_request_step = array(
         MFCS_REVIEW_STEP_COMPLETED,
-        MFCS_REVIEW_STEP_MAKE_DECISIONS,
         MFCS_REVIEW_STEP_REVIEW,
         MFCS_REVIEW_STEP_REQUIREMENTS,
       );
@@ -1648,7 +1685,6 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
 
   $show_step_venue_coordinator = array(
     MFCS_REVIEW_STEP_VENUE_AVAILABLE,
-    MFCS_REVIEW_STEP_MAKE_DECISIONS,
   );
 
   // if the reviewer is associated with the requests classification, then allow access when in these statuses.
@@ -1673,15 +1709,9 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
     MFCS_REVIEW_STEP_REQUIREMENTS,
   );
 
-  $show_decision = array(
-    MFCS_REVIEW_DECISION_APPROVE,
-    MFCS_REVIEW_DECISION_DENY,
-  );
-
   $show_step_insurance = array(
     MFCS_REVIEW_STEP_REVIEW,
     MFCS_REVIEW_STEP_REQUIREMENTS,
-    MFCS_REVIEW_STEP_MAKE_DECISIONS,
     MFCS_REVIEW_STEP_COMPLETED,
   );
 
@@ -6911,7 +6941,6 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
 
   $show_step_venue_coordinator = array(
     MFCS_REVIEW_STEP_VENUE_AVAILABLE,
-    MFCS_REVIEW_STEP_MAKE_DECISIONS,
   );
 
   $show_status_reviewer = array(
@@ -6921,11 +6950,6 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
   $show_step_reviewer = array(
     MFCS_REVIEW_STEP_REVIEW,
     MFCS_REVIEW_STEP_REQUIREMENTS,
-  );
-
-  $show_decision = array(
-    MFCS_REVIEW_DECISION_APPROVE,
-    MFCS_REVIEW_DECISION_DENY,
   );
 
   if ($review_restrictions != MFCS_REVIEW_RESTRICTION_NONE && $user_id !== MFCS_USER_REQUEST) {
@@ -9198,7 +9222,12 @@ function mfcs_get_requests_current_review_decisions($request_ids, $classificatio
 
     if (!array_key_exists($reviewer_classification, $required_reviewers_classifications)) {
       // never count venue coordinator or the proxy reviewer classifications.
-      if (($reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR) || ($reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY)) {
+      if ($reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR || $reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY) {
+        continue;
+      }
+
+      // never count managers, administers, or requesters.
+      if ($reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR || $reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_MANAGER || $reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_REQUESTER) {
         continue;
       }
 
@@ -9209,10 +9238,18 @@ function mfcs_get_requests_current_review_decisions($request_ids, $classificatio
   $total_required = count($required_reviewers_classifications);
   $required_reviewers_classifications_ids = array_keys($required_reviewers_classifications);
 
-  $review_decisions = array(
-    MFCS_REVIEW_DECISION_DENY,
-    MFCS_REVIEW_DECISION_APPROVE,
-  );
+  if ($step === MFCS_REVIEW_STEP_REVIEW) {
+    $review_decisions = array(
+      MFCS_REVIEW_DECISION_ISSUES,
+      MFCS_REVIEW_DECISION_ISSUES_NONE,
+    );
+  }
+  elseif ($step === MFCS_REVIEW_STEP_REQUIREMENTS) {
+    $review_decisions = array(
+      MFCS_REVIEW_DECISION_APPROVE,
+      MFCS_REVIEW_DECISION_DENY,
+    );
+  }
 
   $decisions = array();
   foreach ($request_ids as $request_id => $review_revision) {
@@ -10581,6 +10618,137 @@ function mfcs_get_holiday($id, $enabled = TRUE, $deleted = FALSE) {
   }
 
   return $results;
+}
+
+/**
+ * Load the reviewer classifications for a given user for a given request classification and step.
+ *
+ * @param int $user_id
+ *   ID of the user to process classifications for.
+ * @param int $request_classification
+ *   Integer of the request classification to fine-tune results based on.
+ * @param int $review_step
+ *   Integer of the review step to fine-tune results based on.
+ *
+ * @param array|bool
+ *   An array containing reviewer classifications with the following keys:
+ *   - 'step': all reviewer classifications associated with the given step.
+ *   - 'all': all reviewer classifications associated with the request.
+ *   FALSE is returned on error.
+ */
+function mfcs_get_reviewer_classifications($user_id, $request_classification, $review_step) {
+  if (!cf_is_integer($user_id)) {
+    cf_error::invalid_integer('user_id');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($request_classification)) {
+    cf_error::invalid_integer('request_classification');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($review_step)) {
+    cf_error::invalid_integer('review_step');
+    return FALSE;
+  }
+
+  $reviewer_classifications = array(
+    'step' => array(),
+    'all' => array(),
+  );
+
+  $reviewer_conditions = array(
+    'mr.user_id' => $user_id,
+    'mr.request_classification' => $request_classification,
+    'mr.disabled' => 0,
+  );
+
+  $reviewers_returned = mfcs_get_reviewers($reviewer_conditions, array('join' => TRUE));
+  $reviewers = array();
+  if (isset($reviewers_returned['results']) && is_array($reviewers_returned['results'])) {
+    $reviewers = $reviewers_returned['results'];
+  }
+  unset($reviewers_returned);
+
+  foreach ($reviewers as $reviewer) {
+    if (is_string($reviewer->reviewer_classification)) {
+      $reviewer_classification = (int) $reviewer->reviewer_classification;
+    }
+    else {
+      $reviewer_classification = $reviewer->reviewer_classification;
+    }
+
+    $step = NULL;
+    if (isset($reviewer->review_step)) {
+      if (is_string($reviewer->review_step)) {
+        $step = (int) $reviewer->review_step;
+      }
+      else {
+        $step = $reviewer->review_step;
+      }
+    }
+
+    if ($review_step === $step) {
+      $reviewer_classifications['step'][$reviewer_classification] = $reviewer_classification;
+    }
+
+    $reviewer_classifications['all'][$reviewer_classification] = $reviewer_classification;
+  }
+
+  return $reviewer_classifications;
+}
+
+/**
+ * Given an array of request classifications, return which have not yet been reviewed.
+ *
+ * @param int $request_id
+ *   The id of the request.
+ * @param array $reviewer_classifications
+ *   An array of reviewer classifications with the array keys being the numeric id of the classification.
+ *
+ * @return array|bool
+ *   An array containing a copy of $reviewer_classifications with already reviewed classifications removed.
+ *   FALSE is returned on error.
+ */
+function mfcs_remove_processed_reviewed_classifications($request_id, $reviewer_classifications) {
+  if (!cf_is_integer($request_id)) {
+    cf_error::invalid_integer('request_id');
+    return FALSE;
+  }
+
+  if (!is_array($reviewer_classifications)) {
+    cf_error::invalid_array('reviewer_classifications');
+    return FALSE;
+  }
+
+  $remaining = $reviewer_classifications;
+
+  if (empty($remaining)) {
+    return $remaining;
+  }
+
+  try {
+    $query = db_select('mfcs_reviewed', 'mr');
+    $query->addField('mr', 'classification', 'classification');
+    $query->condition('request_id', $request_id);
+    $query->condition('classification', array_keys($reviewer_classifications), 'IN');
+    $results = $query->execute()->fetchAll();
+
+    $processed = array();
+
+    if (is_array($results)) {
+      foreach ($results as $result) {
+        unset($remaining[$result->classification]);
+      }
+    }
+  }
+  catch (Exception $ex) {
+    cf_error::on_exception($ex);
+
+    return FALSE;
+  }
+
+  return $remaining;
 }
 
 /**

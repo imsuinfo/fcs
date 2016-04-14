@@ -866,13 +866,13 @@ function mfcs_request_statistics_render_request_step($counts, $step_options) {
     'color' => '#e94a50',
   );
 
-  $options['rows']['make_decisions'] = array(
-    'total' => $counts['step']['make_decisions'],
-    'text' => $step_options[MFCS_REVIEW_STEP_MAKE_DECISIONS],
-    'label' => "Resolve Conflics / ",
-    'label_2' => "Make Decisions",
-    'color' => '#6Ce94a',
-  );
+  #$options['rows']['make_decisions'] = array(
+  #  'total' => $counts['step']['make_decisions'],
+  #  'text' => $step_options[MFCS_REVIEW_STEP_MAKE_DECISIONS],
+  #  'label' => "Resolve Conflics / ",
+  #  'label_2' => "Make Decisions",
+  #  'color' => '#6Ce94a',
+  #);
 
   // currently this is not used so do not expose it to the user.
   #$options['rows']['release_hold'] = array(
@@ -921,7 +921,7 @@ function mfcs_request_statistics_render_request_step($counts, $step_options) {
   $markup .= '<div class="statistics-block-text">' . "\n";
   #$markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['changes_required'] . "</em> <strong>" . $step_options[MFCS_REVIEW_STEP_CHANGES_REQUIRED] . "</strong> (<em>" . $options['rows']['changes_required']['percent'] . '%</em> of requests). ' . "</div>\n";
   $markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['completed'] . "</em> <strong>" . $step_options[MFCS_REVIEW_STEP_COMPLETED] . "</strong> (<em>" . $options['rows']['completed']['percent'] . '%</em> of requests). ' . "</div>\n";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['make_decisions'] . "</em> <strong>" . $step_options[MFCS_REVIEW_STEP_MAKE_DECISIONS] . "</strong> (<em>" . $options['rows']['make_decisions']['percent'] . '%</em> of requests). ' . "</div>\n";
+  #$markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['make_decisions'] . "</em> <strong>" . $step_options[MFCS_REVIEW_STEP_MAKE_DECISIONS] . "</strong> (<em>" . $options['rows']['make_decisions']['percent'] . '%</em> of requests). ' . "</div>\n";
   #$markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['release_hold'] . "</em> <strong>" . $step_options[MFCS_REVIEW_STEP_RELEASE_HOLD] . "</strong> (<em>" . $options['rows']['release_hold']['percent'] . '%</em> of requests). ' . "</div>\n";
   $markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['review'] . "</em> <strong>" . $step_options[MFCS_REVIEW_STEP_REVIEW] . "</strong> (<em>" . $options['rows']['review']['percent'] . '%</em> of requests). ' . "</div>\n";
   $markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['requirements'] . "</em> <strong>" . $step_options[MFCS_REVIEW_STEP_REQUIREMENTS] . "</strong> (<em>" . $options['rows']['requirements']['percent'] . '%</em> of requests). ' . "</div>\n";

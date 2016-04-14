@@ -298,21 +298,29 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
                         $custom_message .= 'the request information was amended and therefore the review process was restarted. ';
                       }
+                      elseif ($decision === MFCS_REVIEW_DECISION_AVAILABLE || $decision === MFCS_REVIEW_DECISION_UNAVAILABLE) {
+                        $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
+                        $custom_message .= 'made a decision to designate that the request rooms are <strong class="review-decision">' . $decision_options[$decision] . '</strong>. ';
+                      }
                       elseif ($decision === MFCS_REVIEW_DECISION_APPROVE || $decision === MFCS_REVIEW_DECISION_DENY) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
                         $custom_message .= 'made a decision of <strong class="review-decision">' . $decision_options[$decision] . '</strong>. ';
                       }
                       elseif ($decision === MFCS_REVIEW_DECISION_COMMENT) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
-                        $custom_message .= 'added a <strong class="review-decision">' . $decision_options[$decision] . '</strong>. ';
+                        $custom_message .= 'added a <strong class="review-decision">Comment</strong> (to reviewers/venue-coordinators). ';
+                      }
+                      elseif ($decision === MFCS_REVIEW_DECISION_COMMENT_ALL) {
+                        $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
+                        $custom_message .= 'added a <strong class="review-decision">Comment</strong> (to all). ';
                       }
                       elseif ($decision === MFCS_REVIEW_DECISION_WAVE) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
-                        $custom_message .= 'decided to <strong class="review-decision">' . $decision_options[$decision] . '</strong> the requirements. ';
+                        $custom_message .= 'decided to <strong class="review-decision">Wave</strong> the requirements. ';
                       }
                       elseif ($decision === MFCS_REVIEW_DECISION_REQUIREMENT) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
-                        $custom_message .= 'assigned a <strong class="review-decision">' . $decision_options[$decision] . '</strong>. ';
+                        $custom_message .= 'assigned a <strong class="review-decision">Requirement</strong>. ';
                       }
                       elseif ($decision === MFCS_REVIEW_DECISION_CANCELLED) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
@@ -333,6 +341,14 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
                       elseif ($decision === MFCS_REVIEW_DECISION_AMENDMENT) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
                         $custom_message .= ' the request was <strong class="review-decision">' . "Amended" . '</strong>. ';
+                      }
+                      elseif ($decision === MFCS_REVIEW_DECISION_ISSUES) {
+                        $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
+                        $custom_message .= ' the reviewer has reported that they have <strong class="review-decision">' . "Issues" . '</strong> with the request. ';
+                      }
+                      elseif ($decision === MFCS_REVIEW_DECISION_ISSUES_NONE) {
+                        $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
+                        $custom_message .= ' the reviewer has reported that they have <strong class="review-decision">' . "No Issues" . '</strong> with the request. ';
                       }
 
                       $processed_values[$value->user_id]['fields'][$group_name][$field_name][$key] = array(

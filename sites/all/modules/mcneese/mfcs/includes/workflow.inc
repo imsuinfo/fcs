@@ -554,57 +554,23 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
     $decision = (int) $decision;
   }
 
-  $reviewer_classifications = array();
-  $reviewer_classifications_all = array();
-  $reviewer_conditions = array(
-    'mr.user_id' => $user->uid,
-    'mr.request_classification' => $classification,
-    'mr.disabled' => 0,
-  );
-
-  $reviewers_returned = mfcs_get_reviewers($reviewer_conditions, array('join' => TRUE));
-  $reviewers = array();
-  if (isset($reviewers_returned['results']) && is_array($reviewers_returned['results'])) {
-    $reviewers = $reviewers_returned['results'];
-  }
-  unset($reviewers_returned);
-
-  foreach ($reviewers as $reviewer) {
-    if (is_string($reviewer->reviewer_classification)) {
-      $reviewer_classification = (int) $reviewer->reviewer_classification;
-    }
-    else {
-      $reviewer_classification = $reviewer->reviewer_classification;
-    }
-
-    $review_step = NULL;
-    if (isset($reviewer->review_step)) {
-      if (is_string($reviewer->review_step)) {
-        $review_step = (int) $reviewer->review_step;
-      }
-      else {
-        $review_step = $reviewer->review_step;
-      }
-    }
-
-    if ($review_step === $step) {
-      $reviewer_classifications[$reviewer_classification] = $reviewer_classification;
-    }
-
-    $reviewer_classifications_all[$reviewer_classification] = $reviewer_classification;
+  $reviewer_classifications = mfcs_get_reviewer_classifications($user->uid, $classification, $step);
+  if ($reviewer_classifications === FALSE) {
+    watchdog(MFCS_WATCHDOG_ID, "Failed to load reviewer classification for user id %user_id, classification id %classification, and step id %step. Cannot continue processing workflow changes.", array('%user_id' => $user->uid, '%classification_id' => $classification, '%step_id' => $step), WATCHDOG_CRITICAL);
+    return FALSE;
   }
 
   // the classifications in $as will be used if and only if those classifications are valid.
   if (!empty($as)) {
     $classifications_to_use = array();
     foreach ($as as $a) {
-      if (array_key_exists($a, $reviewer_classifications)) {
-        $classifications_to_use[$a] = $reviewer_classifications[$a];
+      if (array_key_exists($a, $reviewer_classifications['step'])) {
+        $classifications_to_use[$a] = $reviewer_classifications['step'][$a];
       }
     }
 
     if (!empty($classifications_to_use)) {
-      $reviewer_classifications = $classifications_to_use;
+      $reviewer_classifications['step'] = $classifications_to_use;
     }
     unset($classifications_to_use);
   }
@@ -618,13 +584,13 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
 
   $is_effective_venue_coordinator = FALSE;
   if ($venue_coordinator_id == $user->uid) {
-    $reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR] = MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR;
-    $reviewer_classifications_all[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR] = MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR;
+    $reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR] = MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR;
+    $reviewer_classifications['all'][MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR] = MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR;
     $is_effective_venue_coordinator = TRUE;
   }
   elseif (in_array($venue_coordinator_id, $venue_coordinator_ids)) {
-    $reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY] = MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY;
-    $reviewer_classifications_all[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY] = MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY;
+    $reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY] = MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY;
+    $reviewer_classifications['all'][MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY] = MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY;
     $is_effective_venue_coordinator = TRUE;
   }
 
@@ -789,11 +755,11 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
     'message' => $message,
   );
 
-  if ($step === MFCS_REVIEW_STEP_REVIEW || $step === MFCS_REVIEW_STEP_REQUIREMENTS) {
+  if ($step === MFCS_REVIEW_STEP_REVIEW || $step === MFCS_REVIEW_STEP_REQUIREMENTS || $step === MFCS_REVIEW_STEP_MAKE_DECISIONS) {
     // remove classifications not allowed in these steps, unless they are for a comment or a message for the review log.
     if ($decision !== MFCS_REVIEW_DECISION_COMMENT && $decision !== MFCS_REVIEW_DECISION_CANCELLED && $decision !== MFCS_REVIEW_DECISION_UNCANCELLED && $decision !== MFCS_REVIEW_DECISION_CLOSED && $decision !== MFCS_REVIEW_DECISION_REASSIGNED) {
-      unset($reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR]);
-      unset($reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY]);
+      unset($reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR]);
+      unset($reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY]);
     }
   }
 
@@ -801,7 +767,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
   $requirements_waived_save = FALSE;
   $requirements_university_save = FALSE;
   $requirements_other_save = FALSE;
-  if (($step === MFCS_REVIEW_STEP_VENUE_AVAILABLE || $is_quick_meeting) && ($decision === MFCS_REVIEW_DECISION_WAVE || $decision === MFCS_REVIEW_DECISION_REQUIREMENT)) {
+  if ((($step === MFCS_REVIEW_STEP_VENUE_AVAILABLE && $is_quick_meeting) || $step === MFCS_REVIEW_STEP_REQUIREMENTS) && ($decision === MFCS_REVIEW_DECISION_WAVE || $decision === MFCS_REVIEW_DECISION_REQUIREMENT)) {
     $requirements_waived = NULL;
     if (isset($extra['requirements']['waived'])) {
       $requirements_waived = $extra['requirements']['waived'];
@@ -906,70 +872,39 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
     }
   }
 
+  $perform_manager_classification_check = FALSE;
   if (($decision === MFCS_REVIEW_DECISION_WAVE || $decision === MFCS_REVIEW_DECISION_REQUIREMENT) && ($step === MFCS_REVIEW_STEP_VENUE_AVAILABLE || $step === MFCS_REVIEW_STEP_REVIEW || $step === MFCS_REVIEW_STEP_REQUIREMENTS || $step === MFCS_REVIEW_STEP_MAKE_DECISIONS || $step === MFCS_REVIEW_STEP_COMPLETED)) {
+    $perform_manager_classification_check = TRUE;
     $uses = array();
     $uses_as_manager = array();
 
-    if ($step === MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
-      if ($type !== MFCS_REQUEST_TYPE_QUICK_MEETING) {
-        if ($is_effective_venue_coordinator) {
-          $uses['facilities'] = MFCS_REVIEWER_CLASSIFICATION_FACILITIES;
-          $uses['equipment'] = MFCS_REVIEWER_CLASSIFICATION_FACILITIES; // @fixme: create an equipment classification
-        }
-        elseif ($manager) {
-          $uses['facilities'] = MFCS_REVIEWER_CLASSIFICATION_FACILITIES;
-          $uses['equipment'] = MFCS_REVIEWER_CLASSIFICATION_FACILITIES; // @fixme: create an equipment classification
+    $uses['facilities'] = MFCS_REVIEWER_CLASSIFICATION_FACILITIES;
+    $uses['equipment'] = MFCS_REVIEWER_CLASSIFICATION_FACILITIES;
+    $uses['custodial'] = MFCS_REVIEWER_CLASSIFICATION_CUSTODIAL;
+    $uses['maintenance'] = MFCS_REVIEWER_CLASSIFICATION_MAINTENANCE;
+    $uses['grounds'] = MFCS_REVIEWER_CLASSIFICATION_FACILITIES; // @fixme: create a grounds classification
+    $uses['security'] = MFCS_REVIEWER_CLASSIFICATION_SECURITY;
 
-          $uses_as_manager['facilities'] = MFCS_REVIEWER_CLASSIFICATION_FACILITIES;
-          $uses_as_manager['equipment'] = MFCS_REVIEWER_CLASSIFICATION_FACILITIES; // @fixme: create an equipment classification
-        }
-      }
-    }
-    elseif ($step === MFCS_REVIEW_STEP_REVIEW) {
-      if ($manager) {
-        $uses['custodial'] = MFCS_REVIEWER_CLASSIFICATION_CUSTODIAL;
-        $uses['maintenance'] = MFCS_REVIEWER_CLASSIFICATION_MAINTENANCE;
-        $uses['grounds'] = MFCS_REVIEWER_CLASSIFICATION_FACILITIES; // @fixme: create a grounds classification
-        $uses['security'] = MFCS_REVIEWER_CLASSIFICATION_SECURITY;
-
-        $uses_as_manager['custodial'] = MFCS_REVIEWER_CLASSIFICATION_CUSTODIAL;
-        $uses_as_manager['maintenance'] = MFCS_REVIEWER_CLASSIFICATION_MAINTENANCE;
-        $uses_as_manager['grounds'] = MFCS_REVIEWER_CLASSIFICATION_FACILITIES; // @fixme: create a grounds classification
-        $uses_as_manager['security'] = MFCS_REVIEWER_CLASSIFICATION_SECURITY;
-      }
-
-      if (isset($reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_FACILITIES_CUSTODIAL]) || isset($reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_CUSTODIAL])) {
-        $uses['custodial'] = MFCS_REVIEWER_CLASSIFICATION_CUSTODIAL;
-        unset($uses_as_manager['custodial']);
-      }
-
-      if (isset($reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_MAINTENANCE])) {
-        $uses['maintenance'] = MFCS_REVIEWER_CLASSIFICATION_MAINTENANCE;
-        unset($uses_as_manager['maintenance']);
-      }
-
-      if (isset($reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_FACILITIES])) {
-        $uses['grounds'] = MFCS_REVIEWER_CLASSIFICATION_FACILITIES; // @fixme: create an grounds classification
-        unset($uses_as_manager['grounds']);
-      }
-
-      if (isset($reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_SECURITY])) {
-        $uses['security'] = MFCS_REVIEWER_CLASSIFICATION_SECURITY;
-        unset($uses_as_manager['security']);
-      }
+    if ($manager) {
+      $uses_as_manager['facilities'] = MFCS_REVIEWER_CLASSIFICATION_FACILITIES;
+      $uses_as_manager['equipment'] = MFCS_REVIEWER_CLASSIFICATION_FACILITIES;
+      $uses_as_manager['custodial'] = MFCS_REVIEWER_CLASSIFICATION_CUSTODIAL;
+      $uses_as_manager['maintenance'] = MFCS_REVIEWER_CLASSIFICATION_MAINTENANCE;
+      $uses_as_manager['grounds'] = MFCS_REVIEWER_CLASSIFICATION_FACILITIES; // @fixme: create a grounds classification
+      $uses_as_manager['security'] = MFCS_REVIEWER_CLASSIFICATION_SECURITY;
     }
 
-    if (isset($reviewer_classifications_all[MFCS_REVIEWER_CLASSIFICATION_PURCHASING])) {
-      if ($step === MFCS_REVIEW_STEP_REVIEW) {
+
+    if (isset($reviewer_classifications['all'][MFCS_REVIEWER_CLASSIFICATION_PURCHASING])) {
+      if ($step === MFCS_REVIEW_STEP_REQUIREMENTS) {
         $insurance_requirements = TRUE;
       }
       else {
         $insurance_provided_exception = TRUE;
-        $reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_PURCHASING] = MFCS_REVIEWER_CLASSIFICATION_PURCHASING;
       }
     }
     elseif ($manager) {
-      if ($step === MFCS_REVIEW_STEP_REVIEW) {
+      if ($step === MFCS_REVIEW_STEP_REQUIREMENTS) {
         $insurance_requirements = TRUE;
       }
       else {
@@ -988,16 +923,10 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
 
     foreach ($uses as $use => $use_id) {
       if (!is_null($use_id) && (!isset($extra['requirements']) || !array_key_exists($use, $extra['requirements']))) {
-        unset($uses_as_manager[$use]);
 
         // @fixme: at the moment, handle the duplicate cases, which will be removed once the duplicates are made distinct.
-        if ($use == 'facilities' || $use == 'equipment' || $use == 'grounds') {
-          if (!isset($uses_as_manager['facilities']) && !isset($uses_as_manager['equipment']) && !isset($uses_as_manager['grounds'])) {
-            unset($reviewer_classifications[$use_id]);
-          }
-        }
-        else {
-          unset($reviewer_classifications[$use_id]);
+        if ($use != 'facilities' && $use != 'equipment' && $use != 'grounds') {
+          unset($reviewer_classifications['step'][$use_id]);
         }
 
         if (!($requirements_university_save && $requirements_waived) && !($requirements_university_save && $requirements_university)) {
@@ -1080,16 +1009,6 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
       }
       unset($use_column);
       unset($requirements);
-    }
-
-    if ($manager && !empty($uses_as_manager)) {
-      if (count($uses_as_manager) == count($uses)) {
-        $reviewer_classifications = array();
-        $reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_MANAGER] = MFCS_REVIEWER_CLASSIFICATION_MANAGER;
-      }
-      else {
-        $reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_MANAGER] = MFCS_REVIEWER_CLASSIFICATION_MANAGER;
-      }
     }
 
     if ($insurance_requirements) {
@@ -1220,6 +1139,43 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
       }
     }
   }
+  elseif (($step === MFCS_REVIEW_STEP_REVIEW || $step === MFCS_REVIEW_STEP_REQUIREMENTS) && ($decision == MFCS_REVIEW_DECISION_ISSUES || $decision == MFCS_REVIEW_DECISION_ISSUES_NONE)) {
+    $perform_manager_classification_check = TRUE;
+  }
+
+  if ($perform_manager_classification_check && $manager) {
+    // remove all reviewer classifications the current reviewer already reviewed as.
+    try {
+      if (!empty($reviewer_classifications['step'])) {
+        $reviewer_classifications_copy = $reviewer_classifications['step'];
+        foreach ($reviewer_classifications_copy as $reviewer_classification) {
+          $query = db_select('mfcs_reviewed', 'mr');
+          $query->addField('mr', 'classification', 'classification');
+          $query->condition('request_id', $request_id);
+          $query->condition('classification', $reviewer_classification);
+          $query->countQuery();
+          $result = $query->execute()->fetchField();
+
+          if ($result != 0) {
+            unset($reviewer_classifications['step'][$reviewer_classification]);
+            unset($uses_as_manager[array_search($reviewer_classification, $uses_as_manager)]);
+          }
+          unset($result);
+        }
+        unset($reviewer_classification);
+        unset($reviewer_classifications_copy);
+      }
+    }
+    catch (Exception $ex) {
+      cf_error::on_query_execution($ex);
+
+      return FALSE;
+    }
+
+    if (empty($reviewer_classifications['step'])) {
+      $reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_MANAGER] = MFCS_REVIEWER_CLASSIFICATION_MANAGER;
+    }
+  }
 
   $failure = FALSE;
   $transaction = db_transaction();
@@ -1241,7 +1197,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
     $query->fields($mfcs_field_review_review);
     $review_id = $query->execute();
 
-    foreach ($reviewer_classifications as $reviewer_classification) {
+    foreach ($reviewer_classifications['step'] as $reviewer_classification) {
       $mfcs_review_classifications = array(
         'review_id' => $review_id,
         'classification' => $reviewer_classification,
@@ -1261,9 +1217,24 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
         $query->fields($mfcs_reviewed);
         $query->execute();
       }
+      elseif ($decision === MFCS_REVIEW_DECISION_AVAILABLE || $decision === MFCS_REVIEW_DECISION_UNAVAILABLE) {
+        $query = db_insert('mfcs_reviewed');
+        $query->fields($mfcs_reviewed);
+        $query->execute();
+      }
+      elseif ($decision === MFCS_REVIEW_DECISION_ISSUES || $decision === MFCS_REVIEW_DECISION_ISSUES_NONE) {
+        if ($reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_MANAGER || $reviewer_classification == MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR) {
+          // these classifications are not allowed here.
+          continue;
+        }
 
-      unset($mfcs_review_classifications);
+        $query = db_insert('mfcs_reviewed');
+        $query->fields($mfcs_reviewed);
+        $query->execute();
+      }
     }
+    unset($mfcs_review_classification);
+    unset($reviewer_classifications);
 
     if (($decision === MFCS_REVIEW_DECISION_WAVE || $decision === MFCS_REVIEW_DECISION_REQUIREMENT) && ($step === MFCS_REVIEW_STEP_VENUE_AVAILABLE || $step === MFCS_REVIEW_STEP_REVIEW  || $step === MFCS_REVIEW_STEP_REQUIREMENTS || $step === MFCS_REVIEW_STEP_MAKE_DECISIONS || $step === MFCS_REVIEW_STEP_COMPLETED)) {
       foreach ($mfcs_field_requirements as $use => $fields) {
@@ -1312,7 +1283,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
         $query->execute();
       }
     }
-    elseif ($step === MFCS_REVIEW_STEP_VENUE_AVAILABLE && ($decision === MFCS_REVIEW_DECISION_WAVE || $decision === MFCS_REVIEW_DECISION_REQUIREMENT)) {
+    elseif (($step === MFCS_REVIEW_STEP_VENUE_AVAILABLE || $step === MFCS_REVIEW_STEP_REQUIREMENTS) && ($decision === MFCS_REVIEW_DECISION_WAVE || $decision === MFCS_REVIEW_DECISION_REQUIREMENT)) {
       if ($requirements_other_save) {
         $query = db_insert('mfcs_field_requirements_other');
         $query->fields($mfcs_field_requirements['other']);
@@ -1410,24 +1381,56 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
 
   // handle steps that do not alter the workflow.
   if ($decision === MFCS_REVIEW_DECISION_COMMENT) {
-    $parameters = array();
-    $parameters['changed_by'] = $user->uid;
-    $parameters['changed_type'] = 'reviewer';
-    $parameters['message'] = $message;
-    $parameters['comment'] = TRUE;
+    if (strlen($message) > 0) {
+      $parameters = array();
+      $parameters['changed_by'] = $user->uid;
+      $parameters['changed_type'] = 'reviewer';
+      $parameters['message'] = $message;
+      $parameters['comment'] = TRUE;
 
-    if ($send_email) {
-      mfcs_send_workflow_emails($request_id, $parameters);
+      if ($send_email) {
+        mfcs_send_workflow_emails($request_id, $parameters);
+      }
+    }
+    else {
+      return FALSE;
     }
 
     return TRUE;
   }
+  elseif ($decision === MFCS_REVIEW_DECISION_ISSUES) {
+    $parameters = array();
+    $parameters['changed_by'] = $user->uid;
+    $parameters['changed_type'] = 'reviewer';
+    $parameters['message'] = $message;
+    $parameters['issue'] = TRUE;
+
+    if ($send_email) {
+      mfcs_send_workflow_emails($request_id, $parameters);
+    }
+  }
   elseif ($decision === MFCS_REVIEW_DECISION_WAVE || $decision === MFCS_REVIEW_DECISION_CANCELLED || $decision === MFCS_REVIEW_DECISION_UNCANCELLED || $decision === MFCS_REVIEW_DECISION_CLOSED || ($decision === MFCS_REVIEW_DECISION_REQUIREMENT && !$insurance_provided_exception) || $decision === MFCS_REVIEW_DECISION_REASSIGNED) {
-    // do not send an e-mail and do not progress to the next step.
+    if ($decision === MFCS_REVIEW_DECISION_WAVE || $decision === MFCS_REVIEW_DECISION_REQUIREMENT) {
+      // if a comment is specified then send an e-mail as a comment.
+      if (strlen($message) > 0) {
+        $parameters = array();
+        $parameters['changed_by'] = $user->uid;
+        $parameters['changed_type'] = 'reviewer';
+        $parameters['message'] = $message;
+        $parameters['comment'] = TRUE;
+
+        if ($send_email) {
+          mfcs_send_workflow_emails($request_id, $parameters);
+        }
+      }
+    }
+
+    // do not send any further e-mails and do not progress to the next step.
     return TRUE;
   }
 
   // continue to next step only if at least 1 of each reviewer classification has submitted a reply.
+  $attach_message = '';
   if ($step === MFCS_REVIEW_STEP_REVIEW || $step === MFCS_REVIEW_STEP_REQUIREMENTS) {
     $decisions = mfcs_get_requests_current_review_decisions(array($request_id => $review_revision), $classification, $step);
 
@@ -1441,8 +1444,26 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
 
     // When FALSE, then there are not enough reviews to continue.
     if ($decisions[$request_id]['current'] < $decisions[$request_id]['total']) {
+      // if a comment is specified then send an e-mail as a comment, but not when issues are specified.
+      if (strlen($message) > 0 && $decision !== MFCS_REVIEW_DECISION_ISSUES) {
+        $parameters = array();
+        $parameters['changed_by'] = $user->uid;
+        $parameters['changed_type'] = 'reviewer';
+        $parameters['message'] = $message;
+        $parameters['comment'] = TRUE;
+
+        if ($send_email) {
+          mfcs_send_workflow_emails($request_id, $parameters);
+        }
+      }
+
       return TRUE;
     }
+
+    $attach_message = $message;
+  }
+  elseif ($step === MFCS_REVIEW_STEP_VENUE_AVAILABLE && ($decision === MFCS_REVIEW_DECISION_AVAILABLE || $decision === MFCS_REVIEW_DECISION_UNAVAILABLE)) {
+    $attach_message = $message;
   }
   elseif ($insurance_provided_exception) {
     // for all other steps, when insurance is provided, send an e-mail to alert reviewers that the insurance has been provided.
@@ -1458,8 +1479,20 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
 
     return TRUE;
   }
+  elseif (strlen($message) > 0) {
+    // if a comment is specified then send an e-mail as a comment.
+    $parameters = array();
+    $parameters['changed_by'] = $user->uid;
+    $parameters['changed_type'] = 'reviewer';
+    $parameters['message'] = $message;
+    $parameters['comment'] = TRUE;
 
-  mfcs_workflow_next_step($request_id, $type, $step, $decision, $message, $send_email);
+    if ($send_email) {
+      mfcs_send_workflow_emails($request_id, $parameters);
+    }
+  }
+
+  mfcs_workflow_next_step($request_id, $type, $step, $decision, $attach_message, $send_email);
 
   return TRUE;
 }
@@ -1527,7 +1560,7 @@ function mfcs_workflow_next_step($request_id, $type, $step, $decision, $message,
 
   // Venue Available
   if ($step === MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
-    if ($decision === MFCS_REVIEW_DECISION_APPROVE) {
+    if ($decision === MFCS_REVIEW_DECISION_AVAILABLE) {
       if ($type === MFCS_REQUEST_TYPE_QUICK_MEETING) {
         // quick meetings bypass the review process.
         $new_status = MFCS_REQUEST_STATUS_CLOSED_ACCEPTED;
@@ -1538,14 +1571,14 @@ function mfcs_workflow_next_step($request_id, $type, $step, $decision, $message,
         $new_step = MFCS_REVIEW_STEP_REVIEW;
       }
     }
-    elseif ($decision === MFCS_REVIEW_DECISION_DENY) {
+    elseif ($decision === MFCS_REVIEW_DECISION_UNAVAILABLE) {
       $new_status = MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE;
       $new_step = MFCS_REVIEW_STEP_COMPLETED;
     }
   }
   // Review Step
   elseif ($step === MFCS_REVIEW_STEP_REVIEW) {
-    if ($decision === MFCS_REVIEW_DECISION_DENY || $decision === MFCS_REVIEW_DECISION_APPROVE || $decision === MFCS_REVIEW_DECISION_MANAGER_RECHECK) {
+    if ($decision === MFCS_REVIEW_DECISION_ISSUES || $decision === MFCS_REVIEW_DECISION_ISSUES_NONE || $decision === MFCS_REVIEW_DECISION_MANAGER_RECHECK) {
       $changed_user = $system_user;
       $changed_by = $system_user->uid;
       $changed_type = 'system';
@@ -1554,16 +1587,13 @@ function mfcs_workflow_next_step($request_id, $type, $step, $decision, $message,
   }
   // Requirements Step
   elseif ($step === MFCS_REVIEW_STEP_REQUIREMENTS) {
-    if ($decision === MFCS_REVIEW_DECISION_DENY || $decision === MFCS_REVIEW_DECISION_APPROVE || $decision === MFCS_REVIEW_DECISION_WAVE || $decision === MFCS_REVIEW_DECISION_MANAGER_RECHECK) {
+    /*if ($decision === MFCS_REVIEW_DECISION_DENY || $decision === MFCS_REVIEW_DECISION_APPROVE || $decision === MFCS_REVIEW_DECISION_WAVE || $decision === MFCS_REVIEW_DECISION_MANAGER_RECHECK) {
       $changed_user = $system_user;
       $changed_by = $system_user->uid;
       $changed_type = 'system';
       $new_step = MFCS_REVIEW_STEP_MAKE_DECISIONS;
     }
-  }
-  // Venue Coordinator (Final) Review Step
-  elseif ($step === MFCS_REVIEW_STEP_MAKE_DECISIONS) {
-    $message = '';
+    */
 
     if ($decision === MFCS_REVIEW_DECISION_APPROVE) {
       $new_status = MFCS_REQUEST_STATUS_CLOSED_ACCEPTED;
@@ -1574,7 +1604,7 @@ function mfcs_workflow_next_step($request_id, $type, $step, $decision, $message,
       $new_step = MFCS_REVIEW_STEP_COMPLETED;
     }
 
-    $reviews = mfcs_get_latest_reviews($request_id, array(MFCS_REVIEW_STEP_REVIEW), array(MFCS_REVIEW_DECISION_APPROVE, MFCS_REVIEW_DECISION_DENY));
+    $reviews = mfcs_get_latest_reviews($request_id, array(MFCS_REVIEW_STEP_REVIEW), array(MFCS_REVIEW_DECISION_ISSUES, MFCS_REVIEW_DECISION_ISSUES_NONE));
 
     if (!empty($reviews)) {
       mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
@@ -1594,11 +1624,11 @@ function mfcs_workflow_next_step($request_id, $type, $step, $decision, $message,
           }
 
           $most_recent_decision = array_shift($reviewer_decisions);
-          if ($most_recent_decision->decision === MFCS_REVIEW_DECISION_APPROVE) {
-            $message .= "Approved";
+          if ($most_recent_decision->decision === MFCS_REVIEW_DECISION_ISSUES_NONE) {
+            $message .= "No Issues";
           }
           else {
-            $message .= "Denied";
+            $message .= "Issues";
           }
 
           $message .= " - " . $classification_options[$reviewer_classification] . "\n";
@@ -1634,7 +1664,7 @@ function mfcs_workflow_next_step($request_id, $type, $step, $decision, $message,
   elseif ($new_step === MFCS_REVIEW_STEP_REVIEW || $new_step === MFCS_REVIEW_STEP_REQUIREMENTS || $new_step === MFCS_REVIEW_STEP_MAKE_DECISIONS) {
     $parameters['step'] = $new_step;
   }
-  elseif ($new_step === MFCS_REVIEW_STEP_VENUE_AVAILABLE && $type === MFCS_REQUEST_TYPE_QUICK_MEETING && ($decision === MFCS_REVIEW_DECISION_APPROVE || $decision === MFCS_REVIEW_DECISION_DENY)) {
+  elseif ($new_step === MFCS_REVIEW_STEP_VENUE_AVAILABLE && $type === MFCS_REQUEST_TYPE_QUICK_MEETING && ($decision === MFCS_REVIEW_DECISION_AVAILABLE || $decision === MFCS_REVIEW_DECISION_UNAVAILABLE)) {
     $parameters['step'] = $new_step;
   }
   else {
@@ -1664,6 +1694,7 @@ function mfcs_workflow_next_step($request_id, $type, $step, $decision, $message,
  *   - new: A boolean representing whether or not this is new.
  *   - update: A boolean representing whether or not this is updated.
  *   - comment: A boolean representing whether or not this is a comment.
+ *   - issue: A boolean representing whether or not there is an issue.
  *   - cancelling: An array of individual dates cancelled or uncancelled, with
  *     two keys containg string values: 'content' and 'markup'.
  *   - cancelled: A boolean representing whether or not the request is
@@ -1787,6 +1818,15 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     $is_comment = $parameters['comment'];
     if (!is_bool($is_comment)) {
       cf_error::invalid_bool('parameters[comment]');
+      return FALSE;
+    }
+  }
+
+  $is_issue = FALSE;
+  if (array_key_exists('issue',  $parameters)) {
+    $is_issue = $parameters['issue'];
+    if (!is_bool($is_issue)) {
+      cf_error::invalid_bool('parameters[issue]');
       return FALSE;
     }
   }
@@ -2684,6 +2724,8 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       $email_params['content'] = "";
       $email_params['content'] .= "The request is ready to have its requirements approved or denied.\n";
       $email_params['content'] .= "\n";
+      $email_params['content'] .= "This is where the final decision needs to be made but only after all use fees and insurance fees are either specified or waived.\n";
+      $email_params['content'] .= "\n";
       $email_params['content'] .= $message . "\n";
       $email_params['content'] .= $standard_content;
       $email_params['markup'] = "";
@@ -2712,6 +2754,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
         }
       }
     }
+    /* No longer used as of ticket fcs-79.
     elseif ($request['top']['step'][0]->value == MFCS_REVIEW_STEP_MAKE_DECISIONS) {
       $email_params['title_suffix'] = "Reviewed";
       $email_params['content'] = "";
@@ -2741,10 +2784,56 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
         }
       }
     }
+    */
     else {
       // This is not a bug and there are no e-mails to send, just log and return.
       watchdog(MFCS_WATCHDOG_ID, "No e-mails to send during make decisions, review step = '%step' and review status = '%status' for request '%request_id'", array('%step' => $request['top']['step'][0]->value, '%status' => $request['top']['status'][0]->value, '%request_id' => $request_id), WATCHDOG_INFO);
       return TRUE;
+    }
+  }
+  elseif ($is_issue) {
+    $email_params['title_suffix'] = "Issue";
+    $email_params['content'] = "";
+    $email_params['content'] .= $changed_by_string . " has an issue with the request.\n";
+    $email_params['content'] .= "\n";
+
+    if (!empty($message)) {
+      $email_params['content'] .= $message . "\n";
+    }
+
+    $email_params['content'] .= $standard_content;
+    $email_params['markup'] = "";
+    $email_params['markup'] .= '<em>' . $changed_by_string . "</em> has an <em>issue</em> with the request.<br>\n";
+    $email_params['markup'] .= "<br>\n";
+
+    if (!empty($message)) {
+      $email_params['markup'] .= $message . "<br>\n";
+    }
+
+    $email_params['markup'] .= $standard_markup;
+
+    if (is_array($venue_coordinator)) {
+      $email_to[$venue_coordinator['email']] = $venue_coordinator['email'];
+    }
+
+    // also send e-mails to the venue coordinator proxies.
+    $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.user_id' => $venue_coordinator['user_id'], 'mpvc.disabled' => 0));
+    if (!empty($proxies_returned['results'])) {
+      foreach ($proxies_returned['results'] as $proxy_returned) {
+        $proxy = mfcs_load_basic_user_settings_by_user_id($proxy_returned->proxy_id);
+
+        if (is_array($proxy)) {
+          $email_to[$proxy['email']] = $proxy['email'];
+        }
+      }
+    }
+
+    foreach ($step_1_reviewers as $r) {
+      $email_to[$r->email] = $r->email;
+    }
+
+    foreach ($step_2_reviewers as $r) {
+      $email_to[$r->email] = $r->email;
     }
   }
   elseif ($is_comment) {

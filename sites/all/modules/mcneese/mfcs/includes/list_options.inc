@@ -556,29 +556,68 @@ function mfcs_get_reviewer_classification_list_options($option = NULL, $include_
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
+ * @param int $restriction
+ *   (optional) An integer representing a set of restrictions in which determines the available list options.
+ *   This option was added to address ticket fcs-79 without conflicting with existing behavior.
+ *   Its sole purpose is to be used during the review process.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_reviewer_decision_list_options($option = NULL) {
+function mfcs_get_reviewer_decision_list_options($option = NULL, $restriction = 0) {
   $options = array();
 
   if ($option == 'select' || $option == 'review_step') {
     $options[''] = "- Select -";
   }
 
-  $options_tree = taxonomy_get_tree(MFCS_VID_REQUEST_REVIEWER_DECISION, 0, NULL, TRUE);
-  foreach ($options_tree as $branch) {
-    $options[$branch->tid] = $branch->name;
+  if (!is_int($restriction) || $restriction < MFCS_RESTRICTION_DECISION_NONE || $restriction > MFCS_RESTRICTION_DECISION_COMMENT_ONLY) {
+    $restriction = MFCS_RESTRICTION_DECISION_NONE;
   }
 
-  // these options are hidden from the users.
-  if ($option == 'review_step') {
-    unset($options[MFCS_REVIEW_DECISION_AMENDMENT]);
-    unset($options[MFCS_REVIEW_DECISION_WAVE]);
-  }
+  if ($restriction == MFCS_RESTRICTION_DECISION_NONE) {
+    $options_tree = taxonomy_get_tree(MFCS_VID_REQUEST_REVIEWER_DECISION, 0, NULL, TRUE);
+    foreach ($options_tree as $branch) {
+      $options[$branch->tid] = $branch->name;
+    }
 
-  asort($options);
+    // these options are hidden from the users.
+    if ($option == 'review_step') {
+      unset($options[MFCS_REVIEW_DECISION_AMENDMENT]);
+      unset($options[MFCS_REVIEW_DECISION_WAVE]);
+    }
+
+    asort($options);
+  }
+  elseif ($restriction == MFCS_RESTRICTION_DECISION_REQUESTER) {
+    $options[MFCS_REVIEW_DECISION_COMMENT_ALL] = "Comment";
+  }
+  elseif ($restriction == MFCS_RESTRICTION_DECISION_VENUE_COORDINATOR) {
+    $options[MFCS_REVIEW_DECISION_AVAILABLE] = "Available";
+    $options[MFCS_REVIEW_DECISION_UNAVAILABLE] = "Unavailable";
+    $options[MFCS_REVIEW_DECISION_COMMENT] = "Comment";
+  }
+  elseif ($restriction == MFCS_RESTRICTION_DECISION_REVIEWER) {
+    $options[MFCS_REVIEW_DECISION_ISSUES] = "Issues";
+    $options[MFCS_REVIEW_DECISION_ISSUES_NONE] = "No Issues";
+    $options[MFCS_REVIEW_DECISION_COMMENT] = "Comment";
+  }
+  elseif ($restriction == MFCS_RESTRICTION_DECISION_APPROVER) {
+    $options[MFCS_REVIEW_DECISION_APPROVE] = "Approve";
+    $options[MFCS_REVIEW_DECISION_DENY] = "Deny";
+    #$options[MFCS_REVIEW_DECISION_WAVE] = "Wave";
+    $options[MFCS_REVIEW_DECISION_REQUIREMENT] = "Requirement";
+    $options[MFCS_REVIEW_DECISION_COMMENT] = "Comment";
+  }
+  elseif ($restriction == MFCS_RESTRICTION_DECISION_MANAGER) {
+    $options[MFCS_REVIEW_DECISION_COMMENT] = "Comment";
+  }
+  elseif ($restriction == MFCS_RESTRICTION_DECISION_ADMINISTER) {
+    $options[MFCS_REVIEW_DECISION_COMMENT] = "Comment";
+  }
+  elseif ($restriction == MFCS_RESTRICTION_DECISION_COMMENT_ONLY) {
+    $options[MFCS_REVIEW_DECISION_COMMENT] = "Comment";
+  }
 
   return $options;
 }

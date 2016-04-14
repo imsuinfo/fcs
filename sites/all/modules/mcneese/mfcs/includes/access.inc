@@ -1518,7 +1518,6 @@ function mfcs_page_request_access_operation_agreement(&$request_ids, &$processed
   if ($roles['manager'] || $roles['reviewer']) {
     $agreement_request_step = array(
       MFCS_REVIEW_STEP_COMPLETED,
-      MFCS_REVIEW_STEP_MAKE_DECISIONS,
       MFCS_REVIEW_STEP_REVIEW,
       MFCS_REVIEW_STEP_REQUIREMENTS,
     );

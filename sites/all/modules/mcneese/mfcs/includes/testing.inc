@@ -193,7 +193,7 @@ function mfcs_testing_cancel_request($request_id) {
  * @return int|bool
  *   Created request id on success, FALSE otherwise.
  */
-function mfcs_testing_review_request_venue_available($request_id, $decision = MFCS_REVIEW_DECISION_APPROVE, $requirement_options = array()) {
+function mfcs_testing_review_request_venue_available($request_id, $decision = MFCS_REVIEW_DECISION_AVAILABLE, $requirement_options = array()) {
   if (mfcs_testing_is_enabled() === FALSE) {
     return FALSE;
   }
@@ -204,7 +204,7 @@ function mfcs_testing_review_request_venue_available($request_id, $decision = MF
     return FALSE;
   }
 
-  if ($decision !== MFCS_REVIEW_DECISION_APPROVE && $decision !== MFCS_REVIEW_DECISION_DENY) {
+  if ($decision !== MFCS_REVIEW_DECISION_AVAILABLE && $decision !== MFCS_REVIEW_DECISION_UNAVAILABLE) {
     cf_error::invalid_integer('decision');
     return FALSE;
   }
@@ -290,7 +290,7 @@ function mfcs_testing_review_request_venue_available($request_id, $decision = MF
  * @return int|bool
  *   Created request id on success, FALSE otherwise.
  */
-function mfcs_testing_review_request_review($request_id, $decision = MFCS_REVIEW_DECISION_APPROVE) {
+function mfcs_testing_review_request_review($request_id, $decision = MFCS_REVIEW_DECISION_ISSUES_NONE) {
   if (mfcs_testing_is_enabled() === FALSE) {
     return FALSE;
   }
@@ -301,9 +301,17 @@ function mfcs_testing_review_request_review($request_id, $decision = MFCS_REVIEW
     return FALSE;
   }
 
-  if ($decision !== MFCS_REVIEW_DECISION_APPROVE && $decision !== MFCS_REVIEW_DECISION_DENY) {
-    cf_error::invalid_integer('decision');
-    return FALSE;
+  if ($request['top']['step'][0]->value == MFCS_REVIEW_STEP_REVIEW) {
+    if ($decision !== MFCS_REVIEW_DECISION_ISSUES_NONE && $decision !== MFCS_REVIEW_DECISION_ISSUES) {
+      cf_error::invalid_integer('decision');
+      return FALSE;
+    }
+  }
+  else {
+    if ($decision !== MFCS_REVIEW_DECISION_APPROVE && $decision !== MFCS_REVIEW_DECISION_DENY && $decision !== MFCS_REVIEW_DECISION_WAVE && $decision !== MFCS_REVIEW_DECISION_REQUIREMENT) {
+      cf_error::invalid_integer('decision');
+      return FALSE;
+    }
   }
 
   $conditions = array(
@@ -383,7 +391,7 @@ function mfcs_testing_review_request_review($request_id, $decision = MFCS_REVIEW
  * @return int|bool
  *   Created request id on success, FALSE otherwise.
  */
-function mfcs_testing_review_request_make_decisions($request_id, $decision = MFCS_REVIEW_DECISION_APPROVE) {
+function mfcs_testing_review_request_r($request_id, $decision = MFCS_REVIEW_DECISION_APPROVE) {
   if (mfcs_testing_is_enabled() === FALSE) {
     return FALSE;
   }
@@ -395,6 +403,73 @@ function mfcs_testing_review_request_make_decisions($request_id, $decision = MFC
   }
 
   if (empty($request['top']['step'][0]) || !is_object($request['top']['step'][0]) || $request['top']['step'][0]->value != MFCS_REVIEW_STEP_MAKE_DECISIONS) {
+    return FALSE;
+  }
+
+  if ($decision !== MFCS_REVIEW_DECISION_APPROVE && $decision !== MFCS_REVIEW_DECISION_DENY) {
+    cf_error::invalid_integer('decision');
+    return FALSE;
+  }
+
+  mfcs_include(MFCS_INCLUDE_REQUEST_VIEW);
+
+  global $user;
+
+  $original_user = $user;
+
+  try {
+    $id = 'mfcs_request_view_0_form';
+
+    $user = user_load($request['venue_coordinator']['user_id'][0]->value);
+
+    $state = array();
+    $state['build_info']['args'] = array($request_id, MFCS_VIEW_MODE_OPERATIONS);
+    $state['no_cache'] = TRUE;
+
+    $form = drupal_build_form($id, $state);
+
+    // force it to think the triggering element is the 'operations' submit button.
+    $state['triggering_element']['#id'] = 'request-review-operations-submit-submit';
+
+    $state['values']['review']['operations']['decision'] = $decision;
+    $state['values']['review']['operations']['message'] = "This has been auto-approved or auto-denied by the system for testing purposes.";
+
+    drupal_form_submit($id, $state);
+  }
+  catch (Exception $ex) {
+    $user = $original_user;
+    return FALSE;
+  }
+
+  $user = $original_user;
+  return TRUE;
+}
+
+/**
+ * Programmatically review the given request.
+ *
+ * This applies to requests in the Venue Available step.
+ *
+ * @param int $request_id
+ *   The request id.
+ * @param int $decision
+ *   The review decision to assign.
+ *
+ * @return int|bool
+ *   Created request id on success, FALSE otherwise.
+ */
+function mfcs_testing_review_request_make_decisions($request_id, $decision = MFCS_REVIEW_DECISION_APPROVE) {
+  if (mfcs_testing_is_enabled() === FALSE) {
+    return FALSE;
+  }
+
+  $request = mfcs_load_request_by_id($request_id);
+
+  if (empty($request['venue_coordinator']['user_id'][0]) || !is_object($request['venue_coordinator']['user_id'][0])) {
+    return FALSE;
+  }
+
+  if (empty($request['top']['step'][0]) || !is_object($request['top']['step'][0]) || $request['top']['step'][0]->value != MFCS_REVIEW_STEP_REQUIREMENTS) {
     return FALSE;
   }
 
