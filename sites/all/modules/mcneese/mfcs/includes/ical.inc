@@ -231,40 +231,40 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
     $request_dates_cleanup_begin = 'This location is reserved for the ' . $dates_categories_options[MFCS_REQUEST_DATES_CATEGORY_CLEANUP] . ' takes place on the following dates and times:' . "\n";
     $request_dates_cleanup_end = "\n";
 
-    $request_description_markup_begin = '<html>' . "\n";
-    $request_description_markup_begin .= '<body>' . "\n";
+    $request_description_markup_begin = '<html>';
+    $request_description_markup_begin .= '<body>';
 
     if ($request->status === MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED) {
-      $request_description_markup_begin .= '<strong>This reservation is cancelled</strong>.' . "<br>\n<br>\n";
+      $request_description_markup_begin .= '<strong>This reservation is cancelled</strong>.' . "<br><br>";
     }
 
-    $request_description_markup_begin .= 'The reserved location is: ' . "<br>\n";
-    $request_description_markup_begin .= '<ul>' . "\n";
-    $request_description_markup_begin .= '  <li>' . $building_options[$request->building] . ' ' . $room_options[$request->room] . "</li>\n";
-    $request_description_markup_begin .= '</ul>' . "\n";
+    $request_description_markup_begin .= 'The reserved location is: ' . "<br>";
+    $request_description_markup_begin .= '<ul>';
+    $request_description_markup_begin .= '  <li>' . $building_options[$request->building] . ' ' . $room_options[$request->room] . "</li>";
+    $request_description_markup_begin .= '</ul>';
 
     $request_description_markup_end = '';
-    $request_description_markup_end .= "<br>\n";
-    $request_description_markup_end .= '<em>The Request ID is: ' . $request->id . ".</em><br>\n";
-    $request_description_markup_end .= "<br>\n";
-    $request_description_markup_end .= 'You may view the request at: <a href="' . $request_url . '">' . $request_url . "</a>.<br>\n";
-    $request_description_markup_end .= '</body>' . "\n";
-    $request_description_markup_end .= '</html>' . "\n";
+    $request_description_markup_end .= "<br>";
+    $request_description_markup_end .= '<em>The Request ID is: ' . $request->id . ".</em><br>";
+    $request_description_markup_end .= "<br>";
+    $request_description_markup_end .= 'You may view the request at: <a href="' . $request_url . '">' . $request_url . "</a>.<br>";
+    $request_description_markup_end .= '</body>';
+    $request_description_markup_end .= '</html>';
 
-    $request_dates_setup_markup_begin = 'The <strong>' . $dates_categories_options[MFCS_REQUEST_DATES_CATEGORY_SETUP] . '</strong> takes place on the following dates and times:' . "\n";
-    $request_dates_setup_markup_begin .= '<ul>' . "\n";
+    $request_dates_setup_markup_begin = 'The <strong>' . $dates_categories_options[MFCS_REQUEST_DATES_CATEGORY_SETUP] . '</strong> takes place on the following dates and times:';
+    $request_dates_setup_markup_begin .= '<ul>';
     $request_dates_setup_markup_end = '';
-    $request_dates_setup_markup_end .= '</ul>' . "\n";
+    $request_dates_setup_markup_end .= '</ul>';
 
-    $request_dates_actual_markup_begin = 'The <strong>' . $dates_categories_options[MFCS_REQUEST_DATES_CATEGORY_ACTUAL] . '</strong> takes place on the following dates and times:' . "\n";
-    $request_dates_actual_markup_begin .= '<ul>' . "\n";
+    $request_dates_actual_markup_begin = 'The <strong>' . $dates_categories_options[MFCS_REQUEST_DATES_CATEGORY_ACTUAL] . '</strong> takes place on the following dates and times:';
+    $request_dates_actual_markup_begin .= '<ul>';
     $request_dates_actual_markup_end = '';
-    $request_dates_actual_markup_end .= '</ul>' . "\n";
+    $request_dates_actual_markup_end .= '</ul>';
 
-    $request_dates_cleanup_markup_begin = 'The <strong>' . $dates_categories_options[MFCS_REQUEST_DATES_CATEGORY_CLEANUP] . '</strong> takes place on the following dates and times:' . "\n";
-    $request_dates_cleanup_markup_begin .= '<ul>' . "\n";
+    $request_dates_cleanup_markup_begin = 'The <strong>' . $dates_categories_options[MFCS_REQUEST_DATES_CATEGORY_CLEANUP] . '</strong> takes place on the following dates and times:';
+    $request_dates_cleanup_markup_begin .= '<ul>';
     $request_dates_cleanup_markup_end = '';
-    $request_dates_cleanup_markup_end .= '</ul>' . "\n";
+    $request_dates_cleanup_markup_end .= '</ul>';
 
 
     // preprocess the dates.
@@ -312,15 +312,15 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
 
       if ($request->category[$delta] == MFCS_REQUEST_DATES_CATEGORY_SETUP) {
         $dates_setup_event_text .= '  - ' . $ical_date['text'] . "\n";
-        $dates_setup_event_markup .= '<li>' . $ical_date['text'] . '</li>' . "\n";
+        $dates_setup_event_markup .= '<li>' . $ical_date['text'] . '</li>';
       }
       elseif ($request->category[$delta] == MFCS_REQUEST_DATES_CATEGORY_ACTUAL) {
         $dates_actual_event_text .= '  - ' . $ical_date['text'] . "\n";
-        $dates_actual_event_markup .= '<li>' . $ical_date['text'] . '</li>' . "\n";
+        $dates_actual_event_markup .= '<li>' . $ical_date['text'] . '</li>';
       }
       elseif ($request->category[$delta] == MFCS_REQUEST_DATES_CATEGORY_CLEANUP) {
         $dates_cleanup_event_text .= '  - ' . $ical_date['text'] . "\n";
-        $dates_cleanup_event_markup .= '<li>' . $ical_date['text'] . '</li>' . "\n";
+        $dates_cleanup_event_markup .= '<li>' . $ical_date['text'] . '</li>';
       }
 
       $ical_dates[$delta][$date] = $ical_date;

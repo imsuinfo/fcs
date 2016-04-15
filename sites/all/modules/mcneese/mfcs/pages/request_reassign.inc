@@ -168,18 +168,18 @@ function mfcs_request_reassign_0_form($form, &$form_state, $request_id) {
   if ($old_coordinator_id == $new_coordinator_id) {
     $form['message']['#markup'] .= '<h3>Unable to Re-Assign Venue Coordinator!</h3> ';
     $form['message']['#markup'] .= '<div>';
-    $form['message']['#markup'] .= 'The new coordinator id would be the same as the old one. Either the Banner Database Cache is out of sync or the Venue Coordinator for this Room has not been updated in the Banner Database.' . "<br>\n";
-    $form['message']['#markup'] .= "<br>\n";
-    $form['message']['#markup'] .= "This request is currently assigned to <span title=\"User ID: " . $old_coordinator_id . "\"><strong>" . $old_coordinator_name . "</strong> <sup>[id: " . $old_coordinator_id . "]</sup></span>." . "<br>\n";
-    $form['message']['#markup'] .= "<br>\n";
+    $form['message']['#markup'] .= 'The new coordinator id would be the same as the old one. Either the Banner Database Cache is out of sync or the Venue Coordinator for this Room has not been updated in the Banner Database.' . "<br>";
+    $form['message']['#markup'] .= "<br>";
+    $form['message']['#markup'] .= "This request is currently assigned to <span title=\"User ID: " . $old_coordinator_id . "\"><strong>" . $old_coordinator_name . "</strong> <sup>[id: " . $old_coordinator_id . "]</sup></span>." . "<br>";
+    $form['message']['#markup'] .= "<br>";
   }
   else {
     $form['message']['#markup'] .= '<h3>Are you sure you want to re-assign the request?</h3> ';
     $form['message']['#markup'] .= '<div>';
-    $form['message']['#markup'] .= 'If this request has an out dated Venue Coordinator, then it will be re-assigned to the correct, updated, Venue Coordinator. ' . "<br>\n";
-    $form['message']['#markup'] .= "<br>\n";
-    $form['message']['#markup'] .= "This request would be re-assigned from <span title=\"User ID: " . $old_coordinator_id . "\"><strong>" . $old_coordinator_name . "</strong> <sup>[id: " . $old_coordinator_id . "]</sup></span> to <span title=\"User ID: " . $new_coordinator_id . "\"><strong>" . $new_coordinator_name . "</strong> <sup>[id: " . $new_coordinator_id . "]</sup></span>.<br>\n";
-    $form['message']['#markup'] .= "<br>\n";
+    $form['message']['#markup'] .= 'If this request has an out dated Venue Coordinator, then it will be re-assigned to the correct, updated, Venue Coordinator. ' . "<br>";
+    $form['message']['#markup'] .= "<br>";
+    $form['message']['#markup'] .= "This request would be re-assigned from <span title=\"User ID: " . $old_coordinator_id . "\"><strong>" . $old_coordinator_name . "</strong> <sup>[id: " . $old_coordinator_id . "]</sup></span> to <span title=\"User ID: " . $new_coordinator_id . "\"><strong>" . $new_coordinator_name . "</strong> <sup>[id: " . $new_coordinator_id . "]</sup></span>.<br>";
+    $form['message']['#markup'] .= "<br>";
   }
 
   $form['message']['#markup'] .= 'Are you certain you want to re-assign? ';

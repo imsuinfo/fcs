@@ -244,14 +244,14 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
 
 
   // calendar links
-  $markup .= '<div id="mfcs-links_and_filters" class="links_and_filters-wrapper no-print">' . "\n";
+  $markup .= '<div id="mfcs-links_and_filters" class="links_and_filters-wrapper no-print">';
 
-  $markup .= '<div class="links_and_filters links_and_filters-group group-1">' . "\n";
+  $markup .= '<div class="links_and_filters links_and_filters-group group-1">';
   $markup .= mfcs_build_calendar_ical_links_markup($month_start, TRUE, TRUE, FALSE);
-  $markup .= '</div>' . "\n"; // filter-group-1
+  $markup .= '</div>'; // filter-group-1
 
   $markup .= mfcs_build_determined_filters_markup();
-  $markup .= '</div>' . "\n"; // #mfcs-links_and_filters
+  $markup .= '</div>'; // #mfcs-links_and_filters
 
 
   // end wrapper (calendar-month-wrapper)
@@ -532,9 +532,9 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
 
 
   // begin page links (Range)
-  $markup .= '<nav class="calendar-day calendar-range_links">' . "\n";
-  $markup .= '<header class="calendar-range_links-header element-invisible"><hgroup><h2 class="calendar-range_links-header-2">Page Selection</h2></hgroup></header>' . "\n";
-  $markup .= '<ul class="calendar-day calendar-range_links-pages">' . "\n";
+  $markup .= '<nav class="calendar-day calendar-range_links">';
+  $markup .= '<header class="calendar-range_links-header element-invisible"><hgroup><h2 class="calendar-range_links-header-2">Page Selection</h2></hgroup></header>';
+  $markup .= '<ul class="calendar-day calendar-range_links-pages">';
 
   $slots_page = 0;
   $slots_count = 0;
@@ -544,10 +544,10 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
 
     $class_active_page = '';
     if ($slots_page == $page_number) {
-      $markup .= '<li class="calendar-range_links-page page-' . $slots_page . '"><div class="calendar-range_links-page-link page-' . $slots_page . ' current_page" title="Currently Viewing Requests on Page ' . ($slots_page + 1) . '">Page #' . ($slots_page + 1) . '</div></li>' . "\n";
+      $markup .= '<li class="calendar-range_links-page page-' . $slots_page . '"><div class="calendar-range_links-page-link page-' . $slots_page . ' current_page" title="Currently Viewing Requests on Page ' . ($slots_page + 1) . '">Page #' . ($slots_page + 1) . '</div></li>';
     }
     else {
-      $markup .= '<li class="calendar-range_links-page page-' . $slots_page . '"><a href="' . $page_url . '" class="calendar-range_links-page-link page-' . $slots_page . '" title="View Requests on Page ' . ($slots_page + 1) . '">Page #' . ($slots_page + 1) . '</a></li>' . "\n";
+      $markup .= '<li class="calendar-range_links-page page-' . $slots_page . '"><a href="' . $page_url . '" class="calendar-range_links-page-link page-' . $slots_page . '" title="View Requests on Page ' . ($slots_page + 1) . '">Page #' . ($slots_page + 1) . '</a></li>';
     }
 
     $slots_count += $slots_per_page;
@@ -558,7 +558,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
   $page_url = $url_base_day . '/' . date('Y', $last_day) . '/' . strtolower(date('F', $last_day)) . '/' . date('d', $day_start) . '/';
 
   // end page links (Range)
-  $markup .= '</ul></nav>' . "\n";
+  $markup .= '</ul></nav>';
 
 
   // begin wrappers (Range)
@@ -902,13 +902,13 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
 
 
   // calendar links
-  $markup .= '<div id="mfcs-links_and_filters" class="links_and_filters-wrapper no-print">' . "\n";
-  $markup .= '<div class="links_and_filters links_and_filters-group group-1">' . "\n";
+  $markup .= '<div id="mfcs-links_and_filters" class="links_and_filters-wrapper no-print">';
+  $markup .= '<div class="links_and_filters links_and_filters-group group-1">';
   $markup .= mfcs_build_calendar_ical_links_markup($day_start);
-  $markup .= '</div>' . "\n";
+  $markup .= '</div>';
 
   $markup .= mfcs_build_determined_filters_markup();
-  $markup .= '</div>' . "\n"; // #mfcs-links_and_filters
+  $markup .= '</div>'; // #mfcs-links_and_filters
 
 
   // end wrappers (main)
@@ -980,9 +980,9 @@ function mfcs_build_calendar_ical_links_markup($date_start, $year = TRUE, $month
     $id = ' id="' . $id . '"';
   }
 
-  $markup = '<div' . $id . ' class="links_and_filters ical">' . "\n";
-  $markup .= '<h3 class="links_and_filters-title ical">iCal Download Options</h3>' . "\n";
-  $markup .= '<ul class="links_and_filters-list ical">' . "\n";
+  $markup = '<div' . $id . ' class="links_and_filters ical">';
+  $markup .= '<h3 class="links_and_filters-title ical">iCal Download Options</h3>';
+  $markup .= '<ul class="links_and_filters-list ical">';
 
   if ($year) {
     $year = date('Y', $date_start);
@@ -996,23 +996,23 @@ function mfcs_build_calendar_ical_links_markup($date_start, $year = TRUE, $month
         $markup .= '<li class="links_and_filters-list-item item-day ical">';
         $markup .= '<div class="links_and_filters-list-item-label item-day item-label ical">Day:</div> ';
         $markup .= '<a href="' . $base_path . 'requests/ical-0/day/' . $year . '/' . $month . '/' . $day . $url_arguments . '" title="Download iCal for ' . $month . ' ' . $day . ', ' . $year . '" class="links_and_filters-list-item-link item-day ical item-link">' . $month . ' ' . $day . ', ' . $year . '</a>';
-        $markup .= '</li>' . "\n";
+        $markup .= '</li>';
       }
 
       $markup .= '<li class="links_and_filters-list-item item-month ical">';
       $markup .= '<div class="links_and_filters-list-item-label item-month item-label ical">Month:</div> ';
       $markup .= '<a href="' . $base_path . 'requests/ical-0/month/' . $year . '/' . $month . $url_arguments . '" title="Download iCal for the month of ' . $month . ' ' . $year . '" class="links_and_filters-list-item-link item-month ical item-link">' . $month . ' ' . $year . '</a>';
-      $markup .= '</li>' . "\n";
+      $markup .= '</li>';
     }
 
     $markup .= '<li class="links_and_filters-list-item item-year ical">';
     $markup .= '<div class="links_and_filters-list-item-label item-year item-label ical">Year:</div> ';
     $markup .= '<a href="' . $base_path . 'requests/ical-0/year/' . $year . $url_arguments . '" title="Download iCal for the year ' . $year . '" class="links_and_filters-list-item-link item-year ical item-link">' . $year . '</a>';
-    $markup .= '</li>' . "\n";
+    $markup .= '</li>';
   }
 
-  $markup .= '</ul>' . "\n";
-  $markup .= '</div>' . "\n";
+  $markup .= '</ul>';
+  $markup .= '</div>';
 
   return $markup;
 }
@@ -1069,10 +1069,10 @@ function mfcs_build_determined_filters_markup($id = NULL) {
 
 
   // classifications
-  $markup = '<div class="links_and_filters links_and_filters-group group-2">' . "\n";
-  $markup .= '<div' . $id . ' class="links_and_filters filter_classifications">' . "\n";
-  $markup .= '<h3 class="links_and_filters-title filter_classifications">Filter by Classification</h3>' . "\n";
-  $markup .= '  <ul class="links_and_filters-list filter_classifications">' . "\n";
+  $markup = '<div class="links_and_filters links_and_filters-group group-2">';
+  $markup .= '<div' . $id . ' class="links_and_filters filter_classifications">';
+  $markup .= '<h3 class="links_and_filters-title filter_classifications">Filter by Classification</h3>';
+  $markup .= '  <ul class="links_and_filters-list filter_classifications">';
 
   foreach ($request_classification_options as $classification_id => $classification) {
     $current_get = array();
@@ -1158,19 +1158,19 @@ function mfcs_build_determined_filters_markup($id = NULL) {
       $link_cg .= $url_arguments_remaining;
     }
 
-    $markup .= '<li' . $id . ' class="links_and_filters-list-item item-' . $classification_id . ' filter_classifications">' . "\n";
-    $markup .= '<a href="' . $link_cg . '" class="links_and_filters-list-item-link item-' . $classification_id . ' item-link ' . $link_action_css . ' filter_classifications" title="' . $link_action_text . $classification . '">' . $link_action_text . $classification . '</a>' . "\n";
-    $markup .= '</li>' . "\n";
+    $markup .= '<li' . $id . ' class="links_and_filters-list-item item-' . $classification_id . ' filter_classifications">';
+    $markup .= '<a href="' . $link_cg . '" class="links_and_filters-list-item-link item-' . $classification_id . ' item-link ' . $link_action_css . ' filter_classifications" title="' . $link_action_text . $classification . '">' . $link_action_text . $classification . '</a>';
+    $markup .= '</li>';
   }
 
-  $markup .= '</ul>' . "\n";
-  $markup .= '</div>' . "\n";
+  $markup .= '</ul>';
+  $markup .= '</div>';
 
 
   // types
-  $markup .= '<div' . $id . ' class="links_and_filters filter_types">' . "\n";
-  $markup .= '<h3 class="links_and_filters-title filter_types">Filter by Type</h3>' . "\n";
-  $markup .= '  <ul class="links_and_filters-list filter_types">' . "\n";
+  $markup .= '<div' . $id . ' class="links_and_filters filter_types">';
+  $markup .= '<h3 class="links_and_filters-title filter_types">Filter by Type</h3>';
+  $markup .= '  <ul class="links_and_filters-list filter_types">';
 
   foreach ($request_type_options as $type_id => $type) {
     $current_get = array();
@@ -1256,22 +1256,22 @@ function mfcs_build_determined_filters_markup($id = NULL) {
       $link_cg .= $url_arguments_remaining;
     }
 
-    $markup .= '<li' . $id . ' class="links_and_filters-list-item item-' . $type_id . ' filter_types">' . "\n";
-    $markup .= '<a href="' . $link_cg . '" class="links_and_filters-list-item-link item-' . $type_id . ' item-link ' . $link_action_css . ' filter_types" title="' . $link_action_text . $type . '">' . $link_action_text . $type . '</a>' . "\n";
-    $markup .= '</li>' . "\n";
+    $markup .= '<li' . $id . ' class="links_and_filters-list-item item-' . $type_id . ' filter_types">';
+    $markup .= '<a href="' . $link_cg . '" class="links_and_filters-list-item-link item-' . $type_id . ' item-link ' . $link_action_css . ' filter_types" title="' . $link_action_text . $type . '">' . $link_action_text . $type . '</a>';
+    $markup .= '</li>';
   }
 
-  $markup .= '</ul>' . "\n";
-  $markup .= '</div>' . "\n";
+  $markup .= '</ul>';
+  $markup .= '</div>';
 
-  $markup .= '</div>' . "\n"; // links_and_filters-group group-2
+  $markup .= '</div>'; // links_and_filters-group group-2
 
 
   // buildings
-  $markup .= '<div class="links_and_filters links_and_filters-group group-3">' . "\n";
-  $markup .= '<div' . $id . ' class="links_and_filters filter_buildings">' . "\n";
-  $markup .= '<h3 class="links_and_filters-title filter_buildings">Filter by Building</h3>' . "\n";
-  $markup .= '  <ul class="links_and_filters-list filter_buildings">' . "\n";
+  $markup .= '<div class="links_and_filters links_and_filters-group group-3">';
+  $markup .= '<div' . $id . ' class="links_and_filters filter_buildings">';
+  $markup .= '<h3 class="links_and_filters-title filter_buildings">Filter by Building</h3>';
+  $markup .= '  <ul class="links_and_filters-list filter_buildings">';
 
   foreach ($building_list_options as $building_id => $building) {
     $current_get = array();
@@ -1357,15 +1357,15 @@ function mfcs_build_determined_filters_markup($id = NULL) {
       $link_cg .= $url_arguments_remaining;
     }
 
-    $markup .= '<li' . $id . ' class="links_and_filters-list-item item-' . $type_id . ' filter_types">' . "\n";
-    $markup .= '<a href="' . $link_cg . '" class="links_and_filters-list-item-link item-' . $type_id . ' item-link ' . $link_action_css . ' filter_types" title="' . $link_action_text . $building . '">' . $link_action_text . $building . '</a>' . "\n";
-    $markup .= '</li>' . "\n";
+    $markup .= '<li' . $id . ' class="links_and_filters-list-item item-' . $type_id . ' filter_types">';
+    $markup .= '<a href="' . $link_cg . '" class="links_and_filters-list-item-link item-' . $type_id . ' item-link ' . $link_action_css . ' filter_types" title="' . $link_action_text . $building . '">' . $link_action_text . $building . '</a>';
+    $markup .= '</li>';
   }
 
-  $markup .= '</ul>' . "\n";
-  $markup .= '</div>' . "\n";
+  $markup .= '</ul>';
+  $markup .= '</div>';
 
-  $markup .= '</div>' . "\n"; // links_and_filters-group group-3
+  $markup .= '</div>'; // links_and_filters-group group-3
 
   return $markup;
 }
@@ -1517,7 +1517,7 @@ function mfcs_output_print_page_view($html, $parameters = array()) {
     $head_markup .= '<title>' . $parameters['title'] . '</title>';
   }
 
-  $body_markup .= $cf_dom->get_dom()->saveHTML($main_tag) . "\n";
+  $body_markup .= $cf_dom->get_dom()->saveHTML($main_tag);
 
   $body_class = 'mcneese';
   $cf = &drupal_static('cf_theme_get_variables', array());
@@ -1530,7 +1530,7 @@ function mfcs_output_print_page_view($html, $parameters = array()) {
   }
 
   $html = '<!DOCTYPE html>' . "\n";
-  $html .= '<html lang="en" dir="ltr">' . "\n";
+  $html .= '<html lang="en" dir="ltr">';
 
   $html .= '<head>' . $head_markup . '</head>';
   $html .= '<body class="' . $body_class . '">';
@@ -1545,7 +1545,7 @@ function mfcs_output_print_page_view($html, $parameters = array()) {
   $html .= '    </div>';
   $html .= '  </div>';
   $html .= '</body>';
-  $html .= '</html>' . "\n";
+  $html .= '</html>';
 
   return $html;
 }

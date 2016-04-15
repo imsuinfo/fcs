@@ -236,18 +236,18 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
   $form = array();
 
   $form['holiday_list']['#markup'] = '';
-  $form['holiday_list']['#markup'] .= '<div class="holiday_links-year no-print">' . "\n";
-  $form['holiday_list']['#markup'] .= '<a href="' . $base_path . 'requests/holiday/year-0/' . ($year - 1) . '" class="year-previous inline-block margin-10 float-left" title="Holidays for ' . ($year - 1) . '">Previous Year</a> ' . "\n";
-  $form['holiday_list']['#markup'] .= '<a href="' . $base_path . 'requests/holiday/year-0/' . ($year + 1) . '" class="year-next inline-block margin-10 float-right" title="Holidays for ' . ($year + 1) . '">Next Year</a> ' . "\n";
-  $form['holiday_list']['#markup'] .= "</div>\n";
+  $form['holiday_list']['#markup'] .= '<div class="holiday_links-year no-print">';
+  $form['holiday_list']['#markup'] .= '<a href="' . $base_path . 'requests/holiday/year-0/' . ($year - 1) . '" class="year-previous inline-block margin-10 float-left" title="Holidays for ' . ($year - 1) . '">Previous Year</a> ';
+  $form['holiday_list']['#markup'] .= '<a href="' . $base_path . 'requests/holiday/year-0/' . ($year + 1) . '" class="year-next inline-block margin-10 float-right" title="Holidays for ' . ($year + 1) . '">Next Year</a> ';
+  $form['holiday_list']['#markup'] .= "</div>";
 
   $form['holiday_list']['#markup'] .= mcneese_libraries_theme_table($holidays_list, $datatable_settings);
 
-  $form['holiday_list']['#markup'] .= '<br class="no-print">' . "\n";
-  $form['holiday_list']['#markup'] .= '<div class="holiday_links-operations no-print">' . "\n";
-  $form['holiday_list']['#markup'] .= '<a href="' . $base_path . 'requests/holiday/year-0/' . $year . '/edit" class="operation-create inline-block margin-10 float-left">Create holiday for ' . $year . '.</a> ' . "\n";
-  $form['holiday_list']['#markup'] .= "</div>\n";
-  $form['holiday_list']['#markup'] .= '<br class="clear">' . "\n";
+  $form['holiday_list']['#markup'] .= '<br class="no-print">';
+  $form['holiday_list']['#markup'] .= '<div class="holiday_links-operations no-print">';
+  $form['holiday_list']['#markup'] .= '<a href="' . $base_path . 'requests/holiday/year-0/' . $year . '/edit" class="operation-create inline-block margin-10 float-left">Create holiday for ' . $year . '.</a> ';
+  $form['holiday_list']['#markup'] .= "</div>";
+  $form['holiday_list']['#markup'] .= '<br class="clear">';
 
   return $form;
 }
@@ -312,26 +312,26 @@ function mfcs_request_holiday_0_page($year, $id) {
 
   drupal_set_title($date_long . ": " . $holiday->title);
 
-  $markup = '<div id="mfcs-holiday_page-view" class="mfcs-holiday_page-view">' . "\n";
-  $markup .= '<div class="mfcs-holiday_page-title"><strong>' . $title . '</strong> is a holiday, break, or office closure for McNeese State University on: <strong>' . $date_long . '</strong>.</div>' . "\n";
-  $markup .= "<br>\n";
-  $markup .= '<div class="mfcs-holiday_page-description">' . $description . '</div>' . "\n";
+  $markup = '<div id="mfcs-holiday_page-view" class="mfcs-holiday_page-view">';
+  $markup .= '<div class="mfcs-holiday_page-title"><strong>' . $title . '</strong> is a holiday, break, or office closure for McNeese State University on: <strong>' . $date_long . '</strong>.</div>';
+  $markup .= "<br>";
+  $markup .= '<div class="mfcs-holiday_page-description">' . $description . '</div>';
 
   if ($is_manager || $is_administer) {
     global $base_path;
-    $markup .= "<br>\n";
+    $markup .= "<br>";
 
-    $markup .= '<div class="mfcs-holiday_page-status"><strong>Status:</strong> ' . ($holiday->enabled ? 'Enabled' : 'Disabled') . "<br>\n";
+    $markup .= '<div class="mfcs-holiday_page-status"><strong>Status:</strong> ' . ($holiday->enabled ? 'Enabled' : 'Disabled') . "<br>";
 
-    $markup .= '<br class="no-print">' . "\n";
-    $markup .= '<div class="holiday_page-operations no-print">' . "\n";
-    $markup .= '<a href="' . $base_path . 'requests/holiday/year-0/' . $year . '/edit/' . $holiday->id . '" class="operation-edit inline-block margin-10 float-left">Edit the holiday.</a> ' . "\n";
-    $markup .= '<a href="' . $base_path . 'requests/holiday/year-0/' . $year . '/delete/' . $holiday->id . '" class="operation-delete inline-block margin-10 float-right">Delete the holiday.</a>' . "\n";
-    $markup .= "</div>\n";
-    $markup .= '<br class="clear">' . "\n";
+    $markup .= '<br class="no-print">';
+    $markup .= '<div class="holiday_page-operations no-print">';
+    $markup .= '<a href="' . $base_path . 'requests/holiday/year-0/' . $year . '/edit/' . $holiday->id . '" class="operation-edit inline-block margin-10 float-left">Edit the holiday.</a> ';
+    $markup .= '<a href="' . $base_path . 'requests/holiday/year-0/' . $year . '/delete/' . $holiday->id . '" class="operation-delete inline-block margin-10 float-right">Delete the holiday.</a>';
+    $markup .= "</div>";
+    $markup .= '<br class="clear">';
   }
 
-  $markup .= '</div>' . "\n";
+  $markup .= '</div>';
 
   return $markup;
 }
@@ -901,12 +901,12 @@ function mfcs_request_holiday_0_delete_form($form, &$form_state, $year, $holiday
 
   $form['confirmation']['#markup'] .= '<h3>Are you sure wou want to delete the holiday?</h3> ';
   $form['confirmation']['#markup'] .= '<div>';
-  $form['confirmation']['#markup'] .= '<strong>ID</strong>: ' . $holiday->id . "<br>\n";
-  $form['confirmation']['#markup'] .= '<strong>Title</strong>: ' . $holiday->title . "<br>\n";
-  $form['confirmation']['#markup'] .= '<strong>Date</strong>: ' . date('l, F j, Y', $holiday->date) . "<br>\n";
-  $form['confirmation']['#markup'] .= '<strong>Status</strong>: ' . ($holiday->enabled == 1 ? 'Enabled' : 'Disabled') . "<br>\n";
+  $form['confirmation']['#markup'] .= '<strong>ID</strong>: ' . $holiday->id . "<br>";
+  $form['confirmation']['#markup'] .= '<strong>Title</strong>: ' . $holiday->title . "<br>";
+  $form['confirmation']['#markup'] .= '<strong>Date</strong>: ' . date('l, F j, Y', $holiday->date) . "<br>";
+  $form['confirmation']['#markup'] .= '<strong>Status</strong>: ' . ($holiday->enabled == 1 ? 'Enabled' : 'Disabled') . "<br>";
   $form['confirmation']['#markup'] .= '</div>';
-  $form['confirmation']['#markup'] .= "<br>\n";
+  $form['confirmation']['#markup'] .= "<br>";
 
   $form['display']['submit'] = array(
     '#id' => 'mfcs-holiday-delete-submit',

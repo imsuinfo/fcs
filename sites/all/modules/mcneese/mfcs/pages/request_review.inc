@@ -236,9 +236,9 @@ function mfcs_request_review_0_page($form, &$form_state, $page_number = NULL) {
     $navigation_total = $count;
   }
 
-  $navigation_bottom .= '<div class="table_listing-comment">' . "\n";
-  $navigation_bottom .= "Showing " . $navigation_start . " to " . $navigation_total . " of " . $count . " entries.\n";
-  $navigation_bottom .= '</div>' . "\n";
+  $navigation_bottom .= '<div class="table_listing-comment">';
+  $navigation_bottom .= "Showing " . $navigation_start . " to " . $navigation_total . " of " . $count . " entries.";
+  $navigation_bottom .= '</div>';
 
   if ($count > ($options['start'] + $rows_per_page)) {
     $next_page = $page_number + 1;

@@ -95,11 +95,11 @@ function mfcs_request_troubleshoot_0_form($form, &$form_state, $request_id = NUL
     ),
   );
 
-  $markup = '<h2 class="code-title">#' . MFCS_TROUBLESHOOT_REQUESTS_REVIEW_RECHECK . ': Requests Review Recheck</h2>' . "\n";
-  $markup .= '<div class="code-description">' . "\n";
-  $markup .= 'When the reviewer assignments are changed, it is possible to forget to click the "Recheck Requests" button.' . "<br>\n";
-  $markup .= "<br>\n";
-  $markup .= 'Using this troubleshoot will force a re-check for all requests currently under review.' . "<br>\n";
+  $markup = '<h2 class="code-title">#' . MFCS_TROUBLESHOOT_REQUESTS_REVIEW_RECHECK . ': Requests Review Recheck</h2>';
+  $markup .= '<div class="code-description">';
+  $markup .= 'When the reviewer assignments are changed, it is possible to forget to click the "Recheck Requests" button.' . "<br>";
+  $markup .= "<br>";
+  $markup .= 'Using this troubleshoot will force a re-check for all requests currently under review.' . "<br>";
   $markup .= '</div>';
   $form['form'][$code]['pre_markup'] = array(
     '#type' => 'markup',
@@ -140,11 +140,11 @@ function mfcs_request_troubleshoot_0_form($form, &$form_state, $request_id = NUL
     ),
   );
 
-  $markup = '<h2 class="code-title">#' . MFCS_TROUBLESHOOT_MER_CACHE_SYNCHRONIZE . ': Requests Cache Synchronize</h2>' . "\n";
-  $markup .= '<div class="code-description">' . "\n";
-  $markup .= 'The requests cache exist to significantly increase the performance of the system when there are a large number of requests on the system. This requests cache is only loosely connected to the actual data, and therefore, the possibility exists that (due to bugs) this cache can become out of sync.' . "<br>\n";
-  $markup .= "<br>\n";
-  $markup .= 'Using this troubleshoot will force a re-synchronization of all cached request data.' . "<br>\n";
+  $markup = '<h2 class="code-title">#' . MFCS_TROUBLESHOOT_MER_CACHE_SYNCHRONIZE . ': Requests Cache Synchronize</h2>';
+  $markup .= '<div class="code-description">';
+  $markup .= 'The requests cache exist to significantly increase the performance of the system when there are a large number of requests on the system. This requests cache is only loosely connected to the actual data, and therefore, the possibility exists that (due to bugs) this cache can become out of sync.' . "<br>";
+  $markup .= "<br>";
+  $markup .= 'Using this troubleshoot will force a re-synchronization of all cached request data.' . "<br>";
   $markup .= '</div>';
   $form['form'][$code]['pre_markup'] = array(
     '#type' => 'markup',
@@ -185,12 +185,12 @@ function mfcs_request_troubleshoot_0_form($form, &$form_state, $request_id = NUL
     ),
   );
 
-  $markup = '<h2 class="code-title">#' . MFCS_TROUBLESHOOT_BANNER_CACHE_SYNCHRONIZE . ': Banner Cache Synchronize</h2>' . "\n";
-  $markup .= '<div class="code-description">' . "\n";
-  $markup .= 'The banner data is cached locally to allow for this system to operate even when banner is unavailable. This cache is usually auto-re-synchronized once a day.' . "<br>\n";
-  $markup .= "<br>\n";
-  $markup .= 'Using this troubleshoot will force a re-synchronization of all banner cache data (including banner role cache), if the system can connect to the banner database.' . "<br>\n";
-  $markup .= '<strong class="code-warning warning">This may take up to 15 minutes.</strong>' . "<br>\n";
+  $markup = '<h2 class="code-title">#' . MFCS_TROUBLESHOOT_BANNER_CACHE_SYNCHRONIZE . ': Banner Cache Synchronize</h2>';
+  $markup .= '<div class="code-description">';
+  $markup .= 'The banner data is cached locally to allow for this system to operate even when banner is unavailable. This cache is usually auto-re-synchronized once a day.' . "<br>";
+  $markup .= "<br>";
+  $markup .= 'Using this troubleshoot will force a re-synchronization of all banner cache data (including banner role cache), if the system can connect to the banner database.' . "<br>";
+  $markup .= '<strong class="code-warning warning">This may take up to 15 minutes.</strong>' . "<br>";
   $markup .= '</div>';
   $form['form'][$code]['pre_markup'] = array(
     '#type' => 'markup',
@@ -231,11 +231,11 @@ function mfcs_request_troubleshoot_0_form($form, &$form_state, $request_id = NUL
     ),
   );
 
-  $markup = '<h2 class="code-title">#' . MFCS_TROUBLESHOOT_BANNER_ROLE_SYNCHRONIZE . ': Banner Role Cache Synchronize</h2>' . "\n";
-  $markup .= '<div class="code-description">' . "\n";
-  $markup .= 'The banner role is cached locally in a separate manner than the other banner data. This cache is usually auto-re-synchronized once a day.' . "<br>\n";
-  $markup .= "<br>\n";
-  $markup .= 'Using this troubleshoot will force a re-synchronization of <strong>only</strong> the banner role cache data, if the system can connect to the banner database.' . "<br>\n";
+  $markup = '<h2 class="code-title">#' . MFCS_TROUBLESHOOT_BANNER_ROLE_SYNCHRONIZE . ': Banner Role Cache Synchronize</h2>';
+  $markup .= '<div class="code-description">';
+  $markup .= 'The banner role is cached locally in a separate manner than the other banner data. This cache is usually auto-re-synchronized once a day.' . "<br>";
+  $markup .= "<br>";
+  $markup .= 'Using this troubleshoot will force a re-synchronization of <strong>only</strong> the banner role cache data, if the system can connect to the banner database.' . "<br>";
   $markup .= '</div>';
   $form['form'][$code]['pre_markup'] = array(
     '#type' => 'markup',
@@ -276,19 +276,19 @@ function mfcs_request_troubleshoot_0_form($form, &$form_state, $request_id = NUL
     ),
   );
 
-  $markup = '<h2 class="code-title">#' . MFCS_TROUBLESHOOT_BANNER_INFORMATION . ': Banner Information</h2>' . "\n";
-  $markup .= '<div class="code-description">' . "\n";
-  $markup .= 'The following links provide locally stored information regarding banner data.' . "<br>\n";
-  $markup .= "<br>\n";
-  $markup .= 'Using this troubleshoot will force a re-synchronization of <strong>only</strong> the banner role cache data, if the system can connect to the banner database.' . "<br>\n";
+  $markup = '<h2 class="code-title">#' . MFCS_TROUBLESHOOT_BANNER_INFORMATION . ': Banner Information</h2>';
+  $markup .= '<div class="code-description">';
+  $markup .= 'The following links provide locally stored information regarding banner data.' . "<br>";
+  $markup .= "<br>";
+  $markup .= 'Using this troubleshoot will force a re-synchronization of <strong>only</strong> the banner role cache data, if the system can connect to the banner database.' . "<br>";
   $markup .= '</div>';
-  $markup .= '<div class="code-links">' . "\n";
-  $markup .= '  <ul class="code-links-list">' . "\n";
-  $markup .= '    <li class="code-links-list-item"><a href="' . $base_path . 'requests/troubleshoot-0/locations' . $url_arguments . '" class="code-links-list-item-link">View Banner Location Information.</a></li>' . "\n";
-  $markup .= '    <li class="code-links-list-item"><a href="' . $base_path . 'requests/troubleshoot-0/buildings' . $url_arguments . '" class="code-links-list-item-link">View Banner Building Information.</a></li>' . "\n";
-  $markup .= '    <li class="code-links-list-item"><a href="' . $base_path . 'requests/troubleshoot-0/rooms' . $url_arguments . '" class="code-links-list-item-link">View Banner Room Information.</a></li>' . "\n";
-  $markup .= '  </ul>' . "\n";
-  $markup .= '</div>' . "\n";
+  $markup .= '<div class="code-links">';
+  $markup .= '  <ul class="code-links-list">';
+  $markup .= '    <li class="code-links-list-item"><a href="' . $base_path . 'requests/troubleshoot-0/locations' . $url_arguments . '" class="code-links-list-item-link">View Banner Location Information.</a></li>';
+  $markup .= '    <li class="code-links-list-item"><a href="' . $base_path . 'requests/troubleshoot-0/buildings' . $url_arguments . '" class="code-links-list-item-link">View Banner Building Information.</a></li>';
+  $markup .= '    <li class="code-links-list-item"><a href="' . $base_path . 'requests/troubleshoot-0/rooms' . $url_arguments . '" class="code-links-list-item-link">View Banner Room Information.</a></li>';
+  $markup .= '  </ul>';
+  $markup .= '</div>';
   $form['form'][$code]['pre_markup'] = array(
     '#type' => 'markup',
     '#markup' => $markup,
@@ -316,12 +316,12 @@ function mfcs_request_troubleshoot_0_form($form, &$form_state, $request_id = NUL
     ),
   );
 
-  $markup = '<h2 class="code-title">#' . MFCS_TROUBLESHOOT_REQUESTS_PROBLEM_CHECK . ': Requests Problem Check</h2>' . "\n";
-  $markup .= '<div class="code-description">' . "\n";
-  $markup .= 'Requests are periodically checked for problems, such as date conflicts or deleted rooms.' . "<br>\n";
-  $markup .= "<br>\n";
-  $markup .= 'Using this troubleshoot will perform integrity checks on requests.' . "<br>\n";
-  $markup .= 'Problems are displaed under the <a href="' . $base_path . 'requests/problems-0/requests">Manage Request Problems</a> page.' . "<br>\n";
+  $markup = '<h2 class="code-title">#' . MFCS_TROUBLESHOOT_REQUESTS_PROBLEM_CHECK . ': Requests Problem Check</h2>';
+  $markup .= '<div class="code-description">';
+  $markup .= 'Requests are periodically checked for problems, such as date conflicts or deleted rooms.' . "<br>";
+  $markup .= "<br>";
+  $markup .= 'Using this troubleshoot will perform integrity checks on requests.' . "<br>";
+  $markup .= 'Problems are displaed under the <a href="' . $base_path . 'requests/problems-0/requests">Manage Request Problems</a> page.' . "<br>";
   $markup .= '</div>';
   $form['form'][$code]['pre_markup'] = array(
     '#type' => 'markup',
@@ -839,8 +839,8 @@ function mfcs_request_troubleshoot_0_mer_cache_synchronize($transaction, $user =
  * This will include a list of disabled locations as well as enabled.
  */
 function mfcs_request_troubleshoot_0_locations_page() {
-  $markup = '<div id="mfcs-troubleshoot_0-locations-page" class="information_page">' . "\n";
-  $markup .= '<h2 class="information_page-content_header element-invisible">Main Content</h2>' . "\n";
+  $markup = '<div id="mfcs-troubleshoot_0-locations-page" class="information_page">';
+  $markup .= '<h2 class="information_page-content_header element-invisible">Main Content</h2>';
 
   try {
     $query = db_select('mfcs_banner_locations', 'mbl');
@@ -878,35 +878,35 @@ function mfcs_request_troubleshoot_0_locations_page() {
         $even_odd_css = 'odd';
       }
 
-      $target_markup .= '<div id="mfcs-troubleshoot_0-locations-page-entry-' . $entry->location_id . '" class="information_page-entry ' . $even_odd_css . '">' . "\n";
-      $target_markup .= '  <h4 class="information_page-entry-title">' . $entry->human_name . '</h4>' . "\n";
-      $target_markup .= '  <ul class="information_page-entry-list">' . "\n";
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-location_id odd">' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-name">Location ID:</div> ' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->location_id . '</div>' . "\n";
-      $target_markup .= '    </li>' . "\n";
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-machine_name even">' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-name">Machine Name:</div> ' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->machine_name . '</div>' . "\n";
-      $target_markup .= '    </li>' . "\n";
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-human_name odd">' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-name">Human Name:</div> ' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->human_name . '</div>' . "\n";
-      $target_markup .= '    </li>' . "\n";
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-term_id even">' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-name">Term ID:</div> ' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->term_id . '</div>' . "\n";
-      $target_markup .= '    </li>' . "\n";
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-date odd">' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-name">Last Updated:</div> ' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . date('l, F j Y h:i:s a', $entry->date) . '</div>' . "\n";
-      $target_markup .= '    </li>' . "\n";
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-disabled even">' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-name">Disabled / Deleted:</div> ' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . ($entry->disabled == 0 ? "No" : "Yes") . '</div>' . "\n";
-      $target_markup .= '    </li>' . "\n";
-      $target_markup .= '  </ul>' . "\n";
-      $target_markup .= '</div>' . "\n";
+      $target_markup .= '<div id="mfcs-troubleshoot_0-locations-page-entry-' . $entry->location_id . '" class="information_page-entry ' . $even_odd_css . '">';
+      $target_markup .= '  <h4 class="information_page-entry-title">' . $entry->human_name . '</h4>';
+      $target_markup .= '  <ul class="information_page-entry-list">';
+      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-location_id odd">';
+      $target_markup .= '      <div class="information_page-entry-list-item-name">Location ID:</div> ';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->location_id . '</div>';
+      $target_markup .= '    </li>';
+      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-machine_name even">';
+      $target_markup .= '      <div class="information_page-entry-list-item-name">Machine Name:</div> ';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->machine_name . '</div>';
+      $target_markup .= '    </li>';
+      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-human_name odd">';
+      $target_markup .= '      <div class="information_page-entry-list-item-name">Human Name:</div> ';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->human_name . '</div>';
+      $target_markup .= '    </li>';
+      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-term_id even">';
+      $target_markup .= '      <div class="information_page-entry-list-item-name">Term ID:</div> ';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->term_id . '</div>';
+      $target_markup .= '    </li>';
+      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-date odd">';
+      $target_markup .= '      <div class="information_page-entry-list-item-name">Last Updated:</div> ';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . date('l, F j Y h:i:s a', $entry->date) . '</div>';
+      $target_markup .= '    </li>';
+      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-disabled even">';
+      $target_markup .= '      <div class="information_page-entry-list-item-name">Disabled / Deleted:</div> ';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . ($entry->disabled == 0 ? "No" : "Yes") . '</div>';
+      $target_markup .= '    </li>';
+      $target_markup .= '  </ul>';
+      $target_markup .= '</div>';
 
       unset($target_markup);
     }
@@ -914,33 +914,33 @@ function mfcs_request_troubleshoot_0_locations_page() {
   catch (Exception $ex) {
     cf_error::on_exception($ex);
 
-    $markup .= '</div>' . "\n";
+    $markup .= '</div>';
     return $markup;
   }
 
-  $markup .= '<h3 id="mfcs-troubleshoot_0-locations-page-section-enabled" class="information_page-section-title">' . "Enabled Locations" . '</h3>' . "\n";
-  $markup .= '<div class="information_page-section-content information_page-section-content-enabled">' . "\n";
+  $markup .= '<h3 id="mfcs-troubleshoot_0-locations-page-section-enabled" class="information_page-section-title">' . "Enabled Locations" . '</h3>';
+  $markup .= '<div class="information_page-section-content information_page-section-content-enabled">';
   if (empty($markup_enabled)) {
-    $markup .= 'There are no entries in this section.' . "\n";
+    $markup .= 'There are no entries in this section.';
   }
   else {
     $markup .= $markup_enabled;
   }
-  $markup .= '</div>' . "\n";
+  $markup .= '</div>';
 
-  $markup .= '<hr class="information_page-section-separator">' . "\n";
+  $markup .= '<hr class="information_page-section-separator">';
 
-  $markup .= '<h3 id="mfcs-troubleshoot_0-locations-page-section-enabled" class="information_page-section-title">' . "Disabled / Deleted Locations" . '</h3>' . "\n";
-  $markup .= '<div class="information_page-section-content information_page-section-content-disabled">' . "\n";
+  $markup .= '<h3 id="mfcs-troubleshoot_0-locations-page-section-enabled" class="information_page-section-title">' . "Disabled / Deleted Locations" . '</h3>';
+  $markup .= '<div class="information_page-section-content information_page-section-content-disabled">';
   if (empty($markup_disabled)) {
-    $markup .= 'There are no entries in this section.' . "\n";
+    $markup .= 'There are no entries in this section.';
   }
   else {
     $markup .= $markup_disabled;
   }
-  $markup .= '</div>' . "\n";
+  $markup .= '</div>';
 
-  $markup .= '</div>' . "\n";
+  $markup .= '</div>';
   return $markup;
 }
 
@@ -950,8 +950,8 @@ function mfcs_request_troubleshoot_0_locations_page() {
  * This will include a list of disabled buildings as well as enabled.
  */
 function mfcs_request_troubleshoot_0_buildings_page() {
-  $markup = '<div id="mfcs-troubleshoot_0-buildings-page" class="information_page">' . "\n";
-  $markup .= '<h2 class="information_page-content_header element-invisible">Main Content</h2>' . "\n";
+  $markup = '<div id="mfcs-troubleshoot_0-buildings-page" class="information_page">';
+  $markup .= '<h2 class="information_page-content_header element-invisible">Main Content</h2>';
 
   try {
     $query = db_select('mfcs_banner_buildings', 'mbb');
@@ -993,51 +993,51 @@ function mfcs_request_troubleshoot_0_buildings_page() {
         $even_odd_css = 'odd';
       }
 
-      $target_markup .= '<div id="mfcs-troubleshoot_0-buildings-page-entry-' . $entry->building_id . '" class="information_page-entry ' . $even_odd_css . '">' . "\n";
-      $target_markup .= '  <h4 class="information_page-entry-title">' . $entry->building_human_name . '</h4>' . "\n";
-      $target_markup .= '  <ul class="information_page-entry-list">' . "\n";
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-building_id odd">' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-name">ID:</div> ' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->building_id . '</div>' . "\n";
-      $target_markup .= '    </li>' . "\n";
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-building_machine_name even">' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-name">Machine Name:</div> ' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->building_machine_name . '</div>' . "\n";
-      $target_markup .= '    </li>' . "\n";
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-building_human_name odd">' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-name">Human Name:</div> ' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->building_human_name . '</div>' . "\n";
-      $target_markup .= '    </li>' . "\n";
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-building_date even">' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-name">Last Updated:</div> ' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . date('l, F j Y h:i:s a', $entry->building_date) . '</div>' . "\n";
-      $target_markup .= '    </li>' . "\n";
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-building_disabled odd">' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-name">Disabled / Deleted:</div> ' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . ($entry->building_disabled == 0 ? "No" : "Yes") . '</div>' . "\n";
-      $target_markup .= '    </li>' . "\n";
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-location_id even">' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-name">Location ID:</div> ' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->location_id . '</div>' . "\n";
-      $target_markup .= '    </li>' . "\n";
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-building_machine_name odd">' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-name">Location Machine Name:</div> ' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->location_machine_name . '</div>' . "\n";
-      $target_markup .= '    </li>' . "\n";
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-building_human_name even">' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-name">Location Human Name:</div> ' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->location_human_name . '</div>' . "\n";
-      $target_markup .= '    </li>' . "\n";
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-location_date odd">' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-name">Location Last Updated:</div> ' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . date('l, F j Y h:i:s a', $entry->location_date) . '</div>' . "\n";
-      $target_markup .= '    </li>' . "\n";
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-location_disabled even">' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-name">Location Disabled / Deleted:</div> ' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . ($entry->location_disabled == 0 ? "No" : "Yes") . '</div>' . "\n";
-      $target_markup .= '    </li>' . "\n";
-      $target_markup .= '  </ul>' . "\n";
-      $target_markup .= '</div>' . "\n";
+      $target_markup .= '<div id="mfcs-troubleshoot_0-buildings-page-entry-' . $entry->building_id . '" class="information_page-entry ' . $even_odd_css . '">';
+      $target_markup .= '  <h4 class="information_page-entry-title">' . $entry->building_human_name . '</h4>';
+      $target_markup .= '  <ul class="information_page-entry-list">';
+      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-building_id odd">';
+      $target_markup .= '      <div class="information_page-entry-list-item-name">ID:</div> ';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->building_id . '</div>';
+      $target_markup .= '    </li>';
+      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-building_machine_name even">';
+      $target_markup .= '      <div class="information_page-entry-list-item-name">Machine Name:</div> ';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->building_machine_name . '</div>';
+      $target_markup .= '    </li>';
+      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-building_human_name odd">';
+      $target_markup .= '      <div class="information_page-entry-list-item-name">Human Name:</div> ';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->building_human_name . '</div>';
+      $target_markup .= '    </li>';
+      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-building_date even">';
+      $target_markup .= '      <div class="information_page-entry-list-item-name">Last Updated:</div> ';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . date('l, F j Y h:i:s a', $entry->building_date) . '</div>';
+      $target_markup .= '    </li>';
+      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-building_disabled odd">';
+      $target_markup .= '      <div class="information_page-entry-list-item-name">Disabled / Deleted:</div> ';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . ($entry->building_disabled == 0 ? "No" : "Yes") . '</div>';
+      $target_markup .= '    </li>';
+      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-location_id even">';
+      $target_markup .= '      <div class="information_page-entry-list-item-name">Location ID:</div> ';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->location_id . '</div>';
+      $target_markup .= '    </li>';
+      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-building_machine_name odd">';
+      $target_markup .= '      <div class="information_page-entry-list-item-name">Location Machine Name:</div> ';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->location_machine_name . '</div>';
+      $target_markup .= '    </li>';
+      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-building_human_name even">';
+      $target_markup .= '      <div class="information_page-entry-list-item-name">Location Human Name:</div> ';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->location_human_name . '</div>';
+      $target_markup .= '    </li>';
+      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-location_date odd">';
+      $target_markup .= '      <div class="information_page-entry-list-item-name">Location Last Updated:</div> ';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . date('l, F j Y h:i:s a', $entry->location_date) . '</div>';
+      $target_markup .= '    </li>';
+      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-location_disabled even">';
+      $target_markup .= '      <div class="information_page-entry-list-item-name">Location Disabled / Deleted:</div> ';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . ($entry->location_disabled == 0 ? "No" : "Yes") . '</div>';
+      $target_markup .= '    </li>';
+      $target_markup .= '  </ul>';
+      $target_markup .= '</div>';
 
       unset($target_markup);
     }
@@ -1045,33 +1045,33 @@ function mfcs_request_troubleshoot_0_buildings_page() {
   catch (Exception $ex) {
     cf_error::on_exception($ex);
 
-    $markup .= '</div>' . "\n";
+    $markup .= '</div>';
     return $markup;
   }
 
-  $markup .= '<h3 id="mfcs-troubleshoot_0-buildings-page-section-enabled" class="information_page-section-title">' . "Enabled Buildings" . '</h3>' . "\n";
-  $markup .= '<div class="information_page-section-content information_page-section-content-enabled">' . "\n";
+  $markup .= '<h3 id="mfcs-troubleshoot_0-buildings-page-section-enabled" class="information_page-section-title">' . "Enabled Buildings" . '</h3>';
+  $markup .= '<div class="information_page-section-content information_page-section-content-enabled">';
   if (empty($markup_enabled)) {
-    $markup .= 'There are no entries in this section.' . "\n";
+    $markup .= 'There are no entries in this section.';
   }
   else {
     $markup .= $markup_enabled;
   }
-  $markup .= '</div>' . "\n";
+  $markup .= '</div>';
 
-  $markup .= '<hr class="information_page-section-separator">' . "\n";
+  $markup .= '<hr class="information_page-section-separator">';
 
-  $markup .= '<h3 id="mfcs-troubleshoot_0-buildings-page-section-enabled" class="information_page-section-title">' . "Disabled / Deleted Buildings" . '</h3>' . "\n";
-  $markup .= '<div class="information_page-section-content information_page-section-content-disabled">' . "\n";
+  $markup .= '<h3 id="mfcs-troubleshoot_0-buildings-page-section-enabled" class="information_page-section-title">' . "Disabled / Deleted Buildings" . '</h3>';
+  $markup .= '<div class="information_page-section-content information_page-section-content-disabled">';
   if (empty($markup_disabled)) {
-    $markup .= 'There are no entries in this section.' . "\n";
+    $markup .= 'There are no entries in this section.';
   }
   else {
     $markup .= $markup_disabled;
   }
-  $markup .= '</div>' . "\n";
+  $markup .= '</div>';
 
-  $markup .= '</div>' . "\n";
+  $markup .= '</div>';
   return $markup;
 }
 
@@ -1089,8 +1089,8 @@ function mfcs_request_troubleshoot_0_rooms_page() {
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
-  $markup = '<div id="mfcs-troubleshoot_0-rooms-page" class="information_page">' . "\n";
-  $markup .= '<h2 class="information_page-content_header element-invisible">Main Content</h2>' . "\n";
+  $markup = '<div id="mfcs-troubleshoot_0-rooms-page" class="information_page">';
+  $markup .= '<h2 class="information_page-content_header element-invisible">Main Content</h2>';
 
   try {
     $query = db_select('mfcs_banner_rooms', 'mbr');
@@ -1143,83 +1143,83 @@ function mfcs_request_troubleshoot_0_rooms_page() {
         $even_odd_css = 'odd';
       }
 
-      $target_markup .= '<div id="mfcs-troubleshoot_0-rooms-page-entry-' . $entry->room_id . '" class="information_page-entry ' . $even_odd_css . '">' . "\n";
-      $target_markup .= '  <h4 class="information_page-entry-title">' . $entry->room_human_name . '</h4>' . "\n";
-      $target_markup .= '  <ul class="information_page-entry-list">' . "\n";
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-room_id odd">' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-name">ID:</div> ' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->room_id . '</div>' . "\n";
-      $target_markup .= '    </li>' . "\n";
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-room_machine_name even">' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-name">Machine Name:</div> ' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->room_machine_name . '</div>' . "\n";
-      $target_markup .= '    </li>' . "\n";
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-room_human_name odd">' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-name">Human Name:</div> ' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->room_human_name . '</div>' . "\n";
-      $target_markup .= '    </li>' . "\n";
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-room_date even">' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-name">Last Updated:</div> ' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . date('l, F j Y h:i:s a', $entry->room_date) . '</div>' . "\n";
-      $target_markup .= '    </li>' . "\n";
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-room_disabled odd">' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-name">Disabled / Deleted:</div> ' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . ($entry->room_disabled == 0 ? "No" : "Yes") . '</div>' . "\n";
-      $target_markup .= '    </li>' . "\n";
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-room_coordinator even">' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-name">Room Coordinator:</div> ' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-value"><a href="' . $base_path . 'user/' . $entry->room_coordinator_id . $url_arguments . '" title="View User Profile">' . $entry->room_coordinator_name . '</a> [id: ' . $entry->room_coordinator_id . ']' . '</div>' . "\n";
-      $target_markup .= '    </li>' . "\n";
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-room_capacity_normal odd">' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-name">Room Capacity Normal:</div> ' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->room_capacity_normal . '</div>' . "\n";
-      $target_markup .= '    </li>' . "\n";
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-room_capacity_max even">' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-name">Room Capacity Max:</div> ' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->room_capacity_max . '</div>' . "\n";
-      $target_markup .= '    </li>' . "\n";
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-building_id odd">' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-name">Building ID:</div> ' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->building_id . '</div>' . "\n";
-      $target_markup .= '    </li>' . "\n";
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-room_machine_name even">' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-name">Building Machine Name:</div> ' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->building_machine_name . '</div>' . "\n";
-      $target_markup .= '    </li>' . "\n";
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-room_human_name odd">' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-name">Building Human Name:</div> ' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->building_human_name . '</div>' . "\n";
-      $target_markup .= '    </li>' . "\n";
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-building_date even">' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-name">Building Last Updated:</div> ' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . date('l, F j Y h:i:s a', $entry->building_date) . '</div>' . "\n";
-      $target_markup .= '    </li>' . "\n";
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-building_disabled odd">' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-name">Building Disabled / Deleted:</div> ' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . ($entry->building_disabled == 0 ? "No" : "Yes") . '</div>' . "\n";
-      $target_markup .= '    </li>' . "\n";
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-location_id even">' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-name">Location ID:</div> ' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->location_id . '</div>' . "\n";
-      $target_markup .= '    </li>' . "\n";
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-room_machine_name odd">' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-name">Location Machine Name:</div> ' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->location_machine_name . '</div>' . "\n";
-      $target_markup .= '    </li>' . "\n";
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-room_human_name even">' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-name">Location Human Name:</div> ' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->location_human_name . '</div>' . "\n";
-      $target_markup .= '    </li>' . "\n";
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-location_date odd">' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-name">Location Last Updated:</div> ' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . date('l, F j Y h:i:s a', $entry->location_date) . '</div>' . "\n";
-      $target_markup .= '    </li>' . "\n";
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-location_disabled even">' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-name">Location Disabled / Deleted:</div> ' . "\n";
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . ($entry->location_disabled == 0 ? "No" : "Yes") . '</div>' . "\n";
-      $target_markup .= '    </li>' . "\n";
-      $target_markup .= '  </ul>' . "\n";
-      $target_markup .= '</div>' . "\n";
+      $target_markup .= '<div id="mfcs-troubleshoot_0-rooms-page-entry-' . $entry->room_id . '" class="information_page-entry ' . $even_odd_css . '">';
+      $target_markup .= '  <h4 class="information_page-entry-title">' . $entry->room_human_name . '</h4>';
+      $target_markup .= '  <ul class="information_page-entry-list">';
+      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-room_id odd">';
+      $target_markup .= '      <div class="information_page-entry-list-item-name">ID:</div> ';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->room_id . '</div>';
+      $target_markup .= '    </li>';
+      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-room_machine_name even">';
+      $target_markup .= '      <div class="information_page-entry-list-item-name">Machine Name:</div> ';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->room_machine_name . '</div>';
+      $target_markup .= '    </li>';
+      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-room_human_name odd">';
+      $target_markup .= '      <div class="information_page-entry-list-item-name">Human Name:</div> ';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->room_human_name . '</div>';
+      $target_markup .= '    </li>';
+      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-room_date even">';
+      $target_markup .= '      <div class="information_page-entry-list-item-name">Last Updated:</div> ';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . date('l, F j Y h:i:s a', $entry->room_date) . '</div>';
+      $target_markup .= '    </li>';
+      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-room_disabled odd">';
+      $target_markup .= '      <div class="information_page-entry-list-item-name">Disabled / Deleted:</div> ';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . ($entry->room_disabled == 0 ? "No" : "Yes") . '</div>';
+      $target_markup .= '    </li>';
+      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-room_coordinator even">';
+      $target_markup .= '      <div class="information_page-entry-list-item-name">Room Coordinator:</div> ';
+      $target_markup .= '      <div class="information_page-entry-list-item-value"><a href="' . $base_path . 'user/' . $entry->room_coordinator_id . $url_arguments . '" title="View User Profile">' . $entry->room_coordinator_name . '</a> [id: ' . $entry->room_coordinator_id . ']' . '</div>';
+      $target_markup .= '    </li>';
+      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-room_capacity_normal odd">';
+      $target_markup .= '      <div class="information_page-entry-list-item-name">Room Capacity Normal:</div> ';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->room_capacity_normal . '</div>';
+      $target_markup .= '    </li>';
+      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-room_capacity_max even">';
+      $target_markup .= '      <div class="information_page-entry-list-item-name">Room Capacity Max:</div> ';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->room_capacity_max . '</div>';
+      $target_markup .= '    </li>';
+      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-building_id odd">';
+      $target_markup .= '      <div class="information_page-entry-list-item-name">Building ID:</div> ';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->building_id . '</div>';
+      $target_markup .= '    </li>';
+      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-room_machine_name even">';
+      $target_markup .= '      <div class="information_page-entry-list-item-name">Building Machine Name:</div> ';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->building_machine_name . '</div>';
+      $target_markup .= '    </li>';
+      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-room_human_name odd">';
+      $target_markup .= '      <div class="information_page-entry-list-item-name">Building Human Name:</div> ';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->building_human_name . '</div>';
+      $target_markup .= '    </li>';
+      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-building_date even">';
+      $target_markup .= '      <div class="information_page-entry-list-item-name">Building Last Updated:</div> ';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . date('l, F j Y h:i:s a', $entry->building_date) . '</div>';
+      $target_markup .= '    </li>';
+      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-building_disabled odd">';
+      $target_markup .= '      <div class="information_page-entry-list-item-name">Building Disabled / Deleted:</div> ';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . ($entry->building_disabled == 0 ? "No" : "Yes") . '</div>';
+      $target_markup .= '    </li>';
+      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-location_id even">';
+      $target_markup .= '      <div class="information_page-entry-list-item-name">Location ID:</div> ';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->location_id . '</div>';
+      $target_markup .= '    </li>';
+      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-room_machine_name odd">';
+      $target_markup .= '      <div class="information_page-entry-list-item-name">Location Machine Name:</div> ';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->location_machine_name . '</div>';
+      $target_markup .= '    </li>';
+      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-room_human_name even">';
+      $target_markup .= '      <div class="information_page-entry-list-item-name">Location Human Name:</div> ';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->location_human_name . '</div>';
+      $target_markup .= '    </li>';
+      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-location_date odd">';
+      $target_markup .= '      <div class="information_page-entry-list-item-name">Location Last Updated:</div> ';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . date('l, F j Y h:i:s a', $entry->location_date) . '</div>';
+      $target_markup .= '    </li>';
+      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-location_disabled even">';
+      $target_markup .= '      <div class="information_page-entry-list-item-name">Location Disabled / Deleted:</div> ';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . ($entry->location_disabled == 0 ? "No" : "Yes") . '</div>';
+      $target_markup .= '    </li>';
+      $target_markup .= '  </ul>';
+      $target_markup .= '</div>';
 
       unset($target_markup);
     }
@@ -1227,33 +1227,33 @@ function mfcs_request_troubleshoot_0_rooms_page() {
   catch (Exception $ex) {
     cf_error::on_exception($ex);
 
-    $markup .= '</div>' . "\n";
+    $markup .= '</div>';
     return $markup;
   }
 
-  $markup .= '<h3 id="mfcs-troubleshoot_0-rooms-page-section-enabled" class="information_page-section-title">' . "Enabled Rooms" . '</h3>' . "\n";
-  $markup .= '<div class="information_page-section-content information_page-section-content-enabled">' . "\n";
+  $markup .= '<h3 id="mfcs-troubleshoot_0-rooms-page-section-enabled" class="information_page-section-title">' . "Enabled Rooms" . '</h3>';
+  $markup .= '<div class="information_page-section-content information_page-section-content-enabled">';
   if (empty($markup_enabled)) {
-    $markup .= 'There are no entries in this section.' . "\n";
+    $markup .= 'There are no entries in this section.';
   }
   else {
     $markup .= $markup_enabled;
   }
-  $markup .= '</div>' . "\n";
+  $markup .= '</div>';
 
-  $markup .= '<hr class="information_page-section-separator">' . "\n";
+  $markup .= '<hr class="information_page-section-separator">';
 
-  $markup .= '<h3 id="mfcs-troubleshoot_0-rooms-page-section-enabled" class="information_page-section-title">' . "Disabled / Deleted Rooms" . '</h3>' . "\n";
-  $markup .= '<div class="information_page-section-content information_page-section-content-disabled">' . "\n";
+  $markup .= '<h3 id="mfcs-troubleshoot_0-rooms-page-section-enabled" class="information_page-section-title">' . "Disabled / Deleted Rooms" . '</h3>';
+  $markup .= '<div class="information_page-section-content information_page-section-content-disabled">';
   if (empty($markup_disabled)) {
-    $markup .= 'There are no entries in this section.' . "\n";
+    $markup .= 'There are no entries in this section.';
   }
   else {
     $markup .= $markup_disabled;
   }
-  $markup .= '</div>' . "\n";
+  $markup .= '</div>';
 
-  $markup .= '</div>' . "\n";
+  $markup .= '</div>';
   return $markup;
 }
 

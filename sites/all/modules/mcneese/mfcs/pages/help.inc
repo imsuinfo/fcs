@@ -136,108 +136,108 @@ function mfcs_help_topic() {
   $section_class = $base_class;
   $section_class[] = 'help-section';
 
-  $markup = '<section class="' . implode(' ', $base_class) . '">' . "\n";
+  $markup = '<section class="' . implode(' ', $base_class) . '">';
 
   $headers = array(
     0 => array('markup' => "Facilities Use Documentation"),
   );
   $markup .= mfcs_help_render_headers('section-topic_index', array(), $headers, 1);
 
-  $markup .= '<div class="paragraph">' . "\n";
-  $markup .= '  The documentation is broken up into multiple <dfn class="term">Topic</dfn>s. ' . "<br>\n";
-  $markup .= '  Each <dfn class="term">Topic</dfn> is may have multiple <dfn class="term">Section</dfn>s, each of which may contain their own <dfn class="term">Sub-Section</dfn>s. ' . "<br>\n";
-  $markup .= '  <dfn class="term">Section</dfn>s and <dfn class="term">Sub-Section</dfn>s will provide specific information while the <dfn class="term">Topic</dfn> provides general information. ' . "<br>\n";
-  $markup .= "  <br>\n";
-  $markup .= '  If you are simply looking for a step-by-step guide, then use the <dfn class="term">Use Guide</dfn> index. ' . "<br>\n";
-  $markup .= '  For more details on the how and the why or to gain a better understanding of the <dfn class="term">Facilities Use System</dfn>, use the <dfn class="term">Documentation</dfn> index. ' . "<br>\n";
-  $markup .= '</div>' . "\n";
+  $markup .= '<div class="paragraph">';
+  $markup .= '  The documentation is broken up into multiple <dfn class="term">Topic</dfn>s. ' . "<br>";
+  $markup .= '  Each <dfn class="term">Topic</dfn> is may have multiple <dfn class="term">Section</dfn>s, each of which may contain their own <dfn class="term">Sub-Section</dfn>s. ' . "<br>";
+  $markup .= '  <dfn class="term">Section</dfn>s and <dfn class="term">Sub-Section</dfn>s will provide specific information while the <dfn class="term">Topic</dfn> provides general information. ' . "<br>";
+  $markup .= "  <br>";
+  $markup .= '  If you are simply looking for a step-by-step guide, then use the <dfn class="term">Use Guide</dfn> index. ' . "<br>";
+  $markup .= '  For more details on the how and the why or to gain a better understanding of the <dfn class="term">Facilities Use System</dfn>, use the <dfn class="term">Documentation</dfn> index. ' . "<br>";
+  $markup .= '</div>';
 
-  $markup .= '<div class="paragraph">' . "\n";
-  $markup .= '  <nav class="navigation navigation-help_index" role="navigation">' . "<br>\n";
+  $markup .= '<div class="paragraph">';
+  $markup .= '  <nav class="navigation navigation-help_index" role="navigation">' . "<br>";
   $headers = array(
     0 => array('markup' => "Topic Index - User Guides"),
   );
   $markup .= mfcs_help_render_headers('menu-topic_index', array(), $headers, 1);
-  $markup .= '    <ul class="navigation-list">' . "\n";
+  $markup .= '    <ul class="navigation-list">';
 
   if (in_array('request-create', $allowed_topics)) {
-    $markup .= '      <li class="list-item">' . "\n";
-    $markup .= '        <a href="' . $base_path . 'help-0/request-create' . $url_arguments . '" class="item-link" title="User Guide: Create a Request">' . "Create a Request" . "</a><br>\n";
-    $markup .= '        <ul class="item-navigation navigation-list">' . "\n";
-    $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/request-create/facilities_use' . $url_arguments . '" class="item-link" title="Section: Camps Requests">' . "Camps" . "</a></li>\n";
-    $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/request-create/facilities_use' . $url_arguments . '" class="item-link" title="Section: External Requests">' . "External" . "</a></li>\n";
-    $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/request-create/facilities_use' . $url_arguments . '" class="item-link" title="Section: Faculty, Staff, and Athletics Requests">' . "Faculty, Staff, and Athletics" . "</a></li>\n";
-    $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/request-create/facilities_use' . $url_arguments . '" class="item-link" title="Section: Student Organization Requests">' . "Student Organization" . "</a></li>\n";
-    $markup .= '        </ul>' . "\n";
-    $markup .= '      </li>' . "\n";
+    $markup .= '      <li class="list-item">';
+    $markup .= '        <a href="' . $base_path . 'help-0/request-create' . $url_arguments . '" class="item-link" title="User Guide: Create a Request">' . "Create a Request" . "</a><br>";
+    $markup .= '        <ul class="item-navigation navigation-list">';
+    $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/request-create/facilities_use' . $url_arguments . '" class="item-link" title="Section: Camps Requests">' . "Camps" . "</a></li>";
+    $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/request-create/facilities_use' . $url_arguments . '" class="item-link" title="Section: External Requests">' . "External" . "</a></li>";
+    $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/request-create/facilities_use' . $url_arguments . '" class="item-link" title="Section: Faculty, Staff, and Athletics Requests">' . "Faculty, Staff, and Athletics" . "</a></li>";
+    $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/request-create/facilities_use' . $url_arguments . '" class="item-link" title="Section: Student Organization Requests">' . "Student Organization" . "</a></li>";
+    $markup .= '        </ul>';
+    $markup .= '      </li>';
   }
 
   if (in_array('request-edit', $allowed_topics)) {
-    $markup .= '      <li class="list-item"><a href="' . $base_path . 'help-0/request-edit' . $url_arguments . '" class="item-link" title="User Guide: Edit a Request">' . "Edit a Request" . "</a></li>\n";
+    $markup .= '      <li class="list-item"><a href="' . $base_path . 'help-0/request-edit' . $url_arguments . '" class="item-link" title="User Guide: Edit a Request">' . "Edit a Request" . "</a></li>";
   }
 
   if (in_array('request-cancel', $allowed_topics)) {
-    $markup .= '      <li class="list-item"><a href="' . $base_path . 'help-0/request-cancel' . $url_arguments . '" class="item-link" title="User Guide: Cancel or Uncancel a Request">' . "Cancel or Uncancel a Request" . "</a></li>\n";
+    $markup .= '      <li class="list-item"><a href="' . $base_path . 'help-0/request-cancel' . $url_arguments . '" class="item-link" title="User Guide: Cancel or Uncancel a Request">' . "Cancel or Uncancel a Request" . "</a></li>";
   }
 
   if (in_array('request-copy', $allowed_topics)) {
-    $markup .= '      <li class="list-item"><a href="' . $base_path . 'help-0/request-copy' . $url_arguments . '" class="item-link" title="User Guide: Copy a Request">' . "Copy a Request" . "</a></li>\n";
+    $markup .= '      <li class="list-item"><a href="' . $base_path . 'help-0/request-copy' . $url_arguments . '" class="item-link" title="User Guide: Copy a Request">' . "Copy a Request" . "</a></li>";
   }
 
   if (in_array('request-find', $allowed_topics)) {
-    $markup .= '      <li class="list-item"><a href="' . $base_path . 'help-0/request-find' . $url_arguments . '" class="item-link" title="User Guide: Find a Request">' . "Find a Request" . "</a></li>\n";
+    $markup .= '      <li class="list-item"><a href="' . $base_path . 'help-0/request-find' . $url_arguments . '" class="item-link" title="User Guide: Find a Request">' . "Find a Request" . "</a></li>";
   }
 
   if (in_array('request-review', $allowed_topics)) {
-    $markup .= '      <li class="list-item"><a href="' . $base_path . 'help-0/request-review' . $url_arguments . '" class="item-link" title="User Guide: Review Request">' . "Review Request" . "</a></li>\n";
+    $markup .= '      <li class="list-item"><a href="' . $base_path . 'help-0/request-review' . $url_arguments . '" class="item-link" title="User Guide: Review Request">' . "Review Request" . "</a></li>";
   }
 
   if (in_array('request-manage', $allowed_topics)) {
-    $markup .= '      <li class="list-item"><a href="' . $base_path . 'help-0/request-manage' . $url_arguments . '" class="item-link" title="User Guide: Manage System">' . "Manage System" . "</a></li>\n";
+    $markup .= '      <li class="list-item"><a href="' . $base_path . 'help-0/request-manage' . $url_arguments . '" class="item-link" title="User Guide: Manage System">' . "Manage System" . "</a></li>";
   }
 
   if (in_array('calendar-use', $allowed_topics)) {
-    $markup .= '      <li class="list-item"><a href="' . $base_path . 'help-0/calendar-use' . $url_arguments . '" class="item-link" title="User Guide: Using the Calendar">' . "Using the Calendar" . "</a></li>\n";
+    $markup .= '      <li class="list-item"><a href="' . $base_path . 'help-0/calendar-use' . $url_arguments . '" class="item-link" title="User Guide: Using the Calendar">' . "Using the Calendar" . "</a></li>";
   }
 
   if (in_array('calendar-export', $allowed_topics)) {
-    $markup .= '      <li class="list-item"><a href="' . $base_path . 'help-0/calendar-export' . $url_arguments . '" class="item-link" title="User Guide: Exporting the Calendar">' . "Exporting the Calendar" . "</a></li>\n";
+    $markup .= '      <li class="list-item"><a href="' . $base_path . 'help-0/calendar-export' . $url_arguments . '" class="item-link" title="User Guide: Exporting the Calendar">' . "Exporting the Calendar" . "</a></li>";
   }
 
-  $markup .= '    </ul>' . "\n";
-  $markup .= '  </nav>' . "\n";
-  $markup .= '</div>' . "\n";
+  $markup .= '    </ul>';
+  $markup .= '  </nav>';
+  $markup .= '</div>';
 
-  $markup .= '<div class="paragraph">' . "\n";
-  $markup .= '  <nav class="navigation navigation-help_index" role="navigation">' . "<br>\n";
+  $markup .= '<div class="paragraph">';
+  $markup .= '  <nav class="navigation navigation-help_index" role="navigation">' . "<br>";
   $headers = array(
     0 => array('markup' => "Topic Index - Documentation"),
   );
   $markup .= mfcs_help_render_headers('menu-topic_index', array(), $headers, 1);
-  $markup .= '    <ul class="navigation-list">' . "\n";
-  $markup .= '      <li class="list-item">' . "\n";
-  $markup .= '        <a href="' . $base_path . 'help-0/request-create' . $url_arguments . '" class="item-link" title="Documentation: Requests">' . "Requests" . "</a><br>\n";
-  $markup .= '        <ul class="item-navigation navigation-list">' . "\n";
-  $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/request/facilities_use' . $url_arguments . '" class="item-link" title="Section: Camps Requests">' . "Camps" . "</a></li>\n";
-  $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/request/facilities_use' . $url_arguments . '" class="item-link" title="Section: External Requests">' . "External" . "</a></li>\n";
-  $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/request/facilities_use' . $url_arguments . '" class="item-link" title="Section: Faculty, Staff, and Athletics Requests">' . "Faculty, Staff, and Athletics" . "</a></li>\n";
-  $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/request/facilities_use' . $url_arguments . '" class="item-link" title="Section: Student Organization Requests">' . "Student Organization" . "</a></li>\n";
-  $markup .= '        </ul>' . "\n";
-  $markup .= '      </li>' . "\n";
-  $markup .= '      <li class="list-item"><a href="' . $base_path . 'help-0/faq' . $url_arguments . '" class="item-link" title="Documentation: Frequently Asked Questions">' . "Frequently Asked Questions" . "</a></li>\n";
-  $markup .= '      <li class="list-item">' . "\n";
-  $markup .= '        <a href="' . $base_path . 'help-0/terminology' . $url_arguments . '" class="item-link" title="Documentation: Terminology">' . "Terminology" . "</a><br>\n";
-  $markup .= '        <ul class="item-navigation navigation-list">' . "\n";
-  $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/terminology/facilities_use' . $url_arguments . '" class="item-link" title="Section: Facilities Use">' . "Facilities Use" . "</a></li>\n";
-  $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/terminology/system' . $url_arguments . '" class="item-link" title="Section: System">' . "System" . "</a></li>\n";
-  $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/terminology/documentation' . $url_arguments . '" class="item-link" title="Section: Documentation">' . "Documentation" . "</a></li>\n";
-  $markup .= '        </ul>' . "\n";
-  $markup .= '      </li>' . "\n";
-  $markup .= '    </ul>' . "\n";
-  $markup .= '  </nav>' . "\n";
-  $markup .= '</div>' . "\n";
+  $markup .= '    <ul class="navigation-list">';
+  $markup .= '      <li class="list-item">';
+  $markup .= '        <a href="' . $base_path . 'help-0/request-create' . $url_arguments . '" class="item-link" title="Documentation: Requests">' . "Requests" . "</a><br>";
+  $markup .= '        <ul class="item-navigation navigation-list">';
+  $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/request/facilities_use' . $url_arguments . '" class="item-link" title="Section: Camps Requests">' . "Camps" . "</a></li>";
+  $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/request/facilities_use' . $url_arguments . '" class="item-link" title="Section: External Requests">' . "External" . "</a></li>";
+  $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/request/facilities_use' . $url_arguments . '" class="item-link" title="Section: Faculty, Staff, and Athletics Requests">' . "Faculty, Staff, and Athletics" . "</a></li>";
+  $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/request/facilities_use' . $url_arguments . '" class="item-link" title="Section: Student Organization Requests">' . "Student Organization" . "</a></li>";
+  $markup .= '        </ul>';
+  $markup .= '      </li>';
+  $markup .= '      <li class="list-item"><a href="' . $base_path . 'help-0/faq' . $url_arguments . '" class="item-link" title="Documentation: Frequently Asked Questions">' . "Frequently Asked Questions" . "</a></li>";
+  $markup .= '      <li class="list-item">';
+  $markup .= '        <a href="' . $base_path . 'help-0/terminology' . $url_arguments . '" class="item-link" title="Documentation: Terminology">' . "Terminology" . "</a><br>";
+  $markup .= '        <ul class="item-navigation navigation-list">';
+  $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/terminology/facilities_use' . $url_arguments . '" class="item-link" title="Section: Facilities Use">' . "Facilities Use" . "</a></li>";
+  $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/terminology/system' . $url_arguments . '" class="item-link" title="Section: System">' . "System" . "</a></li>";
+  $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/terminology/documentation' . $url_arguments . '" class="item-link" title="Section: Documentation">' . "Documentation" . "</a></li>";
+  $markup .= '        </ul>';
+  $markup .= '      </li>';
+  $markup .= '    </ul>';
+  $markup .= '  </nav>';
+  $markup .= '</div>';
 
-  $markup .= '</section>' . "\n";
+  $markup .= '</section>';
 
   return $markup;
 }
@@ -291,7 +291,7 @@ function mfcs_help_topic_not_found($topic = NULL, $section = NULL, $sub_section 
     $base_class[] = 'NULL-section';
     $base_class[] = 'NULL-sub_section';
 
-    $first_line = 'The help documentation you were looking for was not found. ' . "<br>\n";
+    $first_line = 'The help documentation you were looking for was not found. ' . "<br>";
   }
   elseif (is_null($section)) {
     $headers[0]['markup'] = "No Valid Topic Found";
@@ -300,7 +300,7 @@ function mfcs_help_topic_not_found($topic = NULL, $section = NULL, $sub_section 
     $base_class[] = 'NULL-section';
     $base_class[] = 'NULL-sub_section';
 
-    $first_line = 'The topic "' . $topic . '" was not found in the help documentation. ' . "<br>\n";
+    $first_line = 'The topic "' . $topic . '" was not found in the help documentation. ' . "<br>";
   }
   elseif (is_null($sub_section)) {
     $headers[0]['markup'] = "No Valid Section Found";
@@ -309,7 +309,7 @@ function mfcs_help_topic_not_found($topic = NULL, $section = NULL, $sub_section 
     $base_class[] = 'section-' . cf_theme_safe_css_string_part($section);
     $base_class[] = 'NULL-sub_section';
 
-    $first_line = 'The section "' . $section . '" was not found under topic "' . $topic . '" of the help documentation. ' . "<br>\n";
+    $first_line = 'The section "' . $section . '" was not found under topic "' . $topic . '" of the help documentation. ' . "<br>";
   }
   else {
     $headers[0]['markup'] = "No Valid Sub-Section Found";
@@ -318,20 +318,20 @@ function mfcs_help_topic_not_found($topic = NULL, $section = NULL, $sub_section 
     $base_class[] = 'section-' . cf_theme_safe_css_string_part($section);
     $base_class[] = 'sub_section-' . cf_theme_safe_css_string_part($sub_section);
 
-    $first_line = 'The sub-section "' . $sub_section . '" was not found under section "' . $section . '" of topic "' . $topic . '" of the help documentation. ' . "<br>\n";
+    $first_line = 'The sub-section "' . $sub_section . '" was not found under section "' . $section . '" of topic "' . $topic . '" of the help documentation. ' . "<br>";
   }
 
   $section_class = $base_class;
   $section_class[] = 'help-section';
 
-  $markup = '<section class="' . implode(' ', $base_class) . '">' . "\n";
+  $markup = '<section class="' . implode(' ', $base_class) . '">';
   $markup .= mfcs_help_render_headers('section-', array(), $headers, 1);
-  $markup .= '<div class="paragraph">' . "\n";
+  $markup .= '<div class="paragraph">';
   $markup .= $first_line;
   $markup .= 'Perhaps you have specified an invalid url. ';
-  $markup .= '</div>' . "\n";
+  $markup .= '</div>';
 
-  $markup .= '</section>' . "\n";
+  $markup .= '</section>';
 
   return $markup;
 }
@@ -433,8 +433,8 @@ function mfcs_help_render_headers($headers_id, $attributes = array(), $headers =
     $attributes_string = '';
   }
 
-  $markup = '<header' . $attributes_string . '">' . "\n";
-  $markup .= '<hgroup class="' . implode(' ', $headers_group_class) . '">' . "\n";
+  $markup = '<header' . $attributes_string . '">';
+  $markup .= '<hgroup class="' . implode(' ', $headers_group_class) . '">';
 
   $headers_count = $start_count;
   foreach ($headers as $header_id => $header) {
@@ -483,11 +483,11 @@ function mfcs_help_render_headers($headers_id, $attributes = array(), $headers =
       $attributes_string = '';
     }
 
-    $markup .= '<h' . $headers_count . $attributes_string . '>' . $header['markup'] . '</h' . $headers_count . '>' . "\n";
+    $markup .= '<h' . $headers_count . $attributes_string . '>' . $header['markup'] . '</h' . $headers_count . '>';
   }
 
-  $markup .= '</hgroup>' . "\n";
-  $markup .= '</header>' . "\n";
+  $markup .= '</hgroup>';
+  $markup .= '</header>';
 
   if ($headers_count > 0) {
     return $markup;

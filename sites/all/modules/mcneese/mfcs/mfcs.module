@@ -2000,13 +2000,13 @@ function mfcs_mail($key, &$message, $params) {
 
 
     if (isset($params['markup'])) {
-      $markup .= $params['markup'] . "\n";
+      $markup .= $params['markup'];
 
-      $markup .= "<br>\n";
-      $markup .= "<strong>Request URL</strong>:\n<ul><li><a href=" . '"' . $request_url . '"' . ">" . $request_url . "</a></li></ul>\n<br>\n";
+      $markup .= "<br>";
+      $markup .= "<strong>Request URL</strong>:<ul><li><a href=" . '"' . $request_url . '"' . ">" . $request_url . "</a></li></ul><br>";
 
-      $markup .= "<br>\n";
-      $markup .= "<em>This e-mail was generated on</em>:\n<ul><li><em>" . date("Y/m/d h:i:s a T", $instance) . "</em></li></ul>\n";
+      $markup .= "<br>";
+      $markup .= "<em>This e-mail was generated on</em>:<ul><li><em>" . date("Y/m/d h:i:s a T", $instance) . "</em></li></ul>";
     }
   }
   else {

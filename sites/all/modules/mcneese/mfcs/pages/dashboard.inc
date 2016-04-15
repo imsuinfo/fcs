@@ -139,32 +139,32 @@ function mfcs_dashboard_page() {
   $item_list_2 = theme('item_list', array('items' => $items_2, 'type' => 'ul'));
   $item_list_3 = theme('item_list', array('items' => $items_3, 'type' => 'ul'));
 
-  $markup = '<div id="mfcs-dashboard_page-choices" class="mfcs-dashboard_page-choices">' . "\n";
+  $markup = '<div id="mfcs-dashboard_page-choices" class="mfcs-dashboard_page-choices">';
 
   if (!$can_create && !$can_list && !$can_search && !$can_review) {
     watchdog('insufficient access', "The user :user_name (:user_id) does not have sufficient access to use the system.", array(':user_name' => $user->name, ':user_id' => $user->uid), WATCHDOG_NOTICE);
-    $markup .= '<h3 class="mfcs-dashboard_page-choices-header">Insufficient Access</h3>' . "\n";
+    $markup .= '<h3 class="mfcs-dashboard_page-choices-header">Insufficient Access</h3>';
 
-    $markup .= '<div>' . "\n";
-    $markup .= 'You lack sufficient access to view or interact with the content on this website.<br>' . "\n";
-    $markup .= '<br>' . "\n";
-    $markup .= '<strong>Have you registered for the current or upcoming semester?</strong><br>' . "\n";
-    $markup .= 'Between semesters, students who have not regestered for the next semester may not have access to the system until they have completed their registration.<br>' . "\n";
-    $markup .= '<br>' . "\n";
+    $markup .= '<div>';
+    $markup .= 'You lack sufficient access to view or interact with the content on this website.<br>';
+    $markup .= '<br>';
+    $markup .= '<strong>Have you registered for the current or upcoming semester?</strong><br>';
+    $markup .= 'Between semesters, students who have not regestered for the next semester may not have access to the system until they have completed their registration.<br>';
+    $markup .= '<br>';
 
     if ($user_account_new_banner_access_problem) {
-      $markup .= 'The system has detected that there were problems creating your account.<br>' . "\n";
-      $markup .= 'This <em>account creation process</em> relies on additional technology that may be unavailable between 4:00am and 5:30am.<br>' . "\n";
-      $markup .= '<br>' . "\n";
-      $markup .= '<strong>Please try re-logging in before 4:00am or after 5:30am for your account to be properly created.</strong><br>' . "\n";
-      $markup .= '<br>' . "\n";
-      $markup .= 'Once your account is properly created, you can log in at any time to access the system.<br>' . "\n";
+      $markup .= 'The system has detected that there were problems creating your account.<br>';
+      $markup .= 'This <em>account creation process</em> relies on additional technology that may be unavailable between 4:00am and 5:30am.<br>';
+      $markup .= '<br>';
+      $markup .= '<strong>Please try re-logging in before 4:00am or after 5:30am for your account to be properly created.</strong><br>';
+      $markup .= '<br>';
+      $markup .= 'Once your account is properly created, you can log in at any time to access the system.<br>';
     }
     else {
-      $markup .= 'If you believe this is in error, then please contact the support staff through the proper channels.' . "\n";
+      $markup .= 'If you believe this is in error, then please contact the support staff through the proper channels.';
     }
 
-    $markup .= '</div>' . "\n";
+    $markup .= '</div>';
 
     if ($user->status != 0) {
       $mfcs_users = mfcs_load_users($user->uid);
@@ -182,22 +182,22 @@ function mfcs_dashboard_page() {
     }
   }
   else {
-    $markup .= '<h3 class="mfcs-dashboard_page-choices-header">Facilities Use and Special Event Request System</h3>' . "\n";
+    $markup .= '<h3 class="mfcs-dashboard_page-choices-header">Facilities Use and Special Event Request System</h3>';
   }
 
   if (!empty($items_1)) {
-    $markup .= '<div class="mfcs-dashboard_page-choices-list_1">' . $item_list_1 . '</div>' . "\n";
+    $markup .= '<div class="mfcs-dashboard_page-choices-list_1">' . $item_list_1 . '</div>';
   }
 
   if (!empty($items_2)) {
-    $markup .= '<div class="mfcs-dashboard_page-choices-list_2">' . $item_list_2 . '</div>' . "\n";
+    $markup .= '<div class="mfcs-dashboard_page-choices-list_2">' . $item_list_2 . '</div>';
   }
 
   if (!empty($items_3)) {
-    $markup .= '<div class="mfcs-dashboard_page-choices-list_3">' . $item_list_3 . '</div>' . "\n";
+    $markup .= '<div class="mfcs-dashboard_page-choices-list_3">' . $item_list_3 . '</div>';
   }
 
-  $markup .= '</div>' . "\n";
+  $markup .= '</div>';
 
 
   if ($can_list) {

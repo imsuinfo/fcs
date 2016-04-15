@@ -590,7 +590,7 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
         $length += strlen($value->$value_name);
       }
       elseif ($type[$value_name] == 'text_lined') {
-        $markup .= preg_replace("/\n/", "<br>\n", check_plain($value->$value_name));
+        $markup .= preg_replace("/\n/", "<br>", check_plain($value->$value_name));
 
         $length += strlen($value->$value_name);
       }
@@ -1135,7 +1135,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
       $message = check_plain($review->message);
       $date = $review->date;
 
-      $message = str_replace("\n", "<br>\n", trim($message));
+      $message = str_replace("\n", "<br>", trim($message));
 
       if (is_string($user_id)) {
         $user_id = (int) $user_id;

@@ -389,9 +389,9 @@ function mfcs_request_email_log_0_form($form, &$form_state, $page_number = NULL)
     $navigation_total = $email_logs_total;
   }
 
-  $navigation_bottom .= '<div class="table_listing-comment">' . "\n";
+  $navigation_bottom .= '<div class="table_listing-comment">';
   $navigation_bottom .= "Showing " . $navigation_start . " to " . $navigation_total . " of " . $email_logs_total . " entries.\n";
-  $navigation_bottom .= '</div>' . "\n";
+  $navigation_bottom .= '</div>';
 
   if ($email_logs_total > ($options['start'] + $rows_per_page)) {
     $next_page = $page_number + 1;
@@ -462,21 +462,21 @@ function mfcs_request_email_log_0_view_page($id) {
     $log = NULL;
   }
 
-  $markup = '<div id="mfcs-request-email_log-0-page" class="email_log">' . "\n";
+  $markup = '<div id="mfcs-request-email_log-0-page" class="email_log">';
 
-  $markup .= '<div class="email_log-title-wrapper">' . "\n";
-  $markup .= '<h3 class="email_log-title">E-mail #' . $id . ': ' . check_plain($log->title) . '</h3>' . "\n";
-  $markup .= '</div>' . "\n"; // email_log-title-wrapper
+  $markup .= '<div class="email_log-title-wrapper">';
+  $markup .= '<h3 class="email_log-title">E-mail #' . $id . ': ' . check_plain($log->title) . '</h3>';
+  $markup .= '</div>'; // email_log-title-wrapper
 
   $markup .= '<div class="email_log-section-top">';
-  $markup .= '<div class="email_log-date-wrapper">' . "\n";
-  $markup .= '<div class="email_log-date"><strong>Submitted On</strong>: ' . date('Y/m/d h:i:s a T', $log->date) . '.</div>' . "\n";
-  $markup .= '</div>' . "\n"; // email_log-date-wrapper
+  $markup .= '<div class="email_log-date-wrapper">';
+  $markup .= '<div class="email_log-date"><strong>Submitted On</strong>: ' . date('Y/m/d h:i:s a T', $log->date) . '.</div>';
+  $markup .= '</div>'; // email_log-date-wrapper
 
-  $markup .= '<div class="email_log-date-wrapper">' . "\n";
-  $markup .= '<div class="email_log-date"><strong>Sent To</strong>: <code>' . check_plain($log->destination) . '</code>.</div>' . "\n";
-  $markup .= '</div>' . "\n"; // email_log-date-wrapper
-  $markup .= '</div>' . "\n"; // email_log-section-top
+  $markup .= '<div class="email_log-date-wrapper">';
+  $markup .= '<div class="email_log-date"><strong>Sent To</strong>: <code>' . check_plain($log->destination) . '</code>.</div>';
+  $markup .= '</div>'; // email_log-date-wrapper
+  $markup .= '</div>'; // email_log-section-top
 
 
   // headers fieldset
@@ -494,11 +494,11 @@ function mfcs_request_email_log_0_view_page($id) {
   );
 
   $boundary = NULL;
-  $fieldset['#children'] .= '<div class="email_log-headers"><pre>' . "\n";
+  $fieldset['#children'] .= '<div class="email_log-headers"><pre>';
   $headers = unserialize($log->headers);
   if (is_array($headers)) {
     foreach ($headers as $header_name => $header) {
-      $fieldset['#children'] .= '<strong>' . check_plain($header_name) . '</strong>: ' . check_plain($header) . ";\n";
+      $fieldset['#children'] .= '<strong>' . check_plain($header_name) . '</strong>: ' . check_plain($header) . ";";
 
       if ($header_name == 'Content-Type') {
         $matches = array();
@@ -510,7 +510,7 @@ function mfcs_request_email_log_0_view_page($id) {
       }
     }
   }
-  $fieldset['#children'] .= '</pre></div>' . "\n";
+  $fieldset['#children'] .= '</pre></div>';
 
   $state = array();
   form_process_fieldset($fieldset, $state);
@@ -531,12 +531,12 @@ function mfcs_request_email_log_0_view_page($id) {
     ),
   );
 
-  $fieldset['#children'] .= '<div class="email_log-headers"><pre>' . "\n";
+  $fieldset['#children'] .= '<div class="email_log-headers"><pre>';
   $body = unserialize($log->body);
   if (is_string($body)) {
-    $fieldset['#children'] .= check_plain($body) . "\n";
+    $fieldset['#children'] .= check_plain($body);
   }
-  $fieldset['#children'] .= '</pre></div>' . "\n";
+  $fieldset['#children'] .= '</pre></div>';
 
   $state = array();
   form_process_fieldset($fieldset, $state);
@@ -632,11 +632,11 @@ function mfcs_request_email_log_0_view_page($id) {
           ),
         );
 
-        $fieldset['#children'] .= '<div class="email_log-body"><pre>' . "\n";
+        $fieldset['#children'] .= '<div class="email_log-body"><pre>';
         if (is_string($text_plain)) {
-          $fieldset['#children'] .= check_plain($text_plain) . "\n";
+          $fieldset['#children'] .= check_plain($text_plain);
         }
-        $fieldset['#children'] .= '</pre></div>' . "\n";
+        $fieldset['#children'] .= '</pre></div>';
 
         $state = array();
         form_process_fieldset($fieldset, $state);
@@ -670,11 +670,11 @@ function mfcs_request_email_log_0_view_page($id) {
           ),
         );
 
-        $fieldset['#children'] .= '<div class="email_log-body">' . "\n";
+        $fieldset['#children'] .= '<div class="email_log-body">';
         if (is_string($text_html)) {
-          $fieldset['#children'] .= check_markup($text_html, 'full_html') . "\n";
+          $fieldset['#children'] .= check_markup($text_html, 'full_html');
         }
-        $fieldset['#children'] .= '</div>' . "\n";
+        $fieldset['#children'] .= '</div>';
 
         $state = array();
         form_process_fieldset($fieldset, $state);
@@ -699,11 +699,11 @@ function mfcs_request_email_log_0_view_page($id) {
           ),
         );
 
-        $fieldset['#children'] .= '<div class="email_log-body"><pre>' . "\n";
+        $fieldset['#children'] .= '<div class="email_log-body"><pre>';
         if (is_string($body_part)) {
-          $fieldset['#children'] .= check_plain($body_part) . "\n";
+          $fieldset['#children'] .= check_plain($body_part);
         }
-        $fieldset['#children'] .= '</pre></div>' . "\n";
+        $fieldset['#children'] .= '</pre></div>';
 
         $state = array();
         form_process_fieldset($fieldset, $state);
@@ -729,13 +729,13 @@ function mfcs_request_email_log_0_view_page($id) {
       ),
     );
 
-    $fieldset['#children'] .= '<div class="email_log-operations">' . "\n";
-    $fieldset['#children'] .= '<div class="email_log-operations-operation"><a href="' . $base_path . 'requests/email_log-0' . $url_arguments . '">Back to Log Listing</a></div>' . "\n";
+    $fieldset['#children'] .= '<div class="email_log-operations">';
+    $fieldset['#children'] .= '<div class="email_log-operations-operation"><a href="' . $base_path . 'requests/email_log-0' . $url_arguments . '">Back to Log Listing</a></div>';
 
     if (is_string($text_html)) {
-      $fieldset['#children'] .= '<div class="email_log-operations-operation"><a href="' . $base_path . 'requests/email_log-0/resend/' . $id . $url_arguments . '">Re-send E-mail</a></div>' . "\n";
+      $fieldset['#children'] .= '<div class="email_log-operations-operation"><a href="' . $base_path . 'requests/email_log-0/resend/' . $id . $url_arguments . '">Re-send E-mail</a></div>';
     }
-    $fieldset['#children'] .= '</div>' . "\n";
+    $fieldset['#children'] .= '</div>';
 
     $state = array();
     form_process_fieldset($fieldset, $state);
@@ -744,7 +744,7 @@ function mfcs_request_email_log_0_view_page($id) {
 
 
 
-  $markup .= '</div>' . "\n"; // #mfcs-request-email_log-0-page
+  $markup .= '</div>'; // #mfcs-request-email_log-0-page
 
   return $markup;
 }

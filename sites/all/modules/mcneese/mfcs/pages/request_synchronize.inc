@@ -383,9 +383,9 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = NUL
     $navigation_total = $returned_total;
   }
 
-  $navigation_bottom .= '<div class="table_listing-comment">' . "\n";
-  $navigation_bottom .= "Showing " . $navigation_start . " to " . $navigation_total . " of " . $returned_total . " entries.\n";
-  $navigation_bottom .= '</div>' . "\n";
+  $navigation_bottom .= '<div class="table_listing-comment">';
+  $navigation_bottom .= "Showing " . $navigation_start . " to " . $navigation_total . " of " . $returned_total . " entries.";
+  $navigation_bottom .= '</div>';
 
   if ($returned_total > ($options['start'] + $rows_per_page)) {
     $next_page = $page_number + 1;

@@ -533,7 +533,7 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
       'id' => $holiday->id,
       'title' => check_plain($holiday->title),
       'tooltip' => str_replace('"', '&quot;', $description),
-      'description' => str_replace("\n", "<br>\n", $description),
+      'description' => str_replace("\n", "<br>", $description),
       'year' => $year,
       'month' => $month,
       'day' => $day,

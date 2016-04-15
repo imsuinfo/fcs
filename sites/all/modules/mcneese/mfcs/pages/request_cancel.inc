@@ -93,8 +93,8 @@ function mfcs_request_cancel_0_form($form, &$form_state, $request_id) {
   );
   $form['message']['#markup'] .= '<h3>Are you sure wou want to cancel the request?</h3> ';
   $form['message']['#markup'] .= '<div>';
-  $form['message']['#markup'] .= 'By cancelling this request you agree to forfeit the time slots that you have requested. You cannot undo this action. ' . "<br>\n";
-  $form['message']['#markup'] .= "<br>\n";
+  $form['message']['#markup'] .= 'By cancelling this request you agree to forfeit the time slots that you have requested. You cannot undo this action. ' . "<br>";
+  $form['message']['#markup'] .= "<br>";
   $form['message']['#markup'] .= 'Are you certain you want to cancel? ';
   $form['message']['#markup'] .= '</div>';
 
@@ -525,7 +525,7 @@ function mfcs_request_cancelling_0_form($form, &$form_state, $request_id) {
   );
   $form['message']['#markup'] .= '<h3>Which dates would you like to cancel or uncancel?</h3> ';
   $form['message']['#markup'] .= '<div>';
-  $form['message']['#markup'] .= 'Once a date is cancelled, that request may no longer be available for uncancelling if another request takes up the time slot.' . "<br>\n";
+  $form['message']['#markup'] .= 'Once a date is cancelled, that request may no longer be available for uncancelling if another request takes up the time slot.' . "<br>";
   $form['message']['#markup'] .= '</div>';
 
   $form['dates'] = array(
@@ -897,38 +897,38 @@ function mfcs_request_cancelling_0_form_submit($form, &$form_state) {
       );
 
       $parameters['cancelling']['content'] .= "\nThe following dates have just been cancelled:\n";
-      $parameters['cancelling']['markup'] .= "<br>\nThe following dates have just been <em>cancelled</em>:\n";
-      $parameters['cancelling']['markup'] .= "<ul>\n";
+      $parameters['cancelling']['markup'] .= "<br>The following dates have just been <em>cancelled</em>:";
+      $parameters['cancelling']['markup'] .= "<ul>";
 
       if (empty($do_cancel)) {
         $parameters['cancelling']['content'] .= " - No dates have been cancelled.\n";
-        $parameters['cancelling']['markup'] .= "<li>No dates have been cancelled.</li>\n";
+        $parameters['cancelling']['markup'] .= "<li>No dates have been cancelled.</li>";
       }
       else {
         foreach ($do_cancel as $key => $content) {
           $parameters['cancelling']['content'] .= ' - ' . $content . "\n";
-          $parameters['cancelling']['markup'] .= "<li>" . $content . "</li>\n";
+          $parameters['cancelling']['markup'] .= "<li>" . $content . "</li>";
         }
       }
 
-      $parameters['cancelling']['markup'] .= "</ul>\n";
+      $parameters['cancelling']['markup'] .= "</ul>";
 
       $parameters['cancelling']['content'] .= "\nThe following dates have just been uncancelled:\n";
-      $parameters['cancelling']['markup'] .= "<br>\nThe following dates have just been <em>uncancelled</em>:\n";
-      $parameters['cancelling']['markup'] .= "<ul>\n";
+      $parameters['cancelling']['markup'] .= "<br>The following dates have just been <em>uncancelled</em>:";
+      $parameters['cancelling']['markup'] .= "<ul>";
 
       if (empty($do_uncancel)) {
         $parameters['cancelling']['content'] .= " - No dates have been uncancelled.\n";
-        $parameters['cancelling']['markup'] .= "<li>No dates have been uncancelled.</li>\n";
+        $parameters['cancelling']['markup'] .= "<li>No dates have been uncancelled.</li>";
       }
       else {
         foreach ($do_uncancel as $key => $content) {
           $parameters['cancelling']['content'] .= ' - ' . $content . "\n";
-          $parameters['cancelling']['markup'] .= "<li>" . $content . "</li>\n";
+          $parameters['cancelling']['markup'] .= "<li>" . $content . "</li>";
         }
       }
 
-      $parameters['cancelling']['markup'] .= "</ul>\n";
+      $parameters['cancelling']['markup'] .= "</ul>";
 
       mfcs_send_workflow_emails($request_id, $parameters);
     }

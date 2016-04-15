@@ -172,7 +172,7 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
           $message_markup = '<div class="history_item-message">';
 
           if (!empty($revision->message)) {
-            $message_markup .= '<pre class="history_item-message-preserved">' . $revision->message . "</pre>\n";
+            $message_markup .= '<pre class="history_item-message-preserved">' . $revision->message . "</pre>";
           }
 
           $message_markup .= '</div>';
@@ -198,7 +198,7 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
             );
 
             $form['history'][$fieldset_name]['history_item-signature_fieldset']['signature'] = array(
-              '#markup' => '<pre class="history_item-signature-preserved">' . $revision->signature . "</pre>\n",
+              '#markup' => '<pre class="history_item-signature-preserved">' . $revision->signature . "</pre>",
             );
           }
         }

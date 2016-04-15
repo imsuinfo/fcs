@@ -347,9 +347,9 @@ function mfcs_request_search_0_form($form, &$form_state) {
       $navigation_total = $form_state['simple_search-count'];
     }
 
-    $form['simple']['results']['table']['#markup'] .= '<div class="table_listing-comment">' . "\n";
-    $form['simple']['results']['table']['#markup'] .= "Showing " . $navigation_start . " to " . $navigation_total . " of " . $form_state['simple_search-count'] . " entries.\n";
-    $form['simple']['results']['table']['#markup'] .= '</div>' . "\n";
+    $form['simple']['results']['table']['#markup'] .= '<div class="table_listing-comment">';
+    $form['simple']['results']['table']['#markup'] .= "Showing " . $navigation_start . " to " . $navigation_total . " of " . $form_state['simple_search-count'] . " entries.";
+    $form['simple']['results']['table']['#markup'] .= '</div>';
   }
 
   $form['advanced'] = array(
@@ -569,9 +569,9 @@ function mfcs_request_search_0_form($form, &$form_state) {
       $navigation_total = $form_state['advanced_search-count'];
     }
 
-    $form['advanced']['results']['table']['#markup'] .= '<div class="table_listing-comment">' . "\n";
+    $form['advanced']['results']['table']['#markup'] .= '<div class="table_listing-comment">';
     $form['advanced']['results']['table']['#markup'] .= "Showing " . $navigation_start . " to " . $navigation_total . " of " . $form_state['advanced_search-count'] . " entries.\n";
-    $form['advanced']['results']['table']['#markup'] .= '</div>' . "\n";
+    $form['advanced']['results']['table']['#markup'] .= '</div>';
   }
 
   // tweak printing display based on results
@@ -3416,7 +3416,7 @@ function mfcs_request_search_0_form_build_grouping($form, &$form_state, &$locati
     );
 
     $location['search']['controls']['grouping']['explanation']['markup']['#markup'] = '<strong>' . "Target Grouping" . '</strong><br>';
-    $location['search']['controls']['grouping']['explanation']['markup']['#markup'] .= '<em class="uppercase">And</em>' . " = match all targets.<br>\n";
+    $location['search']['controls']['grouping']['explanation']['markup']['#markup'] .= '<em class="uppercase">And</em>' . " = match all targets.<br>";
     $location['search']['controls']['grouping']['explanation']['markup']['#markup'] .= '<em class="uppercase">OR</em>' . " = match any target.";
 
     $location['search']['controls']['grouping']['add_and'] = array(

@@ -476,9 +476,9 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
     $navigation_total = $reviewers_returned['count'];
   }
 
-  $navigation_bottom .= '<div class="table_listing-comment">' . "\n";
-  $navigation_bottom .= "Showing " . $navigation_start . " to " . $navigation_total . " of " . $reviewers_returned['count'] . " entries.\n";
-  $navigation_bottom .= '</div>' . "\n";
+  $navigation_bottom .= '<div class="table_listing-comment">';
+  $navigation_bottom .= "Showing " . $navigation_start . " to " . $navigation_total . " of " . $reviewers_returned['count'] . " entries.";
+  $navigation_bottom .= '</div>';
 
   if ($reviewers_returned['count'] > ($options['start'] + $rows_per_page)) {
     $next_page = $page_number + 1;

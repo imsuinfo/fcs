@@ -180,18 +180,18 @@ function mfcs_request_statistics_0_page($year = NULL, $month = NULL, $day = NULL
 
   $now = date("Y/m/d h:i:s a");
 
-  $markup = '<div id="mfcs-statistics-page" class="statistics-page">' . "\n";
+  $markup = '<div id="mfcs-statistics-page" class="statistics-page">';
 
   // next/prev years
-  $markup .= '<div class="statistics-navigation position-relative no-print clear">' . "\n";
-  $markup .= '  <a href="' . $base_path . 'requests/statistics-0/' . $path_previous . '" class="statistics-navigation-link link-previous inline-block" title="Statistics for ' . $string_previous . '">Prev</a>' . "\n";
-  $markup .= '  <a href="' . $base_path . 'requests/statistics-0/' . $path_next . '" class="statistics-navigation-link link-previous inline-block float-right" title="Statistics for for ' . $string_next . '">Next</a>' . "\n";
-  $markup .= '</div>' . "\n";
+  $markup .= '<div class="statistics-navigation position-relative no-print clear">';
+  $markup .= '  <a href="' . $base_path . 'requests/statistics-0/' . $path_previous . '" class="statistics-navigation-link link-previous inline-block" title="Statistics for ' . $string_previous . '">Prev</a>';
+  $markup .= '  <a href="' . $base_path . 'requests/statistics-0/' . $path_next . '" class="statistics-navigation-link link-previous inline-block float-right" title="Statistics for for ' . $string_next . '">Next</a>';
+  $markup .= '</div>';
 
-  $markup .= '<div class="statistics-title">' . "\n";
+  $markup .= '<div class="statistics-title">';
   if (is_null($month)) {
     mfcs_add_canonical_headers('requests/statistics-0/' . $year);
-    $markup .= '<h3 class="statistics-title-text">' . "Request Statistics for the year " . $year . ' <span class="statistics-title-text-note">(generated on ' . $now . ')</span></h3>' . "\n";
+    $markup .= '<h3 class="statistics-title-text">' . "Request Statistics for the year " . $year . ' <span class="statistics-title-text-note">(generated on ' . $now . ')</span></h3>';
 
     $counts = mfcs_request_statistics_load_counts($year_start, $year_stop);
   }
@@ -199,7 +199,7 @@ function mfcs_request_statistics_0_page($year = NULL, $month = NULL, $day = NULL
     $month = strtolower(date('F', $month_start));
     $year = date('Y', $month_start);
     mfcs_add_canonical_headers('requests/statistics-0/' . $year . '/' . $month);
-    $markup .= '<h3 class="statistics-title-text">' . "Request Statistics for " . $month_name . " " . $year . ' <span class="statistics-title-text-note">(generated on ' . $now . ')</span></h3>' . "\n";
+    $markup .= '<h3 class="statistics-title-text">' . "Request Statistics for " . $month_name . " " . $year . ' <span class="statistics-title-text-note">(generated on ' . $now . ')</span></h3>';
 
     $counts = mfcs_request_statistics_load_counts($month_start, $month_stop);
   }
@@ -209,21 +209,21 @@ function mfcs_request_statistics_0_page($year = NULL, $month = NULL, $day = NULL
     $day = date('d', $day_start);
 
     mfcs_add_canonical_headers('requests/statistics-0/' . $year . '/' . $month . '/' . $day);
-    $markup .= '<h3 class="statistics-title-text">' . "Request Statistics for " . $month_name . " " . $day . ", " . $year . ' <span class="statistics-title-text-note">(generated on ' . $now . ')</span></h3>' . "\n";
+    $markup .= '<h3 class="statistics-title-text">' . "Request Statistics for " . $month_name . " " . $day . ", " . $year . ' <span class="statistics-title-text-note">(generated on ' . $now . ')</span></h3>';
 
     $counts = mfcs_request_statistics_load_counts($day_start, $day_stop);
   }
-  $markup .= '</div>' . "\n"; // statistics-title
+  $markup .= '</div>'; // statistics-title
 
   $markup .= mfcs_request_statistics_render_request_classification($counts, $classification_options);
-  $markup .= '<hr>' . "\n";
+  $markup .= '<hr>';
   $markup .= mfcs_request_statistics_render_request_type($counts, $type_options);
-  $markup .= '<hr>' . "\n";
+  $markup .= '<hr>';
   $markup .= mfcs_request_statistics_render_request_step($counts, $steps_options);
-  $markup .= '<hr>' . "\n";
+  $markup .= '<hr>';
   $markup .= mfcs_request_statistics_render_request_status($counts, $status_options);
 
-  $markup .= '</div>' . "\n"; // mfcs-statistics-page
+  $markup .= '</div>'; // mfcs-statistics-page
 
   return $markup;
 }
@@ -618,26 +618,26 @@ function mfcs_request_statistics_render_request_classification($counts, $classif
 
 
   // render the markup
-  $markup = '<div class="statistics-block statistics-block-main">' . "\n";
-  $markup .= '<div id="' . 'mfcs-statistics-' . $options['name'] . '-wrapper" class="statistics-block-chart">' . "\n";
-  $markup .= '  <svg id="' . 'mfcs-statistics-' . $options['name'] . '" class="statistics-block-chart-main" title="Requests by Classification" width="' . $width . '" height="' . $height . '"' . $svg_options . '>' . $chart_markup . '</svg>' . "\n";
-  $markup .= '</div>' . "\n";
+  $markup = '<div class="statistics-block statistics-block-main">';
+  $markup .= '<div id="' . 'mfcs-statistics-' . $options['name'] . '-wrapper" class="statistics-block-chart">';
+  $markup .= '  <svg id="' . 'mfcs-statistics-' . $options['name'] . '" class="statistics-block-chart-main" title="Requests by Classification" width="' . $width . '" height="' . $height . '"' . $svg_options . '>' . $chart_markup . '</svg>';
+  $markup .= '</div>';
 
-  $markup .= '<div class="statistics-block-text">' . "\n";
+  $markup .= '<div class="statistics-block-text">';
 
   if (isset($counts['main']['total'])) {
-    $markup .= '<div class="statistics-block-text-item statistics-block-text-item-created">' . "\n";
-    $markup .= "There have been <em>" . $counts['main']['total'] . "</em> requests created." . "\n";
-    $markup .= '</div>' . "\n";
+    $markup .= '<div class="statistics-block-text-item statistics-block-text-item-created">';
+    $markup .= "There have been <em>" . $counts['main']['total'] . "</em> requests created.";
+    $markup .= '</div>';
   }
 
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['classification']['student'] . "</em> <strong>" . $classification_options[MFCS_REQUEST_CLASSIFICATION_STUDENT] . "</strong> (<em>" . $options['rows']['student']['percent'] . '%</em> of requests). ' . "</div>\n";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['classification']['faculty'] . "</em> <strong>" . $classification_options[MFCS_REQUEST_CLASSIFICATION_FACULTY] . "</strong> (<em>" . $options['rows']['faculty']['percent'] . '%</em> of requests). ' . "</div>\n";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['classification']['camps'] . "</em> <strong>" . $classification_options[MFCS_REQUEST_CLASSIFICATION_CAMPS] . "</strong> (<em>" . $options['rows']['camps']['percent'] . '%</em> of requests). ' . "</div>\n";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['classification']['external'] . "</em> <strong>" . $classification_options[MFCS_REQUEST_CLASSIFICATION_EXTERNAL] . "</strong> (<em>" . $options['rows']['external']['percent'] . '%</em> of requests). ' . "</div>\n";
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['classification']['student'] . "</em> <strong>" . $classification_options[MFCS_REQUEST_CLASSIFICATION_STUDENT] . "</strong> (<em>" . $options['rows']['student']['percent'] . '%</em> of requests). ' . "</div>";
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['classification']['faculty'] . "</em> <strong>" . $classification_options[MFCS_REQUEST_CLASSIFICATION_FACULTY] . "</strong> (<em>" . $options['rows']['faculty']['percent'] . '%</em> of requests). ' . "</div>";
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['classification']['camps'] . "</em> <strong>" . $classification_options[MFCS_REQUEST_CLASSIFICATION_CAMPS] . "</strong> (<em>" . $options['rows']['camps']['percent'] . '%</em> of requests). ' . "</div>";
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['classification']['external'] . "</em> <strong>" . $classification_options[MFCS_REQUEST_CLASSIFICATION_EXTERNAL] . "</strong> (<em>" . $options['rows']['external']['percent'] . '%</em> of requests). ' . "</div>";
 
-  $markup .= '</div>' . "\n"; // statistics-block-text
-  $markup .= '</div>' . "\n"; // statistics-block-main
+  $markup .= '</div>'; // statistics-block-text
+  $markup .= '</div>'; // statistics-block-main
 
   return $markup;
 }
@@ -779,29 +779,29 @@ function mfcs_request_statistics_render_request_type($counts, $type_options) {
   $svg_options = ' version="1.1" viewBox="0 0 ' . $options['chart_width'] . ' ' . $options['chart_height'] . '" preserveAspectRatio="xMaxYMax meet" xmlns="http://www.w3.org/2000/svg"';
 
   // render the markup
-  $markup = '<div class="statistics-block statistics-block-request_type">' . "\n";
+  $markup = '<div class="statistics-block statistics-block-request_type">';
 
-  $markup .= '<div class="statistics-block-text">' . "\n";
+  $markup .= '<div class="statistics-block-text">';
 
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['athletic'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_ATHLETIC] . "</strong> (<em>" . $options['rows']['athletic']['percent'] . '%</em> of requests). ' . "</div>\n";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['banquet'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_BANQUET] . "</strong> (<em>" . $options['rows']['banquet']['percent'] . '%</em> of requests). ' . "</div>\n";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['ceremony'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_CEREMONY] . "</strong> (<em>" . $options['rows']['ceremony']['percent'] . '%</em> of requests). ' . "</div>\n";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['fair'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_FAIR] . "</strong> (<em>" . $options['rows']['fair']['percent'] . '%</em> of requests). ' . "</div>\n";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['lecture'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_LECTURE] . "</strong> (<em>" . $options['rows']['lecture']['percent'] . '%</em> of requests). ' . "</div>\n";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['meeting'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_MEETING] . "</strong> (<em>" . $options['rows']['meeting']['percent'] . '%</em> of requests). ' . "</div>\n";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['other'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_OTHER] . "</strong> (<em>" . $options['rows']['other']['percent'] . '%</em> of requests). ' . "</div>\n";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['performance'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_PERFORMANCE] . "</strong> (<em>" . $options['rows']['performance']['percent'] . '%</em> of requests). ' . "</div>\n";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['quick_meeting'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_QUICK_MEETING] . "</strong> (<em>" . $options['rows']['quick_meeting']['percent'] . '%</em> of requests). ' . "</div>\n";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['reception'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_RECEPTION] . "</strong> (<em>" . $options['rows']['reception']['percent'] . '%</em> of requests). ' . "</div>\n";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['talent'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_TALENT] . "</strong> (<em>" . $options['rows']['talent']['percent'] . '%</em> of requests). ' . "</div>\n";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['workshop'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_WORKSHOP] . "</strong> (<em>" . $options['rows']['workshop']['percent'] . '%</em> of requests). ' . "</div>\n";
-  $markup .= '</div>' . "\n"; // statistics-block-text
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['athletic'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_ATHLETIC] . "</strong> (<em>" . $options['rows']['athletic']['percent'] . '%</em> of requests). ' . "</div>";
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['banquet'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_BANQUET] . "</strong> (<em>" . $options['rows']['banquet']['percent'] . '%</em> of requests). ' . "</div>";
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['ceremony'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_CEREMONY] . "</strong> (<em>" . $options['rows']['ceremony']['percent'] . '%</em> of requests). ' . "</div>";
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['fair'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_FAIR] . "</strong> (<em>" . $options['rows']['fair']['percent'] . '%</em> of requests). ' . "</div>";
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['lecture'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_LECTURE] . "</strong> (<em>" . $options['rows']['lecture']['percent'] . '%</em> of requests). ' . "</div>";
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['meeting'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_MEETING] . "</strong> (<em>" . $options['rows']['meeting']['percent'] . '%</em> of requests). ' . "</div>";
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['other'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_OTHER] . "</strong> (<em>" . $options['rows']['other']['percent'] . '%</em> of requests). ' . "</div>";
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['performance'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_PERFORMANCE] . "</strong> (<em>" . $options['rows']['performance']['percent'] . '%</em> of requests). ' . "</div>";
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['quick_meeting'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_QUICK_MEETING] . "</strong> (<em>" . $options['rows']['quick_meeting']['percent'] . '%</em> of requests). ' . "</div>";
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['reception'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_RECEPTION] . "</strong> (<em>" . $options['rows']['reception']['percent'] . '%</em> of requests). ' . "</div>";
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['talent'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_TALENT] . "</strong> (<em>" . $options['rows']['talent']['percent'] . '%</em> of requests). ' . "</div>";
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['workshop'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_WORKSHOP] . "</strong> (<em>" . $options['rows']['workshop']['percent'] . '%</em> of requests). ' . "</div>";
+  $markup .= '</div>'; // statistics-block-text
 
-  $markup .= '<div id="' . 'mfcs-statistics-' . $options['name'] . '-wrapper" class="statistics-block-chart">' . "\n";
-  $markup .= '  <svg id="' . 'mfcs-statistics-' . $options['name'] . '" class="statistics-block-chart-request_type" title="Requests by Type" width="' . $width . '" height="' . $height . '"' . $svg_options . '>' . $chart_markup . '</svg>' . "\n";
-  $markup .= '</div>' . "\n";
+  $markup .= '<div id="' . 'mfcs-statistics-' . $options['name'] . '-wrapper" class="statistics-block-chart">';
+  $markup .= '  <svg id="' . 'mfcs-statistics-' . $options['name'] . '" class="statistics-block-chart-request_type" title="Requests by Type" width="' . $width . '" height="' . $height . '"' . $svg_options . '>' . $chart_markup . '</svg>';
+  $markup .= '</div>';
 
-  $markup .= '</div>' . "\n"; // statistics-block
+  $markup .= '</div>'; // statistics-block
 
   return $markup;
 }
@@ -912,23 +912,23 @@ function mfcs_request_statistics_render_request_step($counts, $step_options) {
   $svg_options = ' version="1.1" viewBox="0 0 ' . $options['chart_width'] . ' ' . $options['chart_height'] . '" preserveAspectRatio="xMaxYMax meet" xmlns="http://www.w3.org/2000/svg"';
 
   // render the markup
-  $markup = '<div class="statistics-block statistics-block-request_step">' . "\n";
+  $markup = '<div class="statistics-block statistics-block-request_step">';
 
-  $markup .= '<div id="' . 'mfcs-statistics-' . $options['name'] . '-wrapper" class="statistics-block-chart">' . "\n";
-  $markup .= '  <svg id="' . 'mfcs-statistics-' . $options['name'] . '" class="statistics-block-chart-request_step" title="Requests by Step" width="' . $width . '" height="' . $height . '"' . $svg_options . '>' . $chart_markup . '</svg>' . "\n";
-  $markup .= '</div>' . "\n"; // statistics-block-chart
+  $markup .= '<div id="' . 'mfcs-statistics-' . $options['name'] . '-wrapper" class="statistics-block-chart">';
+  $markup .= '  <svg id="' . 'mfcs-statistics-' . $options['name'] . '" class="statistics-block-chart-request_step" title="Requests by Step" width="' . $width . '" height="' . $height . '"' . $svg_options . '>' . $chart_markup . '</svg>';
+  $markup .= '</div>'; // statistics-block-chart
 
-  $markup .= '<div class="statistics-block-text">' . "\n";
-  #$markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['changes_required'] . "</em> <strong>" . $step_options[MFCS_REVIEW_STEP_CHANGES_REQUIRED] . "</strong> (<em>" . $options['rows']['changes_required']['percent'] . '%</em> of requests). ' . "</div>\n";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['completed'] . "</em> <strong>" . $step_options[MFCS_REVIEW_STEP_COMPLETED] . "</strong> (<em>" . $options['rows']['completed']['percent'] . '%</em> of requests). ' . "</div>\n";
-  #$markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['make_decisions'] . "</em> <strong>" . $step_options[MFCS_REVIEW_STEP_MAKE_DECISIONS] . "</strong> (<em>" . $options['rows']['make_decisions']['percent'] . '%</em> of requests). ' . "</div>\n";
-  #$markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['release_hold'] . "</em> <strong>" . $step_options[MFCS_REVIEW_STEP_RELEASE_HOLD] . "</strong> (<em>" . $options['rows']['release_hold']['percent'] . '%</em> of requests). ' . "</div>\n";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['review'] . "</em> <strong>" . $step_options[MFCS_REVIEW_STEP_REVIEW] . "</strong> (<em>" . $options['rows']['review']['percent'] . '%</em> of requests). ' . "</div>\n";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['requirements'] . "</em> <strong>" . $step_options[MFCS_REVIEW_STEP_REQUIREMENTS] . "</strong> (<em>" . $options['rows']['requirements']['percent'] . '%</em> of requests). ' . "</div>\n";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['venue_available'] . "</em> <strong>" . $step_options[MFCS_REVIEW_STEP_VENUE_AVAILABLE] . "</strong> (<em>" . $options['rows']['venue_available']['percent'] . '%</em> of requests). ' . "</div>\n";
-  $markup .= '</div>' . "\n"; // statistics-block-text
+  $markup .= '<div class="statistics-block-text">';
+  #$markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['changes_required'] . "</em> <strong>" . $step_options[MFCS_REVIEW_STEP_CHANGES_REQUIRED] . "</strong> (<em>" . $options['rows']['changes_required']['percent'] . '%</em> of requests). ' . "</div>";
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['completed'] . "</em> <strong>" . $step_options[MFCS_REVIEW_STEP_COMPLETED] . "</strong> (<em>" . $options['rows']['completed']['percent'] . '%</em> of requests). ' . "</div>";
+  #$markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['make_decisions'] . "</em> <strong>" . $step_options[MFCS_REVIEW_STEP_MAKE_DECISIONS] . "</strong> (<em>" . $options['rows']['make_decisions']['percent'] . '%</em> of requests). ' . "</div>";
+  #$markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['release_hold'] . "</em> <strong>" . $step_options[MFCS_REVIEW_STEP_RELEASE_HOLD] . "</strong> (<em>" . $options['rows']['release_hold']['percent'] . '%</em> of requests). ' . "</div>";
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['review'] . "</em> <strong>" . $step_options[MFCS_REVIEW_STEP_REVIEW] . "</strong> (<em>" . $options['rows']['review']['percent'] . '%</em> of requests). ' . "</div>";
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['requirements'] . "</em> <strong>" . $step_options[MFCS_REVIEW_STEP_REQUIREMENTS] . "</strong> (<em>" . $options['rows']['requirements']['percent'] . '%</em> of requests). ' . "</div>";
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['venue_available'] . "</em> <strong>" . $step_options[MFCS_REVIEW_STEP_VENUE_AVAILABLE] . "</strong> (<em>" . $options['rows']['venue_available']['percent'] . '%</em> of requests). ' . "</div>";
+  $markup .= '</div>'; // statistics-block-text
 
-  $markup .= '</div>' . "\n"; // statistics-block
+  $markup .= '</div>'; // statistics-block
 
   return $markup;
 }
@@ -1043,24 +1043,24 @@ function mfcs_request_statistics_render_request_status($counts, $status_options)
   $svg_options = ' version="1.1" viewBox="0 0 ' . $options['chart_width'] . ' ' . $options['chart_height'] . '" preserveAspectRatio="xMaxYMax meet" xmlns="http://www.w3.org/2000/svg"';
 
   // render the markup
-  $markup = '<div class="statistics-block statistics-block-request_step">' . "\n";
+  $markup = '<div class="statistics-block statistics-block-request_step">';
 
-  $markup .= '<div class="statistics-block-text">' . "\n";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['locked'] . "</em> <strong>" . $status_options[MFCS_REQUEST_STATUS_LOCKED] . "</strong> (<em>" . $options['rows']['locked']['percent'] . '%</em> of requests). ' . "</div>\n";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['unlocked'] . "</em> <strong>" . $status_options[MFCS_REQUEST_STATUS_UNLOCKED] . "</strong> (<em>" . $options['rows']['unlocked']['percent'] . '%</em> of requests). ' . "</div>\n";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['accepted'] . "</em> <strong>" . $status_options[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED] . "</strong> (<em>" . $options['rows']['accepted']['percent'] . '%</em> of requests). ' . "</div>\n";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['denied'] . "</em> <strong>" . $status_options[MFCS_REQUEST_STATUS_CLOSED_DENIED] . "</strong> (<em>" . $options['rows']['denied']['percent'] . '%</em> of requests). ' . "</div>\n";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['unavailable'] . "</em> <strong>" . $status_options[MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE] . "</strong> (<em>" . $options['rows']['unavailable']['percent'] . '%</em> of requests). ' . "</div>\n";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['due_to_lock'] . "</em> <strong>" . $status_options[MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK] . "</strong> (<em>" . $options['rows']['due_to_lock']['percent'] . '%</em> of requests). ' . "</div>\n";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['cancelled'] . "</em> <strong>" . $status_options[MFCS_REQUEST_STATUS_CANCELLED] . "</strong> (<em>" . $options['rows']['cancelled']['percent'] . '%</em> of requests). ' . "</div>\n";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['accepted_cancelled'] . "</em> <strong>" . $status_options[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED] . "</strong> (<em>" . $options['rows']['accepted_cancelled']['percent'] . '%</em> of requests). ' . "</div>\n";
-  $markup .= '</div>' . "\n"; // statistics-block-text
+  $markup .= '<div class="statistics-block-text">';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['locked'] . "</em> <strong>" . $status_options[MFCS_REQUEST_STATUS_LOCKED] . "</strong> (<em>" . $options['rows']['locked']['percent'] . '%</em> of requests). ' . "</div>";
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['unlocked'] . "</em> <strong>" . $status_options[MFCS_REQUEST_STATUS_UNLOCKED] . "</strong> (<em>" . $options['rows']['unlocked']['percent'] . '%</em> of requests). ' . "</div>";
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['accepted'] . "</em> <strong>" . $status_options[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED] . "</strong> (<em>" . $options['rows']['accepted']['percent'] . '%</em> of requests). ' . "</div>";
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['denied'] . "</em> <strong>" . $status_options[MFCS_REQUEST_STATUS_CLOSED_DENIED] . "</strong> (<em>" . $options['rows']['denied']['percent'] . '%</em> of requests). ' . "</div>";
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['unavailable'] . "</em> <strong>" . $status_options[MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE] . "</strong> (<em>" . $options['rows']['unavailable']['percent'] . '%</em> of requests). ' . "</div>";
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['due_to_lock'] . "</em> <strong>" . $status_options[MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK] . "</strong> (<em>" . $options['rows']['due_to_lock']['percent'] . '%</em> of requests). ' . "</div>";
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['cancelled'] . "</em> <strong>" . $status_options[MFCS_REQUEST_STATUS_CANCELLED] . "</strong> (<em>" . $options['rows']['cancelled']['percent'] . '%</em> of requests). ' . "</div>";
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['accepted_cancelled'] . "</em> <strong>" . $status_options[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED] . "</strong> (<em>" . $options['rows']['accepted_cancelled']['percent'] . '%</em> of requests). ' . "</div>";
+  $markup .= '</div>'; // statistics-block-text
 
-  $markup .= '<div id="' . 'mfcs-statistics-' . $options['name'] . '-wrapper" class="statistics-block-chart">' . "\n";
-  $markup .= '  <svg id="' . 'mfcs-statistics-' . $options['name'] . '" class="statistics-block-chart-request_status" title="Requests by Status" width="' . $width . '" height="' . $height . '"' . $svg_options . '>' . $chart_markup . '</svg>' . "\n";
-  $markup .= '</div>' . "\n"; // statistics-block-chart
+  $markup .= '<div id="' . 'mfcs-statistics-' . $options['name'] . '-wrapper" class="statistics-block-chart">';
+  $markup .= '  <svg id="' . 'mfcs-statistics-' . $options['name'] . '" class="statistics-block-chart-request_status" title="Requests by Status" width="' . $width . '" height="' . $height . '"' . $svg_options . '>' . $chart_markup . '</svg>';
+  $markup .= '</div>'; // statistics-block-chart
 
-  $markup .= '</div>' . "\n"; // statistics-block
+  $markup .= '</div>'; // statistics-block
 
   return $markup;
 }
@@ -1157,8 +1157,8 @@ function mfcs_request_statistics_render_chart(&$options) {
   // build markup
   $chart_markup = '';
 
-  $chart_markup .= '<title>' . $options['text_title'] . '</title>' . "\n";
-  $chart_markup .= '<desc>' . $options['text_description'] . '</desc>' . "\n";
+  $chart_markup .= '<title>' . $options['text_title'] . '</title>';
+  $chart_markup .= '<desc>' . $options['text_description'] . '</desc>';
   $chart_markup .= '<text font-size="16" x="' . $options['line_start_x'] . '" y="15" style="font-weight: bold;">' . $options['text_title'] . '</text>';
   $chart_markup .= '<text x="' . $text_x_x_offset . '" y="' . $text_x_y_offset . '">' . $options['text_x'] . '</text>';
   #$chart_markup .= '<text x="0" y="0" transform="rotate(270,70,60)">' . $options['text_y'] . '</text>';
@@ -1167,21 +1167,21 @@ function mfcs_request_statistics_render_chart(&$options) {
   $x2 = $options['line_start_x'];
   $y1 = $options['line_start_y'];
   $y2 = $options['line_start_y'] + (($row_increment_y + $row_padding_y) * $total_rows);
-  $chart_markup .= '<g><line x1="' . $x1 . '" y1="' . $y1 . '" x2="' . $x2 . '" y2="' . $y2 . '" style="stroke: #000000; stroke-width: 1;" /></g>' . "\n";
+  $chart_markup .= '<g><line x1="' . $x1 . '" y1="' . $y1 . '" x2="' . $x2 . '" y2="' . $y2 . '" style="stroke: #000000; stroke-width: 1;" /></g>';
 
   $y1 = $y2;
   $x2 = $options['chart_width'];
-  $chart_markup .= '<g><line x1="' . $x1 . '" y1="' . $y2 . '" x2="' . $x2 . '" y2="' . $y2 . '" style="stroke: #000000; stroke-width: 1;" /></g>' . "\n";
+  $chart_markup .= '<g><line x1="' . $x1 . '" y1="' . $y2 . '" x2="' . $x2 . '" y2="' . $y2 . '" style="stroke: #000000; stroke-width: 1;" /></g>';
 
   $x1 = $options['line_start_x'] + $increment_width;
   $x2 = $x1;
   $y1 = $options['line_start_y'];
   $y2 = $options['line_start_y'] + (($row_increment_y + $row_padding_y) * $total_rows);
   for ($i = 1; $i <= $increment_split; $i++) {
-    $chart_markup .= '<g>' . "\n";
-    $chart_markup .= '  <line x1="' . $x1 . '" y1="' . $y1 . '" x2="' . $x2 . '" y2="' . $y2 . '" style="stroke: #505050; stroke-width: 1; stroke-dasharray: 1,4;" />' . "\n";
-    $chart_markup .= '  <text font-size="11" x="' . ($x1 - 4) . '" y="' . ($y2 + 15) . '">' . ($i * $increment_value) . '</text>' . "\n";
-    $chart_markup .= '</g>' . "\n";
+    $chart_markup .= '<g>';
+    $chart_markup .= '  <line x1="' . $x1 . '" y1="' . $y1 . '" x2="' . $x2 . '" y2="' . $y2 . '" style="stroke: #505050; stroke-width: 1; stroke-dasharray: 1,4;" />';
+    $chart_markup .= '  <text font-size="11" x="' . ($x1 - 4) . '" y="' . ($y2 + 15) . '">' . ($i * $increment_value) . '</text>';
+    $chart_markup .= '</g>';
 
     $x1 += $increment_width;
     $x2 = $x1;
@@ -1209,21 +1209,21 @@ function mfcs_request_statistics_render_chart(&$options) {
       $y2_offset -= 4;
     }
 
-    $chart_markup .= '<g id="mfcs-statistics' . $row_name . '-bar-' . $row_number . '" class="row-bar">' . "\n";
-    $chart_markup .= '  <title>' . $row['text'] . ': ' . $row['total'] . ' (' . $row['percent'] . '%)' . '</title>' . "\n";
-    $chart_markup .= '  <text font-size="' . $label_font_size . '" x="0" y="' . $y2_offset . '" style="line-height: 12px;">' . $row['label'] . '</text>' . "\n";
+    $chart_markup .= '<g id="mfcs-statistics' . $row_name . '-bar-' . $row_number . '" class="row-bar">';
+    $chart_markup .= '  <title>' . $row['text'] . ': ' . $row['total'] . ' (' . $row['percent'] . '%)' . '</title>';
+    $chart_markup .= '  <text font-size="' . $label_font_size . '" x="0" y="' . $y2_offset . '" style="line-height: 12px;">' . $row['label'] . '</text>';
 
     if (!empty($row['label_2'])) {
-      $chart_markup .= '  <text font-size="' . $label_font_size . '" x="0" y="' . ($y2_offset + 12) . '" style="line-height: 12px;">' . $row['label_2'] . '</text>' . "\n";
+      $chart_markup .= '  <text font-size="' . $label_font_size . '" x="0" y="' . ($y2_offset + 12) . '" style="line-height: 12px;">' . $row['label_2'] . '</text>';
     }
 
     if (!empty($row['label_3'])) {
-      $chart_markup .= '  <text font-size="' . $label_font_size . '" x="0" y="' . ($y2_offset + 24) . '" style="line-height: 12px;">' . $row['label_3'] . '</text>' . "\n";
+      $chart_markup .= '  <text font-size="' . $label_font_size . '" x="0" y="' . ($y2_offset + 24) . '" style="line-height: 12px;">' . $row['label_3'] . '</text>';
     }
 
-    $chart_markup .= '  <text font-size="14" x="' . ($x1 + $bar_width + 10) . '" y="' . ($y1 + 15) . '">' . $row['total'] . '</text>' . "\n";
-    $chart_markup .= '  <rect width="' . $bar_width . '" height="' . $bar_height . '" x="' . $x1 . '" y="' . $y1 . '" style="fill: ' . $row['color'] . '; stroke-width: 1; stroke: #000000;">' . "\n";
-    $chart_markup .= '</g>' . "\n";
+    $chart_markup .= '  <text font-size="14" x="' . ($x1 + $bar_width + 10) . '" y="' . ($y1 + 15) . '">' . $row['total'] . '</text>';
+    $chart_markup .= '  <rect width="' . $bar_width . '" height="' . $bar_height . '" x="' . $x1 . '" y="' . $y1 . '" style="fill: ' . $row['color'] . '; stroke-width: 1; stroke: #000000;">';
+    $chart_markup .= '</g>';
 
     $y1 = $y1 + $row_increment_y + $row_padding_y;
     $y2 = $y1 + 10;
