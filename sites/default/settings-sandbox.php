@@ -756,6 +756,12 @@ $conf['fcs_testing-email_to-remove'] = array(
   'no-reply@mcneese.edu',
   'facilities_use@sandbox.mcneese.edu',
 );
+$conf['fcs_testing-email_to-whitelist'] = array(
+  #'kday@mcneese.edu',
+  #'gbodin@mcneese.edu',
+  #'ctownsend@mcneese.edu',
+  #'pprejean@mcneese.edu',
+);
 
 $conf['fcs_banner_roles'] = array(
   'student' => 'student roke',

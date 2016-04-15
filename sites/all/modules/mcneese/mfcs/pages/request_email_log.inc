@@ -952,6 +952,12 @@ function mfcs_request_email_log_0_resend_form_submit($form, &$form_state) {
   $testing = isset($conf['fcs_testing']) && $conf['fcs_testing'];
   $debugging_email = isset($conf['fcs_testing-email_to-debug']) && $conf['fcs_testing-email_to-debug'];
 
+  // the e-mail whitelist supercedes the "remove email" addresses.
+  $email_whitelist = array();
+  if (isset($conf['fcs_testing-email_to-whitelist']) && is_array($conf['fcs_testing-email_to-whitelist'])) {
+    $email_whitelist = $conf['fcs_testing-email_to-whitelist'];
+  }
+
   // when testing, prepend the testing prefix to e-mails to distinguish between production and non-production e-mails.
   if ($testing) {
     if (isset($conf['fcs_testing-email_to-prefix']) && is_string($conf['fcs_testing-email_to-prefix'])) {
@@ -974,13 +980,16 @@ function mfcs_request_email_log_0_resend_form_submit($form, &$form_state) {
 
     if (isset($conf['fcs_testing-email_to-remove']) && is_array($conf['fcs_testing-email_to-remove'])) {
       foreach ($conf['fcs_testing-email_to-remove'] as $remove_email) {
-        unset($destinations[$remove_email]);
-        unset($debug_accounts[$remove_email]);
+        // the e-mail whitelist supercedes the "remove email" addresses
+        if (!in_array($remove_email, $email_whitelist)) {
+          unset($destinations[$remove_email]);
+          unset($debug_accounts[$remove_email]);
+        }
       }
     }
 
     foreach ($destinations as $to) {
-      if (!in_array($to, $debug_accounts)) {
+      if (!in_array($to, $email_whitelist) && !in_array($to, $debug_accounts)) {
         drupal_set_message(t("Warning: not sending mail to @to while testing the system.", array('@to' => $to)), 'warning');
         #watchdog('debug', "Warning: not sending mail to @to while testing the system.", array('@to' => $to), WATCHDOG_WARNING);
         unset($destinations[$to]);

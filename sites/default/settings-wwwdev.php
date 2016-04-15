@@ -736,7 +736,7 @@ $conf['fcs_testing'] = TRUE;
 $conf['fcs_testing-email_to-debug'] = TRUE;
 $conf['fcs_testing-email_to-prefix'] = "(TESTING) ";
 $conf['fcs_testing-email_to-add'] = array(
-  #'kday@mcneese.edu',
+  'kday@mcneese.edu',
   #'colleen@mcneese.edu',
   #'gfisher@mcneese.edu',
   #'stan@mcneese.edu',
@@ -755,6 +755,12 @@ $conf['fcs_testing-email_to-add'] = array(
 $conf['fcs_testing-email_to-remove'] = array(
   'no-reply@mcneese.edu',
   'facilities_use@wwwdev.mcneese.edu',
+);
+$conf['fcs_testing-email_to-whitelist'] = array(
+  #'kday@mcneese.edu',
+  #'gbodin@mcneese.edu',
+  #'ctownsend@mcneese.edu',
+  #'pprejean@mcneese.edu',
 );
 
 $conf['fcs_banner_roles'] = array(
