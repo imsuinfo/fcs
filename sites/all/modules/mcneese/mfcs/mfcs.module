@@ -4715,7 +4715,6 @@ function mfcs_insurance_not_provided_alert_cron() {
       }
 
       foreach ($sent as $reminder) {
-
         mfcs_save_request_reminders($reminder);
       }
     }

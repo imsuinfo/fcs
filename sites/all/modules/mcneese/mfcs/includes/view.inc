@@ -1132,8 +1132,10 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
       $user_id = $review->user_id;
       $review_step = $review->step;
       $decision = $review->decision;
-      $message = $review->message;
+      $message = check_plain($review->message);
       $date = $review->date;
+
+      $message = str_replace("\n", "<br>\n", trim($message));
 
       if (is_string($user_id)) {
         $user_id = (int) $user_id;

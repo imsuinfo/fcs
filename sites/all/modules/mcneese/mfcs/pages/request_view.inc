@@ -1378,7 +1378,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
       }
 
       $form['review']['operations']['header'] = array(
-        '#markup' => '<h2 id="request- ' . $request_id . '-section-review-operations-header" class="request-section-review-operations-header">Review Operations</h2>',
+        '#markup' => '<h2 id="request-' . $request_id . '-section-review-operations-header" class="request-section-review-operations-header">Review Operations</h2>',
         '#weight' => 0,
       );
 
@@ -1387,7 +1387,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         '#weight' => 0,
       );
 
-      $form['review']['operations']['instructions']['#markup'] .= "<div>The current step is: <strong>" . $step_options[$step] . "</strong>.</div>\n";
+      $form['review']['operations']['instructions']['#markup'] .= "<div class=\"instructions-current_step\">The current step is: <strong>" . $step_options[$step] . "</strong>.</div>\n";
 
       $form['review']['operations']['as_reviewer'] = array(
         '#markup' => '',
@@ -1524,15 +1524,19 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         }
 
         if (!empty($holidays)) {
-          $form['review']['operations']['warnings']['#markup'] .= '<div class="warning-holidays">' . "\n";
-          $form['review']['operations']['warnings']['#markup'] .= '<div class="warning-holidays-title">This request is scheduled on the same dates as the following:</div>' . "\n";
-          $form['review']['operations']['warnings']['#markup'] .= '<ul class="warning-holidays-list">' . "\n";
+          $form['review']['operations']['warnings']['#markup'] .= '<div class="warning-holidays">';
+          $form['review']['operations']['warnings']['#markup'] .= '<div class="warning-holidays-title">This request is scheduled on the same dates as the following:</div>';
+          $form['review']['operations']['warnings']['#markup'] .= '<ul class="warning-holidays-list">';
           foreach ($holidays as $holiday) {
-            $form['review']['operations']['warnings']['#markup'] .= '<li class="warning-holidays-list-item">' . t("<strong>@holiday</strong> on: <em>@date</em>.", array('@date' => date('l, F j, Y', $holiday->date), '@holiday' => $holiday->title)) . '</li>' . "\n";
+            $form['review']['operations']['warnings']['#markup'] .= '<li class="warning-holidays-list-item">' . t("<strong>@holiday</strong> on: <em>@date</em>.", array('@date' => date('l, F j, Y', $holiday->date), '@holiday' => $holiday->title)) . '</li>';
           }
-          $form['review']['operations']['warnings']['#markup'] .= '</ul>' . "\n";
-          $form['review']['operations']['warnings']['#markup'] .= '</div>' . "\n";
+          $form['review']['operations']['warnings']['#markup'] .= '</ul>';
+          $form['review']['operations']['warnings']['#markup'] .= '</div>';
         }
+      }
+
+      if (array_key_exists(MFCS_REVIEW_DECISION_ISSUES, $decision_options) && array_key_exists(MFCS_REVIEW_DECISION_ISSUES_NONE, $decision_options)) {
+        $form['review']['operations']['instructions']['#markup'] .= "<div class=\"instructions-issues\">To mark this request as <strong>reviewed</strong>, be sure to select either <strong>" . $decision_options[MFCS_REVIEW_DECISION_ISSUES_NONE] . "</strong> or <strong>" . $decision_options[MFCS_REVIEW_DECISION_ISSUES] . "</strong>.</div>";
       }
 
       $form['review']['operations']['decision'] = array(
