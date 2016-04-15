@@ -1345,15 +1345,22 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
         unset($value);
       }
 
-      if (!empty($changelog['requirements']['university'])) {
-        $value = reset($changelog['requirements']['university']);
-        if ($value) {
-          $fees_are_not_waved = FALSE;
+      $requirements_specified = FALSE;
+      if ($fees_are_not_waved && $review_step === MFCS_REVIEW_STEP_REQUIREMENTS && $decision === MFCS_REVIEW_DECISION_REQUIREMENT) {
+        $requirements_specified = TRUE;
+      }
+      else {
+        // (legacy) support old/original behavior for when use fees were not always specified during the requirements step.
+        if (!empty($changelog['requirements']['university'])) {
+          $value = reset($changelog['requirements']['university']);
+          if ($value) {
+            $fees_are_not_waved = FALSE;
+          }
+          unset($value);
         }
-        unset($value);
       }
 
-      if ($review_step === MFCS_REVIEW_STEP_VENUE_AVAILABLE && ($decision === MFCS_REVIEW_DECISION_REQUIREMENT || $decision === MFCS_REVIEW_DECISION_WAVE) && $type !== MFCS_REQUEST_TYPE_QUICK_MEETING) {
+      if ($requirements_specified || ($review_step === MFCS_REVIEW_STEP_VENUE_AVAILABLE && ($decision === MFCS_REVIEW_DECISION_REQUIREMENT || $decision === MFCS_REVIEW_DECISION_WAVE) && $type !== MFCS_REQUEST_TYPE_QUICK_MEETING)) {
         if ($fees_are_not_waved && !empty($changelog['requirements']['facilities'])) {
           $message .= '<div class="review-item-message-requirements-facilities review-item-message-requirements review-item-message-requirements">';
           $message .= '<div class="item-label">Facilities Fees:</div> ';
@@ -1433,27 +1440,27 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
         $message .= '</div>';
       }
 
-      if ($review_step === MFCS_REVIEW_STEP_VENUE_AVAILABLE && ($decision === MFCS_REVIEW_DECISION_REQUIREMENT || $decision === MFCS_REVIEW_DECISION_WAVE) || ($type === MFCS_REQUEST_TYPE_QUICK_MEETING && $decision === MFCS_REVIEW_DECISION_REQUIREMENT)) {
-        if ($fees_are_not_waved && !empty($changelog['requirements']['other'])) {
-          $message .= '<div class="review-item-message-requirements-other review-item-message-requirements review-item-message-requirements">';
-          $message .= '<div class="item-label">Other Fees:</div> ';
+      if (!empty($changelog['requirements']['other'])) {
+        $message .= '<div class="review-item-message-requirements-other review-item-message-requirements review-item-message-requirements">';
+        $message .= '<div class="item-label">Other Fees:</div> ';
 
-          // always display the boolean when displayed in the review log.
-          foreach ($presentation['requirements']['other']['display'] as &$value) {
-            if ($value == 'when_true' || $value == 'when_false') {
-              $value = 'raw';
-            }
+        // always display the boolean when displayed in the review log.
+        foreach ($presentation['requirements']['other']['display'] as &$value) {
+          if ($value == 'when_true' || $value == 'when_false') {
+            $value = 'raw';
           }
-
-          $value = reset($changelog['requirements']['other']);
-          $value_markup = mfcs_view_build_request_value_structure($request_id, 'requirements', 'other', 0, $value, $presentation['requirements']['other'], $changelog);
-
-          if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
-            $message .= drupal_render($value_markup);
-          }
-          $message .= '</div>';
         }
 
+        $value = reset($changelog['requirements']['other']);
+        $value_markup = mfcs_view_build_request_value_structure($request_id, 'requirements', 'other', 0, $value, $presentation['requirements']['other'], $changelog);
+
+        if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
+          $message .= drupal_render($value_markup);
+        }
+        $message .= '</div>';
+      }
+
+      if ($review_step === MFCS_REVIEW_STEP_VENUE_AVAILABLE && ($decision === MFCS_REVIEW_DECISION_REQUIREMENT || $decision === MFCS_REVIEW_DECISION_WAVE) || ($type === MFCS_REQUEST_TYPE_QUICK_MEETING && $decision === MFCS_REVIEW_DECISION_REQUIREMENT)) {
         if (!empty($changelog['requirements']['waived'])) {
           $message .= '<div class="review-item-message-requirements-waived review-item-message-requirements review-item-message-requirements">';
           $message .= '<div class="item-label">Waived with Presidents Approval:</div> ';
@@ -1473,26 +1480,27 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
           }
           $message .= '</div>';
         }
+      }
 
-        if (!empty($changelog['requirements']['university'])) {
-          $message .= '<div class="review-item-message-requirements-university review-item-message-university review-item-message-requirements">';
-          $message .= '<div class="item-label">Strictly University Business:</div> ';
+      // strictly university business
+      if (!empty($changelog['requirements']['university'])) {
+        $message .= '<div class="review-item-message-requirements-university review-item-message-university review-item-message-requirements">';
+        $message .= '<div class="item-label">Strictly University Business:</div> ';
 
-          // always display the boolean when displayed in the review log.
-          foreach ($presentation['requirements']['university']['display'] as &$value) {
-            if ($value == 'when_true' || $value == 'when_false') {
-              $value = 'raw';
-            }
+        // always display the boolean when displayed in the review log.
+        foreach ($presentation['requirements']['university']['display'] as &$value) {
+          if ($value == 'when_true' || $value == 'when_false') {
+            $value = 'raw';
           }
-
-          $value = reset($changelog['requirements']['university']);
-          $value_markup = mfcs_view_build_request_value_structure($request_id, 'requirements', 'university', 0, $value, $presentation['requirements']['university'], $changelog);
-
-          if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
-            $message .= drupal_render($value_markup);
-          }
-          $message .= '</div>';
         }
+
+        $value = reset($changelog['requirements']['university']);
+        $value_markup = mfcs_view_build_request_value_structure($request_id, 'requirements', 'university', 0, $value, $presentation['requirements']['university'], $changelog);
+
+        if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
+          $message .= drupal_render($value_markup);
+        }
+        $message .= '</div>';
       }
 
       // contractor insurance
