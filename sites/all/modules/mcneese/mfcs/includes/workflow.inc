@@ -834,7 +834,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
       $requirements_other_save = TRUE;
 
       // do not save the 'other' value when requirements are waved or reset if 'other' is already saved.
-      if (($requirements_university_save && $requirements_waived) || ($requirements_university_save && $requirements_university)) {
+      if ($requirements_waived_save && $requirements_waived) {
         $requirements_other = NULL;
       }
     }
@@ -913,7 +913,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
     }
 
     // when waiving fees, automatically reset all use fees, by assigning ID as NULL to prevent them from being utilized as a reviewer_classification.
-    if (($requirements_university_save && $requirements_waived) || ($requirements_university_save && $requirements_university)) {
+    if ($requirements_waived_save && $requirements_waived) {
       foreach (array('facilities', 'equipment', 'custodial', 'maintenance', 'grounds', 'security', 'other') as $use) {
         if (!array_key_exists($use, $uses)) {
           $uses[$use] = NULL;
@@ -929,20 +929,20 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
           unset($reviewer_classifications['step'][$use_id]);
         }
 
-        if (!($requirements_university_save && $requirements_waived) && !($requirements_university_save && $requirements_university)) {
+        if (!($requirements_waived_save && $requirements_waived)) {
           continue;
         }
       }
 
       if (is_null($use_id)) {
-        if (($requirements_university_save && $requirements_waived) || ($requirements_university_save && $requirements_university)) {
+        if (($requirements_waived_save && $requirements_waived)) {
           $requirements = array('quantity' => NULL, 'hours' => NULL, 'days' => NULL, 'amount' => NULL);
         }
         else {
           continue;
         }
       }
-      elseif (($requirements_university_save && $requirements_waived) || ($requirements_university_save && $requirements_university) || is_null($extra['requirements'][$use])) {
+      elseif (($requirements_waived_save && $requirements_waived) || is_null($extra['requirements'][$use])) {
         $requirements = array('quantity' => NULL, 'hours' => NULL, 'days' => NULL, 'amount' => NULL);
       }
       else {

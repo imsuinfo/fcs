@@ -1560,12 +1560,10 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           'visible' => array(
             ':input[name="review[operations][decision]"]' => array('value' => MFCS_REVIEW_DECISION_REQUIREMENT),
             ':input[name="review[operations][presidents_approval]"]' => array('checked' => FALSE),
-            ':input[name="review[operations][university_business]"]' => array('checked' => FALSE),
           ),
           'invisible' => array(
             'or' => array(
               ':input[name="review[operations][presidents_approval]"]' => array('checked' => TRUE),
-              ':input[name="review[operations][university_business]"]' => array('checked' => TRUE),
             ),
           ),
         );
@@ -2295,6 +2293,8 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
     }
 
     if ($step === MFCS_REVIEW_STEP_REQUIREMENTS) {
+      $university_business = FALSE;
+
       if ($decision === MFCS_REVIEW_DECISION_APPROVE && $type !== MFCS_REQUEST_TYPE_QUICK_MEETING) {
         $requirements_not_supplied = TRUE;
 
@@ -2309,11 +2309,13 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
           if (isset($request['requirements']['university'][0]) && property_exists($request['requirements']['university'][0], 'value')) {
             if ($request['requirements']['university'][0]->value) {
               $requirements_not_supplied = FALSE;
+
+              $university_business = TRUE;
             }
           }
         }
 
-        if (isset($request['requirements']['facilities'][0]) && property_exists($request['requirements']['facilities'][0], 'days') && !empty($request['requirements']['facilities'][0]->days)) {
+        if ($university_business || (isset($request['requirements']['facilities'][0]) && property_exists($request['requirements']['facilities'][0], 'days') && !empty($request['requirements']['facilities'][0]->days))) {
           $requirements_not_supplied = FALSE;
         }
 
@@ -2597,10 +2599,6 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
 
       if (isset($form_state['values']['review']['operations']['university_business'])) {
         $extra['requirements']['university'] = $form_state['values']['review']['operations']['university_business'];
-
-        if ($extra['requirements']['university'] == 1) {
-          $extra['requirements']['other'] = 0;
-        }
       }
     }
 
@@ -2741,6 +2739,7 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
       }
 
       // remove waived fields that have no changes detected from the "save" variable.
+      // @fixme: this might not be used anymore and might need to be removed for being stale code.
       foreach ($changes_waived as $waived_name => $waived_change) {
         if (isset($extra['requirements']) && array_key_exists($waived_name, $extra['requirements'])) {
           if ($waived_change['detected'] === FALSE) {
