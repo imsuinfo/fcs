@@ -462,6 +462,14 @@ function mfcs_request_email_log_0_view_page($id) {
     $log = NULL;
   }
 
+  // no valid object was found, so the specified id is invalid.
+  if (!is_object($log)) {
+    cf_error::invalid_integer('log_id');
+
+    drupal_not_found();
+    drupal_exit();
+  }
+
   $markup = '<div id="mfcs-request-email_log-0-page" class="email_log">';
 
   $markup .= '<div class="email_log-title-wrapper">';
