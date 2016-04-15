@@ -923,7 +923,6 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
 
     foreach ($uses as $use => $use_id) {
       if (!is_null($use_id) && (!isset($extra['requirements']) || !array_key_exists($use, $extra['requirements']))) {
-
         // @fixme: at the moment, handle the duplicate cases, which will be removed once the duplicates are made distinct.
         if ($use != 'facilities' && $use != 'equipment' && $use != 'grounds') {
           unset($reviewer_classifications['step'][$use_id]);

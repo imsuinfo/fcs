@@ -2209,11 +2209,6 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
             form_set_error('review][operations][university_business', t("The system does not allow both @presidents_approval and @university_business to be selected at the same time. Choose one or the other (They both wave fees).", array('@presidents_approval' => '"Approved by the President"', '@university_business' => '"Strictly University Business"')));
             $failure = TRUE;
           }
-          else {
-            $form_state['values']['review']['operations']['decision'] = MFCS_REVIEW_DECISION_WAVE;
-            $decision = MFCS_REVIEW_DECISION_WAVE;
-            $requirements_waived = TRUE;
-          }
         }
       }
       elseif ($decision !== MFCS_REVIEW_DECISION_COMMENT) {
@@ -2667,36 +2662,38 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
       $any_requirements_changes_made = FALSE;
 
       // process requirements changes.
-      foreach ($changes_requirements as $requirements_field => &$changes) {
-        if (!isset($requirements_form[$requirements_field]) || !isset($requirements_state[$requirements_field])) {
-          continue;
-        }
-
-        foreach ($requirements_fields[$requirements_field] as $requirements_part_key => $requirements_part_value) {
-          if (!$requirements_part_value || !isset($requirements_state[$requirements_field][$requirements_part_key]) || !isset($requirements_form[$requirements_field][$requirements_part_key])) {
+      if ($decision === MFCS_REVIEW_DECISION_REQUIREMENT) {
+        foreach ($changes_requirements as $requirements_field => &$changes) {
+          if (!isset($requirements_form[$requirements_field])) {
             continue;
           }
 
-          $value_length = strlen(trim($requirements_state[$requirements_field][$requirements_part_key]));
-          if ($value_length == 0) {
-            if (array_key_exists('#default_value', $requirements_form[$requirements_field][$requirements_part_key]) && !is_null($requirements_form[$requirements_field][$requirements_part_key]['#default_value'])) {
-              if (strlen(trim(($requirements_form[$requirements_field][$requirements_part_key]['#default_value']))) != $value_length) {
+          foreach ($requirements_fields[$requirements_field] as $requirements_part_key => $requirements_part_value) {
+            if (!$requirements_part_value || !isset($requirements_form[$requirements_field][$requirements_part_key])) {
+              continue;
+            }
+
+            // if the field is not set but was previously set, then this is a change.
+            if (!isset($requirements_state[$requirements_field][$requirements_part_key])) {
+              continue;
+            }
+
+            $value_length = strlen(trim($requirements_state[$requirements_field][$requirements_part_key]));
+            if ($value_length == 0) {
+              $original_length = strlen(trim(($requirements_form[$requirements_field][$requirements_part_key]['#default_value'])));
+              if ($original_length != $value_length) {
                 $changes['detected'] = NULL;
                 $any_requirements_changes_made = TRUE;
                 break;
               }
+              unset($original_length);
             }
-            else {
-              $changes['detected'] = NULL;
+            elseif ($requirements_form[$requirements_field][$requirements_part_key]['#default_value'] != $requirements_state[$requirements_field][$requirements_part_key]) {
+              $changes['detected'] = TRUE;
               $any_requirements_changes_made = TRUE;
-              break;
             }
+            unset($value_length);
           }
-          elseif ($requirements_form[$requirements_field][$requirements_part_key]['#default_value'] != $requirements_state[$requirements_field][$requirements_part_key]) {
-            $changes['detected'] = TRUE;
-            $any_requirements_changes_made = TRUE;
-          }
-          unset($value_length);
         }
       }
 
