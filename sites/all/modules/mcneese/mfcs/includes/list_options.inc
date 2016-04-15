@@ -584,7 +584,7 @@ function mfcs_get_reviewer_decision_list_options($option = NULL, $restriction = 
     // these options are hidden from the users.
     if ($option == 'review_step') {
       unset($options[MFCS_REVIEW_DECISION_AMENDMENT]);
-      unset($options[MFCS_REVIEW_DECISION_WAVE]);
+      unset($options[MFCS_REVIEW_DECISION_WAIVE]);
     }
 
     asort($options);
@@ -605,7 +605,7 @@ function mfcs_get_reviewer_decision_list_options($option = NULL, $restriction = 
   elseif ($restriction == MFCS_RESTRICTION_DECISION_APPROVER) {
     $options[MFCS_REVIEW_DECISION_APPROVE] = "Approve";
     $options[MFCS_REVIEW_DECISION_DENY] = "Deny";
-    #$options[MFCS_REVIEW_DECISION_WAVE] = "Wave";
+    #$options[MFCS_REVIEW_DECISION_WAIVE] = "Waive";
     $options[MFCS_REVIEW_DECISION_REQUIREMENT] = "Requirement";
     $options[MFCS_REVIEW_DECISION_COMMENT] = "Comment";
   }

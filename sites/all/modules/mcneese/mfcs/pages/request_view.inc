@@ -2193,20 +2193,20 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
     }
 
     // A request was made to have the requirements waived options be displayed with the requirements to avoid confusion.
-    // To do this without changing the underlining design, when the requirement is specified with a wave checked, then convert the decision to a wave.
-    // @todo: remove the Wave Decision entirely.
+    // To do this without changing the underlining design, when the requirement is specified with a waive checked, then convert the decision to a waive.
+    // @todo: remove the Waive Decision entirely.
     $requirements_waived = FALSE;
     if ($step === MFCS_REVIEW_STEP_REQUIREMENTS) {
       if ($decision === MFCS_REVIEW_DECISION_REQUIREMENT) {
         if (isset($form_state['values']['review']['operations']['presidents_approval']) && $form_state['values']['review']['operations']['presidents_approval'] == 1) {
-          $form_state['values']['review']['operations']['decision'] = MFCS_REVIEW_DECISION_WAVE;
-          $decision = MFCS_REVIEW_DECISION_WAVE;
+          $form_state['values']['review']['operations']['decision'] = MFCS_REVIEW_DECISION_WAIVE;
+          $decision = MFCS_REVIEW_DECISION_WAIVE;
           $requirements_waived = TRUE;
         }
 
         if (isset($form_state['values']['review']['operations']['university_business']) && $form_state['values']['review']['operations']['university_business'] == 1) {
           if ($requirements_waived) {
-            form_set_error('review][operations][university_business', t("The system does not allow both @presidents_approval and @university_business to be selected at the same time. Choose one or the other (They both wave fees).", array('@presidents_approval' => '"Approved by the President"', '@university_business' => '"Strictly University Business"')));
+            form_set_error('review][operations][university_business', t("The system does not allow both @presidents_approval and @university_business to be selected at the same time. Choose one or the other (They both waive fees).", array('@presidents_approval' => '"Approved by the President"', '@university_business' => '"Strictly University Business"')));
             $failure = TRUE;
           }
         }
@@ -2283,7 +2283,7 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
     }
 
     // The requirements values should be removed when they are not needed.
-    if ($requirements_waived || ($decision !== MFCS_REVIEW_DECISION_REQUIREMENT && $decision !== MFCS_REVIEW_DECISION_WAVE)) {
+    if ($requirements_waived || ($decision !== MFCS_REVIEW_DECISION_REQUIREMENT && $decision !== MFCS_REVIEW_DECISION_WAIVE)) {
       unset($form_state['values']['review']['operations']['requirements']);
     }
 
@@ -2325,8 +2325,8 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
       $check_requirements = TRUE;
     }
 
-    // @fixme: is autowave valid anymore?
-    $form_state['autowave'] = FALSE;
+    // @fixme: is autowaive valid anymore?
+    $form_state['autowaive'] = FALSE;
 
     if ($check_requirements) {
       $requirements = array();
@@ -2574,13 +2574,13 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
           'requirements' => array('other' => 0, 'waived' => 0, 'university' => 1),
         );
 
-        $success = mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], MFCS_REVIEW_DECISION_REQUIREMENT, "The system has auto-waved the fees because the request is a Quick Meeting.", $requirements_extra, $already_reviewed_as);
+        $success = mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], MFCS_REVIEW_DECISION_REQUIREMENT, "The system has auto-waived the fees because the request is a Quick Meeting.", $requirements_extra, $already_reviewed_as);
       }
     }
     elseif ($step === MFCS_REVIEW_STEP_REVIEW) {
-      if (isset($form_state['autowave']) && $form_state['autowave']) {
-        // @todo: this might be a valid use of MFCS_REVIEW_DECISION_WAVE. If 'autowave' is removed, then this is no longer necessary.
-        $success = mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], MFCS_REVIEW_DECISION_WAVE, "", array('send_email' => FALSE), $already_reviewed_as);
+      if (isset($form_state['autowaive']) && $form_state['autowaive']) {
+        // @todo: this might be a valid use of MFCS_REVIEW_DECISION_WAIVE. If 'autowaive' is removed, then this is no longer necessary.
+        $success = mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], MFCS_REVIEW_DECISION_WAIVE, "", array('send_email' => FALSE), $already_reviewed_as);
       }
     }
     elseif ($step === MFCS_REVIEW_STEP_REQUIREMENTS) {
@@ -2773,7 +2773,7 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
         }
       }
 
-      if (($decision === MFCS_REVIEW_DECISION_REQUIREMENT || $decision === MFCS_REVIEW_DECISION_WAVE) && !$any_requirements_changes_made) {
+      if (($decision === MFCS_REVIEW_DECISION_REQUIREMENT || $decision === MFCS_REVIEW_DECISION_WAIVE) && !$any_requirements_changes_made) {
         form_set_error('review][operations][decision', "The Requirements decision has been selected, but no changes have been made. If you only wish to leave a comment, then select the Comment instead of Requirements.");
         watchdog(MFCS_WATCHDOG_ID, "The Requirements decision has been selected, but no changes have been made.", array(), WATCHDOG_ERROR);
 

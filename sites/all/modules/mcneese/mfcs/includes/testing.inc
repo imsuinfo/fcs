@@ -308,7 +308,7 @@ function mfcs_testing_review_request_review($request_id, $decision = MFCS_REVIEW
     }
   }
   else {
-    if ($decision !== MFCS_REVIEW_DECISION_APPROVE && $decision !== MFCS_REVIEW_DECISION_DENY && $decision !== MFCS_REVIEW_DECISION_WAVE && $decision !== MFCS_REVIEW_DECISION_REQUIREMENT) {
+    if ($decision !== MFCS_REVIEW_DECISION_APPROVE && $decision !== MFCS_REVIEW_DECISION_DENY && $decision !== MFCS_REVIEW_DECISION_WAIVE && $decision !== MFCS_REVIEW_DECISION_REQUIREMENT) {
       cf_error::invalid_integer('decision');
       return FALSE;
     }

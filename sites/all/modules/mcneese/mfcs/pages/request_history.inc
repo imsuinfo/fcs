@@ -314,9 +314,9 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
                         $custom_message .= 'added a <strong class="review-decision">Comment</strong> (to all). ';
                       }
-                      elseif ($decision === MFCS_REVIEW_DECISION_WAVE) {
+                      elseif ($decision === MFCS_REVIEW_DECISION_WAIVE) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
-                        $custom_message .= 'decided to <strong class="review-decision">Wave</strong> the requirements. ';
+                        $custom_message .= 'decided to <strong class="review-decision">Waive</strong> the requirements. ';
                       }
                       elseif ($decision === MFCS_REVIEW_DECISION_REQUIREMENT) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
