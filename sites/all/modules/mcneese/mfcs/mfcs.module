@@ -1269,7 +1269,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
     );
 
     // when quick meeting is enabled, a section is not null, then additional checks are required.
-    if (!is_null($request_id) && !is_null($section) && ($roles['manager'] || $roles['requester'] || $roles['reviewer'])) {
+    if (!is_null($request_id) && !is_null($section) && ($roles['manager'] || $roles['requester'] || $roles['reviewer'] || $roles['administer'])) {
       if (isset($request['information']['type'][0]->value) && $request['information']['type'][0]->value == MFCS_REQUEST_TYPE_QUICK_MEETING) {
         // deny access to sections that are not allowed to be edited for a quick meeting.
         $allowed_sections_quick_meeting = array(
@@ -1290,7 +1290,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
       return FALSE;
     }
 
-    if ($roles['manager']) {
+    if ($roles['manager'] || $roles['administer']) {
       $access[$request_id] = TRUE;
       return TRUE;
     }
@@ -1319,7 +1319,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
       return FALSE;
     }
 
-    if ($roles['manager']) {
+    if ($roles['manager'] || $roles['administer']) {
       $access[$request_id] = TRUE;
       return TRUE;
     }
@@ -1401,7 +1401,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
       return FALSE;
     }
 
-    if ($roles['manager']) {
+    if ($roles['manager'] || $roles['administer']) {
       $access[$request_id] = TRUE;
       return TRUE;
     }
@@ -1448,7 +1448,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
       return FALSE;
     }
 
-    if ($roles['manager'] || array_key_exists($request['venue_coordinator']['user_id'][0]->value, $venue_coordinator_ids)) {
+    if ($roles['manager'] || array_key_exists($request['venue_coordinator']['user_id'][0]->value, $venue_coordinator_ids) || $roles['administer']) {
       $access[$request_id] = TRUE;
       return TRUE;
     }
@@ -1486,8 +1486,8 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
       return FALSE;
     }
 
-    // managers and venue coordinators can uncancel an request at any point in the process.
-    if ($roles['manager'] || array_key_exists($request['venue_coordinator']['user_id'][0]->value, $venue_coordinator_ids)) {
+    // managers, venue coordinators, and administers can uncancel an request at any point in the process.
+    if ($roles['manager'] || array_key_exists($request['venue_coordinator']['user_id'][0]->value, $venue_coordinator_ids) || $roles['administer']) {
       $access[$request_id] = TRUE;
       return TRUE;
     }
@@ -1519,7 +1519,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
     }
 
     // must be either an administer, a manager, a venue coordinator, or a requester for the specific request to perform cancelling.
-    if ($roles['administer'] || $roles['manager']) {
+    if ($roles['manager'] || $roles['administer']) {
       // no restrictions applied.
     }
     elseif ($roles['reviewer']) {
@@ -1573,7 +1573,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
       return FALSE;
     }
 
-    if ($roles['manager']) {
+    if ($roles['manager'] || $roles['administer']) {
       $access[$request_id] = TRUE;
       return TRUE;
     }
@@ -1584,7 +1584,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
       return FALSE;
     }
 
-    if ($roles['manager']) {
+    if ($roles['manager'] || $roles['administer']) {
       $access[$request_id] = TRUE;
       return TRUE;
     }
@@ -1603,7 +1603,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
       MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED,
     );
 
-    if ($roles['manager'] || $roles['reviewer']) {
+    if ($roles['manager'] || $roles['reviewer'] || $roles['administer']) {
       $agreement_request_step = array(
         MFCS_REVIEW_STEP_COMPLETED,
         MFCS_REVIEW_STEP_REVIEW,

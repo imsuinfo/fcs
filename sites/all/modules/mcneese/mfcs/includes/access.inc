@@ -138,7 +138,7 @@ function mfcs_page_request_access_operation_edit(&$request_ids, &$processed, &$a
     MFCS_REQUEST_STATUS_LOCKED,
   );
 
-  if ($roles['manager'] || $roles['requester'] || $roles['reviewer']) {
+  if ($roles['manager'] || $roles['requester'] || $roles['reviewer'] || $roles['administer']) {
     if (array_key_exists(NULL, $request_ids)) {
       $access[NULL] = TRUE;
       $processed[NULL] = TRUE;
@@ -158,7 +158,7 @@ function mfcs_page_request_access_operation_edit(&$request_ids, &$processed, &$a
       $query->condition('mer.id', $request_ids, 'IN');
       $query->condition('mer.status', $edit_request_status, 'IN');
 
-      if (!$roles['manager']) {
+      if (!$roles['manager'] && !$roles['administer']) {
         if ($roles['requester']) {
           if ($roles['reviewer']) {
             $or = db_or();
@@ -286,7 +286,7 @@ function mfcs_page_request_access_operation_view(&$request_ids, &$processed, &$a
     MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED,
   );
 
-  if ($roles['manager'] || $roles['requester']) {
+  if ($roles['manager'] || $roles['requester'] || $roles['administer']) {
     if (array_key_exists(NULL, $request_ids)) {
       $access[NULL] = TRUE;
       $processed[NULL] = TRUE;
@@ -300,7 +300,7 @@ function mfcs_page_request_access_operation_view(&$request_ids, &$processed, &$a
 
       $query->condition('mer.id', $request_ids, 'IN');
 
-      if ($roles['requester'] && !$roles['manager']) {
+      if ($roles['requester'] && !$roles['manager'] && !$roles['administer']) {
         $or = db_or();
 
         $and = db_and();
@@ -522,7 +522,7 @@ function mfcs_page_request_access_operation_comment(&$request_ids, &$processed, 
       return TRUE;
     }
 
-    // managers should always be able to comment.
+    // managers and administers should always be able to comment.
     if ($roles['manager'] || $roles['administer']) {
       $processed[$id] = TRUE;
       $access[$id] = TRUE;
@@ -606,7 +606,7 @@ function mfcs_page_request_access_operation_log(&$request_ids, &$processed, &$ac
     return FALSE;
   }
 
-  if ($roles['manager']) {
+  if ($roles['manager'] || $roles['administer']) {
     if (array_key_exists(NULL, $request_ids)) {
       $access[NULL] = TRUE;
       $processed[NULL] = TRUE;
@@ -705,7 +705,7 @@ function mfcs_page_request_access_operation_cancel(&$request_ids, &$processed, &
     return FALSE;
   }
 
-  if ($roles['requester'] || $roles['reviewer'] || $roles['manager']) {
+  if ($roles['requester'] || $roles['reviewer'] || $roles['manager'] || $roles['administer']) {
     if (array_key_exists(NULL, $request_ids)) {
       $access[NULL] = TRUE;
       $processed[NULL] = TRUE;
@@ -721,8 +721,8 @@ function mfcs_page_request_access_operation_cancel(&$request_ids, &$processed, &
     MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE,
   );
 
-  // always grant managers cancel access.
-  if ($roles['manager']) {
+  // always grant managers and administers cancel access.
+  if ($roles['manager'] || $roles['administer']) {
     try {
       $query = db_select('mfcs_requests', 'mer');
 
@@ -938,7 +938,7 @@ function mfcs_page_request_access_operation_cancelling(&$request_ids, &$processe
   }
 
 
-  if ($roles['administer'] || $roles['manager']) {
+  if ($roles['manager'] || $roles['administer']) {
     if (array_key_exists(NULL, $request_ids)) {
       $access[NULL] = TRUE;
       $processed[NULL] = TRUE;
@@ -1019,7 +1019,7 @@ function mfcs_page_request_access_operation_cancelling(&$request_ids, &$processe
 
     $query->condition('mer.id', $request_ids, 'IN');
 
-    if (!$roles['administer'] && !$roles['manager']) {
+    if (!$roles['manager'] || !$roles['administer']) {
       if ($roles['requester'] && $roles['reviewer']) {
         $or = db_or();
         $or->condition('mer.user_id', $user->uid);
@@ -1151,8 +1151,8 @@ function mfcs_page_request_access_operation_uncancel(&$request_ids, &$processed,
     MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED,
   );
 
-  // always grant managers uncancel access.
-  if ($roles['manager']) {
+  // always grant managers and administers uncancel access.
+  if ($roles['manager'] || $roles['administer']) {
     try {
       $query = db_select('mfcs_requests', 'mer');
 
@@ -1301,7 +1301,7 @@ function mfcs_page_request_access_operation_reassign(&$request_ids, &$processed,
     return FALSE;
   }
 
-  if ($roles['manager']) {
+  if ($roles['manager'] || $roles['administer']) {
     if (array_key_exists(NULL, $request_ids)) {
       $access[NULL] = TRUE;
       $processed[NULL] = TRUE;
@@ -1314,8 +1314,8 @@ function mfcs_page_request_access_operation_reassign(&$request_ids, &$processed,
     MFCS_REQUEST_STATUS_UNLOCKED,
   );
 
-  // always grant managers uncancel access.
-  if ($roles['manager']) {
+  // always grant managers and administers re-assign access.
+  if ($roles['manager'] || $roles['administer']) {
     try {
       $query = db_select('mfcs_requests', 'mer');
 
@@ -1408,7 +1408,7 @@ function mfcs_page_request_access_operation_history(&$request_ids, &$processed, 
     return FALSE;
   }
 
-  if ($roles['manager']) {
+  if ($roles['manager'] || $roles['administer']) {
     if (array_key_exists(NULL, $request_ids)) {
       $access[NULL] = TRUE;
       $processed[NULL] = TRUE;
@@ -1515,7 +1515,7 @@ function mfcs_page_request_access_operation_agreement(&$request_ids, &$processed
     MFCS_REVIEW_STEP_COMPLETED,
   );
 
-  if ($roles['manager'] || $roles['reviewer']) {
+  if ($roles['manager'] || $roles['reviewer'] || $roles['administer']) {
     $agreement_request_step = array(
       MFCS_REVIEW_STEP_COMPLETED,
       MFCS_REVIEW_STEP_REVIEW,
@@ -1523,7 +1523,7 @@ function mfcs_page_request_access_operation_agreement(&$request_ids, &$processed
     );
   }
 
-  if ($roles['requester'] || $roles['reviewer'] || $roles['manager']) {
+  if ($roles['requester'] || $roles['reviewer'] || $roles['manager'] || $roles['administer']) {
     if (array_key_exists(NULL, $request_ids)) {
       $access[NULL] = TRUE;
       $processed[NULL] = TRUE;
@@ -1539,8 +1539,8 @@ function mfcs_page_request_access_operation_agreement(&$request_ids, &$processed
       $query->condition('mer.status', $agreement_request_status, 'IN');
       $query->condition('mer.step', $agreement_request_step, 'IN');
 
-      // the submitter should be the only non-manager/non-reviewer that can access the agreement.
-      if (!$roles['manager'] && !$roles['reviewer']) {
+      // the submitter should be the only non-manager/non-reviewer/non-administer that can access the agreement.
+      if (!$roles['manager'] && !$roles['reviewer'] && !$roles['administer']) {
         $query->condition('mer.user_id', $user->uid);
       }
 
