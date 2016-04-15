@@ -1648,11 +1648,20 @@ function mfcs_workflow_next_step($request_id, $type, $step, $decision, $message,
           }
 
           $most_recent_decision = array_shift($reviewer_decisions);
-          if ($most_recent_decision->decision === MFCS_REVIEW_DECISION_ISSUES_NONE) {
+
+          $recent_decision = NULL;
+          if (is_numeric($most_recent_decision->decision)) {
+            $recent_decision = (int) $most_recent_decision->decision;
+          }
+
+          if ($recent_decision === MFCS_REVIEW_DECISION_ISSUES_NONE) {
             $message .= "No Issues";
           }
-          else {
+          elseif ($recent_decision === MFCS_REVIEW_DECISION_ISSUES) {
             $message .= "Issues";
+          }
+          else {
+            continue;
           }
 
           $message .= " - " . $classification_options[$reviewer_classification] . "\n";
