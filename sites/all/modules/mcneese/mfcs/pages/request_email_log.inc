@@ -498,7 +498,7 @@ function mfcs_request_email_log_0_view_page($id) {
   $headers = unserialize($log->headers);
   if (is_array($headers)) {
     foreach ($headers as $header_name => $header) {
-      $fieldset['#children'] .= '<strong>' . check_plain($header_name) . '</strong>: ' . check_plain($header) . ";";
+      $fieldset['#children'] .= '<strong>' . check_plain($header_name) . '</strong>: ' . check_plain($header) . ";\n";
 
       if ($header_name == 'Content-Type') {
         $matches = array();
