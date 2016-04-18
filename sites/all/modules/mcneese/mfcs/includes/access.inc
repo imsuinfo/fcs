@@ -55,7 +55,7 @@ function mfcs_page_request_access_operation_create(&$request_ids, &$processed, &
     return FALSE;
   }
 
-  if ($roles['requester']) {
+  if ($roles['requester'] || $roles['manager'] || $roles['administer']) {
     if (array_key_exists(NULL, $request_ids)) {
       $access[NULL] = TRUE;
       $processed[NULL] = TRUE;
@@ -138,7 +138,7 @@ function mfcs_page_request_access_operation_edit(&$request_ids, &$processed, &$a
     MFCS_REQUEST_STATUS_LOCKED,
   );
 
-  if ($roles['manager'] || $roles['requester'] || $roles['reviewer'] || $roles['administer']) {
+  if ($roles['requester'] || $roles['reviewer'] || $roles['manager']  || $roles['administer']) {
     if (array_key_exists(NULL, $request_ids)) {
       $access[NULL] = TRUE;
       $processed[NULL] = TRUE;
@@ -286,7 +286,7 @@ function mfcs_page_request_access_operation_view(&$request_ids, &$processed, &$a
     MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED,
   );
 
-  if ($roles['manager'] || $roles['requester'] || $roles['administer']) {
+  if ($roles['requester'] || $roles['manager'] || $roles['administer']) {
     if (array_key_exists(NULL, $request_ids)) {
       $access[NULL] = TRUE;
       $processed[NULL] = TRUE;
@@ -431,7 +431,7 @@ function mfcs_page_request_access_operation_review(&$request_ids, &$processed, &
     return FALSE;
   }
 
-  if ($roles['reviewer']) {
+  if ($roles['reviewer'] || $roles['manager'] || $roles['administer']) {
     if (array_key_exists(NULL, $request_ids)) {
       $access[NULL] = TRUE;
       $processed[NULL] = TRUE;

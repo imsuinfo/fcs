@@ -681,7 +681,7 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
     return $processed[$request_id];
   }
   elseif ($operation == 'list') {
-    if ($roles['requester'] || $roles['reviewer'] || $roles['manager']) {
+    if ($roles['requester'] || $roles['reviewer'] || $roles['manager'] || $roles['administer']) {
       if (is_array($request_id)) {
         foreach ($request_ids as $id) {
           $access[$id] = TRUE;
@@ -696,7 +696,7 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
     }
   }
   elseif ($operation == 'search') {
-    if ($roles['requester'] || $roles['reviewer'] || $roles['manager']) {
+    if ($roles['requester'] || $roles['reviewer'] || $roles['manager'] || $roles['administer']) {
       if (is_array($request_id)) {
         foreach ($request_ids as $id) {
           $access[$id] = TRUE;
@@ -711,7 +711,7 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
     }
   }
   elseif ($operation == 'reviewers') {
-    if ($roles['manager']) {
+    if ($roles['manager'] || $roles['administer']) {
       if (is_array($request_id)) {
         foreach ($request_ids as $id) {
           $access[$id] = TRUE;
@@ -726,8 +726,8 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
     }
   }
   elseif ($operation == 'review') {
-    // managers are always allowed to review.
-    if ($roles['manager']) {
+    // managers and administers are always allowed to review.
+    if ($roles['manager'] || $roles['administer']) {
       if (is_array($request_id)) {
         foreach ($request_ids as $id) {
           $access[$id] = TRUE;
@@ -882,7 +882,7 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
   }
   elseif ($operation == 'statistics') {
     if (is_null($request_id)) {
-      if ($roles['manager'] || $roles['reviewer']) {
+      if ($roles['reviewer'] || $roles['manager'] || $roles['administer']) {
         $access[$request_id] = TRUE;
         return TRUE;
       }
@@ -1355,8 +1355,8 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
       return FALSE;
     }
 
-    // managers are always allowed to review.
-    if ($roles['manager']) {
+    // managers adn administers are always allowed to review.
+    if ($roles['manager'] || $roles['administer']) {
       $access[$request_id] = TRUE;
       return TRUE;
     }
@@ -6913,6 +6913,7 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
     $user = user_load(0);
   }
 
+  $administer = FALSE;
   $manager = FALSE;
   $reviewer = FALSE;
   $requester = FALSE;
@@ -6921,6 +6922,7 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
     $requester = TRUE;
   }
   else {
+    $administer = user_access('mfcs administer', $user);
     $manager = user_access('mfcs manage', $user);
     $reviewer = user_access('mfcs review', $user);
     $requester = user_access('mfcs request', $user);
@@ -7124,7 +7126,7 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
       $query->range($start, $limit);
     }
 
-    if ($reviewer || $manager) {
+    if ($reviewer || $manager || $administer) {
       $or = NULL;
 
       $proxies = mfcs_get_proxy_venue_coordinator($user->uid);
@@ -7172,7 +7174,7 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
         }
       }
       elseif ($review_restrictions == MFCS_REVIEW_RESTRICTION_VIEW) {
-        if (!$manager) {
+        if (!$manager && !$administer) {
           if (is_null($or)) {
             $or = db_or();
           }
@@ -8217,6 +8219,7 @@ function mfcs_build_request_table($items, $max_rows, $columns = NULL, $user = NU
     return $table;
   }
 
+  $administer = user_access('mfcs administer', $user);
   $manager = user_access('mfcs manage', $user);
 
   $item_ids = array_keys($items);
@@ -8387,7 +8390,7 @@ function mfcs_build_request_table($items, $max_rows, $columns = NULL, $user = NU
           $name .= ' (' . $submitter->name . ')';
         }
 
-        if ($manager) {
+        if ($manager || $administer) {
           $row['submitted_by']['data'] = '<a href="' . $base_path . 'user/' . $submitter->uid . $url_arguments . '">' . $name . '</a>';
         }
         else {
@@ -8843,6 +8846,7 @@ function mfcs_build_request_ajax_table_process_rows($items, $columns, $user = NU
 
   $item_ids = array_keys($items);
 
+  $administer = user_access('mfcs administer', $user);
   $manager = user_access('mfcs manage', $user);
 
   $can_create_requests = mfcs_page_request_access('create', $item_ids, $user);
@@ -9031,7 +9035,7 @@ function mfcs_build_request_ajax_table_process_rows($items, $columns, $user = NU
             }
           }
 
-          if ($manager) {
+          if ($manager || $administer) {
             $data = '<a href="' . $base_path . 'user/' . $item->user_id . $url_arguments . '">' . $name . '</a>';
           }
           else {

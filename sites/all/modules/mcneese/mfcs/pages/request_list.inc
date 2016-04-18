@@ -69,6 +69,7 @@ function mfcs_request_list_0_form($form, &$form_state, $page_number = NULL) {
 
   $user = cf_current_user();
 
+  $administer = FALSE;
   $manager = FALSE;
   $reviewer = FALSE;
   $requester = FALSE;
@@ -77,13 +78,14 @@ function mfcs_request_list_0_form($form, &$form_state, $page_number = NULL) {
     $requester = TRUE;
   }
   else {
+    $administer = user_access('mfcs administer', $user);
     $manager = user_access('mfcs manage', $user);
     $reviewer = user_access('mfcs review', $user);
     $requester = user_access('mfcs request', $user);
   }
 
   $show_my_request_only_default = FALSE;
-  if ($requester && !($manager || $reviewer)) {
+  if ($requester && !($reviewer || $manager || $administer)) {
     $show_my_request_only_default = TRUE;
   }
 
