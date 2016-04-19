@@ -404,7 +404,6 @@ define('MFCS_USER_REQUEST', -1);
 define('MFCS_REVIEW_RESTRICTIONS_NONE', 0);
 define('MFCS_REVIEW_RESTRICTIONS_REQUESTER', 1);
 define('MFCS_REVIEW_RESTRICTIONS_REVIEWER', 2);
-define('MFCS_REVIEW_RESTRICTIONS_COORDINATOR', 3);
 
 
 /**
@@ -1421,6 +1420,10 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
         $access[$request_id] = $log_access[$request_id];
         return $log_access[$request_id];
       }
+    }
+    elseif ($roles['requester'] && $request['mer']['user_id'][0]->value == $user->uid) {
+      $access[$request_id] = TRUE;
+      return TRUE;
     }
   }
   elseif ($operation == 'delete') {

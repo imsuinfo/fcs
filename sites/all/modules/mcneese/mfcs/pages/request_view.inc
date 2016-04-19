@@ -1095,7 +1095,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           $yet_to_review[$request['venue_coordinator']['user_id'][0]->value] = "Venue Coordinator";
         }
 
-        if (!empty($yet_to_review)) {
+        if (!empty($yet_to_review) && ($reviewer || $manager || $administer)) {
           $module_path = drupal_get_path('module', 'mfcs');
           drupal_add_js($module_path . '/js/request_view-reviewers.js', array('type' => 'file', 'group' => JS_DEFAULT, 'preprocess' => TRUE));
 
@@ -1245,51 +1245,53 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
       mfcs_view_build_reviews_log($form, $form_state, $request_id, $use_revision);
 
-      $form['review']['log']['submit'] = array(
-        '#id' => 'request-review-log-submit',
-        '#type' => 'container',
-        '#tree' => TRUE,
-        '#attributes' => array(
-          'class' => array(
-            'no-print',
-            'request-review-log-submit',
-            'mode-' . $mode,
+      if (isset($form['review'])) {
+        $form['review']['log']['submit'] = array(
+          '#id' => 'request-review-log-submit',
+          '#type' => 'container',
+          '#tree' => TRUE,
+          '#attributes' => array(
+            'class' => array(
+              'no-print',
+              'request-review-log-submit',
+              'mode-' . $mode,
+            ),
           ),
-        ),
-        '#weight' => 1000,
-      );
+          '#weight' => 1000,
+        );
 
-      $form['review']['log']['submit']['print'] = array(
-        '#id' => 'request-review-log-submit-print',
-        '#name' => 'request-review-log-submit-print',
-        '#type' => 'submit',
-        '#default_value' => t("Print"),
-        '#attributes' => array(
-          'class' => array(
-            'no-print',
-            'request-review-log-submit-print',
-            'mode-' . $mode,
+        $form['review']['log']['submit']['print'] = array(
+          '#id' => 'request-review-log-submit-print',
+          '#name' => 'request-review-log-submit-print',
+          '#type' => 'submit',
+          '#default_value' => t("Print"),
+          '#attributes' => array(
+            'class' => array(
+              'no-print',
+              'request-review-log-submit-print',
+              'mode-' . $mode,
+            ),
+            'onclick' => 'window.print(); return false;',
           ),
-          'onclick' => 'window.print(); return false;',
-        ),
-      );
+        );
 
-      $form['review']['log']['submit']['download'] = array(
-        '#id' => 'request-review-log-submit-download',
-        '#name' => 'request-review-log-submit-download',
-        '#type' => 'submit',
-        '#default_value' => t("Download"),
-        '#attributes' => array(
-          'class' => array(
-            'no-print',
-            'request-review-log-submit-download',
-            'mode-' . $mode,
+        $form['review']['log']['submit']['download'] = array(
+          '#id' => 'request-review-log-submit-download',
+          '#name' => 'request-review-log-submit-download',
+          '#type' => 'submit',
+          '#default_value' => t("Download"),
+          '#attributes' => array(
+            'class' => array(
+              'no-print',
+              'request-review-log-submit-download',
+              'mode-' . $mode,
+            ),
           ),
-        ),
-        '#submit' => array(
-          'mfcs_request_view_0_form_submit_pdf',
-        ),
-      );
+          '#submit' => array(
+            'mfcs_request_view_0_form_submit_pdf',
+          ),
+        );
+      }
     }
 
     if ($show_operations && !$contained && is_null($use_revision)) {

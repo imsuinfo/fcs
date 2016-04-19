@@ -645,6 +645,26 @@ function mfcs_page_request_access_operation_log(&$request_ids, &$processed, &$ac
 
     return TRUE;
   }
+  elseif ($roles['requester']) {
+    if (array_key_exists(NULL, $request_ids)) {
+      $access[NULL] = TRUE;
+      $processed[NULL] = TRUE;
+      return TRUE;
+    }
+
+    foreach ($request_ids as $request_id) {
+      if ($request['mer']['user_id'][0]->value == $user->uid) {
+        $access[$request_id] = TRUE;
+        $processed[$request_id] = TRUE;
+      }
+      else {
+        $access[$request_id] = FALSE;
+        $processed[$request_id] = FALSE;
+      }
+    }
+
+    return TRUE;
+  }
 
   if (array_key_exists(NULL, $request_ids)) {
     $access[NULL] = FALSE;

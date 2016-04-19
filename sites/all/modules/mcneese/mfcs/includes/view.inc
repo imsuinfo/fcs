@@ -1044,6 +1044,18 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
     return FALSE;
   }
 
+  $user = cf_current_user();
+  $administer = FALSE;
+  $manager = FALSE;
+  $reviewer = FALSE;
+  $requester = FALSE;
+  if (is_object($user)) {
+    $administer = user_access('mfcs administer', $user);
+    $manager = user_access('mfcs manage', $user);
+    $reviewer = user_access('mfcs review', $user);
+    $requester = user_access('mfcs request', $user);
+  }
+
   mfcs_include(MFCS_INCLUDE_TABLE);
 
   $presentation = mfcs_table_presentation();
@@ -1119,6 +1131,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
   $users = array();
   $reviewers = array();
   $has_log = FALSE;
+  $has_viewable_entries = FALSE;
   if (is_array($reviews)) {
     $review_step_options = mfcs_get_review_step_list_options();
     $reviewer_classification_options = mfcs_get_reviewer_classification_list_options();
@@ -1134,6 +1147,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
       $decision = $review->decision;
       $message = check_plain($review->message);
       $date = $review->date;
+      $restriction = $review->restriction;
 
       $message = str_replace("\n", "<br>", trim($message));
 
@@ -1152,6 +1166,28 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
       if (is_string($date)) {
         $date = (int) $date;
       }
+
+      if (is_string($restriction)) {
+        $restriction = (int) $restriction;
+      }
+
+      if (!is_int($restriction) || $restriction < MFCS_REVIEW_RESTRICTIONS_NONE || $restriction > MFCS_REVIEW_RESTRICTIONS_REVIEWER) {
+        $restriction = MFCS_REVIEW_RESTRICTIONS_NONE;
+      }
+
+      if ($restriction === MFCS_REVIEW_RESTRICTIONS_REQUESTER) {
+        if (!($requester || $manager || $administer)) {
+          continue;
+        }
+      }
+      elseif ($restriction === MFCS_REVIEW_RESTRICTIONS_REVIEWER) {
+        if (!($reviewer || $manager || $administer)) {
+          continue;
+        }
+      }
+
+      // if there are viewable entries, then the log can be displayed.
+      $has_viewable_entries = TRUE;
 
       $user_can_administer = mfcs_user_can_administer($user_id);
       $user_can_manage = mfcs_user_can_manage($user_id);
@@ -1249,6 +1285,17 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
       $user_id_markup = '<span class="updater_id">[id: ' . $user_id . ']</span>';
 
       $row_id_block = '<div class="review-item-label-text-row">[' . $row . ']</div> ';
+
+      if ($restriction === MFCS_REVIEW_RESTRICTIONS_REQUESTER) {
+        $markup .= '<div class="review-item-restricted review-item-restricted-requester">';
+        $markup .= '<div class="review-item-restricted-message review-item-restricted-requester-message" title="Only requesters, managers, and administrators can view this item">' . "Restricted to Requesters" . '</div>';
+        $markup .= '</div>';
+      }
+      elseif ($restriction === MFCS_REVIEW_RESTRICTIONS_REVIEWER) {
+        $markup .= '<div class="review-item-restricted review-item-restricted-requester">';
+        $markup .= '<div class="review-item-restricted-message review-item-restricted-requester-message" title="Only reviewers, venue coordinators, managers, and administrators can view this item">' . "Restricted to Reviewers" . '</div>';
+        $markup .= '</div>';
+      }
 
       $markup .= '<div class="review-item-label">';
       $markup .= '<h3 class="review-item-label-text">' . $row_id_block . '<div class="review-item-label-text-title">';
@@ -1589,6 +1636,17 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
     $form['review']['log']['history']['nothing'] = array(
       '#markup' => 'The review log is empty.',
     );
+  }
+
+  if (!$has_viewable_entries) {
+    if (!($reviewer || $manager || $administer)) {
+      unset($form['review']);
+    }
+    elseif ($has_log) {
+      $form['review']['log']['history']['nothing'] = array(
+        '#markup' => 'The review log is empty.',
+      );
+    }
   }
 
   return TRUE;
