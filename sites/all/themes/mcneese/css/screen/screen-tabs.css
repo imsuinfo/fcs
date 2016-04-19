@@ -54,6 +54,15 @@
   padding: 0px;
 }
 
+.mcneese #mcneese-tabs.relative > .navigation_list > .tab > .sub_tabs {
+  margin: 0px 0px 0px 4px;
+  padding: 0px;
+}
+
+.mcneese #mcneese-tabs.relative.collapsed > .navigation_list > .tab {
+  display: none;
+}
+
 .mcneese #mcneese-tabs.relative > .navigation_list > .tab,
 .mcneese #mcneese-tabs.relative > .navigation_list > .tab.leaf {
   margin-right: 6px;
@@ -65,15 +74,6 @@
 
 .mcneese #mcneese-tabs.relative > .navigation_list > .tab:last-of-type {
   margin-right: 0px;
-}
-
-.mcneese #mcneese-tabs.relative > .navigation_list > .tab > .sub_tabs {
-  margin: 0px 0px 0px 4px;
-  padding: 0px;
-}
-
-.mcneese #mcneese-tabs.relative.collapsed > .navigation_list > .tab {
-  display: none;
 }
 
 .mcneese #mcneese-tabs.relative.collapsed > .navigation_list > .tab-command-1 {
