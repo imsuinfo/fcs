@@ -280,7 +280,7 @@ function mfcs_request_reassign_0_form_submit($form, &$form_state) {
   $reassigned = mfcs_workflow_set_venue_coordinator($request_id, $form['form']['new_coordinator_id']['#value'], NULL, $extra);
 
   if ($reassigned) {
-    mfcs_workflow_step_review($request_id, $user, MFCS_REVIEW_DECISION_REASSIGNED, $extra['revisions']['message']);
+    mfcs_workflow_step_review($request_id, $user, MFCS_REVIEW_DECISION_REASSIGNED, MFCS_REVIEW_RESTRICTIONS_NONE, $extra['revisions']['message']);
 
     $parameters = array();
     $parameters['changed_by'] = $user->uid;

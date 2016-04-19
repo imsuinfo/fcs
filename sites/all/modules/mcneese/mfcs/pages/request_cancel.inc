@@ -180,7 +180,7 @@ function mfcs_request_cancel_0_form_submit($form, &$form_state) {
   }
 
   if ($cancelled) {
-    mfcs_workflow_step_review($request_id, $user, MFCS_REVIEW_DECISION_CANCELLED);
+    mfcs_workflow_step_review($request_id, $user, MFCS_REVIEW_DECISION_CANCELLED, MFCS_REVIEW_RESTRICTIONS_NONE);
 
     $parameters = array();
     $parameters['changed_by'] = $user->uid;
@@ -407,7 +407,7 @@ function mfcs_request_uncancel_0_form_submit($form, &$form_state) {
   }
 
   if ($uncancelled) {
-    mfcs_workflow_step_review($request_id, $user, MFCS_REVIEW_DECISION_UNCANCELLED);
+    mfcs_workflow_step_review($request_id, $user, MFCS_REVIEW_DECISION_UNCANCELLED, MFCS_REVIEW_RESTRICTIONS_NONE);
 
     $parameters = array();
     $parameters['changed_by'] = $user->uid;

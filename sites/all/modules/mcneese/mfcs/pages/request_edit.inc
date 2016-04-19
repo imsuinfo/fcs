@@ -832,6 +832,7 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
         // do not send e-mail when the previous step is already set to venue available.
         if ($step !== MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
           $parameters['amendment'] = TRUE;
+          $parameters['restriction'] = MFCS_REVIEW_RESTRICTIONS_NONE;
           mfcs_send_workflow_emails($request_id, $parameters);
         }
       }

@@ -1855,6 +1855,21 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         }
       }
 
+      $form['review']['operations']['message_is_reviewers_only'] = array(
+        '#id' => 'request-review-operations-message_is_reviewers_only',
+        '#type' => 'checkbox',
+        '#title' => "Restrict message to reviewers only.",
+        '#default_value' => FALSE,
+        '#required' => FALSE,
+        '#attributes' => array(
+          'title' => "When enabled, messages will be restricted to reviewers, managers, and administrators.",
+        ),
+        '#label_attributes' => array(
+          'title' => "When enabled, messages will be restricted to reviewers, managers, and administrators.",
+        ),
+        '#weight' => 6,
+      );
+
       $form['review']['operations']['message'] = array(
         '#id' => 'request-review-operations-message',
         '#type' => 'textarea',
@@ -1867,7 +1882,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
             'mode-' . $mode,
           ),
         ),
-        '#weight' => 6,
+        '#weight' => 7,
       );
 
       $form['review']['operations']['submit'] = array(
@@ -2502,6 +2517,11 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
     mfcs_include(MFCS_INCLUDE_WORKFLOW);
     $decision = $form_state['values']['review']['operations']['decision'];
     $message = $form_state['values']['review']['operations']['message'];
+    $restriction = MFCS_REVIEW_RESTRICTIONS_NONE;
+
+    if (isset($form_state['values']['review']['operations']['message_is_reviewers_only']) && $form_state['values']['review']['operations']['message_is_reviewers_only']) {
+      $restriction = MFCS_REVIEW_RESTRICTIONS_REVIEWER;
+    }
 
     $request = $form['form']['request']['#value'];
 
@@ -2574,13 +2594,13 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
           'requirements' => array('other' => 0, 'waived' => 0, 'university' => 1),
         );
 
-        $success = mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], MFCS_REVIEW_DECISION_REQUIREMENT, "The system has auto-waived the fees because the request is a Quick Meeting.", $requirements_extra, $already_reviewed_as);
+        $success = mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], MFCS_REVIEW_DECISION_REQUIREMENT, MFCS_REVIEW_RESTRICTIONS_NONE, "The system has auto-waived the fees because the request is a Quick Meeting.", $requirements_extra, $already_reviewed_as);
       }
     }
     elseif ($step === MFCS_REVIEW_STEP_REVIEW) {
       if (isset($form_state['autowaive']) && $form_state['autowaive']) {
         // @todo: this might be a valid use of MFCS_REVIEW_DECISION_WAIVE. If 'autowaive' is removed, then this is no longer necessary.
-        $success = mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], MFCS_REVIEW_DECISION_WAIVE, "", array('send_email' => FALSE), $already_reviewed_as);
+        $success = mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], MFCS_REVIEW_DECISION_WAIVE, MFCS_REVIEW_RESTRICTIONS_NONE, "", array('send_email' => FALSE), $already_reviewed_as);
       }
     }
     elseif ($step === MFCS_REVIEW_STEP_REQUIREMENTS) {
@@ -2784,7 +2804,7 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
         return;
       }
 
-      $success = mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], $decision, $message, $extra, $already_reviewed_as);
+      $success = mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], $decision, $restriction, $message, $extra, $already_reviewed_as);
     }
 
     if ($success) {

@@ -398,6 +398,14 @@ define('MFCS_USER_ANONYMOUS', 0);
 define('MFCS_USER_SYSTEM', 1);
 define('MFCS_USER_REQUEST', -1);
 
+/**
+ * View/Access restrictions for review log and related e-mails.
+ */
+define('MFCS_REVIEW_RESTRICTIONS_NONE', 0);
+define('MFCS_REVIEW_RESTRICTIONS_REQUESTER', 1);
+define('MFCS_REVIEW_RESTRICTIONS_REVIEWER', 2);
+define('MFCS_REVIEW_RESTRICTIONS_COORDINATOR', 3);
+
 
 /**
  * Implements hook_init().
@@ -4779,7 +4787,7 @@ function mfcs_autocancel_old_requests_cron() {
 
     if ($cancelled) {
       $message = "One or more dates associated with the request are now in the past.";
-      mfcs_workflow_step_review($request_id, $system_user, MFCS_REVIEW_DECISION_CANCELLED, $message);
+      mfcs_workflow_step_review($request_id, $system_user, MFCS_REVIEW_DECISION_CANCELLED, MFCS_REVIEW_RESTRICTIONS_NONE, $message);
 
       $parameters = array();
       $parameters['changed_by'] = $system_user->uid;

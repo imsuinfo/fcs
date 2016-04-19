@@ -23,7 +23,7 @@ function mfcs_table_install_structure() {
   );
 
   $structure['review'] = array(
-    'review' => array('id' => 'serial_pkey', 'user_id' => 'unsigned', 'step' => 'unsigned', 'decision' => 'unsigned', 'message' => 'text'),
+    'review' => array('id' => 'serial_pkey', 'user_id' => 'unsigned', 'step' => 'unsigned', 'decision' => 'unsigned', 'message' => 'text', 'restriction' => 'unsigned_small'),
   );
 
   $structure['requirements'] = array(

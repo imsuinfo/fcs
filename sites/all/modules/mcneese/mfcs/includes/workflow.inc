@@ -465,6 +465,8 @@ function mfcs_workflow_set_venue_coordinator($request_id, $venue_coordinator_id,
  *   The reviewer.
  * @param int $decision
  *   The facilities use decision.
+* @param int $restriction
+ *   (optional) Designates who is able to view or receive e-mails in regards to this review.
  * @param string $message
  *   (optional) The facilities use decision message.
  * @param array $extra
@@ -477,7 +479,7 @@ function mfcs_workflow_set_venue_coordinator($request_id, $venue_coordinator_id,
  * @return bool
  *   TRUE on success, FALSE otherwise.
  */
-function mfcs_workflow_step_review($request_id, $user, $decision, $message = "", $extra = array(), $as = NULL) {
+function mfcs_workflow_step_review($request_id, $user, $decision, $restriction = MFCS_REVIEW_RESTRICTIONS_NONE, $message = "", $extra = array(), $as = NULL) {
   if (!is_object($user)) {
     cf_error::invalid_object('user');
     return FALSE;
@@ -485,6 +487,11 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
 
   if (!cf_is_integer($decision)) {
     cf_error::invalid_integer('decision');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($restriction)) {
+    cf_error::invalid_integer('restriction');
     return FALSE;
   }
 
@@ -753,6 +760,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
     'step' => $step,
     'decision' => $decision,
     'message' => $message,
+    'restriction' => $restriction,
   );
 
   if ($step === MFCS_REVIEW_STEP_REVIEW || $step === MFCS_REVIEW_STEP_REQUIREMENTS || $step === MFCS_REVIEW_STEP_MAKE_DECISIONS) {
@@ -1387,6 +1395,10 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
       $parameters['message'] = $message;
       $parameters['comment'] = TRUE;
 
+      if ($restriction !== MFCS_REVIEW_RESTRICTIONS_NONE && $restriction !== MFCS_REVIEW_RESTRICTIONS_REQUESTER) {
+        $parameters['requester_included'] = FALSE;
+      }
+
       if ($send_email) {
         mfcs_send_workflow_emails($request_id, $parameters);
       }
@@ -1404,6 +1416,10 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
     $parameters['message'] = $message;
     $parameters['issues'] = TRUE;
 
+    if ($restriction !== MFCS_REVIEW_RESTRICTIONS_NONE && $restriction !== MFCS_REVIEW_RESTRICTIONS_REQUESTER) {
+      $parameters['requester_included'] = FALSE;
+    }
+
     if ($send_email) {
       mfcs_send_workflow_emails($request_id, $parameters);
     }
@@ -1414,6 +1430,10 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
     $parameters['changed_type'] = 'reviewer';
     $parameters['message'] = $message;
     $parameters['issues'] = FALSE;
+
+    if ($restriction !== MFCS_REVIEW_RESTRICTIONS_NONE && $restriction !== MFCS_REVIEW_RESTRICTIONS_REQUESTER) {
+      $parameters['requester_included'] = FALSE;
+    }
 
     if ($send_email) {
       mfcs_send_workflow_emails($request_id, $parameters);
@@ -1428,6 +1448,10 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
         $parameters['changed_type'] = 'reviewer';
         $parameters['message'] = $message;
         $parameters['comment'] = TRUE;
+
+        if ($restriction !== MFCS_REVIEW_RESTRICTIONS_NONE && $restriction !== MFCS_REVIEW_RESTRICTIONS_REQUESTER) {
+          $parameters['requester_included'] = FALSE;
+        }
 
         if ($send_email) {
           mfcs_send_workflow_emails($request_id, $parameters);
@@ -1463,6 +1487,10 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
           $parameters['message'] = $message;
           $parameters['comment'] = TRUE;
 
+          if ($restriction !== MFCS_REVIEW_RESTRICTIONS_NONE && $restriction !== MFCS_REVIEW_RESTRICTIONS_REQUESTER) {
+            $parameters['requester_included'] = FALSE;
+          }
+
           if ($send_email) {
             mfcs_send_workflow_emails($request_id, $parameters);
           }
@@ -1495,6 +1523,10 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
         $parameters['message'] = $message;
         $parameters['comment'] = TRUE;
 
+        if ($restriction !== MFCS_REVIEW_RESTRICTIONS_NONE && $restriction !== MFCS_REVIEW_RESTRICTIONS_REQUESTER) {
+          $parameters['requester_included'] = FALSE;
+        }
+
         if ($send_email) {
           mfcs_send_workflow_emails($request_id, $parameters);
         }
@@ -1516,6 +1548,10 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
     $parameters['message'] = $message;
     $parameters['insurance_provided'] = TRUE;
 
+    if ($restriction !== MFCS_REVIEW_RESTRICTIONS_NONE && $restriction !== MFCS_REVIEW_RESTRICTIONS_REQUESTER) {
+      $parameters['requester_included'] = FALSE;
+    }
+
     if ($send_email) {
       mfcs_send_workflow_emails($request_id, $parameters);
     }
@@ -1530,12 +1566,16 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
     $parameters['message'] = $message;
     $parameters['comment'] = TRUE;
 
+    if ($restriction !== MFCS_REVIEW_RESTRICTIONS_NONE && $restriction !== MFCS_REVIEW_RESTRICTIONS_REQUESTER) {
+      $parameters['requester_included'] = FALSE;
+    }
+
     if ($send_email) {
       mfcs_send_workflow_emails($request_id, $parameters);
     }
   }
 
-  mfcs_workflow_next_step($request_id, $type, $step, $decision, $attach_message, $send_email);
+  mfcs_workflow_next_step($request_id, $type, $step, $decision, $restriction, $attach_message, $send_email);
 
   return TRUE;
 }
@@ -1551,6 +1591,8 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
  *   The current step.
  * @param int $decision
  *   The facilities use decision.
+ * @param int $restriction
+ *   Designates who is able to view or receive e-mails in regards to this review.
  * @param string $message
  *   The facilities use decision message.
  * @param bool $send_email
@@ -1560,7 +1602,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $message = "",
  *   TRUE on success, FALSE otherwise.
  *
  */
-function mfcs_workflow_next_step($request_id, $type, $step, $decision, $message, $send_email) {
+function mfcs_workflow_next_step($request_id, $type, $step, $decision, $restriction, $message, $send_email) {
   if (!cf_is_integer($request_id)) {
     cf_error::invalid_integer('request_id');
     return FALSE;
@@ -1697,7 +1739,7 @@ function mfcs_workflow_next_step($request_id, $type, $step, $decision, $message,
     mfcs_workflow_set_step($request_id, $new_step, $changed_user);
 
     #if ($new_step === MFCS_REVIEW_STEP_COMPLETED && $type !== MFCS_REQUEST_TYPE_QUICK_MEETING) {
-    #  mfcs_workflow_step_review($request_id, $changed_user, MFCS_REVIEW_DECISION_CLOSED);
+    #  mfcs_workflow_step_review($request_id, $changed_user, MFCS_REVIEW_DECISION_CLOSED, MFCS_REVIEW_RESTRICTIONS_NONE);
     #}
   }
 
@@ -1709,6 +1751,10 @@ function mfcs_workflow_next_step($request_id, $type, $step, $decision, $message,
   $parameters['changed_by'] = $changed_by;
   $parameters['changed_type'] = $changed_type;
   $parameters['message'] = $message;
+
+  if ($restriction !== MFCS_REVIEW_RESTRICTIONS_NONE && $restriction !== MFCS_REVIEW_RESTRICTIONS_REQUESTER) {
+    $parameters['requester_included'] = FALSE;
+  }
 
   if (!is_null($new_status) && $new_status !== MFCS_REQUEST_STATUS_LOCKED) {
     $parameters['status'] = $new_status;
@@ -1821,6 +1867,12 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
   else {
     cf_error::invalid_string('parameters[changed_type]');
     return FALSE;
+  }
+
+  // this only applies to e-mails that the requester would not normally receive prior to ticket fcs-79.
+  $reviewer_included_in_emails = TRUE;
+  if (array_key_exists('requester_included', $parameters) && $parameters['requester_included'] === FALSE) {
+    $reviewer_included_in_emails = FALSE;
   }
 
   if (!is_null($changed_by)) {
@@ -2101,6 +2153,8 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
   $email_params['request_id'] = $request_id;
   $email_params['from'] = $fcs_email;
 
+  $email_comment_only = array();
+
   $email_to = array();
 
   if (isset($parameters['message_priority'])) {
@@ -2196,14 +2250,13 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
         'send_email' => FALSE,
         'requirements' => array('other' => 0, 'waived' => 0, 'university' => 1),
       );
-      mfcs_workflow_step_review($request_id, $request_requester_object, MFCS_REVIEW_DECISION_REQUIREMENT, "", $extra);
+      mfcs_workflow_step_review($request_id, $request_requester_object, MFCS_REVIEW_DECISION_REQUIREMENT, MFCS_REVIEW_RESTRICTIONS_NONE, "", $extra);
 
       $extra = array(
         'send_email' => FALSE,
       );
-      mfcs_workflow_step_review($request_id, $request_requester_object, MFCS_REVIEW_DECISION_APPROVE, "", $extra);
-
-      #mfcs_workflow_step_review($request_id, $request_requester, MFCS_REVIEW_DECISION_CLOSED);
+      mfcs_workflow_step_review($request_id, $request_requester_object, MFCS_REVIEW_DECISION_APPROVE, MFCS_REVIEW_RESTRICTIONS_NONE, "", $extra);
+      #mfcs_workflow_step_review($request_id, $request_requester, MFCS_REVIEW_DECISION_CLOSED, MFCS_REVIEW_RESTRICTIONS_NONE);
 
       $email_params['title_suffix'] = "Approved";
       $email_params['content'] = "";
@@ -2230,6 +2283,8 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
           }
         }
       }
+
+      // this happens when the venue coordinator is the requester, additional e-mails to requester are unnecessary.
     }
     elseif ($status === MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK) {
       $email_params['title_suffix'] = "Unavailable (due to lock)";
@@ -2253,6 +2308,14 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
           if (is_array($proxy)) {
             $email_to[$proxy['email']] = $proxy['email'];
           }
+        }
+      }
+
+      // as of fcs-79, conditionally include the requester in the e-mails.
+      if ($reviewer_included_in_emails && !is_null($request_requester['email'])) {
+        // requesters should receive an e-mail for created requests that have been closed as unavailable and a comment is left.
+        if (strlen($message) > 0) {
+          $email_to[$request_requester['email']] = $request_requester['email'];
         }
       }
     }
@@ -2280,6 +2343,14 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
           }
         }
       }
+
+      // as of fcs-79, conditionally include the requester in the e-mails.
+      if ($reviewer_included_in_emails && !is_null($request_requester['email'])) {
+        // requesters should receive an e-mail for created requests that have been closed as unavailable and a comment is left.
+        if (strlen($message) > 0) {
+          $email_to[$request_requester['email']] = $request_requester['email'];
+        }
+      }
     }
     else {
       $email_params['title_suffix'] = "Requested";
@@ -2305,9 +2376,12 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
           }
         }
       }
+
+      // requesters should not receive an e-mail for created requests.
     }
   }
   elseif ($is_update) {
+    // @fixme: does this get processed anymore or is it also superseded by amendment?
     $email_params['title_suffix'] = "Modified";
     $email_params['content'] = "";
     $email_params['content'] .= $changed_by_string . " has modified this request.\n";
@@ -2355,34 +2429,10 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       }
     }
     elseif ($status === MFCS_REQUEST_STATUS_LOCKED) {
-      // warning: this condition appears to be superseded by the amendment and execution might not ever reach this point.
-      if (is_array($venue_coordinator)) {
-        $email_to[$venue_coordinator['email']] = $venue_coordinator['email'];
-      }
-
-      // also send e-mails to the venue coordinator proxies.
-      $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.user_id' => $venue_coordinator['user_id'], 'mpvc.disabled' => 0));
-      if (!empty($proxies_returned['results'])) {
-        foreach ($proxies_returned['results'] as $proxy_returned) {
-          $proxy = mfcs_load_basic_user_settings_by_user_id($proxy_returned->proxy_id);
-
-          if (is_array($proxy)) {
-            $email_to[$proxy['email']] = $proxy['email'];
-          }
-        }
-      }
-
-      if ($request['top']['step'][0]->value == MFCS_REVIEW_STEP_REVIEW) {
-        foreach ($step_1_reviewers as $r) {
-          $email_to[$r->email] = $r->email;
-        }
-      }
-
-      if ($request['top']['step'][0]->value == MFCS_REVIEW_STEP_REQUIREMENTS) {
-        foreach ($step_2_reviewers as $r) {
-          $email_to[$r->email] = $r->email;
-        }
-      }
+      // this was superseded by amendment and execution should not reach this point.
+      // this has been added to catch any cases where this still gets executed.
+      watchdog(MFC_WATCHDOG_ID, "Status 'locked' in " . __function__ . " is being called when it is expected to no longer be called (execution should not reach this point), request_id = %request_id. No e-mails are being sent.", array('%request_id' => $request_id), WATCHDOG_WARNING);
+      return TRUE;
     }
     else {
       // This is not a bug and there are no e-mails to send, just log and return.
@@ -2425,6 +2475,12 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
 
       foreach ($step_2_reviewers as $r) {
         $email_to[$r->email] = $r->email;
+      }
+
+      // as of fcs-79, conditionally include the requester in the e-mails
+      if ($reviewer_included_in_emails && !is_null($request_requester['email'])) {
+        // not adding to comment only here because in this case the requester should receive the full/normal e-mail.
+        $email_to[$request_requester['email']] = $request_requester['email'];
       }
     }
     else {
@@ -2478,6 +2534,12 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     foreach ($step_2_reviewers as $r) {
       $email_to[$r->email] = $r->email;
     }
+
+    // as of fcs-79, conditionally include the requester in the e-mails.
+    if ($reviewer_included_in_emails && !is_null($request_requester['email'])) {
+      // not adding to comment only here because in this case the requester should receive the full/normal e-mail.
+      $email_to[$request_requester['email']] = $request_requester['email'];
+    }
   }
   elseif ($is_reminder) {
     if ($parameters['reminder_reason'] == 'insurance_provided') {
@@ -2511,6 +2573,12 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
 
       if (!empty($parameters['reminder_data']->coordinator_email)) {
         $email_to[$parameters['reminder_data']->coordinator_email] = $parameters['reminder_data']->coordinator_email;
+      }
+
+      // as of fcs-79, conditionally include the requester in the e-mails.
+      if ($reviewer_included_in_emails && !is_null($request_requester['email'])) {
+        // not adding to comment only here because in this case the requester should receive the full/normal e-mail.
+        $email_to[$request_requester['email']] = $request_requester['email'];
       }
     }
     else {
@@ -2785,6 +2853,12 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
           }
         }
       }
+
+      // as of fcs-79, conditionally include the requester in the e-mails.
+      if ($reviewer_included_in_emails && !is_null($request_requester['email'])) {
+        // not adding to comment only here because in this case the requester should receive the full/normal e-mail.
+        $email_to[$request_requester['email']] = $request_requester['email'];
+      }
     }
   }
   elseif (!is_null($step)) {
@@ -2828,6 +2902,14 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
           }
         }
       }
+
+      // as of fcs-79, conditionally include the requester in the e-mails.
+      if ($reviewer_included_in_emails && !is_null($request_requester['email'])) {
+        if (!array_key_exists($request_requester['email'], $email_to) && strlen($message) > 0) {
+          $email_comment_only[$request_requester['email']] = $request_requester['email'];
+          $email_to[$request_requester['email']] = $request_requester['email'];
+        }
+      }
     }
     elseif ($request['top']['step'][0]->value == MFCS_REVIEW_STEP_REQUIREMENTS) {
       $email_params['title_suffix'] = "Requirements";
@@ -2869,6 +2951,14 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
           if (is_array($proxy)) {
             $email_to[$proxy['email']] = $proxy['email'];
           }
+        }
+      }
+
+      // as of fcs-79, conditionally include the requester in the e-mails.
+      if ($reviewer_included_in_emails && !is_null($request_requester['email'])) {
+        if (!array_key_exists($request_requester['email'], $email_to) && strlen($message) > 0) {
+          $email_comment_only[$request_requester['email']] = $request_requester['email'];
+          $email_to[$request_requester['email']] = $request_requester['email'];
         }
       }
     }
@@ -2966,8 +3056,58 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     foreach ($step_2_reviewers as $r) {
       $email_to[$r->email] = $r->email;
     }
+
+    // as of fcs-79, conditionally include the requester in the e-mails.
+    if ($reviewer_included_in_emails && !is_null($request_requester['email'])) {
+      if (!array_key_exists($request_requester['email'], $email_to) && strlen($message) > 0) {
+        $email_comment_only[$request_requester['email']] = $request_requester['email'];
+        $email_to[$request_requester['email']] = $request_requester['email'];
+      }
+    }
   }
   elseif ($is_comment) {
+    if (is_array($venue_coordinator)) {
+      $email_comment_only[$venue_coordinator['email']] = $venue_coordinator['email'];
+      $email_to[$venue_coordinator['email']] = $venue_coordinator['email'];
+    }
+
+    // also send e-mails to the venue coordinator proxies.
+    $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.user_id' => $venue_coordinator['user_id'], 'mpvc.disabled' => 0));
+    if (!empty($proxies_returned['results'])) {
+      foreach ($proxies_returned['results'] as $proxy_returned) {
+        $proxy = mfcs_load_basic_user_settings_by_user_id($proxy_returned->proxy_id);
+
+        if (is_array($proxy)) {
+          $email_comment_only[$proxy['email']] = $proxy['email'];
+          $email_to[$proxy['email']] = $proxy['email'];
+        }
+      }
+    }
+
+    foreach ($step_1_reviewers as $r) {
+      $email_comment_only[$r->email] = $r->email;
+      $email_to[$r->email] = $r->email;
+    }
+
+    foreach ($step_2_reviewers as $r) {
+      $email_comment_only[$r->email] = $r->email;
+      $email_to[$r->email] = $r->email;
+    }
+
+    // as of fcs-79, conditionally include the requester in the e-mails.
+    if ($reviewer_included_in_emails && !is_null($request_requester['email'])) {
+      $email_comment_only[$request_requester['email']] = $request_requester['email'];
+      $email_to[$request_requester['email']] = $request_requester['email'];
+    }
+  }
+  else {
+    watchdog(MFCS_WATCHDOG_ID, "Exception detected in workflow e-mail process. Not sending e-mail. Request ID = %request_id, Parameters = %parameters.", array('%request_id' => $request_id, '%parameters' => print_r($parameters, TRUE)), WATCHDOG_WARNING);
+    return FALSE;
+  }
+
+  // as of ticket fcs-79, comments are handled differently.
+  $comment_email_params = NULL;
+  if (!empty($email_comment_only)) {
     $email_params['title_suffix'] = "Comment";
     $email_params['content'] = "";
     $email_params['content'] .= $changed_by_string . " has made the following comment:\n";
@@ -2980,33 +3120,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     $email_params['markup'] .= str_replace("\n", "<br>", trim(check_plain($message))) . "<br>";
     $email_params['markup'] .= $standard_markup;
 
-    if (is_array($venue_coordinator)) {
-      $email_to[$venue_coordinator['email']] = $venue_coordinator['email'];
-    }
-
-    // also send e-mails to the venue coordinator proxies.
-    $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.user_id' => $venue_coordinator['user_id'], 'mpvc.disabled' => 0));
-    if (!empty($proxies_returned['results'])) {
-      foreach ($proxies_returned['results'] as $proxy_returned) {
-        $proxy = mfcs_load_basic_user_settings_by_user_id($proxy_returned->proxy_id);
-
-        if (is_array($proxy)) {
-          $email_to[$proxy['email']] = $proxy['email'];
-        }
-      }
-    }
-
-    foreach ($step_1_reviewers as $r) {
-      $email_to[$r->email] = $r->email;
-    }
-
-    foreach ($step_2_reviewers as $r) {
-      $email_to[$r->email] = $r->email;
-    }
-  }
-  else {
-    watchdog(MFCS_WATCHDOG_ID, "Exception detected in workflow e-mail process. Not sending e-mail. Request ID = %request_id, Parameters = %parameters.", array('%request_id' => $request_id, '%parameters' => print_r($parameters, TRUE)), WATCHDOG_WARNING);
-    return FALSE;
+    $comment_email_params = $email_params;
   }
 
   // for testing, add/remove email addresses
@@ -3025,6 +3139,10 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
   if ($testing) {
     if (isset($conf['fcs_testing-email_to-prefix']) && is_string($conf['fcs_testing-email_to-prefix'])) {
       $email_params['title_prefix'] = $conf['fcs_testing-email_to-prefix'];
+
+      if (!is_null($comment_email_params)) {
+        $comment_email_params['title_prefix'] = $conf['fcs_testing-email_to-prefix'];
+      }
     }
   }
 
@@ -3055,12 +3173,46 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
         continue;
       }
 
-      drupal_mail('mfcs', 'request_alert', $to, language_default(), $email_params, $email_from, TRUE);
+      if (is_array($comment_email_params) && array_key_exists($to, $email_comment_only)) {
+        if (isset($comment_email_params['content']) && strlen($comment_email_params['content']) > 0) {
+          drupal_mail('mfcs', 'request_alert', $to, language_default(), $comment_email_params, $email_from, TRUE);
+        }
+        else {
+          watchdog(MFCS_WATCHDOG_ID, "Unable to send (comment only) e-mail to %to because the e-mail content was not populated for request %request_id.", array('%to' => $to, '%request_id' => $request_id), WATCHDOG_ERROR);
+          // @todo: implement a problem report id and report it to the request problems table.
+        }
+      }
+      else {
+        if (isset($email_params['content']) && strlen($email_params['content']) > 0) {
+          drupal_mail('mfcs', 'request_alert', $to, language_default(), $email_params, $email_from, TRUE);
+        }
+        else {
+          watchdog(MFCS_WATCHDOG_ID, "Unable to send e-mail to %to because the e-mail content was not populated for request %request_id.", array('%to' => $to, '%request_id' => $request_id), WATCHDOG_ERROR);
+          // @todo: implement a problem report id and report it to the request problems table.
+        }
+      }
     }
   }
   else {
     foreach ($email_to as $to) {
-      drupal_mail('mfcs', 'request_alert', $to, language_default(), $email_params, $email_from, TRUE);
+      if (!is_null($comment_email_params) && array_key_exists($to, $email_comment_only)) {
+        if (isset($comment_email_params['content']) && strlen($comment_email_params['content']) > 0) {
+          drupal_mail('mfcs', 'request_alert', $to, language_default(), $comment_email_params, $email_from, TRUE);
+        }
+        else {
+          watchdog(MFCS_WATCHDOG_ID, "Unable to send (comment only) e-mail to %to because the e-mail content was not populated for request %request_id.", array('%to' => $to, '%request_id' => $request_id), WATCHDOG_ERROR);
+          // @todo: implement a problem report id and report it to the request problems table.
+        }
+      }
+      else {
+        if (isset($email_params['content']) && strlen($email_params['content']) > 0) {
+          drupal_mail('mfcs', 'request_alert', $to, language_default(), $email_params, $email_from, TRUE);
+        }
+        else {
+          watchdog(MFCS_WATCHDOG_ID, "Unable to send e-mail to %to because the e-mail content was not populated for request %request_id.", array('%to' => $to, '%request_id' => $request_id), WATCHDOG_ERROR);
+          // @todo: implement a problem report id and report it to the request problems table.
+        }
+      }
     }
   }
 

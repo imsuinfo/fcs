@@ -560,7 +560,7 @@ function mfcs_request_troubleshoot_0_request_review_recheck($transaction, $user 
 
             $message = "This request's workflow has changed as a result of a change in the reviewer management settings.";
 
-            mfcs_workflow_next_step($request_id, $classification, $step, MFCS_REVIEW_DECISION_MANAGER_RECHECK, $message, TRUE);
+            mfcs_workflow_next_step($request_id, $classification, $step, MFCS_REVIEW_DECISION_MANAGER_RECHECK, MFCS_REVIEW_RESTRICTIONS_NONE, $message, TRUE);
           }
         }
       }

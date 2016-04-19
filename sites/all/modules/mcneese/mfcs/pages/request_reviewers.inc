@@ -809,7 +809,7 @@ function mfcs_request_reviewers_0_form_submit($form, &$form_state) {
 
         $message = "This request's workflow has changed as a result of a change in the reviewer management settings.";
 
-        mfcs_workflow_next_step($request_id, $classification, $step, MFCS_REVIEW_DECISION_MANAGER_RECHECK, $message, TRUE);
+        mfcs_workflow_next_step($request_id, $classification, $step, MFCS_REVIEW_DECISION_MANAGER_RECHECK, MFCS_REVIEW_RESTRICTIONS_NONE, $message, TRUE);
       }
     }
 
