@@ -1557,6 +1557,11 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         '#weight' => 1,
       );
 
+      if (count($decision_options) == 1 && array_key_exists(MFCS_REVIEW_DECISION_COMMENT, $decision_options)) {
+        $form['review']['operations']['decision']['#title'] = "Operation";
+        $form['review']['operations']['decision']['#default_value'] = MFCS_REVIEW_DECISION_COMMENT;
+      }
+
       if ($can_review_request && $step === MFCS_REVIEW_STEP_REQUIREMENTS) {
         $states = array(
           'visible' => array(
@@ -1857,20 +1862,22 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         }
       }
 
-      $form['review']['operations']['message_is_reviewers_only'] = array(
-        '#id' => 'request-review-operations-message_is_reviewers_only',
-        '#type' => 'checkbox',
-        '#title' => "Restrict message to reviewers only.",
-        '#default_value' => FALSE,
-        '#required' => FALSE,
-        '#attributes' => array(
-          'title' => "When enabled, messages will be restricted to reviewers, managers, and administrators.",
-        ),
-        '#label_attributes' => array(
-          'title' => "When enabled, messages will be restricted to reviewers, managers, and administrators.",
-        ),
-        '#weight' => 6,
-      );
+      if ($reviewer || $manager || $administer) {
+        $form['review']['operations']['message_is_reviewers_only'] = array(
+          '#id' => 'request-review-operations-message_is_reviewers_only',
+          '#type' => 'checkbox',
+          '#title' => "Restrict message to reviewers only.",
+          '#default_value' => FALSE,
+          '#required' => FALSE,
+          '#attributes' => array(
+            'title' => "When enabled, messages will be restricted to reviewers, managers, and administrators.",
+          ),
+          '#label_attributes' => array(
+            'title' => "When enabled, messages will be restricted to reviewers, managers, and administrators.",
+          ),
+          '#weight' => 6,
+        );
+      }
 
       $form['review']['operations']['message'] = array(
         '#id' => 'request-review-operations-message',
@@ -2175,7 +2182,7 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
     }
 
     if ($can_comment_request && $decision === MFCS_REVIEW_DECISION_COMMENT) {
-      // if there are any cases where a comment cannot be posted, then is the place to add the restriction.
+      // if there are any cases where a comment cannot be posted, then this is the place to add the restriction.
     }
     else {
       if (!in_array($status, $allowed_statuses)) {

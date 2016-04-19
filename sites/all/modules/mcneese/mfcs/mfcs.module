@@ -1377,11 +1377,6 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
     }
   }
   elseif ($operation == 'comment') {
-    if (!$roles['reviewer'] && !$roles['manager'] && !$roles['administer']) {
-      $access[$request_id] = FALSE;
-      return FALSE;
-    }
-
     if ($request['top']['status'][0]->value == MFCS_REQUEST_STATUS_DELETED) {
       $access[$request_id] = FALSE;
       return FALSE;
@@ -1389,6 +1384,10 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
 
     // managers and administration should always be able to comment.
     if ($roles['manager'] || $roles['administer']) {
+      $access[$request_id] = TRUE;
+      return TRUE;
+    }
+    elseif ($roles['requester'] && $request['mer']['user_id'][0]->value == $user->uid) {
       $access[$request_id] = TRUE;
       return TRUE;
     }
@@ -1400,6 +1399,10 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
         $access[$request_id] = $comment_access[$request_id];
         return $comment_access[$request_id];
       }
+    }
+    else {
+      $access[$request_id] = FALSE;
+      return FALSE;
     }
   }
   elseif ($operation == 'log') {
@@ -1715,6 +1718,18 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
     MFCS_REQUEST_STATUS_LOCKED,
   );
 
+  // allow comments when the request is assigned any of these status codes.
+  $show_status_comments_allowed = array(
+    MFCS_REQUEST_STATUS_UNLOCKED,
+    MFCS_REQUEST_STATUS_LOCKED,
+    MFCS_REQUEST_STATUS_CLOSED_ACCEPTED,
+    MFCS_REQUEST_STATUS_CLOSED_DENIED,
+    MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE,
+    MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK,
+    MFCS_REQUEST_STATUS_CANCELLED,
+    MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED,
+  );
+
   $show_step_reviewer = array(
     MFCS_REVIEW_STEP_REVIEW,
     MFCS_REVIEW_STEP_REQUIREMENTS,
@@ -1876,13 +1891,13 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
       // allow venue coordinator for the request access to comment.
       $or->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
 
+      // allow requester for the request access to comment.
+      $or->condition('mer.user_id', $user->uid);
+
+
       // allow reviewer access to comment if they are allowed to review the request at some point.
       if (!empty($reviewer_settings['request_classifications'])) {
-        $and = db_and();
-        $and->condition('mer.classification', $reviewer_settings['request_classifications'], 'IN');
-        $and->condition('mer.status', $show_status_reviewer, 'IN');
-
-        $or->condition($and);
+        $or->condition('mer.classification', $reviewer_settings['request_classifications'], 'IN');
       }
     }
     elseif ($review_restrictions == MFCS_REVIEW_RESTRICTION_NONE) {
@@ -1903,7 +1918,7 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
       if (!empty($reviewer_settings['request_classifications'])) {
         $and = db_and();
         $and->condition('mer.classification', $reviewer_settings['request_classifications'], 'IN');
-        $and->condition('mer.status', $show_status_reviewer, 'IN');
+        $and->condition('mer.status', $show_status_comments_allowed, 'IN');
 
         $or->condition($and);
       }

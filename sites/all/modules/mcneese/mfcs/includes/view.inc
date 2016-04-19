@@ -1191,6 +1191,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
 
       $user_can_administer = mfcs_user_can_administer($user_id);
       $user_can_manage = mfcs_user_can_manage($user_id);
+      $user_is_requester = ($request['mer']['user_id'][0]->value == $user_id);
 
       $changelog = mfcs_load_request_by_timestamp($request_id, $date, $user_id, $changelog_fields);
       $nearest = mfcs_load_request_by_timestamp($request_id, $date, NULL, $nearest_fields, TRUE, FALSE);
@@ -1251,6 +1252,9 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
         }
         elseif ($user_can_manage) {
           $reviewer_classification = "Manager";
+        }
+        elseif ($user_is_requester) {
+          $reviewer_classification = "Requester";
         }
       }
 
@@ -1640,7 +1644,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
 
   if (!$has_viewable_entries) {
     if (!($reviewer || $manager || $administer)) {
-      unset($form['review']);
+      unset($form['review']['log']);
     }
     elseif ($has_log) {
       $form['review']['log']['history']['nothing'] = array(

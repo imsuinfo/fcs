@@ -515,7 +515,7 @@ function mfcs_page_request_access_operation_comment(&$request_ids, &$processed, 
     return FALSE;
   }
 
-  if ($roles['reviewer'] || $roles['manager'] || $roles['administer']) {
+  if ($roles['requester'] || $roles['reviewer'] || $roles['manager'] || $roles['administer']) {
     if (array_key_exists(NULL, $request_ids)) {
       $access[NULL] = TRUE;
       $processed[NULL] = TRUE;
@@ -524,23 +524,30 @@ function mfcs_page_request_access_operation_comment(&$request_ids, &$processed, 
 
     // managers and administers should always be able to comment.
     if ($roles['manager'] || $roles['administer']) {
-      $processed[$id] = TRUE;
-      $access[$id] = TRUE;
+      foreach ($request_ids as $id) {
+        $processed[$id] = TRUE;
+        $access[$id] = TRUE;
+      }
       return TRUE;
     }
+    elseif ($roles['reviewer'] || $roles['requester']) {
+      $review_access = mfcs_page_request_reviewer_access($user, $request_ids, MFCS_REVIEW_RESTRICTION_COMMENT);
 
-    $review_access = mfcs_page_request_reviewer_access($user, $request_ids, MFCS_REVIEW_RESTRICTION_COMMENT);
+      if (is_array($review_access)) {
+        foreach ($request_ids as $id) {
+          if (array_key_exists($id, $processed)) {
+            continue;
+          }
 
-    if (is_array($review_access)) {
-      foreach ($request_ids as $id) {
-        $processed[$id] = array_key_exists($id, $review_access) && $review_access[$id];
-        $access[$id] = $processed[$id];
+          $processed[$id] = array_key_exists($id, $review_access) && $review_access[$id];
+          $access[$id] = $processed[$id];
+        }
       }
-    }
-    else {
-      foreach ($request_ids as $id) {
-        $processed[$id] = FALSE;
-        $access[$id] = FALSE;
+      else {
+        foreach ($request_ids as $id) {
+          $processed[$id] = FALSE;
+          $access[$id] = FALSE;
+        }
       }
     }
 

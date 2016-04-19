@@ -3121,6 +3121,12 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     $email_params['markup'] .= $standard_markup;
 
     $comment_email_params = $email_params;
+
+    // do not send comments to self.
+    if (isset($changed_by->mail) && array_key_exists($changed_by->mail, $email_comment_only)) {
+      unset($email_comment_only[$changed_by->mail]);
+      unset($email_to[$changed_by->mail]);
+    }
   }
 
   // for testing, add/remove email addresses
