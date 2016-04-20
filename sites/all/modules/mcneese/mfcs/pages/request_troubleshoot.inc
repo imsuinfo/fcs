@@ -918,7 +918,7 @@ function mfcs_request_troubleshoot_0_locations_page() {
     return $markup;
   }
 
-  $markup .= '<h3 id="mfcs-troubleshoot_0-locations-page-section-enabled" class="information_page-section-title">' . "Enabled Locations" . '</h3>';
+  $markup .= '<h3 id="mfcs-troubleshoot_0-locations-page-section-enabled" class="information_page-section-title information_page-section-title-enabled">' . "Enabled Locations" . '</h3>';
   $markup .= '<div class="information_page-section-content information_page-section-content-enabled">';
   if (empty($markup_enabled)) {
     $markup .= 'There are no entries in this section.';
@@ -930,7 +930,7 @@ function mfcs_request_troubleshoot_0_locations_page() {
 
   $markup .= '<hr class="information_page-section-separator">';
 
-  $markup .= '<h3 id="mfcs-troubleshoot_0-locations-page-section-enabled" class="information_page-section-title">' . "Disabled / Deleted Locations" . '</h3>';
+  $markup .= '<h3 id="mfcs-troubleshoot_0-locations-page-section-enabled" class="information_page-section-title information_page-section-title-disabled">' . "Disabled / Deleted Locations" . '</h3>';
   $markup .= '<div class="information_page-section-content information_page-section-content-disabled">';
   if (empty($markup_disabled)) {
     $markup .= 'There are no entries in this section.';
@@ -1049,7 +1049,7 @@ function mfcs_request_troubleshoot_0_buildings_page() {
     return $markup;
   }
 
-  $markup .= '<h3 id="mfcs-troubleshoot_0-buildings-page-section-enabled" class="information_page-section-title">' . "Enabled Buildings" . '</h3>';
+  $markup .= '<h3 id="mfcs-troubleshoot_0-buildings-page-section-enabled" class="information_page-section-title information_page-section-title-enabled">' . "Enabled Buildings" . '</h3>';
   $markup .= '<div class="information_page-section-content information_page-section-content-enabled">';
   if (empty($markup_enabled)) {
     $markup .= 'There are no entries in this section.';
@@ -1061,7 +1061,7 @@ function mfcs_request_troubleshoot_0_buildings_page() {
 
   $markup .= '<hr class="information_page-section-separator">';
 
-  $markup .= '<h3 id="mfcs-troubleshoot_0-buildings-page-section-enabled" class="information_page-section-title">' . "Disabled / Deleted Buildings" . '</h3>';
+  $markup .= '<h3 id="mfcs-troubleshoot_0-buildings-page-section-disabled" class="information_page-section-title information_page-section-title-disabled">' . "Disabled / Deleted Buildings" . '</h3>';
   $markup .= '<div class="information_page-section-content information_page-section-content-disabled">';
   if (empty($markup_disabled)) {
     $markup .= 'There are no entries in this section.';
@@ -1231,7 +1231,7 @@ function mfcs_request_troubleshoot_0_rooms_page() {
     return $markup;
   }
 
-  $markup .= '<h3 id="mfcs-troubleshoot_0-rooms-page-section-enabled" class="information_page-section-title">' . "Enabled Rooms" . '</h3>';
+  $markup .= '<h3 id="mfcs-troubleshoot_0-rooms-page-section-enabled" class="information_page-section-title information_page-section-title-enabled">' . "Enabled Rooms" . '</h3>';
   $markup .= '<div class="information_page-section-content information_page-section-content-enabled">';
   if (empty($markup_enabled)) {
     $markup .= 'There are no entries in this section.';
@@ -1243,7 +1243,7 @@ function mfcs_request_troubleshoot_0_rooms_page() {
 
   $markup .= '<hr class="information_page-section-separator">';
 
-  $markup .= '<h3 id="mfcs-troubleshoot_0-rooms-page-section-enabled" class="information_page-section-title">' . "Disabled / Deleted Rooms" . '</h3>';
+  $markup .= '<h3 id="mfcs-troubleshoot_0-rooms-page-section-disabled" class="information_page-section-title information_page-section-title-disabled">' . "Disabled / Deleted Rooms" . '</h3>';
   $markup .= '<div class="information_page-section-content information_page-section-content-disabled">';
   if (empty($markup_disabled)) {
     $markup .= 'There are no entries in this section.';
