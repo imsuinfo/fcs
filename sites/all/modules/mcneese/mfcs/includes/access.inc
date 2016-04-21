@@ -659,8 +659,11 @@ function mfcs_page_request_access_operation_log(&$request_ids, &$processed, &$ac
       return TRUE;
     }
 
+    // access is dependent on the requester, so load all requester ids for all requests.
+    $requesters = mfcs_load_requesters_of_requests($request_ids);
+
     foreach ($request_ids as $request_id) {
-      if ($request['mer']['user_id'][0]->value == $user->uid) {
+      if (isset($requesters[$request_id]) && $requesters[$request_id] == $user->uid) {
         $access[$request_id] = TRUE;
         $processed[$request_id] = TRUE;
       }

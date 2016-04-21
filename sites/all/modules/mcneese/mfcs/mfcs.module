@@ -10781,5 +10781,54 @@ function mfcs_remove_processed_reviewed_classifications($request_id, $reviewer_c
 }
 
 /**
+ * Get the ids of all requesters for the specified requests.
+ *
+ * @param array $request_ids
+ *   An array of request ids to process.
+ *
+ * @param array|bool
+ *   An array containing the requesters indexed by the request id.
+ *   FALSE is returned on error.
+ */
+function mfcs_load_requesters_of_requests($request_ids) {
+  if (!is_array($request_ids)) {
+    cf_error::invalid_array('request_ids');
+    return FALSE;
+  }
+
+  if (empty($request_ids)) {
+    return array();
+  }
+
+  try {
+    $query = db_select('mfcs_requests', 'mer');
+    $query->addField('mer', 'id', 'request_id');
+    $query->addField('mer', 'user_id', 'user_id');
+    $query->condition('mer.id', $request_ids, 'IN');
+    $results = $query->execute()->fetchAllAssoc('request_id');
+
+    if (!is_array($results)) {
+      return FALSE;
+    }
+  }
+  catch (Exception $ex) {
+    cf_error::on_exception($ex);
+    return FALSE;
+  }
+
+  $return = array();
+  foreach ($request_ids as $request_id) {
+    if (array_key_exists($request_id, $results)) {
+      $return[$request_id] = $results[$request_id]->user_id;
+    }
+    else {
+      $return[$request_id] = NULL;
+    }
+  }
+
+  return $return;
+}
+
+/**
  * @} End of '@defgroup mfcs McNeese Facilities Use'.
  */
