@@ -490,7 +490,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
     return FALSE;
   }
 
-  if (!cf_is_integer($restriction) || $restrictions < MFCS_REVIEW_RESTRICTIONS_NONE || $restrictions > MFCS_REVIEW_RESTRICTIONS_MANAGERS) {
+  if (!cf_is_integer($restriction) || $restriction < MFCS_REVIEW_RESTRICTIONS_NONE || $restriction > MFCS_REVIEW_RESTRICTIONS_MANAGERS) {
     cf_error::invalid_integer('restriction');
     return FALSE;
   }
@@ -1623,7 +1623,7 @@ function mfcs_workflow_next_step($request_id, $type, $step, $decision, $restrict
     return FALSE;
   }
 
-  if (!cf_is_integer($restriction) || $restrictions < MFCS_REVIEW_RESTRICTIONS_NONE || $restrictions > MFCS_REVIEW_RESTRICTIONS_MANAGERS) {
+  if (!cf_is_integer($restriction) || $restriction < MFCS_REVIEW_RESTRICTIONS_NONE || $restriction > MFCS_REVIEW_RESTRICTIONS_MANAGERS) {
     cf_error::invalid_integer('restriction');
     return FALSE;
   }
