@@ -490,7 +490,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
     return FALSE;
   }
 
-  if (!cf_is_integer($restriction)) {
+  if (!cf_is_integer($restriction) || $restrictions < MFCS_REVIEW_RESTRICTIONS_NONE || $restrictions > MFCS_REVIEW_RESTRICTIONS_MANAGERS) {
     cf_error::invalid_integer('restriction');
     return FALSE;
   }
@@ -1395,7 +1395,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
       $parameters['message'] = $message;
       $parameters['comment'] = TRUE;
 
-      if ($restriction !== MFCS_REVIEW_RESTRICTIONS_NONE && $restriction !== MFCS_REVIEW_RESTRICTIONS_REQUESTER) {
+      if ($restriction === MFCS_REVIEW_RESTRICTIONS_REVIEWER || $restriction === MFCS_REVIEW_RESTRICTIONS_MANAGERS) {
         $parameters['requester_included'] = FALSE;
       }
 
@@ -1416,7 +1416,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
     $parameters['message'] = $message;
     $parameters['issues'] = TRUE;
 
-    if ($restriction !== MFCS_REVIEW_RESTRICTIONS_NONE && $restriction !== MFCS_REVIEW_RESTRICTIONS_REQUESTER) {
+    if ($restriction === MFCS_REVIEW_RESTRICTIONS_REVIEWER || $restriction === MFCS_REVIEW_RESTRICTIONS_MANAGERS) {
       $parameters['requester_included'] = FALSE;
     }
 
@@ -1431,7 +1431,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
     $parameters['message'] = $message;
     $parameters['issues'] = FALSE;
 
-    if ($restriction !== MFCS_REVIEW_RESTRICTIONS_NONE && $restriction !== MFCS_REVIEW_RESTRICTIONS_REQUESTER) {
+    if ($restriction === MFCS_REVIEW_RESTRICTIONS_REVIEWER || $restriction === MFCS_REVIEW_RESTRICTIONS_MANAGERS) {
       $parameters['requester_included'] = FALSE;
     }
 
@@ -1449,7 +1449,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
         $parameters['message'] = $message;
         $parameters['comment'] = TRUE;
 
-        if ($restriction !== MFCS_REVIEW_RESTRICTIONS_NONE && $restriction !== MFCS_REVIEW_RESTRICTIONS_REQUESTER) {
+        if ($restriction === MFCS_REVIEW_RESTRICTIONS_REVIEWER || $restriction === MFCS_REVIEW_RESTRICTIONS_MANAGERS) {
           $parameters['requester_included'] = FALSE;
         }
 
@@ -1487,7 +1487,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
           $parameters['message'] = $message;
           $parameters['comment'] = TRUE;
 
-          if ($restriction !== MFCS_REVIEW_RESTRICTIONS_NONE && $restriction !== MFCS_REVIEW_RESTRICTIONS_REQUESTER) {
+          if ($restriction === MFCS_REVIEW_RESTRICTIONS_REVIEWER || $restriction === MFCS_REVIEW_RESTRICTIONS_MANAGERS) {
             $parameters['requester_included'] = FALSE;
           }
 
@@ -1523,7 +1523,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
         $parameters['message'] = $message;
         $parameters['comment'] = TRUE;
 
-        if ($restriction !== MFCS_REVIEW_RESTRICTIONS_NONE && $restriction !== MFCS_REVIEW_RESTRICTIONS_REQUESTER) {
+        if ($restriction === MFCS_REVIEW_RESTRICTIONS_REVIEWER || $restriction === MFCS_REVIEW_RESTRICTIONS_MANAGERS) {
           $parameters['requester_included'] = FALSE;
         }
 
@@ -1548,7 +1548,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
     $parameters['message'] = $message;
     $parameters['insurance_provided'] = TRUE;
 
-    if ($restriction !== MFCS_REVIEW_RESTRICTIONS_NONE && $restriction !== MFCS_REVIEW_RESTRICTIONS_REQUESTER) {
+    if ($restriction === MFCS_REVIEW_RESTRICTIONS_REVIEWER || $restriction === MFCS_REVIEW_RESTRICTIONS_MANAGERS) {
       $parameters['requester_included'] = FALSE;
     }
 
@@ -1566,7 +1566,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
     $parameters['message'] = $message;
     $parameters['comment'] = TRUE;
 
-    if ($restriction !== MFCS_REVIEW_RESTRICTIONS_NONE && $restriction !== MFCS_REVIEW_RESTRICTIONS_REQUESTER) {
+    if ($restriction === MFCS_REVIEW_RESTRICTIONS_REVIEWER || $restriction === MFCS_REVIEW_RESTRICTIONS_MANAGERS) {
       $parameters['requester_included'] = FALSE;
     }
 
@@ -1620,6 +1620,11 @@ function mfcs_workflow_next_step($request_id, $type, $step, $decision, $restrict
 
   if (!cf_is_integer($decision)) {
     cf_error::invalid_integer('decision');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($restriction) || $restrictions < MFCS_REVIEW_RESTRICTIONS_NONE || $restrictions > MFCS_REVIEW_RESTRICTIONS_MANAGERS) {
+    cf_error::invalid_integer('restriction');
     return FALSE;
   }
 
@@ -1752,7 +1757,7 @@ function mfcs_workflow_next_step($request_id, $type, $step, $decision, $restrict
   $parameters['changed_type'] = $changed_type;
   $parameters['message'] = $message;
 
-  if ($restriction !== MFCS_REVIEW_RESTRICTIONS_NONE && $restriction !== MFCS_REVIEW_RESTRICTIONS_REQUESTER) {
+  if ($restriction === MFCS_REVIEW_RESTRICTIONS_REVIEWER || $restriction === MFCS_REVIEW_RESTRICTIONS_MANAGERS) {
     $parameters['requester_included'] = FALSE;
   }
 

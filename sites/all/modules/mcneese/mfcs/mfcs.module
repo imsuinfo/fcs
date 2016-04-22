@@ -109,6 +109,7 @@ define('MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED', 8);
  define('MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR', 1);
  define('MFCS_REVIEWER_CLASSIFICATION_MANAGER', 2);
  define('MFCS_REVIEWER_CLASSIFICATION_REQUESTER', 3);
+ define('MFCS_REVIEWER_CLASSIFICATION_SYSTEM', 4);
 
 /**
  * Defines Taxonomy TIDs for request classifications.
@@ -404,6 +405,7 @@ define('MFCS_USER_REQUEST', -1);
 define('MFCS_REVIEW_RESTRICTIONS_NONE', 0);
 define('MFCS_REVIEW_RESTRICTIONS_REQUESTER', 1);
 define('MFCS_REVIEW_RESTRICTIONS_REVIEWER', 2);
+define('MFCS_REVIEW_RESTRICTIONS_MANAGERS', 3);
 
 
 /**
@@ -4805,7 +4807,7 @@ function mfcs_autocancel_old_requests_cron() {
 
     if ($cancelled) {
       $message = "One or more dates associated with the request are now in the past.";
-      mfcs_workflow_step_review($request_id, $system_user, MFCS_REVIEW_DECISION_CANCELLED, MFCS_REVIEW_RESTRICTIONS_NONE, $message);
+      mfcs_workflow_step_review($request_id, $system_user, MFCS_REVIEW_DECISION_CANCELLED, MFCS_REVIEW_RESTRICTIONS_SYSTEM, $message);
 
       $parameters = array();
       $parameters['changed_by'] = $system_user->uid;
