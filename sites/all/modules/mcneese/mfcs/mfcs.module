@@ -1684,6 +1684,9 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
     return FALSE;
   }
 
+  // managers get special review access.
+  $manager = user_access('mfcs manage', $user);
+
   $request_ids = $request_id;
   if (!is_array($request_id)) {
     $request_ids = array($request_id);
@@ -1737,6 +1740,12 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
     MFCS_REVIEW_STEP_REQUIREMENTS,
   );
 
+  $show_step_manager = array(
+    MFCS_REVIEW_STEP_VENUE_AVAILABLE,
+    MFCS_REVIEW_STEP_REVIEW,
+    MFCS_REVIEW_STEP_REQUIREMENTS,
+  );
+
   $show_step_insurance = array(
     MFCS_REVIEW_STEP_REVIEW,
     MFCS_REVIEW_STEP_REQUIREMENTS,
@@ -1769,96 +1778,103 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
     $or = null;
 
     if ($review_restrictions == MFCS_REVIEW_RESTRICTION_REVIEW) {
-      if (is_null($or)) {
-        $or = db_or();
-      }
-
-      // process venue coordinator access.
-      $already_venue_coordinated_query = db_select('mfcs_reviewed', 'mrd_vc');
-      $already_venue_coordinated_query->addField('mrd_vc', 'request_id', 'request_id');
-      $already_venue_coordinated_query->where('mrd_vc.request_id = mer.id');
-      $already_venue_coordinated_query->condition('mrd_vc.classification', MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR);
-
-      $and = db_and();
-      $and->condition('mer.status', $show_status_venue_coordinator, 'IN');
-      $and->condition('mer.step', $show_step_venue_coordinator, 'IN');
-      $and->condition('mer.id', $already_venue_coordinated_query, 'NOT IN');
-      $and->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
-
-      $or->condition($and);
-
-      // process review access.
-      if (empty($reviewer_settings['classifications'])) {
-        // if the 'reviewer' has no reviewer classifications, then they cannot review, remove all requests associated with reviewer steps.
-        $query->condition('mer.step', $show_step_reviewer, 'NOT IN');
+      if ($manager) {
+        // Manager is allowed both venue coordinator and reviewer step review access.
+        $query->condition('mer.step', $show_step_manager, 'IN');
+        $query->condition('mer.status', $show_status_reviewer, 'IN');
       }
       else {
+        if (is_null($or)) {
+          $or = db_or();
+        }
+
+        // process venue coordinator access.
+        $already_venue_coordinated_query = db_select('mfcs_reviewed', 'mrd_vc');
+        $already_venue_coordinated_query->addField('mrd_vc', 'request_id', 'request_id');
+        $already_venue_coordinated_query->where('mrd_vc.request_id = mer.id');
+        $already_venue_coordinated_query->condition('mrd_vc.classification', MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR);
+
         $and = db_and();
-        $and->condition('mer.status', $show_status_reviewer_review, 'IN');
-        $and->condition('mer.step', $show_step_reviewer, 'IN');
+        $and->condition('mer.status', $show_status_venue_coordinator, 'IN');
+        $and->condition('mer.step', $show_step_venue_coordinator, 'IN');
+        $and->condition('mer.id', $already_venue_coordinated_query, 'NOT IN');
+        $and->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
 
-        // check each and every single reviewer classification separately.
-        // while this is more expensive, this allows for reviewing when some (but not all) of the classifications have not yet reviewed.
-        // example:
-        // - user 1, with roles A, B and C, has reviewed request Z.
-        // - user 2, with roles B, C, and D, wants to review request Z.
-        // - user 2 should still be allowed to review as D, but not as B or C.
-        $reviewed_or = db_or();
-        foreach ($reviewer_settings['classifications'] as $reviewer_classification) {
-          $already_reviewed_query = db_select('mfcs_reviewers', 'mr_r');
-          $already_reviewed_query->innerJoin('mfcs_reviewed', 'mrd_r', 'mr_r.reviewer_classification = mrd_r.classification');
-          $already_reviewed_query->addField('mrd_r', 'request_id', 'request_id');
-          $already_reviewed_query->where('mr_r.request_classification = mer.classification AND mr_r.review_step = mer.step');
-          $already_reviewed_query->condition('mr_r.user_id', $user->uid);
-          $already_reviewed_query->condition('mr_r.disabled', 0);
-          $already_reviewed_query->condition('mrd_r.classification', $reviewer_classification);
-          $reviewed_or->condition('mer.id', $already_reviewed_query, 'NOT IN');
-          unset($already_reviewed_query);
-        }
-        $and->condition($reviewed_or);
-        unset($reviewed_or);
-
-        $sub_or = db_or();
-        foreach ($reviewer_settings['for_step'] as $for_step => $step_classifications) {
-          $sub_and = db_and();
-          $sub_and->condition('mer.step', $for_step);
-          $sub_and->condition('mer.classification', $step_classifications, 'IN');
-
-          $sub_or->condition($sub_and);
-          unset($sub_and);
-        }
-
-        $and->condition($sub_or);
         $or->condition($and);
 
-        // special case reviewer access: insurance provided
-        if (array_key_exists(MFCS_REVIEWER_CLASSIFICATION_PURCHASING, $reviewer_settings['request_classifications'])) {
-          $has_insurance_query = db_select('mfcs_current', 'mc');
-          $has_insurance_query->leftJoin('mfcs_field_insurance_contractor', 'mfic', 'mc.request_id = mfic.request_id AND mc.insurance_contractor = mfic.revision AND mfic.delta = 0');
-          $has_insurance_query->leftJoin('mfcs_field_insurance_unaffiliated', 'mfiu', 'mc.request_id = mfiu.request_id AND mc.insurance_unaffiliated = mfiu.revision AND mfiu.delta = 0');
-          $has_insurance_query->leftJoin('mfcs_field_insurance_provided', 'mfip', 'mc.request_id = mfip.request_id AND mc.insurance_provided = mfip.revision AND mfip.delta = 0');
-
-          // $query->countQuery() does not appear to be functioning as expected, so manually count.
-          $has_insurance_query->addExpression('count(mc.request_id)');
-
-          $has_insurance_query->where('mer.id = mc.request_id');
-
-          $nand = db_and();
-          $nand->not();
-          $nand->condition('mfip.value', 1);
-          $has_insurance_query->condition($nand);
-
-          $another_or = db_or();
-          $another_or->condition('mfic.value', 1);
-          $another_or->condition('mfiu.value', 1);
-          $has_insurance_query->condition($another_or);
-
+        // process review access.
+        if (empty($reviewer_settings['classifications'])) {
+          // if the 'reviewer' has no reviewer classifications, then they cannot review, remove all requests associated with reviewer steps.
+          $query->condition('mer.step', $show_step_reviewer, 'NOT IN');
+        }
+        else {
           $and = db_and();
-          $and->condition('mer.status', $show_status_insurance, 'IN');
-          $and->condition('mer.step', $show_step_insurance, 'IN');
-          $and->condition(0, $has_insurance_query, 'NOT IN');
+          $and->condition('mer.status', $show_status_reviewer_review, 'IN');
+          $and->condition('mer.step', $show_step_reviewer, 'IN');
 
+          // check each and every single reviewer classification separately.
+          // while this is more expensive, this allows for reviewing when some (but not all) of the classifications have not yet reviewed.
+          // example:
+          // - user 1, with roles A, B and C, has reviewed request Z.
+          // - user 2, with roles B, C, and D, wants to review request Z.
+          // - user 2 should still be allowed to review as D, but not as B or C.
+          $reviewed_or = db_or();
+          foreach ($reviewer_settings['classifications'] as $reviewer_classification) {
+            $already_reviewed_query = db_select('mfcs_reviewers', 'mr_r');
+            $already_reviewed_query->innerJoin('mfcs_reviewed', 'mrd_r', 'mr_r.reviewer_classification = mrd_r.classification');
+            $already_reviewed_query->addField('mrd_r', 'request_id', 'request_id');
+            $already_reviewed_query->where('mr_r.request_classification = mer.classification AND mr_r.review_step = mer.step');
+            $already_reviewed_query->condition('mr_r.user_id', $user->uid);
+            $already_reviewed_query->condition('mr_r.disabled', 0);
+            $already_reviewed_query->condition('mrd_r.classification', $reviewer_classification);
+            $reviewed_or->condition('mer.id', $already_reviewed_query, 'NOT IN');
+            unset($already_reviewed_query);
+          }
+          $and->condition($reviewed_or);
+          unset($reviewed_or);
+
+          $sub_or = db_or();
+          foreach ($reviewer_settings['for_step'] as $for_step => $step_classifications) {
+            $sub_and = db_and();
+            $sub_and->condition('mer.step', $for_step);
+            $sub_and->condition('mer.classification', $step_classifications, 'IN');
+
+            $sub_or->condition($sub_and);
+            unset($sub_and);
+          }
+
+          $and->condition($sub_or);
           $or->condition($and);
+
+          // special case reviewer access: insurance provided
+          if (array_key_exists(MFCS_REVIEWER_CLASSIFICATION_PURCHASING, $reviewer_settings['request_classifications'])) {
+            $has_insurance_query = db_select('mfcs_current', 'mc');
+            $has_insurance_query->leftJoin('mfcs_field_insurance_contractor', 'mfic', 'mc.request_id = mfic.request_id AND mc.insurance_contractor = mfic.revision AND mfic.delta = 0');
+            $has_insurance_query->leftJoin('mfcs_field_insurance_unaffiliated', 'mfiu', 'mc.request_id = mfiu.request_id AND mc.insurance_unaffiliated = mfiu.revision AND mfiu.delta = 0');
+            $has_insurance_query->leftJoin('mfcs_field_insurance_provided', 'mfip', 'mc.request_id = mfip.request_id AND mc.insurance_provided = mfip.revision AND mfip.delta = 0');
+
+            // $query->countQuery() does not appear to be functioning as expected, so manually count.
+            $has_insurance_query->addExpression('count(mc.request_id)');
+
+            $has_insurance_query->where('mer.id = mc.request_id');
+
+            $nand = db_and();
+            $nand->not();
+            $nand->condition('mfip.value', 1);
+            $has_insurance_query->condition($nand);
+
+            $another_or = db_or();
+            $another_or->condition('mfic.value', 1);
+            $another_or->condition('mfiu.value', 1);
+            $has_insurance_query->condition($another_or);
+
+            $and = db_and();
+            $and->condition('mer.status', $show_status_insurance, 'IN');
+            $and->condition('mer.step', $show_step_insurance, 'IN');
+            $and->condition(0, $has_insurance_query, 'NOT IN');
+
+            $or->condition($and);
+          }
         }
       }
     }
@@ -6822,7 +6838,7 @@ function mfcs_display_room_unavailable_message($dates) {
  *                  When MFCS_LOAD_CANCELLED_REQUEST, requests that are cancelled are loaded.
  *                  When MFCS_LOAD_CANCELLED_ALL, both individual dates and requests that are cancelled are loaded.
  *     'user_id': When defined and an integer, represents the user id of the user to load the listing as.
- *     'only_requester': When defined an a boolean, represents that only requests whose requester is the current user xor the user specified by 'user_id'.
+ *     'only_requester': When defined as a boolean, represents that only requests whose requester is the current user xor the user specified by 'user_id' are loaded.
  *
  * @return array|false
  *   An array of containing the following:
@@ -6976,7 +6992,18 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
     MFCS_REQUEST_STATUS_LOCKED,
   );
 
+  $show_status_manager = array(
+    MFCS_REQUEST_STATUS_UNLOCKED,
+    MFCS_REQUEST_STATUS_LOCKED,
+  );
+
   $show_step_reviewer = array(
+    MFCS_REVIEW_STEP_REVIEW,
+    MFCS_REVIEW_STEP_REQUIREMENTS,
+  );
+
+  $show_step_manager = array(
+    MFCS_REVIEW_STEP_VENUE_AVAILABLE,
     MFCS_REVIEW_STEP_REVIEW,
     MFCS_REVIEW_STEP_REQUIREMENTS,
   );
@@ -7164,41 +7191,53 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
       }
       $venue_coordinator_ids[$user->uid] = $user->uid;
 
+
       if ($review_restrictions == MFCS_REVIEW_RESTRICTION_REVIEW) {
-        if (is_null($or)) {
-          $or = db_or();
+        if ($manager) {
+          if (is_null($outermost_and)) {
+            $outermost_and = db_and();
+          }
+
+          // Manager is allowed both venue coordinator and reviewer step review access.
+          $outermost_and->condition('mer.step', $show_step_manager, 'IN');
+          $outermost_and->condition('mer.status', $show_status_manager, 'IN');
         }
+        else {
+          if (is_null($or)) {
+            $or = db_or();
+          }
 
-        // process venue coordinator access.
-        $already_venue_coordinated_query = db_select('mfcs_reviewed', 'mrd_vc');
-        $already_venue_coordinated_query->addField('mrd_vc', 'request_id', 'request_id');
-        $already_venue_coordinated_query->where('mrd_vc.request_id = mer.id');
-        $already_venue_coordinated_query->condition('mrd_vc.classification', MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR);
-
-        $and = db_and();
-        $and->condition('mer.status', $show_status_venue_coordinator, 'IN');
-        $and->condition('mer.step', $show_step_venue_coordinator, 'IN');
-        $and->condition('mer.id', $already_venue_coordinated_query, 'NOT IN');
-        $and->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
-
-        $or->condition($and);
-
-        // process review access.
-        if (!empty($reviewer_settings['classifications'])) {
-          $already_reviewed_query = db_select('mfcs_reviewers', 'mr_r');
-          $already_reviewed_query->innerJoin('mfcs_reviewed', 'mrd_r', 'mr_r.reviewer_classification = mrd_r.classification');
-          $already_reviewed_query->addField('mrd_r', 'request_id', 'request_id');
-          $already_reviewed_query->where('mr_r.request_classification = mer.classification AND mr_r.review_step = mer.step');
-          $already_reviewed_query->condition('mr_r.user_id', $user->uid);
-          $already_reviewed_query->condition('mr_r.disabled', 0);
+          // process venue coordinator access.
+          $already_venue_coordinated_query = db_select('mfcs_reviewed', 'mrd_vc');
+          $already_venue_coordinated_query->addField('mrd_vc', 'request_id', 'request_id');
+          $already_venue_coordinated_query->where('mrd_vc.request_id = mer.id');
+          $already_venue_coordinated_query->condition('mrd_vc.classification', MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR);
 
           $and = db_and();
-          $and->condition('mer.status', $show_status_reviewer, 'IN');
-          $and->condition('mer.step', $show_step_reviewer, 'IN');
-          $and->condition('mer.step', $reviewer_settings['steps'], 'IN');
-          $and->condition('mer.id', $already_reviewed_query, 'NOT IN');
+          $and->condition('mer.status', $show_status_venue_coordinator, 'IN');
+          $and->condition('mer.step', $show_step_venue_coordinator, 'IN');
+          $and->condition('mer.id', $already_venue_coordinated_query, 'NOT IN');
+          $and->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
 
           $or->condition($and);
+
+          // process review access.
+          if (!empty($reviewer_settings['classifications'])) {
+            $already_reviewed_query = db_select('mfcs_reviewers', 'mr_r');
+            $already_reviewed_query->innerJoin('mfcs_reviewed', 'mrd_r', 'mr_r.reviewer_classification = mrd_r.classification');
+            $already_reviewed_query->addField('mrd_r', 'request_id', 'request_id');
+            $already_reviewed_query->where('mr_r.request_classification = mer.classification AND mr_r.review_step = mer.step');
+            $already_reviewed_query->condition('mr_r.user_id', $user->uid);
+            $already_reviewed_query->condition('mr_r.disabled', 0);
+
+            $and = db_and();
+            $and->condition('mer.status', $show_status_reviewer, 'IN');
+            $and->condition('mer.step', $show_step_reviewer, 'IN');
+            $and->condition('mer.step', $reviewer_settings['steps'], 'IN');
+            $and->condition('mer.id', $already_reviewed_query, 'NOT IN');
+
+            $or->condition($and);
+          }
         }
       }
       elseif ($review_restrictions == MFCS_REVIEW_RESTRICTION_VIEW) {
