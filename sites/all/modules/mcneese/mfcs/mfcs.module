@@ -6839,6 +6839,8 @@ function mfcs_display_room_unavailable_message($dates) {
  *                  When MFCS_LOAD_CANCELLED_ALL, both individual dates and requests that are cancelled are loaded.
  *     'user_id': When defined and an integer, represents the user id of the user to load the listing as.
  *     'only_requester': When defined as a boolean, represents that only requests whose requester is the current user xor the user specified by 'user_id' are loaded.
+ *     'only_reviewer': When defined as a boolean, represents that only requests whose reviewer is the current user are loaded (venue coordinators are also reviewers).
+ *                      This only applies when review restrictions are set to MFCS_REVIEW_RESTRICTION_REVIEW.
  *
  * @return array|false
  *   An array of containing the following:
@@ -6940,6 +6942,13 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
   $review_restrictions = MFCS_REVIEW_RESTRICTION_NONE;
   if (isset($options['review_restrictions'])) {
     $review_restrictions = $options['review_restrictions'];
+  }
+
+  $only_reviewer = NULL;
+  if ($review_restrictions === MFCS_REVIEW_RESTRICTION_REVIEW) {
+    if (isset($options['only_reviewer']) && is_bool($options['only_reviewer'])) {
+      $only_reviewer = $options['only_reviewer'];
+    }
   }
 
   $extra_fields = array();
@@ -7193,7 +7202,7 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
 
 
       if ($review_restrictions == MFCS_REVIEW_RESTRICTION_REVIEW) {
-        if ($manager) {
+        if ($manager && !$only_reviewer) {
           if (is_null($outermost_and)) {
             $outermost_and = db_and();
           }
@@ -8196,7 +8205,11 @@ function mfcs_get_latest_reviews($request_id, $steps = array(), $decisions = arr
  * @param object|null $user
  *   (optional) The user to populate access control based data.
  * @param array|null $extra
- *   (optional) Additional information.
+ *   (optional) Additional information:
+ *   - table_sort: Use the specified table sort instead of the default.
+ *   - table_caption: Display the provided text as a caption instead of the default.
+ *   - table_summary: Display the provided text as a summary instead of the default.
+ *   - table_empty: Display the provided text on empty instead of the default.
  *
  * @return array
  *   A generated table array structure for passing to theme_table().
@@ -8239,6 +8252,21 @@ function mfcs_build_request_table($items, $max_rows, $columns = NULL, $user = NU
     $table_sort = FALSE;
   }
 
+  $table_caption = "Requests";
+  if (array_key_exists('table_caption', $extra) && is_string($extra['table_caption'])) {
+    $table_caption = $extra['table_caption'];
+  }
+
+  $table_summary = "A listing of requests associated by ID.";
+  if (array_key_exists('table_summary', $extra) && is_string($extra['table_summary'])) {
+    $table_summary = $extra['table_summary'];
+  }
+
+  $table_empty = "No requests were found.";
+  if (array_key_exists('table_empty', $extra) && is_string($extra['table_empty'])) {
+    $table_empty = $extra['table_empty'];
+  }
+
   $table = array();
   foreach ($columns as $column_name => $column_title) {
     $column_class = array();
@@ -8266,10 +8294,10 @@ function mfcs_build_request_table($items, $max_rows, $columns = NULL, $user = NU
   }
 
   $table['attributes'] = array();
-  $table['attributes']['summary'] = "A listing of requests associated by ID.";
+  $table['attributes']['summary'] = $table_summary;
   $table['rows'] = array();
-  $table['empty'] = t("No requests were found.");
-  $table['caption'] = "Requests";
+  $table['empty'] = $table_empty;
+  $table['caption'] = $table_caption;
 
   global $base_path;
   global $mfcs_determined;
@@ -8539,6 +8567,9 @@ function mfcs_build_request_table($items, $max_rows, $columns = NULL, $user = NU
  *   'columns': an array containing the column information.
  *   'columns_default': An array of integers representing the column with the
  *    default order and the values being either 'asc' or 'desc'.
+ *   'table_caption': Display the provided text as a caption instead of the default.
+ *   'table_summary': Display the provided text as a summary instead of the default.
+ *   'table_empty': Display the provided text on empty instead of the default.
  * @param object|null $user
  *   (optional) The user to populate access control based data.
  *
@@ -8576,6 +8607,21 @@ function mfcs_build_request_ajax_table($items_returned, $conditions, $options, $
     return array('error' => TRUE);
   }
 
+  $table_caption = "Requests";
+  if (array_key_exists('table_caption', $options) && is_string($options['table_caption'])) {
+    $table_caption = $options['table_caption'];
+  }
+
+  $table_summary = NULL;
+  if (array_key_exists('table_summary', $options) && is_string($options['table_summary'])) {
+    $table_summary = $options['table_summary'];
+  }
+
+  $table_empty = "No requests were found.";
+  if (array_key_exists('table_empty', $options) && is_string($options['table_empty'])) {
+    $table_empty = $options['table_empty'];
+  }
+
   $table = array();
   $table['attributes'] = array(
     'class' => array(
@@ -8589,8 +8635,12 @@ function mfcs_build_request_ajax_table($items_returned, $conditions, $options, $
   );
   $table['headers'] = array();
   $table['rows'] = array();
-  $table['empty'] = t("No requests were found.");
-  $table['caption'] = "Requests";
+  $table['empty'] = $table_empty;
+  $table['caption'] = $table_caption;
+
+  if (!is_null($table_summary)) {
+    $table['attributes']['summary'] = $table_summary;
+  }
 
   $columns = array(
     'id' => array(
@@ -8848,6 +8898,62 @@ function mfcs_build_request_ajax_table($items_returned, $conditions, $options, $
 
       if ($options['only_requester'] === FALSE) {
         $table['datatable_settings']['buttons']['Show Requests']['text'] = "'Show My Requests'";
+      }
+    }
+    elseif (isset($options['only_reviewer']) && is_bool($options['only_reviewer'])) {
+      $url_options = array();
+      $ajax_path = preg_replace("/'/", '', $options['ajax_path']);
+      preg_match('/\?[^?]*$/', $ajax_path, $url_options);
+      $ajax_path = preg_replace('/\?[^?]*$/', '', $ajax_path);
+
+      if (isset($url_options[0])) {
+        $url_options = $url_options[0];
+      }
+      else {
+        $url_options = '';
+      }
+
+      $showing_my_requests = "function (e, dt, node, config) {" . "\n";
+      $showing_my_requests .= "  var data = dt.ajax.params();" . "\n";
+      $showing_my_requests .= "  var url = dt.ajax.url();" . "\n";
+
+      $showing_my_requests .= "  if (url == '" . $ajax_path . "/as_reviewer' || url == '" . $ajax_path . "/as_reviewer" . $url_options . "') {" . "\n";
+      $showing_my_requests .= "    dt.ajax.url('" . $ajax_path . "/as_manager" . $url_options . "');" . "\n";
+      $showing_my_requests .= "    dt.buttons('.datatable-showing_requests').text('Show As Reviewer');" . "\n";
+      $showing_my_requests .= "    $($($(dt).context[0].nTable).children('caption')[0]).text('Requests (As Manager)');" . "\n";
+      $showing_my_requests .= "  }" . "\n";
+      $showing_my_requests .= "  else if (url == '" . $ajax_path . "/as_manager' || url == '" . $ajax_path . "/as_manager" . $url_options . "') {" . "\n";
+      $showing_my_requests .= "    dt.ajax.url('" . $ajax_path . "/as_reviewer" . $url_options . "');" . "\n";
+      $showing_my_requests .= "    dt.buttons('.datatable-showing_requests').text('Show As Manager');" . "\n";
+      $showing_my_requests .= "    $($($(dt).context[0].nTable).children('caption')[0]).text('Requests (As Reviewer)');" . "\n";
+      $showing_my_requests .= "  }" . "\n";
+      $showing_my_requests .= "  else {" . "\n";
+
+      if ($options['only_reviewer']) {
+        $showing_my_requests .= "    dt.ajax.url('" . $ajax_path . "/as_manager" . $url_options . "');" . "\n";
+        $showing_my_requests .= "    dt.buttons('.datatable-showing_requests').text('Show As Reviewer');" . "\n";
+        $showing_my_requests .= "    $($($(dt).context[0].nTable).children('caption')[0]).text('Requests (As Manager)');" . "\n";
+      }
+      else {
+        $showing_my_requests .= "    dt.ajax.url('" . $ajax_path . "/as_reviewer" . $url_options . "');" . "\n";
+        $showing_my_requests .= "    $($($(dt).context[0].nTable).children('caption')[0]).text('Requests (As Reviewer)');" . "\n";
+      }
+
+      $showing_my_requests .= "  }" . "\n";
+      $showing_my_requests .= "  dt.ajax.reload();" . "\n";
+      $showing_my_requests .= "}" . "\n";
+
+      $table['datatable_settings']['dom'] = 'lfCBrtip';
+      $table['datatable_settings']['buttons'] = array();
+      $table['datatable_settings']['buttons']['Show Requests'] = array(
+        'text' => "'Show As Manager'",
+        'action' => $showing_my_requests,
+        'className' => "'datatable-showing_requests'",
+      );
+      unset($showing_my_requests);
+
+      if ($options['only_reviewer'] === FALSE) {
+        $table['datatable_settings']['buttons']['Show Requests']['text'] = "'Show As Reviewer'";
       }
     }
   }

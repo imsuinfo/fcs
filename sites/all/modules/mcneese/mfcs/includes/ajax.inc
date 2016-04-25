@@ -570,11 +570,38 @@ function mfcs_ajax_list_0($argument_1 = NULL) {
 
 /**
  * Ajax function call for loading request review list datatables.
+ *
+ * @param string|int $argument_1
+ *   Some string or number to send as the first argument.
  */
-function mfcs_ajax_review_0() {
+function mfcs_ajax_review_0($argument_1 = NULL) {
+  $user = cf_current_user();
+
+  $manager = FALSE;
+  if ($user->uid === MFCS_USER_REQUEST) {
+    // this is a simulated user account and must be handled as a special case.
+  }
+  else {
+    $manager = user_access('mfcs manage', $user);
+  }
+
   $options = array(
     'review_restrictions' => MFCS_REVIEW_RESTRICTION_REVIEW,
   );
+
+  if ($manager) {
+    $options['only_reviewer'] = TRUE;
+    $options['table_caption'] = "Requests (As Reviewer)";
+
+    if ($argument_1 == 'as_reviewer') {
+      $options['only_reviewer'] = TRUE;
+      $options['table_caption'] = "Requests (As Reviewer)";
+    }
+    elseif ($argument_1 == 'as_manager') {
+      $options['only_reviewer'] = FALSE;
+      $options['table_caption'] = "Requests (As Manager)";
+    }
+  }
 
   mfcs_ajax_listing_0(array(), $options);
 }

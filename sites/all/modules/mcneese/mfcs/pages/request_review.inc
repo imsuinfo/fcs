@@ -65,6 +65,9 @@ function mfcs_request_review_0_page($form, &$form_state, $page_number = NULL) {
     $page_number = 0;
   }
 
+  $user = cf_current_user();
+  $manager = user_access('mfcs manage', $user);
+
   mfcs_add_canonical_headers('requests/review-0/' . $page_number);
 
   $page_title = "Facilities Use Reviewable Requests";
@@ -167,6 +170,11 @@ function mfcs_request_review_0_page($form, &$form_state, $page_number = NULL) {
     'count' => TRUE,
     'review_restrictions' => MFCS_REVIEW_RESTRICTION_REVIEW,
   );
+
+  if ($manager) {
+    $options['only_reviewer'] = TRUE;
+    $options['table_caption'] = "Requests (As Reviewer)";
+  }
 
   if (!is_null($order)) {
     $options['sort'] = $sorting;
