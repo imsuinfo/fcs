@@ -147,6 +147,7 @@ function mfcs_request_create_0_form($form, &$form_state, $clone_request = NULL) 
     unset($request_fields['review']);
     unset($request_fields['requirements']);
     unset($request_fields['insurance']);
+    unset($request_fields['request_coordinator']);
   }
 
   $statement_markup = 'McNeese State University is happy to provide facilities and resources to our Students, Employees, and the Community to further educational, cultural, and recreational initiatives through requests held on campus.' . "<br>";
