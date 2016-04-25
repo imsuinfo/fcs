@@ -1558,7 +1558,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
       );
 
       if (count($decision_options) == 1 && array_key_exists(MFCS_REVIEW_DECISION_COMMENT, $decision_options)) {
-        $form['review']['operations']['decision']['#title'] = "Operation";
+        $form['review']['operations']['decision']['#title'] = "Action / Decision";
         $form['review']['operations']['decision']['#default_value'] = MFCS_REVIEW_DECISION_COMMENT;
       }
 

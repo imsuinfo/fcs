@@ -1392,7 +1392,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
           $markup .= $user_name_markup . ' ' . $user_id_markup . ' chose to <strong class="review-item-label-text-row-decision">' . $decision_options[$decision] . '</strong> the request' . $reviewer_classification . '.';
         }
         else {
-          $markup .= $user_name_markup . ' ' . $user_id_markup . ' performed an <strong class="review-item-label-text-row-decision">Unknown Operation</strong> on the request' . $reviewer_classification . '.';
+          $markup .= $user_name_markup . ' ' . $user_id_markup . ' performed an <strong class="review-item-label-text-row-decision">Unknown Action / Decision</strong> on the request' . $reviewer_classification . '.';
         }
       }
       $markup .= '</div></h3>';
