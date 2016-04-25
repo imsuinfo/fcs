@@ -628,6 +628,36 @@ function mfcs_page_request_access_operation_log(&$request_ids, &$processed, &$ac
     return TRUE;
   }
 
+  if ($roles['requester']) {
+    if (array_key_exists(NULL, $request_ids)) {
+      $access[NULL] = TRUE;
+      $processed[NULL] = TRUE;
+      return TRUE;
+    }
+
+    // access is dependent on the requester, so load all requester ids for all requests.
+    $requesters = mfcs_load_requesters_of_requests($request_ids);
+
+    foreach ($request_ids as $request_id) {
+      if (isset($requesters[$request_id]) && $requesters[$request_id] == $user->uid) {
+        $access[$request_id] = TRUE;
+        $processed[$request_id] = TRUE;
+      }
+      else {
+        $access[$request_id] = FALSE;
+
+        // If the requester also has reviewer role, make sure the unapproved requests are also checked by not marking the request as processed.
+        if (!$roles['reviewer']) {
+          $processed[$request_id] = FALSE;
+        }
+      }
+    }
+
+    if (!$roles['reviewer']) {
+      return TRUE;
+    }
+  }
+
   if ($roles['reviewer']) {
     if (array_key_exists(NULL, $request_ids)) {
       $access[NULL] = TRUE;
@@ -647,29 +677,6 @@ function mfcs_page_request_access_operation_log(&$request_ids, &$processed, &$ac
       foreach ($request_ids as $id) {
         $processed[$id] = FALSE;
         $access[$id] = FALSE;
-      }
-    }
-
-    return TRUE;
-  }
-  elseif ($roles['requester']) {
-    if (array_key_exists(NULL, $request_ids)) {
-      $access[NULL] = TRUE;
-      $processed[NULL] = TRUE;
-      return TRUE;
-    }
-
-    // access is dependent on the requester, so load all requester ids for all requests.
-    $requesters = mfcs_load_requesters_of_requests($request_ids);
-
-    foreach ($request_ids as $request_id) {
-      if (isset($requesters[$request_id]) && $requesters[$request_id] == $user->uid) {
-        $access[$request_id] = TRUE;
-        $processed[$request_id] = TRUE;
-      }
-      else {
-        $access[$request_id] = FALSE;
-        $processed[$request_id] = FALSE;
       }
     }
 

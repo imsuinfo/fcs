@@ -1417,6 +1417,10 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
       $access[$request_id] = TRUE;
       return TRUE;
     }
+    elseif ($roles['requester'] && $request['mer']['user_id'][0]->value == $user->uid) {
+      $access[$request_id] = TRUE;
+      return TRUE;
+    }
     elseif ($roles['reviewer']) {
       // due to its complexity, the database calling function for reviewer access will be used.
       $log_access = mfcs_page_request_reviewer_access($user, $request_id, MFCS_REVIEW_RESTRICTION_VIEW);
@@ -1425,10 +1429,6 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
         $access[$request_id] = $log_access[$request_id];
         return $log_access[$request_id];
       }
-    }
-    elseif ($roles['requester'] && $request['mer']['user_id'][0]->value == $user->uid) {
-      $access[$request_id] = TRUE;
-      return TRUE;
     }
   }
   elseif ($operation == 'delete') {
