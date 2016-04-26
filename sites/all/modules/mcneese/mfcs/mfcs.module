@@ -4823,7 +4823,7 @@ function mfcs_autocancel_old_requests_cron() {
 
     if ($cancelled) {
       $message = "One or more dates associated with the request are now in the past.";
-      mfcs_workflow_step_review($request_id, $system_user, MFCS_REVIEW_DECISION_CANCELLED, MFCS_REVIEW_RESTRICTIONS_SYSTEM, $message);
+      mfcs_workflow_step_review($request_id, $system_user, MFCS_REVIEW_DECISION_CANCELLED, MFCS_REVIEW_RESTRICTIONS_MANAGER, $message);
 
       $parameters = array();
       $parameters['changed_by'] = $system_user->uid;
