@@ -76,7 +76,7 @@ function mcneese_libraries_libraries_info() {
     'extensions/Buttons/js/buttons.print.js',
     'extensions/Buttons/js/dataTables.buttons.js',
     'extensions/KeyTable/js/dataTables.keyTable.js',
-    'extensions/ColReorder/js/dataTables.colReorder.js',
+    //'extensions/ColReorder/js/dataTables.colReorder.js', // @fixme: currently breaks colVis.
     'extensions/Pagination/js/pagination.input.js',
   );
   $libraries['datatables']['files']['css'] = array(
@@ -84,7 +84,7 @@ function mcneese_libraries_libraries_info() {
     'extensions/ColVis/css/dataTables.colVis.css',
     'extensions/Buttons/css/buttons.dataTables.css',
     'extensions/KeyTable/css/dataTables.KeyTable.css',
-    'extensions/ColReorder/css/dataTables.colReorder.css',
+    //'extensions/ColReorder/css/dataTables.colReorder.css',
     'extensions/Pagination/css/pagination.input.css',
   );
 
