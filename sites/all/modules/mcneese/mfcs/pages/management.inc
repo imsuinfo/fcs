@@ -49,7 +49,7 @@ function mfcs_management_page() {
     );
   }
 
-  if ($manager || $reviewer) {
+  if ($reviewer || $manager || $administer) {
     $c_1 = count($items_1);
     $c_2 = count($items_2);
     if ($c_1 == $c_2) {
@@ -190,6 +190,26 @@ function mfcs_management_page() {
 
     $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/holiday/year-0' . $url_arguments . '" class="item-link">Manage Holidays</a></h4>';
     $help = '<div class="item-description inline-block">View and manage list of holidays.</div>';
+    $items_array[] = array(
+      'data' => $link . '<br>' . $help,
+      'class' => array(
+      ),
+    );
+
+    $c_1 = count($items_1);
+    $c_2 = count($items_2);
+    if ($c_1 == $c_2) {
+      $items_array = &$items_1;
+    }
+    elseif ($c_1 > $c_2) {
+      $items_array = &$items_2;
+    }
+    else {
+      $items_array = &$items_1;
+    }
+
+    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/users-0/list' . $url_arguments . '" class="item-link">Manage Users</a></h4>';
+    $help = '<div class="item-description inline-block">View, add, delete, and otherwise manage users.</div>';
     $items_array[] = array(
       'data' => $link . '<br>' . $help,
       'class' => array(

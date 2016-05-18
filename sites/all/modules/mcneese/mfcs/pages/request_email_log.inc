@@ -296,7 +296,7 @@ function mfcs_request_email_log_0_form($form, &$form_state, $page_number = NULL)
   $email_log_list['caption'] = t("E-mail Log");
   $email_log_list['header'] = array(
     'id' => array('field' => 'id', 'data' => "ID", 'align' => 'center'),
-    'account_id' => array('field' => 'user_id', 'data' => "Account ID", 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
+    'account_id' => array('field' => 'user_id', 'data' => "Account ID", 'align' => 'center', 'class' => array('script-hidden')),
     'account' => array('field' => 'name', 'data' => "Account", 'align' => 'center', 'class' => array('script-hidden')),
     'date' => array('field' => 'date', 'data' => "Date", 'align' => 'center'),
     'destination' => array('field' => 'destination', 'data' => "Destination", 'align' => 'center'),

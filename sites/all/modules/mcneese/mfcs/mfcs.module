@@ -276,6 +276,7 @@ define('MFCS_INCLUDE_REQUEST_VIEW', 13);
 define('MFCS_INCLUDE_REQUEST_LIST', 14);
 define('MFCS_INCLUDE_REQUEST_REASSIGN', 18);
 define('MFCS_INCLUDE_REQUEST_ICAL', 19);
+define('MFCS_INCLUDE_REQUEST_USERS', 20);
 define('MFCS_INCLUDE_TESTING', 15);
 define('MFCS_INCLUDE_VIEW', 16);
 define('MFCS_INCLUDE_MANAGEMENT', 17);
@@ -940,6 +941,14 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
   elseif ($operation == 'help') {
     if (is_null($request_id)) {
       if ($user->uid > 0) {
+        $access[$request_id] = TRUE;
+        return TRUE;
+      }
+    }
+  }
+  elseif ($operation == 'users') {
+    if (is_null($request_id)) {
+      if ($roles['manager'] || $roles['administer']) {
         $access[$request_id] = TRUE;
         return TRUE;
       }
@@ -2167,6 +2176,9 @@ function mfcs_include($id) {
   elseif ($id == MFCS_INCLUDE_MANAGEMENT) {
     require_once($module_path . '/includes/management.inc');
   }
+  elseif ($id == MFCS_INCLUDE_REQUEST_USERS) {
+    require_once($module_path . '/pages/request_users.inc');
+  }
 }
 
 /**
@@ -3194,7 +3206,7 @@ function mfcs_load_request_user_by_banner_id($banner_id) {
  * @param array $roles
  *   (optional) New roles to assign the user to.
  *   The argument $append_rules determines how these roles are assigned.
- *   The array keys are the role ids and the array values are the role names.
+ *   The array keys are the role ids and the array values should be the role id (or 0 to remove).
  * @param bool $refresh_banner
  *   (optional) If TRUE, then when the function determines in needs to reload/re-synchronize the banner database, then it will do so.
  *   If FALSE, then it will never reload/re-synchronize the banner database even if synchronization may need to be performed.
@@ -3248,16 +3260,32 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $append_
 
 
   $original_roles = (array) $user->roles;
+  foreach ($original_roles as $role_id => $role_value) {
+    $original_roles[$role_id] = $role_id;
+  }
+  unset($role_id);
+  unset($role_value);
+
   if ($append_roles) {
     $user_roles = $original_roles;
-    foreach ($roles as $role_id => $role_name) {
-      $user_roles[$role_id] = $role_name;
+    foreach ($roles as $role_id => $role_value) {
+      if ($role_value == 0) {
+        continue;
+      }
+      $user_roles[$role_id] = $role_id;
     }
     unset($role_id);
-    unset($role_name);
+    unset($role_value);
   }
   else {
-    $user_roles = $roles;
+    foreach ($roles as $role_id => $role_value) {
+      if ($role_value == 0) {
+        continue;
+      }
+      $user_roles[$role_id] = $role_id;
+    }
+    unset($role_id);
+    unset($role_value);
   }
 
   $bannerless_exception_role = user_role_load_by_name('bannerless exception');
@@ -3597,9 +3625,11 @@ function mfcs_process_user_banner_roles($user, &$problems, $settings = array()) 
     $banner_id = (int) $user->field_user_banner_id['und'][0]['value'];
   }
 
-  $already_executed = &drupal_static(__FUNCTION__, NULL);
-  if (is_array($already_executed) && array_key_exists($user->uid, $already_executed)) {
-    return $already_executed[$user->uid];
+  if (isset($user->uid)) {
+    $already_executed = &drupal_static(__FUNCTION__, NULL);
+    if (is_array($already_executed) && array_key_exists($user->uid, $already_executed)) {
+      return $already_executed[$user->uid];
+    }
   }
 
   $primary_account_id = NULL;
@@ -3626,7 +3656,7 @@ function mfcs_process_user_banner_roles($user, &$problems, $settings = array()) 
     unset($ldap_primary);
   }
 
-  if (is_null($primary_account_id)) {
+  if (is_null($primary_account_id) && isset($user->uid)) {
     if ($is_primary) {
       $primary_account_id = $user->uid;
     }
@@ -3647,24 +3677,30 @@ function mfcs_process_user_banner_roles($user, &$problems, $settings = array()) 
     }
   }
 
+  $user_roles = array();
+  if (isset($user->roles)) {
+    $user_roles = (array) $user->roles;
+  }
 
-  $user_roles = (array) $user->roles;
   if (array_key_exists('roles', $settings)) {
     if (is_array($settings['roles'])) {
       $user_roles = $settings['roles'];
     }
   }
 
-  $user_status = $user->status;
-  if (array_key_exists('status', $settings) && is_int($settings['status'])) {
-    $user_status = $settings['status'];
+  $user_status = NULL;
+  if (isset($user->status)) {
+    $user_status = (int) $user->status;
+    if (array_key_exists('status', $settings) && is_int($settings['status'])) {
+      $user_status = (int) $settings['status'];
+    }
   }
 
 
   // remove roles associated with banner from the user roles.
   $processed_roles = array();
   foreach ((array) $user_roles as $role_id => $role_name) {
-    $processed_roles[$role_id] = $role_name;
+    $processed_roles[$role_id] = $role_id;
   }
   unset($role_id);
   unset($role_name);
@@ -3686,7 +3722,9 @@ function mfcs_process_user_banner_roles($user, &$problems, $settings = array()) 
 
   if (array_key_exists($bannerless_exception_role->rid, $processed_roles)) {
     // if the user is defined as being an exception to operate as if it is bannerless, then do so.
-    $already_executed[$user->uid] = TRUE;
+    if (isset($user->uid)) {
+      $already_executed[$user->uid] = TRUE;
+    }
     return TRUE;
   }
 
@@ -3696,21 +3734,26 @@ function mfcs_process_user_banner_roles($user, &$problems, $settings = array()) 
   if (array_key_exists($requester_role->rid, $processed_roles)) {
     $assign_requester_role = FALSE;
   }
-  elseif (array_key_exists($reviewer_role->rid, $processed_roles)) {
+
+  if (array_key_exists($reviewer_role->rid, $processed_roles)) {
     $assign_requester_role = FALSE;
   }
-  elseif (array_key_exists($manager_role->rid, $processed_roles)) {
+
+  if (array_key_exists($manager_role->rid, $processed_roles)) {
     $is_manager = TRUE;
   }
-  elseif (array_key_exists($administrator_role->rid, $processed_roles)) {
+
+  if (array_key_exists($administrator_role->rid, $processed_roles)) {
     // administrators are not auto-managed.
-    $already_executed[$user->uid] = TRUE;
+    if (isset($user->uid)) {
+      $already_executed[$user->uid] = TRUE;
+    }
     return TRUE;
   }
 
   // validate banner id, if invalid, then strip all user roles (admins are cleared before this point).
   if (mfcs_load_request_user_by_banner_id($banner_id) === FALSE) {
-    if ($user_status == 0) {
+    if ($user_status === 0) {
       // disabled accounts should not report invalid banner ids.
       if (($problems & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) != 0) {
         $problems = $problems - MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
@@ -3720,7 +3763,9 @@ function mfcs_process_user_banner_roles($user, &$problems, $settings = array()) 
       $problems = $problems | MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
     }
 
-    $already_executed[$user->uid] = FALSE;
+    if (isset($user->uid)) {
+      $already_executed[$user->uid] = FALSE;
+    }
     return FALSE;
   }
 
@@ -3728,23 +3773,27 @@ function mfcs_process_user_banner_roles($user, &$problems, $settings = array()) 
     $problems = $problems - MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
   }
 
-  if ($is_manager) {
+  if ($is_manager) {;
     // managers are not auto-managed once their banner id is confirmed to be valid.
-    $already_executed[$user->uid] = TRUE;
+    if (isset($user->uid)) {
+      $already_executed[$user->uid] = TRUE;
+    }
     return TRUE;
   }
 
   if ($assign_requester_role) {
-    $processed_roles[$requester_role->rid] = 'requester';
+    $processed_roles[$requester_role->rid] = $requester_role->rid;
   }
 
 
   // load banner role information associated with the primary user.
   $user_banner = array();
   if ($is_primary) {
-    $user_banner = mfcs_load_request_user_by_user_id($user->uid);
-    if ($user_banner == FALSE) {
-      $user_banner = array();
+    if (isset($user->uid)) {
+      $user_banner = mfcs_load_request_user_by_user_id($user->uid);
+      if ($user_banner == FALSE) {
+        $user_banner = array();
+      }
     }
   }
   elseif (!is_null($primary_account_id)) {
@@ -3768,7 +3817,7 @@ function mfcs_process_user_banner_roles($user, &$problems, $settings = array()) 
     foreach ($user_banner['role'] as $role) {
       if (isset($mappings[$role]['tid'])) {
         $banner_roles[] = array('tid' => $mappings[$role]['tid']);
-        $processed_roles[$mappings[$role]['rid']] = $mappings[$role]['role'];
+        $processed_roles[$mappings[$role]['rid']] = $mappings[$role]['rid'];
       }
     }
     unset($role);
@@ -3803,7 +3852,7 @@ function mfcs_process_user_banner_roles($user, &$problems, $settings = array()) 
     $all_coordinators = mfcs_load_room_coordinators(NULL, TRUE);
     if (array_key_exists($primary_account_id, $all_coordinators) || $assigned_as_reviewer) {
       if (!array_key_exists($reviewer_role->rid, $processed_roles)) {
-        $processed_roles[$reviewer_role->rid] = 'reviewer';
+        $processed_roles[$reviewer_role->rid] = $reviewer_role->rid;
       }
     }
     elseif (!$can_proxy) {
@@ -3812,7 +3861,7 @@ function mfcs_process_user_banner_roles($user, &$problems, $settings = array()) 
 
         // the function arguments are trying to assign 'proxy' role to a user who has no venue or room to review.
         // do not allow this and provide a watchdog warning for reference.
-        watchdog(MFCS_WATCHDOG_ID, "The user '%user_name' (%user_id, %primary_id) is not being granted reviewer access as requested because the user is not assigned as either a venue or room coordinator in the banner database and is not a venue coordinator proxy.", array('%user_name' => $user->name, '%user_id' => $user->uid, '%primary_id' => $primary_account_id), WATCHDOG_WARNING);
+        watchdog(MFCS_WATCHDOG_ID, "The user '%user_name' (%user_id, %primary_id) is not being granted reviewer access as requested because the user is not assigned as either a venue or room coordinator in the banner database and is not a venue coordinator proxy.", array('%user_name' => $user->name, '%user_id' => isset($user->uid) ? $user->uid : 'undefined', '%primary_id' => $primary_account_id), WATCHDOG_WARNING);
 
         $problems = $problems | MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED;
       }
@@ -3833,7 +3882,7 @@ function mfcs_process_user_banner_roles($user, &$problems, $settings = array()) 
         // auto-unlock account.
         $results['status'] = 1;
 
-        watchdog(MFCS_WATCHDOG_ID, "The user '%user_name' (%user_id, %primary_id) has had the account enabled/unlocked due to regaining sufficient banner roles.", array('%user_name' => $user->name, '%user_id' => $user->uid, '%primary_id' => $primary_account_id), WATCHDOG_NOTICE);
+        watchdog(MFCS_WATCHDOG_ID, "The user '%user_name' (%user_id, %primary_id) has had the account enabled/unlocked due to regaining sufficient banner roles.", array('%user_name' => $user->name, '%user_id' => isset($user->uid) ? $user->uid : 'undefined', '%primary_id' => $primary_account_id), WATCHDOG_NOTICE);
       }
     }
     else {
@@ -3841,7 +3890,7 @@ function mfcs_process_user_banner_roles($user, &$problems, $settings = array()) 
         // auto-lock account (currently disabled).
         #$results['status'] = 0;
 
-        #watchdog(MFCS_WATCHDOG_ID, "The user '%user_name' (%user_id, %primary_id) has had the account disabled/locked due to insufficient banner roles.", array('%user_name' => $user->name, '%user_id' => $user->uid, '%primary_id' => $primary_account_id), WATCHDOG_NOTICE);
+        #watchdog(MFCS_WATCHDOG_ID, "The user '%user_name' (%user_id, %primary_id) has had the account disabled/locked due to insufficient banner roles.", array('%user_name' => $user->name, '%user_id' => isset($user->uid) ? $user->uid : 'undefined', '%primary_id' => $primary_account_id), WATCHDOG_NOTICE);
       }
     }
   }
@@ -3850,7 +3899,9 @@ function mfcs_process_user_banner_roles($user, &$problems, $settings = array()) 
   $results['field_user_event_roles'] = array('und' => $banner_roles);
   $results['roles'] = $processed_roles;
 
-  $already_executed[$user->uid] = $results;
+  if (isset($user->uid)) {
+    $already_executed[$user->uid] = $results;
+  }
   return $results;
 }
 
@@ -4170,11 +4221,37 @@ function mfcs_sync_banner_to_local($transaction = NULL, $user = NULL, $message_o
         // add the room and venue coordinators.
         $room_coordinator = NULL;
         if (!empty($coordinator_room_item['email'])) {
-          $room_coordinator = mfcs_ensure_user_by_email($coordinator_room_item['email'], array('reviewer', 'requester'));
+          $roles = array();
+          $role = user_role_load_by_name('reviewer');
+          if (is_object($role)) {
+            $roles[$role->rid] = $role->rid;
+          }
+
+          $role = user_role_load_by_name('requester');
+          if (is_object($role)) {
+            $roles[$role->rid] = $role->rid;
+          }
+          unset($role);
+
+          $room_coordinator = mfcs_ensure_user_by_email($coordinator_room_item['email'], $roles);
+          unset($roles);
         }
 
         if (!is_object($room_coordinator) && !empty($coordinator_venue_item['email'])) {
-          $room_coordinator = mfcs_ensure_user_by_email($coordinator_venue_item['email'], array('reviewer', 'requester'));
+          $roles = array();
+          $role = user_role_load_by_name('reviewer');
+          if (is_object($role)) {
+            $roles[$role->rid] = $role->rid;
+          }
+
+          $role = user_role_load_by_name('requester');
+          if (is_object($role)) {
+            $roles[$role->rid] = $role->rid;
+          }
+          unset($role);
+
+          $room_coordinator = mfcs_ensure_user_by_email($coordinator_venue_item['email'], $roles);
+          unset($roles);
         }
 
         if (is_object($room_coordinator)) {
@@ -4823,7 +4900,7 @@ function mfcs_autocancel_old_requests_cron() {
 
     if ($cancelled) {
       $message = "One or more dates associated with the request are now in the past.";
-      mfcs_workflow_step_review($request_id, $system_user, MFCS_REVIEW_DECISION_CANCELLED, MFCS_REVIEW_RESTRICTIONS_MANAGER, $message);
+      mfcs_workflow_step_review($request_id, $system_user, MFCS_REVIEW_DECISION_CANCELLED, MFCS_REVIEW_RESTRICTIONS_MANAGERS, $message);
 
       $parameters = array();
       $parameters['changed_by'] = $system_user->uid;
@@ -10974,6 +11051,51 @@ function mfcs_load_requesters_of_requests($request_ids) {
   }
 
   return $return;
+}
+
+/**
+ * Load LDAP user name for the given banner id.
+ *
+ * @param int $banner_id
+ *   The numeric banner id to search by.
+ *
+ * @param bool|string
+ *   Username string on success, FALSE otherwise.
+ */
+function mfcs_get_ldap_user_name_by_banner_id($banner_id) {
+  if (!cf_is_integer($banner_id)) {
+    cf_error::invalid_integer('banner_id');
+    return FALSE;
+  }
+
+  $ldap_servers = ldap_servers_get_servers(NULL, 'enabled');
+  $ldap_server = NULL;
+
+  if (empty($ldap_servers)) {
+    return FALSE;
+  }
+
+  // @fixme: currently only searching the first enabled server found.
+  foreach ($ldap_servers as $server) {
+    if ($server->status) {
+      $ldap_server = $server;
+      break;
+    }
+  }
+
+  if (is_null($ldap_server)) {
+    return FALSE;
+  }
+
+  $banner_id_string = mfcs_banner_id_int_to_string($banner_id);
+  $attr_banner_id = ldap_server_massage_text($banner_id_string, 'attr_value', LDAP_SERVER_MASSAGE_QUERY_LDAP);
+  $search_results = $ldap_server->search(NULL, 'employeeNumber=' . $attr_banner_id);
+
+  if (isset($search_results[0]['uid'][0])) {
+    return $search_results[0]['uid'][0];
+  }
+
+  return FALSE;
 }
 
 /**

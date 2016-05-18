@@ -564,13 +564,26 @@ function mfcs_request_proxy_0_form_submit($form, &$form_state) {
       $create_new_user = (bool) $form_state['values']['proxy']['new_user'];
 
       if ($create_new_user && !empty($form_state['user_name'])) {
+        $roles = array();
+        $role = user_role_load_by_name('reviewer');
+        if (is_object($role)) {
+          $roles[$role->rid] = $role->rid;
+        }
+
+        $role = user_role_load_by_name('requester');
+        if (is_object($role)) {
+          $roles[$role->rid] = $role->rid;
+        }
+        unset($role);
+
         if (preg_match('/@student\.mcneese\.edu/i', $form_state['values']['proxy']['proxy_id'])) {
-          $new_user = mfcs_ensure_user_by_email($form_state['user_name'] . '@student.mcneese.edu', array('reviewer', 'requester'));
+          $new_user = mfcs_ensure_user_by_email($form_state['user_name'] . '@student.mcneese.edu', $roles);
           watchdog(MFCS_WATCHDOG_ID, "The student account '%proxy_user' was created as a proxy for '%user_id' by '%name' ('%uid').", array('%proxy_user' => $form_state['user_name'], '%user_id' => $form_state['values']['proxy']['user_id'], '%name' => $user->name, '%uid' => $user->uid), WATCHDOG_NOTICE);
         }
         else {
-          $new_user = mfcs_ensure_user_by_email($form_state['user_name'] . '@mcneese.edu', array('reviewer', 'requester'));
+          $new_user = mfcs_ensure_user_by_email($form_state['user_name'] . '@mcneese.edu', $roles);
         }
+        unset($roles);
 
         if (!is_object($new_user)) {
           form_set_error('form', "An error occurred while trying to create the proxy user's account. Please contact the support staff.");

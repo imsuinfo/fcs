@@ -753,6 +753,8 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
     'tab_root' => 'requests',
   );
 
+  /*
+  // @fixme: the function callbacks specified here are not implemented.
   $items['requests/search-0/ajax/simple/%'] = array(
     'title' => "",
     'page callback' => 'mfcs_ajax_search_simple_0',
@@ -778,6 +780,7 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
     'tab_parent' => 'requests/search-0',
     'tab_root' => 'requests/search-0',
   );
+  */
 }
 
 /**
@@ -830,7 +833,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'title' => "Manage Proxies",
     'description' => "List users who are able to proxy as a venue coordinator.",
     'page callback' => 'mfcs_ajax_proxy_0_list',
-    'file' => 'ajax.inc',
+    'file' => 'ajax-management.inc',
     'file path' => $module_path . '/includes',
     'access callback' => 'mfcs_page_request_access',
     'access arguments' => array('proxy'),
@@ -903,7 +906,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'title' => "",
     'page callback' => 'mfcs_ajax_reviewers_0_list',
     'page arguments' => array(4, 5),
-    'file' => 'ajax.inc',
+    'file' => 'ajax-management.inc',
     'file path' => $module_path . '/includes',
     'access callback' => 'mfcs_page_request_access',
     'access arguments' => array('reviewers'),
@@ -1013,7 +1016,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'title' => "E-mail Logs",
     'description' => "E-mail Logs",
     'page callback' => 'mfcs_ajax_email_log_0_list',
-    'file' => 'ajax.inc',
+    'file' => 'ajax-management.inc',
     'file path' => $module_path . '/includes',
     'access callback' => 'mfcs_page_request_access',
     'access arguments' => array('email_log'),
@@ -1152,7 +1155,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'title' => "User Problems",
     'description' => "View a list of users with problems that the system has detected.",
     'page callback' => 'mfcs_ajax_problems_0_users_list',
-    'file' => 'ajax.inc',
+    'file' => 'ajax-management.inc',
     'file path' => $module_path . '/includes',
     'access callback' => 'mfcs_page_request_access',
     'access arguments' => array('problems'),
@@ -1229,7 +1232,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'title' => "",
     'page callback' => 'mfcs_ajax_problems_0_disabled_in_use',
     'page arguments' => array(5),
-    'file' => 'ajax.inc',
+    'file' => 'ajax-management.inc',
     'file path' => $module_path . '/includes',
     'access callback' => 'mfcs_page_request_access',
     'access arguments' => array('problems'),
@@ -1255,7 +1258,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'title' => "Request Problems",
     'description' => "View a list of requests with problems that the system has detected.",
     'page callback' => 'mfcs_ajax_problems_0_requests_list',
-    'file' => 'ajax.inc',
+    'file' => 'ajax-management.inc',
     'file path' => $module_path . '/includes',
     'access callback' => 'mfcs_page_request_access',
     'access arguments' => array('problems'),
@@ -1268,7 +1271,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'description' => "View a list of requests with problems that the system has detected.",
     'page callback' => 'mfcs_ajax_problems_0_requests_list',
     'page arguments' => array(4),
-    'file' => 'ajax.inc',
+    'file' => 'ajax-management.inc',
     'file path' => $module_path . '/includes',
     'access callback' => 'mfcs_page_request_access',
     'access arguments' => array('problems'),
@@ -1320,7 +1323,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'title' => "Synchronize Requests",
     'description' => "The synchronize ",
     'page callback' => 'mfcs_ajax_synchronize_0_form',
-    'file' => 'ajax.inc',
+    'file' => 'ajax-management.inc',
     'file path' => $module_path . '/includes',
     'access callback' => 'mfcs_synchronize_request_access',
     'access arguments' => array(),
@@ -1424,6 +1427,96 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
     'type' => MENU_CALLBACK,
+  );
+
+  $items['requests/users-0/list'] = array(
+    'title' => "Manage Users",
+    'description' => "Manage Users",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_users_0_form'),
+    'file' => 'request_users.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('users'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
+
+  $items['requests/users-0/list/%'] = array(
+    'title' => "Manage Users",
+    'description' => "Manage Users",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_users_0_form', 3),
+    'file' => 'request_users.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('users'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
+
+  $items['requests/users-0/list/ajax'] = array(
+    'title' => "Manage Users",
+    'description' => "Manage Users",
+    'page callback' => 'mfcs_ajax_users_0_list',
+    'file' => 'ajax-management.inc',
+    'file path' => $module_path . '/includes',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('users'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
+
+  $items['requests/users-0/list/ajax/%'] = array(
+    'title' => "Manage Users",
+    'description' => "Manage Users",
+    'page callback' => 'mfcs_ajax_users_0_list',
+    'page arguments' => array(4),
+    'file' => 'ajax-management.inc',
+    'file path' => $module_path . '/includes',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('users'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
+
+  $items['requests/users-0/add'] = array(
+    'title' => "Add User",
+    'description' => "Add User",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_users_0_add_form'),
+    'file' => 'request_users.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('users'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
+
+  $items['requests/users-0/view/%'] = array(
+    'title' => "View User",
+    'description' => "View User",
+    'page callback' => 'mfcs_request_users_0_view_page',
+    'page arguments' => array(3),
+    'file' => 'request_users.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('users'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
+
+  $items['requests/users-0/edit/%'] = array(
+    'title' => "Edit User",
+    'description' => "Edit User",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_users_0_edit_form', 3),
+    'file' => 'request_users.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('users'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
   );
 }
 
@@ -1611,6 +1704,7 @@ function mfcs_hook_user_login(&$edit, $user, $category) {
     // do not sync to banner for bannerless-exception.
     return;
   }
+
   mfcs_synchronize_user_settings();
 
 
@@ -1630,22 +1724,24 @@ function mfcs_hook_user_login(&$edit, $user, $category) {
   $problems = MFCS_USER_PROBLEM_NONE;
   $changes = mfcs_process_user_banner_roles($user, $problems, $settings);
 
-  $changes_roles = array();
-  if (isset($changes['roles']) && is_array($changes['roles'])) {
-    $changes_roles = array_keys($changes['roles']);
-  }
-
   if (is_array($changes)) {
-    if (count($user->roles) != count($changes_roles)) {
+    $user_roles = array_keys($user->roles);
+
+    $changes_roles = array();
+    if (isset($changes['roles']) && is_array($changes['roles'])) {
+      $changes_roles = array_keys($changes['roles']);
+    }
+
+    if (count($user_roles) != count($changes_roles)) {
       user_save($user);
     }
     else {
-      $difference = array_diff($user->roles, $changes_roles);
+      $difference = array_diff($user_roles, $changes_roles);
       if (!empty($difference)) {
         user_save($user);
       }
       else {
-        $difference = array_diff($changes_roles, $user->roles);
+        $difference = array_diff($changes_roles, $user_roles);
         if (!empty($difference)) {
           user_save($user);
         }
@@ -1658,6 +1754,16 @@ function mfcs_hook_user_login(&$edit, $user, $category) {
  * Internal function for hook_user_insert().
  */
 function mfcs_hook_user_insert(&$edit, $account, $category) {
+  // $account must be an object.
+  if (!is_object($account)) {
+    return;
+  }
+
+  // only operate on the account-specific categories.
+  if ($category != 'account') {
+    return;
+  }
+
   // if the user does not have a valid banner id, then there is nothing to synchronize to.
   if (empty($account->field_user_banner_id['und'][0]['value']) || !is_numeric($account->field_user_banner_id['und'][0]['value'])) {
     return;
@@ -1670,21 +1776,25 @@ function mfcs_hook_user_insert(&$edit, $account, $category) {
     return;
   }
 
-  $result = mfcs_sync_banner_to_local_users($account->uid, $account->field_user_banner_id['und'][0]['value']);
+  // Some changes usually happen during the user presave hook, but the uid does not yet exist for new accounts.
+  // Now that the user id should be defined, perform those operations.
+  if (isset($account->uid)) {
 
-  // account synchronization failed, so assign the appropriate problem flag.
-  if ($result === FALSE) {
-    $mfcs_users = mfcs_load_users($account->uid);
+    $result = mfcs_sync_banner_to_local_users($account->uid, $account->field_user_banner_id['und'][0]['value']);
+    if ($result === FALSE) {
+      // account synchronization failed, so assign the appropriate problem flag.
+      $mfcs_users = mfcs_load_users($account->uid);
 
-    $problems = MFCS_USER_PROBLEM_NONE + MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE;
-    if (isset($mfcs_users[$account->uid])) {
-      $problems = $mfcs_users[$account->uid]->problems;
-      if (($problems & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) == 0) {
-        $problems += MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE;
+      $problems = MFCS_USER_PROBLEM_NONE + MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE;
+      if (isset($mfcs_users[$account->uid])) {
+        $problems = $mfcs_users[$account->uid]->problems;
+        if (($problems & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) == 0) {
+          $problems += MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE;
+        }
       }
-    }
 
-    mfcs_save_user($account->uid, array('problems' => $problems));
+      mfcs_save_user($account->uid, array('problems' => $problems));
+    }
   }
 }
 
@@ -1692,13 +1802,17 @@ function mfcs_hook_user_insert(&$edit, $account, $category) {
  * Internal function for hook_user_presave().
  */
 function mfcs_hook_user_presave(&$edit, $account, $category) {
-  if (!is_object($account) || !property_exists($account, 'uid')) {
-    // for new accounts, the object will not be defined and therefore no user id exist during the user presave function.
-    // nothing can be done yet.
+  // $account must be an object.
+  if (!is_object($account)) {
     return;
   }
 
-  if (isset($edit['field_user_primary_account']['und'][0]) && isset($account->field_user_primary_account['und'][0])) {
+  // only operate on the account-specific categories.
+  if ($category != 'account') {
+    return;
+  }
+
+  if (isset($account->uid) && isset($edit['field_user_primary_account']['und'][0]) && isset($account->field_user_primary_account['und'][0])) {
     if (!empty(array_diff($edit['field_user_primary_account']['und'][0], $account->field_user_primary_account['und'][0]))) {
       // re-synchronize account information following change.
       if (isset($account->field_user_banner_id['und'][0]['value'])) {
@@ -1708,24 +1822,22 @@ function mfcs_hook_user_presave(&$edit, $account, $category) {
   }
 
   $roles = array();
-  foreach ($account->roles as $role_id => $role_value) {
-    $roles[$role_id] = $role_id;
-  }
-  unset($role_id);
-  unset($role_value);
-
   if (isset($edit['roles']) && is_array($edit['roles'])) {
     foreach ($edit['roles'] as $role_id => $role_value) {
       if ($role_value == 0) {
-        unset($roles[$role_id]);
+        continue;
       }
-      else {
-        $roles[$role_id] = $role_id;
-      }
+
+      $roles[$role_id] = (int) $role_id;
     }
-    unset($role_id);
-    unset($role_value);
   }
+  elseif (isset($account->roles)) {
+    foreach ($account->roles as $role_id => $role_value) {
+      $roles[$role_id] = (int) $role_id;
+    }
+  }
+  unset($role_id);
+  unset($role_value);
 
   $bannerless_exception = user_role_load_by_name('bannerless exception');
   if (array_key_exists($bannerless_exception->rid, $roles)) {
@@ -1733,19 +1845,25 @@ function mfcs_hook_user_presave(&$edit, $account, $category) {
     return;
   }
 
-  $mfcs_users = mfcs_load_users($account->uid, FALSE, ($account->status == 0));
+  $problems = MFCS_USER_PROBLEM_NONE;
   $problems_original = MFCS_USER_PROBLEM_NONE;
-  if (isset($mfcs_users[$account->uid])) {
-    $problems_original = $mfcs_users[$account->uid]->problems;
+  if (isset($account->uid)) {
+    $mfcs_users = mfcs_load_users($account->uid, FALSE, ($account->status == 0));
+    if (isset($mfcs_users[$account->uid])) {
+      $problems_original = $mfcs_users[$account->uid]->problems;
+    }
+    unset($mfcs_users);
+    $problems = $problems_original;
   }
-  unset($mfcs_users);
-  $problems = $problems_original;
 
   $settings = array(
     'banner_id' => NULL,
-    'primary' => $account->uid,
-    'roles' => array(),
+    'roles' => $roles,
   );
+
+  if (isset($account->uid)) {
+    $settings['primary'] = (int) $account->uid;
+  }
 
   if (array_key_exists('status', $edit)) {
     $settings['status'] = (int) $edit['status'];
@@ -1754,13 +1872,6 @@ function mfcs_hook_user_presave(&$edit, $account, $category) {
   if (!isset($edit['field_user_banner_id']['und']) && isset($account->field_user_banner_id['und'][0]) && array_key_exists('value', $account->field_user_banner_id['und'][0])) {
     if (is_numeric($account->field_user_banner_id['und'][0]['value'])) {
       $settings['banner_id'] = (int) $account->field_user_banner_id['und'][0]['value'];
-    }
-  }
-
-  foreach ($roles as $role_id) {
-    $loaded_role = user_role_load($role_id);
-    if (is_object($loaded_role)) {
-      $settings['roles'][$role_id] = $loaded_role->name;
     }
   }
 
@@ -1803,33 +1914,34 @@ function mfcs_hook_user_presave(&$edit, $account, $category) {
       $edit['status'] = $changes['status'];
     }
 
-
+// @todo: when account is locked, disable all roles, even for new accounts?
     // if status has changed, and the account is disabled, then unset all roles.
-    if (isset($edit['status'])) {
-      if ($account->status != $edit['status']) {
-        if (array_key_exists('status', $edit)) {
-          if ($edit['status'] == 0) {
+    if (isset($edit['roles'])) {
+      if (isset($edit['status']) && isset($account->status)) {
+        if ($account->status != $edit['status']) {
+          if (array_key_exists('status', $edit)) {
+            if ($edit['status'] == 0) {
+              foreach ($edit['roles'] as &$role_value) {
+                $role_value = 0;
+              }
+            }
+          }
+          elseif ($account->status == 0) {
             foreach ($edit['roles'] as &$role_value) {
               $role_value = 0;
             }
           }
         }
-        elseif ($account->status == 0) {
-          foreach ($edit['roles'] as &$role_value) {
-            $role_value = 0;
-          }
-        }
       }
-    }
-    elseif ($account->status == 0) {
-      foreach ($edit['roles'] as &$role_value) {
-        $role_value = 0;
+      elseif ($account->status == 0) {
+        foreach ($edit['roles'] as &$role_value) {
+          $role_value = 0;
+        }
       }
     }
   }
 
-
-  if ($problems != $problems_original) {
+  if ($problems != $problems_original && isset($account->uid)) {
     mfcs_save_user($account->uid, array('problems' => $problems));
   }
 }
@@ -1838,6 +1950,16 @@ function mfcs_hook_user_presave(&$edit, $account, $category) {
  * Internal function for hook_user_update().
  */
 function mfcs_hook_user_update(&$edit, $account, $category) {
+  // $account must be an object.
+  if (!is_object($account)) {
+    return;
+  }
+
+  // only operate on the account-specific categories.
+  if ($category != 'account') {
+    return;
+  }
+
   if (!array_key_exists('status', $edit) || !isset($edit['original']->status) || !isset($account->uid)) {
     return;
   }
