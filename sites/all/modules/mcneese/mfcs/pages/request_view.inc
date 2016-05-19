@@ -226,7 +226,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
           if (!empty($user_venue_coordinator['first_name']) && !empty($user_venue_coordinator['last_name'])) {
             if ($manager || $administer) {
-              $user_venue_coordinator_name = '<a href="' . $base_path . 'user/' . $request['venue_coordinator']['user_id'][0]->value . '" title="User ID: ' . $request['venue_coordinator']['user_id'][0]->value .'">' . $user_venue_coordinator['first_name'] . ' ' . $user_venue_coordinator['last_name'] . '</a>';
+              $user_venue_coordinator_name = '<a href="' . $base_path . 'requests/users-0/view/' . $request['venue_coordinator']['user_id'][0]->value . '" title="User ID: ' . $request['venue_coordinator']['user_id'][0]->value .'">' . $user_venue_coordinator['first_name'] . ' ' . $user_venue_coordinator['last_name'] . '</a>';
             }
             else {
               $user_venue_coordinator_name = $user_venue_coordinator['first_name'] . ' ' . $user_venue_coordinator['last_name'];
@@ -234,7 +234,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           }
           else {
             if ($manager || $administer) {
-              $user_venue_coordinator_name = '<a href="' . $base_path . 'user/' . $request['venue_coordinator']['user_id'][0]->value . '" title="User ID: ' . $request['venue_coordinator']['user_id'][0]->value .'">' . $user_venue_coordinator['name'] . '</a>';
+              $user_venue_coordinator_name = '<a href="' . $base_path . 'requests/users-0/view/' . $request['venue_coordinator']['user_id'][0]->value . '" title="User ID: ' . $request['venue_coordinator']['user_id'][0]->value .'">' . $user_venue_coordinator['name'] . '</a>';
             }
             else {
               $user_venue_coordinator_name = $user_venue_coordinator['name'];

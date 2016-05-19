@@ -725,7 +725,7 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
 
             // only show link to user account for reviewers and managers.
             if ($reviewer || $manager) {
-              $markup .= '<a href="' . $base_path . 'user/' . $users[$value->$value_name]['user_id'] . $url_arguments . '" class="item-link" title="' . $user_title . '">' . $user_name . '</a>';
+              $markup .= '<a href="' . $base_path . 'requests/users-0/view/' . $users[$value->$value_name]['user_id'] . $url_arguments . '" class="item-link" title="' . $user_title . '">' . $user_name . '</a>';
             }
             else {
               $markup .= $user_name;
@@ -913,7 +913,7 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
 
           // only show link to user account for reviewers and managers.
           if ($reviewer || $manager) {
-            $markup .= '<a href="' . $base_path . 'user/' . $users[$value->$value_name]['user_id'] . $url_arguments . '" class="item-link" title="' . $user_title . '">' . $user_name . '</a>';
+            $markup .= '<a href="' . $base_path . 'requests/users-0/view/' . $users[$value->$value_name]['user_id'] . $url_arguments . '" class="item-link" title="' . $user_title . '">' . $user_name . '</a>';
           }
           else {
             $markup .= $user_name;

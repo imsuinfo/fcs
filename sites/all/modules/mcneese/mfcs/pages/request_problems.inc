@@ -324,7 +324,7 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
     );
 
     $row['account'] = array(
-      'data' => '<a href="' . $base_path . 'user/' . $problem->user_id . $url_arguments . '" class="user-link">' . check_plain($problem->name) . '</a>' . ' <span class="user-id script-hidden">[id: ' .  $problem->user_id . ']</span>',
+      'data' => '<a href="' . $base_path . 'requests/users-0/view/' . $problem->user_id . $url_arguments . '" class="user-link">' . check_plain($problem->name) . '</a>' . ' <span class="user-id script-hidden">[id: ' .  $problem->user_id . ']</span>',
       'class' => $class_name,
     );
 
@@ -610,7 +610,7 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
   $message .= "This page provides details of the problems and the ability to reset the problem flags for each of these problems.<br>";
   $message .= "Some of these problems can be reset, others cannot.<br>";
   $message .= "<br>";
-  $message .= "The <a href=\"" . $base_path . 'user/' . $problem_user_id . "\" title=\"View Profile for " . $user_name . " (id #" . $problem_user_id . ")\">user's information</a> and problem flags were last updated on: <strong>" . date("Y/m/d h:i:s a", $mfcs_user->date) . "</strong>.<br>";
+  $message .= "The <a href=\"" . $base_path . 'requests/users-0/view/' . $problem_user_id . "\" title=\"View Profile for " . $user_name . " (id #" . $problem_user_id . ")\">user's information</a> and problem flags were last updated on: <strong>" . date("Y/m/d h:i:s a", $mfcs_user->date) . "</strong>.<br>";
   $message .= "<br>";
 
   $form['message'] = array(
@@ -883,7 +883,7 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
           $form['problems'][$problem_id]['explanation']['#markup'] .= ":<ul>";
 
           foreach ($all_accounts as $account_id => $account_name) {
-            $form['problems'][$problem_id]['explanation']['#markup'] .= '<li><a href="' . $base_path . 'user/' . $account_id . $url_arguments . '">' . $account_name . '</a></li>';
+            $form['problems'][$problem_id]['explanation']['#markup'] .= '<li><a href="' . $base_path . 'requests/users-0/view/' . $account_id . $url_arguments . '">' . $account_name . '</a></li>';
           }
           $form['problems'][$problem_id]['explanation']['#markup'] .= "</ul><br>";
         }
@@ -2192,7 +2192,7 @@ function mfcs_request_problems_0_request_form_validate($form, &$form_state) {
           }
 
           $coordinator = user_load($room_information->coordinator_id);
-          $extra_text .= ' Coordinator Information: <a href="' . $base_path . 'user/' . $room_information->coordinator_id . '" title="View user account">' . $coordinator->field_user_first_name['und'][0]['safe_value'] . ' ' . $coordinator->field_user_last_name['und'][0]['safe_value'] . '</a>.';
+          $extra_text .= ' Coordinator Information: <a href="' . $base_path . 'requests/users-0/view/' . $room_information->coordinator_id . '" title="View user account">' . $coordinator->field_user_first_name['und'][0]['safe_value'] . ' ' . $coordinator->field_user_last_name['und'][0]['safe_value'] . '</a>.';
 
           if ($new_coordinator_id == $request['venue_coordinator']['user_id'][0]->value) {
             form_set_error('actions][action', "Unable to re-assign venue coordinator, the banner information remains the same." . $extra_text);

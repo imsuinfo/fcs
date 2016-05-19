@@ -1168,7 +1168,7 @@ function mfcs_request_troubleshoot_0_rooms_page() {
       $target_markup .= '    </li>';
       $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-room_coordinator even">';
       $target_markup .= '      <div class="information_page-entry-list-item-name">Room Coordinator:</div> ';
-      $target_markup .= '      <div class="information_page-entry-list-item-value"><a href="' . $base_path . 'user/' . $entry->room_coordinator_id . $url_arguments . '" title="View User Profile">' . $entry->room_coordinator_name . '</a> [id: ' . $entry->room_coordinator_id . ']' . '</div>';
+      $target_markup .= '      <div class="information_page-entry-list-item-value"><a href="' . $base_path . 'requests/users-0/view/' . $entry->room_coordinator_id . $url_arguments . '" title="View User Profile">' . $entry->room_coordinator_name . '</a> [id: ' . $entry->room_coordinator_id . ']' . '</div>';
       $target_markup .= '    </li>';
       $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-room_capacity_normal odd">';
       $target_markup .= '      <div class="information_page-entry-list-item-name">Room Capacity Normal:</div> ';

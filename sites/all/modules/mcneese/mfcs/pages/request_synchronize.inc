@@ -241,7 +241,7 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = NUL
     );
 
     $row['account'] = array(
-      'data' => '<a href="' . $base_path . 'user/' . $item->user_id . $url_arguments . '" class="user-link">' . check_plain($item->name) . '</a>' . ' <span class="user-id script-hidden">(id: ' .  $item->user_id . ')</span>',
+      'data' => '<a href="' . $base_path . 'requests/users-0/view/' . $item->user_id . $url_arguments . '" class="user-link">' . check_plain($item->name) . '</a>' . ' <span class="user-id script-hidden">(id: ' .  $item->user_id . ')</span>',
       'class' => $class_name,
     );
 

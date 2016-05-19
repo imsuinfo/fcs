@@ -240,7 +240,7 @@ function mfcs_request_email_log_0_form($form, &$form_state, $page_number = NULL)
     );
 
     $row['account'] = array(
-      'data' => '<a href="' . $base_path . 'user/' . $email_log->user_id . $url_arguments . '" class="user-link">' . check_plain($email_log->name) . '</a>' . ' <span class="user-id script-hidden">(id: ' .  $email_log->user_id . ')</span>',
+      'data' => '<a href="' . $base_path . 'requests/users-0/view/' . $email_log->user_id . $url_arguments . '" class="user-link">' . check_plain($email_log->name) . '</a>' . ' <span class="user-id script-hidden">(id: ' .  $email_log->user_id . ')</span>',
       'class' => $class_name,
     );
 
@@ -257,7 +257,7 @@ function mfcs_request_email_log_0_form($form, &$form_state, $page_number = NULL)
     }
     else {
       $row['destination'] = array(
-        'data' => '<a href="' . $base_path . 'user/' . $email_log->destination_user_id . $url_arguments . '" class="user-link">' . check_plain($email_log->destination) . '</a>',
+        'data' => '<a href="' . $base_path . 'requests/users-0/view/' . $email_log->destination_user_id . $url_arguments . '" class="user-link">' . check_plain($email_log->destination) . '</a>',
         'class' => $class_destination,
       );
     }

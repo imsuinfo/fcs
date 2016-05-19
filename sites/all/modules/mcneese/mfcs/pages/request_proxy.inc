@@ -217,7 +217,7 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = NULL) {
     );
 
     $row['proxy_account'] = array(
-      'data' => '<a href="' . $base_path . 'user/' . $proxy->proxy_id . $url_arguments . '" class="user-link">' . check_plain($proxy->proxy_name) . '</a>' . ' <span class="user-id script-hidden">(id: ' .  $proxy->proxy_id . ')</span>',
+      'data' => '<a href="' . $base_path . 'requests/users-0/view/' . $proxy->proxy_id . $url_arguments . '" class="user-link">' . check_plain($proxy->proxy_name) . '</a>' . ' <span class="user-id script-hidden">(id: ' .  $proxy->proxy_id . ')</span>',
       'class' => $class_proxy_account,
     );
 
@@ -237,7 +237,7 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = NULL) {
     );
 
     $row['account'] = array(
-      'data' => '<a href="' . $base_path . 'user/' . $proxy->user_id . $url_arguments . '" class="user-link">' . check_plain($proxy->name) . '</a>' . ' <span class="user-id script-hidden">(id: ' .  $proxy->user_id . ')</span>',
+      'data' => '<a href="' . $base_path . 'requests/users-0/view/' . $proxy->user_id . $url_arguments . '" class="user-link">' . check_plain($proxy->name) . '</a>' . ' <span class="user-id script-hidden">(id: ' .  $proxy->user_id . ')</span>',
       'class' => $class_account,
     );
 
