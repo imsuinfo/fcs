@@ -1912,8 +1912,12 @@ function mfcs_request_view_0_form_pre_validate(&$form, &$form_state) {
   $unrequire_usage_fields = TRUE;
   if ($step == MFCS_REVIEW_STEP_REQUIREMENTS && $decision === MFCS_REVIEW_DECISION_REQUIREMENT) {
     $unrequire_usage_fields = FALSE;
-    if (isset($form_state['values']['review']['operations']['university_business']) && $form_state['values']['review']['operations']['university_business'] == 1) {
-      $unrequire_usage_fields = TRUE;
+    if (isset($form_state['values']['review']['operations']['university_business'])) {
+      // if the university business field has been specified whatsoever, that value overrides the pre-existing form value.
+      // this check is in a separate if statement to ensure that if university business is unset, the usage fees become required.
+      if ($form_state['values']['review']['operations']['university_business'] == 1) {
+        $unrequire_usage_fields = TRUE;
+      }
     }
     elseif (isset($form['form']['request']['#value']['requirements']['university'][0]->value) && $form['form']['request']['#value']['requirements']['university'][0]->value == 1) {
       $unrequire_usage_fields = TRUE;
