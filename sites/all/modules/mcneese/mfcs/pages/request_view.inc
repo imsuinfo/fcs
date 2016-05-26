@@ -1766,48 +1766,6 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         );
 
         if ($can_review_request && ($step === MFCS_REVIEW_STEP_REQUIREMENTS || $step === MFCS_REVIEW_STEP_COMPLETED)) {
-          // contractor insurance
-          $form['review']['operations']['insurance']['contractor'] = array(
-            '#id' => 'request-review-operations-insurance-contractor',
-            '#type' => 'checkbox',
-            '#title' => 'Contractor Insurance',
-            '#description' => "Each technical/service industry contractor must provide proof of liability insurance in amounts and coverages specified.",
-            '#default_value' => NULL,
-            '#attributes' => array(
-              'class' => array(
-                'no-print',
-                'mode-' . $mode,
-                'insurance-contractor',
-              ),
-            ),
-            '#states' => $states,
-          );
-
-          if (!empty($request['insurance']['contractor'][0])) {
-            $form['review']['operations']['insurance']['contractor']['#default_value'] = $request['insurance']['contractor'][0]->value;
-          }
-
-          // unaffiliated insurance
-          $form['review']['operations']['insurance']['unaffiliated'] = array(
-            '#id' => 'request-review-operations-insurance-unaffiliated',
-            '#type' => 'checkbox',
-            '#title' => 'Unaffiliated Insurance',
-            '#description' => "Non-affiliated entity (renter) must provide proof of liability insurance in amounts and coverages specified.",
-            '#default_value' => NULL,
-            '#attributes' => array(
-              'class' => array(
-                'no-print',
-                'mode-' . $mode,
-                'insurance-unaffiliated',
-              ),
-            ),
-            '#states' => $states,
-          );
-
-          if (!empty($request['insurance']['unaffiliated'][0])) {
-            $form['review']['operations']['insurance']['unaffiliated']['#default_value'] = $request['insurance']['unaffiliated'][0]->value;
-          }
-
           // provided insurance
           $form['review']['operations']['insurance']['provided'] = array(
             '#id' => 'request-review-operations-insurance-provided',

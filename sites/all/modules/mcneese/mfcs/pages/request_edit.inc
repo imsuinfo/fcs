@@ -774,8 +774,6 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
         $mfcs_current['requirements_other'] = NULL;
         $mfcs_current['requirements_university'] = NULL;
 
-        $mfcs_current['insurance_contractor'] = NULL;
-        $mfcs_current['insurance_unaffiliated'] = NULL;
         $mfcs_current['insurance_provided'] = NULL;
       }
 
