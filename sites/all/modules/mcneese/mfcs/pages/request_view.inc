@@ -1566,39 +1566,8 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         $states = array(
           'visible' => array(
             ':input[name="review[operations][decision]"]' => array('value' => MFCS_REVIEW_DECISION_REQUIREMENT),
-            ':input[name="review[operations][presidents_approval]"]' => array('checked' => FALSE),
-          ),
-          'invisible' => array(
-            'or' => array(
-              ':input[name="review[operations][presidents_approval]"]' => array('checked' => TRUE),
-            ),
           ),
         );
-
-        $form['review']['operations']['presidents_approval'] = array(
-          '#id' => 'request-review-operations-presidents_approval',
-          '#type' => 'checkbox',
-          '#title' => "Approved by the President",
-          '#description' => "By selecting this checkbox you claim that the president has approved this action. This action will be logged.",
-          '#default_value' => NULL,
-          '#required' => FALSE,
-          '#attributes' => array(
-            'class' => array(
-              'no-print',
-              'mode-' . $mode,
-            ),
-          ),
-          '#states' => array(
-            'visible' => array(
-              ':input[name="review[operations][decision]"]' => array('value' => MFCS_REVIEW_DECISION_REQUIREMENT),
-            ),
-          ),
-          '#weight' => 2,
-        );
-
-        if (!empty($request['requirements']['waived'][0])) {
-          $form['review']['operations']['presidents_approval']['#default_value'] = $request['requirements']['waived'][0]->value;
-        }
 
         $form['review']['operations']['university_business'] = array(
           '#id' => 'request-review-operations-university_business',
@@ -1985,21 +1954,11 @@ function mfcs_request_view_0_form_pre_validate(&$form, &$form_state) {
   $unrequire_usage_fields = TRUE;
   if ($step == MFCS_REVIEW_STEP_REQUIREMENTS && $decision === MFCS_REVIEW_DECISION_REQUIREMENT) {
     $unrequire_usage_fields = FALSE;
-    if (isset($form_state['values']['review']['operations']['presidents_approval']) || isset($form_state['values']['review']['operations']['university_business'])) {
-      if (isset($form_state['values']['review']['operations']['presidents_approval']) && $form_state['values']['review']['operations']['presidents_approval'] == 1) {
-        $unrequire_usage_fields = TRUE;
-      }
-      elseif (isset($form_state['values']['review']['operations']['university_business']) && $form_state['values']['review']['operations']['university_business'] == 1) {
-        $unrequire_usage_fields = TRUE;
-      }
+    if (isset($form_state['values']['review']['operations']['university_business']) && $form_state['values']['review']['operations']['university_business'] == 1) {
+      $unrequire_usage_fields = TRUE;
     }
-    else {
-      if (isset($form['form']['request']['#value']['requirements']['waived'][0]->value) && $form['form']['request']['#value']['requirements']['waived'][0]->value == 1) {
-        $unrequire_usage_fields = TRUE;
-      }
-      elseif (isset($form['form']['request']['#value']['requirements']['university'][0]->value) && $form['form']['request']['#value']['requirements']['university'][0]->value == 1) {
-        $unrequire_usage_fields = TRUE;
-      }
+    elseif (isset($form['form']['request']['#value']['requirements']['university'][0]->value) && $form['form']['request']['#value']['requirements']['university'][0]->value == 1) {
+      $unrequire_usage_fields = TRUE;
     }
   }
 
@@ -2216,28 +2175,9 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
       }
     }
 
-    // A request was made to have the requirements waived options be displayed with the requirements to avoid confusion.
-    // To do this without changing the underlining design, when the requirement is specified with a waive checked, then convert the decision to a waive.
-    // @todo: remove the Waive Decision entirely.
-    $requirements_waived = FALSE;
-    if ($step === MFCS_REVIEW_STEP_REQUIREMENTS) {
-      if ($decision === MFCS_REVIEW_DECISION_REQUIREMENT) {
-        if (isset($form_state['values']['review']['operations']['presidents_approval']) && $form_state['values']['review']['operations']['presidents_approval'] == 1) {
-          $form_state['values']['review']['operations']['decision'] = MFCS_REVIEW_DECISION_WAIVE;
-          $decision = MFCS_REVIEW_DECISION_WAIVE;
-          $requirements_waived = TRUE;
-        }
-
-        if (isset($form_state['values']['review']['operations']['university_business']) && $form_state['values']['review']['operations']['university_business'] == 1) {
-          if ($requirements_waived) {
-            form_set_error('review][operations][university_business', t("The system does not allow both @presidents_approval and @university_business to be selected at the same time. Choose one or the other (They both waive fees).", array('@presidents_approval' => '"Approved by the President"', '@university_business' => '"Strictly University Business"')));
-            $failure = TRUE;
-          }
-        }
-      }
-      elseif ($decision !== MFCS_REVIEW_DECISION_COMMENT) {
-        $check_requirements = TRUE;
-      }
+    // Check requirements during the requirements step unless a comment is made.
+    if ($step === MFCS_REVIEW_STEP_REQUIREMENTS && $decision !== MFCS_REVIEW_DECISION_COMMENT) {
+      $check_requirements = TRUE;
     }
 
     // ticket: fcs-77.
@@ -2306,8 +2246,8 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
       unset($all_holidays);
     }
 
-    // The requirements values should be removed when they are not needed.
-    if ($requirements_waived || ($decision !== MFCS_REVIEW_DECISION_REQUIREMENT && $decision !== MFCS_REVIEW_DECISION_WAIVE)) {
+    // The requirements values should only be used during the requirements decision.
+    if ($decision !== MFCS_REVIEW_DECISION_REQUIREMENT) {
       unset($form_state['values']['review']['operations']['requirements']);
     }
 
@@ -2318,13 +2258,6 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
         $requirements_not_supplied = TRUE;
 
         if ($step === MFCS_REVIEW_STEP_REQUIREMENTS) {
-          // @todo: convert 'waived' to 'presidents_approval' and 'university' to 'university_business'.
-          if (isset($request['requirements']['waived'][0]) && property_exists($request['requirements']['waived'][0], 'value')) {
-            if ($request['requirements']['waived'][0]->value) {
-              $requirements_not_supplied = FALSE;
-            }
-          }
-
           if (isset($request['requirements']['university'][0]) && property_exists($request['requirements']['university'][0], 'value')) {
             if ($request['requirements']['university'][0]->value) {
               $requirements_not_supplied = FALSE;
@@ -2343,10 +2276,6 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
           $failure = TRUE;
         }
       }
-    }
-
-    if ($decision === MFCS_REVIEW_DECISION_REQUIREMENT && !$requirements_waived) {
-      $check_requirements = TRUE;
     }
 
     // @fixme: is autowaive valid anymore?
@@ -2606,21 +2535,7 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
         $success = mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], MFCS_REVIEW_DECISION_REQUIREMENT, MFCS_REVIEW_RESTRICTIONS_NONE, "The system has auto-waived the fees because the request is a Quick Meeting.", $requirements_extra, $already_reviewed_as);
       }
     }
-    elseif ($step === MFCS_REVIEW_STEP_REVIEW) {
-      if (isset($form_state['autowaive']) && $form_state['autowaive']) {
-        // @todo: this might be a valid use of MFCS_REVIEW_DECISION_WAIVE. If 'autowaive' is removed, then this is no longer necessary.
-        $success = mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], MFCS_REVIEW_DECISION_WAIVE, MFCS_REVIEW_RESTRICTIONS_NONE, "", array('send_email' => FALSE), $already_reviewed_as);
-      }
-    }
     elseif ($step === MFCS_REVIEW_STEP_REQUIREMENTS) {
-      if (isset($form_state['values']['review']['operations']['presidents_approval'])) {
-        $extra['requirements']['waived'] = $form_state['values']['review']['operations']['presidents_approval'];
-
-        if ($extra['requirements']['waived'] == 1) {
-          $extra['requirements']['other'] = 0;
-        }
-      }
-
       if (isset($form_state['values']['review']['operations']['university_business'])) {
         $extra['requirements']['university'] = $form_state['values']['review']['operations']['university_business'];
       }
@@ -2740,7 +2655,7 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
       }
 
       // process waived changes.
-      // @todo: perform the necessary work to convert this to their proper names, such as 'presidents_approval', or 'university_business' to be more consistent.
+      // @todo: perform the necessary work to convert this to their proper names, such as 'university_business' to be more consistent.
       if (isset($requirements_form['other']) && isset($requirements_state['other'])) {
         if ($requirements_form['other']['#default_value'] != $requirements_state['other']) {
           $changes_waived['other']['detected'] = TRUE;
@@ -2749,13 +2664,6 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
         }
       }
 
-      if (isset($operations_form['presidents_approval']) && isset($operations_state['presidents_approval'])) {
-        if ($operations_form['presidents_approval']['#default_value'] != $operations_state['presidents_approval']) {
-          $changes_waived['waived']['detected'] = TRUE;
-
-          $any_requirements_changes_made = TRUE;
-        }
-      }
       if (isset($operations_form['university_business']) && isset($operations_state['university_business'])) {
         if ($operations_form['university_business']['#default_value'] != $operations_state['university_business']) {
           $changes_waived['university']['detected'] = TRUE;
@@ -2802,7 +2710,7 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
         }
       }
 
-      if (($decision === MFCS_REVIEW_DECISION_REQUIREMENT || $decision === MFCS_REVIEW_DECISION_WAIVE) && !$any_requirements_changes_made) {
+      if ($decision === MFCS_REVIEW_DECISION_REQUIREMENT && !$any_requirements_changes_made) {
         form_set_error('review][operations][decision', "The Requirements decision has been selected, but no changes have been made. If you only wish to leave a comment, then select the Comment instead of Requirements.");
         watchdog(MFCS_WATCHDOG_ID, "The Requirements decision has been selected, but no changes have been made.", array(), WATCHDOG_ERROR);
 

@@ -237,7 +237,6 @@ function mfcs_testing_review_request_venue_available($request_id, $decision = MF
     $state['triggering_element']['#id'] = 'request-review-operations-submit-submit';
 
     $state['values']['review']['operations']['decision'] = MFCS_REVIEW_DECISION_REQUIREMENT;
-    $state['values']['review']['operations']['presidents_approval'] = FALSE;
     $state['values']['review']['operations']['university_business'] = TRUE;
     $state['values']['review']['operations']['message'] = "This has been auto-populated by the system for testing purposes.";
 

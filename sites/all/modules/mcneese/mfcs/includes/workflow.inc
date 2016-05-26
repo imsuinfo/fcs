@@ -652,7 +652,6 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
     'requirements_grounds' => NULL,
     'requirements_security' => NULL,
     'requirements_other' => NULL,
-    'requirements_waived' => NULL,
     'requirements_university' => NULL,
   );
 
