@@ -128,6 +128,11 @@ function mfcs_request_agreement_0_form($form, &$form_state, $request_id, $contai
     }
   }
 
+  $revisoon = 0;
+  if (isset($request['mer']['revision'][0]->value)) {
+    $revision = (int) $request['mer']['revision'][0]->value;
+  }
+
   // failsafe to current date.
   if (is_null($review_date)) {
     $instance = mfcs_instance();
@@ -143,6 +148,11 @@ function mfcs_request_agreement_0_form($form, &$form_state, $request_id, $contai
   $markup .= '<div class="agreement-header-request_id-label">' . "Request ID:" . '</div> ';
   $markup .= '<div class="agreement-header-request_id-value">' . $request_id . '</div>';
   $markup .= '</div>'; // agreement-header-request_id
+
+  $markup .= '<div class="agreement-header-revision">';
+  $markup .= '<div class="agreement-header-revision-label">' . "Revision:" . '</div> ';
+  $markup .= '<div class="agreement-header-revision-value">' . $revision . '</div>';
+  $markup .= '</div>'; // agreement-header-revision
 
   $markup .= '</div>'; // agreement-header-information
   $markup .= '</div>'; // agreement-header
