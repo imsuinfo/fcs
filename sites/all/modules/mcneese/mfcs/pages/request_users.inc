@@ -558,6 +558,36 @@ function mfcs_request_users_0_view_page($user_id) {
     }
   }
 
+  $banner_information = '';
+  if (isset($account->field_user_banner_id['und']['0']['value'])) {
+    try {
+      $event_roles = mfcs_oracle_select('select role from ucs.msu_event_role where id = :banner_id', array('banner_id' => $account->field_user_banner_id['und']['0']['value']));
+
+      if (is_array($event_roles)) {
+        if (empty($event_roles)) {
+          $banner_information = '<div class="view_user-item view_user-item-roles-unavailable">No banner roles found.</div>';
+        }
+        else {
+          foreach ($event_roles as $event_role) {
+            $banner_information .= '<div class="view_user-item view_user-item-banner_role"><span class="item-information item-information-banner_role">' . $event_role['role'] . '</span></div>';
+          }
+          unset($event_role);
+        }
+      }
+      else {
+        $banner_information = '<div class="view_user-item view_user-item-roles-unavailable">Banner information is currently unavailable.</div>';
+      }
+    }
+    catch (Exception $ex) {
+      $banner_information = '<div class="view_user-item view_user-item-roles-unavailable">Banner information is currently unavailable.</div>';
+    }
+  }
+  else {
+    $banner_information = '<div class="view_user-item view_user-item-roles-no_banner_id">No Banner ID assigned to this account.</div>';
+  }
+
+
+  // build presentation.
   $markup = '<div id="mfcs-request-users-view-page" class="manage-users_0-view">';
 
   $markup .= '<div class="view_user-group view_user-group-personal">';
@@ -582,6 +612,11 @@ function mfcs_request_users_0_view_page($user_id) {
     $markup .= '<div class="view_user-item view_user-item-view_profile no-print"><span class="item-information item-information-view_profile"><a href="' . $base_path . 'user/' . $account->uid . '">' . "View User Profile" . '</a></span></div>';
   }
 
+  $markup .= '</div>';
+
+  $markup .= '<div class="view_user-group view_user-group-banner_information">';
+  $markup .= '<h3 class="view_user-group-header view_user-group-header-banner_information">Banner Information</h3>';
+  $markup .= $banner_information;
   $markup .= '</div>';
 
   $markup .= '<br>';
