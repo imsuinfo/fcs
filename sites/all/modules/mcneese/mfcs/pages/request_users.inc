@@ -1348,6 +1348,7 @@ function mfcs_request_users_0_add_or_edit_form_submit($form, &$form_state, $edit
     return;
   }
 
+  $saved_account = FALSE;
   if ($clicked_id == 'submit-buttons-submit') {
     global $base_path;
 
@@ -1450,7 +1451,6 @@ function mfcs_request_users_0_add_or_edit_form_submit($form, &$form_state, $edit
     }
 
     if ($edit) {
-      $saved_account = FALSE;
       if (isset($form['user']['#value']) && is_object($form['user']['#value'])) {
         $new_account->name = $form['user']['#value']->name;
 
@@ -1500,10 +1500,20 @@ function mfcs_request_users_0_add_or_edit_form_submit($form, &$form_state, $edit
       return;
     }
   }
+  elseif ($clicked_id == 'submit-buttons-cancel') {
+    if (isset($form['user']['#value']) && is_object($form['user']['#value'])) {
+      $saved_account = $form['user']['#value'];
+    }
+  }
 
   // redirect after submitting.
   if (empty($form_state['values']['redirect_to'])) {
-    $form_state['redirect'] = mfcs_build_redirect_array('requests/users-0/view/' . $saved_account->uid);
+    if (is_object($saved_account)) {
+      $form_state['redirect'] = mfcs_build_redirect_array('requests/users-0/view/' . $saved_account->uid);
+    }
+    else {
+      $form_state['redirect'] = mfcs_build_redirect_array('requests/users-0/list');
+    }
   }
   else {
     $form_state['redirect'] = $form_state['values']['redirect_to'];
