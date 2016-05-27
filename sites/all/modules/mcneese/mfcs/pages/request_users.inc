@@ -251,16 +251,24 @@ function mfcs_request_users_0_form($form, &$form_state, $page_number = NULL) {
       'class' => $class_primary_account,
     );
 
-    $roles = str_replace('{', '', $item->roles);
-    $roles = str_replace('}', '', $roles);
-    $roles = str_replace('"', '', $roles);
-    $roles = str_replace(',', ', ', $roles);
-    $roles = str_replace(' role', '', $roles);
-    $row['roles'] = array(
-      'data' => check_plain($roles),
-      'class' => $class_roles,
-    );
-    unset($roles);
+    if ($item->roles == '{NULL}') {
+      $row['roles'] = array(
+        'data' => '',
+        'class' => $class_roles,
+      );
+    }
+    else {
+      $roles = str_replace('{', '', $item->roles);
+      $roles = str_replace('}', '', $roles);
+      $roles = str_replace('"', '', $roles);
+      $roles = str_replace(',', ', ', $roles);
+      $roles = str_replace(' role', '', $roles);
+      $row['roles'] = array(
+        'data' => check_plain($roles),
+        'class' => $class_roles,
+      );
+      unset($roles);
+    }
 
     $row['operations'] = array(
       'data' => '',
@@ -1533,13 +1541,10 @@ function mfcs_request_users_get_users($search = '', $order_by = array(), $offset
     return FALSE;
   }
 
-  $roles = mfcs_request_users_get_roles(TRUE, TRUE, TRUE, TRUE);
   $users = array();
 
-  // do not load the administer role.
-  unset($roles[3]);
-
-  $roles = array_keys($roles);
+  // do not load the administer role (@fixme: role id is hardcoded).
+  $role_administer = 3;
 
   $query_string = 'with the_users_roles as (select ur.uid, r.rid, r.name from users_roles ur inner join role r on ur.rid = r.rid order by r.name desc) ';
   $count_string = $query_string;
@@ -1568,13 +1573,12 @@ function mfcs_request_users_get_users($search = '', $order_by = array(), $offset
   unset($join_string);
 
   $where_string = 'where ';
-  $where_string .= 'tur.rid in (' . implode(', ', $roles) . ') ';
+
+  // prohibit loading users with administer roles.
+  $where_string .= 'not u.uid in (select uid from the_users_roles where rid = :role_administer) ';
 
   // prohibit loading the system accounts.
   $where_string .= 'and not u.uid < 2 ';
-
-  // prohibit loading users with administer roles (@fixme: role id is hardcoded).
-  $where_string .= 'and not u.uid in (select uid from the_users_roles where rid = 3) ';
 
   if ($locked === TRUE) {
     $where_string .= 'and u.status = 0 ';
@@ -1663,6 +1667,8 @@ function mfcs_request_users_get_users($search = '', $order_by = array(), $offset
     $where_string .= 'and u.uid = :id ';
     $arguments[':id'] = $search;
   }
+
+  $arguments[':role_administer'] = $role_administer;
 
   $query_string .= $where_string;
   $count_string .= $where_string;

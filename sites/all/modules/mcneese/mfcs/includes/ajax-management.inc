@@ -2094,12 +2094,17 @@ function mfcs_ajax_users_0_list($argument_1 = NULL) {
       $row[7] = ($item->ldap_duplicate ? 'Is Duplicate' : 'Not Duplicate');
       $row[8] = ($item->primary_account ? 'Primary Account' : 'Alternate Account');
 
-      $roles = str_replace('{', '', $item->roles);
-      $roles = str_replace('}', '', $roles);
-      $roles = str_replace('"', '', $roles);
-      $roles = str_replace(',', ', ', $roles);
-      $roles = str_replace(' role', '', $roles);
-      $row[9] = check_plain($roles);
+      if ($item->roles == '{NULL}') {
+        $row[9] = '';
+      }
+      else {
+        $roles = str_replace('{', '', $item->roles);
+        $roles = str_replace('}', '', $roles);
+        $roles = str_replace('"', '', $roles);
+        $roles = str_replace(',', ', ', $roles);
+        $roles = str_replace(' role', '', $roles);
+        $row[9] = check_plain($roles);
+      }
 
       $row[10] = '<a href="' . $base_path . 'requests/users-0/view/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="View User">View</a>';
       $row[10] .= ' <a href="' . $base_path . 'requests/users-0/edit/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="Edit User">Edit</a>';
