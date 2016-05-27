@@ -1399,10 +1399,12 @@ function mfcs_request_users_0_add_or_edit_form_submit($form, &$form_state, $edit
 
     $bannerless_exception_role_id = array_search('bannerless exception', $form['roles']['special']['#value']);
     if (is_int($bannerless_exception_role_id) && array_key_exists($bannerless_exception_role_id,  $new_account->roles)) {
+      $new_account->field_user_first_name['und'][0]['value'] = NULL;
       if (isset($form_state['values']['form']['personal']['name_first']) && strlen($form_state['values']['form']['personal']['name_first']) > 0) {
         $new_account->field_user_first_name['und'][0]['value'] = $form_state['values']['form']['personal']['name_first'];
       }
 
+      $new_account->field_user_last_name['und'][0]['value'] = NULL;
       if (isset($form_state['values']['form']['personal']['name_last']) && strlen($form_state['values']['form']['personal']['name_last']) > 0) {
         $new_account->field_user_last_name['und'][0]['value'] = $form_state['values']['form']['personal']['name_last'];
       }
@@ -1420,10 +1422,12 @@ function mfcs_request_users_0_add_or_edit_form_submit($form, &$form_state, $edit
     unset($role);
     unset($term);
 
+    $new_account->field_user_banner_id['und'][0]['value'] = NULL;
     if (isset($form_state['values']['form']['personal']['banner_id']) && $form_state['values']['form']['personal']['banner_id'] > 0) {
       $new_account->field_user_banner_id['und'][0]['value'] = mfcs_banner_id_int_to_string($form_state['values']['form']['personal']['banner_id']);
     }
 
+    $new_account->field_user_phone_number['und'][0]['value'] = NULL;
     if (isset($form_state['values']['form']['personal']['phone']) && !empty($form_state['values']['form']['personal']['phone'])) {
       $new_account->field_user_phone_number['und'][0]['value'] = $form_state['values']['form']['personal']['phone'];
     }
