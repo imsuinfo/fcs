@@ -1842,7 +1842,7 @@ function mfcs_request_users_get_roles($standard = TRUE, $venue = TRUE, $special 
   }
 
   if ($special) {
-    foreach (array('bannerless exception', 'locked exception') as $role_name) {
+    foreach (array('bannerless exception', 'locked exception', 'reviewer exception') as $role_name) {
       $role = user_role_load_by_name($role_name);
       if (is_object($role)) {
         $roles[$role->rid] = $role->name;

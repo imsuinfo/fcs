@@ -1044,32 +1044,36 @@ function mfcs_request_problems_0_user_form_submit($form, &$form_state) {
         $manager_role_id = user_role_load_by_name('manager');
         $administrator_role_id = user_role_load_by_name('administrator');
         $bannerless_exception_role_id = user_role_load_by_name('bannerless exception');
+        $reviewer_exception_role_id = user_role_load_by_name('reviewer exception');
 
         $changes_made = FALSE;
         $system_roles = (array) $form['values']['problem_user']['#value']->roles;
 
-        // do not alter reviewer role settings for users with 'manager', 'administrator', or 'bannerless_exception' roles.
+        // do not alter reviewer role settings for users with 'manager', 'administrator', 'bannerless_exception', or 'reviewer_exception' roles.
         $process_reviewer_role = TRUE;
-        if (array_key_exists($manager_role_id->rid, $system_roles)) {
+        if (isset($manager_role_id->rid) && array_key_exists($manager_role_id->rid, $system_roles)) {
           $process_reviewer_role = FALSE;
         }
-        elseif (array_key_exists($administrator_role_id->rid, $system_roles)) {
+        elseif (isset($administrator_role_id->rid) && array_key_exists($administrator_role_id->rid, $system_roles)) {
           $process_reviewer_role = FALSE;
         }
-        elseif (array_key_exists($bannerless_exception_role_id->rid, $system_roles)) {
+        elseif (isset($bannerless_exception_role_id->rid) && array_key_exists($bannerless_exception_role_id->rid, $system_roles)) {
+          $process_reviewer_role = FALSE;
+        }
+        elseif (isset($reviewer_exception_role_id->rid) && array_key_exists($reviewer_exception_role_id->rid, $system_roles)) {
           $process_reviewer_role = FALSE;
         }
 
         if ($process_reviewer_role) {
           $all_coordinators = mfcs_load_room_coordinators(NULL, TRUE);
           if (array_key_exists($form['values']['problem_user']['#value']->uid, $all_coordinators)) {
-            if (!array_key_exists($reviewer_role_id->rid, $system_roles)) {
+            if (isset($reviewer_role_id->rid) && !array_key_exists($reviewer_role_id->rid, $system_roles)) {
               $system_roles[$reviewer_role_id->rid] = 'reviewer';
               $changes_made = TRUE;
             }
           }
           else {
-            if (array_key_exists($reviewer_role_id->rid, $system_roles)) {
+            if (isset($reviewer_role_id->rid) && array_key_exists($reviewer_role_id->rid, $system_roles)) {
               unset($system_roles[$reviewer_role_id->rid]);
               $changes_made = TRUE;
             }

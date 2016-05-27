@@ -1844,6 +1844,7 @@ function mfcs_hook_user_presave(&$edit, $account, $category) {
     // do not sync to banner for bannerless-exception.
     return;
   }
+  unset($bannerless_exception);
 
   $problems = MFCS_USER_PROBLEM_NONE;
   $problems_original = MFCS_USER_PROBLEM_NONE;
@@ -1890,14 +1891,25 @@ function mfcs_hook_user_presave(&$edit, $account, $category) {
     return;
   }
 
-  if (isset($edit['field_user_primary_account']['und'][0]) && array_key_exists('value', $edit['field_user_primary_account']['und'][0])) {
-    $settings['primary'] = $edit['field_user_primary_account']['und'][0]['value'];
-    if (empty($settings['primary'])) {
-      unset($settings['primary']);
+  if (is_int($settings['banner_id'])) {
+    $primary = FALSE;
+    if (isset($edit['field_user_primary_account']['und'][0]) && array_key_exists('value', $edit['field_user_primary_account']['und'][0])) {
+      $primary = $edit['field_user_primary_account']['und'][0]['value'];
     }
-    elseif (!is_int($settings['banner_id'])) {
-      $settings['primary'] = (int) $settings['banner_id'];
+
+    if ($primary == FALSE) {
+      $associated_users = mfcs_users_load_banner_id_to_user_id($settings['banner_id']);
+
+      if (isset($associated_users['user']) && is_array($associated_users['user'])) {
+        foreach ($associated_users['user'] as $associated_user_id => $associated_user_settings) {
+          if (isset($associated_user_settings['primary']) && $associated_user_settings['primary'] == 1) {
+            $settings['primary'] = (int) $associated_user_id;
+            break;
+          }
+        }
+      }
     }
+    unset($primary);
   }
 
   $changes = mfcs_process_user_banner_roles($account, $problems, $settings);
