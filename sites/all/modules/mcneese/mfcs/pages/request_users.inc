@@ -558,6 +558,11 @@ function mfcs_request_users_0_view_page($user_id) {
     }
   }
 
+  $email = NULL;
+  if (isset($account->mail)) {
+    $email = check_plain($account->mail);
+  }
+
   $banner_information = '';
   if (isset($account->field_user_banner_id['und']['0']['value'])) {
     try {
@@ -595,6 +600,7 @@ function mfcs_request_users_0_view_page($user_id) {
   $markup .= '<div class="view_user-item view_user-item-user_id"><span class="item-label item-label-user_id strong">User ID:</span> <span class="item-value item-value-user_id">' . $account->uid . '</span></div>';
   $markup .= '<div class="view_user-item view_user-item-account"><span class="item-label item-label-account strong">Account:</span> <span class="item-value item-value-account">' . $account->name . '</span></div>';
   $markup .= '<div class="view_user-item view_user-item-name"><span class="item-label item-label-name strong">Name:</span> <span class="item-value item-value-name">' . $name . '</span></div>';
+  $markup .= '<div class="view_user-item view_user-item-email"><span class="item-label item-label-email strong">E-mail:</span> <span class="item-value item-value-email">' . $email . '</span></div>';
   $markup .= '<div class="view_user-item view_user-item-banner_id"><span class="item-label item-label-name strong">Banner ID:</span> <span class="item-value item-value-banner_id">' . $banner_id . '</span></div>';
   $markup .= '<div class="view_user-item view_user-item-phone"><span class="item-label item-label-name strong">Phone:</span> <span class="item-value item-value-phone">' . $phone . '</span></div>';
   $markup .= '</div>';
