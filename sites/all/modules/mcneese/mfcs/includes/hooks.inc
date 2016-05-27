@@ -1127,7 +1127,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
 
   $items['requests/problems-0'] = array(
     'title' => "Manage Problems",
-    'description' => "Manage problems detected by the system.",
+    'description' => "Manage problems and troubleshoot detected by the system.",
     'page callback' => 'mfcs_management_problems_page',
     'page arguments' => array(),
     'file' => 'request_problems.inc',

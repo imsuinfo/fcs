@@ -128,28 +128,8 @@ function mfcs_management_page() {
       $items_array = &$items_1;
     }
 
-    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/troubleshoot-0' . $url_arguments . '" class="item-link">Troubleshooting Tools</a></h4>';
-    $help = '<div class="item-description inline-block">Utilize troubleshooting tools to help fix problems on the system.</div>';
-    $items_array[] = array(
-      'data' => $link . '<br>' . $help,
-      'class' => array(
-      ),
-    );
-
-    $c_1 = count($items_1);
-    $c_2 = count($items_2);
-    if ($c_1 == $c_2) {
-      $items_array = &$items_1;
-    }
-    elseif ($c_1 > $c_2) {
-      $items_array = &$items_2;
-    }
-    else {
-      $items_array = &$items_1;
-    }
-
-    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/problems-0' . $url_arguments . '" class="item-link">Manage Problems</a></h4>';
-    $help = '<div class="item-description inline-block">Manage problems that have been detected by the system.</div>';
+    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/users-0/list' . $url_arguments . '" class="item-link">Manage Users</a></h4>';
+    $help = '<div class="item-description inline-block">View, add, delete, and otherwise manage users.</div>';
     $items_array[] = array(
       'data' => $link . '<br>' . $help,
       'class' => array(
@@ -188,8 +168,8 @@ function mfcs_management_page() {
       $items_array = &$items_1;
     }
 
-    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/holiday/year-0' . $url_arguments . '" class="item-link">Manage Holidays</a></h4>';
-    $help = '<div class="item-description inline-block">View and manage list of holidays.</div>';
+    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/problems-0' . $url_arguments . '" class="item-link">Manage Problems</a></h4>';
+    $help = '<div class="item-description inline-block">Manage and troubleshoot problems that have been detected by the system.</div>';
     $items_array[] = array(
       'data' => $link . '<br>' . $help,
       'class' => array(
@@ -208,8 +188,8 @@ function mfcs_management_page() {
       $items_array = &$items_1;
     }
 
-    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/users-0/list' . $url_arguments . '" class="item-link">Manage Users</a></h4>';
-    $help = '<div class="item-description inline-block">View, add, delete, and otherwise manage users.</div>';
+    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/holiday/year-0' . $url_arguments . '" class="item-link">Manage Holidays</a></h4>';
+    $help = '<div class="item-description inline-block">View and manage list of holidays.</div>';
     $items_array[] = array(
       'data' => $link . '<br>' . $help,
       'class' => array(
