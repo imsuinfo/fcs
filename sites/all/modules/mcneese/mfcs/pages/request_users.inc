@@ -405,7 +405,7 @@ function mfcs_request_users_0_form($form, &$form_state, $page_number = NULL) {
   #$form['manage_users_list']['#markup'] .= '<div class="table_listing-navigator table_listing-navigator-bottom">' . $navigation_bottom . '</div>';
 
 
-  $form['manage_users_list']['#markup'] .= '<div class="mfcs-manage_users_form-add_user">';
+  $form['manage_users_list']['#markup'] .= '<div class="mfcs-manage_users_form-add_user no-print">';
   $form['manage_users_list']['#markup'] .= '<a href="' . $base_path . 'requests/users-0/add" title="Add new user">Add User</a>';
   $form['manage_users_list']['#markup'] .= '</div>';
 
@@ -591,6 +591,13 @@ function mfcs_request_users_0_view_page($user_id) {
     $banner_information = '<div class="view_user-item view_user-item-roles-no_banner_id">No Banner ID assigned to this account.</div>';
   }
 
+  // drupal only stores the account creation, so a custom field has been added to store when the account was last changed.
+  // because it is non-standard, fallback to the account creation date in case the update data is not present.
+  $updated = $account->created;
+  if (isset($account->data['mfcs_updated']) && $account->data['mfcs_updated'] > $account->created) {
+    $updated = $account->data['mfcs_updated'];
+  }
+
 
   // build presentation.
   $markup = '<div id="mfcs-request-users-view-page" class="manage-users_0-view">';
@@ -603,6 +610,7 @@ function mfcs_request_users_0_view_page($user_id) {
   $markup .= '<div class="view_user-item view_user-item-email"><span class="item-label item-label-email strong">E-mail:</span> <span class="item-value item-value-email">' . $email . '</span></div>';
   $markup .= '<div class="view_user-item view_user-item-banner_id"><span class="item-label item-label-name strong">Banner ID:</span> <span class="item-value item-value-banner_id">' . $banner_id . '</span></div>';
   $markup .= '<div class="view_user-item view_user-item-phone"><span class="item-label item-label-name strong">Phone:</span> <span class="item-value item-value-phone">' . $phone . '</span></div>';
+  $markup .= '<div class="view_user-item view_user-item-updated_on"><span class="item-label item-label-updated_on strong">Updated On:</span> <span class="item-value item-value-updated_on">' . date('Y/m/d h:i:s a', $updated) . '</span></div>';
   $markup .= '</div>';
 
   $markup .= '<div class="view_user-group view_user-group-status">';

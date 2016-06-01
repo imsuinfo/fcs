@@ -1812,6 +1812,9 @@ function mfcs_hook_user_presave(&$edit, $account, $category) {
     return;
   }
 
+  // store the timestamp in which the account was last updated.
+  $edit['data']['mfcs_updated'] = mfcs_instance();
+
   if (isset($account->uid) && isset($edit['field_user_primary_account']['und'][0]) && isset($account->field_user_primary_account['und'][0])) {
     if (!empty(array_diff($edit['field_user_primary_account']['und'][0], $account->field_user_primary_account['und'][0]))) {
       // re-synchronize account information following change.
