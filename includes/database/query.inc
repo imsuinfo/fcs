@@ -498,6 +498,13 @@ class InsertQuery extends Query {
   protected $fromQuery;
 
   /**
+   * Flag indicating whether or not to assign an on conflict action (postgresql 9.5 or newer).
+   *
+   * @var int
+   */
+  protected $on_conflict = Database::CONFLICT_NOT_USED;
+
+  /**
    * Constructs an InsertQuery object.
    *
    * @param DatabaseConnection $connection
@@ -513,6 +520,25 @@ class InsertQuery extends Query {
     }
     parent::__construct($connection, $options);
     $this->table = $table;
+    $this->on_conflict= Database::CONFLICT_NOT_USED;
+  }
+
+  /**
+   * Assigns on conflict action.
+   *
+   * Postgresql 9.5+.
+   * MySQL and SQLite both have equivalent behavior, but that is not
+   * implemented at this time.
+   *
+   * @param int $conflict_action
+   *   An integer defining the on conflict do action for update queries.
+   *
+   * @return MergeQuery
+   *   The called object.
+   */
+  public function onConflictDo(int $conflict_action) {
+    // nothing is performed here, the postgresql class will override this.
+    return $this;
   }
 
   /**
@@ -1391,6 +1417,13 @@ class MergeQuery extends Query implements QueryConditionInterface {
   protected $not = FALSE;
 
   /**
+   * Flag indicating whether or not to assign an on conflict action (postgresql 9.5 or newer).
+   *
+   * @var int
+   */
+  protected $on_conflict = Database::CONFLICT_NOT_USED;
+
+  /**
   * Constructs a MergeQuery object.
   *
   * @param DatabaseConnection $connection
@@ -1406,6 +1439,7 @@ class MergeQuery extends Query implements QueryConditionInterface {
     $this->table = $table;
     $this->conditionTable = $table;
     $this->condition = new DatabaseCondition('AND');
+    $this->on_conflict= Database::CONFLICT_NOT_USED;
   }
 
   /**
@@ -1436,6 +1470,22 @@ class MergeQuery extends Query implements QueryConditionInterface {
   public function updateFields(array $fields) {
     $this->updateFields = $fields;
     $this->needsUpdate = TRUE;
+    return $this;
+  }
+
+  /**
+   * Assigns on conflict action.
+   *
+   * Postgresql 9.5+.
+   *
+   * @param int $conflict_action
+   *   An integer defining the on conflict do action for update queries.
+   *
+   * @return MergeQuery
+   *   The called object.
+   */
+  public function onConflictDo(int $conflict_action) {
+    $this->on_conflict = $conflict_action;
     return $this;
   }
 
@@ -1684,6 +1734,25 @@ class MergeQuery extends Query implements QueryConditionInterface {
     if (!count($this->condition)) {
       throw new InvalidMergeQueryException(t('Invalid merge query: no conditions'));
     }
+
+    // @fixme: currently this behavior is postgresql-specific, but I currently see no merit in wasting time making this portable.
+    if ($this->on_conflict === Database::CONFLICT_DO_NOTHING || $this->on_conflict === Database::CONFLICT_DO_UPDATE) {
+      try {
+        $insert = $this->connection->insert($this->table)->fields($this->insertFields);
+        if ($this->defaultFields) {
+          $insert->useDefaults($this->defaultFields);
+        }
+        $insert->onConflictDo($this->on_conflict);
+        $insert->execute();
+        return self::STATUS_INSERT;
+      }
+      catch (Exception $e) {
+        throw $e;
+      }
+
+      return FALSE;
+    }
+
     $select = $this->connection->select($this->conditionTable)
       ->condition($this->condition);
     $select->addExpression('1');

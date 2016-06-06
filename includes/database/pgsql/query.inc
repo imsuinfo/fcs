@@ -13,6 +13,22 @@
 
 class InsertQuery_pgsql extends InsertQuery {
 
+  /**
+   * Assigns on conflict action.
+   *
+   * Postgresql 9.5+.
+   *
+   * @param int $conflict_action
+   *   An integer defining the on conflict do action for update queries.
+   *
+   * @return MergeQuery
+   *   The called object.
+   */
+  public function onConflictDo(int $conflict_action) {
+    $this->on_conflict = $conflict_action;
+    return $this;
+  }
+
   public function execute() {
     if (!$this->preExecute()) {
       return NULL;
@@ -109,11 +125,19 @@ class InsertQuery_pgsql extends InsertQuery {
     // Default fields are always placed first for consistency.
     $insert_fields = array_merge($this->defaultFields, $this->insertFields);
 
+    $on_conflict = '';
+    if ($this->on_conflict === Database::CONFLICT_DO_NOTHING) {
+      $on_conflict = ' on conflict do nothing';
+    }
+    elseif ($this->on_conflict === Database::CONFLICT_DO_UPDATE) {
+      $on_conflict = ' on conflict do update';
+    }
+
     // If we're selecting from a SelectQuery, finish building the query and
     // pass it back, as any remaining options are irrelevant.
     if (!empty($this->fromQuery)) {
       $insert_fields_string = $insert_fields ? ' (' . implode(', ', $insert_fields) . ') ' : ' ';
-      return $comments . 'INSERT INTO {' . $this->table . '}' . $insert_fields_string . $this->fromQuery;
+      return $comments . 'INSERT INTO {' . $this->table . '}' . $insert_fields_string . $this->fromQuery . $on_conflict;
     }
 
     $query = $comments . 'INSERT INTO {' . $this->table . '} (' . implode(', ', $insert_fields) . ') VALUES ';
@@ -142,7 +166,7 @@ class InsertQuery_pgsql extends InsertQuery {
       $values[] = '(' . implode(', ', $placeholders) . ')';
     }
 
-    $query .= implode(', ', $values);
+    $query .= implode(', ', $values) . $on_conflict;
 
     return $query;
   }
