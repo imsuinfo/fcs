@@ -55,7 +55,12 @@ class InsertQuery_pgsql extends InsertQuery {
       unset($value);
     }
 
-    if (empty($conflict_target) || empty($conflict_action)) {
+    if ($conflict == Database::CONFLICT_DO_NOTHING) {
+      if (empty($conflict_target)) {
+        $this->on_conflict = Database::CONFLICT_NOT_USED;
+      }
+    }
+    elseif (empty($conflict_target) || empty($conflict_action)) {
       $this->on_conflict = Database::CONFLICT_NOT_USED;
     }
 
