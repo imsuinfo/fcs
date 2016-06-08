@@ -18,14 +18,47 @@ class InsertQuery_pgsql extends InsertQuery {
    *
    * Postgresql 9.5+.
    *
-   * @param int $conflict_action
-   *   An integer defining the on conflict do action for update queries.
+   * @todo: Add a where() clause in the query to assign the update action.
    *
-   * @return MergeQuery
+   * @param int $conflict
+   *   An integer defining the on conflict do action for update queries.
+   * @param array $conflict_target
+   *   (optional) The field names or the index name in which the insert.
+   *   This is optional for "do nothing", but is required for "do update".
+   * @param array $conflict_action
+   *   (optional) The field names of the fields to apply the update action against.
+   *   This is optional for "do nothing", but is required for "do update".
+   * @param bool $constraint
+   *   (optional) When TRUE, the $conflict_target represents the constraint name.
+   *   When FALSE, the $conflict_target represents the field names.
+   *
+   * @return InsertQuery
    *   The called object.
    */
-  public function onConflictDo(int $conflict_action) {
-    $this->on_conflict = $conflict_action;
+  public function onConflictDo(int $conflict, $conflict_target = array(), $conflict_action = array(), $constraint = FALSE) {
+    $this->on_conflict = $conflict;
+    $this->on_conflict_target = array();
+    $this->on_conflict_action = array();
+    $this->on_conflict_contraint = (bool) $constraint;
+
+    if (is_array($conflict_target)) {
+      foreach ($conflict_target as $value) {
+        $this->on_conflict_target[] = $this->connection->escapeField($value);
+      }
+      unset($value);
+    }
+
+    if (is_array($conflict_action)) {
+      foreach ($conflict_action as $value) {
+        $this->on_conflict_action[] = $this->connection->escapeField($value);
+      }
+      unset($value);
+    }
+
+    if (empty($conflict_target) || empty($conflict_action)) {
+      $this->on_conflict = Database::CONFLICT_NOT_USED;
+    }
+
     return $this;
   }
 
@@ -125,12 +158,32 @@ class InsertQuery_pgsql extends InsertQuery {
     // Default fields are always placed first for consistency.
     $insert_fields = array_merge($this->defaultFields, $this->insertFields);
 
+    $on_conflict_target = '';
+    if ($this->on_conflict_constraint) {
+      $on_conflict_target = ' ON CONSTRAINT (' . reset($this->on_conflict_target) . ')';
+    }
+    else {
+      $on_conflict_target = ' (' . implode(', ', $this->on_conflict_target) . ')';
+    }
+
     $on_conflict = '';
     if ($this->on_conflict === Database::CONFLICT_DO_NOTHING) {
-      $on_conflict = ' on conflict do nothing';
+      $on_conflict = "\nON CONFLICT" . $on_conflict_target . ' DO NOTHING';
     }
     elseif ($this->on_conflict === Database::CONFLICT_DO_UPDATE) {
-      $on_conflict = ' on conflict do update';
+      $on_conflict_fields = NULL;
+      foreach ($this->on_conflict_action as $field_name) {
+        if (is_null($on_conflict_fields)) {
+          $on_conflict_fields  = $field_name . ' = EXCLUDED.' . $field_name;
+        }
+        else {
+          $on_conflict_fields  .= ', ' . $field_name . ' = EXCLUDED.' . $field_name;
+        }
+      }
+      unset($field_name);
+
+      $on_conflict = "\nON CONFLICT" . $on_conflict_target . ' DO UPDATE SET ' . $on_conflict_fields;
+      unset($on_conflict_fields);
     }
 
     // If we're selecting from a SelectQuery, finish building the query and
@@ -144,7 +197,7 @@ class InsertQuery_pgsql extends InsertQuery {
 
     $max_placeholder = 0;
     $values = array();
-      if (count($this->insertValues)) {
+    if (count($this->insertValues)) {
       foreach ($this->insertValues as $insert_values) {
         $placeholders = array();
 

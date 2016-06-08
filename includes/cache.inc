@@ -447,6 +447,7 @@ class DrupalDatabaseCache implements DrupalCacheInterface {
    */
   function set($cid, $data, $expire = CACHE_PERMANENT) {
     $fields = array(
+      'cid' => $cid,
       'serialized' => 0,
       'created' => REQUEST_TIME,
       'expire' => $expire,
@@ -461,10 +462,9 @@ class DrupalDatabaseCache implements DrupalCacheInterface {
     }
 
     try {
-      db_merge($this->bin)
-        ->key(array('cid' => $cid))
+      db_insert($this->bin)
         ->fields($fields)
-        ->onConflictDo(Database::CONFLICT_DO_UPDATE)
+        ->onConflictDo(Database::CONFLICT_DO_UPDATE, array('cid'), array('data', 'expire', 'created', 'serialized'), array_keys($fields))
         ->execute();
     }
     catch (Exception $e) {
