@@ -215,7 +215,7 @@ class LdapUserConf {
       && (count(array_filter(array_values($this->ldapEntryProvisionTriggers))) > 0)
       );
 
-    $this->setSynchMapping(TRUE);
+    $this->setSynchMapping();
     $this->detailedWatchdog = variable_get('ldap_help_watchdog_detail', 0);
   }
 
@@ -413,7 +413,7 @@ class LdapUserConf {
 
    */
 
-  function setSynchMapping($reset = TRUE) {  // @todo change default to false after development
+  function setSynchMapping($reset = FALSE) {
     $synch_mapping_cache = cache_get('ldap_user_synch_mapping');
     if (!$reset && $synch_mapping_cache) {
       $this->synchMapping = $synch_mapping_cache->data;
@@ -433,10 +433,10 @@ class LdapUserConf {
 
         drupal_alter('ldap_user_attrs_list', $available_user_attrs[$direction], $params);
       }
-    }
-    $this->synchMapping = $available_user_attrs;
+      $this->synchMapping = $available_user_attrs;
 
-    cache_set('ldap_user_synch_mapping',  $this->synchMapping);
+      cache_set('ldap_user_synch_mapping',  $this->synchMapping);
+    }
   }
 
   /**
