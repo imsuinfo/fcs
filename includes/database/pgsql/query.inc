@@ -182,7 +182,7 @@ class InsertQuery_pgsql extends InsertQuery {
       }
       unset($field_name);
 
-      $on_conflict = "\nON CONFLICT" . $on_conflict_target . ' DO UPDATE SET ' . $on_conflict_fields;
+      $on_conflict = "\nON CONFLICT" . $on_conflict_target . ' DO UPDATE SET ' . $on_conflict_fields . ' RETURNING *';
       unset($on_conflict_fields);
     }
 
