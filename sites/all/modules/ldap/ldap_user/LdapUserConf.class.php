@@ -414,6 +414,11 @@ class LdapUserConf {
    */
 
   function setSynchMapping($reset = FALSE) {
+    global $user;
+    if ($user->uid == 0) {
+      return;
+    }
+
     $synch_mapping_cache = cache_get('ldap_user_synch_mapping');
     if (!$reset && $synch_mapping_cache) {
       $this->synchMapping = $synch_mapping_cache->data;
