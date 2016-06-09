@@ -2982,6 +2982,9 @@ function drupal_deliver_html_page($page_callback_result) {
               $markup_css = str_replace(' is-collapsed ', ' ', $markup_css);
               $page = str_replace('<body id="mcneese-body" class="mcneese ', '<body id="mcneese-body" class="mcneese ' . $markup_css . ' ', $page);
             }
+            catch (Throwable $ex) {
+              // if the code is currently being modified, then errors could occur, so attempt to silently ignore them.
+            }
             catch (Exception $ex) {
               // if the code is currently being modified, then errors could occur, so attempt to silently ignore them.
             }
@@ -5659,6 +5662,9 @@ function drupal_cron_run() {
       try {
         module_invoke($module, 'cron');
       }
+      catch (Throwable $e) {
+        watchdog_exception('cron', $e);
+      }
       catch (Exception $e) {
         watchdog_exception('cron', $e);
       }
@@ -5686,6 +5692,11 @@ function drupal_cron_run() {
       try {
         call_user_func($callback, $item->data);
         $queue->deleteItem($item);
+      }
+      catch (Throwable $e) {
+        // In case of exception log it and leave the item in the queue
+        // to be processed again later.
+        watchdog_exception('cron', $e);
       }
       catch (Exception $e) {
         // In case of exception log it and leave the item in the queue
