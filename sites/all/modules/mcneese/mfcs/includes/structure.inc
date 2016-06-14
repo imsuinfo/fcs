@@ -6566,7 +6566,7 @@ function mfcs_get_request_existing_values($request) {
                 $current[$field_object->delta][$column_id] = NULL;
 
                 if (property_exists($field_object, $column_name)) {
-                  $current[$field_object->delta][$column_id] = $field_object->$column_name;
+                  $current[$field_object->delta][$column_id] = $field_object->{$column_name};
 
                   if (array_key_exists('storage', $field_structure) && is_string($field_structure['storage']) && !empty($field_structure['storage'])) {
                     $storage_method = $field_structure['storage'];

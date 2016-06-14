@@ -5261,7 +5261,7 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL, $revision_id
       $request['mer'] = array();
       foreach (array('id', 'user_id', 'created', 'updated', 'revision', 'revision_message') as $key) {
         $request['mer'][$key] = array(0 => new stdClass());
-        $request['mer'][$key][0]->value = $mer->$key;
+        $request['mer'][$key][0]->value = $mer->{$key};
       }
 
       if (property_exists($mer, 'revision_date')) {
@@ -5296,12 +5296,12 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL, $revision_id
         $current_name = $table_name . '_' . $field_name;
         if (is_null($revision_id)) {
           if (property_exists($current, $current_name)) {
-            $request['current'][$table_name][$field_name] = $current->$current_name;
+            $request['current'][$table_name][$field_name] = $current->{$current_name};
           }
         }
         else {
           if (property_exists($current, $current_name)) {
-            $request['current'][$table_name][$field_name] = $current->$current_name;
+            $request['current'][$table_name][$field_name] = $current->{$current_name};
           }
 
           $query = db_select('mfcs_field_' . $current_name, 'mftf');
@@ -5315,7 +5315,7 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL, $revision_id
 
           if ($result !== FALSE) {
             $request['current'][$table_name][$field_name] = $result;
-            $current->$current_name = $result;
+            $current->{$current_name} = $result;
           }
         }
 
@@ -5325,12 +5325,12 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL, $revision_id
             $current_name = $table_name . '_' . $alternate_name;
 
             if (property_exists($current, $current_name)) {
-              $request['current'][$table_name][$field_name] = $current->$current_name;
+              $request['current'][$table_name][$field_name] = $current->{$current_name};
             }
 
             $query = db_select($field_table_name, 'mftf');
             $query->condition('mftf.request_id', $request_id);
-            $query->condition('mftf.revision', $current->$current_name);
+            $query->condition('mftf.revision', $current->{$current_name});
             $query->fields('mftf');
 
             $results = $query->execute()->fetchAll();
@@ -5348,7 +5348,7 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL, $revision_id
 
           $query = db_select($field_table_name, 'mftf');
           $query->condition('mftf.request_id', $request_id);
-          $query->condition('mftf.revision', $current->$current_name);
+          $query->condition('mftf.revision', $current->{$current_name});
           $query->fields('mftf');
 
           $results = $query->execute()->fetchAll();
@@ -7909,12 +7909,12 @@ function mfcs_request_process_query_search_array(&$query, &$count_query, &$opera
           $field_alias = $already_joined[$mfcs_field];
 
           if (isset($search_values['multiple']) && $search_values['multiple']) {
-            if (!is_null($query)) $query->$join($mfcs_field, $field_alias, 'mc.request_id = ' . $field_alias . '.request_id AND mc.' . $search_values['group_name'] . '_' . $search_values['field_name'] . ' = ' . $field_alias . '.revision');
-            if (!is_null($count_query)) $count_query->$join($mfcs_field, $field_alias, 'mc.request_id = ' . $field_alias . '.request_id AND mc.' . $search_values['group_name'] . '_' . $search_values['field_name'] . ' = ' . $field_alias . '.revision');
+            if (!is_null($query)) $query->{$join}($mfcs_field, $field_alias, 'mc.request_id = ' . $field_alias . '.request_id AND mc.' . $search_values['group_name'] . '_' . $search_values['field_name'] . ' = ' . $field_alias . '.revision');
+            if (!is_null($count_query)) $count_query->{$join}($mfcs_field, $field_alias, 'mc.request_id = ' . $field_alias . '.request_id AND mc.' . $search_values['group_name'] . '_' . $search_values['field_name'] . ' = ' . $field_alias . '.revision');
           }
           else {
-            if (!is_null($query)) $query->$join($mfcs_field, $field_alias, 'mc.request_id = ' . $field_alias . '.request_id AND mc.' . $search_values['group_name'] . '_' . $search_values['field_name'] . ' = ' . $field_alias . '.revision AND ' . $field_alias . '.delta = 0');
-            if (!is_null($count_query)) $count_query->$join($mfcs_field, $field_alias, 'mc.request_id = ' . $field_alias . '.request_id AND mc.' . $search_values['group_name'] . '_' . $search_values['field_name'] . ' = ' . $field_alias . '.revision AND ' . $field_alias . '.delta = 0');
+            if (!is_null($query)) $query->{$join}($mfcs_field, $field_alias, 'mc.request_id = ' . $field_alias . '.request_id AND mc.' . $search_values['group_name'] . '_' . $search_values['field_name'] . ' = ' . $field_alias . '.revision AND ' . $field_alias . '.delta = 0');
+            if (!is_null($count_query)) $count_query->{$join}($mfcs_field, $field_alias, 'mc.request_id = ' . $field_alias . '.request_id AND mc.' . $search_values['group_name'] . '_' . $search_values['field_name'] . ' = ' . $field_alias . '.revision AND ' . $field_alias . '.delta = 0');
           }
         }
 
@@ -9196,7 +9196,7 @@ function mfcs_build_request_ajax_table_process_rows($items, $columns, $user = NU
         }
       }
       elseif (is_string($column['column']) && property_exists($item, $column['column'])) {
-        $data = property_exists($item, $column['column']) ? $item->$column['column'] : '';
+        $data = property_exists($item, $column['column']) ? $item->{$column['column']} : '';
 
         // a number of the database columns are expected and required to be available.
         // these columns are handled differently, such as being converted from an integer to a string.
@@ -9307,7 +9307,7 @@ function mfcs_build_request_ajax_table_process_rows($items, $columns, $user = NU
           $data = check_plain(date("Y/m/d h:i a", $item->updated));
         }
         elseif (!array_key_exists('sanitize', $column) || $column['sanitize'] === FALSE) {
-          $data = property_exists($item, $column['column']) ? check_plain($item->$column['column']) : '';
+          $data = property_exists($item, $column['column']) ? check_plain($item->{$column['column']}) : '';
         }
         else {
           continue;

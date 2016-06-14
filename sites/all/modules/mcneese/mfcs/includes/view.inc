@@ -583,16 +583,16 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
       $output[$value_name]['#attributes']['class'][] = 'item-cancelled';
     }
 
-    if (property_exists($value, $value_name) && (is_numeric($value->$value_name) || !empty($value->$value_name))) {
+    if (property_exists($value, $value_name) && (is_numeric($value->{$value_name}) || !empty($value->{$value_name}))) {
       if ($type[$value_name] == 'string' || $type[$value_name] == 'text') {
-        $markup .= check_plain($value->$value_name);
+        $markup .= check_plain($value->{$value_name});
 
-        $length += strlen($value->$value_name);
+        $length += strlen($value->{$value_name});
       }
       elseif ($type[$value_name] == 'text_lined') {
-        $markup .= preg_replace("/\n/", "<br>", check_plain($value->$value_name));
+        $markup .= preg_replace("/\n/", "<br>", check_plain($value->{$value_name}));
 
-        $length += strlen($value->$value_name);
+        $length += strlen($value->{$value_name});
       }
       elseif ($type[$value_name] == 'timestamp') {
         if (!array_key_exists($value_name, $display)) {
@@ -600,13 +600,13 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
         }
 
         if ($display[$value_name] == 'stamp') {
-          $markup .= check_plain($value->$value_name);
+          $markup .= check_plain($value->{$value_name});
         }
         else {
-          $markup .= check_plain(date($display[$value_name], $value->$value_name));
+          $markup .= check_plain(date($display[$value_name], $value->{$value_name}));
         }
 
-        $length += strlen($value->$value_name);
+        $length += strlen($value->{$value_name});
       }
       elseif ($type[$value_name] == 'timestamp_linked_month') {
         if (!array_key_exists($value_name, $display)) {
@@ -614,21 +614,21 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
         }
 
         if ($display[$value_name] == 'stamp') {
-          $markup .= check_plain($value->$value_name);
+          $markup .= check_plain($value->{$value_name});
         }
         else {
-          $s_year = date('Y', $value->$value_name);
-          $s_month = date('F', $value->$value_name);
+          $s_year = date('Y', $value->{$value_name});
+          $s_month = date('F', $value->{$value_name});
           $s_title = $s_month . " " . $s_year;
 
-          $markup .= '<a href="' . $base_path . 'requests/calendar-0/month/' . $s_year . '/' . $s_month . $url_arguments .'" title="' . $s_title . '" class="item-link">' . check_plain(date($display[$value_name], $value->$value_name)) . '</a>';
+          $markup .= '<a href="' . $base_path . 'requests/calendar-0/month/' . $s_year . '/' . $s_month . $url_arguments .'" title="' . $s_title . '" class="item-link">' . check_plain(date($display[$value_name], $value->{$value_name})) . '</a>';
 
           unset($s_year);
           unset($s_month);
           unset($s_title);
         }
 
-        $length += strlen($value->$value_name);
+        $length += strlen($value->{$value_name});
       }
       elseif ($type[$value_name] == 'timestamp_linked_day') {
         if (!array_key_exists($value_name, $display)) {
@@ -636,16 +636,16 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
         }
 
         if ($display[$value_name] == 'stamp') {
-          $markup .= check_plain($value->$value_name);
+          $markup .= check_plain($value->{$value_name});
         }
         else {
-          $s_day_name = date('l', $value->$value_name);
-          $s_year = date('Y', $value->$value_name);
-          $s_month = date('F', $value->$value_name);
-          $s_day = date('d', $value->$value_name);
+          $s_day_name = date('l', $value->{$value_name});
+          $s_year = date('Y', $value->{$value_name});
+          $s_month = date('F', $value->{$value_name});
+          $s_day = date('d', $value->{$value_name});
           $s_title = $s_day_name . ", " . $s_month . " " . $s_day . ", " . $s_year;
 
-          $markup .= '<a href="' . $base_path . 'requests/calendar-0/day/' . $s_year . '/' . $s_month . '/' . $s_day . $url_arguments .'" title="' . $s_title . '" class="item-link">' . check_plain(date($display[$value_name], $value->$value_name)) . '</a>';
+          $markup .= '<a href="' . $base_path . 'requests/calendar-0/day/' . $s_year . '/' . $s_month . '/' . $s_day . $url_arguments .'" title="' . $s_title . '" class="item-link">' . check_plain(date($display[$value_name], $value->{$value_name})) . '</a>';
 
           unset($s_year);
           unset($s_month);
@@ -653,7 +653,7 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
           unset($s_title);
         }
 
-        $length += strlen($value->$value_name);
+        $length += strlen($value->{$value_name});
       }
       elseif ($type[$value_name] == 'timestamp_linked_hour') {
         if (!array_key_exists($value_name, $display)) {
@@ -661,19 +661,19 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
         }
 
         if ($display[$value_name] == 'stamp') {
-          $markup .= check_plain($value->$value_name);
+          $markup .= check_plain($value->{$value_name});
         }
         else {
-          $s_day_name = date('l', $value->$value_name);
-          $s_year = date('Y', $value->$value_name);
-          $s_month = date('F', $value->$value_name);
-          $s_day = date('d', $value->$value_name);
-          $s_hour = date('h', $value->$value_name);
-          $s_ampm = date('a', $value->$value_name);
+          $s_day_name = date('l', $value->{$value_name});
+          $s_year = date('Y', $value->{$value_name});
+          $s_month = date('F', $value->{$value_name});
+          $s_day = date('d', $value->{$value_name});
+          $s_hour = date('h', $value->{$value_name});
+          $s_ampm = date('a', $value->{$value_name});
           $s_title = $s_day_name . ", " . $s_month . " " . $s_day . ", " . $s_year . " at " . $s_hour . ":00" . $s_ampm;
           $s_id = 'time_slot-' . $s_hour . '_00' . $s_ampm;
 
-          $markup .= '<a href="' . $base_path . 'requests/calendar-0/day/' . $s_year . '/' . $s_month . '/' . $s_day . $url_arguments . '#' . $s_id .'" title="' . $s_title . '" class="item-link">' . check_plain(date($display[$value_name], $value->$value_name)) . '</a>';
+          $markup .= '<a href="' . $base_path . 'requests/calendar-0/day/' . $s_year . '/' . $s_month . '/' . $s_day . $url_arguments . '#' . $s_id .'" title="' . $s_title . '" class="item-link">' . check_plain(date($display[$value_name], $value->{$value_name})) . '</a>';
 
           unset($s_year);
           unset($s_month);
@@ -684,10 +684,10 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
           unset($s_id);
         }
 
-        $length += strlen($value->$value_name);
+        $length += strlen($value->{$value_name});
       }
       elseif ($type[$value_name] == 'taxonomy') {
-        $term = taxonomy_term_load($value->$value_name);
+        $term = taxonomy_term_load($value->{$value_name});
 
         if (is_object($term)) {
           $markup .= check_plain($term->name);
@@ -697,35 +697,35 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
         unset($term);
       }
       elseif ($type[$value_name] == 'user_id') {
-        if (!isset($users[$value->$value_name])) {
-          $users[$value->$value_name] = mfcs_load_basic_user_settings_by_user_id($value->$value_name);
+        if (!isset($users[$value->{$value_name}])) {
+          $users[$value->{$value_name}] = mfcs_load_basic_user_settings_by_user_id($value->{$value_name});
 
-          if (!is_array($users[$value->$value_name])) {
-            unset($users[$value->$value_name]);
+          if (!is_array($users[$value->{$value_name}])) {
+            unset($users[$value->{$value_name}]);
           }
         }
 
-        if (!empty($users[$value->$value_name])){
+        if (!empty($users[$value->{$value_name}])){
           if (!array_key_exists($value_name, $display)) {
             $display[$value_name] = 'name';
           }
 
           if ($display[$value_name] == 'account_name') {
-            $user_name = check_plain($users[$value->$value_name]['name']);
-            $user_title = $user_name . ' (uid: ' . $value->$value_name . ')';
+            $user_name = check_plain($users[$value->{$value_name}]['name']);
+            $user_title = $user_name . ' (uid: ' . $value->{$value_name} . ')';
 
-            if (!empty($users[$value->$value_name]['last_name'])) {
-              $user_name = check_plain($users[$value->$value_name]['last_name']) . ', ';
+            if (!empty($users[$value->{$value_name}]['last_name'])) {
+              $user_name = check_plain($users[$value->{$value_name}]['last_name']) . ', ';
             }
 
-            if (!empty($users[$value->$value_name]['first_name'])) {
-              $user_name .= check_plain($users[$value->$value_name]['first_name']);
-              $user_title = check_plain($users[$value->$value_name]['first_name'] . ' ' . $users[$value->$value_name]['last_name']) . ' (uid: ' . $value->$value_name . ')';
+            if (!empty($users[$value->{$value_name}]['first_name'])) {
+              $user_name .= check_plain($users[$value->{$value_name}]['first_name']);
+              $user_title = check_plain($users[$value->{$value_name}]['first_name'] . ' ' . $users[$value->{$value_name}]['last_name']) . ' (uid: ' . $value->{$value_name} . ')';
             }
 
             // only show link to user account for reviewers and managers.
             if ($reviewer || $manager) {
-              $markup .= '<a href="' . $base_path . 'requests/users-0/view/' . $users[$value->$value_name]['user_id'] . $url_arguments . '" class="item-link" title="' . $user_title . '">' . $user_name . '</a>';
+              $markup .= '<a href="' . $base_path . 'requests/users-0/view/' . $users[$value->{$value_name}]['user_id'] . $url_arguments . '" class="item-link" title="' . $user_title . '">' . $user_name . '</a>';
             }
             else {
               $markup .= $user_name;
@@ -733,8 +733,8 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
             $length += strlen($user_name);
           }
           elseif ($display[$value_name] != 'pass' && property_exists($user, $display)) {
-            $markup .= check_plain($user->$display[$value_name]);
-            $length += strlen($user->$display[$value_name]);
+            $markup .= check_plain($user->{$display[$value_name]});
+            $length += strlen($user->{$display[$value_name]});
           }
         }
       }
@@ -743,15 +743,15 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
 
         $status_options = mfcs_get_request_status_list_options();
 
-        if (isset($status_options[$value->$value_name])) {
-          if ($value->$value_name == MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED) {
-            $markup .= '<span title="The request was accepted but has since been cancelled.">' . $status_options[$value->$value_name] . '</span>';
+        if (isset($status_options[$value->{$value_name}])) {
+          if ($value->{$value_name} == MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED) {
+            $markup .= '<span title="The request was accepted but has since been cancelled.">' . $status_options[$value->{$value_name}] . '</span>';
           }
           else {
-            $markup .= $status_options[$value->$value_name];
+            $markup .= $status_options[$value->{$value_name}];
           }
 
-          $length += strlen($value->$value_name);
+          $length += strlen($value->{$value_name});
         }
       }
       elseif ($type[$value_name] == 'step') {
@@ -759,9 +759,9 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
 
         $step_options = mfcs_get_request_steps_list_options();
 
-        if (isset($step_options[$value->$value_name])) {
-          $markup .= $step_options[$value->$value_name];
-          $length += strlen($step_options[$value->$value_name]);
+        if (isset($step_options[$value->{$value_name}])) {
+          $markup .= $step_options[$value->{$value_name}];
+          $length += strlen($step_options[$value->{$value_name}]);
         }
       }
       elseif ($type[$value_name] == 'location') {
@@ -769,9 +769,9 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
 
         $location_options = mfcs_get_request_location_list_options(NULL, FALSE, TRUE);
 
-        if (isset($location_options[$value->$value_name])) {
-          $markup .= $location_options[$value->$value_name];
-          $length += strlen($location_options[$value->$value_name]);
+        if (isset($location_options[$value->{$value_name}])) {
+          $markup .= $location_options[$value->{$value_name}];
+          $length += strlen($location_options[$value->{$value_name}]);
         }
       }
       elseif ($type[$value_name] == 'building') {
@@ -779,9 +779,9 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
 
         $building_options = mfcs_get_request_building_list_options(NULL, NULL, TRUE);
 
-        if (isset($building_options[$value->$value_name])) {
-          $markup .= $building_options[$value->$value_name];
-          $length += strlen($building_options[$value->$value_name]);
+        if (isset($building_options[$value->{$value_name}])) {
+          $markup .= $building_options[$value->{$value_name}];
+          $length += strlen($building_options[$value->{$value_name}]);
         }
       }
       elseif ($type[$value_name] == 'room') {
@@ -789,13 +789,13 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
 
         $room_options = mfcs_get_request_room_list_options(NULL, NULL, TRUE);
 
-        if (isset($room_options[$value->$value_name])) {
-          $markup .= $room_options[$value->$value_name];
-          $length += strlen($room_options[$value->$value_name]);
+        if (isset($room_options[$value->{$value_name}])) {
+          $markup .= $room_options[$value->{$value_name}];
+          $length += strlen($room_options[$value->{$value_name}]);
         }
       }
       elseif ($type[$value_name] == 'currency') {
-        $currency = mfcs_convert_value_from_database_format($value->$value_name, 'currency');
+        $currency = mfcs_convert_value_from_database_format($value->{$value_name}, 'currency');
 
         if ($currency !== FALSE) {
           $processed_markup = '$' . printf('%01.2f', $currency);
@@ -804,7 +804,7 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
         }
       }
       elseif ($type[$value_name] == 'boolean') {
-        $boolean = (bool) $value->$value_name;
+        $boolean = (bool) $value->{$value_name};
 
         if ($boolean) {
           $markup .= 'yes';
@@ -827,11 +827,11 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
         }
       }
       elseif ($type[$value_name] == 'requirement_personnel') {
-        $markup .= ' ' . $value->$value_name . ' personnel';
-        $length += strlen($value->$value_name . ' personnel');
+        $markup .= ' ' . $value->{$value_name} . ' personnel';
+        $length += strlen($value->{$value_name} . ' personnel');
       }
       elseif ($type[$value_name] == 'requirement_hours') {
-        $hours = mfcs_convert_value_from_database_format($value->$value_name, 'currency');
+        $hours = mfcs_convert_value_from_database_format($value->{$value_name}, 'currency');
 
         if (intval($hours) == $hours) {
           $markup .= ' ' . $hours . ' hours';
@@ -843,7 +843,7 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
         $length += strlen($hours . ' hours');
       }
       elseif ($type[$value_name] == 'requirement_days') {
-        $days = mfcs_convert_value_from_database_format($value->$value_name, 'currency');
+        $days = mfcs_convert_value_from_database_format($value->{$value_name}, 'currency');
 
         if (intval($days) == $days) {
           $markup .= ' ' . $days . ' days';
@@ -855,7 +855,7 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
         $length += strlen($days . 'days');
       }
       elseif ($type[$value_name] == 'requirement_amount') {
-        $amount = mfcs_convert_value_from_database_format($value->$value_name, 'currency');
+        $amount = mfcs_convert_value_from_database_format($value->{$value_name}, 'currency');
 
         if ($amount !== FALSE) {
           $processed_markup = ' at $' . sprintf('%01.2f', $amount);
@@ -890,30 +890,30 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
         }
       }
       elseif ($type[$value_name] == 'venue_coordinator') {
-        if (!isset($users[$value->$value_name])) {
-          $users[$value->$value_name] = mfcs_load_basic_user_settings_by_user_id($value->$value_name);
+        if (!isset($users[$value->{$value_name}])) {
+          $users[$value->{$value_name}] = mfcs_load_basic_user_settings_by_user_id($value->{$value_name});
 
-          if (!is_array($users[$value->$value_name])) {
-            unset($users[$value->$value_name]);
+          if (!is_array($users[$value->{$value_name}])) {
+            unset($users[$value->{$value_name}]);
           }
         }
 
         if ($display[$value_name] == 'name') {
-          $user_name = check_plain($users[$value->$value_name]['name']);
-          $user_title = $user_name . ' (uid: ' . $value->$value_name . ')';
+          $user_name = check_plain($users[$value->{$value_name}]['name']);
+          $user_title = $user_name . ' (uid: ' . $value->{$value_name} . ')';
 
-          if (!empty($users[$value->$value_name]['last_name'])) {
-            $user_name = check_plain($users[$value->$value_name]['last_name']) . ', ';
+          if (!empty($users[$value->{$value_name}]['last_name'])) {
+            $user_name = check_plain($users[$value->{$value_name}]['last_name']) . ', ';
           }
 
-          if (!empty($users[$value->$value_name]['first_name'])) {
-            $user_name .= check_plain($users[$value->$value_name]['first_name']);
-            $user_title = check_plain($users[$value->$value_name]['first_name'] . ' ' . $users[$value->$value_name]['last_name']) . ' (uid: ' . $value->$value_name . ')';
+          if (!empty($users[$value->{$value_name}]['first_name'])) {
+            $user_name .= check_plain($users[$value->{$value_name}]['first_name']);
+            $user_title = check_plain($users[$value->{$value_name}]['first_name'] . ' ' . $users[$value->{$value_name}]['last_name']) . ' (uid: ' . $value->{$value_name} . ')';
           }
 
           // only show link to user account for reviewers and managers.
           if ($reviewer || $manager) {
-            $markup .= '<a href="' . $base_path . 'requests/users-0/view/' . $users[$value->$value_name]['user_id'] . $url_arguments . '" class="item-link" title="' . $user_title . '">' . $user_name . '</a>';
+            $markup .= '<a href="' . $base_path . 'requests/users-0/view/' . $users[$value->{$value_name}]['user_id'] . $url_arguments . '" class="item-link" title="' . $user_title . '">' . $user_name . '</a>';
           }
           else {
             $markup .= $user_name;
@@ -922,52 +922,52 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
           $length += strlen($user_name);
         }
         elseif ($display[$value_name] == 'email') {
-          $markup .= check_plain($users[$value->$value_name]['email']);
-          $length += strlen(check_plain($users[$value->$value_name]['email']));
+          $markup .= check_plain($users[$value->{$value_name}]['email']);
+          $length += strlen(check_plain($users[$value->{$value_name}]['email']));
         }
         elseif ($display[$value_name] == 'phone') {
-          if (!empty($users[$value->$value_name]['phone_number'])) {
-            $markup .= check_plain($users[$value->$value_name]['phone_number']);
-            $length += strlen(check_plain($users[$value->$value_name]['phone_number']));
+          if (!empty($users[$value->{$value_name}]['phone_number'])) {
+            $markup .= check_plain($users[$value->{$value_name}]['phone_number']);
+            $length += strlen(check_plain($users[$value->{$value_name}]['phone_number']));
           }
         }
         elseif ($display[$value_name] == 'user_id') {
           $processed_markup = '';
 
           $first_name = FALSE;
-          if (!empty($users[$value->$value_name]['last_name'])) {
+          if (!empty($users[$value->{$value_name}]['last_name'])) {
             $first_name = TRUE;
-            $processed_markup .= check_plain($users[$value->$value_name]['last_name']);
+            $processed_markup .= check_plain($users[$value->{$value_name}]['last_name']);
           }
 
-          if (!empty($users[$value->$value_name]['first_name'])) {
+          if (!empty($users[$value->{$value_name}]['first_name'])) {
             if ($first_name) {
               $processed_markup .=  ', ';
             }
 
-            $processed_markup .= check_plain($users[$value->$value_name]['first_name']);
+            $processed_markup .= check_plain($users[$value->{$value_name}]['first_name']);
           }
 
-          $processed_markup .= ' <sup class="item-extra-user-user_id" title="User ID: ' . $value->$value_name . '">[id: ' . $value->$value_name . ']' . '</sup>';
+          $processed_markup .= ' <sup class="item-extra-user-user_id" title="User ID: ' . $value->{$value_name} . '">[id: ' . $value->{$value_name} . ']' . '</sup>';
 
           $markup .= $processed_markup;
           $length += strlen($processed_markup);
         }
       }
       elseif ($type[$value_name] == 'review_decision') {
-        if ($value->$value_name == MFCS_REVIEW_DECISION_APPROVE) {
+        if ($value->{$value_name} == MFCS_REVIEW_DECISION_APPROVE) {
           $markup .= "Approved";
           $length += strlen("Approved");
         }
-        elseif ($value->$value_name == MFCS_REVIEW_DECISION_DENY) {
+        elseif ($value->{$value_name} == MFCS_REVIEW_DECISION_DENY) {
           $markup .= "Denied";
           $length += strlen("Denied");
         }
-        elseif ($value->$value_name == MFCS_REVIEW_DECISION_ISSUES) {
+        elseif ($value->{$value_name} == MFCS_REVIEW_DECISION_ISSUES) {
           $markup .= "Issues";
           $length += strlen("Issues");
         }
-        elseif ($value->$value_name == MFCS_REVIEW_DECISION_ISSUES_NONE) {
+        elseif ($value->{$value_name} == MFCS_REVIEW_DECISION_ISSUES_NONE) {
           $markup .= "No Issues";
           $length += strlen("No Issues");
         }

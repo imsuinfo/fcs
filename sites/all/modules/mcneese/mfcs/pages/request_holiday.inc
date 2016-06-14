@@ -693,9 +693,9 @@ function mfcs_request_holiday_0_edit_form_submit($form, &$form_state) {
           continue;
         }
 
-        if ($value != $holiday->$key) {
+        if ($value != $holiday->{$key}) {
           $changes[$key] = array(
-            'from' => $holiday->$key,
+            'from' => $holiday->{$key},
             'to' => $value,
           );
         }
