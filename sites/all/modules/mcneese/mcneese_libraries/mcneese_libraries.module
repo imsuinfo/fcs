@@ -23,11 +23,13 @@ function mcneese_libraries_libraries_info() {
   $libraries['cycle2']['vendor url '] = 'http://jquery.malsup.com/cycle2/';
   $libraries['cycle2']['download url'] = 'http://jquery.malsup.com/cycle2/download/';
 
-  $libraries['cycle2']['version arguments'] = array(
-    'file' => 'version.txt',
-    'pattern' => '/^Version\s+(\d+\.\d+\.\d+)$/i',
-    'lines' => 1,
-  );
+  // manually specify version as it is unecessary here and removing the version file prevents the version from being exposed.
+  $libraries['cycle2']['version'] = '2.1.6';
+  #$libraries['cycle2']['version arguments'] = array(
+  #  'file' => 'version.txt',
+  #  'pattern' => '/^Version\s+(\d+\.\d+\.\d+)$/i',
+  #  'lines' => 1,
+  #);
 
   $libraries['cycle2']['files'] = array();
   $libraries['cycle2']['files']['js'] = array(
@@ -42,6 +44,7 @@ function mcneese_libraries_libraries_info() {
     'jquery.cycle2.swipe.js',
     'jquery.cycle2.tile.js',
     'jquery.cycle2.video.js',
+    'jquery.easing.1.3.js',
   );
 
   // d3

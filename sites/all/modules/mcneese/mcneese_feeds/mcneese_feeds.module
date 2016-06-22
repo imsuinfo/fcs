@@ -120,6 +120,13 @@ function mcneese_feeds_save_cache($feed_url, $output) {
   // use the checksum as the cache_id.
   // because the client is expected to cache the page, no data needs to actually be cached.
   $cache_expire = new DateTime("+20 minutes");
+
+  // cache_set does not check to see if row already exists, so perform test and if it exists return.
+  $cache = cache_get('feed:' . $feed_url . '/' . $checksum, 'cache_page');
+  if ($cache) {
+    return $checksum;
+  }
+
   cache_set('feed:' . $feed_url . '/' . $checksum, NULL, 'cache_page', $cache_expire->getTimestamp());
 
   return $checksum;

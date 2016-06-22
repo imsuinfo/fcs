@@ -55,6 +55,9 @@ function mcneese_front_page_embed_featured() {
     if (class_exists('cf_error')) {
       cf_error::failed_to_load('cycle2');
     }
+    if (isset($cycle2['error'])) {
+      watchdog('cycle2', "Unable to load cycle2 library, reason: @reason.", array('@reason' => $cycle2['error']), WATCHDOG_ERROR);
+    }
   }
 
   drupal_add_js(drupal_get_path('module', 'mcneese_front_page') . '/js/mcneese_front_page-featured.js', array('type' => 'file', 'group' => JS_DEFAULT, 'weight' => 20, 'preprocess' => TRUE));

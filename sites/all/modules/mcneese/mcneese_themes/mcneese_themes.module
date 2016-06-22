@@ -29,6 +29,9 @@ function mcneese_themes_init() {
   foreach ($jquery_ui_names as $name) {
     drupal_add_library('system', $name);
   }
+
+  // enable cycle2 by default.
+  $cycle2 = libraries_load('cycle2');
 }
 
 /**

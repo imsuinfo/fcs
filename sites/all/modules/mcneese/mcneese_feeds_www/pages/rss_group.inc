@@ -259,7 +259,11 @@ function mcneese_feeds_www_rss_group($group) {
     drupal_exit();
   }
 
-  $checksum = mcneese_feeds_save_cache($feed_url, $output);
+  // save results as a string and perform checksum against results to make checksum specific to results and not the generated page.
+  // making checksums specific to the generated page would result in different checksums for the same data due to the presence of timestamps.
+  $results_string = print_r($results, TRUE);
+
+  $checksum = mcneese_feeds_save_cache($feed_url, $results_string);
 
   mcneese_feeds_send_output($feed_url, $output, $checksum);
 }
