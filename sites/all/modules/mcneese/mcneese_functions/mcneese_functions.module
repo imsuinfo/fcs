@@ -546,6 +546,13 @@ function mcneese_functions_embed_job_opportunity_listing($opportunity) {
     $executed = $query->execute();
     $all = $executed->fetchAll();
   }
+  catch (Error $e) {
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
+    }
+
+    return FALSE;
+  }
   catch (Exception $e) {
     if (class_exists('cf_error')) {
       cf_error::on_query_execution($e);
@@ -738,6 +745,13 @@ function mcneese_functions_build_a_to_z_listing_content($type, $filter = NULL, $
 
     $output .= '</ul>';
   }
+  catch (Error $e) {
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
+    }
+
+    return FALSE;
+  }
   catch (Exception $e) {
     if (class_exists('cf_error')) {
       cf_error::on_query_execution($e);
@@ -836,6 +850,13 @@ function mcneese_functions_build_policy_content($page = 0, $limit = 15) {
     }
 
     $output .= '</ul>';
+  }
+  catch (Error $e) {
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
+    }
+
+    return FALSE;
   }
   catch (Exception $e) {
     if (class_exists('cf_error')) {

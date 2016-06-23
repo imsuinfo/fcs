@@ -711,9 +711,15 @@ function mfcs_request_create_0_form_submit($form, &$form_state) {
     // enforce transaction execution
     unset($transaction);
   }
-  catch (Exception $ex) {
+  catch (Error $e) {
     $transaction->rollback();
-    cf_error::on_query_execution($ex);
+    cf_error::on_query_execution($e);
+
+    $failure = TRUE;
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+    cf_error::on_query_execution($e);
 
     $failure = TRUE;
   }

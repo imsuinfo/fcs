@@ -67,6 +67,11 @@ function mfcs_autocomplete_user_id($string) {
 
     $results = $query->execute()->fetchAll();
   }
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+    drupal_json_output(array());
+    return;
+  }
   catch (Exception $e) {
     cf_error::on_query_execution($e);
     drupal_json_output(array());
@@ -123,6 +128,11 @@ function mfcs_request_reviewers_0_autocomplete_reviewer_classification($string) 
 
     $results = $query->execute()->fetchAll();
   }
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+    drupal_json_output(array());
+    return;
+  }
   catch (Exception $e) {
     cf_error::on_query_execution($e);
     drupal_json_output(array());
@@ -178,6 +188,11 @@ function mfcs_edit_0_autocomplete_request_coordinator_name($string) {
     $query->range(0, 9);
 
     $results = $query->execute()->fetchAll();
+  }
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+    drupal_json_output(array());
+    return;
   }
   catch (Exception $e) {
     cf_error::on_query_execution($e);
@@ -253,6 +268,11 @@ function mfcs_edit_0_autocomplete_request_coordinator_email($string) {
 
     $results = $query->execute()->fetchAll();
   }
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+    drupal_json_output(array());
+    return;
+  }
   catch (Exception $e) {
     cf_error::on_query_execution($e);
     drupal_json_output(array());
@@ -327,6 +347,11 @@ function mfcs_edit_0_autocomplete_request_coordinator_phone($string) {
     $query->range(0, 9);
 
     $results = $query->execute()->fetchAll();
+  }
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+    drupal_json_output(array());
+    return;
   }
   catch (Exception $e) {
     cf_error::on_query_execution($e);

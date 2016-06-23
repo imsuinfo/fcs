@@ -1056,8 +1056,14 @@ function mfcs_synchronize_request_access($type = NULL, $password = NULL, $user_i
           return TRUE;
         }
       }
-    } catch (Exception $ex) {
-      cf_error::on_query_execution($ex);
+    }
+    catch (Error $e) {
+      cf_error::on_query_execution($e);
+
+      return FALSE;
+    }
+    catch (Exception $e) {
+      cf_error::on_query_execution($e);
 
       return FALSE;
     }
@@ -1137,8 +1143,14 @@ function mfcs_holiday_request_access($id = NULL, $user_id = NULL, $enabled = TRU
       }
 
       return TRUE;
-    } catch (Exception $ex) {
-      cf_error::on_query_execution($ex);
+    }
+    catch (Error $e) {
+      cf_error::on_query_execution($e);
+
+      return FALSE;
+    }
+    catch (Exception $e) {
+      cf_error::on_query_execution($e);
 
       return FALSE;
     }
@@ -1972,8 +1984,13 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
 
     return $access;
   }
-  catch (Exception $ex) {
-    cf_error::on_query_execution($ex);
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+
+    return $access;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
 
     return $access;
   }
@@ -2218,14 +2235,25 @@ function mfcs_oracle_select($query, $arguments = array()) {
     $conn = Database::getConnection('default', 'oracle');
 
     $results = (array) $conn->oracleQuery($query, $arguments, $options)->fetchAll();
-  } catch (Exception $ex) {
+  }
+  catch (Error $e) {
     $silent = FALSE;
-    if ($ex->getCode() == 12170) {
+    if ($e->getCode() == 12170) {
       // Make an oracle connection error silent because the error presented is likely jibberish to the caller.
       $silent = TRUE;
     }
 
-    cf_error::on_exception($ex, WATCHDOG_ERROR, $silent);
+    cf_error::on_exception($e, WATCHDOG_ERROR, $silent);
+    return FALSE;
+  }
+  catch (Exception $e) {
+    $silent = FALSE;
+    if ($e->getCode() == 12170) {
+      // Make an oracle connection error silent because the error presented is likely jibberish to the caller.
+      $silent = TRUE;
+    }
+
+    cf_error::on_exception($e, WATCHDOG_ERROR, $silent);
     return FALSE;
   }
 
@@ -2315,8 +2343,13 @@ function mfcs_load_locations($location = NULL, $disabled = FALSE) {
       $items[$location] = FALSE;
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_query_execution($ex);
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
 
     return FALSE;
   }
@@ -2436,8 +2469,13 @@ function mfcs_load_buildings($location = NULL, $building = NULL, $disabled = FAL
       $items[$building] = FALSE;
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_query_execution($ex);
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
 
     return FALSE;
   }
@@ -2582,8 +2620,13 @@ function mfcs_load_rooms($location = NULL, $building = NULL, $room = NULL, $disa
       $items[$room] = FALSE;
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_query_execution($ex);
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
 
     return FALSE;
   }
@@ -2604,7 +2647,13 @@ function mfcs_load_request_user_roles() {
     $query->addField('mber', 'machine_name', 'role');
 
     $roles = $query->execute()->fetchAll();
-  } catch (Exception $ex) {
+  }
+  catch (Error $e) {
+    $transaction->rollback();
+
+    return FALSE;
+  }
+  catch (Exception $e) {
     $transaction->rollback();
 
     return FALSE;
@@ -2691,8 +2740,13 @@ function mfcs_load_users($user_ids, $join = FALSE, $deleted = FALSE) {
       return $users;
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_query_execution($ex);
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
 
     return FALSE;
   }
@@ -2778,9 +2832,15 @@ function mfcs_save_user($user_id, $data) {
     // enforce transaction execution
     unset($transaction);
   }
-  catch (Exception $ex) {
+  catch (Error $e) {
     $transaction->rollback();
-    cf_error::on_query_execution($ex);
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+    cf_error::on_query_execution($e);
 
     return FALSE;
   }
@@ -2882,8 +2942,13 @@ function mfcs_search_users($search, $wildcard = TRUE, $sensitive = FALSE, $delet
       return $users;
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_query_execution($ex);
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
 
     return FALSE;
   }
@@ -2940,8 +3005,14 @@ function mfcs_load_request_user_role_mapping() {
         $terms[$name]['name'] = $term->name;
       }
     }
-  } catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  }
+  catch (Error $e) {
+    cf_error::on_exception($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
 
     return FALSE;
   }
@@ -3054,8 +3125,14 @@ function mfcs_load_basic_user_settings_by_user_id($user_id) {
         break;
       }
     }
-  } catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  }
+  catch (Error $e) {
+    cf_error::on_exception($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
 
     return FALSE;
   }
@@ -3121,8 +3198,14 @@ function mfcs_load_request_user_by_user_id($user_id) {
         }
       }
     }
-  } catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  }
+  catch (Error $e) {
+    cf_error::on_exception($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
 
     return FALSE;
   }
@@ -3188,8 +3271,14 @@ function mfcs_load_request_user_by_banner_id($banner_id) {
         }
       }
     }
-  } catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  }
+  catch (Error $e) {
+    cf_error::on_exception($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
 
     return FALSE;
   }
@@ -3510,9 +3599,27 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $append_
 
         unset($transaction);
       }
-      catch (Exception $ex) {
+      catch (Error $e) {
         $transaction->rollback();
-        cf_error::on_query_execution($ex);
+        cf_error::on_query_execution($e);
+
+        // account synchronization failed, so assign the problem flag.
+        if (($problems_new & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) == 0) {
+          $problems_new = $problems_new | MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE;
+        }
+
+        if ($problems_original != $problems_new) {
+          mfcs_save_user($user->uid, array('problems' => $problems_new));
+        }
+
+        if (!is_null($user)) {
+          $already_executed[$user->uid] = FALSE;
+        }
+        return FALSE;
+      }
+      catch (Exception $e) {
+        $transaction->rollback();
+        cf_error::on_query_execution($e);
 
         // account synchronization failed, so assign the problem flag.
         if (($problems_new & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) == 0) {
@@ -4378,9 +4485,16 @@ function mfcs_sync_banner_to_local($transaction = NULL, $user = NULL, $message_o
 
     // enforce transaction execution
     unset($transaction);
-  } catch (Exception $ex) {
+  }
+  catch (Error $e) {
     $transaction->rollback();
-    cf_error::on_exception($ex);
+    cf_error::on_exception($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+    cf_error::on_exception($e);
 
     return FALSE;
   }
@@ -4432,9 +4546,16 @@ function mfcs_sync_banner_to_local($transaction = NULL, $user = NULL, $message_o
 
       // enforce transaction execution
       unset($transaction);
-    } catch (Exception $ex) {
+    }
+    catch (Error $e) {
       $transaction->rollback();
-      cf_error::on_exception($ex);
+      cf_error::on_exception($e);
+
+      return FALSE;
+    }
+    catch (Exception $e) {
+      $transaction->rollback();
+      cf_error::on_exception($e);
 
       return FALSE;
     }
@@ -4603,10 +4724,18 @@ function mfcs_sync_banner_to_local_users($user_id = NULL, $banner_id = NULL, $me
 
       // enforce transaction execution
       unset($transaction);
-    } catch (Exception $ex) {
+    }
+    catch (Error $e) {
       $transaction->rollback();
 
-      cf_error::on_exception($ex, WATCHDOG_ERROR);
+      cf_error::on_exception($e, WATCHDOG_ERROR);
+
+      return FALSE;
+    }
+    catch (Exception $e) {
+      $transaction->rollback();
+
+      cf_error::on_exception($e, WATCHDOG_ERROR);
 
       return FALSE;
     }
@@ -4747,9 +4876,16 @@ function mfcs_sync_banner_to_local_classes() {
 
     // enforce transaction execution
     unset($transaction);
-  } catch (Exception $ex) {
+  }
+  catch (Error $e) {
     $transaction->rollback();
-    cf_error::on_exception($ex);
+    cf_error::on_exception($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+    cf_error::on_exception($e);
 
     return FALSE;
   }
@@ -4885,8 +5021,13 @@ function mfcs_autocancel_old_requests_cron() {
 
     $unresolved_requests = $query->execute()->fetchAllAssoc('id');
   }
-  catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  catch (Error $e) {
+    cf_error::on_exception($e);
+
+    return;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
 
     return;
   }
@@ -4989,9 +5130,13 @@ function mfcs_auto_block_accounts_cron() {
     }
     unset($transaction);
   }
-  catch (Exception $ex) {
+  catch (Error $e) {
     if (is_object($transaction)) $transaction->rollback();
-    cf_error::on_query_execution($ex);
+    cf_error::on_query_execution($e);
+  }
+  catch (Exception $e) {
+    if (is_object($transaction)) $transaction->rollback();
+    cf_error::on_query_execution($e);
   }
 }
 
@@ -5369,8 +5514,12 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL, $revision_id
       unset($query);
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  catch (Error $e) {
+    cf_error::on_exception($e);
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
     return FALSE;
   }
 
@@ -5563,8 +5712,12 @@ function mfcs_load_request_by_timestamp($request_id, $timestamp, $revision_user_
       }
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  catch (Error $e) {
+    cf_error::on_exception($e);
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
     return FALSE;
   }
 
@@ -5607,8 +5760,11 @@ function mfcs_load_request_revision_number($request_id, $table_field_name = NULL
 
       return $field;
     }
-    catch (Exception $ex) {
-      cf_error::on_query_execution($ex);
+    catch (Error $e) {
+      cf_error::on_query_execution($e);
+    }
+    catch (Exception $e) {
+      cf_error::on_query_execution($e);
     }
 
     return FALSE;
@@ -5630,8 +5786,12 @@ function mfcs_load_request_revision_number($request_id, $table_field_name = NULL
 
     return $result;
   }
-  catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  catch (Error $e) {
+    cf_error::on_exception($e);
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
     return FALSE;
   }
 
@@ -5686,8 +5846,12 @@ function mfcs_load_user_by_banner_id($banner_id, $reset = FALSE) {
 
     $results = $query->execute()->fetchAll();
   }
-  catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  catch (Error $e) {
+    cf_error::on_exception($e);
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
     return FALSE;
   }
 
@@ -6138,8 +6302,13 @@ function mfcs_get_reviewers($conditions = array(), $options = array()) {
       $return['results'] = $query->execute()->fetchAll();
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_query_execution($ex);
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
 
     return FALSE;
   }
@@ -6364,8 +6533,13 @@ function mfcs_get_proxy_venue_coordinators($conditions = array(), $options = arr
       $return['results'] = $query->execute()->fetchAll();
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_query_execution($ex);
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
 
     return FALSE;
   }
@@ -6526,8 +6700,13 @@ function mfcs_get_user_information($user_id) {
       return $result;
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_query_execution($ex);
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
 
     return FALSE;
   }
@@ -6843,8 +7022,12 @@ function mfcs_check_room_availability($room, $dates, $time_start, $time_stop, $r
       $matched_requests[] = $result;
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_query_execution($ex);
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
     return FALSE;
   }
 
@@ -7748,8 +7931,13 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
       }
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_query_execution($ex);
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
 
     return FALSE;
   }
@@ -8268,8 +8456,13 @@ function mfcs_get_latest_reviews($request_id, $steps = array(), $decisions = arr
       }
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  catch (Error $e) {
+    cf_error::on_exception($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
 
     return FALSE;
   }
@@ -9380,6 +9573,10 @@ function mfcs_request_get_available_venue_coordinators() {
 
     $results = $query->execute()->fetchAll();
   }
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+    return FALSE;
+  }
   catch (Exception $e) {
     cf_error::on_query_execution($e);
     return FALSE;
@@ -9565,8 +9762,13 @@ function mfcs_get_requests_current_review_decisions($request_ids, $classificatio
         $decisions[$request_id]['current'] = count($decisions[$request_id]['completed']);
       }
     }
-    catch (Exception $ex) {
-      cf_error::on_query_execution($ex);
+    catch (Error $e) {
+      cf_error::on_query_execution($e);
+
+      return FALSE;
+    }
+    catch (Exception $e) {
+      cf_error::on_query_execution($e);
 
       return FALSE;
     }
@@ -9677,8 +9879,12 @@ function mfcs_get_requests_not_providing_insurance($date_from = NULL, $date_to =
       return array();
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  catch (Error $e) {
+    cf_error::on_exception($e);
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
     return FALSE;
   }
 
@@ -9775,8 +9981,12 @@ function mfcs_clear_request_reminders($type) {
 
     $query->execute();
   }
-  catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  catch (Error $e) {
+    cf_error::on_exception($e);
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
     return FALSE;
   }
 
@@ -9849,8 +10059,12 @@ function mfcs_get_request_reminders($dates, $type, $interval = NULL, $request_id
       $results[MFCS_REMINDER_INTERVAL_DAY_30] = $query_day_30->execute()->fetchAllAssoc('request_id');
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  catch (Error $e) {
+    cf_error::on_exception($e);
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
     return FALSE;
   }
 
@@ -9898,8 +10112,12 @@ function mfcs_save_request_reminders($reminder) {
     $query->fields($reminder);
     $query->execute();
   }
-  catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  catch (Error $e) {
+    cf_error::on_exception($e);
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
     return FALSE;
   }
 
@@ -10216,11 +10434,14 @@ function mfcs_user_can_manage($user_id) {
 
       $can_manage[$user_id] = !empty($results);
     }
-    catch (Exception $ex) {
-      cf_error::on_exception($ex);
+    catch (Error $e) {
+      cf_error::on_exception($e);
       return FALSE;
     }
-
+    catch (Exception $e) {
+      cf_error::on_exception($e);
+      return FALSE;
+    }
   }
 
   return $can_manage[$user_id];
@@ -10256,11 +10477,14 @@ function mfcs_user_can_administer($user_id) {
 
       $can_administer[$user_id] = !empty($results);
     }
-    catch (Exception $ex) {
-      cf_error::on_exception($ex);
+    catch (Error $e) {
+      cf_error::on_exception($e);
       return FALSE;
     }
-
+    catch (Exception $e) {
+      cf_error::on_exception($e);
+      return FALSE;
+    }
   }
 
   return $can_administer[$user_id];
@@ -10300,8 +10524,12 @@ function mfcs_request_is_still_upcoming($request_id) {
     $upcoming_dates = $query->execute()->fetchField();
     return $upcoming_dates > 0;
   }
-  catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  catch (Error $e) {
+    cf_error::on_exception($e);
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
     return FALSE;
   }
 
@@ -10350,8 +10578,11 @@ function mfcs_gpg_sign($message) {
     return $gpg->sign($message);
     #$valid = $gpg->verify($message, $signature);
   }
-  catch (Exception $ex) {
-    watchdog(MFCS_WATCHDOG_ID, "Failed to sign PGP key: @key, reason: @reason", array('@key' => $fingerprint, '@reason' => $ex->getMessage()), WATCHDOG_ERROR);
+  catch (Error $e) {
+    watchdog(MFCS_WATCHDOG_ID, "Failed to sign PGP key: @key, reason: @reason", array('@key' => $fingerprint, '@reason' => $e->getMessage()), WATCHDOG_ERROR);
+  }
+  catch (Exception $e) {
+    watchdog(MFCS_WATCHDOG_ID, "Failed to sign PGP key: @key, reason: @reason", array('@key' => $fingerprint, '@reason' => $e->getMessage()), WATCHDOG_ERROR);
   }
 
   return FALSE;
@@ -10405,8 +10636,14 @@ function mfcs_load_room_coordinators($room_id = NULL, $coordinators_only = FALSE
 
       $rows = $query->execute()->fetchAllKeyed();
     }
-  } catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  }
+  catch (Error $e) {
+    cf_error::on_exception($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
 
     return FALSE;
   }
@@ -10523,8 +10760,14 @@ function mfcs_disabled_users_with_active_content($user_id = NULL) {
         $rows[$result->venue_coordinator] = $result->venue_coordinator;
       }
     }
-  } catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  }
+  catch (Error $e) {
+    cf_error::on_exception($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
 
     return FALSE;
   }
@@ -10693,8 +10936,13 @@ function mfcs_get_request_already_reviewed_as_classifications($request_id, $revi
       }
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  catch (Error $e) {
+    cf_error::on_exception($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
 
     return FALSE;
   }
@@ -10799,8 +11047,13 @@ function mfcs_get_holidays($year, $timestamp_start = NULL, $timestamp_stop = NUL
 
     $results = $query->execute()->fetchAllAssoc('id');
   }
-  catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  catch (Error $e) {
+    cf_error::on_exception($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
 
     return FALSE;
   }
@@ -10872,8 +11125,13 @@ function mfcs_get_holiday($id, $enabled = TRUE, $deleted = FALSE) {
 
     $results = $query->execute()->fetchObject();
   }
-  catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  catch (Error $e) {
+    cf_error::on_exception($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
 
     return FALSE;
   }
@@ -11003,8 +11261,13 @@ function mfcs_remove_processed_reviewed_classifications($request_id, $reviewer_c
       }
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  catch (Error $e) {
+    cf_error::on_exception($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
 
     return FALSE;
   }
@@ -11043,8 +11306,12 @@ function mfcs_load_requesters_of_requests($request_ids) {
       return FALSE;
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  catch (Error $e) {
+    cf_error::on_exception($e);
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
     return FALSE;
   }
 

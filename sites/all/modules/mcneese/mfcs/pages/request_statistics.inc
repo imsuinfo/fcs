@@ -525,8 +525,13 @@ function mfcs_request_statistics_load_counts($start, $stop) {
     $the_query->condition('mer.type', MFCS_REQUEST_TYPE_WORKSHOP);
     $counts['type']['workshop'] = $the_query->execute()->fetchField();
   }
-  catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  catch (Error $e) {
+    cf_error::on_exception($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
 
     return FALSE;
   }

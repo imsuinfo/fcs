@@ -259,8 +259,15 @@ function mcneese_feeds_fcs_rss_room($rooms, $date, $limit) {
       }
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  catch (Error $e) {
+    cf_error::on_exception($e);
+
+    watchdog('mcneese_feeds_fcs', "Failed to generate RSS Feed Channel", array(), WATCHDOG_ERROR);
+    drupal_not_found();
+    drupal_exit();
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
 
     watchdog('mcneese_feeds_fcs', "Failed to generate RSS Feed Channel", array(), WATCHDOG_ERROR);
     drupal_not_found();

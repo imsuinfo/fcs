@@ -678,7 +678,10 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
         $form['banner_information']['details']['#markup'] .= 'Banner information is currently unavailable.';
       }
     }
-    catch (Exception $ex) {
+    catch (Error $e) {
+      $form['banner_information']['details']['#markup'] .= 'Banner information is currently unavailable.';
+    }
+    catch (Exception $e) {
       $form['banner_information']['details']['#markup'] .= 'Banner information is currently unavailable.';
     }
   }
@@ -2361,9 +2364,13 @@ function mfcs_request_problems_0_request_form_submit($form, &$form_state) {
       // enforce transaction execution.
       unset($transaction);
     }
-    catch (Exception $ex) {
+    catch (Error $e) {
       $transaction->rollback();
-      cf_error::on_query_execution($ex);
+      cf_error::on_query_execution($e);
+    }
+    catch (Exception $e) {
+      $transaction->rollback();
+      cf_error::on_query_execution($e);
     }
 
     if ($failure) {
@@ -2409,9 +2416,13 @@ function mfcs_request_problems_0_request_form_submit($form, &$form_state) {
       // enforce transaction execution.
       unset($transaction);
     }
-    catch (Exception $ex) {
+    catch (Error $e) {
       $transaction->rollback();
-      cf_error::on_query_execution($ex);
+      cf_error::on_query_execution($e);
+    }
+    catch (Exception $e) {
+      $transaction->rollback();
+      cf_error::on_query_execution($e);
     }
 
     // once the cache is rebuilt, re-check the request to ensure the problem is corrected.
@@ -2449,9 +2460,13 @@ function mfcs_request_problems_0_request_form_submit($form, &$form_state) {
       // enforce transaction execution.
       unset($transaction);
     }
-    catch (Exception $ex) {
+    catch (Error $e) {
       $transaction->rollback();
-      cf_error::on_query_execution($ex);
+      cf_error::on_query_execution($e);
+    }
+    catch (Exception $e) {
+      $transaction->rollback();
+      cf_error::on_query_execution($e);
     }
 
     $transaction = db_transaction();
@@ -2464,9 +2479,22 @@ function mfcs_request_problems_0_request_form_submit($form, &$form_state) {
       // enforce transaction execution.
       unset($transaction);
     }
-    catch (Exception $ex) {
+    catch (Error $e) {
       $transaction->rollback();
-      cf_error::on_query_execution($ex);
+      cf_error::on_query_execution($e);
+
+      form_set_error('form', "An error occurred while trying to ignore the request. Please contact the support staff.");
+      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to ignore the problem: @problem_id.", array('@problem_id' => $form['form']['problem']['#value']->id), WATCHDOG_ERROR);
+
+      $form_state['rebuild'] = TRUE;
+      $form_state['redirect'] = FALSE;
+      $form_state['submitted'] = FALSE;
+
+      return;
+    }
+    catch (Exception $e) {
+      $transaction->rollback();
+      cf_error::on_query_execution($e);
 
       form_set_error('form', "An error occurred while trying to ignore the request. Please contact the support staff.");
       watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to ignore the problem: @problem_id.", array('@problem_id' => $form['form']['problem']['#value']->id), WATCHDOG_ERROR);
@@ -2495,9 +2523,13 @@ function mfcs_request_problems_0_request_form_submit($form, &$form_state) {
       // enforce transaction execution.
       unset($transaction);
     }
-    catch (Exception $ex) {
+    catch (Error $e) {
       $transaction->rollback();
-      cf_error::on_query_execution($ex);
+      cf_error::on_query_execution($e);
+    }
+    catch (Exception $e) {
+      $transaction->rollback();
+      cf_error::on_query_execution($e);
     }
 
     $transaction = db_transaction();
@@ -2510,9 +2542,22 @@ function mfcs_request_problems_0_request_form_submit($form, &$form_state) {
       // enforce transaction execution.
       unset($transaction);
     }
-    catch (Exception $ex) {
+    catch (Error $e) {
       $transaction->rollback();
-      cf_error::on_query_execution($ex);
+      cf_error::on_query_execution($e);
+
+      form_set_error('form', "An error occurred while trying to unignore the request. Please contact the support staff.");
+      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to unignore the problem: @problem_id.", array('@problem_id' => $form['form']['problem']['#value']->id), WATCHDOG_ERROR);
+
+      $form_state['rebuild'] = TRUE;
+      $form_state['redirect'] = FALSE;
+      $form_state['submitted'] = FALSE;
+
+      return;
+    }
+    catch (Exception $e) {
+      $transaction->rollback();
+      cf_error::on_query_execution($e);
 
       form_set_error('form', "An error occurred while trying to unignore the request. Please contact the support staff.");
       watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to unignore the problem: @problem_id.", array('@problem_id' => $form['form']['problem']['#value']->id), WATCHDOG_ERROR);
@@ -2649,9 +2694,13 @@ function mfcs_request_problems_0_request_perform_recheck($request_id, $problem_c
     // enforce transaction execution.
     unset($transaction);
   }
-  catch (Exception $ex) {
+  catch (Error $e) {
     $transaction->rollback();
-    cf_error::on_query_execution($ex);
+    cf_error::on_query_execution($e);
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+    cf_error::on_query_execution($e);
   }
 
   $results = mfcs_miscellaneous_check_requests($request_id, $problem_code);
@@ -2674,9 +2723,15 @@ function mfcs_request_problems_0_request_perform_recheck($request_id, $problem_c
       // enforce transaction execution.
       unset($transaction);
     }
-    catch (Exception $ex) {
+    catch (Error $e) {
       $transaction->rollback();
-      cf_error::on_query_execution($ex);
+      cf_error::on_query_execution($e);
+
+      return FALSE;
+    }
+    catch (Exception $e) {
+      $transaction->rollback();
+      cf_error::on_query_execution($e);
 
       return FALSE;
     }
@@ -2742,8 +2797,13 @@ function mfcs_request_problem_0_request_perform_recache($request_id) {
     $query->condition('id', $request_id);
     $query->execute();
   }
-  catch (Exception $ex) {
-    cf_error::on_query_execution($ex);
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
 
     return FALSE;
   }

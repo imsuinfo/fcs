@@ -128,9 +128,15 @@ function mfcs_workflow_set_step($request_id, $step, $user = NULL) {
     // enforce transaction execution
     unset($transaction);
   }
-  catch (Exception $ex) {
+  catch (Error $e) {
     $transaction->rollback();
-    cf_error::on_query_execution($ex);
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+    cf_error::on_query_execution($e);
 
     return FALSE;
   }
@@ -291,9 +297,15 @@ function mfcs_workflow_set_status($request_id, $status, $user = NULL, $extra = a
     // enforce transaction execution
     unset($transaction);
   }
-  catch (Exception $ex) {
+  catch (Error $e) {
     $transaction->rollback();
-    cf_error::on_query_execution($ex);
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+    cf_error::on_query_execution($e);
 
     return FALSE;
   }
@@ -443,9 +455,15 @@ function mfcs_workflow_set_venue_coordinator($request_id, $venue_coordinator_id,
     // enforce transaction execution
     unset($transaction);
   }
-  catch (Exception $ex) {
+  catch (Error $e) {
     $transaction->rollback();
-    cf_error::on_query_execution($ex);
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+    cf_error::on_query_execution($e);
 
     return FALSE;
   }
@@ -688,8 +706,13 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
       }
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_query_execution($ex);
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
 
     return FALSE;
   }
@@ -744,8 +767,13 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
       }
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_query_execution($ex);
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
 
     return FALSE;
   }
@@ -1172,8 +1200,13 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
         unset($reviewer_classifications_copy);
       }
     }
-    catch (Exception $ex) {
-      cf_error::on_query_execution($ex);
+    catch (Error $e) {
+      cf_error::on_query_execution($e);
+
+      return FALSE;
+    }
+    catch (Exception $e) {
+      cf_error::on_query_execution($e);
 
       return FALSE;
     }
@@ -1319,9 +1352,15 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
     // enforce transaction execution
     unset($transaction);
   }
-  catch (Exception $ex) {
+  catch (Error $e) {
     $transaction->rollback();
-    cf_error::on_query_execution($ex);
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+    cf_error::on_query_execution($e);
 
     return FALSE;
   }

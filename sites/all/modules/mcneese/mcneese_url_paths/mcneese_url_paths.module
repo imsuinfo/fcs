@@ -40,6 +40,10 @@ function mcneese_url_paths_delete_all_node_aliases($node_id) {
     $query->condition($or);
     $query->execute();
   }
+  catch (Error $e) {
+    $transaction->rollback();
+    cf_error::on_query_execution($e);
+  }
   catch (Exception $e) {
     $transaction->rollback();
     cf_error::on_query_execution($e);
@@ -53,7 +57,7 @@ function mcneese_url_paths_delete_all_node_aliases($node_id) {
  *
  * @param string $long_string
  *   A string to be shortened.
- *   
+ *
  */
 function mcneese_url_paths_create_short_string($long_string) {
   if (!is_string($long_string)) {

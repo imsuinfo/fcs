@@ -152,8 +152,15 @@ function mcneese_feeds_www_rss_spotlight() {
       }
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  catch (Error $e) {
+    cf_error::on_exception($e);
+
+    watchdog('mcneese_feeds_www', "Failed to generate RSS Feed Channel", array(), WATCHDOG_ERROR);
+    drupal_not_found();
+    drupal_exit();
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
 
     watchdog('mcneese_feeds_www', "Failed to generate RSS Feed Channel", array(), WATCHDOG_ERROR);
     drupal_not_found();

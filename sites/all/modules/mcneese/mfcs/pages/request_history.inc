@@ -560,8 +560,13 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
 
     $form['navigator_bottom']['markup'] = $form['navigator_top']['markup'];
   }
-  catch (Exception $ex) {
-    cf_error::on_query_execution($ex);
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+
+    return array();
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
 
     return array();
   }

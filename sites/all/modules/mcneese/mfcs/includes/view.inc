@@ -1097,8 +1097,13 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
       }
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_query_execution($ex);
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
 
     return FALSE;
   }

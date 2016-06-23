@@ -70,6 +70,13 @@ function mcneese_content_sitemap_main() {
     $row = $executed->fetchAssoc();
     $node_last_updated = $row['changed'];
   }
+  catch (Error $e) {
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
+    }
+
+    throw $e;
+  }
   catch (Exception $e) {
     if (class_exists('cf_error')) {
       cf_error::on_query_execution($e);
@@ -102,6 +109,13 @@ function mcneese_content_sitemap_main() {
 
     $row = $executed->fetchAssoc();
     $media_last_updated = $row['timestamp'];
+  }
+  catch (Error $e) {
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
+    }
+
+    throw $e;
   }
   catch (Exception $e) {
     if (class_exists('cf_error')) {
@@ -199,6 +213,13 @@ function mcneese_content_sitemap_group_node($offset) {
     }
 
   }
+  catch (Error $e) {
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
+    }
+
+    throw $e;
+  }
   catch (Exception $e) {
     if (class_exists('cf_error')) {
       cf_error::on_query_execution($e);
@@ -295,6 +316,13 @@ function mcneese_content_sitemap_group_media($offset) {
         $rows .= '  </url>' . "\n";
       }
     }
+  }
+  catch (Error $e) {
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
+    }
+
+    throw $e;
   }
   catch (Exception $e) {
     if (class_exists('cf_error')) {

@@ -400,8 +400,13 @@ function mfcs_management_search_table($table_name, $table_alias, $primary_key, $
       }
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_query_execution($ex);
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
 
     return FALSE;
   }
@@ -735,8 +740,13 @@ function mfcs_management_search_users($conditions = array(), $options = array())
       $return['results'] = $query->execute()->fetchAllAssoc('user_id');
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_query_execution($ex);
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
 
     return FALSE;
   }

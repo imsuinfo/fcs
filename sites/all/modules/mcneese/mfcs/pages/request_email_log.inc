@@ -456,8 +456,14 @@ function mfcs_request_email_log_0_view_page($id) {
     $query->condition('mle.id', $id);
 
     $log = $query->execute()->fetchObject();
-  } catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  }
+  catch (Error $e) {
+    cf_error::on_exception($e);
+
+    $log = NULL;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
 
     $log = NULL;
   }
@@ -831,8 +837,14 @@ function mfcs_request_email_log_0_resend_form($form, &$form_state, $id, $extra_a
     $query->condition('mle.id', $id);
 
     $log = $query->execute()->fetchObject();
-  } catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  }
+  catch (Error $e) {
+    cf_error::on_exception($e);
+
+    $log = NULL;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
 
     $log = NULL;
   }
@@ -935,8 +947,14 @@ function mfcs_request_email_log_0_resend_form_submit($form, &$form_state) {
     $query->condition('mle.id', $form['form']['id']['#value']);
 
     $log = $query->execute()->fetchObject();
-  } catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  }
+  catch (Error $e) {
+    cf_error::on_exception($e);
+
+    $log = NULL;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
 
     $log = NULL;
   }
@@ -1061,9 +1079,19 @@ function mfcs_request_email_log_0_resend_form_submit($form, &$form_state) {
 
       // enforce transaction execution
       unset($transaction);
-    } catch (Exception $ex) {
+    }
+    catch (Error $e) {
       $transaction->rollback();
-      cf_error::on_exception($ex);
+      cf_error::on_exception($e);
+
+      $success = FALSE;
+
+      // do not send e-mail because of log saving problems.
+      continue;
+    }
+    catch (Exception $e) {
+      $transaction->rollback();
+      cf_error::on_exception($e);
 
       $success = FALSE;
 

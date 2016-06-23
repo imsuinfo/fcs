@@ -250,8 +250,12 @@ class McNeeseFacilitiesUseMail implements MailSystemInterface {
       $append .= $signature . "\n";
       $append .= '--' . $sig_boundary . '--';
     }
-    catch (Exception $ex) {
-      watchdog(MFCS_WATCHDOG_ID, "Failed to sign PGP key: @key, reason: @reason", array('@key' => $fingerprint, '@reason' => $ex->getMessage()), WATCHDOG_ERROR);
+    catch (Error $e) {
+      watchdog(MFCS_WATCHDOG_ID, "Failed to sign PGP key: @key, reason: @reason", array('@key' => $fingerprint, '@reason' => $e->getMessage()), WATCHDOG_ERROR);
+      return FALSE;
+    }
+    catch (Exception $e) {
+      watchdog(MFCS_WATCHDOG_ID, "Failed to sign PGP key: @key, reason: @reason", array('@key' => $fingerprint, '@reason' => $e->getMessage()), WATCHDOG_ERROR);
       return FALSE;
     }
 
@@ -306,9 +310,16 @@ class McNeeseFacilitiesUseMail implements MailSystemInterface {
 
       // enforce transaction execution
       unset($transaction);
-    } catch (Exception $ex) {
+    }
+    catch (Error $e) {
       $transaction->rollback();
-      cf_error::on_exception($ex);
+      cf_error::on_exception($e);
+
+      return FALSE;
+    }
+    catch (Exception $e) {
+      $transaction->rollback();
+      cf_error::on_exception($e);
 
       return FALSE;
     }

@@ -392,8 +392,13 @@ function mfcs_request_uncancel_0_form_submit($form, &$form_state) {
 
     $previous = $query->execute()->fetchAll();
   }
-  catch (Exception $ex) {
-    cf_error::on_query_execution($ex);
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+
+    $uncancelled = FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
 
     $uncancelled = FALSE;
   }
@@ -871,12 +876,24 @@ function mfcs_request_cancelling_0_form_submit($form, &$form_state) {
         // enforce transaction execution
         unset($transaction);
       }
-      catch (Exception $ex) {
+      catch (Error $e) {
         $transaction->rollback();
 
         form_set_error('form', "An error occurred while trying to save the request. Please contact the support staff.");
 
-        cf_error::on_query_execution($ex);
+        cf_error::on_query_execution($e);
+
+        $form_state['rebuild'] = TRUE;
+        $form_state['redirect'] = FALSE;
+        $form_state['submitted'] = FALSE;
+        return;
+      }
+      catch (Exception $e) {
+        $transaction->rollback();
+
+        form_set_error('form', "An error occurred while trying to save the request. Please contact the support staff.");
+
+        cf_error::on_query_execution($e);
 
         $form_state['rebuild'] = TRUE;
         $form_state['redirect'] = FALSE;

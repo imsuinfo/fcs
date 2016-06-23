@@ -583,7 +583,10 @@ function mfcs_request_users_0_view_page($user_id) {
         $banner_information = '<div class="view_user-item view_user-item-roles-unavailable">Banner information is currently unavailable.</div>';
       }
     }
-    catch (Exception $ex) {
+    catch (Error $e) {
+      $banner_information = '<div class="view_user-item view_user-item-roles-unavailable">Banner information is currently unavailable.</div>';
+    }
+    catch (Exception $e) {
       $banner_information = '<div class="view_user-item view_user-item-roles-unavailable">Banner information is currently unavailable.</div>';
     }
   }
@@ -1319,8 +1322,13 @@ function mfcs_request_users_0_add_or_edit_form_validate($form, &$form_state, $ed
       }
       unset($field);
     }
-    catch (Exception $ex) {
-      cf_error::on_query_execution($ex);
+    catch (Error $e) {
+      cf_error::on_query_execution($e);
+
+      form_set_error('', "An error occured while accessing the database. Please try again. If this problem persists, please contact the technical support staff.");
+    }
+    catch (Exception $e) {
+      cf_error::on_query_execution($e);
 
       form_set_error('', "An error occured while accessing the database. Please try again. If this problem persists, please contact the technical support staff.");
     }
@@ -1839,8 +1847,14 @@ function mfcs_request_users_get_users($search = '', $order_by = array(), $offset
       $return['results'] = $query->fetchAll();
       unset($query);
     }
-  } catch (Exception $ex) {
-    cf_error::on_query_execution($ex);
+  }
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
 
     return FALSE;
   }

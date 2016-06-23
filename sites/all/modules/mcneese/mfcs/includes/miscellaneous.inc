@@ -323,9 +323,16 @@ function mfcs_miscellaneous_nearby_requests($timestamp_start, $timestamp_stop, $
     else {
       watchdog(MFCS_WATCHDOG_ID, "An error occured while searching for nearby requests in room @room with status @status and range of @range seconds after @time.", array('@time' => date('Y/m/d h:i:s a', $timestamp_stop), '@room' => $room, '@status' => $status, '@range' => $nearby_range_seconds), WATCHDOG_WARNING);
     }
-  } catch (Exception $ex) {
-    cf_error::on_exception($ex);
-    watchdog(MFCS_WATCHDOG_ID, "While searching for nearby requests in room @room with status @status and range of @range seconds before @before or after @after, the following error eoccured: @error.", array('@before' => date('Y/m/d h:i:s a', $timestamp_start), '@after' => date('Y/m/d h:i:s a', $timestamp_stop), '@room' => $room, '@status' => $status, '@range' => $nearby_range_seconds, '@error' => $ex->getMessage()), WATCHDOG_ERROR);
+  }
+  catch (Error $e) {
+    cf_error::on_exception($e);
+    watchdog(MFCS_WATCHDOG_ID, "While searching for nearby requests in room @room with status @status and range of @range seconds before @before or after @after, the following error eoccured: @error.", array('@before' => date('Y/m/d h:i:s a', $timestamp_start), '@after' => date('Y/m/d h:i:s a', $timestamp_stop), '@room' => $room, '@status' => $status, '@range' => $nearby_range_seconds, '@error' => $e->getMessage()), WATCHDOG_ERROR);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
+    watchdog(MFCS_WATCHDOG_ID, "While searching for nearby requests in room @room with status @status and range of @range seconds before @before or after @after, the following error eoccured: @error.", array('@before' => date('Y/m/d h:i:s a', $timestamp_start), '@after' => date('Y/m/d h:i:s a', $timestamp_stop), '@room' => $room, '@status' => $status, '@range' => $nearby_range_seconds, '@error' => $e->getMessage()), WATCHDOG_ERROR);
 
     return FALSE;
   }
@@ -454,8 +461,13 @@ function mfcs_miscellaneous_check_requests_conflict($request_id = NULL) {
       }
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_query_execution($ex);
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
 
     return FALSE;
   }
@@ -551,8 +563,13 @@ function mfcs_miscellaneous_check_requests_stale($request_id = NULL) {
       }
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_query_execution($ex);
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
 
     return FALSE;
   }
@@ -729,8 +746,13 @@ function mfcs_miscellaneous_check_requests_coordinator($request_id = NULL) {
       }
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_query_execution($ex);
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
 
     return FALSE;
   }
@@ -841,8 +863,13 @@ function mfcs_miscellaneous_check_requests_requester($request_id = NULL) {
       }
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_query_execution($ex);
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
 
     return FALSE;
   }
@@ -999,8 +1026,13 @@ function mfcs_miscellaneous_check_requests_room($request_id = NULL) {
       }
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_query_execution($ex);
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
 
     return FALSE;
   }
@@ -1145,8 +1177,13 @@ function mfcs_miscellaneous_check_requests_building($request_id = NULL) {
       }
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_query_execution($ex);
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
 
     return FALSE;
   }
@@ -1279,8 +1316,13 @@ function mfcs_miscellaneous_check_requests_location($request_id = NULL) {
       }
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_query_execution($ex);
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
 
     return FALSE;
   }
@@ -1447,8 +1489,13 @@ function mfcs_miscellaneous_check_requests_problem_cache_requests($request_id = 
       }
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_query_execution($ex);
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
 
     return FALSE;
   }
@@ -1789,8 +1836,13 @@ function mfcs_miscellaneous_problems_request_load($problem_id = NULL, $include_i
 
     $problems = $query->execute()->fetchAllAssoc('id');
   }
-  catch (Exception $ex) {
-    cf_error::on_query_execution($ex);
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
 
     return FALSE;
   }
@@ -2085,8 +2137,13 @@ function mfcs_miscellaneous_problems_request_search($conditions = array(), $opti
       $return['results'] = $query->execute()->fetchAllAssoc('id');
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_query_execution($ex);
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
 
     return FALSE;
   }
@@ -2134,8 +2191,11 @@ function mfcs_mischellaneous_check_requests_for_problems($request_id = NULL) {
     }
     unset($results);
   }
-  catch (Exception $ex) {
-    cf_error::on_query_execution($ex);
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
   }
 
   $problems = mfcs_miscellaneous_check_requests($request_id);
@@ -2180,9 +2240,15 @@ function mfcs_mischellaneous_check_requests_for_problems($request_id = NULL) {
     // enforce transaction execution.
     unset($transaction);
   }
-  catch (Exception $ex) {
+  catch (Error $e) {
     if (is_object($transaction)) $transaction->rollback();
-    cf_error::on_query_execution($ex);
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    if (is_object($transaction)) $transaction->rollback();
+    cf_error::on_query_execution($e);
 
     return FALSE;
   }

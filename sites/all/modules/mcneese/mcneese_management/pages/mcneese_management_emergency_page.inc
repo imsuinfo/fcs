@@ -357,6 +357,11 @@ function mcneese_management_emergency_settings_page_submit($form, &$form_state) 
             ->fields(array('published' => 0))
             ->execute();
         }
+        catch (Error $e) {
+          if (class_exists('cf_error')) {
+            cf_error::on_query_execution($e);
+          }
+        }
         catch (Exception $e) {
           if (class_exists('cf_error')) {
             cf_error::on_query_execution($e);

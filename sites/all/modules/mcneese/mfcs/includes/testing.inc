@@ -118,7 +118,11 @@ function mfcs_testing_clone_request($request_id, $custom_title = NULL, $custom_d
       return $state['created_request_id'];
     }
   }
-  catch (Exception $ex) {
+  catch (Error $e) {
+    $user = $original_user;
+    return FALSE;
+  }
+  catch (Exception $e) {
     $user = $original_user;
     return FALSE;
   }
@@ -169,7 +173,11 @@ function mfcs_testing_cancel_request($request_id) {
 
     drupal_form_submit($id, $state);
   }
-  catch (Exception $ex) {
+  catch (Error $e) {
+    $user = $original_user;
+    return FALSE;
+  }
+  catch (Exception $e) {
     $user = $original_user;
     return FALSE;
   }
@@ -267,7 +275,11 @@ function mfcs_testing_review_request_venue_available($request_id, $decision = MF
 
     drupal_form_submit($id, $state);
   }
-  catch (Exception $ex) {
+  catch (Error $e) {
+    $user = $original_user;
+    return FALSE;
+  }
+  catch (Exception $e) {
     $user = $original_user;
     return FALSE;
   }
@@ -368,7 +380,11 @@ function mfcs_testing_review_request_review($request_id, $decision = MFCS_REVIEW
       $processed[$reviewer->user_id] = TRUE;
     }
   }
-  catch (Exception $ex) {
+  catch (Error $e) {
+    $user = $original_user;
+    return FALSE;
+  }
+  catch (Exception $e) {
     $user = $original_user;
     return FALSE;
   }
@@ -435,7 +451,11 @@ function mfcs_testing_review_request_r($request_id, $decision = MFCS_REVIEW_DECI
 
     drupal_form_submit($id, $state);
   }
-  catch (Exception $ex) {
+  catch (Error $e) {
+    $user = $original_user;
+    return FALSE;
+  }
+  catch (Exception $e) {
     $user = $original_user;
     return FALSE;
   }
@@ -502,7 +522,11 @@ function mfcs_testing_review_request_make_decisions($request_id, $decision = MFC
 
     drupal_form_submit($id, $state);
   }
-  catch (Exception $ex) {
+  catch (Error $e) {
+    $user = $original_user;
+    return FALSE;
+  }
+  catch (Exception $e) {
     $user = $original_user;
     return FALSE;
   }

@@ -488,9 +488,14 @@ function mfcs_request_troubleshoot_0_form_submit($form, &$form_state) {
       drupal_set_message(t($label . " completed with errors in @minutes minutes and @seconds seconds.", array('@minutes' => $time_minutes, '@seconds' => $time_seconds)), 'warning');
       watchdog(MFCS_WATCHDOG_ID, $label . ", started by @user (@user_id) completed with errors in @minutes minutes and @seconds seconds.", array('@minutes' => $time_minutes, '@seconds' => $time_seconds, '@user' => $user->name, '@user_id' => $user->uid), WATCHDOG_WARNING);
     }
-  } catch (Exception $ex) {
+  }
+  catch (Error $e) {
     $transaction->rollback();
-    cf_error::on_exception($ex);
+    cf_error::on_exception($e);
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+    cf_error::on_exception($e);
   }
 }
 
@@ -566,9 +571,15 @@ function mfcs_request_troubleshoot_0_request_review_recheck($transaction, $user 
       }
     }
   }
-  catch (Exception $ex) {
+  catch (Error $e) {
     $transaction->rollback();
-    cf_error::on_exception($ex);
+    cf_error::on_exception($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+    cf_error::on_exception($e);
 
     return FALSE;
   }
@@ -823,9 +834,15 @@ function mfcs_request_troubleshoot_0_mer_cache_synchronize($transaction, $user =
       }
     }
   }
-  catch (Exception $ex) {
+  catch (Error $e) {
     $transaction->rollback();
-    cf_error::on_exception($ex);
+    cf_error::on_exception($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+    cf_error::on_exception($e);
 
     return FALSE;
   }
@@ -911,8 +928,14 @@ function mfcs_request_troubleshoot_0_locations_page() {
       unset($target_markup);
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  catch (Error $e) {
+    cf_error::on_exception($e);
+
+    $markup .= '</div>';
+    return $markup;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
 
     $markup .= '</div>';
     return $markup;
@@ -1042,8 +1065,14 @@ function mfcs_request_troubleshoot_0_buildings_page() {
       unset($target_markup);
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  catch (Error $e) {
+    cf_error::on_exception($e);
+
+    $markup .= '</div>';
+    return $markup;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
 
     $markup .= '</div>';
     return $markup;
@@ -1224,8 +1253,14 @@ function mfcs_request_troubleshoot_0_rooms_page() {
       unset($target_markup);
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  catch (Error $e) {
+    cf_error::on_exception($e);
+
+    $markup .= '</div>';
+    return $markup;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
 
     $markup .= '</div>';
     return $markup;

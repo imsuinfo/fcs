@@ -148,6 +148,12 @@ class mcneese_file_db_unrestricted_stream_wrapper extends mcneese_file_db_stream
             $query->condition('id', $this->stream_fid);
             $query->execute();
           }
+          catch (Error $e) {
+            $transaction->rollback();
+            cf_error::on_query_execution($e);
+
+            throw $e;
+          }
           catch (Exception $e) {
             $transaction->rollback();
             cf_error::on_query_execution($e);
@@ -225,6 +231,12 @@ class mcneese_file_db_unrestricted_stream_wrapper extends mcneese_file_db_stream
             }
 
             // @todo: add group relations
+          }
+          catch (Error $e) {
+            $transaction->rollback();
+            cf_error::on_query_execution($e);
+
+            throw $e;
           }
           catch (Exception $e) {
             $transaction->rollback();
@@ -339,6 +351,11 @@ class mcneese_file_db_unrestricted_stream_wrapper extends mcneese_file_db_stream
         $this->stream_last_read = 0;
         $this->stream_blocks = $this->stream->rowCount();
       }
+      catch (Error $e) {
+        cf_error::on_query_execution($e);
+
+        throw $e;
+      }
       catch (Exception $e) {
         cf_error::on_query_execution($e);
 
@@ -418,6 +435,11 @@ class mcneese_file_db_unrestricted_stream_wrapper extends mcneese_file_db_stream
         $this->stream_position = $max_blocks;
       }
 
+    }
+    catch (Error $e) {
+      cf_error::on_query_execution($e);
+
+      throw $e;
     }
     catch (Exception $e) {
       cf_error::on_query_execution($e);
@@ -515,6 +537,12 @@ class mcneese_file_db_unrestricted_stream_wrapper extends mcneese_file_db_stream
           $query->useDefaults(array('timestamp')); // @todo: use php timestamp or leave it alone to postgresql?
           $this->stream_fid = $query->execute();
         }
+        catch (Error $e) {
+          $transaction->rollback();
+          cf_error::on_query_execution($e);
+
+          throw $e;
+        }
         catch (Exception $e) {
           $transaction->rollback();
           cf_error::on_query_execution($e);
@@ -553,6 +581,12 @@ class mcneese_file_db_unrestricted_stream_wrapper extends mcneese_file_db_stream
       }
 
       return $block_length;
+    }
+    catch (Error $e) {
+      if (isset($transaction)) $transaction->rollback();
+      cf_error::on_query_execution($e);
+
+      throw $e;
     }
     catch (Exception $e) {
       if (isset($transaction)) $transaction->rollback();
@@ -604,6 +638,11 @@ class mcneese_file_db_unrestricted_stream_wrapper extends mcneese_file_db_stream
           $query->execute();
         }
       }
+      catch (Error $e) {
+        cf_error::on_query_execution($e);
+
+        throw $e;
+      }
       catch (Exception $e) {
         cf_error::on_query_execution($e);
 
@@ -615,6 +654,11 @@ class mcneese_file_db_unrestricted_stream_wrapper extends mcneese_file_db_stream
         $query->condition('server_id', mcneese_file_db_get_server_id());
         $query->condition('file_id', $this->file_meta->id);
         $query->execute();
+      }
+      catch (Error $e) {
+        cf_error::on_query_execution($e);
+
+        throw $e;
       }
       catch (Exception $e) {
         cf_error::on_query_execution($e);

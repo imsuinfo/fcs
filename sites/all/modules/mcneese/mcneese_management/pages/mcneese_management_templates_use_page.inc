@@ -71,6 +71,11 @@ function mcneese_management_templates_use_page() {
       $rows[] = $row;
     }
   }
+  catch (Error $e) {
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
+    }
+  }
   catch (Exception $e) {
     if (class_exists('cf_error')) {
       cf_error::on_query_execution($e);
@@ -185,6 +190,11 @@ function mcneese_management_templates_use_list_page($template_id) {
       $row[] = $links;
 
       $rows[] = $row;
+    }
+  }
+  catch (Error $e) {
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
     }
   }
   catch (Exception $e) {

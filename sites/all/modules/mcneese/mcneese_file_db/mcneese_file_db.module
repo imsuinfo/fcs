@@ -97,10 +97,18 @@ function mcneese_file_db_prepare_connection() {
   try {
     $file_db = Database::getConnection(MCNEESE_FILE_DB_TARGET, MCNEESE_FILE_DB_KEY);
   }
-  catch (exception $ex) {
+  catch (Error $e) {
     // do not allow exceptions to stop the functioning of the website.
     if (class_exists('cf_error')) {
-      cf_error::on_exception($ex);
+      cf_error::on_exception($e);
+    }
+
+    return FALSE;
+  }
+  catch (exception $e) {
+    // do not allow exceptions to stop the functioning of the website.
+    if (class_exists('cf_error')) {
+      cf_error::on_exception($e);
     }
 
     return FALSE;
@@ -136,10 +144,18 @@ function mcneese_file_db_transaction($name = NULL) {
   try {
     $transaction = Database::getConnection(MCNEESE_FILE_DB_TARGET, MCNEESE_FILE_DB_KEY)->startTransaction($name);
   }
-  catch (exception $ex) {
+  catch (Error $e) {
     // do not allow exceptions to stop the functioning of the website.
     if (class_exists('cf_error')) {
-      cf_error::on_exception($ex);
+      cf_error::on_exception($e);
+    }
+
+    return FALSE;
+  }
+  catch (exception $e) {
+    // do not allow exceptions to stop the functioning of the website.
+    if (class_exists('cf_error')) {
+      cf_error::on_exception($e);
     }
 
     return FALSE;
@@ -327,6 +343,13 @@ function mcneese_file_db_load_available_files($conditions = array()) {
     }
 
     return $results->fetchAll();
+  }
+  catch (Error $e) {
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
+    }
+
+    throw $e;
   }
   catch (Exception $e) {
     if (class_exists('cf_error')) {
@@ -1219,6 +1242,12 @@ function mcneese_file_db_check_existence($checksum, $association) {
 
       $write_result = $query->execute();
     }
+  }
+  catch (Error $e) {
+    $transaction->rollback();
+    cf_error::on_query_execution($e);
+
+    throw $e;
   }
   catch (Exception $e) {
     $transaction->rollback();

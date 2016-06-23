@@ -209,8 +209,13 @@ function mfcs_page_request_access_operation_edit(&$request_ids, &$processed, &$a
         return TRUE;
       }
     }
-    catch (Exception $ex) {
-      cf_error::on_exception($ex);
+    catch (Error $e) {
+      cf_error::on_exception($e);
+
+      return FALSE;
+    }
+    catch (Exception $e) {
+      cf_error::on_exception($e);
 
       return FALSE;
     }
@@ -340,8 +345,13 @@ function mfcs_page_request_access_operation_view(&$request_ids, &$processed, &$a
         return TRUE;
       }
     }
-    catch (Exception $ex) {
-      cf_error::on_exception($ex);
+    catch (Error $e) {
+      cf_error::on_exception($e);
+
+      return FALSE;
+    }
+    catch (Exception $e) {
+      cf_error::on_exception($e);
 
       return FALSE;
     }
@@ -791,8 +801,12 @@ function mfcs_page_request_access_operation_cancel(&$request_ids, &$processed, &
         }
       }
     }
-    catch (Exception $ex) {
-      cf_error::on_exception($ex);
+    catch (Error $e) {
+      cf_error::on_exception($e);
+      return FALSE;
+    }
+    catch (Exception $e) {
+      cf_error::on_exception($e);
       return FALSE;
     }
 
@@ -852,8 +866,12 @@ function mfcs_page_request_access_operation_cancel(&$request_ids, &$processed, &
       }
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  catch (Error $e) {
+    cf_error::on_exception($e);
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
     return FALSE;
   }
 
@@ -885,8 +903,13 @@ function mfcs_page_request_access_operation_cancel(&$request_ids, &$processed, &
         return TRUE;
       }
     }
-    catch (Exception $ex) {
-      cf_error::on_exception($ex);
+    catch (Error $e) {
+      cf_error::on_exception($e);
+
+      return FALSE;
+    }
+    catch (Exception $e) {
+      cf_error::on_exception($e);
 
       return FALSE;
     }
@@ -1111,8 +1134,12 @@ function mfcs_page_request_access_operation_cancelling(&$request_ids, &$processe
       }
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  catch (Error $e) {
+    cf_error::on_exception($e);
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
     return FALSE;
   }
 
@@ -1217,8 +1244,12 @@ function mfcs_page_request_access_operation_uncancel(&$request_ids, &$processed,
         }
       }
     }
-    catch (Exception $ex) {
-      cf_error::on_exception($ex);
+    catch (Error $e) {
+      cf_error::on_exception($e);
+      return FALSE;
+    }
+    catch (Exception $e) {
+      cf_error::on_exception($e);
       return FALSE;
     }
 
@@ -1274,8 +1305,12 @@ function mfcs_page_request_access_operation_uncancel(&$request_ids, &$processed,
       }
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  catch (Error $e) {
+    cf_error::on_exception($e);
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
     return FALSE;
   }
 
@@ -1380,8 +1415,12 @@ function mfcs_page_request_access_operation_reassign(&$request_ids, &$processed,
         }
       }
     }
-    catch (Exception $ex) {
-      cf_error::on_exception($ex);
+    catch (Error $e) {
+      cf_error::on_exception($e);
+      return FALSE;
+    }
+    catch (Exception $e) {
+      cf_error::on_exception($e);
       return FALSE;
     }
   }
@@ -1474,8 +1513,13 @@ function mfcs_page_request_access_operation_history(&$request_ids, &$processed, 
         return TRUE;
       }
     }
-    catch (Exception $ex) {
-      cf_error::on_exception($ex);
+    catch (Error $e) {
+      cf_error::on_exception($e);
+
+      return FALSE;
+    }
+    catch (Exception $e) {
+      cf_error::on_exception($e);
 
       return FALSE;
     }
@@ -1592,8 +1636,13 @@ function mfcs_page_request_access_operation_agreement(&$request_ids, &$processed
         return TRUE;
       }
     }
-    catch (Exception $ex) {
-      cf_error::on_exception($ex);
+    catch (Error $e) {
+      cf_error::on_exception($e);
+
+      return FALSE;
+    }
+    catch (Exception $e) {
+      cf_error::on_exception($e);
 
       return FALSE;
     }
@@ -1706,8 +1755,12 @@ function mfcs_page_request_access_operation_delete(&$request_ids, &$processed, &
       }
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  catch (Error $e) {
+    cf_error::on_exception($e);
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
     return FALSE;
   }
 

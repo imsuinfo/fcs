@@ -485,6 +485,13 @@ function mcneese_management_node_insert($node) {
           $update = TRUE;
         }
       }
+      catch (Error $e) {
+        if (class_exists('cf_error')) {
+          cf_error::on_query_execution($e);
+        }
+
+        throw $e;
+      }
       catch (Exception $e) {
         if (class_exists('cf_error')) {
           cf_error::on_query_execution($e);
@@ -507,6 +514,12 @@ function mcneese_management_node_insert($node) {
           $query->fields($fields);
           $query->execute();
         }
+      }
+      catch (Error $e) {
+        $transaction->rollback();
+        cf_error::on_query_execution($e);
+
+        throw $e;
       }
       catch (Exception $e) {
         $transaction->rollback();
@@ -546,6 +559,13 @@ function mcneese_management_node_delete($node) {
     $query->condition('node_id', $node->nid);
     $query->execute();
   }
+  catch (Error $e) {
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
+    }
+
+    throw $e;
+  }
   catch (Exception $e) {
     if (class_exists('cf_error')) {
       cf_error::on_query_execution($e);
@@ -570,6 +590,13 @@ function mcneese_management_user_delete($user) {
     $query = db_delete('mcneese_management_template_user');
     $query->condition('user_id', $user->uid);
     $query->execute();
+  }
+  catch (Error $e) {
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
+    }
+
+    throw $e;
   }
   catch (Exception $e) {
     if (class_exists('cf_error')) {
@@ -642,6 +669,14 @@ function mcneese_management_autocomplete_nid($string) {
         $matches[$value] = check_plain($value);
       }
     }
+  }
+  catch (Error $e) {
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
+    }
+
+    drupal_json_output($matches);
+    return;
   }
   catch (Exception $e) {
     if (class_exists('cf_error')) {
@@ -914,6 +949,11 @@ function mcneese_management_set_emergency_mode($stage, $emergency_mode) {
               ->fields(array('published' => 0))
               ->execute();
           }
+          catch (Error $e) {
+            if (class_exists('cf_error')) {
+              cf_error::on_query_execution($e);
+            }
+          }
           catch (Exception $e) {
             if (class_exists('cf_error')) {
               cf_error::on_query_execution($e);
@@ -1035,6 +1075,14 @@ function mcneese_management_autocomplete_user($username = '') {
       }
     }
   }
+  catch (Error $e) {
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
+    }
+
+    drupal_json_output($matches);
+    return;
+  }
   catch (Exception $e) {
     if (class_exists('cf_error')) {
       cf_error::on_query_execution($e);
@@ -1146,6 +1194,13 @@ function mcneese_management_assign_node_user($nids, $user_id) {
     // enforce transaction execution
     unset($transaction);
   }
+  catch (Error $e) {
+    $transaction->rollback();
+
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
+    }
+  }
   catch (Exception $e) {
     $transaction->rollback();
 
@@ -1203,6 +1258,11 @@ function mcneese_management_load_assigned_nids($user_id) {
      $nids[] = $result->nid;
     }
   }
+  catch (Error $e) {
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
+    }
+  }
   catch (Exception $e) {
     if (class_exists('cf_error')) {
       cf_error::on_query_execution($e);
@@ -1230,6 +1290,13 @@ function mcneese_management_perform_redirect($local_path) {
 
     $executed = $query->execute();
     $redirect = $executed->fetchAssoc();
+  }
+  catch (Error $e) {
+    $transaction->rollback();
+
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
+    }
   }
   catch (Exception $e) {
     $transaction->rollback();
@@ -1307,6 +1374,11 @@ function mcneese_management_template_load_template($template_id) {
 
     $result = $query->execute()->fetchObject();
   }
+  catch (Error $e) {
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
+    }
+  }
   catch (Exception $e) {
     if (class_exists('cf_error')) {
       cf_error::on_query_execution($e);
@@ -1383,6 +1455,12 @@ function mcneese_management_template_use_node_access($op, $node, $template_id = 
 
       if ($result == 0) return FALSE;
     }
+    catch (Error $e) {
+      if (class_exists('cf_error')) {
+        cf_error::on_query_execution($e);
+      }
+      return FALSE;
+    }
     catch (Exception $e) {
       if (class_exists('cf_error')) {
         cf_error::on_query_execution($e);
@@ -1436,6 +1514,11 @@ function mcneese_management_template_user_access($user_id, $template_id) {
 
     if ($result > 0) {
       return TRUE;
+    }
+  }
+  catch (Error $e) {
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
     }
   }
   catch (Exception $e) {
@@ -1929,6 +2012,13 @@ function mcneese_management_template_build_form(&$form) {
 
               $existing_values = (array) $query->execute()->fetchAssoc();
             }
+            catch (Error $e) {
+              if (class_exists('cf_error')) {
+                cf_error::on_query_execution($e);
+              }
+
+              $existing_values = array();
+            }
             catch (Exception $e) {
               if (class_exists('cf_error')) {
                 cf_error::on_query_execution($e);
@@ -1953,6 +2043,13 @@ function mcneese_management_template_build_form(&$form) {
               $query->condition('delta', $cardinality_count);
 
               $existing_values = (array) $query->execute()->fetchAssoc();
+            }
+            catch (Error $e) {
+              if (class_exists('cf_error')) {
+                cf_error::on_query_execution($e);
+              }
+
+              $existing_values = array();
             }
             catch (Exception $e) {
               if (class_exists('cf_error')) {
@@ -2946,6 +3043,13 @@ function mcneese_management_template_load_node_data($nids) {
 
     $executed = $query->execute();
     return $executed->fetchAll();
+  }
+  catch (Error $e) {
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
+    }
+
+    throw $e;
   }
   catch (Exception $e) {
     if (class_exists('cf_error')) {

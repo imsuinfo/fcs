@@ -818,6 +818,11 @@ function mcneese_management_templates_manage_user_add_form_validate($form, &$for
         form_set_error('machine_name', t("The specified user '%user' is already added and therefore cannot be added again.", array('%user' => $form_state['values']['settings']['user'])));
       }
     }
+    catch (Error $e) {
+      if (class_exists('cf_error')) {
+        cf_error::on_query_execution($e);
+      }
+    }
     catch (Exception $e) {
       if (class_exists('cf_error')) {
         cf_error::on_query_execution($e);
@@ -866,6 +871,13 @@ function mcneese_management_templates_manage_user_add_form_submit($form, &$form_
 
     // enforce transaction execution
     unset($transaction);
+  }
+  catch (Error $e) {
+    $transaction->rollback();
+
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
+    }
   }
   catch (Exception $e) {
     $transaction->rollback();
@@ -983,6 +995,13 @@ function mcneese_management_templates_manage_user_delete_form_submit($form, &$fo
 
     // enforce transaction execution
     unset($transaction);
+  }
+  catch (Error $e) {
+    $transaction->rollback();
+
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
+    }
   }
   catch (Exception $e) {
     $transaction->rollback();

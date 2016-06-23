@@ -742,9 +742,15 @@ function mfcs_request_holiday_0_edit_form_submit($form, &$form_state) {
 
     unset($transaction);
   }
-  catch (Exception $ex) {
+  catch (Error $e) {
     $transaction->rollback();
-    cf_error::on_exception($ex);
+    cf_error::on_exception($e);
+
+    $success = FALSE;
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+    cf_error::on_exception($e);
 
     $success = FALSE;
   }
@@ -1003,9 +1009,15 @@ function mfcs_request_holiday_0_delete_form_submit($form, &$form_state) {
 
     unset($transaction);
   }
-  catch (Exception $ex) {
+  catch (Error $e) {
     $transaction->rollback();
-    cf_error::on_exception($ex);
+    cf_error::on_exception($e);
+
+    $deleted = FALSE;
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+    cf_error::on_exception($e);
 
     $deleted = FALSE;
   }

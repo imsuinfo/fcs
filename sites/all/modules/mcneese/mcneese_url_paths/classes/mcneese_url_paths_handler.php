@@ -253,7 +253,7 @@ class mcneese_url_paths_node_handler {
     if (empty($source) || empty($destination_0)) {
       return FALSE;
     }
-   
+
     $transaction = db_transaction();
 
     $deleted = $this->p_delete_path_alias($source, $destination_0, $transaction);
@@ -487,6 +487,11 @@ class mcneese_url_paths_node_handler {
 
       $query->execute();
     }
+    catch (Error $e) {
+      $transaction->rollback();
+      cf_error::on_query_execution($e);
+      return FALSE;
+    }
     catch (Exception $e) {
       $transaction->rollback();
       cf_error::on_query_execution($e);
@@ -536,6 +541,11 @@ class mcneese_url_paths_node_handler {
       $query->fields($record);
       $query->execute();
     }
+    catch (Error $e) {
+      $transaction->rollback();
+      cf_error::on_query_execution($e);
+      return FALSE;
+    }
     catch (Exception $e) {
       $transaction->rollback();
       cf_error::on_query_execution($e);
@@ -570,6 +580,11 @@ class mcneese_url_paths_node_handler {
           return TRUE;
         }
       }
+    }
+    catch (Error $e) {
+      $transaction->rollback();
+      cf_error::on_query_execution($e);
+      return FALSE;
     }
     catch (Exception $e) {
       $transaction->rollback();

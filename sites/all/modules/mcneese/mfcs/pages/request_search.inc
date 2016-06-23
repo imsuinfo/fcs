@@ -1296,9 +1296,15 @@ function mfcs_request_search_0_form_submit($form, &$form_state) {
         // enforce transaction execution
         unset($transaction);
       }
-      catch (Exception $ex) {
+      catch (Error $e) {
         $transaction->rollback();
-        cf_error::on_exception($ex);
+        cf_error::on_exception($e);
+
+        return FALSE;
+      }
+      catch (Exception $e) {
+        $transaction->rollback();
+        cf_error::on_exception($e);
 
         return FALSE;
       }
@@ -1341,9 +1347,21 @@ function mfcs_request_search_0_form_submit($form, &$form_state) {
         // enforce transaction execution
         unset($transaction);
       }
-      catch (Exception $ex) {
+      catch (Error $e) {
         $transaction->rollback();
-        cf_error::on_exception($ex);
+        cf_error::on_exception($e);
+
+        form_set_error('form', "An error occurred while trying to save the advanced search settings. Please contact the support staff.");
+        watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to save the advanced search settings.", array(), WATCHDOG_ERROR);
+
+        $form_state['rebuild'] = TRUE;
+        $form_state['redirect'] = FALSE;
+        $form_state['submitted'] = FALSE;
+        return FALSE;
+      }
+      catch (Exception $e) {
+        $transaction->rollback();
+        cf_error::on_exception($e);
 
         form_set_error('form', "An error occurred while trying to save the advanced search settings. Please contact the support staff.");
         watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to save the advanced search settings.", array(), WATCHDOG_ERROR);
@@ -1372,9 +1390,21 @@ function mfcs_request_search_0_form_submit($form, &$form_state) {
         // enforce transaction execution
         unset($transaction);
       }
-      catch (Exception $ex) {
+      catch (Error $e) {
         $transaction->rollback();
-        cf_error::on_exception($ex);
+        cf_error::on_exception($e);
+
+        form_set_error('form', "An error occurred while trying to delete the advanced search settings. Please contact the support staff.");
+        watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to delete the advanced search settings.", array(), WATCHDOG_ERROR);
+
+        $form_state['rebuild'] = TRUE;
+        $form_state['redirect'] = FALSE;
+        $form_state['submitted'] = FALSE;
+        return FALSE;
+      }
+      catch (Exception $e) {
+        $transaction->rollback();
+        cf_error::on_exception($e);
 
         form_set_error('form', "An error occurred while trying to delete the advanced search settings. Please contact the support staff.");
         watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to delete the advanced search settings.", array(), WATCHDOG_ERROR);
@@ -3629,8 +3659,13 @@ function mfcs_search_target_grouping_load($user = NULL) {
       $grouping[$result->id] = $result;
     }
   }
-  catch (Exception $ex) {
-    cf_error::on_exception($ex);
+  catch (Error $e) {
+    cf_error::on_exception($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
 
     return FALSE;
   }

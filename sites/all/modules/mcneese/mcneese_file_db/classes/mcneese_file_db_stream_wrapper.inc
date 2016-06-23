@@ -669,6 +669,11 @@ abstract class mcneese_file_db_stream_wrapper implements DrupalStreamWrapperInte
 
       return $results->rowCount() != 0;
     }
+    catch (Error $e) {
+      cf_error::on_query_execution($e);
+
+      throw $e;
+    }
     catch (Exception $e) {
       cf_error::on_query_execution($e);
 
@@ -712,6 +717,11 @@ abstract class mcneese_file_db_stream_wrapper implements DrupalStreamWrapperInte
       }
 
       return $row[0]->id;
+    }
+    catch (Error $e) {
+      cf_error::on_query_execution($e);
+
+      throw $e;
     }
     catch (Exception $e) {
       cf_error::on_query_execution($e);

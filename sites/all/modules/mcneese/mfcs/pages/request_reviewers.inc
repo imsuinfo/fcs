@@ -628,8 +628,11 @@ function mfcs_request_reviewers_0_form_validate($form, &$form_state) {
           form_set_error('reviewer][reviewer_classification', "An invalid Reviewer Classification has been specified. Please select a valid Reviewer Classification.");
         }
       }
-      catch (Exception $ex) {
-        cf_error::on_query_execution($ex);
+      catch (Error $e) {
+        cf_error::on_query_execution($e);
+      }
+      catch (Exception $e) {
+        cf_error::on_query_execution($e);
       }
     }
 
@@ -738,9 +741,15 @@ function mfcs_request_reviewers_0_form_submit($form, &$form_state) {
         $query->execute();
       }
     }
-    catch (Exception $ex) {
+    catch (Error $e) {
       $transaction->rollback();
-      cf_error::on_query_execution($ex);
+      cf_error::on_query_execution($e);
+
+      $failure = TRUE;
+    }
+    catch (Exception $e) {
+      $transaction->rollback();
+      cf_error::on_query_execution($e);
 
       $failure = TRUE;
     }
@@ -779,9 +788,15 @@ function mfcs_request_reviewers_0_form_submit($form, &$form_state) {
         return TRUE;
       }
     }
-    catch (Exception $ex) {
+    catch (Error $e) {
       $transaction->rollback();
-      cf_error::on_query_execution($ex);
+      cf_error::on_query_execution($e);
+
+      $failure = TRUE;
+    }
+    catch (Exception $e) {
+      $transaction->rollback();
+      cf_error::on_query_execution($e);
 
       $failure = TRUE;
     }
@@ -1018,9 +1033,21 @@ function mfcs_request_reviewers_0_delete_form_submit($form, &$form_state) {
     $query->condition('id', $form['form']['id']['#value']);
     $query->execute();
   }
-  catch (Exception $ex) {
+  catch (Error $e) {
     $transaction->rollback();
-    cf_error::on_query_execution($ex);
+    cf_error::on_query_execution($e);
+
+    form_set_error('form', "An error occurred while trying to delete the reviewer. Please contact the support staff.");
+    watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to delete the reviewer '%reviewer_id'.", array('%reviewer_id' => $form['form']['id']['#value']), WATCHDOG_ERROR);
+
+    $form_state['rebuild'] = TRUE;
+    $form_state['redirect'] = FALSE;
+    $form_state['submitted'] = FALSE;
+    return;
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+    cf_error::on_query_execution($e);
 
     form_set_error('form', "An error occurred while trying to delete the reviewer. Please contact the support staff.");
     watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to delete the reviewer '%reviewer_id'.", array('%reviewer_id' => $form['form']['id']['#value']), WATCHDOG_ERROR);

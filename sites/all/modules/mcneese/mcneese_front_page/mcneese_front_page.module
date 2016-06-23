@@ -103,6 +103,11 @@ function mcneese_front_page_embed_featured() {
     $executed = $query->execute();
     $results = (array) $executed->fetchAll();
   }
+  catch (Error $e) {
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
+    }
+  }
   catch (Exception $e) {
     if (class_exists('cf_error')) {
       cf_error::on_query_execution($e);
@@ -169,6 +174,13 @@ function mcneese_front_page_embed_featured() {
 
       $executed = $query->execute();
       $urls = $executed->fetchAllKeyed();
+    }
+    catch (Error $e) {
+      if (class_exists('cf_error')) {
+        cf_error::on_query_execution($e);
+      }
+
+      continue;
     }
     catch (Exception $e) {
       if (class_exists('cf_error')) {
@@ -387,6 +399,11 @@ function mcneese_front_page_embed_highlight() {
       $executed = $query->execute();
       $result = $executed->fetchObject();
     }
+    catch (Error $e) {
+      if (class_exists('cf_error')) {
+        cf_error::on_query_execution($e);
+      }
+    }
     catch (Exception $e) {
       if (class_exists('cf_error')) {
         cf_error::on_query_execution($e);
@@ -524,6 +541,11 @@ function mcneese_front_page_embed_events($highlight) {
 
     $executed = $query->execute();
     $results = (array) $executed->fetchAll();
+  }
+  catch (Error $e) {
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
+    }
   }
   catch (Exception $e) {
     if (class_exists('cf_error')) {
@@ -767,6 +789,11 @@ function mcneese_front_page_embed_spotlight() {
 
     $executed = $query->execute();
     $results = (array) $executed->fetchAll();
+  }
+  catch (Error $e) {
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
+    }
   }
   catch (Exception $e) {
     if (class_exists('cf_error')) {

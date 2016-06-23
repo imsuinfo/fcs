@@ -329,6 +329,13 @@ function mcneese_management_redirects_update_form_submit($form, &$form_state) {
       // enforce transaction execution
       unset($transaction);
     }
+    catch (Error $e) {
+      $transaction->rollback();
+
+      if (class_exists('cf_error')) {
+        cf_error::on_query_execution($e);
+      }
+    }
     catch (Exception $e) {
       $transaction->rollback();
 
@@ -347,6 +354,13 @@ function mcneese_management_redirects_update_form_submit($form, &$form_state) {
 
       // enforce transaction execution
       unset($transaction);
+    }
+    catch (Error $e) {
+      $transaction->rollback();
+
+      if (class_exists('cf_error')) {
+        cf_error::on_query_execution($e);
+      }
     }
     catch (Exception $e) {
       $transaction->rollback();
@@ -459,6 +473,13 @@ function mcneese_management_redirects_delete_form_submit($form, &$form_state) {
 
     // enforce transaction execution
     unset($transaction);
+  }
+  catch (Error $e) {
+    $transaction->rollback();
+
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
+    }
   }
   catch (Exception $e) {
     $transaction->rollback();

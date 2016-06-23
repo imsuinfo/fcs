@@ -652,9 +652,22 @@ function mfcs_request_proxy_0_form_submit($form, &$form_state) {
         $query->execute();
       }
     }
-    catch (Exception $ex) {
+    catch (Error $e) {
       $transaction->rollback();
-      cf_error::on_query_execution($ex);
+      cf_error::on_query_execution($e);
+
+      form_set_error('form', "An error occurred while trying to add the proxy. Please contact the support staff.");
+      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to create the proxy '%proxy_id' to proxy as '%user_id'.", array('%proxy_id' => $values['proxy_id'], '%user_id' => $values['user_id']), WATCHDOG_ERROR);
+
+      $form_state['rebuild'] = TRUE;
+      $form_state['redirect'] = FALSE;
+      $form_state['submitted'] = FALSE;
+
+      return;
+    }
+    catch (Exception $e) {
+      $transaction->rollback();
+      cf_error::on_query_execution($e);
 
       form_set_error('form', "An error occurred while trying to add the proxy. Please contact the support staff.");
       watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to create the proxy '%proxy_id' to proxy as '%user_id'.", array('%proxy_id' => $values['proxy_id'], '%user_id' => $values['user_id']), WATCHDOG_ERROR);
@@ -824,9 +837,22 @@ function mfcs_request_proxy_0_delete_form_submit($form, &$form_state) {
     $query->condition('id', $form['form']['id']['#value']);
     $query->execute();
   }
-  catch (Exception $ex) {
+  catch (Error $e) {
     $transaction->rollback();
-    cf_error::on_query_execution($ex);
+    cf_error::on_query_execution($e);
+
+    form_set_error('form', "An error occurred while trying to delete the proxy. Please contact the support staff.");
+    watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to delete the proxy '%proxy_id'.", array('%proxy_id' => $form['form']['id']['#value']), WATCHDOG_ERROR);
+
+    $form_state['rebuild'] = TRUE;
+    $form_state['redirect'] = FALSE;
+    $form_state['submitted'] = FALSE;
+
+    return;
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+    cf_error::on_query_execution($e);
 
     form_set_error('form', "An error occurred while trying to delete the proxy. Please contact the support staff.");
     watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to delete the proxy '%proxy_id'.", array('%proxy_id' => $form['form']['id']['#value']), WATCHDOG_ERROR);
