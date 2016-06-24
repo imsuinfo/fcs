@@ -81,9 +81,10 @@ function mcneese_content_node_view($node, $view_mode, $langcode){
   if ($shortlink != $current_path) return;
 
   global $base_path;
+  global $base_url;
 
   $link = '<' . $base_path . $shortlink . '>; rel="shortlink"';
-  $link .= ', <' . $base_path . $request_path . '>; rel="canonical";';
+  $link .= ', <' . $base_url . $base_path . $request_path . '>; rel="canonical";';
 
   drupal_add_http_header('Link', $link);
 }
