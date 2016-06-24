@@ -31,15 +31,20 @@ class InsertQuery_pgsql extends InsertQuery {
    * @param bool $constraint
    *   (optional) When TRUE, the $conflict_target represents the constraint name.
    *   When FALSE, the $conflict_target represents the field names.
+   * @param bool $returning
+   *   (optional) When TRUE, the updated results are returned.
+   *   When FALSE, no updated results are returned.
+   *   This only applies to "do update".
    *
    * @return InsertQuery
    *   The called object.
    */
-  public function onConflictDo(int $conflict, $conflict_target = array(), $conflict_action = array(), $constraint = FALSE) {
+  public function onConflictDo(int $conflict, $conflict_target = array(), $conflict_action = array(), $constraint = FALSE, $returning = FALSE) {
     $this->on_conflict = $conflict;
     $this->on_conflict_target = array();
     $this->on_conflict_action = array();
     $this->on_conflict_contraint = (bool) $constraint;
+    $this->on_conflict_returning = (bool) $returning;
 
     if (is_array($conflict_target)) {
       foreach ($conflict_target as $value) {
@@ -187,7 +192,12 @@ class InsertQuery_pgsql extends InsertQuery {
       }
       unset($field_name);
 
-      $on_conflict = "\nON CONFLICT" . $on_conflict_target . ' DO UPDATE SET ' . $on_conflict_fields . ' RETURNING *';
+      $on_conflict = "\nON CONFLICT" . $on_conflict_target . ' DO UPDATE SET ' . $on_conflict_fields;
+
+      if ($this->on_conflict_returning) {
+        $on_conflict .= ' RETURNING *';
+      }
+
       unset($on_conflict_fields);
     }
 

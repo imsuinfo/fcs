@@ -968,7 +968,7 @@ function update_do_one($module, $number, $dependency_map, &$context) {
     // @TODO We may want to do different error handling for different
     // exception types, but for now we'll just log the exception and
     // return the message for printing.
-    catch (Throwable $e) {
+    catch (Error $e) {
       watchdog_exception('update', $e);
 
       require_once DRUPAL_ROOT . '/includes/errors.inc';

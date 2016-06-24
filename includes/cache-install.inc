@@ -61,7 +61,7 @@ class DrupalFakeCache extends DrupalDatabaseCache implements DrupalCacheInterfac
     // either the database connection is not set up yet or the relevant cache
     // table in the database has not yet been created, so we can safely do
     // nothing here.
-    catch (Throwable $e) {
+    catch (Error $e) {
     }
     catch (Exception $e) {
     }

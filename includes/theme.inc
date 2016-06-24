@@ -792,7 +792,7 @@ function list_themes($refresh = FALSE) {
       try {
         $themes = system_list('theme');
       }
-      catch (Throwable $e) {
+      catch (Error $e) {
         // If the database is not available, rebuild the theme data.
         $themes = _system_rebuild_theme_data();
       }
@@ -2509,7 +2509,7 @@ function _template_preprocess_default_variables() {
   try {
     $variables['is_front'] = drupal_is_front_page();
   }
-  catch (Throwable $e) {
+  catch (Error $e) {
     // If the database is not yet available, set default values for these
     // variables.
     $variables['is_front'] = FALSE;

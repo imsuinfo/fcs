@@ -8,7 +8,7 @@
 /**
  * The current system version.
  */
-define('VERSION', '7.43');
+define('VERSION', '7.44');
 
 /**
  * Core API compatibility.
@@ -859,7 +859,7 @@ function drupal_get_filename($type, $name, $filename = NULL) {
         }
       }
     }
-    catch (Throwable $e) {
+    catch (Error $e) {
       // The database table may not exist because Drupal is not yet installed,
       // or the database might be down. We have a fallback for this case so we
       // hide the error completely.
@@ -2393,7 +2393,7 @@ function _drupal_exception_handler($exception) {
     // Log the message to the watchdog and return an error page to the user.
     _drupal_log_error(_drupal_decode_exception($exception), TRUE);
   }
-  catch (Throwable $exception2) {
+  catch (Error $exception2) {
     // Another uncaught exception was thrown while handling the first one.
     // If we are displaying errors, then do so with no possibility of a further uncaught exception being thrown.
     if (error_displayable()) {
@@ -3229,28 +3229,6 @@ function drupal_autoload_trait($trait) {
  *   NULL if either of the REGISTRY_* constants is passed in as $type.
  */
 function _registry_check_code($type, $name = NULL) {
-  global $conf;
-
-  if (array_key_exists('static_registry', $conf) && is_array($conf['static_registry'])) {
-    if ($type == REGISTRY_RESET_LOOKUP_CACHE || $type == REGISTRY_WRITE_LOOKUP_CACHE || is_null($name)) {
-      // not applicable to static registry.
-      return;
-    }
-
-    $file = FALSE;
-    if (isset($conf['static_registry']['by_type'][$type][$name]['filename'])) {
-      $file = $conf['static_registry']['by_type'][$type][$name]['filename'];
-    }
-
-    if ($file) {
-      require_once DRUPAL_ROOT . '/' . $file;
-      return TRUE;
-    }
-    else {
-      return FALSE;
-    }
-  }
-
   static $lookup_cache, $cache_update_needed;
 
   if ($type == 'class' && class_exists($name) || $type == 'interface' && interface_exists($name) || $type == 'trait' && trait_exists($name)) {
@@ -3600,7 +3578,7 @@ function _drupal_shutdown_function() {
       call_user_func_array($callback['callback'], $callback['arguments']);
     }
   }
-  catch (Throwable $exception) {
+  catch (Error $exception) {
     // If we are displaying errors, then do so with no possibility of a further uncaught exception being thrown.
    require_once DRUPAL_ROOT . '/includes/errors.inc';
    if (error_displayable()) {

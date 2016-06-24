@@ -516,7 +516,7 @@ function taxonomy_vocabulary_delete($vid) {
 
     return SAVED_DELETED;
   }
-  catch (Throwable $e) {
+  catch (Error $e) {
     $transaction->rollback();
     watchdog_exception('taxonomy', $e);
     throw $e;
@@ -745,7 +745,7 @@ function taxonomy_term_delete($tid) {
     }
     return SAVED_DELETED;
   }
-  catch (Throwable $e) {
+  catch (Error $e) {
     $transaction->rollback();
     watchdog_exception('taxonomy', $e);
     throw $e;

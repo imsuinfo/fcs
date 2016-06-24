@@ -59,7 +59,7 @@ class DatabaseConnection_oracle extends DatabaseConnection
       {
         $stmt->execute($args);
       }
-      catch (Throwable $e)
+      catch (Error $e)
       {
          syslog(LOG_ERR,"error: ".$e->getMessage()." ".$query);
          throw $e;
@@ -136,7 +136,7 @@ class DatabaseConnection_oracle extends DatabaseConnection
 
        $stmt->execute();
     }
-    catch (Throwable $ex)
+    catch (Error $ex)
     {
        // ignore at install time or external databases
 
@@ -210,7 +210,7 @@ class DatabaseConnection_oracle extends DatabaseConnection
           return $this->query($query_string, $args, $options, 2);
       }
 
-      try { $this->rollBack(); } catch (Throwable $rex) { syslog(LOG_ERR,"rollback ex: ".$rex->getMessage()); } catch (Exception $rex) { syslog(LOG_ERR,"rollback ex: ".$rex->getMessage()); }
+      try { $this->rollBack(); } catch (Error $rex) { syslog(LOG_ERR,"rollback ex: ".$rex->getMessage()); } catch (Exception $rex) { syslog(LOG_ERR,"rollback ex: ".$rex->getMessage()); }
 
       if ($options['throw_exception'])
       {
@@ -283,7 +283,7 @@ class DatabaseConnection_oracle extends DatabaseConnection
     {
       return $this->oracleQuery($this->prefixTables("select ".$name.".currval from dual",true))->fetchColumn();
     }
-    catch (Throwable $ex)
+    catch (Error $ex)
     { syslog(LOG_ERR," currval: ".print_r(debug_backtrace(false),true)); /* ignore if CURRVAL not set (may be an insert that specified the serial field) */  }
     catch (Exception $ex)
     { syslog(LOG_ERR," currval: ".print_r(debug_backtrace(false),true)); /* ignore if CURRVAL not set (may be an insert that specified the serial field) */  }
@@ -315,7 +315,7 @@ class DatabaseConnection_oracle extends DatabaseConnection
 
   public function queryTemporary($query, array $args = array(), array $options = array()) {
     $tablename = $this->generateTemporaryTableName();
-    try { db_query("DROP TABLE {". $tablename ."}"); } catch (Throwable $ex) { /* ignore drop errors */ } catch (Exception $ex) { /* ignore drop errors */ }
+    try { db_query("DROP TABLE {". $tablename ."}"); } catch (Error $ex) { /* ignore drop errors */ } catch (Exception $ex) { /* ignore drop errors */ }
     db_query('CREATE GLOBAL TEMPORARY TABLE {'. $tablename .'} ON COMMIT PRESERVE ROWS AS '.$query, $args);
     return $tablename;
   }
@@ -345,7 +345,7 @@ class DatabaseConnection_oracle extends DatabaseConnection
     {
         return $this->getAttribute(PDO::ATTR_SERVER_VERSION);
     }
-    catch (Throwable $ex)
+    catch (Error $ex)
     {
         return $this->oracleQuery("select regexp_replace(banner,'[^0-9\.]','') from v\$version where banner like 'CORE%'")->fetchColumn();
     }
@@ -758,7 +758,7 @@ class DatabaseStatement_oracle extends DatabaseStatementPrefetch implements Iter
     {
         $this->data = $statement->fetchAll(PDO::FETCH_ASSOC);
     }
-    catch (Throwable $e)
+    catch (Error $e)
     {
       if (!(isset($e->errorInfo)&&is_array($e->errorInfo)&&$e->errorInfo[1]=='24374')) //ignore non-fetchable statements errors
           throw $e;
@@ -974,7 +974,7 @@ class DatabaseLongIdentifierHandler_oracle
         }
 
     }
-    catch (Throwable $ex)
+    catch (Error $ex)
     {
        // ignore until long_identifiers table is not created
     }

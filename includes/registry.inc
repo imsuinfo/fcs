@@ -96,7 +96,7 @@ function _registry_update() {
     module_implements('', FALSE, TRUE);
     _registry_check_code(REGISTRY_RESET_LOOKUP_CACHE);
   }
-  catch (Throwable $e) {
+  catch (Error $e) {
     $transaction->rollback();
     watchdog_exception('registry', $e);
     throw $e;

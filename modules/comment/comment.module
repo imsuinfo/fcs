@@ -1593,7 +1593,7 @@ function comment_save($comment) {
     }
     unset($comment->original);
   }
-  catch (Throwable $e) {
+  catch (Error $e) {
     $transaction->rollback('comment');
     watchdog_exception('comment', $e);
     throw $e;
@@ -1642,7 +1642,7 @@ function comment_delete_multiple($cids) {
         _comment_update_node_statistics($comment->nid);
       }
     }
-    catch (Throwable $e) {
+    catch (Error $e) {
       $transaction->rollback();
       watchdog_exception('comment', $e);
       throw $e;

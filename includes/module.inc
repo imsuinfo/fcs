@@ -519,16 +519,16 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
 
     unset($transaction);
   }
-  catch (Throwable $ex) {
+  catch (Error $e) {
     $transaction->rollback();
     drupal_set_message(t('The selected modules have failed to install.'), 'error');
-    watchdog_exception('system', $ex, "Failed to install and enable the modules: %modules, reason: %ex.", array('%modules' => print_r($module_list, TRUE), '%ex' => $ex->getMessage()), WATCHDOG_ERROR);
+    watchdog_exception('system', $e, "Failed to install and enable the modules: %modules, reason: %ex.", array('%modules' => print_r($module_list, TRUE), '%ex' => $e->getMessage()), WATCHDOG_ERROR);
     return FALSE;
   }
-  catch (Exception $ex) {
+  catch (Exception $e) {
     $transaction->rollback();
     drupal_set_message(t('The selected modules have failed to install.'), 'error');
-    watchdog_exception('system', $ex, "Failed to install and enable the modules: %modules, reason: %ex.", array('%modules' => print_r($module_list, TRUE), '%ex' => $ex->getMessage()), WATCHDOG_ERROR);
+    watchdog_exception('system', $e, "Failed to install and enable the modules: %modules, reason: %ex.", array('%modules' => print_r($module_list, TRUE), '%ex' => $e->getMessage()), WATCHDOG_ERROR);
     return FALSE;
   }
 

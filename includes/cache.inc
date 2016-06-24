@@ -372,7 +372,7 @@ class DrupalDatabaseCache implements DrupalCacheInterface {
       $cids = array_diff($cids, array_keys($cache));
       return $cache;
     }
-    catch (Throwable $e) {
+    catch (Error $e) {
       // If the database is never going to be available, cache requests should
       // return FALSE in order to allow exception handling to occur.
       return array();
@@ -493,12 +493,15 @@ class DrupalDatabaseCache implements DrupalCacheInterface {
 
       unset($transaction);
     }
-    catch (Throwable $e) {
+    catch (Error $e) {
       // The database may not be available, so we'll ignore cache_set requests.
       if (isset($transaction) && is_object($transaction)) {
         $transaction->rollback();
       }
       unset($transaction);
+    }
+    catch (Error $e) {
+      // The database may not be available, so we'll ignore cache_set requests.
     }
     catch (Exception $e) {
       // The database may not be available, so we'll ignore cache_set requests.

@@ -827,7 +827,7 @@ function field_ui_field_overview_form_submit($form, &$form_state) {
       // Store new field information for any additional submit handlers.
       $form_state['fields_added']['_add_new_field'] = $field['field_name'];
     }
-    catch (Throwable $e) {
+    catch (Error $e) {
       drupal_set_message(t('There was a problem creating field %label: !message', array('%label' => $instance['label'], '!message' => $e->getMessage())), 'error');
     }
     catch (Exception $e) {
@@ -860,7 +860,7 @@ function field_ui_field_overview_form_submit($form, &$form_state) {
         // Store new field information for any additional submit handlers.
         $form_state['fields_added']['_add_existing_field'] = $instance['field_name'];
       }
-      catch (Throwable $e) {
+      catch (Error $e) {
         drupal_set_message(t('There was a problem creating field instance %label: @message.', array('%label' => $instance['label'], '@message' => $e->getMessage())), 'error');
       }
       catch (Exception $e) {
@@ -1640,7 +1640,7 @@ function field_ui_field_settings_form_submit($form, &$form_state) {
     drupal_set_message(t('Updated field %label field settings.', array('%label' => $instance['label'])));
     $form_state['redirect'] = field_ui_next_destination($entity_type, $bundle);
   }
-  catch (Throwable $e) {
+  catch (Error $e) {
     drupal_set_message(t('Attempt to update field %label failed: %message.', array('%label' => $instance['label'], '%message' => $e->getMessage())), 'error');
   }
   catch (Exception $e) {
@@ -1723,7 +1723,7 @@ function field_ui_widget_type_form_submit($form, &$form_state) {
     field_update_instance($instance);
     drupal_set_message(t('Changed the widget for field %label.', array('%label' => $instance['label'])));
   }
-  catch (Throwable $e) {
+  catch (Error $e) {
     drupal_set_message(t('There was a problem changing the widget for field %label.', array('%label' => $instance['label'])), 'error');
   }
   catch (Exception $e) {
@@ -2091,7 +2091,7 @@ function field_ui_field_edit_form_submit($form, &$form_state) {
   try {
     field_update_field($field);
   }
-  catch (Throwable $e) {
+  catch (Error $e) {
     drupal_set_message(t('Attempt to update field %label failed: %message.', array('%label' => $instance['label'], '%message' => $e->getMessage())), 'error');
     return;
   }

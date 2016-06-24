@@ -135,7 +135,7 @@ class DatabaseConnection_sqlite extends DatabaseConnection {
             unlink($this->connectionOptions['database'] . '-' . $prefix);
           }
         }
-        catch (Throwable $e) {
+        catch (Error $e) {
           // Ignore the exception and continue. There is nothing we can do here
           // to report the error or fail safe.
         }

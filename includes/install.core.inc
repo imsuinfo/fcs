@@ -76,7 +76,7 @@ function install_drupal($settings = array()) {
     // request, and collect any output.
     $output = install_run_tasks($install_state);
   }
-  catch (Throwable $e) {
+  catch (Error $e) {
     // When an installation error occurs, either send the error to the web
     // browser or pass on the exception so the calling script can use it.
     if ($install_state['interactive']) {
@@ -836,7 +836,7 @@ function install_verify_completed_task() {
   }
   // Do not trigger an error if the database query fails, since the database
   // might not be set up yet.
-  catch (Throwable $e) {
+  catch (Error $e) {
   }
   if (isset($task)) {
     if ($task == 'done') {

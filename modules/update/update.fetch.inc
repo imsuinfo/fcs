@@ -262,7 +262,7 @@ function _update_create_fetch_task($project) {
         ))
         ->execute();
     }
-    catch (Throwable $e) {
+    catch (Error $e) {
       // The exception can be ignored safely.
     }
     catch (Exception $e) {
@@ -392,7 +392,7 @@ function update_parse_xml($raw_xml) {
   try {
     $xml = new SimpleXMLElement($raw_xml);
   }
-  catch (Throwable $e) {
+  catch (Error $e) {
     // SimpleXMLElement::__construct produces an E_WARNING error message for
     // each error found in the XML data and throws an exception if errors
     // were detected. Catch any exception and return failure (NULL).

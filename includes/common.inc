@@ -678,8 +678,10 @@ function drupal_goto($path = '', array $options = array(), $http_response_code =
   }
 
   // In some cases modules call drupal_goto(current_path()). We need to ensure
-  // that such a redirect is not to an external URL.
-  if ($path === current_path() && empty($options['external']) && url_is_external($path)) {
+  // that such a redirect is not to an external URL. Check $_GET['q'] rather
+  // than current_path() in case this function is called early in the
+  // bootstrap.
+  if ($path === $_GET['q'] && empty($options['external']) && url_is_external($path)) {
     // Force url() to generate a non-external URL.
     $options['external'] = FALSE;
   }
@@ -2982,10 +2984,10 @@ function drupal_deliver_html_page($page_callback_result) {
               $markup_css = str_replace(' is-collapsed ', ' ', $markup_css);
               $page = str_replace('<body id="mcneese-body" class="mcneese ', '<body id="mcneese-body" class="mcneese ' . $markup_css . ' ', $page);
             }
-            catch (Throwable $ex) {
+            catch (Error $e) {
               // if the code is currently being modified, then errors could occur, so attempt to silently ignore them.
             }
-            catch (Exception $ex) {
+            catch (Exception $e) {
               // if the code is currently being modified, then errors could occur, so attempt to silently ignore them.
             }
           }
@@ -5662,7 +5664,7 @@ function drupal_cron_run() {
       try {
         module_invoke($module, 'cron');
       }
-      catch (Throwable $e) {
+      catch (Error $e) {
         watchdog_exception('cron', $e);
       }
       catch (Exception $e) {
@@ -5693,7 +5695,7 @@ function drupal_cron_run() {
         call_user_func($callback, $item->data);
         $queue->deleteItem($item);
       }
-      catch (Throwable $e) {
+      catch (Error $e) {
         // In case of exception log it and leave the item in the queue
         // to be processed again later.
         watchdog_exception('cron', $e);

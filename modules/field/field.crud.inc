@@ -179,7 +179,7 @@ function field_create_field($field) {
     // drupal_write_record() sets the field id.
     module_invoke($storage_type['module'], 'field_storage_create_field', $field);
   }
-  catch (Throwable $e) {
+  catch (Error $e) {
     // If storage creation failed, remove the field_config record before
     // rethrowing the exception.
     db_delete('field_config')

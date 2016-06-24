@@ -57,7 +57,7 @@ class DatabaseTasks_pgsql extends DatabaseTasks {
         $this->fail(st($text, $replacements));
       }
     }
-    catch (Throwable $e) {
+    catch (Error $e) {
       $this->fail(st('Drupal could not determine the encoding of the database was set to UTF-8'));
     }
     catch (Exception $e) {
@@ -104,7 +104,7 @@ class DatabaseTasks_pgsql extends DatabaseTasks {
         try {
           db_query($query);
         }
-        catch (Throwable $e) {
+        catch (Error $e) {
           // Ignore possible errors when the user doesn't have the necessary
           // privileges to ALTER the database.
         }
@@ -196,7 +196,7 @@ class DatabaseTasks_pgsql extends DatabaseTasks {
 
       $this->pass(st('PostgreSQL has initialized itself.'));
     }
-    catch (Throwable $e) {
+    catch (Error $e) {
       $this->fail(st('Drupal could not be correctly setup with the existing database. Revise any errors.'));
     }
     catch (Exception $e) {

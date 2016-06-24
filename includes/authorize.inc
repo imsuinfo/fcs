@@ -207,7 +207,7 @@ function authorize_filetransfer_form_validate($form, &$form_state) {
       }
       $filetransfer->connect();
     }
-    catch (Throwable $e) {
+    catch (Error $e) {
       // The format of this error message is similar to that used on the
       // database connection form in the installer.
       form_set_error('connection_settings', t('Failed to connect to the server. The server reports the following message: !message For more help installing or updating code on your server, see the <a href="@handbook_url">handbook</a>.', array(
@@ -271,7 +271,7 @@ function authorize_filetransfer_form_submit($form, &$form_state) {
         // Now run the operation.
         authorize_run_operation($filetransfer);
       }
-      catch (Throwable $e) {
+      catch (Error $e) {
         // If there is no database available, we don't care and just skip
         // this part entirely.
       }

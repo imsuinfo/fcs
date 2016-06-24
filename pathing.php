@@ -104,6 +104,79 @@ function pathing_get_uri($uri_unshift = 1) {
 }
 
 /**
+ * Execute the main drupal handler, wrapping the handler in exception handling that reports to the drupal watchdog where possible.
+ */
+function pathing_execute_handler() {
+  try {
+    menu_execute_active_handler();
+  }
+  catch (ParseError $ex) {
+    $decoded = _drupal_decode_exception($ex);
+    watchdog('php', '%type: !message in %function (line %line of %file).', $decoded, WATCHDOG_CRITICAL);
+    throw $ex;
+  }
+  catch (Error $ex) {
+    $decoded = _drupal_decode_exception($ex);
+    watchdog('php', '%type: !message in %function (line %line of %file).', $decoded);
+    throw $ex;
+  }
+  catch (Exception $ex) {
+    $decoded = _drupal_decode_exception($ex);
+    watchdog('php', '%type: !message in %function (line %line of %file).', $decoded);
+    throw $ex;
+  }
+}
+
+/**
+ * Provide a exception reporting via watchdog.
+ */
+function _drupal_root_exception_watchdog($ex, $severity = WATCHDOG_NOTICE) {
+  $decoded = _drupal_decode_exception($ex);
+  watchdog('php', '%type: !message in %function (line %line of %file).', $decoded, $severity);
+}
+
+/**
+ * Wrap the main drupal execution function inside of try..catch statements to handle errors.
+ *
+ * @todo: it should be possible to load a static page or a fallback page at this point as a failsafe that looks better than Internal Server Error.
+ */
+function _drupal_root_execute_handler($not_found = FALSE) {
+  try {
+    menu_execute_active_handler();
+  }
+  catch (ParseError $ex) {
+    _drupal_root_exception_watchdog($ex, WATCHDOG_CRITICAL);
+
+    if ($not_found) {
+      drupal_not_found();
+      drupal_exit();
+    }
+
+    throw $ex;
+  }
+  catch (Error $ex) {
+    _drupal_root_exception_watchdog($ex);
+
+    if ($not_found) {
+      drupal_not_found();
+      drupal_exit();
+    }
+
+    throw $ex;
+  }
+  catch (Exception $ex) {
+    _drupal_root_exception_watchdog($ex);
+
+    if ($not_found) {
+      drupal_not_found();
+      drupal_exit();
+    }
+
+    throw $ex;
+  }
+}
+
+/**
  * Main Function
  */
 function pathing_main() {
@@ -119,7 +192,7 @@ function pathing_main() {
       if (empty($results[0]->alias)) {
         unset($results);
         drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
-        menu_execute_active_handler();
+        _drupal_root_execute_handler();
       }
       else {
         global $base_path;
@@ -129,13 +202,13 @@ function pathing_main() {
     catch (Exception $ex) {
       // if something goes wrong, simply jump into the normal drupal load functions.
       drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
-      menu_execute_active_handler();
+      _drupal_root_execute_handler();
     }
   }
   else {
     unset($uri);
     drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
-    menu_execute_active_handler();
+    _drupal_root_execute_handler();
   }
 }
 

@@ -306,7 +306,7 @@ function field_sql_storage_field_storage_update_field($field, $prior_field, $has
         db_create_table($name, $table);
       }
     }
-    catch (Throwable $e) {
+    catch (Error $e) {
       if (Database::getConnection()->supportsTransactionalDDL()) {
         $transaction->rollback();
       }
