@@ -134,7 +134,7 @@ function mcneese_content_sitemap_main() {
   print('<?xml version="1.0" encoding="UTF-8"?>' . "\n");
   print('<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n");
 
-  $url = $base_url . $base_path . 'sitemap/node/';
+  $url = $base_url . '/sitemap/node/';
   for ($i = 0; $i < $node_pages; $i++) {
     print('  <sitemap>' . "\n");
     print('    <loc>' . $url . $i . '</loc>' . "\n");
@@ -143,7 +143,7 @@ function mcneese_content_sitemap_main() {
   }
 
 /*
-  $url = $base_url . $base_path . 'sitemap/media/';
+  $url = $base_url . '/sitemap/media/';
   for ($i = 0; $i < $media_pages; $i++) {
     print('  <sitemap>' . "\n");
     print('    <loc>' . $url . $i . '</loc>' . "\n");
@@ -172,7 +172,7 @@ function mcneese_content_sitemap_group_node($offset) {
   $rows = '';
 
   $offset_value = $offset * MCNEESE_CONTENT_SITEMAP_NODE_MAX;
-  $url = $base_url . $base_path . 'node/';
+  $url = $base_url . '/node/';
 
   // first load all nodes and handle errors before output is printed.
   try {

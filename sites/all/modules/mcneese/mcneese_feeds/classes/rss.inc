@@ -1558,7 +1558,7 @@ class McNeeseFeedsRssItem extends McNeeseFeedsRssBase {
       if ($this->permanent_link === FALSE) {
         global $base_url;
         global $base_path;
-        $item .= " on " . htmlspecialchars($base_url . $base_path, ENT_XML1, 'UTF-8');
+        $item .= " on " . htmlspecialchars($base_url . '/', ENT_XML1, 'UTF-8');
       }
 
       $item .= '</guid>' . "\n";

@@ -10161,7 +10161,7 @@ function mfcs_add_canonical_headers($unique_path, $short_path = NULL) {
 
   $mfcs_canonical[] = array(
     'rel' => 'canonical',
-    'href' => $base_url . $base_path . $unique_path,
+    'href' => $base_url . '/' . $unique_path,
   );
 
   $mfcs_canonical[] = array(
@@ -10169,7 +10169,7 @@ function mfcs_add_canonical_headers($unique_path, $short_path = NULL) {
     'href' => $base_path . $short_path,
   );
 
-  $link = '<' . $base_path . $short_path . '>; rel="shortlink", <' . $base_url . $base_path . $unique_path . '>; rel="canonical"';
+  $link = '<' . $base_path . $short_path . '>; rel="shortlink", <' . $base_url . '/' . $unique_path . '>; rel="canonical"';
 
   // provide content-location http header.
   drupal_add_http_header('content-location', $base_path . $unique_path, FALSE);
