@@ -19,11 +19,14 @@
  *   The new step to assign to the specified request.
  * @param object|null $user
  *   If specified, the user to log this change as.
+ * @param array $extra
+ *   (optional) Additional information to save. This is used for the revision
+ *   log message and signature.
  *
  * @return bool
  *   (optional) TRUE on success, FALSE otherwise.
  */
-function mfcs_workflow_set_step($request_id, $step, $user = NULL) {
+function mfcs_workflow_set_step($request_id, $step, $user = NULL, $extra = array()) {
   $request = mfcs_load_request_by_id($request_id);
 
   if (empty($request)) {
@@ -32,6 +35,11 @@ function mfcs_workflow_set_step($request_id, $step, $user = NULL) {
 
   if (!cf_is_integer($step)) {
     cf_error::invalid_integer('step');
+    return FALSE;
+  }
+
+  if (!is_array($extra)) {
+    cf_error::invalid_array('extra');
     return FALSE;
   }
 
@@ -81,6 +89,17 @@ function mfcs_workflow_set_step($request_id, $step, $user = NULL) {
     'user_id' => $user->uid,
   );
 
+  $revisions_has_extras = FALSE;
+  if (!empty($extra['revisions']['message'])) {
+    $mfcs_request_revisions['message'] = $extra['revisions']['message'];
+    $revisions_has_extras = TRUE;
+  }
+
+  if (!empty($extra['revisions']['signature'])) {
+    $mfcs_request_revisions['signature'] = $extra['revisions']['signature'];
+    $revisions_has_extras = TRUE;
+  }
+
   $step_revision = $request['current']['top']['step'] + 1;
 
   $mfcs_current = array(
@@ -104,7 +123,17 @@ function mfcs_workflow_set_step($request_id, $step, $user = NULL) {
     $query->fields($mfcs_requests);
     $query->execute();
 
-    if (!$processed_mfcs_request_revisions) {
+    if ($processed_mfcs_request_revisions) {
+      if ($revisions_has_extras) {
+        $query = db_update('mfcs_request_revisions');
+        $query->condition('id', $request_id);
+        $query->condition('date', $instance);
+        $query->condition('user_id', $user->uid);
+        $query->fields($mfcs_request_revisions);
+        $query->execute();
+      }
+    }
+    else {
       $query = db_insert('mfcs_request_revisions');
       $query->fields($mfcs_request_revisions);
       $query->execute();
