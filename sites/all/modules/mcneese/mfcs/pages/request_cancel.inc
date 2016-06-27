@@ -98,6 +98,20 @@ function mfcs_request_cancel_0_form($form, &$form_state, $request_id) {
   $form['message']['#markup'] .= 'Are you certain you want to cancel? ';
   $form['message']['#markup'] .= '</div>';
 
+  $form['decision'] = array(
+    '#tree' => TRUE,
+  );
+
+  $form['decision']['message'] = array(
+    '#id' => 'request-override-message',
+    '#type' => 'textarea',
+    '#tree' => TRUE,
+    '#title' => 'Log Message',
+    '#default_value' => NULL,
+    '#required' => FALSE,
+    '#description' => "Optionally provide a message in the log."
+  );
+
   $form['display']['submit'] = array(
     '#id' => 'request-cancel-submit',
     '#type' => 'container',
@@ -172,15 +186,20 @@ function mfcs_request_cancel_0_form_submit($form, &$form_state) {
 
   mfcs_include(MFCS_INCLUDE_WORKFLOW);
 
+  $extra = array();
+  if (isset($form_state['values']['decision']['message'])) {
+    $extra['revisions']['message'] = $form_state['values']['decision']['message'];
+  }
+
   if (isset($form['form']['request']['top']['status'][0]->value) && $form['form']['request']['top']['status'][0]->value == MFCS_REQUEST_STATUS_CLOSED_ACCEPTED) {
-    $cancelled = mfcs_workflow_set_status($request_id, MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED);
+    $cancelled = mfcs_workflow_set_status($request_id, MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED, NULL, $extra);
   }
   else {
-    $cancelled = mfcs_workflow_set_status($request_id, MFCS_REQUEST_STATUS_CANCELLED);
+    $cancelled = mfcs_workflow_set_status($request_id, MFCS_REQUEST_STATUS_CANCELLED, NULL, $extra);
   }
 
   if ($cancelled) {
-    mfcs_workflow_step_review($request_id, $user, MFCS_REVIEW_DECISION_CANCELLED, MFCS_REVIEW_RESTRICTIONS_NONE);
+    mfcs_workflow_step_review($request_id, $user, MFCS_REVIEW_DECISION_CANCELLED, MFCS_REVIEW_RESTRICTIONS_NONE, $extra['revisions']['message']);
 
     $parameters = array();
     $parameters['changed_by'] = $user->uid;
@@ -298,10 +317,24 @@ function mfcs_request_uncancel_0_form($form, &$form_state, $request_id) {
   $form['message'] = array(
     '#markup' => '',
   );
-  $form['message']['#markup'] .= '<h3>Are you sure wou want to uncancel the request?</h3> ';
+  $form['message']['#markup'] .= '<h3>Are you sure you want to uncancel the request?</h3> ';
   $form['message']['#markup'] .= '<div>';
   $form['message']['#markup'] .= 'Uncancelling the form will add the request back to the queue in its prior status. ';
   $form['message']['#markup'] .= '</div>';
+
+  $form['decision'] = array(
+    '#tree' => TRUE,
+  );
+
+  $form['decision']['message'] = array(
+    '#id' => 'request-override-message',
+    '#type' => 'textarea',
+    '#tree' => TRUE,
+    '#title' => 'Log Message',
+    '#default_value' => NULL,
+    '#required' => FALSE,
+    '#description' => "Optionally provide a message in the log."
+  );
 
   $form['display']['submit'] = array(
     '#id' => 'request-uncancel-submit',
@@ -386,6 +419,8 @@ function mfcs_request_uncancel_0_form_submit($form, &$form_state) {
 
     $query->condition('mfts.request_id', $request_id);
     $query->condition('mfts.revision', $form['form']['request']['#value']['current']['top']['status'], '<');
+    $query->condition('mfts.value', MFCS_REQUEST_STATUS_CANCELLED, '<>');
+    $query->condition('mfts.value', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED, '<>');
 
     $query->range(0, 1);
     $query->orderBy('mfts.revision', 'desc');
@@ -407,12 +442,17 @@ function mfcs_request_uncancel_0_form_submit($form, &$form_state) {
     $uncancelled = FALSE;
   }
 
-  if ($uncancelled) {
-    $uncancelled = mfcs_workflow_set_status($request_id, $previous[0]->value);
+  $extra = array();
+  if (isset($form_state['values']['decision']['message'])) {
+    $extra['revisions']['message'] = $form_state['values']['decision']['message'];
   }
 
   if ($uncancelled) {
-    mfcs_workflow_step_review($request_id, $user, MFCS_REVIEW_DECISION_UNCANCELLED, MFCS_REVIEW_RESTRICTIONS_NONE);
+    $uncancelled = mfcs_workflow_set_status($request_id, $previous[0]->value, NULL, $extra);
+  }
+
+  if ($uncancelled) {
+    mfcs_workflow_step_review($request_id, $user, MFCS_REVIEW_DECISION_UNCANCELLED, MFCS_REVIEW_RESTRICTIONS_NONE, $extra['revisions']['message']);
 
     $parameters = array();
     $parameters['changed_by'] = $user->uid;
