@@ -1913,9 +1913,9 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
   }
 
   // this only applies to e-mails that the requester would not normally receive prior to ticket fcs-79.
-  $reviewer_included_in_emails = TRUE;
+  $requester_included_in_emails = TRUE;
   if (array_key_exists('requester_included', $parameters) && $parameters['requester_included'] === FALSE) {
-    $reviewer_included_in_emails = FALSE;
+    $requester_included_in_emails = FALSE;
   }
 
   if (!is_null($changed_by)) {
@@ -2355,7 +2355,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       }
 
       // as of fcs-79, conditionally include the requester in the e-mails.
-      if ($reviewer_included_in_emails && !is_null($request_requester['email'])) {
+      if ($requester_included_in_emails && !is_null($request_requester['email'])) {
         // requesters should receive an e-mail for created requests that have been closed as unavailable and a comment is left.
         if (strlen($message) > 0) {
           $email_to[$request_requester['email']] = $request_requester['email'];
@@ -2388,7 +2388,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       }
 
       // as of fcs-79, conditionally include the requester in the e-mails.
-      if ($reviewer_included_in_emails && !is_null($request_requester['email'])) {
+      if ($requester_included_in_emails && !is_null($request_requester['email'])) {
         // requesters should receive an e-mail for created requests that have been closed as unavailable and a comment is left.
         if (strlen($message) > 0) {
           $email_to[$request_requester['email']] = $request_requester['email'];
@@ -2521,7 +2521,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       }
 
       // as of fcs-79, conditionally include the requester in the e-mails
-      if ($reviewer_included_in_emails && !is_null($request_requester['email'])) {
+      if ($requester_included_in_emails && !is_null($request_requester['email'])) {
         // not adding to comment only here because in this case the requester should receive the full/normal e-mail.
         $email_to[$request_requester['email']] = $request_requester['email'];
       }
@@ -2579,7 +2579,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     }
 
     // as of fcs-79, conditionally include the requester in the e-mails.
-    if ($reviewer_included_in_emails && !is_null($request_requester['email'])) {
+    if ($requester_included_in_emails && !is_null($request_requester['email'])) {
       // not adding to comment only here because in this case the requester should receive the full/normal e-mail.
       $email_to[$request_requester['email']] = $request_requester['email'];
     }
@@ -2619,7 +2619,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       }
 
       // as of fcs-79, conditionally include the requester in the e-mails.
-      if ($reviewer_included_in_emails && !is_null($request_requester['email'])) {
+      if ($requester_included_in_emails && !is_null($request_requester['email'])) {
         // not adding to comment only here because in this case the requester should receive the full/normal e-mail.
         $email_to[$request_requester['email']] = $request_requester['email'];
       }
@@ -2898,7 +2898,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       }
 
       // as of fcs-79, conditionally include the requester in the e-mails.
-      if ($reviewer_included_in_emails && !is_null($request_requester['email'])) {
+      if ($requester_included_in_emails && !is_null($request_requester['email'])) {
         // not adding to comment only here because in this case the requester should receive the full/normal e-mail.
         $email_to[$request_requester['email']] = $request_requester['email'];
       }
@@ -2947,7 +2947,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       }
 
       // as of fcs-79, conditionally include the requester in the e-mails.
-      if ($reviewer_included_in_emails && !is_null($request_requester['email'])) {
+      if ($requester_included_in_emails && !is_null($request_requester['email'])) {
         if (!array_key_exists($request_requester['email'], $email_to) && strlen($message) > 0) {
           $email_comment_only[$request_requester['email']] = $request_requester['email'];
           $email_to[$request_requester['email']] = $request_requester['email'];
@@ -2998,7 +2998,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       }
 
       // as of fcs-79, conditionally include the requester in the e-mails.
-      if ($reviewer_included_in_emails && !is_null($request_requester['email'])) {
+      if ($requester_included_in_emails && !is_null($request_requester['email'])) {
         if (!array_key_exists($request_requester['email'], $email_to) && strlen($message) > 0) {
           $email_comment_only[$request_requester['email']] = $request_requester['email'];
           $email_to[$request_requester['email']] = $request_requester['email'];
@@ -3101,7 +3101,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     }
 
     // as of fcs-79, conditionally include the requester in the e-mails.
-    if ($reviewer_included_in_emails && !is_null($request_requester['email'])) {
+    if ($requester_included_in_emails && !is_null($request_requester['email'])) {
       if (!array_key_exists($request_requester['email'], $email_to) && strlen($message) > 0) {
         $email_comment_only[$request_requester['email']] = $request_requester['email'];
         $email_to[$request_requester['email']] = $request_requester['email'];
@@ -3138,7 +3138,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     }
 
     // as of fcs-79, conditionally include the requester in the e-mails.
-    if ($reviewer_included_in_emails && !is_null($request_requester['email'])) {
+    if ($requester_included_in_emails && !is_null($request_requester['email'])) {
       $email_comment_only[$request_requester['email']] = $request_requester['email'];
       $email_to[$request_requester['email']] = $request_requester['email'];
     }
