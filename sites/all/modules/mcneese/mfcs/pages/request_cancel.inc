@@ -103,7 +103,7 @@ function mfcs_request_cancel_0_form($form, &$form_state, $request_id) {
   );
 
   $form['decision']['message'] = array(
-    '#id' => 'request-override-message',
+    '#id' => 'request-cancel-message',
     '#type' => 'textarea',
     '#tree' => TRUE,
     '#title' => 'Log Message',
@@ -327,7 +327,7 @@ function mfcs_request_uncancel_0_form($form, &$form_state, $request_id) {
   );
 
   $form['decision']['message'] = array(
-    '#id' => 'request-override-message',
+    '#id' => 'request-cancel-message',
     '#type' => 'textarea',
     '#tree' => TRUE,
     '#title' => 'Log Message',

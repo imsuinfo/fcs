@@ -71,6 +71,8 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     $can_agreement_request = mfcs_request_access('agreement', $request, $user);
     $can_cancel_request = mfcs_request_access('cancel', $request, $user);
     $can_uncancel_request = mfcs_request_access('uncancel', $request, $user);
+    $can_manage_request = mfcs_request_access('manage', $request, $user);
+    $can_override_request = mfcs_request_access('override', $request, $user);
     $can_reassign_request = mfcs_request_access('reassign', $request, $user);
     $can_cancelling_request = mfcs_request_access('cancelling', $request, $user);
   }
@@ -93,6 +95,8 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     $can_agreement_request = mfcs_request_access('agreement', $request_latest, $user);
     $can_cancel_request = mfcs_request_access('cancel', $request_latest, $user);
     $can_uncancel_request = mfcs_request_access('uncancel', $request_latest, $user);
+    $can_manage_request = mfcs_request_access('manage', $request_latest, $user);
+    $can_override_request = mfcs_request_access('override', $request_latest, $user);
     $can_reassign_request = mfcs_request_access('reassign', $request_latest, $user);
     $can_cancelling_request = mfcs_request_access('cancelling', $request_latest, $user);
 
@@ -166,13 +170,14 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     $cancel_form_state = array();
     return mfcs_request_uncancel_0_form($cancel_form, $cancel_form_state, $request_id);
   }
-  elseif (isset($form_state['reassign_was_clicked'])) {
-    mfcs_include(MFCS_INCLUDE_REQUEST_REASSIGN);
 
-    $cancel_form = array();
-    $cancel_form_state = array();
-    return mfcs_request_reassign_0_form($cancel_form, $cancel_form_state, $request_id);
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
   }
+
 
   $proxies = mfcs_get_proxy_venue_coordinator($user->uid);
   $venue_coordinator_ids = array();
@@ -198,11 +203,13 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
   elseif ($mode == MFCS_VIEW_MODE_LOG) {
     $show_display = FALSE;
     $show_operations = FALSE;
+    $can_manage_request = FALSE;
     $can_reassign_request = FALSE;
   }
   elseif ($mode == MFCS_VIEW_MODE_OPERATIONS) {
     $show_display = FALSE;
     $show_log = FALSE;
+    $can_manage_request = FALSE;
     $can_reassign_request = FALSE;
   }
 
@@ -218,7 +225,8 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
   if ($can_reassign_request && is_null($use_revision)) {
     if ($show_display) {
-      if (mfcs_disabled_users_with_active_content($request['venue_coordinator']['user_id'][0]->value)) {
+      $disabled_with_active = mfcs_disabled_venue_coordinators_with_active_content($request['venue_coordinator']['user_id'][0]->value);
+      if (!empty($disabled_with_active)) {
         $user_venue_coordinator = mfcs_load_basic_user_settings_by_user_id($request['venue_coordinator']['user_id'][0]->value);
 
         if (!empty($user_venue_coordinator['name'])) {
@@ -928,6 +936,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
               'request-display-submit-cancel',
               'mode-' . $mode,
             ),
+            'title' => "Cancel this request.",
           ),
           '#submit' => array(
             'mfcs_request_cancel_0_form_submit',
@@ -946,6 +955,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
               'request-display-submit-uncancel',
               'mode-' . $mode,
             ),
+            'title' => "Uncancel this request.",
           ),
           '#submit' => array(
             'mfcs_request_uncancel_0_form_submit',
@@ -965,6 +975,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
             'mode-' . $mode,
           ),
           'onclick' => 'window.print(); return false;',
+          'title' => "Send this request to your printer.",
         ),
       );
 
@@ -979,27 +990,47 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
             'request-display-submit-download',
             'mode-' . $mode,
           ),
+          'title' => "View or Download this request as a PDF.",
         ),
         '#submit' => array(
           'mfcs_request_view_0_form_submit_pdf',
         ),
       );
 
+      if ($can_manage_request && is_null($use_revision)) {
+        $form['display']['submit']['manage'] = array(
+          '#id' => 'request-display-submit-manage',
+          '#name' => 'request-display-submit-manage',
+          '#type' => 'link',
+          '#title' => t("Manage"),
+          '#href' => 'requests/manage-0/' . $request_id . $url_arguments,
+          '#attributes' => array(
+            'class' => array(
+              'no-print',
+              'button',
+              'request-display-submit-manage',
+              'mode-' . $mode,
+            ),
+            'title' => "Perform management tasks on this request.",
+          ),
+        );
+      }
+
       if ($can_reassign_request && is_null($use_revision)) {
         $form['display']['submit']['reassign'] = array(
           '#id' => 'request-display-submit-reassign',
           '#name' => 'request-display-submit-reassign',
-          '#type' => 'submit',
-          '#default_value' => t("Re-Assign"),
+          '#type' => 'link',
+          '#title' => t("Re-Assign"),
+          '#href' => 'requests/manage-0/reassign/' . $request_id . $url_arguments,
           '#attributes' => array(
             'class' => array(
               'no-print',
+              'button',
               'request-display-submit-reassign',
               'mode-' . $mode,
             ),
-          ),
-          '#submit' => array(
-            'mfcs_request_reassign_0_form_submit',
+            'title' => "Re-assign the Venue Coordinator.",
           ),
         );
       }
@@ -1116,7 +1147,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
               // create a javascript based users list to easily display the users associated with the given classification.
               $yet_to_review_markup .= '<div class="details_list inline" title="View list of users associated with this reviewer classification.">';
-              $yet_to_review_markup .= '<span class="no-script-hidden no-print details_list-label label-' . $classification_id . '">(<span class="details_list-link link-' . $classification_id . ' inline fake_link">Details</span>)</span>';
+              $yet_to_review_markup .= ' <span class="no-script-hidden no-print details_list-label label-' . $classification_id . '">(<span class="details_list-link link-' . $classification_id . ' inline fake_link">Details</span>)</span>';
               $yet_to_review_markup .= '<ul class="script-hidden details_list-item item-' . $classification_id . '">';
               if (!empty($decisions[$request_id]['reviewers'][$classification_id])) {
                 foreach ($decisions[$request_id]['reviewers'][$classification_id] as $user_id) {
@@ -1272,6 +1303,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
               'mode-' . $mode,
             ),
             'onclick' => 'window.print(); return false;',
+          'title' => "Send this request to your printer.",
           ),
         );
 
@@ -1286,6 +1318,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
               'request-review-log-submit-download',
               'mode-' . $mode,
             ),
+           'title' => "View or Download this request as a PDF.",
           ),
           '#submit' => array(
             'mfcs_request_view_0_form_submit_pdf',
@@ -2058,17 +2091,6 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
 
     $form_state['uncancel_was_clicked'] = TRUE;
   }
-  elseif ($clicked_id == 'request-display-submit-reassign') {
-    if ($mode != MFCS_VIEW_MODE_NORMAL && $mode != MFCS_VIEW_MODE_DISPLAY) {
-      form_set_error('', "This view mode does not allow re-assignment.");
-    }
-
-    if (isset($form['form']['use_revision']['#value']) && !is_null($form['form']['use_revision']['#value'])) {
-      form_set_error('', "Revisions can not be re-assigned.");
-    }
-
-    $form_state['reassign_was_clicked'] = TRUE;
-  }
   elseif ($clicked_id == 'request-review-operations-submit-submit') {
     if (isset($form['form']['use_revision']['#value']) && !is_null($form['form']['use_revision']['#value'])) {
       form_set_error('', "Revisions can not be changed or reviewed.");
@@ -2338,26 +2360,6 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
 
     $form_state['rebuild'] = FALSE;
   }
-  elseif ($clicked_id == 'request-reassign-submit-yes' || $clicked_id == 'request-reassign-submit-no') {
-    if (isset($form['form']['use_revision']['#value']) && !is_null($form['form']['use_revision']['#value'])) {
-      form_set_error('', "Revisions can not be Re-assigned.");
-      return;
-    }
-
-    if ($clicked_id == 'request-reassign-submit-yes') {
-      if (!isset($form['form']['old_coordinator_id']['#value']) || !isset($form['form']['new_coordinator_id']['#value'])) {
-        form_set_error('', 'Cannot submit, key information is missing.');
-        return;
-      }
-
-      if ($form['form']['old_coordinator_id']['#value'] == $form['form']['new_coordinator_id']['#value']) {
-        form_set_error('', 'The new coordinator would be the same as the old one. Either the Banner Database Cache is out of sync or the Venue Coordinator for this Room has not been updated in the Banner Database.');
-        return;
-      }
-    }
-
-    $form_state['rebuild'] = FALSE;
-  }
 }
 
 /**
@@ -2401,13 +2403,6 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
     $deleted = mfcs_include(MFCS_INCLUDE_REQUEST_CANCEL);
 
     mfcs_request_uncancel_0_form_submit($form, $form_state);
-
-    return;
-  }
-  elseif ($clicked_id == 'request-reassign-submit-yes') {
-    $deleted = mfcs_include(MFCS_INCLUDE_REQUEST_REASSIGN);
-
-    mfcs_request_reassign_0_form_submit($form, $form_state);
 
     return;
   }

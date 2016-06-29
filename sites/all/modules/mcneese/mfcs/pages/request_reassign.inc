@@ -23,7 +23,7 @@
  * @return string
  *   The HTML output representing the page.
  */
-function mfcs_request_reassign_0_form($form, &$form_state, $request_id) {
+function mfcs_request_manage_0_reassign_form($form, &$form_state, $request_id) {
   if (!is_array($form)) {
     cf_error::invalid_array('form');
 
@@ -49,20 +49,13 @@ function mfcs_request_reassign_0_form($form, &$form_state, $request_id) {
     return array();
   }
 
-  mfcs_add_canonical_headers('requests/reassign-0/' . $request_id);
+  mfcs_add_canonical_headers('requests/manage-0/reassign/' . $request_id);
 
   $page_title = "Re-Assign Request";
   if (!empty($request['information']['title'][0]->value)) {
     $page_title = "Re-Assign Request: " . $request['information']['title'][0]->value;
   }
   drupal_set_title($page_title);
-
-
-  if (!mfcs_disabled_users_with_active_content($request['venue_coordinator']['user_id'][0]->value)) {
-    drupal_not_found();
-    drupal_exit();
-    return array();
-  }
 
   global $conf;
 
@@ -214,16 +207,16 @@ function mfcs_request_reassign_0_form($form, &$form_state, $request_id) {
 }
 
 /**
- * Validation for mfcs_request_reassign_0_form().
+ * Validation for mfcs_request_manage_0_reassign_form().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mfcs_request_reassign_0_form()
+ * @see: mfcs_request_manage_0_reassign_form()
  */
-function mfcs_request_reassign_0_form_validate($form, &$form_state) {
+function mfcs_request_manage_0_reassign_form_validate($form, &$form_state) {
   $clicked_id = '';
   if (isset($form_state['triggering_element']['#id'])) {
     $clicked_id = $form_state['triggering_element']['#id'];
@@ -235,16 +228,16 @@ function mfcs_request_reassign_0_form_validate($form, &$form_state) {
 }
 
 /**
- * Submit process for mfcs_request_reassign_0_form().
+ * Submit process for mfcs_request_manage_0_reassign_form().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mfcs_request_reassign_0_form()
+ * @see: mfcs_request_manage_0_reassign_form()
  */
-function mfcs_request_reassign_0_form_submit($form, &$form_state) {
+function mfcs_request_manage_0_reassign_form_submit($form, &$form_state) {
   $user = cf_current_user();
 
   $clicked_id = '';

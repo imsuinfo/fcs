@@ -85,6 +85,7 @@ define('MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED', 8);
  define('MFCS_REVIEW_DECISION_CANCELLED', 2);
  define('MFCS_REVIEW_DECISION_UNCANCELLED', 3);
  define('MFCS_REVIEW_DECISION_REASSIGNED', 4);
+ define('MFCS_REVIEW_DECISION_OVERRIDE', 5);
 
 /**
  * Defines Taxonomy TIDs for review classifications.
@@ -274,6 +275,7 @@ define('MFCS_INCLUDE_REQUEST_CANCEL', 11);
 define('MFCS_INCLUDE_REQUEST_CREATE', 12);
 define('MFCS_INCLUDE_REQUEST_VIEW', 13);
 define('MFCS_INCLUDE_REQUEST_LIST', 14);
+define('MFCS_INCLUDE_REQUEST_OVERRIDE', 21);
 define('MFCS_INCLUDE_REQUEST_REASSIGN', 18);
 define('MFCS_INCLUDE_REQUEST_ICAL', 19);
 define('MFCS_INCLUDE_REQUEST_USERS', 20);
@@ -837,6 +839,34 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
   }
   elseif ($operation == 'cancelling') {
     $operation_result = mfcs_page_request_access_operation_cancelling($request_ids, $processed, $access, $roles, $user);
+
+    // if something went wrong with the operation check, return FALSE but do not cache.
+    if ($operation_result === FALSE) {
+      return FALSE;
+    }
+
+    if (is_array($request_id)) {
+      return $processed;
+    }
+
+    return $processed[$request_id];
+  }
+  elseif ($operation == 'manage') {
+    $operation_result = mfcs_page_request_access_operation_manage($request_ids, $processed, $access, $roles, $user);
+
+    // if something went wrong with the operation check, return FALSE but do not cache.
+    if ($operation_result === FALSE) {
+      return FALSE;
+    }
+
+    if (is_array($request_id)) {
+      return $processed;
+    }
+
+    return $processed[$request_id];
+  }
+  elseif ($operation == 'override') {
+    $operation_result = mfcs_page_request_access_operation_override($request_ids, $processed, $access, $roles, $user);
 
     // if something went wrong with the operation check, return FALSE but do not cache.
     if ($operation_result === FALSE) {
@@ -1595,6 +1625,30 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
       }
     }
   }
+  elseif ($operation == 'manage') {
+    if ($request['top']['status'][0]->value == MFCS_REQUEST_STATUS_DELETED) {
+      $access[$request_id] = FALSE;
+      return FALSE;
+    }
+
+    // only managers and administers are allowed to override the status of a request.
+    if ($roles['manager'] || $roles['administer']) {
+      $access[$request_id] = TRUE;
+      return TRUE;
+    }
+  }
+  elseif ($operation == 'override') {
+    if ($request['top']['status'][0]->value == MFCS_REQUEST_STATUS_DELETED) {
+      $access[$request_id] = FALSE;
+      return FALSE;
+    }
+
+    // only managers and administers are allowed to override the status of a request.
+    if ($roles['manager'] || $roles['administer']) {
+      $access[$request_id] = TRUE;
+      return TRUE;
+    }
+  }
   elseif ($operation == 'reassign') {
     if ($request['top']['status'][0]->value == MFCS_REQUEST_STATUS_DELETED) {
       $access[$request_id] = FALSE;
@@ -2168,23 +2222,23 @@ function mfcs_include($id) {
   elseif ($id == MFCS_INCLUDE_REQUEST_CANCEL) {
     require_once($module_path . '/pages/request_cancel.inc');
   }
-  elseif ($id == MFCS_INCLUDE_REQUEST_REASSIGN) {
-    require_once($module_path . '/pages/request_reassign.inc');
-  }
-  elseif ($id == MFCS_INCLUDE_REQUEST_ICAL) {
-    require_once($module_path . '/pages/request_ical.inc');
-  }
   elseif ($id == MFCS_INCLUDE_REQUEST_CREATE) {
     require_once($module_path . '/pages/request_create.inc');
   }
-  elseif ($id == MFCS_INCLUDE_REQUEST_VIEW) {
-    require_once($module_path . '/pages/request_view.inc');
+  elseif ($id == MFCS_INCLUDE_REQUEST_ICAL) {
+    require_once($module_path . '/pages/request_ical.inc');
   }
   elseif ($id == MFCS_INCLUDE_REQUEST_LIST) {
     require_once($module_path . '/pages/request_list.inc');
   }
-  elseif ($id == MFCS_INCLUDE_REQUEST_ICAL) {
-    require_once($module_path . '/pages/request_ical.inc');
+  elseif ($id == MFCS_INCLUDE_REQUEST_OVERRIDE) {
+    require_once($module_path . '/pages/request_override.inc');
+  }
+  elseif ($id == MFCS_INCLUDE_REQUEST_REASSIGN) {
+    require_once($module_path . '/pages/request_reassign.inc');
+  }
+  elseif ($id == MFCS_INCLUDE_REQUEST_VIEW) {
+    require_once($module_path . '/pages/request_view.inc');
   }
   elseif ($id == MFCS_INCLUDE_TESTING) {
     require_once($module_path . '/includes/testing.inc');
@@ -4588,7 +4642,7 @@ function mfcs_sync_banner_to_local($transaction = NULL, $user = NULL, $message_o
  * @return bool
  *   TRUE on success, FALSE otherwise.
  *
- * @see: mfcs_search_for_and_mark_disabled_users_with_active_content()
+ * @see: mfcs_search_for_and_mark_disabled_venue_coordinators_with_active_content()
  */
 function mfcs_sync_banner_to_local_users($user_id = NULL, $banner_id = NULL, $message_on_oracle_failure = FALSE) {
   if (!is_null($user_id) && !cf_is_integer($user_id)) {
@@ -4742,7 +4796,7 @@ function mfcs_sync_banner_to_local_users($user_id = NULL, $banner_id = NULL, $me
   }
 
   // once banner sync is complete, check for disabled accounts.
-  mfcs_search_for_and_mark_disabled_users_with_active_content();
+  mfcs_search_for_and_mark_disabled_venue_coordinators_with_active_content();
 
   return TRUE;
 }
@@ -8600,6 +8654,7 @@ function mfcs_build_request_table($items, $max_rows, $columns = NULL, $user = NU
   $can_edit_requests = mfcs_page_request_access('edit', $item_ids, $user);
   $can_review_requests = mfcs_page_request_access('review', $item_ids, $user);
   $can_log_requests = mfcs_page_request_access('log', $item_ids, $user);
+  $can_manage_requests = mfcs_page_request_access('manage', $item_ids, $user);
   $can_history_requests = mfcs_page_request_access('history', $item_ids, $user);
   #$can_delete_requests = mfcs_page_request_access('delete', $item_ids, $user);
   $can_delete_requests = FALSE;
@@ -8618,6 +8673,10 @@ function mfcs_build_request_table($items, $max_rows, $columns = NULL, $user = NU
 
   if (!is_array($can_log_requests)) {
     $can_log_requests = array();
+  }
+
+  if (!is_array($can_manage_requests)) {
+    $can_manage_requests = array();
   }
 
   if (!is_array($can_history_requests)) {
@@ -8809,6 +8868,10 @@ function mfcs_build_request_table($items, $max_rows, $columns = NULL, $user = NU
         $row['operations']['data'] .= '<a href="' . $base_path . 'requests/view-0/' . $item->id . '/' . MFCS_VIEW_MODE_LOG . $url_arguments . '" class="operation-link operation-link-log">Log</a> ';
       }
 
+      if (array_key_exists($item->id, $can_manage_requests) && $can_manage_requests[$item->id]) {
+        $row['operations']['data'] .= '<a href="' . $base_path . 'requests/manage-0/' . $item->id . $url_arguments . '" class="operation-link operation-link-manage">Manage</a> ';
+      }
+
       if (array_key_exists($item->id, $can_history_requests) && $can_history_requests[$item->id]) {
         $row['operations']['data'] .= '<a href="' . $base_path . 'requests/history-0/' . $item->id . $url_arguments . '" class="operation-link operation-link-history">History</a> ';
       }
@@ -8992,52 +9055,10 @@ function mfcs_build_request_ajax_table($items_returned, $conditions, $options, $
     }
   }
 
-  $rows = array();
-  $rows_count = 0;
-
   $items = array();
   if (isset($items_returned['results']) && is_array($items_returned['results'])) {
     $items = $items_returned['results'];
   }
-
-  $item_ids = array_keys($items);
-  $can_create_requests = mfcs_page_request_access('create', $item_ids, $user);
-  $can_edit_requests = mfcs_page_request_access('edit', $item_ids, $user);
-  $can_review_requests = mfcs_page_request_access('review', $item_ids, $user);
-  $can_log_requests = mfcs_page_request_access('log', $item_ids, $user);
-  $can_history_requests = mfcs_page_request_access('history', $item_ids, $user);
-  #$can_delete_requests = mfcs_page_request_access('delete', $item_ids, $user);
-  $can_delete_requests = FALSE;
-
-  if (!is_array($can_create_requests)) {
-    $can_create_requests = array();
-  }
-
-  if (!is_array($can_edit_requests)) {
-    $can_edit_requests = array();
-  }
-
-  if (!is_array($can_review_requests)) {
-    $can_review_requests = array();
-  }
-
-  if (!is_array($can_log_requests)) {
-    $can_log_requests = array();
-  }
-
-  if (!is_array($can_history_requests)) {
-    $can_history_requests = array();
-  }
-
-  if (!is_array($can_delete_requests)) {
-    $can_delete_requests = array();
-  }
-
-  $status_options = mfcs_get_request_status_list_options();
-  $step_options = mfcs_get_request_steps_list_options();
-  $location_options = mfcs_get_request_location_list_options(NULL, FALSE, TRUE);
-  $room_options = mfcs_get_request_room_list_options(NULL, NULL, TRUE);
-  $building_options = array();
 
 
   // populate the table headers.
@@ -9304,6 +9325,7 @@ function mfcs_build_request_ajax_table_process_rows($items, $columns, $user = NU
   $can_edit_requests = mfcs_page_request_access('edit', $item_ids, $user);
   $can_review_requests = mfcs_page_request_access('review', $item_ids, $user);
   $can_log_requests = mfcs_page_request_access('log', $item_ids, $user);
+  $can_manage_requests = mfcs_page_request_access('manage', $item_ids, $user);
   $can_history_requests = mfcs_page_request_access('history', $item_ids, $user);
   #$can_delete_requests = mfcs_page_request_access('delete', $item_ids, $user);
   $can_delete_requests = FALSE;
@@ -9322,6 +9344,10 @@ function mfcs_build_request_ajax_table_process_rows($items, $columns, $user = NU
 
   if (!is_array($can_log_requests)) {
     $can_log_requests = array();
+  }
+
+  if (!is_array($can_manage_requests)) {
+    $can_manage_requests = array();
   }
 
   if (!is_array($can_history_requests)) {
@@ -9363,6 +9389,10 @@ function mfcs_build_request_ajax_table_process_rows($items, $columns, $user = NU
 
           if (array_key_exists($item->id, $can_log_requests) && $can_log_requests[$item->id]) {
             $data .= '<a href="' . $base_path . 'requests/view-0/' . $item->id . '/' . MFCS_VIEW_MODE_LOG . $url_arguments . '" class="operation-link operation-link-log">Log</a> ';
+          }
+
+          if (array_key_exists($item->id, $can_manage_requests) && $can_manage_requests[$item->id]) {
+            $data .= '<a href="' . $base_path . 'requests/manage-0/' . $item->id . $url_arguments . '" class="operation-link operation-link-manage">Manage</a> ';
           }
 
           if (array_key_exists($item->id, $can_history_requests) && $can_history_requests[$item->id]) {
@@ -10721,9 +10751,8 @@ function mfcs_users_load_banner_id_to_user_id($banner_id = NULL) {
 
   return $list;
 }
-
 /**
- * Obtain a list of disabled accounts that are assigned to active content.
+ * Obtain a list of disabled accounts that are assigned as a requester to active content.
  *
  * @param int|null $user_id
  *   (optional) When an integer, represents the user id for a single user to load.
@@ -10733,7 +10762,60 @@ function mfcs_users_load_banner_id_to_user_id($banner_id = NULL) {
  *   An array of users who have active content.
  *   FALSE is returned on error.
  */
-function mfcs_disabled_users_with_active_content($user_id = NULL) {
+function mfcs_disabled_requesters_with_active_content($user_id = NULL) {
+  if (!is_null($user_id) && !cf_is_integer($user_id)) {
+    cf_error::invalid_integer('user_id');
+    return FALSE;
+  }
+
+  $rows = array();
+  try {
+    $query = db_select('mfcs_requests', 'mer');
+    $query->innerJoin('users', 'u', 'mer.user_id = u.uid');
+
+    $query->addField('mer', 'user_id', 'user_id');
+    $query->distinct();
+
+    $query->condition('mer.status', array(MFCS_REQUEST_STATUS_LOCKED, MFCS_REQUEST_STATUS_UNLOCKED), 'IN');
+    $query->condition('u.status', 0);
+
+    if (!is_null($user_id)) {
+      $query->condition('u.uid', $user_id);
+    }
+
+    $results = $query->execute()->fetchAll();
+    if (is_array($results)) {
+      foreach ($results as $result) {
+        $rows[$result->user_id] = $result->user_id;
+      }
+    }
+  }
+  catch (Error $e) {
+    cf_error::on_exception($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
+
+    return FALSE;
+  }
+
+  return $rows;
+}
+
+/**
+ * Obtain a list of disabled accounts that are assigned as a venue coordinator to active content.
+ *
+ * @param int|null $user_id
+ *   (optional) When an integer, represents the user id for a single user to load.
+ *   When NULL, all users will be loaded.
+ *
+ * @return bool|array
+ *   An array of users who have active content.
+ *   FALSE is returned on error.
+ */
+function mfcs_disabled_venue_coordinators_with_active_content($user_id = NULL) {
   if (!is_null($user_id) && !cf_is_integer($user_id)) {
     cf_error::invalid_integer('user_id');
     return FALSE;
@@ -10777,12 +10859,12 @@ function mfcs_disabled_users_with_active_content($user_id = NULL) {
 }
 
 /**
- * Search through database for users and store the appropriate user problem settings.
+ * Search through database for venue coordinators and store the appropriate user problem settings.
  *
- * @see: mfcs_disabled_users_with_active_content()
+ * @see: mfcs_disabled_venue_coordinators_with_active_content()
  */
-function mfcs_search_for_and_mark_disabled_users_with_active_content() {
-  $disabled_user_ids = mfcs_disabled_users_with_active_content();
+function mfcs_search_for_and_mark_disabled_venue_coordinators_with_active_content() {
+  $disabled_user_ids = mfcs_disabled_venue_coordinators_with_active_content();
 
   // do not bother with error reporting, just exit if a non-array is returned.
   if (!is_array($disabled_user_ids)) {

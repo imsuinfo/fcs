@@ -244,15 +244,41 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
     'tab_root' => 'requests',
   );
 
-  $items['requests/reassign-0/%'] = array(
+  $items['requests/manage-0/%'] = array(
+    'title' => "Override Request",
+    'description' => "Override Request",
+    'page callback' => 'mfcs_request_manage_0_page',
+    'page arguments' => array(2),
+    'file' => 'request_manage.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('manage', 2),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
+
+  $items['requests/manage-0/override/%'] = array(
+    'title' => "Override Request",
+    'description' => "Override Request",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_manage_0_override_form', 3),
+    'file' => 'request_override.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('override', 3),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
+
+  $items['requests/manage-0/reassign/%'] = array(
     'title' => "Re-Assign Request",
     'description' => "Re-Assign Request",
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_request_reassign_0_form', 2),
+    'page arguments' => array('mfcs_request_manage_0_reassign_form', 3),
     'file' => 'request_reassign.inc',
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_page_request_access',
-    'access arguments' => array('reassign', 2),
+    'access arguments' => array('reassign', 3),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
   );
@@ -1981,7 +2007,7 @@ function mfcs_hook_user_update(&$edit, $account, $category) {
 
   // if the status has changed, perform a user problem check.
   if ($edit['status'] != $edit['original']->status) {
-    $disabled_with_active = mfcs_disabled_users_with_active_content($account->uid);
+    $disabled_with_active = mfcs_disabled_venue_coordinators_with_active_content($account->uid);
 
     $mfcs_users = mfcs_load_users($account->uid);
 

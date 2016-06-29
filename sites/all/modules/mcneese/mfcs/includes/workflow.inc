@@ -1453,6 +1453,11 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
     $venue_coordinator_id = (int) $venue_coordinator_id;
   }
 
+  // do not continue to next step on override because override performs an explicit step and then calls this function to log the change.
+  if ($decision === MFCS_REVIEW_DECISION_OVERRIDE) {
+    return TRUE;
+  }
+
   // handle steps that do not alter the workflow.
   if ($decision === MFCS_REVIEW_DECISION_COMMENT) {
     if (strlen($message) > 0) {
@@ -1849,6 +1854,102 @@ function mfcs_workflow_next_step($request_id, $type, $step, $decision, $restrict
 }
 
 /**
+ * Continue onto the next step in the workflow.
+ *
+ * @param int $request_id
+ *   The request id.
+ * @param int $step
+ *   The step to assign.
+ * @param int|null $status
+ *   The status to assign.
+ *   Set to NULL to leave status alone.
+ * @param int $restriction
+ *   Designates who is able to view or receive e-mails in regards to this review.
+ * @param string $message
+ *   The facilities use decision message.
+ * @param bool $send_email
+ *   TRUE to send e-mail, FALSE to not send.
+ *
+ * @return bool
+ *   TRUE on success, FALSE otherwise.
+ *
+ */
+function mfcs_workflow_force_step($request_id, $step, $status, $restriction, $message, $send_email) {
+  if (!cf_is_integer($request_id)) {
+    cf_error::invalid_integer('request_id');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($step)) {
+    cf_error::invalid_integer('step');
+    return FALSE;
+  }
+
+  if (!is_null($status) && !cf_is_integer($status)) {
+    cf_error::invalid_integer('status');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($restriction) || $restriction < MFCS_REVIEW_RESTRICTIONS_NONE || $restriction > MFCS_REVIEW_RESTRICTIONS_MANAGERS) {
+    cf_error::invalid_integer('restriction');
+    return FALSE;
+  }
+
+  if (!is_string($message)) {
+    cf_error::invalid_string('message');
+    return FALSE;
+  }
+
+  if (!is_bool($send_email)) {
+    cf_error::invalid_bool('send_email');
+    return FALSE;
+  }
+
+  global $user;
+
+  $changed_user = $user;
+  $changed_by = $user->uid;
+  $changed_type = 'user';
+
+  $extra = array();
+
+  if (!is_null($message)) {
+    $extra['revisions']['message'] = $message;
+  }
+
+  if (!is_null($status)) {
+    mfcs_workflow_set_status($request_id, $status, $changed_user, $extra);
+  }
+
+  mfcs_workflow_set_step($request_id, $step, $changed_user, $extra);
+
+
+  // send out e-mails.
+  mfcs_include(MFCS_INCLUDE_OUTPUT);
+
+  $parameters = array();
+  $parameters['changed_by'] = $changed_by;
+  $parameters['changed_type'] = $changed_type;
+  $parameters['message'] = $message;
+  $parameters['step'] = $step;
+  $parameters['forced_transition'] = TRUE;
+
+  if ($restriction === MFCS_REVIEW_RESTRICTIONS_REVIEWER || $restriction === MFCS_REVIEW_RESTRICTIONS_MANAGERS) {
+    $parameters['requester_included'] = FALSE;
+  }
+
+  if (!is_null($status)) {
+    $parameters['status'] = $status;
+  }
+
+  if ($send_email) {
+    mfcs_send_workflow_emails($request_id, $parameters);
+  }
+
+  return TRUE;
+}
+
+/**
  * Sends e-mails about certain requests.
  *
  * @param int $request_id
@@ -1885,6 +1986,8 @@ function mfcs_workflow_next_step($request_id, $type, $step, $decision, $restrict
  *     Current strings are: 'insurance_provided'.
  *   - reminder_data: An array of values needed by a particular reminder
  *     reason.
+ *   - forced_transition: A boolean representing that the transition is
+ *     adminostratively forced and is therefore not a normal transition.
  *
  *   The keys: 'new', 'update', 'step', 'status', 'cancelling', 'cancelled',
  *   'uncancelled', 'amendment', 'reminder', and 'reassigned' are mutually
@@ -2149,6 +2252,15 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     }
   }
 
+  $is_forced_transition = FALSE;
+  if (array_key_exists('forced_transition',  $parameters)) {
+    $is_forced_transition = $parameters['forced_transition'];
+    if (!is_bool($is_forced_transition)) {
+      cf_error::invalid_bool('parameters[forced_transition]');
+      return FALSE;
+    }
+  }
+
   $filename = NULL;
   if (array_key_exists('filename',  $parameters)) {
     $filename = $parameters['filename'];
@@ -2310,7 +2422,46 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
 
   $email_params['request_title'] = $request['information']['title'][0]->value;
 
-  if ($is_new) {
+  if ($is_forced_transition) {
+    $email_params['title_suffix'] = "Forced";
+    $email_params['content'] = "";
+    $email_params['content'] .= $changed_by_string . " has forcibly altered this request.\n";
+    $email_params['content'] .= $standard_content;
+    $email_params['markup'] = "";
+    $email_params['markup'] .= $changed_by_markup . " has forcibly altered this request.<br>";
+    $email_params['markup'] .= $standard_markup;
+
+    if (is_array($venue_coordinator)) {
+      $email_to[$venue_coordinator['email']] = $venue_coordinator['email'];
+    }
+
+    // also send e-mails to the venue coordinator proxies.
+    $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.user_id' => $venue_coordinator['user_id'], 'mpvc.disabled' => 0));
+    if (!empty($proxies_returned['results'])) {
+      foreach ($proxies_returned['results'] as $proxy_returned) {
+        $proxy = mfcs_load_basic_user_settings_by_user_id($proxy_returned->proxy_id);
+
+        if (is_array($proxy)) {
+          $email_to[$proxy['email']] = $proxy['email'];
+        }
+      }
+    }
+
+    foreach ($step_1_reviewers as $r) {
+      $email_to[$r->email] = $r->email;
+    }
+
+    foreach ($step_2_reviewers as $r) {
+      $email_to[$r->email] = $r->email;
+    }
+
+    // as of fcs-79, conditionally include the requester in the e-mails
+    if ($requester_included_in_emails && !is_null($request_requester['email'])) {
+      // not adding to comment only here because in this case the requester should receive the full/normal e-mail.
+      $email_to[$request_requester['email']] = $request_requester['email'];
+    }
+  }
+  elseif ($is_new) {
     $type = $request['information']['type'][0]->value;
 
     if (is_string($type)) {

@@ -332,7 +332,10 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
                       }
                       elseif ($decision === MFCS_REVIEW_DECISION_REASSIGNED) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
-                        $custom_message .= ' the request\'s Venue Coordinator has been <strong class="review-decision">' . "Re-Assigned" . '</strong>. ';
+                        $custom_message .= ' the request\'s Venue Coordinator has been manually <strong class="review-decision">' . "Re-Assigned" . '</strong>. ';
+                      }
+                      elseif ($decision === MFCS_REVIEW_DECISION_OVERRIDE) {
+                        $custom_message = 'The request\'s step and/or status have been manually <strong class="review-decision">' . "Overridden" . '</strong>. ';
                       }
                       elseif ($decision === MFCS_REVIEW_DECISION_CLOSED) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
