@@ -619,7 +619,7 @@ function mfcs_request_statistics_render_request_classification($counts, $classif
 
   $width = 450;
   $height = 207;
-  $svg_options = ' version="1.1" viewBox="0 0 ' . $options['chart_width'] . ' ' . $options['chart_height'] . '" preserveAspectRatio="xMaxYMax meet" xmlns="http://www.w3.org/2000/svg"';
+  $svg_options = ' version="1.1" viewBox="0 0 ' . $options['chart_width'] . ' ' . $options['chart_height'] . '" preserveAspectRatio="xMaxYMax meet" xmlns="//www.w3.org/2000/svg"';
 
 
   // render the markup
@@ -781,7 +781,7 @@ function mfcs_request_statistics_render_request_type($counts, $type_options) {
 
   $width = 450;
   $height = 472;
-  $svg_options = ' version="1.1" viewBox="0 0 ' . $options['chart_width'] . ' ' . $options['chart_height'] . '" preserveAspectRatio="xMaxYMax meet" xmlns="http://www.w3.org/2000/svg"';
+  $svg_options = ' version="1.1" viewBox="0 0 ' . $options['chart_width'] . ' ' . $options['chart_height'] . '" preserveAspectRatio="xMaxYMax meet" xmlns="//www.w3.org/2000/svg"';
 
   // render the markup
   $markup = '<div class="statistics-block statistics-block-request_type">';
@@ -914,7 +914,7 @@ function mfcs_request_statistics_render_request_step($counts, $step_options) {
 
   $width = 450;
   $height = 218;
-  $svg_options = ' version="1.1" viewBox="0 0 ' . $options['chart_width'] . ' ' . $options['chart_height'] . '" preserveAspectRatio="xMaxYMax meet" xmlns="http://www.w3.org/2000/svg"';
+  $svg_options = ' version="1.1" viewBox="0 0 ' . $options['chart_width'] . ' ' . $options['chart_height'] . '" preserveAspectRatio="xMaxYMax meet" xmlns="//www.w3.org/2000/svg"';
 
   // render the markup
   $markup = '<div class="statistics-block statistics-block-request_step">';
@@ -1045,7 +1045,7 @@ function mfcs_request_statistics_render_request_status($counts, $status_options)
 
   $width = 450;
   $height = 282;
-  $svg_options = ' version="1.1" viewBox="0 0 ' . $options['chart_width'] . ' ' . $options['chart_height'] . '" preserveAspectRatio="xMaxYMax meet" xmlns="http://www.w3.org/2000/svg"';
+  $svg_options = ' version="1.1" viewBox="0 0 ' . $options['chart_width'] . ' ' . $options['chart_height'] . '" preserveAspectRatio="xMaxYMax meet" xmlns="//www.w3.org/2000/svg"';
 
   // render the markup
   $markup = '<div class="statistics-block statistics-block-request_step">';

@@ -9112,7 +9112,7 @@ function mfcs_build_request_ajax_table($items_returned, $conditions, $options, $
     'pagingType' => 'input',
   );
 
-  // see: https://datatables.net/reference/option/rowId
+  // see: //datatables.net/reference/option/rowId
   if (!is_null($rowId)) {
     $table['datatable_settings']['rowId'] = $rowId;
   }

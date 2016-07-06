@@ -154,11 +154,11 @@ function mfcs_request_create_0_form($form, &$form_state, $clone_request = NULL) 
   $statement_markup .= "<br>";
   $statement_markup .= 'All activities, meetings, or requests, excluding scheduled academic classes, must be scheduled through the Facilities Use and Special Event Request form. The following questionnaire assists campus officials in not only scheduling campus facilities or maintaining a master calendar; it allows better service through inter-departmental communication and collaboration enhancing the excellence of McNeese.' . "<br>";
   $statement_markup .= "<br>";
-  $statement_markup .= 'The questionnaire is designed according to the University\'s <a href="http://www.mcneese.edu/node/3217">Facility Use Policy</a>. Any activity scheduled on behalf of the University, regardless of venue, must be submitted.' . "<br>";
+  $statement_markup .= 'The questionnaire is designed according to the University\'s <a href="//www.mcneese.edu/node/3217">Facility Use Policy</a>. Any activity scheduled on behalf of the University, regardless of venue, must be submitted.' . "<br>";
   $statement_markup .= "<br>";
   $statement_markup .= '<strong>All requests should be made <a href="//www.mcneese.edu/node/3217#3_week_requirement">a minimum of three weeks in advance</a> of the event or of expected start date of publicity for the event, whichever comes first.</strong>' . "<br>";
   $statement_markup .= "<br>";
-  $statement_markup .= 'If you are only making a request for a <em>Table Reservation</em> in the <em>New Ranch</em> or in the <em>Quad</em>, then you should instead use the <a href="http://www.mcneese.edu/studentunion/student_union_reservations">Table Request Form</a>.' . "<br>";
+  $statement_markup .= 'If you are only making a request for a <em>Table Reservation</em> in the <em>New Ranch</em> or in the <em>Quad</em>, then you should instead use the <a href="//www.mcneese.edu/studentunion/student_union_reservations">Table Request Form</a>.' . "<br>";
   $statement_markup .= "<br>";
   $statement_markup .= 'Confirmation and approval of the submitted request must be received before any publicity is scheduled.';
   $statement_markup .= "<br>";
@@ -173,7 +173,7 @@ function mfcs_request_create_0_form($form, &$form_state, $clone_request = NULL) 
     $form['agreement']['agree'] = array(
       '#id' => 'field-agreement-agree',
       '#type' => 'checkbox',
-      '#title' => 'I have read the above information and agree to the terms of the <a href="http://www.mcneese.edu/node/3217">Facility Use Policy</a>.',
+      '#title' => 'I have read the above information and agree to the terms of the <a href="//www.mcneese.edu/node/3217">Facility Use Policy</a>.',
     );
 
     $form['agreement']['submit'] = array(
