@@ -5,7 +5,7 @@
         var item = $(this);
 
         $(item).click(function() {
-          $('#field-request-location-0 > .location-image', context).each(function() {
+          $('#field-request-location-0 > .location-image-link > .location-image', context).each(function() {
             if ($(this).hasClass('location-image-visible')) {
               $(this).removeClass('location-image-visible');
             }
