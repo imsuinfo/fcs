@@ -158,6 +158,11 @@ function mcneese_libraries_theme_table($variables, $datatable_settings = array()
     $buttons = $datatable_settings['buttons'];
   }
 
+  // force the rows to be a defined array.
+  if (!isset($variables['rows']) || !is_array($variables['rows'])) {
+    $variables['rows'] = array();
+  }
+
   $script_markup = '';
   if (!is_null($id)) {
     $datatables = libraries_load('datatables');
@@ -217,6 +222,7 @@ function mcneese_libraries_theme_table($variables, $datatable_settings = array()
       $array_settings = array(
         'oColVis',
         'oLanguage',
+        'language',
         'select',
       );
 
@@ -494,9 +500,9 @@ function mcneese_libraries_theme_table($variables, $datatable_settings = array()
   $attributes['class'][] = 'dataTable';
   $attributes['role'] = 'grid';
 
-  $output = '<table' . drupal_attributes($attributes) . '>' . "\n";
+  $output = '<table' . drupal_attributes($attributes) . '>';
   if (array_key_exists('caption', $variables)) {
-    $output .= '<caption>' . $variables['caption'] . '</caption>' . "\n";
+    $output .= '<caption>' . $variables['caption'] . '</caption>';
   }
 
   // Format the table columns:
@@ -521,48 +527,34 @@ function mcneese_libraries_theme_table($variables, $datatable_settings = array()
 
       // Build colgroup.
       if (is_array($cols) && count($cols)) {
-        $output .= ' <colgroup' . drupal_attributes($attributes) . '>';
+        $output .= '<colgroup' . drupal_attributes($attributes) . '>';
         $i = 0;
         foreach ($cols as $col) {
-          $output .= ' <col' . drupal_attributes($col) . '>';
+          $output .= '<col' . drupal_attributes($col) . '>';
         }
-        $output .= ' </colgroup>' . "\n";
+        $output .= '</colgroup>';
       }
       else {
-        $output .= ' <colgroup' . drupal_attributes($attributes) . '>' . "\n";
+        $output .= '<colgroup' . drupal_attributes($attributes) . '>';
       }
     }
-  }
-
-  // Add the 'empty' row message if available.
-  if (!count($variables['rows']) && !empty($variables['empty'])) {
-    $header_count = 0;
-    foreach ($variables['header'] as $header_cell) {
-      if (is_array($header_cell)) {
-        $header_count += isset($header_cell['colspan']) ? $header_cell['colspan'] : 1;
-      }
-      else {
-        $header_count++;
-      }
-    }
-    $variables['rows'][] = array(array('data' => $variables['empty'], 'colspan' => $header_count, 'class' => array('empty', 'message')));
   }
 
   // Format the table header:
-  if (count($variables['header'])) {
+  if (isset($variables['header']) && count($variables['header'])) {
     // HTML requires that the thead tag has tr tags in it followed by tbody
     // tags. Using ternary operator to check and see if we have any rows.
-    $output .= (count($variables['rows']) ? ' <thead><tr>' : ' <tr>');
+    $output .= '<thead><tr>';
     foreach ($variables['header'] as $cell) {
       $output .= _theme_table_cell($cell, TRUE);
     }
     // Using ternary operator to close the tags based on whether or not there are rows
-    $output .= (count($variables['rows']) ? ' </tr></thead>' . "\n" : '</tr>' . "\n");
+    $output .= '</thead></tr>';
   }
 
   // Format the table rows:
+  $output .= '<tbody>';
   if (count($variables['rows'])) {
-    $output .= '<tbody>' . "\n";
     $flip = array('even' => 'odd', 'odd' => 'even');
     $class = 'even';
     foreach ($variables['rows'] as $number => $row) {
@@ -581,6 +573,7 @@ function mcneese_libraries_theme_table($variables, $datatable_settings = array()
         $row_attributes = array();
         $no_striping = FALSE;
       }
+
       if (count($cells)) {
         // Add odd/even class
         if (!$no_striping) {
@@ -591,18 +584,18 @@ function mcneese_libraries_theme_table($variables, $datatable_settings = array()
         $row_attributes['role'] = 'row';
 
         // Build row
-        $output .= ' <tr' . drupal_attributes($row_attributes) . '>';
+        $output .= '<tr' . drupal_attributes($row_attributes) . '>';
         $i = 0;
         foreach ($cells as $cell) {
           $output .= _theme_table_cell($cell);
         }
-        $output .= ' </tr>' . "\n";
+        $output .= '</tr>';
       }
     }
-    $output .= '</tbody>' . "\n";
   }
+  $output .= '</tbody>';
 
-  $output .= '</table>' . $script_markup . "\n";
+  $output .= '</table>' . $script_markup;
   return $output;
 }
 
