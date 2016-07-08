@@ -3076,6 +3076,12 @@
 				oCol = oSettings.aoColumns[i];
 	
 				nTd = nTrIn ? anTds[i] : document.createElement( oCol.sCellType );
+
+				/* Prevent errors because no rows are defined (resulting in nTd being undefined). */
+				if (!nTd) {
+					continue;
+				}
+
 				nTd._DT_CellIndex = {
 					row: iRow,
 					column: i
