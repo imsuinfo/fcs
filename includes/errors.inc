@@ -185,11 +185,6 @@ function _drupal_log_error($error, $fatal = FALSE) {
   if ($fatal && !drupal_is_cli()) {
     drupal_add_http_header('Status', '500 Service Unavailable');
 
-    // if possible, record any fatal errors (reporting them as critical) in the watchdog log.
-    if (function_exists('watchdog')) {
-      watchdog('php', '%type: !message in %function (line %line of %file).', $error, WATCHDOG_CRITICAL);
-    }
-
     $error_document_file_500 = variable_get('error_document_file_500', '/var/www/error_documents/5xx/500.html');
     if (is_string($error_document_file_500) && file_exists($error_document_file_500)) {
       $page = file_get_contents($error_document_file_500);
@@ -232,6 +227,11 @@ function _drupal_log_error($error, $fatal = FALSE) {
   // Initialize a maintenance theme if the bootstrap was not complete.
   // Do it early because drupal_set_message() triggers a drupal_theme_initialize().
   if ($fatal && (drupal_get_bootstrap_phase() != DRUPAL_BOOTSTRAP_FULL)) {
+    // if possible, record any fatal errors (reporting them as critical) in the watchdog log.
+    if (function_exists('watchdog')) {
+      watchdog('php', '%type: !message in %function (line %line of %file).', $error, WATCHDOG_CRITICAL);
+    }
+
     unset($GLOBALS['theme']);
     if (!defined('MAINTENANCE_MODE')) {
       define('MAINTENANCE_MODE', 'error');
@@ -259,7 +259,16 @@ function _drupal_log_error($error, $fatal = FALSE) {
     $number++;
   }
 
-  watchdog('php', '%type: !message in %function (line %line of %file).', $error, $error['severity_level']);
+  // Log the error immediately, unless this is a non-fatal error which has been
+  // triggered via drupal_trigger_error_with_delayed_logging(); in that case
+  // trigger it in a shutdown function. Fatal errors are always triggered
+  // immediately since for a fatal error the page request will end here anyway.
+  if (!$fatal && drupal_static('_drupal_trigger_error_with_delayed_logging')) {
+    drupal_register_shutdown_function('watchdog', 'php', '%type: !message in %function (line %line of %file).', $error, $error['severity_level']);
+  }
+  else {
+    watchdog('php', '%type: !message in %function (line %line of %file).', $error, $error['severity_level']);
+  }
 
   if ($fatal) {
     drupal_add_http_header('Status', '500 Service Unavailable');

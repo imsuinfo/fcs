@@ -751,7 +751,8 @@ function drupal_access_denied() {
  *   - headers: An array containing request headers to send as name/value pairs.
  *   - method: A string containing the request method. Defaults to 'GET'.
  *   - data: A string containing the request body, formatted as
- *     'param=value&param=value&...'. Defaults to NULL.
+ *     'param=value&param=value&...'; to generate this, use http_build_query().
+ *     Defaults to NULL.
  *   - max_redirects: An integer representing how many times a redirect
  *     may be followed. Defaults to 3.
  *   - timeout: A float representing the maximum number of seconds the function
@@ -776,6 +777,8 @@ function drupal_access_denied() {
  *     HTTP header names are case-insensitive (RFC 2616, section 4.2), so for
  *     easy access the array keys are returned in lower case.
  *   - data: A string containing the response body that was received.
+ *
+ * @see http_build_query()
  */
 function drupal_http_request($url, array $options = array()) {
   // Allow an alternate HTTP client library to replace Drupal's default
@@ -1758,9 +1761,15 @@ function format_rss_item($title, $link, $description, $args = array()) {
  *     - 'key': element name
  *     - 'value': element contents
  *     - 'attributes': associative array of element attributes
+ *     - 'encoded': TRUE if 'value' is already encoded
  *
  * In both cases, 'value' can be a simple string, or it can be another array
  * with the same format as $array itself for nesting.
+ *
+ * If 'encoded' is TRUE it is up to the caller to ensure that 'value' is either
+ * entity-encoded or CDATA-escaped. Using this option is not recommended when
+ * working with untrusted user input, since failing to escape the data
+ * correctly has security implications.
  */
 function format_xml_elements($array) {
   $output = '';
@@ -1773,7 +1782,7 @@ function format_xml_elements($array) {
         }
 
         if (isset($value['value']) && $value['value'] != '') {
-          $output .= '>' . (is_array($value['value']) ? format_xml_elements($value['value']) : check_plain($value['value'])) . '</' . $value['key'] . ">\n";
+          $output .= '>' . (is_array($value['value']) ? format_xml_elements($value['value']) : (!empty($value['encoded']) ? $value['value'] : check_plain($value['value']))) . '</' . $value['key'] . ">\n";
         }
         else {
           $output .= " />\n";
@@ -2648,6 +2657,15 @@ function drupal_deliver_html_page($page_callback_result) {
   global $language;
   drupal_add_http_header('Content-Language', $language->language);
 
+  // By default, do not allow the site to be rendered in an iframe on another
+  // domain, but provide a variable to override this. If the code running for
+  // this page request already set the X-Frame-Options header earlier, don't
+  // overwrite it here.
+  $frame_options = variable_get('x_frame_options', 'SAMEORIGIN');
+  if ($frame_options && is_null(drupal_get_http_header('X-Frame-Options'))) {
+    drupal_add_http_header('X-Frame-Options', $frame_options);
+  }
+
   // Menu status constants are integers; page content is a string or array.
   if (is_int($page_callback_result)) {
     // @todo: Break these up into separate functions?
@@ -3044,6 +3062,7 @@ function drupal_page_footer() {
   _registry_check_code(REGISTRY_WRITE_LOOKUP_CACHE);
   drupal_cache_system_paths();
   module_implements_write_cache();
+  drupal_file_scan_write_cache();
   system_run_automated_cron();
 }
 
@@ -3313,7 +3332,8 @@ function drupal_add_css($data = NULL, $options = NULL) {
   $css = &drupal_static(__FUNCTION__, array());
   $count = &drupal_static(__FUNCTION__ . '_count', 0);
 
-  // Reset the order counter every time the number of entries in $css is 0.
+  // If the $css variable has been reset with drupal_static_reset(), there is
+  // no longer any CSS being tracked, so set the counter back to 0 also.
   if (count($css) === 0) {
     $count = 0;
   }
@@ -5664,9 +5684,6 @@ function drupal_cron_run() {
       try {
         module_invoke($module, 'cron');
       }
-      catch (Error $e) {
-        watchdog_exception('cron', $e);
-      }
       catch (Exception $e) {
         watchdog_exception('cron', $e);
       }
@@ -5694,11 +5711,6 @@ function drupal_cron_run() {
       try {
         call_user_func($callback, $item->data);
         $queue->deleteItem($item);
-      }
-      catch (Error $e) {
-        // In case of exception log it and leave the item in the queue
-        // to be processed again later.
-        watchdog_exception('cron', $e);
       }
       catch (Exception $e) {
         // In case of exception log it and leave the item in the queue
