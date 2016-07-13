@@ -95,14 +95,14 @@ function mcneese_content_formats_mcneese_content_node_type_form_submit_alter($fo
   }
 
   if (isset($form_state['values']['mcneese_content']['fix_links']) && $form_state['values']['mcneese_content']['fix_links']) {
-    variable_set('fix_links_' . $form['#node_type']->type, TRUE);
+    variable_set('mcneese_content_formats_fix_links_' . $form['#node_type']->type, TRUE);
   }
   else {
     variable_set('mcneese_content_formats_fix_links_' . $form['#node_type']->type, FALSE);
   }
 
   if (isset($form_state['values']['mcneese_content']['fix_markup']) && $form_state['values']['mcneese_content']['fix_markup']) {
-    variable_set('fix_markup_' . $form['#node_type']->type, TRUE);
+    variable_set('mcneese_content_formats_fix_markup_' . $form['#node_type']->type, TRUE);
   }
   else {
     variable_set('mcneese_content_formats_fix_markup_' . $form['#node_type']->type, FALSE);
