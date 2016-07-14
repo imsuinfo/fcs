@@ -20,15 +20,23 @@
  *
  * @param array $variables
  *   The variables array from the theme template functions.
+ * @param bool $fatal
+ *   (optional) This should be set to TRUE only when thi
+ *   function is called during a fatal error.
+ *   This reduces the number of calls that might cause problems.
  *
  * @return array
  *   An array of variables to be provided to the calling theme.
  */
-function cf_theme_get_variables(array &$variables) {
+function cf_theme_get_variables(array &$variables, $fatal = FALSE) {
   $cf = &drupal_static(__FUNCTION__, array());
 
   if (!empty($cf)) {
     return $cf;
+  }
+
+  if (!is_bool($fatal)) {
+    $fatal = FALSE;
   }
 
   $cf['css'] = array();
@@ -51,7 +59,9 @@ function cf_theme_get_variables(array &$variables) {
     $cf['is_data'][$key] = array();
   }
 
-  $cf['user']['object'] = cf_current_user();
+  if (!$fatal) {
+    $cf['user']['object'] = cf_current_user();
+  }
 
   // set the request time if it exists
   if (empty($_SERVER['REQUEST_TIME'])) {
@@ -64,7 +74,7 @@ function cf_theme_get_variables(array &$variables) {
   // do not cache maintenance mode pages.
   $maintenance_mode = variable_get('maintenance_mode', 0);
 
-  if ($maintenance_mode || defined('MAINTENANCE_MODE')) {
+  if ($fatal || $maintenance_mode || defined('MAINTENANCE_MODE')) {
     $cf['meta']['name']['googlebot'] = 'noarchive,noindex,nofollow,nosnippet';
     $cf['meta']['name']['robots'] = 'NONE';
     $cf['meta']['http-equiv']['cache-control'] = 'no-cache';
@@ -332,7 +342,7 @@ function cf_theme_get_variables(array &$variables) {
   }
 
   // set frontpage defaults
-  if (drupal_is_front_page()) {
+  if (!$fatal && drupal_is_front_page()) {
     $cf['is']['front'] = TRUE;
     $cf['meta']['name']['robots'] = 'INDEX,FOLLOW';
   }
@@ -350,14 +360,14 @@ function cf_theme_get_variables(array &$variables) {
     $cf['is_data']['anonymous']['user'] = &$cf['user']['object'];
   }
 
-  if (!empty($variables['db_is_active'])) {
+  if (!$fatal && !empty($variables['db_is_active'])) {
     $cf['is']['using_database'] = TRUE;
     $cf['is_data']['using_database']['database'] = db_driver();
   }
 
   $node_object = NULL;
   $node_id_matches = array();
-  if (preg_match('@^node/(\d+)(/.*|$|\?.*|#.*)@', current_path(), $node_id_matches)) {
+  if (!$fatal && preg_match('@^node/(\d+)(/.*|$|\?.*|#.*)@', current_path(), $node_id_matches)) {
     if (!empty($node_id_matches[1])) {
       $revision_id_matches = array();
 
@@ -404,7 +414,7 @@ function cf_theme_get_variables(array &$variables) {
   }
 
   $user_id_matches = array();
-  if (preg_match('@^user/(\d+)(/.*|$|\?.*|#.*)@', current_path(), $user_id_matches)) {
+  if (!$fatal && preg_match('@^user/(\d+)(/.*|$|\?.*|#.*)@', current_path(), $user_id_matches)) {
     if (!empty($user_id_matches[1])) {
       $cf['is_data']['profile']['object'] = user_load($user_id_matches[1]);
 
@@ -415,7 +425,7 @@ function cf_theme_get_variables(array &$variables) {
   }
   unset($user_id_matches);
 
-  if (module_exists('overlay')) {
+  if (!$fatal && module_exists('overlay')) {
     $overlay_mode = overlay_get_mode();
 
     if ($overlay_mode == 'child') {
