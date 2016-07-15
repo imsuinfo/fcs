@@ -371,9 +371,9 @@ function mfcs_miscellaneous_check_requests_conflict($request_id = NULL) {
     // drupal api does not support WITH statements, so use a manually created query string for this test.
     $sql_with = 'with requests as (';
     $sql_with .= 'select mer.id, mer.title, mer.location, mer.building, mer.room, mfdd.delta as delta, mfdd.value as date, mfdts.value as time_start, mfdtsp.value as time_stop';
-    $sql_with .= ', mbl.machine_name as location_machine_name, mbl.human_name as location_human_name, mbl.date as location_date, mbl.disabled as location_disabled';
-    $sql_with .= ', mbb.machine_name as building_machine_name, mbb.human_name as building_human_name, mbb.date as building_date, mbb.disabled as building_disabled';
-    $sql_with .= ', mbr.machine_name as room_machine_name, mbr.human_name as room_human_name, mbr.date as room_date, mbr.disabled as room_disabled';
+    $sql_with .= ', mbl.machine_name as location_code, mbl.human_name as location_name, mbl.date as location_date, mbl.disabled as location_disabled';
+    $sql_with .= ', mbb.machine_name as building_code, mbb.human_name as building_name, mbb.date as building_date, mbb.disabled as building_disabled';
+    $sql_with .= ', mbr.machine_name as room_number, mbr.human_name as room_name, mbr.date as room_date, mbr.disabled as room_disabled';
     $sql_with .= ' from mfcs_requests mer';
     $sql_with .= ' inner join mfcs_current mc on mer.id = mc.request_id inner join mfcs_field_dates_date mfdd on (mc.request_id = mfdd.request_id and mc.dates_date = mfdd.revision)';
     $sql_with .= ' left join mfcs_field_dates_time_start mfdts on mfdd.request_id = mfdts.request_id and mfdd.revision = mfdts.revision and mfdd.delta = mfdts.delta';
@@ -419,22 +419,22 @@ function mfcs_miscellaneous_check_requests_conflict($request_id = NULL) {
             'title' => $result->title,
             'location' => array(
               'id' => $result->location,
-              'machine_name' => $result->location_machine_name,
-              'human_name' => $result->location_human_name,
+              'machine_name' => $result->location_code,
+              'human_name' => $result->location_name,
               'date' => $result->location_date,
               'disabled' => $result->location_disabled,
             ),
             'building' => array(
               'id' => $result->building,
-              'machine_name' => $result->building_machine_name,
-              'human_name' => $result->building_human_name,
+              'machine_name' => $result->building_code,
+              'human_name' => $result->building_name,
               'date' => $result->building_date,
               'disabled' => $result->building_disabled,
             ),
             'room' => array(
               'id' => $result->room,
-              'machine_name' => $result->room_machine_name,
-              'human_name' => $result->room_human_name,
+              'machine_name' => $result->room_number,
+              'human_name' => $result->room_name,
               'date' => $result->room_date,
               'disabled' => $result->room_disabled,
             ),
@@ -920,20 +920,20 @@ function mfcs_miscellaneous_check_requests_room($request_id = NULL) {
     $query->addField('mer', 'status', 'status');
 
     $query->addField('mer', 'location', 'location_id');
-    $query->addField('mbl', 'machine_name', 'location_machine_name');
-    $query->addField('mbl', 'human_name', 'location_human_name');
+    $query->addField('mbl', 'machine_name', 'location_code');
+    $query->addField('mbl', 'human_name', 'location_name');
     $query->addField('mbl', 'date', 'location_date');
     $query->addField('mbl', 'disabled', 'location_disabled');
 
     $query->addField('mer', 'building', 'building_id');
-    $query->addField('mbb', 'machine_name', 'building_machine_name');
-    $query->addField('mbb', 'human_name', 'building_human_name');
+    $query->addField('mbb', 'machine_name', 'building_code');
+    $query->addField('mbb', 'human_name', 'building_name');
     $query->addField('mbb', 'date', 'building_date');
     $query->addField('mbb', 'disabled', 'building_disabled');
 
     $query->addField('mftr', 'value', 'room_id');
-    $query->addField('mbr', 'machine_name', 'room_machine_name');
-    $query->addField('mbr', 'human_name', 'room_human_name');
+    $query->addField('mbr', 'machine_name', 'room_number');
+    $query->addField('mbr', 'human_name', 'room_name');
     $query->addField('mbr', 'date', 'room_date');
     $query->addField('mbr', 'disabled', 'room_disabled');
     $query->addField('mbr', 'coordinator_id', 'room_coordinator_id');
@@ -1003,22 +1003,22 @@ function mfcs_miscellaneous_check_requests_room($request_id = NULL) {
           'title' => $result->title,
           'location' => array(
             'id' => $result->location_id,
-            'machine_name' => $result->location_machine_name,
-            'human_name' => $result->location_human_name,
+            'machine_name' => $result->location_code,
+            'human_name' => $result->location_name,
             'date' => $result->location_date,
             'disabled' => $result->location_disabled,
           ),
           'building' => array(
             'id' => $result->building_id,
-            'machine_name' => $result->building_machine_name,
-            'human_name' => $result->building_human_name,
+            'machine_name' => $result->building_code,
+            'human_name' => $result->building_name,
             'date' => $result->building_date,
             'disabled' => $result->building_disabled,
           ),
           'room' => array(
             'id' => $result->room_id,
-            'machine_name' => $result->room_machine_name,
-            'human_name' => $result->room_human_name,
+            'machine_name' => $result->room_number,
+            'human_name' => $result->room_name,
             'date' => $result->room_date,
             'disabled' => $result->room_disabled,
           ),
@@ -1082,14 +1082,14 @@ function mfcs_miscellaneous_check_requests_building($request_id = NULL) {
     $query->addField('mer', 'status', 'status');
 
     $query->addField('mer', 'location', 'location_id');
-    $query->addField('mbl', 'machine_name', 'location_machine_name');
-    $query->addField('mbl', 'human_name', 'location_human_name');
+    $query->addField('mbl', 'machine_name', 'location_code');
+    $query->addField('mbl', 'human_name', 'location_name');
     $query->addField('mbl', 'date', 'location_date');
     $query->addField('mbl', 'disabled', 'location_disabled');
 
     $query->addField('mftb', 'value', 'building_id');
-    $query->addField('mbb', 'machine_name', 'building_machine_name');
-    $query->addField('mbb', 'human_name', 'building_human_name');
+    $query->addField('mbb', 'machine_name', 'building_code');
+    $query->addField('mbb', 'human_name', 'building_name');
     $query->addField('mbb', 'date', 'building_date');
     $query->addField('mbb', 'disabled', 'building_disabled');
 
@@ -1160,15 +1160,15 @@ function mfcs_miscellaneous_check_requests_building($request_id = NULL) {
           'title' => $result->title,
           'location' => array(
             'id' => $result->location_id,
-            'machine_name' => $result->location_machine_name,
-            'human_name' => $result->location_human_name,
+            'machine_name' => $result->location_code,
+            'human_name' => $result->location_name,
             'date' => $result->location_date,
             'disabled' => $result->location_disabled,
           ),
           'building' => array(
             'id' => $result->building_id,
-            'machine_name' => $result->building_machine_name,
-            'human_name' => $result->building_human_name,
+            'machine_name' => $result->building_code,
+            'human_name' => $result->building_name,
             'date' => $result->building_date,
             'disabled' => $result->building_disabled,
           ),
@@ -1232,8 +1232,8 @@ function mfcs_miscellaneous_check_requests_location($request_id = NULL) {
     $query->addField('mer', 'status', 'status');
 
     $query->addField('mftl', 'value', 'location_id');
-    $query->addField('mbl', 'machine_name', 'location_machine_name');
-    $query->addField('mbl', 'human_name', 'location_human_name');
+    $query->addField('mbl', 'machine_name', 'location_code');
+    $query->addField('mbl', 'human_name', 'location_name');
     $query->addField('mbl', 'date', 'location_date');
     $query->addField('mbl', 'disabled', 'location_disabled');
 
@@ -1305,8 +1305,8 @@ function mfcs_miscellaneous_check_requests_location($request_id = NULL) {
           'title' => $result->title,
           'location' => array(
             'id' => $result->location_id,
-            'machine_name' => $result->location_machine_name,
-            'human_name' => $result->location_human_name,
+            'machine_name' => $result->location_code,
+            'human_name' => $result->location_name,
             'date' => $result->location_date,
             'disabled' => $result->location_disabled,
           ),
@@ -1415,20 +1415,20 @@ function mfcs_miscellaneous_check_requests_problem_cache_requests($request_id = 
       $query->addField('mer', 'title', 'title');
 
       $query->addField('mer', 'location', 'location_id');
-      $query->addField('mbl', 'machine_name', 'location_machine_name');
-      $query->addField('mbl', 'human_name', 'location_human_name');
+      $query->addField('mbl', 'machine_name', 'location_code');
+      $query->addField('mbl', 'human_name', 'location_name');
       $query->addField('mbl', 'date', 'location_date');
       $query->addField('mbl', 'disabled', 'location_disabled');
 
       $query->addField('mer', 'building', 'building_id');
-      $query->addField('mbb', 'machine_name', 'building_machine_name');
-      $query->addField('mbb', 'human_name', 'building_human_name');
+      $query->addField('mbb', 'machine_name', 'building_code');
+      $query->addField('mbb', 'human_name', 'building_name');
       $query->addField('mbb', 'date', 'building_date');
       $query->addField('mbb', 'disabled', 'building_disabled');
 
       $query->addField('mer', 'room', 'room_id');
-      $query->addField('mbr', 'machine_name', 'room_machine_name');
-      $query->addField('mbr', 'human_name', 'room_human_name');
+      $query->addField('mbr', 'machine_name', 'room_number');
+      $query->addField('mbr', 'human_name', 'room_name');
       $query->addField('mbr', 'date', 'room_date');
       $query->addField('mbr', 'disabled', 'room_disabled');
       $query->addField('mbr', 'coordinator_id', 'room_coordinator_id');
@@ -1456,22 +1456,22 @@ function mfcs_miscellaneous_check_requests_problem_cache_requests($request_id = 
               'title' => $result->title,
               'location' => array(
                 'id' => $result->location_id,
-                'machine_name' => $result->location_machine_name,
-                'human_name' => $result->location_human_name,
+                'machine_name' => $result->location_code,
+                'human_name' => $result->location_name,
                 'date' => $result->location_date,
                 'disabled' => $result->location_disabled,
               ),
               'building' => array(
                 'id' => $result->building_id,
-                'machine_name' => $result->building_machine_name,
-                'human_name' => $result->building_human_name,
+                'machine_name' => $result->building_code,
+                'human_name' => $result->building_name,
                 'date' => $result->building_date,
                 'disabled' => $result->building_disabled,
               ),
               'room' => array(
                 'id' => $result->room_id,
-                'machine_name' => $result->room_machine_name,
-                'human_name' => $result->room_human_name,
+                'machine_name' => $result->room_number,
+                'human_name' => $result->room_name,
                 'date' => $result->room_date,
                 'disabled' => $result->room_disabled,
               ),

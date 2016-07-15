@@ -168,9 +168,27 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
   $rows = array();
   $current_date = $absolute_start;
 
-  $holidays = mfcs_get_holidays($year, $absolute_start, $absolute_stop);
+  $room_ids = NULL;
+  if (!empty($rooms)) {
+    $room_ids = array_keys($rooms);
+  }
 
-  // Holidays are setup on a per-year basis.
+  $holidays = mfcs_get_holidays($year, $absolute_start, $absolute_stop);
+  if (!is_array($holidays)) {
+    $holidays = array();
+  }
+
+  $search_room_ids = NULL;
+  if (!empty($mfcs_determined['filters']['field_top-building-0']['search'])) {
+    $search_room_ids = $mfcs_determined['filters']['field_top-building-0']['search'];
+  }
+
+  $unavailabilities = mfcs_get_unavailabilities($year, $search_room_ids, $absolute_start, $absolute_stop, TRUE, FALSE, TRUE);
+  if (!is_array($unavailabilities)) {
+    $unavailabilities = array();
+  }
+
+  // Holidays and Unavailabilities are setup on a per-year basis.
   // If absolute_start is a previous or next year, additional function calls are required.
   $year_start = strtotime('midnight january 1 ' . $year);
   $year_stop = strtotime('next year', $year_start);
@@ -181,6 +199,19 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
         $holidays[$holiday_key] = $holiday_value;
       }
     }
+    unset($holiday_key);
+    unset($holiday_value);
+    unset($holidays_previous);
+
+    $unavailabilities_previous = mfcs_get_unavailabilities($year - 1, $search_room_ids, $absolute_start, $year_start, TRUE, FALSE, TRUE);
+    if (is_array($unavailabilities_previous)) {
+      foreach ($unavailabilities_previous as $unavailability_key => $unavailability_value) {
+        $unavailabilities[$unavailability_value->id] = $unavailability_value;
+      }
+    }
+    unset($unavailability_key);
+    unset($unavailability_value);
+    unset($unavailabilities_previous);
   }
   if ($absolute_stop > $year_stop) {
     $holidays_next = mfcs_get_holidays($year + 1, $year_stop, $absolute_stop);
@@ -189,6 +220,19 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
         $holidays[$holiday_key] = $holiday_value;
       }
     }
+    unset($holiday_key);
+    unset($holiday_value);
+    unset($holidays_next);
+
+    $unavailabilities_next = mfcs_get_unavailabilities($year + 1, $search_room_ids, $absolute_start, $year_start, TRUE, FALSE, TRUE);
+    if (is_array($unavailabilities_next)) {
+      foreach ($unavailabilities_next as $unavailability_key => $unavailability_value) {
+        $unavailabilities[$unavailability_value->id] = $unavailability_value;
+      }
+    }
+    unset($unavailability_key);
+    unset($unavailability_value);
+    unset($unavailabilities_next);
   }
 
   foreach ($holidays as $holiday) {
@@ -210,6 +254,85 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
       'date' => $holiday->date,
     );
   }
+  unset($holidays);
+
+  foreach ($unavailabilities as $unavailability) {
+    $building_code = check_plain($unavailability->building_code);
+    $building_name = check_plain($unavailability->building_name);
+    $room_number = check_plain($unavailability->room_number);
+    $room_name = check_plain($unavailability->room_name);
+    $description = check_plain($unavailability->description);
+    $tooltip = $building_code . ' ' . $room_number . ': ' . $description;
+
+    if ($unavailability->date_start == $unavailability->date_stop) {
+      $day = date('j', $unavailability->date_start);
+      $month = date('n', $unavailability->date_start);
+      $month_day = $month . '-' . $day;
+      if (!isset($rows[$month_day])) {
+        $rows[$month_day] = array();
+      }
+
+      $rows[$month_day]['unavailable-' . $unavailability->id] = array(
+        'is' => 'unavailable',
+        'id' => $unavailability->id,
+        'href' => $base_path . '/requests/unavailable-0/view/' . $year . '/' . $unavailability->room_id . '/' . $unavailability->id,
+        'title' => check_plain($unavailability->title),
+        'tooltip' => str_replace('"', '&quot;', $tooltip),
+        'year' => $year,
+        'month' => $month,
+        'day' => $day,
+        'date' => $unavailability->date_start,
+        'building' => $unavailability->building_id,
+        'room' => $unavailability->room_id,
+        'building_code' => $building_code,
+        'building_name' => $building_name,
+        'room_number' => $room_number,
+        'room_name' => $room_name,
+        'description' => str_replace("\n", '<br>', $description),
+      );
+    }
+    else {
+      $date_current = $unavailability->date_start;
+      while ($date_current < $unavailability->date_stop) {
+        $day = date('j', $date_current);
+        $month = date('n', $date_current);
+        $month_day = $month . '-' . $day;
+        if (!isset($rows[$month_day])) {
+          $rows[$month_day] = array();
+        }
+
+        $rows[$month_day]['unavailable-' . $unavailability->id] = array(
+          'is' => 'unavailable',
+          'id' => $unavailability->id,
+          'href' => $base_path . '/requests/unavailable-0/view/' . $year . '/' . $unavailability->room_id . '/' . $unavailability->id,
+          'title' => check_plain($unavailability->title),
+          'tooltip' => str_replace('"', '&quot;', $tooltip),
+          'year' => $year,
+          'month' => $month,
+          'day' => $day,
+          'date' => $date_current,
+          'building' => $unavailability->building_id,
+          'room' => $unavailability->room_id,
+          'building_code' => $building_code,
+          'building_name' => $building_name,
+          'room_number' => $room_number,
+          'room_name' => $room_name,
+          'description' => str_replace("\n", '<br>', $description),
+        );
+
+        $date_current = strtotime('tomorrow', $date_current);
+        $date_current = strtotime('midnight today', $date_current);
+      }
+      unset($date_current);
+    }
+  }
+  unset($unavailabilities);
+  unset($building_code);
+  unset($building_name);
+  unset($room_number);
+  unset($room_name);
+  unset($description);
+  unset($tooltip);
 
   while ($current_date < $absolute_stop) {
     $next_date = strtotime('+1 days', $current_date);
@@ -254,13 +377,17 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
             $rows[$month_day][$item->id]['time_start'][] = array('start' => $item->time_start, 'stop' => $item->time_stop);
           }
           else {
+            $room_number = '';
             $room_name = '';
             if (array_key_exists($item->room, $rooms)) {
+              $room_number = check_plain($rooms[$item->room]->room_number);
               $room_name = check_plain($rooms[$item->room]->room_name);
             }
 
+            $building_code = '';
             $building_name = '';
             if (array_key_exists($item->building, $buildings)) {
+              $building_code = check_plain($buildings[$item->building]->building_code);
               $building_name = check_plain($buildings[$item->building]->building_name);
             }
 
@@ -296,7 +423,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
                 'is' => 'event',
                 'href' => $base_path . 'requests/view-0/' . $item->id . $url_arguments,
                 'title' => $item_title,
-                'tooltip' => '[' . $item->id . '] ' . $building_name . ' ' . $room_name . ': ' . $item_title,
+                'tooltip' => '[' . $item->id . '] ' . $building_code . ' ' . $room_number . ': ' . $item_title,
                 'date' => $date,
                 'year' => $year,
                 'month' => $month,
@@ -305,7 +432,9 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
                 'building' => $building,
                 'room' => $room,
                 'type' => $type,
+                'building_code' => $building_code,
                 'building_name' => $building_name,
+                'room_number' => $room_number,
                 'room_name' => $room_name,
               );
               unset($item_title);
@@ -489,6 +618,11 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
     $buildings = array();
   }
 
+  $room_ids = NULL;
+  if (!empty($rooms)) {
+    $room_ids = array_keys($rooms);
+  }
+
   $options = array(
     'limit' => 0,
     'sort' => array('date' => 'ASC'),
@@ -519,6 +653,9 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
   unset($current_time);
 
   $holidays = mfcs_get_holidays($year, $day_start, $day_stop);
+  if (!is_array($holidays)) {
+    $holidays = array();
+  }
 
   foreach ($holidays as $holiday) {
     $date = strtotime('midnight today', $holiday->date);
@@ -533,7 +670,7 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
       'id' => $holiday->id,
       'title' => check_plain($holiday->title),
       'tooltip' => str_replace('"', '&quot;', $description),
-      'description' => str_replace("\n", "<br>", $description),
+      'description' => str_replace("\n", '<br>', $description),
       'year' => $year,
       'month' => $month,
       'day' => $day,
@@ -541,6 +678,155 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
     );
     unset($description);
   }
+  unset($holidays);
+  unset($date);
+
+  $search_room_ids = NULL;
+  if (!empty($mfcs_determined['filters']['field_top-building-0']['search'])) {
+    $search_room_ids = $mfcs_determined['filters']['field_top-building-0']['search'];
+  }
+
+  $unavailabilities = mfcs_get_unavailabilities($year, $search_room_ids, $day_start, $day_stop, TRUE, FALSE, TRUE);
+  if (!is_array($unavailabilities)) {
+    $unavailabilities = array();
+  }
+
+  foreach ($unavailabilities as $unavailability) {
+    $building_code = check_plain($unavailability->building_code);
+    $building_name = check_plain($unavailability->building_name);
+    $room_number = check_plain($unavailability->room_number);
+    $room_name = check_plain($unavailability->room_name);
+    $description = check_plain($unavailability->description);
+    $tooltip = $building_code . ' ' . $room_number . ': ' . $description;
+
+    if ($unavailability->date_start == $unavailability->date_stop || ($unavailability->date_start <= $day_start && $unavailability->date_stop >= $day_stop)) {
+      $date = strtotime('midnight today', $unavailability->date_start);
+
+      if (!isset($rows['all_day'][$date])) {
+        $rows['all_day'][$date] = array();
+      }
+
+      $rows['all_day'][$date]['unavailability-' . $unavailability->id] = array(
+        'is' => 'unavailable',
+        'id' => $unavailability->id,
+        'href' => $base_path . '/requests/unavailable-0/view/' . $year . '/' . $unavailability->room_id . '/' . $unavailability->id,
+        'title' => check_plain($unavailability->title),
+        'tooltip' => str_replace('"', '&quot;', $tooltip),
+        'description' => str_replace("\n", '<br>', $description),
+        'year' => $year,
+        'month' => $month,
+        'day' => $day,
+        'date' => $unavailability->date_start,
+        'building' => $unavailability->building_id,
+        'room' => $unavailability->room_id,
+        'building_code' => $building_code,
+        'building_name' => $building_name,
+        'room_number' => $room_number,
+        'room_name' => $room_name,
+        'type' => 'unavailable',
+      );
+    }
+    else {
+      // the dates may extend beyond the current day, therefore determine the nearest time value for the current date.
+      $time_start = $unavailability->date_start;
+      if ($unavailability->date_start < $day_start) {
+        $time_start = $day_start;
+      }
+
+      $time_stop = $unavailability->date_stop;
+      if ($unavailability->date_stop > $day_stop) {
+        $time_stop = $day_stop;
+      }
+
+      // floor() and ceil() to nearest hours.
+      $time_offset_start = $time_start % $range_interval;
+      $time_offset_stop = $time_stop % $range_interval;
+      $time_floor = $time_start - $time_offset_start;
+      $time_ceiling = $time_stop - $time_offset_stop;
+      if ($time_offset_stop > 0) {
+        $time_ceiling += $range_interval;
+      }
+      $time_zindex = 100 + (int) date("G", $time_floor);
+
+      // preprocess the slots in an attempt to find the leftmost slot that is available for all date slots.
+      $time_slot = 0;
+      do {
+        $time_slot_found = TRUE;
+        $time_count = $time_floor;
+        while ($time_count < $time_ceiling) {
+          while (!empty($rows['range'][$time_count][$time_slot])) {
+            $time_slot_found = FALSE;
+            break;
+          }
+
+          $time_count += $range_interval;
+        }
+
+        if ($time_slot_found) {
+          break;
+        }
+
+        $time_slot++;
+      } while (TRUE);
+
+      $time_count = $time_floor;
+      while ($time_count < $time_ceiling) {
+        $rows['range'][$time_count][$time_slot]['unavailable-' . $unavailability->id] = array(
+          'is' => 'unavailable',
+          'id' => $unavailability->id,
+          'href' => $base_path . '/requests/unavailable-0/view/' . $year . '/' . $unavailability->room_id . '/' . $unavailability->id,
+          'title' => check_plain($unavailability->title),
+          'tooltip' => str_replace('"', '&quot;', $tooltip),
+          'description' => str_replace("\n", '<br>', $description),
+          'year' => $year,
+          'month' => $month,
+          'day' => $day,
+          'date' => $time_start,
+          'building' => $unavailability->building_id,
+          'room' => $unavailability->room_id,
+          'building_code' => $building_code,
+          'building_name' => $building_name,
+          'room_number' => $room_number,
+          'room_name' => $room_name,
+          'time_start' => $time_start,
+          'time_stop' => $time_stop,
+          'time_floor' => $time_floor,
+          'time_ceiling' => $time_ceiling,
+          'slot_start' => FALSE,
+          'slot_stop' => FALSE,
+          'offset_start' => $time_offset_start,
+          'offset_stop' => $time_offset_stop,
+          'z-index' => $time_zindex,
+          'type' => 'unavailable',
+        );
+
+        if ($time_count == $time_floor) {
+          $rows['range'][$time_count][$time_slot]['unavailable-' . $unavailability->id]['slot_start'] = TRUE;
+        }
+
+        if (($time_count + $range_interval) == $time_ceiling) {
+          $rows['range'][$time_count][$time_slot]['unavailable-' . $unavailability->id]['slot_stop'] = TRUE;
+        }
+
+        $time_count += $range_interval;
+      }
+
+      $slots_max = count($rows['range'][$time_floor]);
+      if ($rows['slots_max'] < $slots_max) {
+        $rows['slots_max'] = $slots_max;
+      }
+
+      unset($time_start);
+      unset($time_stop);
+    }
+  }
+  unset($date_current);
+  unset($building_code);
+  unset($building_name);
+  unset($room_number);
+  unset($room_name);
+  unset($description);
+  unset($tooltip);
 
   $processed_items = array();
 
@@ -558,13 +844,17 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
 
         $item_title = check_plain($item->title);
 
+        $room_number = '';
         $room_name = '';
         if (array_key_exists($item->room, $rooms)) {
+          $room_number = check_plain($rooms[$item->room]->room_number);
           $room_name = check_plain($rooms[$item->room]->room_name);
         }
 
+        $building_code = '';
         $building_name = '';
         if (array_key_exists($item->building, $buildings)) {
+          $building_code = check_plain($buildings[$item->building]->building_code);
           $building_name = check_plain($buildings[$item->building]->building_name);
         }
 
@@ -583,7 +873,7 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
             'id' => $item->id,
             'href' => $base_path . 'requests/view-0/' . $item->id . $url_arguments,
             'title' => $item_title,
-            'tooltip' => '[' . $item->id . '] ' . $building_name . ' ' . $room_name . ': ' . $item_title,
+            'tooltip' => '[' . $item->id . '] ' . $building_code . ' ' . $room_number . ': ' . $item_title,
             'date' => $date,
             'year' => $year,
             'month' => $month,
@@ -592,7 +882,9 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
             'building' => $building,
             'room' => $room,
             'type' => $type,
+            'building_code' => $building_code,
             'building_name' => $building_name,
+            'room_number' => $room_number,
             'room_name' => $room_name,
           );
         }
@@ -642,7 +934,7 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
               'id' => $item->id,
               'href' => $base_path . 'requests/view-0/' . $item->id . $url_arguments,
               'title' => $item_title,
-              'tooltip' => '[' . $item->id . '] ' . $building_name . ' ' . $room_name . ': ' . $item_title,
+              'tooltip' => '[' . $item->id . '] ' . $building_code . ' ' . $room_number . ': ' . $item_title,
               'date' => $date,
               'year' => $year,
               'month' => $month,
@@ -651,7 +943,9 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
               'building' => $building,
               'room' => $room,
               'type' => $type,
+              'building_code' => $building_code,
               'building_name' => $building_name,
+              'room_number' => $room_number,
               'room_name' => $room_name,
               'time_start' => $item->time_start[$delta],
               'time_stop' => $item->time_stop[$delta],

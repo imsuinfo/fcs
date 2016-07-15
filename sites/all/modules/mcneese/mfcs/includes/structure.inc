@@ -18,7 +18,7 @@
  * @return array
  *   An array containing the generated sections.
  *
- * @see mfcs_get_request_fields()
+ * @see: mfcs_get_request_fields()
  */
 function mfcs_get_request_section_information() {
   $information = array();
@@ -137,6 +137,8 @@ function mfcs_get_request_fields($form, &$form_state) {
   }
 
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+
+  global $base_path;
 
   $ps = NULL;
 
@@ -299,6 +301,17 @@ function mfcs_get_request_fields($form, &$form_state) {
           ),
         );
       }
+    }
+
+    $fields['dates']['markup'] = array(
+      '#type' => 'markup',
+      '#markup' => '',
+    );
+
+    if (isset($form['form']['room_information']['#value']->room_id)) {
+      $room_id = (int) $form['form']['room_information']['#value']->room_id;
+      $fields['dates']['markup']['#markup'] .= '<div class="dates-holiday_markup">You may want to <a href="' . $base_path . 'requests/holiday-0" target="_blank">view the holidays</a> or <a href="' . $base_path . 'requests/unavailable-0/' . $room_id . '" target="_blank">view the room unavailability</a> when selecting your dates.</div>';
+      unset($room_id);
     }
 
     $fields['dates']['add'] = array(
@@ -640,7 +653,7 @@ function mfcs_get_request_fields($form, &$form_state) {
 
     $fields['message']['#markup'] .= '<div id="mfcs-markup-request-message" class="markup-request">';
     $fields['message']['#markup'] .= 'Once your request has been approved appropriate campus personnel, you will be emailed with the outcome. ';
-    $fields['message']['#markup'] .= 'If the request receives approval, you will also receive an itemized detail of any and all charges that will be assessed to you.' . "<br>";
+    $fields['message']['#markup'] .= 'If the request receives approval, you will also receive an itemized detail of any and all charges that will be assessed to you.' . '<br>';
     $fields['message']['#markup'] .= '<strong>You must agree and accept the terms offered for the venue to be reserved.</strong> ';
     $fields['message']['#markup'] .= '</div>';
   }

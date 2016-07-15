@@ -353,6 +353,10 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = NUL
     ),
     'oLanguage' => array(
       'sSearch' => '"Filter"',
+      'sEmptyTable' => '"' . $synchronize_list['empty'] . '"',
+    ),
+    'language' => array(
+      'emptyTable' => '"' . $synchronize_list['empty'] . '"',
     ),
     'searchDelay' => 1200,
     'pagingType' => 'input',

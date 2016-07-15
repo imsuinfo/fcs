@@ -133,8 +133,8 @@ class McNeeseFacilitiesUseMail implements MailSystemInterface {
   /**
    * Send an e-mail message, using Drupal variables and default settings.
    *
-   * @see //php.net/manual/function.mail.php
-   * @see drupal_mail()
+   * @see: //php.net/manual/function.mail.php
+   * @see: drupal_mail()
    *
    * @param $message
    *   A message array, as described in hook_mail_alter().

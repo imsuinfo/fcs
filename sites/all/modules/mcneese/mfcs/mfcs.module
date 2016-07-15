@@ -1103,26 +1103,38 @@ function mfcs_synchronize_request_access($type = NULL, $password = NULL, $user_i
 }
 
 /**
- * Access callback for facilities use holiday related operations.
+ * Access callback for facilities use unavailability related operations.
  *
  * This is a simple access check and is not cached like the other access checks.
  *
- * @param int|null $type
- *   (optional) When NULL, access to holiday management page is checked.
+ * @param string $operation
+ *   The operation to check access against.
+ * @param int|null $year
+ *   (optional) When not NULL, the current year is checked.
+ *   Years in the past are denied access, depending on operation.
+ * @param int|null $holiday_id
+ *   (optional) When NULL, this is ignored.
  *   When not NULL, access to a specific holiday id is checked.
  * @param int|null $user_id
  *   (optional) When NULL, the id of the current user is used.
  *   When not NULL, the provided user id is used.
- * @param bool|null $enabled
- *   (optional) When TRUE, only enabled holidays are allowed.
- *   When FALSE, not enabled holidays are allowed.
  *
  * @param return bool
  *   TRUE on granted, FALSE otherwise.
  */
-function mfcs_holiday_request_access($id = NULL, $user_id = NULL, $enabled = TRUE) {
-  if (!is_null($id) && !cf_is_integer($id)) {
-    cf_error::invalid_integer('id');
+function mfcs_holiday_request_access($operation, $year = NULL, $holiday_id = NULL, $user_id = NULL) {
+  if (!is_string($operation)) {
+    cf_error::invalid_integer('operation');
+    return FALSE;
+  }
+
+  if (!is_null($year) && !cf_is_integer($year)) {
+    cf_error::invalid_integer('year');
+    return FALSE;
+  }
+
+  if (!is_null($holiday_id) && !cf_is_integer($holiday_id)) {
+    cf_error::invalid_integer('holiday_id');
     return FALSE;
   }
 
@@ -1138,34 +1150,81 @@ function mfcs_holiday_request_access($id = NULL, $user_id = NULL, $enabled = TRU
     return FALSE;
   }
 
-  if (!is_null($enabled) && !is_bool($enabled)) {
-    cf_error::invalid_bool('enabled');
+  // must be a requester to gain any access.
+  $is_requester = user_access('mfcs request', $user);
+  if (!$is_requester) {
     return FALSE;
   }
 
-  // only allow managers and administers to do anything with holidays.
-  if (!user_access('mfcs manage', $user) && !user_access('mfcs administer', $user)) {
-    return FALSE;
+  $is_manager = user_access('mfcs manage', $user);
+  $is_administer = user_access('mfcs administer', $user);
+
+  $is_power = FALSE;
+  if ($is_manager || $is_administer) {
+    $is_power = TRUE;
   }
 
-  if (is_null($id)) {
-    return TRUE;
+  $enabled = FALSE;
+  $check_year = FALSE;
+  switch ($operation) {
+    case 'view':
+    case 'manage':
+      if (is_null($holiday_id)) {
+        // all users can view holidays and holiday management page.
+        return TRUE;
+      }
+
+      if (!$is_power) {
+        $enabled = TRUE;
+      }
+
+      break;
+    case 'create':
+    case 'edit':
+    case 'delete':
+      // only certain roles will ever be allowed to manage, add, edit, or delete.
+      if (!($is_manager || $is_administer)) {
+        return FALSE;
+      }
+
+      if (!is_null($year)) {
+        $check_year = TRUE;
+      }
+
+      break;
+    default:
+      // not a valid operation.
+      return FALSE;
   }
-  else {
+
+  if ($check_year) {
+    $instance = mfcs_instance();
+    $current_year = date('Y', $instance);
+
+    if ($year < $current_year) {
+      return FALSE;
+    }
+  }
+
+  if (!is_null($holiday_id)) {
     try {
       $query = db_select('mfcs_holiday', 'mh');
       $query->addField('mh', 'id', 'id');
 
-      if (!is_null($id)) {
-        $query->condition('id', $id);
+      if (!is_null($holiday_id)) {
+        $query->condition('id', $holiday_id);
       }
 
       if ($enabled) {
         $query->condition('enabled', 1);
       }
 
+      if (!is_null($year)) {
+        $query->condition('year', $year, '>=');
+      }
+
       // prohibit access to soft-deleted rows.
-      $query->condition('disabled', 0);
+      $query->condition('deleted', 0);
 
       $results = $query->execute()->fetchAll();
       if (empty($results)) {
@@ -1184,6 +1243,192 @@ function mfcs_holiday_request_access($id = NULL, $user_id = NULL, $enabled = TRU
 
       return FALSE;
     }
+  }
+
+  // managers and adminsiters are allowed access even if they are not the coordinator.
+  if ($is_manager || $is_administer) {
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
+/**
+ * Access callback for facilities use unavailability related operations.
+ *
+ * This is a simple access check and is not cached like the other access checks.
+ *
+ * @param string $operation
+ *   The operation to check access against.
+ * @param int|null $year
+ *   (optional) When not NULL, the current year is checked.
+ *   Years in the past are denied access, depending on operation.
+ * @param int|null $room_id
+ *   (optional) When NULL, access to unavailability management page is checked.
+ *   When not NULL, access to a specific room id is checked.
+ * @param int|null $availability_id
+ *   (optional) When NULL, this is ignored.
+ *   When not NULL, access to a specific unavailability id is checked.
+ * @param int|null $user_id
+ *   (optional) When NULL, the id of the current user is used.
+ *   When not NULL, the provided user id is used.
+ *
+ * @param return bool
+ *   TRUE on granted, FALSE otherwise.
+ */
+function mfcs_unavailability_request_access($operation, $year = NULL, $room_id = NULL, $availability_id = NULL, $user_id = NULL) {
+  if (!is_string($operation)) {
+    cf_error::invalid_integer('operation');
+    return FALSE;
+  }
+
+  if (!is_null($year) && !cf_is_integer($year)) {
+    cf_error::invalid_integer('year');
+    return FALSE;
+  }
+
+  if (!is_null($room_id) && !cf_is_integer($room_id)) {
+    cf_error::invalid_integer('room_id');
+    return FALSE;
+  }
+
+  if (!is_null($availability_id) && !cf_is_integer($availability_id)) {
+    cf_error::invalid_integer('availability_id');
+    return FALSE;
+  }
+
+  if (is_null($user_id)) {
+    $user = cf_current_user();
+  }
+  else {
+    $user = user_load($user_id);
+  }
+
+  if (!is_object($user)) {
+    cf_error::invalid_integer('user_id');
+    return FALSE;
+  }
+
+  // must be a requester to gain any access.
+  $is_requester = user_access('mfcs request', $user);
+  if (!$is_requester) {
+    return FALSE;
+  }
+
+  $is_manager = user_access('mfcs manage', $user);
+  $is_administer = user_access('mfcs administer', $user);
+  $is_reviewer = user_access('mfcs review', $user);
+
+  $is_coordinator_or_proxy_or_power = FALSE;
+  if ($is_manager || $is_administer) {
+    $is_coordinator_or_proxy_or_power = TRUE;
+  }
+  elseif ($is_reviewer) {
+    // reviewers must have venue coordinator or venue coordinator proxy access for the room to be able to access this.
+    $proxy_as = mfcs_get_proxy_venue_coordinator($user->uid);
+    if (!is_array($proxy_as)) {
+      $proxy_as = array();
+    }
+    $proxy_as[$user->uid] = (int) $user->uid;
+
+    $room_coordinators = mfcs_load_room_coordinators($room_id, TRUE);
+    if (is_array($room_coordinators)) {
+      foreach ($room_coordinators as $room_coordinator) {
+        if (array_key_exists($room_coordinator, $proxy_as)) {
+          $is_coordinator_or_proxy_or_power = TRUE;
+          break;
+        }
+      }
+    }
+  }
+
+  $enabled = FALSE;
+  $check_year = FALSE;
+  switch ($operation) {
+    case 'manage':
+    case 'view':
+      if (is_null($availability_id)) {
+        // all users can view unavailabilities and unavailability management page.
+        return TRUE;
+      }
+
+      if (!$is_coordinator_or_proxy_or_power) {
+        $enabled = TRUE;
+      }
+
+      break;
+    case 'create':
+    case 'edit':
+    case 'delete':
+      // only certain roles will ever be allowed to add, edit, or delete.
+      if (!$is_coordinator_or_proxy_or_power) {
+        return FALSE;
+      }
+
+      if (!is_null($year)) {
+        $check_year = TRUE;
+      }
+
+      break;
+    default:
+      // not a valid operation.
+      return FALSE;
+  }
+
+  if ($check_year) {
+    $instance = mfcs_instance();
+    $current_year = date('Y', $instance);
+
+    if ($year < $current_year) {
+      return FALSE;
+    }
+  }
+
+  if (!is_null($availability_id)) {
+    try {
+      $query = db_select('mfcs_unavailability', 'mu');
+      $query->addField('mu', 'id', 'id');
+
+      if (!is_null($availability_id)) {
+        $query->condition('id', $availability_id);
+      }
+
+      if (!is_null($year)) {
+        $query->condition('year', $year);
+      }
+
+      if ($enabled) {
+        $query->condition('enabled', 1);
+      }
+
+      // prohibit access to soft-deleted rows.
+      $query->condition('deleted', 0);
+
+      $results = $query->execute()->fetchAll();
+      if (empty($results)) {
+        return FALSE;
+      }
+    }
+    catch (Error $e) {
+      cf_error::on_query_execution($e);
+
+      return FALSE;
+    }
+    catch (Exception $e) {
+      cf_error::on_query_execution($e);
+
+      return FALSE;
+    }
+  }
+
+  // this restriction happens only during the view operation in which all requesters are alllowed access.
+  if ($enabled) {
+    return TRUE;
+  }
+
+  // managers and adminsiters are allowed access even if they are not the coordinator.
+  if ($is_manager || $is_administer) {
+    return TRUE;
   }
 
   return FALSE;
@@ -2073,7 +2318,7 @@ function mfcs_dashboard_page_access() {
  *   TRUE on access granted, FALSE otherwise.
  */
 function mfcs_management_page_access() {
-  if (user_access('mfcs administer') || user_access('mfcs manage') || user_access('mfcs review')) {
+  if (user_access('mfcs request') || user_access('mfcs review') || user_access('mfcs manage') || user_access('mfcs administer')) {
     return TRUE;
   }
 
@@ -2128,10 +2373,10 @@ function mfcs_mail($key, &$message, $params) {
     if (isset($params['markup'])) {
       $markup .= $params['markup'];
 
-      $markup .= "<br>";
+      $markup .= '<br>';
       $markup .= "<strong>Request URL</strong>:<ul><li><a href=" . '"' . $request_url . '"' . ">" . $request_url . "</a></li></ul><br>";
 
-      $markup .= "<br>";
+      $markup .= '<br>';
       $markup .= "<em>This e-mail was generated on</em>:<ul><li><em>" . date("Y/m/d h:i:s a T", $instance) . "</em></li></ul>";
     }
   }
@@ -4829,7 +5074,8 @@ function mfcs_sync_banner_to_local_classes() {
 
   $classes_query = 'select ssrmeet_start_date, ssrmeet_end_date, ssrmeet_begin_time, ssrmeet_end_time, ';
   $classes_query .= 'ssrmeet_bldg_code, ssrmeet_room_code, ssrmeet_mon_day, ssrmeet_tue_day, ';
-  $classes_query .= 'ssrmeet_wed_day, ssrmeet_thu_day, ssrmeet_fri_day, ssrmeet_sat_day, ssrmeet_sun_day ';
+  $classes_query .= 'ssrmeet_wed_day, ssrmeet_thu_day, ssrmeet_fri_day, ssrmeet_sat_day, ssrmeet_sun_day, ';
+  $classes_query .= 'ssbsect_subj_code, ssbsect_crse_numb ';
   $classes_query .= 'from ssvmeet sm ';
 
   $classes_query .= 'where (ssrmeet_term_code like \'' . $year . '%\' or ssrmeet_term_code like \'' . $year_next . '%\')';
@@ -4952,7 +5198,7 @@ function mfcs_sync_banner_to_local_classes() {
  *
  * This requires the ultimate_cron module to function.
  *
- * @see mfcs_cronapi()
+ * @see: mfcs_cronapi()
  */
 function mfcs_oracle_recache_cron() {
   mfcs_set_using_effective_system_id();
@@ -4965,7 +5211,7 @@ function mfcs_oracle_recache_cron() {
  *
  * This requires the ultimate_cron module to function.
  *
- * @see mfcs_cronapi()
+ * @see: mfcs_cronapi()
  */
 function mfcs_insurance_not_provided_alert_cron() {
   mfcs_set_using_effective_system_id();
@@ -5045,7 +5291,7 @@ function mfcs_insurance_not_provided_alert_cron() {
  *
  * This requires the ultimate_cron module to function.
  *
- * @see mfcs_cronapi()
+ * @see: mfcs_cronapi()
  */
 function mfcs_autocancel_old_requests_cron() {
   mfcs_set_using_effective_system_id();
@@ -5125,7 +5371,7 @@ function mfcs_autocancel_old_requests_cron() {
  * An exception to this are the accounts defined in the settings array
  * 'fcs_no_auto_block_accounts'.
  *
- * @see mfcs_cronapi()
+ * @see: mfcs_cronapi()
  */
 function mfcs_auto_block_accounts_cron() {
   mfcs_set_using_effective_system_id();
@@ -5621,7 +5867,7 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL, $revision_id
  *   An array of values associated with the request, date, and fields.
  *   FALSE is returned on error.
  *
- * @see mfcs_table_structure()
+ * @see: mfcs_table_structure()
  */
 function mfcs_load_request_by_timestamp($request_id, $timestamp, $revision_user_id, $desired_fields = array(), $nearest = FALSE) {
   if (!cf_is_integer($request_id) || $request_id < 0) {
@@ -5944,8 +6190,8 @@ function mfcs_load_user_by_banner_id($banner_id, $reset = FALSE) {
  *   When an array, the created tables are updates to existing values.
  *   The array should be populated by mfcs_load_request_by_id().
  *
- * @see mfcs_table_structure()
- * @see mfcs_load_request_by_id()
+ * @see: mfcs_table_structure()
+ * @see: mfcs_load_request_by_id()
  */
 function mfcs_build_table_structure($structure, &$structure_current, &$structure_field_tables, $table_name, $field_name, $db_table_field, $user_data, $values, $form_state, $request = NULL) {
   $instance = mfcs_instance();
@@ -6619,8 +6865,8 @@ function mfcs_get_proxy_venue_coordinators($conditions = array(), $options = arr
  *
  *   FALSE is returned on error.
  *
- * @see mfcs_get_proxy_venue_coordinators()
- * @see mfcs_get_venue_coordinator_proxy()
+ * @see: mfcs_get_proxy_venue_coordinators()
+ * @see: mfcs_get_venue_coordinator_proxy()
  */
 function mfcs_get_proxy_venue_coordinator($proxy_id) {
   if (!cf_is_integer($proxy_id)) {
@@ -6673,8 +6919,8 @@ function mfcs_get_proxy_venue_coordinator($proxy_id) {
  *
  *   FALSE is returned on error.
  *
- * @see mfcs_get_proxy_venue_coordinators()
- * @see mfcs_get_proxy_venue_coordinator()
+ * @see: mfcs_get_proxy_venue_coordinators()
+ * @see: mfcs_get_proxy_venue_coordinator()
  */
 function mfcs_get_venue_coordinator_proxy($venue_coordinator_id) {
   if (!cf_is_integer($venue_coordinator_id)) {
@@ -6888,7 +7134,9 @@ function mfcs_get_reviewer_settings_by_user_id($user_id, $disabled = FALSE) {
  *   itself as the request using the room.
  *
  * @return array|false
- *   An array containing any requests currently using the room at the specified date and time.
+ *   An array with the following keys;
+ *   - conflicts: an array containing any requests currently using the room at the specified date and time.
+ *   - unavailable: an array containing any room unavailability.
  *   FALSE on error.
  */
 function mfcs_check_room_availability($room, $dates, $time_start, $time_stop, $request_id = NULL) {
@@ -6917,7 +7165,11 @@ function mfcs_check_room_availability($room, $dates, $time_start, $time_stop, $r
     return FALSE;
   }
 
-  $matched_requests = array();
+  $matched_requests = array(
+    'conflicts' => array(),
+    'unavailable' => array(),
+  );
+
   try {
     $query = db_select('mfcs_requests', 'mer');
 
@@ -6996,7 +7248,7 @@ function mfcs_check_room_availability($room, $dates, $time_start, $time_stop, $r
         foreach ($dates as $key => $value) {
           // all day requests match, they have NULL for start and stop time values.
           if (is_null($time_start[$key]) && is_null($time_stop[$key])) {
-            $matched_requests[] = $result;
+            $matched_requests['conflicts'][] = $result;
           }
 
           $and = db_and();
@@ -7029,7 +7281,7 @@ function mfcs_check_room_availability($room, $dates, $time_start, $time_stop, $r
         foreach ($matches as $match) {
           $result->time_start = $match->time_start;
           $result->time_stop = $match->time_stop;
-          $matched_requests[] = $result;
+          $matched_requests['conflicts'][] = $result;
         }
       }
     }
@@ -7073,7 +7325,7 @@ function mfcs_check_room_availability($room, $dates, $time_start, $time_stop, $r
 
     $results = $query->execute()->fetchAll();
     foreach ($results as $result) {
-      $matched_requests[] = $result;
+      $matched_requests['conflicts'][] = $result;
     }
   }
   catch (Error $e) {
@@ -7085,34 +7337,142 @@ function mfcs_check_room_availability($room, $dates, $time_start, $time_stop, $r
     return FALSE;
   }
 
+  // process explicit/non-conflict unavailabilities.
+  foreach ($dates as $key => $date) {
+    $year = date('Y', $date);
+
+    if (is_null($time_start[$key])) {
+      $start_time = strtotime('midnight today', $date);
+      $stop_time = strtotime('midnight tomorrow', $date);
+    }
+    else {
+      $start_time = $time_start[$key];
+      $stop_time = $time_stop[$key];
+    }
+
+    $unavailabilities = mfcs_get_unavailabilities($year, $room, $start_time, $stop_time);
+    foreach ($unavailabilities as $unavailability) {
+      $matched_requests['unavailable'][$unavailability->id] = $unavailability;
+    }
+    unset($unavailability);
+    unset($unavailabilities);
+  }
+
   return $matched_requests;
 }
 
 /**
- * Prints a warning message about the room being unavailable.
+ * Builds and returns the availability problem message based on the room availability information.
  *
- * @param array $dates
- *   An array of dates that the room is unavailable for.
+ * This creates an unordered list.
+ * The initial warning/title for the list is not generated because the specfic message may vary.
  *
- * @see mfcs_check_room_availability()
+ * @param array $availability_issues
+ *   An array containing availability issues as returned by mfcs_check_room_availability()
+ * @param string|null $url_arguments
+ *   (optional) An string of url arguments to append to each link.
+ *
+ * @return string|bool|null
+ *   The built string in HTML markup format.
+ *   FALSE is returned on error.
+ *   NULL is returned when there are no availability issues to process.
+ *
+ * @see: mfcs_check_room_availability()
  */
-function mfcs_display_room_unavailable_message($dates) {
-  if (!is_array($dates)) {
-    cf_error::invalid_array('dates');
-    $dates = array();
+function mfcs_build_room_unavailable_message($availability_issues, $url_arguments = NULL) {
+  if (!is_array($availability_issues)) {
+    cf_error::invalid_array('availability_issues');
+    return FALSE;
   }
 
-  $unavailable_message = '';
-  $unavailable_message .= '<span class="uppercase">Warning</span>: The specified room is currently unavailable for the following dates: ';
-
-  $unavailable_message .= '<ul>';
-  foreach ($dates as $date) {
-    $unavailable_message .= '<li>' . $date . '</li>';
+  if (!is_null($url_arguments) && !is_string($url_arguments)) {
+    cf_error::invalid_string('url_arguments');
+    return FALSE;
   }
+
+  if (empty($availability_issues['conflicts']) && empty($availability_issues['unavailable'])) {
+    return NULL;
+  }
+
+  global $base_path;
+
+  $unavailable_message = '<ul>';
+
+  $problematic_dates = array();
+  if (!empty($availability_issues['conflicts'])) {
+    foreach ($availability_issues['conflicts'] as $request_using_room) {
+      if (isset($request_using_room->date)) {
+        if (isset($request_using_room->time_start)) {
+          $problematic_date_key =  '' . $request_using_room->reserved_day . '-' . $request_using_room->reserved_time_start . '-' . $request_using_room->reserved_time_stop;
+          $problematic_date = '<strong>' . date('l, F j, Y', $request_using_room->date) . '</strong> from <strong>' . date('h:ia', $request_using_room->time_start) . '</strong> to <strong>' . date('h:ia', $request_using_room->time_stop) . '</strong> because of a ';
+          $problematic_date .= '<strong><a href="' . $base_path . 'requests/view-0/' . $request_using_room->request_id . $url_arguments . '" title="View conflicting request.">scheduling conflict</a></strong>.';
+          $problematic_dates[$problematic_date_key] = $problematic_date;
+        }
+        else {
+          $problematic_date_key =  '' . $request_using_room->reserved_day;
+          $problematic_date = '<strong>' . date('l, F j, Y', $request_using_room->date) . '</strong> (all day) because of a ';
+          $problematic_date .= '<strong><a href="' . $base_path . 'requests/view-0/' . $request_using_room->request_id . $url_arguments . '" title="View conflicting request.">scheduling conflict</a></strong>.';
+          $problematic_dates[$problematic_date_key] = $problematic_date;
+        }
+      }
+      elseif (isset($request_using_room->reserved_day)) {
+        $problematic_date_key =  '' . $request_using_room->reserved_day . '-' . $request_using_room->reserved_time_start . '-' . $request_using_room->reserved_time_stop;
+        $problematic_date = '<strong>' . date('l, F j, Y', $request_using_room->reserved_day) . '</strong> from <strong>' . date('h:ia', $request_using_room->reserved_time_start) . '</strong> to <strong>' . date('h:ia', $request_using_room->reserved_time_stop) . '</strong> because of a scheduling conflict.';
+        $problematic_dates[$problematic_date_key] = $problematic_date;
+      }
+    }
+    unset($problematic_date_key);
+    unset($request_using_room);
+
+    ksort($problematic_dates);
+    foreach ($problematic_dates as $date) {
+      $unavailable_message .= '<li>' . $date . '</li>';
+    }
+    unset($date);
+  }
+
+  if (!empty($availability_issues['unavailable'])) {
+    foreach ($availability_issues['unavailable'] as $unavailable) {
+      $year = (int) date('Y', $unavailable->date_start);
+
+      $unavailable_message .= '<li>';
+
+      $start_day = strtotime('midnight today', $unavailable->date_start);
+      $stop_day = strtotime('midnight today', $unavailable->date_stop);
+
+      if ($unavailable->date_start == $start_day && $unavailable->date_stop == $stop_day) {
+        // all day.
+        if ($unavailable->date_stop == strtotime('midnight tomorrow', $start_day)) {
+          // all day, one day.
+          $unavailable_message .= '<strong>' . check_plain(date('l, F j, Y', $unavailable->date_start)) . '</strong>';
+        }
+        else {
+          // all day, over more than one days.
+          $unavailable_message .= '<strong>' . check_plain(date('l, F j, Y', $unavailable->date_start)) . '</strong> to <strong>' . check_plain(date('l, F j, Y', $unavailable->date_stop)) . '</strong>';
+        }
+      }
+      elseif ($start_day == $stop_day || $unavailable->date_stop == strtotime('midnight tomorrow', $start_day)) {
+        // specific times in one day.
+        $unavailable_message .= '<strong>' . check_plain(date('l, F j, Y', $unavailable->date_start)) . '</strong> from <strong>' . check_plain(date('h:i a', $unavailable->date_start)) . '</strong> to <strong>' . check_plain(date('h:i a', $unavailable->date_stop)) . '</strong>';
+      }
+      else {
+        // specific times over more than one days.
+        $unavailable_message .= '<strong>' . check_plain(date('h:i a, l, F j, Y', $unavailable->date_start)) . '</strong> to <strong>' . check_plain(date('h:i a, l, F j, Y', $unavailable->date_stop)) . '</strong>';
+      }
+
+      $unavailable_message .= ' because of: ';
+      $unavailable_message .= '<strong><a href="' . $base_path . 'requests/unavailable-0/view/' . $year . '/' . $unavailable->room_id. '/' . $unavailable->id . $url_arguments . '" title="View details about room unavailability.">';
+      $unavailable_message .= check_plain(preg_replace('/\.\s*$/i', '', $unavailable->title)) . '</a></strong>.';
+      $unavailable_message .= '</li>';
+
+      unset($year);
+    }
+    unset($unavailable);
+  }
+
   $unavailable_message .= '</ul>';
 
-  $unavailable_message .= 'You may still submit this request and your request attempt will still be logged. ';
-  drupal_set_message($unavailable_message, 'warning');
+  return $unavailable_message;
 }
 
 /**
@@ -7787,10 +8147,10 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
             if ($distinct || $distinct_id) {
               $existing_alias = array_search($already_joined['mfcs_banner_locations'] . '.human_name', $already_added);
               if ($existing_alias === FALSE) {
-                $query->addField($already_joined['mfcs_banner_locations'], 'human_name', 'banner_locations_human_name');
-                $already_added['banner_locations_human_name'] = $already_joined['mfcs_banner_locations'] . '.human_name';
+                $query->addField($already_joined['mfcs_banner_locations'], 'human_name', 'banner_locations_name');
+                $already_added['banner_locations_name'] = $already_joined['mfcs_banner_locations'] . '.human_name';
 
-                $query->orderBy('banner_locations_human_name', is_null($sort_value) ? 'ASC' : $sort_value);
+                $query->orderBy('banner_locations_name', is_null($sort_value) ? 'ASC' : $sort_value);
               }
               else {
                 $query->orderBy($existing_alias, is_null($sort_value) ? 'ASC' : $sort_value);
@@ -7810,10 +8170,10 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
             if ($distinct || $distinct_id) {
               $existing_alias = array_search($already_joined['mfcs_banner_buildings'] . '.human_name', $already_added);
               if ($existing_alias === FALSE) {
-                $query->addField($already_joined['mfcs_banner_buildings'], 'human_name', 'banner_buildings_human_name');
-                $already_added['banner_buildings_human_name'] = $already_joined['mfcs_banner_buildings'] . '.human_name';
+                $query->addField($already_joined['mfcs_banner_buildings'], 'human_name', 'banner_buildings_name');
+                $already_added['banner_buildings_name'] = $already_joined['mfcs_banner_buildings'] . '.human_name';
 
-                $query->orderBy('banner_buildings_human_name', is_null($sort_value) ? 'ASC' : $sort_value);
+                $query->orderBy('banner_buildings_name', is_null($sort_value) ? 'ASC' : $sort_value);
               }
               else {
                 $query->orderBy($existing_alias, is_null($sort_value) ? 'ASC' : $sort_value);
@@ -7833,10 +8193,10 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
             if ($distinct || $distinct_id) {
               $existing_alias = array_search($already_joined['mfcs_banner_rooms'] . '.human_name', $already_added);
               if ($existing_alias === FALSE) {
-                $query->addField($already_joined['mfcs_banner_rooms'], 'human_name', 'banner_rooms_human_name');
-                $already_added['banner_rooms_human_name'] = $already_joined['mfcs_banner_rooms'] . '.human_name';
+                $query->addField($already_joined['mfcs_banner_rooms'], 'human_name', 'banner_rooms_name');
+                $already_added['banner_rooms_name'] = $already_joined['mfcs_banner_rooms'] . '.human_name';
 
-                $query->orderBy('banner_rooms_human_name' , is_null($sort_value) ? 'ASC' : $sort_value);
+                $query->orderBy('banner_rooms_name' , is_null($sort_value) ? 'ASC' : $sort_value);
               }
               else {
                 $query->orderBy($existing_alias, is_null($sort_value) ? 'ASC' : $sort_value);
@@ -9107,6 +9467,10 @@ function mfcs_build_request_ajax_table($items_returned, $conditions, $options, $
     ),
     'oLanguage' => array(
       'sSearch' => '"Filter"',
+      'sEmptyTable' => '"' . $table['empty'] . '"',
+    ),
+    'language' => array(
+      'emptyTable' => '"' . $table['empty'] . '"',
     ),
     'searchDelay' => 1200,
     'pagingType' => 'input',
@@ -10652,7 +11016,7 @@ function mfcs_load_room_coordinators($room_id = NULL, $coordinators_only = FALSE
     $query = db_select('mfcs_banner_rooms', 'mbr');
 
     if (!is_null($room_id)) {
-      $query->condition('mbr.room_id', $room_id);
+      $query->condition('mbr.id', $room_id);
     }
 
     if ($coordinators_only) {
@@ -11049,8 +11413,8 @@ function mfcs_get_request_already_reviewed_as_classifications($request_id, $revi
  *   When FALSE, only load holidays when the enabled column is 0.
  *   When NULL, ignore this column.
  * @param bool|null $deleted
- *   (optional) When TRUE, only load holidays when the disabled column is 1.
- *   When FALSE, only load holidays when the disabled column is 0.
+ *   (optional) When TRUE, only load holidays when the deleted column is 1.
+ *   When FALSE, only load holidays when the deleted column is 0.
  *   When NULL, ignore this column.
  *
  * @return array|bool
@@ -11087,10 +11451,11 @@ function mfcs_get_holidays($year, $timestamp_start = NULL, $timestamp_stop = NUL
     $query = db_select('mfcs_holiday', 'mh');
     $query->addField('mh', 'id', 'id');
     $query->addField('mh', 'date', 'date');
+    $query->addField('mh', 'year', 'year');
     $query->addField('mh', 'title', 'title');
     $query->addField('mh', 'description', 'description');
     $query->addField('mh', 'enabled', 'enabled');
-    $query->addField('mh', 'disabled', 'disabled');
+    $query->addField('mh', 'deleted', 'deleted');
     $query->addField('mh', 'created', 'created');
     $query->addField('mh', 'updated', 'updated');
 
@@ -11104,10 +11469,10 @@ function mfcs_get_holidays($year, $timestamp_start = NULL, $timestamp_stop = NUL
     }
 
     if ($deleted === TRUE) {
-      $query->condition('mh.disabled', 1);
+      $query->condition('mh.deleted', 1);
     }
     elseif ($deleted === FALSE) {
-      $query->condition('mh.disabled', 0);
+      $query->condition('mh.deleted', 0);
     }
 
     if (!is_null($timestamp_start)) {
@@ -11145,7 +11510,7 @@ function mfcs_get_holidays($year, $timestamp_start = NULL, $timestamp_stop = NUL
 }
 
 /**
- * Returns a list of holidays for the given year, month, day.
+ * Returns information for a specific holiday.
  *
  * @param int $id
  *   The id of the holiday to load.
@@ -11154,8 +11519,8 @@ function mfcs_get_holidays($year, $timestamp_start = NULL, $timestamp_stop = NUL
  *   When FALSE, only load holidays when the enabled column is 0.
  *   When NULL, ignore this column.
  * @param bool|null $deleted
- *   (optional) When TRUE, only load holidays when the disabled column is 1.
- *   When FALSE, only load holidays when the disabled column is 0.
+ *   (optional) When TRUE, only load holidays when the deleted column is 1.
+ *   When FALSE, only load holidays when the deleted column is 0.
  *   When NULL, ignore this column.
  *
  * @return array|bool
@@ -11186,7 +11551,7 @@ function mfcs_get_holiday($id, $enabled = TRUE, $deleted = FALSE) {
     $query->addField('mh', 'title', 'title');
     $query->addField('mh', 'description', 'description');
     $query->addField('mh', 'enabled', 'enabled');
-    $query->addField('mh', 'disabled', 'disabled');
+    $query->addField('mh', 'deleted', 'deleted');
     $query->addField('mh', 'created', 'created');
     $query->addField('mh', 'updated', 'updated');
 
@@ -11200,10 +11565,270 @@ function mfcs_get_holiday($id, $enabled = TRUE, $deleted = FALSE) {
     }
 
     if ($deleted === TRUE) {
-      $query->condition('mh.disabled', 1);
+      $query->condition('mh.deleted', 1);
     }
     elseif ($deleted === FALSE) {
-      $query->condition('mh.disabled', 0);
+      $query->condition('mh.deleted', 0);
+    }
+
+    $results = $query->execute()->fetchObject();
+  }
+  catch (Error $e) {
+    cf_error::on_exception($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
+
+    return FALSE;
+  }
+
+  return $results;
+}
+
+/**
+ * Returns a list of unavailabilities for the given year, month, day.
+ *
+ * @param int $year
+ *   The year the unavailability belongs under.
+ * @param array|int|null $room_id
+ *   (optional) The ID of the room to load.
+ *   May be an array of room IDS to load by multiple rooms.
+ *   If NULL, then all rooms for the given year are loaded.
+ * @param int|null $timestamp_start
+ *   (optional) The timestamp start range.
+ * @param int|null $timestamp_stop
+ *   (optional) The timestamp stop range.
+ *   If NULL, then this value is ignored.
+ *   If timestamp_start is NULL, then this value is ignored.
+ * @param bool|null $enabled
+ *   (optional) When TRUE, only load unavailabilities when the enabled column is 1.
+ *   When FALSE, only load unavailabilities when the enabled column is 0.
+ *   When NULL, ignore this column.
+ * @param bool|null $deleted
+ *   (optional) When TRUE, only load unavailabilities when the disabled column is 1.
+ *   When FALSE, only load unavailabilities when the disabled column is 0.
+ *   When NULL, ignore this column.
+ * @param bool $inner_joinbs
+ *   (optional) When TRUE, additional inner joins will be performed to load the banner room and building information.
+ *
+ * @return array|bool
+ *   An array of unavailabilities.
+ *   FALSE is returned on error.
+ */
+function mfcs_get_unavailabilities($year, $room_id = NULL, $timestamp_start = NULL, $timestamp_stop = NULL, $enabled = TRUE, $deleted = FALSE, $inner_joins = FALSE) {
+  if (!cf_is_integer($year)) {
+    cf_error::invalid_integer('year');
+    return FALSE;
+  }
+
+  if (!is_null($room_id) && !cf_is_integer($room_id) && !is_array($room_id)) {
+    cf_error::invalid_integer('room_id');
+    return FALSE;
+  }
+
+  if (!is_null($timestamp_start) && !cf_is_integer($timestamp_start)) {
+    cf_error::invalid_integer('timestamp_start');
+    return FALSE;
+  }
+
+  if (!is_null($timestamp_stop) && !cf_is_integer($timestamp_stop)) {
+    cf_error::invalid_integer('timestamp_stop');
+    return FALSE;
+  }
+
+  if (!is_null($enabled) && !is_bool($enabled)) {
+    cf_error::invalid_bool('enabled');
+    return FALSE;
+  }
+
+  if (!is_null($deleted) && !is_bool($deleted)) {
+    cf_error::invalid_bool('deleted');
+    return FALSE;
+  }
+
+  if (!is_bool($inner_joins)) {
+    cf_error::invalid_bool('inner_joins');
+    return FALSE;
+  }
+
+  // start and stop integers must not be identical.
+  if (!is_null($timestamp_start) && !is_null($timestamp_stop)) {
+    if ($timestamp_start == $timestamp_stop) {
+      cf_error::invalid_integer('timestamp_stop');
+      return FALSE;
+    }
+  }
+
+  try {
+    $query = db_select('mfcs_unavailability', 'mu');
+    $query->addField('mu', 'id', 'id');
+    $query->addField('mu', 'room_id', 'room_id');
+    $query->addField('mu', 'building_id', 'building_id');
+    $query->addField('mu', 'date_start', 'date_start');
+    $query->addField('mu', 'date_stop', 'date_stop');
+    $query->addField('mu', 'title', 'title');
+    $query->addField('mu', 'description', 'description');
+    $query->addField('mu', 'enabled', 'enabled');
+    $query->addField('mu', 'deleted', 'deleted');
+    $query->addField('mu', 'created', 'created');
+    $query->addField('mu', 'updated', 'updated');
+
+    if ($inner_joins) {
+      $query->innerJoin('mfcs_banner_rooms', 'mbr', 'mu.room_id = mbr.id');
+      $query->innerJoin('mfcs_banner_buildings', 'mbb', 'mu.building_id = mbb.id');
+
+      $query->addField('mbr', 'machine_name', 'room_number');
+      $query->addField('mbr', 'human_name', 'room_name');
+      $query->addField('mbr', 'coordinator_id', 'room_coordinator_id');
+      $query->addField('mbb', 'id', 'building_id');
+      $query->addField('mbb', 'machine_name', 'building_code');
+      $query->addField('mbb', 'human_name', 'building_name');
+    }
+
+    $query->condition('mu.year', $year);
+
+    if (!is_null($room_id)) {
+      if (is_array($room_id)) {
+        $query->condition('mu.room_id', $room_id, 'IN');
+      }
+      else {
+        $query->condition('mu.room_id', $room_id);
+      }
+    }
+
+    if ($enabled === TRUE) {
+      $query->condition('mu.enabled', 1);
+    }
+    elseif ($enabled === FALSE) {
+      $query->condition('mu.enabled', 0);
+    }
+
+    if ($deleted === TRUE) {
+      $query->condition('mu.deleted', 1);
+    }
+    elseif ($deleted === FALSE) {
+      $query->condition('mu.deleted', 0);
+    }
+
+    if (!is_null($timestamp_start)) {
+      if (is_null($timestamp_stop)) {
+        $query->condition('mu.date_start', $timestamp_start, '>=');
+        $query->condition('mu.date_stop', $timestamp_start, '<');
+      }
+      else {
+        $or = db_or();
+
+        // [B] [DS] [E] [DF] ~ B <= DS && E > DS | DS < E && DF >= E
+        // [B] [DS] [DF] [E] ~ B <= DS && E > DF | DS >= B && DF < E
+        // [DS] [B] [DF] [E] ~ B >= DS && B < DF | DS <= B && DF > B
+
+        $and = db_and();
+        $and->condition('mu.date_start', $timestamp_stop, '<');
+        $and->condition('mu.date_stop', $timestamp_stop, '>=');
+        $or->condition($and);
+
+        $and = db_and();
+        $and->condition('mu.date_start', $timestamp_start, '>=');
+        $and->condition('mu.date_stop', $timestamp_stop, '<');
+        $or->condition($and);
+
+        $and = db_and();
+        $and->condition('mu.date_start', $timestamp_start, '<=');
+        $and->condition('mu.date_stop', $timestamp_start, '>');
+        $or->condition($and);
+
+        $query->condition($or);
+
+    #( (mu.date_start >= 1469077200) AND (mu.date_start < 1469163600) )
+    #OR                  1468389600
+    #( (mu.date_stop > 1469077200) AND (mu.date_stop <= 1469163600) )
+      }
+    }
+
+    $query->orderBy('mu.date_start');
+    $query->orderBy('mu.date_stop');
+
+    $results = $query->execute()->fetchAllAssoc('id');
+  }
+  catch (Error $e) {
+    cf_error::on_exception($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
+
+    return FALSE;
+  }
+
+  return $results;
+}
+
+/**
+ * Returns information for a specific unavailability.
+ *
+ * @param int $id
+ *   The id of the unavailability to load.
+ * @param bool|null $enabled
+ *   (optional) When TRUE, only load unavailabilities when the enabled column is 1.
+ *   When FALSE, only load unavailabilities when the enabled column is 0.
+ *   When NULL, ignore this column.
+ * @param bool|null $deleted
+ *   (optional) When TRUE, only load unavailabilities when the disabled column is 1.
+ *   When FALSE, only load unavailabilities when the disabled column is 0.
+ *   When NULL, ignore this column.
+ *
+ * @return array|bool
+ *   An array of unavailabilities.
+ *   FALSE is returned on error.
+ */
+function mfcs_get_unavailability($id, $enabled = TRUE, $deleted = FALSE) {
+  if (!cf_is_integer($id)) {
+    cf_error::invalid_integer('id');
+    return FALSE;
+  }
+
+  if (!is_null($enabled) && !is_bool($enabled)) {
+    cf_error::invalid_bool('enabled');
+    return FALSE;
+  }
+
+  if (!is_null($deleted) && !is_bool($deleted)) {
+    cf_error::invalid_bool('deleted');
+    return FALSE;
+  }
+
+  try {
+    $query = db_select('mfcs_unavailability', 'mu');
+    $query->addField('mu', 'id', 'id');
+    $query->addField('mu', 'year', 'year');
+    $query->addField('mu', 'room_id', 'room_id');
+    $query->addField('mu', 'building_id', 'building_id');
+    $query->addField('mu', 'date_start', 'date_start');
+    $query->addField('mu', 'date_stop', 'date_stop');
+    $query->addField('mu', 'title', 'title');
+    $query->addField('mu', 'description', 'description');
+    $query->addField('mu', 'enabled', 'enabled');
+    $query->addField('mu', 'deleted', 'deleted');
+    $query->addField('mu', 'created', 'created');
+    $query->addField('mu', 'updated', 'updated');
+
+    $query->condition('mu.id', $id);
+
+    if ($enabled === TRUE) {
+      $query->condition('mu.enabled', 1);
+    }
+    elseif ($enabled === FALSE) {
+      $query->condition('mu.enabled', 0);
+    }
+
+    if ($deleted === TRUE) {
+      $query->condition('mu.deleted', 1);
+    }
+    elseif ($deleted === FALSE) {
+      $query->condition('mu.deleted', 0);
     }
 
     $results = $query->execute()->fetchObject();

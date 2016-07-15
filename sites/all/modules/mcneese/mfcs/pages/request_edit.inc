@@ -454,39 +454,23 @@ function mfcs_request_edit_0_form_validate($form, &$form_state) {
           }
 
           if (!empty($date)) {
-            $requests_using_room = mfcs_check_room_availability($room, $date, $time_start, $time_stop, $request_id);
-
-            if ($requests_using_room === FALSE) {
+            $room_unavailability = mfcs_check_room_availability($room, $date, $time_start, $time_stop, $request_id);
+            if ($room_unavailability === FALSE) {
               form_set_error('', "An internal error occurred while checking the room for availability. Please contact the support staff.");
             }
-            elseif (!empty($requests_using_room)) {
-              $problematic_dates = array();
-              foreach ($requests_using_room as $request_using_room) {
-                if (isset($request_using_room->date)) {
-                  if (isset($request_using_room->time_start)) {
-                    $problematic_date = date("Y/m/d", $request_using_room->date) . " from " . date("h:ia", $request_using_room->time_start) . " to " . date("h:ia", $request_using_room->time_stop) . '.';
-                    $problematic_dates[$problematic_date] = $problematic_date;
-                  }
-                  else {
-                    $problematic_date = date("Y/m/d", $request_using_room->date) . " (all day).";
-                    $problematic_dates[$problematic_date] = $problematic_date;
-                  }
-                }
-                elseif (isset($request_using_room->reserved_day)) {
-                  $problematic_date = date("Y/m/d", $request_using_room->reserved_day) . " from " . date("h:ia", $request_using_room->reserved_time_start) . " to " . date("h:ia", $request_using_room->reserved_time_stop) . '.';
-                  $problematic_dates[$problematic_date] = $problematic_date;
-                }
-              }
-              ksort($problematic_dates);
-              mfcs_display_room_unavailable_message($problematic_dates);
+            elseif (!empty($room_unavailability['conflict']) || !empty($room_unavailability['unavailable'])) {
+              $unavailable_message = '<span class="uppercase">Warning</span>: The specified room is currently unavailable for the following dates: ';
+              $unavailable_message .= mfcs_build_room_unavailable_message($room_unavailability);
+              drupal_set_message($unavailable_message, 'warning');
+              unset($unavailable_message);
             }
           }
-
           unset($room);
           unset($date);
           unset($time_start);
           unset($time_stop);
           unset($category);
+          unset($room_unavailability);
 
           if (empty($form_state['values']['request']['information']['type'][0])) {
             form_set_error('request][information][type][0', "The <strong>" . $form['request']['information']['type'][0]['#title'] . "</strong> is required.");

@@ -446,6 +446,10 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
     ),
     'oLanguage' => array(
       'sSearch' => '"Filter"',
+      'sEmptyTable' => '"' . $reviewers_list['empty'] . '"',
+    ),
+    'language' => array(
+      'emptyTable' => '"' . $reviewers_list['empty'] . '"',
     ),
     'searchDelay' => 1200,
     'pagingType' => 'input',

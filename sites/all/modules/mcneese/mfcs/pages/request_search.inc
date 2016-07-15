@@ -2007,7 +2007,7 @@ function mfcs_request_search_0_form_build_targets_and_groups($form, &$form_state
  * @return bool
  *   TRUE on success, FALSE otherwise.
  *
- * @see mfcs_table_structure()
+ * @see: mfcs_table_structure()
  */
 function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$location, $state_location, $target_name, $target_delta, $id_extra) {
   if (!is_array($form)) {
@@ -2580,7 +2580,7 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
  * @return array|bool
  *   Array of built search targets or FALSE on error.
  *
- * @see mfcs_table_structure()
+ * @see: mfcs_table_structure()
  */
 function mfcs_request_search_0_form_build_search_targets($structure, $targets, $recurse_count) {
   if (!is_array($structure)) {
@@ -2653,7 +2653,7 @@ function mfcs_request_search_0_form_build_search_targets($structure, $targets, $
  * @return array|bool
  *   Array of search options or FALSE on error.
  *
- * @see mfcs_table_structure()
+ * @see: mfcs_table_structure()
  */
 function mfcs_request_search_0_form_build_search_target($structure, $target_name, $target_delta, $target_values) {
   if (!is_array($structure)) {

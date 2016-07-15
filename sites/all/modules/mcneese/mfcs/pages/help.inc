@@ -144,16 +144,16 @@ function mfcs_help_topic() {
   $markup .= mfcs_help_render_headers('section-topic_index', array(), $headers, 1);
 
   $markup .= '<div class="paragraph">';
-  $markup .= '  The documentation is broken up into multiple <dfn class="term">Topic</dfn>s. ' . "<br>";
-  $markup .= '  Each <dfn class="term">Topic</dfn> is may have multiple <dfn class="term">Section</dfn>s, each of which may contain their own <dfn class="term">Sub-Section</dfn>s. ' . "<br>";
-  $markup .= '  <dfn class="term">Section</dfn>s and <dfn class="term">Sub-Section</dfn>s will provide specific information while the <dfn class="term">Topic</dfn> provides general information. ' . "<br>";
+  $markup .= '  The documentation is broken up into multiple <dfn class="term">Topic</dfn>s. ' . '<br>';
+  $markup .= '  Each <dfn class="term">Topic</dfn> is may have multiple <dfn class="term">Section</dfn>s, each of which may contain their own <dfn class="term">Sub-Section</dfn>s. ' . '<br>';
+  $markup .= '  <dfn class="term">Section</dfn>s and <dfn class="term">Sub-Section</dfn>s will provide specific information while the <dfn class="term">Topic</dfn> provides general information. ' . '<br>';
   $markup .= "  <br>";
-  $markup .= '  If you are simply looking for a step-by-step guide, then use the <dfn class="term">Use Guide</dfn> index. ' . "<br>";
-  $markup .= '  For more details on the how and the why or to gain a better understanding of the <dfn class="term">Facilities Use System</dfn>, use the <dfn class="term">Documentation</dfn> index. ' . "<br>";
+  $markup .= '  If you are simply looking for a step-by-step guide, then use the <dfn class="term">Use Guide</dfn> index. ' . '<br>';
+  $markup .= '  For more details on the how and the why or to gain a better understanding of the <dfn class="term">Facilities Use System</dfn>, use the <dfn class="term">Documentation</dfn> index. ' . '<br>';
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
-  $markup .= '  <nav class="navigation navigation-help_index" role="navigation">' . "<br>";
+  $markup .= '  <nav class="navigation navigation-help_index" role="navigation">' . '<br>';
   $headers = array(
     0 => array('markup' => "Topic Index - User Guides"),
   );
@@ -209,7 +209,7 @@ function mfcs_help_topic() {
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
-  $markup .= '  <nav class="navigation navigation-help_index" role="navigation">' . "<br>";
+  $markup .= '  <nav class="navigation navigation-help_index" role="navigation">' . '<br>';
   $headers = array(
     0 => array('markup' => "Topic Index - Documentation"),
   );
@@ -291,7 +291,7 @@ function mfcs_help_topic_not_found($topic = NULL, $section = NULL, $sub_section 
     $base_class[] = 'NULL-section';
     $base_class[] = 'NULL-sub_section';
 
-    $first_line = 'The help documentation you were looking for was not found. ' . "<br>";
+    $first_line = 'The help documentation you were looking for was not found. ' . '<br>';
   }
   elseif (is_null($section)) {
     $headers[0]['markup'] = "No Valid Topic Found";
@@ -300,7 +300,7 @@ function mfcs_help_topic_not_found($topic = NULL, $section = NULL, $sub_section 
     $base_class[] = 'NULL-section';
     $base_class[] = 'NULL-sub_section';
 
-    $first_line = 'The topic "' . $topic . '" was not found in the help documentation. ' . "<br>";
+    $first_line = 'The topic "' . $topic . '" was not found in the help documentation. ' . '<br>';
   }
   elseif (is_null($sub_section)) {
     $headers[0]['markup'] = "No Valid Section Found";
@@ -309,7 +309,7 @@ function mfcs_help_topic_not_found($topic = NULL, $section = NULL, $sub_section 
     $base_class[] = 'section-' . cf_theme_safe_css_string_part($section);
     $base_class[] = 'NULL-sub_section';
 
-    $first_line = 'The section "' . $section . '" was not found under topic "' . $topic . '" of the help documentation. ' . "<br>";
+    $first_line = 'The section "' . $section . '" was not found under topic "' . $topic . '" of the help documentation. ' . '<br>';
   }
   else {
     $headers[0]['markup'] = "No Valid Sub-Section Found";
@@ -318,7 +318,7 @@ function mfcs_help_topic_not_found($topic = NULL, $section = NULL, $sub_section 
     $base_class[] = 'section-' . cf_theme_safe_css_string_part($section);
     $base_class[] = 'sub_section-' . cf_theme_safe_css_string_part($sub_section);
 
-    $first_line = 'The sub-section "' . $sub_section . '" was not found under section "' . $section . '" of topic "' . $topic . '" of the help documentation. ' . "<br>";
+    $first_line = 'The sub-section "' . $sub_section . '" was not found under section "' . $section . '" of topic "' . $topic . '" of the help documentation. ' . '<br>';
   }
 
   $section_class = $base_class;

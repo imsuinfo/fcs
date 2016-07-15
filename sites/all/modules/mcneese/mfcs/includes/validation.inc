@@ -501,6 +501,12 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
   }
 
   global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
 
   $clicked_id = '';
   if (isset($form_state['triggering_element']['#id'])) {
@@ -532,6 +538,7 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
   }
 
   $holidays = array();
+  $unavailabilities = array();
 
   if (!empty($location_state['dates']['date'])) {
     $all_day = array();
@@ -592,8 +599,7 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
 
         if (!empty($holidays[$day_start])) {
           $holiday = reset($holidays[$day_start]);
-          #form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t("<strong>@date</strong> is not available because of: <strong>@holiday</strong>.", array('@date' => date('l, F j, Y', $holiday->date), '@holiday' => $holiday->title)));
-          drupal_set_message(t("Warning: <strong>@date</strong> may not available because of: <strong>@holiday</strong>.", array('@date' => date('l, F j, Y', $holiday->date), '@holiday' => $holiday->title)), 'warning');
+          drupal_set_message(t('Warning: <strong>@date</strong> may not available because of: <strong><a href="' . $base_path . 'requests/holiday-0/view/' . $holiday->year . '/' . $holiday->id . $url_arguments . '" title="View details about holiday.">@holiday</a></strong>.', array('@year' => date('Y', $holiday->date), '@date' => date('l, F j, Y', $holiday->date), '@holiday' => $holiday->title)), 'warning');
           unset($holiday);
         }
       }
@@ -1238,6 +1244,54 @@ function mfcs_check_range_limit($field, $form, $structure, $size, $delta, $value
       form_set_error($ps . '[' . $delta, t("The field '@title' is too large. The field can be no larger than @size.", array('@title' => $title, '@size' => $max)));
       return FALSE;
     }
+  }
+
+  return TRUE;
+}
+
+/**
+ * Confirms that the given time is in a valid (12-hour) format.
+ *
+ * @param string $time
+ *   The time string to validate
+ *
+ * @return bool
+ *   TRUE on no validation errors.
+ *   FALSE on validation errors.
+ *   NULL in all other cases.
+ */
+function mfcs_validate_time_12hour($time) {
+  if (!is_string($time)) {
+    cf_error::invalid_string('time');
+    return NULL;
+  }
+
+  $matches = array();
+  $matched = preg_match('/^\s*(\d+):(\d+)\s*(am|pm)\s*$/i', $time, $matches);
+
+  if (!$matched) {
+    return FALSE;
+  }
+
+  $hour = (int) $matches[1];
+  $minutes = (int) $matches[2];
+
+  if ($hour < 1 || $hour > 12) {
+    return FALSE;
+  }
+  elseif ($hour < 10) {
+    $hour = '0' . $hour;
+  }
+
+  if ($minutes < 0 || $minutes > 59) {
+    return FALSE;
+  }
+  elseif ($minutes < 10) {
+    $minutes = '0' . $minutes;
+  }
+
+  if (empty($matches[3])) {
+    return FALSE;
   }
 
   return TRUE;

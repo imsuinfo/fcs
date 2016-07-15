@@ -42,6 +42,7 @@ files[] = pages/dashboard.inc
 files[] = pages/help.inc
 files[] = pages/management.inc
 files[] = pages/request_agreement.inc
+files[] = pages/request_unavailability.inc
 files[] = pages/request_calendar.inc
 files[] = pages/request_cancel.inc
 files[] = pages/request_create.inc

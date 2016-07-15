@@ -356,6 +356,10 @@ function mfcs_request_users_0_form($form, &$form_state, $page_number = NULL) {
     ),
     'oLanguage' => array(
       'sSearch' => '"Filter"',
+      'sEmptyTable' => '"' . $users_list['empty'] . '"',
+    ),
+    'language' => array(
+      'emptyTable' => '"' . $users_list['empty'] . '"',
     ),
     'searchDelay' => 1200,
     'pagingType' => 'input',

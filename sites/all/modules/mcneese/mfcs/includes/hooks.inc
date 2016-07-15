@@ -1127,6 +1127,19 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'tab_root' => 'requests/troubleshoot-0',
   );
 
+  $items['requests/troubleshoot-0/locations/%'] = array(
+    'title' => "Troubleshooting Tools - Locations",
+    'description' => "A listing of locations available on the system with details.",
+    'page callback' => 'mfcs_request_troubleshoot_0_locations_page',
+    'page arguments' => array(3),
+    'file' => 'request_troubleshoot.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('troubleshoot'),
+    'tab_parent' => 'requests/troubleshoot-0',
+    'tab_root' => 'requests/troubleshoot-0',
+  );
+
   $items['requests/troubleshoot-0/buildings'] = array(
     'title' => "Troubleshooting Tools - Buildings",
     'description' => "A listing of buildings available on the system with details.",
@@ -1139,10 +1152,36 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'tab_root' => 'requests/troubleshoot-0',
   );
 
+  $items['requests/troubleshoot-0/buildings/%'] = array(
+    'title' => "Troubleshooting Tools - Buildings",
+    'description' => "A listing of buildings available on the system with details.",
+    'page callback' => 'mfcs_request_troubleshoot_0_buildings_page',
+    'page arguments' => array(3),
+    'file' => 'request_troubleshoot.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('troubleshoot'),
+    'tab_parent' => 'requests/troubleshoot-0',
+    'tab_root' => 'requests/troubleshoot-0',
+  );
+
   $items['requests/troubleshoot-0/rooms'] = array(
     'title' => "Troubleshooting Tools - Rooms",
     'description' => "A listing of rooms available on the system with details.",
     'page callback' => 'mfcs_request_troubleshoot_0_rooms_page',
+    'file' => 'request_troubleshoot.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('troubleshoot'),
+    'tab_parent' => 'requests/troubleshoot-0',
+    'tab_root' => 'requests/troubleshoot-0',
+  );
+
+  $items['requests/troubleshoot-0/rooms/%'] = array(
+    'title' => "Troubleshooting Tools - Rooms",
+    'description' => "A listing of rooms available on the system with details.",
+    'page callback' => 'mfcs_request_troubleshoot_0_rooms_page',
+    'page arguments' => array(3),
     'file' => 'request_troubleshoot.inc',
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_page_request_access',
@@ -1371,7 +1410,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'type' => MENU_CALLBACK,
   );
 
-  $items['requests/holiday/year-0'] = array(
+  $items['requests/holiday-0'] = array(
     'title' => "Holidays",
     'description' => "Holidays.",
     'page callback' => 'drupal_get_form',
@@ -1379,27 +1418,27 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'file' => 'request_holiday.inc',
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_holiday_request_access',
-    'access arguments' => array(),
+    'access arguments' => array('manage'),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
     'type' => MENU_CALLBACK,
   );
 
-  $items['requests/holiday/year-0/%'] = array(
+  $items['requests/holiday-0/%'] = array(
     'title' => "Holidays",
     'description' => "Holidays.",
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_request_holiday_0_form', 3),
+    'page arguments' => array('mfcs_request_holiday_0_form', 2),
     'file' => 'request_holiday.inc',
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_holiday_request_access',
-    'access arguments' => array(),
+    'access arguments' => array('manage', 2),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
     'type' => MENU_CALLBACK,
   );
 
-  $items['requests/holiday/year-0/%/edit'] = array(
+  $items['requests/holiday-0/create/%'] = array(
     'title' => "Create Holidays",
     'description' => "Holidays.",
     'page callback' => 'drupal_get_form',
@@ -1407,49 +1446,175 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'file' => 'request_holiday.inc',
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_holiday_request_access',
-    'access arguments' => array(),
+    'access arguments' => array('create', 3),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
     'type' => MENU_CALLBACK,
   );
 
-  $items['requests/holiday/year-0/%/edit/%'] = array(
+  $items['requests/holiday-0/create/%/%'] = array(
+    'title' => "Create Holidays",
+    'description' => "Holidays.",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_holiday_0_edit_form', 3, 4, TRUE),
+    'file' => 'request_holiday.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_holiday_request_access',
+    'access arguments' => array('create', 3, 4),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['requests/holiday-0/edit/%/%'] = array(
     'title' => "Edit Holidays",
     'description' => "Holidays.",
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_request_holiday_0_edit_form', 3, 5),
+    'page arguments' => array('mfcs_request_holiday_0_edit_form', 3, 4),
     'file' => 'request_holiday.inc',
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_holiday_request_access',
-    'access arguments' => array(),
+    'access arguments' => array('edit', 3, 4),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
     'type' => MENU_CALLBACK,
   );
 
-  $items['requests/holiday/year-0/%/delete/%'] = array(
+  $items['requests/holiday-0/delete/%/%'] = array(
     'title' => "Delete Holidays",
     'description' => "Holidays.",
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_request_holiday_0_delete_form', 3, 5),
+    'page arguments' => array('mfcs_request_holiday_0_delete_form', 3, 4),
     'file' => 'request_holiday.inc',
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_holiday_request_access',
-    'access arguments' => array(5, NULL, FALSE),
+    'access arguments' => array('delete', 3, 4),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
     'type' => MENU_CALLBACK,
   );
 
-  $items['requests/holiday/year-0/%/view/%'] = array(
+  $items['requests/holiday-0/view/%/%'] = array(
     'title' => "Holidays",
     'description' => "Holidays.",
     'page callback' => 'mfcs_request_holiday_0_page',
-    'page arguments' => array(3, 5),
+    'page arguments' => array(3, 4),
     'file' => 'request_holiday.inc',
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_holiday_request_access',
-    'access arguments' => array(5, NULL, NULL),
+    'access arguments' => array('view', 3, 4),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['requests/unavailable-0'] = array(
+    'title' => "Manage Unavailabilities",
+    'description' => "Unavailabilities.",
+    'page callback' => 'mfcs_request_unavailability_0_rooms_page',
+    'page arguments' => array(),
+    'file' => 'request_unavailability.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_unavailability_request_access',
+    'access arguments' => array('manage'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['requests/unavailable-0/%'] = array(
+    'title' => "Room Unavailabilities",
+    'description' => "Unavailabilities.",
+    'page callback' => 'mfcs_request_unavailability_0_room_page',
+    'page arguments' => array(2),
+    'file' => 'request_unavailability.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_unavailability_request_access',
+    'access arguments' => array('manage', NULL, 2),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['requests/unavailable-0/%/%'] = array(
+    'title' => "Room Unavailabilities",
+    'description' => "Unavailabilities.",
+    'page callback' => 'mfcs_request_unavailability_0_room_page',
+    'page arguments' => array(3, 2),
+    'file' => 'request_unavailability.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_unavailability_request_access',
+    'access arguments' => array('manage', 2, 3),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['requests/unavailable-0/create/%/%'] = array(
+    'title' => "Create Unavailabilities",
+    'description' => "Unavailabilities.",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_unavailability_0_edit_form', 3, 4),
+    'file' => 'request_unavailability.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_unavailability_request_access',
+    'access arguments' => array('create', 3, 4),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['requests/unavailable-0/create/%/%/%'] = array(
+    'title' => "Edit Unavailabilities",
+    'description' => "Unavailabilities.",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_unavailability_0_edit_form', 3, 4, 5, TRUE),
+    'file' => 'request_unavailability.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_unavailability_request_access',
+    'access arguments' => array('edit', 3, 4, 5),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['requests/unavailable-0/edit/%/%/%'] = array(
+    'title' => "Edit Unavailabilities",
+    'description' => "Unavailabilities.",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_unavailability_0_edit_form', 3, 4, 5),
+    'file' => 'request_unavailability.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_unavailability_request_access',
+    'access arguments' => array('edit', 3, 4, 5),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['requests/unavailable-0/delete/%/%/%'] = array(
+    'title' => "Delete Unavailabilities",
+    'description' => "Unavailabilities.",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_unavailability_0_delete_form', 3, 4, 5),
+    'file' => 'request_unavailability.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_unavailability_request_access',
+    'access arguments' => array('delete', 3, 4, 5, NULL, FALSE),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['requests/unavailable-0/view/%/%/%'] = array(
+    'title' => "View Unavailabilities",
+    'description' => "Unavailabilities.",
+    'page callback' => 'mfcs_request_unavailability_0_page',
+    'page arguments' => array(3, 4, 5),
+    'file' => 'request_unavailability.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_unavailability_request_access',
+    'access arguments' => array('view', 4, 5),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
     'type' => MENU_CALLBACK,

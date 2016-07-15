@@ -636,10 +636,10 @@ function mfcs_request_statistics_render_request_classification($counts, $classif
     $markup .= '</div>';
   }
 
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['classification']['student'] . "</em> <strong>" . $classification_options[MFCS_REQUEST_CLASSIFICATION_STUDENT] . "</strong> (<em>" . $options['rows']['student']['percent'] . '%</em> of requests). ' . "</div>";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['classification']['faculty'] . "</em> <strong>" . $classification_options[MFCS_REQUEST_CLASSIFICATION_FACULTY] . "</strong> (<em>" . $options['rows']['faculty']['percent'] . '%</em> of requests). ' . "</div>";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['classification']['camps'] . "</em> <strong>" . $classification_options[MFCS_REQUEST_CLASSIFICATION_CAMPS] . "</strong> (<em>" . $options['rows']['camps']['percent'] . '%</em> of requests). ' . "</div>";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['classification']['external'] . "</em> <strong>" . $classification_options[MFCS_REQUEST_CLASSIFICATION_EXTERNAL] . "</strong> (<em>" . $options['rows']['external']['percent'] . '%</em> of requests). ' . "</div>";
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['classification']['student'] . '</em> <strong>' . $classification_options[MFCS_REQUEST_CLASSIFICATION_STUDENT] . "</strong> (<em>" . $options['rows']['student']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['classification']['faculty'] . '</em> <strong>' . $classification_options[MFCS_REQUEST_CLASSIFICATION_FACULTY] . "</strong> (<em>" . $options['rows']['faculty']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['classification']['camps'] . '</em> <strong>' . $classification_options[MFCS_REQUEST_CLASSIFICATION_CAMPS] . "</strong> (<em>" . $options['rows']['camps']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['classification']['external'] . '</em> <strong>' . $classification_options[MFCS_REQUEST_CLASSIFICATION_EXTERNAL] . "</strong> (<em>" . $options['rows']['external']['percent'] . '%</em> of requests). ' . '</div>';
 
   $markup .= '</div>'; // statistics-block-text
   $markup .= '</div>'; // statistics-block-main
@@ -788,18 +788,18 @@ function mfcs_request_statistics_render_request_type($counts, $type_options) {
 
   $markup .= '<div class="statistics-block-text">';
 
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['athletic'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_ATHLETIC] . "</strong> (<em>" . $options['rows']['athletic']['percent'] . '%</em> of requests). ' . "</div>";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['banquet'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_BANQUET] . "</strong> (<em>" . $options['rows']['banquet']['percent'] . '%</em> of requests). ' . "</div>";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['ceremony'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_CEREMONY] . "</strong> (<em>" . $options['rows']['ceremony']['percent'] . '%</em> of requests). ' . "</div>";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['fair'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_FAIR] . "</strong> (<em>" . $options['rows']['fair']['percent'] . '%</em> of requests). ' . "</div>";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['lecture'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_LECTURE] . "</strong> (<em>" . $options['rows']['lecture']['percent'] . '%</em> of requests). ' . "</div>";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['meeting'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_MEETING] . "</strong> (<em>" . $options['rows']['meeting']['percent'] . '%</em> of requests). ' . "</div>";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['other'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_OTHER] . "</strong> (<em>" . $options['rows']['other']['percent'] . '%</em> of requests). ' . "</div>";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['performance'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_PERFORMANCE] . "</strong> (<em>" . $options['rows']['performance']['percent'] . '%</em> of requests). ' . "</div>";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['quick_meeting'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_QUICK_MEETING] . "</strong> (<em>" . $options['rows']['quick_meeting']['percent'] . '%</em> of requests). ' . "</div>";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['reception'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_RECEPTION] . "</strong> (<em>" . $options['rows']['reception']['percent'] . '%</em> of requests). ' . "</div>";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['talent'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_TALENT] . "</strong> (<em>" . $options['rows']['talent']['percent'] . '%</em> of requests). ' . "</div>";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['workshop'] . "</em> <strong>" . $type_options[MFCS_REQUEST_TYPE_WORKSHOP] . "</strong> (<em>" . $options['rows']['workshop']['percent'] . '%</em> of requests). ' . "</div>";
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['athletic'] . '</em> <strong>' . $type_options[MFCS_REQUEST_TYPE_ATHLETIC] . "</strong> (<em>" . $options['rows']['athletic']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['banquet'] . '</em> <strong>' . $type_options[MFCS_REQUEST_TYPE_BANQUET] . "</strong> (<em>" . $options['rows']['banquet']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['ceremony'] . '</em> <strong>' . $type_options[MFCS_REQUEST_TYPE_CEREMONY] . "</strong> (<em>" . $options['rows']['ceremony']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['fair'] . '</em> <strong>' . $type_options[MFCS_REQUEST_TYPE_FAIR] . "</strong> (<em>" . $options['rows']['fair']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['lecture'] . '</em> <strong>' . $type_options[MFCS_REQUEST_TYPE_LECTURE] . "</strong> (<em>" . $options['rows']['lecture']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['meeting'] . '</em> <strong>' . $type_options[MFCS_REQUEST_TYPE_MEETING] . "</strong> (<em>" . $options['rows']['meeting']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['other'] . '</em> <strong>' . $type_options[MFCS_REQUEST_TYPE_OTHER] . "</strong> (<em>" . $options['rows']['other']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['performance'] . '</em> <strong>' . $type_options[MFCS_REQUEST_TYPE_PERFORMANCE] . "</strong> (<em>" . $options['rows']['performance']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['quick_meeting'] . '</em> <strong>' . $type_options[MFCS_REQUEST_TYPE_QUICK_MEETING] . "</strong> (<em>" . $options['rows']['quick_meeting']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['reception'] . '</em> <strong>' . $type_options[MFCS_REQUEST_TYPE_RECEPTION] . "</strong> (<em>" . $options['rows']['reception']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['talent'] . '</em> <strong>' . $type_options[MFCS_REQUEST_TYPE_TALENT] . "</strong> (<em>" . $options['rows']['talent']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['type']['workshop'] . '</em> <strong>' . $type_options[MFCS_REQUEST_TYPE_WORKSHOP] . "</strong> (<em>" . $options['rows']['workshop']['percent'] . '%</em> of requests). ' . '</div>';
   $markup .= '</div>'; // statistics-block-text
 
   $markup .= '<div id="' . 'mfcs-statistics-' . $options['name'] . '-wrapper" class="statistics-block-chart">';
@@ -924,13 +924,13 @@ function mfcs_request_statistics_render_request_step($counts, $step_options) {
   $markup .= '</div>'; // statistics-block-chart
 
   $markup .= '<div class="statistics-block-text">';
-  #$markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['changes_required'] . "</em> <strong>" . $step_options[MFCS_REVIEW_STEP_CHANGES_REQUIRED] . "</strong> (<em>" . $options['rows']['changes_required']['percent'] . '%</em> of requests). ' . "</div>";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['completed'] . "</em> <strong>" . $step_options[MFCS_REVIEW_STEP_COMPLETED] . "</strong> (<em>" . $options['rows']['completed']['percent'] . '%</em> of requests). ' . "</div>";
-  #$markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['make_decisions'] . "</em> <strong>" . $step_options[MFCS_REVIEW_STEP_MAKE_DECISIONS] . "</strong> (<em>" . $options['rows']['make_decisions']['percent'] . '%</em> of requests). ' . "</div>";
-  #$markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['release_hold'] . "</em> <strong>" . $step_options[MFCS_REVIEW_STEP_RELEASE_HOLD] . "</strong> (<em>" . $options['rows']['release_hold']['percent'] . '%</em> of requests). ' . "</div>";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['review'] . "</em> <strong>" . $step_options[MFCS_REVIEW_STEP_REVIEW] . "</strong> (<em>" . $options['rows']['review']['percent'] . '%</em> of requests). ' . "</div>";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['requirements'] . "</em> <strong>" . $step_options[MFCS_REVIEW_STEP_REQUIREMENTS] . "</strong> (<em>" . $options['rows']['requirements']['percent'] . '%</em> of requests). ' . "</div>";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['venue_available'] . "</em> <strong>" . $step_options[MFCS_REVIEW_STEP_VENUE_AVAILABLE] . "</strong> (<em>" . $options['rows']['venue_available']['percent'] . '%</em> of requests). ' . "</div>";
+  #$markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['changes_required'] . '</em> <strong>' . $step_options[MFCS_REVIEW_STEP_CHANGES_REQUIRED] . "</strong> (<em>" . $options['rows']['changes_required']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['completed'] . '</em> <strong>' . $step_options[MFCS_REVIEW_STEP_COMPLETED] . "</strong> (<em>" . $options['rows']['completed']['percent'] . '%</em> of requests). ' . '</div>';
+  #$markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['make_decisions'] . '</em> <strong>' . $step_options[MFCS_REVIEW_STEP_MAKE_DECISIONS] . "</strong> (<em>" . $options['rows']['make_decisions']['percent'] . '%</em> of requests). ' . '</div>';
+  #$markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['release_hold'] . '</em> <strong>' . $step_options[MFCS_REVIEW_STEP_RELEASE_HOLD] . "</strong> (<em>" . $options['rows']['release_hold']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['review'] . '</em> <strong>' . $step_options[MFCS_REVIEW_STEP_REVIEW] . "</strong> (<em>" . $options['rows']['review']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['requirements'] . '</em> <strong>' . $step_options[MFCS_REVIEW_STEP_REQUIREMENTS] . "</strong> (<em>" . $options['rows']['requirements']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['venue_available'] . '</em> <strong>' . $step_options[MFCS_REVIEW_STEP_VENUE_AVAILABLE] . "</strong> (<em>" . $options['rows']['venue_available']['percent'] . '%</em> of requests). ' . '</div>';
   $markup .= '</div>'; // statistics-block-text
 
   $markup .= '</div>'; // statistics-block
@@ -1051,14 +1051,14 @@ function mfcs_request_statistics_render_request_status($counts, $status_options)
   $markup = '<div class="statistics-block statistics-block-request_step">';
 
   $markup .= '<div class="statistics-block-text">';
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['locked'] . "</em> <strong>" . $status_options[MFCS_REQUEST_STATUS_LOCKED] . "</strong> (<em>" . $options['rows']['locked']['percent'] . '%</em> of requests). ' . "</div>";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['unlocked'] . "</em> <strong>" . $status_options[MFCS_REQUEST_STATUS_UNLOCKED] . "</strong> (<em>" . $options['rows']['unlocked']['percent'] . '%</em> of requests). ' . "</div>";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['accepted'] . "</em> <strong>" . $status_options[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED] . "</strong> (<em>" . $options['rows']['accepted']['percent'] . '%</em> of requests). ' . "</div>";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['denied'] . "</em> <strong>" . $status_options[MFCS_REQUEST_STATUS_CLOSED_DENIED] . "</strong> (<em>" . $options['rows']['denied']['percent'] . '%</em> of requests). ' . "</div>";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['unavailable'] . "</em> <strong>" . $status_options[MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE] . "</strong> (<em>" . $options['rows']['unavailable']['percent'] . '%</em> of requests). ' . "</div>";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['due_to_lock'] . "</em> <strong>" . $status_options[MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK] . "</strong> (<em>" . $options['rows']['due_to_lock']['percent'] . '%</em> of requests). ' . "</div>";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['cancelled'] . "</em> <strong>" . $status_options[MFCS_REQUEST_STATUS_CANCELLED] . "</strong> (<em>" . $options['rows']['cancelled']['percent'] . '%</em> of requests). ' . "</div>";
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['accepted_cancelled'] . "</em> <strong>" . $status_options[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED] . "</strong> (<em>" . $options['rows']['accepted_cancelled']['percent'] . '%</em> of requests). ' . "</div>";
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['locked'] . '</em> <strong>' . $status_options[MFCS_REQUEST_STATUS_LOCKED] . "</strong> (<em>" . $options['rows']['locked']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['unlocked'] . '</em> <strong>' . $status_options[MFCS_REQUEST_STATUS_UNLOCKED] . "</strong> (<em>" . $options['rows']['unlocked']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['accepted'] . '</em> <strong>' . $status_options[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED] . "</strong> (<em>" . $options['rows']['accepted']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['denied'] . '</em> <strong>' . $status_options[MFCS_REQUEST_STATUS_CLOSED_DENIED] . "</strong> (<em>" . $options['rows']['denied']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['unavailable'] . '</em> <strong>' . $status_options[MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE] . "</strong> (<em>" . $options['rows']['unavailable']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['due_to_lock'] . '</em> <strong>' . $status_options[MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK] . "</strong> (<em>" . $options['rows']['due_to_lock']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['cancelled'] . '</em> <strong>' . $status_options[MFCS_REQUEST_STATUS_CANCELLED] . "</strong> (<em>" . $options['rows']['cancelled']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['accepted_cancelled'] . '</em> <strong>' . $status_options[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED] . "</strong> (<em>" . $options['rows']['accepted_cancelled']['percent'] . '%</em> of requests). ' . '</div>';
   $markup .= '</div>'; // statistics-block-text
 
   $markup .= '<div id="' . 'mfcs-statistics-' . $options['name'] . '-wrapper" class="statistics-block-chart">';

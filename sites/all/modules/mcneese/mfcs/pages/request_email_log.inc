@@ -359,6 +359,10 @@ function mfcs_request_email_log_0_form($form, &$form_state, $page_number = NULL)
     ),
     'oLanguage' => array(
       'sSearch' => '"Filter"',
+      'sEmptyTable' => '"' . $email_log_list['empty'] . '"',
+    ),
+    'language' => array(
+      'emptyTable' => '"' . $email_log_list['empty'] . '"',
     ),
     'searchDelay' => 1200,
     'pagingType' => 'input',

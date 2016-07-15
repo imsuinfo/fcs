@@ -1989,6 +1989,8 @@ function mfcs_request_view_0_form_pre_validate(&$form, &$form_state) {
  * @see: mfcs_request_view_0_form()
  */
 function mfcs_request_view_0_form_validate($form, &$form_state) {
+  global $base_path;
+
   $clicked_id = '';
   if (isset($form_state['triggering_element']['#id'])) {
     $clicked_id = $form_state['triggering_element']['#id'];
@@ -2181,49 +2183,29 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
         $all_holidays = mfcs_get_holidays((int) date('Y', $request['dates']['date'][$date_delta]->value), $request['dates']['date'][$date_delta]->value);
       }
 
-      $requests_using_room = mfcs_check_room_availability($room, $all_dates, $all_time_start, $all_time_stop, $request_id);
+      $room_unavailability = mfcs_check_room_availability($room, $all_dates, $all_time_start, $all_time_stop, $request_id);
+      if ($room_unavailability === FALSE) {
+        form_set_error('', "An internal error occurred while checking the room for availability. Please contact the support staff.");
+      }
+      else {
+        $unavailable_message = mfcs_build_room_unavailable_message($room_unavailability);
+        form_set_error('review][operations][decision', $unavailable_message);
+        unset($unavailable_message);
+      }
       unset($all_dates);
       unset($all_time_start);
       unset($all_time_stop);
-
-      if ($requests_using_room === FALSE) {
-        form_set_error('', "An internal error occurred while checking the room for availability. Please contact the support staff.");
-      }
-      elseif (!empty($requests_using_room)) {
-        $problematic_dates = array();
-        foreach ($requests_using_room as $request_using_room) {
-          if (isset($request_using_room->date)) {
-            if (isset($request_using_room->time_start)) {
-              $problematic_date = date("Y/m/d", $request_using_room->date) . " from " . date("h:ia", $request_using_room->time_start) . " to " . date("h:ia", $request_using_room->time_stop) . '.';
-              $problematic_dates[$problematic_date] = $problematic_date;
-            }
-            else {
-              $problematic_date = date("Y/m/d", $request_using_room->date) . " (all day).";
-              $problematic_dates[$problematic_date] = $problematic_date;
-            }
-          }
-          elseif (isset($request_using_room->reserved_day)) {
-            $problematic_date = date("Y/m/d", $request_using_room->reserved_day) . " from " . date("h:ia", $request_using_room->reserved_time_start) . " to " . date("h:ia", $request_using_room->reserved_time_stop) . '.';
-            $problematic_dates[$problematic_date] = $problematic_date;
-          }
-        }
-        ksort($problematic_dates);
-
-        $unavailable_message = "Cannot continue. The room is unavailable for the following dates:<br>";
-        $unavailable_message .= '<ul>';
-        foreach ($problematic_dates as $date) {
-          $unavailable_message .= '<li>' . $date . '</li>';
-        }
-        $unavailable_message .= '</ul>';
-        form_set_error('review][operations][decision', $unavailable_message);
-      }
+      unset($room_unavailability);
 
       // check for holidays.
       if (!empty($all_holidays)) {
+        // there currently can only be a single holiday per day, so only process a single holiday.
         $holiday = reset($all_holidays);
         if (is_object($holiday)) {
-          #form_set_error('review][operations][decision', t("<strong>@date</strong> is not available because of: <strong>@holiday</strong>.", array('@date' => date('l, F j, Y', $holiday->date), '@holiday' => $holiday->title)));
-          drupal_set_message(t("Warning: <strong>@date</strong> may not available because of: <strong>@holiday</strong>.", array('@date' => date('l, F j, Y', $holiday->date), '@holiday' => $holiday->title)), 'warning');
+          $unavailable_message .= '<strong>';
+          $unavailable_message .= '@title</a></strong>.';
+
+          drupal_set_message(t('Warning: <strong>@date</strong> may not available because of: <strong><a href="' . $base_path . 'requests/holiday-0/view/@year/' . $holiday->year. '/' . $holiday->id . $url_arguments . '" title="View details about holiday.">@holiday</a></strong>.', array('@year' => $holiday->year, '@date' => date('l, F j, Y', $holiday->date), '@holiday' => $holiday->title)), 'warning');
         }
         unset($holiday);
       }

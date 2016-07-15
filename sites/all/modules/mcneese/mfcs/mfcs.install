@@ -1133,6 +1133,63 @@ function mfcs_schema() {
         'table' => 'users',
         'columns' => array('user_id' => 'uid'),
       ),
+      'holiday_id' => array(
+        'table' => 'mfcs_holiday',
+        'columns' => array('holiday_id' => 'id'),
+      ),
+    ),
+  );
+
+  $schema['mfcs_log_unavailability'] = array(
+    'description' => $t("McNeese Facilities Use availability log table. Contains a record of all availability actions performed."),
+    'fields' => array(
+      'id' => array(
+        'description' => $t("The primary key used to represent the log entry."),
+        'type' => 'serial',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'unavailability_id' => array(
+        'description' => $t("This is the availability id."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'user_id' => array(
+        'description' => $t("This is the system user id. Represents the user associated with the log entry."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'date' => array(
+        'description' => $t("Represents the date the action was performed."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'change' => array(
+        'description' => $t("A description of the changes made."),
+        'type' => 'text',
+        'size' => 'big',
+        'serialize' => TRUE,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('id'),
+    'foreign keys' => array(
+      'user_id' => array(
+        'table' => 'users',
+        'columns' => array('user_id' => 'uid'),
+      ),
+      'unavailability_id' => array(
+        'table' => 'mfcs_unavailability',
+        'columns' => array('unavailability_id' => 'id'),
+      ),
     ),
   );
 
@@ -1341,12 +1398,11 @@ function mfcs_schema() {
     ),
   );
 
-
   $schema['mfcs_holiday'] = array(
     'description' => $t("McNeese Facilities Use holiday dates table."),
     'fields' => array(
       'id' => array(
-        'description' => $t("The primary key used to represent the ical import entry."),
+        'description' => $t("The primary key used to represent the holiday item."),
         'type' => 'serial',
         'size' => 'big',
         'unsigned' => TRUE,
@@ -1388,7 +1444,100 @@ function mfcs_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
-      'disabled' => array(
+      'deleted' => array(
+        'description' => $t("Boolean designating that the entry is deleted. This is used as a soft-delete to prevent loss of records."),
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'created' => array(
+        'description' => $t("Represents the row was created."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'updated' => array(
+        'description' => $t("Represents the row was last updated."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+
+  $schema['mfcs_unavailability'] = array(
+    'description' => $t("McNeese Facilities Use room availability table. Contains a record of all rooms marked as unavailable."),
+    'fields' => array(
+      'id' => array(
+        'description' => $t("The primary key used to represent the availability item."),
+        'type' => 'serial',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'year' => array(
+        'description' => $t("Represents the year associated with the entry."),
+        'type' => 'int',
+        'size' => 'small',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'room_id' => array(
+        'description' => $t("The ID of the room that is marked as unavailable."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'building_id' => array(
+        'description' => $t("The ID of the building whose room is marked as unavailable."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'date_start' => array(
+        'description' => $t("Represents the start date associated with the entry."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'date_stop' => array(
+        'description' => $t("Represents the stop date associated with the entry."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'title' => array(
+        'description' => $t("Represents the title of the entry."),
+        'type' => 'varchar',
+        'size' => '255',
+        'serialize' => TRUE,
+        'not null' => TRUE,
+      ),
+      'description' => array(
+        'description' => $t("Represents the description of the entry."),
+        'type' => 'varchar',
+        'size' => '255',
+        'serialize' => TRUE,
+        'not null' => TRUE,
+      ),
+      'enabled' => array(
+        'description' => $t("Boolean designating that the entry is enable. This is used to enable/disable entries from appear on calendard and restricting requests."),
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'deleted' => array(
         'description' => $t("Boolean designating that the entry is disabled. This is used as a soft-delete to prevent loss of records."),
         'type' => 'int',
         'size' => 'tiny',
@@ -1434,6 +1583,14 @@ function mfcs_schema() {
       'request_id' => array(
         'table' => 'mfcs_requests',
         'columns' => array('request_id' => 'id'),
+      ),
+      'room_id' => array(
+        'table' => 'mfcs_banner_rooms',
+        'columns' => array('room_id' => 'id'),
+      ),
+      'building_id' => array(
+        'table' => 'mfcs_banner_buildings',
+        'columns' => array('building_id' => 'id'),
       ),
     ),
   );
@@ -1817,6 +1974,26 @@ function mfcs_install() {
   $table6_foreign = 'mfcs_banner_event_roles';
   $table6_foreign_key = 'id';
 
+  $key7_name = 'holiday_id';
+  $key7_foreign = 'holiday_id_fkey';
+  $table7_foreign = 'mfcs_holiday';
+  $table7_foreign_key = 'id';
+
+  $key8_name = 'unavailability_id';
+  $key8_foreign = 'unavailability_id_fkey';
+  $table8_foreign = 'mfcs_unavailability';
+  $table8_foreign_key = 'id';
+
+  $key9_name = 'room_id';
+  $key9_foreign = 'room_id_fkey';
+  $table9_foreign = 'mfcs_banner_rooms';
+  $table9_foreign_key = 'id';
+
+  $key10_name = 'building_id';
+  $key10_foreign = 'building_id_fkey';
+  $table10_foreign = 'mfcs_banner_buildings';
+  $table10_foreign_key = 'id';
+
   $structure = mfcs_table_install_structure();
 
   db_query('ALTER TABLE {requests} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
@@ -1844,10 +2021,17 @@ function mfcs_install() {
   db_query('ALTER TABLE {mfcs_log_emails} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
   db_query('ALTER TABLE {mfcs_users} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
   db_query('ALTER TABLE {mfcs_log_problems_requests} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_log_holiday} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_log_unavailability} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
 
   db_query('ALTER TABLE {mfcs_synchronize} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
   db_query('ALTER TABLE {mfcs_log_troubleshoot} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
   db_query('ALTER TABLE {mfcs_log_problems_requests} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
+
+  db_query('ALTER TABLE {mfcs_log_holiday} ADD CONSTRAINT ' . $key7_foreign . ' FOREIGN KEY (' . $key7_name . ') REFERENCES {' . $table7_foreign . '} (' . $table7_foreign_key . ') ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_log_unavailability} ADD CONSTRAINT ' . $key8_foreign . ' FOREIGN KEY (' . $key8_name . ') REFERENCES {' . $table8_foreign . '} (' . $table8_foreign_key . ') ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_log_unavailability} ADD CONSTRAINT ' . $key9_foreign . ' FOREIGN KEY (' . $key9_name . ') REFERENCES {' . $table9_foreign . '} (' . $table9_foreign_key . ') ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_log_unavailability} ADD CONSTRAINT ' . $key10_foreign . ' FOREIGN KEY (' . $key10_name . ') REFERENCES {' . $table10_foreign . '} (' . $table10_foreign_key . ') ON DELETE RESTRICT');
 
   foreach ($structure as $structure_name => &$structure_array) {
     foreach ($structure_array as $field_name => &$field_type) {
@@ -1911,6 +2095,10 @@ function mfcs_uninstall() {
   $key4_foreign = 'building_fkey';
   $key5_foreign = 'room_fkey';
   $key6_foreign = 'event_role_id_fkey';
+  $key7_foreign = 'holiday_id_fkey';
+  $key8_foreign = 'unavailability_id_fkey';
+  $key9_foreign = 'room_id_fkey';
+  $key10_foreign = 'building_id_fkey';
   $keyR_foreign = 'review_fkey';
 
   $structure = mfcs_table_install_structure();
@@ -1942,6 +2130,13 @@ function mfcs_uninstall() {
   db_query('ALTER TABLE {mfcs_log_troubleshoot} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
   db_query('ALTER TABLE {mfcs_log_troubleshoot} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
   db_query('ALTER TABLE {mfcs_log_emails} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
+  db_query('ALTER TABLE {mfcs_log_holiday} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
+  db_query('ALTER TABLE {mfcs_log_holiday} DROP CONSTRAINT IF EXISTS ' . $key7_foreign);
+  db_query('ALTER TABLE {mfcs_log_unavailability} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
+  db_query('ALTER TABLE {mfcs_log_unavailability} DROP CONSTRAINT IF EXISTS ' . $key7_foreign);
+  db_query('ALTER TABLE {mfcs_log_unavailability} DROP CONSTRAINT IF EXISTS ' . $key8_foreign);
+  db_query('ALTER TABLE {mfcs_log_unavailability} DROP CONSTRAINT IF EXISTS ' . $key9_foreign);
+  db_query('ALTER TABLE {mfcs_log_unavailability} DROP CONSTRAINT IF EXISTS ' . $key10_foreign);
   db_query('ALTER TABLE {mfcs_users} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
   db_query('ALTER TABLE {mfcs_synchronize} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
   db_query('ALTER TABLE {mfcs_log_problems_requests} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);

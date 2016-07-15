@@ -238,15 +238,15 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
       $request_description_markup_begin .= '<strong>This reservation is cancelled</strong>.' . "<br><br>";
     }
 
-    $request_description_markup_begin .= 'The reserved location is: ' . "<br>";
+    $request_description_markup_begin .= 'The reserved location is: ' . '<br>';
     $request_description_markup_begin .= '<ul>';
     $request_description_markup_begin .= '  <li>' . $building_options[$request->building] . ' ' . $room_options[$request->room] . "</li>";
     $request_description_markup_begin .= '</ul>';
 
     $request_description_markup_end = '';
-    $request_description_markup_end .= "<br>";
+    $request_description_markup_end .= '<br>';
     $request_description_markup_end .= '<em>The Request ID is: ' . $request->id . ".</em><br>";
-    $request_description_markup_end .= "<br>";
+    $request_description_markup_end .= '<br>';
     $request_description_markup_end .= 'You may view the request at: <a href="' . $request_url . '">' . $request_url . "</a>.<br>";
     $request_description_markup_end .= '</body>';
     $request_description_markup_end .= '</html>';

@@ -93,8 +93,8 @@ function mfcs_request_cancel_0_form($form, &$form_state, $request_id) {
   );
   $form['message']['#markup'] .= '<h3>Are you sure wou want to cancel the request?</h3> ';
   $form['message']['#markup'] .= '<div>';
-  $form['message']['#markup'] .= 'By cancelling this request you agree to forfeit the time slots that you have requested. You cannot undo this action. ' . "<br>";
-  $form['message']['#markup'] .= "<br>";
+  $form['message']['#markup'] .= 'By cancelling this request you agree to forfeit the time slots that you have requested. You cannot undo this action. ' . '<br>';
+  $form['message']['#markup'] .= '<br>';
   $form['message']['#markup'] .= 'Are you certain you want to cancel? ';
   $form['message']['#markup'] .= '</div>';
 
@@ -570,7 +570,7 @@ function mfcs_request_cancelling_0_form($form, &$form_state, $request_id) {
   );
   $form['message']['#markup'] .= '<h3>Which dates would you like to cancel or uncancel?</h3> ';
   $form['message']['#markup'] .= '<div>';
-  $form['message']['#markup'] .= 'Once a date is cancelled, that request may no longer be available for uncancelling if another request takes up the time slot.' . "<br>";
+  $form['message']['#markup'] .= 'Once a date is cancelled, that request may no longer be available for uncancelling if another request takes up the time slot.' . '<br>';
   $form['message']['#markup'] .= '</div>';
 
   $form['dates'] = array(
@@ -727,18 +727,20 @@ function mfcs_request_cancelling_0_form_validate($form, &$form_state) {
       continue;
     }
     elseif ($operation['select'] == MFCS_CANCELLING_UNCANCEL) {
-      $requests_using_room = mfcs_check_room_availability($room, array($form['form']['request']['#value']['dates']['date'][$key]->value), array($form['form']['request']['#value']['dates']['time_start'][$key]->value), array($form['form']['request']['#value']['dates']['time_stop'][$key]->value));
-      if ($requests_using_room === FALSE) {
+      $room_unavailability = mfcs_check_room_availability($room, array($form['form']['request']['#value']['dates']['date'][$key]->value), array($form['form']['request']['#value']['dates']['time_start'][$key]->value), array($form['form']['request']['#value']['dates']['time_stop'][$key]->value));
+      if ($room_unavailability === FALSE) {
         form_set_error('dates][' . $key . '][select', "An internal error occurred while checking the room for availability. Please contact the support staff.");
       }
-      elseif (!empty($requests_using_room)) {
+      elseif (!empty($room_unavailability['conflict']) || !empty($room_unavailability['unavailable'])) {
         $time = date('Y/m/d', $form['form']['request']['#value']['dates']['date'][$key]->value);
         if (!is_null($form['form']['request']['#value']['dates']['time_start'][$key]->value)) {
           $time .= ' from ' . date('h:i:s a', $form['form']['request']['#value']['dates']['time_start'][$key]->value);
           $time .= ' to ' . date('h:i:s a', $form['form']['request']['#value']['dates']['time_stop'][$key]->value);
         }
 
-        form_set_error('dates][' . $key . '][select', "The room is no longer available for <strong>" . $time . "</strong> and therefore may not be uncancelled.");
+        $unavailable_message = 'The room is no longer available for <strong>' .  $time . '</strong> and therefore may not be uncancelled because of the following:<br>';
+        $unavailable_message .= mfcs_build_room_unavailable_message($room_unavailability);
+        form_set_error('dates][' . $key . '][select', $unavailable_message);
       }
 
       $changes = TRUE;

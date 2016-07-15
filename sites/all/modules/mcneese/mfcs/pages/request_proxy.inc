@@ -330,6 +330,10 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = NULL) {
     ),
     'oLanguage' => array(
       'sSearch' => '"Filter"',
+      'sEmptyTable' => '"' . $proxy_list['empty'] . '"',
+    ),
+    'language' => array(
+      'emptyTable' => '"' . $proxy_list['empty'] . '"',
     ),
     'searchDelay' => 1200,
     'pagingType' => 'input',

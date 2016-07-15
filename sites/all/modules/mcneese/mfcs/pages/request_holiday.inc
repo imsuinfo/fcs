@@ -30,7 +30,6 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
 
     drupal_not_found();
     drupal_exit();
-    return array();
   }
 
   if (!is_array($form_state)) {
@@ -38,18 +37,16 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
 
     drupal_not_found();
     drupal_exit();
-    return array();
   }
 
   // require that year be only an integer.
   if (!is_null($year) && !cf_is_integer($year)) {
     drupal_not_found();
     drupal_exit();
-    return array();
   }
 
   if (is_null($year)) {
-    $year = (int) date("Y");
+    $year = (int) date('Y');
   }
 
   global $conf;
@@ -61,12 +58,13 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
-  mfcs_add_canonical_headers('requests/holiday/year-0/' . $year);
+  mfcs_add_canonical_headers('requests/holiday-0/' . $year);
 
-  $page_title = "Holidays for " . $year;
-  drupal_set_title($page_title);
+  drupal_set_title("Holidays for " . $year);
 
   $user = cf_current_user();
+
+  $can_edit = mfcs_holiday_request_access('edit', $year, NULL, $user->uid);
 
   mfcs_include(MFCS_INCLUDE_MANAGEMENT);
 
@@ -114,9 +112,11 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
       $class_title .= 'sorting_1 ';
     }
     elseif ($order == 'enabled') {
-      $sorting['enabled'] = is_null($sort) ? 'DESC' : $sort;
-      $order_column = array(3 => strtolower($sorting[$order]));
-      $class_enabled .= 'sorting_1 ';
+      if ($can_edit) {
+        $sorting['enabled'] = is_null($sort) ? 'DESC' : $sort;
+        $order_column = array(3 => strtolower($sorting[$order]));
+        $class_enabled .= 'sorting_1 ';
+      }
     }
     else {
       $sorting['id'] = 'ASC';
@@ -125,13 +125,17 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
     }
   }
 
-  $items = mfcs_get_holidays($year, NULL, NULL, NULL);
+  if ($can_edit) {
+    $items = mfcs_get_holidays($year, NULL, NULL, NULL);
+  }
+  else {
+    $items = mfcs_get_holidays($year);
+  }
 
   // do not provide pages when the page number would bring the user beyond the available items.
   if ($items === FALSE) {
     drupal_not_found();
     drupal_exit();
-    return array();
   }
 
   $rows = array();
@@ -153,33 +157,43 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
       'class' => $class_title,
     );
 
-    $row['enabled'] = array(
-      'data' => $item->enabled ? 'Yes' : 'No',
-      'class' => $class_enabled,
-    );
+    if ($can_edit) {
+      $row['enabled'] = array(
+        'data' => $item->enabled ? 'Yes' : 'No',
+        'class' => $class_enabled,
+      );
+    }
 
     $row['operations'] = array(
       'data' => '',
       'class' => $class_operations,
     );
 
-    $row['operations']['data'] .= '<a href="' . $base_path . 'requests/holiday/year-0/' . $year . '/view/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="View Holiday">View</a>';
-    $row['operations']['data'] .= ' <a href="' . $base_path . 'requests/holiday/year-0/' . $year . '/edit/' . $item->id . $url_arguments . '" class="operation-link operation-link-edit" title="Edit Holiday">Edit</a>';
-    $row['operations']['data'] .= ' <a href="' . $base_path . 'requests/holiday/year-0/' . $year . '/delete/' . $item->id . $url_arguments . '" class="operation-link operation-link-delete" title="Delete Holiday">Delete</a>';
+    $row['operations']['data'] .= '<a href="' . $base_path . 'requests/holiday-0/view/' . $year . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="View Holiday">View</a>';
+
+    if ($can_edit) {
+      $row['operations']['data'] .= ' <a href="' . $base_path . 'requests/holiday-0/edit/' . $year . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-edit" title="Edit Holiday">Edit</a>';
+      $row['operations']['data'] .= ' <a href="' . $base_path . 'requests/holiday-0/create/' . $year . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-copy" title="Copy Holiday">Copy</a>';
+      $row['operations']['data'] .= ' <a href="' . $base_path . 'requests/holiday-0/delete/' . $year . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-delete" title="Delete Holiday">Delete</a>';
+    }
 
     $rows[] = $row;
   }
 
 
   $holidays_list = array();
-  $holidays_list['caption'] = '' . $year . ' ' . t("Holidays");
+  $holidays_list['caption'] = '' . $year . ' ' . "Holidays";
   $holidays_list['header'] = array(
     'id' => array('field' => 'id', 'data' => "ID", 'align' => 'center'),
     'date' => array('field' => 'date', 'data' => "Date", 'align' => 'center'),
     'title' => array('field' => 'title', 'data' => "Title", 'align' => 'center'),
-    'enabled' => array('field' => 'enabled', 'data' => "Enabled", 'align' => 'center'),
-    'operations' => array('data' => "Operations", 'align' => 'center', 'class' => array('no-print')),
   );
+
+  if ($can_edit) {
+    $holidays_list['header']['enabled'] = array('field' => 'enabled', 'data' => "Enabled", 'align' => 'center');
+  }
+
+  $holidays_list['header']['operations'] = array('data' => "Operations", 'align' => 'center', 'class' => array('no-print'));
 
   $holidays_list['attributes'] = array();
   $holidays_list['attributes']['id'] = 'mfcs-holiday_form';
@@ -195,7 +209,7 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
   $holidays_list['attributes']['summary'] = 'List of holidays.';
 
   $holidays_list['rows'] = $rows;
-  $holidays_list['empty'] = t("This system has no holidays defined for the specified year.");
+  $holidays_list['empty'] = "This system has no holidays defined for the specified year.";
 
   $datatable_settings = array(
     'sort' => strtolower($sort),
@@ -216,8 +230,6 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
       array('id' => 0, 'column' => 'id', 'name' => "ID", 'className' => 'column-id', 'sanitize' => FALSE),
       array('id' => 1, 'column' => 'date', 'name' => "Date", 'className' => 'column-date'),
       array('id' => 2, 'column' => 'title', 'name' => "Title", 'className' => 'column-title'),
-      array('id' => 3, 'column' => 'enabled', 'name' => "Enabled", 'className' => 'column-enabled'),
-      array('id' => 6, 'column' => NULL, 'name' => "Operations", 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
     ),
     'displayStart' => 0,
     'pageLength' => 40,
@@ -228,25 +240,41 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
     ),
     'oLanguage' => array(
       'sSearch' => '"Filter"',
+      'sEmptyTable' => '"' . $holidays_list['empty'] . '"',
+    ),
+    'language' => array(
+      'emptyTable' => '"' . $holidays_list['empty'] . '"',
     ),
     'searchDelay' => 1200,
     'pagingType' => 'input',
   );
 
+  if ($can_edit) {
+    $datatable_settings['columns'][] = array('id' => 3, 'column' => 'enabled', 'name' => "Enabled", 'className' => 'column-enabled');
+    $datatable_settings['columns'][] = array('id' => 4, 'column' => NULL, 'name' => "Operations", 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE);
+  }
+  else {
+    $datatable_settings['columns'][] = array('id' => 3, 'column' => NULL, 'name' => "Operations", 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE);
+  }
+
   $form = array();
 
   $form['holiday_list']['#markup'] = '';
   $form['holiday_list']['#markup'] .= '<div class="holiday_links-year no-print">';
-  $form['holiday_list']['#markup'] .= '<a href="' . $base_path . 'requests/holiday/year-0/' . ($year - 1) . '" class="year-previous inline-block margin-10 float-left" title="Holidays for ' . ($year - 1) . '">Previous Year</a> ';
-  $form['holiday_list']['#markup'] .= '<a href="' . $base_path . 'requests/holiday/year-0/' . ($year + 1) . '" class="year-next inline-block margin-10 float-right" title="Holidays for ' . ($year + 1) . '">Next Year</a> ';
-  $form['holiday_list']['#markup'] .= "</div>";
+  $form['holiday_list']['#markup'] .= '<a href="' . $base_path . 'requests/holiday-0/' . ($year - 1) . $url_arguments . '" class="year-previous inline-block margin-10 float-left" title="Holidays for ' . ($year - 1) . '">Previous Year</a> ';
+  $form['holiday_list']['#markup'] .= '<a href="' . $base_path . 'requests/holiday-0/' . ($year + 1) . $url_arguments . '" class="year-next inline-block margin-10 float-right" title="Holidays for ' . ($year + 1) . '">Next Year</a> ';
+  $form['holiday_list']['#markup'] .= '</div>';
+
+  if ($can_edit) {
+    $form['holiday_list']['#markup'] .= '<div class="holiday_links-create clear no-print">';
+    $form['holiday_list']['#markup'] .= 'You may <a href="' . $base_path . 'requests/holiday-0/create/' . $year . $url_arguments . '">create a new ' . $year . ' holiday</a>.';
+    $form['holiday_list']['#markup'] .= '</div>';
+  }
+
+  $form['holiday_list']['#markup'] .= '<br class="clear">';
 
   $form['holiday_list']['#markup'] .= mcneese_libraries_theme_table($holidays_list, $datatable_settings);
 
-  $form['holiday_list']['#markup'] .= '<br class="no-print">';
-  $form['holiday_list']['#markup'] .= '<div class="holiday_links-operations no-print">';
-  $form['holiday_list']['#markup'] .= '<a href="' . $base_path . 'requests/holiday/year-0/' . $year . '/edit" class="operation-create inline-block margin-10 float-left">Create holiday for ' . $year . '.</a> ';
-  $form['holiday_list']['#markup'] .= "</div>";
   $form['holiday_list']['#markup'] .= '<br class="clear">';
 
   return $form;
@@ -256,11 +284,11 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
  * Renders a single holiday entry.
  *
  * @param int $year
- *   The holiday year to operate on.
- * @param int $id
+ *   The holholiday_iday year to operate on.
+ * @param int $holiday_id
  *   The unique id associated with a specific holiday entry.
  */
-function mfcs_request_holiday_0_page($year, $id) {
+function mfcs_request_holiday_0_page($year, $holiday_id) {
   if (!cf_is_integer($year)) {
     cf_error::invalid_integer('year');
 
@@ -268,8 +296,8 @@ function mfcs_request_holiday_0_page($year, $id) {
     drupal_exit();
   }
 
-  if (!cf_is_integer($id)) {
-    cf_error::invalid_integer('id');
+  if (!cf_is_integer($holiday_id)) {
+    cf_error::invalid_integer('holiday_id');
 
     drupal_not_found();
     drupal_exit();
@@ -288,10 +316,10 @@ function mfcs_request_holiday_0_page($year, $id) {
   }
 
   if ($is_manager || $is_administer) {
-    $holiday = mfcs_get_holiday($id, NULL);
+    $holiday = mfcs_get_holiday($holiday_id, NULL);
   }
   else {
-    $holiday = mfcs_get_holiday($id);
+    $holiday = mfcs_get_holiday($holiday_id);
   }
 
   if (!is_object($holiday)) {
@@ -299,9 +327,18 @@ function mfcs_request_holiday_0_page($year, $id) {
     drupal_exit();
   }
 
-  if ($year != date('Y', $holiday->date)) {
+  if ($year != $holiday->year) {
     drupal_not_found();
     drupal_exit();
+  }
+
+  global $conf;
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
   $date_short = date('Y/m/d', $holiday->date);
@@ -310,24 +347,29 @@ function mfcs_request_holiday_0_page($year, $id) {
   $title = check_plain($holiday->title);
   $description = check_plain($holiday->description);
 
-  drupal_set_title($date_long . ": " . $holiday->title);
+  mfcs_add_canonical_headers('requests/holiday-0/view/' . $year . '/' . $holiday_id);
+  drupal_set_title('' . $year . " Holiday: " . $holiday->title);
 
   $markup = '<div id="mfcs-holiday_page-view" class="mfcs-holiday_page-view">';
   $markup .= '<div class="mfcs-holiday_page-title"><strong>' . $title . '</strong> is a holiday, break, or office closure for McNeese State University on: <strong>' . $date_long . '</strong>.</div>';
-  $markup .= "<br>";
+  $markup .= '<br>';
   $markup .= '<div class="mfcs-holiday_page-description">' . $description . '</div>';
 
   if ($is_manager || $is_administer) {
-    global $base_path;
-    $markup .= "<br>";
+    $markup .= '<br>';
+    $markup .= '<div class="mfcs-holiday_page-status"><strong>Status:</strong> ' . ($holiday->enabled ? 'Enabled' : 'Disabled') . '<br>';
 
-    $markup .= '<div class="mfcs-holiday_page-status"><strong>Status:</strong> ' . ($holiday->enabled ? 'Enabled' : 'Disabled') . "<br>";
+    $instance = mfcs_instance();
+    $current_year = date('Y', $instance);
+    if ($year >= $current_year) {
+      $markup .= '<br class="no-print">';
+      $markup .= '<div class="holiday_page-operations no-print">';
+      $markup .= '<a href="' . $base_path . 'requests/holiday-0/edit/' . $year . '/' . $holiday_id . $url_arguments . '" class="operation-edit inline-block margin-10 float-left">Edit this holiday</a> ';
+      $markup .= '<a href="' . $base_path . 'requests/holiday-0/create/' . $year . '/' . $holiday_id . $url_arguments . '" class="operation-copy inline-block margin-10 float-left">Copy this holiday</a> ';
+      $markup .= '<a href="' . $base_path . 'requests/holiday-0/delete/' . $year . '/' . $holiday_id . $url_arguments . '" class="operation-delete inline-block margin-10 float-right">Delete this holiday</a>';
+      $markup .= '</div>';
+    }
 
-    $markup .= '<br class="no-print">';
-    $markup .= '<div class="holiday_page-operations no-print">';
-    $markup .= '<a href="' . $base_path . 'requests/holiday/year-0/' . $year . '/edit/' . $holiday->id . '" class="operation-edit inline-block margin-10 float-left">Edit the holiday.</a> ';
-    $markup .= '<a href="' . $base_path . 'requests/holiday/year-0/' . $year . '/delete/' . $holiday->id . '" class="operation-delete inline-block margin-10 float-right">Delete the holiday.</a>';
-    $markup .= "</div>";
     $markup .= '<br class="clear">';
   }
 
@@ -337,7 +379,7 @@ function mfcs_request_holiday_0_page($year, $id) {
 }
 
 /**
- * Provides the facilities use request holiday main page(s).
+ * Provides the facilities use request holiday create/edit form.
  *
  * @param array $form
  *   The form array as defined by drupals form api.
@@ -348,17 +390,18 @@ function mfcs_request_holiday_0_page($year, $id) {
  * @param int|null $holiday_id
  *   The id of the holiday to load.
  *   If NULL, then a new holiday is being created.
+ * @param bool $copy
+ *   If TRUE, then the specified unavailability id is "cloned/copied" instead of edited.
  *
  * @return string
  *   The HTML output representing the page.
  */
-function mfcs_request_holiday_0_edit_form($form, &$form_state, $year, $holiday_id = NULL) {
+function mfcs_request_holiday_0_edit_form($form, &$form_state, $year, $holiday_id = NULL, $copy = FALSE) {
   if (!is_array($form)) {
     cf_error::invalid_array('form');
 
     drupal_not_found();
     drupal_exit();
-    return array();
   }
 
   if (!is_array($form_state)) {
@@ -366,7 +409,6 @@ function mfcs_request_holiday_0_edit_form($form, &$form_state, $year, $holiday_i
 
     drupal_not_found();
     drupal_exit();
-    return array();
   }
 
   if (!cf_is_integer($year)) {
@@ -374,7 +416,13 @@ function mfcs_request_holiday_0_edit_form($form, &$form_state, $year, $holiday_i
 
     drupal_not_found();
     drupal_exit();
-    return array();
+  }
+
+  if (!is_bool($copy)) {
+    cf_error::invalid_bool('copy');
+
+    drupal_not_found();
+    drupal_exit();
   }
 
   if (!is_null($holiday_id) && !cf_is_integer($holiday_id)) {
@@ -382,7 +430,6 @@ function mfcs_request_holiday_0_edit_form($form, &$form_state, $year, $holiday_i
 
     drupal_not_found();
     drupal_exit();
-    return array();
   }
 
   global $conf;
@@ -418,23 +465,34 @@ function mfcs_request_holiday_0_edit_form($form, &$form_state, $year, $holiday_i
     if (!is_object($holiday)) {
       drupal_not_found();
       drupal_exit();
-      return array();
+    }
+
+    if ($year != $holiday->year) {
+      drupal_not_found();
+      drupal_exit();
     }
   }
 
-  if (is_object($holiday)) {
-    mfcs_add_canonical_headers('requests/holiday/year-0/' . $year . '/edit/' . $holiday_id);
-
-    $page_title = "Edit " . $year . " Holiday: " . $holiday->title . ' (' . date('l, F j, Y', $holiday->date) . ')';
-  }
-  else {
-    mfcs_add_canonical_headers('requests/holiday/year-0/' . $year . '/edit');
+  if (is_null($holiday)) {
+    mfcs_add_canonical_headers('requests/holiday-0/create/' . $year);
 
     $page_title = "Create " . $year . " Holiday";
+  }
+  elseif ($copy) {
+    mfcs_add_canonical_headers('requests/holiday-0/create/' . $year . '/' . $holiday_id);
+
+    $page_title = "Copy " . $year . " Holiday: " . $holiday->title;
+  }
+  else {
+    mfcs_add_canonical_headers('requests/holiday-0/edit/' . $year . '/' . $holiday_id);
+
+    $page_title = "Edit " . $year . " Holiday: " . $holiday->title;
   }
 
   drupal_set_title($page_title);
 
+  // a year offset is necessary to create the date field for a specific year.
+  // the date field needs to be limited to a certain year and it works based off the offset to the current year.
   $instance = mfcs_instance();
   $year_offset = $year - ((int) date('Y', $instance));
 
@@ -470,6 +528,12 @@ function mfcs_request_holiday_0_edit_form($form, &$form_state, $year, $holiday_i
     '#value' => cf_current_user(),
   );
 
+  $form['form']['copy'] = array(
+    '#id' => 'field-form-copy',
+    '#type' => 'value',
+    '#value' => $copy,
+  );
+
   $form['holiday'] = array(
     '#tree' => TRUE,
   );
@@ -484,7 +548,7 @@ function mfcs_request_holiday_0_edit_form($form, &$form_state, $year, $holiday_i
   $form['holiday']['description'] = array(
     '#id' => 'field-holiday-description',
     '#type' => 'textarea',
-    '#title' => "description",
+    '#title' => "Description",
   );
 
   $form['holiday']['date'] = array(
@@ -638,10 +702,10 @@ function mfcs_request_holiday_0_edit_form_submit($form, &$form_state) {
   if ($clicked_id == 'mfcs-holiday-edit-submit-cancel') {
     if (empty($form_state['values']['redirect_to'])) {
       if (is_object($holiday)) {
-        $form_state['redirect'] = mfcs_build_redirect_array('requests/holiday/year-0/' . $holiday->year . '/view/' . $holiday->id);
+        $form_state['redirect'] = mfcs_build_redirect_array('requests/holiday-0/view/' . $holiday->year . '/' . $holiday->id);
       }
       else {
-        $form_state['redirect'] = mfcs_build_redirect_array('requests/holiday/year-0/' . $form['form']['year']['#value']);
+        $form_state['redirect'] = mfcs_build_redirect_array('requests/holiday-0/' . $form['form']['year']['#value']);
       }
     }
     else {
@@ -685,41 +749,57 @@ function mfcs_request_holiday_0_edit_form_submit($form, &$form_state) {
 
     $id = NULL;
     if (is_object($holiday)) {
-      // check to see if there are any changes made.
-      $changes = array();
-      foreach ($fields as $key => $value) {
-        // do not check updated key because it must be different.
-        if ($key == 'updated') {
-          continue;
+      $id = (int) $holiday->id;
+
+      if ($form['form']['copy']['#value']) {
+        $fields['created'] = $fields['updated'];
+
+        $query = db_insert('mfcs_holiday');
+        $query->fields($fields);
+        $id = $query->execute();
+
+        if (is_numeric($id)) {
+          $id = (int) $id;
         }
 
-        if ($value != $holiday->{$key}) {
-          $changes[$key] = array(
-            'from' => $holiday->{$key},
-            'to' => $value,
-          );
-        }
+        $change = 'copied from holiday ' . $holiday->id . '.';
       }
+      else {
+        // check to see if there are any changes made.
+        $changes = array();
+        foreach ($fields as $key => $value) {
+          // do not check updated key because it must be different.
+          if ($key == 'updated') {
+            continue;
+          }
 
-      if (!empty($changes)) {
-        $query = db_update('mfcs_holiday');
-        $query->condition('id', $holiday->id);
-        $query->fields($fields);
-        $query->execute();
-
-        $fields = array();
-        $fields['holiday_id'] = $holiday->id;
-        $fields['date'] = mfcs_instance();
-        $fields['user_id'] = $user->uid;
-        $fields['change'] = '';
-
-        foreach ($changes as $key => $value) {
-          $fields['change'] .= $key . ' has been changed from \'' . $value['from'] . '\' to \'' . $value['to'] . '\'. ';
+          if ($value != $holiday->{$key}) {
+            $changes[$key] = array(
+              'from' => $holiday->{$key},
+              'to' => $value,
+            );
+          }
         }
 
-        $query = db_insert('mfcs_log_holiday');
-        $query->fields($fields);
-        $query->execute();
+        $change = '';
+        if (!empty($changes)) {
+          $query = db_update('mfcs_holiday');
+          $query->condition('id', $holiday->id);
+          $query->fields($fields);
+          $query->execute();
+
+          $fields = array();
+          $fields['holiday_id'] = $holiday->id;
+          $fields['date'] = mfcs_instance();
+          $fields['user_id'] = $user->uid;
+          $fields['change'] = '';
+
+          foreach ($changes as $key => $value) {
+            $change .= $key . ' has been changed from \'' . $value['from'] . '\' to \'' . $value['to'] . '\'. ';
+          }
+
+          trim($change);
+        }
       }
     }
     else {
@@ -729,11 +809,19 @@ function mfcs_request_holiday_0_edit_form_submit($form, &$form_state) {
       $query->fields($fields);
       $id = $query->execute();
 
+      if (is_numeric($id)) {
+        $id = (int) $id;
+      }
+
+      $change = 'created.';
+    }
+
+    if (!is_null($change)) {
       $fields = array();
       $fields['holiday_id'] = $id;
       $fields['date'] = mfcs_instance();
       $fields['user_id'] = $user->uid;
-      $fields['change'] = 'created.';
+      $fields['change'] = $change;
 
       $query = db_insert('mfcs_log_holiday');
       $query->fields($fields);
@@ -758,11 +846,14 @@ function mfcs_request_holiday_0_edit_form_submit($form, &$form_state) {
   if (!$success) {
     form_set_error('form', "An error occurred while trying to edit the holiday. Please contact the support staff.");
 
-    if (is_object($holiday)) {
-      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to edit the holiday: @holiday_id.", array('@holiday_id' => $holiday->id), WATCHDOG_ERROR);
+    if (null($holiday)) {
+      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to create a holiday.", array(), WATCHDOG_ERROR);
+    }
+    elseif ($form['form']['copy']['#value']) {
+      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to copy the holiday: @holiday_id.", array('@holiday_id' => $holiday->id), WATCHDOG_ERROR);
     }
     else {
-      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to create a holiday.", array(), WATCHDOG_ERROR);
+      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to edit the holiday: @holiday_id.", array('@holiday_id' => $holiday->id), WATCHDOG_ERROR);
     }
 
     $form_state['rebuild'] = TRUE;
@@ -774,14 +865,11 @@ function mfcs_request_holiday_0_edit_form_submit($form, &$form_state) {
 
   // redirect after submitting.
   if (empty($form_state['values']['redirect_to'])) {
-    if (is_object($holiday)) {
-      $form_state['redirect'] = mfcs_build_redirect_array('requests/holiday/year-0/' . $holiday->year . '/view/' . $holiday->id);
-    }
-    elseif (is_null($id)) {
-      $form_state['redirect'] = mfcs_build_redirect_array('requests/holiday/year-0/' . $form['form']['year']['#value']);
+    if (is_numeric($id)) {
+      $form_state['redirect'] = mfcs_build_redirect_array('requests/holiday-0/view/' . $form['form']['year']['#value'] . '/' . $id);
     }
     else {
-      $form_state['redirect'] = mfcs_build_redirect_array('requests/holiday/year-0/' . $form['form']['year']['#value'] . '/view/' . $id);
+      $form_state['redirect'] = mfcs_build_redirect_array('requests/holiday-0/' . $form['form']['year']['#value']);
     }
   }
   else {
@@ -810,7 +898,6 @@ function mfcs_request_holiday_0_delete_form($form, &$form_state, $year, $holiday
 
     drupal_not_found();
     drupal_exit();
-    return array();
   }
 
   if (!is_array($form_state)) {
@@ -818,7 +905,6 @@ function mfcs_request_holiday_0_delete_form($form, &$form_state, $year, $holiday
 
     drupal_not_found();
     drupal_exit();
-    return array();
   }
 
   if (!cf_is_integer($year)) {
@@ -826,7 +912,6 @@ function mfcs_request_holiday_0_delete_form($form, &$form_state, $year, $holiday
 
     drupal_not_found();
     drupal_exit();
-    return array();
   }
 
   if (!cf_is_integer($holiday_id)) {
@@ -834,7 +919,6 @@ function mfcs_request_holiday_0_delete_form($form, &$form_state, $year, $holiday
 
     drupal_not_found();
     drupal_exit();
-    return array();
   }
 
   global $conf;
@@ -868,7 +952,6 @@ function mfcs_request_holiday_0_delete_form($form, &$form_state, $year, $holiday
   if (!is_object($holiday)) {
     drupal_not_found();
     drupal_exit();
-    return array();
   }
 
   if ($year != date('Y', $holiday->date)) {
@@ -879,11 +962,9 @@ function mfcs_request_holiday_0_delete_form($form, &$form_state, $year, $holiday
   }
 
   $year = date('Y', $holiday->date);
-  mfcs_add_canonical_headers('requests/holiday/year-0/' . $year . '/delete/' . $holiday_id);
+  mfcs_add_canonical_headers('requests/holiday-0/delete/' . $year . '/' . $holiday_id);
 
-  $page_title = "Delete Holiday: " . $holiday->title . ' (' . date('l, F j, Y', $holiday->date) . ')';
-
-  drupal_set_title($page_title);
+  drupal_set_title("Delete " . $year . " Holiday: " . $holiday->title);
 
   $form['form'] = array(
     '#tree' => TRUE,
@@ -893,6 +974,12 @@ function mfcs_request_holiday_0_delete_form($form, &$form_state, $year, $holiday
     '#id' => 'field-form-holiday',
     '#type' => 'value',
     '#value' => $holiday,
+  );
+
+  $form['form']['year'] = array(
+    '#id' => 'field-form-year',
+    '#type' => 'value',
+    '#value' => $year,
   );
 
   $form['form']['user'] = array(
@@ -907,12 +994,13 @@ function mfcs_request_holiday_0_delete_form($form, &$form_state, $year, $holiday
 
   $form['confirmation']['#markup'] .= '<h3>Are you sure wou want to delete the holiday?</h3> ';
   $form['confirmation']['#markup'] .= '<div>';
-  $form['confirmation']['#markup'] .= '<strong>ID</strong>: ' . $holiday->id . "<br>";
-  $form['confirmation']['#markup'] .= '<strong>Title</strong>: ' . $holiday->title . "<br>";
-  $form['confirmation']['#markup'] .= '<strong>Date</strong>: ' . date('l, F j, Y', $holiday->date) . "<br>";
-  $form['confirmation']['#markup'] .= '<strong>Status</strong>: ' . ($holiday->enabled == 1 ? 'Enabled' : 'Disabled') . "<br>";
+  $form['confirmation']['#markup'] .= '<strong>ID</strong>: ' . $holiday->id . '<br>';
+  $form['confirmation']['#markup'] .= '<strong>Title</strong>: ' . $holiday->title . '<br>';
+  $form['confirmation']['#markup'] .= '<strong>Year</strong>: ' . $holiday->year . '<br>';
+  $form['confirmation']['#markup'] .= '<strong>Date</strong>: ' . date('l, F j, Y', $holiday->date) . '<br>';
+  $form['confirmation']['#markup'] .= '<strong>Status</strong>: ' . ($holiday->enabled == 1 ? 'Enabled' : 'Disabled') . '<br>';
   $form['confirmation']['#markup'] .= '</div>';
-  $form['confirmation']['#markup'] .= "<br>";
+  $form['confirmation']['#markup'] .= '<br>';
 
   $form['display']['submit'] = array(
     '#id' => 'mfcs-holiday-delete-submit',
@@ -971,10 +1059,12 @@ function mfcs_request_holiday_0_delete_form_submit($form, &$form_state) {
   if ($clicked_id == 'mfcs-holiday-delete-submit-no') {
     if (empty($form_state['values']['redirect_to'])) {
       if (empty($holiday_id)) {
-        $form_state['redirect'] = mfcs_build_redirect_array('requests');
+        $year = (int) $form['form']['year']['#value'];
+
+        $form_state['redirect'] = mfcs_build_redirect_array('requests/holiday-0/' . $year);
       }
       else {
-        $form_state['redirect'] = mfcs_build_redirect_array('requests/holiday/year-0/' . $holiday_year . '/view/' . $holiday_id);
+        $form_state['redirect'] = mfcs_build_redirect_array('requests/holiday-0/view/' . $holiday_year . '/' . $holiday_id);
       }
     }
     else {
@@ -985,7 +1075,7 @@ function mfcs_request_holiday_0_delete_form_submit($form, &$form_state) {
   }
 
   $fields = array();
-  $fields['disabled'] = 1;
+  $fields['deleted'] = 1;
   $fields['updated'] = mfcs_instance();
 
   $transaction = db_transaction();
@@ -1035,7 +1125,7 @@ function mfcs_request_holiday_0_delete_form_submit($form, &$form_state) {
 
   // redirect after submitting.
   if (empty($form_state['values']['redirect_to'])) {
-    $form_state['redirect'] = mfcs_build_redirect_array('requests/holiday/year-0');
+    $form_state['redirect'] = mfcs_build_redirect_array('requests/holiday-0');
   }
   else {
     $form_state['redirect'] = $form_state['values']['redirect_to'];

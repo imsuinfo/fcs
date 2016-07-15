@@ -150,18 +150,18 @@ function mfcs_request_create_0_form($form, &$form_state, $clone_request = NULL) 
     unset($request_fields['request_coordinator']);
   }
 
-  $statement_markup = 'McNeese State University is happy to provide facilities and resources to our Students, Employees, and the Community to further educational, cultural, and recreational initiatives through requests held on campus.' . "<br>";
-  $statement_markup .= "<br>";
-  $statement_markup .= 'All activities, meetings, or requests, excluding scheduled academic classes, must be scheduled through the Facilities Use and Special Event Request form. The following questionnaire assists campus officials in not only scheduling campus facilities or maintaining a master calendar; it allows better service through inter-departmental communication and collaboration enhancing the excellence of McNeese.' . "<br>";
-  $statement_markup .= "<br>";
-  $statement_markup .= 'The questionnaire is designed according to the University\'s <a href="//www.mcneese.edu/node/3217">Facility Use Policy</a>. Any activity scheduled on behalf of the University, regardless of venue, must be submitted.' . "<br>";
-  $statement_markup .= "<br>";
-  $statement_markup .= '<strong>All requests should be made <a href="//www.mcneese.edu/node/3217#3_week_requirement">a minimum of three weeks in advance</a> of the event or of expected start date of publicity for the event, whichever comes first.</strong>' . "<br>";
-  $statement_markup .= "<br>";
-  $statement_markup .= 'If you are only making a request for a <em>Table Reservation</em> in the <em>New Ranch</em> or in the <em>Quad</em>, then you should instead use the <a href="//www.mcneese.edu/studentunion/student_union_reservations">Table Request Form</a>.' . "<br>";
-  $statement_markup .= "<br>";
+  $statement_markup = 'McNeese State University is happy to provide facilities and resources to our Students, Employees, and the Community to further educational, cultural, and recreational initiatives through requests held on campus.' . '<br>';
+  $statement_markup .= '<br>';
+  $statement_markup .= 'All activities, meetings, or requests, excluding scheduled academic classes, must be scheduled through the Facilities Use and Special Event Request form. The following questionnaire assists campus officials in not only scheduling campus facilities or maintaining a master calendar; it allows better service through inter-departmental communication and collaboration enhancing the excellence of McNeese.' . '<br>';
+  $statement_markup .= '<br>';
+  $statement_markup .= 'The questionnaire is designed according to the University\'s <a href="//www.mcneese.edu/node/3217">Facility Use Policy</a>. Any activity scheduled on behalf of the University, regardless of venue, must be submitted.' . '<br>';
+  $statement_markup .= '<br>';
+  $statement_markup .= '<strong>All requests should be made <a href="//www.mcneese.edu/node/3217#3_week_requirement">a minimum of three weeks in advance</a> of the event or of expected start date of publicity for the event, whichever comes first.</strong>' . '<br>';
+  $statement_markup .= '<br>';
+  $statement_markup .= 'If you are only making a request for a <em>Table Reservation</em> in the <em>New Ranch</em> or in the <em>Quad</em>, then you should instead use the <a href="//www.mcneese.edu/studentunion/student_union_reservations">Table Request Form</a>.' . '<br>';
+  $statement_markup .= '<br>';
   $statement_markup .= 'Confirmation and approval of the submitted request must be received before any publicity is scheduled.';
-  $statement_markup .= "<br>";
+  $statement_markup .= '<br>';
 
   if ($step == 'agreement') {
     $form['agreement']['statement'] = array(
@@ -378,6 +378,7 @@ function mfcs_request_create_0_form_validate($form, &$form_state) {
         unset($form_state['values']['request']['dates']['category'][$clicked_id_part]);
       }
       elseif ($clicked_id == 'submit-request-submit') {
+        // @todo: fixme unavailability must be processed.
         if (isset($form_state['values']['request']['information']['type'][0]) && $form_state['values']['request']['information']['type'][0] == MFCS_REQUEST_TYPE_QUICK_MEETING) {
           if (!empty($form['form']['user']['#value']) && user_access('mfcs manage', $form['form']['user']['#value'])) {
             $form_state['values']['request']['status'][0] = MFCS_REQUEST_STATUS_CLOSED_ACCEPTED;
@@ -453,31 +454,17 @@ function mfcs_request_create_0_form_validate($form, &$form_state) {
         }
 
         if (!empty($date)) {
-          $requests_using_room = mfcs_check_room_availability($room, $date, $time_start, $time_stop);
+          $room_unavailability = mfcs_check_room_availability($room, $date, $time_start, $time_stop);
 
-          if ($requests_using_room === FALSE) {
+          if ($room_unavailability === FALSE) {
             form_set_error('', "An internal error occurred while checking the room for availability. Please contact the support staff.");
           }
-          elseif (!empty($requests_using_room)) {
-            $problematic_dates = array();
-            foreach ($requests_using_room as $request_using_room) {
-              if (isset($request_using_room->date)) {
-                if (isset($request_using_room->time_start)) {
-                  $problematic_date = date("Y/m/d", $request_using_room->date) . " from " . date("h:ia", $request_using_room->time_start) . " to " . date("h:ia", $request_using_room->time_stop) . '.';
-                  $problematic_dates[$problematic_date] = $problematic_date;
-                }
-                else {
-                  $problematic_date = date("Y/m/d", $request_using_room->date) . " (all day).";
-                  $problematic_dates[$problematic_date] = $problematic_date;
-                }
-              }
-              elseif (isset($request_using_room->reserved_day)) {
-                $problematic_date = date("Y/m/d", $request_using_room->reserved_day) . " from " . date("h:ia", $request_using_room->reserved_time_start) . " to " . date("h:ia", $request_using_room->reserved_time_stop) . '.';
-                $problematic_dates[$problematic_date] = $problematic_date;
-              }
-            }
-            ksort($problematic_dates);
-            mfcs_display_room_unavailable_message($problematic_dates);
+          elseif (!empty($room_unavailability['conflict']) || !empty($room_unavailability['unavailable'])) {
+            $unavailable_message = '<span class="uppercase">Warning</span>: The specified room is currently unavailable for the following dates: ';
+            $unavailable_message .= mfcs_build_room_unavailable_message($room_unavailability);
+            $unavailable_message .= 'You may still submit this request and your request attempt will still be logged (but your request will be auto-closed). ';
+            drupal_set_message($unavailable_message, 'warning');
+            unset($unavailable_message);
 
             // force the status to be closed due to room being unavailable on save.
             if (!isset($form_state['room_unavailable_prior_settings'])) {
@@ -502,25 +489,36 @@ function mfcs_request_create_0_form_validate($form, &$form_state) {
                 }
               }
 
-              $request_using_room = reset($requests_using_room);
-              $request_using_room_status = NULL;
-              if (isset($request_using_room->status)) {
-                if (is_string($request_using_room->status)) {
-                  $request_using_room_status = (int) $request_using_room->status;
+              // if any of the rooms that is causing the scheduling conflict is locked (but not approved) close the request due to lock instead of as unavailable.
+              $conflict_is_locked = FALSE;
+              if (!empty($room_unavailability['conflict'])) {
+                foreach ($room_unavailability['conflict'] as $conflict) {
+                  $request_using_room_status = NULL;
+
+                  if (isset($conflict->status)) {
+                    if (is_string($conflict->status)) {
+                      $request_using_room_status = (int) $conflict->status;
+                    }
+                    else {
+                      $request_using_room_status = $conflict->status;
+                    }
+
+                    if ($request_using_room_status === MFCS_REQUEST_STATUS_LOCKED) {
+                      $conflict_is_locked = TRUE;
+                      break;
+                    }
+                  }
                 }
-                else {
-                  $request_using_room_status = $request_using_room->status;
-                }
+                unset($request_using_room_status);
               }
 
-              if ($request_using_room_status === MFCS_REQUEST_STATUS_LOCKED) {
+              if ($conflict_is_locked) {
                 $form_state['values']['request']['status'][0] = MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK;
               }
               else {
                 $form_state['values']['request']['status'][0] = MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE;
               }
-              unset($request_using_room);
-              unset($request_using_room_status);
+              unset($conflict_is_locked);
 
               $form_state['values']['request']['step'][0] = MFCS_REVIEW_STEP_COMPLETED;
             }

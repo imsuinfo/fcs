@@ -456,6 +456,10 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
     ),
     'oLanguage' => array(
       'sSearch' => '"Filter"',
+      'sEmptyTable' => '"' . $problem_list['empty'] . '"',
+    ),
+    'language' => array(
+      'emptyTable' => '"' . $problem_list['empty'] . '"',
     ),
     'searchDelay' => 1200,
     'pagingType' => 'input',
@@ -629,9 +633,9 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
   $message = "The system has detected problems for <strong>" . $user_name . "</strong>.<br>";
   $message .= "This page provides details of the problems and the ability to reset the problem flags for each of these problems.<br>";
   $message .= "Some of these problems can be reset, others cannot.<br>";
-  $message .= "<br>";
+  $message .= '<br>';
   $message .= "The <a href=\"" . $base_path . 'requests/users-0/view/' . $problem_user_id . "\" title=\"View Profile for " . $user_name . " (id #" . $problem_user_id . ")\">user's information</a> and problem flags were last updated on: <strong>" . date("Y/m/d h:i:s a", $mfcs_user->date) . "</strong>.<br>";
-  $message .= "<br>";
+  $message .= '<br>';
 
   $form['message'] = array(
     '#markup' => '<div class="problem-message">' . $message . '</div>',
@@ -657,7 +661,7 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
   );
 
   if (isset($problem_user->field_user_banner_id['und']['0']['value'])) {
-    $form['banner_information']['details']['#markup'] .= '<strong>Banner ID</strong>: ' . $problem_user->field_user_banner_id['und']['0']['safe_value'] . "<br>";
+    $form['banner_information']['details']['#markup'] .= '<strong>Banner ID</strong>: ' . $problem_user->field_user_banner_id['und']['0']['safe_value'] . '<br>';
 
     try {
       $event_roles = mfcs_oracle_select('select * from ucs.msu_event_role where id = :banner_id', array('banner_id' => $problem_user->field_user_banner_id['und']['0']['value']));
@@ -700,7 +704,7 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
       'label' => "Generic System Related Problems",
       'explanation' =>
         "This flag gets set when a generic system error is detected while the specified user was accessing this system.<br>" .
-        "<br>" .
+        '<br>' .
         "This system currently does not provide the details of these problems, but in the future it may.<br>",
       'resettable' => TRUE,
       'custom_action' => FALSE,
@@ -709,7 +713,7 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
       'label' => "Generic Facilities Use Problems",
       'explanation' =>
         "This flag gets set when an error is detected for the facilities use specific functionality while the specified user was accessing this system.<br>" .
-        "<br>" .
+        '<br>' .
         "This system currently does not provide the details of these problems, but in the future it may.<br>",
       'resettable' => TRUE,
       'custom_action' => FALSE,
@@ -720,7 +724,7 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
         "The banner system was unavailable during account creation (first login) and the appropriate access controls could not be auto-assigned.<br>" .
         "The next time the user logs in this flag will be cleared and the account will load the appropriate banner roles.<br>" .
         "The user must log out before the banner information can be updated.<br>" .
-        "<br>" .
+        '<br>' .
         "This system currently does not provide the details of these problems, but in the future it may.<br>",
       'resettable' => FALSE,
       'custom_action' => TRUE,
@@ -731,7 +735,7 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
       'explanation' =>
         "The banner system was unavailable during the login process and the account could not be updated if necessary.<br>" .
         "This flag will be reset the next time the user logs in and banner is available.<br>" .
-        "<br>" .
+        '<br>' .
         "This system currently does not provide the details of these problems, but in the future it may.<br>",
       'resettable' => FALSE,
       'custom_action' => TRUE,
@@ -741,7 +745,7 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
       'label' => "Multiple Login Problems",
       'explanation' =>
         "This flag gets set when a user has multiple problems logging in or multiple failed attempts logging in.<br>" .
-        "<br>" .
+        '<br>' .
         "This system currently does not provide the details of these problems, but in the future it may.<br>",
       'resettable' => TRUE,
       'custom_action' => FALSE,
@@ -750,12 +754,12 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
       'label' => "Unable to Assign Reviewer/Venue-Coordinator Role",
       'explanation' =>
         "This flag gets set when an attempt is made to assign or unassign the reviewer role to a user when there is no reference to that use as a venue coordinator or room coordinator.<br>" .
-        "<br>" .
+        '<br>' .
         "This may be caused by the banner database cache being out of date.<br>" .
         "You may need to re-synchronizing the banner cache.<br>" .
-        "<br>" .
+        '<br>' .
         "If the user is not in banner, then ask a administrator to manually grant the review role for this user.<br>" .
-        "<br>" .
+        '<br>' .
         "Administrators, managers, and users without banner ids should not get this error.<br>",
       'resettable' => TRUE,
       'custom_action' => TRUE,
@@ -765,7 +769,7 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
       'label' => "Old/Duplicate Account",
       'explanation' =>
         "This flag gets set when a user has logged in and the <strong>LDAP</strong> has the <strong>isDuplicate</strong> flag set to <strong>TRUE</strong> and there is no primary account (or this is not the primary account).<br>" .
-        "<br>" .
+        '<br>' .
         "A specific account must be manually assigned by an administer to designate which account is the primary account.<br>",
         "Only the primary account will be allowed access to this system.<br>",
       'resettable' => TRUE,
@@ -777,7 +781,7 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
         "This flag gets set when an error is detected while the users is processing a form.<br>" .
         "This could be something as simple as not adding in the date fields or something technical such as a PHP error.<br>" .
         "This flag refers to facilities use specific functionality.<br>" .
-        "<br>" .
+        '<br>' .
         "This system currently does not provide the details of these problems, but in the future it may.<br>",
       'resettable' => TRUE,
       'custom_action' => FALSE,
@@ -787,7 +791,7 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
       'explanation' =>
         "This flag gets set when an error is detected while the users is processing a form.<br>" .
         "This flag refers to the drupal core form functionality and not the facilities use specific functionality.<br>" .
-        "<br>" .
+        '<br>' .
         "This system currently does not provide the details of these problems, but in the future it may.<br>",
       'resettable' => TRUE,
       'custom_action' => FALSE,
@@ -796,9 +800,9 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
       'label' => "Deleted/Disabled User Assigned Requests",
       'explanation' =>
         "This flag gets set when a deleted or disabled user account is assigned as a venue coordinator or similar access roles.<br>" .
-        "<br>" .
+        '<br>' .
         "This is generally casued when an account is deleted but <a href=\"" . $base_path . 'requests/problems-0/users/disabled_in_use/' . $problem_user_id . "\">active or on-going requests have not been re-assigned</a>.<br>" .
-        "<br>" .
+        '<br>' .
         "Requests will need to be re-assigned.<br>",
       'resettable' => TRUE,
       'custom_action' => FALSE,
@@ -807,7 +811,7 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
       'label' => "Invalid Banner ID Assigned to User",
       'explanation' =>
         "This flag gets set when a user has a banner id that is unknown to the system.<br>" .
-        "<br>" .
+        '<br>' .
         "The user either needs to have their banner id fixed, removed, or the account should be disabled.<br>",
       'resettable' => FALSE,
       'custom_action' => FALSE,
@@ -816,9 +820,9 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
       'label' => "Insufficient Banner Access",
       'explanation' =>
         "This flag gets set when a user logs into the system but has not been granted any banner roles to perform any actions, but the account is still technically enabled/unlocked.<br>" .
-        "<br>" .
+        '<br>' .
         "Either the account needs to be manually disabled/locked or the account needs to have its banner roles fixed.<br>",
-        "<br>" .
+        '<br>' .
         "This may also be triggered if a new user tries to login while banner is down and there is no locally cached data associated with the new account to properly assign its banner roles.<br>",
       'resettable' => TRUE,
       'custom_action' => FALSE,
@@ -896,7 +900,7 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
       if ($problem_id == MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES) {
         $all_accounts = mfcs_users_load_all_users_with_banner_id($banner_id);
         if (!empty($all_accounts)) {
-          $form['problems'][$problem_id]['explanation']['#markup'] .= "<br>";
+          $form['problems'][$problem_id]['explanation']['#markup'] .= '<br>';
           $form['problems'][$problem_id]['explanation']['#markup'] .= "The following accounts have the same banner id";
 
           if ($user_is_manager || $user_is_administer) {
@@ -1781,6 +1785,10 @@ function mfcs_request_problems_0_requests_form($form, &$form_state, $page_number
     ),
     'oLanguage' => array(
       'sSearch' => '"Filter"',
+      'sEmptyTable' => '"' . $problem_list['empty'] . '"',
+    ),
+    'language' => array(
+      'emptyTable' => '"' . $problem_list['empty'] . '"',
     ),
     'searchDelay' => 1200,
     'pagingType' => 'input',
@@ -2063,14 +2071,14 @@ function mfcs_request_problems_0_request_form($form, &$form_state, $problem_id) 
   $form['markup']['#markup'] .= '  <div class="request_problem-summary_row"><span class="request_problem-summary_row-label label-reason">Reason:</span> <span class="request_problem-summary_row-value value-reason">' . (isset($problem->reason) ? $problem->reason : '') . "</span></div>";
   $form['markup']['#markup'] .= '</div>';
 
-  $form['markup']['#markup'] .= "<br>";
+  $form['markup']['#markup'] .= '<br>';
 
   $form['markup']['#markup'] .= 'This problem is catagorized as a <strong>' . $problem_code_name . '</strong> problem.<br>';
-  $form['markup']['#markup'] .= "<br>";
+  $form['markup']['#markup'] .= '<br>';
 
   if ($problem->problem == MFCS_REQUEST_PROBLEM_CONFLICT) {
-    $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where one or more requests are scheduled on the same day and time at the same location, building, and room.' . "<br>";
-    $form['markup']['#markup'] .= "<br>";
+    $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where one or more requests are scheduled on the same day and time at the same location, building, and room.' . '<br>';
+    $form['markup']['#markup'] .= '<br>';
 
     $details = unserialize($problem->details);
 
@@ -2080,67 +2088,67 @@ function mfcs_request_problems_0_request_form($form, &$form_state, $problem_id) 
       $form['markup']['#markup'] .= '<li class="request_problem-extra-conflict-item"><a href="' . $base_path . 'requests/view-0/' . $detail . $url_arguments . '" class="request_problem-extra-conflict-item-link" title="View Request ' . $detail . '">Request ' . $detail . '</a></li>';
     }
     $form['markup']['#markup'] .= '</ul>';
-    $form['markup']['#markup'] .= "<br>";
+    $form['markup']['#markup'] .= '<br>';
   }
   elseif ($problem->problem == MFCS_REQUEST_PROBLEM_STALE) {
-    $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where a request has all of its scheduled dates in the past but is still open for review.' . "<br>";
-    $form['markup']['#markup'] .= 'Stale requests should likely be cancelled.' . "<br>";
-    $form['markup']['#markup'] .= "<br>";
+    $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where a request has all of its scheduled dates in the past but is still open for review.' . '<br>';
+    $form['markup']['#markup'] .= 'Stale requests should likely be cancelled.' . '<br>';
+    $form['markup']['#markup'] .= '<br>';
   }
   elseif ($problem->problem == MFCS_REQUEST_PROBLEM_STUCK) {
-    $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where the request is somehow being prevented from progressing in the review process when it otherwise should be able to do so.' . "<br>";
-    $form['markup']['#markup'] .= 'This could happen when a reviewer position is altered during the review process.' . "<br>";
-    $form['markup']['#markup'] .= 'This could happen when a venue coordinator account is no longer valid and must be re-assigned.' . "<br>";
-    $form['markup']['#markup'] .= "<br>";
+    $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where the request is somehow being prevented from progressing in the review process when it otherwise should be able to do so.' . '<br>';
+    $form['markup']['#markup'] .= 'This could happen when a reviewer position is altered during the review process.' . '<br>';
+    $form['markup']['#markup'] .= 'This could happen when a venue coordinator account is no longer valid and must be re-assigned.' . '<br>';
+    $form['markup']['#markup'] .= '<br>';
   }
   elseif ($problem->problem == MFCS_REQUEST_PROBLEM_BLOCKED) {
-    $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where a request is being prevented from progressing further in the review process.' . "<br>";
-    $form['markup']['#markup'] .= 'This generally applies when multiple requests are made for the same date and time (only one request will make it into the review process and the others will be stuck).' . "<br>";
-    $form['markup']['#markup'] .= 'Stuck requests should be cancelled at the venue coordinators discretion.' . "<br>";
-    $form['markup']['#markup'] .= "<br>";
+    $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where a request is being prevented from progressing further in the review process.' . '<br>';
+    $form['markup']['#markup'] .= 'This generally applies when multiple requests are made for the same date and time (only one request will make it into the review process and the others will be stuck).' . '<br>';
+    $form['markup']['#markup'] .= 'Stuck requests should be cancelled at the venue coordinators discretion.' . '<br>';
+    $form['markup']['#markup'] .= '<br>';
   }
   elseif ($problem->problem == MFCS_REQUEST_PROBLEM_COORDINATOR) {
     $form['actions']['action']['#options']['reassign_venue_coordinator'] = "Re-Assign Venue Coordinator";
 
-    $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where the venue coordinator assigned to a request no longer exists, is disabled, or is otherwise invalid.' . "<br>";
-    $form['markup']['#markup'] .= "<br>";
+    $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where the venue coordinator assigned to a request no longer exists, is disabled, or is otherwise invalid.' . '<br>';
+    $form['markup']['#markup'] .= '<br>';
 
-    $form['markup']['#markup'] .= 'The <strong>' . $form['actions']['action']['#options']['reassign_venue_coordinator'] . ' </strong> action will attempt to auto-reassign the venue coordinator.' . "<br>";
+    $form['markup']['#markup'] .= 'The <strong>' . $form['actions']['action']['#options']['reassign_venue_coordinator'] . ' </strong> action will attempt to auto-reassign the venue coordinator.' . '<br>';
     $form['markup']['#markup'] .= "The re-assigmment functionality only refreshes the banner information.<br>";
     $form['markup']['#markup'] .= "If that information has not changed for the venue coordinator, then this will do nothing.<br>";
-    $form['markup']['#markup'] .= "<br>";
+    $form['markup']['#markup'] .= '<br>';
   }
   elseif ($problem->problem == MFCS_REQUEST_PROBLEM_REQUESTER) {
-    $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where the requester assigned to a request no longer exists, is disabled, or is otherwise invalid.' . "<br>";
-    $form['markup']['#markup'] .= 'The requester is the account used to create the request and is viewable under the <em>created by</em> section of the request.' . "<br>";
-    $form['markup']['#markup'] .= "<br>";
+    $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where the requester assigned to a request no longer exists, is disabled, or is otherwise invalid.' . '<br>';
+    $form['markup']['#markup'] .= 'The requester is the account used to create the request and is viewable under the <em>created by</em> section of the request.' . '<br>';
+    $form['markup']['#markup'] .= '<br>';
   }
   elseif ($problem->problem == MFCS_REQUEST_PROBLEM_ROOM) {
-    $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where the room assigned to a request no longer exists, is disabled, or is otherwise invalid.' . "<br>";
-    $form['markup']['#markup'] .= "<br>";
-    $form['markup']['#markup'] .= 'You can may want to <a href="' . $base_path . 'requests/troubleshoot-0/rooms' . $url_arguments . '">look at the listing of rooms according to the local banner information</a>.' . "<br>";
-    $form['markup']['#markup'] .= "<br>";
+    $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where the room assigned to a request no longer exists, is disabled, or is otherwise invalid.' . '<br>';
+    $form['markup']['#markup'] .= '<br>';
+    $form['markup']['#markup'] .= 'You can may want to <a href="' . $base_path . 'requests/troubleshoot-0/rooms' . $url_arguments . '">look at the listing of rooms according to the local banner information</a>.' . '<br>';
+    $form['markup']['#markup'] .= '<br>';
   }
   elseif ($problem->problem == MFCS_REQUEST_PROBLEM_BUILDING) {
-    $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where the building assigned to a request no longer exists, is disabled, or is otherwise invalid.' . "<br>";
-    $form['markup']['#markup'] .= "<br>";
-    $form['markup']['#markup'] .= 'You can may want to <a href="' . $base_path . 'requests/troubleshoot-0/buildings' . $url_arguments . '">look at the listing of buildings according to the local banner information</a>.' . "<br>";
-    $form['markup']['#markup'] .= "<br>";
+    $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where the building assigned to a request no longer exists, is disabled, or is otherwise invalid.' . '<br>';
+    $form['markup']['#markup'] .= '<br>';
+    $form['markup']['#markup'] .= 'You can may want to <a href="' . $base_path . 'requests/troubleshoot-0/buildings' . $url_arguments . '">look at the listing of buildings according to the local banner information</a>.' . '<br>';
+    $form['markup']['#markup'] .= '<br>';
   }
   elseif ($problem->problem == MFCS_REQUEST_PROBLEM_LOCATION) {
-    $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where the location assigned to a request no longer exists, is disabled, or is otherwise invalid.' . "<br>";
-    $form['markup']['#markup'] .= "<br>";
-    $form['markup']['#markup'] .= 'You can may want to <a href="' . $base_path . 'requests/troubleshoot-0/locations' . $url_arguments . '">look at the listing of locations according to the local banner information</a>.' . "<br>";
-    $form['markup']['#markup'] .= "<br>";
+    $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where the location assigned to a request no longer exists, is disabled, or is otherwise invalid.' . '<br>';
+    $form['markup']['#markup'] .= '<br>';
+    $form['markup']['#markup'] .= 'You can may want to <a href="' . $base_path . 'requests/troubleshoot-0/locations' . $url_arguments . '">look at the listing of locations according to the local banner information</a>.' . '<br>';
+    $form['markup']['#markup'] .= '<br>';
   }
   elseif ($problem->problem == MFCS_REQUEST_PROBLEM_CACHE_REQUEST) {
     $form['actions']['action']['#options']['rebuild_request_cache'] = "Rebuild Request Cache";
 
-    $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where internal database cache is inconsistent with the stored values.' . "<br>";
-    $form['markup']['#markup'] .= 'This issue will cause inconsistencies with the values associated with the request.' . "<br>";
-    $form['markup']['#markup'] .= "<br>";
-    $form['markup']['#markup'] .= 'The <strong>' . $form['actions']['action']['#options']['rebuild_request_cache'] . '</strong> action should fix this issue by rebuilding the cache associated with the specific request.' . "<br>";
-    $form['markup']['#markup'] .= "<br>";
+    $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where internal database cache is inconsistent with the stored values.' . '<br>';
+    $form['markup']['#markup'] .= 'This issue will cause inconsistencies with the values associated with the request.' . '<br>';
+    $form['markup']['#markup'] .= '<br>';
+    $form['markup']['#markup'] .= 'The <strong>' . $form['actions']['action']['#options']['rebuild_request_cache'] . '</strong> action should fix this issue by rebuilding the cache associated with the specific request.' . '<br>';
+    $form['markup']['#markup'] .= '<br>';
   }
 
   return $form;
