@@ -157,14 +157,19 @@ function mcneese_content_formats_node_presave($node) {
           continue;
         }
 
+        $text_format = NULL;
+        if (isset($index_value['format'])) {
+          $text_format = $index_value['format'];
+        }
+
         if (!empty($index_value['summary'])) {
           if ($operations['deny_abused_codes']) mcneese_content_formats_deny_abused_codes($abused_codes, $index_value['summary']);
-          mcneese_content_formats_alter_dom($index_value['summary'], $operations);
+          mcneese_content_formats_alter_dom($index_value['summary'], $operations, $text_format);
         }
 
         if (!empty($index_value['value'])) {
           if ($operations['deny_abused_codes']) mcneese_content_formats_deny_abused_codes($abused_codes, $index_value['value']);
-          mcneese_content_formats_alter_dom($index_value['value'], $operations);
+          mcneese_content_formats_alter_dom($index_value['value'], $operations, $text_format);
         }
       }
     }
@@ -217,17 +222,21 @@ function mcneese_content_formats_webform_component_presave(&$component) {
 
   $node_variables = array_keys(get_object_vars($node));
 
+  $text_format = NULL;
+  if (isset($component['extra']['format'])) {
+    $text_format = $component['extra']['format'];
+  }
+
   if (isset($component['type']) && $component['type'] == 'markup') {
 
     if (!isset($component['extra']['format']) || $component['extra']['format'] != 'php_code') {
-
       if ($operations['deny_abused_codes']) mcneese_content_formats_deny_abused_codes($abused_codes, $component['value']);
-      mcneese_content_formats_alter_dom($component['value'], $operations);
+      mcneese_content_formats_alter_dom($component['value'], $operations, $text_format);
     }
   }
 
   if (isset($component['name_html'])) {
-    mcneese_content_formats_alter_dom($component['name_html'], $operations);
+    mcneese_content_formats_alter_dom($component['name_html'], $operations, $text_format);
   }
 }
 
@@ -256,9 +265,15 @@ function mcneese_content_formats_deny_abused_codes($abused_codes, &$value) {
  *   The text to alter.
  * @param array $operations
  *   A collection of operations designating what to do and not to do.
+ * @param string|null $text_format
+ *   (optional) The custom text format in use to perform specific operations.
  */
-function mcneese_content_formats_alter_dom(&$text, $operations) {
+function mcneese_content_formats_alter_dom(&$text, $operations, $text_format = NULL) {
   if (empty($text)) return '';
+
+  if (!is_null($text_format) && !is_string($text_format)) {
+    $text_format = NULL;
+  }
 
   $dom = new cf_dom(TRUE, TRUE, TRUE, $text);
 
@@ -359,6 +374,18 @@ function mcneese_content_formats_alter_dom(&$text, $operations) {
   $unsupported_attributes[] = 'ontimeupdate';
   $unsupported_attributes[] = 'onvolumechange';
   $unsupported_attributes[] = 'onwaiting';
+
+  $unsupported_attributes_js_allowed = array();
+  $unsupported_attributes_js_allowed[] = 'lang';
+  $unsupported_attributes_js_allowed[] = 'align';
+  $unsupported_attributes_js_allowed[] = 'valign';
+  $unsupported_attributes_js_allowed[] = 'abbr';
+  $unsupported_attributes_js_allowed[] = 'axis';
+  $unsupported_attributes_js_allowed[] = 'bgcolor';
+  $unsupported_attributes_js_allowed[] = 'char';
+  $unsupported_attributes_js_allowed[] = 'charoff';
+  $unsupported_attributes_js_allowed[] = 'nowrap';
+  $unsupported_attributes_js_allowed[] = 'charset';
 
   $unsupported_td_attr = array();
   $unsupported_td_attr[] = 'height';
@@ -720,10 +747,20 @@ function mcneese_content_formats_alter_dom(&$text, $operations) {
 
 
       // strip out unsupported attributes.
-      foreach ($unsupported_attributes as $attr_name) {
-        if ($tag->hasAttribute($attr_name)) {
-          $tag->removeAttribute($attr_name);
-          $altered = TRUE;
+      if ($text_format == 'full_html_js') {
+        foreach ($unsupported_attributes_js_allowed as $attr_name) {
+          if ($tag->hasAttribute($attr_name)) {
+            $tag->removeAttribute($attr_name);
+            $altered = TRUE;
+          }
+        }
+      }
+      else {
+        foreach ($unsupported_attributes as $attr_name) {
+          if ($tag->hasAttribute($attr_name)) {
+            $tag->removeAttribute($attr_name);
+            $altered = TRUE;
+          }
         }
       }
     }
