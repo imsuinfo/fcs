@@ -523,6 +523,17 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
     $is_quick_meeting = TRUE;
   }
 
+  $exceptional_dates_allowed = FALSE;
+  if (isset($form['form']['user']['#value']->uid)) {
+    $is_manager = user_access('mfcs manage', $form['form']['user']['#value']);
+    $is_administer = user_access('mfcs administer', $form['form']['user']['#value']);
+
+    // allow managers and administers to bypass the 21-day requirement.
+    if ($is_manager || $is_administer) {
+      $exceptional_dates_allowed = TRUE;
+    }
+  }
+
   $instance = mfcs_instance();
 
   $passed = TRUE;
@@ -568,13 +579,14 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
         $date_timestamp[$key] = strtotime($value);
 
         // request time and date time may have same day, but different times, so only compare day.
-        $date_string = date("Y/m/d", $date_timestamp[$key]);
-        $request_string = date("Y/m/d", $instance);
+        $min_days_by_policy = strtotime('-21 days', $date_timestamp[$key]);
+        $min_days_by_policy = strtotime('midnight today', $min_days_by_policy);
+        $request_date = strtotime('midnight today', $instance);
 
-        if ($date_string == $request_string) {
+        if ($request_date >= $min_days_by_policy) {
           // Quick Meetings allow same day requests.
-          if (!$is_quick_meeting) {
-            form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t("The date '@date' is too soon, the request process takes time.", array('@date' => $value)));
+          if (!$is_quick_meeting && !$exceptional_dates_allowed) {
+            form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t("The date '@date' is too soon and must be <a href=\"//www.mcneese.edu/node/3217#3_week_requirement\" class=\"strong\">a minimum of three weeks in advance</a> prior to the event or prior to the expected start date for publicity for the event, whichever comes first.", array('@date' => $value)));
             $passed = FALSE;
           }
         }
@@ -582,6 +594,9 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
           form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t("The date '@date' is in the past and cannot be used.", array('@date' => $value)));
           $passed = FALSE;
         }
+
+        unset($min_days_by_policy);
+        unset($request_date);
       }
 
       // check for holidays.
