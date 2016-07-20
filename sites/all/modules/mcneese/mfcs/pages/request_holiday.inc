@@ -585,7 +585,7 @@ function mfcs_request_holiday_0_edit_form($form, &$form_state, $year, $holiday_i
   }
 
   $form['holiday']['submit'] = array(
-    '#id' => 'mfcs-holiday-delete-submit',
+    '#id' => 'mfcs-holiday-edit-submit',
     '#type' => 'container',
     '#tree' => TRUE,
     '#attributes' => array(
