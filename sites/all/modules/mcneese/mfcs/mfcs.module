@@ -1150,6 +1150,11 @@ function mfcs_holiday_request_access($operation, $year = NULL, $holiday_id = NUL
     return FALSE;
   }
 
+  // user account must be able to list content before doing anything here..
+  if (!mfcs_page_request_access('list', NULL, $user)) {
+    return FALSE;
+  }
+
   $is_requester = user_access('mfcs request', $user);
   $is_reviewer = user_access('mfcs review', $user);
   $is_manager = user_access('mfcs manage', $user);
@@ -1307,6 +1312,11 @@ function mfcs_unavailability_request_access($operation, $year = NULL, $room_id =
 
   if (!is_object($user)) {
     cf_error::invalid_integer('user_id');
+    return FALSE;
+  }
+
+  // user account must be able to list content before doing anything here..
+  if (!mfcs_page_request_access('list', NULL, $user)) {
     return FALSE;
   }
 
@@ -2325,10 +2335,25 @@ function mfcs_dashboard_page_access() {
  *   TRUE on access granted, FALSE otherwise.
  */
 function mfcs_management_page_access() {
+  $access = &drupal_static(__FUNCTION__, NULL);
+
+  if (is_bool($access)) {
+    return $access;
+  }
+
+  $user = cf_current_user();
+  // user account must be able to list content before doing anything here..
+  if (!mfcs_page_request_access('list', NULL, $user)) {
+    $access = FALSE;
+    return FALSE;
+  }
+
   if (user_access('mfcs request') || user_access('mfcs review') || user_access('mfcs manage') || user_access('mfcs administer')) {
+    $access = TRUE;
     return TRUE;
   }
 
+  $access = FALSE;
   return FALSE;
 }
 
