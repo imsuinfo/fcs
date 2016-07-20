@@ -540,6 +540,7 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
 
   if ($can_create) {
     $markup .= 'You may <a href="' . $base_path . 'requests/unavailable-0/create/' . $year . '/' . $room_id . $url_arguments . '">create a new unavailable date and time</a> for this room.<br>';
+    $markup .= 'You may <a href="' . $base_path . 'requests/unavailable-0/copy/' . $year . '/' . $room_id . $url_arguments . '">copy all unavailable dates and times</a> for this room from another year.<br>';
   }
 
   $markup .= '<div class="unavailable_0_links-year no-print">';
@@ -721,6 +722,434 @@ function mfcs_request_unavailability_0_page($year, $room_id, $unavailability_id)
   $markup .= '</div>';
 
   return $markup;
+}
+
+/**
+ * Provides the facilities use request unavailability copy form.
+ *
+ * This copies all unavailabilities from one year to another (and not individual holidays).
+ * To copy individual unavailabilities use mfcs_request_unavailability_0_edit_form().
+ *
+ * @param array $form
+ *   The form array as defined by drupals form api.
+ * @param array $form_state
+ *   The form state array as defined by drupals form api
+ * @param int $year
+ *   The unavailability year to operate on.
+ * @param int $room_id
+ *   The Room ID associated with the unavailability item.
+ *
+ * @return string
+ *   The HTML output representing the page.
+ *
+ * @see: mfcs_request_unavailability_0_edit_form()
+ */
+function mfcs_request_unavailability_0_copy_form($form, &$form_state, $year, $room_id) {
+  if (!is_array($form)) {
+    cf_error::invalid_array('form');
+
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  if (!is_array($form_state)) {
+    cf_error::invalid_array('form_state');
+
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  if (!cf_is_integer($year)) {
+    cf_error::invalid_integer('year');
+
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  if (!cf_is_integer($room_id)) {
+    cf_error::invalid_integer('room_id');
+
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  global $conf;
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  $user = cf_current_user();
+
+  $is_manager = FALSE;
+  if (user_access('mfcs manage', $user)) {
+    $is_manager = TRUE;
+  }
+
+  $is_administer = FALSE;
+  if (user_access('mfcs administer', $user)) {
+    $is_administer = TRUE;
+  }
+
+  $can_troubleshoot = mfcs_page_request_access('troubleshoot', NULL, $user);
+
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+
+  // do not provide a page for a non-existent room id.
+  $room = mfcs_load_rooms(NULL, NULL, $room_id, TRUE);
+  if (!is_object($room)) {
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  mfcs_add_canonical_headers('requests/unavailable-0/copy/' . $year . '/' . $room_id);
+
+  $page_title = "Copy Unavailable for " . $room->building_code . ' ' . $room->room_number . " to " . $year;
+  $form['#id'] = 'mfcs-unavailable_0-copy-page';
+  drupal_set_title($page_title);
+
+  // a year offset is necessary to create the date field for a specific year.
+  // the date field needs to be limited to a certain year and it works based off the offset to the current year.
+  $instance = mfcs_instance();
+  $year_offset = $year - ((int) date('Y', $instance));
+
+  if ($year_offset > 0) {
+    $year_offset = '+' . $year_offset;
+  }
+  elseif ($year_offset < 0) {
+    $year_offset = '-' . abs($year_offset);
+  }
+  else {
+    $year_offset = '0';
+  }
+
+  $form['form'] = array(
+    '#tree' => TRUE,
+  );
+
+  $form['form']['year'] = array(
+    '#id' => 'field-form-year',
+    '#type' => 'value',
+    '#value' => (int) $year,
+  );
+
+  $form['form']['room_id'] = array(
+    '#id' => 'field-form-room_id',
+    '#type' => 'value',
+    '#value' => (int) $room_id,
+  );
+
+  $form['form']['building_id'] = array(
+    '#id' => 'field-form-building_id',
+    '#type' => 'value',
+    '#value' => $room->building_id,
+  );
+
+  $form['form']['user'] = array(
+    '#id' => 'field-form-user',
+    '#type' => 'value',
+    '#value' => cf_current_user(),
+  );
+
+  $form['unavailable'] = array(
+    '#tree' => TRUE,
+  );
+
+  $form['unavailable']['pre_markup'] = array(
+    '#type' => 'markup',
+    '#markup' => '',
+    '#weight' => -100,
+  );
+
+  if ($can_troubleshoot) {
+    $building_value = '<a href="' . $base_path . 'requests/troubleshoot-0/rooms/' . $room_id . $url_arguments . '" class="operation-link operation-link-view" title="View Technical Building Information">' . check_plain($room->building_name) . '</a>';
+    $room_value = '<a href="' . $base_path . 'requests/troubleshoot-0/rooms/' . $room_id . $url_arguments . '" class="operation-link operation-link-view" title="View Technical Room Information">' . check_plain($room->room_name) . '</a>';
+  }
+  else {
+    $building_value = check_plain($room->building_name);
+    $room_value = check_plain($room->room_name);
+  }
+
+  $form['unavailable']['pre_markup']['#markup'] .= '<div class="room_information-wrapper">';
+  $form['unavailable']['pre_markup']['#markup'] .= '<div class="room_information-item item-building_name">';
+  $form['unavailable']['pre_markup']['#markup'] .= '<div class="room_information-item-label">Building Name:</div>';
+  $form['unavailable']['pre_markup']['#markup'] .= '<div class="room_information-item-value">' . $building_value . '</div>';
+  $form['unavailable']['pre_markup']['#markup'] .= '</div>';
+  $form['unavailable']['pre_markup']['#markup'] .= '<div class="room_information-item item-room_name">';
+  $form['unavailable']['pre_markup']['#markup'] .= '<div class="room_information-item-label">Room Name:</div>';
+  $form['unavailable']['pre_markup']['#markup'] .= '<div class="room_information-item-value">' . $room_value . '</div>';
+  $form['unavailable']['pre_markup']['#markup'] .= '</div>';
+  $form['unavailable']['pre_markup']['#markup'] .= '</div>';
+
+  $form['unavailable']['year'] = array(
+    '#id' => 'field-unavailable-year',
+    '#type' => 'numberfield',
+    '#title' => "Year",
+    '#required' => TRUE,
+    '#description' => "Select a year to copy all unavailabilities of.",
+  );
+
+  $form['unavailable']['include_disabled'] = array(
+    '#id' => 'field-unavailable-include_disabled',
+    '#type' => 'checkbox',
+    '#title' => "Include Disabled",
+    '#required' => FALSE,
+    '#description' => "When copying unavailabilities, include disabled unavailabilities.",
+  );
+
+  $form['unavailable']['as_disabled'] = array(
+    '#id' => 'field-unavailable-as_disabled',
+    '#type' => 'checkbox',
+    '#title' => "As Disabled",
+    '#required' => FALSE,
+    '#default_value' => TRUE,
+    '#description' => "When copying unavailabilities, set the copied unavailabilities to disabled.",
+  );
+
+  $form['unavailable']['submit'] = array(
+    '#id' => 'mfcs-unavailable-copy-submit',
+    '#type' => 'container',
+    '#tree' => TRUE,
+    '#attributes' => array(
+      'class' => array('no-print'),
+    ),
+  );
+
+  $form['unavailable']['submit']['cancel'] = array(
+    '#id' => 'mfcs-unavailable-copy-submit-cancel',
+    '#name' => 'mfcs-unavailable-copy-submit-cancel',
+    '#type' => 'submit',
+    '#default_value' => t("Cancel"),
+  );
+
+  $form['unavailable']['submit']['submit'] = array(
+    '#id' => 'mfcs-unavailable-copy-submit-submit',
+    '#name' => 'mfcs-unavailable-copy-submit-submit',
+    '#type' => 'submit',
+    '#default_value' => t("Submit"),
+  );
+
+  return $form;
+}
+
+/**
+ * Pre-Validate process for mfcs_request_unavailable_0_copy_form().
+ *
+ * @param array $form
+ *   The form array as defined by drupals form api.
+ * @param array $form_state
+ *   The form state array as defined by drupals form api
+ *
+ * @see: mfcs_request_unavailable_0_copy_form()
+ */
+function mfcs_request_unavailable_0_copy_form_pre_validate(&$form, &$form_state) {
+  $clicked_id = '';
+  if (isset($form_state['triggering_element']['#id'])) {
+    $clicked_id = $form_state['triggering_element']['#id'];
+  }
+
+  if ($clicked_id == 'mfcs-unavailable-copy-submit-cancel') {
+    $form['unavailable']['year']['#required'] = FALSE;
+  }
+}
+
+/**
+ * Validate process for mfcs_request_unavailability_0_copy_form().
+ *
+ * @param array $form
+ *   The form array as defined by drupals form api.
+ * @param array $form_state
+ *   The form state array as defined by drupals form api
+ *
+ * @see: mfcs_request_unavailability_0_copy_form()
+ */
+function mfcs_request_unavailability_0_copy_form_validate($form, &$form_state) {
+  $clicked_id = '';
+  if (isset($form_state['triggering_element']['#id'])) {
+    $clicked_id = $form_state['triggering_element']['#id'];
+  }
+
+  if ($clicked_id == 'mfcs-unavailable-copy-submit-cancel') {
+    return;
+  }
+  elseif ($clicked_id != 'mfcs-unavailable-copy-submit-submit') {
+    form_set_error('', "Unknown submit process detected.");
+    return;
+  }
+
+  if (isset($form_state['values']['unavailable']['year']) && is_numeric($form_state['values']['unavailable']['year'])) {
+    $year = (int) $form_state['values']['unavailable']['year'];
+  }
+  else {
+    form_set_error('unavailable][year', "Please specify a valid year.");
+    return;
+  }
+
+  $enabled = TRUE;
+  if (isset($form_state['values']['unavailable']['include_disabled'])) {
+    if ($form_state['values']['unavailable']['include_disabled'] == 1) {
+      $enabled = NULL;
+    }
+  }
+
+  // check to see if there are any years to copy.
+  $unavailabilities = mfcs_get_unavailabilities($year, $form['form']['room_id']['#value'], NULL, NULL, $enabled);
+  if ($unavailabilities === FALSE) {
+    form_set_error('', "Internal Error. An unknown error has been detected while trying to process this request. Please contact the appropriate support staff.");
+
+    $user = cf_current_user();
+    watchdog(MFCS_WATCHDOG_ID, "Internal Error. Error while calling mfcs_get_unavailabilities() for the user %user_name [%user_id].", array('%user_name' => $user->name, '%user_id' => $user->uid), WATCHDOG_ERROR);
+  }
+  elseif (empty($unavailabilities)) {
+    form_set_error('unavailable][year', "No unavailabilities were found for the year " . $year . ". There is nothing to copy.");
+  }
+}
+
+/**
+ * Submit process for mfcs_request_unavailability_0_copy_form().
+ *
+ * @param array $form
+ *   The form array as defined by drupals form api.
+ * @param array $form_state
+ *   The form state array as defined by drupals form api
+ *
+ * @see: mfcs_request_unavailability_0_copy_form()
+ */
+function mfcs_request_unavailability_0_copy_form_submit($form, &$form_state) {
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  $user = cf_current_user();
+
+  $clicked_id = '';
+  if (isset($form_state['triggering_element']['#id'])) {
+    $clicked_id = $form_state['triggering_element']['#id'];
+  }
+
+  $instance = mfcs_instance();
+  $year_this = date('Y', $instance);
+
+  if ($clicked_id == 'mfcs-unavailable-copy-submit-cancel') {
+    if (empty($form_state['values']['redirect_to'])) {
+      $form_state['redirect'] = mfcs_build_redirect_array('requests/unavailable-0/' . $form['form']['year']['#value']);
+    }
+    else {
+      $form_state['redirect'] = $form_state['values']['redirect_to'];
+    }
+
+    return;
+  }
+
+  $room_id = $form['form']['room_id']['#value'];
+  $year_current = (int) $form['form']['year']['#value'];
+  $year_previous = (int) $form_state['values']['unavailable']['year'];
+
+  $enabled = TRUE;
+  if ($form_state['values']['unavailable']['include_disabled'] == 1) {
+    $enabled = NULL;
+  }
+
+  $as_disabled = TRUE;
+  if ($form_state['values']['unavailable']['as_disabled'] == 0) {
+    $as_disabled = FALSE;
+  }
+
+  $unavailabilities = mfcs_get_unavailabilities($year_previous, $room_id, NULL, NULL, $enabled);
+
+  $transaction = db_transaction();
+  $success = TRUE;
+  try {
+    if (!empty($unavailabilities)) {
+      foreach ($unavailabilities as $unavailability) {
+        // copy the unavailability.
+        $current_date_start = '' . $year_current . date('/m/d h:i:s a', $unavailability->date_start);
+        $current_date_stop = '' . $year_current . date('/m/d h:i:s a', $unavailability->date_stop);
+
+        $fields = array();
+        $fields['year'] = $year_current;
+        $fields['room_id'] = $room_id;
+        $fields['building_id'] = $unavailability->building_id;
+        $fields['date_start'] = strtotime($current_date_start);
+        $fields['date_stop'] = strtotime($current_date_stop);
+        $fields['title'] = $unavailability->title;
+        $fields['description'] = $unavailability->description;
+        $fields['created'] = $instance;
+        $fields['updated'] = $instance;
+
+        if ($as_disabled) {
+          $fields['enabled'] = 0;
+        }
+        else {
+          $fields['enabled'] = $unavailability->enabled;
+        }
+
+        $query = db_insert('mfcs_unavailability');
+        $query->fields($fields);
+        $id = $query->execute();
+
+        if (is_numeric($id)) {
+          $id = (int) $id;
+        }
+
+        // write to the log.
+        $fields = array();
+        $fields['unavailability_id'] = $id;
+        $fields['user_id'] = $user->uid;
+        $fields['date'] = $instance;
+        $fields['change'] = 'copied from unavailability ' . $unavailability->id . '.';
+
+        $query = db_insert('mfcs_log_unavailability');
+        $query->fields($fields);
+        $query->execute();
+
+        unset($id);
+        unset($current_date);
+      }
+    }
+    else {
+      $success = FALSE;
+    }
+
+    unset($transaction);
+  }
+  catch (Error $e) {
+    $transaction->rollback();
+    cf_error::on_exception($e);
+
+    $success = FALSE;
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+    cf_error::on_exception($e);
+
+    $success = FALSE;
+  }
+
+  if (!$success) {
+    form_set_error('form', "An error occurred while trying to copy the unavailabilities. Please contact the support staff.");
+    watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to copy a unavailabilities.", array(), WATCHDOG_ERROR);
+
+    $form_state['rebuild'] = TRUE;
+    $form_state['redirect'] = FALSE;
+    $form_state['submitted'] = FALSE;
+
+    return;
+  }
+
+  // redirect after submitting.
+  if (empty($form_state['values']['redirect_to'])) {
+    $form_state['redirect'] = mfcs_build_redirect_array('requests/unavailable-0/' . $form['form']['year']['#value'] . '/' . $room_id);
+  }
+  else {
+    $form_state['redirect'] = $form_state['values']['redirect_to'];
+  }
 }
 
 /**

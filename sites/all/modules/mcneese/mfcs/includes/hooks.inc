@@ -1438,6 +1438,20 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'type' => MENU_CALLBACK,
   );
 
+  $items['requests/holiday-0/copy/%'] = array(
+    'title' => "Copy Holidays",
+    'description' => "Holidays.",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_holiday_0_copy_form', 3),
+    'file' => 'request_holiday.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_holiday_request_access',
+    'access arguments' => array('create', 3),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+    'type' => MENU_CALLBACK,
+  );
+
   $items['requests/holiday-0/create/%'] = array(
     'title' => "Create Holidays",
     'description' => "Holidays.",
@@ -1545,6 +1559,20 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_unavailability_request_access',
     'access arguments' => array('manage', 2, 3),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['requests/unavailable-0/copy/%/%'] = array(
+    'title' => "Copy Unavailabilities",
+    'description' => "Unavailabilities.",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_unavailability_0_copy_form', 3, 4),
+    'file' => 'request_unavailability.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_unavailability_request_access',
+    'access arguments' => array('create', 3, 4),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
     'type' => MENU_CALLBACK,

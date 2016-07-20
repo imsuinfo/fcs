@@ -258,18 +258,19 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
   }
 
   $form = array();
-
   $form['holiday_list']['#markup'] = '';
+
+  if ($can_edit) {
+    $form['holiday_list']['#markup'] .= '<div class="holiday_links-create clear no-print">';
+    $form['holiday_list']['#markup'] .= 'You may <a href="' . $base_path . 'requests/holiday-0/create/' . $year . $url_arguments . '">create a new ' . $year . ' holiday</a>.<br>';
+    $form['holiday_list']['#markup'] .= 'You may <a href="' . $base_path . 'requests/holiday-0/copy/' . $year . $url_arguments . '">copy all holidays from another year</a>.<br>';
+    $form['holiday_list']['#markup'] .= '</div>';
+  }
+
   $form['holiday_list']['#markup'] .= '<div class="holiday_links-year no-print">';
   $form['holiday_list']['#markup'] .= '<a href="' . $base_path . 'requests/holiday-0/' . ($year - 1) . $url_arguments . '" class="year-previous inline-block margin-10 float-left" title="Holidays for ' . ($year - 1) . '">Previous Year</a> ';
   $form['holiday_list']['#markup'] .= '<a href="' . $base_path . 'requests/holiday-0/' . ($year + 1) . $url_arguments . '" class="year-next inline-block margin-10 float-right" title="Holidays for ' . ($year + 1) . '">Next Year</a> ';
   $form['holiday_list']['#markup'] .= '</div>';
-
-  if ($can_edit) {
-    $form['holiday_list']['#markup'] .= '<div class="holiday_links-create clear no-print">';
-    $form['holiday_list']['#markup'] .= 'You may <a href="' . $base_path . 'requests/holiday-0/create/' . $year . $url_arguments . '">create a new ' . $year . ' holiday</a>.';
-    $form['holiday_list']['#markup'] .= '</div>';
-  }
 
   $form['holiday_list']['#markup'] .= '<br class="clear">';
 
@@ -376,6 +377,359 @@ function mfcs_request_holiday_0_page($year, $holiday_id) {
   $markup .= '</div>';
 
   return $markup;
+}
+
+/**
+ * Provides the facilities use request holiday copy form.
+ *
+ * This copies all holidays from one year to another (and not individual holidays).
+ * To copy individual holidays use mfcs_request_holiday_0_edit_form().
+ *
+ * @param array $form
+ *   The form array as defined by drupals form api.
+ * @param array $form_state
+ *   The form state array as defined by drupals form api
+ * @param int $year
+ *   The holiday year to operate on.
+ *   The represents the destination year and not the source year.
+ *
+ * @return string
+ *   The HTML output representing the page.
+ *
+ * @see: mfcs_request_holiday_0_edit_form()
+ */
+function mfcs_request_holiday_0_copy_form($form, &$form_state, $year) {
+  if (!is_array($form)) {
+    cf_error::invalid_array('form');
+
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  if (!is_array($form_state)) {
+    cf_error::invalid_array('form_state');
+
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  if (!cf_is_integer($year)) {
+    cf_error::invalid_integer('year');
+
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  global $conf;
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  $user = cf_current_user();
+
+  mfcs_add_canonical_headers('requests/holiday-0/copy/' . $year);
+  drupal_set_title("Copy to " . $year . " Holidays");
+
+  // a year offset is necessary to create the date field for a specific year.
+  // the date field needs to be limited to a certain year and it works based off the offset to the current year.
+  $instance = mfcs_instance();
+  $year_offset = $year - ((int) date('Y', $instance));
+
+  if ($year_offset > 0) {
+    $year_offset = '+' . $year_offset;
+  }
+  elseif ($year_offset < 0) {
+    $year_offset = '-' . abs($year_offset);
+  }
+  else {
+    $year_offset = '0';
+  }
+
+  $form['form'] = array(
+    '#tree' => TRUE,
+  );
+
+  $form['form']['year'] = array(
+    '#id' => 'field-form-year',
+    '#type' => 'value',
+    '#value' => (int) $year,
+  );
+
+  $form['form']['user'] = array(
+    '#id' => 'field-form-user',
+    '#type' => 'value',
+    '#value' => cf_current_user(),
+  );
+
+  $form['holiday'] = array(
+    '#tree' => TRUE,
+  );
+
+  $form['holiday']['year'] = array(
+    '#id' => 'field-holiday-year',
+    '#type' => 'numberfield',
+    '#title' => "Year",
+    '#required' => TRUE,
+    '#description' => "Select a year to copy all holidays of.",
+  );
+
+  $form['holiday']['include_disabled'] = array(
+    '#id' => 'field-holiday-include_disabled',
+    '#type' => 'checkbox',
+    '#title' => "Include Disabled",
+    '#required' => FALSE,
+    '#description' => "When copying holidays, include disabled holidays.",
+  );
+
+  $form['holiday']['as_disabled'] = array(
+    '#id' => 'field-holiday-as_disabled',
+    '#type' => 'checkbox',
+    '#title' => "As Disabled",
+    '#required' => FALSE,
+    '#default_value' => TRUE,
+    '#description' => "When copying holidays, set the copied holidays to disabled.",
+  );
+
+  $form['holiday']['submit'] = array(
+    '#id' => 'mfcs-holiday-copy-submit',
+    '#type' => 'container',
+    '#tree' => TRUE,
+    '#attributes' => array(
+      'class' => array('no-print'),
+    ),
+  );
+
+  $form['holiday']['submit']['cancel'] = array(
+    '#id' => 'mfcs-holiday-copy-submit-cancel',
+    '#name' => 'mfcs-holiday-copy-submit-cancel',
+    '#type' => 'submit',
+    '#default_value' => t("Cancel"),
+  );
+
+  $form['holiday']['submit']['submit'] = array(
+    '#id' => 'mfcs-holiday-copy-submit-submit',
+    '#name' => 'mfcs-holiday-copy-submit-submit',
+    '#type' => 'submit',
+    '#default_value' => t("Submit"),
+  );
+
+  return $form;
+}
+
+/**
+ * Pre-Validate process for mfcs_request_holiday_0_copy_form().
+ *
+ * @param array $form
+ *   The form array as defined by drupals form api.
+ * @param array $form_state
+ *   The form state array as defined by drupals form api
+ *
+ * @see: mfcs_request_holiday_0_copy_form()
+ */
+function mfcs_request_holiday_0_copy_form_pre_validate(&$form, &$form_state) {
+  $clicked_id = '';
+  if (isset($form_state['triggering_element']['#id'])) {
+    $clicked_id = $form_state['triggering_element']['#id'];
+  }
+
+  if ($clicked_id == 'mfcs-holiday-copy-submit-cancel') {
+    $form['holiday']['year']['#required'] = FALSE;
+  }
+}
+
+/**
+ * Validate process for mfcs_request_holiday_0_copy_form().
+ *
+ * @param array $form
+ *   The form array as defined by drupals form api.
+ * @param array $form_state
+ *   The form state array as defined by drupals form api
+ *
+ * @see: mfcs_request_holiday_0_copy_form()
+ */
+function mfcs_request_holiday_0_copy_form_validate($form, &$form_state) {
+  $clicked_id = '';
+  if (isset($form_state['triggering_element']['#id'])) {
+    $clicked_id = $form_state['triggering_element']['#id'];
+  }
+
+  if ($clicked_id == 'mfcs-holiday-copy-submit-cancel') {
+    return;
+  }
+  elseif ($clicked_id != 'mfcs-holiday-copy-submit-submit') {
+    form_set_error('', "Unknown submit process detected.");
+    return;
+  }
+
+  if (isset($form_state['values']['holiday']['year']) && is_numeric($form_state['values']['holiday']['year'])) {
+    $year = (int) $form_state['values']['holiday']['year'];
+  }
+  else {
+    form_set_error('holiday][year', "Please specify a valid year.");
+    return;
+  }
+
+  $enabled = TRUE;
+  if (isset($form_state['values']['holiday']['include_disabled'])) {
+    if ($form_state['values']['holiday']['include_disabled'] == 1) {
+      $enabled = NULL;
+    }
+  }
+
+  // check to see if there are any years to copy.
+  $holidays = mfcs_get_holidays($year, NULL, NULL, $enabled);
+  if ($holidays === FALSE) {
+    form_set_error('', "Internal Error. An unknown error has been detected while trying to process this request. Please contact the appropriate support staff.");
+
+    $user = cf_current_user();
+    watchdog(MFCS_WATCHDOG_ID, "Internal Error. Error while calling mfcs_get_holidays() for the user %user_name [%user_id].", array('%user_name' => $user->name, '%user_id' => $user->uid), WATCHDOG_ERROR);
+  }
+  elseif (empty($holidays)) {
+    form_set_error('holiday][year', "No holidays were found for the year " . $year . ". There is nothing to copy.");
+  }
+}
+
+/**
+ * Submit process for mfcs_request_holiday_0_copy_form().
+ *
+ * @param array $form
+ *   The form array as defined by drupals form api.
+ * @param array $form_state
+ *   The form state array as defined by drupals form api
+ *
+ * @see: mfcs_request_holiday_0_copy_form()
+ */
+function mfcs_request_holiday_0_copy_form_submit($form, &$form_state) {
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  $user = cf_current_user();
+
+  $clicked_id = '';
+  if (isset($form_state['triggering_element']['#id'])) {
+    $clicked_id = $form_state['triggering_element']['#id'];
+  }
+
+  $instance = mfcs_instance();
+  $year_this = date('Y', $instance);
+
+  if ($clicked_id == 'mfcs-holiday-copy-submit-cancel') {
+    if (empty($form_state['values']['redirect_to'])) {
+      $form_state['redirect'] = mfcs_build_redirect_array('requests/holiday-0/' . $form['form']['year']['#value']);
+    }
+    else {
+      $form_state['redirect'] = $form_state['values']['redirect_to'];
+    }
+
+    return;
+  }
+
+  $year_current = (int) $form['form']['year']['#value'];
+  $year_previous = (int) $form_state['values']['holiday']['year'];
+
+  $enabled = TRUE;
+  if ($form_state['values']['holiday']['include_disabled'] == 1) {
+    $enabled = NULL;
+  }
+
+  $as_disabled = TRUE;
+  if ($form_state['values']['holiday']['as_disabled'] == 0) {
+    $as_disabled = FALSE;
+  }
+
+  $holidays = mfcs_get_holidays($year_previous, NULL, NULL, $enabled);
+
+  $transaction = db_transaction();
+  $success = TRUE;
+  try {
+    if (!empty($holidays)) {
+      foreach ($holidays as $holiday) {
+        // copy the holiday.
+        $current_date = '' . $year_current . date('/m/d h:i:s a', $holiday->date);
+
+        $fields = array();
+        $fields['year'] = $year_current;
+        $fields['date'] = strtotime($current_date);
+        $fields['title'] = $holiday->title;
+        $fields['description'] = $holiday->description;
+        $fields['created'] = $instance;
+        $fields['updated'] = $instance;
+
+        if ($as_disabled) {
+          $fields['enabled'] = 0;
+        }
+        else {
+          $fields['enabled'] = $holiday->enabled;
+        }
+
+        $query = db_insert('mfcs_holiday');
+        $query->fields($fields);
+        $id = $query->execute();
+
+        if (is_numeric($id)) {
+          $id = (int) $id;
+        }
+
+        // write to the log.
+        $fields = array();
+        $fields['holiday_id'] = $id;
+        $fields['user_id'] = $user->uid;
+        $fields['date'] = $instance;
+        $fields['change'] = 'copied from holiday ' . $holiday->id . '.';
+
+        $query = db_insert('mfcs_log_holiday');
+        $query->fields($fields);
+        $query->execute();
+
+        unset($id);
+        unset($current_date);
+      }
+    }
+    else {
+      $success = FALSE;
+    }
+
+    unset($transaction);
+  }
+  catch (Error $e) {
+    $transaction->rollback();
+    cf_error::on_exception($e);
+
+    $success = FALSE;
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+    cf_error::on_exception($e);
+
+    $success = FALSE;
+  }
+
+  if (!$success) {
+    form_set_error('form', "An error occurred while trying to copy the holidays. Please contact the support staff.");
+    watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to copy a holiday.", array(), WATCHDOG_ERROR);
+
+    $form_state['rebuild'] = TRUE;
+    $form_state['redirect'] = FALSE;
+    $form_state['submitted'] = FALSE;
+
+    return;
+  }
+
+  // redirect after submitting.
+  if (empty($form_state['values']['redirect_to'])) {
+    $form_state['redirect'] = mfcs_build_redirect_array('requests/holiday-0/' . $form['form']['year']['#value']);
+  }
+  else {
+    $form_state['redirect'] = $form_state['values']['redirect_to'];
+  }
 }
 
 /**
