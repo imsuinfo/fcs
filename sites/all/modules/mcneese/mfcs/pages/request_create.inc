@@ -156,7 +156,7 @@ function mfcs_request_create_0_form($form, &$form_state, $clone_request = NULL) 
   $statement_markup .= '<br>';
   $statement_markup .= 'The questionnaire is designed according to the University\'s <a href="//www.mcneese.edu/node/3217">Facility Use Policy</a>. Any activity scheduled on behalf of the University, regardless of venue, must be submitted.' . '<br>';
   $statement_markup .= '<br>';
-  $statement_markup .= '<strong>All requests should be made <a href="//www.mcneese.edu/node/3217#3_week_requirement">a minimum of three weeks in advance</a> of the event or of expected start date of publicity for the event, whichever comes first.</strong>' . '<br>';
+  $statement_markup .= '<strong>All requests should be made <a href="//www.mcneese.edu/node/3217#3_week_requirement" target="_blank">a minimum of three weeks in advance</a> of the event or of expected start date of publicity for the event, whichever comes first.</strong>' . '<br>';
   $statement_markup .= '<br>';
   $statement_markup .= 'If you are only making a request for a <em>Table Reservation</em> in the <em>New Ranch</em> or in the <em>Quad</em>, then you should instead use the <a href="//www.mcneese.edu/studentunion/student_union_reservations">Table Request Form</a>.' . '<br>';
   $statement_markup .= '<br>';

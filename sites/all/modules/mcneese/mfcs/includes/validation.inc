@@ -586,7 +586,7 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
         if ($request_date >= $min_days_by_policy) {
           // Quick Meetings allow same day requests.
           if (!$is_quick_meeting && !$exceptional_dates_allowed) {
-            form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t("The date '@date' is too soon and must be <a href=\"//www.mcneese.edu/node/3217#3_week_requirement\" class=\"strong\">a minimum of three weeks in advance</a> prior to the event or prior to the expected start date for publicity for the event, whichever comes first.", array('@date' => $value)));
+            form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t("The date '@date' is too soon and must be <a href=\"//www.mcneese.edu/node/3217#3_week_requirement\" class=\"strong\" target=\"_blank\">a minimum of three weeks in advance</a> prior to the event or prior to the expected start date for publicity for the event, whichever comes first.", array('@date' => $value)));
             $passed = FALSE;
           }
         }
