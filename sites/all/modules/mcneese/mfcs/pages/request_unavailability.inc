@@ -1098,7 +1098,7 @@ function mfcs_request_unavailability_0_edit_form($form, &$form_state, $year, $ro
   $form['unavailable']['help']['inclusiveness']['#markup'] .= '</div>';
 
   $form['unavailable']['submit'] = array(
-    '#id' => 'mfcs-unavailable-delete-submit',
+    '#id' => 'mfcs-unavailable-edit-submit',
     '#type' => 'container',
     '#tree' => TRUE,
     '#attributes' => array(
