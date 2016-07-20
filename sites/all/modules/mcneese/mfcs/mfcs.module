@@ -1150,18 +1150,19 @@ function mfcs_holiday_request_access($operation, $year = NULL, $holiday_id = NUL
     return FALSE;
   }
 
-  // must be a requester to gain any access.
   $is_requester = user_access('mfcs request', $user);
-  if (!$is_requester) {
-    return FALSE;
-  }
-
+  $is_reviewer = user_access('mfcs review', $user);
   $is_manager = user_access('mfcs manage', $user);
   $is_administer = user_access('mfcs administer', $user);
 
   $is_power = FALSE;
   if ($is_manager || $is_administer) {
     $is_power = TRUE;
+  }
+
+  // must be a requester, reviewer, or power to gain any access.
+  if (!$is_power && !($is_requester || $is_reviewer)) {
+    return FALSE;
   }
 
   $enabled = FALSE;
@@ -1309,18 +1310,23 @@ function mfcs_unavailability_request_access($operation, $year = NULL, $room_id =
     return FALSE;
   }
 
-  // must be a requester to gain any access.
   $is_requester = user_access('mfcs request', $user);
-  if (!$is_requester) {
+  $is_reviewer = user_access('mfcs review', $user);
+  $is_manager = user_access('mfcs manage', $user);
+  $is_administer = user_access('mfcs administer', $user);
+
+  $is_power = FALSE;
+  if ($is_manager || $is_administer) {
+    $is_power = TRUE;
+  }
+
+  // must be a requester, reviewer, or power to gain any access.
+  if (!$is_power && !($is_requester || $is_reviewer)) {
     return FALSE;
   }
 
-  $is_manager = user_access('mfcs manage', $user);
-  $is_administer = user_access('mfcs administer', $user);
-  $is_reviewer = user_access('mfcs review', $user);
-
   $is_coordinator_or_proxy_or_power = FALSE;
-  if ($is_manager || $is_administer) {
+  if ($is_power) {
     $is_coordinator_or_proxy_or_power = TRUE;
   }
   elseif ($is_reviewer) {
@@ -1341,6 +1347,7 @@ function mfcs_unavailability_request_access($operation, $year = NULL, $room_id =
       }
     }
   }
+  unset($is_power);
 
   $enabled = FALSE;
   $check_year = FALSE;

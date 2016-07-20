@@ -40,7 +40,7 @@ function mfcs_management_page() {
   $items_array = &$items_1;
   $items_array_current = 0;
 
-  if ($manager) {
+  if ($manager || $administer) {
     $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/reviewers-0' . $url_arguments . '" class="item-link">Manage Reviewers</a></h4>';
     $help = '<div class="item-description inline-block">Manage what users are allowed to approve/deny requests by request type.</div>';
     $items_array[] = array(
@@ -74,7 +74,7 @@ function mfcs_management_page() {
     );
   }
 
-  if ($manager) {
+  if ($manager || $administer) {
     $c_1 = count($items_1);
     $c_2 = count($items_2);
     if ($c_1 == $c_2) {
