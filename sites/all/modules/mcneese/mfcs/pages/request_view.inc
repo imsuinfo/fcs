@@ -1335,7 +1335,6 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
       // make sure the decision options are populated based on the current users roles and the current review step.
       if ($can_review_request) {
         $remove_already_reviewed = FALSE;
-
         if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
           // only venue coordinator or manager may perform operations other than comment.
           if ($venue_coordinator || $manager) {
@@ -1372,22 +1371,6 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           // for all other steps, only comments are allowed.
           $decision_options = mfcs_get_reviewer_decision_list_options(NULL, MFCS_RESTRICTION_DECISION_COMMENT_ONLY);
         }
-
-        // if the reviewer has already reviewed, then restrict decisions granted for unreviewed requests.
-        if ($remove_already_reviewed) {
-          $reviewer_classifications =  mfcs_get_reviewer_classifications($user->uid, $request_classification, $step);
-
-          if (is_array($reviewer_classifications)) {
-            $reviewer_classifications = mfcs_remove_processed_reviewed_classifications($request_id, $reviewer_classifications['step']);
-          }
-
-          if (empty($reviewer_classifications)) {
-            unset($decision_options[MFCS_REVIEW_DECISION_ISSUES]);
-            unset($decision_options[MFCS_REVIEW_DECISION_ISSUES_NONE]);
-          }
-          unset($reviewer_classifications);
-        }
-        unset($remove_already_reviewed);
       }
 
       $form['review']['operations'] = array(
@@ -1537,7 +1520,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
 
       // restrict options to commenting only, if the user is only allowed to comment.
-      if (($can_review_request && empty($reviewer_classifications)) || (!$can_review_request && $can_comment_request)) {
+      if (!$can_review_request && $can_comment_request) {
         $decision_options = array();
         if ($can_comment_request) {
           $decision_options[MFCS_REVIEW_DECISION_COMMENT] = $decision_options_all[MFCS_REVIEW_DECISION_COMMENT];
@@ -1571,7 +1554,12 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
       }
 
       if (array_key_exists(MFCS_REVIEW_DECISION_ISSUES, $decision_options) && array_key_exists(MFCS_REVIEW_DECISION_ISSUES_NONE, $decision_options)) {
-        $form['review']['operations']['instructions']['#markup'] .= "<div class=\"instructions-issues\">To mark this request as <strong>reviewed</strong>, be sure to select either <strong>" . $decision_options[MFCS_REVIEW_DECISION_ISSUES_NONE] . "</strong> or <strong>" . $decision_options[MFCS_REVIEW_DECISION_ISSUES] . "</strong>.</div>";
+        if ($can_review_request && empty($reviewer_classifications)) {
+          $form['review']['operations']['instructions']['#markup'] .= "<div class=\"instructions-issues\">You have already <strong>reviewed</strong> this request, but you may still change your decision.</div>";
+        }
+        else {
+          $form['review']['operations']['instructions']['#markup'] .= "<div class=\"instructions-issues\">To mark this request as <strong>reviewed</strong>, be sure to select either <strong>" . $decision_options[MFCS_REVIEW_DECISION_ISSUES_NONE] . "</strong> or <strong>" . $decision_options[MFCS_REVIEW_DECISION_ISSUES] . "</strong>.</div>";
+        }
       }
 
       $form['review']['operations']['decision'] = array(

@@ -1275,6 +1275,17 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
       $query->fields($mfcs_review_classifications);
       $query->execute();
 
+      // check to see if the specified classification is already marked as reviewed.
+      $query = db_select('mfcs_reviewed', 'mr');
+      $query->addExpression('count(mr.request_id)');
+      $query->condition('mr.request_id', $request_id);
+      $query->condition('mr.classification', $reviewer_classification);
+      $already_reviewed = $query->execute()->fetchField();
+
+      if ($already_reviewed > 0) {
+        continue;
+      }
+
       $mfcs_reviewed = array(
         'request_id' => $request_id,
         'classification' => $reviewer_classification,
