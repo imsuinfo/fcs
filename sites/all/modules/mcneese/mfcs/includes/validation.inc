@@ -534,13 +534,18 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
     }
   }
 
+  $request_id = NULL;
+  if (isset($form['form']['request']['#value']['mer']['id'][0]->value)) {
+    $request_id = (int) $form['form']['request']['#value']['mer']['id'][0]->value;
+  }
+
   $instance = mfcs_instance();
 
   $passed = TRUE;
 
   $date_timestamp = array(0 => NULL);
-  $start_timestamp = array(0 => FALSE);
-  $stop_timestamp = array(0 => FALSE);
+  $start_timestamp = array(0 => NULL);
+  $stop_timestamp = array(0 => NULL);
 
   // quick meetings can only be used by venue coordinators.
   $is_quick_meeting = FALSE;
@@ -567,11 +572,11 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
       }
 
       if (!array_key_exists($key, $start_timestamp)) {
-        $start_timestamp[$key] = FALSE;
+        $start_timestamp[$key] = NULL;
       }
 
       if (!array_key_exists($key, $stop_timestamp)) {
-        $stop_timestamp[$key] = FALSE;
+        $stop_timestamp[$key] = NULL;
       }
 
       $date_timestamp[$key] = NULL;
@@ -665,6 +670,7 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
           if ($start_timestamp[$key] === FALSE || !$matched) {
             form_set_error($path_string_prefix . '][dates][time_start][' . $key, t("'@value' is not a valid start time.", array('@value' => $value)));
             $passed = FALSE;
+            $start_timestamp[$key] = NULL;
           }
           else {
             $matched = preg_match('/(pm|am)\s*$/i', $value);
@@ -745,7 +751,7 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
     );
 
     foreach ($start_timestamp as $key => &$value) {
-      if ($start_timestamp[$key] !== FALSE && $stop_timestamp[$key] !== FALSE) {
+      if (!is_null($start_timestamp[$key]) && !is_null($stop_timestamp[$key])) {
         if ($stop_timestamp[$key] < $start_timestamp[$key]) {
           form_set_error($path_string_prefix . '][dates][time_stop][' . $key, "The stop time cannot be before the start time.");
           $passed = FALSE;
@@ -812,6 +818,22 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
         drupal_set_message("<strong>Please be aware that there may be complications and the room may not be available or clean without adequate time between events or meetings.</strong>", 'warning');
       }
     }
+
+    // check for room availability, but only if the room has been defined.
+    // @todo: add the request id if it exists.
+    $room_id = (int) $room->room_id;
+    $room_unavailability = mfcs_check_room_availability($room_id, $date_timestamp, $start_timestamp, $stop_timestamp, $request_id);
+    if ($room_unavailability === FALSE) {
+      form_set_error('', "An internal error occurred while checking the room for availability. Please contact the support staff.");
+    }
+    elseif (!empty($room_unavailability['conflict']) || !empty($room_unavailability['unavailable'])) {
+      $unavailable_message = '<span class="uppercase">Conflict</span>: The specified room is currently unavailable for the following dates: ';
+      $unavailable_message .= mfcs_build_room_unavailable_message($room_unavailability);
+      form_set_error('review][operations][decision', $unavailable_message);
+      unset($unavailable_message);
+    }
+    unset($room_unavailability);
+    unset($room_id);
   }
 
 
