@@ -738,7 +738,7 @@ function mfcs_request_cancelling_0_form_validate($form, &$form_state) {
           $time .= ' to ' . date('h:i:s a', $form['form']['request']['#value']['dates']['time_stop'][$key]->value);
         }
 
-        $unavailable_message = 'The room is no longer available for <strong>' .  $time . '</strong> and therefore may not be uncancelled because of the following:<br>';
+        $unavailable_message = '<span class="uppercase">Conflict</span>: The room is no longer available for <strong>' .  $time . '</strong> and therefore may not be uncancelled because of the following:<br>';
         $unavailable_message .= mfcs_build_room_unavailable_message($room_unavailability);
         form_set_error('dates][' . $key . '][select', $unavailable_message);
       }

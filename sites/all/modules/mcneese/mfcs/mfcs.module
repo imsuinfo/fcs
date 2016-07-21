@@ -7280,7 +7280,13 @@ function mfcs_check_room_availability($room, $dates, $time_start, $time_stop, $r
         foreach ($dates as $key => $value) {
           // all day requests match, they have NULL for start and stop time values.
           if (is_null($time_start[$key]) && is_null($time_stop[$key])) {
-            $matched_requests['conflicts'][] = $result;
+            $and = db_and();
+            $and->condition('mfdd.value', $value);
+            $and->condition('mfdd.cancelled', 1, '<>'); // using <> for backwards compatibility where mfdd.cancelled may be NULL.
+            $and->isNotNull('mfdts.value');
+            $and->isNotNull('mfdtsp.value');
+            $or->condition($and);
+            continue;
           }
 
           $and = db_and();
@@ -7435,13 +7441,13 @@ function mfcs_build_room_unavailable_message($availability_issues, $url_argument
     foreach ($availability_issues['conflicts'] as $request_using_room) {
       if (isset($request_using_room->date)) {
         if (isset($request_using_room->time_start)) {
-          $problematic_date_key =  '' . $request_using_room->reserved_day . '-' . $request_using_room->reserved_time_start . '-' . $request_using_room->reserved_time_stop;
+          $problematic_date_key =  '' . $request_using_room->date . '-' . $request_using_room->time_start . '-' . $request_using_room->time_stop;
           $problematic_date = '<strong>' . date('l, F j, Y', $request_using_room->date) . '</strong> from <strong>' . date('h:ia', $request_using_room->time_start) . '</strong> to <strong>' . date('h:ia', $request_using_room->time_stop) . '</strong> because of a ';
           $problematic_date .= '<strong><a href="' . $base_path . 'requests/view-0/' . $request_using_room->request_id . $url_arguments . '" title="View conflicting request.">scheduling conflict</a></strong>.';
           $problematic_dates[$problematic_date_key] = $problematic_date;
         }
         else {
-          $problematic_date_key =  '' . $request_using_room->reserved_day;
+          $problematic_date_key =  '' . $request_using_room->date;
           $problematic_date = '<strong>' . date('l, F j, Y', $request_using_room->date) . '</strong> (all day) because of a ';
           $problematic_date .= '<strong><a href="' . $base_path . 'requests/view-0/' . $request_using_room->request_id . $url_arguments . '" title="View conflicting request.">scheduling conflict</a></strong>.';
           $problematic_dates[$problematic_date_key] = $problematic_date;
