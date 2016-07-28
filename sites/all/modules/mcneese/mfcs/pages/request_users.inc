@@ -857,9 +857,6 @@ function mfcs_request_users_0_add_or_edit_form($form, &$form_state, $user_id = N
   asort($roles_special);
   asort($roles_administer);
 
-  // do not provide the ability to set the admin role here.
-  unset($roles_administer[3]);
-
   $url_arguments = '';
   if (!empty($mfcs_determined['complete'])) {
     $url_arguments .= '?' . $mfcs_determined['complete'];
@@ -1262,6 +1259,43 @@ function mfcs_request_users_0_add_or_edit_form_pre_validate(&$form, &$form_state
       $form['form']['personal']['email']['#value'] = $user_name . '@mcneese.edu';
     }
   }
+
+  // only an administrator can modify the administrator role for any given user.
+  global $user;
+  $is_administer = user_access('mfcs administer', $user);
+  $is_manager = user_access('mfcs manage', $user);
+
+  if ($is_administer) {
+    if (isset($form['user']['#value']) && is_object($form['user']['#value']) && $form['user']['#value']->uid == $user->uid) {
+      $administer_role_id = array_search('administrator', $form['roles']['administer']['#value']);
+      if (!isset($form_state['values']['form']['roles']['administer'][$administer_role_id]) || $form_state['values']['form']['roles']['administer'][$administer_role_id] != $administer_role_id) {
+        form_set_error('form][roles][administer', "Will not remove administration role from your own account.");
+      }
+    }
+  }
+  else {
+    $administer_role_id = array_search('administrator', $form['roles']['administer']['#value']);
+    if (isset($form['form']['roles']['administer']['#default_value'][$administer_role_id])) {
+      if (isset($form_state['values']['form']['roles']['administer'][$administer_role_id]) && $form['form']['roles']['administer']['#default_value'][$administer_role_id] != $form_state['values']['form']['roles']['administer'][$administer_role_id]) {
+        form_set_error('form][roles][administer', "Only a system administrator may add/remove the administration role from users.");
+      }
+    }
+    else {
+      if (isset($form_state['values']['form']['roles']['administer'][$administer_role_id]) && $form_state['values']['form']['roles']['administer'][$administer_role_id] == $administer_role_id) {
+        form_set_error('form][roles][administer', "Only a system administrator may add/remove the administration role from users.");
+      }
+    }
+  }
+
+  // also prevent removal of manager role for a user editing their own account (when that user is not an administrator)
+  if (isset($form['user']['#value']) && is_object($form['user']['#value']) && $form['user']['#value']->uid == $user->uid) {
+    if (!$is_administer && $is_manager) {
+      $manager_role_id = array_search('manager', $form['roles']['basic']['#value']);
+      if (!isset($form_state['values']['form']['roles']['basic'][$manager_role_id]) || $form_state['values']['form']['roles']['basic'][$manager_role_id] != $manager_role_id) {
+        form_set_error('form][roles][administer', "Will not remove manager role from your own account.");
+      }
+    }
+  }
 }
 
 /**
@@ -1300,7 +1334,7 @@ function mfcs_request_users_0_add_or_edit_form_validate($form, &$form_state, $ed
     }
 
     // Let administers be also allowed, but only silently (because this interface does not manage users with the administration role).
-    if (isset($form_state['values']['form']['roles']['basic'][$administer_role_id]) && $form_state['values']['form']['roles']['basic'][$administer_role_id] == $administer_role_id) {
+    if (isset($form_state['values']['form']['roles']['administer'][$administer_role_id]) && $form_state['values']['form']['roles']['administer'][$administer_role_id] == $administer_role_id) {
       $allow_masquerade_role = TRUE;
     }
 
@@ -1938,7 +1972,7 @@ function mfcs_request_users_get_roles($standard = TRUE, $venue = TRUE, $special 
   }
 
   if ($administer) {
-    foreach (array('administer', 'masquerade') as $role_name) {
+    foreach (array('administrator', 'masquerade') as $role_name) {
       $role = user_role_load_by_name($role_name);
       if (is_object($role)) {
         $roles[$role->rid] = $role->name;
