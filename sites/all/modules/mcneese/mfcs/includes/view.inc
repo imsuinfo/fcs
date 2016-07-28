@@ -1368,10 +1368,10 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
       elseif (($review_step === MFCS_REVIEW_STEP_REVIEW || $review_step === MFCS_REVIEW_STEP_VENUE_AVAILABLE) && $decision === MFCS_REVIEW_DECISION_WAIVE) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has waived the <strong class="review-item-label-text-row-decision">' . $decision_options[MFCS_REVIEW_DECISION_REQUIREMENT] . '</strong> ' . $reviewer_classification . '.';
       }
-      elseif ($review_step === MFCS_REVIEW_STEP_REVIEW && $decision === MFCS_REVIEW_DECISION_ISSUES) {
+      elseif ($decision === MFCS_REVIEW_DECISION_ISSUES) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">Issues</strong> with the request' . $reviewer_classification . '.';
       }
-      elseif ($review_step === MFCS_REVIEW_STEP_REVIEW && $decision === MFCS_REVIEW_DECISION_ISSUES_NONE) {
+      elseif ($decision === MFCS_REVIEW_DECISION_ISSUES_NONE) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">No Issues</strong> with the request' . $reviewer_classification . '.';
       }
       elseif ($decision === MFCS_REVIEW_DECISION_REQUIREMENT) {

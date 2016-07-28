@@ -2060,6 +2060,12 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
   // if the reviewer is associated with the requests and the request is in one of these status, then the reviewer can review.
   $show_status_reviewer_review = array(
     MFCS_REQUEST_STATUS_LOCKED,
+    MFCS_REQUEST_STATUS_CLOSED_ACCEPTED,
+    MFCS_REQUEST_STATUS_CLOSED_DENIED,
+    MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE,
+    MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK,
+    MFCS_REQUEST_STATUS_CANCELLED,
+    MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED,
   );
 
   // allow comments when the request is assigned any of these status codes.
@@ -2077,6 +2083,7 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
   $show_step_reviewer = array(
     MFCS_REVIEW_STEP_REVIEW,
     MFCS_REVIEW_STEP_REQUIREMENTS,
+    MFCS_REVIEW_STEP_COMPLETED,
   );
 
   $show_step_manager = array(
@@ -7666,6 +7673,7 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
   $show_step_reviewer = array(
     MFCS_REVIEW_STEP_REVIEW,
     MFCS_REVIEW_STEP_REQUIREMENTS,
+    MFCS_REVIEW_STEP_COMPLETED,
   );
 
   $show_step_manager = array(
@@ -8773,12 +8781,17 @@ function mfcs_request_process_query_search_array(&$query, &$count_query, &$opera
  *   (optional) Limit the results to only the provided steps.
  * @parem array $decisions
  *   (optional) An array of decisions to limit the results to.
+ * @param bool $ascend
+ *   (optional) When TRUE, the list is loaded in ascend order.
+ *   When FALSE, the list is loaded in descend order.
  *
  * @return array|bool
- *   An array of reviews by order of step, classification, and then date
- *   (with the date descending). FALSE is returned on error.
+ *   An array of reviews, keyed with the following:
+ *   'group': an array of reviews grouped by step and then classification.
+ *   'order': an array of reviews in the order in which they were submitted (favoring the revision and then delta columns).
+ *   FALSE is returned on error.
  */
-function mfcs_get_latest_reviews($request_id, $steps = array(), $decisions = array()) {
+function mfcs_get_latest_reviews($request_id, $steps = array(), $decisions = array(), $ascend = TRUE) {
   if (!cf_is_integer($request_id)) {
     cf_error::invalid_integer('request_id');
     return FALSE;
@@ -8794,7 +8807,15 @@ function mfcs_get_latest_reviews($request_id, $steps = array(), $decisions = arr
     return FALSE;
   }
 
-  $reviews = array();
+  if (!is_bool($ascend)) {
+    cf_error::invalid_bool('ascend');
+    return FALSE;
+  }
+
+  $reviews = array(
+    'group' => array(),
+    'order' => array(),
+  );
   try {
     $query = db_select('mfcs_field_review_review', 'mfrr');
 
@@ -8818,31 +8839,26 @@ function mfcs_get_latest_reviews($request_id, $steps = array(), $decisions = arr
       $query->condition('mfrr.decision', $decisions, 'IN');
     }
 
-    // some classifications are only allowed in certain steps.
-    $and = db_and();
-    $and->condition('mfrr.step', array(MFCS_REVIEW_STEP_REVIEW, MFCS_REVIEW_STEP_REQUIREMENTS), 'IN');
-    $and->condition('mrc.classification', array(MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR, MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY), 'IN');
-    $and->not();
-    $query->condition($and);
-
-    $query->orderBy('mfrr.step');
-    $query->orderBy('mrc.classification');
-    $query->orderBy('mfrr.date', 'DESC');
+    if ($ascend) {
+      $query->orderBy('mfrr.revision', 'ASC');
+      $query->orderBy('mfrr.delta', 'ASC');
+      $query->orderBy('mfrr.date', 'ASC');
+    }
+    else {
+      $query->orderBy('mfrr.revision', 'DESC');
+      $query->orderBy('mfrr.delta', 'DESC');
+      $query->orderBy('mfrr.date', 'DESC');
+    }
 
     $results = $query->execute()->fetchAll();
     if (is_array($results)) {
       foreach ($results as $result) {
-
-        if (!isset($reviews[$result->step])) {
-          $reviews[$result->step] = array();
-        }
-
-        if (!isset($reviews[$result->step][$result->classification])) {
-          $reviews[$result->step][$result->classification] = array();
-        }
-
-        $reviews[$result->step][$result->classification][$result->id] = $result;
+        $reviews['group'][$result->step][$result->classification][$result->id] = $result;
+        $reviews['order'][] = $result;
       }
+    }
+    else {
+      return FALSE;
     }
   }
   catch (Error $e) {

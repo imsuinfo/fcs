@@ -1275,6 +1275,19 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
       $query->fields($mfcs_review_classifications);
       $query->execute();
 
+      // the mfcs reviewed table is intended for controlling the progression of the review process.
+      // it has no purpose for completed or otherwise closed requests and therefore should not be populated for approval decisions.
+      if ($decision === MFCS_REVIEW_DECISION_APPROVE || $decision === MFCS_REVIEW_DECISION_DENY) {
+        if ($step !== MFCS_REVIEW_STEP_REVIEW && $step !== MFCS_REVIEW_STEP_REQUIREMENTS) {
+          continue;
+        }
+      }
+
+      // comments also do not need to be stored in the mfcs_reviewed table.
+      if ($decision === MFCS_REVIEW_DECISION_COMMENT || $decision === MFCS_REVIEW_DECISION_COMMENT_ALL) {
+        continue;
+      }
+
       // check to see if the specified classification is already marked as reviewed.
       $query = db_select('mfcs_reviewed', 'mr');
       $query->addExpression('count(mr.request_id)');

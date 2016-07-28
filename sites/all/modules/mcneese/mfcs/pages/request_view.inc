@@ -500,56 +500,43 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     }
     unset($presentation['reviews']['decision']);
 
-    $reviews = mfcs_get_latest_reviews($request_id, array(MFCS_REVIEW_STEP_REVIEW, MFCS_REVIEW_STEP_REQUIREMENTS), array(MFCS_REVIEW_DECISION_ISSUES, MFCS_REVIEW_DECISION_ISSUES_NONE, MFCS_REVIEW_DECISION_APPROVE, MFCS_REVIEW_DECISION_DENY));
+    $reviews = mfcs_get_latest_reviews($request_id, array(MFCS_REVIEW_STEP_VENUE_AVAILABLE, MFCS_REVIEW_STEP_REVIEW, MFCS_REVIEW_STEP_REQUIREMENTS, MFCS_REVIEW_STEP_COMPLETED), array(MFCS_REVIEW_DECISION_ISSUES, MFCS_REVIEW_DECISION_ISSUES_NONE, MFCS_REVIEW_DECISION_APPROVE, MFCS_REVIEW_DECISION_DENY));
 
-    if (!empty($reviews)) {
+    if (!empty($reviews['order']) && isset($reviews['group'])) {
       mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
       $classification_options = mfcs_get_reviewer_classification_list_options(NULL, TRUE);
       $preprocessed_decisions = array();
 
-      $reviews_step = array();
-      if (isset($reviews[MFCS_REVIEW_STEP_REVIEW])) {
-        $reviews_step = $reviews[MFCS_REVIEW_STEP_REVIEW];
-      }
-
-      if (!empty($reviews_step)) {
-        foreach ($reviews_step as $reviewer_classification => $reviewer_decisions) {
-          if (is_string($reviewer_classification)) {
-            $reviewer_classification = (int) $reviewer_classification;
-          }
-
-          if (!isset($classification_options[$reviewer_classification])) {
-            continue;
-          }
-
-          // the last decision made is the first item and should be the only value displayed.
-          $decision = array_shift($reviewer_decisions);
-          if (is_string($decision)) {
-            $decision = (int) $decision;
-          }
-
-          // as of ticket fcs-79, approve should become "no issues" and deny should become "issues".
-          // @fixme: it was noticed that $decision is an object, when would these checks ever pass?
-          if ($decision === MFCS_REVIEW_DECISION_APPROVE) {
-            $preprocessed_decisions[$reviewer_classification] = array(0 => MFCS_REVIEW_DECISION_ISSUES_NONE);
-          }
-          elseif ($decision === MFCS_REVIEW_DECISION_DENY) {
-            $preprocessed_decisions[$reviewer_classification] = array(0 => MFCS_REVIEW_DECISION_ISSUES);
-          }
-          else {
-            $preprocessed_decisions[$reviewer_classification] = array(0 => $decision);
-          }
-
-          unset($decision);
+      foreach ($reviews['order'] as $review) {
+        if (is_string($review->classification)) {
+          $reviewer_classification = (int) $review->classification;
+        }
+        else {
+          $reviewer_classification = $review->classification;
         }
 
-        unset($reviewer_classification);
+        if (!isset($classification_options[$reviewer_classification])) {
+          continue;
+        }
+
+        // the last decision made is the first item and should be the only value displayed.
+        if (is_string($review->decision)) {
+          $decision = (int) $review->decision;
+        }
+        else {
+          $decision = $review->decision;
+        }
+
+        $preprocessed_decisions[$reviewer_classification] = array(0 => $review);
       }
-      unset($reviews_step);
+      unset($decision);
+      unset($reviewer_classification);
+      unset($review);
 
       // apply alphabetical sorting to decisions.
       $weight = 0;
+
       foreach ($classification_options as $key => $name) {
         $key_string = 'classification-' . $key;
         if (isset($preprocessed_decisions[$key])) {
@@ -563,9 +550,10 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
       }
 
       // display the final decision last.
+      // @fixme: this needs to be rewritten to ensure consistency with "Approved/Denied" and not display "Issues/No Issues".
       $decision_step = array();
-      if (isset($reviews[MFCS_REVIEW_STEP_REQUIREMENTS])) {
-        $decision_step = $reviews[MFCS_REVIEW_STEP_REQUIREMENTS];
+      if (isset($reviews['group'][MFCS_REVIEW_STEP_REQUIREMENTS])) {
+        $decision_step = $reviews['group'][MFCS_REVIEW_STEP_REQUIREMENTS];
       }
 
       if (!empty($decision_step)) {
@@ -579,23 +567,17 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           }
 
           // the last decision made is the first item and should be the only value displayed.
-          $decision = array_shift($reviewer_decisions);
-          if (is_string($decision)) {
-            $decision = (int) $decision;
-          }
-
-          // issues and no issues are not valid for the final decision (only approve and deny are).
-          if ($decision === MFCS_REVIEW_DECISION_ISSUES || $decision === MFCS_REVIEW_DECISION_ISSUES_NONE) {
-            continue;
-          }
+          $review = array_shift($reviewer_decisions);
+          $decision = (int) $review->decision;
 
           $key_string = 'classification-final_decision';
           $presentation['reviews'][$key_string] = $decision_presentation;
           $presentation['reviews'][$key_string]['label'] = "Final Decision";
           $presentation['reviews'][$key_string]['weight'] = $weight;
 
-          $request['reviews'][$key_string] = array(0 => $decision);
+          $request['reviews'][$key_string] = array(0 => $review);
           unset($decision);
+          unset($review);
 
           $weight++;
           break;
@@ -1367,6 +1349,19 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
             }
           }
         }
+        elseif ($step == MFCS_REVIEW_STEP_COMPLETED) {
+          // only reviewers and managers may perform operations other than comment for all other steps.
+          if ($reviewer || $manager) {
+            $decision_options = mfcs_get_reviewer_decision_list_options(NULL, MFCS_RESTRICTION_DECISION_REVIEWER);
+
+            if ($manager) {
+              $remove_already_reviewed = TRUE;
+            }
+          }
+          else {
+            $decision_options = mfcs_get_reviewer_decision_list_options(NULL, MFCS_RESTRICTION_DECISION_COMMENT_ONLY);
+          }
+        }
         else {
           // for all other steps, only comments are allowed.
           $decision_options = mfcs_get_reviewer_decision_list_options(NULL, MFCS_RESTRICTION_DECISION_COMMENT_ONLY);
@@ -1554,10 +1549,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
       }
 
       if (array_key_exists(MFCS_REVIEW_DECISION_ISSUES, $decision_options) && array_key_exists(MFCS_REVIEW_DECISION_ISSUES_NONE, $decision_options)) {
-        if ($can_review_request && empty($reviewer_classifications)) {
-          $form['review']['operations']['instructions']['#markup'] .= "<div class=\"instructions-issues\">You have already <strong>reviewed</strong> this request, but you may still change your decision.</div>";
-        }
-        else {
+        if (!$can_review_request || !empty($reviewer_classifications)) {
           $form['review']['operations']['instructions']['#markup'] .= "<div class=\"instructions-issues\">To mark this request as <strong>reviewed</strong>, be sure to select either <strong>" . $decision_options[MFCS_REVIEW_DECISION_ISSUES_NONE] . "</strong> or <strong>" . $decision_options[MFCS_REVIEW_DECISION_ISSUES] . "</strong>.</div>";
         }
       }
@@ -2105,6 +2097,25 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
       $allowed_statuses = array(
         MFCS_REQUEST_STATUS_LOCKED,
         MFCS_REQUEST_STATUS_CLOSED_ACCEPTED,
+      );
+
+      $allowed_steps = array(
+        MFCS_REVIEW_STEP_REVIEW,
+        MFCS_REVIEW_STEP_REQUIREMENTS,
+        MFCS_REVIEW_STEP_COMPLETED,
+      );
+    }
+
+    if ($decision === MFCS_REVIEW_DECISION_ISSUES || $decision === MFCS_REVIEW_DECISION_ISSUES_NONE) {
+      $allowed_statuses = array(
+        MFCS_REQUEST_STATUS_LOCKED,
+        MFCS_REQUEST_STATUS_UNLOCKED,
+        MFCS_REQUEST_STATUS_CLOSED_ACCEPTED,
+        MFCS_REQUEST_STATUS_CLOSED_DENIED,
+        MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE,
+        MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK,
+        MFCS_REQUEST_STATUS_CANCELLED,
+        MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED,
       );
 
       $allowed_steps = array(
