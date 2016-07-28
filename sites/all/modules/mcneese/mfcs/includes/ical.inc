@@ -34,7 +34,7 @@ function mfcs_ical_generate_array_from_id($request_id) {
 
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
-  $request_location_options = mfcs_get_request_location_list_options(NULL, FALSE, TRUE);
+  $request_location_options = mfcs_get_request_location_list_options(NULL, TRUE);
   $request_building_options = mfcs_get_request_building_list_options(NULL, NULL, TRUE);
   $request_room_options = mfcs_get_request_room_list_options(NULL, NULL, TRUE);
 
@@ -173,7 +173,7 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
   $request_type_options = mfcs_get_request_type_list_options();
   $request_classification_options = mfcs_get_request_classification_list_options();
   $dates_categories_options = mfcs_get_dates_category_list_options();
-  $location_options = mfcs_get_request_location_list_options(NULL, FALSE, TRUE);
+  $location_options = mfcs_get_request_location_list_options(NULL, TRUE);
   $room_options = mfcs_get_request_room_list_options(NULL, NULL, TRUE);
   $building_options = mfcs_get_request_building_list_options(NULL, NULL, TRUE);
 

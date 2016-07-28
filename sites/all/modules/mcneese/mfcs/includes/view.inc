@@ -757,7 +757,7 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
       elseif ($type[$value_name] == 'step') {
         mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
-        $step_options = mfcs_get_request_steps_list_options();
+        $step_options = mfcs_get_review_steps_list_options();
 
         if (isset($step_options[$value->{$value_name}])) {
           $markup .= $step_options[$value->{$value_name}];
@@ -767,7 +767,7 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
       elseif ($type[$value_name] == 'location') {
         mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
-        $location_options = mfcs_get_request_location_list_options(NULL, FALSE, TRUE);
+        $location_options = mfcs_get_request_location_list_options(NULL, TRUE);
 
         if (isset($location_options[$value->{$value_name}])) {
           $markup .= $location_options[$value->{$value_name}];

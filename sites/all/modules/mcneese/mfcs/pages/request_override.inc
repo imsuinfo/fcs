@@ -105,10 +105,10 @@ function mfcs_request_manage_0_override_form($form, &$form_state, $request_id) {
 
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
-  $all_steps = mfcs_get_request_steps_list_options();
+  $all_steps = mfcs_get_review_steps_list_options();
   $all_status = mfcs_get_request_status_list_options();
 
-  $options_steps = mfcs_get_request_steps_list_options('select');
+  $options_steps = mfcs_get_review_steps_list_options('select');
   $options_status = mfcs_get_request_status_list_options('select');
 
   // do not allow assigning the following steps.
@@ -244,7 +244,7 @@ function mfcs_request_manage_0_override_form_validate($form, &$form_state) {
 
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
-  $options_steps = mfcs_get_request_steps_list_options();
+  $options_steps = mfcs_get_review_steps_list_options();
   $options_status = mfcs_get_request_status_list_options();
 
   if ($form_state['values']['decision']['step'] == MFCS_REVIEW_STEP_COMPLETED) {
@@ -322,7 +322,7 @@ function mfcs_request_manage_0_override_form_submit($form, &$form_state) {
 
   $overrided = mfcs_workflow_force_step($request_id, $step, $status, MFCS_REVIEW_RESTRICTIONS_MANAGERS, $message, FALSE);
   if ($overrided) {
-    $options_steps = mfcs_get_request_steps_list_options();
+    $options_steps = mfcs_get_review_steps_list_options();
     $options_status = mfcs_get_request_status_list_options();
 
     if (is_null($status)) {

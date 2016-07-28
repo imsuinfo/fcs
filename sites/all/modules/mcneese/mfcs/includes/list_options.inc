@@ -13,28 +13,44 @@
 /**
  * Returns an array of facilities use status options for populating lists.
  *
+ * @fixme: status currently has deleted set to 0 and therefore none and deleted conflict.
+ *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
+ * @param bool $disabled
+ *   (optional) When TRUE, load disabled options in addition to existing options.
+ * @param bool $include_none
+ *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_request_status_list_options($option = NULL) {
+function mfcs_get_request_status_list_options($option = NULL, $disabled = FALSE, $include_none = FALSE) {
   $options = array();
 
-  if ($option == 'select') {
-    $options[''] = "- Select -";
+  $options_all = array();
+
+  if ($include_none) {
+    $options_all[MFCS_REQUEST_STATUS_NONE] = 'None';
   }
 
-  $options[MFCS_REQUEST_STATUS_DELETED] = "Deleted";
-  $options[MFCS_REQUEST_STATUS_LOCKED] = "Queued (Locked)";
-  $options[MFCS_REQUEST_STATUS_UNLOCKED] = "Queued (Unlocked)";
-  $options[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED] = "Accepted";
-  $options[MFCS_REQUEST_STATUS_CLOSED_DENIED] = "Denied";
-  $options[MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE] = "Room Unavailable";
-  $options[MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK] = "Room Unavailable (due to lock)";
-  $options[MFCS_REQUEST_STATUS_CANCELLED] = "Cancelled";
-  $options[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED] = "Accepted (Cancelled)";
+  $options_all[MFCS_REQUEST_STATUS_DELETED] = 'Deleted';
+  $options_all[MFCS_REQUEST_STATUS_UNLOCKED] = 'Queued (Unlocked)';
+  $options_all[MFCS_REQUEST_STATUS_LOCKED] = 'Queued (Locked)';
+  $options_all[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED] = 'Accepted';
+  $options_all[MFCS_REQUEST_STATUS_CLOSED_DENIED] = 'Denied';
+  $options_all[MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE] = 'Room Unavailable';
+  $options_all[MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK] = 'Room Unavailable (due to lock)';
+  $options_all[MFCS_REQUEST_STATUS_CANCELLED] = 'Cancelled';
+  $options_all[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED] = 'Accepted (Cancelled)';
+
+  if ($option == 'select') {
+    $options[''] = '- Select -';
+  }
+
+  foreach ($options_all as $option_id => $option_name) {
+    $options[$option_id] = $option_name;
+  }
 
   if ($option == 'search') {
     unset($options[MFCS_REQUEST_STATUS_DELETED]);
@@ -50,27 +66,41 @@ function mfcs_get_request_status_list_options($option = NULL) {
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
+ * @param bool $disabled
+ *   (optional) When TRUE, load disabled options in addition to existing options.
+ * @param bool $include_none
+ *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_request_steps_list_options($option = NULL) {
+function mfcs_get_review_steps_list_options($option = NULL, $disabled = FALSE, $include_none = FALSE) {
   $options = array();
 
-  if ($option == 'select') {
-    $options[''] = "- Select -";
+  $options_all = array();
+
+  if ($include_none) {
+    $options_all[MFCS_REVIEW_STEP_NONE] = 'None';
   }
 
-  $options_tree = taxonomy_get_tree(MFCS_VID_REQUEST_STEPS, 0, NULL, TRUE);
-  foreach ($options_tree as $branch) {
-    $options[$branch->tid] = $branch->name;
+  $options_all[MFCS_REVIEW_STEP_VENUE_AVAILABLE] = 'Venue Available';
+  $options_all[MFCS_REVIEW_STEP_MAKE_DECISIONS] = 'Resolve Conflicts / Make Decisions';
+  $options_all[MFCS_REVIEW_STEP_RELEASE_HOLD] = 'Release Tentative Hold';
+  $options_all[MFCS_REVIEW_STEP_REVIEW] = 'Review';
+  $options_all[MFCS_REVIEW_STEP_REQUIREMENTS] = 'Requirements';
+  $options_all[MFCS_REVIEW_STEP_CHANGES_REQUIRED] = 'Changes Required';
+  $options_all[MFCS_REVIEW_STEP_COMPLETED] = 'Completed';
+
+  if ($option == 'select') {
+    $options[''] = '- Select -';
+  }
+
+  foreach ($options_all as $option_id => $option_name) {
+    $options[$option_id] = $option_name;
   }
 
   if ($option == 'search') {
-    unset($options[121]);
-    unset($options[120]);
-    unset($options[119]);
-    unset($options[118]);
+    unset($options[MFCS_REVIEW_STEP_RELEASE_HOLD]);
   }
 
   asort($options);
@@ -85,18 +115,31 @@ function mfcs_get_request_steps_list_options($option = NULL) {
  *   (optional) A string designating how the list will be populated.
  * @param object|null $user
  *   (optional) When not NULL, the user to build the available options against.
+ * @param bool $disabled
+ *   (optional) When TRUE, load disabled options in addition to existing options.
+ * @param bool $include_none
+ *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_request_classification_list_options($option = NULL, $user = NULL) {
+function mfcs_get_request_classification_list_options($option = NULL, $user = NULL, $disabled = FALSE, $include_none = FALSE) {
   $options = array();
 
-  if ($option == 'select') {
-    $options[''] = "- Select -";
+  $options_all = array();
+
+  if ($include_none) {
+    $options_all[MFCS_REQUEST_CLASSIFICATION_NONE] = 'None';
   }
 
-  $options_tree = taxonomy_get_tree(MFCS_VID_REQUEST_CLASSIFICATION, 0, NULL, TRUE);
+  $options_all[MFCS_REQUEST_CLASSIFICATION_STUDENT] = 'Student Organization';
+  $options_all[MFCS_REQUEST_CLASSIFICATION_CAMPS] = 'Camps';
+  $options_all[MFCS_REQUEST_CLASSIFICATION_FACULTY] = 'Faculty, Staff, Athletics';
+  $options_all[MFCS_REQUEST_CLASSIFICATION_EXTERNAL] = 'Externals';
+
+  if ($option == 'select') {
+    $options[''] = '- Select -';
+  }
 
   if (is_object($user)) {
     foreach ($options_tree as $branch) {
@@ -108,8 +151,8 @@ function mfcs_get_request_classification_list_options($option = NULL, $user = NU
     }
   }
   else {
-    foreach ($options_tree as $branch) {
-      $options[$branch->tid] = $branch->name;
+    foreach ($options_all as $option_id => $option_name) {
+      $options[$option_id] = $option_name;
     }
   }
 
@@ -125,54 +168,29 @@ function mfcs_get_request_classification_list_options($option = NULL, $user = NU
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
- * @param bool $taxonomy
- *   (optional) When TRUE, will load the taxonomy term data. When FALSE will
- *   load the {mfcs_banner_locations} data.
  * @param bool $disabled
- *   (optional) When TRUE, load disabled rooms in addition to existing rooms.
+ *   (optional) When TRUE, load disabled options in addition to existing options.
+ * @param bool $include_none
+ *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_request_location_list_options($option = NULL, $taxonomy = FALSE, $disabled = FALSE) {
+function mfcs_get_request_location_list_options($option = NULL, $disabled = FALSE, $include_none = FALSE) {
   $options = array();
 
   if ($option == 'select') {
-    $options[''] = "- Select -";
+    $options[''] = '- Select -';
   }
 
-  if ($taxonomy) {
-    $system_column_name = FALSE;
-    if ($option == 'column_name') {
-      $system_column_name = TRUE;
-    }
-
-    $options_tree = taxonomy_get_tree(MFCS_VID_REQUEST_LOCATION, 0, NULL, TRUE);
-    foreach ($options_tree as $branch) {
-      if ($system_column_name) {
-        if (!empty($branch->field_system_column_name['und'][0]['value'])) {
-          $options[$branch->tid] = $branch->field_system_column_name['und'][0]['value'];
-        }
-      }
-      else {
-        $branch_category = '';
-        if (isset($branch->field_column_venue_category['und'][0]['value'])) {
-          $branch_category = $branch->field_column_venue_category['und'][0]['value'];
-        }
-
-        $options[$branch_category] = $branch->name;
-      }
-    }
-
-    asort($options);
+  if ($include_none) {
+    $options[0] = 'None';
   }
-  else {
-    $locations = mfcs_load_locations(NULL, $disabled);
 
-    if (is_array($locations)) {
-      foreach ($locations as $location) {
-        $options[$location->location_id] = $location->location_name;
-      }
+  $locations = mfcs_load_locations(NULL, $disabled);
+  if (is_array($locations)) {
+    foreach ($locations as $location) {
+      $options[(int) $location->location_id] = $location->location_name;
     }
   }
 
@@ -187,16 +205,22 @@ function mfcs_get_request_location_list_options($option = NULL, $taxonomy = FALS
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
  * @param bool $disabled
- *   (optional) When TRUE, load disabled rooms in addition to existing rooms.
+ *   (optional) When TRUE, load disabled options in addition to existing options.
+ * @param bool $include_none
+ *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_request_building_list_options($location = NULL, $option = NULL, $disabled = FALSE) {
+function mfcs_get_request_building_list_options($location = NULL, $option = NULL, $disabled = FALSE, $include_none = FALSE) {
   $options = array();
 
   if ($option == 'select') {
-    $options[''] = "- Select -";
+    $options[''] = '- Select -';
+  }
+
+  if ($include_none) {
+    $options[0] = 'None';
   }
 
   $buildings = mfcs_load_buildings($location, NULL, $disabled);
@@ -218,13 +242,23 @@ function mfcs_get_request_building_list_options($location = NULL, $option = NULL
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
  * @param bool $disabled
- *   (optional) When TRUE, load disabled rooms in addition to existing rooms.
+ *   (optional) When TRUE, load disabled options in addition to existing options.
+ * @param bool $include_none
+ *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_request_room_list_options($location = NULL, $option = NULL, $disabled = FALSE) {
+function mfcs_get_request_room_list_options($location = NULL, $option = NULL, $disabled = FALSE, $include_none = FALSE) {
   $options = array();
+
+  if ($option == 'select') {
+    $options[''] = '- Select -';
+  }
+
+  if ($include_none) {
+    $options[0] = 'None';
+  }
 
   $rooms = mfcs_load_rooms($location, NULL, NULL, $disabled);
 
@@ -262,20 +296,33 @@ function mfcs_get_request_room_list_options($location = NULL, $option = NULL, $d
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
+ * @param bool $disabled
+ *   (optional) When TRUE, load disabled options in addition to existing options.
+ * @param bool $include_none
+ *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_dates_category_list_options($option = NULL) {
+function mfcs_get_dates_category_list_options($option = NULL, $disabled = FALSE, $include_none = FALSE) {
   $options = array();
 
-  if ($option == 'select') {
-    $options[''] = "- Select -";
+  $options_all = array();
+
+  if ($include_none) {
+    $options_all[MFCS_REQUEST_DATES_CATEGORY_NONE] = 'None';
   }
 
-  $options_tree = taxonomy_get_tree(MFCS_VID_REQUEST_DATES_CATEGORY, 0, NULL, TRUE);
-  foreach ($options_tree as $branch) {
-    $options[$branch->tid] = $branch->name;
+  $options_all[MFCS_REQUEST_DATES_CATEGORY_ACTUAL] = 'Event / Meeting';
+  $options_all[MFCS_REQUEST_DATES_CATEGORY_SETUP] = 'Rehearsel / Setup';
+  $options_all[MFCS_REQUEST_DATES_CATEGORY_CLEANUP] = 'Cleanup / Breakdown';
+
+  if ($option == 'select') {
+    $options[''] = '- Select -';
+  }
+
+  foreach ($options_all as $option_id => $option_name) {
+    $options[$option_id] = $option_name;
   }
 
   asort($options);
@@ -288,32 +335,37 @@ function mfcs_get_dates_category_list_options($option = NULL) {
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
+ * @param bool $disabled
+ *   (optional) When TRUE, load disabled options in addition to existing options.
+ * @param bool $include_none
+ *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_audience_list_options($option = NULL) {
+function mfcs_get_audience_list_options($option = NULL, $disabled = FALSE, $include_none = FALSE) {
   $options = array();
 
+  $options_all = array();
+
+  if ($include_none) {
+    $options_all[MFCS_REQUEST_AUDIENCE_NONE] = 'None';
+  }
+
+  $options_all[MFCS_REQUEST_AUDIENCE_GUESTS_ONLY] = 'Invited Guests Only';
+  $options_all[MFCS_REQUEST_AUDIENCE_STUDENTS_ONLY] = 'Students Only';
+  $options_all[MFCS_REQUEST_AUDIENCE_STUDENTS_AND_EMPLOYEES] = 'Open to all Students and Employees';
+  $options_all[MFCS_REQUEST_AUDIENCE_FACULTY_AND_STAFF] = 'Faculty and Staff Only';
+  $options_all[MFCS_REQUEST_AUDIENCE_PUBLIC] = 'Open to the Public';
+
+  $options_all = array();
+
   if ($option == 'select') {
-    $options[''] = "- Select -";
+    $options[''] = '- Select -';
   }
 
-  $system_column_name = FALSE;
-  if ($option == 'column_name') {
-    $system_column_name = TRUE;
-  }
-
-  $options_tree = taxonomy_get_tree(MFCS_VID_REQUEST_AUDIENCE, 0, NULL, TRUE);
-  foreach ($options_tree as $branch) {
-    if ($system_column_name) {
-      if (!empty($branch->field_system_column_name['und'][0]['value'])) {
-        $options[$branch->tid] = $branch->field_system_column_name['und'][0]['value'];
-      }
-    }
-    else {
-      $options[$branch->tid] = $branch->name;
-    }
+  foreach ($options_all as $option_id => $option_name) {
+    $options[$option_id] = $option_name;
   }
 
   asort($options);
@@ -326,32 +378,38 @@ function mfcs_get_audience_list_options($option = NULL) {
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
+ * @param bool $disabled
+ *   (optional) When TRUE, load disabled options in addition to existing options.
+ * @param bool $include_none
+ *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_revenue_generated_list_options($option = NULL) {
+function mfcs_get_revenue_generated_list_options($option = NULL, $disabled = FALSE, $include_none = FALSE) {
   $options = array();
 
+  $options_all = array();
+
+  if ($include_none) {
+    $options_all[MFCS_REQUEST_REVENUE_NONE] = 'None';
+  }
+
+  $options_all[MFCS_REQUEST_REVENUE_TICKET_SALES] = 'Ticket Sales';
+  $options_all[MFCS_REQUEST_REVENUE_MERCHANDISE_SALES] = 'Merchandise Sales';
+  $options_all[MFCS_REQUEST_REVENUE_CONCESSION_SALES] = 'Concession Sales';
+
   if ($option == 'select') {
-    $options[''] = "- Select -";
+    $options[''] = '- Select -';
+  }
+  elseif ($option == 'column_name') {
+    $options_all[MFCS_REQUEST_REVENUE_TICKET_SALES] = 'ticket';
+    $options_all[MFCS_REQUEST_REVENUE_MERCHANDISE_SALES] = 'merchandise';
+    $options_all[MFCS_REQUEST_REVENUE_CONCESSION_SALES] = 'concession';
   }
 
-  $system_column_name = FALSE;
-  if ($option == 'column_name') {
-    $system_column_name = TRUE;
-  }
-
-  $options_tree = taxonomy_get_tree(MFCS_VID_REQUEST_REVENUE_GENERATED, 0, NULL, TRUE);
-  foreach ($options_tree as $branch) {
-    if ($system_column_name) {
-      if (!empty($branch->field_system_column_name['und'][0]['value'])) {
-        $options[$branch->tid] = $branch->field_system_column_name['und'][0]['value'];
-      }
-    }
-    else {
-      $options[$branch->tid] = $branch->name;
-    }
+  foreach ($options_all as $option_id => $option_name) {
+    $options[$option_id] = $option_name;
   }
 
   asort($options);
@@ -364,32 +422,42 @@ function mfcs_get_revenue_generated_list_options($option = NULL) {
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
+ * @param bool $disabled
+ *   (optional) When TRUE, load disabled options in addition to existing options.
+ * @param bool $include_none
+ *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_request_type_list_options($option = NULL) {
+function mfcs_get_request_type_list_options($option = NULL, $disabled = FALSE, $include_none = FALSE) {
   $options = array();
 
+  $options_all = array();
+
+  if ($include_none) {
+    $options_all[MFCS_REQUEST_TYPE_NONE] = 'None';
+  }
+
+  $options_all[MFCS_REQUEST_TYPE_MEETING] = 'Meeting';
+  $options_all[MFCS_REQUEST_TYPE_PERFORMANCE] = 'Performance';
+  $options_all[MFCS_REQUEST_TYPE_LECTURE] = 'Lecture';
+  $options_all[MFCS_REQUEST_TYPE_RECEPTION] = 'Reception';
+  $options_all[MFCS_REQUEST_TYPE_BANQUET] = 'Banquet';
+  $options_all[MFCS_REQUEST_TYPE_WORKSHOP] = 'Workshop';
+  $options_all[MFCS_REQUEST_TYPE_TALENT] = 'Talent';
+  $options_all[MFCS_REQUEST_TYPE_CEREMONY] = 'Ceremony';
+  $options_all[MFCS_REQUEST_TYPE_FAIR] = 'Fair';
+  $options_all[MFCS_REQUEST_TYPE_ATHLETIC] = 'Athletic';
+  $options_all[MFCS_REQUEST_TYPE_OTHER] = 'Other';
+  $options_all[MFCS_REQUEST_TYPE_QUICK_MEETING] = 'Quick Meeting';
+
   if ($option == 'select') {
-    $options[''] = "- Select -";
+    $options[''] = '- Select -';
   }
 
-  $system_column_name = FALSE;
-  if ($option == 'column_name') {
-    $system_column_name = TRUE;
-  }
-
-  $options_tree = taxonomy_get_tree(MFCS_VID_REQUEST_REQUEST_TYPE, 0, NULL, TRUE);
-  foreach ($options_tree as $branch) {
-    if ($system_column_name) {
-      if (!empty($branch->field_system_column_name['und'][0]['value'])) {
-        $options[$branch->tid] = $branch->field_system_column_name['und'][0]['value'];
-      }
-    }
-    else {
-      $options[$branch->tid] = $branch->name;
-    }
+  foreach ($options_all as $option_id => $option_name) {
+    $options[$option_id] = $option_name;
   }
 
   asort($options);
@@ -402,32 +470,44 @@ function mfcs_get_request_type_list_options($option = NULL) {
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
+ * @param bool $disabled
+ *   (optional) When TRUE, load disabled options in addition to existing options.
+ * @param bool $include_none
+ *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_publicity_details_list_options($option = NULL) {
+function mfcs_get_publicity_details_list_options($option = NULL, $disabled = FALSE, $include_none = FALSE) {
   $options = array();
 
+  $options_all = array();
+
+  if ($include_none) {
+    $options_all[MFCS_REQUEST_PUBLICITY_NONE] = 'None';
+  }
+
+  $options_all[MFCS_REQUEST_PUBLICITY_CAMPUS_DIGEST] = 'Campus Digest';
+  $options_all[MFCS_REQUEST_PUBLICITY_STUDENT_DIGEST] = 'Student Digest';
+  $options_all[MFCS_REQUEST_PUBLICITY_WEBSITE] = 'Website';
+  $options_all[MFCS_REQUEST_PUBLICITY_SOCIAL_MEDIA] = 'Social Media';
+  $options_all[MFCS_REQUEST_PUBLICITY_AXIS_TVS] = 'Axis TV\'s';
+  $options_all[MFCS_REQUEST_PUBLICITY_PRESS_RELEASE] = 'Press Release';
+
   if ($option == 'select') {
-    $options[''] = "- Select -";
+    $options[''] = '- Select -';
+  }
+  elseif ($option == 'column_name') {
+    $options_all[MFCS_REQUEST_PUBLICITY_CAMPUS_DIGEST] = 'campus_digest';
+    $options_all[MFCS_REQUEST_PUBLICITY_STUDENT_DIGEST] = 'student_digest';
+    $options_all[MFCS_REQUEST_PUBLICITY_WEBSITE] = 'website';
+    $options_all[MFCS_REQUEST_PUBLICITY_SOCIAL_MEDIA] = 'social_media';
+    $options_all[MFCS_REQUEST_PUBLICITY_AXIS_TVS] = 'axis_tv';
+    $options_all[MFCS_REQUEST_PUBLICITY_PRESS_RELEASE] = 'press_release';
   }
 
-  $system_column_name = FALSE;
-  if ($option == 'column_name') {
-    $system_column_name = TRUE;
-  }
-
-  $options_tree = taxonomy_get_tree(MFCS_VID_REQUEST_PUBLICITY_DETAILS, 0, NULL, TRUE);
-  foreach ($options_tree as $branch) {
-    if ($system_column_name) {
-      if (!empty($branch->field_system_column_name['und'][0]['value'])) {
-        $options[$branch->tid] = $branch->field_system_column_name['und'][0]['value'];
-      }
-    }
-    else {
-      $options[$branch->tid] = $branch->name;
-    }
+  foreach ($options_all as $option_id => $option_name) {
+    $options[$option_id] = $option_name;
   }
 
   asort($options);
@@ -440,32 +520,38 @@ function mfcs_get_publicity_details_list_options($option = NULL) {
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
+ * @param bool $disabled
+ *   (optional) When TRUE, load disabled options in addition to existing options.
+ * @param bool $include_none
+ *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_designing_material_list_options($option = NULL) {
+function mfcs_get_designing_material_list_options($option = NULL, $disabled = FALSE, $include_none = FALSE) {
   $options = array();
 
+  $options_all = array();
+
+  if ($include_none) {
+    $options_all[MFCS_REQUEST_DESIGNING_MATERIALS_NONE] = 'None';
+  }
+
+  $options_all[MFCS_REQUEST_DESIGNING_MATERIALS_PUBLIC_RELATIONS] = 'McNeese Public Relations';
+  $options_all[MFCS_REQUEST_DESIGNING_MATERIALS_MARKETING] = 'McNeese Marketing';
+  $options_all[MFCS_REQUEST_DESIGNING_MATERIALS_OTHER] = 'Other';
+
   if ($option == 'select') {
-    $options[''] = "- Select -";
+    $options[''] = '- Select -';
+  }
+  elseif ($option == 'column_name') {
+    $options_all[MFCS_REQUEST_DESIGNING_MATERIALS_PUBLIC_RELATIONS] = 'public_relations';
+    $options_all[MFCS_REQUEST_DESIGNING_MATERIALS_MARKETING] = 'marketing';
+    $options_all[MFCS_REQUEST_DESIGNING_MATERIALS_OTHER] = 'other';
   }
 
-  $system_column_name = FALSE;
-  if ($option == 'column_name') {
-    $system_column_name = TRUE;
-  }
-
-  $options_tree = taxonomy_get_tree(MFCS_VID_REQUEST_DESIGNING_MATERIAL, 0, NULL, TRUE);
-  foreach ($options_tree as $branch) {
-    if ($system_column_name) {
-      if (!empty($branch->field_system_column_name['und'][0]['value'])) {
-        $options[$branch->tid] = $branch->field_system_column_name['und'][0]['value'];
-      }
-    }
-    else {
-      $options[$branch->tid] = $branch->name;
-    }
+  foreach ($options_all as $option_id => $option_name) {
+    $options[$option_id] = $option_name;
   }
 
   asort($options);
@@ -478,32 +564,40 @@ function mfcs_get_designing_material_list_options($option = NULL) {
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
+ * @param bool $disabled
+ *   (optional) When TRUE, load disabled options in addition to existing options.
+ * @param bool $include_none
+ *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_technical_equipment_details_list_options($option = NULL) {
+function mfcs_get_technical_equipment_details_list_options($option = NULL, $disabled = FALSE, $include_none = FALSE) {
   $options = array();
 
+  $options_all = array();
+
+  if ($include_none) {
+    $options_all[MFCS_REQUEST_TECHNICAL_EQUIPMENT_NONE] = 'None';
+  }
+
+  $options_all[MFCS_REQUEST_TECHNICAL_EQUIPMENT_SCREEN] = 'Projector / Screen';
+  $options_all[MFCS_REQUEST_TECHNICAL_EQUIPMENT_COMPUTER] = 'Computer';
+  $options_all[MFCS_REQUEST_TECHNICAL_EQUIPMENT_SOUND] = 'Sound for Presentation / Music / Etc.';
+  $options_all[MFCS_REQUEST_TECHNICAL_EQUIPMENT_MICROPHONE] = 'Microphone';
+
   if ($option == 'select') {
-    $options[''] = "- Select -";
+    $options[''] = '- Select -';
+  }
+  elseif ($option == 'column_name') {
+    $options_all[MFCS_REQUEST_TECHNICAL_EQUIPMENT_SCREEN] = 'screen';
+    $options_all[MFCS_REQUEST_TECHNICAL_EQUIPMENT_COMPUTER] = 'computer';
+    $options_all[MFCS_REQUEST_TECHNICAL_EQUIPMENT_SOUND] = 'sound';
+    $options_all[MFCS_REQUEST_TECHNICAL_EQUIPMENT_MICROPHONE] = 'equipment';
   }
 
-  $system_column_name = FALSE;
-  if ($option == 'column_name') {
-    $system_column_name = TRUE;
-  }
-
-  $options_tree = taxonomy_get_tree(MFCS_VID_REQUEST_TECHNICAL_EQUIPMENT_DETAILS, 0, NULL, TRUE);
-  foreach ($options_tree as $branch) {
-    if ($system_column_name) {
-      if (!empty($branch->field_system_column_name['und'][0]['value'])) {
-        $options[$branch->tid] = $branch->field_system_column_name['und'][0]['value'];
-      }
-    }
-    else {
-      $options[$branch->tid] = $branch->name;
-    }
+  foreach ($options_all as $option_id => $option_name) {
+    $options[$option_id] = $option_name;
   }
 
   asort($options);
@@ -519,31 +613,61 @@ function mfcs_get_technical_equipment_details_list_options($option = NULL) {
  * @param bool $include_hidden
  *   (optional) When TRUE, will include hidden/special case classifications
  *   that are not normally exposed through the select list options.
+ * @param bool $disabled
+ *   (optional) When TRUE, load disabled options in addition to existing options.
+ * @param bool $include_none
+ *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_reviewer_classification_list_options($option = NULL, $include_hidden = FALSE) {
+function mfcs_get_reviewer_classification_list_options($option = NULL, $include_hidden = FALSE, $disabled = FALSE, $include_none = FALSE) {
   if (!is_bool($include_hidden)) {
     $include_hidden = FALSE;
   }
 
   $options = array();
 
+  $options_all = array();
+
+  if ($include_none) {
+    $options_all[MFCS_REVIEWER_CLASSIFICATION_NONE] = 'None';
+  }
+
+  $options_all[MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR] = 'System Administrator';
+  $options_all[MFCS_REVIEWER_CLASSIFICATION_MANAGER] = 'Manager';
+  $options_all[MFCS_REVIEWER_CLASSIFICATION_REQUESTER] = 'Requester';
+  $options_all[MFCS_REVIEWER_CLASSIFICATION_SYSTEM] = 'System';
+  $options_all[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR] = 'Venue Coordinator';
+  $options_all[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY] = 'Venue Coordinator Proxy';
+  $options_all[MFCS_REVIEWER_CLASSIFICATION_ADMINISTRATIVE_ACCOUNTING] = 'Administrative Accounting';
+  $options_all[MFCS_REVIEWER_CLASSIFICATION_CUSTODIAL] = 'Custodial';
+  $options_all[MFCS_REVIEWER_CLASSIFICATION_UNIVERSITY_EVENTS] = 'University Events';
+  $options_all[MFCS_REVIEWER_CLASSIFICATION_FACILITIES_CUSTODIAL] = 'Facilities / Custodial Services';
+  $options_all[MFCS_REVIEWER_CLASSIFICATION_FACILITIES] = 'Facilities';
+  $options_all[MFCS_REVIEWER_CLASSIFICATION_FACULTY_ADVISOR] = 'Faculty Advisor';
+  $options_all[MFCS_REVIEWER_CLASSIFICATION_FOOD_SERVICES] = 'Food Services';
+  $options_all[MFCS_REVIEWER_CLASSIFICATION_HOUSING] = 'Housing';
+  $options_all[MFCS_REVIEWER_CLASSIFICATION_MAINTENANCE] = 'Maintenance';
+  $options_all[MFCS_REVIEWER_CLASSIFICATION_PURCHASING] = 'Purchasing / Insurance';
+  $options_all[MFCS_REVIEWER_CLASSIFICATION_SECURITY] = 'Security / University Police';
+  $options_all[MFCS_REVIEWER_CLASSIFICATION_STUDENT_ACTIVITIES_ADMINISTRATION] = 'Student Activities Administration';
+  $options_all[MFCS_REVIEWER_CLASSIFICATION_UNIVERSITY_SERVICES] = 'University Services';
+
   if ($option == 'select') {
-    $options[''] = "- Select -";
+    $options[''] = '- Select -';
   }
 
-  $options_tree = taxonomy_get_tree(MFCS_VID_REQUEST_REVIEWER_CLASSIFICATION, 0, NULL, TRUE);
-  foreach ($options_tree as $branch) {
-    $options[$branch->tid] = $branch->name;
+  foreach ($options_all as $option_id => $option_name) {
+    $options[$option_id] = $option_name;
   }
 
-  if ($include_hidden) {
-    $options[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR] = "Venue Coordinator";
-    $options[MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR] = "System Administrator";
-    $options[MFCS_REVIEWER_CLASSIFICATION_MANAGER] = "Manager";
-    $options[MFCS_REVIEWER_CLASSIFICATION_REQUESTER] = "Requester";
+  if (!$include_hidden) {
+    unset($options[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR]);
+    unset($options[MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR]);
+    unset($options[MFCS_REVIEWER_CLASSIFICATION_MANAGER]);
+    unset($options[MFCS_REVIEWER_CLASSIFICATION_REQUESTER]);
+    unset($options[MFCS_REVIEWER_CLASSIFICATION_SYSTEM]);
   }
 
   asort($options);
@@ -560,15 +684,38 @@ function mfcs_get_reviewer_classification_list_options($option = NULL, $include_
  *   (optional) An integer representing a set of restrictions in which determines the available list options.
  *   This option was added to address ticket fcs-79 without conflicting with existing behavior.
  *   Its sole purpose is to be used during the review process.
+ * @param bool $disabled
+ *   (optional) When TRUE, load disabled options in addition to existing options.
+ * @param bool $include_none
+ *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_reviewer_decision_list_options($option = NULL, $restriction = 0) {
+function mfcs_get_reviewer_decision_list_options($option = NULL, $restriction = 0, $disabled = FALSE, $include_none = FALSE) {
   $options = array();
 
+  $options_all = array();
+
+  if ($include_none) {
+    $options_all[MFCS__NONE] = 'None';
+  }
+
+  $options_all[MFCS_REVIEW_DECISION_MANAGER_RECHECK] = 'Manager Recheck';
+  $options_all[MFCS_REVIEW_DECISION_AMENDMENT] = 'Amendment';
+  $options_all[MFCS_REVIEW_DECISION_APPROVE] = 'Approve';
+  $options_all[MFCS_REVIEW_DECISION_COMMENT] = 'Comment';
+  $options_all[MFCS_REVIEW_DECISION_COMMENT_ALL] = 'Comment';
+  $options_all[MFCS_REVIEW_DECISION_DENY] = 'Deny';
+  $options_all[MFCS_REVIEW_DECISION_WAIVE] = 'Waive';
+  $options_all[MFCS_REVIEW_DECISION_REQUIREMENT] = 'Requirement';
+  $options_all[MFCS_REVIEW_DECISION_AVAILABLE] = 'Available';
+  $options_all[MFCS_REVIEW_DECISION_UNAVAILABLE] = 'Unavailable';
+  $options_all[MFCS_REVIEW_DECISION_ISSUES] = 'Issues';
+  $options_all[MFCS_REVIEW_DECISION_ISSUES_NONE] = 'No Issues';
+
   if ($option == 'select' || $option == 'review_step') {
-    $options[''] = "- Select -";
+    $options[''] = '- Select -';
   }
 
   if (!is_int($restriction) || $restriction < MFCS_RESTRICTION_DECISION_NONE || $restriction > MFCS_RESTRICTION_DECISION_COMMENT_ONLY) {
@@ -576,9 +723,8 @@ function mfcs_get_reviewer_decision_list_options($option = NULL, $restriction = 
   }
 
   if ($restriction == MFCS_RESTRICTION_DECISION_NONE) {
-    $options_tree = taxonomy_get_tree(MFCS_VID_REQUEST_REVIEWER_DECISION, 0, NULL, TRUE);
-    foreach ($options_tree as $branch) {
-      $options[$branch->tid] = $branch->name;
+    foreach ($options_all as $option_id => $option_name) {
+      $options[$option_id] = $option_name;
     }
 
     // these options are hidden from the users.
@@ -590,32 +736,31 @@ function mfcs_get_reviewer_decision_list_options($option = NULL, $restriction = 
     asort($options);
   }
   elseif ($restriction == MFCS_RESTRICTION_DECISION_REQUESTER) {
-    $options[MFCS_REVIEW_DECISION_COMMENT_ALL] = "Comment";
+    $options[MFCS_REVIEW_DECISION_COMMENT_ALL] = $options_all[MFCS_REVIEW_DECISION_COMMENT_ALL];
   }
   elseif ($restriction == MFCS_RESTRICTION_DECISION_VENUE_COORDINATOR) {
-    $options[MFCS_REVIEW_DECISION_AVAILABLE] = "Available";
-    $options[MFCS_REVIEW_DECISION_UNAVAILABLE] = "Unavailable";
-    $options[MFCS_REVIEW_DECISION_COMMENT] = "Comment";
+    foreach (array(MFCS_REVIEW_DECISION_AVAILABLE, MFCS_REVIEW_DECISION_UNAVAILABLE, MFCS_REVIEW_DECISION_COMMENT) as $option_id) {
+      $options[$option_id] = $options_all[$option_id];
+    }
   }
   elseif ($restriction == MFCS_RESTRICTION_DECISION_REVIEWER) {
-    $options[MFCS_REVIEW_DECISION_ISSUES] = "Issues";
-    $options[MFCS_REVIEW_DECISION_ISSUES_NONE] = "No Issues";
-    $options[MFCS_REVIEW_DECISION_COMMENT] = "Comment";
+    foreach (array(MFCS_REVIEW_DECISION_ISSUES, MFCS_REVIEW_DECISION_ISSUES_NONE, MFCS_REVIEW_DECISION_COMMENT) as $option_id) {
+      $options[$option_id] = $options_all[$option_id];
+    }
   }
   elseif ($restriction == MFCS_RESTRICTION_DECISION_APPROVER) {
-    $options[MFCS_REVIEW_DECISION_APPROVE] = "Approve";
-    $options[MFCS_REVIEW_DECISION_DENY] = "Deny";
-    $options[MFCS_REVIEW_DECISION_REQUIREMENT] = "Requirement";
-    $options[MFCS_REVIEW_DECISION_COMMENT] = "Comment";
+    foreach (array(MFCS_REVIEW_DECISION_APPROVE, MFCS_REVIEW_DECISION_DENY, MFCS_REVIEW_DECISION_REQUIREMENT, MFCS_REVIEW_DECISION_COMMENT) as $option_id) {
+      $options[$option_id] = $options_all[$option_id];
+    }
   }
   elseif ($restriction == MFCS_RESTRICTION_DECISION_MANAGER) {
-    $options[MFCS_REVIEW_DECISION_COMMENT] = "Comment";
+    $options[MFCS_REVIEW_DECISION_COMMENT] = $options_all[MFCS_REVIEW_DECISION_COMMENT];
   }
   elseif ($restriction == MFCS_RESTRICTION_DECISION_ADMINISTER) {
-    $options[MFCS_REVIEW_DECISION_COMMENT] = "Comment";
+    $options[MFCS_REVIEW_DECISION_COMMENT] = $options_all[MFCS_REVIEW_DECISION_COMMENT];
   }
   elseif ($restriction == MFCS_RESTRICTION_DECISION_COMMENT_ONLY) {
-    $options[MFCS_REVIEW_DECISION_COMMENT] = "Comment";
+    $options[MFCS_REVIEW_DECISION_COMMENT] = $options_all[MFCS_REVIEW_DECISION_COMMENT];
   }
 
   return $options;
@@ -626,36 +771,61 @@ function mfcs_get_reviewer_decision_list_options($option = NULL, $restriction = 
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
+ * @param bool $disabled
+ *   (optional) When TRUE, load disabled options in addition to existing options.
+ * @param bool $include_none
+ *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_review_step_list_options($option = NULL) {
+function mfcs_get_review_step_list_options($option = NULL, $disabled = FALSE, $include_none = FALSE) {
   $options = array();
 
+  $options_all = array();
+
+  if ($include_none) {
+    $options_all[MFCS_REQUEST_STEP_NONE] = 'None';
+  }
+
+  $options_all[MFCS_REQUEST_STEP_VENUE_AVAILABLE] = 'Venue Available';
+  $options_all[MFCS_REQUEST_STEP_RESOLVE_CONFLICTS] = 'Resolve Conflicts / Make Decisions';
+  $options_all[MFCS_REQUEST_STEP_TENTATIVE_HOLD] = 'Release Tentative Hold';
+  $options_all[MFCS_REQUEST_STEP_REVIEW] = 'Review';
+  $options_all[MFCS_REQUEST_STEP_REQUIREMENTS] = 'Requirements';
+  $options_all[MFCS_REQUEST_STEP_COMPLETED] = 'Completed';
+  $options_all[MFCS_REQUEST_STEP_CHANGES_REQUIRED] = 'Changes Required';
+
   if ($option == 'select') {
-    $options[''] = "- Select -";
+    $options[''] = '- Select -';
   }
 
   $options_tree = taxonomy_get_tree(MFCS_VID_REQUEST_STEPS, 0, NULL, TRUE);
 
-  if ($option == 'object') {
-    $unsorted = array();
-    $sorted = array();
-    foreach ($options_tree as $branch) {
-      $unsorted[$branch->tid] = $branch;
-      $sorted[$branch->tid] = $branch->name;
+  if ($option == 'roles') {
+    asort($options_all);
+
+    if ($include_none) {
+      $options_roles[MFCS_REQUEST_STEP_NONE] = array();
     }
 
-    asort($sorted);
+    $options_roles[MFCS_REQUEST_STEP_VENUE_AVAILABLE] = array(1, 2, 3, 4);
+    $options_roles[MFCS_REQUEST_STEP_RESOLVE_CONFLICTS] = array(1, 2, 3, 4);
+    $options_roles[MFCS_REQUEST_STEP_TENTATIVE_HOLD] = array();
+    $options_roles[MFCS_REQUEST_STEP_REVIEW] = array(1, 2, 3, 4);
+    $options_roles[MFCS_REQUEST_STEP_REQUIREMENTS] = array(1, 2, 3, 4);
+    $options_roles[MFCS_REQUEST_STEP_COMPLETED] = array();
+    $options_roles[MFCS_REQUEST_STEP_CHANGES_REQUIRED] = array();
 
-    foreach ($sorted as $tid => $name) {
-      $options[$tid] = $unsorted[$tid];
+    foreach ($options_all as $option_id => $option_name) {
+      $options[$option_id] = array();
+      $options[$option_id]['name'] = $option_name;
+      $options[$option_id]['roles'] = $options_roles[$option_id];
     }
   }
   else {
-    foreach ($options_tree as $branch) {
-      $options[$branch->tid] = $branch->name;
+    foreach ($options_all as $option_id => $option_name) {
+      $options[$option_id] = $option_name;
     }
 
     asort($options);
@@ -669,28 +839,41 @@ function mfcs_get_review_step_list_options($option = NULL) {
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
+ * @param bool $disabled
+ *   (optional) When TRUE, load disabled options in addition to existing options.
+ * @param bool $include_none
+ *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_request_problems_list_options($option = NULL) {
+function mfcs_get_request_problems_list_options($option = NULL, $disabled = FALSE, $include_none = FALSE) {
   $options = array();
 
-  if ($option == 'select') {
-    $options[''] = "- Select -";
+  $options_all = array();
+
+  if ($include_none) {
+    $options_all[MFCS_REQUEST_PROBLEM_NONE] = 'None';
   }
 
-  $options[MFCS_REQUEST_PROBLEM_NONE] = 'None';
-  $options[MFCS_REQUEST_PROBLEM_CONFLICT] = 'Conflict';
-  $options[MFCS_REQUEST_PROBLEM_STALE] = 'Stale';
-  $options[MFCS_REQUEST_PROBLEM_STUCK] = 'Stuck';
-  $options[MFCS_REQUEST_PROBLEM_BLOCKED] = 'Blocked';
-  $options[MFCS_REQUEST_PROBLEM_COORDINATOR] = 'Coordinator Invalid';
-  $options[MFCS_REQUEST_PROBLEM_REQUESTER] = 'Requester Invalid';
-  $options[MFCS_REQUEST_PROBLEM_ROOM] = 'Room Invalid';
-  $options[MFCS_REQUEST_PROBLEM_BUILDING] = 'Building Invalid';
-  $options[MFCS_REQUEST_PROBLEM_LOCATION] = 'Location Invalid';
-  $options[MFCS_REQUEST_PROBLEM_CACHE_REQUEST] = 'Cache Invalid';
+  $options_all[MFCS_REQUEST_PROBLEM_CONFLICT] = 'Conflict';
+  $options_all[MFCS_REQUEST_PROBLEM_STALE] = 'Stale';
+  $options_all[MFCS_REQUEST_PROBLEM_STUCK] = 'Stuck';
+  $options_all[MFCS_REQUEST_PROBLEM_BLOCKED] = 'Blocked';
+  $options_all[MFCS_REQUEST_PROBLEM_COORDINATOR] = 'Coordinator Invalid';
+  $options_all[MFCS_REQUEST_PROBLEM_REQUESTER] = 'Requester Invalid';
+  $options_all[MFCS_REQUEST_PROBLEM_ROOM] = 'Room Invalid';
+  $options_all[MFCS_REQUEST_PROBLEM_BUILDING] = 'Building Invalid';
+  $options_all[MFCS_REQUEST_PROBLEM_LOCATION] = 'Location Invalid';
+  $options_all[MFCS_REQUEST_PROBLEM_CACHE_REQUEST] = 'Cache Invalid';
+
+  if ($option == 'select') {
+    $options[''] = '- Select -';
+  }
+
+  foreach ($options_all as $option_id => $option_name) {
+    $options[$option_id] = $option_name;
+  }
 
   asort($options);
 
@@ -705,55 +888,62 @@ function mfcs_get_request_problems_list_options($option = NULL) {
  * @param string|null $type
  *   (optional) A string designating a specific type to process, such as:
  *   - 'request'
+ * @param bool $disabled
+ *   (optional) When TRUE, load disabled options in addition to existing options.
+ * @param bool $include_none
+ *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_log_problems_list_options($option = NULL, $type = NULL) {
+function mfcs_get_log_problems_list_options($option = NULL, $type = NULL, $disabled = FALSE, $include_none = FALSE) {
   $options = array();
 
+  $options_all = array();
+
+  if ($include_none) {
+    $options_all[MFCS_LOG_PROBLEMS_NONE] = 'None';
+  }
+
+  $options_all[MFCS_LOG_PROBLEMS_INSERT] = 'Insert';
+  $options_all[MFCS_LOG_PROBLEMS_UPDATE] = 'Update';
+  $options_all[MFCS_LOG_PROBLEMS_DELETE] = 'Delete';
+  $options_all[MFCS_LOG_PROBLEMS_RESYNC] = 'Re-Synchronize';
+  $options_all[MFCS_LOG_PROBLEMS_IGNORE] = 'Ignore';
+  $options_all[MFCS_LOG_PROBLEMS_UNIGNORE] = 'Unignore';
+  $options_all[MFCS_LOG_PROBLEMS_RECHECK] = 'Re-Check';
+  $options_all[MFCS_LOG_PROBLEMS_REASSIGN_VENUE_COORDINATOR] = 'Re-assign Venue Coordinator';
+  $options_all[MFCS_LOG_PROBLEMS_REASSIGN_REQUESTER] = 'Re-assign Requester';
+  $options_all[MFCS_LOG_PROBLEMS_REASSIGN_REBUILD_CACHE] = 'Rebuild Cache';
+
   if ($option == 'select') {
-    $options[''] = "- Select -";
+    $options[''] = '- Select -';
   }
 
   if ($type == 'requests') {
-    $options[MFCS_LOG_PROBLEMS_NONE] = 'None';
-    $options[MFCS_LOG_PROBLEMS_IGNORE] = 'Ignore';
-    $options[MFCS_LOG_PROBLEMS_UNIGNORE] = 'Unignore';
-    $options[MFCS_LOG_PROBLEMS_RECHECK] = 'Re-Check';
-    $options[MFCS_LOG_PROBLEMS_REASSIGN_VENUE_COORDINATOR] = 'Re-assign Venue Coordinator';
-    $options[MFCS_LOG_PROBLEMS_REASSIGN_REQUESTER] = 'Re-assign Requester';
-    $options[MFCS_LOG_PROBLEMS_REASSIGN_REBUILD_CACHE] = 'Rebuild Cache';
+    foreach (array(MFCS_LOG_PROBLEMS_NONE, MFCS_LOG_PROBLEMS_IGNORE, MFCS_LOG_PROBLEMS_UNIGNORE, MFCS_LOG_PROBLEMS_RECHECK, MFCS_LOG_PROBLEMS_REASSIGN_VENUE_COORDINATOR, MFCS_LOG_PROBLEMS_REASSIGN_REQUESTER, MFCS_LOG_PROBLEMS_REASSIGN_REBUILD_CACHE) as $option_id) {
+      if (array_key_exists($option_id, $options_all)) {
+        $options[$option_id] = $options_all[$option_id];
+      }
+    }
   }
   elseif ($type == 'basic') {
-    $options[MFCS_LOG_PROBLEMS_NONE] = 'None';
-    $options[MFCS_LOG_PROBLEMS_INSERT] = 'Insert';
-    $options[MFCS_LOG_PROBLEMS_UPDATE] = 'Update';
-    $options[MFCS_LOG_PROBLEMS_DELETE] = 'Delete';
-    $options[MFCS_LOG_PROBLEMS_RESYNC] = 'Re-Synchronize';
-    $options[MFCS_LOG_PROBLEMS_IGNORE] = 'Ignore';
-    $options[MFCS_LOG_PROBLEMS_UNIGNORE] = 'Unignore';
-    $options[MFCS_LOG_PROBLEMS_RECHECK] = 'Re-Check';
+    foreach (array(MFCS_LOG_PROBLEMS_NONE, MFCS_LOG_PROBLEMS_INSERT, MFCS_LOG_PROBLEMS_UPDATE, MFCS_LOG_PROBLEMS_DELETE, MFCS_LOG_PROBLEMS_RESYNC, MFCS_LOG_PROBLEMS_IGNORE, MFCS_LOG_PROBLEMS_UNIGNORE, MFCS_LOG_PROBLEMS_RECHECK) as $option_id) {
+      if (array_key_exists($option_id, $options_all)) {
+        $options[$option_id] = $options_all[$option_id];
+      }
+    }
   }
   else {
-    $options[MFCS_LOG_PROBLEMS_NONE] = 'None';
-    $options[MFCS_LOG_PROBLEMS_INSERT] = 'Insert';
-    $options[MFCS_LOG_PROBLEMS_UPDATE] = 'Update';
-    $options[MFCS_LOG_PROBLEMS_DELETE] = 'Delete';
-    $options[MFCS_LOG_PROBLEMS_RESYNC] = 'Re-Synchronize';
-    $options[MFCS_LOG_PROBLEMS_IGNORE] = 'Ignore';
-    $options[MFCS_LOG_PROBLEMS_UNIGNORE] = 'Unignore';
-    $options[MFCS_LOG_PROBLEMS_RECHECK] = 'Re-Check';
-    $options[MFCS_LOG_PROBLEMS_REASSIGN_VENUE_COORDINATOR] = 'Re-assign Venue Coordinator';
-    $options[MFCS_LOG_PROBLEMS_REASSIGN_REQUESTER] = 'Re-assign Requester';
-    $options[MFCS_LOG_PROBLEMS_REASSIGN_REBUILD_CACHE] = 'Rebuild Cache';
+    foreach ($options_all as $option_id => $option_name) {
+      $options[$option_id] = $option_name;
+    }
   }
 
   asort($options);
 
   return $options;
 }
-
 
 /**
  * @} End of '@addtogroup mfcs'.

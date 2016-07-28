@@ -1040,7 +1040,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
     mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
-    $step_options = mfcs_get_request_steps_list_options();
+    $step_options = mfcs_get_review_steps_list_options();
 
     $decisions = array();
     if ($request['top']['step'][0]->value == MFCS_REVIEW_STEP_REVIEW || $request['top']['step'][0]->value == MFCS_REVIEW_STEP_REQUIREMENTS) {

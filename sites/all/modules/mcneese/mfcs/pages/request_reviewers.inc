@@ -39,7 +39,7 @@ function mfcs_request_reviewers_0_page() {
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
   $request_classifications = mfcs_get_request_classification_list_options();
-  $review_steps = mfcs_get_review_step_list_options('object');
+  $review_steps = mfcs_get_review_step_list_options('roles');
 
   $markup = '<div id="mfcs-manage_reviewers">';
   $groups = array();
@@ -47,8 +47,8 @@ function mfcs_request_reviewers_0_page() {
     if (!is_numeric($classification_id)) continue;
 
     $items = array();
-    foreach ($review_steps as $review_step_id => $review_step_object) {
-      if (empty($review_step_object->field_review_event_roles['und'])) {
+    foreach ($review_steps as $review_step_id => $review_step) {
+      if (empty($review_step['roles'])) {
         continue;
       }
 
@@ -56,8 +56,8 @@ function mfcs_request_reviewers_0_page() {
       if ($review_step_id != MFCS_REVIEW_STEP_REVIEW && $review_step_id != MFCS_REVIEW_STEP_REQUIREMENTS) continue;
 
       $unmatched = TRUE;
-      foreach ($review_step_object->field_review_event_roles['und'] as $key => $value) {
-        if ($value['tid'] == $classification_id) {
+      foreach ($review_step['roles'] as $role) {
+        if ($role == $classification_id) {
           $unmatched = FALSE;
           break;
         }
@@ -67,7 +67,7 @@ function mfcs_request_reviewers_0_page() {
         continue;
       }
 
-      $link = '<a id="mfcs-manage_reviewers-manage-' . $classification_id . '-link-' . $review_step_id .'" href="' . $base_path . 'requests/reviewers-0/list/' . $classification_id . '/' . $review_step_id . $url_arguments . '" class="item-link mfcs-manage_reviewers-manage-link">' . $review_step_object->name . ' Step</a>';
+      $link = '<a id="mfcs-manage_reviewers-manage-' . $classification_id . '-link-' . $review_step_id .'" href="' . $base_path . 'requests/reviewers-0/list/' . $classification_id . '/' . $review_step_id . $url_arguments . '" class="item-link mfcs-manage_reviewers-manage-link">' . $review_step['name'] . ' Step</a>';
       $items[] = array(
         'data' => $link,
         'class' => array(

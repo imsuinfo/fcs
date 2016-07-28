@@ -174,7 +174,7 @@ function mfcs_request_statistics_0_page($year = NULL, $month = NULL, $day = NULL
   }
 
   $status_options = mfcs_get_request_status_list_options();
-  $steps_options = mfcs_get_request_steps_list_options();
+  $steps_options = mfcs_get_review_steps_list_options();
   $type_options = mfcs_get_request_type_list_options();
   $classification_options = mfcs_get_request_classification_list_options();
 

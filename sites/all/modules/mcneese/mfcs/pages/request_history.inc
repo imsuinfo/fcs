@@ -113,7 +113,7 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
   $presentation_tables = mfcs_table_presentation(1);
 
   $status_options = mfcs_get_request_status_list_options();
-  $step_options = mfcs_get_request_steps_list_options();
+  $step_options = mfcs_get_review_steps_list_options();
 
   // The venue coordinator user id is a 'split' structure and does not normally get displayed.
   // Manually change the behavior such that the Venue Coordinator Name will be properly presented.
@@ -283,7 +283,7 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
 
                   if ($group_name == 'review') {
                     if ($field_name == 'review') {
-                      $step_options = mfcs_get_request_steps_list_options();
+                      $step_options = mfcs_get_review_steps_list_options();
                       $decision_options = mfcs_get_reviewer_decision_list_options();
                       $custom_message = "";
 
@@ -299,6 +299,9 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
                         $custom_message .= 'the request information was amended and therefore the review process was restarted. ';
                       }
                       elseif ($decision === MFCS_REVIEW_DECISION_AVAILABLE || $decision === MFCS_REVIEW_DECISION_UNAVAILABLE) {
+                        if (!isset($decision_options[$decision])) {
+                          drupal_set_message("DEBUG: $decision is not available in: " . print_r($decision_options, TRUE));
+                        }
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
                         $custom_message .= 'made a decision to designate that the request rooms are <strong class="review-decision">' . $decision_options[$decision] . '</strong>. ';
                       }

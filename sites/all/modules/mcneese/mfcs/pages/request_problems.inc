@@ -1554,7 +1554,7 @@ function mfcs_request_problems_0_requests_form($form, &$form_state, $page_number
   mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
-  $request_problems_by_id = mfcs_get_request_problems_list_options();
+  $request_problems_by_id = mfcs_get_request_problems_list_options(NULL, FALSE, TRUE);
 
   // load sorting information
   $order = NULL;
@@ -1965,7 +1965,7 @@ function mfcs_request_problems_0_request_form($form, &$form_state, $problem_id) 
   $problem = array_pop($problem_results);
   unset($problem_results);
 
-  $request_problems_by_id = mfcs_get_request_problems_list_options();
+  $request_problems_by_id = mfcs_get_request_problems_list_options(NULL, FALSE, TRUE);
 
   $problem_code_name = 'Unknown';
   if (array_key_exists($problem->problem, $request_problems_by_id)) {
@@ -2197,7 +2197,7 @@ function mfcs_request_problems_0_request_form_validate($form, &$form_state) {
   $do_something = FALSE;
 
   if (isset($form_state['values']['actions']['action'])) {
-    $request_problems_by_id = mfcs_get_request_problems_list_options();
+    $request_problems_by_id = mfcs_get_request_problems_list_options(NULL, FALSE, TRUE);
     if (array_key_exists($form['form']['problem']['#value']->problem, $request_problems_by_id) && $form['form']['problem']['#value']->problem != MFCS_REQUEST_PROBLEM_NONE) {
       if ($form_state['values']['actions']['action'] == 'recheck') {
         $do_something = TRUE;

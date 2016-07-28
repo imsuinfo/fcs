@@ -15,6 +15,7 @@
 /**
  * Defines request status codes.
  */
+define('MFCS_REQUEST_STATUS_NONE', 0);
 define('MFCS_REQUEST_STATUS_DELETED', 0);
 define('MFCS_REQUEST_STATUS_LOCKED', 1);
 define('MFCS_REQUEST_STATUS_UNLOCKED', 2);
@@ -44,6 +45,7 @@ define('MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED', 8);
 /**
  * Defines Taxonomy TIDs for review steps.
  */
+ define('MFCS_REVIEW_STEP_NONE', 0);
  define('MFCS_REVIEW_STEP_CHANGES_REQUIRED', 140);
  define('MFCS_REVIEW_STEP_COMPLETED', 134);
  define('MFCS_REVIEW_STEP_MAKE_DECISIONS', 117);
@@ -68,7 +70,7 @@ define('MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED', 8);
  define('MFCS_REVIEW_DECISION_ISSUES', 150);
  define('MFCS_REVIEW_DECISION_ISSUES_NONE', 151);
 
- /**
+/**
  * Defines restrictions review decisions.
  */
  define('MFCS_RESTRICTION_DECISION_NONE', 0);
@@ -90,9 +92,16 @@ define('MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED', 8);
 /**
  * Defines Taxonomy TIDs for review classifications.
  */
+ define('MFCS_REVIEWER_CLASSIFICATION_NONE', 0);
+ define('MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR', 1);
+ define('MFCS_REVIEWER_CLASSIFICATION_MANAGER', 2);
+ define('MFCS_REVIEWER_CLASSIFICATION_REQUESTER', 3);
+ define('MFCS_REVIEWER_CLASSIFICATION_SYSTEM', 4);
+ define('MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR', 112);
+ define('MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY', 144);
  define('MFCS_REVIEWER_CLASSIFICATION_ADMINISTRATIVE_ACCOUNTING', 105);
  define('MFCS_REVIEWER_CLASSIFICATION_CUSTODIAL', 147);
- define('MFCS_REVIEWER_CLASSIFICATION_EVENT_COORDINATOR', 99);
+ define('MFCS_REVIEWER_CLASSIFICATION_UNIVERSITY_EVENTS', 99);
  define('MFCS_REVIEWER_CLASSIFICATION_FACILITIES_CUSTODIAL', 104);
  define('MFCS_REVIEWER_CLASSIFICATION_FACILITIES', 146);
  define('MFCS_REVIEWER_CLASSIFICATION_FACULTY_ADVISOR', 100);
@@ -101,20 +110,13 @@ define('MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED', 8);
  define('MFCS_REVIEWER_CLASSIFICATION_MAINTENANCE', 103);
  define('MFCS_REVIEWER_CLASSIFICATION_PURCHASING', 106);
  define('MFCS_REVIEWER_CLASSIFICATION_SECURITY', 102);
- define('MFCS_REVIEWER_CLASSIFICATION_STUDENT_SERVICE_ADMINISTRATION', 145);
+ define('MFCS_REVIEWER_CLASSIFICATION_STUDENT_ACTIVITIES_ADMINISTRATION', 145);
  define('MFCS_REVIEWER_CLASSIFICATION_UNIVERSITY_SERVICES', 101);
- define('MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR', 112);
- define('MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY', 144);
-
- // these are not taxonomy-created classifications, they are instead unique ids.
- define('MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR', 1);
- define('MFCS_REVIEWER_CLASSIFICATION_MANAGER', 2);
- define('MFCS_REVIEWER_CLASSIFICATION_REQUESTER', 3);
- define('MFCS_REVIEWER_CLASSIFICATION_SYSTEM', 4);
 
 /**
  * Defines Taxonomy TIDs for request classifications.
  */
+ define('MFCS_REQUEST_CLASSIFICATION_NONE', 0);
  define('MFCS_REQUEST_CLASSIFICATION_STUDENT', 1);
  define('MFCS_REQUEST_CLASSIFICATION_CAMPS', 2);
  define('MFCS_REQUEST_CLASSIFICATION_FACULTY', 3);
@@ -131,9 +133,58 @@ define('MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED', 8);
 /**
  * Defines Taxonomy TIDs for request dates categories.
  */
+ define('MFCS_REQUEST_DATES_CATEGORY_NONE', 0);
  define('MFCS_REQUEST_DATES_CATEGORY_ACTUAL', 137);
  define('MFCS_REQUEST_DATES_CATEGORY_SETUP', 138);
  define('MFCS_REQUEST_DATES_CATEGORY_CLEANUP', 139);
+
+/**
+ * Defines Taxonomy TIDs for request revenue.
+ */
+ define('MFCS_REQUEST_REVENUE_NONE', 0);
+ define('MFCS_REQUEST_REVENUE_TICKET_SALES', 91);
+ define('MFCS_REQUEST_REVENUE_MERCHANDISE_SALES', 92);
+ define('MFCS_REQUEST_REVENUE_CONCESSION_SALES', 93);
+
+/**
+ * Defines Taxonomy TIDs for request publicity.
+ */
+ define('MFCS_REQUEST_PUBLICITY_NONE', 0);
+ define('MFCS_REQUEST_PUBLICITY_CAMPUS_DIGEST', 77);
+ define('MFCS_REQUEST_PUBLICITY_STUDENT_DIGEST', 78);
+ define('MFCS_REQUEST_PUBLICITY_WEBSITE', 79);
+ define('MFCS_REQUEST_PUBLICITY_SOCIAL_MEDIA', 80);
+ define('MFCS_REQUEST_PUBLICITY_AXIS_TVS', 81);
+ define('MFCS_REQUEST_PUBLICITY_PRESS_RELEASE', 82);
+
+/**
+ * Defines Taxonomy TIDs for request designing material.
+ */
+ define('MFCS_REQUEST_DESIGNING_MATERIALS_NONE', 0);
+ define('MFCS_REQUEST_DESIGNING_MATERIALS_PUBLIC_RELATIONS', 95);
+ define('MFCS_REQUEST_DESIGNING_MATERIALS_MARKETING', 96);
+ define('MFCS_REQUEST_DESIGNING_MATERIALS_OTHER', 97);
+
+/**
+ * Defines Taxonomy TIDs for request technical equipment.
+ */
+ define('MFCS_REQUEST_TECHNICAL_EQUIPMENT_NONE', 0);
+ define('MFCS_REQUEST_TECHNICAL_EQUIPMENT_SCREEN', 73);
+ define('MFCS_REQUEST_TECHNICAL_EQUIPMENT_COMPUTER', 74);
+ define('MFCS_REQUEST_TECHNICAL_EQUIPMENT_SOUND', 75);
+ define('MFCS_REQUEST_TECHNICAL_EQUIPMENT_MICROPHONE', 76);
+
+/**
+ * Defines Taxonomy TIDs for request step.
+ */
+ define('MFCS_REQUEST_STEP_NONE', 0);
+ define('MFCS_REQUEST_STEP_VENUE_AVAILABLE', 116);
+ define('MFCS_REQUEST_STEP_RESOLVE_CONFLICTS', 117);
+ define('MFCS_REQUEST_STEP_TENTATIVE_HOLD', 118);
+ define('MFCS_REQUEST_STEP_REVIEW', 132);
+ define('MFCS_REQUEST_STEP_REQUIREMENTS', 133);
+ define('MFCS_REQUEST_STEP_COMPLETED', 134);
+ define('MFCS_REQUEST_STEP_CHANGES_REQUIRED', 140);
 
 /**
  * Defines operator codes for building search queries.
@@ -235,6 +286,7 @@ define('MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED', 8);
 /**
  * Defines Taxonomy TIDs for review steps.
  */
+ define('MFCS_REQUEST_TYPE_NONE', 0);
  define('MFCS_REQUEST_TYPE_ATHLETIC', 66);
  define('MFCS_REQUEST_TYPE_BANQUET', 61);
  define('MFCS_REQUEST_TYPE_CEREMONY', 64);
@@ -251,6 +303,7 @@ define('MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED', 8);
 /**
  * Defines Taxonomy TIDs for request classifications.
  */
+ define('MFCS_REQUEST_AUDIENCE_NONE', 0);
  define('MFCS_REQUEST_AUDIENCE_FACULTY_AND_STAFF', 71);
  define('MFCS_REQUEST_AUDIENCE_GUESTS_ONLY', 68);
  define('MFCS_REQUEST_AUDIENCE_STUDENTS_AND_EMPLOYEES', 70);
@@ -476,7 +529,6 @@ function mfcs_user_update(&$edit, $account, $category) {
 
   return mfcs_hook_user_update($edit, $account, $category);
 }
-
 
 /**
  * Access callback for facilities use dashboard page.
@@ -4501,7 +4553,7 @@ function mfcs_sync_banner_to_local($transaction = NULL, $user = NULL, $message_o
   }
 
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
-  $request_locations = mfcs_get_request_location_list_options(NULL, TRUE);
+  $request_locations = mfcs_get_request_location_list_options();
 
   $instance = mfcs_instance();
 
@@ -9039,8 +9091,8 @@ function mfcs_build_request_table($items, $max_rows, $columns = NULL, $user = NU
   }
 
   $status_options = mfcs_get_request_status_list_options();
-  $step_options = mfcs_get_request_steps_list_options();
-  $location_options = mfcs_get_request_location_list_options(NULL, FALSE, TRUE);
+  $step_options = mfcs_get_review_steps_list_options();
+  $location_options = mfcs_get_request_location_list_options(NULL, TRUE);
   $room_options = mfcs_get_request_room_list_options(NULL, NULL, TRUE);
   $building_options = array();
 
@@ -9715,8 +9767,8 @@ function mfcs_build_request_ajax_table_process_rows($items, $columns, $user = NU
 
   $type_options = mfcs_get_request_type_list_options();
   $status_options = mfcs_get_request_status_list_options();
-  $step_options = mfcs_get_request_steps_list_options();
-  $location_options = mfcs_get_request_location_list_options(NULL, FALSE, TRUE);
+  $step_options = mfcs_get_review_steps_list_options();
+  $location_options = mfcs_get_request_location_list_options(NULL, TRUE);
   $room_options = mfcs_get_request_room_list_options(NULL, NULL, TRUE);
   $building_options = array();
 

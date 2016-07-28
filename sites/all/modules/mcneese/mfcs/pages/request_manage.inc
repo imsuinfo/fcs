@@ -92,7 +92,7 @@ function mfcs_request_manage_0_page($request_id) {
   $can_uncancel_request = mfcs_request_access('uncancel', $request, $user);
 
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
-  $options_step = mfcs_get_request_steps_list_options();
+  $options_step = mfcs_get_review_steps_list_options();
   $options_status = mfcs_get_request_status_list_options();
   $options_room = mfcs_get_request_room_list_options($id_location);
   $options_building = mfcs_get_request_building_list_options($id_location);
