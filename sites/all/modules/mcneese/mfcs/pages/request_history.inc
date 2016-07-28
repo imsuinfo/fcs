@@ -299,9 +299,6 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
                         $custom_message .= 'the request information was amended and therefore the review process was restarted. ';
                       }
                       elseif ($decision === MFCS_REVIEW_DECISION_AVAILABLE || $decision === MFCS_REVIEW_DECISION_UNAVAILABLE) {
-                        if (!isset($decision_options[$decision])) {
-                          drupal_set_message("DEBUG: $decision is not available in: " . print_r($decision_options, TRUE));
-                        }
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
                         $custom_message .= 'made a decision to designate that the request rooms are <strong class="review-decision">' . $decision_options[$decision] . '</strong>. ';
                       }
