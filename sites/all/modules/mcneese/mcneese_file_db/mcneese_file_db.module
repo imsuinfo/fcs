@@ -348,15 +348,11 @@ function mcneese_file_db_load_available_files($conditions = array()) {
     if (class_exists('cf_error')) {
       cf_error::on_query_execution($e);
     }
-
-    throw $e;
   }
   catch (Exception $e) {
     if (class_exists('cf_error')) {
       cf_error::on_query_execution($e);
     }
-
-    throw $e;
   }
 
   return FALSE;
@@ -505,14 +501,28 @@ function mcneese_file_db_load_file($by = '', $arg1 = '', $arg2 = '', $arg3 = '',
       foreach ($associations as $a) {
         $filepath = $a['scheme'] . '://';
 
-        if (!strncmp($arg1, $if_none_match, MCNEESE_FILE_DB_SHORT_SUM_SIZE)) {
-          $filepath .= MCNEESE_FILE_DB_PATH_BY_HASH . '/' . $if_none_match;
-          $files = (array) mcneese_file_db_load_available_files(array('checksum' => $if_none_match, 'association' => $a['association']));
-          $not_modified = TRUE;
+        try {
+          if (!strncmp($arg1, $if_none_match, MCNEESE_FILE_DB_SHORT_SUM_SIZE)) {
+            $filepath .= MCNEESE_FILE_DB_PATH_BY_HASH . '/' . $if_none_match;
+            $files = (array) mcneese_file_db_load_available_files(array('checksum' => $if_none_match, 'association' => $a['association']));
+            $not_modified = TRUE;
+          }
+          else {
+            $filepath .= MCNEESE_FILE_DB_PATH_BY_HASH . '/' . $arg1;
+            $files = (array) mcneese_file_db_load_available_files(array('checksum' => $arg1, 'association' => $a['association']));
+          }
         }
-        else {
-          $filepath .= MCNEESE_FILE_DB_PATH_BY_HASH . '/' . $arg1;
-          $files = (array) mcneese_file_db_load_available_files(array('checksum' => $arg1, 'association' => $a['association']));
+        catch (Error $e) {
+          if (class_exists('cf_error')) {
+            cf_error::on_query_exception($e);
+          }
+          return FALSE;
+        }
+        catch (Exception $e) {
+          if (class_exists('cf_error')) {
+            cf_error::on_query_exception($e);
+          }
+          return FALSE;
         }
 
         if (!empty($files)) {
@@ -603,16 +613,30 @@ function mcneese_file_db_load_file($by = '', $arg1 = '', $arg2 = '', $arg3 = '',
       foreach ($associations as $a) {
         $filepath = $a['scheme'] . '://';
 
-        if ($arg1 == $if_none_match) {
-          if (!is_numeric($if_none_match)) return FALSE;
-          $filepath .= MCNEESE_FILE_DB_PATH_BY_ID . '/' . $if_none_match;
-          $files = (array) mcneese_file_db_load_available_files(array('id' => $if_none_match, 'association' => $a['association']));
-          $not_modified = TRUE;
+        try {
+          if ($arg1 == $if_none_match) {
+            if (!is_numeric($if_none_match)) return FALSE;
+            $filepath .= MCNEESE_FILE_DB_PATH_BY_ID . '/' . $if_none_match;
+            $files = (array) mcneese_file_db_load_available_files(array('id' => $if_none_match, 'association' => $a['association']));
+            $not_modified = TRUE;
+          }
+          else {
+            if (!is_numeric($arg1)) return FALSE;
+            $filepath .= MCNEESE_FILE_DB_PATH_BY_ID . '/' . $arg1;
+            $files = (array) mcneese_file_db_load_available_files(array('id' => $arg1, 'association' => $a['association']));
+          }
         }
-        else {
-          if (!is_numeric($arg1)) return FALSE;
-          $filepath .= MCNEESE_FILE_DB_PATH_BY_ID . '/' . $arg1;
-          $files = (array) mcneese_file_db_load_available_files(array('id' => $arg1, 'association' => $a['association']));
+        catch (Error $e) {
+          if (class_exists('cf_error')) {
+            cf_error::on_query_exception($e);
+          }
+          return FALSE;
+        }
+        catch (Exception $e) {
+          if (class_exists('cf_error')) {
+            cf_error::on_query_exception($e);
+          }
+          return FALSE;
         }
 
         if (!empty($files)) {
@@ -1215,7 +1239,21 @@ function mcneese_file_db_file_entity_access($op, $file = NULL, $account = NULL) 
  *   The association string to check against.
  */
 function mcneese_file_db_check_existence($checksum, $association) {
-  $loaded = mcneese_file_db_load_available_files(array('checksum' => $checksum, 'association' => $association));
+  try {
+    $loaded = mcneese_file_db_load_available_files(array('checksum' => $checksum, 'association' => $association));
+  }
+  catch (Error $e) {
+    if (class_exists('cf_error')) {
+      cf_error::on_query_exception($e);
+    }
+    return;
+  }
+  catch (Exception $e) {
+    if (class_exists('cf_error')) {
+      cf_error::on_query_exception($e);
+    }
+    return;
+  }
 
   if (!empty($loaded)) return;
 
@@ -1274,16 +1312,30 @@ function mcneese_file_db_check_existence($checksum, $association) {
  *   The filename is returned on success, FALSE otherwise.
  */
 function mcneese_file_db_get_filename($id, $association, $method = MCNEESE_FILE_DB_PATH_BY_HASH) {
-  if ($method == MCNEESE_FILE_DB_PATH_BY_HASH) {
-    $loaded = mcneese_file_db_load_available_files(array('checksum' => $id, 'association' => $association));
+  try {
+    if ($method == MCNEESE_FILE_DB_PATH_BY_HASH) {
+      $loaded = mcneese_file_db_load_available_files(array('checksum' => $id, 'association' => $association));
+    }
+    elseif ($method == MCNEESE_FILE_DB_PATH_BY_ID) {
+      $loaded = mcneese_file_db_load_available_files(array('id' => $id, 'association' => $association));
+    }
+    elseif ($method == MCNEESE_FILE_DB_PATH_BY_FID) {
+      $loaded = mcneese_file_db_load_available_files(array('file_id' => $id, 'association' => $association));
+    }
+    else {
+      return FALSE;
+    }
   }
-  elseif ($method == MCNEESE_FILE_DB_PATH_BY_ID) {
-    $loaded = mcneese_file_db_load_available_files(array('id' => $id, 'association' => $association));
+  catch (Error $e) {
+    if (class_exists('cf_error')) {
+      cf_error::on_query_exception($e);
+    }
+    return FALSE;
   }
-  elseif ($method == MCNEESE_FILE_DB_PATH_BY_FID) {
-    $loaded = mcneese_file_db_load_available_files(array('file_id' => $id, 'association' => $association));
-  }
-  else {
+  catch (Exception $e) {
+    if (class_exists('cf_error')) {
+      cf_error::on_query_exception($e);
+    }
     return FALSE;
   }
 
