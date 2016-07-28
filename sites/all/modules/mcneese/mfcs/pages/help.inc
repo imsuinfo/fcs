@@ -189,7 +189,7 @@ function mfcs_help_topic() {
   }
 
   if (in_array('request-review', $allowed_topics)) {
-    $markup .= '      <li class="list-item"><a href="' . $base_path . 'help-0/request-review' . $url_arguments . '" class="item-link" title="User Guide: Review Request">' . "Review Request" . "</a></li>";
+    $markup .= '      <li class="list-item"><a href="' . $base_path . 'help-0/request-review' . $url_arguments . '" class="item-link" title="User Guide: Review Requests">' . "Review Requests" . "</a></li>";
   }
 
   if (in_array('request-manage', $allowed_topics)) {

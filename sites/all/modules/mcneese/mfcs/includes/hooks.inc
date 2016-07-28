@@ -69,7 +69,7 @@ function mfcs_hook_menu() {
  */
 function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   $items['requests'] = array(
-    'title' => "Requests Dashboard",
+    'title' => "Dashboard",
     'description' => "Requests Dashboard",
     'page callback' => 'mfcs_dashboard_page',
     'file' => 'dashboard.inc',
@@ -432,8 +432,8 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
  */
 function mfcs_hook_menu_requests_reviewing(&$items, $module_path) {
   $items['requests/review-0'] = array(
-    'title' => "Review Requests",
-    'description' => "Review Request",
+    'title' => "Review",
+    'description' => "Review Requests",
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_review_0_page'),
     'file' => 'request_review.inc',
@@ -445,8 +445,8 @@ function mfcs_hook_menu_requests_reviewing(&$items, $module_path) {
   );
 
   $items['requests/review-0/%'] = array(
-    'title' => "Review Requests",
-    'description' => "Review Request",
+    'title' => "Review",
+    'description' => "Review Requests",
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_review_0_page', 2),
     'file' => 'request_review.inc',
@@ -819,14 +819,14 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
  */
 function mfcs_hook_menu_management(&$items, $module_path) {
   $items['requests/management'] = array(
-    'title' => "Requests Management",
-    'description' => "Requests Management",
+    'title' => "Management",
+    'description' => "Management",
     'page callback' => 'mfcs_management_page',
     'file' => 'management.inc',
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_management_page_access',
-    'tab_parent' => '',
-    'tab_root' => '',
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
   );
 
   $items['requests/proxy-0'] = array(
@@ -892,7 +892,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
 
   $items['requests/reviewers-0'] = array(
     'title' => "Manage Reviewers",
-    'description' => "Review Request",
+    'description' => "Manage Reviewers",
     'page callback' => 'mfcs_request_reviewers_0_page',
     'file' => 'request_reviewers.inc',
     'file path' => $module_path . '/pages',
