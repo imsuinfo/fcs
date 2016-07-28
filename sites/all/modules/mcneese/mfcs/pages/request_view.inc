@@ -1731,7 +1731,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           $form['review']['operations']['requirements'][$use_name]['amount'] = array(
             '#id' => 'request-review-operations-requirements-' . $use_name . '-amount',
             '#type' => 'textfield',
-            '#title' => '<span class="element-invisible">' . $use_title . ' Fee</span> Amount',
+            '#title' => '<span class="element-invisible">' . $use_title . ' Fee</span> Rate',
             '#default_value' => NULL,
             '#size' => 16,
             '#required' => (in_array($use_name, $uses_required) ? TRUE : FALSE),
