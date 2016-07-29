@@ -1465,18 +1465,6 @@ function mfcs_request_users_0_add_or_edit_form_submit($form, &$form_state, $edit
       }
     }
 
-    $mappings = mfcs_load_request_user_role_mapping();
-    foreach ($mappings as $mapping) {
-      $role = (int) $mapping['rid'];
-      $term = (int) $mapping['tid'];
-      if ($role > 0 && array_key_exists($role, $new_account->roles) && $term > 0) {
-        $new_account->field_user_event_roles['und'][] = array('tid' => $term);
-        unset($term);
-      }
-    }
-    unset($role);
-    unset($term);
-
     $new_account->field_user_banner_id['und'][0]['value'] = NULL;
     if (isset($form_state['values']['form']['personal']['banner_id']) && $form_state['values']['form']['personal']['banner_id'] > 0) {
       $new_account->field_user_banner_id['und'][0]['value'] = mfcs_banner_id_int_to_string($form_state['values']['form']['personal']['banner_id']);

@@ -3284,70 +3284,6 @@ function mfcs_search_users($search, $wildcard = TRUE, $sensitive = FALSE, $delet
 }
 
 /**
- * Returns an array containg mapping information for oracle.
- *
- * Use this to map drupal request role taxonomy terms with the oracle roles.
- *
- * @return array|bool
- *   An array containing the mapping information.
- *   FALSE is returned on error.
- */
-function mfcs_load_request_user_role_mapping() {
-  $cache_id = __function__;
-  $terms = &drupal_static($cache_id, array());
-  if (!empty($terms)) {
-    return $terms;
-  }
-
-  try {
-    $query = db_select('taxonomy_term_data', 'ttd');
-    $query->innerJoin('taxonomy_vocabulary', 'tv', 'tv.vid = ttd.vid');
-    $query->fields('ttd', array('tid'));
-    $query->condition('tv.machine_name', 'user_roles');
-
-    $executed = $query->execute();
-    foreach ($executed as $row) {
-      $term = taxonomy_term_load($row->tid);
-      $name = $term->field_role_oracle_name['und'][0]['value'];
-
-      $terms[$name] = array('tid' => FALSE, 'role' => FALSE, 'rid' => FALSE, 'name' => FALSE);
-
-
-      if (!empty($term->field_role_oracle_name['und'][0]['value'])) {
-        $terms[$name]['tid'] = $row->tid;
-      }
-
-      if (!empty($term->field_role_system_name['und'][0]['value'])) {
-        $role = user_role_load_by_name($term->field_role_system_name['und'][0]['value']);
-
-        if (is_object($role)) {
-          $terms[$name]['role'] = $role->name;
-          $terms[$name]['rid'] = $role->rid;
-        }
-
-        unset($role);
-      }
-
-      if (!empty($term->name)) {
-        $terms[$name]['name'] = $term->name;
-      }
-    }
-  }
-  catch (Error $e) {
-    cf_error::on_exception($e);
-
-    return FALSE;
-  }
-  catch (Exception $e) {
-    cf_error::on_exception($e);
-
-    return FALSE;
-  }
-
-  return $terms;
-}
-
-/**
  * Returns user's basic information.
  *
  * This is different from user_load in that it loads a small set of fields.
@@ -4133,6 +4069,7 @@ function mfcs_process_user_banner_roles($user, &$problems, $settings = array()) 
   $bannerless_exception_role = user_role_load_by_name('bannerless exception');
   $reviewer_exception_role = user_role_load_by_name('reviewer exception');
 
+  $role_mappings = mfcs_get_drupal_to_banner_role_mappings('banner_name');
 
   $user_roles = array();
   if (isset($user->roles) && is_array($user->roles)) {
@@ -4183,21 +4120,15 @@ function mfcs_process_user_banner_roles($user, &$problems, $settings = array()) 
 
   $is_manager = array_key_exists($manager_role->rid, $processed_roles);
 
-
   // remove roles associated with banner from the user roles for non-managers.
-  $mappings = mfcs_load_request_user_role_mapping();
-  $manager_banner_roles = array();
-  foreach ($mappings as $mapping) {
-    if (array_key_exists($mapping['rid'], $processed_roles)) {
-      if ($is_manager) {
-        $manager_banner_roles[$mapping['rid']] = $mapping['tid'];
-      }
-      else {
-        unset($processed_roles[$mapping['rid']]);
+  if (!$is_manager) {
+    foreach ($role_mappings as $mapping) {
+      if (array_key_exists($mapping->role_id, $processed_roles)) {
+        unset($processed_roles[$mapping->role_id]);
       }
     }
+    unset($mapping);
   }
-  unset($mapping);
 
 
   // validate banner id, if invalid, then strip all user roles (admins are cleared before this point).
@@ -4245,30 +4176,29 @@ function mfcs_process_user_banner_roles($user, &$problems, $settings = array()) 
     $processed_roles[$requester_role->rid] = $requester_role->rid;
   }
 
+  // managers are auto-granted roles even if the roles are not supplied according to their banner access.
+  if ($is_manager) {
+    foreach ($role_mappings as $mapping) {
+      $processed_roles[$mapping->role_id] = $mapping->role_id;
+    }
+    unset($mapping);
+  }
+
   // if the (non-admin) user is a venue or room coordinator, then add/remove reviewer role as necessary.
-  $banner_roles = array();
   if (empty($user_banner['role'])) {
-    // if the user has no banner roles, is not a manager, and is not a reviewer exception, then do not allow the user to have reviewer role (bannerless exception and administrators cannot reach this point).
+    // if the user has no banner roles, is not a manager, and is not a reviewer exception, then do not allow the user to have reviewer or requester roles (bannerless exception and administrators cannot reach this point).
     if (!$is_manager && !array_key_exists($reviewer_exception_role->rid, $processed_roles)) {
       unset($processed_roles[$reviewer_role->rid]);
+      unset($processed_roles[$requester_role->rid]);
     }
   }
   else {
     foreach ($user_banner['role'] as $role) {
-      if (isset($mappings[$role]['tid'])) {
-        $banner_roles[] = array('tid' => $mappings[$role]['tid']);
-        $processed_roles[$mappings[$role]['rid']] = $mappings[$role]['rid'];
+      if (isset($role_mappings[$role])) {
+        $processed_roles[$role_mappings[$role]->role_id] = $role_mappings[$role]->role_id;
       }
     }
     unset($role);
-  }
-
-  // managers are auto-granted specified roles even if the roles are not supplied by banner.
-  if ($is_manager) {
-    foreach ($manager_banner_roles as $role_tid) {
-      $banner_roles[] = array('tid' => $role_tid);
-    }
-    unset($role_tid);
   }
 
 
@@ -4337,8 +4267,6 @@ function mfcs_process_user_banner_roles($user, &$problems, $settings = array()) 
     }
   }
 
-  // Note: the system used to refer to requests as events, but because this is a drupal field, 'event' cannot be easily changed to 'request' in this explicit case.
-  $results['field_user_event_roles'] = array('und' => $banner_roles);
   $results['roles'] = $processed_roles;
 
   if (isset($user->uid)) {
@@ -12122,6 +12050,51 @@ function mfcs_get_ldap_user_name_by_banner_id($banner_id) {
   }
 
   return FALSE;
+}
+
+/**
+ * Loads all drupal role to banner role mappings.
+ *
+ * @param string|null $key
+ *   (optional) When not NULL, a string representing the column to key the returned array with.
+ *
+ * @return array|bool
+ *   An array of mappings on success, optionally keyed by $key.
+ *   FALSE is returned on error.
+ */
+function mfcs_get_drupal_to_banner_role_mappings($key = NULL) {
+  try {
+    $query = db_select('mfcs_drupal_to_banner_role_mapping', 'mdbrm');
+    $query->addField('mdbrm', 'role_id', 'role_id');
+    $query->addField('mdbrm', 'banner_id', 'banner_id');
+    $query->addField('mdbrm', 'role_name', 'role_name');
+    $query->addField('mdbrm', 'banner_name', 'banner_name');
+
+    if ($key != 'role_id' && $key != 'banner_id' && $key != 'role_name' && $key != 'banner_name') {
+      $key = NULL;
+    }
+
+    if (is_null($key)) {
+      $results = $query->execute()->fetchAllAssoc('role_id');
+    }
+    else {
+      $results = $query->execute()->fetchAllAssoc($key);
+    }
+
+    if (!is_array($results)) {
+      return FALSE;
+    }
+  }
+  catch (Error $e) {
+    cf_error::on_exception($e);
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
+    return FALSE;
+  }
+
+  return $results;
 }
 
 /**
