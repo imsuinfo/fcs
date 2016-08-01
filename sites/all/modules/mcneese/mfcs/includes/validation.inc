@@ -584,9 +584,9 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
         $date_timestamp[$key] = strtotime($value);
 
         // request time and date time may have same day, but different times, so only compare day.
-        $min_days_by_policy = strtotime('+21 days', $date_timestamp[$key]);
-        $min_days_by_policy = strtotime('midnight today', $min_days_by_policy);
         $current_date = strtotime('midnight today', $instance);
+        $min_days_by_policy = strtotime('+21 days', $instance);
+        $min_days_by_policy = strtotime('midnight today', $min_days_by_policy);
 
         if ($date_timestamp[$key] < $current_date) {
           form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t("The date '@date' is in the past and cannot be used.", array('@date' => $value)));
