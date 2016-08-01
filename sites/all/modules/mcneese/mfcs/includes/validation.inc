@@ -584,24 +584,27 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
         $date_timestamp[$key] = strtotime($value);
 
         // request time and date time may have same day, but different times, so only compare day.
-        $min_days_by_policy = strtotime('-21 days', $date_timestamp[$key]);
+        $min_days_by_policy = strtotime('+21 days', $date_timestamp[$key]);
         $min_days_by_policy = strtotime('midnight today', $min_days_by_policy);
-        $request_date = strtotime('midnight today', $instance);
+        $current_date = strtotime('midnight today', $instance);
 
-        if ($request_date >= $min_days_by_policy) {
+        if ($date_timestamp[$key] < $current_date) {
+          form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t("The date '@date' is in the past and cannot be used.", array('@date' => $value)));
+          $passed = FALSE;
+        }
+        elseif ($date_timestamp[$key] <= $min_days_by_policy) {
           // Quick Meetings allow same day requests.
           if (!$is_quick_meeting && !$exceptional_dates_allowed) {
             form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t("The date '@date' is too soon and must be <a href=\"//www.mcneese.edu/node/3217#3_week_requirement\" class=\"strong\" target=\"_blank\">a minimum of three weeks in advance</a> prior to the event or prior to the expected start date for publicity for the event, whichever comes first.", array('@date' => $value)));
             $passed = FALSE;
           }
-        }
-        elseif ($date_timestamp[$key] < $instance) {
-          form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t("The date '@date' is in the past and cannot be used.", array('@date' => $value)));
-          $passed = FALSE;
+          elseif (!$is_quick_meeting && $exceptional_dates_allowed) {
+            drupal_set_message(t("Warning: The date '@date' is too soon and must be <a href=\"//www.mcneese.edu/node/3217#3_week_requirement\" class=\"strong\" target=\"_blank\">a minimum of three weeks in advance</a> prior to the event or prior to the expected start date for publicity for the event, whichever comes first.", array('@date' => $value)), 'warning');
+          }
         }
 
         unset($min_days_by_policy);
-        unset($request_date);
+        unset($current_date);
       }
 
       // check for holidays.
