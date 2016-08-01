@@ -505,8 +505,11 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     if (!empty($reviews['order']) && isset($reviews['group'])) {
       mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
-      $classification_options = mfcs_get_reviewer_classification_list_options(NULL, TRUE);
+      $classification_options = mfcs_get_reviewer_classification_list_options(NULL, TRUE, TRUE);
       $preprocessed_decisions = array();
+
+      // do not use the none value
+      unset($classification_options[MFCS_REVIEWER_CLASSIFICATION_NONE]);
 
       foreach ($reviews['order'] as $review) {
         if (is_string($review->classification)) {

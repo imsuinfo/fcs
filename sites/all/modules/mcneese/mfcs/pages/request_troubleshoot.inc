@@ -866,6 +866,15 @@ function mfcs_request_troubleshoot_0_locations_page($location_id = NULL) {
     return '';
   }
 
+  global $conf;
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
   $markup = '<div id="mfcs-troubleshoot_0-locations-page" class="information_page">';
   $markup .= '<h2 class="information_page-content_header element-invisible">Main Content</h2>';
 
@@ -922,7 +931,7 @@ function mfcs_request_troubleshoot_0_locations_page($location_id = NULL) {
       $target_markup .= '    </li>';
       $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-human_name odd">';
       $target_markup .= '      <div class="information_page-entry-list-item-name">Location Name:</div> ';
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->human_name . '</div>';
+      $target_markup .= '      <div class="information_page-entry-list-item-value"><a href="' . $base_path . 'requests/troubleshoot-0/locations/' . $entry->location_id . '/edit' . $url_arguments . '" class="information_page-entry-list-item-value-link">' . $entry->human_name . '</a></div>';
       $target_markup .= '    </li>';
       $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-term_id even">';
       $target_markup .= '      <div class="information_page-entry-list-item-name">Term ID:</div> ';
@@ -979,6 +988,230 @@ function mfcs_request_troubleshoot_0_locations_page($location_id = NULL) {
 
   $markup .= '</div>';
   return $markup;
+}
+
+/**
+ * Change the name of the location.
+ *
+ * The banner information does not provide a human friendly name, so this provides a way to change that name.
+ *
+ * @param int|null $location_id
+ *   (optional) When not NULL, only load the information for the specified location.
+ *   Otherwise load all locations.
+ */
+function mfcs_request_troubleshoot_0_locations_edit_name_form($form, &$form_state, $location_id) {
+  if (!is_array($form)) {
+    cf_error::invalid_array('form');
+
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  if (!is_array($form_state)) {
+    cf_error::invalid_array('form_state');
+
+    drupal_not_found();
+    drupal_exit();
+
+  }
+
+  if (!is_null($location_id) && !cf_is_integer($location_id)) {
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  global $conf;
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  $location_id = (int) $location_id;
+  $location = mfcs_load_locations($location_id, TRUE);
+
+  if ($location === FALSE) {
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  mfcs_add_canonical_headers('requests/troubleshoot-0/locations/' . $location_id . '/edit');
+
+  $page_title = "Troubleshooting Tools - Locations - Edit Name";
+  drupal_set_title($page_title);
+
+  $user = cf_current_user();
+
+  $form['form'] = array(
+    '#tree' => TRUE,
+  );
+
+  $form['form']['location'] = array(
+    '#type' => 'value',
+    '#value' => $location,
+  );
+
+  $form['form']['location_id'] = array(
+    '#type' => 'value',
+    '#value' => $location_id,
+  );
+
+  $form['markup'] = array(
+    '#type' => 'markup',
+    '#markup' => '',
+  );
+
+  $form['location'] = array(
+    '#tree' => TRUE,
+  );
+
+  $form['location']['name'] = array(
+    '#type' => 'textfield',
+    '#title' => "Name",
+    '#default_value' => $location->location_name,
+    '#required' => TRUE,
+  );
+
+  $form['submit'] = array(
+    '#id' => 'locations-edit_name-submit',
+    '#type' => 'container',
+    '#tree' => TRUE,
+    '#attributes' => array(
+      'class' => array(
+        'no-print',
+        'locations-edit_name-submit',
+      ),
+    ),
+  );
+
+  $form['submit']['cancel'] = array(
+    '#id' => 'locations-edit_name-submit-cancel',
+    '#name' => 'locations-edit_name-submit-cancel',
+    '#type' => 'submit',
+    '#default_value' => t("Cancel"),
+    '#attributes' => array(
+      'class' => array(
+        'no-print',
+        'request_problems-submit-cancel',
+      ),
+    ),
+  );
+
+  $form['submit']['submit'] = array(
+    '#id' => 'locations-edit_name-submit-submit',
+    '#name' => 'locations-edit_name-submit-submit',
+    '#type' => 'submit',
+    '#default_value' => t("Submit"),
+    '#attributes' => array(
+      'class' => array(
+        'no-print',
+        'request_problems-submit-submit',
+      ),
+    ),
+  );
+
+
+  $form['markup']['#markup'] .= '<div class="locations-edit_name-summary">';
+  $form['markup']['#markup'] .= '  <div class="locations-edit_name-summary_row"><span class="locations-edit_name-summary_row-label label-id">Location ID:</span> <span class="locations-edit_name-summary_row-value value-id">' . $location_id . '</span></div>';
+  $form['markup']['#markup'] .= '  <div class="locations-edit_name-summary_row"><span class="locations-edit_name-summary_row-label label-machine_name">Machine Name:</span> <span class="locations-edit_name-summary_row-value value-machine_name">' . $location->machine_name . '</a></span></div>';
+  $form['markup']['#markup'] .= '  <div class="locations-edit_name-summary_row"><span class="locations-edit_name-summary_row-label label-location_name">Location Name:</span> <span class="locations-edit_name-summary_row-value value-location_name">' . $location->location_name . '</span></div>';
+  $form['markup']['#markup'] .= '  <div class="locations-edit_name-summary_row"><span class="locations-edit_name-summary_row-label label-date_updated">Date Updated:</span> <span class="locations-edit_name-summary_row-value value-date_updated">' . date('l, F j, Y h:i:s a', $location->date) . '</span></div>';
+  $form['markup']['#markup'] .= '  <div class="locations-edit_name-summary_row"><span class="locations-edit_name-summary_row-label label-disabled">Disabled:</span> <span class="locations-edit_name-summary_row-value value-disabled">' . (isset($location->disabled) && $location->disabled == 1 ? 'Yes' : 'No') . '</span></div>';
+  $form['markup']['#markup'] .= '</div>';
+
+  return $form;
+}
+
+/**
+ * Validation for mfcs_request_troubleshoot_0_locations_edit_name_form().
+ *
+ * @param array $form
+ *   The form array as defined by drupals form api.
+ * @param array $form_state
+ *   The form state array as defined by drupals form api
+ *
+ * @see: mfcs_request_troubleshoot_0_locations_edit_name_form()
+ */
+function mfcs_request_troubleshoot_0_locations_edit_name_form_validate($form, &$form_state) {
+}
+
+/**
+ * Submit for mfcs_request_troubleshoot_0_locations_edit_name_form().
+ *
+ * @param array $form
+ *   The form array as defined by drupals form api.
+ * @param array $form_state
+ *   The form state array as defined by drupals form api
+ *
+ * @see: mfcs_request_troubleshoot_0_locations_edit_name_form()
+ */
+function mfcs_request_troubleshoot_0_locations_edit_name_form_submit($form, &$form_state) {
+  global $mfcs_determined;
+  $user = cf_current_user();
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  $clicked_id = '';
+  if (isset($form_state['triggering_element']['#id'])) {
+    $clicked_id = $form_state['triggering_element']['#id'];
+  }
+
+  if ($clicked_id == 'locations-edit_name-submit-cancel') {
+    if (empty($form_state['values']['redirect_to'])) {
+      $form_state['redirect'] = mfcs_build_redirect_array('requests/troubleshoot-0/locations');
+    }
+    else {
+      $form_state['redirect'] = $form_state['values']['redirect_to'];
+    }
+
+    return;
+  }
+
+  $instance = mfcs_instance();
+
+  $failure = FALSE;
+  $transaction = db_transaction();
+  try {
+    $query = db_update('mfcs_banner_locations');
+    $query->fields(array('human_name' => $form_state['values']['location']['name'], 'date' => $instance));
+    $query->condition('id', $form['form']['location_id']['#value']);
+    $query->execute();
+  }
+  catch (Error $e) {
+    $transaction->rollback();
+    cf_error::on_query_execution($e);
+
+    $failure = TRUE;
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+    cf_error::on_query_execution($e);
+
+    $failure = TRUE;
+  }
+
+  if ($failure) {
+    form_set_error('form', "An error occurred while trying to save the location name. Please contact the support staff.");
+    watchdog(MFCS_WATCHDOG_ID, "An error occurred while trying to save the location name.", array(), WATCHDOG_ERROR);
+
+    $form_state['rebuild'] = TRUE;
+    $form_state['redirect'] = FALSE;
+    $form_state['submitted'] = FALSE;
+    return FALSE;
+  }
+
+  // redirect after submitting.
+  if (empty($form_state['values']['redirect_to'])) {
+    $form_state['redirect'] = mfcs_build_redirect_array('requests/troubleshoot-0/locations');
+  }
+  else {
+    $form_state['redirect'] = $form_state['values']['redirect_to'];
+  }
 }
 
 /**

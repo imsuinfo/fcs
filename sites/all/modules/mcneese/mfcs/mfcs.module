@@ -104,7 +104,7 @@ define('MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED', 8);
  define('MFCS_REVIEWER_CLASSIFICATION_UNIVERSITY_EVENTS', 99);
  define('MFCS_REVIEWER_CLASSIFICATION_FACILITIES_CUSTODIAL', 104);
  define('MFCS_REVIEWER_CLASSIFICATION_FACILITIES', 146);
- define('MFCS_REVIEWER_CLASSIFICATION_FACULTY_ADVISOR', 100);
+ define('MFCS_REVIEWER_CLASSIFICATION_FACULTY_ADVISER', 100);
  define('MFCS_REVIEWER_CLASSIFICATION_FOOD_SERVICES', 108);
  define('MFCS_REVIEWER_CLASSIFICATION_HOUSING', 107);
  define('MFCS_REVIEWER_CLASSIFICATION_MAINTENANCE', 103);
@@ -2642,6 +2642,7 @@ function mfcs_load_locations($location = NULL, $disabled = FALSE) {
     }
 
     $query->addField('mbl', 'id', 'location_id');
+    $query->addField('mbl', 'machine_name', 'machine_name');
     $query->addField('mbl', 'human_name', 'location_name');
 
     if ($disabled) {
@@ -4481,7 +4482,12 @@ function mfcs_sync_banner_to_local($transaction = NULL, $user = NULL, $message_o
   }
 
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
-  $request_locations = mfcs_get_request_location_list_options();
+  $locations = mfcs_load_locations(NULL, TRUE);
+
+  $locations_machine_to_human_names = array();
+  foreach ($locations as $location) {
+    $locations_machine_to_human_names[$location->machine_name] = $location->location_name;
+  }
 
   $instance = mfcs_instance();
 
@@ -4571,8 +4577,8 @@ function mfcs_sync_banner_to_local($transaction = NULL, $user = NULL, $message_o
             $location_item['human_name'] = $v;
             $location_item['disabled'] = 0;
 
-            if (array_key_exists($v, $request_locations)) {
-              $location_item['human_name'] = substr($request_locations[$v], 0, 63);
+            if (array_key_exists($v, $locations_machine_to_human_names)) {
+              $location_item['human_name'] = substr($locations_machine_to_human_names[$v], 0, 63);
             }
           }
           elseif ($key == 'room_coordinator_email') {
@@ -9020,8 +9026,8 @@ function mfcs_build_request_table($items, $max_rows, $columns = NULL, $user = NU
 
   $status_options = mfcs_get_request_status_list_options();
   $step_options = mfcs_get_review_steps_list_options();
-  $location_options = mfcs_get_request_location_list_options(NULL, TRUE);
-  $room_options = mfcs_get_request_room_list_options(NULL, NULL, TRUE);
+  $location_options = mfcs_get_request_location_list_options(NULL, FALSE, TRUE);
+  $room_options = mfcs_get_request_room_list_options(NULL, NULL, FALSE, TRUE);
   $building_options = array();
 
   foreach ($items as $item) {
@@ -9048,7 +9054,7 @@ function mfcs_build_request_table($items, $max_rows, $columns = NULL, $user = NU
     }
 
     if (!array_key_exists($item->location, $building_options)) {
-      $building_options[$item->location] = mfcs_get_request_building_list_options($item->location, NULL, TRUE);
+      $building_options[$item->location] = mfcs_get_request_building_list_options($item->location, NULL, FALSE, TRUE);
     }
 
     if (isset($columns['location'])) {
@@ -9696,8 +9702,8 @@ function mfcs_build_request_ajax_table_process_rows($items, $columns, $user = NU
   $type_options = mfcs_get_request_type_list_options();
   $status_options = mfcs_get_request_status_list_options();
   $step_options = mfcs_get_review_steps_list_options();
-  $location_options = mfcs_get_request_location_list_options(NULL, TRUE);
-  $room_options = mfcs_get_request_room_list_options(NULL, NULL, TRUE);
+  $location_options = mfcs_get_request_location_list_options(NULL, FALSE, TRUE);
+  $room_options = mfcs_get_request_room_list_options(NULL, NULL, FALSE, TRUE);
   $building_options = array();
 
 
@@ -9706,7 +9712,7 @@ function mfcs_build_request_ajax_table_process_rows($items, $columns, $user = NU
     $row = array();
 
     if (!array_key_exists($item->location, $building_options)) {
-      $building_options[$item->location] = mfcs_get_request_building_list_options($item->location, NULL, TRUE);
+      $building_options[$item->location] = mfcs_get_request_building_list_options($item->location, NULL, FALSE, TRUE);
     }
 
     foreach ($columns as $column_id => $column) {

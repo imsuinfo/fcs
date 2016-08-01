@@ -1776,8 +1776,11 @@ function mfcs_workflow_next_step($request_id, $type, $step, $decision, $restrict
     if (!empty($reviews)) {
       mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
-      $classification_options = mfcs_get_reviewer_classification_list_options(NULL, TRUE);
+      $classification_options = mfcs_get_reviewer_classification_list_options(NULL, TRUE, TRUE);
       $preprocessed_decisions = array();
+
+      // do not use the none value
+      unset($classification_options[MFCS_REVIEWER_CLASSIFICATION_NONE]);
 
       $reviews_step = array();
       if (isset($reviews[MFCS_REVIEW_STEP_REVIEW])) {

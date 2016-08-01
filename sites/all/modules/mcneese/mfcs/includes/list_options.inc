@@ -17,20 +17,21 @@
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
+ * @param bool $hidden
+ *   (optional) When TRUE, will include hidden/special case classifications
+ *   that are not normally exposed through the select list options.
  * @param bool $disabled
  *   (optional) When TRUE, load disabled options in addition to existing options.
- * @param bool $include_none
- *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_request_status_list_options($option = NULL, $disabled = FALSE, $include_none = FALSE) {
+function mfcs_get_request_status_list_options($option = NULL, $hidden = FALSE, $disabled = FALSE) {
   $options = array();
 
   $options_all = array();
 
-  if ($include_none) {
+  if ($hidden) {
     $options_all[MFCS_REQUEST_STATUS_NONE] = 'None';
   }
 
@@ -66,20 +67,21 @@ function mfcs_get_request_status_list_options($option = NULL, $disabled = FALSE,
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
+ * @param bool $hidden
+ *   (optional) When TRUE, will include hidden/special case classifications
+ *   that are not normally exposed through the select list options.
  * @param bool $disabled
  *   (optional) When TRUE, load disabled options in addition to existing options.
- * @param bool $include_none
- *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_review_steps_list_options($option = NULL, $disabled = FALSE, $include_none = FALSE) {
+function mfcs_get_review_steps_list_options($option = NULL, $hidden = FALSE, $disabled = FALSE) {
   $options = array();
 
   $options_all = array();
 
-  if ($include_none) {
+  if ($hidden) {
     $options_all[MFCS_REVIEW_STEP_NONE] = 'None';
   }
 
@@ -115,26 +117,27 @@ function mfcs_get_review_steps_list_options($option = NULL, $disabled = FALSE, $
  *   (optional) A string designating how the list will be populated.
  * @param object|null $user
  *   (optional) When not NULL, the user to build the available options against.
+ * @param bool $hidden
+ *   (optional) When TRUE, will include hidden/special case classifications
+ *   that are not normally exposed through the select list options.
  * @param bool $disabled
  *   (optional) When TRUE, load disabled options in addition to existing options.
- * @param bool $include_none
- *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_request_classification_list_options($option = NULL, $user = NULL, $disabled = FALSE, $include_none = FALSE) {
+function mfcs_get_request_classification_list_options($option = NULL, $user = NULL, $hidden = FALSE, $disabled = FALSE) {
   $options = array();
 
   $options_all = array();
 
-  if ($include_none) {
+  if ($hidden) {
     $options_all[MFCS_REQUEST_CLASSIFICATION_NONE] = 'None';
   }
 
   $options_all[MFCS_REQUEST_CLASSIFICATION_STUDENT] = 'Student Organization';
   $options_all[MFCS_REQUEST_CLASSIFICATION_CAMPS] = 'Camps';
-  $options_all[MFCS_REQUEST_CLASSIFICATION_FACULTY] = 'Faculty, Staff, Athletics';
+  $options_all[MFCS_REQUEST_CLASSIFICATION_FACULTY] = 'Faculty / Staff / Athletics';
   $options_all[MFCS_REQUEST_CLASSIFICATION_EXTERNAL] = 'Externals';
 
   if ($option == 'select') {
@@ -142,11 +145,9 @@ function mfcs_get_request_classification_list_options($option = NULL, $user = NU
   }
 
   if (is_object($user)) {
-    foreach ($options_tree as $branch) {
-      if (isset($branch->field_role_name['und'][0]['value'])) {
-        if (in_array($branch->field_role_name['und'][0]['value'], $user->roles)) {
-          $options[$branch->tid] = $branch->name;
-        }
+    foreach ($options_all as $option_id => $option_name) {
+      if (in_array($option_id, $user->roles)) {
+        $options[$option_id] = $option_name;
       }
     }
   }
@@ -168,22 +169,23 @@ function mfcs_get_request_classification_list_options($option = NULL, $user = NU
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
+ * @param bool $hidden
+ *   (optional) When TRUE, will include hidden/special case classifications
+ *   that are not normally exposed through the select list options.
  * @param bool $disabled
  *   (optional) When TRUE, load disabled options in addition to existing options.
- * @param bool $include_none
- *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_request_location_list_options($option = NULL, $disabled = FALSE, $include_none = FALSE) {
+function mfcs_get_request_location_list_options($option = NULL, $hidden = FALSE, $disabled = FALSE) {
   $options = array();
 
   if ($option == 'select') {
     $options[''] = '- Select -';
   }
 
-  if ($include_none) {
+  if ($hidden) {
     $options[0] = 'None';
   }
 
@@ -204,22 +206,23 @@ function mfcs_get_request_location_list_options($option = NULL, $disabled = FALS
  *   (optional) When not NULL, select options based on provided location.
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
+ * @param bool $hidden
+ *   (optional) When TRUE, will include hidden/special case classifications
+ *   that are not normally exposed through the select list options.
  * @param bool $disabled
  *   (optional) When TRUE, load disabled options in addition to existing options.
- * @param bool $include_none
- *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_request_building_list_options($location = NULL, $option = NULL, $disabled = FALSE, $include_none = FALSE) {
+function mfcs_get_request_building_list_options($location = NULL, $option = NULL, $hidden = FALSE, $disabled = FALSE) {
   $options = array();
 
   if ($option == 'select') {
     $options[''] = '- Select -';
   }
 
-  if ($include_none) {
+  if ($hidden) {
     $options[0] = 'None';
   }
 
@@ -241,22 +244,23 @@ function mfcs_get_request_building_list_options($location = NULL, $option = NULL
  *   (optional) When not NULL, select options based on provided location.
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
+ * @param bool $hidden
+ *   (optional) When TRUE, will include hidden/special case classifications
+ *   that are not normally exposed through the select list options.
  * @param bool $disabled
  *   (optional) When TRUE, load disabled options in addition to existing options.
- * @param bool $include_none
- *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_request_room_list_options($location = NULL, $option = NULL, $disabled = FALSE, $include_none = FALSE) {
+function mfcs_get_request_room_list_options($location = NULL, $option = NULL, $hidden = FALSE, $disabled = FALSE) {
   $options = array();
 
   if ($option == 'select') {
     $options[''] = '- Select -';
   }
 
-  if ($include_none) {
+  if ($hidden) {
     $options[0] = 'None';
   }
 
@@ -296,20 +300,21 @@ function mfcs_get_request_room_list_options($location = NULL, $option = NULL, $d
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
+ * @param bool $hidden
+ *   (optional) When TRUE, will include hidden/special case classifications
+ *   that are not normally exposed through the select list options.
  * @param bool $disabled
  *   (optional) When TRUE, load disabled options in addition to existing options.
- * @param bool $include_none
- *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_dates_category_list_options($option = NULL, $disabled = FALSE, $include_none = FALSE) {
+function mfcs_get_dates_category_list_options($option = NULL, $hidden = FALSE, $disabled = FALSE) {
   $options = array();
 
   $options_all = array();
 
-  if ($include_none) {
+  if ($hidden) {
     $options_all[MFCS_REQUEST_DATES_CATEGORY_NONE] = 'None';
   }
 
@@ -335,20 +340,21 @@ function mfcs_get_dates_category_list_options($option = NULL, $disabled = FALSE,
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
+ * @param bool $hidden
+ *   (optional) When TRUE, will include hidden/special case classifications
+ *   that are not normally exposed through the select list options.
  * @param bool $disabled
  *   (optional) When TRUE, load disabled options in addition to existing options.
- * @param bool $include_none
- *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_audience_list_options($option = NULL, $disabled = FALSE, $include_none = FALSE) {
+function mfcs_get_audience_list_options($option = NULL, $hidden = FALSE, $disabled = FALSE) {
   $options = array();
 
   $options_all = array();
 
-  if ($include_none) {
+  if ($hidden) {
     $options_all[MFCS_REQUEST_AUDIENCE_NONE] = 'None';
   }
 
@@ -378,20 +384,21 @@ function mfcs_get_audience_list_options($option = NULL, $disabled = FALSE, $incl
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
+ * @param bool $hidden
+ *   (optional) When TRUE, will include hidden/special case classifications
+ *   that are not normally exposed through the select list options.
  * @param bool $disabled
  *   (optional) When TRUE, load disabled options in addition to existing options.
- * @param bool $include_none
- *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_revenue_generated_list_options($option = NULL, $disabled = FALSE, $include_none = FALSE) {
+function mfcs_get_revenue_generated_list_options($option = NULL, $hidden = FALSE, $disabled = FALSE) {
   $options = array();
 
   $options_all = array();
 
-  if ($include_none) {
+  if ($hidden) {
     $options_all[MFCS_REQUEST_REVENUE_NONE] = 'None';
   }
 
@@ -422,20 +429,21 @@ function mfcs_get_revenue_generated_list_options($option = NULL, $disabled = FAL
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
+ * @param bool $hidden
+ *   (optional) When TRUE, will include hidden/special case classifications
+ *   that are not normally exposed through the select list options.
  * @param bool $disabled
  *   (optional) When TRUE, load disabled options in addition to existing options.
- * @param bool $include_none
- *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_request_type_list_options($option = NULL, $disabled = FALSE, $include_none = FALSE) {
+function mfcs_get_request_type_list_options($option = NULL, $hidden = FALSE, $disabled = FALSE) {
   $options = array();
 
   $options_all = array();
 
-  if ($include_none) {
+  if ($hidden) {
     $options_all[MFCS_REQUEST_TYPE_NONE] = 'None';
   }
 
@@ -470,20 +478,21 @@ function mfcs_get_request_type_list_options($option = NULL, $disabled = FALSE, $
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
+ * @param bool $hidden
+ *   (optional) When TRUE, will include hidden/special case classifications
+ *   that are not normally exposed through the select list options.
  * @param bool $disabled
  *   (optional) When TRUE, load disabled options in addition to existing options.
- * @param bool $include_none
- *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_publicity_details_list_options($option = NULL, $disabled = FALSE, $include_none = FALSE) {
+function mfcs_get_publicity_details_list_options($option = NULL, $hidden = FALSE, $disabled = FALSE) {
   $options = array();
 
   $options_all = array();
 
-  if ($include_none) {
+  if ($hidden) {
     $options_all[MFCS_REQUEST_PUBLICITY_NONE] = 'None';
   }
 
@@ -520,20 +529,21 @@ function mfcs_get_publicity_details_list_options($option = NULL, $disabled = FAL
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
+ * @param bool $hidden
+ *   (optional) When TRUE, will include hidden/special case classifications
+ *   that are not normally exposed through the select list options.
  * @param bool $disabled
  *   (optional) When TRUE, load disabled options in addition to existing options.
- * @param bool $include_none
- *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_designing_material_list_options($option = NULL, $disabled = FALSE, $include_none = FALSE) {
+function mfcs_get_designing_material_list_options($option = NULL, $hidden = FALSE, $disabled = FALSE) {
   $options = array();
 
   $options_all = array();
 
-  if ($include_none) {
+  if ($hidden) {
     $options_all[MFCS_REQUEST_DESIGNING_MATERIALS_NONE] = 'None';
   }
 
@@ -564,20 +574,21 @@ function mfcs_get_designing_material_list_options($option = NULL, $disabled = FA
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
+ * @param bool $hidden
+ *   (optional) When TRUE, will include hidden/special case classifications
+ *   that are not normally exposed through the select list options.
  * @param bool $disabled
  *   (optional) When TRUE, load disabled options in addition to existing options.
- * @param bool $include_none
- *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_technical_equipment_details_list_options($option = NULL, $disabled = FALSE, $include_none = FALSE) {
+function mfcs_get_technical_equipment_details_list_options($option = NULL, $hidden = FALSE, $disabled = FALSE) {
   $options = array();
 
   $options_all = array();
 
-  if ($include_none) {
+  if ($hidden) {
     $options_all[MFCS_REQUEST_TECHNICAL_EQUIPMENT_NONE] = 'None';
   }
 
@@ -610,27 +621,25 @@ function mfcs_get_technical_equipment_details_list_options($option = NULL, $disa
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
- * @param bool $include_hidden
+ * @param bool $hidden
  *   (optional) When TRUE, will include hidden/special case classifications
  *   that are not normally exposed through the select list options.
  * @param bool $disabled
  *   (optional) When TRUE, load disabled options in addition to existing options.
- * @param bool $include_none
- *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_reviewer_classification_list_options($option = NULL, $include_hidden = FALSE, $disabled = FALSE, $include_none = FALSE) {
-  if (!is_bool($include_hidden)) {
-    $include_hidden = FALSE;
+function mfcs_get_reviewer_classification_list_options($option = NULL, $hidden = FALSE, $disabled = FALSE) {
+  if (!is_bool($hidden)) {
+    $hidden = FALSE;
   }
 
   $options = array();
 
   $options_all = array();
 
-  if ($include_none) {
+  if ($hidden) {
     $options_all[MFCS_REVIEWER_CLASSIFICATION_NONE] = 'None';
   }
 
@@ -645,7 +654,7 @@ function mfcs_get_reviewer_classification_list_options($option = NULL, $include_
   $options_all[MFCS_REVIEWER_CLASSIFICATION_UNIVERSITY_EVENTS] = 'University Events';
   $options_all[MFCS_REVIEWER_CLASSIFICATION_FACILITIES_CUSTODIAL] = 'Facilities / Custodial Services';
   $options_all[MFCS_REVIEWER_CLASSIFICATION_FACILITIES] = 'Facilities';
-  $options_all[MFCS_REVIEWER_CLASSIFICATION_FACULTY_ADVISOR] = 'Faculty Advisor';
+  $options_all[MFCS_REVIEWER_CLASSIFICATION_FACULTY_ADVISER] = 'Faculty Adviser';
   $options_all[MFCS_REVIEWER_CLASSIFICATION_FOOD_SERVICES] = 'Food Services';
   $options_all[MFCS_REVIEWER_CLASSIFICATION_HOUSING] = 'Housing';
   $options_all[MFCS_REVIEWER_CLASSIFICATION_MAINTENANCE] = 'Maintenance';
@@ -662,12 +671,17 @@ function mfcs_get_reviewer_classification_list_options($option = NULL, $include_
     $options[$option_id] = $option_name;
   }
 
-  if (!$include_hidden) {
+  if (!$hidden) {
     unset($options[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR]);
+    unset($options[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY]);
     unset($options[MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR]);
     unset($options[MFCS_REVIEWER_CLASSIFICATION_MANAGER]);
     unset($options[MFCS_REVIEWER_CLASSIFICATION_REQUESTER]);
     unset($options[MFCS_REVIEWER_CLASSIFICATION_SYSTEM]);
+  }
+
+  if (!$disabled) {
+    unset($options[MFCS_REVIEWER_CLASSIFICATION_FACILITIES_CUSTODIAL]);
   }
 
   asort($options);
@@ -684,20 +698,21 @@ function mfcs_get_reviewer_classification_list_options($option = NULL, $include_
  *   (optional) An integer representing a set of restrictions in which determines the available list options.
  *   This option was added to address ticket fcs-79 without conflicting with existing behavior.
  *   Its sole purpose is to be used during the review process.
+ * @param bool $hidden
+ *   (optional) When TRUE, will include hidden/special case classifications
+ *   that are not normally exposed through the select list options.
  * @param bool $disabled
  *   (optional) When TRUE, load disabled options in addition to existing options.
- * @param bool $include_none
- *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_reviewer_decision_list_options($option = NULL, $restriction = 0, $disabled = FALSE, $include_none = FALSE) {
+function mfcs_get_reviewer_decision_list_options($option = NULL, $restriction = 0, $hidden = FALSE, $disabled = FALSE) {
   $options = array();
 
   $options_all = array();
 
-  if ($include_none) {
+  if ($hidden) {
     $options_all[MFCS__NONE] = 'None';
   }
 
@@ -771,20 +786,21 @@ function mfcs_get_reviewer_decision_list_options($option = NULL, $restriction = 
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
+ * @param bool $hidden
+ *   (optional) When TRUE, will include hidden/special case classifications
+ *   that are not normally exposed through the select list options.
  * @param bool $disabled
  *   (optional) When TRUE, load disabled options in addition to existing options.
- * @param bool $include_none
- *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_review_step_list_options($option = NULL, $disabled = FALSE, $include_none = FALSE) {
+function mfcs_get_review_step_list_options($option = NULL, $hidden = FALSE, $disabled = FALSE) {
   $options = array();
 
   $options_all = array();
 
-  if ($include_none) {
+  if ($hidden) {
     $options_all[MFCS_REQUEST_STEP_NONE] = 'None';
   }
 
@@ -805,7 +821,7 @@ function mfcs_get_review_step_list_options($option = NULL, $disabled = FALSE, $i
   if ($option == 'roles') {
     asort($options_all);
 
-    if ($include_none) {
+    if ($hidden) {
       $options_roles[MFCS_REQUEST_STEP_NONE] = array();
     }
 
@@ -839,20 +855,21 @@ function mfcs_get_review_step_list_options($option = NULL, $disabled = FALSE, $i
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
+ * @param bool $hidden
+ *   (optional) When TRUE, will include hidden/special case classifications
+ *   that are not normally exposed through the select list options.
  * @param bool $disabled
  *   (optional) When TRUE, load disabled options in addition to existing options.
- * @param bool $include_none
- *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_request_problems_list_options($option = NULL, $disabled = FALSE, $include_none = FALSE) {
+function mfcs_get_request_problems_list_options($option = NULL, $hidden = FALSE, $disabled = FALSE) {
   $options = array();
 
   $options_all = array();
 
-  if ($include_none) {
+  if ($hidden) {
     $options_all[MFCS_REQUEST_PROBLEM_NONE] = 'None';
   }
 
@@ -888,20 +905,21 @@ function mfcs_get_request_problems_list_options($option = NULL, $disabled = FALS
  * @param string|null $type
  *   (optional) A string designating a specific type to process, such as:
  *   - 'request'
+ * @param bool $hidden
+ *   (optional) When TRUE, will include hidden/special case classifications
+ *   that are not normally exposed through the select list options.
  * @param bool $disabled
  *   (optional) When TRUE, load disabled options in addition to existing options.
- * @param bool $include_none
- *   (optional) When TRUE, the appropriate 'NONE' value (should be 0) will be included in the list.
  *
  * @return array
  *   An array of options available.
  */
-function mfcs_get_log_problems_list_options($option = NULL, $type = NULL, $disabled = FALSE, $include_none = FALSE) {
+function mfcs_get_log_problems_list_options($option = NULL, $type = NULL, $hidden = FALSE, $disabled = FALSE) {
   $options = array();
 
   $options_all = array();
 
-  if ($include_none) {
+  if ($hidden) {
     $options_all[MFCS_LOG_PROBLEMS_NONE] = 'None';
   }
 

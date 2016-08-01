@@ -1140,6 +1140,19 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'tab_root' => 'requests/troubleshoot-0',
   );
 
+  $items['requests/troubleshoot-0/locations/%/edit'] = array(
+    'title' => "Troubleshooting Tools - Edit Location Name",
+    'description' => "A listing of locations available on the system with details.",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_troubleshoot_0_locations_edit_name_form', 3),
+    'file' => 'request_troubleshoot.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('troubleshoot'),
+    'tab_parent' => 'requests/troubleshoot-0',
+    'tab_root' => 'requests/troubleshoot-0',
+  );
+
   $items['requests/troubleshoot-0/buildings'] = array(
     'title' => "Troubleshooting Tools - Buildings",
     'description' => "A listing of buildings available on the system with details.",

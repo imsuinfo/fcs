@@ -591,8 +591,8 @@ function mfcs_ajax_listing_0($custom_conditions = array(), $override_options = a
     $status_options = mfcs_get_request_status_list_options();
     $step_options = mfcs_get_review_steps_list_options();
 
-    $room_options = mfcs_get_request_room_list_options(NULL, NULL, TRUE);
-    $building_options = mfcs_get_request_building_list_options(NULL, NULL, TRUE);
+    $room_options = mfcs_get_request_room_list_options(NULL, NULL, FALSE, TRUE);
+    $building_options = mfcs_get_request_building_list_options(NULL, NULL, FALSE, TRUE);
 
     $limit_type = array();
     foreach ($type_options as $key => $value) {
