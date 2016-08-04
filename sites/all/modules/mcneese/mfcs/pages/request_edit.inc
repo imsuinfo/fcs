@@ -751,10 +751,12 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
         $query->fields($mfcs_field_review_review);
         $query->execute();
 
-        $mfcs_current['requirements_facilities'] = NULL;
-        $mfcs_current['requirements_equipment'] = NULL;
-        $mfcs_current['requirements_custodial'] = NULL;
-        $mfcs_current['requirements_security'] = NULL;
+        $mfcs_current['requirements_facilities_fees'] = NULL;
+        $mfcs_current['requirements_equipment_fees'] = NULL;
+        $mfcs_current['requirements_custodial_fees'] = NULL;
+        $mfcs_current['requirements_security_fees'] = NULL;
+        $mfcs_current['requirements_grounds_fees'] = NULL;
+        $mfcs_current['requirements_maintenance_fees'] = NULL;
         $mfcs_current['requirements_other'] = NULL;
         $mfcs_current['requirements_university'] = NULL;
 

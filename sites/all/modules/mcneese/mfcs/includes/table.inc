@@ -169,64 +169,64 @@ function mfcs_table_structure($include_mer = FALSE) {
   );
 
   $structure['requirements'] = array(
-    'facilities' => array(
-      'path' => 'request][requirements][facilities',
+    'facilities_fees' => array(
+      'path' => 'request][requirements][facilities_fees',
       'name' => "Facilities Fees",
       'type' => 'requirements',
       'manual_processing' => TRUE,
-      'columns' => array('hours', 'days', 'amount'),
-      'size' => array('normal', 'normal', 'normal'),
-      'storage' => 'currency',
+      'columns' => array('personnel', 'hours', 'days', 'rate', 'supplies', 'post', 'description'),
+      'size' => array('normal', 'normal', 'normal', 'normal', 'normal', 'normal', 'normal'),
+      'storage' => 'requirements_fees',
       'allows_null' => TRUE,
     ),
-    'equipment' => array(
+    'equipment_fees' => array(
       'path' => 'request][requirements][equipment',
       'name' => "Equipment Fees",
       'type' => 'requirements',
       'manual_processing' => TRUE,
-      'columns' => array('hours', 'days', 'amount'),
-      'size' => array('normal', 'normal', 'normal'),
-      'storage' => 'currency',
+      'columns' => array('personnel', 'hours', 'days', 'rate', 'supplies', 'post', 'description'),
+      'size' => array('normal', 'normal', 'normal', 'normal', 'normal', 'normal', 'normal'),
+      'storage' => 'requirements_fees',
       'allows_null' => TRUE,
     ),
-    'custodial' => array(
-      'path' => 'request][requirements][custodial',
+    'custodial_fees' => array(
+      'path' => 'request][requirements][custodial_fees',
       'name' => "Custodial Fees",
       'type' => 'requirements',
       'manual_processing' => TRUE,
-      'columns' => array('quantity', 'hours', 'days', 'amount'),
-      'size' => array('normal', 'normal', 'normal', 'normal'),
-      'storage' => 'currency',
+      'columns' => array('personnel', 'hours', 'days', 'rate', 'supplies', 'post', 'description'),
+      'size' => array('normal', 'normal', 'normal', 'normal', 'normal', 'normal', 'normal'),
+      'storage' => 'requirements_fees',
       'allows_null' => TRUE,
     ),
-    'maintenance' => array(
-      'path' => 'request][requirements][maintenance',
+    'maintenance_fees' => array(
+      'path' => 'request][requirements][maintenance_fees',
       'name' => "Maintenance Fees",
       'type' => 'requirements',
       'manual_processing' => TRUE,
-      'columns' => array('quantity', 'hours', 'days', 'amount'),
-      'size' => array('normal', 'normal', 'normal', 'normal'),
-      'storage' => 'currency',
+      'columns' => array('personnel', 'hours', 'days', 'rate', 'supplies', 'post', 'description'),
+      'size' => array('normal', 'normal', 'normal', 'normal', 'normal', 'normal', 'normal'),
+      'storage' => 'requirements_fees',
       'allows_null' => TRUE,
     ),
-    'grounds' => array(
-      'path' => 'request][requirements][grounds',
+    'grounds_fees' => array(
+      'path' => 'request][requirements][grounds_fees',
       'name' => "Grounds Fees",
       'type' => 'requirements',
       'manual_processing' => TRUE,
-      'columns' => array('quantity', 'hours', 'days', 'amount'),
-      'size' => array('normal', 'normal', 'normal', 'normal'),
-      'storage' => 'currency',
+      'columns' => array('personnel', 'hours', 'days', 'rate', 'supplies', 'post', 'description'),
+      'size' => array('normal', 'normal', 'normal', 'normal', 'normal', 'normal', 'normal'),
+      'storage' => 'requirements_fees',
       'allows_null' => TRUE,
     ),
-    'security' => array(
-      'path' => 'request][requirements][security',
+    'security_fees' => array(
+      'path' => 'request][requirements][security_fees',
       'name' => "Security Fees",
       'type' => 'requirements',
       'manual_processing' => TRUE,
-      'columns' => array('quantity', 'hours', 'days', 'amount'),
-      'size' => array('normal', 'normal', 'normal', 'normal'),
-      'storage' => 'currency',
+      'columns' => array('personnel', 'hours', 'days', 'rate', 'supplies', 'post', 'description'),
+      'size' => array('normal', 'normal', 'normal', 'normal', 'normal', 'normal', 'normal'),
+      'storage' => 'requirements_fees',
       'allows_null' => TRUE,
     ),
     'other' => array(
@@ -991,16 +991,26 @@ function mfcs_table_presentation($option = NULL) {
   );
 
   $presentation['requirements'] = array(
-    'facilities' => array(
+    'facilities_fees' => array(
       'label' => 'Facilities Use',
       'combined' => TRUE,
       'value_names' => array(
+        'personnel',
+        'hours',
         'days',
-        'amount',
+        'rate',
+        'supplies',
+        'post',
+        'description',
       ),
       'type' => array(
+        'personnel' => 'requirement_personnel',
+        'hours' => 'requirement_hours',
         'days' => 'requirement_days',
-        'amount' => 'requirement_amount',
+        'rate' => 'requirement_rate',
+        'supplies' => 'requirement_supplies',
+        'post' => 'requirement_post',
+        'description' => 'requirement_description',
        ),
       'group' => 'requirements',
       'request_type' => array(
@@ -1008,16 +1018,26 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => FALSE,
       ),
     ),
-    'equipment' => array(
+    'equipment_fees' => array(
       'label' => 'Additional Equipment Use',
       'combined' => TRUE,
       'value_names' => array(
+        'personnel',
+        'hours',
         'days',
-        'amount',
+        'rate',
+        'supplies',
+        'post',
+        'description',
       ),
       'type' => array(
+        'personnel' => 'requirement_personnel',
+        'hours' => 'requirement_hours',
         'days' => 'requirement_days',
-        'amount' => 'requirement_amount',
+        'rate' => 'requirement_rate',
+        'supplies' => 'requirement_supplies',
+        'post' => 'requirement_post',
+        'description' => 'requirement_description',
        ),
       'group' => 'requirements',
       'request_type' => array(
@@ -1025,20 +1045,26 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => FALSE,
       ),
     ),
-    'custodial' => array(
+    'custodial_fees' => array(
       'label' => 'Custodial Use',
       'combined' => TRUE,
       'value_names' => array(
-        'quantity',
+        'personnel',
         'hours',
         'days',
-        'amount',
+        'rate',
+        'supplies',
+        'post',
+        'description',
       ),
       'type' => array(
-        'quantity' => 'requirement_personnel',
+        'personnel' => 'requirement_personnel',
         'hours' => 'requirement_hours',
         'days' => 'requirement_days',
-        'amount' => 'requirement_amount',
+        'rate' => 'requirement_rate',
+        'supplies' => 'requirement_supplies',
+        'post' => 'requirement_post',
+        'description' => 'requirement_description',
       ),
       'group' => 'requirements',
       'request_type' => array(
@@ -1046,20 +1072,26 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => FALSE,
       ),
     ),
-    'maintenance' => array(
+    'maintenance_fees' => array(
       'label' => 'Maintenance Use',
       'combined' => TRUE,
       'value_names' => array(
-        'quantity',
+        'personnel',
         'hours',
         'days',
-        'amount',
+        'rate',
+        'supplies',
+        'post',
+        'description',
       ),
       'type' => array(
-        'quantity' => 'requirement_personnel',
+        'personnel' => 'requirement_personnel',
         'hours' => 'requirement_hours',
         'days' => 'requirement_days',
-        'amount' => 'requirement_amount',
+        'rate' => 'requirement_rate',
+        'supplies' => 'requirement_supplies',
+        'post' => 'requirement_post',
+        'description' => 'requirement_description',
        ),
       'group' => 'requirements',
       'request_type' => array(
@@ -1067,20 +1099,26 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => FALSE,
       ),
     ),
-    'grounds' => array(
+    'grounds_fees' => array(
       'label' => 'Grounds Use',
       'combined' => TRUE,
       'value_names' => array(
-        'quantity',
+        'personnel',
         'hours',
         'days',
-        'amount',
+        'rate',
+        'supplies',
+        'post',
+        'description',
       ),
       'type' => array(
-        'quantity' => 'requirement_personnel',
+        'personnel' => 'requirement_personnel',
         'hours' => 'requirement_hours',
         'days' => 'requirement_days',
-        'amount' => 'requirement_amount',
+        'rate' => 'requirement_rate',
+        'supplies' => 'requirement_supplies',
+        'post' => 'requirement_post',
+        'description' => 'requirement_description',
        ),
       'group' => 'requirements',
       'request_type' => array(
@@ -1088,34 +1126,26 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => FALSE,
       ),
     ),
-    'security' => array(
+    'security_fees' => array(
       'label' => 'Security Use',
       'combined' => TRUE,
       'value_names' => array(
-        'quantity',
+        'personnel',
         'hours',
         'days',
-        'amount',
+        'rate',
+        'supplies',
+        'post',
+        'description',
       ),
       'type' => array(
-        'quantity' => 'requirement_personnel',
+        'personnel' => 'requirement_personnel',
         'hours' => 'requirement_hours',
         'days' => 'requirement_days',
-        'amount' => 'requirement_amount',
-      ),
-      'group' => 'requirements',
-      'request_type' => array(
-        'show' => TRUE,
-        'hide' => FALSE,
-      ),
-    ),
-    'other' => array(
-      'label' => 'Other Use',
-      'type' => array(
-        'value' => 'boolean',
-      ),
-      'display' => array(
-        'value' => 'when_true',
+        'rate' => 'requirement_rate',
+        'supplies' => 'requirement_supplies',
+        'post' => 'requirement_post',
+        'description' => 'requirement_description',
       ),
       'group' => 'requirements',
       'request_type' => array(

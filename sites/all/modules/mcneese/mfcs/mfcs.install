@@ -27,12 +27,12 @@ function mfcs_table_install_structure() {
   );
 
   $structure['requirements'] = array(
-    'facilities' => array('quantity' => 'requirement', 'hours' => 'requirement', 'days' => 'requirement', 'amount' => 'requirement'),
-    'equipment' => array('quantity' => 'requirement', 'hours' => 'requirement', 'days' => 'requirement', 'amount' => 'requirement'),
-    'security' => array('quantity' => 'requirement', 'hours' => 'requirement', 'days' => 'requirement', 'amount' => 'requirement'),
-    'custodial' => array('quantity' => 'requirement', 'hours' => 'requirement', 'days' => 'requirement', 'amount' => 'requirement'),
-    'maintenance' => array('quantity' => 'requirement', 'hours' => 'requirement', 'days' => 'requirement', 'amount' => 'requirement'),
-    'grounds' => array('quantity' => 'requirement', 'hours' => 'requirement', 'days' => 'requirement', 'amount' => 'requirement'),
+    'facilities_fees' => array('personnel' => 'requirement', 'hours' => 'requirement', 'days' => 'requirement', 'rate' => 'requirement', 'supplies' => 'requirement', 'post' => 'requirement', 'description' => 'text'),
+    'equipment_fees' => array('personnel' => 'requirement', 'hours' => 'requirement', 'days' => 'requirement', 'rate' => 'requirement', 'supplies' => 'requirement', 'post' => 'requirement', 'description' => 'text'),
+    'security_fees' => array('personnel' => 'requirement', 'hours' => 'requirement', 'days' => 'requirement', 'rate' => 'requirement', 'supplies' => 'requirement', 'post' => 'requirement', 'description' => 'text'),
+    'custodial_fees' => array('personnel' => 'requirement', 'hours' => 'requirement', 'days' => 'requirement', 'rate' => 'requirement', 'supplies' => 'requirement', 'post' => 'requirement', 'description' => 'text'),
+    'maintenance_fees' => array('personnel' => 'requirement', 'hours' => 'requirement', 'days' => 'requirement', 'rate' => 'requirement', 'supplies' => 'requirement', 'post' => 'requirement', 'description' => 'text'),
+    'grounds_fees' => array('personnel' => 'requirement', 'hours' => 'requirement', 'days' => 'requirement', 'rate' => 'requirement', 'supplies' => 'requirement', 'post' => 'requirement', 'description' => 'text'),
     'other' => 'unsigned_tiny',
     'waived' => 'unsigned_tiny',
     'university' => 'unsigned_tiny',

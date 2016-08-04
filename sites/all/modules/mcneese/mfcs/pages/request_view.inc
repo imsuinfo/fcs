@@ -1631,26 +1631,23 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         );
 
         $uses = array();
-        $uses['facilities'] = "Facilities";
-        $uses['equipment'] = "Additional Equipment";
-        $uses['custodial'] = "Custodial";
-        $uses['maintenance'] = "Maintenance";
-        $uses['grounds'] = "Grounds";
-        $uses['security'] = "Security";
+        $uses['facilities_fees'] = "Facilities";
+        $uses['equipment_fees'] = "Additional Equipment";
+        $uses['custodial_fees'] = "Custodial";
+        $uses['maintenance_fees'] = "Maintenance";
+        $uses['grounds_fees'] = "Grounds";
+        $uses['security_fees'] = "Security";
 
         $insurance_requirement = TRUE;
 
-        $requirements_amount_defaults = array('custodial' => '18.50', 'maintenance' => '18.50', 'grounds' => '18.50', 'security' => '30.00');
-        $uses_personnel = array('custodial', 'maintenance', 'grounds', 'security');
-        $uses_hours = array('custodial', 'maintenance', 'grounds', 'security');
-        $uses_required = array('facilities');
+        $requirements_amount_defaults = array('custodial_fees' => array('rate' => '18.50'), 'maintenance_fees' => array('rate' => '18.50'), 'grounds_fees' => array('rate' => '18.50'), 'security_fees' => array('rate' => '30.00'));
 
         foreach ($uses as $use_name => $use_title) {
           $form['review']['operations']['requirements'][$use_name] = array(
             '#type' => 'fieldset',
             '#title' => $use_title . ' Fee',
             '#collapsible' => TRUE,
-            '#collapsed' => FALSE,
+            '#collapsed' => TRUE,
             '#tree' => TRUE,
             '#attributes' => array(
               'class' => array(
@@ -1662,61 +1659,74 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
             '#states' => $states,
           );
 
-          if (in_array($use_name, $uses_personnel)) {
-            $form['review']['operations']['requirements'][$use_name]['quantity'] = array(
-              '#id' => 'request-review-operations-requirements-' . $use_name . '-quantity',
-              '#type' => 'numberfield',
-              '#title' => '<span class="element-invisible">' . $use_title . ' Fee </span>Personnel',
-              '#default_value' => NULL,
-              '#size' => 16,
-              '#min' => 1,
-              '#required' => (in_array($use_name, $uses_required) ? TRUE : FALSE),
-              '#attributes' => array(
-                'class' => array(
-                  'no-print',
-                  'mode-' . $mode,
-                  'requirement-quantity',
-                ),
-              ),
-              '#states' => $states,
-            );
 
-            if (!empty($request['requirements'][$use_name][0])) {
-              $form['review']['operations']['requirements'][$use_name]['quantity']['#default_value'] = $request['requirements'][$use_name][0]->quantity;
-            }
+          // rates group
+          $form['review']['operations']['requirements'][$use_name]['group_rates'] = array(
+            '#id' => 'request-review-operations-requirements-' . $use_name . '-group_rates',
+            '#type' => 'container',
+            '#attributes' => array(
+              'class' => array(
+                'group',
+                'group_rates',
+                'requirements-' . $use_name . '-group_rates',
+              ),
+            ),
+          );
+
+          $form['review']['operations']['requirements'][$use_name]['group_rates']['personnel'] = array(
+            '#id' => 'request-review-operations-requirements-' . $use_name . '-personnel',
+            '#type' => 'numberfield',
+            '#title' => '<span class="element-invisible">' . $use_title . ' Fee</span> Personnel',
+            '#default_value' => NULL,
+            '#size' => 16,
+            '#min' => 0,
+            '#required' => FALSE,
+            '#attributes' => array(
+              'class' => array(
+                'no-print',
+                'mode-' . $mode,
+                'requirement-personnel',
+              ),
+            ),
+            '#states' => $states,
+            '#parents' => array('review', 'operations', 'requirements', $use_name, 'personnel'),
+          );
+
+          if (!empty($request['requirements'][$use_name][0])) {
+            $form['review']['operations']['requirements'][$use_name]['group_rates']['personnel']['#default_value'] = (int) $request['requirements'][$use_name][0]->personnel;
           }
 
-          if (in_array($use_name, $uses_hours)) {
-            $form['review']['operations']['requirements'][$use_name]['hours'] = array(
-              '#id' => 'request-review-operations-requirements-' . $use_name . '-hours',
-              '#type' => 'textfield',
-              '#title' => '<span class="element-invisible">' . $use_title . ' Fee </span>Hours',
-              '#default_value' => NULL,
-              '#size' => 16,
-              '#required' => (in_array($use_name, $uses_required) ? TRUE : FALSE),
-              '#attributes' => array(
-                'class' => array(
-                  'no-print',
-                  'mode-' . $mode,
-                  'requirement-hours',
-                ),
+          $form['review']['operations']['requirements'][$use_name]['group_rates']['hours'] = array(
+            '#id' => 'request-review-operations-requirements-' . $use_name . '-hours',
+            '#type' => 'numberfield',
+            '#title' => '<span class="element-invisible">' . $use_title . ' Fee</span> Hours',
+            '#default_value' => NULL,
+            '#min' => 0,
+            '#size' => 16,
+            '#required' => FALSE,
+            '#attributes' => array(
+              'class' => array(
+                'no-print',
+                'mode-' . $mode,
+                'requirement-hours',
               ),
-              '#states' => $states,
-            );
+            ),
+            '#states' => $states,
+            '#parents' => array('review', 'operations', 'requirements', $use_name, 'hours'),
+          );
 
-            if (!empty($request['requirements'][$use_name][0])) {
-              $form['review']['operations']['requirements'][$use_name]['hours']['#default_value'] = mfcs_convert_value_from_database_format($request['requirements'][$use_name][0]->hours, 'currency');
-            }
+          if (!empty($request['requirements'][$use_name][0])) {
+            $form['review']['operations']['requirements'][$use_name]['group_rates']['hours']['#default_value'] = (int) $request['requirements'][$use_name][0]->hours;
           }
 
-          $form['review']['operations']['requirements'][$use_name]['days'] = array(
+          $form['review']['operations']['requirements'][$use_name]['group_rates']['days'] = array(
             '#id' => 'request-review-operations-requirements-' . $use_name . '-days',
             '#type' => 'numberfield',
-            '#title' => '<span class="element-invisible">' . $use_title . ' Fee </span>Days',
+            '#title' => '<span class="element-invisible">' . $use_title . ' Fee</span> Days',
             '#default_value' => NULL,
-            '#min' => 1,
+            '#min' => 0,
             '#size' => 16,
-            '#required' => (in_array($use_name, $uses_required) ? TRUE : FALSE),
+            '#required' => FALSE,
             '#attributes' => array(
               'class' => array(
                 'no-print',
@@ -1725,55 +1735,133 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
               ),
             ),
             '#states' => $states,
+            '#parents' => array('review', 'operations', 'requirements', $use_name, 'days'),
           );
 
           if (!empty($request['requirements'][$use_name][0])) {
-            $form['review']['operations']['requirements'][$use_name]['days']['#default_value'] = mfcs_convert_value_from_database_format($request['requirements'][$use_name][0]->days, 'currency');
+            $form['review']['operations']['requirements'][$use_name]['group_rates']['days']['#default_value'] = (int) $request['requirements'][$use_name][0]->days;
           }
 
-          $form['review']['operations']['requirements'][$use_name]['amount'] = array(
-            '#id' => 'request-review-operations-requirements-' . $use_name . '-amount',
+          $form['review']['operations']['requirements'][$use_name]['group_rates']['rate'] = array(
+            '#id' => 'request-review-operations-requirements-' . $use_name . '-rate',
             '#type' => 'textfield',
             '#title' => '<span class="element-invisible">' . $use_title . ' Fee</span> Rate',
             '#default_value' => NULL,
             '#size' => 16,
-            '#required' => (in_array($use_name, $uses_required) ? TRUE : FALSE),
+            '#required' => FALSE,
             '#attributes' => array(
               'class' => array(
                 'no-print',
                 'mode-' . $mode,
-                'requirement-amount',
+                'requirement-rate',
               ),
             ),
             '#states' => $states,
+            '#parents' => array('review', 'operations', 'requirements', $use_name, 'rate'),
           );
 
-          if (!empty($request['requirements'][$use_name][0]) && strlen($request['requirements'][$use_name][0]->amount) > 0) {
-            $form['review']['operations']['requirements'][$use_name]['amount']['#default_value'] = mfcs_convert_value_from_database_format($request['requirements'][$use_name][0]->amount, 'currency');
+          if (!empty($request['requirements'][$use_name][0]) && strlen($request['requirements'][$use_name][0]->rate) > 0) {
+            $form['review']['operations']['requirements'][$use_name]['group_rates']['rate']['#default_value'] = mfcs_convert_value_from_database_format($request['requirements'][$use_name][0]->rate, 'currency');
           }
-          elseif (isset($requirements_amount_defaults[$use_name])) {
-            $form['review']['operations']['requirements'][$use_name]['amount']['#default_value'] = $requirements_amount_defaults[$use_name];
+          elseif (isset($requirements_amount_defaults[$use_name]['rate'])) {
+            $form['review']['operations']['requirements'][$use_name]['group_rates']['rate']['#default_value'] = $requirements_amount_defaults[$use_name]['rate'];
           }
-        }
 
-        $form['review']['operations']['requirements']['other'] = array(
-          '#id' => 'request-review-operations-requirements-other',
-          '#type' => 'checkbox',
-          '#title' => 'Other Fees',
-          '#description' => "Other charges, unknown presently, will be provided to the presenter at a later time.",
-          '#default_value' => NULL,
-          '#attributes' => array(
-            'class' => array(
-              'no-print',
-              'mode-' . $mode,
-              'requirement-other',
+
+          // supplies group
+          $form['review']['operations']['requirements'][$use_name]['group_supplies'] = array(
+            '#id' => 'request-review-operations-requirements-' . $use_name . '-group_supplies',
+            '#type' => 'container',
+            '#attributes' => array(
+              'class' => array(
+                'group',
+                'group_supplies',
+                'requirements-' . $use_name . '-group_supplies',
+              ),
             ),
-          ),
-          '#states' => $states,
-        );
+          );
 
-        if (!empty($request['requirements']['other'][0])) {
-          $form['review']['operations']['requirements']['other']['#default_value'] = $request['requirements']['other'][0]->value;
+          $form['review']['operations']['requirements'][$use_name]['group_supplies']['supplies'] = array(
+            '#id' => 'request-review-operations-requirements-' . $use_name . '-supplies',
+            '#type' => 'textfield',
+            '#title' => '<span class="element-invisible">' . $use_title . ' Fee</span> Supplies',
+            '#default_value' => NULL,
+            '#size' => 16,
+            '#min' => 0,
+            '#required' => FALSE,
+            '#attributes' => array(
+              'class' => array(
+                'no-print',
+                'mode-' . $mode,
+                'requirement-supplies',
+              ),
+            ),
+            '#states' => $states,
+            '#parents' => array('review', 'operations', 'requirements', $use_name, 'supplies'),
+          );
+
+          if (!empty($request['requirements'][$use_name][0]) && strlen($request['requirements'][$use_name][0]->supplies) > 0) {
+            $form['review']['operations']['requirements'][$use_name]['group_supplies']['supplies']['#default_value'] = mfcs_convert_value_from_database_format($request['requirements'][$use_name][0]->supplies, 'currency');
+          }
+
+
+          // post group
+          $form['review']['operations']['requirements'][$use_name]['group_post'] = array(
+            '#id' => 'request-review-operations-requirements-' . $use_name . '-group_post',
+            '#type' => 'container',
+            '#attributes' => array(
+              'class' => array(
+                'group',
+                'group_post',
+                'requirements-' . $use_name . '-group_post',
+              ),
+            ),
+          );
+
+          $form['review']['operations']['requirements'][$use_name]['group_post']['post'] = array(
+            '#id' => 'request-review-operations-requirements-' . $use_name . '-post',
+            '#type' => 'textfield',
+            '#title' => '<span class="element-invisible">' . $use_title . ' Fee</span> Post',
+            '#default_value' => NULL,
+            '#size' => 16,
+            '#min' => 0,
+            '#required' => FALSE,
+            '#attributes' => array(
+              'class' => array(
+                'no-print',
+                'mode-' . $mode,
+                'requirement-post',
+              ),
+            ),
+            '#states' => $states,
+            '#parents' => array('review', 'operations', 'requirements', $use_name, 'post'),
+          );
+
+          if (!empty($request['requirements'][$use_name][0]) && strlen($request['requirements'][$use_name][0]->post) > 0) {
+            $form['review']['operations']['requirements'][$use_name]['group_post']['post']['#default_value'] = mfcs_convert_value_from_database_format($request['requirements'][$use_name][0]->post, 'currency');
+          }
+
+          $form['review']['operations']['requirements'][$use_name]['group_post']['description'] = array(
+            '#id' => 'request-review-operations-requirements-' . $use_name . '-description',
+            '#type' => 'textarea',
+            '#title' => '<span class="element-invisible">' . $use_title . ' Fee</span> Post Description',
+            '#default_value' => NULL,
+            '#rows' => 4,
+            '#required' => FALSE,
+            '#attributes' => array(
+              'class' => array(
+                'no-print',
+                'mode-' . $mode,
+                'requirement-description',
+              ),
+            ),
+            '#states' => $states,
+            '#parents' => array('review', 'operations', 'requirements', $use_name, 'description'),
+          );
+
+          if (!empty($request['requirements'][$use_name][0])) {
+            $form['review']['operations']['requirements'][$use_name]['group_post']['description']['#default_value'] = $request['requirements'][$use_name][0]->description;
+          }
         }
 
         $form['review']['operations']['insurance'] = array(
@@ -1922,41 +2010,6 @@ function mfcs_request_view_0_form_pre_validate(&$form, &$form_state) {
 
     if (is_string($decision)) {
       $decision = (int) $decision;
-    }
-  }
-
-  $unrequire_usage_fields = TRUE;
-  if ($step == MFCS_REVIEW_STEP_REQUIREMENTS && $decision === MFCS_REVIEW_DECISION_REQUIREMENT) {
-    $unrequire_usage_fields = FALSE;
-    if (isset($form_state['values']['review']['operations']['university_business'])) {
-      // if the university business field has been specified whatsoever, that value overrides the pre-existing form value.
-      // this check is in a separate if statement to ensure that if university business is unset, the usage fees become required.
-      if ($form_state['values']['review']['operations']['university_business'] == 1) {
-        $unrequire_usage_fields = TRUE;
-      }
-    }
-    elseif (isset($form['form']['request']['#value']['requirements']['university'][0]->value) && $form['form']['request']['#value']['requirements']['university'][0]->value == 1) {
-      $unrequire_usage_fields = TRUE;
-    }
-  }
-
-  if ($unrequire_usage_fields) {
-    if (isset($form['review']['operations']['requirements']) && is_array($form['review']['operations']['requirements'])) {
-      foreach ($form['review']['operations']['requirements'] as $key => &$value) {
-        if (is_array($value)) {
-          if (isset($value['#required'])) {
-            $value['#required'] = FALSE;
-          }
-
-          foreach ($value as $subkey => &$subvalue) {
-            if (is_array($subvalue)) {
-              if (isset($subvalue['#required'])) {
-                $subvalue['#required'] = FALSE;
-              }
-            }
-          }
-        }
-      }
     }
   }
 }
@@ -2257,69 +2310,94 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
       }
 
       $requirements_names = array(
-        'facilities' => array('human_name' => "Facilities Fee", 'amount' => TRUE, 'hours' => FALSE, 'days' => TRUE, 'quantity' => FALSE),
-        'equipment' => array('human_name' => "Equipment Fee", 'amount' => TRUE, 'hours' => FALSE, 'days' => TRUE, 'quantity' => FALSE),
-        'custodial' => array('human_name' => "Custodial Fee", 'amount' => TRUE, 'hours' => TRUE, 'days' => TRUE, 'quantity' => TRUE),
-        'maintenance' => array('human_name' => "Maintenance Fee", 'amount' => TRUE, 'hours' => TRUE, 'days' => TRUE, 'quantity' => TRUE),
-        'grounds' => array('human_name' => "Grounds Fee", 'amount' => TRUE, 'hours' => TRUE, 'days' => TRUE, 'quantity' => TRUE),
-        'security' => array('human_name' => "Security Fee", 'amount' => TRUE, 'hours' => TRUE, 'days' => TRUE, 'quantity' => TRUE),
+        'facilities_fees' => "Facilities Fee",
+        'equipment_fees' => "Equipment Fee",
+        'custodial_fees' => "Custodial Fee",
+        'maintenance_fees' => "Maintenance Fee",
+        'grounds_fees' => "Grounds Fee",
+        'security_fees' => "Security Fee",
       );
 
       $requirements_real = array(
-        'amount' => array('error_message' => "The :human_name '@number' is not a valid @number_name. It must be a number greater than 0 (with at most 2 decimal places). Do not provide a dollar sign."),
-        'hours' => array('error_message' => "The :human_name '@number' is not a valid @number_name. It must be a number greater than 0 (with at most 2 decimal places)."),
+        'rate' => array('group' => 'group_rates', 'error_message' => "The :human_name '@number' is not a valid @number_name. It must be a number greater than or equal to 0 (with at most 2 decimal places). Do not provide a dollar sign."),
+        'hours' => array('group' => 'group_rates', 'error_message' => "The :human_name '@number' is not a valid @number_name. It must be a number greater than or equal to 0 (with at most 2 decimal places)."),
+        'supplies' => array('group' => 'group_supplies', 'error_message' => "The :human_name '@number' is not a valid @number_name. It must be a number greater than or equal to 0 (with at most 2 decimal places). Do not provide a dollar sign."),
+        'post' => array('group' => 'group_post', 'error_message' => "The :human_name '@number' is not a valid @number_name. It must be a number greater than or equal to 0 (with at most 2 decimal places). Do not provide a dollar sign."),
       );
 
       $requirements_integer = array(
-        'days' => array(),
-        'quantity' => array(),
+        'days' => array('group' => 'group_rates', 'error_message' => "The :human_name '@number' is not a valid @number_name. It is not an allowed number. Use only numbers without decimal places that are greater than or equal to 0."),
+        'personnel' => array('group' => 'group_rates', 'error_message' => "The :human_name '@number' is not a valid @number_name. It is not an allowed number. Use only numbers without decimal places that are greater than or equal to 0."),
       );
 
-      foreach ($requirements_names as $requirements_machine_name => $requirements_settings) {
+      foreach ($requirements_names as $requirements_machine_name => $requirements_human_name) {
         if (!array_key_exists($requirements_machine_name, $requirements)) {
           continue;
         }
 
-        foreach ($requirements_real as $requirements_real_name => $requirements_real_value) {
-          if ($requirements_settings[$requirements_real_name] && isset($requirements[$requirements_machine_name][$requirements_real_name]) && (!empty($requirements[$requirements_machine_name][$requirements_real_name]) || cf_is_integer($requirements[$requirements_machine_name][$requirements_real_name]))) {
-            $matches = array();
-            $matched = preg_match('/^(\d+|\d+\.\d|\d+\.\d\d)$/i', $requirements[$requirements_machine_name][$requirements_real_name], $matches);
+        foreach ($requirements_real as $requirements_field_name => $requirements_field_value) {
+          if (!array_key_exists($requirements_field_name, $requirements[$requirements_machine_name])) {
+            continue;
+          }
 
-            if (!$matched) {
-              form_set_error('review][operations][requirements][' . $requirements_machine_name . '][' . $requirements_real_name, t($requirements_real_value['error_message'], array(':human_name' => $requirements_settings['human_name'], '@number' => $requirements[$requirements_machine_name][$requirements_real_name], '@number_name' => $requirements_real_name)));
+          $r = $requirements[$requirements_machine_name][$requirements_field_name];
+
+          if (is_numeric($r)) {
+            if (!preg_match('/^(\d+|\d+\.\d|\d+\.\d\d)$/i', $r)) {
+              form_set_error('review][operations][requirements][' . $requirements_machine_name . '][' . $requirements_field_name, t($requirements_field_value['error_message'], array(':human_name' => $requirements_human_name, '@number' => $r, '@number_name' => $requirements_field_name)));
               $failure = TRUE;
             }
             else {
-              $number = (real) $requirements[$requirements_machine_name][$requirements_real_name];
-              if ($number <= 0) {
-                form_set_error('review][operations][requirements][' . $requirements_machine_name . '][' . $requirements_real_name, t($requirements_real_value['error_message'], array(':human_name' => $requirements_settings['human_name'], '@number' => $number, '@number_name' => $requirements_real_name)));
+              $number = floatval($r);
+              if ($number < 0) {
+                form_set_error('review][operations][requirements][' . $requirements_machine_name . '][' . $requirements_field_name, t($requirements_field_value['error_message'], array(':human_name' => $requirements_human_name, '@number' => $number, '@number_name' => $requirements_field_name)));
                 $failure = TRUE;
               }
               else {
-                // save the value as a real instead of an integer or string.
-                $requirements[$requirements_machine_name][$requirements_real_name] = $number;
+                // save the value as a float instead of an integer or string.
+                $r = $number;
               }
 
               unset($number);
             }
           }
+          elseif (is_string($r) && strlen($r) > 0) {
+            form_set_error('review][operations][requirements][' . $requirements_machine_name . '][' . $requirements_field_name, t($requirements_field_value['error_message'], array(':human_name' => $requirements_human_name, '@number' => $r, '@number_name' => $requirements_field_name)));
+            $failure = TRUE;
+          }
+
+          unset($r);
         }
 
-        foreach ($requirements_integer as $requirements_integer_name => $requirements_integer_value) {
-          if ($requirements_settings[$requirements_integer_name] && isset($requirements[$requirements_machine_name][$requirements_integer_name]) && (!empty($requirements[$requirements_machine_name][$requirements_integer_name]) || cf_is_integer($requirements[$requirements_machine_name][$requirements_integer_name]))) {
-            $number = intval($requirements[$requirements_machine_name][$requirements_integer_name]);
-
-            if (!preg_match('/^\d+$/i', $requirements[$requirements_machine_name][$requirements_integer_name])) {
-              form_set_error('review][operations][requirements][' . $requirements_machine_name . '][' . $requirements_integer_name, t("The :human_name '@number' is not a valid @number_name. It is not an allowed number. Use only numbers without decimal places.", array(':human_name' => $requirements_settings['human_name'], '@number' => $requirements[$requirements_machine_name][$requirements_integer_name], '@number_name' => $requirements_integer_name)));
-              $failure = TRUE;
-            }
-            elseif ($number <= 0) {
-              form_set_error('review][operations][requirements][' . $requirements_machine_name . '][' . $requirements_integer_name, t("The :human_name '@number' is not a valid @number_name. It must be greater than 0.", array(':human_name' => $requirements_settings['human_name'], '@number' => $number, '@number_name' => $requirements_integer_name)));
-              $failure = TRUE;
-            }
-
-            unset($number);
+        foreach ($requirements_integer as $requirements_field_name => $requirements_field_value) {
+          if (!isset($requirements[$requirements_machine_name][$requirements_field_name])) {
+            continue;
           }
+
+          $r = $requirements[$requirements_machine_name][$requirements_field_name];
+
+          if (cf_is_integer($r)) {
+            if (!preg_match('/^\d+$/i', $r)) {
+              form_set_error('review][operations][requirements][' . $requirements_machine_name . '][' . $requirements_field_name, t($requirements_field_value['error_message'], array(':human_name' => $requirements_human_name, '@number' => $r, '@number_name' => $requirements_field_name)));
+              $failure = TRUE;
+            }
+            else {
+              $number = intval($r);
+
+              if ($number < 0) {
+                form_set_error('review][operations][requirements][' . $requirements_machine_name . '][' . $requirements_field_name, t($requirements_field_value['error_message'], array(':human_name' => $requirements_human_name, '@number' => $number, '@number_name' => $requirements_field_name)));
+                $failure = TRUE;
+              }
+
+              unset($number);
+            }
+          }
+          elseif (is_string($r) && strlen($r) > 0) {
+            form_set_error('review][operations][requirements][' . $requirements_machine_name . '][' . $requirements_field_name, t($requirements_field_value['error_message'], array(':human_name' => $requirements_human_name, '@number' => $r, '@number_name' => $requirements_field_name)));
+            $failure = TRUE;
+          }
+
+          unset($r);
         }
       }
 
@@ -2436,25 +2514,6 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
     }
 
     $extra = array();
-    if ($step === MFCS_REVIEW_STEP_REQUIREMENTS) {
-      if (isset($form_state['values']['review']['operations']['requirements'])) {
-        $extra['requirements'] = $form_state['values']['review']['operations']['requirements'];
-      }
-
-      if (isset($form_state['values']['review']['operations']['insurance'])) {
-        $extra['insurance'] = $form_state['values']['review']['operations']['insurance'];
-      }
-    }
-
-    if ($insurance_provided_available) {
-      if (isset($form_state['values']['review']['operations']['insurance']['provided'])) {
-        if (!isset($extra['insurance'])) {
-          $extra['insurance'] = array();
-        }
-
-        $extra['insurance']['provided'] = $form_state['values']['review']['operations']['insurance']['provided'];
-      }
-    }
 
     if ($decision === MFCS_REVIEW_DECISION_COMMENT) {
       // comments do not need to be processed on a per step basis, so skip the $step conditions below.
@@ -2477,182 +2536,32 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
         $success = mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], MFCS_REVIEW_DECISION_REQUIREMENT, MFCS_REVIEW_RESTRICTIONS_NONE, "The system has auto-waived the fees because the request is a Quick Meeting.", $requirements_extra, $already_reviewed_as);
       }
     }
-    elseif ($step === MFCS_REVIEW_STEP_REQUIREMENTS) {
+    else {
+      if (isset($form_state['values']['review']['operations']['requirements'])) {
+        $extra['requirements'] = $form_state['values']['review']['operations']['requirements'];
+      }
+
+      if (isset($form_state['values']['review']['operations']['insurance'])) {
+        $extra['insurance'] = $form_state['values']['review']['operations']['insurance'];
+      }
+
       if (isset($form_state['values']['review']['operations']['university_business'])) {
         $extra['requirements']['university'] = $form_state['values']['review']['operations']['university_business'];
       }
+
+      if ($insurance_provided_available) {
+        if (isset($form_state['values']['review']['operations']['insurance']['provided'])) {
+          if (!isset($extra['insurance'])) {
+            $extra['insurance'] = array();
+          }
+
+          $extra['insurance']['provided'] = $form_state['values']['review']['operations']['insurance']['provided'];
+        }
+      }
     }
 
-    if ($success) {
-      // walk through each requirement and only apply it if values change for a given requirement group.
-      $requirements_form = array();
-      if (isset($form['review']['operations']['requirements'])) {
-        $requirements_form = $form['review']['operations']['requirements'];
-      }
-
-      $requirements_state = array();
-      if (isset($form_state['values']['review']['operations']['requirements'])) {
-        $requirements_state = $form_state['values']['review']['operations']['requirements'];
-      }
-
-      $insurance_form = array();
-      if (isset($form['review']['operations']['insurance'])) {
-        $insurance_form = $form['review']['operations']['insurance'];
-      }
-
-      $insurance_state = array();
-      if (isset($form_state['values']['review']['operations']['insurance'])) {
-        $insurance_state = $form_state['values']['review']['operations']['insurance'];
-      }
-
-      $operations_form = array();
-      if (isset($form['review']['operations'])) {
-        $operations_form = $form['review']['operations'];
-      }
-
-      $operations_state = array();
-      if (isset($form_state['values']['review']['operations'])) {
-        $operations_state = $form_state['values']['review']['operations'];
-      }
-
-      $requirements_fields = array(
-        'facilities' => array('amount' => TRUE, 'hours' => FALSE, 'days' => TRUE, 'quantity' => FALSE),
-        'equipment' => array('amount' => TRUE, 'hours' => FALSE, 'days' => TRUE, 'quantity' => FALSE),
-        'custodial' => array('amount' => TRUE, 'hours' => TRUE, 'days' => TRUE, 'quantity' => TRUE),
-        'maintenance' => array('amount' => TRUE, 'hours' => TRUE, 'days' => TRUE, 'quantity' => TRUE),
-        'grounds' => array('amount' => TRUE, 'hours' => TRUE, 'days' => TRUE, 'quantity' => TRUE),
-        'security' => array('amount' => TRUE, 'hours' => TRUE, 'days' => TRUE, 'quantity' => TRUE),
-      );
-
-      $changes_requirements = array(
-        'facilities' => array('detected' => FALSE),
-        'equipment' => array('detected' => FALSE),
-        'custodial' => array('detected' => FALSE),
-        'maintenance' => array('detected' => FALSE),
-        'grounds' => array('detected' => FALSE),
-        'security' => array('detected' => FALSE),
-      );
-
-      $changes_waived = array(
-        'waived' => array('detected' => FALSE),
-        'university' => array('detected' => FALSE),
-        'other' => array('detected' => FALSE),
-      );
-
-      $changes_insurance = array(
-        'provided' => array('detected' => FALSE),
-        'contractor' => array('detected' => FALSE),
-        'unaffiliated' => array('detected' => FALSE),
-      );
-
-      $any_requirements_changes_made = FALSE;
-
-      // process requirements changes.
-      if ($decision === MFCS_REVIEW_DECISION_REQUIREMENT) {
-        foreach ($changes_requirements as $requirements_field => &$changes) {
-          if (!isset($requirements_form[$requirements_field])) {
-            continue;
-          }
-
-          foreach ($requirements_fields[$requirements_field] as $requirements_part_key => $requirements_part_value) {
-            if (!$requirements_part_value || !isset($requirements_form[$requirements_field][$requirements_part_key])) {
-              continue;
-            }
-
-            // if the field is not set but was previously set, then this is a change.
-            if (!isset($requirements_state[$requirements_field][$requirements_part_key])) {
-              continue;
-            }
-
-            $value_length = strlen(trim($requirements_state[$requirements_field][$requirements_part_key]));
-            if ($value_length == 0) {
-              $original_length = strlen(trim(($requirements_form[$requirements_field][$requirements_part_key]['#default_value'])));
-              if ($original_length != $value_length) {
-                $changes['detected'] = NULL;
-                $any_requirements_changes_made = TRUE;
-                break;
-              }
-              unset($original_length);
-            }
-            elseif ($requirements_form[$requirements_field][$requirements_part_key]['#default_value'] != $requirements_state[$requirements_field][$requirements_part_key]) {
-              $changes['detected'] = TRUE;
-              $any_requirements_changes_made = TRUE;
-            }
-            unset($value_length);
-          }
-        }
-      }
-
-      foreach ($changes_requirements as $requirement_name => $requirements_change) {
-        if (isset($extra['requirements']) && array_key_exists($requirement_name, $extra['requirements'])) {
-          // remove requirements fields that have no changes detected from the "save" variable.
-          if ($requirements_change['detected'] === FALSE) {
-            unset($extra['requirements'][$requirement_name]);
-          }
-          // if any requirements fields has a null detected, set the entire group to null.
-          elseif (is_null($requirements_change['detected'])) {
-            $extra['requirements'][$requirement_name] = NULL;
-          }
-        }
-      }
-
-      // process waived changes.
-      // @todo: perform the necessary work to convert this to their proper names, such as 'university_business' to be more consistent.
-      if (isset($requirements_form['other']) && isset($requirements_state['other'])) {
-        if ($requirements_form['other']['#default_value'] != $requirements_state['other']) {
-          $changes_waived['other']['detected'] = TRUE;
-
-          $any_requirements_changes_made = TRUE;
-        }
-      }
-
-      if (isset($operations_form['university_business']) && isset($operations_state['university_business'])) {
-        if ($operations_form['university_business']['#default_value'] != $operations_state['university_business']) {
-          $changes_waived['university']['detected'] = TRUE;
-
-          $any_requirements_changes_made = TRUE;
-        }
-      }
-
-      // remove waived fields that have no changes detected from the "save" variable.
-      // @fixme: this might not be used anymore and might need to be removed for being stale code.
-      foreach ($changes_waived as $waived_name => $waived_change) {
-        if (isset($extra['requirements']) && array_key_exists($waived_name, $extra['requirements'])) {
-          if ($waived_change['detected'] === FALSE) {
-            unset($extra['requirements'][$waived_name]);
-          }
-          elseif (is_null($waived_change['detected'])) {
-            $extra['requirements'][$waived_name] = NULL;
-          }
-        }
-      }
-
-      // process insurance changes.
-      foreach ($changes_insurance as $insurance_field => &$changes) {
-        if (!isset($insurance_form[$insurance_field]) || !isset($insurance_state[$insurance_field])) {
-          continue;
-        }
-
-        if ($insurance_form[$insurance_field]['#default_value'] != $insurance_state[$insurance_field]) {
-          $changes['detected'] = TRUE;
-
-          $any_requirements_changes_made = TRUE;
-        }
-      }
-
-      // remove insurance fields that have no changes detected from the "save" variable.
-      foreach ($changes_insurance as $insurance_name => $insurance_change) {
-        if (isset($extra['insurance']) && array_key_exists($insurance_name, $extra['insurance'])) {
-          if ($insurance_change['detected'] === FALSE) {
-            unset($extra[$insurance_name]);
-          }
-          elseif (is_null($insurance_change['detected'])) {
-            $extra[$insurance_name] = NULL;
-          }
-        }
-      }
-
-      if ($decision === MFCS_REVIEW_DECISION_REQUIREMENT && !$any_requirements_changes_made) {
+    if ($success && $decision === MFCS_REVIEW_DECISION_REQUIREMENT) {
+      if (!mfcs_request_view_0_detect_requirements_changes($form, $form_state, $extra)) {
         form_set_error('review][operations][decision', "The Requirements decision has been selected, but no changes have been made. If you only wish to leave a comment, then select the Comment instead of Requirements.");
         watchdog(MFCS_WATCHDOG_ID, "The Requirements decision has been selected, but no changes have been made.", array(), WATCHDOG_ERROR);
 
@@ -2738,6 +2647,195 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
   else {
     $form_state['redirect'] = $form_state['values']['redirect_to'];
   }
+}
+
+/**
+ * Scan through the form and form state and determine if any changes in the requirements fields were peformed.
+ *
+ * @param array $form
+ *   The form array.
+ * @param array $form_state
+ *   The form state array.
+ * @param array $extra
+ *   The array containing extra fields to be updated, namely the 'requirements' columns.
+ *
+ * @return bool
+ *   TRUE is returned if changes are detected, otherwise FALSE is returned.
+ *   FALSE is returned on error.
+ */
+function mfcs_request_view_0_detect_requirements_changes($form, $form_state, &$extra) {
+  if (!is_array($form)) {
+    return FALSE;
+  }
+
+  if (!is_array($form_state)) {
+    return FALSE;
+  }
+
+  $requirements_form = array();
+  if (isset($form['review']['operations']['requirements'])) {
+    $requirements_form = $form['review']['operations']['requirements'];
+  }
+
+  $requirements_state = array();
+  if (isset($form_state['values']['review']['operations']['requirements'])) {
+    $requirements_state = $form_state['values']['review']['operations']['requirements'];
+  }
+
+  $insurance_form = array();
+  if (isset($form['review']['operations']['insurance'])) {
+    $insurance_form = $form['review']['operations']['insurance'];
+  }
+
+  $insurance_state = array();
+  if (isset($form_state['values']['review']['operations']['insurance'])) {
+    $insurance_state = $form_state['values']['review']['operations']['insurance'];
+  }
+
+  $operations_form = array();
+  if (isset($form['review']['operations'])) {
+    $operations_form = $form['review']['operations'];
+  }
+
+  $operations_state = array();
+  if (isset($form_state['values']['review']['operations'])) {
+    $operations_state = $form_state['values']['review']['operations'];
+  }
+
+  $changes_requirements = array(
+    'facilities_fees' => array('personnel' => FALSE, 'hours' => FALSE, 'days' => FALSE, 'rate' => FALSE, 'supplies' => FALSE, 'post' => FALSE, 'description' => FALSE),
+    'equipment_fees' => array('personnel' => FALSE, 'hours' => FALSE, 'days' => FALSE, 'rate' => FALSE, 'supplies' => FALSE, 'post' => FALSE, 'description' => FALSE),
+    'custodial_fees' => array('personnel' => FALSE, 'hours' => FALSE, 'days' => FALSE, 'rate' => FALSE, 'supplies' => FALSE, 'post' => FALSE, 'description' => FALSE),
+    'maintenance_fees' => array('personnel' => FALSE, 'hours' => FALSE, 'days' => FALSE, 'rate' => FALSE, 'supplies' => FALSE, 'post' => FALSE, 'description' => FALSE),
+    'grounds_fees' => array('personnel' => FALSE, 'hours' => FALSE, 'days' => FALSE, 'rate' => FALSE, 'supplies' => FALSE, 'post' => FALSE, 'description' => FALSE),
+    'security_fees' => array('personnel' => FALSE, 'hours' => FALSE, 'days' => FALSE, 'rate' => FALSE, 'supplies' => FALSE, 'post' => FALSE, 'description' => FALSE),
+  );
+
+  $requirements_groups = array(
+    'personnel' => 'group_rates',
+    'hours' => 'group_rates',
+    'days' => 'group_rates',
+    'rate' => 'group_rates',
+    'supplies' => 'group_supplies',
+    'post' => 'group_post',
+    'description' => 'group_post',
+  );
+
+  $changes_waived = array(
+    'university' => FALSE,
+  );
+
+  $changes_insurance = array(
+    'provided' => FALSE,
+    'contractor' => FALSE,
+    'unaffiliated' => FALSE,
+  );
+
+  $changes_made = FALSE;
+  foreach ($changes_requirements as $requirements_field => &$columns) {
+    if (!isset($requirements_form[$requirements_field])) {
+      continue;
+    }
+
+    foreach ($columns as $column_name => &$change) {
+      if (!isset($requirements_form[$requirements_field][$requirements_groups[$column_name]][$column_name])) {
+        continue;
+      }
+
+      $form_column = $requirements_form[$requirements_field][$requirements_groups[$column_name]][$column_name];
+
+      // if the field is not set but was previously set, then this is a change.
+      if (!array_key_exists($column_name, $requirements_state[$requirements_field])) {
+        continue;
+      }
+
+      // some browsers like to put '\r\n' or '\r', in the string value fields.
+      // this causes the string length test to fail, so strip out and remove all '\r\n' and '\r', making them all a consistent '\n' (identical to the way the string is stored in the database).
+      if ($column_name == 'description') {
+        $requirements_state[$requirements_field][$column_name] = str_replace("\r\n", "\n", $requirements_state[$requirements_field][$column_name]);
+        $requirements_state[$requirements_field][$column_name] = str_replace("\r", "\n", $requirements_state[$requirements_field][$column_name]);
+
+        $extra['requirements'][$requirements_field][$column_name] = $requirements_state[$requirements_field][$column_name];
+      }
+
+      $value_length = strlen(trim($requirements_state[$requirements_field][$column_name]));
+      if ($value_length == 0) {
+        $original_length = strlen(trim($form_column['#default_value']));
+        if ($original_length != $value_length) {
+          $change = NULL;
+          $changes_made = TRUE;
+          break;
+        }
+      }
+      elseif ($form_column['#default_value'] != $requirements_state[$requirements_field][$column_name]) {
+        $change = TRUE;
+        $changes_made = TRUE;
+      }
+    }
+    unset($change);
+
+    if (!isset($extra['requirements']) || !array_key_exists($requirements_field, $extra['requirements']) || !array_key_exists($column_name, $extra['requirements'][$requirements_field])) {
+      continue;
+    }
+
+    foreach ($columns as $column_name => $change) {
+      // remove requirements fields that have no changes detected.
+      if ($change === FALSE) {
+        unset($extra['requirements'][$requirements_field][$column_name]);
+      }
+    }
+
+    // if not fields are provided, then remove the entire requirement.
+    if (empty($extra['requirements'][$requirements_field])) {
+      unset($extra['requirements'][$requirements_field]);
+    }
+    unset($change);
+  }
+
+  // process university business changes.
+  if (isset($operations_form['university_business']) && isset($operations_state['university_business'])) {
+    if ($operations_form['university_business']['#default_value'] != $operations_state['university_business']) {
+      $changes_waived['university'] = TRUE;
+
+      $changes_made = TRUE;
+    }
+    else {
+      unset($extra['requirements']['university']);
+    }
+  }
+
+  // process insurance changes.
+  foreach ($changes_insurance as $insurance_field => &$change) {
+    if (!isset($insurance_form[$insurance_field]) || !isset($insurance_state[$insurance_field])) {
+      continue;
+    }
+
+    if ($insurance_form[$insurance_field]['#default_value'] != $insurance_state[$insurance_field]) {
+      $change = TRUE;
+
+      $changes_made = TRUE;
+    }
+  }
+  unset($change);
+
+  // remove insurance fields that have no changes detected.
+  foreach ($changes_insurance as $insurance_name => $change) {
+    if (isset($extra['insurance']) && array_key_exists($insurance_name, $extra['insurance'])) {
+      if ($change === FALSE) {
+        unset($extra['insurance'][$insurance_name]);
+      }
+      elseif (is_null($change)) {
+        $extra[$insurance_name] = NULL;
+      }
+    }
+  }
+  unset($change);
+
+  if (empty($extra['insurance'])) {
+    unset($extra['insurance']);
+  }
+
+  return $changes_made;
 }
 
 /**

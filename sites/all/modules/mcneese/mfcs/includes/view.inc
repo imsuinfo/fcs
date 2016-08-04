@@ -252,6 +252,11 @@ function mfcs_view_build_request_item_structure($request_id, $field_group, $fiel
     $label = $presentation['label'];
   }
 
+  $combined = FALSE;
+  if (!empty($presentation['combined'])) {
+    $combined = (bool) $presentation['combined'];
+  }
+
   $label_length = strlen($label);
 
   $output = array();
@@ -315,6 +320,11 @@ function mfcs_view_build_request_item_structure($request_id, $field_group, $fiel
     }
 
     unset($generated);
+
+    // combined values only get processed one time.
+    if ($combined) {
+      break;
+    }
   }
 
   if ($no_values) {
@@ -369,8 +379,9 @@ function mfcs_view_build_request_item_structure($request_id, $field_group, $fiel
  *   - 'no_prefix': If TRUE, don't show prefix.
  *   - 'no_suffix': If TRUE, don't show suffix.
  *   - 'print_delta_for_multiple': If TRUE, prepend the delta to the value for
- *      fields that have #multiple set to TRUE.
+ *     fields that have #multiple set to TRUE.
  *   - 'history': If TRUE, handle specific deviations relevant to history presentation.
+ *   - 'combine_partial': If TRUE, combined values will be combined into a single field/value, but may have additional information.
  *
  * @return array|bool
  *   The built array.
@@ -483,6 +494,16 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
     $options_history = $options['history'];
   }
 
+  $combine_partial = FALSE;
+  if (!empty($options['combine_partial'])) {
+    $combine_partial = (bool) $options['combine_partial'];
+  }
+
+  // use 'combined' for the value name when applicable.
+  if ($combined && !$combine_partial) {
+    $value_names = array('combined');
+  }
+
   $users = array();
 
   global $base_path;
@@ -498,6 +519,8 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
   $output = array();
   $empty_value = TRUE;
   $no_values = TRUE;
+
+  $combined_processed = array();
 
   foreach ($value_names as $value_name) {
     $cancelled = NULL;
@@ -583,7 +606,73 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
       $output[$value_name]['#attributes']['class'][] = 'item-cancelled';
     }
 
-    if (property_exists($value, $value_name) && (is_numeric($value->{$value_name}) || !empty($value->{$value_name}))) {
+    if ($combined && !$combine_partial) {
+      if ($field_name == 'facilities_fees' || $field_name == 'equipment_fees' || $field_name == 'custodial_fees' || $field_name == 'maintenance_fees' || $field_name == 'grounds_fees' || $field_name == 'security_fees') {
+        $total = NULL;
+
+        $rate = NULL;
+        if (!is_null($value->rate)) {
+          $rate = mfcs_convert_value_from_database_format($value->rate, 'currency');
+        }
+
+        if (!is_null($rate) && $rate !== FALSE) {
+          // calculate total and append from other fields that should exist.
+          $total = $rate;
+
+          if (isset($value->personnel) && is_numeric($value->personnel) && $value->personnel > 0) {
+            $total *= $value->personnel;
+          }
+
+          if (isset($value->hours) && is_numeric($value->hours) && $value->hours > 0) {
+            $total *= $value->hours;
+          }
+
+          if (isset($value->days) && is_numeric($value->days) && $value->days > 0) {
+            $total *= $value->days;
+          }
+        }
+
+        if (isset($value->supplies) && is_numeric($value->supplies) && $value->supplies > 0) {
+          $supplies = mfcs_convert_value_from_database_format($value->supplies, 'currency');
+          if ($supplies !== FALSE) {
+            if (is_null($total)) {
+              $total = $supplies;
+            }
+            else {
+              $total += $supplies;
+            }
+          }
+        }
+
+        if (isset($value->post) && is_numeric($value->post) && $value->post > 0) {
+          $post = mfcs_convert_value_from_database_format($value->post, 'currency');
+          if ($post !== FALSE) {
+            if (is_null($total)) {
+              $total = $post;
+            }
+            else {
+              $total += $post;
+            }
+          }
+        }
+
+        if (!is_null($total)) {
+          $markup .= ' $' . sprintf('%01.2f', $total);
+          $length += strlen(' $' . sprintf('%01.2f', $total));
+
+          if (!is_numeric($markup) && empty($markup)) {
+            $output_value['#attributes']['class'][] = 'empty_value';
+          }
+          else {
+            $empty_value = FALSE;
+            $markup = $delta_prefix . $prefix . $markup . $suffix;
+          }
+
+          $no_values = FALSE;
+        }
+      }
+    }
+    elseif (property_exists($value, $value_name) && (is_numeric($value->{$value_name}) || !empty($value->{$value_name}))) {
       if ($type[$value_name] == 'string' || $type[$value_name] == 'text') {
         $markup .= check_plain($value->{$value_name});
 
@@ -827,66 +916,55 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
         }
       }
       elseif ($type[$value_name] == 'requirement_personnel') {
-        $markup .= ' ' . $value->{$value_name} . ' personnel';
-        $length += strlen($value->{$value_name} . ' personnel');
+        if (isset($value->{$value_name}) && $value->{$value_name} > 0) {
+          $markup .= ' ' . $value->{$value_name} . ' personnel';
+          $length += strlen(' ' . $value->{$value_name} . ' personnel');
+        }
       }
       elseif ($type[$value_name] == 'requirement_hours') {
-        $hours = mfcs_convert_value_from_database_format($value->{$value_name}, 'currency');
-
-        if (intval($hours) == $hours) {
-          $markup .= ' ' . $hours . ' hours';
+        if (isset($value->{$value_name}) && $value->{$value_name} > 0) {
+          $markup .= ' ' . $value->{$value_name} . ' hours';
+          $length += strlen(' ' . $value->{$value_name} . ' hours');
         }
-        else {
-          $markup .= ' ' . sprintf('%01.2f', $hours) . ' hours';
-        }
-
-        $length += strlen($hours . ' hours');
       }
       elseif ($type[$value_name] == 'requirement_days') {
-        $days = mfcs_convert_value_from_database_format($value->{$value_name}, 'currency');
-
-        if (intval($days) == $days) {
-          $markup .= ' ' . $days . ' days';
+        if (isset($value->{$value_name}) && $value->{$value_name} > 0) {
+          $markup .= ' ' . $value->{$value_name} . ' days';
+          $length += strlen(' ' . $value->{$value_name} . ' days');
         }
-        else {
-          $markup .= ' ' . sprintf('%01.2f', $days) . ' days';
-        }
-
-        $length += strlen($days . 'days');
       }
-      elseif ($type[$value_name] == 'requirement_amount') {
-        $amount = mfcs_convert_value_from_database_format($value->{$value_name}, 'currency');
-
-        if ($amount !== FALSE) {
-          $processed_markup = ' at $' . sprintf('%01.2f', $amount);
-
-          // calculate total and append from other fields that should exist.
-          $total = $amount;
-
-          if (in_array('quantity', $value_names) && isset($value->quantity) && is_numeric($value->quantity)) {
-            $total = $total * $value->quantity;
+      elseif ($type[$value_name] == 'requirement_rate') {
+        if (isset($value->{$value_name}) && $value->{$value_name} > 0) {
+          $rate = mfcs_convert_value_from_database_format($value->rate, 'currency');
+          if ($rate !== FALSE) {
+            $markup .=  ' at $' . sprintf('%01.2f', $rate);
+            $length += strlen(' at $' . sprintf('%01.2f', $rate));
           }
-
-          if (in_array('hours', $value_names) && isset($value->hours) && is_numeric($value->hours)) {
-            $hours = mfcs_convert_value_from_database_format($value->hours, 'currency');
-
-            if ($hours !== FALSE) {
-              $total = $total * $hours;
-            }
+        }
+      }
+      elseif ($type[$value_name] == 'requirement_supplies') {
+        if (isset($value->{$value_name}) && $value->{$value_name} > 0) {
+          $supplies = mfcs_convert_value_from_database_format($value->{$value_name}, 'currency');
+          if ($supplies !== FALSE) {
+            $markup .= ' supplies = $' . sprintf('%01.2f', $supplies);
+            $length += strlen(' $' . sprintf('%01.2f', $supplies));
           }
-
-          if (in_array('days', $value_names) && isset($value->days) && is_numeric($value->days)) {
-            $days = mfcs_convert_value_from_database_format($value->days, 'currency');
-
-            if ($days !== FALSE) {
-              $total = $total * $days;
-            }
+        }
+      }
+      elseif ($type[$value_name] == 'requirement_post') {
+        if (isset($value->{$value_name}) && $value->{$value_name} > 0) {
+          $post = mfcs_convert_value_from_database_format($value->{$value_name}, 'currency');
+          if ($post !== FALSE) {
+            $markup .= ' post = $' . sprintf('%01.2f', $post);
+            $length += strlen(' $' . sprintf('%01.2f', $post));
           }
-
-          $processed_markup .= ' = $' . sprintf('%01.2f', $total);
-
-          $markup .= $processed_markup;
-          $length += strlen($processed_markup);
+        }
+      }
+      elseif ($type[$value_name] == 'requirement_description') {
+        if (isset($value->{$value_name})) {
+          $description = ' description = "' . check_plain($value->{$value_name}) . '"';
+          $markup .= $description;
+          $length += strlen($description);
         }
       }
       elseif ($type[$value_name] == 'venue_coordinator') {
@@ -992,7 +1070,7 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
     $output_value['#attributes']['class'][] = 'no_value';
     $output['no_values'] = TRUE;
   }
-  elseif ($combined && !$empty_value) {
+  elseif ($combined && !$combine_partial && !$empty_value) {
     $output['value']['markup']['#markup'] = $delta_prefix . $prefix . $output['value']['markup']['#markup'] . $suffix;
   }
 
@@ -1111,13 +1189,12 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
 
   $changelog_fields = array();
   $changelog_fields['requirements'] = array(
-    'facilities',
-    'equipment',
-    'custodial',
-    'maintenance',
-    'grounds',
-    'security',
-    'other',
+    'facilities_fees',
+    'equipment_fees',
+    'custodial_fees',
+    'maintenance_fees',
+    'grounds_fees',
+    'security_fees',
     'waived',
     'university',
   );
@@ -1427,7 +1504,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
       }
 
       $requirements_specified = FALSE;
-      if ($fees_are_not_waived && $review_step === MFCS_REVIEW_STEP_REQUIREMENTS && $decision === MFCS_REVIEW_DECISION_REQUIREMENT) {
+      if ($fees_are_not_waived && $decision === MFCS_REVIEW_DECISION_REQUIREMENT) {
         $requirements_specified = TRUE;
       }
       else {
@@ -1442,12 +1519,12 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
       }
 
       if ($requirements_specified || ($review_step === MFCS_REVIEW_STEP_VENUE_AVAILABLE && ($decision === MFCS_REVIEW_DECISION_REQUIREMENT || $decision === MFCS_REVIEW_DECISION_WAIVE) && $type !== MFCS_REQUEST_TYPE_QUICK_MEETING)) {
-        if ($fees_are_not_waived && !empty($changelog['requirements']['facilities'])) {
-          $message .= '<div class="review-item-message-requirements-facilities review-item-message-requirements review-item-message-requirements">';
+        if ($fees_are_not_waived && !empty($changelog['requirements']['facilities_fees'])) {
+          $message .= '<div class="review-item-message-requirements-facilities_fees review-item-message-requirements review-item-message-requirements">';
           $message .= '<div class="item-label">Facilities Fees:</div> ';
 
-          $value = reset($changelog['requirements']['facilities']);
-          $value_markup = mfcs_view_build_request_value_structure($request_id, 'requirements', 'facilities', 0, $value, $presentation['requirements']['facilities'], $changelog);
+          $value = reset($changelog['requirements']['facilities_fees']);
+          $value_markup = mfcs_view_build_request_value_structure($request_id, 'requirements', 'facilities_fees', 0, $value, $presentation['requirements']['facilities_fees'], $changelog, array('combine_partial' => TRUE));
 
           if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
             $message .= drupal_render($value_markup);
@@ -1455,12 +1532,12 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
           $message .= '</div>';
         }
 
-        if ($fees_are_not_waived && !empty($changelog['requirements']['equipment'])) {
-          $message .= '<div class="review-item-message-requirements-equipment review-item-message-requirements review-item-message-requirements">';
+        if ($fees_are_not_waived && !empty($changelog['requirements']['equipment_fees'])) {
+          $message .= '<div class="review-item-message-requirements-equipment_fees review-item-message-requirements review-item-message-requirements">';
           $message .= '<div class="item-label">Additional Equipment Fees:</div> ';
 
-          $value = reset($changelog['requirements']['equipment']);
-          $value_markup = mfcs_view_build_request_value_structure($request_id, 'requirements', 'equipment', 0, $value, $presentation['requirements']['equipment'], $changelog);
+          $value = reset($changelog['requirements']['equipment_fees']);
+          $value_markup = mfcs_view_build_request_value_structure($request_id, 'requirements', 'equipment_fees', 0, $value, $presentation['requirements']['equipment_fees'], $changelog, array('combine_partial' => TRUE));
 
           if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
             $message .= drupal_render($value_markup);
@@ -1469,12 +1546,12 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
         }
       }
 
-      if ($fees_are_not_waived && !empty($changelog['requirements']['security'])) {
-        $message .= '<div class="review-item-message-requirements-security review-item-message-requirements review-item-message-requirements">';
+      if ($fees_are_not_waived && !empty($changelog['requirements']['security_fees'])) {
+        $message .= '<div class="review-item-message-requirements-security_fees review-item-message-requirements review-item-message-requirements">';
         $message .= '<div class="item-label">Security Fees:</div> ';
 
-        $value = reset($changelog['requirements']['security']);
-        $value_markup = mfcs_view_build_request_value_structure($request_id, 'requirements', 'security', 0, $value, $presentation['requirements']['security'], $changelog);
+        $value = reset($changelog['requirements']['security_fees']);
+        $value_markup = mfcs_view_build_request_value_structure($request_id, 'requirements', 'security_fees', 0, $value, $presentation['requirements']['security_fees'], $changelog, array('combine_partial' => TRUE));
 
         if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
           $message .= drupal_render($value_markup);
@@ -1482,12 +1559,12 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
         $message .= '</div>';
       }
 
-      if ($fees_are_not_waived && !empty($changelog['requirements']['custodial'])) {
-        $message .= '<div class="review-item-message-requirements-custodial review-item-message-requirements review-item-message-requirements">';
+      if ($fees_are_not_waived && !empty($changelog['requirements']['custodial_fees'])) {
+        $message .= '<div class="review-item-message-requirements-custodial_fees review-item-message-requirements review-item-message-requirements">';
         $message .= '<div class="item-label">Custodial Fees:</div> ';
 
-        $value = reset($changelog['requirements']['custodial']);
-        $value_markup = mfcs_view_build_request_value_structure($request_id, 'requirements', 'custodial', 0, $value, $presentation['requirements']['custodial'], $changelog);
+        $value = reset($changelog['requirements']['custodial_fees']);
+        $value_markup = mfcs_view_build_request_value_structure($request_id, 'requirements', 'custodial_fees', 0, $value, $presentation['requirements']['custodial_fees'], $changelog, array('combine_partial' => TRUE));
 
         if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
           $message .= drupal_render($value_markup);
@@ -1495,12 +1572,12 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
         $message .= '</div>';
       }
 
-      if ($fees_are_not_waived && !empty($changelog['requirements']['maintenance'])) {
-        $message .= '<div class="review-item-message-requirements-maintenance review-item-message-requirements review-item-message-requirements">';
+      if ($fees_are_not_waived && !empty($changelog['requirements']['maintenance_fees'])) {
+        $message .= '<div class="review-item-message-requirements-maintenance_fees review-item-message-requirements review-item-message-requirements">';
         $message .= '<div class="item-label">Maintenance Fees:</div> ';
 
-        $value = reset($changelog['requirements']['maintenance']);
-        $value_markup = mfcs_view_build_request_value_structure($request_id, 'requirements', 'maintenance', 0, $value, $presentation['requirements']['maintenance'], $changelog);
+        $value = reset($changelog['requirements']['maintenance_fees']);
+        $value_markup = mfcs_view_build_request_value_structure($request_id, 'requirements', 'maintenance_fees', 0, $value, $presentation['requirements']['maintenance_fees'], $changelog, array('combine_partial' => TRUE));
 
         if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
           $message .= drupal_render($value_markup);
@@ -1508,32 +1585,12 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
         $message .= '</div>';
       }
 
-      if ($fees_are_not_waived && !empty($changelog['requirements']['grounds'])) {
-        $message .= '<div class="review-item-message-requirements-grounds review-item-message-requirements review-item-message-requirements">';
+      if ($fees_are_not_waived && !empty($changelog['requirements']['grounds_fees'])) {
+        $message .= '<div class="review-item-message-requirements-grounds_fees review-item-message-requirements review-item-message-requirements">';
         $message .= '<div class="item-label">Grounds Fees:</div> ';
 
-        $value = reset($changelog['requirements']['grounds']);
-        $value_markup = mfcs_view_build_request_value_structure($request_id, 'requirements', 'grounds', 0, $value, $presentation['requirements']['grounds'], $changelog);
-
-        if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
-          $message .= drupal_render($value_markup);
-        }
-        $message .= '</div>';
-      }
-
-      if (!empty($changelog['requirements']['other'])) {
-        $message .= '<div class="review-item-message-requirements-other review-item-message-requirements review-item-message-requirements">';
-        $message .= '<div class="item-label">Other Fees:</div> ';
-
-        // always display the boolean when displayed in the review log.
-        foreach ($presentation['requirements']['other']['display'] as &$value) {
-          if ($value == 'when_true' || $value == 'when_false') {
-            $value = 'raw';
-          }
-        }
-
-        $value = reset($changelog['requirements']['other']);
-        $value_markup = mfcs_view_build_request_value_structure($request_id, 'requirements', 'other', 0, $value, $presentation['requirements']['other'], $changelog);
+        $value = reset($changelog['requirements']['grounds_fees']);
+        $value_markup = mfcs_view_build_request_value_structure($request_id, 'requirements', 'grounds_fees', 0, $value, $presentation['requirements']['grounds_fees'], $changelog, array('combine_partial' => TRUE));
 
         if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
           $message .= drupal_render($value_markup);

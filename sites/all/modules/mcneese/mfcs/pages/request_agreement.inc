@@ -176,131 +176,44 @@ function mfcs_request_agreement_0_form($form, &$form_state, $request_id, $contai
   $grand_total = (float) 0;
 
   $requirements = array();
-  $requirements['facilities'] = array(
-    'calculate' => array(
-      'days' => 'days',
-      'amount' => 'amount',
-    ),
-    'name' => "Facilities",
-  );
-
-  $requirements['equipment'] = array(
-    'calculate' => array(
-      'days' => 'days',
-      'amount' => 'amount',
-    ),
-    'name' => "Equipment",
-  );
-
-  $requirements['custodial'] = array(
-    'calculate' => array(
-      'quantity' => 'quantity',
-      'hours' => 'hours',
-      'days' => 'days',
-      'amount' => 'amount',
-    ),
-    'name' => "Custodial",
-  );
-
-  $requirements['maintenance'] = array(
-    'calculate' => array(
-      'quantity' => 'quantity',
-      'hours' => 'hours',
-      'days' => 'days',
-      'amount' => 'amount',
-    ),
-    'name' => "Maintenance",
-  );
-
-  $requirements['grounds'] = array(
-    'calculate' => array(
-      'quantity' => 'quantity',
-      'hours' => 'hours',
-      'days' => 'days',
-      'amount' => 'amount',
-    ),
-    'name' => "Grounds",
-  );
-
-  $requirements['security'] = array(
-    'calculate' => array(
-      'quantity' => 'quantity',
-      'hours' => 'hours',
-      'days' => 'days',
-      'amount' => 'amount',
-    ),
-    'name' => "Security",
-  );
+  $requirements['facilities_fees'] = 'Facilities';
+  $requirements['equipment_fees'] = 'Equipment';
+  $requirements['custodial_fees'] = 'Custodial';
+  $requirements['maintenance_fees'] = 'Maintenance';
+  $requirements['grounds_fees'] = 'Grounds';
+  $requirements['security_fees'] = 'Security';
 
   $requirements_found = FALSE;
-  foreach ($requirements as $requirement => $requirement_data) {
-    if (!empty($request['requirements'][$requirement])) {
-      $requirements_found = TRUE;
+  foreach ($requirements as $requirement => $requirement_name) {
+    if (empty($request['requirements'][$requirement])) {
+      continue;
+    }
 
-      $value = reset($request['requirements'][$requirement]);
+    $requirements_found = TRUE;
+    $value = reset($request['requirements'][$requirement]);
+    $amount = mfcs_calculate_use_fees($value);
 
-      $amount = array();
-      $amount['total'] = NULL;
-      $amount['quantity'] = NULL;
-      $amount['hours'] = NULL;
-      $amount['days'] = NULL;
-      $amount['amount'] = NULL;
+    if ($amount === FALSE || (is_null($amount['total']) && is_null($amount['supplies']) && is_null($amount['post']))) {
+      continue;
+    }
 
-      if (isset($requirement_data['calculate']['quantity'])) {
-        if (is_null($amount['total'])) {
-          $amount['total'] = 1;
-        }
+    $markup .= '<div class="agreement-table-body-row">';
 
-        $amount['quantity'] = (int) $value->quantity;
-        $amount['total'] *= $amount['quantity'];
+    $grand_total += $amount['total'];
+
+    // column 0
+    $markup .= '<div class="agreement-table-body-row-cell column-0">';
+    $markup .= '<div class="item-label">' . $requirement_name . ' Fees:</div> ';
+
+    $markup .= '<div class="item-value">';
+
+    $markup_added = FALSE;
+    if (!is_null($amount['rate'])) {
+      if (!is_null($amount['personnel'])) {
+        $markup .= $amount['personnel'] . ' personnel ';
       }
 
-      if (isset($requirement_data['calculate']['hours'])) {
-        if (is_null($amount['total'])) {
-          $amount['total'] = 1;
-        }
-
-        $amount['hours'] = (float) mfcs_convert_value_from_database_format($value->hours, 'currency');
-        $amount['total'] *= $amount['hours'];
-      }
-
-      if (isset($requirement_data['calculate']['days'])) {
-        if (is_null($amount['total'])) {
-          $amount['total'] = 1;
-        }
-
-        $amount['days'] = (float) mfcs_convert_value_from_database_format($value->days, 'currency');
-        $amount['total'] *= $amount['days'];
-      }
-
-      if (isset($requirement_data['calculate']['amount'])) {
-        if (is_null($amount['total'])) {
-          $amount['total'] = 1;
-        }
-
-        $amount['amount'] = (float) mfcs_convert_value_from_database_format($value->amount, 'currency');
-        $amount['total'] *= $amount['amount'];
-      }
-
-      if (is_null($amount['total'])) {
-        continue;
-      }
-
-      $markup .= '<div class="agreement-table-body-row">';
-
-      $grand_total += $amount['total'];
-
-      // column 0
-      $markup .= '<div class="agreement-table-body-row-cell column-0">';
-      $markup .= '<div class="item-label">' . $requirement_data['name'] . ' Fees:</div> ';
-
-      $markup .= '<div class="item-value">';
-
-      if (isset($requirement_data['calculate']['quantity'])) {
-        $markup .= $amount['quantity'] . ' personnel ';
-      }
-
-      if (isset($requirement_data['calculate']['hours'])) {
+      if (!is_null($amount['hours'])) {
         if (floor($amount['hours']) == $amount['hours']) {
           $markup .= $amount['hours'];
         }
@@ -310,36 +223,58 @@ function mfcs_request_agreement_0_form($form, &$form_state, $request_id, $contai
         $markup .= ' hours ';
       }
 
-      if (isset($requirement_data['calculate']['days'])) {
+      if (!is_null($amount['days'])) {
         if (floor($amount['days']) == $amount['days']) {
           $markup .= $amount['days'];
         }
         else {
           $markup .= sprintf('%01.2f', $amount['days']);
         }
-
         $markup .= ' days ';
       }
 
-      if (isset($requirement_data['calculate']['amount'])) {
-        $markup .= 'at $' . sprintf('%01.2f', $amount['amount']);
+      $markup .= 'at $' . sprintf('%01.2f', $amount['rate']);
+      $markup_added = TRUE;
+    }
+
+    if (!is_null($amount['supplies'])) {
+      if ($markup_added) {
+        $markup .= '<br>';
       }
 
-      $markup .= '</div>'; // item-value
-      $markup .= '</div>'; // column-0
+      $markup .= 'Supplies at $' . sprintf('%01.2f', $amount['supplies']);
 
-      // column 1
-      $markup .= '<div class="agreement-table-body-row-cell column-1">';
-      $markup .= '$' . sprintf('%01.2f', $amount['total']);
-      $markup .= '</div>'; // column-1
-
-      // column 2
-      $markup .= '<div class="agreement-table-body-row-cell column-2">';
-      $markup .= '$' . sprintf('%01.2f', $grand_total);
-      $markup .= '</div>'; // column-2
-
-      $markup .= '</div>'; // agreement-table-body-row
+      $markup_added = TRUE;
     }
+
+    if (!is_null($amount['post'])) {
+      if ($markup_added) {
+        $markup .= '<br>';
+      }
+
+      $markup .= 'Other Expenses at $' . sprintf('%01.2f', $amount['post']);
+
+      if (!is_null($amount['description'])) {
+        $markup .= '<div class="other_expenses-description">' . str_replace("\n", "<br>\n", $amount['description']) . '</div>';
+      }
+
+      $markup_added = TRUE;
+    }
+
+    $markup .= '</div>'; // item-value
+    $markup .= '</div>'; // column-0
+
+    // column 1
+    $markup .= '<div class="agreement-table-body-row-cell column-1">';
+    $markup .= '$' . sprintf('%01.2f', $amount['total']);
+    $markup .= '</div>'; // column-1
+
+    // column 2
+    $markup .= '<div class="agreement-table-body-row-cell column-2">';
+    $markup .= '$' . sprintf('%01.2f', $grand_total);
+    $markup .= '</div>'; // column-2
+
+    $markup .= '</div>'; // agreement-table-body-row
   }
 
   if (!$requirements_found) {
