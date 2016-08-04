@@ -533,6 +533,8 @@ function mfcs_request_email_log_0_view_page($id) {
   $state = array();
   form_process_fieldset($fieldset, $state);
   $markup .= theme('fieldset', array('element' => $fieldset));
+  unset($fieldset);
+  unset($state);
 
 
   // raw_body fieldset
@@ -559,12 +561,16 @@ function mfcs_request_email_log_0_view_page($id) {
   $state = array();
   form_process_fieldset($fieldset, $state);
   $markup .= theme('fieldset', array('element' => $fieldset));
+  unset($fieldset);
+  unset($state);
 
   // break the e-mail apart based on the boundary settings.
+  $text_html = NULL;
   if (!is_null($boundary)) {
-    $b = preg_replace('@--' . $boundary . '--@i', '--' . $boundary, $body);
+    // convert the final boundary into the same format as the initial boundary to make explode() operations work smoothly.
+    $b = preg_replace('@^--' . $boundary . '--$@im', '', $body);
 
-    $body_parts = explode('--' . $boundary, $b);
+    $body_parts = explode('--' . $boundary . "\n", $b);
     array_shift($body_parts);
 
     foreach ($body_parts as $delta => $body_part) {
@@ -608,13 +614,30 @@ function mfcs_request_email_log_0_view_page($id) {
         $description = strtolower($match[0]);
       }
 
-      if ($type == 'multipart/related') {
-        // this assumes an expected format of: ---alt_$sub_boundary
-        $bp = preg_replace('@^---alt_' . $sub_boundary . '--$@i', '', $body_part);
+      if ($type == 'multipart/related' || $type == 'multipart/alternative') {
+        if ($type == 'multipart/related') {
+          $bp = preg_replace('@^--' . $sub_boundary . '--$@im', '', $body_part);
 
-        $sub_body_parts = explode('---alt_' . $sub_boundary, $bp);
-        if (empty($sub_body_parts)) {
-          continue;
+          $sub_body_parts = preg_split('@^--' . $sub_boundary .'$@im', $bp);
+          if (empty($sub_body_parts) && count($sub_body_parts) > 1) {
+            continue;
+          }
+
+          $bp = preg_replace('@^---alt_' . $sub_boundary . '--$@im', '', $sub_body_parts[1]);
+
+          $sub_body_parts = preg_split('@^---alt_' . $sub_boundary .'$@im', $bp);
+          if (empty($sub_body_parts)) {
+            continue;
+          }
+        }
+        else {
+          $bp = preg_replace('@^--' . $sub_boundary . '--$@im', '', $body_part);
+
+          //$sub_body_parts = explode('--' . $sub_boundary . "\n", $bp);
+          $sub_body_parts = preg_split('@^--' . $sub_boundary .'$@im', $bp);
+          if (empty($sub_body_parts)) {
+            continue;
+          }
         }
 
         array_shift($sub_body_parts);
