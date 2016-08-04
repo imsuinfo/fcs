@@ -548,19 +548,22 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
 
     $output = &$form['navigator_top']['markup']['#markup'];
 
+    // In the case of history, it makes more sense that the next/prev navigation flow in relation to the history.
+    // The code that I use to generate the current next/prev behavior is remaining unchanged and therefore the links and text are being swapped.
+    // This means that the variable $previous_page would be used with the words "Next Page".
     if ($page_number > 0) {
       if ($page_number == 1) {
-        $output .= '<a href="' . $base_path . 'requests/history-0/' . $request_id . $url_arguments . '" class="request-history-page-choice request-history-page-previous" title="Previous Page">Prev</a>';
+        $output .= '<a href="' . $base_path . 'requests/history-0/' . $request_id . $url_arguments . '" class="request-history-page-choice request-history-page-next" title="Next Page">Next</a>';
       }
       else {
         $previous_page = $page_number - 1;
-        $output .= '<a href="' . $base_path . 'requests/history-0/' . $request_id . '/' . $previous_page . $url_arguments . '" class="request-history-page-choice request-history-page-previous" title="Previous Page">Prev</a>';
+        $output .= '<a href="' . $base_path . 'requests/history-0/' . $request_id . '/' . $previous_page . $url_arguments . '" class="request-history-page-choice request-history-page-next" title="Next Page">Next</a>';
       }
     }
 
     if ($total_results > $rows_per_page) {
       $next_page = $page_number + 1;
-      $output .= '<a href="' . $base_path . 'requests/history-0/' . $request_id . '/' . $next_page . $url_arguments . '" class="request-history-page-choice request-history-page-next" title="Next Page">Next</a>';
+      $output .= '<a href="' . $base_path . 'requests/history-0/' . $request_id . '/' . $next_page . $url_arguments . '" class="request-history-page-choice request-history-page-previous" title="Previous Page">Prev</a>';
     }
 
     $form['navigator_bottom']['markup'] = $form['navigator_top']['markup'];
