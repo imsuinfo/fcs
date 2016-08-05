@@ -2781,6 +2781,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
         if ($is_auto_cancelled) {
           $email_params['title_suffix'] = "Cancelled (Auto)";
           $email_params['content'] .= "The request was auto-cancelled";
+          $email_params['markup'] .= "The request was auto-cancelled";
 
           if (empty($parameters['auto-cancelled-reason'])) {
             $email_params['content'] .= ".\n";
