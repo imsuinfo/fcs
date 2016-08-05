@@ -228,10 +228,11 @@ $databases = array (
       'username' => 'fcs_user',
       'password' => $dbp['fcs_user'],
       'host' => '192.251.101.223',
-      'port' => '5092',
+      'port' => '5095',
       'driver' => 'pgsql',
       'prefix' => '',
       'transactions' => TRUE,
+      'connect_timeout' => 2,
     ),
   ),
   'oracle' =>
@@ -703,7 +704,7 @@ $conf['ldap_user_blacklist']['mcneese_ldap']= array(
 /**
  *  GNU PG Support
  */
-putenv('GNUPGHOME=/var/www/drupal/sandbox/fcs/sites/default/gnupg');
+putenv('GNUPGHOME=/var/www/drupal/wwwdev/fcs/sites/default/gnupg');
 $conf['gpg-mail'] = array(
   'facilities_use@wwwdev.mcneese.edu' => array(
     'fingerprint' => '75D4F1FD41C485582CD0648E3112BAA0D8BEC67F',
@@ -757,6 +758,8 @@ $conf['fcs_testing-email_to-remove'] = array(
   'facilities_use@wwwdev.mcneese.edu',
 );
 $conf['fcs_testing-email_to-whitelist'] = array(
+  'kday@mcneese.edu',
+  'kevin@mcneese.edu',
   #'kday@mcneese.edu',
   #'gbodin@mcneese.edu',
   #'ctownsend@mcneese.edu',
@@ -827,6 +830,7 @@ if (file_exists(DRUPAL_ROOT . '/sites/default/registry-fcs.php')) {
 $conf['error_document_file_403'] = '/var/www/error_documents/4xx/fcs_wwwdev/403.html';
 $conf['error_document_file_404'] = '/var/www/error_documents/4xx/fcs_wwwdev/404.html';
 $conf['error_document_file_500'] = '/var/www/error_documents/5xx/fcs_wwwdev/500.html';
+$conf['error_document_file_500-no_database'] = FALSE;
 $conf['error_document_file_503'] = '/var/www/error_documents/5xx/fcs_wwwdev/503.html';
 $conf['error_document_custom_menu_1_logged_in'] = '<nav class="menu html_tag-nav">' . "\n" . '  <ul class="navigation_list html_tag-list">' . "\n" . '    <li class="leaf menu_link-wrapper menu_link-wrapper-standout menu_link-create_request-wrapper first"><a class="menu_link menu_link-create_request" href="/fcs/requests/create-0" title="Create a New Request">Create Request</a></li>' . "\n" . '    <li class="leaf menu_link-wrapper menu_link-this_month-wrapper"><a class="menu_link menu_link-this_month" href="/fcs/requests/calendar-0/month" title="View Calendar for This Month">This Month</a></li>' . "\n" . '    <li class="leaf menu_link-wrapper menu_link-this_day-wrapper"><a class="menu_link menu_link-this_day" href="/fcs/requests/calendar-0/day" title="View Calendar for Today">This Day</a></li>' . "\n" . '    <li class="leaf menu_link-wrapper menu_link-facilities_use_information-wrapper"><a class="menu_link menu_link-facilities_use_information" href="https://www.mcneese.edu/facilities/facilitiesuse" title="Facilities Use Information">Facilities Use Information</a></li>' . "\n" . '    <li class="leaf menu_link-wrapper menu_link-my_mcneese-wrapper last"><a class="menu_link menu_link-my_mcneese" href="https://mymcneese.mcneese.edu/" title="Go Back to MyMcNeese Portal">MyMcneese</a></li>' . "\n" . '  </ul>' . "\n" . '</nav>';
 #$conf['error_document_custom_menu_2_logged_in'] = NULL;
