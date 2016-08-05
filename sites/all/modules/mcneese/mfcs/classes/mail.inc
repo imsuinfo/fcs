@@ -239,7 +239,11 @@ class McNeeseFacilitiesUseMail implements MailSystemInterface {
       $body = preg_replace("/\n/i", "\r\n", $body);
 
       $signature = $gpg->sign($body);
-      #$valid = $gpg->verify($body, $signature);
+      $valid = $gpg->verify($body, $signature);
+
+      if ($valid === FALSE) {
+        watchdog(MFCS_WATCHDOG_ID, "Signature verification failed for PGP key: @key.", array('@key' => $fingerprint), WATCHDOG_ERROR);
+      }
 
       $prepend = '--' . $sig_boundary . "\n";
 

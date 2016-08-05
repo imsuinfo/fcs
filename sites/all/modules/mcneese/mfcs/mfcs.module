@@ -10950,8 +10950,14 @@ function mfcs_gpg_sign($message) {
     $gpg->setsignmode(gnupg::SIG_MODE_DETACH);
     $gpg->setarmor(1);
 
-    return $gpg->sign($message);
-    #$valid = $gpg->verify($message, $signature);
+    $signature = $gpg->sign($message);
+    $valid = $gpg->verify($message, $signature);
+
+    if ($valid === FALSE) {
+      watchdog(MFCS_WATCHDOG_ID, "Signature verification failed for PGP key: @key.", array('@key' => $fingerprint), WATCHDOG_ERROR);
+    }
+
+    return $signature;
   }
   catch (Error $e) {
     watchdog(MFCS_WATCHDOG_ID, "Failed to sign PGP key: @key, reason: @reason", array('@key' => $fingerprint, '@reason' => $e->getMessage()), WATCHDOG_ERROR);
