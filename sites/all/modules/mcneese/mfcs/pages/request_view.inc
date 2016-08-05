@@ -2571,9 +2571,9 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
 
         return;
       }
-
-      $success = mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], $decision, $restriction, $message, $extra, $already_reviewed_as);
     }
+
+    $success = mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], $decision, $restriction, $message, $extra, $already_reviewed_as);
 
     if ($success) {
       if ($decision === MFCS_REVIEW_DECISION_COMMENT) {
