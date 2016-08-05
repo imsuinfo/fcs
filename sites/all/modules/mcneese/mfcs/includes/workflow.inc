@@ -1070,11 +1070,11 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
 
       // contractor insurance
       if ($new_contractor_insurance) {
-        $mfcs_current_insurance['insurance_contractor'] = $insurance_latest['contractor'] + 1;
-        if (is_null($mfcs_current_insurance['insurance_contractor'])) {
-          if (is_null($insurance_latest['contractor'])) {
-            $mfcs_current_insurance['insurance_contractor'] = 0;
-          }
+        if (is_null($insurance_latest['contractor'])) {
+          $mfcs_current_insurance['insurance_contractor'] = 0;
+        }
+        else {
+          $mfcs_current_insurance['insurance_contractor'] = $insurance_latest['contractor']->revision + 1;
         }
 
         $mfcs_field_insurance_contractor = array(
@@ -1089,11 +1089,11 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
 
       // unaffiliated insurance
       if ($new_unaffiliated_insurance) {
-        $mfcs_current_insurance['insurance_unaffiliated'] = $insurance_latest['unaffiliated'] + 1;
-        if (is_null($mfcs_current_insurance['insurance_unaffiliated'])) {
-          if (is_null($insurance_latest['unaffiliated'])) {
-            $mfcs_current_insurance['insurance_unaffiliated'] = 0;
-          }
+        if (is_null($insurance_latest['unaffiliated'])) {
+          $mfcs_current_insurance['insurance_unaffiliated'] = 0;
+        }
+        else {
+          $mfcs_current_insurance['insurance_unaffiliated'] = $insurance_latest['unaffiliated']->revision + 1;
         }
 
         $mfcs_field_insurance_unaffiliated = array(
@@ -1128,11 +1128,11 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
       }
 
       if ($new_provided_insurance) {
-        $mfcs_current_insurance['insurance_provided'] = $insurance_latest['provided'] + 1;
-        if (is_null($mfcs_current_insurance['insurance_provided'])) {
-          if (is_null($insurance_latest['provided'])) {
-            $mfcs_current_insurance['insurance_provided'] = 0;
-          }
+        if (is_null($insurance_latest['provided'])) {
+          $mfcs_current_insurance['insurance_provided'] = 0;
+        }
+        else {
+          $mfcs_current_insurance['insurance_provided'] = $insurance_latest['provided']->revision + 1;
         }
 
         $mfcs_field_insurance_provided = array(

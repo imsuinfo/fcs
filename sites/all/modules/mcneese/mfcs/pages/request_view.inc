@@ -1313,63 +1313,8 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     }
 
     if ($show_operations && !$contained && is_null($use_revision)) {
-      $decision_options = array();
+      $decision_options = mfcs_request_view_0_detect_allowed_decisions($request, $user, $administer, $manager, $venue_coordinator, $reviewer);
       $decision_options_all = mfcs_get_reviewer_decision_list_options();
-
-      // new behavior as of ticket: fcs-79.
-      // make sure the decision options are populated based on the current users roles and the current review step.
-      if ($can_review_request) {
-        $remove_already_reviewed = FALSE;
-        if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
-          // only venue coordinator or manager may perform operations other than comment.
-          if ($venue_coordinator || $manager) {
-            $decision_options = mfcs_get_reviewer_decision_list_options(NULL, MFCS_RESTRICTION_DECISION_VENUE_COORDINATOR);
-          }
-          else {
-            $decision_options = mfcs_get_reviewer_decision_list_options(NULL, MFCS_RESTRICTION_DECISION_COMMENT_ONLY);
-          }
-        }
-        elseif ($step == MFCS_REVIEW_STEP_REVIEW) {
-          // only reviewers and managers may perform operations other than comment.
-          if ($reviewer || $manager) {
-            $decision_options = mfcs_get_reviewer_decision_list_options(NULL, MFCS_RESTRICTION_DECISION_REVIEWER);
-
-            if ($manager) {
-              $remove_already_reviewed = TRUE;
-            }
-          }
-          else {
-            $decision_options = mfcs_get_reviewer_decision_list_options(NULL, MFCS_RESTRICTION_DECISION_COMMENT_ONLY);
-          }
-        }
-        elseif ($step == MFCS_REVIEW_STEP_REQUIREMENTS) {
-          // only reviewers and managers may perform operations other than comment.
-          if ($reviewer || $manager) {
-            $decision_options = mfcs_get_reviewer_decision_list_options(NULL, MFCS_RESTRICTION_DECISION_APPROVER);
-
-            if ($manager) {
-              $remove_already_reviewed = TRUE;
-            }
-          }
-        }
-        elseif ($step == MFCS_REVIEW_STEP_COMPLETED) {
-          // only reviewers and managers may perform operations other than comment for all other steps.
-          if ($reviewer || $manager) {
-            $decision_options = mfcs_get_reviewer_decision_list_options(NULL, MFCS_RESTRICTION_DECISION_REVIEWER);
-
-            if ($manager) {
-              $remove_already_reviewed = TRUE;
-            }
-          }
-          else {
-            $decision_options = mfcs_get_reviewer_decision_list_options(NULL, MFCS_RESTRICTION_DECISION_COMMENT_ONLY);
-          }
-        }
-        else {
-          // for all other steps, only comments are allowed.
-          $decision_options = mfcs_get_reviewer_decision_list_options(NULL, MFCS_RESTRICTION_DECISION_COMMENT_ONLY);
-        }
-      }
 
       $form['review']['operations'] = array(
         '#id' => 'request-' . $request_id . '-section-review-operations',
@@ -1578,7 +1523,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         $form['review']['operations']['decision']['#default_value'] = MFCS_REVIEW_DECISION_COMMENT;
       }
 
-      if ($can_review_request && $step === MFCS_REVIEW_STEP_REQUIREMENTS) {
+      if (array_key_exists(MFCS_REVIEW_DECISION_REQUIREMENT, $decision_options)) {
         $states = array(
           'visible' => array(
             ':input[name="review[operations][decision]"]' => array('value' => MFCS_REVIEW_DECISION_REQUIREMENT),
@@ -2149,10 +2094,15 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
       MFCS_REVIEW_STEP_REQUIREMENTS,
     );
 
-    if (isset($form['form']['insurance_provided_available']['#value']) && $form['form']['insurance_provided_available']['#value']) {
+    if ($decision === MFCS_REVIEW_DECISION_REQUIREMENT) {
       $allowed_statuses = array(
         MFCS_REQUEST_STATUS_LOCKED,
         MFCS_REQUEST_STATUS_CLOSED_ACCEPTED,
+        MFCS_REQUEST_STATUS_CLOSED_DENIED,
+        MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE,
+        MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK,
+        MFCS_REQUEST_STATUS_CANCELLED,
+        MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED,
       );
 
       $allowed_steps = array(
@@ -2160,6 +2110,9 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
         MFCS_REVIEW_STEP_REQUIREMENTS,
         MFCS_REVIEW_STEP_COMPLETED,
       );
+    }
+
+    if ($manager) {
     }
 
     if ($decision === MFCS_REVIEW_DECISION_ISSUES || $decision === MFCS_REVIEW_DECISION_ISSUES_NONE) {
@@ -2836,6 +2789,130 @@ function mfcs_request_view_0_detect_requirements_changes($form, $form_state, &$e
   }
 
   return $changes_made;
+}
+
+/**
+ * Determine which steps are allowed for the given request and given user.
+ *
+ * This helps make sure the decision options are populated based on the current users roles and the current review step.
+ *
+ * @param array $request
+ *   An already loaded request array.
+ * @param object $user
+ *   An already loaded user object.
+ * @param bool $administer
+ *    Defines whether or not the current user is an administer.
+ * @param bool $manager
+ *    Defines whether or not the current user is a manager.
+ * @param bool $venue_coordinator
+ *    Defines whether or not the current user is a venue coordinator.
+ * @param bool $reviewer
+ *    Defines whether or not the current user is a reviewer.
+ *
+ * @return array
+ *   An array of valid decision on success.
+ */
+function mfcs_request_view_0_detect_allowed_decisions($request, $user, $administer, $manager, $venue_coordinator, $reviewer) {
+  if (!is_array($request)) {
+    cf_error::invalid_array('request');
+    return array();
+  }
+
+  if (!is_object($user)) {
+    cf_error::invalid_object('user');
+    return array();
+  }
+
+  if (!is_bool($venue_coordinator)) {
+    cf_error::invalid_bool('venue_coordinator');
+    return array();
+  }
+
+  if (!is_bool($manager)) {
+    cf_error::invalid_bool('manager');
+    return array();
+  }
+
+  if (!is_bool($reviewer)) {
+    cf_error::invalid_bool('reviewer');
+    return array();
+  }
+
+  if (!mfcs_request_access('review', $request, $user)) {
+    return array();
+  }
+
+  if ($reviewer || $manager) {
+    $allowed_statuses = array(
+      MFCS_REQUEST_STATUS_LOCKED,
+      MFCS_REQUEST_STATUS_CLOSED_ACCEPTED,
+      MFCS_REQUEST_STATUS_CLOSED_DENIED,
+      MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE,
+      MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK,
+      MFCS_REQUEST_STATUS_CANCELLED,
+      MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED,
+    );
+  }
+  else {
+    $allowed_statuses = array(
+      MFCS_REQUEST_STATUS_UNLOCKED,
+      MFCS_REQUEST_STATUS_LOCKED,
+    );
+  }
+
+  $step = $request['top']['step'][0]->value;
+  $status = $request['top']['status'][0]->value;
+
+  $decision_options = mfcs_get_reviewer_decision_list_options(NULL, MFCS_RESTRICTION_DECISION_COMMENT_ONLY);
+
+  if (!in_array($status, $allowed_statuses)) {
+    return $decision_options;
+  }
+
+  if ($administer) {
+    $decision_options = mfcs_get_reviewer_decision_list_options(NULL, MFCS_RESTRICTION_DECISION_ADMINISTER);
+  }
+  elseif ($manager) {
+    $decision_options = mfcs_get_reviewer_decision_list_options(NULL, MFCS_RESTRICTION_DECISION_MANAGER);
+  }
+  elseif ($reviewer) {
+    $decision_options = mfcs_get_reviewer_decision_list_options(NULL, MFCS_RESTRICTION_DECISION_REVIEWER);
+  }
+
+  if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
+    // venue coordinators get special options.
+    if ($venue_coordinator && !$manager && !$administer) {
+      $decision_options = mfcs_get_reviewer_decision_list_options(NULL, MFCS_RESTRICTION_DECISION_VENUE_COORDINATOR);
+    }
+
+    // remove decisions that are not allowed during this step.
+    unset($decision_options[MFCS_REVIEW_DECISION_ISSUES]);
+    unset($decision_options[MFCS_REVIEW_DECISION_ISSUES_NONE]);
+    unset($decision_options[MFCS_REVIEW_DECISION_APPROVE]);
+    unset($decision_options[MFCS_REVIEW_DECISION_DENY]);
+  }
+  elseif ($step == MFCS_REVIEW_STEP_REVIEW) {
+    // remove decisions that are not allowed during this step.
+    unset($decision_options[MFCS_REVIEW_DECISION_AVAILABLE]);
+    unset($decision_options[MFCS_REVIEW_DECISION_UNAVAILABLE]);
+    unset($decision_options[MFCS_REVIEW_DECISION_APPROVE]);
+    unset($decision_options[MFCS_REVIEW_DECISION_DENY]);
+
+  }
+  elseif ($step == MFCS_REVIEW_STEP_REQUIREMENTS) {
+    // remove decisions that are not allowed during this step.
+    unset($decision_options[MFCS_REVIEW_DECISION_AVAILABLE]);
+    unset($decision_options[MFCS_REVIEW_DECISION_UNAVAILABLE]);
+  }
+  elseif ($step == MFCS_REVIEW_STEP_COMPLETED) {
+    // remove decisions that are not allowed during this step.
+    unset($decision_options[MFCS_REVIEW_DECISION_AVAILABLE]);
+    unset($decision_options[MFCS_REVIEW_DECISION_UNAVAILABLE]);
+    unset($decision_options[MFCS_REVIEW_DECISION_APPROVE]);
+    unset($decision_options[MFCS_REVIEW_DECISION_DENY]);
+  }
+
+  return $decision_options;
 }
 
 /**
