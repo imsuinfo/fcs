@@ -2860,13 +2860,15 @@ function mfcs_request_view_0_detect_allowed_decisions($request, $user, $administ
     );
   }
 
-  $step = $request['top']['step'][0]->value;
-  $status = $request['top']['status'][0]->value;
+  $step = (int) $request['top']['step'][0]->value;
+  $status = (int) $request['top']['status'][0]->value;
 
   $decision_options = mfcs_get_reviewer_decision_list_options(NULL, MFCS_RESTRICTION_DECISION_COMMENT_ONLY);
 
   if (!in_array($status, $allowed_statuses)) {
-    return $decision_options;
+    if (!($venue_coordinator && $step === MFCS_REVIEW_STEP_VENUE_AVAILABLE)) {
+      return $decision_options;
+    }
   }
 
   if ($administer) {
