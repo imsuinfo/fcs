@@ -2014,7 +2014,7 @@ function mfcs_request_unavailability_0_delete_form($form, &$form_state, $year, $
     '#markup' => '',
   );
 
-  $form['unavailable']['confirmation']['#markup'] .= '<h3>Are you sure wou want to delete this unavailability?</h3> ';
+  $form['unavailable']['confirmation']['#markup'] .= '<h3>Are you sure you want to delete this unavailability?</h3> ';
   $form['unavailable']['confirmation']['#markup'] .= '<div>';
   $form['unavailable']['confirmation']['#markup'] .= '<strong>ID</strong>: ' . $unavailable->id . '<br>';
   $form['unavailable']['confirmation']['#markup'] .= '<strong>Title</strong>: ' . $unavailable->title . '<br>';

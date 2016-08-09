@@ -92,7 +92,7 @@ function mfcs_request_delete_0_form($form, &$form_state, $request_id) {
     '#markup' => '',
   );
 
-  $form['confirmation']['#markup'] .= '<h3>Are you sure wou want to delete the request?</h3> ';
+  $form['confirmation']['#markup'] .= '<h3>Are you sure you want to delete the request?</h3> ';
   $form['confirmation']['#markup'] .= '<div>';
   $form['confirmation']['#markup'] .= 'Deleting the form will remove your request from the system. ';
   $form['confirmation']['#markup'] .= '</div>';

@@ -1346,7 +1346,7 @@ function mfcs_request_holiday_0_delete_form($form, &$form_state, $year, $holiday
     '#markup' => '',
   );
 
-  $form['confirmation']['#markup'] .= '<h3>Are you sure wou want to delete the holiday?</h3> ';
+  $form['confirmation']['#markup'] .= '<h3>Are you sure you want to delete the holiday?</h3> ';
   $form['confirmation']['#markup'] .= '<div>';
   $form['confirmation']['#markup'] .= '<strong>ID</strong>: ' . $holiday->id . '<br>';
   $form['confirmation']['#markup'] .= '<strong>Title</strong>: ' . $holiday->title . '<br>';
