@@ -759,12 +759,12 @@ function mfcs_get_reviewer_decision_list_options($option = NULL, $restriction = 
     }
   }
   elseif ($restriction == MFCS_RESTRICTION_DECISION_REVIEWER) {
-    foreach (array(MFCS_REVIEW_DECISION_ISSUES, MFCS_REVIEW_DECISION_ISSUES_NONE, MFCS_REVIEW_DECISION_REQUIREMENT, MFCS_REVIEW_DECISION_COMMENT) as $option_id) {
+    foreach (array(MFCS_REVIEW_DECISION_ISSUES, MFCS_REVIEW_DECISION_ISSUES_NONE, MFCS_REVIEW_DECISION_COMMENT) as $option_id) {
       $options[$option_id] = $options_all[$option_id];
     }
   }
   elseif ($restriction == MFCS_RESTRICTION_DECISION_APPROVER) {
-    foreach (array(MFCS_REVIEW_DECISION_APPROVE, MFCS_REVIEW_DECISION_DENY, MFCS_REVIEW_DECISION_REQUIREMENT, MFCS_REVIEW_DECISION_COMMENT) as $option_id) {
+    foreach (array(MFCS_REVIEW_DECISION_APPROVE, MFCS_REVIEW_DECISION_DENY, MFCS_REVIEW_DECISION_COMMENT) as $option_id) {
       $options[$option_id] = $options_all[$option_id];
     }
   }
