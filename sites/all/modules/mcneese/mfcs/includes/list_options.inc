@@ -86,7 +86,7 @@ function mfcs_get_review_steps_list_options($option = NULL, $hidden = FALSE, $di
   }
 
   $options_all[MFCS_REVIEW_STEP_VENUE_AVAILABLE] = 'Venue Available';
-  $options_all[MFCS_REVIEW_STEP_MAKE_DECISIONS] = 'Resolve Conflicts / Make Decisions';
+  $options_all[MFCS_REVIEW_STEP_FINAL_APPROVAL] = 'Final Approval';
   $options_all[MFCS_REVIEW_STEP_RELEASE_HOLD] = 'Release Tentative Hold';
   $options_all[MFCS_REVIEW_STEP_REVIEW] = 'Review';
   $options_all[MFCS_REVIEW_STEP_REQUIREMENTS] = 'Requirements';

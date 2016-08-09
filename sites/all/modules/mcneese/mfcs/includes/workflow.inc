@@ -921,7 +921,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
     'restriction' => $restriction,
   );
 
-  if ($step === MFCS_REVIEW_STEP_REVIEW || $step === MFCS_REVIEW_STEP_REQUIREMENTS || $step === MFCS_REVIEW_STEP_MAKE_DECISIONS) {
+  if ($step === MFCS_REVIEW_STEP_REVIEW || $step === MFCS_REVIEW_STEP_REQUIREMENTS || $step === MFCS_REVIEW_STEP_FINAL_APPROVAL) {
     // remove classifications not allowed in these steps, unless they are for a comment or a message for the review log.
     if ($decision !== MFCS_REVIEW_DECISION_COMMENT && $decision !== MFCS_REVIEW_DECISION_CANCELLED && $decision !== MFCS_REVIEW_DECISION_UNCANCELLED && $decision !== MFCS_REVIEW_DECISION_CLOSED && $decision !== MFCS_REVIEW_DECISION_REASSIGNED) {
       unset($reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR]);
@@ -932,7 +932,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
   $mfcs_field_requirements = array();
   $requirements_university_save = FALSE;
   $perform_manager_classification_check = FALSE;
-  if (($decision === MFCS_REVIEW_DECISION_WAIVE || $decision === MFCS_REVIEW_DECISION_REQUIREMENT) && ($step === MFCS_REVIEW_STEP_VENUE_AVAILABLE || $step === MFCS_REVIEW_STEP_REVIEW || $step === MFCS_REVIEW_STEP_REQUIREMENTS || $step === MFCS_REVIEW_STEP_MAKE_DECISIONS || $step === MFCS_REVIEW_STEP_COMPLETED)) {
+  if (($decision === MFCS_REVIEW_DECISION_WAIVE || $decision === MFCS_REVIEW_DECISION_REQUIREMENT) && ($step === MFCS_REVIEW_STEP_VENUE_AVAILABLE || $step === MFCS_REVIEW_STEP_REVIEW || $step === MFCS_REVIEW_STEP_REQUIREMENTS || $step === MFCS_REVIEW_STEP_FINAL_APPROVAL || $step === MFCS_REVIEW_STEP_COMPLETED)) {
     $requirements_university = NULL;
     if (isset($extra['requirements']['university'])) {
       $requirements_university = $extra['requirements']['university'];
@@ -1392,7 +1392,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
     unset($mfcs_review_classification);
     unset($reviewer_classifications);
 
-    if (($decision === MFCS_REVIEW_DECISION_WAIVE || $decision === MFCS_REVIEW_DECISION_REQUIREMENT) && ($step === MFCS_REVIEW_STEP_VENUE_AVAILABLE || $step === MFCS_REVIEW_STEP_REVIEW  || $step === MFCS_REVIEW_STEP_REQUIREMENTS || $step === MFCS_REVIEW_STEP_MAKE_DECISIONS || $step === MFCS_REVIEW_STEP_COMPLETED)) {
+    if (($decision === MFCS_REVIEW_DECISION_WAIVE || $decision === MFCS_REVIEW_DECISION_REQUIREMENT) && ($step === MFCS_REVIEW_STEP_VENUE_AVAILABLE || $step === MFCS_REVIEW_STEP_REVIEW  || $step === MFCS_REVIEW_STEP_REQUIREMENTS || $step === MFCS_REVIEW_STEP_FINAL_APPROVAL || $step === MFCS_REVIEW_STEP_COMPLETED)) {
       foreach ($mfcs_field_requirements as $use => $fields) {
         $query = db_insert('mfcs_field_requirements_' . $use);
         $query->fields($fields);
@@ -1873,7 +1873,7 @@ function mfcs_workflow_next_step($request_id, $type, $step, $decision, $restrict
       $changed_user = $system_user;
       $changed_by = $system_user->uid;
       $changed_type = 'system';
-      $new_step = MFCS_REVIEW_STEP_MAKE_DECISIONS;
+      $new_step = MFCS_REVIEW_STEP_FINAL_APPROVAL;
     }
     */
 
@@ -1915,7 +1915,7 @@ function mfcs_workflow_next_step($request_id, $type, $step, $decision, $restrict
   if (!is_null($new_status) && $new_status !== MFCS_REQUEST_STATUS_LOCKED) {
     $parameters['status'] = $new_status;
   }
-  elseif ($new_step === MFCS_REVIEW_STEP_REVIEW || $new_step === MFCS_REVIEW_STEP_REQUIREMENTS || $new_step === MFCS_REVIEW_STEP_MAKE_DECISIONS) {
+  elseif ($new_step === MFCS_REVIEW_STEP_REVIEW || $new_step === MFCS_REVIEW_STEP_REQUIREMENTS || $new_step === MFCS_REVIEW_STEP_FINAL_APPROVAL) {
     $parameters['step'] = $new_step;
   }
   elseif ($new_step === MFCS_REVIEW_STEP_VENUE_AVAILABLE && $type === MFCS_REQUEST_TYPE_QUICK_MEETING && ($decision === MFCS_REVIEW_DECISION_AVAILABLE || $decision === MFCS_REVIEW_DECISION_UNAVAILABLE)) {
@@ -3266,7 +3266,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       }
     }
     /* No longer used as of ticket fcs-79.
-    elseif ($request['top']['step'][0]->value == MFCS_REVIEW_STEP_MAKE_DECISIONS) {
+    elseif ($request['top']['step'][0]->value == MFCS_REVIEW_STEP_FINAL_APPROVAL) {
       $email_params['title_suffix'] = "Reviewed";
       $email_params['content'] = "";
       $email_params['content'] .= "The request has been reviewed and is ready for conflict resolution / decision making / final review.\n";

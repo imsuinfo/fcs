@@ -417,7 +417,7 @@ function mfcs_testing_review_request_r($request_id, $decision = MFCS_REVIEW_DECI
     return FALSE;
   }
 
-  if (empty($request['top']['step'][0]) || !is_object($request['top']['step'][0]) || $request['top']['step'][0]->value != MFCS_REVIEW_STEP_MAKE_DECISIONS) {
+  if (empty($request['top']['step'][0]) || !is_object($request['top']['step'][0]) || $request['top']['step'][0]->value != MFCS_REVIEW_STEP_FINAL_APPROVAL) {
     return FALSE;
   }
 
