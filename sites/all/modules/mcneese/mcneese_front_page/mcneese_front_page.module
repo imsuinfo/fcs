@@ -956,5 +956,31 @@ function mcneese_front_page_embed_spotlight() {
 }
 
 /**
+ * Removes the static front page, forcing it to be rebuilt on next request.
+ *
+ * This depends on:
+ * - custom index.php changes.
+ * - variable: mcneese_static_file_frontpage
+ *
+ * @return bool
+ *   TRUE on success, FALSE otherwise.
+ */
+function mcneese_front_page_static_flush() {
+  $static_file_frontpage = variable_get('mcneese_static_file_frontpage', FALSE);
+  if (!is_string($static_file_frontpage) || empty($static_file_frontpage)) {
+    if ($static_file_frontpage === FALSE) {
+      return TRUE;
+    }
+    return FALSE;
+  }
+
+  if (file_exists($static_file_frontpage)) {
+    return (bool) unlink($static_file_frontpage);
+  }
+
+  return TRUE;
+}
+
+/**
  * @} End of '@defgroup mcneese_front_page McNeese Front Page'.
  */
