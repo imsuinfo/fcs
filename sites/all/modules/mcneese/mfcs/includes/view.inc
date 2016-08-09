@@ -1327,8 +1327,11 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
         elseif ($classification == MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR) {
           $reviewer_classification .= "System Administrator";
         }
-        else {
+        elseif (array_key_exists($classification, $reviewer_classification_options)) {
           $reviewer_classification .= $reviewer_classification_options[$classification];
+        }
+        else {
+          watchdog(MFCS_WATCHDOG_ID, "The classification %classification does not exist in the classification options array for the user %user_id.", array('%user_id' => $user_id, '%classification' => $classification), WATCHDOG_WARNING);
         }
 
         $markup_class .= ' classification-' . $classification;
