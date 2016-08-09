@@ -5272,12 +5272,19 @@ function mfcs_autocancel_old_requests_cron() {
 
     $query->innerJoin('mfcs_current', 'mc', 'mer.id = mc.request_id');
     $query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mc.request_id = mfdd.request_id AND mc.dates_date = mfdd.revision');
+    $query->leftJoin('mfcs_request_locks', 'mrl', 'mer.id = mrl.request_id');
 
     $query->addField('mer', 'id', 'id');
 
     $query->condition('mer.status', $status, 'IN');
     $query->condition('mfdd.value', $date, '<');
     $query->condition('mfdd.cancelled', 1, '<>'); // using <> for backwards compatibility where mfdd.cancelled may be NULL.
+
+    // when auto-cancel lock is set to TRUE, then auto-cancel is locked/prohibited from cancelling the request.
+    $or = db_or();
+    $or->isNull('mrl.auto_cancel');
+    $or->condition('mrl.auto_cancel', 't', '<>');
+    $query->condition($or);
 
     $query->distinct();
 
@@ -12191,6 +12198,112 @@ function mfcs_calculate_use_fees($fees) {
   }
 
   return $amount;
+}
+
+/**
+ * Load any locks associated with a given request.
+ *
+ * @param int $request_id
+ *   The request id to load the locks of.
+ * @param array $column_names
+ *   (optional) When not empty, load only the specified column names.
+ *   When empty, load all column names.
+ *
+ * @return object|bool
+ *   The resulting database object.
+ *   TRUE is returned when the request_id is not assigned a row in the table.
+ *   FALSE is returned on error.
+ */
+function mfcs_load_request_locks($request_id, $column_names = array()) {
+  if (!cf_is_integer($request_id)) {
+    cf_error::invalid_integer('request_id');
+    return FALSE;
+  }
+
+  if (!is_array($column_names)) {
+    cf_error::invalid_array('column_names');
+    return FALSE;
+  }
+
+  try {
+    $query = db_select('mfcs_request_locks', 'mrl');
+
+    if (empty($column_names)) {
+      $query->fields('mrl');
+    }
+    else {
+      $query->fields('mrl', $column_names);
+    }
+
+    $query->condition('mrl.request_id', $request_id);
+
+    $result = $query->execute()->fetchObject();
+
+    if ($result === FALSE) {
+      return TRUE;
+    }
+  }
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
+  }
+
+  if (is_object($result)) {
+    return $result;
+  }
+
+  return FALSE;
+}
+
+/**
+ * Assign/Unassign any locks associated with a given request.
+ *
+ * @param int $request_id
+ *   The request id to assign/unassign the locks of.
+ * @param array $values
+ *   An array of column names and their values (either: TRUE, FALSE, or NULL).
+ *   If set to an empty array, the row associated with the request id is completely deleted.
+ *
+ * @return bool
+ *   TRUE on success, FALSE otherwise.
+ */
+function mfcs_set_request_locks($request_id, $values) {
+  if (!cf_is_integer($request_id)) {
+    cf_error::invalid_integer('request_id');
+    return FALSE;
+  }
+
+  if (!is_array($values)) {
+    cf_error::invalid_array('values');
+    return FALSE;
+  }
+
+  try {
+    if (empty($values)) {
+      $query = db_delete('mfcs_request_locks');
+      $query->condition('request_id', $request_id);
+      $result = $query->execute();
+    }
+    else {
+      $query = db_insert('mfcs_request_locks');
+      $values['request_id'] = $request_id;
+      $query->fields($values);
+      $query->onConflictDo(Database::CONFLICT_DO_UPDATE, array('request_id'), array_keys($values));
+      $query->execute();
+    }
+
+      return TRUE;
+  }
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
+  }
+
+  return FALSE;
 }
 
 /**

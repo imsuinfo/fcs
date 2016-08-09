@@ -306,6 +306,35 @@ function mfcs_schema() {
     ),
   );
 
+/*
+  $schema['mfcs_request_locks'] = array(
+    'description' => $t("McNeese Facilities Use Requests field table representing specific locks associated with requests."),
+    'fields' => array(
+      'request_id' => array(
+        'description' => $t("Foreign key to the primary key in the {mfcs_requests} table."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'auto_cancel' => array(
+        'description' => $t("Defines that the auto-cancel process should be prevented in some manner."),
+        'type' => 'boolean',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => FALSE,
+      ),
+    ),
+    'primary key' => array('request_id'),
+    'foreign keys' => array(
+      'request_id' => array(
+        'table' => 'mfcs_requests',
+        'columns' => array('request_id' => 'id'),
+      ),
+    ),
+  );
+*/
+
   $schema['mfcs_reviewers'] = array(
     'description' => $t("McNeese Facilities Use mapping users to an request classification and a review classification."),
     'fields' => array(
@@ -2204,6 +2233,11 @@ function mfcs_install() {
 
   $structure = mfcs_table_install_structure();
 
+  // create the tables that use the 'boolean' data type not currently supported by drupal but supported by postgresql:
+  db_query('create table mfcs_request_locks (request_id bigint not null, auto_cancel boolean default FALSE, primary key(request_id), constraint mfcs_request_locks_request_id_check check (request_id >= 0))');
+  db_query('alter table mfcs_request_locks add constraint request_id_fkey foreign key (request_id) references mfcs_requests (id) on delete cascade');
+
+
   db_query('ALTER TABLE {requests} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
   db_query('ALTER TABLE {mfcs_current} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
   db_query('ALTER TABLE {mfcs_request_revisions} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
@@ -2389,6 +2423,9 @@ function mfcs_uninstall() {
 
   db_query('DROP VIEW {mfcs_view_dates_asc}');
   db_query('DROP VIEW {mfcs_view_dates_desc}');
+
+  db_query('alter table {mfcs_request_locks} drop constraint if exists request_id_fkey');
+  db_query('drop table {mfcs_request_locks}');
 
   db_query('ALTER TABLE {mfcs_requests} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
   db_query('ALTER TABLE {mfcs_current} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);

@@ -9,6 +9,126 @@
  * @addtogroup mfcs
  * @{
  */
+/**
+ * Assign a new history entry by creating a new revision number.
+ *
+ * @param int $request_id
+ *   The id of the given request.
+ * @param object|null $user
+ *   If specified, the user to log this change as.
+ * @param array $extra
+ *   (optional) Additional information to save. This is used for the revision
+ *   log message and signature.
+ *
+ * @return bool
+ *   (optional) TRUE on success, FALSE otherwise.
+ */
+function mfcs_workflow_set_history($request_id, $user = NULL, $extra = array()) {
+  $request = mfcs_load_request_by_id($request_id);
+
+  if (empty($request)) {
+    return FALSE;
+  }
+
+  if (!is_array($extra)) {
+    cf_error::invalid_array('extra');
+    return FALSE;
+  }
+
+  if (is_null($user)) {
+    $user = cf_current_user();
+  }
+
+  if (!is_object($user)) {
+    cf_error::invalid_object('user');
+    return FALSE;
+  }
+
+  $instance = mfcs_instance();
+
+  $mfcs_requests = array(
+    'updated' => $instance,
+  );
+
+  $request_revision = mfcs_load_request_revision_number($request_id);
+  $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . $instance . '_' . $user->uid . '_' . $request_id, FALSE);
+
+  if ($request_revision === FALSE) {
+    watchdog(MFCS_WATCHDOG_ID, "Failed to load revision number for request %request_id.", array('%request_id' => $request_id), WATCHDOG_ERROR);
+    return FALSE;
+  }
+  elseif (is_null($request_revision)) {
+    $request_revision_next = 0;
+  }
+  else {
+    $request_revision_next = $request_revision + 1;
+  }
+
+  $mfcs_request_revisions = array(
+    'request_id' => $request_id,
+    'date' => $instance,
+    'revision' => $request_revision_next,
+    'user_id' => $user->uid,
+  );
+
+  $revisions_has_extras = FALSE;
+  if (!empty($extra['revisions']['message'])) {
+    $mfcs_request_revisions['message'] = $extra['revisions']['message'];
+    $revisions_has_extras = TRUE;
+  }
+
+  if (!empty($extra['revisions']['signature'])) {
+    $mfcs_request_revisions['signature'] = $extra['revisions']['signature'];
+    $revisions_has_extras = TRUE;
+  }
+
+
+  $transaction = db_transaction();
+  try {
+    $query = db_update('mfcs_requests');
+    $query->condition('id', $request_id);
+    $query->fields($mfcs_requests);
+    $query->execute();
+
+    if ($processed_mfcs_request_revisions) {
+      if ($revisions_has_extras) {
+        $query = db_update('mfcs_request_revisions');
+        $query->condition('id', $request_id);
+        $query->condition('date', $instance);
+        $query->condition('user_id', $user->uid);
+        $query->fields($mfcs_request_revisions);
+        $query->execute();
+      }
+    }
+    else {
+      $query = db_insert('mfcs_request_revisions');
+      $query->fields($mfcs_request_revisions);
+      $query->execute();
+
+      $processed_mfcs_request_revisions = TRUE;
+    }
+
+    // enforce transaction execution
+    unset($transaction);
+  }
+  catch (Error $e) {
+    $transaction->rollback();
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+
+  // reset the cached request object
+  mfcs_load_request_by_id($request_id, FALSE);
+
+  return TRUE;
+}
 
 /**
  * Assign a new step to a given request.

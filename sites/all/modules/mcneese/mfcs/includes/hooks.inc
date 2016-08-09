@@ -266,8 +266,8 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_page_request_access',
     'access arguments' => array('override', 3),
-    'tab_parent' => 'requests',
-    'tab_root' => 'requests',
+    'tab_parent' => 'requests/manage-0',
+    'tab_root' => 'requests/manage-0',
   );
 
   $items['requests/manage-0/reassign/%'] = array(
@@ -279,8 +279,21 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_page_request_access',
     'access arguments' => array('reassign', 3),
-    'tab_parent' => 'requests',
-    'tab_root' => 'requests',
+    'tab_parent' => 'requests/manage-0',
+    'tab_root' => 'requests/manage-0',
+  );
+
+  $items['requests/manage-0/locks/%'] = array(
+    'title' => "Request Locks",
+    'description' => "Request Locks",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_manage_0_locks_form', 3),
+    'file' => 'request_locks.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('manage', 3),
+    'tab_parent' => 'requests/manage-0',
+    'tab_root' => 'requests/manage-0',
   );
 
   $items['requests/view-0/%'] = array(

@@ -475,6 +475,16 @@ function mfcs_request_uncancel_0_form_submit($form, &$form_state) {
     return;
   }
 
+  // assign auto_cancel locked code.
+  $locked_object = mfcs_load_request_locks($request_id, array('auto_cancel'));
+  if ($locked_object !== FALSE) {
+    if ($locked_object === TRUE || is_null($locked_object->auto_cancel)) {
+      // when auto_cancel is set to NULL (or is not defined), set it to TRUE.
+      // once auto_cancel lock is TRUE, the auto_cancel process will no longer attempt to auto-cancel a given request.
+      mfcs_set_request_locks($request_id, array('auto_cancel' => 't'));
+    }
+  }
+
   // redirect after submitting.
   if (empty($form_state['values']['redirect_to'])) {
     if (empty($request_id)) {
