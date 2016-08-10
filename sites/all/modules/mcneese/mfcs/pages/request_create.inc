@@ -377,7 +377,7 @@ function mfcs_request_create_0_form_validate($form, &$form_state) {
         unset($form_state['values']['request']['dates']['time_stop'][$clicked_id_part]);
         unset($form_state['values']['request']['dates']['category'][$clicked_id_part]);
       }
-      elseif ($clicked_id == 'submit-request-submit') {
+      elseif ($clicked_id == 'submit-request-submit' || $clicked_id == 'submit-request-next') {
         // @todo: fixme unavailability must be processed.
         if (isset($form_state['values']['request']['information']['type'][0]) && $form_state['values']['request']['information']['type'][0] == MFCS_REQUEST_TYPE_QUICK_MEETING) {
           if (!empty($form['form']['user']['#value']) && user_access('mfcs manage', $form['form']['user']['#value'])) {
