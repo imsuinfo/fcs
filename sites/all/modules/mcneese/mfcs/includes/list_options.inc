@@ -148,7 +148,7 @@ function mfcs_get_request_classification_list_options($option = NULL, $user = NU
 
   if (is_object($user)) {
     foreach ($options_all as $option_id => $option_name) {
-      if (in_array($option_id, $user->roles)) {
+      if (array_key_exists($option_id, $user->roles)) {
         $options[$option_id] = $option_name;
       }
     }
