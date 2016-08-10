@@ -153,7 +153,7 @@ function mfcs_request_manage_0_page($request_id) {
   $markup .= mfcs_request_manage_0_page_create_item_and_value('Location:',  $string_location, $class_name);
   $markup .= mfcs_request_manage_0_page_create_item_user_name('Requester:',  $user_requester, $class_name);
   $markup .= mfcs_request_manage_0_page_create_item_user_name('Venue Coordinator:',  $user_venue_coordinator, $class_name);
-  $markup .= mfcs_request_manage_0_page_create_item_and_value('Auto-Cancel Lock:',  $locks_auto_cancel, $class_name);
+  $markup .= mfcs_request_manage_0_page_create_item_and_value('Auto-Cancel:',  $locks_auto_cancel, $class_name);
 
   $markup .= '</div>';
   $markup .= '</div>';
