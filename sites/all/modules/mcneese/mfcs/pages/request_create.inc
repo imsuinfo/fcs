@@ -412,155 +412,160 @@ function mfcs_request_create_0_form_validate($form, &$form_state) {
         if (empty($form_state['values']['request']['request_coordinator']['classification'][0]) || !is_numeric($form_state['values']['request']['request_coordinator']['classification'][0])) {
           form_set_error('request][request_coordinator][classification][0', "No request coordinator classification has been specified.");
         }
-      }
-      else {
-        $room = explode('_', $form_state['values']['request']['room'][0], 3);
-        $room = (int) $room[0];
-        $date = $form_state['values']['request']['dates']['date'];
-        $time_start = $form_state['values']['request']['dates']['time_start'];
-        $time_stop = $form_state['values']['request']['dates']['time_stop'];
 
-        foreach ($date as $key => $d) {
-          $v = mfcs_convert_value_to_database_format($d, 'date_popup', array('view' => 'Y/m/d'), $form_state, $key);
+        if ($clicked_id == 'submit-request-next') {
+          $room = explode('_', $form_state['values']['request']['room'][0], 3);
+          $room = (int) $room[0];
+          $date = $form_state['values']['request']['dates']['date'];
+          $time_start = $form_state['values']['request']['dates']['time_start'];
+          $time_stop = $form_state['values']['request']['dates']['time_stop'];
 
-          if ($v === FALSE) {
-            unset($date[$key]);
-            unset($time_start[$key]);
-            unset($time_stop[$key]);
-          }
-          else {
-            $date[$key] = $v;
+          foreach ($date as $key => $d) {
+            $v = mfcs_convert_value_to_database_format($d, 'date_popup', array('view' => 'Y/m/d'), $form_state, $key);
 
-            $v = mfcs_convert_value_to_database_format($time_start[$key], 'timestamp', array('view' => 'h:ia', 'relative_to' => 'request][dates][date'), $form_state, $key);
             if ($v === FALSE) {
-              $time_start[$key] = NULL;
-              $time_stop[$key] = NULL;
+              unset($date[$key]);
+              unset($time_start[$key]);
+              unset($time_stop[$key]);
             }
             else {
-              $time_start[$key] = $v;
+              $date[$key] = $v;
 
-              $v = mfcs_convert_value_to_database_format($time_stop[$key], 'timestamp', array('view' => 'h:ia', 'relative_to' => 'request][dates][date'), $form_state, $key);
+              $v = mfcs_convert_value_to_database_format($time_start[$key], 'timestamp', array('view' => 'h:ia', 'relative_to' => 'request][dates][date'), $form_state, $key);
               if ($v === FALSE) {
                 $time_start[$key] = NULL;
                 $time_stop[$key] = NULL;
               }
               else {
-                $time_stop[$key] = $v;
+                $time_start[$key] = $v;
+
+                $v = mfcs_convert_value_to_database_format($time_stop[$key], 'timestamp', array('view' => 'h:ia', 'relative_to' => 'request][dates][date'), $form_state, $key);
+                if ($v === FALSE) {
+                  $time_start[$key] = NULL;
+                  $time_stop[$key] = NULL;
+                }
+                else {
+                  $time_stop[$key] = $v;
+                }
               }
             }
+
+            unset($v);
           }
 
-          unset($v);
-        }
+          if (!empty($date)) {
+            $room_unavailability = mfcs_check_room_availability($room, $date, $time_start, $time_stop);
 
-        if (!empty($date)) {
-          $room_unavailability = mfcs_check_room_availability($room, $date, $time_start, $time_stop);
+            if ($room_unavailability === FALSE) {
+              form_set_error('', "An internal error occurred while checking the room for availability. Please contact the support staff.");
+            }
+            elseif (!empty($room_unavailability['conflict']) || !empty($room_unavailability['unavailable'])) {
+              $unavailable_message = '<span class="uppercase">Warning</span>: The specified room is currently unavailable for the following dates: ';
+              $unavailable_message .= mfcs_build_room_unavailable_message($room_unavailability);
+              $unavailable_message .= 'You may still submit this request and your request attempt will still be logged (but your request will be auto-closed). ';
+              drupal_set_message($unavailable_message, 'warning');
+              unset($unavailable_message);
 
-          if ($room_unavailability === FALSE) {
-            form_set_error('', "An internal error occurred while checking the room for availability. Please contact the support staff.");
-          }
-          elseif (!empty($room_unavailability['conflict']) || !empty($room_unavailability['unavailable'])) {
-            $unavailable_message = '<span class="uppercase">Warning</span>: The specified room is currently unavailable for the following dates: ';
-            $unavailable_message .= mfcs_build_room_unavailable_message($room_unavailability);
-            $unavailable_message .= 'You may still submit this request and your request attempt will still be logged (but your request will be auto-closed). ';
-            drupal_set_message($unavailable_message, 'warning');
-            unset($unavailable_message);
+              // force the status to be closed due to room being unavailable on save.
+              if (!isset($form_state['room_unavailable_prior_settings'])) {
+                $form_state['room_unavailable_prior_settings'] = array(
+                  'status' => NULL,
+                  'step' => NULL,
+                );
 
-            // force the status to be closed due to room being unavailable on save.
-            if (!isset($form_state['room_unavailable_prior_settings'])) {
-              $form_state['room_unavailable_prior_settings'] = array(
-                'status' => NULL,
-                'step' => NULL,
-              );
+                if (isset($form_state['values']['request']['status'])) {
+                  $form_state['room_unavailable_prior_settings']['status'] = $form_state['values']['request']['status'][0];
 
-              if (isset($form_state['values']['request']['status'])) {
-                $form_state['room_unavailable_prior_settings']['status'] = $form_state['values']['request']['status'][0];
-
-                if (is_string($form_state['room_unavailable_prior_settings']['status'])) {
-                  $form_state['room_unavailable_prior_settings']['status'] = (int) $form_state['room_unavailable_prior_settings']['status'];
-                }
-              }
-
-              if (isset($form_state['values']['request']['step'])) {
-                $form_state['room_unavailable_prior_settings']['step'] = $form_state['values']['request']['step'][0];
-
-                if (is_string($form_state['room_unavailable_prior_settings']['step'])) {
-                  $form_state['room_unavailable_prior_settings']['step'] = (int) $form_state['room_unavailable_prior_settings']['step'];
-                }
-              }
-
-              // if any of the rooms that is causing the scheduling conflict is locked (but not approved) close the request due to lock instead of as unavailable.
-              $conflict_is_locked = FALSE;
-              if (!empty($room_unavailability['conflict'])) {
-                foreach ($room_unavailability['conflict'] as $conflict) {
-                  $request_using_room_status = NULL;
-
-                  if (isset($conflict->status)) {
-                    if (is_string($conflict->status)) {
-                      $request_using_room_status = (int) $conflict->status;
-                    }
-                    else {
-                      $request_using_room_status = $conflict->status;
-                    }
-
-                    if ($request_using_room_status === MFCS_REQUEST_STATUS_LOCKED) {
-                      $conflict_is_locked = TRUE;
-                      break;
-                    }
+                  if (is_string($form_state['room_unavailable_prior_settings']['status'])) {
+                    $form_state['room_unavailable_prior_settings']['status'] = (int) $form_state['room_unavailable_prior_settings']['status'];
                   }
                 }
-                unset($request_using_room_status);
-              }
 
-              if ($conflict_is_locked) {
-                $form_state['values']['request']['status'][0] = MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK;
-              }
-              else {
-                $form_state['values']['request']['status'][0] = MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE;
-              }
-              unset($conflict_is_locked);
+                if (isset($form_state['values']['request']['step'])) {
+                  $form_state['room_unavailable_prior_settings']['step'] = $form_state['values']['request']['step'][0];
 
-              $form_state['values']['request']['step'][0] = MFCS_REVIEW_STEP_COMPLETED;
+                  if (is_string($form_state['room_unavailable_prior_settings']['step'])) {
+                    $form_state['room_unavailable_prior_settings']['step'] = (int) $form_state['room_unavailable_prior_settings']['step'];
+                  }
+                }
+
+                // if any of the rooms that is causing the scheduling conflict is locked (but not approved) close the request due to lock instead of as unavailable.
+                $conflict_is_locked = FALSE;
+                if (!empty($room_unavailability['conflict'])) {
+                  foreach ($room_unavailability['conflict'] as $conflict) {
+                    $request_using_room_status = NULL;
+
+                    if (isset($conflict->status)) {
+                      if (is_string($conflict->status)) {
+                        $request_using_room_status = (int) $conflict->status;
+                      }
+                      else {
+                        $request_using_room_status = $conflict->status;
+                      }
+
+                      if ($request_using_room_status === MFCS_REQUEST_STATUS_LOCKED) {
+                        $conflict_is_locked = TRUE;
+                        break;
+                      }
+                    }
+                  }
+                  unset($request_using_room_status);
+                }
+
+                if ($conflict_is_locked) {
+                  $form_state['values']['request']['status'][0] = MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK;
+                }
+                else {
+                  $form_state['values']['request']['status'][0] = MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE;
+                }
+                unset($conflict_is_locked);
+
+                $form_state['values']['request']['step'][0] = MFCS_REVIEW_STEP_COMPLETED;
+              }
+            }
+            else {
+              // restore status settings in case an available room was selected.
+              if (isset($form_state['room_unavailable_prior_settings'])) {
+                $form_state['values']['request']['status'][0] = $form_state['room_unavailable_prior_settings']['status'];
+                $form_state['values']['request']['step'][0] = $form_state['room_unavailable_prior_settings']['step'];
+
+                if (is_string($form_state['values']['request']['status'][0])) {
+                  $form_state['values']['request']['status'][0] = (int) $form_state['values']['request']['status'][0];
+                }
+
+                if (is_string($form_state['values']['request']['step'][0])) {
+                  $form_state['values']['request']['step'][0] = (int) $form_state['values']['request']['step'][0];
+                }
+
+                unset($form_state['room_unavailable_prior_settings']);
+              }
             }
           }
+
+          unset($room);
+          unset($date);
+          unset($time_start);
+          unset($time_stop);
+
+
+          if (empty($form_state['values']['request']['information']['type'][0])) {
+            form_set_error('request][information][type][0', "The <strong>" . $form['request']['information']['type'][0]['#title'] . "</strong> is required.");
+          }
           else {
-            // restore status settings in case an available room was selected.
-            if (isset($form_state['room_unavailable_prior_settings'])) {
-              $form_state['values']['request']['status'][0] = $form_state['room_unavailable_prior_settings']['status'];
-              $form_state['values']['request']['step'][0] = $form_state['room_unavailable_prior_settings']['step'];
+            $type_term = taxonomy_term_load($form_state['values']['request']['information']['type'][0]);
 
-              if (is_string($form_state['values']['request']['status'][0])) {
-                $form_state['values']['request']['status'][0] = (int) $form_state['values']['request']['status'][0];
-              }
-
-              if (is_string($form_state['values']['request']['step'][0])) {
-                $form_state['values']['request']['step'][0] = (int) $form_state['values']['request']['step'][0];
-              }
-
-              unset($form_state['room_unavailable_prior_settings']);
+            if (is_object($type_term)) {
+              $form_state['values']['form']['step'] = 'details';
+            }
+            else {
+              form_set_error('request][information][type][0', "An invalid <strong>" . $form['request']['information']['type'][0]['#title'] . "</strong> is has been selected.");
             }
           }
         }
-
-        unset($room);
-        unset($date);
-        unset($time_start);
-        unset($time_stop);
-
-
-        if (empty($form_state['values']['request']['information']['type'][0])) {
-          form_set_error('request][information][type][0', "The <strong>" . $form['request']['information']['type'][0]['#title'] . "</strong> is required.");
-        }
-        else {
-          $type_term = taxonomy_term_load($form_state['values']['request']['information']['type'][0]);
-
-          if (is_object($type_term)) {
-            $form_state['values']['form']['step'] = 'details';
-          }
-          else {
-            form_set_error('request][information][type][0', "An invalid <strong>" . $form['request']['information']['type'][0]['#title'] . "</strong> is has been selected.");
-          }
-        }
+      }
+      else {
+        form_set_error('', 'Illegal operation detected while processing request. Please contact the support staff.');
+        watchdog(MFCS_WATCHDOG_ID, "During the create process, an unhandled click state was presented: @clicked_id.", array('@clicked_id' => $clicked_id), WATCHDOG_ERROR);
       }
     }
     elseif ($form_state['values']['form']['step'] == 'details') {

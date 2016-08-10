@@ -423,6 +423,7 @@ function mfcs_validate_request_fields($form, &$form_state) {
     // validate the dates.
     if ($validate_dates) {
       $dates_passed = mfcs_validate_request_fields_dates($form, $form_state, $ps_p, $location_form, $location_state, $room);
+
       $passed = $passed && $dates_passed;
       unset($dates_passed);
     }
