@@ -91,11 +91,13 @@ function mfcs_request_manage_0_locks_form($form, &$form_state, $request_id) {
   );
 
   $default_auto_cancel = 'default';
-  if ($locks->auto_cancel === FALSE) {
-    $default_auto_cancel = 'unlocked';
-  }
-  elseif ($locks->auto_cancel === TRUE) {
-    $default_auto_cancel = 'locked';
+  if (is_object($locks)) {
+    if ($locks->auto_cancel === FALSE) {
+      $default_auto_cancel = 'unlocked';
+    }
+    elseif ($locks->auto_cancel === TRUE) {
+      $default_auto_cancel = 'locked';
+    }
   }
 
   $form['locks']['auto_cancel'] = array(
