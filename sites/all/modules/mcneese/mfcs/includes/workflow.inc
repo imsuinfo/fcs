@@ -93,7 +93,7 @@ function mfcs_workflow_set_history($request_id, $user = NULL, $extra = array()) 
     if ($processed_mfcs_request_revisions) {
       if ($revisions_has_extras) {
         $query = db_update('mfcs_request_revisions');
-        $query->condition('id', $request_id);
+        $query->condition('request_id', $request_id);
         $query->condition('date', $instance);
         $query->condition('user_id', $user->uid);
         $query->fields($mfcs_request_revisions);
@@ -246,7 +246,7 @@ function mfcs_workflow_set_step($request_id, $step, $user = NULL, $extra = array
     if ($processed_mfcs_request_revisions) {
       if ($revisions_has_extras) {
         $query = db_update('mfcs_request_revisions');
-        $query->condition('id', $request_id);
+        $query->condition('request_id', $request_id);
         $query->condition('date', $instance);
         $query->condition('user_id', $user->uid);
         $query->fields($mfcs_request_revisions);
@@ -419,7 +419,7 @@ function mfcs_workflow_set_status($request_id, $status, $user = NULL, $extra = a
     if ($processed_mfcs_request_revisions) {
       if ($revisions_has_extras) {
         $query = db_update('mfcs_request_revisions');
-        $query->condition('id', $request_id);
+        $query->condition('request_id', $request_id);
         $query->condition('date', $instance);
         $query->condition('user_id', $user->uid);
         $query->fields($mfcs_request_revisions);
@@ -577,7 +577,7 @@ function mfcs_workflow_set_venue_coordinator($request_id, $venue_coordinator_id,
     if ($processed_mfcs_request_revisions) {
       if ($revisions_has_extras) {
         $query = db_update('mfcs_request_revisions');
-        $query->condition('id', $request_id);
+        $query->condition('request_id', $request_id);
         $query->condition('date', $instance);
         $query->condition('user_id', $user->uid);
         $query->fields($mfcs_request_revisions);
