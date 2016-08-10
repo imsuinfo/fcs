@@ -28,7 +28,6 @@
  */
 function mfcs_get_request_status_list_options($option = NULL, $hidden = FALSE, $disabled = FALSE) {
   $options = array();
-
   $options_all = array();
 
   if ($hidden) {
@@ -78,7 +77,6 @@ function mfcs_get_request_status_list_options($option = NULL, $hidden = FALSE, $
  */
 function mfcs_get_review_steps_list_options($option = NULL, $hidden = FALSE, $disabled = FALSE) {
   $options = array();
-
   $options_all = array();
 
   if ($hidden) {
@@ -130,7 +128,6 @@ function mfcs_get_review_steps_list_options($option = NULL, $hidden = FALSE, $di
  */
 function mfcs_get_request_classification_list_options($option = NULL, $user = NULL, $hidden = FALSE, $disabled = FALSE) {
   $options = array();
-
   $options_all = array();
 
   if ($hidden) {
@@ -313,7 +310,6 @@ function mfcs_get_request_room_list_options($location = NULL, $option = NULL, $h
  */
 function mfcs_get_dates_category_list_options($option = NULL, $hidden = FALSE, $disabled = FALSE) {
   $options = array();
-
   $options_all = array();
 
   if ($hidden) {
@@ -353,7 +349,6 @@ function mfcs_get_dates_category_list_options($option = NULL, $hidden = FALSE, $
  */
 function mfcs_get_audience_list_options($option = NULL, $hidden = FALSE, $disabled = FALSE) {
   $options = array();
-
   $options_all = array();
 
   if ($hidden) {
@@ -365,8 +360,6 @@ function mfcs_get_audience_list_options($option = NULL, $hidden = FALSE, $disabl
   $options_all[MFCS_REQUEST_AUDIENCE_STUDENTS_AND_EMPLOYEES] = 'Open to all Students and Employees';
   $options_all[MFCS_REQUEST_AUDIENCE_FACULTY_AND_STAFF] = 'Faculty and Staff Only';
   $options_all[MFCS_REQUEST_AUDIENCE_PUBLIC] = 'Open to the Public';
-
-  $options_all = array();
 
   if ($option == 'select') {
     $options[''] = '- Select -';
@@ -397,7 +390,6 @@ function mfcs_get_audience_list_options($option = NULL, $hidden = FALSE, $disabl
  */
 function mfcs_get_revenue_generated_list_options($option = NULL, $hidden = FALSE, $disabled = FALSE) {
   $options = array();
-
   $options_all = array();
 
   if ($hidden) {
@@ -442,7 +434,6 @@ function mfcs_get_revenue_generated_list_options($option = NULL, $hidden = FALSE
  */
 function mfcs_get_request_type_list_options($option = NULL, $hidden = FALSE, $disabled = FALSE) {
   $options = array();
-
   $options_all = array();
 
   if ($hidden) {
@@ -491,7 +482,6 @@ function mfcs_get_request_type_list_options($option = NULL, $hidden = FALSE, $di
  */
 function mfcs_get_publicity_details_list_options($option = NULL, $hidden = FALSE, $disabled = FALSE) {
   $options = array();
-
   $options_all = array();
 
   if ($hidden) {
@@ -542,7 +532,6 @@ function mfcs_get_publicity_details_list_options($option = NULL, $hidden = FALSE
  */
 function mfcs_get_designing_material_list_options($option = NULL, $hidden = FALSE, $disabled = FALSE) {
   $options = array();
-
   $options_all = array();
 
   if ($hidden) {
@@ -587,7 +576,6 @@ function mfcs_get_designing_material_list_options($option = NULL, $hidden = FALS
  */
 function mfcs_get_technical_equipment_details_list_options($option = NULL, $hidden = FALSE, $disabled = FALSE) {
   $options = array();
-
   $options_all = array();
 
   if ($hidden) {
@@ -638,7 +626,6 @@ function mfcs_get_reviewer_classification_list_options($option = NULL, $hidden =
   }
 
   $options = array();
-
   $options_all = array();
 
   if ($hidden) {
@@ -711,7 +698,6 @@ function mfcs_get_reviewer_classification_list_options($option = NULL, $hidden =
  */
 function mfcs_get_reviewer_decision_list_options($option = NULL, $restriction = 0, $hidden = FALSE, $disabled = FALSE) {
   $options = array();
-
   $options_all = array();
 
   if ($hidden) {
@@ -803,7 +789,6 @@ function mfcs_get_reviewer_decision_list_options($option = NULL, $restriction = 
  */
 function mfcs_get_review_step_list_options($option = NULL, $hidden = FALSE, $disabled = FALSE) {
   $options = array();
-
   $options_all = array();
 
   if ($hidden) {
@@ -872,7 +857,6 @@ function mfcs_get_review_step_list_options($option = NULL, $hidden = FALSE, $dis
  */
 function mfcs_get_request_problems_list_options($option = NULL, $hidden = FALSE, $disabled = FALSE) {
   $options = array();
-
   $options_all = array();
 
   if ($hidden) {
@@ -922,7 +906,6 @@ function mfcs_get_request_problems_list_options($option = NULL, $hidden = FALSE,
  */
 function mfcs_get_log_problems_list_options($option = NULL, $type = NULL, $hidden = FALSE, $disabled = FALSE) {
   $options = array();
-
   $options_all = array();
 
   if ($hidden) {
