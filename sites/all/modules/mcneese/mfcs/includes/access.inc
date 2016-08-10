@@ -1804,7 +1804,7 @@ function mfcs_page_request_access_operation_agreement(&$request_ids, &$processed
     $agreement_request_step = array(
       MFCS_REVIEW_STEP_COMPLETED,
       MFCS_REVIEW_STEP_REVIEW,
-      MFCS_REVIEW_STEP_REQUIREMENTS,
+      MFCS_REVIEW_STEP_FINAL_DECISION,
     );
   }
 

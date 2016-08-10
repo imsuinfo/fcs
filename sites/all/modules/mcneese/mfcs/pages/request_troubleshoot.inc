@@ -525,7 +525,7 @@ function mfcs_request_troubleshoot_0_request_review_recheck($transaction, $user 
   mfcs_include(MFCS_INCLUDE_WORKFLOW);
 
   try {
-    foreach (array(MFCS_REVIEW_STEP_REVIEW, MFCS_REVIEW_STEP_REQUIREMENTS) as $step) {
+    foreach (array(MFCS_REVIEW_STEP_REVIEW, MFCS_REVIEW_STEP_FINAL_DECISION) as $step) {
       foreach (array(MFCS_REQUEST_CLASSIFICATION_STUDENT, MFCS_REQUEST_CLASSIFICATION_CAMPS, MFCS_REQUEST_CLASSIFICATION_FACULTY, MFCS_REQUEST_CLASSIFICATION_EXTERNAL) as $classification) {
         $query = db_select('mfcs_requests', 'mer');
 

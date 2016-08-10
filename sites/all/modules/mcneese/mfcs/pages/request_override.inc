@@ -113,7 +113,7 @@ function mfcs_request_manage_0_override_form($form, &$form_state, $request_id) {
 
   // do not allow assigning the following steps.
   unset($options_steps[MFCS_REVIEW_STEP_CHANGES_REQUIRED]);
-  unset($options_steps[MFCS_REVIEW_STEP_FINAL_APPROVAL]);
+  unset($options_steps[MFCS_REVIEW_STEP_FINAL_DECISION]);
   unset($options_steps[MFCS_REVIEW_STEP_RELEASE_HOLD]);
 
   // do not allow assigning the following statuses.

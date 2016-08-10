@@ -308,7 +308,7 @@ function mfcs_testing_review_request_review($request_id, $decision = MFCS_REVIEW
 
   $request = mfcs_load_request_by_id($request_id);
 
-  if (empty($request['top']['step'][0]) || ($request['top']['step'][0]->value != MFCS_REVIEW_STEP_REVIEW && $request['top']['step'][0]->value != MFCS_REVIEW_STEP_REQUIREMENTS)) {
+  if (empty($request['top']['step'][0]) || ($request['top']['step'][0]->value != MFCS_REVIEW_STEP_REVIEW && $request['top']['step'][0]->value != MFCS_REVIEW_STEP_FINAL_DECISION)) {
     return FALSE;
   }
 
@@ -417,7 +417,7 @@ function mfcs_testing_review_request_r($request_id, $decision = MFCS_REVIEW_DECI
     return FALSE;
   }
 
-  if (empty($request['top']['step'][0]) || !is_object($request['top']['step'][0]) || $request['top']['step'][0]->value != MFCS_REVIEW_STEP_FINAL_APPROVAL) {
+  if (empty($request['top']['step'][0]) || !is_object($request['top']['step'][0]) || $request['top']['step'][0]->value != MFCS_REVIEW_STEP_FINAL_DECISION) {
     return FALSE;
   }
 
@@ -488,7 +488,7 @@ function mfcs_testing_review_request_make_decisions($request_id, $decision = MFC
     return FALSE;
   }
 
-  if (empty($request['top']['step'][0]) || !is_object($request['top']['step'][0]) || $request['top']['step'][0]->value != MFCS_REVIEW_STEP_REQUIREMENTS) {
+  if (empty($request['top']['step'][0]) || !is_object($request['top']['step'][0]) || $request['top']['step'][0]->value != MFCS_REVIEW_STEP_REVIEW) {
     return FALSE;
   }
 

@@ -1216,7 +1216,9 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
   $has_viewable_entries = FALSE;
   if (is_array($reviews)) {
     $review_step_options = mfcs_get_review_step_list_options();
-    $reviewer_classification_options = mfcs_get_reviewer_classification_list_options();
+
+    // This is for a history log and hidden/disabled classifications may have been used, so enable all classifications.
+    $reviewer_classification_options = mfcs_get_reviewer_classification_list_options(NULL, TRUE, TRUE);
     $type = $request['information']['type'][0]->value;
 
     if (is_string($type)) {
@@ -1425,16 +1427,18 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
       elseif ($review_step === MFCS_REVIEW_STEP_VENUE_AVAILABLE && $decision === MFCS_REVIEW_DECISION_UNAVAILABLE) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has designated that the <strong class="review-item-label-text-row-decision">Venue is Unavailable</strong>' . $reviewer_classification . '.';
       }
-      elseif ($review_step === MFCS_REVIEW_STEP_FINAL_APPROVAL && $decision === MFCS_REVIEW_DECISION_APPROVE) {
+      elseif ($review_step === MFCS_REVIEW_STEP_FINAL_DECISION && $decision === MFCS_REVIEW_DECISION_APPROVE) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">Confirmed and Reserved</strong> the request' . $reviewer_classification . "";
       }
-      elseif ($review_step === MFCS_REVIEW_STEP_FINAL_APPROVAL && $decision === MFCS_REVIEW_DECISION_DENY) {
+      elseif ($review_step === MFCS_REVIEW_STEP_FINAL_DECISION && $decision === MFCS_REVIEW_DECISION_DENY) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">Denied</strong> the request' . $reviewer_classification . '.';
       }
       elseif ($review_step === MFCS_REVIEW_STEP_REQUIREMENTS && $decision === MFCS_REVIEW_DECISION_APPROVE) {
-        $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">Confirmed and Reserved</strong> the request' . $reviewer_classification . "";
+        // as of fcs-79, this is provided for archival purposes but is otherwise no longer needed.
+        $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">Approved</strong> the request' . $reviewer_classification . "";
       }
       elseif ($review_step === MFCS_REVIEW_STEP_REQUIREMENTS && $decision === MFCS_REVIEW_DECISION_DENY) {
+        // as of fcs-79, this is provided for archival purposes but is otherwise no longer needed.
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">Denied</strong> the request' . $reviewer_classification . '.';
       }
       elseif ($decision === MFCS_REVIEW_DECISION_COMMENT) {

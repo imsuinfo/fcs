@@ -2314,7 +2314,7 @@ function mfcs_install() {
   db_query('INSERT INTO mfcs_taxonomy_review_step (id, machine_name, human_name, hidden) VALUES (' . (int) MFCS_REVIEW_STEP_NONE . ', \'none\', \'None\', 1)');
   db_query('INSERT INTO mfcs_taxonomy_review_step (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_STEP_CHANGES_REQUIRED . ', \'changes_required\', \'Changes Required\')');
   db_query('INSERT INTO mfcs_taxonomy_review_step (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_STEP_COMPLETED . ', \'completed\', \'Completed\')');
-  db_query('INSERT INTO mfcs_taxonomy_review_step (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_STEP_FINAL_APPROVAL . ', \'final_approval\', \'Final Approval\')');
+  db_query('INSERT INTO mfcs_taxonomy_review_step (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_STEP_FINAL_DECISION . ', \'final_decision\', \'Final Decision\')');
   db_query('INSERT INTO mfcs_taxonomy_review_step (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_STEP_RELEASE_HOLD . ', \'release_hold\', \'Release Hold\')');
   db_query('INSERT INTO mfcs_taxonomy_review_step (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_STEP_REVIEW . ', \'review\', \'Review\')');
   db_query('INSERT INTO mfcs_taxonomy_review_step (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_STEP_REQUIREMENTS . ', \'requirements\', \'Requirements\')');

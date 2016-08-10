@@ -298,7 +298,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     $allowed_steps = array(
       MFCS_REVIEW_STEP_VENUE_AVAILABLE,
       MFCS_REVIEW_STEP_REVIEW,
-      MFCS_REVIEW_STEP_REQUIREMENTS,
+      MFCS_REVIEW_STEP_FINAL_DECISION,
       MFCS_REVIEW_STEP_COMPLETED, // added due to insurance provided exception.
     );
 
@@ -500,7 +500,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     }
     unset($presentation['reviews']['decision']);
 
-    $reviews = mfcs_get_latest_reviews($request_id, array(MFCS_REVIEW_STEP_VENUE_AVAILABLE, MFCS_REVIEW_STEP_REVIEW, MFCS_REVIEW_STEP_REQUIREMENTS, MFCS_REVIEW_STEP_COMPLETED), array(MFCS_REVIEW_DECISION_ISSUES, MFCS_REVIEW_DECISION_ISSUES_NONE, MFCS_REVIEW_DECISION_APPROVE, MFCS_REVIEW_DECISION_DENY));
+    $reviews = mfcs_get_latest_reviews($request_id, array(MFCS_REVIEW_STEP_VENUE_AVAILABLE, MFCS_REVIEW_STEP_REVIEW, MFCS_REVIEW_STEP_FINAL_DECISION, MFCS_REVIEW_STEP_COMPLETED), array(MFCS_REVIEW_DECISION_ISSUES, MFCS_REVIEW_DECISION_ISSUES_NONE, MFCS_REVIEW_DECISION_APPROVE, MFCS_REVIEW_DECISION_DENY));
 
     if (!empty($reviews['order']) && isset($reviews['group'])) {
       mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
@@ -555,8 +555,8 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
       // display the final decision last.
       // @fixme: this needs to be rewritten to ensure consistency with "Approved/Denied" and not display "Issues/No Issues".
       $decision_step = array();
-      if (isset($reviews['group'][MFCS_REVIEW_STEP_REQUIREMENTS])) {
-        $decision_step = $reviews['group'][MFCS_REVIEW_STEP_REQUIREMENTS];
+      if (isset($reviews['group'][MFCS_REVIEW_STEP_FINAL_DECISION])) {
+        $decision_step = $reviews['group'][MFCS_REVIEW_STEP_FINAL_DECISION];
       }
 
       if (!empty($decision_step)) {
@@ -1046,7 +1046,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     $step_options = mfcs_get_review_steps_list_options();
 
     $decisions = array();
-    if ($request['top']['step'][0]->value == MFCS_REVIEW_STEP_REVIEW || $request['top']['step'][0]->value == MFCS_REVIEW_STEP_REQUIREMENTS) {
+    if ($request['top']['step'][0]->value == MFCS_REVIEW_STEP_REVIEW || $request['top']['step'][0]->value == MFCS_REVIEW_STEP_FINAL_DECISION) {
       $decisions = mfcs_get_requests_current_review_decisions(array($request_id => NULL), $request['request_coordinator']['classification'][0]->value, $request['top']['step'][0]->value);
     }
 
@@ -1098,7 +1098,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         // preprocess and generate a list of reviewer classifications that have not yet reviewed.
         $yet_to_review = array();
 
-        if ($request['top']['step'][0]->value == MFCS_REVIEW_STEP_REVIEW || $request['top']['step'][0]->value == MFCS_REVIEW_STEP_REQUIREMENTS) {
+        if ($request['top']['step'][0]->value == MFCS_REVIEW_STEP_REVIEW || $request['top']['step'][0]->value == MFCS_REVIEW_STEP_FINAL_DECISION) {
           foreach ($decisions[$request_id]['needed'] as $classification_id => $classification_name) {
             if (array_key_exists($classification_id, $decisions[$request_id]['completed'])) {
               continue;
@@ -1117,12 +1117,12 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
           $yet_to_review_markup .= '<div id="request-' . $request_id . '-section-review-log-yet_to_review" class="request-section-review-log-yet_to_review">';
 
-          if ($request['top']['step'][0]->value == MFCS_REVIEW_STEP_REVIEW || $request['top']['step'][0]->value == MFCS_REVIEW_STEP_REQUIREMENTS) {
+          if ($request['top']['step'][0]->value == MFCS_REVIEW_STEP_REVIEW || $request['top']['step'][0]->value == MFCS_REVIEW_STEP_FINAL_DECISION) {
             if ($request['top']['step'][0]->value == MFCS_REVIEW_STEP_REVIEW) {
               $yet_to_review_markup .= '<div class="yet_to_review-label">Reviewer classifications that have not yet reviewed:</div>';
             }
-            elseif ($request['top']['step'][0]->value == MFCS_REVIEW_STEP_REQUIREMENTS) {
-              $yet_to_review_markup .= '<div class="yet_to_review-label">Requirements that have not yet reviewed:</div>';
+            elseif ($request['top']['step'][0]->value == MFCS_REVIEW_STEP_FINAL_DECISION) {
+              $yet_to_review_markup .= '<div class="yet_to_review-label">The final approvals have not yet been made:</div>';
             }
 
             $yet_to_review_markup .= '<ul class="yet_to_review-list">';
@@ -1478,7 +1478,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
       );
 
       // Display warning messages if the user can make a decision.
-      if ($can_review_request && !empty($reviewer_classifications) && ($step === MFCS_REVIEW_STEP_VENUE_AVAILABLE || $step === MFCS_REVIEW_STEP_REVIEW || $step === MFCS_REVIEW_STEP_REQUIREMENTS)) {
+      if ($can_review_request && !empty($reviewer_classifications) && ($step === MFCS_REVIEW_STEP_VENUE_AVAILABLE || $step === MFCS_REVIEW_STEP_REVIEW || $step === MFCS_REVIEW_STEP_FINAL_DECISION)) {
         $holidays = array();
         foreach ($request['dates']['date'] as $date_delta => $date_value) {
           $holidays = mfcs_get_holidays((int) date('Y', $request['dates']['date'][$date_delta]->value), $request['dates']['date'][$date_delta]->value);
@@ -1814,7 +1814,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           '#weight' => 5,
         );
 
-        if ($can_review_request && ($step === MFCS_REVIEW_STEP_REQUIREMENTS || $step === MFCS_REVIEW_STEP_COMPLETED)) {
+        if ($can_review_request && ($step === MFCS_REVIEW_STEP_FINAL_DECISION || $step === MFCS_REVIEW_STEP_COMPLETED)) {
           // provided insurance
           $form['review']['operations']['insurance']['provided'] = array(
             '#id' => 'request-review-operations-insurance-provided',
@@ -2091,7 +2091,7 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
     $allowed_steps = array(
       MFCS_REVIEW_STEP_VENUE_AVAILABLE,
       MFCS_REVIEW_STEP_REVIEW,
-      MFCS_REVIEW_STEP_REQUIREMENTS,
+      MFCS_REVIEW_STEP_FINAL_DECISION,
     );
 
     if ($decision === MFCS_REVIEW_DECISION_REQUIREMENT) {
@@ -2107,7 +2107,7 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
 
       $allowed_steps = array(
         MFCS_REVIEW_STEP_REVIEW,
-        MFCS_REVIEW_STEP_REQUIREMENTS,
+        MFCS_REVIEW_STEP_FINAL_DECISION,
         MFCS_REVIEW_STEP_COMPLETED,
       );
     }
@@ -2129,7 +2129,7 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
 
       $allowed_steps = array(
         MFCS_REVIEW_STEP_REVIEW,
-        MFCS_REVIEW_STEP_REQUIREMENTS,
+        MFCS_REVIEW_STEP_FINAL_DECISION,
         MFCS_REVIEW_STEP_COMPLETED,
       );
     }
@@ -2170,13 +2170,13 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
     }
 
     // Check requirements during the requirements step unless a comment is made.
-    if ($step === MFCS_REVIEW_STEP_REQUIREMENTS && $decision !== MFCS_REVIEW_DECISION_COMMENT) {
+    if ($step === MFCS_REVIEW_STEP_FINAL_DECISION && $decision !== MFCS_REVIEW_DECISION_COMMENT) {
       $check_requirements = TRUE;
     }
 
     // ticket: fcs-77.
     // make sure the request cannot be acted on when there already is a locked request or have final approval.
-    if (($step === MFCS_REVIEW_STEP_VENUE_AVAILABLE && $decision === MFCS_REVIEW_DECISION_AVAILABLE) || ($step == MFCS_REVIEW_STEP_REQUIREMENTS && $decision === MFCS_REVIEW_DECISION_APPROVE)) {
+    if (($step === MFCS_REVIEW_STEP_VENUE_AVAILABLE && $decision === MFCS_REVIEW_DECISION_AVAILABLE) || ($step == MFCS_REVIEW_STEP_FINAL_DECISION && $decision === MFCS_REVIEW_DECISION_APPROVE)) {
       $room = (int) $request['top']['room'][0]->value;
 
       $all_dates = array();
@@ -2226,13 +2226,13 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
       unset($form_state['values']['review']['operations']['requirements']);
     }
 
-    if ($step === MFCS_REVIEW_STEP_REQUIREMENTS) {
+    if ($step === MFCS_REVIEW_STEP_FINAL_DECISION) {
       $university_business = FALSE;
 
       if ($decision === MFCS_REVIEW_DECISION_APPROVE && $type !== MFCS_REQUEST_TYPE_QUICK_MEETING) {
         $requirements_not_supplied = TRUE;
 
-        if ($step === MFCS_REVIEW_STEP_REQUIREMENTS) {
+        if ($step === MFCS_REVIEW_STEP_FINAL_DECISION) {
           if (isset($request['requirements']['university'][0]) && property_exists($request['requirements']['university'][0], 'value')) {
             if ($request['requirements']['university'][0]->value) {
               $requirements_not_supplied = FALSE;
@@ -2540,7 +2540,7 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
           mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
           mfcs_mischellaneous_check_requests_for_problems($request_id);
         }
-        elseif ($step == MFCS_REVIEW_STEP_REQUIREMENTS && ($decision === MFCS_REVIEW_DECISION_APPROVE || $decision === MFCS_REVIEW_DECISION_DENY)) {
+        elseif ($step == MFCS_REVIEW_STEP_FINAL_DECISION && ($decision === MFCS_REVIEW_DECISION_APPROVE || $decision === MFCS_REVIEW_DECISION_DENY)) {
           // perform check against this request to see if new problems are detected or existing problems are resolved.
           mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
           mfcs_mischellaneous_check_requests_for_problems($request_id);
@@ -2901,7 +2901,7 @@ function mfcs_request_view_0_detect_allowed_decisions($request, $user, $administ
     unset($decision_options[MFCS_REVIEW_DECISION_DENY]);
 
   }
-  elseif ($step == MFCS_REVIEW_STEP_REQUIREMENTS) {
+  elseif ($step == MFCS_REVIEW_STEP_FINAL_DECISION) {
     // remove decisions that are not allowed during this step.
     unset($decision_options[MFCS_REVIEW_DECISION_AVAILABLE]);
     unset($decision_options[MFCS_REVIEW_DECISION_UNAVAILABLE]);

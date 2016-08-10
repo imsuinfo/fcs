@@ -86,7 +86,7 @@ function mfcs_get_review_steps_list_options($option = NULL, $hidden = FALSE, $di
   }
 
   $options_all[MFCS_REVIEW_STEP_VENUE_AVAILABLE] = 'Venue Available';
-  $options_all[MFCS_REVIEW_STEP_FINAL_APPROVAL] = 'Final Approval';
+  $options_all[MFCS_REVIEW_STEP_FINAL_DECISION] = 'Final Decision';
   $options_all[MFCS_REVIEW_STEP_RELEASE_HOLD] = 'Release Tentative Hold';
   $options_all[MFCS_REVIEW_STEP_REVIEW] = 'Review';
   $options_all[MFCS_REVIEW_STEP_REQUIREMENTS] = 'Requirements';
@@ -103,6 +103,8 @@ function mfcs_get_review_steps_list_options($option = NULL, $hidden = FALSE, $di
 
   if ($option == 'search') {
     unset($options[MFCS_REVIEW_STEP_RELEASE_HOLD]);
+    unset($options[MFCS_REVIEW_STEP_REQUIREMENTS]);
+    unset($options[MFCS_REVIEW_STEP_CHANGES_REQUIRED]);
   }
 
   asort($options);
@@ -809,7 +811,7 @@ function mfcs_get_review_step_list_options($option = NULL, $hidden = FALSE, $dis
   }
 
   $options_all[MFCS_REQUEST_STEP_VENUE_AVAILABLE] = 'Venue Available';
-  $options_all[MFCS_REQUEST_STEP_RESOLVE_CONFLICTS] = 'Resolve Conflicts / Make Decisions';
+  $options_all[MFCS_REQUEST_STEP_FINAL_DECISION] = 'Final Decision';
   $options_all[MFCS_REQUEST_STEP_TENTATIVE_HOLD] = 'Release Tentative Hold';
   $options_all[MFCS_REQUEST_STEP_REVIEW] = 'Review';
   $options_all[MFCS_REQUEST_STEP_REQUIREMENTS] = 'Requirements';
@@ -830,7 +832,7 @@ function mfcs_get_review_step_list_options($option = NULL, $hidden = FALSE, $dis
     }
 
     $options_roles[MFCS_REQUEST_STEP_VENUE_AVAILABLE] = array(1, 2, 3, 4);
-    $options_roles[MFCS_REQUEST_STEP_RESOLVE_CONFLICTS] = array(1, 2, 3, 4);
+    $options_roles[MFCS_REQUEST_STEP_FINAL_DECISION] = array(1, 2, 3, 4);
     $options_roles[MFCS_REQUEST_STEP_TENTATIVE_HOLD] = array();
     $options_roles[MFCS_REQUEST_STEP_REVIEW] = array(1, 2, 3, 4);
     $options_roles[MFCS_REQUEST_STEP_REQUIREMENTS] = array(1, 2, 3, 4);

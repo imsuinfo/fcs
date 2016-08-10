@@ -48,7 +48,7 @@ define('MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED', 8);
  define('MFCS_REVIEW_STEP_NONE', 0);
  define('MFCS_REVIEW_STEP_CHANGES_REQUIRED', 140);
  define('MFCS_REVIEW_STEP_COMPLETED', 134);
- define('MFCS_REVIEW_STEP_FINAL_APPROVAL', 117);
+ define('MFCS_REVIEW_STEP_FINAL_DECISION', 117);
  define('MFCS_REVIEW_STEP_RELEASE_HOLD', 118);
  define('MFCS_REVIEW_STEP_REVIEW', 132);
  define('MFCS_REVIEW_STEP_REQUIREMENTS', 133);
@@ -179,7 +179,7 @@ define('MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED', 8);
  */
  define('MFCS_REQUEST_STEP_NONE', 0);
  define('MFCS_REQUEST_STEP_VENUE_AVAILABLE', 116);
- define('MFCS_REQUEST_STEP_RESOLVE_CONFLICTS', 117);
+ define('MFCS_REQUEST_STEP_FINAL_DECISION', 117);
  define('MFCS_REQUEST_STEP_TENTATIVE_HOLD', 118);
  define('MFCS_REQUEST_STEP_REVIEW', 132);
  define('MFCS_REQUEST_STEP_REQUIREMENTS', 133);
@@ -2014,7 +2014,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
       $agreement_request_step = array(
         MFCS_REVIEW_STEP_COMPLETED,
         MFCS_REVIEW_STEP_REVIEW,
-        MFCS_REVIEW_STEP_REQUIREMENTS,
+        MFCS_REVIEW_STEP_FINAL_DECISION,
       );
 
       if (in_array($request['top']['status'][0]->value, $agreement_request_status) && in_array($request['top']['step'][0]->value, $agreement_request_step)) {
@@ -2134,19 +2134,19 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
 
   $show_step_reviewer = array(
     MFCS_REVIEW_STEP_REVIEW,
-    MFCS_REVIEW_STEP_REQUIREMENTS,
+    MFCS_REVIEW_STEP_FINAL_DECISION,
     MFCS_REVIEW_STEP_COMPLETED,
   );
 
   $show_step_manager = array(
     MFCS_REVIEW_STEP_VENUE_AVAILABLE,
     MFCS_REVIEW_STEP_REVIEW,
-    MFCS_REVIEW_STEP_REQUIREMENTS,
+    MFCS_REVIEW_STEP_FINAL_DECISION,
   );
 
   $show_step_insurance = array(
     MFCS_REVIEW_STEP_REVIEW,
-    MFCS_REVIEW_STEP_REQUIREMENTS,
+    MFCS_REVIEW_STEP_FINAL_DECISION,
     MFCS_REVIEW_STEP_COMPLETED,
   );
 
@@ -7668,14 +7668,14 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
 
   $show_step_reviewer = array(
     MFCS_REVIEW_STEP_REVIEW,
-    MFCS_REVIEW_STEP_REQUIREMENTS,
+    MFCS_REVIEW_STEP_FINAL_DECISION,
     MFCS_REVIEW_STEP_COMPLETED,
   );
 
   $show_step_manager = array(
     MFCS_REVIEW_STEP_VENUE_AVAILABLE,
     MFCS_REVIEW_STEP_REVIEW,
-    MFCS_REVIEW_STEP_REQUIREMENTS,
+    MFCS_REVIEW_STEP_FINAL_DECISION,
   );
 
   if ($review_restrictions != MFCS_REVIEW_RESTRICTION_NONE && $user_id !== MFCS_USER_REQUEST) {
@@ -10029,7 +10029,7 @@ function mfcs_get_requests_current_review_decisions($request_ids, $classificatio
   }
 
   // do not operate on steps that cannot be normally reviewed.
-  if ($step !== MFCS_REVIEW_STEP_REVIEW && $step !== MFCS_REVIEW_STEP_REQUIREMENTS) {
+  if ($step !== MFCS_REVIEW_STEP_REVIEW && $step !== MFCS_REVIEW_STEP_FINAL_DECISION) {
     return FALSE;
   }
 
@@ -10083,7 +10083,7 @@ function mfcs_get_requests_current_review_decisions($request_ids, $classificatio
       MFCS_REVIEW_DECISION_ISSUES_NONE,
     );
   }
-  elseif ($step === MFCS_REVIEW_STEP_REQUIREMENTS) {
+  elseif ($step === MFCS_REVIEW_STEP_FINAL_DECISION) {
     $review_decisions = array(
       MFCS_REVIEW_DECISION_APPROVE,
       MFCS_REVIEW_DECISION_DENY,

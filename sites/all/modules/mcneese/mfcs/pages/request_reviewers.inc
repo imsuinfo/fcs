@@ -53,7 +53,7 @@ function mfcs_request_reviewers_0_page() {
       }
 
       // this only applies to two different steps.
-      if ($review_step_id != MFCS_REVIEW_STEP_REVIEW && $review_step_id != MFCS_REVIEW_STEP_REQUIREMENTS) continue;
+      if ($review_step_id != MFCS_REVIEW_STEP_REVIEW && $review_step_id != MFCS_REVIEW_STEP_FINAL_DECISION) continue;
 
       $unmatched = TRUE;
       foreach ($review_step['roles'] as $role) {
@@ -157,7 +157,7 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
   }
 
   // only the specified steps can be used.
-  if ($review_step !== MFCS_REVIEW_STEP_REVIEW && $review_step !== MFCS_REVIEW_STEP_REQUIREMENTS) {
+  if ($review_step !== MFCS_REVIEW_STEP_REVIEW && $review_step !== MFCS_REVIEW_STEP_FINAL_DECISION) {
     drupal_not_found();
     drupal_exit();
     return array();
