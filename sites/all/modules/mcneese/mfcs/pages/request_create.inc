@@ -453,6 +453,9 @@ function mfcs_request_create_0_form_validate($form, &$form_state) {
             unset($v);
           }
 
+          // as of fcs-79, this check is now performed elsewhere during the validation process and is triggered via a form_set_error() instead of a warning.
+          // the code is left commented out in case there is still something needed.
+          /*
           if (!empty($date)) {
             $room_unavailability = mfcs_check_room_availability($room, $date, $time_start, $time_stop);
 
@@ -541,6 +544,7 @@ function mfcs_request_create_0_form_validate($form, &$form_state) {
               }
             }
           }
+          */
 
           unset($room);
           unset($date);
