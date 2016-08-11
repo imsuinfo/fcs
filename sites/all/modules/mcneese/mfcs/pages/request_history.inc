@@ -613,12 +613,9 @@ function mfcs_request_history_0_form_build_updater_name($user_id, &$processed_va
 
     $updater_name = NULL;
     if (is_object($updater)) {
-      if (!empty($updater->field_user_first_name['und'][0]['safe_value'])) {
-        $updater_name = $updater->field_user_first_name['und'][0]['safe_value'];
-
-        if (!empty($updater->field_user_last_name['und'][0]['safe_value'])) {
-          $updater_name .= ' ' . $updater->field_user_last_name['und'][0]['safe_value'];
-        }
+      $updater_name = mfcs_generate_form_user_name($updater);
+      if ($updater_name === FALSE) {
+        $updater_name = NULL;
       }
 
       if (is_null($updater_name)) {

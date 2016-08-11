@@ -12307,5 +12307,148 @@ function mfcs_set_request_locks($request_id, $values) {
 }
 
 /**
+ * Generate the user name string as presented on the form for a given user.
+ *
+ * @param int|object $user
+ *   Either the user id, or an already loaded user object.
+ *
+ * @return string|NULL|bool
+ *   The generated user name, generally of the form "last name, first name".
+ *   NULL is returned if unable to generate the user name, but the user object/id is valid.
+ *   FALSE is returned on error.
+ */
+function mfcs_generate_form_user_name($user) {
+  if (is_int($user)) {
+    $user = user_load($user);
+  }
+
+  if (!is_object($user)) {
+    cf_error::invalid_object('user');
+    return FALSE;
+  }
+
+  $user_name = NULL;
+  if (!empty($user->field_user_last_name['und'][0]['safe_value'])) {
+    $user_name .= $user->field_user_last_name['und'][0]['safe_value'];
+  }
+
+  if (!empty($user->field_user_first_name['und'][0]['safe_value'])) {
+    if (!empty($user_name)) {
+      $user_name .=  ', ';
+    }
+
+    $user_name .= $user->field_user_first_name['und'][0]['safe_value'];
+  }
+
+  return $user_name;
+}
+
+/**
+ * Search for a given user id in the database from a form user name string.
+ *
+ * @param string $user_name
+ *   The form user name string, generally of the form "last name, first name".
+ *
+ * @return array|bool
+ *   An array of user ids matching the provided user name.
+ *   FALSE is returned on error.
+ */
+function mfcs_find_from_form_user_name($user_name) {
+  if (!is_string($user_name) || strlen($user_name) == 0) {
+    cf_error::invalid_string('user_name');
+    return FALSE;
+  }
+
+  $query = db_select('users', 'u');
+  $query->innerJoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id');
+  $query->innerJoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id');
+
+  $query->addField('u', 'uid', 'user_id');
+  #$query->addField('fdfufn', 'field_user_first_name_value', 'first_name');
+  #$query->addField('fdfuln', 'field_user_last_name_value', 'last_name');
+
+  $parts = explode(', ', $user_name);
+  if (count($parts) == 1) {
+    $query->condition('fdfufn.field_user_first_name_value', db_like(trim($parts[0])), 'ilike');
+  }
+  else {
+    $query->condition('fdfufn.field_user_first_name_value', db_like(trim($parts[1])), 'ilike');
+    $query->condition('fdfuln.field_user_last_name_value', db_like(trim($parts[0])), 'ilike');
+  }
+
+  $matches = array();
+  $results = $query->execute()->fetchAll();
+  if (is_array($results)) {
+    foreach ($results as $result) {
+      $matches[] = $result->user_id;
+    }
+  }
+
+  return $matches;
+}
+
+/**
+ * Find all requests where the given user id is referenced as a request coordinator.
+ *
+ * @param int $user_id
+ *   The numeric id of the user to search.
+ * @param bool $search_revision
+ *   (optional) When TRUE, all revisions will be searched.
+ *   When FALSE, only the latest revision is searched.
+ *
+ * @return array|bool
+ *   An array of request ids as array keys and revision numbers as array values.
+ *   FALSE is returned on error.
+ */
+function mfcs_find_requests_with_requester_id($user_id, $search_revision = FALSE) {
+  if (!cf_is_integer($user_id)) {
+    cf_error::invalid_integer('user_id');
+    return FALSE;
+  }
+
+  if (!is_bool($search_revision)) {
+    cf_error::invalid_bool('search_revision');
+    return FALSE;
+  }
+
+  $found = array();
+  try {
+    if ($search_revision) {
+      $query = db_select('mfcs_field_request_coordinator_user_id', 'mfrcui');
+    }
+    else {
+      $query = db_select('mfcs_current', 'mc');
+      $query->innerJoin('mfcs_field_request_coordinator_user_id', 'mfrcui', 'mc.request_id = mfrcui.request_id and mc.request_coordinator_user_id = mfrcui.revision');
+    }
+
+    $query->addField('mfrcui', 'request_id', 'request_id');
+    $query->addField('mfrcui', 'revision', 'revision');
+
+    $query->condition('mfrcui.value', $user_id);
+    $query->condition('mfrcui.delta', 0);
+
+    $results = $query->execute()->fetchAll();
+    if (is_array($results)) {
+      foreach ($results as $result) {
+        if (!isset($found[$result->request_id])) {
+          $found[$result->request_id] = array();
+        }
+        $found[$result->request_id][$result->revision] = $result->revision;
+      }
+    }
+  }
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
+    return FALSE;
+  }
+
+  return $found;
+}
+
+/**
  * @} End of '@defgroup mfcs McNeese Facilities Use'.
  */

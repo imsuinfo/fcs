@@ -394,6 +394,7 @@ function mfcs_get_request_fields($form, &$form_state) {
     );
   }
 
+  mfcs_get_request_field_request_coordinator_id($form, $form_state, $fields, $request_state, $ps);
   mfcs_get_request_field_request_coordinator_name($form, $form_state, $fields, $request_state, $ps);
   mfcs_get_request_field_request_coordinator_phone($form, $form_state, $fields, $request_state, $ps);
   mfcs_get_request_field_request_coordinator_email($form, $form_state, $fields, $request_state, $ps);
@@ -1430,6 +1431,32 @@ function mfcs_get_request_field_venue_coordinator_user_id($form, &$form_state, &
 /**
  * Process and build a specific form field.
  */
+function mfcs_get_request_field_request_coordinator_id($form, &$form_state, &$fields, &$request_state, $ps) {
+  $values = array(0 => NULL);
+
+  if (isset($request_state['request_coordinator']) && array_key_exists('user_id', $request_state['request_coordinator'])) {
+    $values = $request_state['request_coordinator']['user_id'];
+  }
+  else {
+    if (!empty($form['form']['user']['#value']->uid)) {
+      $values[0] = (int) $form['form']['user']['#value']->uid;
+    }
+  }
+
+  foreach ($values as $key => $value) {
+    $fields['request_coordinator']['user_id'][$key] = array(
+      '#id' => 'field-request-request_coordinator-user_id-' . $key,
+      '#type' => 'value',
+      '#value' => empty($value) ? NULL : (int) $value,
+    );
+  }
+
+  return $values;
+}
+
+/**
+ * Process and build a specific form field.
+ */
 function mfcs_get_request_field_request_coordinator_name($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
 
@@ -1437,16 +1464,11 @@ function mfcs_get_request_field_request_coordinator_name($form, &$form_state, &$
     $values = $request_state['request_coordinator']['name'];
   }
   else {
-    if (!empty($form['form']['user']['#value']->field_user_last_name['und'][0]['safe_value'])) {
-      $values[0] .= $form['form']['user']['#value']->field_user_last_name['und'][0]['safe_value'];
-    }
-
-    if (!empty($form['form']['user']['#value']->field_user_first_name['und'][0]['safe_value'])) {
-      if (!empty($values[0])) {
-        $values[0] .=  ', ';
+    if (isset($form['form']['user']['#value']) && is_object($form['form']['user']['#value'])) {
+      $values[0] = mfcs_generate_form_user_name($form['form']['user']['#value']);
+      if ($values[0] === FALSE) {
+        $values[0] = NULL;
       }
-
-      $values[0] .= $form['form']['user']['#value']->field_user_first_name['und'][0]['safe_value'];
     }
   }
 

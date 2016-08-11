@@ -139,6 +139,33 @@ function mfcs_pre_validate_request_fields(&$form, &$form_state, $dont_validate =
         }
       }
     }
+
+
+    if ($clicked_id == 'submit-request-submit' || $clicked_id == 'submit-request-next') {
+      // check to see if the request coordinator's name has changed.
+      // if so, then attempt to determine the user id for that name or set to NULL on fail.
+      if (isset($location_form['request_coordinator']['name']) && is_array($location_form['request_coordinator']['name'])) {
+        foreach ($location_form['request_coordinator']['name'] as $key => $value) {
+          if (!is_numeric($key) || !is_array($value)) {
+            continue;
+          }
+
+          if ($value['#default_value'] != $location_state['request_coordinator']['name'][$key]) {
+            $found_ids = mfcs_find_from_form_user_name($location_state['request_coordinator']['name'][$key]);
+            if (!is_array($found_ids) || count($found_ids) != 1) {
+              // unable to identify user name, so set the user id to NULL to mark it as unknown.
+              $location_state['request_coordinator']['user_id'][$key] = NULL;
+            }
+            else {
+              $location_state['request_coordinator']['user_id'][$key] = $found_ids[0];
+            }
+            unset($found_ids);
+          }
+        }
+        unset($key);
+        unset($value);
+      }
+    }
   }
   elseif ($form_state['values']['form']['step'] == 'location') {
   }

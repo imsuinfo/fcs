@@ -52,6 +52,7 @@ function mfcs_table_install_structure() {
   );
 
   $structure['request_coordinator'] = array(
+    'user_id' => 'unsigned',
     'name' => 'varchar',
     'phone' => 'varchar',
     'email' => 'varchar',

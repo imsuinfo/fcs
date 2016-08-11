@@ -331,6 +331,14 @@ function mfcs_table_structure($include_mer = FALSE) {
   );
 
   $structure['request_coordinator'] = array(
+    'user_id' => array(
+      'path' => 'request][request_coordinator][user_id',
+      'name' => "Request Coordinator",
+      'type' => 'request_coordinator',
+      'size' => 'normal',
+      'hide_from_search' => TRUE,
+      'manual_processing' => TRUE,
+    ),
     'name' => array(
       'path' => 'request][request_coordinator][name',
       'name' => "Request Coordinator Name",
@@ -1362,6 +1370,9 @@ function mfcs_table_presentation($option = NULL) {
       'label' => 'Request Coordinator Name',
       'group' => 'coordinator',
       'weight' => 4,
+      'type' => array(
+        'value' => 'request_coordinator',
+      ),
       'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,

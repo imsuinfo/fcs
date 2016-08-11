@@ -2246,6 +2246,51 @@ function mfcs_hook_user_update(&$edit, $account, $category) {
         mfcs_save_user($account->uid, array('problems' => $problems));
       }
     }
+
+    // the code below cannot be performed due to security restrictions on the tables (which prevent update operations).
+    // walk through each request whose request id is associated with the given user and update the name if the name settings have changed.
+    /*
+    $request_ids = mfcs_find_requests_with_requester_id($account->uid, TRUE);
+    if (!empty($request_ids)) {
+      $old_name = mfcs_generate_form_user_name($edit['original']);
+      $new_name = mfcs_generate_form_user_name($account);
+
+      $transaction = db_transaction();
+      try {
+        $query = db_update('mfcs_field_request_coordinator_name');
+        $query->fields(array('value' => $new_name));
+
+        $query->condition('value', $old_name);
+        $query->condition('delta', 0);
+
+        $or = db_or();
+        foreach ($request_ids as $request_id => $revision_ids) {
+          foreach ($revision_ids as $revision_id) {
+            $and = db_and();
+            $and->condition('request_id', $request_id);
+            $and->condition('revision', $revision_id);
+            $or->condition($and);
+          }
+        }
+        unset($request_id);
+        unset($revision_id);
+        unset($revision_ids);
+
+        $query->condition($or);
+        $results = $query->execute();
+
+        unset($transaction);
+      }
+      catch (Error $e) {
+        $transaction->rollback();
+        cf_error::on_exception($e);
+      }
+      catch (Exception $e) {
+        $transaction->rollback();
+        cf_error::on_exception($e);
+      }
+    }
+    */
   }
 }
 

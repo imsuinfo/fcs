@@ -1032,6 +1032,35 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
           $length += strlen($processed_markup);
         }
       }
+      elseif ($type[$value_name] == 'request_coordinator') {
+        $request_coordinator_user_id = NULL;
+        $user_title = NULL;
+        if (isset($request['request_coordinator']['user_id'][0]->value)) {
+          $request_coordinator_user_id = (int) $request['request_coordinator']['user_id'][0]->value;
+
+          if (!isset($users[$request_coordinator_user_id])) {
+            $users[$request_coordinator_user_id] = mfcs_load_basic_user_settings_by_user_id($request_coordinator_user_id);
+          }
+
+          $user_title = check_plain($users[$request_coordinator_user_id]['first_name'] . ' ' . $users[$request_coordinator_user_id]['last_name']) . ' (uid: ' . $request_coordinator_user_id . ')';
+        }
+
+        if (is_null($request_coordinator_user_id)) {
+          $markup .= check_plain($value->{$value_name});
+
+          $length += strlen($value->{$value_name});
+        }
+        else {
+          if ($reviewer || $manager) {
+            $markup .= '<a href="' . $base_path . 'requests/users-0/view/' . $request_coordinator_user_id . $url_arguments . '" class="item-link" title="' . $user_title . '">' . check_plain($value->{$value_name}) . '</a>';
+          }
+          else {
+            $markup .= check_plain($value->{$value_name});
+          }
+
+          $length += strlen($value->{$value_name});
+        }
+      }
       elseif ($type[$value_name] == 'review_decision') {
         if ($value->{$value_name} == MFCS_REVIEW_DECISION_APPROVE) {
           $markup .= "Approved";
