@@ -463,6 +463,17 @@ define('MFCS_REVIEW_RESTRICTIONS_REQUESTER', 1);
 define('MFCS_REVIEW_RESTRICTIONS_REVIEWER', 2);
 define('MFCS_REVIEW_RESTRICTIONS_MANAGERS', 3);
 
+/**
+ * Unavailability Types
+ */
+define('MFCS_UNAVAILABILITY_TYPE_NONE', 0);
+define('MFCS_UNAVAILABILITY_TYPE_RENOVATION', 1);
+define('MFCS_UNAVAILABILITY_TYPE_REPAIR', 2);
+define('MFCS_UNAVAILABILITY_TYPE_REFURBISHMENT', 3);
+define('MFCS_UNAVAILABILITY_TYPE_SPECIAL_EVENT', 4);
+define('MFCS_UNAVAILABILITY_TYPE_OUTAGE', 5);
+define('MFCS_UNAVAILABILITY_TYPE_EMERGENCY', 6);
+define('MFCS_UNAVAILABILITY_TYPE_CLASS', 7);
 
 /**
  * Implements hook_init().
@@ -11657,6 +11668,7 @@ function mfcs_get_unavailabilities($year, $room_id = NULL, $timestamp_start = NU
   try {
     $query = db_select('mfcs_unavailability', 'mu');
     $query->addField('mu', 'id', 'id');
+    $query->addField('mu', 'type', 'type');
     $query->addField('mu', 'room_id', 'room_id');
     $query->addField('mu', 'building_id', 'building_id');
     $query->addField('mu', 'date_start', 'date_start');
@@ -11796,6 +11808,7 @@ function mfcs_get_unavailability($id, $enabled = TRUE, $deleted = FALSE) {
   try {
     $query = db_select('mfcs_unavailability', 'mu');
     $query->addField('mu', 'id', 'id');
+    $query->addField('mu', 'type', 'type');
     $query->addField('mu', 'year', 'year');
     $query->addField('mu', 'room_id', 'room_id');
     $query->addField('mu', 'building_id', 'building_id');

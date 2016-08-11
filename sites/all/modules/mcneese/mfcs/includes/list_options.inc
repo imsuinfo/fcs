@@ -953,5 +953,58 @@ function mfcs_get_log_problems_list_options($option = NULL, $type = NULL, $hidde
 }
 
 /**
+ * Returns an array of facilities use unavailability type options for populating lists.
+ *
+ * @param string|null $option
+ *   (optional) A string designating how the list will be populated.
+ * @param bool $hidden
+ *   (optional) When TRUE, will include hidden/special case types.
+ *   that are not normally exposed through the select list options.
+ * @param bool $disabled
+ *   (optional) When TRUE, load disabled options in addition to existing options.
+ *
+ * @return array
+ *   An array of options available.
+ */
+function mfcs_get_unavailability_type_list_options($option = NULL, $hidden = FALSE, $disabled = FALSE) {
+  $options = array();
+  $options_all = array();
+
+  if ($hidden) {
+    $options_all[MFCS_UNAVAILABILITY_TYPE_NONE] = 'None';
+  }
+
+  $options_all[MFCS_UNAVAILABILITY_TYPE_RENOVATION] = 'Renovation';
+  $options_all[MFCS_UNAVAILABILITY_TYPE_REPAIR] = 'Repair';
+  $options_all[MFCS_UNAVAILABILITY_TYPE_REFURBISHMENT] = 'Planned Refurbishment';
+  $options_all[MFCS_UNAVAILABILITY_TYPE_SPECIAL_EVENT] = 'Special Event';
+  $options_all[MFCS_UNAVAILABILITY_TYPE_OUTAGE] = 'Outage';
+  $options_all[MFCS_UNAVAILABILITY_TYPE_EMERGENCY] = 'Emergency';
+  $options_all[MFCS_UNAVAILABILITY_TYPE_CLASS] = 'Class';
+
+  if ($option == 'select') {
+    $options[''] = '- Select -';
+  }
+  elseif ($option == 'combined') {
+    $options_all = array();
+    $options_all[MFCS_UNAVAILABILITY_TYPE_RENOVATION] = 'Renovation / Repair';
+    $options_all[MFCS_UNAVAILABILITY_TYPE_REPAIR] = 'Renovation / Repair';
+    $options_all[MFCS_UNAVAILABILITY_TYPE_REFURBISHMENT] = 'Planned Refurbishment';
+    $options_all[MFCS_UNAVAILABILITY_TYPE_SPECIAL_EVENT] = 'Special Event';
+    $options_all[MFCS_UNAVAILABILITY_TYPE_OUTAGE] = 'Emergency / Outage';
+    $options_all[MFCS_UNAVAILABILITY_TYPE_EMERGENCY] = 'Emergency / Outage';
+    $options_all[MFCS_UNAVAILABILITY_TYPE_CLASS] = 'Class';
+  }
+
+  foreach ($options_all as $option_id => $option_name) {
+    $options[$option_id] = $option_name;
+  }
+
+  asort($options);
+
+  return $options;
+}
+
+/**
  * @} End of '@addtogroup mfcs'.
  */

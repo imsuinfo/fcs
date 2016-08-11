@@ -312,6 +312,7 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
   $user = cf_current_user();
 
   mfcs_include(MFCS_INCLUDE_MANAGEMENT);
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
   // load sorting information
   $order = NULL;
@@ -331,6 +332,7 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
   $class_id = '';
   $class_date = '';
   $class_title = '';
+  $class_type = '';
   $class_enabled = '';
   $class_operations = 'no-print ';
 
@@ -356,6 +358,11 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
       $order_column = array(0 => strtolower($sorting[$order]));
       $class_title .= 'sorting_1 ';
     }
+    elseif ($order == 'type') {
+      $sorting['type'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = array(0 => strtolower($sorting[$order]));
+      $class_type .= 'sorting_1 ';
+    }
     elseif ($order == 'enabled') {
       $sorting['enabled'] = is_null($sort) ? 'DESC' : $sort;
       $order_column = array(0 => strtolower($sorting[$order]));
@@ -373,6 +380,8 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
   $is_administer = user_access('mfcs administer', $user);
   $can_troubleshoot = mfcs_page_request_access('troubleshoot', NULL, $user);
   $can_create = mfcs_unavailability_request_access('create', $year, $room_id, NULL, $user->uid);
+
+  $unavailability_types = mfcs_get_unavailability_type_list_options('combined');
 
   $items_enabled = TRUE;
   if ($is_reviewer || $is_manager || $is_administer) {
@@ -425,6 +434,11 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
       'class' => $class_title,
     );
 
+    $row['type'] = array(
+      'data' => (array_key_exists($item->type, $unavailability_types) ? check_plain($unavailability_types[$item->type]) : 'Unknown'),
+      'class' => $class_type,
+    );
+
     $row['date'] = array(
       'data' => $date,
       'class' => $class_date,
@@ -455,6 +469,7 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
   $availability_list['header'] = array(
     'id' => array('field' => 'id', 'data' => "ID", 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
     'title' => array('field' => 'title', 'data' => "Title", 'align' => 'center'),
+    'type' => array('field' => 'type', 'data' => "Type", 'align' => 'center'),
     'date' => array('field' => 'date', 'data' => "Date", 'align' => 'center'),
     'enabled' => array('field' => 'enabled', 'data' => "Enabled", 'align' => 'center'),
     'operations' => array('data' => "Operations", 'align' => 'center', 'class' => array('no-print')),
@@ -494,9 +509,10 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
     'columns' => array(
       array('id' => 0, 'column' => 'id', 'name' => "ID", 'className' => 'column-id', 'sanitize' => FALSE, 'visible' => FALSE),
       array('id' => 1, 'column' => 'title', 'name' => "Title", 'className' => 'column-title'),
-      array('id' => 2, 'column' => 'date', 'name' => "Date", 'className' => 'column-date'),
-      array('id' => 3, 'column' => 'enabled', 'name' => "Enabled", 'className' => 'column-enabled'),
-      array('id' => 4, 'column' => NULL, 'name' => "Operations", 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
+      array('id' => 2, 'column' => 'type', 'name' => "Type", 'className' => 'column-type'),
+      array('id' => 3, 'column' => 'date', 'name' => "Date", 'className' => 'column-date'),
+      array('id' => 4, 'column' => 'enabled', 'name' => "Enabled", 'className' => 'column-enabled'),
+      array('id' => 5, 'column' => NULL, 'name' => "Operations", 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
     ),
     'displayStart' => 0,
     'pageLength' => 40,
@@ -631,6 +647,11 @@ function mfcs_request_unavailability_0_page($year, $room_id, $unavailability_id)
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
+  // @todo: display custom page when processing classroom unavailability types (MFCS_UNAVAILABILITY_TYPE_CLASS).
+
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+  $unavailability_types = mfcs_get_unavailability_type_list_options('combined');
+
   if ($unavailable->date_start == strtotime('midnight today', $unavailable->date_start) && $unavailable->date_stop == strtotime('midnight tomorrow', $unavailable->date_start)) {
     $date_label = 'Unavailable On:';
     $date_value = date('l, F jS, Y', $unavailable->date_start);
@@ -672,6 +693,7 @@ function mfcs_request_unavailability_0_page($year, $room_id, $unavailability_id)
   $markup .= '<div class="room_information-item-label">Building Name:</div>';
   $markup .= '<div class="room_information-item-value">' . $building_value . '</div>';
   $markup .= '</div>';
+
   $markup .= '<div class="room_information-item item-room_name">';
   $markup .= '<div class="room_information-item-label">Room Name:</div>';
   $markup .= '<div class="room_information-item-value">' . $room_value . '</div>';
@@ -691,6 +713,12 @@ function mfcs_request_unavailability_0_page($year, $room_id, $unavailability_id)
   $markup .= '<div class="room_information-item-label">' . $date_label . '</div>';
   $markup .= '<div class="room_information-item-value">' . $date_value . '</div>';
   $markup .= '</div>';
+
+  $markup .= '<div class="room_information-item item-unavailability_type">';
+  $markup .= '<div class="room_information-item-label">' . 'Type' . '</div>';
+  $markup .= '<div class="room_information-item-value">' . (array_key_exists($unavailable->type, $unavailability_types) ? $unavailability_types[$unavailable->type] : 'Unknown') . '</div>';
+  $markup .= '</div>';
+
   $markup .= '</div>';
 
   $markup .= '<div class="room_information-description">';
@@ -945,7 +973,7 @@ function mfcs_request_unavailability_0_copy_form($form, &$form_state, $year, $ro
  *
  * @see: mfcs_request_unavailable_0_copy_form()
  */
-function mfcs_request_unavailable_0_copy_form_pre_validate(&$form, &$form_state) {
+function mfcs_request_unavailability_0_copy_form_pre_validate(&$form, &$form_state) {
   $clicked_id = '';
   if (isset($form_state['triggering_element']['#id'])) {
     $clicked_id = $form_state['triggering_element']['#id'];
@@ -1036,9 +1064,13 @@ function mfcs_request_unavailability_0_copy_form_submit($form, &$form_state) {
   $instance = mfcs_instance();
   $year_this = date('Y', $instance);
 
+  $room_id = $form['form']['room_id']['#value'];
+  $year_current = (int) $form['form']['year']['#value'];
+  $year_previous = (int) $form_state['values']['unavailable']['year'];
+
   if ($clicked_id == 'mfcs-unavailable-copy-submit-cancel') {
     if (empty($form_state['values']['redirect_to'])) {
-      $form_state['redirect'] = mfcs_build_redirect_array('requests/unavailable-0/' . $form['form']['year']['#value']);
+      $form_state['redirect'] = mfcs_build_redirect_array('requests/unavailable-0/' . $form['form']['year']['#value'] . '/' . $room_id);
     }
     else {
       $form_state['redirect'] = $form_state['values']['redirect_to'];
@@ -1046,10 +1078,6 @@ function mfcs_request_unavailability_0_copy_form_submit($form, &$form_state) {
 
     return;
   }
-
-  $room_id = $form['form']['room_id']['#value'];
-  $year_current = (int) $form['form']['year']['#value'];
-  $year_previous = (int) $form_state['values']['unavailable']['year'];
 
   $enabled = TRUE;
   if ($form_state['values']['unavailable']['include_disabled'] == 1) {
@@ -1068,11 +1096,17 @@ function mfcs_request_unavailability_0_copy_form_submit($form, &$form_state) {
   try {
     if (!empty($unavailabilities)) {
       foreach ($unavailabilities as $unavailability) {
+        // classrooms must never be copied.
+        if ($unavailability->type == MFCS_UNAVAILABILITY_TYPE_CLASS) {
+          continue;
+        }
+
         // copy the unavailability.
         $current_date_start = '' . $year_current . date('/m/d h:i:s a', $unavailability->date_start);
         $current_date_stop = '' . $year_current . date('/m/d h:i:s a', $unavailability->date_stop);
 
         $fields = array();
+        $fields['type'] = $unavailability->type;
         $fields['year'] = $year_current;
         $fields['room_id'] = $room_id;
         $fields['building_id'] = $unavailability->building_id;
@@ -1251,6 +1285,12 @@ function mfcs_request_unavailability_0_edit_form($form, &$form_state, $year, $ro
       drupal_not_found();
       drupal_exit();
     }
+
+    // class types are managed via banner.
+    if ($unavailable->type == MFCS_UNAVAILABILITY_TYPE_CLASS) {
+      drupal_not_found();
+      drupal_exit();
+    }
   }
 
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
@@ -1285,6 +1325,11 @@ function mfcs_request_unavailability_0_edit_form($form, &$form_state, $year, $ro
   }
 
   drupal_set_title($page_title);
+
+  $unavailability_types = mfcs_get_unavailability_type_list_options('select');
+
+  // class rooms are never directly assigned/copied, but are instead handled via banner.
+  unset($unavailability_types[MFCS_UNAVAILABILITY_TYPE_CLASS]);
 
   // a year offset is necessary to create the date field for a specific year.
   // the date field needs to be limited to a certain year and it works based off the offset to the current year.
@@ -1377,6 +1422,15 @@ function mfcs_request_unavailability_0_edit_form($form, &$form_state, $year, $ro
     '#title' => "Title",
     '#required' => TRUE,
     '#default_value' => isset($unavailable->title) ? $unavailable->title : '',
+  );
+
+  $form['unavailable']['type'] = array(
+    '#id' => 'field-unavailable-type',
+    '#type' => 'select',
+    '#title' => "Type",
+    '#options' => $unavailability_types,
+    '#required' => TRUE,
+    '#default_value' => (isset($unavailable->type) ? $unavailable->type : NULL),
   );
 
   $form['unavailable']['description'] = array(
@@ -1570,6 +1624,7 @@ function mfcs_request_unavailability_0_edit_form_pre_validate(&$form, &$form_sta
 
   if ($clicked_id == 'mfcs-unavailable-edit-submit-cancel') {
     $form['unavailable']['title']['#required'] = FALSE;
+    $form['unavailable']['type']['#required'] = FALSE;
     $form['unavailable']['date_start']['day']['#required'] = FALSE;
   }
 }
@@ -1712,6 +1767,7 @@ function mfcs_request_unavailability_0_edit_form_submit($form, &$form_state) {
   try {
     $fields = array();
     $fields['title'] = $form_state['values']['unavailable']['title'];
+    $fields['type'] = $form_state['values']['unavailable']['type'];
     $fields['description'] = str_replace("\r\n", "\n", $form_state['values']['unavailable']['description']);
     $fields['description'] = str_replace("\r", "\n", $fields['description']);
     $fields['room_id'] = (int) $form['form']['room_id']['#value'];
@@ -1947,6 +2003,12 @@ function mfcs_request_unavailability_0_delete_form($form, &$form_state, $year, $
   }
 
   if ($room_id != $unavailable->room_id) {
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  // class types are managed via banner.
+  if ($unavailable->type == MFCS_UNAVAILABILITY_TYPE_CLASS) {
     drupal_not_found();
     drupal_exit();
   }
@@ -2246,6 +2308,7 @@ function mfcs_unavailability_rooms_room($room_id, $year, $user_id = NULL, $enabl
     $query->condition('mbb.disabled', 0);
 
     $query->addField('mu', 'id', 'id');
+    $query->addField('mu', 'type', 'type');
     $query->addField('mu', 'title', 'title');
     $query->addField('mu', 'date_start', 'date_start');
     $query->addField('mu', 'date_stop', 'date_stop');
