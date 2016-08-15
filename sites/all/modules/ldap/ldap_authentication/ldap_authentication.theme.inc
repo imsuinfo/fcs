@@ -23,12 +23,6 @@ function theme_ldap_authentication_user_login_block_links($variables) {
   if (variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL)) {
     $items[] = l(t('Create new account'), 'user/register', array('attributes' => array('title' => t('Create a new user account.'))));
   }
-  if ($show_reset_pwd) {
-    $items[] = l(t('Request new password'), 'user/password', array('attributes' => array('title' => t('Request new password via e-mail.'))));
-  }
-  elseif ($auth_conf->ldapUserHelpLinkUrl) {
-    $items[] = l(t($auth_conf->ldapUserHelpLinkText), $auth_conf->ldapUserHelpLinkUrl);
-  }
 
   $output = theme('item_list', array('items' => $items));
   return $output;
