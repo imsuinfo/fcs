@@ -5032,11 +5032,12 @@ function mfcs_sync_banner_to_local_users($user_id = NULL, $banner_id = NULL, $me
 function mfcs_sync_banner_to_local_classes() {
   $instance = mfcs_instance();
 
-  $year = date("Y");
+  $year = date('Y');
+  $year_short = date('y');
   $year_next = $year + 1;
-  $year_stamp = strtotime("midnight Jan 1, " . $year);
+  $year_stamp = strtotime('midnight Jan 1, ' . $year);
 
-  $buildings = mfcs_load_rooms();
+  $buildings = mfcs_load_buildings();
   $rooms = mfcs_load_rooms();
 
   if (empty($buildings) || empty($rooms)) {
@@ -5044,35 +5045,36 @@ function mfcs_sync_banner_to_local_classes() {
     return TRUE;
   }
 
-
-  $classes_query = 'select ssrmeet_start_date, ssrmeet_end_date, ssrmeet_begin_time, ssrmeet_end_time, ';
+  $classes_query = 'select ssrmeet_term_code, ssrmeet_start_date, ssrmeet_end_date, ssrmeet_begin_time, ssrmeet_end_time, ';
   $classes_query .= 'ssrmeet_bldg_code, ssrmeet_room_code, ssrmeet_mon_day, ssrmeet_tue_day, ';
   $classes_query .= 'ssrmeet_wed_day, ssrmeet_thu_day, ssrmeet_fri_day, ssrmeet_sat_day, ssrmeet_sun_day, ';
-  $classes_query .= 'ssbsect_subj_code, ssbsect_crse_numb ';
+  $classes_query .= 'ssbsect_subj_code, ssbsect_crse_numb, ssrmeet_crn, ssrmeet_func_code ';
   $classes_query .= 'from ssvmeet sm ';
 
-  $classes_query .= 'where (ssrmeet_term_code like \'' . $year . '%\' or ssrmeet_term_code like \'' . $year_next . '%\')';
-  $classes_query .= 'and not ssrmeet_begin_time is NULL ';
-  $classes_query .= 'and not ssrmeet_end_time is NULL ';
+  $classes_query .= 'where not ssrmeet_start_date is null and not ssrmeet_end_date is null and not ssrmeet_term_code is null ';
+  $classes_query .= 'and to_number(regexp_replace(ssrmeet_start_date, \'.*-([[:digit:]]+)$\', \'\1\')) >= ' . $year_short . ' ';
 
-  $classes_query .= 'and ssrmeet_bldg_code in (';
-  $count = 0;
-  $buildings_total = count($buildings);
-  $buildings_list = array();
-  foreach ($buildings as $building) {
-    $buildings_list[$building->building_id] = $building->building_code;
+  // ssvmeet contains rooms not being processed by the reservations system.
+  // the list of rooms as specified in ucs.msu_venue_detail provides the only list of rooms and buildings that are needed.
+  // filter by these rooms.
+  $generated = array();
+  foreach ($rooms as $room) {
+    if (!isset($room->building_code) || strlen($room->building_code) == 0) continue;
+    if (!isset($room->room_number) || strlen($room->room_number) == 0) continue;
 
-    $classes_query .= '\'' . $building->building_code . '\'';
-    $count++;
-
-    if ($count < $buildings_total) {
-      $classes_query .= ', ';
-    }
+    $generated[] = '(ssrmeet_bldg_code = \'' . $room->building_code . '\' and ssrmeet_room_code = \'' . $room->room_number . '\')';
   }
-  $classes_query .= ') ';
-  $classes_query .= 'order by ssrmeet_start_date asc';
+  unset($room);
 
+  if (!empty($generated)) {
+    $classes_query .= 'and (' . implode(' or ', $generated) . ') ';
+  }
+
+  gc_collect_cycles();
+
+  $classes_query .= 'order by ssrmeet_start_date asc';
   $classes = mfcs_oracle_select($classes_query);
+  unset($classes_query);
 
   $banner_to_local_weekdays = array(
     'sunday' => 'ssrmeet_sun_day',
@@ -5084,68 +5086,202 @@ function mfcs_sync_banner_to_local_classes() {
     'saturday' => 'ssrmeet_sat_day',
   );
 
+  gc_collect_cycles();
+
 
   $transaction = db_transaction();
   try {
-    // permanently remove all classes and restart the sequence.
-    $query = db_delete('mfcs_banner_classes');
-    $query->execute();
+    $banner_classes_fields = array();
 
-    // do not restart the sequence, instead make sure the sequence has 'cycle' such that this restart can be avoided.
-    // the restart is impossible because postgresql only allows the owner to restart the sequence and providing such an owner is to be avoided.
-    #db_query('ALTER SEQUENCE {mfcs_banner_classes_id_seq} RESTART');
-
-    // process all of the classes and add new reservations or remove the 'deleted' status to existing reservations.
     if (!empty($classes)) {
       foreach ($classes as $class) {
-        $start_stamp = strtotime($class['ssrmeet_start_date']);
-        $stop_stamp = strtotime($class['ssrmeet_end_date']);
-
-        $start_time_string = implode(':', str_split($class['ssrmeet_begin_time'], 2));
-        $stop_time_string = implode(':', str_split($class['ssrmeet_end_time'], 2));
-
         // search the system by both building code and room code.
         $class_room = FALSE;
+        $class_building = FALSE;
         foreach ($rooms as $room) {
           if ($class['ssrmeet_room_code'] != $room->room_number) continue;
 
           if ($class['ssrmeet_bldg_code'] == $room->building_code) {
             $class_room = $room->room_id;
-             break;
+            $class_building = $room->building_id;
+            break;
           }
         }
         if ($class_room === FALSE) {
+          // this really shouldn't happen due to the filters added to the query. (should a watchdog warning be provided here?)
           continue;
         }
 
-        $class_base = array(
-          'room' => $class_room,
-        );
+        $term_code = $class['ssrmeet_term_code']; // could be something like 'EVENT'
+        $subject_code = $class['ssbsect_subj_code'];
+        $course_number = $class['ssbsect_crse_numb'];
+
+        $start_stamp = strtotime($class['ssrmeet_start_date']);
+        $stop_stamp = strtotime($class['ssrmeet_end_date']);
+
+        // start stamps are inclusive, ensure that they always begin at the start of the day.
+        $start_stamp = strtotime('midnight today', $start_stamp);
+
+        // banner seems to treat stop dates as inclusive, but we need our logic to be consistent and make all stop stamps exclusive.
+        $stop_stamp = strtotime('midnight tomorrow', $stop_stamp);
+
+        $is_class = TRUE;
+        if ($term_code == 'EVENT') {
+          $is_class = FALSE;
+          $subject_code = $class['ssrmeet_func_code'];
+          $course_number = $class['ssrmeet_crn'];
+        }
+
+        $start_time_string = '00:00';
+        $stop_time_string = '24:00';
+        $all_day = TRUE;
+        if (!empty($class['ssrmeet_begin_time']) && !empty($class['ssrmeet_end_time'])) {
+          $start_time_string = implode(':', str_split($class['ssrmeet_begin_time'], 2));
+          $stop_time_string = implode(':', str_split($class['ssrmeet_end_time'], 2));
+          $all_day = FALSE;
+        }
+
+        $class_key = $subject_code . '-' . $course_number;
+        if (!array_key_exists($class_key, $banner_classes_fields)) {
+          $banner_classes_fields[$class_key] = array(
+            'is_class' => ($is_class ? 'y' : 'n'),
+            'subject_code' => $subject_code,
+            'course_number' => $course_number,
+            'updated' => $instance,
+          );
+
+          $query = db_insert('mfcs_banner_classes');
+          $query->fields($banner_classes_fields[$class_key]);
+          $query->onConflictDo(Database::CONFLICT_DO_NOTHING);
+          $query->execute();
+
+          // load the class id to be used later.
+          $query = db_select('mfcs_banner_classes', 'mbc');
+          $query->addField('mbc', 'id', 'id');
+          $query->condition('subject_code', $subject_code);
+          $query->condition('course_number', $course_number);
+          $class_object = $query->execute()->fetchObject();
+
+          if (is_object($class_object) && isset($class_object->id)) {
+            $banner_classes_fields[$class_key]['class_id'] = $class_object->id;
+          }
+          unset($class_object);
+          unset($query);
+        }
+
+        // @fixme: ask about the cases where no start or stop time has been specified and no days of the week have been specified.
+        if (empty($class['ssrmeet_sun_day']) && empty($class['ssrmeet_mon_day']) && empty($class['ssrmeet_tue_day']) && empty($class['ssrmeet_wed_day']) && empty($class['ssrmeet_thu_day']) && empty($class['ssrmeet_fri_day']) && empty($class['ssrmeet_sat_day'])) {
+          // for now, mark them as always in use for mon->fri
+          #$class['ssrmeet_mon_day'] = TRUE;
+          #$class['ssrmeet_tue_day'] = TRUE;
+          #$class['ssrmeet_wed_day'] = TRUE;
+          #$class['ssrmeet_thu_day'] = TRUE;
+          #$class['ssrmeet_fri_day'] = TRUE;
+        }
+
+        $processed = array();
+        foreach ($banner_to_local_weekdays as $weekday) {
+          $processed[$weekday] = FALSE;
+        }
 
         foreach ($banner_to_local_weekdays as $weekday => $banner_weekday) {
-          if (!empty($class[$banner_weekday])) {
-            $stamp_day = strtotime("this " . $weekday, $start_stamp);
+          if ($processed[$weekday] == TRUE) {
+            continue;
+          }
+          $processed[$weekday] = TRUE;
 
-            while ($stamp_day <= $stop_stamp) {
-              $stamp_day_string = date("Y/m/d ", $stamp_day);
-              $stamp_time_start = strtotime($stamp_day_string . $start_time_string);
-              $stamp_time_stop = strtotime($stamp_day_string . $stop_time_string);
+          if (empty($class[$banner_weekday])) {
+            continue;
+          }
 
-              $class_fields = $class_base;
-              $class_fields['reserved_day'] = $stamp_day;
-              $class_fields['reserved_time_start'] = $stamp_time_start;
-              $class_fields['reserved_time_stop'] = $stamp_time_stop;
+          $stamp_day = strtotime('this ' . $weekday, $start_stamp);
 
-              $query = db_insert('mfcs_banner_classes');
-              $query->fields($class_fields);
-              $query->execute();
+          // walkthrough each consecutive day and attempt to include consecutive dates.
+          if ($all_day) {
+            $total_days = 1;
+            $day_next = $stamp_day;
+            $today_name = strtolower(date('l', $stamp_day));
+            do {
+              $day_next = strtotime('tomorrow', $day_next);
+              $day_name = strtolower(date('l', $day_next));
 
-              $stamp_day = strtotime("next " . $weekday, $stamp_day);
+              if (empty($banner_to_local_weekdays[$day_name]) || $processed[$day_name]) {
+                break;
+              }
+
+              $total_days++;
+              $processed[$day_name] = TRUE;
+            } while ($today_name != $day_name);
+          }
+
+          while ($stamp_day < $stop_stamp) {
+            $stamp_day_string = date('Y/m/d ', $stamp_day);
+            $stamp_day_year = date('Y', $stamp_day);
+            $stamp_time_start = strtotime($stamp_day_string . $start_time_string);
+
+            if ($all_day) {
+              $stamp_time_stop = strtotime('+' . $total_days . ' days', $stamp_time_start);
             }
+            else {
+              $stamp_time_stop = strtotime($stamp_day_string . $stop_time_string);
+            }
+
+            $banner_unavailability_field = array(
+              'type' => MFCS_UNAVAILABILITY_TYPE_CLASS,
+              'year' => $stamp_day_year,
+              'room_id' => $class_room,
+              'building_id' => $class_building,
+              'class_id' => $banner_classes_fields[$class_key]['class_id'],
+              'date_start' => $stamp_time_start,
+              'date_stop' => $stamp_time_stop,
+              'title' => $subject_code . ' ' . $course_number,
+              'enabled' => 1,
+              'deleted' => 0,
+              'created' => $instance,
+              'updated' => $instance,
+            );
+
+            // dates may span multiple years, but the unavailability table is on a per year basis.
+            // determine if the specified date spans more than one year and if so, add it.
+            $current_year = date('Y', $stamp_time_start);
+            $stop_year = date('Y', $stamp_time_stop);
+
+            while ($current_year <= $stop_year) {
+              $banner_unavailability_field['year'] = $current_year;
+
+              $select_query = db_select('mfcs_unavailability', 'mu');
+              $select_query->addField('mu', 'id', 'unavailability_id');
+              $select_query->addField('mu', 'class_id', 'class_id');
+              $select_query->condition('mu.class_id', $banner_classes_fields[$class_key]['class_id']);
+              $existing_unavailability = $select_query->execute()->fetchObject();
+
+              if (is_object($existing_unavailability)) {
+                $unavailability_query = db_update('mfcs_unavailability');
+                $unavailability_query->condition('id', $existing_unavailability->unavailability_id);
+
+                $unavailability_fields = array('updated' => $instance, 'enabled' => 1, 'deleted' => 0);
+              }
+              else {
+                $unavailability_query = db_insert('mfcs_unavailability');
+              }
+              unset($select_query);
+              unset($existing_unavailability);
+
+              $unavailability_query->fields($banner_unavailability_field);
+              $unavailability_query->execute();
+              unset($unavailability_query);
+
+              $current_year++;
+            }
+
+            $stamp_day = strtotime('next ' . $weekday, $stamp_day);
           }
         }
       }
     }
+    unset($classes);
+
+    gc_collect_cycles();
 
     // enforce transaction execution
     unset($transaction);
@@ -7273,48 +7409,6 @@ function mfcs_check_room_availability($room, $dates, $time_start, $time_stop, $r
           $matched_requests['conflicts'][] = $result;
         }
       }
-    }
-
-
-    // check to see if classes (in banner) have reserved the room.
-    $query = db_select('mfcs_banner_classes', 'mbc');
-    $query->fields('mbc');
-    $query->condition('mbc.room', $room);
-
-    $or = db_or();
-    foreach ($dates as $key => $value) {
-      // all day requests match, they have NULL for start and stop time values.
-      if (is_null($time_start[$key]) && is_null($time_stop[$key])) {
-        $or->condition('mbc.reserved_day', $value);
-        continue;
-      }
-
-      $and = db_and();
-      $and->condition('mbc.reserved_day', $value);
-      $and->condition('mbc.reserved_time_start', $time_start[$key], '<=');
-      $and->condition('mbc.reserved_time_stop', $time_start[$key], '>');
-      $or->condition($and);
-
-      $and = db_and();
-      $and->condition('mbc.reserved_day', $value);
-      $and->condition('mbc.reserved_time_start', $time_stop[$key], '<');
-      $and->condition('mbc.reserved_time_stop', $time_stop[$key], '>=');
-      $or->condition($and);
-
-      $and = db_and();
-      $and->condition('mbc.reserved_day', $value);
-      $and->condition('mbc.reserved_time_start', $time_start[$key], '>');
-      $and->condition('mbc.reserved_time_stop', $time_start[$key], '>');
-      $and->condition('mbc.reserved_time_start', $time_stop[$key], '<');
-      $and->condition('mbc.reserved_time_stop', $time_stop[$key], '<');
-      $or->condition($and);
-    }
-
-    $query->condition($or);
-
-    $results = $query->execute()->fetchAll();
-    foreach ($results as $result) {
-      $matched_requests['conflicts'][] = $result;
     }
   }
   catch (Error $e) {
@@ -11671,6 +11765,7 @@ function mfcs_get_unavailabilities($year, $room_id = NULL, $timestamp_start = NU
     $query->addField('mu', 'type', 'type');
     $query->addField('mu', 'room_id', 'room_id');
     $query->addField('mu', 'building_id', 'building_id');
+    $query->addField('mu', 'class_id', 'class_id');
     $query->addField('mu', 'date_start', 'date_start');
     $query->addField('mu', 'date_stop', 'date_stop');
     $query->addField('mu', 'title', 'title');
@@ -11812,6 +11907,7 @@ function mfcs_get_unavailability($id, $enabled = TRUE, $deleted = FALSE) {
     $query->addField('mu', 'year', 'year');
     $query->addField('mu', 'room_id', 'room_id');
     $query->addField('mu', 'building_id', 'building_id');
+    $query->addField('mu', 'class_id', 'class_id');
     $query->addField('mu', 'date_start', 'date_start');
     $query->addField('mu', 'date_stop', 'date_stop');
     $query->addField('mu', 'title', 'title');

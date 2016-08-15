@@ -1562,6 +1562,34 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'type' => MENU_CALLBACK,
   );
 
+  $items['requests/unavailable-0/all'] = array(
+    'title' => "Room Unavailabilities",
+    'description' => "Unavailabilities.",
+    'page callback' => 'mfcs_request_unavailability_0_room_page',
+    'page arguments' => array(NULL),
+    'file' => 'request_unavailability.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_unavailability_request_access',
+    'access arguments' => array('manage'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['requests/unavailable-0/%/all'] = array(
+    'title' => "Room Unavailabilities",
+    'description' => "Unavailabilities.",
+    'page callback' => 'mfcs_request_unavailability_0_room_page',
+    'page arguments' => array(NULL, 2),
+    'file' => 'request_unavailability.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_unavailability_request_access',
+    'access arguments' => array('manage', 2),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+    'type' => MENU_CALLBACK,
+  );
+
   $items['requests/unavailable-0/%'] = array(
     'title' => "Room Unavailabilities",
     'description' => "Unavailabilities.",

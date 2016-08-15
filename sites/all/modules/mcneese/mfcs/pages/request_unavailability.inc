@@ -52,54 +52,55 @@ function mfcs_request_unavailability_0_rooms_page() {
     }
   }
 
-  $class_room_id = '';
-  $class_room_number = '';
-  $class_room_name = '';
+
   $class_building_id = '';
   $class_building_code = '';
   $class_building_name = '';
+  $class_room_id = '';
+  $class_room_number = '';
+  $class_room_name = '';
   $class_operations = 'no-print ';
 
   $sorting = array();
   if (is_null($order)) {
     $sorting['room_id'] = 'ASC';
-    $order_column = array(0 => strtolower($sorting['room_id']));
+    $order_column = array(3 => strtolower($sorting['room_id']));
     $class_room_id .= 'sorting_1 ';
   }
   else {
-    if ($order == 'room_id') {
-      $sorting['room_id'] = is_null($sort) ? 'DESC' : $sort;
-      $order_column = array(0 => strtolower($sorting[$order]));
-      $class_room_id .= 'sorting_1 ';
-    }
-    elseif ($order == 'room_number') {
-      $sorting['room_number'] = is_null($sort) ? 'DESC' : $sort;
-      $order_column = array(1 => strtolower($sorting[$order]));
-      $class_room_number .= 'sorting_1 ';
-    }
-    elseif ($order == 'room_name') {
-      $sorting['room_name'] = is_null($sort) ? 'DESC' : $sort;
-      $order_column = array(2 => strtolower($sorting[$order]));
-      $class_room_name .= 'sorting_1 ';
-    }
-    elseif ($order == 'building_id') {
+    if ($order == 'building_id') {
       $sorting['building_id'] = is_null($sort) ? 'DESC' : $sort;
-      $order_column = array(3 => strtolower($sorting[$order]));
+      $order_column = array(0 => strtolower($sorting[$order]));
       $class_building_id .= 'sorting_1 ';
     }
     elseif ($order == 'building_code') {
       $sorting['building_code'] = is_null($sort) ? 'DESC' : $sort;
-      $order_column = array(4 => strtolower($sorting[$order]));
+      $order_column = array(1 => strtolower($sorting[$order]));
       $class_building_id .= 'sorting_1 ';
     }
     elseif ($order == 'building_name') {
       $sorting['building_name'] = is_null($sort) ? 'DESC' : $sort;
-      $order_column = array(5 => strtolower($sorting[$order]));
+      $order_column = array(2 => strtolower($sorting[$order]));
       $class_building_name .= 'sorting_1 ';
+    }
+    elseif ($order == 'room_id') {
+      $sorting['room_id'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = array(3 => strtolower($sorting[$order]));
+      $class_room_id .= 'sorting_1 ';
+    }
+    elseif ($order == 'room_number') {
+      $sorting['room_number'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = array(4 => strtolower($sorting[$order]));
+      $class_room_number .= 'sorting_1 ';
+    }
+    elseif ($order == 'room_name') {
+      $sorting['room_name'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = array(5 => strtolower($sorting[$order]));
+      $class_room_name .= 'sorting_1 ';
     }
     else {
       $sorting['room_id'] = 'ASC';
-      $order_column = array(0 => strtolower($sorting['room_id']));
+      $order_column = array(3 => strtolower($sorting['room_id']));
       $class_room_id .= 'sorting_1 ';
     }
   }
@@ -126,20 +127,6 @@ function mfcs_request_unavailability_0_rooms_page() {
   $rows = array();
   foreach ($items as $item) {
     $row = array();
-    $row['room_id'] = array(
-      'data' => (int) $item->id,
-      'class' => $class_room_id,
-    );
-
-    $row['room_number'] = array(
-      'data' => check_plain($item->room_number),
-      'class' => $class_room_number,
-    );
-
-    $row['room_name'] = array(
-      'data' => check_plain($item->room_name),
-      'class' => $class_room_name,
-    );
 
     $row['building_id'] = array(
       'data' => check_plain($item->building_id),
@@ -154,6 +141,21 @@ function mfcs_request_unavailability_0_rooms_page() {
     $row['building_name'] = array(
       'data' => check_plain($item->building_name),
       'class' => $class_building_name,
+    );
+
+    $row['room_id'] = array(
+      'data' => (int) $item->id,
+      'class' => $class_room_id,
+    );
+
+    $row['room_number'] = array(
+      'data' => check_plain($item->room_number),
+      'class' => $class_room_number,
+    );
+
+    $row['room_name'] = array(
+      'data' => check_plain($item->room_name),
+      'class' => $class_room_name,
     );
 
     $row['operations'] = array(
@@ -182,12 +184,12 @@ function mfcs_request_unavailability_0_rooms_page() {
   $availability_list = array();
   $availability_list['caption'] = "Room Unavailability";
   $availability_list['header'] = array(
-    'room_id' => array('field' => 'room_id', 'data' => "Room ID", 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
-    'room_number' => array('field' => 'room_number', 'data' => "Room Number", 'align' => 'center'),
-    'room_name' => array('field' => 'room_name', 'data' => "Room Name", 'align' => 'center'),
     'building_id' => array('field' => 'building_id', 'data' => "Building ID", 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
     'building_code' => array('field' => 'building_code', 'data' => "Building Code", 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
     'building_name' => array('field' => 'building_name', 'data' => "Building Name", 'align' => 'center'),
+    'room_id' => array('field' => 'room_id', 'data' => "Room ID", 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
+    'room_number' => array('field' => 'room_number', 'data' => "Room Number", 'align' => 'center'),
+    'room_name' => array('field' => 'room_name', 'data' => "Room Name", 'align' => 'center'),
     'operations' => array('data' => "Operations", 'align' => 'center', 'class' => array('no-print')),
   );
 
@@ -223,12 +225,12 @@ function mfcs_request_unavailability_0_rooms_page() {
     'serverSide' => FALSE,
     'deferRender' => TRUE,
     'columns' => array(
-      array('id' => 0, 'column' => 'room_id', 'name' => "Room ID", 'className' => 'column-room_id', 'sanitize' => FALSE, 'visible' => FALSE),
-      array('id' => 1, 'column' => 'room_number', 'name' => "Room Number", 'className' => 'column-room_number'),
-      array('id' => 2, 'column' => 'room_name', 'name' => "Room Name", 'className' => 'column-room_name'),
-      array('id' => 3, 'column' => 'building_id', 'name' => "Building ID", 'className' => 'column-building_id', 'sanitize' => FALSE, 'visible' => FALSE),
-      array('id' => 4, 'column' => 'building_code', 'name' => "Building Code", 'className' => 'column-building_code', 'sanitize' => FALSE, 'visible' => FALSE),
-      array('id' => 5, 'column' => 'building_name', 'name' => "Building Name", 'className' => 'column-building_name'),
+      array('id' => 0, 'column' => 'building_id', 'name' => "Building ID", 'className' => 'column-building_id', 'sanitize' => FALSE, 'visible' => FALSE),
+      array('id' => 1, 'column' => 'building_code', 'name' => "Building Code", 'className' => 'column-building_code', 'visible' => FALSE),
+      array('id' => 2, 'column' => 'building_name', 'name' => "Building Name", 'className' => 'column-building_name'),
+      array('id' => 3, 'column' => 'room_id', 'name' => "Room ID", 'className' => 'column-room_id', 'sanitize' => FALSE, 'visible' => FALSE),
+      array('id' => 4, 'column' => 'room_number', 'name' => "Room Number", 'className' => 'column-room_number'),
+      array('id' => 5, 'column' => 'room_name', 'name' => "Room Name", 'className' => 'column-room_name'),
       array('id' => 6, 'column' => NULL, 'name' => "Operations", 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
     ),
     'displayStart' => 0,
@@ -250,6 +252,11 @@ function mfcs_request_unavailability_0_rooms_page() {
   );
 
   $markup = '<div id="mfcs-unavailable_0-manage_rooms-page">';
+
+  $markup .= '<div class="no-print margin-bottom-15">';
+  $markup .= 'You may also <a href="' . $base_path . 'requests/unavailable-0/all' . $url_arguments . '" class="operation-link operation-link-manage">view and manage all unavavailabilities</a> instead of viewing and managing unavailabilities per room.';
+  $markup .= '</div>';
+
   $markup .= mcneese_libraries_theme_table($availability_list, $datatable_settings);
   $markup .= '<br class="clear">';
   $markup .= '</div>';
@@ -260,8 +267,9 @@ function mfcs_request_unavailability_0_rooms_page() {
 /**
  * Provides the facilities use request unavailability room page(s).
  *
- * @param int $room_id
+ * @param int|NULL $room_id
  *   The ID of the room to render a page for.
+ *   When set to NULL, all possible rooms are loaded.
  * @param int|null $year
  *   (optional) The year to load the room unavailability listing for.
  *   When NULL the current year is used.
@@ -270,7 +278,7 @@ function mfcs_request_unavailability_0_rooms_page() {
  *   The HTML output representing the page.
  */
 function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
-  if (!cf_is_integer($room_id)) {
+  if (!cf_is_integer($room_id) && !is_null($room_id)) {
     cf_error::invalid_integer('room_id');
 
     drupal_not_found();
@@ -299,15 +307,22 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
   }
 
   // do not provide a page for a non-existent room id.
-  $room = mfcs_load_rooms(NULL, NULL, $room_id, TRUE);
-  if (!is_object($room)) {
-    drupal_not_found();
-    drupal_exit();
+  if (is_null($room_id)) {
+    mfcs_add_canonical_headers('requests/unavailable-0/all/' . $year);
+
+    drupal_set_title($year . ' Room Unavailabilities');
   }
+  else {
+    $room = mfcs_load_rooms(NULL, NULL, $room_id, TRUE);
+    if (!is_object($room)) {
+      drupal_not_found();
+      drupal_exit();
+    }
 
-  mfcs_add_canonical_headers('requests/unavailable-0/' . $room_id . '/' . $year);
+    mfcs_add_canonical_headers('requests/unavailable-0/' . $room_id . '/' . $year);
 
-  drupal_set_title("" . $year . " Room Unavailability for " . $room->building_code . " " . $room->room_number);
+    drupal_set_title($year . ' Room Unavailability for ' . $room->building_code . ' ' . $room->room_number);
+  }
 
   $user = cf_current_user();
 
@@ -334,6 +349,12 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
   $class_title = '';
   $class_type = '';
   $class_enabled = '';
+  $class_building_id = '';
+  $class_building_code = '';
+  $class_building_name = '';
+  $class_room_id = '';
+  $class_room_number = '';
+  $class_room_name = '';
   $class_operations = 'no-print ';
 
   $sorting = array();
@@ -350,28 +371,67 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
     }
     elseif ($order == 'date') {
       $sorting['date'] = is_null($sort) ? 'DESC' : $sort;
-      $order_column = array(0 => strtolower($sorting[$order]));
+      $order_column = array(1 => strtolower($sorting[$order]));
       $class_date .= 'sorting_1 ';
     }
     elseif ($order == 'title') {
       $sorting['title'] = is_null($sort) ? 'DESC' : $sort;
-      $order_column = array(0 => strtolower($sorting[$order]));
+      $order_column = array(2 => strtolower($sorting[$order]));
       $class_title .= 'sorting_1 ';
     }
     elseif ($order == 'type') {
       $sorting['type'] = is_null($sort) ? 'DESC' : $sort;
-      $order_column = array(0 => strtolower($sorting[$order]));
+      $order_column = array(3 => strtolower($sorting[$order]));
       $class_type .= 'sorting_1 ';
     }
     elseif ($order == 'enabled') {
       $sorting['enabled'] = is_null($sort) ? 'DESC' : $sort;
-      $order_column = array(0 => strtolower($sorting[$order]));
+      $order_column = array(4 => strtolower($sorting[$order]));
       $class_enabled .= 'sorting_1 ';
     }
     else {
-      $sorting['id'] = 'ASC';
-      $order_column = array(0 => strtolower($sorting['id']));
-      $class_id .= 'sorting_1 ';
+      if (is_null($room_id)) {
+        if ($order == 'building_id') {
+          $sorting['building_id'] = is_null($sort) ? 'DESC' : $sort;
+          $order_column = array(5 => strtolower($sorting[$order]));
+          $class_building_id .= 'sorting_1 ';
+        }
+        elseif ($order == 'building_code') {
+          $sorting['building_code'] = is_null($sort) ? 'DESC' : $sort;
+          $order_column = array(6 => strtolower($sorting[$order]));
+          $class_building_id .= 'sorting_1 ';
+        }
+        elseif ($order == 'building_name') {
+          $sorting['building_name'] = is_null($sort) ? 'DESC' : $sort;
+          $order_column = array(7 => strtolower($sorting[$order]));
+          $class_building_name .= 'sorting_1 ';
+        }
+        elseif ($order == 'room_id') {
+          $sorting['room_id'] = is_null($sort) ? 'DESC' : $sort;
+          $order_column = array(8 => strtolower($sorting[$order]));
+          $class_room_id .= 'sorting_1 ';
+        }
+        elseif ($order == 'room_number') {
+          $sorting['room_number'] = is_null($sort) ? 'DESC' : $sort;
+          $order_column = array(9 => strtolower($sorting[$order]));
+          $class_room_number .= 'sorting_1 ';
+        }
+        elseif ($order == 'room_name') {
+          $sorting['room_name'] = is_null($sort) ? 'DESC' : $sort;
+          $order_column = array(10 => strtolower($sorting[$order]));
+          $class_room_name .= 'sorting_1 ';
+        }
+        else {
+          $sorting['id'] = 'ASC';
+          $order_column = array(0 => strtolower($sorting['id']));
+          $class_id .= 'sorting_1 ';
+        }
+      }
+      else {
+        $sorting['id'] = 'ASC';
+        $order_column = array(0 => strtolower($sorting['id']));
+        $class_id .= 'sorting_1 ';
+      }
     }
   }
 
@@ -379,7 +439,13 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
   $is_manager = user_access('mfcs manage', $user);
   $is_administer = user_access('mfcs administer', $user);
   $can_troubleshoot = mfcs_page_request_access('troubleshoot', NULL, $user);
-  $can_create = mfcs_unavailability_request_access('create', $year, $room_id, NULL, $user->uid);
+
+  if (is_null($room_id)) {
+    $can_create = FALSE;
+  }
+  else {
+    $can_create = mfcs_unavailability_request_access('create', $year, $room_id, NULL, $user->uid);
+  }
 
   $unavailability_types = mfcs_get_unavailability_type_list_options('combined');
 
@@ -419,7 +485,10 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
       $date = date('l, F jS, Y', $date_start);
     }
     else {
-      if ($date_start != strtotime('midnight today', $date_start) || $date_stop != strtotime('midnight today', $date_stop)) {
+      if (strtotime('midnight today', $date_start) == strtotime('midnight today', $date_stop)) {
+        $date = date('h:ia', $date_start) . ' to ' . date('h:ia', $date_stop) . ' on ' . date('l, F jS, Y', $date_start);
+      }
+      elseif ($date_start != strtotime('midnight today', $date_start) || $date_stop != strtotime('midnight today', $date_stop)) {
         $date = date('h:ia l, F jS, Y', $date_start) . ' to<br>' . date('h:ia l, F jS, Y', $date_stop);
       }
       else {
@@ -450,30 +519,106 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
       'class' => $class_enabled,
     );
 
-    $row['operations']['data'] = '';
-    $row['operations']['data'] .= '<a href="' . $base_path . 'requests/unavailable-0/view/' . $year . '/' . $room_id . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="View Unavailability">View</a> ';
+    if (is_null($room_id)) {
+      $row['building_id'] = array(
+        'data' => check_plain($item->building_id),
+        'class' => $class_building_id,
+      );
 
-    if ($year >= $current_year && array_key_exists($item->id, $items_editable)) {
-      $row['operations']['data'] .= '<a href="' . $base_path . 'requests/unavailable-0/edit/' . $year . '/' . $room_id . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-edit" title="Edit Unavailability">Edit</a> ';
-      $row['operations']['data'] .= '<a href="' . $base_path . 'requests/unavailable-0/create/' . $year . '/' . $room_id . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-copy" title="Edit Unavailability">Copy</a> ';
-      $row['operations']['data'] .= '<a href="' . $base_path . 'requests/unavailable-0/delete/' . $year . '/' . $room_id . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-delete" title="Delete Unavailability">Delete</a> ';
+      $row['building_code'] = array(
+        'data' => check_plain($item->building_code),
+        'class' => $class_building_code,
+      );
+
+      $row['building_name'] = array(
+        'data' => check_plain($item->building_name),
+        'class' => $class_building_name,
+      );
+
+      $row['room_id'] = array(
+        'data' => (int) $item->id,
+        'class' => $class_room_id,
+      );
+
+      $row['room_number'] = array(
+        'data' => check_plain($item->room_number),
+        'class' => $class_room_number,
+      );
+
+      $row['room_name'] = array(
+        'data' => check_plain($item->room_name),
+        'class' => $class_room_name,
+      );
+    }
+
+    $row['operations']['data'] = '';
+    $row['operations']['data'] .= '<a href="' . $base_path . 'requests/unavailable-0/view/' . $year . '/' . $item->room_id . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="View Unavailability">View</a> ';
+
+    if ($year >= $current_year && array_key_exists($item->id, $items_editable) && is_null($item->class_id)) {
+      $row['operations']['data'] .= '<a href="' . $base_path . 'requests/unavailable-0/edit/' . $year . '/' . $item->room_id . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-edit" title="Edit Unavailability">Edit</a> ';
+      $row['operations']['data'] .= '<a href="' . $base_path . 'requests/unavailable-0/create/' . $year . '/' . $item->room_id . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-copy" title="Edit Unavailability">Copy</a> ';
+      $row['operations']['data'] .= '<a href="' . $base_path . 'requests/unavailable-0/delete/' . $year . '/' . $item->room_id . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-delete" title="Delete Unavailability">Delete</a> ';
     }
 
     $rows[] = $row;
   }
 
-  $room_name = '(' . check_plain($room->building_name) . ') ' . check_plain($room->room_name);
-
   $availability_list = array();
-  $availability_list['caption'] = $room_name . " Unavailability";
-  $availability_list['header'] = array(
-    'id' => array('field' => 'id', 'data' => "ID", 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
-    'title' => array('field' => 'title', 'data' => "Title", 'align' => 'center'),
-    'type' => array('field' => 'type', 'data' => "Type", 'align' => 'center'),
-    'date' => array('field' => 'date', 'data' => "Date", 'align' => 'center'),
-    'enabled' => array('field' => 'enabled', 'data' => "Enabled", 'align' => 'center'),
-    'operations' => array('data' => "Operations", 'align' => 'center', 'class' => array('no-print')),
-  );
+  $columns = array();
+  if (is_null($room_id)) {
+    $availability_list['caption'] = 'All ' . $year . ' Room Unavailabilities';
+
+    $availability_list['header'] = array(
+      'id' => array('field' => 'id', 'data' => "ID", 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
+      'title' => array('field' => 'title', 'data' => "Title", 'align' => 'center'),
+      'type' => array('field' => 'type', 'data' => "Type", 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
+      'date' => array('field' => 'date', 'data' => "Date", 'align' => 'center'),
+      'enabled' => array('field' => 'enabled', 'data' => "Enabled", 'align' => 'center'),
+      'building_id' => array('field' => 'building_id', 'data' => "Building ID", 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
+      'building_code' => array('field' => 'building_code', 'data' => "Building Code", 'align' => 'center'),
+      'building_name' => array('field' => 'building_name', 'data' => "Building Name", 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
+      'room_id' => array('field' => 'room_id', 'data' => "Room ID", 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
+      'room_number' => array('field' => 'room_number', 'data' => "Room Number", 'align' => 'center'),
+      'room_name' => array('field' => 'room_name', 'data' => "Room Name", 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
+      'operations' => array('data' => "Operations", 'align' => 'center', 'class' => array('no-print')),
+    );
+
+    $columns = array(
+      array('id' => 0, 'column' => 'id', 'name' => "ID", 'className' => 'column-id', 'sanitize' => FALSE, 'visible' => FALSE),
+      array('id' => 1, 'column' => 'title', 'name' => "Title", 'className' => 'column-title'),
+      array('id' => 2, 'column' => 'type', 'name' => "Type", 'className' => 'column-type', 'visible' => FALSE),
+      array('id' => 3, 'column' => 'date', 'name' => "Date", 'className' => 'column-date'),
+      array('id' => 4, 'column' => 'enabled', 'name' => "Enabled", 'className' => 'column-enabled'),
+      array('id' => 5, 'column' => 'building_id', 'name' => "Building ID", 'className' => 'column-building_id', 'sanitize' => FALSE, 'visible' => FALSE),
+      array('id' => 6, 'column' => 'building_code', 'name' => "Building Code", 'className' => 'column-building_code'),
+      array('id' => 7, 'column' => 'building_name', 'name' => "Building Name", 'className' => 'column-building_name', 'visible' => FALSE),
+      array('id' => 8, 'column' => 'room_id', 'name' => "Room ID", 'className' => 'column-room_id', 'sanitize' => FALSE, 'visible' => FALSE),
+      array('id' => 9, 'column' => 'room_number', 'name' => "Room Number", 'className' => 'column-room_number'),
+      array('id' => 10, 'column' => 'room_name', 'name' => "Room Name", 'className' => 'column-room_name', 'visible' => FALSE),
+      array('id' => 11, 'column' => NULL, 'name' => "Operations", 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
+    );
+  }
+  else {
+    $availability_list['caption'] = '(' . check_plain($room->building_name) . ') ' . check_plain($room->room_name) . ' Unavailability';
+
+    $availability_list['header'] = array(
+      'id' => array('field' => 'id', 'data' => "ID", 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
+      'title' => array('field' => 'title', 'data' => "Title", 'align' => 'center'),
+      'type' => array('field' => 'type', 'data' => "Type", 'align' => 'center'),
+      'date' => array('field' => 'date', 'data' => "Date", 'align' => 'center'),
+      'enabled' => array('field' => 'enabled', 'data' => "Enabled", 'align' => 'center'),
+      'operations' => array('data' => "Operations", 'align' => 'center', 'class' => array('no-print')),
+    );
+
+    $columns = array(
+      array('id' => 0, 'column' => 'id', 'name' => "ID", 'className' => 'column-id', 'sanitize' => FALSE, 'visible' => FALSE),
+      array('id' => 1, 'column' => 'title', 'name' => "Title", 'className' => 'column-title'),
+      array('id' => 2, 'column' => 'type', 'name' => "Type", 'className' => 'column-type'),
+      array('id' => 3, 'column' => 'date', 'name' => "Date", 'className' => 'column-date'),
+      array('id' => 4, 'column' => 'enabled', 'name' => "Enabled", 'className' => 'column-enabled'),
+      array('id' => 5, 'column' => NULL, 'name' => "Operations", 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
+    );
+  }
 
   $availability_list['attributes'] = array();
   $availability_list['attributes']['id'] = 'mfcs-unavailability_manage_room_page';
@@ -506,14 +651,7 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
     'processing' => FALSE,
     'serverSide' => FALSE,
     'deferRender' => TRUE,
-    'columns' => array(
-      array('id' => 0, 'column' => 'id', 'name' => "ID", 'className' => 'column-id', 'sanitize' => FALSE, 'visible' => FALSE),
-      array('id' => 1, 'column' => 'title', 'name' => "Title", 'className' => 'column-title'),
-      array('id' => 2, 'column' => 'type', 'name' => "Type", 'className' => 'column-type'),
-      array('id' => 3, 'column' => 'date', 'name' => "Date", 'className' => 'column-date'),
-      array('id' => 4, 'column' => 'enabled', 'name' => "Enabled", 'className' => 'column-enabled'),
-      array('id' => 5, 'column' => NULL, 'name' => "Operations", 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
-    ),
+    'columns' => $columns,
     'displayStart' => 0,
     'pageLength' => 40,
     'dom' => 'lfCrtip',
@@ -534,36 +672,47 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
 
   $markup = '<div id="mfcs-unavailable_0-manage_room-page">';
 
-  if ($can_troubleshoot) {
-    $building_value = '<a href="' . $base_path . 'requests/troubleshoot-0/rooms/' . $room_id . $url_arguments . '" class="operation-link operation-link-view" title="View Technical Building Information">' . check_plain($room->building_name) . '</a>';
-    $room_value = '<a href="' . $base_path . 'requests/troubleshoot-0/rooms/' . $room_id . $url_arguments . '" class="operation-link operation-link-view" title="View Technical Room Information">' . check_plain($room->room_name) . '</a>';
+  if (is_null($room_id)) {
+    $markup .= '<div class="unavailable_0_links-year no-print">';
+    $markup .= '<a href="' . $base_path . 'requests/unavailable-0/' . ($year - 1) . '/all' . $url_arguments . '" class="year-previous inline-block margin-10 float-left" title="Unavailabilities for ' . ($year - 1) . '">Previous Year</a> ';
+    $markup .= '<a href="' . $base_path . 'requests/unavailable-0/' . ($year + 1) . '/all' . $url_arguments . '" class="year-next inline-block margin-10 float-right" title="Unavailabilities for ' . ($year + 1) . '">Next Year</a> ';
+    $markup .= '</div>';
+    $markup .= '<br class="clear">';
   }
   else {
-    $building_value = check_plain($room->building_name);
-    $room_value = check_plain($room->room_name);
+    if ($can_troubleshoot) {
+      $building_value = '<a href="' . $base_path . 'requests/troubleshoot-0/rooms/' . $room_id . $url_arguments . '" class="operation-link operation-link-view" title="View Technical Building Information">' . check_plain($room->building_name) . '</a>';
+      $room_value = '<a href="' . $base_path . 'requests/troubleshoot-0/rooms/' . $room_id . $url_arguments . '" class="operation-link operation-link-view" title="View Technical Room Information">' . check_plain($room->room_name) . '</a>';
+    }
+    else {
+      $building_value = check_plain($room->building_name);
+      $room_value = check_plain($room->room_name);
+    }
+
+    $markup .= '<div class="room_information-wrapper">';
+    $markup .= '<div class="room_information-item item-building_name">';
+    $markup .= '<div class="room_information-item-label">Building Name:</div>';
+    $markup .= '<div class="room_information-item-value">' . $building_value . '</div>';
+    $markup .= '</div>';
+    $markup .= '<div class="room_information-item item-room_name">';
+    $markup .= '<div class="room_information-item-label">Room Name:</div>';
+    $markup .= '<div class="room_information-item-value">' . $room_value . '</div>';
+    $markup .= '</div>';
+    $markup .= '</div>';
+
+    if ($can_create) {
+      $markup .= '<div class="no-print">';
+      $markup .= 'You may <a href="' . $base_path . 'requests/unavailable-0/create/' . $year . '/' . $room_id . $url_arguments . '">create a new unavailable date and time</a> for this room.<br>';
+      $markup .= 'You may <a href="' . $base_path . 'requests/unavailable-0/copy/' . $year . '/' . $room_id . $url_arguments . '">copy all unavailable dates and times</a> for this room from another year (Type \'Class\' is never copied).';
+      $markup .= '</div>';
+    }
+
+    $markup .= '<div class="unavailable_0_links-year no-print">';
+    $markup .= '<a href="' . $base_path . 'requests/unavailable-0/' . ($year - 1) . '/' . $room_id . $url_arguments . '" class="year-previous inline-block margin-10 float-left" title="Unavailabilities for ' . ($year - 1) . '">Previous Year</a> ';
+    $markup .= '<a href="' . $base_path . 'requests/unavailable-0/' . ($year + 1) . '/' . $room_id . $url_arguments . '" class="year-next inline-block margin-10 float-right" title="Unavailabilities for ' . ($year + 1) . '">Next Year</a> ';
+    $markup .= '</div>';
+    $markup .= '<br class="clear">';
   }
-
-  $markup .= '<div class="room_information-wrapper">';
-  $markup .= '<div class="room_information-item item-building_name">';
-  $markup .= '<div class="room_information-item-label">Building Name:</div>';
-  $markup .= '<div class="room_information-item-value">' . $building_value . '</div>';
-  $markup .= '</div>';
-  $markup .= '<div class="room_information-item item-room_name">';
-  $markup .= '<div class="room_information-item-label">Room Name:</div>';
-  $markup .= '<div class="room_information-item-value">' . $room_value . '</div>';
-  $markup .= '</div>';
-  $markup .= '</div>';
-
-  if ($can_create) {
-    $markup .= 'You may <a href="' . $base_path . 'requests/unavailable-0/create/' . $year . '/' . $room_id . $url_arguments . '">create a new unavailable date and time</a> for this room.<br>';
-    $markup .= 'You may <a href="' . $base_path . 'requests/unavailable-0/copy/' . $year . '/' . $room_id . $url_arguments . '">copy all unavailable dates and times</a> for this room from another year.<br>';
-  }
-
-  $markup .= '<div class="unavailable_0_links-year no-print">';
-  $markup .= '<a href="' . $base_path . 'requests/unavailable-0/' . ($year - 1) . '/' . $room_id . $url_arguments . '" class="year-previous inline-block margin-10 float-left" title="Unavailabilities for ' . ($year - 1) . '">Previous Year</a> ';
-  $markup .= '<a href="' . $base_path . 'requests/unavailable-0/' . ($year + 1) . '/' . $room_id . $url_arguments . '" class="year-next inline-block margin-10 float-right" title="Unavailabilities for ' . ($year + 1) . '">Next Year</a> ';
-  $markup .= '</div>';
-  $markup .= '<br class="clear">';
 
   $markup .= mcneese_libraries_theme_table($availability_list, $datatable_settings);
   $markup .= '<br class="clear">';
@@ -647,8 +796,6 @@ function mfcs_request_unavailability_0_page($year, $room_id, $unavailability_id)
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
-  // @todo: display custom page when processing classroom unavailability types (MFCS_UNAVAILABILITY_TYPE_CLASS).
-
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
   $unavailability_types = mfcs_get_unavailability_type_list_options('combined');
 
@@ -657,9 +804,13 @@ function mfcs_request_unavailability_0_page($year, $room_id, $unavailability_id)
     $date_value = date('l, F jS, Y', $unavailable->date_start);
   }
   else {
-    if ($unavailable->date_start != strtotime('midnight today', $unavailable->date_start) || $unavailable->date_stop != strtotime('midnight today', $unavailable->date_stop)) {
+    if (strtotime('midnight today', $unavailable->date_start) == strtotime('midnight today', $unavailable->date_stop)) {
       $date_label = 'Unavailable From:';
-      $date_value = '' . date('h:ia l, F jS, Y', $unavailable->date_start) . ' to ' . date('h:ia l, F jS, Y', $unavailable->date_stop);
+      $date_value = date('h:ia', $unavailable->date_start) . ' to ' . date('h:ia', $unavailable->date_stop) . ' on ' . date('l, F jS, Y', $unavailable->date_start);
+    }
+    elseif ($unavailable->date_start != strtotime('midnight today', $unavailable->date_start) || $unavailable->date_stop != strtotime('midnight today', $unavailable->date_stop)) {
+      $date_label = 'Unavailable From:';
+      $date_value = date('h:ia l, F jS, Y', $unavailable->date_start) . ' to ' . date('h:ia l, F jS, Y', $unavailable->date_stop);
     }
     else {
       // For whatever reason, the culture treats the stop date inclusively when it has no time (but then treats it inclusively when there is a time!).
@@ -733,18 +884,20 @@ function mfcs_request_unavailability_0_page($year, $room_id, $unavailability_id)
     $markup .= '<div class="room_information-status-value">' . ($unavailable->enabled ? 'Enabled' : 'Disabled') . '</div>';
     $markup .= '</div>';
 
-    $instance = mfcs_instance();
-    $current_year = date('Y', $instance);
-    if ($year >= $current_year) {
-      $markup .= '<br class="no-print">';
-      $markup .= '<div class="unavailability_page-operations no-print">';
-      $markup .= '<a href="' . $base_path . 'requests/unavailable-0/edit/' . $year . '/' . $unavailable->room_id . '/' . $unavailability_id . $url_arguments . '" class="operation-edit inline-block margin-10 float-left">Edit this unavailability</a> ';
-      $markup .= '<a href="' . $base_path . 'requests/unavailable-0/create/' . $year . '/' . $unavailable->room_id . '/' . $unavailability_id . $url_arguments . '" class="operation-copy inline-block margin-10 float-left">Copy this unavailability</a> ';
-      $markup .= '<a href="' . $base_path . 'requests/unavailable-0/delete/' . $year . '/' . $unavailable->room_id . '/' . $unavailability_id . $url_arguments . '" class="operation-delete inline-block margin-10 float-right">Delete this unavailability</a>';
-      $markup .= '</div>';
-    }
+    if (is_null($unavailable->class_id)) {
+      $instance = mfcs_instance();
+      $current_year = date('Y', $instance);
+      if ($year >= $current_year) {
+        $markup .= '<br class="no-print">';
+        $markup .= '<div class="unavailability_page-operations no-print">';
+        $markup .= '<a href="' . $base_path . 'requests/unavailable-0/edit/' . $year . '/' . $unavailable->room_id . '/' . $unavailability_id . $url_arguments . '" class="operation-edit inline-block margin-10 float-left">Edit this unavailability</a> ';
+        $markup .= '<a href="' . $base_path . 'requests/unavailable-0/create/' . $year . '/' . $unavailable->room_id . '/' . $unavailability_id . $url_arguments . '" class="operation-copy inline-block margin-10 float-left">Copy this unavailability</a> ';
+        $markup .= '<a href="' . $base_path . 'requests/unavailable-0/delete/' . $year . '/' . $unavailable->room_id . '/' . $unavailability_id . $url_arguments . '" class="operation-delete inline-block margin-10 float-right">Delete this unavailability</a>';
+        $markup .= '</div>';
+      }
 
-    $markup .= '<br class="clear">';
+      $markup .= '<br class="clear">';
+    }
   }
 
   $markup .= '</div>';
@@ -1097,7 +1250,7 @@ function mfcs_request_unavailability_0_copy_form_submit($form, &$form_state) {
     if (!empty($unavailabilities)) {
       foreach ($unavailabilities as $unavailability) {
         // classrooms must never be copied.
-        if ($unavailability->type == MFCS_UNAVAILABILITY_TYPE_CLASS) {
+        if (!is_null($unavailable->class_id)) {
           continue;
         }
 
@@ -1287,7 +1440,7 @@ function mfcs_request_unavailability_0_edit_form($form, &$form_state, $year, $ro
     }
 
     // class types are managed via banner.
-    if ($unavailable->type == MFCS_UNAVAILABILITY_TYPE_CLASS) {
+    if (!is_null($unavailable->class_id)) {
       drupal_not_found();
       drupal_exit();
     }
@@ -2008,7 +2161,7 @@ function mfcs_request_unavailability_0_delete_form($form, &$form_state, $year, $
   }
 
   // class types are managed via banner.
-  if ($unavailable->type == MFCS_UNAVAILABILITY_TYPE_CLASS) {
+  if (!is_null($unavailable->class_id)) {
     drupal_not_found();
     drupal_exit();
   }
@@ -2237,8 +2390,9 @@ function mfcs_request_unavailability_0_delete_form_submit($form, &$form_state) {
 /**
  * Returns a list of rooms that are unavailable.
  *
- * @param int $room_id
+ * @param int|NULL $room_id
  *   The ID of the room to render a page for.
+ *   When NULL, all rooms are loaded (based on user id permissions).
  * @param int $year
  *   The year to load the room unavailability listing for.
  * @param integer $user_id
@@ -2254,7 +2408,7 @@ function mfcs_request_unavailability_0_delete_form_submit($form, &$form_state) {
  *   FALSE is returned on error.
  */
 function mfcs_unavailability_rooms_room($room_id, $year, $user_id = NULL, $enabled = TRUE) {
-  if (!cf_is_integer($room_id)) {
+  if (!cf_is_integer($room_id) && !is_null($room_id)) {
     cf_error::invalid_integer('room_id');
     return FALSE;
   }
@@ -2300,7 +2454,9 @@ function mfcs_unavailability_rooms_room($room_id, $year, $user_id = NULL, $enabl
       $query->condition('mu.enabled', 0);
     }
 
-    $query->condition('mu.room_id', $room_id);
+    if (!is_null($room_id)) {
+      $query->condition('mu.room_id', $room_id);
+    }
     $query->condition('mu.year', $year);
 
     $query->condition('mu.deleted', 0);
@@ -2309,11 +2465,23 @@ function mfcs_unavailability_rooms_room($room_id, $year, $user_id = NULL, $enabl
 
     $query->addField('mu', 'id', 'id');
     $query->addField('mu', 'type', 'type');
-    $query->addField('mu', 'title', 'title');
+    $query->addField('mu', 'year', 'year');
+    $query->addField('mu', 'room_id', 'room_id');
+    $query->addField('mu', 'building_id', 'building_id');
+    $query->addField('mu', 'class_id', 'class_id');
     $query->addField('mu', 'date_start', 'date_start');
     $query->addField('mu', 'date_stop', 'date_stop');
+    $query->addField('mu', 'title', 'title');
     $query->addField('mu', 'description', 'description');
+    $query->addField('mu', 'created', 'created');
+    $query->addField('mu', 'updated', 'updated');
     $query->addField('mu', 'enabled', 'enabled');
+
+    $query->addField('mbr', 'machine_name', 'room_number');
+    $query->addField('mbr', 'human_name', 'room_name');
+    $query->addField('mbb', 'machine_name', 'building_code');
+    $query->addField('mbb', 'human_name', 'building_name');
+    $query->addField('mbr', 'coordinator_id', 'coordinator_id');
 
     $query->orderBy('mu', 'id', 'asc');
 

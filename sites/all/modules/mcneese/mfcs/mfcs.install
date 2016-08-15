@@ -830,53 +830,7 @@ function mfcs_schema() {
     ),
   );
 
-  $schema['mfcs_banner_classes'] = array(
-    'description' => $t("McNeese Facilities Use Event Banner table. This is for providing local storage of rooms that have been reserved for/by classes."),
-    'fields' => array(
-      'id' => array(
-        'description' => $t("The primary key used to represent a room."),
-        'type' => 'serial',
-        'size' => 'big',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-      'room' => array(
-        'description' => $t("Foreign key to the {mfcs_banner_roomns} table."),
-        'type' => 'int',
-        'size' => 'big',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-      'reserved_day' => array(
-        'description' => $t("A timtestamp representing the date when the room was reserved."),
-        'type' => 'int',
-        'size' => 'big',
-        'unsigned' => FALSE,
-        'not null' => TRUE,
-      ),
-      'reserved_time_start' => array(
-        'description' => $t("A timtestamp representing the start time when the room was reserved. Set to NULL for all day."),
-        'type' => 'int',
-        'size' => 'big',
-        'unsigned' => FALSE,
-        'not null' => TRUE,
-      ),
-      'reserved_time_stop' => array(
-        'description' => $t("A timtestamp representing the stop time when the room was reserved. Set to NULL for all day."),
-        'type' => 'int',
-        'size' => 'big',
-        'unsigned' => FALSE,
-        'not null' => TRUE,
-      ),
-    ),
-    'primary key' => array('id'),
-    'foreign keys' => array(
-      'room' => array(
-        'table' => 'mfcs_banner_rooms',
-        'columns' => array('room' => 'id'),
-      ),
-    ),
-  );
+  // as of fcs-79, mfcs_banner_classes is now manually populated below because it uses postgresql's 'boolean' data type that is not known to be directly supported by drupal.
 
   $schema['mfcs_banner_event_roles'] = array(
     'description' => $t("McNeese Facilities Use Event Roles Banner table. This is for providing local storage of a given banner event role table."),
@@ -1510,6 +1464,13 @@ function mfcs_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
+      'type' => array(
+        'description' => $t("A number representing the type of the entry."),
+        'type' => 'int',
+        'size' => 'normal',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
       'year' => array(
         'description' => $t("Represents the year associated with the entry."),
         'type' => 'int',
@@ -1589,8 +1550,21 @@ function mfcs_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
+      'class_id' => array(
+        'description' => $t("The ID of the room, if it is a classroom type, in regards to mfcs_banner_classes."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+      ),
     ),
     'primary key' => array('id'),
+    'foreign keys' => array(
+      'class_id' => array(
+        'table' => 'mfcs_banner_classes',
+        'columns' => array('class_id' => 'id'),
+      ),
+    ),
   );
 
   $schema['mfcs_drupal_to_banner_role_mapping'] = array(
@@ -2232,11 +2206,21 @@ function mfcs_install() {
   $table10_foreign = 'mfcs_banner_buildings';
   $table10_foreign_key = 'id';
 
+  $key11_name = 'class_id';
+  $key11_foreign = 'class_id_fkey';
+  $table11_foreign = 'mfcs_banner_classes';
+  $table11_foreign_key = 'id';
+
   $structure = mfcs_table_install_structure();
 
   // create the tables that use the 'boolean' data type not currently supported by drupal but supported by postgresql:
   db_query('create table mfcs_request_locks (request_id bigint not null, auto_cancel boolean default FALSE, primary key(request_id), constraint mfcs_request_locks_request_id_check check (request_id >= 0))');
   db_query('alter table mfcs_request_locks add constraint request_id_fkey foreign key (request_id) references mfcs_requests (id) on delete cascade');
+
+  db_query('create table mfcs_banner_classes (id bigint not null, is_class boolean not null default \'y\', subject_code varchar(32), course_number varchar(32), updated bigint not null, deleted smallint not null default 0, primary key (id), constraint mfcs_banner_classes_ukey unique (is_class, subject_code, course_number), constraint mfcs_banner_classes_id_check check (id >= 0), constraint mfcs_banner_classes_deleted_check check (deleted >= 0), constraint mfcs_banner_classes_updated_check check (updated >= 0))');
+
+  db_query('create sequence mfcs_banner_classes_id_seq;');
+  db_query('alter table mfcs_banner_classes alter id set default nextval(\'mfcs_banner_classes_id_seq\'::regclass);');
 
 
   db_query('ALTER TABLE {requests} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
@@ -2259,6 +2243,8 @@ function mfcs_install() {
   db_query('ALTER TABLE {mfcs_request_reminders} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
 
   db_query('ALTER TABLE {mfcs_review_classifications} ADD CONSTRAINT review_fkey FOREIGN KEY (review_id) REFERENCES {mfcs_field_review_review} (id) ON DELETE CASCADE');
+
+  db_query('ALTER TABLE {mfcs_unavailability} ADD CONSTRAINT ' . $key11_foreign . ' FOREIGN KEY (' . $key11_name . ') REFERENCES {' . $table11_foreign . '} (' . $table11_foreign_key . ') ON DELETE CASCADE');
 
   db_query('ALTER TABLE {mfcs_log_troubleshoot} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
   db_query('ALTER TABLE {mfcs_log_emails} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
