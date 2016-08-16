@@ -5414,7 +5414,7 @@ function mfcs_autocancel_old_requests_cron() {
     MFCS_REQUEST_STATUS_LOCKED,
   );
 
-  $date = strtotime('midnight today');
+  $midnight_today = strtotime('midnight today');
 
   $unresolved_requests = array();
 
@@ -5425,10 +5425,10 @@ function mfcs_autocancel_old_requests_cron() {
     $query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mc.request_id = mfdd.request_id AND mc.dates_date = mfdd.revision');
     $query->leftJoin('mfcs_request_locks', 'mrl', 'mer.id = mrl.request_id');
 
-    $query->addField('mer', 'id', 'id');
+    $query->addField('mer', 'id', 'request_id');
 
     $query->condition('mer.status', $status, 'IN');
-    $query->condition('mfdd.value', $date, '<');
+    $query->condition('mfdd.value', $midnight_today, '<');
     $query->condition('mfdd.cancelled', 1, '<>'); // using <> for backwards compatibility where mfdd.cancelled may be NULL.
 
     // when auto-cancel lock is set to TRUE, then auto-cancel is locked/prohibited from cancelling the request.
@@ -5439,7 +5439,25 @@ function mfcs_autocancel_old_requests_cron() {
 
     $query->distinct();
 
-    $unresolved_requests = $query->execute()->fetchAllAssoc('id');
+    $unresolved_requests = $query->execute()->fetchAllAssoc('request_id');
+
+    // of the unresolved requests, only cancel requests that have no upcoming/future dates.
+    if (!empty($unresolved_requests)) {
+      $query = db_select('mfcs_field_dates_date', 'mfdd');
+      $query->innerJoin('mfcs_current', 'mc', 'mfdd.request_id = mc.request_id AND mfdd.revision = mc.dates_date');
+
+      $query->addField('mfdd', 'request_id', 'request_id');
+
+      $query->condition('mfdd.request_id', array_keys($unresolved_requests), 'IN');
+      $query->condition('mfdd.value', $midnight_today, '>=');
+
+      $query->distinct();
+
+      $future_requests = $query->execute()->fetchAllAssoc('request_id');
+      if (empty($future_requests)) {
+        $future_requests = array();
+      }
+    }
   }
   catch (Error $e) {
     cf_error::on_exception($e);
@@ -5462,6 +5480,11 @@ function mfcs_autocancel_old_requests_cron() {
   mfcs_include(MFCS_INCLUDE_WORKFLOW);
 
   foreach ($unresolved_requests as $request_id => $request_object) {
+    // skip all requests that have any dates in the future.
+    if (array_key_exists($request_id, $future_requests)) {
+      continue;
+    }
+
     // create a new instance for every unresolved request.
     mfcs_instance(TRUE);
 
