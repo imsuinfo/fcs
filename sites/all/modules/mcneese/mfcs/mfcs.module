@@ -984,70 +984,6 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
 
     return $processed[$request_id];
   }
-  elseif ($operation == 'statistics') {
-    if (is_null($request_id)) {
-      if ($roles['reviewer'] || $roles['manager'] || $roles['administer']) {
-        $access[$request_id] = TRUE;
-        return TRUE;
-      }
-    }
-  }
-  elseif ($operation == 'email_log') {
-    if (is_null($request_id)) {
-      if ($roles['manager'] || $roles['administer']) {
-        $access[$request_id] = TRUE;
-        return TRUE;
-      }
-    }
-  }
-  elseif ($operation == 'email_log-resend') {
-    if (is_null($request_id)) {
-      if ($roles['manager'] || $roles['administer']) {
-        $access[$request_id] = TRUE;
-        return TRUE;
-      }
-    }
-  }
-  elseif ($operation == 'proxy') {
-    if (is_null($request_id)) {
-      if ($roles['manager'] || $roles['administer']) {
-        $access[$request_id] = TRUE;
-        return TRUE;
-      }
-    }
-  }
-  elseif ($operation == 'troubleshoot') {
-    if (is_null($request_id)) {
-      if ($roles['manager'] || $roles['administer']) {
-        $access[$request_id] = TRUE;
-        return TRUE;
-      }
-    }
-  }
-  elseif ($operation == 'problems') {
-    if (is_null($request_id)) {
-      if ($roles['manager'] || $roles['administer']) {
-        $access[$request_id] = TRUE;
-        return TRUE;
-      }
-    }
-  }
-  elseif ($operation == 'help') {
-    if (is_null($request_id)) {
-      if ($user->uid > 0) {
-        $access[$request_id] = TRUE;
-        return TRUE;
-      }
-    }
-  }
-  elseif ($operation == 'users') {
-    if (is_null($request_id)) {
-      if ($roles['manager'] || $roles['administer']) {
-        $access[$request_id] = TRUE;
-        return TRUE;
-      }
-    }
-  }
 
   if (is_array($request_id)) {
     foreach ($request_ids as $id) {
@@ -1059,6 +995,204 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
   }
 
   $access[$request_id] = FALSE;
+  return FALSE;
+}
+
+/**
+ * Access callback for facilities use pages not directly related to requests.
+ *
+ * @param null|string $operation
+ *   (optional) When specified, performs access check based on operation.
+ * @param null|int|array $access_id
+ *   (optional) When specified, performs access check based the provided id or array of access ids.
+ *   What the access id specifical represents is dependent on the $operation.
+ * @param null|object $user
+ *   (optional) The user object to obtain access for.
+ *
+ * @param bool|array
+ *   TRUE on access granted, FALSE otherwise.
+ *   An array of boolean values is returned when access_id is an array.
+ */
+function mfcs_page_generic_access($operation = NULL, $access_id = NULL, $user = NULL) {
+  if (is_null($user) || !is_object($user)) {
+    $user = cf_current_user();
+  }
+
+  // anonymous user is denied access to everything as a whole.
+  if ($user->uid == 0) {
+    return FALSE;
+  }
+
+  // allow for access_id to be an array of ids.
+  $processed = array();
+  if (is_array($access_id)) {
+    $access_ids = array();
+
+    foreach ($access_id as $id) {
+      $access_ids[$id] = $id;
+    }
+
+    // only allow the null array key to be specified by this function.
+    unset($access_ids[NULL]);
+  }
+  elseif (is_null($access_id)) {
+    $access_ids = array(NULL => NULL);
+  }
+  elseif (cf_is_integer($access_id)) {
+    $access_ids = array($access_id => $access_id);
+  }
+  else {
+    return FALSE;
+  }
+
+  // nothing to check access for.
+  if (empty($access_ids)) {
+    return FALSE;
+  }
+
+
+  // use advanced static cache for increased performance.
+  static $mfcs_generic_access_static;
+
+  if (!isset($mfcs_generic_access_static)) {
+    $mfcs_generic_access_static[$operation] = &drupal_static('mfcs_generic_access');
+  }
+
+  if (!isset($mfcs_generic_access_static[$operation][$user->uid])) {
+    $mfcs_generic_access_static[$operation][$user->uid] = array();
+  }
+
+  $access = &$mfcs_generic_access_static[$operation][$user->uid];
+
+  if (is_string($access_id) || is_numeric($access_id)) {
+    if (array_key_exists($access_id, $access)) {
+      return $access[$access_id];
+    }
+  }
+  elseif (is_array($access_id)) {
+    $access_ids_copy = $access_ids;
+    foreach ($access_ids_copy as $id => $value) {
+      if (array_key_exists($id, $access)) {
+        $processed[$id] = $access[$id];
+        unset($access_ids[$id]);
+      }
+    }
+    unset($access_ids_copy);
+
+    // if all of the access ids have been processed, then return.
+    if (empty($access_ids)) {
+      return $processed;
+    }
+  }
+  elseif (is_null($access_id)) {
+    // the access id is allowed to be NULL.
+  }
+  else {
+    return FALSE;
+  }
+
+  $roles = array(
+    'manager' => user_access('mfcs manage', $user),
+    'reviewer' => user_access('mfcs review', $user),
+    'requester' => user_access('mfcs request', $user),
+    'administer' => user_access('mfcs administer', $user),
+
+    // @fixme: these roles are hardcoded, implement a more dynamic approach.
+    'role_student' => array_search('student role', $user->roles),
+    'role_camp' => array_search('camp role', $user->roles),
+    'role_employee' => array_search('employee role', $user->roles),
+    'role_external' => array_search('external role', $user->roles),
+    'bannerless_exception' => array_search('bannerless exception', $user->roles),
+    'reviewer_exception' => array_search('reviewer exception', $user->roles),
+  );
+
+  // Access will only be granted to administrators, managers, and requesters.
+  if (!$roles['administer'] && !$roles['manager'] && !$roles['reviewer'] && !$roles['requester']) {
+    return FALSE;
+  }
+
+  // Deny access to requesters and reviewers who do not have a student, camp, employee, or external role.
+  if (!$roles['administer'] && !$roles['manager']) {
+    if (($roles['reviewer'] || $roles['requester']) && !$roles['role_student'] && !$roles['role_camp'] && !$roles['role_employee'] && !$roles['role_external']) {
+      return FALSE;
+    }
+  }
+
+  if ($operation == 'statistics') {
+    if (is_null($access_id)) {
+      if ($roles['reviewer'] || $roles['manager'] || $roles['administer']) {
+        $access[$access_id] = TRUE;
+        return TRUE;
+      }
+    }
+  }
+  elseif ($operation == 'email_log') {
+    if (is_null($access_id)) {
+      if ($roles['manager'] || $roles['administer']) {
+        $access[$access_id] = TRUE;
+        return TRUE;
+      }
+    }
+  }
+  elseif ($operation == 'email_log-resend') {
+    if (is_null($access_id)) {
+      if ($roles['manager'] || $roles['administer']) {
+        $access[$access_id] = TRUE;
+        return TRUE;
+      }
+    }
+  }
+  elseif ($operation == 'proxy') {
+    if (is_null($access_id)) {
+      if ($roles['manager'] || $roles['administer']) {
+        $access[$access_id] = TRUE;
+        return TRUE;
+      }
+    }
+  }
+  elseif ($operation == 'troubleshoot') {
+    if (is_null($access_id)) {
+      if ($roles['manager'] || $roles['administer']) {
+        $access[$access_id] = TRUE;
+        return TRUE;
+      }
+    }
+  }
+  elseif ($operation == 'problems') {
+    if (is_null($access_id)) {
+      if ($roles['manager'] || $roles['administer']) {
+        $access[$access_id] = TRUE;
+        return TRUE;
+      }
+    }
+  }
+  elseif ($operation == 'help') {
+    if (is_null($access_id)) {
+      if ($user->uid > 0) {
+        $access[$access_id] = TRUE;
+        return TRUE;
+      }
+    }
+  }
+  elseif ($operation == 'users') {
+    if (is_null($access_id)) {
+      if ($roles['manager'] || $roles['administer']) {
+        $access[$access_id] = TRUE;
+        return TRUE;
+      }
+    }
+  }
+
+  if (is_array($access_id)) {
+    foreach ($access_ids as $id) {
+      $access[$id] = FALSE;
+      $processed[$id] = FALSE;
+    }
+
+    return $processed;
+  }
+
+  $access[$access_id] = FALSE;
   return FALSE;
 }
 

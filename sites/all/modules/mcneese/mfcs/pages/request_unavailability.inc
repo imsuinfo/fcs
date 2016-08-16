@@ -107,7 +107,7 @@ function mfcs_request_unavailability_0_rooms_page() {
 
   $is_manager = user_access('mfcs manage', $user);
   $is_administer = user_access('mfcs administer', $user);
-  $can_troubleshoot = mfcs_page_request_access('troubleshoot', NULL, $user);
+  $can_troubleshoot = mfcs_page_generic_access('troubleshoot', NULL, $user);
 
   $items = mfcs_unavailability_rooms();
   if ($items === FALSE) {
@@ -438,7 +438,7 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
   $is_reviewer = user_access('mfcs manage', $user);
   $is_manager = user_access('mfcs manage', $user);
   $is_administer = user_access('mfcs administer', $user);
-  $can_troubleshoot = mfcs_page_request_access('troubleshoot', NULL, $user);
+  $can_troubleshoot = mfcs_page_generic_access('troubleshoot', NULL, $user);
 
   if (is_null($room_id)) {
     $can_create = FALSE;
@@ -826,7 +826,7 @@ function mfcs_request_unavailability_0_page($year, $room_id, $unavailability_id)
   mfcs_add_canonical_headers('requests/unavailable-0/view/' . $year . '/' . $unavailable->room_id . '/' . $unavailability_id);
   drupal_set_title('' . $unavailable->year . " Room Unavailable: " . $unavailable->title);
 
-  $can_troubleshoot = mfcs_page_request_access('troubleshoot', NULL, $user);
+  $can_troubleshoot = mfcs_page_generic_access('troubleshoot', NULL, $user);
 
   $markup = '<div id="mfcs-unavailable_0-view-page" class="mfcs-unavailable_0-view-page">';
 
@@ -975,7 +975,7 @@ function mfcs_request_unavailability_0_copy_form($form, &$form_state, $year, $ro
     $is_administer = TRUE;
   }
 
-  $can_troubleshoot = mfcs_page_request_access('troubleshoot', NULL, $user);
+  $can_troubleshoot = mfcs_page_generic_access('troubleshoot', NULL, $user);
 
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
@@ -1423,7 +1423,7 @@ function mfcs_request_unavailability_0_edit_form($form, &$form_state, $year, $ro
     $is_administer = TRUE;
   }
 
-  $can_troubleshoot = mfcs_page_request_access('troubleshoot', NULL, $user);
+  $can_troubleshoot = mfcs_page_generic_access('troubleshoot', NULL, $user);
 
   $unavailable = NULL;
   if (!is_null($unavailability_id)) {
@@ -2175,7 +2175,7 @@ function mfcs_request_unavailability_0_delete_form($form, &$form_state, $year, $
     drupal_exit();
   }
 
-  $can_troubleshoot = mfcs_page_request_access('troubleshoot', NULL, $user);
+  $can_troubleshoot = mfcs_page_generic_access('troubleshoot', NULL, $user);
 
   drupal_set_title("Delete " . $unavailable->year . " Unavailability: " . $unavailable->title);
 

@@ -1584,7 +1584,7 @@ function mfcs_ajax_email_log_0_list() {
     exit();
   }
 
-  $may_resend_log = mfcs_page_request_access('email_log-resend');
+  $may_resend_log = mfcs_page_generic_access('email_log-resend');
 
   $response['data'] = array();
   if (!empty($email_logs)) {

@@ -223,7 +223,7 @@ function mfcs_request_email_log_0_form($form, &$form_state, $page_number = NULL)
   // Results is needed and therefore must not be FALSE, unsetting it will default to TRUE.
   unset($options['results']);
 
-  $may_resend_log = mfcs_page_request_access('email_log-resend');
+  $may_resend_log = mfcs_page_generic_access('email_log-resend');
 
   $rows = array();
   foreach ($email_logs as $id => $email_log) {
@@ -754,7 +754,7 @@ function mfcs_request_email_log_0_view_page($id) {
   }
 
   // Operations section, where 'resend' and 'forward' links may exist.
-  $may_resend_log = mfcs_page_request_access('email_log-resend');
+  $may_resend_log = mfcs_page_generic_access('email_log-resend');
 
   if ($may_resend_log) {
     $fieldset = array(
