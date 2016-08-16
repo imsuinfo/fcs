@@ -1549,9 +1549,9 @@ function mfcs_miscellaneous_check_requests($request_id = NULL, $problem_code = N
     if (is_array($results) && !empty($results)) {
       foreach ($results as $result) {
         $reason = 'Scheduling Conflict in ';
-        $reason .= check_plain($result['room']['human_name']) . ' of ';
-        $reason .= check_plain($result['building']['human_name']) . ' for ';
-        $reason .= check_plain(date("l, F j, Y", $result['date'])) . ' with requests: ';
+        $reason .= $result['room']['human_name'] . ' of ';
+        $reason .= $result['building']['human_name'] . ' for ';
+        $reason .= date("l, F j, Y", $result['date']) . ' with requests: ';
 
         $processed = FALSE;
         foreach ($result['conflict'] as $conflict_id => $conflict_data) {
@@ -1641,7 +1641,7 @@ function mfcs_miscellaneous_check_requests($request_id = NULL, $problem_code = N
       foreach ($results as $result) {
         $reason = 'The venue coordinator ';
         $reason .= $result['coordinator']['first_name'] . ' ' . $result['coordinator']['last_name'];
-        $reason .= ' [id: ' . check_plain($result['coordinator']['user_id']) . ']';
+        $reason .= ' [id: ' . $result['coordinator']['user_id'] . ']';
 
         if ($result['coordinator']['user_id']['status'] == 0) {
           $reason .= ' account is disabled.';
@@ -1764,7 +1764,7 @@ function mfcs_miscellaneous_check_requests($request_id = NULL, $problem_code = N
           else {
             $processed = TRUE;
           }
-          $reason .= check_plain($field_name) . ' (cache = ' . check_plain($field_data['cache']) . ' vs real = ' . check_plain($field_data['real']) . ')';
+          $reason .= $field_name . ' (cache = ' . $field_data['cache'] . ' vs real = ' . $field_data['real'] . ')';
         }
         unset($processed);
         unset($field_name);
