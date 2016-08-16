@@ -4771,6 +4771,8 @@ function mfcs_sync_banner_to_local($transaction = NULL, $user = NULL, $message_o
     return FALSE;
   }
 
+  gc_collect_cycles();
+
 
   $rows = mfcs_oracle_select('select distinct role from ucs.msu_event_role');
 
@@ -4832,6 +4834,8 @@ function mfcs_sync_banner_to_local($transaction = NULL, $user = NULL, $message_o
       return FALSE;
     }
   }
+
+  gc_collect_cycles();
 
   $result = mfcs_sync_banner_to_local_classes();
   if ($result === FALSE) {
