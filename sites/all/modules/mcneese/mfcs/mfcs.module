@@ -5189,7 +5189,7 @@ function mfcs_sync_banner_to_local_classes() {
         }
 
         foreach ($banner_to_local_weekdays as $weekday => $banner_weekday) {
-          if ($processed[$weekday] == TRUE) {
+          if (array_key_exists($weekday, $processed) && $processed[$weekday] == TRUE) {
             continue;
           }
           $processed[$weekday] = TRUE;
