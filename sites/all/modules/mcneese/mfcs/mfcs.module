@@ -3664,18 +3664,6 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $append_
   }
   unset($bannerless_exception_role);
 
-  $reviewer_exception = NULL;
-  $reviewer_exception_role = user_role_load_by_name('reviewer exception');
-  if (isset($reviewer_exception_role->rid) && array_key_exists($reviewer_exception_role->rid, $user_roles)) {
-    $reviewer_role = user_role_load_by_name('reviewer');
-    if (isset($reviewer_role->rid)) {
-      $reviewer_exception = array_key_exists($reviewer_role->rid, $user_roles);
-    }
-    unset($reviewer_role);
-  }
-
-  unset($reviewer_exception_role);
-
   // load the mfcs user-specific problem data as a baseline to make changes to.
   $mfcs_users = mfcs_load_users($user->uid, FALSE, ($user->status == 0));
   $problems_original = MFCS_USER_PROBLEM_NONE;
@@ -4196,10 +4184,16 @@ function mfcs_process_user_banner_roles($user, &$problems, $settings = array()) 
     unset($mapping);
   }
 
+  // determine if the user is a reviewer exception
+  $reviewer_exception = FALSE;
+  if (array_key_exists($reviewer_exception_role->rid, $processed_roles)) {
+    $reviewer_exception = TRUE;
+  }
+
   // if the (non-admin) user is a venue or room coordinator, then add/remove reviewer role as necessary.
   if (empty($user_banner['role'])) {
     // if the user has no banner roles, is not a manager, and is not a reviewer exception, then do not allow the user to have reviewer or requester roles (bannerless exception and administrators cannot reach this point).
-    if (!$is_manager && !array_key_exists($reviewer_exception_role->rid, $processed_roles)) {
+    if (!$is_manager && !$reviewer_exception) {
       unset($processed_roles[$reviewer_role->rid]);
       unset($processed_roles[$requester_role->rid]);
     }
@@ -4214,32 +4208,32 @@ function mfcs_process_user_banner_roles($user, &$problems, $settings = array()) 
   }
 
 
-  // if the user can proxy as another account, then they need the reviewer role (but make no changes if the user is a manager).
-  if (!$is_manager) {
-    $can_proxy = FALSE;
-    $proxy_accounts = mfcs_get_proxy_venue_coordinators(array('mpvc.user_id' => $primary_account_id));
+  // if the user can proxy as another account, then they need the reviewer role (but make no changes if the user is a manager or is a reviewer exception).
+  if (!$is_manager && !$reviewer_exception) {
+    $can_review = FALSE;
+    $proxy_accounts = mfcs_get_proxy_venue_coordinators(array('mpvc.proxy_id' => $primary_account_id));
     if (!empty($proxy_accounts['results'])) {
       $processed_roles[$reviewer_role->rid] = $reviewer_role->rid;
-      $can_proxy = TRUE;
+      $can_review = TRUE;
     }
-  }
 
-
-  // Alter reviewer role settings for users without 'manager' and 'reviewer exception' roles.
-  if (!$is_manager && !array_key_exists($reviewer_exception_role->rid, $processed_roles)) {
-    $assigned_as_reviewer = FALSE;
+    // Alter reviewer role settings for users without 'manager' and 'reviewer exception' roles.
     $reviewers = mfcs_get_reviewers(array('mr.user_id' => $primary_account_id, 'mr.disabled' => 0));
     if (!empty($reviewers['results'])) {
-      $assigned_as_reviewer = TRUE;
+      $can_review = TRUE;
     }
 
     $all_coordinators = mfcs_load_room_coordinators(NULL, TRUE);
-    if (array_key_exists($primary_account_id, $all_coordinators) || $assigned_as_reviewer) {
-      if (!array_key_exists($reviewer_role->rid, $processed_roles)) {
-        $processed_roles[$reviewer_role->rid] = $reviewer_role->rid;
+    if (array_key_exists($primary_account_id, $all_coordinators)) {
+      if (array_key_exists($reviewer_role->rid, $processed_roles)) {
+        $can_review = TRUE;
       }
     }
-    elseif (!$can_proxy) {
+
+    if ($can_review) {
+      $processed_roles[$reviewer_role->rid] = $reviewer_role->rid;
+    }
+    else {
       if (array_key_exists($reviewer_role->rid, $processed_roles)) {
         unset($processed_roles[$reviewer_role->rid]);
 
