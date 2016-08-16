@@ -534,15 +534,15 @@ function mfcs_request_users_0_view_page($user_id) {
     $special = '<div class="view_user-item view_user-item-roles-special"><span class="item-information item-information-roles-special">No roles assigned</span></div>';
   }
 
-  $administer = NULL;
+  $administer_text = NULL;
   foreach ($roles_administer as $role_id => $role) {
     if (array_key_exists($role_id, $account->roles)) {
-      $administer .= '<div class="view_user-item view_user-item-roles-administer"><span class="item-information item-information-roles-administer">' . $role . '</span></div>';
+      $administer_text .= '<div class="view_user-item view_user-item-roles-administer"><span class="item-information item-information-roles-administer">' . $role . '</span></div>';
     }
   }
   unset($role);
-  if (is_null($administer)) {
-    $administer = '<div class="view_user-item view_user-item-roles-administer"><span class="item-information item-information-roles-administer">No roles assigned</span></div>';
+  if (is_null($administer_text)) {
+    $administer_text = '<div class="view_user-item view_user-item-roles-administer"><span class="item-information item-information-roles-administer">No roles assigned</span></div>';
   }
 
   $primary = 'This is the <strong>Primary</strong> account.';
@@ -598,6 +598,75 @@ function mfcs_request_users_0_view_page($user_id) {
     $banner_information = '<div class="view_user-item view_user-item-roles-no_banner_id">No Banner ID assigned to this account.</div>';
   }
 
+  $proxy_information = NULL;
+  $proxy_accounts = mfcs_get_proxy_venue_coordinators(array('mpvc.proxy_id' => $account->uid));
+  if (!empty($proxy_accounts['results'])) {
+    $name_information = NULL;
+    foreach ($proxy_accounts['results'] as $proxy_account) {
+      if (!isset($proxy_account->user_id)) continue;
+      $proxy_user = user_load($proxy_account->user_id);
+
+      if (is_object($proxy_user)) {
+        $generated_name = mfcs_generate_form_user_name($proxy_user);
+
+        if ($manager || $administer) {
+          $name_information .= '<div class="view_user-item-proxy-item view_user-item-proxy-as-item"><a href="' . $base_path . 'requests/users-0/view/' . $proxy_user->uid . $url_arguments . '" class="view_user-item-proxy-as-item no_print_links_as_link" title="View user information">' . $generated_name . '</a></div>';
+        }
+        else {
+          $name_information .= '<div class="view_user-item-proxy-item view_user-item-proxy-as-item">' . $generated_name . '</div>';
+        }
+      }
+    }
+    unset($proxy_account);
+    unset($proxy_user);
+
+    if (!is_null($name_information)) {
+      $proxy_information .= '<div class="view_user-item view_user-item-proxy-as">';
+      $proxy_information .= '<div class="view_user-item-label view_user-item-proxy-as-label">May Proxy As:</div>';
+      $proxy_information .= $name_information;
+      $proxy_information .= '</div>';
+    }
+    unset($name_information);
+  }
+
+  $proxy_accounts = mfcs_get_proxy_venue_coordinators(array('mpvc.user_id' => $account->uid));
+  if (!empty($proxy_accounts['results'])) {
+    $name_information = NULL;
+    foreach ($proxy_accounts['results'] as $proxy_account) {
+      if (!isset($proxy_account->proxy_id)) continue;
+      $proxy_user = user_load($proxy_account->proxy_id);
+
+      if (is_object($proxy_user)) {
+        $generated_name = mfcs_generate_form_user_name($proxy_user);
+
+        if ($manager || $administer) {
+          $name_information .= '<div class="view_user-item-proxy-item view_user-item-proxy-by-item"><a href="' . $base_path . 'requests/users-0/view/' . $proxy_user->uid . $url_arguments . '" class="view_user-item-proxy-by-item no_print_links_as_link" title="View user information">' . $generated_name . '</a></div>';
+        }
+        else {
+          $name_information .= '<div class="view_user-item-proxy-item view_user-item-proxy-by-item">' . $generated_name . '</div>';
+        }
+      }
+    }
+    unset($proxy_account);
+    unset($proxy_user);
+
+    if (!is_null($name_information)) {
+      if (!is_null($proxy_information)) {
+        $proxy_information .= '<br>';
+      }
+
+      $proxy_information .= '<div class="view_user-item view_user-item-proxy-by">';
+      $proxy_information .= '<div class="view_user-item-label view_user-item-proxy-by-label">Is Proxied By:</div>';
+      $proxy_information .= $name_information;
+      $proxy_information .= '</div>';
+    }
+    unset($name_information);
+  }
+
+  if (is_null($proxy_information)) {
+    $proxy_information = '<div class="view_user-item view_user-item-proxy-none">Not a proxy and has no proxies.</div>';
+  }
+
   // drupal only stores the account creation, so a custom field has been added to store when the account was last changed.
   // because it is non-standard, fallback to the account creation date in case the update data is not present.
   $updated = $account->created;
@@ -640,6 +709,11 @@ function mfcs_request_users_0_view_page($user_id) {
   $markup .= $banner_information;
   $markup .= '</div>';
 
+  $markup .= '<div class="view_user-group view_user-group-proxy_information">';
+  $markup .= '<h3 class="view_user-group-header view_user-group-header-proxy_information">Proxy Information</h3>';
+  $markup .= $proxy_information;
+  $markup .= '</div>';
+
   $markup .= '<br>';
 
   $markup .= '<div class="view_user-group view_user-group-roles-basic">';
@@ -659,7 +733,7 @@ function mfcs_request_users_0_view_page($user_id) {
 
   $markup .= '<div class="view_user-group view_user-group-roles-administer">';
   $markup .= '<h3 class="view_user-group-header view_user-group-header-roles-administer">Administration Roles</h3>';
-  $markup .= $administer;
+  $markup .= $administer_text;
   $markup .= '</div>';
 
   if ($manager || $administer) {
