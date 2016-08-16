@@ -469,24 +469,39 @@ function mfcs_request_troubleshoot_0_form_submit($form, &$form_state) {
 
     $time_stop = microtime(TRUE);
     $time_elapsed = $time_stop - $time_start;
+    $time_elapsed_floor = floor($time_stop - $time_start);
 
-    $time_minutes = floor($time_elapsed / 60);
-    $time_seconds = ceil($time_elapsed - $time_minutes);
+    $time_hours = floor($time_elapsed_floor / 3600);
+    $time_minutes = floor(($time_elapsed_floor - ($time_hours * 60)) / 60);
+    $time_seconds = ceil($time_elapsed_floor - ($time_minutes * 60));
+    $time_microseconds = floor(($time_elapsed - $time_elapsed_floor) * 1000000);
 
-    if ($time_minutes < 0) {
-      $time_minutes = 0;
+    if ($time_hours > 0) {
+      $time_text = 'in @hours hours, @minutes minutes, and @seconds seconds';
+      $arguments = array('@hours' => $time_hours, '@minutes' => $time_minutes, '@seconds' => $time_seconds);
     }
-
-    if ($time_seconds < 0) {
-      $time_seconds = 0;
+    elseif ($time_minutes > 0) {
+      $time_text = 'in @minutes minutes and @seconds seconds';
+      $arguments = array('@minutes' => $time_minutes, '@seconds' => $time_seconds);
+    }
+    elseif ($time_seconds > 0) {
+      $time_text = 'in @seconds seconds';
+      $arguments = array('@seconds' => $time_seconds);
+    }
+    else {
+      $time_text = 'in @microseconds microseconds';
+      $arguments = array('@microseconds' => $time_microseconds);
     }
 
     if ($result) {
-      drupal_set_message(t($label . " completed in @minutes minutes and @seconds seconds.", array('@minutes' => $time_minutes, '@seconds' => $time_seconds)));
+      drupal_set_message(t($label . ' completed ' . $time_text . '.', $arguments));
     }
     else {
-      drupal_set_message(t($label . " completed with errors in @minutes minutes and @seconds seconds.", array('@minutes' => $time_minutes, '@seconds' => $time_seconds)), 'warning');
-      watchdog(MFCS_WATCHDOG_ID, $label . ", started by @user (@user_id) completed with errors in @minutes minutes and @seconds seconds.", array('@minutes' => $time_minutes, '@seconds' => $time_seconds, '@user' => $user->name, '@user_id' => $user->uid), WATCHDOG_WARNING);
+      drupal_set_message(t($label . ' completed with errors ' . $time_text . '.', $arguments), 'warning');
+
+      $arguments['@user'] = $user->name;
+      $arguments['@user_id'] = $user->uid;
+      watchdog(MFCS_WATCHDOG_ID, $label . 'started by @user (@user_id) completed with errors ' . $time_text . '.', $arguments . '.', $arguments, WATCHDOG_WARNING);
     }
   }
   catch (Error $e) {
