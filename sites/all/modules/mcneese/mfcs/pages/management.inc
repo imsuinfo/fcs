@@ -116,7 +116,9 @@ function mfcs_management_page() {
       'class' => array(
       ),
     );
+  }
 
+  if ($requester || $reviewer || $manager || $administer) {
     $c_1 = count($items_1);
     $c_2 = count($items_2);
     if ($c_1 == $c_2) {
@@ -129,14 +131,24 @@ function mfcs_management_page() {
       $items_array = &$items_1;
     }
 
-    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/users-0/list' . $url_arguments . '" class="item-link">Manage Users</a></h4>';
-    $help = '<div class="item-description inline-block">View, add, delete, and otherwise manage users.</div>';
+    if ($manager || $administer) {
+      $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/users-0/list' . $url_arguments . '" class="item-link">Manage Users</a></h4>';
+      $help = '<div class="item-description inline-block">View, add, delete, and otherwise manage users.</div>';
+    }
+    else {
+      $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/users-0/list' . $url_arguments . '" class="item-link">View Users</a></h4>';
+      $help = '<div class="item-description inline-block">View your user accounts.</div>';
+    }
+
+
     $items_array[] = array(
       'data' => $link . '<br>' . $help,
       'class' => array(
       ),
     );
+  }
 
+  if ($manager || $administer) {
     $c_1 = count($items_1);
     $c_2 = count($items_2);
     if ($c_1 == $c_2) {

@@ -1174,12 +1174,53 @@ function mfcs_page_generic_access($operation = NULL, $access_id = NULL, $user = 
       }
     }
   }
-  elseif ($operation == 'users') {
+  elseif ($operation == 'users-list') {
+    if (is_null($access_id)) {
+      if ($roles['requester'] || $roles['reviewer'] || $roles['manager'] || $roles['administer']) {
+        $access[$access_id] = TRUE;
+        return TRUE;
+      }
+    }
+  }
+  elseif ($operation == 'users-view') {
+    if ($roles['manager'] || $roles['administer']) {
+      $access[$access_id] = TRUE;
+      return TRUE;
+    }
+
+    if (is_null($access_id)) {
+      if ($roles['requester'] || $roles['reviewer']) {
+        $access[$access_id] = TRUE;
+        return TRUE;
+      }
+    }
+    else {
+      if ($access_id == $user->uid) {
+        $access[$access_id] = TRUE;
+        return TRUE;
+      }
+      else {
+        $user_ids = mfcs_get_related_user_ids_from_user_banner_id($user);
+        if (is_array($user_ids) && array_key_exists($access_id, $user_ids)) {
+          $access[$access_id] = TRUE;
+          return TRUE;
+        }
+        unset($user_ids);
+      }
+    }
+  }
+  elseif ($operation == 'users-add') {
     if (is_null($access_id)) {
       if ($roles['manager'] || $roles['administer']) {
         $access[$access_id] = TRUE;
         return TRUE;
       }
+    }
+  }
+  elseif ($operation == 'users-edit') {
+    if ($roles['manager'] || $roles['administer']) {
+      $access[$access_id] = TRUE;
+      return TRUE;
     }
   }
 
@@ -12711,6 +12752,56 @@ function mfcs_find_requests_with_requester_id($user_id, $search_revision = FALSE
   }
 
   return $found;
+}
+
+/**
+ * Returns an array of user ids associated with the given users banner id.
+ *
+ * @param object|int $user
+ *   If an integer, then this is the user id of the user.
+ *   If an object, then this is the user object of the user.
+ *
+ * @param array|bool
+ *   An array of user ids is returned on success.
+ *   If there is no banner id, the current user's id is still present in the array.
+ *   FALSE is returned on error.
+ */
+function mfcs_get_related_user_ids_from_user_banner_id($user) {
+  if (cf_is_integer($user) && $user != 0) {
+    $user = user_load($user);
+  }
+
+  if (!is_object($user)) {
+    cf_error::invalid_object('user');
+    return FALSE;
+  }
+
+  $user_ids = array($user->uid => $user->uid);
+
+  $banner_id = NULL;
+  if (!empty($user->field_user_banner_id['und'][0]['value']) && is_numeric($user->field_user_banner_id['und'][0]['value'])) {
+    $banner_id = $user->field_user_banner_id['und'][0]['value'];
+    if (is_numeric($banner_id)) {
+      $banner_id = (int) $banner_id;
+    }
+  }
+
+  if (!is_null($banner_id)) {
+    $associated_users = mfcs_users_load_banner_id_to_user_id($banner_id);
+    $banner_id = $user->field_user_banner_id['und'][0]['value'];
+    if (isset($associated_users['banner'][$banner_id]['others']) && is_array($associated_users['banner'][$banner_id]['others'])) {
+      foreach ($associated_users['banner'][$banner_id]['others'] as $other) {
+        $other_id = (int) $other['user_id'];
+
+        if ($other_id > 0) {
+          $user_ids[$other_id] = $other_id;
+        }
+      }
+      unset($other);
+    }
+  }
+
+  return $user_ids;
 }
 
 /**

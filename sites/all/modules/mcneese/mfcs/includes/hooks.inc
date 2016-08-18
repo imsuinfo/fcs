@@ -1710,7 +1710,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'file' => 'request_users.inc',
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_page_generic_access',
-    'access arguments' => array('users'),
+    'access arguments' => array('users-list'),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
   );
@@ -1723,7 +1723,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'file' => 'request_users.inc',
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_page_generic_access',
-    'access arguments' => array('users'),
+    'access arguments' => array('users-list'),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
   );
@@ -1735,7 +1735,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'file' => 'ajax-management.inc',
     'file path' => $module_path . '/includes',
     'access callback' => 'mfcs_page_generic_access',
-    'access arguments' => array('users'),
+    'access arguments' => array('users-list'),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
   );
@@ -1748,7 +1748,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'file' => 'ajax-management.inc',
     'file path' => $module_path . '/includes',
     'access callback' => 'mfcs_page_generic_access',
-    'access arguments' => array('users'),
+    'access arguments' => array('users-list'),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
   );
@@ -1761,7 +1761,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'file' => 'request_users.inc',
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_page_generic_access',
-    'access arguments' => array('users'),
+    'access arguments' => array('users-add'),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
   );
@@ -1774,7 +1774,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'file' => 'request_users.inc',
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_page_generic_access',
-    'access arguments' => array('users'),
+    'access arguments' => array('users-view', 3),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
   );
@@ -1787,7 +1787,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'file' => 'request_users.inc',
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_page_generic_access',
-    'access arguments' => array('users'),
+    'access arguments' => array('users-edit', 3),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
   );
