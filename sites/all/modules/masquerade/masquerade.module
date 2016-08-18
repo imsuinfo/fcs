@@ -634,12 +634,22 @@ function masquerade_block_1_validate($form, &$form_state) {
   //unset($form);
   $name = $form_state['values']['masquerade_user_field'];
   $allowed = FALSE;
+  $disabled = FALSE;
   $to_uid = db_select('users', 'u')
     ->fields('u', array('uid'))
     ->condition('u.name', $name, '=')
+    ->condition('u.status', 0, '<>')
     ->execute()
     ->fetchField();
-  if ($to_uid !== FALSE) {
+  if ($to_uid === FALSE) {
+    $disabled = db_select('users', 'u')
+      ->fields('u', array('uid'))
+      ->condition('u.name', $name, '=')
+      ->condition('u.status', 0, '=')
+      ->execute()
+      ->fetchField();
+  }
+  else {
     $allowed = user_access('masquerade as any user') ||
                db_select('masquerade_users', 'm')
                   ->fields('m', array('uid_to'))
@@ -652,7 +662,12 @@ function masquerade_block_1_validate($form, &$form_state) {
     form_set_error('masquerade_user_field', t('You are already masquerading. Please <a href="@unswitch">switch back</a> to your account to masquerade as another user.', array('@unswitch' => url('masquerade/unswitch', array('query' => array('token' => drupal_get_token('masquerade/unswitch')))))));
   }
   if ($allowed === FALSE) {
-    form_set_error('masquerade_user_field', t('You are not allowed to masquerade as the selected user.'));
+    if ($disabled) {
+      form_set_error('masquerade_user_field', t('You are not allowed to masquerade as the selected user because the account is locked.'));
+    }
+    else {
+      form_set_error('masquerade_user_field', t('You are not allowed to masquerade as the selected user.'));
+    }
   }
 
   if ($name != variable_get('anonymous', t('Anonymous')) && module_exists('alt_login')) {
