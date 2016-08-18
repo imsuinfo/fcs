@@ -291,7 +291,7 @@ function mfcs_page_request_access_operation_view(&$request_ids, &$processed, &$a
     MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED,
   );
 
-  if ($roles['requester'] || $roles['manager'] || $roles['administer']) {
+  if (!$roles['reviewer'] && ($roles['requester'] || $roles['manager'] || $roles['administer'])) {
     if (array_key_exists(NULL, $request_ids)) {
       $access[NULL] = TRUE;
       $processed[NULL] = TRUE;

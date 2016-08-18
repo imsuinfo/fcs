@@ -8247,23 +8247,34 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
       }
       // always show accepted requests when there are no restrictions.
       elseif ($review_restrictions == MFCS_REVIEW_RESTRICTION_NONE) {
-        // if there are no conditions, then don't add any!
-        if (!is_null($or)) {
-          $and = db_and();
-          if ($cancelled === MFCS_LOAD_CANCELLED_REQUEST || $cancelled === MFCS_LOAD_CANCELLED_ALL) {
-            $subor = db_or();
-            $subor->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
-            $subor->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED);
-            $and->condition($subor);
-            unset($subor);
-          }
-          else {
-            $and->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
-          }
-          $and->condition('mer.step', MFCS_REVIEW_STEP_COMPLETED);
-          $or->condition($and);
-          unset($and);
+        if (is_null($or)) {
+          $or = db_or();
         }
+
+        if (!$manager && !$administer) {
+          $proxy_as = mfcs_get_proxy_venue_coordinator($user->uid);
+          if (!is_array($proxy_as)) {
+            $proxy_as = array();
+          }
+          $proxy_as[$user->uid] = (int) $user->uid;
+
+          $or->condition('mer.venue_coordinator', $proxy_as, 'IN');
+        }
+
+        $and = db_and();
+        if ($cancelled === MFCS_LOAD_CANCELLED_REQUEST || $cancelled === MFCS_LOAD_CANCELLED_ALL) {
+          $subor = db_or();
+          $subor->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
+          $subor->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED);
+          $and->condition($subor);
+          unset($subor);
+        }
+        else {
+          $and->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
+        }
+        $and->condition('mer.step', MFCS_REVIEW_STEP_COMPLETED);
+        $or->condition($and);
+        unset($and);
       }
 
       if (!is_null($or)) {
