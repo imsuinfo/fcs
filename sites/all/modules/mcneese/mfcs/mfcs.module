@@ -2288,8 +2288,9 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
     return FALSE;
   }
 
-  // managers get special review access.
-  $manager = user_access('mfcs manage', $user);
+  // managers and administers get special review access.
+  $is_manager = user_access('mfcs manage', $user);
+  $is_administer = user_access('mfcs administer', $user);
 
   $request_ids = $request_id;
   if (!is_array($request_id)) {
@@ -2354,7 +2355,9 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
   $show_step_manager = array(
     MFCS_REVIEW_STEP_VENUE_AVAILABLE,
     MFCS_REVIEW_STEP_REVIEW,
+    MFCS_REVIEW_STEP_REQUIREMENTS,
     MFCS_REVIEW_STEP_FINAL_DECISION,
+    MFCS_REVIEW_STEP_COMPLETED,
   );
 
   $show_step_insurance = array(
@@ -2389,7 +2392,7 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
     $or = null;
 
     if ($review_restrictions == MFCS_REVIEW_RESTRICTION_REVIEW) {
-      if ($manager) {
+      if ($is_manager || $is_administer) {
         // Manager is allowed both venue coordinator and reviewer step review access.
         $query->condition('mer.step', $show_step_manager, 'IN');
         $query->condition('mer.status', $show_status_reviewer, 'IN');
@@ -2427,66 +2430,87 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
       }
     }
     elseif ($review_restrictions == MFCS_REVIEW_RESTRICTION_VIEW) {
-      if (is_null($or)) {
-        $or = db_or();
+      if ($is_manager || $is_administer) {
+        // Manager is allowed both venue coordinator and reviewer step review access.
+        $query->condition('mer.step', $show_step_manager, 'IN');
+        $query->condition('mer.status', $show_status_reviewer, 'IN');
       }
+      else {
+        if (is_null($or)) {
+          $or = db_or();
+        }
 
-      // always show accepted requests.
-      $or->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
+        // always show accepted requests.
+        $or->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
 
-      // accepted but cancelled requests need to be visible for telling clients that the request was cancelled.
-      $or->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED);
+        // accepted but cancelled requests need to be visible for telling clients that the request was cancelled.
+        $or->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED);
 
-      // always allow venue coordinator access. to view.
-      $or->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
+        // always allow venue coordinator access to view.
+        $or->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
 
-      // allow reviewer access to view if they are allowed to review the request at some point.
-      if (!empty($reviewer_settings['request_classifications'])) {
-        $and = db_and();
-        $and->condition('mer.classification', $reviewer_settings['request_classifications'], 'IN');
-        $and->condition('mer.status', $show_status_reviewer, 'IN');
+        // allow reviewer access to view if they are allowed to review the request at some point.
+        if (!empty($reviewer_settings['request_classifications'])) {
+          $and = db_and();
+          $and->condition('mer.classification', $reviewer_settings['request_classifications'], 'IN');
+          $and->condition('mer.status', $show_status_reviewer, 'IN');
 
-        $or->condition($and);
+          $or->condition($and);
+        }
       }
     }
     elseif ($review_restrictions == MFCS_REVIEW_RESTRICTION_COMMENT) {
-      if (is_null($or)) {
-        $or = db_or();
+      if ($is_manager || $is_administer) {
+        // Manager is allowed both venue coordinator and reviewer step review access.
+        $query->condition('mer.step', $show_step_manager, 'IN');
+        $query->condition('mer.status', $show_status_reviewer, 'IN');
       }
+      else {
+        if (is_null($or)) {
+          $or = db_or();
+        }
 
-      // allow venue coordinator for the request access to comment.
-      $or->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
+        // allow venue coordinator for the request access to comment.
+        $or->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
 
-      // allow requester for the request access to comment.
-      $or->condition('mer.user_id', $user->uid);
+        // allow requester for the request access to comment.
+        $or->condition('mer.user_id', $user->uid);
 
 
-      // allow reviewer access to comment if they are allowed to review the request at some point.
-      if (!empty($reviewer_settings['request_classifications'])) {
-        $or->condition('mer.classification', $reviewer_settings['request_classifications'], 'IN');
+        // allow reviewer access to comment if they are allowed to review the request at some point.
+        if (!empty($reviewer_settings['request_classifications'])) {
+          $or->condition('mer.classification', $reviewer_settings['request_classifications'], 'IN');
+        }
       }
     }
     elseif ($review_restrictions == MFCS_REVIEW_RESTRICTION_NONE) {
-      if (is_null($or)) {
-        $or = db_or();
+      if ($is_manager || $is_administer) {
+        // Manager is allowed both venue coordinator and reviewer step review access.
+        $query->condition('mer.step', $show_step_manager, 'IN');
+        $query->condition('mer.status', $show_status_reviewer, 'IN');
       }
+      else {
+        if (is_null($or)) {
+          $or = db_or();
+        }
 
-      // always show completed and accepted requests when there are no restrictions.
-      $or->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
+        // always show completed and accepted requests when there are no restrictions.
+        $or->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED);
 
-      // accepted but cancelled requests need to be visible for telling clients that the request was cancelled.
-      $or->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED);
+        // accepted but cancelled requests need to be visible for telling clients that the request was cancelled.
+        $or->condition('mer.status', MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED);
 
-      // always allow venue coordinator access.
-      $or->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
+        // always allow venue coordinator access.
+        $or->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
 
-      // allow reviewer access if they are allowed to review the request at some point.
-      if (!empty($reviewer_settings['request_classifications'])) {
-        $and = db_and();
-        $and->condition('mer.classification', $reviewer_settings['request_classifications'], 'IN');
-        $and->condition('mer.status', $show_status_comments_allowed, 'IN');
+        // allow reviewer access if they are allowed to review the request at some point.
+        if (!empty($reviewer_settings['request_classifications'])) {
+          $and = db_and();
+          $and->condition('mer.classification', $reviewer_settings['request_classifications'], 'IN');
+          $and->condition('mer.status', $show_status_comments_allowed, 'IN');
 
-        $or->condition($and);
+          $or->condition($and);
+        }
       }
     }
     else {
