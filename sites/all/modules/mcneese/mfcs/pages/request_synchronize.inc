@@ -246,12 +246,12 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = NUL
     );
 
     $row['created'] = array(
-      'data' => check_plain(date("Y/m/d h:i:s a", $item->created)),
+      'data' => check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS, $item->created)),
       'class' => $class_created,
     );
 
     $row['updated'] = array(
-      'data' => check_plain(date("Y/m/d h:i:s a", $item->updated)),
+      'data' => check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS, $item->updated)),
       'class' => $class_updated,
     );
 

@@ -650,7 +650,7 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
 
         if (!empty($holidays[$day_start])) {
           $holiday = reset($holidays[$day_start]);
-          drupal_set_message(t('Warning: <strong>@date</strong> may not available because of: <strong><a href="' . $base_path . 'requests/holiday-0/view/' . $holiday->year . '/' . $holiday->id . $url_arguments . '" title="View details about holiday.">@holiday</a></strong>.', array('@year' => date('Y', $holiday->date), '@date' => date('l, F j, Y', $holiday->date), '@holiday' => $holiday->title)), 'warning');
+          drupal_set_message(t('Warning: <strong>@date</strong> may not available because of: <strong><a href="' . $base_path . 'requests/holiday-0/view/' . $holiday->year . '/' . $holiday->id . $url_arguments . '" title="View details about holiday.">@holiday</a></strong>.', array('@year' => date('Y', $holiday->date), '@date' => date(MFCS_DATE_FORMAT_DATE, $holiday->date), '@holiday' => $holiday->title)), 'warning');
           unset($holiday);
         }
       }
@@ -669,7 +669,7 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
     // detect and report errors for invalid date combinations.
     foreach ($all_day as $datestamp => $key) {
       if (array_key_exists($datestamp, $partial_day)) {
-        $date_string = date("Y/m/d", $datestamp);
+        $date_string = date(MFCS_DATE_FORMAT_DATE, $datestamp);
         form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t("<strong>@date</strong> is set to all day, but there are also partial day times in use for that same day. Please use either all day or partial day times but not both.", array('@date' => $date_string)));
         $passed = FALSE;
       }
@@ -835,13 +835,13 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
 
       foreach ($nearby['before'] as $nearby_time => $nearby_value) {
         foreach ($nearby_value as $before_id => $before_title) {
-          drupal_set_message('<em>' . $room->building_name . " " . $room->room_name . "</em> has the following meeting within " . $minutes_range . " minutes before " . date("Y/m/d h:i a", $nearby_time) . ': <ul><li><a href="' . $base_path . 'requests/view-0/' . $before_id . '">' . $before_title . '</a></li></ul>', 'warning');
+          drupal_set_message('<em>' . $room->building_name . " " . $room->room_name . "</em> has the following meeting within " . $minutes_range . " minutes before " . date(MFCS_DATE_FORMAT_DATE_TIME, $nearby_time) . ': <ul><li><a href="' . $base_path . 'requests/view-0/' . $before_id . '">' . $before_title . '</a></li></ul>', 'warning');
         }
       }
 
       foreach ($nearby['after'] as $nearby_time => $nearby_value) {
         foreach ($nearby_value as $after_id => $after_title) {
-          drupal_set_message('<em>' . $room->building_name . " " . $room->room_name . "</em> has the following meeting within " . $minutes_range . " minutes after " . date("Y/m/d h:i a", $nearby_time) . ': <ul><li><a href="' . $base_path . 'requests/view-0/' . $after_id . '">' . $after_title . '</a></li></ul>', 'warning');
+          drupal_set_message('<em>' . $room->building_name . " " . $room->room_name . "</em> has the following meeting within " . $minutes_range . " minutes after " . date(MFCS_DATE_FORMAT_DATE_TIME, $nearby_time) . ': <ul><li><a href="' . $base_path . 'requests/view-0/' . $after_id . '">' . $after_title . '</a></li></ul>', 'warning');
         }
       }
 

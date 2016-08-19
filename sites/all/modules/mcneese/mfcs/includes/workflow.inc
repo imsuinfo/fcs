@@ -2494,21 +2494,21 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
   $standard_markup .= "<strong>Dates</strong>:";
 
   foreach ($request['dates']['date'] as $key => $date) {
-    $standard_content .= " - " . date("Y/m/d", $date->value);
+    $standard_content .= " - " . date(MFCS_DATE_FORMAT_DATE, $date->value);
     $standard_markup .= "<ul><li>";
 
     if ($date->cancelled == 1) {
       $standard_markup .= "<strike>";
     }
 
-    $standard_markup .= date("Y/m/d", $date->value);
+    $standard_markup .= date(MFCS_DATE_FORMAT_DATE, $date->value);
 
     if (!is_null($request['dates']['time_start'][$key]->value)) {
-      $standard_content .= " " . date("h:ia", $request['dates']['time_start'][$key]->value);
-      $standard_content .= " to " . date("h:ia", $request['dates']['time_stop'][$key]->value);
+      $standard_content .= " " . date(MFCS_DATE_FORMAT_TIME, $request['dates']['time_start'][$key]->value);
+      $standard_content .= " to " . date(MFCS_DATE_FORMAT_TIME, $request['dates']['time_stop'][$key]->value);
 
-      $standard_markup .= " " . date("h:ia", $request['dates']['time_start'][$key]->value);
-      $standard_markup .= " to " . date("h:ia", $request['dates']['time_stop'][$key]->value);
+      $standard_markup .= " " . date(MFCS_DATE_FORMAT_TIME, $request['dates']['time_start'][$key]->value);
+      $standard_markup .= " to " . date(MFCS_DATE_FORMAT_TIME, $request['dates']['time_stop'][$key]->value);
     }
 
     if ($date->cancelled == 1) {

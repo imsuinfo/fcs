@@ -486,7 +486,7 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
     }
     else {
       if (strtotime('midnight today', $date_start) == strtotime('midnight today', $date_stop)) {
-        $date = date('h:ia', $date_start) . ' to ' . date('h:ia', $date_stop) . ' on ' . date('l, F jS, Y', $date_start);
+        $date = date(MFCS_DATE_FORMAT_TIME, $date_start) . ' to ' . date(MFCS_DATE_FORMAT_TIME, $date_stop) . ' on ' . date('l, F jS, Y', $date_start);
       }
       elseif ($date_start != strtotime('midnight today', $date_start) || $date_stop != strtotime('midnight today', $date_stop)) {
         $date = date('h:ia l, F jS, Y', $date_start) . ' to<br>' . date('h:ia l, F jS, Y', $date_stop);
@@ -806,7 +806,7 @@ function mfcs_request_unavailability_0_page($year, $room_id, $unavailability_id)
   else {
     if (strtotime('midnight today', $unavailable->date_start) == strtotime('midnight today', $unavailable->date_stop)) {
       $date_label = 'Unavailable From:';
-      $date_value = date('h:ia', $unavailable->date_start) . ' to ' . date('h:ia', $unavailable->date_stop) . ' on ' . date('l, F jS, Y', $unavailable->date_start);
+      $date_value = date(MFCS_DATE_FORMAT_TIME, $unavailable->date_start) . ' to ' . date(MFCS_DATE_FORMAT_TIME, $unavailable->date_stop) . ' on ' . date('l, F jS, Y', $unavailable->date_start);
     }
     elseif ($unavailable->date_start != strtotime('midnight today', $unavailable->date_start) || $unavailable->date_stop != strtotime('midnight today', $unavailable->date_stop)) {
       $date_label = 'Unavailable From:';
@@ -1602,17 +1602,17 @@ function mfcs_request_unavailability_0_edit_form($form, &$form_state, $year, $ro
     $date_start_day = date('Y-m-d', $unavailable->date_start);
 
     if ($unavailable->date_start != strtotime('midnight today', $unavailable->date_start)) {
-      $date_start_time = date('h:ia', $unavailable->date_start);
+      $date_start_time = date(MFCS_DATE_FORMAT_TIME, $unavailable->date_start);
     }
 
     if ($unavailable->date_start != $unavailable->date_stop) {
       if ($unavailable->date_stop < strtotime('midnight tomorrow', $unavailable->date_start)) {
-        $date_start_time = date('h:ia', $unavailable->date_start);
+        $date_start_time = date(MFCS_DATE_FORMAT_TIME, $unavailable->date_start);
       }
 
       $date_stop_day = date('Y-m-d', $unavailable->date_stop);
       if ($unavailable->date_stop != strtotime('midnight today', $unavailable->date_stop)) {
-        $date_stop_time = date('h:ia', $unavailable->date_stop);
+        $date_stop_time = date(MFCS_DATE_FORMAT_TIME, $unavailable->date_stop);
       }
     }
   }
@@ -1655,7 +1655,7 @@ function mfcs_request_unavailability_0_edit_form($form, &$form_state, $year, $ro
     '#size' => 8,
     '#maxlength' => 8,
     '#description' => "E.g, 12:31pm",
-    '#expected_format' => array('date' => "h:ia"),
+    '#expected_format' => array('date' => MFCS_DATE_FORMAT_TIME),
     '#required' => FALSE,
     '#default_value' => $date_start_time,
   );
@@ -1698,7 +1698,7 @@ function mfcs_request_unavailability_0_edit_form($form, &$form_state, $year, $ro
     '#size' => 8,
     '#maxlength' => 8,
     '#description' => "E.g, 12:31pm",
-    '#expected_format' => array('date' => "h:ia"),
+    '#expected_format' => array('date' => MFCS_DATE_FORMAT_TIME),
     '#required' => FALSE,
     '#default_value' => $date_stop_time,
   );
@@ -2236,21 +2236,21 @@ function mfcs_request_unavailability_0_delete_form($form, &$form_state, $year, $
   $form['unavailable']['confirmation']['#markup'] .= '<strong>Year</strong>: ' . $unavailable->year . '<br>';
 
   if ($unavailable->date_start == $unavailable->date_stop) {
-    $form['unavailable']['confirmation']['#markup'] .= '<strong>Start Date</strong>: ' . date('l, F j, Y', $unavailable->date_start) . ' (All Day)<br>';
+    $form['unavailable']['confirmation']['#markup'] .= '<strong>Start Date</strong>: ' . date(MFCS_DATE_FORMAT_DATE, $unavailable->date_start) . ' (All Day)<br>';
   }
   else {
     if ($unavailable->date_start == strtotime('midnight today', $unavailable->date_start)) {
-      $form['unavailable']['confirmation']['#markup'] .= '<strong>Start Date</strong>: ' . date('l, F j, Y', $unavailable->date_start) . '<br>';
+      $form['unavailable']['confirmation']['#markup'] .= '<strong>Start Date</strong>: ' . date(MFCS_DATE_FORMAT_DATE, $unavailable->date_start) . '<br>';
     }
     else {
-      $form['unavailable']['confirmation']['#markup'] .= '<strong>Start Date</strong>: ' . date('h:ia l, F j, Y', $unavailable->date_start) . '<br>';
+      $form['unavailable']['confirmation']['#markup'] .= '<strong>Start Date</strong>: ' . date(MFCS_DATE_FORMAT_DATE_TIME, $unavailable->date_start) . '<br>';
     }
 
     if ($unavailable->date_stop == strtotime('midnight today', $unavailable->date_stop)) {
-      $form['unavailable']['confirmation']['#markup'] .= '<strong>Stop Date</strong>: ' . date('l, F j, Y', $unavailable->date_stop) . '<br>';
+      $form['unavailable']['confirmation']['#markup'] .= '<strong>Stop Date</strong>: ' . date(MFCS_DATE_FORMAT_DATE, $unavailable->date_stop) . '<br>';
     }
     else {
-      $form['unavailable']['confirmation']['#markup'] .= '<strong>Stop Date</strong>: ' . date('h:ia l, F j, Y', $unavailable->date_stop) . '<br>';
+      $form['unavailable']['confirmation']['#markup'] .= '<strong>Stop Date</strong>: ' . date(MFCS_DATE_FORMAT_DATE_TIME, $unavailable->date_stop) . '<br>';
     }
   }
   $form['unavailable']['confirmation']['#markup'] .= '<strong>Status</strong>: ' . ($unavailable->enabled == 1 ? 'Enabled' : 'Disabled') . '<br>';

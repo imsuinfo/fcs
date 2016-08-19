@@ -291,7 +291,7 @@ function mfcs_miscellaneous_nearby_requests($timestamp_start, $timestamp_stop, $
       $nearby_events['before'] = $results;
     }
     else {
-      watchdog(MFCS_WATCHDOG_ID, "An error occured while searching for nearby requests in room @room with status @status and range of @range seconds before @time.", array('@time' => date('Y/m/d h:i:s a', $timestamp_start), '@room' => $room, '@status' => $status, '@range' => $nearby_range_seconds), WATCHDOG_WARNING);
+      watchdog(MFCS_WATCHDOG_ID, "An error occured while searching for nearby requests in room @room with status @status and range of @range seconds before @time.", array('@time' => date(MFCS_DATE_FORMAT_DATE_TIME, $timestamp_start), '@room' => $room, '@status' => $status, '@range' => $nearby_range_seconds), WATCHDOG_WARNING);
     }
 
     // the stop range must look at start values to find nearby ranges.
@@ -321,18 +321,18 @@ function mfcs_miscellaneous_nearby_requests($timestamp_start, $timestamp_stop, $
       $nearby_events['after'] = $results;
     }
     else {
-      watchdog(MFCS_WATCHDOG_ID, "An error occured while searching for nearby requests in room @room with status @status and range of @range seconds after @time.", array('@time' => date('Y/m/d h:i:s a', $timestamp_stop), '@room' => $room, '@status' => $status, '@range' => $nearby_range_seconds), WATCHDOG_WARNING);
+      watchdog(MFCS_WATCHDOG_ID, "An error occured while searching for nearby requests in room @room with status @status and range of @range seconds after @time.", array('@time' => date(MFCS_DATE_FORMAT_DATE_TIME, $timestamp_stop), '@room' => $room, '@status' => $status, '@range' => $nearby_range_seconds), WATCHDOG_WARNING);
     }
   }
   catch (Error $e) {
     cf_error::on_exception($e);
-    watchdog(MFCS_WATCHDOG_ID, "While searching for nearby requests in room @room with status @status and range of @range seconds before @before or after @after, the following error eoccured: @error.", array('@before' => date('Y/m/d h:i:s a', $timestamp_start), '@after' => date('Y/m/d h:i:s a', $timestamp_stop), '@room' => $room, '@status' => $status, '@range' => $nearby_range_seconds, '@error' => $e->getMessage()), WATCHDOG_ERROR);
+    watchdog(MFCS_WATCHDOG_ID, "While searching for nearby requests in room @room with status @status and range of @range seconds before @before or after @after, the following error eoccured: @error.", array('@before' => date(MFCS_DATE_FORMAT_DATE_TIME, $timestamp_start), '@after' => date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS, $timestamp_stop), '@room' => $room, '@status' => $status, '@range' => $nearby_range_seconds, '@error' => $e->getMessage()), WATCHDOG_ERROR);
 
     return FALSE;
   }
   catch (Exception $e) {
     cf_error::on_exception($e);
-    watchdog(MFCS_WATCHDOG_ID, "While searching for nearby requests in room @room with status @status and range of @range seconds before @before or after @after, the following error eoccured: @error.", array('@before' => date('Y/m/d h:i:s a', $timestamp_start), '@after' => date('Y/m/d h:i:s a', $timestamp_stop), '@room' => $room, '@status' => $status, '@range' => $nearby_range_seconds, '@error' => $e->getMessage()), WATCHDOG_ERROR);
+    watchdog(MFCS_WATCHDOG_ID, "While searching for nearby requests in room @room with status @status and range of @range seconds before @before or after @after, the following error eoccured: @error.", array('@before' => date(MFCS_DATE_FORMAT_DATE_TIME, $timestamp_start), '@after' => date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS, $timestamp_stop), '@room' => $room, '@status' => $status, '@range' => $nearby_range_seconds, '@error' => $e->getMessage()), WATCHDOG_ERROR);
 
     return FALSE;
   }
@@ -1551,7 +1551,7 @@ function mfcs_miscellaneous_check_requests($request_id = NULL, $problem_code = N
         $reason = 'Scheduling Conflict in ';
         $reason .= $result['room']['human_name'] . ' of ';
         $reason .= $result['building']['human_name'] . ' for ';
-        $reason .= date("l, F j, Y", $result['date']) . ' with requests: ';
+        $reason .= date(MFCS_DATE_FORMAT_DATE, $result['date']) . ' with requests: ';
 
         $processed = FALSE;
         foreach ($result['conflict'] as $conflict_id => $conflict_data) {

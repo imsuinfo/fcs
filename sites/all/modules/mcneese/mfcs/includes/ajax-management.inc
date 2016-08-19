@@ -1087,7 +1087,7 @@ function mfcs_ajax_problems_0_users_list() {
 
       unset($taxonomy_id);
 
-      $row[7] = check_plain(date("Y/m/d h:i:s a", $problem->date));
+      $row[7] = check_plain(date(MFCS_DATE_FORMAT_DATE_TIME, $problem->date));
       $row[8] = '<a href="' . $base_path . 'requests/problems-0/users/user/' . $problem->user_id . $url_arguments . '" class="operation-link operation-link-view">View</a>' . $additional_operations;
 
       $response['data'][] = $row;
@@ -1332,7 +1332,7 @@ function mfcs_ajax_problems_0_requests_list($argument_1 = NULL) {
       $row[0] = '' . $problem->id;
       $row[1] = $problem_id;
       $row[2] = '' . $problem->request_id;
-      $row[3] = check_plain(date("Y/m/d h:i:s a", $problem->date));
+      $row[3] = check_plain(date(MFCS_DATE_FORMAT_DATE_TIME, $problem->date));
       $row[4] = (isset($problem->reason) ? check_plain($problem->reason) : '');
       $row[5] = (isset($problem->ignore) && $problem->ignore == 1 ? 'Yes' : 'No');
       $row[6] = '<a href="' . $base_path . 'requests/problems-0/requests/request/' . $problem->id . $url_arguments . '" class="operation-link operation-link-details">Details</a>';
@@ -1594,7 +1594,7 @@ function mfcs_ajax_email_log_0_list() {
       $row[0] = '' . $email_log->id;
       $row[1] = '' . $email_log->user_id;
       $row[2] = '<a href="' . $base_path . 'requests/users-0/view/' . $email_log->user_id . $url_arguments . '" class="user-link">' . check_plain($email_log->name) . '</a>';
-      $row[3] = check_plain(date("Y/m/d h:i:s a", $email_log->date));
+      $row[3] = check_plain(date(MFCS_DATE_FORMAT_DATE_TIME, $email_log->date));
 
       if (empty($email_log->destination_user_id)) {
         $row[4] = check_plain($email_log->destination);
@@ -1899,8 +1899,8 @@ function mfcs_ajax_synchronize_0_form() {
       $row[0] = '' . $item->id;
       $row[1] = '' . $item->user_id;
       $row[2] = '<a href="' . $base_path . 'requests/users-0/view/' . $item->user_id . $url_arguments . '" class="user-link">' . check_plain($item->name) . '</a>';
-      $row[3] = check_plain(date("Y/m/d h:i:s a", $item->created));
-      $row[4] = check_plain(date("Y/m/d h:i:s a", $item->updated));
+      $row[3] = check_plain(date(MFCS_DATE_FORMAT_DATE_TIME, $item->created));
+      $row[4] = check_plain(date(MFCS_DATE_FORMAT_DATE_TIME, $item->updated));
       $row[5] = check_plain($item->password);
       $row[6] = "Unknown";
       $row[7] = check_plain($item->address);

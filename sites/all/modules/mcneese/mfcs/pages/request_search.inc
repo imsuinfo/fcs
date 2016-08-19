@@ -992,7 +992,7 @@ function mfcs_request_search_0_form_validate_target($form, &$form_state, &$state
           form_set_error(implode('][', $path_array), t('@value is not a valid YYYY/MM/DD date.', array('@value' => $state['search'])));
         }
         else {
-          $state['search'] = date('Y/m/d', $search_day);
+          $state['search'] = date(MFCS_DATE_FORMAT_DATE, $search_day);
         }
 
         unset($search_date);
@@ -2557,7 +2557,7 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
     $location['targets'][$target_name][$target_delta]['search']['#type'] = 'textfield';
     $location['targets'][$target_name][$target_delta]['search']['#size'] = 8;
     $location['targets'][$target_name][$target_delta]['search']['#maxlength'] = 8;
-    $location['targets'][$target_name][$target_delta]['search']['#expected_format'] = array('date' => "h:ia");
+    $location['targets'][$target_name][$target_delta]['search']['#expected_format'] = array('date' => MFCS_DATE_FORMAT_TIME);
     $location['targets'][$target_name][$target_delta]['search']['#description'] = "E.g, 12:31pm";
   }
   elseif ($field['type'] == 'number') {

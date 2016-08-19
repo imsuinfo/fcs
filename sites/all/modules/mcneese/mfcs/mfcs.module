@@ -477,6 +477,16 @@ define('MFCS_UNAVAILABILITY_TYPE_EMERGENCY', 6);
 define('MFCS_UNAVAILABILITY_TYPE_CLASS', 7);
 
 /**
+ * Date Formats
+ */
+define('MFCS_DATE_FORMAT_DATE', 'l, F j, Y');
+define('MFCS_DATE_FORMAT_DATE_TIME', 'h:ia, l, F j, Y');
+define('MFCS_DATE_FORMAT_DATE_TIME_SECONDS', 'h:i:sa, l, F j, Y');
+define('MFCS_DATE_FORMAT_DATE_TIME_SECONDS_TIMEZONE', 'h:i:sa T, l, F j, Y');
+define('MFCS_DATE_FORMAT_TIME', 'h:ia');
+define('MFCS_DATE_FORMAT_TIME_SECONDS', 'h:i:sa');
+
+/**
  * Implements hook_init().
  */
 function mfcs_init() {
@@ -2632,7 +2642,7 @@ function mfcs_mail($key, &$message, $params) {
     $body .= "Request URL:\n - " . $request_url . "\n\n";
 
     $body .= "\n";
-    $body .= "This e-mail was generated on:\n - " . date("Y/m/d h:i:s a T", $instance) . "\n";
+    $body .= "This e-mail was generated on:\n - " . date('Y/m/d h:i:s a T', $instance) . "\n";
 
 
     if (isset($params['markup'])) {
@@ -2642,7 +2652,7 @@ function mfcs_mail($key, &$message, $params) {
       $markup .= "<strong>Request URL</strong>:<ul><li><a href=" . '"' . $request_url . '"' . ">" . $request_url . "</a></li></ul><br>";
 
       $markup .= '<br>';
-      $markup .= "<em>This e-mail was generated on</em>:<ul><li><em>" . date("Y/m/d h:i:s a T", $instance) . "</em></li></ul>";
+      $markup .= "<em>This e-mail was generated on</em>:<ul><li><em>" . date('Y/m/d h:i:s a T', $instance) . "</em></li></ul>";
     }
   }
   else {
@@ -5439,7 +5449,7 @@ function mfcs_sync_banner_to_local_classes() {
           }
 
           while ($stamp_day < $stop_stamp) {
-            $stamp_day_string = date('Y/m/d ', $stamp_day);
+            $stamp_day_string = date('l, F j, Y ', $stamp_day);
             $stamp_day_year = date('Y', $stamp_day);
             $stamp_time_start = strtotime($stamp_day_string . $start_time_string);
 
@@ -5884,7 +5894,7 @@ function mfcs_convert_value_to_database_format($value, $method, $option = array(
 
     // force the date to begin at the earlies time in the day.
     $date_stamp = strtotime($value);
-    $date = date("Y/m/d", $date_stamp);
+    $date = date('Y/m/d', $date_stamp);
     return strtotime($date, 0);
   }
   elseif ($method == 'date_month') {
@@ -7508,20 +7518,20 @@ function mfcs_build_room_unavailable_message($availability_issues, $url_argument
       if (isset($request_using_room->date)) {
         if (isset($request_using_room->time_start)) {
           $problematic_date_key =  '' . $request_using_room->date . '-' . $request_using_room->time_start . '-' . $request_using_room->time_stop;
-          $problematic_date = '<strong>' . date('l, F j, Y', $request_using_room->date) . '</strong> from <strong>' . date('h:ia', $request_using_room->time_start) . '</strong> to <strong>' . date('h:ia', $request_using_room->time_stop) . '</strong> because of a ';
+          $problematic_date = '<strong>' . date(MFCS_DATE_FORMAT_DATE, $request_using_room->date) . '</strong> from <strong>' . date(MFCS_DATE_FORMAT_TIME, $request_using_room->time_start) . '</strong> to <strong>' . date(MFCS_DATE_FORMAT_TIME, $request_using_room->time_stop) . '</strong> because of a ';
           $problematic_date .= '<strong><a href="' . $base_path . 'requests/view-0/' . $request_using_room->request_id . $url_arguments . '" title="View conflicting request.">scheduling conflict</a></strong>.';
           $problematic_dates[$problematic_date_key] = $problematic_date;
         }
         else {
           $problematic_date_key =  '' . $request_using_room->date;
-          $problematic_date = '<strong>' . date('l, F j, Y', $request_using_room->date) . '</strong> (all day) because of a ';
+          $problematic_date = '<strong>' . date(MFCS_DATE_FORMAT_DATE, $request_using_room->date) . '</strong> (all day) because of a ';
           $problematic_date .= '<strong><a href="' . $base_path . 'requests/view-0/' . $request_using_room->request_id . $url_arguments . '" title="View conflicting request.">scheduling conflict</a></strong>.';
           $problematic_dates[$problematic_date_key] = $problematic_date;
         }
       }
       elseif (isset($request_using_room->reserved_day)) {
         $problematic_date_key =  '' . $request_using_room->reserved_day . '-' . $request_using_room->reserved_time_start . '-' . $request_using_room->reserved_time_stop;
-        $problematic_date = '<strong>' . date('l, F j, Y', $request_using_room->reserved_day) . '</strong> from <strong>' . date('h:ia', $request_using_room->reserved_time_start) . '</strong> to <strong>' . date('h:ia', $request_using_room->reserved_time_stop) . '</strong> because of a scheduling conflict.';
+        $problematic_date = '<strong>' . date(MFCS_DATE_FORMAT_DATE, $request_using_room->reserved_day) . '</strong> from <strong>' . date(MFCS_DATE_FORMAT_TIME, $request_using_room->reserved_time_start) . '</strong> to <strong>' . date(MFCS_DATE_FORMAT_TIME, $request_using_room->reserved_time_stop) . '</strong> because of a scheduling conflict.';
         $problematic_dates[$problematic_date_key] = $problematic_date;
       }
     }
@@ -7548,16 +7558,16 @@ function mfcs_build_room_unavailable_message($availability_issues, $url_argument
         // all day.
         if ($unavailable->date_stop == strtotime('midnight tomorrow', $start_day)) {
           // all day, one day.
-          $unavailable_message .= '<strong>' . check_plain(date('l, F j, Y', $unavailable->date_start)) . '</strong>';
+          $unavailable_message .= '<strong>' . check_plain(date(MFCS_DATE_FORMAT_DATE, $unavailable->date_start)) . '</strong>';
         }
         else {
           // all day, over more than one days.
-          $unavailable_message .= '<strong>' . check_plain(date('l, F j, Y', $unavailable->date_start)) . '</strong> to <strong>' . check_plain(date('l, F j, Y', $unavailable->date_stop)) . '</strong>';
+          $unavailable_message .= '<strong>' . check_plain(date(MFCS_DATE_FORMAT_DATE, $unavailable->date_start)) . '</strong> to <strong>' . check_plain(date(MFCS_DATE_FORMAT_DATE, $unavailable->date_stop)) . '</strong>';
         }
       }
       elseif ($start_day == $stop_day || $unavailable->date_stop == strtotime('midnight tomorrow', $start_day)) {
         // specific times in one day.
-        $unavailable_message .= '<strong>' . check_plain(date('l, F j, Y', $unavailable->date_start)) . '</strong> from <strong>' . check_plain(date('h:i a', $unavailable->date_start)) . '</strong> to <strong>' . check_plain(date('h:i a', $unavailable->date_stop)) . '</strong>';
+        $unavailable_message .= '<strong>' . check_plain(date(MFCS_DATE_FORMAT_DATE, $unavailable->date_start)) . '</strong> from <strong>' . check_plain(date(MFCS_DATE_FORMAT_TIME, $unavailable->date_start)) . '</strong> to <strong>' . check_plain(date(MFCS_DATE_FORMAT_TIME, $unavailable->date_stop)) . '</strong>';
       }
       else {
         // specific times over more than one days.
@@ -9258,11 +9268,11 @@ function mfcs_build_request_table($items, $max_rows, $columns = NULL, $user = NU
             $row['date']['data'] .= '<br>';
           }
 
-          $row['date']['data'] .= check_plain(date("Y/m/d", $date));
+          $row['date']['data'] .= check_plain(date(MFCS_DATE_FORMAT_DATE, $date));
 
           if (array_key_exists($delta, $item->time_start) && !is_null($item->time_start[$delta]) && array_key_exists($delta, $item->time_stop) && !is_null($item->time_stop[$delta])) {
-            $row['date']['data'] .= ' ' . check_plain(date("h:i a", $item->time_start[$delta]));
-            $row['date']['data'] .= ' to ' . check_plain(date("h:i a", $item->time_stop[$delta]));
+            $row['date']['data'] .= ' ' . check_plain(date(MFCS_DATE_FORMAT_TIME, $item->time_start[$delta]));
+            $row['date']['data'] .= ' to ' . check_plain(date(MFCS_DATE_FORMAT_TIME, $item->time_stop[$delta]));
           }
         }
       }
@@ -9325,7 +9335,7 @@ function mfcs_build_request_table($items, $max_rows, $columns = NULL, $user = NU
       $date_stamp = $item->created;
 
       $row['submitted_on'] = array(
-        'data' => check_plain(date("Y/m/d h:i a", $date_stamp)),
+        'data' => check_plain(date('h:i a, l, F j, Y', $date_stamp)),
         'class' => 'column-submitted_on',
       );
     }
@@ -9944,11 +9954,11 @@ function mfcs_build_request_ajax_table_process_rows($items, $columns, $user = NU
                 $data .= '<br>';
               }
 
-              $data .= check_plain(date("Y/m/d", $date));
+              $data .= check_plain(date(MFCS_DATE_FORMAT_DATE, $date));
 
               if (array_key_exists($delta, $item->time_start) && !is_null($item->time_start[$delta]) && array_key_exists($delta, $item->time_stop) && !is_null($item->time_stop[$delta])) {
-                $data .= ' ' . check_plain(date("h:i a", $item->time_start[$delta]));
-                $data .= ' to ' . check_plain(date("h:i a", $item->time_stop[$delta]));
+                $data .= ' ' . check_plain(date(MFCS_DATE_FORMAT_TIME, $item->time_start[$delta]));
+                $data .= ' to ' . check_plain(date(MFCS_DATE_FORMAT_TIME, $item->time_stop[$delta]));
               }
             }
           }
@@ -10012,10 +10022,10 @@ function mfcs_build_request_ajax_table_process_rows($items, $columns, $user = NU
           }
         }
         elseif ($column['column'] == 'created') {
-          $data = check_plain(date("Y/m/d h:i a", $item->created));
+          $data = check_plain(date(MFCS_DATE_FORMAT_DATE_TIME, $item->created));
         }
         elseif ($column['column'] == 'updated') {
-          $data = check_plain(date("Y/m/d h:i a", $item->updated));
+          $data = check_plain(date(MFCS_DATE_FORMAT_DATE_TIME, $item->updated));
         }
         elseif (!array_key_exists('sanitize', $column) || $column['sanitize'] === FALSE) {
           $data = property_exists($item, $column['column']) ? check_plain($item->{$column['column']}) : '';

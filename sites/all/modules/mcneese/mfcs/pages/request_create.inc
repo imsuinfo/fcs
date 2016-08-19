@@ -431,7 +431,7 @@ function mfcs_request_create_0_form_validate($form, &$form_state) {
             else {
               $date[$key] = $v;
 
-              $v = mfcs_convert_value_to_database_format($time_start[$key], 'timestamp', array('view' => 'h:ia', 'relative_to' => 'request][dates][date'), $form_state, $key);
+              $v = mfcs_convert_value_to_database_format($time_start[$key], 'timestamp', array('view' => MFCS_DATE_FORMAT_TIME, 'relative_to' => 'request][dates][date'), $form_state, $key);
               if ($v === FALSE) {
                 $time_start[$key] = NULL;
                 $time_stop[$key] = NULL;
@@ -439,7 +439,7 @@ function mfcs_request_create_0_form_validate($form, &$form_state) {
               else {
                 $time_start[$key] = $v;
 
-                $v = mfcs_convert_value_to_database_format($time_stop[$key], 'timestamp', array('view' => 'h:ia', 'relative_to' => 'request][dates][date'), $form_state, $key);
+                $v = mfcs_convert_value_to_database_format($time_stop[$key], 'timestamp', array('view' => MFCS_DATE_FORMAT_TIME, 'relative_to' => 'request][dates][date'), $form_state, $key);
                 if ($v === FALSE) {
                   $time_start[$key] = NULL;
                   $time_stop[$key] = NULL;

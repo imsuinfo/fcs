@@ -612,9 +612,9 @@ function mfcs_testing_generate_dates_and_times() {
   $dates_and_times['time_stop'] = strtotime('+' . $time_stop . ' hours', $dates_and_times['time_start']);
   $dates_and_times['category'] = $category;
 
-  $dates_and_times['format_date'] = date('Y/m/d', $dates_and_times['date']);
-  $dates_and_times['format_time_start'] = date('h:ia', $dates_and_times['time_start']);
-  $dates_and_times['format_time_stop'] = date('h:ia', $dates_and_times['time_stop']);
+  $dates_and_times['format_date'] = date(MFCS_DATE_FORMAT_DATE, $dates_and_times['date']);
+  $dates_and_times['format_time_start'] = date(MFCS_DATE_FORMAT_TIME, $dates_and_times['time_start']);
+  $dates_and_times['format_time_stop'] = date(MFCS_DATE_FORMAT_TIME, $dates_and_times['time_stop']);
   $dates_and_times['format_category'] = $format_category;
 
   return $dates_and_times;

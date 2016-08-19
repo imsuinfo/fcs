@@ -1489,7 +1489,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           $form['review']['operations']['warnings']['#markup'] .= '<div class="warning-holidays-title">This request is scheduled on the same dates as the following:</div>';
           $form['review']['operations']['warnings']['#markup'] .= '<ul class="warning-holidays-list">';
           foreach ($holidays as $holiday) {
-            $form['review']['operations']['warnings']['#markup'] .= '<li class="warning-holidays-list-item">' . t("<strong>@holiday</strong> on: <em>@date</em>.", array('@date' => date('l, F j, Y', $holiday->date), '@holiday' => $holiday->title)) . '</li>';
+            $form['review']['operations']['warnings']['#markup'] .= '<li class="warning-holidays-list-item">' . t("<strong>@holiday</strong> on: <em>@date</em>.", array('@date' => date(MFCS_DATE_FORMAT_DATE, $holiday->date), '@holiday' => $holiday->title)) . '</li>';
           }
           $form['review']['operations']['warnings']['#markup'] .= '</ul>';
           $form['review']['operations']['warnings']['#markup'] .= '</div>';
@@ -2214,7 +2214,7 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
           $unavailable_message .= '<strong>';
           $unavailable_message .= '@title</a></strong>.';
 
-          drupal_set_message(t('Warning: <strong>@date</strong> may not available because of: <strong><a href="' . $base_path . 'requests/holiday-0/view/@year/' . $holiday->year. '/' . $holiday->id . $url_arguments . '" title="View details about holiday.">@holiday</a></strong>.', array('@year' => $holiday->year, '@date' => date('l, F j, Y', $holiday->date), '@holiday' => $holiday->title)), 'warning');
+          drupal_set_message(t('Warning: <strong>@date</strong> may not available because of: <strong><a href="' . $base_path . 'requests/holiday-0/view/@year/' . $holiday->year. '/' . $holiday->id . $url_arguments . '" title="View details about holiday.">@holiday</a></strong>.', array('@year' => $holiday->year, '@date' => date(MFCS_DATE_FORMAT_DATE, $holiday->date), '@holiday' => $holiday->title)), 'warning');
         }
         unset($holiday);
       }

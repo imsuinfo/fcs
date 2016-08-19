@@ -245,7 +245,7 @@ function mfcs_request_email_log_0_form($form, &$form_state, $page_number = NULL)
     );
 
     $row['date'] = array(
-      'data' => check_plain(date("Y/m/d h:i:s a", $email_log->date)),
+      'data' => check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS, $email_log->date)),
       'class' => $class_date,
     );
 
@@ -488,7 +488,7 @@ function mfcs_request_email_log_0_view_page($id) {
 
   $markup .= '<div class="email_log-section-top">';
   $markup .= '<div class="email_log-date-wrapper">';
-  $markup .= '<div class="email_log-date"><strong>Submitted On</strong>: ' . date('Y/m/d h:i:s a T', $log->date) . '.</div>';
+  $markup .= '<div class="email_log-date"><strong>Submitted On</strong>: ' . date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS_TIMEZONE, $log->date) . '.</div>';
   $markup .= '</div>'; // email_log-date-wrapper
 
   $markup .= '<div class="email_log-date-wrapper">';

@@ -398,7 +398,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
   $markup .= '</div>';
 
   $instance = mfcs_instance();
-  if (date("Y/m/d", $instance) != date("Y/m/d", $day_start)) {
+  if (date('Y/m/d', $instance) != date('Y/m/d', $day_start)) {
     $markup .= '<div class="calendar-navigation-this">';
     $markup .= '<a href="' . $this_url . '" title="Go to Current Day">Today</a>';
     $markup .= '</div>';
@@ -617,7 +617,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
     $markup .= '<div class="calendar-time_slot">';
 
     $markup .= '<div class="calendar-time_slot-label-wrapper">';
-    $markup .= '<div class="calendar-time_slot-label">' . date("h:i a", $floor_time) . '</div>';
+    $markup .= '<div class="calendar-time_slot-label">' . date(MFCS_DATE_FORMAT_TIME, $floor_time) . '</div>';
 
     $display_prev = $page_number > 0 && $slots_total > 0;
     $display_next = ($slots_total - $slots_minimum) > $slots_per_page;
@@ -838,7 +838,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
               }
             }
 
-            $item_times = date("h:i a", $item['time_start']) . " to " . date("h:i a", $item['time_stop']);
+            $item_times = date(MFCS_DATE_FORMAT_TIME, $item['time_start']) . " to " . date(MFCS_DATE_FORMAT_TIME, $item['time_stop']);
 
             $item_text .= '<div class="calendar-item-link-wrapper"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
             $item_text .= '<div class="calendar-item-time-wrapper"><div class="calendar-item-time" title="Time: ' . $item_times . '">' . $item_times . '</div></div>';

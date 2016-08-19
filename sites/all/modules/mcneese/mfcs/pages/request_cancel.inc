@@ -659,13 +659,13 @@ function mfcs_request_cancelling_0_form($form, &$form_state, $request_id) {
     if (isset($request['dates']['time_start'][$key]) && !is_null($request['dates']['time_start'][$key]->value)) {
       $form['dates'][$key]['markup'] = array(
         '#type' => 'markup',
-        '#markup' => '<span id="request-cancelling-' . $key . '-markup" class="' . $extra_css . '">' . date("Y/m/d", $date->value) . " from " . date("h:i:s a", $request['dates']['time_start'][$key]->value) . " to " . date("h:i:s a", $request['dates']['time_stop'][$key]->value) . "</span>",
+        '#markup' => '<span id="request-cancelling-' . $key . '-markup" class="' . $extra_css . '">' . date(MFCS_DATE_FORMAT_DATE, $date->value) . " from " . date(MFCS_DATE_FORMAT_TIME_SECONDS, $request['dates']['time_start'][$key]->value) . " to " . date(MFCS_DATE_FORMAT_TIME_SECONDS, $request['dates']['time_stop'][$key]->value) . "</span>",
       );
     }
     else {
       $form['dates'][$key]['markup'] = array(
         '#type' => 'markup',
-        '#markup' => '<span id="request-cancelling-' . $key . '-markup" class="cancelling-item-message' . $extra_css . '">' . date("Y/m/d", $date->value) . " (all day)</span>",
+        '#markup' => '<span id="request-cancelling-' . $key . '-markup" class="cancelling-item-message' . $extra_css . '">' . date(MFCS_DATE_FORMAT_DATE, $date->value) . " (all day)</span>",
       );
     }
   }
@@ -742,10 +742,10 @@ function mfcs_request_cancelling_0_form_validate($form, &$form_state) {
         form_set_error('dates][' . $key . '][select', "An internal error occurred while checking the room for availability. Please contact the support staff.");
       }
       elseif (!empty($room_unavailability['conflict']) || !empty($room_unavailability['unavailable'])) {
-        $time = date('Y/m/d', $form['form']['request']['#value']['dates']['date'][$key]->value);
+        $time = date(MFCS_DATE_FORMAT_DATE, $form['form']['request']['#value']['dates']['date'][$key]->value);
         if (!is_null($form['form']['request']['#value']['dates']['time_start'][$key]->value)) {
-          $time .= ' from ' . date('h:i:s a', $form['form']['request']['#value']['dates']['time_start'][$key]->value);
-          $time .= ' to ' . date('h:i:s a', $form['form']['request']['#value']['dates']['time_stop'][$key]->value);
+          $time .= ' from ' . date(MFCS_DATE_FORMAT_TIME_SECONDS, $form['form']['request']['#value']['dates']['time_start'][$key]->value);
+          $time .= ' to ' . date(MFCS_DATE_FORMAT_TIME_SECONDS, $form['form']['request']['#value']['dates']['time_stop'][$key]->value);
         }
 
         $unavailable_message = '<span class="uppercase">Conflict</span>: The room is no longer available for <strong>' .  $time . '</strong> and therefore may not be uncancelled because of the following:<br>';
@@ -874,10 +874,10 @@ function mfcs_request_cancelling_0_form_submit($form, &$form_state) {
       }
 
       if ($operation['select'] == MFCS_CANCELLING_CANCEL) {
-        $do_cancel[$key] = date("Y/m/d", $dates['date'][$key]->value);
+        $do_cancel[$key] = date(MFCS_DATE_FORMAT_DATE, $dates['date'][$key]->value);
 
         if (isset($dates['time_start'][$key]->value) && !is_null($dates['time_start'][$key]->value)) {
-          $do_cancel[$key] .= ' from ' . date("h:ia", $dates['time_start'][$key]->value) . ' to ' . date("h:ia", $dates['time_stop'][$key]->value);
+          $do_cancel[$key] .= ' from ' . date(MFCS_DATE_FORMAT_TIME, $dates['time_start'][$key]->value) . ' to ' . date(MFCS_DATE_FORMAT_TIME, $dates['time_stop'][$key]->value);
         }
         else {
           $do_cancel[$key] .= ' (all day)';
@@ -886,10 +886,10 @@ function mfcs_request_cancelling_0_form_submit($form, &$form_state) {
         $mfcs_field_dates_date_fields[$key]['cancelled'] = 1;
       }
       elseif ($operation['select'] == MFCS_CANCELLING_UNCANCEL) {
-        $do_uncancel[$key] = date("Y/m/d", $dates['date'][$key]->value);
+        $do_uncancel[$key] = date(MFCS_DATE_FORMAT_DATE, $dates['date'][$key]->value);
 
         if (isset($dates['time_start'][$key]->value) && !is_null($dates['time_start'][$key]->value)) {
-          $do_uncancel[$key] .= ' from ' . date("h:ia", $dates['time_start'][$key]->value) . ' to ' . date("h:ia", $dates['time_stop'][$key]->value);
+          $do_uncancel[$key] .= ' from ' . date(MFCS_DATE_FORMAT_TIME, $dates['time_start'][$key]->value) . ' to ' . date(MFCS_DATE_FORMAT_TIME, $dates['time_stop'][$key]->value);
         }
         else {
           $do_uncancel[$key] .= ' (all day)';

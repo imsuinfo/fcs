@@ -299,7 +299,7 @@ function mfcs_table_structure($include_mer = FALSE) {
       'type' => 'time',
       'size' => 'big',
       'storage' => 'timestamp',
-      'timestamp' => array('view' => 'h:ia', 'relative_to' => 'request][dates][date'),
+      'timestamp' => array('view' => MFCS_DATE_FORMAT_TIME, 'relative_to' => 'request][dates][date'),
       'multiple' => TRUE,
     ),
     'time_stop' => array(
@@ -308,7 +308,7 @@ function mfcs_table_structure($include_mer = FALSE) {
       'type' => 'time',
       'size' => 'big',
       'storage' => 'timestamp',
-      'timestamp' => array('view' => 'h:ia', 'relative_to' => 'request][dates][date'),
+      'timestamp' => array('view' => MFCS_DATE_FORMAT_TIME, 'relative_to' => 'request][dates][date'),
       'multiple' => TRUE,
     ),
     'category' => array(
@@ -1240,7 +1240,7 @@ function mfcs_table_presentation($option = NULL) {
         'value' => 'timestamp_linked_day',
       ),
       'display' => array(
-        'value' => 'Y/m/d',
+        'value' => MFCS_DATE_FORMAT_DATE,
       ),
       'request_type' => array(
         'show' => TRUE,
@@ -1258,7 +1258,7 @@ function mfcs_table_presentation($option = NULL) {
         'value' => 'timestamp_linked_hour',
       ),
       'display' => array(
-        'value' => 'h:ia',
+        'value' => MFCS_DATE_FORMAT_TIME,
       ),
       'request_type' => array(
         'show' => TRUE,
@@ -1275,7 +1275,7 @@ function mfcs_table_presentation($option = NULL) {
         'value' => 'timestamp_linked_hour',
       ),
       'display' => array(
-        'value' => 'h:ia',
+        'value' => MFCS_DATE_FORMAT_TIME,
       ),
       'request_type' => array(
         'show' => TRUE,

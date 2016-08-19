@@ -150,7 +150,7 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
   $date_format = 'Ymd\THis\Z';
   $date_format_all_day = 'Ymd';
   $date_day_format = 'l, F jS, Y';
-  $date_time_format = 'h:i a';
+  $date_time_format = MFCS_DATE_FORMAT_TIME;
 
   $date_timezone_string = date('T');
 

@@ -148,7 +148,7 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
     );
 
     $row['date'] = array(
-      'data' => check_plain(date("l, F j, Y", $item->date)),
+      'data' => check_plain(date(MFCS_DATE_FORMAT_DATE, $item->date)),
       'class' => $class_date,
     );
 
@@ -342,8 +342,7 @@ function mfcs_request_holiday_0_page($year, $holiday_id) {
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
-  $date_short = date('Y/m/d', $holiday->date);
-  $date_long = date('l, F j, Y', $holiday->date);
+  $formatted_date = date(MFCS_DATE_FORMAT_DATE, $holiday->date);
 
   $title = check_plain($holiday->title);
   $description = check_plain($holiday->description);
@@ -352,7 +351,7 @@ function mfcs_request_holiday_0_page($year, $holiday_id) {
   drupal_set_title('' . $year . " Holiday: " . $holiday->title);
 
   $markup = '<div id="mfcs-holiday_page-view" class="mfcs-holiday_page-view">';
-  $markup .= '<div class="mfcs-holiday_page-title"><strong>' . $title . '</strong> is a holiday, break, or office closure for McNeese State University on: <strong>' . $date_long . '</strong>.</div>';
+  $markup .= '<div class="mfcs-holiday_page-title"><strong>' . $title . '</strong> is a holiday, break, or office closure for McNeese State University on: <strong>' . $formatted_date . '</strong>.</div>';
   $markup .= '<br>';
   $markup .= '<div class="mfcs-holiday_page-description">' . $description . '</div>';
 
@@ -1351,7 +1350,7 @@ function mfcs_request_holiday_0_delete_form($form, &$form_state, $year, $holiday
   $form['confirmation']['#markup'] .= '<strong>ID</strong>: ' . $holiday->id . '<br>';
   $form['confirmation']['#markup'] .= '<strong>Title</strong>: ' . $holiday->title . '<br>';
   $form['confirmation']['#markup'] .= '<strong>Year</strong>: ' . $holiday->year . '<br>';
-  $form['confirmation']['#markup'] .= '<strong>Date</strong>: ' . date('l, F j, Y', $holiday->date) . '<br>';
+  $form['confirmation']['#markup'] .= '<strong>Date</strong>: ' . date(MFCS_DATE_FORMAT_DATE, $holiday->date) . '<br>';
   $form['confirmation']['#markup'] .= '<strong>Status</strong>: ' . ($holiday->enabled == 1 ? 'Enabled' : 'Disabled') . '<br>';
   $form['confirmation']['#markup'] .= '</div>';
   $form['confirmation']['#markup'] .= '<br>';

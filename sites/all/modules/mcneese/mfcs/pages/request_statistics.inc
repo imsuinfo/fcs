@@ -178,7 +178,7 @@ function mfcs_request_statistics_0_page($year = NULL, $month = NULL, $day = NULL
   $type_options = mfcs_get_request_type_list_options();
   $classification_options = mfcs_get_request_classification_list_options();
 
-  $now = date("Y/m/d h:i:s a");
+  $now = date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS);
 
   $markup = '<div id="mfcs-statistics-page" class="statistics-page">';
 

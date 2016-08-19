@@ -685,7 +685,7 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
       }
       elseif ($type[$value_name] == 'timestamp') {
         if (!array_key_exists($value_name, $display)) {
-          $display[$value_name] = 'Y/m/d h:ia';
+          $display[$value_name] = MFCS_DATE_FORMAT_DATE_TIME;
         }
 
         if ($display[$value_name] == 'stamp') {
@@ -699,7 +699,7 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
       }
       elseif ($type[$value_name] == 'timestamp_linked_month') {
         if (!array_key_exists($value_name, $display)) {
-          $display[$value_name] = 'Y/m/d';
+          $display[$value_name] = MFCS_DATE_FORMAT_DATE;
         }
 
         if ($display[$value_name] == 'stamp') {
@@ -721,7 +721,7 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
       }
       elseif ($type[$value_name] == 'timestamp_linked_day') {
         if (!array_key_exists($value_name, $display)) {
-          $display[$value_name] = 'Y/m/d';
+          $display[$value_name] = MFCS_DATE_FORMAT_DATE;
         }
 
         if ($display[$value_name] == 'stamp') {
@@ -746,7 +746,7 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
       }
       elseif ($type[$value_name] == 'timestamp_linked_hour') {
         if (!array_key_exists($value_name, $display)) {
-          $display[$value_name] = 'h:ia';
+          $display[$value_name] = MFCS_DATE_FORMAT_TIME;
         }
 
         if ($display[$value_name] == 'stamp') {
@@ -1332,7 +1332,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
 
       $user_name = '';
       if (is_null($users[$user_id])) {
-        watchdog(MFCS_WATCHDOG_ID, "Failed to load the user id of %user_id for request %request_id review log dated %date.", array('%user_id' => $user_id, '%request_id' => $request_id, '%date' => date("Y/m/d h:i:s a", $date)), WATCHDOG_ERROR);
+        watchdog(MFCS_WATCHDOG_ID, "Failed to load the user id of %user_id for request %request_id review log dated %date.", array('%user_id' => $user_id, '%request_id' => $request_id, '%date' => date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS, $date)), WATCHDOG_ERROR);
         continue;
       }
 
@@ -1518,7 +1518,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
         }
       }
       $markup .= '</div></h3>';
-      $markup .= '<div class="review-item-label-date">' . date("Y/m/d h:i:s a", $date) . '</div>';
+      $markup .= '<div class="review-item-label-date">' . date(MFCS_DATE_FORMAT_DATE_TIME, $date) . '</div>';
       $markup .= '</div>';
 
 
