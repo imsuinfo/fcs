@@ -841,8 +841,8 @@ function mfcs_get_request_field_location($form, &$form_state, &$fields, &$reques
     $fields['location'][0]['location-images'][0] = array();
     $fields['location'][0]['location-images'][1] = array();
 
-    $fields['location'][0]['location-images'][0]['#markup'] = '<a href="//www.mcneese.edu/node/5530" class="location-image-link" title="View Campus Map"><img id="field-request-location-0-image-0" src="' . $base_path . $module_path . '/images/example-map.png" alt="Campus Map" class="location-image location-image-visible noscript"></a>';
-    $fields['location'][0]['location-images'][1]['#markup'] = '<a href="//www.mcneese.edu/node/5530" class="location-image-link" title="View Campus Map"><img id="field-request-location-0-image-1" src="' . $base_path . $module_path . '/images/example-seed.png" alt="Campus Map, SEED Center" class="location-image location-image-invisible noscript"></a>';
+    $fields['location'][0]['location-images'][0]['#markup'] = '<a href="//www.mcneese.edu/node/5530" class="location-image-link" title="View Campus Map" target="_blank"><img id="field-request-location-0-image-0" src="' . $base_path . $module_path . '/images/example-map.png" alt="Campus Map" class="location-image location-image-visible noscript"></a>';
+    $fields['location'][0]['location-images'][1]['#markup'] = '<a href="//www.mcneese.edu/node/5530" class="location-image-link" title="View Campus Map" target="_blank"><img id="field-request-location-0-image-1" src="' . $base_path . $module_path . '/images/example-seed.png" alt="Campus Map, SEED Center" class="location-image location-image-invisible noscript"></a>';
 
     $limits_check['visible'] = TRUE;
   }
