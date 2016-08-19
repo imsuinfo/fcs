@@ -597,18 +597,13 @@ function mfcs_request_create_0_form_validate($form, &$form_state) {
  * @see: mfcs_request_create_0_form()
  */
 function mfcs_request_create_0_form_submit($form, &$form_state) {
-  $user = cf_current_user();
-
-  $user_data = array(
-    'user_id' => $user->uid,
-  );
+  mfcs_include(MFCS_INCLUDE_STRUCTURE);
+  mfcs_include(MFCS_INCLUDE_TABLE);
 
   $instance = mfcs_instance();
+  $user = cf_current_user();
 
-  $mfcs_requests = array(
-    'user_id' => (int) $user_data['user_id'],
-    'created' => $instance,
-    'updated' => $instance,
+  $changes = array(
     'status' =>  $form_state['values']['request']['status'][0],
     'step' => $form_state['values']['request']['step'][0],
     'type' =>  $form_state['values']['request']['information']['type'][0],
@@ -620,122 +615,21 @@ function mfcs_request_create_0_form_submit($form, &$form_state) {
     'title' => $form_state['values']['request']['information']['title'][0],
   );
 
-  $mfcs_request_revisions = array(
-    'date' => $instance,
-    'revision' => 0,
-    'user_id' => $user->uid,
-  );
+  $prepared = mfcs_prepare_request_values(NULL, $changes);
+  if ($prepared === FALSE) {
+    form_set_Error('form', 'An error occurred while trying to save the request. Please contact the support staff.');
+    $form_state['rebuild'] = TRUE;
+    $form_state['redirect'] = FALSE;
+    $form_state['submitted'] = FALSE;
+    return;
+  }
 
-  mfcs_include(MFCS_INCLUDE_TABLE);
-
+  $request_id = NULL;
   $structure = mfcs_table_structure();
-  $structure_current = array();
-  $structure_field_tables = array();
-
-  foreach ($structure as $table_name => &$fields) {
-    foreach ($fields as $field_name => &$field_values) {
-      $structure_current[$table_name . '_' . $field_name] = 0;
-
-      // manual processing fields must not be auto-populated through the normal form submit process.
-      if (array_key_exists('manual_processing', $field_values) && $field_values['manual_processing']) {
-        continue;
-      }
-
-      // store the values for each individual mfcs_field_* table.
-      $db_table_field = 'mfcs_field_' . $table_name . '_' . $field_name;
-
-      $current = &$form_state['values'];
-      $parts = explode('][', $field_values['path']);
-      if (empty($parts)) {
-        unset($current);
-        $current = NULL;
-      }
-      else {
-        foreach ($parts as $part) {
-          if (is_array($current) && array_key_exists($part, $current)) {
-            $current = &$current[$part];
-
-            if (empty($current)) {
-              $current = NULL;
-            }
-          }
-          else {
-            watchdog(MFCS_WATCHDOG_ID, "Failed to process '@part' for '@field_name' in '@table_name' during form submit. Invalid array or missing array key (new).", array('@part' => $part, '@field_name' => $field_name, '@table_name' => $table_name), WATCHDOG_ERROR);
-            unset($current);
-            $current = NULL;
-            continue 2;
-          }
-        }
-      }
-
-      mfcs_build_table_structure($structure, $structure_current, $structure_field_tables, $table_name, $field_name, $db_table_field, $user_data, $current, $form_state);
-    }
-  }
-
-  $failure = FALSE;
-  $transaction = db_transaction();
-
-  try {
-    // now perform the operations.
-    $query = db_insert('mfcs_requests');
-    $query->fields($mfcs_requests);
-    $request_id = $query->execute();
-
-    if (!is_numeric($request_id) || $request_id <= 0) {
-      // the request was not properly saved, present an error here.
-      $transaction->rollback();
-      return FALSE;
-    }
-
-    // save the request id so that a programmatic caller can determine the request_id.
-    $form_state['created_request_id'] = $request_id;
-
-    $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . $instance . '_' . $user->uid . '_' . $request_id, FALSE);
-
-    $mfcs_request_revisions['request_id'] = $request_id;
-
-    if (!$processed_mfcs_request_revisions) {
-      $query = db_insert('mfcs_request_revisions');
-      $query->fields($mfcs_request_revisions);
-      $query->execute();
-
-      $processed_mfcs_request_revisions = TRUE;
-    }
-
-    foreach ($structure_field_tables as $table_name => $fields) {
-      foreach ($fields as $delta => $values) {
-        $values['request_id'] = $request_id;
-
-        $query = db_insert($table_name);
-        $query->fields($values);
-        $query->execute();
-      }
-    }
-
-    $structure_current['request_id'] = $request_id;
-    $query = db_insert('mfcs_current');
-    $query->fields($structure_current);
-    $query->execute();
-
-    // enforce transaction execution
-    unset($transaction);
-  }
-  catch (Error $e) {
-    $transaction->rollback();
-    cf_error::on_query_execution($e);
-
-    $failure = TRUE;
-  }
-  catch (Exception $e) {
-    $transaction->rollback();
-    cf_error::on_query_execution($e);
-
-    $failure = TRUE;
-  }
-
-  if ($failure) {
-    form_set_error('form', "An error occurred while trying to save the request. Please contact the support staff.");
-    watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to save the request.", array(), WATCHDOG_ERROR);
+  $success = mfcs_set_request_values(NULL, $prepared, $structure, array(), $form_state);
+  if ($success === FALSE) {
+    form_set_error('form', 'An error occurred while trying to save the request. Please contact the support staff.');
+    watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to save the request.', array(), WATCHDOG_ERROR);
 
     $form_state['rebuild'] = TRUE;
     $form_state['redirect'] = FALSE;
@@ -743,7 +637,9 @@ function mfcs_request_create_0_form_submit($form, &$form_state) {
 
     return;
   }
-  else {
+  elseif ($success === TRUE) {
+    $request_id = $form_state['created_request_id'];
+
     mfcs_include(MFCS_INCLUDE_WORKFLOW);
 
     $parameters = array();

@@ -557,23 +557,14 @@ function mfcs_request_manage_0_move_form_submit($form, &$form_state) {
     return;
   }
 
-  $failure = FALSE;
+  mfcs_include(MFCS_INCLUDE_STRUCTURE);
+  mfcs_include(MFCS_INCLUDE_TABLE);
+
   $request = &$form['form']['request']['#value'];
-  $request_id = (int) $request['mer']['id'][0]->value;
-  $status = (int) $request['top']['status'][0]->value;
-  $step = (int) $request['top']['step'][0]->value;
-  $requirements = $request['current']['requirements'];
-
   $user = cf_current_user();
-
-  $user_data = array(
-    'user_id' => $user->uid,
-  );
-
   $instance = mfcs_instance();
 
-  $mfcs_requests = array(
-    'updated' => $instance,
+  $changes = array(
     'status' =>  $request['top']['status'][0]->value,
     'step' => $request['top']['step'][0]->value,
     'type' =>  $request['information']['type'][0]->value,
@@ -585,39 +576,17 @@ function mfcs_request_manage_0_move_form_submit($form, &$form_state) {
     'title' => $request['information']['title'][0]->value,
   );
 
-  $request_revision = mfcs_load_request_revision_number($request_id);
-  $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . $instance . '_' . $user->uid . '_' . $request_id, FALSE);
-
-  if ($request_revision === FALSE) {
+  $prepared = mfcs_prepare_request_values($request, $changes);
+  if ($prepared === FALSE) {
     form_set_error('form', "An error occurred while trying to save the request. Please contact the support staff.");
-    watchdog(MFCS_WATCHDOG_ID, "Failed to load revision number for request %request_id while trying to save the request.", array('%request_id' => $request_id), WATCHDOG_ERROR);
-
     $form_state['rebuild'] = TRUE;
     $form_state['redirect'] = FALSE;
     $form_state['submitted'] = FALSE;
     return;
   }
-  elseif (is_null($request_revision)) {
-    $request_revision_next = 0;
-  }
-  else {
-    $request_revision_next = $request_revision + 1;
-  }
-
-  $mfcs_request_revisions = array(
-    'request_id' => $request_id,
-    'date' => $instance,
-    'revision' => $request_revision_next,
-    'user_id' => $user->uid,
-  );
-
-  mfcs_include(MFCS_INCLUDE_TABLE);
-
-  $structure_original = mfcs_table_structure();
-  $structure_current = array();
-  $structure_field_tables = array();
 
   // only a subset of the structure needs to be updated.
+  $structure_original = mfcs_table_structure();
   $structure = array(
     'top' => array(
       'location' => $structure_original['top']['location'],
@@ -625,127 +594,30 @@ function mfcs_request_manage_0_move_form_submit($form, &$form_state) {
       'room' => $structure_original['top']['room'],
     ),
   );
+  unset($structure_original);
 
-  foreach ($structure as $table_name => &$fields) {
-    foreach ($fields as $field_name => &$field_values) {
-      // manual processing fields must not be auto-populated through the normal form submit process.
-      if (array_key_exists('manual_processing', $field_values) && $field_values['manual_processing']) {
-        continue;
-      }
+  $success = mfcs_set_request_values($request, $prepared, $structure, $form['form']['existing']['#value'], $form_state);
+  if ($success === FALSE) {
+    form_set_error('form', 'An error occurred while trying to save the request. Please contact the support staff.');
+    watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to save the request: @request_id.', array('@request_id' => $request_id), WATCHDOG_ERROR);
 
-      // load the path so that it can be checked to see if anything needs to be changed.
-      $parts = explode('][', $field_values['path']);
-      if (empty($parts)) {
-        // this should not happen.
-        continue;
-      }
+    $form_state['rebuild'] = TRUE;
+    $form_state['redirect'] = FALSE;
+    $form_state['submitted'] = FALSE;
 
-      unset($current_existing);
-      unset($current_new);
-
-      $current_existing = &$form['form']['existing']['#value'];
-      $current_new = &$form_state['values'];
-
-      while (!empty($parts)){
-        $part = array_shift($parts);
-
-        if (!is_array($current_existing) || !array_key_exists($part, $current_existing)) {
-          watchdog(MFCS_WATCHDOG_ID, "Failed to process '@part' for '@field_name' in '@table_name' during form submit. Invalid array or missing array key (existing).", array('@part' => $part, '@field_name' => $field_name, '@table_name' => $table_name), WATCHDOG_ERROR);
-          continue 2;
-        }
-
-        if (!is_array($current_new) || !array_key_exists($part, $current_new)) {
-          watchdog(MFCS_WATCHDOG_ID, "Failed to process '@part' for '@field_name' in '@table_name' during form submit. Invalid array or missing array key (new).", array('@part' => $part, '@field_name' => $field_name, '@table_name' => $table_name), WATCHDOG_ERROR);
-          continue 2;
-        }
-
-        $current_existing = &$current_existing[$part];
-        $current_new = &$current_new[$part];
-      }
-      unset($part);
-
-      // when the values are the same, do not update them.
-      if ($current_existing == $current_new) {
-        continue;
-      }
-
-      $db_table_field = 'mfcs_field_' . $table_name . '_' . $field_name;
-
-      mfcs_build_table_structure($structure, $structure_current, $structure_field_tables, $table_name, $field_name, $db_table_field, $user_data, $current_new, $form_state, $request);
-    }
+    return;
   }
-
-  if (!empty($structure_field_tables)) {
-    $failure = FALSE;
-    $transaction = db_transaction();
-
-    try {
-      // now perform the operations.
-      $query = db_update('mfcs_requests');
-      $query->condition('id', $request_id);
-      $query->fields($mfcs_requests);
-      $query->execute();
-
-      if (!$processed_mfcs_request_revisions) {
-        $query = db_insert('mfcs_request_revisions');
-        $query->fields($mfcs_request_revisions);
-        $query->execute();
-
-        $processed_mfcs_request_revisions = TRUE;
-      }
-
-      foreach ($structure_field_tables as $table_name => $fields) {
-        foreach ($fields as $delta => $values) {
-          $query = db_insert($table_name);
-          $query->fields($values);
-          $query->execute();
-        }
-      }
-
-      // update the current revisions table.
-      $query = db_update('mfcs_current');
-      $query->condition('request_id', $request_id);
-      $query->fields($structure_current);
-      $query->execute();
-
-      // enforce transaction execution
-      unset($transaction);
-    }
-    catch (Error $e) {
-      $transaction->rollback();
-      cf_error::on_query_execution($e);
-
-      $failure = TRUE;
-    }
-    catch (Exception $e) {
-      $transaction->rollback();
-      cf_error::on_query_execution($e);
-
-      $failure = TRUE;
+  elseif ($success === TRUE) {
+    $log_message = '';
+    if (isset($form_state['values']['log']['message'])) {
+      $log_message = $form_state['values']['log']['message'];
     }
 
-    if ($failure) {
-      form_set_error('form', "An error occurred while trying to save the request. Please contact the support staff.");
-      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to save the request: @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
+    // forcefully clear the request cache so that it can reflect the changes.
+    mfcs_load_request_by_id($request_id, FALSE);
 
-      $form_state['rebuild'] = TRUE;
-      $form_state['redirect'] = FALSE;
-      $form_state['submitted'] = FALSE;
-
-      return;
-    }
-    else {
-      $log_message = '';
-      if (isset($form_state['values']['log']['message'])) {
-        $log_message = $form_state['values']['log']['message'];
-      }
-
-      // forcefully clear the request cache so that it can reflect the changes.
-      mfcs_load_request_by_id($request_id, FALSE);
-
-      mfcs_include(MFCS_INCLUDE_WORKFLOW);
-      mfcs_workflow_step_review($request_id, $user, MFCS_REVIEW_DECISION_MOVE, MFCS_REVIEW_RESTRICTIONS_REQUESTER, $log_message);
-    }
+    mfcs_include(MFCS_INCLUDE_WORKFLOW);
+    mfcs_workflow_step_review($request_id, $user, MFCS_REVIEW_DECISION_MOVE, MFCS_REVIEW_RESTRICTIONS_REQUESTER, $log_message);
   }
 
   // redirect after submitting.

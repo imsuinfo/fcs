@@ -545,7 +545,6 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
   $request_id = (int) $request['mer']['id'][0]->value;
   $status = (int) $request['top']['status'][0]->value;
   $step = (int) $request['top']['step'][0]->value;
-  $requirements = $request['current']['requirements'];
 
   // make sure the cancel button is never treated as a save submit.
   if ($clicked_id == 'submit-request-cancel') {
@@ -564,16 +563,13 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
     return;
   }
 
+  mfcs_include(MFCS_INCLUDE_STRUCTURE);
+  mfcs_include(MFCS_INCLUDE_TABLE);
+
   $user = cf_current_user();
-
-  $user_data = array(
-    'user_id' => $user->uid,
-  );
-
   $instance = mfcs_instance();
 
-  $mfcs_requests = array(
-    'updated' => $instance,
+  $changes = array(
     'status' =>  $form_state['values']['request']['status'][0],
     'step' => $form_state['values']['request']['step'][0],
     'type' =>  $form_state['values']['request']['information']['type'][0],
@@ -585,251 +581,59 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
     'title' => $form_state['values']['request']['information']['title'][0],
   );
 
-  $request_revision = mfcs_load_request_revision_number($request_id);
-  $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . $instance . '_' . $user->uid . '_' . $request_id, FALSE);
-
-  if ($request_revision === FALSE) {
+  $prepared = mfcs_prepare_request_values($request, $changes);
+  if ($prepared === FALSE) {
     form_set_error('form', "An error occurred while trying to save the request. Please contact the support staff.");
-    watchdog(MFCS_WATCHDOG_ID, "Failed to load revision number for request %request_id while trying to save the request.", array('%request_id' => $request_id), WATCHDOG_ERROR);
 
     $form_state['rebuild'] = TRUE;
     $form_state['redirect'] = FALSE;
     $form_state['submitted'] = FALSE;
     return;
   }
-  elseif (is_null($request_revision)) {
-    $request_revision_next = 0;
-  }
-  else {
-    $request_revision_next = $request_revision + 1;
-  }
-
-  $mfcs_request_revisions = array(
-    'request_id' => $request_id,
-    'date' => $instance,
-    'revision' => $request_revision_next,
-    'user_id' => $user->uid,
-  );
-
-  mfcs_include(MFCS_INCLUDE_TABLE);
 
   $structure = mfcs_table_structure();
-  $structure_current = array();
-  $structure_field_tables = array();
-
-  foreach ($structure as $table_name => &$fields) {
-    foreach ($fields as $field_name => &$field_values) {
-      // manual processing fields must not be auto-populated through the normal form submit process.
-      if (array_key_exists('manual_processing', $field_values) && $field_values['manual_processing']) {
-        continue;
-      }
-
-      // load the path so that it can be checked to see if anything needs to be changed.
-      $parts = explode('][', $field_values['path']);
-      if (empty($parts)) {
-        // this should not happen.
-        continue;
-      }
-
-      unset($current_existing);
-      unset($current_new);
-
-      $current_existing = &$form['form']['existing']['#value'];
-      $current_new = &$form_state['values'];
-
-      while (!empty($parts)){
-        $part = array_shift($parts);
-
-        if (!is_array($current_existing) || !array_key_exists($part, $current_existing)) {
-          watchdog(MFCS_WATCHDOG_ID, "Failed to process '@part' for '@field_name' in '@table_name' during form submit. Invalid array or missing array key (existing).", array('@part' => $part, '@field_name' => $field_name, '@table_name' => $table_name), WATCHDOG_ERROR);
-          continue 2;
-        }
-
-        if (!is_array($current_new) || !array_key_exists($part, $current_new)) {
-          watchdog(MFCS_WATCHDOG_ID, "Failed to process '@part' for '@field_name' in '@table_name' during form submit. Invalid array or missing array key (new).", array('@part' => $part, '@field_name' => $field_name, '@table_name' => $table_name), WATCHDOG_ERROR);
-          continue 2;
-        }
-
-        $current_existing = &$current_existing[$part];
-        $current_new = &$current_new[$part];
-      }
-      unset($part);
-
-      // when the values are the same, do not update them.
-      if ($current_existing == $current_new) {
-        continue;
-      }
-
-      $db_table_field = 'mfcs_field_' . $table_name . '_' . $field_name;
-
-      mfcs_build_table_structure($structure, $structure_current, $structure_field_tables, $table_name, $field_name, $db_table_field, $user_data, $current_new, $form_state, $request);
-    }
+  $success = mfcs_set_request_values($request, $prepared, $structure, $form['form']['existing']['#value'], $form_state, TRUE);
+  if ($success === FALSE) {
+    form_set_error('form', 'An error occurred while trying to save the request. Please contact the support staff.');
+    $form_state['rebuild'] = TRUE;
+    $form_state['redirect'] = FALSE;
+    $form_state['submitted'] = FALSE;
+    return;
   }
+  elseif ($success === TRUE) {
+    // forcefully clear the request cache so that it can reflect the changes.
+    mfcs_load_request_by_id($request_id, FALSE);
 
-  if (!empty($structure_field_tables)) {
-    $failure = FALSE;
-    $transaction = db_transaction();
+    mfcs_include(MFCS_INCLUDE_WORKFLOW);
 
-    try {
-      // now perform the operations.
-      $query = db_update('mfcs_requests');
-      $query->condition('id', $request_id);
-      $query->fields($mfcs_requests);
-      $query->execute();
+    $parameters = array();
+    $parameters['changed_by'] = $user->uid;
+    $parameters['changed_type'] = 'user';
+    $parameters['status'] = $status;
+    $parameters['step'] = $step;
 
-      if (!$processed_mfcs_request_revisions) {
-        $query = db_insert('mfcs_request_revisions');
-        $query->fields($mfcs_request_revisions);
-        $query->execute();
 
-        $processed_mfcs_request_revisions = TRUE;
+    // when switching the type to a quick meeting, do not send out update e-mails.
+    $to_quick_meeting = NULL;
+    if (isset($form_state['values']['request']['information']['type'][0])) {
+      $to_quick_meeting = $form_state['values']['request']['information']['type'][0];
+      if (is_string($to_quick_meeting)) {
+        $to_quick_meeting = (int) $to_quick_meeting;
       }
-
-      foreach ($structure_field_tables as $table_name => $fields) {
-        foreach ($fields as $delta => $values) {
-          $query = db_insert($table_name);
-          $query->fields($values);
-          $query->execute();
-        }
-      }
-
-      // if the request has been updated while it is in a locked status, the review log must be reset/restarted.
-      if ($status === MFCS_REQUEST_STATUS_LOCKED) {
-        $step_revision = $request['current']['top']['step'] + 1;
-        $structure_current['top_step'] = $step_revision;
-
-        $mfcs_field_top_step = array(
-          'request_id' => $request_id,
-          'revision' => $step_revision,
-          'delta' => 0,
-          'user_id' => $user->uid,
-          'date' => $instance,
-          'value' => MFCS_REVIEW_STEP_VENUE_AVAILABLE,
-        );
-
-        $mfcs_requests = array(
-          'step' => MFCS_REVIEW_STEP_VENUE_AVAILABLE,
-          'updated' => $instance,
-        );
-
-        $query = db_update('mfcs_requests');
-        $query->fields($mfcs_requests);
-        $query->condition('id', $request_id);
-        $query->execute();
-
-        $query = db_insert('mfcs_field_top_step');
-        $query->fields($mfcs_field_top_step);
-        $query->execute();
-
-        $query = db_delete('mfcs_reviewed');
-        $query->condition('request_id', $request_id);
-        $query->execute();
-
-        $review_revision = mfcs_load_request_revision_number($request_id, 'mfcs_field_review_review');
-
-        if ($review_revision === FALSE || is_null($review_revision)) {
-          $review_revision = 0;
-        }
-        else {
-          $review_revision++;
-        }
-
-        $structure_current['review_review'] = $review_revision;
-
-        $mfcs_field_review_review = array(
-          'request_id' => $request_id,
-          'revision' => $review_revision,
-          'delta' => 0,
-          'user_id' => $user->uid,
-          'date' => $instance,
-          'step' => $step,
-          'decision' => MFCS_REVIEW_DECISION_AMENDMENT,
-          'message' => '',
-        );
-
-        $query = db_insert('mfcs_field_review_review');
-        $query->fields($mfcs_field_review_review);
-        $query->execute();
-
-        $mfcs_current['requirements_facilities_fees'] = NULL;
-        $mfcs_current['requirements_equipment_fees'] = NULL;
-        $mfcs_current['requirements_custodial_fees'] = NULL;
-        $mfcs_current['requirements_security_fees'] = NULL;
-        $mfcs_current['requirements_grounds_fees'] = NULL;
-        $mfcs_current['requirements_maintenance_fees'] = NULL;
-        $mfcs_current['requirements_other'] = NULL;
-        $mfcs_current['requirements_university'] = NULL;
-
-        $mfcs_current['insurance_provided'] = NULL;
-      }
-
-      // update the current revisions table.
-      $query = db_update('mfcs_current');
-      $query->condition('request_id', $request_id);
-      $query->fields($structure_current);
-      $query->execute();
-
-      // enforce transaction execution
-      unset($transaction);
-    }
-    catch (Error $e) {
-      $transaction->rollback();
-      cf_error::on_query_execution($e);
-
-      $failure = TRUE;
-    }
-    catch (Exception $e) {
-      $transaction->rollback();
-      cf_error::on_query_execution($e);
-
-      $failure = TRUE;
     }
 
-    if ($failure) {
-      form_set_error('form', "An error occurred while trying to save the request. Please contact the support staff.");
-      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to save the request: @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
-
-      $form_state['rebuild'] = TRUE;
-      $form_state['redirect'] = FALSE;
-      $form_state['submitted'] = FALSE;
-
-      return;
-    }
-    else {
-      // forcefully clear the request cache so that it can reflect the changes.
-      mfcs_load_request_by_id($request_id, FALSE);
-
-      mfcs_include(MFCS_INCLUDE_WORKFLOW);
-
-      $parameters = array();
-      $parameters['changed_by'] = $user->uid;
-      $parameters['changed_type'] = 'user';
-      $parameters['status'] = $status;
-      $parameters['step'] = $step;
-
-
-      // when switching the type to a quick meeting, do not send out update e-mails.
-      $to_quick_meeting = NULL;
-      if (isset($form_state['values']['request']['information']['type'][0])) {
-        $to_quick_meeting = $form_state['values']['request']['information']['type'][0];
-        if (is_string($to_quick_meeting)) {
-          $to_quick_meeting = (int) $to_quick_meeting;
-        }
-      }
-
-      if ($status === MFCS_REQUEST_STATUS_LOCKED) {
-        // do not send e-mail when the previous step is already set to venue available.
-        if ($step !== MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
-          $parameters['amendment'] = TRUE;
-          $parameters['restriction'] = MFCS_REVIEW_RESTRICTIONS_NONE;
-          mfcs_send_workflow_emails($request_id, $parameters);
-        }
-      }
-      elseif ($status === MFCS_REQUEST_STATUS_UNLOCKED) {
-        // send emails when the request has been updated.
-        $parameters['update'] = TRUE;
+    if ($status === MFCS_REQUEST_STATUS_LOCKED) {
+      // do not send e-mail when the previous step is already set to venue available.
+      if ($step !== MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
+        $parameters['amendment'] = TRUE;
+        $parameters['restriction'] = MFCS_REVIEW_RESTRICTIONS_NONE;
         mfcs_send_workflow_emails($request_id, $parameters);
       }
+    }
+    elseif ($status === MFCS_REQUEST_STATUS_UNLOCKED) {
+      // send emails when the request has been updated.
+      $parameters['update'] = TRUE;
+      mfcs_send_workflow_emails($request_id, $parameters);
     }
   }
 

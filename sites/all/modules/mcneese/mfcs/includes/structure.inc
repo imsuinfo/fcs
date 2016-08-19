@@ -6631,5 +6631,593 @@ function mfcs_get_request_existing_values($request) {
 }
 
 /**
+ * Build the table structure for saving new or existing information.
+ *
+ * @param array $structure
+ *   Describes how the secondary tables are populated and processed.
+ * @param array $structure_current
+ *   The 'current' table with the fields to be updated.
+ * @param array $structure_field_tables
+ *   A collection of 'field' tables to create or update.
+ * @param string $table_name
+ *   Name of the current table being processed.
+ * @param string $field_name
+ *   Name of the current field being processed.
+ * @param string $db_table_field
+ *   The name of the 'field' table as defined the SQL database.
+ * @param array $user_data
+ *   An array of user related information:
+ *   - 'user_id': The users ID.
+ * @param array $form_state
+ *   The form state for advanced processing of fields that depend on other
+ *   fields when they are converted into the database format.
+ * @param array|null $request
+ *   (optional) When NULL, this created tables are new tables.
+ *   When an array, the created tables are updates to existing values.
+ *   The array should be populated by mfcs_load_request_by_id().
+ *
+ * @see: mfcs_table_structure()
+ * @see: mfcs_load_request_by_id()
+ */
+function mfcs_build_table_structure($structure, &$structure_current, &$structure_field_tables, $table_name, $field_name, $db_table_field, $user_data, $values, $form_state, $request = NULL) {
+  $instance = mfcs_instance();
+
+  if (is_null($request)) {
+    $request_id = NULL;
+    $revision = 0;
+  }
+  else {
+    $request_id = $request['mer']['id'][0]->value;
+
+    $revision = mfcs_load_request_revision_number($request_id, $db_table_field);
+    if ($revision === FALSE) {
+      watchdog(MFCS_WATCHDOG_ID, "Failed to load revision number for request %request_id while building the table structure, forcing revision number to be 0.", array('%request_id' => $request_id), WATCHDOG_ERROR);
+      $revision = 0;
+    }
+    elseif (is_null($revision)) {
+      $revision = 0;
+    }
+    else {
+      $revision++;
+    }
+  }
+
+  if (!isset($structure_field_tables[$db_table_field])) {
+    $structure_field_tables[$db_table_field] = array();
+  }
+
+  if (array_key_exists('storage', $structure[$table_name][$field_name])) {
+    if (!is_string($structure[$table_name][$field_name]['storage']) || empty($structure[$table_name][$field_name]['storage'])) {
+      watchdog(MFCS_WATCHDOG_ID, "Invalid storage structure specification for the field %field_name in the table %table_name. This must be a non-empty string.", array('%field_name' => $field_name, '%table_name' => $table_name), WATCHDOG_ERROR);
+      return;
+    }
+
+    $storage_key = $structure[$table_name][$field_name]['storage'];
+    if (!array_key_exists($storage_key, $structure[$table_name][$field_name]) || empty($structure[$table_name][$field_name][$storage_key])) {
+      watchdog(MFCS_WATCHDOG_ID, "The storage key %storage_key was not found in the structure specification for the field %field_name in the table %table_name. This must be a non-empty string.", array('%storage_key' => $storage_key, '%field_name' => $field_name, '%table_name' => $table_name), WATCHDOG_ERROR);
+      return;
+    }
+
+    // alternate is used for handling fields that are stored in multiple separate tables.
+    if ($storage_key == 'alternate') {
+      unset($structure_current[$table_name . '_' . $field_name]);
+      unset($structure_field_tables[$db_table_field]);
+
+      foreach ($values as $delta => $value) {
+        $alternate_values = array();
+        if (!empty($structure[$table_name][$field_name]['alternate_method'])) {
+          foreach ($structure[$table_name][$field_name]['alternate_method'] as $method_name => $method_values) {
+            if ($method_name == 'explode') {
+              $alternate_values = explode($method_values[0], $value, $method_values[1]);
+            }
+
+            break;
+          }
+        }
+
+        foreach ($structure[$table_name][$field_name]['alternate'] as $alternate_name => &$alternate_data) {
+          if (!array_key_exists('key', $alternate_data)) continue;
+
+          $db_table_field = 'mfcs_field_' . $table_name . '_' . $alternate_name;
+
+          if (!isset($structure_field_tables[$db_table_field])) {
+            $structure_field_tables[$db_table_field] = array();
+          }
+
+          $structure_field_tables[$db_table_field][$delta] = array();
+          $structure_field_tables[$db_table_field][$delta]['user_id'] = $user_data['user_id'];
+          $structure_field_tables[$db_table_field][$delta]['date'] = $instance;
+          $structure_field_tables[$db_table_field][$delta]['delta'] = $delta;
+          $structure_field_tables[$db_table_field][$delta]['revision'] = $revision;
+
+          if (isset($alternate_values[$alternate_data['key']]) && (is_numeric($alternate_values[$alternate_data['key']]) || !empty($alternate_values[$alternate_data['key']]))) {
+            $structure_field_tables[$db_table_field][$delta]['value'] = $alternate_values[$alternate_data['key']];
+
+            // fix_lines works by stripping out all carriage returns and replacing them with a single newline.
+            if (array_key_exists('fix_lines', $structure[$table_name][$field_name]) && $structure[$table_name][$field_name]['fix_lines']) {
+              $structure_field_tables[$db_table_field][$delta]['value'] = preg_replace("/\r\n/", "\n", $structure_field_tables[$db_table_field][$delta]['value']);
+              $structure_field_tables[$db_table_field][$delta]['value'] = preg_replace("/\r/", "\n", $structure_field_tables[$db_table_field][$delta]['value']);
+            }
+          }
+
+          if (!is_null($request_id)) {
+            $structure_field_tables[$db_table_field][$delta]['request_id'] = $request_id;
+          }
+
+          $structure_current[$table_name . '_' . $alternate_name] = $revision;
+        }
+      }
+    }
+    else {
+      $structure_current[$table_name . '_' . $field_name] = $revision;
+
+      foreach ($values as $delta => $value) {
+        $structure_field_tables[$db_table_field][$delta] = array();
+        $structure_field_tables[$db_table_field][$delta]['user_id'] = $user_data['user_id'];
+        $structure_field_tables[$db_table_field][$delta]['date'] = $instance;
+        $structure_field_tables[$db_table_field][$delta]['delta'] = $delta;
+        $structure_field_tables[$db_table_field][$delta]['revision'] = $revision;
+
+        if (!is_null($request)) {
+          $structure_field_tables[$db_table_field][$delta]['request_id'] = $request_id;
+        }
+
+        $storage_values = FALSE;
+        if (isset($structure[$table_name][$field_name][$storage_key]) && is_array($structure[$table_name][$field_name][$storage_key])) {
+          $storage_values = mfcs_convert_value_to_database_format($value, $storage_key, $structure[$table_name][$field_name][$storage_key], $form_state, $delta);
+        }
+
+        if ($storage_values !== FALSE && !is_null($storage_values)) {
+          $structure_field_tables[$db_table_field][$delta]['value'] = $storage_values;
+
+          // fix_lines works by stripping out all carriage returns and replacing them with a single newline.
+          if (array_key_exists('fix_lines', $structure[$table_name][$field_name]) && $structure[$table_name][$field_name]['fix_lines']) {
+            $structure_field_tables[$db_table_field][$delta]['value'] = preg_replace("/\r\n/", "\n", $structure_field_tables[$db_table_field][$delta]['value']);
+            $structure_field_tables[$db_table_field][$delta]['value'] = preg_replace("/\r/", "\n", $structure_field_tables[$db_table_field][$delta]['value']);
+          }
+        }
+
+        if (isset($structure[$table_name][$field_name]['type'])) {
+          // exception case: the time type is also stored in a field with the y/m/d set to 0 for quick and easy relative searches at the cost of extra space usage.
+          if ($structure[$table_name][$field_name]['type'] == 'time' && $storage_key == 'timestamp') {
+            $storage_values = FALSE;
+            if (isset($structure[$table_name][$field_name][$storage_key]) && is_array($structure[$table_name][$field_name][$storage_key])) {
+              $storage_options = $structure[$table_name][$field_name][$storage_key];
+              unset($storage_options['relative_to']);
+              $storage_values = mfcs_convert_value_to_database_format($value, 'timestamp_relative', $storage_options);
+              unset($storage_options);
+            }
+
+            if ($storage_values !== FALSE && !is_null($storage_values)) {
+              $structure_field_tables[$db_table_field][$delta]['value_relative'] = $storage_values;
+            }
+          }
+          // exception case: the date_popup type is also stored in a month and a day field for quick and easy relative searches at the cost of extra space usage.
+          elseif ($structure[$table_name][$field_name]['type'] == 'date' && $storage_key == 'date_popup') {
+            $storage_values = FALSE;
+            if (isset($structure[$table_name][$field_name][$storage_key]) && is_array($structure[$table_name][$field_name][$storage_key])) {
+              $storage_options = $structure[$table_name][$field_name][$storage_key];
+              unset($storage_options['relative_to']);
+              $storage_values = mfcs_convert_value_to_database_format($value, 'date_month', $storage_options);
+              unset($storage_options);
+            }
+
+            if ($storage_values !== FALSE && !is_null($storage_values)) {
+              $structure_field_tables[$db_table_field][$delta]['value_month'] = $storage_values;
+            }
+
+            $storage_values = FALSE;
+            if (isset($structure[$table_name][$field_name][$storage_key]) && is_array($structure[$table_name][$field_name][$storage_key])) {
+              $storage_options = $structure[$table_name][$field_name][$storage_key];
+              unset($storage_options['relative_to']);
+              $storage_values = mfcs_convert_value_to_database_format($value, 'date_day', $storage_options);
+              unset($storage_options);
+            }
+
+            if ($storage_values !== FALSE && !is_null($storage_values)) {
+              $structure_field_tables[$db_table_field][$delta]['value_day'] = $storage_values;
+            }
+          }
+        }
+      }
+    }
+  }
+  else {
+    $structure_current[$table_name . '_' . $field_name] = $revision;
+
+    foreach ($values as $delta => $value) {
+      $structure_field_tables[$db_table_field][$delta] = array();
+      $structure_field_tables[$db_table_field][$delta]['user_id'] = $user_data['user_id'];
+      $structure_field_tables[$db_table_field][$delta]['date'] = $instance;
+      $structure_field_tables[$db_table_field][$delta]['delta'] = $delta;
+      $structure_field_tables[$db_table_field][$delta]['revision'] = $revision;
+
+      if (!is_null($request)) {
+        $structure_field_tables[$db_table_field][$delta]['request_id'] = $request_id;
+      }
+
+      if (isset($structure[$table_name][$field_name]['columns'])) {
+        foreach ($structure[$table_name][$field_name]['columns'] as $special_field_id => &$special_field_name) {
+          if (isset($value[$special_field_id]) && $value[$special_field_id] > 0) {
+            $structure_field_tables[$db_table_field][$delta][$special_field_name] = $special_field_id;
+          }
+        }
+      }
+      elseif (is_numeric($value) || !empty($value)) {
+        $structure_field_tables[$db_table_field][$delta]['value'] = $value;
+
+        // fix_lines works by stripping out all carriage returns and replacing them with a single newline.
+        if (array_key_exists('fix_lines', $structure[$table_name][$field_name]) && $structure[$table_name][$field_name]['fix_lines']) {
+          $structure_field_tables[$db_table_field][$delta]['value'] = preg_replace("/\r\n/", "\n", $structure_field_tables[$db_table_field][$delta]['value']);
+          $structure_field_tables[$db_table_field][$delta]['value'] = preg_replace("/\r/", "\n", $structure_field_tables[$db_table_field][$delta]['value']);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Prepare request values for use by mfcs_set_request_values()
+ *
+ * This is provided as a separate function so that the return value can be explititly handled on error.
+ *
+ * @return array|FALSE
+ *   A combined array to be processed by mfcs_set_request_values().
+ *   FALSE is returned on error.
+ *
+ * @see: mfcs_set_request_values()
+ */
+function mfcs_prepare_request_values($request, $changes) {
+  $instance = mfcs_instance();
+  $user = cf_current_user();
+
+  $prepared = array(
+    'mfcs_requests' => array(
+      'updated' => $instance,
+    ),
+    'mfcs_request_revisions' => array(),
+    'request_revision' => NULL,
+    'request_revision_next' => NULL,
+  );
+
+  if (is_null($request)) {
+    $prepared['mfcs_requests']['user_id'] = $user->uid;
+    $prepared['mfcs_requests']['created'] = $instance;
+  }
+  else {
+    $request_id = (int) $request['mer']['id'][0]->value;
+  }
+
+  foreach ($changes as $column => $value) {
+    $prepared['mfcs_requests'][$column] = $value;
+  }
+
+  if (is_null($request)) {
+    $prepared['request_revision'] = 0;
+    $prepared['request_revision_next'] = 0;
+
+    $prepared['mfcs_request_revisions'] = array(
+      'date' => $instance,
+      'revision' => 0,
+      'user_id' => $user->uid,
+    );
+  }
+  else {
+    $prepared['request_revision'] = mfcs_load_request_revision_number($request_id);
+    if ($prepared['request_revision'] === FALSE) {
+      watchdog(MFCS_WATCHDOG_ID, "Failed to load revision number for request %request_id while trying to save the request.", array('%request_id' => $request_id), WATCHDOG_ERROR);
+      return FALSE;
+    }
+    elseif (is_null($prepared['request_revision'])) {
+      $prepared['request_revision_next'] = 0;
+    }
+    else {
+      $prepared['request_revision_next'] = $prepared['request_revision'] + 1;
+    }
+
+    $prepared['mfcs_request_revisions'] = array(
+      'request_id' => $request_id,
+      'date' => $instance,
+      'revision' => $prepared['request_revision_next'],
+      'user_id' => $user->uid,
+    );
+  }
+
+  return $prepared;
+}
+
+/**
+ * Assign changes to a request to the database.
+ *
+ * @param object|NULL $request
+ *   The (unchanged) request object.
+ *   If NULL, this is is a new request.
+ * @param array $prepared
+ *   An array as processed by mfcs_prepare_request_values()
+ * @param array $existing
+ *   An existing array as populated by mfcs_get_request_existing_values().
+ *   This parameter is ignored when $request is NULL.
+ * @param array $form_state
+ *   An array of new values to assign using the same structure as that stored in $form_state.
+ * @param bool $review_log_log
+ *   (optional) When TRUE, review log is restarted depending on whether or not lock is in place.
+ *   When FALSE, the review log lock is ignored.
+ *   This parameter is ignored when $request is NULL.
+ *
+ * @return bool|NULL
+ *   TRUE on success.
+ *   NULL when nothing was done.
+ *   FALSE on error.
+ *
+ * @see: mfcs_prepare_request_values()
+ * @see: mfcs_get_request_existing_values()
+ */
+function mfcs_set_request_values($request, $prepared, $structure, $existing, &$form_state, $review_log_lock = FALSE) {
+  $instance = mfcs_instance();
+  $success = TRUE;
+
+  $user = cf_current_user();
+  $user_data = array(
+    'user_id' => $user->uid,
+  );
+
+  if (!is_null($request)) {
+    $request_id = (int) $request['mer']['id'][0]->value;
+    $status = (int) $request['top']['status'][0]->value;
+    $step = (int) $request['top']['step'][0]->value;
+    $requirements = $request['current']['requirements'];
+  }
+
+  mfcs_include(MFCS_INCLUDE_TABLE);
+
+  $structure_current = array();
+  $structure_field_tables = array();
+
+  if (is_null($request)) {
+    foreach ($structure as $table_name => &$fields) {
+      foreach ($fields as $field_name => &$field_values) {
+        $structure_current[$table_name . '_' . $field_name] = 0;
+
+        // manual processing fields must not be auto-populated through the normal form submit process.
+        if (array_key_exists('manual_processing', $field_values) && $field_values['manual_processing']) {
+          continue;
+        }
+
+        // store the values for each individual mfcs_field_* table.
+        $db_table_field = 'mfcs_field_' . $table_name . '_' . $field_name;
+
+        $current = &$form_state['values'];
+        $parts = explode('][', $field_values['path']);
+        if (empty($parts)) {
+          unset($current);
+          $current = NULL;
+        }
+        else {
+          foreach ($parts as $part) {
+            if (is_array($current) && array_key_exists($part, $current)) {
+              $current = &$current[$part];
+
+              if (empty($current)) {
+                $current = NULL;
+              }
+            }
+            else {
+              watchdog(MFCS_WATCHDOG_ID, 'Failed to process \'@part\' for \'@field_name\' in \'@table_name\' during form submit. Invalid array or missing array key (new).', array('@part' => $part, '@field_name' => $field_name, '@table_name' => $table_name), WATCHDOG_ERROR);
+              unset($current);
+              $current = NULL;
+              continue 2;
+            }
+          }
+        }
+
+        mfcs_build_table_structure($structure, $structure_current, $structure_field_tables, $table_name, $field_name, $db_table_field, $user_data, $current, $form_state);
+      }
+    }
+  }
+  else {
+    foreach ($structure as $table_name => &$fields) {
+      foreach ($fields as $field_name => &$field_values) {
+        // manual processing fields must not be auto-populated through the normal form submit process.
+        if (array_key_exists('manual_processing', $field_values) && $field_values['manual_processing']) {
+          continue;
+        }
+
+        // load the path so that it can be checked to see if anything needs to be changed.
+        $parts = explode('][', $field_values['path']);
+        if (empty($parts)) {
+          // this should not happen.
+          continue;
+        }
+
+        unset($current_existing);
+        unset($current_new);
+
+        $current_existing = &$existing;
+        $current_new = &$form_state['values'];
+
+        while (!empty($parts)){
+          $part = array_shift($parts);
+
+          if (!is_array($current_existing) || !array_key_exists($part, $current_existing)) {
+            watchdog(MFCS_WATCHDOG_ID, 'Failed to process \'@part\' for \'@field_name\' in \'@table_name\' during form submit. Invalid array or missing array key (existing).', array('@part' => $part, '@field_name' => $field_name, '@table_name' => $table_name), WATCHDOG_ERROR);
+            continue 2;
+          }
+
+          if (!is_array($current_new) || !array_key_exists($part, $current_new)) {
+            watchdog(MFCS_WATCHDOG_ID, 'Failed to process \'@part\' for \'@field_name\' in \'@table_name\' during form submit. Invalid array or missing array key (new).', array('@part' => $part, '@field_name' => $field_name, '@table_name' => $table_name), WATCHDOG_ERROR);
+            continue 2;
+          }
+
+          $current_existing = &$current_existing[$part];
+          $current_new = &$current_new[$part];
+        }
+        unset($part);
+
+        // when the values are the same, do not update them.
+        if ($current_existing == $current_new) {
+          continue;
+        }
+
+        $db_table_field = 'mfcs_field_' . $table_name . '_' . $field_name;
+
+        mfcs_build_table_structure($structure, $structure_current, $structure_field_tables, $table_name, $field_name, $db_table_field, $user_data, $current_new, $form_state, $request);
+      }
+    }
+  }
+
+  if (empty($structure_field_tables)) {
+    return NULL;
+  }
+
+  $transaction = db_transaction();
+
+  try {
+    // now perform the operations.
+    if (is_null($request)) {
+      $query = db_insert('mfcs_requests');
+      $query->fields($prepared['mfcs_requests']);
+      $request_id = $query->execute();
+
+      if (!is_numeric($request_id) || $request_id <= 0) {
+        // the request was not properly saved, present an error here.
+        $transaction->rollback();
+        return FALSE;
+      }
+
+      // save the request id so that a programmatic caller can determine the request_id.
+      $form_state['created_request_id'] = $request_id;
+
+      $prepared['mfcs_request_revisions']['request_id'] = $request_id;
+    }
+    else {
+      $query = db_update('mfcs_requests');
+      $query->fields($prepared['mfcs_requests']);
+      $query->condition('id', $request_id);
+      $query->execute();
+    }
+
+    $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . $instance . '_' . $user->uid . '_' . $request_id, FALSE);
+    if (!$processed_mfcs_request_revisions) {
+      $query = db_insert('mfcs_request_revisions');
+      $query->fields($prepared['mfcs_request_revisions']);
+      $query->execute();
+
+      $processed_mfcs_request_revisions = TRUE;
+    }
+
+    foreach ($structure_field_tables as $table_name => $fields) {
+      foreach ($fields as $delta => $values) {
+        $values['request_id'] = $request_id;
+
+        $query = db_insert($table_name);
+        $query->fields($values);
+        $query->execute();
+      }
+    }
+
+    // if the request has been updated while it is in a locked status, the review log must be reset/restarted.
+    if (!is_null($request) && $review_log_lock && $status === MFCS_REQUEST_STATUS_LOCKED && $step !== MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
+      $step_revision = $request['current']['top']['step'] + 1;
+      $structure_current['top_step'] = $step_revision;
+
+      $mfcs_field_top_step = array(
+        'request_id' => $request_id,
+        'revision' => $step_revision,
+        'delta' => 0,
+        'user_id' => $user->uid,
+        'date' => $instance,
+        'value' => MFCS_REVIEW_STEP_VENUE_AVAILABLE,
+      );
+
+      $mfcs_requests = array(
+        'step' => MFCS_REVIEW_STEP_VENUE_AVAILABLE,
+        'updated' => $instance,
+      );
+
+      $query = db_update('mfcs_requests');
+      $query->fields($mfcs_requests);
+      $query->condition('id', $request_id);
+      $query->execute();
+
+      $query = db_insert('mfcs_field_top_step');
+      $query->fields($mfcs_field_top_step);
+      $query->execute();
+
+      $query = db_delete('mfcs_reviewed');
+      $query->condition('request_id', $request_id);
+      $query->execute();
+
+      $review_revision = mfcs_load_request_revision_number($request_id, 'mfcs_field_review_review');
+
+      if ($review_revision === FALSE || is_null($review_revision)) {
+        $review_revision = 0;
+      }
+      else {
+        $review_revision++;
+      }
+
+      $structure_current['review_review'] = $review_revision;
+
+      $mfcs_field_review_review = array(
+        'request_id' => $request_id,
+        'revision' => $review_revision,
+        'delta' => 0,
+        'user_id' => $user->uid,
+        'date' => $instance,
+        'step' => $step,
+        'decision' => MFCS_REVIEW_DECISION_AMENDMENT,
+        'message' => '',
+      );
+
+      $query = db_insert('mfcs_field_review_review');
+      $query->fields($mfcs_field_review_review);
+      $query->execute();
+
+      $mfcs_current['requirements_facilities_fees'] = NULL;
+      $mfcs_current['requirements_equipment_fees'] = NULL;
+      $mfcs_current['requirements_custodial_fees'] = NULL;
+      $mfcs_current['requirements_security_fees'] = NULL;
+      $mfcs_current['requirements_grounds_fees'] = NULL;
+      $mfcs_current['requirements_maintenance_fees'] = NULL;
+      $mfcs_current['requirements_other'] = NULL;
+      $mfcs_current['requirements_university'] = NULL;
+
+      $mfcs_current['insurance_provided'] = NULL;
+    }
+
+    // update the current revisions table.
+    if (is_null($request)) {
+      $structure_current['request_id'] = $request_id;
+      $query = db_insert('mfcs_current');
+      $query->fields($structure_current);
+      $query->execute();
+    }
+    else {
+      $query = db_update('mfcs_current');
+      $query->condition('request_id', $request_id);
+      $query->fields($structure_current);
+      $query->execute();
+    }
+
+    // enforce transaction execution
+    unset($transaction);
+  }
+  catch (Error $e) {
+    $transaction->rollback();
+    cf_error::on_query_execution($e);
+
+    $success = FALSE;
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+    cf_error::on_query_execution($e);
+
+    $success = FALSE;
+  }
+
+  return $success;
+}
+
+/**
  * @} End of '@addtogroup mfcs'.
  */
