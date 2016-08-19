@@ -517,7 +517,6 @@ function mfcs_request_manage_0_move_form_validate($form, &$form_state) {
   if ($clicked_id == 'submit-request-submit') {
     if ($no_problems) {
       $form_state['rebuild'] = FALSE;
-      #form_set_error('', "DEBUG: prevent final submit.");
     }
   }
 }
