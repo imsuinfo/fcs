@@ -1506,6 +1506,9 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
       elseif ($decision === MFCS_REVIEW_DECISION_OVERRIDE) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">Overridden</strong> the request' . $reviewer_classification . '.';
       }
+      elseif ($decision === MFCS_REVIEW_DECISION_MOVE) {
+        $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">Moved</strong> the request' . $reviewer_classification . '.';
+      }
       else {
         if (isset($decision_options[$decision])) {
           $markup .= $user_name_markup . ' ' . $user_id_markup . ' chose to <strong class="review-item-label-text-row-decision">' . $decision_options[$decision] . '</strong> the request' . $reviewer_classification . '.';

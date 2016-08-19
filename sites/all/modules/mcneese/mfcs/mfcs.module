@@ -88,6 +88,7 @@ define('MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED', 8);
  define('MFCS_REVIEW_DECISION_UNCANCELLED', 3);
  define('MFCS_REVIEW_DECISION_REASSIGNED', 4);
  define('MFCS_REVIEW_DECISION_OVERRIDE', 5);
+ define('MFCS_REVIEW_DECISION_MOVE', 6);
 
 /**
  * Defines Taxonomy TIDs for review classifications.
@@ -930,6 +931,20 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
   }
   elseif ($operation == 'override') {
     $operation_result = mfcs_page_request_access_operation_override($request_ids, $processed, $access, $roles, $user);
+
+    // if something went wrong with the operation check, return FALSE but do not cache.
+    if ($operation_result === FALSE) {
+      return FALSE;
+    }
+
+    if (is_array($request_id)) {
+      return $processed;
+    }
+
+    return $processed[$request_id];
+  }
+  elseif ($operation == 'move') {
+    $operation_result = mfcs_page_request_access_operation_move($request_ids, $processed, $access, $roles, $user);
 
     // if something went wrong with the operation check, return FALSE but do not cache.
     if ($operation_result === FALSE) {
@@ -2126,6 +2141,18 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
     }
   }
   elseif ($operation == 'manage') {
+    if ($request['top']['status'][0]->value == MFCS_REQUEST_STATUS_DELETED) {
+      $access[$request_id] = FALSE;
+      return FALSE;
+    }
+
+    // only managers and administers are allowed to override the status of a request.
+    if ($roles['manager'] || $roles['administer']) {
+      $access[$request_id] = TRUE;
+      return TRUE;
+    }
+  }
+  elseif ($operation == 'move') {
     if ($request['top']['status'][0]->value == MFCS_REQUEST_STATUS_DELETED) {
       $access[$request_id] = FALSE;
       return FALSE;

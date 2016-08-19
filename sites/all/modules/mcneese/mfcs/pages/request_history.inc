@@ -353,6 +353,9 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
                         $custom_message .= ' the reviewer has reported that they have <strong class="review-decision">' . "No Issues" . '</strong> with the request. ';
                       }
+                      elseif ($decision === MFCS_REVIEW_DECISION_MOVE) {
+                        $custom_message = 'The request has been <strong class="review-decision">' . "Moved" . '</strong> to another location, building, or room. ';
+                      }
 
                       $processed_values[$value->user_id]['fields'][$group_name][$field_name][$key] = array(
                         '#markup' => '<div class="item-value">' . $custom_message . '</div>',

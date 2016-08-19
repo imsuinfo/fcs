@@ -1610,6 +1610,25 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
     // do not send any further e-mails and do not progress to the next step.
     return TRUE;
   }
+  elseif ($decision === MFCS_REVIEW_DECISION_MOVE) {
+    $parameters = array();
+    $parameters['changed_by'] = $user->uid;
+    $parameters['changed_type'] = 'reviewer';
+    $parameters['message'] = $message;
+    $parameters['move'] = TRUE;
+    $parameters['requester_included'] = TRUE;
+
+    if ($restriction === MFCS_REVIEW_RESTRICTIONS_REVIEWER || $restriction === MFCS_REVIEW_RESTRICTIONS_MANAGERS) {
+      $parameters['requester_included'] = FALSE;
+    }
+
+    if ($send_email) {
+      mfcs_send_workflow_emails($request_id, $parameters);
+    }
+
+    // do not send any further e-mails and do not progress to the next step.
+    return TRUE;
+  }
 
   // continue to next step only if at least 1 of each reviewer classification has submitted a reply.
   $attach_message = '';
@@ -2059,10 +2078,11 @@ function mfcs_workflow_force_step($request_id, $step, $status, $restriction, $me
  *     reason.
  *   - forced_transition: A boolean representing that the transition is
  *     adminostratively forced and is therefore not a normal transition.
+ *   - move: A boolean representing whether or not this is a move operation.
  *
  *   The keys: 'new', 'update', 'step', 'status', 'cancelling', 'cancelled',
- *   'uncancelled', 'amendment', 'reminder', and 'reassigned' are mutually
- *   exclusive.
+ *   'uncancelled', 'amendment', 'reminder', 'reassigned', 'comment' and 'move'
+ *   are mutually exclusive.
  *
  * @return bool
  *   TRUE on success, FALSE otherwise.
@@ -2209,6 +2229,15 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     $is_amendment = $parameters['amendment'];
     if (!is_bool($is_amendment)) {
       cf_error::invalid_bool('parameters[amendment]');
+      return FALSE;
+    }
+  }
+
+  $is_move = FALSE;
+  if (array_key_exists('move',  $parameters)) {
+    $is_move = $parameters['move'];
+    if (!is_bool($is_move)) {
+      cf_error::invalid_bool('parameters[move]');
       return FALSE;
     }
   }
@@ -3358,6 +3387,46 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     if ($requester_included_in_emails && !is_null($request_requester['email'])) {
       if (!array_key_exists($request_requester['email'], $email_to) && strlen($message) > 0) {
         $email_comment_only[$request_requester['email']] = $request_requester['email'];
+        $email_to[$request_requester['email']] = $request_requester['email'];
+      }
+    }
+  }
+  elseif ($is_move) {
+    $email_params['title_suffix'] = "Moved";
+    $email_params['content'] = "";
+    $email_params['content'] .= $changed_by_string . " has moved the request to a new location, building, or room.\n";
+    $email_params['content'] .= "\n";
+    $email_params['content'] .= $message . "\n";
+    $email_params['content'] .= $standard_content;
+    $email_params['markup'] = "";
+    $email_params['markup'] .= '<em>' . $changed_by_markup . "</em> has <em>moved</em> the request to a new location, building, or room.<br>";
+    $email_params['markup'] .= '<br>';
+    $email_params['markup'] .= str_replace("\n", '<br>', trim(check_plain($message))) . '<br>';
+    $email_params['markup'] .= $standard_markup;
+
+    foreach ($step_1_reviewers as $r) {
+      $email_to[$r->email] = $r->email;
+    }
+
+    if (is_array($venue_coordinator)) {
+      $email_to[$venue_coordinator['email']] = $venue_coordinator['email'];
+    }
+
+    // also send e-mails to the venue coordinator proxies.
+    $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.user_id' => $venue_coordinator['user_id'], 'mpvc.disabled' => 0));
+    if (!empty($proxies_returned['results'])) {
+      foreach ($proxies_returned['results'] as $proxy_returned) {
+        $proxy = mfcs_load_basic_user_settings_by_user_id($proxy_returned->proxy_id);
+
+        if (is_array($proxy)) {
+          $email_to[$proxy['email']] = $proxy['email'];
+        }
+      }
+    }
+
+    // as of fcs-79, conditionally include the requester in the e-mails.
+    if ($requester_included_in_emails && !is_null($request_requester['email'])) {
+      if (!array_key_exists($request_requester['email'], $email_to) && strlen($message) > 0) {
         $email_to[$request_requester['email']] = $request_requester['email'];
       }
     }

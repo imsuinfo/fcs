@@ -296,6 +296,19 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
     'tab_root' => 'requests/manage-0',
   );
 
+  $items['requests/manage-0/move/%'] = array(
+    'title' => "Move Request",
+    'description' => "Move Request",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_manage_0_move_form', 3),
+    'file' => 'request_move.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('move', 3),
+    'tab_parent' => 'requests/manage-0',
+    'tab_root' => 'requests/manage-0',
+  );
+
   $items['requests/view-0/%'] = array(
     'title' => "View Request",
     'description' => "View Request",
