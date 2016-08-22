@@ -2214,7 +2214,6 @@ function mfcs_hook_user_presave(&$edit, $account, $category) {
       $edit['status'] = $changes['status'];
     }
 
-// @todo: when account is locked, disable all roles, even for new accounts?
     // if status has changed, and the account is disabled, then unset all roles.
     if (isset($edit['roles'])) {
       if (isset($edit['status']) && isset($account->status)) {

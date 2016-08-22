@@ -630,9 +630,6 @@ function mfcs_request_troubleshoot_0_mer_cache_synchronize($transaction, $user =
   try {
     $requests = array();
 
-    // updated
-    // @todo: append current request revision number to the mfcs_current table and use that value.
-
 
     // status
     $query = db_select('mfcs_requests', 'mer');

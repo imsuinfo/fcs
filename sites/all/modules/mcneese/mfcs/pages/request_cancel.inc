@@ -645,8 +645,6 @@ function mfcs_request_cancelling_0_form($form, &$form_state, $request_id) {
     }
     elseif ($date->cancelled == MFCS_CANCELLING_CANCEL) {
       unset($form['dates'][$key]['select']['#options'][MFCS_CANCELLING_CANCEL]);
-
-      // @todo: check to see if date is available and if not, then set this to 3 and lock this field (read-only?) (disabled?).
       unset($form['dates'][$key]['select']['#options'][MFCS_CANCELLING_UNAVAILABLE]);
 
       $extra_css .= ' strike';
@@ -720,6 +718,14 @@ function mfcs_request_cancelling_0_form_validate($form, &$form_state) {
     return;
   }
 
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
   $room = $form['form']['request']['#value']['top']['room'][0]->value;
   if (is_string($room)) {
     $room = (int) $room;
@@ -730,6 +736,7 @@ function mfcs_request_cancelling_0_form_validate($form, &$form_state) {
   $cancelled_dates = 0;
 
   $changes = FALSE;
+  $holidays = array();
   foreach ($form_state['values']['dates'] as $key => $operation) {
     if ($operation['select'] == MFCS_CANCELLING_CANCEL) {
       $cancelling_dates++;
@@ -737,6 +744,26 @@ function mfcs_request_cancelling_0_form_validate($form, &$form_state) {
       continue;
     }
     elseif ($operation['select'] == MFCS_CANCELLING_UNCANCEL) {
+      // check for holidays.
+      $day_start = strtotime('midnight today', $form['form']['request']['#value']['dates']['date'][$key]->value);
+
+      if (!array_key_exists($day_start, $holidays)) {
+        $holidays[$day_start] = mfcs_get_holidays((int) date('Y', $day_start), $day_start);
+
+        if ($holidays[$day_start] === FALSE) {
+          watchdog(MFCS_WATCHDOG_ID, 'Failed to load holidays for year @year and timestamp @timestamp (based on @date).', array('@year' => (int) date('Y', $day_start), '@timestamp' => $day_start, '@date' => $form['form']['request']['#value']['dates']['date'][$key]->value));
+        }
+      }
+
+      if (!empty($holidays[$day_start])) {
+        $holiday = reset($holidays[$day_start]);
+        drupal_set_message(t('Warning: <strong>@date</strong> may not available because of: <strong><a href="' . $base_path . 'requests/holiday-0/view/' . $holiday->year . '/' . $holiday->id . $url_arguments . '" title="View details about holiday.">@holiday</a></strong>.', array('@year' => date('Y', $holiday->date), '@date' => date(MFCS_DATE_FORMAT_DATE, $holiday->date), '@holiday' => $holiday->title)), 'warning');
+      }
+      unset($holiday);
+      unset($day_start);
+
+
+      // check room unavailability.
       $room_unavailability = mfcs_check_room_availability($room, array($form['form']['request']['#value']['dates']['date'][$key]->value), array($form['form']['request']['#value']['dates']['time_start'][$key]->value), array($form['form']['request']['#value']['dates']['time_stop'][$key]->value));
       if ($room_unavailability === FALSE) {
         form_set_error('dates][' . $key . '][select', "An internal error occurred while checking the room for availability. Please contact the support staff.");

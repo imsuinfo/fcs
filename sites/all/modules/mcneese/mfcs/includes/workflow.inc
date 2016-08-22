@@ -3556,8 +3556,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
           drupal_mail('mfcs', 'request_alert', $to, language_default(), $comment_email_params, $email_from, TRUE);
         }
         else {
-          watchdog(MFCS_WATCHDOG_ID, "Unable to send (comment only) e-mail to %to because the e-mail content was not populated for request %request_id.", array('%to' => $to, '%request_id' => $request_id), WATCHDOG_ERROR);
-          // @todo: implement a problem report id and report it to the request problems table.
+          watchdog(MFCS_WATCHDOG_ID, 'Unable to send (comment only) e-mail to %to because the e-mail content was not populated for request %request_id.', array('%to' => $to, '%request_id' => $request_id), WATCHDOG_ERROR);
         }
       }
       else {
@@ -3565,8 +3564,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
           drupal_mail('mfcs', 'request_alert', $to, language_default(), $email_params, $email_from, TRUE);
         }
         else {
-          watchdog(MFCS_WATCHDOG_ID, "Unable to send e-mail to %to because the e-mail content was not populated for request %request_id.", array('%to' => $to, '%request_id' => $request_id), WATCHDOG_ERROR);
-          // @todo: implement a problem report id and report it to the request problems table.
+          watchdog(MFCS_WATCHDOG_ID, 'Unable to send e-mail to %to because the e-mail content was not populated for request %request_id.', array('%to' => $to, '%request_id' => $request_id), WATCHDOG_ERROR);
         }
       }
     }
@@ -3578,8 +3576,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
           drupal_mail('mfcs', 'request_alert', $to, language_default(), $comment_email_params, $email_from, TRUE);
         }
         else {
-          watchdog(MFCS_WATCHDOG_ID, "Unable to send (comment only) e-mail to %to because the e-mail content was not populated for request %request_id.", array('%to' => $to, '%request_id' => $request_id), WATCHDOG_ERROR);
-          // @todo: implement a problem report id and report it to the request problems table.
+          watchdog(MFCS_WATCHDOG_ID, 'Unable to send (comment only) e-mail to %to because the e-mail content was not populated for request %request_id.', array('%to' => $to, '%request_id' => $request_id), WATCHDOG_ERROR);
         }
       }
       else {
@@ -3587,8 +3584,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
           drupal_mail('mfcs', 'request_alert', $to, language_default(), $email_params, $email_from, TRUE);
         }
         else {
-          watchdog(MFCS_WATCHDOG_ID, "Unable to send e-mail to %to because the e-mail content was not populated for request %request_id.", array('%to' => $to, '%request_id' => $request_id), WATCHDOG_ERROR);
-          // @todo: implement a problem report id and report it to the request problems table.
+          watchdog(MFCS_WATCHDOG_ID, 'Unable to send e-mail to %to because the e-mail content was not populated for request %request_id.', array('%to' => $to, '%request_id' => $request_id), WATCHDOG_ERROR);
         }
       }
     }

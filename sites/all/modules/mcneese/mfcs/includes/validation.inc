@@ -851,7 +851,6 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
     }
 
     // check for room availability, but only if the room has been defined.
-    // @todo: add the request id if it exists.
     $room_id = (int) $room->room_id;
     $room_unavailability = mfcs_check_room_availability($room_id, $date_timestamp, $start_timestamp, $stop_timestamp, $request_id);
     if ($room_unavailability === FALSE) {

@@ -602,8 +602,68 @@ function mfcs_miscellaneous_check_requests_stuck($request_id = NULL) {
     return FALSE;
   }
 
-  // @todo: implement this.
-  return FALSE;
+  $requests = array();
+  $instance = mfcs_instance();
+
+  try {
+    // as of fcs-79, much of the review system's structure has been changed.
+    // the MFCS_REVIEW_STEP_REQUIREMENTS step is no longer in use.
+    // also check other steps not currently in use.
+    $steps = array(
+      MFCS_REVIEW_STEP_NONE,
+      MFCS_REVIEW_STEP_CHANGES_REQUIRED,
+      MFCS_REVIEW_STEP_RELEASE_HOLD,
+      MFCS_REVIEW_STEP_REQUIREMENTS,
+    );
+
+    // the following status to restrict search to when processing unused steps.
+    $status = array(
+      MFCS_REQUEST_STATUS_LOCKED,
+      MFCS_REQUEST_STATUS_UNLOCKED,
+    );
+
+    $query = db_select('mfcs_requests', 'mer');
+
+    $query->addField('mer', 'id', 'id');
+    $query->addField('mer', 'title', 'title');
+    $query->addField('mer', 'status', 'status');
+    $query->addField('mer', 'step', 'step');
+
+    if (!is_null($request_id)) {
+      $query->condition('mer.id', $request_id);
+    }
+
+    $query->condition('mer.status', $status, 'IN');
+    $query->condition('mer.step', $steps, 'IN');
+
+    $results = $query->execute()->fetchAll();
+    if (!is_array($results)) {
+      return FALSE;
+    }
+
+    if (!empty($results)) {
+      foreach ($results as $result) {
+        $requests[$result->id] = array(
+          'id' => $result->id,
+          'title' => $result->title,
+          'status' => $result->status,
+          'step' => $result->step,
+        );
+      }
+    }
+  }
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+
+  return $requests;
 }
 
 /**

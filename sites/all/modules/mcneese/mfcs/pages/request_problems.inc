@@ -336,8 +336,6 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
       }
     }
 
-    // @todo: add date search
-
     $row['account_id'] = array(
       'data' => $problem->user_id,
       'class' => $class_user_id,

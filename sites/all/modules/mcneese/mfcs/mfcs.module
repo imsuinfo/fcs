@@ -2679,7 +2679,7 @@ function mfcs_mail($key, &$message, $params) {
       $message['headers']['Importance'] = 'high';
     }
     elseif ($params['message_priority'] == MFCS_MAIL_PRIORITY_NORMAL) {
-      // @todo: should low be manually specified, such as: 3 (normal) ?
+      // nothing to do here.
     }
     elseif ($params['message_priority'] == MFCS_MAIL_PRIORITY_LOW) {
       $message['headers']['X-Priority'] = '4 (Low)';
