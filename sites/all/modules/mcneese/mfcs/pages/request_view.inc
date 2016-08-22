@@ -1551,6 +1551,12 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           '#weight' => 3,
         );
 
+        // do not allow for changing strictly university business for completed requests.
+        if ($step === MFCS_REVIEW_STEP_COMPLETED) {
+          $form['review']['operations']['university_business']['#disabled'] = TRUE;
+          $form['review']['operations']['university_business']['#readonly'] = TRUE;
+        }
+
         if (!empty($request['requirements']['university'][0])) {
           $form['review']['operations']['university_business']['#default_value'] = $request['requirements']['university'][0]->value;
         }
