@@ -1531,6 +1531,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
 
       // pre-process fee waving so that related changes are not displayed in the log.
       // this is done to help keep the log clean.
+      // as of fcs-79, 'waived' no longer exists for new content, but old content settings are preserved so this check must remain.
       $fees_are_not_waived = TRUE;
       if (!empty($changelog['requirements']['waived'])) {
         $value = reset($changelog['requirements']['waived']);
@@ -1544,15 +1545,14 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
       if ($fees_are_not_waived && $decision === MFCS_REVIEW_DECISION_REQUIREMENT) {
         $requirements_specified = TRUE;
       }
-      else {
-        // (legacy) support old/original behavior for when use fees were not always specified during the requirements step.
-        if (!empty($changelog['requirements']['university'])) {
-          $value = reset($changelog['requirements']['university']);
-          if ($value) {
-            $fees_are_not_waived = FALSE;
-          }
-          unset($value);
+
+      // As of fcs-79, use fees may be specified at almost any time.
+      if (!empty($changelog['requirements']['university'])) {
+        $value = reset($changelog['requirements']['university']);
+        if ($value) {
+          $fees_are_not_waived = FALSE;
         }
+        unset($value);
       }
 
       if ($requirements_specified || ($review_step === MFCS_REVIEW_STEP_VENUE_AVAILABLE && ($decision === MFCS_REVIEW_DECISION_REQUIREMENT || $decision === MFCS_REVIEW_DECISION_WAIVE) && $type !== MFCS_REQUEST_TYPE_QUICK_MEETING)) {

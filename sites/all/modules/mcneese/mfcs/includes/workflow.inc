@@ -940,7 +940,10 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
     }
 
     if ($requirements_university_save || is_null($requirements_latest['university'])) {
-      $current_revision = $requirements_latest['university']->revision + 1;
+      $current_revision = 0;
+      if (isset($requirements_latest['university']->revision)) {
+        $current_revision = $requirements_latest['university']->revision + 1;
+      }
 
       if (is_null($requirements_latest['university'])) {
         $current_revision = 0;
@@ -1120,7 +1123,10 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
         continue;
       }
 
-      $current_revision = $requirements_latest[$use]->revision + 1;
+      $current_revision = 0;
+      if (isset($requirements_latest[$use]->revision)) {
+        $current_revision = $requirements_latest[$use]->revision + 1;
+      }
       if (is_null($requirements_latest[$use])) {
         $current_revision = 0;
       }

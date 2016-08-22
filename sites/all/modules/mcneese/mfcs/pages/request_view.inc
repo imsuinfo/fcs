@@ -1498,7 +1498,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
       if (array_key_exists(MFCS_REVIEW_DECISION_ISSUES, $decision_options) && array_key_exists(MFCS_REVIEW_DECISION_ISSUES_NONE, $decision_options)) {
         if (!$can_review_request || !empty($reviewer_classifications)) {
-          $form['review']['operations']['instructions']['#markup'] .= "<div class=\"instructions-issues\">To mark this request as <strong>reviewed</strong>, be sure to select either <strong>" . $decision_options[MFCS_REVIEW_DECISION_ISSUES_NONE] . "</strong> or <strong>" . $decision_options[MFCS_REVIEW_DECISION_ISSUES] . "</strong>.</div>";
+          $form['review']['operations']['instructions']['#markup'] .= '<div class="instructions-issues">To mark this request as <strong>reviewed</strong>, be sure to select either <strong>' . $decision_options[MFCS_REVIEW_DECISION_ISSUES_NONE] . '</strong> or <strong>' . $decision_options[MFCS_REVIEW_DECISION_ISSUES] . '</strong>.</div>';
         }
       }
 
@@ -2912,6 +2912,10 @@ function mfcs_request_view_0_detect_allowed_decisions($request, $user, $administ
     unset($decision_options[MFCS_REVIEW_DECISION_UNAVAILABLE]);
     unset($decision_options[MFCS_REVIEW_DECISION_APPROVE]);
     unset($decision_options[MFCS_REVIEW_DECISION_DENY]);
+
+    // issues or no issues should not be allowed after a request is final approved.
+    unset($decision_options[MFCS_REVIEW_DECISION_ISSUES]);
+    unset($decision_options[MFCS_REVIEW_DECISION_ISSUES_NONE]);
   }
 
   return $decision_options;
