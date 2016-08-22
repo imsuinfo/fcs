@@ -2887,7 +2887,7 @@ function mfcs_request_view_0_detect_allowed_decisions($request, $user, $administ
     $decision_options = mfcs_get_reviewer_decision_list_options(NULL, MFCS_RESTRICTION_DECISION_REVIEWER);
   }
 
-  if ($step == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
+  if ($step === MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
     // venue coordinators get special options.
     if ($venue_coordinator && !$manager && !$administer) {
       $decision_options = mfcs_get_reviewer_decision_list_options(NULL, MFCS_RESTRICTION_DECISION_VENUE_COORDINATOR);
@@ -2899,7 +2899,7 @@ function mfcs_request_view_0_detect_allowed_decisions($request, $user, $administ
     unset($decision_options[MFCS_REVIEW_DECISION_APPROVE]);
     unset($decision_options[MFCS_REVIEW_DECISION_DENY]);
   }
-  elseif ($step == MFCS_REVIEW_STEP_REVIEW) {
+  elseif ($step === MFCS_REVIEW_STEP_REVIEW) {
     // remove decisions that are not allowed during this step.
     unset($decision_options[MFCS_REVIEW_DECISION_AVAILABLE]);
     unset($decision_options[MFCS_REVIEW_DECISION_UNAVAILABLE]);
@@ -2907,12 +2907,12 @@ function mfcs_request_view_0_detect_allowed_decisions($request, $user, $administ
     unset($decision_options[MFCS_REVIEW_DECISION_DENY]);
 
   }
-  elseif ($step == MFCS_REVIEW_STEP_FINAL_DECISION) {
+  elseif ($step === MFCS_REVIEW_STEP_FINAL_DECISION) {
     // remove decisions that are not allowed during this step.
     unset($decision_options[MFCS_REVIEW_DECISION_AVAILABLE]);
     unset($decision_options[MFCS_REVIEW_DECISION_UNAVAILABLE]);
   }
-  elseif ($step == MFCS_REVIEW_STEP_COMPLETED) {
+  elseif ($step === MFCS_REVIEW_STEP_COMPLETED) {
     // remove decisions that are not allowed during this step.
     unset($decision_options[MFCS_REVIEW_DECISION_AVAILABLE]);
     unset($decision_options[MFCS_REVIEW_DECISION_UNAVAILABLE]);
@@ -2922,6 +2922,13 @@ function mfcs_request_view_0_detect_allowed_decisions($request, $user, $administ
     // issues or no issues should not be allowed after a request is final approved.
     unset($decision_options[MFCS_REVIEW_DECISION_ISSUES]);
     unset($decision_options[MFCS_REVIEW_DECISION_ISSUES_NONE]);
+  }
+
+  // prohibit certain operations for cancelled requests.
+  if ($status === MFCS_REQUEST_STATUS_CANCELLED || $status === MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED) {
+    unset($decision_options[MFCS_REVIEW_DECISION_ISSUES]);
+    unset($decision_options[MFCS_REVIEW_DECISION_ISSUES_NONE]);
+    unset($decision_options[MFCS_REVIEW_DECISION_REQUIREMENT]);
   }
 
   return $decision_options;
