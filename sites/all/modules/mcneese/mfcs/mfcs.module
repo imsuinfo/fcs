@@ -480,9 +480,9 @@ define('MFCS_UNAVAILABILITY_TYPE_CLASS', 7);
  * Date Formats
  */
 define('MFCS_DATE_FORMAT_DATE', 'l, F j, Y');
-define('MFCS_DATE_FORMAT_DATE_TIME', 'h:ia, l, F j, Y');
-define('MFCS_DATE_FORMAT_DATE_TIME_SECONDS', 'h:i:sa, l, F j, Y');
-define('MFCS_DATE_FORMAT_DATE_TIME_SECONDS_TIMEZONE', 'h:i:sa T, l, F j, Y');
+define('MFCS_DATE_FORMAT_DATE_TIME', 'l, F j, Y h:ia');
+define('MFCS_DATE_FORMAT_DATE_TIME_SECONDS', 'l, F j, Y h:i:sa');
+define('MFCS_DATE_FORMAT_DATE_TIME_SECONDS_TIMEZONE', 'T, l, F j, Y h:i:sa');
 define('MFCS_DATE_FORMAT_TIME', 'h:ia');
 define('MFCS_DATE_FORMAT_TIME_SECONDS', 'h:i:sa');
 
