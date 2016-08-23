@@ -383,14 +383,14 @@ function mfcs_miscellaneous_check_requests_conflict($request_id = NULL) {
     $sql_with .= ' left join mfcs_banner_rooms mbr on mer.room = mbr.id';
     $sql_with .= ' where mer.status in (:locked, :unlocked, :accepted) and (mfdd.value > :instance or (mfdts.value is not null and mfdts.value > :instance) or (mfdtsp.value is not null and mfdtsp.value > :instance))) ';
 
-    $sql_on_1 = 'r.time_start is null and r2.time_start is null and r.date = r2.date';
-    $sql_on_2 = 'r.time_start is null and r2.time_start is not null and r.date >= r2.time_start and r.date < r2.time_stop';
-    $sql_on_3 = 'r.time_start is not null and r2.time_start is not null and ((r.time_start >= r2.time_start and r.time_start < r2.time_stop) or (r.time_stop > r2.time_start and r.time_stop <= r2.time_stop))';
-    $sql_on_4 = 'r.time_start is not null and r2.time_start is null and r2.date >= r.time_start and r2.date < r.time_stop';
+    $sql_on_1 = 'r1.time_start is null and r2.time_start is null and r1.date = r2.date';
+    $sql_on_2 = 'r1.time_start is null and r2.time_start is not null and r1.date >= r2.time_start and r1.date < r2.time_stop';
+    $sql_on_3 = 'r1.time_start is not null and r2.time_start is not null and ((r1.time_start >= r2.time_start and r1.time_start < r2.time_stop) or (r1.time_stop > r2.time_start and r1.time_stop <= r2.time_stop))';
+    $sql_on_4 = 'r1.time_start is not null and r2.time_start is null and r2.date >= r1.time_start and r2.date < r1.time_stop';
 
-    $sql_main = 'select r.*, r2.id as conflict_id, r2.title as conflict_title, r2.date as conflict_date, r2.time_start as conflict_time_start, r2.time_stop as conflict_time_stop, r2.delta as conflict_delta';
-    $sql_main .= ' from requests r';
-    $sql_main .= ' inner join requests r2 on (r.id <> r2.id and r.room = r2.room and ((' . $sql_on_1 . ') or (' . $sql_on_2 . ') or (' . $sql_on_3 . ') or (' . $sql_on_4 . ')))';
+    $sql_main = 'select r1.*, r2.id as conflict_id, r2.title as conflict_title, r2.date as conflict_date, r2.time_start as conflict_time_start, r2.time_stop as conflict_time_stop, r2.delta as conflict_delta';
+    $sql_main .= ' from requests r1';
+    $sql_main .= ' inner join requests r2 on (r1.id <> r2.id and r1.room = r2.room and ((' . $sql_on_1 . ') or (' . $sql_on_2 . ') or (' . $sql_on_3 . ') or (' . $sql_on_4 . ')))';
 
     $arguments = array(
       ':locked' => MFCS_REQUEST_STATUS_LOCKED,
@@ -402,7 +402,7 @@ function mfcs_miscellaneous_check_requests_conflict($request_id = NULL) {
     if (!is_null($request_id)) {
       $arguments[':request_id'] = $request_id;
 
-      $sql_main .= ' where r.id = :request_id';
+      $sql_main .= ' where r1.id = :request_id';
     }
 
     $results = db_query($sql_with . $sql_main, $arguments)->fetchAll();
