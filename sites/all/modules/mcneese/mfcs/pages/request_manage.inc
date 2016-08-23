@@ -218,6 +218,37 @@ function mfcs_request_manage_0_page($request_id) {
   $markup .= '</div>';
 
 
+  // Request Problems
+  mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
+
+  $conditions = array(
+    'value_request_id' => array(
+      'field' => 'mpr.request_id',
+      'operator' => MFCS_OPERATOR_EQUAL,
+      'search' => $id_id
+    ),
+  );
+  $request_problems_by_id = mfcs_miscellaneous_problems_request_search($conditions, array('count' => FALSE));
+  unset($conditions);
+
+  if (!empty($request_problems_by_id['results'])) {
+    $class_name = 'request_problems';
+    $markup .= '<div id="mfcs-request-manage-0-page-' . $class_name . '" class="section section-' . $class_name . '">';
+    $markup .= '<h3 class="header header-' . $class_name . '">Request Problems</h3>';
+    $markup .= '<div class="content content-' . $class_name . '">';
+
+    foreach ($request_problems_by_id['results'] as $problem_id => $problem_data) {
+      $markup .= mfcs_request_manage_0_page_create_item_message('<a href="' . $base_path . '/requests/problems-0/requests/request/' . ((int)$problem_id) . $url_arguments . '" class="link link-request_problem">' . check_plain($problem_data->reason) . '</a>.', $class_name);
+    }
+    unset($problem_id);
+    unset($problem_data);
+
+    $markup .= '</div>';
+    $markup .= '</div>';
+  }
+  unset($request_problems_by_id);
+
+
   $markup .= '</div>';
 
   return $markup;
