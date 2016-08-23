@@ -1008,7 +1008,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           '#name' => 'request-display-submit-reassign',
           '#type' => 'link',
           '#title' => t("Re-Assign"),
-          '#href' => 'requests/manage-0/reassign/' . $request_id . $url_arguments,
+          '#href' => 'requests/manage-0/reassign/coordinator/' . $request_id . $url_arguments,
           '#attributes' => array(
             'class' => array(
               'no-print',

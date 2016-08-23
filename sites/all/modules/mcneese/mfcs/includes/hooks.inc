@@ -275,15 +275,15 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
     'tab_root' => 'requests/manage-0',
   );
 
-  $items['requests/manage-0/reassign/%'] = array(
+  $items['requests/manage-0/reassign/coordinator/%'] = array(
     'title' => "Re-Assign Request",
     'description' => "Re-Assign Request",
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_request_manage_0_reassign_form', 3),
+    'page arguments' => array('mfcs_request_manage_0_reassign_form', 4),
     'file' => 'request_reassign.inc',
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_page_request_access',
-    'access arguments' => array('reassign', 3),
+    'access arguments' => array('reassign', 4),
     'tab_parent' => 'requests/manage-0',
     'tab_root' => 'requests/manage-0',
   );

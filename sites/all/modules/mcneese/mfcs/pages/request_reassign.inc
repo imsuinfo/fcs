@@ -49,7 +49,7 @@ function mfcs_request_manage_0_reassign_form($form, &$form_state, $request_id) {
     return array();
   }
 
-  mfcs_add_canonical_headers('requests/manage-0/reassign/' . $request_id);
+  mfcs_add_canonical_headers('requests/manage-0/reassign/coordinator/' . $request_id);
 
   $page_title = "Re-Assign Request";
   if (!empty($request['information']['title'][0]->value)) {

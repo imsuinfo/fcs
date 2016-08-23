@@ -184,7 +184,7 @@ function mfcs_request_manage_0_page($request_id) {
   $markup .= mfcs_request_manage_0_page_create_item_message('<a href="' . $base_path . 'requests/manage-0/override/' . $id_id . $url_arguments . '" class="link link-override">Manually Override</a> the current requests review step or status.', $class_name);
 
   if ($disabled_venue_coordinator) {
-    $markup .= mfcs_request_manage_0_page_create_item_message('The venue coordinator account should be <a href="' . $base_path . 'requests/manage-0/reassign/' . $id_id . $url_arguments . '" class="link link-reassign">Re-Assigned</a>.', $class_name);
+    $markup .= mfcs_request_manage_0_page_create_item_message('The venue coordinator account should be <a href="' . $base_path . 'requests/manage-0/reassign/coordinator/' . $id_id . $url_arguments . '" class="link link-reassign">Re-Assigned</a>.', $class_name);
   }
 
   if ($can_cancel_request) {
