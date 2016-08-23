@@ -1510,8 +1510,8 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           // @todo: should any errors be reported?
         }
         elseif (!empty($room_unavailability['conflicts']) || !empty($room_unavailability['unavailable'])) {
-          $form['review']['operations']['warnings']['#markup'] .= '<div class="warning-unavailabilities">';
-          $form['review']['operations']['warnings']['#markup'] .= '<div class="warning-unavailabilities-title">This request\'s dates are unavailable:</div>';
+          $form['review']['operations']['warnings']['#markup'] .= '<div class="error-unavailabilities">';
+          $form['review']['operations']['warnings']['#markup'] .= '<div class="error-unavailabilities-title">The following dates are unavailable:</div>';
           $form['review']['operations']['warnings']['#markup'] .= mfcs_build_room_unavailable_message($room_unavailability);
           $form['review']['operations']['warnings']['#markup'] .= '</div>';
           $form['review']['operations']['warnings']['#markup'] .= '</div>';
