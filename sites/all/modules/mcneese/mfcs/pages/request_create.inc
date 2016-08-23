@@ -462,7 +462,7 @@ function mfcs_request_create_0_form_validate($form, &$form_state) {
             if ($room_unavailability === FALSE) {
               form_set_error('', "An internal error occurred while checking the room for availability. Please contact the support staff.");
             }
-            elseif (!empty($room_unavailability['conflict']) || !empty($room_unavailability['unavailable'])) {
+            elseif (!empty($room_unavailability['conflicts']) || !empty($room_unavailability['unavailable'])) {
               $unavailable_message = '<span class="uppercase">Warning</span>: The specified room is currently unavailable for the following dates: ';
               $unavailable_message .= mfcs_build_room_unavailable_message($room_unavailability);
               $unavailable_message .= 'You may still submit this request and your request attempt will still be logged (but your request will be auto-closed). ';
@@ -494,8 +494,8 @@ function mfcs_request_create_0_form_validate($form, &$form_state) {
 
                 // if any of the rooms that is causing the scheduling conflict is locked (but not approved) close the request due to lock instead of as unavailable.
                 $conflict_is_locked = FALSE;
-                if (!empty($room_unavailability['conflict'])) {
-                  foreach ($room_unavailability['conflict'] as $conflict) {
+                if (!empty($room_unavailability['conflicts'])) {
+                  foreach ($room_unavailability['conflicts'] as $conflict) {
                     $request_using_room_status = NULL;
 
                     if (isset($conflict->status)) {

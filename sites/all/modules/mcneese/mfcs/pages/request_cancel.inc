@@ -768,7 +768,7 @@ function mfcs_request_cancelling_0_form_validate($form, &$form_state) {
       if ($room_unavailability === FALSE) {
         form_set_error('dates][' . $key . '][select', "An internal error occurred while checking the room for availability. Please contact the support staff.");
       }
-      elseif (!empty($room_unavailability['conflict']) || !empty($room_unavailability['unavailable'])) {
+      elseif (!empty($room_unavailability['conflicts']) || !empty($room_unavailability['unavailable'])) {
         $time = date(MFCS_DATE_FORMAT_DATE, $form['form']['request']['#value']['dates']['date'][$key]->value);
         if (!is_null($form['form']['request']['#value']['dates']['time_start'][$key]->value)) {
           $time .= ' from ' . date(MFCS_DATE_FORMAT_TIME_SECONDS, $form['form']['request']['#value']['dates']['time_start'][$key]->value);

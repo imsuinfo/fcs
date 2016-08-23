@@ -2227,7 +2227,7 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
       if ($room_unavailability === FALSE) {
         form_set_error('', "An internal error occurred while checking the room for availability. Please contact the support staff.");
       }
-      elseif (!empty($room_unavailability['conflict']) || !empty($room_unavailability['unavailable'])) {
+      elseif (!empty($room_unavailability['conflicts']) || !empty($room_unavailability['unavailable'])) {
         $unavailable_message = '<span class="uppercase">Conflict</span>: The specified room is currently unavailable for the following dates: ';
         $unavailable_message .= mfcs_build_room_unavailable_message($room_unavailability);
         form_set_error('review][operations][decision', $unavailable_message);
