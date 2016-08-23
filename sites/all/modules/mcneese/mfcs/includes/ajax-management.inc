@@ -933,7 +933,7 @@ function mfcs_ajax_problems_0_users_list() {
     'search' => MFCS_USER_PROBLEM_NONE,
   );
 
-  $taxonomy_problems = mfcs_management_get_problems_taxonomy();
+  $taxonomy_problems = mfcs_management_get_problems_user_taxonomy();
   $problems_mask = 0;
 
   if ($search) {

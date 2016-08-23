@@ -760,21 +760,21 @@ function mfcs_management_search_users($conditions = array(), $options = array())
  * @return array
  *   An array of problems by id, each with a human readable label.
  */
-function mfcs_management_get_problems_taxonomy() {
+function mfcs_management_get_problems_user_taxonomy() {
   $labels = array();
 
-  $labels[MFCS_USER_PROBLEM_SYSTEM] = "Core System Problem";
-  $labels[MFCS_USER_PROBLEM_MFCS] = "Facilities Use Problem";
-  $labels[MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE] = "Banner Unavailable on Create";
-  $labels[MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE] = "Banner Unavailable on Login";
-  $labels[MFCS_USER_PROBLEM_ACCOUNT_LOGIN_PROBLEMS_MULTIPLE] = "Multiple Login Attempt Problems";
-  $labels[MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED] = "Unable to Assign/Unassign Reviewer/Venue-Coordinator Role";
-  $labels[MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES] = "Old/Duplicate Account";
-  $labels[MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE] = "Disabled Account in Use";
-  $labels[MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID] = "Invalid Banner ID";
-  $labels[MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS] = "Insufficient Banner Access";
-  $labels[MFCS_USER_PROBLEM_FORM_ERROR_USER] = "Core System Form Errors";
-  $labels[MFCS_USER_PROBLEM_FORM_ERROR_USER] = "Facilities Use Form Errors";
+  $labels[MFCS_USER_PROBLEM_SYSTEM] = 'Core System Problem';
+  $labels[MFCS_USER_PROBLEM_MFCS] = 'Facilities Use Problem';
+  $labels[MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE] = 'Banner Unavailable on Create';
+  $labels[MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE] = 'Banner Unavailable on Login';
+  $labels[MFCS_USER_PROBLEM_ACCOUNT_LOGIN_PROBLEMS_MULTIPLE] = 'Multiple Login Attempt Problems';
+  $labels[MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED] = 'Unable to Assign/Unassign Reviewer/Venue-Coordinator Role';
+  $labels[MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES] = 'Old/Duplicate Account';
+  $labels[MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE] = 'Disabled Account in Use';
+  $labels[MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID] = 'Invalid Banner ID';
+  $labels[MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS] = 'Insufficient Banner Access';
+  $labels[MFCS_USER_PROBLEM_FORM_ERROR_USER] = 'Core System Form Errors';
+  $labels[MFCS_USER_PROBLEM_FORM_ERROR_USER] = 'Facilities Use Form Errors';
 
   return $labels;
 }

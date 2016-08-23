@@ -278,7 +278,7 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
   // Results is needed and therefore must not be FALSE, unsetting it will default to TRUE.
   unset($options['results']);
 
-  $taxonomy_problems = mfcs_management_get_problems_taxonomy();
+  $taxonomy_problems = mfcs_management_get_problems_user_taxonomy();
   $problems_mask = 0;
 
   $rows = array();

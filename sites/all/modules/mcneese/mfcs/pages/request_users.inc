@@ -774,15 +774,39 @@ function mfcs_request_users_0_view_page($user_id) {
     $markup .= $administer_text;
     $markup .= '</div>';
 
+    // load any problems associated with the given user.
+    $problems_detected = NULL;
+
+    $mfcs_users = mfcs_load_users($account->uid, FALSE, TRUE);
+    if (is_array($mfcs_users) && array_key_exists($account->uid, $mfcs_users) && !empty($mfcs_users[$account->uid])) {
+      mfcs_include(MFCS_INCLUDE_MANAGEMENT);
+      $problems_list = mfcs_management_get_problems_user_taxonomy();
+
+      foreach ($problems_list as $problem_id => $problem_text) {
+        if (($mfcs_users[$account->uid]->problems & $problem_id) != 0) {
+          $problems_detected .= '<div class="view_user-item view_user-item-problems"><a href="' . $base_path . 'requests/problems-0/users/user/' . $account->uid . $url_arguments . '" class="problem problem-' . ((int) $problem_id) . ' no_print_links_as_link">' . $problem_text . '</a></div>';
+        }
+      }
+      unset($problem_text);
+      unset($problem_id);
+    }
+    unset($mfcs_users);
+
+    if (!is_null($problems_detected)) {
+      $markup .= '<br>';
+      $markup .= '<div class="view_user-group view_user-group-problems">';
+      $markup .= '<h3 class="view_user-group-header view_user-group-header-problems">Problems Detected</h3>';
+      $markup .= $problems_detected;
+      $markup .= '</div>';
+    }
+    unset($problems_detected);
+
     $markup .= '<div class="view_user-buttons">';
     $markup .= '<a href="' . $base_path . 'requests/users-0/edit/' . $user_id . $url_arguments . '" class="view_user-button view_user-edit">Edit</a>' ;
     $markup .= '</div>';
   }
 
   $markup .= '</div>';
-
-
-
 
   return $markup;
 }
