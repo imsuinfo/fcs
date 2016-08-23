@@ -102,6 +102,7 @@ function mfcs_request_manage_0_page($request_id) {
   $can_cancel_request = mfcs_request_access('cancel', $request, $user);
   $can_uncancel_request = mfcs_request_access('uncancel', $request, $user);
   $can_move_request = mfcs_request_access('move', $request, $user);
+  $can_reassign_request = mfcs_request_access('reassign', $request, $user);
 
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
   $options_step = mfcs_get_review_steps_list_options();
@@ -199,6 +200,10 @@ function mfcs_request_manage_0_page($request_id) {
 
   if ($can_move_request) {
     $markup .= mfcs_request_manage_0_page_create_item_message('The request may be <a href="' . $base_path . 'requests/manage-0/move/' . $id_id . $url_arguments . '" class="link link-uncancel">Moved</a>.', $class_name);
+  }
+
+  if ($can_reassign_request) {
+    $markup .= mfcs_request_manage_0_page_create_item_message('The Venue Coordinator may be <a href="' . $base_path . 'requests/manage-0/reassign/coordinator/' . $id_id . $url_arguments . '" class="link link-uncancel">Re-Assigned</a>.', $class_name);
   }
 
   $markup .= '</div>';
