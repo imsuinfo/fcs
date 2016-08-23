@@ -39,9 +39,9 @@ function mfcs_table_install_structure() {
   );
 
   $structure['insurance'] = array(
-    'contractor' => 'unsigned_tiny',
-    'unaffiliated' => 'unsigned_tiny',
-    'provided' => 'unsigned_tiny',
+    'contractor' => 'unsigned',
+    'unaffiliated' => 'unsigned',
+    'provided' => 'unsigned',
   );
 
   $structure['dates'] = array(

@@ -701,16 +701,19 @@ function mfcs_get_reviewer_decision_list_options($option = NULL, $restriction = 
   $options_all = array();
 
   if ($hidden) {
-    $options_all[MFCS__NONE] = 'None';
+    $options_all[MFCS_REVIEW_DECISION_NONE] = 'None';
+    $options_all[MFCS_REVIEW_DECISION_MANAGER_RECHECK] = 'Manager Recheck';
+    $options_all[MFCS_REVIEW_DECISION_AMENDMENT] = 'Amendment';
   }
 
-  $options_all[MFCS_REVIEW_DECISION_MANAGER_RECHECK] = 'Manager Recheck';
-  $options_all[MFCS_REVIEW_DECISION_AMENDMENT] = 'Amendment';
+  if ($disabled) {
+    $options_all[MFCS_REVIEW_DECISION_WAIVE] = 'Waive';
+  }
+
   $options_all[MFCS_REVIEW_DECISION_APPROVE] = 'Approve';
   $options_all[MFCS_REVIEW_DECISION_COMMENT] = 'Comment';
   $options_all[MFCS_REVIEW_DECISION_COMMENT_ALL] = 'Comment';
   $options_all[MFCS_REVIEW_DECISION_DENY] = 'Deny';
-  $options_all[MFCS_REVIEW_DECISION_WAIVE] = 'Waive';
   $options_all[MFCS_REVIEW_DECISION_REQUIREMENT] = 'Requirement';
   $options_all[MFCS_REVIEW_DECISION_AVAILABLE] = 'Available';
   $options_all[MFCS_REVIEW_DECISION_UNAVAILABLE] = 'Unavailable';
@@ -721,7 +724,7 @@ function mfcs_get_reviewer_decision_list_options($option = NULL, $restriction = 
     $options[''] = '- Select -';
   }
 
-  if (!is_int($restriction) || $restriction < MFCS_RESTRICTION_DECISION_NONE || $restriction > MFCS_RESTRICTION_DECISION_COMMENT_ONLY) {
+  if (!is_int($restriction) || $restriction < MFCS_RESTRICTION_DECISION_NONE || $restriction > MFCS_RESTRICTION_DECISION_FINANCER) {
     $restriction = MFCS_RESTRICTION_DECISION_NONE;
   }
 
@@ -739,36 +742,58 @@ function mfcs_get_reviewer_decision_list_options($option = NULL, $restriction = 
     asort($options);
   }
   elseif ($restriction == MFCS_RESTRICTION_DECISION_REQUESTER) {
-    $options[MFCS_REVIEW_DECISION_COMMENT_ALL] = $options_all[MFCS_REVIEW_DECISION_COMMENT_ALL];
+    if (array_key_exists(MFCS_REVIEW_DECISION_COMMENT_ALL, $options_all)) {
+      $options[MFCS_REVIEW_DECISION_COMMENT_ALL] = $options_all[MFCS_REVIEW_DECISION_COMMENT_ALL];
+    }
   }
   elseif ($restriction == MFCS_RESTRICTION_DECISION_VENUE_COORDINATOR) {
-    foreach (array(MFCS_REVIEW_DECISION_AVAILABLE, MFCS_REVIEW_DECISION_UNAVAILABLE, MFCS_REVIEW_DECISION_COMMENT) as $option_id) {
-      $options[$option_id] = $options_all[$option_id];
+    foreach (array(MFCS_REVIEW_DECISION_AVAILABLE, MFCS_REVIEW_DECISION_UNAVAILABLE, MFCS_REVIEW_DECISION_COMMENT, MFCS_REVIEW_DECISION_REQUIREMENT) as $option_id) {
+      if (array_key_exists($option_id, $options_all)) {
+        $options[$option_id] = $options_all[$option_id];
+      }
     }
   }
   elseif ($restriction == MFCS_RESTRICTION_DECISION_REVIEWER) {
     foreach (array(MFCS_REVIEW_DECISION_ISSUES, MFCS_REVIEW_DECISION_ISSUES_NONE, MFCS_REVIEW_DECISION_COMMENT) as $option_id) {
-      $options[$option_id] = $options_all[$option_id];
+      if (array_key_exists($option_id, $options_all)) {
+        $options[$option_id] = $options_all[$option_id];
+      }
     }
   }
   elseif ($restriction == MFCS_RESTRICTION_DECISION_APPROVER) {
     foreach (array(MFCS_REVIEW_DECISION_APPROVE, MFCS_REVIEW_DECISION_DENY, MFCS_REVIEW_DECISION_COMMENT) as $option_id) {
-      $options[$option_id] = $options_all[$option_id];
+      if (array_key_exists($option_id, $options_all)) {
+        $options[$option_id] = $options_all[$option_id];
+      }
     }
   }
   elseif ($restriction == MFCS_RESTRICTION_DECISION_MANAGER) {
     foreach (array(MFCS_REVIEW_DECISION_AVAILABLE, MFCS_REVIEW_DECISION_UNAVAILABLE, MFCS_REVIEW_DECISION_APPROVE, MFCS_REVIEW_DECISION_DENY, MFCS_REVIEW_DECISION_ISSUES, MFCS_REVIEW_DECISION_ISSUES_NONE, MFCS_REVIEW_DECISION_REQUIREMENT, MFCS_REVIEW_DECISION_COMMENT) as $option_id) {
-      $options[$option_id] = $options_all[$option_id];
+      if (array_key_exists($option_id, $options_all)) {
+        $options[$option_id] = $options_all[$option_id];
+      }
     }
   }
   elseif ($restriction == MFCS_RESTRICTION_DECISION_ADMINISTER) {
     foreach (array(MFCS_REVIEW_DECISION_AVAILABLE, MFCS_REVIEW_DECISION_UNAVAILABLE, MFCS_REVIEW_DECISION_APPROVE, MFCS_REVIEW_DECISION_DENY, MFCS_REVIEW_DECISION_ISSUES, MFCS_REVIEW_DECISION_ISSUES_NONE, MFCS_REVIEW_DECISION_REQUIREMENT, MFCS_REVIEW_DECISION_COMMENT) as $option_id) {
-      $options[$option_id] = $options_all[$option_id];
+      if (array_key_exists($option_id, $options_all)) {
+        $options[$option_id] = $options_all[$option_id];
+      }
     }
   }
   elseif ($restriction == MFCS_RESTRICTION_DECISION_COMMENT_ONLY) {
-    $options[MFCS_REVIEW_DECISION_COMMENT] = $options_all[MFCS_REVIEW_DECISION_COMMENT];
+    if (array_key_exists(MFCS_REVIEW_DECISION_COMMENT, $options_all)) {
+      $options[MFCS_REVIEW_DECISION_COMMENT] = $options_all[MFCS_REVIEW_DECISION_COMMENT];
+    }
   }
+  elseif ($restriction == MFCS_RESTRICTION_DECISION_FINANCER) {
+    foreach (array(MFCS_REVIEW_DECISION_ISSUES, MFCS_REVIEW_DECISION_ISSUES_NONE, MFCS_REVIEW_DECISION_COMMENT, MFCS_REVIEW_DECISION_REQUIREMENT) as $option_id) {
+      if (array_key_exists($option_id, $options_all)) {
+        $options[$option_id] = $options_all[$option_id];
+      }
+    }
+  }
+
 
   return $options;
 }
@@ -995,6 +1020,42 @@ function mfcs_get_unavailability_type_list_options($option = NULL, $hidden = FAL
     $options_all[MFCS_UNAVAILABILITY_TYPE_EMERGENCY] = 'Emergency / Outage';
     $options_all[MFCS_UNAVAILABILITY_TYPE_CLASS] = 'Class';
   }
+
+  foreach ($options_all as $option_id => $option_name) {
+    $options[$option_id] = $option_name;
+  }
+
+  asort($options);
+
+  return $options;
+}
+
+/**
+ * Returns an array of facilities use insurance type options for populating lists.
+ *
+ * @param string|null $option
+ *   (optional) A string designating how the list will be populated.
+ * @param bool $hidden
+ *   (optional) When TRUE, will include hidden/special case types.
+ *   that are not normally exposed through the select list options.
+ * @param bool $disabled
+ *   (optional) When TRUE, load disabled options in addition to existing options.
+ *
+ * @return array
+ *   An array of options available.
+ */
+function mfcs_get_insurance_list_options($option = NULL, $hidden = FALSE, $disabled = FALSE) {
+  $options = array();
+  $options_all = array();
+
+  if ($hidden) {
+    $options_all[MFCS_INSURANCE_NONE] = 'None';
+  }
+
+  $options_all[MFCS_INSURANCE_REQUIRED_NOT] = 'Not Required';
+  $options_all[MFCS_INSURANCE_REQUIRED] = 'Required';
+  $options_all[MFCS_INSURANCE_PROVIDED] = 'Provided';
+  $options_all[MFCS_INSURANCE_PROVIDED_NOT] = 'Not Provided';
 
   foreach ($options_all as $option_id => $option_name) {
     $options[$option_id] = $option_name;

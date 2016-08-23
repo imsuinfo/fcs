@@ -448,13 +448,13 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
   }
 
   $user = cf_current_user();
-  $manager = FALSE;
-  $reviewer = FALSE;
-  $requester = FALSE;
+  $is_manager = FALSE;
+  $is_reviewer = FALSE;
+  $is_requester = FALSE;
   if (is_object($user)) {
-    $manager = user_access('mfcs manage', $user);
-    $reviewer = user_access('mfcs review', $user);
-    $requester = user_access('mfcs request', $user);
+    $is_manager = user_access('mfcs manage', $user);
+    $is_reviewer = user_access('mfcs review', $user);
+    $is_requester = user_access('mfcs request', $user);
   }
 
   // define a prefix to append before the value.
@@ -813,7 +813,7 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
             }
 
             // only show link to user account for reviewers and managers.
-            if ($reviewer || $manager) {
+            if ($is_reviewer || $is_manager) {
               $markup .= '<a href="' . $base_path . 'requests/users-0/view/' . $users[$value->{$value_name}]['user_id'] . $url_arguments . '" class="item-link" title="' . $user_title . '">' . $user_name . '</a>';
             }
             else {
@@ -990,7 +990,7 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
           }
 
           // only show link to user account for reviewers and managers.
-          if ($reviewer || $manager) {
+          if ($is_reviewer || $is_manager) {
             $markup .= '<a href="' . $base_path . 'requests/users-0/view/' . $users[$value->{$value_name}]['user_id'] . $url_arguments . '" class="item-link" title="' . $user_title . '">' . $user_name . '</a>';
           }
           else {
@@ -1051,7 +1051,7 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
           $length += strlen($value->{$value_name});
         }
         else {
-          if ($reviewer || $manager) {
+          if ($is_reviewer || $is_manager) {
             $markup .= '<a href="' . $base_path . 'requests/users-0/view/' . $request_coordinator_user_id . $url_arguments . '" class="item-link" title="' . $user_title . '">' . check_plain($value->{$value_name}) . '</a>';
           }
           else {
@@ -1077,6 +1077,36 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
         elseif ($value->{$value_name} == MFCS_REVIEW_DECISION_ISSUES_NONE) {
           $markup .= "No Issues";
           $length += strlen("No Issues");
+        }
+      }
+      elseif ($type[$value_name] == 'insurance') {
+        if ($value->{$value_name} == MFCS_INSURANCE_NONE) {
+          continue;
+        }
+        elseif ($value->{$value_name} == MFCS_INSURANCE_REQUIRED_NOT) {
+          if ($display[$value_name] == 'always') {
+            $markup .= 'Not Required';
+            $length += strlen('Not Required');
+          }
+          else {
+            // when insurance is set to not required, do not show the insurance entry.
+            continue;
+          }
+        }
+        elseif ($value->{$value_name} == MFCS_INSURANCE_REQUIRED) {
+          $markup .= 'Required';
+          $length += strlen('Required');
+        }
+        elseif ($value->{$value_name} == MFCS_INSURANCE_PROVIDED_NOT || $value->{$value_name} == MFCS_INSURANCE_REQUIRED) {
+          $markup .= 'Not Provided';
+          $length += strlen('Not Provided');
+        }
+        elseif ($value->{$value_name} == MFCS_INSURANCE_PROVIDED) {
+          $markup .= 'Provided';
+          $length += strlen('Provided');
+        }
+        else {
+          continue;
         }
       }
 
@@ -1152,15 +1182,15 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
   }
 
   $user = cf_current_user();
-  $administer = FALSE;
-  $manager = FALSE;
-  $reviewer = FALSE;
-  $requester = FALSE;
+  $is_administer = FALSE;
+  $is_manager = FALSE;
+  $is_reviewer = FALSE;
+  $is_requester = FALSE;
   if (is_object($user)) {
-    $administer = user_access('mfcs administer', $user);
-    $manager = user_access('mfcs manage', $user);
-    $reviewer = user_access('mfcs review', $user);
-    $requester = user_access('mfcs request', $user);
+    $is_administer = user_access('mfcs administer', $user);
+    $is_manager = user_access('mfcs manage', $user);
+    $is_reviewer = user_access('mfcs review', $user);
+    $is_requester = user_access('mfcs request', $user);
   }
 
   mfcs_include(MFCS_INCLUDE_TABLE);
@@ -1229,7 +1259,6 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
   );
   $changelog_fields['insurance'] = array(
     'contractor',
-    'insurance',
     'unaffiliated',
     'provided',
   );
@@ -1240,7 +1269,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
   );
 
   $users = array();
-  $reviewers = array();
+  $is_reviewers = array();
   $has_log = FALSE;
   $has_viewable_entries = FALSE;
   if (is_array($reviews)) {
@@ -1289,17 +1318,17 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
       }
 
       if ($restriction === MFCS_REVIEW_RESTRICTIONS_REQUESTER) {
-        if (!($requester || $manager || $administer)) {
+        if (!($is_requester || $is_manager || $is_administer)) {
           continue;
         }
       }
       elseif ($restriction === MFCS_REVIEW_RESTRICTIONS_REVIEWER) {
-        if (!($reviewer || $manager || $administer)) {
+        if (!($is_reviewer || $is_manager || $is_administer)) {
           continue;
         }
       }
       elseif ($restriction === MFCS_REVIEW_RESTRICTIONS_MANAGERS) {
-        if (!($manager || $administer)) {
+        if (!($is_manager || $is_administer)) {
           continue;
         }
       }
@@ -1680,15 +1709,10 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
 
       // contractor insurance
       if (!empty($changelog['insurance']['contractor'])) {
-        $message .= '<div class="review-item-message-insurance-contractor review-item-message-insurance review-item-message-requirements">';
-        $message .= '<div class="item-label">Contractor Insurance:</div> ';
-
         // always display the boolean when displayed in the review log.
         if (!empty($presentation['insurance']['contractor']['display'])) {
           foreach ($presentation['insurance']['contractor']['display'] as &$value) {
-            if ($value == 'when_true' || $value == 'when_false') {
-              $value = 'raw';
-            }
+            $value = 'always';
           }
         }
 
@@ -1696,22 +1720,19 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
         $value_markup = mfcs_view_build_request_value_structure($request_id, 'insurance', 'contractor', 0, $value, $presentation['insurance']['contractor'], $changelog);
 
         if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
+          $message .= '<div class="review-item-message-insurance-contractor review-item-message-insurance review-item-message-requirements">';
+          $message .= '<div class="item-label">Contractor Insurance:</div> ';
           $message .= drupal_render($value_markup);
+          $message .= '</div>';
         }
-        $message .= '</div>';
       }
 
       // unaffiliated insurance
       if (!empty($changelog['insurance']['unaffiliated'])) {
-        $message .= '<div class="review-item-message-insurance-unaffiliated review-item-message-insurance review-item-message-requirements">';
-        $message .= '<div class="item-label">Unaffiliated Insurance:</div> ';
-
         // always display the boolean when displayed in the review log.
         if (!empty($presentation['insurance']['unaffiliated']['display'])) {
           foreach ($presentation['insurance']['unaffiliated']['display'] as &$value) {
-            if ($value == 'when_true' || $value == 'when_false') {
-              $value = 'raw';
-            }
+            $value = 'always';
           }
         }
 
@@ -1719,32 +1740,11 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
         $value_markup = mfcs_view_build_request_value_structure($request_id, 'insurance', 'unaffiliated', 0, $value, $presentation['insurance']['unaffiliated'], $changelog);
 
         if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
+          $message .= '<div class="review-item-message-insurance-unaffiliated review-item-message-insurance review-item-message-requirements">';
+          $message .= '<div class="item-label">Unaffiliated Insurance:</div> ';
           $message .= drupal_render($value_markup);
+          $message .= '</div>';
         }
-        $message .= '</div>';
-      }
-
-      // provided insurance
-      if (!empty($changelog['insurance']['provided'])) {
-        $message .= '<div class="review-item-message-insurance-provided review-item-message-insurance review-item-message-requirements">';
-        $message .= '<div class="item-label">Provided Insurance:</div> ';
-
-        // always display the boolean when displayed in the review log.
-        if (!empty($presentation['insurance']['provided']['display'])) {
-          foreach ($presentation['insurance']['provided']['display'] as &$value) {
-            if ($value == 'when_true' || $value == 'when_false') {
-              $value = 'raw';
-            }
-          }
-        }
-
-        $value = reset($changelog['insurance']['provided']);
-        $value_markup = mfcs_view_build_request_value_structure($request_id, 'insurance', 'provided', 0, $value, $presentation['insurance']['provided'], $changelog);
-
-        if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
-          $message .= drupal_render($value_markup);
-        }
-        $message .= '</div>';
       }
 
       $markup .= '<div class="review-item-message">' . $message . '</div>';
@@ -1767,7 +1767,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
   }
 
   if (!$has_viewable_entries) {
-    if (!($reviewer || $manager || $administer)) {
+    if (!($is_reviewer || $is_manager || $is_administer)) {
       unset($form['review']['log']);
     }
     elseif ($has_log) {

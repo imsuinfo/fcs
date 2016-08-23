@@ -57,6 +57,7 @@ define('MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED', 8);
 /**
  * Defines Taxonomy TID for review decisions.
  */
+ define('MFCS_REVIEW_DECISION_NONE', 0);
  define('MFCS_REVIEW_DECISION_MANAGER_RECHECK', -1);
  define('MFCS_REVIEW_DECISION_AMENDMENT', 141);
  define('MFCS_REVIEW_DECISION_APPROVE', 115);
@@ -81,6 +82,7 @@ define('MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED', 8);
  define('MFCS_RESTRICTION_DECISION_MANAGER', 5);
  define('MFCS_RESTRICTION_DECISION_ADMINISTER', 6);
  define('MFCS_RESTRICTION_DECISION_COMMENT_ONLY', 7);
+ define('MFCS_RESTRICTION_DECISION_FINANCER', 8);
 
  // These are hidden/reserved and are used to populate the review log when certain operations have been performed.
  define('MFCS_REVIEW_DECISION_CLOSED', 1);
@@ -487,6 +489,15 @@ define('MFCS_DATE_FORMAT_TIME', 'h:ia');
 define('MFCS_DATE_FORMAT_TIME_SECONDS', 'h:i:sa');
 
 /**
+ * Insurance Settings
+ */
+define('MFCS_INSURANCE_NONE', 0);
+define('MFCS_INSURANCE_REQUIRED_NOT', 1);
+define('MFCS_INSURANCE_REQUIRED', 2);
+define('MFCS_INSURANCE_PROVIDED', 3);
+define('MFCS_INSURANCE_PROVIDED_NOT', 4);
+
+/**
  * Implements hook_init().
  */
 function mfcs_init() {
@@ -698,6 +709,7 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
 
   $roles = array(
     'manager' => user_access('mfcs manage', $user),
+    'financer' => user_access('mfcs finance', $user),
     'reviewer' => user_access('mfcs review', $user),
     'requester' => user_access('mfcs request', $user),
     'administer' => user_access('mfcs administer', $user),
@@ -1118,6 +1130,7 @@ function mfcs_page_generic_access($operation = NULL, $access_id = NULL, $user = 
 
   $roles = array(
     'manager' => user_access('mfcs manage', $user),
+    'financer' => user_access('mfcs finance', $user),
     'reviewer' => user_access('mfcs review', $user),
     'requester' => user_access('mfcs request', $user),
     'administer' => user_access('mfcs administer', $user),
@@ -1802,6 +1815,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
 
   $roles = array(
     'manager' => user_access('mfcs manage', $user),
+    'financer' => user_access('mfcs finance', $user),
     'reviewer' => user_access('mfcs review', $user),
     'requester' => user_access('mfcs request', $user),
     'administer' => user_access('mfcs administer', $user),
@@ -10345,24 +10359,23 @@ function mfcs_get_requests_not_providing_insurance($date_from = NULL, $date_to =
   try {
     $query = db_select('mfcs_requests', 'mer');
 
+    // As of fcs-79, the insurance database structure was re-written but the table naming system was preserved.
+    // As a result the mfcs_field_insurance_provided table is redundant, but has been designed to be used to optimize processing.
+    // The optimization works by joining only mfcs_field_insurance_provided instead of joining both mfcs_field_insurance_contractor and mfcs_field_insurance_unaffiliated.
     $query->innerJoin('mfcs_current', 'mc', 'mer.id = mc.request_id');
-
     $query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mc.request_id = mfdd.request_id AND mc.dates_date = mfdd.revision');
-
-    $query->innerJoin('mfcs_field_insurance_contractor', 'mfic', 'mc.request_id = mfic.request_id AND mc.insurance_contractor = mfic.revision AND mfic.delta = 0');
-    $query->innerJoin('mfcs_field_insurance_unaffiliated', 'mfiu', 'mc.request_id = mfiu.request_id AND mc.insurance_unaffiliated = mfiu.revision AND mfiu.delta = 0');
     $query->innerJoin('mfcs_field_insurance_provided', 'mfip', 'mc.request_id = mfip.request_id AND mc.insurance_provided = mfip.revision AND mfip.delta = 0');
-
     $query->innerJoin('mfcs_field_request_coordinator_name', 'mfrcn', 'mc.request_id = mfrcn.request_id AND mc.request_coordinator_name = mfrcn.revision AND mfrcn.delta = 0');
     $query->innerJoin('mfcs_field_request_coordinator_email', 'mfrce', 'mc.request_id = mfrce.request_id AND mc.request_coordinator_email = mfrce.revision AND mfrce.delta = 0');
-
 
     $query->addField('mer', 'id', 'id');
     $query->addField('mer', 'title', 'title');
     $query->addField('mfdd', 'value', 'date');
-    $query->condition('mfdd.cancelled', 1, '<>'); // using <> for backwards compatibility where mfdd.cancelled may be NULL.
     $query->addField('mfrcn', 'value', 'coordinator_name');
     $query->addField('mfrce', 'value', 'coordinator_email');
+
+    $query->condition('mfip.value', MFCS_INSURANCE_PROVIDED_NOT);
+    $query->condition('mfdd.cancelled', 1, '<>');
 
 
     $allowed_status = array(
@@ -10376,16 +10389,6 @@ function mfcs_get_requests_not_providing_insurance($date_from = NULL, $date_to =
     );
 
     $query->condition('mer.step', $allowed_steps, 'IN');
-
-    $or = db_or();
-    $or->condition('mfic.value', 1);
-    $or->condition('mfiu.value', 1);
-    $query->condition($or);
-
-    $nand = db_and();
-    $nand->not();
-    $nand->condition('mfip.value', 1);
-    $query->condition($nand);
 
     if (!is_null($date_from)) {
       if (is_null($date_to)) {

@@ -19,23 +19,28 @@
 function mfcs_hook_permission() {
   $permissions = array();
   $permissions['mfcs administer'] = array(
-    'title' => t("Administer Facilities Use Requests"),
-    'description' => t("Grants permissions to administer requests and workflow."),
+    'title' => t('Administer Facilities Use Requests'),
+    'description' => t('Grants permissions to administer requests and workflow.'),
   );
 
   $permissions['mfcs request'] = array(
-    'title' => t("Request Facilities Use Requests"),
-    'description' => t("Grants permissions to make requests."),
+    'title' => t('Request Facilities Use Requests'),
+    'description' => t('Grants permissions to make requests.'),
   );
 
   $permissions['mfcs review'] = array(
-    'title' => t("Review Facilities Use Requests"),
-    'description' => t("Grants permissions to review requests."),
+    'title' => t('Review Facilities Use Requests'),
+    'description' => t('Grants permissions to review requests.'),
+  );
+
+  $permissions['mfcs finance'] = array(
+    'title' => t('Finance Facilities Use Requests'),
+    'description' => t('Grants permissions to perform financial related activity with requests (a privileged subset of mfcs review).'),
   );
 
   $permissions['mfcs manage'] = array(
-    'title' => t("Manage Facilities Use Requests"),
-    'description' => t("Grants permissions to manage requests."),
+    'title' => t('Manage Facilities Use Requests'),
+    'description' => t('Grants permissions to manage requests.'),
   );
 
   return $permissions;

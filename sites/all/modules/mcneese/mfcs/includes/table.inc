@@ -50,28 +50,28 @@ function mfcs_table_structure($include_mer = FALSE) {
         'path' => 'request][status',
         'name' => "Status",
         'type' => 'options',
-        'size' => 'small',
+        'size' => 'big',
         'manual_processing' => TRUE,
       ),
       'step' => array(
         'path' => 'request][step',
         'name' => "Step",
         'type' => 'options',
-        'size' => 'normal',
+        'size' => 'big',
         'manual_processing' => TRUE,
       ),
       'classification' => array(
         'path' => 'request][request_coordinator][classification',
         'name' => "Request Coordinator Classification",
         'type' => 'options',
-        'size' => 'normal',
+        'size' => 'big',
         'manual_processing' => TRUE,
       ),
       'type' => array(
         'path' => 'request][information][type',
         'name' => "Type",
         'type' => 'options',
-        'size' => 'normal',
+        'size' => 'big',
         'manual_processing' => TRUE,
       ),
       'location' => array(
@@ -99,7 +99,7 @@ function mfcs_table_structure($include_mer = FALSE) {
         'path' => 'request][venue_coordinator][user_id',
         'name' => "Venue Coordinator",
         'type' => 'venue_coordinator',
-        'size' => 'normal',
+        'size' => 'big',
         'manual_processing' => TRUE,
       ),
       'title' => array(
@@ -117,14 +117,14 @@ function mfcs_table_structure($include_mer = FALSE) {
       'path' => 'request][status',
       'name' => "Status",
       'type' => 'options',
-      'size' => 'small',
+      'size' => 'big',
       'hide_from_search' => TRUE,
     ),
     'step' => array(
       'path' => 'request][step',
       'name' => "Step",
       'type' => 'options',
-      'size' => 'normal',
+      'size' => 'big',
       'hide_from_search' => TRUE,
     ),
     'location' => array(
@@ -259,26 +259,20 @@ function mfcs_table_structure($include_mer = FALSE) {
     'contractor' => array(
       'path' => 'request][insurance][contractor',
       'name' => "Contractor Insurance",
-      'type' => 'bool',
-      'size' => 'tiny',
-      'manual_processing' => TRUE,
-      'allows_null' => TRUE,
+      'type' => 'int',
+      'size' => 'normal',
     ),
     'unaffiliated' => array(
       'name' => "Unaffiliated Insurance",
       'path' => 'request][insurance][unaffiliated',
-      'type' => 'bool',
-      'size' => 'tiny',
-      'manual_processing' => TRUE,
-      'allows_null' => TRUE,
+      'type' => 'int',
+      'size' => 'normal',
     ),
     'provided' => array(
       'name' => "Insurance Has Been Provided",
       'path' => 'request][insurance][provided',
-      'type' => 'bool',
-      'size' => 'tiny',
-      'manual_processing' => TRUE,
-      'allows_null' => TRUE,
+      'type' => 'int',
+      'size' => 'normal',
     ),
   );
 
@@ -361,7 +355,7 @@ function mfcs_table_structure($include_mer = FALSE) {
       'path' => 'request][request_coordinator][classification',
       'name' => "Request Coordinator Classification",
       'type' => 'options',
-      'size' => 'normal',
+      'size' => 'big',
     ),
   );
 
@@ -383,7 +377,7 @@ function mfcs_table_structure($include_mer = FALSE) {
       'path' => 'request][information][type',
       'name' => "Type",
       'type' => 'options',
-      'size' => 'normal',
+      'size' => 'big',
       'hide_from_search' => TRUE,
     ),
     'organization' => array(
@@ -1195,10 +1189,10 @@ function mfcs_table_presentation($option = NULL) {
     'contractor' => array(
       'label' => 'Contractor Insurance',
       'type' => array(
-        'value' => 'boolean',
+        'value' => 'insurance',
       ),
       'display' => array(
-        'value' => 'when_true',
+        'value' => 'insurance',
       ),
       'group' => 'requirements',
       'request_type' => array(
@@ -1209,10 +1203,10 @@ function mfcs_table_presentation($option = NULL) {
     'unaffiliated' => array(
       'label' => 'Unaffiliated Insurance',
       'type' => array(
-        'value' => 'boolean',
+        'value' => 'insurance',
       ),
       'display' => array(
-        'value' => 'when_true',
+        'value' => 'insurance',
       ),
       'group' => 'requirements',
       'request_type' => array(
@@ -1223,12 +1217,15 @@ function mfcs_table_presentation($option = NULL) {
     'provided' => array(
       'label' => 'Insurance Provided',
       'type' => array(
-        'value' => 'boolean',
+        'value' => 'insurance',
+      ),
+      'display' => array(
+        'value' => NULL,
       ),
       'group' => 'requirements',
       'request_type' => array(
-        'show' => TRUE,
-        'hide' => FALSE,
+        'show' => FALSE,
+        'hide' => TRUE,
       ),
     ),
   );

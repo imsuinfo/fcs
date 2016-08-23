@@ -646,7 +646,7 @@ function mfcs_workflow_set_venue_coordinator($request_id, $venue_coordinator_id,
  * @return bool
  *   TRUE on success, FALSE otherwise.
  */
-function mfcs_workflow_step_review($request_id, $user, $decision, $restriction = MFCS_REVIEW_RESTRICTIONS_NONE, $message = "", $extra = array(), $as = NULL) {
+function mfcs_workflow_step_review($request_id, $user, $decision, $restriction = MFCS_REVIEW_RESTRICTIONS_NONE, $message = '', $extra = array(), $as = NULL) {
   if (!is_object($user)) {
     cf_error::invalid_object('user');
     return FALSE;
@@ -689,7 +689,8 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
     return FALSE;
   }
 
-  $manager = user_access('mfcs manage', $user);
+  $is_manager = user_access('mfcs manage', $user);
+  $is_administer = user_access('mfcs administer', $user);
 
   $instance = mfcs_instance();
 
@@ -769,7 +770,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
   }
 
   $is_quick_meeting = FALSE;
-  if ($type === MFCS_REQUEST_TYPE_QUICK_MEETING && ($is_effective_venue_coordinator || $manager)) {
+  if ($type === MFCS_REQUEST_TYPE_QUICK_MEETING && ($is_effective_venue_coordinator || $is_manager || $is_administer)) {
     $is_quick_meeting = TRUE;
   }
 
@@ -862,9 +863,6 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
     return FALSE;
   }
 
-  $insurance_requirements = FALSE;
-  $insurance_provided_exception = FALSE;
-
   $mfcs_current_insurance = array(
     'request_id' => $request_id,
     'insurance_contractor' => NULL,
@@ -931,7 +929,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
 
   $mfcs_field_requirements = array();
   $requirements_university_save = FALSE;
-  $perform_manager_classification_check = FALSE;
+  $perform_power_user_classification_check = FALSE;
   if (($decision === MFCS_REVIEW_DECISION_WAIVE || $decision === MFCS_REVIEW_DECISION_REQUIREMENT) && ($step === MFCS_REVIEW_STEP_VENUE_AVAILABLE || $step === MFCS_REVIEW_STEP_REVIEW || $step === MFCS_REVIEW_STEP_FINAL_DECISION || $step === MFCS_REVIEW_STEP_COMPLETED)) {
     $requirements_university = NULL;
     if (isset($extra['requirements']['university'])) {
@@ -973,7 +971,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
     $uses['grounds_fees'] = MFCS_REVIEWER_CLASSIFICATION_FACILITIES; // @fixme: create a grounds classification
     $uses['security_fees'] = MFCS_REVIEWER_CLASSIFICATION_SECURITY;
 
-    if ($manager) {
+    if ($is_manager || $is_administer) {
       $uses_as_manager['facilities_fees'] = MFCS_REVIEWER_CLASSIFICATION_FACILITIES;
       $uses_as_manager['equipment_fees'] = MFCS_REVIEWER_CLASSIFICATION_FACILITIES;
       $uses_as_manager['custodial_fees'] = MFCS_REVIEWER_CLASSIFICATION_CUSTODIAL;
@@ -982,23 +980,6 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
       $uses_as_manager['security_fees'] = MFCS_REVIEWER_CLASSIFICATION_SECURITY;
     }
 
-
-    if (isset($reviewer_classifications['all'][MFCS_REVIEWER_CLASSIFICATION_PURCHASING])) {
-      if ($step === MFCS_REVIEW_STEP_FINAL_DECISION) {
-        $insurance_requirements = TRUE;
-      }
-      else {
-        $insurance_provided_exception = TRUE;
-      }
-    }
-    elseif ($manager) {
-      if ($step === MFCS_REVIEW_STEP_FINAL_DECISION) {
-        $insurance_requirements = TRUE;
-      }
-      else {
-        $insurance_provided_exception = TRUE;
-      }
-    }
 
     // when assigned as "university business", automatically reset all use fees, by assigning ID as NULL to prevent them from being utilized as a reviewer_classification.
     if ($requirements_university_save && $requirements_university) {
@@ -1158,126 +1139,149 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
       unset($requirements);
     }
 
-    if ($insurance_requirements) {
-      $contractor_insurance = 0;
-      $unaffiliated_insurance = 0;
+    $contractor_insurance = MFCS_INSURANCE_REQUIRED_NOT;
+    if (isset($request['insurance']['contractor'][0]->value)) {
+      $contractor_insurance = (int) $request['insurance']['contractor'][0]->value;
+    }
 
-      if (isset($extra['insurance']['contractor'])) {
-        $contractor_insurance = $extra['insurance']['contractor'];
+    $unaffiliated_insurance = MFCS_INSURANCE_REQUIRED_NOT;
+    if (isset($request['insurance']['unaffiliated'][0]->value)) {
+      $unaffiliated_insurance = (int) $request['insurance']['unaffiliated'][0]->value;
+    }
+
+    $provided_insurance = MFCS_INSURANCE_REQUIRED_NOT;
+    if (isset($request['insurance']['provided'][0]->value)) {
+      $provided_insurance = (int) $request['insurance']['provided'][0]->value;
+    }
+
+    if (isset($extra['insurance']['contractor'])) {
+      $contractor_insurance = (int) $extra['insurance']['contractor'];
+    }
+
+    if (isset($extra['insurance']['unaffiliated'])) {
+      $unaffiliated_insurance = (int) $extra['insurance']['unaffiliated'];
+    }
+
+    // as of fcs-79, insurance_provided table now represents whether or not contractor or unaffiliated insurance is required or provided at all.
+    // if either of the two is required, make as required.
+    // Of the ones required, if all are set to provided, then mark the insurance provided as provided.
+    // Of the ones required, if any are set to not provided, then mark the insurance provided as not provided.
+    if ($contractor_insurance === MFCS_INSURANCE_REQUIRED_NOT && $unaffiliated_insurance === MFCS_INSURANCE_REQUIRED_NOT) {
+      $provided_insurance = MFCS_INSURANCE_PROVIDED_NOT;
+    }
+    else {
+      $provided_insurance = MFCS_INSURANCE_REQUIRED;
+      if (($contractor_insurance === MFCS_INSURANCE_REQUIRED_NOT || $contractor_insurance === MFCS_INSURANCE_PROVIDED) && ($unaffiliated_insurance === MFCS_INSURANCE_REQUIRED_NOT || $unaffiliated_insurance === MFCS_INSURANCE_PROVIDED)) {
+        $provided_insurance = MFCS_INSURANCE_PROVIDED;
       }
-
-      if (isset($extra['insurance']['unaffiliated'])) {
-        $unaffiliated_insurance = $extra['insurance']['unaffiliated'];
+      elseif ($contractor_insurance === MFCS_INSURANCE_PROVIDED_NOT || $unaffiliated_insurance === MFCS_INSURANCE_PROVIDED_NOT) {
+        $provided_insurance = MFCS_INSURANCE_PROVIDED_NOT;
       }
+    }
 
-      $new_contractor_insurance = FALSE;
-      if (isset($request['insurance']['contractor'][0]->value)) {
-        if ($contractor_insurance != $request['insurance']['contractor'][0]->value) {
-          $new_contractor_insurance = TRUE;
-        }
+    $new_contractor_insurance = FALSE;
+    if (isset($request['insurance']['contractor'][0]->value)) {
+      $value = $request['insurance']['contractor'][0]->value;
+      if (!is_null($value)) {
+        $value = (int) $value;
+      }
+      $new_contractor_insurance = ($contractor_insurance !== $value);
+      unset($value);
+    }
+    else {
+      if (isset($extra['insurance']['contractor']) && !is_null($extra['insurance']['contractor'])) {
+        $new_contractor_insurance = TRUE;
+      }
+    }
+
+    $new_unaffiliated_insurance = FALSE;
+    if (isset($request['insurance']['unaffiliated'][0]->value)) {
+      $value = $request['insurance']['contractor'][0]->value;
+      if (!is_null($value)) {
+        $value = (int) $value;
+      }
+      $new_unaffiliated_insurance = ($unaffiliated_insurance !== $value);
+      unset($value);
+    }
+    else {
+      if (isset($extra['insurance']['unaffiliated']) && !is_null($extra['insurance']['unaffiliated'])) {
+        $new_unaffiliated_insurance = TRUE;
+      }
+    }
+
+    $new_provided_insurance = FALSE;
+    if (isset($request['insurance']['provided'][0]->value)) {
+      $value = $request['insurance']['provided'][0]->value;
+      if (!is_null($value)) {
+        $value = (int) $value;
+      }
+      $new_provided_insurance = ($provided_insurance !== $value);
+      unset($value);
+    }
+
+    // contractor insurance
+    if ($new_contractor_insurance) {
+      if (is_null($insurance_latest['contractor'])) {
+        $mfcs_current_insurance['insurance_contractor'] = 0;
       }
       else {
-        if (isset($extra['insurance']['contractor']) && !is_null($extra['insurance']['contractor'])) {
-          $new_contractor_insurance = TRUE;
-        }
+        $mfcs_current_insurance['insurance_contractor'] = $insurance_latest['contractor']->revision + 1;
       }
 
-      $new_unaffiliated_insurance = FALSE;
-      if (isset($request['insurance']['unaffiliated'][0]->value)) {
-        if ($unaffiliated_insurance != $request['insurance']['unaffiliated'][0]->value) {
-          $new_unaffiliated_insurance = TRUE;
-        }
+      $mfcs_field_insurance_contractor = array(
+        'request_id' => $request_id,
+        'revision' => $mfcs_current_insurance['insurance_contractor'],
+        'delta' => 0,
+        'user_id' => $user->uid,
+        'date' => $instance,
+        'value' => $contractor_insurance,
+      );
+    }
+
+    // unaffiliated insurance
+    if ($new_unaffiliated_insurance) {
+      if (is_null($insurance_latest['unaffiliated'])) {
+        $mfcs_current_insurance['insurance_unaffiliated'] = 0;
       }
       else {
-        if (isset($extra['insurance']['unaffiliated']) && !is_null($extra['insurance']['unaffiliated'])) {
-          $new_unaffiliated_insurance = TRUE;
-        }
+        $mfcs_current_insurance['insurance_unaffiliated'] = $insurance_latest['unaffiliated']->revision + 1;
       }
 
-      // contractor insurance
-      if ($new_contractor_insurance) {
-        if (is_null($insurance_latest['contractor'])) {
-          $mfcs_current_insurance['insurance_contractor'] = 0;
-        }
-        else {
-          $mfcs_current_insurance['insurance_contractor'] = $insurance_latest['contractor']->revision + 1;
-        }
-
-        $mfcs_field_insurance_contractor = array(
-          'request_id' => $request_id,
-          'revision' => $mfcs_current_insurance['insurance_contractor'],
-          'delta' => 0,
-          'user_id' => $user->uid,
-          'date' => $instance,
-          'value' => $contractor_insurance,
-        );
-      }
-
-      // unaffiliated insurance
-      if ($new_unaffiliated_insurance) {
-        if (is_null($insurance_latest['unaffiliated'])) {
-          $mfcs_current_insurance['insurance_unaffiliated'] = 0;
-        }
-        else {
-          $mfcs_current_insurance['insurance_unaffiliated'] = $insurance_latest['unaffiliated']->revision + 1;
-        }
-
-        $mfcs_field_insurance_unaffiliated = array(
-          'request_id' => $request_id,
-          'revision' => $mfcs_current_insurance['insurance_unaffiliated'],
-          'delta' => 0,
-          'user_id' => $user->uid,
-          'date' => $instance,
-          'value' => $unaffiliated_insurance,
-        );
-      }
+      $mfcs_field_insurance_unaffiliated = array(
+        'request_id' => $request_id,
+        'revision' => $mfcs_current_insurance['insurance_unaffiliated'],
+        'delta' => 0,
+        'user_id' => $user->uid,
+        'date' => $instance,
+        'value' => $unaffiliated_insurance,
+      );
     }
 
     // provided insurance
-    if ($insurance_requirements || $insurance_provided_exception) {
-      $provided_insurance = 0;
-
-      if (isset($extra['insurance']['provided'])) {
-        $provided_insurance = $extra['insurance']['provided'];
-      }
-
-      $new_provided_insurance = FALSE;
-      if (isset($request['insurance']['provided'][0]->value)) {
-        if ($provided_insurance != $request['insurance']['provided'][0]->value) {
-          $new_provided_insurance = TRUE;
-        }
+    if ($new_provided_insurance) {
+      if (is_null($insurance_latest['provided'])) {
+        $mfcs_current_insurance['insurance_provided'] = 0;
       }
       else {
-        if (isset($extra['insurance']['provided']) && !is_null($extra['insurance']['provided'])) {
-          $new_provided_insurance = TRUE;
-        }
+        $mfcs_current_insurance['insurance_provided'] = $insurance_latest['provided']->revision + 1;
       }
 
-      if ($new_provided_insurance) {
-        if (is_null($insurance_latest['provided'])) {
-          $mfcs_current_insurance['insurance_provided'] = 0;
-        }
-        else {
-          $mfcs_current_insurance['insurance_provided'] = $insurance_latest['provided']->revision + 1;
-        }
-
-        $mfcs_field_insurance_provided = array(
-          'request_id' => $request_id,
-          'revision' => $mfcs_current_insurance['insurance_provided'],
-          'delta' => 0,
-          'user_id' => $user->uid,
-          'date' => $instance,
-          'value' => $provided_insurance,
-        );
-      }
+      $mfcs_field_insurance_provided = array(
+        'request_id' => $request_id,
+        'revision' => $mfcs_current_insurance['insurance_provided'],
+        'delta' => 0,
+        'user_id' => $user->uid,
+        'date' => $instance,
+        'value' => $provided_insurance,
+      );
     }
   }
   elseif (($step === MFCS_REVIEW_STEP_REVIEW || $step === MFCS_REVIEW_STEP_FINAL_DECISION) && ($decision == MFCS_REVIEW_DECISION_ISSUES || $decision == MFCS_REVIEW_DECISION_ISSUES_NONE)) {
-    $perform_manager_classification_check = TRUE;
+    $perform_power_user_classification_check = TRUE;
   }
 
-  if ($perform_manager_classification_check && $manager) {
-    // remove all reviewer classifications the current reviewer already reviewed as.
+  if ($perform_power_user_classification_check && ($is_manager || $is_administer)) {
+    // remove all reviewer classifications the current reviewer already reviewed as (if the reviewer is an administer or a manager).
     try {
       if (!empty($reviewer_classifications['step'])) {
         $reviewer_classifications_copy = $reviewer_classifications['step'];
@@ -1310,7 +1314,11 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
       return FALSE;
     }
 
-    if (empty($reviewer_classifications['step'])) {
+
+    if ($is_administer && empty($reviewer_classifications['step'])) {
+      $reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR] = MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR;
+    }
+    if ($is_manager && empty($reviewer_classifications['step'])) {
       $reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_MANAGER] = MFCS_REVIEWER_CLASSIFICATION_MANAGER;
     }
   }
@@ -1410,35 +1418,25 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
       $query->fields($mfcs_current_requirements);
       $query->execute();
 
-      if ($insurance_requirements) {
-        if ($new_contractor_insurance) {
-          $query = db_insert('mfcs_field_insurance_contractor');
-          $query->fields($mfcs_field_insurance_contractor);
-          $query->execute();
-        }
-
-        if ($new_unaffiliated_insurance) {
-          $query = db_insert('mfcs_field_insurance_unaffiliated');
-          $query->fields($mfcs_field_insurance_unaffiliated);
-          $query->execute();
-        }
-      }
-
-      if ($insurance_requirements || $insurance_provided_exception) {
-        if ($new_provided_insurance) {
-          $query = db_insert('mfcs_field_insurance_provided');
-          $query->fields($mfcs_field_insurance_provided);
-          $query->execute();
-        }
-      }
-
-      if ($insurance_requirements && ($new_contractor_insurance || $new_unaffiliated_insurance)) {
-        $query = db_update('mfcs_current');
-        $query->condition('request_id', $request_id);
-        $query->fields($mfcs_current_insurance);
+      if ($new_contractor_insurance) {
+        $query = db_insert('mfcs_field_insurance_contractor');
+        $query->fields($mfcs_field_insurance_contractor);
         $query->execute();
       }
-      elseif (($insurance_requirements || $insurance_provided_exception) && $new_provided_insurance) {
+
+      if ($new_unaffiliated_insurance) {
+        $query = db_insert('mfcs_field_insurance_unaffiliated');
+        $query->fields($mfcs_field_insurance_unaffiliated);
+        $query->execute();
+      }
+
+      if ($new_provided_insurance) {
+        $query = db_insert('mfcs_field_insurance_provided');
+        $query->fields($mfcs_field_insurance_provided);
+        $query->execute();
+      }
+
+      if ($new_contractor_insurance || $new_unaffiliated_insurance || $new_provided_insurance) {
         $query = db_update('mfcs_current');
         $query->condition('request_id', $request_id);
         $query->fields($mfcs_current_insurance);
@@ -1593,7 +1591,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
       mfcs_send_workflow_emails($request_id, $parameters);
     }
   }
-  elseif ($decision === MFCS_REVIEW_DECISION_WAIVE || $decision === MFCS_REVIEW_DECISION_CANCELLED || $decision === MFCS_REVIEW_DECISION_UNCANCELLED || $decision === MFCS_REVIEW_DECISION_CLOSED || ($decision === MFCS_REVIEW_DECISION_REQUIREMENT && !$insurance_provided_exception) || $decision === MFCS_REVIEW_DECISION_REASSIGNED) {
+  elseif ($decision === MFCS_REVIEW_DECISION_WAIVE || $decision === MFCS_REVIEW_DECISION_CANCELLED || $decision === MFCS_REVIEW_DECISION_UNCANCELLED || $decision === MFCS_REVIEW_DECISION_CLOSED || ($decision === MFCS_REVIEW_DECISION_REQUIREMENT && $new_provided_insurance && $provided_insurance === MFCS_INSURANCE_PROVIDED) || $decision === MFCS_REVIEW_DECISION_REASSIGNED) {
     if ($decision === MFCS_REVIEW_DECISION_WAIVE || $decision === MFCS_REVIEW_DECISION_REQUIREMENT) {
       // if a comment is specified then send an e-mail as a comment.
       if (strlen($message) > 0) {
@@ -1713,7 +1711,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
   elseif ($step === MFCS_REVIEW_STEP_VENUE_AVAILABLE && ($decision === MFCS_REVIEW_DECISION_AVAILABLE || $decision === MFCS_REVIEW_DECISION_UNAVAILABLE)) {
     $attach_message = $message;
   }
-  elseif ($insurance_provided_exception) {
+  elseif ($new_provided_insurance && $provided_insurance === MFCS_INSURANCE_PROVIDED) {
     // for all other steps, when insurance is provided, send an e-mail to alert reviewers that the insurance has been provided.
     $parameters = array();
     $parameters['changed_by'] = $user->uid;

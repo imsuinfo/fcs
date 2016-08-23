@@ -7172,17 +7172,6 @@ function mfcs_set_request_values($request, $prepared, $structure, $existing, &$f
       $query = db_insert('mfcs_field_review_review');
       $query->fields($mfcs_field_review_review);
       $query->execute();
-
-      $mfcs_current['requirements_facilities_fees'] = NULL;
-      $mfcs_current['requirements_equipment_fees'] = NULL;
-      $mfcs_current['requirements_custodial_fees'] = NULL;
-      $mfcs_current['requirements_security_fees'] = NULL;
-      $mfcs_current['requirements_grounds_fees'] = NULL;
-      $mfcs_current['requirements_maintenance_fees'] = NULL;
-      $mfcs_current['requirements_other'] = NULL;
-      $mfcs_current['requirements_university'] = NULL;
-
-      $mfcs_current['insurance_provided'] = NULL;
     }
 
     // update the current revisions table.
