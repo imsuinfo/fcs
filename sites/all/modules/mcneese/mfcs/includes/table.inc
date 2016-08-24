@@ -871,8 +871,23 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => FALSE,
       ),
     ),
-    'user_id' => array(
+    'creator' => array(
       'label' => 'Created By',
+      'group' => 'request',
+      'weight' => 7,
+      'type' => array(
+        'value' => 'user_id',
+      ),
+      'display' => array(
+        'value' => 'account_name',
+      ),
+      'request_type' => array(
+        'show' => FALSE,
+        'hide' => TRUE,
+      ),
+    ),
+    'user_id' => array(
+      'label' => 'Requester',
       'group' => 'request',
       'weight' => 7,
       'type' => array(

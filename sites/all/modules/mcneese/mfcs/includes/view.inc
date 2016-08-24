@@ -1529,8 +1529,11 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
       elseif ($decision === MFCS_REVIEW_DECISION_UNCANCELLED) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">Uncancelled</strong> the request' . $reviewer_classification . '.';
       }
-      elseif ($decision === MFCS_REVIEW_DECISION_REASSIGNED) {
-        $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">Re-Assigned</strong> the request' . $reviewer_classification . '.';
+      elseif ($decision === MFCS_REVIEW_DECISION_REASSIGNED_COORDINATOR) {
+        $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">Re-Assigned</strong> the coordinator' . $reviewer_classification . '.';
+      }
+      elseif ($decision === MFCS_REVIEW_DECISION_REASSIGNED_REQUESTER) {
+        $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">Re-Assigned</strong> the requester' . $reviewer_classification . '.';
       }
       elseif ($decision === MFCS_REVIEW_DECISION_OVERRIDE) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">Overridden</strong> the request' . $reviewer_classification . '.';

@@ -276,14 +276,39 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   );
 
   $items['requests/manage-0/reassign/coordinator/%'] = array(
-    'title' => "Re-Assign Request",
-    'description' => "Re-Assign Request",
+    'title' => "Re-Assign Request Coordinator",
+    'description' => "Re-Assign Request Coordinator",
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_request_manage_0_reassign_form', 4),
+    'page arguments' => array('mfcs_request_manage_0_reassign_coordinator_form', 4),
     'file' => 'request_reassign.inc',
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_page_request_access',
-    'access arguments' => array('reassign', 4),
+    'access arguments' => array('reassign-coordinator', 4),
+    'tab_parent' => 'requests/manage-0',
+    'tab_root' => 'requests/manage-0',
+  );
+
+  $items['requests/manage-0/reassign/requester/%'] = array(
+    'title' => "Re-Assign Request Requester",
+    'description' => "Re-Assign Request Requester",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_manage_0_reassign_requester_form', 4),
+    'file' => 'request_reassign.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('reassign-requester', 4),
+    'tab_parent' => 'requests/manage-0',
+    'tab_root' => 'requests/manage-0',
+  );
+
+  $items['requests/manage-0/reassign/requester/autocomplete/user_id'] = array(
+    'title' => "",
+    'page callback' => 'mfcs_autocomplete_user_id',
+    'file' => 'autocomplete.inc',
+    'file path' => $module_path . '/includes',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('reassign-requester'),
+    'type' => MENU_CALLBACK,
     'tab_parent' => 'requests/manage-0',
     'tab_root' => 'requests/manage-0',
   );

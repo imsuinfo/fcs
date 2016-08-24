@@ -7075,6 +7075,7 @@ function mfcs_set_request_values($request, $prepared, $structure, $existing, &$f
     // now perform the operations.
     if (is_null($request)) {
       $query = db_insert('mfcs_requests');
+      $prepared['mfcs_requests']['creator'] = $prepared['mfcs_requests']['user_id'];
       $query->fields($prepared['mfcs_requests']);
       $request_id = $query->execute();
 
@@ -7083,6 +7084,7 @@ function mfcs_set_request_values($request, $prepared, $structure, $existing, &$f
         $transaction->rollback();
         return FALSE;
       }
+      unset($prepared['mfcs_requests']['creator']);
 
       // save the request id so that a programmatic caller can determine the request_id.
       $form_state['created_request_id'] = $request_id;

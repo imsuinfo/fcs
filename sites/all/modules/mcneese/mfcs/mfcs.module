@@ -88,9 +88,10 @@ define('MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED', 9);
  define('MFCS_REVIEW_DECISION_CLOSED', 1);
  define('MFCS_REVIEW_DECISION_CANCELLED', 2);
  define('MFCS_REVIEW_DECISION_UNCANCELLED', 3);
- define('MFCS_REVIEW_DECISION_REASSIGNED', 4);
+ define('MFCS_REVIEW_DECISION_REASSIGNED_COORDINATOR', 4);
  define('MFCS_REVIEW_DECISION_OVERRIDE', 5);
  define('MFCS_REVIEW_DECISION_MOVE', 6);
+ define('MFCS_REVIEW_DECISION_REASSIGNED_REQUESTER', 7);
 
 /**
  * Defines Taxonomy TIDs for review classifications.
@@ -979,8 +980,22 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
 
     return $processed[$request_id];
   }
-  elseif ($operation == 'reassign') {
-    $operation_result = mfcs_page_request_access_operation_reassign($request_ids, $processed, $access, $roles, $user);
+  elseif ($operation == 'reassign-coordinator') {
+    $operation_result = mfcs_page_request_access_operation_reassign_coordinator($request_ids, $processed, $access, $roles, $user);
+
+    // if something went wrong with the operation check, return FALSE but do not cache.
+    if ($operation_result === FALSE) {
+      return FALSE;
+    }
+
+    if (is_array($request_id)) {
+      return $processed;
+    }
+
+    return $processed[$request_id];
+  }
+  elseif ($operation == 'reassign-requester') {
+    $operation_result = mfcs_page_request_access_operation_reassign_requester($request_ids, $processed, $access, $roles, $user);
 
     // if something went wrong with the operation check, return FALSE but do not cache.
     if ($operation_result === FALSE) {
@@ -2200,7 +2215,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
       return TRUE;
     }
   }
-  elseif ($operation == 'reassign') {
+  elseif ($operation == 'reassign-coordinator') {
     if ($request['top']['status'][0]->value == MFCS_REQUEST_STATUS_DELETED) {
       $access[$request_id] = FALSE;
       return FALSE;
@@ -2213,6 +2228,17 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
 
     // no matter who the user is, if the request is not one of these status', then do not allow re-assignment.
     if (!in_array($request['top']['status'][0]->value, $reassignable_status)) {
+      $access[$request_id] = FALSE;
+      return FALSE;
+    }
+
+    if ($roles['manager'] || $roles['administer']) {
+      $access[$request_id] = TRUE;
+      return TRUE;
+    }
+  }
+  elseif ($operation == 'reassign-requester') {
+    if ($request['top']['status'][0]->value == MFCS_REQUEST_STATUS_DELETED) {
       $access[$request_id] = FALSE;
       return FALSE;
     }
@@ -6091,7 +6117,7 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL, $revision_id
     // manually add the request information and presentation fields.
     if (!isset($request['mer'])) {
       $request['mer'] = array();
-      foreach (array('id', 'user_id', 'created', 'updated', 'revision', 'revision_message') as $key) {
+      foreach (array('id', 'creator', 'user_id', 'created', 'updated', 'revision', 'revision_message') as $key) {
         $request['mer'][$key] = array(0 => new stdClass());
         $request['mer'][$key][0]->value = $mer->{$key};
       }
@@ -7893,6 +7919,7 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
       $query->addField('mer', 'id', 'id');
     }
 
+    $query->addField('mer', 'creator', 'creator');
     $query->addField('mer', 'user_id', 'user_id');
     $query->addField('mer', 'created', 'created');
     $query->addField('mer', 'updated', 'updated');

@@ -73,7 +73,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     $can_uncancel_request = mfcs_request_access('uncancel', $request, $user);
     $can_manage_request = mfcs_request_access('manage', $request, $user);
     $can_override_request = mfcs_request_access('override', $request, $user);
-    $can_reassign_request = mfcs_request_access('reassign', $request, $user);
+    $can_reassign_request = mfcs_request_access('reassign-coordinator', $request, $user);
     $can_cancelling_request = mfcs_request_access('cancelling', $request, $user);
   }
   else {
@@ -97,7 +97,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     $can_uncancel_request = mfcs_request_access('uncancel', $request_latest, $user);
     $can_manage_request = mfcs_request_access('manage', $request_latest, $user);
     $can_override_request = mfcs_request_access('override', $request_latest, $user);
-    $can_reassign_request = mfcs_request_access('reassign', $request_latest, $user);
+    $can_reassign_request = mfcs_request_access('reassign-coordinator', $request_latest, $user);
     $can_cancelling_request = mfcs_request_access('cancelling', $request_latest, $user);
 
     if (!$can_history_request) {

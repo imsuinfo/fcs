@@ -61,6 +61,7 @@ function mfcs_request_manage_0_page($request_id) {
   $id_room = (int) $request['top']['room'][0]->value;
   $id_building = (int) $request['top']['building'][0]->value;
   $id_location = (int) $request['top']['location'][0]->value;
+  $id_creator = (int) $request['mer']['creator'][0]->value;
   $id_requester = (int) $request['mer']['user_id'][0]->value;
   $id_venue_coordinator = (int) $request['request_coordinator']['name'][0]->user_id;
 
@@ -75,6 +76,7 @@ function mfcs_request_manage_0_page($request_id) {
     }
   }
 
+  $user_creator = mfcs_load_basic_user_settings_by_user_id($id_creator);
   $user_requester = mfcs_load_basic_user_settings_by_user_id($id_requester);
   $user_venue_coordinator = mfcs_load_basic_user_settings_by_user_id($id_venue_coordinator);
 
@@ -102,7 +104,8 @@ function mfcs_request_manage_0_page($request_id) {
   $can_cancel_request = mfcs_request_access('cancel', $request, $user);
   $can_uncancel_request = mfcs_request_access('uncancel', $request, $user);
   $can_move_request = mfcs_request_access('move', $request, $user);
-  $can_reassign_request = mfcs_request_access('reassign', $request, $user);
+  $can_reassign_request_coordinator = mfcs_request_access('reassign-coordinator', $request, $user);
+  $can_reassign_request_requester = mfcs_request_access('reassign-requester', $request, $user);
 
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
   $options_step = mfcs_get_review_steps_list_options();
@@ -153,6 +156,7 @@ function mfcs_request_manage_0_page($request_id) {
   $markup .= mfcs_request_manage_0_page_create_item_and_value('Room:',  $string_room, $class_name);
   $markup .= mfcs_request_manage_0_page_create_item_and_value('Building:',  $string_building, $class_name);
   $markup .= mfcs_request_manage_0_page_create_item_and_value('Location:',  $string_location, $class_name);
+  $markup .= mfcs_request_manage_0_page_create_item_user_name('Creator:',  $user_creator, $class_name);
   $markup .= mfcs_request_manage_0_page_create_item_user_name('Requester:',  $user_requester, $class_name);
   $markup .= mfcs_request_manage_0_page_create_item_user_name('Venue Coordinator:',  $user_venue_coordinator, $class_name);
   $markup .= mfcs_request_manage_0_page_create_item_and_value('Auto-Cancel:',  $locks_auto_cancel, $class_name);
@@ -182,28 +186,28 @@ function mfcs_request_manage_0_page($request_id) {
   $markup .= '<h3 class="header header-' . $class_name . '">Management Actions</h3>';
   $markup .= '<div class="content content-' . $class_name . '">';
 
-  $markup .= mfcs_request_manage_0_page_create_item_message('<a href="' . $base_path . 'requests/manage-0/override/' . $id_id . $url_arguments . '" class="link link-override">Manually Override</a> the current requests review step or status.', $class_name);
-
-  if ($disabled_venue_coordinator) {
-    $markup .= mfcs_request_manage_0_page_create_item_message('The venue coordinator account should be <a href="' . $base_path . 'requests/manage-0/reassign/coordinator/' . $id_id . $url_arguments . '" class="link link-reassign">Re-Assigned</a>.', $class_name);
-  }
+  $markup .= mfcs_request_manage_0_page_create_item_message('<a href="' . $base_path . 'requests/manage-0/override/' . $id_id . $url_arguments . '" class="link link-override" title="Override Request\'s Step or Status">Manually Override</a> the current requests review step or status.', $class_name);
 
   if ($can_cancel_request) {
-    $markup .= mfcs_request_manage_0_page_create_item_message('The request may be <a href="' . $base_path . 'requests/cancel-0/' . $id_id . $url_arguments . '" class="link link-cancel">Cancelled</a>.', $class_name);
+    $markup .= mfcs_request_manage_0_page_create_item_message('The request may be <a href="' . $base_path . 'requests/cancel-0/' . $id_id . $url_arguments . '" class="link link-cancel" title="Cancel Request">Cancelled</a>.', $class_name);
   }
 
   if ($can_uncancel_request) {
-    $markup .= mfcs_request_manage_0_page_create_item_message('The request may be <a href="' . $base_path . 'requests/uncancel-0/' . $id_id . $url_arguments . '" class="link link-uncancel">Uncancelled</a>.', $class_name);
+    $markup .= mfcs_request_manage_0_page_create_item_message('The request may be <a href="' . $base_path . 'requests/uncancel-0/' . $id_id . $url_arguments . '" class="link link-uncancel" title="Uncancel Request">Uncancelled</a>.', $class_name);
   }
 
-  $markup .= mfcs_request_manage_0_page_create_item_message('The <a href="' . $base_path . 'requests/manage-0/locks/' . $id_id . $url_arguments . '" class="link link-override">Request\'s Locks</a> may be manually updated.', $class_name);
+  $markup .= mfcs_request_manage_0_page_create_item_message('The <a href="' . $base_path . 'requests/manage-0/locks/' . $id_id . $url_arguments . '" class="link link-override" title="Toggle Request Locks">Request\'s Locks</a> may be manually updated.', $class_name);
 
   if ($can_move_request) {
-    $markup .= mfcs_request_manage_0_page_create_item_message('The request may be <a href="' . $base_path . 'requests/manage-0/move/' . $id_id . $url_arguments . '" class="link link-uncancel">Moved</a>.', $class_name);
+    $markup .= mfcs_request_manage_0_page_create_item_message('The request may be <a href="' . $base_path . 'requests/manage-0/move/' . $id_id . $url_arguments . '" class="link link-uncancel" title="Move Request">Moved</a>.', $class_name);
   }
 
-  if ($can_reassign_request) {
-    $markup .= mfcs_request_manage_0_page_create_item_message('The Venue Coordinator may be <a href="' . $base_path . 'requests/manage-0/reassign/coordinator/' . $id_id . $url_arguments . '" class="link link-uncancel">Re-Assigned</a>.', $class_name);
+  if ($disabled_venue_coordinator && $can_reassign_request_coordinator) {
+    $markup .= mfcs_request_manage_0_page_create_item_message('The Venue Coordinator should be <a href="' . $base_path . 'requests/manage-0/reassign/coordinator/' . $id_id . $url_arguments . '" class="link link-uncancel" title="Re-Assign Coordinator"">Re-Assigned</a>.', $class_name);
+  }
+
+  if ($can_reassign_request_requester) {
+    $markup .= mfcs_request_manage_0_page_create_item_message('The Requester may be <a href="' . $base_path . 'requests/manage-0/reassign/requester/' . $id_id . $url_arguments . '" class="link link-uncancel" title="Re-Assign Requester">Re-Assigned</a>.', $class_name);
   }
 
   $markup .= '</div>';
