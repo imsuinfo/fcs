@@ -2223,55 +2223,54 @@ function mfcs_install() {
   db_query('alter table mfcs_banner_classes alter id set default nextval(\'mfcs_banner_classes_id_seq\'::regclass);');
 
 
-  db_query('ALTER TABLE {requests} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
-  db_query('ALTER TABLE {mfcs_current} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
-  db_query('ALTER TABLE {mfcs_request_revisions} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
-  db_query('ALTER TABLE {mfcs_request_revisions} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
-  db_query('ALTER TABLE {mfcs_reviewers} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
-  db_query('ALTER TABLE {mfcs_search_settings} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE CASCADE');
-  db_query('ALTER TABLE {mfcs_reviewed} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
-  db_query('ALTER TABLE {mfcs_proxy_venue_coordinator} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
-  db_query('ALTER TABLE {mfcs_proxy_venue_coordinator} ADD CONSTRAINT ' . $key2_foreign_2 . ' FOREIGN KEY (' . $key2_name_2 . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_requests} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_current} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON UPDATE CASCADE ON DELETE CASCADE');
+  db_query('ALTER TABLE {mfcs_request_revisions} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON UPDATE CASCADE ON DELETE CASCADE');
+  db_query('ALTER TABLE {mfcs_request_revisions} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_reviewers} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_search_settings} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON UPDATE CASCADE ON DELETE CASCADE');
+  db_query('ALTER TABLE {mfcs_reviewed} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON UPDATE CASCADE ON DELETE CASCADE');
+  db_query('ALTER TABLE {mfcs_proxy_venue_coordinator} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_proxy_venue_coordinator} ADD CONSTRAINT ' . $key2_foreign_2 . ' FOREIGN KEY (' . $key2_name_2 . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON UPDATE CASCADE ON DELETE RESTRICT');
 
-  db_query('ALTER TABLE {mfcs_banner_building_to_location} ADD CONSTRAINT ' . $key3_foreign . ' FOREIGN KEY (' . $key3_name . ') REFERENCES {' . $table3_foreign . '} (' . $table3_foreign_key . ') ON DELETE CASCADE');
-  db_query('ALTER TABLE {mfcs_banner_building_to_location} ADD CONSTRAINT ' . $key4_foreign . ' FOREIGN KEY (' . $key4_name . ') REFERENCES {' . $table4_foreign . '} (' . $table4_foreign_key . ') ON DELETE CASCADE');
-  db_query('ALTER TABLE {mfcs_banner_rooms} ADD CONSTRAINT ' . $key4_foreign . ' FOREIGN KEY (' . $key4_name . ') REFERENCES {' . $table4_foreign . '} (' . $table4_foreign_key . ') ON DELETE CASCADE');
-  db_query('ALTER TABLE {mfcs_banner_rooms} ADD CONSTRAINT ' . $key2_foreign_1 . ' FOREIGN KEY (' . $key2_name_1 . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
-  db_query('ALTER TABLE {mfcs_banner_classes} ADD CONSTRAINT ' . $key5_foreign . ' FOREIGN KEY (' . $key5_name . ') REFERENCES {' . $table5_foreign . '} (' . $table5_foreign_key . ') ON DELETE CASCADE');
-  db_query('ALTER TABLE {mfcs_banner_event_roles_to_users} ADD CONSTRAINT ' . $key6_foreign . ' FOREIGN KEY (' . $key6_name . ') REFERENCES {' . $table6_foreign . '} (' . $table6_foreign_key . ') ON DELETE CASCADE');
+  db_query('ALTER TABLE {mfcs_banner_building_to_location} ADD CONSTRAINT ' . $key3_foreign . ' FOREIGN KEY (' . $key3_name . ') REFERENCES {' . $table3_foreign . '} (' . $table3_foreign_key . ') ON UPDATE CASCADE ON DELETE CASCADE');
+  db_query('ALTER TABLE {mfcs_banner_building_to_location} ADD CONSTRAINT ' . $key4_foreign . ' FOREIGN KEY (' . $key4_name . ') REFERENCES {' . $table4_foreign . '} (' . $table4_foreign_key . ') ON UPDATE CASCADE ON DELETE CASCADE');
+  db_query('ALTER TABLE {mfcs_banner_rooms} ADD CONSTRAINT ' . $key4_foreign . ' FOREIGN KEY (' . $key4_name . ') REFERENCES {' . $table4_foreign . '} (' . $table4_foreign_key . ') ON UPDATE CASCADE ON DELETE CASCADE');
+  db_query('ALTER TABLE {mfcs_banner_rooms} ADD CONSTRAINT ' . $key2_foreign_1 . ' FOREIGN KEY (' . $key2_name_1 . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_banner_event_roles_to_users} ADD CONSTRAINT ' . $key6_foreign . ' FOREIGN KEY (' . $key6_name . ') REFERENCES {' . $table6_foreign . '} (' . $table6_foreign_key . ') ON UPDATE CASCADE ON DELETE CASCADE');
 
-  db_query('ALTER TABLE {mfcs_request_reminders} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
+  db_query('ALTER TABLE {mfcs_request_reminders} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON UPDATE CASCADE ON DELETE CASCADE');
 
-  db_query('ALTER TABLE {mfcs_review_classifications} ADD CONSTRAINT review_fkey FOREIGN KEY (review_id) REFERENCES {mfcs_field_review_review} (id) ON DELETE CASCADE');
+  db_query('ALTER TABLE {mfcs_review_classifications} ADD CONSTRAINT review_id_fkey FOREIGN KEY (review_id) REFERENCES {mfcs_field_review_review} (id) ON UPDATE CASCADE ON DELETE CASCADE');
 
-  db_query('ALTER TABLE {mfcs_unavailability} ADD CONSTRAINT ' . $key11_foreign . ' FOREIGN KEY (' . $key11_name . ') REFERENCES {' . $table11_foreign . '} (' . $table11_foreign_key . ') ON DELETE CASCADE');
+  db_query('ALTER TABLE {mfcs_unavailability} ADD CONSTRAINT ' . $key11_foreign . ' FOREIGN KEY (' . $key11_name . ') REFERENCES {' . $table11_foreign . '} (' . $table11_foreign_key . ') ON UPDATE CASCADE ON DELETE CASCADE');
 
-  db_query('ALTER TABLE {mfcs_log_troubleshoot} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
-  db_query('ALTER TABLE {mfcs_log_emails} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
-  db_query('ALTER TABLE {mfcs_users} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
-  db_query('ALTER TABLE {mfcs_log_problems_requests} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
-  db_query('ALTER TABLE {mfcs_log_holiday} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
-  db_query('ALTER TABLE {mfcs_log_unavailability} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_log_troubleshoot} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_log_emails} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_users} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_log_problems_requests} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_log_holiday} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_log_unavailability} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON UPDATE CASCADE ON DELETE RESTRICT');
 
-  db_query('ALTER TABLE {mfcs_synchronize} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
-  db_query('ALTER TABLE {mfcs_log_troubleshoot} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
-  db_query('ALTER TABLE {mfcs_log_problems_requests} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
+  db_query('ALTER TABLE {mfcs_synchronize} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON UPDATE CASCADE ON DELETE CASCADE');
+  db_query('ALTER TABLE {mfcs_log_troubleshoot} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON UPDATE CASCADE ON DELETE CASCADE');
+  db_query('ALTER TABLE {mfcs_log_problems_requests} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON UPDATE CASCADE ON DELETE CASCADE');
 
-  db_query('ALTER TABLE {mfcs_log_holiday} ADD CONSTRAINT ' . $key7_foreign . ' FOREIGN KEY (' . $key7_name . ') REFERENCES {' . $table7_foreign . '} (' . $table7_foreign_key . ') ON DELETE RESTRICT');
-  db_query('ALTER TABLE {mfcs_log_unavailability} ADD CONSTRAINT ' . $key8_foreign . ' FOREIGN KEY (' . $key8_name . ') REFERENCES {' . $table8_foreign . '} (' . $table8_foreign_key . ') ON DELETE RESTRICT');
-  db_query('ALTER TABLE {mfcs_log_unavailability} ADD CONSTRAINT ' . $key9_foreign . ' FOREIGN KEY (' . $key9_name . ') REFERENCES {' . $table9_foreign . '} (' . $table9_foreign_key . ') ON DELETE RESTRICT');
-  db_query('ALTER TABLE {mfcs_log_unavailability} ADD CONSTRAINT ' . $key10_foreign . ' FOREIGN KEY (' . $key10_name . ') REFERENCES {' . $table10_foreign . '} (' . $table10_foreign_key . ') ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_log_holiday} ADD CONSTRAINT ' . $key7_foreign . ' FOREIGN KEY (' . $key7_name . ') REFERENCES {' . $table7_foreign . '} (' . $table7_foreign_key . ') ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_log_unavailability} ADD CONSTRAINT ' . $key8_foreign . ' FOREIGN KEY (' . $key8_name . ') REFERENCES {' . $table8_foreign . '} (' . $table8_foreign_key . ') ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_log_unavailability} ADD CONSTRAINT ' . $key9_foreign . ' FOREIGN KEY (' . $key9_name . ') REFERENCES {' . $table9_foreign . '} (' . $table9_foreign_key . ') ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_log_unavailability} ADD CONSTRAINT ' . $key10_foreign . ' FOREIGN KEY (' . $key10_name . ') REFERENCES {' . $table10_foreign . '} (' . $table10_foreign_key . ') ON UPDATE CASCADE ON DELETE RESTRICT');
 
-  db_query('ALTER TABLE {mfcs_drupal_to_banner_role_mapping} ADD CONSTRAINT role_id_fkey FOREIGN KEY (role_id) REFERENCES {role} (rid) ON DELETE RESTRICT ON UPDATE CASCADE');
-  db_query('ALTER TABLE {mfcs_drupal_to_banner_role_mapping} ADD CONSTRAINT banner_id_fkey FOREIGN KEY (banner_id) REFERENCES {mfcs_banner_event_roles} (id) ON DELETE RESTRICT ON UPDATE CASCADE');
-  db_query('ALTER TABLE {mfcs_drupal_to_banner_role_mapping} ADD CONSTRAINT role_name_fkey FOREIGN KEY (role_name) REFERENCES {role} (name) ON DELETE RESTRICT ON UPDATE CASCADE');
-  db_query('ALTER TABLE {mfcs_drupal_to_banner_role_mapping} ADD CONSTRAINT banner_name_fkey FOREIGN KEY (banner_name) REFERENCES {mfcs_banner_event_roles} (machine_name) ON DELETE RESTRICT ON UPDATE CASCADE');
+  db_query('ALTER TABLE {mfcs_drupal_to_banner_role_mapping} ADD CONSTRAINT role_id_fkey FOREIGN KEY (role_id) REFERENCES {role} (rid) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_drupal_to_banner_role_mapping} ADD CONSTRAINT banner_id_fkey FOREIGN KEY (banner_id) REFERENCES {mfcs_banner_event_roles} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_drupal_to_banner_role_mapping} ADD CONSTRAINT role_name_fkey FOREIGN KEY (role_name) REFERENCES {role} (name) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_drupal_to_banner_role_mapping} ADD CONSTRAINT banner_name_fkey FOREIGN KEY (banner_name) REFERENCES {mfcs_banner_event_roles} (machine_name) ON UPDATE CASCADE ON DELETE RESTRICT');
 
   foreach ($structure as $structure_name => &$structure_array) {
     foreach ($structure_array as $field_name => &$field_type) {
       $field_table1_name = 'mfcs_field_' . $structure_name . '_' . $field_name;
 
-      db_query('ALTER TABLE {' . $field_table1_name . '} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON DELETE CASCADE');
+      db_query('ALTER TABLE {' . $field_table1_name . '} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON UPDATE CASCADE ON DELETE CASCADE');
     }
   }
 
@@ -2329,18 +2328,18 @@ function mfcs_install() {
   db_query('INSERT INTO mfcs_taxonomy_reviewer_classification (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_UNIVERSITY_SERVICES . ', \'university_services\', \'University Services\')');
 
 
-  db_query('ALTER TABLE mfcs_requests ADD CONSTRAINT classification_fkey FOREIGN KEY (classification) REFERENCES mfcs_taxonomy_request_classification (id) ON DELETE RESTRICT ON UPDATE CASCADE');
-  db_query('ALTER TABLE mfcs_requests ADD CONSTRAINT step_fkey FOREIGN KEY (step) REFERENCES mfcs_taxonomy_review_step (id) ON DELETE RESTRICT ON UPDATE CASCADE');
-  db_query('ALTER TABLE mfcs_field_request_coordinator_classification ADD CONSTRAINT value_fkey FOREIGN KEY (value) REFERENCES mfcs_taxonomy_request_classification (id) ON DELETE RESTRICT ON UPDATE CASCADE');
+  db_query('ALTER TABLE mfcs_requests ADD CONSTRAINT classification_fkey FOREIGN KEY (classification) REFERENCES mfcs_taxonomy_request_classification (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE mfcs_requests ADD CONSTRAINT step_fkey FOREIGN KEY (step) REFERENCES mfcs_taxonomy_review_step (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE mfcs_field_request_coordinator_classification ADD CONSTRAINT value_fkey FOREIGN KEY (value) REFERENCES mfcs_taxonomy_request_classification (id) ON UPDATE CASCADE ON DELETE RESTRICT');
 
-  db_query('ALTER TABLE mfcs_reviewers ADD CONSTRAINT request_classification_fkey FOREIGN KEY (request_classification) REFERENCES mfcs_taxonomy_request_classification (id) ON DELETE RESTRICT ON UPDATE CASCADE');
-  db_query('ALTER TABLE mfcs_reviewers ADD CONSTRAINT review_step_fkey FOREIGN KEY (review_step) REFERENCES mfcs_taxonomy_review_step (id) ON DELETE RESTRICT ON UPDATE CASCADE');
-  db_query('ALTER TABLE mfcs_field_top_step ADD CONSTRAINT value_fkey FOREIGN KEY (value) REFERENCES mfcs_taxonomy_review_step (id) ON DELETE RESTRICT ON UPDATE CASCADE');
-  db_query('ALTER TABLE mfcs_field_review_review ADD CONSTRAINT step_fkey FOREIGN KEY (step) REFERENCES mfcs_taxonomy_review_step (id) ON DELETE RESTRICT ON UPDATE CASCADE');
+  db_query('ALTER TABLE mfcs_reviewers ADD CONSTRAINT request_classification_fkey FOREIGN KEY (request_classification) REFERENCES mfcs_taxonomy_request_classification (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE mfcs_reviewers ADD CONSTRAINT review_step_fkey FOREIGN KEY (review_step) REFERENCES mfcs_taxonomy_review_step (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE mfcs_field_top_step ADD CONSTRAINT value_fkey FOREIGN KEY (value) REFERENCES mfcs_taxonomy_review_step (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE mfcs_field_review_review ADD CONSTRAINT step_fkey FOREIGN KEY (step) REFERENCES mfcs_taxonomy_review_step (id) ON UPDATE CASCADE ON DELETE RESTRICT');
 
-  db_query('ALTER TABLE mfcs_reviewers ADD CONSTRAINT reviewer_classification_fkey FOREIGN KEY (reviewer_classification) REFERENCES mfcs_taxonomy_reviewer_classification (id) ON DELETE RESTRICT ON UPDATE CASCADE');
-  db_query('ALTER TABLE mfcs_reviewed ADD CONSTRAINT classification_fkey FOREIGN KEY (classification) REFERENCES mfcs_taxonomy_reviewer_classification (id) ON DELETE RESTRICT ON UPDATE CASCADE');
-  db_query('ALTER TABLE mfcs_review_classifications ADD CONSTRAINT classification_fkey FOREIGN KEY (classification) REFERENCES mfcs_taxonomy_reviewer_classification (id) ON DELETE RESTRICT ON UPDATE CASCADE');
+  db_query('ALTER TABLE mfcs_reviewers ADD CONSTRAINT reviewer_classification_fkey FOREIGN KEY (reviewer_classification) REFERENCES mfcs_taxonomy_reviewer_classification (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE mfcs_reviewed ADD CONSTRAINT classification_fkey FOREIGN KEY (classification) REFERENCES mfcs_taxonomy_reviewer_classification (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE mfcs_review_classifications ADD CONSTRAINT classification_fkey FOREIGN KEY (classification) REFERENCES mfcs_taxonomy_reviewer_classification (id) ON UPDATE CASCADE ON DELETE RESTRICT');
 
 
 
