@@ -821,6 +821,110 @@ function mfcs_miscellaneous_check_requests_coordinator($request_id = NULL) {
 }
 
 /**
+ * Check for requests with outdated venue coordinator status.
+ *
+ * Look for requests where the venue coordinator is not the same as specified in banner.
+ *
+ * These requests should be considered for MFCS_REQUEST_PROBLEM_COORDINATOR.
+ *
+ * @param int|null $request_id
+ *   (optional) If specified, check for conflicts against the specified request.
+ *
+ * @return array|bool
+ *   An array containing requests that are in conflict on success.
+ *   FALSE is returned on error.
+ *
+ * @see: mfcs_requests_set_problem()
+ */
+function mfcs_miscellaneous_check_requests_coordinator_out_of_sync($request_id = NULL) {
+  if (!is_null($request_id) && !cf_is_integer($request_id)) {
+    cf_error::invalid_integer('request_id');
+    return FALSE;
+  }
+
+  $requests = array();
+
+  try {
+    $query = db_select('mfcs_requests', 'mer');
+    $query->innerJoin('mfcs_current', 'mc', 'mer.id = mc.request_id');
+    $query->innerJoin('mfcs_field_venue_coordinator_user_id', 'mfvcui', 'mc.request_id = mfvcui.request_id and mc.venue_coordinator_user_id = mfvcui.revision');
+    $query->innerJoin('users', 'u', 'mfvcui.value = u.uid');
+    $query->innerJoin('mfcs_banner_rooms', 'mbr', 'mer.building = mbr.id');
+    $query->leftJoin('field_data_field_user_banner_id', 'fdfubi', 'u.uid = fdfubi.entity_id');
+    $query->leftJoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id');
+    $query->leftJoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id');
+
+    $query->addField('mer', 'id', 'id');
+    $query->addField('mer', 'title', 'title');
+    $query->addField('mer', 'location', 'location');
+    $query->addField('mer', 'building', 'building');
+    $query->addField('mer', 'room', 'room');
+    $query->addField('u', 'uid', 'user_id');
+    $query->addField('u', 'name', 'name');
+    $query->addField('u', 'status', 'status');
+    $query->addField('fdfubi', 'field_user_banner_id_value', 'banner_id');
+    $query->addField('fdfufn', 'field_user_first_name_value', 'first_name');
+    $query->addField('fdfuln', 'field_user_last_name_value', 'last_name');
+    $query->addField('mbr', 'coordinator_id', 'room_coordinator');
+
+    $status = array(
+      MFCS_REQUEST_STATUS_LOCKED,
+      MFCS_REQUEST_STATUS_UNLOCKED,
+    );
+
+    $query->where('mer.venue_coordinator <> mbr.coordinator_id');
+
+    $query->condition('mer.status', $status, 'IN');
+
+    if (!is_null($request_id)) {
+      $query->condition('mer.id', $request_id);
+    }
+
+    $results = $query->execute()->fetchAll();
+
+    if (!is_array($results)) {
+      return FALSE;
+    }
+
+    if (!empty($results)) {
+      foreach ($results as $result) {
+        $requests[$result->id] = array(
+          'id' => $result->id,
+          'title' => $result->title,
+          'location' => $result->location,
+          'building' => $result->building,
+          'room' => $result->room,
+          'coordinator' => array(
+            'user_id' => $result->user_id,
+            'name' => $result->name,
+            'first_name' => $result->first_name,
+            'last_name' => $result->last_name,
+            'banner_id' => $result->banner_id,
+            'classification' => NULL,
+            'status' => $result->status,
+          ),
+          'coordinator_banner' => array(
+            'user_id' => $result->room_coordinator,
+          ),
+        );
+      }
+    }
+  }
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+
+  return $requests;
+}
+
+/**
  * Check for requests without valid requester.
  *
  * Look for requests where the requester is disabled, deleted, locked out, or is otherwise invalid.
@@ -1712,6 +1816,39 @@ function mfcs_miscellaneous_check_requests($request_id = NULL, $problem_code = N
         else {
           $reason .= ' assignment is invalid.';
         }
+
+        $problems[] = array(
+          'request_id' => $result['id'],
+          'problem' => MFCS_REQUEST_PROBLEM_COORDINATOR,
+          'date' => $instance,
+          'reason' => $reason,
+          'details' => '',
+        );
+        unset($reason);
+      }
+      unset($result);
+    }
+    unset($results);
+
+    $results = mfcs_miscellaneous_check_requests_coordinator_out_of_sync($request_id);
+    if (is_array($results) && !empty($results)) {
+      foreach ($results as $result) {
+        $reason = 'The venue coordinator ';
+        $reason .= $result['coordinator']['first_name'] . ' ' . $result['coordinator']['last_name'];
+        $reason .= ' [id: ' . $result['coordinator']['user_id'] . ']';
+        $reason .= ' is not the most recent venue coordinator: ';
+
+        $coordinator_id = (int) $result['coordinator_banner']['user_id'];
+        $new_coordinator_user = mfcs_load_basic_user_settings_by_user_id($coordinator_id);
+        if (!empty($new_coordinator_user['name'])) {
+          if (!empty($new_coordinator_user['first_name']) && !empty($new_coordinator_user['first_name'])) {
+            $reason .= $new_coordinator_user['first_name'] . ' ' . $new_coordinator_user['last_name'];
+          }
+          else {
+            $reason .= $new_coordinator_user['name'];
+          }
+        }
+        $reason .= ' [id: ' . $coordinator_id . '].';
 
         $problems[] = array(
           'request_id' => $result['id'],
