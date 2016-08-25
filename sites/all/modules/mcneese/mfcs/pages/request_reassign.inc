@@ -373,12 +373,13 @@ function mfcs_request_manage_0_reassign_requester_form($form, &$form_state, $req
   drupal_set_title($page_title);
 
   global $conf;
+  global $base_path;
 
   mfcs_include(MFCS_INCLUDE_WORKFLOW);
 
   $old_requester_id = NULL;
   if (isset($request['mer']['user_id'][0]->value)) {
-    $old_requester_id = $request['mer']['user_id'][0]->value;
+    $old_requester_id = (int) $request['mer']['user_id'][0]->value;
   }
 
   $old_requester_user = mfcs_load_basic_user_settings_by_user_id($old_requester_id);
@@ -390,6 +391,11 @@ function mfcs_request_manage_0_reassign_requester_form($form, &$form_state, $req
     else {
       $old_requester_name = $old_requester_user['name'];
     }
+  }
+
+  $request_title = NULL;
+  if (isset($request['information']['title'][0]->value)) {
+    $request_title = $request['information']['title'][0]->value;
   }
 
   $form = array();
@@ -433,6 +439,15 @@ function mfcs_request_manage_0_reassign_requester_form($form, &$form_state, $req
     '#type' => 'markup',
     '#markup' => '',
   );
+
+
+  $form['message']['#markup'] .= '<div class="reassign-requester-description">';
+  $form['message']['#markup'] .= 'Assigning a new requester will change who recieves e-mails and who is allowed to perform edit operations as a normal requester (not as a reviewer or manager).';
+  $form['message']['#markup'] .= '<br>';
+  $form['message']['#markup'] .= 'The current requester assign to request <strong>' . check_plain($request_title) . '</strong> <sup>[id: ' . $request_id . ']</sup> is <strong><a href="' . $base_path . 'requests/users-0/view/' . $old_requester_id . '">' . check_plain($old_requester_name) . '</a></strong> <sup>[id: ' . $old_requester_id . ']</sup>.<br>';
+  $form['message']['#markup'] .= '<br>';
+  $form['message']['#markup'] .= 'You can <a href="' . $base_path . 'requests/users-0/list">search through a comprehensive list of system users</a> to find the username or id and specify it below.';
+  $form['message']['#markup'] .= '</div>';
 
   $form['requester'] = array(
     '#tree' => TRUE,
