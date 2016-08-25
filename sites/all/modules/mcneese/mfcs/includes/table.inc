@@ -268,6 +268,12 @@ function mfcs_table_structure($include_mer = FALSE) {
       'type' => 'int',
       'size' => 'normal',
     ),
+    'affiliated' => array(
+      'name' => "Affiliated Insurance",
+      'path' => 'request][insurance][affiliated',
+      'type' => 'int',
+      'size' => 'normal',
+    ),
     'provided' => array(
       'name' => "Insurance Has Been Provided",
       'path' => 'request][insurance][provided',
@@ -1217,6 +1223,20 @@ function mfcs_table_presentation($option = NULL) {
     ),
     'unaffiliated' => array(
       'label' => 'Unaffiliated Insurance',
+      'type' => array(
+        'value' => 'insurance',
+      ),
+      'display' => array(
+        'value' => 'insurance',
+      ),
+      'group' => 'requirements',
+      'request_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
+    ),
+    'affiliated' => array(
+      'label' => 'Affiliated Insurance',
       'type' => array(
         'value' => 'insurance',
       ),

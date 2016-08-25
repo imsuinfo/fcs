@@ -1887,6 +1887,30 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           else {
             $form['review']['operations']['insurance']['unaffiliated']['#default_value'] = $request['insurance']['unaffiliated'][0]->value;
           }
+
+          // affiliated insurance
+          $form['review']['operations']['insurance']['affiliated'] = array(
+            '#id' => 'request-review-operations-insurance-affiliated',
+            '#type' => 'select',
+            '#title' => 'Affiliated Insurance',
+            '#description' => 'Define whether or not affiliated insurance is required and if it has or has not been provided.',
+            '#options' => $insurance_options,
+            '#attributes' => array(
+              'class' => array(
+                'no-print',
+                'mode-' . $mode,
+                'insurance-affiliated',
+              ),
+            ),
+            '#states' => $states,
+          );
+
+          if (empty($request['insurance']['affiliated'][0])) {
+            $form['review']['operations']['insurance']['affiliated']['#default_value'] = MFCS_INSURANCE_REQUIRED_NOT;
+          }
+          else {
+            $form['review']['operations']['insurance']['affiliated']['#default_value'] = $request['insurance']['affiliated'][0]->value;
+          }
         }
       }
 
@@ -2719,6 +2743,7 @@ function mfcs_request_view_0_detect_requirements_changes($form, $form_state, &$e
     'provided' => FALSE,
     'contractor' => FALSE,
     'unaffiliated' => FALSE,
+    'affiliated' => FALSE,
   );
 
   $changes_made = FALSE;

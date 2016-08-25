@@ -41,6 +41,7 @@ function mfcs_table_install_structure() {
   $structure['insurance'] = array(
     'contractor' => 'unsigned',
     'unaffiliated' => 'unsigned',
+    'affiliated' => 'unsigned',
     'provided' => 'unsigned',
   );
 

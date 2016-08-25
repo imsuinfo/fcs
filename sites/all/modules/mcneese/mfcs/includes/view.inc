@@ -1260,6 +1260,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
   $changelog_fields['insurance'] = array(
     'contractor',
     'unaffiliated',
+    'affiliated',
     'provided',
   );
 
@@ -1745,6 +1746,26 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
         if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
           $message .= '<div class="review-item-message-insurance-unaffiliated review-item-message-insurance review-item-message-requirements">';
           $message .= '<div class="item-label">Unaffiliated Insurance:</div> ';
+          $message .= drupal_render($value_markup);
+          $message .= '</div>';
+        }
+      }
+
+      // affiliated insurance
+      if (!empty($changelog['insurance']['affiliated'])) {
+        // always display the boolean when displayed in the review log.
+        if (!empty($presentation['insurance']['affiliated']['display'])) {
+          foreach ($presentation['insurance']['affiliated']['display'] as &$value) {
+            $value = 'always';
+          }
+        }
+
+        $value = reset($changelog['insurance']['affiliated']);
+        $value_markup = mfcs_view_build_request_value_structure($request_id, 'insurance', 'affiliated', 0, $value, $presentation['insurance']['affiliated'], $changelog);
+
+        if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
+          $message .= '<div class="review-item-message-insurance-affiliated review-item-message-insurance review-item-message-requirements">';
+          $message .= '<div class="item-label">Affiliated Insurance:</div> ';
           $message .= drupal_render($value_markup);
           $message .= '</div>';
         }
