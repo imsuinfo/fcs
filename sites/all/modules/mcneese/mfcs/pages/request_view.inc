@@ -1129,8 +1129,8 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
               $yet_to_review_markup .= $classification_name;
 
               // create a javascript based users list to easily display the users associated with the given classification.
-              $yet_to_review_markup .= '<div class="details_list inline" title="View list of users associated with this reviewer classification.">';
-              $yet_to_review_markup .= ' <span class="no-script-hidden no-print details_list-label label-' . $classification_id . '">(<span class="details_list-link link-' . $classification_id . ' inline fake_link">Details</span>)</span>';
+              $yet_to_review_markup .= ' <div class="details_list inline" title="View list of users associated with this reviewer classification.">';
+              $yet_to_review_markup .= '<sup class="no-script-hidden no-print details_list-label label-' . $classification_id . '">(<span class="details_list-link link-' . $classification_id . ' inline fake_link">Details</span>)</sup>';
               $yet_to_review_markup .= '<ul class="script-hidden details_list-item item-' . $classification_id . '">';
               if (!empty($decisions[$request_id]['reviewers'][$classification_id])) {
                 foreach ($decisions[$request_id]['reviewers'][$classification_id] as $user_id) {
@@ -1172,8 +1172,8 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
             $basic_user_settings = mfcs_load_basic_user_settings_by_user_id($request['venue_coordinator']['user_id'][0]->value);
             if ($basic_user_settings !== FALSE) {
               // create a javascript based users list to easily display the users associated with the given classification.
-              $yet_to_review_markup .= '<div class="details_list inline" title="View list of users associated with this reviewer classification.">';
-              $yet_to_review_markup .= '<span class="no-script-hidden no-print details_list-label label-venue_coordinator">(<span class="details_list-link link-venue_coordinator inline fake_link">Details</span>)</span>';
+              $yet_to_review_markup .= ' <div class="details_list inline" title="View list of users associated with this reviewer classification.">';
+              $yet_to_review_markup .= '<sup class="no-script-hidden no-print details_list-label label-venue_coordinator">(<span class="details_list-link link-venue_coordinator inline fake_link">Details</span>)</sup>';
               $yet_to_review_markup .= '<ul class="script-hidden details_list-item item-venue_coordinator">';
 
               $yet_to_review_markup .= '<li class="details_list-user">';
@@ -1208,8 +1208,8 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
               $yet_to_review_markup .= "Venue Coordinator Proxy";
 
               // create a javascript based users list to easily display the users associated with the given classification.
-              $yet_to_review_markup .= '<div class="details_list inline" title="View list of users allowed to proxy as the venue coordinator.">';
-              $yet_to_review_markup .= '<span class="no-script-hidden no-print details_list-label label-venue_coordinator_proxy">(<span class="details_list-link link-venue_coordinator_proxy inline fake_link">Details</span>)</span>';
+              $yet_to_review_markup .= ' <div class="details_list inline super" title="View list of users allowed to proxy as the venue coordinator.">';
+              $yet_to_review_markup .= '<sup class="no-script-hidden no-print details_list-label label-venue_coordinator_proxy">(<span class="details_list-link link-venue_coordinator_proxy inline fake_link">Details</span>)</sup>';
               $yet_to_review_markup .= '<ul class="script-hidden details_list-item item-venue_coordinator_proxy">';
 
               foreach ($request_proxies as $proxy_id) {
