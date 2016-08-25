@@ -164,7 +164,7 @@ function mfcs_request_manage_0_reassign_coordinator_form($form, &$form_state, $r
     $form['message']['#markup'] .= '<div>';
     $form['message']['#markup'] .= 'The new coordinator id would be the same as the old one. If you believe this to be incorrect, then either the Banner Database Cache is out of sync or the Venue Coordinator for this Room has not been updated in the Banner Database.' . '<br>';
     $form['message']['#markup'] .= '<br>';
-    $form['message']['#markup'] .= 'This request is currently assigned to <span title="User ID: ' . $old_coordinator_id . '"><strong><a href="' . $base_path . 'requests/users-0/view/' . $old_coordinator_id . '">' . check_plain($old_coordinator_name) . '</a></strong> <sup>[id: ' . $old_coordinator_id . ']</sup></span>.' . '<br>';
+    $form['message']['#markup'] .= 'This request is currently assigned to <span><strong><a href="' . $base_path . 'requests/users-0/view/' . $old_coordinator_id . '">' . check_plain($old_coordinator_name) . '</a></strong> <sup>[id: ' . $old_coordinator_id . ']</sup></span>.' . '<br>';
     $form['message']['#markup'] .= '<br>';
   }
   else {
@@ -172,7 +172,7 @@ function mfcs_request_manage_0_reassign_coordinator_form($form, &$form_state, $r
     $form['message']['#markup'] .= '<div>';
     $form['message']['#markup'] .= 'The currently assigned coordinator is out dated based on the currently cached Banner information. Re-assignment will update the Venue Coordinator to match the Venue Coordinator defined in the Banner cache. ' . '<br>';
     $form['message']['#markup'] .= '<br>';
-    $form['message']['#markup'] .= 'This request would be re-assigned from <span title="User ID: ' . $old_coordinator_id . '"><strong><a href="' . $base_path . 'requests/users-0/view/' . $old_coordinator_id . '">' . check_plain($old_coordinator_name) . '</a></strong> <sup>[id: ' . $old_coordinator_id . ']</sup></span> to <span title="User ID: ' . $new_coordinator_id . '"><strong><a href="' . $base_path . 'requests/users-0/view/' . $new_coordinator_id . '">' . check_plain($new_coordinator_name) . '</a></strong> <sup>[id: ' . $new_coordinator_id . ']</sup></span>.<br>';
+    $form['message']['#markup'] .= 'This request would be re-assigned from <span><strong><a href="' . $base_path . 'requests/users-0/view/' . $old_coordinator_id . '">' . check_plain($old_coordinator_name) . '</a></strong> <sup>[id: ' . $old_coordinator_id . ']</sup></span> to <span><strong><a href="' . $base_path . 'requests/users-0/view/' . $new_coordinator_id . '">' . check_plain($new_coordinator_name) . '</a></strong> <sup>[id: ' . $new_coordinator_id . ']</sup></span>.<br>';
     $form['message']['#markup'] .= '<br>';
 
     $form['message']['#markup'] .= 'Are you certain you want to re-assign? ';
