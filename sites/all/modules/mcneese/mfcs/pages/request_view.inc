@@ -226,34 +226,31 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
   if ($can_reassign_request && is_null($use_revision)) {
     if ($show_display) {
-      $disabled_with_active = mfcs_disabled_venue_coordinators_with_active_content($request['venue_coordinator']['user_id'][0]->value);
-      if (!empty($disabled_with_active)) {
-        $user_venue_coordinator = mfcs_load_basic_user_settings_by_user_id($request['venue_coordinator']['user_id'][0]->value);
+      $coordinator_problems = mfcs_get_request_venue_coordinator_inconsistencies($request);
+      if (!empty($coordinator_problems)) {
+        global $base_path;
 
-        if (!empty($user_venue_coordinator['name'])) {
-          global $base_path;
+        if (!empty($coordinator_problems['disabled'])) {
+          if (!empty($coordinator_problems['disabled']['current']['processed_name'])) {
+            $user_venue_coordinator_name = '<a href="' . $base_path . 'requests/users-0/view/' . $coordinator_problems['disabled']['current']['id'] . '" title="User ID: ' . $coordinator_problems['disabled']['current']['id'] .'">' . $coordinator_problems['disabled']['current']['processed_name'] . '</a> <sup>[id: ' . $coordinator_problems['disabled']['current']['id'] . ']</sup>';
 
-          if (!empty($user_venue_coordinator['first_name']) && !empty($user_venue_coordinator['last_name'])) {
-            if ($is_manager || $is_administer) {
-              $user_venue_coordinator_name = '<a href="' . $base_path . 'requests/users-0/view/' . $request['venue_coordinator']['user_id'][0]->value . '" title="User ID: ' . $request['venue_coordinator']['user_id'][0]->value .'">' . $user_venue_coordinator['first_name'] . ' ' . $user_venue_coordinator['last_name'] . '</a>';
-            }
-            else {
-              $user_venue_coordinator_name = $user_venue_coordinator['first_name'] . ' ' . $user_venue_coordinator['last_name'];
-            }
+            drupal_set_message('Warning: The Venue Coordinator (' . $user_venue_coordinator_name . ') assigned to this request no longer has access to this system.', 'warning', FALSE);
           }
           else {
-            if ($is_manager || $is_administer) {
-              $user_venue_coordinator_name = '<a href="' . $base_path . 'requests/users-0/view/' . $request['venue_coordinator']['user_id'][0]->value . '" title="User ID: ' . $request['venue_coordinator']['user_id'][0]->value .'">' . $user_venue_coordinator['name'] . '</a>';
-            }
-            else {
-              $user_venue_coordinator_name = $user_venue_coordinator['name'];
-            }
+            drupal_set_message('Warning: The Venue Coordinator assigned to this request no longer has access to this system.', 'warning', FALSE);
           }
-
-          drupal_set_message("Warning: The Venue Coordinator (" . $user_venue_coordinator_name . ") assigned to this request no longer has access to this system.", 'warning', FALSE);
         }
-        else {
-          drupal_set_message("Warning: The Venue Coordinator assigned to this request no longer has access to this system.", 'warning', FALSE);
+
+        if (!empty($coordinator_problems['out_of_sync'])) {
+          if (!empty($coordinator_problems['out_of_sync']['current']['processed_name']) && !empty($coordinator_problems['out_of_sync']['banner']['processed_name'])) {
+            $user_venue_coordinator_name = '<a href="' . $base_path . 'requests/users-0/view/' . $coordinator_problems['out_of_sync']['current']['id'] . '">' . $coordinator_problems['out_of_sync']['current']['processed_name'] . '</a> <sup>[id: ' . $coordinator_problems['out_of_sync']['current']['id'] . ']</sup>';
+            $user_banner_coordinator_name = '<a href="' . $base_path . 'requests/users-0/view/' . $coordinator_problems['out_of_sync']['banner']['id'] . '" title="User ID: ' . $coordinator_problems['out_of_sync']['banner']['id'] .'">' . $coordinator_problems['out_of_sync']['banner']['processed_name'] . '</a> <sup>[id: ' . $coordinator_problems['out_of_sync']['banner']['id'] . ']</sup>';
+
+            drupal_set_message('Warning: The Venue Coordinator (' . $user_venue_coordinator_name . ') assigned to this request no longer the same as the Venue Coordinator (' . $user_banner_coordinator_name . ') assigned via Banner.', 'warning', FALSE);
+          }
+          else {
+            drupal_set_message('Warning: The Venue Coordinator assigned to this request is no longer  the same as the Venue Coordinator assigned via Banner.', 'warning', FALSE);
+          }
         }
       }
       else {

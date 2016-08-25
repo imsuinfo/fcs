@@ -3107,6 +3107,17 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
         }
         $email_params['content'] .= $changed_by_string . " has re-assigned the requester from " . $reassigned_from_user_name . " [id: " . $reassigned_from . "] to " . $reassigned_to_user_name . " [id: " . $reassigned_to . "].\n";
         $email_params['markup'] .= $changed_by_markup . " has re-assigned the requester from <strong>" . $reassigned_from_user_name . "</strong> <sup>[id: " . $reassigned_from . "]</sup> to <strong>" . $reassigned_to_user_name . "</strong> <sup>[id: " . $reassigned_to . "]</sup>.<br>";
+
+        if (!empty($reassigned_from_user['email'])) {
+          $email_to[$reassigned_from_user['email']] = $reassigned_from_user['email'];
+        }
+
+        if (!empty($reassigned_to_user['email'])) {
+          $email_to[$reassigned_to_user['email']] = $reassigned_to_user['email'];
+        }
+
+        unset($reassigned_from_user);
+        unset($reassigned_to_user);
       }
       elseif ($is_deleted || $status === MFCS_REQUEST_STATUS_DELETED) {
         $email_params['title_suffix'] = "Deleted";
@@ -3148,7 +3159,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
         }
       }
 
-      if ($status !== MFCS_REQUEST_STATUS_DELETED) {
+      if ($status !== MFCS_REQUEST_STATUS_DELETED && !$is_reassigned) {
         // send messages to all reviewers.
         foreach ($step_1_reviewers as $r) {
           $email_to[$r->email] = $r->email;

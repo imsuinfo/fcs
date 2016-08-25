@@ -849,7 +849,7 @@ function mfcs_miscellaneous_check_requests_coordinator_out_of_sync($request_id =
     $query->innerJoin('mfcs_current', 'mc', 'mer.id = mc.request_id');
     $query->innerJoin('mfcs_field_venue_coordinator_user_id', 'mfvcui', 'mc.request_id = mfvcui.request_id and mc.venue_coordinator_user_id = mfvcui.revision');
     $query->innerJoin('users', 'u', 'mfvcui.value = u.uid');
-    $query->innerJoin('mfcs_banner_rooms', 'mbr', 'mer.building = mbr.id');
+    $query->innerJoin('mfcs_banner_rooms', 'mbr', 'mer.room = mbr.id and mer.building = mbr.building');
     $query->leftJoin('field_data_field_user_banner_id', 'fdfubi', 'u.uid = fdfubi.entity_id');
     $query->leftJoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id');
     $query->leftJoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id');

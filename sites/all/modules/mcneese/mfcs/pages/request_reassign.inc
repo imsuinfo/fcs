@@ -58,6 +58,7 @@ function mfcs_request_manage_0_reassign_coordinator_form($form, &$form_state, $r
   drupal_set_title($page_title);
 
   global $conf;
+  global $base_path;
 
   mfcs_include(MFCS_INCLUDE_WORKFLOW);
 
@@ -163,15 +164,15 @@ function mfcs_request_manage_0_reassign_coordinator_form($form, &$form_state, $r
     $form['message']['#markup'] .= '<div>';
     $form['message']['#markup'] .= 'The new coordinator id would be the same as the old one. If you believe this to be incorrect, then either the Banner Database Cache is out of sync or the Venue Coordinator for this Room has not been updated in the Banner Database.' . '<br>';
     $form['message']['#markup'] .= '<br>';
-    $form['message']['#markup'] .= 'This request is currently assigned to <span title="User ID: ' . $old_coordinator_id . '"><strong>' . $old_coordinator_name . '</strong> <sup>[id: ' . $old_coordinator_id . ']</sup></span>.' . '<br>';
+    $form['message']['#markup'] .= 'This request is currently assigned to <span title="User ID: ' . $old_coordinator_id . '"><strong><a href="' . $base_path . 'requests/users-0/view/' . $old_coordinator_id . '">' . $old_coordinator_name . '</a></strong> <sup>[id: ' . $old_coordinator_id . ']</sup></span>.' . '<br>';
     $form['message']['#markup'] .= '<br>';
   }
   else {
     $form['message']['#markup'] .= '<h3>Are you sure you want to re-assign the request?</h3> ';
     $form['message']['#markup'] .= '<div>';
-    $form['message']['#markup'] .= 'If this request has an out dated Venue Coordinator, then it will be re-assigned to the correct, updated, Venue Coordinator. ' . '<br>';
+    $form['message']['#markup'] .= 'The currently assigned coordinator is out dated based on the currently cached Banner information. Re-assignment will update the Venue Coordinator to match the Venue Coordinator defined in the Banner cache. ' . '<br>';
     $form['message']['#markup'] .= '<br>';
-    $form['message']['#markup'] .= 'This request would be re-assigned from <span title="User ID: ' . $old_coordinator_id . '"><strong>' . $old_coordinator_name . '</strong> <sup>[id: ' . $old_coordinator_id . ']</sup></span> to <span title="User ID: ' . $new_coordinator_id . '"><strong>' . $new_coordinator_name . '</strong> <sup>[id: ' . $new_coordinator_id . ']</sup></span>.<br>';
+    $form['message']['#markup'] .= 'This request would be re-assigned from <span title="User ID: ' . $old_coordinator_id . '"><strong><a href="' . $base_path . 'requests/users-0/view/' . $old_coordinator_id . '">' . $old_coordinator_name . '</a></strong> <sup>[id: ' . $old_coordinator_id . ']</sup></span> to <span title="User ID: ' . $new_coordinator_id . '"><strong><a href="' . $base_path . 'requests/users-0/view/' . $new_coordinator_id . '">' . $new_coordinator_name . '</a></strong> <sup>[id: ' . $new_coordinator_id . ']</sup></span>.<br>';
     $form['message']['#markup'] .= '<br>';
 
     $form['message']['#markup'] .= 'Are you certain you want to re-assign? ';
@@ -295,9 +296,9 @@ function mfcs_request_manage_0_reassign_coordinator_form_submit($form, &$form_st
     $parameters['reassigned_type'] = 'coordinator';
     mfcs_send_workflow_emails($request_id, $parameters);
 
-    // perform check against this request to see if new problems are detected or existing problems are resolved.
-    mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
-    mfcs_mischellaneous_check_requests_for_problems($request_id);
+    // perform re-check for coordinator problems.
+    mfcs_include(MFCS_INCLUDE_PROBLEMS);
+    mfcs_request_problems_0_request_perform_recheck($request_id, MFCS_REQUEST_PROBLEM_COORDINATOR);
   }
   else {
     form_set_error('form', 'An error occurred while trying to re-assign the coordinator. Please contact the support staff.');
@@ -316,7 +317,7 @@ function mfcs_request_manage_0_reassign_coordinator_form_submit($form, &$form_st
       $form_state['redirect'] = mfcs_build_redirect_array('requests');
     }
     else {
-      $form_state['redirect'] = mfcs_build_redirect_array('requests/list-0');
+      $form_state['redirect'] = mfcs_build_redirect_array('requests/view-0/' . $request_id);
     }
   }
   else {
@@ -599,9 +600,9 @@ function mfcs_request_manage_0_reassign_requester_form_submit($form, &$form_stat
     $parameters['reassigned_type'] = 'requester';
     mfcs_send_workflow_emails($request_id, $parameters);
 
-    // perform check against this request to see if new problems are detected or existing problems are resolved.
-    mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
-    mfcs_mischellaneous_check_requests_for_problems($request_id);
+    // perform re-check for requester problems.
+    mfcs_include(MFCS_INCLUDE_PROBLEMS);
+    mfcs_request_problems_0_request_perform_recheck($request_id, MFCS_REQUEST_PROBLEM_REQUESTER);
   }
   else {
     form_set_error('form', 'An error occurred while trying to re-assign the requester. Please contact the support staff.');

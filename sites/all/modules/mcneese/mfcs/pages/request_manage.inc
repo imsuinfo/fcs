@@ -63,7 +63,7 @@ function mfcs_request_manage_0_page($request_id) {
   $id_location = (int) $request['top']['location'][0]->value;
   $id_creator = (int) $request['mer']['creator'][0]->value;
   $id_requester = (int) $request['mer']['user_id'][0]->value;
-  $id_venue_coordinator = (int) $request['request_coordinator']['name'][0]->user_id;
+  $id_venue_coordinator = (int) $request['venue_coordinator']['user_id'][0]->value;
 
   $locks_auto_cancel = 'Default';
   $request_locks = mfcs_load_request_locks($request_id);
@@ -80,26 +80,19 @@ function mfcs_request_manage_0_page($request_id) {
   $user_requester = mfcs_load_basic_user_settings_by_user_id($id_requester);
   $user_venue_coordinator = mfcs_load_basic_user_settings_by_user_id($id_venue_coordinator);
 
-  $disabled_requester = mfcs_disabled_requesters_with_active_content($id_requester);
-  $disabled_venue_coordinator = mfcs_disabled_venue_coordinators_with_active_content($id_venue_coordinator);
+  $coordinator_problems = mfcs_get_request_venue_coordinator_inconsistencies($request);
 
-  if (is_array($disabled_requester)) {
-    if (empty($disabled_requester)) {
-      $disabled_requester = FALSE;
-    }
-    else {
-      $disabled_requester = TRUE;
-    }
-  }
+  $disabled_requester = ($user_requester['status'] == 0);
+  $disabled_venue_coordinator = ($user_venue_coordinator['status'] == 0);
 
-  if (is_array($disabled_venue_coordinator)) {
-    if (empty($disabled_venue_coordinator)) {
-      $disabled_venue_coordinator = FALSE;
-    }
-    else {
-      $disabled_venue_coordinator = TRUE;
-    }
+  $user_banner_coordinator = NULL;
+  $disabled_banner_coordinator = FALSE;
+  $room_information = mfcs_load_rooms(NULL, NULL, $id_room, TRUE);
+  if (isset($room_information->coordinator_id)) {
+    $user_banner_coordinator = mfcs_load_basic_user_settings_by_user_id((int)$room_information->coordinator_id);
+    $disabled_banner_coordinator = ($user_banner_coordinator['status'] == 0);
   }
+  unset($room_information);
 
   $can_cancel_request = mfcs_request_access('cancel', $request, $user);
   $can_uncancel_request = mfcs_request_access('uncancel', $request, $user);
@@ -108,11 +101,11 @@ function mfcs_request_manage_0_page($request_id) {
   $can_reassign_request_requester = mfcs_request_access('reassign-requester', $request, $user);
 
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
-  $options_step = mfcs_get_review_steps_list_options();
-  $options_status = mfcs_get_request_status_list_options();
-  $options_room = mfcs_get_request_room_list_options($id_location);
-  $options_building = mfcs_get_request_building_list_options($id_location);
-  $options_location = mfcs_get_request_location_list_options();
+  $options_step = mfcs_get_review_steps_list_options(NULL, FALSE, TRUE);
+  $options_status = mfcs_get_request_status_list_options(NULL, FALSE, TRUE);
+  $options_room = mfcs_get_request_room_list_options($id_location, NULL, FALSE, TRUE);
+  $options_building = mfcs_get_request_building_list_options($id_location, NULL, FALSE, TRUE);
+  $options_location = mfcs_get_request_location_list_options(NULL, FALSE, TRUE);
 
   $string_id = '' . $id_id;
   $string_step = '';
@@ -159,6 +152,7 @@ function mfcs_request_manage_0_page($request_id) {
   $markup .= mfcs_request_manage_0_page_create_item_user_name('Creator:',  $user_creator, $class_name);
   $markup .= mfcs_request_manage_0_page_create_item_user_name('Requester:',  $user_requester, $class_name);
   $markup .= mfcs_request_manage_0_page_create_item_user_name('Venue Coordinator:',  $user_venue_coordinator, $class_name);
+  $markup .= mfcs_request_manage_0_page_create_item_user_name('Banner Coordinator:',  $user_banner_coordinator, $class_name);
   $markup .= mfcs_request_manage_0_page_create_item_and_value('Auto-Cancel:',  $locks_auto_cancel, $class_name);
 
   $markup .= '</div>';
@@ -175,6 +169,9 @@ function mfcs_request_manage_0_page($request_id) {
 
   $markup .= mfcs_request_manage_0_page_create_item_and_value('Venue Coordinator Status:', ($disabled_venue_coordinator ? 'Account Disabled / Deleted' : 'Account Enabled'), $class_name);
   $markup .= mfcs_request_manage_0_page_create_item_user_banner_id('Venue Coordinator Banner ID:',  $user_venue_coordinator, $class_name);
+
+  $markup .= mfcs_request_manage_0_page_create_item_and_value('Banner Coordinator Status:', ($disabled_banner_coordinator ? 'Account Disabled / Deleted' : 'Account Enabled'), $class_name);
+  $markup .= mfcs_request_manage_0_page_create_item_user_banner_id('Banner Coordinator Banner ID:',  $user_banner_coordinator, $class_name);
 
   $markup .= '</div>';
   $markup .= '</div>';
@@ -202,8 +199,8 @@ function mfcs_request_manage_0_page($request_id) {
     $markup .= mfcs_request_manage_0_page_create_item_message('The request may be <a href="' . $base_path . 'requests/manage-0/move/' . $id_id . $url_arguments . '" class="link link-uncancel" title="Move Request">Moved</a>.', $class_name);
   }
 
-  if ($disabled_venue_coordinator && $can_reassign_request_coordinator) {
-    $markup .= mfcs_request_manage_0_page_create_item_message('The Venue Coordinator should be <a href="' . $base_path . 'requests/manage-0/reassign/coordinator/' . $id_id . $url_arguments . '" class="link link-uncancel" title="Re-Assign Coordinator"">Re-Assigned</a>.', $class_name);
+  if ($can_reassign_request_coordinator) {
+    $markup .= mfcs_request_manage_0_page_create_item_message('The Venue Coordinator may be <a href="' . $base_path . 'requests/manage-0/reassign/coordinator/' . $id_id . $url_arguments . '" class="link link-uncancel" title="Re-Assign Coordinator"">Re-Assigned</a>.', $class_name);
   }
 
   if ($can_reassign_request_requester) {

@@ -1396,11 +1396,6 @@ function mfcs_page_request_access_operation_reassign_coordinator(&$request_ids, 
     }
   }
 
-  $reassignable_status = array(
-    MFCS_REQUEST_STATUS_LOCKED,
-    MFCS_REQUEST_STATUS_UNLOCKED,
-  );
-
   // always grant managers and administers re-assign access.
   if ($roles['manager'] || $roles['administer']) {
     try {
@@ -1409,7 +1404,7 @@ function mfcs_page_request_access_operation_reassign_coordinator(&$request_ids, 
       $query->addField('mer', 'id', 'id');
 
       $query->condition('mer.id', $request_ids, 'IN');
-      $query->condition('mer.status', $reassignable_status, 'IN');
+      $query->condition('mer.status', MFCS_REQUEST_STATUS_DELETED, '<>');
 
       $access_results = $query->execute()->fetchAllAssoc('id');
 

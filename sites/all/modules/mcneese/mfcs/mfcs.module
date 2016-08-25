@@ -339,6 +339,7 @@ define('MFCS_INCLUDE_REQUEST_USERS', 20);
 define('MFCS_INCLUDE_TESTING', 15);
 define('MFCS_INCLUDE_VIEW', 16);
 define('MFCS_INCLUDE_MANAGEMENT', 17);
+define('MFCS_INCLUDE_PROBLEMS', 22);
 
 /**
  * Defines review restrictions.
@@ -2740,7 +2741,7 @@ function mfcs_mail($key, &$message, $params) {
  */
 function mfcs_include($id) {
   if (!is_numeric($id)) {
-    cf_error::invalid_number('id');
+    cf_error::invalid_integer('id');
     return;
   }
 
@@ -2811,6 +2812,9 @@ function mfcs_include($id) {
   }
   elseif ($id == MFCS_INCLUDE_REQUEST_USERS) {
     require_once($module_path . '/pages/request_users.inc');
+  }
+  elseif ($id == MFCS_INCLUDE_PROBLEMS) {
+    require_once($module_path . '/pages/request_problems.inc');
   }
 }
 
@@ -3637,7 +3641,7 @@ function mfcs_load_basic_user_settings_by_user_id($user_id) {
         'user_id' => $user_id,
         'name' => '',
         'email' => '',
-        'status' => '',
+        'status' => NULL,
         'first_name' => '',
         'last_name' => '',
         'banner_id' => '',
@@ -3654,7 +3658,7 @@ function mfcs_load_basic_user_settings_by_user_id($user_id) {
         }
 
         if (property_exists($row, 'status') && !is_null($row->status)) {
-          $user[$user_id]['status'] = $row->status;
+          $user[$user_id]['status'] = (int) $row->status;
         }
 
         if (property_exists($row, 'first_name') && !is_null($row->first_name)) {
@@ -11390,6 +11394,136 @@ function mfcs_disabled_venue_coordinators_with_active_content($user_id = NULL) {
   }
 
   return $rows;
+}
+
+/**
+ * Determine if a given request's venue coordinator is invalid.
+ *
+ * This will load and process the user name.
+ *
+ * @param array $request
+ *   A loaded request object.
+ *
+ * @return bool|array
+ *   An array containint a sub array of detected problems and the related coordinators..
+ *   FALSE is returned on error.
+ */
+function mfcs_get_request_venue_coordinator_inconsistencies($request) {
+  if (!is_array($request)) {
+    cf_error::invalid_array('request');
+    return FALSE;
+  }
+
+  $inconsistencies = array();
+
+  mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
+
+  $current_coordinator_id = (int) $request['mer']['id'][0]->value;
+  $out_of_sync = mfcs_miscellaneous_check_requests_coordinator_out_of_sync($current_coordinator_id);
+  if (!empty($out_of_sync[$current_coordinator_id])) {
+    $inconsistencies['out_of_sync'] = array(
+      'current' => array(
+        'id' => $current_coordinator_id,
+        'name' => NULL,
+        'first_name' => NULL,
+        'last_name' => NULL,
+        'processed_name' => NULL,
+      ),
+      'banner' => array(
+        'id' => NULL,
+        'name' => NULL,
+        'first_name' => NULL,
+        'last_name' => NULL,
+        'processed_name' => NULL,
+      ),
+    );
+
+    if (!empty($out_of_sync[$current_coordinator_id]['coordinator']['name'])) {
+      $inconsistencies['out_of_sync']['current']['name'] = $out_of_sync[$current_coordinator_id]['coordinator']['name'];
+      if (!empty($out_of_sync[$current_coordinator_id]['coordinator']['first_name'])) {
+        $inconsistencies['out_of_sync']['current']['first_name'] = $out_of_sync[$current_coordinator_id]['coordinator']['first_name'];
+        $inconsistencies['out_of_sync']['current']['processed_name'] = $out_of_sync[$current_coordinator_id]['coordinator']['first_name'];
+      }
+
+      if (!empty($out_of_sync[$current_coordinator_id]['coordinator']['last_name'])) {
+        $inconsistencies['out_of_sync']['current']['last_name'] = $out_of_sync[$current_coordinator_id]['coordinator']['last_name'];
+
+        if (!is_null($inconsistencies['out_of_sync']['current']['processed_name'])) {
+          $inconsistencies['out_of_sync']['current']['processed_name'] .= ' ';
+        }
+
+        $inconsistencies['out_of_sync']['current']['processed_name'] .= $out_of_sync[$current_coordinator_id]['coordinator']['first_name'];
+      }
+
+      if (empty($out_of_sync[$current_coordinator_id]['coordinator']['first_name']) && empty($out_of_sync[$current_coordinator_id]['coordinator']['last_name'])) {
+        $inconsistencies['out_of_sync']['current']['processed_name'] = $out_of_sync[$current_coordinator_id]['coordinator']['name'];
+      }
+    }
+
+    $inconsistencies['out_of_sync']['banner']['id'] = (int) $out_of_sync[$current_coordinator_id]['coordinator_banner']['user_id'];
+    $banner_coordinator = mfcs_load_basic_user_settings_by_user_id($inconsistencies['out_of_sync']['banner']['id']);
+    if (!empty($banner_coordinator['name'])) {
+      $inconsistencies['out_of_sync']['banner']['name'] = $banner_coordinator['name'];
+
+      if (!empty($banner_coordinator['first_name'])) {
+        $inconsistencies['out_of_sync']['banner']['first_name'] = $banner_coordinator['first_name'];
+        $inconsistencies['out_of_sync']['banner']['processed_name'] = $banner_coordinator['first_name'];
+      }
+
+      if (!empty($banner_coordinator['last_name'])) {
+        $inconsistencies['out_of_sync']['banner']['last_name'] = $banner_coordinator['last_name'];
+
+        if (!is_null($inconsistencies['out_of_sync']['banner']['processed_name'])) {
+          $inconsistencies['out_of_sync']['banner']['processed_name'] .= ' ';
+        }
+
+        $inconsistencies['out_of_sync']['banner']['processed_name'] .= $banner_coordinator['last_name'];
+      }
+
+      if (empty($banner_coordinator['first_name']) && empty($banner_coordinator['last_name'])) {
+        $inconsistencies['out_of_sync']['banner']['processed_name'] = $banner_coordinator['name'];
+      }
+    }
+  }
+
+  $disabled = mfcs_disabled_venue_coordinators_with_active_content($current_coordinator_id);
+  if (!empty($disabled[$current_coordinator_id])) {
+    $inconsistencies['disabled'] = array(
+      'current' => array(
+        'id' => $current_coordinator_id,
+        'name' => NULL,
+        'first_name' => NULL,
+        'last_name' => NULL,
+        'processed_name' => NULL,
+      ),
+    );
+
+    $banner_coordinator = mfcs_load_basic_user_settings_by_user_id($current_coordinator_id);
+    if (!empty($banner_coordinator['name'])) {
+      $inconsistencies['disabled']['banner']['name'] = $banner_coordinator['name'];
+
+      if (!empty($banner_coordinator['first_name'])) {
+        $inconsistencies['disabled']['banner']['first_name'] = $banner_coordinator['first_name'];
+        $inconsistencies['disabled']['banner']['processed_name'] = $banner_coordinator['first_name'];
+      }
+
+      if (!empty($banner_coordinator['last_name'])) {
+        $inconsistencies['disabled']['banner']['last_name'] = $banner_coordinator['last_name'];
+
+        if (!is_null($inconsistencies['disabled']['banner']['processed_name'])) {
+          $inconsistencies['disabled']['banner']['processed_name'] .= ' ';
+        }
+
+        $inconsistencies['disabled']['banner']['processed_name'] .= $banner_coordinator['last_name'];
+      }
+
+      if (empty($banner_coordinator['first_name']) && empty($banner_coordinator['last_name'])) {
+        $inconsistencies['disabled']['banner']['processed_name'] = $banner_coordinator['name'];
+      }
+    }
+  }
+
+  return $inconsistencies;
 }
 
 /**

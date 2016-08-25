@@ -2297,12 +2297,16 @@ function mfcs_request_problems_0_request_form_submit($form, &$form_state) {
   }
 
   $return_to_problem_page = TRUE;
+  $request_id = NULL;
+  if (isset($form['form']['problem']['#value']->request_id) && is_numeric($form['form']['problem']['#value']->request_id)) {
+    $request_id = (int) $form['form']['problem']['#value']->request_id;
+  }
 
   if ($clicked_id == 'request_problems-submit-back') {
     $return_to_problem_page = FALSE;
   }
   elseif ($form_state['values']['actions']['action'] == 'recheck') {
-    $recheck_result = mfcs_request_problems_0_request_perform_recheck($form['form']['problem']['#value']->request_id, $form['form']['problem']['#value']->problem);
+    $recheck_result = mfcs_request_problems_0_request_perform_recheck($request_id, $form['form']['problem']['#value']->problem);
     if ($recheck_result === TRUE) {
       $return_to_problem_page = FALSE;
     }
@@ -2313,8 +2317,8 @@ function mfcs_request_problems_0_request_form_submit($form, &$form_state) {
     mfcs_include(MFCS_INCLUDE_WORKFLOW);
 
     $failure = TRUE;
-    $request = mfcs_load_request_by_id($form['form']['problem']['#value']->request_id);
-    if (isset($request['mer']['id'][0]->value) && isset($request['venue_coordinator']['user_id'][0]->value)) {
+    $request = mfcs_load_request_by_id($request_id);
+    if (is_array($request) && isset($request['venue_coordinator']['user_id'][0]->value)) {
       $old_coordinator_id = $request['venue_coordinator']['user_id'][0]->value;
 
       if (empty($conf['fcs_failsafe_coordinator']) || !is_integer($conf['fcs_failsafe_coordinator'])) {
@@ -2324,31 +2328,38 @@ function mfcs_request_problems_0_request_form_submit($form, &$form_state) {
         $new_coordinator_id = $conf['fcs_failsafe_coordinator'];
       }
 
-      if (isset($request['top']['room'][0]->value)) {
-        $room_information = mfcs_load_rooms(NULL, NULL, $request['top']['room'][0]->value);
-        if (isset($room_information->coordinator_id)) {
-          $new_coordinator_id = $room_information->coordinator_id;
+      $room_id = (int) $request['top']['room'][0]->value;
+      $room_information = mfcs_load_rooms(NULL, NULL, $room_id, TRUE);
+      if (isset($room_information->coordinator_id)) {
+        $new_coordinator_id = $room_information->coordinator_id;
+      }
+
+      $old_coordinator_user = mfcs_load_basic_user_settings_by_user_id($old_coordinator_id);
+      $old_coordinator_name = NULL;
+      if (!empty($old_coordinator_user['name'])) {
+        if (!empty($old_coordinator_user['first_name']) && !empty($old_coordinator_user['last_name'])) {
+          $old_coordinator_name = $old_coordinator_user['first_name'] . ' ' . $old_coordinator_user['last_name'];
+        }
+        else {
+          $old_coordinator_name = $old_coordinator_user['name'];
         }
       }
 
-      $old_coordinator = user_load($old_coordinator_id);
-      $old_coordinator_name = $old_coordinator->name;
-      if (!empty($old_coordinator['field_user_first_name']['und'][0]['safe_value']) && !empty($old_coordinator['field_user_last_name']['und'][0]['safe_value'])) {
-        $old_coordinator_name = $old_coordinator['field_user_first_name']['und'][0]['safe_value'] . ' ' . $old_coordinator['field_user_last_name']['und'][0]['safe_value'];
-      }
-
-      $new_coordinator = user_load($new_coordinator_id);
-      $new_coordinator_name = $new_coordinator->name;
-      if (!empty($new_coordinator['field_user_first_name']['und'][0]['safe_value']) && !empty($new_coordinator['field_user_last_name']['und'][0]['safe_value'])) {
-        $new_coordinator_name = $new_coordinator['field_user_first_name']['und'][0]['safe_value'] . ' ' . $new_coordinator['field_user_last_name']['und'][0]['safe_value'];
+      $new_coordinator_user = mfcs_load_basic_user_settings_by_user_id($new_coordinator_id);
+      $new_coordinator_name = NULL;
+      if (!empty($new_coordinator_user['name'])) {
+        if (!empty($new_coordinator_user['first_name']) && !empty($new_coordinator_user['last_name'])) {
+          $new_coordinator_name = $new_coordinator_user['first_name'] . ' ' . $new_coordinator_user['last_name'];
+        }
+        else {
+          $new_coordinator_name = $new_coordinator_user['name'];
+        }
       }
 
       $extra = array();
-      if (!empty($form['form']['old_coordinator_name']['#value']) && !empty($form['form']['new_coordinator_name']['#value'])) {
-        $extra['revisions']['message'] = "The Venue Coordinator has been changed from " . $old_coordinator_name . " [id: " . $old_coordinator_id . "] to " . $new_coordinator_name . " [id: " . $new_coordinator_id . "].";
-      }
+      $extra['revisions']['message'] = 'The Venue Coordinator has been changed from ' . $old_coordinator_name . ' [id: ' . $old_coordinator_id . '] to ' . $new_coordinator_name . ' [id: ' . $new_coordinator_id . '].';
 
-      $reassigned = mfcs_workflow_set_venue_coordinator($request['mer']['id'][0]->value, $new_coordinator_id, NULL, $extra);
+      $reassigned = mfcs_workflow_set_venue_coordinator($request_id, $new_coordinator_id, NULL, $extra);
       if ($reassigned) {
         $failure = FALSE;
       }
@@ -2358,7 +2369,7 @@ function mfcs_request_problems_0_request_form_submit($form, &$form_state) {
     try {
       $fields = array(
         'code' => MFCS_LOG_PROBLEMS_REASSIGN_VENUE_COORDINATOR,
-        'request_id' => $form['form']['problem']['#value']->request_id,
+        'request_id' => $request_id,
         'user_id' => $user->uid,
         'date' => $instance,
       );
@@ -2380,8 +2391,8 @@ function mfcs_request_problems_0_request_form_submit($form, &$form_state) {
     }
 
     if ($failure) {
-      form_set_error('form', "An error occurred while trying to re-assign the request. Please contact the support staff.");
-      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to re-assign the request: @request_id.", array('@request_id' => $form['form']['problem']['#value']->request_id), WATCHDOG_ERROR);
+      form_set_error('form', 'An error occurred while trying to re-assign the request. Please contact the support staff.');
+      watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to re-assign the request: @request_id.', array('@request_id' => $request_id), WATCHDOG_ERROR);
 
       $form_state['rebuild'] = TRUE;
       $form_state['redirect'] = FALSE;
@@ -2392,7 +2403,7 @@ function mfcs_request_problems_0_request_form_submit($form, &$form_state) {
     else {
       $return_to_problem_page = FALSE;
 
-      mfcs_workflow_step_review($form['form']['problem']['#value']->request_id, $user, MFCS_REVIEW_DECISION_REASSIGNED_COORDINATOR, MFCS_REVIEW_RESTRICTIONS_MANAGERS, $extra['revisions']['message']);
+      mfcs_workflow_step_review($request_id, $user, MFCS_REVIEW_DECISION_REASSIGNED_COORDINATOR, MFCS_REVIEW_RESTRICTIONS_MANAGERS, $extra['revisions']['message']);
 
       $parameters = array();
       $parameters['changed_by'] = $user->uid;
@@ -2400,17 +2411,18 @@ function mfcs_request_problems_0_request_form_submit($form, &$form_state) {
       $parameters['reassigned'] = TRUE;
       $parameters['reassigned_from'] = $old_coordinator_id;
       $parameters['reassigned_to'] = $new_coordinator_id;
-      mfcs_send_workflow_emails($form['form']['problem']['#value']->request_id, $parameters);
+      $parameters['reassigned_type'] = 'coordinator';
+      mfcs_send_workflow_emails($request_id, $parameters);
     }
   }
   elseif ($form_state['values']['actions']['action'] == 'rebuild_request_cache') {
-    $recached = mfcs_request_problem_0_request_perform_recache($form['form']['problem']['#value']->request_id);
+    $recached = mfcs_request_problem_0_request_perform_recache($request_id);
 
     $transaction = db_transaction();
     try {
       $fields = array(
         'code' => MFCS_LOG_PROBLEMS_REASSIGN_REBUILD_CACHE,
-        'request_id' => $form['form']['problem']['#value']->request_id,
+        'request_id' => $request_id,
         'user_id' => $user->uid,
         'date' => $instance,
       );
@@ -2433,14 +2445,14 @@ function mfcs_request_problems_0_request_form_submit($form, &$form_state) {
 
     // once the cache is rebuilt, re-check the request to ensure the problem is corrected.
     if ($recached) {
-      $recheck_result = mfcs_request_problems_0_request_perform_recheck($form['form']['problem']['#value']->request_id, $form['form']['problem']['#value']->problem);
+      $recheck_result = mfcs_request_problems_0_request_perform_recheck($request_id, $form['form']['problem']['#value']->problem);
       if ($recheck_result === TRUE) {
         $return_to_problem_page = FALSE;
       }
     }
     else {
-      form_set_error('form', "An error occurred while trying to re-cache the request. Please contact the support staff.");
-      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to re-cache the request: @request_id.", array('@request_id' => $form['form']['problem']['#value']->request_id), WATCHDOG_ERROR);
+      form_set_error('form', 'An error occurred while trying to re-cache the request. Please contact the support staff.');
+      watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to re-cache the request: @request_id.', array('@request_id' => $request_id), WATCHDOG_ERROR);
 
       $form_state['rebuild'] = TRUE;
       $form_state['redirect'] = FALSE;
@@ -2454,7 +2466,7 @@ function mfcs_request_problems_0_request_form_submit($form, &$form_state) {
     try {
       $fields = array(
         'code' => MFCS_LOG_PROBLEMS_IGNORE,
-        'request_id' => $form['form']['problem']['#value']->request_id,
+        'request_id' => $request_id,
         'user_id' => $user->uid,
         'date' => $instance,
       );
@@ -2489,8 +2501,8 @@ function mfcs_request_problems_0_request_form_submit($form, &$form_state) {
       $transaction->rollback();
       cf_error::on_query_execution($e);
 
-      form_set_error('form', "An error occurred while trying to ignore the request. Please contact the support staff.");
-      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to ignore the problem: @problem_id.", array('@problem_id' => $form['form']['problem']['#value']->id), WATCHDOG_ERROR);
+      form_set_error('form', 'An error occurred while trying to ignore the request. Please contact the support staff.');
+      watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to ignore the problem: @problem_id.', array('@problem_id' => $form['form']['problem']['#value']->id), WATCHDOG_ERROR);
 
       $form_state['rebuild'] = TRUE;
       $form_state['redirect'] = FALSE;
@@ -2502,8 +2514,8 @@ function mfcs_request_problems_0_request_form_submit($form, &$form_state) {
       $transaction->rollback();
       cf_error::on_query_execution($e);
 
-      form_set_error('form', "An error occurred while trying to ignore the request. Please contact the support staff.");
-      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to ignore the problem: @problem_id.", array('@problem_id' => $form['form']['problem']['#value']->id), WATCHDOG_ERROR);
+      form_set_error('form', 'An error occurred while trying to ignore the request. Please contact the support staff.');
+      watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to ignore the problem: @problem_id.', array('@problem_id' => $form['form']['problem']['#value']->id), WATCHDOG_ERROR);
 
       $form_state['rebuild'] = TRUE;
       $form_state['redirect'] = FALSE;
@@ -2517,7 +2529,7 @@ function mfcs_request_problems_0_request_form_submit($form, &$form_state) {
     try {
       $fields = array(
         'code' => MFCS_LOG_PROBLEMS_UNIGNORE,
-        'request_id' => $form['form']['problem']['#value']->request_id,
+        'request_id' => $request_id,
         'user_id' => $user->uid,
         'date' => $instance,
       );
@@ -2552,8 +2564,8 @@ function mfcs_request_problems_0_request_form_submit($form, &$form_state) {
       $transaction->rollback();
       cf_error::on_query_execution($e);
 
-      form_set_error('form', "An error occurred while trying to unignore the request. Please contact the support staff.");
-      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to unignore the problem: @problem_id.", array('@problem_id' => $form['form']['problem']['#value']->id), WATCHDOG_ERROR);
+      form_set_error('form', 'An error occurred while trying to unignore the request. Please contact the support staff.');
+      watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to unignore the problem: @problem_id.', array('@problem_id' => $form['form']['problem']['#value']->id), WATCHDOG_ERROR);
 
       $form_state['rebuild'] = TRUE;
       $form_state['redirect'] = FALSE;
@@ -2565,8 +2577,8 @@ function mfcs_request_problems_0_request_form_submit($form, &$form_state) {
       $transaction->rollback();
       cf_error::on_query_execution($e);
 
-      form_set_error('form', "An error occurred while trying to unignore the request. Please contact the support staff.");
-      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to unignore the problem: @problem_id.", array('@problem_id' => $form['form']['problem']['#value']->id), WATCHDOG_ERROR);
+      form_set_error('form', 'An error occurred while trying to unignore the request. Please contact the support staff.');
+      watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to unignore the problem: @problem_id.', array('@problem_id' => $form['form']['problem']['#value']->id), WATCHDOG_ERROR);
 
       $form_state['rebuild'] = TRUE;
       $form_state['redirect'] = FALSE;
