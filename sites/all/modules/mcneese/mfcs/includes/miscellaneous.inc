@@ -366,27 +366,24 @@ function mfcs_miscellaneous_check_requests_conflict($request_id = NULL) {
 
   // this is complex, so only check upcoming requests to reduce the resources used during this task.
   $instance = mfcs_instance();
+  $instance_day = strtotime('midnight today', $instance);
 
   try {
     // drupal api does not support WITH statements, so use a manually created query string for this test.
     $sql_with = 'with requests as (';
-    $sql_with .= 'select mer.id, mer.title, mer.location, mer.building, mer.room, mfdd.delta as delta, mfdd.value as date, mfdts.value as time_start, mfdtsp.value as time_stop';
-    $sql_with .= ', mbl.machine_name as location_code, mbl.human_name as location_name, mbl.date as location_date, mbl.disabled as location_disabled';
+    $sql_with .= 'select mer.id, mer.title, mer.building, mer.room, mfdd.delta as delta, mfdd.value as date, mfdts.value as time_start, mfdtsp.value as time_stop';
     $sql_with .= ', mbb.machine_name as building_code, mbb.human_name as building_name, mbb.date as building_date, mbb.disabled as building_disabled';
     $sql_with .= ', mbr.machine_name as room_number, mbr.human_name as room_name, mbr.date as room_date, mbr.disabled as room_disabled';
     $sql_with .= ' from mfcs_requests mer';
     $sql_with .= ' inner join mfcs_current mc on mer.id = mc.request_id inner join mfcs_field_dates_date mfdd on (mc.request_id = mfdd.request_id and mc.dates_date = mfdd.revision)';
-    $sql_with .= ' left join mfcs_field_dates_time_start mfdts on mfdd.request_id = mfdts.request_id and mfdd.revision = mfdts.revision and mfdd.delta = mfdts.delta';
-    $sql_with .= ' left join mfcs_field_dates_time_stop mfdtsp on mfdd.request_id = mfdtsp.request_id and mfdd.revision = mfdtsp.revision and mfdd.delta = mfdtsp.delta';
-    $sql_with .= ' left join mfcs_banner_locations mbl on mer.location = mbl.id';
+    $sql_with .= ' left join mfcs_field_dates_time_start mfdts on (mc.request_id = mfdts.request_id and mc.dates_time_start = mfdts.revision)';
+    $sql_with .= ' left join mfcs_field_dates_time_stop mfdtsp on (mc.request_id = mfdtsp.request_id and mc.dates_time_stop = mfdtsp.revision)';
+
     $sql_with .= ' left join mfcs_banner_buildings mbb on mer.building = mbb.id';
     $sql_with .= ' left join mfcs_banner_rooms mbr on mer.room = mbr.id';
-    $sql_with .= ' where mer.status in (:locked, :unlocked, :accepted) and (mfdd.value > :instance or (mfdts.value is not null and mfdts.value > :instance) or (mfdtsp.value is not null and mfdtsp.value > :instance))) ';
-
+    $sql_with .= ' where mer.status in (:locked, :unlocked, :accepted) and mfdd.value >= :instance_day and mfdd.delta = mfdts.delta and mfdd.delta = mfdtsp.delta) ';
 
     // perform the following tests:
-    // perform all day event checks
-
     // test 1: each event date is on a per day basis, so if either r1 or r2 has an all day event, then there is a conflict between r1 and r2.
     $sql_on_1 = 'r1.time_start is null or r2.time_start is null';
 
@@ -398,13 +395,13 @@ function mfcs_miscellaneous_check_requests_conflict($request_id = NULL) {
 
     $sql_main = 'select r1.*, r2.id as conflict_id, r2.title as conflict_title, r2.date as conflict_date, r2.time_start as conflict_time_start, r2.time_stop as conflict_time_stop, r2.delta as conflict_delta';
     $sql_main .= ' from requests r1';
-    $sql_main .= ' inner join requests r2 on (r1.id <> r2.id and r1.room = r2.room and r1.date = r2.date and ((' . $sql_on_1 . ') or (' . $sql_on_2 . ') or (' . $sql_on_3 . ')))';
+    $sql_main .= ' inner join requests r2 on (r1.id <> r2.id and r1.building = r2.building and r1.room = r2.room and r1.delta = r2.delta and r1.date = r2.date and ((' . $sql_on_1 . ') or (' . $sql_on_2 . ') or (' . $sql_on_3 . ')))';
 
     $arguments = array(
       ':locked' => MFCS_REQUEST_STATUS_LOCKED,
       ':unlocked' => MFCS_REQUEST_STATUS_UNLOCKED,
       ':accepted' => MFCS_REQUEST_STATUS_CLOSED_ACCEPTED,
-      ':instance' => $instance,
+      ':instance_day' => $instance_day,
     );
 
     if (!is_null($request_id)) {
@@ -425,13 +422,6 @@ function mfcs_miscellaneous_check_requests_conflict($request_id = NULL) {
           $requests[$result->id] = array(
             'id' => $result->id,
             'title' => $result->title,
-            'location' => array(
-              'id' => $result->location,
-              'machine_name' => $result->location_code,
-              'human_name' => $result->location_name,
-              'date' => $result->location_date,
-              'disabled' => $result->location_disabled,
-            ),
             'building' => array(
               'id' => $result->building,
               'machine_name' => $result->building_code,
