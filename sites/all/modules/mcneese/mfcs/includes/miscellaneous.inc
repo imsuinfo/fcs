@@ -1712,6 +1712,10 @@ function mfcs_miscellaneous_check_requests_problem_holiday($request_id = NULL) {
       $query->condition('mer.id', $request_id);
     }
 
+    // don't bother with detecting conflicts that are in the past.
+    $instance = mfcs_instance();
+    $query->condition('mfdd.value', $instance, '>=');
+
     $not_these_status = array(
       MFCS_REQUEST_STATUS_DELETED,
       MFCS_REQUEST_STATUS_CLOSED_DENIED,
@@ -1831,6 +1835,11 @@ function mfcs_miscellaneous_check_requests_problem_unavailable($request_id = NUL
       $query_string .= 'and u.id = :request_id ';
       $arguments[':request_id'] = $request_id;
     }
+
+    // don't bother with detecting conflicts that are in the past.
+    $instance = mfcs_instance();
+    $query_string .= 'and mfdd.value >= :instance ';
+    $arguments[':instance'] = $instance;
 
     $results = db_query($query_string, $arguments)->fetchAll();
     if (!is_array($results)) {
