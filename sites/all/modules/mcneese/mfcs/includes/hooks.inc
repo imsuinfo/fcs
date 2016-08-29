@@ -74,8 +74,8 @@ function mfcs_hook_menu() {
  */
 function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   $items['requests'] = array(
-    'title' => "Dashboard",
-    'description' => "Requests Dashboard",
+    'title' => 'Dashboard',
+    'description' => 'View your dashboard',
     'page callback' => 'mfcs_dashboard_page',
     'file' => 'dashboard.inc',
     'file path' => $module_path . '/pages',
@@ -85,8 +85,8 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   );
 
   $items['requests/create-0'] = array(
-    'title' => "Create Request",
-    'description' => "Create Request",
+    'title' => 'Create Request',
+    'description' => 'Create Request',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_create_0_form'),
     'file' => 'request_create.inc',
@@ -98,8 +98,8 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   );
 
   $items['requests/create-0/%'] = array(
-    'title' => "Create Request",
-    'description' => "Create Request",
+    'title' => 'Create Request',
+    'description' => 'Create Request',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_create_0_form', 2),
     'file' => 'request_create.inc',
@@ -111,7 +111,7 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   );
 
   $items['requests/create-0/autocomplete/request_coordinator/email'] = array(
-    'title' => "",
+    'title' => '',
     'page callback' => 'mfcs_edit_0_autocomplete_request_coordinator_email',
     'file' => 'autocomplete.inc',
     'file path' => $module_path . '/includes',
@@ -121,7 +121,7 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   );
 
   $items['requests/create-0/autocomplete/request_coordinator/name'] = array(
-    'title' => "",
+    'title' => '',
     'page callback' => 'mfcs_edit_0_autocomplete_request_coordinator_name',
     'file' => 'autocomplete.inc',
     'file path' => $module_path . '/includes',
@@ -131,7 +131,7 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   );
 
   $items['requests/create-0/autocomplete/request_coordinator/phone'] = array(
-    'title' => "",
+    'title' => '',
     'page callback' => 'mfcs_edit_0_autocomplete_request_coordinator_phone',
     'file' => 'autocomplete.inc',
     'file path' => $module_path . '/includes',
@@ -142,8 +142,8 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
 
   // this is provided as a way to have the breadcrumb path simulate the 'view' despite not being in the url path.
   $items['requests/edit-0/%'] = array(
-    'title' => "View Request",
-    'description' => "Edit Request",
+    'title' => 'View Request',
+    'description' => 'Edit Request',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_edit_0_form', 2),
     'file' => 'request_edit.inc',
@@ -155,8 +155,8 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   );
 
   $items['requests/edit-0/%/%'] = array(
-    'title' => "Edit Request",
-    'description' => "Edit Request",
+    'title' => 'Edit Request',
+    'description' => 'Edit Request',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_edit_0_form', 2, 3),
     'file' => 'request_edit.inc',
@@ -168,7 +168,7 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   );
 
   $items['requests/edit-0/autocomplete/request_coordinator/email'] = array(
-    'title' => "",
+    'title' => '',
     'page callback' => 'mfcs_edit_0_autocomplete_request_coordinator_email',
     'file' => 'autocomplete.inc',
     'file path' => $module_path . '/includes',
@@ -178,7 +178,7 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   );
 
   $items['requests/edit-0/autocomplete/request_coordinator/name'] = array(
-    'title' => "",
+    'title' => '',
     'page callback' => 'mfcs_edit_0_autocomplete_request_coordinator_name',
     'file' => 'autocomplete.inc',
     'file path' => $module_path . '/includes',
@@ -188,7 +188,7 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   );
 
   $items['requests/edit-0/autocomplete/request_coordinator/phone'] = array(
-    'title' => "",
+    'title' => '',
     'page callback' => 'mfcs_edit_0_autocomplete_request_coordinator_phone',
     'file' => 'autocomplete.inc',
     'file path' => $module_path . '/includes',
@@ -198,8 +198,8 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   );
 
   $items['requests/delete-0/%'] = array(
-    'title' => "Delete Request",
-    'description' => "Delete Request",
+    'title' => 'Delete Request',
+    'description' => 'Delete Request',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_delete_0_form', 2),
     'file' => 'request_delete.inc',
@@ -211,8 +211,8 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   );
 
   $items['requests/cancel-0/%'] = array(
-    'title' => "Cancel Request",
-    'description' => "Cancel Request",
+    'title' => 'Cancel Request',
+    'description' => 'Cancel Request',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_cancel_0_form', 2),
     'file' => 'request_cancel.inc',
@@ -224,8 +224,8 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   );
 
   $items['requests/uncancel-0/%'] = array(
-    'title' => "Uncancel Request",
-    'description' => "Uncancel Request",
+    'title' => 'Uncancel Request',
+    'description' => 'Uncancel Request',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_uncancel_0_form', 2),
     'file' => 'request_cancel.inc',
@@ -237,8 +237,8 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   );
 
   $items['requests/cancelling-0/%'] = array(
-    'title' => "Cancel or Uncancel Individual Dates",
-    'description' => "Cancel or Uncancel Individual Dates",
+    'title' => 'Cancel or Uncancel Individual Dates',
+    'description' => 'Cancel or Uncancel Individual Dates',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_cancelling_0_form', 2),
     'file' => 'request_cancel.inc',
@@ -250,8 +250,8 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   );
 
   $items['requests/manage-0/%'] = array(
-    'title' => "Override Request",
-    'description' => "Override Request",
+    'title' => 'Override Request',
+    'description' => 'Override Request',
     'page callback' => 'mfcs_request_manage_0_page',
     'page arguments' => array(2),
     'file' => 'request_manage.inc',
@@ -263,8 +263,8 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   );
 
   $items['requests/manage-0/override/%'] = array(
-    'title' => "Override Request",
-    'description' => "Override Request",
+    'title' => 'Override Request',
+    'description' => 'Override Request',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_manage_0_override_form', 3),
     'file' => 'request_override.inc',
@@ -276,8 +276,8 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   );
 
   $items['requests/manage-0/reassign/coordinator/%'] = array(
-    'title' => "Re-Assign Request Coordinator",
-    'description' => "Re-Assign Request Coordinator",
+    'title' => 'Re-Assign Request Coordinator',
+    'description' => 'Re-Assign Request Coordinator',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_manage_0_reassign_coordinator_form', 4),
     'file' => 'request_reassign.inc',
@@ -289,8 +289,8 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   );
 
   $items['requests/manage-0/reassign/requester/%'] = array(
-    'title' => "Re-Assign Request Requester",
-    'description' => "Re-Assign Request Requester",
+    'title' => 'Re-Assign Request Requester',
+    'description' => 'Re-Assign Request Requester',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_manage_0_reassign_requester_form', 4),
     'file' => 'request_reassign.inc',
@@ -302,7 +302,7 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   );
 
   $items['requests/manage-0/reassign/requester/autocomplete/user_id'] = array(
-    'title' => "",
+    'title' => '',
     'page callback' => 'mfcs_autocomplete_user_id',
     'file' => 'autocomplete.inc',
     'file path' => $module_path . '/includes',
@@ -314,8 +314,8 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   );
 
   $items['requests/manage-0/locks/%'] = array(
-    'title' => "Request Locks",
-    'description' => "Request Locks",
+    'title' => 'Request Locks',
+    'description' => 'Request Locks',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_manage_0_locks_form', 3),
     'file' => 'request_locks.inc',
@@ -327,8 +327,8 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   );
 
   $items['requests/manage-0/move/%'] = array(
-    'title' => "Move Request",
-    'description' => "Move Request",
+    'title' => 'Move Request',
+    'description' => 'Move Request',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_manage_0_move_form', 3),
     'file' => 'request_move.inc',
@@ -340,8 +340,8 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   );
 
   $items['requests/view-0/%'] = array(
-    'title' => "View Request",
-    'description' => "View Request",
+    'title' => 'View Request',
+    'description' => 'View Request',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_view_0_form', 2),
     'file' => 'request_view.inc',
@@ -353,8 +353,8 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   );
 
   $items['requests/view-0/%/%'] = array(
-    'title' => "View Request",
-    'description' => "View Request",
+    'title' => 'View Request',
+    'description' => 'View Request',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_view_0_form', 2, 3),
     'file' => 'request_view.inc',
@@ -366,8 +366,8 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   );
 
   $items['requests/pdf-0/%'] = array(
-    'title' => "Request PDF",
-    'description' => "Download Request PDF",
+    'title' => 'Request PDF',
+    'description' => 'Download Request PDF',
     'page callback' => 'mfcs_request_pdf_0_page',
     'page arguments' => array(2),
     'file' => 'request_view.inc',
@@ -380,8 +380,8 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   );
 
   $items['requests/pdf-0/%/%'] = array(
-    'title' => "Request PDF",
-    'description' => "Download Request PDF",
+    'title' => 'Request PDF',
+    'description' => 'Download Request PDF',
     'page callback' => 'mfcs_request_pdf_0_page',
     'page arguments' => array(2, 3),
     'file' => 'request_view.inc',
@@ -394,8 +394,8 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   );
 
   $items['requests/pdf-0/%/%/%'] = array(
-    'title' => "Request PDF",
-    'description' => "Download Request PDF",
+    'title' => 'Request PDF',
+    'description' => 'Download Request PDF',
     'page callback' => 'mfcs_request_pdf_0_page',
     'page arguments' => array(2, 3, 4),
     'file' => 'request_view.inc',
@@ -408,8 +408,8 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   );
 
   $items['requests/print-0/%'] = array(
-    'title' => "Printable Request",
-    'description' => "Self-contained/Printable Request",
+    'title' => 'Printable Request',
+    'description' => 'Self-contained/Printable Request',
     'page callback' => 'mfcs_request_print_0_page',
     'page arguments' => array(2),
     'file' => 'request_view.inc',
@@ -422,8 +422,8 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   );
 
   $items['requests/print-0/%/%'] = array(
-    'title' => "Printable Request",
-    'description' => "Self-contained/Printable Request",
+    'title' => 'Printable Request',
+    'description' => 'Self-contained/Printable Request',
     'page callback' => 'mfcs_request_print_0_page',
     'page arguments' => array(2, 3),
     'file' => 'request_view.inc',
@@ -436,8 +436,8 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   );
 
   $items['requests/print-0/%/%/%'] = array(
-    'title' => "Printable Request",
-    'description' => "Self-contained/Printable Request",
+    'title' => 'Printable Request',
+    'description' => 'Self-contained/Printable Request',
     'page callback' => 'mfcs_request_print_0_page',
     'page arguments' => array(2, 3, 4),
     'file' => 'request_view.inc',
@@ -450,8 +450,8 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   );
 
   $items['requests/synchronize-0/ical/%'] = array(
-    'title' => "Synchronize Requests",
-    'description' => "Perform iCal synchronization operations.",
+    'title' => 'Synchronize Requests',
+    'description' => 'Perform iCal synchronization operations.',
     'page callback' => 'mfcs_request_synchronize_0_ical_page',
     'page arguments' => array(3),
     'file' => 'request_synchronize.inc',
@@ -464,8 +464,8 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
   );
 
   $items['requests/synchronize-0/ical/%/%'] = array(
-    'title' => "Synchronize Requests",
-    'description' => "Perform iCal synchronization operations.",
+    'title' => 'Synchronize Requests',
+    'description' => 'Perform iCal synchronization operations.',
     'page callback' => 'mfcs_request_synchronize_0_ical_page',
     'page arguments' => array(3, 4),
     'file' => 'request_synchronize.inc',
@@ -488,8 +488,8 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
  */
 function mfcs_hook_menu_requests_reviewing(&$items, $module_path) {
   $items['requests/review-0'] = array(
-    'title' => "Review",
-    'description' => "Review Requests",
+    'title' => 'Review',
+    'description' => 'View a listing of requests that you are allowed to review.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_review_0_page'),
     'file' => 'request_review.inc',
@@ -501,8 +501,8 @@ function mfcs_hook_menu_requests_reviewing(&$items, $module_path) {
   );
 
   $items['requests/review-0/%'] = array(
-    'title' => "Review",
-    'description' => "Review Requests",
+    'title' => 'Review',
+    'description' => 'Review Requests',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_review_0_page', 2),
     'file' => 'request_review.inc',
@@ -514,7 +514,7 @@ function mfcs_hook_menu_requests_reviewing(&$items, $module_path) {
   );
 
   $items['requests/review-0/ajax'] = array(
-    'title' => "",
+    'title' => '',
     'page callback' => 'mfcs_ajax_review_0',
     'page arguments' => array(),
     'file' => 'ajax.inc',
@@ -527,8 +527,8 @@ function mfcs_hook_menu_requests_reviewing(&$items, $module_path) {
   );
 
   $items['requests/history-0/%'] = array(
-    'title' => "Request History",
-    'description' => "Request History",
+    'title' => 'Request History',
+    'description' => 'Request History',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_history_0_form', 2),
     'file' => 'request_history.inc',
@@ -540,8 +540,8 @@ function mfcs_hook_menu_requests_reviewing(&$items, $module_path) {
   );
 
   $items['requests/agreement-0/%'] = array(
-    'title' => "Facilities Use Agreement",
-    'description' => "Facilities Use Agreement",
+    'title' => 'Facilities Use Agreement',
+    'description' => 'Facilities Use Agreement',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_agreement_0_form', 2),
     'file' => 'request_agreement.inc',
@@ -553,8 +553,8 @@ function mfcs_hook_menu_requests_reviewing(&$items, $module_path) {
   );
 
   $items['requests/agreement-0/%/pdf'] = array(
-    'title' => "Facilities Use Agreement",
-    'description' => "Facilities Use Agreement",
+    'title' => 'Facilities Use Agreement',
+    'description' => 'Facilities Use Agreement',
     'page callback' => 'mfcs_request_agreement_0_pdf',
     'page arguments' => array(2),
     'file' => 'request_agreement.inc',
@@ -576,8 +576,8 @@ function mfcs_hook_menu_requests_reviewing(&$items, $module_path) {
  */
 function mfcs_hook_menu_requests_listing(&$items, $module_path) {
   $items['requests/list-0'] = array(
-    'title' => "List Requests",
-    'description' => "List Requests",
+    'title' => 'Requests',
+    'description' => 'View all requests on the system.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_list_0_form'),
     'file' => 'request_list.inc',
@@ -589,8 +589,8 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
   );
 
   $items['requests/list-0/%'] = array(
-    'title' => "List Requests",
-    'description' => "List Requests",
+    'title' => 'List Requests',
+    'description' => 'List Requests',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_list_0_form', 2),
     'file' => 'request_list.inc',
@@ -602,7 +602,7 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
   );
 
   $items['requests/list-0/ajax'] = array(
-    'title' => "",
+    'title' => '',
     'page callback' => 'mfcs_ajax_list_0',
     'page arguments' => array(),
     'file' => 'ajax.inc',
@@ -615,7 +615,7 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
   );
 
   $items['requests/list-0/ajax/%'] = array(
-    'title' => "",
+    'title' => '',
     'page callback' => 'mfcs_ajax_list_0',
     'page arguments' => array(3),
     'file' => 'ajax.inc',
@@ -628,8 +628,8 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
   );
 
   $items['requests/calendar-0/month'] = array(
-    'title' => "Request Calendar",
-    'description' => "Request Calendar - Month",
+    'title' => 'Request Calendar',
+    'description' => 'Request Calendar - Month',
     'page callback' => 'mfcs_request_calendar_month_0_page',
     'page arguments' => array(),
     'file' => 'request_calendar.inc',
@@ -641,8 +641,8 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
   );
 
   $items['requests/calendar-0/month/%'] = array(
-    'title' => "Request Calendar",
-    'description' => "Requests Calendar - Month",
+    'title' => 'Request Calendar',
+    'description' => 'Requests Calendar - Month',
     'page callback' => 'mfcs_request_calendar_month_0_page',
     'page arguments' => array(3),
     'file' => 'request_calendar.inc',
@@ -654,8 +654,8 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
   );
 
   $items['requests/calendar-0/month/%/%'] = array(
-    'title' => "Request Calendar",
-    'description' => "Requests Calendar - Month",
+    'title' => 'Request Calendar',
+    'description' => 'Requests Calendar - Month',
     'page callback' => 'mfcs_request_calendar_month_0_page',
     'page arguments' => array(3, 4),
     'file' => 'request_calendar.inc',
@@ -667,8 +667,8 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
   );
 
   $items['requests/calendar-0/day'] = array(
-    'title' => "Request Calendar",
-    'description' => "Requests Calendar - Day",
+    'title' => 'Request Calendar',
+    'description' => 'Requests Calendar - Day',
     'page callback' => 'mfcs_request_calendar_day_0_page',
     'page arguments' => array(),
     'file' => 'request_calendar.inc',
@@ -680,8 +680,8 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
   );
 
   $items['requests/calendar-0/day/%'] = array(
-    'title' => "Request Calendar",
-    'description' => "Requests Calendar - Day",
+    'title' => 'Request Calendar',
+    'description' => 'Requests Calendar - Day',
     'page callback' => 'mfcs_request_calendar_day_0_page',
     'page arguments' => array(3),
     'file' => 'request_calendar.inc',
@@ -693,8 +693,8 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
   );
 
   $items['requests/calendar-0/day/%/%'] = array(
-    'title' => "Request Calendar",
-    'description' => "Requests Calendar - Day",
+    'title' => 'Request Calendar',
+    'description' => 'Requests Calendar - Day',
     'page callback' => 'mfcs_request_calendar_day_0_page',
     'page arguments' => array(3, 4),
     'file' => 'request_calendar.inc',
@@ -706,8 +706,8 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
   );
 
   $items['requests/calendar-0/day/%/%/%'] = array(
-    'title' => "Request Calendar",
-    'description' => "Requests Calendar - Day",
+    'title' => 'Request Calendar',
+    'description' => 'Requests Calendar - Day',
     'page callback' => 'mfcs_request_calendar_day_0_page',
     'page arguments' => array(3, 4, 5),
     'file' => 'request_calendar.inc',
@@ -719,8 +719,8 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
   );
 
   $items['requests/calendar-0/day/%/%/%/%'] = array(
-    'title' => "Request Calendar",
-    'description' => "Requests Calendar - Day",
+    'title' => 'Request Calendar',
+    'description' => 'Requests Calendar - Day',
     'page callback' => 'mfcs_request_calendar_day_0_page',
     'page arguments' => array(3, 4, 5, 6),
     'file' => 'request_calendar.inc',
@@ -732,8 +732,8 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
   );
 
   $items['requests/ical-0/%'] = array(
-    'title' => "Request iCal",
-    'description' => "Request iCal",
+    'title' => 'Request iCal',
+    'description' => 'Request iCal',
     'page callback' => 'mfcs_request_ical_request_0_page',
     'page arguments' => array(2),
     'file' => 'request_ical.inc',
@@ -745,8 +745,8 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
   );
 
   $items['requests/ical-0/year'] = array(
-    'title' => "Request iCal",
-    'description' => "Request iCal - Year",
+    'title' => 'Request iCal',
+    'description' => 'Request iCal - Year',
     'page callback' => 'mfcs_request_ical_year_0_page',
     'page arguments' => array(NULL, NULL),
     'file' => 'request_ical.inc',
@@ -758,8 +758,8 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
   );
 
   $items['requests/ical-0/year/%'] = array(
-    'title' => "Request iCal",
-    'description' => "Requests iCal - Year",
+    'title' => 'Request iCal',
+    'description' => 'Requests iCal - Year',
     'page callback' => 'mfcs_request_ical_year_0_page',
     'page arguments' => array(3, 4),
     'file' => 'request_ical.inc',
@@ -771,8 +771,8 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
   );
 
   $items['requests/ical-0/month'] = array(
-    'title' => "Request iCal",
-    'description' => "Request iCal - Month",
+    'title' => 'Request iCal',
+    'description' => 'Request iCal - Month',
     'page callback' => 'mfcs_request_ical_month_0_page',
     'page arguments' => array(NULL, NULL),
     'file' => 'request_ical.inc',
@@ -784,8 +784,8 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
   );
 
   $items['requests/ical-0/month/%/%'] = array(
-    'title' => "Request iCal",
-    'description' => "Requests iCal - Month",
+    'title' => 'Request iCal',
+    'description' => 'Requests iCal - Month',
     'page callback' => 'mfcs_request_ical_month_0_page',
     'page arguments' => array(3, 4),
     'file' => 'request_ical.inc',
@@ -797,8 +797,8 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
   );
 
   $items['requests/ical-0/day'] = array(
-    'title' => "Request iCal",
-    'description' => "Requests iCal - Day",
+    'title' => 'Request iCal',
+    'description' => 'Requests iCal - Day',
     'page callback' => 'mfcs_request_ical_day_0_page',
     'page arguments' => array(),
     'file' => 'request_ical.inc',
@@ -810,8 +810,8 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
   );
 
   $items['requests/ical-0/day/%/%/%'] = array(
-    'title' => "Request iCal",
-    'description' => "Requests iCal - Day",
+    'title' => 'Request iCal',
+    'description' => 'Requests iCal - Day',
     'page callback' => 'mfcs_request_ical_day_0_page',
     'page arguments' => array(3, 4, 5),
     'file' => 'request_ical.inc',
@@ -823,8 +823,8 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
   );
 
   $items['requests/search-0'] = array(
-    'title' => "Search Requests",
-    'description' => "Search Requests",
+    'title' => 'Search Requests',
+    'description' => 'Search Requests',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_search_0_form'),
     'file' => 'request_search.inc',
@@ -838,7 +838,7 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
   /*
   // @fixme: the function callbacks specified here are not implemented.
   $items['requests/search-0/ajax/simple/%'] = array(
-    'title' => "",
+    'title' => '',
     'page callback' => 'mfcs_ajax_search_simple_0',
     'page arguments' => array(4),
     'file' => 'ajax.inc',
@@ -851,7 +851,7 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
   );
 
   $items['requests/search-0/ajax/advanced/%'] = array(
-    'title' => "",
+    'title' => '',
     'page callback' => 'mfcs_ajax_search_simple_0',
     'page arguments' => array(4),
     'file' => 'ajax.inc',
@@ -875,8 +875,8 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
  */
 function mfcs_hook_menu_management(&$items, $module_path) {
   $items['requests/management'] = array(
-    'title' => "Management",
-    'description' => "Management",
+    'title' => 'Management',
+    'description' => 'Access management options.',
     'page callback' => 'mfcs_management_page',
     'file' => 'management.inc',
     'file path' => $module_path . '/pages',
@@ -886,8 +886,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/proxy-0'] = array(
-    'title' => "Manage Proxies",
-    'description' => "List users who are able to proxy as a venue coordinator.",
+    'title' => 'Proxies',
+    'description' => 'Manage who is able to proxy as venue coordinators.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_proxy_0_form'),
     'file' => 'request_proxy.inc',
@@ -899,8 +899,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/proxy-0/%'] = array(
-    'title' => "Manage Proxies",
-    'description' => "List users who are able to proxy as a venue coordinator.",
+    'title' => 'Manage Proxies',
+    'description' => 'List users who are able to proxy as a venue coordinator.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_proxy_0_form', 2),
     'file' => 'request_proxy.inc',
@@ -912,8 +912,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/proxy-0/ajax'] = array(
-    'title' => "Manage Proxies",
-    'description' => "List users who are able to proxy as a venue coordinator.",
+    'title' => 'Manage Proxies',
+    'description' => 'List users who are able to proxy as a venue coordinator.',
     'page callback' => 'mfcs_ajax_proxy_0_list',
     'file' => 'ajax-management.inc',
     'file path' => $module_path . '/includes',
@@ -924,8 +924,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/proxy-0/delete/%'] = array(
-    'title' => "Delete Proxy",
-    'description' => "Delete a proxy",
+    'title' => 'Delete Proxy',
+    'description' => 'Delete a proxy',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_proxy_0_delete_form', 3),
     'file' => 'request_proxy.inc',
@@ -937,7 +937,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/proxy-0/autocomplete/user_id'] = array(
-    'title' => "",
+    'title' => '',
     'page callback' => 'mfcs_autocomplete_user_id',
     'file' => 'autocomplete.inc',
     'file path' => $module_path . '/includes',
@@ -947,8 +947,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/reviewers-0'] = array(
-    'title' => "Manage Reviewers",
-    'description' => "Manage Reviewers",
+    'title' => 'Reviewers',
+    'description' => 'Manage what reviewers are allowed to review.',
     'page callback' => 'mfcs_request_reviewers_0_page',
     'file' => 'request_reviewers.inc',
     'file path' => $module_path . '/pages',
@@ -959,8 +959,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/reviewers-0/list/%/%'] = array(
-    'title' => "List Reviewers",
-    'description' => "List Reviewers",
+    'title' => 'List Reviewers',
+    'description' => 'List Reviewers',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_reviewers_0_form', 3, 4),
     'file' => 'request_reviewers.inc',
@@ -972,8 +972,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/reviewers-0/list/%/%/%'] = array(
-    'title' => "List Reviewers",
-    'description' => "List Reviewers",
+    'title' => 'List Reviewers',
+    'description' => 'List Reviewers',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_reviewers_0_form', 3, 4, 5),
     'file' => 'request_reviewers.inc',
@@ -985,7 +985,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/reviewers-0/ajax/list/%/%'] = array(
-    'title' => "",
+    'title' => '',
     'page callback' => 'mfcs_ajax_reviewers_0_list',
     'page arguments' => array(4, 5),
     'file' => 'ajax-management.inc',
@@ -998,8 +998,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/reviewers-0/delete/%'] = array(
-    'title' => "Delete Reviewer",
-    'description' => "Delete Reviewer",
+    'title' => 'Delete Reviewer',
+    'description' => 'Delete Reviewer',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_reviewers_0_delete_form', 3),
     'file' => 'request_reviewers.inc',
@@ -1011,7 +1011,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/reviewers-0/autocomplete/user_id'] = array(
-    'title' => "",
+    'title' => '',
     'page callback' => 'mfcs_autocomplete_user_id',
     'file' => 'autocomplete.inc',
     'file path' => $module_path . '/includes',
@@ -1021,7 +1021,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/reviewers-0/autocomplete/reviewer_classification'] = array(
-    'title' => "",
+    'title' => '',
     'page callback' => 'mfcs_request_reviewers_0_autocomplete_reviewer_classification',
     'file' => 'autocomplete.inc',
     'file path' => $module_path . '/includes',
@@ -1031,8 +1031,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/statistics-0'] = array(
-    'title' => "Request Statistics",
-    'description' => "Request Statistics",
+    'title' => 'Request Statistics',
+    'description' => 'Request Statistics',
     'page callback' => 'mfcs_request_statistics_0_page',
     'file' => 'request_statistics.inc',
     'file path' => $module_path . '/pages',
@@ -1043,8 +1043,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/statistics-0/%'] = array(
-    'title' => "Request Statistics",
-    'description' => "Request Statistics",
+    'title' => 'Request Statistics',
+    'description' => 'Request Statistics',
     'page callback' => 'mfcs_request_statistics_0_page',
     'page arguments' => array(2),
     'file' => 'request_statistics.inc',
@@ -1056,8 +1056,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/statistics-0/%/%'] = array(
-    'title' => "Request Statistics",
-    'description' => "Request Statistics",
+    'title' => 'Request Statistics',
+    'description' => 'Request Statistics',
     'page callback' => 'mfcs_request_statistics_0_page',
     'page arguments' => array(2, 3),
     'file' => 'request_statistics.inc',
@@ -1069,8 +1069,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/statistics-0/%/%/%'] = array(
-    'title' => "Request Statistics",
-    'description' => "Request Statistics",
+    'title' => 'Request Statistics',
+    'description' => 'Request Statistics',
     'page callback' => 'mfcs_request_statistics_0_page',
     'page arguments' => array(2, 3, 4),
     'file' => 'request_statistics.inc',
@@ -1082,8 +1082,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/email_log-0'] = array(
-    'title' => "E-mail Logs",
-    'description' => "E-mail Logs",
+    'title' => 'E-mail Logs',
+    'description' => 'E-mail Logs',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_email_log_0_form'),
     'file' => 'request_email_log.inc',
@@ -1095,8 +1095,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/email_log-0/ajax'] = array(
-    'title' => "E-mail Logs",
-    'description' => "E-mail Logs",
+    'title' => 'E-mail Logs',
+    'description' => 'E-mail Logs',
     'page callback' => 'mfcs_ajax_email_log_0_list',
     'file' => 'ajax-management.inc',
     'file path' => $module_path . '/includes',
@@ -1107,8 +1107,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/email_log-0/%'] = array(
-    'title' => "E-mail Logs",
-    'description' => "E-mail Logs",
+    'title' => 'E-mail Logs',
+    'description' => 'E-mail Logs',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_email_log_0_form', 2),
     'file' => 'request_email_log.inc',
@@ -1120,8 +1120,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/email_log-0/view/%'] = array(
-    'title' => "E-mail Logs",
-    'description' => "E-mail Logs",
+    'title' => 'E-mail Logs',
+    'description' => 'E-mail Logs',
     'page callback' => 'mfcs_request_email_log_0_view_page',
     'page arguments' => array(3),
     'file' => 'request_email_log.inc',
@@ -1133,8 +1133,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/email_log-0/resend/%'] = array(
-    'title' => "E-mail Logs",
-    'description' => "E-mail Logs",
+    'title' => 'E-mail Logs',
+    'description' => 'E-mail Logs',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_email_log_0_resend_form', 3),
     'file' => 'request_email_log.inc',
@@ -1146,8 +1146,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/email_log-0/resend/%/%'] = array(
-    'title' => "E-mail Logs",
-    'description' => "E-mail Logs",
+    'title' => 'E-mail Logs',
+    'description' => 'E-mail Logs',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_email_log_0_resend_form', 3, 4),
     'file' => 'request_email_log.inc',
@@ -1159,8 +1159,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/troubleshoot-0'] = array(
-    'title' => "Troubleshooting Tools",
-    'description' => "Troubleshoot problems on the system using pre-built tools.",
+    'title' => 'Troubleshooting',
+    'description' => 'Troubleshoot problems on the system using pre-built tools.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_troubleshoot_0_form'),
     'file' => 'request_troubleshoot.inc',
@@ -1172,8 +1172,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/troubleshoot-0/locations'] = array(
-    'title' => "Troubleshooting Tools - Locations",
-    'description' => "A listing of locations available on the system with details.",
+    'title' => 'Troubleshooting - Locations',
+    'description' => 'A listing of locations available on the system with details.',
     'page callback' => 'mfcs_request_troubleshoot_0_locations_page',
     'file' => 'request_troubleshoot.inc',
     'file path' => $module_path . '/pages',
@@ -1184,8 +1184,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/troubleshoot-0/locations/%'] = array(
-    'title' => "Troubleshooting Tools - Locations",
-    'description' => "A listing of locations available on the system with details.",
+    'title' => 'Troubleshooting - Locations',
+    'description' => 'A listing of locations available on the system with details.',
     'page callback' => 'mfcs_request_troubleshoot_0_locations_page',
     'page arguments' => array(3),
     'file' => 'request_troubleshoot.inc',
@@ -1197,8 +1197,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/troubleshoot-0/locations/%/edit'] = array(
-    'title' => "Troubleshooting Tools - Edit Location Name",
-    'description' => "A listing of locations available on the system with details.",
+    'title' => 'Troubleshooting - Edit Location Name',
+    'description' => 'A listing of locations available on the system with details.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_troubleshoot_0_locations_edit_name_form', 3),
     'file' => 'request_troubleshoot.inc',
@@ -1210,8 +1210,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/troubleshoot-0/buildings'] = array(
-    'title' => "Troubleshooting Tools - Buildings",
-    'description' => "A listing of buildings available on the system with details.",
+    'title' => 'Troubleshooting - Buildings',
+    'description' => 'A listing of buildings available on the system with details.',
     'page callback' => 'mfcs_request_troubleshoot_0_buildings_page',
     'file' => 'request_troubleshoot.inc',
     'file path' => $module_path . '/pages',
@@ -1222,8 +1222,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/troubleshoot-0/buildings/%'] = array(
-    'title' => "Troubleshooting Tools - Buildings",
-    'description' => "A listing of buildings available on the system with details.",
+    'title' => 'Troubleshooting - Buildings',
+    'description' => 'A listing of buildings available on the system with details.',
     'page callback' => 'mfcs_request_troubleshoot_0_buildings_page',
     'page arguments' => array(3),
     'file' => 'request_troubleshoot.inc',
@@ -1235,8 +1235,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/troubleshoot-0/rooms'] = array(
-    'title' => "Troubleshooting Tools - Rooms",
-    'description' => "A listing of rooms available on the system with details.",
+    'title' => 'Troubleshooting - Rooms',
+    'description' => 'A listing of rooms available on the system with details.',
     'page callback' => 'mfcs_request_troubleshoot_0_rooms_page',
     'file' => 'request_troubleshoot.inc',
     'file path' => $module_path . '/pages',
@@ -1247,8 +1247,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/troubleshoot-0/rooms/%'] = array(
-    'title' => "Troubleshooting Tools - Rooms",
-    'description' => "A listing of rooms available on the system with details.",
+    'title' => 'Troubleshooting - Rooms',
+    'description' => 'A listing of rooms available on the system with details.',
     'page callback' => 'mfcs_request_troubleshoot_0_rooms_page',
     'page arguments' => array(3),
     'file' => 'request_troubleshoot.inc',
@@ -1260,8 +1260,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/problems-0'] = array(
-    'title' => "Manage Problems",
-    'description' => "Manage problems and troubleshoot detected by the system.",
+    'title' => 'Manage Problems',
+    'description' => 'Manage problems and troubleshoot detected by the system.',
     'page callback' => 'mfcs_management_problems_page',
     'page arguments' => array(),
     'file' => 'request_problems.inc',
@@ -1273,8 +1273,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/problems-0/users'] = array(
-    'title' => "User Problems",
-    'description' => "View a list of users with problems that the system has detected.",
+    'title' => 'User Problems',
+    'description' => 'View a list of users with problems that the system has detected.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_problems_0_users_form'),
     'file' => 'request_problems.inc',
@@ -1286,8 +1286,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/problems-0/users/ajax'] = array(
-    'title' => "User Problems",
-    'description' => "View a list of users with problems that the system has detected.",
+    'title' => 'User Problems',
+    'description' => 'View a list of users with problems that the system has detected.',
     'page callback' => 'mfcs_ajax_problems_0_users_list',
     'file' => 'ajax-management.inc',
     'file path' => $module_path . '/includes',
@@ -1298,8 +1298,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/problems-0/users/%'] = array(
-    'title' => "User Problems",
-    'description' => "View a list of users with problems that the system has detected.",
+    'title' => 'User Problems',
+    'description' => 'View a list of users with problems that the system has detected.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_problems_0_users_form', 3),
     'file' => 'request_problems.inc',
@@ -1311,8 +1311,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/problems-0/users/user/%'] = array(
-    'title' => "User Problems",
-    'description' => "Manage problems detected by the system that are specific to a single user.",
+    'title' => 'User Problems',
+    'description' => 'Manage problems detected by the system that are specific to a single user.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_problems_0_user_form', 4),
     'file' => 'request_problems.inc',
@@ -1324,8 +1324,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/problems-0/users/resynchronize/%'] = array(
-    'title' => "User Problems - Re-sync Account",
-    'description' => "Attempt to re-synchronize user account to banner database.",
+    'title' => 'User Problems - Re-sync Account',
+    'description' => 'Attempt to re-synchronize user account to banner database.',
     'page callback' => 'mfcs_request_problems_0_users_resynchronize',
     'page arguments' => array(4),
     'file' => 'request_problems.inc',
@@ -1337,8 +1337,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/problems-0/users/disabled_in_use/%'] = array(
-    'title' => "User Problems - Disabled Account in Use",
-    'description' => "Display open requests that are associated with a given disabled user.",
+    'title' => 'User Problems - Disabled Account in Use',
+    'description' => 'Display open requests that are associated with a given disabled user.',
     'page callback' => 'mfcs_request_problems_0_users_disabled_in_use',
     'page arguments' => array(4),
     'file' => 'request_problems.inc',
@@ -1350,8 +1350,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/problems-0/users/disabled_in_use/%/%'] = array(
-    'title' => "User Problems - Disabled Account in Use",
-    'description' => "Display open requests that are associated with a given disabled user.",
+    'title' => 'User Problems - Disabled Account in Use',
+    'description' => 'Display open requests that are associated with a given disabled user.',
     'page callback' => 'mfcs_request_problems_0_users_disabled_in_use',
     'page arguments' => array(4, 5),
     'file' => 'request_problems.inc',
@@ -1363,7 +1363,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/problems-0/users/disabled_in_use/ajax/%'] = array(
-    'title' => "",
+    'title' => '',
     'page callback' => 'mfcs_ajax_problems_0_disabled_in_use',
     'page arguments' => array(5),
     'file' => 'ajax-management.inc',
@@ -1376,8 +1376,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/problems-0/requests'] = array(
-    'title' => "Request Problems",
-    'description' => "View a list of requests with problems that the system has detected.",
+    'title' => 'Request Problems',
+    'description' => 'View a list of requests with problems that the system has detected.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_problems_0_requests_form'),
     'file' => 'request_problems.inc',
@@ -1389,8 +1389,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/problems-0/requests/ajax'] = array(
-    'title' => "Request Problems",
-    'description' => "View a list of requests with problems that the system has detected.",
+    'title' => 'Request Problems',
+    'description' => 'View a list of requests with problems that the system has detected.',
     'page callback' => 'mfcs_ajax_problems_0_requests_list',
     'file' => 'ajax-management.inc',
     'file path' => $module_path . '/includes',
@@ -1401,8 +1401,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/problems-0/requests/ajax/%'] = array(
-    'title' => "Request Problems",
-    'description' => "View a list of requests with problems that the system has detected.",
+    'title' => 'Request Problems',
+    'description' => 'View a list of requests with problems that the system has detected.',
     'page callback' => 'mfcs_ajax_problems_0_requests_list',
     'page arguments' => array(4),
     'file' => 'ajax-management.inc',
@@ -1414,8 +1414,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/problems-0/requests/request/%'] = array(
-    'title' => "Request Problems",
-    'description' => "Manage problems detected by the system that are specific to a single request.",
+    'title' => 'Request Problems',
+    'description' => 'Manage problems detected by the system that are specific to a single request.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_problems_0_request_form', 4),
     'file' => 'request_problems.inc',
@@ -1427,8 +1427,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/problems-0/requests/request/%/recheck'] = array(
-    'title' => "Request Problems",
-    'description' => "Re-check a single problem for a single request.",
+    'title' => 'Request Problems',
+    'description' => 'Re-check a single problem for a single request.',
     'page callback' => 'mfcs_request_problems_0_request_recheck',
     'page arguments' => array(4),
     'file' => 'request_problems.inc',
@@ -1440,8 +1440,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/synchronize-0'] = array(
-    'title' => "Synchronize Requests",
-    'description' => "The synchronize ",
+    'title' => 'Synchronize Requests',
+    'description' => 'The synchronize ',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_synchronize_0_form'),
     'file' => 'request_synchronize.inc',
@@ -1454,8 +1454,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/synchronize-0/ajax'] = array(
-    'title' => "Synchronize Requests",
-    'description' => "The synchronize ",
+    'title' => 'Synchronize Requests',
+    'description' => 'The synchronize ',
     'page callback' => 'mfcs_ajax_synchronize_0_form',
     'file' => 'ajax-management.inc',
     'file path' => $module_path . '/includes',
@@ -1466,8 +1466,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/synchronize-0/%'] = array(
-    'title' => "Synchronize Requests",
-    'description' => "The synchronize ",
+    'title' => 'Synchronize Requests',
+    'description' => 'The synchronize ',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_synchronize_0_form', 2),
     'file' => 'request_synchronize.inc',
@@ -1480,8 +1480,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/holiday-0'] = array(
-    'title' => "Holidays",
-    'description' => "Holidays.",
+    'title' => 'Holidays',
+    'description' => 'View or manage holidays.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_holiday_0_form'),
     'file' => 'request_holiday.inc',
@@ -1490,12 +1490,11 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'access arguments' => array('manage'),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
-    'type' => MENU_CALLBACK,
   );
 
   $items['requests/holiday-0/%'] = array(
-    'title' => "Holidays",
-    'description' => "Holidays.",
+    'title' => 'Holidays',
+    'description' => 'Holidays.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_holiday_0_form', 2),
     'file' => 'request_holiday.inc',
@@ -1504,12 +1503,11 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'access arguments' => array('manage', 2),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
-    'type' => MENU_CALLBACK,
   );
 
   $items['requests/holiday-0/copy/%'] = array(
-    'title' => "Copy Holidays",
-    'description' => "Holidays.",
+    'title' => 'Copy Holidays',
+    'description' => 'Holidays.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_holiday_0_copy_form', 3),
     'file' => 'request_holiday.inc',
@@ -1518,12 +1516,11 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'access arguments' => array('create', 3),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
-    'type' => MENU_CALLBACK,
   );
 
   $items['requests/holiday-0/create/%'] = array(
-    'title' => "Create Holidays",
-    'description' => "Holidays.",
+    'title' => 'Create Holidays',
+    'description' => 'Holidays.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_holiday_0_edit_form', 3),
     'file' => 'request_holiday.inc',
@@ -1532,12 +1529,11 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'access arguments' => array('create', 3),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
-    'type' => MENU_CALLBACK,
   );
 
   $items['requests/holiday-0/create/%/%'] = array(
-    'title' => "Create Holidays",
-    'description' => "Holidays.",
+    'title' => 'Create Holidays',
+    'description' => 'Holidays.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_holiday_0_edit_form', 3, 4, TRUE),
     'file' => 'request_holiday.inc',
@@ -1546,12 +1542,11 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'access arguments' => array('create', 3, 4),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
-    'type' => MENU_CALLBACK,
   );
 
   $items['requests/holiday-0/edit/%/%'] = array(
-    'title' => "Edit Holidays",
-    'description' => "Holidays.",
+    'title' => 'Edit Holidays',
+    'description' => 'Holidays.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_holiday_0_edit_form', 3, 4),
     'file' => 'request_holiday.inc',
@@ -1560,12 +1555,11 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'access arguments' => array('edit', 3, 4),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
-    'type' => MENU_CALLBACK,
   );
 
   $items['requests/holiday-0/delete/%/%'] = array(
-    'title' => "Delete Holidays",
-    'description' => "Holidays.",
+    'title' => 'Delete Holidays',
+    'description' => 'Holidays.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_holiday_0_delete_form', 3, 4),
     'file' => 'request_holiday.inc',
@@ -1574,12 +1568,11 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'access arguments' => array('delete', 3, 4),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
-    'type' => MENU_CALLBACK,
   );
 
   $items['requests/holiday-0/view/%/%'] = array(
-    'title' => "Holidays",
-    'description' => "Holidays.",
+    'title' => 'Holidays',
+    'description' => 'Holidays.',
     'page callback' => 'mfcs_request_holiday_0_page',
     'page arguments' => array(3, 4),
     'file' => 'request_holiday.inc',
@@ -1588,12 +1581,11 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'access arguments' => array('view', 3, 4),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
-    'type' => MENU_CALLBACK,
   );
 
   $items['requests/unavailable-0'] = array(
-    'title' => "Manage Unavailabilities",
-    'description' => "Unavailabilities.",
+    'title' => 'Room Unavailabilities',
+    'description' => 'View or manage when specific rooms are unavailable for reservation.',
     'page callback' => 'mfcs_request_unavailability_0_rooms_page',
     'page arguments' => array(),
     'file' => 'request_unavailability.inc',
@@ -1602,12 +1594,11 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'access arguments' => array('manage'),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
-    'type' => MENU_CALLBACK,
   );
 
   $items['requests/unavailable-0/all'] = array(
-    'title' => "Room Unavailabilities",
-    'description' => "Unavailabilities.",
+    'title' => 'Room Unavailabilities',
+    'description' => 'Unavailabilities.',
     'page callback' => 'mfcs_request_unavailability_0_room_page',
     'page arguments' => array(NULL),
     'file' => 'request_unavailability.inc',
@@ -1616,12 +1607,11 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'access arguments' => array('manage'),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
-    'type' => MENU_CALLBACK,
   );
 
   $items['requests/unavailable-0/%/all'] = array(
-    'title' => "Room Unavailabilities",
-    'description' => "Unavailabilities.",
+    'title' => 'Room Unavailabilities',
+    'description' => 'Unavailabilities.',
     'page callback' => 'mfcs_request_unavailability_0_room_page',
     'page arguments' => array(NULL, 2),
     'file' => 'request_unavailability.inc',
@@ -1630,12 +1620,11 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'access arguments' => array('manage', 2),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
-    'type' => MENU_CALLBACK,
   );
 
   $items['requests/unavailable-0/%'] = array(
-    'title' => "Room Unavailabilities",
-    'description' => "Unavailabilities.",
+    'title' => 'Room Unavailabilities',
+    'description' => 'Unavailabilities.',
     'page callback' => 'mfcs_request_unavailability_0_room_page',
     'page arguments' => array(2),
     'file' => 'request_unavailability.inc',
@@ -1644,12 +1633,11 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'access arguments' => array('manage', NULL, 2),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
-    'type' => MENU_CALLBACK,
   );
 
   $items['requests/unavailable-0/%/%'] = array(
-    'title' => "Room Unavailabilities",
-    'description' => "Unavailabilities.",
+    'title' => 'Room Unavailabilities',
+    'description' => 'Unavailabilities.',
     'page callback' => 'mfcs_request_unavailability_0_room_page',
     'page arguments' => array(3, 2),
     'file' => 'request_unavailability.inc',
@@ -1658,12 +1646,11 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'access arguments' => array('manage', 2, 3),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
-    'type' => MENU_CALLBACK,
   );
 
   $items['requests/unavailable-0/copy/%/%'] = array(
-    'title' => "Copy Unavailabilities",
-    'description' => "Unavailabilities.",
+    'title' => 'Copy Unavailabilities',
+    'description' => 'Unavailabilities.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_unavailability_0_copy_form', 3, 4),
     'file' => 'request_unavailability.inc',
@@ -1672,12 +1659,11 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'access arguments' => array('create', 3, 4),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
-    'type' => MENU_CALLBACK,
   );
 
   $items['requests/unavailable-0/create/%/%'] = array(
-    'title' => "Create Unavailabilities",
-    'description' => "Unavailabilities.",
+    'title' => 'Create Unavailabilities',
+    'description' => 'Unavailabilities.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_unavailability_0_edit_form', 3, 4),
     'file' => 'request_unavailability.inc',
@@ -1686,12 +1672,11 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'access arguments' => array('create', 3, 4),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
-    'type' => MENU_CALLBACK,
   );
 
   $items['requests/unavailable-0/create/%/%/%'] = array(
-    'title' => "Edit Unavailabilities",
-    'description' => "Unavailabilities.",
+    'title' => 'Edit Unavailabilities',
+    'description' => 'Unavailabilities.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_unavailability_0_edit_form', 3, 4, 5, TRUE),
     'file' => 'request_unavailability.inc',
@@ -1700,12 +1685,11 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'access arguments' => array('edit', 3, 4, 5),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
-    'type' => MENU_CALLBACK,
   );
 
   $items['requests/unavailable-0/edit/%/%/%'] = array(
-    'title' => "Edit Unavailabilities",
-    'description' => "Unavailabilities.",
+    'title' => 'Edit Unavailabilities',
+    'description' => 'Unavailabilities.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_unavailability_0_edit_form', 3, 4, 5),
     'file' => 'request_unavailability.inc',
@@ -1714,12 +1698,11 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'access arguments' => array('edit', 3, 4, 5),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
-    'type' => MENU_CALLBACK,
   );
 
   $items['requests/unavailable-0/delete/%/%/%'] = array(
-    'title' => "Delete Unavailabilities",
-    'description' => "Unavailabilities.",
+    'title' => 'Delete Unavailabilities',
+    'description' => 'Unavailabilities.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_unavailability_0_delete_form', 3, 4, 5),
     'file' => 'request_unavailability.inc',
@@ -1728,12 +1711,11 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'access arguments' => array('delete', 3, 4, 5, NULL, FALSE),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
-    'type' => MENU_CALLBACK,
   );
 
   $items['requests/unavailable-0/view/%/%/%'] = array(
-    'title' => "View Unavailabilities",
-    'description' => "Unavailabilities.",
+    'title' => 'View Unavailabilities',
+    'description' => 'Unavailabilities.',
     'page callback' => 'mfcs_request_unavailability_0_page',
     'page arguments' => array(3, 4, 5),
     'file' => 'request_unavailability.inc',
@@ -1742,12 +1724,11 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'access arguments' => array('view', 4, 5),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
-    'type' => MENU_CALLBACK,
   );
 
   $items['requests/users-0/list'] = array(
-    'title' => "Manage Users",
-    'description' => "Manage Users",
+    'title' => 'Users',
+    'description' => 'View or manage users on the system.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_users_0_form'),
     'file' => 'request_users.inc',
@@ -1759,8 +1740,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/users-0/list/%'] = array(
-    'title' => "Manage Users",
-    'description' => "Manage Users",
+    'title' => 'Manage Users',
+    'description' => 'Manage Users',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_users_0_form', 3),
     'file' => 'request_users.inc',
@@ -1772,8 +1753,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/users-0/list/ajax'] = array(
-    'title' => "Manage Users",
-    'description' => "Manage Users",
+    'title' => 'Manage Users',
+    'description' => 'Manage Users',
     'page callback' => 'mfcs_ajax_users_0_list',
     'file' => 'ajax-management.inc',
     'file path' => $module_path . '/includes',
@@ -1784,8 +1765,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/users-0/list/ajax/%'] = array(
-    'title' => "Manage Users",
-    'description' => "Manage Users",
+    'title' => 'Manage Users',
+    'description' => 'Manage Users',
     'page callback' => 'mfcs_ajax_users_0_list',
     'page arguments' => array(4),
     'file' => 'ajax-management.inc',
@@ -1797,8 +1778,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/users-0/add'] = array(
-    'title' => "Add User",
-    'description' => "Add User",
+    'title' => 'Add User',
+    'description' => 'Add User',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_users_0_add_form'),
     'file' => 'request_users.inc',
@@ -1810,8 +1791,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/users-0/view/%'] = array(
-    'title' => "View User",
-    'description' => "View User",
+    'title' => 'View User',
+    'description' => 'View User',
     'page callback' => 'mfcs_request_users_0_view_page',
     'page arguments' => array(3),
     'file' => 'request_users.inc',
@@ -1823,8 +1804,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   );
 
   $items['requests/users-0/edit/%'] = array(
-    'title' => "Edit User",
-    'description' => "Edit User",
+    'title' => 'Edit User',
+    'description' => 'Edit User',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mfcs_request_users_0_edit_form', 3),
     'file' => 'request_users.inc',
@@ -1846,8 +1827,8 @@ function mfcs_hook_menu_management(&$items, $module_path) {
  */
 function mfcs_hook_menu_help(&$items, $module_path) {
   $items['requests/help-0'] = array(
-    'title' => "Help",
-    'description' => "Online Documentation",
+    'title' => 'Help',
+    'description' => 'Online Documentation',
     'page callback' => 'mfcs_help_0_page',
     'page arguments' => array(),
     'file' => 'help.inc',
@@ -1859,8 +1840,8 @@ function mfcs_hook_menu_help(&$items, $module_path) {
   );
 
   $items['requests/help-0/%'] = array(
-    'title' => "Help",
-    'description' => "Online Documentation",
+    'title' => 'Help',
+    'description' => 'Online Documentation',
     'page callback' => 'mfcs_help_0_page',
     'page arguments' => array(2),
     'file' => 'help.inc',
@@ -1872,8 +1853,8 @@ function mfcs_hook_menu_help(&$items, $module_path) {
   );
 
   $items['requests/help-0/%/%'] = array(
-    'title' => "Help",
-    'description' => "Online Documentation",
+    'title' => 'Help',
+    'description' => 'Online Documentation',
     'page callback' => 'mfcs_help_0_page',
     'page arguments' => array(2, 3),
     'file' => 'help.inc',
@@ -1885,8 +1866,8 @@ function mfcs_hook_menu_help(&$items, $module_path) {
   );
 
   $items['requests/help-0/%/%/%'] = array(
-    'title' => "Help",
-    'description' => "Online Documentation",
+    'title' => 'Help',
+    'description' => 'Online Documentation',
     'page callback' => 'mfcs_help_0_page',
     'page arguments' => array(2, 3, 4),
     'file' => 'help.inc',
@@ -1900,8 +1881,8 @@ function mfcs_hook_menu_help(&$items, $module_path) {
   // @todo: provide custom pdf downloading for help pages
   /*
   $items['requests/pdf-0/help'] = array(
-    'title' => "Help PDF",
-    'description' => "Download Help PDF",
+    'title' => 'Help PDF',
+    'description' => 'Download Help PDF',
     'page callback' => 'mfcs_help_0_pdf_page',
     'page arguments' => array(),
     'file' => 'help.inc',
@@ -1914,8 +1895,8 @@ function mfcs_hook_menu_help(&$items, $module_path) {
   );
 
   $items['requests/pdf-0/help/%'] = array(
-    'title' => "Help PDF",
-    'description' => "Download Help PDF",
+    'title' => 'Help PDF',
+    'description' => 'Download Help PDF',
     'page callback' => 'mfcs_help_0_pdf_page',
     'page arguments' => array(3),
     'file' => 'help.inc',
@@ -1928,8 +1909,8 @@ function mfcs_hook_menu_help(&$items, $module_path) {
   );
 
   $items['requests/pdf-0/help/%/%'] = array(
-    'title' => "Help PDF",
-    'description' => "Download Help PDF",
+    'title' => 'Help PDF',
+    'description' => 'Download Help PDF',
     'page callback' => 'mfcs_help_0_pdf_page',
     'page arguments' => array(3, 4),
     'file' => 'help.inc',
@@ -1942,8 +1923,8 @@ function mfcs_hook_menu_help(&$items, $module_path) {
   );
 
   $items['requests/pdf-0/help/%/%/%'] = array(
-    'title' => "Help PDF",
-    'description' => "Download Help PDF",
+    'title' => 'Help PDF',
+    'description' => 'Download Help PDF',
     'page callback' => 'mfcs_help_0_pdf_page',
     'page arguments' => array(3, 4, 5),
     'file' => 'help.inc',
@@ -1964,35 +1945,35 @@ function mfcs_hook_cronapi() {
   $items = array();
 
   $items['mfcs_oracle_recache'] = array(
-    'title' => t("Recreate Oracle Cache"),
+    'title' => t('Recreate Oracle Cache'),
     'callback' => 'mfcs_oracle_recache_cron',
     'callback arguments' => array(),
     'enabled' => FALSE,
   );
 
   $items['mfcs_insurance_not_provided_alert'] = array(
-    'title' => t("Insurance Not Provided Alert"),
+    'title' => t('Insurance Not Provided Alert'),
     'callback' => 'mfcs_insurance_not_provided_alert_cron',
     'callback arguments' => array(),
     'enabled' => FALSE,
   );
 
   $items['mfcs_autocancel_old_requests'] = array(
-    'title' => t("Auto-Cancel Old Reqests"),
+    'title' => t('Auto-Cancel Old Reqests'),
     'callback' => 'mfcs_autocancel_old_requests_cron',
     'callback arguments' => array(),
     'enabled' => FALSE,
   );
 
   $items['mfcs_auto_block_accounts'] = array(
-    'title' => t("Auto-Block Accounts"),
+    'title' => t('Auto-Block Accounts'),
     'callback' => 'mfcs_auto_block_accounts_cron',
     'callback arguments' => array(),
     'enabled' => FALSE,
   );
 
   $items['mfcs_check_for_problems_requests'] = array(
-    'title' => t("Check for Problems - Requests"),
+    'title' => t('Check for Problems - Requests'),
     'callback' => 'mfcs_check_for_problems_requests_cron',
     'callback arguments' => array(),
     'enabled' => FALSE,

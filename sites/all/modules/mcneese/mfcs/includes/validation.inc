@@ -711,6 +711,14 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
               $passed = FALSE;
             }
             else {
+              if (!empty($location_state['dates']['time_stop'][$key])) {
+                $stop_value = strtotime($location_state['dates']['time_stop'][$key], $date_timestamp[$key]);
+
+                if ($start_timestamp[$key] == $stop_value) {
+                  form_set_error($path_string_prefix . '][dates][time_stop][' . $key, 'The start and stop times must not be the same.');
+                }
+              }
+
               $value = date($location_form['dates']['group_dates'][$key]['dates']['time_start'][$key]['#expected_format']['date'], $start_timestamp[$key]);
             }
           }

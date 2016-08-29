@@ -1051,7 +1051,7 @@ function mfcs_request_troubleshoot_0_locations_edit_name_form($form, &$form_stat
 
   mfcs_add_canonical_headers('requests/troubleshoot-0/locations/' . $location_id . '/edit');
 
-  $page_title = "Troubleshooting Tools - Locations - Edit Name";
+  $page_title = "Troubleshooting - Locations - Edit Name";
   drupal_set_title($page_title);
 
   $user = cf_current_user();
