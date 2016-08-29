@@ -1945,7 +1945,7 @@ function mfcs_request_problems_0_request_form($form, &$form_state, $problem_id) 
 
   mfcs_add_canonical_headers('requests/problems-0/requests/request/' . $problem_id);
 
-  $problem_results = mfcs_miscellaneous_problems_request_load($problem_id, TRUE);
+  $problem_results = mfcs_miscellaneous_problems_request_load($problem_id, TRUE, TRUE);
   if (empty($problem_results)) {
     drupal_not_found();
     drupal_exit();
@@ -1964,6 +1964,7 @@ function mfcs_request_problems_0_request_form($form, &$form_state, $problem_id) 
   unset($problem_results);
 
   $request_problems_by_id = mfcs_get_request_problems_list_options(NULL, FALSE, TRUE);
+  $status_options = mfcs_get_request_status_list_options(NULL, FALSE, TRUE);
 
   $problem_code_name = 'Unknown';
   if (array_key_exists($problem->problem, $request_problems_by_id)) {
@@ -2061,12 +2062,14 @@ function mfcs_request_problems_0_request_form($form, &$form_state, $problem_id) 
 
 
   $form['markup']['#markup'] .= '<div class="request_problem-summary">';
-  $form['markup']['#markup'] .= '  <div class="request_problem-summary_row"><span class="request_problem-summary_row-label label-id">Problem ID:</span> <span class="request_problem-summary_row-value value-id">' . $problem_id . "</span></div>";
-  $form['markup']['#markup'] .= '  <div class="request_problem-summary_row"><span class="request_problem-summary_row-label label-request_id">Request ID:</span> <span class="request_problem-summary_row-value value-request_id"><a href="' . $base_path . 'requests/view-0/' . $problem->request_id . $url_arguments . '" class="operation-link operation-link-request" title="View Request ' . $problem->request_id . '">' . $problem->request_id . "</a></span></div>";
-  $form['markup']['#markup'] .= '  <div class="request_problem-summary_row"><span class="request_problem-summary_row-label label-problem">Problem:</span> <span class="request_problem-summary_row-value value-problem">' . $problem_code_name . "</span></div>";
-  $form['markup']['#markup'] .= '  <div class="request_problem-summary_row"><span class="request_problem-summary_row-label label-date_detected">Date Detected:</span> <span class="request_problem-summary_row-value value-date_detected">' . date("l, F j, Y h:i:s a", $problem->date) . "</span></div>";
-  $form['markup']['#markup'] .= '  <div class="request_problem-summary_row"><span class="request_problem-summary_row-label label-ignored">Ignored:</span> <span class="request_problem-summary_row-value value-ignored">' . (isset($problem->ignore) && $problem->ignore == 1 ? "Yes" : "No") . "</span></div>";
-  $form['markup']['#markup'] .= '  <div class="request_problem-summary_row"><span class="request_problem-summary_row-label label-reason">Reason:</span> <span class="request_problem-summary_row-value value-reason">' . (isset($problem->reason) ? $problem->reason : '') . "</span></div>";
+  $form['markup']['#markup'] .= '  <div class="request_problem-summary_row"><span class="request_problem-summary_row-label label-id">Problem ID:</span> <span class="request_problem-summary_row-value value-id">' . $problem_id . '</span></div>';
+  $form['markup']['#markup'] .= '  <div class="request_problem-summary_row"><span class="request_problem-summary_row-label label-request_id">Request ID:</span> <span class="request_problem-summary_row-value value-request_id">' . $problem->request_id . '</span></div>';
+  $form['markup']['#markup'] .= '  <div class="request_problem-summary_row"><span class="request_problem-summary_row-label label-request_title">Request Title:</span> <span class="request_problem-summary_row-value value-request_title"><a href="' . $base_path . 'requests/view-0/' . $problem->request_id . $url_arguments . '" class="operation-link operation-link-request">' . $problem->request_title . '</a></span></div>';
+  $form['markup']['#markup'] .= '  <div class="request_problem-summary_row"><span class="request_problem-summary_row-label label-request_title">Request Status:</span> <span class="request_problem-summary_row-value value-request_status">' . (array_key_exists($problem->request_status, $status_options) ? $status_options[$problem->request_status] : 'Unknown') . '</span></div>';
+  $form['markup']['#markup'] .= '  <div class="request_problem-summary_row"><span class="request_problem-summary_row-label label-problem">Problem:</span> <span class="request_problem-summary_row-value value-problem">' . $problem_code_name . '</span></div>';
+  $form['markup']['#markup'] .= '  <div class="request_problem-summary_row"><span class="request_problem-summary_row-label label-date_detected">Date Detected:</span> <span class="request_problem-summary_row-value value-date_detected">' . date('l, F j, Y h:i:s a', $problem->date) . '</span></div>';
+  $form['markup']['#markup'] .= '  <div class="request_problem-summary_row"><span class="request_problem-summary_row-label label-ignored">Ignored:</span> <span class="request_problem-summary_row-value value-ignored">' . (isset($problem->ignore) && $problem->ignore == 1 ? 'Yes' : 'No') . '</span></div>';
+  $form['markup']['#markup'] .= '  <div class="request_problem-summary_row"><span class="request_problem-summary_row-label label-reason">Reason:</span> <span class="request_problem-summary_row-value value-reason">' . (isset($problem->reason) ? $problem->reason : '') . '</span></div>';
   $form['markup']['#markup'] .= '</div>';
 
   $form['markup']['#markup'] .= '<br>';
@@ -2148,6 +2151,45 @@ function mfcs_request_problems_0_request_form($form, &$form_state, $problem_id) 
     $form['markup']['#markup'] .= 'The <strong>' . $form['actions']['action']['#options']['rebuild_request_cache'] . '</strong> action should fix this issue by rebuilding the cache associated with the specific request.' . '<br>';
     $form['markup']['#markup'] .= '<br>';
   }
+  elseif ($problem->problem == MFCS_REQUEST_PROBLEM_HOLIDAY) {
+    $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where the request is assigned on the same date as a holiday.' . '<br>';
+    $form['markup']['#markup'] .= 'This is not necesserily a problem because some events may appropriately happen on holidays.' . '<br>';
+    $form['markup']['#markup'] .= '<br>';
+
+    $details = unserialize($problem->details);
+    $holiday_date = reset($details['dates']);
+    $form['markup']['#markup'] .= '<strong>Holiday:</strong> <a href="' . $base_path . 'requests/holiday-0/view/' . $details['holiday']['year'] . '/' . $details['holiday']['id'] . $url_arguments . '">' . check_plain($details['holiday']['title']) . '</a><br>';
+    $form['markup']['#markup'] .= '<strong>Date of Holiday:</strong> ' . check_plain(date(MFCS_DATE_FORMAT_DATE, $holiday_date)) . '<br>';
+    unset($holiday_date);
+    unset($details);
+  }
+  elseif ($problem->problem == MFCS_REQUEST_PROBLEM_UNAVAILABLE) {
+    $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where the request is assigned during times in which a given room is unavailable.' . '<br>';
+    $form['markup']['#markup'] .= '<br>';
+
+    $details = unserialize($problem->details);
+
+    $form['markup']['#markup'] .= '<strong>Unavailability:</strong><ul>';
+    foreach ($details['unavailabilities'] as $unavailability) {
+      $unavailability_date_start = $unavailability['date_start'];
+      $unavailability_date_stop = $unavailability['date_stop'];
+
+      $date_string = 'Unknown';
+      if ($unavailability_date_start == strtotime('midnight today', $unavailability_date_start) && $unavailability_date_stop == strtotime('midnight tomorrow', $unavailability_date_start)) {
+        $date_string = check_plain(date(MFCS_DATE_FORMAT_DATE, $unavailability_date_start));
+      }
+      else {
+        $date_string = check_plain(date(MFCS_DATE_FORMAT_DATE_TIME, $unavailability_date_start)) . ' to ' . check_plain(date(MFCS_DATE_FORMAT_DATE_TIME, $unavailability_date_stop));
+      }
+      unset($unavailability_date_start);
+      unset($unavailability_date_stop);
+
+      $form['markup']['#markup'] .= '<li><a href="' . $base_path . 'requests/unavailable-0/view/' . $unavailability['year'] . '/' . $details['room_id']  . '/' . $unavailability['id'] . $url_arguments . '">' . check_plain($unavailability['title']) . '</a> (' . $date_string .')</li>';
+    }
+    $form['markup']['#markup'] .= '</ul>';
+    unset($date_string);
+    unset($details);
+  }
 
   return $form;
 }
@@ -2176,16 +2218,16 @@ function mfcs_request_problems_0_request_form_validate($form, &$form_state) {
   if (!isset($form['form']['problem_id']['#value'])) {
     // should never happen.
     $user = cf_current_user();
-    form_set_error('', "Invalid problem data detected, cannot continue.");
-    watchdog(MFCS_WATCHDOG_ID, "Unable to submit request problems form because the problem id is missing or invalid, user: @user_id.", array('@user_id' => $user->uid), WATCHDOG_ERROR);
+    form_set_error('', 'Invalid problem data detected, cannot continue.');
+    watchdog(MFCS_WATCHDOG_ID, 'Unable to submit request problems form because the problem id is missing or invalid, user: @user_id.', array('@user_id' => $user->uid), WATCHDOG_ERROR);
     return;
   }
 
   if (!isset($form['form']['problem']['#value']) || !is_object($form['form']['problem']['#value'])) {
     // should never happen.
     $user = cf_current_user();
-    form_set_error('', "Invalid problem data detected, cannot continue.");
-    watchdog(MFCS_WATCHDOG_ID, "Unable to submit request problems form because the problem object is missing or invalid, user: @user_id, problem_id: @problem_id.", array('@user_id' => $user->uid, '@problem_id' => $form['form']['problem_id']), WATCHDOG_ERROR);
+    form_set_error('', 'Invalid problem data detected, cannot continue.');
+    watchdog(MFCS_WATCHDOG_ID, 'Unable to submit request problems form because the problem object is missing or invalid, user: @user_id, problem_id: @problem_id.', array('@user_id' => $user->uid, '@problem_id' => $form['form']['problem_id']), WATCHDOG_ERROR);
     return;
   }
 

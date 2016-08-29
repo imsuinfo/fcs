@@ -418,6 +418,8 @@ define('MFCS_REQUEST_PROBLEM_ROOM', 7); // room no longer exists, is disabled, o
 define('MFCS_REQUEST_PROBLEM_BUILDING', 8); // building no longer exists, is disabled, or is otherwise invalid.
 define('MFCS_REQUEST_PROBLEM_LOCATION', 9); // location no longer exists, is disabled, or is otherwise invalid.
 define('MFCS_REQUEST_PROBLEM_CACHE_REQUEST', 10); // The mfcs_requests caches are inconsistend with the mfcs_current data.
+define('MFCS_REQUEST_PROBLEM_HOLIDAY', 11); // The request is assigned on a holiday, this 'may' be a problem.
+define('MFCS_REQUEST_PROBLEM_UNAVAILABLE', 12); // The request is assigned on a date in which the given room is unavailable according to the unavailability table.
 
 /**
  * Define codes that represent what the e-mail represents.

@@ -1201,6 +1201,7 @@ function mfcs_request_unavailability_0_copy_form_validate($form, &$form_state) {
  */
 function mfcs_request_unavailability_0_copy_form_submit($form, &$form_state) {
   global $mfcs_determined;
+  global $base_path;
 
   $url_arguments = '';
   if (!empty($mfcs_determined['complete'])) {
@@ -1243,6 +1244,7 @@ function mfcs_request_unavailability_0_copy_form_submit($form, &$form_state) {
   }
 
   $unavailabilities = mfcs_get_unavailabilities($year_previous, $room_id, NULL, NULL, $enabled);
+  $ids = array();
 
   $transaction = db_transaction();
   $success = TRUE;
@@ -1283,6 +1285,7 @@ function mfcs_request_unavailability_0_copy_form_submit($form, &$form_state) {
 
         if (is_numeric($id)) {
           $id = (int) $id;
+          $ids[$id] = $id;
         }
 
         // write to the log.
@@ -1296,7 +1299,6 @@ function mfcs_request_unavailability_0_copy_form_submit($form, &$form_state) {
         $query->fields($fields);
         $query->execute();
 
-        unset($id);
         unset($current_date);
       }
     }
@@ -1320,14 +1322,27 @@ function mfcs_request_unavailability_0_copy_form_submit($form, &$form_state) {
   }
 
   if (!$success) {
-    form_set_error('form', "An error occurred while trying to copy the unavailabilities. Please contact the support staff.");
-    watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to copy a unavailabilities.", array(), WATCHDOG_ERROR);
+    form_set_error('form', 'An error occurred while trying to copy the unavailabilities. Please contact the support staff.');
+    watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to copy a unavailabilities.', array(), WATCHDOG_ERROR);
 
     $form_state['rebuild'] = TRUE;
     $form_state['redirect'] = FALSE;
     $form_state['submitted'] = FALSE;
 
     return;
+  }
+
+  // report any detected unavailability to request conflicts.
+  if (!empty($ids)) {
+    $conflicts = mfcs_unavailability_rooms_conflicts($ids);
+    if (!empty($conflicts)) {
+      $conflict_message = 'Warning: the following requests are scheduled on unavailable dates:<ul>';
+      foreach ($conflicts as $conflict) {
+        $conflict_message .= '<li><a href="' . $base_path . 'requests/view-0/' . $conflict['id'] . $url_arguments . '">' . check_plain($conflict['title']) . '</a></li>';
+      }
+      $conflict_message .= '</ul>';
+      drupal_set_message($conflict_message, 'warning');
+    }
   }
 
   // redirect after submitting.
@@ -1877,6 +1892,7 @@ function mfcs_request_unavailability_0_edit_form_validate($form, &$form_state) {
  */
 function mfcs_request_unavailability_0_edit_form_submit($form, &$form_state) {
   global $mfcs_determined;
+  global $base_path;
 
   $url_arguments = '';
   if (!empty($mfcs_determined['complete'])) {
@@ -2063,6 +2079,19 @@ function mfcs_request_unavailability_0_edit_form_submit($form, &$form_state) {
     $form_state['submitted'] = FALSE;
 
     return;
+  }
+
+  // report any detected unavailability to request conflicts.
+  if (!empty($id)) {
+    $conflicts = mfcs_unavailability_rooms_conflicts($id);
+    if (!empty($conflicts)) {
+      $conflict_message = 'Warning: the following requests are scheduled on unavailable dates:<ul>';
+      foreach ($conflicts as $conflict) {
+        $conflict_message .= '<li><a href="' . $base_path . 'requests/view-0/' . $conflict['id'] . $url_arguments . '">' . check_plain($conflict['title']) . '</a></li>';
+      }
+      $conflict_message .= '</ul>';
+      drupal_set_message($conflict_message, 'warning');
+    }
   }
 
   // redirect after submitting.
@@ -2564,4 +2593,118 @@ function mfcs_unavailability_rooms($user_id = NULL) {
   }
 
   return $rows;
+}
+
+/**
+ * Check for requests where the request is assigned on the same day and time as an unavailability.
+ *
+ * @param int|array $unavailability_id
+ *   The id or an array of ids to to limit conflict checks by.
+ *
+ * @return array|bool
+ *   An array containing requests that are in conflict on success.
+ *   FALSE is returned on error.
+ *
+ * @see: mfcs_requests_set_problem()
+ */
+function mfcs_unavailability_rooms_conflicts($unavailability_id) {
+  if (is_array($unavailability_id)) {
+    foreach ($unavailability_id as $id) {
+      if (!cf_is_integer($id)) {
+        cf_error::invalid_array('unavailability_id');
+        return FALSE;
+      }
+    }
+    unset($id);
+  }
+  elseif (!cf_is_integer($unavailability_id)) {
+    cf_error::invalid_integer('unavailability_id');
+    return FALSE;
+  }
+
+  $requests = array();
+
+  try {
+    $arguments = array();
+
+    $not_these_status = array(
+      MFCS_REQUEST_STATUS_DELETED,
+      MFCS_REQUEST_STATUS_CLOSED_DENIED,
+      MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE,
+      MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK,
+      MFCS_REQUEST_STATUS_CANCELLED,
+      MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED,
+    );
+
+    $arguments[':status_1'] = MFCS_REQUEST_STATUS_DELETED;
+    $arguments[':status_2'] = MFCS_REQUEST_STATUS_CLOSED_DENIED;
+    $arguments[':status_3'] = MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE;
+    $arguments[':status_4'] = MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK;
+    $arguments[':status_5'] = MFCS_REQUEST_STATUS_CANCELLED;
+    $arguments[':status_6'] = MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED;
+    $arguments[':unavailability_id'] = $unavailability_id;
+
+    $query_string = 'with unavailabilities as ( ';
+    $query_string .= 'select mu.id as unavailability_id, mu.title as unavailability_title, mu.type as unavailability_type, mu.year as unavailability_year, mu.date_start as unavailability_date_start, mu.date_stop as unavailability_date_stop, mu.title, mer.id, mer.title, mer.location as location_id, mer.building as building_id, mer.room as room_id, mer.status ';
+    $query_string .= 'from mfcs_unavailability mu ';
+    $query_string .= 'inner join mfcs_requests mer on (mu.room_id = mer.room and mu.building_id = mer.building) ';
+    $query_string .= 'where mer.status not in (:status_1, :status_2, :status_3, :status_4, :status_5, :status_6) ';
+    if (is_array($unavailability_id)) {
+      $query_string .= 'and mu.id in (:unavailability_id) ';
+    }
+    else {
+      $query_string .= 'and mu.id = :unavailability_id ';
+    }
+    $query_string .= ' and mu.deleted = 0 and mu.enabled = 1';
+    $query_string .= ') ';
+
+    $query_string .= 'select u.*, mfdd.delta, mfdd.value as date, mfdts.value as time_start, mfdtsp.value as time_stop from unavailabilities u ';
+    $query_string .= 'inner join mfcs_current mc on (u.id = mc.request_id) ';
+    $query_string .= 'inner join mfcs_field_dates_date mfdd on (mc.request_id = mfdd.request_id and mc.dates_date = mfdd.revision) ';
+    $query_string .= 'left join mfcs_field_dates_time_start mfdts on (mc.request_id = mfdts.request_id and mc.dates_time_start = mfdts.revision and mfdd.delta = mfdts.delta) ';
+    $query_string .= 'left join mfcs_field_dates_time_stop mfdtsp on (mc.request_id = mfdtsp.request_id and mc.dates_time_stop = mfdtsp.revision and mfdts.delta = mfdtsp.delta) ';
+
+    $query_string .= 'where (mfdts.value is null and mfdtsp.value is null and (mfdd.value >= u.unavailability_date_start and mfdd.value < u.unavailability_date_stop)) or ';
+    $query_string .= '( not (mfdts.value is null and mfdtsp.value is null) and ( ';
+    $query_string .= '(u.unavailability_date_start < mfdts.value and u.unavailability_date_stop > mfdts.value) or (u.unavailability_date_start >= mfdts.value and u.unavailability_date_start < mfdtsp.value) ';
+    $query_string .= ') ) ';
+
+    $results = db_query($query_string, $arguments)->fetchAll();
+    if (!is_array($results)) {
+      return FALSE;
+    }
+
+    if (!empty($results)) {
+      foreach ($results as $result) {
+        if (!array_key_exists($result->id, $requests)) {
+          $requests[(int) $result->id] = array(
+            'id' => (int) $result->id,
+            'title' => $result->title,
+            'location' => (int) $result->location_id,
+            'building' => (int) $result->building_id,
+            'room' => (int) $result->room_id,
+            'dates' => array(),
+          );
+        }
+
+        $requests[$result->id]['dates'][(int) $result->delta] = array(
+          'date' => $result->date,
+          'time_start' => $result->time_start,
+          'time_stop' => $result->time_stop,
+        );
+      }
+    }
+  }
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+
+  return $requests;
 }

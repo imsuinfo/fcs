@@ -646,6 +646,8 @@ function mfcs_request_holiday_0_copy_form_submit($form, &$form_state) {
 
   $holidays = mfcs_get_holidays($year_previous, NULL, NULL, $enabled);
 
+  $holidays_to_check = array();
+
   $transaction = db_transaction();
   $success = TRUE;
   try {
@@ -675,6 +677,7 @@ function mfcs_request_holiday_0_copy_form_submit($form, &$form_state) {
 
         if (is_numeric($id)) {
           $id = (int) $id;
+          $holidays_to_check[$id] = $holiday->title;
         }
 
         // write to the log.
@@ -720,6 +723,22 @@ function mfcs_request_holiday_0_copy_form_submit($form, &$form_state) {
     $form_state['submitted'] = FALSE;
 
     return;
+  }
+
+  // search for and report any holiday conflicts
+  global $base_path;
+  foreach ($holidays_to_check as $holiday_id => $holiday_title) {
+    $conflicts = mfcs_request_holiday_0_check_for_conlficts($holiday_id);
+    if (!empty($conflicts)) {
+      $warning = 'The holiday, <strong>' . check_plain($holiday_title) . ',</strong>, is in conflict with the following requests:<br><ul class="holiday_conflict-warning-list">';
+      foreach ($conflicts as $conflict) {
+        $warning .= '<li class="holiday_conflict-warning-list-item"><a href="' . $base_path . 'requests/view-0/' . $conflict->id . $url_arguments . '">' . check_plain($conflict->title) . '</a></li>';
+      }
+      $warning .= '</ul>';
+
+      drupal_set_message($warning, 'warning');
+      unset($warning);
+    }
   }
 
   // redirect after submitting.
@@ -1044,9 +1063,11 @@ function mfcs_request_holiday_0_edit_form_submit($form, &$form_state) {
     $clicked_id = $form_state['triggering_element']['#id'];
   }
 
+  $holiday_id = NULL;
   $holiday = NULL;
   if (isset($form['form']['holiday']['#value']->id)) {
     $holiday = $form['form']['holiday']['#value'];
+    $holiday_id = (int) $form['form']['holiday']['#value']->id;
   }
 
   $instance = mfcs_instance();
@@ -1100,10 +1121,7 @@ function mfcs_request_holiday_0_edit_form_submit($form, &$form_state) {
       }
     }
 
-    $id = NULL;
     if (is_object($holiday)) {
-      $id = (int) $holiday->id;
-
       if ($form['form']['copy']['#value']) {
         $fields['created'] = $fields['updated'];
 
@@ -1112,7 +1130,7 @@ function mfcs_request_holiday_0_edit_form_submit($form, &$form_state) {
         $id = $query->execute();
 
         if (is_numeric($id)) {
-          $id = (int) $id;
+          $holiday_id = (int) $id;
         }
 
         $change = 'copied from holiday ' . $holiday->id . '.';
@@ -1163,7 +1181,7 @@ function mfcs_request_holiday_0_edit_form_submit($form, &$form_state) {
       $id = $query->execute();
 
       if (is_numeric($id)) {
-        $id = (int) $id;
+        $holiday_id = (int) $id;
       }
 
       $change = 'created.';
@@ -1171,7 +1189,7 @@ function mfcs_request_holiday_0_edit_form_submit($form, &$form_state) {
 
     if (!is_null($change)) {
       $fields = array();
-      $fields['holiday_id'] = $id;
+      $fields['holiday_id'] = $holiday_id;
       $fields['date'] = mfcs_instance();
       $fields['user_id'] = $user->uid;
       $fields['change'] = $change;
@@ -1216,10 +1234,25 @@ function mfcs_request_holiday_0_edit_form_submit($form, &$form_state) {
     return;
   }
 
+  // search for and report any holiday conflicts
+  $conflicts = mfcs_request_holiday_0_check_for_conlficts($holiday_id);
+  if (!empty($conflicts)) {
+    global $base_path;
+
+    $warning = 'The holiday, <strong>' . check_plain($form_state['values']['holiday']['title']) . ',</strong>, is in conflict with the following requests:<br><ul class="holiday_conflict-warning-list">';
+    foreach ($conflicts as $conflict) {
+      $warning .= '<li class="holiday_conflict-warning-list-item"><a href="' . $base_path . 'requests/view-0/' . $conflict->id . $url_arguments . '">' . check_plain($conflict->title) . '</a></li>';
+    }
+    $warning .= '</ul>';
+
+    drupal_set_message($warning, 'warning');
+    unset($warning);
+  }
+
   // redirect after submitting.
   if (empty($form_state['values']['redirect_to'])) {
-    if (is_numeric($id)) {
-      $form_state['redirect'] = mfcs_build_redirect_array('requests/holiday-0/view/' . $form['form']['year']['#value'] . '/' . $id);
+    if (is_numeric($holiday_id)) {
+      $form_state['redirect'] = mfcs_build_redirect_array('requests/holiday-0/view/' . $form['form']['year']['#value'] . '/' . $holiday_id);
     }
     else {
       $form_state['redirect'] = mfcs_build_redirect_array('requests/holiday-0/' . $form['form']['year']['#value']);
@@ -1483,6 +1516,69 @@ function mfcs_request_holiday_0_delete_form_submit($form, &$form_state) {
   else {
     $form_state['redirect'] = $form_state['values']['redirect_to'];
   }
+}
+
+/**
+ * Find any requests that conflict with the specified holiday.
+ *
+ * @param int $holiday_id
+ *   The id of the holiday.
+ *
+ * @return array|FALSE
+ *   An array of requests whose dates conflict with the specified holiday.
+ *   FALSE is returned on error.
+ */
+function mfcs_request_holiday_0_check_for_conlficts($holiday_id) {
+  if (!cf_is_integer($holiday_id)) {
+    cf_error::invalid_integer('holiday_id');
+    return FALSE;
+  }
+
+  try {
+    $query = db_select('mfcs_requests', 'mer');
+    $query->innerJoin('mfcs_current', 'mc', 'mer.id = mc.request_id');
+    $query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mc.request_id = mfdd.request_id AND mc.dates_date = mfdd.revision');
+    $query->innerJoin('mfcs_holiday', 'mh', 'mfdd.value = mh.date');
+
+    $query->addField('mer', 'id', 'id');
+    $query->addField('mer', 'title', 'title');
+    $query->addField('mer', 'location', 'location_id');
+    $query->addField('mer', 'building', 'building_id');
+    $query->addField('mer', 'room', 'room_id');
+
+    $query->addField('mfdd', 'delta', 'delta');
+    $query->addField('mfdd', 'value', 'date');
+
+    $query->condition('mh.id', $holiday_id);
+
+    $not_these_status = array(
+      MFCS_REQUEST_STATUS_DELETED,
+      MFCS_REQUEST_STATUS_CLOSED_DENIED,
+      MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE,
+      MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK,
+      MFCS_REQUEST_STATUS_CANCELLED,
+      MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED,
+    );
+
+    $query->condition('mer.status', $not_these_status, 'NOT IN');
+    $query->condition('mh.enabled', 1);
+    $query->condition('mh.deleted', 0);
+
+    $results = $query->execute()->fetchAll();
+    if (!is_array($results)) {
+      return FALSE;
+    }
+  }
+  catch (Error $e) {
+    cf_error::on_exception($e);
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
+    return FALSE;
+  }
+
+  return $results;
 }
 
 /**

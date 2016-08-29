@@ -898,6 +898,8 @@ function mfcs_get_request_problems_list_options($option = NULL, $hidden = FALSE,
   $options_all[MFCS_REQUEST_PROBLEM_BUILDING] = 'Building Invalid';
   $options_all[MFCS_REQUEST_PROBLEM_LOCATION] = 'Location Invalid';
   $options_all[MFCS_REQUEST_PROBLEM_CACHE_REQUEST] = 'Cache Invalid';
+  $options_all[MFCS_REQUEST_PROBLEM_HOLIDAY] = 'Holiday Conflict';
+  $options_all[MFCS_REQUEST_PROBLEM_UNAVAILABLE] = 'Room Unavailable';
 
   if ($option == 'select') {
     $options[''] = '- Select -';
