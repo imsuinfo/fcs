@@ -2664,7 +2664,7 @@ function mfcs_unavailability_rooms_conflicts($unavailability_id) {
     $query_string .= 'left join mfcs_field_dates_time_start mfdts on (mc.request_id = mfdts.request_id and mc.dates_time_start = mfdts.revision and mfdd.delta = mfdts.delta) ';
     $query_string .= 'left join mfcs_field_dates_time_stop mfdtsp on (mc.request_id = mfdtsp.request_id and mc.dates_time_stop = mfdtsp.revision and mfdts.delta = mfdtsp.delta) ';
 
-    $query_string .= 'where (mfdts.value is null and mfdtsp.value is null and (mfdd.value >= u.unavailability_date_start and mfdd.value < u.unavailability_date_stop)) or ';
+    $query_string .= 'where (mfdts.value is null and mfdtsp.value is null and ((u.unavailability_date_start < mfdd.value and u.unavailability_date_stop > mfdts.value) or (u.unavailability_date_start >= mfdd.value and u.unavailability_date_start < (mfdd.value + 86400)))) or ';
     $query_string .= '( not (mfdts.value is null and mfdtsp.value is null) and ( ';
     $query_string .= '(u.unavailability_date_start < mfdts.value and u.unavailability_date_stop > mfdts.value) or (u.unavailability_date_start >= mfdts.value and u.unavailability_date_start < mfdtsp.value) ';
     $query_string .= ') ) ';
