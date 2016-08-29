@@ -7511,8 +7511,10 @@ function mfcs_check_room_availability($room, $dates, $time_start, $time_stop, $r
     }
 
     $unavailabilities = mfcs_get_unavailabilities($year, $room, $start_time, $stop_time);
-    foreach ($unavailabilities as $unavailability) {
-      $matched_requests['unavailable'][$unavailability->id] = $unavailability;
+    if (is_array($unavailabilities)) {
+      foreach ($unavailabilities as $unavailability) {
+        $matched_requests['unavailable'][$unavailability->id] = $unavailability;
+      }
     }
     unset($unavailability);
     unset($unavailabilities);
