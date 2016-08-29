@@ -796,6 +796,17 @@ function mfcs_request_unavailability_0_page($year, $room_id, $unavailability_id)
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
+  // report any detected unavailability to request conflicts.
+  $conflicts = mfcs_unavailability_rooms_conflicts($unavailability_id);
+  if (!empty($conflicts)) {
+    $conflict_message = 'Warning: the following requests are scheduled on unavailable dates:<ul>';
+    foreach ($conflicts as $conflict) {
+      $conflict_message .= '<li><a href="' . $base_path . 'requests/view-0/' . $conflict['id'] . $url_arguments . '">' . check_plain($conflict['title']) . '</a></li>';
+    }
+    $conflict_message .= '</ul>';
+    drupal_set_message($conflict_message, 'warning');
+  }
+
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
   $unavailability_types = mfcs_get_unavailability_type_list_options('combined');
 
@@ -1244,7 +1255,6 @@ function mfcs_request_unavailability_0_copy_form_submit($form, &$form_state) {
   }
 
   $unavailabilities = mfcs_get_unavailabilities($year_previous, $room_id, NULL, NULL, $enabled);
-  $ids = array();
 
   $transaction = db_transaction();
   $success = TRUE;
@@ -1285,7 +1295,6 @@ function mfcs_request_unavailability_0_copy_form_submit($form, &$form_state) {
 
         if (is_numeric($id)) {
           $id = (int) $id;
-          $ids[$id] = $id;
         }
 
         // write to the log.
@@ -1299,6 +1308,7 @@ function mfcs_request_unavailability_0_copy_form_submit($form, &$form_state) {
         $query->fields($fields);
         $query->execute();
 
+        unset($id);
         unset($current_date);
       }
     }
@@ -1330,19 +1340,6 @@ function mfcs_request_unavailability_0_copy_form_submit($form, &$form_state) {
     $form_state['submitted'] = FALSE;
 
     return;
-  }
-
-  // report any detected unavailability to request conflicts.
-  if (!empty($ids)) {
-    $conflicts = mfcs_unavailability_rooms_conflicts($ids);
-    if (!empty($conflicts)) {
-      $conflict_message = 'Warning: the following requests are scheduled on unavailable dates:<ul>';
-      foreach ($conflicts as $conflict) {
-        $conflict_message .= '<li><a href="' . $base_path . 'requests/view-0/' . $conflict['id'] . $url_arguments . '">' . check_plain($conflict['title']) . '</a></li>';
-      }
-      $conflict_message .= '</ul>';
-      drupal_set_message($conflict_message, 'warning');
-    }
   }
 
   // redirect after submitting.
@@ -2079,19 +2076,6 @@ function mfcs_request_unavailability_0_edit_form_submit($form, &$form_state) {
     $form_state['submitted'] = FALSE;
 
     return;
-  }
-
-  // report any detected unavailability to request conflicts.
-  if (!empty($id)) {
-    $conflicts = mfcs_unavailability_rooms_conflicts($id);
-    if (!empty($conflicts)) {
-      $conflict_message = 'Warning: the following requests are scheduled on unavailable dates:<ul>';
-      foreach ($conflicts as $conflict) {
-        $conflict_message .= '<li><a href="' . $base_path . 'requests/view-0/' . $conflict['id'] . $url_arguments . '">' . check_plain($conflict['title']) . '</a></li>';
-      }
-      $conflict_message .= '</ul>';
-      drupal_set_message($conflict_message, 'warning');
-    }
   }
 
   // redirect after submitting.
