@@ -659,6 +659,13 @@ function mfcs_get_request_fields($form, &$form_state) {
     $fields['message']['#markup'] .= '</div>';
   }
 
+
+  // Fieldset: Hidden Fields
+  mfcs_get_request_field_insurance_affiliated($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_insurance_contractor($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_insurance_provided($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_insurance_unaffiliated($form, $form_state, $fields, $request_state, $ps);
+
   return $fields;
 }
 
@@ -6392,6 +6399,102 @@ function mfcs_get_request_field_additional($form, &$form_state, &$fields, &$requ
         '#value' => $value,
       );
     }
+  }
+
+  return $values;
+}
+
+/**
+ * Process and build a specific form field.
+ */
+function mfcs_get_request_field_insurance_affiliated($form, &$form_state, &$fields, &$request_state, $ps) {
+  $values = array(0 => NULL);
+
+  if (isset($request_state['insurance']) && array_key_exists('affiliated', $request_state['insurance'])) {
+    $values = $request_state['insurance']['affiliated'];
+  }
+  else {
+    $values[0] = MFCS_INSURANCE_REQUIRED_NOT;
+  }
+
+  foreach ($values as $key => $value) {
+    $fields['insurance']['affiliated'][$key] = array(
+      '#id' => 'field-request-insurance-affiliated-' . $key,
+      '#type' => 'value',
+      '#value' => empty($value) ? NULL : (int) $value,
+    );
+  }
+
+  return $values;
+}
+
+/**
+ * Process and build a specific form field.
+ */
+function mfcs_get_request_field_insurance_contractor($form, &$form_state, &$fields, &$request_state, $ps) {
+  $values = array(0 => NULL);
+
+  if (isset($request_state['insurance']) && array_key_exists('contractor', $request_state['insurance'])) {
+    $values = $request_state['insurance']['contractor'];
+  }
+  else {
+    $values[0] = MFCS_INSURANCE_REQUIRED_NOT;
+  }
+
+  foreach ($values as $key => $value) {
+    $fields['insurance']['contractor'][$key] = array(
+      '#id' => 'field-request-insurance-contractor-' . $key,
+      '#type' => 'value',
+      '#value' => empty($value) ? NULL : (int) $value,
+    );
+  }
+
+  return $values;
+}
+
+/**
+ * Process and build a specific form field.
+ */
+function mfcs_get_request_field_insurance_provided($form, &$form_state, &$fields, &$request_state, $ps) {
+  $values = array(0 => NULL);
+
+  if (isset($request_state['insurance']) && array_key_exists('provided', $request_state['insurance'])) {
+    $values = $request_state['insurance']['provided'];
+  }
+  else {
+    $values[0] = MFCS_INSURANCE_REQUIRED_NOT;
+  }
+
+  foreach ($values as $key => $value) {
+    $fields['insurance']['provided'][$key] = array(
+      '#id' => 'field-request-insurance-provided-' . $key,
+      '#type' => 'value',
+      '#value' => empty($value) ? NULL : (int) $value,
+    );
+  }
+
+  return $values;
+}
+
+/**
+ * Process and build a specific form field.
+ */
+function mfcs_get_request_field_insurance_unaffiliated($form, &$form_state, &$fields, &$request_state, $ps) {
+  $values = array(0 => NULL);
+
+  if (isset($request_state['insurance']) && array_key_exists('unaffiliated', $request_state['insurance'])) {
+    $values = $request_state['insurance']['unaffiliated'];
+  }
+  else {
+    $values[0] = MFCS_INSURANCE_REQUIRED_NOT;
+  }
+
+  foreach ($values as $key => $value) {
+    $fields['insurance']['unaffiliated'][$key] = array(
+      '#id' => 'field-request-insurance-unaffiliated-' . $key,
+      '#type' => 'value',
+      '#value' => empty($value) ? NULL : (int) $value,
+    );
   }
 
   return $values;

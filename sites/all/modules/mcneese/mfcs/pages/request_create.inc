@@ -577,15 +577,6 @@ function mfcs_request_create_0_form_validate($form, &$form_state) {
         $form_state['values']['form']['step'] = 'standard';
       }
       elseif ($clicked_id == 'submit-request-submit') {
-        // ensure insurance defaults are assigned (these fields are not normally editable/settable through the form created/edit/clone interface and must be manually initialized).
-        if (!isset($form_state['values']['request']['insurance'])) {
-          $structure = mfcs_table_structure();
-
-          foreach ($structure['insurance'] as $field_name => $field_settings) {
-            $form_state['values']['request']['insurance'][$field_name][0] = MFCS_INSURANCE_REQUIRED_NOT;
-          }
-        }
-
         $form_state['rebuild'] = FALSE;
       }
     }
