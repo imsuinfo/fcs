@@ -204,10 +204,6 @@ class ctools_context_required {
  */
 class ctools_context_optional extends ctools_context_required {
   var $required = FALSE;
-  function __construct() {
-    $args = func_get_args();
-    parent::__construct(NULL);
-  }
 
   /**
    * Add the 'empty' context which is possible for optional
