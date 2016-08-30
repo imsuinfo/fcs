@@ -475,6 +475,8 @@ function mfcs_request_users_0_view_page($user_id) {
   }
 
   $user = cf_current_user();
+  $is_requester = user_access('mfcs request', $user);
+  $is_reviewer = user_access('mfcs review', $user);
   $is_manager = user_access('mfcs manage', $user);
   $is_administer = user_access('mfcs administer', $user);
 
@@ -733,8 +735,8 @@ function mfcs_request_users_0_view_page($user_id) {
     $markup .= '<div class="view_user-item view_user-item-duplicate"><span class="item-information item-information-duplicate">' . $duplicate . '</span></div>';
   }
 
-  if ($is_administer) {
-    $markup .= '<div class="view_user-item view_user-item-view_profile no-print"><span class="item-information item-information-view_profile"><a href="' . $base_path . 'user/' . $account->uid . '">' . "View User Profile" . '</a></span></div>';
+  if ($is_manager || $is_administer || ($user->uid == $account->uid && ($is_requester || $is_reviewer))) {
+    $markup .= '<div class="view_user-item view_user-item-view_profile no-print"><span class="item-information item-information-view_profile"><a href="' . $base_path . 'user/' . $account->uid . '">View User Profile</a></span></div>';
   }
 
   $markup .= '</div>';
