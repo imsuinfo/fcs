@@ -72,6 +72,14 @@ function masquerade_install() {
     ->fields(array('weight' => -10))
     ->condition('name', 'masquerade')
     ->execute();
+
+  // postgresql-specific support for enforcing uid consistency.
+  if (db_driver() == 'pgsql') {
+    db_query('ALTER TABLE {masquerade} ADD CONSTRAINT uid_from_fkey FOREIGN KEY (uid_from) REFERENCES {users} (uid) ON UPDATE CASCADE ON DELETE CASCADE');
+    db_query('ALTER TABLE {masquerade} ADD CONSTRAINT uid_as_fkey FOREIGN KEY (uid_as) REFERENCES {users} (uid) ON UPDATE CASCADE ON DELETE CASCADE');
+    db_query('ALTER TABLE {masquerade_users} ADD CONSTRAINT uid_from_fkey FOREIGN KEY (uid_from) REFERENCES {users} (uid) ON UPDATE CASCADE ON DELETE CASCADE');
+    db_query('ALTER TABLE {masquerade_users} ADD CONSTRAINT uid_to_fkey FOREIGN KEY (uid_to) REFERENCES {users} (uid) ON UPDATE CASCADE ON DELETE CASCADE');
+  }
 }
 
 /**
