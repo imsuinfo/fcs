@@ -61,7 +61,16 @@ function ldap_user_install() {
   _ldap_user_install_update_authmap();
 
 
-
+  // postgresql-specific support for enforcing uid consistency.
+  if (db_driver() == 'pgsql') {
+    db_query('ALTER TABLE {field_data_ldap_user_current_dn} ADD CONSTRAINT entity_id_fkey FOREIGN KEY (entity_id) REFERENCES {users} (uid) ON UPDATE CASCADE ON DELETE CASCADE');
+    db_query('ALTER TABLE {field_data_ldap_user_last_checked} ADD CONSTRAINT entity_id_fkey FOREIGN KEY (entity_id) REFERENCES {users} (uid) ON UPDATE CASCADE ON DELETE CASCADE');
+    db_query('ALTER TABLE {field_data_ldap_user_ldap_exclude} ADD CONSTRAINT entity_id_fkey FOREIGN KEY (entity_id) REFERENCES {users} (uid) ON UPDATE CASCADE ON DELETE CASCADE');
+    db_query('ALTER TABLE {field_data_ldap_user_prov_entries} ADD CONSTRAINT entity_id_fkey FOREIGN KEY (entity_id) REFERENCES {users} (uid) ON UPDATE CASCADE ON DELETE CASCADE');
+    db_query('ALTER TABLE {field_data_ldap_user_puid} ADD CONSTRAINT entity_id_fkey FOREIGN KEY (entity_id) REFERENCES {users} (uid) ON UPDATE CASCADE ON DELETE CASCADE');
+    db_query('ALTER TABLE {field_data_ldap_user_puid_property} ADD CONSTRAINT entity_id_fkey FOREIGN KEY (entity_id) REFERENCES {users} (uid) ON UPDATE CASCADE ON DELETE CASCADE');
+    db_query('ALTER TABLE {field_data_ldap_user_puid_sid} ADD CONSTRAINT entity_id_fkey FOREIGN KEY (entity_id) REFERENCES {users} (uid) ON UPDATE CASCADE ON DELETE CASCADE');
+  }
 }
 
 function _ldap_user_install_update_authmap() {
@@ -422,7 +431,7 @@ function ldap_user_user_entity_fields() {
           'type' => 'hidden',
         ),
       ));
-  
+
   return $fields;
 }
 
