@@ -2310,55 +2310,55 @@ function mfcs_install() {
   db_query('ALTER TABLE {mfcs_taxonomy_reviewer_classification} ADD CONSTRAINT mfcs_taxonomy_reviewer_classification_deleted_check CHECK (deleted = 0 or deleted = 1)');
 
 
-  db_query('INSERT INTO mfcs_taxonomy_request_classification (id, machine_name, human_name, hidden) VALUES (' . (int) MFCS_REQUEST_CLASSIFICATION_NONE . ', \'none\', \'None\', 1)');
-  db_query('INSERT INTO mfcs_taxonomy_request_classification (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_CLASSIFICATION_STUDENT . ', \'student\', \'Student Organization\')');
-  db_query('INSERT INTO mfcs_taxonomy_request_classification (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_CLASSIFICATION_CAMPS . ', \'camps\', \'Camps\')');
-  db_query('INSERT INTO mfcs_taxonomy_request_classification (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_CLASSIFICATION_FACULTY . ', \'faculty\', \'Faculty / Staff / Atheletics\')');
-  db_query('INSERT INTO mfcs_taxonomy_request_classification (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_CLASSIFICATION_EXTERNAL . ', \'external\', \'External\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_classification} (id, machine_name, human_name, hidden) VALUES (' . (int) MFCS_REQUEST_CLASSIFICATION_NONE . ', \'none\', \'None\', 1)');
+  db_query('INSERT INTO {mfcs_taxonomy_request_classification} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_CLASSIFICATION_STUDENT . ', \'student\', \'Student Organization\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_classification} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_CLASSIFICATION_CAMPS . ', \'camps\', \'Camps\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_classification} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_CLASSIFICATION_FACULTY . ', \'faculty\', \'Faculty / Staff / Atheletics\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_classification} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_CLASSIFICATION_EXTERNAL . ', \'external\', \'External\')');
 
-  db_query('INSERT INTO mfcs_taxonomy_review_step (id, machine_name, human_name, hidden) VALUES (' . (int) MFCS_REVIEW_STEP_NONE . ', \'none\', \'None\', 1)');
-  db_query('INSERT INTO mfcs_taxonomy_review_step (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_STEP_CHANGES_REQUIRED . ', \'changes_required\', \'Changes Required\')');
-  db_query('INSERT INTO mfcs_taxonomy_review_step (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_STEP_COMPLETED . ', \'completed\', \'Completed\')');
-  db_query('INSERT INTO mfcs_taxonomy_review_step (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_STEP_FINAL_DECISION . ', \'final_decision\', \'Final Decision\')');
-  db_query('INSERT INTO mfcs_taxonomy_review_step (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_STEP_RELEASE_HOLD . ', \'release_hold\', \'Release Hold\')');
-  db_query('INSERT INTO mfcs_taxonomy_review_step (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_STEP_REVIEW . ', \'review\', \'Review\')');
-  db_query('INSERT INTO mfcs_taxonomy_review_step (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_STEP_REQUIREMENTS . ', \'requirements\', \'Requirements\')');
-  db_query('INSERT INTO mfcs_taxonomy_review_step (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_STEP_VENUE_AVAILABLE . ', \'venue_available\', \'Venue Available\')');
+  db_query('INSERT INTO {mfcs_taxonomy_review_step} (id, machine_name, human_name, hidden) VALUES (' . (int) MFCS_REVIEW_STEP_NONE . ', \'none\', \'None\', 1)');
+  db_query('INSERT INTO {mfcs_taxonomy_review_step} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_STEP_CHANGES_REQUIRED . ', \'changes_required\', \'Changes Required\')');
+  db_query('INSERT INTO {mfcs_taxonomy_review_step} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_STEP_COMPLETED . ', \'completed\', \'Completed\')');
+  db_query('INSERT INTO {mfcs_taxonomy_review_step} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_STEP_FINAL_DECISION . ', \'final_decision\', \'Final Decision\')');
+  db_query('INSERT INTO {mfcs_taxonomy_review_step} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_STEP_RELEASE_HOLD . ', \'release_hold\', \'Release Hold\')');
+  db_query('INSERT INTO {mfcs_taxonomy_review_step} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_STEP_REVIEW . ', \'review\', \'Review\')');
+  db_query('INSERT INTO {mfcs_taxonomy_review_step} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_STEP_REQUIREMENTS . ', \'requirements\', \'Requirements\')');
+  db_query('INSERT INTO {mfcs_taxonomy_review_step} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_STEP_VENUE_AVAILABLE . ', \'venue_available\', \'Venue Available\')');
 
-  db_query('INSERT INTO mfcs_taxonomy_reviewer_classification (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_NONE . ', \'none\', \'None');
-  db_query('INSERT INTO mfcs_taxonomy_reviewer_classification (id, machine_name, human_name, hidden) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR . ', \'system_administrator\', \'System Administrator\', 1)');
-  db_query('INSERT INTO mfcs_taxonomy_reviewer_classification (id, machine_name, human_name, hidden) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_MANAGER . ', \'manager\', \'Manager\', 1)');
-  db_query('INSERT INTO mfcs_taxonomy_reviewer_classification (id, machine_name, human_name, hidden) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_REQUESTER . ', \'requester\', \'Requester\', 1)');
-  db_query('INSERT INTO mfcs_taxonomy_reviewer_classification (id, machine_name, human_name, hidden) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_SYSTEM . ', \'system\', \'System\', 1)');
-  db_query('INSERT INTO mfcs_taxonomy_reviewer_classification (id, machine_name, human_name, hidden) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR . ', \'venue_cordinator\', \'Venue Coordinator\', 1)');
-  db_query('INSERT INTO mfcs_taxonomy_reviewer_classification (id, machine_name, human_name, hidden) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY . ', \'venue_cordinator_proxy\', \'Venue Coordinator (Proxy)\', 1)');
-  db_query('INSERT INTO mfcs_taxonomy_reviewer_classification (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_ADMINISTRATIVE_ACCOUNTING . ', \'administrative_accounting\', \'Administrative Accounting\')');
-  db_query('INSERT INTO mfcs_taxonomy_reviewer_classification (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_CUSTODIAL . ', \'custodial\', \'Custodial\')');
-  db_query('INSERT INTO mfcs_taxonomy_reviewer_classification (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_UNIVERSITY_EVENTS . ', \'university_events\', \'University Events\')');
-  db_query('INSERT INTO mfcs_taxonomy_reviewer_classification (id, machine_name, human_name, enabled) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_FACILITIES_CUSTODIAL . ', \'facilities_custodial\', \'Facilities / Custodial Services\', 0)');
-  db_query('INSERT INTO mfcs_taxonomy_reviewer_classification (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_FACILITIES . ', \'facilities\', \'Facilities\')');
-  db_query('INSERT INTO mfcs_taxonomy_reviewer_classification (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_FACULTY_ADVISER . ', \'faculty_adviser\', \'Faculty Adviser\')');
-  db_query('INSERT INTO mfcs_taxonomy_reviewer_classification (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_FOOD_SERVICES . ', \'food_services\', \'Food Services\')');
-  db_query('INSERT INTO mfcs_taxonomy_reviewer_classification (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_HOUSING . ', \'housing\', \'Housing\')');
-  db_query('INSERT INTO mfcs_taxonomy_reviewer_classification (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_MAINTENANCE . ', \'maintenance\', \'Maintenance\')');
-  db_query('INSERT INTO mfcs_taxonomy_reviewer_classification (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_PURCHASING . ', \'purchasing\', \'Purchasing\')');
-  db_query('INSERT INTO mfcs_taxonomy_reviewer_classification (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_SECURITY . ', \'security\', \'Security\')');
-  db_query('INSERT INTO mfcs_taxonomy_reviewer_classification (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_STUDENT_ACTIVITIES_ADMINISTRATION . ', \'student_activities_administration\', \'Student Activities Administration\')');
-  db_query('INSERT INTO mfcs_taxonomy_reviewer_classification (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_UNIVERSITY_SERVICES . ', \'university_services\', \'University Services\')');
+  db_query('INSERT INTO {mfcs_taxonomy_reviewer_classification} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_NONE . ', \'none\', \'None');
+  db_query('INSERT INTO {mfcs_taxonomy_reviewer_classification} (id, machine_name, human_name, hidden) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR . ', \'system_administrator\', \'System Administrator\', 1)');
+  db_query('INSERT INTO {mfcs_taxonomy_reviewer_classification} (id, machine_name, human_name, hidden) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_MANAGER . ', \'manager\', \'Manager\', 1)');
+  db_query('INSERT INTO {mfcs_taxonomy_reviewer_classification} (id, machine_name, human_name, hidden) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_REQUESTER . ', \'requester\', \'Requester\', 1)');
+  db_query('INSERT INTO {mfcs_taxonomy_reviewer_classification} (id, machine_name, human_name, hidden) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_SYSTEM . ', \'system\', \'System\', 1)');
+  db_query('INSERT INTO {mfcs_taxonomy_reviewer_classification} (id, machine_name, human_name, hidden) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR . ', \'venue_cordinator\', \'Venue Coordinator\', 1)');
+  db_query('INSERT INTO {mfcs_taxonomy_reviewer_classification} (id, machine_name, human_name, hidden) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY . ', \'venue_cordinator_proxy\', \'Venue Coordinator (Proxy)\', 1)');
+  db_query('INSERT INTO {mfcs_taxonomy_reviewer_classification} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_ADMINISTRATIVE_ACCOUNTING . ', \'administrative_accounting\', \'Administrative Accounting\')');
+  db_query('INSERT INTO {mfcs_taxonomy_reviewer_classification} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_CUSTODIAL . ', \'custodial\', \'Custodial\')');
+  db_query('INSERT INTO {mfcs_taxonomy_reviewer_classification} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_UNIVERSITY_EVENTS . ', \'university_events\', \'University Events\')');
+  db_query('INSERT INTO {mfcs_taxonomy_reviewer_classification} (id, machine_name, human_name, enabled) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_FACILITIES_CUSTODIAL . ', \'facilities_custodial\', \'Facilities / Custodial Services\', 0)');
+  db_query('INSERT INTO {mfcs_taxonomy_reviewer_classification} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_FACILITIES . ', \'facilities\', \'Facilities\')');
+  db_query('INSERT INTO {mfcs_taxonomy_reviewer_classification} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_FACULTY_ADVISER . ', \'faculty_adviser\', \'Faculty Adviser\')');
+  db_query('INSERT INTO {mfcs_taxonomy_reviewer_classification} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_FOOD_SERVICES . ', \'food_services\', \'Food Services\')');
+  db_query('INSERT INTO {mfcs_taxonomy_reviewer_classification} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_HOUSING . ', \'housing\', \'Housing\')');
+  db_query('INSERT INTO {mfcs_taxonomy_reviewer_classification} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_MAINTENANCE . ', \'maintenance\', \'Maintenance\')');
+  db_query('INSERT INTO {mfcs_taxonomy_reviewer_classification} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_PURCHASING . ', \'purchasing\', \'Purchasing\')');
+  db_query('INSERT INTO {mfcs_taxonomy_reviewer_classification} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_SECURITY . ', \'security\', \'Security\')');
+  db_query('INSERT INTO {mfcs_taxonomy_reviewer_classification} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_STUDENT_ACTIVITIES_ADMINISTRATION . ', \'student_activities_administration\', \'Student Activities Administration\')');
+  db_query('INSERT INTO {mfcs_taxonomy_reviewer_classification} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_UNIVERSITY_SERVICES . ', \'university_services\', \'University Services\')');
 
 
-  db_query('ALTER TABLE mfcs_requests ADD CONSTRAINT classification_fkey FOREIGN KEY (classification) REFERENCES mfcs_taxonomy_request_classification (id) ON UPDATE CASCADE ON DELETE RESTRICT');
-  db_query('ALTER TABLE mfcs_requests ADD CONSTRAINT step_fkey FOREIGN KEY (step) REFERENCES mfcs_taxonomy_review_step (id) ON UPDATE CASCADE ON DELETE RESTRICT');
-  db_query('ALTER TABLE mfcs_field_request_coordinator_classification ADD CONSTRAINT value_fkey FOREIGN KEY (value) REFERENCES mfcs_taxonomy_request_classification (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_requests} ADD CONSTRAINT classification_fkey FOREIGN KEY (classification) REFERENCES {mfcs_taxonomy_request_classification} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_requests} ADD CONSTRAINT step_fkey FOREIGN KEY (step) REFERENCES {mfcs_taxonomy_review_step} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_field_request_coordinator_classification} ADD CONSTRAINT value_fkey FOREIGN KEY (value) REFERENCES {mfcs_taxonomy_request_classification} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
 
-  db_query('ALTER TABLE mfcs_reviewers ADD CONSTRAINT request_classification_fkey FOREIGN KEY (request_classification) REFERENCES mfcs_taxonomy_request_classification (id) ON UPDATE CASCADE ON DELETE RESTRICT');
-  db_query('ALTER TABLE mfcs_reviewers ADD CONSTRAINT review_step_fkey FOREIGN KEY (review_step) REFERENCES mfcs_taxonomy_review_step (id) ON UPDATE CASCADE ON DELETE RESTRICT');
-  db_query('ALTER TABLE mfcs_field_top_step ADD CONSTRAINT value_fkey FOREIGN KEY (value) REFERENCES mfcs_taxonomy_review_step (id) ON UPDATE CASCADE ON DELETE RESTRICT');
-  db_query('ALTER TABLE mfcs_field_review_review ADD CONSTRAINT step_fkey FOREIGN KEY (step) REFERENCES mfcs_taxonomy_review_step (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_reviewers} ADD CONSTRAINT request_classification_fkey FOREIGN KEY (request_classification) REFERENCES {mfcs_taxonomy_request_classification} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_reviewers} ADD CONSTRAINT review_step_fkey FOREIGN KEY (review_step) REFERENCES {mfcs_taxonomy_review_step} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_field_top_step} ADD CONSTRAINT value_fkey FOREIGN KEY (value) REFERENCES {mfcs_taxonomy_review_step} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_field_review_review} ADD CONSTRAINT step_fkey FOREIGN KEY (step) REFERENCES {mfcs_taxonomy_review_step} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
 
-  db_query('ALTER TABLE mfcs_reviewers ADD CONSTRAINT reviewer_classification_fkey FOREIGN KEY (reviewer_classification) REFERENCES mfcs_taxonomy_reviewer_classification (id) ON UPDATE CASCADE ON DELETE RESTRICT');
-  db_query('ALTER TABLE mfcs_reviewed ADD CONSTRAINT classification_fkey FOREIGN KEY (classification) REFERENCES mfcs_taxonomy_reviewer_classification (id) ON UPDATE CASCADE ON DELETE RESTRICT');
-  db_query('ALTER TABLE mfcs_review_classifications ADD CONSTRAINT classification_fkey FOREIGN KEY (classification) REFERENCES mfcs_taxonomy_reviewer_classification (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_reviewers} ADD CONSTRAINT reviewer_classification_fkey FOREIGN KEY (reviewer_classification) REFERENCES {mfcs_taxonomy_reviewer_classification} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_reviewed} ADD CONSTRAINT classification_fkey FOREIGN KEY (classification) REFERENCES {mfcs_taxonomy_reviewer_classification} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_review_classifications} ADD CONSTRAINT classification_fkey FOREIGN KEY (classification) REFERENCES {mfcs_taxonomy_reviewer_classification} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
 
 
 
