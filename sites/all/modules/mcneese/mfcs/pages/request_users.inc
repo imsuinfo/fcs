@@ -630,6 +630,11 @@ function mfcs_request_users_0_view_page($user_id) {
     catch (Exception $e) {
       $banner_information = '<div class="view_user-item view_user-item-roles-unavailable">Banner information is currently unavailable.</div>';
     }
+
+    $coordinator_rooms = mfcs_load_coordinator_rooms($account->uid);
+    if (is_array($coordinator_rooms) && !empty($coordinator_rooms)) {
+      $banner_information .= '<div class="view_user-item view_user-item-room_coordinator"><span class="item-information item-information-room_coordinator">Is Room Coordinator</span></div>';
+    }
   }
   else {
     $banner_information = '<div class="view_user-item view_user-item-roles-no_banner_id">No Banner ID assigned to this account.</div>';

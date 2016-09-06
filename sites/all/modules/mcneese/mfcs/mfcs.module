@@ -11225,6 +11225,52 @@ function mfcs_load_room_coordinators($room_id = NULL, $coordinators_only = FALSE
 }
 
 /**
+ * Returns an array of rooms the user is a coordinator of.
+ *
+ * @param int $user_id
+ *   This is the user id of the user.
+ *
+ * @param array|bool
+ *   An array of rooms the user is a coordinator of.
+ *   FALSE is returned on error.
+ */
+function mfcs_load_coordinator_rooms($user_id) {
+  if (!cf_is_integer($user_id)) {
+    cf_error::invalid_integer('user_id');
+    return FALSE;
+  }
+
+  try {
+    $query = db_select('mfcs_banner_rooms', 'mbr');
+    $query->innerJoin('mfcs_banner_buildings', 'mbb', 'mbr.building = mbb.id');
+
+    $query->condition('mbr.coordinator_id', $user_id);
+
+    $query->addField('mbr', 'id', 'room_id');
+    $query->addField('mbb', 'id', 'building_id');
+    $query->addField('mbr', 'machine_name', 'room_number');
+    $query->addField('mbr', 'human_name', 'room_name');
+    $query->addField('mbb', 'machine_name', 'building_code');
+    $query->addField('mbb', 'human_name', 'building_name');
+
+    $results = $query->execute()->fetchAll();
+    if (!is_array($results)) {
+      return FALSE;
+    }
+  }
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
+    return FALSE;
+  }
+
+  return $results;
+}
+
+/**
  * Return an array containing the user id and name of the primary user.
  *
  * jira ticket: fcs-58.
