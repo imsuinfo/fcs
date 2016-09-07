@@ -213,6 +213,14 @@ function mcneese_management_schema() {
 function mcneese_management_install() {
   cf_settings_register('emergency_mode', 'drupal_variables', 'mcneese_management', FALSE);
   cf_settings_register('emergency_node', 'drupal_variables', 'mcneese_management', 0);
+
+  // postgresql-specific support for enforcing uid consistency.
+  if (db_driver() == 'pgsql') {
+    db_query('ALTER TABLE {mcneese_management_template_user} ADD CONSTRAINT user_id_fkey FOREIGN KEY (user_id) REFERENCES {users} (uid) ON UPDATE CASCADE ON DELETE CASCADE');
+    db_query('ALTER TABLE {mcneese_management_template_user} ADD CONSTRAINT template_id_fkey FOREIGN KEY (template_id) REFERENCES {mcneese_management_template} (id) ON UPDATE CASCADE ON DELETE CASCADE');
+    db_query('ALTER TABLE {mcneese_management_template_node} ADD CONSTRAINT template_id_fkey FOREIGN KEY (template_id) REFERENCES {mcneese_management_template} (id) ON UPDATE CASCADE ON DELETE CASCADE');
+    db_query('ALTER TABLE {mcneese_management_template_node} ADD CONSTRAINT node_id_fkey FOREIGN KEY (node_id) REFERENCES {node} (nid) ON UPDATE CASCADE ON DELETE CASCADE');
+  }
 }
 
 /**
