@@ -2223,25 +2223,18 @@ function mfcs_install() {
     }
   }
 
-  db_query('ALTER TABLE {mfcs_taxonomy_request_classification} ADD CONSTRAINT mfcs_taxonomy_request_classification_machine_name_ukey UNIQUE (machine_name)');
-  db_query('ALTER TABLE {mfcs_taxonomy_review_step} ADD CONSTRAINT mfcs_taxonomy_review_step_machine_name_ukey UNIQUE (machine_name)');
-  db_query('ALTER TABLE {mfcs_taxonomy_reviewer_classification} ADD CONSTRAINT mfcs_taxonomy_reviewer_classification_machine_name_ukey UNIQUE (machine_name)');
-  db_query('ALTER TABLE {mfcs_taxonomy_request_status} ADD CONSTRAINT mfcs_taxonomy_request_status_machine_name_ukey UNIQUE (machine_name)');
-
-  db_query('ALTER TABLE {mfcs_taxonomy_request_classification} ADD CONSTRAINT mfcs_taxonomy_request_classification_hidden_check CHECK (hidden = 0 or hidden = 1)');
-  db_query('ALTER TABLE {mfcs_taxonomy_review_step} ADD CONSTRAINT mfcs_taxonomy_review_step_hidden_check CHECK (hidden = 0 or hidden = 1)');
-  db_query('ALTER TABLE {mfcs_taxonomy_reviewer_classification} ADD CONSTRAINT mfcs_taxonomy_reviewer_classification_hidden_check CHECK (hidden = 0 or hidden = 1)');
-  db_query('ALTER TABLE {mfcs_taxonomy_request_status} ADD CONSTRAINT mfcs_taxonomy_request_status_hidden_check CHECK (hidden = 0 or hidden = 1)');
-
-  db_query('ALTER TABLE {mfcs_taxonomy_request_classification} ADD CONSTRAINT mfcs_taxonomy_request_classification_enabled_check CHECK (enabled = 0 or enabled = 1)');
-  db_query('ALTER TABLE {mfcs_taxonomy_review_step} ADD CONSTRAINT mfcs_taxonomy_review_step_enabled_check CHECK (enabled = 0 or enabled = 1)');
-  db_query('ALTER TABLE {mfcs_taxonomy_reviewer_classification} ADD CONSTRAINT mfcs_taxonomy_reviewer_classification_enabled_check CHECK (enabled = 0 or enabled = 1)');
-  db_query('ALTER TABLE {mfcs_taxonomy_request_status} ADD CONSTRAINT mfcs_taxonomy_request_status_enabled_check CHECK (enabled = 0 or enabled = 1)');
-
-  db_query('ALTER TABLE {mfcs_taxonomy_request_classification} ADD CONSTRAINT mfcs_taxonomy_request_classification_deleted_check CHECK (deleted = 0 or deleted = 1)');
-  db_query('ALTER TABLE {mfcs_taxonomy_review_step} ADD CONSTRAINT mfcs_taxonomy_review_step_deleted_check CHECK (deleted = 0 or deleted = 1)');
-  db_query('ALTER TABLE {mfcs_taxonomy_reviewer_classification} ADD CONSTRAINT mfcs_taxonomy_reviewer_classification_deleted_check CHECK (deleted = 0 or deleted = 1)');
-  db_query('ALTER TABLE {mfcs_taxonomy_request_status} ADD CONSTRAINT mfcs_taxonomy_request_status_deleted_check CHECK (deleted = 0 or deleted = 1)');
+  $taxonomy_tables = array(
+    'mfcs_taxonomy_request_classification',
+    'mfcs_taxonomy_review_step',
+    'mfcs_taxonomy_reviewer_classification',
+    'mfcs_taxonomy_request_status',
+  );
+  foreach ($taxonomy_tables as $taxonomy_table) {
+    db_query('ALTER TABLE {' . $taxonomy_table . '} ADD CONSTRAINT ' . $taxonomy_table . '_machine_name_ukey UNIQUE (machine_name)');
+    db_query('ALTER TABLE {' . $taxonomy_table . '} ADD CONSTRAINT ' . $taxonomy_table . '_hidden_check CHECK (hidden = 0 or hidden = 1)');
+    db_query('ALTER TABLE {' . $taxonomy_table . '} ADD CONSTRAINT ' . $taxonomy_table . '_enabled_check CHECK (enabled = 0 or enabled = 1)');
+    db_query('ALTER TABLE {' . $taxonomy_table . '} ADD CONSTRAINT ' . $taxonomy_table . '_deleted_check CHECK (deleted = 0 or deleted = 1)');
+  }
 
 
   db_query('INSERT INTO {mfcs_taxonomy_request_classification} (id, machine_name, human_name, hidden) VALUES (' . (int) MFCS_REQUEST_CLASSIFICATION_NONE . ', \'none\', \'None\', 1)');
