@@ -22,6 +22,7 @@ files[] = includes/access.inc
 files[] = includes/ajax.inc
 files[] = includes/ajax-management.inc
 files[] = includes/autocomplete.inc
+files[] = includes/defragment.inc
 files[] = includes/hooks.inc
 files[] = includes/ical.inc
 files[] = includes/list_options.inc

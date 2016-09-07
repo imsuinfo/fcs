@@ -2241,8 +2241,25 @@ function mfcs_install() {
   db_query('alter table mfcs_banner_classes alter id set default nextval(\'mfcs_banner_classes_id_seq\'::regclass);');
 
 
+  // create user defragment log table using special postgresql data types.
+  db_query('create table mfcs_log_user_defragment(id bigint not null, from_ids integer[] not null, to_ids integer[] not null, user_id bigint not null, updated bigint not null, primary key (id), constraint mfcs_log_user_defragment_user_id_check check (user_id >= 0), constraint mfcs_log_user_defragment_updated_check check (updated >= 0), constraint user_id_fkey foreign key (user_id) references users(uid) on update cascade on delete restrict)');
+  db_query('create sequence mfcs_log_user_defragment_id_seq');
+  db_query('alter table mfcs_log_user_defragment alter id set default nextval(\'mfcs_log_user_defragment_id_seq\'::regclass)');
+  db_query('grant select, insert, update on mfcs_log_user_defragment to fcs_user');
+  db_query('grant select, usage on mfcs_log_user_defragment_id_seq to fcs_user');
+
+
   db_query('ALTER TABLE {mfcs_requests} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON UPDATE CASCADE ON DELETE RESTRICT');
   db_query('ALTER TABLE {mfcs_requests} ADD CONSTRAINT creator_fkey FOREIGN KEY (creator) REFERENCES {users} (uid) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_requests} ADD CONSTRAINT venue_coordinator_fkey FOREIGN KEY (venue_coordinator) REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_requests} ADD CONSTRAINT location_fkey FOREIGN KEY (location) REFERENCES {mfcs_banner_locations} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_requests} ADD CONSTRAINT building_fkey FOREIGN KEY (building) REFERENCES {mfcs_banner_buildings} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_requests} ADD CONSTRAINT room_fkey FOREIGN KEY (room) REFERENCES {mfcs_banner_rooms} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+
+  db_query('ALTER TABLE {mfcs_field_top_location} ADD CONSTRAINT value_fkey FOREIGN KEY (value) REFERENCES {mfcs_banner_locations} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_field_top_building} ADD CONSTRAINT value_fkey FOREIGN KEY (value) REFERENCES {mfcs_banner_buildings} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_field_top_room} ADD CONSTRAINT value_fkey FOREIGN KEY (value) REFERENCES {mfcs_banner_rooms} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+
   db_query('ALTER TABLE {mfcs_current} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON UPDATE CASCADE ON DELETE CASCADE');
   db_query('ALTER TABLE {mfcs_request_revisions} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON UPDATE CASCADE ON DELETE CASCADE');
   db_query('ALTER TABLE {mfcs_request_revisions} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON UPDATE CASCADE ON DELETE RESTRICT');
@@ -2287,9 +2304,13 @@ function mfcs_install() {
 
   foreach ($structure as $structure_name => &$structure_array) {
     foreach ($structure_array as $field_name => &$field_type) {
-      $field_table1_name = 'mfcs_field_' . $structure_name . '_' . $field_name;
+      $field_table_name = 'mfcs_field_' . $structure_name . '_' . $field_name;
 
-      db_query('ALTER TABLE {' . $field_table1_name . '} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON UPDATE CASCADE ON DELETE CASCADE');
+      // add request id foreign key.
+      db_query('ALTER TABLE {' . $field_table_name . '} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON UPDATE CASCADE ON DELETE CASCADE');
+
+      // add user id foreign key.
+      db_query('ALTER TABLE {' . $field_table_name . '} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON UPDATE CASCADE ON DELETE RESTRICT');
     }
   }
 
@@ -2350,6 +2371,8 @@ function mfcs_install() {
   db_query('ALTER TABLE {mfcs_requests} ADD CONSTRAINT classification_fkey FOREIGN KEY (classification) REFERENCES {mfcs_taxonomy_request_classification} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
   db_query('ALTER TABLE {mfcs_requests} ADD CONSTRAINT step_fkey FOREIGN KEY (step) REFERENCES {mfcs_taxonomy_review_step} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
   db_query('ALTER TABLE {mfcs_field_request_coordinator_classification} ADD CONSTRAINT value_fkey FOREIGN KEY (value) REFERENCES {mfcs_taxonomy_request_classification} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_field_request_coordinator_user_id} ADD CONSTRAINT value_fkey FOREIGN KEY (value) REFERENCES {users} (uid) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_field_request_coordinator_user_id} ADD CONSTRAINT user_id_fkey FOREIGN KEY (user_id) REFERENCES {users} (uid) ON UPDATE CASCADE ON DELETE RESTRICT');
 
   db_query('ALTER TABLE {mfcs_reviewers} ADD CONSTRAINT request_classification_fkey FOREIGN KEY (request_classification) REFERENCES {mfcs_taxonomy_request_classification} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
   db_query('ALTER TABLE {mfcs_reviewers} ADD CONSTRAINT review_step_fkey FOREIGN KEY (review_step) REFERENCES {mfcs_taxonomy_review_step} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
@@ -2359,7 +2382,6 @@ function mfcs_install() {
   db_query('ALTER TABLE {mfcs_reviewers} ADD CONSTRAINT reviewer_classification_fkey FOREIGN KEY (reviewer_classification) REFERENCES {mfcs_taxonomy_reviewer_classification} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
   db_query('ALTER TABLE {mfcs_reviewed} ADD CONSTRAINT classification_fkey FOREIGN KEY (classification) REFERENCES {mfcs_taxonomy_reviewer_classification} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
   db_query('ALTER TABLE {mfcs_review_classifications} ADD CONSTRAINT classification_fkey FOREIGN KEY (classification) REFERENCES {mfcs_taxonomy_reviewer_classification} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
-
 
 
   // enable postgresql-specific TOAST support (aka: compression).
@@ -2386,6 +2408,19 @@ function mfcs_install() {
   $mail_system = variable_get('mail_system' , array('default-system' => 'DefaultMailSystem'));
   $mail_system['default-system'] = 'McNeeseFacilitiesUseMail';
   variable_set('mail_system', $mail_system);
+
+
+  // improve (some of) drupal core's tables data integrity.
+  db_query('ALTER TABLE {users_roles} add constraint uid_fkey FOREIGN KEY (uid) REFERENCES {users} (uid) ON UPDATE CASCADE ON DELETE CASCADE');
+  db_query('ALTER TABLE {users_roles} add constraint role_id_fkey FOREIGN KEY (rid) REFERENCES {role} (rid) ON UPDATE CASCADE ON DELETE CASCADE');
+  db_query('ALTER TABLE {authmap} add constraint uid_fkey FOREIGN KEY (uid) REFERENCES {users} (uid) ON UPDATE CASCADE ON DELETE CASCADE');
+  db_query('ALTER TABLE {history} add constraint uid_fkey FOREIGN KEY (uid) REFERENCES {users} (uid) ON UPDATE CASCADE ON DELETE CASCADE');
+  db_query('ALTER TABLE {node} add constraint uid_fkey FOREIGN KEY (uid) REFERENCES {users} (uid) ON UPDATE CASCADE ON DELETE RESTRICT'); // intentionally restrict.
+  db_query('ALTER TABLE {node_revision} add constraint uid_fkey FOREIGN KEY (uid) REFERENCES {users} (uid) ON UPDATE CASCADE ON DELETE RESTRICT'); // intentionally restrict.
+  db_query('ALTER TABLE {watchdog} add constraint uid_fkey FOREIGN KEY (uid) REFERENCES {users} (uid) ON UPDATE CASCADE ON DELETE RESTRICT'); // intentionally restrict.
+  db_query('ALTER TABLE {sessions} add constraint uid_fkey FOREIGN KEY (uid) REFERENCES {users} (uid) ON UPDATE CASCADE ON DELETE CASCADE');
+  db_query('ALTER TABLE {file_managed} add constraint uid_fkey FOREIGN KEY (uid) REFERENCES {users} (uid) ON UPDATE CASCADE ON DELETE RESTRICT'); // intentionally restrict.
+  db_query('ALTER TABLE {shortcut_set_users} add constraint uid_fkey FOREIGN KEY (uid) REFERENCES {users} (uid) ON UPDATE CASCADE ON DELETE CASCADE');
 }
 
 /**
@@ -2434,6 +2469,9 @@ function mfcs_uninstall() {
 
   db_query('ALTER TABLE {mfcs_requests} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
   db_query('ALTER TABLE {mfcs_requests} DROP CONSTRAINT IF EXISTS creator_fkey');
+  db_query('ALTER TABLE {mfcs_requests} DROP CONSTRAINT IF EXISTS location_fkey');
+  db_query('ALTER TABLE {mfcs_requests} DROP CONSTRAINT IF EXISTS building_fkey');
+  db_query('ALTER TABLE {mfcs_requests} DROP CONSTRAINT IF EXISTS room_fkey');
   db_query('ALTER TABLE {mfcs_current} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
   db_query('ALTER TABLE {mfcs_request_revisions} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
   db_query('ALTER TABLE {mfcs_request_revisions} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
@@ -2471,6 +2509,7 @@ function mfcs_uninstall() {
       $field_table_name = 'mfcs_field_' . $structure_name . '_' . $field_name;
 
       db_query('ALTER TABLE {' . $field_table_name . '} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
+      db_query('ALTER TABLE {' . $field_table_name . '} DROP CONSTRAINT IF EXISTS ' . $key2_foreign);
     }
   }
 }

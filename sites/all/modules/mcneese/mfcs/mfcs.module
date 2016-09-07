@@ -340,6 +340,7 @@ define('MFCS_INCLUDE_TESTING', 15);
 define('MFCS_INCLUDE_VIEW', 16);
 define('MFCS_INCLUDE_MANAGEMENT', 17);
 define('MFCS_INCLUDE_PROBLEMS', 22);
+define('MFCS_INCLUDE_DEFRAGMENT', 23);
 
 /**
  * Defines review restrictions.
@@ -2644,6 +2645,29 @@ function mfcs_management_page_access() {
 }
 
 /**
+ * Access callback for facilities use defragment page.
+ *
+ * @param bool
+ *   TRUE on access granted, FALSE otherwise.
+ */
+function mfcs_defragment_access() {
+  $access = &drupal_static(__FUNCTION__, NULL);
+
+  if (is_bool($access)) {
+    return $access;
+  }
+
+  $user = cf_current_user();
+  if (user_access('mfcs manage') || user_access('mfcs administer')) {
+    $access = TRUE;
+    return TRUE;
+  }
+
+  $access = FALSE;
+  return FALSE;
+}
+
+/**
  * Implements hook_cronapi().
  */
 function mfcs_cronapi() {
@@ -2817,6 +2841,9 @@ function mfcs_include($id) {
   }
   elseif ($id == MFCS_INCLUDE_PROBLEMS) {
     require_once($module_path . '/pages/request_problems.inc');
+  }
+  elseif ($id == MFCS_INCLUDE_DEFRAGMENT) {
+    require_once($module_path . '/includes/defragment.inc');
   }
 }
 
