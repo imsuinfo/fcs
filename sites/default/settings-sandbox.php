@@ -694,6 +694,10 @@ $conf['ldap_user_blacklist']['mcneese_ldap']= array(
     'administrator',
     'anonymous',
     'person',
+    'adapless',
+    'kdapless',
+    'pdapless',
+    'ldapless',
     'unknown',
   ),
   'regex' => array(
