@@ -1649,6 +1649,7 @@ function mfcs_schema() {
     'mfcs_taxonomy_request_status',
     'mfcs_taxonomy_request_date_category',
     'mfcs_taxonomy_request_type',
+    'mfcs_taxonomy_request_audience',
   );
   foreach ($taxonomy_tables as $taxonomy_table) {
     $schema[$taxonomy_table] = array(
@@ -2232,6 +2233,7 @@ function mfcs_install() {
     'mfcs_taxonomy_request_status',
     'mfcs_taxonomy_request_date_category',
     'mfcs_taxonomy_request_type',
+    'mfcs_taxonomy_request_audience',
   );
   foreach ($taxonomy_tables as $taxonomy_table) {
     db_query('ALTER TABLE {' . $taxonomy_table . '} ADD CONSTRAINT ' . $taxonomy_table . '_machine_name_ukey UNIQUE (machine_name)');
@@ -2307,6 +2309,13 @@ function mfcs_install() {
   db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TYPE_TALENT . ', \'talent\', \'Talent\')');
   db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TYPE_WORKSHOP . ', \'workshop\', \'Workshop\')');
 
+  db_query('INSERT INTO {mfcs_taxonomy_request_audience} (id, machine_name, human_name, hidden) VALUES (' . (int) MFCS_REQUEST_AUDIENCE_NONE . ', \'none\', \'None\', 1)');
+  db_query('INSERT INTO {mfcs_taxonomy_request_audience} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_AUDIENCE_FACULTY_AND_STAFF . ', \'employees\', \'Faculty and Staff Only\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_audience} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_AUDIENCE_GUESTS_ONLY . ', \'guests\', \'Invited Guests Only\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_audience} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_AUDIENCE_STUDENTS_AND_EMPLOYEES . ', \'students_employees\', \'Open to all Students and Employees\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_audience} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_AUDIENCE_PUBLIC . ', \'public\', \'Open to the Public\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_audience} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_AUDIENCE_STUDENTS_ONLY . ', \'students\', \'Students Only\')');
+
   db_query('ALTER TABLE {mfcs_requests} ADD CONSTRAINT classification_fkey FOREIGN KEY (classification) REFERENCES {mfcs_taxonomy_request_classification} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
   db_query('ALTER TABLE {mfcs_requests} ADD CONSTRAINT step_fkey FOREIGN KEY (step) REFERENCES {mfcs_taxonomy_review_step} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
   db_query('ALTER TABLE {mfcs_field_request_coordinator_classification} ADD CONSTRAINT value_fkey FOREIGN KEY (value) REFERENCES {mfcs_taxonomy_request_classification} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
@@ -2322,6 +2331,8 @@ function mfcs_install() {
 
   db_query('ALTER TABLE {mfcs_requests} ADD CONSTRAINT type_fkey FOREIGN KEY (type) REFERENCES {mfcs_taxonomy_request_type} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
   db_query('ALTER TABLE {mfcs_field_information_type} ADD CONSTRAINT value_fkey FOREIGN KEY (value) REFERENCES {mfcs_taxonomy_request_type} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+
+  db_query('ALTER TABLE {mfcs_field_plans_audience} ADD CONSTRAINT value_fkey FOREIGN KEY (value) REFERENCES {mfcs_taxonomy_request_audience} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
 
   db_query('ALTER TABLE {mfcs_reviewers} ADD CONSTRAINT reviewer_classification_fkey FOREIGN KEY (reviewer_classification) REFERENCES {mfcs_taxonomy_reviewer_classification} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
   db_query('ALTER TABLE {mfcs_reviewed} ADD CONSTRAINT classification_fkey FOREIGN KEY (classification) REFERENCES {mfcs_taxonomy_reviewer_classification} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
