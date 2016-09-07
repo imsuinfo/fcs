@@ -1643,7 +1643,7 @@ function mfcs_schema() {
   // normally the list_options functions (which avoid database calls) should be used.
   // the tables here are provided on an as needed basis and does not necesserily represent all of the possible list option tables.
   $schema['mfcs_taxonomy_request_classification'] = array(
-    'description' => $t("McNeese Facilities Use list option table."),
+    'description' => 'McNeese Facilities Use list option table.',
     'fields' => array(
       'id' => array(
         'description' => 'Unique ID to represent the list option.',
@@ -1693,7 +1693,7 @@ function mfcs_schema() {
   );
 
   $schema['mfcs_taxonomy_review_step'] = array(
-    'description' => $t("McNeese Facilities Use list option table."),
+    'description' => 'McNeese Facilities Use list option table.',
     'fields' => array(
       'id' => array(
         'description' => 'Unique ID to represent the list option.',
@@ -1742,9 +1742,58 @@ function mfcs_schema() {
     'primary key' => array('id'),
   );
 
-
   $schema['mfcs_taxonomy_reviewer_classification'] = array(
-    'description' => $t("McNeese Facilities Use list option table."),
+    'description' => 'McNeese Facilities Use list option table.',
+    'fields' => array(
+      'id' => array(
+        'description' => 'Unique ID to represent the list option.',
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'machine_name' => array(
+        'description' => 'Machine Name for the list option',
+        'type' => 'varchar',
+        'size' => 64,
+        'not null' => TRUE,
+      ),
+      'human_name' => array(
+        'description' => 'Human Name for the list option',
+        'type' => 'varchar',
+        'size' => 128,
+        'not null' => TRUE,
+      ),
+      'hidden' => array(
+        'description' => 'Designates that the list option is hidden or not.',
+        'type' => 'int',
+        'size' => 'small',
+        'unsigned' => FALSE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'enabled' => array(
+        'description' => 'Designates that the list option is enabled or not.',
+        'type' => 'int',
+        'size' => 'small',
+        'unsigned' => FALSE,
+        'not null' => TRUE,
+        'default' => 1,
+      ),
+      'deleted' => array(
+        'description' => 'Designates that the list option is deleted or not.',
+        'type' => 'int',
+        'size' => 'small',
+        'unsigned' => FALSE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+
+  $schema['mfcs_taxonomy_request_status'] = array(
+    'description' => 'McNeese Facilities Use list option table.',
     'fields' => array(
       'id' => array(
         'description' => 'Unique ID to represent the list option.',
@@ -2317,18 +2366,22 @@ function mfcs_install() {
   db_query('ALTER TABLE {mfcs_taxonomy_request_classification} ADD CONSTRAINT mfcs_taxonomy_request_classification_machine_name_ukey UNIQUE (machine_name)');
   db_query('ALTER TABLE {mfcs_taxonomy_review_step} ADD CONSTRAINT mfcs_taxonomy_review_step_machine_name_ukey UNIQUE (machine_name)');
   db_query('ALTER TABLE {mfcs_taxonomy_reviewer_classification} ADD CONSTRAINT mfcs_taxonomy_reviewer_classification_machine_name_ukey UNIQUE (machine_name)');
+  db_query('ALTER TABLE {mfcs_taxonomy_request_status} ADD CONSTRAINT mfcs_taxonomy_request_status_machine_name_ukey UNIQUE (machine_name)');
 
   db_query('ALTER TABLE {mfcs_taxonomy_request_classification} ADD CONSTRAINT mfcs_taxonomy_request_classification_hidden_check CHECK (hidden = 0 or hidden = 1)');
   db_query('ALTER TABLE {mfcs_taxonomy_review_step} ADD CONSTRAINT mfcs_taxonomy_review_step_hidden_check CHECK (hidden = 0 or hidden = 1)');
   db_query('ALTER TABLE {mfcs_taxonomy_reviewer_classification} ADD CONSTRAINT mfcs_taxonomy_reviewer_classification_hidden_check CHECK (hidden = 0 or hidden = 1)');
+  db_query('ALTER TABLE {mfcs_taxonomy_request_status} ADD CONSTRAINT mfcs_taxonomy_request_status_hidden_check CHECK (hidden = 0 or hidden = 1)');
 
   db_query('ALTER TABLE {mfcs_taxonomy_request_classification} ADD CONSTRAINT mfcs_taxonomy_request_classification_enabled_check CHECK (enabled = 0 or enabled = 1)');
   db_query('ALTER TABLE {mfcs_taxonomy_review_step} ADD CONSTRAINT mfcs_taxonomy_review_step_enabled_check CHECK (enabled = 0 or enabled = 1)');
   db_query('ALTER TABLE {mfcs_taxonomy_reviewer_classification} ADD CONSTRAINT mfcs_taxonomy_reviewer_classification_enabled_check CHECK (enabled = 0 or enabled = 1)');
+  db_query('ALTER TABLE {mfcs_taxonomy_request_status} ADD CONSTRAINT mfcs_taxonomy_request_status_enabled_check CHECK (enabled = 0 or enabled = 1)');
 
   db_query('ALTER TABLE {mfcs_taxonomy_request_classification} ADD CONSTRAINT mfcs_taxonomy_request_classification_deleted_check CHECK (deleted = 0 or deleted = 1)');
   db_query('ALTER TABLE {mfcs_taxonomy_review_step} ADD CONSTRAINT mfcs_taxonomy_review_step_deleted_check CHECK (deleted = 0 or deleted = 1)');
   db_query('ALTER TABLE {mfcs_taxonomy_reviewer_classification} ADD CONSTRAINT mfcs_taxonomy_reviewer_classification_deleted_check CHECK (deleted = 0 or deleted = 1)');
+  db_query('ALTER TABLE {mfcs_taxonomy_request_status} ADD CONSTRAINT mfcs_taxonomy_request_status_deleted_check CHECK (deleted = 0 or deleted = 1)');
 
 
   db_query('INSERT INTO {mfcs_taxonomy_request_classification} (id, machine_name, human_name, hidden) VALUES (' . (int) MFCS_REQUEST_CLASSIFICATION_NONE . ', \'none\', \'None\', 1)');
@@ -2366,6 +2419,17 @@ function mfcs_install() {
   db_query('INSERT INTO {mfcs_taxonomy_reviewer_classification} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_SECURITY . ', \'security\', \'Security\')');
   db_query('INSERT INTO {mfcs_taxonomy_reviewer_classification} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_STUDENT_ACTIVITIES_ADMINISTRATION . ', \'student_activities_administration\', \'Student Activities Administration\')');
   db_query('INSERT INTO {mfcs_taxonomy_reviewer_classification} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_UNIVERSITY_SERVICES . ', \'university_services\', \'University Services\')');
+
+  db_query('INSERT INTO {mfcs_taxonomy_request_status} (id, machine_name, human_name, hidden) VALUES (' . (int) MFCS_REQUEST_STATUS_NONE . ', \'none\', \'None\', 1)');
+  db_query('INSERT INTO {mfcs_taxonomy_request_status} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_STATUS_DELETED . ', \'deleted\', \'Deleted\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_status} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_STATUS_UNLOCKED . ', \'locked\', \'Queued (Locked)\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_status} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_STATUS_LOCKED . ', \'unlocked\', \'Queued (Unlocked)\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_status} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_STATUS_CLOSED_ACCEPTED . ', \'closed_accepted\', \'Accepted\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_status} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_STATUS_CLOSED_DENIED . ', \'closed_denied\', \'Denied\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_status} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE . ', \'closed_unavailable\', \'Room Unavailable\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_status} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK . ', \'closed_due_to_lock\', \'Room Unavailable (due to lock)\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_status} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_STATUS_CANCELLED . ', \'cancelled\', \'Cancelled\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_status} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED . ', \'cancelled_accepted\', \'Accepted (Cancelled)\')');
 
 
   db_query('ALTER TABLE {mfcs_requests} ADD CONSTRAINT classification_fkey FOREIGN KEY (classification) REFERENCES {mfcs_taxonomy_request_classification} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
