@@ -12,10 +12,10 @@
 
 define('MFCS_DEFRAG_USER_STRATEGY_NONE', 0);
 
-// randomization, first 100 reserved, blacklist and whitelist supported.
+// randomization, first 100 reserved (admins, etc..), blacklist and whitelist supported.
 define('MFCS_DEFRAG_USER_STRATEGY_1', 1);
 
-// randomization with disabled accounts the higher numbers, first 100 reserved, blacklist and whitelist supported.
+// randomization with disabled accounts the higher numbers, first 100 reserved (admins, etc..), blacklist and whitelist supported.
 define('MFCS_DEFRAG_USER_STRATEGY_2', 2);
 
 /**
@@ -56,6 +56,12 @@ function mfcs_defragment_defrag_user_ids($strategy = MFCS_DEFRAG_USER_STRATEGY_1
 
   global $user;
 
+  $max_reserved_accounts = 100;
+  $low_reserved_accounts = 3;
+
+  $administrator_role = user_role_load_by_name('administrator');
+  $administrator_accounts = array();
+
   $editing_user_id = NULL;
 
   $instance = mfcs_instance();
@@ -85,12 +91,34 @@ function mfcs_defragment_defrag_user_ids($strategy = MFCS_DEFRAG_USER_STRATEGY_1
     if (empty($results)) {
       return FALSE;
     }
+    unset($query);
 
     foreach ($results as $result) {
+      $query = db_select('users_roles', 'r');
+      $query->addField('r', 'rid', 'role_id');
+      $query->condition('r.uid', $result->user_id);
+
+      $roles = array();
+      $roles_results = $query->execute()->fetchAll();
+      if (is_array($roles_results)) {
+        foreach ($roles_results as $roles_result) {
+          $roles[(int) $roles_result->role_id] = (int) $roles_result->role_id;
+        }
+        unset($roles_result);
+      }
+      unset($query);
+      unset($roles_results);
+
       $all_users[(int) $result->user_id] = array(
         'user_id' => (int) $result->user_id,
         'status' => (int) $result->status,
+        'roles' => $roles,
       );
+
+      if (isset($administrator_role->rid) && array_key_exists($administrator_role->rid, $roles)) {
+        $administrator_accounts[(int) $result->user_id] = (int) $result->user_id;
+      }
+      unset($roles);
     }
     unset($result);
     unset($results);
@@ -122,11 +150,18 @@ function mfcs_defragment_defrag_user_ids($strategy = MFCS_DEFRAG_USER_STRATEGY_1
     $system_accounts = array(
       0 => 0, // anonymous
       1 => 1, // administrator
+      2 => 2, // reserved
     );
 
     foreach ($system_accounts as $system_account) {
       unset($all_users[$system_account]);
     }
+    unset($system_account);
+
+    foreach ($administrator_accounts as $administrator_account) {
+      unset($all_users[$administrator_account]);
+    }
+    unset($administrator_account);
 
     if ($strategy === MFCS_DEFRAG_USER_STRATEGY_1) {
       $shuffled_users = $all_users;
@@ -164,7 +199,26 @@ function mfcs_defragment_defrag_user_ids($strategy = MFCS_DEFRAG_USER_STRATEGY_1
       unset($shuffled_users_disabled);
     }
 
-    $count = 100;
+    // Make sure administrator accounts are assigned starting from the highest going to the smallest, starting
+    $count = $max_reserved_accounts - 1;
+    foreach ($administrator_accounts as $administrator_account) {
+      // do not allow administrator accounts to go below a certain limit.
+      if ($count < $low_reserved_accounts) {
+        // @todo: report error about too many admin accounts.
+        return FALSE;
+      }
+
+      // ignore the system accounts.
+      if (array_key_exists($administrator_account, $system_accounts)) {
+        continue;
+      }
+
+      $new_user_ids[$count] = $administrator_account;
+      $count--;
+    }
+    unset($administrator_account);
+
+    $count = $max_reserved_accounts;
     $unused = $highest_integer;
     foreach ($shuffled_users as $user_columns) {
       if ($user_columns['user_id'] == $count) {
