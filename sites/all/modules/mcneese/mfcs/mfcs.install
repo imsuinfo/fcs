@@ -1648,6 +1648,7 @@ function mfcs_schema() {
     'mfcs_taxonomy_reviewer_classification',
     'mfcs_taxonomy_request_status',
     'mfcs_taxonomy_request_date_category',
+    'mfcs_taxonomy_request_type',
   );
   foreach ($taxonomy_tables as $taxonomy_table) {
     $schema[$taxonomy_table] = array(
@@ -2230,6 +2231,7 @@ function mfcs_install() {
     'mfcs_taxonomy_reviewer_classification',
     'mfcs_taxonomy_request_status',
     'mfcs_taxonomy_request_date_category',
+    'mfcs_taxonomy_request_type',
   );
   foreach ($taxonomy_tables as $taxonomy_table) {
     db_query('ALTER TABLE {' . $taxonomy_table . '} ADD CONSTRAINT ' . $taxonomy_table . '_machine_name_ukey UNIQUE (machine_name)');
@@ -2291,6 +2293,19 @@ function mfcs_install() {
   db_query('INSERT INTO {mfcs_taxonomy_request_date_category} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_DATES_CATEGORY_SETUP . ', \'setup\', \'Rehearsal / Setup\')');
   db_query('INSERT INTO {mfcs_taxonomy_request_date_category} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_DATES_CATEGORY_CLEANUP . ', \'cleanup\', \'Cleanup / Breakdown\')');
 
+  db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name, hidden) VALUES (' . (int) MFCS_REQUEST_TYPE_NONE . ', \'none\', \'None\', 1)');
+  db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TYPE_ATHLETIC . ', \'athletic\', \'Athletic\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TYPE_BANQUET . ', \'banquet\', \'Banquet\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TYPE_CEREMONY . ', \'ceremony\', \'Ceremony\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TYPE_FAIR . ', \'fair\', \'Fair\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TYPE_LECTURE . ', \'lecture\', \'Lecture\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TYPE_MEETING . ', \'meeting\', \'Meeting\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TYPE_OTHER . ', \'other\', \'Other\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TYPE_PERFORMANCE . ', \'performance\', \'Performance\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TYPE_QUICK_MEETING . ', \'quick_meeting\', \'Quick Meeting\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TYPE_RECEPTION . ', \'reception\', \'Reception\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TYPE_TALENT . ', \'talent\', \'Talent\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TYPE_WORKSHOP . ', \'workshop\', \'Workshop\')');
 
   db_query('ALTER TABLE {mfcs_requests} ADD CONSTRAINT classification_fkey FOREIGN KEY (classification) REFERENCES {mfcs_taxonomy_request_classification} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
   db_query('ALTER TABLE {mfcs_requests} ADD CONSTRAINT step_fkey FOREIGN KEY (step) REFERENCES {mfcs_taxonomy_review_step} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
@@ -2304,6 +2319,9 @@ function mfcs_install() {
   db_query('ALTER TABLE {mfcs_field_review_review} ADD CONSTRAINT step_fkey FOREIGN KEY (step) REFERENCES {mfcs_taxonomy_review_step} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
 
   db_query('ALTER TABLE {mfcs_field_dates_category} ADD CONSTRAINT value_fkey FOREIGN KEY (value) REFERENCES {mfcs_taxonomy_request_date_category} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+
+  db_query('ALTER TABLE {mfcs_requests} ADD CONSTRAINT type_fkey FOREIGN KEY (type) REFERENCES {mfcs_taxonomy_request_type} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_field_information_type} ADD CONSTRAINT value_fkey FOREIGN KEY (value) REFERENCES {mfcs_taxonomy_request_type} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
 
   db_query('ALTER TABLE {mfcs_reviewers} ADD CONSTRAINT reviewer_classification_fkey FOREIGN KEY (reviewer_classification) REFERENCES {mfcs_taxonomy_reviewer_classification} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
   db_query('ALTER TABLE {mfcs_reviewed} ADD CONSTRAINT classification_fkey FOREIGN KEY (classification) REFERENCES {mfcs_taxonomy_reviewer_classification} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
