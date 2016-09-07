@@ -5487,9 +5487,11 @@ function mfcs_sync_banner_to_local_classes() {
         }
 
         $processed = array();
-        foreach ($banner_to_local_weekdays as $weekday) {
+        foreach ($banner_to_local_weekdays as $weekday => $banner_weekday) {
           $processed[$weekday] = FALSE;
         }
+        unset($weekday);
+        unset($banner_weekday);
 
         foreach ($banner_to_local_weekdays as $weekday => $banner_weekday) {
           if (array_key_exists($weekday, $processed) && $processed[$weekday] == TRUE) {
@@ -5584,6 +5586,8 @@ function mfcs_sync_banner_to_local_classes() {
             $stamp_day = strtotime('next ' . $weekday, $stamp_day);
           }
         }
+        unset($weekday);
+        unset($banner_weekday);
       }
     }
     unset($classes);
