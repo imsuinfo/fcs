@@ -1642,205 +1642,65 @@ function mfcs_schema() {
   // these tables are provided for database integrity and mapping/joining of values.
   // normally the list_options functions (which avoid database calls) should be used.
   // the tables here are provided on an as needed basis and does not necesserily represent all of the possible list option tables.
-  $schema['mfcs_taxonomy_request_classification'] = array(
-    'description' => 'McNeese Facilities Use list option table.',
-    'fields' => array(
-      'id' => array(
-        'description' => 'Unique ID to represent the list option.',
-        'type' => 'int',
-        'size' => 'big',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-      'machine_name' => array(
-        'description' => 'Machine Name for the list option',
-        'type' => 'varchar',
-        'size' => 64,
-        'not null' => TRUE,
-      ),
-      'human_name' => array(
-        'description' => 'Human Name for the list option',
-        'type' => 'varchar',
-        'size' => 128,
-        'not null' => TRUE,
-      ),
-      'hidden' => array(
-        'description' => 'Designates that the list option is hidden or not.',
-        'type' => 'int',
-        'size' => 'small',
-        'unsigned' => FALSE,
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-      'enabled' => array(
-        'description' => 'Designates that the list option is enabled or not.',
-        'type' => 'int',
-        'size' => 'small',
-        'unsigned' => FALSE,
-        'not null' => TRUE,
-        'default' => 1,
-      ),
-      'deleted' => array(
-        'description' => 'Designates that the list option is deleted or not.',
-        'type' => 'int',
-        'size' => 'small',
-        'unsigned' => FALSE,
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-    ),
-    'primary key' => array('id'),
+  $taxonomy_tables = array(
+    'mfcs_taxonomy_request_classification',
+    'mfcs_taxonomy_review_step',
+    'mfcs_taxonomy_reviewer_classification',
+    'mfcs_taxonomy_request_status',
   );
-
-  $schema['mfcs_taxonomy_review_step'] = array(
-    'description' => 'McNeese Facilities Use list option table.',
-    'fields' => array(
-      'id' => array(
-        'description' => 'Unique ID to represent the list option.',
-        'type' => 'int',
-        'size' => 'big',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
+  foreach ($taxonomy_tables as $taxonomy_table) {
+    $schema[$taxonomy_table] = array(
+      'description' => 'McNeese Facilities Use list option table.',
+      'fields' => array(
+        'id' => array(
+          'description' => 'Unique ID to represent the list option.',
+          'type' => 'int',
+          'size' => 'big',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+        ),
+        'machine_name' => array(
+          'description' => 'Machine Name for the list option',
+          'type' => 'varchar',
+          'size' => 64,
+          'not null' => TRUE,
+        ),
+        'human_name' => array(
+          'description' => 'Human Name for the list option',
+          'type' => 'varchar',
+          'size' => 128,
+          'not null' => TRUE,
+        ),
+        'hidden' => array(
+          'description' => 'Designates that the list option is hidden or not.',
+          'type' => 'int',
+          'size' => 'small',
+          'unsigned' => FALSE,
+          'not null' => TRUE,
+          'default' => 0,
+        ),
+        'enabled' => array(
+          'description' => 'Designates that the list option is enabled or not.',
+          'type' => 'int',
+          'size' => 'small',
+          'unsigned' => FALSE,
+          'not null' => TRUE,
+          'default' => 1,
+        ),
+        'deleted' => array(
+          'description' => 'Designates that the list option is deleted or not.',
+          'type' => 'int',
+          'size' => 'small',
+          'unsigned' => FALSE,
+          'not null' => TRUE,
+          'default' => 0,
+        ),
       ),
-      'machine_name' => array(
-        'description' => 'Machine Name for the list option',
-        'type' => 'varchar',
-        'size' => 64,
-        'not null' => TRUE,
-      ),
-      'human_name' => array(
-        'description' => 'Human Name for the list option',
-        'type' => 'varchar',
-        'size' => 128,
-        'not null' => TRUE,
-      ),
-      'hidden' => array(
-        'description' => 'Designates that the list option is hidden or not.',
-        'type' => 'int',
-        'size' => 'small',
-        'unsigned' => FALSE,
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-      'enabled' => array(
-        'description' => 'Designates that the list option is enabled or not.',
-        'type' => 'int',
-        'size' => 'small',
-        'unsigned' => FALSE,
-        'not null' => TRUE,
-        'default' => 1,
-      ),
-      'deleted' => array(
-        'description' => 'Designates that the list option is deleted or not.',
-        'type' => 'int',
-        'size' => 'small',
-        'unsigned' => FALSE,
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-    ),
-    'primary key' => array('id'),
-  );
-
-  $schema['mfcs_taxonomy_reviewer_classification'] = array(
-    'description' => 'McNeese Facilities Use list option table.',
-    'fields' => array(
-      'id' => array(
-        'description' => 'Unique ID to represent the list option.',
-        'type' => 'int',
-        'size' => 'big',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-      'machine_name' => array(
-        'description' => 'Machine Name for the list option',
-        'type' => 'varchar',
-        'size' => 64,
-        'not null' => TRUE,
-      ),
-      'human_name' => array(
-        'description' => 'Human Name for the list option',
-        'type' => 'varchar',
-        'size' => 128,
-        'not null' => TRUE,
-      ),
-      'hidden' => array(
-        'description' => 'Designates that the list option is hidden or not.',
-        'type' => 'int',
-        'size' => 'small',
-        'unsigned' => FALSE,
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-      'enabled' => array(
-        'description' => 'Designates that the list option is enabled or not.',
-        'type' => 'int',
-        'size' => 'small',
-        'unsigned' => FALSE,
-        'not null' => TRUE,
-        'default' => 1,
-      ),
-      'deleted' => array(
-        'description' => 'Designates that the list option is deleted or not.',
-        'type' => 'int',
-        'size' => 'small',
-        'unsigned' => FALSE,
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-    ),
-    'primary key' => array('id'),
-  );
-
-  $schema['mfcs_taxonomy_request_status'] = array(
-    'description' => 'McNeese Facilities Use list option table.',
-    'fields' => array(
-      'id' => array(
-        'description' => 'Unique ID to represent the list option.',
-        'type' => 'int',
-        'size' => 'big',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-      'machine_name' => array(
-        'description' => 'Machine Name for the list option',
-        'type' => 'varchar',
-        'size' => 64,
-        'not null' => TRUE,
-      ),
-      'human_name' => array(
-        'description' => 'Human Name for the list option',
-        'type' => 'varchar',
-        'size' => 128,
-        'not null' => TRUE,
-      ),
-      'hidden' => array(
-        'description' => 'Designates that the list option is hidden or not.',
-        'type' => 'int',
-        'size' => 'small',
-        'unsigned' => FALSE,
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-      'enabled' => array(
-        'description' => 'Designates that the list option is enabled or not.',
-        'type' => 'int',
-        'size' => 'small',
-        'unsigned' => FALSE,
-        'not null' => TRUE,
-        'default' => 1,
-      ),
-      'deleted' => array(
-        'description' => 'Designates that the list option is deleted or not.',
-        'type' => 'int',
-        'size' => 'small',
-        'unsigned' => FALSE,
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-    ),
-    'primary key' => array('id'),
-  );
+      'primary key' => array('id'),
+    );
+  }
+  unset($taxonomy_tables);
+  unset($taxonomy_table);
 
 
   // create the mapping table that maps the latest request.
