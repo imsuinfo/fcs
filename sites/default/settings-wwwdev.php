@@ -688,8 +688,14 @@ $conf['html5_tools_add_chrome_frame_header'] = 0;
  * Ldap blacklisting.
  */
 $conf['ldap_user_blacklist']['mcneese_ldap']= array(
-  #'names' => array(
-  #),
+  'names' => array(
+    'admin',
+    'administer',
+    'administrator',
+    'anonymous',
+    'person',
+    'unknown',
+  ),
   'regex' => array(
     '/^(other|test|oth|om)-.*$/i',
   ),
