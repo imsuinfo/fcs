@@ -1537,19 +1537,19 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
       elseif ($decision === MFCS_REVIEW_DECISION_AVAILABLE && $type === MFCS_REQUEST_TYPE_QUICK_MEETING) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has designated that the <strong class="review-item-label-text-row-decision">Venue is Available</strong>, <strong class="review-item-label-text-row-decision">Confirmed</strong>, and <strong class="review-item-label-text-row-decision">Reserved</strong>' . $reviewer_classification . '.';
       }
-      elseif ($decision === MFCS_REVIEW_DECISION_CLOSED) {
+      elseif ($decision === MFCS_REVIEW_DECISION_CLOSE) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">Closed</strong> the request' . $reviewer_classification . '.';
       }
-      elseif ($decision === MFCS_REVIEW_DECISION_CANCELLED) {
+      elseif ($decision === MFCS_REVIEW_DECISION_CANCEL) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">Cancelled</strong> the request' . $reviewer_classification . '.';
       }
-      elseif ($decision === MFCS_REVIEW_DECISION_UNCANCELLED) {
+      elseif ($decision === MFCS_REVIEW_DECISION_UNCANCEL) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">Uncancelled</strong> the request' . $reviewer_classification . '.';
       }
-      elseif ($decision === MFCS_REVIEW_DECISION_REASSIGNED_COORDINATOR) {
+      elseif ($decision === MFCS_REVIEW_DECISION_REASSIGN_COORDINATOR) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">Re-Assigned</strong> the coordinator' . $reviewer_classification . '.';
       }
-      elseif ($decision === MFCS_REVIEW_DECISION_REASSIGNED_REQUESTER) {
+      elseif ($decision === MFCS_REVIEW_DECISION_REASSIGN_REQUESTER) {
         $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">Re-Assigned</strong> the requester' . $reviewer_classification . '.';
       }
       elseif ($decision === MFCS_REVIEW_DECISION_OVERRIDE) {

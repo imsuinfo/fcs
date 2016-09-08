@@ -58,18 +58,25 @@ define('MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED', 9);
  * Defines Taxonomy TID for review decisions.
  */
  define('MFCS_REVIEW_DECISION_NONE', 0);
- define('MFCS_REVIEW_DECISION_MANAGER_RECHECK', -1);
- define('MFCS_REVIEW_DECISION_AMENDMENT', 141);
- define('MFCS_REVIEW_DECISION_APPROVE', 115);
- define('MFCS_REVIEW_DECISION_COMMENT', 113);
- define('MFCS_REVIEW_DECISION_COMMENT_ALL', 152);
- define('MFCS_REVIEW_DECISION_DENY', 114);
- define('MFCS_REVIEW_DECISION_WAIVE', 135);
- define('MFCS_REVIEW_DECISION_REQUIREMENT', 136);
- define('MFCS_REVIEW_DECISION_AVAILABLE', 148);
- define('MFCS_REVIEW_DECISION_UNAVAILABLE', 149);
- define('MFCS_REVIEW_DECISION_ISSUES', 150);
- define('MFCS_REVIEW_DECISION_ISSUES_NONE', 151);
+ define('MFCS_REVIEW_DECISION_CLOSE', 1);
+ define('MFCS_REVIEW_DECISION_CANCEL', 2);
+ define('MFCS_REVIEW_DECISION_UNCANCEL', 3);
+ define('MFCS_REVIEW_DECISION_REASSIGN_COORDINATOR', 4);
+ define('MFCS_REVIEW_DECISION_OVERRIDE', 5);
+ define('MFCS_REVIEW_DECISION_MOVE', 6);
+ define('MFCS_REVIEW_DECISION_REASSIGN_REQUESTER', 7);
+ define('MFCS_REVIEW_DECISION_MANAGER_RECHECK', 8);
+ define('MFCS_REVIEW_DECISION_AMENDMENT', 9);
+ define('MFCS_REVIEW_DECISION_APPROVE', 10);
+ define('MFCS_REVIEW_DECISION_COMMENT', 11);
+ define('MFCS_REVIEW_DECISION_COMMENT_ALL', 12);
+ define('MFCS_REVIEW_DECISION_DENY', 13);
+ define('MFCS_REVIEW_DECISION_WAIVE', 14);
+ define('MFCS_REVIEW_DECISION_REQUIREMENT', 15);
+ define('MFCS_REVIEW_DECISION_AVAILABLE', 16);
+ define('MFCS_REVIEW_DECISION_UNAVAILABLE', 17);
+ define('MFCS_REVIEW_DECISION_ISSUES', 18);
+ define('MFCS_REVIEW_DECISION_ISSUES_NONE', 19);
 
 /**
  * Defines restrictions review decisions.
@@ -83,15 +90,6 @@ define('MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED', 9);
  define('MFCS_RESTRICTION_DECISION_ADMINISTER', 6);
  define('MFCS_RESTRICTION_DECISION_COMMENT_ONLY', 7);
  define('MFCS_RESTRICTION_DECISION_FINANCER', 8);
-
- // These are hidden/reserved and are used to populate the review log when certain operations have been performed.
- define('MFCS_REVIEW_DECISION_CLOSED', 1);
- define('MFCS_REVIEW_DECISION_CANCELLED', 2);
- define('MFCS_REVIEW_DECISION_UNCANCELLED', 3);
- define('MFCS_REVIEW_DECISION_REASSIGNED_COORDINATOR', 4);
- define('MFCS_REVIEW_DECISION_OVERRIDE', 5);
- define('MFCS_REVIEW_DECISION_MOVE', 6);
- define('MFCS_REVIEW_DECISION_REASSIGNED_REQUESTER', 7);
 
 /**
  * Defines Taxonomy TIDs for review classifications.
@@ -5787,7 +5785,7 @@ function mfcs_autocancel_old_requests_cron() {
 
     if ($cancelled) {
       $message = "One or more dates associated with the request are now in the past.";
-      mfcs_workflow_step_review($request_id, $system_user, MFCS_REVIEW_DECISION_CANCELLED, MFCS_REVIEW_RESTRICTIONS_MANAGERS, $message);
+      mfcs_workflow_step_review($request_id, $system_user, MFCS_REVIEW_DECISION_CANCEL, MFCS_REVIEW_RESTRICTIONS_MANAGERS, $message);
 
       $parameters = array();
       $parameters['changed_by'] = $system_user->uid;

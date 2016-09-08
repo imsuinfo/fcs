@@ -322,26 +322,26 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
                         $custom_message .= 'assigned a <strong class="review-decision">Requirement</strong>. ';
                       }
-                      elseif ($decision === MFCS_REVIEW_DECISION_CANCELLED) {
+                      elseif ($decision === MFCS_REVIEW_DECISION_CANCEL) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
                         $custom_message .= ' the request was <strong class="review-decision">' . "Cancelled" . '</strong>. ';
                       }
-                      elseif ($decision === MFCS_REVIEW_DECISION_UNCANCELLED) {
+                      elseif ($decision === MFCS_REVIEW_DECISION_UNCANCEL) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
                         $custom_message .= ' the request was <strong class="review-decision">' . "Uncancelled" . '</strong>. ';
                       }
-                      elseif ($decision === MFCS_REVIEW_DECISION_REASSIGNED_COORDINATOR) {
+                      elseif ($decision === MFCS_REVIEW_DECISION_REASSIGN_COORDINATOR) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
                         $custom_message .= ' the request\'s Venue Coordinator has been manually <strong class="review-decision">' . "Re-Assigned" . '</strong>. ';
                       }
-                      elseif ($decision === MFCS_REVIEW_DECISION_REASSIGNED_REQUESTER) {
+                      elseif ($decision === MFCS_REVIEW_DECISION_REASSIGN_REQUESTER) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
                         $custom_message .= ' the request\'s Requester has been manually <strong class="review-decision">' . "Re-Assigned" . '</strong>. ';
                       }
                       elseif ($decision === MFCS_REVIEW_DECISION_OVERRIDE) {
                         $custom_message = 'The request\'s step and/or status have been manually <strong class="review-decision">' . "Overridden" . '</strong>. ';
                       }
-                      elseif ($decision === MFCS_REVIEW_DECISION_CLOSED) {
+                      elseif ($decision === MFCS_REVIEW_DECISION_CLOSE) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
                         $custom_message .= ' the request was <strong class="review-decision">' . "Closed" . '</strong>. ';
                       }

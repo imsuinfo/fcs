@@ -2445,7 +2445,7 @@ function mfcs_request_problems_0_request_form_submit($form, &$form_state) {
     else {
       $return_to_problem_page = FALSE;
 
-      mfcs_workflow_step_review($request_id, $user, MFCS_REVIEW_DECISION_REASSIGNED_COORDINATOR, MFCS_REVIEW_RESTRICTIONS_MANAGERS, $extra['revisions']['message']);
+      mfcs_workflow_step_review($request_id, $user, MFCS_REVIEW_DECISION_REASSIGN_COORDINATOR, MFCS_REVIEW_RESTRICTIONS_MANAGERS, $extra['revisions']['message']);
 
       $parameters = array();
       $parameters['changed_by'] = $user->uid;

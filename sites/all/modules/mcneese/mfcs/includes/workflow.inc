@@ -1057,7 +1057,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
 
   if ($step === MFCS_REVIEW_STEP_REVIEW || $step === MFCS_REVIEW_STEP_FINAL_DECISION) {
     // remove classifications not allowed in these steps, unless they are for a comment or a message for the review log.
-    if ($decision !== MFCS_REVIEW_DECISION_COMMENT && $decision !== MFCS_REVIEW_DECISION_CANCELLED && $decision !== MFCS_REVIEW_DECISION_UNCANCELLED && $decision !== MFCS_REVIEW_DECISION_CLOSED && $decision !== MFCS_REVIEW_DECISION_REASSIGNED_COORDINATOR && $decision !== MFCS_REVIEW_DECISION_REASSIGNED_REQUESTER) {
+    if ($decision !== MFCS_REVIEW_DECISION_COMMENT && $decision !== MFCS_REVIEW_DECISION_CANCEL && $decision !== MFCS_REVIEW_DECISION_UNCANCEL && $decision !== MFCS_REVIEW_DECISION_CLOSE && $decision !== MFCS_REVIEW_DECISION_REASSIGN_COORDINATOR && $decision !== MFCS_REVIEW_DECISION_REASSIGN_REQUESTER) {
       unset($reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR]);
       unset($reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY]);
     }
@@ -1776,7 +1776,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
       mfcs_send_workflow_emails($request_id, $parameters);
     }
   }
-  elseif ($decision === MFCS_REVIEW_DECISION_WAIVE || $decision === MFCS_REVIEW_DECISION_CANCELLED || $decision === MFCS_REVIEW_DECISION_UNCANCELLED || $decision === MFCS_REVIEW_DECISION_CLOSED || ($decision === MFCS_REVIEW_DECISION_REQUIREMENT && $new_provided_insurance && $provided_insurance === MFCS_INSURANCE_PROVIDED) || $decision === MFCS_REVIEW_DECISION_REASSIGNED_COORDINATOR || $decision === MFCS_REVIEW_DECISION_REASSIGNED_REQUESTER) {
+  elseif ($decision === MFCS_REVIEW_DECISION_WAIVE || $decision === MFCS_REVIEW_DECISION_CANCEL || $decision === MFCS_REVIEW_DECISION_UNCANCEL || $decision === MFCS_REVIEW_DECISION_CLOSE || ($decision === MFCS_REVIEW_DECISION_REQUIREMENT && $new_provided_insurance && $provided_insurance === MFCS_INSURANCE_PROVIDED) || $decision === MFCS_REVIEW_DECISION_REASSIGN_COORDINATOR || $decision === MFCS_REVIEW_DECISION_REASSIGN_REQUESTER) {
     if ($decision === MFCS_REVIEW_DECISION_WAIVE || $decision === MFCS_REVIEW_DECISION_REQUIREMENT) {
       // if a comment is specified then send an e-mail as a comment.
       if (strlen($message) > 0) {
@@ -2095,7 +2095,7 @@ function mfcs_workflow_next_step($request_id, $type, $step, $decision, $restrict
     mfcs_workflow_set_step($request_id, $new_step, $changed_user);
 
     #if ($new_step === MFCS_REVIEW_STEP_COMPLETED && $type !== MFCS_REQUEST_TYPE_QUICK_MEETING) {
-    #  mfcs_workflow_step_review($request_id, $changed_user, MFCS_REVIEW_DECISION_CLOSED, MFCS_REVIEW_RESTRICTIONS_NONE);
+    #  mfcs_workflow_step_review($request_id, $changed_user, MFCS_REVIEW_DECISION_CLOSE, MFCS_REVIEW_RESTRICTIONS_NONE);
     #}
   }
 
@@ -2776,7 +2776,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
         'send_email' => FALSE,
       );
       mfcs_workflow_step_review($request_id, $request_requester_object, MFCS_REVIEW_DECISION_APPROVE, MFCS_REVIEW_RESTRICTIONS_NONE, "", $extra);
-      #mfcs_workflow_step_review($request_id, $request_requester, MFCS_REVIEW_DECISION_CLOSED, MFCS_REVIEW_RESTRICTIONS_NONE);
+      #mfcs_workflow_step_review($request_id, $request_requester, MFCS_REVIEW_DECISION_CLOSE, MFCS_REVIEW_RESTRICTIONS_NONE);
 
       $email_params['title_suffix'] = "Approved";
       $email_params['content'] = "";

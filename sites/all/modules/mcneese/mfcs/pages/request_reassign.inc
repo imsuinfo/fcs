@@ -285,7 +285,7 @@ function mfcs_request_manage_0_reassign_coordinator_form_submit($form, &$form_st
   $reassigned = mfcs_workflow_set_venue_coordinator($request_id, $form['form']['new_coordinator_id']['#value'], NULL, $extra);
 
   if ($reassigned) {
-    mfcs_workflow_step_review($request_id, $user, MFCS_REVIEW_DECISION_REASSIGNED_COORDINATOR, MFCS_REVIEW_RESTRICTIONS_MANAGERS, $extra['revisions']['message']);
+    mfcs_workflow_step_review($request_id, $user, MFCS_REVIEW_DECISION_REASSIGN_COORDINATOR, MFCS_REVIEW_RESTRICTIONS_MANAGERS, $extra['revisions']['message']);
 
     $parameters = array();
     $parameters['changed_by'] = $user->uid;
@@ -604,7 +604,7 @@ function mfcs_request_manage_0_reassign_requester_form_submit($form, &$form_stat
   $reassigned = mfcs_workflow_set_requester($request_id, $user_id, NULL, $extra);
 
   if ($reassigned) {
-    mfcs_workflow_step_review($request_id, $user, MFCS_REVIEW_DECISION_REASSIGNED_REQUESTER, MFCS_REVIEW_RESTRICTIONS_MANAGERS, $extra['revisions']['message']);
+    mfcs_workflow_step_review($request_id, $user, MFCS_REVIEW_DECISION_REASSIGN_REQUESTER, MFCS_REVIEW_RESTRICTIONS_MANAGERS, $extra['revisions']['message']);
 
     $parameters = array();
     $parameters['changed_by'] = $user->uid;

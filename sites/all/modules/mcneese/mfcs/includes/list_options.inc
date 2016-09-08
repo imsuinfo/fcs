@@ -702,6 +702,13 @@ function mfcs_get_reviewer_decision_list_options($option = NULL, $restriction = 
 
   if ($hidden) {
     $options_all[MFCS_REVIEW_DECISION_NONE] = 'None';
+    $options_all[MFCS_REVIEW_DECISION_CLOSE] = 'Close';
+    $options_all[MFCS_REVIEW_DECISION_CANCEL] = 'Cancel';
+    $options_all[MFCS_REVIEW_DECISION_UNCANCEL] = 'Uncancel';
+    $options_all[MFCS_REVIEW_DECISION_REASSIGN_COORDINATOR] = 'Re-Assign Venue Coordinator';
+    $options_all[MFCS_REVIEW_DECISION_OVERRIDE] = 'Override';
+    $options_all[MFCS_REVIEW_DECISION_MOVE] = 'Move';
+    $options_all[MFCS_REVIEW_DECISION_REASSIGN_REQUESTER] = 'Re-Assign Requester';
     $options_all[MFCS_REVIEW_DECISION_MANAGER_RECHECK] = 'Manager Recheck';
     $options_all[MFCS_REVIEW_DECISION_AMENDMENT] = 'Amendment';
   }
