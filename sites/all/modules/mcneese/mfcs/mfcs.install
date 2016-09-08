@@ -1650,6 +1650,10 @@ function mfcs_schema() {
     'mfcs_taxonomy_request_date_category',
     'mfcs_taxonomy_request_type',
     'mfcs_taxonomy_request_audience',
+    'mfcs_taxonomy_request_designing_materials',
+    'mfcs_taxonomy_request_publicity',
+    'mfcs_taxonomy_request_revenue_generated',
+    'mfcs_taxonomy_request_technical_equipment',
   );
   foreach ($taxonomy_tables as $taxonomy_table) {
     $schema[$taxonomy_table] = array(
@@ -2234,6 +2238,10 @@ function mfcs_install() {
     'mfcs_taxonomy_request_date_category',
     'mfcs_taxonomy_request_type',
     'mfcs_taxonomy_request_audience',
+    'mfcs_taxonomy_request_designing_materials',
+    'mfcs_taxonomy_request_publicity',
+    'mfcs_taxonomy_request_revenue_generated',
+    'mfcs_taxonomy_request_technical_equipment',
   );
   foreach ($taxonomy_tables as $taxonomy_table) {
     db_query('ALTER TABLE {' . $taxonomy_table . '} ADD CONSTRAINT ' . $taxonomy_table . '_machine_name_ukey UNIQUE (machine_name)');
@@ -2316,6 +2324,31 @@ function mfcs_install() {
   db_query('INSERT INTO {mfcs_taxonomy_request_audience} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_AUDIENCE_PUBLIC . ', \'public\', \'Open to the Public\')');
   db_query('INSERT INTO {mfcs_taxonomy_request_audience} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_AUDIENCE_STUDENTS_ONLY . ', \'students\', \'Students Only\')');
 
+  db_query('INSERT INTO {mfcs_taxonomy_request_designing_materials} (id, machine_name, human_name, hidden) VALUES (' . (int) MFCS_REQUEST_DESIGNING_MATERIALS_NONE . ', \'none\', \'None\', 1)');
+  db_query('INSERT INTO {mfcs_taxonomy_request_designing_materials} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_DESIGNING_MATERIALS_PUBLIC_RELATIONS . ', \'public_relations\', \'McNeese Public Relations\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_designing_materials} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_DESIGNING_MATERIALS_MARKETING . ', \'marketing\', \'McNeese Marketing\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_designing_materials} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_DESIGNING_MATERIALS_OTHER . ', \'other\', \'Other\')');
+
+  db_query('INSERT INTO {mfcs_taxonomy_request_publicity} (id, machine_name, human_name, hidden) VALUES (' . (int) MFCS_REQUEST_PUBLICITY_NONE . ', \'none\', \'None\', 1)');
+  db_query('INSERT INTO {mfcs_taxonomy_request_publicity} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_PUBLICITY_CAMPUS_DIGEST . ', \'campus_digest\', \'Campus Digest\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_publicity} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_PUBLICITY_STUDENT_DIGEST . ', \'student_digest\', \'Student Digest\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_publicity} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_PUBLICITY_WEBSITE . ', \'website\', \'Website\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_publicity} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_PUBLICITY_SOCIAL_MEDIA . ', \'social_media\', \'Social Media\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_publicity} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_PUBLICITY_AXIS_TVS . ', \'axis_tv\', \'Axis TV\'s\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_publicity} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_PUBLICITY_PRESS_RELEASE . ', \'press_release\', \'Press Release\')');
+
+  db_query('INSERT INTO {mfcs_taxonomy_request_revenue_generated} (id, machine_name, human_name, hidden) VALUES (' . (int) MFCS_REQUEST_REVENUE_NONE . ', \'none\', \'None\', 1)');
+  db_query('INSERT INTO {mfcs_taxonomy_request_revenue_generated} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_REVENUE_TICKET_SALES . ', \'ticket\', \'Ticket Sales\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_revenue_generated} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_REVENUE_MERCHANDISE_SALES . ', \'merchandise\', \'Merchandise Sales\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_revenue_generated} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_REVENUE_CONCESSION_SALES . ', \'concession\', \'Concession Sales\')');
+
+  db_query('INSERT INTO {mfcs_taxonomy_request_technical_equipment} (id, machine_name, human_name, hidden) VALUES (' . (int) MFCS_REQUEST_TECHNICAL_EQUIPMENT_NONE . ', \'none\', \'None\', 1)');
+  db_query('INSERT INTO {mfcs_taxonomy_request_technical_equipment} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TECHNICAL_EQUIPMENT_SCREEN . ', \'screen\', \'Projector / Screen\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_technical_equipment} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TECHNICAL_EQUIPMENT_COMPUTER . ', \'computer\', \'Computer\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_technical_equipment} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TECHNICAL_EQUIPMENT_SOUND . ', \'sound\', \'Sound for Presentation / Music / Etc\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_technical_equipment} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TECHNICAL_EQUIPMENT_MICROPHONE . ', \'microphone\', \'Microphone\')');
+
+
   db_query('ALTER TABLE {mfcs_requests} ADD CONSTRAINT classification_fkey FOREIGN KEY (classification) REFERENCES {mfcs_taxonomy_request_classification} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
   db_query('ALTER TABLE {mfcs_requests} ADD CONSTRAINT step_fkey FOREIGN KEY (step) REFERENCES {mfcs_taxonomy_review_step} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
   db_query('ALTER TABLE {mfcs_field_request_coordinator_classification} ADD CONSTRAINT value_fkey FOREIGN KEY (value) REFERENCES {mfcs_taxonomy_request_classification} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
@@ -2333,6 +2366,27 @@ function mfcs_install() {
   db_query('ALTER TABLE {mfcs_field_information_type} ADD CONSTRAINT value_fkey FOREIGN KEY (value) REFERENCES {mfcs_taxonomy_request_type} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
 
   db_query('ALTER TABLE {mfcs_field_plans_audience} ADD CONSTRAINT value_fkey FOREIGN KEY (value) REFERENCES {mfcs_taxonomy_request_audience} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+
+  db_query('ALTER TABLE {mfcs_field_presentation_designing_material} ADD CONSTRAINT public_relations_fkey FOREIGN KEY (public_relations) REFERENCES {mfcs_taxonomy_request_designing_materials} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_field_presentation_designing_material} ADD CONSTRAINT marketing_fkey FOREIGN KEY (marketing) REFERENCES {mfcs_taxonomy_request_designing_materials} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_field_presentation_designing_material} ADD CONSTRAINT other_relations_fkey FOREIGN KEY (other) REFERENCES {mfcs_taxonomy_request_designing_materials} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+
+  db_query('ALTER TABLE {mfcs_field_presentation_publicity_details} ADD CONSTRAINT campus_digest_fkey FOREIGN KEY (campus_digest) REFERENCES {mfcs_taxonomy_request_publicity} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_field_presentation_publicity_details} ADD CONSTRAINT student_digest_fkey FOREIGN KEY (student_digest) REFERENCES {mfcs_taxonomy_request_publicity} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_field_presentation_publicity_details} ADD CONSTRAINT website_fkey FOREIGN KEY (website) REFERENCES {mfcs_taxonomy_request_publicity} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_field_presentation_publicity_details} ADD CONSTRAINT social_media_fkey FOREIGN KEY (social_media) REFERENCES {mfcs_taxonomy_request_publicity} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_field_presentation_publicity_details} ADD CONSTRAINT axis_tv_fkey FOREIGN KEY (axis_tv) REFERENCES {mfcs_taxonomy_request_publicity} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_field_presentation_publicity_details} ADD CONSTRAINT press_release_fkey FOREIGN KEY (press_release) REFERENCES {mfcs_taxonomy_request_publicity} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+
+  db_query('ALTER TABLE {mfcs_field_registration_revenue_generated} ADD CONSTRAINT ticket_fkey FOREIGN KEY (ticket) REFERENCES {mfcs_taxonomy_request_revenue_generated} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_field_registration_revenue_generated} ADD CONSTRAINT merchandise_fkey FOREIGN KEY (merchandise) REFERENCES {mfcs_taxonomy_request_revenue_generated} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_field_registration_revenue_generated} ADD CONSTRAINT concession_fkey FOREIGN KEY (concession) REFERENCES {mfcs_taxonomy_request_revenue_generated} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+
+  db_query('ALTER TABLE {mfcs_field_presentation_technical_equipment_details} ADD CONSTRAINT screen_fkey FOREIGN KEY (screen) REFERENCES {mfcs_taxonomy_request_technical_equipment} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_field_presentation_technical_equipment_details} ADD CONSTRAINT computer_fkey FOREIGN KEY (computer) REFERENCES {mfcs_taxonomy_request_technical_equipment} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_field_presentation_technical_equipment_details} ADD CONSTRAINT sound_fkey FOREIGN KEY (sound) REFERENCES {mfcs_taxonomy_request_technical_equipment} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+  db_query('ALTER TABLE {mfcs_field_presentation_technical_equipment_details} ADD CONSTRAINT microphone_fkey FOREIGN KEY (microphone) REFERENCES {mfcs_taxonomy_request_technical_equipment} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+
 
   db_query('ALTER TABLE {mfcs_reviewers} ADD CONSTRAINT reviewer_classification_fkey FOREIGN KEY (reviewer_classification) REFERENCES {mfcs_taxonomy_reviewer_classification} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
   db_query('ALTER TABLE {mfcs_reviewed} ADD CONSTRAINT classification_fkey FOREIGN KEY (classification) REFERENCES {mfcs_taxonomy_reviewer_classification} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
