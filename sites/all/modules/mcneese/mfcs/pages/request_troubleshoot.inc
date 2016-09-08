@@ -11,6 +11,17 @@
  */
 
 /**
+ * Defines troubleshoot codes.
+ */
+define('MFCS_TROUBLESHOOT_NONE', 0);
+define('MFCS_TROUBLESHOOT_REQUESTS_REVIEW_RECHECK', 1);
+define('MFCS_TROUBLESHOOT_MER_CACHE_SYNCHRONIZE', 2);
+define('MFCS_TROUBLESHOOT_BANNER_CACHE_SYNCHRONIZE', 3);
+define('MFCS_TROUBLESHOOT_BANNER_ROLE_SYNCHRONIZE', 4);
+define('MFCS_TROUBLESHOOT_BANNER_INFORMATION', 5);
+define('MFCS_TROUBLESHOOT_REQUESTS_PROBLEM_CHECK', 6);
+
+/**
  * Provides the facilities use request troubleshoot page.
  *
  * @param array $form
