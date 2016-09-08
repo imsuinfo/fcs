@@ -6204,6 +6204,7 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL, $revision_id
           $query->condition('mftf.request_id', $request_id);
           $query->condition('mftf.date', $revision_date, '<=');
           $query->orderBy('mftf.date', 'DESC');
+          $query->orderBy('mftf.delta', 'ASC');
           $query->range(0, 1);
 
           $result = $query->execute()->fetchField();
@@ -6224,11 +6225,12 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL, $revision_id
             }
 
             $query = db_select($field_table_name, 'mftf');
+            $query->fields('mftf');
             $query->condition('mftf.request_id', $request_id);
             $query->condition('mftf.revision', $current->{$current_name});
-            $query->fields('mftf');
+            $query->orderBy('mftf.delta', 'ASC');
 
-            $results = $query->execute()->fetchAll();
+            $results = $query->execute()->fetchAllAssoc('delta');
 
             if (empty($results)) {
               $request[$table_name][$alternate_name] = array();
@@ -6248,8 +6250,9 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL, $revision_id
           if (isset($current->{$current_name})) {
             $query->condition('mftf.revision', $current->{$current_name});
           }
+          $query->orderBy('mftf.delta', 'ASC');
 
-          $results = $query->execute()->fetchAll();
+          $results = $query->execute()->fetchAllAssoc('delta');
 
           if (empty($results)) {
             $request[$table_name][$field_name] = array();
