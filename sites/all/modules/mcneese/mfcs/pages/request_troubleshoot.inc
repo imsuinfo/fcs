@@ -1313,7 +1313,7 @@ function mfcs_request_troubleshoot_0_buildings_page($building_id = NULL) {
       $target_markup .= '    </li>';
       $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-location_id even">';
       $target_markup .= '      <div class="information_page-entry-list-item-name">Location ID:</div> ';
-      $target_markup .= '      <div class="information_page-entry-list-item-value"><a href="' . $base_path . 'requests/troubleshoot-0/locations#mfcs-troubleshoot_0-locations-page-entry-' . $entry->location_id . $url_arguments . '" class="no_print_links_as_link">' . $entry->location_id . '</a></div>';
+      $target_markup .= '      <div class="information_page-entry-list-item-value"><a href="' . $base_path . 'requests/troubleshoot-0/locations/' . $entry->location_id . $url_arguments . '" class="no_print_links_as_link">' . $entry->location_id . '</a></div>';
       $target_markup .= '    </li>';
       $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-location_code odd">';
       $target_markup .= '      <div class="information_page-entry-list-item-name">Location Code:</div> ';
@@ -1495,7 +1495,7 @@ function mfcs_request_troubleshoot_0_rooms_page($room_id = NULL) {
       $target_markup .= '    </li>';
       $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-building_id odd">';
       $target_markup .= '      <div class="information_page-entry-list-item-name">Building ID:</div> ';
-      $target_markup .= '      <div class="information_page-entry-list-item-value"><a href="' . $base_path . 'requests/troubleshoot-0/buildings#mfcs-troubleshoot_0-buildings-page-entry-' . $entry->building_id . $url_arguments . '" class="no_print_links_as_link">' . $entry->building_id . '</a></div>';
+      $target_markup .= '      <div class="information_page-entry-list-item-value"><a href="' . $base_path . 'requests/troubleshoot-0/buildings/' . $entry->building_id . $url_arguments . '" class="no_print_links_as_link">' . $entry->building_id . '</a></div>';
       $target_markup .= '    </li>';
       $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-building_code even">';
       $target_markup .= '      <div class="information_page-entry-list-item-name">Building Code:</div> ';
@@ -1515,7 +1515,7 @@ function mfcs_request_troubleshoot_0_rooms_page($room_id = NULL) {
       $target_markup .= '    </li>';
       $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-location_id even">';
       $target_markup .= '      <div class="information_page-entry-list-item-name">Location ID:</div> ';
-      $target_markup .= '      <div class="information_page-entry-list-item-value"><a href="' . $base_path . 'requests/troubleshoot-0/locations#mfcs-troubleshoot_0-locations-page-entry-' . $entry->location_id . $url_arguments . '" class="no_print_links_as_link">' . $entry->location_id . '</a></div>';
+      $target_markup .= '      <div class="information_page-entry-list-item-value"><a href="' . $base_path . 'requests/troubleshoot-0/locations/' . $entry->location_id . $url_arguments . '" class="no_print_links_as_link">' . $entry->location_id . '</a></div>';
       $target_markup .= '    </li>';
       $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-location_code odd">';
       $target_markup .= '      <div class="information_page-entry-list-item-name">Location Machine Name:</div> ';

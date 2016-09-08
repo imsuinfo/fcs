@@ -681,7 +681,7 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
   }
   else {
     if ($can_troubleshoot) {
-      $building_value = '<a href="' . $base_path . 'requests/troubleshoot-0/rooms/' . $room_id . $url_arguments . '" class="operation-link operation-link-view" title="View Technical Building Information">' . check_plain($room->building_name) . '</a>';
+      $building_value = '<a href="' . $base_path . 'requests/troubleshoot-0/buildings/' . $room->building_id . $url_arguments . '" class="operation-link operation-link-view" title="View Technical Building Information">' . check_plain($room->building_name) . '</a>';
       $room_value = '<a href="' . $base_path . 'requests/troubleshoot-0/rooms/' . $room_id . $url_arguments . '" class="operation-link operation-link-view" title="View Technical Room Information">' . check_plain($room->room_name) . '</a>';
     }
     else {
