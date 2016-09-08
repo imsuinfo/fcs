@@ -317,6 +317,9 @@ function mfcs_request_create_0_form_validate($form, &$form_state) {
   }
   unset($clicked_id_parts);
 
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+  $request_type_options = mfcs_get_request_type_list_options();
+
   if (empty($form_state['values']['form']['step'])) {
     form_set_error('form][step', "An internal error occured. Form Step is not defined. Please contact the System Administrator.");
   }
@@ -553,23 +556,21 @@ function mfcs_request_create_0_form_validate($form, &$form_state) {
 
 
           if (empty($form_state['values']['request']['information']['type'][0])) {
-            form_set_error('request][information][type][0', "The <strong>" . $form['request']['information']['type'][0]['#title'] . "</strong> is required.");
+            form_set_error('request][information][type][0', 'The <strong>' . $form['request']['information']['type'][0]['#title'] . '</strong> is required.');
           }
           else {
-            $type_term = taxonomy_term_load($form_state['values']['request']['information']['type'][0]);
-
-            if (is_object($type_term)) {
+            if (array_key_exists($form_state['values']['request']['information']['type'][0], $request_type_options)) {
               $form_state['values']['form']['step'] = 'details';
             }
             else {
-              form_set_error('request][information][type][0', "An invalid <strong>" . $form['request']['information']['type'][0]['#title'] . "</strong> is has been selected.");
+              form_set_error('request][information][type][0', 'An invalid <strong>' . $form['request']['information']['type'][0]['#title'] . '</strong> is selected.');
             }
           }
         }
       }
       else {
         form_set_error('', 'Illegal operation detected while processing request. Please contact the support staff.');
-        watchdog(MFCS_WATCHDOG_ID, "During the create process, an unhandled click state was presented: @clicked_id.", array('@clicked_id' => $clicked_id), WATCHDOG_ERROR);
+        watchdog(MFCS_WATCHDOG_ID, 'During the create process, an unhandled click state was presented: @clicked_id.', array('@clicked_id' => $clicked_id), WATCHDOG_ERROR);
       }
     }
     elseif ($form_state['values']['form']['step'] == 'details') {

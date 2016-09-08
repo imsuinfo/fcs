@@ -892,8 +892,6 @@ function mfcs_request_troubleshoot_0_locations_page($location_id = NULL) {
 
   try {
     $query = db_select('mfcs_banner_locations', 'mbl');
-    $query->innerJoin('field_data_field_column_venue_category', 'fdfcvc', 'mbl.machine_name = fdfcvc.field_column_venue_category_value');
-    $query->innerJoin('taxonomy_term_data', 'ttd', 'fdfcvc.entity_id = ttd.tid');
 
     if (!is_null($location_id)) {
       $query->condition('mbl.id', $location_id);
@@ -902,11 +900,8 @@ function mfcs_request_troubleshoot_0_locations_page($location_id = NULL) {
     $query->addField('mbl', 'id', 'location_id');
     $query->addField('mbl', 'machine_name', 'machine_name');
     $query->addField('mbl', 'human_name', 'human_name');
-    $query->addField('ttd', 'tid', 'term_id');
     $query->addField('mbl', 'date', 'date');
     $query->addField('mbl', 'disabled', 'disabled');
-
-    $query->condition('ttd.vid', MFCS_VID_REQUEST_LOCATION);
 
     $query->orderBy('mbl.disabled');
     $query->orderBy('mbl.machine_name');
@@ -945,17 +940,13 @@ function mfcs_request_troubleshoot_0_locations_page($location_id = NULL) {
       $target_markup .= '      <div class="information_page-entry-list-item-name">Location Name:</div> ';
       $target_markup .= '      <div class="information_page-entry-list-item-value"><a href="' . $base_path . 'requests/troubleshoot-0/locations/' . $entry->location_id . '/edit' . $url_arguments . '" class="information_page-entry-list-item-value-link">' . $entry->human_name . '</a></div>';
       $target_markup .= '    </li>';
-      $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-term_id even">';
-      $target_markup .= '      <div class="information_page-entry-list-item-name">Term ID:</div> ';
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . $entry->term_id . '</div>';
-      $target_markup .= '    </li>';
       $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-date odd">';
       $target_markup .= '      <div class="information_page-entry-list-item-name">Last Updated:</div> ';
       $target_markup .= '      <div class="information_page-entry-list-item-value">' . date('l, F j Y h:i:s a', $entry->date) . '</div>';
       $target_markup .= '    </li>';
       $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-disabled even">';
       $target_markup .= '      <div class="information_page-entry-list-item-name">Disabled / Deleted:</div> ';
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . ($entry->disabled == 0 ? "No" : "Yes") . '</div>';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . ($entry->disabled == 0 ? 'No' : 'Yes') . '</div>';
       $target_markup .= '    </li>';
       $target_markup .= '  </ul>';
       $target_markup .= '</div>';

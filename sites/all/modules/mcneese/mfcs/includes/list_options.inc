@@ -136,7 +136,7 @@ function mfcs_get_request_classification_list_options($option = NULL, $user = NU
 
   $options_all[MFCS_REQUEST_CLASSIFICATION_STUDENT] = 'Student Organization';
   $options_all[MFCS_REQUEST_CLASSIFICATION_CAMPS] = 'Camps';
-  $options_all[MFCS_REQUEST_CLASSIFICATION_FACULTY] = 'Faculty / Staff / Athletics';
+  $options_all[MFCS_REQUEST_CLASSIFICATION_FACULTY] = 'Faculty, Staff, Athletics';
   $options_all[MFCS_REQUEST_CLASSIFICATION_EXTERNAL] = 'Externals';
 
   if ($option == 'select') {
@@ -317,7 +317,7 @@ function mfcs_get_dates_category_list_options($option = NULL, $hidden = FALSE, $
   }
 
   $options_all[MFCS_REQUEST_DATES_CATEGORY_ACTUAL] = 'Event / Meeting';
-  $options_all[MFCS_REQUEST_DATES_CATEGORY_SETUP] = 'Rehearsel / Setup';
+  $options_all[MFCS_REQUEST_DATES_CATEGORY_SETUP] = 'Rehearsal / Setup';
   $options_all[MFCS_REQUEST_DATES_CATEGORY_CLEANUP] = 'Cleanup / Breakdown';
 
   if ($option == 'select') {
@@ -446,9 +446,9 @@ function mfcs_get_request_type_list_options($option = NULL, $hidden = FALSE, $di
   $options_all[MFCS_REQUEST_TYPE_RECEPTION] = 'Reception';
   $options_all[MFCS_REQUEST_TYPE_BANQUET] = 'Banquet';
   $options_all[MFCS_REQUEST_TYPE_WORKSHOP] = 'Workshop';
-  $options_all[MFCS_REQUEST_TYPE_TALENT] = 'Talent';
-  $options_all[MFCS_REQUEST_TYPE_CEREMONY] = 'Ceremony';
-  $options_all[MFCS_REQUEST_TYPE_FAIR] = 'Fair';
+  $options_all[MFCS_REQUEST_TYPE_TALENT] = 'Talent / Variety Show';
+  $options_all[MFCS_REQUEST_TYPE_CEREMONY] = 'Ceremony / Presentation';
+  $options_all[MFCS_REQUEST_TYPE_FAIR] = 'Fair / Expo';
   $options_all[MFCS_REQUEST_TYPE_ATHLETIC] = 'Athletic';
   $options_all[MFCS_REQUEST_TYPE_OTHER] = 'Other';
   $options_all[MFCS_REQUEST_TYPE_QUICK_MEETING] = 'Quick Meeting';
@@ -724,7 +724,7 @@ function mfcs_get_reviewer_decision_list_options($option = NULL, $restriction = 
     $options[''] = '- Select -';
   }
 
-  if (!is_int($restriction) || $restriction < MFCS_RESTRICTION_DECISION_NONE || $restriction > MFCS_RESTRICTION_DECISION_FINANCER) {
+  if (!is_int($restriction)) {
     $restriction = MFCS_RESTRICTION_DECISION_NONE;
   }
 
@@ -831,8 +831,6 @@ function mfcs_get_review_step_list_options($option = NULL, $hidden = FALSE, $dis
   if ($option == 'select') {
     $options[''] = '- Select -';
   }
-
-  $options_tree = taxonomy_get_tree(MFCS_VID_REQUEST_STEPS, 0, NULL, TRUE);
 
   if ($option == 'roles') {
     asort($options_all);

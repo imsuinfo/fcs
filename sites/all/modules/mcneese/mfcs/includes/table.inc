@@ -1321,7 +1321,10 @@ function mfcs_table_presentation($option = NULL) {
     'category' => array(
       'label' => 'Date Category',
       'type' => array(
-        'value' => 'taxonomy',
+        'value' => 'mfcs_taxonomy',
+      ),
+      'taxonomy_function' => array(
+        'value' => 'mfcs_get_dates_category_list_options',
       ),
       'request_type' => array(
         'show' => TRUE,
@@ -1433,7 +1436,10 @@ function mfcs_table_presentation($option = NULL) {
       'group' => 'coordinator',
       'weight' => 7,
       'type' => array(
-        'value' => 'taxonomy',
+        'value' => 'mfcs_taxonomy',
+      ),
+      'taxonomy_function' => array(
+        'value' => 'mfcs_get_request_classification_list_options',
       ),
       'request_type' => array(
         'show' => TRUE,
@@ -1463,7 +1469,10 @@ function mfcs_table_presentation($option = NULL) {
       'label' => 'Request Type',
       'weight' => 2,
       'type' => array(
-        'value' => 'taxonomy',
+        'value' => 'mfcs_taxonomy',
+      ),
+      'taxonomy_function' => array(
+        'value' => 'mfcs_get_request_type_list_options',
       ),
       'request_type' => array(
         'show' => TRUE,
@@ -1499,7 +1508,10 @@ function mfcs_table_presentation($option = NULL) {
     'audience' => array(
       'label' => 'Intended Audience',
       'type' => array(
-        'value' => 'taxonomy',
+        'value' => 'mfcs_taxonomy',
+      ),
+      'taxonomy_function' => array(
+        'value' => 'mfcs_get_audience_list_options',
       ),
       'request_type' => array(
         'show' => TRUE,
@@ -1631,9 +1643,14 @@ function mfcs_table_presentation($option = NULL) {
         'concession',
       ),
       'type' => array(
-        'ticket' => 'taxonomy',
-        'merchandise' => 'taxonomy',
-        'concession' => 'taxonomy',
+        'ticket' => 'mfcs_taxonomy',
+        'merchandise' => 'mfcs_taxonomy',
+        'concession' => 'mfcs_taxonomy',
+      ),
+      'taxonomy_function' => array(
+        'ticket' => 'mfcs_get_revenue_generated_list_options',
+        'merchandise' => 'mfcs_get_revenue_generated_list_options',
+        'concession' => 'mfcs_get_revenue_generated_list_options',
       ),
       'request_type' => array(
         'show' => TRUE,
@@ -1834,10 +1851,16 @@ function mfcs_table_presentation($option = NULL) {
         'sound',
       ),
       'type' => array(
-        'microphone' => 'taxonomy',
-        'screen' => 'taxonomy',
-        'computer' => 'taxonomy',
-        'sound' => 'taxonomy',
+        'microphone' => 'mfcs_taxonomy',
+        'screen' => 'mfcs_taxonomy',
+        'computer' => 'mfcs_taxonomy',
+        'sound' => 'mfcs_taxonomy',
+      ),
+      'taxonomy_function' => array(
+        'microphone' => 'mfcs_get_technical_equipment_details_list_options',
+        'screen' => 'mfcs_get_technical_equipment_details_list_options',
+        'computer' => 'mfcs_get_technical_equipment_details_list_options',
+        'sound' => 'mfcs_get_technical_equipment_details_list_options',
       ),
       'request_type' => array(
         'show' => TRUE,
@@ -1915,13 +1938,21 @@ function mfcs_table_presentation($option = NULL) {
         'press_release',
       ),
       'type' => array(
-        'campus_digest' => 'taxonomy',
-        'student_digest' => 'taxonomy',
-        'website' => 'taxonomy',
-        'social_media' => 'taxonomy',
-        'axis_tv' => 'taxonomy',
-        'press_release' => 'taxonomy',
+        'campus_digest' => 'mfcs_taxonomy',
+        'student_digest' => 'mfcs_taxonomy',
+        'website' => 'mfcs_taxonomy',
+        'social_media' => 'mfcs_taxonomy',
+        'axis_tv' => 'mfcs_taxonomy',
+        'press_release' => 'mfcs_taxonomy',
        ),
+      'taxonomy_function' => array(
+        'campus_digest' => 'mfcs_get_publicity_details_list_options',
+        'student_digest' => 'mfcs_get_publicity_details_list_options',
+        'website' => 'mfcs_get_publicity_details_list_options',
+        'social_media' => 'mfcs_get_publicity_details_list_options',
+        'axis_tv' => 'mfcs_get_publicity_details_list_options',
+        'press_release' => 'mfcs_get_publicity_details_list_options',
+      ),
       'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
@@ -2014,9 +2045,14 @@ function mfcs_table_presentation($option = NULL) {
         'other',
       ),
       'type' => array(
-        'public_relations' => 'taxonomy',
-        'marketing' => 'taxonomy',
-        'other' => 'taxonomy',
+        'public_relations' => 'mfcs_taxonomy',
+        'marketing' => 'mfcs_taxonomy',
+        'other' => 'mfcs_taxonomy',
+      ),
+      'taxonomy_function' => array(
+        'public_relations' => 'mfcs_get_designing_material_list_options',
+        'marketing' => 'mfcs_get_designing_material_list_options',
+        'other' => 'mfcs_get_designing_material_list_options',
       ),
       'request_type' => array(
         'show' => TRUE,

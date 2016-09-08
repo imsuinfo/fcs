@@ -323,6 +323,9 @@ function mfcs_request_edit_0_form_validate($form, &$form_state) {
     return;
   }
 
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+  $request_type_options = mfcs_get_request_type_list_options();
+
   $request = $form['form']['request']['#value'];
   $request_id = (int) $request['mer']['id'][0]->value;
 
@@ -456,7 +459,7 @@ function mfcs_request_edit_0_form_validate($form, &$form_state) {
           if (!empty($date)) {
             $room_unavailability = mfcs_check_room_availability($room, $date, $time_start, $time_stop, $request_id);
             if ($room_unavailability === FALSE) {
-              form_set_error('', "An internal error occurred while checking the room for availability. Please contact the support staff.");
+              form_set_error('', 'An internal error occurred while checking the room for availability. Please contact the support staff.');
             }
             elseif (!empty($room_unavailability['conflicts']) || !empty($room_unavailability['unavailable'])) {
               $unavailable_message = '<span class="uppercase">Warning</span>: The specified room is currently unavailable for the following dates: ';
@@ -473,16 +476,14 @@ function mfcs_request_edit_0_form_validate($form, &$form_state) {
           unset($room_unavailability);
 
           if (empty($form_state['values']['request']['information']['type'][0])) {
-            form_set_error('request][information][type][0', "The <strong>" . $form['request']['information']['type'][0]['#title'] . "</strong> is required.");
+            form_set_error('request][information][type][0', 'The <strong>' . $form['request']['information']['type'][0]['#title'] . '</strong> is required.');
           }
           else {
-            $type_term = taxonomy_term_load($form_state['values']['request']['information']['type'][0]);
-
-            if (is_object($type_term)) {
+            if (array_key_exists($form_state['values']['request']['information']['type'][0], $request_type_options)) {
               $form_state['values']['form']['step'] = 'details';
             }
             else {
-              form_set_error('request][information][type][0', "An invalid <strong>" . $form['request']['information']['type'][0]['#title'] . "</strong> is has been selected.");
+              form_set_error('request][information][type][0', 'An invalid <strong>' . $form['request']['information']['type'][0]['#title'] . '</strong> is selected.');
             }
           }
         }

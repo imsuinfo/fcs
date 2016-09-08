@@ -2254,7 +2254,7 @@ function mfcs_install() {
   db_query('INSERT INTO {mfcs_taxonomy_request_classification} (id, machine_name, human_name, hidden) VALUES (' . (int) MFCS_REQUEST_CLASSIFICATION_NONE . ', \'none\', \'None\', 1)');
   db_query('INSERT INTO {mfcs_taxonomy_request_classification} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_CLASSIFICATION_STUDENT . ', \'student\', \'Student Organization\')');
   db_query('INSERT INTO {mfcs_taxonomy_request_classification} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_CLASSIFICATION_CAMPS . ', \'camps\', \'Camps\')');
-  db_query('INSERT INTO {mfcs_taxonomy_request_classification} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_CLASSIFICATION_FACULTY . ', \'faculty\', \'Faculty / Staff / Atheletics\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_classification} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_CLASSIFICATION_FACULTY . ', \'faculty\', \'Faculty, Staff, Atheletics\')');
   db_query('INSERT INTO {mfcs_taxonomy_request_classification} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_CLASSIFICATION_EXTERNAL . ', \'external\', \'External\')');
 
   db_query('INSERT INTO {mfcs_taxonomy_review_step} (id, machine_name, human_name, hidden) VALUES (' . (int) MFCS_REVIEW_STEP_NONE . ', \'none\', \'None\', 1)');
@@ -2306,15 +2306,15 @@ function mfcs_install() {
   db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name, hidden) VALUES (' . (int) MFCS_REQUEST_TYPE_NONE . ', \'none\', \'None\', 1)');
   db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TYPE_ATHLETIC . ', \'athletic\', \'Athletic\')');
   db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TYPE_BANQUET . ', \'banquet\', \'Banquet\')');
-  db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TYPE_CEREMONY . ', \'ceremony\', \'Ceremony\')');
-  db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TYPE_FAIR . ', \'fair\', \'Fair\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TYPE_CEREMONY . ', \'ceremony\', \'Ceremony / Presentation\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TYPE_FAIR . ', \'fair\', \'Fair / Expo\')');
   db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TYPE_LECTURE . ', \'lecture\', \'Lecture\')');
   db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TYPE_MEETING . ', \'meeting\', \'Meeting\')');
   db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TYPE_OTHER . ', \'other\', \'Other\')');
   db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TYPE_PERFORMANCE . ', \'performance\', \'Performance\')');
   db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TYPE_QUICK_MEETING . ', \'quick_meeting\', \'Quick Meeting\')');
   db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TYPE_RECEPTION . ', \'reception\', \'Reception\')');
-  db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TYPE_TALENT . ', \'talent\', \'Talent\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TYPE_TALENT . ', \'talent\', \'Talent / Variety Show\')');
   db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TYPE_WORKSHOP . ', \'workshop\', \'Workshop\')');
 
   db_query('INSERT INTO {mfcs_taxonomy_request_audience} (id, machine_name, human_name, hidden) VALUES (' . (int) MFCS_REQUEST_AUDIENCE_NONE . ', \'none\', \'None\', 1)');

@@ -776,14 +776,30 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
         $length += strlen($value->{$value_name});
       }
       elseif ($type[$value_name] == 'taxonomy') {
-        $term = taxonomy_term_load($value->{$value_name});
+        if (function_exists('taxonomy_term_load')) {
+          $term = taxonomy_term_load($value->{$value_name});
 
-        if (is_object($term)) {
-          $markup .= check_plain($term->name);
-          $length += strlen($term->name);
+          if (is_object($term)) {
+            $markup .= check_plain($term->name);
+            $length += strlen($term->name);
+          }
+
+          unset($term);
         }
+      }
+      elseif ($type[$value_name] == 'mfcs_taxonomy') {
+        if (isset($presentation['taxonomy_function'][$value_name]) && function_exists($presentation['taxonomy_function'][$value_name])) {
+          $function_name = $presentation['taxonomy_function'][$value_name];
+          $terms = $function_name();
 
-        unset($term);
+          if (array_key_exists($value->{$value_name}, $terms)) {
+            $markup .= check_plain($terms[$value->{$value_name}]);
+            $length += strlen($terms[$value->{$value_name}]);
+          }
+
+          unset($terms);
+          unset($function_name);
+        }
       }
       elseif ($type[$value_name] == 'user_id') {
         if (!isset($users[$value->{$value_name}])) {

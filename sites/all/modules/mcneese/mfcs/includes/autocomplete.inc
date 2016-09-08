@@ -114,15 +114,14 @@ function mfcs_request_reviewers_0_autocomplete_reviewer_classification($string) 
   }
 
   try {
-    $query = db_select('taxonomy_term_data', 'ttd');
+    $query = db_select('mfcs_taxonomy_reviewer_classification', 'mtrc');
 
-    $query->addField('ttd', 'tid', 'tid');
-    $query->addField('ttd', 'name', 'name');
+    $query->addField('mtrc', 'id', 'id');
+    $query->addField('mtrc', 'human_name', 'human_name');
 
-    $query->condition('ttd.vid', 17);
-    $query->condition('ttd.name', '%' . db_like($s) . '%', $ilike);
+    $query->condition('mtrc.human_name', '%' . db_like($s) . '%', $ilike);
 
-    $query->orderBy('name');
+    $query->orderBy('human_name');
 
     $query->range(0, 9);
 
@@ -141,7 +140,7 @@ function mfcs_request_reviewers_0_autocomplete_reviewer_classification($string) 
 
   $matches = array();
   foreach ($results as $result) {
-    $value = $result->name . ' [id: ' . $result->tid . ']';
+    $value = $result->human_name . ' [id: ' . $result->id . ']';
     $matches[$value] = check_plain($value);
   }
 

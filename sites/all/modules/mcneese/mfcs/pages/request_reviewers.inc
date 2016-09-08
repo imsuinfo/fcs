@@ -599,7 +599,7 @@ function mfcs_request_reviewers_0_form_validate($form, &$form_state) {
       $user = user_load($user_id);
 
       if (!is_object($user)) {
-        form_set_error('reviewer][user_id', "An invalid User has been specified. Please select a valid User.");
+        form_set_error('reviewer][user_id', 'An invalid User has been specified. Please select a valid User.');
       }
     }
 
@@ -618,18 +618,15 @@ function mfcs_request_reviewers_0_form_validate($form, &$form_state) {
 
     if (!is_null($reviewer_classification)) {
       try {
-        $query = db_select('taxonomy_term_data', 'ttd');
-        $query->fields('ttd');
-
-        $query->condition('ttd.vid', 17);
-        $query->condition('ttd.tid', $reviewer_classification);
-
+        $query = db_select('mfcs_taxonomy_reviewer_classification', 'mtrc');
+        $query->addField('mtrc', 'id', 'id');
+        $query->condition('mtrc.id', $reviewer_classification);
         $query->countQuery();
 
         $result = $query->execute()->fetchField();
         if ($result == 0) {
           $reviewer_classification = NULL;
-          form_set_error('reviewer][reviewer_classification', "An invalid Reviewer Classification has been specified. Please select a valid Reviewer Classification.");
+          form_set_error('reviewer][reviewer_classification', 'An invalid Reviewer Classification has been specified. Please select a valid Reviewer Classification.');
         }
       }
       catch (Error $e) {
