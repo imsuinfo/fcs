@@ -594,7 +594,7 @@ function mfcs_get_technical_equipment_details_list_options($option = NULL, $hidd
     $options_all[MFCS_REQUEST_TECHNICAL_EQUIPMENT_SCREEN] = 'screen';
     $options_all[MFCS_REQUEST_TECHNICAL_EQUIPMENT_COMPUTER] = 'computer';
     $options_all[MFCS_REQUEST_TECHNICAL_EQUIPMENT_SOUND] = 'sound';
-    $options_all[MFCS_REQUEST_TECHNICAL_EQUIPMENT_MICROPHONE] = 'equipment';
+    $options_all[MFCS_REQUEST_TECHNICAL_EQUIPMENT_MICROPHONE] = 'microphone';
   }
 
   foreach ($options_all as $option_id => $option_name) {
