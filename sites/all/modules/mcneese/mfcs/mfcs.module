@@ -43,7 +43,7 @@ define('MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED', 9);
  define('MFCS_VID_REQUEST_DATES_CATEGORY', 20);
 
 /**
- * Defines Taxonomy TIDs for review steps.
+ * Defines Taxonomy TIDs for review steps (aka: request step).
  */
  define('MFCS_REVIEW_STEP_NONE', 0);
  define('MFCS_REVIEW_STEP_CHANGES_REQUIRED', 1);
@@ -177,18 +177,6 @@ define('MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED', 9);
  define('MFCS_REQUEST_TECHNICAL_EQUIPMENT_COMPUTER', 2);
  define('MFCS_REQUEST_TECHNICAL_EQUIPMENT_SOUND', 3);
  define('MFCS_REQUEST_TECHNICAL_EQUIPMENT_MICROPHONE', 4);
-
-/**
- * Defines Taxonomy TIDs for request step.
- */
- define('MFCS_REQUEST_STEP_NONE', 0);
- define('MFCS_REQUEST_STEP_VENUE_AVAILABLE', 116);
- define('MFCS_REQUEST_STEP_FINAL_DECISION', 117);
- define('MFCS_REQUEST_STEP_TENTATIVE_HOLD', 118);
- define('MFCS_REQUEST_STEP_REVIEW', 132);
- define('MFCS_REQUEST_STEP_REQUIREMENTS', 133);
- define('MFCS_REQUEST_STEP_COMPLETED', 134);
- define('MFCS_REQUEST_STEP_CHANGES_REQUIRED', 140);
 
 /**
  * Defines operator codes for building search queries.

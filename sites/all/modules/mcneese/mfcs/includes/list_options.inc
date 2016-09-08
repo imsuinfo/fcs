@@ -817,16 +817,16 @@ function mfcs_get_review_step_list_options($option = NULL, $hidden = FALSE, $dis
   $options_all = array();
 
   if ($hidden) {
-    $options_all[MFCS_REQUEST_STEP_NONE] = 'None';
+    $options_all[MFCS_REVIEW_STEP_NONE] = 'None';
   }
 
-  $options_all[MFCS_REQUEST_STEP_VENUE_AVAILABLE] = 'Venue Available';
-  $options_all[MFCS_REQUEST_STEP_FINAL_DECISION] = 'Final Decision';
-  $options_all[MFCS_REQUEST_STEP_TENTATIVE_HOLD] = 'Release Tentative Hold';
-  $options_all[MFCS_REQUEST_STEP_REVIEW] = 'Review';
-  $options_all[MFCS_REQUEST_STEP_REQUIREMENTS] = 'Requirements';
-  $options_all[MFCS_REQUEST_STEP_COMPLETED] = 'Completed';
-  $options_all[MFCS_REQUEST_STEP_CHANGES_REQUIRED] = 'Changes Required';
+  $options_all[MFCS_REVIEW_STEP_VENUE_AVAILABLE] = 'Venue Available';
+  $options_all[MFCS_REVIEW_STEP_FINAL_DECISION] = 'Final Decision';
+  $options_all[MFCS_REVIEW_STEP_RELEASE_HOLD] = 'Release Tentative Hold';
+  $options_all[MFCS_REVIEW_STEP_REVIEW] = 'Review';
+  $options_all[MFCS_REVIEW_STEP_REQUIREMENTS] = 'Requirements';
+  $options_all[MFCS_REVIEW_STEP_COMPLETED] = 'Completed';
+  $options_all[MFCS_REVIEW_STEP_CHANGES_REQUIRED] = 'Changes Required';
 
   if ($option == 'select') {
     $options[''] = '- Select -';
@@ -836,16 +836,16 @@ function mfcs_get_review_step_list_options($option = NULL, $hidden = FALSE, $dis
     asort($options_all);
 
     if ($hidden) {
-      $options_roles[MFCS_REQUEST_STEP_NONE] = array();
+      $options_roles[MFCS_REVIEW_STEP_NONE] = array();
     }
 
-    $options_roles[MFCS_REQUEST_STEP_VENUE_AVAILABLE] = array(1, 2, 3, 4);
-    $options_roles[MFCS_REQUEST_STEP_FINAL_DECISION] = array(1, 2, 3, 4);
-    $options_roles[MFCS_REQUEST_STEP_TENTATIVE_HOLD] = array();
-    $options_roles[MFCS_REQUEST_STEP_REVIEW] = array(1, 2, 3, 4);
-    $options_roles[MFCS_REQUEST_STEP_REQUIREMENTS] = array(1, 2, 3, 4);
-    $options_roles[MFCS_REQUEST_STEP_COMPLETED] = array();
-    $options_roles[MFCS_REQUEST_STEP_CHANGES_REQUIRED] = array();
+    $options_roles[MFCS_REVIEW_STEP_VENUE_AVAILABLE] = array(1, 2, 3, 4);
+    $options_roles[MFCS_REVIEW_STEP_FINAL_DECISION] = array(1, 2, 3, 4);
+    $options_roles[MFCS_REVIEW_STEP_RELEASE_HOLD] = array();
+    $options_roles[MFCS_REVIEW_STEP_REVIEW] = array(1, 2, 3, 4);
+    $options_roles[MFCS_REVIEW_STEP_REQUIREMENTS] = array(1, 2, 3, 4);
+    $options_roles[MFCS_REVIEW_STEP_COMPLETED] = array();
+    $options_roles[MFCS_REVIEW_STEP_CHANGES_REQUIRED] = array();
 
     foreach ($options_all as $option_id => $option_name) {
       $options[$option_id] = array();
