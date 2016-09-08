@@ -1654,6 +1654,7 @@ function mfcs_schema() {
     'mfcs_taxonomy_request_publicity',
     'mfcs_taxonomy_request_revenue_generated',
     'mfcs_taxonomy_request_technical_equipment',
+    'mfcs_taxonomy_review_decisions',
   );
   foreach ($taxonomy_tables as $taxonomy_table) {
     $schema[$taxonomy_table] = array(
@@ -2242,6 +2243,7 @@ function mfcs_install() {
     'mfcs_taxonomy_request_publicity',
     'mfcs_taxonomy_request_revenue_generated',
     'mfcs_taxonomy_request_technical_equipment',
+    'mfcs_taxonomy_review_decisions',
   );
   foreach ($taxonomy_tables as $taxonomy_table) {
     db_query('ALTER TABLE {' . $taxonomy_table . '} ADD CONSTRAINT ' . $taxonomy_table . '_machine_name_ukey UNIQUE (machine_name)');
@@ -2348,6 +2350,27 @@ function mfcs_install() {
   db_query('INSERT INTO {mfcs_taxonomy_request_technical_equipment} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TECHNICAL_EQUIPMENT_SOUND . ', \'sound\', \'Sound for Presentation / Music / Etc\')');
   db_query('INSERT INTO {mfcs_taxonomy_request_technical_equipment} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TECHNICAL_EQUIPMENT_MICROPHONE . ', \'microphone\', \'Microphone\')');
 
+  db_query('INSERT INTO {mfcs_taxonomy_review_decisions} (id, machine_name, human_name, hidden) VALUES (' . (int) MFCS_REVIEW_DECISION_NONE . ', \'none\', \'None\', 1)');
+  db_query('INSERT INTO {mfcs_taxonomy_review_decisions} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_DECISION_CLOSE . ', \'close\', \'Close\')');
+  db_query('INSERT INTO {mfcs_taxonomy_review_decisions} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_DECISION_CANCEL . ', \'cancel\', \'Cancel\')');
+  db_query('INSERT INTO {mfcs_taxonomy_review_decisions} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_DECISION_UNCANCEL . ', \'uncancel\', \'Uncancel\')');
+  db_query('INSERT INTO {mfcs_taxonomy_review_decisions} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_DECISION_REASSIGN_COORDINATOR . ', \'reassign_coordinator\', \'Re-assign Venue Coordinator\')');
+  db_query('INSERT INTO {mfcs_taxonomy_review_decisions} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_DECISION_OVERRIDE . ', \'override\', \'Override\')');
+  db_query('INSERT INTO {mfcs_taxonomy_review_decisions} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_DECISION_MOVE . ', \'move\', \'Move\')');
+  db_query('INSERT INTO {mfcs_taxonomy_review_decisions} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_DECISION_REASSIGN_REQUESTER . ', \'reassign_requester\', \'Re-assign Requester\')');
+  db_query('INSERT INTO {mfcs_taxonomy_review_decisions} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_DECISION_MANAGER_RECHECK . ', \'manager_recheck\', \'Manager Re-Check\')');
+  db_query('INSERT INTO {mfcs_taxonomy_review_decisions} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_DECISION_AMENDMENT . ', \'amendment\', \'Amendment\')');
+  db_query('INSERT INTO {mfcs_taxonomy_review_decisions} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_DECISION_APPROVE . ', \'approve\', \'Approve\')');
+  db_query('INSERT INTO {mfcs_taxonomy_review_decisions} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_DECISION_COMMENT . ', \'comment\', \'Comment\')');
+  db_query('INSERT INTO {mfcs_taxonomy_review_decisions} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_DECISION_COMMENT_ALL . ', \'comment_all\', \'Comment\')');
+  db_query('INSERT INTO {mfcs_taxonomy_review_decisions} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_DECISION_DENY . ', \'deny\', \'Deny\')');
+  db_query('INSERT INTO {mfcs_taxonomy_review_decisions} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_DECISION_WAIVE . ', \'waive\', \'Waive\')');
+  db_query('INSERT INTO {mfcs_taxonomy_review_decisions} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_DECISION_REQUIREMENT . ', \'requirement\', \'Requirement\')');
+  db_query('INSERT INTO {mfcs_taxonomy_review_decisions} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_DECISION_AVAILABLE . ', \'available\', \'Available\')');
+  db_query('INSERT INTO {mfcs_taxonomy_review_decisions} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_DECISION_UNAVAILABLE . ', \'unavailable\', \'Unavailable\')');
+  db_query('INSERT INTO {mfcs_taxonomy_review_decisions} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_DECISION_ISSUES . ', \'issues\', \'Issues\')');
+  db_query('INSERT INTO {mfcs_taxonomy_review_decisions} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_DECISION_ISSUES_NONE . ', \'issues_none\', \'No Issues\')');
+
 
   db_query('ALTER TABLE {mfcs_requests} ADD CONSTRAINT classification_fkey FOREIGN KEY (classification) REFERENCES {mfcs_taxonomy_request_classification} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
   db_query('ALTER TABLE {mfcs_requests} ADD CONSTRAINT step_fkey FOREIGN KEY (step) REFERENCES {mfcs_taxonomy_review_step} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
@@ -2391,6 +2414,8 @@ function mfcs_install() {
   db_query('ALTER TABLE {mfcs_reviewers} ADD CONSTRAINT reviewer_classification_fkey FOREIGN KEY (reviewer_classification) REFERENCES {mfcs_taxonomy_reviewer_classification} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
   db_query('ALTER TABLE {mfcs_reviewed} ADD CONSTRAINT classification_fkey FOREIGN KEY (classification) REFERENCES {mfcs_taxonomy_reviewer_classification} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
   db_query('ALTER TABLE {mfcs_review_classifications} ADD CONSTRAINT classification_fkey FOREIGN KEY (classification) REFERENCES {mfcs_taxonomy_reviewer_classification} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
+
+  db_query('ALTER TABLE {mfcs_reviewed} ADD CONSTRAINT decision_fkey FOREIGN KEY (decision) REFERENCES {mfcs_taxonomy_review_decisions} (id) ON UPDATE CASCADE ON DELETE RESTRICT');
 
 
   // enable postgresql-specific TOAST support (aka: compression).
