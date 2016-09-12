@@ -2335,19 +2335,19 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     $changed_by_string = '';
     $changed_by_markup = '';
 
-    if (!empty($changed_by->field_user_first_name['und'][0]['value'])) {
-      $changed_by_string .= $changed_by->field_user_first_name['und'][0]['value'];
+    if (!empty($changed_by->mfcs['first_name'])) {
+      $changed_by_string .= $changed_by->mfcs['first_name'];
 
-      if (!empty($changed_by->field_user_last_name['und'][0]['value'])) {
-        $changed_by_string .= ' ' . $changed_by->field_user_last_name['und'][0]['value'];
+      if (!empty($changed_by->mfcs['last_name'])) {
+        $changed_by_string .= ' ' . $changed_by->mfcs['last_name'];
       }
 
-      $changed_by_markup .= $changed_by_string . " <sup>[id: " . $changed_by->uid . "]</sup>";
-      $changed_by_string .= " [id: " . $changed_by->uid . "]";
+      $changed_by_markup .= $changed_by_string . ' <sup>[id: ' . $changed_by->uid . ']</sup>';
+      $changed_by_string .= ' [id: ' . $changed_by->uid . ']';
     }
     else {
-      $changed_by_string .= $changed_by->name . " [id: " . $changed_by->uid . "]";
-      $changed_by_markup .= $changed_by->name . " <sup>[id: " . $changed_by->uid . "]</sup>";
+      $changed_by_string .= $changed_by->name . ' [id: ' . $changed_by->uid . ']';
+      $changed_by_markup .= $changed_by->name . ' <sup>[id: ' . $changed_by->uid . ']</sup>';
     }
   }
 

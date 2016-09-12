@@ -1554,12 +1554,12 @@ function mfcs_get_request_field_request_coordinator_phone($form, &$form_state, &
     $values = $request_state['request_coordinator']['phone'];
   }
   else {
-    if (!empty($form['form']['user']['#value']->field_user_phone_number['und'][0]['safe_value'])) {
-      $values[0] = $form['form']['user']['#value']->field_user_phone_number['und'][0]['safe_value'];
+    if (!empty($form['form']['user']['#value']->mfcs['phone_number'])) {
+      $values[0] = check_plain($form['form']['user']['#value']->mfcs['phone_number']);
     }
   }
 
-  $field_title = "Request Coordinator Phone";
+  $field_title = 'Request Coordinator Phone';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'phone',

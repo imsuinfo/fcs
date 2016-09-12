@@ -562,12 +562,8 @@ function mfcs_management_search_users($conditions = array(), $options = array())
 
     if ($join) {
       $query->innerJoin('users', 'u', 'mu.user_id = u.uid');
-      $query->innerJoin('field_data_field_user_first_name', 'fdfufn', 'mu.user_id = fdfufn.entity_id AND fdfufn.delta = 0');
-      $query->innerJoin('field_data_field_user_last_name', 'fdfuln', 'mu.user_id = fdfuln.entity_id AND fdfuln.delta = 0');
 
       $already_joined['u'] = 'users';
-      $already_joined['fdfufn'] = 'field_data_field_user_first_name';
-      $already_joined['fdfuln'] = 'field_data_field_user_last_name';
     }
 
     $count_query = NULL;
@@ -594,22 +590,22 @@ function mfcs_management_search_users($conditions = array(), $options = array())
     }
 
     $query->addField('mu', 'problems', 'problems');
-    $query->addField('mu', 'date', 'date');
+    $query->addField('mu', 'updated', 'updated');
+    $query->addField('mu', 'first_name', 'first_name');
+    $query->addField('mu', 'last_name', 'last_name');
 
     $already_added['user_id'] = 'mu.user_id';
     $already_added['problems'] = 'mu.problems';
-    $already_added['date'] = 'mu.date';
+    $already_added['updated'] = 'mu.updated';
+    $already_added['first_name'] = 'mu.first_name';
+    $already_added['last_name'] = 'mu.last_name';
 
     if ($join) {
       $query->addField('u', 'name', 'name');
       $query->addField('u', 'mail', 'email');
-      $query->addField('fdfufn', 'field_user_first_name_value', 'first_name');
-      $query->addField('fdfuln', 'field_user_last_name_value', 'last_name');
 
       $already_added['name'] = 'u.name';
       $already_added['email'] = 'u.mail';
-      $already_added['first_name'] = 'fdfufn.first_name';
-      $already_added['last_name'] = 'fdfuln.last_name';
     }
 
     // add custom fields to the select results as requested by the caller.

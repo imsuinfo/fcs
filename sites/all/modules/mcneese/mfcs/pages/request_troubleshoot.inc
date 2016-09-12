@@ -477,6 +477,9 @@ function mfcs_request_troubleshoot_0_form_submit($form, &$form_state) {
       $result = mfcs_mischellaneous_check_requests_for_problems();
     }
 
+    // force transaction execution.
+    unset($transaction);
+
 
     $time_stop = microtime(TRUE);
     $time_elapsed = $time_stop - $time_start;
@@ -516,11 +519,11 @@ function mfcs_request_troubleshoot_0_form_submit($form, &$form_state) {
     }
   }
   catch (Error $e) {
-    $transaction->rollback();
+    if (isset($transaction)) $transaction->rollback();
     cf_error::on_exception($e);
   }
   catch (Exception $e) {
-    $transaction->rollback();
+    if (isset($transaction)) $transaction->rollback();
     cf_error::on_exception($e);
   }
 }

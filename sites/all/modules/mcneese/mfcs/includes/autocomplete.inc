@@ -41,19 +41,18 @@ function mfcs_autocomplete_user_id($string) {
 
   try {
     $query = db_select('users', 'u');
-    $query->leftJoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id AND u.uid = fdfufn.entity_id AND fdfufn.delta = 0');
-    $query->leftJoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id AND u.uid = fdfuln.entity_id AND fdfufn.entity_id = fdfuln.entity_id AND fdfuln.delta = 0');
+    $query->leftJoin('mfcs_users', 'mu', 'u.uid = mu.user_id');
 
     $query->addField('u', 'uid', 'user_id');
     $query->addField('u', 'name', 'name');
 
-    $query->addField('fdfufn', 'field_user_first_name_value', 'first_name');
-    $query->addField('fdfuln', 'field_user_last_name_value', 'last_name');
+    $query->addField('mu', 'first_name', 'first_name');
+    $query->addField('mu', 'last_name', 'last_name');
 
     $or = db_or();
     $or->condition('u.name', '%' . db_like($s) . '%', $ilike);
-    $or->condition('fdfufn.field_user_first_name_value', '%' . db_like($s) . '%', $ilike);
-    $or->condition('fdfuln.field_user_last_name_value', '%' . db_like($s) . '%', $ilike);
+    $or->condition('mu.first_name', '%' . db_like($s) . '%', $ilike);
+    $or->condition('mu.last_name', '%' . db_like($s) . '%', $ilike);
     $query->condition($or);
 
     $query->condition('u.status', 0, '<>');
@@ -178,8 +177,8 @@ function mfcs_edit_0_autocomplete_request_coordinator_name($string) {
 
     $db_string = db_like($string);
     $or = db_or();
-    $or->condition('fdfuln.field_user_last_name_value', '%' . $db_string . '%', $ilike);
-    $or->condition('fdfufn.field_user_first_name_value', '%' . $db_string . '%', $ilike);
+    $or->condition('mu.last_name', '%' . $db_string . '%', $ilike);
+    $or->condition('mu.first_name', '%' . $db_string . '%', $ilike);
     $or->condition('u.name', '%' . $db_string . '%', $ilike);
     $or->condition('u.mail', '%' . $db_string . '%', $ilike);
     $query->condition($or);
@@ -257,8 +256,8 @@ function mfcs_edit_0_autocomplete_request_coordinator_email($string) {
 
     $db_string = db_like($string);
     $or = db_or();
-    $or->condition('fdfuln.field_user_last_name_value', '%' . $db_string . '%', $ilike);
-    $or->condition('fdfufn.field_user_first_name_value', '%' . $db_string . '%', $ilike);
+    $or->condition('mu.last_name', '%' . $db_string . '%', $ilike);
+    $or->condition('mu.first_name', '%' . $db_string . '%', $ilike);
     $or->condition('u.name', '%' . $db_string . '%', $ilike);
     $or->condition('u.mail', '%' . $db_string . '%', $ilike);
     $query->condition($or);
@@ -332,13 +331,12 @@ function mfcs_edit_0_autocomplete_request_coordinator_phone($string) {
   try {
     $query = mfcs_autocomplete_build_request_coordinator_query();
 
-    $query->innerJoin('field_data_field_user_phone_number', 'fdfupn', 'u.uid = fdfupn.entity_id AND fdfupn.delta = 0');
-    $query->addField('fdfupn', 'field_user_phone_number_value', 'phone_number');
+    $query->addField('mu', 'phone_number', 'phone_number');
 
     $db_string = db_like($string);
     $or = db_or();
-    $or->condition('fdfuln.field_user_last_name_value', '%' . $db_string . '%', $ilike);
-    $or->condition('fdfufn.field_user_first_name_value', '%' . $db_string . '%', $ilike);
+    $or->condition('mu.last_name', '%' . $db_string . '%', $ilike);
+    $or->condition('mu.first_name', '%' . $db_string . '%', $ilike);
     $or->condition('u.name', '%' . $db_string . '%', $ilike);
     $or->condition('u.mail', '%' . $db_string . '%', $ilike);
     $query->condition($or);
@@ -399,15 +397,14 @@ function mfcs_edit_0_autocomplete_request_coordinator_phone($string) {
  */
 function mfcs_autocomplete_build_request_coordinator_query() {
   $query = db_select('users', 'u');
-  $query->innerJoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id AND u.uid = fdfufn.entity_id AND fdfufn.delta = 0');
-  $query->innerJoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id AND u.uid = fdfuln.entity_id AND fdfufn.entity_id = fdfuln.entity_id AND fdfuln.delta = 0');
+  $query->innerJoin('mfcs_users', 'mu', 'u.uid = mu.user_id');
 
   $query->addField('u', 'uid', 'user_id');
   $query->addField('u', 'name', 'name');
   $query->addField('u', 'mail', 'email');
 
-  $query->addField('fdfufn', 'field_user_first_name_value', 'first_name');
-  $query->addField('fdfuln', 'field_user_last_name_value', 'last_name');
+  $query->addField('mu', 'first_name', 'first_name');
+  $query->addField('mu', 'last_name', 'last_name');
 
   $query->condition('u.status', 0, '<>');
   $query->condition('u.uid', 1, '>');

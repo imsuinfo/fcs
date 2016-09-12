@@ -370,8 +370,8 @@ function mfcs_ical_generate($requests, $start = NULL, $stop = NULL) {
         // see: https://tools.ietf.org/html/rfc5545#section-3.8.4.3
         $requester = user_load($request->user_id);
         $requester_user_name = $requester->name;
-        if (isset($requester->field_user_first_name['und'][0]['value']) && isset($requester->field_user_last_name['und'][0]['value'])) {
-          $requester_user_name = mfcs_ical_sanitize_text($requester->field_user_first_name['und'][0]['value']) . ' ' . mfcs_ical_sanitize_text($requester->field_user_last_name['und'][0]['value']);
+        if (!empty($requester->mfcs['first_name']) && !empty($requester->mfcs['last_name'])) {
+          $requester_user_name = mfcs_ical_sanitize_text($requester->mfcs['first_name']) . ' ' . mfcs_ical_sanitize_text($requester->mfcs['last_name']);
         }
         $requester_text = $requester_user_name;
         if (!empty($requester->mail)) {

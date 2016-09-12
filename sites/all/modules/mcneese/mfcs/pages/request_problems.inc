@@ -372,7 +372,7 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
     );
 
     $row['date'] = array(
-      'data' => check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS, $problem->date)),
+      'data' => check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS, $problem->updated)),
       'class' => $class_date,
     );
 
@@ -569,16 +569,12 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
     return array();
   }
 
-  $mfcs_users = mfcs_load_users($problem_user_id, FALSE, TRUE);
-  if (!is_array($mfcs_users) || !array_key_exists($problem_user_id, $mfcs_users)) {
+  $problem_user = user_load($problem_user_id);
+  if (!is_object($problem_user)) {
     drupal_not_found();
     drupal_exit();
     return array();
   }
-
-  $mfcs_user = $mfcs_users[$problem_user_id];
-  unset($mfcs_users);
-  $problem_user = user_load($problem_user_id);
 
   global $user;
   global $base_path;
@@ -592,16 +588,16 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
   mfcs_add_canonical_headers('requests/problems-0/users/user/' . $problem_user_id);
 
   $user_name = $problem_user->name;
-  if (!empty($problem_user->field_user_first_name['und'][0]['safe_value']) && !empty($problem_user->field_user_last_name['und'][0]['safe_value'])) {
-    $user_name = $problem_user->field_user_first_name['und'][0]['safe_value'] . ' ' . $problem_user->field_user_last_name['und'][0]['safe_value'];
+  if (!empty($problem_user->mfcs['first_name']) && !empty($problem_user->mfcs['last_name'])) {
+    $user_name = check_plain($problem_user->mfcs['first_name']) . ' ' . check_plain($problem_user->mfcs['last_name']);
   }
 
   $banner_id = NULL;
-  if (!empty($problem_user->field_user_banner_id['und'][0]['value']) && is_numeric($problem_user->field_user_banner_id['und'][0]['value'])) {
-    $banner_id = (int) $problem_user->field_user_banner_id['und'][0]['value'];
+  if (!empty($problem_user->mfcs['banner_id']) && is_numeric($problem_user->mfcs['banner_id'])) {
+    $banner_id = (int) $problem_user->mfcs['banner_id'];
   }
 
-  $page_title = "Facilities Use Problems: " . $user_name . " [id: " . $problem_user_id . "]";
+  $page_title = 'Facilities Use Problems: ' . $user_name . ' [id: ' . $problem_user_id . ']';
   drupal_set_title($page_title);
 
   $user_is_manager = user_access('mfcs manage', $user);
@@ -615,7 +611,7 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
 
   $form['values']['mfcs_user'] = array(
     '#type' => 'value',
-    '#value' => $mfcs_user,
+    '#value' => $problem_user->mfcs,
   );
 
   $form['values']['problem_user'] = array(
@@ -628,11 +624,11 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
     '#value' => NULL,
   );
 
-  $message = "The system has detected problems for <strong>" . $user_name . "</strong>.<br>";
-  $message .= "This page provides details of the problems and the ability to reset the problem flags for each of these problems.<br>";
-  $message .= "Some of these problems can be reset, others cannot.<br>";
+  $message = 'The system has detected problems for <strong>' . $user_name . '</strong>.<br>';
+  $message .= 'This page provides details of the problems and the ability to reset the problem flags for each of these problems.<br>';
+  $message .= 'Some of these problems can be reset, others cannot.<br>';
   $message .= '<br>';
-  $message .= "The <a href=\"" . $base_path . 'requests/users-0/view/' . $problem_user_id . "\" title=\"View Profile for " . $user_name . " (id #" . $problem_user_id . ")\">user's information</a> and problem flags were last updated on: <strong>" . date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS, $mfcs_user->date) . "</strong>.<br>";
+  $message .= 'The <a href="' . $base_path . 'requests/users-0/view/' . $problem_user_id . '" title="View Profile for ' . $user_name . ' (id #' . $problem_user_id . ')">user\'s information</a> and problem flags were last updated on: <strong>' . date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS, $mfcs_user->date) . '</strong>.<br>';
   $message .= '<br>';
 
   $form['message'] = array(
@@ -658,11 +654,12 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
     '#markup' => '',
   );
 
-  if (isset($problem_user->field_user_banner_id['und']['0']['value'])) {
-    $form['banner_information']['details']['#markup'] .= '<strong>Banner ID</strong>: ' . $problem_user->field_user_banner_id['und']['0']['safe_value'] . '<br>';
+  if (!is_null($banner_id)) {
+    $banner_id_string = mfcs_banner_id_int_to_string($banner_id);
+    $form['banner_information']['details']['#markup'] .= '<strong>Banner ID</strong>: ' . $banner_id_string . '<br>';
 
     try {
-      $event_roles = mfcs_oracle_select('select * from ucs.msu_event_role where id = :banner_id', array('banner_id' => $problem_user->field_user_banner_id['und']['0']['value']));
+      $event_roles = mfcs_oracle_select('select * from ucs.msu_event_role where id = :banner_id', array('banner_id' => $banner_id_string));
 
       if (is_array($event_roles)) {
         $form['banner_information']['details']['#markup'] .= '<strong>Banner Roles</strong>:';
@@ -699,146 +696,146 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
 
   $form['values']['problem_list']['#value'] = array(
     MFCS_USER_PROBLEM_SYSTEM => array(
-      'label' => "Generic System Related Problems",
+      'label' => 'Generic System Related Problems',
       'explanation' =>
-        "This flag gets set when a generic system error is detected while the specified user was accessing this system.<br>" .
+        'This flag gets set when a generic system error is detected while the specified user was accessing this system.<br>' .
         '<br>' .
-        "This system currently does not provide the details of these problems, but in the future it may.<br>",
+        'This system currently does not provide the details of these problems, but in the future it may.<br>',
       'resettable' => TRUE,
       'custom_action' => FALSE,
     ),
     MFCS_USER_PROBLEM_MFCS => array(
-      'label' => "Generic Facilities Use Problems",
+      'label' => 'Generic Facilities Use Problems',
       'explanation' =>
-        "This flag gets set when an error is detected for the facilities use specific functionality while the specified user was accessing this system.<br>" .
+        'This flag gets set when an error is detected for the facilities use specific functionality while the specified user was accessing this system.<br>' .
         '<br>' .
-        "This system currently does not provide the details of these problems, but in the future it may.<br>",
+        'This system currently does not provide the details of these problems, but in the future it may.<br>',
       'resettable' => TRUE,
       'custom_action' => FALSE,
     ),
     MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE => array(
-      'label' => "Banner Unavailable During Account Creation",
+      'label' => 'Banner Unavailable During Account Creation',
       'explanation' =>
-        "The banner system was unavailable during account creation (first login) and the appropriate access controls could not be auto-assigned.<br>" .
-        "The next time the user logs in this flag will be cleared and the account will load the appropriate banner roles.<br>" .
-        "The user must log out before the banner information can be updated.<br>" .
+        'The banner system was unavailable during account creation (first login) and the appropriate access controls could not be auto-assigned.<br>' .
+        'The next time the user logs in this flag will be cleared and the account will load the appropriate banner roles.<br>' .
+        'The user must log out before the banner information can be updated.<br>' .
         '<br>' .
-        "This system currently does not provide the details of these problems, but in the future it may.<br>",
+        'This system currently does not provide the details of these problems, but in the future it may.<br>',
       'resettable' => FALSE,
       'custom_action' => TRUE,
-      'custom_action-message' => "Re-synchronize banner information for account."
+      'custom_action-message' => 'Re-synchronize banner information for account.',
     ),
     MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE => array(
-      'label' => "Banner Unavailable During Login Synchronizeation",
+      'label' => 'Banner Unavailable During Login Synchronizeation',
       'explanation' =>
-        "The banner system was unavailable during the login process and the account could not be updated if necessary.<br>" .
-        "This flag will be reset the next time the user logs in and banner is available.<br>" .
+        'The banner system was unavailable during the login process and the account could not be updated if necessary.<br>' .
+        'This flag will be reset the next time the user logs in and banner is available.<br>' .
         '<br>' .
-        "This system currently does not provide the details of these problems, but in the future it may.<br>",
+        'This system currently does not provide the details of these problems, but in the future it may.<br>',
       'resettable' => FALSE,
       'custom_action' => TRUE,
-      'custom_action-message' => "Re-synchronize banner information for account."
+      'custom_action-message' => 'Re-synchronize banner information for account.',
     ),
     MFCS_USER_PROBLEM_ACCOUNT_LOGIN_PROBLEMS_MULTIPLE => array(
-      'label' => "Multiple Login Problems",
+      'label' => 'Multiple Login Problems',
       'explanation' =>
-        "This flag gets set when a user has multiple problems logging in or multiple failed attempts logging in.<br>" .
+        'This flag gets set when a user has multiple problems logging in or multiple failed attempts logging in.<br>' .
         '<br>' .
-        "This system currently does not provide the details of these problems, but in the future it may.<br>",
+        'This system currently does not provide the details of these problems, but in the future it may.<br>',
       'resettable' => TRUE,
       'custom_action' => FALSE,
     ),
     MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED => array(
-      'label' => "Unable to Assign Reviewer/Venue-Coordinator Role",
+      'label' => 'Unable to Assign Reviewer/Venue-Coordinator Role',
       'explanation' =>
-        "This flag gets set when an attempt is made to assign or unassign the reviewer role to a user when there is no reference to that use as a venue coordinator or room coordinator.<br>" .
+        'This flag gets set when an attempt is made to assign or unassign the reviewer role to a user when there is no reference to that use as a venue coordinator or room coordinator.<br>' .
         '<br>' .
-        "This may be caused by the banner database cache being out of date.<br>" .
-        "You may need to re-synchronizing the banner cache.<br>" .
+        'This may be caused by the banner database cache being out of date.<br>' .
+        'You may need to re-synchronizing the banner cache.<br>' .
         '<br>' .
-        "If the user is not in banner, then ask a administrator to manually grant the review role for this user.<br>" .
+        'If the user is not in banner, then ask a administrator to manually grant the review role for this user.<br>' .
         '<br>' .
-        "Administrators, managers, and users without banner ids should not get this error.<br>",
+        'Administrators, managers, and users without banner ids should not get this error.<br>',
       'resettable' => TRUE,
       'custom_action' => TRUE,
-      'custom_action-message' => "Re-process Reviewer/Venue-Coordinator Role."
+      'custom_action-message' => 'Re-process Reviewer/Venue-Coordinator Role.',
     ),
     MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES => array(
       'label' => "Old/Duplicate Account",
       'explanation' =>
-        "This flag gets set when a user has logged in and the <strong>LDAP</strong> has the <strong>isDuplicate</strong> flag set to <strong>TRUE</strong> and there is no primary account (or this is not the primary account).<br>" .
+        'This flag gets set when a user has logged in and the <strong>LDAP</strong> has the <strong>isDuplicate</strong> flag set to <strong>TRUE</strong> and there is no primary account (or this is not the primary account).<br>' .
         '<br>' .
-        "A specific account must be manually assigned by an administer to designate which account is the primary account.<br>",
-        "Only the primary account will be allowed access to this system.<br>",
+        'A specific account must be manually assigned by an administer to designate which account is the primary account.<br>',
+        'Only the primary account will be allowed access to this system.<br>',
       'resettable' => TRUE,
       'custom_action' => FALSE,
     ),
     MFCS_USER_PROBLEM_FORM_ERROR_USER => array(
-      'label' => "Facilities Use Form Problems",
+      'label' => 'Facilities Use Form Problems',
       'explanation' =>
-        "This flag gets set when an error is detected while the users is processing a form.<br>" .
-        "This could be something as simple as not adding in the date fields or something technical such as a PHP error.<br>" .
-        "This flag refers to facilities use specific functionality.<br>" .
+        'This flag gets set when an error is detected while the users is processing a form.<br>' .
+        'This could be something as simple as not adding in the date fields or something technical such as a PHP error.<br>' .
+        'This flag refers to facilities use specific functionality.<br>' .
         '<br>' .
-        "This system currently does not provide the details of these problems, but in the future it may.<br>",
+        'This system currently does not provide the details of these problems, but in the future it may.<br>',
       'resettable' => TRUE,
       'custom_action' => FALSE,
     ),
     MFCS_USER_PROBLEM_FORM_ERROR_SYSTEM => array(
-      'label' => "System Form Problems",
+      'label' => 'System Form Problems',
       'explanation' =>
-        "This flag gets set when an error is detected while the users is processing a form.<br>" .
-        "This flag refers to the drupal core form functionality and not the facilities use specific functionality.<br>" .
+        'This flag gets set when an error is detected while the users is processing a form.<br>' .
+        'This flag refers to the drupal core form functionality and not the facilities use specific functionality.<br>' .
         '<br>' .
-        "This system currently does not provide the details of these problems, but in the future it may.<br>",
+        'This system currently does not provide the details of these problems, but in the future it may.<br>',
       'resettable' => TRUE,
       'custom_action' => FALSE,
     ),
     MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE => array(
-      'label' => "Deleted/Disabled User Assigned Requests",
+      'label' => 'Deleted/Disabled User Assigned Requests',
       'explanation' =>
-        "This flag gets set when a deleted or disabled user account is assigned as a venue coordinator or similar access roles.<br>" .
+        'This flag gets set when a deleted or disabled user account is assigned as a venue coordinator or similar access roles.<br>' .
         '<br>' .
-        "This is generally casued when an account is deleted but <a href=\"" . $base_path . 'requests/problems-0/users/disabled_in_use/' . $problem_user_id . "\">active or on-going requests have not been re-assigned</a>.<br>" .
+        'This is generally casued when an account is deleted but <a href="' . $base_path . 'requests/problems-0/users/disabled_in_use/' . $problem_user_id . '">active or on-going requests have not been re-assigned</a>.<br>' .
         '<br>' .
-        "Requests will need to be re-assigned.<br>",
+        'Requests will need to be re-assigned.<br>',
       'resettable' => TRUE,
       'custom_action' => FALSE,
     ),
     MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID => array(
-      'label' => "Invalid Banner ID Assigned to User",
+      'label' => 'Invalid Banner ID Assigned to User',
       'explanation' =>
-        "This flag gets set when a user has a banner id that is unknown to the system.<br>" .
+        'This flag gets set when a user has a banner id that is unknown to the system.<br>' .
         '<br>' .
-        "The user either needs to have their banner id fixed, removed, or the account should be disabled.<br>",
+        'The user either needs to have their banner id fixed, removed, or the account should be disabled.<br>',
       'resettable' => FALSE,
       'custom_action' => FALSE,
     ),
     MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS => array(
-      'label' => "Insufficient Banner Access",
+      'label' => 'Insufficient Banner Access',
       'explanation' =>
-        "This flag gets set when a user logs into the system but has not been granted any banner roles to perform any actions, but the account is still technically enabled/unlocked.<br>" .
+        'This flag gets set when a user logs into the system but has not been granted any banner roles to perform any actions, but the account is still technically enabled/unlocked.<br>' .
         '<br>' .
-        "Either the account needs to be manually disabled/locked or the account needs to have its banner roles fixed.<br>",
+        'Either the account needs to be manually disabled/locked or the account needs to have its banner roles fixed.<br>',
         '<br>' .
-        "This may also be triggered if a new user tries to login while banner is down and there is no locally cached data associated with the new account to properly assign its banner roles.<br>",
+        'This may also be triggered if a new user tries to login while banner is down and there is no locally cached data associated with the new account to properly assign its banner roles.<br>',
       'resettable' => TRUE,
       'custom_action' => FALSE,
     ),
   );
 
   // if the user does not have a banner id, then do not provide banner sync custom action support.
-  if (empty($form['values']['problem_user']['#value']->field_user_banner_id['und'][0]['value']) || !is_numeric($form['values']['problem_user']['#value']->field_user_banner_id['und'][0]['value'])) {
+  if (is_null($banner_id)) {
     $form['values']['problem_list']['#value'][MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE]['custom_action'] = FALSE;
     $form['values']['problem_list']['#value'][MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE]['custom_action'] = FALSE;
   }
 
   foreach ($form['values']['problem_list']['#value'] as $problem_id => $problem_settings) {
-    if (($mfcs_user->problems & $problem_id) > 0) {
+    if (($problem_user->mfcs['problems'] & $problem_id) > 0) {
       $form['problems'][$problem_id] = array(
         '#id' => 'problem-fieldset-' . $problem_id,
         '#type' => 'fieldset',
-        '#title' => $problem_settings['label'] . " Detected",
+        '#title' => $problem_settings['label'] . ' Detected',
         '#tree' => TRUE,
         '#attributes' => array(
           'class' => array(
@@ -856,7 +853,7 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
         $form['problems'][$problem_id]['reset'] = array(
           '#id' => 'problem-field-reset-' . $problem_id,
           '#type' => 'checkbox',
-          '#title' => "Reset " . $problem_settings['label'] . " Flag",
+          '#title' => 'Reset ' . $problem_settings['label'] . ' Flag',
           '#default_value' => FALSE,
           '#required' => FALSE,
           '#attributes' => array(
@@ -899,18 +896,18 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
         $all_accounts = mfcs_users_load_all_users_with_banner_id($banner_id);
         if (!empty($all_accounts)) {
           $form['problems'][$problem_id]['explanation']['#markup'] .= '<br>';
-          $form['problems'][$problem_id]['explanation']['#markup'] .= "The following accounts have the same banner id";
+          $form['problems'][$problem_id]['explanation']['#markup'] .= 'The following accounts have the same banner id';
 
           if ($user_is_manager || $user_is_administer) {
-            $form['problems'][$problem_id]['explanation']['#markup'] .= " (<strong>" . check_plain($banner_id) . "</strong>)";
+            $form['problems'][$problem_id]['explanation']['#markup'] .= ' (<strong>' . $banner_id_string . '</strong>)';
           }
 
-          $form['problems'][$problem_id]['explanation']['#markup'] .= ":<ul>";
+          $form['problems'][$problem_id]['explanation']['#markup'] .= ':<ul>';
 
           foreach ($all_accounts as $account_id => $account_name) {
             $form['problems'][$problem_id]['explanation']['#markup'] .= '<li><a href="' . $base_path . 'requests/users-0/view/' . $account_id . $url_arguments . '">' . $account_name . '</a></li>';
           }
-          $form['problems'][$problem_id]['explanation']['#markup'] .= "</ul><br>";
+          $form['problems'][$problem_id]['explanation']['#markup'] .= '</ul><br>';
         }
       }
     }
@@ -920,7 +917,7 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
     $form['problems']['reset'] = array(
       '#id' => 'submit-problems-perform_actions',
       '#type' => 'submit',
-      '#default_value' => t("Perform Actions / Reset Problems"),
+      '#default_value' => 'Perform Actions / Reset Problems',
       '#attributes' => array(
         'class' => array(
           'problem-submit-perform_actions',
@@ -1045,7 +1042,7 @@ function mfcs_request_problems_0_user_form_submit($form, &$form_state) {
   if ($perform_custom_action) {
     foreach ($custom_actions as $custom_action_id => $custom_action_value) {
       if ($custom_action_id == MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE || $custom_action_id == MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) {
-        if (!empty($form['values']['problem_user']['#value']->field_user_banner_id['und'][0]['value']) && is_numeric($form['values']['problem_user']['#value']->field_user_banner_id['und'][0]['value'])) {
+        if (!empty($form['values']['problem_user']['#value']->mfcs['banner_id']) && is_numeric($form['values']['problem_user']['#value']->mfcs['banner_id'])) {
           $result = mfcs_synchronize_user_settings($form['values']['problem_user']['#value']);
           if ($result === TRUE) {
             if (($problems & $custom_action_id) != 0) {
@@ -1478,12 +1475,10 @@ function mfcs_users_load_all_users_with_banner_id($banner_id) {
     return array();
   }
 
-  $banner_id_string = mfcs_banner_id_int_to_string($banner_id);
+  $query = db_query('select u.uid as uid, u.name as name from mfcs_users mu inner join users u on mu.user_id = u.uid where mu.banner_id = :banner_id', array(':banner_id' => $banner_id));
+  $results = $query->fetchAll();
 
   $names = array();
-
-  $query = db_query('select u.uid as uid, u.name as name from field_data_field_user_banner_id fdfubi inner join users u on fdfubi.entity_id = u.uid where field_user_banner_id_value = :banner_id', array(':banner_id' => $banner_id_string));
-  $results = $query->fetchAll();
   foreach ($results as $result) {
     $names[$result->uid] = $result->name;
   }
@@ -2267,7 +2262,7 @@ function mfcs_request_problems_0_request_form_validate($form, &$form_state) {
           }
 
           $coordinator = user_load($room_information->coordinator_id);
-          $extra_text .= ' Coordinator Information: <a href="' . $base_path . 'requests/users-0/view/' . $room_information->coordinator_id . '" title="View user account">' . $coordinator->field_user_first_name['und'][0]['safe_value'] . ' ' . $coordinator->field_user_last_name['und'][0]['safe_value'] . '</a>.';
+          $extra_text .= ' Coordinator Information: <a href="' . $base_path . 'requests/users-0/view/' . $room_information->coordinator_id . '" title="View user account">' . check_plain($coordinator->mfcs['first_name']) . ' ' . check_plain($coordinator->mfcs['last_name']) . '</a>.';
 
           if ($new_coordinator_id == $request['venue_coordinator']['user_id'][0]->value) {
             form_set_error('actions][action', "Unable to re-assign venue coordinator, the banner information remains the same." . $extra_text);

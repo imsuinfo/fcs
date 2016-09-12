@@ -1236,41 +1236,6 @@ function mfcs_schema() {
     ),
   );
 
-  $schema['mfcs_users'] = array(
-    'description' => $t("McNeese Facilities Use Users table. This represents custom settings or exceptional cases involved with users."),
-    'fields' => array(
-      'user_id' => array(
-        'description' => $t("This is the system id"),
-        'type' => 'int',
-        'size' => 'big',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-      'problems' => array(
-        'description' => $t("Represents a series of problems, using bitwise operations."),
-        'type' => 'int',
-        'size' => 'big',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-      'date' => array(
-        'description' => $t("Represents the row was last updated."),
-        'type' => 'int',
-        'size' => 'big',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-    ),
-    'primary key' => array('user_id'),
-    'foreign keys' => array(
-      'user_id' => array(
-        'table' => 'users',
-        'columns' => array('user_id' => 'uid'),
-      ),
-    ),
-  );
-
   $schema['mfcs_problems_requests'] = array(
     'description' => $t("McNeese Facilities Use request problems table. This represents exceptional cases involved with requests."),
     'fields' => array(
@@ -2157,6 +2122,25 @@ function mfcs_install() {
   db_query('create sequence mfcs_banner_classes_id_seq;');
   db_query('alter table mfcs_banner_classes alter id set default nextval(\'mfcs_banner_classes_id_seq\'::regclass);');
 
+  // create the custom mfcs_users table.
+  db_query('create table mfcs_users (
+    user_id bigint not null,
+    banner_id bigint,
+    first_name varchar(127),
+    last_name varchar(127),
+    phone_number varchar(31),
+    ldap_duplicate bool default false,
+    primary_account bool default true,
+    problems bigint not null default 0,
+    updated bigint not null,
+
+    primary key (user_id),
+    constraint mfcs_users_user_id_check check (user_id >= 0),
+    constraint mfcs_users_updated_check check (updated >= 0),
+
+    constraint user_id_fkey foreign key (user_id) references users(uid) on update cascade on delete restrict
+  );');
+
 
   // create user defragment log table using special postgresql data types.
   db_query('create table mfcs_log_user_defragment(id bigint not null, from_ids integer[] not null, to_ids integer[] not null, user_id bigint not null, updated bigint not null, primary key (id), constraint mfcs_log_user_defragment_user_id_check check (user_id >= 0), constraint mfcs_log_user_defragment_updated_check check (updated >= 0), constraint user_id_fkey foreign key (user_id) references users(uid) on update cascade on delete restrict)');
@@ -2191,6 +2175,7 @@ function mfcs_install() {
   db_query('ALTER TABLE {mfcs_banner_rooms} ADD CONSTRAINT ' . $key4_foreign . ' FOREIGN KEY (' . $key4_name . ') REFERENCES {' . $table4_foreign . '} (' . $table4_foreign_key . ') ON UPDATE CASCADE ON DELETE CASCADE');
   db_query('ALTER TABLE {mfcs_banner_rooms} ADD CONSTRAINT ' . $key2_foreign_1 . ' FOREIGN KEY (' . $key2_name_1 . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON UPDATE CASCADE ON DELETE RESTRICT');
   db_query('ALTER TABLE {mfcs_banner_event_roles_to_users} ADD CONSTRAINT ' . $key6_foreign . ' FOREIGN KEY (' . $key6_name . ') REFERENCES {' . $table6_foreign . '} (' . $table6_foreign_key . ') ON UPDATE CASCADE ON DELETE CASCADE');
+  db_query('ALTER TABLE {mfcs_banner_event_roles_to_users} ADD CONSTRAINT user_id_fkey FOREIGN KEY (user_id) REFERENCES {users} (uid) ON UPDATE CASCADE ON DELETE RESTRICT');
 
   db_query('ALTER TABLE {mfcs_request_reminders} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON UPDATE CASCADE ON DELETE CASCADE');
 
@@ -2200,7 +2185,6 @@ function mfcs_install() {
 
   db_query('ALTER TABLE {mfcs_log_troubleshoot} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON UPDATE CASCADE ON DELETE RESTRICT');
   db_query('ALTER TABLE {mfcs_log_emails} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON UPDATE CASCADE ON DELETE RESTRICT');
-  db_query('ALTER TABLE {mfcs_users} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON UPDATE CASCADE ON DELETE RESTRICT');
   db_query('ALTER TABLE {mfcs_log_problems_requests} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON UPDATE CASCADE ON DELETE RESTRICT');
   db_query('ALTER TABLE {mfcs_log_holiday} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON UPDATE CASCADE ON DELETE RESTRICT');
   db_query('ALTER TABLE {mfcs_log_unavailability} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON UPDATE CASCADE ON DELETE RESTRICT');

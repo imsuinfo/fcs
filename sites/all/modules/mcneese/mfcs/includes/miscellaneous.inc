@@ -716,31 +716,30 @@ function mfcs_miscellaneous_check_requests_coordinator($request_id = NULL) {
   $requests = array();
 
   try {
-    // only join if request classification and user classification would both be the same.
-    // this will allow for a simple is NULL test to see if the user is not allowed to utilize the content.
-    #$complex_join = 'and (';
-    #$complex_join .= ' (mer.classification = ' . MFCS_REQUEST_CLASSIFICATION_STUDENT . ' and fdfuer.field_user_event_roles_tid = ' . MFCS_USER_CLASSIFICATION_STUDENT . ')';
-    #$complex_join .= ' or (mer.classification = ' . MFCS_REQUEST_CLASSIFICATION_CAMPS . ' and fdfuer.field_user_event_roles_tid = ' . MFCS_USER_CLASSIFICATION_CAMPS . ')';
-    #$complex_join .= ' or (mer.classification = ' . MFCS_REQUEST_CLASSIFICATION_FACULTY . ' and fdfuer.field_user_event_roles_tid = ' . MFCS_USER_CLASSIFICATION_FACULTY . ')';
-    #$complex_join .= ' or (mer.classification = ' . MFCS_REQUEST_CLASSIFICATION_EXTERNAL . ' and fdfuer.field_user_event_roles_tid = ' . MFCS_USER_CLASSIFICATION_EXTERNAL . ')';
-    #$complex_join .= ' )';
+    // @todo: consider the follow query design:
+    /*
+      SELECT mer.id AS id, mer.title AS title, mer.location AS location, mer.building AS building, mer.room AS room, u.uid AS user_id, u.name AS name, u.status AS status, mu.banner_id AS banner_id, mu.first_name AS first_name, mu.last_name AS last_name, array_agg(mbertu.event_role_id) AS user_classification, array_agg(mber.machine_name) AS user_classification_machine_name
+      FROM mfcs_requests mer
+      INNER JOIN mfcs_current mc ON mer.id = mc.request_id
+      LEFT JOIN mfcs_field_venue_coordinator_user_id mfvcui ON mc.request_id = mfvcui.request_id and mc.venue_coordinator_user_id = mfvcui.revision
+      INNER JOIN users u ON mfvcui.value = u.uid
+      LEFT JOIN mfcs_users mu ON u.uid = mu.user_id
+      LEFT JOIN mfcs_banner_event_roles_to_users mbertu ON u.uid = mbertu.user_id and mbertu.disabled = 0
+      LEFT JOIN mfcs_banner_event_roles mber ON mbertu.event_role_id = mber.id
 
-    // only join if request classiciation is valid and the coordinator has at least one banner role.
-    $complex_join = 'and (';
-    $complex_join .= ' fdfuer.field_user_event_roles_tid = ' . MFCS_USER_CLASSIFICATION_STUDENT;
-    $complex_join .= ' or fdfuer.field_user_event_roles_tid = ' . MFCS_USER_CLASSIFICATION_CAMPS;
-    $complex_join .= ' or fdfuer.field_user_event_roles_tid = ' . MFCS_USER_CLASSIFICATION_FACULTY;
-    $complex_join .= ' or fdfuer.field_user_event_roles_tid = ' . MFCS_USER_CLASSIFICATION_EXTERNAL;
-    $complex_join .= ' )';
+      WHERE  (mer.status IN  (:db_condition_placeholder_0, :db_condition_placeholder_1)) AND (mer.id = :db_condition_placeholder_2) AND ( (u.status <> 1) OR (mu.banner_id IS NULL ) OR (mbertu.event_role_id IS NULL ) )
+
+      group by mer.id, mer.title, mer.location, mer.building, mer.room, u.uid, u.name, u.status, mu.banner_id, mu.first_name, mu.last_name
+      order by id;
+    */
 
     $query = db_select('mfcs_requests', 'mer');
     $query->innerJoin('mfcs_current', 'mc', 'mer.id = mc.request_id');
-    $query->innerJoin('mfcs_field_venue_coordinator_user_id', 'mfvcui', 'mc.request_id = mfvcui.request_id and mc.venue_coordinator_user_id = mfvcui.revision');
+    $query->leftJoin('mfcs_field_venue_coordinator_user_id', 'mfvcui', 'mc.request_id = mfvcui.request_id and mc.venue_coordinator_user_id = mfvcui.revision');
     $query->innerJoin('users', 'u', 'mfvcui.value = u.uid');
-    $query->leftJoin('field_data_field_user_banner_id', 'fdfubi', 'u.uid = fdfubi.entity_id');
-    $query->leftJoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id');
-    $query->leftJoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id');
-    $query->leftJoin('field_data_field_user_event_roles', 'fdfuer', 'u.uid = fdfuer.entity_id ' . $complex_join);
+    $query->leftJoin('mfcs_users', 'mu', 'u.uid = mu.user_id');
+    $query->leftJoin('mfcs_banner_event_roles_to_users', 'mbertu', 'u.uid = mbertu.user_id and mbertu.disabled = 0');
+    $query->leftJoin('mfcs_banner_event_roles', 'mber', 'mbertu.event_role_id = mber.id');
 
     $query->addField('mer', 'id', 'id');
     $query->addField('mer', 'title', 'title');
@@ -750,10 +749,11 @@ function mfcs_miscellaneous_check_requests_coordinator($request_id = NULL) {
     $query->addField('u', 'uid', 'user_id');
     $query->addField('u', 'name', 'name');
     $query->addField('u', 'status', 'status');
-    $query->addField('fdfubi', 'field_user_banner_id_value', 'banner_id');
-    $query->addField('fdfufn', 'field_user_first_name_value', 'first_name');
-    $query->addField('fdfuln', 'field_user_last_name_value', 'last_name');
-    $query->addField('fdfuer', 'field_user_event_roles_tid', 'user_classification');
+    $query->addField('mu', 'banner_id', 'banner_id');
+    $query->addField('mu', 'first_name', 'first_name');
+    $query->addField('mu', 'last_name', 'last_name');
+    $query->addField('mbertu', 'event_role_id', 'user_classification');
+    $query->addField('mber', 'machine_name', 'user_classification_machine_name');
 
     $status = array(
       MFCS_REQUEST_STATUS_LOCKED,
@@ -772,10 +772,12 @@ function mfcs_miscellaneous_check_requests_coordinator($request_id = NULL) {
 
     $or = db_or();
     $or->condition('u.status', 1, '<>');
-    $or->isNull('fdfubi.field_user_banner_id_value');
-    $or->isNull('fdfuer.field_user_event_roles_tid');
+    $or->isNull('mu.banner_id');
+    $or->isNull('mbertu.event_role_id');
 
     $query->condition($or);
+
+    // @fixme: this needs to be tested and confirmed to work, consider using array_agg() on the user_classification and user_classification_machine_name.
 
     $results = $query->execute()->fetchAll();
 
@@ -798,6 +800,7 @@ function mfcs_miscellaneous_check_requests_coordinator($request_id = NULL) {
             'last_name' => $result->last_name,
             'banner_id' => $result->banner_id,
             'classification' => $result->user_classification,
+            'classification_machine_name' => $result->user_classification_machine_name,
             'status' => $result->status,
           ),
         );
@@ -848,9 +851,7 @@ function mfcs_miscellaneous_check_requests_coordinator_out_of_sync($request_id =
     $query->innerJoin('mfcs_field_venue_coordinator_user_id', 'mfvcui', 'mc.request_id = mfvcui.request_id and mc.venue_coordinator_user_id = mfvcui.revision');
     $query->innerJoin('users', 'u', 'mfvcui.value = u.uid');
     $query->innerJoin('mfcs_banner_rooms', 'mbr', 'mer.room = mbr.id and mer.building = mbr.building');
-    $query->leftJoin('field_data_field_user_banner_id', 'fdfubi', 'u.uid = fdfubi.entity_id');
-    $query->leftJoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id');
-    $query->leftJoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id');
+    $query->leftJoin('mfcs_users', 'mu', 'u.uid = mu.user_id');
 
     $query->addField('mer', 'id', 'id');
     $query->addField('mer', 'title', 'title');
@@ -860,9 +861,9 @@ function mfcs_miscellaneous_check_requests_coordinator_out_of_sync($request_id =
     $query->addField('u', 'uid', 'user_id');
     $query->addField('u', 'name', 'name');
     $query->addField('u', 'status', 'status');
-    $query->addField('fdfubi', 'field_user_banner_id_value', 'banner_id');
-    $query->addField('fdfufn', 'field_user_first_name_value', 'first_name');
-    $query->addField('fdfuln', 'field_user_last_name_value', 'last_name');
+    $query->addField('mu', 'banner_id', 'banner_id');
+    $query->addField('mu', 'first_name', 'first_name');
+    $query->addField('mu', 'last_name', 'last_name');
     $query->addField('mbr', 'coordinator_id', 'room_coordinator');
 
     $status = array(
@@ -950,18 +951,17 @@ function mfcs_miscellaneous_check_requests_requester($request_id = NULL) {
     // only join if request classification and user classification would both be the same.
     // this will allow for a simple is NULL test to see if the user is not allowed to utilize the content.
     $complex_join = 'and (';
-    $complex_join .= ' (mer.classification = ' . MFCS_REQUEST_CLASSIFICATION_STUDENT . ' and fdfuer.field_user_event_roles_tid = ' . MFCS_USER_CLASSIFICATION_STUDENT . ')';
-    $complex_join .= ' or (mer.classification = ' . MFCS_REQUEST_CLASSIFICATION_CAMPS . ' and fdfuer.field_user_event_roles_tid = ' . MFCS_USER_CLASSIFICATION_CAMPS . ')';
-    $complex_join .= ' or (mer.classification = ' . MFCS_REQUEST_CLASSIFICATION_FACULTY . ' and fdfuer.field_user_event_roles_tid = ' . MFCS_USER_CLASSIFICATION_FACULTY . ')';
-    $complex_join .= ' or (mer.classification = ' . MFCS_REQUEST_CLASSIFICATION_EXTERNAL . ' and fdfuer.field_user_event_roles_tid = ' . MFCS_USER_CLASSIFICATION_EXTERNAL . ')';
+    $complex_join .= ' (mer.classification = ' . MFCS_REQUEST_CLASSIFICATION_STUDENT . ' and mbertu.event_role_id = ' . MFCS_USER_CLASSIFICATION_STUDENT . ')';
+    $complex_join .= ' or (mer.classification = ' . MFCS_REQUEST_CLASSIFICATION_CAMPS . ' and mbertu.event_role_id = ' . MFCS_USER_CLASSIFICATION_CAMPS . ')';
+    $complex_join .= ' or (mer.classification = ' . MFCS_REQUEST_CLASSIFICATION_FACULTY . ' and mbertu.event_role_id = ' . MFCS_USER_CLASSIFICATION_FACULTY . ')';
+    $complex_join .= ' or (mer.classification = ' . MFCS_REQUEST_CLASSIFICATION_EXTERNAL . ' and mbertu.event_role_id = ' . MFCS_USER_CLASSIFICATION_EXTERNAL . ')';
     $complex_join .= ' )';
 
     $query = db_select('mfcs_requests', 'mer');
     $query->innerJoin('users', 'u', 'mer.user_id = u.uid');
-    $query->leftJoin('field_data_field_user_banner_id', 'fdfubi', 'u.uid = fdfubi.entity_id');
-    $query->leftJoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id');
-    $query->leftJoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id');
-    $query->leftJoin('field_data_field_user_event_roles', 'fdfuer', 'u.uid = fdfuer.entity_id ' . $complex_join);
+    $query->leftJoin('mfcs_users', 'mu', 'u.uid = mu.user_id');
+    $query->leftJoin('mfcs_banner_event_roles_to_users', 'mbertu', 'mer.user_id = mbertu.user_id and mbertu.disabled = 0 ' . $complex_join);
+    $query->leftJoin('mfcs_banner_event_roles', 'mber', 'mbertu.event_role_id = mber.id');
 
     $query->addField('mer', 'id', 'id');
     $query->addField('mer', 'title', 'title');
@@ -971,10 +971,11 @@ function mfcs_miscellaneous_check_requests_requester($request_id = NULL) {
     $query->addField('u', 'uid', 'user_id');
     $query->addField('u', 'name', 'name');
     $query->addField('u', 'status', 'status');
-    $query->addField('fdfubi', 'field_user_banner_id_value', 'banner_id');
-    $query->addField('fdfufn', 'field_user_first_name_value', 'first_name');
-    $query->addField('fdfuln', 'field_user_last_name_value', 'last_name');
-    $query->addField('fdfuer', 'field_user_event_roles_tid', 'user_classification');
+    $query->addField('mu', 'banner_id', 'banner_id');
+    $query->addField('mu', 'first_name', 'first_name');
+    $query->addField('mu', 'last_name', 'last_name');
+    $query->addField('mbertu', 'event_role_id', 'user_classification');
+    $query->addField('mber', 'machine_name', 'user_classification_machine_name');
 
     $status = array(
       MFCS_REQUEST_STATUS_LOCKED,
@@ -992,11 +993,13 @@ function mfcs_miscellaneous_check_requests_requester($request_id = NULL) {
     }
 
     $or = db_or();
-    $or->condition('u.status', 1, '<>');
-    $or->isNull('fdfubi.field_user_banner_id_value');
-    $or->isNull('fdfuer.field_user_event_roles_tid');
+    $or->condition('u.status', 0);
+    $or->isNull('mu.banner_id');
+    $or->isNull('mbertu.event_role_id');
 
     $query->condition($or);
+
+    // @fixme: this needs to be tested and confirmed to work, consider using array_agg() on the user_classification and user_classification_machine_name.
 
     $results = $query->execute()->fetchAll();
 
@@ -1019,6 +1022,7 @@ function mfcs_miscellaneous_check_requests_requester($request_id = NULL) {
             'last_name' => $result->last_name,
             'banner_id' => $result->banner_id,
             'classification' => $result->user_classification,
+            'classification_machine_name' => $result->user_classification_machine_name,
             'status' => $result->status,
           ),
         );
@@ -2029,10 +2033,10 @@ function mfcs_miscellaneous_check_requests($request_id = NULL, $problem_code = N
         $reason .= $result['coordinator']['first_name'] . ' ' . $result['coordinator']['last_name'];
         $reason .= ' [id: ' . $result['coordinator']['user_id'] . ']';
 
-        if ($result['coordinator']['user_id']['status'] == 0) {
+        if ($result['coordinator']['status'] == 0) {
           $reason .= ' account is disabled.';
         }
-        elseif (empty($result['coordinator']['user_id']['classification'])) {
+        elseif (empty($result['coordinator']['classification'])) {
           $reason .= ' lacks the appropriate banner roles.';
         }
         else {
@@ -2717,6 +2721,7 @@ function mfcs_mischellaneous_check_requests_for_problems($request_id = NULL) {
         else {
           $query = db_insert('mfcs_problems_requests');
           $query->fields($problem);
+          $query->onConflictDo(Database::CONFLICT_DO_UPDATE, array('request_id', 'problem'), array_keys($problem));
           $query->execute();
         }
       }

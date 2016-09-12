@@ -232,7 +232,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
         if (!empty($coordinator_problems['disabled'])) {
           if (!empty($coordinator_problems['disabled']['current']['processed_name'])) {
-            $user_venue_coordinator_name = '<a href="' . $base_path . 'requests/users-0/view/' . $coordinator_problems['disabled']['current']['id'] . '" title="User ID: ' . $coordinator_problems['disabled']['current']['id'] .'">' . $coordinator_problems['disabled']['current']['processed_name'] . '</a> <sup>[id: ' . $coordinator_problems['disabled']['current']['id'] . ']</sup>';
+            $user_venue_coordinator_name = '<a href="' . $base_path . 'requests/users-0/view/' . $coordinator_problems['disabled']['current']['user_id'] . '" title="User ID: ' . $coordinator_problems['disabled']['current']['user_id'] .'">' . $coordinator_problems['disabled']['current']['processed_name'] . '</a> <sup>[id: ' . $coordinator_problems['disabled']['current']['id'] . ']</sup>';
 
             drupal_set_message('Warning: The Venue Coordinator (' . $user_venue_coordinator_name . ') assigned to this request no longer has access to this system.', 'warning', FALSE);
           }
@@ -243,8 +243,8 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
         if (!empty($coordinator_problems['out_of_sync'])) {
           if (!empty($coordinator_problems['out_of_sync']['current']['processed_name']) && !empty($coordinator_problems['out_of_sync']['banner']['processed_name'])) {
-            $user_venue_coordinator_name = '<a href="' . $base_path . 'requests/users-0/view/' . $coordinator_problems['out_of_sync']['current']['id'] . '">' . $coordinator_problems['out_of_sync']['current']['processed_name'] . '</a> <sup>[id: ' . $coordinator_problems['out_of_sync']['current']['id'] . ']</sup>';
-            $user_banner_coordinator_name = '<a href="' . $base_path . 'requests/users-0/view/' . $coordinator_problems['out_of_sync']['banner']['id'] . '" title="User ID: ' . $coordinator_problems['out_of_sync']['banner']['id'] .'">' . $coordinator_problems['out_of_sync']['banner']['processed_name'] . '</a> <sup>[id: ' . $coordinator_problems['out_of_sync']['banner']['id'] . ']</sup>';
+            $user_venue_coordinator_name = '<a href="' . $base_path . 'requests/users-0/view/' . $coordinator_problems['out_of_sync']['current']['user_id'] . '">' . $coordinator_problems['out_of_sync']['current']['processed_name'] . '</a> <sup>[id: ' . $coordinator_problems['out_of_sync']['current']['user_id'] . ']</sup>';
+            $user_banner_coordinator_name = '<a href="' . $base_path . 'requests/users-0/view/' . $coordinator_problems['out_of_sync']['banner']['banner_id'] . '" title="User ID: ' . $coordinator_problems['out_of_sync']['banner']['banner_id'] .'">' . $coordinator_problems['out_of_sync']['banner']['processed_name'] . '</a> <sup>[id: ' . $coordinator_problems['out_of_sync']['banner']['banner_id'] . ']</sup>';
 
             drupal_set_message('Warning: The Venue Coordinator (' . $user_venue_coordinator_name . ') assigned to this request no longer the same as the Venue Coordinator (' . $user_banner_coordinator_name . ') assigned via Banner.', 'warning', FALSE);
           }

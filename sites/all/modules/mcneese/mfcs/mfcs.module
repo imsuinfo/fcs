@@ -98,10 +98,10 @@ define('MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED', 9);
 /**
  * Defines Taxonomy TIDs for user classifications.
  */
- define('MFCS_USER_CLASSIFICATION_STUDENT', 87);
- define('MFCS_USER_CLASSIFICATION_CAMPS', 88);
- define('MFCS_USER_CLASSIFICATION_FACULTY', 89);
- define('MFCS_USER_CLASSIFICATION_EXTERNAL', 90);
+ define('MFCS_USER_CLASSIFICATION_EXTERNAL', 1);
+ define('MFCS_USER_CLASSIFICATION_STUDENT', 2);
+ define('MFCS_USER_CLASSIFICATION_FACULTY', 3);
+ define('MFCS_USER_CLASSIFICATION_CAMPS', 4);
 
 /**
  * Defines Taxonomy TIDs for request dates categories.
@@ -415,6 +415,15 @@ function mfcs_user_login(&$edit, $account, $category) {
 }
 
 /**
+ * Implements hook_user_load().
+ */
+function mfcs_user_load($users) {
+  mfcs_include(MFCS_INCLUDE_HOOKS);
+
+  return mfcs_hook_user_load($users);
+}
+
+/**
  * Implements hook_user_insert().
  */
 function mfcs_user_insert(&$edit, $account, $category) {
@@ -439,6 +448,15 @@ function mfcs_user_update(&$edit, $account, $category) {
   mfcs_include(MFCS_INCLUDE_HOOKS);
 
   return mfcs_hook_user_update($edit, $account, $category);
+}
+
+/**
+ * Implements hook_user_cancel().
+ */
+function mfcs_user_cancel($account) {
+  mfcs_include(MFCS_INCLUDE_HOOKS);
+
+  return mfcs_hook_user_cancel($account);
 }
 
 /**
@@ -3238,8 +3256,14 @@ function mfcs_load_users($user_ids, $join = FALSE, $deleted = FALSE) {
     $query = db_select('mfcs_users', 'mu');
 
     $query->addField('mu', 'user_id', 'user_id');
+    $query->addField('mu', 'banner_id', 'banner_id');
+    $query->addField('mu', 'first_name', 'first_name');
+    $query->addField('mu', 'last_name', 'last_name');
+    $query->addField('mu', 'phone_number', 'phone_number');
+    $query->addField('mu', 'ldap_duplicate', 'ldap_duplicate');
+    $query->addField('mu', 'primary_account', 'primary_account');
     $query->addField('mu', 'problems', 'problems');
-    $query->addField('mu', 'date', 'date');
+    $query->addField('mu', 'updated', 'updated');
 
     if (is_array($user_ids)) {
       $query->condition('mu.user_id', $user_ids, 'IN');
@@ -3248,9 +3272,14 @@ function mfcs_load_users($user_ids, $join = FALSE, $deleted = FALSE) {
       $query->condition('mu.user_id', $user_ids);
     }
 
-    if ($deleted === FALSE) {
+    if ($join || $deleted === FALSE) {
       $query->innerJoin('users', 'u', 'mu.user_id = u.uid');
-      $query->condition('u.status', 0, '>');
+      $query->addField('u', 'status', 'status');
+      $query->addField('u', 'mail', 'email');
+
+      if ($deleted === FALSE) {
+        $query->condition('u.status', 0, '>');
+      }
     }
 
     $query->orderBy('mu.user_id');
@@ -3301,7 +3330,7 @@ function mfcs_save_user($user_id, $data) {
   }
 
   // ensure only this function assignes the date and user_id, overriding any existing values.
-  $data['date'] = mfcs_instance();
+  $data['updated'] = mfcs_instance();
   $data['user_id'] = $user_id;
 
   $transaction = db_transaction();
@@ -3318,33 +3347,16 @@ function mfcs_save_user($user_id, $data) {
       return FALSE;
     }
 
-    // at this time only the 'problems' field exists, so if the problems is set to none, just delete the entry.
-    if (array_key_exists('problems', $data) && $data['problems'] == MFCS_USER_PROBLEM_NONE) {
-      $query = db_delete('mfcs_users');
-      $query->condition('user_id', $user_id);
-      $query->execute();
-
-      // enforce transaction execution
-      unset($transaction);
-      return TRUE;
-    }
-
-    $do_insert = FALSE;
     $query = db_select('mfcs_users', 'mu');
     $query->condition('mu.user_id', $user_id);
-    $query->addExpression('count(mu.user_id)');
 
-    $user_exists = $query->execute()->fetchField();
-    if ($user_exists == 0) {
-      $do_insert = TRUE;
-    }
-
-    if ($do_insert) {
-      $query = db_insert('mfcs_users');
-    }
-    else {
+    $user_object = $query->execute()->fetchObject();
+    if (is_object($user_object)) {
       $query = db_update('mfcs_users');
       $query->condition('user_id', $user_id);
+    }
+    else {
+      $query = db_insert('mfcs_users');
     }
 
     $query->fields($data);
@@ -3410,14 +3422,13 @@ function mfcs_search_users($search, $wildcard = TRUE, $sensitive = FALSE, $delet
   $users = array();
   try {
     $query = db_select('users', 'u');
-    $query->leftJoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id');
-    $query->leftJoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id');
+    $query->leftJoin('mfcs_users', 'mu', 'u.uid = mu.user_id');
 
     $query->addField('u', 'uid', 'user_id');
     $query->addField('u', 'name', 'name');
     $query->addField('u', 'mail', 'email');
-    $query->addField('fdfufn', 'field_user_first_name_value', 'name_first');
-    $query->addField('fdfuln', 'field_user_last_name_value', 'name_last');
+    $query->addField('mu', 'first_name', 'name_first');
+    $query->addField('mu', 'last_name', 'name_last');
 
     if ($deleted === FALSE) {
       $query->condition('u.status', 0, '>');
@@ -3430,27 +3441,27 @@ function mfcs_search_users($search, $wildcard = TRUE, $sensitive = FALSE, $delet
       if ($sensitive) {
         $or->condition('u.name', '%' . db_like($search) . '%', 'LIKE');
         $or->condition('u.mail', '%' . db_like($search) . '%', 'LIKE');
-        $or->condition('fdfufn.field_user_first_name_value', '%' . db_like($search) . '%', 'LIKE');
-        $or->condition('fdfuln.field_user_last_name_value', '%' . db_like($search) . '%', 'LIKE');
+        $or->condition('mu.first_name', '%' . db_like($search) . '%', 'LIKE');
+        $or->condition('mu.last_name', '%' . db_like($search) . '%', 'LIKE');
       }
       else {
         $or->condition('u.name', '%' . db_like($search) . '%', 'ILIKE');
         $or->condition('u.mail', '%' . db_like($search) . '%', 'ILIKE');
-        $or->condition('fdfufn.field_user_first_name_value', '%' . db_like($search) . '%', 'ILIKE');
-        $or->condition('fdfuln.field_user_last_name_value', '%' . db_like($search) . '%', 'ILIKE');
+        $or->condition('mu.first_name', '%' . db_like($search) . '%', 'ILIKE');
+        $or->condition('mu.last_name', '%' . db_like($search) . '%', 'ILIKE');
       }
     }
     elseif ($sensitive) {
       $or->condition('u.name', db_like($search), 'LIKE');
       $or->condition('u.mail', db_like($search), 'LIKE');
-      $or->condition('fdfufn.field_user_first_name_value', db_like($search), 'LIKE');
-      $or->condition('fdfuln.field_user_last_name_value', db_like($search), 'LIKE');
+      $or->condition('mu.first_name', db_like($search), 'LIKE');
+      $or->condition('mu.last_name', db_like($search), 'LIKE');
     }
     else {
       $or->condition('u.name', $search);
       $or->condition('u.mail', $search);
-      $or->condition('fdfufn.field_user_first_name_value', $search);
-      $or->condition('fdfuln.field_user_last_name_value', $search);
+      $or->condition('mu.first_name', $search);
+      $or->condition('mu.last_name', $search);
     }
 
     $query->condition($or);
@@ -3483,6 +3494,8 @@ function mfcs_search_users($search, $wildcard = TRUE, $sensitive = FALSE, $delet
  * This is different from user_load in that it loads a small set of fields.
  * This includes some hardcoded fields that are expected to be created via
  * the drupal field api frontend.
+ *
+ * @fixme: this may be redundant now that mfcs_users table has a function for loading it.
  *
  * Information loaded is:
  * - 'user_id': the users id.
@@ -3518,19 +3531,19 @@ function mfcs_load_basic_user_settings_by_user_id($user_id) {
 
   try {
     $query = db_select('users', 'u');
-    $query->leftJoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id AND fdfufn.delta = 0');
-    $query->leftJoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id AND fdfuln.delta = 0');
-    $query->leftJoin('field_data_field_user_banner_id', 'fdfubi', 'u.uid = fdfubi.entity_id AND fdfubi.delta = 0');
-    $query->leftJoin('field_data_field_user_phone_number', 'fdfupn', 'u.uid = fdfupn.entity_id AND fdfupn.delta = 0');
+    $query->leftJoin('mfcs_users', 'mu', 'u.uid = mu.user_id');
 
     $query->addField('u', 'name', 'name');
     $query->addField('u', 'mail', 'email');
     $query->addField('u', 'status', 'status');
 
-    $query->addField('fdfufn', 'field_user_first_name_value', 'first_name');
-    $query->addField('fdfuln', 'field_user_last_name_value', 'last_name');
-    $query->addField('fdfubi', 'field_user_banner_id_value', 'banner_id');
-    $query->addField('fdfupn', 'field_user_phone_number_value', 'phone_number');
+    $query->addField('mu', 'first_name', 'first_name');
+    $query->addField('mu', 'last_name', 'last_name');
+    $query->addField('mu', 'banner_id', 'banner_id');
+    $query->addField('mu', 'phone_number', 'phone_number');
+    $query->addField('mu', 'ldap_duplicate', 'ldap_duplicate');
+    $query->addField('mu', 'primary_account', 'primary_account');
+    $query->addField('mu', 'updated', 'updated');
 
     $query->condition('u.uid', $user_id);
 
@@ -3546,8 +3559,11 @@ function mfcs_load_basic_user_settings_by_user_id($user_id) {
         'status' => NULL,
         'first_name' => '',
         'last_name' => '',
-        'banner_id' => '',
+        'banner_id' => NULL,
         'phone_number' => '',
+        'ldap_duplicate' => FALSE,
+        'primary_account' => TRUE,
+        'updated' => NULL,
       );
 
       foreach ($rows as $row) {
@@ -3572,11 +3588,23 @@ function mfcs_load_basic_user_settings_by_user_id($user_id) {
         }
 
         if (property_exists($row, 'banner_id') && !is_null($row->banner_id)) {
-          $user[$user_id]['banner_id'] = $row->banner_id;
+          $user[$user_id]['banner_id'] = (int) $row->banner_id;
         }
 
         if (property_exists($row, 'phone_number') && !is_null($row->phone_number)) {
           $user[$user_id]['phone_number'] = $row->phone_number;
+        }
+
+        if (property_exists($row, 'ldap_duplicate') && !is_null($row->ldap_duplicate)) {
+          $user[$user_id]['ldap_duplicate'] = (bool) $row->ldap_duplicate;
+        }
+
+        if (property_exists($row, 'primary_account') && !is_null($row->primary_account)) {
+          $user[$user_id]['primary_account'] = (bool) $row->primary_account;
+        }
+
+        if (property_exists($row, 'updated') && !is_null($row->updated)) {
+          $user[$user_id]['updated'] = (int) $row->updated;
         }
 
         break;
@@ -3626,17 +3654,17 @@ function mfcs_load_request_user_by_user_id($user_id) {
 
   $user[$user_id] = NULL;
 
+  $transaction = db_transaction();
   try {
-    $query = db_select('mfcs_banner_event_roles_to_users', 'mberu');
-    $query->innerJoin('mfcs_banner_event_roles', 'mber', 'mber.id = mberu.event_role_id');
-    $query->innerJoin('field_data_field_user_banner_id', 'fdfubi', 'mberu.user_id = fdfubi.entity_id');
+    $query = db_select('mfcs_users', 'mu');
+    $query->leftJoin('mfcs_banner_event_roles_to_users', 'mberu', 'mu.user_id = mberu.user_id');
+    $query->innerJoin('mfcs_banner_event_roles', 'mber', 'mberu.event_role_id = mber.id');
 
     $query->addField('mber', 'machine_name', 'role');
-    $query->addField('fdfubi', 'field_user_banner_id_value', 'banner_id');
+    $query->addField('mu', 'banner_id', 'banner_id');
 
-    $query->condition('mberu.user_id', $user_id);
+    $query->condition('mu.user_id', $user_id);
     $query->condition('mberu.disabled', 0);
-    $query->condition('fdfubi.entity_type', 'user');
 
     $rows = $query->execute()->fetchAll();
 
@@ -3651,17 +3679,20 @@ function mfcs_load_request_user_by_user_id($user_id) {
         $user[$user_id]['role'][] = $row->role;
 
         if (is_null($user[$user_id]['id'])) {
-          $user[$user_id]['id'] = $row->banner_id;
+          $user[$user_id]['id'] = (int) $row->banner_id;
         }
       }
     }
   }
   catch (Error $e) {
+    $transaction->rollback();
     cf_error::on_exception($e);
+
 
     return FALSE;
   }
   catch (Exception $e) {
+    $transaction->rollback();
     cf_error::on_exception($e);
 
     return FALSE;
@@ -3682,6 +3713,7 @@ function mfcs_load_request_user_by_user_id($user_id) {
  *
  * @return array|bool
  *   An array containing the user information.
+ *   TRUE is returned if no banner information exists and no error has been detected.
  *   FALSE is returned on error.
  */
 function mfcs_load_request_user_by_banner_id($banner_id) {
@@ -3691,8 +3723,6 @@ function mfcs_load_request_user_by_banner_id($banner_id) {
     return FALSE;
   }
 
-  $banner_id_string = mfcs_banner_id_int_to_string($banner_id);
-
   $cache_id = __function__;
   $user = &drupal_static($cache_id, NULL);
   if (isset($user[$banner_id]) && is_array($user[$banner_id])) {
@@ -3701,15 +3731,16 @@ function mfcs_load_request_user_by_banner_id($banner_id) {
 
   $user[$banner_id] = NULL;
 
+  $transaction = db_transaction();
   try {
-    $query = db_select('mfcs_banner_event_roles_to_users', 'mberu');
-    $query->innerJoin('mfcs_banner_event_roles', 'mber', 'mber.id = mberu.event_role_id');
-    $query->innerJoin('field_data_field_user_banner_id', 'fdfubi', 'mberu.user_id = fdfubi.entity_id');
+    $query = db_select('mfcs_users', 'mu');
+    $query->leftJoin('mfcs_banner_event_roles_to_users', 'mberu', 'mu.user_id = mberu.user_id');
+    $query->innerJoin('mfcs_banner_event_roles', 'mber', 'mberu.event_role_id = mber.id');
 
     $query->addField('mber', 'machine_name', 'role');
-    $query->addField('fdfubi', 'entity_id', 'user_id');
+    $query->addField('mu', 'user_id', 'user_id');
 
-    $query->condition('fdfubi.field_user_banner_id_value', $banner_id_string);
+    $query->condition('mu.banner_id', $banner_id);
 
     $rows = $query->execute()->fetchAll();
 
@@ -3730,17 +3761,20 @@ function mfcs_load_request_user_by_banner_id($banner_id) {
     }
   }
   catch (Error $e) {
+    $transaction->rollback();
     cf_error::on_exception($e);
 
     return FALSE;
   }
   catch (Exception $e) {
+    $transaction->rollback();
     cf_error::on_exception($e);
 
     return FALSE;
   }
 
-  if (is_null($user[$banner_id])) return FALSE;
+  // no banner information found, but this is not an error.
+  if (is_null($user[$banner_id])) return TRUE;
 
   return $user[$banner_id];
 }
@@ -3797,7 +3831,6 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $append_
     return TRUE;
   }
 
-
   // only execute function once per user account per execution.
   if (!is_null($user)) {
     $already_executed = &drupal_static(__FUNCTION__, NULL);
@@ -3847,22 +3880,17 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $append_
   unset($bannerless_exception_role);
 
   // load the mfcs user-specific problem data as a baseline to make changes to.
-  $mfcs_users = mfcs_load_users($user->uid, FALSE, ($user->status == 0));
   $problems_original = MFCS_USER_PROBLEM_NONE;
-  if (isset($mfcs_users[$user->uid])) {
-    $problems_original = $mfcs_users[$user->uid]->problems;
+  if (isset($user->mfcs['problems']) && is_numeric($user->mfcs['problems'])) {
+    $problems_original = (int) $user->mfcs['problems'];
   }
-  unset($mfcs_users);
   $problems_new = $problems_original;
 
 
   // load the current users custom account information where available.
   $banner_id = NULL;
-  if (!empty($user->field_user_banner_id['und'][0]['value']) && is_numeric($user->field_user_banner_id['und'][0]['value'])) {
-    $banner_id = $user->field_user_banner_id['und'][0]['value'];
-    if (is_numeric($banner_id)) {
-      $banner_id = (int) $banner_id;
-    }
+  if (!empty($user->mfcs['banner_id']) && is_numeric($user->mfcs['banner_id'])) {
+    $banner_id = (int) $user->mfcs['banner_id'];
   }
 
   if (is_null($banner_id)) {
@@ -3874,47 +3902,30 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $append_
   }
 
   $ldap_duplicate = NULL;
-  if (!empty($user->field_user_ldap_duplicate['und'][0]['value']) && is_string($user->field_user_ldap_duplicate['und'][0]['value'])) {
-    $ldap_duplicate = strtolower($user->field_user_ldap_duplicate['und'][0]['value']);
-
-    // drupal may store the boolean as either 'true' or '1' for TRUE and either 'false' or '0' for FALSE.
-    if ($ldap_duplicate == 'true' || $ldap_duplicate == '1') {
-      $ldap_duplicate = TRUE;
-    }
-    elseif ($ldap_duplicate == 'false' || $ldap_duplicate == '0') {
-      $ldap_duplicate = FALSE;
-    }
+  if (!empty($user->mfcs['ldap_duplicate']) && is_bool($user->mfcs['ldap_duplicate'])) {
+    $ldap_duplicate = $user->mfcs['ldap_duplicate'];
   }
 
-  $ldap_primary = NULL;
+  $primary_account = NULL;
   $primary_account_id = NULL;
-  if (!empty($user->field_user_primary_account['und'][0]['value']) && is_string($user->field_user_primary_account['und'][0]['value'])) {
-    $ldap_primary = strtolower($user->field_user_primary_account['und'][0]['value']);
-
-    // drupal may store the boolean as either 'true' or '1' for TRUE and either 'false' or '0' for FALSE.
-    if ($ldap_primary == 'true' || $ldap_primary == '1') {
-      $ldap_primary = TRUE;
-      $primary_account_id = $user->uid;
-    }
-    elseif ($ldap_primary == 'false' || $ldap_primary == '0') {
-      $ldap_primary = FALSE;
-    }
+  if (!empty($user->mfcs['primary_account']) && is_bool($user->mfcs['primary_account'])) {
+    $primary_account = $user->mfcs['primary_account'];
+    $primary_account_id = $user->uid;
   }
-
 
   // Determine how many accounts (with same banner id) are assigned as primary.
-  if ($ldap_primary !== TRUE && !is_null($banner_id)) {
+  if ($primary_account !== TRUE && is_int($banner_id)) {
     $associated_users = mfcs_users_load_banner_id_to_user_id($banner_id);
     $total_primary = 0;
     $total_accounts = 0;
-    $accounts = array();
+    $account_ids = array();
 
     if (!empty($associated_users['user'])) {
       foreach ($associated_users['user'] as $associated_user_id => $associated_user) {
         $total_accounts++;
 
-        $accounts[$associated_user_id] = $associated_user_id;
-        if ($associated_user['primary'] == 1) {
+        $account_ids[$associated_user_id] = $associated_user_id;
+        if ($associated_user['primary'] == TRUE) {
           $total_primary++;
 
           if (is_null($primary_account_id)) {
@@ -3927,17 +3938,17 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $append_
     unset($associated_user);
     unset($associated_users);
 
-    // $accounts is used to perform synchronization loads, so do not save the user account currently being processed.
-    unset($accounts[$user->uid]);
+    // $account_ids is used to perform synchronization loads, so do not save the user account currently being processed.
+    unset($account_ids[$user->uid]);
   }
   else {
     $total_primary = 0;
     $total_accounts = 1;
-    $accounts = array();
+    $account_ids = array();
   }
 
 
-  // ticket: fcs-60, if there is only 1 user when isDuplicate is set, then assign that as primary.
+  // ticket: fcs-60, if there is only 1 account when isDuplicate is set, then assign that account as primary user.
   $assign_primary = FALSE;
   if ($total_primary < 1) {
     $assign_primary = TRUE;
@@ -3998,12 +4009,12 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $append_
       }
     }
 
-    if (!empty($accounts)) {
-      $account_mfcs_information = mfcs_load_users($accounts, FALSE, TRUE);
-      foreach ($accounts as $account_id) {
+    if (!empty($account_ids)) {
+      $account_mfcs_information = mfcs_load_users($account_ids, FALSE, TRUE);
+      foreach ($account_ids as $account_id) {
         $account_problems = MFCS_USER_PROBLEM_NONE;
-        if (isset($account_mfcs_information[$account_id])) {
-          $account_problems = $account_mfcs_information[$account_id]->problems;
+        if (isset($account_mfcs_information[$account_id]) && is_numeric($account_mfcs_information[$account_id])) {
+          $account_problems = (int) $account_mfcs_information[$account_id]->problems;
         }
 
         if (($account_problems & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) != 0 || ($account_problems & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) != 0 || ($problems_original & MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) != 0) {
@@ -4028,18 +4039,18 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $append_
     $changes_detected = TRUE;
 
     // make sure that all reviewer roles associated with the current user are assigned to the primary user and not the others.
-    if (!empty($accounts)) {
+    if (!empty($account_ids)) {
       $transaction = db_transaction();
       try {
-        if (count($accounts) == 1) {
-          $query = db_query('update mfcs_reviewers set user_id = :primary_id where user_id = :account_id', array(':primary_id' => $user->uid, ':account_id' => reset($accounts)));
-          $query = db_query('update mfcs_proxy_venue_coordinator set user_id = :primary_id where user_id = :account_id', array(':primary_id' => $user->uid, ':account_id' => reset($accounts)));
-          $query = db_query('update mfcs_proxy_venue_coordinator set proxy_id = :primary_id where proxy_id = :account_id', array(':primary_id' => $user->uid, ':account_id' => reset($accounts)));
+        if (count($account_ids) == 1) {
+          $query = db_query('update mfcs_reviewers set user_id = :primary_id where user_id = :account_id', array(':primary_id' => $user->uid, ':account_id' => reset($account_ids)));
+          $query = db_query('update mfcs_proxy_venue_coordinator set user_id = :primary_id where user_id = :account_id', array(':primary_id' => $user->uid, ':account_id' => reset($account_ids)));
+          $query = db_query('update mfcs_proxy_venue_coordinator set proxy_id = :primary_id where proxy_id = :account_id', array(':primary_id' => $user->uid, ':account_id' => reset($account_ids)));
         }
         else {
-          $query = db_query('update mfcs_reviewers set user_id = :primary_id where user_id IN :account_ids', array(':primary_id' => $user->uid, ':account_ids' => $accounts));
-          $query = db_query('update mfcs_proxy_venue_coordinator set user_id = :primary_id where user_id IN :account_ids', array(':primary_id' => $user->uid, ':account_ids' => $accounts));
-          $query = db_query('update mfcs_proxy_venue_coordinator set proxy_id = :primary_id where proxy_id IN :account_ids', array(':primary_id' => $user->uid, ':account_ids' => $accounts));
+          $query = db_query('update mfcs_reviewers set user_id = :primary_id where user_id IN :account_ids', array(':primary_id' => $user->uid, ':account_ids' => $account_ids));
+          $query = db_query('update mfcs_proxy_venue_coordinator set user_id = :primary_id where user_id IN :account_ids', array(':primary_id' => $user->uid, ':account_ids' => $account_ids));
+          $query = db_query('update mfcs_proxy_venue_coordinator set proxy_id = :primary_id where proxy_id IN :account_ids', array(':primary_id' => $user->uid, ':account_ids' => $account_ids));
         }
 
         unset($transaction);
@@ -4082,385 +4093,46 @@ function mfcs_synchronize_user_settings($user = NULL, $roles = array(), $append_
       }
     }
 
-    $edit['field_user_primary_account']['und'][0]['value'] = 1;
+    $edit['mfcs']['primary_account'] = TRUE;
   }
 
 
   // Whenever user_save() is called, the hook_user_presave() will auto-refresh banner information.
   if ($changes_detected || $refresh_banner) {
     $edit['roles'] = $user_roles;
+    $edit['mfcs']['problems'] = $problems_new;
 
     if (!user_save($user, $edit)) {
       // the user-presave process may have altered the user problems settings.
       $mfcs_users = mfcs_load_users($user->uid, FALSE, ($user->status == 0));
       if (isset($mfcs_users[$user->uid])) {
         $problems_original = $mfcs_users[$user->uid]->problems;
+        $problems_new = $problems_original;
+
+        // account synchronization failed, so assign the problem flag.
+        if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) == 0) {
+          $problems_new = $problems_original | MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE;
+        }
+
+        if ($problems_original != $problems_new) {
+          mfcs_save_user($user->uid, array('problems' => $problems_new));
+        }
       }
       unset($mfcs_users);
-
-      // account synchronization failed, so assign the problem flag.
-      if (($problems_new & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) == 0) {
-        $problems_new = $problems_new | MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE;
-      }
-
-      if ($problems_original != $problems_new) {
-        mfcs_save_user($user->uid, array('problems' => $problems_new));
-      }
 
       if (!is_null($user)) {
         $already_executed[$user->uid] = FALSE;
       }
+
       return FALSE;
     }
-
-    // the user-presave process may have altered the user problems settings.
-    $mfcs_users = mfcs_load_users($user->uid, FALSE, ($user->status == 0));
-    if (isset($mfcs_users[$user->uid])) {
-      $problems_original = $mfcs_users[$user->uid]->problems;
-    }
-    unset($mfcs_users);
-  }
-
-  if ($problems_original != $problems_new) {
-    mfcs_save_user($user->uid, array('problems' => $problems_new));
   }
 
   if (!is_null($user)) {
     $already_executed[$user->uid] = FALSE;
   }
+
   return TRUE;
-}
-
-/**
- * Given a user object, the user settings will be updated.
- *
- * Process bannerless exception before calling this and if bannerless exception is enabled, then do not call this.
- *
- * @param object $user
- *   The user object to process.
- * @param int $problems
- *   An integer representing existing problems.
- *   This will be altered so that the caller can discover and handle problems encountered during the execution of this function.
- * @param array $settings
- *   (optional) An array containing the following keys:
- *   'banner_id': If set, then is an integer representing the banner id.
- *                May be set to NULL to designate that the account has no banner id.
- *   'primary': If set, then is a boolean representing the is primary account status.
- *              May be set to NULL to designate that the primary account needs to be determined/detected.
- *   'roles': If set, then is a complete list of role integers associated with the user.
- *            The array key is the role id and the array value is the role name.
- *   'status: If set, then this is an integer to use in place of the user accounts status.
- *
- * @return bool|array
- *   An array containing the changed fields, to be merged with a function such as mfcs_hook_user_presave().
- *   TRUE is returned when banner roles are not to be changed.
- *   FALSE is returned on error.
- *
- * @see: mfcs_hook_user_presave()
- */
-function mfcs_process_user_banner_roles($user, &$problems, $settings = array()) {
-  if (!is_object($user)) {
-    cf_error::invalid_object('user');
-    return FALSE;
-  }
-
-  if (!cf_is_integer($problems)) {
-    cf_error::invalid_integer('problems');
-    return FALSE;
-  }
-
-  if (!is_array($settings)) {
-    cf_error::invalid_array('settings');
-    return FALSE;
-  }
-
-  if (array_key_exists('banner_id', $settings)) {
-    if (is_null($settings['banner_id'])) {
-      // accounts without banner ids cannot be synced and are therefore ignored.
-      return TRUE;
-    }
-
-    $banner_id = $settings['banner_id'];
-  }
-  else {
-    if (empty($user->field_user_banner_id['und'][0]['value']) || !is_numeric($user->field_user_banner_id['und'][0]['value'])) {
-      // accounts without banner ids cannot be synced and are therefore ignored.
-      return TRUE;
-    }
-
-    $banner_id = (int) $user->field_user_banner_id['und'][0]['value'];
-  }
-
-  if (isset($user->uid)) {
-    $already_executed = &drupal_static(__FUNCTION__, NULL);
-    if (is_array($already_executed) && array_key_exists($user->uid, $already_executed)) {
-      return $already_executed[$user->uid];
-    }
-  }
-
-  $primary_account_id = NULL;
-  if (array_key_exists('primary', $settings)) {
-    if (cf_is_integer($settings['primary'])) {
-      $primary_account_id = (int) $settings['primary'];
-    }
-  }
-
-  $is_primary = TRUE;
-  if (is_null($primary_account_id)) {
-    $ldap_primary = NULL;
-    if (!empty($user->field_user_primary_account['und'][0]['value']) && is_string($user->field_user_primary_account['und'][0]['value'])) {
-      $ldap_primary = strtolower($user->field_user_primary_account['und'][0]['value']);
-
-      // drupal may store the boolean as either 'true' or '1' for TRUE and either 'false' or '0' for FALSE.
-      if ($ldap_primary == 'true' || $ldap_primary == '1') {
-        $is_primary = TRUE;
-      }
-      elseif ($ldap_primary == 'false' || $ldap_primary == '0') {
-        $is_primary = FALSE;
-      }
-    }
-    unset($ldap_primary);
-
-    if (isset($user->uid)) {
-      if ($is_primary) {
-        $primary_account_id = (int) $user->uid;
-      }
-      else {
-        // load the user id for the primary account.
-        $associated_users = mfcs_users_load_banner_id_to_user_id($banner_id);
-        if (!empty($associated_users['user'])) {
-          foreach ($associated_users['user'] as $associated_user_id => $associated_user) {
-            if ($associated_user['primary'] == TRUE) {
-              $primary_account_id = (int) $associated_user_id;
-              break;
-            }
-          }
-        }
-        unset($associated_user_id);
-        unset($associated_user);
-        unset($associated_users);
-      }
-    }
-  }
-
-  // warning: these are assumed to be defined (on a new install, they must be manually created with these exact names).
-  $requester_role = user_role_load_by_name('requester');
-  $reviewer_role = user_role_load_by_name('reviewer');
-  $manager_role = user_role_load_by_name('manager');
-  $administrator_role = user_role_load_by_name('administrator');
-  $bannerless_exception_role = user_role_load_by_name('bannerless exception');
-  $reviewer_exception_role = user_role_load_by_name('reviewer exception');
-
-  $role_mappings = mfcs_get_drupal_to_banner_role_mappings('banner_name');
-
-  $user_roles = array();
-  if (isset($user->roles) && is_array($user->roles)) {
-    $user_roles = $user->roles;
-  }
-
-  if (array_key_exists('roles', $settings)) {
-    if (is_array($settings['roles'])) {
-      $user_roles = $settings['roles'];
-    }
-  }
-
-  $user_status = NULL;
-  if (isset($user->status)) {
-    $user_status = (int) $user->status;
-    if (array_key_exists('status', $settings) && is_int($settings['status'])) {
-      $user_status = (int) $settings['status'];
-    }
-  }
-
-
-  // force array to be populated with role ids and not role names.
-  $processed_roles = array();
-  foreach ($user_roles as $role_id => $role_name) {
-    $processed_roles[$role_id] = (int) $role_id;
-  }
-  unset($role_id);
-  unset($role_name);
-
-  if (isset($bannerless_exception_role->rid) && array_key_exists($bannerless_exception_role->rid, $processed_roles)) {
-    // if the user is defined as being an exception to operate as if it is bannerless, then do so.
-    if (isset($user->uid)) {
-      $already_executed[$user->uid] = TRUE;
-    }
-    return TRUE;
-  }
-
-  if (isset($administrator_role->rid) && array_key_exists($administrator_role->rid, $processed_roles)) {
-    // administrators are not auto-managed.
-    if (isset($user->uid)) {
-      $already_executed[$user->uid] = TRUE;
-    }
-    return TRUE;
-  }
-
-  unset($administrator_role);
-  unset($bannerless_exception_role);
-
-  $is_manager = array_key_exists($manager_role->rid, $processed_roles);
-
-  // remove roles associated with banner from the user roles for non-managers.
-  if (!$is_manager) {
-    foreach ($role_mappings as $mapping) {
-      if (array_key_exists($mapping->role_id, $processed_roles)) {
-        unset($processed_roles[$mapping->role_id]);
-      }
-    }
-    unset($mapping);
-  }
-
-
-  // validate banner id, if invalid, then strip all user roles (admins are cleared before this point).
-  if (mfcs_load_request_user_by_banner_id($banner_id) === FALSE) {
-    if ($user_status === 0) {
-      // disabled accounts should not report invalid banner ids.
-      if (($problems & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) != 0) {
-        $problems = $problems - MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
-      }
-    }
-    elseif (($problems & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) == 0) {
-      $problems = $problems | MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
-    }
-
-    if (!$is_manager) {
-      if (isset($user->uid)) {
-        $already_executed[$user->uid] = FALSE;
-      }
-      return FALSE;
-    }
-  }
-  elseif (($problems & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) != 0) {
-    $problems = $problems - MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
-  }
-
-  // load banner role information associated with the primary user.
-  $user_banner = array();
-  if ($is_primary) {
-    if (isset($user->uid)) {
-      $user_banner = mfcs_load_request_user_by_user_id($user->uid);
-      if ($user_banner == FALSE) {
-        $user_banner = array();
-      }
-    }
-  }
-  elseif (!is_null($primary_account_id)) {
-    $user_banner = mfcs_load_request_user_by_user_id($primary_account_id);
-    if ($user_banner == FALSE) {
-      $user_banner = array();
-    }
-  }
-
-  // Assign requester role for all users who have valid banner accounts (administrators and bannerless exception should never reach this point).
-  if (!array_key_exists($requester_role->rid, $processed_roles) && !empty($user_banner)) {
-    $processed_roles[$requester_role->rid] = $requester_role->rid;
-  }
-
-  // managers are auto-granted roles even if the roles are not supplied according to their banner access.
-  if ($is_manager) {
-    foreach ($role_mappings as $mapping) {
-      $processed_roles[$mapping->role_id] = $mapping->role_id;
-    }
-    unset($mapping);
-  }
-
-  // determine if the user is a reviewer exception
-  $reviewer_exception = FALSE;
-  if (array_key_exists($reviewer_exception_role->rid, $processed_roles)) {
-    $reviewer_exception = TRUE;
-  }
-
-  // if the (non-admin) user is a venue or room coordinator, then add/remove reviewer role as necessary.
-  if (empty($user_banner['role'])) {
-    // if the user has no banner roles, is not a manager, and is not a reviewer exception, then do not allow the user to have reviewer or requester roles (bannerless exception and administrators cannot reach this point).
-    if (!$is_manager && !$reviewer_exception) {
-      unset($processed_roles[$reviewer_role->rid]);
-      unset($processed_roles[$requester_role->rid]);
-    }
-  }
-  else {
-    foreach ($user_banner['role'] as $role) {
-      if (isset($role_mappings[$role])) {
-        $processed_roles[$role_mappings[$role]->role_id] = $role_mappings[$role]->role_id;
-      }
-    }
-    unset($role);
-  }
-
-
-  // if the user can proxy as another account, then they need the reviewer role (but make no changes if the user is a manager or is a reviewer exception).
-  if (!$is_manager && !$reviewer_exception) {
-    $can_review = FALSE;
-    $proxy_accounts = mfcs_get_proxy_venue_coordinators(array('mpvc.proxy_id' => $primary_account_id));
-    if (!empty($proxy_accounts['results'])) {
-      $processed_roles[$reviewer_role->rid] = $reviewer_role->rid;
-      $can_review = TRUE;
-    }
-
-    // Alter reviewer role settings for users without 'manager' and 'reviewer exception' roles.
-    $reviewers = mfcs_get_reviewers(array('mr.user_id' => $primary_account_id, 'mr.disabled' => 0));
-    if (!empty($reviewers['results'])) {
-      $can_review = TRUE;
-    }
-
-    $all_coordinators = mfcs_load_room_coordinators(NULL, TRUE);
-    if (array_key_exists($primary_account_id, $all_coordinators)) {
-      if (array_key_exists($reviewer_role->rid, $processed_roles)) {
-        $can_review = TRUE;
-      }
-    }
-
-    if ($can_review) {
-      $processed_roles[$reviewer_role->rid] = $reviewer_role->rid;
-    }
-    else {
-      if (array_key_exists($reviewer_role->rid, $processed_roles)) {
-        unset($processed_roles[$reviewer_role->rid]);
-
-        // the function arguments are trying to assign 'proxy' role to a user who has no venue or room to review.
-        // do not allow this and provide a watchdog warning for reference.
-        watchdog(MFCS_WATCHDOG_ID, "The user '%user_name' (%user_id, %primary_id) is not being granted reviewer access as requested because the user is not assigned as either a venue or room coordinator in the banner database and is not a venue coordinator proxy.", array('%user_name' => $user->name, '%user_id' => isset($user->uid) ? $user->uid : 'undefined', '%primary_id' => $primary_account_id), WATCHDOG_WARNING);
-
-        $problems = $problems | MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED;
-      }
-    }
-  }
-
-  $results = array();
-
-  // auto-lock or auto-unlock accounts without any banner roles, but only when banner can be refreshed.
-  if (($problems & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) == 0 && ($problems & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) == 0 && ($problems & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) == 0) {
-    // If the user has banner roles, then make sure MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS is no longer set.
-    if (!empty($banner_roles) && ($problems & MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) != 0) {
-      $problems -= MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS;
-    }
-
-    if ($user->status == 0) {
-      if (!empty($banner_roles)) {
-        // auto-unlock account.
-        $results['status'] = 1;
-
-        watchdog(MFCS_WATCHDOG_ID, "The user '%user_name' (%user_id, %primary_id) has had the account enabled/unlocked due to regaining sufficient banner roles.", array('%user_name' => $user->name, '%user_id' => isset($user->uid) ? $user->uid : 'undefined', '%primary_id' => $primary_account_id), WATCHDOG_NOTICE);
-      }
-    }
-    else {
-      if (empty($banner_roles)) {
-        // auto-lock account (currently disabled).
-        #$results['status'] = 0;
-
-        #watchdog(MFCS_WATCHDOG_ID, "The user '%user_name' (%user_id, %primary_id) has had the account disabled/locked due to insufficient banner roles.", array('%user_name' => $user->name, '%user_id' => isset($user->uid) ? $user->uid : 'undefined', '%primary_id' => $primary_account_id), WATCHDOG_NOTICE);
-      }
-    }
-  }
-
-  $results['roles'] = $processed_roles;
-
-  if (isset($user->uid)) {
-    $already_executed[$user->uid] = $results;
-  }
-  return $results;
 }
 
 /**
@@ -4662,7 +4334,7 @@ function mfcs_sync_banner_to_local($transaction = NULL, $user = NULL, $message_o
   if (empty($rows) || !is_array($rows)) {
     if ($rows === FALSE) {
       if ($message_on_oracle_failure) {
-        drupal_set_message("Failed to connect to banner database.", 'error', FALSE);
+        drupal_set_message('Failed to connect to banner database.', 'error', FALSE);
       }
     }
     return FALSE;
@@ -5056,16 +4728,11 @@ function mfcs_sync_banner_to_local_users($user_id = NULL, $banner_id = NULL, $me
   if (!is_null($user_id) && is_null($banner_id)) {
     $user = user_load($user_id);
 
-    if (!is_object($user) || !isset($user->field_user_banner_id['und'][0]) || !array_key_exists('value', $user->field_user_banner_id['und'][0])) {
+    if (!is_object($user) || !isset($user->mfcs['banner_id']) || !is_numeric($user->mfcs['banner_id'])) {
       return FALSE;
     }
 
-    $banner_id = $user->field_user_banner_id['und'][0]['value'];
-
-    if (empty($banner_id) || !is_numeric($banner_id)) {
-      return FALSE;
-    }
-
+    $banner_id = (int) $user->mfcs['banner_id'];
     unset($user);
   }
 
@@ -5089,7 +4756,7 @@ function mfcs_sync_banner_to_local_users($user_id = NULL, $banner_id = NULL, $me
   // failed to connect to oracle database.
   if ($rows === FALSE) {
     if ($message_on_oracle_failure) {
-      drupal_set_message("Failed to connect to banner database.", 'error', FALSE);
+      drupal_set_message('Failed to connect to banner database.', 'error', FALSE);
     }
     return FALSE;
   }
@@ -5130,13 +4797,16 @@ function mfcs_sync_banner_to_local_users($user_id = NULL, $banner_id = NULL, $me
 
         // add/update the roles to users.
         if (is_null($banner_id)) {
-          if (isset($banner_ids_to_user_ids['banner'][$row['id']]['user_id'])) {
-            $current_user_id = $banner_ids_to_user_ids['banner'][$row['id']]['user_id'];
+          // convert string id to integer, which should truncate the leading 0's and allow a valid match.
+          $row_banner_id = (int) $row['id'];
+
+          if (isset($banner_ids_to_user_ids['banner'][$row_banner_id]['user_id'])) {
+            $current_user_id = $banner_ids_to_user_ids['banner'][$row_banner_id]['user_id'];
           }
-          elseif (isset($banner_ids_to_user_ids['banner'][$row['id']]) && !array_key_exists('user_id', $banner_ids_to_user_ids['banner'][$row['id']])) {
+          elseif (isset($banner_ids_to_user_ids['banner'][$row_banner_id]) && !array_key_exists('user_id', $banner_ids_to_user_ids['banner'][$row_banner_id])) {
             // if the 'primary account' flag is not set, but exactly 1 account exists, then assume it is the primary account.
-            if (!empty($banner_ids_to_user_ids['banner'][$row['id']]['others']) && count($banner_ids_to_user_ids['banner'][$row['id']]['others']) == 1) {
-              $first = reset($banner_ids_to_user_ids['banner'][$row['id']]['others']);
+            if (!empty($banner_ids_to_user_ids['banner'][$row_banner_id]['others']) && count($banner_ids_to_user_ids['banner'][$row_banner_id]['others']) == 1) {
+              $first = reset($banner_ids_to_user_ids['banner'][$row_banner_id]['others']);
               if (isset($first['user_id'])) {
                 $current_user_id = $first['user_id'];
               }
@@ -5709,29 +5379,29 @@ function mfcs_auto_block_accounts_cron() {
   $transaction = NULL;
   try {
     // using PostgresSQL's WITH clause because it is much faster.
-    $sql = "with admin_or_exception as (select ur.uid from users_roles ur inner join role r ON ur.rid = r.rid where (r.name IN ('administrator', 'bannerless exception'))), ";
-    $sql .= "banner_user_roles as (select mberu.user_id AS user_id from mfcs_banner_event_roles_to_users mberu where mberu.disabled = 0) ";
+    $sql = 'with admin_or_exception as (select ur.uid from users_roles ur inner join role r ON ur.rid = r.rid where (r.name IN (\'administrator\', \'bannerless exception\'))), ';
+    $sql .= 'banner_user_roles as (select mberu.user_id AS user_id from mfcs_banner_event_roles_to_users mberu where mberu.disabled = 0) ';
 
-    $sql .= "select u.uid as user_id, fdfubi.field_user_banner_id_value as banner_id, u.name AS name from users u ";
-    $sql .= "left outer join field_data_field_user_banner_id fdfubi on u.uid = fdfubi.entity_id ";
+    $sql .= 'select u.uid as user_id, mu.banner_id as banner_id, u.name AS name from users u ';
+    $sql .= 'left outer join mfcs_users mu on u.uid = mu.user_id ';
 
     // do not process anonymous
-    $sql .= "where (u.uid <> 0) ";
+    $sql .= 'where (u.uid <> 0) ';
 
     // do not process system admin account
-    $sql .= "and (u.uid <> 1) ";
+    $sql .= 'and (u.uid <> 1) ';
 
     // only check enabled accounts
-    $sql .= "and (u.status = 1) ";
+    $sql .= 'and (u.status = 1) ';
 
     // ignore manually disabled accounts by name.
-    $sql .= "and (u.name not in (:no_auto_block_accounts)) ";
+    $sql .= 'and (u.name not in (:no_auto_block_accounts)) ';
 
     // the user must not have any banner roles to be auto-blocked.
-    $sql .= "and (u.uid not in (select * from banner_user_roles bur where bur.user_id = u.uid)) ";
+    $sql .= 'and (u.uid not in (select * from banner_user_roles bur where bur.user_id = u.uid)) ';
 
     // the user must not have any drupal administer or bannerless exception roles to be auto-blocked.
-    $sql .= "and (u.uid not in (select * from admin_or_exception aoe)) ";
+    $sql .= 'and (u.uid not in (select * from admin_or_exception aoe)) ';
 
     $users = db_query($sql, array(':no_auto_block_accounts' => $no_auto_block_accounts))->fetchAll();
 
@@ -5740,7 +5410,7 @@ function mfcs_auto_block_accounts_cron() {
     // using user_load() is not the most efficient way, but it works and functions like mfcs_synchronize_user_settings() expect a user object.
     $transaction = db_transaction();
     foreach ($users as $u) {
-      watchdog(MFCS_WATCHDOG_ID, "Auto-blocking the user @user (@user_id) and removing all existing roles, reason: Not in appropriate banner groups or local admin groups.", array('@user' => $u->name, '@user_id' => $u->user_id), WATCHDOG_INFO);
+      watchdog(MFCS_WATCHDOG_ID, 'Auto-blocking the user @user (@user_id) and removing all existing roles, reason: Not in appropriate banner groups or local admin groups.', array('@user' => $u->name, '@user_id' => $u->user_id), WATCHDOG_INFO);
 
       $block_query = db_update('users');
       $block_query->fields(array('status' => 0));
@@ -6452,14 +6122,10 @@ function mfcs_load_user_by_banner_id($banner_id, $reset = FALSE) {
     return $cached_user[$banner_id];
   }
 
-  $banner_id_string = mfcs_banner_id_int_to_string($banner_id);
-
   try {
     $query = db_select('users', 'u');
 
-    $query->innerJoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id AND fdfufn.delta = 0');
-    $query->innerJoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id AND fdfuln.delta = 0');
-    $query->innerJoin('field_data_field_user_banner_id', 'fdfubi', 'u.uid = fdfubi.entity_id AND fdfubi.delta = 0');
+    $query->innerJoin('mfcs_users', 'mu', 'u.uid = mu.user_id');
 
     $query->addField('u', 'uid', 'user_id');
     $query->addField('u', 'name', 'name');
@@ -6467,11 +6133,11 @@ function mfcs_load_user_by_banner_id($banner_id, $reset = FALSE) {
     $query->addField('u', 'status', 'status');
     $query->addField('u', 'mail', 'email');
 
-    $query->addField('fdfufn', 'field_user_first_name_value', 'first_name');
-    $query->addField('fdfuln', 'field_user_last_name_value', 'last_name');
-    $query->addField('fdfubi', 'field_user_banner_id_value', 'banner_id');
+    $query->addField('mu', 'first_name', 'first_name');
+    $query->addField('mu', 'last_name', 'last_name');
+    $query->addField('mu', 'banner_id', 'banner_id');
 
-    $query->condition('field_user_banner_id_value', $banner_id_string);
+    $query->condition('mu.banner_id', $banner_id);
 
     $results = $query->execute()->fetchAll();
   }
@@ -6588,13 +6254,11 @@ function mfcs_get_reviewers($conditions = array(), $options = array()) {
 
     if ($join) {
       $query->innerJoin('users', 'u', 'u.uid = mr.user_id');
-      $query->leftJoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id AND fdfufn.delta = 0');
-      $query->leftJoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id AND fdfuln.delta = 0');
-      $query->leftJoin('field_data_field_user_banner_id', 'fdfubi', 'u.uid = fdfubi.entity_id AND fdfubi.delta = 0');
+      $query->innerJoin('mfcs_users', 'mu', 'u.uid = mu.user_id');
 
-      $query->innerJoin('taxonomy_term_data', 'ttd1', 'ttd1.vid = 1 AND mr.request_classification = ttd1.tid');
-      $query->innerJoin('taxonomy_term_data', 'ttd2', 'ttd2.vid = 19 AND mr.review_step = ttd2.tid');
-      $query->innerJoin('taxonomy_term_data', 'ttd3', 'ttd3.vid = 17 AND mr.reviewer_classification = ttd3.tid');
+      $query->leftJoin('mfcs_taxonomy_request_classification', 'mtrc', 'mr.request_classification = mtrc.id');
+      $query->leftJoin('mfcs_taxonomy_review_step', 'mtrs', 'mr.review_step = mtrs.id');
+      $query->leftJoin('mfcs_taxonomy_reviewer_classification', 'mtrcn', 'mr.reviewer_classification = mtrcn.id');
     }
 
     if (!empty($conditions)) {
@@ -6678,13 +6342,13 @@ function mfcs_get_reviewers($conditions = array(), $options = array()) {
       $query->addField('u', 'status', 'status');
       $query->addField('u', 'mail', 'email');
 
-      $query->addField('fdfufn', 'field_user_first_name_value', 'first_name');
-      $query->addField('fdfuln', 'field_user_last_name_value', 'last_name');
-      $query->addField('fdfubi', 'field_user_banner_id_value', 'banner_id');
+      $query->addField('mu', 'first_name', 'first_name');
+      $query->addField('mu', 'last_name', 'last_name');
+      $query->addField('mu', 'banner_id', 'banner_id');
 
-      $query->addField('ttd1', 'name', 'request_classification_name');
-      $query->addField('ttd2', 'name', 'review_step_name');
-      $query->addField('ttd3', 'name', 'reviewer_classification_name');
+      $query->addField('mtrc', 'machine_name', 'request_classification_name');
+      $query->addField('mtrs', 'machine_name', 'review_step_name');
+      $query->addField('mtrcn', 'machine_name', 'reviewer_classification_name');
     }
 
     if (!is_null($start) || !is_null($limit)) {
@@ -6813,14 +6477,10 @@ function mfcs_get_proxy_venue_coordinators($conditions = array(), $options = arr
 
     if ($join) {
       $query->innerJoin('users', 'u', 'mpvc.user_id = u.uid');
-      $query->leftJoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id AND fdfufn.delta = 0');
-      $query->leftJoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id AND fdfuln.delta = 0');
-      $query->leftJoin('field_data_field_user_banner_id', 'fdfubi', 'u.uid = fdfubi.entity_id AND fdfubi.delta = 0');
+      $query->leftJoin('mfcs_users', 'mu', 'u.uid = mu.user_id');
 
       $query->innerJoin('users', 'pu', 'mpvc.proxy_id = pu.uid');
-      $query->leftJoin('field_data_field_user_first_name', 'pfdfufn', 'pu.uid = pfdfufn.entity_id AND pfdfufn.delta = 0');
-      $query->leftJoin('field_data_field_user_last_name', 'pfdfuln', 'pu.uid = pfdfuln.entity_id AND pfdfuln.delta = 0');
-      $query->leftJoin('field_data_field_user_banner_id', 'pfdfubi', 'pu.uid = pfdfubi.entity_id AND pfdfubi.delta = 0');
+      $query->leftJoin('mfcs_users', 'pmu', 'pu.uid = pmu.user_id');
     }
 
     if (!empty($conditions)) {
@@ -6904,18 +6564,18 @@ function mfcs_get_proxy_venue_coordinators($conditions = array(), $options = arr
       $query->addField('u', 'status', 'status');
       $query->addField('u', 'mail', 'email');
 
-      $query->addField('fdfufn', 'field_user_first_name_value', 'first_name');
-      $query->addField('fdfuln', 'field_user_last_name_value', 'last_name');
-      $query->addField('fdfubi', 'field_user_banner_id_value', 'banner_id');
+      $query->addField('mu', 'first_name', 'first_name');
+      $query->addField('mu', 'last_name', 'last_name');
+      $query->addField('mu', 'banner_id', 'banner_id');
 
       $query->addField('pu', 'name', 'proxy_name');
       $query->addField('pu', 'created', 'proxy_created');
       $query->addField('pu', 'status', 'proxy_status');
       $query->addField('pu', 'mail', 'proxy_email');
 
-      $query->addField('pfdfufn', 'field_user_first_name_value', 'proxy_first_name');
-      $query->addField('pfdfuln', 'field_user_last_name_value', 'proxy_last_name');
-      $query->addField('pfdfubi', 'field_user_banner_id_value', 'proxy_banner_id');
+      $query->addField('pmu', 'first_name', 'proxy_first_name');
+      $query->addField('pmu', 'last_name', 'proxy_last_name');
+      $query->addField('pmu', 'banner_id', 'proxy_banner_id');
     }
 
     if (!is_null($start) || !is_null($limit)) {
@@ -7080,18 +6740,16 @@ function mfcs_get_user_information($user_id) {
 
   try {
     $query = db_select('users', 'u');
-    $query->leftJoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id AND fdfufn.delta = 0');
-    $query->leftJoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id AND fdfuln.delta = 0');
-    $query->leftJoin('field_data_field_user_banner_id', 'fdfubi', 'u.uid = fdfubi.entity_id AND fdfubi.delta = 0');
+    $query->leftJoin('mfcs_users', 'mu', 'u.uid = mu.user_id');
 
     $query->addField('u', 'name', 'name');
     $query->addField('u', 'created', 'created');
     $query->addField('u', 'status', 'status');
     $query->addField('u', 'mail', 'email');
 
-    $query->addField('fdfufn', 'field_user_first_name_value', 'first_name');
-    $query->addField('fdfuln', 'field_user_last_name_value', 'last_name');
-    $query->addField('fdfubi', 'field_user_banner_id_value', 'banner_id');
+    $query->addField('mu', 'first_name', 'first_name');
+    $query->addField('mu', 'last_name', 'last_name');
+    $query->addField('mu', 'banner_id', 'banner_id');
 
     $query->condition('u.uid', $user_id);
 
@@ -7803,12 +7461,11 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
 
     if ($join) {
       $query->leftJoin('users', 'sb_u', 'mer.user_id = sb_u.uid');
-      $query->leftJoin('field_data_field_user_first_name', 'sb_fdfufn', 'sb_u.uid = sb_fdfufn.entity_id AND sb_fdfufn.delta = 0');
-      $query->leftJoin('field_data_field_user_last_name', 'sb_fdfuln', 'sb_u.uid = sb_fdfuln.entity_id AND sb_fdfuln.delta = 0');
+      $query->leftJoin('mfcs_users', 'sb_mu', 'sb_u.uid = sb_mu.user_id');
 
       $already_joined['submitted_by-users'] = 'sb_u';
-      $already_joined['submitted_by-field_data_field_user_first_name'] = 'sb_fdfufn';
-      $already_joined['submitted_by-field_data_field_user_last_name'] = 'sb_fdfuln';
+      $already_joined['submitted_by-first_name'] = 'sb_mu';
+      $already_joined['submitted_by-last_name'] = 'sb_mu';
     }
 
     $count_query = NULL;
@@ -7842,8 +7499,8 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
     if ($join) {
       $query->addField('sb_u', 'name', 'submitted_by_name');
 
-      $query->addField('sb_fdfufn', 'field_user_first_name_value', 'submitted_by_first_name');
-      $query->addField('sb_fdfuln', 'field_user_last_name_value', 'submitted_by_last_name');
+      $query->addField('sb_mu', 'first_name', 'submitted_by_first_name');
+      $query->addField('sb_mu', 'last_name', 'submitted_by_last_name');
 
       $already_added['submitted_by_name'] = 'sb_u.name';
 
@@ -9262,11 +8919,11 @@ function mfcs_build_request_table($items, $max_rows, $columns = NULL, $user = NU
       if (is_object($submitter)) {
         $name = $submitter->name;
 
-        if (!empty($submitter->field_user_first_name['und'][0]['value'])) {
-          $name = $submitter->field_user_first_name['und'][0]['value'];
+        if (!empty($submitter->mfcs['first_name'])) {
+          $name = $submitter->mfcs['first_name'];
 
-          if (!empty($submitter->field_user_last_name['und'][0]['value'])) {
-            $name .= ' ' . $submitter->field_user_last_name['und'][0]['value'];
+          if (!empty($submitter->mfcs['last_name'])) {
+            $name .= ' ' . $submitter->mfcs['last_name'];
           }
 
           $name .= ' (' . $submitter->name . ')';
@@ -9280,7 +8937,7 @@ function mfcs_build_request_table($items, $max_rows, $columns = NULL, $user = NU
         }
       }
       else {
-        watchdog(MFCS_WATCHDOG_ID, "Failed to load the submitter a user id of %user_id. No submitter name can be provided.", array('%user_id' => $item->user_id), WATCHDOG_WARNING);
+        watchdog(MFCS_WATCHDOG_ID, 'Failed to load the submitter a user id of %user_id. No submitter name can be provided.', array('%user_id' => $item->user_id), WATCHDOG_WARNING);
         $row['submitter_name'] = '';
       }
 
@@ -9946,18 +9603,18 @@ function mfcs_build_request_ajax_table_process_rows($items, $columns, $user = NU
             if (is_object($submitter)) {
               $name = $submitter->name;
 
-              if (!empty($submitter->field_user_first_name['und'][0]['value'])) {
-                $name = $submitter->field_user_first_name['und'][0]['value'];
+              if (!empty($submitter->mfcs['first_name'])) {
+                $name = $submitter->mfcs['first_name'];
 
-                if (!empty($submitter->field_user_last_name['und'][0]['value'])) {
-                  $name .= ' ' . $submitter->field_user_last_name['und'][0]['value'];
+                if (!empty($submitter->mfcs['last_name'])) {
+                  $name .= ' ' . $submitter->mfcs['last_name'];
                 }
 
                 $name .= ' (' . $submitter->name . ')';
               }
             }
             else {
-              watchdog(MFCS_WATCHDOG_ID, "Failed to load the submitter a user id of %user_id. No submitter name can be provided.", array('%user_id' => $item->user_id), WATCHDOG_WARNING);
+              watchdog(MFCS_WATCHDOG_ID, 'Failed to load the submitter a user id of %user_id. No submitter name can be provided.', array('%user_id' => $item->user_id), WATCHDOG_WARNING);
             }
 
             unset($submitter);
@@ -10031,15 +9688,14 @@ function mfcs_request_get_available_venue_coordinators() {
 
   try {
     $query = db_select('users', 'u');
-    $query->leftJoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id AND u.uid = fdfufn.entity_id AND fdfufn.delta = 0');
-    $query->leftJoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id AND u.uid = fdfuln.entity_id AND fdfufn.entity_id = fdfuln.entity_id AND fdfuln.delta = 0');
+    $query->leftJoin('mfcs_users', 'mu', 'u.uid = mu.user_id');
 
     $query->addField('u', 'uid', 'user_id');
     $query->addField('u', 'name', 'name');
     $query->addField('u', 'mail', 'email');
 
-    $query->addField('fdfufn', 'field_user_first_name_value', 'first_name');
-    $query->addField('fdfuln', 'field_user_last_name_value', 'last_name');
+    $query->addField('mu', 'first_name', 'first_name');
+    $query->addField('mu', 'last_name', 'last_name');
 
     $subquery = db_select('mfcs_banner_rooms', 'mbr');
     $subquery->addField('mbr', 'coordinator_id', 'coordinator_id');
@@ -11199,11 +10855,10 @@ function mfcs_users_load_banner_id_to_user_id($banner_id = NULL) {
   }
 
   if (is_null($banner_id)) {
-    $query = db_query('select u.uid as user_id, u.name as name, fdfubi.field_user_banner_id_value as banner_id, fdfupa.field_user_primary_account_value as primary_account from field_data_field_user_banner_id fdfubi inner join users u on fdfubi.entity_id = u.uid left join field_data_field_user_primary_account fdfupa on u.uid = fdfupa.entity_id order by u.uid');
+    $query = db_query('select u.uid as user_id, u.name as name, mu.banner_id as banner_id, mu.primary_account as primary_account from mfcs_users mu inner join users u on mu.user_id = u.uid order by mu.user_id');
   }
   else {
-    $banner_id_string = mfcs_banner_id_int_to_string($banner_id);
-    $query = db_query('select u.uid as user_id, u.name as name, fdfubi.field_user_banner_id_value as banner_id, fdfupa.field_user_primary_account_value as primary_account from field_data_field_user_banner_id fdfubi inner join users u on fdfubi.entity_id = u.uid left join field_data_field_user_primary_account fdfupa on u.uid = fdfupa.entity_id where field_user_banner_id_value = :banner_id order by u.uid', array(':banner_id' => $banner_id_string));
+    $query = db_query('select u.uid as user_id, u.name as name, mu.banner_id as banner_id, mu.primary_account as primary_account from mfcs_users mu inner join users u on mu.user_id = u.uid where mu.banner_id = :banner_id order by mu.user_id', array(':banner_id' => $banner_id));
   }
 
   $results = $query->fetchAll();
@@ -11212,11 +10867,7 @@ function mfcs_users_load_banner_id_to_user_id($banner_id = NULL) {
   }
 
   foreach ($results as $result) {
-    $is_primary = TRUE;
-    if (!isset($result->primary_account) || $result->primary_account == 0) {
-      $is_primary = FALSE;
-    }
-
+    $is_primary = $result->primary_account == TRUE;
     if (!isset($list['banner'][$result->banner_id])) {
       $list['banner'][$result->banner_id] = array(
         'others' => array(
@@ -11233,8 +10884,6 @@ function mfcs_users_load_banner_id_to_user_id($banner_id = NULL) {
         'user_id' => $result->user_id,
         'name' => $result->name,
       );
-
-      $is_primary = FALSE;
     }
 
     $list['user'][$result->user_id] = array(
@@ -11374,20 +11023,21 @@ function mfcs_get_request_venue_coordinator_inconsistencies($request) {
   $inconsistencies = array();
 
   mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
-
-  $current_coordinator_id = (int) $request['mer']['id'][0]->value;
-  $out_of_sync = mfcs_miscellaneous_check_requests_coordinator_out_of_sync($current_coordinator_id);
-  if (!empty($out_of_sync[$current_coordinator_id])) {
+  $current_request_id = (int) $request['mer']['id'][0]->value;
+  $current_coordinator_id = (int) $request['venue_coordinator']['user_id'][0]->value;
+  $out_of_sync = mfcs_miscellaneous_check_requests_coordinator_out_of_sync($current_request_id);
+  if (!empty($out_of_sync[$current_request_id])) {
     $inconsistencies['out_of_sync'] = array(
+      'request_id' => $current_request_id,
       'current' => array(
-        'id' => $current_coordinator_id,
+        'user_id' => $current_coordinator_id,
         'name' => NULL,
         'first_name' => NULL,
         'last_name' => NULL,
         'processed_name' => NULL,
       ),
       'banner' => array(
-        'id' => NULL,
+        'banner_id' => NULL,
         'name' => NULL,
         'first_name' => NULL,
         'last_name' => NULL,
@@ -11395,29 +11045,29 @@ function mfcs_get_request_venue_coordinator_inconsistencies($request) {
       ),
     );
 
-    if (!empty($out_of_sync[$current_coordinator_id]['coordinator']['name'])) {
-      $inconsistencies['out_of_sync']['current']['name'] = $out_of_sync[$current_coordinator_id]['coordinator']['name'];
-      if (!empty($out_of_sync[$current_coordinator_id]['coordinator']['first_name'])) {
-        $inconsistencies['out_of_sync']['current']['first_name'] = $out_of_sync[$current_coordinator_id]['coordinator']['first_name'];
-        $inconsistencies['out_of_sync']['current']['processed_name'] = $out_of_sync[$current_coordinator_id]['coordinator']['first_name'];
+    if (!empty($out_of_sync[$current_request_id]['coordinator']['name'])) {
+      $inconsistencies['out_of_sync']['current']['name'] = $out_of_sync[$current_request_id]['coordinator']['name'];
+      if (!empty($out_of_sync[$current_request_id]['coordinator']['first_name'])) {
+        $inconsistencies['out_of_sync']['current']['first_name'] = $out_of_sync[$current_request_id]['coordinator']['first_name'];
+        $inconsistencies['out_of_sync']['current']['processed_name'] = $out_of_sync[$current_request_id]['coordinator']['first_name'];
       }
 
-      if (!empty($out_of_sync[$current_coordinator_id]['coordinator']['last_name'])) {
-        $inconsistencies['out_of_sync']['current']['last_name'] = $out_of_sync[$current_coordinator_id]['coordinator']['last_name'];
+      if (!empty($out_of_sync[$current_request_id]['coordinator']['last_name'])) {
+        $inconsistencies['out_of_sync']['current']['last_name'] = $out_of_sync[$current_request_id]['coordinator']['last_name'];
 
         if (!is_null($inconsistencies['out_of_sync']['current']['processed_name'])) {
           $inconsistencies['out_of_sync']['current']['processed_name'] .= ' ';
         }
 
-        $inconsistencies['out_of_sync']['current']['processed_name'] .= $out_of_sync[$current_coordinator_id]['coordinator']['first_name'];
+        $inconsistencies['out_of_sync']['current']['processed_name'] .= $out_of_sync[$current_request_id]['coordinator']['first_name'];
       }
 
-      if (empty($out_of_sync[$current_coordinator_id]['coordinator']['first_name']) && empty($out_of_sync[$current_coordinator_id]['coordinator']['last_name'])) {
-        $inconsistencies['out_of_sync']['current']['processed_name'] = $out_of_sync[$current_coordinator_id]['coordinator']['name'];
+      if (empty($out_of_sync[$current_request_id]['coordinator']['first_name']) && empty($out_of_sync[$current_request_id]['coordinator']['last_name'])) {
+        $inconsistencies['out_of_sync']['current']['processed_name'] = $out_of_sync[$current_request_id]['coordinator']['name'];
       }
     }
 
-    $inconsistencies['out_of_sync']['banner']['id'] = (int) $out_of_sync[$current_coordinator_id]['coordinator_banner']['user_id'];
+    $inconsistencies['out_of_sync']['banner']['id'] = (int) $out_of_sync[$current_request_id]['coordinator_banner']['user_id'];
     $banner_coordinator = mfcs_load_basic_user_settings_by_user_id($inconsistencies['out_of_sync']['banner']['id']);
     if (!empty($banner_coordinator['name'])) {
       $inconsistencies['out_of_sync']['banner']['name'] = $banner_coordinator['name'];
@@ -12600,16 +12250,16 @@ function mfcs_generate_form_user_name($user) {
   }
 
   $user_name = NULL;
-  if (!empty($user->field_user_last_name['und'][0]['safe_value'])) {
-    $user_name .= $user->field_user_last_name['und'][0]['safe_value'];
+  if (!empty($user->mfcs['last_name'])) {
+    $user_name .= $user->mfcs['last_name'];
   }
 
-  if (!empty($user->field_user_first_name['und'][0]['safe_value'])) {
+  if (!empty($user->mfcs['first_name'])) {
     if (!empty($user_name)) {
       $user_name .=  ', ';
     }
 
-    $user_name .= $user->field_user_first_name['und'][0]['safe_value'];
+    $user_name .= $user->mfcs['first_name'];
   }
 
   return $user_name;
@@ -12632,20 +12282,17 @@ function mfcs_find_from_form_user_name($user_name) {
   }
 
   $query = db_select('users', 'u');
-  $query->innerJoin('field_data_field_user_first_name', 'fdfufn', 'u.uid = fdfufn.entity_id');
-  $query->innerJoin('field_data_field_user_last_name', 'fdfuln', 'u.uid = fdfuln.entity_id');
+  $query->innerJoin('mfcs_users', 'mu', 'u.uid = mu.user_id');
 
   $query->addField('u', 'uid', 'user_id');
-  #$query->addField('fdfufn', 'field_user_first_name_value', 'first_name');
-  #$query->addField('fdfuln', 'field_user_last_name_value', 'last_name');
 
   $parts = explode(', ', $user_name);
   if (count($parts) == 1) {
-    $query->condition('fdfufn.field_user_first_name_value', db_like(trim($parts[0])), 'ilike');
+    $query->condition('mu.first_name', db_like(trim($parts[0])), 'ilike');
   }
   else {
-    $query->condition('fdfufn.field_user_first_name_value', db_like(trim($parts[1])), 'ilike');
-    $query->condition('fdfuln.field_user_last_name_value', db_like(trim($parts[0])), 'ilike');
+    $query->condition('mu.first_name', db_like(trim($parts[1])), 'ilike');
+    $query->condition('mu.last_name', db_like(trim($parts[0])), 'ilike');
   }
 
   $matches = array();
@@ -12746,8 +12393,8 @@ function mfcs_get_related_user_ids_from_user_banner_id($user) {
   $user_ids = array($user->uid => $user->uid);
 
   $banner_id = NULL;
-  if (!empty($user->field_user_banner_id['und'][0]['value']) && is_numeric($user->field_user_banner_id['und'][0]['value'])) {
-    $banner_id = $user->field_user_banner_id['und'][0]['value'];
+  if (!empty($user->mfcs['banner_id']) && is_numeric($user->mfcs['banner_id'])) {
+    $banner_id = $user->mfcs['banner_id'];
     if (is_numeric($banner_id)) {
       $banner_id = (int) $banner_id;
     }
@@ -12755,7 +12402,7 @@ function mfcs_get_related_user_ids_from_user_banner_id($user) {
 
   if (!is_null($banner_id)) {
     $associated_users = mfcs_users_load_banner_id_to_user_id($banner_id);
-    $banner_id = $user->field_user_banner_id['und'][0]['value'];
+    $banner_id = $user->mfcs['banner_id'];
     if (isset($associated_users['banner'][$banner_id]['others']) && is_array($associated_users['banner'][$banner_id]['others'])) {
       foreach ($associated_users['banner'][$banner_id]['others'] as $other) {
         $other_id = (int) $other['user_id'];
