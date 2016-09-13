@@ -628,7 +628,7 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
   $message .= 'This page provides details of the problems and the ability to reset the problem flags for each of these problems.<br>';
   $message .= 'Some of these problems can be reset, others cannot.<br>';
   $message .= '<br>';
-  $message .= 'The <a href="' . $base_path . 'requests/users-0/view/' . $problem_user_id . '" title="View Profile for ' . $user_name . ' (id #' . $problem_user_id . ')">user\'s information</a> and problem flags were last updated on: <strong>' . date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS, $mfcs_user->date) . '</strong>.<br>';
+  $message .= 'The <a href="' . $base_path . 'requests/users-0/view/' . $problem_user_id . '" title="View Profile for ' . $user_name . ' (id #' . $problem_user_id . ')">user\'s information</a> and problem flags were last updated on: <strong>' . date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS, $problem_user->mfcs['updated']) . '</strong>.<br>';
   $message .= '<br>';
 
   $form['message'] = array(
@@ -1004,7 +1004,7 @@ function mfcs_request_problems_0_user_form_submit($form, &$form_state) {
   $perform_reset = FALSE;
   $perform_custom_action = FALSE;
 
-  $problems = $form['values']['mfcs_user']['#value']->problems;
+  $problems = $form['values']['mfcs_user']['#value']['problems'];
   $custom_actions = array();
   foreach ($form['values']['problem_list']['#value'] as $problem_id => $problem_settings) {
     if ($problem_settings['resettable'] && array_key_exists($problem_id, $actions) && array_key_exists('reset', $actions[$problem_id])) {
@@ -1025,11 +1025,11 @@ function mfcs_request_problems_0_user_form_submit($form, &$form_state) {
   }
 
   if ($perform_reset) {
-    $results = mfcs_save_user($form['values']['mfcs_user']['#value']->user_id, array('problems' => $problems));
+    $results = mfcs_save_user($form['values']['mfcs_user']['#value']['user_id'], array('problems' => $problems));
 
     if ($results === FALSE) {
       form_set_error('form', "An error occurred while trying to reset the user problem flags. Please contact the support staff.");
-      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to reset the user problem flags, user: @user_id, problems: @problems.", array('@user_id' => $form['values']['mfcs_user']['#value']->user_id, '@problems' => print_r($problems, TRUE)), WATCHDOG_ERROR);
+      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to reset the user problem flags, user: @user_id, problems: @problems.", array('@user_id' => $form['values']['mfcs_user']['#value']['user_id'], '@problems' => print_r($problems, TRUE)), WATCHDOG_ERROR);
 
       $form_state['rebuild'] = TRUE;
       $form_state['redirect'] = FALSE;
@@ -1052,7 +1052,7 @@ function mfcs_request_problems_0_user_form_submit($form, &$form_state) {
           }
           else {
             form_set_error('form', "An error occurred while trying to synchronize the user settings. Please contact the support staff.");
-            watchdog(MFCS_WATCHDOG_ID, "An error occurred while trying to synchronize the user settings, user: @user_id, problems: @problems.", array('@user_id' => $form['values']['mfcs_user']['#value']->user_id, '@problems' => print_r($problems, TRUE)), WATCHDOG_ERROR);
+            watchdog(MFCS_WATCHDOG_ID, "An error occurred while trying to synchronize the user settings, user: @user_id, problems: @problems.", array('@user_id' => $form['values']['mfcs_user']['#value']['user_id'], '@problems' => print_r($problems, TRUE)), WATCHDOG_ERROR);
 
             $form_state['rebuild'] = TRUE;
             $form_state['redirect'] = FALSE;
@@ -1105,7 +1105,7 @@ function mfcs_request_problems_0_user_form_submit($form, &$form_state) {
         if ($changes_made) {
           if (!user_save($form['values']['problem_user']['#value'],  array('roles' => $system_roles))) {
             form_set_error('form', "An error occurred while trying to re-assign or re-unassign the manager role. Please contact the support staff.");
-            watchdog(MFCS_WATCHDOG_ID, "An error occurred while trying to re-assign or re-unassign the manager role, user: @user_id, problems: @problems.", array('@user_id' => $form['values']['mfcs_user']['#value']->user_id, '@problems' => print_r($problems, TRUE)), WATCHDOG_ERROR);
+            watchdog(MFCS_WATCHDOG_ID, "An error occurred while trying to re-assign or re-unassign the manager role, user: @user_id, problems: @problems.", array('@user_id' => $form['values']['mfcs_user']['#value']['user_id'], '@problems' => print_r($problems, TRUE)), WATCHDOG_ERROR);
 
             $form_state['rebuild'] = TRUE;
             $form_state['redirect'] = FALSE;

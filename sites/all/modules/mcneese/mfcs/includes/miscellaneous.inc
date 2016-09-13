@@ -2766,5 +2766,66 @@ function mfcs_mischellaneous_check_requests_for_problems($request_id = NULL) {
 }
 
 /**
+ * Checks all users for problems and then reports them.
+ *
+ * This does not process users with ids of 0, 1, and 2.
+ *
+ * @param null|int $user_id
+ *   If not NULL, then only perform checks against the specified user.
+ *   If NULL, then perform checks against all users.
+ *
+ * @return bool
+ *   TRUE on success, FALSE otherwise.
+ */
+function mfcs_mischellaneous_check_users_for_problems($user_id = NULL) {
+  if (!is_null($user_id) && !cf_is_integer($user_id)) {
+    cf_error::invalid_integer('user_id');
+    return FALSE;
+  }
+
+  // do not load special reserved drupal accounts.
+  if (!is_null($user_id) && $user_id < 2) {
+    return FALSE;
+  }
+
+  // load all users and any existing problems (except for special accounts).
+  $all_users = array();
+  try {
+    $query = db_select('users', 'u');
+
+    $query->addField('u', 'uid', 'user_id');
+
+    if (!is_null($user_id)) {
+      $query->condition('u.uid', $user_id);
+    }
+
+    $query->condition('u.uid', 0, '<>');
+    $query->condition('u.uid', 1, '<>');
+
+    $all_users = $query->execute()->fetchAll();
+    if (!is_array($all_users)) {
+      return FALSE;
+    }
+  }
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
+  }
+
+  // while this is less efficient, just use the synchronize function to perform user problem checks.
+  foreach ($all_users as $user_information) {
+    #$current_user = user_load($user_information->user_id);
+    #mfcs_synchronize_user_settings($current_user, array(), TRUE, FALSE);
+    mfcs_synchronize_user_settings($user_information->user_id, array(), TRUE, FALSE);
+  }
+  unset($current_user);
+  unset($all_users);
+
+  return TRUE;
+}
+
+/**
  * @} End of '@addtogroup mfcs'.
  */

@@ -20,6 +20,7 @@ define('MFCS_TROUBLESHOOT_BANNER_CACHE_SYNCHRONIZE', 3);
 define('MFCS_TROUBLESHOOT_BANNER_ROLE_SYNCHRONIZE', 4);
 define('MFCS_TROUBLESHOOT_BANNER_INFORMATION', 5);
 define('MFCS_TROUBLESHOOT_REQUESTS_PROBLEM_CHECK', 6);
+define('MFCS_TROUBLESHOOT_USERS_PROBLEM_CHECK', 7);
 
 /**
  * Provides the facilities use request troubleshoot page.
@@ -312,7 +313,7 @@ function mfcs_request_troubleshoot_0_form($form, &$form_state, $request_id = NUL
   );
 
 
-  // Requests Review Recheck
+  // Requests Problems Check
   $code = 'code_' . MFCS_TROUBLESHOOT_REQUESTS_PROBLEM_CHECK;
   $form['form'][$code] = array(
     '#id' => 'field-troubleshoot-' . $code,
@@ -343,7 +344,53 @@ function mfcs_request_troubleshoot_0_form($form, &$form_state, $request_id = NUL
     '#id' => 'troubleshoot-' . $code . '-submit',
     '#name' => 'troubleshoot-' . $code . '-submit',
     '#type' => 'submit',
-    '#default_value' => t("Check Requests for Problems"),
+    '#default_value' => 'Check Requests for Problems',
+    '#attributes' => array(
+      'class' => array(
+        'no-print',
+      ),
+    ),
+  );
+
+  $markup = '<hr class="code-separator">';
+  $form['form'][$code]['post_markup'] = array(
+    '#type' => 'markup',
+    '#markup' => $markup,
+  );
+
+
+  // Users Problems Check
+  $code = 'code_' . MFCS_TROUBLESHOOT_USERS_PROBLEM_CHECK;
+  $form['form'][$code] = array(
+    '#id' => 'field-troubleshoot-' . $code,
+    '#type' => 'container',
+    '#tree' => TRUE,
+    '#attributes' => array(
+      'class' => array(
+        'form-item-wrapper',
+        'troubleshoot-code',
+        'troubleshoot-' . $code,
+      ),
+    ),
+  );
+
+  $markup = '<h2 class="code-title">#' . MFCS_TROUBLESHOOT_USERS_PROBLEM_CHECK . ': Users Problem Check</h2>';
+  $markup .= '<div class="code-description">';
+  $markup .= 'Users are periodically checked for problems, generally when they log into the system.' . '<br>';
+  $markup .= '<br>';
+  $markup .= 'Using this troubleshoot will perform integrity checks on users.' . '<br>';
+  $markup .= 'Problems are displaed under the <a href="' . $base_path . 'requests/problems-0/users">Manage User Problems</a> page.' . '<br>';
+  $markup .= '</div>';
+  $form['form'][$code]['pre_markup'] = array(
+    '#type' => 'markup',
+    '#markup' => $markup,
+  );
+
+  $form['form'][$code]['button'] = array(
+    '#id' => 'troubleshoot-' . $code . '-submit',
+    '#name' => 'troubleshoot-' . $code . '-submit',
+    '#type' => 'submit',
+    '#default_value' => 'Check Users for Problems',
     '#attributes' => array(
       'class' => array(
         'no-print',
@@ -392,8 +439,11 @@ function mfcs_request_troubleshoot_0_form_validate($form, &$form_state) {
   elseif ($clicked_id == 'troubleshoot-code_' . MFCS_TROUBLESHOOT_REQUESTS_PROBLEM_CHECK . '-submit') {
     // no validation necessary
   }
+  elseif ($clicked_id == 'troubleshoot-code_' . MFCS_TROUBLESHOOT_USERS_PROBLEM_CHECK . '-submit') {
+    // no validation necessary
+  }
   else {
-    form_set_error('', "Unknown submit process detected.");
+    form_set_error('', 'Unknown submit process detected.');
   }
 }
 
@@ -429,6 +479,9 @@ function mfcs_request_troubleshoot_0_form_submit($form, &$form_state) {
   elseif ($clicked_id == 'troubleshoot-code_' . MFCS_TROUBLESHOOT_REQUESTS_PROBLEM_CHECK . '-submit') {
     $code = MFCS_TROUBLESHOOT_REQUESTS_PROBLEM_CHECK;
   }
+  elseif ($clicked_id == 'troubleshoot-code_' . MFCS_TROUBLESHOOT_USERS_PROBLEM_CHECK . '-submit') {
+    $code = MFCS_TROUBLESHOOT_USERS_PROBLEM_CHECK;
+  }
   else {
     // do nothing for invalid submits.
     return;
@@ -452,29 +505,35 @@ function mfcs_request_troubleshoot_0_form_submit($form, &$form_state) {
 
     $result = FALSE;
     $time_start = microtime(TRUE);
-    $label = "Unknown";
+    $label = 'Unknown';
 
     if ($code == MFCS_TROUBLESHOOT_REQUESTS_REVIEW_RECHECK) {
-      $label = "Requests review re-check";
+      $label = 'Requests review re-check';
       $result = mfcs_request_troubleshoot_0_request_review_recheck($transaction, $user);
     }
     elseif ($code == MFCS_TROUBLESHOOT_MER_CACHE_SYNCHRONIZE) {
-      $label = "Re-synchronize requests cache";
+      $label = 'Re-synchronize requests cache';
       $result = mfcs_request_troubleshoot_0_mer_cache_synchronize($transaction, $user);
     }
     elseif ($code == MFCS_TROUBLESHOOT_BANNER_CACHE_SYNCHRONIZE) {
-      $label = "Re-synchronize banner cache";
+      $label = 'Re-synchronize banner cache';
       $result = mfcs_sync_banner_to_local($transaction, $user, TRUE);
     }
     elseif ($code == MFCS_TROUBLESHOOT_BANNER_ROLE_SYNCHRONIZE) {
-      $label = "Re-synchronize banner role cache";
+      $label = 'Re-synchronize banner role cache';
       $result = mfcs_sync_banner_to_local_users(NULL, NULL, TRUE);
     }
     elseif ($code == MFCS_TROUBLESHOOT_REQUESTS_PROBLEM_CHECK) {
       mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
 
-      $label = "Check requests for problems";
+      $label = 'Check requests for problems';
       $result = mfcs_mischellaneous_check_requests_for_problems();
+    }
+    elseif ($code == MFCS_TROUBLESHOOT_USERS_PROBLEM_CHECK) {
+      mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
+
+      $label = 'Check users for problems';
+      $result = mfcs_mischellaneous_check_users_for_problems();
     }
 
     // force transaction execution.
@@ -515,7 +574,7 @@ function mfcs_request_troubleshoot_0_form_submit($form, &$form_state) {
 
       $arguments['@user'] = $user->name;
       $arguments['@user_id'] = $user->uid;
-      watchdog(MFCS_WATCHDOG_ID, $label . 'started by @user (@user_id) completed with errors ' . $time_text . '.', $arguments . '.', $arguments, WATCHDOG_WARNING);
+      watchdog(MFCS_WATCHDOG_ID, $label . 'started by @user (@user_id) completed with errors ' . $time_text . '.', $arguments, WATCHDOG_WARNING);
     }
   }
   catch (Error $e) {
