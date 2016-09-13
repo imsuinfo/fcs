@@ -3881,9 +3881,10 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
 
       if (is_array($results)) {
         foreach ($results as $result) {
-          $user_information['roles'][(int) $results->role_id] = (int) $results->role_id;
+          $user_information['roles'][(int) $result->role_id] = (int) $result->role_id;
         }
       }
+      unset($result);
       unset($results);
       unset($query);
 
