@@ -2283,12 +2283,12 @@ function mfcs_hook_user_update(&$edit, $account, $category) {
     return;
   }
 
-  if (!array_key_exists('status', $edit) || !isset($edit['original']->status) || !isset($account->uid)) {
+  if (!isset($account->uid)) {
     return;
   }
 
   // if the status has changed, perform a user problem check.
-  if ($edit['status'] != $edit['original']->status) {
+  if (array_key_exists('status', $edit) && !isset($edit['original']->status) && $edit['status'] != $edit['original']->status) {
     $disabled_with_active = mfcs_disabled_venue_coordinators_with_active_content($account->uid);
 
     $problems = MFCS_USER_PROBLEM_NONE;
