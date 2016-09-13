@@ -2180,6 +2180,10 @@ function mfcs_ajax_users_0_list($argument_1 = NULL) {
 
       if ($is_manager || $is_administer) {
         $row[10] .= ' <a href="' . $base_path . 'requests/users-0/edit/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="Edit User">Edit</a>';
+
+        if ($item->problems != MFCS_USER_PROBLEM_NONE) {
+          $row[10] .= ' <a href="' . $base_path . 'requests/problems-0/users/user/' . $item->id . $url_arguments . '" class="operation-link operation-link-problems" title="View User Problems">Problems</a>' ;
+        }
       }
 
       $response['data'][] = $row;

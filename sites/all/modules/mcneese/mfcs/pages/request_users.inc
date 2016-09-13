@@ -293,10 +293,14 @@ function mfcs_request_users_0_form($form, &$form_state, $page_number = NULL) {
       'class' => $class_operations,
     );
 
-    $row['operations']['data'] .= '<a href="' . $base_path . 'requests/users-0/view/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="View User">View</a> ';
+    $row['operations']['data'] .= '<a href="' . $base_path . 'requests/users-0/view/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="View User">View</a>';
 
     if ($is_manager || $is_administer) {
-      $row['operations']['data'] .= '<a href="' . $base_path . 'requests/users-0/edit/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="Edit User">Edit</a>' ;
+      $row['operations']['data'] .= ' <a href="' . $base_path . 'requests/users-0/edit/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="Edit User">Edit</a>' ;
+
+      if ($item->problems != MFCS_USER_PROBLEM_NONE) {
+        $row['operations']['data'] .= ' <a href="' . $base_path . 'requests/problems-0/users/user/' . $item->id . $url_arguments . '" class="operation-link operation-link-problems" title="View User Problems">Problems</a>' ;
+      }
     }
 
     $rows[] = $row;
@@ -1845,6 +1849,7 @@ function mfcs_request_users_get_users($search = '', $order_by = array(), $offset
   $query_string .= 'mu.last_name as last_name, ';
   $query_string .= 'mu.ldap_duplicate as ldap_duplicate, ';
   $query_string .= 'mu.primary_account as primary_account, ';
+  $query_string .= 'mu.problems as problems, ';
   $query_string .= 'array_agg(tur.name) as roles ';
   $query_string .= 'from users u ';
 
@@ -1983,7 +1988,7 @@ function mfcs_request_users_get_users($search = '', $order_by = array(), $offset
   $count_string .= $where_string;
   unset($where_string);
 
-  $query_string .= 'group by u.uid, mu.banner_id, mu.first_name, mu.last_name, mu.ldap_duplicate, mu.primary_account ';
+  $query_string .= 'group by u.uid, mu.banner_id, mu.first_name, mu.last_name, mu.ldap_duplicate, mu.primary_account, mu.problems ';
 
   // default to order by user id.
   if (empty($order_by)) {
