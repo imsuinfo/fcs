@@ -2816,8 +2816,6 @@ function mfcs_mischellaneous_check_users_for_problems($user_id = NULL) {
 
   // while this is less efficient, just use the synchronize function to perform user problem checks.
   foreach ($all_users as $user_information) {
-    #$current_user = user_load($user_information->user_id);
-    #mfcs_synchronize_user_settings($current_user, array(), TRUE, FALSE);
     mfcs_synchronize_user_settings($user_information->user_id, array(), TRUE, FALSE);
   }
   unset($current_user);
