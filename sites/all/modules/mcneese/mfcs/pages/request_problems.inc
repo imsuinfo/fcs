@@ -566,14 +566,17 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
   if (!cf_is_integer($problem_user_id) || $problem_user_id < 0) {
     drupal_not_found();
     drupal_exit();
-    return array();
   }
 
   $problem_user = user_load($problem_user_id);
   if (!is_object($problem_user)) {
     drupal_not_found();
     drupal_exit();
-    return array();
+  }
+
+  if ($problem_user->mfcs['problems'] == MFCS_USER_PROBLEM_NONE) {
+    drupal_not_found();
+    drupal_exit();
   }
 
   global $user;
