@@ -594,7 +594,30 @@ function mfcs_request_users_0_view_page($user_id) {
 
   $duplicate = NULL;
   if (isset($account->mfcs['ldap_duplicate']) && $account->mfcs['ldap_duplicate']) {
-    $duplicate = 'There are <strong>Duplicate</strong> accounts for this user.';
+    $duplicate = 'There <strong>Duplicate</strong> accounts for this user.';
+
+    if (isset($account->mfcs['banner_id'])) {
+      $associated_users = mfcs_users_load_banner_id_to_user_id($account->mfcs['banner_id']);
+
+      if (!empty($associated_users['banner'][$account->mfcs['banner_id']]['others'])) {
+        $duplicate = 'There are <strong>Duplicate</strong> ldap accounts:<ul class="item-information-list item-information-duplicate-list">';
+
+        foreach ($associated_users['user'] as $associated_user) {
+          if ($account->uid == $associated_user['user_id']) {
+            continue;
+          }
+
+          $associated_name = $associated_user['name'];
+          if (!empty($associated_user['first_name']) && !empty($associated_user['last_name'])) {
+            $associated_name = $associated_user['first_name'] . ' ' . $associated_user['last_name'];
+          }
+
+          $duplicate .= '<li class="item-information-list-item item-information-duplicate-list-item"><a href="' . $base_path . 'requests/users-0/view/' . $associated_user['user_id'] . $url_arguments . '" class="item-information-list-item-link item-information-duplicate-list-item-link">' . $associated_name . '</a> <sup>[id: ' . $associated_user['user_id'] . ']</sup></li>';
+        }
+
+        $duplicate .= '</ul>';
+      }
+    }
   }
 
   $email = NULL;

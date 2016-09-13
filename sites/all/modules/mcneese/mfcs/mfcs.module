@@ -3993,6 +3993,10 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
     $ldap_duplicate = $user_information['mfcs']['ldap_duplicate'];
   }
 
+  if (is_null($ldap_duplicate)) {
+    $ldap_duplicate = FALSE;
+  }
+
   $primary_account = NULL;
   $primary_account_id = NULL;
   if (!empty($user_information['mfcs']['primary_account']) && is_bool($user_information['mfcs']['primary_account'])) {
@@ -4027,11 +4031,18 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
 
     // $account_ids is used to perform synchronization loads, so do not save the user account currently being processed.
     unset($account_ids[$user_information['user_id']]);
+
+    // there cannot be ldap duplicate accounts if there is only 1 account.
+    if ($total_accounts < 2) {
+      $ldap_duplicate = FALSE;
+    }
   }
   else {
     $total_primary = 0;
     $total_accounts = 1;
     $account_ids = array();
+
+    $ldap_duplicate = FALSE;
   }
 
 
@@ -4122,6 +4133,16 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
     $changes_detected = TRUE;
   }
 
+  $update_ldap_duplicate = FALSE;
+  if ($ldap_duplicate !== $user_information['mfcs']['ldap_duplicate']) {
+    $update_ldap_duplicate = TRUE;
+    $changes_detected = TRUE;
+
+    if (is_null($ldap_duplicate)) {
+      $ldap_duplicate = FALSE;
+    }
+  }
+
 
   $edit = array();
   if ($assign_primary) {
@@ -4186,6 +4207,15 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
   if ($changes_detected || $refresh_banner) {
     $edit['roles'] = $user_roles;
     $edit['mfcs']['problems'] = $problems_new;
+
+    if ($update_ldap_duplicate) {
+      $edit['mfcs']['ldap_duplicate'] = $ldap_duplicate;
+    }
+
+    if ($assign_primary) {
+      // @fixme: check to see if primary account flag is ever removed (it needs to be so that there may only be a single account with this flag set).
+      $edit['mfcs']['primary_account'] = TRUE;
+    }
 
     if (is_object($user_object_or_id)) {
       $user = $user_object_or_id;
@@ -10943,10 +10973,10 @@ function mfcs_users_load_banner_id_to_user_id($banner_id = NULL) {
   }
 
   if (is_null($banner_id)) {
-    $query = db_query('select u.uid as user_id, u.name as name, mu.banner_id as banner_id, mu.primary_account as primary_account from mfcs_users mu inner join users u on mu.user_id = u.uid order by mu.user_id');
+    $query = db_query('select u.uid as user_id, u.name as name, mu.first_name as first_name, mu.last_name as last_name, mu.banner_id as banner_id, mu.primary_account as primary_account from mfcs_users mu inner join users u on mu.user_id = u.uid order by mu.user_id');
   }
   else {
-    $query = db_query('select u.uid as user_id, u.name as name, mu.banner_id as banner_id, mu.primary_account as primary_account from mfcs_users mu inner join users u on mu.user_id = u.uid where mu.banner_id = :banner_id order by mu.user_id', array(':banner_id' => $banner_id));
+    $query = db_query('select u.uid as user_id, u.name as name, mu.first_name as first_name, mu.last_name as last_name, mu.banner_id as banner_id, mu.primary_account as primary_account from mfcs_users mu inner join users u on mu.user_id = u.uid where mu.banner_id = :banner_id order by mu.user_id', array(':banner_id' => $banner_id));
   }
 
   $results = $query->fetchAll();
@@ -10965,18 +10995,29 @@ function mfcs_users_load_banner_id_to_user_id($banner_id = NULL) {
 
     if ($is_primary) {
       $list['banner'][$result->banner_id]['user_id'] = $result->user_id;
+      $list['banner'][$result->banner_id]['banner_id'] = $result->banner_id;
       $list['banner'][$result->banner_id]['name'] = $result->name;
+      $list['banner'][$result->banner_id]['first_name'] = $result->first_name;
+      $list['banner'][$result->banner_id]['last_name'] = $result->last_name;
+      $list['banner'][$result->banner_id]['primary'] = TRUE;
     }
     else {
       $list['banner'][$result->banner_id]['others'][$result->user_id] = array(
         'user_id' => $result->user_id,
+        'banner_id' => $result->banner_id,
         'name' => $result->name,
+        'first_name' => $result->first_name,
+        'last_name' => $result->last_name,
+        'primary' => FALSE,
       );
     }
 
     $list['user'][$result->user_id] = array(
+      'user_id' => $result->user_id,
       'banner_id' => $result->banner_id,
       'name' => $result->name,
+      'first_name' => $result->first_name,
+      'last_name' => $result->last_name,
       'primary' => $is_primary,
     );
   }
