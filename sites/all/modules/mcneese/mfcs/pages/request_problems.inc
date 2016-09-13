@@ -1028,7 +1028,7 @@ function mfcs_request_problems_0_user_form_submit($form, &$form_state) {
   }
 
   if ($perform_reset) {
-    $results = mfcs_save_user($form['values']['mfcs_user']['#value']['user_id'], array('problems' => $problems));
+    $results = mfcs_save_user($form['values']['problem_user']['#value']->uid, array('problems' => $problems));
 
     if ($results === FALSE) {
       form_set_error('form', "An error occurred while trying to reset the user problem flags. Please contact the support staff.");
