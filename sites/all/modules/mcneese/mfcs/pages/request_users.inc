@@ -1915,7 +1915,7 @@ function mfcs_request_users_get_users($search = '', $order_by = array(), $offset
     $where_string .= 'or ';
     $where_string .= 'mu.last_name ilike :last_name ';
     $where_string .= 'or ';
-    $where_string .= 'tur.name ilike :roles ';
+    $where_string .= 'u.uid in (select uid from the_users_roles turs where turs.name ilike :roles) ';
 
     if (!empty($limit_users_by_ldap_duplicate)) {
       $where_string .= 'or ';
