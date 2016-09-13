@@ -3333,6 +3333,24 @@ function mfcs_save_user($user_id, $data) {
   $data['updated'] = mfcs_instance();
   $data['user_id'] = $user_id;
 
+  if (array_key_exists('primary_account', $data)) {
+    if ($data['primary_account'] === TRUE) {
+      $data['primary_account'] = 'TRUE';
+    }
+    elseif ($data['primary_account'] === FALSE) {
+      $data['primary_account'] = 'FALSE';
+    }
+  }
+
+  if (array_key_exists('ldap_duplicate', $data)) {
+    if ($data['ldap_duplicate'] === TRUE) {
+      $data['ldap_duplicate'] = 'TRUE';
+    }
+    elseif ($data['ldap_duplicate'] === FALSE) {
+      $data['ldap_duplicate'] = 'FALSE';
+    }
+  }
+
   $transaction = db_transaction();
 
   try {
