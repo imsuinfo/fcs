@@ -860,44 +860,44 @@ function mfcs_request_users_0_add_form($form, &$form_state) {
 }
 
 /**
- * Pre-Validation for mfcs_request_users_0_add_Form().
+ * Pre-Validation for mfcs_request_users_0_add_form().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mfcs_request_users_0_add_Form()
+ * @see: mfcs_request_users_0_add_form()
  */
-function mfcs_request_users_0_add_Form_pre_validate(&$form, &$form_state) {
+function mfcs_request_users_0_add_form_pre_validate(&$form, &$form_state) {
   return mfcs_request_users_0_add_or_edit_form_pre_validate($form, $form_state);
 }
 
 /**
- * Validation for mfcs_request_users_0_add_Form().
+ * Validation for mfcs_request_users_0_add_form().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mfcs_request_users_0_add_Form()
+ * @see: mfcs_request_users_0_add_form()
  */
-function mfcs_request_users_0_add_Form_validate($form, &$form_state) {
+function mfcs_request_users_0_add_form_validate($form, &$form_state) {
   return mfcs_request_users_0_add_or_edit_form_validate($form, $form_state);
 }
 
 /**
- * Submit for mfcs_request_users_0_add_Form().
+ * Submit for mfcs_request_users_0_add_form().
  *
  * @param array $form
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
  *
- * @see: mfcs_request_users_0_add_Form()
+ * @see: mfcs_request_users_0_add_form()
  */
-function mfcs_request_users_0_add_Form_submit($form, &$form_state) {
+function mfcs_request_users_0_add_form_submit($form, &$form_state) {
   return mfcs_request_users_0_add_or_edit_form_submit($form, $form_state);
 }
 
