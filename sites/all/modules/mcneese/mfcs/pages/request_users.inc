@@ -1887,18 +1887,18 @@ function mfcs_request_users_get_users($search = '', $order_by = array(), $offset
 
     $limit_users_by_ldap_duplicate = array();
     if (preg_match('/' . $regex_safe_search . '/i', 'Not Duplicate') > 0) {
-      $limit_users_by_ldap_duplicate[FALSE] = FALSE;
+      $limit_users_by_ldap_duplicate['FALSE'] = 'FALSE';
     }
     if (preg_match('/' . $regex_safe_search . '/i', 'Is Duplicate') > 0) {
-      $limit_users_by_ldap_duplicate[TRUE] = TRUE;
+      $limit_users_by_ldap_duplicate['TRUE'] = 'TRUE';
     }
 
     $limit_users_by_primary_account = array();
     if (preg_match('/' . $regex_safe_search . '/i', 'Alternate Account') > 0) {
-      $limit_users_by_primary_account[FALSE] = FALSE;
+      $limit_users_by_primary_account['FALSE'] = 'FALSE';
     }
     if (preg_match('/' . $regex_safe_search . '/i', 'Primary Account') > 0) {
-      $limit_users_by_primary_account[TRUE] = TRUE;
+      $limit_users_by_primary_account['TRUE'] = 'TRUE';
     }
     unset($regex_safe_search);
 
