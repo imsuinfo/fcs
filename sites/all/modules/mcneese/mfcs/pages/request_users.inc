@@ -602,8 +602,7 @@ function mfcs_request_users_0_view_page($user_id) {
 
     if (isset($account->mfcs['banner_id'])) {
       $associated_users = mfcs_users_load_banner_id_to_user_id($account->mfcs['banner_id']);
-
-      if (!empty($associated_users['banner'][$account->mfcs['banner_id']]['others'])) {
+      if (!empty($associated_users['user']) && count($associated_users['user']) > 1) {
         $duplicate = 'There are <strong>Duplicate</strong> ldap accounts:<ul class="item-information-list item-information-duplicate-list">';
 
         foreach ($associated_users['user'] as $associated_user) {
@@ -836,6 +835,7 @@ function mfcs_request_users_0_view_page($user_id) {
 
     $markup .= '<div class="view_user-buttons">';
     $markup .= '<a href="' . $base_path . 'requests/users-0/edit/' . $user_id . $url_arguments . '" class="view_user-button view_user-edit">Edit</a>' ;
+    $markup .= '<a href="' . $base_path . 'requests/users-0/check/' . $user_id . $url_arguments . '" class="view_user-button view_user-check">Check for Problems</a>' ;
     $markup .= '</div>';
   }
 
@@ -2187,6 +2187,66 @@ function mfcs_request_users_get_roles($standard = TRUE, $venue = TRUE, $special 
 
   ksort($roles);
   return $roles;
+}
+
+/**
+ * Performs a check for a given user when the specified page is loaded and then returns to the user view path.
+ *
+ * This function calls drupal_goto().
+ *
+ * @param int $user_id
+ *   The id of the user to check problems for.
+ *
+ * @return array
+ *   The form array.
+ *
+ * @see: drupal_goto()
+ */
+function mfcs_request_users_0_check_page($user_id) {
+  // The edit form requires the user id, because the add_or_edit function treats this as optional, force it to be required.
+  if (is_null($user_id)) {
+    cf_error::invalid_array('user_id');
+
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  $loaded_users = mfcs_load_users($user_id, FALSE, TRUE);
+  if (!is_array($loaded_users)) {
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  $original_user = reset($loaded_users);
+  unset($loaded_users);
+
+  $results = mfcs_synchronize_user_settings($user_id);
+  if ($results) {
+    $loaded_users = mfcs_load_users($user_id, FALSE, TRUE);
+    if (is_array($loaded_users)) {
+      $updated_user = reset($loaded_users);
+
+      if ($updated_user->problems == $original_user->problems) {
+        drupal_set_message('User has been successfully checked with no new problems detected and no existing problems resolved.');
+      }
+      elseif ($updated_user->problems > $original_user->problems) {
+        drupal_set_message('User has been successfully checked with new problems detected.');
+      }
+      elseif ($updated_user->problems < $original_user->problems) {
+        drupal_set_message('User has been successfully checked with existing problems resolved');
+      }
+    }
+    else {
+      drupal_set_message('User has been successfully checked.');
+    }
+  }
+  else {
+    drupal_set_message('Something went wrong while checking user.', 'error');
+  }
+
+  $redirect_array = mfcs_build_redirect_array('requests/problems-0/users');
+
+  drupal_goto('requests/users-0/view/' . $user_id, array('query' => drupal_get_query_parameters()));
 }
 
 /**

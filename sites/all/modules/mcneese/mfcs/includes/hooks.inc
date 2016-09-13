@@ -1815,6 +1815,19 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
   );
+
+  $items['requests/users-0/check/%'] = array(
+    'title' => 'Check User for Problems',
+    'description' => 'Check User for Problems',
+    'page callback' => 'mfcs_request_users_0_check_page',
+    'page arguments' => array(3),
+    'file' => 'request_users.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_generic_access',
+    'access arguments' => array('users-check'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
 }
 
 /**

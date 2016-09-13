@@ -1165,6 +1165,14 @@ function mfcs_page_generic_access($operation = NULL, $access_id = NULL, $user = 
       }
     }
   }
+  elseif ($operation == 'users-check') {
+    if (is_null($access_id)) {
+      if ($roles['manager'] || $roles['administer']) {
+        $access[$access_id] = TRUE;
+        return TRUE;
+      }
+    }
+  }
   elseif ($operation == 'users-edit') {
     if ($roles['manager'] || $roles['administer']) {
       $access[$access_id] = TRUE;
@@ -3222,6 +3230,8 @@ function mfcs_load_request_user_roles() {
  *   An array of objects containing the mfcs-specific user fields.
  *
  *   FALSE is returned on error.
+ *
+ * @see: mfcs_load_basic_user_settings_by_user_id()
  */
 function mfcs_load_users($user_ids, $join = FALSE, $deleted = FALSE) {
   if (is_array($user_ids)) {
@@ -3540,6 +3550,8 @@ function mfcs_search_users($search, $wildcard = TRUE, $sensitive = FALSE, $delet
  * @return array|bool
  *   An array containing the user information.
  *   FALSE is returned on error.
+ *
+ * @see: mfcs_load_users()
  */
 function mfcs_load_basic_user_settings_by_user_id($user_id) {
   if (!cf_is_integer($user_id)) {
@@ -3570,7 +3582,9 @@ function mfcs_load_basic_user_settings_by_user_id($user_id) {
     $query->addField('mu', 'phone_number', 'phone_number');
     $query->addField('mu', 'ldap_duplicate', 'ldap_duplicate');
     $query->addField('mu', 'primary_account', 'primary_account');
+    $query->addField('mu', 'problems', 'problems');
     $query->addField('mu', 'updated', 'updated');
+    $query->addField('mu', 'updated_problems', 'updated_problems');
 
     $query->condition('u.uid', $user_id);
 
@@ -3590,7 +3604,9 @@ function mfcs_load_basic_user_settings_by_user_id($user_id) {
         'phone_number' => '',
         'ldap_duplicate' => FALSE,
         'primary_account' => TRUE,
+        'problems' => MFCS_USER_PROBLEM_NONE,
         'updated' => NULL,
+        'updated_problems' => NULL,
       );
 
       foreach ($rows as $row) {
@@ -3630,8 +3646,16 @@ function mfcs_load_basic_user_settings_by_user_id($user_id) {
           $user[$user_id]['primary_account'] = (bool) $row->primary_account;
         }
 
+        if (property_exists($row, 'problems') && !is_null($row->problems)) {
+          $user[$user_id]['problems'] = (int) $row->problems;
+        }
+
         if (property_exists($row, 'updated') && !is_null($row->updated)) {
           $user[$user_id]['updated'] = (int) $row->updated;
+        }
+
+        if (property_exists($row, 'updated_problems') && !is_null($row->updated_problems)) {
+          $user[$user_id]['updated_problems'] = (int) $row->updated_problems;
         }
 
         break;
@@ -3857,6 +3881,7 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
       'roles' => $user_object_or_id->roles,
       'mfcs' => $user_object_or_id->mfcs,
       'status' => $user_object_or_id->status,
+      'pass' => $user_object_or_id->pass,
     );
   }
   else {
@@ -3875,8 +3900,12 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
         'phone_number' => '',
         'ldap_duplicate' => FALSE,
         'primary_account' => TRUE,
+        'problems' => MFCS_USER_PROBLEM_NONE,
         'updated' => NULL,
+        'updated_problems' => NULL,
       ),
+      'status' => NULL,
+      'pass' => NULL,
     );
 
     try {
@@ -3899,12 +3928,14 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
 
       $query = db_select('users', 'u');
       $query->addField('u', 'status', 'status');
+      $query->addField('u', 'pass', 'pass');
 
       $query->condition('u.uid', $user_information['user_id']);
 
-      $result = $query->execute()->fetchField();
-      if (is_numeric($result)) {
-        $user_information['status'] = (int) $result;
+      $result = $query->execute()->fetchObject();
+      if (is_object($result)) {
+        $user_information['status'] = (int) $result->status;
+        $user_information['pass'] = $result->pass;
       }
       unset($result);
       unset($query);
@@ -3940,6 +3971,7 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
     return $already_executed[$user_information['user_id']];
   }
 
+  $changes_detected = FALSE;
 
   $original_roles = (array) $user_information['roles'];
   foreach ($original_roles as $role_id => $role_value) {
@@ -4007,6 +4039,8 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
     $ldap_duplicate = FALSE;
   }
 
+
+  // setup primary accounts.
   $primary_account = NULL;
   $primary_account_id = NULL;
   if (!empty($user_information['mfcs']['primary_account']) && is_bool($user_information['mfcs']['primary_account'])) {
@@ -4014,12 +4048,27 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
     $primary_account_id = $user_information['user_id'];
   }
 
+  $total_primary = 0;
+  $total_accounts = 1;
+  $account_ids = array();
+
+  if ($user_information['status'] > 0) {
+    $total_primary_enabled = 1;
+  }
+  else {
+    $total_primary_enabled = 0;
+  }
+
+  if ($primary_account_id == $user_information['user_id']) {
+    $total_primary = 1;
+  }
+
 
   // handle all appropriate banner refreshes.
   if ($refresh_banner) {
     $result = mfcs_sync_banner_to_local_users($user_information['user_id'], $banner_id);
     if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) != 0 || ($problems_original & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) != 0 || ($problems_original & MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) != 0) {
-      if ($result === TRUE) {
+      if ($result) {
         if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) != 0) {
           $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE;
         }
@@ -4048,6 +4097,7 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
     else {
       $associated_users = mfcs_users_load_banner_id_to_user_id($banner_id);
       $total_primary = 0;
+      $total_primary_enabled = 0;
       $total_accounts = 0;
       $account_ids = array();
 
@@ -4058,6 +4108,9 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
           $account_ids[$associated_user_id] = $associated_user_id;
           if ($associated_user['primary'] == TRUE) {
             $total_primary++;
+            if ($associated_user['status'] > 0) {
+              $total_primary_enabled++;
+            }
 
             if (is_null($primary_account_id)) {
               $primary_account_id = $associated_user_id;
@@ -4076,14 +4129,10 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
       if ($total_accounts < 2) {
         $ldap_duplicate = FALSE;
       }
+      elseif ($total_accounts > 1) {
+        $ldap_duplicate = TRUE;
+      }
     }
-  }
-  else {
-    $total_primary = 0;
-    $total_accounts = 1;
-    $account_ids = array();
-
-    $ldap_duplicate = FALSE;
   }
 
 
@@ -4091,38 +4140,29 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
   $assign_primary = FALSE;
   if ($total_primary < 1) {
     $assign_primary = TRUE;
-
-    if ($total_accounts > 1 && !$ldap_duplicate) {
-      $problems_new = $problems_new | MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES;
-    }
+    $primary_account_id = $user_information['user_id'];
+    $changes_detected = TRUE;
   }
-  elseif ($total_primary > 1) {
-    if (!$ldap_duplicate) {
-      $problems_new = $problems_new | MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES;
-    }
+  elseif ($total_primary > 1 && $total_primary_enabled > 1) {
+    $problems_new = $problems_new | MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES;
+    $ldap_duplicate = TRUE;
+    $changes_detected = TRUE;
   }
 
   if ($ldap_duplicate) {
-    // if the current user is not the primary account, then load the roles from the primary account and return.
+    // if the current user is not the primary account, then use roles from the primary account (this explicitly forces a replace on roles instead of update).
     if (!is_null($primary_account_id) && $user_information['user_id'] != $primary_account_id) {
+      $changes_detected = TRUE;
       $primary_account = user_load($primary_account_id);
-      $results = mfcs_synchronize_user_settings($primary_account, $roles, $append_roles, $refresh_banner);
-      if ($results === TRUE) {
-        $primary_account = user_load($primary_account_id);
-        return is_object(user_save($primary_account, array('roles' => $primary_account->roles)));
-      }
 
-      // account synchronization failed, so assign the problem flag.
-      if (($problems_new & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) == 0) {
-        $problems_new = $problems_new | MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE;
+      $user_roles = array();
+      foreach ($primary_account->roles as $primary_account_role_id => $primary_account_role_name) {
+        $user_roles[(int) $primary_account_role_id] = (int) $primary_account_role_id;
       }
+      unset($primary_account_role_id);
+      unset($primary_account_role_name);
 
-      if ($problems_original != $problems_new) {
-        mfcs_save_user($user_information['user_id'], array('problems' => $problems_new));
-      }
-
-      $already_executed[$user_information['user_id']] = FALSE;
-      return FALSE;
+      unset($primary_account);
     }
   }
 
@@ -4144,7 +4184,6 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
     }
   }
 
-  $changes_detected = FALSE;
   if (count($original_roles) == count($user_roles)) {
     $difference = array_diff(array_keys($original_roles), array_keys($user_roles));
     if (!empty($difference)) {
@@ -4155,8 +4194,8 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
     $changes_detected = TRUE;
   }
 
-  if ($banner_invalid && ($problems & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) == 0) {
-    $problems = $problems | MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
+  if ($banner_invalid && ($problems_new & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) == 0) {
+    $problems_new = $problems_new | MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
     $changes_detected = TRUE;
   }
 
@@ -4233,7 +4272,10 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
   // Whenever user_save() is called, the hook_user_presave() will auto-refresh banner information.
   if ($changes_detected || $refresh_banner) {
     $edit['roles'] = $user_roles;
-    $edit['mfcs']['problems'] = $problems_new;
+
+    if ($problems_original != $problems_new) {
+      $edit['mfcs']['problems'] = $problems_new;
+    }
 
     if ($update_ldap_duplicate) {
       $edit['mfcs']['ldap_duplicate'] = $ldap_duplicate;
@@ -4244,16 +4286,17 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
       $edit['mfcs']['primary_account'] = TRUE;
     }
 
-    if (is_object($user_object_or_id)) {
-      $user = $user_object_or_id;
-    }
-    else {
-      // The user_save() function requires a user object passed, so call entity_load_unchanged() to load an unchanged version of the object.
-      $user = entity_load_unchanged('user', $user_information['user_id']);
-      $user->mfcs = $user_information['mfcs'];
-    }
+    $user_information['mfcs']['problems'] = $problems_new;
 
-    if (!user_save($user, $edit)) {
+    // create the minimum required fields in a custom user object for updating.
+    $user_to_update = new stdClass();
+    $user_to_update->uid = $user_information['user_id'];
+    $user_to_update->roles = $user_roles;
+    $user_to_update->mfcs = $user_information['mfcs'];
+    $user_to_update->status = $user_information['status'];
+    $user_to_update->pass = $user_information['pass'];
+
+    if (!user_save($user_to_update, $edit)) {
       // the user-presave process may have altered the user problems settings.
       $mfcs_users = mfcs_load_users($user_information['user_id'], FALSE, ($user_information['status'] == 0));
       if (isset($mfcs_users[$user_information['user_id']])) {
@@ -4274,6 +4317,9 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
       $already_executed[$user_information['user_id']] = FALSE;
       return FALSE;
     }
+  }
+  elseif ($problems_original != $problems_new) {
+    mfcs_save_user($user_information['user_id'], array('problems' => $problems_new));
   }
 
   $already_executed[$user_information['user_id']] = FALSE;
@@ -11000,10 +11046,10 @@ function mfcs_users_load_banner_id_to_user_id($banner_id = NULL) {
   }
 
   if (is_null($banner_id)) {
-    $query = db_query('select u.uid as user_id, u.name as name, mu.first_name as first_name, mu.last_name as last_name, mu.banner_id as banner_id, mu.primary_account as primary_account from mfcs_users mu inner join users u on mu.user_id = u.uid order by mu.user_id');
+    $query = db_query('select u.uid as user_id, u.name as name, u.status, mu.first_name as first_name, mu.last_name as last_name, mu.banner_id as banner_id, mu.primary_account as primary_account from mfcs_users mu inner join users u on mu.user_id = u.uid order by mu.user_id');
   }
   else {
-    $query = db_query('select u.uid as user_id, u.name as name, mu.first_name as first_name, mu.last_name as last_name, mu.banner_id as banner_id, mu.primary_account as primary_account from mfcs_users mu inner join users u on mu.user_id = u.uid where mu.banner_id = :banner_id order by mu.user_id', array(':banner_id' => $banner_id));
+    $query = db_query('select u.uid as user_id, u.name as name, u.status, mu.first_name as first_name, mu.last_name as last_name, mu.banner_id as banner_id, mu.primary_account as primary_account from mfcs_users mu inner join users u on mu.user_id = u.uid where mu.banner_id = :banner_id order by mu.user_id', array(':banner_id' => $banner_id));
   }
 
   $results = $query->fetchAll();
@@ -11011,42 +11057,47 @@ function mfcs_users_load_banner_id_to_user_id($banner_id = NULL) {
     return $list;
   }
 
+  $first_primary = NULL;
+  $others = array();
   foreach ($results as $result) {
     $is_primary = $result->primary_account == TRUE;
-    if (!isset($list['banner'][$result->banner_id])) {
-      $list['banner'][$result->banner_id] = array(
-        'others' => array(
-       ),
-      );
-    }
-
-    if ($is_primary) {
-      $list['banner'][$result->banner_id]['user_id'] = $result->user_id;
-      $list['banner'][$result->banner_id]['banner_id'] = $result->banner_id;
-      $list['banner'][$result->banner_id]['name'] = $result->name;
-      $list['banner'][$result->banner_id]['first_name'] = $result->first_name;
-      $list['banner'][$result->banner_id]['last_name'] = $result->last_name;
-      $list['banner'][$result->banner_id]['primary'] = TRUE;
-    }
-    else {
-      $list['banner'][$result->banner_id]['others'][$result->user_id] = array(
-        'user_id' => $result->user_id,
-        'banner_id' => $result->banner_id,
-        'name' => $result->name,
-        'first_name' => $result->first_name,
-        'last_name' => $result->last_name,
-        'primary' => FALSE,
-      );
-    }
 
     $list['user'][$result->user_id] = array(
       'user_id' => $result->user_id,
-      'banner_id' => $result->banner_id,
+      'banner_id' => $banner_id,
       'name' => $result->name,
       'first_name' => $result->first_name,
       'last_name' => $result->last_name,
       'primary' => $is_primary,
+      'status' => $result->status,
     );
+
+    if ($is_primary) {
+      if (is_null($first_primary)) {
+        $first_primary = $list['user'][$result->user_id];
+      }
+
+      if ($result->status > 0) {
+        $list['banner'][$banner_id] = $list['user'][$result->user_id];
+      }
+      else {
+        $others[$result->user_id] = $list['user'][$result->user_id];
+      }
+    }
+    else {
+      $others[$result->user_id] = $list['user'][$result->user_id];
+    }
+  }
+
+  if (!isset($list['banner'][$banner_id])) {
+    if (is_null($first_primary)) {
+      $list['banner'][$banner_id] = array();
+    }
+    else {
+      $list['banner'][$banner_id] = $first_primary;
+    }
+
+    $list['banner'][$banner_id]['others'] = $others[$result->user_id];
   }
 
   return $list;
