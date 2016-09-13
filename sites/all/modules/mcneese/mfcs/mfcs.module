@@ -3264,6 +3264,7 @@ function mfcs_load_users($user_ids, $join = FALSE, $deleted = FALSE) {
     $query->addField('mu', 'primary_account', 'primary_account');
     $query->addField('mu', 'problems', 'problems');
     $query->addField('mu', 'updated', 'updated');
+    $query->addField('mu', 'updated_problems', 'updated_problems');
 
     if (is_array($user_ids)) {
       $query->condition('mu.user_id', $user_ids, 'IN');
@@ -3332,6 +3333,14 @@ function mfcs_save_user($user_id, $data) {
   // ensure only this function assignes the date and user_id, overriding any existing values.
   $data['updated'] = mfcs_instance();
   $data['user_id'] = $user_id;
+
+  // when the problems column is updated, save the changes to the updated_problems column (otherwise prevent updated_problems from being altered).
+  if (array_key_exists('problems', $data)) {
+    $data['updated_problems'] = $data['updated'];
+  }
+  else {
+    unset($data['updated_problems']);
+  }
 
   if (array_key_exists('primary_account', $data)) {
     if ($data['primary_account'] === TRUE) {
@@ -4005,37 +4014,68 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
     $primary_account_id = $user_information['user_id'];
   }
 
-  // Determine how many accounts (with same banner id) are assigned as primary.
-  if (is_int($banner_id)) {
-    $associated_users = mfcs_users_load_banner_id_to_user_id($banner_id);
-    $total_primary = 0;
-    $total_accounts = 0;
-    $account_ids = array();
 
-    if (!empty($associated_users['user'])) {
-      foreach ($associated_users['user'] as $associated_user_id => $associated_user) {
-        $total_accounts++;
+  // handle all appropriate banner refreshes.
+  if ($refresh_banner) {
+    $result = mfcs_sync_banner_to_local_users($user_information['user_id'], $banner_id);
+    if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) != 0 || ($problems_original & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) != 0 || ($problems_original & MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) != 0) {
+      if ($result === TRUE) {
+        if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) != 0) {
+          $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE;
+        }
 
-        $account_ids[$associated_user_id] = $associated_user_id;
-        if ($associated_user['primary'] == TRUE) {
-          $total_primary++;
+        if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) != 0) {
+          $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE;
+        }
 
-          if (is_null($primary_account_id)) {
-            $primary_account_id = $associated_user_id;
-          }
+        if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) != 0) {
+          $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS;
         }
       }
     }
-    unset($associated_user_id);
-    unset($associated_user);
-    unset($associated_users);
+  }
 
-    // $account_ids is used to perform synchronization loads, so do not save the user account currently being processed.
-    unset($account_ids[$user_information['user_id']]);
 
-    // there cannot be ldap duplicate accounts if there is only 1 account.
-    if ($total_accounts < 2) {
-      $ldap_duplicate = FALSE;
+  // Determine how many accounts (with same banner id) are assigned as primary.
+  $banner_invalid = FALSE;
+  if (is_int($banner_id)) {
+    $banner_information = mfcs_load_request_user_by_banner_id($banner_id);
+    if (is_bool($banner_information)) {
+      // normally TRUE means no error, but because there is a banner id provided, then that banner id must exist.
+      // which means both FALSE and TRUE mean that the banner id is to be considered invalid.
+      $banner_invalid = TRUE;
+    }
+    else {
+      $associated_users = mfcs_users_load_banner_id_to_user_id($banner_id);
+      $total_primary = 0;
+      $total_accounts = 0;
+      $account_ids = array();
+
+      if (!empty($associated_users['user'])) {
+        foreach ($associated_users['user'] as $associated_user_id => $associated_user) {
+          $total_accounts++;
+
+          $account_ids[$associated_user_id] = $associated_user_id;
+          if ($associated_user['primary'] == TRUE) {
+            $total_primary++;
+
+            if (is_null($primary_account_id)) {
+              $primary_account_id = $associated_user_id;
+            }
+          }
+        }
+      }
+      unset($associated_user_id);
+      unset($associated_user);
+      unset($associated_users);
+
+      // $account_ids is used to perform synchronization loads, so do not save the user account currently being processed.
+      unset($account_ids[$user_information['user_id']]);
+
+      // there cannot be ldap duplicate accounts if there is only 1 account.
+      if ($total_accounts < 2) {
+        $ldap_duplicate = FALSE;
+      }
     }
   }
   else {
@@ -4087,25 +4127,8 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
   }
 
 
-  // handle all appropriate banner refreshes.
+  // check account ids following a banner refresh.
   if ($refresh_banner) {
-    $result = mfcs_sync_banner_to_local_users($user_information['user_id'], $banner_id);
-    if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) != 0 || ($problems_original & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) != 0 || ($problems_original & MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) != 0) {
-      if ($result === TRUE) {
-        if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) != 0) {
-          $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE;
-        }
-
-        if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) != 0) {
-          $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE;
-        }
-
-        if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) != 0) {
-          $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS;
-        }
-      }
-    }
-
     if (!empty($account_ids)) {
       $account_mfcs_information = mfcs_load_users($account_ids, FALSE, TRUE);
       foreach ($account_ids as $account_id) {
@@ -4115,9 +4138,7 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
         }
 
         if (($account_problems & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) != 0 || ($account_problems & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) != 0 || ($problems_original & MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) != 0) {
-          $account = user_load($account_id);
-          mfcs_synchronize_user_settings($account, $user_roles, FALSE, FALSE);
-          unset($account);
+          mfcs_synchronize_user_settings($account_id, $user_roles, FALSE, FALSE);
         }
       }
     }
@@ -4131,6 +4152,11 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
     }
   }
   else {
+    $changes_detected = TRUE;
+  }
+
+  if ($banner_invalid && ($problems & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) == 0) {
+    $problems = $problems | MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
     $changes_detected = TRUE;
   }
 

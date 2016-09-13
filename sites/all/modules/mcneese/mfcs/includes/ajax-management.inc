@@ -976,7 +976,7 @@ function mfcs_ajax_problems_0_users_list() {
 
     // Commented out because this is confusing because the date format will not match.
     #$conditions['or_1']['value_date'] = array(
-    #  'field' => 'text(to_timestamp(mu.updated))',
+    #  'field' => 'text(to_timestamp(mu.updated_problems))',
     #  'operator' => MFCS_OPERATOR_LIKE,
     #  'search' => $get_post['search']['value'],
     #  'expression' => TRUE,
@@ -1087,7 +1087,7 @@ function mfcs_ajax_problems_0_users_list() {
 
       unset($taxonomy_id);
 
-      $row[7] = check_plain(date(MFCS_DATE_FORMAT_DATE_TIME, $problem->updated));
+      $row[7] = check_plain(date(MFCS_DATE_FORMAT_DATE_TIME, $problem->updated_problems));
       $row[8] = '<a href="' . $base_path . 'requests/problems-0/users/user/' . $problem->user_id . $url_arguments . '" class="operation-link operation-link-view">View</a>' . $additional_operations;
 
       $response['data'][] = $row;

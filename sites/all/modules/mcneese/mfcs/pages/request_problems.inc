@@ -372,7 +372,7 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
     );
 
     $row['date'] = array(
-      'data' => check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS, $problem->updated)),
+      'data' => check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS, $problem->updated_problems)),
       'class' => $class_date,
     );
 
@@ -631,7 +631,7 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
   $message .= 'This page provides details of the problems and the ability to reset the problem flags for each of these problems.<br>';
   $message .= 'Some of these problems can be reset, others cannot.<br>';
   $message .= '<br>';
-  $message .= 'The <a href="' . $base_path . 'requests/users-0/view/' . $problem_user_id . '" title="View Profile for ' . $user_name . ' (id #' . $problem_user_id . ')">user\'s information</a> and problem flags were last updated on: <strong>' . date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS, $problem_user->mfcs['updated']) . '</strong>.<br>';
+  $message .= 'The <a href="' . $base_path . 'requests/users-0/view/' . $problem_user_id . '" title="View Profile for ' . $user_name . ' (id #' . $problem_user_id . ')">user\'s information</a> and problem flags were last updated on: <strong>' . date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS, $problem_user->mfcs['updated_problems']) . '</strong>.<br>';
   $message .= '<br>';
 
   $form['message'] = array(

@@ -2133,10 +2133,12 @@ function mfcs_install() {
     primary_account bool default true,
     problems bigint not null default 0,
     updated bigint not null,
+    updated_problems bigint not null,
 
     primary key (user_id),
     constraint mfcs_users_user_id_check check (user_id >= 0),
     constraint mfcs_users_updated_check check (updated >= 0),
+    constraint mfcs_users_updated_problems_check check (updated_problems >= 0),
 
     constraint user_id_fkey foreign key (user_id) references users(uid) on update cascade on delete restrict
   );');

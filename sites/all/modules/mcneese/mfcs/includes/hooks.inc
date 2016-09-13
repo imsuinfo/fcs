@@ -1986,7 +1986,7 @@ function mfcs_hook_cronapi() {
  * Internal function for hook_user_load().
  */
 function mfcs_hook_user_load($users) {
-  $results = db_query('SELECT user_id, banner_id, first_name, last_name, phone_number, ldap_duplicate, primary_account, problems, updated FROM {mfcs_users} WHERE user_id IN (:uids)', array(':uids' => array_keys($users)));
+  $results = db_query('SELECT user_id, banner_id, first_name, last_name, phone_number, ldap_duplicate, primary_account, problems, updated, updated_problems FROM {mfcs_users} WHERE user_id IN (:uids)', array(':uids' => array_keys($users)));
 
   $found = array();
   foreach ($results as $result) {
@@ -2000,6 +2000,7 @@ function mfcs_hook_user_load($users) {
     $users[$result->user_id]->mfcs['primary_account'] = ($result->primary_account == TRUE) ? TRUE : FALSE;
     $users[$result->user_id]->mfcs['problems'] = (int) $result->problems;
     $users[$result->user_id]->mfcs['updated'] = (int) $result->updated;
+    $users[$result->user_id]->mfcs['updated_problems'] = (int) $result->updated_problems;
   }
 
   foreach (array_keys($users) as $user_id) {
@@ -2014,6 +2015,7 @@ function mfcs_hook_user_load($users) {
     $user->mfcs['primary_account'] = TRUE;
     $user->mfcs['problems'] = MFCS_USER_PROBLEM_NONE;
     $user->mfcs['updated'] = isset($users[$user_id]->created) ? (int) $users[$user_id]->created : mfcs_instance();
+    $user->mfcs['updated_problems'] = $user->mfcs['updated'];
   }
 }
 

@@ -591,12 +591,14 @@ function mfcs_management_search_users($conditions = array(), $options = array())
 
     $query->addField('mu', 'problems', 'problems');
     $query->addField('mu', 'updated', 'updated');
+    $query->addField('mu', 'updated_problems', 'updated_problems');
     $query->addField('mu', 'first_name', 'first_name');
     $query->addField('mu', 'last_name', 'last_name');
 
     $already_added['user_id'] = 'mu.user_id';
     $already_added['problems'] = 'mu.problems';
     $already_added['updated'] = 'mu.updated';
+    $already_added['updated_problems'] = 'mu.updated_problems';
     $already_added['first_name'] = 'mu.first_name';
     $already_added['last_name'] = 'mu.last_name';
 
