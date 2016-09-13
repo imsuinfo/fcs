@@ -810,7 +810,7 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
       'explanation' =>
         'This flag gets set when a user has a banner id that is unknown to the system.<br>' .
         '<br>' .
-        'The user either needs to have their banner id fixed, removed, or the account should be disabled.<br>',
+        'The user either needs to have their banner id fixed, removed, or the account should be locked.<br>',
       'resettable' => FALSE,
       'custom_action' => FALSE,
     ),
