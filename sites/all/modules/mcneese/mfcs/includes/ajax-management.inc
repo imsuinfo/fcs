@@ -907,7 +907,7 @@ function mfcs_ajax_problems_0_users_list() {
       $sorting['problems'] = $order_direction;
     }
     elseif ($order_column == 7) {
-      $sorting['date'] = $order_direction;
+      $sorting['updated_problems'] = $order_direction;
     }
   }
 
@@ -1201,9 +1201,6 @@ function mfcs_ajax_problems_0_requests_list($argument_1 = NULL) {
     }
     elseif ($order_column == 5) {
       $sorting['ignore'] = $order_direction;
-    }
-    elseif ($order_column == 6) {
-      $sorting['date'] = $order_direction;
     }
   }
 

@@ -217,8 +217,8 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
       $order_column = array(6 => strtolower($sorting[$order]));
       $class_problems_other .= 'sorting_1 ';
     }
-    elseif ($order == 'date') {
-      $sorting['date'] = is_null($sort) ? 'DESC' : $sort;
+    elseif ($order == 'updated_problems') {
+      $sorting['updated_problems'] = is_null($sort) ? 'DESC' : $sort;
       $order_column = array(6 => strtolower($sorting[$order]));
       $class_date .= 'sorting_1 ';
     }
@@ -371,7 +371,7 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
       'class' => $class_problems_other,
     );
 
-    $row['date'] = array(
+    $row['updated_problems'] = array(
       'data' => check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS, $problem->updated_problems)),
       'class' => $class_date,
     );
@@ -394,7 +394,7 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
     'problems_account' => array('field' => 'problems', 'data' => "Problems Account", 'align' => 'center'),
     'problems_form' => array('field' => 'problems', 'data' => "Problems Forms", 'align' => 'center'),
     'problems_other' => array('field' => 'problems', 'data' => "Problems Other", 'align' => 'center'),
-    'date' => array('field' => 'date', 'data' => "Date", 'align' => 'center'),
+    'updated_problems' => array('field' => 'updated_problems', 'data' => "Date", 'align' => 'center'),
     'operations' => array('data' => "Operations", 'align' => 'center', 'class' => array('no-print')),
   );
 
@@ -441,7 +441,7 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
       array('id' => 4, 'column' => 'problem_account', 'name' => "Problems Account", 'className' => 'column-problem_account'),
       array('id' => 5, 'column' => 'problem_forms', 'name' => "Problems Forms", 'className' => 'column-problem_forms'),
       array('id' => 6, 'column' => 'problem_other', 'name' => "Problems Other", 'className' => 'column-problem_other'),
-      array('id' => 7, 'column' => 'date', 'name' => "Date", 'className' => 'column-date'),
+      array('id' => 7, 'column' => 'updated_problems', 'name' => "Date", 'className' => 'column-updated_problems'),
       array('id' => 8, 'column' => NULL, 'name' => "Operations", 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
     ),
     'displayStart' => $options['start'],
