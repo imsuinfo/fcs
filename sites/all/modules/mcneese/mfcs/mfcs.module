@@ -3375,6 +3375,8 @@ function mfcs_save_user($user_id, $data) {
     }
   }
 
+  $instance = mfcs_instance();
+
   $transaction = db_transaction();
 
   try {
@@ -3399,6 +3401,15 @@ function mfcs_save_user($user_id, $data) {
     }
     else {
       $query = db_insert('mfcs_users');
+
+      // make sure that required fields without defaults are created on insert.
+      if (!array_key_exists('updated', $data)) {
+        $data['updated'] = $instance;
+      }
+
+      if (!array_key_exists('updated_problems', $data)) {
+        $data['updated_problems'] = $instance;
+      }
     }
 
     $query->fields($data);
@@ -12796,6 +12807,128 @@ function mfcs_get_banner_roles_for_user_id($user_id) {
   }
 
   return $mfcs_banner_event_roles;
+}
+
+/**
+ * Obtain the ldap information for a given user.
+ *
+ * @param int|object $user_object_or_id
+ *   The user id or user object.
+ *
+ * @return array|bool
+ *   An array of ldap information is returned.
+ *   TRUE is returned when there is not ldap information.
+ *   FALSE is returned on error.
+ */
+function mfcs_get_ldap_information($user_object_or_id) {
+  if (!is_object($user_object_or_id) && !cf_is_integer($user_object_or_id)) {
+    cf_error::invalid_object('user_object_or_id');
+    return FALSE;
+  }
+
+  if (is_object($user_object_or_id)) {
+    $account = $user_object_or_id;
+  }
+  else {
+    $account = user_load($user_object_or_id);
+  }
+
+  if (!is_object($account)) {
+    cf_error::invalid_object('user_object_or_id');
+    return FALSE;
+  }
+
+  if (!function_exists('ldap_user_conf')) {
+    return TRUE;
+  }
+
+  $ldap_user_conf = ldap_user_conf();
+
+  $account_name = NULL;
+  if (isset($account->name)) {
+    $account_name = $account->name;
+  }
+  if (is_null($account_name) && isset($account->original->name)) {
+    $account_name = $account->original->name;
+  }
+
+  $ldap_user = ldap_servers_get_user_ldap_data($account_name, $ldap_user_conf->drupalAcctProvisionServer);
+
+  $information = array(
+    'name' => $account_name,
+    'banner_id' => NULL,
+    'common_name' => NULL,
+    'full_name' => NULL,
+    'first_name' => NULL,
+    'last_name' => NULL,
+    'email' => NULL,
+    'ldap_duplicate' => NULL,
+    'gids' => array(),
+    'uids' => array(),
+    'is_gmail' => NULL,
+  );
+
+  if (isset($ldap_user['attr']['employeenumber'][0]) && is_numeric($ldap_user['attr']['employeenumber'][0])) {
+    $information['banner_id'] = (int) $ldap_user['attr']['employeenumber'][0];
+  }
+
+  if (isset($ldap_user['attr']['cn'][0])) {
+    $information['common_name'] = $ldap_user['attr']['cn'][0];
+  }
+
+  if (isset($ldap_user['attr']['gecos'][0])) {
+    $information['full_name'] = $ldap_user['attr']['gecos'][0];
+  }
+
+  if (isset($ldap_user['attr']['givenname'][0])) {
+    $information['first_name'] = $ldap_user['attr']['givenname'][0];
+  }
+
+  if (isset($ldap_user['attr']['sn'][0])) {
+    $information['last_name'] = $ldap_user['attr']['sn'][0];
+  }
+
+  if (isset($ldap_user['attr']['mail'][0])) {
+    $information['email'] = $ldap_user['attr']['mail'][0];
+  }
+
+  if (isset($ldap_user['attr']['isduplicate'][0])) {
+    $information['ldap_duplicate'] = (strtolower($ldap_user['attr']['isduplicate'][0]) == 'true') ? TRUE : FALSE;
+  }
+
+  if (isset($ldap_user['attr']['uidnumber']) && is_array($ldap_user['attr']['uidnumber'])) {
+    foreach ($ldap_user['attr']['uidnumber'] as $attr_key => $attr_value) {
+      if (!is_numeric($attr_key)) {
+        continue;
+      }
+
+      if (is_numeric($attr_value)) {
+        $information['uids'][(int) $attr_value] = (int) $attr_value;
+      }
+    }
+    unset($attr_key);
+    unset($attr_value);
+  }
+
+  if (isset($ldap_user['attr']['gidnumber']) && is_array($ldap_user['attr']['gidnumber'])) {
+    foreach ($ldap_user['attr']['gidnumber'] as $attr_key => $attr_value) {
+      if (!is_numeric($attr_key)) {
+        continue;
+      }
+
+      if (is_numeric($attr_value)) {
+        $information['gids'][(int) $attr_value] = (int) $attr_value;
+      }
+    }
+    unset($attr_key);
+    unset($attr_value);
+  }
+
+  if (isset($ldap_user['attr']['msugmailflag'][0])) {
+    $information['is_gmail'] = (strtolower($ldap_user['attr']['msugmailflag'][0]) == 'true') ? TRUE : FALSE;
+  }
+
+  return $information;
 }
 
 

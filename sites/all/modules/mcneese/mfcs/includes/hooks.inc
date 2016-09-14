@@ -2019,6 +2019,7 @@ function mfcs_hook_user_load($users) {
   foreach (array_keys($users) as $user_id) {
     if (array_key_exists($user_id, $found)) continue;
 
+    $user = new stdClass();
     $user->mfcs = array();
     $user->mfcs['banner_id'] = NULL;
     $user->mfcs['first_name'] = NULL;
@@ -2040,15 +2041,32 @@ function mfcs_hook_user_login(&$edit, $user, $category) {
     return;
   }
 
-  // if the user does not have a valid banner id, then there is nothing to synchronize to.
-  if (empty($user->mfcs['banner_id']) || !is_int($user->mfcs['banner_id'])) {
-    return;
-  }
-
   $roles = (array) $user->roles;
   $bannerless_exception_role_id = user_role_load_by_name('bannerless exception');
   if (array_key_exists($bannerless_exception_role_id->rid, $roles)) {
     // do not sync to banner for bannerless-exception.
+    return;
+  }
+
+  if (!isset($user->mfcs['banner_id']) || !is_numeric($user->mfcs['banner_id'])) {
+    $ldap_information = mfcs_get_ldap_information($user);
+    if (is_array($ldap_information)) {
+      $information = array(
+        'banner_id' => $ldap_information['banner_id'],
+        'first_name' => $ldap_information['first_name'],
+        'last_name' => $ldap_information['last_name'],
+        'ldap_duplicate' => $ldap_information['ldap_duplicate'],
+      );
+      mfcs_save_user($user->uid, $information);
+      unset($information);
+
+      // reload settings to ensure the user object now has the correct ldap information.
+      $user = user_load($user->uid, TRUE);
+    }
+  }
+
+  // if the user does not have a valid banner id, then there is nothing to synchronize to.
+  if (empty($user->mfcs['banner_id']) || !is_int($user->mfcs['banner_id'])) {
     return;
   }
 
@@ -2135,10 +2153,64 @@ function mfcs_hook_user_insert(&$edit, $account, $category) {
     return;
   }
 
+  // attempt to load banner information.
+  if (isset($account->uid)) {
+    $bannerless_exception_role_id = user_role_load_by_name('bannerless exception');
+    if (!isset($account->roles) || !is_array($account->roles) || !array_key_exists($bannerless_exception_role_id->rid, $account->roles)) {
+      $ldap_information = mfcs_get_ldap_information($account);
+      if (is_array($ldap_information)) {
+        $edit['mail'] = $ldap_information['email'];
+
+        $information = array(
+          'banner_id' => $ldap_information['banner_id'],
+          'first_name' => $ldap_information['first_name'],
+          'last_name' => $ldap_information['last_name'],
+          'ldap_duplicate' => $ldap_information['ldap_duplicate'],
+        );
+        mfcs_save_user($account->uid, $information);
+        unset($information);
+
+        // save the updated settings.
+        if (!isset($account->mfcs)) {
+          $account->mfcs = array();
+          $account->mfcs['banner_id'] = NULL;
+          $account->mfcs['first_name'] = NULL;
+          $account->mfcs['last_name'] = NULL;
+          $account->mfcs['phone_number'] = NULL;
+          $account->mfcs['ldap_duplicate'] = FALSE;
+          $account->mfcs['primary_account'] = TRUE;
+          $account->mfcs['problems'] = MFCS_USER_PROBLEM_NONE;
+          $account->mfcs['updated'] = isset($account->created) ? (int) $account->created : mfcs_instance();
+          $account->mfcs['updated_problems'] = $user->mfcs['updated'];
+        }
+
+        $account->mfcs['banner_id'] = $ldap_information['banner_id'];
+        $account->mfcs['first_name'] = $ldap_information['first_name'];
+        $account->mfcs['last_name'] = $ldap_information['last_name'];
+        $account->mfcs['ldap_duplicate'] = $ldap_information['ldap_duplicate'];
+      }
+      unset($ldap_information);
+    }
+  }
+
   // if the user does not have a valid banner id, then there is nothing to synchronize to.
   if (empty($account->mfcs['banner_id']) || !is_int($account->mfcs['banner_id'])) {
+
     // create the initial/default user settings.
-    if (isset($account->uid) && isset($account->mfcs)) {
+    if (isset($account->uid)) {
+      if (!isset($account->mfcs)) {
+        $account->mfcs = array();
+        $account->mfcs['banner_id'] = NULL;
+        $account->mfcs['first_name'] = NULL;
+        $account->mfcs['last_name'] = NULL;
+        $account->mfcs['phone_number'] = NULL;
+        $account->mfcs['ldap_duplicate'] = FALSE;
+        $account->mfcs['primary_account'] = TRUE;
+        $account->mfcs['problems'] = MFCS_USER_PROBLEM_NONE;
+        $account->mfcs['updated'] = isset($account->created) ? (int) $account->created : mfcs_instance();
+        $account->mfcs['updated_problems'] = $user->mfcs['updated'];
+      }
+
       mfcs_save_user($account->uid, $account->mfcs);
     }
 
@@ -2195,13 +2267,79 @@ function mfcs_hook_user_presave(&$edit, $account, $category) {
   // store the timestamp in which the account was last updated.
   $edit['mfcs']['updated'] = mfcs_instance();
 
-  // re-synchronize account information following change.
-  if (array_key_exists('banner_id', $edit)) {
-    if (!empty($edit['banner_id'])) {
-      $result = mfcs_sync_banner_to_local_users($account->uid, $edit['banner_id']);
+
+  // enforce banner information if the account is not a bannerless exception.
+  if (isset($account->uid) && isset($account->mfcs)) {
+    $bannerless_exception_role_id = user_role_load_by_name('bannerless exception');
+    if (!isset($account->roles) || !is_array($account->roles) || !array_key_exists($bannerless_exception_role_id->rid, $account->roles)) {
+      $ldap_information = mfcs_get_ldap_information($account);
+      if (is_array($ldap_information) && !empty($ldap_information)) {
+        if (isset($edit['mail'])) {
+          if ($edit['mail'] != $ldap_information['email']) {
+            $edit['mail'] = $ldap_information['email'];
+          }
+        }
+        elseif (isset($account->mail)) {
+          if ($account->mail != $ldap_information['email']) {
+            $edit['mail'] = $ldap_information['email'];
+          }
+        }
+
+        if (isset($edit['mfcs']['banner_id'])) {
+          if ($edit['mfcs']['banner_id'] != $ldap_information['banner_id']) {
+            $edit['mfcs']['banner_id'] = $ldap_information['banner_id'];
+          }
+        }
+        elseif (isset($account->mfcs) && array_key_exists('banner_id', $account->mfcs)) {
+          if ($account->mfcs['banner_id'] != $ldap_information['banner_id']) {
+            $edit['mfcs']['banner_id'] = $ldap_information['banner_id'];
+          }
+        }
+
+        if (isset($edit['mfcs']['first_name'])) {
+          if ($edit['mfcs']['first_name'] != $ldap_information['first_name']) {
+            $edit['mfcs']['first_name'] = $ldap_information['first_name'];
+          }
+        }
+        elseif (isset($account->mfcs) && array_key_exists('first_name', $account->mfcs)) {
+          if ($account->mfcs['first_name'] != $ldap_information['first_name']) {
+            $edit['mfcs']['first_name'] = $ldap_information['first_name'];
+          }
+        }
+
+        if (isset($edit['mfcs']['last_name'])) {
+          if ($edit['mfcs']['last_name'] != $ldap_information['last_name']) {
+            $edit['mfcs']['last_name'] = $ldap_information['last_name'];
+          }
+        }
+        elseif (isset($account->mfcs) && array_key_exists('last_name', $account->mfcs)) {
+          if ($account->mfcs['last_name'] != $ldap_information['last_name']) {
+            $edit['mfcs']['last_name'] = $ldap_information['last_name'];
+          }
+        }
+
+        if (isset($edit['mfcs']['ldap_duplicate'])) {
+          if ($edit['mfcs']['ldap_duplicate'] != $ldap_information['ldap_duplicate']) {
+            $edit['mfcs']['ldap_duplicate'] = $ldap_information['ldap_duplicate'];
+          }
+        }
+        elseif (isset($account->mfcs) && array_key_exists('ldap_duplicate', $account->mfcs)) {
+          if ($account->mfcs['ldap_duplicate'] != $ldap_information['ldap_duplicate']) {
+            $edit['mfcs']['ldap_duplicate'] = $ldap_information['ldap_duplicate'];
+          }
+        }
+      }
+      unset($ldap_information);
     }
   }
-  elseif (array_key_exists('banner_id', $account->mfcs)) {
+
+  // re-synchronize account information following change.
+  if (isset($edit['mfcs']) && array_key_exists('banner_id', $edit['mfcs'])) {
+    if (!empty($edit['mfcs']['banner_id'])) {
+      $result = mfcs_sync_banner_to_local_users($account->uid, $edit['mfcs']['banner_id']);
+    }
+  }
+  elseif (isset($account->mfcs) && array_key_exists('banner_id', $account->mfcs)) {
     if (!empty($account->mfcs['banner_id'])) {
       $result = mfcs_sync_banner_to_local_users($account->uid, $account->mfcs['banner_id']);
     }
@@ -2231,15 +2369,20 @@ function mfcs_hook_user_presave(&$edit, $account, $category) {
   }
   $problems_original = $problems;
 
-  $settings = array(
-    'mfcs' => $edit['mfcs'],
-  );
+  $settings = array();
+
+  if (array_key_exists('mfcs', $edit) && is_array($edit['mfcs'])) {
+    $settings['mfcs'] = $edit['mfcs'];
+  }
 
   if (array_key_exists('roles', $edit) && is_array($edit['roles'])) {
     $settings['roles'] = $edit['roles'];
   }
 
-  $changes = mfcs_hook_process_user_banner_roles($account, $problems, $settings);
+  $changes = NULL;
+  if (!empty($settings)) {
+    $changes = mfcs_hook_process_user_banner_roles($account, $problems, $settings);
+  }
 
   if (is_array($changes)) {
     if (isset($changes['roles']) && is_array($changes['roles'])) {
@@ -2281,7 +2424,7 @@ function mfcs_hook_user_presave(&$edit, $account, $category) {
 
   // pass along the changes to the problems, but do not perform any update actions just yet.
   if (isset($account->uid)) {
-    if ($problems != $problems_original || count($edit['mfcs']) > 1) {
+    if ($problems != $problems_original || (isset($edit['mfcs']) && count($edit['mfcs']) > 1)) {
       $edit['mfcs']['problems'] = $problems;
     }
   }
@@ -2479,7 +2622,7 @@ function mfcs_hook_process_user_banner_roles($user, &$problems, $changes = array
   }
 
   // use any available changes in place of default.
-  if (array_key_exists('mfcs', $changes)) {
+  if (isset($changes['mfcs']) && array_key_exists('mfcs', $changes)) {
     if (array_key_exists('banner_id', $changes['mfcs']) && is_numeric($changes['mfcs']['banner_id'])) {
       $mfcs_user_settings['banner_id'] = (int) $changes['mfcs']['banner_id'];
     }
