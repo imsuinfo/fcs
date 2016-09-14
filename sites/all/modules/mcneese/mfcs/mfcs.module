@@ -4258,15 +4258,19 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
   if ($ldap_duplicate) {
     // if the current user is not the primary account, then use roles from the primary account (this explicitly forces a replace on roles instead of update).
     if (!is_null($primary_account_id) && $user_information['user_id'] != $primary_account_id) {
-      $changes_detected = TRUE;
       $primary_account = user_load($primary_account_id);
 
-      $user_roles = array();
+      $new_user_roles = array();
       foreach ($primary_account->roles as $primary_account_role_id => $primary_account_role_name) {
-        $user_roles[(int) $primary_account_role_id] = (int) $primary_account_role_id;
+        $new_user_roles[(int) $primary_account_role_id] = (int) $primary_account_role_id;
       }
       unset($primary_account_role_id);
       unset($primary_account_role_name);
+
+      if (array_diff($user_roles, $new_user_roles)) {
+        $changes_detected = TRUE;
+        $user_roles = $new_user_roles;
+      }
 
       unset($primary_account);
     }
