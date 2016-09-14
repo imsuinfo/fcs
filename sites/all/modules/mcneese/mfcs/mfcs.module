@@ -365,6 +365,10 @@ define('MFCS_DATE_FORMAT_DATE_TIME_SECONDS', 'l, F j, Y h:i:sa');
 define('MFCS_DATE_FORMAT_DATE_TIME_SECONDS_TIMEZONE', 'T, l, F j, Y h:i:sa');
 define('MFCS_DATE_FORMAT_TIME', 'h:ia');
 define('MFCS_DATE_FORMAT_TIME_SECONDS', 'h:i:sa');
+define('MFCS_DATE_FORMAT_DATE_SQUEEZE', 'D, M j, Y');
+define('MFCS_DATE_FORMAT_DATE_TIME_SQUEEZE', 'D, M j, Y h:ia');
+define('MFCS_DATE_FORMAT_DATE_SQUEEZE_NO_YEAR', 'D, M j');
+define('MFCS_DATE_FORMAT_DATE_TIME_SQUEEZE_NO_YEAR', 'D, M j h:ia');
 
 /**
  * Insurance Settings
@@ -9191,7 +9195,7 @@ function mfcs_build_request_table($items, $max_rows, $columns = NULL, $user = NU
             $row['date']['data'] .= '<br>';
           }
 
-          $row['date']['data'] .= check_plain(date(MFCS_DATE_FORMAT_DATE, $date));
+          $row['date']['data'] .= check_plain(date(MFCS_DATE_FORMAT_DATE_SQUEEZE, $date));
 
           if (array_key_exists($delta, $item->time_start) && !is_null($item->time_start[$delta]) && array_key_exists($delta, $item->time_stop) && !is_null($item->time_stop[$delta])) {
             $row['date']['data'] .= ' ' . check_plain(date(MFCS_DATE_FORMAT_TIME, $item->time_start[$delta]));
@@ -9737,6 +9741,8 @@ function mfcs_build_request_ajax_table_process_rows($items, $columns, $user = NU
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
+  $instance = mfcs_instance();
+
   $item_ids = array_keys($items);
 
   $administer = user_access('mfcs administer', $user);
@@ -9877,7 +9883,12 @@ function mfcs_build_request_ajax_table_process_rows($items, $columns, $user = NU
                 $data .= '<br>';
               }
 
-              $data .= check_plain(date(MFCS_DATE_FORMAT_DATE, $date));
+              if (date('Y', $instance) == date('Y', $date)) {
+                $data .= check_plain(date(MFCS_DATE_FORMAT_DATE_SQUEEZE_NO_YEAR, $date));
+              }
+              else {
+                $data .= check_plain(date(MFCS_DATE_FORMAT_DATE_SQUEEZE, $date));
+              }
 
               if (array_key_exists($delta, $item->time_start) && !is_null($item->time_start[$delta]) && array_key_exists($delta, $item->time_stop) && !is_null($item->time_stop[$delta])) {
                 $data .= ' ' . check_plain(date(MFCS_DATE_FORMAT_TIME, $item->time_start[$delta]));
@@ -9945,10 +9956,10 @@ function mfcs_build_request_ajax_table_process_rows($items, $columns, $user = NU
           }
         }
         elseif ($column['column'] == 'created') {
-          $data = check_plain(date(MFCS_DATE_FORMAT_DATE_TIME, $item->created));
+          $data = check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SQUEEZE, $item->created));
         }
         elseif ($column['column'] == 'updated') {
-          $data = check_plain(date(MFCS_DATE_FORMAT_DATE_TIME, $item->updated));
+          $data = check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SQUEEZE, $item->updated));
         }
         elseif (!array_key_exists('sanitize', $column) || $column['sanitize'] === FALSE) {
           $data = property_exists($item, $column['column']) ? check_plain($item->{$column['column']}) : '';

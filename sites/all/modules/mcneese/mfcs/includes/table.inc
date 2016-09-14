@@ -870,7 +870,7 @@ function mfcs_table_presentation($option = NULL) {
         'value' => 'timestamp',
       ),
       'display' => array(
-        'value' => 'l, F j, Y h:i:sa',
+        'value' => MFCS_DATE_FORMAT_DATE_TIME_SQUEEZE,
       ),
       'request_type' => array(
         'show' => TRUE,
@@ -915,7 +915,7 @@ function mfcs_table_presentation($option = NULL) {
         'value' => 'timestamp',
       ),
       'display' => array(
-        'value' => 'l, F j, Y h:i:sa',
+        'value' => MFCS_DATE_FORMAT_DATE_TIME_SQUEEZE,
       ),
       'request_type' => array(
         'show' => TRUE,
@@ -1272,7 +1272,7 @@ function mfcs_table_presentation($option = NULL) {
         'value' => 'timestamp_linked_day',
       ),
       'display' => array(
-        'value' => MFCS_DATE_FORMAT_DATE,
+        'value' => MFCS_DATE_FORMAT_DATE_SQUEEZE,
       ),
       'request_type' => array(
         'show' => TRUE,

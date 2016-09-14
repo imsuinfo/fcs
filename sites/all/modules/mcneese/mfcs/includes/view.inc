@@ -1567,7 +1567,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
         }
       }
       $markup .= '</div></h3>';
-      $markup .= '<div class="review-item-label-date">' . date(MFCS_DATE_FORMAT_DATE_TIME, $date) . '</div>';
+      $markup .= '<div class="review-item-label-date">' . date(MFCS_DATE_FORMAT_DATE_TIME_SQUEEZE, $date) . '</div>';
       $markup .= '</div>';
 
 
