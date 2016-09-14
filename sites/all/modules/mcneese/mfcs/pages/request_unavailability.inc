@@ -486,15 +486,15 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
     }
     else {
       if (strtotime('midnight today', $date_start) == strtotime('midnight today', $date_stop)) {
-        $date = date(MFCS_DATE_FORMAT_TIME, $date_start) . ' to ' . date(MFCS_DATE_FORMAT_TIME, $date_stop) . ' on ' . date('l, F jS, Y', $date_start);
+        $date = date(MFCS_DATE_FORMAT_TIME, $date_start) . ' to ' . date(MFCS_DATE_FORMAT_TIME, $date_stop) . ' on ' . date(MFCS_DATE_FORMAT_DATE_SQUEEZE, $date_start);
       }
       elseif ($date_start != strtotime('midnight today', $date_start) || $date_stop != strtotime('midnight today', $date_stop)) {
-        $date = date('h:ia l, F jS, Y', $date_start) . ' to<br>' . date('h:ia l, F jS, Y', $date_stop);
+        $date = date(MFCS_DATE_FORMAT_DATE_TIME_SQUEEZE, $date_start) . ' to<br>' . date(MFCS_DATE_FORMAT_DATE_TIME_SQUEEZE, $date_stop);
       }
       else {
         // For whatever reason, the culture treats the stop date inclusively when it has no time (but then treats it inclusively when there is a time!).
         // Make sure the stop date that is printed to the screen is an inclusive date (this therefore cannot be used for any calculations)
-        $date = date('l, F jS, Y', $date_start) . ' to<br>' . date('l, F jS, Y', strtotime('midnight yesterday', $date_stop));
+        $date = date(MFCS_DATE_FORMAT_DATE_SQUEEZE, $date_start) . ' to<br>' . date(MFCS_DATE_FORMAT_DATE_SQUEEZE, strtotime('midnight yesterday', $date_stop));
       }
     }
 
