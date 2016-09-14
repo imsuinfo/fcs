@@ -4088,34 +4088,34 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
 
       // handle role changes in banner.
       if (is_array($original_banner_roles) && is_array($new_banner_roles)) {
-        $original_roles = array();
+        $original_banner_role_ids = array();
         foreach ($original_banner_roles as $original_banner_role) {
-          $original_roles[$original_banner_role->role_id] = $original_banner_role->role_id;
+          $original_banner_role_ids[$original_banner_role->role_id] = $original_banner_role->role_id;
         }
         unset($original_banner_role);
 
-        $new_roles = array();
+        $new_banner_role_ids = array();
         foreach ($new_banner_roles as $new_banner_role) {
-          $new_roles[$new_banner_role->role_id] = $new_banner_role->role_id;
+          $new_banner_role_ids[$new_banner_role->role_id] = $new_banner_role->role_id;
         }
         unset($new_banner_role);
 
-        if (!empty(array_diff($original_roles, $new_roles))) {
+        if (!empty(array_diff($original_banner_role_ids, $new_banner_role_ids))) {
           $changes_detected = TRUE;
           if (!$has_manager_role && !$has_administrator_role) {
-            foreach ($original_roles as $role_value) {
+            foreach ($original_banner_role_ids as $role_value) {
               unset($user_roles[$role_value]);
             }
             unset($role_value);
 
-            foreach ($new_roles as $role_value) {
+            foreach ($new_banner_role_ids as $role_value) {
               $user_roles[(int) $role_value] = (int) $role_value;
             }
             unset($role_value);
           }
         }
-        unset($original_roles);
-        unset($new_roles);
+        unset($original_banner_role_ids);
+        unset($new_banner_role_ids);
       }
 
       // handle venue coordinator changes in banner.
