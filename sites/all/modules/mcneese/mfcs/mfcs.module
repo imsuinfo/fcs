@@ -4255,9 +4255,11 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
     $changes_detected = TRUE;
   }
   elseif ($total_primary > 1 && $total_primary_enabled > 1) {
-    $problems_new = $problems_new | MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES;
-    $ldap_duplicate = TRUE;
-    $changes_detected = TRUE;
+    if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES) == 0) {
+      $problems_new = $problems_new | MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES;
+      $ldap_duplicate = TRUE;
+      $changes_detected = TRUE;
+    }
   }
 
   if ($ldap_duplicate) {
