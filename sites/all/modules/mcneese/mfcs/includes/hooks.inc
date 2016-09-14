@@ -2232,9 +2232,12 @@ function mfcs_hook_user_presave(&$edit, $account, $category) {
   $problems_original = $problems;
 
   $settings = array(
-    'roles' => $edit['roles'],
     'mfcs' => $edit['mfcs'],
   );
+
+  if (array_key_exists('roles', $edit) && is_array($edit['roles'])) {
+    $settings['roles'] = $edit['roles'];
+  }
 
   $changes = mfcs_hook_process_user_banner_roles($account, $problems, $settings);
 
@@ -2415,7 +2418,6 @@ function mfcs_hook_user_cancel($account) {
  * @see: mfcs_hook_user_login()
  */
 function mfcs_hook_process_user_banner_roles($user, &$problems, $changes = array()) {
-
   if (!is_object($user)) {
     cf_error::invalid_object('user');
     return FALSE;
