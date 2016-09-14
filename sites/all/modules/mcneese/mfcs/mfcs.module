@@ -4010,6 +4010,30 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
   }
   unset($bannerless_exception_role);
 
+  $reviewer_exception_role = user_role_load_by_name('reviewer exception');
+  $has_reviewer_exception_role = FALSE;
+  if (isset($reviewer_exception_role->rid) || array_key_exists($reviewer_exception_role->rid, $user_roles)) {
+    $has_reviewer_exception_role = TRUE;
+  }
+
+  $manager_role = user_role_load_by_name('manager');
+  $has_manager_role = FALSE;
+  if (isset($manager_role->rid) || array_key_exists($manager_role->rid, $user_roles)) {
+    $has_manager_role = TRUE;
+  }
+
+  $administrator_role = user_role_load_by_name('administrator');
+  $has_administrator_role = FALSE;
+  if (isset($administrator_role->rid) || array_key_exists($administrator_role->rid, $user_roles)) {
+    $has_administrator_role = TRUE;
+  }
+
+  $reviewer_role = user_role_load_by_name('reviewer');
+  $has_reviewer_role = FALSE;
+  if (isset($reviewer_role->rid) || array_key_exists($reviewer_role->rid, $user_roles)) {
+    $has_reviewer_role = TRUE;
+  }
+
   // load the mfcs user-specific problem data as a baseline to make changes to.
   $problems_original = MFCS_USER_PROBLEM_NONE;
   if (isset($user_information['mfcs']['problems']) && is_numeric($user_information['mfcs']['problems'])) {
@@ -4022,6 +4046,109 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
   $banner_id = NULL;
   if (!empty($user_information['mfcs']['banner_id']) && is_numeric($user_information['mfcs']['banner_id'])) {
     $banner_id = (int) $user_information['mfcs']['banner_id'];
+  }
+
+  // @todo: depending on time of day if banner is not going to be available, then auto-set refresh_banner to FALSE.
+
+  // handle all appropriate banner refreshes.
+  if ($refresh_banner) {
+    $original_banner_roles = mfcs_get_banner_roles_for_user_id($user_information['user_id']);
+    $original_coordinator_rooms = mfcs_load_coordinator_rooms($user_information['user_id']);
+    if (empty($original_coordinator_rooms)) {
+      $original_coordinator_rooms = FALSE;
+    }
+    else {
+      $original_coordinator_rooms = TRUE;
+    }
+
+    $result = mfcs_sync_banner_to_local_users($user_information['user_id'], $banner_id);
+    if ($result) {
+      if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) != 0 || ($problems_original & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) != 0 || ($problems_original & MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) != 0) {
+        if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) != 0) {
+          $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE;
+        }
+
+        if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) != 0) {
+          $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE;
+        }
+
+        if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) != 0) {
+          $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS;
+        }
+      }
+
+      $new_banner_roles = mfcs_get_banner_roles_for_user_id($user_information['user_id']);
+      $new_coordinator_rooms = mfcs_load_coordinator_rooms($user_information['user_id']);
+      if (empty($new_coordinator_rooms)) {
+        $new_coordinator_rooms = FALSE;
+      }
+      else {
+        $new_coordinator_rooms = TRUE;
+      }
+
+      // handle role changes in banner.
+      if (is_array($original_banner_roles) && is_array($new_banner_roles)) {
+        $original_roles = array();
+        foreach ($original_banner_roles as $original_banner_role) {
+          $original_roles[$original_banner_role->role_id] = $original_banner_role->role_id;
+        }
+        unset($original_banner_role);
+
+        $new_roles = array();
+        foreach ($new_banner_roles as $new_banner_role) {
+          $new_roles[$new_banner_role->role_id] = $new_banner_role->role_id;
+        }
+        unset($new_banner_role);
+
+        if (!empty(array_diff($original_roles, $new_roles))) {
+          $changes_detected = TRUE;
+          if (!$has_manager_role && !$has_administrator_role) {
+            foreach ($original_roles as $role_value) {
+              unset($user_roles[$role_value]);
+            }
+            unset($role_value);
+
+            foreach ($new_roles as $role_value) {
+              $user_roles[(int) $role_value] = (int) $role_value;
+            }
+            unset($role_value);
+          }
+        }
+        unset($original_roles);
+        unset($new_roles);
+      }
+
+      // handle venue coordinator changes in banner.
+      if ($original_coordinator_rooms !== $new_coordinator_rooms) {
+        if (!$has_reviewer_exception_role && !$has_manager_role && !$has_administrator_role) {
+          if (isset($reviewer_role->rid)) {
+            if ($new_coordinator_rooms) {
+              $user_roles[$reviewer_role->rid] = $reviewer_role->rid;
+              $has_reviewer_role = TRUE;
+            }
+            else {
+              unset($user_roles[$reviewer_role->rid]);
+              $has_reviewer_role = FALSE;
+            }
+          }
+        }
+
+        $changes_detected = TRUE;
+      }
+
+      unset($new_banner_roles);
+      unset($new_coordinator_rooms);
+    }
+    else {
+      // @todo: should this be reported here?
+      #if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) == 0) {
+      #  $problems_new = $problems_new | MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE;
+      #}
+    }
+    unset($result);
+
+    unset($original_banner_roles);
+    unset($original_coordinator_rooms);
   }
 
   if (is_null($banner_id)) {
@@ -4061,27 +4188,6 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
 
   if ($primary_account_id == $user_information['user_id']) {
     $total_primary = 1;
-  }
-
-
-  // handle all appropriate banner refreshes.
-  if ($refresh_banner) {
-    $result = mfcs_sync_banner_to_local_users($user_information['user_id'], $banner_id);
-    if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) != 0 || ($problems_original & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) != 0 || ($problems_original & MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) != 0) {
-      if ($result) {
-        if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) != 0) {
-          $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE;
-        }
-
-        if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) != 0) {
-          $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE;
-        }
-
-        if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) != 0) {
-          $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS;
-        }
-      }
-    }
   }
 
 
@@ -4270,7 +4376,7 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
 
 
   // Whenever user_save() is called, the hook_user_presave() will auto-refresh banner information.
-  if ($changes_detected || $refresh_banner) {
+  if ($changes_detected) {
     $edit['roles'] = $user_roles;
 
     if ($problems_original != $problems_new) {
@@ -4932,9 +5038,13 @@ function mfcs_sync_banner_to_local_users($user_id = NULL, $banner_id = NULL, $me
     return FALSE;
   }
 
-  $banner_ids_to_user_ids = mfcs_users_load_banner_id_to_user_id($banner_id);
-
   $instance = mfcs_instance();
+  $already_synced_banner = &drupal_static('already_synced_banner_' . $user_id . '_' . $instance, NULL);
+  if (is_bool($already_synced_banner)) {
+    return $already_synced_banner;
+  }
+
+  $banner_ids_to_user_ids = mfcs_users_load_banner_id_to_user_id($banner_id);
 
   if (is_null($banner_id)) {
     $rows = mfcs_oracle_select('select id, role from ucs.msu_event_role');
@@ -4949,6 +5059,8 @@ function mfcs_sync_banner_to_local_users($user_id = NULL, $banner_id = NULL, $me
     if ($message_on_oracle_failure) {
       drupal_set_message('Failed to connect to banner database.', 'error', FALSE);
     }
+
+    // Note: do not cache result here because of connection error, a follow up call may still succeed.
     return FALSE;
   }
 
@@ -5043,6 +5155,7 @@ function mfcs_sync_banner_to_local_users($user_id = NULL, $banner_id = NULL, $me
 
       cf_error::on_exception($e, WATCHDOG_ERROR);
 
+      $already_synced_banner = FALSE;
       return FALSE;
     }
     catch (Exception $e) {
@@ -5050,6 +5163,7 @@ function mfcs_sync_banner_to_local_users($user_id = NULL, $banner_id = NULL, $me
 
       cf_error::on_exception($e, WATCHDOG_ERROR);
 
+      $already_synced_banner = FALSE;
       return FALSE;
     }
   }
@@ -5057,6 +5171,7 @@ function mfcs_sync_banner_to_local_users($user_id = NULL, $banner_id = NULL, $me
   // once banner sync is complete, check for disabled accounts.
   mfcs_search_for_and_mark_disabled_venue_coordinators_with_active_content();
 
+  $already_synced_banner = TRUE;
   return TRUE;
 }
 
@@ -12624,6 +12739,47 @@ function mfcs_get_related_user_ids_from_user_banner_id($user) {
 
   return $user_ids;
 }
+
+/**
+ * Load banner roles for a specified user id.
+ *
+ * @param int $user_id
+ *   The user id.
+ *
+ * @return array|bool
+ *   An array of roles (as database objects) are returned on success.
+ *   FALSE is returned on error.
+ */
+function mfcs_get_banner_roles_for_user_id($user_id) {
+  if (!cf_is_integer($user_id)) {
+    cf_error::invalid_integer('user_id');
+    return FALSE;
+  }
+
+  try {
+    $query = db_select('mfcs_banner_event_roles_to_users', 'mberu');
+    $query->innerJoin('mfcs_drupal_to_banner_role_mapping', 'mdtbrm', 'mberu.event_role_id = mdtbrm.banner_id');
+    $query->addField('mberu', 'event_role_id');
+    $query->addField('mdtbrm', 'role_id', 'role_id');
+    $query->addField('mdtbrm', 'role_name', 'role_name');
+    $query->addField('mdtbrm', 'banner_name', 'banner_name');
+    $query->condition('mberu.user_id', $user_id);
+    $query->condition('mberu.disabled', 0);
+
+    $mfcs_banner_event_roles = $query->execute()->fetchAll();
+  }
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
+    return FALSE;
+  }
+
+  return $mfcs_banner_event_roles;
+}
+
 
 /**
  * @} End of '@defgroup mfcs McNeese Facilities Use'.
