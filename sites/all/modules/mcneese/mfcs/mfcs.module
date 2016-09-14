@@ -12761,15 +12761,15 @@ function mfcs_get_related_user_ids_from_user_banner_id($user) {
 
   if (!is_null($banner_id)) {
     $associated_users = mfcs_users_load_banner_id_to_user_id($banner_id);
-    $banner_id = $user->mfcs['banner_id'];
-    if (isset($associated_users['banner'][$banner_id]['others']) && is_array($associated_users['banner'][$banner_id]['others'])) {
-      foreach ($associated_users['banner'][$banner_id]['others'] as $other) {
-        $other_id = (int) $other['user_id'];
+    if (isset($associated_users['user']) && is_array($associated_users['user'])) {
+      foreach ($associated_users['user'] as $associated_id => $associated_user) {
+        $user_id = (int) $associated_id;
 
-        if ($other_id > 0) {
-          $user_ids[$other_id] = $other_id;
+        if ($user_id > 0) {
+          $user_ids[$user_id] = $user_id;
         }
       }
+      unset($user_id);
       unset($other);
     }
   }
