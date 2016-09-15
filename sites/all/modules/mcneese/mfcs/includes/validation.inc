@@ -368,11 +368,7 @@ function mfcs_validate_request_fields($form, &$form_state) {
 
   $passed = TRUE;
   if ($form_state['values']['form']['step'] == 'standard' || $clicked_id == 'submit-request-submit') {
-    $quick_meeting_name = "Quick Meeting";
-    $quick_meeting_term = taxonomy_term_load(MFCS_REQUEST_TYPE_QUICK_MEETING);
-    if (!empty($quick_meeting_term->name)) {
-      $quick_meeting_name = $quick_meeting_term->name;
-    }
+    $quick_meeting_name = 'Quick Meeting';
 
     // quick meetings can only be used by venue coordinators.
     if ($is_quick_meeting) {
