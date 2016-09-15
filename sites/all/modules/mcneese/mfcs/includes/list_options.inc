@@ -737,6 +737,7 @@ function mfcs_get_reviewer_classification_list_options($option = NULL, $hidden =
   $options_all[MFCS_REVIEWER_CLASSIFICATION_SECURITY] = 'Security / University Police';
   $options_all[MFCS_REVIEWER_CLASSIFICATION_STUDENT_ACTIVITIES_ADMINISTRATION] = 'Student Activities Administration';
   $options_all[MFCS_REVIEWER_CLASSIFICATION_UNIVERSITY_SERVICES] = 'University Services';
+  $options_all[MFCS_REVIEWER_CLASSIFICATION_GROUNDS] = 'Grounds';
 
   if ($option == 'select') {
     $options[''] = '- Select -';

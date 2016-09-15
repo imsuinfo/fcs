@@ -1108,7 +1108,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
     $uses['equipment_fees'] = MFCS_REVIEWER_CLASSIFICATION_FACILITIES;
     $uses['custodial_fees'] = MFCS_REVIEWER_CLASSIFICATION_CUSTODIAL;
     $uses['maintenance_fees'] = MFCS_REVIEWER_CLASSIFICATION_MAINTENANCE;
-    $uses['grounds_fees'] = MFCS_REVIEWER_CLASSIFICATION_FACILITIES; // @fixme: create a grounds classification
+    $uses['grounds_fees'] = MFCS_REVIEWER_CLASSIFICATION_GROUNDS;
     $uses['security_fees'] = MFCS_REVIEWER_CLASSIFICATION_SECURITY;
 
     if ($is_manager || $is_administer) {
@@ -1116,7 +1116,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
       $uses_as_manager['equipment_fees'] = MFCS_REVIEWER_CLASSIFICATION_FACILITIES;
       $uses_as_manager['custodial_fees'] = MFCS_REVIEWER_CLASSIFICATION_CUSTODIAL;
       $uses_as_manager['maintenance_fees'] = MFCS_REVIEWER_CLASSIFICATION_MAINTENANCE;
-      $uses_as_manager['grounds_fees'] = MFCS_REVIEWER_CLASSIFICATION_FACILITIES; // @fixme: create a grounds classification
+      $uses_as_manager['grounds_fees'] = MFCS_REVIEWER_CLASSIFICATION_GROUNDS;
       $uses_as_manager['security_fees'] = MFCS_REVIEWER_CLASSIFICATION_SECURITY;
     }
 
