@@ -1067,7 +1067,11 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
   $requirements_university_save = FALSE;
   $perform_power_user_classification_check = FALSE;
   if (($decision === MFCS_REVIEW_DECISION_WAIVE || $decision === MFCS_REVIEW_DECISION_REQUIREMENT) && ($step === MFCS_REVIEW_STEP_VENUE_AVAILABLE || $step === MFCS_REVIEW_STEP_REVIEW || $step === MFCS_REVIEW_STEP_FINAL_DECISION || $step === MFCS_REVIEW_STEP_COMPLETED)) {
-    $requirements_university = NULL;
+    // this used to be set to NULL as default, but an unexpected bug that I have yet to consistently reproduce causes this to be set to NULL and then saved to the database as NULL.
+    // at this time NULL values shouldn't be appearing in the database (only 0 or 1 are desired).
+    // set the default to 0 just in case in hopes of avoiding the issue.
+    // the value still will not be saved unless $requirements_university_save is set to TRUE.
+    $requirements_university = 0;
     if (isset($extra['requirements']['university'])) {
       $requirements_university = $extra['requirements']['university'];
       $requirements_university_save = TRUE;
