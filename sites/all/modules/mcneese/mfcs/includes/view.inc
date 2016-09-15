@@ -1438,7 +1438,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
 
       if ($user_id == 1) {
         $user_name .= "System";
-        $reviewer_classification = "";
+        $reviewer_classification = '';
         $markup_class .= ' classification-' . MFCS_REVIEWER_CLASSIFICATION_SYSTEM;
       }
       else {

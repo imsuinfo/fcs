@@ -200,7 +200,7 @@ function mfcs_edit_0_autocomplete_request_coordinator_name($string) {
 
   $matches = array();
   foreach ($results as $result) {
-    $name = "";
+    $name = '';
     if (!empty($result->last_name)) {
       $name .= $result->last_name;
     }
@@ -279,7 +279,7 @@ function mfcs_edit_0_autocomplete_request_coordinator_email($string) {
 
   $matches = array();
   foreach ($results as $result) {
-    $name = "";
+    $name = '';
     if (!empty($result->last_name)) {
       $name .= $result->last_name;
     }
@@ -364,7 +364,7 @@ function mfcs_edit_0_autocomplete_request_coordinator_phone($string) {
 
     $phone = (string) $result->phone_number;
 
-    $name = "";
+    $name = '';
     if (!empty($result->last_name)) {
       $name .= $result->last_name;
     }

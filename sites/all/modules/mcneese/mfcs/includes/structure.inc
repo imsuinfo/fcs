@@ -952,7 +952,7 @@ function mfcs_get_request_field_room($form, &$form_state, &$fields, &$request_st
     );
 
     foreach ($values as $key => $value) {
-      $location = "";
+      $location = '';
       if (!empty($request_state['location'][$key])) {
         $location = $request_state['location'][$key];
       }

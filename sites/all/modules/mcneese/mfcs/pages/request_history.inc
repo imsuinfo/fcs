@@ -285,7 +285,7 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
 
                   if ($group_name == 'review') {
                     if ($field_name == 'review') {
-                      $custom_message = "";
+                      $custom_message = '';
 
                       if (is_string($value->decision)) {
                         $decision = (int) $value->decision;
@@ -495,7 +495,7 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
                   $presentation_group = $presentation[$group_name][$field_name]['group'];
                 }
 
-                $group_label = "";
+                $group_label = '';
                 if (array_key_exists($presentation_group, $presentation_tables)) {
                   $group_label = $presentation_tables[$presentation_group]['label'];
                 }

@@ -1901,7 +1901,7 @@ function mfcs_ajax_synchronize_0_form() {
       $row[5] = check_plain($item->password);
       $row[6] = "Unknown";
       $row[7] = check_plain($item->address);
-      $row[8] = "";
+      $row[8] = '';
 
       if ($item->type == MFCS_SYNCHRONIZE_TYPE_ICAL) {
         $row[6] = "iCal";

@@ -2621,10 +2621,10 @@ function mfcs_mail($key, &$message, $params) {
       $markup .= $params['markup'];
 
       $markup .= '<br>';
-      $markup .= "<strong>Request URL</strong>:<ul><li><a href=" . '"' . $request_url . '"' . ">" . $request_url . "</a></li></ul><br>";
+      $markup .= '<strong>Request URL</strong>:<ul><li><a href="' . $request_url . '"' . $request_url . '</a></li></ul><br>';
 
       $markup .= '<br>';
-      $markup .= "<em>This e-mail was generated on</em>:<ul><li><em>" . date('Y/m/d h:i:s a T', $instance) . "</em></li></ul>";
+      $markup .= '<em>This e-mail was generated on</em>:<ul><li><em>' . date('Y/m/d h:i:s a T', $instance) . '</em></li></ul>';
     }
   }
   else {
@@ -8736,7 +8736,7 @@ function mfcs_request_process_query_search_array(&$query, &$count_query, &$opera
         $operator = '=';
       }
       elseif ($search_values['operator'] == MFCS_OPERATOR_LIKE) {
-        if ($search_string == "") {
+        if ($search_string == '') {
           $operator = '=';
         }
         else {
@@ -8745,7 +8745,7 @@ function mfcs_request_process_query_search_array(&$query, &$count_query, &$opera
         }
       }
       elseif ($search_values['operator'] == MFCS_OPERATOR_SLIKE) {
-        if ($search_string == "") {
+        if ($search_string == '') {
           $operator = '=';
         }
         else {
@@ -8754,7 +8754,7 @@ function mfcs_request_process_query_search_array(&$query, &$count_query, &$opera
         }
       }
       elseif ($search_values['operator'] == MFCS_OPERATOR_ILIKE) {
-        if ($search_string == "") {
+        if ($search_string == '') {
           $operator = '=';
         }
         else {
@@ -8772,7 +8772,7 @@ function mfcs_request_process_query_search_array(&$query, &$count_query, &$opera
         $operator = '<>';
       }
       elseif ($search_values['operator'] == MFCS_OPERATOR_NOT_LIKE) {
-        if ($search_string == "") {
+        if ($search_string == '') {
           $operator = '<>';
         }
         else {
@@ -8781,7 +8781,7 @@ function mfcs_request_process_query_search_array(&$query, &$count_query, &$opera
         }
       }
       elseif ($search_values['operator'] == MFCS_OPERATOR_NOT_SLIKE) {
-        if ($search_string == "") {
+        if ($search_string == '') {
           $operator = '<>';
         }
         else {
@@ -8790,7 +8790,7 @@ function mfcs_request_process_query_search_array(&$query, &$count_query, &$opera
         }
       }
       elseif ($search_values['operator'] == MFCS_OPERATOR_NOT_ILIKE) {
-        if ($search_string == "") {
+        if ($search_string == '') {
           $operator = '<>';
         }
         else {
@@ -8852,7 +8852,7 @@ function mfcs_request_process_query_search_array(&$query, &$count_query, &$opera
         $operator = '=';
       }
       elseif ($search_values['operator'] == MFCS_OPERATOR_LIKE) {
-        if ($search_string == "") {
+        if ($search_string == '') {
           $operator = '=';
         }
         else {
@@ -8861,7 +8861,7 @@ function mfcs_request_process_query_search_array(&$query, &$count_query, &$opera
         }
       }
       elseif ($search_values['operator'] == MFCS_OPERATOR_SLIKE) {
-        if ($search_string == "") {
+        if ($search_string == '') {
           $operator = '=';
         }
         else {
@@ -8870,7 +8870,7 @@ function mfcs_request_process_query_search_array(&$query, &$count_query, &$opera
         }
       }
       elseif ($search_values['operator'] == MFCS_OPERATOR_ILIKE) {
-        if ($search_string == "") {
+        if ($search_string == '') {
           $operator = '=';
         }
         else {
@@ -8888,7 +8888,7 @@ function mfcs_request_process_query_search_array(&$query, &$count_query, &$opera
         $operator = '<>';
       }
       elseif ($search_values['operator'] == MFCS_OPERATOR_NOT_LIKE) {
-        if ($search_string == "") {
+        if ($search_string == '') {
           $operator = '<>';
         }
         else {
@@ -8897,7 +8897,7 @@ function mfcs_request_process_query_search_array(&$query, &$count_query, &$opera
         }
       }
       elseif ($search_values['operator'] == MFCS_OPERATOR_NOT_SLIKE) {
-        if ($search_string == "") {
+        if ($search_string == '') {
           $operator = '<>';
         }
         else {
@@ -8906,7 +8906,7 @@ function mfcs_request_process_query_search_array(&$query, &$count_query, &$opera
         }
       }
       elseif ($search_values['operator'] == MFCS_OPERATOR_NOT_ILIKE) {
-        if ($search_string == "") {
+        if ($search_string == '') {
           $operator = '<>';
         }
         else {
@@ -10190,7 +10190,7 @@ function mfcs_request_get_available_venue_coordinators() {
 
   $matches = array();
   foreach ($results as $result) {
-    $name = "";
+    $name = '';
     if (!empty($result->last_name)) {
       $name .= $result->last_name;
     }

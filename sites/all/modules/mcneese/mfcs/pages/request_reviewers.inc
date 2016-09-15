@@ -935,7 +935,7 @@ function mfcs_request_reviewers_0_delete_form($form, &$form_state, $id) {
     $reviewer_step = $reviewer->review_step;
   }
 
-  $request_classification_name = "";
+  $request_classification_name = '';
   if (isset($request_classifications[$reviewer_request_classification])) {
     $request_classification_name = $request_classifications[$reviewer_request_classification];
   }
