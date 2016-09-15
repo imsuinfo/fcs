@@ -3091,14 +3091,90 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       $email_params['markup'] .= '<br>';
       $email_params['markup'] .= $standard_markup;
 
-      if (!empty($parameters['reminder_data']->coordinator_email)) {
-        $email_to[$parameters['reminder_data']->coordinator_email] = $parameters['reminder_data']->coordinator_email;
+      // send e-mails to venue coordinator.
+      if (is_array($venue_coordinator)) {
+        $email_to[$venue_coordinator['email']] = $venue_coordinator['email'];
+      }
+
+      // also send e-mails to the venue coordinator proxies.
+      $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.user_id' => $venue_coordinator['user_id'], 'mpvc.disabled' => 0));
+      if (!empty($proxies_returned['results'])) {
+        foreach ($proxies_returned['results'] as $proxy_returned) {
+          $proxy = mfcs_load_basic_user_settings_by_user_id($proxy_returned->proxy_id);
+
+          if (is_array($proxy)) {
+            $email_to[$proxy['email']] = $proxy['email'];
+          }
+        }
       }
 
       // as of fcs-79, conditionally include the requester in the e-mails.
       if ($requester_included_in_emails && !is_null($request_requester['email'])) {
         // not adding to comment only here because in this case the requester should receive the full/normal e-mail.
         $email_to[$request_requester['email']] = $request_requester['email'];
+      }
+    }
+    elseif ($parameters['reminder_reason'] == 'unreviewed_request') {
+      $request_title = 'Request';
+      if (!empty($parameters['reminder_data']->title)) {
+        $request_title = $parameters['reminder_data']->title;
+      }
+
+      $remaining_content = '';
+      $remaining_markup = '';
+      $remaining_days = '';
+
+      $current_date = date('l, F jS, Y', $instance);
+      if (isset($parameters['reminder_data']->interval)) {
+        if ($parameters['reminder_data']->interval == MFCS_REMINDER_INTERVAL_DAY_7) {
+          $remaining_days = '7';
+        }
+        elseif ($parameters['reminder_data']->interval == MFCS_REMINDER_INTERVAL_DAY_3) {
+          $remaining_days = '3';
+        }
+        elseif ($parameters['reminder_data']->interval == MFCS_REMINDER_INTERVAL_DAY_1) {
+          $remaining_days = '1';
+        }
+      }
+
+      $remaining_content = "\nThis is the " . $remaining_days . "-day reminder e-mail submitted on: " . $current_date . ".\n";
+      $remaining_markup = "<br>This is the " . $remaining_days . "-day reminder e-mail submitted on: " . $current_date . ").<br>";
+
+      $email_params['title_suffix'] = "Unreviewed Request";
+      $email_params['content'] = "";
+      $email_params['content'] .= "This is a reminder that the review process has not been completed and the first event/meeting date begins in approximately " . $remaining_days . " days for the request: " . check_plain($request_title) . ".\n";
+      $email_params['content'] .= $remaining_content;
+      $email_params['content'] .= "\n";
+      $email_params['content'] .= $standard_content;
+      $email_params['markup'] = "";
+      $email_params['markup'] .= "This is a reminder that the review process has not been completed and the first event/meeting date begins in approximately " . $remaining_days . " days for the request: <em>" . check_plain($request_title) . "</em>.<br>";
+      $email_params['markup'] .= $remaining_markup;
+      $email_params['markup'] .= '<br>';
+      $email_params['markup'] .= $standard_markup;
+
+      // send the e-mails to the reviewers and the venue coordinators.
+      if (is_array($venue_coordinator)) {
+        $email_to[$venue_coordinator['email']] = $venue_coordinator['email'];
+      }
+
+      // also send e-mails to the venue coordinator proxies.
+      $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.user_id' => $venue_coordinator['user_id'], 'mpvc.disabled' => 0));
+      if (!empty($proxies_returned['results'])) {
+        foreach ($proxies_returned['results'] as $proxy_returned) {
+          $proxy = mfcs_load_basic_user_settings_by_user_id($proxy_returned->proxy_id);
+
+          if (is_array($proxy)) {
+            $email_to[$proxy['email']] = $proxy['email'];
+          }
+        }
+      }
+
+      foreach ($step_1_reviewers as $r) {
+        $email_to[$r->email] = $r->email;
+      }
+
+      foreach ($step_2_reviewers as $r) {
+        $email_to[$r->email] = $r->email;
       }
     }
     else {

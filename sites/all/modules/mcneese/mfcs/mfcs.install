@@ -964,6 +964,13 @@ function mfcs_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
+      'expires' => array(
+        'description' => $t("Represents the date the reminder expires and should be removed from this table."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
     ),
     'primary key' => array('request_id', 'date', 'type', 'interval'),
     'foreign keys' => array(

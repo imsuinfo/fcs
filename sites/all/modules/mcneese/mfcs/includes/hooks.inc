@@ -1971,6 +1971,13 @@ function mfcs_hook_cronapi() {
     'enabled' => FALSE,
   );
 
+  $items['mfcs_unreviewed_request_alert'] = array(
+    'title' => t('Unreviewed Request Alert'),
+    'callback' => 'mfcs_unreviewed_request_alert_alert_cron',
+    'callback arguments' => array(),
+    'enabled' => FALSE,
+  );
+
   $items['mfcs_autocancel_old_requests'] = array(
     'title' => t('Auto-Cancel Old Reqests'),
     'callback' => 'mfcs_autocancel_old_requests_cron',

@@ -166,12 +166,14 @@ define('MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED', 9);
 /**
  * Defines e-mail reminder types.
  */
- define('MFCS_REMINDER_TYPE_INSURANCE_NOT_PROVIDED', 0);
+ define('MFCS_REMINDER_TYPE_NONE', 0);
+ define('MFCS_REMINDER_TYPE_INSURANCE_NOT_PROVIDED', 1);
+ define('MFCS_REMINDER_TYPE_UNREVIEWED_REQUEST', 2);
 
 /**
  * Defines e-mail reminder intervals.
  */
- define('MFCS_REMINDER_INTERVAL_DAY_0', 0);
+ define('MFCS_REMINDER_INTERVAL_NONE', 0);
  define('MFCS_REMINDER_INTERVAL_DAY_1', 1);
  define('MFCS_REMINDER_INTERVAL_DAY_2', 2);
  define('MFCS_REMINDER_INTERVAL_DAY_3', 3);
@@ -185,7 +187,6 @@ define('MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED', 9);
  define('MFCS_REMINDER_INTERVAL_DAY_11', 11);
  define('MFCS_REMINDER_INTERVAL_DAY_12', 12);
  define('MFCS_REMINDER_INTERVAL_DAY_30', 30);
- define('MFCS_REMINDER_INTERVAL_WEEK_0', 1000);
  define('MFCS_REMINDER_INTERVAL_WEEK_1', 1001);
  define('MFCS_REMINDER_INTERVAL_WEEK_2', 1002);
  define('MFCS_REMINDER_INTERVAL_WEEK_3', 1003);
@@ -5524,6 +5525,7 @@ function mfcs_insurance_not_provided_alert_cron() {
   $parameters['changed_type'] = 'system';
   $parameters['reminder'] = TRUE;
   $parameters['reminder_reason'] = 'insurance_provided';
+  $parameters['requester_included'] = TRUE;
 
   $processed = array(
     MFCS_REMINDER_INTERVAL_DAY_30 => array(),
@@ -5531,10 +5533,11 @@ function mfcs_insurance_not_provided_alert_cron() {
 
   $dates = mfcs_request_reminders_get_dates();
 
+  mfcs_clear_request_reminders(MFCS_REMINDER_TYPE_INSURANCE_NOT_PROVIDED);
+
   foreach ($processed as $interval => &$processed_values) {
     if ($interval == MFCS_REMINDER_INTERVAL_DAY_30) {
       $from = strtotime('+30 days', $dates['today']);
-      $to = strtotime('tomorrow', $from);
 
       $parameters['message_priority'] = MFCS_MAIL_PRIORITY_HIGH;
     }
@@ -5542,9 +5545,7 @@ function mfcs_insurance_not_provided_alert_cron() {
       continue;
     }
 
-    mfcs_clear_request_reminders(MFCS_REMINDER_TYPE_INSURANCE_NOT_PROVIDED);
-
-    $results = mfcs_get_requests_not_providing_insurance($from, $to);
+    $results = mfcs_get_requests_not_providing_insurance($from);
     if (!empty($results)) {
       $sent = array();
 
@@ -5572,6 +5573,7 @@ function mfcs_insurance_not_provided_alert_cron() {
           'date' => $dates['today'],
           'type' => MFCS_REMINDER_TYPE_INSURANCE_NOT_PROVIDED,
           'interval' => $interval,
+          'expires' => strtotime('+1 month', $dates['today']),
         );
 
         $processed_values[$result->id] = $result->id;
@@ -5580,6 +5582,127 @@ function mfcs_insurance_not_provided_alert_cron() {
 
       foreach ($sent as $reminder) {
         mfcs_save_request_reminders($reminder);
+      }
+    }
+  }
+}
+
+/**
+ * MFCS_REMINDER_INTERVAL_DAY_7
+ */
+function mfcs_unreviewed_request_alert_alert_cron() {
+  mfcs_set_using_effective_system_id();
+
+  mfcs_include(MFCS_INCLUDE_WORKFLOW);
+
+  $system_user = user_load(1);
+
+  $parameters = array();
+  $parameters['changed_by'] = $system_user->uid;
+  $parameters['changed_type'] = 'system';
+  $parameters['reminder'] = TRUE;
+  $parameters['reminder_reason'] = 'unreviewed_request';
+
+  $intervals = array(
+    MFCS_REMINDER_INTERVAL_DAY_1,
+    MFCS_REMINDER_INTERVAL_DAY_3,
+    MFCS_REMINDER_INTERVAL_DAY_7,
+  );
+
+  $dates = mfcs_request_reminders_get_dates();
+
+  mfcs_clear_request_reminders(MFCS_REMINDER_TYPE_UNREVIEWED_REQUEST);
+
+  $all_sent = array();
+  $reminder_logged = array();
+  foreach ($intervals as $interval) {
+    if ($interval == MFCS_REMINDER_INTERVAL_DAY_1) {
+      $from = strtotime('+1 days', $dates['today']);
+      $min_create_date = strtotime('-3 days', $dates['today']);
+
+      $parameters['message_priority'] = MFCS_MAIL_PRIORITY_HIGH;
+    }
+    elseif ($interval == MFCS_REMINDER_INTERVAL_DAY_3) {
+      $from = strtotime('+3 days', $dates['today']);
+      $min_create_date = strtotime('-4 days', $dates['today']);
+
+      $parameters['message_priority'] = MFCS_MAIL_PRIORITY_HIGH;
+    }
+    elseif ($interval == MFCS_REMINDER_INTERVAL_DAY_7) {
+      $from = strtotime('+7 days', $dates['today']);
+      $min_create_date = strtotime('-7 days', $dates['today']);
+
+      $parameters['message_priority'] = MFCS_MAIL_PRIORITY_HIGH;
+    }
+    else {
+      continue;
+    }
+
+    $results = mfcs_get_requests_unreviewed($from, NULL, $min_create_date);
+    if (!empty($results)) {
+      $sent = array();
+
+      foreach ($results as $result) {
+        // if the reminder has already been sent, do not resend.
+        if (array_key_exists($result->id, $sent)) {
+          continue;
+        }
+
+        if (array_key_exists($result->id, $all_sent)) {
+          continue;
+        }
+
+        $reminders = mfcs_get_request_reminders($dates, MFCS_REMINDER_TYPE_UNREVIEWED_REQUEST, $interval, $result->id);
+        if (isset($reminders[$interval][$result->id])) {
+          continue;
+        }
+
+        // load the request and determine its latest date.
+        $expires = strtotime('+6 months', $dates['today']);
+        $request = mfcs_load_request_by_id($result->id);
+        if (!empty($request['dates']['date']) && is_array($request['dates']['date'])) {
+          $first_key = reset($request['dates']['date']);
+          $longest_date = $first_key->value;
+          unset($first_key);
+
+          foreach ($request['dates']['date'] as $date_settings) {
+            if ($date_settings->value > $longest_date) {
+              $longest_date = $date_settings->value;
+            }
+          }
+          unset($date_settings);
+
+          $expires = strtotime('+1 day', $longest_date);
+          unset($longest_date);
+        }
+        unset($request);
+
+        // create a new instance for every reminder e-mail.
+        mfcs_instance(TRUE);
+
+        $parameters['reminder_data'] = $result;
+        $parameters['reminder_data']->interval = $interval;
+        mfcs_send_workflow_emails($result->id, $parameters);
+
+        $sent[$result->id] = array(
+          'request_id' => $result->id,
+          'date' => $dates['today'],
+          'type' => MFCS_REMINDER_TYPE_UNREVIEWED_REQUEST,
+          'interval' => $interval,
+          'expires' => $expires,
+        );
+
+        $all_sent[$result->id] = $result->id;
+        unset($parameters['reminder_data']);
+      }
+
+      foreach ($sent as $reminder) {
+        if (array_key_exists($reminder['request_id'], $reminder_logged)) {
+          continue;
+        }
+
+        mfcs_save_request_reminders($reminder);
+        $reminder_logged[$reminder['request_id']] = $reminder['request_id'];
       }
     }
   }
@@ -10267,13 +10390,13 @@ function mfcs_get_requests_current_review_decisions($request_ids, $classificatio
  * This only loads requests that have been accepted.
  *
  * @param int|null $date_from
- *   When specified, a unix timestamp representing a current date to load
+ *   (optional) When specified, a unix timestamp representing a current date to load
  *   requests within a certain amount of time.
  *   When not specified, all results are loaded.
  *   An = is performed on this value when $date_to is null.
  *   A >= is performed on this value when $date_to is an integer.
  * @param int|null $date_to
- *   When specified, a unix timestamp representing a current date to load
+ *   (optional) When specified, a unix timestamp representing a current date to load
  *   requests within a certain amount of time.
  *   When not specified, all results are loaded.
  *   If specified, this requires $date_from to be non-null.
@@ -10315,7 +10438,7 @@ function mfcs_get_requests_not_providing_insurance($date_from = NULL, $date_to =
     $query->addField('mfrcn', 'value', 'coordinator_name');
     $query->addField('mfrce', 'value', 'coordinator_email');
 
-    $query->condition('mfip.value', MFCS_INSURANCE_PROVIDED_NOT);
+    $query->condition('mfip.value', array(MFCS_INSURANCE_PROVIDED_NOT, MFCS_INSURANCE_REQUIRED), 'IN');
     $query->condition('mfdd.cancelled', 1, '<>');
 
 
@@ -10364,6 +10487,110 @@ function mfcs_get_requests_not_providing_insurance($date_from = NULL, $date_to =
 }
 
 /**
+ * Loads a list of requests that are not yet reviewed whose dates are upcoming.
+ *
+ * This only loads requests that are currently locked and in the review process.
+ *
+ * @param int|null $date_from
+ *   (optional) When specified, a unix timestamp representing a current date to load
+ *   requests within a certain amount of time.
+ *   When not specified, all results are loaded.
+ *   An = is performed on this value when $date_to is null.
+ *   A >= is performed on this value when $date_to is an integer.
+ * @param int|null $date_to
+ *   (optional) When specified, a unix timestamp representing a current date to load
+ *   requests within a certain amount of time.
+ *   When not specified, all results are loaded.
+ *   If specified, this requires $date_from to be non-null.
+ *   A < is performed on this value.
+ * @param int|null $min_create_date
+ *   (optional) When not NULL, an date timestamp integer that is considered the minimum create date.
+ *   For exmaple, requests that are created within a certain number of days should avoid something like sending a 3-day alert for a request what was created 2 days before the event takes place.
+ *
+ * @return array|bool
+ *   An array of requests. FALSE is returned on error.
+ */
+function mfcs_get_requests_unreviewed($date_from = NULL, $date_to = NULL, $min_create_date = NULL) {
+  if (!is_null($date_from)) {
+    if (!cf_is_integer($date_from)) {
+      cf_error::invalid_integer('date_from');
+      return FALSE;
+    }
+
+    if (!is_null($date_to) && !cf_is_integer($date_to)) {
+      cf_error::invalid_integer('date_to');
+      return FALSE;
+    }
+  }
+
+  if (!is_null($min_create_date) && !cf_is_integer($min_create_date)) {
+    cf_error::invalid_integer('min_create_date');
+    return FALSE;
+  }
+
+  $results = array();
+
+  $allowed_status = array(
+    MFCS_REQUEST_STATUS_LOCKED,
+  );
+
+  $allowed_steps = array(
+    MFCS_REVIEW_STEP_REVIEW,
+    MFCS_REVIEW_STEP_FINAL_DECISION,
+  );
+
+  try {
+    $query = db_select('mfcs_requests', 'mer');
+    $query->innerJoin('mfcs_current', 'mc', 'mer.id = mc.request_id');
+    $query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mc.request_id = mfdd.request_id AND mc.dates_date = mfdd.revision');
+
+    $query->addField('mer', 'id', 'id');
+    $query->addField('mer', 'title', 'title');
+    $query->addField('mer', 'step', 'step');
+    $query->addField('mfdd', 'value', 'date');
+
+    $query->condition('mer.status', $allowed_status, 'IN');
+    $query->condition('mer.step', $allowed_steps, 'IN');
+    $query->condition('mfdd.cancelled', 1, '<>');
+
+    if (!is_null($min_create_date)) {
+      $query->condition('mer.created', $min_create_date, '<');
+    }
+
+    // quick meeting are generally auto-approved but in case weird cases exist, make sure quick meetings are not included in the alerts.
+    $query->condition('mer.type', MFCS_REQUEST_TYPE_QUICK_MEETING, '<>');
+
+    if (!is_null($date_from)) {
+      if (is_null($date_to)) {
+        $query->condition('mfdd.value', $date_from);
+      }
+      else {
+        $query->condition('mfdd.value', $date_from, '>=');
+        $query->condition('mfdd.value', $date_to, '<');
+      }
+    }
+
+    $query->orderBy('mfdd.value');
+
+    $results = $query->execute()->fetchAll();
+
+    if (empty($results)) {
+      return array();
+    }
+  }
+  catch (Error $e) {
+    cf_error::on_exception($e);
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
+    return FALSE;
+  }
+
+  return $results;
+}
+
+/**
  * Determines the current dates for reminders relative to the current day.
  *
  * There are a number of problems with the PHP date system that forced me
@@ -10392,6 +10619,10 @@ function mfcs_get_requests_not_providing_insurance($date_from = NULL, $date_to =
  * return monday even when working with sunday.
  * - This is probably true for 'this week', and 'next week' as well.
  *
+ * @param bool $iso_8601
+ *   (optional) When TRUE, the weeks are in iso-8601 format (monday = first day of week).
+ *   When FALSE, the weeks are in normal format (sunday = first day of week).
+ *
  * @return array
  *   An array containing dates relative to today.
  *   - 'today': contains the current day at 00:00.
@@ -10399,15 +10630,24 @@ function mfcs_get_requests_not_providing_insurance($date_from = NULL, $date_to =
  *   - 'first_day_this_week': contains the proper first day 'this' week at
  *     00:00.
  */
-function mfcs_request_reminders_get_dates() {
+function mfcs_request_reminders_get_dates($iso_8601 = FALSE) {
+  // guarantee function returns by forcing default value for $iso_8601 when the variable is invalid.
+  if (!is_bool($iso_8601)) {
+    $iso_8601 = FALSE;
+  }
+
   $dates = array();
 
   $dates['today'] = strtotime('today');
   $dates['yesterday'] = strtotime('yesterday', $dates['today']);
   $dates['tomorrow'] = strtotime('tomorrow', $dates['today']);
 
-  $dates['week_day'] = strtotime('first sunday this week');
-  #$dates['week_day'] = strtotime('first monday this week'); // iso-8601
+  if ($iso_8601) {
+    $dates['week_day'] = strtotime('first monday this week');
+  }
+  else {
+    $dates['week_day'] = strtotime('first sunday this week');
+  }
 
   if ($dates['week_day'] == $dates['today']) {
     $dates['first_day_this_week'] = $dates['week_day'];
@@ -10424,32 +10664,32 @@ function mfcs_request_reminders_get_dates() {
  *
  * @param int $type
  *   The reminder type to clear all old data for.
+ * @param int|null $interval
+ *   (optional) When NULL, clears all reminders for the given interval that are expired.
+ *   When not NULL, clears all reminders for the specified type that are expired.
  *
  * @return bool
  *   TRUE on success, FALSE otherwise.
  */
-function mfcs_clear_request_reminders($type) {
+function mfcs_clear_request_reminders($type, $interval = NULL) {
   if (!cf_is_integer($type)) {
     cf_error::invalid_integer('type');
     return FALSE;
   }
 
-  $dates = mfcs_request_reminders_get_dates();
+  if (!is_null($interval) && !cf_is_integer($interval)) {
+    cf_error::invalid_integer('interval');
+    return FALSE;
+  }
 
   try {
     $query = db_delete('mfcs_request_reminders');
-
     $query->condition('type', $type);
+    $query->condition('expires', strtotime('today'), '<=');
 
-    $or = db_or();
-
-    $days_30 = strtotime('-30 days', $dates['today']);
-    $and = db_and();
-    $and->condition('interval', MFCS_REMINDER_INTERVAL_DAY_30);
-    $and->condition('date', $days_30, '<');
-    $or->condition($and);
-
-    $query->condition($or);
+    if (!is_null($interval)) {
+      $query->condition('interval', $interval);
+    }
 
     $query->execute();
   }
@@ -10505,9 +10745,48 @@ function mfcs_get_request_reminders($dates, $type, $interval = NULL, $request_id
     return FALSE;
   }
 
-  $results = array(
-    MFCS_REMINDER_INTERVAL_DAY_30 => array(),
+  if (is_null($interval)) {
+    $interval = MFCS_REMINDER_INTERVAL_DAY_30;
+  }
+
+  $intervals = array(
+    MFCS_REMINDER_INTERVAL_DAY_1,
+    MFCS_REMINDER_INTERVAL_DAY_2,
+    MFCS_REMINDER_INTERVAL_DAY_3,
+    MFCS_REMINDER_INTERVAL_DAY_4,
+    MFCS_REMINDER_INTERVAL_DAY_5,
+    MFCS_REMINDER_INTERVAL_DAY_6,
+    MFCS_REMINDER_INTERVAL_DAY_7,
+    MFCS_REMINDER_INTERVAL_DAY_8,
+    MFCS_REMINDER_INTERVAL_DAY_9,
+    MFCS_REMINDER_INTERVAL_DAY_10,
+    MFCS_REMINDER_INTERVAL_DAY_11,
+    MFCS_REMINDER_INTERVAL_DAY_12,
+    MFCS_REMINDER_INTERVAL_DAY_30,
+    MFCS_REMINDER_INTERVAL_WEEK_1,
+    MFCS_REMINDER_INTERVAL_WEEK_2,
+    MFCS_REMINDER_INTERVAL_WEEK_3,
+    MFCS_REMINDER_INTERVAL_WEEK_4,
+    MFCS_REMINDER_INTERVAL_WEEK_5,
+    MFCS_REMINDER_INTERVAL_WEEK_6,
+    MFCS_REMINDER_INTERVAL_WEEK_7,
+    MFCS_REMINDER_INTERVAL_WEEK_8,
+    MFCS_REMINDER_INTERVAL_WEEK_9,
+    MFCS_REMINDER_INTERVAL_WEEK_10,
+    MFCS_REMINDER_INTERVAL_WEEK_11,
+    MFCS_REMINDER_INTERVAL_WEEK_12,
   );
+
+  if (!array_key_exists($interval, $intervals)) {
+    cf_error::invalid_integer('interval');
+    return FALSE;
+  }
+
+  $results = array();
+  foreach ($intervals as $interval_id) {
+    $results[$interval_id] = array();
+  }
+  unset($interval_id);
 
   try {
     $query = db_select('mfcs_request_reminders', 'mrr');
@@ -10522,14 +10801,11 @@ function mfcs_get_request_reminders($dates, $type, $interval = NULL, $request_id
     // perform separate queries instead of doing a php loop to rebuild the results in the desired structure.
     // this puts the work onto the database, which is generally more efficient at such tasks at the cost of multiple queries.
     // when $interval is specified, then only one of these queries is performed.
-
-    if (is_null($interval) || $interval == MFCS_REMINDER_INTERVAL_DAY_30) {
-      $days_30 = strtotime('-30 days', $dates['today']);
-      $query_day_30 = clone $query;
-      $query_day_30->condition('interval', MFCS_REMINDER_INTERVAL_DAY_30);
-      $query_day_30->condition('date', $days_30, '>=');
-      $results[MFCS_REMINDER_INTERVAL_DAY_30] = $query_day_30->execute()->fetchAllAssoc('request_id');
-    }
+    $days = strtotime($intervals[$interval], $dates['today']);
+    $query_day = clone $query;
+    $query_day->condition('interval', $interval);
+    #$query_day->condition('date', $days, '>=');
+    $results[$interval] = $query_day->execute()->fetchAllAssoc('request_id');
   }
   catch (Error $e) {
     cf_error::on_exception($e);
