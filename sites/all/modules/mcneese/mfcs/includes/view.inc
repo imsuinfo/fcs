@@ -311,7 +311,7 @@ function mfcs_view_build_request_item_structure($request_id, $field_group, $fiel
         );
 
         $output[$delta]['label']['markup'] = array(
-          '#markup' => $label,
+          '#markup' => $label . ':',
         );
       }
 
@@ -1134,7 +1134,6 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
 
         if (!$combined) {
           $markup = $delta_prefix . $prefix . $markup . $suffix;
-          #$markup = $delta_prefix . $prefix . $markup . $suffix . '<div class="clear"></div>';
         }
       }
 
