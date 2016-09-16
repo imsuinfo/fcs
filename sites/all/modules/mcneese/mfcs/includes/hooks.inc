@@ -2106,13 +2106,9 @@ function mfcs_hook_user_login(&$edit, $user, $category) {
     $reset_user = TRUE;
   }
 
-  if (is_array($changes)) {
+  if (isset($changes['roles']) && is_array($changes['roles'])) {
     $user_roles = array_keys($user->roles);
-
-    $changes_roles = array();
-    if (isset($changes['roles']) && is_array($changes['roles'])) {
-      $changes_roles = array_keys($changes['roles']);
-    }
+    $changes_roles = array_keys($changes['roles']);
 
     if (count($user_roles) != count($changes_roles)) {
       user_save($user);
@@ -2658,13 +2654,8 @@ function mfcs_hook_process_user_banner_roles($user, &$problems, $changes = array
   $primary_account_id = (int) $user->uid;
   if (!is_null($mfcs_user_settings['banner_id']) && $mfcs_user_settings['primary_account'] === FALSE) {
     $associated_users = mfcs_users_load_banner_id_to_user_id($mfcs_user_settings['banner_id']);
-    if (isset($associated_users['user']) && is_array($associated_users['user'])) {
-      foreach ($associated_users['user'] as $associated_user_id => $associated_user_settings) {
-        if (isset($associated_user_settings['primary']) && $associated_user_settings['primary'] == 1) {
-          $primary_account_id = (int) $associated_user_id;
-          break;
-        }
-      }
+    if (isset($associated_users['banner_id'][$mfcs_user_settings['banner_id']]['primary']['user_id'])) {
+      $primary_account_id = (int) $associated_users['banner_id'][$mfcs_user_settings['banner_id']]['primary']['user_id'];
     }
     unset($associated_users);
   }
@@ -2844,7 +2835,6 @@ function mfcs_hook_process_user_banner_roles($user, &$problems, $changes = array
     }
     unset($role);
   }
-
 
   // if the user can proxy as another account, then they need the reviewer role (but make no changes if the user is a manager or is a reviewer exception).
   if (!$is_manager && !$reviewer_exception) {

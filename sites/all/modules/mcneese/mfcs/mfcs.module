@@ -4188,6 +4188,7 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
   // setup primary accounts.
   $primary_account = NULL;
   $primary_account_id = NULL;
+  $primary_account_failsafe_not_set = FALSE;
   if (!empty($user_information['mfcs']['primary_account']) && is_bool($user_information['mfcs']['primary_account'])) {
     $primary_account = $user_information['mfcs']['primary_account'];
     $primary_account_id = $user_information['user_id'];
@@ -4225,8 +4226,17 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
       $total_accounts = 0;
       $account_ids = array();
 
-      if (!empty($associated_users['user'])) {
-        foreach ($associated_users['user'] as $associated_user_id => $associated_user) {
+      if (!empty($associated_users['banner_id'][$banner_id]['all'])) {
+        if (is_null($primary_account_id)) {
+          $primary_account_id = $associated_users['banner_id'][$banner_id]['primary']['user_id'];
+
+          // @todo: handle and report this error where a failsafe primary account is picked and as such the 'primary' flag is not set to TRUE.
+          if (!$associated_users['banner_id'][$banner_id]['primary']['primary']) {
+            $primary_account_failsafe_not_set = TRUE;
+          }
+        }
+
+        foreach ($associated_users['banner_id'][$banner_id]['all'] as $associated_user_id => $associated_user) {
           $total_accounts++;
 
           $account_ids[$associated_user_id] = $associated_user_id;
@@ -4234,10 +4244,6 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
             $total_primary++;
             if ($associated_user['status'] > 0) {
               $total_primary_enabled++;
-            }
-
-            if (is_null($primary_account_id)) {
-              $primary_account_id = $associated_user_id;
             }
           }
         }
@@ -5071,7 +5077,7 @@ function mfcs_sync_banner_to_local_users($user_id = NULL, $banner_id = NULL, $me
   }
 
   $instance = mfcs_instance();
-  $already_synced_banner = &drupal_static('already_synced_banner_' . $user_id . '_' . $instance, NULL);
+  $already_synced_banner = &drupal_static('already_synced_banner_' . $user_id . '_' . $banner_id . '_' . $instance, NULL);
   if (is_bool($already_synced_banner)) {
     return $already_synced_banner;
   }
@@ -5126,27 +5132,26 @@ function mfcs_sync_banner_to_local_users($user_id = NULL, $banner_id = NULL, $me
           continue;
         }
 
+        // convert string id to integer, which should truncate the leading 0's and allow a valid match.
+        $row_banner_id = (int) $row['id'];
+
+        // when an explicit banner id is specified, ensure that only that row gets processed.
+        if (!is_null($banner_id) && $banner_id != $row_banner_id) {
+          continue;
+        }
+
         if (is_null($user_id)) {
           $current_user_id = NULL;
         }
 
         // add/update the roles to users.
-        if (is_null($banner_id)) {
-          // convert string id to integer, which should truncate the leading 0's and allow a valid match.
-          $row_banner_id = (int) $row['id'];
+        if (isset($banner_ids_to_user_ids['banner'][$row_banner_id]['primary']['user_id'])) {
+          $current_user_id = $banner_ids_to_user_ids['banner'][$row_banner_id]['primary']['user_id'];
+        }
 
-          if (isset($banner_ids_to_user_ids['banner'][$row_banner_id]['user_id'])) {
-            $current_user_id = $banner_ids_to_user_ids['banner'][$row_banner_id]['user_id'];
-          }
-          elseif (isset($banner_ids_to_user_ids['banner'][$row_banner_id]) && !array_key_exists('user_id', $banner_ids_to_user_ids['banner'][$row_banner_id])) {
-            // if the 'primary account' flag is not set, but exactly 1 account exists, then assume it is the primary account.
-            if (!empty($banner_ids_to_user_ids['banner'][$row_banner_id]['others']) && count($banner_ids_to_user_ids['banner'][$row_banner_id]['others']) == 1) {
-              $first = reset($banner_ids_to_user_ids['banner'][$row_banner_id]['others']);
-              if (isset($first['user_id'])) {
-                $current_user_id = $first['user_id'];
-              }
-            }
-          }
+        if (is_null($current_user_id)) {
+          // @todo: something went wrong here, report watchdog error about banner to user id mapping and primary account failure (mfcs_users_load_banner_id_to_user_id() is supposed to guarantee a primary account).
+          continue;
         }
 
         if (!($current_user_id > 0)) {
@@ -11456,6 +11461,8 @@ function mfcs_load_coordinator_rooms($user_id) {
 /**
  * Return an array containing the user id and name of the primary user.
  *
+ * This should guarantee a primary account is defined if the account exists at all with a valid banner id.
+ *
  * jira ticket: fcs-58.
  *
  * @param null|int $banner_id
@@ -11463,6 +11470,8 @@ function mfcs_load_coordinator_rooms($user_id) {
  *
  * @return array
  *   An array with the banner ids and user ids.
+ *   The array key 'banner_id' stores all banner ids found.
+ *   The array key 'user_id' stores all user ids found.
  */
 function mfcs_users_load_banner_id_to_user_id($banner_id = NULL) {
   $list = array(
@@ -11486,14 +11495,21 @@ function mfcs_users_load_banner_id_to_user_id($banner_id = NULL) {
     return $list;
   }
 
-  $first_primary = NULL;
-  $others = array();
+  $first_primary = array();
   foreach ($results as $result) {
+    if (!isset($list['banner'][$result->banner_id])) {
+      $list['banner'][$result->banner_id] = array(
+        'primary' => array(),
+        'alternate' => array(),
+        'all' => array(),
+      );
+    }
+
     $is_primary = $result->primary_account == TRUE;
 
     $list['user'][$result->user_id] = array(
       'user_id' => $result->user_id,
-      'banner_id' => $banner_id,
+      'banner_id' => $result->banner_id,
       'name' => $result->name,
       'first_name' => $result->first_name,
       'last_name' => $result->last_name,
@@ -11501,32 +11517,36 @@ function mfcs_users_load_banner_id_to_user_id($banner_id = NULL) {
       'status' => $result->status,
     );
 
-    if ($is_primary) {
-      if (is_null($first_primary)) {
-        $first_primary = $list['user'][$result->user_id];
-      }
+    $list['banner'][$result->banner_id]['all'][$result->user_id] = $list['user'][$result->user_id];
 
+    if ($is_primary) {
       if ($result->status > 0) {
-        $list['banner'][$banner_id] = $list['user'][$result->user_id];
+        if (isset($first_primary[$result->banner_id])) {
+          $list['banner'][$result->banner_id]['alternate'][$result->user_id] = $list['user'][$result->user_id];
+        }
+        else {
+          $list['banner'][$result->banner_id]['primary'] = $list['user'][$result->user_id];
+          $first_primary[$result->banner_id] = $list['user'][$result->user_id];
+        }
       }
       else {
-        $others[$result->user_id] = $list['user'][$result->user_id];
+        $list['banner'][$result->banner_id]['alternate'][$result->user_id] = $list['user'][$result->user_id];
       }
     }
     else {
-      $others[$result->user_id] = $list['user'][$result->user_id];
+      $list['banner'][$result->banner_id]['alternate'][$result->user_id] = $list['user'][$result->user_id];
     }
   }
 
-  if (!isset($list['banner'][$banner_id])) {
-    if (is_null($first_primary)) {
-      $list['banner'][$banner_id] = array();
-    }
-    else {
-      $list['banner'][$banner_id] = $first_primary;
+  // ensure that a primary account always exists, even if disabled.
+  foreach ($list['banner'] as $banner_id_key => $banner_id_value) {
+    if (isset($first_primary[$banner_id_key])) {
+      continue;
     }
 
-    $list['banner'][$banner_id]['others'] = $others[$result->user_id];
+    $first_primary[$banner_id_key] = reset($list['banner'][$banner_id_key]['all']);
+    $list['banner'][$result->banner_id]['primary'] = $first_primary[$banner_id_key];
+    unset($list['banner'][$banner_id_key]['alternate'][$first_primary[$banner_id_key]['user_id']]);
   }
 
   return $list;
@@ -13038,8 +13058,8 @@ function mfcs_get_related_user_ids_from_user_banner_id($user) {
 
   if (!is_null($banner_id)) {
     $associated_users = mfcs_users_load_banner_id_to_user_id($banner_id);
-    if (isset($associated_users['user']) && is_array($associated_users['user'])) {
-      foreach ($associated_users['user'] as $associated_id => $associated_user) {
+    if (isset($associated_users['banner_id'][$banner_id]['all']) && is_array($associated_users['banner_id'][$banner_id]['all'])) {
+      foreach ($associated_users['banner_id'][$banner_id]['all'] as $associated_id => $associated_user) {
         $user_id = (int) $associated_id;
 
         if ($user_id > 0) {

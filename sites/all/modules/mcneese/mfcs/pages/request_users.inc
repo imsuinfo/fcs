@@ -602,10 +602,10 @@ function mfcs_request_users_0_view_page($user_id) {
 
     if (isset($account->mfcs['banner_id'])) {
       $associated_users = mfcs_users_load_banner_id_to_user_id($account->mfcs['banner_id']);
-      if (!empty($associated_users['user']) && count($associated_users['user']) > 1) {
+      if (!empty($associated_users['banner_id'][$account->mfcs['banner_id']]['all']) && count($associated_users['banner_id'][$account->mfcs['banner_id']]['all']) > 1) {
         $duplicate = 'There are <strong>Duplicate</strong> ldap accounts:<ul class="item-information-list item-information-duplicate-list">';
 
-        foreach ($associated_users['user'] as $associated_user) {
+        foreach ($associated_users['banner_id'][$account->mfcs['banner_id']]['all'] as $associated_user) {
           if ($account->uid == $associated_user['user_id']) {
             continue;
           }
