@@ -2868,7 +2868,7 @@ function mfcs_hook_process_user_banner_roles($user, &$problems, $changes = array
 
         // the function arguments are trying to assign 'proxy' role to a user who has no venue or room to review.
         // do not allow this and provide a watchdog warning for reference.
-        watchdog(MFCS_WATCHDOG_ID, 'The user \'%user_name\' (%user_id, %primary_id) is not being granted reviewer access as requested because the user is not assigned as either a venue or room coordinator in the banner database and is not a venue coordinator proxy.', array('%user_name' => $user->name, '%user_id' => isset($user->uid) ? $user->uid : 'undefined', '%primary_id' => $primary_account_id), WATCHDOG_WARNING);
+        watchdog(MFCS_WATCHDOG_ID, 'The user \'%user_name\' (%user_id, %primary_id) is not being granted reviewer access as requested because the user is not assigned as either a venue or room coordinator in the banner database and is not a venue coordinator proxy.', array('%user_name' => isset($user->name) ? $user->name : 'undefined', '%user_id' => isset($user->uid) ? $user->uid : 'undefined', '%primary_id' => $primary_account_id), WATCHDOG_WARNING);
 
         $problems = $problems | MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED;
       }
