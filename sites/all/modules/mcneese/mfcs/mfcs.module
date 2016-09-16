@@ -2754,7 +2754,9 @@ function mfcs_include($id) {
 }
 
 /**
- * Performs a select query.
+ * Performs a select query against the oracle database.
+ *
+ * If oracle is not available because certain conditions such as timeout or listener not available, then further attempts to call this function will return FALSE without querying oracle for this connection.
  *
  * @param string $query
  *   A query string to process.
@@ -2778,6 +2780,13 @@ function mfcs_oracle_select($query, $arguments = array()) {
     return FALSE;
   }
 
+  global $mfcs_oracle_is_not_available;
+
+  // when oracle is unavailable, stop attempting to execute queries (performance improvement).
+  if (isset($mfcs_oracle_is_not_available) && $mfcs_oracle_is_not_available === TRUE) {
+    return FALSE;
+  }
+
   $results = array();
   $options = array();
   if (isset($arguments['options']) && is_array($arguments['options'])) {
@@ -2791,9 +2800,17 @@ function mfcs_oracle_select($query, $arguments = array()) {
   }
   catch (Error $e) {
     $silent = FALSE;
-    if ($e->getCode() == 12170) {
+    $halt_further_oracle_attempts = FALSE;
+    if ($e->getCode() == 12170 || $e->getCode() == 12541) {
+      // This is the 'no listener' error.
+      $halt_further_oracle_attempts = TRUE;
+
       // Make an oracle connection error silent because the error presented is likely jibberish to the caller.
       $silent = TRUE;
+    }
+
+    if ($halt_further_oracle_attempts) {
+      $mfcs_oracle_is_not_available = TRUE;
     }
 
     cf_error::on_exception($e, WATCHDOG_ERROR, $silent);
@@ -2801,9 +2818,17 @@ function mfcs_oracle_select($query, $arguments = array()) {
   }
   catch (Exception $e) {
     $silent = FALSE;
-    if ($e->getCode() == 12170) {
+    $halt_further_oracle_attempts = FALSE;
+    if ($e->getCode() == 12170 || $e->getCode() == 12541) {
+      // This is the 'no listener' error.
+      $halt_further_oracle_attempts = TRUE;
+
       // Make an oracle connection error silent because the error presented is likely jibberish to the caller.
       $silent = TRUE;
+    }
+
+    if ($halt_further_oracle_attempts) {
+      $mfcs_oracle_is_not_available = TRUE;
     }
 
     cf_error::on_exception($e, WATCHDOG_ERROR, $silent);
@@ -4658,6 +4683,13 @@ function mfcs_sync_banner_to_local($transaction = NULL, $user = NULL, $message_o
     return FALSE;
   }
 
+  global $mfcs_oracle_is_not_available;
+
+  // when oracle is unavailable, stop attempting to execute queries (performance improvement).
+  if (isset($mfcs_oracle_is_not_available) && $mfcs_oracle_is_not_available === TRUE) {
+    return FALSE;
+  }
+
   $join = ' inner join ucs.msu_venue_list mvl on (mvl.category = mvd.category and mvl.building_code = mvd.building_code and mvl.room_number = mvd.room_number)';
 
   $select = 'mvd.*';
@@ -4666,10 +4698,19 @@ function mfcs_sync_banner_to_local($transaction = NULL, $user = NULL, $message_o
 
   $rows = mfcs_oracle_select('select ' . $select . ' from ucs.msu_venue_detail mvd' . $join);
 
+  $instance = mfcs_instance();
+
   if (empty($rows) || !is_array($rows)) {
     if ($rows === FALSE) {
       if ($message_on_oracle_failure) {
-        drupal_set_message('Failed to connect to banner database.', 'error', FALSE);
+        $backup_begin = strtotime('12:00am', $instance);
+        $backup_end = strtotime('4:00am', $instance);
+
+        // McNeese's oracle database is down for database backup for a few hours in the morning.
+        // prevent further attempts during this session instance by marking that oracle is not available.
+        if ($instance < $backup_begin || $instance >= $backup_end) {
+          drupal_set_message('Failed to connect to banner database.', 'error', FALSE);
+        }
       }
     }
     return FALSE;
@@ -4682,8 +4723,6 @@ function mfcs_sync_banner_to_local($transaction = NULL, $user = NULL, $message_o
   foreach ($locations as $location) {
     $locations_machine_to_human_names[$location->machine_name] = $location->location_name;
   }
-
-  $instance = mfcs_instance();
 
   if (!is_object($transaction)) {
     $transaction = db_transaction();
@@ -5082,6 +5121,8 @@ function mfcs_sync_banner_to_local_users($user_id = NULL, $banner_id = NULL, $me
     return $already_synced_banner;
   }
 
+  global $mfcs_oracle_is_not_available;
+
   $banner_ids_to_user_ids = mfcs_users_load_banner_id_to_user_id($banner_id);
 
   if (is_null($banner_id)) {
@@ -5094,7 +5135,12 @@ function mfcs_sync_banner_to_local_users($user_id = NULL, $banner_id = NULL, $me
 
   // failed to connect to oracle database.
   if ($rows === FALSE) {
-    if ($message_on_oracle_failure) {
+    $backup_begin = strtotime('12:00am', $instance);
+    $backup_end = strtotime('4:00am', $instance);
+
+    // McNeese's oracle database is down for database backup for a few hours in the morning.
+    // prevent further attempts during this session instance by marking that oracle is not available.
+    if ($instance < $backup_begin || $instance >= $backup_end) {
       drupal_set_message('Failed to connect to banner database.', 'error', FALSE);
     }
 
