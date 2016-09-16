@@ -2301,30 +2301,7 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
     }
 
     if ($step === MFCS_REVIEW_STEP_FINAL_DECISION) {
-      $university_business = FALSE;
-
-      if ($decision === MFCS_REVIEW_DECISION_APPROVE && $type !== MFCS_REQUEST_TYPE_QUICK_MEETING) {
-        $requirements_not_supplied = TRUE;
-
-        if ($step === MFCS_REVIEW_STEP_FINAL_DECISION) {
-          if (isset($request['requirements']['university'][0]) && property_exists($request['requirements']['university'][0], 'value')) {
-            if ($request['requirements']['university'][0]->value) {
-              $requirements_not_supplied = FALSE;
-
-              $university_business = TRUE;
-            }
-          }
-        }
-
-        if ($university_business || (isset($request['requirements']['facilities'][0]) && property_exists($request['requirements']['facilities'][0], 'days') && !empty($request['requirements']['facilities'][0]->days))) {
-          $requirements_not_supplied = FALSE;
-        }
-
-        if ($requirements_not_supplied) {
-          form_set_error('review][operations][decision', t("The request cannot be approved until the requirements are either specified or waived."));
-          $failure = TRUE;
-        }
-      }
+      // any restrictions for final decision go here.
     }
 
     // @fixme: is autowaive valid anymore?
