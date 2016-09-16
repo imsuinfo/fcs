@@ -4366,6 +4366,22 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
 
   if ($banner_invalid && ($problems_new & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) == 0) {
     $problems_new = $problems_new | MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
+
+    // Do not report banner id as invalid if the account is locked.
+    if (!$changes_detected) {
+      if ($user_information['status'] == 0 && ($problems_new & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) != 0) {
+        $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
+      }
+      else {
+        $changes_detected = TRUE;
+      }
+    }
+
+  }
+  // if the banner id is invalid, the account is locked, then remove the banner id and unset the code.
+  elseif ($user_information['status'] == 0 && ($problems_new & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) != 0) {
+    $user_information['mfcs']['banner_id'] = NULL;
+    $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
     $changes_detected = TRUE;
   }
 
