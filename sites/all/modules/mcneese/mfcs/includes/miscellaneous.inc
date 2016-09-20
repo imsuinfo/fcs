@@ -2703,7 +2703,7 @@ function mfcs_miscellaneous_problems_request_search($conditions = array(), $opti
  *
  * @see: mfcs_miscellaneous_check_requests()
  */
-function mfcs_mischellaneous_check_requests_for_problems($request_id = NULL) {
+function mfcs_miscellaneous_check_requests_for_problems($request_id = NULL) {
   if (!is_null($request_id) && !cf_is_integer($request_id)) {
     cf_error::invalid_integer('request_id');
     return FALSE;
@@ -2809,7 +2809,7 @@ function mfcs_mischellaneous_check_requests_for_problems($request_id = NULL) {
  * @return bool
  *   TRUE on success, FALSE otherwise.
  */
-function mfcs_mischellaneous_check_users_for_problems($user_id = NULL) {
+function mfcs_miscellaneous_check_users_for_problems($user_id = NULL) {
   if (!is_null($user_id) && !cf_is_integer($user_id)) {
     cf_error::invalid_integer('user_id');
     return FALSE;

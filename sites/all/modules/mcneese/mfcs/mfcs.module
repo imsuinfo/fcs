@@ -5964,13 +5964,13 @@ function mfcs_auto_block_accounts_cron() {
  * Executes the cron queue to scan requests looking for known problem situations.
  *
  * @see: mfcs_cronapi()
- * @see: mfcs_mischellaneous_check_requests_for_problems()
+ * @see: mfcs_miscellaneous_check_requests_for_problems()
  */
 function mfcs_check_for_problems_requests_cron() {
   mfcs_set_using_effective_system_id();
 
   mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
-  mfcs_mischellaneous_check_requests_for_problems();
+  mfcs_miscellaneous_check_requests_for_problems();
 }
 
 /***

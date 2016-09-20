@@ -527,13 +527,13 @@ function mfcs_request_troubleshoot_0_form_submit($form, &$form_state) {
       mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
 
       $label = 'Check requests for problems';
-      $result = mfcs_mischellaneous_check_requests_for_problems();
+      $result = mfcs_miscellaneous_check_requests_for_problems();
     }
     elseif ($code == MFCS_TROUBLESHOOT_USERS_PROBLEM_CHECK) {
       mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
 
       $label = 'Check users for problems';
-      $result = mfcs_mischellaneous_check_users_for_problems();
+      $result = mfcs_miscellaneous_check_users_for_problems();
     }
 
     // force transaction execution.

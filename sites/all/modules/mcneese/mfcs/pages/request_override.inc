@@ -335,7 +335,7 @@ function mfcs_request_manage_0_override_form_submit($form, &$form_state) {
 
     // perform check against this request to see if new problems are detected or existing problems are resolved.
     mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
-    mfcs_mischellaneous_check_requests_for_problems($request_id);
+    mfcs_miscellaneous_check_requests_for_problems($request_id);
   }
   else {
     form_set_error('form', "An error occurred while trying to override the request. Please contact the support staff.");

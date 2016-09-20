@@ -209,7 +209,7 @@ function mfcs_request_cancel_0_form_submit($form, &$form_state) {
 
     // perform check against this request to see if new problems are detected or existing problems are resolved.
     mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
-    mfcs_mischellaneous_check_requests_for_problems($request_id);
+    mfcs_miscellaneous_check_requests_for_problems($request_id);
   }
   else {
     form_set_error('form', "An error occurred while trying to cancel the request. Please contact the support staff.");
@@ -462,7 +462,7 @@ function mfcs_request_uncancel_0_form_submit($form, &$form_state) {
 
     // perform check against this request to see if new problems are detected or existing problems are resolved.
     mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
-    mfcs_mischellaneous_check_requests_for_problems($request_id);
+    mfcs_miscellaneous_check_requests_for_problems($request_id);
   }
   else {
     form_set_error('form', "An error occurred while trying to uncancel the request. Please contact the support staff.");
