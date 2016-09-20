@@ -433,6 +433,8 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
   }
 
   if ($show_display) {
+    global $base_path;
+
     mfcs_include(MFCS_INCLUDE_VIEW);
 
     $form['display'] = array(
@@ -981,40 +983,18 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
       );
 
       if ($can_manage_request && is_null($use_revision)) {
+        // cannot use drupal type 'link' because it does not preserve $url_arguments and passing them causes the url to be encoded.
         $form['display']['submit']['manage'] = array(
-          '#id' => 'request-display-submit-manage',
-          '#name' => 'request-display-submit-manage',
-          '#type' => 'link',
-          '#title' => t("Manage"),
-          '#href' => 'requests/manage-0/' . $request_id . $url_arguments,
-          '#attributes' => array(
-            'class' => array(
-              'no-print',
-              'button',
-              'request-display-submit-manage',
-              'mode-' . $mode,
-            ),
-            'title' => "Perform management tasks on this request.",
-          ),
+          '#type' => 'markup',
+          '#markup' => '<a id="request-display-submit-manage" class="no-print button request-display-submit-manage mode-' . $mode. '" href="' . $base_path . 'requests/manage-0/' . $request_id . $url_arguments . '" title="Perform management tasks on this request.">Manage</a>',
         );
       }
 
       if ($can_reassign_request && is_null($use_revision)) {
+        // cannot use drupal type 'link' because it does not preserve $url_arguments and passing them causes the url to be encoded.
         $form['display']['submit']['reassign'] = array(
-          '#id' => 'request-display-submit-reassign',
-          '#name' => 'request-display-submit-reassign',
-          '#type' => 'link',
-          '#title' => t("Re-Assign"),
-          '#href' => 'requests/manage-0/reassign/coordinator/' . $request_id . $url_arguments,
-          '#attributes' => array(
-            'class' => array(
-              'no-print',
-              'button',
-              'request-display-submit-reassign',
-              'mode-' . $mode,
-            ),
-            'title' => "Re-assign the Venue Coordinator.",
-          ),
+          '#type' => 'markup',
+          '#markup' => '<a id="request-display-submit-reassign" class="no-print button request-display-submit-reassign mode-' . $mode. '" href="' . $base_path . 'requests/manage-0/reassign/coordinator/' . $request_id . $url_arguments . '" title="Re-assign the Venue Coordinator.">Re-Assign</a>',
         );
       }
     }
