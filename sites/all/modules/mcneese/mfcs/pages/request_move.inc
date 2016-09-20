@@ -475,7 +475,7 @@ function mfcs_request_manage_0_move_form_validate($form, &$form_state) {
           $all_time_start[$date_delta] = $form['form']['request']['#value']['dates']['time_start'][$date_delta]->value;
           $all_time_stop[$date_delta] = $form['form']['request']['#value']['dates']['time_stop'][$date_delta]->value;
 
-          $holidays = mfcs_get_holidays((int) date('Y', $form['form']['request']['#value']['dates']['date'][$date_delta]->value), $form['form']['request']['#value']['dates']['date'][$date_delta]->value)
+          $holidays = mfcs_get_holidays((int) date('Y', $form['form']['request']['#value']['dates']['date'][$date_delta]->value), $form['form']['request']['#value']['dates']['date'][$date_delta]->value);
           if (is_array($holidays)) {
             $all_holidays = array_merge($all_holidays, $holidays);
           }
