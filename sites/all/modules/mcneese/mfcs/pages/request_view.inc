@@ -1496,7 +1496,6 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           $conflict_message .= '<div class="error-unavailabilities-title">The following dates are unavailable:</div>';
           $conflict_message .= mfcs_build_room_unavailable_message($room_unavailability);
           $conflict_message .= '</div>';
-          $conflict_message .= '</div>';
         }
         unset($all_dates);
         unset($all_time_start);
