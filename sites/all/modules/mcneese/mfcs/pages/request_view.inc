@@ -128,9 +128,14 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     $mode = MFCS_VIEW_MODE_NORMAL;
   }
 
-  $page_title = "Facilities Use Request";
+  $page_title = 'Facilities Use Request';
   if (!empty($request['information']['title'][0]->value)) {
-    $page_title = "Facilities Use Request: " . $request['information']['title'][0]->value;
+    if (is_null($use_revision)) {
+      $page_title = 'Facilities Use Request: ' . $request['information']['title'][0]->value;
+    }
+    else {
+      $page_title = 'Facilities Use Request (Revision ' . (int) $use_revision . '): ' . $request['information']['title'][0]->value;
+    }
   }
 
   if ($contained === FALSE) {
