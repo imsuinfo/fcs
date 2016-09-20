@@ -1794,6 +1794,19 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
       MFCS_REQUEST_STATUS_LOCKED,
     );
 
+    if ($roles['manager'] || $roles['administer']) {
+      $edit_request_status = array(
+        MFCS_REQUEST_STATUS_LOCKED,
+        MFCS_REQUEST_STATUS_UNLOCKED,
+        MFCS_REQUEST_STATUS_CLOSED_ACCEPTED,
+        MFCS_REQUEST_STATUS_CLOSED_DENIED,
+        MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE,
+        MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK,
+        MFCS_REQUEST_STATUS_CANCELLED,
+        MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED,
+      );
+    }
+
     // when quick meeting is enabled, a section is not null, then additional checks are required.
     if (!is_null($request_id) && !is_null($section) && ($roles['manager'] || $roles['requester'] || $roles['reviewer'] || $roles['administer'])) {
       if (isset($request['information']['type'][0]->value) && $request['information']['type'][0]->value == MFCS_REQUEST_TYPE_QUICK_MEETING) {

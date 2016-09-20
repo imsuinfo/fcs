@@ -138,6 +138,19 @@ function mfcs_page_request_access_operation_edit(&$request_ids, &$processed, &$a
     MFCS_REQUEST_STATUS_LOCKED,
   );
 
+  if ($roles['manager'] || $roles['administer']) {
+    $edit_request_status = array(
+      MFCS_REQUEST_STATUS_LOCKED,
+      MFCS_REQUEST_STATUS_UNLOCKED,
+      MFCS_REQUEST_STATUS_CLOSED_ACCEPTED,
+      MFCS_REQUEST_STATUS_CLOSED_DENIED,
+      MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE,
+      MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK,
+      MFCS_REQUEST_STATUS_CANCELLED,
+      MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED,
+    );
+  }
+
   if ($roles['requester'] || $roles['reviewer'] || $roles['manager']  || $roles['administer']) {
     if (array_key_exists(NULL, $request_ids)) {
       $access[NULL] = TRUE;
