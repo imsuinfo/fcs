@@ -1043,7 +1043,7 @@ function mfcs_ajax_problems_0_users_list() {
           }
 
           if ($taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE) {
-            $additional_operations .= " <a href=\"" . $base_path . 'requests/problems-0/users/disabled_in_use/' . $problem->user_id . "\">Requests</a>";
+            $additional_operations .= ' <a href="' . $base_path . 'requests/problems-0/users/disabled_in_use/' . $problem->user_id . '">Requests</a>';
           }
 
           if (is_null($row[4])) {

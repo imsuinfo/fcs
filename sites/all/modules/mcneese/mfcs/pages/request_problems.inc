@@ -294,7 +294,7 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
         }
 
         if ($taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE) {
-          $additional_operations .= " <a href=\"" . $base_path . 'requests/problems-0/users/disabled_in_use/' . $problem->user_id . "\">Requests</a>";
+          $additional_operations .= ' <a href="' . $base_path . 'requests/problems-0/users/disabled_in_use/' . $problem->user_id . '">Requests</a>';
         }
 
         if (is_null($problem_account)) {
@@ -751,7 +751,7 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
     MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED => array(
       'label' => 'Unable to Assign Reviewer/Venue-Coordinator Role',
       'explanation' =>
-        'This flag gets set when an attempt is made to assign or unassign the reviewer role to a user when there is no reference to that use as a venue coordinator or room coordinator.<br>' .
+        'This flag gets set when an attempt is made to assign or unassign the reviewer role to a user when there is no reference to that user as a venue coordinator or a room coordinator.<br>' .
         '<br>' .
         'This may be caused by the banner database cache being out of date.<br>' .
         'You may need to re-synchronizing the banner cache.<br>' .
@@ -1107,8 +1107,8 @@ function mfcs_request_problems_0_user_form_submit($form, &$form_state) {
 
         if ($changes_made) {
           if (!user_save($form['values']['problem_user']['#value'],  array('roles' => $system_roles))) {
-            form_set_error('form', "An error occurred while trying to re-assign or re-unassign the manager role. Please contact the support staff.");
-            watchdog(MFCS_WATCHDOG_ID, "An error occurred while trying to re-assign or re-unassign the manager role, user: @user_id, problems: @problems.", array('@user_id' => $form['values']['mfcs_user']['#value']['user_id'], '@problems' => print_r($problems, TRUE)), WATCHDOG_ERROR);
+            form_set_error('form', 'An error occurred while trying to re-assign or re-unassign the manager role. Please contact the support staff.');
+            watchdog(MFCS_WATCHDOG_ID, 'An error occurred while trying to re-assign or re-unassign the manager role, user: @user_id, problems: @problems.', array('@user_id' => $form['values']['mfcs_user']['#value']['user_id'], '@problems' => print_r($problems, TRUE)), WATCHDOG_ERROR);
 
             $form_state['rebuild'] = TRUE;
             $form_state['redirect'] = FALSE;
@@ -1177,7 +1177,7 @@ function mfcs_request_problems_0_users_resynchronize($user_id) {
 
   mfcs_add_canonical_headers('requests/problems-0/users/resynchronize/' . $user_id);
 
-  $page_title = "Facilities Use Problems - Resynchronize User";
+  $page_title = 'Facilities Use Problems - Resynchronize User';
   drupal_set_title($page_title);
 
   $result = mfcs_synchronize_user_settings($user);
