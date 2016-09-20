@@ -1999,11 +1999,11 @@ function mfcs_request_problems_0_request_form($form, &$form_state, $problem_id) 
 
   $form['actions']['action'] = array(
     '#type' => 'select',
-    '#title' => "Actions",
+    '#title' => 'Actions',
     '#default_value' => NULL,
     '#options' => array(
-      NULL => "- Select Action -",
-      'recheck' => "Re-Check Problem",
+      NULL => '- Select Action -',
+      'recheck' => 'Re-Check Problem',
     ),
     '#required' => FALSE,
     '#attributes' => array(
@@ -2029,7 +2029,7 @@ function mfcs_request_problems_0_request_form($form, &$form_state, $problem_id) 
     '#id' => 'request_problems-submit-back',
     '#name' => 'request_problems-submit-back',
     '#type' => 'submit',
-    '#default_value' => t("Back"),
+    '#default_value' => 'Back',
     '#attributes' => array(
       'class' => array(
         'no-print',
@@ -2042,7 +2042,7 @@ function mfcs_request_problems_0_request_form($form, &$form_state, $problem_id) 
     '#id' => 'request_problems-submit-submit',
     '#name' => 'request_problems-submit-submit',
     '#type' => 'submit',
-    '#default_value' => t("Submit"),
+    '#default_value' => 'Submit',
     '#attributes' => array(
       'class' => array(
         'no-print',
@@ -2052,22 +2052,22 @@ function mfcs_request_problems_0_request_form($form, &$form_state, $problem_id) 
   );
 
   if ($problem->ignore == 1) {
-    $form['actions']['action']['#options']['unignore'] = "Unignore Problem";
+    $form['actions']['action']['#options']['unignore'] = 'Unignore Problem';
   }
   else {
-    $form['actions']['action']['#options']['ignore'] = "Ignore Problem";
+    $form['actions']['action']['#options']['ignore'] = 'Ignore Problem';
   }
 
 
   $form['markup']['#markup'] .= '<div class="request_problem-summary">';
   $form['markup']['#markup'] .= '  <div class="request_problem-summary_row"><span class="request_problem-summary_row-label label-id">Problem ID:</span> <span class="request_problem-summary_row-value value-id">' . $problem_id . '</span></div>';
-  $form['markup']['#markup'] .= '  <div class="request_problem-summary_row"><span class="request_problem-summary_row-label label-request_id">Request ID:</span> <span class="request_problem-summary_row-value value-request_id">' . $problem->request_id . '</span></div>';
-  $form['markup']['#markup'] .= '  <div class="request_problem-summary_row"><span class="request_problem-summary_row-label label-request_title">Request Title:</span> <span class="request_problem-summary_row-value value-request_title"><a href="' . $base_path . 'requests/view-0/' . $problem->request_id . $url_arguments . '" class="operation-link operation-link-request">' . $problem->request_title . '</a></span></div>';
+  $form['markup']['#markup'] .= '  <div class="request_problem-summary_row"><span class="request_problem-summary_row-label label-request_id">Request ID:</span> <span class="request_problem-summary_row-value value-request_id">' . (int) $problem->request_id . '</span></div>';
+  $form['markup']['#markup'] .= '  <div class="request_problem-summary_row"><span class="request_problem-summary_row-label label-request_title">Request Title:</span> <span class="request_problem-summary_row-value value-request_title"><a href="' . $base_path . 'requests/view-0/' . (int) $problem->request_id . $url_arguments . '" class="operation-link operation-link-request">' . check_plain($problem->request_title) . '</a></span></div>';
   $form['markup']['#markup'] .= '  <div class="request_problem-summary_row"><span class="request_problem-summary_row-label label-request_title">Request Status:</span> <span class="request_problem-summary_row-value value-request_status">' . (array_key_exists($problem->request_status, $status_options) ? $status_options[$problem->request_status] : 'Unknown') . '</span></div>';
   $form['markup']['#markup'] .= '  <div class="request_problem-summary_row"><span class="request_problem-summary_row-label label-problem">Problem:</span> <span class="request_problem-summary_row-value value-problem">' . $problem_code_name . '</span></div>';
   $form['markup']['#markup'] .= '  <div class="request_problem-summary_row"><span class="request_problem-summary_row-label label-date_detected">Date Detected:</span> <span class="request_problem-summary_row-value value-date_detected">' . date('l, F j, Y h:i:s a', $problem->date) . '</span></div>';
   $form['markup']['#markup'] .= '  <div class="request_problem-summary_row"><span class="request_problem-summary_row-label label-ignored">Ignored:</span> <span class="request_problem-summary_row-value value-ignored">' . (isset($problem->ignore) && $problem->ignore == 1 ? 'Yes' : 'No') . '</span></div>';
-  $form['markup']['#markup'] .= '  <div class="request_problem-summary_row"><span class="request_problem-summary_row-label label-reason">Reason:</span> <span class="request_problem-summary_row-value value-reason">' . (isset($problem->reason) ? $problem->reason : '') . '</span></div>';
+  $form['markup']['#markup'] .= '  <div class="request_problem-summary_row"><span class="request_problem-summary_row-label label-reason">Reason:</span> <span class="request_problem-summary_row-value value-reason">' . (isset($problem->reason) ? check_plain($problem->reason) : '') . '</span></div>';
   $form['markup']['#markup'] .= '</div>';
 
   $form['markup']['#markup'] .= '<br>';
@@ -2081,7 +2081,7 @@ function mfcs_request_problems_0_request_form($form, &$form_state, $problem_id) 
 
     $details = unserialize($problem->details);
 
-    $form['markup']['#markup'] .= '<a href="' . $base_path . 'requests/view-0/' . $problem->request_id . $url_arguments . '" class="request_problem-extra-conflict-link" title="View Request ' . $problem->request_id . '">Request ' . $problem->request_id . '</a> is in conflict with the following requests:';
+    $form['markup']['#markup'] .= '<a href="' . $base_path . 'requests/view-0/' . (int) $problem->request_id . $url_arguments . '" class="request_problem-extra-conflict-link" title="View Request ' . (int) $problem->request_id . '">Request ' . (int) $problem->request_id . '</a> is in conflict with the following requests:';
     $form['markup']['#markup'] .= '<ul class="request_problem-extra-conflict-items">';
     foreach ($details as $detail) {
       $form['markup']['#markup'] .= '<li class="request_problem-extra-conflict-item"><a href="' . $base_path . 'requests/view-0/' . $detail . $url_arguments . '" class="request_problem-extra-conflict-item-link" title="View Request ' . $detail . '">Request ' . $detail . '</a></li>';
@@ -2107,41 +2107,102 @@ function mfcs_request_problems_0_request_form($form, &$form_state, $problem_id) 
     $form['markup']['#markup'] .= '<br>';
   }
   elseif ($problem->problem == MFCS_REQUEST_PROBLEM_COORDINATOR) {
-    $form['actions']['action']['#options']['reassign_venue_coordinator'] = "Re-Assign Venue Coordinator";
+    $form['actions']['action']['#options']['reassign_venue_coordinator'] = 'Re-Assign Venue Coordinator';
 
     $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where the venue coordinator assigned to a request no longer exists, is disabled, or is otherwise invalid.' . '<br>';
     $form['markup']['#markup'] .= '<br>';
 
     $form['markup']['#markup'] .= 'The <strong>' . $form['actions']['action']['#options']['reassign_venue_coordinator'] . ' </strong> action will attempt to auto-reassign the venue coordinator.' . '<br>';
-    $form['markup']['#markup'] .= "The re-assigmment functionality only refreshes the banner information.<br>";
-    $form['markup']['#markup'] .= "If that information has not changed for the venue coordinator, then this will do nothing.<br>";
+    $form['markup']['#markup'] .= 'The re-assigmment functionality only refreshes the banner information.<br>';
+    $form['markup']['#markup'] .= 'If that information has not changed for the venue coordinator, then this will do nothing.<br>';
     $form['markup']['#markup'] .= '<br>';
+
+    $details = unserialize($problem->details);
+
+    if (isset($details['coordinator'])) {
+      $form['markup']['#markup'] .= '<strong>Coordinator ID:</strong> ' . (int) $details['coordinator']['id'] . '<br>';
+      $form['markup']['#markup'] .= '<strong>Coordinator Account:</strong> <a href="' . $base_path . 'requests/users-0/view/' . (int) $details['coordinator']['id'] . $url_arguments . '">' . check_plain($details['coordinator']['name']) . '</a><br>';
+      $form['markup']['#markup'] .= '<strong>Coordinator First Name:</strong> ' . check_plain($details['coordinator']['first_name']) . '<br>';
+      $form['markup']['#markup'] .= '<strong>Coordinator Last Name:</strong> ' . check_plain($details['coordinator']['last_name']) . '<br>';
+    }
+    elseif (isset($details['current_coordinator']) && isset($details['new_coordinator'])) {
+      $form['markup']['#markup'] .= '<strong>Old Coordinator ID:</strong> ' . (int) $details['current_coordinator']['id'] . '<br>';
+      $form['markup']['#markup'] .= '<strong>Old Coordinator Account:</strong> <a href="' . $base_path . 'requests/users-0/view/' . (int) $details['current_coordinator']['id'] . $url_arguments . '">' . check_plain($details['current_coordinator']['name']) . '</a><br>';
+      $form['markup']['#markup'] .= '<strong>Old Coordinator First Name:</strong> ' . check_plain($details['current_coordinator']['first_name']) . '<br>';
+      $form['markup']['#markup'] .= '<strong>Old Coordinator Last Name:</strong> ' . check_plain($details['current_coordinator']['last_name']) . '<br>';
+
+      $form['markup']['#markup'] .= '<br>';
+
+      $form['markup']['#markup'] .= '<strong>New Coordinator ID:</strong> ' . (int) $details['new_coordinator']['id'] . '<br>';
+      $form['markup']['#markup'] .= '<strong>New Coordinator Account:</strong> <a href="' . $base_path . 'requests/users-0/view/' . (int) $details['new_coordinator']['id'] . $url_arguments . '">' . check_plain($details['new_coordinator']['name']) . '</a><br>';
+      $form['markup']['#markup'] .= '<strong>New Coordinator First Name:</strong> ' . check_plain($details['new_coordinator']['first_name']) . '<br>';
+      $form['markup']['#markup'] .= '<strong>New Coordinator Last Name:</strong> ' . check_plain($details['new_coordinator']['last_name']) . '<br>';
+    }
+
+    unset($details);
   }
   elseif ($problem->problem == MFCS_REQUEST_PROBLEM_REQUESTER) {
     $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where the requester assigned to a request no longer exists, is disabled, or is otherwise invalid.' . '<br>';
     $form['markup']['#markup'] .= 'The requester is the account used to create the request and is viewable under the <em>created by</em> section of the request.' . '<br>';
     $form['markup']['#markup'] .= '<br>';
+
+    $details = unserialize($problem->details);
+
+    if (isset($details['requester'])) {
+      $form['markup']['#markup'] .= '<strong>Requester ID:</strong> ' . (int) $details['requester']['user_id'] . '<br>';
+      $form['markup']['#markup'] .= '<strong>Requester Account:</strong> <a href="' . $base_path . 'requests/users-0/view/' . (int) $details['requester']['user_id'] . $url_arguments . '">' . check_plain($details['requester']['name']) . '</a><br>';
+      $form['markup']['#markup'] .= '<strong>Requester First Name:</strong> ' . check_plain($details['requester']['first_name']) . '<br>';
+      $form['markup']['#markup'] .= '<strong>Requester Last Name:</strong> ' . check_plain($details['requester']['last_name']) . '<br>';
+    }
+
+    unset($details);
   }
   elseif ($problem->problem == MFCS_REQUEST_PROBLEM_ROOM) {
     $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where the room assigned to a request no longer exists, is disabled, or is otherwise invalid.' . '<br>';
     $form['markup']['#markup'] .= '<br>';
     $form['markup']['#markup'] .= 'You can may want to <a href="' . $base_path . 'requests/troubleshoot-0/rooms' . $url_arguments . '">look at the listing of rooms according to the local banner information</a>.' . '<br>';
     $form['markup']['#markup'] .= '<br>';
+
+    $details = unserialize($problem->details);
+
+    if (isset($details['room']) && isset($details['building'])) {
+      $form['markup']['#markup'] .= '<strong>Room Unavailabilities:</strong> <a href="' . $base_path . 'requests/unavailable-0/' . (int) $details['room']['id'] . $url_arguments . '">' . check_plain($details['building']['machine_name']) . ' ' . check_plain($details['room']['machine_name']) . '</a><br>';
+      $form['markup']['#markup'] .= '<strong>Room Information:</strong> <a href="' . $base_path . 'requests/troubleshoot-0/rooms/' . (int) $details['room']['id'] . $url_arguments . '">' . check_plain($details['room']['human_name']) . '</a><br>';
+      $form['markup']['#markup'] .= '<strong>Building Information:</strong> <a href="' . $base_path . 'requests/troubleshoot-0/buildings/' . (int) $details['building']['id'] . $url_arguments . '">' . check_plain($details['building']['human_name']) . '</a><br>';
+    }
+
+    unset($details);
   }
   elseif ($problem->problem == MFCS_REQUEST_PROBLEM_BUILDING) {
     $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where the building assigned to a request no longer exists, is disabled, or is otherwise invalid.' . '<br>';
     $form['markup']['#markup'] .= '<br>';
     $form['markup']['#markup'] .= 'You can may want to <a href="' . $base_path . 'requests/troubleshoot-0/buildings' . $url_arguments . '">look at the listing of buildings according to the local banner information</a>.' . '<br>';
     $form['markup']['#markup'] .= '<br>';
+
+    $details = unserialize($problem->details);
+
+    if (isset($details['building'])) {
+      $form['markup']['#markup'] .= '<strong>Building Information:</strong> <a href="' . $base_path . 'requests/troubleshoot-0/buildings/' . $details['building']['id'] . $url_arguments . '">' . check_plain($details['building']['human_name']) . '</a><br>';
+    }
+
+    unset($details);
   }
   elseif ($problem->problem == MFCS_REQUEST_PROBLEM_LOCATION) {
     $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where the location assigned to a request no longer exists, is disabled, or is otherwise invalid.' . '<br>';
     $form['markup']['#markup'] .= '<br>';
     $form['markup']['#markup'] .= 'You can may want to <a href="' . $base_path . 'requests/troubleshoot-0/locations' . $url_arguments . '">look at the listing of locations according to the local banner information</a>.' . '<br>';
     $form['markup']['#markup'] .= '<br>';
+
+    $details = unserialize($problem->details);
+
+    if (isset($details['location'])) {
+      $form['markup']['#markup'] .= '<strong>Location Information:</strong> <a href="' . $base_path . 'requests/troubleshoot-0/locations/' . $details['location']['id'] . $url_arguments . '">' . check_plain($details['location']['human_name']) . '</a><br>';
+    }
+
+    unset($details);
   }
   elseif ($problem->problem == MFCS_REQUEST_PROBLEM_CACHE_REQUEST) {
-    $form['actions']['action']['#options']['rebuild_request_cache'] = "Rebuild Request Cache";
+    $form['actions']['action']['#options']['rebuild_request_cache'] = 'Rebuild Request Cache';
 
     $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where internal database cache is inconsistent with the stored values.' . '<br>';
     $form['markup']['#markup'] .= 'This issue will cause inconsistencies with the values associated with the request.' . '<br>';
@@ -2155,10 +2216,14 @@ function mfcs_request_problems_0_request_form($form, &$form_state, $problem_id) 
     $form['markup']['#markup'] .= '<br>';
 
     $details = unserialize($problem->details);
-    $holiday_date = reset($details['dates']);
-    $form['markup']['#markup'] .= '<strong>Holiday:</strong> <a href="' . $base_path . 'requests/holiday-0/view/' . $details['holiday']['year'] . '/' . $details['holiday']['id'] . $url_arguments . '">' . check_plain($details['holiday']['title']) . '</a><br>';
-    $form['markup']['#markup'] .= '<strong>Date of Holiday:</strong> ' . check_plain(date(MFCS_DATE_FORMAT_DATE, $holiday_date)) . '<br>';
-    unset($holiday_date);
+
+    if (isset($details['holiday'])) {
+      $holiday_date = reset($details['dates']);
+      $form['markup']['#markup'] .= '<strong>Holiday:</strong> <a href="' . $base_path . 'requests/holiday-0/view/' . (int) $details['holiday']['year'] . '/' . (int) $details['holiday']['id'] . $url_arguments . '">' . check_plain($details['holiday']['title']) . '</a><br>';
+      $form['markup']['#markup'] .= '<strong>Date of Holiday:</strong> ' . check_plain(date(MFCS_DATE_FORMAT_DATE, $holiday_date)) . '<br>';
+      unset($holiday_date);
+    }
+
     unset($details);
   }
   elseif ($problem->problem == MFCS_REQUEST_PROBLEM_UNAVAILABLE) {
@@ -2167,25 +2232,28 @@ function mfcs_request_problems_0_request_form($form, &$form_state, $problem_id) 
 
     $details = unserialize($problem->details);
 
-    $form['markup']['#markup'] .= '<strong>Unavailability:</strong><ul>';
-    foreach ($details['unavailabilities'] as $unavailability) {
-      $unavailability_date_start = $unavailability['date_start'];
-      $unavailability_date_stop = $unavailability['date_stop'];
+    if (isset($details['unavailabilities'])) {
+      $form['markup']['#markup'] .= '<strong>Unavailability:</strong><ul>';
+      foreach ($details['unavailabilities'] as $unavailability) {
+        $unavailability_date_start = $unavailability['date_start'];
+        $unavailability_date_stop = $unavailability['date_stop'];
 
-      $date_string = 'Unknown';
-      if ($unavailability_date_start == strtotime('midnight today', $unavailability_date_start) && $unavailability_date_stop == strtotime('midnight tomorrow', $unavailability_date_start)) {
-        $date_string = check_plain(date(MFCS_DATE_FORMAT_DATE, $unavailability_date_start));
-      }
-      else {
-        $date_string = check_plain(date(MFCS_DATE_FORMAT_DATE_TIME, $unavailability_date_start)) . ' to ' . check_plain(date(MFCS_DATE_FORMAT_DATE_TIME, $unavailability_date_stop));
-      }
-      unset($unavailability_date_start);
-      unset($unavailability_date_stop);
+        $date_string = 'Unknown';
+        if ($unavailability_date_start == strtotime('midnight today', $unavailability_date_start) && $unavailability_date_stop == strtotime('midnight tomorrow', $unavailability_date_start)) {
+          $date_string = check_plain(date(MFCS_DATE_FORMAT_DATE, $unavailability_date_start));
+        }
+        else {
+          $date_string = check_plain(date(MFCS_DATE_FORMAT_DATE_TIME, $unavailability_date_start)) . ' to ' . check_plain(date(MFCS_DATE_FORMAT_DATE_TIME, $unavailability_date_stop));
+        }
+        unset($unavailability_date_start);
+        unset($unavailability_date_stop);
 
-      $form['markup']['#markup'] .= '<li><a href="' . $base_path . 'requests/unavailable-0/view/' . $unavailability['year'] . '/' . $details['room_id']  . '/' . $unavailability['id'] . $url_arguments . '">' . check_plain($unavailability['title']) . '</a> (' . $date_string .')</li>';
+        $form['markup']['#markup'] .= '<li><a href="' . $base_path . 'requests/unavailable-0/view/' . $unavailability['year'] . '/' . $details['room_id']  . '/' . $unavailability['id'] . $url_arguments . '">' . check_plain($unavailability['title']) . '</a> (' . $date_string .')</li>';
+      }
+      $form['markup']['#markup'] .= '</ul>';
+      unset($date_string);
     }
-    $form['markup']['#markup'] .= '</ul>';
-    unset($date_string);
+
     unset($details);
   }
 

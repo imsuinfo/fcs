@@ -2043,14 +2043,24 @@ function mfcs_miscellaneous_check_requests($request_id = NULL, $problem_code = N
           $reason .= ' assignment is invalid.';
         }
 
+        $details = array();
+        $details['coordinator'] = array(
+          'id' => $result['coordinator']['user_id'],
+          'name' => $result['coordinator']['name'],
+          'first_name' => $result['coordinator']['first_name'],
+          'last_name' => $result['coordinator']['last_name'],
+        );
+
         $problems[] = array(
           'request_id' => $result['id'],
           'problem' => MFCS_REQUEST_PROBLEM_COORDINATOR,
           'date' => $instance,
           'reason' => $reason,
-          'details' => '',
+          'details' => serialize($details),
         );
+
         unset($reason);
+        unset($details);
       }
       unset($result);
     }
@@ -2064,11 +2074,30 @@ function mfcs_miscellaneous_check_requests($request_id = NULL, $problem_code = N
         $reason .= ' [id: ' . $result['coordinator']['user_id'] . ']';
         $reason .= ' is not the most recent venue coordinator: ';
 
+        $details = array();
+        $details['current_coordinator'] = array(
+          'id' => $result['coordinator']['user_id'],
+          'name' => $result['coordinator']['name'],
+          'first_name' => $result['coordinator']['first_name'],
+          'last_name' => $result['coordinator']['last_name'],
+        );
+
         $coordinator_id = (int) $result['coordinator_banner']['user_id'];
+        $details['new_coordinator'] = array(
+          'id' => $coordinator_id,
+          'name' => NULL,
+          'first_name' => NULL,
+          'last_name' => NULL,
+        );
+
         $new_coordinator_user = mfcs_load_basic_user_settings_by_user_id($coordinator_id);
         if (!empty($new_coordinator_user['name'])) {
+          $details['new_coordinator']['name'] = $new_coordinator_user['name'];
           if (!empty($new_coordinator_user['first_name']) && !empty($new_coordinator_user['first_name'])) {
             $reason .= $new_coordinator_user['first_name'] . ' ' . $new_coordinator_user['last_name'];
+
+            $details['new_coordinator']['first_name'] = $new_coordinator_user['first_name'];
+            $details['new_coordinator']['last_name'] = $new_coordinator_user['last_name'];
           }
           else {
             $reason .= $new_coordinator_user['name'];
@@ -2081,9 +2110,11 @@ function mfcs_miscellaneous_check_requests($request_id = NULL, $problem_code = N
           'problem' => MFCS_REQUEST_PROBLEM_COORDINATOR,
           'date' => $instance,
           'reason' => $reason,
-          'details' => '',
+          'details' => serialize($details),
         );
+
         unset($reason);
+        unset($details);
       }
       unset($result);
     }
@@ -2113,8 +2144,9 @@ function mfcs_miscellaneous_check_requests($request_id = NULL, $problem_code = N
           'problem' => MFCS_REQUEST_PROBLEM_REQUESTER,
           'date' => $instance,
           'reason' => $reason,
-          'details' => '',
+          'details' => serialize(array('requester' => $result['requester'])),
         );
+
         unset($reason);
       }
       unset($result);
@@ -2131,7 +2163,7 @@ function mfcs_miscellaneous_check_requests($request_id = NULL, $problem_code = N
           'problem' => MFCS_REQUEST_PROBLEM_ROOM,
           'date' => $instance,
           'reason' => 'The room ' . $result['room']['human_name'] . ' of ' . $result['building']['human_name'] . ' is unavailable, deleted, or otherwise invalid.',
-          'details' => '',
+          'details' => serialize(array('room' => $result['room'], 'building' => $result['building'], 'location' => $result['location'])),
         );
       }
       unset($result);
@@ -2148,7 +2180,7 @@ function mfcs_miscellaneous_check_requests($request_id = NULL, $problem_code = N
           'problem' => MFCS_REQUEST_PROBLEM_BUILDING,
           'date' => $instance,
           'reason' => 'The building ' . $result['building']['human_name'] . ' is unavailable, deleted, or otherwise invalid.',
-          'details' => '',
+          'details' => serialize(array('building' => $result['building'], 'location' => $result['location'])),
         );
       }
       unset($result);
@@ -2165,7 +2197,7 @@ function mfcs_miscellaneous_check_requests($request_id = NULL, $problem_code = N
           'problem' => MFCS_REQUEST_PROBLEM_LOCATION,
           'date' => $instance,
           'reason' => 'The location ' . $result['location']['human_name'] . ' is unavailable, deleted, or otherwise invalid.',
-          'details' => '',
+          'details' => serialize(array('location' => $result['location'])),
         );
       }
       unset($result);
