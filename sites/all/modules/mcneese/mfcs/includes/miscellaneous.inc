@@ -2857,5 +2857,68 @@ function mfcs_miscellaneous_check_users_for_problems($user_id = NULL) {
 }
 
 /**
+ * Delete all user related problems, restart any sequences, and check for problems.
+ *
+ * This should ideally be called after calling a function such as mfcs_defragment_defrag_user_ids().
+ *
+ * @return bool
+ *   TRUE on success, FALSE otherwise.
+ *
+ * @see mfcs_defragment_defrag_user_ids()
+ */
+function mfcs_miscellaneous_reset_user_problems() {
+  $transaction = db_transaction();
+  try {
+    db_query('update {mfcs_users} set problems = 0');
+    db_query('update {mfcs_users} set updated_problems = :instance', array(':instance' => mfcs_instance()));
+  }
+  catch (Error $e) {
+    unset($transaction);
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    unset($transaction);
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+
+  return mfcs_miscellaneous_check_users_for_problems();
+}
+
+/**
+ * Delete all request related problems, restart any sequences, and check for problems.
+ *
+ * Warning: current privileges may prevent this function from executing.
+ * In such a case, just run the commands as the database root user.
+ *
+ * @return bool
+ *   TRUE on success, FALSE otherwise.
+ */
+function mfcs_miscellaneous_reset_request_problems() {
+  $transaction = db_transaction();
+  try {
+    db_query('delete from {mfcs_problems_requests}');
+    db_query('alter sequence mfcs_problems_requests_id_seq restart');
+  }
+  catch (Error $e) {
+    unset($transaction);
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    unset($transaction);
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+
+  return mfcs_miscellaneous_check_requests_for_problems();
+}
+
+/**
  * @} End of '@addtogroup mfcs'.
  */
