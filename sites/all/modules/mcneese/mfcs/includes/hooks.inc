@@ -2868,6 +2868,11 @@ function mfcs_hook_process_user_banner_roles($user, &$problems, $changes = array
 
     if ($can_review) {
       $processed_roles[$reviewer_role->rid] = $reviewer_role->rid;
+
+      // make sure that if the reviewer can now review, to get rid of the reviewer not allowed problem flag.
+      if (($problems & MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED) != 0) {
+        $problems -= MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED;
+      }
     }
     else {
       if (array_key_exists($reviewer_role->rid, $processed_roles)) {
