@@ -58,9 +58,9 @@ function mfcs_request_agreement_0_form($form, &$form_state, $request_id, $contai
 
   mfcs_add_canonical_headers('requests/agreement-0/' . $request_id);
 
-  $page_title = "Facilities Use Agreement";
+  $page_title = 'Facilities Use Agreement';
   if (!empty($request['information']['title'][0]->value)) {
-    $page_title = "Facilities Use Agreement: " . $request['information']['title'][0]->value;
+    $page_title = 'Facilities Use Agreement: ' . $request['information']['title'][0]->value;
   }
   drupal_set_title($page_title);
 
@@ -128,9 +128,27 @@ function mfcs_request_agreement_0_form($form, &$form_state, $request_id, $contai
     }
   }
 
-  $revisoon = 0;
+  $revision = 0;
   if (isset($request['mer']['revision'][0]->value)) {
     $revision = (int) $request['mer']['revision'][0]->value;
+  }
+
+  $requester = '';
+  if (isset($request['mer']['user_id'][0]->value) && is_numeric($request['mer']['user_id'][0]->value)) {
+    $requester_user = mfcs_get_user_information((int) $request['mer']['user_id'][0]->value);
+    if (is_object($requester_user)) {
+      $requester_user_name = $requester_user->name;
+      $requester_user_email = $requester_user->email;
+      if (!empty($requester_user->first_name) && !empty($requester_user->last_name)) {
+        $requester_user_name = $requester_user->first_name . ' ' . $requester_user->last_name;
+        $requester_user_email = '"' . $requester_user_name . '" <' . $requester_user->email . '>';
+      }
+      unset($requester_user_name);
+
+      $requester = '<a href="mailto:' . str_replace('"', '%22', $requester_user_email) . '" class="agreement-header-requester-value-link no_print_links_as_link">' . check_plain($requester_user_email) . '</a>';
+      unset($requester_user_email);
+    }
+    unset($requester_user);
   }
 
   // failsafe to current date.
@@ -140,19 +158,24 @@ function mfcs_request_agreement_0_form($form, &$form_state, $request_id, $contai
   }
 
   $markup .= '<div class="agreement-header-date">';
-  $markup .= '<div class="agreement-header-date-label">' . "Date:" . '</div> ';
-  $markup .= '<div class="agreement-header-date-value">' . date("Y / m / d", $review_date) . '</div>';
+  $markup .= '<div class="agreement-header-date-label">' . 'Date:' . '</div> ';
+  $markup .= '<div class="agreement-header-date-value">' . date(MFCS_DATE_FORMAT_DATE_SQUEEZE, $review_date) . '</div>';
   $markup .= '</div>'; // agreement-header-date
 
   $markup .= '<div class="agreement-header-request_id">';
-  $markup .= '<div class="agreement-header-request_id-label">' . "Request ID:" . '</div> ';
+  $markup .= '<div class="agreement-header-request_id-label">' . 'Request ID:' . '</div> ';
   $markup .= '<div class="agreement-header-request_id-value">' . $request_id . '</div>';
   $markup .= '</div>'; // agreement-header-request_id
 
   $markup .= '<div class="agreement-header-revision">';
-  $markup .= '<div class="agreement-header-revision-label">' . "Revision:" . '</div> ';
+  $markup .= '<div class="agreement-header-revision-label">' . 'Revision:' . '</div> ';
   $markup .= '<div class="agreement-header-revision-value">' . $revision . '</div>';
   $markup .= '</div>'; // agreement-header-revision
+
+  $markup .= '<div class="agreement-header-requester">';
+  $markup .= '<div class="agreement-header-requester-label">' . 'Requester:' . '</div> ';
+  $markup .= '<div class="agreement-header-requester-value">' . $requester . '</div>';
+  $markup .= '</div>'; // agreement-header-requester
 
   $markup .= '</div>'; // agreement-header-information
   $markup .= '</div>'; // agreement-header
@@ -164,9 +187,9 @@ function mfcs_request_agreement_0_form($form, &$form_state, $request_id, $contai
 
   $markup .= '<div class="agreement-table-header-row">';
 
-  $markup .= '<div class="agreement-table-header-cell column-0">' . "Description" . '</div>';
-  $markup .= '<div class="agreement-table-header-cell column-1">' . "Cost" . '</div>';
-  $markup .= '<div class="agreement-table-header-cell column-2">' . "Total" . '</div>';
+  $markup .= '<div class="agreement-table-header-cell column-0">' . 'Description' . '</div>';
+  $markup .= '<div class="agreement-table-header-cell column-1">' . 'Cost' . '</div>';
+  $markup .= '<div class="agreement-table-header-cell column-2">' . 'Total' . '</div>';
 
   $markup .= '</div>'; // agreement-table-header-row
   $markup .= '</div>'; // agreement-table-header

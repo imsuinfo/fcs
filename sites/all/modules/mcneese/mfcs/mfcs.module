@@ -6225,6 +6225,9 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL, $revision_id
       $query->condition('mrv.revision', $revision_id);
     }
 
+    $query->orderBy('mrv.revision', 'desc');
+    $query->range(0, 1);
+
     $results = $query->execute()->fetchAll();
 
     if (empty($results)) {
@@ -6238,7 +6241,9 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL, $revision_id
     if (!isset($request['mer'])) {
       $request['mer'] = array();
       foreach (array('id', 'creator', 'user_id', 'created', 'updated', 'revision', 'revision_message') as $key) {
-        $request['mer'][$key] = array(0 => new stdClass());
+        if (!isset($request['mer'][$key][0])) {
+          $request['mer'][$key] = array(0 => new stdClass());
+        }
         $request['mer'][$key][0]->value = $mer->{$key};
       }
 
@@ -6248,7 +6253,30 @@ function mfcs_load_request_by_id($request_id, $reset_action = NULL, $revision_id
       }
     }
 
+    // @todo: in theory something like below could be a good idea, but too much is dependent on mer values always being set to [0].
+    /*
+    foreach ($results as $mer) {
+      $revision_date = NULL;
+
+      // manually add the request information and presentation fields.
+      if (!isset($request['mer'])) {
+        $request['mer'] = array();
+      }
+
+      foreach (array('id', 'creator', 'user_id', 'created', 'updated', 'revision', 'revision_message') as $key) {
+        if (!isset($request['mer'][$key][$mer->revision])) {
+          $request['mer'][$key] = array($mer->revision => new stdClass());
+        }
+        $request['mer'][$key][$mer->revision]->value = $mer->{$key};
+      }
+
+      if (property_exists($mer, 'revision_date')) {
+        $revision_date = $mer->revision_date;
+        $request['mer']['updated'][$mer->revision]->value = $revision_date;
+      }
+    }
     unset($mer);
+    */
 
     $query = db_select('mfcs_current', 'mc');
     $query->condition('mc.request_id', $request_id);
