@@ -666,7 +666,7 @@ function mfcs_request_users_0_view_page($user_id) {
   }
 
   $proxy_information = NULL;
-  $proxy_accounts = mfcs_get_proxy_venue_coordinators(array('mpvc.proxy_id' => $account->uid));
+  $proxy_accounts = mfcs_get_proxy_venue_coordinators(array('mpvc.proxy_id' => $account->uid, 'mpvc.disabled' => 0));
   if (!empty($proxy_accounts['results'])) {
     $name_information = NULL;
     foreach ($proxy_accounts['results'] as $proxy_account) {
@@ -696,7 +696,7 @@ function mfcs_request_users_0_view_page($user_id) {
     unset($name_information);
   }
 
-  $proxy_accounts = mfcs_get_proxy_venue_coordinators(array('mpvc.user_id' => $account->uid));
+  $proxy_accounts = mfcs_get_proxy_venue_coordinators(array('mpvc.user_id' => $account->uid, 'mpvc.disabled' => 0));
   if (!empty($proxy_accounts['results'])) {
     $name_information = NULL;
     foreach ($proxy_accounts['results'] as $proxy_account) {

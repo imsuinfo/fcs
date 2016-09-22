@@ -2847,7 +2847,7 @@ function mfcs_hook_process_user_banner_roles($user, &$problems, $changes = array
   // if the user can proxy as another account, then they need the reviewer role (but make no changes if the user is a manager or is a reviewer exception).
   if (!$is_manager && !$reviewer_exception) {
     $can_review = FALSE;
-    $proxy_accounts = mfcs_get_proxy_venue_coordinators(array('mpvc.proxy_id' => $primary_account_id));
+    $proxy_accounts = mfcs_get_proxy_venue_coordinators(array('mpvc.proxy_id' => $primary_account_id, 'mpvc.disabled' => 0));
     if (!empty($proxy_accounts['results'])) {
       $processed_roles[$reviewer_role->rid] = $reviewer_role->rid;
       $can_review = TRUE;
