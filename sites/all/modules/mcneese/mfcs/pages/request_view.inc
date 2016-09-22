@@ -1784,7 +1784,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
             $form['review']['operations']['requirements'][$use_name]['group_post']['post'] = array(
               '#id' => 'request-review-operations-requirements-' . $use_name . '-post',
               '#type' => 'textfield',
-              '#title' => '<span class="element-invisible">' . $use_title . ' Fee</span> Post',
+              '#title' => '<span class="element-invisible">' . $use_title . ' Fee</span> Post Event/Meeting',
               '#default_value' => NULL,
               '#size' => 16,
               '#min' => 0,
@@ -1807,7 +1807,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
             $form['review']['operations']['requirements'][$use_name]['group_post']['description'] = array(
               '#id' => 'request-review-operations-requirements-' . $use_name . '-description',
               '#type' => 'textarea',
-              '#title' => '<span class="element-invisible">' . $use_title . ' Fee</span> Post Description',
+              '#title' => '<span class="element-invisible">' . $use_title . ' Fee</span> Post Event/Meeting Description',
               '#default_value' => NULL,
               '#rows' => 4,
               '#required' => FALSE,
