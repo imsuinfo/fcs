@@ -766,7 +766,7 @@ function mfcs_management_get_problems_user_taxonomy() {
   $labels[MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE] = 'Banner Unavailable on Create';
   $labels[MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE] = 'Banner Unavailable on Login';
   $labels[MFCS_USER_PROBLEM_ACCOUNT_LOGIN_PROBLEMS_MULTIPLE] = 'Multiple Login Attempt Problems';
-  $labels[MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED] = 'Unable to Assign/Unassign Reviewer/Venue-Coordinator Role';
+  $labels[MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED] = 'Reviewer/Venue-Coordinator Role Not Allowed';
   $labels[MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES] = 'Old/Duplicate Account';
   $labels[MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE] = 'Disabled Account in Use';
   $labels[MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID] = 'Invalid Banner ID';

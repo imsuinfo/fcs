@@ -749,7 +749,7 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
       'custom_action' => FALSE,
     ),
     MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED => array(
-      'label' => 'Unable to Assign Reviewer/Venue-Coordinator Role',
+      'label' => 'Reviewer/Venue-Coordinator Role Not Allowed',
       'explanation' =>
         'This flag gets set when an attempt is made to assign or unassign the reviewer role to a user when there is no reference to that user as a venue coordinator or a room coordinator.<br>' .
         '<br>' .
@@ -1119,12 +1119,6 @@ function mfcs_request_problems_0_user_form_submit($form, &$form_state) {
               $problems -= $custom_action_id;
               mfcs_save_user($form['values']['problem_user']['#value']->uid, array('problems' => $problems));
             }
-          }
-        }
-        else {
-          if (($problems & $custom_action_id) != 0) {
-            $problems -= $custom_action_id;
-            mfcs_save_user($form['values']['problem_user']['#value']->uid, array('problems' => $problems));
           }
         }
       }
