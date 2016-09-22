@@ -2098,6 +2098,7 @@ function mfcs_hook_user_login(&$edit, $user, $category) {
   $problems_original = $problems;
 
   $changes = mfcs_hook_process_user_banner_roles($user, $problems, $settings);
+  unset($settings);
 
   // save problems in the problems database.
   $reset_user = FALSE;
@@ -2385,7 +2386,12 @@ function mfcs_hook_user_presave(&$edit, $account, $category) {
   $changes = NULL;
   if (!empty($settings)) {
     $changes = mfcs_hook_process_user_banner_roles($account, $problems, $settings);
+
+    if ($problems != $problems_original) {
+      $edit['mfcs']['problems'] = $problems;
+    }
   }
+  unset($settings);
 
   if (is_array($changes)) {
     if (isset($changes['roles']) && is_array($changes['roles'])) {
@@ -2461,7 +2467,7 @@ function mfcs_hook_user_update(&$edit, $account, $category) {
     }
 
     if (isset($edit['mfcs']['problems']) && is_numeric($edit['mfcs']['problems'])) {
-      $problems = (int) $edit->mfcs['problems'];
+      $problems = (int) $edit['mfcs']['problems'];
     }
     $problems_original = $problems;
 
@@ -2531,7 +2537,9 @@ function mfcs_hook_user_update(&$edit, $account, $category) {
   }
 
   // save operations are always recorded because the 'updated' field must accurately reflect every update.
-  mfcs_save_user($account->uid, $edit['mfcs']);
+  if (!empty($edit['mfcs'])) {
+    mfcs_save_user($account->uid, $edit['mfcs']);
+  }
 }
 
 /**
@@ -2870,7 +2878,9 @@ function mfcs_hook_process_user_banner_roles($user, &$problems, $changes = array
         // do not allow this and provide a watchdog warning for reference.
         watchdog(MFCS_WATCHDOG_ID, 'The user \'%user_name\' (%user_id, %primary_id) is not being granted reviewer access as requested because the user is not assigned as either a venue or room coordinator in the banner database and is not a venue coordinator proxy.', array('%user_name' => isset($user->name) ? $user->name : 'undefined', '%user_id' => isset($user->uid) ? $user->uid : 'undefined', '%primary_id' => $primary_account_id), WATCHDOG_WARNING);
 
-        $problems = $problems | MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED;
+        if (($problems & MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED) == 0) {
+          $problems = $problems | MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED;
+        }
       }
     }
   }

@@ -1549,8 +1549,12 @@ function mfcs_request_users_0_add_or_edit_form_validate($form, &$form_state, $ed
  *   The form array as defined by drupals form api.
  * @param array $form_state
  *   The form state array as defined by drupals form api
+ * @param bool $edit
+ *   (optional) When TRUE, this is processed as an edit action.
+ *   When FALSE, this is processed as an add action.
  *
  * @see: mfcs_request_users_0_add_or_edit_form()
+ * @see: mfcs_save_user()
  */
 function mfcs_request_users_0_add_or_edit_form_submit($form, &$form_state, $edit = FALSE) {
   global $mfcs_determined;
@@ -1580,12 +1584,9 @@ function mfcs_request_users_0_add_or_edit_form_submit($form, &$form_state, $edit
     $new_account->mail = $form_state['values']['form']['personal']['email'];
     $new_account->roles = array();
 
-    $mfcs_settings = array(
-      'updated' => mfcs_instance(),
-      'problems' => MFCS_USER_PROBLEM_NONE,
-    );
+    $mfcs_settings = array();
 
-    if (isset($form['user']['#value']) && is_object($form['user']['#value']) && isset($form['user']['#value']->mfcs['problems']) && is_numeric($form['user']['#value']->mfcs['problems'])) {
+    if (isset($form['user']['#value']->mfcs['problems']) && is_numeric($form['user']['#value']->mfcs['problems'])) {
       $mfcs_settings['problems'] = (int) $form['user']['#value']->mfcs['problems'];
     }
 
@@ -1689,6 +1690,11 @@ function mfcs_request_users_0_add_or_edit_form_submit($form, &$form_state, $edit
 
         $updates = (array) $new_account;
 
+        // pass mfcs settings to the $updates array because user_save() will call mfcs_save_user().
+        if (!empty($mfcs_settings)) {
+          $updates['mfcs'] = $mfcs_settings;
+        }
+
         unset($updates['name']);
 
         if ($new_account->status == $form['user']['#value']->status) {
@@ -1700,11 +1706,13 @@ function mfcs_request_users_0_add_or_edit_form_submit($form, &$form_state, $edit
         }
 
         $saved_account = user_save($form['user']['#value'], $updates);
-
-        mfcs_save_user($form['user']['#value']->uid, $mfcs_settings);
       }
     }
     else {
+      if (!isset($mfcs_settings['problems'])) {
+        $mfcs_settings['problems'] = MFCS_USER_PROBLEM_NONE;
+      }
+
       $saved_account = user_save($new_account);
 
       // new accounts need to be manually synchronized.
