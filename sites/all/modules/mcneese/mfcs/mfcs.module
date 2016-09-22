@@ -12882,7 +12882,7 @@ function mfcs_calculate_use_fees($fees) {
     }
 
     $amount['post'] = (float) mfcs_convert_value_from_database_format($fees->post, 'currency');
-    $amount['total'] *= $amount['post'];
+    $amount['total'] += $amount['post'];
 
     if (!empty($fees->description)) {
       $amount['description'] = check_plain($fees->description);
