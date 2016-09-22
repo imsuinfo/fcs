@@ -6750,14 +6750,22 @@ function mfcs_get_reviewers($conditions = array(), $options = array()) {
     $join = $options['join'];
   }
 
-  $start = NULL;
+  $start = 0;
   if (isset($options['start']) && is_numeric($options['start'])) {
     $start = $options['start'];
+
+    if ($start < 0) {
+      $start = 0;
+    }
   }
 
   $limit = NULL;
   if (isset($options['limit']) && is_numeric($options['limit'])) {
     $limit = $options['limit'];
+
+    if ($limit <= 0) {
+      $limit = NULL;
+    }
   }
 
   $count = FALSE;
@@ -6891,8 +6899,13 @@ function mfcs_get_reviewers($conditions = array(), $options = array()) {
       $query->addField('mtrcn', 'machine_name', 'reviewer_classification_name');
     }
 
-    if (!is_null($start) || !is_null($limit)) {
-      $query->range($start, $limit);
+    if ($start > 0 || !is_null($limit)) {
+      if ($start > 0 && is_null($limit)) {
+        $query->range($start);
+      }
+      else {
+        $query->range($start, $limit);
+      }
     }
 
     if (!empty($sort)) {
@@ -6973,14 +6986,22 @@ function mfcs_get_proxy_venue_coordinators($conditions = array(), $options = arr
     $join = $options['join'];
   }
 
-  $start = NULL;
+  $start = 0;
   if (isset($options['start']) && is_numeric($options['start'])) {
     $start = $options['start'];
+
+    if ($start < 0) {
+      $start = 0;
+    }
   }
 
   $limit = NULL;
   if (isset($options['limit']) && is_numeric($options['limit'])) {
     $limit = $options['limit'];
+
+    if ($limit <= 0) {
+      $limit = NULL;
+    }
   }
 
   $count = FALSE;
@@ -7118,8 +7139,13 @@ function mfcs_get_proxy_venue_coordinators($conditions = array(), $options = arr
       $query->addField('pmu', 'banner_id', 'proxy_banner_id');
     }
 
-    if (!is_null($start) || !is_null($limit)) {
-      $query->range($start, $limit);
+    if ($start > 0 || !is_null($limit)) {
+      if ($start > 0 && is_null($limit)) {
+        $query->range($start);
+      }
+      else {
+        $query->range($start, $limit);
+      }
     }
 
     if (!empty($sort)) {
@@ -7816,13 +7842,21 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
   }
 
   $start = 0;
-  if (isset($options['start']) && is_numeric($options['start']) && $start >= 0) {
+  if (isset($options['start']) && is_numeric($options['start'])) {
     $start = $options['start'];
+
+    if ($start < 0) {
+      $start = 0;
+    }
   }
 
-  $limit = 20;
-  if (isset($options['limit']) && is_numeric($options['limit']) && $limit >= 0) {
+  $limit = NULL;
+  if (isset($options['limit']) && is_numeric($options['limit'])) {
     $limit = $options['limit'];
+
+    if ($limit <= 0) {
+      $limit = NULL;
+    }
   }
 
   $count = FALSE;
@@ -8136,8 +8170,13 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
       }
     }
 
-    if ($limit > 0) {
-      $query->range($start, $limit);
+    if ($start > 0 || !is_null($limit)) {
+      if ($start > 0 && is_null($limit)) {
+        $query->range($start);
+      }
+      else {
+        $query->range($start, $limit);
+      }
     }
 
     if ($reviewer || $manager || $administer) {
