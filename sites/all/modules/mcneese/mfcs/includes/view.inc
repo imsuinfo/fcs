@@ -277,6 +277,8 @@ function mfcs_view_build_request_item_structure($request_id, $field_group, $fiel
               $value_length += $generated_value['markup']['#length'];
             }
           }
+          unset($generated_value);
+          unset($key);
         }
 
         if ($label_length + $value_length > 50) {
@@ -326,6 +328,8 @@ function mfcs_view_build_request_item_structure($request_id, $field_group, $fiel
       break;
     }
   }
+  unset($value);
+  unset($delta);
 
   if ($no_values) {
     // this is added in case later on it is decided that $output should be returned.
@@ -1079,20 +1083,20 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
       }
       elseif ($type[$value_name] == 'review_decision') {
         if ($value->{$value_name} == MFCS_REVIEW_DECISION_APPROVE) {
-          $markup .= "Approved";
-          $length += strlen("Approved");
+          $markup .= 'Approved';
+          $length += strlen('Approved');
         }
         elseif ($value->{$value_name} == MFCS_REVIEW_DECISION_DENY) {
-          $markup .= "Denied";
-          $length += strlen("Denied");
+          $markup .= 'Denied';
+          $length += strlen('Denied');
         }
         elseif ($value->{$value_name} == MFCS_REVIEW_DECISION_ISSUES) {
-          $markup .= "Issues";
-          $length += strlen("Issues");
+          $markup .= 'Issues';
+          $length += strlen('Issues');
         }
         elseif ($value->{$value_name} == MFCS_REVIEW_DECISION_ISSUES_NONE) {
-          $markup .= "No Issues";
-          $length += strlen("No Issues");
+          $markup .= 'No Issues';
+          $length += strlen('No Issues');
         }
       }
       elseif ($type[$value_name] == 'insurance') {
@@ -1140,6 +1144,7 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
       $no_values = FALSE;
     }
   }
+  unset($value_name);
 
   if ($no_values) {
     $output_value['#attributes']['class'][] = 'no_value';
@@ -1246,8 +1251,10 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
           foreach ($review_classifications as $review_classification) {
             $review->reviewer_classifications[$review_classification->classification] = $review_classification->classification;
           }
+          unset($review_classification);
         }
       }
+      unset($review);
     }
   }
   catch (Error $e) {
@@ -1413,6 +1420,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
 
         $markup_class .= ' classification-' . $classification;
       }
+      unset($classification);
 
       if (is_null($reviewer_classification)) {
         if ($user_can_administer) {
@@ -1694,6 +1702,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
             if ($value == 'when_true' || $value == 'when_false') {
               $value = 'raw';
             }
+            unset($value);
           }
 
           $value = reset($changelog['requirements']['waived']);
@@ -1716,6 +1725,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
           if ($value == 'when_true' || $value == 'when_false') {
             $value = 'raw';
           }
+          unset($value);
         }
 
         $value = reset($changelog['requirements']['university']);
@@ -1734,6 +1744,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
           foreach ($presentation['insurance']['contractor']['display'] as &$value) {
             $value = 'always';
           }
+          unset($value);
         }
 
         $value = reset($changelog['insurance']['contractor']);
@@ -1754,6 +1765,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
           foreach ($presentation['insurance']['unaffiliated']['display'] as &$value) {
             $value = 'always';
           }
+          unset($value);
         }
 
         $value = reset($changelog['insurance']['unaffiliated']);
@@ -1774,6 +1786,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
           foreach ($presentation['insurance']['affiliated']['display'] as &$value) {
             $value = 'always';
           }
+          unset($value);
         }
 
         $value = reset($changelog['insurance']['affiliated']);
@@ -1798,6 +1811,8 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
       $has_log = TRUE;
       unset($changelog);
     }
+    unset($review);
+    unset($row);
   }
 
   if (!$has_log) {
