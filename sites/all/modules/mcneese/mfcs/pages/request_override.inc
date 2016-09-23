@@ -266,6 +266,11 @@ function mfcs_request_manage_0_override_form_validate($form, &$form_state) {
     elseif ($form_state['values']['decision']['status'] == MFCS_REQUEST_STATUS_CLOSED_ACCEPTED || $form_state['values']['decision']['status'] == MFCS_REQUEST_STATUS_CLOSED_DENIED || $form_state['values']['decision']['status'] == MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE) {
       form_set_error('decision][status', '<strong>' . $options_status[$form_state['values']['decision']['status']] . '</strong> may only be used when the step is set to <strong>' . $options_steps[MFCS_REVIEW_STEP_COMPLETED] . '</strong>.');
     }
+    elseif ($form_state['values']['decision']['status'] == MFCS_REQUEST_STATUS_UNLOCKED) {
+      if ($form_state['values']['decision']['step'] != MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
+        form_set_error('decision][status', '<strong>' . $options_status[$form_state['values']['decision']['status']] . '</strong> may only be used when the step is set to <strong>' . $options_steps[MFCS_REVIEW_STEP_VENUE_AVAILABLE] . '</strong>.');
+      }
+    }
   }
 }
 
