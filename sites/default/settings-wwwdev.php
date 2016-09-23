@@ -634,9 +634,9 @@ $conf['file_temporary_path'] = '/var/www/webfiles/temporary/wwwdev-fcs';
  * Order of operations do apply.
  */
 $conf['role_php_ini'] = array();
-$conf['role_php_ini']['memory_limit'] = array('1' => '96M', '2' => '256M', '3' => '512M');
-$conf['role_php_ini']['max_execution_time'] = array('1' => '30', '2' => '60', '3' => '90');
-$conf['role_php_ini']['max_input_time'] = array('1' => '30', '2' => '60', '3' => '90');
+$conf['role_php_ini']['memory_limit'] = array('1' => '96M', '2' => '256M', '3' => '512M', '9' => '512M');
+$conf['role_php_ini']['max_execution_time'] = array('1' => '30', '2' => '60', '3' => '7200', '9' => '7200');
+$conf['role_php_ini']['max_input_time'] = array('1' => '30', '2' => '60', '3' => '90', '9' => '90');
 
 $conf['user_php_ini'] = array();
 
