@@ -600,12 +600,12 @@ function mfcs_request_users_0_view_page($user_id) {
   if (isset($account->mfcs['ldap_duplicate']) && $account->mfcs['ldap_duplicate']) {
     $duplicate = 'There <strong>Duplicate</strong> accounts for this user.';
 
-    if (isset($account->mfcs['banner_id'])) {
+    if (isset($account->mfcs['banner_id']) && is_numeric($account->mfcs['banner_id'])) {
       $associated_users = mfcs_users_load_banner_id_to_user_id($account->mfcs['banner_id']);
-      if (!empty($associated_users['banner_id'][$account->mfcs['banner_id']]['all']) && count($associated_users['banner_id'][$account->mfcs['banner_id']]['all']) > 1) {
+      if (isset($associated_users['banner'][$account->mfcs['banner_id']]['all']) && is_array($associated_users['banner'][$account->mfcs['banner_id']]['all'])) {
         $duplicate = 'There are <strong>Duplicate</strong> ldap accounts:<ul class="item-information-list item-information-duplicate-list">';
 
-        foreach ($associated_users['banner_id'][$account->mfcs['banner_id']]['all'] as $associated_user) {
+        foreach ($associated_users['banner'][$account->mfcs['banner_id']]['all'] as $associated_user) {
           if ($account->uid == $associated_user['user_id']) {
             continue;
           }
@@ -751,7 +751,7 @@ function mfcs_request_users_0_view_page($user_id) {
   $markup .= '<div class="view_user-item view_user-item-account"><span class="item-label item-label-account strong">Account:</span> <span class="item-value item-value-account">' . $account->name . '</span></div>';
   $markup .= '<div class="view_user-item view_user-item-name"><span class="item-label item-label-name strong">Name:</span> <span class="item-value item-value-name">' . $name . '</span></div>';
   $markup .= '<div class="view_user-item view_user-item-email"><span class="item-label item-label-email strong">E-mail:</span> <span class="item-value item-value-email">' . $email . '</span></div>';
-  $markup .= '<div class="view_user-item view_user-item-banner_id"><span class="item-label item-label-banner_id strong">Banner ID:</span> <span class="item-value item-value-banner_id">' . $banner_id . '</span></div>';
+  $markup .= '<div class="view_user-item view_user-item-banner_id"><span class="item-label item-label-banner_id strong">Banner ID:</span> <span class="item-value item-value-banner_id">' . $account->mfcs['banner_id'] . '</span></div>';
   $markup .= '<div class="view_user-item view_user-item-phone"><span class="item-label item-label-phone strong">Phone:</span> <span class="item-value item-value-phone">' . $phone . '</span></div>';
   $markup .= '<div class="view_user-item view_user-item-updated_on"><span class="item-label item-label-updated_on strong">Updated On:</span> <span class="item-value item-value-updated_on">' . date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS_SQUEEZE, $updated) . '</span></div>';
   $markup .= '</div>';

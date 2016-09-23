@@ -4264,17 +4264,17 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
       $total_accounts = 0;
       $account_ids = array();
 
-      if (!empty($associated_users['banner_id'][$banner_id]['all'])) {
+      if (!empty($associated_users['banner'][$banner_id]['all'])) {
         if (is_null($primary_account_id)) {
-          $primary_account_id = $associated_users['banner_id'][$banner_id]['primary']['user_id'];
+          $primary_account_id = $associated_users['banner'][$banner_id]['primary']['user_id'];
 
           // @todo: handle and report this error where a failsafe primary account is picked and as such the 'primary' flag is not set to TRUE.
-          if (!$associated_users['banner_id'][$banner_id]['primary']['primary']) {
+          if (!$associated_users['banner'][$banner_id]['primary']['primary']) {
             $primary_account_failsafe_not_set = TRUE;
           }
         }
 
-        foreach ($associated_users['banner_id'][$banner_id]['all'] as $associated_user_id => $associated_user) {
+        foreach ($associated_users['banner'][$banner_id]['all'] as $associated_user_id => $associated_user) {
           $total_accounts++;
 
           $account_ids[$associated_user_id] = $associated_user_id;
@@ -13200,8 +13200,8 @@ function mfcs_get_related_user_ids_from_user_banner_id($user) {
 
   if (!is_null($banner_id)) {
     $associated_users = mfcs_users_load_banner_id_to_user_id($banner_id);
-    if (isset($associated_users['banner_id'][$banner_id]['all']) && is_array($associated_users['banner_id'][$banner_id]['all'])) {
-      foreach ($associated_users['banner_id'][$banner_id]['all'] as $associated_id => $associated_user) {
+    if (isset($associated_users['banner'][$banner_id]['all']) && is_array($associated_users['banner'][$banner_id]['all'])) {
+      foreach ($associated_users['banner'][$banner_id]['all'] as $associated_id => $associated_user) {
         $user_id = (int) $associated_id;
 
         if ($user_id > 0) {
