@@ -663,7 +663,29 @@ function mfcs_request_users_0_view_page($user_id) {
     if (!isset($mfcs_oracle_is_not_available)) {
       $coordinator_rooms = mfcs_load_coordinator_rooms_from_banner($account->mfcs['banner_id']);
       if (is_array($coordinator_rooms) && !empty($coordinator_rooms)) {
-        $banner_information .= '<div class="view_user-item view_user-item-room_coordinator"><span class="item-information item-information-room_coordinator">Is Room Coordinator</span></div>';
+        $is_room_coordinator = FALSE;
+        $is_venue_coordinator = FALSE;
+        foreach ($coordinator_rooms as $coordinator_room) {
+          if ($coordinator_room['room_coordinator_id'] == $banner_id_string) {
+            $is_room_coordinator = TRUE;
+          }
+
+          if ($coordinator_room['venue_coordinator_id'] == $banner_id_string) {
+            $is_venue_coordinator = TRUE;
+          }
+
+          if ($is_room_coordinator && $is_venue_coordinator) {
+            break;
+          }
+        }
+
+        if ($is_room_coordinator) {
+          $banner_information .= '<div class="view_user-item view_user-item-room_coordinator"><span class="item-information item-information-room_coordinator">Is Room Coordinator</span></div>';
+        }
+
+        if ($is_venue_coordinator) {
+          $banner_information .= '<div class="view_user-item view_user-item-venue_coordinator"><span class="item-information item-information-venue_coordinator">Is Venue Coordinator</span></div>';
+        }
       }
     }
   }
