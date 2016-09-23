@@ -1758,6 +1758,11 @@ function mfcs_get_request_field_request_coordinator_classification($form, &$form
     $values = $request_state['request_coordinator']['classification'];
   }
 
+  $edit_operation = FALSE;
+  if (isset($form['form']['operation']['#value']) && $form['form']['operation']['#value'] === 'edit') {
+    $edit_operation = TRUE;
+  }
+
   $user = NULL;
   if (isset($form['form']['user']['#value']) && is_object($form['form']['user']['#value'])) {
     $user = $form['form']['user']['#value'];
@@ -1874,6 +1879,13 @@ function mfcs_get_request_field_request_coordinator_classification($form, &$form
     }
     else {
       foreach ($values as $key => $value) {
+        // if value is not defined and only one classification is possible, make that one classification the value.
+        if (is_null($value)) {
+          $classification_keys = array_keys($classification);
+          $value = reset($classification_keys);
+          unset($classification_keys);
+        }
+
         $fields['request_coordinator']['classification'][$key] = array(
           '#id' => 'field-request-request_coordinator-classification-' . $key,
           '#type' => 'select',
@@ -2074,6 +2086,11 @@ function mfcs_get_request_field_information_type($form, &$form_state, &$fields, 
     $values = $request_state['information']['type'];
   }
 
+  $edit_operation = FALSE;
+  if (isset($form['form']['operation']['#value']) && $form['form']['operation']['#value'] === 'edit') {
+    $edit_operation = TRUE;
+  }
+
   $readonly = FALSE;
 
   $field_title = 'Type of Request';
@@ -2110,7 +2127,7 @@ function mfcs_get_request_field_information_type($form, &$form_state, &$fields, 
     if (isset($form['form']['existing']['#value']['request']['information']['type'][0]) && is_numeric($form['form']['existing']['#value']['request']['information']['type'][0])) {
       $existing_option = (int) $form['form']['existing']['#value']['request']['information']['type'][0];
 
-      if (!array_key_exists($existing_option, $type_options)) {
+      if ($edit_operation && !array_key_exists($existing_option, $type_options)) {
         $type_options[$existing_option] = $type_options_all[$existing_option];
 
         // if the existing type is not a type the current user is allowed to assign, deny access to change unless that user is a manager or an administer.
@@ -2140,7 +2157,7 @@ function mfcs_get_request_field_information_type($form, &$form_state, &$fields, 
     }
 
     if (empty($fields['venue_coordinator']['user_id'][0]['#value']) || !in_array($fields['venue_coordinator']['user_id'][0]['#value'], $venue_coordinator_ids)) {
-      if ($existing_option === MFCS_REQUEST_TYPE_QUICK_MEETING) {
+      if ($edit_operation && $existing_option === MFCS_REQUEST_TYPE_QUICK_MEETING) {
         // if the existing type is not a type the current user is allowed to assign, deny access to change unless that user is a manager or an administer.
         $is_manager = FALSE;
         $is_administer = FALSE;
