@@ -621,7 +621,7 @@ function mfcs_request_manage_0_move_form_submit($form, &$form_state) {
     mfcs_load_request_by_id($request_id, FALSE);
 
     mfcs_include(MFCS_INCLUDE_WORKFLOW);
-    mfcs_workflow_step_review($request_id, $user, MFCS_REVIEW_DECISION_MOVE, MFCS_REVIEW_RESTRICTIONS_REQUESTER, $log_message);
+    mfcs_workflow_step_review($request_id, $user, MFCS_REVIEW_DECISION_MOVE, MFCS_REVIEW_RESTRICTIONS_NONE, $log_message);
   }
 
   // redirect after submitting.

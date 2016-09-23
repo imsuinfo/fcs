@@ -1385,7 +1385,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
 
       $user_name = '';
       if (is_null($users[$user_id])) {
-        watchdog(MFCS_WATCHDOG_ID, "Failed to load the user id of %user_id for request %request_id review log dated %date.", array('%user_id' => $user_id, '%request_id' => $request_id, '%date' => date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS, $date)), WATCHDOG_ERROR);
+        watchdog(MFCS_WATCHDOG_ID, 'Failed to load the user id of %user_id for request %request_id review log dated %date.', array('%user_id' => $user_id, '%request_id' => $request_id, '%date' => date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS, $date)), WATCHDOG_ERROR);
         continue;
       }
 
@@ -1400,22 +1400,22 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
         }
 
         if ($classification == MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR) {
-          $reviewer_classification .= "Venue Coordinator";
+          $reviewer_classification .= 'Venue Coordinator';
         }
         elseif ($classification == MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY) {
-          $reviewer_classification .= "Venue Coordinator (Proxy)";
+          $reviewer_classification .= 'Venue Coordinator (Proxy)';
         }
         elseif ($classification == MFCS_REVIEWER_CLASSIFICATION_MANAGER) {
-          $reviewer_classification .= "Manager";
+          $reviewer_classification .= 'Manager';
         }
         elseif ($classification == MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR) {
-          $reviewer_classification .= "System Administrator";
+          $reviewer_classification .= 'System Administrator';
         }
         elseif (array_key_exists($classification, $reviewer_classification_options)) {
           $reviewer_classification .= $reviewer_classification_options[$classification];
         }
         else {
-          watchdog(MFCS_WATCHDOG_ID, "The classification %classification does not exist in the classification options array for the user %user_id.", array('%user_id' => $user_id, '%classification' => $classification), WATCHDOG_WARNING);
+          watchdog(MFCS_WATCHDOG_ID, 'The classification %classification does not exist in the classification options array for the user %user_id.', array('%user_id' => $user_id, '%classification' => $classification), WATCHDOG_WARNING);
         }
 
         $markup_class .= ' classification-' . $classification;
@@ -1424,15 +1424,15 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
 
       if (is_null($reviewer_classification)) {
         if ($user_can_administer) {
-          $reviewer_classification = "Administrator";
+          $reviewer_classification = 'Administrator';
           $markup_class .= ' classification-' . MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR;
         }
         elseif ($user_can_manage) {
-          $reviewer_classification = "Manager";
+          $reviewer_classification = 'Manager';
           $markup_class .= ' classification-' . MFCS_REVIEWER_CLASSIFICATION_MANAGER;
         }
         elseif ($user_is_requester) {
-          $reviewer_classification = "Requester";
+          $reviewer_classification = 'Requester';
           $markup_class .= ' classification-' . MFCS_REVIEWER_CLASSIFICATION_REQUESTER;
         }
       }
@@ -1445,7 +1445,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
       }
 
       if ($user_id == 1) {
-        $user_name .= "System";
+        $user_name .= 'System';
         $reviewer_classification = '';
         $markup_class .= ' classification-' . MFCS_REVIEWER_CLASSIFICATION_SYSTEM;
       }
@@ -1479,17 +1479,17 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
 
       if ($restriction === MFCS_REVIEW_RESTRICTIONS_REQUESTER) {
         $markup .= '<div class="review-item-restricted review-item-restricted-requester">';
-        $markup .= '<div class="review-item-restricted-message review-item-restricted-requester-message" title="Only requesters, managers, and administrators can view this item">' . "Restricted to Requesters" . '</div>';
+        $markup .= '<div class="review-item-restricted-message review-item-restricted-requester-message" title="Only requesters, managers, and administrators can view this item">Restricted to Requesters</div>';
         $markup .= '</div>';
       }
       elseif ($restriction === MFCS_REVIEW_RESTRICTIONS_REVIEWER) {
         $markup .= '<div class="review-item-restricted review-item-restricted-reviewer">';
-        $markup .= '<div class="review-item-restricted-message review-item-restricted-reviewer-message" title="Only reviewers, venue coordinators, managers, and administrators can view this item">' . "Restricted to Reviewers" . '</div>';
+        $markup .= '<div class="review-item-restricted-message review-item-restricted-reviewer-message" title="Only reviewers, venue coordinators, managers, and administrators can view this item">Restricted to Reviewers</div>';
         $markup .= '</div>';
       }
       elseif ($restriction === MFCS_REVIEW_RESTRICTIONS_MANAGERS) {
         $markup .= '<div class="review-item-restricted review-item-restricted-internal">';
-        $markup .= '<div class="review-item-restricted-message review-item-restricted-internal-message" title="Only managers and administrators can view this item">' . "Restricted to Managers" . '</div>';
+        $markup .= '<div class="review-item-restricted-message review-item-restricted-internal-message" title="Only managers and administrators can view this item">Restricted to Managers</div>';
         $markup .= '</div>';
       }
 
@@ -1497,7 +1497,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
       $markup .= '<h3 class="review-item-label-text">' . $row_id_block . '<div class="review-item-label-text-title">';
 
       if ($decision === MFCS_REVIEW_DECISION_AMENDMENT) {
-        $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">' . "Amended" . '</strong> the request' . $reviewer_classification . '.';
+        $markup .= $user_name_markup . ' ' . $user_id_markup . ' has <strong class="review-item-label-text-row-decision">Amended</strong> the request' . $reviewer_classification . '.';
       }
       elseif ($review_step === MFCS_REVIEW_STEP_VENUE_AVAILABLE && $decision === MFCS_REVIEW_DECISION_AVAILABLE) {
         if ($type === MFCS_REQUEST_TYPE_QUICK_MEETING) {
