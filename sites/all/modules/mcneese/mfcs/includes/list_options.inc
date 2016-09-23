@@ -215,6 +215,7 @@ function mfcs_get_review_steps_list_options($option = NULL, $hidden = FALSE, $di
 function mfcs_get_request_classification_list_options($option = NULL, $user = NULL, $hidden = FALSE, $disabled = FALSE) {
   $options = array();
   $options_all = array();
+  $options_to_roles = array();
 
   if ($hidden) {
     $options_all[MFCS_REQUEST_CLASSIFICATION_NONE] = 'None';
@@ -225,14 +226,38 @@ function mfcs_get_request_classification_list_options($option = NULL, $user = NU
   $options_all[MFCS_REQUEST_CLASSIFICATION_FACULTY] = 'Faculty, Staff, Athletics';
   $options_all[MFCS_REQUEST_CLASSIFICATION_EXTERNAL] = 'Externals';
 
+  $role = user_role_load_by_name('student role');
+  if (is_object($role)) {
+    $options_to_roles[$role->rid] = MFCS_REQUEST_CLASSIFICATION_STUDENT;
+  }
+  unset($role);
+
+  $role = user_role_load_by_name('camp role');
+  if (is_object($role)) {
+    $options_to_roles[$role->rid] = MFCS_REQUEST_CLASSIFICATION_CAMPS;
+  }
+  unset($role);
+
+  $role = user_role_load_by_name('employee role');
+  if (is_object($role)) {
+    $options_to_roles[$role->rid] = MFCS_REQUEST_CLASSIFICATION_FACULTY;
+  }
+  unset($role);
+
+  $role = user_role_load_by_name('external role');
+  if (is_object($role)) {
+    $options_to_roles[$role->rid] = MFCS_REQUEST_CLASSIFICATION_EXTERNAL;
+  }
+  unset($role);
+
   if ($option == 'select') {
     $options[''] = '- Select -';
   }
 
   if (is_object($user)) {
-    foreach ($options_all as $option_id => $option_name) {
-      if (array_key_exists($option_id, $user->roles)) {
-        $options[$option_id] = $option_name;
+    foreach ($options_to_roles as $role_id => $classification_id) {
+      if (array_key_exists($role_id, $user->roles) && array_key_exists($classification_id, $options_all)) {
+        $options[$classification_id] = $options_all[$classification_id];
       }
     }
   }
