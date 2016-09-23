@@ -486,6 +486,7 @@ function mfcs_request_users_0_view_page($user_id) {
 
   global $base_path;
   global $mfcs_determined;
+  global $mfcs_oracle_is_not_available;
 
   $url_arguments = '';
   if (!empty($mfcs_determined['complete'])) {
@@ -629,7 +630,10 @@ function mfcs_request_users_0_view_page($user_id) {
   }
 
   $banner_information = '';
-  if (isset($account->mfcs['banner_id'])) {
+  if (isset($mfcs_oracle_is_not_available) && $mfcs_oracle_is_not_available === TRUE) {
+    $banner_information = '<div class="view_user-item view_user-item-roles-unavailable">Banner is currently unavailable.</div>';
+  }
+  elseif (isset($account->mfcs['banner_id']) && is_numeric($account->mfcs['banner_id'])) {
     try {
       $banner_id_string = mfcs_banner_id_int_to_string($account->mfcs['banner_id']);
       $event_roles = mfcs_oracle_select('select role from ucs.msu_event_role where id = :banner_id', array('banner_id' => $banner_id_string));
@@ -646,19 +650,21 @@ function mfcs_request_users_0_view_page($user_id) {
         }
       }
       else {
-        $banner_information = '<div class="view_user-item view_user-item-roles-unavailable">Banner information is currently unavailable.</div>';
+        $banner_information = '<div class="view_user-item view_user-item-roles-unavailable">Banner is currently unavailable.</div>';
       }
     }
     catch (Error $e) {
-      $banner_information = '<div class="view_user-item view_user-item-roles-unavailable">Banner information is currently unavailable.</div>';
+      $banner_information = '<div class="view_user-item view_user-item-roles-unavailable">Banner is currently unavailable.</div>';
     }
     catch (Exception $e) {
-      $banner_information = '<div class="view_user-item view_user-item-roles-unavailable">Banner information is currently unavailable.</div>';
+      $banner_information = '<div class="view_user-item view_user-item-roles-unavailable">Banner is currently unavailable.</div>';
     }
 
-    $coordinator_rooms = mfcs_load_coordinator_rooms($account->uid);
-    if (is_array($coordinator_rooms) && !empty($coordinator_rooms)) {
-      $banner_information .= '<div class="view_user-item view_user-item-room_coordinator"><span class="item-information item-information-room_coordinator">Is Room Coordinator</span></div>';
+    if (!isset($mfcs_oracle_is_not_available)) {
+      $coordinator_rooms = mfcs_load_coordinator_rooms_from_banner($account->mfcs['banner_id']);
+      if (is_array($coordinator_rooms) && !empty($coordinator_rooms)) {
+        $banner_information .= '<div class="view_user-item view_user-item-room_coordinator"><span class="item-information item-information-room_coordinator">Is Room Coordinator</span></div>';
+      }
     }
   }
   else {

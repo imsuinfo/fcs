@@ -11557,12 +11557,16 @@ function mfcs_load_room_coordinators($room_id = NULL, $coordinators_only = FALSE
 /**
  * Returns an array of rooms the user is a coordinator of.
  *
+ * This uses the local/cached/processed version of banner room information.
+ *
  * @param int $user_id
  *   This is the user id of the user.
  *
  * @param array|bool
  *   An array of rooms the user is a coordinator of.
  *   FALSE is returned on error.
+ *
+ * @see: mfcs_load_coordinator_rooms_from_banner()
  */
 function mfcs_load_coordinator_rooms($user_id) {
   if (!cf_is_integer($user_id)) {
@@ -11596,6 +11600,33 @@ function mfcs_load_coordinator_rooms($user_id) {
     cf_error::on_query_execution($e);
     return FALSE;
   }
+
+  return $results;
+}
+
+/**
+ * Returns an array of rooms the user is a coordinator of (according to banner).
+ *
+ * This uses the remote/banner version of banner room information.
+ *
+ * @param int $banner_id
+ *   This is the user id of the user.
+ *
+ * @param array|bool
+ *   An array of rooms the user is a coordinator of.
+ *   FALSE is returned on error.
+ *
+ * @see: mfcs_load_coordinator_rooms()
+ */
+function mfcs_load_coordinator_rooms_from_banner($banner_id) {
+  if (!cf_is_integer($banner_id)) {
+    cf_error::invalid_integer('banner_id');
+    return FALSE;
+  }
+
+  $banner_id_string = mfcs_banner_id_int_to_string($banner_id);
+
+  $results = mfcs_oracle_select('select room_number, building_code, room_coordinator_id, venue_coordinator_id from ucs.msu_venue_detail mvd where mvd.venue_coordinator_id = \'' . $banner_id_string . '\' or  mvd.room_coordinator_id = \'' . $banner_id_string . '\'');
 
   return $results;
 }
