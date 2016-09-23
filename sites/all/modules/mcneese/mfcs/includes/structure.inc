@@ -1529,7 +1529,7 @@ function mfcs_get_request_field_request_coordinator_name($form, &$form_state, &$
     }
   }
 
-  $field_title = "Request Coordinator Name";
+  $field_title = 'Request Coordinator Name';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'name',
@@ -1754,43 +1754,65 @@ function mfcs_get_request_field_request_coordinator_email($form, &$form_state, &
  */
 function mfcs_get_request_field_request_coordinator_classification($form, &$form_state, &$fields, &$request_state, $ps) {
   $values = array(0 => NULL);
+  if (!empty($request_state['request_coordinator']['classification'])) {
+    $values = $request_state['request_coordinator']['classification'];
+  }
 
   $user = NULL;
   if (isset($form['form']['user']['#value']) && is_object($form['form']['user']['#value'])) {
     $user = $form['form']['user']['#value'];
   }
 
-  $state = array();
-  if (isset($request_state['request_coordinator']) && is_array($request_state['request_coordinator'])) {
-    $state = $request_state['request_coordinator'];
+  $readonly = FALSE;
+
+  // when editing a request, if an existing classification is unavailable to the user, it needs to be preserved even if that user is normally not allowed access to that classification.
+  $existing_option = NULL;
+  if (isset($form['form']['existing']['#value']['request']['request_coordinator']['classification'][0]) && is_numeric($form['form']['existing']['#value']['request']['request_coordinator']['classification'][0])) {
+    $existing_option = (int) $form['form']['existing']['#value']['request']['request_coordinator']['classification'][0];
   }
 
-  // for exiting requests (when editing a request), if current editor is not part of the requestor's classification, make sure the old state remains.
-  $old_classification = NULL;
-  if (isset($form['form']['new']['#value']) && $form['form']['new']['#value'] === FALSE && isset($state['classification'])) {
-    $old_classification = (int) reset($state['classification']);
+  $classification = mfcs_get_request_classification_list_options('select', $user);
+  $classification_count = count($classification);
+  if ($classification_count == 2) {
+    unset($classification[NULL]);
+    $classification_count = 1;
+  }
+  elseif ($classification_count < 2) {
+    unset($classification[NULL]);
+    $classification_count = 0;
   }
 
-  $classification = mfcs_determine_user_classification($state, $user, $old_classification);
+  $classification_all = mfcs_get_request_classification_list_options(NULL, NULL, TRUE, TRUE);
 
-  if (isset($request_state['request_coordinator']) && array_key_exists('classification', $request_state['request_coordinator']) && !empty($request_state['request_coordinator']['classification'][0])) {
-    $values = $request_state['request_coordinator']['classification'];
+  if (!is_null($existing_option) && !array_key_exists($existing_option, $classification)) {
+    $classification[$existing_option] = $classification_all[$existing_option];
+    $classification_count++;
 
-    // if the user's classifications change while on the form, existing saved data between states must be reset.
-    if (!empty($classification['options']) && is_array($classification['options'])) {
-      foreach ($request_state['request_coordinator']['classification'] as $key => $value) {
-        // for users with multiple classifications, the value will be an array.
-        if (is_array($value)) continue;
+    // if the existing type is not a type the current user is allowed to assign, deny access to change unless that user is a manager or an administer.
+    $is_manager = FALSE;
+    $is_administer = FALSE;
+    if (is_object($user)) {
+      $is_manager = user_access('mfcs manage', $user);
+      $is_administer = user_access('mfcs administer', $user);
+    }
 
-        if (!array_key_exists($value, $classification['options'])) {
-          $values = array(0 => $classification['value']);
-          break;
-        }
-      }
+    if (!($is_manager || $is_administer)) {
+      $readonly = TRUE;
     }
   }
-  else {
-    $values = array(0 => $classification['value']);
+
+  // if the user classification has changed during the request process, attempt to reset the classification.
+  if (isset($values[0]) && is_numeric($values[0])) {
+    if (!array_key_exists($values[0], $classification)) {
+      if ($classification_count == 1) {
+        $classification_keys = array_keys($classification);
+        $values[0] = reset($classification_keys);
+        unset($classification_keys);
+      }
+      else {
+        $values[0] = NULL;
+      }
+    }
   }
 
   $field_title = 'Request Coordinator Classification';
@@ -1821,14 +1843,14 @@ function mfcs_get_request_field_request_coordinator_classification($form, &$form
     );
 
     // multiple classifications exists, so prompt user for desired classification.
-    if ($classification['count'] > 1) {
+    if ($classification_count > 1) {
       foreach ($values as $key => $value) {
         $fields['request_coordinator']['classification'][$key] = array(
           '#id' => 'field-request-request_coordinator-classification-' . $key,
           '#type' => 'select',
           '#title' => $field_title,
           '#description' => 'Associate this request with a specific classification.',
-          '#options' => $classification['options'],
+          '#options' => $classification,
           '#default_value' => $value,
           '#required' => TRUE,
           '#attributes' => array(
@@ -1838,6 +1860,11 @@ function mfcs_get_request_field_request_coordinator_classification($form, &$form
             ),
           ),
         );
+
+        if ($readonly) {
+          $fields['request_coordinator']['classification'][$key]['#disabled'] = TRUE;
+          $fields['request_coordinator']['classification'][$key]['#attributes']['readonly'] = 'readonly';
+        }
       }
       krsort($fields['request_coordinator']['classification']);
 
@@ -1851,7 +1878,7 @@ function mfcs_get_request_field_request_coordinator_classification($form, &$form
           '#id' => 'field-request-request_coordinator-classification-' . $key,
           '#type' => 'select',
           '#title' => 'Request Coordinator Classification',
-          '#options' => $classification['options'],
+          '#options' => $classification,
           '#default_value' => $value,
           '#value' => $value,
           '#readonly' => TRUE,
@@ -1862,8 +1889,13 @@ function mfcs_get_request_field_request_coordinator_classification($form, &$form
               'form-item-delta',
               'form-item-delta-' . $key,
             ),
+            'readonly' => 'readonly',
           ),
         );
+
+        if ($readonly) {
+          $fields['request_coordinator']['classification'][$key]['#disabled'] = TRUE;
+        }
       }
 
       $form_state['conditionally_required'][0][] = 'request_coordinator][classification';
@@ -6591,82 +6623,6 @@ function mfcs_get_request_field_insurance_unaffiliated($form, &$form_state, &$fi
   }
 
   return $values;
-}
-
-/**
- * Returns an array containing classication information.
- *
- * @param array $state
- *   (optional) The form_state array containing the 'classsification' key and
- *   value.
- * @param object|null $user
- *   (optional) The loaded user object for the user to load the classification
- *   for. When NULL, returns all options available.
- * @param int|null $old_classification
- *   (optional) Require that the old classification exists, even if the user is
- *   not granted access to the classification.
- *
- * @return array
- *   An array with the following keys:
- *   - count: the number of classifications available for the current user.
- *   - options: all available select list options.
- *   - value: the default value to use.
- */
-function mfcs_determine_user_classification($state = array(), $user = NULL, $old_classification = NULL) {
-  $information = array();
-  $information['count'] = 0;
-  $information['options'] = array();
-  $information['value'] = '';
-
-  if (!is_array($state)) {
-    cf_error:invalid_array('state');
-    return $information;
-  }
-
-  if (!is_null($user) && !is_object($user)) {
-    cf_error::invalid_object('user');
-
-    return $information;
-  }
-
-  if (!is_null($old_classification) && !is_int($old_classification)) {
-    cf_error::invalid_integer('old_classification');
-
-    return $information;
-  }
-
-  $information['options'] = mfcs_get_request_classification_list_options(NULL, $user);
-  $information['count'] = count($information['options']);
-
-  if (!is_null($old_classification) && !array_key_exists($old_classification, $information['options'])) {
-    $all_options = mfcs_get_request_classification_list_options(NULL);
-
-    if (isset($all_options[$old_classification])) {
-      $information['options'][$old_classification] = $all_options[$old_classification];
-      $information['count']++;
-    }
-  }
-
-  if ($information['count'] == 1) {
-    $classification_keys = array_keys($information['options']);
-    $information['value'] = array_pop($classification_keys);
-  }
-  else {
-    $rebuild = array();
-    $rebuild[''] = "- Select -";
-
-    foreach ($information['options'] as $key => $value) {
-      $rebuild[$key] = $value;
-    }
-
-    $information['options'] = $rebuild;
-
-    if (array_key_exists('classification', $state)) {
-      $information['value'] = $state['classification'];
-    }
-  }
-
-  return $information;
 }
 
 /**

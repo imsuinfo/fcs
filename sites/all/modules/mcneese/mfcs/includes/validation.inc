@@ -325,14 +325,14 @@ function mfcs_validate_request_fields($form, &$form_state) {
     $ps = array_pop($ps_c);
 
     if (!array_key_exists($ps, $location_form)) {
-      watchdog(MFCS_WATCHDOG_ID, "Failed to perform validation, the key '@key' is missing from the form. Currently processed path is @processed", array('@key' => $ps, '@processed' => isset($ps_p) ? $ps_p : NULL), WATCHDOG_ERROR);
+      watchdog(MFCS_WATCHDOG_ID, 'Failed to perform validation, the key \'@key\' is missing from the form. Currently processed path is @processed', array('@key' => $ps, '@processed' => isset($ps_p) ? $ps_p : NULL), WATCHDOG_ERROR);
       return NULL;
     }
 
     if (!array_key_exists($ps, $location_state)) {
       // for creating new requests, the form state may not yet exist under certain circumstances and in such cases do not present and error.
       if (isset($form['form']['request'])) {
-        watchdog(MFCS_WATCHDOG_ID, "Failed to perform validation, the key '@key' is missing from the form_state. Currently processed path is @processed", array('@key' => $ps, '@processed' => isset($ps_p) ? $ps_p : NULL), WATCHDOG_ERROR);
+        watchdog(MFCS_WATCHDOG_ID, 'Failed to perform validation, the key \'@key\' is missing from the form_state. Currently processed path is @processed', array('@key' => $ps, '@processed' => isset($ps_p) ? $ps_p : NULL), WATCHDOG_ERROR);
       }
       return NULL;
     }
@@ -373,7 +373,7 @@ function mfcs_validate_request_fields($form, &$form_state) {
     // quick meetings can only be used by venue coordinators.
     if ($is_quick_meeting) {
       if ($clicked_id == 'submit-request-next') {
-        form_set_error($clicked_id, t("The form has no additional steps when '@term_name' is used. Use the submit button instead.", array('@term_name' => $quick_meeting_name)));
+        form_set_error($clicked_id, t('The form has no additional steps when \'@term_name\' is used. Use the submit button instead.', array('@term_name' => $quick_meeting_name)));
       }
       elseif ($clicked_id == 'submit-request-submit') {
         $cannot_perform_quick_meetings = TRUE;
@@ -399,7 +399,7 @@ function mfcs_validate_request_fields($form, &$form_state) {
         }
 
         if ($cannot_perform_quick_meetings) {
-          form_set_error($ps_p . '][information][type][0', t("You are not authorized to utilize a '@term_name'.", array('@term_name' => $quick_meeting_name)));
+          form_set_error($ps_p . '][information][type][0', t('You are not authorized to utilize a \'@term_name\'.', array('@term_name' => $quick_meeting_name)));
         }
       }
     }
@@ -410,18 +410,18 @@ function mfcs_validate_request_fields($form, &$form_state) {
       }
 
       if ($clicked_id == 'submit-request-submit' && $not_custom_section) {
-        form_set_error($clicked_id, t("The form may only be submitted during this step if a '@term_name' is used. Use the continue button instead.", array('@term_name' => $quick_meeting_name)));
+        form_set_error($clicked_id, t('The form may only be submitted during this step if a \'@term_name\' is used. Use the continue button instead.', array('@term_name' => $quick_meeting_name)));
       }
     }
 
     // confirm the availability of the room, building, and location.
     if (empty($location_state['location'][0]) || empty($location_state['building'][0]) || empty($location_state['room'][0])) {
-      form_set_error('', t("The request room, building, or location has not been specified."));
+      form_set_error('', 'The request room, building, or location has not been specified.');
     }
     else {
       $room = mfcs_load_rooms($location_state['location'][0], $location_state['building'][0], $location_state['room'][0]);
       if ($room === FALSE) {
-        form_set_error('', t("The request room/building/location cannot be selected at this time. Please try another room, building, or location."));
+        form_set_error('', 'The request room/building/location cannot be selected at this time. Please try another room, building, or location.');
       }
     }
 
@@ -431,7 +431,13 @@ function mfcs_validate_request_fields($form, &$form_state) {
     }
 
     if (!is_object($coordinator_user)) {
-      form_set_error($ps_p . '][coordinator][email][0', "Unable to map the coordinator to a valid e-mail address. Either an invalid McNeese e-mail address was provided or an internal system error occurred.");
+      form_set_error($ps_p . '][coordinator][email][0', 'Unable to map the coordinator to a valid e-mail address. Either an invalid McNeese e-mail address was provided or an internal system error occurred.');
+    }
+
+
+    // make sure the request coordinator classification is never NULL.
+    if (!isset($location_state['request_coordinator']['classification'][0]) || is_null($location_state['request_coordinator']['classification'][0])) {
+      form_set_error($ps_p . '][request_coordinator][classification][0', 'An invalid request coordinator classification has been specified.');
     }
 
 
