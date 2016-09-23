@@ -789,7 +789,22 @@ function mfcs_get_request_field_location($form, &$form_state, &$fields, &$reques
     $values = $request_state['location'];
   }
 
-  $field_title = "Please indicate the requested facility or request location?";
+  // do not allow certain fields to be editable when a request is completed, even by admins (in this case there is a move operation to change location, building, and room).
+  $readonly = FALSE;
+  if (isset($form['form']['operation']['#value']) && $form['form']['operation']['#value'] === 'edit' && isset($form['form']['existing']['#value'])) {
+    if (isset($form['form']['existing']['#value']['request']['step'][0]) && is_numeric($form['form']['existing']['#value']['request']['step'][0])) {
+      if ((int)$form['form']['existing']['#value']['request']['step'][0] === MFCS_REVIEW_STEP_COMPLETED) {
+        $readonly = TRUE;
+      }
+    }
+  }
+
+  $form['form']['operation'] = array(
+    '#type' => 'value',
+    '#value' => 'create',
+  );
+
+  $field_title = 'Please indicate the requested facility or request location?';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'location',
@@ -836,6 +851,11 @@ function mfcs_get_request_field_location($form, &$form_state, &$fields, &$reques
         ),
         '#description' => 'If you are unsure of which location to choose, then please contact the administration or your adviser.',
       );
+
+      if ($readonly) {
+        $fields['location'][$key]['#disabled'] = TRUE;
+        $fields['location'][$key]['#attributes']['readonly'] = 'readonly';
+      }
     }
     krsort($fields['location']);
 
@@ -875,8 +895,18 @@ function mfcs_get_request_field_building($form, &$form_state, &$fields, &$reques
     $values[0] = $form['form']['room_information']['#value']->building_id;
   }
 
+  // do not allow certain fields to be editable when a request is completed, even by admins (in this case there is a move operation to change location, building, and room).
+  $readonly = FALSE;
+  if (isset($form['form']['operation']['#value']) && $form['form']['operation']['#value'] === 'edit' && isset($form['form']['existing']['#value'])) {
+    if (isset($form['form']['existing']['#value']['request']['step'][0]) && is_numeric($form['form']['existing']['#value']['request']['step'][0])) {
+      if ((int)$form['form']['existing']['#value']['request']['step'][0] === MFCS_REVIEW_STEP_COMPLETED) {
+        $readonly = TRUE;
+      }
+    }
+  }
+
   $limits_check = array(
-    'title' => "Building",
+    'title' => 'Building',
     'field' => 'building',
     'group' => 'top',
     'path' => 'building',
@@ -899,6 +929,11 @@ function mfcs_get_request_field_building($form, &$form_state, &$fields, &$reques
         ),
       ),
     );
+
+    if ($readonly) {
+      $fields['building']['#disabled'] = TRUE;
+      $fields['building']['#attributes']['readonly'] = 'readonly';
+    }
 
     $limits_check['visible'] = TRUE;
   }
@@ -924,7 +959,17 @@ function mfcs_get_request_field_room($form, &$form_state, &$fields, &$request_st
     $values = $request_state['room'];
   }
 
-  $field_title = "Select a Room";
+  // do not allow certain fields to be editable when a request is completed, even by admins (in this case there is a move operation to change location, building, and room).
+  $readonly = FALSE;
+  if (isset($form['form']['operation']['#value']) && $form['form']['operation']['#value'] === 'edit' && isset($form['form']['existing']['#value'])) {
+    if (isset($form['form']['existing']['#value']['request']['step'][0]) && is_numeric($form['form']['existing']['#value']['request']['step'][0])) {
+      if ((int)$form['form']['existing']['#value']['request']['step'][0] === MFCS_REVIEW_STEP_COMPLETED) {
+        $readonly = TRUE;
+      }
+    }
+  }
+
+  $field_title = 'Select a Room';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'room',
@@ -980,6 +1025,11 @@ function mfcs_get_request_field_room($form, &$form_state, &$fields, &$request_st
           ),
         ),
       );
+
+      if ($readonly) {
+        $fields['room'][$key]['#disabled'] = TRUE;
+        $fields['room'][$key]['#attributes']['readonly'] = 'readonly';
+      }
     }
     krsort($fields['room']);
 

@@ -69,9 +69,9 @@ function mfcs_request_create_0_form($form, &$form_state, $clone_request = NULL) 
     mfcs_add_canonical_headers('requests/create-0/' . $clone_request);
   }
 
-  $page_title = "Create Request";
+  $page_title = 'Create Request';
   if (!empty($request['information']['title'][0]->value)) {
-    $page_title = "Copy Request: " . $request['information']['title'][0]->value;
+    $page_title = 'Copy Request: ' . $request['information']['title'][0]->value;
   }
   drupal_set_title($page_title);
 
@@ -108,6 +108,11 @@ function mfcs_request_create_0_form($form, &$form_state, $clone_request = NULL) 
     '#id' => 'field-form-step',
     '#type' => 'value',
     '#value' => $step,
+  );
+
+  $form['form']['operation'] = array(
+    '#type' => 'value',
+    '#value' => 'create',
   );
 
   $form['form']['new'] = array(

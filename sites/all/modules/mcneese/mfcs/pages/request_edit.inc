@@ -79,9 +79,9 @@ function mfcs_request_edit_0_form($form, &$form_state, $request_id, $target_sect
     mfcs_add_canonical_headers('requests/edit-0/' . $request_id . '/' . $target_section);
   }
 
-  $page_title = "Edit Request";
+  $page_title = 'Edit Request';
   if (!empty($request['information']['title'][0]->value)) {
-    $page_title = "Edit Request: " . $request['information']['title'][0]->value;
+    $page_title = 'Edit Request: ' . $request['information']['title'][0]->value;
   }
   drupal_set_title($page_title);
 
@@ -112,6 +112,11 @@ function mfcs_request_edit_0_form($form, &$form_state, $request_id, $target_sect
     '#id' => 'field-form-step',
     '#type' => 'value',
     '#value' => $step,
+  );
+
+  $form['form']['operation'] = array(
+    '#type' => 'value',
+    '#value' => 'edit',
   );
 
   $form['form']['new'] = array(

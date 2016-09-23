@@ -52,9 +52,9 @@ function mfcs_request_manage_0_move_form($form, &$form_state, $request_id) {
 
   mfcs_add_canonical_headers('requests/manage-0/move/' . $request_id);
 
-  $page_title = "Move Request";
+  $page_title = 'Move Request';
   if (!empty($request['information']['title'][0]->value)) {
-    $page_title = "Move Request: " . $request['information']['title'][0]->value;
+    $page_title = 'Move Request: ' . $request['information']['title'][0]->value;
   }
   drupal_set_title($page_title);
 
@@ -85,6 +85,11 @@ function mfcs_request_manage_0_move_form($form, &$form_state, $request_id) {
   $form['form']['step'] = array(
     '#type' => 'value',
     '#value' => 'location',
+  );
+
+  $form['form']['operation'] = array(
+    '#type' => 'value',
+    '#value' => 'move',
   );
 
   $form['form']['sections'] = array(
