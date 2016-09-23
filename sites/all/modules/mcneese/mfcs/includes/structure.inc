@@ -2311,7 +2311,7 @@ function mfcs_get_request_field_information_adviser_approval($form, &$form_state
     }
   }
 
-  $field_title = "Has your adviser been notified and has approved this request?";
+  $field_title = 'My adviser has been notified and has approved this request.';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'adviser_approval',
