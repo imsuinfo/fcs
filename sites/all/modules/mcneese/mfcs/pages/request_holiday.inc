@@ -730,7 +730,7 @@ function mfcs_request_holiday_0_copy_form_submit($form, &$form_state) {
   foreach ($holidays_to_check as $holiday_id => $holiday_title) {
     $conflicts = mfcs_request_holiday_0_check_for_conlficts($holiday_id);
     if (!empty($conflicts)) {
-      $warning = 'The holiday, <strong>' . check_plain($holiday_title) . ',</strong>, is in conflict with the following requests:<br><ul class="holiday_conflict-warning-list">';
+      $warning = 'The holiday, <strong>' . check_plain($holiday_title) . '</strong>, is in conflict with the following requests:<br><ul class="holiday_conflict-warning-list">';
       foreach ($conflicts as $conflict) {
         $warning .= '<li class="holiday_conflict-warning-list-item"><a href="' . $base_path . 'requests/view-0/' . $conflict->id . $url_arguments . '">' . check_plain($conflict->title) . '</a></li>';
       }
@@ -1239,7 +1239,7 @@ function mfcs_request_holiday_0_edit_form_submit($form, &$form_state) {
   if (!empty($conflicts)) {
     global $base_path;
 
-    $warning = 'The holiday, <strong>' . check_plain($form_state['values']['holiday']['title']) . ',</strong>, is in conflict with the following requests:<br><ul class="holiday_conflict-warning-list">';
+    $warning = 'The holiday, <strong>' . check_plain($form_state['values']['holiday']['title']) . '</strong>, is in conflict with the following requests:<br><ul class="holiday_conflict-warning-list">';
     foreach ($conflicts as $conflict) {
       $warning .= '<li class="holiday_conflict-warning-list-item"><a href="' . $base_path . 'requests/view-0/' . $conflict->id . $url_arguments . '">' . check_plain($conflict->title) . '</a></li>';
     }
