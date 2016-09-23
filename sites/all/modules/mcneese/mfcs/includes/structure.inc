@@ -1793,7 +1793,7 @@ function mfcs_get_request_field_request_coordinator_classification($form, &$form
     $values = array(0 => $classification['value']);
   }
 
-  $field_title = "Request Coordinator Classification";
+  $field_title = 'Request Coordinator Classification';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'classification',
@@ -1827,7 +1827,7 @@ function mfcs_get_request_field_request_coordinator_classification($form, &$form
           '#id' => 'field-request-request_coordinator-classification-' . $key,
           '#type' => 'select',
           '#title' => $field_title,
-          '#description' => t("Associate this request with a specific classification."),
+          '#description' => 'Associate this request with a specific classification.',
           '#options' => $classification['options'],
           '#default_value' => $value,
           '#required' => TRUE,
@@ -2042,7 +2042,9 @@ function mfcs_get_request_field_information_type($form, &$form_state, &$fields, 
     $values = $request_state['information']['type'];
   }
 
-  $field_title = "Type of Request";
+  $readonly = FALSE;
+
+  $field_title = 'Type of Request';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'type',
@@ -2069,7 +2071,29 @@ function mfcs_get_request_field_information_type($form, &$form_state, &$fields, 
     );
 
     $type_options = mfcs_get_request_type_list_options('select');
+    $type_options_all = mfcs_get_request_type_list_options(NULL, TRUE, TRUE);
 
+    // when editing a request, if an existing type is unavailable to the user, it needs to be preserved even if that user is normally not allowed access to that type.
+    $existing_option = NULL;
+    if (isset($form['form']['existing']['#value']['request']['information']['type'][0]) && is_numeric($form['form']['existing']['#value']['request']['information']['type'][0])) {
+      $existing_option = (int) $form['form']['existing']['#value']['request']['information']['type'][0];
+
+      if (!array_key_exists($existing_option, $type_options)) {
+        $type_options[$existing_option] = $type_options_all[$existing_option];
+
+        // if the existing type is not a type the current user is allowed to assign, deny access to change unless that user is a manager or an administer.
+        $is_manager = FALSE;
+        $is_administer = FALSE;
+        if (isset($form['form']['user']['#value']) && is_object($form['form']['user']['#value'])) {
+          $is_manager = user_access('mfcs manage', $form['form']['user']['#value']);
+          $is_administer = user_access('mfcs administer', $form['form']['user']['#value']);
+        }
+
+        if (!($is_manager || $is_administer)) {
+          $readonly = TRUE;
+        }
+      }
+    }
 
     // quick meetings can only be used by venue coordinators and their proxies.
     $venue_coordinator_ids = array();
@@ -2084,9 +2108,23 @@ function mfcs_get_request_field_information_type($form, &$form_state, &$fields, 
     }
 
     if (empty($fields['venue_coordinator']['user_id'][0]['#value']) || !in_array($fields['venue_coordinator']['user_id'][0]['#value'], $venue_coordinator_ids)) {
-      unset($type_options[MFCS_REQUEST_TYPE_QUICK_MEETING]);
-    }
+      if ($existing_option === MFCS_REQUEST_TYPE_QUICK_MEETING) {
+        // if the existing type is not a type the current user is allowed to assign, deny access to change unless that user is a manager or an administer.
+        $is_manager = FALSE;
+        $is_administer = FALSE;
+        if (isset($form['form']['user']['#value']) && is_object($form['form']['user']['#value'])) {
+          $is_manager = user_access('mfcs manage', $form['form']['user']['#value']);
+          $is_administer = user_access('mfcs administer', $form['form']['user']['#value']);
+        }
 
+        if (!($is_manager || $is_administer)) {
+          $readonly = TRUE;
+        }
+      }
+      else {
+        unset($type_options[MFCS_REQUEST_TYPE_QUICK_MEETING]);
+      }
+    }
 
     foreach ($values as $key => $value) {
       $fields['information']['type'][$key] = array(
@@ -2103,6 +2141,11 @@ function mfcs_get_request_field_information_type($form, &$form_state, &$fields, 
           ),
         ),
       );
+
+      if ($readonly) {
+        $fields['information']['type'][$key]['#disabled'] = TRUE;
+        $fields['information']['type'][$key]['#attributes']['readonly'] = 'readonly';
+      }
     }
     krsort($fields['information']['type']);
 
