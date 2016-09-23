@@ -140,15 +140,15 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
   if ($contained === FALSE) {
     if ($mode == MFCS_VIEW_MODE_LOG) {
-      $page_title = "Request Review Log";
+      $page_title = 'Request Review Log';
       if (!empty($request['information']['title'][0]->value)) {
-        $page_title = "Request Review Log: " . $request['information']['title'][0]->value;
+        $page_title = 'Request Review Log: ' . $request['information']['title'][0]->value;
       }
     }
     elseif ($mode == MFCS_VIEW_MODE_OPERATIONS) {
-      $page_title = "Request Review Operations";
+      $page_title = 'Request Review Operations';
       if (!empty($request['information']['title'][0]->value)) {
-        $page_title = "Request Review Operations: " . $request['information']['title'][0]->value;
+        $page_title = 'Request Review Operations: ' . $request['information']['title'][0]->value;
       }
     }
   }
@@ -420,7 +420,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
   if (!isset($request['information']['type'][0]->value) || !cf_is_integer($request['information']['type'][0]->value)) {
     cf_error::invalid_integer('request[information][type][0]->value');
     $form['message'] = array(
-      '#markup' => "Error: Unable to load request (ID = " . check_plain($request_id) . ") due to missing request type value.",
+      '#markup' => 'Error: Unable to load request (ID = ' . check_plain($request_id) . ') due to missing request type value.',
     );
 
     return $form;
@@ -447,7 +447,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
       '#type' => 'fieldset',
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
-      '#title' => "Request Details",
+      '#title' => 'Request Details',
       '#attributes' => array(
         'class' => array(
           'request-section-display',
@@ -919,14 +919,14 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           '#id' => 'request-display-submit-cancel',
           '#name' => 'request-display-submit-cancel',
           '#type' => 'submit',
-          '#default_value' => t("Cancel"),
+          '#default_value' => 'Cancel',
           '#attributes' => array(
             'class' => array(
               'no-print',
               'request-display-submit-cancel',
               'mode-' . $mode,
             ),
-            'title' => "Cancel this request.",
+            'title' => 'Cancel this request.',
           ),
           '#submit' => array(
             'mfcs_request_cancel_0_form_submit',
@@ -938,14 +938,14 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           '#id' => 'request-display-submit-uncancel',
           '#name' => 'request-display-submit-uncancel',
           '#type' => 'submit',
-          '#default_value' => t("Uncancel"),
+          '#default_value' => 'Uncancel',
           '#attributes' => array(
             'class' => array(
               'no-print',
               'request-display-submit-uncancel',
               'mode-' . $mode,
             ),
-            'title' => "Uncancel this request.",
+            'title' => 'Uncancel this request.',
           ),
           '#submit' => array(
             'mfcs_request_uncancel_0_form_submit',
@@ -957,7 +957,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         '#id' => 'request-display-submit-print',
         '#name' => 'request-display-submit-print',
         '#type' => 'submit',
-        '#default_value' => t("Print"),
+        '#default_value' => 'Print',
         '#attributes' => array(
           'class' => array(
             'no-print',
@@ -965,7 +965,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
             'mode-' . $mode,
           ),
           'onclick' => 'window.print(); return false;',
-          'title' => "Send this request to your printer.",
+          'title' => 'Send this request to your printer.',
         ),
       );
 
@@ -973,14 +973,14 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         '#id' => 'request-display-submit-download',
         '#name' => 'request-display-submit-download',
         '#type' => 'submit',
-        '#default_value' => t("Download"),
+        '#default_value' => 'Download',
         '#attributes' => array(
           'class' => array(
             'no-print',
             'request-display-submit-download',
             'mode-' . $mode,
           ),
-          'title' => "View or Download this request as a PDF.",
+          'title' => 'View or Download this request as a PDF.',
         ),
         '#submit' => array(
           'mfcs_request_view_0_form_submit_pdf',
@@ -1091,7 +1091,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           }
         }
         elseif ($request['top']['step'][0]->value == MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
-          $yet_to_review[$request['venue_coordinator']['user_id'][0]->value] = "Venue Coordinator";
+          $yet_to_review[$request['venue_coordinator']['user_id'][0]->value] = 'Venue Coordinator';
         }
 
         if (!empty($yet_to_review) && ($is_reviewer || $is_manager || $is_administer)) {
@@ -1263,7 +1263,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           '#id' => 'request-review-log-submit-print',
           '#name' => 'request-review-log-submit-print',
           '#type' => 'submit',
-          '#default_value' => t("Print"),
+          '#default_value' => 'Print',
           '#attributes' => array(
             'class' => array(
               'no-print',
@@ -1271,7 +1271,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
               'mode-' . $mode,
             ),
             'onclick' => 'window.print(); return false;',
-          'title' => "Send this request to your printer.",
+          'title' => 'Send this request to your printer.',
           ),
         );
 
@@ -1279,14 +1279,14 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           '#id' => 'request-review-log-submit-download',
           '#name' => 'request-review-log-submit-download',
           '#type' => 'submit',
-          '#default_value' => t("Download"),
+          '#default_value' => 'Download',
           '#attributes' => array(
             'class' => array(
               'no-print',
               'request-review-log-submit-download',
               'mode-' . $mode,
             ),
-           'title' => "View or Download this request as a PDF.",
+           'title' => 'View or Download this request as a PDF.',
           ),
           '#submit' => array(
             'mfcs_request_view_0_form_submit_pdf',
@@ -1427,12 +1427,12 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
       if ($is_venue_coordinator && (empty($reviewer_classifications) || $step === MFCS_REVIEW_STEP_VENUE_AVAILABLE)) {
 
         if ($request['venue_coordinator']['user_id'][0]->value == $user->uid) {
-          $reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR] = "Venue Coordinator";
-          $reviewer_classifications_all[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR] = "Venue Coordinator";
+          $reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR] = 'Venue Coordinator';
+          $reviewer_classifications_all[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR] = 'Venue Coordinator';
         }
         else {
-          $reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY] = "Venue Coordinator (Proxy)";
-          $reviewer_classifications_all[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY] = "Venue Coordinator (Proxy)";
+          $reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY] = 'Venue Coordinator (Proxy)';
+          $reviewer_classifications_all[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY] = 'Venue Coordinator (Proxy)';
         }
       }
 
@@ -1594,12 +1594,12 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           );
 
           $uses = array();
-          $uses['facilities_fees'] = "Facilities";
-          $uses['equipment_fees'] = "Additional Equipment";
-          $uses['custodial_fees'] = "Custodial";
-          $uses['maintenance_fees'] = "Maintenance";
-          $uses['grounds_fees'] = "Grounds";
-          $uses['security_fees'] = "Security";
+          $uses['facilities_fees'] = 'Facilities';
+          $uses['equipment_fees'] = 'Additional Equipment';
+          $uses['custodial_fees'] = 'Custodial';
+          $uses['maintenance_fees'] = 'Maintenance';
+          $uses['grounds_fees'] = 'Grounds';
+          $uses['security_fees'] = 'Security';
 
           $insurance_requirement = TRUE;
 
@@ -1912,14 +1912,14 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         $form['review']['operations']['message_is_reviewers_only'] = array(
           '#id' => 'request-review-operations-message_is_reviewers_only',
           '#type' => 'checkbox',
-          '#title' => "Restrict message to reviewers only.",
+          '#title' => 'Restrict message to reviewers only.',
           '#default_value' => FALSE,
           '#required' => FALSE,
           '#attributes' => array(
-            'title' => "When enabled, messages will be restricted to reviewers, managers, and administrators.",
+            'title' => 'When enabled, messages will be restricted to reviewers, managers, and administrators.',
           ),
           '#label_attributes' => array(
-            'title' => "When enabled, messages will be restricted to reviewers, managers, and administrators.",
+            'title' => 'When enabled, messages will be restricted to reviewers, managers, and administrators.',
           ),
           '#weight' => 6,
         );
@@ -2099,8 +2099,8 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
     }
 
     if ($step_latest !== $step_previous) {
-      drupal_set_message("Warning: the request has changed since you last loaded this page. This page is out of date and has been reloaded. No changes have been made.", 'warning');
-      watchdog(MFCS_WATCHDOG_ID, "The user '%user_name' (%user_id) attempted to review a request using a stale page", array('%user_name' => $user->name, '%user_id' => $user->uid), WATCHDOG_WARNING);
+      drupal_set_message('Warning: the request has changed since you last loaded this page. This page is out of date and has been reloaded. No changes have been made.', 'warning');
+      watchdog(MFCS_WATCHDOG_ID, 'The user \'%user_name\' (%user_id) attempted to review a request using a stale page', array('%user_name' => $user->name, '%user_id' => $user->uid), WATCHDOG_WARNING);
       return;
     }
   }
@@ -2117,36 +2117,36 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
   }
 
   if ($clicked_id == 'request-display-submit-print' || $clicked_id == 'request-review-log-submit-print') {
-    form_set_error('', "The print button uses javascript to help force a print. You can always use your browsers print button (or equivalent) directly.");
+    form_set_error('', 'The print button uses javascript to help force a print. You can always use your browsers print button (or equivalent) directly.');
   }
   elseif ($clicked_id == 'request-display-submit-download' || $clicked_id == 'request-review-log-submit-download') {
     $form_state['rebuild'] = FALSE;
   }
   elseif ($clicked_id == 'request-display-submit-cancel') {
     if ($mode != MFCS_VIEW_MODE_NORMAL && $mode != MFCS_VIEW_MODE_DISPLAY) {
-      form_set_error('', "This view mode does not allow cancelling.");
+      form_set_error('', 'This view mode does not allow cancelling.');
     }
 
     if (isset($form['form']['use_revision']['#value']) && !is_null($form['form']['use_revision']['#value'])) {
-      form_set_error('', "Revisions can not be cancelled.");
+      form_set_error('', 'Revisions can not be cancelled.');
     }
 
     $form_state['cancel_was_clicked'] = TRUE;
   }
   elseif ($clicked_id == 'request-display-submit-uncancel') {
     if ($mode != MFCS_VIEW_MODE_NORMAL && $mode != MFCS_VIEW_MODE_DISPLAY) {
-      form_set_error('', "This view mode does not allow uncancelling.");
+      form_set_error('', 'This view mode does not allow uncancelling.');
     }
 
     if (isset($form['form']['use_revision']['#value']) && !is_null($form['form']['use_revision']['#value'])) {
-      form_set_error('', "Revisions can not be uncancelled.");
+      form_set_error('', 'Revisions can not be uncancelled.');
     }
 
     $form_state['uncancel_was_clicked'] = TRUE;
   }
   elseif ($clicked_id == 'request-review-operations-submit-submit') {
     if (isset($form['form']['use_revision']['#value']) && !is_null($form['form']['use_revision']['#value'])) {
-      form_set_error('', "Revisions can not be changed or reviewed.");
+      form_set_error('', 'Revisions can not be changed or reviewed.');
     }
 
     $failure = FALSE;
@@ -2211,18 +2211,18 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
     }
     else {
       if (!in_array($status, $allowed_statuses)) {
-        form_set_error('', "Illegal operation detected. Operations cannot be performed for the request's current status.");
+        form_set_error('', 'Illegal operation detected. Operations cannot be performed for the request\'s current status.');
         $failure = TRUE;
       }
 
       if (!in_array($step, $allowed_steps)) {
-        form_set_error('', "Illegal operation detected. Operations cannot be performed for the request's current step.");
+        form_set_error('', 'Illegal operation detected. Operations cannot be performed for the request\'s current step.');
         $failure = TRUE;
       }
     }
 
     if (!($mode == MFCS_VIEW_MODE_NORMAL || $mode == MFCS_VIEW_MODE_DISPLAY || $mode == MFCS_VIEW_MODE_LOG || $mode == MFCS_VIEW_MODE_OPERATIONS)) {
-      form_set_error('', "Illegal operation detected. Invalid mode selected.");
+      form_set_error('', 'Illegal operation detected. Invalid mode selected.');
       $failure = TRUE;
     }
     elseif (!$can_review_request) {
@@ -2231,12 +2231,12 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
         unset($form_state['values']['review']['operations']['insurance']);
 
         if (!$can_comment_request) {
-          form_set_error('', "Illegal operation detected. Unauthorized access attempt.");
+          form_set_error('', 'Illegal operation detected. Unauthorized access attempt.');
           $failure = TRUE;
         }
       }
       else {
-        form_set_error('', "Illegal operation detected. Unauthorized access attempt.");
+        form_set_error('', 'Illegal operation detected. Unauthorized access attempt.');
         $failure = TRUE;
       }
     }
@@ -2269,7 +2269,7 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
 
       $room_unavailability = mfcs_check_room_availability($room, $all_dates, $all_time_start, $all_time_stop, $request_id);
       if ($room_unavailability === FALSE) {
-        form_set_error('', "An internal error occurred while checking the room for availability. Please contact the support staff.");
+        form_set_error('', 'An internal error occurred while checking the room for availability. Please contact the support staff.');
       }
       elseif (!empty($room_unavailability['conflicts']) || !empty($room_unavailability['unavailable'])) {
         $unavailable_message = '<span class="uppercase">Conflict</span>: The specified room is currently unavailable for the following dates: ';
@@ -2316,24 +2316,24 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
       }
 
       $requirements_names = array(
-        'facilities_fees' => "Facilities Fee",
-        'equipment_fees' => "Equipment Fee",
-        'custodial_fees' => "Custodial Fee",
-        'maintenance_fees' => "Maintenance Fee",
-        'grounds_fees' => "Grounds Fee",
-        'security_fees' => "Security Fee",
+        'facilities_fees' => 'Facilities Fee',
+        'equipment_fees' => 'Equipment Fee',
+        'custodial_fees' => 'Custodial Fee',
+        'maintenance_fees' => 'Maintenance Fee',
+        'grounds_fees' => 'Grounds Fee',
+        'security_fees' => 'Security Fee',
       );
 
       $requirements_real = array(
-        'rate' => array('group' => 'group_rates', 'error_message' => "The :human_name '@number' is not a valid @number_name. It must be a number greater than or equal to 0 (with at most 2 decimal places). Do not provide a dollar sign."),
-        'hours' => array('group' => 'group_rates', 'error_message' => "The :human_name '@number' is not a valid @number_name. It must be a number greater than or equal to 0 (with at most 2 decimal places)."),
-        'supplies' => array('group' => 'group_supplies', 'error_message' => "The :human_name '@number' is not a valid @number_name. It must be a number greater than or equal to 0 (with at most 2 decimal places). Do not provide a dollar sign."),
-        'post' => array('group' => 'group_post', 'error_message' => "The :human_name '@number' is not a valid @number_name. It must be a number greater than or equal to 0 (with at most 2 decimal places). Do not provide a dollar sign."),
+        'rate' => array('group' => 'group_rates', 'error_message' => 'The :human_name \'@number\' is not a valid @number_name. It must be a number greater than or equal to 0 (with at most 2 decimal places). Do not provide a dollar sign.'),
+        'hours' => array('group' => 'group_rates', 'error_message' => 'The :human_name \'@number\' is not a valid @number_name. It must be a number greater than or equal to 0 (with at most 2 decimal places).'),
+        'supplies' => array('group' => 'group_supplies', 'error_message' => 'The :human_name \'@number\' is not a valid @number_name. It must be a number greater than or equal to 0 (with at most 2 decimal places). Do not provide a dollar sign.'),
+        'post' => array('group' => 'group_post', 'error_message' => 'The :human_name \'@number\' is not a valid @number_name. It must be a number greater than or equal to 0 (with at most 2 decimal places). Do not provide a dollar sign.'),
       );
 
       $requirements_integer = array(
-        'days' => array('group' => 'group_rates', 'error_message' => "The :human_name '@number' is not a valid @number_name. It is not an allowed number. Use only numbers without decimal places that are greater than or equal to 0."),
-        'personnel' => array('group' => 'group_rates', 'error_message' => "The :human_name '@number' is not a valid @number_name. It is not an allowed number. Use only numbers without decimal places that are greater than or equal to 0."),
+        'days' => array('group' => 'group_rates', 'error_message' => 'The :human_name \'@number\' is not a valid @number_name. It is not an allowed number. Use only numbers without decimal places that are greater than or equal to 0.'),
+        'personnel' => array('group' => 'group_rates', 'error_message' => 'The :human_name \'@number\' is not a valid @number_name. It is not an allowed number. Use only numbers without decimal places that are greater than or equal to 0.'),
       );
 
       foreach ($requirements_names as $requirements_machine_name => $requirements_human_name) {
@@ -2416,7 +2416,7 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
   }
   elseif ($clicked_id == 'request-cancel-submit-yes' || $clicked_id == 'request-cancel-submit-no') {
     if (isset($form['form']['use_revision']['#value']) && !is_null($form['form']['use_revision']['#value'])) {
-      form_set_error('', "Revisions can not be cancelled.");
+      form_set_error('', 'Revisions can not be cancelled.');
       return;
     }
 
@@ -2424,7 +2424,7 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
   }
   elseif ($clicked_id == 'request-uncancel-submit-yes' || $clicked_id == 'request-uncancel-submit-no') {
     if (isset($form['form']['use_revision']['#value']) && !is_null($form['form']['use_revision']['#value'])) {
-      form_set_error('', "Revisions can not be uncancelled.");
+      form_set_error('', 'Revisions can not be uncancelled.');
     }
 
     $form_state['rebuild'] = FALSE;
@@ -2534,7 +2534,7 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
           'requirements' => array('other' => 0, 'waived' => 0, 'university' => 1),
         );
 
-        $success = mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], MFCS_REVIEW_DECISION_REQUIREMENT, MFCS_REVIEW_RESTRICTIONS_NONE, "The system has auto-waived the fees because the request is a Quick Meeting.", $requirements_extra, $already_reviewed_as);
+        $success = mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], MFCS_REVIEW_DECISION_REQUIREMENT, MFCS_REVIEW_RESTRICTIONS_NONE, 'The system has auto-waived the fees because the request is a Quick Meeting.', $requirements_extra, $already_reviewed_as);
       }
     }
 
@@ -2554,8 +2554,8 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
 
     if ($success && $decision === MFCS_REVIEW_DECISION_REQUIREMENT) {
       if (!mfcs_request_view_0_detect_requirements_changes($form, $form_state, $extra)) {
-        form_set_error('review][operations][decision', "The Requirements decision has been selected, but no changes have been made. If you only wish to leave a comment, then select the Comment instead of Requirements.");
-        watchdog(MFCS_WATCHDOG_ID, "The Requirements decision has been selected, but no changes have been made.", array(), WATCHDOG_ERROR);
+        form_set_error('review][operations][decision', 'The Requirements decision has been selected, but no changes have been made. If you only wish to leave a comment, then select the Comment instead of Requirements.');
+        watchdog(MFCS_WATCHDOG_ID, 'The Requirements decision has been selected, but no changes have been made.', array(), WATCHDOG_ERROR);
 
         $form_state['rebuild'] = TRUE;
         $form_state['redirect'] = FALSE;
@@ -2569,10 +2569,10 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
 
     if ($success) {
       if ($decision === MFCS_REVIEW_DECISION_COMMENT) {
-        drupal_set_message("Your comment has been received.");
+        drupal_set_message('Your comment has been received.');
       }
       else {
-        drupal_set_message("Your review has been received.");
+        drupal_set_message('Your review has been received.');
 
         if ($type == MFCS_REQUEST_TYPE_QUICK_MEETING && ($decision === MFCS_REVIEW_DECISION_AVAILABLE || $decision === MFCS_REVIEW_DECISION_UNAVAILABLE)) {
           // perform check against this request to see if new problems are detected or existing problems are resolved.
@@ -2587,8 +2587,8 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
       }
     }
     else {
-      form_set_error('form', "An error occurred while trying to submit the request review. Please contact the support staff.");
-      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to submit the request review.", array(), WATCHDOG_ERROR);
+      form_set_error('form', 'An error occurred while trying to submit the request review. Please contact the support staff.');
+      watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to submit the request review.', array(), WATCHDOG_ERROR);
 
       $form_state['rebuild'] = TRUE;
       $form_state['redirect'] = FALSE;
