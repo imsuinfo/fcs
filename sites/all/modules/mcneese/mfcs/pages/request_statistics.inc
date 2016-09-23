@@ -841,10 +841,10 @@ function mfcs_request_statistics_render_request_step($counts, $step_options) {
   $options = array(
     'total' => $counts['main']['total'],
     'rows' => array(),
-    'text_title' => "Requests by Step",
+    'text_title' => 'Requests by Step',
     'text_description' => 'A bar chart representing the number of requests for each step they are currently in.',
-    'text_x' => "Requests",
-    'text_y' => "Step",
+    'text_x' => 'Requests',
+    'text_y' => 'Step',
     'chart_height' => 220,
     'line_start_x' => 120,
     'line_start_y' => 25,
@@ -917,14 +917,14 @@ function mfcs_request_statistics_render_request_step($counts, $step_options) {
   $markup .= '  <svg id="' . 'mfcs-statistics-' . $options['name'] . '" class="statistics-block-chart-request_step" title="Requests by Step" width="' . $width . '" height="' . $height . '"' . $svg_options . '>' . $chart_markup . '</svg>';
   $markup .= '</div>'; // statistics-block-chart
 
-  $markup .= '<div class="statistics-block-text">';
-  #$markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['changes_required'] . '</em> <strong>' . $step_options[MFCS_REVIEW_STEP_CHANGES_REQUIRED] . "</strong> (<em>" . $options['rows']['changes_required']['percent'] . '%</em> of requests). ' . '</div>';
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['completed'] . '</em> <strong>' . $step_options[MFCS_REVIEW_STEP_COMPLETED] . "</strong> (<em>" . $options['rows']['completed']['percent'] . '%</em> of requests). ' . '</div>';
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['final_decision'] . '</em> <strong>' . $step_options[MFCS_REVIEW_STEP_FINAL_DECISION] . "</strong> (<em>" . $options['rows']['final_decision']['percent'] . '%</em> of requests). ' . '</div>';
-  #$markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['release_hold'] . '</em> <strong>' . $step_options[MFCS_REVIEW_STEP_RELEASE_HOLD] . "</strong> (<em>" . $options['rows']['release_hold']['percent'] . '%</em> of requests). ' . '</div>';
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['review'] . '</em> <strong>' . $step_options[MFCS_REVIEW_STEP_REVIEW] . "</strong> (<em>" . $options['rows']['review']['percent'] . '%</em> of requests). ' . '</div>';
-  #$markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['requirements'] . '</em> <strong>' . $step_options[MFCS_REVIEW_STEP_REQUIREMENTS] . "</strong> (<em>" . $options['rows']['requirements']['percent'] . '%</em> of requests). ' . '</div>';
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['step']['venue_available'] . '</em> <strong>' . $step_options[MFCS_REVIEW_STEP_VENUE_AVAILABLE] . "</strong> (<em>" . $options['rows']['venue_available']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class='statistics-block-text'>';
+  #$markup .= '<div class='statistics-block-text-item'><em>' . $counts['step']['changes_required'] . '</em> <strong>' . $step_options[MFCS_REVIEW_STEP_CHANGES_REQUIRED] . '</strong> (<em>' . $options['rows']['changes_required']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class='statistics-block-text-item'><em>' . $counts['step']['completed'] . '</em> <strong>' . $step_options[MFCS_REVIEW_STEP_COMPLETED] . '</strong> (<em>' . $options['rows']['completed']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class='statistics-block-text-item'><em>' . $counts['step']['final_decision'] . '</em> <strong>' . $step_options[MFCS_REVIEW_STEP_FINAL_DECISION] . '</strong> (<em>' . $options['rows']['final_decision']['percent'] . '%</em> of requests). ' . '</div>';
+  #$markup .= '<div class='statistics-block-text-item'><em>' . $counts['step']['release_hold'] . '</em> <strong>' . $step_options[MFCS_REVIEW_STEP_RELEASE_HOLD] . '</strong> (<em>' . $options['rows']['release_hold']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class='statistics-block-text-item'><em>' . $counts['step']['review'] . '</em> <strong>' . $step_options[MFCS_REVIEW_STEP_REVIEW] . '</strong> (<em>' . $options['rows']['review']['percent'] . '%</em> of requests). ' . '</div>';
+  #$markup .= '<div class='statistics-block-text-item'><em>' . $counts['step']['requirements'] . '</em> <strong>' . $step_options[MFCS_REVIEW_STEP_REQUIREMENTS] . '</strong> (<em>' . $options['rows']['requirements']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class='statistics-block-text-item'><em>' . $counts['step']['venue_available'] . '</em> <strong>' . $step_options[MFCS_REVIEW_STEP_VENUE_AVAILABLE] . '</strong> (<em>' . $options['rows']['venue_available']['percent'] . '%</em> of requests). ' . '</div>';
   $markup .= '</div>'; // statistics-block-text
 
   $markup .= '</div>'; // statistics-block

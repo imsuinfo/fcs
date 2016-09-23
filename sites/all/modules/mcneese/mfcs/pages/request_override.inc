@@ -60,9 +60,9 @@ function mfcs_request_manage_0_override_form($form, &$form_state, $request_id) {
 
   mfcs_add_canonical_headers('requests/manage-0/override/' . $request_id);
 
-  $page_title = "Override Request";
+  $page_title = 'Override Request';
   if (!empty($request['information']['title'][0]->value)) {
-    $page_title = "Override Request: " . $request['information']['title'][0]->value;
+    $page_title = 'Override Request: ' . $request['information']['title'][0]->value;
   }
   drupal_set_title($page_title);
 
@@ -113,7 +113,7 @@ function mfcs_request_manage_0_override_form($form, &$form_state, $request_id) {
 
   // do not allow assigning the following steps.
   unset($options_steps[MFCS_REVIEW_STEP_CHANGES_REQUIRED]);
-  unset($options_steps[MFCS_REVIEW_STEP_FINAL_DECISION]);
+  unset($options_steps[MFCS_REVIEW_STEP_REQUIREMENTS]);
   unset($options_steps[MFCS_REVIEW_STEP_RELEASE_HOLD]);
 
   // do not allow assigning the following statuses.
@@ -147,7 +147,7 @@ function mfcs_request_manage_0_override_form($form, &$form_state, $request_id) {
     '#options' => $options_steps,
     '#default_value' => NULL,
     '#required' => TRUE,
-    '#description' => "This is a listing of all steps available on the system."
+    '#description' => 'This is a listing of all steps available on the system.'
   );
 
   $form['decision']['status'] = array(
@@ -158,13 +158,13 @@ function mfcs_request_manage_0_override_form($form, &$form_state, $request_id) {
     '#options' => $options_status,
     '#default_value' => NULL,
     '#required' => FALSE,
-    '#description' => "This is a listing of all (common) statuses available on the system.<br>When assigning a step of <em>Completed</em> the status of <em>Accepted</em> or <em>Denied</em> should also be specified."
+    '#description' => 'This is a listing of all (common) statuses available on the system.<br>When assigning a step of <em>Completed</em> the status of <em>Accepted</em> or <em>Denied</em> should also be specified.'
   );
 
   if ($current_status === MFCS_REQUEST_STATUS_CANCELLED || $current_status === MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED) {
     $form['decision']['status']['#disabled'] = TRUE;
     $form['decision']['status']['#options'] = array(NULL => '- Unavailable -');
-    $form['decision']['status']['#description'] = "The request is currently cancelled. To assign a new status, please first uncancel the request.";
+    $form['decision']['status']['#description'] = 'The request is currently cancelled. To assign a new status, please first uncancel the request.';
   }
 
   $form['decision']['message'] = array(
@@ -174,7 +174,7 @@ function mfcs_request_manage_0_override_form($form, &$form_state, $request_id) {
     '#title' => 'Log Message',
     '#default_value' => NULL,
     '#required' => FALSE,
-    '#description' => "Optionally provide a message to display in the logs."
+    '#description' => 'Optionally provide a message to display in the logs.'
   );
 
   $form['display']['submit'] = array(
@@ -187,14 +187,14 @@ function mfcs_request_manage_0_override_form($form, &$form_state, $request_id) {
     '#id' => 'request-override-submit-cancel',
     '#name' => 'request-override-submit-cancel',
     '#type' => 'submit',
-    '#default_value' => t("Cancel"),
+    '#default_value' => 'Cancel',
   );
 
   $form['display']['submit']['submit'] = array(
     '#id' => 'request-override-submit-submit',
     '#name' => 'request-override-submit-submit',
     '#type' => 'submit',
-    '#default_value' => t("Submit"),
+    '#default_value' => 'Submit',
   );
 
   return $form;
@@ -325,12 +325,19 @@ function mfcs_request_manage_0_override_form_submit($form, &$form_state) {
     $options_steps = mfcs_get_review_steps_list_options();
     $options_status = mfcs_get_request_status_list_options();
 
+    $original_message = $message;
     if (is_null($status)) {
-      $message = "Forcibly altered the workflow step from " . $options_steps[$form['form']['request_step']['#value']] . " to " . $options_steps[$step] . ".";
+      $message = 'Forcibly altered the workflow step from ' . $options_steps[$form['form']['request_step']['#value']] . ' to ' . $options_steps[$step] . '.';
     }
     else {
-      $message = "Forcibly altered the workflow step from " . $options_steps[$form['form']['request_step']['#value']] . " to " . $options_steps[$step] . " and status from " . $options_status[$form['form']['request_status']['#value']] . " to " . $options_status[$status] . ".";
+      $message = 'Forcibly altered the workflow step from ' . $options_steps[$form['form']['request_step']['#value']] . ' to ' . $options_steps[$step] . ' and status from ' . $options_status[$form['form']['request_status']['#value']] . ' to ' . $options_status[$status] . '.';
     }
+
+    if (!empty($original_message)) {
+      $message .= "\n" . $original_message;
+    }
+    unset($original_message);
+
     mfcs_workflow_step_review($request_id, $user, MFCS_REVIEW_DECISION_OVERRIDE, MFCS_REVIEW_RESTRICTIONS_MANAGERS, $message);
 
     // perform check against this request to see if new problems are detected or existing problems are resolved.
@@ -338,8 +345,8 @@ function mfcs_request_manage_0_override_form_submit($form, &$form_state) {
     mfcs_miscellaneous_check_requests_for_problems($request_id);
   }
   else {
-    form_set_error('form', "An error occurred while trying to override the request. Please contact the support staff.");
-    watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to override the request: @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
+    form_set_error('form', 'An error occurred while trying to override the request. Please contact the support staff.');
+    watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to override the request: @request_id.', array('@request_id' => $request_id), WATCHDOG_ERROR);
 
     $form_state['rebuild'] = TRUE;
     $form_state['redirect'] = FALSE;
