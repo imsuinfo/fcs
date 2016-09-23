@@ -151,7 +151,11 @@ function mfcs_pre_validate_request_fields(&$form, &$form_state, $dont_validate =
           }
 
           if (!isset($value['#default_value']) || $value['#default_value'] != $location_state['request_coordinator']['name'][$key]) {
-            $found_ids = mfcs_find_from_form_user_name($location_state['request_coordinator']['name'][$key]);
+            $found_ids = NULL;
+            if (!empty($location_state['request_coordinator']['name'][$key]) && is_string($location_state['request_coordinator']['name'][$key])) {
+              $found_ids = mfcs_find_from_form_user_name($location_state['request_coordinator']['name'][$key]);
+            }
+
             if (!is_array($found_ids) || count($found_ids) != 1) {
               // unable to identify user name, so set the user id to NULL to mark it as unknown.
               $location_state['request_coordinator']['user_id'][$key] = NULL;
