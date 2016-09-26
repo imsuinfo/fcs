@@ -1685,7 +1685,7 @@ function mfcs_request_unavailability_0_edit_form($form, &$form_state, $year, $ro
   $form['unavailable']['date_stop']['day'] = array(
     '#id' => 'field-unavailable-date_stop-day',
     '#type' => 'date_popup',
-    '#title' => "Date",
+    '#title' => "Stop Date",
     '#date_format' => "M d",
     '#date_label_position' => 'invisible',
     '#date_year_range' => '' . $year_offset . ':' . $year_offset,
