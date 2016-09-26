@@ -3176,7 +3176,8 @@ function mfcs_load_rooms($location = NULL, $building = NULL, $room = NULL, $disa
     $query->addField('mbr', 'id', 'room_id');
     $query->addField('mbr', 'machine_name', 'room_number');
     $query->addField('mbr', 'human_name', 'room_name');
-    $query->addField('mbr', 'coordinator_id', 'coordinator_id');
+    $query->addField('mbr', 'room_coordinator_id', 'room_coordinator_id');
+    $query->addField('mbr', 'venue_coordinator_id', 'venue_coordinator_id');
     $query->addField('mbr', 'capacity_normal', 'capacity_normal');
     $query->addField('mbr', 'capacity_max', 'capacity_max');
 
@@ -4719,6 +4720,8 @@ function mfcs_sync_banner_to_local($transaction = NULL, $user = NULL, $message_o
     return FALSE;
   }
 
+  global $conf;
+
   $join = ' inner join ucs.msu_venue_list mvl on (mvl.category = mvd.category and mvl.building_code = mvd.building_code and mvl.room_number = mvd.room_number)';
 
   $select = 'mvd.*';
@@ -4856,7 +4859,44 @@ function mfcs_sync_banner_to_local($transaction = NULL, $user = NULL, $message_o
           }
         }
 
-        // add the room and venue coordinators.
+        // add the venue coordinators.
+        $venue_coordinator = NULL;
+        if (!empty($coordinator_venue_item['email'])) {
+          $roles = array();
+          $role = user_role_load_by_name('reviewer');
+          if (is_object($role)) {
+            $roles[$role->rid] = $role->rid;
+          }
+
+          $role = user_role_load_by_name('requester');
+          if (is_object($role)) {
+            $roles[$role->rid] = $role->rid;
+          }
+          unset($role);
+
+          $venue_coordinator = mfcs_ensure_user_by_email($coordinator_venue_item['email'], $roles);
+          unset($roles);
+        }
+
+        if (is_object($venue_coordinator)) {
+          $room_item['venue_coordinator_id'] = $venue_coordinator->uid;
+        }
+        else {
+          if (empty($conf['fcs_failsafe_coordinator']) || !is_integer($conf['fcs_failsafe_coordinator'])) {
+            watchdog(MFCS_WATCHDOG_ID, 'Failed to load \'fcs_failsafe_coordinator\' settings. Your settings.php does not contain the failsafe coordinator user id.', array(), WATCHDOG_CRITICAL);
+
+            // as a last resort fall back to the default drupal admin account.
+            $room_item['venue_coordinator_id'] = 1;
+            $room_item['room_coordinator_id'] = 1;
+          }
+          else {
+            $room_item['venue_coordinator_id'] = $conf['fcs_failsafe_coordinator'];
+            $room_item['room_coordinator_id'] = $conf['fcs_failsafe_coordinator'];
+          }
+        }
+
+
+        // add the room coordinators.
         $room_coordinator = NULL;
         if (!empty($coordinator_room_item['email'])) {
           $roles = array();
@@ -4875,37 +4915,15 @@ function mfcs_sync_banner_to_local($transaction = NULL, $user = NULL, $message_o
           unset($roles);
         }
 
-        if (!is_object($room_coordinator) && !empty($coordinator_venue_item['email'])) {
-          $roles = array();
-          $role = user_role_load_by_name('reviewer');
-          if (is_object($role)) {
-            $roles[$role->rid] = $role->rid;
-          }
-
-          $role = user_role_load_by_name('requester');
-          if (is_object($role)) {
-            $roles[$role->rid] = $role->rid;
-          }
-          unset($role);
-
-          $room_coordinator = mfcs_ensure_user_by_email($coordinator_venue_item['email'], $roles);
-          unset($roles);
+        if (!is_object($room_coordinator)) {
+          // fallback to the venue coordinator if there is no room coordinator.
+          $room_coordinator = $venue_coordinator;
         }
 
         if (is_object($room_coordinator)) {
-          $room_item['coordinator_id'] = $room_coordinator->uid;
+          $room_item['room_coordinator_id'] = $room_coordinator->uid;
         }
-        else {
-          global $conf;
 
-          if (empty($conf['fcs_failsafe_coordinator']) || !is_integer($conf['fcs_failsafe_coordinator'])) {
-            watchdog(MFCS_WATCHDOG_ID, "Failed to load 'fcs_failsafe_coordinator' settings. Your settings.php does not contain the failsafe coordinator user id.", array(), WATCHDOG_CRITICAL);
-            $room_item['coordinator_id'] = 1; // as a last resort fall back to the default drupal admin account.
-          }
-          else {
-            $room_item['coordinator_id'] = $conf['fcs_failsafe_coordinator'];
-          }
-        }
 
         // add/update the location.
         $query = db_select('mfcs_banner_locations', 'mbl');
@@ -10312,7 +10330,8 @@ function mfcs_request_get_available_venue_coordinators() {
     $query->addField('mu', 'last_name', 'last_name');
 
     $subquery = db_select('mfcs_banner_rooms', 'mbr');
-    $subquery->addField('mbr', 'coordinator_id', 'coordinator_id');
+    $subquery->addField('mbr', 'room_coordinator_id', 'room_coordinator_id');
+    $subquery->addField('mbr', 'venue_coordinator_id', 'venue_coordinator_id');
     $subquery->condition('mbr.disabled', 0);
     $subquery->distinct();
 
@@ -11528,14 +11547,14 @@ function mfcs_load_room_coordinators($room_id = NULL, $coordinators_only = FALSE
     }
 
     if ($coordinators_only) {
-      $query->addField('mbr', 'coordinator_id', 'coordinator_id');
+      $query->addField('mbr', 'room_coordinator_id', 'room_coordinator_id');
       $query->distinct();
 
       $rows = $query->execute()->fetchAllKeyed(0, 0);
     }
     else {
       $query->addField('mbr', 'id', 'id');
-      $query->addField('mbr', 'coordinator_id', 'coordinator_id');
+      $query->addField('mbr', 'venue_coordinator_id', 'venue_coordinator_id');
 
       $rows = $query->execute()->fetchAllKeyed();
     }
@@ -11578,7 +11597,10 @@ function mfcs_load_coordinator_rooms($user_id) {
     $query = db_select('mfcs_banner_rooms', 'mbr');
     $query->innerJoin('mfcs_banner_buildings', 'mbb', 'mbr.building = mbb.id');
 
-    $query->condition('mbr.coordinator_id', $user_id);
+    $or = db_or();
+    $or->condition('mbr.room_coordinator_id', $user_id);
+    $or->condition('mbr.venue_coordinator_id', $user_id);
+    $query->condition($or);
 
     $query->addField('mbr', 'id', 'room_id');
     $query->addField('mbb', 'id', 'building_id');
@@ -12423,7 +12445,8 @@ function mfcs_get_unavailabilities($year, $room_id = NULL, $timestamp_start = NU
 
       $query->addField('mbr', 'machine_name', 'room_number');
       $query->addField('mbr', 'human_name', 'room_name');
-      $query->addField('mbr', 'coordinator_id', 'room_coordinator_id');
+      $query->addField('mbr', 'room_coordinator_id', 'room_coordinator_id');
+      $query->addField('mbr', 'venue_coordinator_id', 'venue_coordinator_id');
       $query->addField('mbb', 'id', 'building_id');
       $query->addField('mbb', 'machine_name', 'building_code');
       $query->addField('mbb', 'human_name', 'building_name');

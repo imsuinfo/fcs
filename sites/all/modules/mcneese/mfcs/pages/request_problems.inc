@@ -2310,7 +2310,7 @@ function mfcs_request_problems_0_request_form_validate($form, &$form_state) {
           mfcs_include(MFCS_INCLUDE_WORKFLOW);
 
           if (empty($conf['fcs_failsafe_coordinator']) || !is_integer($conf['fcs_failsafe_coordinator'])) {
-            watchdog(MFCS_WATCHDOG_ID, "Failed to load 'fcs_failsafe_coordinator' settings. Your settings.php does not contain the failsafe coordinator user id.", array(), WATCHDOG_CRITICAL);
+            watchdog(MFCS_WATCHDOG_ID, 'Failed to load \'fcs_failsafe_coordinator\' settings. Your settings.php does not contain the failsafe coordinator user id.', array(), WATCHDOG_CRITICAL);
             $new_coordinator_id = 1; // as a last resort fall back to the default drupal admin account.
           }
           else {
@@ -2320,17 +2320,17 @@ function mfcs_request_problems_0_request_form_validate($form, &$form_state) {
           $extra_text = '';
           if (isset($request['top']['room'][0]->value)) {
             $room_information = mfcs_load_rooms(NULL, NULL, $request['top']['room'][0]->value);
-            if (isset($room_information->coordinator_id)) {
-              $new_coordinator_id = $room_information->coordinator_id;
+            if (isset($room_information->room_coordinator_id)) {
+              $new_coordinator_id = $room_information->room_coordinator_id;
             }
-            $extra_text .= " Room Information: " . $room_information->room_name . " (" . $room_information->room_number . "). Building Information: " . $room_information->building_name . " (" . $room_information->building_code . ").";
+            $extra_text .= ' Room Information: ' . $room_information->room_name . ' (' . $room_information->room_number . '). Building Information: ' . $room_information->building_name . ' (' . $room_information->building_code . ').';
           }
 
-          $coordinator = user_load($room_information->coordinator_id);
-          $extra_text .= ' Coordinator Information: <a href="' . $base_path . 'requests/users-0/view/' . $room_information->coordinator_id . '" title="View user account">' . check_plain($coordinator->mfcs['first_name']) . ' ' . check_plain($coordinator->mfcs['last_name']) . '</a>.';
+          $coordinator = user_load($room_information->room_coordinator_id);
+          $extra_text .= ' Coordinator Information: <a href="' . $base_path . 'requests/users-0/view/' . $room_information->room_coordinator_id . '" title="View user account">' . check_plain($coordinator->mfcs['first_name']) . ' ' . check_plain($coordinator->mfcs['last_name']) . '</a>.';
 
           if ($new_coordinator_id == $request['venue_coordinator']['user_id'][0]->value) {
-            form_set_error('actions][action', "Unable to re-assign venue coordinator, the banner information remains the same." . $extra_text);
+            form_set_error('actions][action', 'Unable to re-assign room/venue coordinator, the banner information remains the same.' . $extra_text);
           }
         }
       }
@@ -2339,12 +2339,12 @@ function mfcs_request_problems_0_request_form_validate($form, &$form_state) {
           $do_something = TRUE;
         }
         else {
-          form_set_error('actions][action', "Cache will only be re-built for a problem with a cache request problem code." . $extra_text);
+          form_set_error('actions][action', 'Cache will only be re-built for a problem with a cache request problem code.' . $extra_text);
         }
       }
       elseif ($form_state['values']['actions']['action'] == 'ignore') {
         if ($form['form']['problem']['#value']->ignore == 1) {
-          form_set_error('actions][action', "This request is already being ignored.");
+          form_set_error('actions][action', 'This request is already being ignored.');
         }
         else {
           $do_something = TRUE;
@@ -2352,7 +2352,7 @@ function mfcs_request_problems_0_request_form_validate($form, &$form_state) {
       }
       elseif ($form_state['values']['actions']['action'] == 'unignore') {
         if ($form['form']['problem']['#value']->ignore == 0) {
-          form_set_error('actions][action', "This request is already not being ignored.");
+          form_set_error('actions][action', 'This request is already not being ignored.');
         }
         else {
           $do_something = TRUE;
@@ -2360,13 +2360,13 @@ function mfcs_request_problems_0_request_form_validate($form, &$form_state) {
       }
     }
     else {
-      form_set_error('', "An invalid problem code was specified, cannot continue.");
-      watchdog(MFCS_WATCHDOG_ID, "Unable to submit request problems form because the problem code invalid, user: @user_id, problem_id: @problem_id, problem: @problem.", array('@user_id' => $user->uid, $form['form']['problem_id'], '@problem' => $form['form']['problem']['#value']->problem), WATCHDOG_ERROR);
+      form_set_error('', 'An invalid problem code was specified, cannot continue.');
+      watchdog(MFCS_WATCHDOG_ID, 'Unable to submit request problems form because the problem code invalid, user: @user_id, problem_id: @problem_id, problem: @problem.', array('@user_id' => $user->uid, $form['form']['problem_id'], '@problem' => $form['form']['problem']['#value']->problem), WATCHDOG_ERROR);
     }
   }
 
   if (!$do_something) {
-    form_set_error('', "You have not specified any action to perform.");
+    form_set_error('', 'You have not specified any action to perform.');
     return;
   }
 }
@@ -2432,8 +2432,8 @@ function mfcs_request_problems_0_request_form_submit($form, &$form_state) {
 
       $room_id = (int) $request['top']['room'][0]->value;
       $room_information = mfcs_load_rooms(NULL, NULL, $room_id, TRUE);
-      if (isset($room_information->coordinator_id)) {
-        $new_coordinator_id = $room_information->coordinator_id;
+      if (isset($room_information->room_coordinator_id)) {
+        $new_coordinator_id = $room_information->room_coordinator_id;
       }
 
       $old_coordinator_user = mfcs_load_basic_user_settings_by_user_id($old_coordinator_id);

@@ -85,12 +85,18 @@ function mfcs_request_manage_0_page($request_id) {
   $disabled_requester = ($user_requester['status'] == 0);
   $disabled_venue_coordinator = ($user_venue_coordinator['status'] == 0);
 
-  $user_banner_coordinator = NULL;
-  $disabled_banner_coordinator = FALSE;
+  $user_banner_coordinator_room = NULL;
+  $user_banner_coordinator_venue = NULL;
+  $disabled_banner_coordinator_room = FALSE;
+  $disabled_banner_coordinator_venue = FALSE;
   $room_information = mfcs_load_rooms(NULL, NULL, $id_room, TRUE);
-  if (isset($room_information->coordinator_id)) {
-    $user_banner_coordinator = mfcs_load_basic_user_settings_by_user_id((int)$room_information->coordinator_id);
-    $disabled_banner_coordinator = ($user_banner_coordinator['status'] == 0);
+  if (isset($room_information->room_coordinator_id)) {
+    $user_banner_coordinator_room = mfcs_load_basic_user_settings_by_user_id((int)$room_information->room_coordinator_id);
+    $disabled_banner_coordinator_room = ($user_banner_coordinator_room['status'] == 0);
+  }
+  if (isset($room_information->venue_coordinator_id)) {
+    $user_banner_coordinator_venue = mfcs_load_basic_user_settings_by_user_id((int)$room_information->venue_coordinator_id);
+    $disabled_banner_coordinator_venue = ($user_banner_coordinator_venue['status'] == 0);
   }
   unset($room_information);
 
@@ -152,7 +158,8 @@ function mfcs_request_manage_0_page($request_id) {
   $markup .= mfcs_request_manage_0_page_create_item_user_name('Creator:',  $user_creator, $class_name);
   $markup .= mfcs_request_manage_0_page_create_item_user_name('Requester:',  $user_requester, $class_name);
   $markup .= mfcs_request_manage_0_page_create_item_user_name('Venue Coordinator:',  $user_venue_coordinator, $class_name);
-  $markup .= mfcs_request_manage_0_page_create_item_user_name('Banner Coordinator:',  $user_banner_coordinator, $class_name);
+  $markup .= mfcs_request_manage_0_page_create_item_user_name('Banner <span title="Room Coordinator">RC</span>:',  $user_banner_coordinator_room, $class_name);
+  $markup .= mfcs_request_manage_0_page_create_item_user_name('Banner <span title="Venue Coordinator">VC</span>:',  $user_banner_coordinator_venue, $class_name);
   $markup .= mfcs_request_manage_0_page_create_item_and_value('Auto-Cancel:',  $locks_auto_cancel, $class_name);
 
   $markup .= '</div>';
@@ -170,8 +177,11 @@ function mfcs_request_manage_0_page($request_id) {
   $markup .= mfcs_request_manage_0_page_create_item_and_value('Venue Coordinator Status:', ($disabled_venue_coordinator ? 'Account Disabled / Deleted' : 'Account Enabled'), $class_name);
   $markup .= mfcs_request_manage_0_page_create_item_user_banner_id('Venue Coordinator Banner ID:',  $user_venue_coordinator, $class_name);
 
-  $markup .= mfcs_request_manage_0_page_create_item_and_value('Banner Coordinator Status:', ($disabled_banner_coordinator ? 'Account Disabled / Deleted' : 'Account Enabled'), $class_name);
-  $markup .= mfcs_request_manage_0_page_create_item_user_banner_id('Banner Coordinator Banner ID:',  $user_banner_coordinator, $class_name);
+  $markup .= mfcs_request_manage_0_page_create_item_and_value('Banner <span title="Room Coordinator">RC</span> Status:', ($disabled_banner_coordinator_room ? 'Account Disabled / Deleted' : 'Account Enabled'), $class_name);
+  $markup .= mfcs_request_manage_0_page_create_item_user_banner_id('Banner <span title="Room Coordinator">RC</span> Banner ID:',  $user_banner_coordinator_room, $class_name);
+
+  $markup .= mfcs_request_manage_0_page_create_item_and_value('Banner <span title="Venue Coordinator">VC</span> Status:', ($disabled_banner_coordinator_venue ? 'Account Disabled / Deleted' : 'Account Enabled'), $class_name);
+  $markup .= mfcs_request_manage_0_page_create_item_user_banner_id('Banner <span title="Venue Coordinator">VC</span> Banner ID:',  $user_banner_coordinator_venue, $class_name);
 
   $markup .= '</div>';
   $markup .= '</div>';
@@ -401,7 +411,7 @@ function mfcs_request_manage_0_page_create_item_user_banner_id($label, $user, $s
   }
 
   $string = '';
-  if (array_key_exists('banner_id', $user) && is_string($user['banner_id'])) {
+  if (array_key_exists('banner_id', $user)) {
     $string = $user['banner_id'];
   }
 

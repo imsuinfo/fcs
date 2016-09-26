@@ -184,8 +184,8 @@ function mfcs_pre_validate_request_fields(&$form, &$form_state, $dont_validate =
     }
 
     $coordinator = NULL;
-    if (isset($form['form']['room_information']['#value']->coordinator_id)) {
-      $coordinator = user_load($form['form']['room_information']['#value']->coordinator_id);
+    if (isset($form['form']['room_information']['#value']->room_coordinator_id)) {
+      $coordinator = user_load($form['form']['room_information']['#value']->room_coordinator_id);
     }
 
     if (!is_object($coordinator)) {
@@ -223,8 +223,8 @@ function mfcs_pre_validate_request_fields(&$form, &$form_state, $dont_validate =
       }
 
       $coordinator = NULL;
-      if (isset($form['form']['room_information']['#value']->coordinator_id)) {
-        $coordinator = user_load($form['form']['room_information']['#value']->coordinator_id);
+      if (isset($form['form']['room_information']['#value']->room_coordinator_id)) {
+        $coordinator = user_load($form['form']['room_information']['#value']->room_coordinator_id);
       }
 
       if (!is_object($coordinator)) {

@@ -2457,7 +2457,10 @@ function mfcs_unavailability_rooms_room($room_id, $year, $user_id = NULL, $enabl
     $query->innerJoin('mfcs_banner_buildings', 'mbb', 'mu.building_id = mbb.id');
 
     if (!is_null($user_id)) {
-      $query->condition('mbr.coordinator_id', $proxy_as, 'IN');
+      $or = db_or();
+      $or->condition('mbr.room_coordinator_id', $proxy_as, 'IN');
+      $or->condition('mbr.venue_coordinator_id', $proxy_as, 'IN');
+      $query->condition($or);
     }
 
     if ($enabled === TRUE) {
@@ -2494,7 +2497,8 @@ function mfcs_unavailability_rooms_room($room_id, $year, $user_id = NULL, $enabl
     $query->addField('mbr', 'human_name', 'room_name');
     $query->addField('mbb', 'machine_name', 'building_code');
     $query->addField('mbb', 'human_name', 'building_name');
-    $query->addField('mbr', 'coordinator_id', 'coordinator_id');
+    $query->addField('mbr', 'room_coordinator_id', 'room_coordinator_id');
+    $query->addField('mbr', 'venue_coordinator_id', 'venue_coordinator_id');
 
     $query->orderBy('mu', 'id', 'asc');
 
@@ -2547,7 +2551,10 @@ function mfcs_unavailability_rooms($user_id = NULL) {
     $query->innerJoin('mfcs_banner_buildings', 'mbb', 'mbr.building = mbb.id');
 
     if (!is_null($user_id)) {
-      $query->condition('mbr.coordinator_id', $proxy_as, 'IN');
+      $or = db_or();
+      $or->condition('mbr.room_coordinator_id', $proxy_as, 'IN');
+      $or->condition('mbr.venue_coordinator_id', $proxy_as, 'IN');
+      $query->condition($or);
     }
 
     $query->condition('mbr.disabled', 0);
@@ -2558,7 +2565,8 @@ function mfcs_unavailability_rooms($user_id = NULL) {
     $query->addField('mbb', 'id', 'building_id');
     $query->addField('mbb', 'machine_name', 'building_code');
     $query->addField('mbb', 'human_name', 'building_name');
-    $query->addField('mbr', 'coordinator_id', 'coordinator_id');
+    $query->addField('mbr', 'room_coordinator_id', 'room_coordinator_id');
+    $query->addField('mbr', 'venue_coordinator_id', 'venue_coordinator_id');
 
     $query->orderBy('mbb', 'id', 'asc');
     $query->orderBy('mbr', 'id', 'asc');

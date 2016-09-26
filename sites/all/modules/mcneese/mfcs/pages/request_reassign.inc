@@ -72,8 +72,8 @@ function mfcs_request_manage_0_reassign_coordinator_form($form, &$form_state, $r
 
   if (isset($request['top']['room'][0]->value)) {
     $room_information = mfcs_load_rooms(NULL, NULL, $request['top']['room'][0]->value);
-    if (isset($room_information->coordinator_id)) {
-      $new_coordinator_id = $room_information->coordinator_id;
+    if (isset($room_information->room_coordinator_id)) {
+      $new_coordinator_id = $room_information->room_coordinator_id;
     }
   }
 

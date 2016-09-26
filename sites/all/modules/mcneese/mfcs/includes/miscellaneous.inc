@@ -864,14 +864,16 @@ function mfcs_miscellaneous_check_requests_coordinator_out_of_sync($request_id =
     $query->addField('mu', 'banner_id', 'banner_id');
     $query->addField('mu', 'first_name', 'first_name');
     $query->addField('mu', 'last_name', 'last_name');
-    $query->addField('mbr', 'coordinator_id', 'room_coordinator');
+    $query->addField('mbr', 'room_coordinator_id', 'room_coordinator');
+    $query->addField('mbr', 'venue_coordinator_id', 'venue_coordinator');
 
     $status = array(
       MFCS_REQUEST_STATUS_LOCKED,
       MFCS_REQUEST_STATUS_UNLOCKED,
     );
 
-    $query->where('mer.venue_coordinator <> mbr.coordinator_id');
+    // only check room coordinator as the room coordinator is who is assigned to the request, the venue coordinator can be the 'room' coordinator but the room coordinator does not have to be the venue coordinator.
+    $query->where('mer.venue_coordinator <> mbr.room_coordinator_id');
 
     $query->condition('mer.status', $status, 'IN');
 
@@ -904,6 +906,9 @@ function mfcs_miscellaneous_check_requests_coordinator_out_of_sync($request_id =
           ),
           'coordinator_banner' => array(
             'user_id' => $result->room_coordinator,
+          ),
+          'coordinator_venue' => array(
+            'user_id' => $result->venue_coordinator,
           ),
         );
       }
@@ -1102,7 +1107,8 @@ function mfcs_miscellaneous_check_requests_room($request_id = NULL) {
     $query->addField('mbr', 'human_name', 'room_name');
     $query->addField('mbr', 'date', 'room_date');
     $query->addField('mbr', 'disabled', 'room_disabled');
-    $query->addField('mbr', 'coordinator_id', 'room_coordinator_id');
+    $query->addField('mbr', 'room_coordinator_id', 'room_coordinator_id');
+    $query->addField('mbr', 'venue_coordinator_id', 'venue_coordinator_id');
 
     $status = array(
       MFCS_REQUEST_STATUS_LOCKED,
@@ -1597,7 +1603,8 @@ function mfcs_miscellaneous_check_requests_problem_cache_requests($request_id = 
       $query->addField('mbr', 'human_name', 'room_name');
       $query->addField('mbr', 'date', 'room_date');
       $query->addField('mbr', 'disabled', 'room_disabled');
-      $query->addField('mbr', 'coordinator_id', 'room_coordinator_id');
+      $query->addField('mbr', 'room_coordinator_id', 'room_coordinator_id');
+      $query->addField('mbr', 'venue_coordinator_id', 'venue_coordinator_id');
 
       $query->addField('mer', $cache_name, 'cache');
       $query->addField($uncached['alias'], 'value', 'real');
