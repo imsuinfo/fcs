@@ -4064,11 +4064,11 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
     unset($role_value);
   }
 
+  $bannerless_exception = FALSE;
   $bannerless_exception_role = user_role_load_by_name('bannerless exception');
   if (isset($bannerless_exception_role->rid) && array_key_exists($bannerless_exception_role->rid, $user_roles)) {
     // if the user has the bannerless exception role assigned, then do not synchronize anything.
-    $already_executed[$user_information['user_id']] = TRUE;
-    return TRUE;
+    $bannerless_exception = TRUE;
   }
   unset($bannerless_exception_role);
 
@@ -4113,7 +4113,7 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
   // @todo: depending on time of day if banner is not going to be available, then auto-set refresh_banner to FALSE.
 
   // handle all appropriate banner refreshes.
-  if ($refresh_banner) {
+  if ($refresh_banner && !$bannerless_exception) {
     $original_banner_roles = mfcs_get_banner_roles_for_user_id($user_information['user_id']);
     $original_coordinator_rooms = mfcs_load_coordinator_rooms($user_information['user_id']);
     if (empty($original_coordinator_rooms)) {
@@ -4357,7 +4357,7 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
 
 
   // check account ids following a banner refresh.
-  if ($refresh_banner) {
+  if ($refresh_banner && !$bannerless_exception) {
     if (!empty($account_ids)) {
       $account_mfcs_information = mfcs_load_users($account_ids, FALSE, TRUE);
       foreach ($account_ids as $account_id) {
