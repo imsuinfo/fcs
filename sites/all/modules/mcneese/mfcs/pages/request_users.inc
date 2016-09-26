@@ -598,7 +598,7 @@ function mfcs_request_users_0_view_page($user_id) {
   }
 
   $duplicate = NULL;
-  if (isset($account->mfcs['ldap_duplicate']) && $account->mfcs['ldap_duplicate']) {
+  if ((isset($account->mfcs['ldap_duplicate']) && $account->mfcs['ldap_duplicate']) || (isset($account->mfcs['problems']) && ($account->mfcs['problems'] & MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES) != 0)) {
     $duplicate = 'There <strong>Duplicate</strong> accounts for this user.';
 
     if (isset($account->mfcs['banner_id']) && is_numeric($account->mfcs['banner_id'])) {
