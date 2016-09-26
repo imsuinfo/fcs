@@ -17,7 +17,9 @@ function mcneese_content_formats_uninstall() {
   $registered = cf_settings_get_registered(array('module_name' => 'mcneese_content_formats'), 'id');
 
   foreach ($registered as &$r) {
-    cf_settings_unregister($r->variable_name, $r->variable_type, $r->module);
+    if (isset($r->variable_name) && isset($r->variable_type) && isset($r->module)) {
+      cf_settings_unregister($r->variable_name, $r->variable_type, $r->module);
+    }
   }
 }
 
