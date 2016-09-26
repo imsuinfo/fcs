@@ -2693,6 +2693,11 @@ function mfcs_hook_process_user_banner_roles($user, &$problems, $changes = array
   // force array to be populated with role ids and not role names.
   $processed_roles = array();
   foreach ($user_roles as $role_id => $role_name) {
+    // drupal's edit will set role_name to 0 for removing roles under certain conditions (while for others will use a role name to simply specify that the roles are assigned).
+    if (is_numeric($role_name) && $role_name == 0) {
+      continue;
+    }
+
     $processed_roles[(int) $role_id] = (int) $role_id;
   }
   unset($role_id);
