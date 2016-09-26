@@ -357,6 +357,8 @@ define('MFCS_REVIEW_RESTRICTIONS_NONE', 0);
 define('MFCS_REVIEW_RESTRICTIONS_REQUESTER', 1);
 define('MFCS_REVIEW_RESTRICTIONS_REVIEWER', 2);
 define('MFCS_REVIEW_RESTRICTIONS_MANAGERS', 3);
+define('MFCS_REVIEW_RESTRICTIONS_FINANCER', 4);
+define('MFCS_REVIEW_RESTRICTIONS_INSURER', 5);
 
 /**
  * Date Formats
@@ -613,6 +615,7 @@ function mfcs_page_request_access($operation = NULL, $request_id = NULL, $user =
   $roles = array(
     'manager' => user_access('mfcs manage', $user),
     'financer' => user_access('mfcs finance', $user),
+    'insurer' => user_access('mfcs insure', $user),
     'reviewer' => user_access('mfcs review', $user),
     'requester' => user_access('mfcs request', $user),
     'administer' => user_access('mfcs administer', $user),
@@ -1048,6 +1051,7 @@ function mfcs_page_generic_access($operation = NULL, $access_id = NULL, $user = 
   $roles = array(
     'manager' => user_access('mfcs manage', $user),
     'financer' => user_access('mfcs finance', $user),
+    'insurer' => user_access('mfcs insure', $user),
     'reviewer' => user_access('mfcs review', $user),
     'requester' => user_access('mfcs request', $user),
     'administer' => user_access('mfcs administer', $user),
@@ -1741,6 +1745,7 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
   $roles = array(
     'manager' => user_access('mfcs manage', $user),
     'financer' => user_access('mfcs finance', $user),
+    'insurer' => user_access('mfcs insure', $user),
     'reviewer' => user_access('mfcs review', $user),
     'requester' => user_access('mfcs request', $user),
     'administer' => user_access('mfcs administer', $user),

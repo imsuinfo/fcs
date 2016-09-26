@@ -38,6 +38,11 @@ function mfcs_hook_permission() {
     'description' => t('Grants permissions to perform financial related activity with requests (a privileged subset of mfcs review).'),
   );
 
+  $permissions['mfcs insure'] = array(
+    'title' => t('Insurance Facilities Use Requests'),
+    'description' => t('Grants permissions to perform insurance related activity with requests (a privileged subset of mfcs review).'),
+  );
+
   $permissions['mfcs manage'] = array(
     'title' => t('Manage Facilities Use Requests'),
     'description' => t('Grants permissions to manage requests.'),
@@ -2672,6 +2677,7 @@ function mfcs_hook_process_user_banner_roles($user, &$problems, $changes = array
   $requester_role = user_role_load_by_name('requester');
   $reviewer_role = user_role_load_by_name('reviewer');
   $financer_role = user_role_load_by_name('financer');
+  $insurer_role = user_role_load_by_name('insurer');
   $manager_role = user_role_load_by_name('manager');
   $administrator_role = user_role_load_by_name('administrator');
   $bannerless_exception_role = user_role_load_by_name('bannerless exception');
@@ -2741,6 +2747,7 @@ function mfcs_hook_process_user_banner_roles($user, &$problems, $changes = array
     unset($processed_roles[$reviewer_role->rid]);
     unset($processed_roles[$requester_role->rid]);
     unset($processed_roles[$financer_role->rid]);
+    unset($processed_roles[$insurer_role->rid]);
 
     $results = array();
     $results['roles'] = $processed_roles;
@@ -2779,6 +2786,7 @@ function mfcs_hook_process_user_banner_roles($user, &$problems, $changes = array
       unset($processed_roles[$reviewer_role->rid]);
       unset($processed_roles[$requester_role->rid]);
       unset($processed_roles[$financer_role->rid]);
+      unset($processed_roles[$insurer_role->rid]);
 
       $results = array();
       $results['roles'] = $processed_roles;
@@ -2833,11 +2841,12 @@ function mfcs_hook_process_user_banner_roles($user, &$problems, $changes = array
 
   // if the (non-admin) user is a venue or room coordinator, then add/remove reviewer role as necessary.
   if (empty($user_banner['role'])) {
-    // if the user has no banner roles, is not a manager, and is not a reviewer exception, then do not allow the user to have reviewer, financer, or requester roles (bannerless exception and administrators cannot reach this point).
+    // if the user has no banner roles, is not a manager, and is not a reviewer exception, then do not allow the user to have reviewer, financer, insurer, or requester roles (bannerless exception and administrators cannot reach this point).
     if (!$is_manager && !$reviewer_exception) {
       unset($processed_roles[$reviewer_role->rid]);
       unset($processed_roles[$requester_role->rid]);
       unset($processed_roles[$financer_role->rid]);
+      unset($processed_roles[$insurer_role->rid]);
     }
   }
   else {
@@ -2883,6 +2892,7 @@ function mfcs_hook_process_user_banner_roles($user, &$problems, $changes = array
       if (array_key_exists($reviewer_role->rid, $processed_roles)) {
         unset($processed_roles[$reviewer_role->rid]);
         unset($processed_roles[$financer_role->rid]);
+        unset($processed_roles[$insurer_role->rid]);
 
         // the function arguments are trying to assign 'proxy' role to a user who has no venue or room to review.
         // do not allow this and provide a watchdog warning for reference.

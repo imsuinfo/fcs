@@ -1206,11 +1206,15 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
   $is_administer = FALSE;
   $is_manager = FALSE;
   $is_reviewer = FALSE;
+  $is_financer = FALSE;
+  $is_insurer = FALSE;
   $is_requester = FALSE;
   if (is_object($user)) {
     $is_administer = user_access('mfcs administer', $user);
     $is_manager = user_access('mfcs manage', $user);
     $is_reviewer = user_access('mfcs review', $user);
+    $is_financer = user_access('mfcs financer', $user);
+    $is_insurer = user_access('mfcs insurer', $user);
     $is_requester = user_access('mfcs request', $user);
   }
 
@@ -1348,6 +1352,16 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
       }
       elseif ($restriction === MFCS_REVIEW_RESTRICTIONS_REVIEWER) {
         if (!($is_reviewer || $is_manager || $is_administer)) {
+          continue;
+        }
+      }
+      elseif ($restriction === MFCS_REVIEW_RESTRICTIONS_FINANCER) {
+        if (!($is_financer || $is_manager || $is_administer)) {
+          continue;
+        }
+      }
+      elseif ($restriction === MFCS_REVIEW_RESTRICTIONS_INSURER) {
+        if (!($is_insurer || $is_manager || $is_administer)) {
           continue;
         }
       }

@@ -22,6 +22,7 @@
  define('MFCS_RESTRICTION_DECISION_ADMINISTER', 6);
  define('MFCS_RESTRICTION_DECISION_COMMENT_ONLY', 7);
  define('MFCS_RESTRICTION_DECISION_FINANCER', 8);
+ define('MFCS_RESTRICTION_DECISION_INSURER', 9);
 
 /**
  * Defines Taxonomy TIDs for request revenue.
@@ -906,6 +907,13 @@ function mfcs_get_reviewer_decision_list_options($option = NULL, $restriction = 
     }
   }
   elseif ($restriction == MFCS_RESTRICTION_DECISION_FINANCER) {
+    foreach (array(MFCS_REVIEW_DECISION_ISSUES, MFCS_REVIEW_DECISION_ISSUES_NONE, MFCS_REVIEW_DECISION_COMMENT, MFCS_REVIEW_DECISION_REQUIREMENT) as $option_id) {
+      if (array_key_exists($option_id, $options_all)) {
+        $options[$option_id] = $options_all[$option_id];
+      }
+    }
+  }
+  elseif ($restriction == MFCS_RESTRICTION_DECISION_INSURER) {
     foreach (array(MFCS_REVIEW_DECISION_ISSUES, MFCS_REVIEW_DECISION_ISSUES_NONE, MFCS_REVIEW_DECISION_COMMENT, MFCS_REVIEW_DECISION_REQUIREMENT) as $option_id) {
       if (array_key_exists($option_id, $options_all)) {
         $options[$option_id] = $options_all[$option_id];

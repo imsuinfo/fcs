@@ -2189,7 +2189,7 @@ function mfcs_request_users_get_roles($standard = TRUE, $venue = TRUE, $special 
   $roles = array();
 
   if ($standard) {
-    foreach (array('reviewer', 'manager', 'requester', 'financer') as $role_name) {
+    foreach (array('reviewer', 'manager', 'requester', 'financer', 'insurer') as $role_name) {
       $role = user_role_load_by_name($role_name);
       if (is_object($role)) {
         $roles[$role->rid] = $role->name;
