@@ -873,6 +873,15 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => FALSE,
       ),
     ),
+    'revision' => array(
+      'label' => 'Revision ID',
+      'group' => 'request',
+      'weight' => 1,
+      'request_type' => array(
+        'show' => TRUE,
+        'hide' => FALSE,
+      ),
+    ),
     'created' => array(
       'label' => 'Created On',
       'group' => 'request',
