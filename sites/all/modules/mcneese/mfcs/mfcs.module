@@ -4110,6 +4110,12 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
     $has_reviewer_role = TRUE;
   }
 
+  $requester_role = user_role_load_by_name('requester');
+  $has_requester_role = FALSE;
+  if (isset($requester_role->rid) && array_key_exists($requester_role->rid, $user_roles)) {
+    $has_requester_role = TRUE;
+  }
+
   // load the mfcs user-specific problem data as a baseline to make changes to.
   $problems_original = MFCS_USER_PROBLEM_NONE;
   if (isset($user_information['mfcs']['problems']) && is_numeric($user_information['mfcs']['problems'])) {
@@ -4126,7 +4132,11 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
 
 
   // Even if refresh_banner is disabled, load the banner roles and coordinator rooms so that users with reviewer role still happens.
-  $original_banner_roles = mfcs_get_banner_roles_for_user_id($user_information['user_id']);
+  $original_banner_roles = array();
+  if (is_int($banner_id)) {
+    $original_banner_roles = mfcs_get_banner_roles_for_banner_id($banner_id);
+  }
+
   $original_coordinator_rooms = mfcs_load_coordinator_rooms($user_information['user_id']);
   if (empty($original_coordinator_rooms)) {
     $original_coordinator_rooms = FALSE;
@@ -4144,9 +4154,18 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
 
   // handle all appropriate banner refreshes.
   if (!$bannerless_exception) {
+    // remove requester role, it will be added back if the user has any banner roles at all.
+    $has_requester_role = FALSE;
+    unset($user_roles[$requester_role->rid]);
+
     if (is_array($original_banner_roles)) {
       foreach ($original_banner_roles as $original_banner_role) {
         $user_roles[(int) $original_banner_role->role_id] = (int) $original_banner_role->role_id;
+
+        if (!$has_requester_role) {
+          $user_roles[$requester_role->rid] = $requester_role->rid;
+          $has_requester_role = TRUE;
+        }
       }
       unset($original_banner_role);
     }
@@ -4168,7 +4187,16 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
           }
         }
 
-        $new_banner_roles = mfcs_get_banner_roles_for_user_id($user_information['user_id']);
+        $new_banner_roles = array();
+        if (is_int($banner_id)) {
+          $new_banner_roles = mfcs_get_banner_roles_for_banner_id($banner_id);
+        }
+
+        if (empty($new_banner_roles)) {
+          $has_requester_role = FALSE;
+          unset($user_roles[$requester_role->rid]);
+        }
+
         $new_coordinator_rooms = mfcs_load_coordinator_rooms($user_information['user_id']);
         if (empty($new_coordinator_rooms)) {
           $new_coordinator_rooms = FALSE;
@@ -4192,7 +4220,6 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
           unset($new_banner_role);
 
           if (!empty(array_diff($original_banner_role_ids, $new_banner_role_ids))) {
-            $changes_detected = TRUE;
             if (!$has_manager_role && !$has_administrator_role) {
               foreach ($original_banner_role_ids as $role_value) {
                 unset($user_roles[$role_value]);
@@ -4223,8 +4250,6 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
               }
             }
           }
-
-          $changes_detected = TRUE;
         }
 
         unset($new_banner_roles);
@@ -4414,13 +4439,11 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
       unset($primary_account_role_name);
 
       if (count($user_roles) != count($new_user_roles)) {
-        $changes_detected = TRUE;
         $user_roles = $new_user_roles;
       }
       else {
         foreach ($new_user_roles as $new_user_role_key => $new_user_role_value) {
           if (!array_key_exists($new_user_role_key, $user_roles)) {
-            $changes_detected = TRUE;
             $user_roles = $new_user_roles;
             break;
           }
@@ -4430,6 +4453,14 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
       }
 
       unset($primary_user_account);
+    }
+  }
+
+  // enable requester role if the user is a reviewer, manager, or administrator.
+  if (!$has_requester_role) {
+    if ($has_reviewer_role || $has_manager_role || $has_administrator_role) {
+      $user_roles[$requester_role->rid] = $requester_role->rid;
+      $has_requester_role = TRUE;
     }
   }
 
@@ -5330,6 +5361,16 @@ function mfcs_sync_banner_to_local_users($user_id = NULL, $banner_id = NULL, $me
 
       $query->execute();
 
+      $query = db_update('mfcs_banner_event_roles_to_banner_ids');
+      $query->fields(array('disabled' => 1, 'date' => $instance));
+      $query->condition('disabled', 0);
+
+      if (!is_null($banner_id)) {
+        $query->condition('banner_id', $banner_id);
+      }
+
+      $query->execute();
+
       foreach ($rows as $row) {
         if (!is_array($row)) {
           continue;
@@ -5355,39 +5396,65 @@ function mfcs_sync_banner_to_local_users($user_id = NULL, $banner_id = NULL, $me
         if (isset($banner_ids_to_user_ids['banner'][$row_banner_id]['primary']['user_id'])) {
           $current_user_id = $banner_ids_to_user_ids['banner'][$row_banner_id]['primary']['user_id'];
         }
+        $current_banner_id = $row_banner_id;
 
         if (is_null($current_user_id)) {
           // @todo: something went wrong here, report watchdog error about banner to user id mapping and primary account failure (mfcs_users_load_banner_id_to_user_id() is supposed to guarantee a primary account).
           continue;
         }
 
-        if (!($current_user_id > 0)) {
-          continue;
+        if ($current_user_id > 0) {
+          $mfcs_banner_event_roles_item['user_id'] = $current_user_id;
+          $mfcs_banner_event_roles_item['event_role_id'] = $roles_by_name[$row['role']];
+          $mfcs_banner_event_roles_item['disabled'] = 0;
+          $mfcs_banner_event_roles_item['date'] = $instance;
+
+          $query = db_select('mfcs_banner_event_roles_to_users', 'mberu');
+          $query->addExpression('count(mberu.user_id)');
+          $query->condition('mberu.user_id', $current_user_id);
+          $query->condition('mberu.event_role_id', $roles_by_name[$row['role']]);
+
+          $mfcs_banner_event_roles_count = $query->execute()->fetchField();
+
+          if ($mfcs_banner_event_roles_count > 0) {
+            $query = db_update('mfcs_banner_event_roles_to_users');
+            $query->fields($mfcs_banner_event_roles_item);
+            $query->condition('user_id', $current_user_id);
+            $query->condition('event_role_id', $roles_by_name[$row['role']]);
+            $query->execute();
+          }
+          else {
+            $query = db_insert('mfcs_banner_event_roles_to_users');
+            $query->fields($mfcs_banner_event_roles_item);
+            $query->execute();
+          }
         }
 
-        $mfcs_banner_event_roles_item['user_id'] = $current_user_id;
-        $mfcs_banner_event_roles_item['event_role_id'] = $roles_by_name[$row['role']];
-        $mfcs_banner_event_roles_item['disabled'] = 0;
-        $mfcs_banner_event_roles_item['date'] = $instance;
+        if (!is_null($row_banner_id)) {
+          $mfcs_banner_event_roles_banner_id_item['banner_id'] = $row_banner_id;
+          $mfcs_banner_event_roles_banner_id_item['event_role_id'] = $roles_by_name[$row['role']];
+          $mfcs_banner_event_roles_banner_id_item['disabled'] = 0;
+          $mfcs_banner_event_roles_banner_id_item['date'] = $instance;
 
-        $query = db_select('mfcs_banner_event_roles_to_users', 'mberu');
-        $query->addExpression('count(mberu.user_id)');
-        $query->condition('mberu.user_id', $current_user_id);
-        $query->condition('mberu.event_role_id', $roles_by_name[$row['role']]);
+          $query = db_select('mfcs_banner_event_roles_to_banner_ids', 'mberbi');
+          $query->addExpression('count(mberbi.banner_id)');
+          $query->condition('mberbi.banner_id', $row_banner_id);
+          $query->condition('mberbi.event_role_id', $roles_by_name[$row['role']]);
 
-        $mfcs_banner_event_roles_count = $query->execute()->fetchField();
+          $mfcs_banner_event_roles_banner_id_count = $query->execute()->fetchField();
 
-        if ($mfcs_banner_event_roles_count > 0) {
-          $query = db_update('mfcs_banner_event_roles_to_users');
-          $query->fields($mfcs_banner_event_roles_item);
-          $query->condition('user_id', $current_user_id);
-          $query->condition('event_role_id', $roles_by_name[$row['role']]);
-          $query->execute();
-        }
-        else {
-          $query = db_insert('mfcs_banner_event_roles_to_users');
-          $query->fields($mfcs_banner_event_roles_item);
-          $query->execute();
+          if ($mfcs_banner_event_roles_banner_id_count > 0) {
+            $query = db_update('mfcs_banner_event_roles_to_banner_ids');
+            $query->fields($mfcs_banner_event_roles_banner_id_item);
+            $query->condition('banner_id', $row_banner_id);
+            $query->condition('event_role_id', $roles_by_name[$row['role']]);
+            $query->execute();
+          }
+          else {
+            $query = db_insert('mfcs_banner_event_roles_to_banner_ids');
+            $query->fields($mfcs_banner_event_roles_banner_id_item);
+            $query->execute();
+          }
         }
       }
 
@@ -13409,6 +13476,46 @@ function mfcs_get_banner_roles_for_user_id($user_id) {
     $query->addField('mdtbrm', 'banner_name', 'banner_name');
     $query->condition('mberu.user_id', $user_id);
     $query->condition('mberu.disabled', 0);
+
+    $mfcs_banner_event_roles = $query->execute()->fetchAll();
+  }
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
+    return FALSE;
+  }
+
+  return $mfcs_banner_event_roles;
+}
+
+/**
+ * Load banner roles for a specified banner id.
+ *
+ * @param int $banner_id
+ *   The banner id.
+ *
+ * @return array|bool
+ *   An array of roles (as database objects) are returned on success.
+ *   FALSE is returned on error.
+ */
+function mfcs_get_banner_roles_for_banner_id($banner_id) {
+  if (!cf_is_integer($banner_id)) {
+    cf_error::invalid_integer('banner_id');
+    return FALSE;
+  }
+
+  try {
+    $query = db_select('mfcs_banner_event_roles_to_banner_ids', 'mberbi');
+    $query->innerJoin('mfcs_drupal_to_banner_role_mapping', 'mdtbrm', 'mberbi.event_role_id = mdtbrm.banner_id');
+    $query->addField('mberbi', 'event_role_id');
+    $query->addField('mdtbrm', 'role_id', 'role_id');
+    $query->addField('mdtbrm', 'role_name', 'role_name');
+    $query->addField('mdtbrm', 'banner_name', 'banner_name');
+    $query->condition('mberbi.banner_id', $banner_id);
+    $query->condition('mberbi.disabled', 0);
 
     $mfcs_banner_event_roles = $query->execute()->fetchAll();
   }

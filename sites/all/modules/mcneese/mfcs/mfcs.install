@@ -944,6 +944,50 @@ function mfcs_schema() {
     ),
   );
 
+  $schema['mfcs_banner_event_roles_to_banner_ids'] = array(
+    'description' => $t("McNeese Facilities Use Event Roles Banner table. This is for providing local storage of a given banner event role table for banner ids."),
+    'fields' => array(
+      'banner_id' => array(
+        'description' => $t("Represents the banner id the role is associated with."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'event_role_id' => array(
+        'description' => $t("Represents the id of the event role associated with the user."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'date' => array(
+        'description' => $t("Represents the date the field was last changed."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'disabled' => array(
+        'description' => $t("Boolean designating that the room is disabled. This happens when it is not found in the banner database."),
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'unique keys' => array(
+      'banner_id_to_role' => array('banner_id', 'event_role_id'),
+    ),
+    'foreign keys' => array(
+      'event_role_id' => array(
+        'table' => 'mfcs_banner_event_roles',
+        'columns' => array('event_role_id' => 'id'),
+      ),
+    ),
+  );
+
   $schema['mfcs_request_reminders'] = array(
     'description' => $t("McNeese Facilities Use Reminders table. This represents requests that have had their reminders e-mailed out."),
     'fields' => array(
@@ -2196,6 +2240,8 @@ function mfcs_install() {
   db_query('ALTER TABLE {mfcs_banner_event_roles_to_users} ADD CONSTRAINT ' . $key6_foreign . ' FOREIGN KEY (' . $key6_name . ') REFERENCES {' . $table6_foreign . '} (' . $table6_foreign_key . ') ON UPDATE CASCADE ON DELETE CASCADE');
   db_query('ALTER TABLE {mfcs_banner_event_roles_to_users} ADD CONSTRAINT user_id_fkey FOREIGN KEY (user_id) REFERENCES {users} (uid) ON UPDATE CASCADE ON DELETE RESTRICT');
 
+  db_query('ALTER TABLE {mfcs_banner_event_roles_to_banner_ids} ADD CONSTRAINT ' . $key6_foreign . ' FOREIGN KEY (' . $key6_name . ') REFERENCES {' . $table6_foreign . '} (' . $table6_foreign_key . ') ON UPDATE CASCADE ON DELETE CASCADE');
+
   db_query('ALTER TABLE {mfcs_request_reminders} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON UPDATE CASCADE ON DELETE CASCADE');
 
   db_query('ALTER TABLE {mfcs_review_classifications} ADD CONSTRAINT review_id_fkey FOREIGN KEY (review_id) REFERENCES {mfcs_field_review_review} (id) ON UPDATE CASCADE ON DELETE CASCADE');
@@ -2524,6 +2570,7 @@ function mfcs_uninstall() {
   db_query('ALTER TABLE {mfcs_banner_rooms} DROP CONSTRAINT IF EXISTS venue_coordinator_id');
   db_query('ALTER TABLE {mfcs_banner_classes} DROP CONSTRAINT IF EXISTS ' . $key5_foreign);
   db_query('ALTER TABLE {mfcs_banner_event_roles_to_users} DROP CONSTRAINT IF EXISTS ' . $key6_foreign);
+  db_query('ALTER TABLE {mfcs_banner_event_roles_to_banner_ids} DROP CONSTRAINT IF EXISTS ' . $key6_foreign);
   db_query('ALTER TABLE {mfcs_request_reminders} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
   db_query('ALTER TABLE {mfcs_review_classifications} DROP CONSTRAINT IF EXISTS ' . $keyR_foreign);
   db_query('ALTER TABLE {mfcs_field_review_review} DROP CONSTRAINT IF EXISTS ' . $key1_foreign);
