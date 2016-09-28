@@ -4046,12 +4046,6 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
     return TRUE;
   }
 
-  // only execute function once per user account per execution.
-  $already_executed = &drupal_static(__FUNCTION__, NULL);
-  if (is_array($already_executed) && array_key_exists($user_information['user_id'], $already_executed)) {
-    return $already_executed[$user_information['user_id']];
-  }
-
   $changes_detected = FALSE;
 
   $original_roles = (array) $user_information['roles'];
@@ -4094,25 +4088,25 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
 
   $reviewer_exception_role = user_role_load_by_name('reviewer exception');
   $has_reviewer_exception_role = FALSE;
-  if (isset($reviewer_exception_role->rid) || array_key_exists($reviewer_exception_role->rid, $user_roles)) {
+  if (isset($reviewer_exception_role->rid) && array_key_exists($reviewer_exception_role->rid, $user_roles)) {
     $has_reviewer_exception_role = TRUE;
   }
 
   $manager_role = user_role_load_by_name('manager');
   $has_manager_role = FALSE;
-  if (isset($manager_role->rid) || array_key_exists($manager_role->rid, $user_roles)) {
+  if (isset($manager_role->rid) && array_key_exists($manager_role->rid, $user_roles)) {
     $has_manager_role = TRUE;
   }
 
   $administrator_role = user_role_load_by_name('administrator');
   $has_administrator_role = FALSE;
-  if (isset($administrator_role->rid) || array_key_exists($administrator_role->rid, $user_roles)) {
+  if (isset($administrator_role->rid) && array_key_exists($administrator_role->rid, $user_roles)) {
     $has_administrator_role = TRUE;
   }
 
   $reviewer_role = user_role_load_by_name('reviewer');
   $has_reviewer_role = FALSE;
-  if (isset($reviewer_role->rid) || array_key_exists($reviewer_role->rid, $user_roles)) {
+  if (isset($reviewer_role->rid) && array_key_exists($reviewer_role->rid, $user_roles)) {
     $has_reviewer_role = TRUE;
   }
 
@@ -4130,112 +4124,161 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
     $banner_id = (int) $user_information['mfcs']['banner_id'];
   }
 
+
+  // Even if refresh_banner is disabled, load the banner roles and coordinator rooms so that users with reviewer role still happens.
+  $original_banner_roles = mfcs_get_banner_roles_for_user_id($user_information['user_id']);
+  $original_coordinator_rooms = mfcs_load_coordinator_rooms($user_information['user_id']);
+  if (empty($original_coordinator_rooms)) {
+    $original_coordinator_rooms = FALSE;
+  }
+  else {
+    $original_coordinator_rooms = TRUE;
+  }
+
+  if ($original_coordinator_rooms && !$has_reviewer_role) {
+    $user_roles[$reviewer_role->rid] = $reviewer_role->rid;
+    $has_reviewer_role = TRUE;
+  }
+
   // @todo: depending on time of day if banner is not going to be available, then auto-set refresh_banner to FALSE.
 
   // handle all appropriate banner refreshes.
-  if ($refresh_banner && !$bannerless_exception) {
-    $original_banner_roles = mfcs_get_banner_roles_for_user_id($user_information['user_id']);
-    $original_coordinator_rooms = mfcs_load_coordinator_rooms($user_information['user_id']);
-    if (empty($original_coordinator_rooms)) {
-      $original_coordinator_rooms = FALSE;
-    }
-    else {
-      $original_coordinator_rooms = TRUE;
-    }
-
-    $result = mfcs_sync_banner_to_local_users($user_information['user_id'], $banner_id);
-    if ($result) {
-      if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) != 0 || ($problems_original & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) != 0 || ($problems_original & MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) != 0) {
-        if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) != 0) {
-          $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE;
-        }
-
-        if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) != 0) {
-          $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE;
-        }
-
-        if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) != 0) {
-          $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS;
-        }
+  if (!$bannerless_exception) {
+    if (is_array($original_banner_roles)) {
+      foreach ($original_banner_roles as $original_banner_role) {
+        $user_roles[(int) $original_banner_role->role_id] = (int) $original_banner_role->role_id;
       }
+      unset($original_banner_role);
+    }
 
-      $new_banner_roles = mfcs_get_banner_roles_for_user_id($user_information['user_id']);
-      $new_coordinator_rooms = mfcs_load_coordinator_rooms($user_information['user_id']);
-      if (empty($new_coordinator_rooms)) {
-        $new_coordinator_rooms = FALSE;
+    if ($refresh_banner) {
+      $result = mfcs_sync_banner_to_local_users($user_information['user_id'], $banner_id);
+      if ($result) {
+        if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) != 0 || ($problems_original & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) != 0 || ($problems_original & MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) != 0) {
+          if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) != 0) {
+            $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE;
+          }
+
+          if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) != 0) {
+            $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE;
+          }
+
+          if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) != 0) {
+            $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS;
+          }
+        }
+
+        $new_banner_roles = mfcs_get_banner_roles_for_user_id($user_information['user_id']);
+        $new_coordinator_rooms = mfcs_load_coordinator_rooms($user_information['user_id']);
+        if (empty($new_coordinator_rooms)) {
+          $new_coordinator_rooms = FALSE;
+        }
+        else {
+          $new_coordinator_rooms = TRUE;
+        }
+
+        // handle role changes in banner.
+        if (is_array($original_banner_roles) && is_array($new_banner_roles)) {
+          $original_banner_role_ids = array();
+          foreach ($original_banner_roles as $original_banner_role) {
+            $original_banner_role_ids[$original_banner_role->role_id] = $original_banner_role->role_id;
+          }
+          unset($original_banner_role);
+
+          $new_banner_role_ids = array();
+          foreach ($new_banner_roles as $new_banner_role) {
+            $new_banner_role_ids[$new_banner_role->role_id] = $new_banner_role->role_id;
+          }
+          unset($new_banner_role);
+
+          if (!empty(array_diff($original_banner_role_ids, $new_banner_role_ids))) {
+            $changes_detected = TRUE;
+            if (!$has_manager_role && !$has_administrator_role) {
+              foreach ($original_banner_role_ids as $role_value) {
+                unset($user_roles[$role_value]);
+              }
+              unset($role_value);
+
+              foreach ($new_banner_role_ids as $role_value) {
+                $user_roles[(int) $role_value] = (int) $role_value;
+              }
+              unset($role_value);
+            }
+          }
+          unset($original_banner_role_ids);
+          unset($new_banner_role_ids);
+        }
+
+        // handle venue coordinator changes in banner.
+        if ($original_coordinator_rooms !== $new_coordinator_rooms) {
+          if (!$has_reviewer_exception_role && !$has_manager_role && !$has_administrator_role) {
+            if (isset($reviewer_role->rid)) {
+              if ($new_coordinator_rooms) {
+                $user_roles[$reviewer_role->rid] = $reviewer_role->rid;
+                $has_reviewer_role = TRUE;
+              }
+              else {
+                unset($user_roles[$reviewer_role->rid]);
+                $has_reviewer_role = FALSE;
+              }
+            }
+          }
+
+          $changes_detected = TRUE;
+        }
+
+        unset($new_banner_roles);
+        unset($new_coordinator_rooms);
       }
       else {
-        $new_coordinator_rooms = TRUE;
+        // @todo: should this be reported here?
+        #if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) == 0) {
+        #  $problems_new = $problems_new | MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE;
+        #}
       }
+      unset($result);
 
-      // handle role changes in banner.
-      if (is_array($original_banner_roles) && is_array($new_banner_roles)) {
-        $original_banner_role_ids = array();
-        foreach ($original_banner_roles as $original_banner_role) {
-          $original_banner_role_ids[$original_banner_role->role_id] = $original_banner_role->role_id;
-        }
-        unset($original_banner_role);
-
-        $new_banner_role_ids = array();
-        foreach ($new_banner_roles as $new_banner_role) {
-          $new_banner_role_ids[$new_banner_role->role_id] = $new_banner_role->role_id;
-        }
-        unset($new_banner_role);
-
-        if (!empty(array_diff($original_banner_role_ids, $new_banner_role_ids))) {
-          $changes_detected = TRUE;
-          if (!$has_manager_role && !$has_administrator_role) {
-            foreach ($original_banner_role_ids as $role_value) {
-              unset($user_roles[$role_value]);
-            }
-            unset($role_value);
-
-            foreach ($new_banner_role_ids as $role_value) {
-              $user_roles[(int) $role_value] = (int) $role_value;
-            }
-            unset($role_value);
-          }
-        }
-        unset($original_banner_role_ids);
-        unset($new_banner_role_ids);
-      }
-
-      // handle venue coordinator changes in banner.
-      if ($original_coordinator_rooms !== $new_coordinator_rooms) {
-        if (!$has_reviewer_exception_role && !$has_manager_role && !$has_administrator_role) {
-          if (isset($reviewer_role->rid)) {
-            if ($new_coordinator_rooms) {
-              $user_roles[$reviewer_role->rid] = $reviewer_role->rid;
-              $has_reviewer_role = TRUE;
-            }
-            else {
-              unset($user_roles[$reviewer_role->rid]);
-              $has_reviewer_role = FALSE;
-            }
-          }
-        }
-
-        $changes_detected = TRUE;
-      }
-
-      unset($new_banner_roles);
-      unset($new_coordinator_rooms);
+      unset($original_banner_roles);
+      unset($original_coordinator_rooms);
     }
-    else {
-      // @todo: should this be reported here?
-      #if (($problems_original & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) == 0) {
-      #  $problems_new = $problems_new | MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE;
-      #}
-    }
-    unset($result);
+  }
 
-    unset($original_banner_roles);
-    unset($original_coordinator_rooms);
+  // if the user is explicitly assigned as a reviewer, then add reviewer role regardless of banner room/venue coordinator status.
+  if (!$has_reviewer_role && isset($reviewer_role->rid)) {
+    try {
+      $query = db_select('mfcs_reviewers', 'mr');
+      $query->condition('mr.user_id', $user_information['user_id']);
+      $query->condition('mr.disabled', 0);
+
+      $results = $query->execute()->fetchAll();
+
+      if (!empty($results)) {
+        $user_roles[$reviewer_role->rid] = $reviewer_role->rid;
+        $has_reviewer_role = TRUE;
+      }
+      unset($results);
+      unset($query);
+    }
+    catch (Error $e) {
+      cf_error::on_query_execution($e);
+    }
+    catch (Exception $e) {
+      cf_error::on_query_execution($e);
+    }
+  }
+
+  // if the user is explicitly assigned as a venue coordinator proxy, then add reviewer role regardless of banner room/venue coordinator status.
+  if (!$has_reviewer_role && isset($reviewer_role->rid)) {
+    $proxy_as = mfcs_get_proxy_venue_coordinator($user_information['user_id']);
+    if (!empty($proxy_as)) {
+      $user_roles[$reviewer_role->rid] = $reviewer_role->rid;
+      $has_reviewer_role = TRUE;
+    }
+    unset($proxy_as);
   }
 
   if (is_null($banner_id)) {
     // banner id is necessary for synchronization, if this account has no banner id, then there is nothing to do.
-    $already_executed[$user_information['user_id']] = TRUE;
     return TRUE;
   }
 
@@ -4347,9 +4390,10 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
   elseif ($total_primary > 1 && $total_primary_enabled > 1) {
     if (($problems_new & MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES) == 0) {
       $problems_new = $problems_new | MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES;
-      $local_duplicate = TRUE;
       $changes_detected = TRUE;
     }
+
+    $local_duplicate = TRUE;
   }
   else {
     if (($problems_new & MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES) != 0) {
@@ -4487,7 +4531,6 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
           mfcs_save_user($user_information['user_id'], array('problems' => $problems_new));
         }
 
-        $already_executed[$user_information['user_id']] = FALSE;
         return FALSE;
       }
       catch (Exception $e) {
@@ -4503,7 +4546,6 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
           mfcs_save_user($user_information['user_id'], array('problems' => $problems_new));
         }
 
-        $already_executed[$user_information['user_id']] = FALSE;
         return FALSE;
       }
     }
@@ -4513,6 +4555,9 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
 
   if ($changes_detected) {
     $edit['roles'] = $user_roles;
+
+    // create this so that mfcs_save_user() has something to pass.
+    $edit['mfcs']['updated'] = mfcs_instance();
 
     if ($problems_original != $problems_new) {
       $edit['mfcs']['problems'] = $problems_new;
@@ -4581,15 +4626,16 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
       }
       unset($mfcs_users);
 
-      $already_executed[$user_information['user_id']] = FALSE;
       return FALSE;
     }
+
+    // save mfcs user table specific settings.
+    mfcs_save_user($user_information['user_id'], $edit['mfcs']);
   }
   elseif ($problems_original != $problems_new) {
     mfcs_save_user($user_information['user_id'], array('problems' => $problems_new));
   }
 
-  $already_executed[$user_information['user_id']] = FALSE;
   return TRUE;
 }
 
