@@ -2277,10 +2277,29 @@ function mfcs_hook_user_presave(&$edit, $account, $category) {
   $edit['mfcs']['updated'] = mfcs_instance();
 
 
+  // bannerless exception can be present on the original account or added via the edit.
+  // drupal sometimes sets values to 0 to designate that they are to be removed.
+  $bannerless_exception = FALSE;
+  $bannerless_exception_role_id = user_role_load_by_name('bannerless exception');
+  if (isset($account->roles) && is_array($account->roles) && array_key_exists($bannerless_exception_role_id->rid, $account->roles)) {
+    if ($account->roles[$bannerless_exception_role_id->rid] != 0) {
+      $bannerless_exception = TRUE;
+    }
+  }
+
+  if (isset($edit['roles']) && is_array($edit['roles']) && array_key_exists($bannerless_exception_role_id->rid, $edit['roles'])) {
+    if ($edit['roles'][$bannerless_exception_role_id->rid] == 0) {
+      $bannerless_exception = FALSE;
+    }
+    else {
+      $bannerless_exception = TRUE;
+    }
+  }
+
+
   // enforce banner information if the account is not a bannerless exception.
   if (isset($account->uid) && isset($account->mfcs)) {
-    $bannerless_exception_role_id = user_role_load_by_name('bannerless exception');
-    if (!isset($account->roles) || !is_array($account->roles) || !array_key_exists($bannerless_exception_role_id->rid, $account->roles)) {
+    if (!$bannerless_exception) {
       $ldap_information = mfcs_get_ldap_information($account);
       if (is_array($ldap_information) && !empty($ldap_information)) {
         if (isset($edit['mail'])) {
@@ -2343,14 +2362,16 @@ function mfcs_hook_user_presave(&$edit, $account, $category) {
   }
 
   // re-synchronize account information following change.
-  if (isset($edit['mfcs']) && array_key_exists('banner_id', $edit['mfcs'])) {
-    if (!empty($edit['mfcs']['banner_id'])) {
-      $result = mfcs_sync_banner_to_local_users($account->uid, $edit['mfcs']['banner_id']);
+  if (!$bannerless_exception) {
+    if (isset($edit['mfcs']) && array_key_exists('banner_id', $edit['mfcs'])) {
+      if (!empty($edit['mfcs']['banner_id'])) {
+        $result = mfcs_sync_banner_to_local_users($account->uid, $edit['mfcs']['banner_id']);
+      }
     }
-  }
-  elseif (isset($account->mfcs) && array_key_exists('banner_id', $account->mfcs)) {
-    if (!empty($account->mfcs['banner_id'])) {
-      $result = mfcs_sync_banner_to_local_users($account->uid, $account->mfcs['banner_id']);
+    elseif (isset($account->mfcs) && array_key_exists('banner_id', $account->mfcs)) {
+      if (!empty($account->mfcs['banner_id'])) {
+        $result = mfcs_sync_banner_to_local_users($account->uid, $account->mfcs['banner_id']);
+      }
     }
   }
 
@@ -2389,7 +2410,7 @@ function mfcs_hook_user_presave(&$edit, $account, $category) {
   }
 
   $changes = NULL;
-  if (!empty($settings)) {
+  if (!empty($settings) && !$bannerless_exception) {
     $changes = mfcs_hook_process_user_banner_roles($account, $problems, $settings);
 
     if ($problems != $problems_original) {

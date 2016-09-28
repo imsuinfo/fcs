@@ -597,31 +597,53 @@ function mfcs_request_users_0_view_page($user_id) {
     $locked = 'Account is <strong>Locked</strong>.';
   }
 
+  $total_users = 1;
+  if (is_int($banner_id)) {
+    $total_users = mfcs_request_users_get_total_users($banner_id);
+
+    if (!is_int($total_users) || $total_users < 1) {
+      $total_users = 1;
+    }
+  }
+
   $duplicate = NULL;
-  if ((isset($account->mfcs['ldap_duplicate']) && $account->mfcs['ldap_duplicate']) || (isset($account->mfcs['problems']) && ($account->mfcs['problems'] & MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES) != 0)) {
+  if ((isset($account->mfcs['ldap_duplicate']) && $account->mfcs['ldap_duplicate']) || $total_users > 1) {
     $duplicate = 'There <strong>Duplicate</strong> accounts for this user.';
+    $duplicate_accounts_in_system = FALSE;
+    $duplicate_accounts = 'There are <strong>Duplicate</strong> accounts:<ul class="item-information-list item-information-duplicate-list">';
+    $duplicate_accounts_processed = array();
 
-    if (isset($account->mfcs['banner_id']) && is_numeric($account->mfcs['banner_id'])) {
-      $associated_users = mfcs_users_load_banner_id_to_user_id($account->mfcs['banner_id']);
-      if (isset($associated_users['banner'][$account->mfcs['banner_id']]['all']) && is_array($associated_users['banner'][$account->mfcs['banner_id']]['all'])) {
-        $duplicate = 'There are <strong>Duplicate</strong> ldap accounts:<ul class="item-information-list item-information-duplicate-list">';
-
-        foreach ($associated_users['banner'][$account->mfcs['banner_id']]['all'] as $associated_user) {
+    if (is_int($banner_id)) {
+      $associated_users = mfcs_users_load_banner_id_to_user_id($banner_id);
+      if (isset($associated_users['banner'][$banner_id]['all']) && is_array($associated_users['banner'][$banner_id]['all'])) {
+        foreach ($associated_users['banner'][$banner_id]['all'] as $associated_user) {
           if ($account->uid == $associated_user['user_id']) {
             continue;
           }
+          if (array_key_exists($associated_user['user_id'], $duplicate_accounts_processed)) {
+            continue;
+          }
+
+          $duplicate_accounts_in_system = TRUE;
+          $duplicate_accounts_processed[$associated_user['user_id']] = $associated_user['user_id'];
 
           $associated_name = $associated_user['name'];
           if (!empty($associated_user['first_name']) && !empty($associated_user['last_name'])) {
             $associated_name = $associated_user['first_name'] . ' ' . $associated_user['last_name'];
           }
 
-          $duplicate .= '<li class="item-information-list-item item-information-duplicate-list-item"><a href="' . $base_path . 'requests/users-0/view/' . $associated_user['user_id'] . $url_arguments . '" class="item-information-list-item-link item-information-duplicate-list-item-link">' . $associated_name . '</a> <sup>[id: ' . $associated_user['user_id'] . ']</sup></li>';
+          $duplicate_accounts .= '<li class="item-information-list-item item-information-duplicate-list-item"><a href="' . $base_path . 'requests/users-0/view/' . $associated_user['user_id'] . $url_arguments . '" class="item-information-list-item-link item-information-duplicate-list-item-link">' . $associated_name . '</a> <sup>[id: ' . $associated_user['user_id'] . ']</sup></li>';
         }
-
-        $duplicate .= '</ul>';
+        unset($associated_user);
       }
     }
+
+    $duplicate_accounts .= '</ul>';
+    if ($duplicate_accounts_in_system) {
+      $duplicate = $duplicate_accounts;
+    }
+    unset($duplicate_accounts_in_system);
+    unset($duplicate_accounts);
   }
 
   $email = NULL;
@@ -633,9 +655,9 @@ function mfcs_request_users_0_view_page($user_id) {
   if (isset($mfcs_oracle_is_not_available) && $mfcs_oracle_is_not_available === TRUE) {
     $banner_information = '<div class="view_user-item view_user-item-roles-unavailable">Banner is currently unavailable.</div>';
   }
-  elseif (isset($account->mfcs['banner_id']) && is_numeric($account->mfcs['banner_id'])) {
+  elseif (is_int($banner_id)) {
     try {
-      $banner_id_string = mfcs_banner_id_int_to_string($account->mfcs['banner_id']);
+      $banner_id_string = mfcs_banner_id_int_to_string($banner_id);
       $event_roles = mfcs_oracle_select('select role from ucs.msu_event_role where id = :banner_id', array('banner_id' => $banner_id_string));
 
       if (is_array($event_roles)) {
@@ -661,7 +683,7 @@ function mfcs_request_users_0_view_page($user_id) {
     }
 
     if (!isset($mfcs_oracle_is_not_available)) {
-      $coordinator_rooms = mfcs_load_coordinator_rooms_from_banner($account->mfcs['banner_id']);
+      $coordinator_rooms = mfcs_load_coordinator_rooms_from_banner($banner_id);
       if (is_array($coordinator_rooms) && !empty($coordinator_rooms)) {
         $is_room_coordinator = FALSE;
         $is_venue_coordinator = FALSE;
@@ -1774,7 +1796,7 @@ function mfcs_request_users_0_add_or_edit_form_submit($form, &$form_state, $edit
   }
 
   // synchronize user settings to identify any problems (without syncing banner)
-  mfcs_synchronize_user_settings($form['user']['#value']->uid, array(), TRUE, FALSE);
+  mfcs_synchronize_user_settings($saved_account->uid, array(), TRUE, FALSE);
 
   // redirect after submitting.
   if (empty($form_state['values']['redirect_to'])) {
@@ -2286,6 +2308,53 @@ function mfcs_request_users_0_check_page($user_id) {
   $redirect_array = mfcs_build_redirect_array('requests/problems-0/users');
 
   drupal_goto('requests/users-0/view/' . $user_id, array('query' => drupal_get_query_parameters()));
+}
+
+/**
+ * Returns user's the total number of users with the given banner id.
+ *
+ * @param int $banner_id
+ *   The numeric banner id string uniquely representing some user.
+ *
+ * @return int|bool
+ *   Total number of users with specified banner id.
+ *   FALSE is returned on error.
+ */
+function mfcs_request_users_get_total_users($banner_id) {
+  if (!cf_is_integer($banner_id)) {
+    cf_error::invalid_integer('banner_id');
+
+    return FALSE;
+  }
+
+  $transaction = db_transaction();
+  try {
+    $query = db_select('users', 'u');
+    $query->leftJoin('mfcs_users', 'mu', 'u.uid = mu.user_id');
+
+    $query->condition('mu.banner_id', $banner_id);
+
+    $query->addExpression('count(u.uid)');
+
+    $total = $query->execute()->fetchField();
+    if (is_numeric($total)) {
+      return (int) $total;
+    }
+  }
+  catch (Error $e) {
+    $transaction->rollback();
+    cf_error::on_exception($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+    cf_error::on_exception($e);
+
+    return FALSE;
+  }
+
+  return FALSE;
 }
 
 /**
