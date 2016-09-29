@@ -628,6 +628,7 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
       }
     }
 
+    /*
     if ($status === MFCS_REQUEST_STATUS_LOCKED) {
       // do not send e-mail when the previous step is already set to venue available.
       if ($step !== MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
@@ -641,6 +642,7 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
       $parameters['update'] = TRUE;
       mfcs_send_workflow_emails($request_id, $parameters);
     }
+    */
   }
 
 

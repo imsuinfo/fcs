@@ -7287,6 +7287,7 @@ function mfcs_set_request_values($request, $prepared, $structure, $existing, &$f
     }
 
     // if the request has been updated while it is in a locked status, the review log must be reset/restarted.
+    /*
     if (!is_null($request) && $review_log_lock && $status === MFCS_REQUEST_STATUS_LOCKED && $step !== MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
       $step_revision = $request['current']['top']['step'] + 1;
       $structure_current['top_step'] = $step_revision;
@@ -7344,6 +7345,7 @@ function mfcs_set_request_values($request, $prepared, $structure, $existing, &$f
       $query->fields($mfcs_field_review_review);
       $query->execute();
     }
+    */
 
     // update the current revisions table.
     if (is_null($request)) {
