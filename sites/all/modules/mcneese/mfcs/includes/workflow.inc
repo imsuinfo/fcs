@@ -869,6 +869,17 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
     return FALSE;
   }
 
+  // as an exceptional case, allow for issues and issues none to be specified/corrected during the final step that belong to the review step.
+  if ($step === MFCS_REVIEW_STEP_FINAL_DECISION && ($decision === MFCS_REVIEW_DECISION_ISSUES || $decision === MFCS_REVIEW_DECISION_ISSUES_NONE)) {
+    $reviewer_classifications_review = mfcs_get_reviewer_classifications($user->uid, $classification, MFCS_REVIEW_STEP_REVIEW);
+    if (isset($reviewer_classifications_review['step'])) {
+      foreach ($reviewer_classifications_review['step'] as $reviewer_classification) {
+        $reviewer_classifications['step'][$reviewer_classification] = $reviewer_classification;
+      }
+      unset($reviewer_classification);
+    }
+  }
+
   // the classifications in $as will be used if and only if those classifications are valid.
   if (!empty($as)) {
     $classifications_to_use = array();

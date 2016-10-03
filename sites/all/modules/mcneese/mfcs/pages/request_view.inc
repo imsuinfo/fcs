@@ -578,9 +578,16 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           $review = array_shift($reviewer_decisions);
           $decision = (int) $review->decision;
 
+          // final decision can only be one of: approve or deny.
+          if ($decision !== MFCS_REVIEW_DECISION_APPROVE && $decision !== MFCS_REVIEW_DECISION_DENY) {
+            unset($decision);
+            unset($review);
+            continue;
+          }
+
           $key_string = 'classification-final_decision';
           $presentation['reviews'][$key_string] = $decision_presentation;
-          $presentation['reviews'][$key_string]['label'] = "Final Decision";
+          $presentation['reviews'][$key_string]['label'] = 'Final Decision';
           $presentation['reviews'][$key_string]['weight'] = $weight;
 
           $request['reviews'][$key_string] = array(0 => $review);
@@ -1413,7 +1420,18 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           continue;
         }
 
-        if ($is_reviewers_review_step === $step) {
+
+        if ($step === MFCS_REVIEW_STEP_FINAL_DECISION) {
+          // during the final decision step, reviewers from the review step are allowed to submit 'issues' and 'no issues' review changes.
+          // this exceptional case requires the classification to be explicitly saved despite being assigned to a different review step.
+          if ($is_reviewers_review_step == MFCS_REVIEW_STEP_REVIEW) {
+            $reviewer_classifications[$reviewer_classification] = $reviewer_classification_options[$reviewer_classification];
+          }
+          elseif ($is_reviewers_review_step === $step) {
+            $reviewer_classifications[$reviewer_classification] = $reviewer_classification_options[$reviewer_classification];
+          }
+        }
+        elseif ($is_reviewers_review_step === $step) {
           $reviewer_classifications[$reviewer_classification] = $reviewer_classification_options[$reviewer_classification];
         }
 
