@@ -2084,8 +2084,8 @@ function mfcs_request_problems_0_request_form($form, &$form_state, $problem_id) 
     $form['markup']['#markup'] .= '<br>';
   }
   elseif ($problem->problem == MFCS_REQUEST_PROBLEM_STALE) {
-    $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where a request has all of its scheduled dates in the past but is still open for review.' . '<br>';
-    $form['markup']['#markup'] .= 'Stale requests should likely be cancelled.' . '<br>';
+    $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where a request has one or more of its scheduled dates in the past but is still open for review.' . '<br>';
+    $form['markup']['#markup'] .= 'This is primarily informative, but some stale requests may need to be cancelled.' . '<br>';
     $form['markup']['#markup'] .= '<br>';
   }
   elseif ($problem->problem == MFCS_REQUEST_PROBLEM_STUCK) {
