@@ -177,6 +177,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
   }
 
   global $mfcs_determined;
+  global $base_path;
 
   $url_arguments = '';
   if (!empty($mfcs_determined['complete'])) {
@@ -439,8 +440,6 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
   }
 
   if ($show_display) {
-    global $base_path;
-
     mfcs_include(MFCS_INCLUDE_VIEW);
 
     $form['display'] = array(
