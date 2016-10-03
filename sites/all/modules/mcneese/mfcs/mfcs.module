@@ -2427,6 +2427,9 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
         // always allow venue coordinator access to view.
         $or->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
 
+        // always allow requester access.
+        $or->condition('mer.user_id', $user->uid);
+
         // allow reviewer access to view if they are allowed to review the request at some point.
         if (!empty($reviewer_settings['request_classifications'])) {
           $and = db_and();
@@ -2480,6 +2483,9 @@ function mfcs_page_request_reviewer_access($user, $request_id, $review_restricti
 
         // always allow venue coordinator access.
         $or->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
+
+        // always allow requester access.
+        $or->condition('mer.user_id', $user->uid);
 
         // allow reviewer access if they are allowed to review the request at some point.
         if (!empty($reviewer_settings['request_classifications'])) {
@@ -8490,6 +8496,9 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
           // process venue coordinator access.
           $or->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
 
+          // always allow requester access.
+          $or->condition('mer.user_id', $user->uid);
+
           // process reviewer access.
           if (!empty($reviewer_settings['steps'])) {
             $and = db_and();
@@ -8513,6 +8522,9 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
           $proxy_as[$user->uid] = (int) $user->uid;
 
           $or->condition('mer.venue_coordinator', $proxy_as, 'IN');
+
+          // always allow requester access.
+          $or->condition('mer.user_id', $user->uid);
 
           $and = db_and();
           if ($cancelled === MFCS_LOAD_CANCELLED_REQUEST || $cancelled === MFCS_LOAD_CANCELLED_ALL) {
