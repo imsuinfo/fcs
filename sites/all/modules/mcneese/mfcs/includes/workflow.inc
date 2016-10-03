@@ -1074,6 +1074,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
     }
   }
 
+  $uses_as_manager = array();
   $mfcs_field_requirements = array();
   $requirements_university_save = FALSE;
   $perform_power_user_classification_check = FALSE;
@@ -1112,9 +1113,8 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
     unset($current_revision);
 
     $perform_manager_classification_check = TRUE;
-    $uses = array();
-    $uses_as_manager = array();
 
+    $uses = array();
     $uses['facilities_fees'] = MFCS_REVIEWER_CLASSIFICATION_FACILITIES;
     $uses['equipment_fees'] = MFCS_REVIEWER_CLASSIFICATION_FACILITIES;
     $uses['custodial_fees'] = MFCS_REVIEWER_CLASSIFICATION_CUSTODIAL;
