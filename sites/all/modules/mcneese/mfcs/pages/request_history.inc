@@ -376,6 +376,12 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
                         'print_delta_for_multiple' => TRUE,
                         'history' => TRUE,
                         'combine_partial' => TRUE,
+                        'combine_partial_separator' => array(
+                          'personnel' => ', ',
+                          'supplies' => ', ',
+                          'post' => ', ',
+                          'description' => ', ',
+                        ),
                       );
 
                       $value_array = mfcs_view_build_request_value_structure($request_id, $group_name, $field_name, $key, $value, $presentation[$group_name][$field_name], $history, $options);
@@ -440,6 +446,7 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
                       'print_delta_for_multiple' => TRUE,
                       'history' => TRUE,
                       'combine_partial' => TRUE,
+                      'combine_partial_separator' => FALSE,
                     );
 
                     $value_array = mfcs_view_build_request_value_structure($request_id, $group_name, $field_name, $key, $value, $presentation[$group_name][$field_name], $history, $options);

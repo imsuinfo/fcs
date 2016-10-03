@@ -499,8 +499,24 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
   }
 
   $combine_partial = FALSE;
+  $combine_partial_first = NULL;
+  $combine_partial_separator = NULL;
   if (!empty($options['combine_partial'])) {
     $combine_partial = (bool) $options['combine_partial'];
+    $combine_partial_first = TRUE;
+
+    $combine_partial_separator = ', ';
+    if (isset($options['combine_partial_separator'])) {
+      if (is_string($options['combine_partial_separator'])) {
+        $combine_partial_separator = $options['combine_partial_separator'];
+      }
+      elseif (is_array($options['combine_partial_separator'])) {
+        $combine_partial_separator = $options['combine_partial_separator'];
+      }
+      elseif ($combine_partial_separator === FALSE) {
+        $combine_partial_separator = NULL;
+      }
+    }
   }
 
   // use 'combined' for the value name when applicable.
@@ -677,6 +693,20 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
       }
     }
     elseif (property_exists($value, $value_name) && (is_numeric($value->{$value_name}) || !empty($value->{$value_name}))) {
+      if ($combine_partial) {
+        if ($combine_partial_first) {
+          $combine_partial_first = FALSE;
+        }
+        else {
+          if (is_string($combine_partial_separator)) {
+            $markup .= $combine_partial_separator;
+          }
+          elseif (is_array($combine_partial_separator) && array_key_exists($value_name, $combine_partial_separator) && is_string($combine_partial_separator[$value_name])) {
+            $markup .= $combine_partial_separator[$value_name];
+          }
+        }
+      }
+
       if ($type[$value_name] == 'string' || $type[$value_name] == 'text') {
         $markup .= check_plain($value->{$value_name});
 
@@ -714,7 +744,7 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
           $s_month = date('F', $value->{$value_name});
           $s_title = $s_month . " " . $s_year;
 
-          $markup .= '<a href="' . $base_path . 'requests/calendar-0/month/' . $s_year . '/' . $s_month . $url_arguments .'" title="' . $s_title . '" class="item-link">' . check_plain(date($display[$value_name], $value->{$value_name})) . '</a>';
+          $markup .= '<a href="' . $base_path . 'requests/calendar-0/month/' . $s_year . '/' . $s_month . $url_arguments . '" title="' . $s_title . '" class="item-link">' . check_plain(date($display[$value_name], $value->{$value_name})) . '</a>';
 
           unset($s_year);
           unset($s_month);
@@ -738,7 +768,7 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
           $s_day = date('d', $value->{$value_name});
           $s_title = $s_day_name . ", " . $s_month . " " . $s_day . ", " . $s_year;
 
-          $markup .= '<a href="' . $base_path . 'requests/calendar-0/day/' . $s_year . '/' . $s_month . '/' . $s_day . $url_arguments .'" title="' . $s_title . '" class="item-link">' . check_plain(date($display[$value_name], $value->{$value_name})) . '</a>';
+          $markup .= '<a href="' . $base_path . 'requests/calendar-0/day/' . $s_year . '/' . $s_month . '/' . $s_day . $url_arguments . '" title="' . $s_title . '" class="item-link">' . check_plain(date($display[$value_name], $value->{$value_name})) . '</a>';
 
           unset($s_year);
           unset($s_month);
@@ -766,7 +796,7 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
           $s_title = $s_day_name . ", " . $s_month . " " . $s_day . ", " . $s_year . " at " . $s_hour . ":00" . $s_ampm;
           $s_id = 'time_slot-' . $s_hour . '_00' . $s_ampm;
 
-          $markup .= '<a href="' . $base_path . 'requests/calendar-0/day/' . $s_year . '/' . $s_month . '/' . $s_day . $url_arguments . '#' . $s_id .'" title="' . $s_title . '" class="item-link">' . check_plain(date($display[$value_name], $value->{$value_name})) . '</a>';
+          $markup .= '<a href="' . $base_path . 'requests/calendar-0/day/' . $s_year . '/' . $s_month . '/' . $s_day . $url_arguments . '#' . $s_id . '" title="' . $s_title . '" class="item-link">' . check_plain(date($display[$value_name], $value->{$value_name})) . '</a>';
 
           unset($s_year);
           unset($s_month);
@@ -1631,12 +1661,19 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
       }
 
       if ($requirements_specified || ($review_step === MFCS_REVIEW_STEP_VENUE_AVAILABLE && ($decision === MFCS_REVIEW_DECISION_REQUIREMENT || $decision === MFCS_REVIEW_DECISION_WAIVE) && $type !== MFCS_REQUEST_TYPE_QUICK_MEETING)) {
+        $combine_partial_separator = array(
+          'personnel' => ", ",
+          'supplies' => ", ",
+          'post' => ", ",
+          'description' => ", ",
+        );
+
         if ($fees_are_not_waived && !empty($changelog['requirements']['facilities_fees'])) {
           $message .= '<div class="review-item-message-requirements-facilities_fees review-item-message-requirements review-item-message-requirements">';
           $message .= '<div class="item-label">Facilities Fees:</div> ';
 
           $value = reset($changelog['requirements']['facilities_fees']);
-          $value_markup = mfcs_view_build_request_value_structure($request_id, 'requirements', 'facilities_fees', 0, $value, $presentation['requirements']['facilities_fees'], $changelog, array('combine_partial' => TRUE));
+          $value_markup = mfcs_view_build_request_value_structure($request_id, 'requirements', 'facilities_fees', 0, $value, $presentation['requirements']['facilities_fees'], $changelog, array('combine_partial' => TRUE, 'combine_partial_separator' => $combine_partial_separator));
 
           if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
             $message .= drupal_render($value_markup);
@@ -1649,7 +1686,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
           $message .= '<div class="item-label">Additional Equipment Fees:</div> ';
 
           $value = reset($changelog['requirements']['equipment_fees']);
-          $value_markup = mfcs_view_build_request_value_structure($request_id, 'requirements', 'equipment_fees', 0, $value, $presentation['requirements']['equipment_fees'], $changelog, array('combine_partial' => TRUE));
+          $value_markup = mfcs_view_build_request_value_structure($request_id, 'requirements', 'equipment_fees', 0, $value, $presentation['requirements']['equipment_fees'], $changelog, array('combine_partial' => TRUE, 'combine_partial_separator' => $combine_partial_separator));
 
           if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
             $message .= drupal_render($value_markup);
@@ -1663,7 +1700,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
         $message .= '<div class="item-label">Security Fees:</div> ';
 
         $value = reset($changelog['requirements']['security_fees']);
-        $value_markup = mfcs_view_build_request_value_structure($request_id, 'requirements', 'security_fees', 0, $value, $presentation['requirements']['security_fees'], $changelog, array('combine_partial' => TRUE));
+        $value_markup = mfcs_view_build_request_value_structure($request_id, 'requirements', 'security_fees', 0, $value, $presentation['requirements']['security_fees'], $changelog, array('combine_partial' => TRUE, 'combine_partial_separator' => $combine_partial_separator));
 
         if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
           $message .= drupal_render($value_markup);
@@ -1676,7 +1713,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
         $message .= '<div class="item-label">Custodial Fees:</div> ';
 
         $value = reset($changelog['requirements']['custodial_fees']);
-        $value_markup = mfcs_view_build_request_value_structure($request_id, 'requirements', 'custodial_fees', 0, $value, $presentation['requirements']['custodial_fees'], $changelog, array('combine_partial' => TRUE));
+        $value_markup = mfcs_view_build_request_value_structure($request_id, 'requirements', 'custodial_fees', 0, $value, $presentation['requirements']['custodial_fees'], $changelog, array('combine_partial' => TRUE, 'combine_partial_separator' => $combine_partial_separator));
 
         if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
           $message .= drupal_render($value_markup);
@@ -1689,7 +1726,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
         $message .= '<div class="item-label">Maintenance Fees:</div> ';
 
         $value = reset($changelog['requirements']['maintenance_fees']);
-        $value_markup = mfcs_view_build_request_value_structure($request_id, 'requirements', 'maintenance_fees', 0, $value, $presentation['requirements']['maintenance_fees'], $changelog, array('combine_partial' => TRUE));
+        $value_markup = mfcs_view_build_request_value_structure($request_id, 'requirements', 'maintenance_fees', 0, $value, $presentation['requirements']['maintenance_fees'], $changelog, array('combine_partial' => TRUE, 'combine_partial_separator' => $combine_partial_separator));
 
         if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
           $message .= drupal_render($value_markup);
@@ -1702,7 +1739,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
         $message .= '<div class="item-label">Grounds Fees:</div> ';
 
         $value = reset($changelog['requirements']['grounds_fees']);
-        $value_markup = mfcs_view_build_request_value_structure($request_id, 'requirements', 'grounds_fees', 0, $value, $presentation['requirements']['grounds_fees'], $changelog, array('combine_partial' => TRUE));
+        $value_markup = mfcs_view_build_request_value_structure($request_id, 'requirements', 'grounds_fees', 0, $value, $presentation['requirements']['grounds_fees'], $changelog, array('combine_partial' => TRUE, 'combine_partial_separator' => $combine_partial_separator));
 
         if ($value_markup !== FALSE && !isset($value_markup['no_values'])) {
           $message .= drupal_render($value_markup);
