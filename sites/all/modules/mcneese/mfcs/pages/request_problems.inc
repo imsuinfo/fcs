@@ -764,7 +764,7 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
       'custom_action-message' => 'Re-process Reviewer/Venue-Coordinator Role.',
     ),
     MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES => array(
-      'label' => "Old/Duplicate Account",
+      'label' => 'Old/Duplicate Account',
       'explanation' =>
         'This flag gets set when a user has logged in and the <strong>LDAP</strong> has the <strong>isDuplicate</strong> flag set to <strong>TRUE</strong> and there is no primary account (or this is not the primary account).<br>' .
         '<br>' .
@@ -812,7 +812,8 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
         '<br>' .
         'The user either needs to have their banner id fixed, removed, or the account should be locked.<br>',
       'resettable' => FALSE,
-      'custom_action' => FALSE,
+      'custom_action' => TRUE,
+      'custom_action-message' => 'Lock the user account.',
     ),
     MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS => array(
       'label' => 'Insufficient Banner Access',
@@ -1119,6 +1120,22 @@ function mfcs_request_problems_0_user_form_submit($form, &$form_state) {
               $problems -= $custom_action_id;
               mfcs_save_user($form['values']['problem_user']['#value']->uid, array('problems' => $problems));
             }
+          }
+        }
+      }
+      elseif ($custom_action_id == MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) {
+        if (!user_save($form['values']['problem_user']['#value'],  array('status' => 0))) {
+          form_set_error('form', 'An error occurred while trying to lock the user account. Please contact the support staff.');
+          watchdog(MFCS_WATCHDOG_ID, 'An error occurred while trying to lock the user account, user: @user_id, problems: @problems.', array('@user_id' => $form['values']['mfcs_user']['#value']['user_id'], '@problems' => print_r($problems, TRUE)), WATCHDOG_ERROR);
+
+          $form_state['rebuild'] = TRUE;
+          $form_state['redirect'] = FALSE;
+          $form_state['submitted'] = FALSE;
+        }
+        else {
+          if (($problems & $custom_action_id) != 0) {
+            $problems -= $custom_action_id;
+            mfcs_save_user($form['values']['problem_user']['#value']->uid, array('problems' => $problems));
           }
         }
       }
