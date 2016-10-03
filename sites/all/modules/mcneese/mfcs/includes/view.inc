@@ -1209,6 +1209,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
   $is_financer = FALSE;
   $is_insurer = FALSE;
   $is_requester = FALSE;
+  $can_review_request = FALSE;
   if (is_object($user)) {
     $is_administer = user_access('mfcs administer', $user);
     $is_manager = user_access('mfcs manage', $user);
@@ -1216,6 +1217,9 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
     $is_financer = user_access('mfcs financer', $user);
     $is_insurer = user_access('mfcs insurer', $user);
     $is_requester = user_access('mfcs request', $user);
+
+    // an account with the reviewer role may not have review access for the request and may even be a requester for the request.
+    $can_review_request = mfcs_request_access('review', $request, $user);
   }
 
   mfcs_include(MFCS_INCLUDE_TABLE);
@@ -1351,7 +1355,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
         }
       }
       elseif ($restriction === MFCS_REVIEW_RESTRICTIONS_REVIEWER) {
-        if (!($is_reviewer || $is_manager || $is_administer)) {
+        if (!($can_review_request || $is_manager || $is_administer)) {
           continue;
         }
       }
@@ -1836,7 +1840,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
   }
 
   if (!$has_viewable_entries) {
-    if (!($is_reviewer || $is_manager || $is_administer)) {
+    if (!($can_review_request || $is_manager || $is_administer)) {
       unset($form['review']['log']);
     }
     elseif ($has_log) {

@@ -1095,7 +1095,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           $yet_to_review[$request['venue_coordinator']['user_id'][0]->value] = 'Venue Coordinator';
         }
 
-        if (!empty($yet_to_review) && ($is_reviewer || $is_manager || $is_administer)) {
+        if (!empty($yet_to_review) && ($can_review_request || $is_manager || $is_administer)) {
           $module_path = drupal_get_path('module', 'mfcs');
           drupal_add_js($module_path . '/js/request_view-reviewers.js', array('type' => 'file', 'group' => JS_DEFAULT, 'preprocess' => TRUE));
 
@@ -1915,7 +1915,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         }
       }
 
-      if ($is_reviewer || $is_manager || $is_administer) {
+      if ($can_review_request || $is_manager || $is_administer) {
         $form['review']['operations']['message_is_reviewers_only'] = array(
           '#id' => 'request-review-operations-message_is_reviewers_only',
           '#type' => 'checkbox',
