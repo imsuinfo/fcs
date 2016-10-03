@@ -1115,8 +1115,8 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
               $yet_to_review_markup .= $classification_name;
 
               // create a javascript based users list to easily display the users associated with the given classification.
-              $yet_to_review_markup .= ' <div class="details_list inline" title="View list of users associated with this reviewer classification.">';
-              $yet_to_review_markup .= '<sup class="no-script-hidden no-print details_list-label label-' . $classification_id . '">(<span class="details_list-link link-' . $classification_id . ' inline fake_link">Details</span>)</sup>';
+              $yet_to_review_markup .= ' <div class="details_list inline">';
+              $yet_to_review_markup .= '<sup class="no-script-hidden no-print details_list-label label-' . $classification_id . '" title="View list of users associated with this reviewer classification.">(<span class="details_list-link link-' . $classification_id . ' inline fake_link">Details</span>)</sup>';
               $yet_to_review_markup .= '<ul class="script-hidden details_list-item item-' . $classification_id . '">';
               if (!empty($decisions[$request_id]['reviewers'][$classification_id])) {
                 foreach ($decisions[$request_id]['reviewers'][$classification_id] as $user_id) {
@@ -1125,15 +1125,22 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
                     continue;
                   }
 
+                  $yet_to_review_markup_prefix = '';
+                  $yet_to_review_markup_suffix = '';
+                  if ($is_manager || $is_administer) {
+                    $yet_to_review_markup_prefix = '<a href="' . $base_path . 'requests/users-0/view/' . $user_id . $url_arguments . '" class="details_list-user_name-link no_print_as_link">';
+                    $yet_to_review_markup_suffix = '</a>';
+                  }
+
                   $yet_to_review_markup .= '<li class="details_list-user">';
+                  $yet_to_review_markup .= '<span class="details_list-user_name">';
                   if (empty($basic_user_settings['first_name']) || empty($basic_user_settings['last_name'])) {
-                    $yet_to_review_markup .= '<span class="details_list-user_name">' . $basic_user_settings['name'] . '</span>';
+                    $yet_to_review_markup .= $yet_to_review_markup_prefix . $basic_user_settings['name'] . $yet_to_review_markup_suffix;
                   }
                   else {
-                    $yet_to_review_markup .= '<span class="details_list-user_name">';
-                    $yet_to_review_markup .= $basic_user_settings['first_name'] . ' ' . $basic_user_settings['last_name'];
-                    $yet_to_review_markup .= '</span>';
+                    $yet_to_review_markup .= $yet_to_review_markup_prefix . $basic_user_settings['first_name'] . ' ' . $basic_user_settings['last_name'] . $yet_to_review_markup_suffix;
                   }
+                  $yet_to_review_markup .= '</span>';
                   $yet_to_review_markup .= ' <span class="details_list-user_id">[id: ' . $user_id . ']</span>';
                   $yet_to_review_markup .= '</li>';
                 }
@@ -1151,28 +1158,36 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
               $yet_to_review_markup .= '<div class="yet_to_review-label">Waiting for the Venue Coordinator or a Venue Coordinator Proxy:</div>';
             }
 
+            $yet_to_review_markup_prefix = '';
+            $yet_to_review_markup_suffix = '';
+            if ($is_manager || $is_administer) {
+              $yet_to_review_markup_prefix = '<a href="' . $base_path . 'requests/users-0/view/' . $request['venue_coordinator']['user_id'][0]->value . $url_arguments . '" class="details_list-user_name-link no_print_as_link">';
+              $yet_to_review_markup_suffix = '</a>';
+            }
+
             $yet_to_review_markup .= '<ul class="yet_to_review-list">';
             $yet_to_review_markup .= '<li class="yet_to_review-list_item">';
-            $yet_to_review_markup .= "Venue Coordinator";
+            $yet_to_review_markup .= 'Venue Coordinator';
 
             $basic_user_settings = mfcs_load_basic_user_settings_by_user_id($request['venue_coordinator']['user_id'][0]->value);
             if ($basic_user_settings !== FALSE) {
               // create a javascript based users list to easily display the users associated with the given classification.
-              $yet_to_review_markup .= ' <div class="details_list inline" title="View list of users associated with this reviewer classification.">';
-              $yet_to_review_markup .= '<sup class="no-script-hidden no-print details_list-label label-venue_coordinator">(<span class="details_list-link link-venue_coordinator inline fake_link">Details</span>)</sup>';
+              $yet_to_review_markup .= ' <div class="details_list inline">';
+              $yet_to_review_markup .= '<sup class="no-script-hidden no-print details_list-label label-venue_coordinator" title="View list of users who are the venue coordinator.">(<span class="details_list-link link-venue_coordinator inline fake_link">Details</span>)</sup>';
               $yet_to_review_markup .= '<ul class="script-hidden details_list-item item-venue_coordinator">';
 
               $yet_to_review_markup .= '<li class="details_list-user">';
+              $yet_to_review_markup .= '<span class="details_list-user_name">';
               if (empty($basic_user_settings['first_name']) || empty($basic_user_settings['last_name'])) {
-                $yet_to_review_markup .= '<span class="details_list-user_name">' . $basic_user_settings['name'] . '</span>';
+                $yet_to_review_markup .= $yet_to_review_markup_prefix . $basic_user_settings['name'] . $yet_to_review_markup_suffix;
               }
               else {
-                $yet_to_review_markup .= '<span class="details_list-user_name">';
-                $yet_to_review_markup .= $basic_user_settings['first_name'] . ' ' . $basic_user_settings['last_name'];
-                $yet_to_review_markup .= '</span>';
+                $yet_to_review_markup .= $yet_to_review_markup_prefix . $basic_user_settings['first_name'] . ' ' . $basic_user_settings['last_name'] . $yet_to_review_markup_suffix;
               }
+              $yet_to_review_markup .= '</span>';
               $yet_to_review_markup .= ' <span class="details_list-user_id">[id: ' . $request['venue_coordinator']['user_id'][0]->value . ']</span>';
               $yet_to_review_markup .= '</li>';
+
               $yet_to_review_markup .= '</ul>';
               $yet_to_review_markup .= '</div>';
             }
@@ -1191,7 +1206,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
             if (!empty($request_proxies)) {
               $yet_to_review_markup .= '<li class="yet_to_review-list_item">';
-              $yet_to_review_markup .= "Venue Coordinator Proxy";
+              $yet_to_review_markup .= 'Venue Coordinator Proxy';
 
               // create a javascript based users list to easily display the users associated with the given classification.
               $yet_to_review_markup .= ' <div class="details_list inline super" title="View list of users allowed to proxy as the venue coordinator.">';
@@ -1204,15 +1219,22 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
                   continue;
                 }
 
+                $yet_to_review_markup_prefix = '';
+                $yet_to_review_markup_suffix = '';
+                if ($is_manager || $is_administer) {
+                  $yet_to_review_markup_prefix = '<a href="' . $base_path . 'requests/users-0/view/' . $proxy_id . $url_arguments . '" class="details_list-user_name-link no_print_as_link">';
+                  $yet_to_review_markup_suffix = '</a>';
+                }
+
                 $yet_to_review_markup .= '<li class="details_list-user">';
+                $yet_to_review_markup .= '<span class="details_list-user_name">';
                 if (empty($basic_user_settings['first_name']) || empty($basic_user_settings['last_name'])) {
-                  $yet_to_review_markup .= '<span class="details_list-user_name">' . $basic_user_settings['name'] . '</span>';
+                  $yet_to_review_markup .= $yet_to_review_markup_prefix . $basic_user_settings['name'] . $yet_to_review_markup_suffix;
                 }
                 else {
-                  $yet_to_review_markup .= '<span class="details_list-user_name">';
-                  $yet_to_review_markup .= $basic_user_settings['first_name'] . ' ' . $basic_user_settings['last_name'];
-                  $yet_to_review_markup .= '</span>';
+                  $yet_to_review_markup .= $yet_to_review_markup_prefix . $basic_user_settings['first_name'] . ' ' . $basic_user_settings['last_name'] . $yet_to_review_markup_suffix;
                 }
+                $yet_to_review_markup .= '</span>';
 
                 $yet_to_review_markup .= ' <span class="details_list-user_id">[id: ' . $proxy_id . ']</span>';
                 $yet_to_review_markup .= '</li>';
