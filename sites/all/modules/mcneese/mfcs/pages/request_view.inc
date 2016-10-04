@@ -414,6 +414,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     '#value' => $user,
   );
 
+  // @todo: this is still being used/passed, but the relevant code was stripped out. This likely should be replaced with an option 'review_as' instead of the current behavior.
   $form['form']['already_reviewed_as'] = array(
     '#type' => 'value',
     '#value' => array(),
@@ -1439,20 +1440,6 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
       }
       unset($is_reviewers_reviewer);
 
-      // remove all classifications that may have been reviewed already.
-      if (!empty($reviewer_classifications)) {
-        $form['form']['already_reviewed_as']['#value'] = mfcs_get_request_already_reviewed_as_classifications($request_id, array_keys($reviewer_classifications));
-        if (isset($form['form']['already_reviewed_as']['#value']['reviewed'])) {
-          foreach ($form['form']['already_reviewed_as']['#value']['reviewed'] as $reviewer_classification) {
-            unset($reviewer_classifications[$reviewer_classification]);
-          }
-          unset($reviewer_classification);
-        }
-        else {
-          $form['form']['already_reviewed_as']['#value'] = array();
-        }
-      }
-
       // report administers and managers if not defined.
       if (empty($reviewer_classifications) && empty($is_venue_coordinator) && ($is_administer || $is_manager)) {
         if ($is_administer) {
@@ -1461,11 +1448,14 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         elseif ($is_manager) {
           $reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_MANAGER] = 'Manager';
         }
+
+        // If the user has no classifications other that administer/manager, then they should not be able to specify issues/no-issues.
+        unset($decision_options[MFCS_REVIEW_DECISION_ISSUES]);
+        unset($decision_options[MFCS_REVIEW_DECISION_ISSUES_NONE]);
       }
 
       // the venue coordinator must be reported as venue coordinator when not reviewing.
       if ($is_venue_coordinator && (empty($reviewer_classifications) || $step === MFCS_REVIEW_STEP_VENUE_AVAILABLE)) {
-
         if ($request['venue_coordinator']['user_id'][0]->value == $user->uid) {
           $reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR] = 'Venue Coordinator';
           $reviewer_classifications_all[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR] = 'Venue Coordinator';
@@ -2555,6 +2545,7 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
       $type = (int) $type;
     }
 
+    // @todo: this is still being used/passed, but the relevant code was stripped out. This likely should be replaced with an option 'review_as' instead of the current behavior.
     $already_reviewed_as = NULL;
     if (!empty($form['form']['already_reviewed_as']['#value']['available']) && is_array($form['form']['already_reviewed_as']['#value']['available'])) {
       $already_reviewed_as = $form['form']['already_reviewed_as']['#value']['available'];
