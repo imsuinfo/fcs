@@ -9351,6 +9351,9 @@ function mfcs_request_process_query_search_array(&$query, &$count_query, &$opera
  *
  * @parem int $request_id
  *   The numeric request id representing the request to process.
+ * @parem int|null $revision_id
+ *   (optional) The numeric revision id representing a specific revision of the request.
+ *   If NULL, the latest revision is used.
  * @parem array $steps
  *   (optional) Limit the results to only the provided steps.
  * @parem array $decisions
@@ -9365,9 +9368,14 @@ function mfcs_request_process_query_search_array(&$query, &$count_query, &$opera
  *   'order': an array of reviews in the order in which they were submitted (favoring the revision and then delta columns).
  *   FALSE is returned on error.
  */
-function mfcs_get_latest_reviews($request_id, $steps = array(), $decisions = array(), $ascend = TRUE) {
+function mfcs_get_latest_reviews($request_id, $revision_id = NULL, $steps = array(), $decisions = array(), $ascend = TRUE) {
   if (!cf_is_integer($request_id)) {
     cf_error::invalid_integer('request_id');
+    return FALSE;
+  }
+
+  if (!is_null($revision_id) && !cf_is_integer($revision_id)) {
+    cf_error::invalid_integer('revision_id');
     return FALSE;
   }
 
@@ -9390,11 +9398,20 @@ function mfcs_get_latest_reviews($request_id, $steps = array(), $decisions = arr
     'group' => array(),
     'order' => array(),
   );
+
   try {
     $query = db_select('mfcs_field_review_review', 'mfrr');
 
     $query->innerJoin('mfcs_review_classifications', 'mrc', 'mfrr.id = mrc.review_id');
-    $query->innerJoin('mfcs_current', 'mc', 'mfrr.request_id = mc.request_id and mfrr.revision = mc.review_review');
+
+    if (is_null($revision_id)) {
+      $query->innerJoin('mfcs_current', 'mc', 'mfrr.request_id = mc.request_id and mfrr.revision = mc.review_review');
+    }
+    else {
+      $query->innerJoin('mfcs_request_revisions', 'mrv', 'mfrr.request_id = mrv.request_id and mfrr.date <= mrv.date');
+
+      $query->condition('mrv.revision', $revision_id);
+    }
 
     $query->addField('mfrr', 'id', 'id');
     $query->addField('mfrr', 'user_id', 'user_id');

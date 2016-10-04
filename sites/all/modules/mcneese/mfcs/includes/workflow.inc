@@ -2055,7 +2055,7 @@ function mfcs_workflow_next_step($request_id, $type, $step, $decision, $restrict
       $new_step = MFCS_REVIEW_STEP_FINAL_DECISION;
     }
 
-    $reviews = mfcs_get_latest_reviews($request_id, array(MFCS_REVIEW_STEP_REVIEW), array(MFCS_REVIEW_DECISION_ISSUES, MFCS_REVIEW_DECISION_ISSUES_NONE));
+    $reviews = mfcs_get_latest_reviews($request_id, NULL, array(MFCS_REVIEW_STEP_REVIEW), array(MFCS_REVIEW_DECISION_ISSUES, MFCS_REVIEW_DECISION_ISSUES_NONE));
 
     if (!empty($reviews)) {
       mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);

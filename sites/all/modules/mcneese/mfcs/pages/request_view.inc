@@ -385,8 +385,12 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     '#value' => $use_revision,
   );
 
+  $revision_id = NULL;
   if (is_null($use_revision)) {
     $form['form']['revision_id']['#value'] = $request['mer']['revision'][0]->value;
+  }
+  else {
+    $revision_id = (int) $request['mer']['revision'][0]->value;
   }
 
   $form['form']['use_revision'] = array(
@@ -506,7 +510,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     }
     unset($presentation['reviews']['decision']);
 
-    $reviews = mfcs_get_latest_reviews($request_id, array(MFCS_REVIEW_STEP_VENUE_AVAILABLE, MFCS_REVIEW_STEP_REVIEW, MFCS_REVIEW_STEP_FINAL_DECISION, MFCS_REVIEW_STEP_COMPLETED), array(MFCS_REVIEW_DECISION_ISSUES, MFCS_REVIEW_DECISION_ISSUES_NONE, MFCS_REVIEW_DECISION_APPROVE, MFCS_REVIEW_DECISION_DENY));
+    $reviews = mfcs_get_latest_reviews($request_id, $revision_id, array(MFCS_REVIEW_STEP_VENUE_AVAILABLE, MFCS_REVIEW_STEP_REVIEW, MFCS_REVIEW_STEP_FINAL_DECISION, MFCS_REVIEW_STEP_COMPLETED), array(MFCS_REVIEW_DECISION_ISSUES, MFCS_REVIEW_DECISION_ISSUES_NONE, MFCS_REVIEW_DECISION_APPROVE, MFCS_REVIEW_DECISION_DENY));
 
     if (!empty($reviews['order']) && isset($reviews['group'])) {
       mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
