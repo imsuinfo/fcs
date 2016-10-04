@@ -1074,6 +1074,11 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
     }
   }
 
+  $new_provided_insurance = FALSE;
+  $new_contractor_insurance = FALSE;
+  $new_unaffiliated_insurance = FALSE;
+  $new_affiliated_insurance = FALSE;
+
   $uses_as_manager = array();
   $mfcs_field_requirements = array();
   $requirements_university_save = FALSE;
@@ -1339,7 +1344,6 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
       }
     }
 
-    $new_contractor_insurance = FALSE;
     if (isset($request['insurance']['contractor'][0]->value)) {
       $value = $request['insurance']['contractor'][0]->value;
       if (!is_null($value)) {
@@ -1354,7 +1358,6 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
       }
     }
 
-    $new_unaffiliated_insurance = FALSE;
     if (isset($request['insurance']['unaffiliated'][0]->value)) {
       $value = $request['insurance']['unaffiliated'][0]->value;
       if (!is_null($value)) {
@@ -1369,7 +1372,6 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
       }
     }
 
-    $new_affiliated_insurance = FALSE;
     if (isset($request['insurance']['affiliated'][0]->value)) {
       $value = $request['insurance']['affiliated'][0]->value;
       if (!is_null($value)) {
@@ -1384,7 +1386,6 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
       }
     }
 
-    $new_provided_insurance = FALSE;
     if (isset($request['insurance']['provided'][0]->value)) {
       $value = $request['insurance']['provided'][0]->value;
       if (!is_null($value)) {

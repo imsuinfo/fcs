@@ -96,6 +96,8 @@ function mfcs_pre_validate_request_fields(&$form, &$form_state, $dont_validate =
   }
 
   if ($form_state['values']['form']['step'] == 'standard') {
+    mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+
     // quick meetings can only be used by venue coordinators, their proxies, and managers.
     if ($clicked_id == 'submit-request-submit') {
       if ($is_quick_meeting) {
