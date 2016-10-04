@@ -6394,7 +6394,7 @@ function mfcs_get_request_field_services_alcohol_note($form, &$form_state, &$fie
     );
 
     $fields['services']['alcohol_note'][0]['markup']['#markup'] .= '<div id="mfcs-markup-request-services-alcohol_note" class="markup-request">';
-    $fields['services']['alcohol_note'][0]['markup']['#markup'] .= 'A formal written request must be submitted to the President for approval of any alcohol served on campus and may require police officer presence at your request for an additional requirement. ';
+    $fields['services']['alcohol_note'][0]['markup']['#markup'] .= 'A formal written request must be submitted to the President for approval of any alcohol served on campus and may require police officer presence at your event for an additional charges. ';
     $fields['services']['alcohol_note'][0]['markup']['#markup'] .= 'Contact the President\'s Office at ext. 5556 for more information. ';
     $fields['services']['alcohol_note'][0]['markup']['#markup'] .= '</div>';
   }
