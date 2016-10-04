@@ -1476,44 +1476,52 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
 
   if ($perform_power_user_classification_check && ($is_manager || $is_administer)) {
     // remove all reviewer classifications the current reviewer already reviewed as (if the reviewer is an administer or a manager).
-    try {
-      if (!empty($reviewer_classifications['step'])) {
-        $reviewer_classifications_copy = $reviewer_classifications['step'];
-        foreach ($reviewer_classifications_copy as $reviewer_classification) {
-          $query = db_select('mfcs_reviewed', 'mr');
-          $query->addField('mr', 'classification', 'classification');
-          $query->condition('request_id', $request_id);
-          $query->condition('classification', $reviewer_classification);
-          $query->countQuery();
-          $result = $query->execute()->fetchField();
+    if ($decision !== MFCS_REVIEW_DECISION_ISSUES && $decision !== MFCS_REVIEW_DECISION_ISSUES_NONE) {
+      try {
+        if (!empty($reviewer_classifications['step'])) {
+          $reviewer_classifications_copy = $reviewer_classifications['step'];
+          foreach ($reviewer_classifications_copy as $reviewer_classification) {
+            $query = db_select('mfcs_reviewed', 'mr');
+            $query->addField('mr', 'classification', 'classification');
+            $query->condition('request_id', $request_id);
+            $query->condition('classification', $reviewer_classification);
+            $query->countQuery();
+            $result = $query->execute()->fetchField();
 
-          if ($result != 0) {
-            unset($reviewer_classifications['step'][$reviewer_classification]);
-            unset($uses_as_manager[array_search($reviewer_classification, $uses_as_manager)]);
+            if ($result != 0) {
+              unset($reviewer_classifications['step'][$reviewer_classification]);
+              unset($uses_as_manager[array_search($reviewer_classification, $uses_as_manager)]);
+            }
+            unset($result);
           }
-          unset($result);
+          unset($reviewer_classification);
+          unset($reviewer_classifications_copy);
         }
-        unset($reviewer_classification);
-        unset($reviewer_classifications_copy);
+      }
+      catch (Error $e) {
+        cf_error::on_query_execution($e);
+
+        return FALSE;
+      }
+      catch (Exception $e) {
+        cf_error::on_query_execution($e);
+
+        return FALSE;
+      }
+
+      if ($is_administer && empty($reviewer_classifications['step'])) {
+        $reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR] = MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR;
+      }
+
+      if ($is_manager && empty($reviewer_classifications['step'])) {
+        $reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_MANAGER] = MFCS_REVIEWER_CLASSIFICATION_MANAGER;
       }
     }
-    catch (Error $e) {
-      cf_error::on_query_execution($e);
 
-      return FALSE;
-    }
-    catch (Exception $e) {
-      cf_error::on_query_execution($e);
-
-      return FALSE;
-    }
-
-
-    if ($is_administer && empty($reviewer_classifications['step'])) {
-      $reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR] = MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR;
-    }
-    if ($is_manager && empty($reviewer_classifications['step'])) {
-      $reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_MANAGER] = MFCS_REVIEWER_CLASSIFICATION_MANAGER;
+    // if the classification is still empty, set it to none so that there is at least some record in the database.
+    if (empty($reviewer_classifications['step'])) {
+      $reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_NONE] = MFCS_REVIEWER_CLASSIFICATION_NONE;
+      watchdog(MFCS_WATCHDOG_ID, 'Failed to assign any classifications for the review step :step with decision :decision for request :request_id for the user :user_id', array(':step' => $step, ':decision' => $decision, ':request_id' => $request_id, ':user_id' => $user->uid), WATCHDOG_ERROR);
     }
   }
 
