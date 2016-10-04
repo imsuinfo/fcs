@@ -461,25 +461,6 @@ function mfcs_request_edit_0_form_validate($form, &$form_state) {
             unset($v);
           }
 
-          if (!empty($date)) {
-            $room_unavailability = mfcs_check_room_availability($room, $date, $time_start, $time_stop, $request_id);
-            if ($room_unavailability === FALSE) {
-              form_set_error('', 'An internal error occurred while checking the room for availability. Please contact the support staff.');
-            }
-            elseif (!empty($room_unavailability['conflicts']) || !empty($room_unavailability['unavailable'])) {
-              $unavailable_message = '<span class="uppercase">Warning</span>: The specified room is currently unavailable for the following dates: ';
-              $unavailable_message .= mfcs_build_room_unavailable_message($room_unavailability);
-              drupal_set_message($unavailable_message, 'warning');
-              unset($unavailable_message);
-            }
-          }
-          unset($room);
-          unset($date);
-          unset($time_start);
-          unset($time_stop);
-          unset($category);
-          unset($room_unavailability);
-
           if (empty($form_state['values']['request']['information']['type'][0])) {
             form_set_error('request][information][type][0', 'The <strong>' . $form['request']['information']['type'][0]['#title'] . '</strong> is required.');
           }

@@ -450,7 +450,7 @@ function mfcs_validate_request_fields($form, &$form_state) {
     // only validate dates when editing a form that has the date fields.
     $validate_dates = TRUE;
     if (isset($form['form']['target_section']['#value']) && $form['form']['target_section']['#value'] != 'request' && $form['form']['target_section']['#value'] != 'dates') {
-      if ($form_state['values']['form']['step'] == 'standard') {
+      if ($form_state['values']['form']['step'] != 'standard') {
         $validate_dates = FALSE;
       }
     }
