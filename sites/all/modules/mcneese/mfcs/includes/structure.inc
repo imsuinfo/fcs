@@ -263,7 +263,7 @@ function mfcs_get_request_fields($form, &$form_state) {
       '#tree' => TRUE,
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
-      '#title' => "Date Settings",
+      '#title' => 'Date Settings',
     );
   }
 
@@ -293,7 +293,7 @@ function mfcs_get_request_fields($form, &$form_state) {
           '#id' => 'submit-request-remove-date-' . $date_key,
           '#name' => 'submit-request-remove-date-' . $date_key,
           '#type' => 'submit',
-          '#default_value' => t("Remove Date"),
+          '#default_value' => 'Remove Date',
           '#attributes' => array(
             'class' => array(
               'buttons-request-remove-date-button',
@@ -328,7 +328,7 @@ function mfcs_get_request_fields($form, &$form_state) {
       '#id' => 'submit-request-add-date',
       '#name' => 'submit-request-add-date',
       '#type' => 'submit',
-      '#default_value' => t("Add Date"),
+      '#default_value' => 'Add Date',
       '#attributes' => array(
         'class' => array(
           'buttons-request-add-date-button',
@@ -360,8 +360,8 @@ function mfcs_get_request_fields($form, &$form_state) {
       '#tree' => TRUE,
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
-      '#title' => "Venue Coordinator Settings",
-      '#description' => "The venue coordinator is either the room coordinator or if there is no room coordinator, then the venue coordinator.",
+      '#title' => 'Venue Coordinator Settings',
+      '#description' => 'The venue coordinator is either the room coordinator or if there is no room coordinator, then the venue coordinator.',
     );
   }
 
@@ -390,7 +390,7 @@ function mfcs_get_request_fields($form, &$form_state) {
       '#tree' => TRUE,
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
-      '#title' => "Request Coordinator Settings",
+      '#title' => 'Request Coordinator Settings',
     );
   }
 
@@ -423,7 +423,7 @@ function mfcs_get_request_fields($form, &$form_state) {
       '#tree' => TRUE,
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
-      '#title' => "Request Information",
+      '#title' => 'Request Information',
     );
   }
 
@@ -476,7 +476,7 @@ function mfcs_get_request_fields($form, &$form_state) {
       '#tree' => TRUE,
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
-      '#title' => "Request Plans",
+      '#title' => 'Request Plans',
     );
   }
 
@@ -509,7 +509,7 @@ function mfcs_get_request_fields($form, &$form_state) {
         '#tree' => TRUE,
         '#collapsible' => TRUE,
         '#collapsed' => FALSE,
-        '#title' => "Request Registration",
+        '#title' => 'Request Registration',
       );
     }
   }
@@ -547,7 +547,7 @@ function mfcs_get_request_fields($form, &$form_state) {
       '#tree' => TRUE,
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
-      '#title' => "Request Setup",
+      '#title' => 'Request Setup',
     );
   }
 
@@ -589,7 +589,7 @@ function mfcs_get_request_fields($form, &$form_state) {
       '#tree' => TRUE,
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
-      '#title' => "Request Presentation",
+      '#title' => 'Request Presentation',
     );
   }
 
@@ -638,7 +638,7 @@ function mfcs_get_request_fields($form, &$form_state) {
       '#tree' => TRUE,
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
-      '#title' => "Request Services",
+      '#title' => 'Request Services',
     );
   }
 
@@ -695,7 +695,7 @@ function mfcs_get_request_field_status($form, &$form_state, &$fields, &$request_
   }
 
   $limits_check = array(
-    'title' => "Status",
+    'title' => 'Status',
     'field' => 'status',
     'group' => 'top',
     'path' => 'status',
@@ -752,7 +752,7 @@ function mfcs_get_request_field_step($form, &$form_state, &$fields, &$request_st
   }
 
   $limits_check = array(
-    'title' => "Step",
+    'title' => 'Step',
     'field' => 'step',
     'group' => 'top',
     'path' => 'step',
@@ -1135,7 +1135,7 @@ function mfcs_get_request_field_dates_date($form, &$form_state, &$fields, &$requ
     $delta_id = '-delta_' . $delta;
   }
 
-  $field_title = "Request Date";
+  $field_title = 'Request Date';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'date',
@@ -1228,7 +1228,7 @@ function mfcs_get_request_field_dates_time_start($form, &$form_state, &$fields, 
     $delta_id = '-delta_' . $delta;
   }
 
-  $field_title = "Request Start Time";
+  $field_title = 'Request Start Time';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'time_start',
@@ -1264,7 +1264,7 @@ function mfcs_get_request_field_dates_time_start($form, &$form_state, &$fields, 
         '#size' => 8,
         '#maxlength' => 8,
         '#expected_format' => array('date' => MFCS_DATE_FORMAT_TIME),
-        '#description' => "E.g, 12:31pm",
+        '#description' => 'E.g, 12:31pm',
         '#weight' => 1,
         '#attributes' => array(
           'class' => array(
@@ -1313,7 +1313,7 @@ function mfcs_get_request_field_dates_time_stop($form, &$form_state, &$fields, &
     $delta_id = '-delta_' . $delta;
   }
 
-  $field_title = "Request Stop Time";
+  $field_title = 'Request Stop Time';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'time_stop',
@@ -1349,7 +1349,7 @@ function mfcs_get_request_field_dates_time_stop($form, &$form_state, &$fields, &
         '#size' => 8,
         '#maxlength' => 8,
         '#expected_format' => array('date' => MFCS_DATE_FORMAT_TIME),
-        '#description' => "E.g, 12:31pm",
+        '#description' => 'E.g, 12:31pm',
         '#weight' => 2,
         '#attributes' => array(
           'class' => array(
@@ -1398,7 +1398,7 @@ function mfcs_get_request_field_dates_category($form, &$form_state, &$fields, &$
     $delta_id = '-delta_' . $delta;
   }
 
-  $field_title = "Category";
+  $field_title = 'Category';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'category',
@@ -1695,7 +1695,7 @@ function mfcs_get_request_field_request_coordinator_email($form, &$form_state, &
     }
   }
 
-  $field_title = "Request Coordinator E-Mail";
+  $field_title = 'Request Coordinator E-Mail';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'email',
@@ -1945,7 +1945,7 @@ function mfcs_get_request_field_information_title($form, &$form_state, &$fields,
     $values = $request_state['information']['title'];
   }
 
-  $field_title = "Request Name"; // renamed from title to "Request Name" as per fcs-23.
+  $field_title = 'Request Name'; // renamed from title to "Request Name" as per fcs-23.
   $limits_check = array(
     'title' => $field_title,
     'field' => 'title',
@@ -1987,7 +1987,7 @@ function mfcs_get_request_field_information_title($form, &$form_state, &$fields,
             'form-item-delta-' . $key,
           ),
         ),
-        '#description' => t("The Name of the Event or Meeting."),
+        '#description' => 'The Name of the Event or Meeting.',
       );
     }
     krsort($fields['information']['title']);
@@ -2018,7 +2018,7 @@ function mfcs_get_request_field_information_attendance($form, &$form_state, &$fi
     $values = $request_state['information']['attendance'];
   }
 
-  $field_title = "Expected Number of Attendance";
+  $field_title = 'Expected Number of Attendance';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'attendance',
@@ -2240,7 +2240,7 @@ function mfcs_get_request_field_information_organization($form, &$form_state, &$
     $values = $request_state['information']['organization'];
   }
 
-  $field_title = "Organization / Affiliation";
+  $field_title = 'Organization / Affiliation';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'organization',
@@ -2471,7 +2471,7 @@ function mfcs_get_request_field_plans_description($form, &$form_state, &$fields,
     $build = TRUE;
   }
 
-  $field_title = "Request Description/Purpose";
+  $field_title = 'Request Description/Purpose';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'description',
@@ -2544,7 +2544,7 @@ function mfcs_get_request_field_plans_activities($form, &$form_state, &$fields, 
     $build = TRUE;
   }
 
-  $field_title = "List all activities planned within the request";
+  $field_title = 'List all activities planned within the request';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'activities',
@@ -2612,7 +2612,7 @@ function mfcs_get_request_field_plans_audience($form, &$form_state, &$fields, &$
     $values = $request_state['plans']['audience'];
   }
 
-  $field_title = "Intended Audience";
+  $field_title = 'Intended Audience';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'audience',
@@ -2690,7 +2690,7 @@ function mfcs_get_request_field_registration_require($form, &$form_state, &$fiel
     $build = TRUE;
   }
 
-  $field_title = "Does the request require registration or ticket purchase?";
+  $field_title = 'Does the request require registration or ticket purchase?';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'require',
@@ -2723,7 +2723,7 @@ function mfcs_get_request_field_registration_require($form, &$form_state, &$fiel
         '#type' => 'radios',
         '#title' => $field_title,
         '#default_value' => $value,
-        '#options' => array(1 => "Yes", 0 => "No"),
+        '#options' => array(1 => 'Yes', 0 => 'No'),
         '#required' => TRUE,
         '#attributes' => array(
           'class' => array(
@@ -2766,7 +2766,7 @@ function mfcs_get_request_field_registration_website($form, &$form_state, &$fiel
     $build = TRUE;
   }
 
-  $field_title = "Please indicate a <em>Registration Website</em>";
+  $field_title = 'Please indicate a <em>Registration Website</em>';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'website',
@@ -2851,7 +2851,7 @@ function mfcs_get_request_field_registration_phone($form, &$form_state, &$fields
     $build = TRUE;
   }
 
-  $field_title = "Please indicate a <em>Registration Phone</em>";
+  $field_title = 'Please indicate a <em>Registration Phone</em>';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'phone',
@@ -2934,7 +2934,7 @@ function mfcs_get_request_field_registration_ticket_price($form, &$form_state, &
     $build = TRUE;
   }
 
-  $field_title = "Please indicate a <em>Ticket Price</em>";
+  $field_title = 'Please indicate a <em>Ticket Price</em>';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'ticket_price',
@@ -3019,7 +3019,7 @@ function mfcs_get_request_field_registration_ticket_dates($form, &$form_state, &
     $build = TRUE;
   }
 
-  $field_title = "Please indicate <em>Dates</em> the tickets are one sale";
+  $field_title = 'Please indicate <em>Dates</em> the tickets are one sale';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'ticket_dates',
@@ -3103,7 +3103,7 @@ function mfcs_get_request_field_registration_ticket_website($form, &$form_state,
     $build = TRUE;
   }
 
-  $field_title = "Please indicate a <em>Ticket Website</em>";
+  $field_title = 'Please indicate a <em>Ticket Website</em>';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'ticket_website',
@@ -3188,7 +3188,7 @@ function mfcs_get_request_field_registration_ticket_phone($form, &$form_state, &
     $build = TRUE;
   }
 
-  $field_title = "Please indicate a <em>Ticket Phone</em>";
+  $field_title = 'Please indicate a <em>Ticket Phone</em>';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'ticket_phone',
@@ -3273,7 +3273,7 @@ function mfcs_get_request_field_registration_generate_revenue($form, &$form_stat
     $build = TRUE;
   }
 
-  $field_title = "Will the Event Generate Revenue?";
+  $field_title = 'Will the Event Generate Revenue?';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'generate_revenue',
@@ -3306,7 +3306,7 @@ function mfcs_get_request_field_registration_generate_revenue($form, &$form_stat
         '#type' => 'radios',
         '#title' => $field_title,
         '#default_value' => $value,
-        '#options' => array(1 => "Yes", 0 => "No"),
+        '#options' => array(1 => 'Yes', 0 => 'No'),
         '#required' => TRUE,
         '#attributes' => array(
           'class' => array(
@@ -3349,7 +3349,7 @@ function mfcs_get_request_field_registration_revenue_generated($form, &$form_sta
     $build = TRUE;
   }
 
-  $field_title = "How Will Revenue be Generated?";
+  $field_title = 'How Will Revenue be Generated?';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'revenue_generated',
@@ -3430,7 +3430,7 @@ function mfcs_get_request_field_setup_rectangular_tables_8ft($form, &$form_state
     $values = $request_state['setup']['rectangular_tables_8ft'];
   }
 
-  $field_title = "How Many 8 ft Rectangular Tables Will You Need?";
+  $field_title = 'How Many 8 ft Rectangular Tables Will You Need?';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'rectangular_tables_8ft',
@@ -3500,7 +3500,7 @@ function mfcs_get_request_field_setup_round_tables_8ft($form, &$form_state, &$fi
     $values = $request_state['setup']['round_tables_8ft'];
   }
 
-  $field_title = "How Many 8 ft Round Tables Will You Need?";
+  $field_title = 'How Many 8 ft Round Tables Will You Need?';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'round_tables_8ft',
@@ -3575,7 +3575,7 @@ function mfcs_get_request_field_setup_other_tables($form, &$form_state, &$fields
     $build = TRUE;
   }
 
-  $field_title = "How Many Other Tables Will You Need? " . '<span class="title_display-note describe_the_table">' . "(Describe the Table)</span>";
+  $field_title = 'How Many Other Tables Will You Need? <span class="title_display-note describe_the_table">(Describe the Table)</span>';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'other_tables',
@@ -3643,7 +3643,7 @@ function mfcs_get_request_field_setup_standard_blue_chairs($form, &$form_state, 
     $values = $request_state['setup']['standard_blue_chairs'];
   }
 
-  $field_title = "How Many Standard Chairs Will You Need?"; // renamed "Blue Chairs" to "Chairs" as per fcs-22.
+  $field_title = 'How Many Standard Chairs Will You Need?'; // renamed "Blue Chairs" to "Chairs" as per fcs-22.
   $limits_check = array(
     'title' => $field_title,
     'field' => 'standard_blue_chairs',
@@ -3713,7 +3713,7 @@ function mfcs_get_request_field_setup_podium($form, &$form_state, &$fields, &$re
     $values = $request_state['setup']['podium'];
   }
 
-  $field_title = "Will You Need a Podium?";
+  $field_title = 'Will You Need a Podium?';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'podium',
@@ -3746,7 +3746,7 @@ function mfcs_get_request_field_setup_podium($form, &$form_state, &$fields, &$re
         '#type' => 'radios',
         '#title' => $field_title,
         '#default_value' => $value,
-        '#options' => array(1 => "Yes", 0 => "No"),
+        '#options' => array(1 => 'Yes', 0 => 'No'),
         '#required' => TRUE,
         '#attributes' => array(
           'class' => array(
@@ -3789,7 +3789,7 @@ function mfcs_get_request_field_setup_portable_stage($form, &$form_state, &$fiel
     $build = TRUE;
   }
 
-  $field_title = "Will You Require a Portable Stage?";
+  $field_title = 'Will You Require a Portable Stage?';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'portable_stage',
@@ -3822,7 +3822,7 @@ function mfcs_get_request_field_setup_portable_stage($form, &$form_state, &$fiel
         '#type' => 'radios',
         '#title' => $field_title,
         '#default_value' => $value,
-        '#options' => array(1 => "Yes", 0 => "No"),
+        '#options' => array(1 => 'Yes', 0 => 'No'),
         '#required' => TRUE,
         '#attributes' => array(
           'class' => array(
@@ -3865,7 +3865,7 @@ function mfcs_get_request_field_setup_portable_stage_configuration($form, &$form
     $build = TRUE;
   }
 
-  $field_title = "What size stage and configuration is needed?";
+  $field_title = 'What size stage and configuration is needed?';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'portable_stage_configuration',
@@ -3951,7 +3951,7 @@ function mfcs_get_request_field_setup_security($form, &$form_state, &$fields, &$
     $build = TRUE;
   }
 
-  $field_title = "Will the Event Require Security? " . '<span class="title_display-note additional_requirements_may_apply">' . "(Additional Requirements May Apply)</span>";
+  $field_title = 'Will the Event Require Security? <span class="title_display-note additional_requirements_may_apply">(Additional Requirements May Apply)</span>';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'security',
@@ -3984,7 +3984,7 @@ function mfcs_get_request_field_setup_security($form, &$form_state, &$fields, &$
         '#type' => 'radios',
         '#title' => $field_title,
         '#default_value' => $value,
-        '#options' => array(1 => "Yes", 0 => "No"),
+        '#options' => array(1 => 'Yes', 0 => 'No'),
         '#required' => TRUE,
         '#attributes' => array(
           'class' => array(
@@ -4027,7 +4027,7 @@ function mfcs_get_request_field_setup_parking_assistance($form, &$form_state, &$
     $build = TRUE;
   }
 
-  $field_title = "Will the Event Require Parking Assistance or Restrictions?";
+  $field_title = 'Will the Event Require Parking Assistance or Restrictions?';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'parking_assistance',
@@ -4060,7 +4060,7 @@ function mfcs_get_request_field_setup_parking_assistance($form, &$form_state, &$
         '#type' => 'radios',
         '#title' => $field_title,
         '#default_value' => $value,
-        '#options' => array(1 => "Yes", 0 => "No"),
+        '#options' => array(1 => 'Yes', 0 => 'No'),
         '#required' => TRUE,
         '#attributes' => array(
           'class' => array(
@@ -4103,7 +4103,7 @@ function mfcs_get_request_field_setup_parking_assistance_area($form, &$form_stat
     $build = TRUE;
   }
 
-  $field_title = "What Parking Area will be Accessed or Restricted?";
+  $field_title = 'What Parking Area will be Accessed or Restricted?';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'parking_assistance_area',
@@ -4189,7 +4189,7 @@ function mfcs_get_request_field_setup_road_closures($form, &$form_state, &$field
     $build = TRUE;
   }
 
-  $field_title = "Will the Event Require Road Closures or Barricades?";
+  $field_title = 'Will the Event Require Road Closures or Barricades?';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'road_closures',
@@ -4222,7 +4222,7 @@ function mfcs_get_request_field_setup_road_closures($form, &$form_state, &$field
         '#type' => 'radios',
         '#title' => $field_title,
         '#default_value' => $value,
-        '#options' => array(1 => "Yes", 0 => "No"),
+        '#options' => array(1 => 'Yes', 0 => 'No'),
         '#required' => TRUE,
         '#attributes' => array(
           'class' => array(
@@ -4265,7 +4265,7 @@ function mfcs_get_request_field_setup_road_closures_details($form, &$form_state,
     $build = TRUE;
   }
 
-  $field_title = "Provide an Explanation on the Road Closures or Barricades";
+  $field_title = 'Provide an Explanation on the Road Closures or Barricades';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'road_closures_details',
@@ -4351,7 +4351,7 @@ function mfcs_get_request_field_setup_special_requests($form, &$form_state, &$fi
     $build = TRUE;
   }
 
-  $field_title = "Will the Event Require any Additional Special Requests for Setup?";
+  $field_title = 'Will the Event Require any Additional Special Requests for Setup?';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'special_requests',
@@ -4384,7 +4384,7 @@ function mfcs_get_request_field_setup_special_requests($form, &$form_state, &$fi
         '#type' => 'radios',
         '#title' => $field_title,
         '#default_value' => $value,
-        '#options' => array(1 => "Yes", 0 => "No"),
+        '#options' => array(1 => 'Yes', 0 => 'No'),
         '#required' => TRUE,
         '#attributes' => array(
           'class' => array(
@@ -4427,7 +4427,7 @@ function mfcs_get_request_field_setup_special_requests_details($form, &$form_sta
     $build = TRUE;
   }
 
-  $field_title = "Explanation on the Special Requests";
+  $field_title = 'Explanation on the Special Requests';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'special_requests_details',
@@ -4507,7 +4507,7 @@ function mfcs_get_request_field_presentation_technical_equipment($form, &$form_s
     $values = $request_state['presentation']['technical_equipment'];
   }
 
-  $field_title = "Will the Event Require any Technical Equipment? " . '<span class="title_display-note additional_requirements_may_apply">' . "(Additional Requirements May Apply)</span>";
+  $field_title = 'Will the Event Require any Technical Equipment? <span class="title_display-note additional_requirements_may_apply">(Additional Requirements May Apply)</span>';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'technical_equipment',
@@ -4540,7 +4540,7 @@ function mfcs_get_request_field_presentation_technical_equipment($form, &$form_s
         '#type' => 'radios',
         '#title' => $field_title,
         '#default_value' => $value,
-        '#options' => array(1 => "Yes", 0 => "No"),
+        '#options' => array(1 => 'Yes', 0 => 'No'),
         '#required' => TRUE,
         '#attributes' => array(
           'class' => array(
@@ -4635,7 +4635,7 @@ function mfcs_get_request_field_presentation_technical_equipment_details($form, 
     $values = $request_state['presentation']['technical_equipment_details'];
   }
 
-  $field_title = "Specify the Equipment Needed";
+  $field_title = 'Specify the Equipment Needed';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'technical_equipment_details',
@@ -4719,7 +4719,7 @@ function mfcs_get_request_field_presentation_technical_equipment_microphone($for
     $values = $request_state['presentation']['technical_equipment_microphone'];
   }
 
-  $field_title = "Specify the Quantity of Microphones";
+  $field_title = 'Specify the Quantity of Microphones';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'technical_equipment_microphone',
@@ -4808,7 +4808,7 @@ function mfcs_get_request_field_presentation_external_audio_person($form, &$form
     $build = TRUE;
   }
 
-  $field_title = "Will an External Audio/Video Person/Company be Utilized?";
+  $field_title = 'Will an External Audio/Video Person/Company be Utilized?';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'external_audio_person',
@@ -4841,7 +4841,7 @@ function mfcs_get_request_field_presentation_external_audio_person($form, &$form
         '#type' => 'radios',
         '#title' => $field_title,
         '#default_value' => $value,
-        '#options' => array(1 => "Yes", 0 => "No"),
+        '#options' => array(1 => 'Yes', 0 => 'No'),
         '#required' => TRUE,
         '#attributes' => array(
           'class' => array(
@@ -4884,7 +4884,7 @@ function mfcs_get_request_field_presentation_external_audio_person_name($form, &
     $build = TRUE;
   }
 
-  $field_title = "Provide the Name of the Person/Company Providing the External Audio/Video";
+  $field_title = 'Provide the Name of the Person/Company Providing the External Audio/Video';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'external_audio_person_name',
@@ -4971,7 +4971,7 @@ function mfcs_get_request_field_presentation_external_audio_person_email($form, 
     $build = TRUE;
   }
 
-  $field_title = "Provide the E-mail of the Person/Company Providing the External Audio/Video";
+  $field_title = 'Provide the E-mail of the Person/Company Providing the External Audio/Video';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'external_audio_person_email',
@@ -5058,7 +5058,7 @@ function mfcs_get_request_field_presentation_external_audio_person_phone($form, 
     $build = TRUE;
   }
 
-  $field_title = "Provide the Phone Number of the Person/Company Providing the External Audio/Video";
+  $field_title = 'Provide the Phone Number of the Person/Company Providing the External Audio/Video';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'external_audio_person_phone',
@@ -5143,7 +5143,7 @@ function mfcs_get_request_field_presentation_production($form, &$form_state, &$f
     $build = TRUE;
   }
 
-  $field_title = "Is the Event Using a Production Company or Professional Promoter?";
+  $field_title = 'Is the Event Using a Production Company or Professional Promoter?';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'production',
@@ -5176,7 +5176,7 @@ function mfcs_get_request_field_presentation_production($form, &$form_state, &$f
         '#type' => 'radios',
         '#title' => $field_title,
         '#default_value' => $value,
-        '#options' => array(1 => "Yes", 0 => "No"),
+        '#options' => array(1 => 'Yes', 0 => 'No'),
         '#required' => TRUE,
         '#attributes' => array(
           'class' => array(
@@ -5219,7 +5219,7 @@ function mfcs_get_request_field_presentation_production_name($form, &$form_state
     $build = TRUE;
   }
 
-  $field_title = "Name of the Company/Individual";
+  $field_title = 'Name of the Company/Individual';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'production_name',
@@ -5305,7 +5305,7 @@ function mfcs_get_request_field_presentation_production_email($form, &$form_stat
     $build = TRUE;
   }
 
-  $field_title = "Contact E-mail of the Company/Individual";
+  $field_title = 'Contact E-mail of the Company/Individual';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'production_email',
@@ -5392,7 +5392,7 @@ function mfcs_get_request_field_presentation_production_phone($form, &$form_stat
     $build = TRUE;
   }
 
-  $field_title = "Phone Number of the Company/Individual";
+  $field_title = 'Phone Number of the Company/Individual';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'production_phone',
@@ -5471,7 +5471,7 @@ function mfcs_get_request_field_presentation_publicity($form, &$form_state, &$fi
     $values = $request_state['presentation']['publicity'];
   }
 
-  $field_title = "Will the Event Need Publicity?";
+  $field_title = 'Will the Event Need Publicity?';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'publicity',
@@ -5503,7 +5503,7 @@ function mfcs_get_request_field_presentation_publicity($form, &$form_state, &$fi
         '#type' => 'radios',
         '#title' => $field_title,
         '#default_value' => $value,
-        '#options' => array(1 => "Yes", 0 => "No"),
+        '#options' => array(1 => 'Yes', 0 => 'No'),
         '#required' => TRUE,
         '#attributes' => array(
           'class' => array(
@@ -5541,7 +5541,7 @@ function mfcs_get_request_field_presentation_publicity_details($form, &$form_sta
     $values = $request_state['presentation']['publicity_details'];
   }
 
-  $field_title = "Specify all Publicity Medium that Apply";
+  $field_title = 'Specify all Publicity Medium that Apply';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'publicity_details',
@@ -5628,7 +5628,7 @@ function mfcs_get_request_field_presentation_printed_material($form, &$form_stat
     $build = TRUE;
   }
 
-  $field_title = "Will the Event use Printed Material?";
+  $field_title = 'Will the Event use Printed Material?';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'printed_material',
@@ -5660,7 +5660,7 @@ function mfcs_get_request_field_presentation_printed_material($form, &$form_stat
         '#type' => 'radios',
         '#title' => $field_title,
         '#default_value' => $value,
-        '#options' => array(1 => "Yes", 0 => "No"),
+        '#options' => array(1 => 'Yes', 0 => 'No'),
         '#required' => TRUE,
         '#attributes' => array(
           'class' => array(
@@ -5703,7 +5703,7 @@ function mfcs_get_request_field_presentation_university_logo($form, &$form_state
     $build = TRUE;
   }
 
-  $field_title = "Will the Event use the University Logo?";
+  $field_title = 'Will the Event use the University Logo?';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'university_logo',
@@ -5735,7 +5735,7 @@ function mfcs_get_request_field_presentation_university_logo($form, &$form_state
         '#type' => 'radios',
         '#title' => $field_title,
         '#default_value' => $value,
-        '#options' => array(1 => "Yes", 0 => "No"),
+        '#options' => array(1 => 'Yes', 0 => 'No'),
         '#states' => array(
           'visible' => array(
             ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => 1),
@@ -5790,7 +5790,7 @@ function mfcs_get_request_field_presentation_designing_material($form, &$form_st
     $build = TRUE;
   }
 
-  $field_title = "Who will be Designing the Material?";
+  $field_title = 'Who will be Designing the Material?';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'designing_material',
@@ -5880,7 +5880,7 @@ function mfcs_get_request_field_presentation_designing_material_name($form, &$fo
     $build = TRUE;
   }
 
-  $field_title = "Name of who will be Designing the Material";
+  $field_title = 'Name of who will be Designing the Material';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'designing_material_name',
@@ -5972,7 +5972,7 @@ function mfcs_get_request_field_presentation_designing_material_email($form, &$f
     $build = TRUE;
   }
 
-  $field_title = "E-mail of who will be Designing the Material";
+  $field_title = 'E-mail of who will be Designing the Material';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'designing_material_email',
@@ -6064,7 +6064,7 @@ function mfcs_get_request_field_presentation_designing_material_phone($form, &$f
     $build = TRUE;
   }
 
-  $field_title = "Phone Number of who will be Designing the Material";
+  $field_title = 'Phone Number of who will be Designing the Material';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'designing_material_phone',
@@ -6149,7 +6149,7 @@ function mfcs_get_request_field_services_food_served($form, &$form_state, &$fiel
     $values = $request_state['services']['food_served'];
   }
 
-  $field_title = "Will Food or Drink be Served? " . '<span class="title_display-note some_venues_dont_permit">' . "(Note some venues do not permit food and drink)</span>";
+  $field_title = 'Will Food or Drink be Served? =<span class="title_display-note some_venues_dont_permit">=(Note some venues do not permit food and drink)</span>';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'food_served',
@@ -6182,7 +6182,7 @@ function mfcs_get_request_field_services_food_served($form, &$form_state, &$fiel
         '#type' => 'radios',
         '#title' => $field_title,
         '#default_value' => $value,
-        '#options' => array(1 => "Yes", 0 => "No"),
+        '#options' => array(1 => 'Yes', 0 => 'No'),
         '#required' => TRUE,
         '#attributes' => array(
           'class' => array(
@@ -6220,7 +6220,7 @@ function mfcs_get_request_field_services_food_caterer($form, &$form_state, &$fie
     $values = $request_state['services']['food_caterer'];
   }
 
-  $field_title = "Provide the Name of the Caterer/Busineess";
+  $field_title = 'Provide the Name of the Caterer/Busineess';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'food_caterer',
@@ -6301,7 +6301,7 @@ function mfcs_get_request_field_services_alcohol($form, &$form_state, &$fields, 
     $values = $request_state['services']['alcohol'];
   }
 
-  $field_title = "Will Alcohol be Served?";
+  $field_title = 'Will Alcohol be Served?';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'alcohol',
@@ -6334,7 +6334,7 @@ function mfcs_get_request_field_services_alcohol($form, &$form_state, &$fields, 
         '#type' => 'radios',
         '#title' => $field_title,
         '#default_value' => $value,
-        '#options' => array(1 => "Yes", 0 => "No"),
+        '#options' => array(1 => 'Yes', 0 => 'No'),
         '#required' => TRUE,
         '#attributes' => array(
           'class' => array(
@@ -6432,7 +6432,7 @@ function mfcs_get_request_field_services_open_flames($form, &$form_state, &$fiel
     $build = TRUE;
   }
 
-  $field_title = "Will Open Flames be Used? " . '<span class="title_display-note examples">' . "(Examples: Sternos, Grill, Candles)</span>";
+  $field_title = 'Will Open Flames be Used? <span class="title_display-note examples">(Examples: Sternos, Grill, Candles)</span>';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'open_flames',
@@ -6464,7 +6464,7 @@ function mfcs_get_request_field_services_open_flames($form, &$form_state, &$fiel
         '#type' => 'radios',
         '#title' => $field_title,
         '#default_value' => $value,
-        '#options' => array(1 => "Yes", 0 => "No"),
+        '#options' => array(1 => 'Yes', 0 => 'No'),
         '#required' => TRUE,
         '#attributes' => array(
           'class' => array(
@@ -6502,7 +6502,7 @@ function mfcs_get_request_field_additional($form, &$form_state, &$fields, &$requ
     $values = $request_state['additional'];
   }
 
-  $field_title = "Please Provide any Other Information or Questions you may Have for Campus Officials";
+  $field_title = 'Please Provide any Other Information or Questions you may Have for Campus Officials';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'additional',
@@ -6542,7 +6542,7 @@ function mfcs_get_request_field_additional($form, &$form_state, &$fields, &$requ
             'form-item-delta-' . $key,
           ),
         ),
-        '#description_before' => "Please use this comment box to provide University Police with details about reserving spaces in parking lots and/or when buildings need to be opened/closed for weekend and after-hours events.",
+        '#description_before' => 'Please use this comment box to provide University Police with details about reserving spaces in parking lots and/or when buildings need to be opened/closed for weekend and after-hours events.',
       );
     }
     krsort($fields['additional']);
@@ -6856,7 +6856,7 @@ function mfcs_build_table_structure($structure, &$structure_current, &$structure
 
     $revision = mfcs_load_request_revision_number($request_id, $db_table_field);
     if ($revision === FALSE) {
-      watchdog(MFCS_WATCHDOG_ID, "Failed to load revision number for request %request_id while building the table structure, forcing revision number to be 0.", array('%request_id' => $request_id), WATCHDOG_ERROR);
+      watchdog(MFCS_WATCHDOG_ID, 'Failed to load revision number for request %request_id while building the table structure, forcing revision number to be 0.', array('%request_id' => $request_id), WATCHDOG_ERROR);
       $revision = 0;
     }
     elseif (is_null($revision)) {
@@ -6873,13 +6873,13 @@ function mfcs_build_table_structure($structure, &$structure_current, &$structure
 
   if (array_key_exists('storage', $structure[$table_name][$field_name])) {
     if (!is_string($structure[$table_name][$field_name]['storage']) || empty($structure[$table_name][$field_name]['storage'])) {
-      watchdog(MFCS_WATCHDOG_ID, "Invalid storage structure specification for the field %field_name in the table %table_name. This must be a non-empty string.", array('%field_name' => $field_name, '%table_name' => $table_name), WATCHDOG_ERROR);
+      watchdog(MFCS_WATCHDOG_ID, 'Invalid storage structure specification for the field %field_name in the table %table_name. This must be a non-empty string.', array('%field_name' => $field_name, '%table_name' => $table_name), WATCHDOG_ERROR);
       return;
     }
 
     $storage_key = $structure[$table_name][$field_name]['storage'];
     if (!array_key_exists($storage_key, $structure[$table_name][$field_name]) || empty($structure[$table_name][$field_name][$storage_key])) {
-      watchdog(MFCS_WATCHDOG_ID, "The storage key %storage_key was not found in the structure specification for the field %field_name in the table %table_name. This must be a non-empty string.", array('%storage_key' => $storage_key, '%field_name' => $field_name, '%table_name' => $table_name), WATCHDOG_ERROR);
+      watchdog(MFCS_WATCHDOG_ID, 'The storage key %storage_key was not found in the structure specification for the field %field_name in the table %table_name. This must be a non-empty string.', array('%storage_key' => $storage_key, '%field_name' => $field_name, '%table_name' => $table_name), WATCHDOG_ERROR);
       return;
     }
 
@@ -7090,7 +7090,7 @@ function mfcs_prepare_request_values($request, $changes) {
   else {
     $prepared['request_revision'] = mfcs_load_request_revision_number($request_id);
     if ($prepared['request_revision'] === FALSE) {
-      watchdog(MFCS_WATCHDOG_ID, "Failed to load revision number for request %request_id while trying to save the request.", array('%request_id' => $request_id), WATCHDOG_ERROR);
+      watchdog(MFCS_WATCHDOG_ID, 'Failed to load revision number for request %request_id while trying to save the request.', array('%request_id' => $request_id), WATCHDOG_ERROR);
       return FALSE;
     }
     elseif (is_null($prepared['request_revision'])) {
