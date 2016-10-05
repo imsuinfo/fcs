@@ -395,6 +395,19 @@ function mfcs_get_request_room_list_options($location = NULL, $option = NULL, $h
       $options[$room->room_id] = $title;
     }
   }
+  elseif ($option == 'room_with_building') {
+    foreach ($rooms as $room) {
+      $title = '(' . $room->building_code . ') ';
+      if (empty($room->room_name) || is_numeric($room->room_number)) {
+        $title .= $room->room_number;
+      }
+      else {
+        $title .= $room->room_name;
+      }
+
+      $options[$room->room_id] = $title;
+    }
+  }
   else {
     foreach ($rooms as $room) {
       $options[$room->room_id] = empty($room->room_name) ? $room->room_number : $room->room_name;
