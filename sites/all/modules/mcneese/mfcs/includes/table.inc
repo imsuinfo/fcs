@@ -817,6 +817,7 @@ function mfcs_table_presentation($option = NULL) {
           'hide_link' => array(
             MFCS_REQUEST_TYPE_MEETING,
             MFCS_REQUEST_TYPE_QUICK_MEETING,
+            MFCS_REQUEST_TYPE_CLUB_MEETING,
           ),
         ),
       );
@@ -1549,6 +1550,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -1563,6 +1565,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -1579,6 +1582,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -1589,6 +1593,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -1599,6 +1604,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -1609,6 +1615,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -1619,6 +1626,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -1629,6 +1637,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -1639,6 +1648,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -1652,6 +1662,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -1677,6 +1688,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -1708,6 +1720,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -1738,6 +1751,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -1752,6 +1766,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -1765,6 +1780,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -1778,6 +1794,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -1792,6 +1809,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -1805,6 +1823,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -1819,6 +1838,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -1832,6 +1852,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -1846,6 +1867,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -1904,6 +1926,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -1914,6 +1937,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -1924,6 +1948,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -1934,6 +1959,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -1988,6 +2014,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -1998,6 +2025,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -2008,6 +2036,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -2018,6 +2047,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -2031,6 +2061,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -2044,6 +2075,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -2054,6 +2086,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -2079,6 +2112,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -2089,6 +2123,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -2099,6 +2134,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),
@@ -2142,6 +2178,7 @@ function mfcs_table_presentation($option = NULL) {
         'hide' => array(
           MFCS_REQUEST_TYPE_MEETING,
           MFCS_REQUEST_TYPE_QUICK_MEETING,
+          MFCS_REQUEST_TYPE_CLUB_MEETING,
         ),
       ),
     ),

@@ -914,11 +914,6 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
     $is_effective_venue_coordinator = TRUE;
   }
 
-  $is_quick_meeting = FALSE;
-  if ($type === MFCS_REQUEST_TYPE_QUICK_MEETING && ($is_effective_venue_coordinator || $is_manager || $is_administer)) {
-    $is_quick_meeting = TRUE;
-  }
-
   // review revisions are neither used nor incremented in the same manner as other fields.
   // the revision number will not increment when a new review is made.
   $review_revision = mfcs_load_request_revision_number($request_id, 'mfcs_field_review_review');

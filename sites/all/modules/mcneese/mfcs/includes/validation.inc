@@ -95,6 +95,13 @@ function mfcs_pre_validate_request_fields(&$form, &$form_state, $dont_validate =
     $is_quick_meeting = TRUE;
   }
 
+  $is_club_meeting = FALSE;
+  // quick meetings can only be used by venue coordinators.
+  if (isset($location_state['information']['type'][0]) && $location_state['information']['type'][0] == MFCS_REQUEST_TYPE_CLUB_MEETING) {
+    $is_club_meeting = TRUE;
+  }
+
+
   if ($form_state['values']['form']['step'] == 'standard') {
     mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
@@ -136,12 +143,11 @@ function mfcs_pre_validate_request_fields(&$form, &$form_state, $dont_validate =
       else {
         // the submit button is not allowed when not in a custom target section.
         if (isset($form['form']['target_section']) && array_key_exists('$value', $form['form']['target_section']) && !is_null($form['form']['target_section']['#value'])) {
-          form_set_error('submit-request-submit', "This request cannot be submitted during this step at this time. Try using the Continue button.");
+          form_set_error('submit-request-submit', 'This request cannot be submitted during this step at this time. Try using the Continue button.');
           $passed = FALSE;
         }
       }
     }
-
 
     if ($clicked_id == 'submit-request-submit' || $clicked_id == 'submit-request-next') {
       // check to see if the request coordinator's name has changed.
@@ -171,6 +177,12 @@ function mfcs_pre_validate_request_fields(&$form, &$form_state, $dont_validate =
         unset($key);
         unset($value);
       }
+
+      if ($is_club_meeting) {
+        if (!isset($location_state['request_coordinator']['classification'][0]) || $location_state['request_coordinator']['classification'][0] != MFCS_REQUEST_CLASSIFICATION_STUDENT) {
+          form_set_error($ps_p . '][information][type][0', 'A <strong>Club Meeting</strong> may only be used for <strong>Student Organizations</strong>.');
+        }
+      }
     }
   }
   elseif ($form_state['values']['form']['step'] == 'location') {
@@ -194,7 +206,7 @@ function mfcs_pre_validate_request_fields(&$form, &$form_state, $dont_validate =
       global $conf;
 
       if (empty($conf['fcs_failsafe_coordinator']) || !is_integer($conf['fcs_failsafe_coordinator'])) {
-        watchdog(MFCS_WATCHDOG_ID, "Failed to load 'fcs_failsafe_coordinator' settings. Your settings.php does not contain the failsafe coordinator user id.", array(), WATCHDOG_CRITICAL);
+        watchdog(MFCS_WATCHDOG_ID, 'Failed to load \'fcs_failsafe_coordinator\' settings. Your settings.php does not contain the failsafe coordinator user id.', array(), WATCHDOG_CRITICAL);
         $coordinator = user_load(1); // as a last resort fall back to the default drupal admin account.
       }
       else {
@@ -211,7 +223,7 @@ function mfcs_pre_validate_request_fields(&$form, &$form_state, $dont_validate =
   }
   elseif ($form_state['values']['form']['step'] == 'clone') {
     if ($form_state['programmed'] !== TRUE) {
-      form_set_error('', "Illegal operation detected. The clone step cannot be performed non-programmatically");
+      form_set_error('', 'Illegal operation detected. The clone step cannot be performed non-programmatically');
       $passed = FALSE;
     }
     else {
@@ -411,7 +423,7 @@ function mfcs_validate_request_fields($form, &$form_state) {
       }
 
       if ($clicked_id == 'submit-request-submit' && $not_custom_section) {
-        form_set_error($clicked_id, t('The form may only be submitted during this step if a \'@term_name\' is used. Use the continue button instead.', array('@term_name' => $quick_meeting_name)));
+        form_set_error($clicked_id, t('The form may only be submitted during this step if a <strong>@term_name</strong> is used. Use the continue button instead.', array('@term_name' => $quick_meeting_name)));
       }
     }
 

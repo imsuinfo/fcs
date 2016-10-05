@@ -2368,6 +2368,7 @@ function mfcs_install() {
   db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TYPE_RECEPTION . ', \'reception\', \'Reception\')');
   db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TYPE_TALENT . ', \'talent\', \'Talent / Variety Show\')');
   db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TYPE_WORKSHOP . ', \'workshop\', \'Workshop\')');
+  db_query('INSERT INTO {mfcs_taxonomy_request_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_TYPE_CLUB_MEETING . ', \'club_meeting\', \'Club Meeting\')');
 
   db_query('INSERT INTO {mfcs_taxonomy_request_audience} (id, machine_name, human_name, hidden) VALUES (' . (int) MFCS_REQUEST_AUDIENCE_NONE . ', \'none\', \'None\', 1)');
   db_query('INSERT INTO {mfcs_taxonomy_request_audience} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_AUDIENCE_FACULTY_AND_STAFF . ', \'employees\', \'Faculty and Staff Only\')');

@@ -564,6 +564,7 @@ function mfcs_get_request_type_list_options($option = NULL, $hidden = FALSE, $di
   $options_all[MFCS_REQUEST_TYPE_ATHLETIC] = 'Athletic';
   $options_all[MFCS_REQUEST_TYPE_OTHER] = 'Other';
   $options_all[MFCS_REQUEST_TYPE_QUICK_MEETING] = 'Quick Meeting';
+  $options_all[MFCS_REQUEST_TYPE_CLUB_MEETING] = 'Club Meeting';
 
   if ($option == 'select') {
     $options[''] = '- Select -';
