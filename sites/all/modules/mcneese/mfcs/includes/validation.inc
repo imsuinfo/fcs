@@ -444,8 +444,13 @@ function mfcs_validate_request_fields($form, &$form_state) {
 
     // only validate dates when editing a form that has the date fields.
     $validate_dates = TRUE;
-    if (isset($form['form']['target_section']['#value']) && $form['form']['target_section']['#value'] != 'request' && $form['form']['target_section']['#value'] != 'dates') {
-      if ($form_state['values']['form']['step'] != 'standard') {
+    if (isset($form_state['values']['form']['step'])) {
+      if ($form_state['values']['form']['step'] == 'standard') {
+        if (isset($form['form']['target_section']['#value']) && $form['form']['target_section']['#value'] != 'request' && $form['form']['target_section']['#value'] != 'dates') {
+          $validate_dates = FALSE;
+        }
+      }
+      else {
         $validate_dates = FALSE;
       }
     }
@@ -723,19 +728,24 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
         continue;
       }
 
-      if (isset($form['form']['existing']['#value']['request']['dates']['time_start'])) {
-        if (array_key_exists($key, $form['form']['existing']['#value']['request']['dates']['time_start'])) {
-          // skip values already saved to allow updating requests if they are sufficiently near/past the request date.
-          // but only do this when the request is not new.
-          if (!$is_new_request && $form['form']['existing']['#value']['request']['dates']['time_start'][$key] == $value) {
-            continue;
-          }
-        }
+      // prevent errors due to undefined start times.
+      if (!array_key_exists($key, $start_timestamp)) {
+        $start_timestamp[$key] = NULL;
       }
 
       if (!empty($value) && !empty($location_form['dates']['group_dates'][$key]['dates']['time_start'][$key]['#expected_format']['date'])) {
         if (is_string($value)) {
           $start_timestamp[$key] = strtotime($value, $date_timestamp[$key]);
+
+          if (isset($form['form']['existing']['#value']['request']['dates']['time_start'])) {
+            if (array_key_exists($key, $form['form']['existing']['#value']['request']['dates']['time_start'])) {
+              // skip values already saved to allow updating requests if they are sufficiently near/past the request date.
+              // but only do this when the request is not new.
+              if (!$is_new_request && $form['form']['existing']['#value']['request']['dates']['time_start'][$key] == $value) {
+                continue;
+              }
+            }
+          }
 
           $matched = preg_match('@^\s*(\d|\d\d):(\d|\d\d)\s*(pm|am)*\s*$@i', $value);
 
@@ -787,19 +797,24 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
         continue;
       }
 
-      if (isset($form['form']['existing']['#value']['request']['dates']['time_stop'])) {
-        if (array_key_exists($key, $form['form']['existing']['#value']['request']['dates']['time_stop'])) {
-          // skip values already saved to allow updating requests if they are sufficiently near/past the request date.
-          // but only do this when the request is not new.
-          if (!$is_new_request && $form['form']['existing']['#value']['request']['dates']['time_stop'][$key] == $value) {
-            continue;
-          }
-        }
+      // prevent errors due to undefined stop times.
+      if (!array_key_exists($key, $stop_timestamp)) {
+        $stop_timestamp[$key] = NULL;
       }
 
       if (!empty($value) && !empty($location_form['dates']['group_dates'][$key]['dates']['time_stop'][$key]['#expected_format']['date'])) {
         if (is_string($value)) {
           $stop_timestamp[$key] = strtotime($value, $date_timestamp[$key]);
+
+          if (isset($form['form']['existing']['#value']['request']['dates']['time_stop'])) {
+            if (array_key_exists($key, $form['form']['existing']['#value']['request']['dates']['time_stop'])) {
+              // skip values already saved to allow updating requests if they are sufficiently near/past the request date.
+              // but only do this when the request is not new.
+              if (!$is_new_request && $form['form']['existing']['#value']['request']['dates']['time_stop'][$key] == $value) {
+                continue;
+              }
+            }
+          }
 
           // midnight is allowed, but triggers a false failure due to the logic in this function.
           // when midnight is specified, it ends up being midnight of the current day, which is considered the start of the day.
@@ -856,6 +871,7 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
       'after' => array(),
     );
 
+    $conflict_checked = array();
     foreach ($start_timestamp as $key => &$value) {
       if (isset($form['form']['existing']['#value']['request']['dates']['time_start'])) {
         if (array_key_exists($key, $form['form']['existing']['#value']['request']['dates']['time_start'])) {
@@ -868,6 +884,8 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
       }
 
       if (!is_null($start_timestamp[$key]) && !is_null($stop_timestamp[$key])) {
+        $conflict_checked[$key] = $key;
+
         if ($stop_timestamp[$key] < $start_timestamp[$key]) {
           form_set_error($path_string_prefix . '][dates][time_stop][' . $key, 'The stop time cannot be before the start time.');
           $passed = FALSE;
@@ -914,6 +932,71 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
       }
     }
 
+    foreach ($stop_timestamp as $key => &$value) {
+      if (isset($form['form']['existing']['#value']['request']['dates']['time_stop'])) {
+        if (array_key_exists($key, $form['form']['existing']['#value']['request']['dates']['time_stop'])) {
+          // skip values already saved to allow updating requests if they are sufficiently near/past the request date.
+          // but only do this when the request is not new.
+          if (!$is_new_request && $form['form']['existing']['#value']['request']['dates']['time_stop'][$key] == $value) {
+            continue;
+          }
+        }
+      }
+
+      if (array_key_exists($key, $conflict_checked)) {
+        continue;
+      }
+
+      if (!is_null($start_timestamp[$key]) && !is_null($stop_timestamp[$key])) {
+        $conflict_checked[$key] = $key;
+
+        if ($stop_timestamp[$key] < $start_timestamp[$key]) {
+          form_set_error($path_string_prefix . '][dates][time_stop][' . $key, 'The stop time cannot be before the start time.');
+          $passed = FALSE;
+        }
+        elseif ($stop_timestamp[$key] == $start_timestamp[$key]) {
+          form_set_error($path_string_prefix . '][dates][time_stop][' . $key, 'The stop time cannot be the same as the start time.');
+          $passed = FALSE;
+        }
+
+        // make sure start and stop timestamps do not overlap.
+        if ($passed) {
+          foreach ($specified_times as $specified_time_start => $specified_time_stop) {
+            if (($start_timestamp[$key] >= $specified_time_start && $start_timestamp[$key] < $specified_time_stop) || ($specified_time_start >= $start_timestamp[$key] && $specified_time_start < $stop_timestamp[$key])) {
+              $start_time_string = date($location_form['dates']['group_dates'][$key]['dates']['time_start'][$key]['#expected_format']['date'], $start_timestamp[$key]);
+              $stop_time_string = date($location_form['dates']['group_dates'][$key]['dates']['time_stop'][$key]['#expected_format']['date'], $stop_timestamp[$key]);
+
+              $start_existing_string = date($location_form['dates']['group_dates'][$key]['dates']['time_start'][$key]['#expected_format']['date'], $specified_time_start);
+              $stop_existing_string = date($location_form['dates']['group_dates'][$key]['dates']['time_stop'][$key]['#expected_format']['date'], $specified_time_stop);
+              form_set_error($path_string_prefix . '][dates][time_start][' . $key, t('The time range \'@start_time\' to \'@stop_time\' overlaps with the specified time range of \'@start_existing\' to \'@stop_existing\'.', array('@start_time' => $start_time_string, '@stop_time' => $stop_time_string, '@start_existing' => $start_existing_string, '@stop_existing' => $stop_existing_string)));
+              $passed = FALSE;
+              break;
+            }
+          }
+        }
+
+        if ($passed) {
+          $specified_times[$start_timestamp[$key]] = $stop_timestamp[$key];
+        }
+
+        // check to see if the times have any requests appearing immediately before or immediately after and present a warning.
+        if ($room !== FALSE) {
+          $nearby_requests = mfcs_miscellaneous_nearby_requests($start_timestamp[$key], $stop_timestamp[$key], $location_state['room'][0]);
+
+          if (is_array($nearby_requests)) {
+            foreach ($nearby_requests['before'] as $before_id => $before_title) {
+              $nearby['before'][$start_timestamp[$key]][$before_id] = $before_title;
+            }
+
+            foreach ($nearby_requests['after'] as $after_id => $after_title) {
+              $nearby['after'][$stop_timestamp[$key]][$after_id] = $after_title;
+            }
+          }
+        }
+      }
+    }
+    unset($conflict_checked);
+
     // scan through each nearby request and report a warnings when the times between multiple requests is very short.
     if (!empty($room)) {
       $minutes_range = floor(MFCS_NEARBY_REQUESTS_RANGE_SECONDS / 60);
@@ -953,6 +1036,7 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
 
 
   // validate the start/stop time relationships.
+  $relationship_processed = array();
   if (!empty($location_state['dates']['time_start'])) {
     foreach ($location_state['dates']['time_start'] as $key => &$value) {
       if (isset($form['form']['existing']['#value']['request']['dates']['time_start'])) {
@@ -965,16 +1049,49 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
         }
       }
 
-      if (empty($value) && !empty($location_state['dates']['time_stop'][$key])) {
+      $relationship_processed[$key] = $key;
+
+      if (empty($location_state['dates']['time_start'][$key]) && !empty($location_state['dates']['time_stop'][$key])) {
         form_set_error($path_string_prefix . '][dates][time_start][' . $key, 'If you specify a stop time, then you must specify a start time.');
         $passed = FALSE;
       }
-      elseif (empty($location_state['dates']['time_stop'][$key]) && !empty($value)) {
+      elseif (!empty($location_state['dates']['time_start'][$key]) && empty($location_state['dates']['time_stop'][$key])) {
         form_set_error($path_string_prefix . '][dates][time_stop][' . $key, 'If you specify a start time, then you must specify a stop time.');
         $passed = FALSE;
       }
     }
   }
+
+  if (!empty($location_state['dates']['time_stop'])) {
+    foreach ($location_state['dates']['time_stop'] as $key => &$value) {
+      if (isset($form['form']['existing']['#value']['request']['dates']['time_stop'])) {
+        if (array_key_exists($key, $form['form']['existing']['#value']['request']['dates']['time_stop'])) {
+          // skip values already saved to allow updating requests if they are sufficiently near/past the request date.
+          // but only do this when the request is not new.
+          if (!$is_new_request && $form['form']['existing']['#value']['request']['dates']['time_stop'][$key] == $value) {
+            continue;
+          }
+        }
+      }
+
+      // skip tests already performed to avoid duplicate error messages..
+      if (array_key_exists($key, $relationship_processed)) {
+        continue;
+      }
+
+      $relationship_processed[$key] = $key;
+
+      if (empty($location_state['dates']['time_start'][$key]) && !empty($location_state['dates']['time_stop'][$key])) {
+        form_set_error($path_string_prefix . '][dates][time_start][' . $key, 'If you specify a stop time, then you must specify a start time.');
+        $passed = FALSE;
+      }
+      elseif (!empty($location_state['dates']['time_start'][$key]) && empty($location_state['dates']['time_stop'][$key])) {
+        form_set_error($path_string_prefix . '][dates][time_stop][' . $key, 'If you specify a start time, then you must specify a stop time.');
+        $passed = FALSE;
+      }
+    }
+  }
+  unset($relationship_processed);
 
 
   // validate the categories for each date.

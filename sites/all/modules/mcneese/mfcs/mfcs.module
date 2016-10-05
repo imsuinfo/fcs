@@ -7806,6 +7806,15 @@ function mfcs_check_room_availability($room, $dates, $time_start, $time_stop, $r
         $or->condition($and);
 
         foreach ($dates as $key => $value) {
+          // prevent errors due to undefined start/stop times.
+          if (!array_key_exists($key, $time_start)) {
+            $time_start[$key] = NULL;
+          }
+
+          if (!array_key_exists($key, $time_stop)) {
+            $time_stop[$key] = NULL;
+          }
+
           // all day requests match, they have NULL for start and stop time values.
           if (is_null($time_start[$key]) && is_null($time_stop[$key])) {
             $and = db_and();
@@ -7874,6 +7883,11 @@ function mfcs_check_room_availability($room, $dates, $time_start, $time_stop, $r
       $stop_time = $time_stop[$key];
     }
 
+    // times that are identical are invalid and cannot be checked, so skip them.
+    if (!is_null($start_time) && $start_time == $stop_time) {
+      continue;
+    }
+
     $unavailabilities = mfcs_get_unavailabilities($year, $room, $start_time, $stop_time);
     if (is_array($unavailabilities)) {
       foreach ($unavailabilities as $unavailability) {
@@ -7882,6 +7896,9 @@ function mfcs_check_room_availability($room, $dates, $time_start, $time_stop, $r
     }
     unset($unavailability);
     unset($unavailabilities);
+
+    unset($start_time);
+    unset($stop_time);
   }
 
   return $matched_requests;
