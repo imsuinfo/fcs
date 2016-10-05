@@ -361,11 +361,6 @@ function mfcs_validate_request_fields($form, &$form_state) {
     $clicked_id = $form_state['triggering_element']['#id'];
   }
 
-  $is_new_request = NULL;
-  if (isset($form['form']['new']['#value'])) {
-    $is_new_request = $form['form']['new']['#value'];
-  }
-
   $is_quick_meeting = FALSE;
   if (isset($location_state['information']['type'][0]) && $location_state['information']['type'][0] == MFCS_REQUEST_TYPE_QUICK_MEETING) {
     $is_quick_meeting = TRUE;
@@ -532,7 +527,7 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
   }
 
   if (!is_array($room) && !is_object($room) && !is_bool($room)) {
-    cf_error::invalid_variable('room', "Must be a valid array, object, or boolean." );
+    cf_error::invalid_variable('room', 'Must be a valid array, object, or boolean.');
     return NULL;
   }
 
@@ -549,25 +544,48 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
     $clicked_id = $form_state['triggering_element']['#id'];
   }
 
-  $is_new_request = NULL;
+  $is_new_request = FALSE;
   if (isset($form['form']['new']['#value'])) {
     $is_new_request = $form['form']['new']['#value'];
   }
 
-  $is_quick_meeting = FALSE;
-  if (isset($location_state['information']['type'][0]) && $location_state['information']['type'][0] == MFCS_REQUEST_TYPE_QUICK_MEETING) {
-    $is_quick_meeting = TRUE;
+  // allow bypassing if within 3-weeks requirements or not.
+  $within_3_weeks_bypass = FALSE;
+  if (isset($location_state['information']['type'][0])) {
+    if ($location_state['information']['type'][0] == MFCS_REQUEST_TYPE_QUICK_MEETING) {
+      $within_3_weeks_bypass = TRUE;
+    }
   }
 
-  $exceptional_dates_allowed = FALSE;
+  $is_venue_coordinator = FALSE;
+  $is_power_user = FALSE;
   if (isset($form['form']['user']['#value']->uid)) {
     $is_manager = user_access('mfcs manage', $form['form']['user']['#value']);
     $is_administer = user_access('mfcs administer', $form['form']['user']['#value']);
+    // Determine if user is a venue coordinator.
+    if (isset($location_state['venue_coordinator']['user_id'][0])) {
+      $proxies = mfcs_get_proxy_venue_coordinator($form['form']['user']['#value']->uid);
+      $is_venue_coordinator_ids = array();
+      if (!empty($proxies)) {
+        $is_venue_coordinator_ids = $proxies;
+      }
+      $is_venue_coordinator_ids[$form['form']['user']['#value']->uid] = $form['form']['user']['#value']->uid;
+      $is_venue_coordinator = (in_array($location_state['venue_coordinator']['user_id'][0], $is_venue_coordinator_ids));
+
+      unset($is_venue_coordinator_ids);
+      unset($proxies);
+    }
 
     // allow managers and administers to bypass the 21-day requirement.
     if ($is_manager || $is_administer) {
-      $exceptional_dates_allowed = TRUE;
+      $is_power_user = TRUE;
+      $within_3_weeks_bypass = TRUE;
     }
+  }
+
+  // bypass can only be used by venue coordinators or power users.
+  if ($within_3_weeks_bypass && !($is_venue_coordinator || $is_power_user)) {
+    $within_3_weeks_bypass = FALSE;
   }
 
   $request_id = NULL;
@@ -582,12 +600,7 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
   $date_timestamp = array(0 => NULL);
   $start_timestamp = array(0 => NULL);
   $stop_timestamp = array(0 => NULL);
-
-  // quick meetings can only be used by venue coordinators.
-  $is_quick_meeting = FALSE;
-  if (isset($location_state['information']['type'][0]) && $location_state['information']['type'][0] == MFCS_REQUEST_TYPE_QUICK_MEETING) {
-    $is_quick_meeting = TRUE;
-  }
+  $date_in_past = array(0 => FALSE);
 
   $holidays = array();
   $unavailabilities = array();
@@ -597,11 +610,25 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
     $partial_day = array();
 
     foreach ($location_state['dates']['date'] as $key => &$value) {
+      $date_in_past[$key] = FALSE;
+
       if (isset($form['form']['existing']['#value']['request']['dates']['date'])) {
-        if (in_array($key, $form['form']['existing']['#value']['request']['dates']['date'])) {
+        if (array_key_exists($key, $form['form']['existing']['#value']['request']['dates']['date'])) {
           // skip values already saved to allow updating requests if they are sufficiently near/past the request date.
           // but only do this when the request is not new.
-          if ($is_new_request !== TRUE) {
+          if (!$is_new_request && $form['form']['existing']['#value']['request']['dates']['date'][$key] == $value) {
+            $date_timestamp[$key] = strtotime($value);
+            if ($date_timestamp[$key] !== FALSE) {
+              $date_timestamp[$key] = strtotime('midnight today', $date_timestamp[$key]);
+            }
+
+            // the check for the past still needs to be performed in case individual times do change.
+            $current_date = strtotime('midnight today', $instance);
+            if ($date_timestamp[$key] < $current_date) {
+              $date_in_past[$key] = TRUE;
+            }
+            unset($current_date);
+
             continue;
           }
         }
@@ -625,17 +652,23 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
         $min_days_by_policy = strtotime('midnight today', $min_days_by_policy);
 
         if ($date_timestamp[$key] < $current_date) {
-          form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t("The date '@date' is in the past and cannot be used.", array('@date' => $value)));
-          $passed = FALSE;
-        }
-        elseif ($date_timestamp[$key] <= $min_days_by_policy) {
-          // Quick Meetings allow same day requests.
-          if (!$is_quick_meeting && !$exceptional_dates_allowed) {
-            form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t("The date '@date' is too soon and must be <a href=\"//www.mcneese.edu/node/3217#3_week_requirement\" class=\"strong\" target=\"_blank\">a minimum of three weeks in advance</a> prior to the event or prior to the expected start date for publicity for the event, whichever comes first.", array('@date' => $value)));
+          $date_in_past[$key] = TRUE;
+
+          if ($is_power_user) {
+            drupal_set_message(t('The date <strong>@date_nice</strong> is in the past and should not be used.', array('@date_nice' => date(MFCS_DATE_FORMAT_DATE_SQUEEZE, $date_timestamp[$key]))), 'warning');
+          }
+          else {
+            form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t('The date <strong>@date_nice</strong> is in the past and cannot be used.', array('@date_nice' => date(MFCS_DATE_FORMAT_DATE_SQUEEZE, $date_timestamp[$key]))));
             $passed = FALSE;
           }
-          elseif (!$is_quick_meeting && $exceptional_dates_allowed) {
-            drupal_set_message(t("Warning: The date '@date' is too soon and must be <a href=\"//www.mcneese.edu/node/3217#3_week_requirement\" class=\"strong\" target=\"_blank\">a minimum of three weeks in advance</a> prior to the event or prior to the expected start date for publicity for the event, whichever comes first.", array('@date' => $value)), 'warning');
+        }
+        elseif ($date_timestamp[$key] <= $min_days_by_policy) {
+          if ($within_3_weeks_bypass) {
+            drupal_set_message(t('Warning: The date <strong>@date_nice</strong> is too soon and must be <a href="//www.mcneese.edu/node/3217#3_week_requirement" class="strong" target="_blank">a minimum of three weeks in advance</a> prior to the event or prior to the expected start date for publicity for the event, whichever comes first.', array('@date_nice' => date(MFCS_DATE_FORMAT_DATE_SQUEEZE, $date_timestamp[$key]))), 'warning');
+          }
+          else {
+            form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t('The date <strong>@date_nice</strong> is too soon and must be <a href="//www.mcneese.edu/node/3217#3_week_requirement" class="strong" target="_blank">a minimum of three weeks in advance</a> prior to the event or prior to the expected start date for publicity for the event, whichever comes first.', array('@date_nice' => date(MFCS_DATE_FORMAT_DATE_SQUEEZE, $date_timestamp[$key]))));
+            $passed = FALSE;
           }
         }
 
@@ -651,14 +684,14 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
           $holidays[$day_start] = mfcs_get_holidays((int) date('Y', $day_start), $day_start);
 
           if ($holidays[$day_start] === FALSE) {
-            watchdog(MFCS_WATCHDOG_ID, "Failed to load holidays for year @year and timestamp @timestamp (based on @date).", array('@year' => (int) date('Y', $day_start), '@timestamp' => $day_start, '@date' => $start_timestamp[$key]));
+            watchdog(MFCS_WATCHDOG_ID, 'Failed to load holidays for year @year and timestamp @timestamp (based on @date).', array('@year' => (int) date('Y', $day_start), '@timestamp' => $day_start, '@date' => $start_timestamp[$key]));
             unset($holidays[$day_start]);
           }
         }
 
         if (!empty($holidays[$day_start])) {
           $holiday = reset($holidays[$day_start]);
-          drupal_set_message(t('Warning: <strong>@date</strong> may not available because of: <strong><a href="' . $base_path . 'requests/holiday-0/view/' . $holiday->year . '/' . $holiday->id . $url_arguments . '" title="View details about holiday.">@holiday</a></strong>.', array('@year' => date('Y', $holiday->date), '@date' => date(MFCS_DATE_FORMAT_DATE, $holiday->date), '@holiday' => $holiday->title)), 'warning');
+          drupal_set_message(t('Warning: <strong>@date</strong> may not available because of: <strong><a href="' . $base_path . 'requests/holiday-0/view/' . $holiday->year . '/' . $holiday->id . $url_arguments . '" title="View details about holiday.">@holiday</a></strong>.', array('@year' => date('Y', $holiday->date), '@date' => date(MFCS_DATE_FORMAT_DATE_SQUEEZE, $holiday->date), '@holiday' => $holiday->title)), 'warning');
           unset($holiday);
         }
       }
@@ -677,8 +710,8 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
     // detect and report errors for invalid date combinations.
     foreach ($all_day as $datestamp => $key) {
       if (array_key_exists($datestamp, $partial_day)) {
-        $date_string = date(MFCS_DATE_FORMAT_DATE, $datestamp);
-        form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t("<strong>@date</strong> is set to all day, but there are also partial day times in use for that same day. Please use either all day or partial day times but not both.", array('@date' => $date_string)));
+        $date_string = date(MFCS_DATE_FORMAT_DATE_SQUEEZE, $datestamp);
+        form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t('<strong>@date</strong> is set to all day, but there are also partial day times in use for that same day. Please use either all day or partial day times but not both.', array('@date' => $date_string)));
         $passed = FALSE;
       }
     }
@@ -691,10 +724,10 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
       }
 
       if (isset($form['form']['existing']['#value']['request']['dates']['time_start'])) {
-        if (in_array($key, $form['form']['existing']['#value']['request']['dates']['time_start'])) {
+        if (array_key_exists($key, $form['form']['existing']['#value']['request']['dates']['time_start'])) {
           // skip values already saved to allow updating requests if they are sufficiently near/past the request date.
           // but only do this when the request is not new.
-          if ($is_new_request !== TRUE) {
+          if (!$is_new_request && $form['form']['existing']['#value']['request']['dates']['time_start'][$key] == $value) {
             continue;
           }
         }
@@ -707,7 +740,7 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
           $matched = preg_match('@^\s*(\d|\d\d):(\d|\d\d)\s*(pm|am)*\s*$@i', $value);
 
           if ($start_timestamp[$key] === FALSE || !$matched) {
-            form_set_error($path_string_prefix . '][dates][time_start][' . $key, t("'@value' is not a valid start time.", array('@value' => $value)));
+            form_set_error($path_string_prefix . '][dates][time_start][' . $key, t('\'@value\' is not a valid start time.', array('@value' => $value)));
             $passed = FALSE;
             $start_timestamp[$key] = NULL;
           }
@@ -715,7 +748,7 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
             $matched = preg_match('/(pm|am)\s*$/i', $value);
 
             if (!$matched) {
-              form_set_error($path_string_prefix . '][dates][time_start][' . $key, t("'@value' is missing a valid 'am' or 'pm'. Please specify either am or pm at the end of the start time.", array('@value' => $value)));
+              form_set_error($path_string_prefix . '][dates][time_start][' . $key, t('\'@value\' is missing a valid \'am\' or \'pm\'. Please specify either am or pm at the end of the start time.', array('@value' => $value)));
               $passed = FALSE;
             }
             else {
@@ -728,6 +761,19 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
               }
 
               $value = date($location_form['dates']['group_dates'][$key]['dates']['time_start'][$key]['#expected_format']['date'], $start_timestamp[$key]);
+            }
+
+            // if a time is related to a day in the past, then restrict changing the field.
+            if (array_key_exists($key, $date_in_past) && $date_in_past[$key]) {
+              if ($form['form']['existing']['#value']['request']['dates']['time_start'][$key] != $value) {
+                if ($is_power_user) {
+                  drupal_set_message(t('The time <strong>@time</strong> on <strong>@date_nice</strong> is in the past and should not be used.', array('@time' => $value, '@date_nice' => date(MFCS_DATE_FORMAT_DATE_SQUEEZE, $start_timestamp[$key]))), 'warning');
+                }
+                else {
+                  form_set_error($path_string_prefix . '][dates][time_start][' . $key, t('The time <strong>@time</strong> on <strong>@date_nice</strong> is in the past and cannot be used.', array('@time' => $value, '@date_nice' => date(MFCS_DATE_FORMAT_DATE_SQUEEZE, $start_timestamp[$key]))));
+                  $passed = FALSE;
+                }
+              }
             }
           }
         }
@@ -742,10 +788,10 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
       }
 
       if (isset($form['form']['existing']['#value']['request']['dates']['time_stop'])) {
-        if (in_array($key, $form['form']['existing']['#value']['request']['dates']['time_stop'])) {
+        if (array_key_exists($key, $form['form']['existing']['#value']['request']['dates']['time_stop'])) {
           // skip values already saved to allow updating requests if they are sufficiently near/past the request date.
           // but only do this when the request is not new.
-          if ($is_new_request !== TRUE) {
+          if (!$is_new_request && $form['form']['existing']['#value']['request']['dates']['time_stop'][$key] == $value) {
             continue;
           }
         }
@@ -758,7 +804,7 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
           // midnight is allowed, but triggers a false failure due to the logic in this function.
           // when midnight is specified, it ends up being midnight of the current day, which is considered the start of the day.
           // when a user specifies midnight, they esentially mean the start of the next day.
-          $midnight = strtotime("midnight today", $stop_timestamp[$key]);
+          $midnight = strtotime('midnight today', $stop_timestamp[$key]);
 
           if ($stop_timestamp[$key] == $midnight) {
             $stop_timestamp[$key] = strtotime('tomorrow', $midnight);
@@ -767,18 +813,31 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
           $matched = preg_match('@^\s*(\d|\d\d):(\d|\d\d)\s*(pm|am)*\s*$@i', $value);
 
           if ($stop_timestamp[$key] === FALSE || !$matched) {
-            form_set_error($path_string_prefix . '][dates][time_stop][' . $key, t("'@value' is not a valid stop time.", array('@value' => $value)));
+            form_set_error($path_string_prefix . '][dates][time_stop][' . $key, t('\'@value\' is not a valid stop time.', array('@value' => $value)));
             $passed = FALSE;
           }
           else {
             $matched = preg_match('/(pm|am)\s*$/i', $value);
 
             if (!$matched) {
-              form_set_error($path_string_prefix . '][dates][time_stop][' . $key, t("'@value' is missing a valid 'am' or 'pm'. Please specify either am or pm at the end of the stop time.", array('@value' => $value)));
+              form_set_error($path_string_prefix . '][dates][time_stop][' . $key, t('\'@value\' is missing a valid \'am\' or \'pm\'. Please specify either am or pm at the end of the stop time.', array('@value' => $value)));
               $passed = FALSE;
             }
             else {
               $value = date($location_form['dates']['group_dates'][$key]['dates']['time_stop'][$key]['#expected_format']['date'], $stop_timestamp[$key]);
+            }
+          }
+
+          // if a time is related to a day in the past, then restrict changing the field.
+          if (array_key_exists($key, $date_in_past) && $date_in_past[$key]) {
+            if ($form['form']['existing']['#value']['request']['dates']['time_stop'][$key] != $value) {
+              if ($is_power_user) {
+                drupal_set_message(t('The time <strong>@time</strong> on <strong>@date_nice</strong> is in the past and should not be used.', array('@time' => $value, '@date_nice' => date(MFCS_DATE_FORMAT_DATE_SQUEEZE, $stop_timestamp[$key]))), 'warning');
+              }
+              else {
+                form_set_error($path_string_prefix . '][dates][time_stop][' . $key, t('The time <strong>@time</strong> on <strong>@date_nice</strong> is in the past and cannot be used.', array('@time' => $value, '@date_nice' => date(MFCS_DATE_FORMAT_DATE_SQUEEZE, $stop_timestamp[$key]))));
+                $passed = FALSE;
+              }
             }
           }
         }
@@ -798,13 +857,23 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
     );
 
     foreach ($start_timestamp as $key => &$value) {
+      if (isset($form['form']['existing']['#value']['request']['dates']['time_start'])) {
+        if (array_key_exists($key, $form['form']['existing']['#value']['request']['dates']['time_start'])) {
+          // skip values already saved to allow updating requests if they are sufficiently near/past the request date.
+          // but only do this when the request is not new.
+          if (!$is_new_request && $form['form']['existing']['#value']['request']['dates']['time_start'][$key] == $value) {
+            continue;
+          }
+        }
+      }
+
       if (!is_null($start_timestamp[$key]) && !is_null($stop_timestamp[$key])) {
         if ($stop_timestamp[$key] < $start_timestamp[$key]) {
-          form_set_error($path_string_prefix . '][dates][time_stop][' . $key, "The stop time cannot be before the start time.");
+          form_set_error($path_string_prefix . '][dates][time_stop][' . $key, 'The stop time cannot be before the start time.');
           $passed = FALSE;
         }
         elseif ($stop_timestamp[$key] == $start_timestamp[$key]) {
-          form_set_error($path_string_prefix . '][dates][time_stop][' . $key, "The stop time cannot be the same as the start time.");
+          form_set_error($path_string_prefix . '][dates][time_stop][' . $key, 'The stop time cannot be the same as the start time.');
           $passed = FALSE;
         }
 
@@ -817,7 +886,7 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
 
               $start_existing_string = date($location_form['dates']['group_dates'][$key]['dates']['time_start'][$key]['#expected_format']['date'], $specified_time_start);
               $stop_existing_string = date($location_form['dates']['group_dates'][$key]['dates']['time_stop'][$key]['#expected_format']['date'], $specified_time_stop);
-              form_set_error($path_string_prefix . '][dates][time_start][' . $key, t("The time range '@start_time' to '@stop_time' overlaps with the specified time range of '@start_existing' to '@stop_existing'.", array('@start_time' => $start_time_string, '@stop_time' => $stop_time_string, '@start_existing' => $start_existing_string, '@stop_existing' => $stop_existing_string)));
+              form_set_error($path_string_prefix . '][dates][time_start][' . $key, t('The time range \'@start_time\' to \'@stop_time\' overlaps with the specified time range of \'@start_existing\' to \'@stop_existing\'.', array('@start_time' => $start_time_string, '@stop_time' => $stop_time_string, '@start_existing' => $start_existing_string, '@stop_existing' => $stop_existing_string)));
               $passed = FALSE;
               break;
             }
@@ -851,18 +920,18 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
 
       foreach ($nearby['before'] as $nearby_time => $nearby_value) {
         foreach ($nearby_value as $before_id => $before_title) {
-          drupal_set_message('<em>' . $room->building_name . " " . $room->room_name . "</em> has the following meeting within " . $minutes_range . " minutes before " . date(MFCS_DATE_FORMAT_DATE_TIME, $nearby_time) . ': <ul><li><a href="' . $base_path . 'requests/view-0/' . $before_id . '">' . $before_title . '</a></li></ul>', 'warning');
+          drupal_set_message('<em>' . $room->building_name . " " . $room->room_name . '</em> has the following meeting within ' . $minutes_range . ' minutes before ' . date(MFCS_DATE_FORMAT_DATE_TIME, $nearby_time) . ': <ul><li><a href="' . $base_path . 'requests/view-0/' . $before_id . '">' . $before_title . '</a></li></ul>', 'warning');
         }
       }
 
       foreach ($nearby['after'] as $nearby_time => $nearby_value) {
         foreach ($nearby_value as $after_id => $after_title) {
-          drupal_set_message('<em>' . $room->building_name . " " . $room->room_name . "</em> has the following meeting within " . $minutes_range . " minutes after " . date(MFCS_DATE_FORMAT_DATE_TIME, $nearby_time) . ': <ul><li><a href="' . $base_path . 'requests/view-0/' . $after_id . '">' . $after_title . '</a></li></ul>', 'warning');
+          drupal_set_message('<em>' . $room->building_name . " " . $room->room_name . '</em> has the following meeting within ' . $minutes_range . ' minutes after ' . date(MFCS_DATE_FORMAT_DATE_TIME, $nearby_time) . ': <ul><li><a href="' . $base_path . 'requests/view-0/' . $after_id . '">' . $after_title . '</a></li></ul>', 'warning');
         }
       }
 
       if (!empty($nearby['before']) || !empty($nearby['after'])) {
-        drupal_set_message("<strong>Please be aware that there may be complications and the room may not be available or clean without adequate time between events or meetings.</strong>", 'warning');
+        drupal_set_message('<strong>Please be aware that there may be complications and the room may not be available or clean without adequate time between events or meetings.</strong>', 'warning');
       }
     }
 
@@ -870,7 +939,7 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
     $room_id = (int) $room->room_id;
     $room_unavailability = mfcs_check_room_availability($room_id, $date_timestamp, $start_timestamp, $stop_timestamp, $request_id);
     if ($room_unavailability === FALSE) {
-      form_set_error('', "An internal error occurred while checking the room for availability. Please contact the support staff.");
+      form_set_error('', 'An internal error occurred while checking the room for availability. Please contact the support staff.');
     }
     elseif (!empty($room_unavailability['conflicts']) || !empty($room_unavailability['unavailable'])) {
       $unavailable_message = '<span class="uppercase">Conflict</span>: The specified room is currently unavailable for the following dates: ';
@@ -887,21 +956,21 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
   if (!empty($location_state['dates']['time_start'])) {
     foreach ($location_state['dates']['time_start'] as $key => &$value) {
       if (isset($form['form']['existing']['#value']['request']['dates']['time_start'])) {
-        if (in_array($key, $form['form']['existing']['#value']['request']['dates']['time_start'])) {
+        if (array_key_exists($key, $form['form']['existing']['#value']['request']['dates']['time_start'])) {
           // skip values already saved to allow updating requests if they are sufficiently near/past the request date.
           // but only do this when the request is not new.
-          if ($is_new_request !== TRUE) {
+          if (!$is_new_request && $form['form']['existing']['#value']['request']['dates']['time_start'][$key] == $value) {
             continue;
           }
         }
       }
 
       if (empty($value) && !empty($location_state['dates']['time_stop'][$key])) {
-        form_set_error($path_string_prefix . '][dates][time_start][' . $key, "If you specify a stop time, then you must specify a start time.");
+        form_set_error($path_string_prefix . '][dates][time_start][' . $key, 'If you specify a stop time, then you must specify a start time.');
         $passed = FALSE;
       }
       elseif (empty($location_state['dates']['time_stop'][$key]) && !empty($value)) {
-        form_set_error($path_string_prefix . '][dates][time_stop][' . $key, "If you specify a start time, then you must specify a stop time.");
+        form_set_error($path_string_prefix . '][dates][time_stop][' . $key, 'If you specify a start time, then you must specify a stop time.');
         $passed = FALSE;
       }
     }
@@ -920,7 +989,7 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
   }
 
   if ($no_actual_request) {
-    form_set_error($path_string_prefix . '][dates][category', "At least one request must have a category of 'Actual Event'.");
+    form_set_error($path_string_prefix . '][dates][category', 'At least one request must have a category of \'Actual Event\'.');
     $passed = FALSE;
   }
 
