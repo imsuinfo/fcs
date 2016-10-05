@@ -373,6 +373,7 @@ function mfcs_table_structure($include_mer = FALSE) {
       'name' => 'Request Coordinator Classification',
       'type' => 'options',
       'size' => 'big',
+      'hide_from_search' => TRUE,
     ),
   );
 
