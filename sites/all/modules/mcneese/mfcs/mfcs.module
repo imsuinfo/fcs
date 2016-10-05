@@ -2666,6 +2666,15 @@ function mfcs_mail($key, &$message, $params) {
     $message['files'] = $params['files'];
   }
 
+  // apply custom headers.
+  if (isset($params['headers']) && is_array($params['headers'])) {
+    foreach ($params['headers'] as $header_name => $header_value) {
+      $message['headers'][$header_name] = $header_value;
+    }
+    unset($header_name);
+    unset($header_value);
+  }
+
   // assign message priority.
   if (isset($params['message_priority'])) {
     if ($params['message_priority'] == MFCS_MAIL_PRIORITY_HIGHEST) {
