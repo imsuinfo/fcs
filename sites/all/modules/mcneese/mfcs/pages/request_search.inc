@@ -2361,27 +2361,27 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
     unset($location['targets'][$target_name][$target_delta]['search']);
     unset($form['form']['conditionally_required']['#value'][0][$target_name][$target_delta]);
 
-    if (isset($field['columns']) && in_array('quantity', $field['columns'])) {
-      $location['targets'][$target_name][$target_delta]['quantity'] = array(
-        '#id' => 'search-advanced-targets' . $id_extra . '-targets-' . $target_name . '-quantity',
+    if (isset($field['columns']) && in_array('personnel', $field['columns'])) {
+      $location['targets'][$target_name][$target_delta]['personnel'] = array(
+        '#id' => 'search-advanced-targets' . $id_extra . '-targets-' . $target_name . '-personnel',
         '#type' => 'textfield',
         '#size' => 9,
-        '#title' => "Quantity",
+        '#title' => "Personnel",
         '#default_value' => NULL,
         '#required' => FALSE,
         '#attributes' => array(
           'class' => array(
             'search-advanced-target-search',
-            'search-advanced-target-' . $target_name . '-quantity',
+            'search-advanced-target-' . $target_name . '-personnel',
           ),
         ),
       );
 
-      if (isset($field_presentation['type']) && is_array($field_presentation['type']) && array_key_exists('quantity', $field_presentation['type']) && $field_presentation['type']['quantity'] == 'requirement_personnel') {
-        $location['targets'][$target_name][$target_delta]['quantity']['#title'] = "Personnel";
+      if (isset($field_presentation['type']) && is_array($field_presentation['type']) && array_key_exists('personnel', $field_presentation['type']) && $field_presentation['type']['personnel'] == 'requirement_personnel') {
+        $location['targets'][$target_name][$target_delta]['personnel']['#title'] = "Personnel";
       }
 
-      $location['targets'][$target_name][$target_delta]['quantity']['#states'] = array(
+      $location['targets'][$target_name][$target_delta]['personnel']['#states'] = array(
         'invisible' => array(
           ':input[name="advanced[targets][' . $target_name . '][' . $target_delta . '][operator]"]' => array(
             array('value' => MFCS_OPERATOR_IS_NULL),
@@ -2390,7 +2390,7 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
         ),
       );
 
-      $form['form']['conditionally_required']['#value'][0][$target_name][] = &$location['targets'][$target_name][$target_delta]['quantity'];
+      $form['form']['conditionally_required']['#value'][0][$target_name][] = &$location['targets'][$target_name][$target_delta]['personnel'];
     }
 
     if (isset($field['columns']) && in_array('hours', $field['columns'])) {
@@ -2422,7 +2422,7 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
     }
 
     if (isset($field['columns']) && in_array('days', $field['columns'])) {
-    $location['targets'][$target_name][$target_delta]['days'] = array(
+      $location['targets'][$target_name][$target_delta]['days'] = array(
         '#id' => 'search-advanced-targets' . $id_extra . '-targets-' . $target_name . '-days',
         '#type' => 'textfield',
         '#size' => 9,
@@ -2449,23 +2449,23 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
       $form['form']['conditionally_required']['#value'][0][$target_name][] = &$location['targets'][$target_name][$target_delta]['days'];
     }
 
-    if (isset($field['columns']) && in_array('amount', $field['columns'])) {
-      $location['targets'][$target_name][$target_delta]['amount'] = array(
-        '#id' => 'search-advanced-targets' . $id_extra . '-targets-' . $target_name . '-amount',
+    if (isset($field['columns']) && in_array('rate', $field['columns'])) {
+      $location['targets'][$target_name][$target_delta]['rate'] = array(
+        '#id' => 'search-advanced-targets' . $id_extra . '-targets-' . $target_name . '-rate',
         '#type' => 'textfield',
         '#size' => 12,
-        '#title' => "Amount",
+        '#title' => "Rate",
         '#default_value' => NULL,
         '#required' => FALSE,
         '#attributes' => array(
           'class' => array(
             'search-advanced-target-search',
-            'search-advanced-target-' . $target_name . '-amount',
+            'search-advanced-target-' . $target_name . '-rate',
           ),
         ),
       );
 
-      $location['targets'][$target_name][$target_delta]['amount']['#states'] = array(
+      $location['targets'][$target_name][$target_delta]['rate']['#states'] = array(
         'invisible' => array(
           ':input[name="advanced[targets][' . $target_name . '][' . $target_delta . '][operator]"]' => array(
             array('value' => MFCS_OPERATOR_IS_NULL),
@@ -2474,7 +2474,63 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
         ),
       );
 
-      $form['form']['conditionally_required']['#value'][0][$target_name][] = &$location['targets'][$target_name][$target_delta]['amount'];
+      $form['form']['conditionally_required']['#value'][0][$target_name][] = &$location['targets'][$target_name][$target_delta]['rate'];
+    }
+
+    if (isset($field['columns']) && in_array('post', $field['columns'])) {
+      $location['targets'][$target_name][$target_delta]['post'] = array(
+        '#id' => 'search-advanced-targets' . $id_extra . '-targets-' . $target_name . '-post',
+        '#type' => 'textfield',
+        '#size' => 9,
+        '#title' => "Post Event/Meeting",
+        '#default_value' => NULL,
+        '#required' => FALSE,
+        '#attributes' => array(
+          'class' => array(
+            'search-advanced-target-search',
+            'search-advanced-target-' . $target_name . '-post',
+          ),
+        ),
+      );
+
+      $location['targets'][$target_name][$target_delta]['post']['#states'] = array(
+        'invisible' => array(
+          ':input[name="advanced[targets][' . $target_name . '][' . $target_delta . '][operator]"]' => array(
+            array('value' => MFCS_OPERATOR_IS_NULL),
+            array('value' => MFCS_OPERATOR_IS_NOT_NULL),
+          ),
+        ),
+      );
+
+      $form['form']['conditionally_required']['#value'][0][$target_name][] = &$location['targets'][$target_name][$target_delta]['post'];
+    }
+
+    if (isset($field['columns']) && in_array('supplies', $field['columns'])) {
+      $location['targets'][$target_name][$target_delta]['supplies'] = array(
+        '#id' => 'search-advanced-targets' . $id_extra . '-targets-' . $target_name . '-supplies',
+        '#type' => 'textfield',
+        '#size' => 9,
+        '#title' => "Supplies",
+        '#default_value' => NULL,
+        '#required' => FALSE,
+        '#attributes' => array(
+          'class' => array(
+            'search-advanced-target-search',
+            'search-advanced-target-' . $target_name . '-supplies',
+          ),
+        ),
+      );
+
+      $location['targets'][$target_name][$target_delta]['supplies']['#states'] = array(
+        'invisible' => array(
+          ':input[name="advanced[targets][' . $target_name . '][' . $target_delta . '][operator]"]' => array(
+            array('value' => MFCS_OPERATOR_IS_NULL),
+            array('value' => MFCS_OPERATOR_IS_NOT_NULL),
+          ),
+        ),
+      );
+
+      $form['form']['conditionally_required']['#value'][0][$target_name][] = &$location['targets'][$target_name][$target_delta]['supplies'];
     }
   }
   elseif ($field['type'] == 'venue_coordinator') {
@@ -2498,10 +2554,10 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
     }
     $location['targets'][$target_name][$target_delta]['date_mode'] = array(
       '#id' => 'search-advanced-targets' . $id_extra . '-targets-' . $target_name . '-' . $target_delta . '-date_mode',
-      '#title' => "Date Mode",
+      '#title' => 'Date Mode',
       '#type' => 'select',
       '#default_value' => $default_value,
-      '#options' => array('y' => "Year", 'y/m' => "Year / Month", 'y/m/d' => "Year / Month / Day", 'm' => "Month", 'd' => "Day"),
+      '#options' => array('y' => 'Year', 'y/m' => 'Year / Month', 'y/m/d' => 'Year / Month / Day', 'm' => 'Month', 'd' => 'Day'),
       '#required' => TRUE,
       '#attributes' => array(
         'class' => array(
@@ -2714,7 +2770,7 @@ function mfcs_request_search_0_form_build_search_target($structure, $target_name
     $and = array();
 
     if (isset($field['columns']) && in_array('personnel', $field['columns'])) {
-      if ($operator_value == MFCS_OPERATOR_IS_NULL || $operator_value == MFCS_OPERATOR_IS_NOT_NULL || $target_values['personnel'] == '0' || !empty($target_values['personnel'])) {
+      if ($operator_value == MFCS_OPERATOR_IS_NULL || $operator_value == MFCS_OPERATOR_IS_NOT_NULL || is_numeric($target_values['personnel'])) {
         $target_field_name = 'field_' . $target_name . '-personnel-' . $target_delta;
         $and[$target_field_name]['group_name'] = $table_name;
         $and[$target_field_name]['field_name'] = $field_name;
@@ -2732,7 +2788,7 @@ function mfcs_request_search_0_form_build_search_target($structure, $target_name
     }
 
     if (isset($field['columns']) && in_array('hours', $field['columns'])) {
-      if ($operator_value == MFCS_OPERATOR_IS_NULL || $operator_value == MFCS_OPERATOR_IS_NOT_NULL || $target_values['hours'] == '0' || !empty($target_values['hours'])) {
+      if ($operator_value == MFCS_OPERATOR_IS_NULL || $operator_value == MFCS_OPERATOR_IS_NOT_NULL || is_numeric($target_values['hours'])) {
         $target_field_name = 'field_' . $target_name . '-hours-' . $target_delta;
         $and[$target_field_name]['group_name'] = $table_name;
         $and[$target_field_name]['field_name'] = $field_name;
@@ -2757,7 +2813,7 @@ function mfcs_request_search_0_form_build_search_target($structure, $target_name
     }
 
     if (isset($field['columns']) && in_array('days', $field['columns'])) {
-      if ($operator_value == MFCS_OPERATOR_IS_NULL || $operator_value == MFCS_OPERATOR_IS_NOT_NULL || $target_values['days'] == '0' || !empty($target_values['days'])) {
+      if ($operator_value == MFCS_OPERATOR_IS_NULL || $operator_value == MFCS_OPERATOR_IS_NOT_NULL || is_numeric($target_values['days'])) {
         $target_field_name = 'field_' . $target_name . '-days-' . $target_delta;
         $and[$target_field_name]['group_name'] = $table_name;
         $and[$target_field_name]['field_name'] = $field_name;
@@ -2782,7 +2838,7 @@ function mfcs_request_search_0_form_build_search_target($structure, $target_name
     }
 
     if (isset($field['columns']) && in_array('rate', $field['columns'])) {
-      if ($operator_value == MFCS_OPERATOR_IS_NULL || $operator_value == MFCS_OPERATOR_IS_NOT_NULL || $target_values['rate'] == '0' || !empty($target_values['rate'])) {
+      if ($operator_value == MFCS_OPERATOR_IS_NULL || $operator_value == MFCS_OPERATOR_IS_NOT_NULL || is_numeric($target_values['rate'])) {
         $target_field_name = 'field_' . $target_name . '-rate-' . $target_delta;
         $and[$target_field_name]['group_name'] = $table_name;
         $and[$target_field_name]['field_name'] = $field_name;
@@ -2807,7 +2863,7 @@ function mfcs_request_search_0_form_build_search_target($structure, $target_name
     }
 
     if (isset($field['columns']) && in_array('supplies', $field['columns'])) {
-      if ($operator_value == MFCS_OPERATOR_IS_NULL || $operator_value == MFCS_OPERATOR_IS_NOT_NULL || $target_values['supplies'] == '0' || !empty($target_values['supplies'])) {
+      if ($operator_value == MFCS_OPERATOR_IS_NULL || $operator_value == MFCS_OPERATOR_IS_NOT_NULL || is_numeric($target_values['supplies'])) {
         $target_field_name = 'field_' . $target_name . '-supplies-' . $target_delta;
         $and[$target_field_name]['group_name'] = $table_name;
         $and[$target_field_name]['field_name'] = $field_name;
@@ -2832,7 +2888,7 @@ function mfcs_request_search_0_form_build_search_target($structure, $target_name
     }
 
     if (isset($field['columns']) && in_array('post', $field['columns'])) {
-      if ($operator_value == MFCS_OPERATOR_IS_NULL || $operator_value == MFCS_OPERATOR_IS_NOT_NULL || $target_values['post'] == '0' || !empty($target_values['post'])) {
+      if ($operator_value == MFCS_OPERATOR_IS_NULL || $operator_value == MFCS_OPERATOR_IS_NOT_NULL || is_numeric($target_values['post'])) {
         $target_field_name = 'field_' . $target_name . '-post-' . $target_delta;
         $and[$target_field_name]['group_name'] = $table_name;
         $and[$target_field_name]['field_name'] = $field_name;

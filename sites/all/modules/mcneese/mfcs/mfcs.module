@@ -10546,10 +10546,17 @@ function mfcs_build_request_ajax_table_process_rows($items, $columns, $user = NU
 /**
  * Load venue coordinators that are available.
  *
+ * @param bool $include_email
+ *   (optional) When TRUE, the user e-mail is included.
+ *
  * @return array|bool
  *   An array of venue coordinators or FALSE on error.
  */
-function mfcs_request_get_available_venue_coordinators() {
+function mfcs_request_get_available_venue_coordinators($include_email = FALSE) {
+  if (!is_bool($include_email)) {
+    $include_email = TRUE;
+  }
+
   $ilike = 'LIKE';
   if (db_driver() == 'pgsql') {
     $ilike = 'ILIKE';
@@ -10566,13 +10573,22 @@ function mfcs_request_get_available_venue_coordinators() {
     $query->addField('mu', 'first_name', 'first_name');
     $query->addField('mu', 'last_name', 'last_name');
 
+    $or = db_or();
+
     $subquery = db_select('mfcs_banner_rooms', 'mbr');
-    $subquery->addField('mbr', 'room_coordinator_id', 'room_coordinator_id');
     $subquery->addField('mbr', 'venue_coordinator_id', 'venue_coordinator_id');
     $subquery->condition('mbr.disabled', 0);
     $subquery->distinct();
+    $or->condition('u.uid', $subquery, 'IN');
 
-    $query->condition('u.uid', $subquery, 'IN');
+    $subquery = db_select('mfcs_banner_rooms', 'mbr');
+    $subquery->addField('mbr', 'room_coordinator_id', 'room_coordinator_id');
+    $subquery->condition('mbr.disabled', 0);
+    $subquery->distinct();
+    $or->condition('u.uid', $subquery, 'IN');
+
+    $query->condition($or);
+
     $query->condition('u.status', 0, '<>');
     $query->condition('u.uid', 1, '>');
 
@@ -10612,8 +10628,14 @@ function mfcs_request_get_available_venue_coordinators() {
       $name = '"' . $name . '" ';
     }
 
-    $value = $name . $result->email;
-    $matches[$result->user_id] = $value;
+    if ($include_email) {
+      $value = $name . '<' . $result->email . '>';
+      $matches[$result->user_id] = $value;
+      unset($value);
+    }
+    else {
+      $matches[$result->user_id] = $name;
+    }
   }
 
   return $matches;

@@ -257,7 +257,7 @@ function mfcs_table_structure($include_mer = FALSE) {
       'allows_null' => TRUE,
     ),
     'university' => array(
-      'name' => 'University Fees',
+      'name' => 'University Business',
       'type' => 'bool',
       'size' => 'tiny',
       'path' => 'request][requirements][university',
