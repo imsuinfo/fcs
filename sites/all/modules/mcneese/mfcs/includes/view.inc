@@ -624,6 +624,10 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
         $output[$value_name] = array_merge($cancelled, $output[$value_name]);
       }
       $output[$value_name]['#attributes']['class'][] = 'item-cancelled';
+
+      if (!isset($output[$value_name]['#attributes']['title'])) {
+        $output[$value_name]['#attributes']['title'] = check_plain($output_value);
+      }
     }
 
     if ($combined && !$combine_partial) {
@@ -827,7 +831,14 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
           $terms = $function_name();
 
           if (array_key_exists($value->{$value_name}, $terms)) {
-            $markup .= check_plain($terms[$value->{$value_name}]);
+            $taxonomy_title_prefix = NULL;
+            $taxonomy_title_suffix = NULL;
+            if (isset($presentation['taxonomy_title'][$value_name])) {
+              $taxonomy_title_prefix = '<span title="' . check_plain($terms[$value->{$value_name}]) . '">';
+              $taxonomy_title_suffix = '</span>';
+            }
+
+            $markup .= $taxonomy_title_prefix . check_plain($terms[$value->{$value_name}]) . $taxonomy_title_suffix;
             $length += strlen($terms[$value->{$value_name}]);
           }
 

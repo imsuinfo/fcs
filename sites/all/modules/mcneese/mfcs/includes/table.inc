@@ -1348,6 +1348,9 @@ function mfcs_table_presentation($option = NULL) {
       'taxonomy_function' => array(
         'value' => 'mfcs_get_dates_category_list_options',
       ),
+      'taxonomy_title' => array(
+        'value' => TRUE,
+      ),
       'request_type' => array(
         'show' => TRUE,
         'hide' => FALSE,
