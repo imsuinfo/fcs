@@ -1789,7 +1789,34 @@ function mfcs_get_request_field_request_coordinator_classification($form, &$form
     $existing_option = (int) $form['form']['existing']['#value']['request']['request_coordinator']['classification'][0];
   }
 
-  $classification = mfcs_get_request_classification_list_options('select', $user);
+  // check to see if the user is a venue coordinator or a venue coordinator proxy.
+  $proxies = mfcs_get_proxy_venue_coordinator($user->uid);
+  $is_venue_coordinator_ids = array();
+  if (!empty($proxies)) {
+    $is_venue_coordinator_ids = $proxies;
+  }
+  $is_venue_coordinator_ids[$user->uid] = $user->uid;
+
+  $is_venue_coordinator = FALSE;
+  $venue_coordinator_id = NULL;
+  if (!empty($request_state['venue_coordinator']['user_id'][0])) {
+    if (!empty($request_state['venue_coordinator']['user_id']) && array_key_exists(0, $request_state['venue_coordinator']['user_id'])) {
+      $venue_coordinator_id = $request_state['venue_coordinator']['user_id'][0];
+    }
+  }
+  if (!is_null($venue_coordinator_id)) {
+    $is_venue_coordinator = (in_array($venue_coordinator_id, $is_venue_coordinator_ids));
+  }
+  unset($is_venue_coordinator_ids);
+  unset($venue_coordinator_id);
+
+  if ($is_venue_coordinator) {
+    $classification = mfcs_get_request_classification_list_options('select');
+  }
+  else {
+    $classification = mfcs_get_request_classification_list_options('select', $user);
+  }
+
   $classification_count = count($classification);
   if ($classification_count == 2) {
     unset($classification[NULL]);

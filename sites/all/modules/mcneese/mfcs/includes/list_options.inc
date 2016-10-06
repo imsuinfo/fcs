@@ -256,6 +256,15 @@ function mfcs_get_request_classification_list_options($option = NULL, $user = NU
   }
 
   if (is_object($user)) {
+    $is_manager = user_access('mfcs manager', $user);
+    $is_administer = user_access('mfcs administer', $user);
+
+    if ($is_manager || $is_administer) {
+      foreach ($options_all as $option_id => $option_name) {
+        $options[$option_id] = $option_name;
+      }
+    }
+
     foreach ($options_to_roles as $role_id => $classification_id) {
       if (array_key_exists($role_id, $user->roles) && array_key_exists($classification_id, $options_all)) {
         $options[$classification_id] = $options_all[$classification_id];
