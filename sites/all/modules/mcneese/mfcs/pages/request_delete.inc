@@ -51,9 +51,9 @@ function mfcs_request_delete_0_form($form, &$form_state, $request_id) {
 
   mfcs_add_canonical_headers('requests/delete-0/' . $request_id);
 
-  $page_title = "Delete Request";
+  $page_title = 'Delete Request';
   if (!empty($request['information']['title'][0]->value)) {
-    $page_title = "Delete Request: " . $request['information']['title'][0]->value;
+    $page_title = 'Delete Request: ' . $request['information']['title'][0]->value;
   }
   drupal_set_title($page_title);
 
@@ -107,30 +107,30 @@ function mfcs_request_delete_0_form($form, &$form_state, $request_id) {
     '#id' => 'request-delete-submit-no',
     '#name' => 'request-delete-submit-no',
     '#type' => 'submit',
-    '#default_value' => t("No"),
+    '#default_value' => 'No',
   );
 
   $form['display']['submit']['yes'] = array(
     '#id' => 'request-delete-submit-yes',
     '#name' => 'request-delete-submit-yes',
     '#type' => 'submit',
-    '#default_value' => t("Yes"),
+    '#default_value' => 'Yes',
   );
 
   $form['message'] = array(
     '#type' => 'textarea',
-    '#title' => "Justification",
+    '#title' => 'Justification',
     '#default_value' => '',
     '#required' => FALSE,
-    '#description' => "Provide a reason explaining why this request is to be deleted. Add your name and e-mail address to this.",
+    '#description' => 'Provide a reason explaining why this request is to be deleted. Add your name and e-mail address to this.',
   );
 
   $form['signature'] = array(
     '#type' => 'textarea',
-    '#title' => "Signature",
+    '#title' => 'Signature',
     '#default_value' => '',
     '#required' => FALSE,
-    '#description' => "The above message must be signed by a PGP key. This is a digital signature that ensures the person who deleted this is who they claim they are according to the PGP key.",
+    '#description' => 'The above message must be signed by a PGP key. This is a digital signature that ensures the person who deleted this is who they claim they are according to the PGP key.',
   );
 
   return $form;
@@ -154,11 +154,11 @@ function mfcs_request_delete_0_form_validate($form, &$form_state) {
 
   if ($clicked_id == 'request-delete-submit-yes') {
     if (empty($form_state['values']['message'])) {
-      form_set_error('message', $form['message']['#title'] . " field is required.");
+      form_set_error('message', $form['message']['#title'] . ' field is required.');
     }
 
     if (empty($form_state['values']['signature'])) {
-      form_set_error('signature', $form['signature']['#title'] . " field is required.");
+      form_set_error('signature', $form['signature']['#title'] . ' field is required.');
     }
   }
 }
@@ -227,8 +227,8 @@ function mfcs_request_delete_0_form_submit($form, &$form_state) {
     mfcs_send_workflow_emails($request_id, $parameters);
   }
   else {
-    form_set_error('form', "An error occurred while trying to delete the request. Please contact the support staff.");
-    watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to delete the request: @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
+    form_set_error('form', 'An error occurred while trying to delete the request. Please contact the support staff.');
+    watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to delete the request: @request_id.', array('@request_id' => $request_id), WATCHDOG_ERROR);
 
     $form_state['rebuild'] = TRUE;
     $form_state['redirect'] = FALSE;

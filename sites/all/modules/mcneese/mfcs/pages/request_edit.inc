@@ -57,7 +57,7 @@ function mfcs_request_edit_0_form($form, &$form_state, $request_id, $target_sect
   $request = mfcs_load_request_by_id($request_id);
 
   if (empty($request)) {
-    watchdog(MFCS_WATCHDOG_ID, "Unable to find request with id of @id.", array('@id' => $request_id), WATCHDOG_ERROR);
+    watchdog(MFCS_WATCHDOG_ID, 'Unable to find request with id of @id.', array('@id' => $request_id), WATCHDOG_ERROR);
     drupal_not_found();
     drupal_exit();
   }
@@ -67,7 +67,7 @@ function mfcs_request_edit_0_form($form, &$form_state, $request_id, $target_sect
   $section_information = mfcs_get_request_section_information();
 
   if (empty($section_information[$target_section]['steps'])) {
-    watchdog(MFCS_WATCHDOG_ID, "The section @target_section does not exist or has no steps.", array('@target_section' => $target_section), WATCHDOG_ERROR);
+    watchdog(MFCS_WATCHDOG_ID, 'The section @target_section does not exist or has no steps.', array('@target_section' => $target_section), WATCHDOG_ERROR);
     drupal_not_found();
     drupal_exit();
   }
@@ -181,7 +181,7 @@ function mfcs_request_edit_0_form($form, &$form_state, $request_id, $target_sect
         '#id' => 'submit-request-cancel',
         '#name' => 'submit-request-cancel',
         '#type' => 'submit',
-        '#default_value' => t("Cancel"),
+        '#default_value' => 'Cancel',
       );
     }
     else {
@@ -189,7 +189,7 @@ function mfcs_request_edit_0_form($form, &$form_state, $request_id, $target_sect
         '#id' => 'submit-request-prev',
         '#name' => 'submit-request-prev',
         '#type' => 'submit',
-        '#default_value' => t("Back"),
+        '#default_value' => 'Back',
       );
     }
 
@@ -198,7 +198,7 @@ function mfcs_request_edit_0_form($form, &$form_state, $request_id, $target_sect
         '#id' => 'submit-request-next',
         '#name' => 'submit-request-next',
         '#type' => 'submit',
-        '#default_value' => t("Continue"),
+        '#default_value' => 'Continue',
         '#states' => array(
           'invisible' => array(
             ':input[name="' . $form['form']['parents']['#value']['path'] . 'information][type][0]' . '"]' => array('value' => MFCS_REQUEST_TYPE_QUICK_MEETING),
@@ -210,7 +210,7 @@ function mfcs_request_edit_0_form($form, &$form_state, $request_id, $target_sect
         '#id' => 'submit-request-submit',
         '#name' => 'submit-request-submit',
         '#type' => 'submit',
-        '#default_value' => t("Submit"),
+        '#default_value' => 'Submit',
         '#states' => array(
           'visible' => array(
             ':input[name="' . $form['form']['parents']['#value']['path'] . 'information][type][0]' . '"]' => array('value' => MFCS_REQUEST_TYPE_QUICK_MEETING),
@@ -223,7 +223,7 @@ function mfcs_request_edit_0_form($form, &$form_state, $request_id, $target_sect
         '#id' => 'submit-request-submit',
         '#name' => 'submit-request-submit',
         '#type' => 'submit',
-        '#default_value' => t("Submit"),
+        '#default_value' => 'Submit',
       );
     }
     else {
@@ -231,7 +231,7 @@ function mfcs_request_edit_0_form($form, &$form_state, $request_id, $target_sect
         '#id' => 'submit-request-next',
         '#name' => 'submit-request-next',
         '#type' => 'submit',
-        '#default_value' => t("Continue"),
+        '#default_value' => 'Continue',
       );
     }
   }
@@ -240,14 +240,14 @@ function mfcs_request_edit_0_form($form, &$form_state, $request_id, $target_sect
       '#id' => 'submit-request-cancel',
       '#name' => 'submit-request-cancel',
       '#type' => 'submit',
-      '#default_value' => t("Cancel"),
+      '#default_value' => 'Cancel',
     );
 
     $form['request']['submit'] = array(
       '#id' => 'submit-request-submit',
       '#name' => 'submit-request-submit',
       '#type' => 'submit',
-      '#default_value' => t("Submit"),
+      '#default_value' => 'Submit',
     );
   }
 
@@ -342,7 +342,7 @@ function mfcs_request_edit_0_form_validate($form, &$form_state) {
   $can_edit_request = mfcs_request_access('edit', $request, $user);
 
   if (!$can_edit_request) {
-    form_set_error('', "Illegal operation detected. Unauthorized access attempt.");
+    form_set_error('', 'Illegal operation detected. Unauthorized access attempt.');
     $no_problems = FALSE;
   }
 
@@ -365,7 +365,7 @@ function mfcs_request_edit_0_form_validate($form, &$form_state) {
   }
 
   if (empty($form_state['values']['form']['step'])) {
-    form_set_error('form][step', "An internal error occured. Form Step is not defined. Please contact the support staff.");
+    form_set_error('form][step', 'An internal error occured. Form Step is not defined. Please contact the support staff.');
   }
 
   // do not perform validation when not going backwards or adding fields.
@@ -570,7 +570,7 @@ function mfcs_request_edit_0_form_submit($form, &$form_state) {
 
   $prepared = mfcs_prepare_request_values($request, $changes);
   if ($prepared === FALSE) {
-    form_set_error('form', "An error occurred while trying to save the request. Please contact the support staff.");
+    form_set_error('form', 'An error occurred while trying to save the request. Please contact the support staff.');
 
     $form_state['rebuild'] = TRUE;
     $form_state['redirect'] = FALSE;
