@@ -13745,6 +13745,43 @@ function mfcs_get_ldap_information($user_object_or_id) {
   return $information;
 }
 
+/**
+ * Finds the next delta to add, starting from 0 and counting up.
+ *
+ * This is used primarily for the date related fields where field data at delta 0 may be removed but data still exists at delta 1.
+ * The add new date function would then need to add a new delta at 0 instead of 1.
+ * The previous behavior used a count and if the field has only 1 entry, the count would result in 1, which is already taken up!
+ *
+ * @param array $deltas
+ *   An array of deltas to search through.
+ *
+ * @return int|bool
+ *   The new delta integer on success.
+ *   Otherwise, FALSE is returned.
+ */
+function mfcs_get_next_delta($deltas) {
+  if (!is_array($deltas)) {
+    cf_error::invalid_array('deltas');
+    return FALSE;
+  }
+
+  if (empty($deltas)) {
+    return 0;
+  }
+
+  $delta = 0;
+  $max = count($deltas) + 1;
+  do {
+    if (!in_array($delta, $deltas)) {
+      return $delta;
+    }
+
+    $delta++;
+  } while ($delta <= $max);
+
+  return $delta;
+}
+
 
 /**
  * @} End of '@defgroup mfcs McNeese Facilities Use'.

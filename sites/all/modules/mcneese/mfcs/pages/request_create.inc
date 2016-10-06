@@ -385,7 +385,7 @@ function mfcs_request_create_0_form_validate($form, &$form_state) {
         $form_state['values']['form']['step'] = 'rooms';
       }
       elseif ($clicked_id == 'submit-request-add-date') {
-        $next_date = count($form_state['values']['request']['dates']['date']);
+        $next_date = mfcs_get_next_delta(array_keys($form_state['values']['request']['dates']['date']));
         $form_state['values']['request']['dates']['date'][$next_date] = NULL;
         $form_state['values']['request']['dates']['time_start'][$next_date] = NULL;
         $form_state['values']['request']['dates']['time_stop'][$next_date] = NULL;
