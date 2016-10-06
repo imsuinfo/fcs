@@ -1664,7 +1664,9 @@ function mfcs_get_request_field_request_coordinator_phone($form, &$form_state, &
     }
     krsort($fields['request_coordinator']['phone']);
 
-    $values = $request_state['request_coordinator']['phone'];
+    if (!empty($request_state['request_coordinator']['phone'])) {
+      $values = $request_state['request_coordinator']['phone'];
+    }
 
     $limits_check['visible'] = TRUE;
   }
