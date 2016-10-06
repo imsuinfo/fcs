@@ -1345,6 +1345,18 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
       $type = (int) $type;
     }
 
+    // venue coordinators are allow to see all messages related to requests that they coordinator as an exceptional case.
+    $proxies = mfcs_get_proxy_venue_coordinator($user->uid);
+    $is_venue_coordinator_ids = array();
+    if (!empty($proxies)) {
+      $is_venue_coordinator_ids = $proxies;
+    }
+    $is_venue_coordinator_ids[$user->uid] = $user->uid;
+
+    $is_venue_coordinator = (in_array($request['venue_coordinator']['user_id'][0]->value, $is_venue_coordinator_ids));
+    unset($is_venue_coordinator_ids);
+    unset($proxies);
+
     foreach ($reviews as $row => $review) {
       $user_id = $review->user_id;
       $review_step = $review->step;
@@ -1380,27 +1392,27 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
       }
 
       if ($restriction === MFCS_REVIEW_RESTRICTIONS_REQUESTER) {
-        if (!($is_requester || $is_manager || $is_administer)) {
+        if (!($is_requester || $is_manager || $is_administer || $is_venue_coordinator)) {
           continue;
         }
       }
       elseif ($restriction === MFCS_REVIEW_RESTRICTIONS_REVIEWER) {
-        if (!($can_review_request || $is_manager || $is_administer)) {
+        if (!($can_review_request || $is_manager || $is_administer || $is_venue_coordinator)) {
           continue;
         }
       }
       elseif ($restriction === MFCS_REVIEW_RESTRICTIONS_FINANCER) {
-        if (!($is_financer || $is_manager || $is_administer)) {
+        if (!($is_financer || $is_manager || $is_administer || $is_venue_coordinator)) {
           continue;
         }
       }
       elseif ($restriction === MFCS_REVIEW_RESTRICTIONS_INSURER) {
-        if (!($is_insurer || $is_manager || $is_administer)) {
+        if (!($is_insurer || $is_manager || $is_administer || $is_venue_coordinator)) {
           continue;
         }
       }
       elseif ($restriction === MFCS_REVIEW_RESTRICTIONS_MANAGERS) {
-        if (!($is_manager || $is_administer)) {
+        if (!($is_manager || $is_administer || $is_venue_coordinator)) {
           continue;
         }
       }

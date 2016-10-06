@@ -1919,7 +1919,19 @@ function mfcs_page_request_access_operation_history(&$request_ids, &$processed, 
     return FALSE;
   }
 
-  if ($roles['manager'] || $roles['administer']) {
+  // venue coordinators are allow to see history related to requests that they coordinator as an exceptional case.
+  $venue_coordinator_ids = NULL;
+  if ($roles['reviewer']) {
+    $proxies = mfcs_get_proxy_venue_coordinator($user->uid);
+    $venue_coordinator_ids = array();
+    if (!empty($proxies)) {
+      $venue_coordinator_ids = $proxies;
+    }
+    $venue_coordinator_ids[$user->uid] = $user->uid;
+    unset($proxies);
+  }
+
+  if (!is_null($venue_coordinator_ids) || $roles['manager'] || $roles['administer']) {
     if (array_key_exists(NULL, $request_ids)) {
       $access[NULL] = TRUE;
       $processed[NULL] = TRUE;
@@ -1932,6 +1944,10 @@ function mfcs_page_request_access_operation_history(&$request_ids, &$processed, 
       $query->addField('mer', 'id', 'id');
 
       $query->condition('mer.id', $request_ids, 'IN');
+
+      if (!is_null($venue_coordinator_ids)) {
+        $query->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
+      }
 
       if (!$roles['administer']) {
         $query->condition('mer.status', MFCS_REQUEST_STATUS_DELETED, '<>');

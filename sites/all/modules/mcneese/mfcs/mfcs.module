@@ -2187,6 +2187,19 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
       $access[$request_id] = TRUE;
       return TRUE;
     }
+
+    // venue coordinators are allow to see all messages related to requests that they coordinator as an exceptional case.
+    $proxies = mfcs_get_proxy_venue_coordinator($user->uid);
+    $is_venue_coordinator_ids = array();
+    if (!empty($proxies)) {
+      $is_venue_coordinator_ids = $proxies;
+    }
+    $is_venue_coordinator_ids[$user->uid] = $user->uid;
+
+    if (in_array($request['venue_coordinator']['user_id'][0]->value, $is_venue_coordinator_ids)) {
+      $access[$request_id] = TRUE;
+      return TRUE;
+    }
   }
   elseif ($operation == 'agreement') {
     if ($request['top']['status'][0]->value == MFCS_REQUEST_STATUS_DELETED) {
