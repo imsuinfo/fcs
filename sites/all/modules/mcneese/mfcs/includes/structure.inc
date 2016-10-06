@@ -2217,7 +2217,9 @@ function mfcs_get_request_field_information_type($form, &$form_state, &$fields, 
 
     if (!isset($fields['request_coordinator']['classification'][0]['#value']) || $fields['request_coordinator']['classification'][0]['#value'] != MFCS_REQUEST_CLASSIFICATION_STUDENT) {
       if (!$edit_operation || $existing_option !== MFCS_REQUEST_TYPE_CLUB_MEETING) {
-        unset($type_options[MFCS_REQUEST_TYPE_CLUB_MEETING]);
+        if (!isset($fields['request_coordinator']['classification'][0]['#options']) || !is_array($fields['request_coordinator']['classification'][0]['#options']) || !array_key_exists(MFCS_REQUEST_CLASSIFICATION_STUDENT, $fields['request_coordinator']['classification'][0]['#options'])) {
+          unset($type_options[MFCS_REQUEST_TYPE_CLUB_MEETING]);
+        }
       }
     }
 

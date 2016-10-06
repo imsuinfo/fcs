@@ -95,12 +95,6 @@ function mfcs_pre_validate_request_fields(&$form, &$form_state, $dont_validate =
     $is_quick_meeting = TRUE;
   }
 
-  $is_club_meeting = FALSE;
-  // quick meetings can only be used by venue coordinators.
-  if (isset($location_state['information']['type'][0]) && $location_state['information']['type'][0] == MFCS_REQUEST_TYPE_CLUB_MEETING) {
-    $is_club_meeting = TRUE;
-  }
-
 
   if ($form_state['values']['form']['step'] == 'standard') {
     mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
@@ -176,12 +170,6 @@ function mfcs_pre_validate_request_fields(&$form, &$form_state, $dont_validate =
         }
         unset($key);
         unset($value);
-      }
-
-      if ($is_club_meeting) {
-        if (!isset($location_state['request_coordinator']['classification'][0]) || $location_state['request_coordinator']['classification'][0] != MFCS_REQUEST_CLASSIFICATION_STUDENT) {
-          form_set_error($ps_p . '][information][type][0', 'A <strong>Club Meeting</strong> may only be used for <strong>Student Organizations</strong>.');
-        }
       }
     }
   }
@@ -451,6 +439,30 @@ function mfcs_validate_request_fields($form, &$form_state) {
     // make sure the request coordinator classification is never NULL.
     if (!isset($location_state['request_coordinator']['classification'][0]) || is_null($location_state['request_coordinator']['classification'][0])) {
       form_set_error($ps_p . '][request_coordinator][classification][0', 'An invalid request coordinator classification has been specified.');
+    }
+    else {
+      // club meeting type is only allowed for student organizations.
+      if (isset($location_state['information']['type'][0]) && is_numeric($location_state['information']['type'][0])) {
+        if ($location_state['information']['type'][0] == MFCS_REQUEST_TYPE_CLUB_MEETING && $location_state['request_coordinator']['classification'][0] != MFCS_REQUEST_CLASSIFICATION_STUDENT) {
+          mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+
+          $request_classifications = mfcs_get_request_classification_list_options(NULL, NULL, TRUE, TRUE);
+          $request_classification_text = 'Unknown';
+          if (is_array($request_classifications) && array_key_exists($location_state['request_coordinator']['classification'][0], $request_classifications)) {
+            $request_classification_text = $request_classifications[MFCS_REQUEST_CLASSIFICATION_STUDENT];
+          }
+          unset($request_classifications);
+
+          $request_types = mfcs_get_request_type_list_options(NULL, NULL, TRUE, TRUE);
+          $request_type_text = 'Unknown';
+          if (is_array($request_types) && array_key_exists($location_state['information']['type'][0], $request_types)) {
+            $request_type_text = $request_types[$location_state['information']['type'][0]];
+          }
+          unset($request_types);
+
+          form_set_error($ps_p . '][information][type][0', 'A <strong>' . check_plain($request_type_text) . '</strong> request type may only be specified with <strong>' . check_plain($request_classification_text) . '</strong> request classifications.');
+        }
+      }
     }
 
 
