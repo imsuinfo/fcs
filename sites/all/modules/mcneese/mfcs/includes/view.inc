@@ -1416,6 +1416,11 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
           continue;
         }
       }
+      elseif ($restriction === MFCS_REVIEW_RESTRICTIONS_COORDINATOR) {
+        if (!($is_manager || $is_administer || $is_venue_coordinator)) {
+          continue;
+        }
+      }
 
       // if there are viewable entries, then the log can be displayed.
       $has_viewable_entries = TRUE;
@@ -1550,6 +1555,21 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
       elseif ($restriction === MFCS_REVIEW_RESTRICTIONS_MANAGERS) {
         $markup .= '<div class="review-item-restricted review-item-restricted-internal">';
         $markup .= '<div class="review-item-restricted-message review-item-restricted-internal-message" title="Only managers and administrators can view this item">Restricted to Managers</div>';
+        $markup .= '</div>';
+      }
+      elseif ($restriction === MFCS_REVIEW_RESTRICTIONS_FINANCER) {
+        $markup .= '<div class="review-item-restricted review-item-restricted-financer">';
+        $markup .= '<div class="review-item-restricted-message review-item-restricted-financer-message" title="Only financers, venue coordinators, managers, and administrators can view this item">Restricted to Financers</div>';
+        $markup .= '</div>';
+      }
+      elseif ($restriction === MFCS_REVIEW_RESTRICTIONS_INSURER) {
+        $markup .= '<div class="review-item-restricted review-item-restricted-insurer">';
+        $markup .= '<div class="review-item-restricted-message review-item-restricted-insurer-message" title="Only insuerers, venue coordinators, managers, and administrators can view this item">Restricted to Insurers</div>';
+        $markup .= '</div>';
+      }
+      elseif ($restriction === MFCS_REVIEW_RESTRICTIONS_COORDINATOR) {
+        $markup .= '<div class="review-item-restricted review-item-restricted-coordinator">';
+        $markup .= '<div class="review-item-restricted-message review-item-restricted-coordinator-message" title="Only venue coordinators, managers, and administrators can view this item">Restricted to Coordinators</div>';
         $markup .= '</div>';
       }
 

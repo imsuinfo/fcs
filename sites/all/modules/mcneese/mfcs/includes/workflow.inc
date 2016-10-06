@@ -2288,6 +2288,7 @@ function mfcs_workflow_force_step($request_id, $step, $status, $restriction, $me
  *   - forced_transition: A boolean representing that the transition is
  *     adminostratively forced and is therefore not a normal transition.
  *   - move: A boolean representing whether or not this is a move operation.
+ *   - restriction: an integer to apply additional review restrictions.
  *
  *   The keys: 'new', 'update', 'step', 'status', 'cancelling', 'cancelled',
  *   'uncancelled', 'amendment', 'reminder', 'reassigned', 'comment' and 'move'
@@ -2451,6 +2452,16 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       cf_error::invalid_bool('parameters[move]');
       return FALSE;
     }
+  }
+
+  $restriction = MFCS_REVIEW_RESTRICTIONS_NONE;
+  if (array_key_exists('restriction',  $parameters)) {
+    if (!is_numeric($restriction)) {
+      cf_error::invalid_integer('parameters[restriction]');
+      return FALSE;
+    }
+
+    $restriction = (int) $parameters['restriction'];
   }
 
   $is_cancelling = FALSE;
@@ -3055,18 +3066,44 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
   }
   elseif ($is_amendment) {
     $headers['mfcs-email-type'] = 'amendment';
-    $email_params['title_suffix'] = "Amended";
+    $email_params['title_suffix'] = 'Amended';
     $email_params['content'] = '';
     $email_params['content'] .= $changed_by_string . " has amended this request.\n";
-    $email_params['content'] .= "The review process has been restarted.\n";
-    $email_params['content'] .= $standard_content;
     $email_params['markup'] = '';
     $email_params['markup'] .= $changed_by_markup . " has amended this request.<br>";
-    $email_params['markup'] .= "The review process has been restarted.<br>";
+
+    if (strlen($message) > 0) {
+      $email_params['content'] .= "\n";
+      $email_params['content'] .= $message . "\n";
+      $email_params['markup'] .= '<br>';
+      $email_params['markup'] .= str_replace("\n", '<br>', trim(check_plain($message))) . '<br>';
+    }
+
+    $email_params['content'] .= $standard_content;
     $email_params['markup'] .= $standard_markup;
 
-    // amendments are only allowed while the request is locked.
-    if ($status === MFCS_REQUEST_STATUS_LOCKED) {
+    // amendments are allowed when restrictions are set to coordinator, but only a limited number of users will get such e-mails.
+    if ($restriction === MFCS_REVIEW_RESTRICTIONS_COORDINATOR) {
+      $requester_included_in_emails = FALSE;
+
+      if (is_array($venue_coordinator)) {
+        $email_to[$venue_coordinator['email']] = $venue_coordinator['email'];
+      }
+
+      // also send e-mails to the venue coordinator proxies.
+      $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.user_id' => $venue_coordinator['user_id'], 'mpvc.disabled' => 0));
+      if (!empty($proxies_returned['results'])) {
+        foreach ($proxies_returned['results'] as $proxy_returned) {
+          $proxy = mfcs_load_basic_user_settings_by_user_id($proxy_returned->proxy_id);
+
+          if (is_array($proxy)) {
+            $email_to[$proxy['email']] = $proxy['email'];
+          }
+        }
+      }
+    }
+    // otherwise amendments are only allowed while the request is locked.
+    elseif ($status === MFCS_REQUEST_STATUS_LOCKED) {
       if (is_array($venue_coordinator)) {
         $email_to[$venue_coordinator['email']] = $venue_coordinator['email'];
       }
