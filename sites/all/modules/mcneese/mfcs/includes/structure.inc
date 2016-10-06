@@ -647,6 +647,7 @@ function mfcs_get_request_fields($form, &$form_state) {
   mfcs_get_request_field_services_alcohol($form, $form_state, $fields, $request_state, $ps);
   mfcs_get_request_field_services_alcohol_note($form, $form_state, $fields, $request_state, $ps);
   mfcs_get_request_field_services_open_flames($form, $form_state, $fields, $request_state, $ps);
+  mfcs_get_request_field_services_open_flames_note($form, $form_state, $fields, $request_state, $ps);
 
 
   // Fieldset: Additional
@@ -3575,7 +3576,7 @@ function mfcs_get_request_field_setup_other_tables($form, &$form_state, &$fields
     $build = TRUE;
   }
 
-  $field_title = 'How Many Other Tables Will You Need? <span class="title_display-note describe_the_table">(Describe the Table)</span>';
+  $field_title = 'How Many Other Tables Will You Need? <span id="mfcs-markup-request-title_display-note-setup_other_tables" class="title_display-note describe_the_table">(Describe the Table)</span>';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'other_tables',
@@ -3951,7 +3952,7 @@ function mfcs_get_request_field_setup_security($form, &$form_state, &$fields, &$
     $build = TRUE;
   }
 
-  $field_title = 'Will the Event Require Security? <span class="title_display-note additional_requirements_may_apply">(Additional Requirements May Apply)</span>';
+  $field_title = 'Will the Event Require Security? <span id="mfcs-markup-request-title_display-note-setup_security" class="title_display-note additional_requirements_may_apply">(Additional Requirements May Apply)</span>';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'security',
@@ -4507,7 +4508,7 @@ function mfcs_get_request_field_presentation_technical_equipment($form, &$form_s
     $values = $request_state['presentation']['technical_equipment'];
   }
 
-  $field_title = 'Will the Event Require any Technical Equipment? <span class="title_display-note additional_requirements_may_apply">(Additional Requirements May Apply)</span>';
+  $field_title = 'Will the Event Require any Technical Equipment? <span id="mfcs-markup-request-title_display-note-presentation_technical_equipment" class="title_display-note additional_requirements_may_apply">(Additional Requirements May Apply)</span>';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'technical_equipment',
@@ -4617,7 +4618,7 @@ function mfcs_get_request_field_presentation_technical_equipment_note($form, &$f
 
     $fields['presentation']['technical_equipment_note'][0]['markup']['#markup'] .= '<div id="mfcs-markup-request-presentation-technical_equipment_note" class="markup-request">';
     $fields['presentation']['technical_equipment_note'][0]['markup']['#markup'] .= 'The technology you requested may or may not be available for this venue. ';
-    #$fields['presentation']['technical_equipment_note'][0]['markup']['#markup'] .= '<em><a href="//www.mcneese.edu/node/5506">You may also be required to complete an additional request form to secure the item(s).</a></em> ';
+    #$fields['presentation']['technical_equipment_note'][0]['markup']['#markup'] .= '<em><a href="//www.mcneese.edu/node/5506" target="_blank" class="no_print_as_link markup-request-link">You may also be required to complete an additional request form to secure the item(s).</a></em> ';
     $fields['presentation']['technical_equipment_note'][0]['markup']['#markup'] .= '<em>You may also be required to complete an additional request form to secure the item(s).</em> ';
     $fields['presentation']['technical_equipment_note'][0]['markup']['#markup'] .= 'Communicate with the venue coordinator to confirm your technical requests. ';
     $fields['presentation']['technical_equipment_note'][0]['markup']['#markup'] .= '</div>';
@@ -6149,7 +6150,7 @@ function mfcs_get_request_field_services_food_served($form, &$form_state, &$fiel
     $values = $request_state['services']['food_served'];
   }
 
-  $field_title = 'Will Food or Drink be Served? =<span class="title_display-note some_venues_dont_permit">=(Note some venues do not permit food and drink)</span>';
+  $field_title = 'Will Food or Drink be Served? <span id="mfcs-markup-request-title_display-note-services_food_served" class="title_display-note some_venues_dont_permit">(Note some venues do not permit food and drink)</span>';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'food_served',
@@ -6432,7 +6433,7 @@ function mfcs_get_request_field_services_open_flames($form, &$form_state, &$fiel
     $build = TRUE;
   }
 
-  $field_title = 'Will Open Flames be Used? <span class="title_display-note examples">(Examples: Sternos, Grill, Candles)</span>';
+  $field_title = 'Will Open Flames be Used? <span id="mfcs-markup-request-title_display-note-services_open_flames" class="title_display-note examples">(Examples: Sternos, Grill, Candles)</span>';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'open_flames',
@@ -6488,6 +6489,69 @@ function mfcs_get_request_field_services_open_flames($form, &$form_state, &$fiel
         '#value' => $value,
       );
     }
+  }
+
+  return $values;
+}
+
+/**
+ * Process and build a specific form field.
+ */
+function mfcs_get_request_field_services_open_flames_note($form, &$form_state, &$fields, &$request_state, $ps) {
+  $values = array(0 => NULL);
+
+  $build = FALSE;
+  if (!isset($form['form']['information_type_meeting']['#value']) || !$form['form']['information_type_meeting']['#value']) {
+    $build = TRUE;
+  }
+
+  if (!$build) {
+    return $values;
+  }
+
+  if ($form['form']['step']['#value'] == 'details' && array_key_exists('services', $form['form']['sections']['#value'])) {
+    $fields['services']['open_flames_note'] = array(
+      '#id' => 'field-request-services-open_flames_note',
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'form-item-wrapper',
+          'field-request-item',
+          'field-request-item-services-open_flames_note',
+        ),
+      ),
+    );
+
+    $fields['services']['open_flames_note'][0] = array(
+      '#id' => 'field-request-services-open_flames_note-0',
+      '#type' => 'container',
+      '#states' => array(
+        'visible' => array(
+          ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[open_flames][0]' . '"]' => array('value' => 1),
+        ),
+        'invisible' => array(
+          'or' => array(
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[open_flames][0]' . '"]' => array('value' => 0),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[open_flames][0]' . '"]' => array('value' => NULL),
+          ),
+        ),
+      ),
+      '#attributes' => array(
+        'class' => array(
+          'form-item-delta',
+          'form-item-delta-0',
+        ),
+      ),
+    );
+
+    $fields['services']['open_flames_note'][0]['markup'] = array(
+      '#markup' => '',
+    );
+
+    $fields['services']['open_flames_note'][0]['markup']['#markup'] .= '<div id="mfcs-markup-request-services-open_flames_note" class="markup-request">';
+    $fields['services']['open_flames_note'][0]['markup']['#markup'] .= 'You must fill out the <a href="//www.mcneese.edu/node/6309" target="_blank" title="Fill out Open Flame Permit" class="markup-request-link no_print_as_link">Open Flame Permit</a> before your request can be approved.';
+    $fields['services']['open_flames_note'][0]['markup']['#markup'] .= '</div>';
   }
 
   return $values;
