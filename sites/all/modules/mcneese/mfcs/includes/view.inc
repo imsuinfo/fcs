@@ -452,10 +452,12 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
   }
 
   $user = cf_current_user();
+  $is_administer = FALSE;
   $is_manager = FALSE;
   $is_reviewer = FALSE;
   $is_requester = FALSE;
   if (is_object($user)) {
+    $is_administer = user_access('mfcs administer', $user);
     $is_manager = user_access('mfcs manage', $user);
     $is_reviewer = user_access('mfcs review', $user);
     $is_requester = user_access('mfcs request', $user);
@@ -873,8 +875,8 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
               $user_title = check_plain($users[$value->{$value_name}]['first_name'] . ' ' . $users[$value->{$value_name}]['last_name']) . ' (uid: ' . $value->{$value_name} . ')';
             }
 
-            // only show link to user account for reviewers and managers.
-            if ($is_reviewer || $is_manager) {
+            // only show link to user account for managers and administers.
+            if ($is_manager || $is_administer) {
               $markup .= '<a href="' . $base_path . 'requests/users-0/view/' . $users[$value->{$value_name}]['user_id'] . $url_arguments . '" class="item-link" title="' . $user_title . '">' . $user_name . '</a>';
             }
             else {
@@ -1050,8 +1052,8 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
             $user_title = check_plain($users[$value->{$value_name}]['first_name'] . ' ' . $users[$value->{$value_name}]['last_name']) . ' (uid: ' . $value->{$value_name} . ')';
           }
 
-          // only show link to user account for reviewers and managers.
-          if ($is_reviewer || $is_manager) {
+          // only show link to user account for managers and administers.
+          if ($is_manager || $is_administer) {
             $markup .= '<a href="' . $base_path . 'requests/users-0/view/' . $users[$value->{$value_name}]['user_id'] . $url_arguments . '" class="item-link" title="' . $user_title . '">' . $user_name . '</a>';
           }
           else {
@@ -1112,7 +1114,8 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
           $length += strlen($value->{$value_name});
         }
         else {
-          if ($is_reviewer || $is_manager) {
+          // only show link to user account for managers and administers.
+          if ($is_manager || $is_administer) {
             $markup .= '<a href="' . $base_path . 'requests/users-0/view/' . $request_coordinator_user_id . $url_arguments . '" class="item-link" title="' . $user_title . '">' . check_plain($value->{$value_name}) . '</a>';
           }
           else {
