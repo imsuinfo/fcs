@@ -2666,9 +2666,9 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     $headers['mfcs-request-revision'] = (int) $request['mer']['revision'][0]->value;
   }
 
-  $headers['mfcs-request-title'] = '';
+  $headers['mfcs-request-name'] = '';
   if (isset($request['information']['title'][0]->value) && is_string($request['information']['title'][0]->value)) {
-    $headers['mfcs-request-title'] = preg_replace("/(\r|\n|\a|\f|\t|\v)/i", '', $request['information']['title'][0]->value);
+    $headers['mfcs-request-name'] = preg_replace("/(\r|\n|\a|\f|\t|\v)/i", '', $request['information']['title'][0]->value);
   }
 
   $headers['mfcs-request-status'] = MFCS_REQUEST_STATUS_NONE;
