@@ -4618,8 +4618,7 @@ function mfcs_get_request_field_presentation_technical_equipment_note($form, &$f
 
     $fields['presentation']['technical_equipment_note'][0]['markup']['#markup'] .= '<div id="mfcs-markup-request-presentation-technical_equipment_note" class="markup-request">';
     $fields['presentation']['technical_equipment_note'][0]['markup']['#markup'] .= 'The technology you requested may or may not be available for this venue. ';
-    #$fields['presentation']['technical_equipment_note'][0]['markup']['#markup'] .= '<em><a href="//www.mcneese.edu/node/5506" target="_blank" class="no_print_as_link markup-request-link">You may also be required to complete an additional request form to secure the item(s).</a></em> ';
-    $fields['presentation']['technical_equipment_note'][0]['markup']['#markup'] .= '<em>You may also be required to complete an additional request form to secure the item(s).</em> ';
+    $fields['presentation']['technical_equipment_note'][0]['markup']['#markup'] .= '<em><a href="//www.mcneese.edu/node/5506" target="_blank" class="no_print_as_link markup-request-link">You may also be required to complete an additional request form to secure the item(s).</a></em> ';
     $fields['presentation']['technical_equipment_note'][0]['markup']['#markup'] .= 'Communicate with the venue coordinator to confirm your technical requests. ';
     $fields['presentation']['technical_equipment_note'][0]['markup']['#markup'] .= '</div>';
   }
