@@ -54,7 +54,7 @@ function mfcs_workflow_set_history($request_id, $user = NULL, $extra = array()) 
   $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . $instance . '_' . $user->uid . '_' . $request_id, FALSE);
 
   if ($request_revision === FALSE) {
-    watchdog(MFCS_WATCHDOG_ID, "Failed to load revision number for request %request_id.", array('%request_id' => $request_id), WATCHDOG_ERROR);
+    watchdog(MFCS_WATCHDOG_ID, 'Failed to load revision number for request %request_id.', array('%request_id' => $request_id), WATCHDOG_ERROR);
     return FALSE;
   }
   elseif (is_null($request_revision)) {
@@ -177,7 +177,7 @@ function mfcs_workflow_set_step($request_id, $step, $user = NULL, $extra = array
   $step_options = mfcs_get_review_step_list_options();
 
   if (!array_key_exists($step, $step_options)) {
-    watchdog(MFCS_WATCHDOG_ID, "%step is not a valid step.", array('%step' => $step), WATCHDOG_ERROR);
+    watchdog(MFCS_WATCHDOG_ID, '%step is not a valid step.', array('%step' => $step), WATCHDOG_ERROR);
     return FALSE;
   }
 
@@ -192,7 +192,7 @@ function mfcs_workflow_set_step($request_id, $step, $user = NULL, $extra = array
   $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . $instance . '_' . $user->uid . '_' . $request_id, FALSE);
 
   if ($request_revision === FALSE) {
-    watchdog(MFCS_WATCHDOG_ID, "Failed to load revision number for request %request_id.", array('%request_id' => $request_id), WATCHDOG_ERROR);
+    watchdog(MFCS_WATCHDOG_ID, 'Failed to load revision number for request %request_id.', array('%request_id' => $request_id), WATCHDOG_ERROR);
     return FALSE;
   }
   elseif (is_null($request_revision)) {
@@ -351,7 +351,7 @@ function mfcs_workflow_set_status($request_id, $status, $user = NULL, $extra = a
   );
 
   if (!in_array($status, $status_options)) {
-    watchdog(MFCS_WATCHDOG_ID, "%status is not a valid status.", array('%status' => $status), WATCHDOG_ERROR);
+    watchdog(MFCS_WATCHDOG_ID, '%status is not a valid status.', array('%status' => $status), WATCHDOG_ERROR);
     return FALSE;
   }
 
@@ -366,7 +366,7 @@ function mfcs_workflow_set_status($request_id, $status, $user = NULL, $extra = a
   $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . $instance . '_' . $user->uid . '_' . $request_id, FALSE);
 
   if ($request_revision === FALSE) {
-    watchdog(MFCS_WATCHDOG_ID, "Failed to load revision number for request %request_id.", array('%request_id' => $request_id), WATCHDOG_ERROR);
+    watchdog(MFCS_WATCHDOG_ID, 'Failed to load revision number for request %request_id.', array('%request_id' => $request_id), WATCHDOG_ERROR);
     return FALSE;
   }
   elseif (is_null($request_revision)) {
@@ -509,7 +509,7 @@ function mfcs_workflow_set_venue_coordinator($request_id, $venue_coordinator_id,
 
   $venue_coordinator = mfcs_load_basic_user_settings_by_user_id($venue_coordinator_id);
   if (!is_array($venue_coordinator)) {
-    watchdog(MFCS_WATCHDOG_ID, "%venue_coordinator is not a valid user id.", array('%venue_coordinator' => $venue_coordinator_id), WATCHDOG_ERROR);
+    watchdog(MFCS_WATCHDOG_ID, '%venue_coordinator is not a valid user id.', array('%venue_coordinator' => $venue_coordinator_id), WATCHDOG_ERROR);
     return FALSE;
   }
 
@@ -524,7 +524,7 @@ function mfcs_workflow_set_venue_coordinator($request_id, $venue_coordinator_id,
   $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . $instance . '_' . $user->uid . '_' . $request_id, FALSE);
 
   if ($request_revision === FALSE) {
-    watchdog(MFCS_WATCHDOG_ID, "Failed to load revision number for request %request_id.", array('%request_id' => $request_id), WATCHDOG_ERROR);
+    watchdog(MFCS_WATCHDOG_ID, 'Failed to load revision number for request %request_id.', array('%request_id' => $request_id), WATCHDOG_ERROR);
     return FALSE;
   }
   elseif (is_null($request_revision)) {
@@ -667,7 +667,7 @@ function mfcs_workflow_set_requester($request_id, $requester_id, $user = NULL, $
 
   $requester = mfcs_load_basic_user_settings_by_user_id($requester_id);
   if (!is_array($requester)) {
-    watchdog(MFCS_WATCHDOG_ID, "%requester is not a valid user id.", array('%requester' => $requester_id), WATCHDOG_ERROR);
+    watchdog(MFCS_WATCHDOG_ID, '%requester is not a valid user id.', array('%requester' => $requester_id), WATCHDOG_ERROR);
     return FALSE;
   }
 
@@ -682,7 +682,7 @@ function mfcs_workflow_set_requester($request_id, $requester_id, $user = NULL, $
   $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . $instance . '_' . $user->uid . '_' . $request_id, FALSE);
 
   if ($request_revision === FALSE) {
-    watchdog(MFCS_WATCHDOG_ID, "Failed to load revision number for request %request_id.", array('%request_id' => $request_id), WATCHDOG_ERROR);
+    watchdog(MFCS_WATCHDOG_ID, 'Failed to load revision number for request %request_id.', array('%request_id' => $request_id), WATCHDOG_ERROR);
     return FALSE;
   }
   elseif (is_null($request_revision)) {
@@ -819,7 +819,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
   $request = mfcs_load_request_by_id($request_id);
 
   if (empty($request)) {
-    watchdog(MFCS_WATCHDOG_ID, "%request_id is not a valid request id, cannot continue processing workflow changes.", array('%request_id' => $request_id), WATCHDOG_CRITICAL);
+    watchdog(MFCS_WATCHDOG_ID, '%request_id is not a valid request id, cannot continue processing workflow changes.', array('%request_id' => $request_id), WATCHDOG_CRITICAL);
     return FALSE;
   }
 
@@ -865,7 +865,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
 
   $reviewer_classifications = mfcs_get_reviewer_classifications($user->uid, $classification, $step);
   if ($reviewer_classifications === FALSE) {
-    watchdog(MFCS_WATCHDOG_ID, "Failed to load reviewer classification for user id %user_id, classification id %classification, and step id %step. Cannot continue processing workflow changes.", array('%user_id' => $user->uid, '%classification_id' => $classification, '%step_id' => $step), WATCHDOG_CRITICAL);
+    watchdog(MFCS_WATCHDOG_ID, 'Failed to load reviewer classification for user id %user_id, classification id %classification, and step id %step. Cannot continue processing workflow changes.', array('%user_id' => $user->uid, '%classification_id' => $classification, '%step_id' => $step), WATCHDOG_CRITICAL);
     return FALSE;
   }
 
@@ -934,7 +934,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
   $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . $instance . '_' . $user->uid . '_' . $request_id, FALSE);
 
   if ($request_revision === FALSE) {
-    watchdog(MFCS_WATCHDOG_ID, "Failed to load revision number for request %request_id.", array('%request_id' => $request_id), WATCHDOG_ERROR);
+    watchdog(MFCS_WATCHDOG_ID, 'Failed to load revision number for request %request_id.', array('%request_id' => $request_id), WATCHDOG_ERROR);
     return FALSE;
   }
   elseif (is_null($request_revision)) {
@@ -1682,32 +1682,32 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
   $request = mfcs_load_request_by_id($request_id, TRUE);
 
   if (empty($request)) {
-    watchdog(MFCS_WATCHDOG_ID, "%request_id is not a valid request id, cannot continue processing workflow changes.", array('%request_id' => $request_id), WATCHDOG_CRITICAL);
+    watchdog(MFCS_WATCHDOG_ID, '%request_id is not a valid request id, cannot continue processing workflow changes.', array('%request_id' => $request_id), WATCHDOG_CRITICAL);
     return FALSE;
   }
 
   if (!isset($request['venue_coordinator']['user_id'][0]->value)) {
-    watchdog(MFCS_WATCHDOG_ID, "%request_id is missing the venue coordinator, cannot continue processing workflow changes.", array('%request_id' => $request_id), WATCHDOG_CRITICAL);
+    watchdog(MFCS_WATCHDOG_ID, '%request_id is missing the venue coordinator, cannot continue processing workflow changes.', array('%request_id' => $request_id), WATCHDOG_CRITICAL);
     return FALSE;
   }
 
   if (!isset($request['request_coordinator']['classification'][0]->value)) {
-    watchdog(MFCS_WATCHDOG_ID, "%request_id is missing the coordinator classification, cannot continue processing workflow changes.", array('%request_id' => $request_id), WATCHDOG_CRITICAL);
+    watchdog(MFCS_WATCHDOG_ID, '%request_id is missing the coordinator classification, cannot continue processing workflow changes.', array('%request_id' => $request_id), WATCHDOG_CRITICAL);
     return FALSE;
   }
 
   if (!isset($request['top']['status'][0]->value)) {
-    watchdog(MFCS_WATCHDOG_ID, "%request_id is missing the status, cannot continue processing workflow changes.", array('%request_id' => $request_id), WATCHDOG_CRITICAL);
+    watchdog(MFCS_WATCHDOG_ID, '%request_id is missing the status, cannot continue processing workflow changes.', array('%request_id' => $request_id), WATCHDOG_CRITICAL);
     return FALSE;
   }
 
   if (!isset($request['top']['step'][0]->value)) {
-    watchdog(MFCS_WATCHDOG_ID, "%request_id is missing the step, cannot continue processing workflow changes.", array('%request_id' => $request_id), WATCHDOG_CRITICAL);
+    watchdog(MFCS_WATCHDOG_ID, '%request_id is missing the step, cannot continue processing workflow changes.', array('%request_id' => $request_id), WATCHDOG_CRITICAL);
     return FALSE;
   }
 
   if (!isset($request['information']['type'][0]->value)) {
-    watchdog(MFCS_WATCHDOG_ID, "%request_id is missing the type, cannot continue processing workflow changes.", array('%request_id' => $request_id), WATCHDOG_CRITICAL);
+    watchdog(MFCS_WATCHDOG_ID, '%request_id is missing the type, cannot continue processing workflow changes.', array('%request_id' => $request_id), WATCHDOG_CRITICAL);
     return FALSE;
   }
 
@@ -2080,16 +2080,16 @@ function mfcs_workflow_next_step($request_id, $type, $step, $decision, $restrict
           }
 
           if ($recent_decision === MFCS_REVIEW_DECISION_ISSUES_NONE) {
-            $message .= "No Issues";
+            $message .= 'No Issues';
           }
           elseif ($recent_decision === MFCS_REVIEW_DECISION_ISSUES) {
-            $message .= "Issues";
+            $message .= 'Issues';
           }
           else {
             continue;
           }
 
-          $message .= " - " . $classification_options[$reviewer_classification] . "\n";
+          $message .= ' - ' . $classification_options[$reviewer_classification] . "\n";
         }
       }
     }
@@ -2609,7 +2609,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     $request_requester_object = user_load($request_requester['user_id']);
   }
   else {
-    watchdog(MFCS_WATCHDOG_ID, "%request_requester is not a valid user id.", array('%request_requester' => $requester_id), WATCHDOG_ERROR);
+    watchdog(MFCS_WATCHDOG_ID, '%request_requester is not a valid user id.', array('%request_requester' => $requester_id), WATCHDOG_ERROR);
 
     // temporary fallback (@todo: implement proper fallback).
     $request_requester = array(
@@ -2621,7 +2621,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
   // load appropriate reviewers in their own categories.
   $venue_coordinator = mfcs_load_basic_user_settings_by_user_id($request['venue_coordinator']['user_id'][0]->value);
   if (!is_array($venue_coordinator)) {
-    watchdog(MFCS_WATCHDOG_ID, "The supplied venue coordinator id for request %request_id is not a valid user id.", array('%request_id' => $request_id), WATCHDOG_ERROR);
+    watchdog(MFCS_WATCHDOG_ID, 'The supplied venue coordinator id for request %request_id is not a valid user id.', array('%request_id' => $request_id), WATCHDOG_ERROR);
 
     // temporary fallback (@todo: implement proper fallback).
     $venue_coordinator = array(
@@ -2739,7 +2739,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     $location_text = $location->location_name;
   }
   else {
-    watchdog(MFCS_WATCHDOG_ID, "Could not load the location for %request_id , the location value is: %value.", array('%request_id' => $request_id, '%value' => $request['top']['location'][0]->value), WATCHDOG_WARNING);
+    watchdog(MFCS_WATCHDOG_ID, 'Could not load the location for %request_id, the location value is: %value.', array('%request_id' => $request_id, '%value' => $request['top']['location'][0]->value), WATCHDOG_WARNING);
   }
 
   $room = mfcs_load_rooms(NULL, NULL, $request['top']['room'][0]->value, TRUE);
@@ -2752,11 +2752,11 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       $building_text = $building->building_name;
     }
     else {
-      watchdog(MFCS_WATCHDOG_ID, "Could not load the room and building information for %request_id , the room value is: %value.", array('%request_id' => $request_id, '%value' => $request['top']['room'][0]->value), WATCHDOG_WARNING);
+      watchdog(MFCS_WATCHDOG_ID, 'Could not load the room and building information for %request_id , the room value is: %value.', array('%request_id' => $request_id, '%value' => $request['top']['room'][0]->value), WATCHDOG_WARNING);
     }
   }
   else {
-    watchdog(MFCS_WATCHDOG_ID, "Could not load the room for request %request_id, the location code is: '%location', the building code is: '%building', the room code is: '%room'.", array('%request_id' => $request_id, '%location' => $request['top']['location'][0]->value, '%building' => $request['top']['building'][0]->value, '%room' => $request['top']['room'][0]->value), WATCHDOG_WARNING);
+    watchdog(MFCS_WATCHDOG_ID, 'Could not load the room for request %request_id, the location code is: \'%location\', the building code is: \'%building\', the room code is: \'%room\'.', array('%request_id' => $request_id, '%location' => $request['top']['location'][0]->value, '%building' => $request['top']['building'][0]->value, '%room' => $request['top']['room'][0]->value), WATCHDOG_WARNING);
   }
 
   $classification_options = mfcs_get_request_classification_list_options(NULL, NULL, TRUE, TRUE);
@@ -2781,53 +2781,53 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
   $standard_content .= "Type:\n - " . $type_text . "\n\n";
   $standard_content .= "Dates:\n";
 
-  $standard_markup = "<br><br>";
-  $standard_markup .= "<strong>Request ID</strong>:<ul><li>" . $request_id . "</li></ul><br>";
-  $standard_markup .= "<strong>Request Name</strong>:<ul><li>" . $request['information']['title'][0]->value . "</li></ul><br>"; // renamed from title to "Request Name" as per fcs-23.
-  $standard_markup .= "<strong>Location</strong>:<ul><li>" . $location_text . "</li></ul><br>";
-  $standard_markup .= "<strong>Building</strong>:<ul><li>" . $building_text . "</li></ul><br>";
-  $standard_markup .= "<strong>Room</strong>:<ul><li>" . $room_text . "</li></ul><br>";
-  $standard_markup .= "<strong>Classification</strong>:<ul><li>" . $classification_text . "</li></ul><br>";
-  $standard_markup .= "<strong>Type</strong>:<ul><li>" . $type_text . "</li></ul><br>";
-  $standard_markup .= "<strong>Dates</strong>:";
+  $standard_markup = '<br><br>';
+  $standard_markup .= '<strong>Request ID</strong>:<ul><li>' . $request_id . '</li></ul><br>';
+  $standard_markup .= '<strong>Request Name</strong>:<ul><li>' . $request['information']['title'][0]->value . '</li></ul><br>'; // renamed from title to 'Request Name' as per fcs-23.
+  $standard_markup .= '<strong>Location</strong>:<ul><li>' . $location_text . '</li></ul><br>';
+  $standard_markup .= '<strong>Building</strong>:<ul><li>' . $building_text . '</li></ul><br>';
+  $standard_markup .= '<strong>Room</strong>:<ul><li>' . $room_text . '</li></ul><br>';
+  $standard_markup .= '<strong>Classification</strong>:<ul><li>' . $classification_text . '</li></ul><br>';
+  $standard_markup .= '<strong>Type</strong>:<ul><li>' . $type_text . '</li></ul><br>';
+  $standard_markup .= '<strong>Dates</strong>:';
 
   foreach ($request['dates']['date'] as $key => $date) {
-    $standard_content .= " - " . date(MFCS_DATE_FORMAT_DATE, $date->value);
-    $standard_markup .= "<ul><li>";
+    $standard_content .= ' - ' . date(MFCS_DATE_FORMAT_DATE, $date->value);
+    $standard_markup .= '<ul><li>';
 
     if ($date->cancelled == 1) {
-      $standard_markup .= "<strike>";
+      $standard_markup .= '<strike>';
     }
 
     $standard_markup .= date(MFCS_DATE_FORMAT_DATE, $date->value);
 
     if (!is_null($request['dates']['time_start'][$key]->value)) {
-      $standard_content .= " " . date(MFCS_DATE_FORMAT_TIME, $request['dates']['time_start'][$key]->value);
-      $standard_content .= " to " . date(MFCS_DATE_FORMAT_TIME, $request['dates']['time_stop'][$key]->value);
+      $standard_content .= ' ' . date(MFCS_DATE_FORMAT_TIME, $request['dates']['time_start'][$key]->value);
+      $standard_content .= ' to ' . date(MFCS_DATE_FORMAT_TIME, $request['dates']['time_stop'][$key]->value);
 
-      $standard_markup .= " " . date(MFCS_DATE_FORMAT_TIME, $request['dates']['time_start'][$key]->value);
-      $standard_markup .= " to " . date(MFCS_DATE_FORMAT_TIME, $request['dates']['time_stop'][$key]->value);
+      $standard_markup .= ' ' . date(MFCS_DATE_FORMAT_TIME, $request['dates']['time_start'][$key]->value);
+      $standard_markup .= ' to ' . date(MFCS_DATE_FORMAT_TIME, $request['dates']['time_stop'][$key]->value);
     }
 
     if ($date->cancelled == 1) {
-      $standard_content .= " (cancelled) ";
-      $standard_markup .= "</strike> (<strong>cancelled</strong>)";
+      $standard_content .= ' (cancelled) ';
+      $standard_markup .= '</strike> (<strong>cancelled</strong>)';
     }
 
     $standard_content .= "\n";
-    $standard_markup .= "</li></ul>";
+    $standard_markup .= '</li></ul>';
   }
 
   $email_params['request_title'] = $request['information']['title'][0]->value;
 
   if ($is_forced_transition) {
     $headers['mfcs-email-type'] = 'transition-force';
-    $email_params['title_suffix'] = "Forced";
+    $email_params['title_suffix'] = 'Forced';
     $email_params['content'] = '';
-    $email_params['content'] .= $changed_by_string . " has forcibly altered this request.\n";
+    $email_params['content'] .= $changed_by_string . ' has forcibly altered this request.' . "\n";
     $email_params['content'] .= $standard_content;
     $email_params['markup'] = '';
-    $email_params['markup'] .= $changed_by_markup . " has forcibly altered this request.<br>";
+    $email_params['markup'] .= $changed_by_markup . ' has forcibly altered this request.<br>';
     $email_params['markup'] .= $standard_markup;
 
     if (is_array($venue_coordinator)) {
@@ -2873,22 +2873,22 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
         'send_email' => FALSE,
         'requirements' => array('university' => 1),
       );
-      mfcs_workflow_step_review($request_id, $request_requester_object, MFCS_REVIEW_DECISION_REQUIREMENT, MFCS_REVIEW_RESTRICTIONS_NONE, "", $extra);
+      mfcs_workflow_step_review($request_id, $request_requester_object, MFCS_REVIEW_DECISION_REQUIREMENT, MFCS_REVIEW_RESTRICTIONS_NONE, '', $extra);
 
       $extra = array(
         'send_email' => FALSE,
       );
-      mfcs_workflow_step_review($request_id, $request_requester_object, MFCS_REVIEW_DECISION_APPROVE, MFCS_REVIEW_RESTRICTIONS_NONE, "", $extra);
+      mfcs_workflow_step_review($request_id, $request_requester_object, MFCS_REVIEW_DECISION_APPROVE, MFCS_REVIEW_RESTRICTIONS_NONE, '', $extra);
       #mfcs_workflow_step_review($request_id, $request_requester, MFCS_REVIEW_DECISION_CLOSE, MFCS_REVIEW_RESTRICTIONS_NONE);
 
-      $email_params['title_suffix'] = "Approved";
+      $email_params['title_suffix'] = 'Approved';
       $email_params['content'] = '';
-      $email_params['content'] .= "The request has been approved.\n";
-      $email_params['content'] .= "For more information, view the review log.\n";
+      $email_params['content'] .= 'The request has been approved.'. "\n";
+      $email_params['content'] .= 'For more information, view the review log.'. "\n";
       $email_params['content'] .= $standard_content;
       $email_params['markup'] = '';
-      $email_params['markup'] .= "The request has been approved.<br>";
-      $email_params['markup'] .= "For more information, view the <a href=" . '"' . $request_view_url . '/' . MFCS_VIEW_MODE_LOG . '"' . ">review log</a>.<br>";
+      $email_params['markup'] .= 'The request has been approved.<br>';
+      $email_params['markup'] .= 'For more information, view the <a href="' . $request_view_url . '/' . MFCS_VIEW_MODE_LOG . '">review log</a>.<br>';
       $email_params['markup'] .= $standard_markup;
 
       if (is_array($venue_coordinator)) {
@@ -2910,12 +2910,12 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       // this happens when the venue coordinator is the requester, additional e-mails to requester are unnecessary.
     }
     elseif ($status === MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK) {
-      $email_params['title_suffix'] = "Unavailable (due to lock)";
+      $email_params['title_suffix'] = 'Unavailable (due to lock)';
       $email_params['content'] = '';
-      $email_params['content'] .= $changed_by_string . " has created this request, but the request was auto-closed due to an existing lock for the specified room, date, and time.\n";
+      $email_params['content'] .= $changed_by_string . ' has created this request, but the request was auto-closed due to an existing lock for the specified room, date, and time.'. "\n";
       $email_params['content'] .= $standard_content;
       $email_params['markup'] = '';
-      $email_params['markup'] .= $changed_by_markup . " has created this request, but the request was auto-closed due to an existing lock for the specified room, date, and time.<br>";
+      $email_params['markup'] .= $changed_by_markup . ' has created this request, but the request was auto-closed due to an existing lock for the specified room, date, and time.<br>';
       $email_params['markup'] .= $standard_markup;
 
       if (is_array($venue_coordinator)) {
@@ -2943,12 +2943,12 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       }
     }
     elseif ($status === MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE) {
-      $email_params['title_suffix'] = "Unavailable";
+      $email_params['title_suffix'] = 'Unavailable';
       $email_params['content'] = '';
-      $email_params['content'] .= $changed_by_string . " has created this request, but the request was auto-closed due the requested room, date, and time being already reserved.\n";
+      $email_params['content'] .= $changed_by_string . ' has created this request, but the request was auto-closed due the requested room, date, and time being already reserved.'. "\n";
       $email_params['content'] .= $standard_content;
       $email_params['markup'] = '';
-      $email_params['markup'] .= $changed_by_markup . " has created this request, but the request was auto-closed due the requested room, date, and time being already reserved.<br>";
+      $email_params['markup'] .= $changed_by_markup . ' has created this request, but the request was auto-closed due the requested room, date, and time being already reserved.<br>';
       $email_params['markup'] .= $standard_markup;
 
       if (is_array($venue_coordinator)) {
@@ -2976,12 +2976,12 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       }
     }
     else {
-      $email_params['title_suffix'] = "Requested";
+      $email_params['title_suffix'] = 'Requested';
       $email_params['content'] = '';
-      $email_params['content'] .= $changed_by_string . " has created this request.\n";
+      $email_params['content'] .= $changed_by_string . ' has created this request.'. "\n";
       $email_params['content'] .= $standard_content;
       $email_params['markup'] = '';
-      $email_params['markup'] .= $changed_by_markup . " has created this request.<br>";
+      $email_params['markup'] .= $changed_by_markup . ' has created this request.<br>';
       $email_params['markup'] .= $standard_markup;
 
       if (is_array($venue_coordinator)) {
@@ -3006,12 +3006,12 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
   elseif ($is_update) {
     // @fixme: does this get processed anymore or is it also superseded by amendment?
     $headers['mfcs-email-type'] = 'update';
-    $email_params['title_suffix'] = "Modified";
+    $email_params['title_suffix'] = 'Modified';
     $email_params['content'] = '';
-    $email_params['content'] .= $changed_by_string . " has modified this request.\n";
+    $email_params['content'] .= $changed_by_string . ' has modified this request.' . "\n";
     $email_params['content'] .= $standard_content;
     $email_params['markup'] = '';
-    $email_params['markup'] .= $changed_by_markup . " has modified this request.<br>";
+    $email_params['markup'] .= $changed_by_markup . ' has modified this request.<br>';
     $email_params['markup'] .= $standard_markup;
 
     // the update message only needs to be sent during the review process.
@@ -3055,12 +3055,12 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     elseif ($status === MFCS_REQUEST_STATUS_LOCKED) {
       // this was superseded by amendment and execution should not reach this point.
       // this has been added to catch any cases where this still gets executed.
-      watchdog(MFC_WATCHDOG_ID, "Status 'locked' in " . __function__ . " is being called when it is expected to no longer be called (execution should not reach this point), request_id = %request_id. No e-mails are being sent.", array('%request_id' => $request_id), WATCHDOG_WARNING);
+      watchdog(MFC_WATCHDOG_ID, 'Status \'locked\' in ' . __function__ . ' is being called when it is expected to no longer be called (execution should not reach this point), request_id = %request_id. No e-mails are being sent.', array('%request_id' => $request_id), WATCHDOG_WARNING);
       return TRUE;
     }
     else {
       // This is not a bug and there are no e-mails to send, just log and return.
-      watchdog(MFCS_WATCHDOG_ID, "No e-mails to send during update, review step = '%step' and review status = '%status' for request '%request_id'", array('%step' => $request['top']['step'][0]->value, '%status' => $request['top']['status'][0]->value, '%request_id' => $request_id), WATCHDOG_INFO);
+      watchdog(MFCS_WATCHDOG_ID, 'No e-mails to send during update, review step = \'%step\' and review status = \'%status\' for request \'%request_id\'', array('%step' => $request['top']['step'][0]->value, '%status' => $request['top']['status'][0]->value, '%request_id' => $request_id), WATCHDOG_INFO);
       return TRUE;
     }
   }
@@ -3068,9 +3068,9 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     $headers['mfcs-email-type'] = 'amendment';
     $email_params['title_suffix'] = 'Amended';
     $email_params['content'] = '';
-    $email_params['content'] .= $changed_by_string . " has amended this request.\n";
+    $email_params['content'] .= $changed_by_string . ' has amended this request.' . "\n";
     $email_params['markup'] = '';
-    $email_params['markup'] .= $changed_by_markup . " has amended this request.<br>";
+    $email_params['markup'] .= $changed_by_markup . ' has amended this request.<br>';
 
     if (strlen($message) > 0) {
       $email_params['content'] .= "\n";
@@ -3136,15 +3136,15 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     }
     else {
       // This is not a bug and there are no e-mails to send, just log and return.
-      watchdog(MFCS_WATCHDOG_ID, "No e-mails to send during amendment, review step = '%step' and review status = '%status' for request '%request_id'", array('%step' => $request['top']['step'][0]->value, '%status' => $request['top']['status'][0]->value, '%request_id' => $request_id), WATCHDOG_INFO);
+      watchdog(MFCS_WATCHDOG_ID, 'No e-mails to send during amendment, review step = \'%step\' and review status = \'%status\' for request \'%request_id\'', array('%step' => $request['top']['step'][0]->value, '%status' => $request['top']['status'][0]->value, '%request_id' => $request_id), WATCHDOG_INFO);
       return TRUE;
     }
   }
   elseif ($is_insurance_provided) {
     $headers['mfcs-email-type'] = 'insurance_provided';
-    $email_params['title_suffix'] = "Insurance Provided";
+    $email_params['title_suffix'] = 'Insurance Provided';
     $email_params['content'] = '';
-    $email_params['content'] .= $changed_by_string . " has designated that the insurance has been provided for this request.\n";
+    $email_params['content'] .= $changed_by_string . ' has designated that the insurance has been provided for this request.' . "\n";
 
     if (strlen($message) > 0) {
       $email_params['content'] .= "\n";
@@ -3154,7 +3154,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     $email_params['content'] .= $standard_content;
 
     $email_params['markup'] = '';
-    $email_params['markup'] .= $changed_by_markup . " has designated that the insurance has been provided for this request.<br>";
+    $email_params['markup'] .= $changed_by_markup . ' has designated that the insurance has been provided for this request.<br>';
 
     if (strlen($message) > 0) {
       $email_params['markup'] .= '<br>';
@@ -3207,19 +3207,19 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       $current_date = date('l, F jS, Y', $instance);
       if (isset($parameters['reminder_data']->interval)) {
         if ($parameters['reminder_data']->interval == MFCS_REMINDER_INTERVAL_DAY_30) {
-          $remaining_content = "\nThis is the 30-day reminder e-mail submitted on: " . $current_date . ".\n";
-          $remaining_markup = "<br>This is the 30-day reminder e-mail submitted on: " . $current_date . ").<br>";
+          $remaining_content = "\n" . 'This is the 30-day reminder e-mail submitted on: ' . $current_date . ".\n";
+          $remaining_markup = '<br>This is the 30-day reminder e-mail submitted on: ' . $current_date . ').<br>';
         }
       }
 
-      $email_params['title_suffix'] = "Insurance Required";
+      $email_params['title_suffix'] = 'Insurance Required';
       $email_params['content'] = '';
-      $email_params['content'] .= "This is a reminder that you have not yet provided the insurance for the request: " . check_plain($request_title) . ".\n";
+      $email_params['content'] .= 'This is a reminder that you have not yet provided the insurance for the request: ' . check_plain($request_title) . ".\n";
       $email_params['content'] .= $remaining_content;
       $email_params['content'] .= "\n";
       $email_params['content'] .= $standard_content;
       $email_params['markup'] = '';
-      $email_params['markup'] .= "This is a reminder that you have not yet provided the insurance for the request: <em>" . check_plain($request_title) . "</em>.<br>";
+      $email_params['markup'] .= 'This is a reminder that you have not yet provided the insurance for the request: <em>' . check_plain($request_title) . '</em>.<br>';
       $email_params['markup'] .= $remaining_markup;
       $email_params['markup'] .= '<br>';
       $email_params['markup'] .= $standard_markup;
@@ -3271,17 +3271,17 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
         }
       }
 
-      $remaining_content = "\nThis is the " . $remaining_days . "-day reminder e-mail submitted on: " . $current_date . ".\n";
-      $remaining_markup = "<br>This is the " . $remaining_days . "-day reminder e-mail submitted on: " . $current_date . ").<br>";
+      $remaining_content = "\n" . 'This is the ' . $remaining_days . '-day reminder e-mail submitted on: ' . $current_date . ".\n";
+      $remaining_markup = '<br>This is the ' . $remaining_days . '-day reminder e-mail submitted on: ' . $current_date . ').<br>';
 
-      $email_params['title_suffix'] = "Unreviewed Request";
+      $email_params['title_suffix'] = 'Unreviewed Request';
       $email_params['content'] = '';
-      $email_params['content'] .= "This is a reminder that the review process has not been completed and the first event/meeting date begins in approximately " . $remaining_days . " days for the request: " . check_plain($request_title) . ".\n";
+      $email_params['content'] .= 'This is a reminder that the review process has not been completed and the first event/meeting date begins in approximately ' . $remaining_days . ' days for the request: ' . check_plain($request_title) . ".\n";
       $email_params['content'] .= $remaining_content;
       $email_params['content'] .= "\n";
       $email_params['content'] .= $standard_content;
       $email_params['markup'] = '';
-      $email_params['markup'] .= "This is a reminder that the review process has not been completed and the first event/meeting date begins in approximately " . $remaining_days . " days for the request: <em>" . check_plain($request_title) . "</em>.<br>";
+      $email_params['markup'] .= 'This is a reminder that the review process has not been completed and the first event/meeting date begins in approximately ' . $remaining_days . ' days for the request: <em>' . check_plain($request_title) . '</em>.<br>';
       $email_params['markup'] .= $remaining_markup;
       $email_params['markup'] .= '<br>';
       $email_params['markup'] .= $standard_markup;
@@ -3323,30 +3323,30 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
 
       if ($is_cancelled || $is_auto_cancelled || $status === MFCS_REQUEST_STATUS_CANCELLED || $status === MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED) {
         $headers['mfcs-email-type'] = 'cancel';
-        $email_params['title_suffix'] = "Cancelled";
-        $email_params['content'] .= $changed_by_string . " has cancelled the request.\n";
-        $email_params['markup'] .= $changed_by_markup . " has cancelled the request.<br>";
+        $email_params['title_suffix'] = 'Cancelled';
+        $email_params['content'] .= $changed_by_string . ' has cancelled the request.' . "\n";
+        $email_params['markup'] .= $changed_by_markup . ' has cancelled the request.<br>';
 
         if ($is_auto_cancelled) {
-          $email_params['title_suffix'] = "Cancelled (Auto)";
-          $email_params['content'] .= "The request was auto-cancelled";
-          $email_params['markup'] .= "The request was auto-cancelled";
+          $email_params['title_suffix'] = 'Cancelled (Auto)';
+          $email_params['content'] .= 'The request was auto-cancelled';
+          $email_params['markup'] .= 'The request was auto-cancelled';
 
           if (empty($parameters['auto-cancelled-reason'])) {
             $email_params['content'] .= ".\n";
-            $email_params['markup'] .= ".<br>";
+            $email_params['markup'] .= '.<br>';
           }
           else {
-            $email_params['content'] .= " because: " . $parameters['auto-cancelled-reason'] . "\n";
-            $email_params['markup'] .= " because: " . $parameters['auto-cancelled-reason'] . '<br>';
+            $email_params['content'] .= ' because: ' . $parameters['auto-cancelled-reason'] . "\n";
+            $email_params['markup'] .= ' because: ' . $parameters['auto-cancelled-reason'] . '<br>';
           }
         }
       }
       elseif ($is_uncancelled) {
         $headers['mfcs-email-type'] = 'uncancel';
-        $email_params['title_suffix'] = "Uncancelled";
-        $email_params['content'] .= $changed_by_string . " has uncancelled the request.\n";
-        $email_params['markup'] .= $changed_by_markup . " has uncancelled the request.<br>";
+        $email_params['title_suffix'] = 'Uncancelled';
+        $email_params['content'] .= $changed_by_string . ' has uncancelled the request.' . "\n";
+        $email_params['markup'] .= $changed_by_markup . ' has uncancelled the request.<br>';
       }
       elseif ($is_reassigned) {
         $headers['mfcs-email-type'] = 'reassign';
@@ -3364,13 +3364,13 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
         }
 
         if ($reassigned_type == 'coordinator') {
-          $email_params['title_suffix'] = "Re-Assigned Coordinator";
+          $email_params['title_suffix'] = 'Re-Assigned Coordinator';
         }
         elseif ($reassigned_type == 'requester') {
-          $email_params['title_suffix'] = "Re-Assigned Requester";
+          $email_params['title_suffix'] = 'Re-Assigned Requester';
         }
-        $email_params['content'] .= $changed_by_string . " has re-assigned the requester from " . $reassigned_from_user_name . " [id: " . $reassigned_from . "] to " . $reassigned_to_user_name . " [id: " . $reassigned_to . "].\n";
-        $email_params['markup'] .= $changed_by_markup . " has re-assigned the requester from <strong>" . $reassigned_from_user_name . "</strong> <sup>[id: " . $reassigned_from . "]</sup> to <strong>" . $reassigned_to_user_name . "</strong> <sup>[id: " . $reassigned_to . "]</sup>.<br>";
+        $email_params['content'] .= $changed_by_string . ' has re-assigned the requester from ' . $reassigned_from_user_name . ' [id: ' . $reassigned_from . '] to ' . $reassigned_to_user_name . ' [id: ' . $reassigned_to . "].\n";
+        $email_params['markup'] .= $changed_by_markup . ' has re-assigned the requester from <strong>' . $reassigned_from_user_name . '</strong> <sup>[id: ' . $reassigned_from . ']</sup> to <strong>' . $reassigned_to_user_name . '</strong> <sup>[id: ' . $reassigned_to . ']</sup>.<br>';
 
         if (!empty($reassigned_from_user['email'])) {
           $email_to[$reassigned_from_user['email']] = $reassigned_from_user['email'];
@@ -3385,9 +3385,9 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       }
       elseif ($is_deleted || $status === MFCS_REQUEST_STATUS_DELETED) {
         $headers['mfcs-email-type'] = 'delete';
-        $email_params['title_suffix'] = "Deleted";
-        $email_params['content'] .= $changed_by_string . " has deleted the request.\n";
-        $email_params['markup'] .= $changed_by_markup . " has deleted the request.<br>";
+        $email_params['title_suffix'] = 'Deleted';
+        $email_params['content'] .= $changed_by_string . ' has deleted the request.' . "\n";
+        $email_params['markup'] .= $changed_by_markup . ' has deleted the request.<br>';
 
         if (!empty($parameters['deleted-message'])) {
           $email_params['content'] .= "\n" . $parameters['deleted-message'] . "\n";
@@ -3396,9 +3396,9 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       }
       elseif ($is_cancelling) {
         $headers['mfcs-email-type'] = 'cancel-dates_and_times';
-        $email_params['title_suffix'] = "Cancelling";
-        $email_params['content'] .= $changed_by_string . " has cancelled or uncancelled specific dates associated with the request.\n";
-        $email_params['markup'] .= $changed_by_markup . " has cancelled or uncancelled specific dates associated with the request.<br>";
+        $email_params['title_suffix'] = 'Cancelling';
+        $email_params['content'] .= $changed_by_string . ' has cancelled or uncancelled specific dates associated with the request.' . "\n";
+        $email_params['markup'] .= $changed_by_markup . ' has cancelled or uncancelled specific dates associated with the request.<br>';
 
         $email_params['content'] .= $parameters['cancelling']['content'];
         $email_params['markup'] .= $parameters['cancelling']['markup'];
@@ -3437,10 +3437,10 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       }
     }
     elseif ($status === MFCS_REQUEST_STATUS_CLOSED_ACCEPTED) {
-      $email_params['title_suffix'] = "Approved";
+      $email_params['title_suffix'] = 'Approved';
       $email_params['content'] = '';
-      $email_params['content'] .= "The request has been approved.\n";
-      $email_params['content'] .= "For more information, view the review log.\n";
+      $email_params['content'] .= 'The request has been approved.' . "\n";
+      $email_params['content'] .= 'For more information, view the review log.' . "\n";
 
       if (strlen($message) > 0) {
         $email_params['content'] .= "\n";
@@ -3449,8 +3449,8 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
 
       $email_params['content'] .= $standard_content;
       $email_params['markup'] = '';
-      $email_params['markup'] .= "The request has been approved.<br>";
-      $email_params['markup'] .= "For more information, view the <a href=" . '"' . $request_view_url . '/' . MFCS_VIEW_MODE_LOG . '"' . ">review log</a>.<br>";
+      $email_params['markup'] .= 'The request has been approved.<br>';
+      $email_params['markup'] .= 'For more information, view the <a href="' . $request_view_url . '/' . MFCS_VIEW_MODE_LOG . '">review log</a>.<br>';
 
       if (strlen($message) > 0) {
         $email_params['markup'] .= '<br>';
@@ -3516,10 +3516,10 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       }
     }
     elseif ($status === MFCS_REQUEST_STATUS_CLOSED_DENIED) {
-      $email_params['title_suffix'] = "Denied";
+      $email_params['title_suffix'] = 'Denied';
       $email_params['content'] = '';
-      $email_params['content'] .= "The request has been denied.\n";
-      $email_params['content'] .= "For more information, view the review log.\n";
+      $email_params['content'] .= 'The request has been denied.' . "\n";
+      $email_params['content'] .= 'For more information, view the review log.' . "\n";
 
       if (strlen($message) > 0) {
         $email_params['content'] .= "\n";
@@ -3528,8 +3528,8 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
 
       $email_params['content'] .= $standard_content;
       $email_params['markup'] = '';
-      $email_params['markup'] .= "The request has been denied.<br>";
-      $email_params['markup'] .= "For more information, view the <a href=" . '"' . $request_view_url . '/' . MFCS_VIEW_MODE_LOG . '"' . ">review log</a>.<br>";
+      $email_params['markup'] .= 'The request has been denied.<br>';
+      $email_params['markup'] .= 'For more information, view the <a href="' . $request_view_url . '/' . MFCS_VIEW_MODE_LOG . '">review log</a>.<br>';
 
       if (strlen($message) > 0) {
         $email_params['markup'] .= '<br>';
@@ -3566,9 +3566,9 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       }
     }
     elseif ($status === MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE || $status === MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK) {
-      $email_params['title_suffix'] = "Denied";
+      $email_params['title_suffix'] = 'Denied';
       $email_params['content'] = '';
-      $email_params['content'] .= "The request has been denied due to the requested location not being available for the requested time slots.\n";
+      $email_params['content'] .= 'The request has been denied due to the requested location not being available for the requested time slots.' . "\n";
 
       if (strlen($message) > 0) {
         $email_params['content'] .= "\n";
@@ -3577,7 +3577,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
 
       $email_params['content'] .= $standard_content;
       $email_params['markup'] = '';
-      $email_params['markup'] .= "The request has been <em>denied</em> due to the requested location <em>not being available</em> for the requested time slots.<br>";
+      $email_params['markup'] .= 'The request has been <em>denied</em> due to the requested location <em>not being available</em> for the requested time slots.<br>';
 
       if (strlen($message) > 0) {
         $email_params['markup'] .= '<br>';
@@ -3617,9 +3617,9 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     if ($request['top']['step'][0]->value == MFCS_REVIEW_STEP_REVIEW) {
       $headers['mfcs-email-type'] = 'transition-review';
 
-      $email_params['title_suffix'] = "Needs Review";
+      $email_params['title_suffix'] = 'Needs Review';
       $email_params['content'] = '';
-      $email_params['content'] .= $changed_by_string . " has made the request available for review.\n";
+      $email_params['content'] .= $changed_by_string . ' has made the request available for review.' . "\n";
 
       if (strlen($message) > 0) {
         $email_params['content'] .= "\n";
@@ -3628,7 +3628,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
 
       $email_params['content'] .= $standard_content;
       $email_params['markup'] = '';
-      $email_params['markup'] .= $changed_by_markup . " has made the request available for <em>review</em>.<br>";
+      $email_params['markup'] .= $changed_by_markup . ' has made the request available for <em>review</em>.<br>';
 
       if (strlen($message) > 0) {
         $email_params['markup'] .= '<br>';
@@ -3668,11 +3668,11 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     elseif ($request['top']['step'][0]->value == MFCS_REVIEW_STEP_FINAL_DECISION) {
       $headers['mfcs-email-type'] = 'transition-final_decision';
 
-      $email_params['title_suffix'] = "Final Decision";
+      $email_params['title_suffix'] = 'Final Decision';
       $email_params['content'] = '';
-      $email_params['content'] .= "The request is ready to be approved or denied.\n";
+      $email_params['content'] .= 'The request is ready to be approved or denied.' . "\n";
       $email_params['content'] .= "\n";
-      $email_params['content'] .= "This is where the final decision needs to be made but only after all use fees and insurance fees are either specified or waived.\n";
+      $email_params['content'] .= 'This is where the final decision needs to be made but only after all use fees and insurance fees are either specified or waived.' . "\n";
 
       if (strlen($message) > 0) {
         $email_params['content'] .= "\n";
@@ -3681,9 +3681,9 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
 
       $email_params['content'] .= $standard_content;
       $email_params['markup'] = '';
-      $email_params['markup'] .= "The request is ready to be <em>approved or denied</em>.<br>";
-      $email_params['markup'] .= "<br>";
-      $email_params['markup'] .= "This is where the final decision needs to be made but only after all use fees and insurance fees are either specified or waived.<br>";
+      $email_params['markup'] .= 'The request is ready to be <em>approved or denied</em>.<br>';
+      $email_params['markup'] .= '<br>';
+      $email_params['markup'] .= 'This is where the final decision needs to be made but only after all use fees and insurance fees are either specified or waived.<br>';
 
       if (strlen($message) > 0) {
         $email_params['markup'] .= '<br>';
@@ -3722,14 +3722,14 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     }
     /* No longer used as of ticket fcs-79.
     elseif ($request['top']['step'][0]->value == MFCS_REVIEW_STEP_FINAL_DECISION) {
-      $email_params['title_suffix'] = "Reviewed";
+      $email_params['title_suffix'] = 'Reviewed';
       $email_params['content'] = '';
-      $email_params['content'] .= "The request has been reviewed and is ready for conflict resolution / decision making / final review.\n";
+      $email_params['content'] .= 'The request has been reviewed and is ready for conflict resolution / decision making / final review.' . "\n";
       $email_params['content'] .= "\n";
       $email_params['content'] .= $message . "\n";
       $email_params['content'] .= $standard_content;
       $email_params['markup'] = '';
-      $email_params['markup'] .= "The request has been reviewed and is ready for <em>conflict resolution / decision making / final review</em>.<br>";
+      $email_params['markup'] .= 'The request has been reviewed and is ready for <em>conflict resolution / decision making / final review</em>.<br>';
       $email_params['markup'] .= '<br>';
       $email_params['markup'] .= $message . '<br>';
       $email_params['markup'] .= $standard_markup;
@@ -3753,22 +3753,22 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     */
     else {
       // This is not a bug and there are no e-mails to send, just log and return.
-      watchdog(MFCS_WATCHDOG_ID, "No e-mails to send during make decisions, review step = '%step' and review status = '%status' for request '%request_id'", array('%step' => $request['top']['step'][0]->value, '%status' => $request['top']['status'][0]->value, '%request_id' => $request_id), WATCHDOG_INFO);
+      watchdog(MFCS_WATCHDOG_ID, 'No e-mails to send during make decisions, review step = \'%step\' and review status = \'%status\' for request \'%request_id\'', array('%step' => $request['top']['step'][0]->value, '%status' => $request['top']['status'][0]->value, '%request_id' => $request_id), WATCHDOG_INFO);
       return TRUE;
     }
   }
   elseif (!is_null($is_issues)) {
     if ($is_issues) {
       $headers['mfcs-email-type'] = 'issues';
-      $email_params['title_suffix'] = "Issues";
-      $issues_message = " has issues with the request.";
-      $issues_message_markup = " has <em>issues</em> with the request.";
+      $email_params['title_suffix'] = 'Issues';
+      $issues_message = ' has issues with the request.';
+      $issues_message_markup = ' has <em>issues</em> with the request.';
     }
     else {
       $headers['mfcs-email-type'] = 'no_issues';
-      $email_params['title_suffix'] = "No Issues";
-      $issues_message = " has no issues with the request.";
-      $issues_message_markup = " has <em>no issues</em> with the request.";
+      $email_params['title_suffix'] = 'No Issues';
+      $issues_message = ' has no issues with the request.';
+      $issues_message_markup = ' has <em>no issues</em> with the request.';
     }
 
 
@@ -3828,14 +3828,14 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
   elseif ($is_move) {
     $headers['mfcs-email-type'] = 'move';
 
-    $email_params['title_suffix'] = "Moved";
+    $email_params['title_suffix'] = 'Moved';
     $email_params['content'] = '';
-    $email_params['content'] .= $changed_by_string . " has moved the request to a new location, building, or room.\n";
+    $email_params['content'] .= $changed_by_string . ' has moved the request to a new location, building, or room.' . "\n";
     $email_params['content'] .= "\n";
     $email_params['content'] .= $message . "\n";
     $email_params['content'] .= $standard_content;
     $email_params['markup'] = '';
-    $email_params['markup'] .= '<em>' . $changed_by_markup . "</em> has <em>moved</em> the request to a new location, building, or room.<br>";
+    $email_params['markup'] .= '<em>' . $changed_by_markup . '</em> has <em>moved</em> the request to a new location, building, or room.<br>';
     $email_params['markup'] .= '<br>';
     $email_params['markup'] .= str_replace("\n", '<br>', trim(check_plain($message))) . '<br>';
     $email_params['markup'] .= $standard_markup;
@@ -3905,21 +3905,21 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     }
   }
   else {
-    watchdog(MFCS_WATCHDOG_ID, "Exception detected in workflow e-mail process. Not sending e-mail. Request ID = %request_id, Parameters = %parameters.", array('%request_id' => $request_id, '%parameters' => print_r($parameters, TRUE)), WATCHDOG_WARNING);
+    watchdog(MFCS_WATCHDOG_ID, 'Exception detected in workflow e-mail process. Not sending e-mail. Request ID = %request_id, Parameters = %parameters.', array('%request_id' => $request_id, '%parameters' => print_r($parameters, TRUE)), WATCHDOG_WARNING);
     return FALSE;
   }
 
   // as of ticket fcs-79, comments are handled differently.
   $comment_email_params = NULL;
   if (!empty($email_comment_only)) {
-    $email_params['title_suffix'] = "Comment";
+    $email_params['title_suffix'] = 'Comment';
     $email_params['content'] = '';
-    $email_params['content'] .= $changed_by_string . " has made the following comment:\n";
+    $email_params['content'] .= $changed_by_string . ' has made the following comment:'. "\n";
     $email_params['content'] .= "\n";
     $email_params['content'] .= $message . "\n";
     $email_params['content'] .= $standard_content;
     $email_params['markup'] = '';
-    $email_params['markup'] .= '<em>' . $changed_by_markup . "</em> has made the following <em>comment</em>:<br>";
+    $email_params['markup'] .= '<em>' . $changed_by_markup . '</em> has made the following <em>comment</em>:<br>';
     $email_params['markup'] .= '<br>';
     $email_params['markup'] .= str_replace("\n", '<br>', trim(check_plain($message))) . '<br>';
     $email_params['markup'] .= $standard_markup;
@@ -3989,8 +3989,8 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
 
     foreach ($email_to as $to) {
       if (!in_array($to, $email_whitelist) && !in_array($to, $debug_accounts)) {
-        drupal_set_message(t("Warning: not sending mail to @to while testing the system.", array('@to' => $to)), 'warning');
-        #watchdog('debug', "Warning: not sending mail to @to while testing the system.", array('@to' => $to), WATCHDOG_WARNING);
+        drupal_set_message(t('Warning: not sending mail to @to while testing the system.', array('@to' => $to)), 'warning');
+        #watchdog('debug', 'Warning: not sending mail to @to while testing the system.', array('@to' => $to), WATCHDOG_WARNING);
         continue;
       }
 
