@@ -533,6 +533,11 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           continue;
         }
 
+        // never display special case classifications in the page view review block.
+        if ($reviewer_classification === MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR || $reviewer_classification === MFCS_REVIEWER_CLASSIFICATION_MANAGER || $reviewer_classification === MFCS_REVIEWER_CLASSIFICATION_REQUESTER || $reviewer_classification === MFCS_REVIEWER_CLASSIFICATION_SYSTEM) {
+          continue;
+        }
+
         // the last decision made is the first item and should be the only value displayed.
         if (is_string($review->decision)) {
           $decision = (int) $review->decision;
