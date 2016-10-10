@@ -1488,7 +1488,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
           $reviewer_classification .= 'Manager';
         }
         elseif ($classification == MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR) {
-          $reviewer_classification .= 'System Administrator';
+          $reviewer_classification .= 'Administrator';
         }
         elseif (array_key_exists($classification, $reviewer_classification_options)) {
           $reviewer_classification .= $reviewer_classification_options[$classification];
@@ -1500,21 +1500,6 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
         $markup_class .= ' classification-' . $classification;
       }
       unset($classification);
-
-      if (is_null($reviewer_classification)) {
-        if ($user_can_administer) {
-          $reviewer_classification = 'Administrator';
-          $markup_class .= ' classification-' . MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR;
-        }
-        elseif ($user_can_manage) {
-          $reviewer_classification = 'Manager';
-          $markup_class .= ' classification-' . MFCS_REVIEWER_CLASSIFICATION_MANAGER;
-        }
-        elseif ($user_is_requester) {
-          $reviewer_classification = 'Requester';
-          $markup_class .= ' classification-' . MFCS_REVIEWER_CLASSIFICATION_REQUESTER;
-        }
-      }
 
       if (!is_null($reviewer_classification)) {
         $reviewer_classification = ' as <strong class="review-item-label-text-row-reviewer_classification">'. $reviewer_classification . '</strong>';

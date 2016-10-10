@@ -838,6 +838,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
   $step = $request['top']['step'][0]->value;
   $type = $request['information']['type'][0]->value;
   $venue_coordinator_id = $request['venue_coordinator']['user_id'][0]->value;
+  $requester_id = $request['mer']['user_id'][0]->value;
 
   if (is_string($classification)) {
     $classification = (int) $classification;
@@ -861,6 +862,10 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
 
   if (is_string($decision)) {
     $decision = (int) $decision;
+  }
+
+  if (is_string($requester_id)) {
+    $requester_id = (int) $requester_id;
   }
 
   $reviewer_classifications = mfcs_get_reviewer_classifications($user->uid, $classification, $step);
@@ -913,6 +918,13 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
     $reviewer_classifications['all'][MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY] = MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY;
     $is_effective_venue_coordinator = TRUE;
   }
+
+  // check to see if the user is a requester and add the requester as a reviewer classification if so.
+  if ($user->uid == $requester_id) {
+    $reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_REQUESTER] = MFCS_REVIEWER_CLASSIFICATION_REQUESTER;
+    $reviewer_classifications['all'][MFCS_REVIEWER_CLASSIFICATION_REQUESTER] = MFCS_REVIEWER_CLASSIFICATION_REQUESTER;
+  }
+
 
   // review revisions are neither used nor incremented in the same manner as other fields.
   // the revision number will not increment when a new review is made.
@@ -1519,6 +1531,12 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
       $reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_NONE] = MFCS_REVIEWER_CLASSIFICATION_NONE;
       watchdog(MFCS_WATCHDOG_ID, 'Failed to assign any classifications for the review step :step with decision :decision for request :request_id for the user :user_id', array(':step' => $step, ':decision' => $decision, ':request_id' => $request_id, ':user_id' => $user->uid), WATCHDOG_ERROR);
     }
+  }
+  elseif ($is_manager && empty($reviewer_classifications['step'])) {
+    $reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_MANAGER] = MFCS_REVIEWER_CLASSIFICATION_MANAGER;
+  }
+  elseif ($is_administer && empty($reviewer_classifications['step'])) {
+    $reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR] = MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR;
   }
 
   $failure = FALSE;
