@@ -2559,6 +2559,16 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
 
     $extra = array();
 
+    // do not report certain decisions as by the requester for users with classifications in addition to requester.
+    if ($decision !== MFCS_REVIEW_DECISION_COMMENT && $decision !== MFCS_REVIEW_DECISION_CANCEL && $decision !== MFCS_REVIEW_DECISION_UNCANCEL) {
+      $extra['never_requester'] = TRUE;
+    }
+
+    // do not report certain decisions as by the venue coordinator for users with classifications in addition to venue coordinator.
+    if ($decision === MFCS_REVIEW_DECISION_REASSIGN_COORDINATOR || $decision === MFCS_REVIEW_DECISION_OVERRIDE || $decision === MFCS_REVIEW_DECISION_MOVE || $decision === MFCS_REVIEW_DECISION_REASSIGN_REQUESTER || $decision === MFCS_REVIEW_DECISION_MANAGER_RECHECK || $decision === MFCS_REVIEW_DECISION_ISSUES || $decision === MFCS_REVIEW_DECISION_ISSUES_NONE) {
+      $extra['never_coordinator'] = TRUE;
+    }
+
     if ($decision === MFCS_REVIEW_DECISION_COMMENT) {
       // comments do not need to be processed on a per step basis, so skip the $step conditions below.
     }
@@ -2575,6 +2585,7 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
         $requirements_extra = array(
           'send_email' => FALSE,
           'requirements' => array('other' => 0, 'waived' => 0, 'university' => 1),
+          'never_requester' => TRUE,
         );
 
         $success = mfcs_workflow_step_review($request_id, $form['form']['user']['#value'], MFCS_REVIEW_DECISION_REQUIREMENT, MFCS_REVIEW_RESTRICTIONS_NONE, 'The system has auto-waived the fees because the request is a Quick Meeting.', $requirements_extra, $already_reviewed_as);

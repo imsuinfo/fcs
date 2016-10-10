@@ -772,6 +772,8 @@ function mfcs_workflow_set_requester($request_id, $requester_id, $user = NULL, $
  *   (optional) The facilities use decision message.
  * @param array $extra
  *   (optional) Additional fields that are specific to the individual step.
+ *   - never_requester: never log the user as a requester for this action.
+ *   - never_coordinator: never log the user as a venue coordinator for this action.
  * @param array|null $as
  *   (optional) Provide a specific set of reviewer classifications to use.
  *   Only classifications assigned to the user are allowed (others are silently ignored).
@@ -825,6 +827,15 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
 
   $is_manager = user_access('mfcs manage', $user);
   $is_administer = user_access('mfcs administer', $user);
+
+  $never_requester = FALSE;
+  $never_coordinator = FALSE;
+  if (array_key_exists('never_requester', $extra) && is_bool($extra['never_requester'])) {
+    $never_requester = $extra['never_requester'];
+  }
+  if (array_key_exists('never_coordinator', $extra) && is_bool($extra['never_coordinator'])) {
+    $never_coordinator = $extra['never_coordinator'];
+  }
 
   $instance = mfcs_instance();
 
@@ -907,20 +918,21 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
   }
   $venue_coordinator_ids[$user->uid] = $user->uid;
 
-  $is_effective_venue_coordinator = FALSE;
   if ($venue_coordinator_id == $user->uid) {
-    $reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR] = MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR;
-    $reviewer_classifications['all'][MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR] = MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR;
-    $is_effective_venue_coordinator = TRUE;
+    if ($never_coordinator === FALSE) {
+      $reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR] = MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR;
+      $reviewer_classifications['all'][MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR] = MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR;
+    }
   }
   elseif (in_array($venue_coordinator_id, $venue_coordinator_ids)) {
-    $reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY] = MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY;
-    $reviewer_classifications['all'][MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY] = MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY;
-    $is_effective_venue_coordinator = TRUE;
+    if ($never_coordinator === FALSE) {
+      $reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY] = MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY;
+      $reviewer_classifications['all'][MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY] = MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY;
+    }
   }
 
   // check to see if the user is a requester and add the requester as a reviewer classification if so.
-  if ($user->uid == $requester_id) {
+  if ($never_requester === FALSE && $user->uid == $requester_id) {
     $reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_REQUESTER] = MFCS_REVIEWER_CLASSIFICATION_REQUESTER;
     $reviewer_classifications['all'][MFCS_REVIEWER_CLASSIFICATION_REQUESTER] = MFCS_REVIEWER_CLASSIFICATION_REQUESTER;
   }
@@ -2130,10 +2142,6 @@ function mfcs_workflow_next_step($request_id, $type, $step, $decision, $restrict
 
   if (!is_null($new_step)) {
     mfcs_workflow_set_step($request_id, $new_step, $changed_user);
-
-    #if ($new_step === MFCS_REVIEW_STEP_COMPLETED && $type !== MFCS_REQUEST_TYPE_QUICK_MEETING) {
-    #  mfcs_workflow_step_review($request_id, $changed_user, MFCS_REVIEW_DECISION_CLOSE, MFCS_REVIEW_RESTRICTIONS_NONE);
-    #}
   }
 
 
@@ -2887,17 +2895,19 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     }
 
     if ($type === MFCS_REQUEST_TYPE_QUICK_MEETING && ($venue_coordinator['user_id'] == $request_requester['user_id'] || (is_object($request_requester_object) && user_access('mfcs manage', $request_requester_object)))) {
+      // @fixme: the calls to mfcs_workflow_step_review() seem out of place here and probably should be performed elsewhere.
       $extra = array(
         'send_email' => FALSE,
         'requirements' => array('university' => 1),
+        'never_requester' => TRUE,
       );
       mfcs_workflow_step_review($request_id, $request_requester_object, MFCS_REVIEW_DECISION_REQUIREMENT, MFCS_REVIEW_RESTRICTIONS_NONE, '', $extra);
 
       $extra = array(
         'send_email' => FALSE,
+        'never_requester' => TRUE,
       );
       mfcs_workflow_step_review($request_id, $request_requester_object, MFCS_REVIEW_DECISION_APPROVE, MFCS_REVIEW_RESTRICTIONS_NONE, '', $extra);
-      #mfcs_workflow_step_review($request_id, $request_requester, MFCS_REVIEW_DECISION_CLOSE, MFCS_REVIEW_RESTRICTIONS_NONE);
 
       $email_params['title_suffix'] = 'Approved';
       $email_params['content'] = '';

@@ -343,7 +343,12 @@ function mfcs_request_manage_0_override_form_submit($form, &$form_state) {
     }
     unset($original_message);
 
-    mfcs_workflow_step_review($request_id, $user, MFCS_REVIEW_DECISION_OVERRIDE, MFCS_REVIEW_RESTRICTIONS_MANAGERS, $message);
+    $review_extra = array(
+      'never_requester' => TRUE,
+      'never_coordinator' => TRUE,
+    );
+
+    mfcs_workflow_step_review($request_id, $user, MFCS_REVIEW_DECISION_OVERRIDE, MFCS_REVIEW_RESTRICTIONS_MANAGERS, $message, $review_extra);
 
     // perform check against this request to see if new problems are detected or existing problems are resolved.
     mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);

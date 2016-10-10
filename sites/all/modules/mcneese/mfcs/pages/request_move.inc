@@ -625,8 +625,13 @@ function mfcs_request_manage_0_move_form_submit($form, &$form_state) {
     // forcefully clear the request cache so that it can reflect the changes.
     mfcs_load_request_by_id($request_id, FALSE);
 
+    $review_extra = array(
+      'never_requester' => TRUE,
+      'never_coordinator' => TRUE,
+    );
+
     mfcs_include(MFCS_INCLUDE_WORKFLOW);
-    mfcs_workflow_step_review($request_id, $user, MFCS_REVIEW_DECISION_MOVE, MFCS_REVIEW_RESTRICTIONS_NONE, $log_message);
+    mfcs_workflow_step_review($request_id, $user, MFCS_REVIEW_DECISION_MOVE, MFCS_REVIEW_RESTRICTIONS_NONE, $log_message, $review_extra);
   }
 
   // redirect after submitting.
