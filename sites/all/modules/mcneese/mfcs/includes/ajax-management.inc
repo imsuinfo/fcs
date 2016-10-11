@@ -1602,12 +1602,12 @@ function mfcs_ajax_email_log_0_list() {
 
       $row[5] = check_plain($email_log->title);
 
-      $row[6] = "Normal";
+      $row[6] = 'Normal';
       if ($email_log->code == MFCS_EMAIL_CODE_RESEND) {
-        $row[6] = "Re-sent";
+        $row[6] = 'Re-sent';
       }
       elseif ($email_log->code == MFCS_EMAIL_CODE_FORWARD) {
-        $row[6] = "Forwarded";
+        $row[6] = 'Forwarded';
       }
 
       $row[7] = '<a href="' . $base_path . 'requests/email_log-0/view/' . $email_log->id . $url_arguments . '" class="operation-link operation-link-view">View</a>';
@@ -1899,12 +1899,12 @@ function mfcs_ajax_synchronize_0_form() {
       $row[3] = check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SQUEEZE, $item->created));
       $row[4] = check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SQUEEZE, $item->updated));
       $row[5] = check_plain($item->password);
-      $row[6] = "Unknown";
+      $row[6] = 'Unknown';
       $row[7] = check_plain($item->address);
       $row[8] = '';
 
       if ($item->type == MFCS_SYNCHRONIZE_TYPE_ICAL) {
-        $row[6] = "iCal";
+        $row[6] = 'iCal';
         $row[8] .= ' <a href="' . $base_path . 'requests/synchronize-0/ical/' . rawurlencode($item->password) . $url_arguments . '" class="operation-link operation-link-view" title="Synchronization URL">Link</a>';
       }
 

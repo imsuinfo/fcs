@@ -480,15 +480,15 @@ function mfcs_ajax_review_0($argument_1 = NULL) {
 
   if ($manager) {
     $options['only_reviewer'] = TRUE;
-    $options['table_caption'] = "Requests (As Reviewer)";
+    $options['table_caption'] = 'Requests (As Reviewer)';
 
     if ($argument_1 == 'as_reviewer') {
       $options['only_reviewer'] = TRUE;
-      $options['table_caption'] = "Requests (As Reviewer)";
+      $options['table_caption'] = 'Requests (As Reviewer)';
     }
     elseif ($argument_1 == 'as_manager') {
       $options['only_reviewer'] = FALSE;
-      $options['table_caption'] = "Requests (As Manager)";
+      $options['table_caption'] = 'Requests (As Manager)';
     }
   }
 
