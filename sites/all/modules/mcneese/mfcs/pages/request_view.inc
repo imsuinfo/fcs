@@ -1565,7 +1565,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
       $form['review']['operations']['decision'] = array(
         '#id' => 'request-review-operations-decision',
         '#type' => 'select',
-        '#title' => "Decision",
+        '#title' => 'Decision',
         '#default_value' => NULL,
         '#options' => $decision_options,
         '#required' => TRUE,
@@ -1645,7 +1645,9 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
             $insurance_requirement = TRUE;
 
+            // @fixme: this needs to be discussed to determine if '#database_default' should be used, should the initial default be set to 0, or should an additional checkbox be added to designate that the rate needs to be calculated when all other values are 0.
             $requirements_amount_defaults = array('custodial_fees' => array('rate' => '18.50'), 'maintenance_fees' => array('rate' => '18.50'), 'grounds_fees' => array('rate' => '18.50'), 'security_fees' => array('rate' => '30.00'));
+            #$requirements_amount_defaults = array();
 
             foreach ($uses as $use_name => $use_title) {
               $form['review']['operations']['requirements'][$use_name] = array(
@@ -1683,6 +1685,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
                 '#type' => 'numberfield',
                 '#title' => '<span class="element-invisible">' . $use_title . ' Fee</span> Personnel',
                 '#default_value' => NULL,
+                '#database_value' => NULL,
                 '#size' => 16,
                 '#min' => 0,
                 '#required' => FALSE,
@@ -1699,6 +1702,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
               if (!empty($request['requirements'][$use_name][0])) {
                 $form['review']['operations']['requirements'][$use_name]['group_rates']['personnel']['#default_value'] = (int) $request['requirements'][$use_name][0]->personnel;
+                $form['review']['operations']['requirements'][$use_name]['group_rates']['personnel']['#database_value'] = $form['review']['operations']['requirements'][$use_name]['group_rates']['personnel']['#default_value'];
               }
 
               $form['review']['operations']['requirements'][$use_name]['group_rates']['hours'] = array(
@@ -1706,6 +1710,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
                 '#type' => 'numberfield',
                 '#title' => '<span class="element-invisible">' . $use_title . ' Fee</span> Hours',
                 '#default_value' => NULL,
+                '#database_value' => NULL,
                 '#min' => 0,
                 '#size' => 16,
                 '#required' => FALSE,
@@ -1722,6 +1727,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
               if (!empty($request['requirements'][$use_name][0])) {
                 $form['review']['operations']['requirements'][$use_name]['group_rates']['hours']['#default_value'] = (int) $request['requirements'][$use_name][0]->hours;
+                $form['review']['operations']['requirements'][$use_name]['group_rates']['hours']['#database_value'] = $form['review']['operations']['requirements'][$use_name]['group_rates']['hours']['#default_value'];
               }
 
               $form['review']['operations']['requirements'][$use_name]['group_rates']['days'] = array(
@@ -1729,6 +1735,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
                 '#type' => 'numberfield',
                 '#title' => '<span class="element-invisible">' . $use_title . ' Fee</span> Days',
                 '#default_value' => NULL,
+                '#database_value' => NULL,
                 '#min' => 0,
                 '#size' => 16,
                 '#required' => FALSE,
@@ -1745,6 +1752,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
               if (!empty($request['requirements'][$use_name][0])) {
                 $form['review']['operations']['requirements'][$use_name]['group_rates']['days']['#default_value'] = (int) $request['requirements'][$use_name][0]->days;
+                $form['review']['operations']['requirements'][$use_name]['group_rates']['days']['#database_value'] = $form['review']['operations']['requirements'][$use_name]['group_rates']['days']['#default_value'];
               }
 
               $form['review']['operations']['requirements'][$use_name]['group_rates']['rate'] = array(
@@ -1752,6 +1760,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
                 '#type' => 'textfield',
                 '#title' => '<span class="element-invisible">' . $use_title . ' Fee</span> Rate',
                 '#default_value' => NULL,
+                '#database_value' => NULL,
                 '#size' => 16,
                 '#required' => FALSE,
                 '#attributes' => array(
@@ -1767,6 +1776,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
               if (!empty($request['requirements'][$use_name][0]) && strlen($request['requirements'][$use_name][0]->rate) > 0) {
                 $form['review']['operations']['requirements'][$use_name]['group_rates']['rate']['#default_value'] = mfcs_convert_value_from_database_format($request['requirements'][$use_name][0]->rate, 'currency');
+                $form['review']['operations']['requirements'][$use_name]['group_rates']['rate']['#database_value'] = $form['review']['operations']['requirements'][$use_name]['group_rates']['rate']['#default_value'];
               }
               elseif (isset($requirements_amount_defaults[$use_name]['rate'])) {
                 $form['review']['operations']['requirements'][$use_name]['group_rates']['rate']['#default_value'] = $requirements_amount_defaults[$use_name]['rate'];
@@ -1791,6 +1801,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
                 '#type' => 'textfield',
                 '#title' => '<span class="element-invisible">' . $use_title . ' Fee</span> Supplies',
                 '#default_value' => NULL,
+                '#database_value' => NULL,
                 '#size' => 16,
                 '#min' => 0,
                 '#required' => FALSE,
@@ -1807,6 +1818,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
               if (!empty($request['requirements'][$use_name][0]) && strlen($request['requirements'][$use_name][0]->supplies) > 0) {
                 $form['review']['operations']['requirements'][$use_name]['group_supplies']['supplies']['#default_value'] = mfcs_convert_value_from_database_format($request['requirements'][$use_name][0]->supplies, 'currency');
+                $form['review']['operations']['requirements'][$use_name]['group_supplies']['supplies']['#database_value'] = $form['review']['operations']['requirements'][$use_name]['group_supplies']['supplies']['#default_value'];
               }
 
 
@@ -1828,6 +1840,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
                 '#type' => 'textfield',
                 '#title' => '<span class="element-invisible">' . $use_title . ' Fee</span> Post Event/Meeting',
                 '#default_value' => NULL,
+                '#database_value' => NULL,
                 '#size' => 16,
                 '#min' => 0,
                 '#required' => FALSE,
@@ -1844,6 +1857,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
               if (!empty($request['requirements'][$use_name][0]) && strlen($request['requirements'][$use_name][0]->post) > 0) {
                 $form['review']['operations']['requirements'][$use_name]['group_post']['post']['#default_value'] = mfcs_convert_value_from_database_format($request['requirements'][$use_name][0]->post, 'currency');
+                $form['review']['operations']['requirements'][$use_name]['group_post']['post']['#database_value'] = $form['review']['operations']['requirements'][$use_name]['group_post']['post']['#default_value'];
               }
 
               $form['review']['operations']['requirements'][$use_name]['group_post']['description'] = array(
@@ -1851,6 +1865,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
                 '#type' => 'textarea',
                 '#title' => '<span class="element-invisible">' . $use_title . ' Fee</span> Post Event/Meeting Description',
                 '#default_value' => NULL,
+                '#database_value' => NULL,
                 '#rows' => 4,
                 '#required' => FALSE,
                 '#attributes' => array(
@@ -1866,6 +1881,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
               if (!empty($request['requirements'][$use_name][0])) {
                 $form['review']['operations']['requirements'][$use_name]['group_post']['description']['#default_value'] = $request['requirements'][$use_name][0]->description;
+                $form['review']['operations']['requirements'][$use_name]['group_post']['description']['#database_value'] = $form['review']['operations']['requirements'][$use_name]['group_post']['description']['#default_value'];
               }
             }
           }
@@ -2286,8 +2302,7 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
       }
     }
 
-    // Check requirements during the requirements step unless a comment is made.
-    if ($step === MFCS_REVIEW_STEP_FINAL_DECISION && $decision !== MFCS_REVIEW_DECISION_COMMENT) {
+    if ($decision === MFCS_REVIEW_DECISION_REQUIREMENT) {
       $check_requirements = TRUE;
     }
 
@@ -2814,6 +2829,11 @@ function mfcs_request_view_0_detect_requirements_changes($form, $form_state, &$e
       elseif ($form_column['#default_value'] != $requirements_state[$requirements_field][$column_name]) {
         $change = TRUE;
         $changes_made = TRUE;
+      }
+
+      // @fixme: temporarily force 'rate' to be enabled on any other change. This may or may not be permanent, but I am currently waiting on a decision to be given to me on how to approach this.
+      if ($change !== FALSE) {
+        $changes_requirements[$requirements_field]['rate'] = TRUE;
       }
     }
     unset($change);

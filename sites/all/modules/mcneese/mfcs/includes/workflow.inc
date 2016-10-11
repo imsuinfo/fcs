@@ -937,6 +937,66 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
     $reviewer_classifications['all'][MFCS_REVIEWER_CLASSIFICATION_REQUESTER] = MFCS_REVIEWER_CLASSIFICATION_REQUESTER;
   }
 
+  // check to see if the user handles financial information or insurance information.
+  if ($decision === MFCS_REVIEW_DECISION_REQUIREMENT) {
+    // Some requirements options are not relevant for 'financer', so disclude them during the check.
+    $modified_extra = $extra;
+    unset($modified_extra['requirements']['other']);
+    unset($modified_extra['requirements']['waived']);
+    unset($modified_extra['requirements']['university']);
+
+    if (array_key_exists('requirements', $modified_extra) && !empty($modified_extra['requirements'])) {
+      $role_financer = user_role_load_by_name('financer');
+      if (is_object($role_financer) && array_key_exists($role_financer->rid, $user->roles)) {
+        if (empty($reviewer_classifications['step']) && (isset($extra['requirements']['other']) || isset($extra['requirements']['waived']) || isset($extra['requirements']['university']))) {
+          if ($is_manager) {
+            $reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_MANAGER] = MFCS_REVIEWER_CLASSIFICATION_MANAGER;
+            $reviewer_classifications['all'][MFCS_REVIEWER_CLASSIFICATION_MANAGER] = MFCS_REVIEWER_CLASSIFICATION_MANAGER;
+          }
+          elseif ($is_administer) {
+            $reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR] = MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR;
+            $reviewer_classifications['all'][MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR] = MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR;
+          }
+        }
+
+        $reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_FINANCIAL] = MFCS_REVIEWER_CLASSIFICATION_FINANCIAL;
+        $reviewer_classifications['all'][MFCS_REVIEWER_CLASSIFICATION_FINANCIAL] = MFCS_REVIEWER_CLASSIFICATION_FINANCIAL;
+      }
+      elseif (empty($reviewer_classifications['step'])) {
+        if ($is_manager) {
+          $reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_MANAGER] = MFCS_REVIEWER_CLASSIFICATION_MANAGER;
+          $reviewer_classifications['all'][MFCS_REVIEWER_CLASSIFICATION_MANAGER] = MFCS_REVIEWER_CLASSIFICATION_MANAGER;
+        }
+        elseif ($is_administer) {
+          $reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR] = MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR;
+          $reviewer_classifications['all'][MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR] = MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR;
+        }
+      }
+      unset($role_financer);
+    }
+    unset($modified_extra);
+
+    if (array_key_exists('insurance', $extra) && !empty($extra['insurance'])) {
+      $role_insurer = user_role_load_by_name('insurer');
+      if (is_object($role_insurer) && array_key_exists($role_insurer->rid, $user->roles)) {
+
+        $reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_INSURANCE] = MFCS_REVIEWER_CLASSIFICATION_INSURANCE;
+        $reviewer_classifications['all'][MFCS_REVIEWER_CLASSIFICATION_INSURANCE] = MFCS_REVIEWER_CLASSIFICATION_INSURANCE;
+      }
+      elseif (empty($reviewer_classifications['step'])) {
+        if ($is_manager) {
+          $reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_MANAGER] = MFCS_REVIEWER_CLASSIFICATION_MANAGER;
+          $reviewer_classifications['all'][MFCS_REVIEWER_CLASSIFICATION_MANAGER] = MFCS_REVIEWER_CLASSIFICATION_MANAGER;
+        }
+        elseif ($is_administer) {
+          $reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR] = MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR;
+          $reviewer_classifications['all'][MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR] = MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR;
+        }
+      }
+      unset($role_insurer);
+    }
+  }
+
 
   // review revisions are neither used nor incremented in the same manner as other fields.
   // the revision number will not increment when a new review is made.
@@ -1528,27 +1588,22 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
 
         return FALSE;
       }
-
-      if ($is_administer && empty($reviewer_classifications['step'])) {
-        $reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR] = MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR;
-      }
-
-      if ($is_manager && empty($reviewer_classifications['step'])) {
-        $reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_MANAGER] = MFCS_REVIEWER_CLASSIFICATION_MANAGER;
-      }
-    }
-
-    // if the classification is still empty, set it to none so that there is at least some record in the database.
-    if (empty($reviewer_classifications['step'])) {
-      $reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_NONE] = MFCS_REVIEWER_CLASSIFICATION_NONE;
-      watchdog(MFCS_WATCHDOG_ID, 'Failed to assign any classifications for the review step :step with decision :decision for request :request_id for the user :user_id', array(':step' => $step, ':decision' => $decision, ':request_id' => $request_id, ':user_id' => $user->uid), WATCHDOG_ERROR);
     }
   }
-  elseif ($is_manager && empty($reviewer_classifications['step'])) {
+
+  if ($is_manager && empty($reviewer_classifications['step'])) {
     $reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_MANAGER] = MFCS_REVIEWER_CLASSIFICATION_MANAGER;
+    $reviewer_classifications['all'][MFCS_REVIEWER_CLASSIFICATION_MANAGER] = MFCS_REVIEWER_CLASSIFICATION_MANAGER;
   }
   elseif ($is_administer && empty($reviewer_classifications['step'])) {
     $reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR] = MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR;
+    $reviewer_classifications['all'][MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR] = MFCS_REVIEWER_CLASSIFICATION_SYSTEM_ADMINISTRATOR;
+  }
+
+  // if the classification is still empty, set it to none so that there is at least some record in the database.
+  if (empty($reviewer_classifications['step'])) {
+    $reviewer_classifications['step'][MFCS_REVIEWER_CLASSIFICATION_NONE] = MFCS_REVIEWER_CLASSIFICATION_NONE;
+    watchdog(MFCS_WATCHDOG_ID, 'Failed to assign any classifications for the review step :step with decision :decision for request :request_id for the user :user_id', array(':step' => $step, ':decision' => $decision, ':request_id' => $request_id, ':user_id' => $user->uid), WATCHDOG_ERROR);
   }
 
   $failure = FALSE;

@@ -2338,6 +2338,8 @@ function mfcs_install() {
   db_query('INSERT INTO {mfcs_taxonomy_reviewer_classification} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_STUDENT_ACTIVITIES_ADMINISTRATION . ', \'student_activities_administration\', \'Student Activities Administration\')');
   db_query('INSERT INTO {mfcs_taxonomy_reviewer_classification} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_UNIVERSITY_SERVICES . ', \'university_services\', \'University Services\')');
   db_query('INSERT INTO {mfcs_taxonomy_reviewer_classification} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_GROUNDS . ', \'grounds\', \'Grounds\')');
+  db_query('INSERT INTO {mfcs_taxonomy_reviewer_classification} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_FINANCIAL . ', \'financial\', \'Financial\')');
+  db_query('INSERT INTO {mfcs_taxonomy_reviewer_classification} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEWER_CLASSIFICATION_INSURANCE . ', \'insurance\', \'Insurance\')');
 
   db_query('INSERT INTO {mfcs_taxonomy_request_status} (id, machine_name, human_name, hidden) VALUES (' . (int) MFCS_REQUEST_STATUS_NONE . ', \'none\', \'None\', 1)');
   db_query('INSERT INTO {mfcs_taxonomy_request_status} (id, machine_name, human_name) VALUES (' . (int) MFCS_REQUEST_STATUS_DELETED . ', \'deleted\', \'Deleted\')');
