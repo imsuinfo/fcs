@@ -816,7 +816,7 @@ function mfcs_request_users_0_view_page($user_id) {
   }
 
   if ($is_manager || $is_administer || ($user->uid == $account->uid && ($is_requester || $is_reviewer))) {
-    $markup .= '<div class="view_user-item view_user-item-view_profile no-print"><span class="item-information item-information-view_profile"><a href="' . $base_path . 'user/' . $account->uid . '">View User Profile</a></span></div>';
+    $markup .= '<div class="view_user-item view_user-item-view_profile no-print"><span class="item-information item-information-view_profile"><a href="' . $base_path . 'user/' . $account->uid . $url_arguments . '">View User Profile</a></span></div>';
   }
 
   $markup .= '</div>';
