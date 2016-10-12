@@ -445,8 +445,6 @@ function mcneese_functions_embed_ntas_widget($cache_id = NULL, $cache_expire = '
   $port = 443;
   $error_detected = FALSE;
 
-  global $is_https;
-
   if (empty($markup)) {
     $webpage = cf_http_get_webpage($server_name, $url_path, $port, NULL, 1, 8192, TRUE);
 
@@ -466,11 +464,12 @@ function mcneese_functions_embed_ntas_widget($cache_id = NULL, $cache_expire = '
       // reduce all other header tags.
       cf_http_reduce_html_headers($document['dom']);
 
-      if ($is_https) {
+      if ($port == 443) {
         $a_tags = $body->getElementsByTagName('a');
         foreach ($a_tags as $a_tag) {
           if ($a_tag->hasAttribute('href')) {
-            $a_href = preg_replace('@http://@i', 'https://', $a_tag->getAttribute('href'));
+            $a_href = preg_replace('@^http://@i', 'https://', $a_tag->getAttribute('href'));
+            $a_href = preg_replace('@^//@i', 'https://', $a_href);
             $a_tag->setAttribute('href', $a_href);
           }
         }
@@ -478,7 +477,8 @@ function mcneese_functions_embed_ntas_widget($cache_id = NULL, $cache_expire = '
         $img_tags = $body->getElementsByTagName('img');
         foreach ($img_tags as $img_tag) {
           if ($img_tag->hasAttribute('src')) {
-            $img_src = preg_replace('@http://@i', 'https://', $img_tag->getAttribute('src'));
+            $img_src = preg_replace('@^http://@i', 'https://', $img_tag->getAttribute('src'));
+            $img_src = preg_replace('@^//@i', 'https://', $img_src);
             $img_tag->setAttribute('src', $img_src);
           }
         }
