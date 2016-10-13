@@ -2815,6 +2815,7 @@ function mfcs_request_problems_0_request_perform_recheck($request_id, $problem_c
     return FALSE;
   }
 
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
   mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
 
   $user = cf_current_user();
