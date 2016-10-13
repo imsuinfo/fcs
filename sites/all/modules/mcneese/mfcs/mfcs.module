@@ -4334,8 +4334,19 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
     unset($proxy_as);
   }
 
+  // banner id is necessary for synchronization, if this account has no banner id, then there is nothing to do except update problems.
   if (is_null($banner_id)) {
-    // banner id is necessary for synchronization, if this account has no banner id, then there is nothing to do.
+
+    // If the user has the 'is duplicate' flag set but no longer has a banner id, then unset that flag because 'is duplicate' is tied to banner ids.
+    if (($problems_new & MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES) != 0) {
+      $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES;
+    }
+
+    // save any changes to to the problems flags.
+    if ($problems_new !== $problems_original) {
+      mfcs_save_user($user_information['user_id'], array('problems' => $problems_new));
+    }
+
     return TRUE;
   }
 
