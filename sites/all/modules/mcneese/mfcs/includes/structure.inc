@@ -278,8 +278,9 @@ function mfcs_get_request_fields($form, &$form_state) {
     }
 
     if (count($dates) > 1) {
+      $first_key = TRUE;
       foreach ($dates as $date_key => $date_value) {
-        $fields['dates']['group_dates'][$date_key]['dates']['remove'] = array(
+        $remove_button = array(
           '#id' => 'buttons-request-remove-date-' . $date_key,
           '#type' => 'container',
           '#attributes' => array(
@@ -289,7 +290,7 @@ function mfcs_get_request_fields($form, &$form_state) {
           ),
         );
 
-        $fields['dates']['group_dates'][$date_key]['dates']['remove']['button-' . $date_key] = array(
+        $remove_button['button-' . $date_key] = array(
           '#id' => 'submit-request-remove-date-' . $date_key,
           '#name' => 'submit-request-remove-date-' . $date_key,
           '#type' => 'submit',
@@ -300,6 +301,17 @@ function mfcs_get_request_fields($form, &$form_state) {
             ),
           ),
         );
+
+        if ($first_key) {
+          $first_key = FALSE;
+          $fields['dates']['group_dates'][$date_key]['date_container']['remove'] = $remove_button;
+          $fields['dates']['group_dates'][$date_key]['date_container']['remove']['#weight'] = 0;
+        }
+        else {
+          $fields['dates']['group_dates'][$date_key]['dates']['remove'] = $remove_button;
+        }
+
+        unset($remove_button);
       }
     }
 
@@ -1083,6 +1095,26 @@ function mfcs_get_request_group_dates_date($form, &$form_state, &$fields, &$requ
       ),
     );
 
+    $first_key = TRUE;
+
+    $options_string = NULL;
+    $options = mfcs_get_dates_category_list_options(NULL);
+    while (!empty($options)) {
+      $option_name = array_shift($options);
+
+      if (is_null($options_string)) {
+        $options_string = '';
+      }
+      elseif (empty($options)) {
+        $options_string .= ', and ';
+      }
+      else {
+        $options_string .= ', ';
+      }
+
+      $options_string .= '"<strong>' . $option_name . '</strong>"';
+    }
+
     foreach ($values as $key => $value) {
       $fields['dates']['group_dates'][$key] = array(
         '#type' => 'container',
@@ -1100,6 +1132,34 @@ function mfcs_get_request_group_dates_date($form, &$form_state, &$fields, &$requ
       mfcs_get_request_field_dates_time_start($form, $form_state, $fields['dates']['group_dates'][$key], $request_state, $new_ps, $key);
       mfcs_get_request_field_dates_time_stop($form, $form_state, $fields['dates']['group_dates'][$key], $request_state, $new_ps, $key);
       mfcs_get_request_field_dates_category($form, $form_state, $fields['dates']['group_dates'][$key], $request_state, $new_ps, $key);
+
+      if ($first_key) {
+        $fields['dates']['group_dates'][$key]['date_container'] = array(
+          '#type' => 'container',
+          '#attributes' => array(
+            'class' => array(
+              'date_container',
+              'date_container-' . $key,
+            ),
+          ),
+        );
+
+        $fields['dates']['group_dates'][$key]['date_container']['note'] = array(
+          '#type' => 'markup',
+          '#markup' => '',
+          '#weight' => 100,
+        );
+
+        $fields['dates']['group_dates'][$key]['date_container']['note']['#markup'] .= '<div id="mfcs-markup-request-dates-date_note" class="markup-request">';
+        $fields['dates']['group_dates'][$key]['date_container']['note']['#markup'] .= 'Please give separate times for ' . $options_string . '.<br>';
+        $fields['dates']['group_dates'][$key]['date_container']['note']['#markup'] .= '<br>';
+        $fields['dates']['group_dates'][$key]['date_container']['note']['#markup'] .= 'Providing a true breakdown may keep you from being overcharged by MSU PD for security fees.<br>';
+        $fields['dates']['group_dates'][$key]['date_container']['note']['#markup'] .= '<br>';
+        $fields['dates']['group_dates'][$key]['date_container']['note']['#markup'] .= 'Please remember to indicate on the next screen under "additional special setup" what time you will need the venue opened by MSU PD, if applicable.<br>';
+        $fields['dates']['group_dates'][$key]['date_container']['note']['#markup'] .= '</div>';
+
+        $first_key = FALSE;
+      }
     }
   }
   else {
@@ -4059,7 +4119,7 @@ function mfcs_get_request_field_setup_parking_assistance($form, &$form_state, &$
     $build = TRUE;
   }
 
-  $field_title = 'Will the Event Require Parking Assistance or Restrictions?';
+  $field_title = 'Do you need parking spaces, or an entire parking lot, blocked off?';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'parking_assistance',
@@ -4135,7 +4195,7 @@ function mfcs_get_request_field_setup_parking_assistance_area($form, &$form_stat
     $build = TRUE;
   }
 
-  $field_title = 'What Parking Area will be Accessed or Restricted?';
+  $field_title = 'Please indicate which parking lot and describe as best as you can which spaces you need to be reserved for your event.';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'parking_assistance_area',
@@ -4221,7 +4281,7 @@ function mfcs_get_request_field_setup_road_closures($form, &$form_state, &$field
     $build = TRUE;
   }
 
-  $field_title = 'Will the Event Require Road Closures or Barricades?';
+  $field_title = 'Do any roads need to be shut down during your event?';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'road_closures',
@@ -4297,7 +4357,8 @@ function mfcs_get_request_field_setup_road_closures_details($form, &$form_state,
     $build = TRUE;
   }
 
-  $field_title = 'Provide an Explanation on the Road Closures or Barricades';
+  $field_title = 'Please tell us which road or roads need to be closed, when the closure needs to begin, and for how many hours the closure will be in effect.';
+  $field_notes = '<span id="mfcs-markup-request-title_display-note-setup_road_closures_details" class="title_display-note">Please note: road closures may not be allowed.</span>';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'road_closures_details',
@@ -4329,6 +4390,10 @@ function mfcs_get_request_field_setup_road_closures_details($form, &$form_state,
         '#id' => 'field-request-setup-road_closures_details-' . $key,
         '#type' => 'textarea',
         '#title' => $field_title,
+        '#title_suffix' => array(
+          '#type' => 'markup',
+          '#markup' => $field_notes,
+        ),
         '#default_value' => $value,
         '#rows' => 2,
         '#states' => array(
@@ -4384,6 +4449,7 @@ function mfcs_get_request_field_setup_special_requests($form, &$form_state, &$fi
   }
 
   $field_title = 'Will the Event Require any Additional Special Requests for Setup?';
+  $field_notes = '<span id="mfcs-markup-request-title_display-note-setup_special_requests" class="title_display-note"><span class="uppercase">Important</span>: If you need MSU PD to open the venue for you, answer \'<strong>yes</strong>\' and enter that time information in the explanation box.</span>';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'special_requests',
@@ -4415,6 +4481,10 @@ function mfcs_get_request_field_setup_special_requests($form, &$form_state, &$fi
         '#id' => 'field-request-setup-special_requests-' . $key,
         '#type' => 'radios',
         '#title' => $field_title,
+        '#title_suffix' => array(
+          '#type' => 'markup',
+          '#markup' => $field_notes,
+        ),
         '#default_value' => $value,
         '#options' => array(1 => 'Yes', 0 => 'No'),
         '#required' => TRUE,
@@ -6580,7 +6650,7 @@ function mfcs_get_request_field_services_open_flames_note($form, &$form_state, &
     );
 
     $fields['services']['open_flames_note'][0]['markup']['#markup'] .= '<div id="mfcs-markup-request-services-open_flames_note" class="markup-request">';
-    $fields['services']['open_flames_note'][0]['markup']['#markup'] .= 'You must fill out the <a href="//www.mcneese.edu/node/6309" target="_blank" title="Fill out Open Flame Permit" class="markup-request-link no_print_as_link">Open Flame Permit</a> before your request can be approved.';
+    $fields['services']['open_flames_note'][0]['markup']['#markup'] .= 'An <strong>Open Flame Permit</strong> will be required. <a href="//www.mcneese.edu/node/6309" target="_blank" title="Fill out an Open Flame Permit form" class="markup-request-link no_print_as_link"><strong>Please fill out and submit an Open Flame Permit form.</strong></a> Please reference your event name on your permit request.';
     $fields['services']['open_flames_note'][0]['markup']['#markup'] .= '</div>';
   }
 
