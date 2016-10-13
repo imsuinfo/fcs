@@ -493,7 +493,7 @@ function mfcs_request_manage_0_move_form_validate($form, &$form_state) {
         }
         elseif (!empty($room_unavailability['conflicts']) || !empty($room_unavailability['unavailable'])) {
           $unavailable_message = '<span class="uppercase">Warning</span>: The specified room is currently unavailable for the following dates: ';
-          $unavailable_message .= mfcs_build_room_unavailable_message($room_unavailability);
+          $unavailable_message .= mfcs_build_room_unavailable_message($room_unavailability, TRUE);
           drupal_set_message($unavailable_message, 'warning');
           unset($unavailable_message);
         }

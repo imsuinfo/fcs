@@ -7946,6 +7946,8 @@ function mfcs_check_room_availability($room, $dates, $time_start, $time_stop, $r
  *
  * @param array $availability_issues
  *   An array containing availability issues as returned by mfcs_check_room_availability()
+ * @param bool $blank_target
+ *   (optional) When TRUE, will append target="_blank" to each a href link.
  * @param string|null $url_arguments
  *   (optional) An string of url arguments to append to each link.
  *
@@ -7956,9 +7958,14 @@ function mfcs_check_room_availability($room, $dates, $time_start, $time_stop, $r
  *
  * @see: mfcs_check_room_availability()
  */
-function mfcs_build_room_unavailable_message($availability_issues, $url_arguments = NULL) {
+function mfcs_build_room_unavailable_message($availability_issues, $blank_target = FALSE, $url_arguments = NULL) {
   if (!is_array($availability_issues)) {
     cf_error::invalid_array('availability_issues');
+    return FALSE;
+  }
+
+  if (!is_bool($blank_target)) {
+    cf_error::invalid_bool('blank_target');
     return FALSE;
   }
 
@@ -7973,6 +7980,11 @@ function mfcs_build_room_unavailable_message($availability_issues, $url_argument
 
   global $base_path;
 
+  $unavailable_target = '';
+  if ($blank_target) {
+    $unavailable_target = ' target="_blank"';
+  }
+
   $unavailable_message = '<ul>';
 
   $problematic_dates = array();
@@ -7982,13 +7994,13 @@ function mfcs_build_room_unavailable_message($availability_issues, $url_argument
         if (isset($request_using_room->time_start)) {
           $problematic_date_key =  '' . $request_using_room->date . '-' . $request_using_room->time_start . '-' . $request_using_room->time_stop;
           $problematic_date = '<strong>' . date(MFCS_DATE_FORMAT_DATE, $request_using_room->date) . '</strong> from <strong>' . date(MFCS_DATE_FORMAT_TIME, $request_using_room->time_start) . '</strong> to <strong>' . date(MFCS_DATE_FORMAT_TIME, $request_using_room->time_stop) . '</strong> because of a ';
-          $problematic_date .= '<strong><a href="' . $base_path . 'requests/view-0/' . $request_using_room->request_id . $url_arguments . '" title="View conflicting request.">scheduling conflict</a></strong>.';
+          $problematic_date .= '<strong><a href="' . $base_path . 'requests/view-0/' . $request_using_room->request_id . $url_arguments . '" title="View conflicting request."' . $unavailable_target . '>scheduling conflict</a></strong>.';
           $problematic_dates[$problematic_date_key] = $problematic_date;
         }
         else {
           $problematic_date_key =  '' . $request_using_room->date;
           $problematic_date = '<strong>' . date(MFCS_DATE_FORMAT_DATE, $request_using_room->date) . '</strong> (all day) because of a ';
-          $problematic_date .= '<strong><a href="' . $base_path . 'requests/view-0/' . $request_using_room->request_id . $url_arguments . '" title="View conflicting request.">scheduling conflict</a></strong>.';
+          $problematic_date .= '<strong><a href="' . $base_path . 'requests/view-0/' . $request_using_room->request_id . $url_arguments . '" title="View conflicting request."' . $unavailable_target . '>scheduling conflict</a></strong>.';
           $problematic_dates[$problematic_date_key] = $problematic_date;
         }
       }
@@ -8038,7 +8050,7 @@ function mfcs_build_room_unavailable_message($availability_issues, $url_argument
       }
 
       $unavailable_message .= ' because of: ';
-      $unavailable_message .= '<strong><a href="' . $base_path . 'requests/unavailable-0/view/' . $year . '/' . $unavailable->room_id. '/' . $unavailable->id . $url_arguments . '" title="View details about room unavailability.">';
+      $unavailable_message .= '<strong><a href="' . $base_path . 'requests/unavailable-0/view/' . $year . '/' . $unavailable->room_id. '/' . $unavailable->id . $url_arguments . '" title="View details about room unavailability."' . $unavailable_target . '>';
       $unavailable_message .= check_plain(preg_replace('/\.\s*$/i', '', $unavailable->title)) . '</a></strong>.';
       $unavailable_message .= '</li>';
 
