@@ -950,23 +950,57 @@ function mfcs_miscellaneous_check_requests_requester($request_id = NULL) {
     return FALSE;
   }
 
+  // only join roles if the classification and rid would be the same (logically the same, because their numeric values likely differ).
+  $role_student = user_role_load_by_name('student role');
+  $role_student_id = (int) $role_student->rid;
+  unset($role_student);
+
+  $role_camp = user_role_load_by_name('camp role');
+  $role_camp_id = (int) $role_camp->rid;
+  unset($role_camp);
+
+  $role_employee = user_role_load_by_name('employee role');
+  $role_employee_id = (int) $role_employee->rid;
+  unset($role_employee);
+
+  $role_external = user_role_load_by_name('external role');
+  $role_external_id = (int) $role_external->rid;
+  unset($role_external);
+
+  $complex_join_roles = 'and (';
+  $complex_join_roles .= '(mer.classification = ' . MFCS_REQUEST_CLASSIFICATION_STUDENT . ' and ur.rid = ' . $role_student_id . ')';
+  $complex_join_roles .= 'or (mer.classification = ' . MFCS_REQUEST_CLASSIFICATION_CAMPS . ' and ur.rid = ' . $role_camp_id . ')';
+  $complex_join_roles .= 'or (mer.classification = ' . MFCS_REQUEST_CLASSIFICATION_FACULTY . ' and ur.rid = ' . $role_employee_id . ')';
+  $complex_join_roles .= 'or (mer.classification = ' . MFCS_REQUEST_CLASSIFICATION_EXTERNAL . ' and ur.rid = ' . $role_external_id . ')';
+  $complex_join_roles .= ' )';
+
+  unset($role_student_id);
+  unset($role_camp_id);
+  unset($role_employee_id);
+  unset($role_external_id);
+
   $requests = array();
 
   try {
     // only join if request classification and user classification would both be the same.
     // this will allow for a simple is NULL test to see if the user is not allowed to utilize the content.
     $complex_join = 'and (';
-    $complex_join .= ' (mer.classification = ' . MFCS_REQUEST_CLASSIFICATION_STUDENT . ' and mbertu.event_role_id = ' . MFCS_USER_CLASSIFICATION_STUDENT . ')';
-    $complex_join .= ' or (mer.classification = ' . MFCS_REQUEST_CLASSIFICATION_CAMPS . ' and mbertu.event_role_id = ' . MFCS_USER_CLASSIFICATION_CAMPS . ')';
-    $complex_join .= ' or (mer.classification = ' . MFCS_REQUEST_CLASSIFICATION_FACULTY . ' and mbertu.event_role_id = ' . MFCS_USER_CLASSIFICATION_FACULTY . ')';
-    $complex_join .= ' or (mer.classification = ' . MFCS_REQUEST_CLASSIFICATION_EXTERNAL . ' and mbertu.event_role_id = ' . MFCS_USER_CLASSIFICATION_EXTERNAL . ')';
+    $complex_join .= ' (mer.classification = ' . MFCS_REQUEST_CLASSIFICATION_STUDENT . ' and mbertu.event_role_id = ' . MFCS_REQUEST_CLASSIFICATION_STUDENT . ')';
+    $complex_join .= ' or (mer.classification = ' . MFCS_REQUEST_CLASSIFICATION_CAMPS . ' and mbertu.event_role_id = ' . MFCS_REQUEST_CLASSIFICATION_CAMPS . ')';
+    $complex_join .= ' or (mer.classification = ' . MFCS_REQUEST_CLASSIFICATION_FACULTY . ' and mbertu.event_role_id = ' . MFCS_REQUEST_CLASSIFICATION_FACULTY . ')';
+    $complex_join .= ' or (mer.classification = ' . MFCS_REQUEST_CLASSIFICATION_EXTERNAL . ' and mbertu.event_role_id = ' . MFCS_REQUEST_CLASSIFICATION_EXTERNAL . ')';
     $complex_join .= ' )';
 
     $query = db_select('mfcs_requests', 'mer');
     $query->innerJoin('users', 'u', 'mer.user_id = u.uid');
+    $query->leftJoin('users_roles', 'ur', 'u.uid = ur.uid ' . $complex_join_roles);
+    $query->leftJoin('role', 'r', 'ur.rid = r.rid');
     $query->leftJoin('mfcs_users', 'mu', 'u.uid = mu.user_id');
     $query->leftJoin('mfcs_banner_event_roles_to_users', 'mbertu', 'mer.user_id = mbertu.user_id and mbertu.disabled = 0 ' . $complex_join);
     $query->leftJoin('mfcs_banner_event_roles', 'mber', 'mbertu.event_role_id = mber.id');
+
+    unset($complex_join_roles);
+    unset($complex_join);
 
     $query->addField('mer', 'id', 'id');
     $query->addField('mer', 'title', 'title');
@@ -981,6 +1015,8 @@ function mfcs_miscellaneous_check_requests_requester($request_id = NULL) {
     $query->addField('mu', 'last_name', 'last_name');
     $query->addField('mbertu', 'event_role_id', 'user_classification');
     $query->addField('mber', 'machine_name', 'user_classification_machine_name');
+    $query->addField('r', 'rid', 'role_id');
+    $query->addField('r', 'name', 'role_name');
 
     $status = array(
       MFCS_REQUEST_STATUS_LOCKED,
@@ -1000,11 +1036,13 @@ function mfcs_miscellaneous_check_requests_requester($request_id = NULL) {
     $or = db_or();
     $or->condition('u.status', 0);
     $or->isNull('mu.banner_id');
-    $or->isNull('mbertu.event_role_id');
+
+    $and = db_and();
+    $and->isNull('mbertu.event_role_id');
+    $and->isNull('ur.rid');
+    $or->condition($and);
 
     $query->condition($or);
-
-    // @fixme: this needs to be tested and confirmed to work, consider using array_agg() on the user_classification and user_classification_machine_name.
 
     $results = $query->execute()->fetchAll();
 
@@ -1029,6 +1067,8 @@ function mfcs_miscellaneous_check_requests_requester($request_id = NULL) {
             'classification' => $result->user_classification,
             'classification_machine_name' => $result->user_classification_machine_name,
             'status' => $result->status,
+            'role_id' => $result->role_id,
+            'role_name' => $result->role_name
           ),
         );
       }

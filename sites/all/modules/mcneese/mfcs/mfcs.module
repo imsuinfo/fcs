@@ -99,14 +99,6 @@ define('MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED', 9);
  define('MFCS_REQUEST_CLASSIFICATION_EXTERNAL', 4);
 
 /**
- * Defines Taxonomy TIDs for user classifications.
- */
- define('MFCS_USER_CLASSIFICATION_EXTERNAL', 1);
- define('MFCS_USER_CLASSIFICATION_STUDENT', 2);
- define('MFCS_USER_CLASSIFICATION_FACULTY', 3);
- define('MFCS_USER_CLASSIFICATION_CAMPS', 4);
-
-/**
  * Defines Taxonomy TIDs for request dates categories.
  */
  define('MFCS_REQUEST_DATES_CATEGORY_NONE', 0);
