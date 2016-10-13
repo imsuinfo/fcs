@@ -1686,18 +1686,30 @@ function mfcs_request_users_0_add_or_edit_form_submit($form, &$form_state, $edit
       if (isset($form_state['values']['form']['personal']['name_first']) && strlen($form_state['values']['form']['personal']['name_first']) > 0) {
         $mfcs_settings['first_name'] = $form_state['values']['form']['personal']['name_first'];
       }
+      else {
+        $mfcs_settings['first_name'] = NULL;
+      }
 
       if (isset($form_state['values']['form']['personal']['name_last']) && strlen($form_state['values']['form']['personal']['name_last']) > 0) {
         $mfcs_settings['last_name'] = $form_state['values']['form']['personal']['name_last'];
+      }
+      else {
+        $mfcs_settings['last_name'] = NULL;
       }
     }
 
     if (isset($form_state['values']['form']['personal']['banner_id']) && $form_state['values']['form']['personal']['banner_id'] > 0) {
       $mfcs_settings['banner_id'] = (int) $form_state['values']['form']['personal']['banner_id'];
     }
+    else {
+      $mfcs_settings['banner_id'] = NULL;
+    }
 
     if (isset($form_state['values']['form']['personal']['phone']) && !empty($form_state['values']['form']['personal']['phone'])) {
       $mfcs_settings['phone_number'] = $form_state['values']['form']['personal']['phone'];
+    }
+    else {
+      $mfcs_settings['phone_number'] = NULL;
     }
 
     $ldap_duplicate = NULL;
