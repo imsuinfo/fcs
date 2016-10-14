@@ -40,7 +40,7 @@ function mfcs_request_search_0_form($form, &$form_state) {
 
   mfcs_add_canonical_headers('requests/search-0');
 
-  $page_title = "Search Requests";
+  $page_title = 'Search Requests';
   drupal_set_title($page_title);
 
   $user = cf_current_user();
@@ -166,7 +166,7 @@ function mfcs_request_search_0_form($form, &$form_state) {
   $form['simple'] = array(
     '#id' => 'search-simple-fieldset',
     '#type' => 'fieldset',
-    '#title' => "Simple Search",
+    '#title' => 'Simple Search',
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
     '#tree' => TRUE,
@@ -201,7 +201,7 @@ function mfcs_request_search_0_form($form, &$form_state) {
   $form['simple']['sensitive'] = array(
     '#id' => 'search-simple-sensitive',
     '#type' => 'checkbox',
-    '#title' => "Case Sensitive",
+    '#title' => 'Case Sensitive',
     '#default_value' => isset($form_state['values']['simple']['sensitive']) ? $form_state['values']['simple']['sensitive'] : FALSE,
     '#element_attributes' => array(
       'class' => array(
@@ -231,7 +231,7 @@ function mfcs_request_search_0_form($form, &$form_state) {
     '#id' => 'search-simple-submit-search',
     '#name' => 'search-simple-submit-search',
     '#type' => 'submit',
-    '#default_value' => t("Search"),
+    '#default_value' => 'Search',
     '#attributes' => array(
       'class' => array(
         'no-print',
@@ -245,7 +245,7 @@ function mfcs_request_search_0_form($form, &$form_state) {
     '#id' => 'search-simple-submit-clear',
     '#name' => 'search-simple-submit-clear',
     '#type' => 'submit',
-    '#default_value' => t("Clear"),
+    '#default_value' => 'Clear',
     '#attributes' => array(
       'class' => array(
         'no-print',
@@ -276,13 +276,13 @@ function mfcs_request_search_0_form($form, &$form_state) {
       ),
     );
 
-    $simple_table['caption'] = t("Simple Search Results");
+    $simple_table['caption'] = 'Simple Search Results';
 
     $simple_table['attributes']['id'] = 'mfcs-search_0-simple_table';
     $simple_table['attributes']['class'][] = 'mfcs-table-requests';
     $simple_table['attributes']['class'][] = 'mfcs-management_page-simple_table';
 
-    $simple_table['empty'] = t("No requests were found matching your simple search query.");
+    $simple_table['empty'] = 'No requests were found matching your simple search query.';
 
     $form['simple']['results']['table'] = array(
       '#markup' => mcneese_libraries_theme_table($simple_table, $simple_table['datatable_settings']),
@@ -304,14 +304,14 @@ function mfcs_request_search_0_form($form, &$form_state) {
       '#id' => 'search-simple-results-navigation-previous',
       '#name' => 'search-simple-results-navigation-previous',
       '#type' => 'submit',
-      '#default_value' => t("Prev"),
+      '#default_value' => 'Prev',
       '#attributes' => array(
         'class' => array(
           'no-print',
           'search-simple-results-navigation-choice',
           'search-simple-results-navigation-previous',
         ),
-        'title' => "Previous Simple Search",
+        'title' => 'Previous Simple Search',
       ),
     );
 
@@ -319,14 +319,14 @@ function mfcs_request_search_0_form($form, &$form_state) {
       '#id' => 'search-simple-results-navigation-next',
       '#name' => 'search-simple-results-navigation-next',
       '#type' => 'submit',
-      '#default_value' => t("Next"),
+      '#default_value' => 'Next',
       '#attributes' => array(
         'class' => array(
           'no-print',
           'search-simple-results-navigation-choice',
           'search-simple-results-navigation-next',
         ),
-        'title' => "Next Simple Search",
+        'title' => 'Next Simple Search',
       ),
     );
 
@@ -348,14 +348,14 @@ function mfcs_request_search_0_form($form, &$form_state) {
     }
 
     $form['simple']['results']['table']['#markup'] .= '<div class="table_listing-comment">';
-    $form['simple']['results']['table']['#markup'] .= "Showing " . $navigation_start . " to " . $navigation_total . " of " . $form_state['simple_search-count'] . " entries.";
+    $form['simple']['results']['table']['#markup'] .= 'Showing ' . $navigation_start . ' to ' . $navigation_total . ' of ' . $form_state['simple_search-count'] . ' entries.';
     $form['simple']['results']['table']['#markup'] .= '</div>';
   }
 
   $form['advanced'] = array(
     '#id' => 'search-advanced-fieldset',
     '#type' => 'fieldset',
-    '#title' => "Advanced Search",
+    '#title' => 'Advanced Search',
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
     '#tree' => TRUE,
@@ -374,7 +374,7 @@ function mfcs_request_search_0_form($form, &$form_state) {
   $form['advanced']['sensitive'] = array(
     '#id' => 'search-advanced-sensitive',
     '#type' => 'checkbox',
-    '#title' => "Case Sensitive",
+    '#title' => 'Case Sensitive',
     '#default_value' => isset($form_state['values']['advanced']['sensitive']) ? $form_state['values']['advanced']['sensitive'] : FALSE,
     '#element_attributes' => array(
       'class' => array(
@@ -391,8 +391,8 @@ function mfcs_request_search_0_form($form, &$form_state) {
   $form['advanced']['targets'] = array(
     '#id' => 'search-advanced-targets',
     '#type' => 'fieldset',
-    '#title' => "Search Targets",
-    '#description' => "All targets within this fieldset are matched using the " . '<em class="uppercase">And</em>' . " operation.",
+    '#title' => 'Search Targets',
+    '#description' => 'All targets within this fieldset are matched using the <em class="uppercase">And</em> operation.',
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
     '#attributes' => array(
@@ -438,7 +438,7 @@ function mfcs_request_search_0_form($form, &$form_state) {
     '#id' => 'search-advanced-submit-search',
     '#name' => 'search-advanced-submit-search',
     '#type' => 'submit',
-    '#default_value' => t("Search"),
+    '#default_value' => 'Search',
     '#attributes' => array(
       'class' => array(
         'no-print',
@@ -452,7 +452,7 @@ function mfcs_request_search_0_form($form, &$form_state) {
     '#id' => 'search-advanced-submit-clear',
     '#name' => 'search-advanced-submit-clear',
     '#type' => 'submit',
-    '#default_value' => t("Clear"),
+    '#default_value' => 'Clear',
     '#attributes' => array(
       'class' => array(
         'no-print',
@@ -466,7 +466,7 @@ function mfcs_request_search_0_form($form, &$form_state) {
     '#id' => 'search-advanced-submit-reset',
     '#name' => 'search-advanced-submit-reset',
     '#type' => 'submit',
-    '#default_value' => t("Reset"),
+    '#default_value' => 'Reset',
     '#attributes' => array(
       'class' => array(
         'no-print',
@@ -498,13 +498,13 @@ function mfcs_request_search_0_form($form, &$form_state) {
       ),
     );
 
-    $advanced_table['caption'] = t("Advanced Search Results");
+    $advanced_table['caption'] = 'Advanced Search Results';
 
     $advanced_table['attributes']['id'] = 'mfcs-search_0-advanced_table';
     $advanced_table['attributes']['class'][] = 'mfcs-table-requests';
     $advanced_table['attributes']['class'][] = 'mfcs-management_page-advanced_table';
 
-    $advanced_table['empty'] = t("No requests were found matching your advanced search query.");
+    $advanced_table['empty'] = 'No requests were found matching your advanced search query.';
 
     $form['advanced']['results']['table'] = array(
       '#markup' => mcneese_libraries_theme_table($advanced_table, $advanced_table['datatable_settings']),
@@ -526,14 +526,14 @@ function mfcs_request_search_0_form($form, &$form_state) {
       '#id' => 'search-advanced-results-navigation-previous',
       '#name' => 'search-advanced-results-navigation-previous',
       '#type' => 'submit',
-      '#default_value' => t("Prev"),
+      '#default_value' => 'Prev',
       '#attributes' => array(
         'class' => array(
           'no-print',
           'search-advanced-results-navigation-choice',
           'search-advanced-results-navigation-previous',
         ),
-        'title' => "Previous Advanced Search",
+        'title' => 'Previous Advanced Search',
       ),
     );
 
@@ -541,14 +541,14 @@ function mfcs_request_search_0_form($form, &$form_state) {
       '#id' => 'search-advanced-results-navigation-next',
       '#name' => 'search-advanced-results-navigation-next',
       '#type' => 'submit',
-      '#default_value' => t("Next"),
+      '#default_value' => 'Next',
       '#attributes' => array(
         'class' => array(
           'no-print',
           'search-advanced-results-navigation-choice',
           'search-advanced-results-navigation-next',
         ),
-        'title' => "Next Advanced Search",
+        'title' => 'Next Advanced Search',
       ),
     );
 
@@ -570,7 +570,7 @@ function mfcs_request_search_0_form($form, &$form_state) {
     }
 
     $form['advanced']['results']['table']['#markup'] .= '<div class="table_listing-comment">';
-    $form['advanced']['results']['table']['#markup'] .= "Showing " . $navigation_start . " to " . $navigation_total . " of " . $form_state['advanced_search-count'] . " entries.\n";
+    $form['advanced']['results']['table']['#markup'] .= 'Showing ' . $navigation_start . ' to ' . $navigation_total . ' of ' . $form_state['advanced_search-count'] . ' entries.';
     $form['advanced']['results']['table']['#markup'] .= '</div>';
   }
 
@@ -642,12 +642,12 @@ function mfcs_request_search_0_form_validate($form, &$form_state) {
 
   if ($clicked_id == 'search-simple-submit-search') {
     if (empty($form_state['values']['simple']['text']) && !is_numeric($form_state['values']['simple']['text'])) {
-      form_set_error('simple][text', "You must supply some text to search for.");
+      form_set_error('simple][text', 'You must supply some text to search for.');
     }
     else {
       $search_string = preg_replace('/(\s)/i', ' ', $form_state['values']['simple']['text']);
       if (empty($search_string)) {
-        form_set_error('simple][text', "You must supply some text to search for.");
+        form_set_error('simple][text', 'You must supply some text to search for.');
       }
     }
   }
@@ -660,7 +660,7 @@ function mfcs_request_search_0_form_validate($form, &$form_state) {
     }
 
     if (empty($form_state['advanced_search-chosen_targets'])) {
-      form_set_error('search-advanced-submit-search', "You did not specify any targets to search for in the advanced search section.");
+      form_set_error('search-advanced-submit-search', 'You did not specify any targets to search for in the advanced search section.');
     }
     else {
       mfcs_request_search_0_form_validate_targets($form, $form_state, $state_location, $form_state['advanced_search-chosen_targets'], array('advanced', 'targets'), 0);
@@ -680,25 +680,25 @@ function mfcs_request_search_0_form_validate($form, &$form_state) {
   }
   elseif ($clicked_id == 'search-advanced-search-controls-manage-new-submit-save') {
     if (empty($form_state['advanced_search-chosen_targets'])) {
-      form_set_error('advanced[search][controls][manage][existing][save]', "There are no search targets available for performing the requested action.");
+      form_set_error('advanced[search][controls][manage][existing][save]', 'There are no search targets available for performing the requested action.');
     }
   }
   elseif ($clicked_id == 'search-advanced-search-controls-manage-existing-submit-load') {
     if (empty($form_state['values']['advanced']['search']['controls']['manage']['existing']['select'])) {
-      form_set_error('advanced[search][controls][manage][existing][select]', "There are no search target groupings available for performing the requested action.");
+      form_set_error('advanced[search][controls][manage][existing][select]', 'There are no search target groupings available for performing the requested action.');
     }
   }
   elseif ($clicked_id == 'search-advanced-search-controls-manage-existing-submit-update') {
     if (empty($form_state['values']['advanced']['search']['controls']['manage']['existing']['select'])) {
-      form_set_error('advanced[search][controls][manage][existing][update]', "There are no search target groupings available for performing the requested action.");
+      form_set_error('advanced[search][controls][manage][existing][update]', 'There are no search target groupings available for performing the requested action.');
     }
     elseif (empty($form_state['advanced_search-chosen_targets'])) {
-      form_set_error('advanced[search][controls][manage][existing][update]', "There are no search targets available for performing the requested action.");
+      form_set_error('advanced[search][controls][manage][existing][update]', 'There are no search targets available for performing the requested action.');
     }
   }
   elseif ($clicked_id == 'search-advanced-search-controls-manage-existing-submit-delete') {
     if (empty($form_state['values']['advanced']['search']['controls']['manage']['existing']['select'])) {
-      form_set_error('advanced[search][controls][manage][existing][select]', "There are no search target groupings available for performing the requested action.");
+      form_set_error('advanced[search][controls][manage][existing][select]', 'There are no search target groupings available for performing the requested action.');
     }
   }
   else {
@@ -732,7 +732,7 @@ function mfcs_request_search_0_form_validate($form, &$form_state) {
     }
 
     if ($invalid) {
-      form_set_error('', "Internal Error. An unknown submit process has been detected. Please contact the appropriate support staff.");
+      form_set_error('', 'Internal Error. An unknown submit process has been detected. Please contact the appropriate support staff.');
     }
   }
 }
@@ -1351,8 +1351,8 @@ function mfcs_request_search_0_form_submit($form, &$form_state) {
         $transaction->rollback();
         cf_error::on_exception($e);
 
-        form_set_error('form', "An error occurred while trying to save the advanced search settings. Please contact the support staff.");
-        watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to save the advanced search settings.", array(), WATCHDOG_ERROR);
+        form_set_error('form', 'An error occurred while trying to save the advanced search settings. Please contact the support staff.');
+        watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to save the advanced search settings.', array(), WATCHDOG_ERROR);
 
         $form_state['rebuild'] = TRUE;
         $form_state['redirect'] = FALSE;
@@ -1363,8 +1363,8 @@ function mfcs_request_search_0_form_submit($form, &$form_state) {
         $transaction->rollback();
         cf_error::on_exception($e);
 
-        form_set_error('form', "An error occurred while trying to save the advanced search settings. Please contact the support staff.");
-        watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to save the advanced search settings.", array(), WATCHDOG_ERROR);
+        form_set_error('form', 'An error occurred while trying to save the advanced search settings. Please contact the support staff.');
+        watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to save the advanced search settings.', array(), WATCHDOG_ERROR);
 
         $form_state['rebuild'] = TRUE;
         $form_state['redirect'] = FALSE;
@@ -1394,8 +1394,8 @@ function mfcs_request_search_0_form_submit($form, &$form_state) {
         $transaction->rollback();
         cf_error::on_exception($e);
 
-        form_set_error('form', "An error occurred while trying to delete the advanced search settings. Please contact the support staff.");
-        watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to delete the advanced search settings.", array(), WATCHDOG_ERROR);
+        form_set_error('form', 'An error occurred while trying to delete the advanced search settings. Please contact the support staff.');
+        watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to delete the advanced search settings.', array(), WATCHDOG_ERROR);
 
         $form_state['rebuild'] = TRUE;
         $form_state['redirect'] = FALSE;
@@ -1406,8 +1406,8 @@ function mfcs_request_search_0_form_submit($form, &$form_state) {
         $transaction->rollback();
         cf_error::on_exception($e);
 
-        form_set_error('form', "An error occurred while trying to delete the advanced search settings. Please contact the support staff.");
-        watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to delete the advanced search settings.", array(), WATCHDOG_ERROR);
+        form_set_error('form', 'An error occurred while trying to delete the advanced search settings. Please contact the support staff.');
+        watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to delete the advanced search settings.', array(), WATCHDOG_ERROR);
 
         $form_state['rebuild'] = TRUE;
         $form_state['redirect'] = FALSE;
@@ -1915,11 +1915,11 @@ function mfcs_request_search_0_form_build_targets_and_groups($form, &$form_state
       }
 
       if (!isset($location['targets'][$chosen_name])) {
-        $title = "And #" . $chosen_name_parts[1];
-        $description = "All targets within this fieldset are matched using the " . '<em class="uppercase">And</em>' . " operation.";
+        $title = 'And #' . $chosen_name_parts[1];
+        $description = 'All targets within this fieldset are matched using the <em class="uppercase">And</em> operation.';
         if ($chosen_name_parts[0] == 'or') {
           $title = 'Or #' . $chosen_name_parts[1];
-          $description = "All targets within this fieldset are matched using the " . '<em class="uppercase">Or</em>' . " operation.";
+          $description = 'All targets within this fieldset are matched using the <em class="uppercase">Or</em> operation.';
         }
 
         $location['targets'][$chosen_name] = array(
@@ -2124,38 +2124,38 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
 
   if ($field['type'] == 'number' || $field['type'] == 'date' || $field['type'] == 'timestamp') {
     $operators = array(
-      MFCS_OPERATOR_LESS_THAN => "Less Than",
-      MFCS_OPERATOR_LESS_THAN_EQUAL => "Less Than or Equal To",
-      MFCS_OPERATOR_EQUAL => "Equal To",
-      MFCS_OPERATOR_GREATER_THAN_EQUAL => "Greater Than or Equal To",
-      MFCS_OPERATOR_GREATER_THAN => "Greater Than",
-      MFCS_OPERATOR_NOT_EQUAL => "Not Equal To",
+      MFCS_OPERATOR_LESS_THAN => 'Less Than',
+      MFCS_OPERATOR_LESS_THAN_EQUAL => 'Less Than or Equal To',
+      MFCS_OPERATOR_EQUAL => 'Equal To',
+      MFCS_OPERATOR_GREATER_THAN_EQUAL => 'Greater Than or Equal To',
+      MFCS_OPERATOR_GREATER_THAN => 'Greater Than',
+      MFCS_OPERATOR_NOT_EQUAL => 'Not Equal To',
     );
 
     $default_value = MFCS_OPERATOR_EQUAL;
   }
   elseif ($field['type'] == 'text') {
     $operators = array(
-      MFCS_OPERATOR_LIKE => "Similar To",
-      MFCS_OPERATOR_NOT_LIKE => "Not Similar To",
-      MFCS_OPERATOR_EQUAL => "Equal To",
-      MFCS_OPERATOR_NOT_EQUAL => "Not Equal To",
+      MFCS_OPERATOR_LIKE => 'Similar To',
+      MFCS_OPERATOR_NOT_LIKE => 'Not Similar To',
+      MFCS_OPERATOR_EQUAL => 'Equal To',
+      MFCS_OPERATOR_NOT_EQUAL => 'Not Equal To',
     );
 
     $default_value = MFCS_OPERATOR_LIKE;
   }
   else {
     $operators = array(
-      MFCS_OPERATOR_EQUAL => "Equal To",
-      MFCS_OPERATOR_NOT_EQUAL => "Not Equal To",
+      MFCS_OPERATOR_EQUAL => 'Equal To',
+      MFCS_OPERATOR_NOT_EQUAL => 'Not Equal To',
     );
 
     $default_value = MFCS_OPERATOR_EQUAL;
   }
 
   if (isset($field['allows_null']) && $field['allows_null']) {
-    $operators[MFCS_OPERATOR_IS_NULL] = "Not Defined / Not Used";
-    $operators[MFCS_OPERATOR_IS_NOT_NULL] = "Defined / Used";
+    $operators[MFCS_OPERATOR_IS_NULL] = 'Not Defined / Not Used';
+    $operators[MFCS_OPERATOR_IS_NOT_NULL] = 'Defined / Used';
   }
 
   if (isset($state_location[$target_name][$target_delta]['operator'])) {
@@ -2163,7 +2163,7 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
   }
   $location['targets'][$target_name][$target_delta]['operator'] = array(
     '#id' => 'search-advanced-targets' . $id_extra . '-targets-' . $target_name . '-' . $target_delta . '-operator',
-    '#title' => "Operator",
+    '#title' => 'Operator',
     '#type' => 'select',
     '#default_value' => $default_value,
     '#options' => $operators,
@@ -2186,7 +2186,7 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
   }
   $location['targets'][$target_name][$target_delta]['search'] = array(
     '#id' => 'search-advanced-targets' . $id_extra . '-targets-' . $target_name . '-' . $target_delta . '-search',
-    '#title' => "Value",
+    '#title' => 'Value',
     '#default_value' => $default_value,
     '#required' => FALSE,
     '#attributes' => array(
@@ -2234,7 +2234,7 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
   }
   elseif ($field['type'] == 'bool') {
     $location['targets'][$target_name][$target_delta]['search']['#type'] = 'select';
-    $location['targets'][$target_name][$target_delta]['search']['#options'] = array(1 => "Yes / True", 0 => "No / False");
+    $location['targets'][$target_name][$target_delta]['search']['#options'] = array(1 => 'Yes / True', 0 => 'No / False');
   }
   elseif ($field['type'] == 'options') {
     $location['targets'][$target_name][$target_delta]['search']['#type'] = 'select';
@@ -2303,8 +2303,8 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
   elseif ($field['type'] == 'checkboxes') {
     $location['targets'][$target_name][$target_delta]['option'] = array(
       '#id' => 'search-advanced-targets' . $id_extra . '-targets-' . $target_name . '-' . $target_delta . '-field',
-      '#title' => "Option",
-      '#type' => "select",
+      '#title' => 'Option',
+      '#type' => 'select',
       '#default_value' => NULL,
       '#required' => TRUE,
       '#attributes' => array(
@@ -2332,7 +2332,7 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
     }
 
     $location['targets'][$target_name][$target_delta]['search']['#type'] = 'select';
-    $location['targets'][$target_name][$target_delta]['search']['#options'] = array(0 => "Unchecked / Disabled", 1 => "Checked / Enabled");
+    $location['targets'][$target_name][$target_delta]['search']['#options'] = array(0 => 'Unchecked / Disabled', 1 => 'Checked / Enabled');
 
     if (isset($form_state['values']['advanced']['targets'][$target_name][$target_delta]['search'])) {
       if (!isset($form_state['advanced_search-clear']) || !$form_state['advanced_search-clear']) {
@@ -2366,7 +2366,7 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
         '#id' => 'search-advanced-targets' . $id_extra . '-targets-' . $target_name . '-personnel',
         '#type' => 'textfield',
         '#size' => 9,
-        '#title' => "Personnel",
+        '#title' => 'Personnel',
         '#default_value' => NULL,
         '#required' => FALSE,
         '#attributes' => array(
@@ -2378,7 +2378,7 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
       );
 
       if (isset($field_presentation['type']) && is_array($field_presentation['type']) && array_key_exists('personnel', $field_presentation['type']) && $field_presentation['type']['personnel'] == 'requirement_personnel') {
-        $location['targets'][$target_name][$target_delta]['personnel']['#title'] = "Personnel";
+        $location['targets'][$target_name][$target_delta]['personnel']['#title'] = 'Personnel';
       }
 
       $location['targets'][$target_name][$target_delta]['personnel']['#states'] = array(
@@ -2398,7 +2398,7 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
         '#id' => 'search-advanced-targets' . $id_extra . '-targets-' . $target_name . '-hours',
         '#type' => 'textfield',
         '#size' => 9,
-        '#title' => "Hours",
+        '#title' => 'Hours',
         '#default_value' => NULL,
         '#required' => FALSE,
         '#attributes' => array(
@@ -2426,7 +2426,7 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
         '#id' => 'search-advanced-targets' . $id_extra . '-targets-' . $target_name . '-days',
         '#type' => 'textfield',
         '#size' => 9,
-        '#title' => "Days",
+        '#title' => 'Days',
         '#default_value' => NULL,
         '#required' => FALSE,
         '#attributes' => array(
@@ -2454,7 +2454,7 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
         '#id' => 'search-advanced-targets' . $id_extra . '-targets-' . $target_name . '-rate',
         '#type' => 'textfield',
         '#size' => 12,
-        '#title' => "Rate",
+        '#title' => 'Rate',
         '#default_value' => NULL,
         '#required' => FALSE,
         '#attributes' => array(
@@ -2482,7 +2482,7 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
         '#id' => 'search-advanced-targets' . $id_extra . '-targets-' . $target_name . '-post',
         '#type' => 'textfield',
         '#size' => 9,
-        '#title' => "Post Event/Meeting",
+        '#title' => 'Post Event/Meeting',
         '#default_value' => NULL,
         '#required' => FALSE,
         '#attributes' => array(
@@ -2510,7 +2510,7 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
         '#id' => 'search-advanced-targets' . $id_extra . '-targets-' . $target_name . '-supplies',
         '#type' => 'textfield',
         '#size' => 9,
-        '#title' => "Supplies",
+        '#title' => 'Supplies',
         '#default_value' => NULL,
         '#required' => FALSE,
         '#attributes' => array(
@@ -2589,10 +2589,10 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
         }
         $location['targets'][$target_name][$target_delta]['date_cancelling'] = array(
           '#id' => 'search-advanced-targets' . $id_extra . '-targets-' . $target_name . '-' . $target_delta . '-date_cancelling',
-          '#title' => "Cancelling",
+          '#title' => 'Cancelling',
           '#type' => 'select',
           '#default_value' => $default_value,
-          '#options' => array(0 => "Disclude Cancelled", 1 => "Include Cancelled", 2 => "Cancelled Only"),
+          '#options' => array(0 => 'Disclude Cancelled', 1 => 'Include Cancelled', 2 => 'Cancelled Only'),
           '#required' => TRUE,
           '#attributes' => array(
             'class' => array(
@@ -2614,7 +2614,7 @@ function mfcs_request_search_0_form_build_target(&$form, &$form_state, &$locatio
     $location['targets'][$target_name][$target_delta]['search']['#size'] = 8;
     $location['targets'][$target_name][$target_delta]['search']['#maxlength'] = 8;
     $location['targets'][$target_name][$target_delta]['search']['#expected_format'] = array('date' => MFCS_DATE_FORMAT_TIME);
-    $location['targets'][$target_name][$target_delta]['search']['#description'] = "E.g, 12:31pm";
+    $location['targets'][$target_name][$target_delta]['search']['#description'] = 'E.g, 12:31pm';
   }
   elseif ($field['type'] == 'number') {
     $location['targets'][$target_name][$target_delta]['search']['#type'] = 'numberfield';
@@ -2947,13 +2947,13 @@ function mfcs_request_search_0_form_build_search_target($structure, $target_name
         }
       }
       elseif ($date_mode == 'y') {
-        $date_value = date("Y", $date_value_stamp);
+        $date_value = date('Y', $date_value_stamp);
       }
       elseif ($date_mode == 'm') {
-        $date_value = date("m", $date_value_stamp);
+        $date_value = date('m', $date_value_stamp);
       }
       elseif ($date_mode == 'd') {
-        $date_value = date("d", $date_value_stamp);
+        $date_value = date('d', $date_value_stamp);
       }
       else {
         // silently ignore invalid date values.
@@ -3406,7 +3406,7 @@ function mfcs_request_search_0_form_build_grouping($form, &$form_state, &$locati
   $location['search']['controls'] = array(
     '#id' => 'search-advanced-search-controls' . $id_extra,
     '#type' => 'fieldset',
-    '#title' => "Search Target Controls",
+    '#title' => 'Search Target Controls',
     '#collapsible' => TRUE,
     '#collapsed' => $collapse_controls,
     '#tree' => TRUE,
@@ -3435,8 +3435,8 @@ function mfcs_request_search_0_form_build_grouping($form, &$form_state, &$locati
   $location['search']['controls']['possible_targets']['select'] = array(
     '#id' => 'search-advanced-search-controls-possible_targets-select' . $id_extra,
     '#type' => 'select',
-    '#title' => t("Available Search Targets"),
-    '#description' => t("Choose a particular target to search by."),
+    '#title' => 'Available Search Targets',
+    '#description' => 'Choose a particular target to search by.',
     '#options' => $possible_targets,
     '#element_attributes' => array(
       'class' => array(
@@ -3451,7 +3451,7 @@ function mfcs_request_search_0_form_build_grouping($form, &$form_state, &$locati
     '#id' => 'search-advanced-search-controls-possible_targets-add' . $id_extra,
     '#name' => 'search-advanced-search-controls-possible_targets-add' . $id_extra,
     '#type' => 'submit',
-    '#default_value' => "Add Target",
+    '#default_value' => 'Add Target',
     '#attributes' => array(
       'class' => array(
         'form-item',
@@ -3484,10 +3484,10 @@ function mfcs_request_search_0_form_build_grouping($form, &$form_state, &$locati
 
     if (count($logic_name_parts) == 2 && ($logic_name_parts[0] == 'and' || $logic_name_parts[0] == 'or')) {
       if ($logic_name_parts[0] == 'and') {
-        $combined_targets['and'][$logic_name] = "And #" . $logic_name_parts[1];
+        $combined_targets['and'][$logic_name] = 'And #' . $logic_name_parts[1];
       }
       else {
-        $combined_targets['or'][$logic_name] = "Or #" . $logic_name_parts[1];
+        $combined_targets['or'][$logic_name] = 'Or #' . $logic_name_parts[1];
       }
     }
   }
@@ -3495,8 +3495,8 @@ function mfcs_request_search_0_form_build_grouping($form, &$form_state, &$locati
   $location['search']['controls']['chosen_targets']['select'] = array(
     '#id' => 'search-advanced-search-controls-chosen_targets-select' . $id_extra,
     '#type' => 'select',
-    '#title' => t("Chosen Search Targets"),
-    '#description' => t("Remove a particular target from the search by choices."),
+    '#title' => 'Chosen Search Targets',
+    '#description' => 'Remove a particular target from the search by choices.',
     '#options' => $combined_targets,
     '#element_attributes' => array(
       'class' => array(
@@ -3511,7 +3511,7 @@ function mfcs_request_search_0_form_build_grouping($form, &$form_state, &$locati
     '#id' => 'search-advanced-search-controls-chosen_targets-remove' . $id_extra,
     '#name' => 'search-advanced-search-controls-chosen_targets-remove' . $id_extra,
     '#type' => 'submit',
-    '#default_value' => "Remove Target",
+    '#default_value' => 'Remove Target',
     '#element_attributes' => array(
       'class' => array(
         'form-item',
@@ -3538,7 +3538,7 @@ function mfcs_request_search_0_form_build_grouping($form, &$form_state, &$locati
     $location['search']['controls']['grouping']['explanation'] = array(
       '#id' => 'search-advanced-search-controls-grouping-explanation' . $id_extra,
       '#type' => 'container',
-      '#description' => "Perform logical search grouping of (field_1 OR field_2).",
+      '#description' => 'Perform logical search grouping of (field_1 OR field_2).',
       '#attributes' => array(
         'class' => array(
           'form-item',
@@ -3551,15 +3551,15 @@ function mfcs_request_search_0_form_build_grouping($form, &$form_state, &$locati
       '#markup' => '',
     );
 
-    $location['search']['controls']['grouping']['explanation']['markup']['#markup'] = '<strong>' . "Target Grouping" . '</strong><br>';
-    $location['search']['controls']['grouping']['explanation']['markup']['#markup'] .= '<em class="uppercase">And</em>' . " = match all targets.<br>";
-    $location['search']['controls']['grouping']['explanation']['markup']['#markup'] .= '<em class="uppercase">OR</em>' . " = match any target.";
+    $location['search']['controls']['grouping']['explanation']['markup']['#markup'] = '<strong>Target Grouping</strong><br>';
+    $location['search']['controls']['grouping']['explanation']['markup']['#markup'] .= '<em class="uppercase">And</em> = match all targets.<br>';
+    $location['search']['controls']['grouping']['explanation']['markup']['#markup'] .= '<em class="uppercase">OR</em> = match any target.';
 
     $location['search']['controls']['grouping']['add_and'] = array(
       '#id' => 'search-advanced-search-controls-grouping-add_and' . $id_extra,
       '#name' => 'search-advanced-search-controls-grouping-add_and' . $id_extra,
       '#type' => 'submit',
-      '#default_value' => "Add AND",
+      '#default_value' => 'Add AND',
       '#element_attributes' => array(
         'class' => array(
           'form-item',
@@ -3573,7 +3573,7 @@ function mfcs_request_search_0_form_build_grouping($form, &$form_state, &$locati
       '#id' => 'search-advanced-search-controls-grouping-add_or' . $id_extra,
       '#name' => 'search-advanced-search-controls-grouping-add_or' . $id_extra,
       '#type' => 'submit',
-      '#default_value' => "Add OR",
+      '#default_value' => 'Add OR',
       '#element_attributes' => array(
         'class' => array(
           'form-item',
@@ -3593,8 +3593,8 @@ function mfcs_request_search_0_form_build_grouping($form, &$form_state, &$locati
     $location['search']['controls']['manage'] = array(
       '#id' => 'search-advanced-search-controls-manage',
       '#type' => 'fieldset',
-      '#title' => "Search Target Groupings",
-      '#description' => "Load, update, save, or delete existing search target structures.",
+      '#title' => 'Search Target Groupings',
+      '#description' => 'Load, update, save, or delete existing search target structures.',
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
       '#attributes' => array(
@@ -3622,8 +3622,8 @@ function mfcs_request_search_0_form_build_grouping($form, &$form_state, &$locati
       '#type' => 'select',
       '#options' => $saved_searches,
       '#default_value' => '',
-      '#title' => t("Available Search Target Groupings"),
-      '#description' => t("Load existing saved search target groupings."),
+      '#title' => 'Available Search Target Groupings',
+      '#description' => 'Load existing saved search target groupings.',
       '#element_attributes' => array(
         'class' => array(
           'search-advanced-search-controls-manage-existing-select',
@@ -3646,7 +3646,7 @@ function mfcs_request_search_0_form_build_grouping($form, &$form_state, &$locati
       '#id' => 'search-advanced-search-controls-manage-existing-submit-load',
       '#name' => 'search-advanced-search-controls-manage-existing-submit-load',
       '#type' => 'submit',
-      '#default_value' => t("Load"),
+      '#default_value' => 'Load',
       '#attributes' => array(
         'class' => array(
           'search-advanced-search-controls-manage-existing-submit-load',
@@ -3658,7 +3658,7 @@ function mfcs_request_search_0_form_build_grouping($form, &$form_state, &$locati
       '#id' => 'search-advanced-search-controls-manage-existing-submit-update',
       '#name' => 'search-advanced-search-controls-manage-existing-submit-update',
       '#type' => 'submit',
-      '#default_value' => t("Update"),
+      '#default_value' => 'Update',
       '#attributes' => array(
         'class' => array(
           'search-advanced-search-controls-manage-existing-submit-update',
@@ -3670,7 +3670,7 @@ function mfcs_request_search_0_form_build_grouping($form, &$form_state, &$locati
       '#id' => 'search-advanced-search-controls-manage-existing-submit-delete',
       '#name' => 'search-advanced-search-controls-manage-existing-submit-delete',
       '#type' => 'submit',
-      '#default_value' => t("Delete"),
+      '#default_value' => 'Delete',
       '#attributes' => array(
         'class' => array(
           'search-advanced-search-controls-manage-existing-submit-delete',
@@ -3696,8 +3696,8 @@ function mfcs_request_search_0_form_build_grouping($form, &$form_state, &$locati
       '#maxlength' => 63,
       '#required' => FALSE,
       '#default_value' => '',
-      '#title' => t("Name"),
-      '#description' => t("Supply a name for this new search target grouping."),
+      '#title' => 'Name',
+      '#description' => 'Supply a name for this new search target grouping.',
       '#element_attributes' => array(
         'class' => array(
           'search-advanced-search-controls-manage-new-human_name',
@@ -3720,7 +3720,7 @@ function mfcs_request_search_0_form_build_grouping($form, &$form_state, &$locati
       '#id' => 'search-advanced-search-controls-manage-new-submit-save',
       '#name' => 'search-advanced-search-controls-manage-new-submit-save',
       '#type' => 'submit',
-      '#default_value' => t("Save"),
+      '#default_value' => 'Save',
       '#attributes' => array(
         'class' => array(
           'search-advanced-search-controls-manage-new-submit-save',
@@ -3790,7 +3790,7 @@ function mfcs_request_search_0_columns() {
     'id' => array(
       'id' => 0,
       'column' => 'id',
-      'name' => "ID",
+      'name' => 'ID',
       'class' => array('column-id'),
       'sanitize' => FALSE,
       'align' => 'center',
@@ -3798,7 +3798,7 @@ function mfcs_request_search_0_columns() {
     'type' => array(
       'id' => 1,
       'column' => 'type',
-      'name' => "Type",
+      'name' => 'Type',
       'class' => array('column-type', 'no-script-hidden'),
       'align' => 'center',
       #'visible' => FALSE,
@@ -3806,35 +3806,35 @@ function mfcs_request_search_0_columns() {
     'title' => array(
       'id' => 2,
       'column' => 'title',
-      'name' => "Title",
+      'name' => 'Title',
       'class' => array('column-title'),
       'align' => 'center',
     ),
     'building' => array(
       'id' => 3,
       'column' => 'building',
-      'name' => "Building",
+      'name' => 'Building',
       'class' => array('column-building'),
       'align' => 'center',
     ),
     'room' => array(
       'id' => 4,
       'column' => 'room',
-      'name' => "Room",
+      'name' => 'Room',
       'class' => array('column-room'),
       'align' => 'center',
     ),
     'date' => array(
       'id' => 5,
       'column' => 'date',
-      'name' => "Date",
+      'name' => 'Date',
       'class' => array('column-date'),
       'align' => 'center',
     ),
     'status' => array(
       'id' => 6,
       'column' => 'status',
-      'name' => "Status",
+      'name' => 'Status',
       'class' => array('column-status', 'no-script-hidden'),
       'align' => 'center',
       #'visible' => FALSE,
@@ -3842,7 +3842,7 @@ function mfcs_request_search_0_columns() {
     'step' => array(
       'id' => 7,
       'column' => 'step',
-      'name' => "Step",
+      'name' => 'Step',
       'class' => array('column-step', 'no-script-hidden'),
       'align' => 'center',
       #'visible' => FALSE,
@@ -3850,7 +3850,7 @@ function mfcs_request_search_0_columns() {
     'submitted_by_id' => array(
       'id' => 8,
       'column' => 'user_id',
-      'name' => "Submitted By ID",
+      'name' => 'Submitted By ID',
       'class' => array('column-submitted_by_id', 'no-script-hidden'),
       'sanitize' => FALSE,
       'align' => 'center',
@@ -3859,7 +3859,7 @@ function mfcs_request_search_0_columns() {
     'submitted_by' => array(
       'id' => 9,
       'column' => 'user_id',
-      'name' => "Submitted By",
+      'name' => 'Submitted By',
       'class' => array('column-submitted_by', 'no-script-hidden'),
       'align' => 'center',
       #'visible' => FALSE,
@@ -3867,14 +3867,14 @@ function mfcs_request_search_0_columns() {
     'submitted_on' => array(
       'id' => 10,
       'column' => 'created',
-      'name' => "Submitted On",
+      'name' => 'Submitted On',
       'class' => array('column-submitted_on'),
       'align' => 'center',
     ),
     'operations' => array(
       'id' => 11,
       'column' => NULL,
-      'name' => "Operations",
+      'name' => 'Operations',
       'class' => array('column-operations', 'no-print'),
       'align' => 'center',
       'searchable' => FALSE,
