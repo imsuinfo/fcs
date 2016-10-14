@@ -157,6 +157,7 @@ define('MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED', 9);
  */
  define('MFCS_PDF_TYPE_REQUEST', 0);
  define('MFCS_PDF_TYPE_AGREEMENT', 1);
+ define('MFCS_PDF_TYPE_CALENDAR', 2);
 
 /**
  * Defines e-mail reminder types.

@@ -1605,7 +1605,7 @@ function mfcs_output_print_page_view($html, $parameters = array()) {
  * @see: mfcs_output_print_page_view()
  */
 function mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $revision_id, $html, $local = FALSE, $type = MFCS_PDF_TYPE_REQUEST) {
-  if (!cf_is_integer($request_id)) {
+  if (!is_null($request_id) && !cf_is_integer($request_id)) {
     cf_error::invalid_integer('request_id');
     return FALSE;
   }
@@ -1655,7 +1655,11 @@ function mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $revision_id, $h
 
   $wkpdf->addPage($html);
 
-  $filename = mfcs_build_filename($request_id, $revision_id, 0, $type);
+  if (is_null($request_id)) {
+  }
+  else {
+    $filename = mfcs_build_filename($request_id, $revision_id, 0, $type);
+  }
 
   if ($local) {
     // save the file, locally.
@@ -1675,7 +1679,92 @@ function mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $revision_id, $h
   }
 
   if (!$result) {
-    watchdog(MFCS_WATCHDOG_ID, "Error occured while generating the PDF of request @id: @error", array('@id' => $request_id, '@error' => $wkpdf->getError()), WATCHDOG_ERROR);
+    watchdog(MFCS_WATCHDOG_ID, 'Error occured while generating the PDF of request @id: @error', array('@id' => $request_id, '@error' => $wkpdf->getError()), WATCHDOG_ERROR);
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
+/**
+ * Renders a PDF of a given request using the wkhtmltopdf library.
+ *
+ * @param string $filename
+ *   The name of the file to use.
+ * @param string $html
+ *   The HTML markup to convert to a PDF. Recommend converting the markup
+ *   using mfcs_output_print_page_view().
+ * @param bool $local
+ *   (optional) If TRUE, then the file is saved to the local disk.
+ *   If FALSE, then the file is print to stdout.
+ * @param int $type
+ *   (optional) What the PDF represents, such as a request or an agreement.
+ *
+ * @return bool
+ *   TRUE on success, FALSE otherwise.
+ *
+ * @see: mfcs_output_print_page_view()
+ */
+function mfcs_request_pdf_0_page_using_wkhtmltopdf_generic($filename, $html, $local = FALSE) {
+  if (!is_string($filename) && strlen($filename) > 0) {
+    cf_error::invalid_string('filename');
+    return FALSE;
+  }
+
+  if (!is_string($html)) {
+    cf_error::invalid_string('html');
+    return FALSE;
+  }
+
+  if (!is_bool($local)) {
+    cf_error::invalid_bool('local');
+    return FALSE;
+  }
+
+  $library = libraries_load('phpwkhtmltopdf');
+  if ($library === FALSE || empty($library['loaded'])) {
+    return FALSE;
+  }
+
+  $wkpdf = new WkHtmlToPdf();
+
+  $wk_options = array();
+
+  $wk_options['binPath'] = '/usr/local/bin/wkhtmltopdf';
+  $wk_options['binName'] = 'wkhtmltopdf';
+
+  // when not ignored, the PDF does not get generated.
+  $wk_options['ignoreWarnings'] = TRUE;
+
+  $wrapper = file_stream_wrapper_get_instance_by_scheme('temporary');
+  if (is_object($wrapper)) {
+    $wk_options['tmp'] = $wrapper->getDirectoryPath();
+  }
+
+  // setup the default options
+  $wkpdf->setOptions($wk_options);
+
+  $wkpdf->addPage($html);
+
+  if ($local) {
+    // save the file, locally.
+    $temporary_name = drupal_tempnam('temporary://', 'file');
+    $wkpdf->saveAs($temporary_name);
+
+    file_unmanaged_move($temporary_name, 'private://requests/local/' . $filename, FILE_EXISTS_REPLACE);
+  }
+  else {
+    drupal_send_headers();
+
+    // send to the browser
+    #$result = $wkpdf->send($filename, TRUE);
+
+    // send as a download
+    $result = $wkpdf->send($filename, FALSE);
+  }
+
+  if (!$result) {
+    watchdog(MFCS_WATCHDOG_ID, 'Error occured while generating the PDF of @filename: @error', array('@filename' => $filename, '@error' => $wkpdf->getError()), WATCHDOG_ERROR);
     return FALSE;
   }
 
@@ -1731,6 +1820,9 @@ function mfcs_build_filename($request_id, $revision_id = NULL, $mode = MFCS_VIEW
   elseif ($type === MFCS_PDF_TYPE_AGREEMENT) {
     $name = 'agreement';
   }
+  elseif ($type === MFCS_PDF_TYPE_CALENDAR) {
+    $name = 'calendar';
+  }
 
   $fixed_title = preg_replace('/\W/i', '_', $request['information']['title'][0]->value);
   $fixed_title = preg_replace('/_+/i', '_', $fixed_title);
@@ -1759,7 +1851,7 @@ function mfcs_build_filename($request_id, $revision_id = NULL, $mode = MFCS_VIEW
     $extra .= '-revision-' . $revision_id;
   }
 
-  return sprintf("%'010s", $request_id) . '-' . $name . '-' . $fixed_title . $extra . '.pdf';
+  return sprintf('%\'010s', $request_id) . '-' . $name . '-' . $fixed_title . $extra . '.pdf';
 }
 
 /**

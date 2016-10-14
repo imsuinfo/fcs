@@ -68,21 +68,21 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
   );
 
   if (!is_null($month) && !in_array(strtolower($month), $valid_month_names)) {
-    if (strlen($month) < 3 && cf_is_integer($month)) {
+    if (cf_is_integer($month)) {
       $month = (int) $month;
 
       if (array_key_exists($month, $valid_month_names)) {
         $month = $valid_month_names[$month];
       }
       else {
-        cf_error::invalid_variable('month', "Must be a valid month name.");
+        cf_error::invalid_variable('month', 'Must be a valid month name.');
 
         drupal_not_found();
         drupal_exit();
       }
     }
     else {
-      cf_error::invalid_variable('month', "Must be a valid month name.");
+      cf_error::invalid_variable('month', 'Must be a valid month name.');
 
       drupal_not_found();
       drupal_exit();
@@ -113,6 +113,9 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
   $month = strtolower(date('F', $month_start));
   $year = date('Y', $month_start);
   mfcs_add_canonical_headers('requests/calendar-0/month/' . $year . '/' . $month);
+
+  $page_title = 'Request Calendar - ' . date('F Y', $current_date['month_stamp']);
+  drupal_set_title($page_title);
 
   // determine the begin and end weeks for the month.
   $absolute_start = strtotime('midnight last sunday', $month_start);
@@ -356,7 +359,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
     if (!empty($items)) {
       foreach ($items as $item) {
         if (!isset($item->date)) {
-          watchdog(MFCS_WATCHDOG_ID, "Unable to find 'date' property in for item, skipping. item = @item.", array('@item' => print_r($item, TRUE)), WATCHDOG_ERROR);
+          watchdog(MFCS_WATCHDOG_ID, 'Unable to find \'date\' property in for item, skipping. item = @item.', array('@item' => print_r($item, TRUE)), WATCHDOG_ERROR);
           continue;
         }
 
@@ -450,7 +453,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
   mfcs_include(MFCS_INCLUDE_OUTPUT);
 
   $markup = '';
-  $title = '<h3>' . "Requests for " . date("F, Y", $month_start) . '</h3>';
+  $title = '<h3>' . 'Requests for ' . date('F, Y', $month_start) . '</h3>';
   $result = mfcs_build_calendar_month_markup($rows, $month_start, $month_stop, $absolute_start, $absolute_stop, $title, 'mfcs-calendar-0-month');
   if ($result !== FALSE) {
     $markup .= $result;
@@ -461,7 +464,131 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
 }
 
 /**
- * Provides the facilities use request calendar month page.
+ * Provides PDF of the facilities use request calendar month page.
+ *
+ * @param int $year
+ *   The year.
+ * @param string $month
+ *   The month.
+ *   Causes $year to be required.
+ *
+ * @return exit
+ *   This function should not return.
+ */
+function mfcs_request_calendar_month_0_page_pdf($year, $month) {
+  if (!cf_is_integer($year)) {
+    cf_error::invalid_integer('year');
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  if (!is_string($month) && !cf_is_integer($month)) {
+    cf_error::invalid_integer('month');
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  $valid_month_names = array(
+    1 => 'january',
+    2 => 'february',
+    3 => 'march',
+    4 => 'april',
+    5 => 'may',
+    6 => 'june',
+    7 => 'july',
+    8 => 'august',
+    9 => 'september',
+    10 => 'october',
+    11 => 'november',
+    12 => 'december',
+  );
+
+  if (!is_null($month) && !in_array(strtolower($month), $valid_month_names)) {
+    if (cf_is_integer($month)) {
+      $month = (int) $month;
+
+      if (array_key_exists($month, $valid_month_names)) {
+        $month = $valid_month_names[$month];
+      }
+      else {
+        cf_error::invalid_variable('month', 'Must be a valid month name.');
+
+        drupal_not_found();
+        drupal_exit();
+      }
+    }
+    else {
+      cf_error::invalid_variable('month', 'Must be a valid month name.');
+
+      drupal_not_found();
+      drupal_exit();
+    }
+  }
+
+  $month_stamp = strtotime($month . ' 1, ' . $year);
+
+  mfcs_add_canonical_headers('requests/pdf-0/calendar/' . $year . '/' . $month);
+
+  $page_title = 'Request Calendar - ' . date('F Y', $month_stamp);
+  drupal_set_title($page_title);
+
+  $form = array();
+  $form_state = array();
+
+  $page = array();
+  $page['html'] = array(
+    '#type' => 'container',
+    '#attributes' => array(
+      'id' => 'mfcs_request-calendar_month-0-page-pdf',
+      'class' => array(
+        'mfcs_request-calendar_month-0-page-pdf',
+      ),
+    ),
+  );
+
+  // turn off devel shutdown functionality.
+  $GLOBALS['devel_shutdown'] = FALSE;
+
+  $markup = mfcs_request_calendar_month_0_page($year, $month);
+  if ($markup === FALSE) {
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  $page['html']['content'] = array(
+    '#type' => 'markup',
+    '#markup' => $markup,
+  );
+  unset($markup);
+
+  $renderred = drupal_render($page);
+  $html = drupal_render_page($renderred);
+
+  mfcs_include(MFCS_INCLUDE_OUTPUT);
+
+  $parameters = array(
+    'page_title' => $page_title,
+    'title' => $page_title,
+  );
+
+  $contained = mfcs_output_print_page_view($html, $parameters);
+
+  if (!is_string($contained)) {
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  $result = mfcs_request_pdf_0_page_using_wkhtmltopdf_generic('fcs-calendar-month-' . $year . '-' . $month . '.pdf', $contained, FALSE);
+  if ($result) {
+    exit();
+  }
+
+  drupal_not_found();
+  drupal_exit();
+}
+
+/**
+ * Provides the facilities use request calendar day page.
  *
  * @param int $year
  *   (optional) When specified, represents the year.
@@ -540,21 +667,21 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
   );
 
   if (!is_null($month) && !in_array(strtolower($month), $valid_month_names)) {
-    if (strlen($month) < 3 && cf_is_integer($month)) {
+    if (cf_is_integer($month)) {
       $month = (int) $month;
 
       if (array_key_exists($month, $valid_month_names)) {
         $month = $valid_month_names[$month];
       }
       else {
-        cf_error::invalid_variable('month', "Must be a valid month name.");
+        cf_error::invalid_variable('month', 'Must be a valid month name.');
 
         drupal_not_found();
         drupal_exit();
       }
     }
     else {
-      cf_error::invalid_variable('month', "Must be a valid month name.");
+      cf_error::invalid_variable('month', 'Must be a valid month name.');
 
       drupal_not_found();
       drupal_exit();
@@ -562,7 +689,7 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
   }
 
   if (!is_null($day) && ($day < 1 || $day > 31)) {
-    cf_error::invalid_variable('month', "Must be a valid day number.");
+    cf_error::invalid_variable('day', 'Must be a valid day number.');
 
     drupal_not_found();
     drupal_exit();
@@ -592,6 +719,9 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
   $year = date('Y', $day_start);
   $day = date('d', $day_start);
   mfcs_add_canonical_headers('requests/calendar-0/day/' . $year . '/' . $month . '/' . $day);
+
+  $page_title = 'Request Calendar - ' . date('F j, Y', $day_start);
+  drupal_set_title($page_title);
 
   $search = mfcs_miscellaneous_generate_requests_by_date_search($day_start, $day_stop);
 
@@ -746,7 +876,7 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
       if ($time_offset_stop > 0) {
         $time_ceiling += $range_interval;
       }
-      $time_zindex = 100 + (int) date("G", $time_floor);
+      $time_zindex = 100 + (int) date('G', $time_floor);
 
       // preprocess the slots in an attempt to find the leftmost slot that is available for all date slots.
       $time_slot = 0;
@@ -833,7 +963,7 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
   if (!empty($items)) {
     foreach ($items as $item) {
       if (!isset($item->date)) {
-        watchdog(MFCS_WATCHDOG_ID, "Unable to find 'date' property in for item, skipping. item = @item.", array('@item' => print_r($item, TRUE)), WATCHDOG_ERROR);
+        watchdog(MFCS_WATCHDOG_ID, 'Unable to find \'date\' property in for item, skipping. item = @item.', array('@item' => print_r($item, TRUE)), WATCHDOG_ERROR);
         continue;
       }
 
@@ -897,7 +1027,7 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
           if ($time_offset_stop > 0) {
             $time_ceiling += $range_interval;
           }
-          $time_zindex = 100 + (int) date("G", $time_floor);
+          $time_zindex = 100 + (int) date('G', $time_floor);
 
           // @fixme: Filter out overlapping times. This needs to be fixed so that the use case can never happen. (result of a bug on insert, not checking to see if multiple dates overlap.)
           if (isset($processed_items[$item->id][$time_floor])) {
@@ -986,7 +1116,7 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
   mfcs_include(MFCS_INCLUDE_OUTPUT);
 
   $markup = '';
-  $title = '<h3>' . "Requests for " . date("l", $day_start) . ', <a href="' . $base_path . 'requests/calendar-0/month/' . date("Y/F", $day_start) . $url_arguments . '" title="Requests for ' . date("F, Y", $day_start) . '">' . date("F", $day_start) . '</a> ' . date("j, Y", $day_start) . ' (Page #' . ($page_number + 1) . ')</h3>';
+  $title = '<h3>' . 'Requests for ' . date('l', $day_start) . ', <a href="' . $base_path . 'requests/calendar-0/month/' . date('Y/F', $day_start) . $url_arguments . '" title="Requests for ' . date('F, Y', $day_start) . '">' . date('F', $day_start) . '</a> ' . date('j, Y', $day_start) . ' (Page #' . ($page_number + 1) . ')</h3>';
 
   $result = mfcs_build_calendar_day_markup($rows, $day_start, $day_stop, $title, $page_number, 'mfcs-calendar-0-day');
   if ($result !== FALSE) {
@@ -995,6 +1125,155 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
   unset($result);
 
   return $markup;
+}
+
+/**
+ * Provides PDF of the facilities use request calendar day page.
+ *
+ * @param int $year
+ *   The year.
+ * @param string $month
+ *   The month.
+ *   Causes $year to be required.
+ * @param string $day
+ *   The day.
+ *   Causes $year and $month to be required.
+ * @param int $page_number
+ *   The page number. Requests are broken up into different pages
+ *   to better handle large numbers of requests per time slot.
+ *
+ * @return string
+ *   The HTML output representing the page.
+ */
+function mfcs_request_calendar_day_0_page_pdf($year, $month, $day, $page_number) {
+  if (!cf_is_integer($year)) {
+    cf_error::invalid_integer('year');
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  if (!is_string($month) && !cf_is_integer($month)) {
+    cf_error::invalid_integer('month');
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  if (!cf_is_integer($day)) {
+    cf_error::invalid_integer('day');
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  if (!cf_is_integer($page_number)) {
+    cf_error::invalid_integer('page_number');
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  if (!is_null($day) && ($day < 1 || $day > 31)) {
+    cf_error::invalid_variable('day', 'Must be a valid day number.');
+
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  $valid_month_names = array(
+    1 => 'january',
+    2 => 'february',
+    3 => 'march',
+    4 => 'april',
+    5 => 'may',
+    6 => 'june',
+    7 => 'july',
+    8 => 'august',
+    9 => 'september',
+    10 => 'october',
+    11 => 'november',
+    12 => 'december',
+  );
+
+  if (!is_null($month) && !in_array(strtolower($month), $valid_month_names)) {
+    if (cf_is_integer($month)) {
+      $month = (int) $month;
+
+      if (array_key_exists($month, $valid_month_names)) {
+        $month = $valid_month_names[$month];
+      }
+      else {
+        cf_error::invalid_variable('month', 'Must be a valid month name.');
+
+        drupal_not_found();
+        drupal_exit();
+      }
+    }
+    else {
+      cf_error::invalid_variable('month', 'Must be a valid month name.');
+
+      drupal_not_found();
+      drupal_exit();
+    }
+  }
+
+  $day_stamp = strtotime($month . ' ' . $day . ', ' . $year);
+
+  mfcs_add_canonical_headers('requests/pdf-0/calendar/' . $year . '/' . $month . '/' . $day . '/' . $page_number);
+
+  $page_title = 'Request Calendar - ' . date('F j, Y', $day_stamp);
+  drupal_set_title($page_title);
+
+  $form = array();
+  $form_state = array();
+
+  $page = array();
+  $page['html'] = array(
+    '#type' => 'container',
+    '#attributes' => array(
+      'id' => 'mfcs_request-calendar_day-0-page-pdf',
+      'class' => array(
+        'mfcs_request-calendar_day-0-page-pdf',
+      ),
+    ),
+  );
+
+  // turn off devel shutdown functionality.
+  $GLOBALS['devel_shutdown'] = FALSE;
+
+  $markup = mfcs_request_calendar_day_0_page($year, $month, $day, $page_number);
+  if ($markup === FALSE) {
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  $page['html']['content'] = array(
+    '#type' => 'markup',
+    '#markup' => $markup,
+  );
+  unset($markup);
+
+  $renderred = drupal_render($page);
+  $html = drupal_render_page($renderred);
+
+  mfcs_include(MFCS_INCLUDE_OUTPUT);
+
+  $parameters = array(
+    'page_title' => $page_title,
+    'title' => $page_title,
+  );
+
+  $contained = mfcs_output_print_page_view($html, $parameters);
+
+  if (!is_string($contained)) {
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  $result = mfcs_request_pdf_0_page_using_wkhtmltopdf_generic('fcs-calendar-day-' . $year . '-' . $month . '-' . $day . '.pdf', $contained, FALSE);
+  if ($result) {
+    exit();
+  }
+
+  drupal_not_found();
+  drupal_exit();
 }
 
 /**

@@ -868,6 +868,32 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
     'tab_root' => 'requests/search-0',
   );
   */
+
+  $items['requests/pdf-0/calendar/%/%'] = array(
+    'title' => 'PDF of Monthly Calendar',
+    'description' => 'PDF of monthly calendar.',
+    'page callback' => 'mfcs_request_calendar_month_0_page_pdf',
+    'page arguments' => array(3, 4),
+    'file' => 'request_calendar.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('list'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
+
+  $items['requests/pdf-0/calendar/%/%/%/%'] = array(
+    'title' => 'PDF of Daily Calendar',
+    'description' => 'PDF of daily calendar.',
+    'page callback' => 'mfcs_request_calendar_day_0_page_pdf',
+    'page arguments' => array(3, 4, 5, 6),
+    'file' => 'request_calendar.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('list'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
 }
 
 /**
