@@ -58,6 +58,8 @@ function mfcs_help_0_page($topic = NULL, $section = NULL, $sub_section = NULL) {
     drupal_exit();
   }
 
+  $user = cf_current_user();
+
   $title = 'Help';
   if (is_null($topic)) {
     mfcs_add_canonical_headers('help');
@@ -94,12 +96,17 @@ function mfcs_help_0_page($topic = NULL, $section = NULL, $sub_section = NULL) {
   }
 
   $allowed_topics = mfcs_help_0_allowed_topics($user);
-
-  if (!in_array($topic, $allowed_topics)) {
+  if (!is_array($allowed_topics)) {
+    return mfcs_help_topic_not_found();
+  }
+  elseif (!in_array($topic, $allowed_topics)) {
     return mfcs_help_topic_not_found($topic, $section, $sub_section);
   }
 
   // @todo: for each section and sub_section, provide and use an allowed_* array.
+  if ($topic == 'introduction') {
+    return mfcs_help_topic_introduction();
+  }
 
   // failsafe.
   return mfcs_help_topic_not_found($topic, $section, $sub_section);
@@ -148,8 +155,8 @@ function mfcs_help_topic() {
   $markup .= '  Each <dfn class="term">Topic</dfn> is may have multiple <dfn class="term">Section</dfn>s, each of which may contain their own <dfn class="term">Sub-Section</dfn>s. ' . '<br>';
   $markup .= '  <dfn class="term">Section</dfn>s and <dfn class="term">Sub-Section</dfn>s will provide specific information while the <dfn class="term">Topic</dfn> provides general information. ' . '<br>';
   $markup .= '  <br>';
-  $markup .= '  If you are simply looking for a step-by-step guide, then use the <dfn class="term">Use Guide</dfn> index. ' . '<br>';
-  $markup .= '  For more details on the how and the why or to gain a better understanding of the <dfn class="term">Facilities Use System</dfn>, use the <dfn class="term">Documentation</dfn> index. ' . '<br>';
+  $markup .= '  If you are simply looking for a step-by-step guide, then use the <dfn class="term">User Guide</dfn> index. ' . '<br>';
+  $markup .= '  For more details on the how and the why or to gain a better understanding of the <dfn class="term">Facilities Use System</dfn>, view the <dfn class="term">Documentation</dfn> topic index. ' . '<br>';
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
@@ -215,6 +222,7 @@ function mfcs_help_topic() {
   );
   $markup .= mfcs_help_render_headers('menu-topic_index', array(), $headers, 1);
   $markup .= '    <ul class="navigation-list">';
+  $markup .= '      <li class="list-item"><a href="' . $base_path . 'help-0/introduction' . $url_arguments . '" class="item-link" title="Documentation: Introduction">' . 'Introduction' . '</a></li>';
   $markup .= '      <li class="list-item">';
   $markup .= '        <a href="' . $base_path . 'help-0/request-create' . $url_arguments . '" class="item-link" title="Documentation: Requests">' . 'Requests' . '</a><br>';
   $markup .= '        <ul class="item-navigation navigation-list">';
@@ -520,6 +528,7 @@ function mfcs_help_0_allowed_topics($user) {
   $requester = user_access('mfcs request', $user);
 
   $topics = array();
+  $topics[] = 'introduction';
   $topics[] = 'request-create';
   $topics[] = 'request-edit';
   $topics[] = 'request-cancel';
@@ -543,6 +552,34 @@ function mfcs_help_0_allowed_topics($user) {
   }
 
   return $topics;
+}
+
+/**
+ * Build the markup for the help topic: introduction.
+ */
+function mfcs_help_topic_introduction() {
+  $markup = '';
+
+  $markup .= '<header id="fcs-header-help-introduction" class="header-help-introduction">';
+  $markup .= '<h1 class="header-help-introduction-header header-1">Facilities Use Documentation</h1>';
+  $markup .= '<h2 class="header-help-introduction-header header-2">Introduction</h2>';
+  $markup .= '</header>';
+
+  $markup .= '<section id="fcs-section-help-introduction" class="section-help-introduction">';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'The <dfn class="definition">Facilities Use System</dfn>, or <abbr title="Facilities Use System" class="abbreviation">FCS</abbr>, is a product of <strong>McNeese State University\'s</strong> culture and needs in tracking special events. ';
+  $markup .= 'Through this system, <strong>McNeese State University</strong> provides facilities and resources to our <strong>Students</strong>, <strong>Employees</strong>, and the <strong>Community</strong> to further educational, cultural, and recreational initiatives through events held on campus. ';
+  $markup .= '</div>';
+  $markup .= '<br>';
+  $markup .= '<div class="paragraph">';
+  $markup .= 'The system itself provides methods for requesting, reviewing, and viewing such events through numerous technologies, such as e-mail, <abbr title="iCalendar" class="abbreviation">iCAL</abbr>, <abbr title="Pretty Good Privacy" class="abbreviation">PGP</abbr>, and <abbr title="Hypertext Markup Language 5" class="abbreviation">HTML5</abbr> are used by the <dfn class="definition">Facilities Use System</dfn>. ';
+  $markup .= '<abbr title="Pretty Good Privacy" class="abbreviation">PGP</abbr> signed e-mails are are sent out for most actions performed on this system. ';
+  $markup .= '<abbr title="iCalendar" class="abbreviation">iCAL</abbr> is provided to allow users to download a copy of approved requests and add them to their own personal calendars.';
+  $markup .= '</div>';
+  $markup .= '</section>';
+
+  return $markup;
 }
 
 /**
