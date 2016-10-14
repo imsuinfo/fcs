@@ -368,8 +368,8 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
 
   // prepare the inline CSS markup
   $css_screen = '';
-  $css_portrait = "@media (orientation:portrait) {\n";
-  $css_landscape = "@media (orientation:landscape) {\n";
+  $css_portrait = '@media (orientation:portrait) {' . "\n";
+  $css_landscape = '@media (orientation:landscape) {' . "\n";
 
   // begin wrappers (main)
   $markup = '<div' . $id_string . ' class="calendar-day-wrapper">';
@@ -413,7 +413,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
   // header (All Day)
   $markup .= '<div class="calendar-header-wrapper calendar-all_day"><div class="calendar-header">';
   $markup .= '<div class="calendar-day-wrapper"><div class="calendar-day">';
-  $markup .= "All Day";
+  $markup .= 'All Day';
   $markup .= '</div></div></div></div>';
 
 
@@ -422,7 +422,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
 
   if (empty($items['all_day'])) {
     $markup .= '<div class="calendar-item-wrapper even row-0"><div class="calendar-item">';
-    $markup .= "No requests found.";
+    $markup .= 'No requests found.';
     $markup .= '</div></div>';
   }
   else {
@@ -686,7 +686,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
           'margin-top' => 'margin-top: 0px;',
           'margin-bottom' => 'margin-bottom: 0px;',
           'margin-right' => 'margin-right: 3px;',
-          'z-index' => 'z-index: 0;',
+          'z-index' => 'z-index: 2;',
         );
 
         $item_style_screen = $item_style;
@@ -838,7 +838,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
               }
             }
 
-            $item_times = date(MFCS_DATE_FORMAT_TIME, $item['time_start']) . " to " . date(MFCS_DATE_FORMAT_TIME, $item['time_stop']);
+            $item_times = date(MFCS_DATE_FORMAT_TIME, $item['time_start']) . ' to ' . date(MFCS_DATE_FORMAT_TIME, $item['time_stop']);
 
             $item_text .= '<div class="calendar-item-link-wrapper"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
             $item_text .= '<div class="calendar-item-time-wrapper"><div class="calendar-item-time" title="Time: ' . $item_times . '">' . $item_times . '</div></div>';
@@ -904,18 +904,18 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
       $css_landscape .= "\n" . $id_string_css_name . ' #' . $row_id . ' #' . $item_id_string . " {\n  " . implode("\n  ", $item_style_landscape) . "\n}\n";
 
       if (!empty($location_style_screen)) {
-        $css_screen .= "\n" . $id_string_css_name . ' #' . $row_id . ' #' . $item_id_string . " > .calendar-item > .calendar-item-location-wrapper,\n";
-        $css_screen .= "\n" . $id_string_css_name . ' #' . $row_id . ' #' . $item_id_string . " > .calendar-item > .calendar-item-location-wrapper > .calendar-item-location {\n  " . implode("\n  ", $location_style_screen) . "\n}\n";
+        $css_screen .= "\n" . $id_string_css_name . ' #' . $row_id . ' #' . $item_id_string . ' > .calendar-item > .calendar-item-location-wrapper,' . "\n";
+        $css_screen .= "\n" . $id_string_css_name . ' #' . $row_id . ' #' . $item_id_string . ' > .calendar-item > .calendar-item-location-wrapper > .calendar-item-location {' . "\n  " . implode("\n  ", $location_style_screen) . "\n}\n";
       }
 
       if (!empty($location_style_portrait)) {
-        $css_portrait .= "\n" . $id_string_css_name . ' #' . $row_id . ' #' . $item_id_string . " > .calendar-item > .calendar-item-location-wrapper,\n";
-        $css_portrait .= "\n" . $id_string_css_name . ' #' . $row_id . ' #' . $item_id_string . " > .calendar-item > .calendar-item-location-wrapper > .calendar-item-location {\n  " . implode("\n  ", $location_style_portrait) . "\n}\n";
+        $css_portrait .= "\n" . $id_string_css_name . ' #' . $row_id . ' #' . $item_id_string . ' > .calendar-item > .calendar-item-location-wrapper,' . "\n";
+        $css_portrait .= "\n" . $id_string_css_name . ' #' . $row_id . ' #' . $item_id_string . ' > .calendar-item > .calendar-item-location-wrapper > .calendar-item-location {' . "\n  " . implode("\n  ", $location_style_portrait) . "\n}\n";
       }
 
       if (!empty($location_style_landscape)) {
-        $css_landscape .= "\n" . $id_string_css_name . ' #' . $row_id . ' #' . $item_id_string . " > .calendar-item > .calendar-item-location-wrapper,\n";
-        $css_landscape .= "\n" . $id_string_css_name . ' #' . $row_id . ' #' . $item_id_string . " > .calendar-item > .calendar-item-location-wrapper > .calendar-item-location {\n  " . implode("\n  ", $location_style_landscape) . "\n}\n";
+        $css_landscape .= "\n" . $id_string_css_name . ' #' . $row_id . ' #' . $item_id_string . ' > .calendar-item > .calendar-item-location-wrapper,' . "\n";
+        $css_landscape .= "\n" . $id_string_css_name . ' #' . $row_id . ' #' . $item_id_string . ' > .calendar-item > .calendar-item-location-wrapper > .calendar-item-location {' . "\n  " . implode("\n  ", $location_style_landscape) . "\n}\n";
       }
     }
 
@@ -1532,7 +1532,7 @@ function mfcs_output_print_page_view($html, $parameters = array()) {
 
   // title tags
   if (empty($parameters['page_title'])) {
-    $page_title = "Facilities Use Request";
+    $page_title = 'Facilities Use Request';
   }
   else {
     $page_title = $parameters['page_title'];
