@@ -570,7 +570,9 @@ function mfcs_help_topic_introduction() {
   $markup .= '<div class="paragraph">';
   $markup .= 'The <dfn class="definition">Facilities Use System</dfn>, or <abbr title="Facilities Use System" class="abbreviation">FCS</abbr>, is a product of <strong>McNeese State University\'s</strong> culture and needs in tracking special events. ';
   $markup .= 'Through this system, <strong>McNeese State University</strong> provides facilities and resources to our <strong>Students</strong>, <strong>Employees</strong>, and the <strong>Community</strong> to further educational, cultural, and recreational initiatives through events held on campus. ';
+  $markup .= 'All activities, meetings, or requests, excluding scheduled academic classes, must be scheduled through the facilities use special event request form. ';
   $markup .= '</div>';
+
   $markup .= '<br>';
   $markup .= '<div class="paragraph">';
   $markup .= 'The system itself provides methods for requesting, reviewing, and viewing such events through numerous technologies, such as e-mail, <abbr title="iCalendar" class="abbreviation">iCAL</abbr>, <abbr title="Pretty Good Privacy" class="abbreviation">PGP</abbr>, and <abbr title="Hypertext Markup Language 5" class="abbreviation">HTML5</abbr> are used by the <dfn class="definition">Facilities Use System</dfn>. ';
