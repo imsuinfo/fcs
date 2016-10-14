@@ -713,148 +713,6 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
     $search_room_ids = $mfcs_determined['filters']['field_top-building-0']['search'];
   }
 
-  $unavailabilities = mfcs_get_unavailabilities($year, $search_room_ids, $day_start, $day_stop, TRUE, FALSE, TRUE);
-  if (!is_array($unavailabilities)) {
-    $unavailabilities = array();
-  }
-
-  foreach ($unavailabilities as $unavailability) {
-    $building_code = check_plain($unavailability->building_code);
-    $building_name = check_plain($unavailability->building_name);
-    $room_number = check_plain($unavailability->room_number);
-    $room_name = check_plain($unavailability->room_name);
-    $description = check_plain($unavailability->description);
-    $tooltip = $building_code . ' ' . $room_number . ': ' . $description;
-
-    if ($unavailability->date_start == $unavailability->date_stop || ($unavailability->date_start <= $day_start && $unavailability->date_stop >= $day_stop)) {
-      $date = strtotime('midnight today', $unavailability->date_start);
-
-      if (!isset($rows['all_day'][$date])) {
-        $rows['all_day'][$date] = array();
-      }
-
-      $rows['all_day'][$date]['unavailability-' . $unavailability->id] = array(
-        'is' => 'unavailable',
-        'id' => $unavailability->id,
-        'href' => $base_path . '/requests/unavailable-0/view/' . $year . '/' . $unavailability->room_id . '/' . $unavailability->id,
-        'title' => check_plain($unavailability->title),
-        'tooltip' => str_replace('"', '&quot;', $tooltip),
-        'description' => str_replace("\n", '<br>', $description),
-        'year' => $year,
-        'month' => $month,
-        'day' => $day,
-        'date' => $unavailability->date_start,
-        'building' => $unavailability->building_id,
-        'room' => $unavailability->room_id,
-        'building_code' => $building_code,
-        'building_name' => $building_name,
-        'room_number' => $room_number,
-        'room_name' => $room_name,
-        'type' => 'unavailable',
-      );
-    }
-    else {
-      // the dates may extend beyond the current day, therefore determine the nearest time value for the current date.
-      $time_start = $unavailability->date_start;
-      if ($unavailability->date_start < $day_start) {
-        $time_start = $day_start;
-      }
-
-      $time_stop = $unavailability->date_stop;
-      if ($unavailability->date_stop > $day_stop) {
-        $time_stop = $day_stop;
-      }
-
-      // floor() and ceil() to nearest hours.
-      $time_offset_start = $time_start % $range_interval;
-      $time_offset_stop = $time_stop % $range_interval;
-      $time_floor = $time_start - $time_offset_start;
-      $time_ceiling = $time_stop - $time_offset_stop;
-      if ($time_offset_stop > 0) {
-        $time_ceiling += $range_interval;
-      }
-      $time_zindex = 100 + (int) date('G', $time_floor);
-
-      // preprocess the slots in an attempt to find the leftmost slot that is available for all date slots.
-      $time_slot = 0;
-      do {
-        $time_slot_found = TRUE;
-        $time_count = $time_floor;
-        while ($time_count < $time_ceiling) {
-          while (!empty($rows['range'][$time_count][$time_slot])) {
-            $time_slot_found = FALSE;
-            break;
-          }
-
-          $time_count += $range_interval;
-        }
-
-        if ($time_slot_found) {
-          break;
-        }
-
-        $time_slot++;
-      } while (TRUE);
-
-      $time_count = $time_floor;
-      while ($time_count < $time_ceiling) {
-        $rows['range'][$time_count][$time_slot]['unavailable-' . $unavailability->id] = array(
-          'is' => 'unavailable',
-          'id' => $unavailability->id,
-          'href' => $base_path . '/requests/unavailable-0/view/' . $year . '/' . $unavailability->room_id . '/' . $unavailability->id,
-          'title' => check_plain($unavailability->title),
-          'tooltip' => str_replace('"', '&quot;', $tooltip),
-          'description' => str_replace("\n", '<br>', $description),
-          'year' => $year,
-          'month' => $month,
-          'day' => $day,
-          'date' => $time_start,
-          'building' => $unavailability->building_id,
-          'room' => $unavailability->room_id,
-          'building_code' => $building_code,
-          'building_name' => $building_name,
-          'room_number' => $room_number,
-          'room_name' => $room_name,
-          'time_start' => $time_start,
-          'time_stop' => $time_stop,
-          'time_floor' => $time_floor,
-          'time_ceiling' => $time_ceiling,
-          'slot_start' => FALSE,
-          'slot_stop' => FALSE,
-          'offset_start' => $time_offset_start,
-          'offset_stop' => $time_offset_stop,
-          'z-index' => $time_zindex,
-          'type' => 'unavailable',
-        );
-
-        if ($time_count == $time_floor) {
-          $rows['range'][$time_count][$time_slot]['unavailable-' . $unavailability->id]['slot_start'] = TRUE;
-        }
-
-        if (($time_count + $range_interval) == $time_ceiling) {
-          $rows['range'][$time_count][$time_slot]['unavailable-' . $unavailability->id]['slot_stop'] = TRUE;
-        }
-
-        $time_count += $range_interval;
-      }
-
-      $slots_max = count($rows['range'][$time_floor]);
-      if ($rows['slots_max'] < $slots_max) {
-        $rows['slots_max'] = $slots_max;
-      }
-
-      unset($time_start);
-      unset($time_stop);
-    }
-  }
-  unset($date_current);
-  unset($building_code);
-  unset($building_name);
-  unset($room_number);
-  unset($room_name);
-  unset($description);
-  unset($tooltip);
-
   $processed_items = array();
 
   if (!empty($items)) {
@@ -1004,6 +862,148 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
       }
     }
   }
+
+  $unavailabilities = mfcs_get_unavailabilities($year, $search_room_ids, $day_start, $day_stop, TRUE, FALSE, TRUE);
+  if (!is_array($unavailabilities)) {
+    $unavailabilities = array();
+  }
+
+  foreach ($unavailabilities as $unavailability) {
+    $building_code = check_plain($unavailability->building_code);
+    $building_name = check_plain($unavailability->building_name);
+    $room_number = check_plain($unavailability->room_number);
+    $room_name = check_plain($unavailability->room_name);
+    $description = check_plain($unavailability->description);
+    $tooltip = $building_code . ' ' . $room_number . ': ' . $description;
+
+    if ($unavailability->date_start == $unavailability->date_stop || ($unavailability->date_start <= $day_start && $unavailability->date_stop >= $day_stop)) {
+      $date = strtotime('midnight today', $unavailability->date_start);
+
+      if (!isset($rows['all_day'][$date])) {
+        $rows['all_day'][$date] = array();
+      }
+
+      $rows['all_day'][$date]['unavailability-' . $unavailability->id] = array(
+        'is' => 'unavailable',
+        'id' => $unavailability->id,
+        'href' => $base_path . '/requests/unavailable-0/view/' . $year . '/' . $unavailability->room_id . '/' . $unavailability->id,
+        'title' => check_plain($unavailability->title),
+        'tooltip' => str_replace('"', '&quot;', $tooltip),
+        'description' => str_replace("\n", '<br>', $description),
+        'year' => $year,
+        'month' => $month,
+        'day' => $day,
+        'date' => $unavailability->date_start,
+        'building' => $unavailability->building_id,
+        'room' => $unavailability->room_id,
+        'building_code' => $building_code,
+        'building_name' => $building_name,
+        'room_number' => $room_number,
+        'room_name' => $room_name,
+        'type' => 'unavailable',
+      );
+    }
+    else {
+      // the dates may extend beyond the current day, therefore determine the nearest time value for the current date.
+      $time_start = $unavailability->date_start;
+      if ($unavailability->date_start < $day_start) {
+        $time_start = $day_start;
+      }
+
+      $time_stop = $unavailability->date_stop;
+      if ($unavailability->date_stop > $day_stop) {
+        $time_stop = $day_stop;
+      }
+
+      // floor() and ceil() to nearest hours.
+      $time_offset_start = $time_start % $range_interval;
+      $time_offset_stop = $time_stop % $range_interval;
+      $time_floor = $time_start - $time_offset_start;
+      $time_ceiling = $time_stop - $time_offset_stop;
+      if ($time_offset_stop > 0) {
+        $time_ceiling += $range_interval;
+      }
+      $time_zindex = 100 + (int) date('G', $time_floor);
+
+      // preprocess the slots in an attempt to find the leftmost slot that is available for all date slots.
+      $time_slot = 0;
+      do {
+        $time_slot_found = TRUE;
+        $time_count = $time_floor;
+        while ($time_count < $time_ceiling) {
+          while (!empty($rows['range'][$time_count][$time_slot])) {
+            $time_slot_found = FALSE;
+            break;
+          }
+
+          $time_count += $range_interval;
+        }
+
+        if ($time_slot_found) {
+          break;
+        }
+
+        $time_slot++;
+      } while (TRUE);
+
+      $time_count = $time_floor;
+      while ($time_count < $time_ceiling) {
+        $rows['range'][$time_count][$time_slot]['unavailable-' . $unavailability->id] = array(
+          'is' => 'unavailable',
+          'id' => $unavailability->id,
+          'href' => $base_path . '/requests/unavailable-0/view/' . $year . '/' . $unavailability->room_id . '/' . $unavailability->id,
+          'title' => check_plain($unavailability->title),
+          'tooltip' => str_replace('"', '&quot;', $tooltip),
+          'description' => str_replace("\n", '<br>', $description),
+          'year' => $year,
+          'month' => $month,
+          'day' => $day,
+          'date' => $time_start,
+          'building' => $unavailability->building_id,
+          'room' => $unavailability->room_id,
+          'building_code' => $building_code,
+          'building_name' => $building_name,
+          'room_number' => $room_number,
+          'room_name' => $room_name,
+          'time_start' => $time_start,
+          'time_stop' => $time_stop,
+          'time_floor' => $time_floor,
+          'time_ceiling' => $time_ceiling,
+          'slot_start' => FALSE,
+          'slot_stop' => FALSE,
+          'offset_start' => $time_offset_start,
+          'offset_stop' => $time_offset_stop,
+          'z-index' => $time_zindex,
+          'type' => 'unavailable',
+        );
+
+        if ($time_count == $time_floor) {
+          $rows['range'][$time_count][$time_slot]['unavailable-' . $unavailability->id]['slot_start'] = TRUE;
+        }
+
+        if (($time_count + $range_interval) == $time_ceiling) {
+          $rows['range'][$time_count][$time_slot]['unavailable-' . $unavailability->id]['slot_stop'] = TRUE;
+        }
+
+        $time_count += $range_interval;
+      }
+
+      $slots_max = count($rows['range'][$time_floor]);
+      if ($rows['slots_max'] < $slots_max) {
+        $rows['slots_max'] = $slots_max;
+      }
+
+      unset($time_start);
+      unset($time_stop);
+    }
+  }
+  unset($date_current);
+  unset($building_code);
+  unset($building_name);
+  unset($room_number);
+  unset($room_name);
+  unset($description);
+  unset($tooltip);
 
   foreach ($rows['range'] as $time_floor => &$time_slots) {
     ksort($time_slots);
