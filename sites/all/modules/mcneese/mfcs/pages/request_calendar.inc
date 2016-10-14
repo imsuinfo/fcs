@@ -876,6 +876,10 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
     $description = check_plain($unavailability->description);
     $tooltip = $building_code . ' ' . $room_number . ': ' . $description;
 
+    if ($unavailability->type == MFCS_UNAVAILABILITY_TYPE_CLASS) {
+      $tooltip = $building_code . ' ' . $room_number . ': unavailable due to class ' . check_plain($unavailability->title) . '.';
+    }
+
     if ($unavailability->date_start == $unavailability->date_stop || ($unavailability->date_start <= $day_start && $unavailability->date_stop >= $day_stop)) {
       $date = strtotime('midnight today', $unavailability->date_start);
 
