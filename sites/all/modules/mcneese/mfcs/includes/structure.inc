@@ -1047,6 +1047,7 @@ function mfcs_get_request_field_room($form, &$form_state, &$fields, &$request_st
             'form-item-delta-' . $key,
           ),
         ),
+        '#order_by' => 'value',
       );
 
       if ($readonly) {
@@ -1054,7 +1055,6 @@ function mfcs_get_request_field_room($form, &$form_state, &$fields, &$request_st
         $fields['room'][$key]['#attributes']['readonly'] = 'readonly';
       }
     }
-    krsort($fields['room']);
 
     $form_state['conditionally_required'][0][] = 'room';
 
