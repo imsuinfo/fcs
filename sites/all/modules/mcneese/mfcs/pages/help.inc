@@ -944,9 +944,11 @@ function mfcs_help_topic_introduction($allowed_topics) {
   $markup .= '<br>';
   $markup .= '</div>';
 
+  $markup .= '<br>';
+
   $markup .= '<div class="paragraph">';
-  $markup .= 'The system itself provides methods for requesting, reviewing, and viewing such events through numerous technologies, such as e-mail, iCalendar, <abbr title="Pretty Good Privacy" class="abbreviation">OpenPGP</abbr>, and <abbr title="Hypertext Markup Language 5" class="abbreviation">HTML5</abbr> are used by the <dfn class="term">Facilities Use System</dfn>. ';
-  $markup .= '<strong><abbr title="Pretty Good Privacy" class="abbreviation">OpenPGP</abbr></strong> signed e-mails are are sent out for many actions performed on or by this system. ';
+  $markup .= 'The system itself provides methods for requesting, reviewing, and viewing such events through numerous technologies, such as e-mail, iCalendar, OpenPGP, and <abbr title="Hypertext Markup Language 5" class="abbreviation">HTML5</abbr> are used by the <dfn class="term">Facilities Use System</dfn>. ';
+  $markup .= '<strong>OpenPGP</strong> signed e-mails are are sent out for many actions performed on or by this system. ';
   $markup .= '<strong>iCalendar</strong> is provided to allow users to download a copy of approved requests and add them to their own personal calendars.';
   $markup .= '<br>';
   $markup .= '</div>';
@@ -980,7 +982,15 @@ function mfcs_help_topic_requests($allowed_topics) {
   $markup = '';
 
   $markup .= '<div class="paragraph">';
-  $markup .= 'A <dfn class="term">Request</dfn> is a web form entry for reserving a particular place at some specified time. ';
+  $markup .= 'A <dfn class="term">Request</dfn> is a web form entry for reserving a particular place owned or operated by <em class="emphasis">McNeese State University</em> at some specified date and time. ';
+  $markup .= 'Each <dfn class="term">Request</dfn> goes through a review process for approval to help ensure that the room is  available, all appropriate expenses are paid, and all conflicts are avoided. ';
+  $markup .= 'All users who make requests, called the <dfn class="term">Request Coordinator</dfn> (or simply <dfn class="term">Requester</dfn> for short), are expected to read, agree to, and abide by the policies put forth by <em class="emphasis">McNeese State University</em>. ';
+  $markup .= 'It is important to read and agree to the <a href="//www.mcneese.edu/node/3217" class="link no_print_as_link">Facility Use Policy</a>. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="note"> ';
+  $markup .= 'In addition to the <a href="//www.mcneese.edu/policy" class="link no_print_as_link">McNeese State University policies</a>, there are also other forms that may need to be filled out, such as the <a href="//www.mcneese.edu/node/6309" class="link no_print_as_link">Open Flame Permit</a>, the <a href="//www.mcneese.edu/node/5434" class="link no_print_as_link">Table Request Form</a>, the <a href="//www.mcneese.edu/node/5506" class="link no_print_as_link">Technical Request Form</a>, and the <a href="//www.mcneese.edu/node/768" class="link no_print_as_link">Student Union Reservation Forms</a>. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
