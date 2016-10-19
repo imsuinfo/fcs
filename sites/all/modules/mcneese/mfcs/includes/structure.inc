@@ -4719,7 +4719,7 @@ function mfcs_get_request_field_presentation_technical_equipment_note($form, &$f
 
     $fields['presentation']['technical_equipment_note'][0]['markup']['#markup'] .= '<div id="mfcs-markup-request-presentation-technical_equipment_note" class="markup-request">';
     $fields['presentation']['technical_equipment_note'][0]['markup']['#markup'] .= 'The technology you requested may or may not be available for this venue. ';
-    $fields['presentation']['technical_equipment_note'][0]['markup']['#markup'] .= '<em><a href="//www.mcneese.edu/node/5506" target="_blank" class="no_print_as_link markup-request-link">You may also be required to complete an additional request form to secure the item(s).</a></em> ';
+    $fields['presentation']['technical_equipment_note'][0]['markup']['#markup'] .= '<em><a href="//www.mcneese.edu/node/5506" target="_blank" class="no_print_links_as_link markup-request-link">You may also be required to complete an additional request form to secure the item(s).</a></em> ';
     $fields['presentation']['technical_equipment_note'][0]['markup']['#markup'] .= 'Communicate with the venue coordinator to confirm your technical requests. ';
     $fields['presentation']['technical_equipment_note'][0]['markup']['#markup'] .= '</div>';
   }
@@ -6650,7 +6650,7 @@ function mfcs_get_request_field_services_open_flames_note($form, &$form_state, &
     );
 
     $fields['services']['open_flames_note'][0]['markup']['#markup'] .= '<div id="mfcs-markup-request-services-open_flames_note" class="markup-request">';
-    $fields['services']['open_flames_note'][0]['markup']['#markup'] .= 'An <strong>Open Flame Permit</strong> will be required. <a href="//www.mcneese.edu/node/6309" target="_blank" title="Fill out an Open Flame Permit form" class="markup-request-link no_print_as_link"><strong>Please fill out and submit an Open Flame Permit form.</strong></a> Please reference your event name on your permit request.';
+    $fields['services']['open_flames_note'][0]['markup']['#markup'] .= 'An <strong>Open Flame Permit</strong> will be required. <a href="//www.mcneese.edu/node/6309" target="_blank" title="Fill out an Open Flame Permit form" class="markup-request-link no_print_links_as_link"><strong>Please fill out and submit an Open Flame Permit form.</strong></a> Please reference your event name on your permit request.';
     $fields['services']['open_flames_note'][0]['markup']['#markup'] .= '</div>';
   }
 

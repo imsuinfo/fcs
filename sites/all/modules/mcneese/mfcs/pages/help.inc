@@ -840,10 +840,10 @@ function mfcs_help_topic($allowed_topics) {
     $markup .= '      <li class="list-item">';
     $markup .= '        <a href="' . $base_path . 'help-0/request-create' . $url_arguments . '" class="item-link" title="User Guide: Create a Request">Create a Request</a><br>';
     $markup .= '        <ul class="item-navigation navigation-list">';
-    $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/request-create/facilities_use' . $url_arguments . '" class="item-link" title="Section: Camps Requests">Camps</a></li>';
-    $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/request-create/facilities_use' . $url_arguments . '" class="item-link" title="Section: External Requests">External</a></li>';
     $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/request-create/facilities_use' . $url_arguments . '" class="item-link" title="Section: Faculty, Staff, and Athletics Requests">Faculty, Staff, and Athletics</a></li>';
     $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/request-create/facilities_use' . $url_arguments . '" class="item-link" title="Section: Student Organization Requests">Student Organization</a></li>';
+    $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/request-create/facilities_use' . $url_arguments . '" class="item-link" title="Section: Camps Requests">Camps</a></li>';
+    $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/request-create/facilities_use' . $url_arguments . '" class="item-link" title="Section: External Requests">External</a></li>';
     $markup .= '        </ul>';
     $markup .= '      </li>';
   }
@@ -899,10 +899,10 @@ function mfcs_help_topic($allowed_topics) {
   $markup .= '      <li class="list-item">';
   $markup .= '        <a href="' . $base_path . 'help-0/requests' . $url_arguments . '" class="item-link" title="Documentation: Requests">Requests</a><br>';
   $markup .= '        <ul class="item-navigation navigation-list">';
-  $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/requests/facilities_use' . $url_arguments . '" class="item-link" title="Section: Camps Requests">Camps</a></li>';
-  $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/requests/facilities_use' . $url_arguments . '" class="item-link" title="Section: External Requests">External</a></li>';
-  $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/requests/facilities_use' . $url_arguments . '" class="item-link" title="Section: Faculty, Staff, and Athletics Requests">Faculty, Staff, and Athletics</a></li>';
-  $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/requests/facilities_use' . $url_arguments . '" class="item-link" title="Section: Student Organization Requests">Student Organization</a></li>';
+  $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/requests/employee' . $url_arguments . '" class="item-link" title="Section: Faculty, Staff, and Athletics Requests">Faculty, Staff, and Athletics</a></li>';
+  $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/requests/student_organization' . $url_arguments . '" class="item-link" title="Section: Student Organization Requests">Student Organization</a></li>';
+  $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/requests/camps' . $url_arguments . '" class="item-link" title="Section: Camps Requests">Camps</a></li>';
+  $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/requests/external' . $url_arguments . '" class="item-link" title="Section: External Requests">External</a></li>';
   $markup .= '        </ul>';
   $markup .= '      </li>';
   $markup .= '      <li class="list-item"><a href="' . $base_path . 'help-0/faq' . $url_arguments . '" class="item-link" title="Documentation: Frequently Asked Questions">Frequently Asked Questions</a></li>';
@@ -938,8 +938,8 @@ function mfcs_help_topic_introduction($allowed_topics) {
 
 
   $markup = '<div class="paragraph">';
-  $markup .= 'The <dfn class="term">Facilities Use System</dfn>, or <abbr title="Facilities Use System" class="abbreviation">FCS</abbr>, is a product of <strong>McNeese State University\'s</strong> culture and needs in tracking special events. ';
-  $markup .= 'Through this system, <strong>McNeese State University</strong> provides facilities and resources to our <strong>Students</strong>, <strong>Employees</strong>, and the <strong>Community</strong> to further educational, cultural, and recreational initiatives through events held on campus. ';
+  $markup .= 'The <dfn class="term">Facilities Use System</dfn>, or <abbr title="Facilities Use System" class="abbreviation">FCS</abbr>, is a product of <em class="emphasis">McNeese State University\'s</em> culture and needs in tracking special events. ';
+  $markup .= 'Through this system, <em class="emphasis">McNeese State University</em> provides facilities and resources to our <strong class="bold">Students</strong>, <strong class="bold">Employees</strong>, and the <strong class="bold">Community</strong> to further educational, cultural, and recreational initiatives through events held on campus. ';
   $markup .= 'All activities, meetings, or requests, excluding scheduled academic classes, must be scheduled through the facilities use special event request form. ';
   $markup .= '<br>';
   $markup .= '</div>';
@@ -947,9 +947,9 @@ function mfcs_help_topic_introduction($allowed_topics) {
   $markup .= '<br>';
 
   $markup .= '<div class="paragraph">';
-  $markup .= 'The system itself provides methods for requesting, reviewing, and viewing such events through numerous technologies, such as e-mail, iCalendar, OpenPGP, and <abbr title="Hypertext Markup Language 5" class="abbreviation">HTML5</abbr> are used by the <dfn class="term">Facilities Use System</dfn>. ';
-  $markup .= '<strong>OpenPGP</strong> signed e-mails are are sent out for many actions performed on or by this system. ';
-  $markup .= '<strong>iCalendar</strong> is provided to allow users to download a copy of approved requests and add them to their own personal calendars.';
+  $markup .= 'The system itself provides methods for requesting, reviewing, and viewing such events through numerous technologies, such as e-mail, iCalendar, <abbr title="Open Pretty Good Privacy" class="abbreviation">OpenPGP</abbr>, and <abbr title="Hypertext Markup Language 5" class="abbreviation">HTML5</abbr> are used by the <dfn class="term">Facilities Use System</dfn>. ';
+  $markup .= '<strong class="bold">OpenPGP</strong> signed e-mails are are sent out for many actions performed on or by this system. ';
+  $markup .= '<strong class="bold">iCalendar</strong> is provided to allow users to download a copy of approved requests and add them to their own personal calendars.';
   $markup .= '<br>';
   $markup .= '</div>';
 
@@ -983,21 +983,108 @@ function mfcs_help_topic_requests($allowed_topics) {
 
   $markup .= '<div class="paragraph">';
   $markup .= 'A <dfn class="term">Request</dfn> is a web form entry for reserving a particular place owned or operated by <em class="emphasis">McNeese State University</em> at some specified date and time. ';
-  $markup .= 'Each <dfn class="term">Request</dfn> goes through a review process for approval to help ensure that the room is  available, all appropriate expenses are paid, and all conflicts are avoided. ';
+  $markup .= 'Each <dfn class="term">Request</dfn> goes through a <dfn class="term">Review</dfn> process for approval to help ensure that the <dfn class="term">Room</dfn> is available, all appropriate expenses are paid, and all conflicts are avoided. ';
   $markup .= 'All users who make requests, called the <dfn class="term">Request Coordinator</dfn> (or simply <dfn class="term">Requester</dfn> for short), are expected to read, agree to, and abide by the policies put forth by <em class="emphasis">McNeese State University</em>. ';
-  $markup .= 'It is important to read and agree to the <a href="//www.mcneese.edu/node/3217" class="link no_print_as_link">Facility Use Policy</a>. ';
+  $markup .= 'It is important to read and agree to the <a href="//www.mcneese.edu/node/3217" class="link no_print_links_as_link">Facility Use Policy</a>. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
   $markup .= '<div class="note"> ';
-  $markup .= 'In addition to the <a href="//www.mcneese.edu/policy" class="link no_print_as_link">McNeese State University policies</a>, there are also other forms that may need to be filled out, such as the <a href="//www.mcneese.edu/node/6309" class="link no_print_as_link">Open Flame Permit</a>, the <a href="//www.mcneese.edu/node/5434" class="link no_print_as_link">Table Request Form</a>, the <a href="//www.mcneese.edu/node/5506" class="link no_print_as_link">Technical Request Form</a>, and the <a href="//www.mcneese.edu/node/768" class="link no_print_as_link">Student Union Reservation Forms</a>. ';
+  $markup .= 'In addition to the <a href="//www.mcneese.edu/policy" class="link no_print_links_as_link">McNeese State University policies</a>, there are also other forms that may need to be filled out, such as the <a href="//www.mcneese.edu/node/6309" class="link no_print_links_as_link">Open Flame Permit</a>, the <a href="//www.mcneese.edu/node/5434" class="link no_print_links_as_link">Table Request Form</a>, the <a href="//www.mcneese.edu/node/5506" class="link no_print_links_as_link">Technical Request Form</a>, and the <a href="//www.mcneese.edu/node/768" class="link no_print_links_as_link">Student Union Reservation Forms</a>. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
-  #$markup .= '<div class="paragraph">';
-  #$markup .= ' ';
-  #$markup .= '<br>';
-  #$markup .= '</div>';
+  $markup .= '<br>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'Each <dfn class="term">Request</dfn> must be associated with a specific <dfn class="term">Room</dfn>. Each <dfn class="term">Room</dfn> is associated with a <dfn class="term">Building</dfn> and each <dfn class="term">Building</dfn> falls under one or more <dfn class="term">Locations</dfn>. ';
+  $markup .= 'The <dfn class="term">Buildings</dfn> themselves are more of an abstract term because they may reference a generic place such as a parking lot (thereby making a <dfn class="term">Room</dfn> also an abstract concept). ';
+  $markup .= 'These places, or <dfn class="term">Venues</dfn>, are managed by their <dfn class="term">Venue Coordinator</dfn> or, if applicable, are managed by their <dfn class="term">Room Coordinator</dfn>. ';
+  $markup .= 'When making a request it is these <dfn class="term">Coordinators</dfn> that are the primary point of contact for their respective <dfn class="term">Venue</dfn>. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="note"> ';
+  $markup .= 'In some cases a <dfn class="term">Requester</dfn> may instead go through a <dfn class="term">Coordinator</dfn> to have their <dfn class="term">Request</dfn> submitted. ';
+  $markup .= 'This is a common practice for <dfn class="term">Student Organizations</dfn>. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<br>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'Specific dates and times must be specified for each event. ';
+  $markup .= 'A date <dfn class="term">Date Category</dfn> must be provided when specifying a date and time. ';
+  $markup .= 'It is highly recommended to assign a rehearsal/setup and a cleanup/break-down time for the requested event. ';
+  $markup .= 'There are a number of restrictions on what dates and times may be specified, such as: room conflicts, holidays, and room unavailabilities. ';
+  $markup .= 'Room conflicts represent other approved requests or other requests currently under review for a given <dfn class="term">Room</dfn> on the specified date and time. ';
+  $markup .= 'Holidays are only an informative restrictions to let the <dfn class="term">Requester</dfn> know that a given <dfn class="term">Room</dfn> <em class="emphasis">may</em> be unavailable on the requested date and time. ';
+  $markup .= 'Room unavailabilities include classes or class-related activities. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<br>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'Each <dfn class="term">Request</dfn> is assigned a <dfn class="term">Request Classification</dfn> (or just <dfn class="term">Classification</dfn> for short) based on the <dfn class="term">Requesters Classification</dfn>. ';
+  $markup .= 'There are 4 types of <dfn class="term">Classifications</dfn>: <dfn class="term">Faculty, Staff, and Athletics</dfn>, <dfn class="term">Student Organization</dfn>, <dfn class="term">Camps</dfn>, and <dfn class="term">External</dfn>. ';
+  $markup .= '<dfn class="term">Managers</dfn> and <dfn class="term">Coordinators</dfn> may be able to alter the <dfn class="term">Classification</dfn> assigned to a given <dfn class="term">Request</dfn>.';
+  $markup .= 'Each of these <dfn class="term">Classifications</dfn> may pose their own questions and form fields. ';
+  $markup .= 'You may want to <a href="' . $base_path . 'help-0/requests/employee' . $url_arguments . '" class="link no_print_links_as_link">read the <dfn class="term">Faculty, Staff, and Athletics</dfn> documentation</a>, <a href="' . $base_path . 'help-0/requests/student_organization' . $url_arguments . '" class="link no_print_links_as_link">read the <dfn class="term">Student Organization</dfn> documentation</a>, <a href="' . $base_path . 'help-0/requests/camps' . $url_arguments . '" class="link no_print_links_as_link">read the <dfn class="term">Camps</dfn> documentation</a>, or <a href="' . $base_path . 'help-0/requests/external' . $url_arguments . '" class="link no_print_links_as_link">read the <dfn class="term">External</dfn> documentation</a>. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<br>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'In addition to the <dfn class="term">Classifications</dfn>, each <dfn class="term">Request</dfn> has a <dfn class="term">Request Type</dfn>. ';
+  $markup .= 'Unlike the <dfn class="term">Classifications</dfn>, each <dfn class="term">Request Type</dfn> generally refers to the purpose of the <dfn class="term">Request</dfn>. ';
+  $markup .= 'Some <dfn class="term">Request Types</dfn> will provide new fields to fill out, fewer fields to fill out, or even allow for quick submittal of a <dfn class="term">Request</dfn>. ';
+  $markup .= 'The special <dfn class="term">Request Type</dfn>, called a <dfn class="term">Quick Meeting</dfn>, does not go through the <dfn class="term">Review</dfn> process and may only be assigned by <dfn class="term">Venue Coordinators</dfn> and <dfn class="term">Managers</dfn>. ';
+  $markup .= 'To better accommodate the needs of students, <dfn class="term">Student Organizations</dfn> are able to create a special <dfn class="term">Request Type</dfn> called a <dfn class="term">Club Meeting</dfn>. ';
+  $markup .= 'When viewing <dfn class="term">Published</dfn> <dfn class="term">Requests</dfn> on the daily calendar, custom color codes are used to make the different <dfn class="term">Request Types</dfn> easier to spot. ';
+  $markup .= 'For those less visually inclined, the <dfn class="term">Request Type</dfn> is also presented along side the <dfn class="term">Approved</dfn> <dfn class="term">Request</dfn>. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<br>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'Once a <dfn class="term">Request</dfn> is created it enters into what is called the <dfn class="term">Review</dfn> process. ';
+  $markup .= 'The <dfn class="term">Review</dfn> process is broken up into multiple <dfn class="term">Steps</dfn>: <dfn class="term">Venue Available</dfn>, <dfn class="term">Review</dfn>, <dfn class="term">Final Decision</dfn>, and <dfn class="term">Completed</dfn>. ';
+  $markup .= 'The first <dfn class="term">Step</dfn> is the <dfn class="term">Venue Available</dfn> <dfn class="term">Step</dfn>. ';
+  $markup .= 'The first action performed during this <dfn class="term">Step</dfn> is an automated check to see if the <dfn class="term">Venue</dfn> is available and if not then appropriately close the <dfn class="term">Request</dfn> and change the <dfn class="term">Step</dfn> to <dfn class="term">Completed</dfn>.';
+  $markup .= 'After this automated check, the <dfn class="term">Venue Coordinator</dfn> is informed of the request and may then designate the <dfn class="term">Request</dfn> as either <dfn class="term">Available</dfn> or <dfn class="term">Unavailable</dfn>. ';
+  $markup .= '<dfn class="term">Requests</dfn> marked as <dfn class="term">Unavailable</dfn> are immediately <dfn class="term">Closed</dfn> as unavailable. ';
+  $markup .= '<dfn class="term">Requests</dfn> marked as <dfn class="term">Available</dfn> are moved to the <dfn class="term">Review</dfn> <dfn class="term">Step</dfn>. ';
+  $markup .= 'During the <dfn class="term">Review</dfn> <dfn class="term">Step</dfn>, different <dfn class="term">Reviewers</dfn> will designate whether they have <dfn class="term">Issues</dfn> or <dfn class="term">No Issues</dfn> with the <dfn class="term">Request</dfn>. ';
+  $markup .= 'These responses are generally sent to the <dfn class="term">Requester</dfn> so that they may be informed of the current <dfn class="term">Decisions</dfn>, answer any questions, or even help solve any <dfn class="term">Issues</dfn>. ';
+  $markup .= 'Once all of the <dfn class="term">Reviewers</dfn> have made at least one <dfn class="term">Decision</dfn>, the <dfn class="term">Request</dfn> is moved into the <dfn class="term">Final Decision</dfn> <dfn class="term">Step</dfn>. ';
+  $markup .= 'It is during this <dfn class="term">Step</dfn> that all <dfn class="term">Issues</dfn> should be resolved and in some cases additional <dfn class="term">Requirements</dfn> may be specified. ';
+  $markup .= 'The <dfn class="term">Request</dfn> may either be <dfn class="term">Approved</dfn> or <dfn class="term">Denied</dfn>, but regardless of the <dfn class="term">Final Decision</dfn>, the <dfn class="term">Request</dfn> will be moved into the <dfn class="term">Completed</dfn> <dfn class="term">Step</dfn> where the <dfn class="term">Review</dfn> process is considered complete. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="note"> ';
+  $markup .= 'The <dfn class="term">Completed</dfn> <dfn class="term">Step</dfn> identifies a <dfn class="term">Request</dfn> as having been fully processed and does <strong class="bold">not</strong> represent whether or not a given <dfn class="term">Request</dfn> is <dfn class="term">Approved</dfn>. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<br>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= ' <dfn class="term">Completed</dfn> and <dfn class="term">Approved</dfn> <dfn class="term">Requests</dfn> appear on the calendars, the time slots are reserved, and an e-mail is sent to the <dfn class="term">Requester</dfn>. ';
+  $markup .= ' These e-mails also contain additional files, such as an iCalendar file (a file with an ICS file extension), for importing the <dfn class="term">Approved</dfn> <dfn class="term">Request</dfn> into the persons own personal calendars. ';
+  $markup .= ' Under certain conditions, <dfn class="term">Requests</dfn> may be altered and even individual dates may be cancelled or uncancelled. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="note"> ';
+  $markup .= 'When a <dfn class="term">Request</dfn> (or one of its dates) is <dfn class="term">Cancelled</dfn>, the requested dates and times is subject to no longer being available for <dfn class="term">Uncancelling</dfn>. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<br>';
 
   return $markup;
 }
@@ -1096,12 +1183,12 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics) {
 
   $markup .= '<dt id="terminology-facilities_use-fcs" class="definition_list-title">FCS</dt>';
   $markup .= '<dd class="definition_list-definition">';
-  $markup .= 'See: <a href="#terminology-facilities_use-facilities_use_system" class="definition_list-see_other no_print_as_link">Facilities Use System</a>. ';
+  $markup .= 'See: <a href="#terminology-facilities_use-facilities_use_system" class="definition_list-see_other no_print_links_as_link">Facilities Use System</a>. ';
   $markup .= '</dd>';
 
   $markup .= '<dt id="terminology-facilities_use-facilities_use_system" class="definition_list-title">Facilities Use System</dt>';
   $markup .= '<dd class="definition_list-definition">';
-  $markup .= 'The <dfn class="term">Facilities Use System</dfn>, or FCS, is the digital system or service used to provide McNeese State University with a facilities reservation process and tools. ';
+  $markup .= 'The <dfn class="term">Facilities Use System</dfn>, or FCS, is the digital system or service used to provide <em class="emphasis">McNeese State University</em> with a facilities reservation process and tools. ';
   $markup .= '</dd>';
 
   $markup .= '<dt id="terminology-facilities_use-location" class="definition_list-title">Location</dt>';
@@ -1115,7 +1202,7 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics) {
   $markup .= 'A web form entry for reserving a particular place at some specified time. ';
   $markup .= 'This is a central part of the <abbr title="Facilities Use System" class="abbreviation">FCS</abbr> such that most operations, functionality, features, and searches are centered around requests. ';
   $markup .= '<br>';
-  $markup .= '<br>See Also: <a href="' . $base_path . 'help-0/requests' . $url_arguments . '" class="definition_list-see_other no_print_as_link">Topic: Requests</a>. ';
+  $markup .= '<br>See Also: <a href="' . $base_path . 'help-0/requests' . $url_arguments . '" class="definition_list-see_other no_print_links_as_link">Topic: Requests</a>. ';
   $markup .= '</dd>';
 
   $markup .= '</dl>';
@@ -1148,12 +1235,12 @@ function mfcs_help_topic_terminology_section_system($allowed_topics) {
   $markup .= 'Files generally have the excetions <em>.ics</em>. ';
   $markup .= 'Files in this format (With a file extension of <em>.ics</em>) may be used to import an event or a set of events into your own personal calendar or even transfer the event details to a third party. ';
   $markup .= '<br>';
-  $markup .= '<br>See Also: <a href="//en.wikipedia.org/wiki/ICalendar" class="definition_list-see_other" target="_blank"><span class="no_print_as_link"></span>https://en.wikipedia.org/wiki/ICalendar</a>. ';
+  $markup .= '<br>See Also: <a href="//en.wikipedia.org/wiki/ICalendar" class="definition_list-see_other" target="_blank"><span class="no_print_links_as_link"></span>https://en.wikipedia.org/wiki/ICalendar</a>. ';
   $markup .= '</dd>';
 
   $markup .= '<dt id="terminology-system-fcs" class="definition_list-title">OpenPGP</dt>';
   $markup .= '<dd class="definition_list-definition">';
-  $markup .= '<dfn class="term">OpenPGP</dfn> stands for <strong>Open Pretty Good Privacy</strong>. ';
+  $markup .= '<dfn class="term">OpenPGP</dfn> stands for <strong class="bold">Open Pretty Good Privacy</strong>. ';
   $markup .= 'This is a standard used as a digital signature and to encrypt files and e-mails. ';
   $markup .= 'E-mails sent by this system are digitally signed using this standard to help ensure that the e-mails are not spam or otherwise falsified. ';
   $markup .= '<br>';
