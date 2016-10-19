@@ -171,6 +171,8 @@ function mfcs_request_create_0_form($form, &$form_state, $copy_request = NULL) {
   $statement_markup .= '<br>';
   $statement_markup .= 'If you are only making a request for a <em>Table Reservation</em> in the <em>New Ranch</em> or in the <em>Quad</em>, then you should instead use the <a href="//www.mcneese.edu/studentunion/student_union_reservations">Table Request Form</a>.' . '<br>';
   $statement_markup .= '<br>';
+  $statement_markup .= 'La. R.S. 14:133 (A) provides that "<em>Filing false public records is the filing or depositing for record in any public office or with any public official, or the maintaining as required by law, regulation, or rule, with knowledge of its falsity, any of the following: (1) Any forged document. (2) Any wrongfully altered document. (3) Any document containing a false statement or false representation of a material fact.</em>"' . '<br>';
+  $statement_markup .= '<br>';
   $statement_markup .= 'Confirmation and approval of the submitted request must be received before any publicity is scheduled.';
   $statement_markup .= '<br>';
 
