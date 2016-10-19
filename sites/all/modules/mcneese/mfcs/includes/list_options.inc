@@ -428,6 +428,12 @@ function mfcs_get_request_room_list_options($location = NULL, $option = NULL, $h
         $building_name = check_plain($room->building_name);
       }
 
+      $room_number = NULL;
+      if (!empty($room->room_number)) {
+        $room_number = mcneese_fcs_text_capitalization($room->room_number);
+        $room_number = check_plain($room_number);
+      }
+
       $title = '';
 
       if (!is_null($image_file_path)) {
@@ -443,7 +449,7 @@ function mfcs_get_request_room_list_options($location = NULL, $option = NULL, $h
       unset($image_alt_text);
 
       $title .= '<div class="room_notes">';
-      $title .= '<div class="room_number"><span class="room_number-label">Room:</span> <span class="room_number-data">' . check_plain($room->room_number) . '</span></div>';
+      $title .= '<div class="room_number"><span class="room_number-label">Room:</span> <span class="room_number-data">' . $room_number . '</span></div>';
 
       if (!empty($room->capacity_normal)) {
         $title .= '<div class="room_capacity"><span class="capacity-label">Capacity:</span> <span class="capacity-data">' . check_plain($room->capacity_normal) . '</span></div>';
@@ -468,10 +474,13 @@ function mfcs_get_request_room_list_options($location = NULL, $option = NULL, $h
     foreach ($rooms as $room) {
       $title = '(' . $room->building_code . ') ';
       if (empty($room->room_name) || is_numeric($room->room_number)) {
-        $title .= $room->room_number;
+        $room_number = mcneese_fcs_text_capitalization($room->room_number);
+
+        $title .= $room_number;
+        unset($room_number);
       }
       else {
-        $title .= $room->room_name;
+        $title .= mcneese_fcs_text_capitalization($room->room_name);
       }
 
       $options[$room->room_id] = $title;
@@ -479,7 +488,15 @@ function mfcs_get_request_room_list_options($location = NULL, $option = NULL, $h
   }
   else {
     foreach ($rooms as $room) {
-      $options[$room->room_id] = empty($room->room_name) ? $room->room_number : $room->room_name;
+      if (empty($room->room_name) || is_numeric($room->room_number)) {
+        $room_number = mcneese_fcs_text_capitalization($room->room_number);
+
+        $options[$room->room_id] = $room_number;
+        unset($room_number);
+      }
+      else {
+        $options[$room->room_id] = $room->room_name;
+      }
     }
   }
 

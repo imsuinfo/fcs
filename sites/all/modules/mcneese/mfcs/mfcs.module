@@ -13805,6 +13805,61 @@ function mfcs_get_next_delta($deltas) {
   return $delta;
 }
 
+/**
+ * Forces the given text to have only the first letter of each word uppercased.
+ *
+ * Only applies to words separated by a space.
+ *
+ * @return string
+ *   A converted string.
+ */
+function mcneese_fcs_text_capitalization($text) {
+  if (!is_string($text)) {
+    return '';
+  }
+
+  // force all text to be lowercase.
+  $text = strtolower($text);
+
+  // convert each (space separated) word to have the first character uppercased.
+  $parts = explode(' ', $text);
+
+  if (empty($parts)) {
+    return ucfirst($text);
+  }
+
+  $fixed = array();
+  foreach ($parts as $part) {
+    // because open-parenthesis are common and ucfirst() fails to take them into consideration, explode those as well.
+    $parenthesis_parts = explode('(', $part);
+    $parenthesis_part_array = array();
+    foreach ($parenthesis_parts as $parenthesis_part) {
+      $parenthesis_part_array[] = ucfirst($parenthesis_part);
+    }
+    unset($parenthesis_part);
+    unset($parenthesis_parts);
+
+    $part = implode('(', $parenthesis_part_array);
+    unset($parenthesis_part_array);
+
+    // dashes are also common.
+    $dashes_parts = explode('-', $part);
+    $dashes_part_array = array();
+    foreach ($dashes_parts as $dashes_part) {
+      $dashes_part_array[] = ucfirst($dashes_part);
+    }
+    unset($dashes_part);
+    unset($dashes_parts);
+
+    $fixed[] = implode('-', $dashes_part_array);
+    unset($dashes_part_array);
+  }
+  unset($part);
+  unset($parts);
+
+  return implode(' ', $fixed);
+}
+
 
 /**
  * @} End of '@defgroup mfcs McNeese Facilities Use'.
