@@ -100,7 +100,7 @@ function mfcs_help_0_page($topic = NULL, $section = NULL, $sub_section = NULL) {
   }
 
   // build the navigation markup.
-  $navigation_urls = mfcs_help_determine_next_previous_top($topic, $section, $sub_section);
+  $navigation_urls = mfcs_help_determine_next_previous_top($allowed_topics, $topic, $section, $sub_section);
   $navigation_markup = '';
 
   if (!is_null($navigation_urls['top'])) {
@@ -216,6 +216,82 @@ function mfcs_help_0_page($topic = NULL, $section = NULL, $sub_section = NULL) {
       $markup .= $navigation_markup;
       $markup .= mfcs_help_render_headers('topic-requests-section-external', $header_attributes, $headers);
       $markup .= mfcs_help_topic_requests_section_external($allowed_topics);
+    }
+    else {
+      // failsafe.
+      return mfcs_help_topic_not_found($topic, $section, $sub_section);
+    }
+  }
+  elseif ($topic == 'review' && in_array('review', $allowed_topics)) {
+    $headers[1] = array('markup' => 'Review', 'attributes' => array('class' => array('header-2', 'topic')));
+
+    if (is_null($section)) {
+      $section_class[] = 'section-help-topic-review';
+
+      $markup = '<section id="' . $section_id . '" class="' . implode(' ', $section_class) . '">';
+      $markup .= $navigation_markup;
+      $markup .= mfcs_help_render_headers('topic-review', $header_attributes, $headers);
+      $markup .= mfcs_help_topic_review($allowed_topics);
+    }
+    elseif (!is_null($sub_section)) {
+      // failsafe.
+      return mfcs_help_topic_not_found($topic, $section, $sub_section);
+    }
+    elseif ($section == 'venue_available') {
+      $section_class[] = 'section-help-topic-review-venue_available';
+      $headers[2] = array('markup' => 'Venue Available Step', 'attributes' => array('class' => array('header-3', 'section')));
+
+      $markup = '<section id="' . $section_id . '" class="' . implode(' ', $section_class) . '">';
+      $markup .= $navigation_markup;
+      $markup .= mfcs_help_render_headers('topic-review-section-venue_available', $header_attributes, $headers);
+      $markup .= mfcs_help_topic_review_section_venue_available($allowed_topics);
+    }
+    elseif ($section == 'review') {
+      $section_class[] = 'section-help-topic-review-review';
+      $headers[2] = array('markup' => 'Review Step', 'attributes' => array('class' => array('header-3', 'section')));
+
+      $markup = '<section id="' . $section_id . '" class="' . implode(' ', $section_class) . '">';
+      $markup .= $navigation_markup;
+      $markup .= mfcs_help_render_headers('topic-review-section-review', $header_attributes, $headers);
+      $markup .= mfcs_help_topic_review_section_review($allowed_topics);
+    }
+    elseif ($section == 'final_decision') {
+      $section_class[] = 'section-help-topic-review-final_decision';
+      $headers[2] = array('markup' => 'Final Decision Step', 'attributes' => array('class' => array('header-3', 'section')));
+
+      $markup = '<section id="' . $section_id . '" class="' . implode(' ', $section_class) . '">';
+      $markup .= $navigation_markup;
+      $markup .= mfcs_help_render_headers('topic-review-section-final_decision', $header_attributes, $headers);
+      $markup .= mfcs_help_topic_review_section_final_decision($allowed_topics);
+    }
+    elseif ($section == 'completed') {
+      $section_class[] = 'section-help-topic-review-completed';
+      $headers[2] = array('markup' => 'Completed Step', 'attributes' => array('class' => array('header-3', 'section')));
+
+      $markup = '<section id="' . $section_id . '" class="' . implode(' ', $section_class) . '">';
+      $markup .= $navigation_markup;
+      $markup .= mfcs_help_render_headers('topic-review-section-completed', $header_attributes, $headers);
+      $markup .= mfcs_help_topic_review_section_completed($allowed_topics);
+    }
+    else {
+      // failsafe.
+      return mfcs_help_topic_not_found($topic, $section, $sub_section);
+    }
+  }
+  elseif ($topic == 'manage' && in_array('manage', $allowed_topics)) {
+    $headers[1] = array('markup' => 'Manage', 'attributes' => array('class' => array('header-2', 'topic')));
+
+    if (is_null($section)) {
+      $section_class[] = 'section-help-topic-manage';
+
+      $markup = '<section id="' . $section_id . '" class="' . implode(' ', $section_class) . '">';
+      $markup .= $navigation_markup;
+      $markup .= mfcs_help_render_headers('topic-manage', $header_attributes, $headers);
+      $markup .= mfcs_help_topic_manage($allowed_topics);
+    }
+    elseif (!is_null($sub_section)) {
+      // failsafe.
+      return mfcs_help_topic_not_found($topic, $section, $sub_section);
     }
     else {
       // failsafe.
@@ -411,6 +487,8 @@ function mfcs_help_url_cleanup_for_title($text) {
 /**
  * Determine the next, previous, and top paths.
  *
+ * @param array $allowed_topics
+ *   An array of topics currently allowed based on the users access.
  * @param string|null $topic
  *   When NULL, represents the default topic. Otherwise, this is a string
  *   representing the topic to reference.
@@ -430,7 +508,7 @@ function mfcs_help_url_cleanup_for_title($text) {
  *   - tooltip-next: Either NULL or a string. The string represents the next url tooltip within the same depth.
  *   - tooltip-previous: Either NULL or a string. The string represents the previous url tooltip within the same depth.
  */
-function mfcs_help_determine_next_previous_top($topic = NULL, $section = NULL, $sub_section = NULL) {
+function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $section = NULL, $sub_section = NULL) {
   $determined = array(
     'top' => NULL,
     'next' => NULL,
@@ -439,6 +517,11 @@ function mfcs_help_determine_next_previous_top($topic = NULL, $section = NULL, $
     'tooltip-next' => NULL,
     'tooltip-previous' => NULL,
   );
+
+  if (!is_array($allowed_topics)) {
+    cf_error::invalid_array('allowed_topics');
+    return $determined;
+  }
 
   if (!is_null($topic) && !is_string($topic)) {
     cf_error::invalid_string('topic');
@@ -466,7 +549,7 @@ function mfcs_help_determine_next_previous_top($topic = NULL, $section = NULL, $
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
-  // at the topmost path, such as index, so there is nowhere to go.
+  // at the topmost path, such as glossary, so there is nowhere to go.
   if (is_null($topic)) {
     return $determined;
   }
@@ -517,11 +600,89 @@ function mfcs_help_determine_next_previous_top($topic = NULL, $section = NULL, $
       $determined['tooltip-previous'] = 'Section: Camps Requests';
     }
     else {
-      $determined['next'] = $base_path . 'help-0/faq' . $url_arguments;
-      $determined['tooltip-next'] = 'Documentation: Frequently Asked Questions';
+      if (in_array('review', $allowed_topics)) {
+        $determined['next'] = $base_path . 'help-0/review' . $url_arguments;
+        $determined['tooltip-next'] = 'Documentation: Review';
+      }
+      elseif (in_array('manage', $allowed_topics)) {
+        $determined['next'] = $base_path . 'help-0/manage' . $url_arguments;
+        $determined['tooltip-next'] = 'Documentation: Manage';
+      }
+      else {
+        $determined['next'] = $base_path . 'help-0/faq' . $url_arguments;
+        $determined['tooltip-next'] = 'Documentation: Frequently Asked Questions';
+      }
 
       $determined['previous'] = $base_path . 'help-0/introduction' . $url_arguments;
       $determined['tooltip-previous'] = 'Documentation: Introduction';
+    }
+  }
+  elseif ($topic == 'review' && in_array('review', $allowed_topics)) {
+    $determined['top'] = $base_path . 'help-0' . $url_arguments;
+    $determined['tooltip-top'] = 'Glossary';
+
+    if ($section == 'venue_available') {
+      $determined['top'] = $base_path . 'help-0/review' . $url_arguments;
+      $determined['tooltip-top'] = 'Documentation: Review';
+
+      $determined['next'] = $base_path . 'help-0/review/review' . $url_arguments;
+      $determined['tooltip-next'] = 'Section: Review Step';
+    }
+    elseif ($section == 'review') {
+      $determined['top'] = $base_path . 'help-0/review' . $url_arguments;
+      $determined['tooltip-top'] = 'Documentation: Review';
+
+      $determined['next'] = $base_path . 'help-0/review/final_decision' . $url_arguments;
+      $determined['tooltip-next'] = 'Section: Final Decision Step';
+
+      $determined['previous'] = $base_path . 'help-0/review/venue_available' . $url_arguments;
+      $determined['tooltip-previous'] = 'Section: Venue Available Step';
+    }
+    elseif ($section == 'final_decision') {
+      $determined['top'] = $base_path . 'help-0/review' . $url_arguments;
+      $determined['tooltip-top'] = 'Documentation: Review';
+
+      $determined['next'] = $base_path . 'help-0/review/completed' . $url_arguments;
+      $determined['tooltip-next'] = 'Section: Completed Step';
+
+      $determined['previous'] = $base_path . 'help-0/review/review' . $url_arguments;
+      $determined['tooltip-previous'] = 'Section: Review Step';
+    }
+    elseif ($section == 'completed') {
+      $determined['top'] = $base_path . 'help-0/review' . $url_arguments;
+      $determined['tooltip-top'] = 'Documentation: Review';
+
+      $determined['previous'] = $base_path . 'help-0/review/final_decision' . $url_arguments;
+      $determined['tooltip-previous'] = 'Section: Final Decision Step';
+    }
+    else {
+      if (in_array('manage', $allowed_topics)) {
+        $determined['next'] = $base_path . 'help-0/manage' . $url_arguments;
+        $determined['tooltip-next'] = 'Documentation: Manage';
+      }
+      else {
+        $determined['next'] = $base_path . 'help-0/faq' . $url_arguments;
+        $determined['tooltip-next'] = 'Documentation: Frequently Asked Questions';
+      }
+
+      $determined['previous'] = $base_path . 'help-0/requests' . $url_arguments;
+      $determined['tooltip-previous'] = 'Documentation: Requests';
+    }
+  }
+  elseif ($topic == 'manage' && in_array('manage', $allowed_topics)) {
+    $determined['top'] = $base_path . 'help-0' . $url_arguments;
+    $determined['tooltip-top'] = 'Glossary';
+
+    $determined['next'] = $base_path . 'help-0/faq' . $url_arguments;
+    $determined['tooltip-next'] = 'Documentation: Frequently Asked Questions';
+
+    if (in_array('review', $allowed_topics)) {
+      $determined['previous'] = $base_path . 'help-0/review' . $url_arguments;
+      $determined['tooltip-previous'] = 'Documentation: Review';
+    }
+    else {
+      $determined['previous'] = $base_path . 'help-0/requests' . $url_arguments;
+      $determined['tooltip-previous'] = 'Documentation: Requests';
     }
   }
   elseif ($topic == 'faq') {
@@ -531,8 +692,19 @@ function mfcs_help_determine_next_previous_top($topic = NULL, $section = NULL, $
     $determined['next'] = $base_path . 'help-0/terminology' . $url_arguments;
     $determined['tooltip-next'] = 'Documentation: Terminology';
 
-    $determined['previous'] = $base_path . 'help-0/requests' . $url_arguments;
-    $determined['tooltip-previous'] = 'Documentation: Requests';
+
+    if (in_array('manage', $allowed_topics)) {
+      $determined['previous'] = $base_path . 'help-0/manage' . $url_arguments;
+      $determined['tooltip-previous'] = 'Documentation: Manage';
+    }
+    elseif (in_array('review', $allowed_topics)) {
+      $determined['previous'] = $base_path . 'help-0/review' . $url_arguments;
+      $determined['tooltip-previous'] = 'Documentation: Review';
+    }
+    else {
+      $determined['previous'] = $base_path . 'help-0/requests' . $url_arguments;
+      $determined['tooltip-previous'] = 'Documentation: Requests';
+    }
   }
   elseif ($topic == 'terminology') {
     $determined['top'] = $base_path . 'help-0' . $url_arguments;
@@ -853,12 +1025,14 @@ function mfcs_help_0_allowed_topics($user) {
 
   // add reviewing-specific topics.
   if ($is_reviewer || $is_manager || $is_administer) {
-    $topics[] = 'request-review';
+    $topics[] = 'requests-review';
+    $topics[] = 'review';
   }
 
   // add managing-specific topics.
   if ($is_manager || $is_administer) {
-    $topics[] = 'request-manage';
+    $topics[] = 'requests-manage';
+    $topics[] = 'manage';
   }
 
   // add administer-specific topics.
@@ -896,106 +1070,123 @@ function mfcs_help_topic($allowed_topics) {
 
   $markup = '';
   $markup .= '<div class="paragraph">';
-  $markup .= '  The documentation is broken up into multiple <dfn class="term">Topics</dfn>.<br>';
-  $markup .= '  Each <dfn class="term">Topic</dfn> is may have multiple <dfn class="term">Sections</dfn>, each of which may contain their own <dfn class="term">Sub-Sections</dfn>.<br>';
-  $markup .= '  <dfn class="term">Sections</dfn> and <dfn class="term">Sub-Sections</dfn> will provide specific information while the <dfn class="term">Topic</dfn> provides general information.<br>';
-  $markup .= '  <br>';
-  $markup .= '  If you are simply looking for a step-by-step guide, then use the <dfn class="term">User Guide</dfn> index.<br>';
-  $markup .= '  For more details on the how and the why or to gain a better understanding of the <dfn class="term">Facilities Use System</dfn>, view the <dfn class="term">Documentation</dfn> topic index.<br>';
+  $markup .= 'The documentation is broken up into multiple <dfn class="term">Topics</dfn>.<br>';
+  $markup .= 'Each <dfn class="term">Topic</dfn> may have multiple <dfn class="term">Sections</dfn>, each of which may contain their own <dfn class="term">Sub-Sections</dfn>.<br>';
+  $markup .= '<dfn class="term">Sections</dfn> and <dfn class="term">Sub-Sections</dfn> will provide specific information while the <dfn class="term">Topic</dfn> provides general information.<br>';
+  $markup .= '<br>';
+  $markup .= 'If you are simply looking for a step-by-step guide, then use the <dfn class="term">User Guide</dfn> section.<br>';
+  $markup .= 'For more details on the how and the why or to gain a better understanding of the <dfn class="term">Facilities Use System</dfn>, view the <dfn class="term">Documentation</dfn> section.<br>';
   $markup .= '</div>';
 
   $markup .= '<br>';
 
-  $markup .= '<div class="paragraph">';
-  $markup .= '  <nav class="navigation navigation-help_index" role="navigation">';
+  $markup .= '<div class="paragraph paragraph-user_guides">';
+  $markup .= '<nav class="navigation navigation-help_glossary" role="navigation">';
 
   $headers = array(
     0 => array('markup' => 'User Guides', 'attributes' => array('class' => array('header-2', 'section'))),
   );
 
-  $markup .= mfcs_help_render_headers('topic-index-user_guides', array('class' => $section_class), $headers, 1);
-  $markup .= '    <ul class="navigation-list">';
+  $markup .= mfcs_help_render_headers('topic-glossary-user_guides', array('class' => $section_class), $headers, 1);
+  $markup .= '<ul class="navigation-list">';
 
   if (in_array('requests-create', $allowed_topics)) {
-    $markup .= '      <li class="list-item">';
-    $markup .= '        <a href="' . $base_path . 'help-0/request-create' . $url_arguments . '" class="item-link" title="User Guide: Create a Request">Create a Request</a><br>';
-    $markup .= '        <ul class="item-navigation navigation-list">';
-    $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/request-create/facilities_use' . $url_arguments . '" class="item-link" title="Section: Faculty, Staff, and Athletics Requests">Faculty, Staff, and Athletics</a></li>';
-    $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/request-create/facilities_use' . $url_arguments . '" class="item-link" title="Section: Student Organization Requests">Student Organization</a></li>';
-    $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/request-create/facilities_use' . $url_arguments . '" class="item-link" title="Section: Camps Requests">Camps</a></li>';
-    $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/request-create/facilities_use' . $url_arguments . '" class="item-link" title="Section: External Requests">External</a></li>';
-    $markup .= '        </ul>';
-    $markup .= '      </li>';
+    $markup .= '<li class="list-item">';
+    $markup .= '<a href="' . $base_path . 'help-0/request-create' . $url_arguments . '" class="item-link" title="User Guide: Create a Request">Create a Request</a><br>';
+    $markup .= '<ul class="item-navigation navigation-list">';
+    $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/request-create/employee' . $url_arguments . '" class="item-link" title="User Guide: Create Faculty, Staff, and Athletics Requests">Faculty, Staff, and Athletics</a></li>';
+    $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/request-create/student' . $url_arguments . '" class="item-link" title="User Guide: Create Student Organization Requests">Student Organization</a></li>';
+    $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/request-create/camps' . $url_arguments . '" class="item-link" title="User Guide: Create Camps Requests">Camps</a></li>';
+    $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/request-create/external' . $url_arguments . '" class="item-link" title="User Guide: Create External Requests">External</a></li>';
+    $markup .= '</ul>';
+    $markup .= '</li>';
   }
 
   if (in_array('requests-edit', $allowed_topics)) {
-    $markup .= '      <li class="list-item"><a href="' . $base_path . 'help-0/request-edit' . $url_arguments . '" class="item-link" title="User Guide: Edit a Request">Edit a Request</a></li>';
+    $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/request-edit' . $url_arguments . '" class="item-link" title="User Guide: Edit a Request">Edit a Request</a></li>';
   }
 
   if (in_array('requests-cancel', $allowed_topics)) {
-    $markup .= '      <li class="list-item"><a href="' . $base_path . 'help-0/request-cancel' . $url_arguments . '" class="item-link" title="User Guide: Cancel or Uncancel a Request">Cancel or Uncancel a Request</a></li>';
+    $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/request-cancel' . $url_arguments . '" class="item-link" title="User Guide: Cancel or Uncancel a Request">Cancel or Uncancel a Request</a></li>';
   }
 
   if (in_array('requests-copy', $allowed_topics)) {
-    $markup .= '      <li class="list-item"><a href="' . $base_path . 'help-0/request-copy' . $url_arguments . '" class="item-link" title="User Guide: Copy a Request">Copy a Request</a></li>';
+    $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/request-copy' . $url_arguments . '" class="item-link" title="User Guide: Copy a Request">Copy a Request</a></li>';
   }
 
   if (in_array('requests-find', $allowed_topics)) {
-    $markup .= '      <li class="list-item"><a href="' . $base_path . 'help-0/request-find' . $url_arguments . '" class="item-link" title="User Guide: Find a Request">Find a Request</a></li>';
+    $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/request-find' . $url_arguments . '" class="item-link" title="User Guide: Find a Request">Find a Request</a></li>';
   }
 
   if (in_array('requests-review', $allowed_topics)) {
-    $markup .= '      <li class="list-item"><a href="' . $base_path . 'help-0/request-review' . $url_arguments . '" class="item-link" title="User Guide: Review Requests">Review Requests</a></li>';
+    $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/request-review' . $url_arguments . '" class="item-link" title="User Guide: Review Requests">Review Requests</a></li>';
   }
 
   if (in_array('requests-manage', $allowed_topics)) {
-    $markup .= '      <li class="list-item"><a href="' . $base_path . 'help-0/request-manage' . $url_arguments . '" class="item-link" title="User Guide: Manage System">Manage System</a></li>';
+    $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/request-manage' . $url_arguments . '" class="item-link" title="User Guide: Manage System">Manage System</a></li>';
   }
 
   if (in_array('calendar-use', $allowed_topics)) {
-    $markup .= '      <li class="list-item"><a href="' . $base_path . 'help-0/calendar-use' . $url_arguments . '" class="item-link" title="User Guide: Using the Calendar">Using the Calendar</a></li>';
+    $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/calendar-use' . $url_arguments . '" class="item-link" title="User Guide: Using the Calendar">Using the Calendar</a></li>';
   }
 
   if (in_array('calendar-export', $allowed_topics)) {
-    $markup .= '      <li class="list-item"><a href="' . $base_path . 'help-0/calendar-export' . $url_arguments . '" class="item-link" title="User Guide: Exporting the Calendar">Exporting the Calendar</a></li>';
+    $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/calendar-export' . $url_arguments . '" class="item-link" title="User Guide: Exporting the Calendar">Exporting the Calendar</a></li>';
   }
 
-  $markup .= '    </ul>';
-  $markup .= '  </nav>';
+  $markup .= '</ul>';
+  $markup .= '</nav>';
   $markup .= '</div>';
 
   $markup .= '<br>';
 
-  $markup .= '<div class="paragraph">';
-  $markup .= '  <nav class="navigation navigation-help_index" role="navigation">';
+  $markup .= '<div class="paragraph paragraph-documentation">';
+  $markup .= '<nav class="navigation navigation-help_glossary" role="navigation">';
 
   $headers = array(
     0 => array('markup' => 'Documentation', 'attributes' => array('class' => array('header-2', 'section'))),
   );
 
-  $markup .= mfcs_help_render_headers('topic-index-documentation', array('class' => $section_class), $headers, 1);
-  $markup .= '    <ul class="navigation-list">';
-  $markup .= '      <li class="list-item"><a href="' . $base_path . 'help-0/introduction' . $url_arguments . '" class="item-link" title="Documentation: Introduction">Introduction</a></li>';
-  $markup .= '      <li class="list-item">';
-  $markup .= '        <a href="' . $base_path . 'help-0/requests' . $url_arguments . '" class="item-link" title="Documentation: Requests">Requests</a><br>';
-  $markup .= '        <ul class="item-navigation navigation-list">';
-  $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/requests/employee' . $url_arguments . '" class="item-link" title="Section: Faculty, Staff, and Athletics Requests">Faculty, Staff, and Athletics</a></li>';
-  $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/requests/student' . $url_arguments . '" class="item-link" title="Section: Student Organization Requests">Student Organization</a></li>';
-  $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/requests/camps' . $url_arguments . '" class="item-link" title="Section: Camps Requests">Camps</a></li>';
-  $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/requests/external' . $url_arguments . '" class="item-link" title="Section: External Requests">External</a></li>';
-  $markup .= '        </ul>';
-  $markup .= '      </li>';
-  $markup .= '      <li class="list-item"><a href="' . $base_path . 'help-0/faq' . $url_arguments . '" class="item-link" title="Documentation: Frequently Asked Questions">Frequently Asked Questions</a></li>';
-  $markup .= '      <li class="list-item">';
-  $markup .= '        <a href="' . $base_path . 'help-0/terminology' . $url_arguments . '" class="item-link" title="Documentation: Terminology">Terminology</a><br>';
-  $markup .= '        <ul class="item-navigation navigation-list">';
-  $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/terminology/facilities_use' . $url_arguments . '" class="item-link" title="Section: Facilities Use">Facilities Use</a></li>';
-  $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/terminology/system' . $url_arguments . '" class="item-link" title="Section: System">System</a></li>';
-  $markup .= '          <li class="list-item"><a href="' . $base_path . 'help-0/terminology/documentation' . $url_arguments . '" class="item-link" title="Section: Documentation">Documentation</a></li>';
-  $markup .= '        </ul>';
-  $markup .= '      </li>';
-  $markup .= '    </ul>';
-  $markup .= '  </nav>';
+  $markup .= mfcs_help_render_headers('topic-glossary-documentation', array('class' => $section_class), $headers, 1);
+  $markup .= '<ul class="navigation-list">';
+  $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/introduction' . $url_arguments . '" class="item-link" title="Documentation: Introduction">Introduction</a></li>';
+  $markup .= '<li class="list-item">';
+  $markup .= '<a href="' . $base_path . 'help-0/requests' . $url_arguments . '" class="item-link" title="Documentation: Requests">Requests</a><br>';
+  $markup .= '<ul class="item-navigation navigation-list">';
+  $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/requests/employee' . $url_arguments . '" class="item-link" title="Section: Faculty, Staff, and Athletics Requests">Faculty, Staff, and Athletics</a></li>';
+  $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/requests/student' . $url_arguments . '" class="item-link" title="Section: Student Organization Requests">Student Organization</a></li>';
+  $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/requests/camps' . $url_arguments . '" class="item-link" title="Section: Camps Requests">Camps</a></li>';
+  $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/requests/external' . $url_arguments . '" class="item-link" title="Section: External Requests">External</a></li>';
+  $markup .= '</ul>';
+  $markup .= '</li>';
+
+  if (in_array('review', $allowed_topics)) {
+    $markup .= '<li class="list-item">';
+    $markup .= '<a href="' . $base_path . 'help-0/review' . $url_arguments . '" class="item-link" title="Documentation: Review">Review</a>';
+    $markup .= '<ul class="item-navigation navigation-list">';
+    $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/review/venue_available' . $url_arguments . '" class="item-link" title="Section: Venue Available Step">Venue Available</a></li>';
+    $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/review/review' . $url_arguments . '" class="item-link" title="Section: Review Step">Review</a></li>';
+    $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/review/final_decision' . $url_arguments . '" class="item-link" title="Section: Final Decision Step">Final Decision</a></li>';
+    $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/review/completed' . $url_arguments . '" class="item-link" title="Section: Completed Step">Completed</a></li>';
+    $markup .= '</ul>';
+    $markup .= '</li>';
+  }
+
+  if (in_array('manage', $allowed_topics)) {
+    $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/manage' . $url_arguments . '" class="item-link" title="Documentation: Manage">Manage</a></li>';
+  }
+
+  $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/faq' . $url_arguments . '" class="item-link" title="Documentation: Frequently Asked Questions">Frequently Asked Questions</a></li>';
+  $markup .= '<li class="list-item">';
+  $markup .= '<a href="' . $base_path . 'help-0/terminology' . $url_arguments . '" class="item-link" title="Documentation: Terminology">Terminology</a><br>';
+  $markup .= '<ul class="item-navigation navigation-list">';
+  $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/terminology/facilities_use' . $url_arguments . '" class="item-link" title="Section: Facilities Use">Facilities Use</a></li>';
+  $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/terminology/system' . $url_arguments . '" class="item-link" title="Section: System">System</a></li>';
+  $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/terminology/documentation' . $url_arguments . '" class="item-link" title="Section: Documentation">Documentation</a></li>';
+  $markup .= '</ul>';
+  $markup .= '</li>';
+  $markup .= '</ul>';
+  $markup .= '</nav>';
   $markup .= '</div>';
 
   return $markup;
@@ -1139,6 +1330,13 @@ function mfcs_help_topic_requests($allowed_topics) {
   $markup .= 'For those less visually inclined, the <dfn class="term">Request Type</dfn> is also presented along side the <dfn class="term">Approved</dfn> <dfn class="term">Request</dfn>. ';
   $markup .= '<br>';
   $markup .= '</div>';
+
+  $markup .= '<div class="note"> ';
+  $markup .= 'During the <dfn class="term">Review</dfn> process, e-mails may be sent by the <dfn class="term">Facilities Use System</dfn>. These e-mails should not be replied to. Your replies will not be recieved. Instead, all responses to received e-mails should be sent via <dfn class="term">Comments</dfn> in the <dfn class="term"><abbr class="abbreviation" title="Facilities Use System">FCS</abbr></dfn> system.';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<br>';
 
   $markup .= '<br>';
 
@@ -1359,6 +1557,202 @@ function mfcs_help_topic_requests_section_external($allowed_topics) {
 }
 
 /**
+ * Build the markup for the help topic: review.
+ *
+ * @param array $allowed_topics
+ *   An array of topics currently allowed based on the users access.
+ *
+ * @return string
+ *   The generated HTML markup.
+ */
+function mfcs_help_topic_review($allowed_topics) {
+  if (!is_array($allowed_topics)) {
+    cf_error::invalid_array('allowed_topics');
+    return '';
+  }
+
+  $markup = '';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'The <dfn class="term">Facilities Use System</dfn> is centerred around the <dfn class="term">Review</dfn> process to help ensure room availability, issue resolution, fee assignments, insurance confirmation, and any other situation including but not limited to closures due to emergencies. ';
+  $markup .= 'This process is intended to increase communication between the different parties in a consistent and centralized manner. ';
+  $markup .= 'Many actions, decisions, comments, and other changes to <dfn class="term">Requests</dfn> are stored on the system in the <dfn class="term">Review Log</dfn> (or in the <dfn class="term">Request History</dfn>) and may also be sent via e-mail to relevant parties. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="note"> ';
+  $markup .= 'E-mails sent by the <dfn class="term">Facilities Use System</dfn> should not be replied to. Your replies will not be recieved. Instead, all responses to received e-mails should be sent via <dfn class="term">Comments</dfn> in the <dfn class="term"><abbr class="abbreviation" title="Facilities Use System">FCS</abbr></dfn> system. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<br>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'The <dfn class="term">Review</dfn> process is broken down into multiple <dfn class="term">Review Steps</dfn>. ';
+  $markup .= 'These <dfn class="term">Steps</dfn> are: <dfn class="term">Venue Available</dfn>, <dfn class="term">Review</dfn>, <dfn class="term">Final Decision</dfn>, and <dfn class="term">Completed</dfn>. ';
+  $markup .= 'Sometimes the system will automatically alter a <dfn class="term">Requests</dfn> <dfn class="term">Review Step</dfn>. ';
+  $markup .= 'This commonly happens with incomplete <dfn class="term">Requests</dfn> with dates and times in the past. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<br>';
+
+  $section_class = array(
+    'section',
+  );
+
+  $headers = array(
+    0 => array('markup' => 'Venue Available Step', 'attributes' => array('class' => array('header-3', 'section'))),
+  );
+
+  $markup .= mfcs_help_render_headers('topic-review-section-venue_available', array('class' => $section_class), $headers);
+  $markup .= mfcs_help_topic_review_section_venue_available($allowed_topics);
+
+  $headers = array(
+    0 => array('markup' => 'Review Step', 'attributes' => array('class' => array('header-3', 'section'))),
+  );
+
+  $markup .= mfcs_help_render_headers('topic-review-section-review', array('class' => $section_class), $headers);
+  $markup .= mfcs_help_topic_review_section_review($allowed_topics);
+
+  $headers = array(
+    0 => array('markup' => 'Final Decision Step', 'attributes' => array('class' => array('header-3', 'section'))),
+  );
+
+  $markup .= mfcs_help_render_headers('topic-review-section-final_decision', array('class' => $section_class), $headers);
+  $markup .= mfcs_help_topic_review_section_final_decision($allowed_topics);
+
+  $headers = array(
+    0 => array('markup' => 'Completed Step', 'attributes' => array('class' => array('header-3', 'section'))),
+  );
+
+  $markup .= mfcs_help_render_headers('topic-review-section-completed', array('class' => $section_class), $headers);
+  $markup .= mfcs_help_topic_review_section_completed($allowed_topics);
+
+  return $markup;
+}
+
+/**
+ * Build the markup for the help topic: review - venue available step.
+ *
+ * @param array $allowed_topics
+ *   An array of topics currently allowed based on the users access.
+ *
+ * @return string
+ *   The generated HTML markup.
+ */
+function mfcs_help_topic_review_section_venue_available($allowed_topics) {
+  if (!is_array($allowed_topics)) {
+    cf_error::invalid_array('allowed_topics');
+    return '';
+  }
+
+  $markup = '<section id="fcs-section-help-review-venue_available" class="section-help-review-venue_available">';
+
+  // @todo
+
+  $markup .= '</section>';
+
+  return $markup;
+}
+
+/**
+ * Build the markup for the help topic: review - review step.
+ *
+ * @param array $allowed_topics
+ *   An array of topics currently allowed based on the users access.
+ *
+ * @return string
+ *   The generated HTML markup.
+ */
+function mfcs_help_topic_review_section_review($allowed_topics) {
+  if (!is_array($allowed_topics)) {
+    cf_error::invalid_array('allowed_topics');
+    return '';
+  }
+
+  $markup = '<section id="fcs-section-help-review-review" class="section-help-review-review">';
+
+  // @todo
+
+  $markup .= '</section>';
+
+  return $markup;
+}
+
+/**
+ * Build the markup for the help topic: review - final decision step.
+ *
+ * @param array $allowed_topics
+ *   An array of topics currently allowed based on the users access.
+ *
+ * @return string
+ *   The generated HTML markup.
+ */
+function mfcs_help_topic_review_section_final_decision($allowed_topics) {
+  if (!is_array($allowed_topics)) {
+    cf_error::invalid_array('allowed_topics');
+    return '';
+  }
+
+  $markup = '<section id="fcs-section-help-review-final_decision" class="section-help-review-final_decision">';
+
+  // @todo
+
+  $markup .= '</section>';
+
+  return $markup;
+}
+
+/**
+ * Build the markup for the help topic: review - completed step.
+ *
+ * @param array $allowed_topics
+ *   An array of topics currently allowed based on the users access.
+ *
+ * @return string
+ *   The generated HTML markup.
+ */
+function mfcs_help_topic_review_section_completed($allowed_topics) {
+  if (!is_array($allowed_topics)) {
+    cf_error::invalid_array('allowed_topics');
+    return '';
+  }
+
+  $markup = '<section id="fcs-section-help-review-completed" class="section-help-review-completed">';
+
+  // @todo
+
+  $markup .= '</section>';
+
+  return $markup;
+}
+
+/**
+ * Build the markup for the help topic: manage.
+ *
+ * @param array $allowed_topics
+ *   An array of topics currently allowed based on the users access.
+ *
+ * @return string
+ *   The generated HTML markup.
+ */
+function mfcs_help_topic_manage($allowed_topics) {
+  if (!is_array($allowed_topics)) {
+    cf_error::invalid_array('allowed_topics');
+    return '';
+  }
+
+  $markup = '';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  return $markup;
+}
+
+/**
  * Build the markup for the help topic: faq.
  *
  * @param array $allowed_topics
@@ -1375,8 +1769,13 @@ function mfcs_help_topic_faq($allowed_topics) {
 
   $markup = '';
 
-  $markup .= '<div class="paragraph">';
-  $markup .= '<br>';
+  $markup .= '<div id="faq-1" class="paragraph faq-item">';
+  $markup .= '<div class="faq-item-question question"> ';
+  $markup .= '<strong class="bold faq-item-number">1.</strong> Why doesn\'t anybody receive my e-mail replies?';
+  $markup .= '</div>';
+  $markup .= '<div class="faq-item-answer answer"> ';
+  $markup .= 'E-mails sent by this sent should not be replied to. There is no one to answer or see them. Instead, replies should be enterred in as <dfn class="term">Comments</dfn> on the <dfn class="term">Request</dfn> form in the <dfn class="term">Facilities Use System</dfn>. ';
+  $markup .= '</div>';
   $markup .= '</div>';
 
   return $markup;
@@ -1919,6 +2318,16 @@ function mfcs_help_topic_terminology_section_documentation($allowed_topics) {
   $markup = '<section id="fcs-section-help-terminology-documentation" class="section-help-terminology-documentation">';
 
   $markup .= '<dl class="definition_list">';
+
+  $markup .= '<dt id="terminology-documentation-documentation" class="definition_list-title">Documentation</dt>';
+  $markup .= '<dd class="definition_list-definition">';
+  $markup .= 'The <dfn class="term">Documentation</dfn> (within the context of this facilities use documentation) refers to a descriptive explanation of the system and its functions. ';
+  $markup .= '</dd>';
+
+  $markup .= '<dt id="terminology-documentation-documentation" class="definition_list-title">User Guides</dt>';
+  $markup .= '<dd class="definition_list-definition">';
+  $markup .= 'A <dfn class="term">User Guide</dfn> refers to a step-by-step explanation on how to perform a particular task within the system (often times including screenshots). ';
+  $markup .= '</dd>';
 
   $markup .= '</dl>';
 
