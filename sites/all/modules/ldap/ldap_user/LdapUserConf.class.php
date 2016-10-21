@@ -1288,7 +1288,12 @@ class LdapUserConf {
         // Field api field - first we get the field.
         $field = field_info_field($value_name);
         // Then the columns for the field in the schema.
-        $columns = array_keys($field['columns']);
+        if (is_array($field['columns'])) {
+          $columns = array_keys($field['columns']);
+        }
+        else {
+          $columns = array(0 => NULL);
+        }
         // Then we convert the value into an array if it's scalar.
         $values = $field['cardinality'] == 1 ? array($value) : (array) $value;
 
