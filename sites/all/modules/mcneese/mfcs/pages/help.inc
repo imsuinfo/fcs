@@ -58,6 +58,14 @@ function mfcs_help_0_page($topic = NULL, $section = NULL, $sub_section = NULL) {
     drupal_exit();
   }
 
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
   $user = cf_current_user();
 
   $title = 'Help';
@@ -245,6 +253,10 @@ function mfcs_help_0_page($topic = NULL, $section = NULL, $sub_section = NULL) {
       $markup .= $navigation_markup;
       $markup .= mfcs_help_render_headers('topic-review-section-venue_available', $header_attributes, $headers);
       $markup .= mfcs_help_topic_review_section_venue_available($allowed_topics);
+
+      $markup .= '<br>';
+      $markup .= 'Continue on to <a href="' . $base_path . 'help-0/review/review' . $url_arguments . '" class="item-link">Documentation: Review - Review</a>. ';
+      $markup .= '<br>';
     }
     elseif ($section == 'review') {
       $section_class[] = 'section-help-topic-review-review';
@@ -254,6 +266,10 @@ function mfcs_help_0_page($topic = NULL, $section = NULL, $sub_section = NULL) {
       $markup .= $navigation_markup;
       $markup .= mfcs_help_render_headers('topic-review-section-review', $header_attributes, $headers);
       $markup .= mfcs_help_topic_review_section_review($allowed_topics);
+
+      $markup .= '<br>';
+      $markup .= 'Continue on to <a href="' . $base_path . 'help-0/review/final_decision' . $url_arguments . '" class="item-link">Documentation: Review - Final Decision</a>. ';
+      $markup .= '<br>';
     }
     elseif ($section == 'final_decision') {
       $section_class[] = 'section-help-topic-review-final_decision';
@@ -263,6 +279,10 @@ function mfcs_help_0_page($topic = NULL, $section = NULL, $sub_section = NULL) {
       $markup .= $navigation_markup;
       $markup .= mfcs_help_render_headers('topic-review-section-final_decision', $header_attributes, $headers);
       $markup .= mfcs_help_topic_review_section_final_decision($allowed_topics);
+
+      $markup .= '<br>';
+      $markup .= 'Continue on to <a href="' . $base_path . 'help-0/review/completed' . $url_arguments . '" class="item-link">Documentation: Review - Completed</a>. ';
+      $markup .= '<br>';
     }
     elseif ($section == 'completed') {
       $section_class[] = 'section-help-topic-review-completed';
@@ -1217,7 +1237,7 @@ function mfcs_help_topic_introduction($allowed_topics) {
 
 
   $markup = '<div class="paragraph">';
-  $markup .= 'The <dfn class="term">Facilities Use System</dfn>, or <abbr title="Facilities Use System" class="abbreviation">FCS</abbr>, is a product of <em class="emphasis">McNeese State University\'s</em> culture and needs in tracking special events. ';
+  $markup .= 'The <dfn class="term">Facilities Use System</dfn>, or <dfn class="term"><abbr title="Facilities Use System" class="abbreviation">FCS</abbr></dfn>, is a product of <em class="emphasis">McNeese State University\'s</em> culture and needs in tracking special events. ';
   $markup .= 'Through this system, <em class="emphasis">McNeese State University</em> provides facilities and resources to our <strong class="bold">Students</strong>, <strong class="bold">Employees</strong>, and the <strong class="bold">Community</strong> to further educational, cultural, and recreational initiatives through events held on campus. ';
   $markup .= 'All activities, meetings, or requests, excluding scheduled academic classes, must be scheduled through the facilities use special event request form. ';
   $markup .= '<br>';
@@ -1279,8 +1299,6 @@ function mfcs_help_topic_requests($allowed_topics) {
   $markup .= '<br>';
   $markup .= '</div>';
 
-  $markup .= '<br>';
-
   $markup .= '<div class="paragraph">';
   $markup .= 'Each <dfn class="term">Request</dfn> must be associated with a specific <dfn class="term">Room</dfn>. Each <dfn class="term">Room</dfn> is associated with a <dfn class="term">Building</dfn> and each <dfn class="term">Building</dfn> falls under one or more <dfn class="term">Locations</dfn>. ';
   $markup .= 'The <dfn class="term">Buildings</dfn> themselves are more of an abstract term because they may reference a generic place such as a parking lot (making a <dfn class="term">Room</dfn> also an abstract concept). ';
@@ -1294,8 +1312,6 @@ function mfcs_help_topic_requests($allowed_topics) {
   $markup .= 'This is a common practice for student organizations. ';
   $markup .= '<br>';
   $markup .= '</div>';
-
-  $markup .= '<br>';
 
   $markup .= '<div class="paragraph">';
   $markup .= 'Specific dates and times must be specified for each event. ';
@@ -1332,11 +1348,9 @@ function mfcs_help_topic_requests($allowed_topics) {
   $markup .= '</div>';
 
   $markup .= '<div class="note"> ';
-  $markup .= 'During the <dfn class="term">Review</dfn> process, e-mails may be sent by the <dfn class="term">Facilities Use System</dfn>. These e-mails should not be replied to. Your replies will not be recieved. Instead, all responses to received e-mails should be sent via <dfn class="term">Comments</dfn> in the <dfn class="term"><abbr class="abbreviation" title="Facilities Use System">FCS</abbr></dfn> system.';
+  $markup .= 'During the <dfn class="term">Review</dfn> process, e-mails may be sent by the <dfn class="term">Facilities Use System</dfn>. These e-mails should not be replied to. Your replies will not be recieved. Instead, all responses to received e-mails should be sent via <dfn class="term">Comments</dfn> in the <dfn class="term"><abbr class="abbreviation" title="Facilities Use System">FCS</abbr></dfn> system. ';
   $markup .= '<br>';
   $markup .= '</div>';
-
-  $markup .= '<br>';
 
   $markup .= '<br>';
 
@@ -1361,8 +1375,6 @@ function mfcs_help_topic_requests($allowed_topics) {
   $markup .= '<br>';
   $markup .= '</div>';
 
-  $markup .= '<br>';
-
   $markup .= '<div class="paragraph">';
   $markup .= ' <dfn class="term">Completed</dfn> and <dfn class="term">Approved</dfn> <dfn class="term">Requests</dfn> appear on the calendars, the time slots are reserved, and an e-mail is sent to the <dfn class="term">Requester</dfn>. ';
   $markup .= ' These e-mails also contain additional files, such as an iCalendar file (a file with an ICS file extension), for importing the <dfn class="term">Approved</dfn> <dfn class="term">Request</dfn> into the persons own personal calendars. ';
@@ -1376,7 +1388,6 @@ function mfcs_help_topic_requests($allowed_topics) {
   $markup .= '</div>';
 
   $markup .= '<br>';
-  $markup .= '<br>';
 
   $markup .= '<div class="continue_on no-print">';
   $markup .= 'View Section: <a href="' . $base_path . 'help-0/requests/employee' . $url_arguments . '" class="item-link">Faculty, Staff, and Athletics Requests</a>. ';
@@ -1388,8 +1399,19 @@ function mfcs_help_topic_requests($allowed_topics) {
   $markup .= 'View Section: <a href="' . $base_path . 'help-0/requests/external' . $url_arguments . '" class="item-link">External Requests</a>. ';
   $markup .= '<br>';
   $markup .= '<br>';
-  $markup .= 'Continue on to <a href="' . $base_path . 'help-0/faq' . $url_arguments . '" class="item-link">Documentation: Frequently Asked Questions</a>. ';
+
+  if (in_array('review', $allowed_topics)) {
+    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/review' . $url_arguments . '" class="item-link">Documentation: Review</a>. ';
+  }
+  elseif (in_array('manage', $allowed_topics)) {
+    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/manage' . $url_arguments . '" class="item-link">Documentation: Manage</a>. ';
+  }
+  else {
+    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/faq' . $url_arguments . '" class="item-link">Documentation: Frequently Asked Questions</a>. ';
+  }
   $markup .= '<br>';
+
+
   $markup .= '</div>';
 
   return $markup;
@@ -1571,6 +1593,14 @@ function mfcs_help_topic_review($allowed_topics) {
     return '';
   }
 
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
   $markup = '';
 
   $markup .= '<div class="paragraph">';
@@ -1585,13 +1615,20 @@ function mfcs_help_topic_review($allowed_topics) {
   $markup .= '<br>';
   $markup .= '</div>';
 
-  $markup .= '<br>';
-
   $markup .= '<div class="paragraph">';
   $markup .= 'The <dfn class="term">Review</dfn> process is broken down into multiple <dfn class="term">Review Steps</dfn>. ';
   $markup .= 'These <dfn class="term">Steps</dfn> are: <dfn class="term">Venue Available</dfn>, <dfn class="term">Review</dfn>, <dfn class="term">Final Decision</dfn>, and <dfn class="term">Completed</dfn>. ';
   $markup .= 'Sometimes the system will automatically alter a <dfn class="term">Requests</dfn> <dfn class="term">Review Step</dfn>. ';
   $markup .= 'This commonly happens with incomplete <dfn class="term">Requests</dfn> with dates and times in the past. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<br>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'There is a <dfn class="term">Comment</dfn> decision that may be used during all <dfn class="term">Review Steps</dfn>. ';
+  $markup .= 'All <dfn class="term">Comments</dfn> are sent to the <dfn class="term">Venue Coordinator</dfn>, every <dfn class="term">Reviewer</dfn>, and also the <dfn class="term">Requester</dfn>. ';
+  $markup .= 'There is an option to restrict messages such that the <dfn class="term">Requester</dfn> does not receive the <dfn class="term">Comment</dfn> (and also hiding the message in the <dfn class="term">Review Log</dfn>) for more private messages between <dfn class="term">Reviewers</dfn> and the <dfn class="term">Venue Coordinator</dfn>. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
@@ -1607,6 +1644,7 @@ function mfcs_help_topic_review($allowed_topics) {
 
   $markup .= mfcs_help_render_headers('topic-review-section-venue_available', array('class' => $section_class), $headers);
   $markup .= mfcs_help_topic_review_section_venue_available($allowed_topics);
+  $markup .= '<br>';
 
   $headers = array(
     0 => array('markup' => 'Review Step', 'attributes' => array('class' => array('header-3', 'section'))),
@@ -1614,6 +1652,7 @@ function mfcs_help_topic_review($allowed_topics) {
 
   $markup .= mfcs_help_render_headers('topic-review-section-review', array('class' => $section_class), $headers);
   $markup .= mfcs_help_topic_review_section_review($allowed_topics);
+  $markup .= '<br>';
 
   $headers = array(
     0 => array('markup' => 'Final Decision Step', 'attributes' => array('class' => array('header-3', 'section'))),
@@ -1621,6 +1660,7 @@ function mfcs_help_topic_review($allowed_topics) {
 
   $markup .= mfcs_help_render_headers('topic-review-section-final_decision', array('class' => $section_class), $headers);
   $markup .= mfcs_help_topic_review_section_final_decision($allowed_topics);
+  $markup .= '<br>';
 
   $headers = array(
     0 => array('markup' => 'Completed Step', 'attributes' => array('class' => array('header-3', 'section'))),
@@ -1628,6 +1668,15 @@ function mfcs_help_topic_review($allowed_topics) {
 
   $markup .= mfcs_help_render_headers('topic-review-section-completed', array('class' => $section_class), $headers);
   $markup .= mfcs_help_topic_review_section_completed($allowed_topics);
+  $markup .= '<br>';
+
+  if (in_array('manage', $allowed_topics)) {
+    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/manage' . $url_arguments . '" class="item-link">Documentation: Manage</a>. ';
+  }
+  else {
+    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/faq' . $url_arguments . '" class="item-link">Documentation: Frequently Asked Questions</a>. ';
+  }
+  $markup .= '<br>';
 
   return $markup;
 }
@@ -1649,7 +1698,32 @@ function mfcs_help_topic_review_section_venue_available($allowed_topics) {
 
   $markup = '<section id="fcs-section-help-review-venue_available" class="section-help-review-venue_available">';
 
-  // @todo
+  $markup .= '<div class="paragraph">';
+  $markup .= 'The <dfn class="term">Venue Available</dfn> <dfn class="term">Review Step</dfn> is the very first step following the creation of a <dfn class="term">Request</dfn>. ';
+  $markup .= 'During this <dfn class="term">Step</dfn>, <dfn class="term">Venue Coordinators</dfn> must determine if the requested venue is available. ';
+  $markup .= 'A decision of either <strong class="bold"><dfn class="term">Available</dfn></strong> or <strong class="bold"><dfn class="term">Unavailable</dfn></strong> must be specified before the <dfn class="term">Request</dfn> can move into the next <dfn class="term">Review Step</dfn>. ';
+  $markup .= 'The next <dfn class="term">Review Step</dfn> is <dfn class="term">Review</dfn>. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<br>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'When the <strong class="bold"><dfn class="term">Unavailable</dfn></strong> decision is made, an e-mail is sent out informing the <dfn class="term">Requester</dfn> that their <dfn class="term">Request</dfn> has been closed because the <dfn class="term">Room</dfn> is <dfn class="term">Unavailable</dfn>. ';
+  $markup .= 'When the <strong class="bold"><dfn class="term">Available</dfn></strong> decision is made, an e-mail is sent out informing the <dfn class="term">Requester</dfn> that their <dfn class="term">Request</dfn> has been made available for review. ';
+  $markup .= 'These <dfn class="term">Requests</dfn> have their <dfn class="term">Request State</dfn> immediately set to <dfn class="term">Queued (Locked)</dfn>. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<br>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= '<dfn class="term">Requests</dfn> in the <dfn class="term">Venue Available</dfn> <dfn class="term">Step</dfn> may sometimes be auto-closed as <dfn class="term">Room Unavailable</dfn> when another <dfn class="term">Request</dfn> is <dfn class="term">Approved</dfn> for the same <dfn class="term">Room</dfn>, dates, and times. ';
+  $markup .= '<dfn class="term">Requests</dfn> in this <dfn class="term">Step</dfn> may become auto-cancelled if their dates and times are in the past. ';
+  $markup .= '<dfn class="term">Requirements</dfn>, such as usage fees, may be specified by the appropriate <dfn class="term">Financer</dfn>, <dfn class="term">Insurerer</dfn>, or <dfn class="term">Manager</dfn> during this <dfn class="term">Step</dfn>. ';
+  $markup .= 'The <dfn class="term">Requirement</dfn> of <em class="emphasis">Strictly University Business</em> may be specified by the <dfn class="term">Venue Coordinator</dfn> to inform the <dfn class="term">Financer</dfn> and <dfn class="term">Insurer</dfn> that fees and insurance may not be required. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
 
   $markup .= '</section>';
 
@@ -1673,7 +1747,33 @@ function mfcs_help_topic_review_section_review($allowed_topics) {
 
   $markup = '<section id="fcs-section-help-review-review" class="section-help-review-review">';
 
-  // @todo
+  $markup .= '<div class="paragraph">';
+  $markup .= 'The <dfn class="term">Review</dfn> <dfn class="term">Review Step</dfn> (or just <dfn class="term">Review Step</dfn> to be less confusing) is where <dfn class="term">Reviewers</dfn> are expected to make decisions. ';
+  $markup .= 'Every <dfn class="term">Reviewer</dfn> associated with the <dfn class="term">Request\'s</dfn> <dfn class="term">Classification</dfn> will revieve an e-mail informing them that a new <dfn class="term">Request</dfn> has been made available for <dfn class="term">Review</dfn>. ';
+  $markup .= 'A decision of either <strong class="bold"><dfn class="term">Issues</dfn></strong> or <strong class="bold"><dfn class="term">No Issues</dfn></strong> must be specified by each <dfn class="term">Reviewer</dfn> before the <dfn class="term">Request</dfn> can move into the next <dfn class="term">Review Step</dfn>. ';
+  $markup .= 'The next <dfn class="term">Review Step</dfn> is <dfn class="term">Final Decision</dfn>. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<br>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'When the <strong class="bold"><dfn class="term">Issues</dfn></strong> decision is made, an e-mail is sent out informing the <dfn class="term">Requester</dfn> and other <dfn class="term">Reviewers</dfn> of the decision. ';
+  $markup .= 'When the <strong class="bold"><dfn class="term">No Issues</dfn></strong> decision is made, an e-mail is sent out informing the <dfn class="term">Requester</dfn> and other <dfn class="term">Reviewers</dfn> of the decision. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="note"> ';
+  $markup .= 'It is highly recommended to use the <strong class="bold"><dfn class="term">Comment</dfn></strong> decision to ask the <dfn class="term">Requester</dfn> questions or give additional instructions during the <dfn class="term">Review Step</dfn>. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'A warning is presented near the <dfn class="term">Review</dfn> decision fields when there are any existing conflicts. ';
+  $markup .= '<dfn class="term">Requests</dfn> in this <dfn class="term">Step</dfn> may become auto-cancelled if their dates and times are in the past. ';
+  $markup .= '<dfn class="term">Requirements</dfn>, such as usage fees, may be specified by the appropriate <dfn class="term">Financer</dfn>, <dfn class="term">Insurerer</dfn>, or <dfn class="term">Manager</dfn> during this <dfn class="term">Step</dfn>. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
 
   $markup .= '</section>';
 
@@ -1697,7 +1797,30 @@ function mfcs_help_topic_review_section_final_decision($allowed_topics) {
 
   $markup = '<section id="fcs-section-help-review-final_decision" class="section-help-review-final_decision">';
 
-  // @todo
+  $markup .= '<div class="paragraph">';
+  $markup .= 'The <dfn class="term">Final Decision</dfn> <dfn class="term">Review Step</dfn> is where <dfn class="term">Reviewers</dfn> the decision for <dfn class="term">Approving</dfn> or <dfn class="term">Denying</dfn> the <dfn class="term">Request</dfn> is made. ';
+  $markup .= 'The only differences between this <dfn class="term">Step</dfn> and the <dfn class="term">Review Step</dfn> is that every <dfn class="term">Reviewer</dfn> has now made at least one decision of either <dfn class="term">Issues</dfn> or <dfn class="term">No Issued</dfn> and certain <dfn class="term">Reviewers</dfn> now have the <strong class="bold"><dfn class="term">Approve</dfn></strong> or <strong class="bold"><dfn class="term">Deny</dfn></strong> decision. ';
+  $markup .= 'The <dfn class="term">Reviewer</dfn> may still update their <dfn class="term">Issues</dfn> or <dfn class="term">No Issues</dfn> decision during this <dfn class="term">Step</dfn>. ';
+  $markup .= 'The next <dfn class="term">Review Step</dfn> is <dfn class="term">Completed</dfn>. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<br>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'When the <strong class="bold"><dfn class="term">Approved</dfn></strong> decision is made, an e-mail is sent out informing the <dfn class="term">Requester</dfn> and other <dfn class="term">Reviewers</dfn> of the decision and the <dfn class="term">Request State</dfn> is set to <dfn class="term">Accepted</dfn>. ';
+  $markup .= 'When the <strong class="bold"><dfn class="term">Denied</dfn></strong> decision is made, an e-mail is sent out informing the <dfn class="term">Requester</dfn> and other <dfn class="term">Reviewers</dfn> of the decision and the <dfn class="term">Request State</dfn> is set to <dfn class="term">Denied</dfn>. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<br>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'A warning is presented near the <dfn class="term">Review</dfn> decision fields when there are any existing conflicts. ';
+  $markup .= '<dfn class="term">Requests</dfn> in this <dfn class="term">Step</dfn> may become auto-cancelled if their dates and times are in the past. ';
+  $markup .= '<dfn class="term">Requirements</dfn>, such as usage fees, may be specified by the appropriate <dfn class="term">Financer</dfn>, <dfn class="term">Insurerer</dfn>, or <dfn class="term">Manager</dfn> during this <dfn class="term">Step</dfn>. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
 
   $markup .= '</section>';
 
@@ -1721,7 +1844,19 @@ function mfcs_help_topic_review_section_completed($allowed_topics) {
 
   $markup = '<section id="fcs-section-help-review-completed" class="section-help-review-completed">';
 
-  // @todo
+  $markup .= '<div class="paragraph">';
+  $markup .= 'The <dfn class="term">Completed</dfn> <dfn class="term">Review Step</dfn> is where the <dfn class="term">Review</dfn> process is complete. ';
+  $markup .= 'No further decisions may be made except for <dfn class="term">Comments</dfn> and <dfn class="term">Requirements</dfn>. ';
+  $markup .= 'Completed <dfn class="term">Requests</dfn> are generally either in the <dfn class="term">Approved</dfn> or <dfn class="term">Denied</dfn> <dfn class="term">State</dfn>. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<br>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= '<dfn class="term">Requirements</dfn>, such as usage fees, may be specified by the appropriate <dfn class="term">Financer</dfn>, <dfn class="term">Insurerer</dfn>, or <dfn class="term">Manager</dfn> during this <dfn class="term">Step</dfn>. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
 
   $markup .= '</section>';
 
@@ -1743,11 +1878,24 @@ function mfcs_help_topic_manage($allowed_topics) {
     return '';
   }
 
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
   $markup = '';
 
   $markup .= '<div class="paragraph">';
   $markup .= '<br>';
   $markup .= '</div>';
+
+  $markup .= '<br>';
+
+  $markup .= 'Continue on to <a href="' . $base_path . 'help-0/faq' . $url_arguments . '" class="item-link">Documentation: Frequently Asked Questions</a>. ';
+  $markup .= '<br>';
 
   return $markup;
 }
@@ -1767,6 +1915,14 @@ function mfcs_help_topic_faq($allowed_topics) {
     return '';
   }
 
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
   $markup = '';
 
   $markup .= '<div id="faq-1" class="paragraph faq-item">';
@@ -1777,6 +1933,11 @@ function mfcs_help_topic_faq($allowed_topics) {
   $markup .= 'E-mails sent by this sent should not be replied to. There is no one to answer or see them. Instead, replies should be enterred in as <dfn class="term">Comments</dfn> on the <dfn class="term">Request</dfn> form in the <dfn class="term">Facilities Use System</dfn>. ';
   $markup .= '</div>';
   $markup .= '</div>';
+
+  $markup .= '<br>';
+
+  $markup .= 'Continue on to <a href="' . $base_path . 'help-0/terminology' . $url_arguments . '" class="item-link">Documentation: Terminology</a>. ';
+  $markup .= '<br>';
 
   return $markup;
 }
@@ -1854,7 +2015,7 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics) {
   $markup .= 'A Request State in which the Request has been Approved by the Reviewers and is now reserved for the requested dates, times, and place. ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
-  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#request_state" class="definition_list-see_other no_print_links_as_link">Request State</a>.</span> ';
+  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#terminology-facilities_use-request_state" class="definition_list-see_other no_print_links_as_link">Request State</a>.</span> ';
   $markup .= '</span>';
   $markup .= '</dd>';
 
@@ -1864,9 +2025,9 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics) {
   $markup .= 'All other Requests that have not been Approved should be assigned the Request State of Cancelled. ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
-  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#request_state" class="definition_list-see_other no_print_links_as_link">Request State</a>.</span> ';
+  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#terminology-facilities_use-request_state" class="definition_list-see_other no_print_links_as_link">Request State</a>.</span> ';
   $markup .= '<br>';
-  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#cancelled" class="definition_list-see_other no_print_links_as_link">Cancelled</a>.</span> ';
+  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#terminology-facilities_use-cancelled" class="definition_list-see_other no_print_links_as_link">Cancelled</a>.</span> ';
   $markup .= '</span>';
   $markup .= '</dd>';
 
@@ -1875,7 +2036,7 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics) {
   $markup .= 'A decision made by the Reviewer during the Final Decision Step to designate that the Request has been Accepted. ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
-  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#review" class="definition_list-see_other no_print_links_as_link">Review</a>.</span> ';
+  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#terminology-facilities_use-review" class="definition_list-see_other no_print_links_as_link">Review</a>.</span> ';
   $markup .= '</span>';
   $markup .= '</dd>';
 
@@ -1884,7 +2045,7 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics) {
   $markup .= 'A decision made during the Venue Available Step by the Venue Coordinator designating that the venue is available. ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
-  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#review_step" class="definition_list-see_other no_print_links_as_link">Review Step</a>.</span> ';
+  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#terminology-facilities_use-review_step" class="definition_list-see_other no_print_links_as_link">Review Step</a>.</span> ';
   $markup .= '</span>';
   $markup .= '</dd>';
 
@@ -1894,7 +2055,7 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics) {
   $markup .= 'This does not include Requests that have already been Approved and then Cancelled. ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
-  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#request_state" class="definition_list-see_other no_print_links_as_link">Request State</a>.</span> ';
+  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#terminology-facilities_use-request_state" class="definition_list-see_other no_print_links_as_link">Request State</a>.</span> ';
   $markup .= '<br>';
   $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#approved_cancelled" class="definition_list-see_other no_print_links_as_link">Approved (Cancelled)</a>.</span> ';
   $markup .= '</span>';
@@ -1913,7 +2074,7 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics) {
   $markup .= 'This includes States such as: Accepted, Accepted (Cancelled), Cancelled, Room Unavailable, Room Unavailable (Due to Lock), and Denied. ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
-  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#request_state" class="definition_list-see_other no_print_links_as_link">Request State</a>.</span> ';
+  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#terminology-facilities_use-request_state" class="definition_list-see_other no_print_links_as_link">Request State</a>.</span> ';
   $markup .= '</span>';
   $markup .= '</dd>';
 
@@ -1922,7 +2083,7 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics) {
   $markup .= 'A Review Step in which a Request is has been completed (as accepted or denied) or closed (as room unavailable, cancelled, etc..). ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
-  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#review_step" class="definition_list-see_other no_print_links_as_link">Review Step</a>.</span> ';
+  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#terminology-facilities_use-review_step" class="definition_list-see_other no_print_links_as_link">Review Step</a>.</span> ';
   $markup .= '</span>';
   $markup .= '</dd>';
 
@@ -1940,7 +2101,7 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics) {
   $markup .= 'A decision made by the Reviewer during the Final Decision Step to designate that the Request has been Denied. ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
-  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#review" class="definition_list-see_other no_print_links_as_link">Review</a>.</span> ';
+  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#terminology-facilities_use-review" class="definition_list-see_other no_print_links_as_link">Review</a>.</span> ';
   $markup .= '</span>';
   $markup .= '</dd>';
 
@@ -1952,9 +2113,9 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics) {
   $markup .= 'Alternatively, this could be used to reference the Deny decision made by a Reviewer during the Final Decision Review Step. ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
-  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#request_state" class="definition_list-see_other no_print_links_as_link">Request State</a>.</span> ';
+  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#terminology-facilities_use-request_state" class="definition_list-see_other no_print_links_as_link">Request State</a>.</span> ';
   $markup .= '<br>';
-  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#review_step" class="definition_list-see_other no_print_links_as_link">Review Step</a>.</span> ';
+  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#terminology-facilities_use-review_step" class="definition_list-see_other no_print_links_as_link">Review Step</a>.</span> ';
   $markup .= '</span>';
   $markup .= '</dd>';
 
@@ -1980,7 +2141,7 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics) {
   $markup .= 'A Review Step in which a Request is waiting to have the final decision made by the Reviewers to be Approved or Denied. ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
-  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#review_step" class="definition_list-see_other no_print_links_as_link">Review Step</a>.</span> ';
+  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#terminology-facilities_use-review_step" class="definition_list-see_other no_print_links_as_link">Review Step</a>.</span> ';
   $markup .= '</span>';
   $markup .= '</dd>';
 
@@ -1995,7 +2156,7 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics) {
 
   $markup .= '<dt id="terminology-facilities_use-facilities_use_system" class="definition_list-title">Facilities Use System</dt>';
   $markup .= '<dd class="definition_list-definition">';
-  $markup .= 'The <dfn class="term">Facilities Use System</dfn>, or FCS, is the digital system or service used to provide <em class="emphasis">McNeese State University</em> with a facilities reservation process and tools. ';
+  $markup .= 'The <dfn class="term">Facilities Use System</dfn>, or <abbr title="Facilities Use System" class="abbreviation">FCS</abbr>, is the digital system or service used to provide <em class="emphasis">McNeese State University</em> with a facilities reservation process and tools. ';
   $markup .= '</dd>';
 
   $markup .= '<dt id="terminology-facilities_use-insurer" class="definition_list-title">Insurer</dt> ';
@@ -2012,7 +2173,7 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics) {
   $markup .= 'A decision made by the Reviewer during the Review Step or the Final Decision Step to designate that the Reviewer has issues with the Request. ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
-  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#review" class="definition_list-see_other no_print_links_as_link">Review</a>.</span> ';
+  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#terminology-facilities_use-review" class="definition_list-see_other no_print_links_as_link">Review</a>.</span> ';
   $markup .= '</span>';
   $markup .= '</dd>';
 
@@ -2026,7 +2187,7 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics) {
   $markup .= '<dd class="definition_list-definition">';
   $markup .= 'A <dfn class="term">Manager</dfn> is responsible most administrative tasks on the system. ';
   $markup .= 'This user can perform Venue Coordinator duties, Review Requests, and make modifications not normally allowed to Requests. ';
-  $markup .= '<dfn class="term">Managers</dfn> should be considered power users for the FCS. ';
+  $markup .= '<dfn class="term">Managers</dfn> should be considered power users for the <abbr title="Facilities Use System" class="abbreviation">FCS</abbr>. ';
   $markup .= '</dd>';
 
   $markup .= '<dt id="terminology-facilities_use-no_issues" class="definition_list-title">No Issues</dt> ';
@@ -2034,7 +2195,7 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics) {
   $markup .= 'A decision made by the Reviewer during the Review Step or the Final Decision Step to designate that the Reviewer does not have any issues with the Request. ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
-  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#review" class="definition_list-see_other no_print_links_as_link">Review</a>.</span> ';
+  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#terminology-facilities_use-review" class="definition_list-see_other no_print_links_as_link">Review</a>.</span> ';
   $markup .= '</span>';
   $markup .= '</dd>';
 
@@ -2044,7 +2205,7 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics) {
   $markup .= 'This is a central part of the <abbr title="Facilities Use System" class="abbreviation">FCS</abbr> such that most operations, functionality, features, and searches are centered around requests. ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
-  $markup .= '<span class="see_also">See Also: <a href="' . $base_path . 'help-0/requests' . $url_arguments . '" class="definition_list-see_other no_print_links_as_link">Topic: Requests</a>.</span> ';
+  $markup .= '<span class="see_also">See Also: <a href="' . $base_path . 'help-0/requests' . $url_arguments . '" class="definition_list-see_other no_print_links_as_link">Documentation: Requests</a>.</span> ';
   $markup .= '</span>';
   $markup .= '</dd>';
 
@@ -2072,7 +2233,7 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics) {
   $markup .= 'There are 9 types of statuses: Accepted, Accepted (Cancelled), Cancelled, Denied, Queued (Locked), Queued (Unlocked), Room Unavailable, Room Unavailable (Due to Lock), and Deleted. ';
   $markup .= '</dd>';
 
-  $markup .= '<dt id="terminology-facilities_use-request_step" class="definition_list-title">Request Step</dt> ';
+  $markup .= '<dt id="terminology-facilities_use-review_step" class="definition_list-title">Review Step</dt> ';
   $markup .= '<dd class="definition_list-definition">';
   $markup .= 'A step within the Review process in which a Request currently belongs to. ';
   $markup .= 'There are 4 types of steps: Venue Available, Review, Final Approval, and Completed. ';
@@ -2089,7 +2250,7 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics) {
   $markup .= 'Such restrictions could be paying facilities use fees or providing insurance. ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
-  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#review" class="definition_list-see_other no_print_links_as_link">Review</a>.</span> ';
+  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#terminology-facilities_use-review" class="definition_list-see_other no_print_links_as_link">Review</a>.</span> ';
   $markup .= '</span>';
   $markup .= '</dd>';
 
@@ -2103,7 +2264,7 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics) {
   $markup .= 'This entails multiple users (Reviewers, Venue Coordinators, Managers, etc..) specifying whether or not there are issues, assign any financial or insurance related requirements, and checking the availability of the requested room. ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
-  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#review_step" class="definition_list-see_other no_print_links_as_link">Review Step</a>.</span> ';
+  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#terminology-facilities_use-review_step" class="definition_list-see_other no_print_links_as_link">Review Step</a>.</span> ';
   $markup .= '</span>';
   $markup .= '</dd>';
 
@@ -2141,9 +2302,9 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics) {
   $markup .= 'This Request has been effectively Denied. ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
-  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#request_state" class="definition_list-see_other no_print_links_as_link">Request State</a>.</span> ';
+  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#terminology-facilities_use-request_state" class="definition_list-see_other no_print_links_as_link">Request State</a>.</span> ';
   $markup .= '<br>';
-  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#room_unavailable_due_to_lock" class="definition_list-see_other no_print_links_as_link">Room Unavailable (Due to Lock)</a>.</span> ';
+  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#terminology-facilities_use-room_unavailable_due_to_lock" class="definition_list-see_other no_print_links_as_link">Room Unavailable (Due to Lock)</a>.</span> ';
   $markup .= '</span>';
   $markup .= '</dd>';
 
@@ -2155,9 +2316,9 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics) {
   $markup .= 'This Request has been effectively Denied. ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
-  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#request_state" class="definition_list-see_other no_print_links_as_link">Request State</a>.</span> ';
+  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#terminology-facilities_use-request_state" class="definition_list-see_other no_print_links_as_link">Request State</a>.</span> ';
   $markup .= '<br>';
-  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#room_unavailable" class="definition_list-see_other no_print_links_as_link">Room Unavailable</a>.</span> ';
+  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#terminology-facilities_use-room_unavailable" class="definition_list-see_other no_print_links_as_link">Room Unavailable</a>.</span> ';
   $markup .= '</span>';
   $markup .= '</dd>';
 
@@ -2171,7 +2332,7 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics) {
   $markup .= '<dt id="terminology-facilities_use-step" class="definition_list-title">Step</dt>';
   $markup .= '<dd class="definition_list-definition">';
   $markup .= '<span class="see_section">';
-  $markup .= '<span class="see">See: <a href="' . $url_arguments . '#terminology-facilities_use-request_step" class="definition_list-see_other no_print_links_as_link">Request Step</a>.</span> ';
+  $markup .= '<span class="see">See: <a href="' . $url_arguments . '#terminology-facilities_use-review_step" class="definition_list-see_other no_print_links_as_link">Review Step</a>.</span> ';
   $markup .= '</span>';
   $markup .= '</dd>';
 
@@ -2191,7 +2352,7 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics) {
   $markup .= 'Any other Requests for the given Room at the specified dates and times will be automatically Closed as Room Unavailable (Due to Lock). ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
-  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#request_state" class="definition_list-see_other no_print_links_as_link">Request State</a>.</span> ';
+  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#terminology-facilities_use-request_state" class="definition_list-see_other no_print_links_as_link">Request State</a>.</span> ';
   $markup .= '</span>';
   $markup .= '</dd>';
 
@@ -2202,18 +2363,18 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics) {
   $markup .= 'The first Request to be Approved should cause all other Queued Requests for the specified dates and times for the given Room to be closed as Room Unavailable. ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
-  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#request_state" class="definition_list-see_other no_print_links_as_link">Request State</a>.</span> ';
+  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#terminology-facilities_use-request_state" class="definition_list-see_other no_print_links_as_link">Request State</a>.</span> ';
   $markup .= '</span>';
   $markup .= '</span>';
   $markup .= '</dd>';
 
-  $markup .= '<dt id="terminology-facilities_use-unavailable" class="definition_list-title">Unvailable</dt> ';
+  $markup .= '<dt id="terminology-facilities_use-unavailable" class="definition_list-title">Unavailable</dt> ';
   $markup .= '<dd class="definition_list-definition">';
   $markup .= 'A decision made during the Venue Available Step by the Venue Coordinator designating that the venue is unavailable. ';
   $markup .= 'The Request is subsequentally Closed as Room Unavailable. ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
-  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#review_step" class="definition_list-see_other no_print_links_as_link">Review Step</a>.</span> ';
+  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#terminology-facilities_use-review_step" class="definition_list-see_other no_print_links_as_link">Review Step</a>.</span> ';
   $markup .= '</span>';
   $markup .= '</dd>';
 
@@ -2222,7 +2383,7 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics) {
   $markup .= 'A Review Step in which a Request is waiting to be designated as available or unavailable by the Venue Coordinator. ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
-  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#review_step" class="definition_list-see_other no_print_links_as_link">Review Step</a>.</span> ';
+  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#terminology-facilities_use-review_step" class="definition_list-see_other no_print_links_as_link">Review Step</a>.</span> ';
   $markup .= '</span>';
   $markup .= '</dd>';
 
@@ -2256,9 +2417,26 @@ function mfcs_help_topic_terminology_section_system($allowed_topics) {
     return '';
   }
 
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
   $markup = '<section id="fcs-section-help-terminology-system" class="section-help-terminology-system">';
 
   $markup .= '<dl class="definition_list">';
+
+  $markup .= '<dt id="terminology-system-fcs" class="definition_list-title">HTML5</dt>';
+  $markup .= '<dd class="definition_list-definition">';
+  $markup .= '<dfn class="term">HTML5</dfn> is an internet standard that can very loosely be described as the <em class="emphasis">"web language"</em> or the <em class="emphasis">"internet"</em>. ';
+  $markup .= '<br>';
+  $markup .= '<span class="see_section">';
+  $markup .= '<span class="see_also">See Also: <a href="//en.wikipedia.org/wiki/HTML5" class="definition_list-see_other" target="_blank">https://en.wikipedia.org/wiki/HTML5</a>. ';
+  $markup .= '</span>';
+  $markup .= '</dd>';
 
   $markup .= '<dt id="terminology-system-fcs" class="definition_list-title">iCalendar</dt>';
   $markup .= '<dd class="definition_list-definition">';
@@ -2284,12 +2462,33 @@ function mfcs_help_topic_terminology_section_system($allowed_topics) {
   $markup .= '</span>';
   $markup .= '</dd>';
 
-  $markup .= '<dt id="terminology-system-fcs" class="definition_list-title">HTML5</dt>';
+  $markup .= '<dt id="terminology-system-proxy" class="definition_list-title">Proxy</dt>';
   $markup .= '<dd class="definition_list-definition">';
-  $markup .= '<dfn class="term">HTML5</dfn> is an internet standard that can very loosely be described as the <em class="emphasis">"web language"</em> or the <em class="emphasis">"internet"</em>. ';
-  $markup .= '<br>';
   $markup .= '<span class="see_section">';
-  $markup .= '<span class="see_also">See Also: <a href="//en.wikipedia.org/wiki/HTML5" class="definition_list-see_other" target="_blank">https://en.wikipedia.org/wiki/HTML5</a>. ';
+  $markup .= '<span class="see">See: <a href="' . $url_arguments . '#terminology-system-venue_coordinator_proxy" class="definition_list-see_other no_print_links_as_link">Venue Coordinator Proxy</a>.</span> ';
+  $markup .= '</span>';
+  $markup .= '</span>';
+  $markup .= '</dd>';
+
+  $markup .= '<dt id="terminology-system-request_history" class="definition_list-title">Request History</dt>';
+  $markup .= '<dd class="definition_list-definition">';
+  $markup .= 'The <dfn class="term">Request History</dfn> contains a record of all changes performed on a Request. ';
+  $markup .= 'This log is restricted to the Venue Coordinator and Managers. ';
+  $markup .= '</span>';
+  $markup .= '</dd>';
+
+  $markup .= '<dt id="terminology-system-review_log" class="definition_list-title">Review Log</dt>';
+  $markup .= '<dd class="definition_list-definition">';
+  $markup .= 'The <dfn class="term">Review Log</dfn> contains a record of all Review decisions made for a given Request. ';
+  $markup .= 'This log is restricted to the Requester, Venue Coordinator, Reviewers, and Managers. ';
+  $markup .= 'Some log entries may have further restrictions. ';
+  $markup .= '</span>';
+  $markup .= '</dd>';
+
+  $markup .= '<dt id="terminology-system-venue_coordinator_proxy" class="definition_list-title">Venue Coordinator Proxy</dt>';
+  $markup .= '<dd class="definition_list-definition">';
+  $markup .= 'A <dfn class="term">Venue Coordinator Proxy</dfn> is some user who may perform tasks as if they were a specified Venue Coordinator and is granted all appropriate priveleges necessary to perform such duties. ';
+  $markup .= 'Such granted priveleges are restricted only to Venue Coordinator tasks. ';
   $markup .= '</span>';
   $markup .= '</dd>';
 
