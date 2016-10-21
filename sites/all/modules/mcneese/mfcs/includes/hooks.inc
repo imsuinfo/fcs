@@ -1922,6 +1922,58 @@ function mfcs_hook_menu_help(&$items, $module_path) {
     'tab_root' => 'requests',
   );
 
+  $items['help-0/presentation/%'] = array(
+    'title' => 'Help',
+    'description' => 'Online Documentation',
+    'page callback' => 'mfcs_help_0_page_presentation',
+    'page arguments' => array(2),
+    'file' => 'help.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_generic_access',
+    'access arguments' => array('help'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
+
+  $items['help-0/presentation/%/%'] = array(
+    'title' => 'Help',
+    'description' => 'Online Documentation',
+    'page callback' => 'mfcs_help_0_page_presentation',
+    'page arguments' => array(2, 3),
+    'file' => 'help.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_generic_access',
+    'access arguments' => array('help'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
+
+  $items['help-0/presentation/%/%/%'] = array(
+    'title' => 'Help',
+    'description' => 'Online Documentation',
+    'page callback' => 'mfcs_help_0_page_presentation',
+    'page arguments' => array(2, 3, 4),
+    'file' => 'help.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_generic_access',
+    'access arguments' => array('help'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
+
+  $items['help-0/presentation/%/%/%/%'] = array(
+    'title' => 'Help',
+    'description' => 'Online Documentation',
+    'page callback' => 'mfcs_help_0_page_presentation',
+    'page arguments' => array(2, 3, 4, 5),
+    'file' => 'help.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_generic_access',
+    'access arguments' => array('help'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
+
   // @todo: provide custom pdf downloading for help pages
   /*
   $items['pdf-0/help'] = array(

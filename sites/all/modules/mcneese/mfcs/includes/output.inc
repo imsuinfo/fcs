@@ -1532,7 +1532,12 @@ function mfcs_output_print_page_view($html, $parameters = array()) {
 
   // title tags
   if (empty($parameters['page_title'])) {
-    $page_title = 'Facilities Use Request';
+    if ($parameters['page_title'] === FALSE) {
+      $page_title = FALSE;
+    }
+    else {
+      $page_title = 'Facilities Use Request';
+    }
   }
   else {
     $page_title = $parameters['page_title'];
@@ -1569,11 +1574,15 @@ function mfcs_output_print_page_view($html, $parameters = array()) {
   $html .= '<body class="' . $body_class . '">';
   $html .= '  <div id="mcneese-page" class="mcneese-page">';
   $html .= '    <div id="mcneese-page-content" class="mcneese-content full" role="main">';
-  $html .= '    <header class="page-title html_tag-header">';
-  $html .= '      <hgroup class="html_tag-hgroup">';
-  $html .= '        <h1 class="page-title html_tag-heading" role="main">' . $page_title . '</h1>';
-  $html .= '      </hgroup>';
-  $html .= '    </header>';
+
+  if ($page_title !== FALSE) {
+    $html .= '    <header class="page-title html_tag-header">';
+    $html .= '      <hgroup class="html_tag-hgroup">';
+    $html .= '        <h1 class="page-title html_tag-heading" role="main">' . $page_title . '</h1>';
+    $html .= '      </hgroup>';
+    $html .= '    </header>';
+  }
+
   $html .= '    ' . $body_markup;
   $html .= '    </div>';
   $html .= '  </div>';
@@ -1697,8 +1706,6 @@ function mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $revision_id, $h
  * @param bool $local
  *   (optional) If TRUE, then the file is saved to the local disk.
  *   If FALSE, then the file is print to stdout.
- * @param int $type
- *   (optional) What the PDF represents, such as a request or an agreement.
  *
  * @return bool
  *   TRUE on success, FALSE otherwise.
