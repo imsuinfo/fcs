@@ -1447,7 +1447,6 @@ function mfcs_help_0_allowed_topics($user) {
     $topics[] = 'request-review';
 
     // documentation
-    $topics[] = 'requests-review';
     $topics[] = 'review';
   }
 
@@ -1457,7 +1456,6 @@ function mfcs_help_0_allowed_topics($user) {
     $topics[] = 'request-manage';
 
     // documentation
-    $topics[] = 'requests-manage';
     $topics[] = 'manage';
   }
 
