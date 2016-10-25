@@ -515,11 +515,6 @@ function mfcs_help_0_page_presentation($presentation_type, $topic = NULL, $secti
     drupal_exit();
   }
 
-
-  if ($presentation_type == 'pdf') {
-    // @todo: special case, prints file instead of returning markup.
-  }
-
   return $markup;
 }
 
@@ -546,6 +541,24 @@ function mfcs_help_0_page_presentation_single($allowed_topics) {
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
+
+  // build the navigation markup.
+  $navigation_markup = '<nav id="mfcs-help-navigation_links" class="help-navigation_links no-print">';
+
+  if (file_exists(DRUPAL_ROOT . '/sites/all/modules/mcneese/mfcs/images/pdf/32.png')) {
+    $module_path = drupal_get_path('module', 'mfcs');
+
+    $image_file_path = $base_path . $module_path . '/images/pdf/32.png';
+
+    $navigation_markup .= '<a href="' . $base_path . 'help-0/presentation/pdf' . $url_arguments . '" title="Download as PDF" class="help-navigation_link link-pdf"><img src="' . $image_file_path . '" alt="PDF" width="32" height="32" class="help-navigation_image image-pdf"></a>';
+
+    unset($image_file_path);
+    unset($module_path);
+  }
+
+  $navigation_markup .= '</nav>';
+
+
   // prepare the header information.
   $section_id = 'mfcs-section-help-main';
   $base_class = array();
@@ -565,6 +578,7 @@ function mfcs_help_0_page_presentation_single($allowed_topics) {
   $section_class[] = 'section-help-presentation-single';
 
   $markup = '<section id="' . $section_id . '" class="' . implode(' ', $section_class) . '">';
+  $markup .= $navigation_markup;
   $markup .= mfcs_help_render_headers('topic', $header_attributes, $headers, 0);
 
   $section_id = 'mfcs-section-help-child';
@@ -1609,7 +1623,7 @@ function mfcs_help_topic_glossary($allowed_topics, $as_inline = FALSE) {
     $markup .= mfcs_help_render_headers('topic-glossary-presentation', array('class' => $section_class), $headers, 2);
     $markup .= '<ul class="navigation-list">';
     $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/presentation/single' . $url_arguments . '" class="item-link no_print_links_as_link">View Documentation as a Single Page</a></li>';
-    $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/presentation/pdf' . $url_arguments . '" class="item-link no_print_links_as_link">Download PDF of Documentation as a Single Page</a></li>';
+    $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/presentation/pdf' . $url_arguments . '" class="item-link no_print_links_as_link">Download Entire Documentation as a PDF</a></li>';
     $markup .= '</ul>';
 
     $markup .= '</nav>';
