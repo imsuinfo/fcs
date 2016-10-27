@@ -2305,7 +2305,7 @@ function mfcs_help_topic_requests($allowed_topics, $section_information, $as_inl
   $markup .= '</div>';
 
   $markup .= '<div class="note"> ';
-  $markup .= 'During the <dfn class="term">Review</dfn> process, e-mails may be sent by the <dfn class="term">Facilities Use System</dfn>. These e-mails should not be replied to. Your replies will not be recieved. Instead, all responses to received e-mails should be sent via <dfn class="term">Comments</dfn> in the <dfn class="term"><abbr class="abbreviation" title="Facilities Use System">FCS</abbr></dfn> system. ';
+  $markup .= 'During the <dfn class="term">Review</dfn> process, e-mails may be sent by the <dfn class="term">Facilities Use System</dfn>. These e-mails should not be replied to. Your replies will not be recieved. Instead, all responses to received e-mails should be sent via <dfn class="term">Comments</dfn> in the <dfn class="term"><abbr class="abbreviation" title="Facilities Use System">FCS</abbr></dfn>. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
@@ -2746,7 +2746,7 @@ function mfcs_help_topic_review($allowed_topics, $section_information, $as_inlin
   $markup .= '</div>';
 
   $markup .= '<div class="note"> ';
-  $markup .= 'E-mails sent by the <dfn class="term">Facilities Use System</dfn> should not be replied to. Your replies will not be recieved. Instead, all responses to received e-mails should be sent via <dfn class="term">Comments</dfn> in the <dfn class="term"><abbr class="abbreviation" title="Facilities Use System">FCS</abbr></dfn> system. ';
+  $markup .= 'E-mails sent by the <dfn class="term">Facilities Use System</dfn> should not be replied to. Your replies will not be recieved. Instead, all responses to received e-mails should be sent via <dfn class="term">Comments</dfn> in the <dfn class="term"><abbr class="abbreviation" title="Facilities Use System">FCS</abbr></dfn>. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
@@ -3415,7 +3415,167 @@ function mfcs_help_topic_manage_section_users($allowed_topics, $section_informat
   $markup .= mfcs_help_render_headers('topic-manage-section-users', $section_information['header_attributes'], $section_information['headers'], $start_count);
 
   $markup .= '<div class="paragraph">';
-  $markup .= ' ';
+  $markup .= 'The <dfn class="term"><abbr class="abbreviation" title="Facilities Use System">FCS</abbr></dfn> provides a few different ways to manage users. ';
+  $markup .= 'The first is the management of the user account itself, simply called <strong class="bold">manage users</strong>. ';
+  $markup .= 'The second is the management of <dfn class="term">Reviewers</dfn>. ';
+  $markup .= 'The third is the management of <dfn class="term">Venue Coordinator</dfn> proxies. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'Each user has a small set of fields describing their account. ';
+  $markup .= 'Each user must have an e-mail account and that e-mail account is required to be an <em class="emphasis">@mcneese.edu</em> address. ';
+  $markup .= 'The <dfn class="term">Banner ID</dfn> is required for all accounts unless an exception is flagged. ';
+  $markup .= 'The phone number is optional and mostly informative. ';
+  $markup .= 'A primary account checkbox is available for designating that an account is or is not a primary account. ';
+  $markup .= 'Primary accounts are tied to the <dfn class="term">Banner ID</dfn>. ';
+  $markup .= 'Most accounts should be a primary account and primary accounts are the user accounts that a person should use for logging into and using this system. ';
+  $markup .= 'Accounts may be locked and locking prevents further access to this system even if <dfn class="term">Banner</dfn> allows states that the user should have access. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'Each account has a set of roles that may be assigned to the user. ';
+  $markup .= 'These roles are broken up into 4 groups: basic roles, venue-specific roles, special/exceptional roles, and administration roles. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'The basic roles group is for defining how a user is classified. ';
+  $markup .= '<ol class="list">';
+  $markup .= '<li class="list-item">';
+  $markup .= '<strong class="bold">Requester Role</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'This role is auto-assigned by the system. ';
+  $markup .= 'The user may access the system, navigate <dfn class="term">Accepted</dfn> <dfn class="term">Requests</dfn>, and make <dfn class="term">Requests</dfn>. ';
+  $markup .= 'Bannerless exception allows for manual control over this role. ';
+  $markup .= '<br>';
+  $markup .= '</li>';
+  $markup .= '<li class="list-item">';
+  $markup .= '<strong class="bold">Reviewer Role</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'This role is auto-assigned by the system. ';
+  $markup .= 'The user may act as a <dfn class="term">Reviewer</dfn> or a <dfn class="term">Venue Coordinator</dfn>. ';
+  $markup .= 'Bannerless exception allows for manual control over this role. ';
+  $markup .= '<br>';
+  $markup .= '</li>';
+  $markup .= '<li class="list-item">';
+  $markup .= '<strong class="bold">Manager Role</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'The user may act as a <dfn class="term">Manager</dfn>. ';
+  $markup .= 'Grant this role only to authorized users. ';
+  $markup .= '<br>';
+  $markup .= '</li>';
+  $markup .= '<li class="list-item">';
+  $markup .= '<strong class="bold">Financer Role</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'The user may act as a <dfn class="term">Financer</dfn>. ';
+  $markup .= 'This is a subset of <dfn class="term">Reviewer</dfn> and requires the user to have the reviewer role to properly function. ';
+  $markup .= '<br>';
+  $markup .= '</li>';
+  $markup .= '<li class="list-item">';
+  $markup .= '<strong class="bold">Insurer Role</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'The user may act as a <dfn class="term">Insurer</dfn>. ';
+  $markup .= 'This is a subset of <dfn class="term">Reviewer</dfn> and requires the user to have the reviewer role to properly function. ';
+  $markup .= '<br>';
+  $markup .= '</li>';
+  $markup .= '</ol>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'The venue-specific roles group is for defining the <dfn class="term">Request Classification</dfn> a user belongs to and is allowed to operate with. ';
+  $markup .= 'All of these roles are auto-populated unless bannerless exception role is assigned. ';
+  $markup .= '<ol class="list">';
+  $markup .= '<li class="list-item">';
+  $markup .= '<strong class="bold">Camp Role</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'The user is assigned the <dfn class="term">Camp</dfn> <dfn class="term">Request Classification</dfn>. ';
+  $markup .= '<br>';
+  $markup .= '</li>';
+  $markup .= '<li class="list-item">';
+  $markup .= '<strong class="bold">Employee Role</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'The user is assigned the <dfn class="term">Faculty, Staff, and Athletics</dfn> <dfn class="term">Request Classification</dfn>. ';
+  $markup .= '<br>';
+  $markup .= '</li>';
+  $markup .= '<li class="list-item">';
+  $markup .= '<strong class="bold">External Role</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'The user is assigned the <dfn class="term">External</dfn> <dfn class="term">Request Classification</dfn>. ';
+  $markup .= '<br>';
+  $markup .= '</li>';
+  $markup .= '<li class="list-item">';
+  $markup .= '<strong class="bold">Student Role</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'The user is assigned the <dfn class="term">Student Organization</dfn> <dfn class="term">Request Classification</dfn>. ';
+  $markup .= '<br>';
+  $markup .= '</li>';
+  $markup .= '</ol>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'The special/exception roles group is for special or exceptional cases. ';
+  $markup .= 'These are commonly assigned for testing or for when the auto-assignment of user information is not working properly for a given user. ';
+  $markup .= '<ol class="list">';
+  $markup .= '<li class="list-item">';
+  $markup .= '<strong class="bold">Bannerless Exception Role</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'All <dfn class="term">Banner</dfn> related information normally auto-populated for the user no longer becomes auto-populated. ';
+  $markup .= 'This allows for the user account to get away without having a <dfn class="term">Banner ID</dfn>';
+  $markup .= '<br>';
+  $markup .= '</li>';
+  $markup .= '<li class="list-item">';
+  $markup .= '<strong class="bold">Locked Exception Role</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'There may be situations where accounts get auto-locked (and auto-unlocked). ';
+  $markup .= 'This role prevents the account from being auto-locked or auto-unlocked. ';
+  $markup .= '<br>';
+  $markup .= '</li>';
+  $markup .= '<li class="list-item">';
+  $markup .= '<strong class="bold">Reviewer Exception Role</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'When assigned, the reviewer role will not be auto-added or auto-removed. ';
+  $markup .= 'This prevents <dfn class="term">Banner</dfn> updates, <dfn class="term">Venue Coordinator</dfn> updates, or <dfn class="term">Reviewer</dfn> updates from toggling a users reviewer role. ';
+  $markup .= '<br>';
+  $markup .= '</li>';
+  $markup .= '</ol>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'The administrations roles group is for administrative cases. ';
+  $markup .= '<ol class="list">';
+  $markup .= '<li class="list-item">';
+  $markup .= '<strong class="bold">Administrator Role</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'This role grants the user full administrative access to the system (including technical aspects not available to <dfn class="term">Managers</dfn>. ';
+  $markup .= '<dfn class="term">Managers</dfn> are not allowed to add or remove this role.';
+  $markup .= '<br>';
+  $markup .= '</li>';
+  $markup .= '<li class="list-item">';
+  $markup .= '<strong class="bold">Masquerade Role</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'This allows a user to switch to (or masquerade as) another user. ';
+  $markup .= 'This functionality is only available on testing systems. ';
+  $markup .= 'This role may only be applied to users with the administrator role or the manager role. ';
+  $markup .= '<br>';
+  $markup .= '</li>';
+  $markup .= '</ol>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'While <dfn class="term">Venue Coordinator</dfn> roles are assigned via <dfn class="term">Banner</dfn>, proxies for each <dfn class="term">Venue Coordinator</dfn> may be assigned via this system. ';
+  $markup .= 'These proxies are able to perform all tasks as the specified <dfn class="term">Venue Coordinator</dfn> in their place. ';
+  $markup .= 'The proxy status only applies to <dfn class="term">Venue Coordinators</dfn> and does not grant the user the ability to proxy as a <dfn class="term">Reviewer</dfn> or a <dfn class="term">Requester</dfn>. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'Each <dfn class="term">Request Classification</dfn> has a set of <dfn class="term">Reviewers</dfn> who are allowed to <dfn class="term">Review</dfn> a particular <dfn class="term">Classification</dfn>. ';
+  $markup .= 'Each <dfn class="term">Reviewer</dfn> is assigned a <dfn class="term">Reviewer Classification</dfn>. ';
+  $markup .= 'Multiple users with the same <dfn class="term">Reviewer Classification</dfn> count towards the same <dfn class="term">Review</dfn> decision. ';
+  $markup .= 'That is to say that <dfn class="term">Reviews</dfn> are tied to the <dfn class="term">Reviewer Classification</dfn> and not the <dfn class="term">Reviewer</dfn>. ';
+  $markup .= 'This means that proxies are not necessary as the individual that would otherwise be a proxy needs only be added under the same <dfn class="term">Reviewer Classification</dfn> as another <dfn class="term">Reviewer</dfn>. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
@@ -3502,14 +3662,15 @@ function mfcs_help_topic_manage_section_problems($allowed_topics, $section_infor
   $markup .= '<strong class="bold">Troubleshooting Option 1</strong>: Requests Review Recheck. ';
   $markup .= '<br>';
   $markup .= 'Whenever <dfn class="term">Reviewer</dfn> types are added or removed on the <dfn class="term">Reviewer</dfn> management pages, <dfn class="term">Requests</dfn> currently under <dfn class="term">Review</dfn> may become stuck in an unusual state. ';
-  $markup .= 'Performing the provided task will find problematic <dfn class="term">Requests</dfn> and re-process the <dfn class="term">Review</dfn> decisions.';
+  $markup .= 'Performing the provided task will find problematic <dfn class="term">Requests</dfn> and re-process the <dfn class="term">Review</dfn> decisions. ';
   $markup .= '</li>';
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">Troubleshooting Option 2</strong>: Requests Cache Synchronize. ';
   $markup .= '<br>';
   $markup .= '<dfn class="term">Requests</dfn> have common information, such as <dfn class="term">Status</dfn> and <dfn class="term">Step</dfn>, cached for performance improvements. ';
-  $markup .= 'In rare cases, this can become inconsistent or otherwise corrupt.';
+  $markup .= 'In rare cases, this can become inconsistent or otherwise corrupt. ';
   $markup .= 'Performing the provided task will re-create the cache, fixing any such problems. ';
+  $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">Troubleshooting Option 3</strong>: Banner Cache Synchronize. ';
@@ -3519,6 +3680,7 @@ function mfcs_help_topic_manage_section_problems($allowed_topics, $section_infor
   $markup .= 'To ensure that this system can operate while <dfn class="term">Banner</dfn> is unavailable, a cache is used. ';
   $markup .= 'This cache takes a long time to build and under normal circumstances is only updated once a day. ';
   $markup .= 'Performing the provided task should cause this cache to be re-created, ensuring the most up to date information. ';
+  $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">Troubleshooting Option 4</strong>: Banner Role Cache Synchronize. ';
@@ -3527,12 +3689,14 @@ function mfcs_help_topic_manage_section_problems($allowed_topics, $section_infor
   $markup .= 'Like the rest of the <dfn class="term">Banner</dfn> cache, this is updated once a day. ';
   $markup .= 'Unlike the rest of the <dfn class="term">Banner</dfn> cache, this should only take a few seconds to perform. ';
   $markup .= 'Performing the provided task will re-create only the banner cache associated with user roles. ';
+  $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">Troubleshooting Option 5</strong>: Banner Information. ';
   $markup .= '<br>';
   $markup .= 'To make it easier to identify <dfn class="term">Banner</dfn> cache bugs, this exposes all cached data related to <dfn class="term">Banner</dfn>. ';
   $markup .= 'This should make it easier to tell if the cache is up to date or if the cache has some incorrect data in it. ';
+  $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">Troubleshooting Option 6</strong>: Requests Problem Check. ';
@@ -3541,6 +3705,7 @@ function mfcs_help_topic_manage_section_problems($allowed_topics, $section_infor
   $markup .= 'Depsite this, there are still some situations where problems may arrive. ';
   $markup .= 'Most of these problems will require a user to make a decision on how to fix them. ';
   $markup .= 'Performing the provided task will scan the system for known request-related problems and report any discovered problems so that they may be manually resolved. ';
+  $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">Troubleshooting Option 7</strong>: Users Problem Check. ';
@@ -3549,9 +3714,9 @@ function mfcs_help_topic_manage_section_problems($allowed_topics, $section_infor
   $markup .= 'Depsite this, there are still some situations where problems may arrive. ';
   $markup .= 'Most of these problems will require a user to make a decision on how to fix them. ';
   $markup .= 'Performing the provided task will scan the system for known user-related problems and report any discovered problems so that they may be manually resolved. ';
+  $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '</ol>';
-  $markup .= '<br>';
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
@@ -3569,49 +3734,75 @@ function mfcs_help_topic_manage_section_problems($allowed_topics, $section_infor
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">Conflict</strong>: ';
   $markup .= '<br>';
+  $markup .= 'The dates and time requested for the given <dfn class="term">Room</dfn> are coinciding with the dates and time for another <dfn class="term">Request</dfn> for the same <dfn class="term">Room</dfn>. ';
+  $markup .= 'This is only flagged for conflicts between other <dfn class="term">Requests</dfn>. ';
+  $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">Stale</strong>: ';
+  $markup .= '<br>';
+  $markup .= '<dfn class="term">Requests</dfn> that have not reached the <dfn class="term">Completed</dfn> <dfn class="term">Review Step</dfn> and have scheduled dates in the past are considered stale. ';
   $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">Stuck</strong>: ';
   $markup .= '<br>';
+  $markup .= 'There is something preventing the <dfn class="term">Request</dfn> from being able to move to the next <dfn class="term">Review Step</dfn>. ';
+  $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">Blocked</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'The <dfn class="term">Requested</dfn> is prevented from being able to move to the next <dfn class="term">Review Step</dfn> specifically because of a conflict with another <dfn class="term">Request</dfn> for the specified dates, times, and <dfn class="term">Room</dfn>. ';
   $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">Coordinator Invalid</strong>: ';
   $markup .= '<br>';
+  $markup .= 'The <dfn class="term">Venue Coordinator</dfn> assigned to the <dfn class="term">Request</dfn> is no longer a <dfn class="term">Venue Coordinator</dfn> or otherwise lacks access to perform <dfn class="term">Venue Coordinator</dfn> duties. ';
+  $markup .= 'This happens most often when the <dfn class="term">Banner</dfn> information related to the <dfn class="term">Venue Coordinator</dfn> changes. ';
+  $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">Requester Invalid</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'The <dfn class="term">Request Coordinator</dfn> assigned to the <dfn class="term">Request</dfn> no longer has access to the <dfn class="term">Request</dfn> or the system. ';
+  $markup .= 'This happens most often when the <dfn class="term">Banner</dfn> information related to the <dfn class="term">Request Coordinator</dfn> changes. ';
   $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">Room Invalid</strong>: ';
   $markup .= '<br>';
+  $markup .= 'The <dfn class="term">Room</dfn> associated with a given <dfn class="term">Request</dfn> no longer exists, is disabled, or is otherwise invalid. ';
+  $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">Building Invalid</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'The <dfn class="term">Building</dfn> associated with a given <dfn class="term">Request</dfn> no longer exists, is disabled, or is otherwise invalid. ';
   $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">Location Invalid</strong>: ';
   $markup .= '<br>';
+  $markup .= 'The <dfn class="term">Location</dfn> associated with a given <dfn class="term">Request</dfn> no longer exists, is disabled, or is otherwise invalid. ';
+  $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">Cache Invalid</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'The cached information for a given <dfn class="term">Request</dfn> is inconsistent or otherwise inaccurate. ';
+  $markup .= 'Tee <dfn class="term">Request</dfn> cache needs to be re-synchronized. ';
   $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">Room Unavailable</strong>: ';
   $markup .= '<br>';
+  $markup .= 'The dates and times requested for the given <dfn class="term">Room</dfn> are coinciding with an unavailability (such as a class room or emergency campus closure). ';
+  $markup .= 'This does not get flagged for conflicts between <dfn class="term">Requests</dfn>. ';
+  $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '</ul>';
-  $markup .= '<br>';
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
@@ -3623,52 +3814,61 @@ function mfcs_help_topic_manage_section_problems($allowed_topics, $section_infor
   $markup .= 'Any non-specific, generic, system related problems are associated with this category. ';
   $markup .= 'These problems are related to the technical structure and functioning of the system. ';
   $markup .= 'Should they be detected, the system <dfn class="term">Administrators</dfn> will have to address the issue. ';
+  $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">Facilities Use Problem</strong>: ';
   $markup .= '<br>';
   $markup .= 'Any non-specific, generic, <dfn class="term">Facilities Use System</dfn> problems are associated with this category. ';
-  $markup .= 'These problems are related to the logic, flow, and presentation of the system.';
+  $markup .= 'These problems are related to the logic, flow, and presentation of the system. ';
+  $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">Banner Unavailable on Create</strong>: ';
   $markup .= '<br>';
   $markup .= 'This problem is flagged when the user account does not yet exist on the system, <dfn class="term">Banner</dfn> is unavailable during account creation, and the specified user currently does not exist in the <dfn class="term">Banner</dfn> cache. ';
+  $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">Banner Unavailable on Login</strong>: ';
   $markup .= '<br>';
   $markup .= 'This problem is flagged when <dfn class="term">Banner</dfn> is unavailable during login and the specified user currently does not exist in the <dfn class="term">Banner</dfn> cache. ';
+  $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">Multiple Login Attempt Problems</strong>: ';
   $markup .= '<br>';
-  $markup .= 'This problem is flagged when a large number of login problems are detected for a given user.';
+  $markup .= 'This problem is flagged when a large number of login problems are detected for a given user. ';
+  $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">Reviewer/Venue-Coordinator Role Not Allowed</strong>: ';
   $markup .= '<br>';
   $markup .= 'This problem is flagged when a user has been assigned the <dfn class="term">Reviewer</dfn> or <dfn class="term">Venue Coordiantor</dfn> roles but according to the cached <dfn class="term">Banner</dfn> information, they should not be allowed to do so. ';
   $markup .= 'This flag is information because when this problem is flagged, the unallowed roles have (or should have been) auto-removed. ';
+  $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">Old/Duplicate Account</strong>: ';
   $markup .= '<br>';
-  $markup .= 'The user information is populated through <abbr class="abbreviation" title="Lightweight Directory Access Protocol">LDAP</abbr>, using the users assigned <dfn class="term">Banner</dfn> ID. ';
-  $markup .= 'Multiple accounts max exist per <dfn class="term">Banner</dfn> ID in <abbr class="abbreviation" title="Lightweight Directory Access Protocol">LDAP</abbr>. ';
-  $markup .= 'This system is not designed to operate with multiple accounts per <dfn class="term">Banner</dfn> ID, so when multiple accounts are detected, this flag is assigned. ';
+  $markup .= 'The user information is populated through <abbr class="abbreviation" title="Lightweight Directory Access Protocol">LDAP</abbr>, using the users assigned <dfn class="term">Banner ID</dfn>. ';
+  $markup .= 'Multiple accounts max exist per <dfn class="term">Banner ID</dfn> in <abbr class="abbreviation" title="Lightweight Directory Access Protocol">LDAP</abbr>. ';
+  $markup .= 'This system is not designed to operate with multiple accounts per <dfn class="term">Banner ID</dfn>, so when multiple accounts are detected, this flag is assigned. ';
   $markup .= 'This can be resolved by assigning one account as the primary account and the all other accounts as not the primary account. ';
+  $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">Disabled Account in Use</strong>: ';
   $markup .= '<br>';
   $markup .= 'Accounts that are locked are disabled accounts. ';
   $markup .= 'If a user with a disabled account is still on the system after the account is disabled, this is considered a security problem. ';
+  $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">Invalid Banner ID</strong>: ';
   $markup .= '<br>';
-  $markup .= 'This flag is assigned when the <dfn class="term">Banner</dfn> ID provided by <abbr class="abbreviation" title="Lightweight Directory Access Protocol">LDAP</abbr> is not found in <dfn class="term">Banner</dfn>. ';
+  $markup .= 'This flag is assigned when the <dfn class="term">Banner ID</dfn> provided by <abbr class="abbreviation" title="Lightweight Directory Access Protocol">LDAP</abbr> is not found in <dfn class="term">Banner</dfn>. ';
+  $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">Insufficient Banner Access</strong>: ';
@@ -3676,19 +3876,21 @@ function mfcs_help_topic_manage_section_problems($allowed_topics, $section_infor
   $markup .= 'Users who have have logged into the system but can perform no actions due to a lack of privileges provided by <dfn class="term">Banner</dfn> are assigned this flag. ';
   $markup .= 'This happens most often with students who may not yet have enrolled in courses for an upcoming semester. ';
   $markup .= 'This flag is informative as it must be resolved in <dfn class="term">Banner</dfn>. ';
+  $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">Core System Form Errors</strong>: ';
   $markup .= '<br>';
   $markup .= 'An technical problems detected while filling out a form on the system are assigned this flag. ';
+  $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">Facilities Use Form Errors</strong>: ';
   $markup .= '<br>';
   $markup .= 'An logical, flow, and presentation problems detected while filling out a form on the system are assigned this flag. ';
+  $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '</ul>';
-  $markup .= '<br>';
   $markup .= '</div>';
 
   if (!$as_inline) {
@@ -3763,7 +3965,77 @@ function mfcs_help_topic_manage_section_availability($allowed_topics, $section_i
   $markup .= mfcs_help_render_headers('topic-manage-section-availability', $section_information['header_attributes'], $section_information['headers'], $start_count);
 
   $markup .= '<div class="paragraph">';
-  $markup .= ' ';
+  $markup .= '<dfn class="term">Managers</dfn> are allowed to assign the availability, or more specifically the unavailability, for a given <dfn class="term">Room</dfn> at a specified date and time. ';
+  $markup .= 'This availability interface also allows for specifying holidays. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'The <dfn class="term">Room</dfn> unavailability is rather large and is broken down into <dfn class="term">Building</dfn> and <dfn class="term">Room</dfn> listings. ';
+  $markup .= 'Each unavailability entry is assigned to a specific <dfn class="term">Room</dfn> within a given <dfn class="term">Building</dfn>. ';
+  $markup .= 'Unavailabilities may be specified using a start and stop date and time range, but for multiple separate dates, a new unavailability must be used. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'There are the following types of unavailabilities: ';
+  $markup .= '<ul class="list">';
+  $markup .= '<li class="list-item">';
+  $markup .= '<strong class="bold">Renovation</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'This is intended to designate renovations to a given <dfn class="term">Room</dfn>. ';
+  $markup .= 'The specific interpretation and use is left to the <dfn class="term">Manager</dfn> to define. ';
+  $markup .= '<br>';
+  $markup .= '</li>';
+  $markup .= '<li class="list-item">';
+  $markup .= '<strong class="bold">Repair</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'This is intended to designate repairs to a given <dfn class="term">Room</dfn>. ';
+  $markup .= 'The specific interpretation and use is left to the <dfn class="term">Manager</dfn> to define. ';
+  $markup .= '<br>';
+  $markup .= '</li>';
+  $markup .= '<li class="list-item">';
+  $markup .= '<strong class="bold">Planned Refurbishment</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'This is intended to designate planned changes, redesigns, etc.. to a given <dfn class="term">Room</dfn>. ';
+  $markup .= 'The specific interpretation and use is left to the <dfn class="term">Manager</dfn> to define. ';
+  $markup .= '<br>';
+  $markup .= '</li>';
+  $markup .= '<li class="list-item">';
+  $markup .= '<strong class="bold">Special Event</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'There is a special event taking place that requires the use of the specified <dfn class="term">Room</dfn>. ';
+  $markup .= 'The specific interpretation and use is left to the <dfn class="term">Manager</dfn> to define. ';
+  $markup .= '<br>';
+  $markup .= '</li>';
+  $markup .= '<li class="list-item">';
+  $markup .= '<strong class="bold">Outage</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'Some service provided for, by, or within the specified <dfn class="term">Room</dfn> is unavailable (such as electricity). ';
+  $markup .= 'The specific interpretation and use is left to the <dfn class="term">Manager</dfn> to define. ';
+  $markup .= '<br>';
+  $markup .= '</li>';
+  $markup .= '<li class="list-item">';
+  $markup .= '<strong class="bold">Emergency</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'There is an emergency related to the <dfn class="term">Room</dfn>, the campus, or the surrounding areas making this <dfn class="term">Room</dfn> unavailable. ';
+  $markup .= 'The specific interpretation and use is left to the <dfn class="term">Manager</dfn> to define. ';
+  $markup .= '<br>';
+  $markup .= '</li>';
+  $markup .= '<li class="list-item">';
+  $markup .= '<strong class="bold">Class</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'This <dfn class="term">Room</dfn> is being used as a class room, or perhaps class related activities, as defined by <dfn class="term">Banner</dfn>. ';
+  $markup .= '<dfn class="term">Managers</dfn> are not allowed to assign this unavailability as this is assigned automatically via <dfn class="term">Banner</dfn>. ';
+  $markup .= '<br>';
+  $markup .= '</li>';
+  $markup .= '</ul>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'Holidays are not assigned to any specific <dfn class="term">Room</dfn>. ';
+  $markup .= 'Each holiday must have an entry created for each day and are all day events. ';
+  $markup .= '<dfn class="term">Requests</dfn> may still be reserved on holidays. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
@@ -3817,6 +4089,15 @@ function mfcs_help_topic_manage_section_logs($allowed_topics, $section_informati
     $closing_tag = TRUE;
   }
 
+  global $base_url;
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
   if ($as_inline) {
     $section_information['navigation'] = NULL;
   }
@@ -3831,9 +4112,56 @@ function mfcs_help_topic_manage_section_logs($allowed_topics, $section_informati
   $markup .= mfcs_help_render_headers('topic-manage-section-logs', $section_information['header_attributes'], $section_information['headers'], $start_count);
 
   $markup .= '<div class="paragraph">';
-  $markup .= ' ';
+  $markup .= 'Nearly every action performed on this system is logged in some way. ';
+  $markup .= '<dfn class="term">Managers</dfn> have access to view most of these logs. ';
+  $markup .= '<dfn class="term">Requests</dfn> have both a <dfn class="term">Review Log</dfn> and a <dfn class="term">Request History</dfn>. ';
+  $markup .= 'E-mails sent by this system are recorded and logged. ';
+  $markup .= 'Special management tasks such as changes to holidays, changes to unavailabilities, troubleshooting actions, and request problem actions are logged. ';
   $markup .= '<br>';
   $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'This system is designed around <dfn class="term">Requests</dfn> and the <dfn class="term">Review</dfn> of <dfn class="term">Requests</dfn>. ';
+  $markup .= 'This makes the <dfn class="term">Request</dfn> and <dfn class="term">Review</dfn> related log entries the most thorough, most complex, and most readily available logs. ';
+  $markup .= 'The <dfn class="term">Review Log</dfn> provides provides a log of all <dfn class="term">Review</dfn> decisions made and any notable action that should be made visible to the involved parties. ';
+  $markup .= 'The <dfn class="term">Request History</dfn> is intended as a complete log of all changes performed directly to a given <dfn class="term">Request</dfn>. ';
+  $markup .= 'Only a limited set of users may view the <dfn class="term">Request History</dfn>. ';
+  $markup .= '<dfn class="term">Manages</dfn> may see the <dfn class="term">Request History</dfn> for all <dfn class="term">Requests</dfn>. ';
+  $markup .= '<dfn class="term">Venue Coordinators</dfn> may see the <dfn class="term">Request History</dfn> only for <dfn class="term">Requests</dfn> that they are allowed to coordinate. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'The e-mail log provides a way to view the complete details of an e-mail (including technical information such as headers) prior to leaving the system. ';
+  $markup .= 'These e-mails may also be resent in case without modification. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'The other logged tasks currently do not have an interface written for viewing but can be obtained directly from the database as necessary. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'There is also a statistics page on the site that is tweaked for processing the <dfn class="term">Request</dfn> logs. ';
+  $markup .= 'The <dfn class="term">Request</dfn> statistics log breaks <dfn class="term">Requests</dfn> down by <dfn class="term">Classification</dfn>, <dfn class="term">Type</dfn>, <dfn class="term">Step</dfn>, and <dfn class="term">Status</dfn>. ';
+  $markup .= 'The information is presented on a yearly basis, but monthly and daily information may be viewed. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="note"> ';
+  $markup .= 'No links have been added for easily selecting the monthly or daily <dfn class="term">Request</dfn> statistics. ';
+  $markup .= 'To view these statistics, go to the url bar while viewing the <dfn class="term">Request</dfn> statistics page and add in <strong class="bold">/month_name</strong> or <strong class="bold">/month_name/day_number</strong>. ';
+  $markup .= 'An example for <em class="emphasis">October 1, 2016</em> would be: <strong class="bold">' . $base_url . '/requests/statistics-0/2016/october/01</strong>. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  // @todo: move this to the e-mail documentation section.
+  #$markup .= '<div class="note"> ';
+  #$markup .= 'The e-mail recieved by the designated recipients is not always identical and may contain additional header information not specified by this server. ';
+  #$markup .= 'E-mail services that transmit the e-mail to the designated addresses can (and often do) add additional header information. ';
+  #$markup .= '<br>';
+  #$markup .= '</div>';
 
   if ($closing_tag) {
     $markup .= '</section>';
@@ -4334,6 +4662,13 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics, $se
   $markup .= '</span>';
   $markup .= '</dd>';
 
+  $markup .= '<dt id="terminology-facilities_use-reviewer_classification" class="definition_list-title">Reviewer Classification</dt> ';
+  $markup .= '<dd class="definition_list-definition">';
+  $markup .= 'A category or classification assigned to a Reviewer for the purposes of Reviewing. ';
+  $markup .= 'Reviewers do not Review as themselves but instead Review as this classification. ';
+  $markup .= '<br>';
+  $markup .= '</dd>';
+
   $markup .= '<dt id="terminology-facilities_use-room" class="definition_list-title">Room</dt> ';
   $markup .= '<dd class="definition_list-definition">';
   $markup .= 'This generally represents a specific room within some building. ';
@@ -4530,6 +4865,20 @@ function mfcs_help_topic_terminology_section_system($allowed_topics, $section_in
   $markup .= '<dd class="definition_list-definition">';
   $markup .= 'McNeese State University provides a service called Banner Self Service, or <dfn class="term">Banner</dfn> for short, for many of its operations. ';
   $markup .= 'User and class related information provided by <dfn class="term">Banner</dfn> are directly used by this system. ';
+  $markup .= '<br>';
+  $markup .= '<span class="see_section">';
+  $markup .= '<span class="see_also">See Also: <a href="//www.mcneese.edu/schedule/banner" class="definition_list-see_other" target="_blank">https://www.mcneese.edu/schedule/banner</a>. ';
+  $markup .= '</span>';
+  $markup .= '</span>';
+  $markup .= '</dd>';
+
+  $markup .= '<dt id="terminology-system-banner_id" class="definition_list-title">Banner ID</dt>';
+  $markup .= '<dd class="definition_list-definition">';
+  $markup .= 'A unique ID assigned to each person involved with McNeese State University, generally as a student, faculty, or staff. ';
+  $markup .= '<br>';
+  $markup .= '<span class="see_section">';
+  $markup .= '<span class="see_also">See Also: <a href="//www.mcneese.edu/schedule/banner" class="definition_list-see_other" target="_blank">https://www.mcneese.edu/schedule/banner</a>. ';
+  $markup .= '</span>';
   $markup .= '</span>';
   $markup .= '</dd>';
 
