@@ -2748,53 +2748,53 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
   $email_params['from'] = $fcs_email;
 
   // Assign custom headers based on request information to assist e-mail clients and servers in processing and/or filtering the email.
-  $headers['mfcs-request-id'] = 0;
+  $headers['fcs-request-id'] = 0;
   if (is_numeric($request_id)) {
-    $headers['mfcs-request-id'] = (int) $request_id;
+    $headers['fcs-request-id'] = (int) $request_id;
   }
 
-  $headers['mfcs-request-revision'] = 0;
+  $headers['fcs-request-revision'] = 0;
   if (isset($request['mer']['revision'][0]->value) && is_numeric($request['mer']['revision'][0]->value)) {
-    $headers['mfcs-request-revision'] = (int) $request['mer']['revision'][0]->value;
+    $headers['fcs-request-revision'] = (int) $request['mer']['revision'][0]->value;
   }
 
-  $headers['mfcs-request-name'] = '';
+  $headers['fcs-request-name'] = '';
   if (isset($request['information']['title'][0]->value) && is_string($request['information']['title'][0]->value)) {
-    $headers['mfcs-request-name'] = preg_replace("/(\r|\n|\a|\f|\t|\v)/i", '', $request['information']['title'][0]->value);
+    $headers['fcs-request-name'] = preg_replace("/(\r|\n|\a|\f|\t|\v)/i", '', $request['information']['title'][0]->value);
   }
 
-  $headers['mfcs-request-status'] = MFCS_REQUEST_STATUS_NONE;
+  $headers['fcs-request-status'] = MFCS_REQUEST_STATUS_NONE;
   if (isset($request['top']['status'][0]->value) && is_numeric($request['top']['status'][0]->value)) {
-    $headers['mfcs-request-status'] = (int) $request['top']['status'][0]->value;
+    $headers['fcs-request-status'] = (int) $request['top']['status'][0]->value;
   }
 
-  $headers['mfcs-request-step'] = MFCS_REVIEW_STEP_NONE;
+  $headers['fcs-request-step'] = MFCS_REVIEW_STEP_NONE;
   if (isset($request['top']['step'][0]->value) && is_numeric($request['top']['step'][0]->value)) {
-    $headers['mfcs-request-step'] = (int) $request['top']['step'][0]->value;
+    $headers['fcs-request-step'] = (int) $request['top']['step'][0]->value;
   }
 
-  $headers['mfcs-request-classification'] = MFCS_REQUEST_CLASSIFICATION_NONE;
+  $headers['fcs-request-classification'] = MFCS_REQUEST_CLASSIFICATION_NONE;
   if (isset($request['request_coordinator']['classification'][0]->value) && is_numeric($request['request_coordinator']['classification'][0]->value)) {
-    $headers['mfcs-request-classification'] = (int) $request['request_coordinator']['classification'][0]->value;
+    $headers['fcs-request-classification'] = (int) $request['request_coordinator']['classification'][0]->value;
   }
 
-  $headers['mfcs-request-type'] = MFCS_REQUEST_TYPE_NONE;
+  $headers['fcs-request-type'] = MFCS_REQUEST_TYPE_NONE;
   if (isset($request['information']['type'][0]->value) && is_numeric($request['information']['type'][0]->value)) {
-    $headers['mfcs-request-type'] = (int) $request['information']['type'][0]->value;
+    $headers['fcs-request-type'] = (int) $request['information']['type'][0]->value;
   }
 
-  $headers['mfcs-request-building'] = 0;
+  $headers['fcs-request-building'] = 0;
   if (isset($request['top']['building'][0]->value) && is_numeric($request['top']['building'][0]->value)) {
-    $headers['mfcs-request-building'] = (int) $request['top']['building'][0]->value;
+    $headers['fcs-request-building'] = (int) $request['top']['building'][0]->value;
   }
 
-  $headers['mfcs-request-room'] = 0;
+  $headers['fcs-request-room'] = 0;
   if (isset($request['top']['room'][0]->value) && is_numeric($request['top']['room'][0]->value)) {
-    $headers['mfcs-request-room'] = (int) $request['top']['room'][0]->value;
+    $headers['fcs-request-room'] = (int) $request['top']['room'][0]->value;
   }
 
-  $headers['mfcs-request-url'] = preg_replace("/(\r|\n|\a|\f|\t|\v)/i", '', $base_url . '/requests/view-0/' . $request_id);
-  $headers['mfcs-email-generated'] = $instance;
+  $headers['fcs-request-url'] = preg_replace("/(\r|\n|\a|\f|\t|\v)/i", '', $base_url . '/requests/view-0/' . $request_id);
+  $headers['fcs-email-generated'] = $instance;
 
   $email_comment_only = array();
 
@@ -2902,7 +2902,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
   $email_params['request_title'] = $request['information']['title'][0]->value;
 
   if ($is_forced_transition) {
-    $headers['mfcs-email-type'] = 'transition-force';
+    $headers['fcs-email-type'] = 'transition-force';
     $email_params['title_suffix'] = 'Forced';
     $email_params['content'] = '';
     $email_params['content'] .= $changed_by_string . ' has forcibly altered this request.' . "\n";
@@ -2942,7 +2942,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     }
   }
   elseif ($is_new) {
-    $headers['mfcs-email-type'] = 'new';
+    $headers['fcs-email-type'] = 'new';
     $type = $request['information']['type'][0]->value;
 
     if (is_string($type)) {
@@ -3088,7 +3088,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
   }
   elseif ($is_update) {
     // @fixme: does this get processed anymore or is it also superseded by amendment?
-    $headers['mfcs-email-type'] = 'update';
+    $headers['fcs-email-type'] = 'update';
     $email_params['title_suffix'] = 'Modified';
     $email_params['content'] = '';
     $email_params['content'] .= $changed_by_string . ' has modified this request.' . "\n";
@@ -3148,7 +3148,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     }
   }
   elseif ($is_amendment) {
-    $headers['mfcs-email-type'] = 'amendment';
+    $headers['fcs-email-type'] = 'amendment';
     $email_params['title_suffix'] = 'Amended';
     $email_params['content'] = '';
     $email_params['content'] .= $changed_by_string . ' has amended this request.' . "\n";
@@ -3224,7 +3224,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     }
   }
   elseif ($is_insurance_provided) {
-    $headers['mfcs-email-type'] = 'insurance_provided';
+    $headers['fcs-email-type'] = 'insurance_provided';
     $email_params['title_suffix'] = 'Insurance Provided';
     $email_params['content'] = '';
     $email_params['content'] .= $changed_by_string . ' has designated that the insurance has been provided for this request.' . "\n";
@@ -3278,7 +3278,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
   }
   elseif ($is_reminder) {
     if ($parameters['reminder_reason'] == 'insurance_provided') {
-      $headers['mfcs-email-type'] = 'reminder-insurance_provided';
+      $headers['fcs-email-type'] = 'reminder-insurance_provided';
       $request_title = 'Request';
       if (!empty($parameters['reminder_data']->title)) {
         $request_title = $parameters['reminder_data']->title;
@@ -3331,7 +3331,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       }
     }
     elseif ($parameters['reminder_reason'] == 'unreviewed_request') {
-      $headers['mfcs-email-type'] = 'reminder-unreviewed_request';
+      $headers['fcs-email-type'] = 'reminder-unreviewed_request';
       $request_title = 'Request';
       if (!empty($parameters['reminder_data']->title)) {
         $request_title = $parameters['reminder_data']->title;
@@ -3405,7 +3405,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       $email_params['markup'] = '';
 
       if ($is_cancelled || $is_auto_cancelled || $status === MFCS_REQUEST_STATUS_CANCELLED || $status === MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED) {
-        $headers['mfcs-email-type'] = 'cancel';
+        $headers['fcs-email-type'] = 'cancel';
         $email_params['title_suffix'] = 'Cancelled';
         $email_params['content'] .= $changed_by_string . ' has cancelled the request.' . "\n";
         $email_params['markup'] .= $changed_by_markup . ' has cancelled the request.<br>';
@@ -3426,13 +3426,13 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
         }
       }
       elseif ($is_uncancelled) {
-        $headers['mfcs-email-type'] = 'uncancel';
+        $headers['fcs-email-type'] = 'uncancel';
         $email_params['title_suffix'] = 'Uncancelled';
         $email_params['content'] .= $changed_by_string . ' has uncancelled the request.' . "\n";
         $email_params['markup'] .= $changed_by_markup . ' has uncancelled the request.<br>';
       }
       elseif ($is_reassigned) {
-        $headers['mfcs-email-type'] = 'reassign';
+        $headers['fcs-email-type'] = 'reassign';
         $reassigned_from_user = mfcs_load_basic_user_settings_by_user_id($reassigned_from);
         $reassigned_to_user = mfcs_load_basic_user_settings_by_user_id($reassigned_to);
 
@@ -3467,7 +3467,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
         unset($reassigned_to_user);
       }
       elseif ($is_deleted || $status === MFCS_REQUEST_STATUS_DELETED) {
-        $headers['mfcs-email-type'] = 'delete';
+        $headers['fcs-email-type'] = 'delete';
         $email_params['title_suffix'] = 'Deleted';
         $email_params['content'] .= $changed_by_string . ' has deleted the request.' . "\n";
         $email_params['markup'] .= $changed_by_markup . ' has deleted the request.<br>';
@@ -3478,7 +3478,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
         }
       }
       elseif ($is_cancelling) {
-        $headers['mfcs-email-type'] = 'cancel-dates_and_times';
+        $headers['fcs-email-type'] = 'cancel-dates_and_times';
         $email_params['title_suffix'] = 'Cancelling';
         $email_params['content'] .= $changed_by_string . ' has cancelled or uncancelled specific dates associated with the request.' . "\n";
         $email_params['markup'] .= $changed_by_markup . ' has cancelled or uncancelled specific dates associated with the request.<br>';
@@ -3698,7 +3698,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
   }
   elseif (!is_null($step)) {
     if ($request['top']['step'][0]->value == MFCS_REVIEW_STEP_REVIEW) {
-      $headers['mfcs-email-type'] = 'transition-review';
+      $headers['fcs-email-type'] = 'transition-review';
 
       $email_params['title_suffix'] = 'Needs Review';
       $email_params['content'] = '';
@@ -3749,7 +3749,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       }
     }
     elseif ($request['top']['step'][0]->value == MFCS_REVIEW_STEP_FINAL_DECISION) {
-      $headers['mfcs-email-type'] = 'transition-final_decision';
+      $headers['fcs-email-type'] = 'transition-final_decision';
 
       $email_params['title_suffix'] = 'Final Decision';
       $email_params['content'] = '';
@@ -3842,13 +3842,13 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
   }
   elseif (!is_null($is_issues)) {
     if ($is_issues) {
-      $headers['mfcs-email-type'] = 'issues';
+      $headers['fcs-email-type'] = 'issues';
       $email_params['title_suffix'] = 'Issues';
       $issues_message = ' has issues with the request.';
       $issues_message_markup = ' has <em>issues</em> with the request.';
     }
     else {
-      $headers['mfcs-email-type'] = 'no_issues';
+      $headers['fcs-email-type'] = 'no_issues';
       $email_params['title_suffix'] = 'No Issues';
       $issues_message = ' has no issues with the request.';
       $issues_message_markup = ' has <em>no issues</em> with the request.';
@@ -3909,7 +3909,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     }
   }
   elseif ($is_move) {
-    $headers['mfcs-email-type'] = 'move';
+    $headers['fcs-email-type'] = 'move';
 
     $email_params['title_suffix'] = 'Moved';
     $email_params['content'] = '';
@@ -3951,7 +3951,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
     }
   }
   elseif ($is_comment) {
-    $headers['mfcs-email-type'] = 'comment';
+    $headers['fcs-email-type'] = 'comment';
 
     if (is_array($venue_coordinator)) {
       $email_comment_only[$venue_coordinator['email']] = $venue_coordinator['email'];

@@ -184,7 +184,7 @@ function mfcs_help_0_page($topic = NULL, $section = NULL, $sub_section = NULL) {
       return mfcs_help_topic_not_found($topic, $section, $sub_section);
     }
   }
-  elseif ($topic == 'introduction') {
+  elseif ($topic == 'introduction' && in_array('introduction', $allowed_topics)) {
     $section_information['headers'][1] = array('markup' => 'Introduction', 'attributes' => array('class' => array('header-2', 'topic')));
     $section_information['class'] = $base_class;
     $section_information['class'][] = 'section-help-break';
@@ -203,7 +203,7 @@ function mfcs_help_0_page($topic = NULL, $section = NULL, $sub_section = NULL) {
       return mfcs_help_topic_not_found($topic, $section, $sub_section);
     }
   }
-  elseif ($topic == 'requests') {
+  elseif ($topic == 'requests' && in_array('requests', $allowed_topics)) {
     $section_information['headers'][1] = array('markup' => 'Requests', 'attributes' => array('class' => array('header-2', 'topic')));
     $section_information['class'] = $base_class;
     $section_information['class'][] = 'section-help-break';
@@ -338,7 +338,57 @@ function mfcs_help_0_page($topic = NULL, $section = NULL, $sub_section = NULL) {
       return mfcs_help_topic_not_found($topic, $section, $sub_section);
     }
   }
-  elseif ($topic == 'faq') {
+  elseif ($topic == 'email' && in_array('email', $allowed_topics)) {
+    $section_information['headers'][1] = array('markup' => 'E-Mail', 'attributes' => array('class' => array('header-2', 'topic')));
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'section-help-break';
+
+    if (is_null($section)) {
+      $section_information['class'][] = 'section-help-topic-email';
+
+      $markup .= mfcs_help_topic_email($allowed_topics, $section_information);
+    }
+    elseif (!is_null($sub_section)) {
+      // failsafe.
+      return mfcs_help_topic_not_found($topic, $section, $sub_section);
+    }
+    elseif ($section == 'request') {
+      $section_information['class'][] = 'section-help-topic-email-request';
+      $section_information['headers'][2] = array('markup' => 'Request E-Mail', 'attributes' => array('class' => array('header-3', 'section')));
+
+      $markup .= mfcs_help_topic_email_section_request($allowed_topics, $section_information);
+    }
+    elseif ($section == 'advanced') {
+      $section_information['class'][] = 'section-help-topic-email-advanced';
+      $section_information['headers'][2] = array('markup' => 'Advanced E-Mail', 'attributes' => array('class' => array('header-3', 'section')));
+
+      $markup .= mfcs_help_topic_email_section_advanced($allowed_topics, $section_information);
+    }
+    else {
+      // failsafe.
+      return mfcs_help_topic_not_found($topic, $section, $sub_section);
+    }
+  }
+  elseif ($topic == 'calendar' && in_array('calendar', $allowed_topics)) {
+    $section_information['headers'][1] = array('markup' => 'Calendar', 'attributes' => array('class' => array('header-2', 'topic')));
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'section-help-break';
+
+    if (is_null($section)) {
+      $section_information['class'][] = 'section-help-topic-calendar';
+
+      $markup .= mfcs_help_topic_calendar($allowed_topics, $section_information);
+    }
+    elseif (!is_null($sub_section)) {
+      // failsafe.
+      return mfcs_help_topic_not_found($topic, $section, $sub_section);
+    }
+    else {
+      // failsafe.
+      return mfcs_help_topic_not_found($topic, $section, $sub_section);
+    }
+  }
+  elseif ($topic == 'faq' && in_array('faq', $allowed_topics)) {
     $section_information['headers'][1] = array('markup' => 'Frequently Asked Questions', 'attributes' => array('class' => array('header-2', 'topic')));
 
     if (is_null($section)) {
@@ -356,7 +406,7 @@ function mfcs_help_0_page($topic = NULL, $section = NULL, $sub_section = NULL) {
       return mfcs_help_topic_not_found($topic, $section, $sub_section);
     }
   }
-  elseif ($topic == 'terminology') {
+  elseif ($topic == 'terminology' && in_array('terminology', $allowed_topics)) {
     $section_information['headers'][1] = array('markup' => 'Terminology', 'attributes' => array('class' => array('header-2', 'topic')));
     $section_information['class'] = $base_class;
     $section_information['class'][] = 'section-help-break';
@@ -630,64 +680,68 @@ function mfcs_help_0_page_presentation_single($allowed_topics) {
 
 
   // introduction
-  $section_information['headers'][0]['markup'] = 'Introduction';
-  $section_information['id'] = $section_id . '-introduction';
-  $section_information['class'] = $base_class;
-  $section_information['class'][] = 'section-help-topic-introduction';
-  $section_information['start_count'] = 1;
+  if (in_array('introduction', $allowed_topics)) {
+    $section_information['headers'][0]['markup'] = 'Introduction';
+    $section_information['id'] = $section_id . '-introduction';
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'section-help-topic-introduction';
+    $section_information['start_count'] = 1;
 
-  $markup .= mfcs_help_topic_introduction($allowed_topics, $section_information, TRUE);
+    $markup .= mfcs_help_topic_introduction($allowed_topics, $section_information, TRUE);
+  }
 
 
   // requests
-  $section_information['headers'] = $headers;
-  $section_information['headers'][0]['markup'] = 'Requests';
-  $section_information['id'] = $section_id . '-requests';
-  $section_information['class'] = $base_class;
-  $section_information['class'][] = 'section-help-topic-requests';
-  $section_information['start_count'] = 1;
+  if (in_array('requests', $allowed_topics)) {
+    $section_information['headers'] = $headers;
+    $section_information['headers'][0]['markup'] = 'Requests';
+    $section_information['id'] = $section_id . '-requests';
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'section-help-topic-requests';
+    $section_information['start_count'] = 1;
 
-  $markup .= mfcs_help_topic_requests($allowed_topics, $section_information, TRUE, FALSE);
+    $markup .= mfcs_help_topic_requests($allowed_topics, $section_information, TRUE, FALSE);
 
-  $section_information['headers'] = $headers;
-  $section_information['headers'][0]['markup'] = 'Faculty, Staff, and Athletics Requests';
-  $section_information['id'] = $section_id . '-requests-section-employee';
-  $section_information['class'] = $sub_base_class;
-  $section_information['class'][] = 'section-help-topic-requests-section-employee';
-  $section_information['class'][] = 'no_first_of_type';
-  $section_information['start_count'] = 2;
+    $section_information['headers'] = $headers;
+    $section_information['headers'][0]['markup'] = 'Faculty, Staff, and Athletics Requests';
+    $section_information['id'] = $section_id . '-requests-section-employee';
+    $section_information['class'] = $sub_base_class;
+    $section_information['class'][] = 'section-help-topic-requests-section-employee';
+    $section_information['class'][] = 'no_first_of_type';
+    $section_information['start_count'] = 2;
 
-  $markup .= mfcs_help_topic_requests_section_employee($allowed_topics, $section_information, TRUE);
+    $markup .= mfcs_help_topic_requests_section_employee($allowed_topics, $section_information, TRUE);
 
-  $section_information['headers'] = $headers;
-  $section_information['headers'][0]['markup'] = 'Student Organization Requests';
-  $section_information['id'] = $section_id . '-requests-section-student';
-  $section_information['class'] = $sub_base_class;
-  $section_information['class'][] = 'section-help-topic-requests-section-student';
-  $section_information['start_count'] = 2;
+    $section_information['headers'] = $headers;
+    $section_information['headers'][0]['markup'] = 'Student Organization Requests';
+    $section_information['id'] = $section_id . '-requests-section-student';
+    $section_information['class'] = $sub_base_class;
+    $section_information['class'][] = 'section-help-topic-requests-section-student';
+    $section_information['start_count'] = 2;
 
-  $markup .= mfcs_help_topic_requests_section_student_organization($allowed_topics, $section_information, TRUE);
+    $markup .= mfcs_help_topic_requests_section_student_organization($allowed_topics, $section_information, TRUE);
 
-  $section_information['headers'] = $headers;
-  $section_information['headers'][0]['markup'] = 'Camps Requests';
-  $section_information['id'] = $section_id . '-requests-section-camps';
-  $section_information['class'] = $sub_base_class;
-  $section_information['class'][] = 'section-help-topic-requests-section-camps';
-  $section_information['start_count'] = 2;
+    $section_information['headers'] = $headers;
+    $section_information['headers'][0]['markup'] = 'Camps Requests';
+    $section_information['id'] = $section_id . '-requests-section-camps';
+    $section_information['class'] = $sub_base_class;
+    $section_information['class'][] = 'section-help-topic-requests-section-camps';
+    $section_information['start_count'] = 2;
 
-  $markup .= mfcs_help_topic_requests_section_camps($allowed_topics, $section_information, TRUE);
+    $markup .= mfcs_help_topic_requests_section_camps($allowed_topics, $section_information, TRUE);
 
-  $section_information['headers'] = $headers;
-  $section_information['headers'][0]['markup'] = 'External Requests';
-  $section_information['id'] = $section_id . '-requests-section-external';
-  $section_information['class'] = $sub_base_class;
-  $section_information['class'][] = 'section-help-topic-requests-section-external';
-  $section_information['start_count'] = 2;
+    $section_information['headers'] = $headers;
+    $section_information['headers'][0]['markup'] = 'External Requests';
+    $section_information['id'] = $section_id . '-requests-section-external';
+    $section_information['class'] = $sub_base_class;
+    $section_information['class'][] = 'section-help-topic-requests-section-external';
+    $section_information['start_count'] = 2;
 
-  $markup .= mfcs_help_topic_requests_section_external($allowed_topics, $section_information, TRUE);
+    $markup .= mfcs_help_topic_requests_section_external($allowed_topics, $section_information, TRUE);
 
-  // close the requests section.
-  $markup .= '</section>';
+    // close the requests section.
+    $markup .= '</section>';
+  }
 
 
   // review
@@ -802,57 +856,110 @@ function mfcs_help_0_page_presentation_single($allowed_topics) {
     $markup .= '</section>';
   }
 
+  // email
+  if (in_array('email', $allowed_topics)) {
+    $section_information['headers'] = $headers;
+    $section_information['headers'][0]['markup'] = 'E-Mail';
+    $section_information['id'] = $section_id . '-email';
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'section-help-topic-email';
+    $section_information['start_count'] = 1;
+
+    $markup .= mfcs_help_topic_email($allowed_topics, $section_information, TRUE, FALSE);
+
+    $section_information['headers'] = $headers;
+    $section_information['headers'][0]['markup'] = 'Request E-Mail';
+    $section_information['id'] = $section_id . '-email-section-request';
+    $section_information['class'] = $sub_base_class;
+    $section_information['class'][] = 'section-help-topic-email-section-request';
+    $section_information['class'][] = 'no_first_of_type';
+    $section_information['start_count'] = 2;
+
+    $markup .= mfcs_help_topic_email_section_request($allowed_topics, $section_information, TRUE);
+
+    $section_information['headers'] = $headers;
+    $section_information['headers'][0]['markup'] = 'Advanced E-Mail';
+    $section_information['id'] = $section_id . '-email-section-advanced';
+    $section_information['class'] = $sub_base_class;
+    $section_information['class'][] = 'section-help-topic-email-section-advanced';
+    $section_information['start_count'] = 2;
+
+    $markup .= mfcs_help_topic_email_section_advanced($allowed_topics, $section_information, TRUE);
+
+    // close the email section.
+    $markup .= '</section>';
+  }
+
+  // calendar
+  if (in_array('calendar', $allowed_topics)) {
+    $section_information['headers'] = $headers;
+    $section_information['headers'][0]['markup'] = 'Calendar';
+    $section_information['id'] = $section_id . '-calendar';
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'section-help-topic-calendar';
+    $section_information['start_count'] = 1;
+
+    $markup .= mfcs_help_topic_calendar($allowed_topics, $section_information, TRUE, FALSE);
+
+    // close the calendar section.
+    $markup .= '</section>';
+  }
+
 
   // frequently asked questions
-  $section_information['headers'] = $headers;
-  $section_information['headers'][0]['markup'] = 'Frequently Asked Questions';
-  $section_information['id'] = $section_id . '-faq';
-  $section_information['class'] = $base_class;
-  $section_information['class'][] = 'section-help-topic-faq';
-  $section_information['start_count'] = 1;
+  if (in_array('faq', $allowed_topics)) {
+    $section_information['headers'] = $headers;
+    $section_information['headers'][0]['markup'] = 'Frequently Asked Questions';
+    $section_information['id'] = $section_id . '-faq';
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'section-help-topic-faq';
+    $section_information['start_count'] = 1;
 
-  $markup .= mfcs_help_topic_faq($allowed_topics, $section_information, TRUE);
+    $markup .= mfcs_help_topic_faq($allowed_topics, $section_information, TRUE);
+  }
 
 
   // terminology
-  $section_information['headers'] = $headers;
-  $section_information['headers'][0]['markup'] = 'Terminology';
-  $section_information['id'] = $section_id . '-terminology';
-  $section_information['class'] = $base_class;
-  $section_information['class'][] = 'section-help-topic-terminology';
-  $section_information['start_count'] = 1;
+  if (in_array('terminology', $allowed_topics)) {
+    $section_information['headers'] = $headers;
+    $section_information['headers'][0]['markup'] = 'Terminology';
+    $section_information['id'] = $section_id . '-terminology';
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'section-help-topic-terminology';
+    $section_information['start_count'] = 1;
 
-  $markup .= mfcs_help_topic_terminology($allowed_topics, $section_information, TRUE, FALSE);
+    $markup .= mfcs_help_topic_terminology($allowed_topics, $section_information, TRUE, FALSE);
 
-  $section_information['headers'] = $headers;
-  $section_information['headers'][0]['markup'] = 'Facilities Use Terminology';
-  $section_information['id'] = $section_id . '-terminology-section-facilities_use';
-  $section_information['class'] = $sub_base_class;
-  $section_information['class'][] = 'section-help-topic-terminology-section-facilities_use';
-  $section_information['start_count'] = 2;
+    $section_information['headers'] = $headers;
+    $section_information['headers'][0]['markup'] = 'Facilities Use Terminology';
+    $section_information['id'] = $section_id . '-terminology-section-facilities_use';
+    $section_information['class'] = $sub_base_class;
+    $section_information['class'][] = 'section-help-topic-terminology-section-facilities_use';
+    $section_information['start_count'] = 2;
 
-  $markup .= mfcs_help_topic_terminology_section_facilities_use($allowed_topics, $section_information, TRUE);
+    $markup .= mfcs_help_topic_terminology_section_facilities_use($allowed_topics, $section_information, TRUE);
 
-  $section_information['headers'] = $headers;
-  $section_information['headers'][0]['markup'] = 'System Terminology';
-  $section_information['id'] = $section_id . '-terminology-section-system';
-  $section_information['class'] = $sub_base_class;
-  $section_information['class'][] = 'section-help-topic-terminology-section-system';
-  $section_information['start_count'] = 2;
+    $section_information['headers'] = $headers;
+    $section_information['headers'][0]['markup'] = 'System Terminology';
+    $section_information['id'] = $section_id . '-terminology-section-system';
+    $section_information['class'] = $sub_base_class;
+    $section_information['class'][] = 'section-help-topic-terminology-section-system';
+    $section_information['start_count'] = 2;
 
-  $markup .= mfcs_help_topic_terminology_section_system($allowed_topics, $section_information, TRUE);
+    $markup .= mfcs_help_topic_terminology_section_system($allowed_topics, $section_information, TRUE);
 
-  $section_information['headers'] = $headers;
-  $section_information['headers'][0]['markup'] = 'Documentation Terminology';
-  $section_information['id'] = $section_id . '-terminology-section-documentation';
-  $section_information['class'] = $sub_base_class;
-  $section_information['class'][] = 'section-help-topic-terminology-section-documentation';
-  $section_information['start_count'] = 2;
+    $section_information['headers'] = $headers;
+    $section_information['headers'][0]['markup'] = 'Documentation Terminology';
+    $section_information['id'] = $section_id . '-terminology-section-documentation';
+    $section_information['class'] = $sub_base_class;
+    $section_information['class'][] = 'section-help-topic-terminology-section-documentation';
+    $section_information['start_count'] = 2;
 
-  $markup .= mfcs_help_topic_terminology_section_documentation($allowed_topics, $section_information, TRUE);
+    $markup .= mfcs_help_topic_terminology_section_documentation($allowed_topics, $section_information, TRUE);
 
-  // close the manage section.
-  $markup .= '</section>';
+    // close the terminology section.
+    $markup .= '</section>';
+  }
 
   // close the main section.
   $markup .= '</section>';
@@ -1163,8 +1270,8 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
         $determined['tooltip-next'] = 'Documentation: Manage';
       }
       else {
-        $determined['next'] = $base_path . 'help-0/faq' . $url_arguments;
-        $determined['tooltip-next'] = 'Documentation: Frequently Asked Questions';
+        $determined['next'] = $base_path . 'help-0/email' . $url_arguments;
+        $determined['tooltip-next'] = 'Documentation: E-Mail';
       }
 
       $determined['previous'] = $base_path . 'help-0/introduction' . $url_arguments;
@@ -1215,8 +1322,8 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
         $determined['tooltip-next'] = 'Documentation: Manage';
       }
       else {
-        $determined['next'] = $base_path . 'help-0/faq' . $url_arguments;
-        $determined['tooltip-next'] = 'Documentation: Frequently Asked Questions';
+        $determined['next'] = $base_path . 'help-0/email' . $url_arguments;
+        $determined['tooltip-next'] = 'Documentation: E-Mail';
       }
 
       $determined['previous'] = $base_path . 'help-0/requests' . $url_arguments;
@@ -1272,8 +1379,8 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
       $determined['tooltip-previous'] = 'Section: Availability Management';
     }
     else {
-      $determined['next'] = $base_path . 'help-0/faq' . $url_arguments;
-      $determined['tooltip-next'] = 'Documentation: Frequently Asked Questions';
+      $determined['next'] = $base_path . 'help-0/email' . $url_arguments;
+      $determined['tooltip-next'] = 'Documentation: E-Mail';
 
       if (in_array('review', $allowed_topics)) {
         $determined['previous'] = $base_path . 'help-0/review' . $url_arguments;
@@ -1285,6 +1392,52 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
       }
     }
   }
+  elseif ($topic == 'email') {
+    $determined['top'] = $base_path . 'help-0' . $url_arguments;
+    $determined['tooltip-top'] = 'Glossary';
+
+    if ($section == 'requests') {
+      $determined['top'] = $base_path . 'help-0/email' . $url_arguments;
+      $determined['tooltip-top'] = 'Documentation: E-Mail';
+
+      $determined['next'] = $base_path . 'help-0/email/advanced' . $url_arguments;
+      $determined['tooltip-next'] = 'Section: Advanced';
+    }
+    elseif ($section == 'advanced') {
+      $determined['top'] = $base_path . 'help-0/email' . $url_arguments;
+      $determined['tooltip-top'] = 'Documentation: E-Mail';
+
+      $determined['previous'] = $base_path . 'help-0/email/request' . $url_arguments;
+      $determined['tooltip-previous'] = 'Section: Request';
+    }
+    else {
+      $determined['next'] = $base_path . 'help-0/calendar' . $url_arguments;
+      $determined['tooltip-next'] = 'Documentation: Calendar';
+
+      if (in_array('manage', $allowed_topics)) {
+        $determined['previous'] = $base_path . 'help-0/manage' . $url_arguments;
+        $determined['tooltip-previous'] = 'Documentation: Manage';
+      }
+      elseif (in_array('review', $allowed_topics)) {
+        $determined['previous'] = $base_path . 'help-0/review' . $url_arguments;
+        $determined['tooltip-previous'] = 'Documentation: Review';
+      }
+      else {
+        $determined['previous'] = $base_path . 'help-0/requests' . $url_arguments;
+        $determined['tooltip-previous'] = 'Documentation: Requests';
+      }
+    }
+  }
+  elseif ($topic == 'calendar') {
+    $determined['top'] = $base_path . 'help-0' . $url_arguments;
+    $determined['tooltip-top'] = 'Glossary';
+
+    $determined['next'] = $base_path . 'help-0/faq' . $url_arguments;
+    $determined['tooltip-next'] = 'Documentation: Frequently Asked Questions';
+
+    $determined['previous'] = $base_path . 'help-0/email' . $url_arguments;
+    $determined['tooltip-previous'] = 'Documentation: E-Mail';
+  }
   elseif ($topic == 'faq') {
     $determined['top'] = $base_path . 'help-0' . $url_arguments;
     $determined['tooltip-top'] = 'Glossary';
@@ -1292,19 +1445,8 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
     $determined['next'] = $base_path . 'help-0/terminology' . $url_arguments;
     $determined['tooltip-next'] = 'Documentation: Terminology';
 
-
-    if (in_array('manage', $allowed_topics)) {
-      $determined['previous'] = $base_path . 'help-0/manage' . $url_arguments;
-      $determined['tooltip-previous'] = 'Documentation: Manage';
-    }
-    elseif (in_array('review', $allowed_topics)) {
-      $determined['previous'] = $base_path . 'help-0/review' . $url_arguments;
-      $determined['tooltip-previous'] = 'Documentation: Review';
-    }
-    else {
-      $determined['previous'] = $base_path . 'help-0/requests' . $url_arguments;
-      $determined['tooltip-previous'] = 'Documentation: Requests';
-    }
+    $determined['previous'] = $base_path . 'help-0/calendar' . $url_arguments;
+    $determined['tooltip-previous'] = 'Documentation: Calendar';
   }
   elseif ($topic == 'terminology') {
     $determined['top'] = $base_path . 'help-0' . $url_arguments;
@@ -1619,7 +1761,7 @@ function mfcs_help_0_allowed_topics($user) {
   $topics[] = 'request-cancel';
   $topics[] = 'request-copy';
   $topics[] = 'request-find';
-  $topics[] = 'calendar-use';
+  $topics[] = 'calendar-import';
   $topics[] = 'calendar-export';
 
   // documentation
@@ -1630,6 +1772,8 @@ function mfcs_help_0_allowed_topics($user) {
   $topics[] = 'requests-cancel';
   $topics[] = 'requests-copy';
   $topics[] = 'requests-find';
+  $topics[] = 'email';
+  $topics[] = 'calendar';
   $topics[] = 'faq';
   $topics[] = 'terminology';
 
@@ -1915,6 +2059,30 @@ function mfcs_help_topic_glossary($allowed_topics, $section_information, $as_inl
       'text' => 'Logs',
       'class' => 'item-link no_print_links_as_link',
     ),
+    'email' => array(
+      'url' => $base_path . 'help-0/email' . $url_arguments,
+      'tooltip' => 'Documentation: E-Mail',
+      'text' => 'E-Mail',
+      'class' => 'item-link no_print_links_as_link',
+    ),
+    'email/request' => array(
+      'url' => $base_path . 'help-0/email/request' . $url_arguments,
+      'tooltip' => 'Section: Request',
+      'text' => 'Request',
+      'class' => 'item-link no_print_links_as_link',
+    ),
+    'email/advanced' => array(
+      'url' => $base_path . 'help-0/email/advanced' . $url_arguments,
+      'tooltip' => 'Section: Advanced',
+      'text' => 'Advanced',
+      'class' => 'item-link no_print_links_as_link',
+    ),
+    'calendar' => array(
+      'url' => $base_path . 'help-0/calendar' . $url_arguments,
+      'tooltip' => 'Documentation: Calendar',
+      'text' => 'Calendar',
+      'class' => 'item-link no_print_links_as_link',
+    ),
     'faq' => array(
       'url' => $base_path . 'help-0/faq' . $url_arguments,
       'tooltip' => 'Documentation: Frequently Asked Questions',
@@ -1970,6 +2138,10 @@ function mfcs_help_topic_glossary($allowed_topics, $section_information, $as_inl
       $links['manage/problems']['url'] = '#help-documentation-topic-manage-section-problems' . $url_arguments;
       $links['manage/availability']['url'] = '#help-documentation-topic-manage-section-availability' . $url_arguments;
       $links['manage/logs']['url'] = '#help-documentation-topic-manage-section-logs' . $url_arguments;
+      $links['email']['url'] = '#help-documentation-topic-email' . $url_arguments;
+      $links['email/request']['url'] = '#help-documentation-topic-email-section-request' . $url_arguments;
+      $links['email/advanced']['url'] = '#help-documentation-topic-email-section-advanced' . $url_arguments;
+      $links['calendar']['url'] = '#help-documentation-topic-calendar' . $url_arguments;
       $links['faq']['url'] = '#help-documentation-topic-faq' . $url_arguments;
       $links['terminology']['url'] = '#help-documentation-topic-terminology' . $url_arguments;
       $links['terminology/facilities_use']['url'] = '#help-documentation-topic-terminology-section-facilities_use' . $url_arguments;
@@ -2066,6 +2238,16 @@ function mfcs_help_topic_glossary($allowed_topics, $section_information, $as_inl
     $markup .= '</ul>';
     $markup .= '</li>';
   }
+
+  $markup .= '<li class="list-item">';
+  $markup .= '<a href="' . $links['email']['url'] . '" class="' . $links['email']['class'] . '" title="' . $links['email']['tooltip'] . '">' . $links['email']['text'] . '</a>';
+  $markup .= '<ul class="item-navigation navigation-list">';
+  $markup .= '<li class="list-item"><a href="' . $links['email/request']['url'] . '" class="' . $links['email/request']['class'] . '" title="' . $links['email/request']['tooltip'] . '">' . $links['email/request']['text'] . '</a></li>';
+  $markup .= '<li class="list-item"><a href="' . $links['email/advanced']['url'] . '" class="' . $links['email/advanced']['class'] . '" title="' . $links['email/advanced']['tooltip'] . '">' . $links['email/advanced']['text'] . '</a></li>';
+  $markup .= '</ul>';
+  $markup .= '</li>';
+
+  $markup .= '<li class="list-item"><a href="' . $links['calendar']['url'] . '" class="' . $links['calendar']['class'] . '" title="' . $links['calendar']['tooltip'] . '">' . $links['calendar']['text'] . '</a></li>';
 
   $markup .= '<li class="list-item"><a href="' . $links['faq']['url'] . '" class="' . $links['faq']['class'] . '" title="' . $links['faq']['tooltip'] . '">' . $links['faq']['text'] . '</a></li>';
 
@@ -2305,7 +2487,10 @@ function mfcs_help_topic_requests($allowed_topics, $section_information, $as_inl
   $markup .= '</div>';
 
   $markup .= '<div class="note"> ';
-  $markup .= 'During the <dfn class="term">Review</dfn> process, e-mails may be sent by the <dfn class="term">Facilities Use System</dfn>. These e-mails should not be replied to. Your replies will not be recieved. Instead, all responses to received e-mails should be sent via <dfn class="term">Comments</dfn> in the <dfn class="term"><abbr class="abbreviation" title="Facilities Use System">FCS</abbr></dfn>. ';
+  $markup .= 'During the <dfn class="term">Review</dfn> process, e-mails may be sent by the <dfn class="term">Facilities Use System</dfn>. ';
+  $markup .= 'These e-mails should not be replied to. ';
+  $markup .= 'Your replies will not be recieved. ';
+  $markup .= 'Instead, all responses to received e-mails should be sent via <dfn class="term">Comments</dfn> in the <dfn class="term"><abbr class="abbreviation" title="Facilities Use System">FCS</abbr></dfn> for the appropraite <dfn class="term">Request</dfn>. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
@@ -2361,7 +2546,7 @@ function mfcs_help_topic_requests($allowed_topics, $section_information, $as_inl
       $markup .= 'Continue on to <a href="' . $base_path . 'help-0/manage' . $url_arguments . '" class="item-link">Documentation: Manage</a>. ';
     }
     else {
-      $markup .= 'Continue on to <a href="' . $base_path . 'help-0/faq' . $url_arguments . '" class="item-link">Documentation: Frequently Asked Questions</a>. ';
+      $markup .= 'Continue on to <a href="' . $base_path . 'help-0/email' . $url_arguments . '" class="item-link">Documentation: E-Mail</a>. ';
     }
     $markup .= '</div>';
   }
@@ -2739,14 +2924,16 @@ function mfcs_help_topic_review($allowed_topics, $section_information, $as_inlin
   $markup .= mfcs_help_render_headers('topic-review', $section_information['header_attributes'], $section_information['headers'], $start_count);
 
   $markup .= '<div class="paragraph">';
-  $markup .= 'The <dfn class="term">Facilities Use System</dfn> is centerred around the <dfn class="term">Review</dfn> process to help ensure room availability, issue resolution, fee assignments, insurance confirmation, and any other situation including but not limited to closures due to emergencies. ';
+  $markup .= 'The <dfn class="term">Facilities Use System</dfn> is centerred around the <dfn class="term">Review</dfn> process to help ensure <dfn class="term">Room</dfn> availability, issue resolution, fee assignments, insurance confirmation, and any other situation including but not limited to closures due to emergencies. ';
   $markup .= 'This process is intended to increase communication between the different parties in a consistent and centralized manner. ';
   $markup .= 'Many actions, decisions, comments, and other changes to <dfn class="term">Requests</dfn> are stored on the system in the <dfn class="term">Review Log</dfn> (or in the <dfn class="term">Request History</dfn>) and may also be sent via e-mail to relevant parties. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
   $markup .= '<div class="note"> ';
-  $markup .= 'E-mails sent by the <dfn class="term">Facilities Use System</dfn> should not be replied to. Your replies will not be recieved. Instead, all responses to received e-mails should be sent via <dfn class="term">Comments</dfn> in the <dfn class="term"><abbr class="abbreviation" title="Facilities Use System">FCS</abbr></dfn>. ';
+  $markup .= 'E-mails sent by the <dfn class="term">Facilities Use System</dfn> should not be replied to. ';
+  $markup .= 'Your replies will not be recieved. ';
+  $markup .= 'Instead, all responses to received e-mails should be sent via <dfn class="term">Comments</dfn> in the <dfn class="term"><abbr class="abbreviation" title="Facilities Use System">FCS</abbr></dfn> for the appropraite <dfn class="term">Request</dfn>. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
@@ -2800,7 +2987,7 @@ function mfcs_help_topic_review($allowed_topics, $section_information, $as_inlin
       $markup .= 'Continue on to <a href="' . $base_path . 'help-0/manage' . $url_arguments . '" class="item-link">Documentation: Manage</a>. ';
     }
     else {
-      $markup .= 'Continue on to <a href="' . $base_path . 'help-0/faq' . $url_arguments . '" class="item-link">Documentation: Frequently Asked Questions</a>. ';
+      $markup .= 'Continue on to <a href="' . $base_path . 'help-0/email' . $url_arguments . '" class="item-link">Documentation: E-Mail</a>. ';
     }
     $markup .= '</div>';
   }
@@ -3244,7 +3431,7 @@ function mfcs_help_topic_manage($allowed_topics, $section_information, $as_inlin
     $markup .= '<br>';
 
     $markup .= '<div class="continue_on no-print">';
-    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/faq' . $url_arguments . '" class="item-link">Documentation: Frequently Asked Questions</a>. ';
+    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/email' . $url_arguments . '" class="item-link">Documentation: E-Mail</a>. ';
     $markup .= '</div>';
   }
 
@@ -4156,12 +4343,484 @@ function mfcs_help_topic_manage_section_logs($allowed_topics, $section_informati
   $markup .= '<br>';
   $markup .= '</div>';
 
-  // @todo: move this to the e-mail documentation section.
-  #$markup .= '<div class="note"> ';
-  #$markup .= 'The e-mail recieved by the designated recipients is not always identical and may contain additional header information not specified by this server. ';
-  #$markup .= 'E-mail services that transmit the e-mail to the designated addresses can (and often do) add additional header information. ';
-  #$markup .= '<br>';
-  #$markup .= '</div>';
+  if ($closing_tag) {
+    $markup .= '</section>';
+  }
+
+  return $markup;
+}
+
+/**
+ * Build the markup for the help topic: email.
+ *
+ * @param array $allowed_topics
+ *   An array of topics currently allowed based on the users access.
+ * @param array $section_information
+ *   Information needed for populating and customizing the generated section tag.
+ * @param bool $as_inline
+ *   (optional) When TRUE, certain links and formatting are omitted.
+ * @param bool $closing_tag
+ *   (optional) When TRUE, the closing section tag is appended.
+ *   When FALSE, no closing section tag is appended and the caller is expected to properly close.
+ *
+ * @return string
+ *   The generated HTML markup.
+ */
+function mfcs_help_topic_email($allowed_topics, $section_information, $as_inline = FALSE, $closing_tag = TRUE) {
+  if (!is_array($allowed_topics)) {
+    cf_error::invalid_array('allowed_topics');
+    return '';
+  }
+
+  if (!is_array($section_information)) {
+    cf_error::invalid_array('section_information');
+    return '';
+  }
+
+  if (!is_bool($as_inline)) {
+    cf_error::invalid_bool('as_inline');
+    $as_inline = FALSE;
+  }
+
+  if (!is_bool($closing_tag)) {
+    cf_error::invalid_bool('closing_tag');
+    $closing_tag = TRUE;
+  }
+
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  if ($as_inline) {
+    $section_information['navigation'] = NULL;
+  }
+
+  $start_count = 0;
+  if (isset($section_information['start_count']) && is_numeric($section_information['start_count']) && $section_information['start_count'] >= 0) {
+    $start_count = (int) $section_information['start_count'];
+  }
+
+  $markup = '<section id="' . $section_information['id'] . '" class="' . implode(' ', $section_information['class']) . '">';
+  $markup .= $section_information['navigation'];
+  $markup .= mfcs_help_render_headers('topic-email', $section_information['header_attributes'], $section_information['headers'], $start_count);
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'The <dfn class="term"><abbr class="abbreviation" title="Facilities Use System">FCS</abbr></dfn> sends e-mails for a large number of actions performed. ';
+  $markup .= 'These e-mails are designed to assist the users, keeping them up to date of the ongoings of the system without having to login to the system. ';
+  $markup .= 'The e-mails themselves are purpely informative and cannot be used to perform any action. ';
+  $markup .= 'For improved compatibility, each e-mail presents its information in two formats: plain text and <abbr class="abbreviation" title="Hypertext Markup Language">HTML</abbr>. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="note"> ';
+  $markup .= 'Do not reply to e-mails system from this system. ';
+  $markup .= 'Your replies will not be recieved. ';
+  $markup .= 'Instead, all responses to received e-mails should be sent via <dfn class="term">Comments</dfn> in the <dfn class="term"><abbr class="abbreviation" title="Facilities Use System">FCS</abbr></dfn> for the appropraite <dfn class="term">Request</dfn>. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'All e-mails sent by this system are saved. ';
+  $markup .= 'If you believe that you did not receive an e-mail (or lost an e-mail), then you can ask a <dfn class="term">Manager</dfn> to re-send a particular e-mail. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  if (!$as_inline) {
+    $markup .= '<div class="continue_on no-print">';
+    $markup .= 'View Section: <a href="' . $base_path . 'help-0/email/request' . $url_arguments . '" class="item-link">Request E-Mail</a>. ';
+    $markup .= '<br>';
+    $markup .= 'View Section: <a href="' . $base_path . 'help-0/email/advanced' . $url_arguments . '" class="item-link">Advanced E-Mail</a>. ';
+    $markup .= '<br>';
+    $markup .= '<br>';
+
+    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/calendar' . $url_arguments . '" class="item-link">Documentation: Calendar</a>. ';
+    $markup .= '</div>';
+  }
+
+  if ($closing_tag) {
+    $markup .= '</section>';
+  }
+
+  return $markup;
+}
+
+/**
+ * Build the markup for the help topic: email - requests.
+ *
+ * @param array $allowed_topics
+ *   An array of topics currently allowed based on the users access.
+ * @param array $section_information
+ *   Information needed for populating and customizing the generated section tag.
+ * @param bool $as_inline
+ *   (optional) When TRUE, certain links and formatting are omitted.
+ * @param bool $closing_tag
+ *   (optional) When TRUE, the closing section tag is appended.
+ *   When FALSE, no closing section tag is appended and the caller is expected to properly close.
+ *
+ * @return string
+ *   The generated HTML markup.
+ */
+function mfcs_help_topic_email_section_request($allowed_topics, $section_information, $as_inline = FALSE, $closing_tag = TRUE) {
+  if (!is_array($allowed_topics)) {
+    cf_error::invalid_array('allowed_topics');
+    return '';
+  }
+
+  if (!is_array($section_information)) {
+    cf_error::invalid_array('section_information');
+    return '';
+  }
+
+  if (!is_bool($as_inline)) {
+    cf_error::invalid_bool('as_inline');
+    $as_inline = FALSE;
+  }
+
+  if (!is_bool($closing_tag)) {
+    cf_error::invalid_bool('closing_tag');
+    $closing_tag = TRUE;
+  }
+
+  global $base_url;
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  if ($as_inline) {
+    $section_information['navigation'] = NULL;
+  }
+
+  $start_count = 0;
+  if (isset($section_information['start_count']) && is_numeric($section_information['start_count']) && $section_information['start_count'] >= 0) {
+    $start_count = (int) $section_information['start_count'];
+  }
+
+  $markup = '<section id="' . $section_information['id'] . '" class="' . implode(' ', $section_information['class']) . '">';
+  $markup .= $section_information['navigation'];
+  $markup .= mfcs_help_render_headers('topic-email-section-requests', $section_information['header_attributes'], $section_information['headers'], $start_count);
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'Most e-mails sent by this system are directly related to a particular <dfn class="term">Request</dfn>. ';
+  $markup .= 'These e-mails contain a special structure to make identifying and reading the e-mails relatively easy. ';
+  $markup .= 'The subject of each e-mail contains generic text, such as <strong class="bold">Facilities Use Request</strong>';
+  $markup .= 'This generic text is then followed by the <dfn class="term">Request ID</dfn>, the <dfn class="term">Request</dfn> name, and finally an action or purpose that the e-mail represents. ';
+  $markup .= 'The contents of each e-mail is broken down into multiple parts. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'The first part is often a generated message describing the purpose of the e-mail, such as <em class="emphasis">The System has cancelled the request</em>. ';
+  $markup .= 'This is then followed by any comments made or associated with the action. ';
+  $markup .= 'The second part contains common <dfn class="term">Request</dfn> information.';
+  $markup .= 'This part contains the following information: <dfn class="term">Request ID</dfn>, <dfn class="term">Request</dfn> name, <dfn class="term">Location</dfn>, <dfn class="term">Building</dfn>, <dfn class="term">Room</dfn>, <dfn class="term">Classification</dfn>, <dfn class="term">Type</dfn>, and all dates and times. ';
+  $markup .= 'The third part presents a link to the <dfn class="term">Request</dfn> for easily accessing the entire <dfn class="term">Request</dfn>. ';
+  $markup .= 'The fourth an final part is a date representing the exact time this e-mail was generated. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  if ($closing_tag) {
+    $markup .= '</section>';
+  }
+
+  return $markup;
+}
+
+/**
+ * Build the markup for the help topic: email - advanced.
+ *
+ * @param array $allowed_topics
+ *   An array of topics currently allowed based on the users access.
+ * @param array $section_information
+ *   Information needed for populating and customizing the generated section tag.
+ * @param bool $as_inline
+ *   (optional) When TRUE, certain links and formatting are omitted.
+ * @param bool $closing_tag
+ *   (optional) When TRUE, the closing section tag is appended.
+ *   When FALSE, no closing section tag is appended and the caller is expected to properly close.
+ *
+ * @return string
+ *   The generated HTML markup.
+ */
+function mfcs_help_topic_email_section_advanced($allowed_topics, $section_information, $as_inline = FALSE, $closing_tag = TRUE) {
+  if (!is_array($allowed_topics)) {
+    cf_error::invalid_array('allowed_topics');
+    return '';
+  }
+
+  if (!is_array($section_information)) {
+    cf_error::invalid_array('section_information');
+    return '';
+  }
+
+  if (!is_bool($as_inline)) {
+    cf_error::invalid_bool('as_inline');
+    $as_inline = FALSE;
+  }
+
+  if (!is_bool($closing_tag)) {
+    cf_error::invalid_bool('closing_tag');
+    $closing_tag = TRUE;
+  }
+
+  global $base_url;
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  if ($as_inline) {
+    $section_information['navigation'] = NULL;
+  }
+
+  $start_count = 0;
+  if (isset($section_information['start_count']) && is_numeric($section_information['start_count']) && $section_information['start_count'] >= 0) {
+    $start_count = (int) $section_information['start_count'];
+  }
+
+  $markup = '<section id="' . $section_information['id'] . '" class="' . implode(' ', $section_information['class']) . '">';
+  $markup .= $section_information['navigation'];
+  $markup .= mfcs_help_render_headers('topic-email-section-advanced', $section_information['header_attributes'], $section_information['headers'], $start_count);
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'Each e-mails contains additional information to assist in validity, integrity, and use of the information provided. ';
+  $markup .= 'Some e-mails contain an <dfn class="term">iCalendar</dfn> file for importing the <dfn class="term">Request</dfn> into your own private calendar. ';
+  $markup .= 'All e-mails should contain an <dfn class="term">OpenPG</dfn> file for helping insure the validity and integrity of the e-mail. ';
+  $markup .= 'All e-mails contain special headers for consistent advanced filtering. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="note"> ';
+  $markup .= 'Recieved e-mails are not always the same as the original e-mail and may contain additional header information not specified by this system. ';
+  $markup .= 'E-mail services that transfer the e-mail to the recipient can (and often do) alter the header information. ';
+  $markup .= 'Most people will never notice this because the header information is normally not displayed. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'When a <dfn class="term">Request</dfn> completes the <dfn class="term">Final Approval Step</dfn> and becomes <dfn class="term">Accepted</dfn> an e-mail is sent out informing the <dfn class="term">Requester</dfn> of the acceptance. ';
+  $markup .= 'That e-mail should contain an <dfn class="term">iCalendar</dfn> file attachment for easy import of the <dfn class="term">Accepted</dfn> <dfn class="term">Request</dfn>. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'Every e-mail should have an <dfn class="term">OpenPG</dfn> download attachment as a digital signature for that e-mail. ';
+  $markup .= 'These signatures only applies to the contents of the e-mail and does not guarantee anything else. ';
+  $markup .= 'Not all e-mail clients support this and if yours does not, this digital signature should not cause any problem. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'If your e-mail client allows for advanced filtering of e-mails based on custom header information, then you can filter by the following header names: ';
+  $markup .= '<ul class="list">';
+  $markup .= '<li class="list-item">';
+  $markup .= '<strong class="bold">fcs-request-id</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'This is a number representing the <dfn class="term">Request ID</dfn>. ';
+  $markup .= '<br>';
+  $markup .= '</li>';
+  $markup .= '<li class="list-item">';
+  $markup .= '<strong class="bold">fcs-request-revision</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'This is a number representing the <dfn class="term">Request Revision</dfn>. ';
+  $markup .= '<br>';
+  $markup .= '</li>';
+  $markup .= '<li class="list-item">';
+  $markup .= '<strong class="bold">fcs-request-name</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'This is a string representing the <dfn class="term">Request</dfn> name. ';
+  $markup .= '<br>';
+  $markup .= '</li>';
+  $markup .= '<li class="list-item">';
+  $markup .= '<strong class="bold">fcs-request-status</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'This is a number used to uniquely represent the <dfn class="term">Request Status</dfn>. ';
+  $markup .= '<br>';
+  $markup .= '</li>';
+  $markup .= '<li class="list-item">';
+  $markup .= '<strong class="bold">fcs-request-step</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'This is a number used to uniquely represent the <dfn class="term">Review Step</dfn>. ';
+  $markup .= '<br>';
+  $markup .= '</li>';
+  $markup .= '<li class="list-item">';
+  $markup .= '<strong class="bold">fcs-request-classification</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'This is a number used to uniquely represent the <dfn class="term">Request Classification</dfn>. ';
+  $markup .= '<br>';
+  $markup .= '</li>';
+  $markup .= '<li class="list-item">';
+  $markup .= '<strong class="bold">fcs-request-type</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'This is a number used to uniquely represent the <dfn class="term">Request Type</dfn>. ';
+  $markup .= '<br>';
+  $markup .= '</li>';
+  $markup .= '<li class="list-item">';
+  $markup .= '<strong class="bold">fcs-request-building</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'This is a number used to uniquely represent the <dfn class="term">Building</dfn>. ';
+  $markup .= '<br>';
+  $markup .= '</li>';
+  $markup .= '<li class="list-item">';
+  $markup .= '<strong class="bold">fcs-request-room</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'This is a number used to uniquely represent the <dfn class="term">Room</dfn>. ';
+  $markup .= '<br>';
+  $markup .= '</li>';
+  $markup .= '<li class="list-item">';
+  $markup .= '<strong class="bold">fcs-request-url</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'This is a string representing a <dfn class="term"><abbr class="abbreviation" title="Universal Resource Locator">URL</abbr></dfn> associated with the <dfn class="term">Request</dfn>. ';
+  $markup .= '<br>';
+  $markup .= '</li>';
+  $markup .= '<li class="list-item">';
+  $markup .= '<strong class="bold">fcs-email-generated</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'This is a number representing the UNIX timestamp of the date in which the e-mail was generated. ';
+  $markup .= '<br>';
+  $markup .= '</li>';
+  $markup .= '<li class="list-item">';
+  $markup .= '<strong class="bold">fcs-email-type</strong>: ';
+  $markup .= '<br>';
+  $markup .= 'This is a number used to uniquely represent the purpose of the e-mail. ';
+  $markup .= '<br>';
+  $markup .= '</li>';
+  $markup .= '</ul>';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+
+  if ($closing_tag) {
+    $markup .= '</section>';
+  }
+
+  return $markup;
+}
+
+/**
+ * Build the markup for the help topic: calendar.
+ *
+ * @param array $allowed_topics
+ *   An array of topics currently allowed based on the users access.
+ * @param array $section_information
+ *   Information needed for populating and customizing the generated section tag.
+ * @param bool $as_inline
+ *   (optional) When TRUE, certain links and formatting are omitted.
+ * @param bool $closing_tag
+ *   (optional) When TRUE, the closing section tag is appended.
+ *   When FALSE, no closing section tag is appended and the caller is expected to properly close.
+ *
+ * @return string
+ *   The generated HTML markup.
+ */
+function mfcs_help_topic_calendar($allowed_topics, $section_information, $as_inline = FALSE, $closing_tag = TRUE) {
+  if (!is_array($allowed_topics)) {
+    cf_error::invalid_array('allowed_topics');
+    return '';
+  }
+
+  if (!is_array($section_information)) {
+    cf_error::invalid_array('section_information');
+    return '';
+  }
+
+  if (!is_bool($as_inline)) {
+    cf_error::invalid_bool('as_inline');
+    $as_inline = FALSE;
+  }
+
+  if (!is_bool($closing_tag)) {
+    cf_error::invalid_bool('closing_tag');
+    $closing_tag = TRUE;
+  }
+
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  if ($as_inline) {
+    $section_information['navigation'] = NULL;
+  }
+
+  $start_count = 0;
+  if (isset($section_information['start_count']) && is_numeric($section_information['start_count']) && $section_information['start_count'] >= 0) {
+    $start_count = (int) $section_information['start_count'];
+  }
+
+  $markup = '<section id="' . $section_information['id'] . '" class="' . implode(' ', $section_information['class']) . '">';
+  $markup .= $section_information['navigation'];
+  $markup .= mfcs_help_render_headers('topic-calendar', $section_information['header_attributes'], $section_information['headers'], $start_count);
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'The <dfn class="term"><abbr class="abbreviation" title="Facilities Use System">FCS</abbr></dfn> provides a calendar containing only <dfn class="term">Accepted</dfn> <dfn class="term">Requests</dfn> and holidays. ';
+  $markup .= 'No other <dfn class="term">Requests</dfn> or <dfn class="term">Room</dfn> Unavailabilities are displayed. ';
+  $markup .= 'The calendars are designed to be printer-friendly with a minimum amount of inconsistencies. ';
+  $markup .= 'There are two main types of calendars on this system: monthly calendars and daily calendars. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'Monthly calendars present only the <dfn class="term">Request</dfn> name for the sake of space. ';
+  $markup .= 'All other information must be view on the <dfn class="term">Request</dfn> itself. ';
+  $markup .= 'Holidays are also presented in name only but are not presented as links. ';
+  $markup .= 'Holidays can be viewed in detail using the holidays link usually found on the top of the screen in the navigation panel. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'Daily calendars present the most common information associated with a given <dfn class="term">Request</dfn>, such as the name, <dfn class="term">Building</dfn>, <dfn class="term">Room</dfn>, time, <dfn class="term">Request ID</dfn>, and the <dfn class="term">Request Type</dfn>. ';
+  $markup .= 'For the sake of space when view and when printing, only four <dfn class="term">Requests</dfn> are presented per hour slot per day. ';
+  $markup .= 'There is a <em class="emphasis">next</em> link on each hour slot for when there are more than four <dfn class="term">Requests</dfn> for that given slot. ';
+  $markup .= 'Holidays are also presented by the holiday name only but are not presented as links. ';
+  $markup .= 'Holidays can be viewed in detail using the holidays link usually found on the top of the screen in the navigation panel. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'At the bottom of each calendar page, there should be a collection of links for filtering the calendar. ';
+  $markup .= 'This type of filter alters the <dfn class="term"><abbr class="abbreviation" title="Universal Resource Locator">URL</abbr></dfn> with the options so that you can customize the filter and then bookmark that filter. ';
+  $markup .= 'The filter settings are preserved so long as the information is still present in the <dfn class="term"><abbr class="abbreviation" title="Universal Resource Locator">URL</abbr></dfn>. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="note"> ';
+  $markup .= 'Many browsers hide or obscure the additional information in the <dfn class="term"><abbr class="abbreviation" title="Universal Resource Locator">URL</abbr></dfn> making it difficult to view and use. ';
+  $markup .= 'If you think the calendar is not showing enough information or showing too much, be sure to scroll to the bottom of the page to determine if any filter is currently in use. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'In the same area as the filters are the <dfn class="term">iCalendar</dfn> download options. ';
+  $markup .= 'These options provide an easy way to export the <dfn class="term">Requests</dfn> for the given calendar (including any active filters) and then import the <dfn class="term">Requests</dfn> into your own personal calendar. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="note"> ';
+  $markup .= 'When exporting <dfn class="term">Requests</dfn> (and subsequently importing into your own calendar), the imported <dfn class="term">Requests</dfn> are a copy. ';
+  $markup .= 'Any changes made to the <dfn class="term">Requests</dfn> on the <dfn class="term">Facilities Use System</dfn> cannot be reflected on your own calendar. ';
+  $markup .= 'This means that the <dfn class="term">Requests</dfn> in your calendar could <em class="emphasis">potentially</em> be out of date. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  if (!$as_inline) {
+    $markup .= '<div class="continue_on no-print">';
+    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/faq' . $url_arguments . '" class="item-link">Documentation: Frequently Asked Questions</a>. ';
+    $markup .= '</div>';
+  }
 
   if ($closing_tag) {
     $markup .= '</section>';
@@ -4591,6 +5250,12 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics, $se
   $markup .= '</span>';
   $markup .= '</dd>';
 
+  $markup .= '<dt id="terminology-facilities_use-request_id" class="definition_list-title">Request ID</dt> ';
+  $markup .= '<dd class="definition_list-definition">';
+  $markup .= 'A unique ID assigned to every Request found on this system. ';
+  $markup .= '</span>';
+  $markup .= '</dd>';
+
   $markup .= '<dt id="terminology-facilities_use-requester" class="definition_list-title">Requester</dt> ';
   $markup .= '<dd class="definition_list-definition">';
   $markup .= '<span class="see_section">';
@@ -4893,7 +5558,7 @@ function mfcs_help_topic_terminology_section_system($allowed_topics, $section_in
 
   $markup .= '<dt id="terminology-system-fcs" class="definition_list-title">iCalendar</dt>';
   $markup .= '<dd class="definition_list-definition">';
-  $markup .= '<dfn class="term">iCal</dfn> is an internet standard used to electronically communicate event information. ';
+  $markup .= '<dfn class="term">iCalendar</dfn> is an internet standard used to electronically communicate event information. ';
   $markup .= 'Files generally have the excetions <em>.ics</em>. ';
   $markup .= 'Files in this format (With a file extension of <em>.ics</em>) may be used to import an event or a set of events into your own personal calendar or even transfer the event details to a third party. ';
   $markup .= '<br>';
