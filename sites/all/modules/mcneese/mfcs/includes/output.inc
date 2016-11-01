@@ -251,6 +251,7 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
 
   $markup .= '<div class="links_and_filters links_and_filters-group group-1">';
   $markup .= mfcs_build_calendar_ical_links_markup($month_start, TRUE, TRUE, FALSE);
+  $markup .= mfcs_build_calendar_openpgp_links_markup();
   $markup .= '</div>'; // filter-group-1
 
   $markup .= mfcs_build_determined_filters_markup();
@@ -938,6 +939,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
   $markup .= '<div id="mfcs-links_and_filters" class="links_and_filters-wrapper no-print">';
   $markup .= '<div class="links_and_filters links_and_filters-group group-1">';
   $markup .= mfcs_build_calendar_ical_links_markup($day_start);
+  $markup .= mfcs_build_calendar_openpgp_links_markup();
   $markup .= '</div>';
 
   $markup .= mfcs_build_determined_filters_markup();
@@ -1043,6 +1045,50 @@ function mfcs_build_calendar_ical_links_markup($date_start, $year = TRUE, $month
     $markup .= '<a href="' . $base_path . 'requests/ical-0/year/' . $year . $url_arguments . '" title="Download iCal for the year ' . $year . '" class="links_and_filters-list-item-link item-year ical item-link">' . $year . '</a>';
     $markup .= '</li>';
   }
+
+  $markup .= '</ul>';
+  $markup .= '</div>';
+
+  return $markup;
+}
+
+/**
+ * Build a list of links that contain the available openpgp public keys for this system.
+ *
+ * @param string|null $id
+ *   (optional) The HTML id attribute to use.
+ *
+ * @return string|bool
+ *   The generate HTML markup or FALSE on error.
+ */
+function mfcs_build_calendar_openpgp_links_markup($id = NULL) {
+  if (!is_null($id) && !is_string($id)) {
+    cf_error::invalid_string('id');
+    return FALSE;
+  }
+
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  $module_path = drupal_get_path('module', 'mfcs');
+
+  if (!empty($id)) {
+    $id = ' id="' . $id . '"';
+  }
+
+  $markup = '<div' . $id . ' class="links_and_filters openpgp">';
+  $markup .= '<h3 class="links_and_filters-title openpgp">OpenPGP Download Options</h3>';
+  $markup .= '<ul class="links_and_filters-list openpgp">';
+
+  $markup .= '<li class="links_and_filters-list-item item-public_key openpgp">';
+  $markup .= '<div class="links_and_filters-list-item-label item-public_key item-label openpgp">Public Key:</div> ';
+  $markup .= '<a href="' . $module_path . '/keys/fcs-public-2014_to_2020.pgp' . $url_arguments . '" title="Download OpenPGP public key for the years 2014 to 2020." class="links_and_filters-list-item-link item-public_key openpgp item-link">2014 to 2020</a>';
+  $markup .= '</li>';
 
   $markup .= '</ul>';
   $markup .= '</div>';
