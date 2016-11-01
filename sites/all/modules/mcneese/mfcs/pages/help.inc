@@ -3761,8 +3761,7 @@ function mfcs_help_topic_manage_section_users($allowed_topics, $section_informat
   $markup .= 'Each <dfn class="term">Request Classification</dfn> has a set of <dfn class="term">Reviewers</dfn> who are allowed to <dfn class="term">Review</dfn> a particular <dfn class="term">Classification</dfn>. ';
   $markup .= 'Each <dfn class="term">Reviewer</dfn> is assigned a <dfn class="term">Reviewer Classification</dfn>. ';
   $markup .= 'Multiple users with the same <dfn class="term">Reviewer Classification</dfn> count towards the same <dfn class="term">Review</dfn> decision. ';
-  $markup .= 'That is to say that <dfn class="term">Reviews</dfn> are tied to the <dfn class="term">Reviewer Classification</dfn> and not the <dfn class="term">Reviewer</dfn>. ';
-  $markup .= 'This means that proxies are not necessary as the individual that would otherwise be a proxy needs only be added under the same <dfn class="term">Reviewer Classification</dfn> as another <dfn class="term">Reviewer</dfn>. ';
+  $markup .= 'That is to say that each <dfn class="term">Review</dfn> decision is tied to the <dfn class="term">Reviewer Classification</dfn> instead of the individual <dfn class="term">Reviewer</dfn>. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
@@ -4810,9 +4809,9 @@ function mfcs_help_topic_calendar($allowed_topics, $section_information, $as_inl
   $markup .= '</div>';
 
   $markup .= '<div class="note"> ';
-  $markup .= 'When exporting <dfn class="term">Requests</dfn> (and subsequently importing into your own calendar), the imported <dfn class="term">Requests</dfn> are a copy. ';
+  $markup .= 'When exporting <dfn class="term">Requests</dfn> (and subsequently importing into your own calendar), the exported <dfn class="term">Requests</dfn> are a copy. ';
   $markup .= 'Any changes made to the <dfn class="term">Requests</dfn> on the <dfn class="term">Facilities Use System</dfn> cannot be reflected on your own calendar. ';
-  $markup .= 'This means that the <dfn class="term">Requests</dfn> in your calendar could <em class="emphasis">potentially</em> be out of date. ';
+  $markup .= 'The <dfn class="term">Requests</dfn> in your calendar could <em class="emphasis">potentially</em> be out of date. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
