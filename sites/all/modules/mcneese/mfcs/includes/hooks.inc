@@ -456,7 +456,7 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
 
   $items['requests/synchronize-0/ical/%'] = array(
     'title' => 'Synchronize Requests',
-    'description' => 'Perform iCal synchronization operations.',
+    'description' => 'Perform iCalendar synchronization operations.',
     'page callback' => 'mfcs_request_synchronize_0_ical_page',
     'page arguments' => array(3),
     'file' => 'request_synchronize.inc',
@@ -470,7 +470,7 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
 
   $items['requests/synchronize-0/ical/%/%'] = array(
     'title' => 'Synchronize Requests',
-    'description' => 'Perform iCal synchronization operations.',
+    'description' => 'Perform iCalendar synchronization operations.',
     'page callback' => 'mfcs_request_synchronize_0_ical_page',
     'page arguments' => array(3, 4),
     'file' => 'request_synchronize.inc',
@@ -737,8 +737,8 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
   );
 
   $items['requests/ical-0/%'] = array(
-    'title' => 'Request iCal',
-    'description' => 'Request iCal',
+    'title' => 'Request iCalendar',
+    'description' => 'Request iCalendar',
     'page callback' => 'mfcs_request_ical_request_0_page',
     'page arguments' => array(2),
     'file' => 'request_ical.inc',
@@ -750,8 +750,8 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
   );
 
   $items['requests/ical-0/year'] = array(
-    'title' => 'Request iCal',
-    'description' => 'Request iCal - Year',
+    'title' => 'Request iCalendar',
+    'description' => 'Request iCalendar - Year',
     'page callback' => 'mfcs_request_ical_year_0_page',
     'page arguments' => array(NULL, NULL),
     'file' => 'request_ical.inc',
@@ -763,8 +763,8 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
   );
 
   $items['requests/ical-0/year/%'] = array(
-    'title' => 'Request iCal',
-    'description' => 'Requests iCal - Year',
+    'title' => 'Request iCalendar',
+    'description' => 'Requests iCalendar - Year',
     'page callback' => 'mfcs_request_ical_year_0_page',
     'page arguments' => array(3, 4),
     'file' => 'request_ical.inc',
@@ -776,8 +776,8 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
   );
 
   $items['requests/ical-0/month'] = array(
-    'title' => 'Request iCal',
-    'description' => 'Request iCal - Month',
+    'title' => 'Request iCalendar',
+    'description' => 'Request iCalendar - Month',
     'page callback' => 'mfcs_request_ical_month_0_page',
     'page arguments' => array(NULL, NULL),
     'file' => 'request_ical.inc',
@@ -789,8 +789,8 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
   );
 
   $items['requests/ical-0/month/%/%'] = array(
-    'title' => 'Request iCal',
-    'description' => 'Requests iCal - Month',
+    'title' => 'Request iCalendar',
+    'description' => 'Requests iCalendar - Month',
     'page callback' => 'mfcs_request_ical_month_0_page',
     'page arguments' => array(3, 4),
     'file' => 'request_ical.inc',
@@ -802,8 +802,8 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
   );
 
   $items['requests/ical-0/day'] = array(
-    'title' => 'Request iCal',
-    'description' => 'Requests iCal - Day',
+    'title' => 'Request iCalendar',
+    'description' => 'Requests iCalendar - Day',
     'page callback' => 'mfcs_request_ical_day_0_page',
     'page arguments' => array(),
     'file' => 'request_ical.inc',
@@ -815,8 +815,8 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
   );
 
   $items['requests/ical-0/day/%/%/%'] = array(
-    'title' => 'Request iCal',
-    'description' => 'Requests iCal - Day',
+    'title' => 'Request iCalendar',
+    'description' => 'Requests iCalendar - Day',
     'page callback' => 'mfcs_request_ical_day_0_page',
     'page arguments' => array(3, 4, 5),
     'file' => 'request_ical.inc',

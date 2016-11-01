@@ -1904,7 +1904,7 @@ function mfcs_ajax_synchronize_0_form() {
       $row[8] = '';
 
       if ($item->type == MFCS_SYNCHRONIZE_TYPE_ICAL) {
-        $row[6] = 'iCal';
+        $row[6] = 'iCalendar';
         $row[8] .= ' <a href="' . $base_path . 'requests/synchronize-0/ical/' . rawurlencode($item->password) . $url_arguments . '" class="operation-link operation-link-view" title="Synchronization URL">Link</a>';
       }
 

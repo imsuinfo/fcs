@@ -276,7 +276,7 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = NUL
     );
 
     if ($item->type == MFCS_SYNCHRONIZE_TYPE_ICAL) {
-      $row['type']['data'] = "iCal";
+      $row['type']['data'] = 'iCalendar';
       $row['operations']['data'] .= ' <a href="' . $base_path . 'requests/synchronize-0/ical/' . rawurlencode($item->password) . $url_arguments . '" class="operation-link operation-link-view" title="Synchronization URL">Link</a>';
     }
 
@@ -285,17 +285,17 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = NUL
 
 
   $synchronize_list = array();
-  $synchronize_list['caption'] = t("Synchronize");
+  $synchronize_list['caption'] = 'Synchronize';
   $synchronize_list['header'] = array(
-    'id' => array('field' => 'id', 'data' => "ID", 'align' => 'center'),
-    'account_id' => array('field' => 'user_id', 'data' => "Account ID", 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
-    'account' => array('field' => 'name', 'data' => "Account", 'align' => 'center', 'class' => array('script-hidden')),
-    'created' => array('field' => 'created', 'data' => "Created", 'align' => 'center', 'class' => array('script-hidden')),
-    'updated' => array('field' => 'updated', 'data' => "Updated", 'align' => 'center', 'class' => array('script-hidden')),
-    'password' => array('field' => 'password', 'data' => "Password", 'align' => 'center'),
-    'type' => array('field' => 'type', 'data' => "Type", 'align' => 'center'),
-    'address' => array('field' => 'address', 'data' => "Address", 'align' => 'center'),
-    'operations' => array('data' => "Operations", 'align' => 'center', 'class' => array('no-print')),
+    'id' => array('field' => 'id', 'data' => 'ID', 'align' => 'center'),
+    'account_id' => array('field' => 'user_id', 'data' => 'Account ID', 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
+    'account' => array('field' => 'name', 'data' => 'Account', 'align' => 'center', 'class' => array('script-hidden')),
+    'created' => array('field' => 'created', 'data' => 'Created', 'align' => 'center', 'class' => array('script-hidden')),
+    'updated' => array('field' => 'updated', 'data' => 'Updated', 'align' => 'center', 'class' => array('script-hidden')),
+    'password' => array('field' => 'password', 'data' => 'Password', 'align' => 'center'),
+    'type' => array('field' => 'type', 'data' => 'Type', 'align' => 'center'),
+    'address' => array('field' => 'address', 'data' => 'Address', 'align' => 'center'),
+    'operations' => array('data' => 'Operations', 'align' => 'center', 'class' => array('no-print')),
   );
 
   $synchronize_list['attributes'] = array();
@@ -312,7 +312,7 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = NUL
   $synchronize_list['attributes']['summary'] = 'List of synchronization URLs.';
 
   $synchronize_list['rows'] = $rows;
-  $synchronize_list['empty'] = t("This system has no synchronization URLs defined.");
+  $synchronize_list['empty'] = 'This system has no synchronization URLs defined.');
 
   $datatable_settings = array(
     'sort' => strtolower($sort),
@@ -329,20 +329,20 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = NUL
     'processing' => TRUE,
     'serverSide' => TRUE,
     'ajax' => array(
-      'url' => "'" . $base_path . 'requests/synchronize-0/ajax' . $url_arguments . "'",
-      'type' => "'POST'",
+      'url' => '\'' . $base_path . 'requests/synchronize-0/ajax' . $url_arguments . '\'',
+      'type' => '\'POST\'',
     ),
     'deferRender' => TRUE,
     'columns' => array(
-      array('id' => 0, 'column' => 'id', 'name' => "ID", 'className' => 'column-id', 'sanitize' => FALSE),
-      array('id' => 1, 'column' => 'account_id', 'name' => "Account ID", 'className' => 'column-account_id', 'sanitize' => FALSE, 'visible' => FALSE),
-      array('id' => 2, 'column' => 'account', 'name' => "Account", 'className' => 'column-account', 'visible' => FALSE),
-      array('id' => 3, 'column' => 'created', 'name' => "Created", 'className' => 'column-created', 'visible' => FALSE),
-      array('id' => 4, 'column' => 'updated', 'name' => "Updated", 'className' => 'column-updated', 'visible' => FALSE),
-      array('id' => 5, 'column' => 'password', 'name' => "Password", 'className' => 'column-password'),
-      array('id' => 6, 'column' => 'type', 'name' => "Type", 'className' => 'column-type'),
-      array('id' => 7, 'column' => 'address', 'name' => "Address", 'className' => 'column-address'),
-      array('id' => 8, 'column' => NULL, 'name' => "Operations", 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
+      array('id' => 0, 'column' => 'id', 'name' => 'ID', 'className' => 'column-id', 'sanitize' => FALSE),
+      array('id' => 1, 'column' => 'account_id', 'name' => 'Account ID', 'className' => 'column-account_id', 'sanitize' => FALSE, 'visible' => FALSE),
+      array('id' => 2, 'column' => 'account', 'name' => 'Account', 'className' => 'column-account', 'visible' => FALSE),
+      array('id' => 3, 'column' => 'created', 'name' => 'Created', 'className' => 'column-created', 'visible' => FALSE),
+      array('id' => 4, 'column' => 'updated', 'name' => 'Updated', 'className' => 'column-updated', 'visible' => FALSE),
+      array('id' => 5, 'column' => 'password', 'name' => 'Password', 'className' => 'column-password'),
+      array('id' => 6, 'column' => 'type', 'name' => 'Type', 'className' => 'column-type'),
+      array('id' => 7, 'column' => 'address', 'name' => 'Address', 'className' => 'column-address'),
+      array('id' => 8, 'column' => NULL, 'name' => 'Operations', 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
     ),
     'displayStart' => $options['start'],
     'pageLength' => $rows_per_page,
@@ -403,20 +403,20 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = NUL
   $form['synchronize_list']['#markup'] .= mcneese_libraries_theme_table($synchronize_list, $datatable_settings);
   #$form['synchronize_list']['#markup'] .= '<div class="table_listing-navigator table_listing-navigator-bottom">' . $navigation_bottom . '</div>';
   $form['synchronize_list']['#markup'] .=  '<br><div>';
-  $form['synchronize_list']['#markup'] .=  "The <strong>iCal</strong> synchronize process is intended to be used by <strong>zimbra calendar</strong> for processing only the approved requests from the current day forward. ";
-  $form['synchronize_list']['#markup'] .=  "Other ip addresses may be added for exceptional, testing, or training purposes. ";
+  $form['synchronize_list']['#markup'] .=  'The <strong>iCalendar</strong> synchronize process is intended to be used by <strong>zimbra calendar</strong> for processing only the approved requests from the current day forward. ';
+  $form['synchronize_list']['#markup'] .=  'Other ip addresses may be added for exceptional, testing, or training purposes. ';
   $form['synchronize_list']['#markup'] .=  '</div>';
 
   return $form;
 }
 
 /**
- * Renders the iCal sync content.
+ * Renders the iCalendar sync content.
  *
- * On valid pages, this generates an iCal feed.
+ * On valid pages, this generates an iCalendar feed.
  *
  * @param string $password
- *   The password needed to be granted anonymous access to the public iCal information.
+ *   The password needed to be granted anonymous access to the public iCalendar information.
  *   This may be used in the future to control what information gets loaded.
  * @param string|null $custom
  *   When NULL, requests for the current moment in time and forward are loaded.

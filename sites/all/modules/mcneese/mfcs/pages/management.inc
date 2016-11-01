@@ -162,7 +162,7 @@ function mfcs_management_page() {
     }
 
     $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/synchronize-0' . $url_arguments . '" class="item-link">Manage Synchronizations</a></h4>';
-    $help = '<div class="item-description inline-block">View and manage list of links for synchronizing, such as iCal (calendar) synchronization.</div>';
+    $help = '<div class="item-description inline-block">View and manage list of links for synchronizing, such as iCalendar synchronization.</div>';
     $items_array[] = array(
       'data' => $link . '<br>' . $help,
       'class' => array(

@@ -1016,7 +1016,7 @@ function mfcs_build_calendar_ical_links_markup($date_start, $year = TRUE, $month
   }
 
   $markup = '<div' . $id . ' class="links_and_filters ical">';
-  $markup .= '<h3 class="links_and_filters-title ical">iCal Download Options</h3>';
+  $markup .= '<h3 class="links_and_filters-title ical">iCalendar Download Options</h3>';
   $markup .= '<ul class="links_and_filters-list ical">';
 
   if ($year) {
@@ -1030,19 +1030,19 @@ function mfcs_build_calendar_ical_links_markup($date_start, $year = TRUE, $month
 
         $markup .= '<li class="links_and_filters-list-item item-day ical">';
         $markup .= '<div class="links_and_filters-list-item-label item-day item-label ical">Day:</div> ';
-        $markup .= '<a href="' . $base_path . 'requests/ical-0/day/' . $year . '/' . $month . '/' . $day . $url_arguments . '" title="Download iCal for ' . $month . ' ' . $day . ', ' . $year . '" class="links_and_filters-list-item-link item-day ical item-link">' . $month . ' ' . $day . ', ' . $year . '</a>';
+        $markup .= '<a href="' . $base_path . 'requests/ical-0/day/' . $year . '/' . $month . '/' . $day . $url_arguments . '" title="Download iCalendar for ' . $month . ' ' . $day . ', ' . $year . '" class="links_and_filters-list-item-link item-day ical item-link">' . $month . ' ' . $day . ', ' . $year . '</a>';
         $markup .= '</li>';
       }
 
       $markup .= '<li class="links_and_filters-list-item item-month ical">';
       $markup .= '<div class="links_and_filters-list-item-label item-month item-label ical">Month:</div> ';
-      $markup .= '<a href="' . $base_path . 'requests/ical-0/month/' . $year . '/' . $month . $url_arguments . '" title="Download iCal for the month of ' . $month . ' ' . $year . '" class="links_and_filters-list-item-link item-month ical item-link">' . $month . ' ' . $year . '</a>';
+      $markup .= '<a href="' . $base_path . 'requests/ical-0/month/' . $year . '/' . $month . $url_arguments . '" title="Download iCalendar for the month of ' . $month . ' ' . $year . '" class="links_and_filters-list-item-link item-month ical item-link">' . $month . ' ' . $year . '</a>';
       $markup .= '</li>';
     }
 
     $markup .= '<li class="links_and_filters-list-item item-year ical">';
     $markup .= '<div class="links_and_filters-list-item-label item-year item-label ical">Year:</div> ';
-    $markup .= '<a href="' . $base_path . 'requests/ical-0/year/' . $year . $url_arguments . '" title="Download iCal for the year ' . $year . '" class="links_and_filters-list-item-link item-year ical item-link">' . $year . '</a>';
+    $markup .= '<a href="' . $base_path . 'requests/ical-0/year/' . $year . $url_arguments . '" title="Download iCalendar for the year ' . $year . '" class="links_and_filters-list-item-link item-year ical item-link">' . $year . '</a>';
     $markup .= '</li>';
   }
 
