@@ -112,7 +112,6 @@ function mfcs_help_0_page($topic = NULL, $section = NULL, $sub_section = NULL) {
     return mfcs_help_topic_not_found($topic, $section, $sub_section);
   }
 
-
   // prepare section information.
   $section_information = array(
     'id' => 'mfcs-section-help-main',
@@ -348,11 +347,12 @@ function mfcs_help_0_page($topic = NULL, $section = NULL, $sub_section = NULL) {
 
       $markup .= mfcs_help_topic_email($allowed_topics, $section_information);
     }
-    elseif (!is_null($sub_section)) {
-      // failsafe.
-      return mfcs_help_topic_not_found($topic, $section, $sub_section);
-    }
     elseif ($section == 'request') {
+      if (!is_null($sub_section)) {
+        // failsafe.
+        return mfcs_help_topic_not_found($topic, $section, $sub_section);
+      }
+
       $section_information['class'][] = 'section-help-topic-email-request';
       $section_information['headers'][2] = array('markup' => 'Request E-Mail', 'attributes' => array('class' => array('header-3', 'section')));
 
@@ -362,7 +362,37 @@ function mfcs_help_0_page($topic = NULL, $section = NULL, $sub_section = NULL) {
       $section_information['class'][] = 'section-help-topic-email-advanced';
       $section_information['headers'][2] = array('markup' => 'Advanced E-Mail', 'attributes' => array('class' => array('header-3', 'section')));
 
-      $markup .= mfcs_help_topic_email_section_advanced($allowed_topics, $section_information);
+      if (is_null($sub_section)) {
+        $markup .= mfcs_help_topic_email_section_advanced($allowed_topics, $section_information);
+      }
+      elseif ($sub_section == 'request_status_codes') {
+        $section_information['class'][] = 'section-help-topic-email-advanced-request_status_codes';
+        $section_information['headers'][3] = array('markup' => 'Request Status Codes', 'attributes' => array('class' => array('header-4', 'sub_section')));
+
+        $markup .= mfcs_help_topic_email_section_advanced_sub_section_status_codes($allowed_topics, $section_information);
+      }
+      elseif ($sub_section == 'review_step_codes') {
+        $section_information['class'][] = 'section-help-topic-email-advanced-review_step_codes';
+        $section_information['headers'][3] = array('markup' => 'Review Step Codes', 'attributes' => array('class' => array('header-4', 'sub_section')));
+
+        $markup .= mfcs_help_topic_email_section_advanced_sub_section_step_codes($allowed_topics, $section_information);
+      }
+      elseif ($sub_section == 'request_classification_codes') {
+        $section_information['class'][] = 'section-help-topic-email-advanced-request_classification_codes';
+        $section_information['headers'][3] = array('markup' => 'Request Classification Codes', 'attributes' => array('class' => array('header-4', 'sub_section')));
+
+        $markup .= mfcs_help_topic_email_section_advanced_sub_section_classification_codes($allowed_topics, $section_information);
+      }
+      elseif ($sub_section == 'request_type_codes') {
+        $section_information['class'][] = 'section-help-topic-email-advanced-request_type_codes';
+        $section_information['headers'][3] = array('markup' => 'Request Type Codes', 'attributes' => array('class' => array('header-4', 'sub_section')));
+
+        $markup .= mfcs_help_topic_email_section_advanced_sub_section_type_codes($allowed_topics, $section_information);
+      }
+      else {
+        // failsafe.
+        return mfcs_help_topic_not_found($topic, $section, $sub_section);
+      }
     }
     else {
       // failsafe.
@@ -886,6 +916,42 @@ function mfcs_help_0_page_presentation_single($allowed_topics) {
 
     $markup .= mfcs_help_topic_email_section_advanced($allowed_topics, $section_information, TRUE);
 
+    $section_information['headers'] = $headers;
+    $section_information['headers'][0]['markup'] = 'Request Status Codes';
+    $section_information['id'] = $section_id . '-email-section-advanced-sub_section-request_status_codes';
+    $section_information['class'] = $sub_base_class;
+    $section_information['class'][] = 'section-help-topic-email-section-advanced-sub_section-request_status_codes';
+    $section_information['start_count'] = 3;
+
+    $markup .= mfcs_help_topic_email_section_advanced_sub_section_status_codes($allowed_topics, $section_information, TRUE);
+
+    $section_information['headers'] = $headers;
+    $section_information['headers'][0]['markup'] = 'Review Step Codes';
+    $section_information['id'] = $section_id . '-email-section-advanced-sub_section-review_step_codes';
+    $section_information['class'] = $sub_base_class;
+    $section_information['class'][] = 'section-help-topic-email-section-advanced-sub_section-review_step_codes';
+    $section_information['start_count'] = 3;
+
+    $markup .= mfcs_help_topic_email_section_advanced_sub_section_step_codes($allowed_topics, $section_information, TRUE);
+
+    $section_information['headers'] = $headers;
+    $section_information['headers'][0]['markup'] = 'Request Classification Codes';
+    $section_information['id'] = $section_id . '-email-section-advanced-sub_section-request_classification_codes';
+    $section_information['class'] = $sub_base_class;
+    $section_information['class'][] = 'section-help-topic-email-section-advanced-sub_section-request_classification_codes';
+    $section_information['start_count'] = 3;
+
+    $markup .= mfcs_help_topic_email_section_advanced_sub_section_classification_codes($allowed_topics, $section_information, TRUE);
+
+    $section_information['headers'] = $headers;
+    $section_information['headers'][0]['markup'] = 'Request Type Codes';
+    $section_information['id'] = $section_id . '-email-section-advanced-sub_section-request_type_codes';
+    $section_information['class'] = $sub_base_class;
+    $section_information['class'][] = 'section-help-topic-email-section-advanced-sub_section-request_type_codes';
+    $section_information['start_count'] = 3;
+
+    $markup .= mfcs_help_topic_email_section_advanced_sub_section_type_codes($allowed_topics, $section_information, TRUE);
+
     // close the email section.
     $markup .= '</section>';
   }
@@ -1401,14 +1467,41 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
       $determined['tooltip-top'] = 'Documentation: E-Mail';
 
       $determined['next'] = $base_path . 'help-0/email/advanced' . $url_arguments;
-      $determined['tooltip-next'] = 'Section: Advanced';
+      $determined['tooltip-next'] = 'Section: Advanced E-mail';
     }
     elseif ($section == 'advanced') {
-      $determined['top'] = $base_path . 'help-0/email' . $url_arguments;
-      $determined['tooltip-top'] = 'Documentation: E-Mail';
+      $determined['top'] = $base_path . 'help-0/email/advanced' . $url_arguments;
+      $determined['tooltip-top'] = 'Section: Advanced E-mail';
 
-      $determined['previous'] = $base_path . 'help-0/email/request' . $url_arguments;
-      $determined['tooltip-previous'] = 'Section: Request';
+      if ($sub_section == 'request_status_codes') {
+        $determined['next'] = $base_path . 'help-0/email/advanced/review_step_codes' . $url_arguments;
+        $determined['tooltip-next'] = 'Sub-Section: Review Step Codes';
+      }
+      elseif ($sub_section == 'review_step_codes') {
+        $determined['next'] = $base_path . 'help-0/email/advanced/request_classification_codes' . $url_arguments;
+        $determined['tooltip-next'] = 'Sub-Section: Request Classification Codes';
+
+        $determined['previous'] = $base_path . 'help-0/email/advanced/request_status_codes' . $url_arguments;
+        $determined['tooltip-previous'] = 'Sub-Section: Request Status Codes';
+      }
+      elseif ($sub_section == 'request_classification_codes') {
+        $determined['next'] = $base_path . 'help-0/email/advanced/request_type_codes' . $url_arguments;
+        $determined['tooltip-next'] = 'Sub-Section: Request Type Codes';
+
+        $determined['previous'] = $base_path . 'help-0/email/advanced/review_step_codes' . $url_arguments;
+        $determined['tooltip-previous'] = 'Sub-Section: Review Step Codes';
+      }
+      elseif ($sub_section == 'request_type_codes') {
+        $determined['previous'] = $base_path . 'help-0/email/advanced/request_classification_codes' . $url_arguments;
+        $determined['tooltip-previous'] = 'Sub-Section: Request Calassification Codes';
+      }
+      else {
+        $determined['top'] = $base_path . 'help-0/email' . $url_arguments;
+        $determined['tooltip-top'] = 'Documentation: E-Mail';
+
+        $determined['previous'] = $base_path . 'help-0/email/request' . $url_arguments;
+        $determined['tooltip-previous'] = 'Section: Request E-mail';
+      }
     }
     else {
       $determined['next'] = $base_path . 'help-0/calendar' . $url_arguments;
@@ -2067,14 +2160,38 @@ function mfcs_help_topic_glossary($allowed_topics, $section_information, $as_inl
     ),
     'email/request' => array(
       'url' => $base_path . 'help-0/email/request' . $url_arguments,
-      'tooltip' => 'Section: Request',
+      'tooltip' => 'Section: Request E-mail',
       'text' => 'Request',
       'class' => 'item-link no_print_links_as_link',
     ),
     'email/advanced' => array(
       'url' => $base_path . 'help-0/email/advanced' . $url_arguments,
-      'tooltip' => 'Section: Advanced',
+      'tooltip' => 'Section: Advanced E-mail',
       'text' => 'Advanced',
+      'class' => 'item-link no_print_links_as_link',
+    ),
+    'email/advanced/request_status_codes' => array(
+      'url' => $base_path . 'help-0/email/advanced/request_status_codes' . $url_arguments,
+      'tooltip' => 'Sub-Section: Request Status Codes',
+      'text' => 'Request Status Codes',
+      'class' => 'item-link no_print_links_as_link',
+    ),
+    'email/advanced/review_step_codes' => array(
+      'url' => $base_path . 'help-0/email/advanced/review_step_codes' . $url_arguments,
+      'tooltip' => 'Sub-Section: Review Step Codes',
+      'text' => 'Review Step Codes',
+      'class' => 'item-link no_print_links_as_link',
+    ),
+    'email/advanced/request_classification_codes' => array(
+      'url' => $base_path . 'help-0/email/advanced/request_classification_codes' . $url_arguments,
+      'tooltip' => 'Sub-Section: Request Classification Codes',
+      'text' => 'Request Classification Codes',
+      'class' => 'item-link no_print_links_as_link',
+    ),
+    'email/advanced/request_type_codes' => array(
+      'url' => $base_path . 'help-0/email/advanced/request_type_codes' . $url_arguments,
+      'tooltip' => 'Sub-Section: Request Type Codes',
+      'text' => 'Request Type Codes',
       'class' => 'item-link no_print_links_as_link',
     ),
     'calendar' => array(
@@ -2141,6 +2258,10 @@ function mfcs_help_topic_glossary($allowed_topics, $section_information, $as_inl
       $links['email']['url'] = '#help-documentation-topic-email' . $url_arguments;
       $links['email/request']['url'] = '#help-documentation-topic-email-section-request' . $url_arguments;
       $links['email/advanced']['url'] = '#help-documentation-topic-email-section-advanced' . $url_arguments;
+      $links['email/advanced/request_status_codes']['url'] = '#help-documentation-topic-email-section-advanced-sub_section-request_status_codes' . $url_arguments;
+      $links['email/advanced/review_step_codes']['url'] = '#help-documentation-topic-email-section-advanced-sub_section-review_step_codes' . $url_arguments;
+      $links['email/advanced/request_classification_codes']['url'] = '#help-documentation-topic-email-section-advanced-sub_section-request_classification_codes' . $url_arguments;
+      $links['email/advanced/request_type_codes']['url'] = '#help-documentation-topic-email-section-advanced-sub_section-request_type_codes' . $url_arguments;
       $links['calendar']['url'] = '#help-documentation-topic-calendar' . $url_arguments;
       $links['faq']['url'] = '#help-documentation-topic-faq' . $url_arguments;
       $links['terminology']['url'] = '#help-documentation-topic-terminology' . $url_arguments;
@@ -2243,7 +2364,17 @@ function mfcs_help_topic_glossary($allowed_topics, $section_information, $as_inl
   $markup .= '<a href="' . $links['email']['url'] . '" class="' . $links['email']['class'] . '" title="' . $links['email']['tooltip'] . '">' . $links['email']['text'] . '</a>';
   $markup .= '<ul class="item-navigation navigation-list">';
   $markup .= '<li class="list-item"><a href="' . $links['email/request']['url'] . '" class="' . $links['email/request']['class'] . '" title="' . $links['email/request']['tooltip'] . '">' . $links['email/request']['text'] . '</a></li>';
-  $markup .= '<li class="list-item"><a href="' . $links['email/advanced']['url'] . '" class="' . $links['email/advanced']['class'] . '" title="' . $links['email/advanced']['tooltip'] . '">' . $links['email/advanced']['text'] . '</a></li>';
+
+  $markup .= '<li class="list-item">';
+  $markup .= '<a href="' . $links['email/advanced']['url'] . '" class="' . $links['email/advanced']['class'] . '" title="' . $links['email/advanced']['tooltip'] . '">' . $links['email/advanced']['text'] . '</a>';
+  $markup .= '<ul class="item-navigation navigation-list">';
+  $markup .= '<li class="list-item"><a href="' . $links['email/advanced/request_status_codes']['url'] . '" class="' . $links['email/advanced/request_status_codes']['class'] . '" title="' . $links['email/advanced/request_status_codes']['tooltip'] . '">' . $links['email/advanced/request_status_codes']['text'] . '</a></li>';
+  $markup .= '<li class="list-item"><a href="' . $links['email/advanced/review_step_codes']['url'] . '" class="' . $links['email/advanced/review_step_codes']['class'] . '" title="' . $links['email/advanced/review_step_codes']['tooltip'] . '">' . $links['email/advanced/review_step_codes']['text'] . '</a></li>';
+  $markup .= '<li class="list-item"><a href="' . $links['email/advanced/request_classification_codes']['url'] . '" class="' . $links['email/advanced/request_classification_codes']['class'] . '" title="' . $links['email/advanced/request_classification_codes']['tooltip'] . '">' . $links['email/advanced/request_classification_codes']['text'] . '</a></li>';
+  $markup .= '<li class="list-item"><a href="' . $links['email/advanced/request_type_codes']['url'] . '" class="' . $links['email/advanced/request_type_codes']['class'] . '" title="' . $links['email/advanced/request_type_codes']['tooltip'] . '">' . $links['email/advanced/request_type_codes']['text'] . '</a></li>';
+  $markup .= '</ul>';
+  $markup .= '</li>';
+
   $markup .= '</ul>';
   $markup .= '</li>';
 
@@ -3410,7 +3541,7 @@ function mfcs_help_topic_manage($allowed_topics, $section_information, $as_inlin
   $markup .= mfcs_help_render_headers('topic-manage', $section_information['header_attributes'], $section_information['headers'], $start_count);
 
   $markup .= '<div class="paragraph">';
-  $markup .= 'The system may be <dfn class="term">managed</dfn> through various administrative tasks, such as forcibly changing the <dfn class="term">Review Step</dfn>, adding and modifying users, altering content, creating <dfn class="term">Room</dfn> <dfn class="term">Unavailabilities</dfn>, and troubleshooting. ';
+  $markup .= 'The system may be <dfn class="term">managed</dfn> through various administrative tasks, such as forcibly changing the <dfn class="term">Review Step</dfn>, adding and modifying users, altering content, creating <dfn class="term">Room</dfn> unavailabilities, and troubleshooting. ';
   $markup .= 'These administrative tasks are performed by <dfn class="term">Managers</dfn>. ';
   $markup .= '<dfn class="term">Managers</dfn> are essentially non-technical administrators. ';
   $markup .= '<br>';
@@ -4691,10 +4822,689 @@ function mfcs_help_topic_email_section_advanced($allowed_topics, $section_inform
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">fcs-email-type</strong>: ';
   $markup .= '<br>';
-  $markup .= 'This is a number used to uniquely represent the purpose of the e-mail. ';
+  $markup .= 'This is a string used to uniquely define the purpose of the e-mail. ';
   $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '</ul>';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  if (!$as_inline) {
+    $markup .= '<div class="continue_on no-print">';
+    $markup .= 'View Sub-Section: <a href="' . $base_path . 'help-0/email/advanced/request_status_codes' . $url_arguments . '" class="item-link">Request Status Codes</a>. ';
+    $markup .= '<br>';
+    $markup .= 'View Sub-Section: <a href="' . $base_path . 'help-0/email/advanced/review_step_codes' . $url_arguments . '" class="item-link">Review Step Codes</a>. ';
+    $markup .= '<br>';
+    $markup .= 'View Sub-Section: <a href="' . $base_path . 'help-0/email/advanced/request_classification_codes' . $url_arguments . '" class="item-link">Request Classification Codes</a>. ';
+    $markup .= '<br>';
+    $markup .= 'View Sub-Section: <a href="' . $base_path . 'help-0/email/advanced/request_type_codes' . $url_arguments . '" class="item-link">Request Type Codes</a>. ';
+    $markup .= '<br>';
+    $markup .= '<br>';
+
+    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/calendar' . $url_arguments . '" class="item-link">Documentation: Calendar</a>. ';
+    $markup .= '</div>';
+  }
+
+
+  if ($closing_tag) {
+    $markup .= '</section>';
+  }
+
+  return $markup;
+}
+
+/**
+ * Build the markup for the help topic: email - advanced.
+ *
+ * @param array $allowed_topics
+ *   An array of topics currently allowed based on the users access.
+ * @param array $section_information
+ *   Information needed for populating and customizing the generated section tag.
+ * @param bool $as_inline
+ *   (optional) When TRUE, certain links and formatting are omitted.
+ * @param bool $closing_tag
+ *   (optional) When TRUE, the closing section tag is appended.
+ *   When FALSE, no closing section tag is appended and the caller is expected to properly close.
+ *
+ * @return string
+ *   The generated HTML markup.
+ */
+function mfcs_help_topic_email_section_advanced_sub_section_status_codes($allowed_topics, $section_information, $as_inline = FALSE, $closing_tag = TRUE) {
+  if (!is_array($allowed_topics)) {
+    cf_error::invalid_array('allowed_topics');
+    return '';
+  }
+
+  if (!is_array($section_information)) {
+    cf_error::invalid_array('section_information');
+    return '';
+  }
+
+  if (!is_bool($as_inline)) {
+    cf_error::invalid_bool('as_inline');
+    $as_inline = FALSE;
+  }
+
+  if (!is_bool($closing_tag)) {
+    cf_error::invalid_bool('closing_tag');
+    $closing_tag = TRUE;
+  }
+
+  global $base_url;
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  if ($as_inline) {
+    $section_information['navigation'] = NULL;
+  }
+
+  $start_count = 0;
+  if (isset($section_information['start_count']) && is_numeric($section_information['start_count']) && $section_information['start_count'] >= 0) {
+    $start_count = (int) $section_information['start_count'];
+  }
+
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+  $options =  mfcs_get_request_status_list_options(NULL, TRUE);
+
+  $markup = '<section id="' . $section_information['id'] . '" class="' . implode(' ', $section_information['class']) . '">';
+  $markup .= $section_information['navigation'];
+  $markup .= mfcs_help_render_headers('topic-email-section-advanced-sub_section-request_status_codes', $section_information['header_attributes'], $section_information['headers'], $start_count);
+
+  $markup .= '<div class="paragraph">';
+
+  $codes = array();
+
+  if (array_key_exists(MFCS_REQUEST_STATUS_DELETED, $options)) {
+    $codes[MFCS_REQUEST_STATUS_DELETED] = '';
+    $codes[MFCS_REQUEST_STATUS_DELETED] .= '<li class="list-item">';
+    $codes[MFCS_REQUEST_STATUS_DELETED] .= '<strong class="bold">Code ' . MFCS_REQUEST_STATUS_DELETED . ', ' . $options[MFCS_REQUEST_STATUS_DELETED] . '</strong>: ';
+    $codes[MFCS_REQUEST_STATUS_DELETED] .= '<br>';
+    $codes[MFCS_REQUEST_STATUS_DELETED] .= 'The <dfn class="term">Facilities Use System</dfn> does not permanently delete <dfn class="term">Requests</dfn>. ';
+    $codes[MFCS_REQUEST_STATUS_DELETED] .= 'Instead, deleted <dfn class="term">Requests</dfn> are assigned the deleted status. ';
+    $codes[MFCS_REQUEST_STATUS_DELETED] .= 'There currently is no interface for viewing or accessing deleted content. ';
+    $codes[MFCS_REQUEST_STATUS_DELETED] .= '<br>';
+    $codes[MFCS_REQUEST_STATUS_DELETED] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_REQUEST_STATUS_LOCKED, $options)) {
+    $codes[MFCS_REQUEST_STATUS_LOCKED] = '';
+    $codes[MFCS_REQUEST_STATUS_LOCKED] .= '<li class="list-item">';
+    $codes[MFCS_REQUEST_STATUS_LOCKED] .= '<strong class="bold">Code ' . MFCS_REQUEST_STATUS_LOCKED . ', ' . $options[MFCS_REQUEST_STATUS_LOCKED] . '</strong>: ';
+    $codes[MFCS_REQUEST_STATUS_LOCKED] .= '<br>';
+    $codes[MFCS_REQUEST_STATUS_LOCKED] .= 'Designates that the <dfn class="term">Request</dfn> is restricted or otherwise preventing other <dfn class="term">Requests</dfn> from requesting reservation for the same dates and times as this <dfn class="term">Request</dfn>. ';
+    $codes[MFCS_REQUEST_STATUS_LOCKED] .= '<br>';
+    $codes[MFCS_REQUEST_STATUS_LOCKED] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_REQUEST_STATUS_UNLOCKED, $options)) {
+    $codes[MFCS_REQUEST_STATUS_UNLOCKED] = '';
+    $codes[MFCS_REQUEST_STATUS_UNLOCKED] .= '<li class="list-item">';
+    $codes[MFCS_REQUEST_STATUS_UNLOCKED] .= '<strong class="bold">Code ' . MFCS_REQUEST_STATUS_UNLOCKED . ', ' . $options[MFCS_REQUEST_STATUS_UNLOCKED] . '</strong>: ';
+    $codes[MFCS_REQUEST_STATUS_UNLOCKED] .= '<br>';
+    $codes[MFCS_REQUEST_STATUS_UNLOCKED] .= 'Designates that the <dfn class="term">Request</dfn> is currently not restricted or preventing other <dfn class="term">Requests</dfn> from requesting reservation for the same dates and times as this <dfn class="term">Request</dfn>. ';
+    $codes[MFCS_REQUEST_STATUS_UNLOCKED] .= '<br>';
+    $codes[MFCS_REQUEST_STATUS_UNLOCKED] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_REQUEST_STATUS_CLOSED_ACCEPTED, $options)) {
+    $codes[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED] = '';
+    $codes[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED] .= '<li class="list-item">';
+    $codes[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED] .= '<strong class="bold">Code ' . MFCS_REQUEST_STATUS_CLOSED_ACCEPTED . ', ' . $options[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED] . '</strong>: ';
+    $codes[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED] .= '<br>';
+    $codes[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED] .= 'Designates that the <dfn class="term">Request</dfn> has been <dfn class="term">Accepted</dfn>. ';
+    $codes[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED] .= '<br>';
+    $codes[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_REQUEST_STATUS_CLOSED_DENIED, $options)) {
+    $codes[MFCS_REQUEST_STATUS_CLOSED_DENIED] = '';
+    $codes[MFCS_REQUEST_STATUS_CLOSED_DENIED] .= '<li class="list-item">';
+    $codes[MFCS_REQUEST_STATUS_CLOSED_DENIED] .= '<strong class="bold">Code ' . MFCS_REQUEST_STATUS_CLOSED_DENIED . ', ' . $options[MFCS_REQUEST_STATUS_CLOSED_DENIED] . '</strong>: ';
+    $codes[MFCS_REQUEST_STATUS_CLOSED_DENIED] .= '<br>';
+    $codes[MFCS_REQUEST_STATUS_CLOSED_DENIED] .= 'Designates that the <dfn class="term">Request</dfn> has been <dfn class="term">Denied</dfn>. ';
+    $codes[MFCS_REQUEST_STATUS_CLOSED_DENIED] .= '<br>';
+    $codes[MFCS_REQUEST_STATUS_CLOSED_DENIED] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE, $options)) {
+    $codes[MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE] = '';
+    $codes[MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE] .= '<li class="list-item">';
+    $codes[MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE] .= '<strong class="bold">Code ' . MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE . ', ' . $options[MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE] . '</strong>: ';
+    $codes[MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE] .= '<br>';
+    $codes[MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE] .= 'Designates that the <dfn class="term">Request</dfn> has been <dfn class="term">Denied</dfn> because the <dfn class="term">Room</dfn> is unavailable. ';
+    $codes[MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE] .= '<br>';
+    $codes[MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK, $options)) {
+    $codes[MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK] = '';
+    $codes[MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK] .= '<li class="list-item">';
+    $codes[MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK] .= '<strong class="bold">Code ' . MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK . ', ' . $options[MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK] . '</strong>: ';
+    $codes[MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK] .= '<br>';
+    $codes[MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK] .= 'Designates that the <dfn class="term">Request</dfn> has been <dfn class="term">Denied</dfn> because another <dfn class="term">Request</dfn> is restricting or otherwise preventing this <dfn class="term">Request</dfn> from being made. ';
+    $codes[MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK] .= '<br>';
+    $codes[MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_REQUEST_STATUS_CANCELLED, $options)) {
+    $codes[MFCS_REQUEST_STATUS_CANCELLED] = '';
+    $codes[MFCS_REQUEST_STATUS_CANCELLED] .= '<li class="list-item">';
+    $codes[MFCS_REQUEST_STATUS_CANCELLED] .= '<strong class="bold">Code ' . MFCS_REQUEST_STATUS_CANCELLED . ', ' . $options[MFCS_REQUEST_STATUS_CANCELLED] . '</strong>: ';
+    $codes[MFCS_REQUEST_STATUS_CANCELLED] .= '<br>';
+    $codes[MFCS_REQUEST_STATUS_CANCELLED] .= 'Designates that the <dfn class="term">Request</dfn> has been <dfn class="term">Cancelled</dfn>. ';
+    $codes[MFCS_REQUEST_STATUS_CANCELLED] .= '<br>';
+    $codes[MFCS_REQUEST_STATUS_CANCELLED] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED, $options)) {
+    $codes[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED] = '';
+    $codes[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED] .= '<li class="list-item">';
+    $codes[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED] .= '<strong class="bold">Code ' . MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED . ', ' . $options[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED] . '</strong>: ';
+    $codes[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED] .= '<br>';
+    $codes[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED] .= 'Designates that the <dfn class="term">Request</dfn> has been <dfn class="term">Cancelled</dfn> after it has already been <dfn class="term">Accepted</dfn>. ';
+    $codes[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED] .= 'This is important for technical reasons regarding iCalendar (or similar technologies) to designate that the <dfn class="term">Request</dfn> should be removed or marked as cancelled. ';
+    $codes[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED] .= '<br>';
+    $codes[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED] .= '</li>';
+  }
+
+  if (empty($codes)) {
+    $markup .= '<br>';
+    $markup .= 'The system currently has no codes available. ';
+  }
+  else {
+    ksort($codes);
+
+    $markup .= '<ul class="list">';
+    $markup .= implode('', $codes);
+    $markup .= '</ul>';
+  }
+  unset($codes);
+
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+
+  if ($closing_tag) {
+    $markup .= '</section>';
+  }
+
+  return $markup;
+}
+
+/**
+ * Build the markup for the help topic: email - advanced.
+ *
+ * @param array $allowed_topics
+ *   An array of topics currently allowed based on the users access.
+ * @param array $section_information
+ *   Information needed for populating and customizing the generated section tag.
+ * @param bool $as_inline
+ *   (optional) When TRUE, certain links and formatting are omitted.
+ * @param bool $closing_tag
+ *   (optional) When TRUE, the closing section tag is appended.
+ *   When FALSE, no closing section tag is appended and the caller is expected to properly close.
+ *
+ * @return string
+ *   The generated HTML markup.
+ */
+function mfcs_help_topic_email_section_advanced_sub_section_step_codes($allowed_topics, $section_information, $as_inline = FALSE, $closing_tag = TRUE) {
+  if (!is_array($allowed_topics)) {
+    cf_error::invalid_array('allowed_topics');
+    return '';
+  }
+
+  if (!is_array($section_information)) {
+    cf_error::invalid_array('section_information');
+    return '';
+  }
+
+  if (!is_bool($as_inline)) {
+    cf_error::invalid_bool('as_inline');
+    $as_inline = FALSE;
+  }
+
+  if (!is_bool($closing_tag)) {
+    cf_error::invalid_bool('closing_tag');
+    $closing_tag = TRUE;
+  }
+
+  global $base_url;
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  if ($as_inline) {
+    $section_information['navigation'] = NULL;
+  }
+
+  $start_count = 0;
+  if (isset($section_information['start_count']) && is_numeric($section_information['start_count']) && $section_information['start_count'] >= 0) {
+    $start_count = (int) $section_information['start_count'];
+  }
+
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+  $options = mfcs_get_review_step_list_options(NULL, TRUE);
+
+  $markup = '<section id="' . $section_information['id'] . '" class="' . implode(' ', $section_information['class']) . '">';
+  $markup .= $section_information['navigation'];
+  $markup .= mfcs_help_render_headers('topic-email-section-advanced-sub_section-review_step_codes', $section_information['header_attributes'], $section_information['headers'], $start_count);
+
+  $markup .= '<div class="paragraph">';
+
+  $codes = array();
+
+  if (array_key_exists(MFCS_REVIEW_STEP_VENUE_AVAILABLE, $options)) {
+    $codes[MFCS_REVIEW_STEP_VENUE_AVAILABLE] = '';
+    $codes[MFCS_REVIEW_STEP_VENUE_AVAILABLE] .= '<li class="list-item">';
+    $codes[MFCS_REVIEW_STEP_VENUE_AVAILABLE] .= '<strong class="bold">Code ' . MFCS_REVIEW_STEP_VENUE_AVAILABLE . ', ' . $options[MFCS_REVIEW_STEP_VENUE_AVAILABLE] . '</strong>: ';
+    $codes[MFCS_REVIEW_STEP_VENUE_AVAILABLE] .= '<br>';
+    $codes[MFCS_REVIEW_STEP_VENUE_AVAILABLE] .= 'The <dfn class="term">Request</dfn> is currently in the <dfn class="term">Venue Available Step</dfn>. ';
+    $codes[MFCS_REVIEW_STEP_VENUE_AVAILABLE] .= '<br>';
+    $codes[MFCS_REVIEW_STEP_VENUE_AVAILABLE] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_REVIEW_STEP_REVIEW, $options)) {
+    $codes[MFCS_REVIEW_STEP_REVIEW] = '';
+    $codes[MFCS_REVIEW_STEP_REVIEW] .= '<li class="list-item">';
+    $codes[MFCS_REVIEW_STEP_REVIEW] .= '<strong class="bold">Code ' . MFCS_REVIEW_STEP_REVIEW . ', ' . $options[MFCS_REVIEW_STEP_REVIEW] . '</strong>: ';
+    $codes[MFCS_REVIEW_STEP_REVIEW] .= '<br>';
+    $codes[MFCS_REVIEW_STEP_REVIEW] .= 'The <dfn class="term">Request</dfn> is currently in the <dfn class="term">Review Step</dfn>. ';
+    $codes[MFCS_REVIEW_STEP_REVIEW] .= '<br>';
+    $codes[MFCS_REVIEW_STEP_REVIEW] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_REVIEW_STEP_FINAL_DECISION, $options)) {
+    $codes[MFCS_REVIEW_STEP_FINAL_DECISION] = '';
+    $codes[MFCS_REVIEW_STEP_FINAL_DECISION] .= '<li class="list-item">';
+    $codes[MFCS_REVIEW_STEP_FINAL_DECISION] .= '<strong class="bold">Code ' . MFCS_REVIEW_STEP_FINAL_DECISION . ', ' . $options[MFCS_REVIEW_STEP_FINAL_DECISION] . '</strong>: ';
+    $codes[MFCS_REVIEW_STEP_FINAL_DECISION] .= '<br>';
+    $codes[MFCS_REVIEW_STEP_FINAL_DECISION] .= 'The <dfn class="term">Request</dfn> is currently in the <dfn class="term">Final Decision Step</dfn>. ';
+    $codes[MFCS_REVIEW_STEP_FINAL_DECISION] .= '<br>';
+    $codes[MFCS_REVIEW_STEP_FINAL_DECISION] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_REVIEW_STEP_COMPLETED, $options)) {
+    $codes[MFCS_REVIEW_STEP_COMPLETED] = '';
+    $codes[MFCS_REVIEW_STEP_COMPLETED] .= '<li class="list-item">';
+    $codes[MFCS_REVIEW_STEP_COMPLETED] .= '<strong class="bold">Code ' . MFCS_REVIEW_STEP_COMPLETED . ', ' . $options[MFCS_REVIEW_STEP_COMPLETED] . '</strong>: ';
+    $codes[MFCS_REVIEW_STEP_COMPLETED] .= '<br>';
+    $codes[MFCS_REVIEW_STEP_COMPLETED] .= 'The <dfn class="term">Request</dfn> is currently in the <dfn class="term">Completed Step</dfn>. ';
+    $codes[MFCS_REVIEW_STEP_COMPLETED] .= '<br>';
+    $codes[MFCS_REVIEW_STEP_COMPLETED] .= '</li>';
+  }
+
+  if (empty($codes)) {
+    $markup .= '<br>';
+    $markup .= 'The system currently has no codes available. ';
+  }
+  else {
+    ksort($codes);
+
+    $markup .= '<ul class="list">';
+    $markup .= implode('', $codes);
+    $markup .= '</ul>';
+  }
+  unset($codes);
+
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+
+  if ($closing_tag) {
+    $markup .= '</section>';
+  }
+
+  return $markup;
+}
+
+/**
+ * Build the markup for the help topic: email - advanced.
+ *
+ * @param array $allowed_topics
+ *   An array of topics currently allowed based on the users access.
+ * @param array $section_information
+ *   Information needed for populating and customizing the generated section tag.
+ * @param bool $as_inline
+ *   (optional) When TRUE, certain links and formatting are omitted.
+ * @param bool $closing_tag
+ *   (optional) When TRUE, the closing section tag is appended.
+ *   When FALSE, no closing section tag is appended and the caller is expected to properly close.
+ *
+ * @return string
+ *   The generated HTML markup.
+ */
+function mfcs_help_topic_email_section_advanced_sub_section_classification_codes($allowed_topics, $section_information, $as_inline = FALSE, $closing_tag = TRUE) {
+  if (!is_array($allowed_topics)) {
+    cf_error::invalid_array('allowed_topics');
+    return '';
+  }
+
+  if (!is_array($section_information)) {
+    cf_error::invalid_array('section_information');
+    return '';
+  }
+
+  if (!is_bool($as_inline)) {
+    cf_error::invalid_bool('as_inline');
+    $as_inline = FALSE;
+  }
+
+  if (!is_bool($closing_tag)) {
+    cf_error::invalid_bool('closing_tag');
+    $closing_tag = TRUE;
+  }
+
+  global $base_url;
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  if ($as_inline) {
+    $section_information['navigation'] = NULL;
+  }
+
+  $start_count = 0;
+  if (isset($section_information['start_count']) && is_numeric($section_information['start_count']) && $section_information['start_count'] >= 0) {
+    $start_count = (int) $section_information['start_count'];
+  }
+
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+  $options =  mfcs_get_request_classification_list_options(NULL, NULL, TRUE);
+
+  $markup = '<section id="' . $section_information['id'] . '" class="' . implode(' ', $section_information['class']) . '">';
+  $markup .= $section_information['navigation'];
+  $markup .= mfcs_help_render_headers('topic-email-section-advanced-sub_section-request_classification_codes', $section_information['header_attributes'], $section_information['headers'], $start_count);
+
+  $markup .= '<div class="paragraph">';
+
+  $codes = array();
+
+  if (array_key_exists(MFCS_REQUEST_CLASSIFICATION_STUDENT, $options)) {
+    $codes[MFCS_REQUEST_CLASSIFICATION_STUDENT] = '';
+    $codes[MFCS_REQUEST_CLASSIFICATION_STUDENT] .= '<li class="list-item">';
+    $codes[MFCS_REQUEST_CLASSIFICATION_STUDENT] .= '<strong class="bold">Code ' . MFCS_REQUEST_CLASSIFICATION_STUDENT . ', ' . $options[MFCS_REQUEST_CLASSIFICATION_STUDENT] . '</strong>: ';
+    $codes[MFCS_REQUEST_CLASSIFICATION_STUDENT] .= '<br>';
+    $codes[MFCS_REQUEST_CLASSIFICATION_STUDENT] .= 'The <dfn class="term">Request</dfn> is categorized as a <dfn class="term">' . $options[MFCS_REQUEST_CLASSIFICATION_STUDENT] . '</dfn>. ';
+    $codes[MFCS_REQUEST_CLASSIFICATION_STUDENT] .= '<br>';
+    $codes[MFCS_REQUEST_CLASSIFICATION_STUDENT] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_REQUEST_CLASSIFICATION_CAMPS, $options)) {
+    $codes[MFCS_REQUEST_CLASSIFICATION_CAMPS] = '';
+    $codes[MFCS_REQUEST_CLASSIFICATION_CAMPS] .= '<li class="list-item">';
+    $codes[MFCS_REQUEST_CLASSIFICATION_CAMPS] .= '<strong class="bold">Code ' . MFCS_REQUEST_CLASSIFICATION_CAMPS . ', ' . $options[MFCS_REQUEST_CLASSIFICATION_CAMPS] . '</strong>: ';
+    $codes[MFCS_REQUEST_CLASSIFICATION_CAMPS] .= '<br>';
+    $codes[MFCS_REQUEST_CLASSIFICATION_CAMPS] .= 'The <dfn class="term">Request</dfn> is categorized as a <dfn class="term">' . $options[MFCS_REQUEST_CLASSIFICATION_CAMPS] . '</dfn>. ';
+    $codes[MFCS_REQUEST_CLASSIFICATION_CAMPS] .= '<br>';
+    $codes[MFCS_REQUEST_CLASSIFICATION_CAMPS] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_REQUEST_CLASSIFICATION_FACULTY, $options)) {
+    $codes[MFCS_REQUEST_CLASSIFICATION_FACULTY] = '';
+    $codes[MFCS_REQUEST_CLASSIFICATION_FACULTY] .= '<li class="list-item">';
+    $codes[MFCS_REQUEST_CLASSIFICATION_FACULTY] .= '<strong class="bold">Code ' . MFCS_REQUEST_CLASSIFICATION_FACULTY . ', ' . $options[MFCS_REQUEST_CLASSIFICATION_FACULTY] . '</strong>: ';
+    $codes[MFCS_REQUEST_CLASSIFICATION_FACULTY] .= '<br>';
+    $codes[MFCS_REQUEST_CLASSIFICATION_FACULTY] .= 'The <dfn class="term">Request</dfn> is categorized as a <dfn class="term">' . $options[MFCS_REQUEST_CLASSIFICATION_FACULTY] . '</dfn>. ';
+    $codes[MFCS_REQUEST_CLASSIFICATION_FACULTY] .= '<br>';
+    $codes[MFCS_REQUEST_CLASSIFICATION_FACULTY] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_REQUEST_CLASSIFICATION_EXTERNAL, $options)) {
+    $codes[MFCS_REQUEST_CLASSIFICATION_EXTERNAL] = '';
+    $codes[MFCS_REQUEST_CLASSIFICATION_EXTERNAL] .= '<li class="list-item">';
+    $codes[MFCS_REQUEST_CLASSIFICATION_EXTERNAL] .= '<strong class="bold">Code ' . MFCS_REQUEST_CLASSIFICATION_EXTERNAL . ', ' . $options[MFCS_REQUEST_CLASSIFICATION_EXTERNAL] . '</strong>: ';
+    $codes[MFCS_REQUEST_CLASSIFICATION_EXTERNAL] .= '<br>';
+    $codes[MFCS_REQUEST_CLASSIFICATION_EXTERNAL] .= 'The <dfn class="term">Request</dfn> is categorized as a <dfn class="term">' . $options[MFCS_REQUEST_CLASSIFICATION_EXTERNAL] . '</dfn>. ';
+    $codes[MFCS_REQUEST_CLASSIFICATION_EXTERNAL] .= '<br>';
+    $codes[MFCS_REQUEST_CLASSIFICATION_EXTERNAL] .= '</li>';
+  }
+
+  if (empty($codes)) {
+    $markup .= '<br>';
+    $markup .= 'The system currently has no codes available. ';
+  }
+  else {
+    ksort($codes);
+
+    $markup .= '<ul class="list">';
+    $markup .= implode('', $codes);
+    $markup .= '</ul>';
+  }
+  unset($codes);
+
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+
+  if ($closing_tag) {
+    $markup .= '</section>';
+  }
+
+  return $markup;
+}
+
+/**
+ * Build the markup for the help topic: email - advanced.
+ *
+ * @param array $allowed_topics
+ *   An array of topics currently allowed based on the users access.
+ * @param array $section_information
+ *   Information needed for populating and customizing the generated section tag.
+ * @param bool $as_inline
+ *   (optional) When TRUE, certain links and formatting are omitted.
+ * @param bool $closing_tag
+ *   (optional) When TRUE, the closing section tag is appended.
+ *   When FALSE, no closing section tag is appended and the caller is expected to properly close.
+ *
+ * @return string
+ *   The generated HTML markup.
+ */
+function mfcs_help_topic_email_section_advanced_sub_section_type_codes($allowed_topics, $section_information, $as_inline = FALSE, $closing_tag = TRUE) {
+  if (!is_array($allowed_topics)) {
+    cf_error::invalid_array('allowed_topics');
+    return '';
+  }
+
+  if (!is_array($section_information)) {
+    cf_error::invalid_array('section_information');
+    return '';
+  }
+
+  if (!is_bool($as_inline)) {
+    cf_error::invalid_bool('as_inline');
+    $as_inline = FALSE;
+  }
+
+  if (!is_bool($closing_tag)) {
+    cf_error::invalid_bool('closing_tag');
+    $closing_tag = TRUE;
+  }
+
+  global $base_url;
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  if ($as_inline) {
+    $section_information['navigation'] = NULL;
+  }
+
+  $start_count = 0;
+  if (isset($section_information['start_count']) && is_numeric($section_information['start_count']) && $section_information['start_count'] >= 0) {
+    $start_count = (int) $section_information['start_count'];
+  }
+
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+  $options =  mfcs_get_request_type_list_options(NULL, TRUE);
+
+  $markup = '<section id="' . $section_information['id'] . '" class="' . implode(' ', $section_information['class']) . '">';
+  $markup .= $section_information['navigation'];
+  $markup .= mfcs_help_render_headers('topic-email-section-advanced-sub_section-request_type_codes', $section_information['header_attributes'], $section_information['headers'], $start_count);
+
+  $markup .= '<div class="paragraph">';
+
+  $codes = array();
+
+  if (array_key_exists(MFCS_REQUEST_TYPE_MEETING, $options)) {
+    $codes[MFCS_REQUEST_TYPE_MEETING] = '';
+    $codes[MFCS_REQUEST_TYPE_MEETING] .= '<li class="list-item">';
+    $codes[MFCS_REQUEST_TYPE_MEETING] .= '<strong class="bold">Code ' . MFCS_REQUEST_TYPE_MEETING . ', ' . $options[MFCS_REQUEST_TYPE_MEETING] . '</strong>: ';
+    $codes[MFCS_REQUEST_TYPE_MEETING] .= '<br>';
+    $codes[MFCS_REQUEST_TYPE_MEETING] .= 'The <dfn class="term">Request</dfn> is categorized as a ' . strtolower($options[MFCS_REQUEST_TYPE_MEETING]) . ' <dfn class="term">Request Type</dfn>. ';
+    $codes[MFCS_REQUEST_TYPE_MEETING] .= '<br>';
+    $codes[MFCS_REQUEST_TYPE_MEETING] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_REQUEST_TYPE_PERFORMANCE, $options)) {
+    $codes[MFCS_REQUEST_TYPE_PERFORMANCE] = '';
+    $codes[MFCS_REQUEST_TYPE_PERFORMANCE] .= '<li class="list-item">';
+    $codes[MFCS_REQUEST_TYPE_PERFORMANCE] .= '<strong class="bold">Code ' . MFCS_REQUEST_TYPE_PERFORMANCE . ', ' . $options[MFCS_REQUEST_TYPE_PERFORMANCE] . '</strong>: ';
+    $codes[MFCS_REQUEST_TYPE_PERFORMANCE] .= '<br>';
+    $codes[MFCS_REQUEST_TYPE_PERFORMANCE] .= 'The <dfn class="term">Request</dfn> is categorized as a ' . strtolower($options[MFCS_REQUEST_TYPE_PERFORMANCE]) . ' <dfn class="term">Request Type</dfn>. ';
+    $codes[MFCS_REQUEST_TYPE_PERFORMANCE] .= '<br>';
+    $codes[MFCS_REQUEST_TYPE_PERFORMANCE] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_REQUEST_TYPE_LECTURE, $options)) {
+    $codes[MFCS_REQUEST_TYPE_LECTURE] = '';
+    $codes[MFCS_REQUEST_TYPE_LECTURE] .= '<li class="list-item">';
+    $codes[MFCS_REQUEST_TYPE_LECTURE] .= '<strong class="bold">Code ' . MFCS_REQUEST_TYPE_LECTURE . ', ' . $options[MFCS_REQUEST_TYPE_LECTURE] . '</strong>: ';
+    $codes[MFCS_REQUEST_TYPE_LECTURE] .= '<br>';
+    $codes[MFCS_REQUEST_TYPE_LECTURE] .= 'The <dfn class="term">Request</dfn> is categorized as a ' . strtolower($options[MFCS_REQUEST_TYPE_LECTURE]) . ' <dfn class="term">Request Type</dfn>. ';
+    $codes[MFCS_REQUEST_TYPE_LECTURE] .= '<br>';
+    $codes[MFCS_REQUEST_TYPE_LECTURE] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_REQUEST_TYPE_RECEPTION, $options)) {
+    $codes[MFCS_REQUEST_TYPE_RECEPTION] = '';
+    $codes[MFCS_REQUEST_TYPE_RECEPTION] .= '<li class="list-item">';
+    $codes[MFCS_REQUEST_TYPE_RECEPTION] .= '<strong class="bold">Code ' . MFCS_REQUEST_TYPE_RECEPTION . ', ' . $options[MFCS_REQUEST_TYPE_RECEPTION] . '</strong>: ';
+    $codes[MFCS_REQUEST_TYPE_RECEPTION] .= '<br>';
+    $codes[MFCS_REQUEST_TYPE_RECEPTION] .= 'The <dfn class="term">Request</dfn> is categorized as a ' . strtolower($options[MFCS_REQUEST_TYPE_RECEPTION]) . ' <dfn class="term">Request Type</dfn>. ';
+    $codes[MFCS_REQUEST_TYPE_RECEPTION] .= '<br>';
+    $codes[MFCS_REQUEST_TYPE_RECEPTION] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_REQUEST_TYPE_BANQUET, $options)) {
+    $codes[MFCS_REQUEST_TYPE_BANQUET] = '';
+    $codes[MFCS_REQUEST_TYPE_BANQUET] .= '<li class="list-item">';
+    $codes[MFCS_REQUEST_TYPE_BANQUET] .= '<strong class="bold">Code ' . MFCS_REQUEST_TYPE_BANQUET . ', ' . $options[MFCS_REQUEST_TYPE_BANQUET] . '</strong>: ';
+    $codes[MFCS_REQUEST_TYPE_BANQUET] .= '<br>';
+    $codes[MFCS_REQUEST_TYPE_BANQUET] .= 'The <dfn class="term">Request</dfn> is categorized as a ' . strtolower($options[MFCS_REQUEST_TYPE_BANQUET]) . ' <dfn class="term">Request Type</dfn>. ';
+    $codes[MFCS_REQUEST_TYPE_BANQUET] .= '<br>';
+    $codes[MFCS_REQUEST_TYPE_BANQUET] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_REQUEST_TYPE_WORKSHOP, $options)) {
+    $codes[MFCS_REQUEST_TYPE_WORKSHOP] = '';
+    $codes[MFCS_REQUEST_TYPE_WORKSHOP] .= '<li class="list-item">';
+    $codes[MFCS_REQUEST_TYPE_WORKSHOP] .= '<strong class="bold">Code ' . MFCS_REQUEST_TYPE_WORKSHOP . ', ' . $options[MFCS_REQUEST_TYPE_WORKSHOP] . '</strong>: ';
+    $codes[MFCS_REQUEST_TYPE_WORKSHOP] .= '<br>';
+    $codes[MFCS_REQUEST_TYPE_WORKSHOP] .= 'The <dfn class="term">Request</dfn> is categorized as a ' . strtolower($options[MFCS_REQUEST_TYPE_WORKSHOP]) . ' <dfn class="term">Request Type</dfn>. ';
+    $codes[MFCS_REQUEST_TYPE_WORKSHOP] .= '<br>';
+    $codes[MFCS_REQUEST_TYPE_WORKSHOP] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_REQUEST_TYPE_TALENT, $options)) {
+    $codes[MFCS_REQUEST_TYPE_TALENT] = '';
+    $codes[MFCS_REQUEST_TYPE_TALENT] .= '<li class="list-item">';
+    $codes[MFCS_REQUEST_TYPE_TALENT] .= '<strong class="bold">Code ' . MFCS_REQUEST_TYPE_TALENT . ', ' . $options[MFCS_REQUEST_TYPE_TALENT] . '</strong>: ';
+    $codes[MFCS_REQUEST_TYPE_TALENT] .= '<br>';
+    $codes[MFCS_REQUEST_TYPE_TALENT] .= 'The <dfn class="term">Request</dfn> is categorized as a ' . strtolower($options[MFCS_REQUEST_TYPE_TALENT]) . ' <dfn class="term">Request Type</dfn>. ';
+    $codes[MFCS_REQUEST_TYPE_TALENT] .= '<br>';
+    $codes[MFCS_REQUEST_TYPE_TALENT] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_REQUEST_TYPE_CEREMONY, $options)) {
+    $codes[MFCS_REQUEST_TYPE_CEREMONY] = '';
+    $codes[MFCS_REQUEST_TYPE_CEREMONY] .= '<li class="list-item">';
+    $codes[MFCS_REQUEST_TYPE_CEREMONY] .= '<strong class="bold">Code ' . MFCS_REQUEST_TYPE_CEREMONY . ', ' . $options[MFCS_REQUEST_TYPE_CEREMONY] . '</strong>: ';
+    $codes[MFCS_REQUEST_TYPE_CEREMONY] .= '<br>';
+    $codes[MFCS_REQUEST_TYPE_CEREMONY] .= 'The <dfn class="term">Request</dfn> is categorized as a ' . strtolower($options[MFCS_REQUEST_TYPE_CEREMONY]) . ' <dfn class="term">Request Type</dfn>. ';
+    $codes[MFCS_REQUEST_TYPE_CEREMONY] .= '<br>';
+    $codes[MFCS_REQUEST_TYPE_CEREMONY] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_REQUEST_TYPE_FAIR, $options)) {
+    $codes[MFCS_REQUEST_TYPE_FAIR] = '';
+    $codes[MFCS_REQUEST_TYPE_FAIR] .= '<li class="list-item">';
+    $codes[MFCS_REQUEST_TYPE_FAIR] .= '<strong class="bold">Code ' . MFCS_REQUEST_TYPE_FAIR . ', ' . $options[MFCS_REQUEST_TYPE_FAIR] . '</strong>: ';
+    $codes[MFCS_REQUEST_TYPE_FAIR] .= '<br>';
+    $codes[MFCS_REQUEST_TYPE_FAIR] .= 'The <dfn class="term">Request</dfn> is categorized as a ' . strtolower($options[MFCS_REQUEST_TYPE_FAIR]) . ' <dfn class="term">Request Type</dfn>. ';
+    $codes[MFCS_REQUEST_TYPE_FAIR] .= '<br>';
+    $codes[MFCS_REQUEST_TYPE_FAIR] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_REQUEST_TYPE_ATHLETIC, $options)) {
+    $codes[MFCS_REQUEST_TYPE_ATHLETIC] = '';
+    $codes[MFCS_REQUEST_TYPE_ATHLETIC] .= '<li class="list-item">';
+    $codes[MFCS_REQUEST_TYPE_ATHLETIC] .= '<strong class="bold">Code ' . MFCS_REQUEST_TYPE_ATHLETIC . ', ' . $options[MFCS_REQUEST_TYPE_ATHLETIC] . '</strong>: ';
+    $codes[MFCS_REQUEST_TYPE_ATHLETIC] .= '<br>';
+    $codes[MFCS_REQUEST_TYPE_ATHLETIC] .= 'The <dfn class="term">Request</dfn> is categorized as an ' . strtolower($options[MFCS_REQUEST_TYPE_ATHLETIC]) . ' <dfn class="term">Request Type</dfn>. ';
+    $codes[MFCS_REQUEST_TYPE_ATHLETIC] .= '<br>';
+    $codes[MFCS_REQUEST_TYPE_ATHLETIC] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_REQUEST_TYPE_OTHER, $options)) {
+    $codes[MFCS_REQUEST_TYPE_OTHER] = '';
+    $codes[MFCS_REQUEST_TYPE_OTHER] .= '<li class="list-item">';
+    $codes[MFCS_REQUEST_TYPE_OTHER] .= '<strong class="bold">Code ' . MFCS_REQUEST_TYPE_OTHER . ', ' . $options[MFCS_REQUEST_TYPE_OTHER] . '</strong>: ';
+    $codes[MFCS_REQUEST_TYPE_OTHER] .= '<br>';
+    $codes[MFCS_REQUEST_TYPE_OTHER] .= 'The <dfn class="term">Request</dfn> is categorized as an ' . strtolower($options[MFCS_REQUEST_TYPE_OTHER]) . ' <dfn class="term">Request Type</dfn>. ';
+    $codes[MFCS_REQUEST_TYPE_OTHER] .= '<br>';
+    $codes[MFCS_REQUEST_TYPE_OTHER] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_REQUEST_TYPE_QUICK_MEETING, $options)) {
+    $codes[MFCS_REQUEST_TYPE_QUICK_MEETING] = '';
+    $codes[MFCS_REQUEST_TYPE_QUICK_MEETING] .= '<li class="list-item">';
+    $codes[MFCS_REQUEST_TYPE_QUICK_MEETING] .= '<strong class="bold">Code ' . MFCS_REQUEST_TYPE_QUICK_MEETING . ', ' . $options[MFCS_REQUEST_TYPE_QUICK_MEETING] . '</strong>: ';
+    $codes[MFCS_REQUEST_TYPE_QUICK_MEETING] .= '<br>';
+    $codes[MFCS_REQUEST_TYPE_QUICK_MEETING] .= 'The <dfn class="term">Request</dfn> is categorized as a ' . strtolower($options[MFCS_REQUEST_TYPE_QUICK_MEETING]) . ' <dfn class="term">Request Type</dfn>. ';
+    $codes[MFCS_REQUEST_TYPE_QUICK_MEETING] .= '<br>';
+    $codes[MFCS_REQUEST_TYPE_QUICK_MEETING] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_REQUEST_TYPE_CLUB_MEETING, $options)) {
+    $codes[MFCS_REQUEST_TYPE_CLUB_MEETING] = '';
+    $codes[MFCS_REQUEST_TYPE_CLUB_MEETING] .= '<li class="list-item">';
+    $codes[MFCS_REQUEST_TYPE_CLUB_MEETING] .= '<strong class="bold">Code ' . MFCS_REQUEST_TYPE_CLUB_MEETING . ', ' . $options[MFCS_REQUEST_TYPE_CLUB_MEETING] . '</strong>: ';
+    $codes[MFCS_REQUEST_TYPE_CLUB_MEETING] .= '<br>';
+    $codes[MFCS_REQUEST_TYPE_CLUB_MEETING] .= 'The <dfn class="term">Request</dfn> is categorized as a ' . strtolower($options[MFCS_REQUEST_TYPE_CLUB_MEETING]) . ' <dfn class="term">Request Type</dfn>. ';
+    $codes[MFCS_REQUEST_TYPE_CLUB_MEETING] .= '<br>';
+    $codes[MFCS_REQUEST_TYPE_CLUB_MEETING] .= '</li>';
+  }
+
+  if (empty($codes)) {
+    $markup .= '<br>';
+    $markup .= 'The system currently has no codes available. ';
+  }
+  else {
+    ksort($codes);
+
+    $markup .= '<ul class="list">';
+    $markup .= implode('', $codes);
+    $markup .= '</ul>';
+  }
+  unset($codes);
+
   $markup .= '<br>';
   $markup .= '</div>';
 
@@ -4766,7 +5576,7 @@ function mfcs_help_topic_calendar($allowed_topics, $section_information, $as_inl
 
   $markup .= '<div class="paragraph">';
   $markup .= 'The <dfn class="term"><abbr class="abbreviation" title="Facilities Use System">FCS</abbr></dfn> provides a calendar containing only <dfn class="term">Accepted</dfn> <dfn class="term">Requests</dfn> and holidays. ';
-  $markup .= 'No other <dfn class="term">Requests</dfn> or <dfn class="term">Room</dfn> Unavailabilities are displayed. ';
+  $markup .= 'No other <dfn class="term">Requests</dfn> or <dfn class="term">Room</dfn> unavailabilities are displayed. ';
   $markup .= 'The calendars are designed to be printer-friendly with a minimum amount of inconsistencies. ';
   $markup .= 'There are two main types of calendars on this system: monthly calendars and daily calendars. ';
   $markup .= '<br>';
