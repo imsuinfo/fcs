@@ -1396,7 +1396,7 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
     $determined['top'] = $base_path . 'help-0' . $url_arguments;
     $determined['tooltip-top'] = 'Glossary';
 
-    if ($section == 'requests') {
+    if ($section == 'request') {
       $determined['top'] = $base_path . 'help-0/email' . $url_arguments;
       $determined['tooltip-top'] = 'Documentation: E-Mail';
 
@@ -2489,7 +2489,7 @@ function mfcs_help_topic_requests($allowed_topics, $section_information, $as_inl
   $markup .= '<div class="note"> ';
   $markup .= 'During the <dfn class="term">Review</dfn> process, e-mails may be sent by the <dfn class="term">Facilities Use System</dfn>. ';
   $markup .= 'These e-mails should not be replied to. ';
-  $markup .= 'Your replies will not be recieved. ';
+  $markup .= 'Your replies will not be received. ';
   $markup .= 'Instead, all responses to received e-mails should be sent via <dfn class="term">Comments</dfn> in the <dfn class="term"><abbr class="abbreviation" title="Facilities Use System">FCS</abbr></dfn> for the appropraite <dfn class="term">Request</dfn>. ';
   $markup .= '<br>';
   $markup .= '</div>';
@@ -2932,7 +2932,7 @@ function mfcs_help_topic_review($allowed_topics, $section_information, $as_inlin
 
   $markup .= '<div class="note"> ';
   $markup .= 'E-mails sent by the <dfn class="term">Facilities Use System</dfn> should not be replied to. ';
-  $markup .= 'Your replies will not be recieved. ';
+  $markup .= 'Your replies will not be received. ';
   $markup .= 'Instead, all responses to received e-mails should be sent via <dfn class="term">Comments</dfn> in the <dfn class="term"><abbr class="abbreviation" title="Facilities Use System">FCS</abbr></dfn> for the appropraite <dfn class="term">Request</dfn>. ';
   $markup .= '<br>';
   $markup .= '</div>';
@@ -3736,7 +3736,7 @@ function mfcs_help_topic_manage_section_users($allowed_topics, $section_informat
   $markup .= '<strong class="bold">Administrator Role</strong>: ';
   $markup .= '<br>';
   $markup .= 'This role grants the user full administrative access to the system (including technical aspects not available to <dfn class="term">Managers</dfn>. ';
-  $markup .= '<dfn class="term">Managers</dfn> are not allowed to add or remove this role.';
+  $markup .= '<dfn class="term">Managers</dfn> are not allowed to add or remove this role. ';
   $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '<li class="list-item">';
@@ -4417,7 +4417,7 @@ function mfcs_help_topic_email($allowed_topics, $section_information, $as_inline
 
   $markup .= '<div class="note"> ';
   $markup .= 'Do not reply to e-mails system from this system. ';
-  $markup .= 'Your replies will not be recieved. ';
+  $markup .= 'Your replies will not be received. ';
   $markup .= 'Instead, all responses to received e-mails should be sent via <dfn class="term">Comments</dfn> in the <dfn class="term"><abbr class="abbreviation" title="Facilities Use System">FCS</abbr></dfn> for the appropraite <dfn class="term">Request</dfn>. ';
   $markup .= '<br>';
   $markup .= '</div>';
@@ -4509,7 +4509,7 @@ function mfcs_help_topic_email_section_request($allowed_topics, $section_informa
   $markup .= '<div class="paragraph">';
   $markup .= 'Most e-mails sent by this system are directly related to a particular <dfn class="term">Request</dfn>. ';
   $markup .= 'These e-mails contain a special structure to make identifying and reading the e-mails relatively easy. ';
-  $markup .= 'The subject of each e-mail contains generic text, such as <strong class="bold">Facilities Use Request</strong>';
+  $markup .= 'The subject of each e-mail contains generic text, such as <strong class="bold">Facilities Use Request</strong>. ';
   $markup .= 'This generic text is then followed by the <dfn class="term">Request ID</dfn>, the <dfn class="term">Request</dfn> name, and finally an action or purpose that the e-mail represents. ';
   $markup .= 'The contents of each e-mail is broken down into multiple parts. ';
   $markup .= '<br>';
@@ -4518,7 +4518,7 @@ function mfcs_help_topic_email_section_request($allowed_topics, $section_informa
   $markup .= '<div class="paragraph">';
   $markup .= 'The first part is often a generated message describing the purpose of the e-mail, such as <em class="emphasis">The System has cancelled the request</em>. ';
   $markup .= 'This is then followed by any comments made or associated with the action. ';
-  $markup .= 'The second part contains common <dfn class="term">Request</dfn> information.';
+  $markup .= 'The second part contains common <dfn class="term">Request</dfn> information. ';
   $markup .= 'This part contains the following information: <dfn class="term">Request ID</dfn>, <dfn class="term">Request</dfn> name, <dfn class="term">Location</dfn>, <dfn class="term">Building</dfn>, <dfn class="term">Room</dfn>, <dfn class="term">Classification</dfn>, <dfn class="term">Type</dfn>, and all dates and times. ';
   $markup .= 'The third part presents a link to the <dfn class="term">Request</dfn> for easily accessing the entire <dfn class="term">Request</dfn>. ';
   $markup .= 'The fourth an final part is a date representing the exact time this e-mail was generated. ';
@@ -4600,7 +4600,7 @@ function mfcs_help_topic_email_section_advanced($allowed_topics, $section_inform
   $markup .= '</div>';
 
   $markup .= '<div class="note"> ';
-  $markup .= 'Recieved e-mails are not always the same as the original e-mail and may contain additional header information not specified by this system. ';
+  $markup .= 'Received e-mails are not always the same as the original e-mail and may contain additional header information not specified by this system. ';
   $markup .= 'E-mail services that transfer the e-mail to the recipient can (and often do) alter the header information. ';
   $markup .= 'Most people will never notice this because the header information is normally not displayed. ';
   $markup .= '<br>';
