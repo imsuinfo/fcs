@@ -2519,8 +2519,8 @@ function mfcs_help_topic_introduction($allowed_topics, $section_information, $as
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
-  $markup .= 'The system itself provides methods for requesting, reviewing, and viewing such events through numerous technologies, such as e-mail, iCalendar, <abbr title="Open Pretty Good Privacy" class="abbreviation">OpenPGP</abbr>, and <abbr title="Hypertext Markup Language 5" class="abbreviation">HTML5</abbr> are used by the <dfn class="term">Facilities Use System</dfn>. ';
-  $markup .= '<strong class="bold">OpenPGP</strong> signed e-mails are are sent out for many actions performed on or by this system. ';
+  $markup .= 'This system provides methods for requesting, reviewing, and viewing such events through numerous technologies, such as e-mail, iCalendar, <abbr title="Open Pretty Good Privacy" class="abbreviation">OpenPGP</abbr>, and <abbr title="Hypertext Markup Language 5" class="abbreviation">HTML5</abbr>. ';
+  $markup .= '<strong class="bold">OpenPGP</strong> signed e-mails are are sent out for many actions performed on or by this system to help keep users informed. ';
   $markup .= '<strong class="bold">iCalendar</strong> is provided to allow users to download a copy of approved requests and add them to their own personal calendars. ';
   $markup .= '<br>';
   $markup .= '</div>';
@@ -2598,7 +2598,7 @@ function mfcs_help_topic_requests($allowed_topics, $section_information, $as_inl
 
   $markup .= '<div class="paragraph">';
   $markup .= 'A <dfn class="term">Request</dfn> is a web form entry for reserving a particular place owned or operated by <em class="emphasis">McNeese State University</em> at some specified date and time. ';
-  $markup .= 'Each <dfn class="term">Request</dfn> goes through a <dfn class="term">Review</dfn> process for approval to help ensure that the <dfn class="term">Room</dfn> is available, all appropriate expenses are paid, and all conflicts are avoided. ';
+  $markup .= 'Each <dfn class="term">Request</dfn> goes through a <dfn class="term">Review</dfn> process for approval to help ensure that the <dfn class="term">Room</dfn> is available, all appropriate expenses are paid, and all conflicts are reasonably avoided. ';
   $markup .= 'All users who make requests, called the <dfn class="term">Request Coordinator</dfn> (or simply <dfn class="term">Requester</dfn> for short), are expected to read, agree to, and abide by the policies put forth by <em class="emphasis">McNeese State University</em>. ';
   $markup .= 'It is important to read and agree to the <a href="//www.mcneese.edu/node/3217" class="link no_print_links_as_link">Facility Use Policy</a>. ';
   $markup .= '<br>';
@@ -2613,7 +2613,7 @@ function mfcs_help_topic_requests($allowed_topics, $section_information, $as_inl
   $markup .= 'Each <dfn class="term">Request</dfn> must be associated with a specific <dfn class="term">Room</dfn>. Each <dfn class="term">Room</dfn> is associated with a <dfn class="term">Building</dfn> and each <dfn class="term">Building</dfn> falls under one or more <dfn class="term">Locations</dfn>. ';
   $markup .= 'The <dfn class="term">Buildings</dfn> themselves are more of an abstract term because they may reference a generic place such as a parking lot (making a <dfn class="term">Room</dfn> also an abstract concept). ';
   $markup .= 'These places, or venues, are managed by their <dfn class="term">Venue Coordinator</dfn> or, if applicable, are managed by their <dfn class="term">Room Coordinator</dfn>. ';
-  $markup .= 'When making a request it is these <dfn class="term">Coordinators</dfn> that are the primary point of contact for their respective venue. ';
+  $markup .= 'These <dfn class="term">Coordinators</dfn> are the primary point of contact for their respective venue. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
@@ -2628,9 +2628,9 @@ function mfcs_help_topic_requests($allowed_topics, $section_information, $as_inl
   $markup .= 'A date category must be provided when specifying a date and time. ';
   $markup .= 'It is highly recommended to assign a rehearsal/setup and a cleanup/break-down time for the requested event. ';
   $markup .= 'There are a number of restrictions on what dates and times may be specified, such as: room conflicts, holidays, and room unavailabilities. ';
-  $markup .= 'Room conflicts represent other approved requests or other requests currently under review for a given <dfn class="term">Room</dfn> on the specified date and time. ';
-  $markup .= 'Holidays are only an informative restrictions to let the <dfn class="term">Requester</dfn> know that a given <dfn class="term">Room</dfn> <em class="emphasis">may</em> be unavailable on the requested date and time. ';
-  $markup .= 'Room unavailabilities include classes or class-related activities. ';
+  $markup .= 'Room conflicts represent other approved requests (or other <dfn class="term">Requests</dfn> currently under review) for a given <dfn class="term">Room</dfn> on the specified date and time. ';
+  $markup .= 'Holidays are intended to inform the <dfn class="term">Requester</dfn> that a given <dfn class="term">Room</dfn> may be unavailable for the requested date and time. ';
+  $markup .= 'Room unavailabilities designate that the room is unavailable and may include classes or class-related activities. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
@@ -2648,16 +2648,13 @@ function mfcs_help_topic_requests($allowed_topics, $section_information, $as_inl
   $markup .= 'Some <dfn class="term">Request Types</dfn> will provide new fields to fill out, fewer fields to fill out, or even allow for quick submittal of a <dfn class="term">Request</dfn>. ';
   $markup .= 'The special <dfn class="term">Request Type</dfn>, called a <dfn class="term">Quick Meeting</dfn>, does not go through the <dfn class="term">Review</dfn> process and may only be assigned by <dfn class="term">Venue Coordinators</dfn> and <dfn class="term">Managers</dfn>. ';
   $markup .= 'To better accommodate the needs of students, student organizations are able to create a special <dfn class="term">Request Type</dfn> called a <dfn class="term">Club Meeting</dfn>. ';
-  $markup .= 'When viewing <dfn class="term">Approved</dfn> <dfn class="term">Requests</dfn> on the daily calendar, custom color codes are used to make the different <dfn class="term">Request Types</dfn> easier to spot. ';
-  $markup .= 'For those less visually inclined, the <dfn class="term">Request Type</dfn> is also presented along side the <dfn class="term">Approved</dfn> <dfn class="term">Request</dfn>. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
   $markup .= '<div class="note"> ';
-  $markup .= 'During the <dfn class="term">Review</dfn> process, e-mails may be sent by the <dfn class="term">Facilities Use System</dfn>. ';
-  $markup .= 'These e-mails should not be replied to. ';
+  $markup .= 'E-mails sent by the <dfn class="term">Facilities Use System</dfn> should not be replied to. ';
   $markup .= 'Your replies will not be received. ';
-  $markup .= 'Instead, all responses to received e-mails should be sent via <dfn class="term">Comments</dfn> in the <dfn class="term"><abbr class="abbreviation" title="Facilities Use System">FCS</abbr></dfn> for the appropraite <dfn class="term">Request</dfn>. ';
+  $markup .= 'Instead, all responses to received e-mails should be sent via <dfn class="term">Comments</dfn> through the <dfn class="term"><abbr class="abbreviation" title="Facilities Use System">FCS</abbr></dfn> for the appropraite <dfn class="term">Request</dfn>. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
@@ -2672,13 +2669,14 @@ function mfcs_help_topic_requests($allowed_topics, $section_information, $as_inl
   $markup .= 'During the <dfn class="term">Review</dfn> <dfn class="term">Step</dfn>, different <dfn class="term">Reviewers</dfn> will designate whether they have <dfn class="term">Issues</dfn> or <dfn class="term">No Issues</dfn> with the <dfn class="term">Request</dfn>. ';
   $markup .= 'These responses are generally sent to the <dfn class="term">Requester</dfn> so that they may be informed of the current <dfn class="term">Decisions</dfn>, answer any questions, or even help solve any <dfn class="term">Issues</dfn>. ';
   $markup .= 'Once all of the <dfn class="term">Reviewers</dfn> have made at least one <dfn class="term">Decision</dfn>, the <dfn class="term">Request</dfn> is moved into the <dfn class="term">Final Decision</dfn> <dfn class="term">Step</dfn>. ';
-  $markup .= 'It is during this <dfn class="term">Step</dfn> that all <dfn class="term">Issues</dfn> should be resolved and in some cases additional <dfn class="term">Requirements</dfn> may be specified. ';
-  $markup .= 'The <dfn class="term">Request</dfn> may either be <dfn class="term">Approved</dfn> or <dfn class="term">Denied</dfn>, but regardless of the <dfn class="term">Final Decision</dfn>, the <dfn class="term">Request</dfn> will be moved into the <dfn class="term">Completed</dfn> <dfn class="term">Step</dfn> where the <dfn class="term">Review</dfn> process is considered complete. ';
+  $markup .= 'It is during this final <dfn class="term">Step</dfn> that all <dfn class="term">Issues</dfn> should be resolved (and in some cases additional <dfn class="term">Requirements</dfn> may also be specified). ';
+  $markup .= 'The <dfn class="term">Request</dfn> may either be <dfn class="term">Approved</dfn> or <dfn class="term">Denied</dfn>, but regardless of what the <dfn class="term">Final Decision</dfn> is, the <dfn class="term">Request</dfn> will be moved into the <dfn class="term">Completed</dfn> <dfn class="term">Step</dfn>. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
   $markup .= '<div class="note"> ';
-  $markup .= 'The <dfn class="term">Completed</dfn> <dfn class="term">Step</dfn> identifies a <dfn class="term">Request</dfn> as having been fully processed and does <strong class="bold">not</strong> represent whether or not a given <dfn class="term">Request</dfn> is <dfn class="term">Approved</dfn>. ';
+  $markup .= 'The <dfn class="term">Completed</dfn> <dfn class="term">Step</dfn> only identifies a <dfn class="term">Request</dfn> as having been fully processed. ';
+  $markup .= 'It does <strong class="bold">not</strong> represent whether or not a given <dfn class="term">Request</dfn> is <dfn class="term">Approved</dfn> or <dfn class="term">Denied</dfn>. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
@@ -2690,7 +2688,7 @@ function mfcs_help_topic_requests($allowed_topics, $section_information, $as_inl
   $markup .= '</div>';
 
   $markup .= '<div class="note"> ';
-  $markup .= 'When a <dfn class="term">Request</dfn> (or one of its dates) is <dfn class="term">Cancelled</dfn>, the requested dates and times is subject to no longer being available for <dfn class="term">Uncancelling</dfn>. ';
+  $markup .= 'When a <dfn class="term">Request</dfn> (or one of its dates) is <dfn class="term">Cancelled</dfn>, the requested dates and times may no longer being available for use. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
@@ -3021,7 +3019,7 @@ function mfcs_help_topic_requests_section_external($allowed_topics, $section_inf
 
   $markup .= '<div class="paragraph">';
   $markup .= 'These <dfn class="term">Requests</dfn> generally represent people or organizations not directly affiliated with <em class="emphasis">McNeese State University</em> or are otherwise consider a 3rd-party. ';
-  $markup .= 'While there are no modifications to these forms, the <dfn class="term">Requester</dfn> is expected to go through the appropriate point of contact for filling out the forms and does not directly create <dfn class="term">Requests</dfn>. ';
+  $markup .= 'While there are no modifications to these forms, the <dfn class="term">Requester</dfn> is expected to go through the appropriate point of contact for filling out the forms and generally does not directly create <dfn class="term">Requests</dfn>. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
@@ -3100,7 +3098,7 @@ function mfcs_help_topic_review($allowed_topics, $section_information, $as_inlin
   $markup .= '<div class="note"> ';
   $markup .= 'E-mails sent by the <dfn class="term">Facilities Use System</dfn> should not be replied to. ';
   $markup .= 'Your replies will not be received. ';
-  $markup .= 'Instead, all responses to received e-mails should be sent via <dfn class="term">Comments</dfn> in the <dfn class="term"><abbr class="abbreviation" title="Facilities Use System">FCS</abbr></dfn> for the appropraite <dfn class="term">Request</dfn>. ';
+  $markup .= 'Instead, all responses to received e-mails should be sent via <dfn class="term">Comments</dfn> through the <dfn class="term"><abbr class="abbreviation" title="Facilities Use System">FCS</abbr></dfn> for the appropraite <dfn class="term">Request</dfn>. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
@@ -3115,7 +3113,7 @@ function mfcs_help_topic_review($allowed_topics, $section_information, $as_inlin
   $markup .= '<div class="paragraph">';
   $markup .= 'There is a <dfn class="term">Comment</dfn> decision that may be used during all <dfn class="term">Review Steps</dfn>. ';
   $markup .= 'All <dfn class="term">Comments</dfn> are sent to the <dfn class="term">Venue Coordinator</dfn>, every <dfn class="term">Reviewer</dfn>, and also the <dfn class="term">Requester</dfn>. ';
-  $markup .= 'There is an option to restrict messages such that the <dfn class="term">Requester</dfn> does not receive the <dfn class="term">Comment</dfn> (and also hiding the message in the <dfn class="term">Review Log</dfn>) for more private messages between <dfn class="term">Reviewers</dfn> and the <dfn class="term">Venue Coordinator</dfn>. ';
+  $markup .= 'There is an option to restrict messages such that the <dfn class="term">Requester</dfn> does not receive the <dfn class="term">Comment</dfn> (and also hiding the message in the <dfn class="term">Review Log</dfn>) for more private messages between <dfn class="term">Reviewers</dfn>, the <dfn class="term">Venue Coordinator</dfn>, and <dfn class="term">Managers</dfn>. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
@@ -3416,7 +3414,7 @@ function mfcs_help_topic_review_section_final_decision($allowed_topics, $section
   $markup .= mfcs_help_render_headers('topic-review-section-final_decision', $section_information['header_attributes'], $section_information['headers'], $start_count);
 
   $markup .= '<div class="paragraph">';
-  $markup .= 'The <dfn class="term">Final Decision</dfn> <dfn class="term">Review Step</dfn> is where <dfn class="term">Reviewers</dfn> the decision for <dfn class="term">Approving</dfn> or <dfn class="term">Denying</dfn> the <dfn class="term">Request</dfn> is made. ';
+  $markup .= 'The <dfn class="term">Final Decision</dfn> <dfn class="term">Review Step</dfn> is where <dfn class="term">Reviewers</dfn> make the final decision for <dfn class="term">Approving</dfn> or <dfn class="term">Denying</dfn> the <dfn class="term">Request</dfn> is made. ';
   $markup .= 'The only differences between this <dfn class="term">Step</dfn> and the <dfn class="term">Review Step</dfn> is that every <dfn class="term">Reviewer</dfn> has now made at least one decision of either <dfn class="term">Issues</dfn> or <dfn class="term">No Issued</dfn> and certain <dfn class="term">Reviewers</dfn> now have the <strong class="bold"><dfn class="term">Approve</dfn></strong> or <strong class="bold"><dfn class="term">Deny</dfn></strong> decision. ';
   $markup .= 'The <dfn class="term">Reviewer</dfn> may still update their <dfn class="term">Issues</dfn> or <dfn class="term">No Issues</dfn> decision during this <dfn class="term">Step</dfn>. ';
   $markup .= 'The next <dfn class="term">Review Step</dfn> is <dfn class="term">Completed</dfn>. ';
@@ -3669,7 +3667,7 @@ function mfcs_help_topic_manage_section_requests($allowed_topics, $section_infor
 
   $markup .= '<div class="paragraph">';
   $markup .= '<dfn class="term">Managers</dfn> are allowed to make changes to any and all <dfn class="term">Requests</dfn> at any point in time with only a few exceptions. ';
-  $markup .= 'Most conditions that are normally prohibited, such as <dfn class="term">Uncancelling</dfn> a <dfn class="term">Request</dfn> that conflicts with already <dfn class="term">Accepted</dfn> <dfn class="term">Requests</dfn>, remain prohibited to <dfn class="term">Managers</dfn>. ';
+  $markup .= 'Some conditions that are prohibited even to <dfn class="term">Managers</dfn>, such as <dfn class="term">Uncancelling</dfn> a <dfn class="term">Request</dfn> that conflicts with already <dfn class="term">Accepted</dfn> <dfn class="term">Requests</dfn>. ';
   $markup .= 'Operations performed by a <dfn class="term">Manager</dfn> for a particular <dfn class="term">Request</dfn> are generally recorded in the <dfn class="term">Review Log</dfn> as well as the <dfn class="term">Request History</dfn>. ';
   $markup .= '<br>';
   $markup .= '</div>';
@@ -3680,10 +3678,10 @@ function mfcs_help_topic_manage_section_requests($allowed_topics, $section_infor
   $markup .= 'Such actions include: manual override of <dfn class="term">Review Step</dfn> and <dfn class="term">Status</dfn>, customizing the <dfn class="term">Request\'s</dfn> auto-locking behavior, moving a <dfn class="term">Request</dfn> to a different <dfn class="term">Room</dfn>, <dfn class="term">Building</dfn>, or <dfn class="term">Location</dfn>, and re-assigning the <dfn class="term">Venue Coordinator</dfn> or <dfn class="term">Request Coordinator</dfn>. ';
   $markup .= 'Manually overriding allows for forcing a new <dfn class="term">Review Step</dfn> and <dfn class="term">Status</dfn>, effectively bypassing the <dfn class="term">Review</dfn> process. ';
   $markup .= 'Auto-locking behavior defines if a <dfn class="term">Request</dfn> will be auto-locked when it is in the past (or for any other condition that triggers the <dfn class="term">Request</dfn> to be automatically locked, cancelled, or otherwise closed). ';
-  $markup .= 'Moving a <dfn class="term">Request</dfn> entails forcibly changing the <dfn class="term">Request</dfn> to a new location (even if the <dfn class="term">Request</dfn> is <dfn class="term">Accepted</dfn>. ';
-  $markup .= 'The <dfn class="term">Venue Coordinator</dfn> may be changed, but only to the current <dfn class="term">Venue Coordinator</dfn> or <dfn class="term">Room Coordinator</dfn> as defined by <dfn class="term">Banner</dfn>. ';
+  $markup .= 'Moving a <dfn class="term">Request</dfn> entails forcibly changing the <dfn class="term">Request</dfn> to a new location (even if the <dfn class="term">Request</dfn> is <dfn class="term">Accepted</dfn>). ';
+  $markup .= 'The <dfn class="term">Venue Coordinator</dfn> may be changed, but only to the <dfn class="term">Venue Coordinator</dfn> or the <dfn class="term">Room Coordinator</dfn> defined by <dfn class="term">Banner</dfn>. ';
   $markup .= 'The <dfn class="term">Request Coordinator</dfn>, or <dfn class="term">Requester</dfn> for short, may be updated through this management interface. ';
-  $markup .= 'In the case of the <dfn class="term">Venue Coordinator</dfn> and <dfn class="term">Request Coordinator</dfn>, a notification e-mail is sent out to both the old and the new coordinators. ';
+  $markup .= 'In the case of both the <dfn class="term">Venue Coordinator</dfn> and the <dfn class="term">Request Coordinator</dfn>, a notification e-mail is sent out to both the old and the new coordinators. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
@@ -3778,12 +3776,12 @@ function mfcs_help_topic_manage_section_users($allowed_topics, $section_informat
 
   $markup .= '<div class="paragraph">';
   $markup .= 'Each user has a small set of fields describing their account. ';
-  $markup .= 'Each user must have an e-mail account and that e-mail account is required to be an <em class="emphasis">@mcneese.edu</em> address. ';
+  $markup .= 'Each user must have an e-mail account and that e-mail account is required to be an <em class="emphasis">@mcneese.edu</em> address or an <em class="emphasis">@student.mcneese.edu</em> address. ';
   $markup .= 'The <dfn class="term">Banner ID</dfn> is required for all accounts unless an exception is flagged. ';
-  $markup .= 'The phone number is optional and mostly informative. ';
+  $markup .= 'The phone number is optional. ';
   $markup .= 'A primary account checkbox is available for designating that an account is or is not a primary account. ';
   $markup .= 'Primary accounts are tied to the <dfn class="term">Banner ID</dfn>. ';
-  $markup .= 'Most accounts should be a primary account and primary accounts are the user accounts that a person should use for logging into and using this system. ';
+  $markup .= 'Most accounts should be a primary account and primary accounts are the user accounts that a person should use for accessing this system. ';
   $markup .= 'Accounts may be locked and locking prevents further access to this system even if <dfn class="term">Banner</dfn> allows states that the user should have access. ';
   $markup .= '<br>';
   $markup .= '</div>';
@@ -3830,7 +3828,7 @@ function mfcs_help_topic_manage_section_users($allowed_topics, $section_informat
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">Insurer Role</strong>: ';
   $markup .= '<br>';
-  $markup .= 'The user may act as a <dfn class="term">Insurer</dfn>. ';
+  $markup .= 'The user may act as an <dfn class="term">Insurer</dfn>. ';
   $markup .= 'This is a subset of <dfn class="term">Reviewer</dfn> and requires the user to have the reviewer role to properly function. ';
   $markup .= '<br>';
   $markup .= '</li>';
@@ -3876,7 +3874,7 @@ function mfcs_help_topic_manage_section_users($allowed_topics, $section_informat
   $markup .= '<strong class="bold">Bannerless Exception Role</strong>: ';
   $markup .= '<br>';
   $markup .= 'All <dfn class="term">Banner</dfn> related information normally auto-populated for the user no longer becomes auto-populated. ';
-  $markup .= 'This allows for the user account to get away without having a <dfn class="term">Banner ID</dfn>';
+  $markup .= 'This allows for the user account to not require a <dfn class="term">Banner ID</dfn>';
   $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '<li class="list-item">';
@@ -3890,7 +3888,7 @@ function mfcs_help_topic_manage_section_users($allowed_topics, $section_informat
   $markup .= '<strong class="bold">Reviewer Exception Role</strong>: ';
   $markup .= '<br>';
   $markup .= 'When assigned, the reviewer role will not be auto-added or auto-removed. ';
-  $markup .= 'This prevents <dfn class="term">Banner</dfn> updates, <dfn class="term">Venue Coordinator</dfn> updates, or <dfn class="term">Reviewer</dfn> updates from toggling a users reviewer role. ';
+  $markup .= 'This prevents <dfn class="term">Banner</dfn> updates, <dfn class="term">Venue Coordinator</dfn> updates, or <dfn class="term">Reviewer</dfn> updates from altering a users reviewer role. ';
   $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '</ol>';
@@ -4055,7 +4053,7 @@ function mfcs_help_topic_manage_section_problems($allowed_topics, $section_infor
   $markup .= '<strong class="bold">Troubleshooting Option 6</strong>: Requests Problem Check. ';
   $markup .= '<br>';
   $markup .= 'The system has extensive constraints, locks, and restrictions to prevent problems from happening. ';
-  $markup .= 'Depsite this, there are still some situations where problems may arrive. ';
+  $markup .= 'Depsite this, there are still some situations where problems may still occur. ';
   $markup .= 'Most of these problems will require a user to make a decision on how to fix them. ';
   $markup .= 'Performing the provided task will scan the system for known request-related problems and report any discovered problems so that they may be manually resolved. ';
   $markup .= '<br>';
@@ -4064,7 +4062,7 @@ function mfcs_help_topic_manage_section_problems($allowed_topics, $section_infor
   $markup .= '<strong class="bold">Troubleshooting Option 7</strong>: Users Problem Check. ';
   $markup .= '<br>';
   $markup .= 'The system has extensive constraints, locks, and restrictions to prevent problems from happening. ';
-  $markup .= 'Depsite this, there are still some situations where problems may arrive. ';
+  $markup .= 'Depsite this, there are still some situations where problems may still occur. ';
   $markup .= 'Most of these problems will require a user to make a decision on how to fix them. ';
   $markup .= 'Performing the provided task will scan the system for known user-related problems and report any discovered problems so that they may be manually resolved. ';
   $markup .= '<br>';
@@ -4074,9 +4072,9 @@ function mfcs_help_topic_manage_section_problems($allowed_topics, $section_infor
 
   $markup .= '<div class="paragraph">';
   $markup .= 'All detected problems are stored in their respective <dfn class="term">Request</dfn> problems or user problems pages. ';
-  $markup .= 'Each of the problems is assigned problem category (such as Conflict, Room Invalid, Old/Duplicate Account, Invalid Banner ID, etc..). ';
+  $markup .= 'Each of the problems are assigned a problem category (such as Conflict, Room Invalid, Old/Duplicate Account, Invalid Banner ID, etc..). ';
   $markup .= 'All of the <dfn class="term">Request</dfn> problems have the ability to be ignored or reset. ';
-  $markup .= 'Some of the <dfn class="term">Request</dfn> problems have options to be automatically fixed while others require manual fixes. ';
+  $markup .= 'Some of the <dfn class="term">Request</dfn> problems have options for automatically fixing them while others require manual fixes. ';
   $markup .= 'Most of the user problems only have the option to be reset. ';
   $markup .= '<br>';
   $markup .= '</div>';
@@ -4113,13 +4111,13 @@ function mfcs_help_topic_manage_section_problems($allowed_topics, $section_infor
   $markup .= '<strong class="bold">Coordinator Invalid</strong>: ';
   $markup .= '<br>';
   $markup .= 'The <dfn class="term">Venue Coordinator</dfn> assigned to the <dfn class="term">Request</dfn> is no longer a <dfn class="term">Venue Coordinator</dfn> or otherwise lacks access to perform <dfn class="term">Venue Coordinator</dfn> duties. ';
-  $markup .= 'This happens most often when the <dfn class="term">Banner</dfn> information related to the <dfn class="term">Venue Coordinator</dfn> changes. ';
+  $markup .= 'This happens most often when the <dfn class="term">Banner</dfn> information related to the <dfn class="term">Venue Coordinator</dfn> changes or the user no longer has access to this system. ';
   $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">Requester Invalid</strong>: ';
   $markup .= '<br>';
-  $markup .= 'The <dfn class="term">Request Coordinator</dfn> assigned to the <dfn class="term">Request</dfn> no longer has access to the <dfn class="term">Request</dfn> or the system. ';
+  $markup .= 'The <dfn class="term">Request Coordinator</dfn> assigned to the <dfn class="term">Request</dfn> no longer has access to the <dfn class="term">Request</dfn> or the user no longer has access to this system. ';
   $markup .= 'This happens most often when the <dfn class="term">Banner</dfn> information related to the <dfn class="term">Request Coordinator</dfn> changes. ';
   $markup .= '<br>';
   $markup .= '</li>';
@@ -4145,7 +4143,7 @@ function mfcs_help_topic_manage_section_problems($allowed_topics, $section_infor
   $markup .= '<strong class="bold">Cache Invalid</strong>: ';
   $markup .= '<br>';
   $markup .= 'The cached information for a given <dfn class="term">Request</dfn> is inconsistent or otherwise inaccurate. ';
-  $markup .= 'Tee <dfn class="term">Request</dfn> cache needs to be re-synchronized. ';
+  $markup .= 'The <dfn class="term">Request</dfn> cache needs to be re-synchronized. ';
   $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '<li class="list-item">';
@@ -4198,14 +4196,14 @@ function mfcs_help_topic_manage_section_problems($allowed_topics, $section_infor
   $markup .= '<strong class="bold">Reviewer/Venue-Coordinator Role Not Allowed</strong>: ';
   $markup .= '<br>';
   $markup .= 'This problem is flagged when a user has been assigned the <dfn class="term">Reviewer</dfn> or <dfn class="term">Venue Coordiantor</dfn> roles but according to the cached <dfn class="term">Banner</dfn> information, they should not be allowed to do so. ';
-  $markup .= 'This flag is information because when this problem is flagged, the unallowed roles have (or should have been) auto-removed. ';
+  $markup .= 'This flag is information because when this problem is flagged, the unallowed roles have (or should have been) auto-removed for the <dfn class="term">Reviewer</dfn> or the <dfn class="term">Venue Coordiantor</dfn>. ';
   $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">Old/Duplicate Account</strong>: ';
   $markup .= '<br>';
-  $markup .= 'The user information is populated through <abbr class="abbreviation" title="Lightweight Directory Access Protocol">LDAP</abbr>, using the users assigned <dfn class="term">Banner ID</dfn>. ';
-  $markup .= 'Multiple accounts max exist per <dfn class="term">Banner ID</dfn> in <abbr class="abbreviation" title="Lightweight Directory Access Protocol">LDAP</abbr>. ';
+  $markup .= 'The user information is populated through <abbr class="abbreviation" title="Lightweight Directory Access Protocol">LDAP</abbr>, using the user\'s assigned <dfn class="term">Banner ID</dfn>. ';
+  $markup .= 'Multiple accounts may exist per <dfn class="term">Banner ID</dfn> in <abbr class="abbreviation" title="Lightweight Directory Access Protocol">LDAP</abbr>. ';
   $markup .= 'This system is not designed to operate with multiple accounts per <dfn class="term">Banner ID</dfn>, so when multiple accounts are detected, this flag is assigned. ';
   $markup .= 'This can be resolved by assigning one account as the primary account and the all other accounts as not the primary account. ';
   $markup .= '<br>';
@@ -4227,7 +4225,7 @@ function mfcs_help_topic_manage_section_problems($allowed_topics, $section_infor
   $markup .= '<strong class="bold">Insufficient Banner Access</strong>: ';
   $markup .= '<br>';
   $markup .= 'Users who have have logged into the system but can perform no actions due to a lack of privileges provided by <dfn class="term">Banner</dfn> are assigned this flag. ';
-  $markup .= 'This happens most often with students who may not yet have enrolled in courses for an upcoming semester. ';
+  $markup .= 'This happens most often with students who may not yet have enrolled in courses between semesters. ';
   $markup .= 'This flag is informative as it must be resolved in <dfn class="term">Banner</dfn>. ';
   $markup .= '<br>';
   $markup .= '</li>';
@@ -4324,7 +4322,7 @@ function mfcs_help_topic_manage_section_availability($allowed_topics, $section_i
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
-  $markup .= 'The <dfn class="term">Room</dfn> unavailability is rather large and is broken down into <dfn class="term">Building</dfn> and <dfn class="term">Room</dfn> listings. ';
+  $markup .= 'The <dfn class="term">Room</dfn> unavailability is broken down into <dfn class="term">Building</dfn> and <dfn class="term">Room</dfn> listings. ';
   $markup .= 'Each unavailability entry is assigned to a specific <dfn class="term">Room</dfn> within a given <dfn class="term">Building</dfn>. ';
   $markup .= 'Unavailabilities may be specified using a start and stop date and time range, but for multiple separate dates, a new unavailability must be used. ';
   $markup .= '<br>';
@@ -4474,7 +4472,7 @@ function mfcs_help_topic_manage_section_logs($allowed_topics, $section_informati
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
-  $markup .= 'This system is designed around <dfn class="term">Requests</dfn> and the <dfn class="term">Review</dfn> of <dfn class="term">Requests</dfn>. ';
+  $markup .= 'This system is primarily designed around <dfn class="term">Requests</dfn> and the <dfn class="term">Review</dfn> of <dfn class="term">Requests</dfn>. ';
   $markup .= 'This makes the <dfn class="term">Request</dfn> and <dfn class="term">Review</dfn> related log entries the most thorough, most complex, and most readily available logs. ';
   $markup .= 'The <dfn class="term">Review Log</dfn> provides provides a log of all <dfn class="term">Review</dfn> decisions made and any notable action that should be made visible to the involved parties. ';
   $markup .= 'The <dfn class="term">Request History</dfn> is intended as a complete log of all changes performed directly to a given <dfn class="term">Request</dfn>. ';
@@ -4486,7 +4484,7 @@ function mfcs_help_topic_manage_section_logs($allowed_topics, $section_informati
 
   $markup .= '<div class="paragraph">';
   $markup .= 'The e-mail log provides a way to view the complete details of an e-mail (including technical information such as headers) prior to leaving the system. ';
-  $markup .= 'These e-mails may also be resent in case without modification. ';
+  $markup .= 'These e-mails may also be re-sent in case without modification. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
