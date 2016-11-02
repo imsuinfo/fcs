@@ -3361,6 +3361,7 @@ function mfcs_load_users($user_ids, $join = FALSE, $deleted = FALSE) {
 
     if ($join || $deleted === FALSE) {
       $query->innerJoin('users', 'u', 'mu.user_id = u.uid');
+      $query->addField('u', 'name', 'name');
       $query->addField('u', 'status', 'status');
       $query->addField('u', 'mail', 'email');
 
@@ -4709,6 +4710,9 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
 /**
  * Loads the user by e-mail and if the user does not exist. create it.
  *
+ * This assumes that the account name and the name part of the e-mail are identical.
+ * This assumes the e-mail address is only from a mcneese domain.
+ *
  * @param string $email
  *   The users mcneese e-mail address.
  * @param array $roles
@@ -4863,6 +4867,45 @@ function mfcs_ensure_user_by_email($email, $roles = array()) {
   $user = user_load($drupal_account->uid, TRUE);
 
   return $user;
+}
+
+/**
+ * Finds a user by their e-mail address if they exist.
+ *
+ * This assumes that the account name and the name part of the e-mail are identical.
+ * This assumes the e-mail address is only from a mcneese domain.
+ *
+ * @param string $email
+ *   The users mcneese e-mail address.
+ *
+ * @return object|FALSE|NULL
+ *   User object on success, FALSE otherwise.
+ */
+function mfcs_get_user_by_email($email) {
+  if (!is_string($email) || empty($email)) {
+    cf_error::invalid_string('email');
+    return FALSE;
+  }
+
+  $email_parts = explode('@', $email);
+
+  if (count($email_parts) != 2) {
+    return FALSE;
+  }
+
+  $username = trim($email_parts[0]);
+  $hostname = trim($email_parts[1]);
+
+  if ($hostname != 'mcneese.edu' && $hostname != 'student.mcneese.edu') {
+    return FALSE;
+  }
+
+  $user = user_load_by_name($username);
+  if (is_object($user)) {
+    return $user;
+  }
+
+  return NULL;
 }
 
 /**

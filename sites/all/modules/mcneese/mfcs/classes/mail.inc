@@ -301,6 +301,13 @@ class McNeeseFacilitiesUseMail implements MailSystemInterface {
       $email_type = (int) $message['headers']['fcs-email-type'];
     }
 
+    $destination_user_id = NULL;
+    $destination_user = mfcs_get_user_by_email($message['to']);
+    if (is_object($destination_user)) {
+      $destination_user_id = $destination_user->uid;
+    }
+    unset($destination_user);
+
     $fields = array(
       'destination' => substr($message['to'], 0, MFCS_EMAIL_MAX_DESTINATION_LENGTH),
       'title' => substr($message['subject'], 0, MFCS_EMAIL_MAX_SUBJECT_LENGTH),
@@ -311,6 +318,10 @@ class McNeeseFacilitiesUseMail implements MailSystemInterface {
       'date' => $instance,
       'type' => $email_type,
     );
+
+    if (!is_null($destination_user_id)) {
+      $fields['destination_user_id'] = $destination_user_id;
+    }
 
     $transaction = db_transaction();
 
