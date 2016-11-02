@@ -2584,11 +2584,11 @@ function mfcs_request_view_0_form_submit($form, &$form_state) {
       $extra['never_coordinator'] = TRUE;
     }
 
+    $is_new_request = NULL;
     if ($decision === MFCS_REVIEW_DECISION_COMMENT) {
       // comments do not need to be processed on a per step basis, so skip the $step conditions below.
     }
     elseif ($step === MFCS_REVIEW_STEP_VENUE_AVAILABLE) {
-      $is_new_request = NULL;
       if (isset($form['form']['new']['#value'])) {
         $is_new_request = $form['form']['new']['#value'];
       }
