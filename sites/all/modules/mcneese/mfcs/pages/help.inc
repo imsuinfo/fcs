@@ -387,7 +387,13 @@ function mfcs_help_0_page($topic = NULL, $section = NULL, $sub_section = NULL) {
         $section_information['class'][] = 'section-help-topic-email-advanced-request_type_codes';
         $section_information['headers'][3] = array('markup' => 'Request Type Codes', 'attributes' => array('class' => array('header-4', 'sub_section')));
 
-        $markup .= mfcs_help_topic_email_section_advanced_sub_section_type_codes($allowed_topics, $section_information);
+        $markup .= mfcs_help_topic_email_section_advanced_sub_section_request_type_codes($allowed_topics, $section_information);
+      }
+      elseif ($sub_section == 'email_type_codes') {
+        $section_information['class'][] = 'section-help-topic-email-advanced-email_type_codes';
+        $section_information['headers'][3] = array('markup' => 'E-Mail Type Codes', 'attributes' => array('class' => array('header-4', 'sub_section')));
+
+        $markup .= mfcs_help_topic_email_section_advanced_sub_section_email_type_codes($allowed_topics, $section_information);
       }
       else {
         // failsafe.
@@ -950,7 +956,16 @@ function mfcs_help_0_page_presentation_single($allowed_topics) {
     $section_information['class'][] = 'section-help-topic-email-section-advanced-sub_section-request_type_codes';
     $section_information['start_count'] = 3;
 
-    $markup .= mfcs_help_topic_email_section_advanced_sub_section_type_codes($allowed_topics, $section_information, TRUE);
+    $markup .= mfcs_help_topic_email_section_advanced_sub_section_request_type_codes($allowed_topics, $section_information, TRUE);
+
+    $section_information['headers'] = $headers;
+    $section_information['headers'][0]['markup'] = 'E-Mail Type Codes';
+    $section_information['id'] = $section_id . '-email-section-advanced-sub_section-email_type_codes';
+    $section_information['class'] = $sub_base_class;
+    $section_information['class'][] = 'section-help-topic-email-section-advanced-sub_section-email_type_codes';
+    $section_information['start_count'] = 3;
+
+    $markup .= mfcs_help_topic_email_section_advanced_sub_section_email_type_codes($allowed_topics, $section_information, TRUE);
 
     // close the email section.
     $markup .= '</section>';
@@ -1492,8 +1507,15 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
         $determined['tooltip-previous'] = 'Sub-Section: Review Step Codes';
       }
       elseif ($sub_section == 'request_type_codes') {
+        $determined['next'] = $base_path . 'help-0/email/advanced/email_type_codes' . $url_arguments;
+        $determined['tooltip-next'] = 'Sub-Section: E-Mail Type Codes';
+
         $determined['previous'] = $base_path . 'help-0/email/advanced/request_classification_codes' . $url_arguments;
         $determined['tooltip-previous'] = 'Sub-Section: Request Calassification Codes';
+      }
+      elseif ($sub_section == 'email_type_codes') {
+        $determined['previous'] = $base_path . 'help-0/email/advanced/request_type_codes' . $url_arguments;
+        $determined['tooltip-previous'] = 'Sub-Section: Request Type Codes';
       }
       else {
         $determined['top'] = $base_path . 'help-0/email' . $url_arguments;
@@ -2194,6 +2216,12 @@ function mfcs_help_topic_glossary($allowed_topics, $section_information, $as_inl
       'text' => 'Request Type Codes',
       'class' => 'item-link no_print_links_as_link',
     ),
+    'email/advanced/email_type_codes' => array(
+      'url' => $base_path . 'help-0/email/advanced/email_type_codes' . $url_arguments,
+      'tooltip' => 'Sub-Section: E-Mail Type Codes',
+      'text' => 'E-Mail Type Codes',
+      'class' => 'item-link no_print_links_as_link',
+    ),
     'calendar' => array(
       'url' => $base_path . 'help-0/calendar' . $url_arguments,
       'tooltip' => 'Documentation: Calendar',
@@ -2262,6 +2290,7 @@ function mfcs_help_topic_glossary($allowed_topics, $section_information, $as_inl
       $links['email/advanced/review_step_codes']['url'] = '#help-documentation-topic-email-section-advanced-sub_section-review_step_codes' . $url_arguments;
       $links['email/advanced/request_classification_codes']['url'] = '#help-documentation-topic-email-section-advanced-sub_section-request_classification_codes' . $url_arguments;
       $links['email/advanced/request_type_codes']['url'] = '#help-documentation-topic-email-section-advanced-sub_section-request_type_codes' . $url_arguments;
+      $links['email/advanced/email_type_codes']['url'] = '#help-documentation-topic-email-section-advanced-sub_section-email_type_codes' . $url_arguments;
       $links['calendar']['url'] = '#help-documentation-topic-calendar' . $url_arguments;
       $links['faq']['url'] = '#help-documentation-topic-faq' . $url_arguments;
       $links['terminology']['url'] = '#help-documentation-topic-terminology' . $url_arguments;
@@ -2372,6 +2401,7 @@ function mfcs_help_topic_glossary($allowed_topics, $section_information, $as_inl
   $markup .= '<li class="list-item"><a href="' . $links['email/advanced/review_step_codes']['url'] . '" class="' . $links['email/advanced/review_step_codes']['class'] . '" title="' . $links['email/advanced/review_step_codes']['tooltip'] . '">' . $links['email/advanced/review_step_codes']['text'] . '</a></li>';
   $markup .= '<li class="list-item"><a href="' . $links['email/advanced/request_classification_codes']['url'] . '" class="' . $links['email/advanced/request_classification_codes']['class'] . '" title="' . $links['email/advanced/request_classification_codes']['tooltip'] . '">' . $links['email/advanced/request_classification_codes']['text'] . '</a></li>';
   $markup .= '<li class="list-item"><a href="' . $links['email/advanced/request_type_codes']['url'] . '" class="' . $links['email/advanced/request_type_codes']['class'] . '" title="' . $links['email/advanced/request_type_codes']['tooltip'] . '">' . $links['email/advanced/request_type_codes']['text'] . '</a></li>';
+  $markup .= '<li class="list-item"><a href="' . $links['email/advanced/email_type_codes']['url'] . '" class="' . $links['email/advanced/email_type_codes']['class'] . '" title="' . $links['email/advanced/email_type_codes']['tooltip'] . '">' . $links['email/advanced/email_type_codes']['text'] . '</a></li>';
   $markup .= '</ul>';
   $markup .= '</li>';
 
@@ -4822,7 +4852,7 @@ function mfcs_help_topic_email_section_advanced($allowed_topics, $section_inform
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">fcs-email-type</strong>: ';
   $markup .= '<br>';
-  $markup .= 'This is a string used to uniquely define the purpose of the e-mail. ';
+  $markup .= 'This is a number used to uniquely define the purpose of the e-mail. ';
   $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '</ul>';
@@ -4839,6 +4869,8 @@ function mfcs_help_topic_email_section_advanced($allowed_topics, $section_inform
     $markup .= '<br>';
     $markup .= 'View Sub-Section: <a href="' . $base_path . 'help-0/email/advanced/request_type_codes' . $url_arguments . '" class="item-link">Request Type Codes</a>. ';
     $markup .= '<br>';
+    $markup .= 'View Sub-Section: <a href="' . $base_path . 'help-0/email/advanced/email_type_codes' . $url_arguments . '" class="item-link">E-Mail Type Codes</a>. ';
+    $markup .= '<br>';
     $markup .= '<br>';
 
     $markup .= 'Continue on to <a href="' . $base_path . 'help-0/calendar' . $url_arguments . '" class="item-link">Documentation: Calendar</a>. ';
@@ -4854,7 +4886,7 @@ function mfcs_help_topic_email_section_advanced($allowed_topics, $section_inform
 }
 
 /**
- * Build the markup for the help topic: email - advanced.
+ * Build the markup for the help topic: email - advanced - request status codes.
  *
  * @param array $allowed_topics
  *   An array of topics currently allowed based on the users access.
@@ -5037,7 +5069,7 @@ function mfcs_help_topic_email_section_advanced_sub_section_status_codes($allowe
 }
 
 /**
- * Build the markup for the help topic: email - advanced.
+ * Build the markup for the help topic: email - advanced - review step codes.
  *
  * @param array $allowed_topics
  *   An array of topics currently allowed based on the users access.
@@ -5167,7 +5199,7 @@ function mfcs_help_topic_email_section_advanced_sub_section_step_codes($allowed_
 }
 
 /**
- * Build the markup for the help topic: email - advanced.
+ * Build the markup for the help topic: email - advanced - request classification codes.
  *
  * @param array $allowed_topics
  *   An array of topics currently allowed based on the users access.
@@ -5297,7 +5329,7 @@ function mfcs_help_topic_email_section_advanced_sub_section_classification_codes
 }
 
 /**
- * Build the markup for the help topic: email - advanced.
+ * Build the markup for the help topic: email - advanced - request type codes.
  *
  * @param array $allowed_topics
  *   An array of topics currently allowed based on the users access.
@@ -5312,7 +5344,7 @@ function mfcs_help_topic_email_section_advanced_sub_section_classification_codes
  * @return string
  *   The generated HTML markup.
  */
-function mfcs_help_topic_email_section_advanced_sub_section_type_codes($allowed_topics, $section_information, $as_inline = FALSE, $closing_tag = TRUE) {
+function mfcs_help_topic_email_section_advanced_sub_section_request_type_codes($allowed_topics, $section_information, $as_inline = FALSE, $closing_tag = TRUE) {
   if (!is_array($allowed_topics)) {
     cf_error::invalid_array('allowed_topics');
     return '';
@@ -5490,6 +5522,338 @@ function mfcs_help_topic_email_section_advanced_sub_section_type_codes($allowed_
     $codes[MFCS_REQUEST_TYPE_CLUB_MEETING] .= 'The <dfn class="term">Request</dfn> is categorized as a ' . strtolower($options[MFCS_REQUEST_TYPE_CLUB_MEETING]) . ' <dfn class="term">Request Type</dfn>. ';
     $codes[MFCS_REQUEST_TYPE_CLUB_MEETING] .= '<br>';
     $codes[MFCS_REQUEST_TYPE_CLUB_MEETING] .= '</li>';
+  }
+
+  if (empty($codes)) {
+    $markup .= '<br>';
+    $markup .= 'The system currently has no codes available. ';
+  }
+  else {
+    ksort($codes);
+
+    $markup .= '<ul class="list">';
+    $markup .= implode('', $codes);
+    $markup .= '</ul>';
+  }
+  unset($codes);
+
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+
+  if ($closing_tag) {
+    $markup .= '</section>';
+  }
+
+  return $markup;
+}
+
+/**
+ * Build the markup for the help topic: email - advanced - e-mail type codes.
+ *
+ * @param array $allowed_topics
+ *   An array of topics currently allowed based on the users access.
+ * @param array $section_information
+ *   Information needed for populating and customizing the generated section tag.
+ * @param bool $as_inline
+ *   (optional) When TRUE, certain links and formatting are omitted.
+ * @param bool $closing_tag
+ *   (optional) When TRUE, the closing section tag is appended.
+ *   When FALSE, no closing section tag is appended and the caller is expected to properly close.
+ *
+ * @return string
+ *   The generated HTML markup.
+ */
+function mfcs_help_topic_email_section_advanced_sub_section_email_type_codes($allowed_topics, $section_information, $as_inline = FALSE, $closing_tag = TRUE) {
+  if (!is_array($allowed_topics)) {
+    cf_error::invalid_array('allowed_topics');
+    return '';
+  }
+
+  if (!is_array($section_information)) {
+    cf_error::invalid_array('section_information');
+    return '';
+  }
+
+  if (!is_bool($as_inline)) {
+    cf_error::invalid_bool('as_inline');
+    $as_inline = FALSE;
+  }
+
+  if (!is_bool($closing_tag)) {
+    cf_error::invalid_bool('closing_tag');
+    $closing_tag = TRUE;
+  }
+
+  global $base_url;
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  if ($as_inline) {
+    $section_information['navigation'] = NULL;
+  }
+
+  $start_count = 0;
+  if (isset($section_information['start_count']) && is_numeric($section_information['start_count']) && $section_information['start_count'] >= 0) {
+    $start_count = (int) $section_information['start_count'];
+  }
+
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+  $options =  mfcs_get_email_type_list_options(NULL, TRUE);
+
+  $markup = '<section id="' . $section_information['id'] . '" class="' . implode(' ', $section_information['class']) . '">';
+  $markup .= $section_information['navigation'];
+  $markup .= mfcs_help_render_headers('topic-email-section-advanced-sub_section-email_type_codes', $section_information['header_attributes'], $section_information['headers'], $start_count);
+
+  $markup .= '<div class="paragraph">';
+
+  $codes = array();
+
+  if (array_key_exists(MFCS_EMAIL_TYPE_AMENDED, $options)) {
+    $codes[MFCS_EMAIL_TYPE_AMENDED] = '';
+    $codes[MFCS_EMAIL_TYPE_AMENDED] .= '<li class="list-item">';
+    $codes[MFCS_EMAIL_TYPE_AMENDED] .= '<strong class="bold">Code ' . MFCS_EMAIL_TYPE_AMENDED . ', ' . $options[MFCS_EMAIL_TYPE_AMENDED] . '</strong>: ';
+    $codes[MFCS_EMAIL_TYPE_AMENDED] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_AMENDED] .= 'This e-mail represents an amendment to a specified <dfn class="term">Request</dfn>. ';
+    $codes[MFCS_EMAIL_TYPE_AMENDED] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_AMENDED] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_EMAIL_TYPE_APPROVED, $options)) {
+    $codes[MFCS_EMAIL_TYPE_APPROVED] = '';
+    $codes[MFCS_EMAIL_TYPE_APPROVED] .= '<li class="list-item">';
+    $codes[MFCS_EMAIL_TYPE_APPROVED] .= '<strong class="bold">Code ' . MFCS_EMAIL_TYPE_APPROVED . ', ' . $options[MFCS_EMAIL_TYPE_APPROVED] . '</strong>: ';
+    $codes[MFCS_EMAIL_TYPE_APPROVED] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_APPROVED] .= 'This e-mail designates that the specified <dfn class="term">Request</dfn> has been <dfn class="term">Approved</dfn>. ';
+    $codes[MFCS_EMAIL_TYPE_APPROVED] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_APPROVED] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_EMAIL_TYPE_DENIED, $options)) {
+    $codes[MFCS_EMAIL_TYPE_DENIED] = '';
+    $codes[MFCS_EMAIL_TYPE_DENIED] .= '<li class="list-item">';
+    $codes[MFCS_EMAIL_TYPE_DENIED] .= '<strong class="bold">Code ' . MFCS_EMAIL_TYPE_DENIED . ', ' . $options[MFCS_EMAIL_TYPE_DENIED] . '</strong>: ';
+    $codes[MFCS_EMAIL_TYPE_DENIED] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_DENIED] .= 'This e-mail designates that the specified <dfn class="term">Request</dfn> has been <dfn class="term">Denied</dfn>. ';
+    $codes[MFCS_EMAIL_TYPE_DENIED] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_DENIED] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_EMAIL_TYPE_CANCELLED, $options)) {
+    $codes[MFCS_EMAIL_TYPE_CANCELLED] = '';
+    $codes[MFCS_EMAIL_TYPE_CANCELLED] .= '<li class="list-item">';
+    $codes[MFCS_EMAIL_TYPE_CANCELLED] .= '<strong class="bold">Code ' . MFCS_EMAIL_TYPE_CANCELLED . ', ' . $options[MFCS_EMAIL_TYPE_CANCELLED] . '</strong>: ';
+    $codes[MFCS_EMAIL_TYPE_CANCELLED] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_CANCELLED] .= 'This e-mail represents that a given <dfn class="term">Request</dfn> has been cancelled. ';
+    $codes[MFCS_EMAIL_TYPE_CANCELLED] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_CANCELLED] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_EMAIL_TYPE_CANCELLING, $options)) {
+    $codes[MFCS_EMAIL_TYPE_CANCELLING] = '';
+    $codes[MFCS_EMAIL_TYPE_CANCELLING] .= '<li class="list-item">';
+    $codes[MFCS_EMAIL_TYPE_CANCELLING] .= '<strong class="bold">Code ' . MFCS_EMAIL_TYPE_CANCELLING . ', ' . $options[MFCS_EMAIL_TYPE_CANCELLING] . '</strong>: ';
+    $codes[MFCS_EMAIL_TYPE_CANCELLING] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_CANCELLING] .= 'This e-mail represents that one or more dates and times for a given <dfn class="term">Request</dfn> have been cancelled. ';
+    $codes[MFCS_EMAIL_TYPE_CANCELLING] .= 'The <dfn class="term">Request</dfn> itself has not been cancelled. ';
+    $codes[MFCS_EMAIL_TYPE_CANCELLING] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_CANCELLING] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_EMAIL_TYPE_COMMENT, $options)) {
+    $codes[MFCS_EMAIL_TYPE_COMMENT] = '';
+    $codes[MFCS_EMAIL_TYPE_COMMENT] .= '<li class="list-item">';
+    $codes[MFCS_EMAIL_TYPE_COMMENT] .= '<strong class="bold">Code ' . MFCS_EMAIL_TYPE_COMMENT . ', ' . $options[MFCS_EMAIL_TYPE_COMMENT] . '</strong>: ';
+    $codes[MFCS_EMAIL_TYPE_COMMENT] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_COMMENT] .= 'A comment has been made on the specified <dfn class="term">Request</dfn>. ';
+    $codes[MFCS_EMAIL_TYPE_COMMENT] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_COMMENT] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_EMAIL_TYPE_DELETED, $options)) {
+    $codes[MFCS_EMAIL_TYPE_DELETED] = '';
+    $codes[MFCS_EMAIL_TYPE_DELETED] .= '<li class="list-item">';
+    $codes[MFCS_EMAIL_TYPE_DELETED] .= '<strong class="bold">Code ' . MFCS_EMAIL_TYPE_DELETED . ', ' . $options[MFCS_EMAIL_TYPE_DELETED] . '</strong>: ';
+    $codes[MFCS_EMAIL_TYPE_DELETED] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_DELETED] .= 'The specified <dfn class="term">Request</dfn> has been deleted. ';
+    $codes[MFCS_EMAIL_TYPE_DELETED] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_DELETED] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_EMAIL_TYPE_FINAL_DECISION, $options)) {
+    $codes[MFCS_EMAIL_TYPE_FINAL_DECISION] = '';
+    $codes[MFCS_EMAIL_TYPE_FINAL_DECISION] .= '<li class="list-item">';
+    $codes[MFCS_EMAIL_TYPE_FINAL_DECISION] .= '<strong class="bold">Code ' . MFCS_EMAIL_TYPE_FINAL_DECISION . ', ' . $options[MFCS_EMAIL_TYPE_FINAL_DECISION] . '</strong>: ';
+    $codes[MFCS_EMAIL_TYPE_FINAL_DECISION] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_FINAL_DECISION] .= 'The <dfn class="term">Request</dfn> has reached the <dfn class="term">Final Decision Step</dfn> of the <dfn class="term">Review</dfn> process. ';
+    $codes[MFCS_EMAIL_TYPE_FINAL_DECISION] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_FINAL_DECISION] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_EMAIL_TYPE_FORCED, $options)) {
+    $codes[MFCS_EMAIL_TYPE_FORCED] = '';
+    $codes[MFCS_EMAIL_TYPE_FORCED] .= '<li class="list-item">';
+    $codes[MFCS_EMAIL_TYPE_FORCED] .= '<strong class="bold">Code ' . MFCS_EMAIL_TYPE_FORCED . ', ' . $options[MFCS_EMAIL_TYPE_FORCED] . '</strong>: ';
+    $codes[MFCS_EMAIL_TYPE_FORCED] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_FORCED] .= 'The current <dfn class="term">Review Step</dfn> or <dfn class="term">Request Status</dfn> for a specified <dfn class="term">Request</dfn> has been administratively altered. ';
+    $codes[MFCS_EMAIL_TYPE_FORCED] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_FORCED] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_EMAIL_TYPE_INSURANCE_PROVIDED, $options)) {
+    $codes[MFCS_EMAIL_TYPE_INSURANCE_PROVIDED] = '';
+    $codes[MFCS_EMAIL_TYPE_INSURANCE_PROVIDED] .= '<li class="list-item">';
+    $codes[MFCS_EMAIL_TYPE_INSURANCE_PROVIDED] .= '<strong class="bold">Code ' . MFCS_EMAIL_TYPE_INSURANCE_PROVIDED . ', ' . $options[MFCS_EMAIL_TYPE_INSURANCE_PROVIDED] . '</strong>: ';
+    $codes[MFCS_EMAIL_TYPE_INSURANCE_PROVIDED] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_INSURANCE_PROVIDED] .= 'Insurance for the specified <dfn class="term">Request</dfn> has been provided. ';
+    $codes[MFCS_EMAIL_TYPE_INSURANCE_PROVIDED] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_INSURANCE_PROVIDED] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_EMAIL_TYPE_INSURANCE_REQUIRED, $options)) {
+    $codes[MFCS_EMAIL_TYPE_INSURANCE_REQUIRED] = '';
+    $codes[MFCS_EMAIL_TYPE_INSURANCE_REQUIRED] .= '<li class="list-item">';
+    $codes[MFCS_EMAIL_TYPE_INSURANCE_REQUIRED] .= '<strong class="bold">Code ' . MFCS_EMAIL_TYPE_INSURANCE_REQUIRED . ', ' . $options[MFCS_EMAIL_TYPE_INSURANCE_REQUIRED] . '</strong>: ';
+    $codes[MFCS_EMAIL_TYPE_INSURANCE_REQUIRED] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_INSURANCE_REQUIRED] .= 'These specified <dfn class="term">Request</dfn> requires insurance to be provided. ';
+    $codes[MFCS_EMAIL_TYPE_INSURANCE_REQUIRED] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_INSURANCE_REQUIRED] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_EMAIL_TYPE_ISSUES, $options)) {
+    $codes[MFCS_EMAIL_TYPE_ISSUES] = '';
+    $codes[MFCS_EMAIL_TYPE_ISSUES] .= '<li class="list-item">';
+    $codes[MFCS_EMAIL_TYPE_ISSUES] .= '<strong class="bold">Code ' . MFCS_EMAIL_TYPE_ISSUES . ', ' . $options[MFCS_EMAIL_TYPE_ISSUES] . '</strong>: ';
+    $codes[MFCS_EMAIL_TYPE_ISSUES] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_ISSUES] .= 'A <dfn class="term">Reviewer</dfn> or <dfn class="term">Venue Coordinator</dfn> has designated that there are issues with the <dfn class="term">Request</dfn>. ';
+    $codes[MFCS_EMAIL_TYPE_ISSUES] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_ISSUES] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_EMAIL_TYPE_ISSUES_NONE, $options)) {
+    $codes[MFCS_EMAIL_TYPE_ISSUES_NONE] = '';
+    $codes[MFCS_EMAIL_TYPE_ISSUES_NONE] .= '<li class="list-item">';
+    $codes[MFCS_EMAIL_TYPE_ISSUES_NONE] .= '<strong class="bold">Code ' . MFCS_EMAIL_TYPE_ISSUES_NONE . ', ' . $options[MFCS_EMAIL_TYPE_ISSUES_NONE] . '</strong>: ';
+    $codes[MFCS_EMAIL_TYPE_ISSUES_NONE] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_ISSUES_NONE] .= 'A <dfn class="term">Reviewer</dfn> or <dfn class="term">Venue Coordinator</dfn> has designated that there are no issues with the <dfn class="term">Request</dfn>. ';
+    $codes[MFCS_EMAIL_TYPE_ISSUES_NONE] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_ISSUES_NONE] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_EMAIL_TYPE_MODIFIED, $options)) {
+    $codes[MFCS_EMAIL_TYPE_MODIFIED] = '';
+    $codes[MFCS_EMAIL_TYPE_MODIFIED] .= '<li class="list-item">';
+    $codes[MFCS_EMAIL_TYPE_MODIFIED] .= '<strong class="bold">Code ' . MFCS_EMAIL_TYPE_MODIFIED . ', ' . $options[MFCS_EMAIL_TYPE_MODIFIED] . '</strong>: ';
+    $codes[MFCS_EMAIL_TYPE_MODIFIED] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_MODIFIED] .= 'The <dfn class="term">Request</dfn> has been modified. ';
+    $codes[MFCS_EMAIL_TYPE_MODIFIED] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_MODIFIED] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_EMAIL_TYPE_MOVED, $options)) {
+    $codes[MFCS_EMAIL_TYPE_MOVED] = '';
+    $codes[MFCS_EMAIL_TYPE_MOVED] .= '<li class="list-item">';
+    $codes[MFCS_EMAIL_TYPE_MOVED] .= '<strong class="bold">Code ' . MFCS_EMAIL_TYPE_MOVED . ', ' . $options[MFCS_EMAIL_TYPE_MOVED] . '</strong>: ';
+    $codes[MFCS_EMAIL_TYPE_MOVED] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_MOVED] .= 'The <dfn class="term">Request</dfn> has been moved to a new <dfn class="term">Room</dfn> or <dfn class="term">Building</dfn>. ';
+    $codes[MFCS_EMAIL_TYPE_MOVED] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_MOVED] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_EMAIL_TYPE_NEEDS_REVIEW, $options)) {
+    $codes[MFCS_EMAIL_TYPE_NEEDS_REVIEW] = '';
+    $codes[MFCS_EMAIL_TYPE_NEEDS_REVIEW] .= '<li class="list-item">';
+    $codes[MFCS_EMAIL_TYPE_NEEDS_REVIEW] .= '<strong class="bold">Code ' . MFCS_EMAIL_TYPE_NEEDS_REVIEW . ', ' . $options[MFCS_EMAIL_TYPE_NEEDS_REVIEW] . '</strong>: ';
+    $codes[MFCS_EMAIL_TYPE_NEEDS_REVIEW] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_NEEDS_REVIEW] .= 'The <dfn class="term">Request</dfn> is now ready to be <dfn class="term">Reviewed</dfn>. ';
+    $codes[MFCS_EMAIL_TYPE_NEEDS_REVIEW] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_NEEDS_REVIEW] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_EMAIL_TYPE_REASSIGN_COORDINATOR, $options)) {
+    $codes[MFCS_EMAIL_TYPE_REASSIGN_COORDINATOR] = '';
+    $codes[MFCS_EMAIL_TYPE_REASSIGN_COORDINATOR] .= '<li class="list-item">';
+    $codes[MFCS_EMAIL_TYPE_REASSIGN_COORDINATOR] .= '<strong class="bold">Code ' . MFCS_EMAIL_TYPE_REASSIGN_COORDINATOR . ', ' . $options[MFCS_EMAIL_TYPE_REASSIGN_COORDINATOR] . '</strong>: ';
+    $codes[MFCS_EMAIL_TYPE_REASSIGN_COORDINATOR] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_REASSIGN_COORDINATOR] .= 'A new <dfn class="term">Venue Coordinator</dfn> has been assigned for the specified <dfn class="term">Request</dfn>. ';
+    $codes[MFCS_EMAIL_TYPE_REASSIGN_COORDINATOR] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_REASSIGN_COORDINATOR] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_EMAIL_TYPE_REASSIGN_REQUESTER, $options)) {
+    $codes[MFCS_EMAIL_TYPE_REASSIGN_REQUESTER] = '';
+    $codes[MFCS_EMAIL_TYPE_REASSIGN_REQUESTER] .= '<li class="list-item">';
+    $codes[MFCS_EMAIL_TYPE_REASSIGN_REQUESTER] .= '<strong class="bold">Code ' . MFCS_EMAIL_TYPE_REASSIGN_REQUESTER . ', ' . $options[MFCS_EMAIL_TYPE_REASSIGN_REQUESTER] . '</strong>: ';
+    $codes[MFCS_EMAIL_TYPE_REASSIGN_REQUESTER] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_REASSIGN_REQUESTER] .= 'A new <dfn class="term">Requester</dfn> has been assigned to the specified <dfn class="term">Request</dfn>. ';
+    $codes[MFCS_EMAIL_TYPE_REASSIGN_REQUESTER] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_REASSIGN_REQUESTER] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_EMAIL_TYPE_UNCANCELLED, $options)) {
+    $codes[MFCS_EMAIL_TYPE_UNCANCELLED] = '';
+    $codes[MFCS_EMAIL_TYPE_UNCANCELLED] .= '<li class="list-item">';
+    $codes[MFCS_EMAIL_TYPE_UNCANCELLED] .= '<strong class="bold">Code ' . MFCS_EMAIL_TYPE_UNCANCELLED . ', ' . $options[MFCS_EMAIL_TYPE_UNCANCELLED] . '</strong>: ';
+    $codes[MFCS_EMAIL_TYPE_UNCANCELLED] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_UNCANCELLED] .= 'The specified <dfn class="term">Request</dfn> has been uncancelled. ';
+    $codes[MFCS_EMAIL_TYPE_UNCANCELLED] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_UNCANCELLED] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_EMAIL_TYPE_UNREVIEWED_REQUEST, $options)) {
+    $codes[MFCS_EMAIL_TYPE_UNREVIEWED_REQUEST] = '';
+    $codes[MFCS_EMAIL_TYPE_UNREVIEWED_REQUEST] .= '<li class="list-item">';
+    $codes[MFCS_EMAIL_TYPE_UNREVIEWED_REQUEST] .= '<strong class="bold">Code ' . MFCS_EMAIL_TYPE_UNREVIEWED_REQUEST . ', ' . $options[MFCS_EMAIL_TYPE_UNREVIEWED_REQUEST] . '</strong>: ';
+    $codes[MFCS_EMAIL_TYPE_UNREVIEWED_REQUEST] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_UNREVIEWED_REQUEST] .= 'This e-mail represents a reminder that a specified <dfn class="term">Request</dfn> has not yet been <dfn class="term">Reviewed</dfn>. ';
+    $codes[MFCS_EMAIL_TYPE_UNREVIEWED_REQUEST] .= 'This is normally sent out a number of days before the <dfn class="term">Request\'s</dfn> first event date. ';
+    $codes[MFCS_EMAIL_TYPE_UNREVIEWED_REQUEST] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_UNREVIEWED_REQUEST] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_EMAIL_TYPE_REVIEWED, $options)) {
+    $codes[MFCS_EMAIL_TYPE_REVIEWED] = '';
+    $codes[MFCS_EMAIL_TYPE_REVIEWED] .= '<li class="list-item">';
+    $codes[MFCS_EMAIL_TYPE_REVIEWED] .= '<strong class="bold">Code ' . MFCS_EMAIL_TYPE_REVIEWED . ', ' . $options[MFCS_EMAIL_TYPE_REVIEWED] . '</strong>: ';
+    $codes[MFCS_EMAIL_TYPE_REVIEWED] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_REVIEWED] .= 'This e-mail designates that a <dfn class="term">Request</dfn> has been reviewed by all of the <dfn class="term">Reviewers</dfn> during the <dfn class="term">Review Step</dfn>. ';
+    $codes[MFCS_EMAIL_TYPE_REVIEWED] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_REVIEWED] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_EMAIL_TYPE_UNAVAILABLE, $options)) {
+    $codes[MFCS_EMAIL_TYPE_UNAVAILABLE] = '';
+    $codes[MFCS_EMAIL_TYPE_UNAVAILABLE] .= '<li class="list-item">';
+    $codes[MFCS_EMAIL_TYPE_UNAVAILABLE] .= '<strong class="bold">Code ' . MFCS_EMAIL_TYPE_UNAVAILABLE . ', ' . $options[MFCS_EMAIL_TYPE_UNAVAILABLE] . '</strong>: ';
+    $codes[MFCS_EMAIL_TYPE_UNAVAILABLE] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_UNAVAILABLE] .= 'This e-mail designates that the specified <dfn class="term">Request</dfn> has been <dfn class="term">Denied</dfn> because of some unavailability. ';
+    $codes[MFCS_EMAIL_TYPE_UNAVAILABLE] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_UNAVAILABLE] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_EMAIL_TYPE_UNAVAILABLE_LOCKED, $options)) {
+    $codes[MFCS_EMAIL_TYPE_UNAVAILABLE_LOCKED] = '';
+    $codes[MFCS_EMAIL_TYPE_UNAVAILABLE_LOCKED] .= '<li class="list-item">';
+    $codes[MFCS_EMAIL_TYPE_UNAVAILABLE_LOCKED] .= '<strong class="bold">Code ' . MFCS_EMAIL_TYPE_UNAVAILABLE_LOCKED . ', ' . $options[MFCS_EMAIL_TYPE_UNAVAILABLE_LOCKED] . '</strong>: ';
+    $codes[MFCS_EMAIL_TYPE_UNAVAILABLE_LOCKED] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_UNAVAILABLE_LOCKED] .= 'This e-mail designates that the specified <dfn class="term">Request</dfn> has been <dfn class="term">Denied</dfn> because another <dfn class="term">Request</dfn> currently has the <dfn class="term">Room</dfn> locked as one or more of the requested dates and times. ';
+    $codes[MFCS_EMAIL_TYPE_UNAVAILABLE_LOCKED] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_UNAVAILABLE_LOCKED] .= '</li>';
+  }
+
+  if (array_key_exists(MFCS_EMAIL_TYPE_REQUESTED, $options)) {
+    $codes[MFCS_EMAIL_TYPE_REQUESTED] = '';
+    $codes[MFCS_EMAIL_TYPE_REQUESTED] .= '<li class="list-item">';
+    $codes[MFCS_EMAIL_TYPE_REQUESTED] .= '<strong class="bold">Code ' . MFCS_EMAIL_TYPE_REQUESTED . ', ' . $options[MFCS_EMAIL_TYPE_REQUESTED] . '</strong>: ';
+    $codes[MFCS_EMAIL_TYPE_REQUESTED] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_REQUESTED] .= 'This e-mail designates that a new <dfn class="term">Request</dfn> has been made. ';
+    $codes[MFCS_EMAIL_TYPE_REQUESTED] .= '<br>';
+    $codes[MFCS_EMAIL_TYPE_REQUESTED] .= '</li>';
   }
 
   if (empty($codes)) {

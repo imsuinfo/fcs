@@ -90,7 +90,7 @@ class McNeeseFacilitiesUseMail implements MailSystemInterface {
         }
 
         if (!isset($file['data'])) {
-          watchdog(MFCS_WATCHDOG_ID, "Error detected in file process of e-mail generation. Not sending file. File Information = %file.", array('%file' => print_r($file, TRUE)), WATCHDOG_ERROR);
+          watchdog(MFCS_WATCHDOG_ID, 'Error detected in file process of e-mail generation. Not sending file. File Information = %file.', array('%file' => print_r($file, TRUE)), WATCHDOG_ERROR);
           continue;
         }
 
@@ -242,7 +242,7 @@ class McNeeseFacilitiesUseMail implements MailSystemInterface {
       $valid = $gpg->verify($body, $signature);
 
       if ($valid === FALSE) {
-        watchdog(MFCS_WATCHDOG_ID, "Signature verification failed for PGP key: @key.", array('@key' => $fingerprint), WATCHDOG_ERROR);
+        watchdog(MFCS_WATCHDOG_ID, 'Signature verification failed for PGP key: @key.', array('@key' => $fingerprint), WATCHDOG_ERROR);
       }
 
       $prepend = '--' . $sig_boundary . "\n";
@@ -255,11 +255,11 @@ class McNeeseFacilitiesUseMail implements MailSystemInterface {
       $append .= '--' . $sig_boundary . '--';
     }
     catch (Error $e) {
-      watchdog(MFCS_WATCHDOG_ID, "Failed to sign PGP key: @key, reason: @reason", array('@key' => $fingerprint, '@reason' => $e->getMessage()), WATCHDOG_ERROR);
+      watchdog(MFCS_WATCHDOG_ID, 'Failed to sign PGP key: @key, reason: @reason', array('@key' => $fingerprint, '@reason' => $e->getMessage()), WATCHDOG_ERROR);
       return FALSE;
     }
     catch (Exception $e) {
-      watchdog(MFCS_WATCHDOG_ID, "Failed to sign PGP key: @key, reason: @reason", array('@key' => $fingerprint, '@reason' => $e->getMessage()), WATCHDOG_ERROR);
+      watchdog(MFCS_WATCHDOG_ID, 'Failed to sign PGP key: @key, reason: @reason', array('@key' => $fingerprint, '@reason' => $e->getMessage()), WATCHDOG_ERROR);
       return FALSE;
     }
 
@@ -295,6 +295,12 @@ class McNeeseFacilitiesUseMail implements MailSystemInterface {
       }
     }
 
+    // assign an e-mail type, with a failsafe type of none.
+    $email_type = MFCS_EMAIL_TYPE_NONE;
+    if (isset($message['headers']['fcs-email-type']) && is_numeric($message['headers']['fcs-email-type']) && $message['headers']['fcs-email-type'] > 0) {
+      $email_type = (int) $message['headers']['fcs-email-type'];
+    }
+
     $fields = array(
       'destination' => substr($message['to'], 0, MFCS_EMAIL_MAX_DESTINATION_LENGTH),
       'title' => substr($message['subject'], 0, MFCS_EMAIL_MAX_SUBJECT_LENGTH),
@@ -303,6 +309,7 @@ class McNeeseFacilitiesUseMail implements MailSystemInterface {
       'code' => MFCS_EMAIL_CODE_NORMAL,
       'user_id' => $user_id,
       'date' => $instance,
+      'type' => $email_type,
     );
 
     $transaction = db_transaction();

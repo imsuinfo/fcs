@@ -98,9 +98,37 @@ define('MFCS_UNAVAILABILITY_TYPE_EMERGENCY', 6);
 define('MFCS_UNAVAILABILITY_TYPE_CLASS', 7);
 
 /**
+ * E-Mail Types
+ */
+define('MFCS_EMAIL_TYPE_NONE', 0);
+define('MFCS_EMAIL_TYPE_AMENDED', 1);
+define('MFCS_EMAIL_TYPE_APPROVED', 2);
+define('MFCS_EMAIL_TYPE_CANCELLED', 3);
+define('MFCS_EMAIL_TYPE_CANCELLING', 4);
+define('MFCS_EMAIL_TYPE_COMMENT', 5);
+define('MFCS_EMAIL_TYPE_DELETED', 6);
+define('MFCS_EMAIL_TYPE_DENIED', 7);
+define('MFCS_EMAIL_TYPE_FINAL_DECISION', 8);
+define('MFCS_EMAIL_TYPE_FORCED', 9);
+define('MFCS_EMAIL_TYPE_INSURANCE_PROVIDED', 10);
+define('MFCS_EMAIL_TYPE_INSURANCE_REQUIRED', 11);
+define('MFCS_EMAIL_TYPE_ISSUES', 12);
+define('MFCS_EMAIL_TYPE_MODIFIED', 13);
+define('MFCS_EMAIL_TYPE_MOVED', 14);
+define('MFCS_EMAIL_TYPE_NEEDS_REVIEW', 15);
+define('MFCS_EMAIL_TYPE_ISSUES_NONE', 16);
+define('MFCS_EMAIL_TYPE_REASSIGN_COORDINATOR', 17);
+define('MFCS_EMAIL_TYPE_REASSIGN_REQUESTER', 18);
+define('MFCS_EMAIL_TYPE_REQUESTED', 19);
+define('MFCS_EMAIL_TYPE_REQUIREMENTS', 20);
+define('MFCS_EMAIL_TYPE_REVIEWED', 21);
+define('MFCS_EMAIL_TYPE_UNAVAILABLE', 22);
+define('MFCS_EMAIL_TYPE_UNAVAILABLE_LOCKED', 23);
+define('MFCS_EMAIL_TYPE_UNCANCELLED', 24);
+define('MFCS_EMAIL_TYPE_UNREVIEWED_REQUEST', 25);
+
+/**
  * Returns an array of facilities use status options for populating lists.
- *
- * @fixme: status currently has deleted set to 0 and therefore none and deleted conflict.
  *
  * @param string|null $option
  *   (optional) A string designating how the list will be populated.
@@ -1297,6 +1325,69 @@ function mfcs_get_insurance_list_options($option = NULL, $hidden = FALSE, $disab
   return $options;
 }
 
+/**
+ * Returns an array of e-mail types.
+ *
+ * @param string|null $option
+ *   (optional) A string designating how the list will be populated.
+ * @param bool $hidden
+ *   (optional) When TRUE, will include hidden/special case classifications
+ *   that are not normally exposed through the select list options.
+ * @param bool $disabled
+ *   (optional) When TRUE, load disabled options in addition to existing options.
+ *
+ * @return array
+ *   An array of options available.
+ */
+function mfcs_get_email_type_list_options($option = NULL, $hidden = FALSE, $disabled = FALSE) {
+  $options = array();
+  $options_all = array();
+
+  if ($hidden) {
+    $options_all[MFCS_EMAIL_TYPE_NONE] = 'None';
+  }
+
+  $options_all[MFCS_EMAIL_TYPE_AMENDED] = 'Amended';
+  $options_all[MFCS_EMAIL_TYPE_APPROVED] = 'Approved';
+  $options_all[MFCS_EMAIL_TYPE_CANCELLED] = 'Cancelled';
+  $options_all[MFCS_EMAIL_TYPE_CANCELLING] = 'Cancelling';
+  $options_all[MFCS_EMAIL_TYPE_COMMENT] = 'Comment';
+  $options_all[MFCS_EMAIL_TYPE_DELETED] = 'Deleted';
+  $options_all[MFCS_EMAIL_TYPE_DENIED] = 'Denied';
+  $options_all[MFCS_EMAIL_TYPE_FINAL_DECISION] = 'Final Decision';
+  $options_all[MFCS_EMAIL_TYPE_FORCED] = 'Forced';
+  $options_all[MFCS_EMAIL_TYPE_INSURANCE_PROVIDED] = 'Insurance Provided';
+  $options_all[MFCS_EMAIL_TYPE_INSURANCE_REQUIRED] = 'Insurance Required';
+  $options_all[MFCS_EMAIL_TYPE_ISSUES] = 'Issues';
+  $options_all[MFCS_EMAIL_TYPE_MODIFIED] = 'Modified';
+  $options_all[MFCS_EMAIL_TYPE_MOVED] = 'Moved';
+  $options_all[MFCS_EMAIL_TYPE_NEEDS_REVIEW] = 'Needs Review';
+  $options_all[MFCS_EMAIL_TYPE_ISSUES_NONE] = 'No Issues';
+  $options_all[MFCS_EMAIL_TYPE_REASSIGN_COORDINATOR] = 'Re-Assign Coordinator';
+  $options_all[MFCS_EMAIL_TYPE_REASSIGN_REQUESTER] = 'Re-Assign Requester';
+  $options_all[MFCS_EMAIL_TYPE_REQUESTED] = 'Requested';
+  $options_all[MFCS_EMAIL_TYPE_UNAVAILABLE] = 'Unavailable';
+  $options_all[MFCS_EMAIL_TYPE_UNAVAILABLE_LOCKED] = 'Unavailable (Due to Lock)';
+  $options_all[MFCS_EMAIL_TYPE_UNCANCELLED] = 'Uncancelled';
+  $options_all[MFCS_EMAIL_TYPE_UNREVIEWED_REQUEST] = 'Unreviewed Request';
+
+  if ($disabled) {
+    $options_all[MFCS_EMAIL_TYPE_REQUIREMENTS] = 'Requirements';
+    $options_all[MFCS_EMAIL_TYPE_REVIEWED] = 'Reviewed';
+  }
+
+  if ($option == 'select') {
+    $options[''] = '- Select -';
+  }
+
+  foreach ($options_all as $option_id => $option_name) {
+    $options[$option_id] = $option_name;
+  }
+
+  asort($options);
+
+  return $options;
+}
 /**
  * @} End of '@addtogroup mfcs'.
  */

@@ -1421,6 +1421,9 @@ function mfcs_ajax_email_log_0_list() {
     elseif ($order_column == 6) {
       $sorting['code'] = $order_direction;
     }
+    elseif ($order_column == 7) {
+      $sorting['type'] = $order_direction;
+    }
   }
 
   // always provide the unique id in the ordering to guarantee consistency in range results.
@@ -1462,6 +1465,15 @@ function mfcs_ajax_email_log_0_list() {
     'on' => 'mle.destination = d_u.mail',
     'columns' => array(
       'destination_user_id' => 'uid',
+    ),
+  );
+
+  $options['extra_fields2']['mfcs_taxonomy_email_type'] = array(
+    'alias' => 'mtet',
+    'join' => 'inner',
+    'on' => 'mle.type = mtet.id',
+    'columns' => array(
+      'type_name' => 'human_name',
     ),
   );
 
@@ -1520,6 +1532,12 @@ function mfcs_ajax_email_log_0_list() {
         'search' => $user_ids,
       );
     }
+
+    $conditions['or_1']['value_type_name'] = array(
+      'field' => 'mtet.human_name',
+      'operator' => MFCS_OPERATOR_LIKE,
+      'search' => $get_post['search']['value'],
+    );
 
     $limit_email_codes = NULL;
     if (preg_match('/' . $regex_safe_search . '/i', 'normal') > 0) {
@@ -1610,10 +1628,12 @@ function mfcs_ajax_email_log_0_list() {
         $row[6] = 'Forwarded';
       }
 
-      $row[7] = '<a href="' . $base_path . 'requests/email_log-0/view/' . $email_log->id . $url_arguments . '" class="operation-link operation-link-view">View</a>';
+      $row[7] = check_plain($email_log->type_name);
+
+      $row[8] = '<a href="' . $base_path . 'requests/email_log-0/view/' . $email_log->id . $url_arguments . '" class="operation-link operation-link-view">View</a>';
 
       if ($may_resend_log) {
-        $row[7] .= ' <a href="' . $base_path . 'requests/email_log-0/resend/' . $email_log->id . $url_arguments . '" class="operation-link operation-link-resend">Re-send</a>';
+        $row[8] .= ' <a href="' . $base_path . 'requests/email_log-0/resend/' . $email_log->id . $url_arguments . '" class="operation-link operation-link-resend">Re-send</a>';
       }
 
       $response['data'][] = $row;
