@@ -458,18 +458,21 @@ function mfcs_help_0_page($topic = NULL, $section = NULL, $sub_section = NULL) {
     }
     elseif ($section == 'facilities_use') {
       $section_information['class'][] = 'section-help-topic-terminology-facilities_use';
+      $section_information['class'][] = 'section-help-break';
       $section_information['headers'][2] = array('markup' => 'Facilities Use Terminology', 'attributes' => array('class' => array('header-3', 'section')));
 
       $markup .= mfcs_help_topic_terminology_section_facilities_use($allowed_topics, $section_information);
     }
     elseif ($section == 'system') {
       $section_information['class'][] = 'section-help-topic-terminology-system';
+      $section_information['class'][] = 'section-help-break';
       $section_information['headers'][2] = array('markup' => 'System Terminology', 'attributes' => array('class' => array('header-3', 'section')));
 
       $markup .= mfcs_help_topic_terminology_section_system($allowed_topics, $section_information);
     }
     elseif ($section == 'documentation') {
       $section_information['class'][] = 'section-help-topic-terminology-documentation';
+      $section_information['class'][] = 'section-help-break';
       $section_information['headers'][2] = array('markup' => 'Documentation Terminology', 'attributes' => array('class' => array('header-3', 'section')));
 
       $markup .= mfcs_help_topic_terminology_section_documentation($allowed_topics, $section_information);
@@ -1016,6 +1019,7 @@ function mfcs_help_0_page_presentation_single($allowed_topics) {
     $section_information['id'] = $section_id . '-terminology-section-facilities_use';
     $section_information['class'] = $sub_base_class;
     $section_information['class'][] = 'section-help-topic-terminology-section-facilities_use';
+    $section_information['class'][] = 'section-help-break';
     $section_information['start_count'] = 2;
 
     $markup .= mfcs_help_topic_terminology_section_facilities_use($allowed_topics, $section_information, TRUE);
@@ -1025,6 +1029,7 @@ function mfcs_help_0_page_presentation_single($allowed_topics) {
     $section_information['id'] = $section_id . '-terminology-section-system';
     $section_information['class'] = $sub_base_class;
     $section_information['class'][] = 'section-help-topic-terminology-section-system';
+    $section_information['class'][] = 'section-help-break';
     $section_information['start_count'] = 2;
 
     $markup .= mfcs_help_topic_terminology_section_system($allowed_topics, $section_information, TRUE);
@@ -1034,6 +1039,7 @@ function mfcs_help_0_page_presentation_single($allowed_topics) {
     $section_information['id'] = $section_id . '-terminology-section-documentation';
     $section_information['class'] = $sub_base_class;
     $section_information['class'][] = 'section-help-topic-terminology-section-documentation';
+    $section_information['class'][] = 'section-help-break';
     $section_information['start_count'] = 2;
 
     $markup .= mfcs_help_topic_terminology_section_documentation($allowed_topics, $section_information, TRUE);
@@ -6135,7 +6141,7 @@ function mfcs_help_topic_terminology($allowed_topics, $section_information, $as_
   if (!$as_inline) {
     $section_information_child = $section_information;
     $section_information_child['id'] = 'help-documentation-topic-terminology-section-facilities_use';
-    $section_information_child['class'] = array('section-help', 'section-help-terminology-facilities_use');
+    $section_information_child['class'] = array('section-help', 'section-help-break', 'section-help-terminology-facilities_use');
     $section_information_child['headers'] = array(
       0 => array('markup' => 'Facilities Use Terminology', 'attributes' => array('class' => array('header-3', 'section'))),
     );
@@ -6145,13 +6151,13 @@ function mfcs_help_topic_terminology($allowed_topics, $section_information, $as_
     $markup .= mfcs_help_topic_terminology_section_facilities_use($allowed_topics, $section_information_child, TRUE);
 
     $section_information_child['id'] = 'help-documentation-topic-terminology-section-system';
-    $section_information_child['class'] = array('section-help', 'section-help-terminology-system');
+    $section_information_child['class'] = array('section-help', 'section-help-break', 'section-help-terminology-system');
     $section_information_child['headers'][0]['markup'] = 'System Terminology';
 
     $markup .= mfcs_help_topic_terminology_section_system($allowed_topics, $section_information_child, TRUE);
 
     $section_information_child['id'] = 'help-documentation-topic-terminology-section-documentation';
-    $section_information_child['class'] = array('section-help', 'section-help-terminology-documentation');
+    $section_information_child['class'] = array('section-help', 'section-help-break', 'section-help-terminology-documentation');
     $section_information_child['headers'][0]['markup'] = 'Documentation Terminology';
 
     $markup .= mfcs_help_topic_terminology_section_documentation($allowed_topics, $section_information_child, TRUE);
