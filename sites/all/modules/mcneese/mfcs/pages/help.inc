@@ -2619,7 +2619,7 @@ function mfcs_help_topic_requests($allowed_topics, $section_information, $as_inl
 
   $markup .= '<div class="note"> ';
   $markup .= 'In some cases a <dfn class="term">Requester</dfn> may instead go through a <dfn class="term">Coordinator</dfn> to have their <dfn class="term">Request</dfn> submitted. ';
-  $markup .= 'This is a common practice for student organizations. ';
+  $markup .= 'This is a common practice for <dfn class="term">Student Organizations</dfn>. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
@@ -2647,7 +2647,7 @@ function mfcs_help_topic_requests($allowed_topics, $section_information, $as_inl
   $markup .= 'Unlike the <dfn class="term">Classifications</dfn>, each <dfn class="term">Request Type</dfn> generally refers to the purpose of the <dfn class="term">Request</dfn>. ';
   $markup .= 'Some <dfn class="term">Request Types</dfn> will provide new fields to fill out, fewer fields to fill out, or even allow for quick submittal of a <dfn class="term">Request</dfn>. ';
   $markup .= 'The special <dfn class="term">Request Type</dfn>, called a <dfn class="term">Quick Meeting</dfn>, does not go through the <dfn class="term">Review</dfn> process and may only be assigned by <dfn class="term">Venue Coordinators</dfn> and <dfn class="term">Managers</dfn>. ';
-  $markup .= 'To better accommodate the needs of students, student organizations are able to create a special <dfn class="term">Request Type</dfn> called a <dfn class="term">Club Meeting</dfn>. ';
+  $markup .= 'To better accommodate the needs of students, <dfn class="term">Student Organizations</dfn> are able to create a special <dfn class="term">Request Type</dfn> called a <dfn class="term">Club Meeting</dfn>. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
@@ -2860,15 +2860,15 @@ function mfcs_help_topic_requests_section_student_organization($allowed_topics, 
   $markup .= mfcs_help_render_headers('topic-requests-section-student', $section_information['header_attributes'], $section_information['headers'], $start_count);
 
   $markup .= '<div class="paragraph">';
-  $markup .= 'These <dfn class="term">Requests</dfn> are associated with <em class="emphasis">McNeese State University</em> student organizations. ';
-  $markup .= 'This form requires that the <strong class="bold">Organization / Affiliation</strong> field to be filled out, providing the name of the student organization. ';
+  $markup .= 'These <dfn class="term">Requests</dfn> are associated with <em class="emphasis">McNeese State University</em> <dfn class="term">Student Organizations</dfn>. ';
+  $markup .= 'This form requires that the <strong class="bold">Organization / Affiliation</strong> field to be filled out, providing the name of the <dfn class="term">Student Organization</dfn>. ';
   $markup .= 'This form requires that the <strong class="bold">Adviser Approval</strong> checkbox be selected. ';
-  $markup .= 'By selecting this checkbox, the <dfn class="term">Requester</dfn> is claiming that the adviser for their student organization has given the approval for the requested event. ';
+  $markup .= 'By selecting this checkbox, the <dfn class="term">Requester</dfn> is claiming that the adviser for their <dfn class="term">Student Organization</dfn> has given the approval for the requested event. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
-  $markup .= 'In addition to the mentioned fields, there is also a new <dfn class="term">Request Type</dfn> available for student organizations. ';
+  $markup .= 'In addition to the mentioned fields, there is also a new <dfn class="term">Request Type</dfn> available for <dfn class="term">Student Organizations</dfn>. ';
   $markup .= 'This new type is called a <dfn class="term">Club Meeting</dfn>. ';
   $markup .= '<dfn class="term">Club Meetings</dfn> are intended to assist students in creating <dfn class="term">Requests</dfn> by simplifying certain aspects of the <dfn class="term">Request</dfn> process. ';
   $markup .= 'This type uses the same, simplied form, as the <dfn class="term">Meeting</dfn> type. ';
@@ -3018,7 +3018,7 @@ function mfcs_help_topic_requests_section_external($allowed_topics, $section_inf
   $markup .= mfcs_help_render_headers('topic-requests-section-external', $section_information['header_attributes'], $section_information['headers'], $start_count);
 
   $markup .= '<div class="paragraph">';
-  $markup .= 'These <dfn class="term">Requests</dfn> generally represent people or organizations not directly affiliated with <em class="emphasis">McNeese State University</em> or are otherwise consider a 3rd-party. ';
+  $markup .= 'These <dfn class="term">Requests</dfn> generally represent people or organizations not directly affiliated with <em class="emphasis">McNeese State University</em> or are otherwise considered a 3rd-party. ';
   $markup .= 'While there are no modifications to these forms, the <dfn class="term">Requester</dfn> is expected to go through the appropriate point of contact for filling out the forms and generally does not directly create <dfn class="term">Requests</dfn>. ';
   $markup .= '<br>';
   $markup .= '</div>';
@@ -6267,6 +6267,16 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics, $se
   $markup .= '</span>';
   $markup .= '</dd>';
 
+  $markup .= '<dt id="terminology-facilities_use-camps" class="definition_list-title">Camps</dt> ';
+  $markup .= '<dd class="definition_list-definition">';
+  $markup .= 'This refers to a classification assigned to Requesters or Requests. ';
+  $markup .= 'This classification represents that the user or request is associated with a camp related to or hosted by <em class="emphasis">McNeese State University</em>. ';
+  $markup .= '<br>';
+  $markup .= '<span class="see_section">';
+  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#terminology-facilities_use-request_classification" class="definition_list-see_other no_print_links_as_link">Request Classification</a>.</span> ';
+  $markup .= '</span>';
+  $markup .= '</dd>';
+
   $markup .= '<dt id="terminology-facilities_use-cancelled" class="definition_list-title">Cancelled</dt> ';
   $markup .= '<dd class="definition_list-definition">';
   $markup .= 'A Request State in which the Request is removed from the Review process or whose reservation is otherwise made unavailable. ';
@@ -6339,8 +6349,18 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics, $se
 
   $markup .= '<dt id="terminology-facilities_use-external" class="definition_list-title">External</dt> ';
   $markup .= '<dd class="definition_list-definition">';
-  $markup .= '<dfn class="term">External</dfn> refers to a classification assigned to Requesters or as a Request Classification. ';
+  $markup .= 'This refers to a classification assigned to Requesters or as a Request Classification. ';
   $markup .= 'This classification represents that the user or request is associated with a non-McNeese affiliated or otherwise 3rd-party. ';
+  $markup .= '<br>';
+  $markup .= '<span class="see_section">';
+  $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#terminology-facilities_use-request_classification" class="definition_list-see_other no_print_links_as_link">Request Classification</a>.</span> ';
+  $markup .= '</span>';
+  $markup .= '</dd>';
+
+  $markup .= '<dt id="terminology-facilities_use-employee" class="definition_list-title">Faculty, Staff, and Athletics</dt> ';
+  $markup .= '<dd class="definition_list-definition">';
+  $markup .= 'This refers to a classification assigned to Requesters or Requests. ';
+  $markup .= 'This classification represents that the user or request is associated with people or organizations not directly affiliated with <em class="emphasis">McNeese State University</em> or are otherwise considered a 3rd-party. ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
   $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#terminology-facilities_use-request_classification" class="definition_list-see_other no_print_links_as_link">Request Classification</a>.</span> ';
@@ -6569,7 +6589,7 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics, $se
 
   $markup .= '<dt id="terminology-facilities_use-student_organization" class="definition_list-title">Student Organization</dt> ';
   $markup .= '<dd class="definition_list-definition">';
-  $markup .= '<dfn class="term">Student Organization</dfn> refers to a classification assigned to Requesters or Requests. ';
+  $markup .= 'This refers to a classification assigned to Requesters or Requests. ';
   $markup .= 'This classification represents that the user or request is associated with a <em class="emphasis">McNeese State University</em> student organization. ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
