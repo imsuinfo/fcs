@@ -927,6 +927,7 @@ function mfcs_help_0_page_presentation_single($allowed_topics) {
 
     $section_information['headers'] = $headers;
     $section_information['headers'][0]['markup'] = 'Request Status Codes';
+    $section_information['header_attributes']['class'][] = 'page-break-after-auto-1';
     $section_information['id'] = $section_id . '-email-section-advanced-sub_section-request_status_codes';
     $section_information['class'] = $sub_base_class;
     $section_information['class'][] = 'section-help-topic-email-section-advanced-sub_section-request_status_codes';
@@ -936,6 +937,7 @@ function mfcs_help_0_page_presentation_single($allowed_topics) {
 
     $section_information['headers'] = $headers;
     $section_information['headers'][0]['markup'] = 'Review Step Codes';
+    $section_information['header_attributes']['class'][] = 'page-break-after-auto-1';
     $section_information['id'] = $section_id . '-email-section-advanced-sub_section-review_step_codes';
     $section_information['class'] = $sub_base_class;
     $section_information['class'][] = 'section-help-topic-email-section-advanced-sub_section-review_step_codes';
@@ -945,6 +947,7 @@ function mfcs_help_0_page_presentation_single($allowed_topics) {
 
     $section_information['headers'] = $headers;
     $section_information['headers'][0]['markup'] = 'Request Classification Codes';
+    $section_information['header_attributes']['class'][] = 'page-break-after-auto-1';
     $section_information['id'] = $section_id . '-email-section-advanced-sub_section-request_classification_codes';
     $section_information['class'] = $sub_base_class;
     $section_information['class'][] = 'section-help-topic-email-section-advanced-sub_section-request_classification_codes';
@@ -954,6 +957,7 @@ function mfcs_help_0_page_presentation_single($allowed_topics) {
 
     $section_information['headers'] = $headers;
     $section_information['headers'][0]['markup'] = 'Request Type Codes';
+    $section_information['header_attributes']['class'][] = 'page-break-after-auto-1';
     $section_information['id'] = $section_id . '-email-section-advanced-sub_section-request_type_codes';
     $section_information['class'] = $sub_base_class;
     $section_information['class'][] = 'section-help-topic-email-section-advanced-sub_section-request_type_codes';
@@ -963,6 +967,7 @@ function mfcs_help_0_page_presentation_single($allowed_topics) {
 
     $section_information['headers'] = $headers;
     $section_information['headers'][0]['markup'] = 'E-Mail Type Codes';
+    $section_information['header_attributes']['class'][] = 'page-break-after-auto-1';
     $section_information['id'] = $section_id . '-email-section-advanced-sub_section-email_type_codes';
     $section_information['class'] = $sub_base_class;
     $section_information['class'][] = 'section-help-topic-email-section-advanced-sub_section-email_type_codes';
@@ -4784,7 +4789,7 @@ function mfcs_help_topic_email_section_advanced($allowed_topics, $section_inform
   $markup .= '<br>';
   $markup .= '</div>';
 
-  $markup .= '<div class="paragraph">';
+  $markup .= '<div class="paragraph page-break-avoid-1">';
   $markup .= 'If your e-mail client allows for advanced filtering of e-mails based on custom header information, then you can filter by the following header names: ';
   $markup .= '<ul class="list">';
   $markup .= '<li class="list-item">';
@@ -4951,7 +4956,7 @@ function mfcs_help_topic_email_section_advanced_sub_section_status_codes($allowe
   $markup .= $section_information['navigation'];
   $markup .= mfcs_help_render_headers('topic-email-section-advanced-sub_section-request_status_codes', $section_information['header_attributes'], $section_information['headers'], $start_count);
 
-  $markup .= '<div class="paragraph">';
+  $markup .= '<div class="paragraph page-break-auto-1">';
 
   $codes = array();
 
@@ -5134,7 +5139,7 @@ function mfcs_help_topic_email_section_advanced_sub_section_step_codes($allowed_
   $markup .= $section_information['navigation'];
   $markup .= mfcs_help_render_headers('topic-email-section-advanced-sub_section-review_step_codes', $section_information['header_attributes'], $section_information['headers'], $start_count);
 
-  $markup .= '<div class="paragraph">';
+  $markup .= '<div class="paragraph page-break-auto-1">';
 
   $codes = array();
 
@@ -5264,7 +5269,7 @@ function mfcs_help_topic_email_section_advanced_sub_section_classification_codes
   $markup .= $section_information['navigation'];
   $markup .= mfcs_help_render_headers('topic-email-section-advanced-sub_section-request_classification_codes', $section_information['header_attributes'], $section_information['headers'], $start_count);
 
-  $markup .= '<div class="paragraph">';
+  $markup .= '<div class="paragraph page-break-auto-1">';
 
   $codes = array();
 
@@ -5394,7 +5399,7 @@ function mfcs_help_topic_email_section_advanced_sub_section_request_type_codes($
   $markup .= $section_information['navigation'];
   $markup .= mfcs_help_render_headers('topic-email-section-advanced-sub_section-request_type_codes', $section_information['header_attributes'], $section_information['headers'], $start_count);
 
-  $markup .= '<div class="paragraph">';
+  $markup .= '<div class="paragraph page-break-auto-1">';
 
   $codes = array();
 
@@ -5614,7 +5619,7 @@ function mfcs_help_topic_email_section_advanced_sub_section_email_type_codes($al
   $markup .= $section_information['navigation'];
   $markup .= mfcs_help_render_headers('topic-email-section-advanced-sub_section-email_type_codes', $section_information['header_attributes'], $section_information['headers'], $start_count);
 
-  $markup .= '<div class="paragraph">';
+  $markup .= '<div class="paragraph page-break-auto-1">';
 
   $codes = array();
 
