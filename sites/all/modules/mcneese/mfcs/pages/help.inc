@@ -2654,7 +2654,7 @@ function mfcs_help_topic_requests($allowed_topics, $section_information, $as_inl
   $markup .= '<div class="note"> ';
   $markup .= 'E-mails sent by the <dfn class="term">Facilities Use System</dfn> should not be replied to. ';
   $markup .= 'Your replies will not be received. ';
-  $markup .= 'Instead, all responses to received e-mails should be sent via <dfn class="term">Comments</dfn> through the <dfn class="term"><abbr class="abbreviation" title="Facilities Use System">FCS</abbr></dfn> for the appropraite <dfn class="term">Request</dfn>. ';
+  $markup .= 'Instead, all responses to received e-mails should be sent via <dfn class="term">Comments</dfn> through the <dfn class="term"><abbr class="abbreviation" title="Facilities Use System">FCS</abbr></dfn> for the appropriate <dfn class="term">Request</dfn>. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
@@ -3098,7 +3098,7 @@ function mfcs_help_topic_review($allowed_topics, $section_information, $as_inlin
   $markup .= '<div class="note"> ';
   $markup .= 'E-mails sent by the <dfn class="term">Facilities Use System</dfn> should not be replied to. ';
   $markup .= 'Your replies will not be received. ';
-  $markup .= 'Instead, all responses to received e-mails should be sent via <dfn class="term">Comments</dfn> through the <dfn class="term"><abbr class="abbreviation" title="Facilities Use System">FCS</abbr></dfn> for the appropraite <dfn class="term">Request</dfn>. ';
+  $markup .= 'Instead, all responses to received e-mails should be sent via <dfn class="term">Comments</dfn> through the <dfn class="term"><abbr class="abbreviation" title="Facilities Use System">FCS</abbr></dfn> for the appropriate <dfn class="term">Request</dfn>. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
@@ -4583,7 +4583,7 @@ function mfcs_help_topic_email($allowed_topics, $section_information, $as_inline
   $markup .= '<div class="note"> ';
   $markup .= 'Do not reply to e-mails system from this system. ';
   $markup .= 'Your replies will not be received. ';
-  $markup .= 'Instead, all responses to received e-mails should be sent via <dfn class="term">Comments</dfn> in the <dfn class="term"><abbr class="abbreviation" title="Facilities Use System">FCS</abbr></dfn> for the appropraite <dfn class="term">Request</dfn>. ';
+  $markup .= 'Instead, all responses to received e-mails should be sent via <dfn class="term">Comments</dfn> in the <dfn class="term"><abbr class="abbreviation" title="Facilities Use System">FCS</abbr></dfn> for the appropriate <dfn class="term">Request</dfn>. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
@@ -4673,20 +4673,20 @@ function mfcs_help_topic_email_section_request($allowed_topics, $section_informa
 
   $markup .= '<div class="paragraph">';
   $markup .= 'Most e-mails sent by this system are directly related to a particular <dfn class="term">Request</dfn>. ';
-  $markup .= 'These e-mails contain a special structure to make identifying and reading the e-mails relatively easy. ';
+  $markup .= 'These e-mails contain a special structure to make quickly identifying the e-mails relatively easy. ';
   $markup .= 'The subject of each e-mail contains generic text, such as <strong class="bold">Facilities Use Request</strong>. ';
   $markup .= 'This generic text is then followed by the <dfn class="term">Request ID</dfn>, the <dfn class="term">Request</dfn> name, and finally an action or purpose that the e-mail represents. ';
-  $markup .= 'The contents of each e-mail is broken down into multiple parts. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
+  $markup .= 'The contents of each e-mail is broken down into multiple parts. ';
   $markup .= 'The first part is often a generated message describing the purpose of the e-mail, such as <em class="emphasis">The System has cancelled the request</em>. ';
   $markup .= 'This is then followed by any comments made or associated with the action. ';
   $markup .= 'The second part contains common <dfn class="term">Request</dfn> information. ';
-  $markup .= 'This part contains the following information: <dfn class="term">Request ID</dfn>, <dfn class="term">Request</dfn> name, <dfn class="term">Location</dfn>, <dfn class="term">Building</dfn>, <dfn class="term">Room</dfn>, <dfn class="term">Classification</dfn>, <dfn class="term">Type</dfn>, and all dates and times. ';
+  $markup .= 'This second part contains the following information: <dfn class="term">Request ID</dfn>, <dfn class="term">Request</dfn> name, <dfn class="term">Location</dfn>, <dfn class="term">Building</dfn>, <dfn class="term">Room</dfn>, <dfn class="term">Classification</dfn>, <dfn class="term">Type</dfn>, and all dates and times. ';
   $markup .= 'The third part presents a link to the <dfn class="term">Request</dfn> for easily accessing the entire <dfn class="term">Request</dfn>. ';
-  $markup .= 'The fourth an final part is a date representing the exact time this e-mail was generated. ';
+  $markup .= 'The fourth an final part is a date and time representing when the e-mail was generated. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
@@ -4759,7 +4759,7 @@ function mfcs_help_topic_email_section_advanced($allowed_topics, $section_inform
   $markup .= '<div class="paragraph">';
   $markup .= 'Each e-mails contains additional information to assist in validity, integrity, and use of the information provided. ';
   $markup .= 'Some e-mails contain an <dfn class="term">iCalendar</dfn> file for importing the <dfn class="term">Request</dfn> into your own private calendar. ';
-  $markup .= 'All e-mails should contain an <dfn class="term">OpenPG</dfn> file for helping insure the validity and integrity of the e-mail. ';
+  $markup .= 'All e-mails should contain an <dfn class="term">OpenPG</dfn> file for helping ensure the validity and integrity of the e-mail. ';
   $markup .= 'All e-mails contain special headers for consistent advanced filtering. ';
   $markup .= '<br>';
   $markup .= '</div>';
@@ -4773,14 +4773,14 @@ function mfcs_help_topic_email_section_advanced($allowed_topics, $section_inform
 
   $markup .= '<div class="paragraph">';
   $markup .= 'When a <dfn class="term">Request</dfn> completes the <dfn class="term">Final Approval Step</dfn> and becomes <dfn class="term">Accepted</dfn> an e-mail is sent out informing the <dfn class="term">Requester</dfn> of the acceptance. ';
-  $markup .= 'That e-mail should contain an <dfn class="term">iCalendar</dfn> file attachment for easy import of the <dfn class="term">Accepted</dfn> <dfn class="term">Request</dfn>. ';
+  $markup .= 'That e-mail should contain an <dfn class="term">iCalendar</dfn> file attachment for easy import into a personal calendar. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
   $markup .= 'Every e-mail should have an <dfn class="term">OpenPG</dfn> download attachment as a digital signature for that e-mail. ';
-  $markup .= 'These signatures only applies to the contents of the e-mail and does not guarantee anything else. ';
-  $markup .= 'Not all e-mail clients support this and if yours does not, this digital signature should not cause any problem. ';
+  $markup .= 'These signatures only apply to the contents of the e-mail and do not guarantee anything else. ';
+  $markup .= 'Not all e-mail clients support this and if yours does not, this digital signature should not cause any problems. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
@@ -5945,7 +5945,7 @@ function mfcs_help_topic_calendar($allowed_topics, $section_information, $as_inl
   $markup .= '<div class="paragraph">';
   $markup .= 'The <dfn class="term"><abbr class="abbreviation" title="Facilities Use System">FCS</abbr></dfn> provides a calendar containing only <dfn class="term">Accepted</dfn> <dfn class="term">Requests</dfn> and holidays. ';
   $markup .= 'No other <dfn class="term">Requests</dfn> or <dfn class="term">Room</dfn> unavailabilities are displayed. ';
-  $markup .= 'The calendars are designed to be printer-friendly with a minimum amount of inconsistencies. ';
+  $markup .= 'The calendars are designed to be printer-friendly with minimal inconsistencies. ';
   $markup .= 'There are two main types of calendars on this system: monthly calendars and daily calendars. ';
   $markup .= '<br>';
   $markup .= '</div>';
@@ -5988,8 +5988,14 @@ function mfcs_help_topic_calendar($allowed_topics, $section_information, $as_inl
 
   $markup .= '<div class="note"> ';
   $markup .= 'When exporting <dfn class="term">Requests</dfn> (and subsequently importing into your own calendar), the exported <dfn class="term">Requests</dfn> are a copy. ';
-  $markup .= 'Any changes made to the <dfn class="term">Requests</dfn> on the <dfn class="term">Facilities Use System</dfn> cannot be reflected on your own calendar. ';
+  $markup .= 'Any changes made to the <dfn class="term">Requests</dfn> on the <dfn class="term">Facilities Use System</dfn> cannot automatically be reflected on your own calendar. ';
   $markup .= 'The <dfn class="term">Requests</dfn> in your calendar could <em class="emphasis">potentially</em> be out of date. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'Although not related to the calendar, the <dfn class="term"><abbr class="abbreviation" title="Facilities Use System">FCS</abbr></dfn> public <dfn class="term">OpenPG</dfn> key is available for download below the iCalendar download options. ';
+  $markup .= 'This can be used to verify e-mails received by the system. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
@@ -6338,7 +6344,7 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics, $se
   $markup .= 'A Request State in which the Request is refused. ';
   $markup .= '<br>';
   $markup .= '<br>';
-  $markup .= 'Alternatively, this could be used to reference the Deny decision made by a Reviewer during the Final Decision Review Step. ';
+  $markup .= 'Alternatively, this might be used to reference the Deny decision made by a Reviewer during the Final Decision Review Step. ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
   $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#terminology-facilities_use-request_state" class="definition_list-see_other no_print_links_as_link">Request State</a>.</span> ';
@@ -6350,7 +6356,7 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics, $se
   $markup .= '<dt id="terminology-facilities_use-external" class="definition_list-title">External</dt> ';
   $markup .= '<dd class="definition_list-definition">';
   $markup .= 'This refers to a classification assigned to Requesters or as a Request Classification. ';
-  $markup .= 'This classification represents that the user or request is associated with a non-McNeese affiliated or otherwise 3rd-party. ';
+  $markup .= 'This classification represents that the user or request is associated with a non-McNeese affiliated or is otherwise a 3rd-party. ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
   $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#terminology-facilities_use-request_classification" class="definition_list-see_other no_print_links_as_link">Request Classification</a>.</span> ';
@@ -6503,9 +6509,9 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics, $se
   $markup .= 'A Review Step in which a Request is being reviewed by Reviewers, Financers, and Insurers. ';
   $markup .= '<br>';
   $markup .= '<br>';
-  $markup .= 'Alteratively, this is referred to as the process in which Requests undergo to have their reservation approved or denied. ';
+  $markup .= 'Alteratively, this is referred to as the process in which Requests undergo to have their reservation Approved or Denied. ';
   $markup .= '<br>';
-  $markup .= 'This entails multiple users (Reviewers, Venue Coordinators, Managers, etc..) specifying whether or not there are issues, assign any financial or insurance related requirements, and checking the availability of the requested room. ';
+  $markup .= 'This entails multiple users (Reviewers, Venue Coordinators, Managers, etc..) specifying whether or not there are issues, assigning any financial or insurance related requirements, and checking the availability of the venue. ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
   $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#terminology-facilities_use-review_step" class="definition_list-see_other no_print_links_as_link">Review Step</a>.</span> ';
@@ -6539,7 +6545,7 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics, $se
 
   $markup .= '<dt id="terminology-facilities_use-room_coordinator" class="definition_list-title">Room Coordinator</dt> ';
   $markup .= '<dd class="definition_list-definition">';
-  $markup .= 'Venue Coordinators who may only coordinate specific rooms within a Building are called <dfn class="term">Room Coordinators</dfn>. ';
+  $markup .= 'Venue Coordinators who may only coordinate specific rooms within a venue (instead of the entire venue) are called <dfn class="term">Room Coordinators</dfn>. ';
   $markup .= '<dfn class="term">Room Coordinators</dfn> are otherwise functionally identical to Venue Coordinators. ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
@@ -6599,7 +6605,7 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics, $se
 
   $markup .= '<dt id="terminology-facilities_use-queued_locked" class="definition_list-title">Queued (Locked)</dt> ';
   $markup .= '<dd class="definition_list-definition">';
-  $markup .= 'A Request State in which the Request has been places in the Review process and the specified dates and times has been locked for the requested Room. ';
+  $markup .= 'A Request State in which the Request has been places in the Review process and the specified dates and times have been locked for the requested Room. ';
   $markup .= 'Any other Requests for the given Room at the specified dates and times will be automatically Closed as Room Unavailable (Due to Lock). ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
@@ -6609,9 +6615,9 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics, $se
 
   $markup .= '<dt id="terminology-facilities_use-queued_locked" class="definition_list-title">Queued (Unlocked)</dt> ';
   $markup .= '<dd class="definition_list-definition">';
-  $markup .= 'A Request State in which the Request has been places in the Review process but the specified dates and times for the given Room have yet to be locked. ';
+  $markup .= 'A Request State in which the Request has been placed in the Review process but the specified dates and times for the given Room have yet to be locked. ';
   $markup .= 'Any other Requests for the given Room at the specified dates and times will be also be placed in the Queued (Unlocked) State. ';
-  $markup .= 'The first Request to be Approved should cause all other Queued Requests for the specified dates and times for the given Room to be closed as Room Unavailable. ';
+  $markup .= 'The first Request to be designated as Available should cause all other conflicting Queued Requests for the specified dates and times for the given Room to be closed as Room Unavailable. ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
   $markup .= '<span class="see_also">See Also: <a href="' . $url_arguments . '#terminology-facilities_use-request_state" class="definition_list-see_other no_print_links_as_link">Request State</a>.</span> ';
@@ -6767,7 +6773,7 @@ function mfcs_help_topic_terminology_section_system($allowed_topics, $section_in
   $markup .= '<dt id="terminology-system-fcs" class="definition_list-title">OpenPGP</dt>';
   $markup .= '<dd class="definition_list-definition">';
   $markup .= '<dfn class="term">OpenPGP</dfn> stands for <strong class="bold">Open Pretty Good Privacy</strong>. ';
-  $markup .= 'This is a standard used as a digital signature and to encrypt files and e-mails. ';
+  $markup .= 'This is a standard used as a digital signature for files and e-mails. ';
   $markup .= 'E-mails sent by this system are digitally signed using this standard to help ensure that the e-mails are not spam or otherwise falsified. ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
@@ -6802,7 +6808,8 @@ function mfcs_help_topic_terminology_section_system($allowed_topics, $section_in
 
   $markup .= '<dt id="terminology-system-venue_coordinator_proxy" class="definition_list-title">Venue Coordinator Proxy</dt>';
   $markup .= '<dd class="definition_list-definition">';
-  $markup .= 'A <dfn class="term">Venue Coordinator Proxy</dfn> is some user who may perform tasks as if they were a specified Venue Coordinator and is granted all appropriate priveleges necessary to perform such duties. ';
+  $markup .= 'A <dfn class="term">Venue Coordinator Proxy</dfn> is some user who may perform tasks as if they were a specified Venue Coordinator. ';
+  $markup .= 'This user is granted all appropriate priveleges necessary to perform such duties. ';
   $markup .= 'Such granted priveleges are restricted only to Venue Coordinator tasks. ';
   $markup .= '</span>';
   $markup .= '</dd>';
