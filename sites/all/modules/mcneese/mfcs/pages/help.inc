@@ -104,7 +104,13 @@ function mfcs_help_0_page($topic = NULL, $section = NULL, $sub_section = NULL) {
 
   drupal_set_title($title);
 
-  $allowed_topics = mfcs_help_0_allowed_topics($user);
+  $as = array(
+    'administer' => user_access('mfcs administer', $user),
+    'manager' => user_access('mfcs manage', $user),
+    'reviewer' => user_access('mfcs review', $user),
+  );
+
+  $allowed_topics = mfcs_help_0_allowed_topics($as);
   if (!is_array($allowed_topics)) {
     return mfcs_help_topic_not_found();
   }
@@ -183,6 +189,120 @@ function mfcs_help_0_page($topic = NULL, $section = NULL, $sub_section = NULL) {
       return mfcs_help_topic_not_found($topic, $section, $sub_section);
     }
   }
+
+  // user guides
+  elseif ($topic == 'navigate_the_system') {
+    $section_information['headers'][0] = array('markup' => 'Facilities Use User Guide', 'attributes' => array('class' => array('header-1', 'title')));
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'user_guide';
+
+    $section_information['class'][] = 'section-help-user_guide-navigate_the_system';
+    $section_information['headers'][1] = array('markup' => 'Navigate the System', 'attributes' => array('class' => array('header-2', 'topic')));
+
+    $markup .= mfcs_help_user_guide_navigate_the_system($as, $allowed_topics, $section_information);
+  }
+  elseif ($topic == 'create_a_request') {
+    $section_information['headers'][0] = array('markup' => 'Facilities Use User Guide', 'attributes' => array('class' => array('header-1', 'title')));
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'user_guide';
+
+    $section_information['class'][] = 'section-help-user_guide-create_a_request';
+    $section_information['headers'][1] = array('markup' => 'Create a Request', 'attributes' => array('class' => array('header-2', 'topic')));
+
+    $markup .= mfcs_help_user_guide_create_a_request($as, $allowed_topics, $section_information);
+  }
+  elseif ($topic == 'edit_a_request') {
+    $section_information['headers'][0] = array('markup' => 'Facilities Use User Guide', 'attributes' => array('class' => array('header-1', 'title')));
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'user_guide';
+
+    $section_information['class'][] = 'section-help-user_guide-edit_a_request';
+    $section_information['headers'][1] = array('markup' => 'Edit a Request', 'attributes' => array('class' => array('header-2', 'topic')));
+
+    $markup .= mfcs_help_user_guide_edit_a_request($as, $allowed_topics, $section_information);
+  }
+  elseif ($topic == 'cancel_a_request') {
+    $section_information['headers'][0] = array('markup' => 'Facilities Use User Guide', 'attributes' => array('class' => array('header-1', 'title')));
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'user_guide';
+
+    $section_information['class'][] = 'section-help-user_guide-cancel_a_request';
+    $section_information['headers'][1] = array('markup' => 'Cancel a Request', 'attributes' => array('class' => array('header-2', 'topic')));
+
+    $markup .= mfcs_help_user_guide_cancel_a_request($as, $allowed_topics, $section_information);
+  }
+  elseif ($topic == 'uncancel_a_request') {
+    $section_information['headers'][0] = array('markup' => 'Facilities Use User Guide', 'attributes' => array('class' => array('header-1', 'title')));
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'user_guide';
+
+    $section_information['class'][] = 'section-help-user_guide-uncancel_a_request';
+    $section_information['headers'][1] = array('markup' => 'Uncancel a Request', 'attributes' => array('class' => array('header-2', 'topic')));
+
+    $markup .= mfcs_help_user_guide_uncancel_a_request($as, $allowed_topics, $section_information);
+  }
+  elseif ($topic == 'copy_a_request') {
+    $section_information['headers'][0] = array('markup' => 'Facilities Use User Guide', 'attributes' => array('class' => array('header-1', 'title')));
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'user_guide';
+
+    $section_information['class'][] = 'section-help-user_guide-copy_a_request';
+    $section_information['headers'][1] = array('markup' => 'Copy a Request', 'attributes' => array('class' => array('header-2', 'topic')));
+
+    $markup .= mfcs_help_user_guide_copy_a_request($as, $allowed_topics, $section_information);
+  }
+  elseif ($topic == 'find_a_request') {
+    $section_information['headers'][0] = array('markup' => 'Facilities Use User Guide', 'attributes' => array('class' => array('header-1', 'title')));
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'user_guide';
+
+    $section_information['class'][] = 'section-help-user_guide-find_a_request';
+    $section_information['headers'][1] = array('markup' => 'Find a Request', 'attributes' => array('class' => array('header-2', 'topic')));
+
+    $markup .= mfcs_help_user_guide_find_a_request($as, $allowed_topics, $section_information);
+  }
+  elseif ($topic == 'review_a_request') {
+    $section_information['headers'][0] = array('markup' => 'Facilities Use User Guide', 'attributes' => array('class' => array('header-1', 'title')));
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'user_guide';
+
+    $section_information['class'][] = 'section-help-user_guide-review_a_request';
+    $section_information['headers'][1] = array('markup' => 'Review a Request', 'attributes' => array('class' => array('header-2', 'topic')));
+
+    $markup .= mfcs_help_user_guide_review_a_request($as, $allowed_topics, $section_information);
+  }
+  elseif ($topic == 'manage_a_request') {
+    $section_information['headers'][0] = array('markup' => 'Facilities Use User Guide', 'attributes' => array('class' => array('header-1', 'title')));
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'user_guide';
+
+    $section_information['class'][] = 'section-help-user_guide-manage_a_request';
+    $section_information['headers'][1] = array('markup' => 'Manage a Request', 'attributes' => array('class' => array('header-2', 'topic')));
+
+    $markup .= mfcs_help_user_guide_manage_a_request($as, $allowed_topics, $section_information);
+  }
+  elseif ($topic == 'using_the_calendar') {
+    $section_information['headers'][0] = array('markup' => 'Facilities Use User Guide', 'attributes' => array('class' => array('header-1', 'title')));
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'user_guide';
+
+    $section_information['class'][] = 'section-help-user_guide-using_the_calendar';
+    $section_information['headers'][1] = array('markup' => 'Using the Calendar', 'attributes' => array('class' => array('header-2', 'topic')));
+
+    $markup .= mfcs_help_user_guide_using_the_calendar($as, $allowed_topics, $section_information);
+  }
+  elseif ($topic == 'exporting_the_calendar') {
+    $section_information['headers'][0] = array('markup' => 'Facilities Use User Guide', 'attributes' => array('class' => array('header-1', 'title')));
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'user_guide';
+
+    $section_information['class'][] = 'section-help-user_guide-exporting_the_calendar';
+    $section_information['headers'][1] = array('markup' => 'Exporting the Calendar', 'attributes' => array('class' => array('header-2', 'topic')));
+
+    $markup .= mfcs_help_user_guide_exporting_the_calendar($as, $allowed_topics, $section_information);
+  }
+
+  // documentation
   elseif ($topic == 'introduction' && in_array('introduction', $allowed_topics)) {
     $section_information['headers'][1] = array('markup' => 'Introduction', 'attributes' => array('class' => array('header-2', 'topic')));
     $section_information['class'] = $base_class;
@@ -552,7 +672,13 @@ function mfcs_help_0_page_presentation($presentation_type, $topic = NULL, $secti
 
   $user = cf_current_user();
 
-  $allowed_topics = mfcs_help_0_allowed_topics($user);
+  $as = array(
+    'administer' => user_access('mfcs administer', $user),
+    'manager' => user_access('mfcs manage', $user),
+    'reviewer' => user_access('mfcs review', $user),
+  );
+
+  $allowed_topics = mfcs_help_0_allowed_topics($as);
   if (!is_array($allowed_topics)) {
     return mfcs_help_topic_not_found();
   }
@@ -1307,7 +1433,114 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
     return $determined;
   }
 
-  if ($topic == 'introduction') {
+  // user guides
+  if ($topic == 'navigate_the_system') {
+    $determined['top'] = $base_path . 'help-0' . $url_arguments;
+    $determined['tooltip-top'] = 'Glossary';
+
+    $determined['next'] = $base_path . 'help-0/create_a_request' . $url_arguments;
+    $determined['tooltip-next'] = 'User Guide: Create a Request';
+  }
+  elseif ($topic == 'create_a_request') {
+    $determined['top'] = $base_path . 'help-0' . $url_arguments;
+    $determined['tooltip-top'] = 'Glossary';
+
+    $determined['next'] = $base_path . 'help-0/edit_a_request' . $url_arguments;
+    $determined['tooltip-next'] = 'User Guide: Edit a Request';
+
+    $determined['previous'] = $base_path . 'help-0/navigate_the_system' . $url_arguments;
+    $determined['tooltip-previous'] = 'User Guide: Navigate the System';
+  }
+  elseif ($topic == 'edit_a_request') {
+    $determined['top'] = $base_path . 'help-0' . $url_arguments;
+    $determined['tooltip-top'] = 'Glossary';
+
+    $determined['next'] = $base_path . 'help-0/cancel_a_request' . $url_arguments;
+    $determined['tooltip-next'] = 'User Guide: Cancel a Request';
+
+    $determined['previous'] = $base_path . 'help-0/create_a_request' . $url_arguments;
+    $determined['tooltip-previous'] = 'User Guide: Create a Request';
+  }
+  elseif ($topic == 'cancel_a_request') {
+    $determined['top'] = $base_path . 'help-0' . $url_arguments;
+    $determined['tooltip-top'] = 'Glossary';
+
+    $determined['next'] = $base_path . 'help-0/uncancel_a_request' . $url_arguments;
+    $determined['tooltip-next'] = 'User Guide: Uncancel a Request';
+
+    $determined['previous'] = $base_path . 'help-0/edit_a_request' . $url_arguments;
+    $determined['tooltip-previous'] = 'User Guide: Edit a Request';
+  }
+  elseif ($topic == 'uncancel_a_request') {
+    $determined['top'] = $base_path . 'help-0' . $url_arguments;
+    $determined['tooltip-top'] = 'Glossary';
+
+    $determined['next'] = $base_path . 'help-0/copy_a_request' . $url_arguments;
+    $determined['tooltip-next'] = 'User Guide: Copy a Request';
+
+    $determined['previous'] = $base_path . 'help-0/cancel_a_request' . $url_arguments;
+    $determined['tooltip-previous'] = 'User Guide: Cancel a Request';
+  }
+  elseif ($topic == 'copy_a_request') {
+    $determined['top'] = $base_path . 'help-0' . $url_arguments;
+    $determined['tooltip-top'] = 'Glossary';
+
+    $determined['next'] = $base_path . 'help-0/find_a_request' . $url_arguments;
+    $determined['tooltip-next'] = 'User Guide: Find a Request';
+
+    $determined['previous'] = $base_path . 'help-0/uncancel_a_request' . $url_arguments;
+    $determined['tooltip-previous'] = 'User Guide: Uncancel a Request';
+  }
+  elseif ($topic == 'find_a_request') {
+    $determined['top'] = $base_path . 'help-0' . $url_arguments;
+    $determined['tooltip-top'] = 'Glossary';
+
+    $determined['next'] = $base_path . 'help-0/review_a_request' . $url_arguments;
+    $determined['tooltip-next'] = 'User Guide: Review a Request';
+
+    $determined['previous'] = $base_path . 'help-0/copy_a_request' . $url_arguments;
+    $determined['tooltip-previous'] = 'User Guide: Copy a Request';
+  }
+  elseif ($topic == 'review_a_request') {
+    $determined['top'] = $base_path . 'help-0' . $url_arguments;
+    $determined['tooltip-top'] = 'Glossary';
+
+    $determined['next'] = $base_path . 'help-0/manage_a_request' . $url_arguments;
+    $determined['tooltip-next'] = 'User Guide: Manage a Request';
+
+    $determined['previous'] = $base_path . 'help-0/find_a_request' . $url_arguments;
+    $determined['tooltip-previous'] = 'User Guide: Find a Request';
+  }
+  elseif ($topic == 'manage_a_request') {
+    $determined['top'] = $base_path . 'help-0' . $url_arguments;
+    $determined['tooltip-top'] = 'Glossary';
+
+    $determined['next'] = $base_path . 'help-0/using_the_calendar' . $url_arguments;
+    $determined['tooltip-next'] = 'User Guide: Using the Calendar';
+
+    $determined['previous'] = $base_path . 'help-0/review_a_request' . $url_arguments;
+    $determined['tooltip-previous'] = 'User Guide: Review a Request';
+  }
+  elseif ($topic == 'using_the_calendar') {
+    $determined['top'] = $base_path . 'help-0' . $url_arguments;
+    $determined['tooltip-top'] = 'Glossary';
+
+    $determined['next'] = $base_path . 'help-0/exporting_the_calendar' . $url_arguments;
+    $determined['tooltip-next'] = 'User Guide: Exporting the Calendar';
+
+    $determined['previous'] = $base_path . 'help-0/manage_a_request' . $url_arguments;
+    $determined['tooltip-previous'] = 'User Guide: Manage a Request';
+  }
+  elseif ($topic == 'exporting_the_calendar') {
+    $determined['top'] = $base_path . 'help-0' . $url_arguments;
+    $determined['tooltip-top'] = 'Glossary';
+
+    $determined['previous'] = $base_path . 'help-0/using_the_calendar' . $url_arguments;
+    $determined['tooltip-previous'] = 'User Guide: Using the Calendar';
+  }
+
+  // documentation
+  elseif ($topic == 'introduction') {
     $determined['top'] = $base_path . 'help-0' . $url_arguments;
     $determined['tooltip-top'] = 'Glossary';
 
@@ -1858,37 +2091,33 @@ function mfcs_help_render_headers($headers_id, $attributes = array(), $headers =
 /**
  * Provide a list of topics the user is allowed to access.
  *
- * @param object $user
- *   The loaded drupal user object.
+ * @param array $as
+ *   An array containing the booleans 'reviewer', 'manager', and 'administer'.
+ *   Each boolean represents a role the user is or is not assigned.
  * @param array $allowed_topics
  *   An array of topics currently allowed based on the users access.
  *
  * @return array|bool
  *   An array of allowed topics, or FALSE on error.
  */
-function mfcs_help_0_allowed_topics($user) {
-  if (!is_object($user)) {
-    cf_error::invalid_object('user');
+function mfcs_help_0_allowed_topics($as) {
+  if (!is_array($as)) {
+    cf_error::invalid_array('as');
     return FALSE;
   }
-
-  // documentation presented will be filtered based on user's access roles.
-  // this will help simplify the documentation for less technical users.
-  $is_administer = user_access('mfcs administer', $user);
-  $is_manager = user_access('mfcs manage', $user);
-  $is_reviewer = user_access('mfcs review', $user);
 
   $topics = array();
 
   // user guides
-  $topics[] = 'request';
-  $topics[] = 'request-create';
-  $topics[] = 'request-edit';
-  $topics[] = 'request-cancel';
-  $topics[] = 'request-copy';
-  $topics[] = 'request-find';
-  $topics[] = 'calendar-import';
-  $topics[] = 'calendar-export';
+  $topics[] = 'navigate_the_system';
+  $topics[] = 'create_a_request';
+  $topics[] = 'edit_a_request';
+  $topics[] = 'cancel_a_request';
+  $topics[] = 'uncancel_a_request';
+  $topics[] = 'copy_a_request';
+  $topics[] = 'find_a_request';
+  $topics[] = 'using_the_calendar';
+  $topics[] = 'exporting_the_calendar';
 
   // documentation
   $topics[] = 'introduction';
@@ -1904,25 +2133,25 @@ function mfcs_help_0_allowed_topics($user) {
   $topics[] = 'terminology';
 
   // add reviewing-specific topics.
-  if ($is_reviewer || $is_manager || $is_administer) {
+  if ($as['reviewer'] || $as['manager'] || $as['administer']) {
     // user guides
-    $topics[] = 'request-review';
+    $topics[] = 'review_a_request';
 
     // documentation
     $topics[] = 'review';
   }
 
   // add managing-specific topics.
-  if ($is_manager || $is_administer) {
+  if ($as['manager'] || $as['administer']) {
     // user guides
-    $topics[] = 'request-manage';
+    $topics[] = 'manage_a_request';
 
     // documentation
     $topics[] = 'manage';
   }
 
   // add administer-specific topics.
-  if ($is_administer) {
+  if ($as['administer']) {
   }
 
   return $topics;
@@ -2005,84 +2234,75 @@ function mfcs_help_topic_glossary($allowed_topics, $section_information, $as_inl
 
   // create a list of links, when $as_inline is TRUE, then the urls can be more easily altered.
   $links = array(
-    'request-create' => array(
-      'url' => $base_path . 'help-0/request-create' . $url_arguments,
+    // user guides
+    'navigate_the_system' => array(
+      'url' => $base_path . 'help-0/navigate_the_system' . $url_arguments,
+      'tooltip' => 'User Guide: Navigate the System',
+      'text' => 'Navigate the System',
+      'class' => 'item-link no_print_links_as_link',
+    ),
+    'create_a_request' => array(
+      'url' => $base_path . 'help-0/create_a_request' . $url_arguments,
       'tooltip' => 'User Guide: Create a Request',
       'text' => 'Create a Request',
       'class' => 'item-link no_print_links_as_link',
     ),
-    'request-create/employee' => array(
-      'url' => $base_path . 'help-0/request-create/employee' . $url_arguments,
-      'tooltip' => 'User Guide: Create Faculty, Staff, and Athletics Requests',
-      'text' => 'Faculty, Staff, and Athletics',
-      'class' => 'item-link no_print_links_as_link',
-    ),
-    'request-create/student' => array(
-      'url' => $base_path . 'help-0/request-create/student' . $url_arguments,
-      'tooltip' => 'User Guide: Create Student Organization Requests',
-      'text' => 'Student Organization',
-      'class' => 'item-link no_print_links_as_link',
-    ),
-    'request-create/camps' => array(
-      'url' => $base_path . 'help-0/request-create/camps' . $url_arguments,
-      'tooltip' => 'User Guide: Create Camps Requests',
-      'text' => 'Create Camps Requests',
-      'class' => 'item-link no_print_links_as_link',
-    ),
-    'request-create/external' => array(
-      'url' => $base_path . 'help-0/request-create/external' . $url_arguments,
-      'tooltip' => 'User Guide: Create External Requests',
-      'text' => 'Create External Requests',
-      'class' => 'item-link no_print_links_as_link',
-    ),
-    'request-edit' => array(
-      'url' => $base_path . 'help-0/request-edit' . $url_arguments,
+    'edit_a_request' => array(
+      'url' => $base_path . 'help-0/edit_a_request' . $url_arguments,
       'tooltip' => 'User Guide: Edit a Request',
       'text' => 'Edit a Request',
       'class' => 'item-link no_print_links_as_link',
     ),
-    'request-cancel' => array(
-      'url' => $base_path . 'help-0/request-cancel' . $url_arguments,
-      'tooltip' => 'User Guide: Cancel or Uncancel a Request',
-      'text' => 'Cancel or Uncancel a Request',
+    'cancel_a_request' => array(
+      'url' => $base_path . 'help-0/cancel_a_request' . $url_arguments,
+      'tooltip' => 'User Guide: Cancel a Request',
+      'text' => 'Cancel  a Request',
       'class' => 'item-link no_print_links_as_link',
     ),
-    'request-copy' => array(
-      'url' => $base_path . 'help-0/request-copy' . $url_arguments,
+    'uncancel_a_request' => array(
+      'url' => $base_path . 'help-0/uncancel_a_request' . $url_arguments,
+      'tooltip' => 'User Guide: Uncancel a Request',
+      'text' => 'Uncancel a Request',
+      'class' => 'item-link no_print_links_as_link',
+    ),
+    'copy_a_request' => array(
+      'url' => $base_path . 'help-0/copy_a_request' . $url_arguments,
       'tooltip' => 'User Guide: Copy a Request',
       'text' => 'Copy a Request',
       'class' => 'item-link no_print_links_as_link',
     ),
-    'request-find' => array(
-      'url' => $base_path . 'help-0/request-find' . $url_arguments,
+    'find_a_request' => array(
+      'url' => $base_path . 'help-0/find_a_request' . $url_arguments,
       'tooltip' => 'User Guide: Find a Request',
       'text' => 'Find a Request',
       'class' => 'item-link no_print_links_as_link',
     ),
-    'request-review' => array(
-      'url' => $base_path . 'help-0/request-review' . $url_arguments,
+    'review_a_request' => array(
+      'url' => $base_path . 'help-0/review_a_request' . $url_arguments,
       'tooltip' => 'User Guide: Review a Request',
       'text' => 'Review a Request',
       'class' => 'item-link no_print_links_as_link',
     ),
-    'request-manage' => array(
-      'url' => $base_path . 'help-0/request-manage' . $url_arguments,
+    'manage_a_request' => array(
+      'url' => $base_path . 'help-0/manage_a_request' . $url_arguments,
       'tooltip' => 'User Guide: Manage System',
       'text' => 'Manage System',
       'class' => 'item-link no_print_links_as_link',
     ),
-    'calendar-use' => array(
-      'url' => $base_path . 'help-0/calendar-use' . $url_arguments,
+    'using_the_calendar' => array(
+      'url' => $base_path . 'help-0/using_the_calendar' . $url_arguments,
       'tooltip' => 'User Guide: Using the Calendar',
       'text' => 'Using the Calendar',
       'class' => 'item-link no_print_links_as_link',
     ),
-    'calendar-export' => array(
-      'url' => $base_path . 'help-0/calendar-export' . $url_arguments,
+    'exporting_the_calendar' => array(
+      'url' => $base_path . 'help-0/exporting_the_calendar' . $url_arguments,
       'tooltip' => 'User Guide: Exporting the Calendar',
       'text' => 'Exporting the Calendar',
       'class' => 'item-link no_print_links_as_link',
     ),
+
+    // documentation
     'introduction' => array(
       'url' => $base_path . 'help-0/introduction' . $url_arguments,
       'tooltip' => 'Documentation: Introduction',
@@ -2274,7 +2494,17 @@ function mfcs_help_topic_glossary($allowed_topics, $section_information, $as_inl
   // change urls to links to an id on the current page for the inline glossary.
   if ($as_inline) {
     if ($user_guides) {
-      // @todo:
+      $links['navigate_the_system']['url'] = '#help-user_guide-navigate_the_system' . $url_arguments;
+      $links['create_a_request']['url'] = '#help-user_guide-create_a_request' . $url_arguments;
+      $links['edit_a_request']['url'] = '#help-user_guide-edit_a_request' . $url_arguments;
+      $links['cancel_a_request']['url'] = '#help-user_guide-cancel_a_request' . $url_arguments;
+      $links['uncancel_a_request']['url'] = '#help-user_guide-uncancel_a_request' . $url_arguments;
+      $links['copy_a_request']['url'] = '#help-user_guide-copy_a_request' . $url_arguments;
+      $links['find_a_request']['url'] = '#help-user_guide-find_a_request' . $url_arguments;
+      $links['review_a_request']['url'] = '#help-user_guide-review_a_request' . $url_arguments;
+      $links['manage_a_request']['url'] = '#help-user_guide-manage_a_request' . $url_arguments;
+      $links['using_the_calendar']['url'] = '#help-user_guide-using_the_calendar' . $url_arguments;
+      $links['exporting_the_calendar']['url'] = '#help-user_guide-exporting_the_calendar' . $url_arguments;
     }
     else {
       $links['introduction']['url'] = '#help-documentation-topic-introduction' . $url_arguments;
@@ -2330,19 +2560,7 @@ function mfcs_help_topic_glossary($allowed_topics, $section_information, $as_inl
   $markup .= mfcs_help_render_headers('topic-glossary-user_guides', array('class' => $sub_section_class), $headers, 2);
   $markup .= '<ul class="navigation-list">';
 
-  if (in_array('requests-create', $allowed_topics) && array_key_exists('request-create', $links)) {
-    $markup .= '<li class="list-item">';
-    $markup .= '<a href="' . $links['request-create']['url'] . '" class="' . $links['request-create']['class'] . '" title="' . $links['request-create']['tooltip'] . '">' . $links['request-create']['text'] . '</a>';
-    $markup .= '<ul class="item-navigation navigation-list">';
-    $markup .= '<li class="list-item"><a href="' . $links['request-create/employee']['url'] . '" class="' . $links['request-create/employee']['class'] . '" title="' . $links['request-create/employee']['tooltip'] . '">' . $links['request-create/employee']['text'] . '</a></li>';
-    $markup .= '<li class="list-item"><a href="' . $links['request-create/student']['url'] . '" class="' . $links['request-create/student']['class'] . '" title="' . $links['request-create/student']['tooltip'] . '">' . $links['request-create/student']['text'] . '</a></li>';
-    $markup .= '<li class="list-item"><a href="' . $links['request-create/camps']['url'] . '" class="' . $links['request-create/camps']['class'] . '" title="' . $links['request-create/camps']['tooltip'] . '">' . $links['request-create/camps']['text'] . '</a></li>';
-    $markup .= '<li class="list-item"><a href="' . $links['request-create/external']['url'] . '" class="' . $links['request-create/external']['class'] . '" title="' . $links['request-create/external']['tooltip'] . '">' . $links['request-create/external']['text'] . '</a></li>';
-    $markup .= '</ul>';
-    $markup .= '</li>';
-  }
-
-  foreach (array('request-edit', 'request-cancel', 'request-cancel', 'request-copy', 'request-find', 'request-review', 'request-manage', 'calendar-use', 'calendar-export') as $topic_name) {
+  foreach (array('navigate_the_system', 'create_a_request', 'edit_a_request', 'cancel_a_request', 'uncancel_a_request', 'copy_a_request', 'find_a_request', 'review_a_request', 'manage_a_request', 'using_the_calendar', 'exporting_the_calendar') as $topic_name) {
     if (!in_array($topic_name, $allowed_topics) || !array_key_exists($topic_name, $links)) {
       continue;
     }
@@ -2445,8 +2663,8 @@ function mfcs_help_topic_glossary($allowed_topics, $section_information, $as_inl
 
     $markup .= mfcs_help_render_headers('topic-glossary-presentation', array('class' => $sub_section_class), $headers, 2);
     $markup .= '<ul class="navigation-list">';
-    $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/presentation/single' . $url_arguments . '" class="item-link no_print_links_as_link">View Documentation as a Single Page</a></li>';
-    $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/presentation/pdf' . $url_arguments . '" class="item-link no_print_links_as_link">Download Entire Documentation as a PDF</a></li>';
+    $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/presentation/single' . $url_arguments . '" class="item-link no_print_links_as_link">View Documentation on a Single Webpage</a></li>';
+    $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/presentation/pdf' . $url_arguments . '" class="item-link no_print_links_as_link">Download Documentation as a PDF</a></li>';
     $markup .= '</ul>';
 
     $markup .= '</nav>';
@@ -6897,6 +7115,780 @@ function mfcs_help_topic_terminology_section_documentation($allowed_topics, $sec
   $markup .= '</dd>';
 
   $markup .= '</dl>';
+
+  if ($closing_tag) {
+    $markup .= '</section>';
+  }
+
+  return $markup;
+}
+
+/**
+ * Build the markup for the help topic: user guide - navigate the system.
+ *
+ * @param array $as
+ *   A collection of roles that the user is acting as.
+ * @param array $allowed_topics
+ *   An array of topics currently allowed based on the users access.
+ * @param array $section_information
+ *   Information needed for populating and customizing the generated section tag.
+ * @param bool $as_inline
+ *   (optional) When TRUE, certain links and formatting are omitted.
+ * @param bool $closing_tag
+ *   (optional) When TRUE, the closing section tag is appended.
+ *   When FALSE, no closing section tag is appended and the caller is expected to properly close.
+ *
+ * @return string
+ *   The generated HTML markup.
+ */
+function mfcs_help_user_guide_navigate_the_system($as, $allowed_topics, $section_information, $as_inline = FALSE, $closing_tag = TRUE) {
+  if (!is_array($as)) {
+    cf_error::invalid_array('as');
+    return '';
+  }
+
+  if (!is_array($allowed_topics)) {
+    cf_error::invalid_array('allowed_topics');
+    return '';
+  }
+
+  if (!is_array($section_information)) {
+    cf_error::invalid_array('section_information');
+    return '';
+  }
+
+  if (!is_bool($as_inline)) {
+    cf_error::invalid_bool('as_inline');
+    $as_inline = FALSE;
+  }
+
+  if (!is_bool($closing_tag)) {
+    cf_error::invalid_bool('closing_tag');
+    $closing_tag = TRUE;
+  }
+
+  global $base_url;
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  $module_path = drupal_get_path('module', 'mfcs');
+  $image_path = $base_path . $module_path . '/images';
+
+  if ($as_inline) {
+    $section_information['navigation'] = NULL;
+  }
+
+  $start_count = 0;
+  if (isset($section_information['start_count']) && is_numeric($section_information['start_count']) && $section_information['start_count'] >= 0) {
+    $start_count = (int) $section_information['start_count'];
+  }
+
+  $markup = '<section id="' . $section_information['id'] . '" class="' . implode(' ', $section_information['class']) . '">';
+  $markup .= $section_information['navigation'];
+  $markup .= mfcs_help_render_headers('topic-user_guide-navigate_the_system', $section_information['header_attributes'], $section_information['headers'], $start_count);
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'When you first login to the system, you should end up viewing the dashboard. ';
+  $markup .= 'At the center of the dashboard are a few links for navigating the website and a calendar of the current month. ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<a href="' . $image_path . '/user_guide/navigate_the_system-1-large.png"><img src="' . $base_path . $module_path . '/images/user_guide/navigate_the_system-1-small.png" alt="Screenshot of dashboard." class="image-user_guide image-user_guide-1"></a>';
+
+  if ($closing_tag) {
+    $markup .= '</section>';
+  }
+
+  return $markup;
+}
+
+/**
+ * Build the markup for the help topic: user guide - create a request.
+ *
+ * @param array $as
+ *   A collection of roles that the user is acting as.
+ * @param array $allowed_topics
+ *   An array of topics currently allowed based on the users access.
+ * @param array $section_information
+ *   Information needed for populating and customizing the generated section tag.
+ * @param bool $as_inline
+ *   (optional) When TRUE, certain links and formatting are omitted.
+ * @param bool $closing_tag
+ *   (optional) When TRUE, the closing section tag is appended.
+ *   When FALSE, no closing section tag is appended and the caller is expected to properly close.
+ *
+ * @return string
+ *   The generated HTML markup.
+ */
+function mfcs_help_user_guide_create_a_request($as, $allowed_topics, $section_information, $as_inline = FALSE, $closing_tag = TRUE) {
+  if (!is_array($as)) {
+    cf_error::invalid_array('as');
+    return '';
+  }
+
+  if (!is_array($allowed_topics)) {
+    cf_error::invalid_array('allowed_topics');
+    return '';
+  }
+
+  if (!is_array($section_information)) {
+    cf_error::invalid_array('section_information');
+    return '';
+  }
+
+  if (!is_bool($as_inline)) {
+    cf_error::invalid_bool('as_inline');
+    $as_inline = FALSE;
+  }
+
+  if (!is_bool($closing_tag)) {
+    cf_error::invalid_bool('closing_tag');
+    $closing_tag = TRUE;
+  }
+
+  if ($as_inline) {
+    $section_information['navigation'] = NULL;
+  }
+
+  $start_count = 0;
+  if (isset($section_information['start_count']) && is_numeric($section_information['start_count']) && $section_information['start_count'] >= 0) {
+    $start_count = (int) $section_information['start_count'];
+  }
+
+  $markup = '<section id="' . $section_information['id'] . '" class="' . implode(' ', $section_information['class']) . '">';
+  $markup .= $section_information['navigation'];
+  $markup .= mfcs_help_render_headers('topic-user_guide-create_a_request', $section_information['header_attributes'], $section_information['headers'], $start_count);
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'todo ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  if ($closing_tag) {
+    $markup .= '</section>';
+  }
+
+  return $markup;
+}
+
+/**
+ * Build the markup for the help topic: user guide - edit a request.
+ *
+ * @param array $as
+ *   A collection of roles that the user is acting as.
+ * @param array $allowed_topics
+ *   An array of topics currently allowed based on the users access.
+ * @param array $section_information
+ *   Information needed for populating and customizing the generated section tag.
+ * @param bool $as_inline
+ *   (optional) When TRUE, certain links and formatting are omitted.
+ * @param bool $closing_tag
+ *   (optional) When TRUE, the closing section tag is appended.
+ *   When FALSE, no closing section tag is appended and the caller is expected to properly close.
+ *
+ * @return string
+ *   The generated HTML markup.
+ */
+function mfcs_help_user_guide_edit_a_request($as, $allowed_topics, $section_information, $as_inline = FALSE, $closing_tag = TRUE) {
+  if (!is_array($as)) {
+    cf_error::invalid_array('as');
+    return '';
+  }
+
+  if (!is_array($allowed_topics)) {
+    cf_error::invalid_array('allowed_topics');
+    return '';
+  }
+
+  if (!is_array($section_information)) {
+    cf_error::invalid_array('section_information');
+    return '';
+  }
+
+  if (!is_bool($as_inline)) {
+    cf_error::invalid_bool('as_inline');
+    $as_inline = FALSE;
+  }
+
+  if (!is_bool($closing_tag)) {
+    cf_error::invalid_bool('closing_tag');
+    $closing_tag = TRUE;
+  }
+
+  if ($as_inline) {
+    $section_information['navigation'] = NULL;
+  }
+
+  $start_count = 0;
+  if (isset($section_information['start_count']) && is_numeric($section_information['start_count']) && $section_information['start_count'] >= 0) {
+    $start_count = (int) $section_information['start_count'];
+  }
+
+  $markup = '<section id="' . $section_information['id'] . '" class="' . implode(' ', $section_information['class']) . '">';
+  $markup .= $section_information['navigation'];
+  $markup .= mfcs_help_render_headers('topic-user_guide-edit_a_request', $section_information['header_attributes'], $section_information['headers'], $start_count);
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'todo ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  if ($closing_tag) {
+    $markup .= '</section>';
+  }
+
+  return $markup;
+}
+
+/**
+ * Build the markup for the help topic: user guide - cancel a request.
+ *
+ * @param array $as
+ *   A collection of roles that the user is acting as.
+ * @param array $allowed_topics
+ *   An array of topics currently allowed based on the users access.
+ * @param array $section_information
+ *   Information needed for populating and customizing the generated section tag.
+ * @param bool $as_inline
+ *   (optional) When TRUE, certain links and formatting are omitted.
+ * @param bool $closing_tag
+ *   (optional) When TRUE, the closing section tag is appended.
+ *   When FALSE, no closing section tag is appended and the caller is expected to properly close.
+ *
+ * @return string
+ *   The generated HTML markup.
+ */
+function mfcs_help_user_guide_cancel_a_request($as, $allowed_topics, $section_information, $as_inline = FALSE, $closing_tag = TRUE) {
+  if (!is_array($as)) {
+    cf_error::invalid_array('as');
+    return '';
+  }
+
+  if (!is_array($allowed_topics)) {
+    cf_error::invalid_array('allowed_topics');
+    return '';
+  }
+
+  if (!is_array($section_information)) {
+    cf_error::invalid_array('section_information');
+    return '';
+  }
+
+  if (!is_bool($as_inline)) {
+    cf_error::invalid_bool('as_inline');
+    $as_inline = FALSE;
+  }
+
+  if (!is_bool($closing_tag)) {
+    cf_error::invalid_bool('closing_tag');
+    $closing_tag = TRUE;
+  }
+
+  if ($as_inline) {
+    $section_information['navigation'] = NULL;
+  }
+
+  $start_count = 0;
+  if (isset($section_information['start_count']) && is_numeric($section_information['start_count']) && $section_information['start_count'] >= 0) {
+    $start_count = (int) $section_information['start_count'];
+  }
+
+  $markup = '<section id="' . $section_information['id'] . '" class="' . implode(' ', $section_information['class']) . '">';
+  $markup .= $section_information['navigation'];
+  $markup .= mfcs_help_render_headers('topic-user_guide-cancel_a_request', $section_information['header_attributes'], $section_information['headers'], $start_count);
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'todo ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  if ($closing_tag) {
+    $markup .= '</section>';
+  }
+
+  return $markup;
+}
+
+/**
+ * Build the markup for the help topic: user guide - uncancel a request.
+ *
+ * @param array $as
+ *   A collection of roles that the user is acting as.
+ * @param array $allowed_topics
+ *   An array of topics currently allowed based on the users access.
+ * @param array $section_information
+ *   Information needed for populating and customizing the generated section tag.
+ * @param bool $as_inline
+ *   (optional) When TRUE, certain links and formatting are omitted.
+ * @param bool $closing_tag
+ *   (optional) When TRUE, the closing section tag is appended.
+ *   When FALSE, no closing section tag is appended and the caller is expected to properly close.
+ *
+ * @return string
+ *   The generated HTML markup.
+ */
+function mfcs_help_user_guide_uncancel_a_request($as, $allowed_topics, $section_information, $as_inline = FALSE, $closing_tag = TRUE) {
+  if (!is_array($as)) {
+    cf_error::invalid_array('as');
+    return '';
+  }
+
+  if (!is_array($allowed_topics)) {
+    cf_error::invalid_array('allowed_topics');
+    return '';
+  }
+
+  if (!is_array($section_information)) {
+    cf_error::invalid_array('section_information');
+    return '';
+  }
+
+  if (!is_bool($as_inline)) {
+    cf_error::invalid_bool('as_inline');
+    $as_inline = FALSE;
+  }
+
+  if (!is_bool($closing_tag)) {
+    cf_error::invalid_bool('closing_tag');
+    $closing_tag = TRUE;
+  }
+
+  if ($as_inline) {
+    $section_information['navigation'] = NULL;
+  }
+
+  $start_count = 0;
+  if (isset($section_information['start_count']) && is_numeric($section_information['start_count']) && $section_information['start_count'] >= 0) {
+    $start_count = (int) $section_information['start_count'];
+  }
+
+  $markup = '<section id="' . $section_information['id'] . '" class="' . implode(' ', $section_information['class']) . '">';
+  $markup .= $section_information['navigation'];
+  $markup .= mfcs_help_render_headers('topic-user_guide-uncancel_a_request', $section_information['header_attributes'], $section_information['headers'], $start_count);
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'todo ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  if ($closing_tag) {
+    $markup .= '</section>';
+  }
+
+  return $markup;
+}
+
+/**
+ * Build the markup for the help topic: user guide - copy a request.
+ *
+ * @param array $as
+ *   A collection of roles that the user is acting as.
+ * @param array $allowed_topics
+ *   An array of topics currently allowed based on the users access.
+ * @param array $section_information
+ *   Information needed for populating and customizing the generated section tag.
+ * @param bool $as_inline
+ *   (optional) When TRUE, certain links and formatting are omitted.
+ * @param bool $closing_tag
+ *   (optional) When TRUE, the closing section tag is appended.
+ *   When FALSE, no closing section tag is appended and the caller is expected to properly close.
+ *
+ * @return string
+ *   The generated HTML markup.
+ */
+function mfcs_help_user_guide_copy_a_request($as, $allowed_topics, $section_information, $as_inline = FALSE, $closing_tag = TRUE) {
+  if (!is_array($as)) {
+    cf_error::invalid_array('as');
+    return '';
+  }
+
+  if (!is_array($allowed_topics)) {
+    cf_error::invalid_array('allowed_topics');
+    return '';
+  }
+
+  if (!is_array($section_information)) {
+    cf_error::invalid_array('section_information');
+    return '';
+  }
+
+  if (!is_bool($as_inline)) {
+    cf_error::invalid_bool('as_inline');
+    $as_inline = FALSE;
+  }
+
+  if (!is_bool($closing_tag)) {
+    cf_error::invalid_bool('closing_tag');
+    $closing_tag = TRUE;
+  }
+
+  if ($as_inline) {
+    $section_information['navigation'] = NULL;
+  }
+
+  $start_count = 0;
+  if (isset($section_information['start_count']) && is_numeric($section_information['start_count']) && $section_information['start_count'] >= 0) {
+    $start_count = (int) $section_information['start_count'];
+  }
+
+  $markup = '<section id="' . $section_information['id'] . '" class="' . implode(' ', $section_information['class']) . '">';
+  $markup .= $section_information['navigation'];
+  $markup .= mfcs_help_render_headers('topic-user_guide-copy_a_request', $section_information['header_attributes'], $section_information['headers'], $start_count);
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'todo ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  if ($closing_tag) {
+    $markup .= '</section>';
+  }
+
+  return $markup;
+}
+
+/**
+ * Build the markup for the help topic: user guide - find a request.
+ *
+ * @param array $as
+ *   A collection of roles that the user is acting as.
+ * @param array $allowed_topics
+ *   An array of topics currently allowed based on the users access.
+ * @param array $section_information
+ *   Information needed for populating and customizing the generated section tag.
+ * @param bool $as_inline
+ *   (optional) When TRUE, certain links and formatting are omitted.
+ * @param bool $closing_tag
+ *   (optional) When TRUE, the closing section tag is appended.
+ *   When FALSE, no closing section tag is appended and the caller is expected to properly close.
+ *
+ * @return string
+ *   The generated HTML markup.
+ */
+function mfcs_help_user_guide_find_a_request($as, $allowed_topics, $section_information, $as_inline = FALSE, $closing_tag = TRUE) {
+  if (!is_array($as)) {
+    cf_error::invalid_array('as');
+    return '';
+  }
+
+  if (!is_array($allowed_topics)) {
+    cf_error::invalid_array('allowed_topics');
+    return '';
+  }
+
+  if (!is_array($section_information)) {
+    cf_error::invalid_array('section_information');
+    return '';
+  }
+
+  if (!is_bool($as_inline)) {
+    cf_error::invalid_bool('as_inline');
+    $as_inline = FALSE;
+  }
+
+  if (!is_bool($closing_tag)) {
+    cf_error::invalid_bool('closing_tag');
+    $closing_tag = TRUE;
+  }
+
+  if ($as_inline) {
+    $section_information['navigation'] = NULL;
+  }
+
+  $start_count = 0;
+  if (isset($section_information['start_count']) && is_numeric($section_information['start_count']) && $section_information['start_count'] >= 0) {
+    $start_count = (int) $section_information['start_count'];
+  }
+
+  $markup = '<section id="' . $section_information['id'] . '" class="' . implode(' ', $section_information['class']) . '">';
+  $markup .= $section_information['navigation'];
+  $markup .= mfcs_help_render_headers('topic-user_guide-find_a_request', $section_information['header_attributes'], $section_information['headers'], $start_count);
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'todo ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  if ($closing_tag) {
+    $markup .= '</section>';
+  }
+
+  return $markup;
+}
+
+/**
+ * Build the markup for the help topic: user guide - review a request.
+ *
+ * @param array $as
+ *   A collection of roles that the user is acting as.
+ * @param array $allowed_topics
+ *   An array of topics currently allowed based on the users access.
+ * @param array $section_information
+ *   Information needed for populating and customizing the generated section tag.
+ * @param bool $as_inline
+ *   (optional) When TRUE, certain links and formatting are omitted.
+ * @param bool $closing_tag
+ *   (optional) When TRUE, the closing section tag is appended.
+ *   When FALSE, no closing section tag is appended and the caller is expected to properly close.
+ *
+ * @return string
+ *   The generated HTML markup.
+ */
+function mfcs_help_user_guide_review_a_request($as, $allowed_topics, $section_information, $as_inline = FALSE, $closing_tag = TRUE) {
+  if (!is_array($as)) {
+    cf_error::invalid_array('as');
+    return '';
+  }
+
+  if (!is_array($allowed_topics)) {
+    cf_error::invalid_array('allowed_topics');
+    return '';
+  }
+
+  if (!is_array($section_information)) {
+    cf_error::invalid_array('section_information');
+    return '';
+  }
+
+  if (!is_bool($as_inline)) {
+    cf_error::invalid_bool('as_inline');
+    $as_inline = FALSE;
+  }
+
+  if (!is_bool($closing_tag)) {
+    cf_error::invalid_bool('closing_tag');
+    $closing_tag = TRUE;
+  }
+
+  if ($as_inline) {
+    $section_information['navigation'] = NULL;
+  }
+
+  $start_count = 0;
+  if (isset($section_information['start_count']) && is_numeric($section_information['start_count']) && $section_information['start_count'] >= 0) {
+    $start_count = (int) $section_information['start_count'];
+  }
+
+  $markup = '<section id="' . $section_information['id'] . '" class="' . implode(' ', $section_information['class']) . '">';
+  $markup .= $section_information['navigation'];
+  $markup .= mfcs_help_render_headers('topic-user_guide-review_a_request', $section_information['header_attributes'], $section_information['headers'], $start_count);
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'todo ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  if ($closing_tag) {
+    $markup .= '</section>';
+  }
+
+  return $markup;
+}
+
+/**
+ * Build the markup for the help topic: user guide - manage a request.
+ *
+ * @param array $as
+ *   A collection of roles that the user is acting as.
+ * @param array $allowed_topics
+ *   An array of topics currently allowed based on the users access.
+ * @param array $section_information
+ *   Information needed for populating and customizing the generated section tag.
+ * @param bool $as_inline
+ *   (optional) When TRUE, certain links and formatting are omitted.
+ * @param bool $closing_tag
+ *   (optional) When TRUE, the closing section tag is appended.
+ *   When FALSE, no closing section tag is appended and the caller is expected to properly close.
+ *
+ * @return string
+ *   The generated HTML markup.
+ */
+function mfcs_help_user_guide_manage_a_request($as, $allowed_topics, $section_information, $as_inline = FALSE, $closing_tag = TRUE) {
+  if (!is_array($as)) {
+    cf_error::invalid_array('as');
+    return '';
+  }
+
+  if (!is_array($allowed_topics)) {
+    cf_error::invalid_array('allowed_topics');
+    return '';
+  }
+
+  if (!is_array($section_information)) {
+    cf_error::invalid_array('section_information');
+    return '';
+  }
+
+  if (!is_bool($as_inline)) {
+    cf_error::invalid_bool('as_inline');
+    $as_inline = FALSE;
+  }
+
+  if (!is_bool($closing_tag)) {
+    cf_error::invalid_bool('closing_tag');
+    $closing_tag = TRUE;
+  }
+
+  if ($as_inline) {
+    $section_information['navigation'] = NULL;
+  }
+
+  $start_count = 0;
+  if (isset($section_information['start_count']) && is_numeric($section_information['start_count']) && $section_information['start_count'] >= 0) {
+    $start_count = (int) $section_information['start_count'];
+  }
+
+  $markup = '<section id="' . $section_information['id'] . '" class="' . implode(' ', $section_information['class']) . '">';
+  $markup .= $section_information['navigation'];
+  $markup .= mfcs_help_render_headers('topic-user_guide-manage_a_request', $section_information['header_attributes'], $section_information['headers'], $start_count);
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'todo ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  if ($closing_tag) {
+    $markup .= '</section>';
+  }
+
+  return $markup;
+}
+
+/**
+ * Build the markup for the help topic: user guide - using the calendar.
+ *
+ * @param array $as
+ *   A collection of roles that the user is acting as.
+ * @param array $allowed_topics
+ *   An array of topics currently allowed based on the users access.
+ * @param array $section_information
+ *   Information needed for populating and customizing the generated section tag.
+ * @param bool $as_inline
+ *   (optional) When TRUE, certain links and formatting are omitted.
+ * @param bool $closing_tag
+ *   (optional) When TRUE, the closing section tag is appended.
+ *   When FALSE, no closing section tag is appended and the caller is expected to properly close.
+ *
+ * @return string
+ *   The generated HTML markup.
+ */
+function mfcs_help_user_guide_using_the_calendar($as, $allowed_topics, $section_information, $as_inline = FALSE, $closing_tag = TRUE) {
+  if (!is_array($as)) {
+    cf_error::invalid_array('as');
+    return '';
+  }
+
+  if (!is_array($allowed_topics)) {
+    cf_error::invalid_array('allowed_topics');
+    return '';
+  }
+
+  if (!is_array($section_information)) {
+    cf_error::invalid_array('section_information');
+    return '';
+  }
+
+  if (!is_bool($as_inline)) {
+    cf_error::invalid_bool('as_inline');
+    $as_inline = FALSE;
+  }
+
+  if (!is_bool($closing_tag)) {
+    cf_error::invalid_bool('closing_tag');
+    $closing_tag = TRUE;
+  }
+
+  if ($as_inline) {
+    $section_information['navigation'] = NULL;
+  }
+
+  $start_count = 0;
+  if (isset($section_information['start_count']) && is_numeric($section_information['start_count']) && $section_information['start_count'] >= 0) {
+    $start_count = (int) $section_information['start_count'];
+  }
+
+  $markup = '<section id="' . $section_information['id'] . '" class="' . implode(' ', $section_information['class']) . '">';
+  $markup .= $section_information['navigation'];
+  $markup .= mfcs_help_render_headers('topic-user_guide-using_the_calendar', $section_information['header_attributes'], $section_information['headers'], $start_count);
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'todo ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  if ($closing_tag) {
+    $markup .= '</section>';
+  }
+
+  return $markup;
+}
+
+/**
+ * Build the markup for the help topic: user guide - exporting the calendar.
+ *
+ * @param array $as
+ *   A collection of roles that the user is acting as.
+ * @param array $allowed_topics
+ *   An array of topics currently allowed based on the users access.
+ * @param array $section_information
+ *   Information needed for populating and customizing the generated section tag.
+ * @param bool $as_inline
+ *   (optional) When TRUE, certain links and formatting are omitted.
+ * @param bool $closing_tag
+ *   (optional) When TRUE, the closing section tag is appended.
+ *   When FALSE, no closing section tag is appended and the caller is expected to properly close.
+ *
+ * @return string
+ *   The generated HTML markup.
+ */
+function mfcs_help_user_guide_exporting_the_calendar($as, $allowed_topics, $section_information, $as_inline = FALSE, $closing_tag = TRUE) {
+  if (!is_array($as)) {
+    cf_error::invalid_array('as');
+    return '';
+  }
+
+  if (!is_array($allowed_topics)) {
+    cf_error::invalid_array('allowed_topics');
+    return '';
+  }
+
+  if (!is_array($section_information)) {
+    cf_error::invalid_array('section_information');
+    return '';
+  }
+
+  if (!is_bool($as_inline)) {
+    cf_error::invalid_bool('as_inline');
+    $as_inline = FALSE;
+  }
+
+  if (!is_bool($closing_tag)) {
+    cf_error::invalid_bool('closing_tag');
+    $closing_tag = TRUE;
+  }
+
+  if ($as_inline) {
+    $section_information['navigation'] = NULL;
+  }
+
+  $start_count = 0;
+  if (isset($section_information['start_count']) && is_numeric($section_information['start_count']) && $section_information['start_count'] >= 0) {
+    $start_count = (int) $section_information['start_count'];
+  }
+
+  $markup = '<section id="' . $section_information['id'] . '" class="' . implode(' ', $section_information['class']) . '">';
+  $markup .= $section_information['navigation'];
+  $markup .= mfcs_help_render_headers('topic-user_guide-exporting_the_calendar', $section_information['header_attributes'], $section_information['headers'], $start_count);
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'todo ';
+  $markup .= '<br>';
+  $markup .= '</div>';
 
   if ($closing_tag) {
     $markup .= '</section>';
