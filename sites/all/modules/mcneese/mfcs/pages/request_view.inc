@@ -1492,6 +1492,18 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         }
       }
 
+      // only allow comments for a cancelled request.
+      if ($status === MFCS_REQUEST_STATUS_CANCELLED || $status === MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED) {
+        if (array_key_exists(MFCS_REVIEW_DECISION_COMMENT, $decision_options)) {
+          $decision_options = array(
+            MFCS_REVIEW_DECISION_COMMENT => $decision_options_all[MFCS_REVIEW_DECISION_COMMENT],
+          );
+        }
+        else {
+          $decision_options = array();
+        }
+      }
+
 
       // provide warnings.
       $form['review']['operations']['warnings'] = array(
@@ -1579,7 +1591,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
       );
 
       if (count($decision_options) == 1 && array_key_exists(MFCS_REVIEW_DECISION_COMMENT, $decision_options)) {
-        $form['review']['operations']['decision']['#title'] = "Action / Decision";
+        $form['review']['operations']['decision']['#title'] = 'Action / Decision';
         $form['review']['operations']['decision']['#default_value'] = MFCS_REVIEW_DECISION_COMMENT;
       }
 
