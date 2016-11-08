@@ -3174,7 +3174,7 @@ function mfcs_request_view_0_form_submit_pdf($form, &$form_state) {
  *   This function should not return.
  */
 function mfcs_request_pdf_0_page($request_id, $mode, $revision_id = NULL) {
-  $page_title = "Facilities Use Request";
+  $page_title = 'Facilities Use Request';
   drupal_set_title($page_title);
 
   if (!is_null($revision_id) && !cf_is_integer($revision_id)) {
@@ -3215,7 +3215,7 @@ function mfcs_request_pdf_0_page($request_id, $mode, $revision_id = NULL) {
   }
 
   if (!empty($request['information']['title'][0]->value)) {
-    $page_title = "Facilities Use Request: " . $request['information']['title'][0]->value;
+    $page_title = 'Facilities Use Request: ' . $request['information']['title'][0]->value;
 
     drupal_set_title($page_title);
   }
@@ -3244,7 +3244,7 @@ function mfcs_request_pdf_0_page($request_id, $mode, $revision_id = NULL) {
   mfcs_include(MFCS_INCLUDE_OUTPUT);
 
   $parameters = array(
-    'page_title' => "Facilities Use Request: " . $request['information']['title'][0]->value,
+    'page_title' => 'Facilities Use Request: ' . $request['information']['title'][0]->value,
     'title' => 'Request #' . $request_id . ': ' . $request['information']['title'][0]->value,
   );
 
@@ -3281,7 +3281,7 @@ function mfcs_request_pdf_0_page($request_id, $mode, $revision_id = NULL) {
  *   This function should not return.
  */
 function mfcs_request_print_0_page($request_id, $mode, $revision_id = NULL) {
-  $page_title = "Facilities Use Request";
+  $page_title = 'Facilities Use Request';
   drupal_set_title($page_title);
 
   if (!is_null($revision_id) && !cf_is_integer($revision_id)) {
@@ -3321,7 +3321,7 @@ function mfcs_request_print_0_page($request_id, $mode, $revision_id = NULL) {
   }
 
   if (!empty($request['information']['title'][0]->value)) {
-    $page_title = "Facilities Use Request: " . $request['information']['title'][0]->value;
+    $page_title = 'Facilities Use Request: ' . $request['information']['title'][0]->value;
 
     drupal_set_title($page_title);
   }
@@ -3350,7 +3350,7 @@ function mfcs_request_print_0_page($request_id, $mode, $revision_id = NULL) {
   mfcs_include(MFCS_INCLUDE_OUTPUT);
 
   $parameters = array(
-    'page_title' => "Facilities Use Request: " . $request['information']['title'][0]->value,
+    'page_title' => 'Facilities Use Request: ' . $request['information']['title'][0]->value,
     'title' => 'Request #' . $request_id . ': ' . $request['information']['title'][0]->value,
     'all_media' => TRUE,
   );
