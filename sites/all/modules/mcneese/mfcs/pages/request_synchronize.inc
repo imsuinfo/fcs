@@ -73,7 +73,7 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = NUL
 
   mfcs_add_canonical_headers('requests/synchronize-0/' . $page_number);
 
-  $page_title = "Synchronize";
+  $page_title = 'Synchronize';
   drupal_set_title($page_title);
 
   $user = cf_current_user();
@@ -312,7 +312,7 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = NUL
   $synchronize_list['attributes']['summary'] = 'List of synchronization URLs.';
 
   $synchronize_list['rows'] = $rows;
-  $synchronize_list['empty'] = 'This system has no synchronization URLs defined.');
+  $synchronize_list['empty'] = 'This system has no synchronization URLs defined.';
 
   $datatable_settings = array(
     'sort' => strtolower($sort),
