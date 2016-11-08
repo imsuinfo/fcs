@@ -281,6 +281,36 @@ function mfcs_help_0_page($topic = NULL, $section = NULL, $sub_section = NULL) {
 
     $markup .= mfcs_help_user_guide_manage_a_request($as, $allowed_topics, $section_information);
   }
+  elseif ($topic == 'manage_a_holiday') {
+    $section_information['headers'][0] = array('markup' => 'Facilities Use User Guide', 'attributes' => array('class' => array('header-1', 'title')));
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'user_guide';
+
+    $section_information['class'][] = 'section-help-user_guide-manage_a_holiday';
+    $section_information['headers'][1] = array('markup' => 'Manage a Holiday', 'attributes' => array('class' => array('header-2', 'topic')));
+
+    $markup .= mfcs_help_user_guide_manage_a_holiday($as, $allowed_topics, $section_information);
+  }
+  elseif ($topic == 'manage_a_room_unavailability') {
+    $section_information['headers'][0] = array('markup' => 'Facilities Use User Guide', 'attributes' => array('class' => array('header-1', 'title')));
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'user_guide';
+
+    $section_information['class'][] = 'section-help-user_guide-manage_a_room_unavailability';
+    $section_information['headers'][1] = array('markup' => 'Manage a Room Unavailability', 'attributes' => array('class' => array('header-2', 'topic')));
+
+    $markup .= mfcs_help_user_guide_manage_a_room_unavailability($as, $allowed_topics, $section_information);
+  }
+  elseif ($topic == 'troubleshoot_requests_and_users') {
+    $section_information['headers'][0] = array('markup' => 'Facilities Use User Guide', 'attributes' => array('class' => array('header-1', 'title')));
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'user_guide';
+
+    $section_information['class'][] = 'section-help-user_guide-troubleshoot_requests_and_users';
+    $section_information['headers'][1] = array('markup' => 'Troubleshoot Requests and Users', 'attributes' => array('class' => array('header-2', 'topic')));
+
+    $markup .= mfcs_help_user_guide_troubleshoot_requests_and_users($as, $allowed_topics, $section_information);
+  }
   elseif ($topic == 'using_the_calendar') {
     $section_information['headers'][0] = array('markup' => 'Facilities Use User Guide', 'attributes' => array('class' => array('header-1', 'title')));
     $section_information['class'] = $base_class;
@@ -1495,8 +1525,18 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
     $determined['top'] = $base_path . 'help-0' . $url_arguments;
     $determined['tooltip-top'] = 'Glossary';
 
-    $determined['next'] = $base_path . 'help-0/review_a_request' . $url_arguments;
-    $determined['tooltip-next'] = 'User Guide: Review a Request';
+    if (in_array('review_a_request', $allowed_topics)) {
+      $determined['next'] = $base_path . 'help-0/review_a_request' . $url_arguments;
+      $determined['tooltip-next'] = 'User Guide: Review a Request';
+    }
+    elseif (in_array('manage_a_request', $allowed_topics)) {
+      $determined['next'] = $base_path . 'help-0/manage_a_request' . $url_arguments;
+      $determined['next-previous'] = 'User Guide: Manage a Request';
+    }
+    else {
+      $determined['next'] = $base_path . 'help-0/using_the_calendar' . $url_arguments;
+      $determined['tooltip-next'] = 'User Guide: Using the Calendar';
+    }
 
     $determined['previous'] = $base_path . 'help-0/copy_a_request' . $url_arguments;
     $determined['tooltip-previous'] = 'User Guide: Copy a Request';
@@ -1505,8 +1545,14 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
     $determined['top'] = $base_path . 'help-0' . $url_arguments;
     $determined['tooltip-top'] = 'Glossary';
 
-    $determined['next'] = $base_path . 'help-0/manage_a_request' . $url_arguments;
-    $determined['tooltip-next'] = 'User Guide: Manage a Request';
+    if (in_array('manage_a_request', $allowed_topics)) {
+      $determined['next'] = $base_path . 'help-0/manage_a_request' . $url_arguments;
+      $determined['next-previous'] = 'User Guide: Manage a Request';
+    }
+    else {
+      $determined['next'] = $base_path . 'help-0/using_the_calendar' . $url_arguments;
+      $determined['tooltip-next'] = 'User Guide: Using the Calendar';
+    }
 
     $determined['previous'] = $base_path . 'help-0/find_a_request' . $url_arguments;
     $determined['tooltip-previous'] = 'User Guide: Find a Request';
@@ -1515,11 +1561,47 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
     $determined['top'] = $base_path . 'help-0' . $url_arguments;
     $determined['tooltip-top'] = 'Glossary';
 
+    $determined['next'] = $base_path . 'help-0/manage_a_holiday' . $url_arguments;
+    $determined['tooltip-next'] = 'User Guide: Manage a Holiday';
+
+    if (in_array('review_a_request', $allowed_topics)) {
+      $determined['previous'] = $base_path . 'help-0/review_a_request' . $url_arguments;
+      $determined['tooltip-previous'] = 'User Guide: Review a Request';
+    }
+    else {
+      $determined['previous'] = $base_path . 'help-0/find_a_request' . $url_arguments;
+      $determined['tooltip-previous'] = 'User Guide: Find a Request';
+    }
+  }
+  elseif ($topic == 'manage_a_holiday') {
+    $determined['top'] = $base_path . 'help-0' . $url_arguments;
+    $determined['tooltip-top'] = 'Glossary';
+
+    $determined['next'] = $base_path . 'help-0/manage_a_room_unavailability' . $url_arguments;
+    $determined['tooltip-next'] = 'User Guide: Manage a Room Unavailability';
+
+    $determined['previous'] = $base_path . 'help-0/manage_a_request' . $url_arguments;
+    $determined['tooltip-previous'] = 'User Guide: Manage a Request';
+  }
+  elseif ($topic == 'manage_a_room_unavailability') {
+    $determined['top'] = $base_path . 'help-0' . $url_arguments;
+    $determined['tooltip-top'] = 'Glossary';
+
+    $determined['next'] = $base_path . 'help-0/troubleshoot_requests_and_users' . $url_arguments;
+    $determined['tooltip-next'] = 'User Guide: Troubleshooting Requests and Users';
+
+    $determined['previous'] = $base_path . 'help-0/manage_a_holiday' . $url_arguments;
+    $determined['tooltip-previous'] = 'User Guide: Manage a Holiday';
+  }
+  elseif ($topic == 'troubleshoot_requests_and_users') {
+    $determined['top'] = $base_path . 'help-0' . $url_arguments;
+    $determined['tooltip-top'] = 'Glossary';
+
     $determined['next'] = $base_path . 'help-0/using_the_calendar' . $url_arguments;
     $determined['tooltip-next'] = 'User Guide: Using the Calendar';
 
-    $determined['previous'] = $base_path . 'help-0/review_a_request' . $url_arguments;
-    $determined['tooltip-previous'] = 'User Guide: Review a Request';
+    $determined['previous'] = $base_path . 'help-0/manage_a_room_unavailability' . $url_arguments;
+    $determined['tooltip-previous'] = 'User Guide: Manage a Room Unavailability';
   }
   elseif ($topic == 'using_the_calendar') {
     $determined['top'] = $base_path . 'help-0' . $url_arguments;
@@ -1528,8 +1610,18 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
     $determined['next'] = $base_path . 'help-0/exporting_the_calendar' . $url_arguments;
     $determined['tooltip-next'] = 'User Guide: Exporting the Calendar';
 
-    $determined['previous'] = $base_path . 'help-0/manage_a_request' . $url_arguments;
-    $determined['tooltip-previous'] = 'User Guide: Manage a Request';
+    if (in_array('troubleshoot_requests_and_users', $allowed_topics)) {
+      $determined['previous'] = $base_path . 'help-0/troubleshoot_requests_and_users' . $url_arguments;
+      $determined['tooltip-previous'] = 'User Guide: Troubleshooting Requests and Users';
+    }
+    elseif (in_array('review_a_request', $allowed_topics)) {
+      $determined['previous'] = $base_path . 'help-0/review_a_request' . $url_arguments;
+      $determined['tooltip-previous'] = 'User Guide: Review a Request';
+    }
+    else {
+      $determined['previous'] = $base_path . 'help-0/find_a_request' . $url_arguments;
+      $determined['tooltip-previous'] = 'User Guide: Find a Request';
+    }
   }
   elseif ($topic == 'exporting_the_calendar') {
     $determined['top'] = $base_path . 'help-0' . $url_arguments;
@@ -2145,6 +2237,10 @@ function mfcs_help_0_allowed_topics($as) {
   if ($as['manager'] || $as['administer']) {
     // user guides
     $topics[] = 'manage_a_request';
+    $topics[] = 'manage_a_holiday';
+    $topics[] = 'manage_a_room_unavailability';
+    $topics[] = 'troubleshoot_requests_and_users';
+
 
     // documentation
     $topics[] = 'manage';
@@ -2285,8 +2381,26 @@ function mfcs_help_topic_glossary($allowed_topics, $section_information, $as_inl
     ),
     'manage_a_request' => array(
       'url' => $base_path . 'help-0/manage_a_request' . $url_arguments,
-      'tooltip' => 'User Guide: Manage System',
-      'text' => 'Manage System',
+      'tooltip' => 'User Guide: Manage a Request',
+      'text' => 'Manage a Request',
+      'class' => 'item-link no_print_links_as_link',
+    ),
+    'manage_a_holiday' => array(
+      'url' => $base_path . 'help-0/manage_a_holiday' . $url_arguments,
+      'tooltip' => 'User Guide: Manage a Holiday',
+      'text' => 'Manage a Holiday',
+      'class' => 'item-link no_print_links_as_link',
+    ),
+    'manage_a_room_unavailability' => array(
+      'url' => $base_path . 'help-0/manage_a_room_unavailability' . $url_arguments,
+      'tooltip' => 'User Guide: Manage a Room Unavailability',
+      'text' => 'Manage a Room Unavailability',
+      'class' => 'item-link no_print_links_as_link',
+    ),
+    'troubleshoot_requests_and_users' => array(
+      'url' => $base_path . 'help-0/troubleshoot_requests_and_users' . $url_arguments,
+      'tooltip' => 'User Guide: Troubleshoot Requests and Users',
+      'text' => 'Troubleshoot Requests and Users',
       'class' => 'item-link no_print_links_as_link',
     ),
     'using_the_calendar' => array(
@@ -2503,6 +2617,9 @@ function mfcs_help_topic_glossary($allowed_topics, $section_information, $as_inl
       $links['find_a_request']['url'] = '#help-user_guide-find_a_request' . $url_arguments;
       $links['review_a_request']['url'] = '#help-user_guide-review_a_request' . $url_arguments;
       $links['manage_a_request']['url'] = '#help-user_guide-manage_a_request' . $url_arguments;
+      $links['manage_a_holiday']['url'] = '#help-user_guide-manage_a_holiday' . $url_arguments;
+      $links['manage_a_room_unavailability']['url'] = '#help-user_guide-manage_a_room_unavailability' . $url_arguments;
+      $links['troubleshoot_requests_and_users']['url'] = '#help-user_guide-troubleshoot_requests_and_users' . $url_arguments;
       $links['using_the_calendar']['url'] = '#help-user_guide-using_the_calendar' . $url_arguments;
       $links['exporting_the_calendar']['url'] = '#help-user_guide-exporting_the_calendar' . $url_arguments;
     }
@@ -2560,7 +2677,7 @@ function mfcs_help_topic_glossary($allowed_topics, $section_information, $as_inl
   $markup .= mfcs_help_render_headers('topic-glossary-user_guides', array('class' => $sub_section_class), $headers, 2);
   $markup .= '<ul class="navigation-list">';
 
-  foreach (array('navigate_the_system', 'create_a_request', 'edit_a_request', 'cancel_a_request', 'uncancel_a_request', 'copy_a_request', 'find_a_request', 'review_a_request', 'manage_a_request', 'using_the_calendar', 'exporting_the_calendar') as $topic_name) {
+  foreach (array('navigate_the_system', 'create_a_request', 'edit_a_request', 'cancel_a_request', 'uncancel_a_request', 'copy_a_request', 'find_a_request', 'review_a_request', 'manage_a_request', 'manage_a_holiday', 'manage_a_room_unavailability', 'troubleshoot_requests_and_users', 'using_the_calendar', 'exporting_the_calendar') as $topic_name) {
     if (!in_array($topic_name, $allowed_topics) || !array_key_exists($topic_name, $links)) {
       continue;
     }
@@ -7940,8 +8057,32 @@ function mfcs_help_user_guide_review_a_request($as, $allowed_topics, $section_in
   $markup .= mfcs_help_render_headers('topic-user_guide-review_a_request', $section_information['header_attributes'], $section_information['headers'], $start_count);
 
   $markup .= '<div class="paragraph">';
-  $markup .= 'todo ';
-  $markup .= '<br>';
+  $markup .= '<div class="image-wrapper image-wrapper-float-right"><img src="' . $base_path . $module_path . '/images/user_guide/review_a_request-1.png" alt="Screenshot of Utility Navigation."" class="image-user_guide" width="289" height="28"></div> ';
+  $markup .= 'You can access <dfn class="term">Requests</dfn> that you are allowed to <dfn class="term">Review</dfn> at any time by visiting the <dfn class="term">Review</dfn> listing page. ';
+  $markup .= 'The link to this page is found on the <dfn class="term">Utility Navigation</dfn> on the top-left side of the web page.';
+  $markup .= 'If you are already viewing a <dfn class="term">Request</dfn>, then scroll to the bottom of the web page to find the <dfn class="term">Review</dfn> operations. ';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'There will be three primary areas of the <dfn class="term">Review</dfn> operations area. ';
+  $markup .= 'The first is the <strong class="bold">Decision</strong> field. ';
+  $markup .= 'The options available in the <strong class="bold">Decision</strong> field is dependent on the current <dfn class="term">Review Step</dfn> as well as the access granted by your account. ';
+  $markup .= 'There is a <strong class="bold">Message</strong> field for leaving messages. ';
+  $markup .= 'Should you wish for your message to be more restrictive, select the checkbox on the top-right side of the <strong class="bold">Message</strong> field. ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/review_a_request-2.png" alt="Screenshot of Request Review Operations during the Venue Available Step." class="image-user_guide" width="640" height="218"></div> ';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'There will sometimes be warnings, such as holiday conflicts, displayed in the <dfn class="term">Review</dfn> operations area. ';
+  $markup .= 'Should there be a <dfn class="term">Room</dfn> scheduling conflict, instead of a warning an error will be presented and some decisions may be prohibited. ';
+  $markup .= 'Otherwise, you need only make your decision, add any messages, and submit the <dfn class="term">Review</dfn> decision. ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/review_a_request-3.png" alt="Screenshot displaying a Review Operations with a holiday conflict warning." class="image-user_guide" width="631" height="292"></div> ';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'If your account has the <dfn class="term">Financer</dfn> role, <dfn class="term">Insurer</dfn> role, or both roles, then you may also be able to specify the <dfn class="term">Requirements</dfn> decision. ';
+  $markup .= 'Select the <dfn class="term">Requirement</dfn> decision and then fill out the extra fields as necessary. ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/review_a_request-4.png" alt="Screenshot displaying Review Operations with usage fee and insurance fee fields." class="image-user_guide" width="512" height="649"></div> ';
   $markup .= '</div>';
 
   if ($closing_tag) {
@@ -8020,9 +8161,280 @@ function mfcs_help_user_guide_manage_a_request($as, $allowed_topics, $section_in
   $markup .= $section_information['navigation'];
   $markup .= mfcs_help_render_headers('topic-user_guide-manage_a_request', $section_information['header_attributes'], $section_information['headers'], $start_count);
 
+  // holidays section.
   $markup .= '<div class="paragraph">';
-  $markup .= 'todo ';
-  $markup .= '<br>';
+  $markup .= 'Todo. ';
+  $markup .= '</div>';
+
+
+  if ($closing_tag) {
+    $markup .= '</section>';
+  }
+
+  return $markup;
+}
+
+/**
+ * Build the markup for the help topic: user guide - manage a holiday.
+ *
+ * @param array $as
+ *   A collection of roles that the user is acting as.
+ * @param array $allowed_topics
+ *   An array of topics currently allowed based on the users access.
+ * @param array $section_information
+ *   Information needed for populating and customizing the generated section tag.
+ * @param bool $as_inline
+ *   (optional) When TRUE, certain links and formatting are omitted.
+ * @param bool $closing_tag
+ *   (optional) When TRUE, the closing section tag is appended.
+ *   When FALSE, no closing section tag is appended and the caller is expected to properly close.
+ *
+ * @return string
+ *   The generated HTML markup.
+ */
+function mfcs_help_user_guide_manage_a_holiday($as, $allowed_topics, $section_information, $as_inline = FALSE, $closing_tag = TRUE) {
+  if (!is_array($as)) {
+    cf_error::invalid_array('as');
+    return '';
+  }
+
+  if (!is_array($allowed_topics)) {
+    cf_error::invalid_array('allowed_topics');
+    return '';
+  }
+
+  if (!is_array($section_information)) {
+    cf_error::invalid_array('section_information');
+    return '';
+  }
+
+  if (!is_bool($as_inline)) {
+    cf_error::invalid_bool('as_inline');
+    $as_inline = FALSE;
+  }
+
+  if (!is_bool($closing_tag)) {
+    cf_error::invalid_bool('closing_tag');
+    $closing_tag = TRUE;
+  }
+
+  global $base_url;
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  $module_path = drupal_get_path('module', 'mfcs');
+  $image_path = $base_path . $module_path . '/images';
+
+  if ($as_inline) {
+    $section_information['navigation'] = NULL;
+  }
+
+  $start_count = 0;
+  if (isset($section_information['start_count']) && is_numeric($section_information['start_count']) && $section_information['start_count'] >= 0) {
+    $start_count = (int) $section_information['start_count'];
+  }
+
+  $markup = '<section id="' . $section_information['id'] . '" class="' . implode(' ', $section_information['class']) . '">';
+  $markup .= $section_information['navigation'];
+  $markup .= mfcs_help_render_headers('topic-user_guide-manage_a_holiday', $section_information['header_attributes'], $section_information['headers'], $start_count);
+
+  // holidays section.
+  $markup .= '<div class="paragraph">';
+  $markup .= 'To view, add, or remove holidays, <dfn class="term">Managers</dfn> may to the holidays web page using the <dfn class="term">Utility Navigation</dfn>. ';
+  $markup .= 'Holidays are group in years and must be re-created for every new year. ';
+  $markup .= 'You can either create a holiday for the current selected year or copy a holiday from a previous year. ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/manage_a_holiday-1.png" alt="Screenshot displaying the holiday web page." class="image-user_guide" width="410" height="216"></div> ';
+  $markup .= '</div>';
+
+
+  if ($closing_tag) {
+    $markup .= '</section>';
+  }
+
+  return $markup;
+}
+
+/**
+ * Build the markup for the help topic: user guide - manage a room unavailability.
+ *
+ * @param array $as
+ *   A collection of roles that the user is acting as.
+ * @param array $allowed_topics
+ *   An array of topics currently allowed based on the users access.
+ * @param array $section_information
+ *   Information needed for populating and customizing the generated section tag.
+ * @param bool $as_inline
+ *   (optional) When TRUE, certain links and formatting are omitted.
+ * @param bool $closing_tag
+ *   (optional) When TRUE, the closing section tag is appended.
+ *   When FALSE, no closing section tag is appended and the caller is expected to properly close.
+ *
+ * @return string
+ *   The generated HTML markup.
+ */
+function mfcs_help_user_guide_manage_a_room_unavailability($as, $allowed_topics, $section_information, $as_inline = FALSE, $closing_tag = TRUE) {
+  if (!is_array($as)) {
+    cf_error::invalid_array('as');
+    return '';
+  }
+
+  if (!is_array($allowed_topics)) {
+    cf_error::invalid_array('allowed_topics');
+    return '';
+  }
+
+  if (!is_array($section_information)) {
+    cf_error::invalid_array('section_information');
+    return '';
+  }
+
+  if (!is_bool($as_inline)) {
+    cf_error::invalid_bool('as_inline');
+    $as_inline = FALSE;
+  }
+
+  if (!is_bool($closing_tag)) {
+    cf_error::invalid_bool('closing_tag');
+    $closing_tag = TRUE;
+  }
+
+  global $base_url;
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  $module_path = drupal_get_path('module', 'mfcs');
+  $image_path = $base_path . $module_path . '/images';
+
+  if ($as_inline) {
+    $section_information['navigation'] = NULL;
+  }
+
+  $start_count = 0;
+  if (isset($section_information['start_count']) && is_numeric($section_information['start_count']) && $section_information['start_count'] >= 0) {
+    $start_count = (int) $section_information['start_count'];
+  }
+
+  $markup = '<section id="' . $section_information['id'] . '" class="' . implode(' ', $section_information['class']) . '">';
+  $markup .= $section_information['navigation'];
+  $markup .= mfcs_help_render_headers('topic-user_guide-manage_a_room_unavailability', $section_information['header_attributes'], $section_information['headers'], $start_count);
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'To manage <dfn class="term">Room</dfn> unavailabilities, go to the <dfn class="term">Room</dfn> unavailabilities web page using the <dfn class="term">Utility Navigation</dfn>. ';
+  $markup .= '<dfn class="term">Room</dfn> unavailabilities are grouped by years and then grouped by <dfn class="term">Buildings</dfn>. ';
+  $markup .= 'Select the <dfn class="term">Building</dfn> to manage by finding the <dfn class="term">Building</dfn> and then select the manage link on the right side of the table row.';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/manage_a_room_unavailability-1.png" alt="Screenshot displaying the room unavailability listing web page." class="image-user_guide" width="551" height="152"></div> ';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'On this <dfn class="term">Building</dfn> management page, unavailabilities for individual <dfn class="term">Rooms</dfn> may be added, edited, copied, or deleted. ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/manage_a_room_unavailability-2.png" alt="Screenshot displaying a specific room unavailability web page." class="image-user_guide" width="693" height="198"></div> ';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'You may edit any unavailability type except for classes (which are managed via <dfn class="term">Banner</dfn>). ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/manage_a_room_unavailability-3.png" alt="Screenshot of an edit unavailability web page." class="image-user_guide" width="377" height="530"></div> ';
+  $markup .= '</div>';
+
+  if ($closing_tag) {
+    $markup .= '</section>';
+  }
+
+  return $markup;
+}
+
+/**
+ * Build the markup for the help topic: user guide - troubleshoot requests and users.
+ *
+ * @param array $as
+ *   A collection of roles that the user is acting as.
+ * @param array $allowed_topics
+ *   An array of topics currently allowed based on the users access.
+ * @param array $section_information
+ *   Information needed for populating and customizing the generated section tag.
+ * @param bool $as_inline
+ *   (optional) When TRUE, certain links and formatting are omitted.
+ * @param bool $closing_tag
+ *   (optional) When TRUE, the closing section tag is appended.
+ *   When FALSE, no closing section tag is appended and the caller is expected to properly close.
+ *
+ * @return string
+ *   The generated HTML markup.
+ */
+function mfcs_help_user_guide_troubleshoot_requests_and_users($as, $allowed_topics, $section_information, $as_inline = FALSE, $closing_tag = TRUE) {
+  if (!is_array($as)) {
+    cf_error::invalid_array('as');
+    return '';
+  }
+
+  if (!is_array($allowed_topics)) {
+    cf_error::invalid_array('allowed_topics');
+    return '';
+  }
+
+  if (!is_array($section_information)) {
+    cf_error::invalid_array('section_information');
+    return '';
+  }
+
+  if (!is_bool($as_inline)) {
+    cf_error::invalid_bool('as_inline');
+    $as_inline = FALSE;
+  }
+
+  if (!is_bool($closing_tag)) {
+    cf_error::invalid_bool('closing_tag');
+    $closing_tag = TRUE;
+  }
+
+  global $base_url;
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  $module_path = drupal_get_path('module', 'mfcs');
+  $image_path = $base_path . $module_path . '/images';
+
+  if ($as_inline) {
+    $section_information['navigation'] = NULL;
+  }
+
+  $start_count = 0;
+  if (isset($section_information['start_count']) && is_numeric($section_information['start_count']) && $section_information['start_count'] >= 0) {
+    $start_count = (int) $section_information['start_count'];
+  }
+
+  $markup = '<section id="' . $section_information['id'] . '" class="' . implode(' ', $section_information['class']) . '">';
+  $markup .= $section_information['navigation'];
+  $markup .= mfcs_help_render_headers('topic-user_guide-troubleshoot_requests_and_users', $section_information['header_attributes'], $section_information['headers'], $start_count);
+
+  // troubleshooting section.
+  $markup .= '<div class="paragraph">';
+  $markup .= 'If your account has the <dfn class="term">Manager</dfn> role, then you will have an expanded version of the <dfn class="term">Utility Navigation</dfn>. ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/troubleshoot_requests_and_users-1.png" alt="Screenshot displaying a Manager\'s Utility Navigation." class="image-user_guide" width="466" height="31"></div> ';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= '<div class="image-wrapper image-wrapper-float-right"><img src="' . $base_path . $module_path . '/images/user_guide/troubleshoot_requests_and_users-2.png" alt="Screenshot displaying a troubleshooting options 6 and 7." class="image-user_guide" width="320" height="275"></div> ';
+  $markup .= 'Generally speaking, it is a good idea to check if there are any problems on the system. ';
+  $markup .= 'Go to the troubleshooting web page using the <dfn class="term">Utility Navigation</dfn>. ';
+  $markup .= 'From there, <dfn class="term">Managers</dfn> can find options 6 and 7 to force scanning the system for problems. ';
+  $markup .= 'You can view a listing of all problems by selecting the <strong class="bold">Manage Request Problems</strong> or <strong class="bold">Manage User Problems</strong> links. ';
+  $markup .= 'From there <dfn class="term">Managers</dfn> may find a problem and view the problem details. ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/troubleshoot_requests_and_users-3.png" alt="Screenshot displaying details of an example Request problem." class="image-user_guide" width="327" height="359"></div> ';
   $markup .= '</div>';
 
   if ($closing_tag) {
