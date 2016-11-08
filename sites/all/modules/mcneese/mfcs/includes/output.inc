@@ -1471,6 +1471,7 @@ function mfcs_output_print_page_view($html, $parameters = array()) {
     return FALSE;
   }
 
+  global $base_url;
   global $base_path;
 
   // determine the number of directories in the base path so that they can be stripped out properly.
@@ -1634,6 +1635,11 @@ function mfcs_output_print_page_view($html, $parameters = array()) {
   $html .= '  </div>';
   $html .= '</body>';
   $html .= '</html>';
+
+  // Workaround: relative paths are not always working so change them to absolute paths.
+  $html = preg_replace('|img src="/fcs/|i', 'img src="' . $base_url . '/', $html);
+  $html = preg_replace('|a href="/fcs/|i', 'a href="' . $base_url . '/', $html);
+  $html = preg_replace('|link href="/fcs/|i', 'link href="' . $base_url . '/', $html);
 
   return $html;
 }
