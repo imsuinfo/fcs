@@ -424,7 +424,7 @@ function mfcs_request_calendar_month_0_page_pdf($year, $month) {
 
   $month_stamp = strtotime($month . ' 1, ' . $year);
 
-  mfcs_add_canonical_headers('requests/pdf-0/calendar/' . $year . '/' . $month);
+  mfcs_add_canonical_headers('pdf-0/calendar/' . $year . '/' . $month);
 
   $page_title = 'Request Calendar - ' . date('F Y', $month_stamp);
   drupal_set_title($page_title);
@@ -1117,7 +1117,7 @@ function mfcs_request_calendar_day_0_page_pdf($year, $month, $day, $page_number)
 
   $day_stamp = strtotime($month . ' ' . $day . ', ' . $year);
 
-  mfcs_add_canonical_headers('requests/pdf-0/calendar/' . $year . '/' . $month . '/' . $day . '/' . $page_number);
+  mfcs_add_canonical_headers('pdf-0/calendar/' . $year . '/' . $month . '/' . $day . '/' . $page_number);
 
   $page_title = 'Request Calendar - ' . date('F j, Y', $day_stamp);
   drupal_set_title($page_title);

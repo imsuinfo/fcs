@@ -3151,10 +3151,10 @@ function mfcs_request_view_0_form_submit_pdf($form, &$form_state) {
   }
 
   if (is_null($use_revision)) {
-    $form_state['redirect'] = mfcs_build_redirect_array('/requests/pdf-0/' . $request_id . '/' . $mode);
+    $form_state['redirect'] = mfcs_build_redirect_array('/pdf-0/' . $request_id . '/' . $mode);
   }
   else {
-    $form_state['redirect'] = mfcs_build_redirect_array('/requests/pdf-0/' . $request_id . '/' . $mode . '/' . $use_revision);
+    $form_state['redirect'] = mfcs_build_redirect_array('/pdf-0/' . $request_id . '/' . $mode . '/' . $use_revision);
   }
 }
 
@@ -3204,14 +3204,14 @@ function mfcs_request_pdf_0_page($request_id, $mode, $revision_id = NULL) {
 
   if (is_null($revision_id)) {
     if ($mode == MFCS_VIEW_MODE_NORMAL) {
-      mfcs_add_canonical_headers('requests/pdf-0/' . $request_id . '/' . $mode, 'requests/pdf-0/' . $request_id);
+      mfcs_add_canonical_headers('pdf-0/' . $request_id . '/' . $mode, 'pdf-0/' . $request_id);
     }
     else {
-      mfcs_add_canonical_headers('requests/pdf-0/' . $request_id . '/' . $mode);
+      mfcs_add_canonical_headers('pdf-0/' . $request_id . '/' . $mode);
     }
   }
   else {
-    mfcs_add_canonical_headers('requests/pdf-0/' . $request_id . '/' . $mode . '/' . $revision_id);
+    mfcs_add_canonical_headers('pdf-0/' . $request_id . '/' . $mode . '/' . $revision_id);
   }
 
   if (!empty($request['information']['title'][0]->value)) {
