@@ -1473,6 +1473,10 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           $reviewer_classifications[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY] = 'Venue Coordinator (Proxy)';
           $reviewer_classifications_all[MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR_PROXY] = 'Venue Coordinator (Proxy)';
         }
+
+        // If the user is a venue coordinator but has no reviewer classifications (or the current step is venue available), then they should not be able to specify issues/no-issues.
+        unset($decision_options[MFCS_REVIEW_DECISION_ISSUES]);
+        unset($decision_options[MFCS_REVIEW_DECISION_ISSUES_NONE]);
       }
 
       if (!empty($reviewer_classifications)) {
