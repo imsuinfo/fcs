@@ -626,11 +626,11 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
       $markup .= '<div class="calendar-time_slot-links-wrapper no-print">';
 
       if ($display_prev) {
-        $markup .= '<a href="' . $page_url . ($page_number - 1) . $url_arguments . '#' . $row_id . '" class="calendar-time_slot-link calendar-time_slot-links-previous" title="There are more requests on the previous page for this time slot."><< Previous</a>';
+        $markup .= '<a href="' . $page_url . ($page_number - 1) . $url_arguments . '#' . $row_id . '" class="calendar-time_slot-link calendar-time_slot-links-previous" title="There are more requests on the previous page for this time slot.">&laquo; Previous</a>';
       }
 
       if ($display_next) {
-        $markup .= '<a href="' . $page_url . ($page_number + 1) . $url_arguments . '#' . $row_id . '" class="calendar-time_slot-link calendar-time_slot-links-next" title="There are more requests on the next page for this time slot.">Next >></a>';
+        $markup .= '<a href="' . $page_url . ($page_number + 1) . $url_arguments . '#' . $row_id . '" class="calendar-time_slot-link calendar-time_slot-links-next" title="There are more requests on the next page for this time slot.">Next &raquo;</a>';
       }
 
       $markup .= '</div>';
