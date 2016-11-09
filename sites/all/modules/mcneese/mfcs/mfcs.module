@@ -9602,7 +9602,7 @@ function mfcs_get_latest_reviews($request_id, $revision_id = NULL, $steps = arra
  */
 function mfcs_build_request_table($items, $max_rows, $columns = NULL, $user = NULL, $extra = array()) {
   if (is_null($columns)) {
-    $columns = array('id' => 'ID', 'title' => 'Title', 'building' => 'Building', 'room' => 'Room', 'date' => 'Date', 'submitted_on' => 'Submitted On', 'operations' => 'Operations');
+    $columns = array('id' => 'ID', 'title' => 'Request Name', 'building' => 'Building', 'room' => 'Room', 'date' => 'Date', 'submitted_on' => 'Submitted On', 'operations' => 'Operations');
   }
 
   if (!is_array($columns)) {
@@ -10042,7 +10042,7 @@ function mfcs_build_request_ajax_table($items_returned, $conditions, $options, $
     ),
     'title' => array(
       'column' => 'title',
-      'name' => 'Title',
+      'name' => 'Request Name',
       'class' => 'column-title ',
       'align' => 'center',
     ),

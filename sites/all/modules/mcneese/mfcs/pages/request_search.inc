@@ -3806,7 +3806,7 @@ function mfcs_request_search_0_columns() {
     'title' => array(
       'id' => 2,
       'column' => 'title',
-      'name' => 'Title',
+      'name' => 'Request Name',
       'class' => array('column-title'),
       'align' => 'center',
     ),
