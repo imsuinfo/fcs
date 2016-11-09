@@ -1637,9 +1637,9 @@ function mfcs_output_print_page_view($html, $parameters = array()) {
   $html .= '</html>';
 
   // Workaround: relative paths are not always working so change them to absolute paths.
-  $html = preg_replace('|img src="/fcs/|i', 'img src="' . $base_url . '/', $html);
-  $html = preg_replace('|a href="/fcs/|i', 'a href="' . $base_url . '/', $html);
-  $html = preg_replace('|link href="/fcs/|i', 'link href="' . $base_url . '/', $html);
+  $html = preg_replace('|<img([^>]*) src="/fcs/|i', '<img$1 src="' . $base_url . '/', $html);
+  $html = preg_replace('|<a([^>]*) href="/fcs/|i', '<a$1 href="' . $base_url . '/', $html);
+  $html = preg_replace('|<link([^>]*) href="/fcs/|i', '<link$1 href="' . $base_url . '/', $html);
 
   return $html;
 }
