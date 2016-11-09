@@ -716,14 +716,19 @@ function mfcs_help_0_page_presentation($presentation_type, $topic = NULL, $secti
   $markup = '';
 
   if ($presentation_type == 'pdf') {
-    if (is_null($topic) && is_null($section) && is_null($sub_section)) {
-      $markup = mfcs_help_0_page_presentation_single($allowed_topics);
+    if ($topic == 'documentation' && is_null($section) && is_null($sub_section)) {
+      $markup = mfcs_help_0_page_presentation_single_documentation($allowed_topics);
       mfcs_help_0_page_presentation_pdf('fcs-documentation-single.pdf', 'Facilities Use Documentation', $markup);
     }
 
-    if ($topic == 'glossary') {
+    if ($topic == 'glossary' && is_null($section) && is_null($sub_section)) {
       $markup = mfcs_help_0_page();
       mfcs_help_0_page_presentation_pdf('fcs-documentation-glossary.pdf', 'Facilities Use Documentation - Glossary', $markup);
+    }
+
+    if ($topic == 'user_guides' && is_null($section) && is_null($sub_section)) {
+      $markup = mfcs_help_0_page_presentation_single_user_guides($as, $allowed_topics);
+      mfcs_help_0_page_presentation_pdf('fcs-user_guides-single.pdf', 'Facilities Use User Guides', $markup);
     }
 
     if (is_null($topic)) {
@@ -746,13 +751,17 @@ function mfcs_help_0_page_presentation($presentation_type, $topic = NULL, $secti
     mfcs_help_0_page_presentation_pdf('fcs-documentation-' . $name . '.pdf', 'Facilities Use Documentation - ' . $label, $markup);
   }
   elseif ($presentation_type == 'single') {
-    // 'single' does not accept any topic, section, or sub-section.
-    if (!is_null($topic) || !is_null($section) || !is_null($sub_section)) {
+    if ($topic == 'documentation' && is_null($section) && is_null($sub_section)) {
+      $markup = mfcs_help_0_page_presentation_single_documentation($allowed_topics);
+    }
+    elseif ($topic == 'user_guides' && is_null($section) && is_null($sub_section)) {
+      $markup = mfcs_help_0_page_presentation_single_user_guides($as, $allowed_topics);
+    }
+    else {
+      // 'single' does not accept any other topic, section, or sub-section.
       drupal_not_found();
       drupal_exit();
     }
-
-    $markup = mfcs_help_0_page_presentation_single($allowed_topics);
   }
   else {
     drupal_not_found();
@@ -763,15 +772,22 @@ function mfcs_help_0_page_presentation($presentation_type, $topic = NULL, $secti
 }
 
 /**
- * Build the entire documentation section as a single page.
+ * Build the entire user guides section as a single page.
  *
+ * @param array $as
+ *   A collection of roles that the user is acting as.
  * @param array $allowed_topics
  *   An array of topics currently allowed based on the users access.
  *
  * @return string
  *   The entire documentation markup.
  */
-function mfcs_help_0_page_presentation_single($allowed_topics) {
+function mfcs_help_0_page_presentation_single_user_guides($as, $allowed_topics) {
+  if (!is_array($as)) {
+    cf_error::invalid_array('as');
+    return '';
+  }
+
   if (!is_array($allowed_topics)) {
     cf_error::invalid_array('allowed_topics');
     return '';
@@ -794,7 +810,268 @@ function mfcs_help_0_page_presentation_single($allowed_topics) {
 
     $image_file_path = $base_path . $module_path . '/images/pdf/32.png';
 
-    $navigation_markup .= '<a href="' . $base_path . 'help-0/presentation/pdf' . $url_arguments . '" title="Download as PDF" class="help-navigation_link link-pdf"><img src="' . $image_file_path . '" alt="PDF" width="32" height="32" class="help-navigation_image image-pdf"></a>';
+    $navigation_markup .= '<a href="' . $base_path . 'help-0/presentation/pdf/user_guides' . $url_arguments . '" title="Download as PDF" class="help-navigation_link link-pdf"><img src="' . $image_file_path . '" alt="PDF" width="32" height="32" class="help-navigation_image image-pdf"></a>';
+
+    unset($image_file_path);
+    unset($module_path);
+  }
+
+  $navigation_markup .= '</nav>';
+
+
+  // prepare the header information.
+  $section_id = 'mfcs-section-help-main';
+  $base_class = array();
+  $base_class[] = 'section-help';
+  $base_class[] = 'section-help-break';
+  $sub_base_class = array();
+  $sub_base_class[] = 'section-help';
+
+  $headers = array(
+    0 => array(
+      'markup' => 'Facilities Use User Guides',
+      'attributes' => array(
+        'class' => array(
+          'header-1',
+          'title',
+        ),
+      ),
+    ),
+  );
+
+  $header_attributes = array();
+
+  $section_class = $base_class;
+  $section_class[] = 'section-help-main';
+  $section_class[] = 'section-help-presentation-single';
+
+  $markup = '<section id="' . $section_id . '" class="' . implode(' ', $section_class) . '">';
+  $markup .= $navigation_markup;
+  $markup .= mfcs_help_render_headers('topic', $header_attributes, $headers, 0);
+  unset($section_class);
+
+  $headers = array(
+    0 => array(
+      'markup' => '',
+      'attributes' => array(
+        'class' => array(
+          'header-2',
+          'section',
+        ),
+      ),
+    ),
+  );
+
+  $section_id = 'help-user_guide-topic';
+  $base_class[] = 'section-help-child';
+  $base_class[] = 'section-help-documentation';
+
+
+  // prepare section information.
+  $section_information = array(
+    'id' => 'mfcs-section-help-main',
+    'class' => NULL,
+    'headers' => $headers,
+    'header_attributes' => array(
+    ),
+    'navigation' => NULL,
+    'start_count' => NULL,
+  );
+
+
+  // navigate_the_system
+  if (in_array('navigate_the_system', $allowed_topics)) {
+    $section_information['headers'][0]['markup'] = 'Navigate the System';
+    $section_information['id'] = $section_id . '-navigate_the_system';
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'section-help-topic-navigate_the_system';
+    $section_information['start_count'] = 1;
+
+    $markup .= mfcs_help_user_guide_navigate_the_system($as, $allowed_topics, $section_information, TRUE);
+  }
+
+  // create_a_request
+  if (in_array('create_a_request', $allowed_topics)) {
+    $section_information['headers'][0]['markup'] = 'Create a Request';
+    $section_information['id'] = $section_id . '-create_a_request';
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'section-help-topic-create_a_request';
+    $section_information['start_count'] = 1;
+
+    $markup .= mfcs_help_user_guide_create_a_request($as, $allowed_topics, $section_information, TRUE);
+  }
+
+  // edit_a_request
+  if (in_array('edit_a_request', $allowed_topics)) {
+    $section_information['headers'][0]['markup'] = 'Edit a Request';
+    $section_information['id'] = $section_id . '-edit_a_request';
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'section-help-topic-edit_a_request';
+    $section_information['start_count'] = 1;
+
+    $markup .= mfcs_help_user_guide_edit_a_request($as, $allowed_topics, $section_information, TRUE);
+  }
+
+  // cancel_a_request
+  if (in_array('cancel_a_request', $allowed_topics)) {
+    $section_information['headers'][0]['markup'] = 'Cancel a Request';
+    $section_information['id'] = $section_id . '-cancel_a_request';
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'section-help-topic-cancel_a_request';
+    $section_information['start_count'] = 1;
+
+    $markup .= mfcs_help_user_guide_cancel_a_request($as, $allowed_topics, $section_information, TRUE);
+  }
+
+  // uncancel_a_request
+  if (in_array('uncancel_a_request', $allowed_topics)) {
+    $section_information['headers'][0]['markup'] = 'Uncancel a Request';
+    $section_information['id'] = $section_id . '-uncancel_a_request';
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'section-help-topic-uncancel_a_request';
+    $section_information['start_count'] = 1;
+
+    $markup .= mfcs_help_user_guide_uncancel_a_request($as, $allowed_topics, $section_information, TRUE);
+  }
+
+  // copy_a_request
+  if (in_array('copy_a_request', $allowed_topics)) {
+    $section_information['headers'][0]['markup'] = 'Copy a Request';
+    $section_information['id'] = $section_id . '-copy_a_request';
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'section-help-topic-copy_a_request';
+    $section_information['start_count'] = 1;
+
+    $markup .= mfcs_help_user_guide_copy_a_request($as, $allowed_topics, $section_information, TRUE);
+  }
+
+  // find_a_request
+  if (in_array('find_a_request', $allowed_topics)) {
+    $section_information['headers'][0]['markup'] = 'Find a Request';
+    $section_information['id'] = $section_id . '-find_a_request';
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'section-help-topic-find_a_request';
+    $section_information['start_count'] = 1;
+
+    $markup .= mfcs_help_user_guide_find_a_request($as, $allowed_topics, $section_information, TRUE);
+  }
+
+  // review_a_request
+  if (in_array('review_a_request', $allowed_topics)) {
+    $section_information['headers'][0]['markup'] = 'Review a Request';
+    $section_information['id'] = $section_id . '-review_a_request';
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'section-help-topic-review_a_request';
+    $section_information['start_count'] = 1;
+
+    $markup .= mfcs_help_user_guide_review_a_request($as, $allowed_topics, $section_information, TRUE);
+  }
+
+  // manage_a_request
+  if (in_array('manage_a_request', $allowed_topics)) {
+    $section_information['headers'][0]['markup'] = 'Manage a Request';
+    $section_information['id'] = $section_id . '-manage_a_request';
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'section-help-topic-manage_a_request';
+    $section_information['start_count'] = 1;
+
+    $markup .= mfcs_help_user_guide_manage_a_request($as, $allowed_topics, $section_information, TRUE);
+  }
+
+  // manage_a_holiday
+  if (in_array('manage_a_holiday', $allowed_topics)) {
+    $section_information['headers'][0]['markup'] = 'Manage a Holiday';
+    $section_information['id'] = $section_id . '-manage_a_holiday';
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'section-help-topic-manage_a_holiday';
+    $section_information['start_count'] = 1;
+
+    $markup .= mfcs_help_user_guide_manage_a_holiday($as, $allowed_topics, $section_information, TRUE);
+  }
+
+  // manage_a_room_unavailability
+  if (in_array('manage_a_room_unavailability', $allowed_topics)) {
+    $section_information['headers'][0]['markup'] = 'Create a Room Unavailability';
+    $section_information['id'] = $section_id . '-manage_a_room_unavailability';
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'section-help-topic-manage_a_room_unavailability';
+    $section_information['start_count'] = 1;
+
+    $markup .= mfcs_help_user_guide_manage_a_room_unavailability($as, $allowed_topics, $section_information, TRUE);
+  }
+
+  // troubleshoot_requests_and_users
+  if (in_array('troubleshoot_requests_and_users', $allowed_topics)) {
+    $section_information['headers'][0]['markup'] = 'Troubleshoot Requests and Users';
+    $section_information['id'] = $section_id . '-troubleshoot_requests_and_users';
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'section-help-topic-troubleshoot_requests_and_users';
+    $section_information['start_count'] = 1;
+
+    $markup .= mfcs_help_user_guide_troubleshoot_requests_and_users($as, $allowed_topics, $section_information, TRUE);
+  }
+
+  // using_the_calendar
+  if (in_array('using_the_calendar', $allowed_topics)) {
+    $section_information['headers'][0]['markup'] = 'Using the Calendar';
+    $section_information['id'] = $section_id . '-using_the_calendar';
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'section-help-topic-using_the_calendar';
+    $section_information['start_count'] = 1;
+
+    $markup .= mfcs_help_user_guide_using_the_calendar($as, $allowed_topics, $section_information, TRUE);
+  }
+
+  // exporting_the_calendar
+  if (in_array('exporting_the_calendar', $allowed_topics)) {
+    $section_information['headers'][0]['markup'] = 'Exporting the Calendar';
+    $section_information['id'] = $section_id . '-exporting_the_calendar';
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'section-help-topic-exporting_the_calendar';
+    $section_information['start_count'] = 1;
+
+    $markup .= mfcs_help_user_guide_exporting_the_calendar($as, $allowed_topics, $section_information, TRUE);
+  }
+
+  // close the main section.
+  $markup .= '</section>';
+
+  return $markup;
+}
+
+/**
+ * Build the entire documentation section as a single page.
+ *
+ * @param array $allowed_topics
+ *   An array of topics currently allowed based on the users access.
+ *
+ * @return string
+ *   The entire documentation markup.
+ */
+function mfcs_help_0_page_presentation_single_documentation($allowed_topics) {
+  if (!is_array($allowed_topics)) {
+    cf_error::invalid_array('allowed_topics');
+    return '';
+  }
+
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+
+  // build the navigation markup.
+  $navigation_markup = '<nav id="mfcs-help-navigation_links" class="help-navigation_links no-print">';
+
+  if (file_exists(DRUPAL_ROOT . '/sites/all/modules/mcneese/mfcs/images/pdf/32.png')) {
+    $module_path = drupal_get_path('module', 'mfcs');
+
+    $image_file_path = $base_path . $module_path . '/images/pdf/32.png';
+
+    $navigation_markup .= '<a href="' . $base_path . 'help-0/presentation/pdf/documentation' . $url_arguments . '" title="Download as PDF" class="help-navigation_link link-pdf"><img src="' . $image_file_path . '" alt="PDF" width="32" height="32" class="help-navigation_image image-pdf"></a>';
 
     unset($image_file_path);
     unset($module_path);
@@ -2780,8 +3057,10 @@ function mfcs_help_topic_glossary($allowed_topics, $section_information, $as_inl
 
     $markup .= mfcs_help_render_headers('topic-glossary-presentation', array('class' => $sub_section_class), $headers, 2);
     $markup .= '<ul class="navigation-list">';
-    $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/presentation/single' . $url_arguments . '" class="item-link no_print_links_as_link">View Documentation on a Single Webpage</a></li>';
-    $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/presentation/pdf' . $url_arguments . '" class="item-link no_print_links_as_link">Download Documentation as a PDF</a></li>';
+    $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/presentation/single/documentation' . $url_arguments . '" class="item-link no_print_links_as_link">View Documentation on a Single Webpage</a></li>';
+    $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/presentation/single/user_guides' . $url_arguments . '" class="item-link no_print_links_as_link">View User Guides on a Single Webpage</a></li>';
+    $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/presentation/pdf/documentation' . $url_arguments . '" class="item-link no_print_links_as_link">Download Documentation as a Single PDF</a></li>';
+    $markup .= '<li class="list-item"><a href="' . $base_path . 'help-0/presentation/pdf/user_guides' . $url_arguments . '" class="item-link no_print_links_as_link">Download User Guides as a Single PDF</a></li>';
     $markup .= '</ul>';
 
     $markup .= '</nav>';
@@ -8059,7 +8338,7 @@ function mfcs_help_user_guide_review_a_request($as, $allowed_topics, $section_in
   $markup .= '<div class="paragraph">';
   $markup .= '<div class="image-wrapper image-wrapper-float-right"><img src="' . $base_path . $module_path . '/images/user_guide/review_a_request-1.png" alt="Screenshot of Utility Navigation."" class="image-user_guide" width="289" height="28"></div> ';
   $markup .= 'You can access <dfn class="term">Requests</dfn> that you are allowed to <dfn class="term">Review</dfn> at any time by visiting the <dfn class="term">Review</dfn> listing page. ';
-  $markup .= 'The link to this page is found on the <dfn class="term">Utility Navigation</dfn> on the top-left side of the web page.';
+  $markup .= 'The link to this page is found on the <dfn class="term">Utility Navigation</dfn> on the top-left side of the web page. ';
   $markup .= 'If you are already viewing a <dfn class="term">Request</dfn>, then scroll to the bottom of the web page to find the <dfn class="term">Review</dfn> operations. ';
   $markup .= '</div>';
 
@@ -8161,9 +8440,29 @@ function mfcs_help_user_guide_manage_a_request($as, $allowed_topics, $section_in
   $markup .= $section_information['navigation'];
   $markup .= mfcs_help_render_headers('topic-user_guide-manage_a_request', $section_information['header_attributes'], $section_information['headers'], $start_count);
 
-  // holidays section.
   $markup .= '<div class="paragraph">';
-  $markup .= 'Todo. ';
+  $markup .= 'To <dfn class="term">Manage</dfn> a <dfn class="term">Request</dfn>, view the <dfn class="term">Request</dfn> and find the <dfn class="term">Manage</dfn> button on the bottom right side of the page (before the <dfn class="term">Review</dfn> log). ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/manage_a_request-1.png" alt="Screenshot displaying the Request Manage button." class="image-user_guide" width="572" height="137"></div> ';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'Once there you are presented with a summary of information related to the <dfn class="term">Request</dfn> and its relevant <dfn class="term">Coordinators</dfn>. ';
+  $markup .= 'Additional operations as well is troubleshooting information is also provided. ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/manage_a_request-2.png" alt="Screenshot displaying the Request Manage page." class="image-user_guide" width="564" height="399"></div> ';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'The override functionality allows for forcibly changing the <dfn class="term">Requester</dfn> to another user. ';
+  $markup .= 'Adding a log message here is recommended. ';
+  $markup .= 'There are still restrictions on what <dfn class="term">Step</dfn> and <dfn class="term">Status</dfn> may be re-assigned to, but for the most part <dfn class="term">Managers</dfn> are able to assign any <dfn class="term">Step</dfn> or <dfn class="term">Status</dfn> despite the normal workflow behavior. ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/manage_a_request-3.png" alt="Screenshot displaying the override Request page." class="image-user_guide" width="257" height="264"></div> ';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= '<dfn class="term">Request Coordinators</dfn>, also known as <dfn class="term">Requesters</dfn>, may be re-assigned through the management interface. ';
+  $markup .= 'This will change who recieves notifcation e-mails and may comment on the <dfn class="term">Request</dfn>. ';
+  $markup .= 'A link is provided to a list of users available on the system to make searching for a given user easier. ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/manage_a_request-4.png" alt="Screenshot displaying the override Request page." class="image-user_guide" width="436" height="178"></div> ';
   $markup .= '</div>';
 
 
@@ -8243,7 +8542,6 @@ function mfcs_help_user_guide_manage_a_holiday($as, $allowed_topics, $section_in
   $markup .= $section_information['navigation'];
   $markup .= mfcs_help_render_headers('topic-user_guide-manage_a_holiday', $section_information['header_attributes'], $section_information['headers'], $start_count);
 
-  // holidays section.
   $markup .= '<div class="paragraph">';
   $markup .= 'To view, add, or remove holidays, <dfn class="term">Managers</dfn> may to the holidays web page using the <dfn class="term">Utility Navigation</dfn>. ';
   $markup .= 'Holidays are group in years and must be re-created for every new year. ';
@@ -8331,7 +8629,7 @@ function mfcs_help_user_guide_manage_a_room_unavailability($as, $allowed_topics,
   $markup .= '<div class="paragraph">';
   $markup .= 'To manage <dfn class="term">Room</dfn> unavailabilities, go to the <dfn class="term">Room</dfn> unavailabilities web page using the <dfn class="term">Utility Navigation</dfn>. ';
   $markup .= '<dfn class="term">Room</dfn> unavailabilities are grouped by years and then grouped by <dfn class="term">Buildings</dfn>. ';
-  $markup .= 'Select the <dfn class="term">Building</dfn> to manage by finding the <dfn class="term">Building</dfn> and then select the manage link on the right side of the table row.';
+  $markup .= 'Select the <dfn class="term">Building</dfn> to manage by finding the <dfn class="term">Building</dfn> and then select the manage link on the right side of the table row. ';
   $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/manage_a_room_unavailability-1.png" alt="Screenshot displaying the room unavailability listing web page." class="image-user_guide" width="551" height="152"></div> ';
   $markup .= '</div>';
 
@@ -8421,7 +8719,6 @@ function mfcs_help_user_guide_troubleshoot_requests_and_users($as, $allowed_topi
   $markup .= $section_information['navigation'];
   $markup .= mfcs_help_render_headers('topic-user_guide-troubleshoot_requests_and_users', $section_information['header_attributes'], $section_information['headers'], $start_count);
 
-  // troubleshooting section.
   $markup .= '<div class="paragraph">';
   $markup .= 'If your account has the <dfn class="term">Manager</dfn> role, then you will have an expanded version of the <dfn class="term">Utility Navigation</dfn>. ';
   $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/troubleshoot_requests_and_users-1.png" alt="Screenshot displaying a Manager\'s Utility Navigation." class="image-user_guide" width="466" height="31"></div> ';
@@ -8514,7 +8811,22 @@ function mfcs_help_user_guide_using_the_calendar($as, $allowed_topics, $section_
   $markup .= mfcs_help_render_headers('topic-user_guide-using_the_calendar', $section_information['header_attributes'], $section_information['headers'], $start_count);
 
   $markup .= '<div class="paragraph">';
-  $markup .= 'todo ';
+  $markup .= 'You can access the monthly or daily calendars at any time by selecting either the <strong class="bold">This Month</strong> or <strong class="bold">This Day</strong> links found in the <dfn class="term">Utility Navigation</dfn>. ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/using_the_calendar-1.png" alt="Screenshot pointing out the This Month and This Day links." class="image-user_guide" width="487" height="234"></div> ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'At the bottom of each calendar page is a set of filters (and other links) to sort and simplify what appears on the calendar. ';
+  $markup .= 'Once you have selected your desired filters, try bookmarking the page to easily return to the specific set of filters. ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/using_the_calendar-2.png" alt="Screenshot displaying some of the filters." class="image-user_guide" width="383" height="165"></div> ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'On the day calendars, there may be multiple pages for displaying <dfn class="term">Requests</dfn> when there are more than 4 <dfn class="term">Requests</dfn> per hour slot per day. ';
+  $markup .= 'You can find the links to these extra pages by selecting the page number on the top-left of each calendar day or by selecting the appropriate <strong class="bold">Next</strong> or <strong class="bold">Previous</strong> link found on each time slot with more than 4 <dfn class="term">Requests</dfn> per day. ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/using_the_calendar-3.png" alt="Screenshot pointing out the page links." class="image-user_guide" width="251" height="189"><img src="' . $base_path . $module_path . '/images/user_guide/using_the_calendar-4.png" alt="Screenshot pointing out the Next page links." class="image-user_guide" width="523" height="251"></div> ';
   $markup .= '<br>';
   $markup .= '</div>';
 
@@ -8595,7 +8907,23 @@ function mfcs_help_user_guide_exporting_the_calendar($as, $allowed_topics, $sect
   $markup .= mfcs_help_render_headers('topic-user_guide-exporting_the_calendar', $section_information['header_attributes'], $section_information['headers'], $start_count);
 
   $markup .= '<div class="paragraph">';
-  $markup .= 'todo ';
+  $markup .= 'You can download <dfn class="term">iCalendar</dfn> versions of all <dfn class="term">Approved</dfn> <dfn class="term">Requests</dfn> for a given day, month, or year. ';
+  $markup .= 'Any active filters in use will be applied. ';
+  $markup .= 'At the bottom-left side of the month or day calendar are a collection of links called <strong class="bold">iCalendar Download Options</strong>. ';
+  $markup .= 'Select any one of these links to download the appropriate day, month, or year. ';
+  $markup .= 'The download day link only appears on the day calendar. ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/exporting_the_calendar-1.png" alt="Screenshot pointing out the download as iCalendar links." class="image-user_guide" width="275" height="162"></div> ';
+  $markup .= '<br>';
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'The import process is dependent on your client and cannot be readily discussed here. ';
+  $markup .= 'However, McNeese State University uses Zimbra, which does allow for importing <dfn class="term">iCalendar</dfn> files. ';
+  $markup .= 'This can be imported into your McNeese State University Zimbra calendar by going to the preferences section of your e-mail account. ';
+  $markup .= 'There you should select the <strong class="bold">Import / Export</strong> link on the left side of the page. ';
+  $markup .= 'At the top of this Import / Export page is an <strong class="bold">Import</strong> section where you can select the file and then designate a calendar to import the file into. ';
+  $markup .= 'The file can then be imported by clicking the import button on the right side of the <strong class="bold">Import</strong> section. ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/exporting_the_calendar-2.png" alt="Screenshot pointing out the download as iCalendar links." class="image-user_guide" width="452" height="225"></div> ';
   $markup .= '<br>';
   $markup .= '</div>';
 
