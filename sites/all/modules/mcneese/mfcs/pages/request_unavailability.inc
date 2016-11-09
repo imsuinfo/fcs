@@ -31,7 +31,7 @@ function mfcs_request_unavailability_0_rooms_page() {
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
   mfcs_add_canonical_headers('requests/unavailable-0');
-  drupal_set_title("Room Unavailability");
+  drupal_set_title('Room Unavailability');
 
   $user = cf_current_user();
 
@@ -182,15 +182,15 @@ function mfcs_request_unavailability_0_rooms_page() {
 
 
   $availability_list = array();
-  $availability_list['caption'] = "Room Unavailability";
+  $availability_list['caption'] = 'Room Unavailability';
   $availability_list['header'] = array(
-    'building_id' => array('field' => 'building_id', 'data' => "Building ID", 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
-    'building_code' => array('field' => 'building_code', 'data' => "Building Code", 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
-    'building_name' => array('field' => 'building_name', 'data' => "Building Name", 'align' => 'center'),
-    'room_id' => array('field' => 'room_id', 'data' => "Room ID", 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
-    'room_number' => array('field' => 'room_number', 'data' => "Room Number", 'align' => 'center'),
-    'room_name' => array('field' => 'room_name', 'data' => "Room Name", 'align' => 'center'),
-    'operations' => array('data' => "Operations", 'align' => 'center', 'class' => array('no-print')),
+    'building_id' => array('field' => 'building_id', 'data' => 'Building ID', 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
+    'building_code' => array('field' => 'building_code', 'data' => 'Building Code', 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
+    'building_name' => array('field' => 'building_name', 'data' => 'Building Name', 'align' => 'center'),
+    'room_id' => array('field' => 'room_id', 'data' => 'Room ID', 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
+    'room_number' => array('field' => 'room_number', 'data' => 'Room Number', 'align' => 'center'),
+    'room_name' => array('field' => 'room_name', 'data' => 'Room Name', 'align' => 'center'),
+    'operations' => array('data' => 'Operations', 'align' => 'center', 'class' => array('no-print')),
   );
 
   $availability_list['attributes'] = array();
@@ -207,7 +207,7 @@ function mfcs_request_unavailability_0_rooms_page() {
   $availability_list['attributes']['summary'] = 'List of Rooms to Manage Unavailability of.';
 
   $availability_list['rows'] = $rows;
-  $availability_list['empty'] = "There are no rooms for you to view or manage the unavailability of.";
+  $availability_list['empty'] = 'There are no rooms for you to view or manage the unavailability of.';
 
   $datatable_settings = array(
     'sort' => strtolower($sort),
@@ -225,13 +225,13 @@ function mfcs_request_unavailability_0_rooms_page() {
     'serverSide' => FALSE,
     'deferRender' => TRUE,
     'columns' => array(
-      array('id' => 0, 'column' => 'building_id', 'name' => "Building ID", 'className' => 'column-building_id', 'sanitize' => FALSE, 'visible' => FALSE),
-      array('id' => 1, 'column' => 'building_code', 'name' => "Building Code", 'className' => 'column-building_code', 'visible' => FALSE),
-      array('id' => 2, 'column' => 'building_name', 'name' => "Building Name", 'className' => 'column-building_name'),
-      array('id' => 3, 'column' => 'room_id', 'name' => "Room ID", 'className' => 'column-room_id', 'sanitize' => FALSE, 'visible' => FALSE),
-      array('id' => 4, 'column' => 'room_number', 'name' => "Room Number", 'className' => 'column-room_number'),
-      array('id' => 5, 'column' => 'room_name', 'name' => "Room Name", 'className' => 'column-room_name'),
-      array('id' => 6, 'column' => NULL, 'name' => "Operations", 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
+      array('id' => 0, 'column' => 'building_id', 'name' => 'Building ID', 'className' => 'column-building_id', 'sanitize' => FALSE, 'visible' => FALSE),
+      array('id' => 1, 'column' => 'building_code', 'name' => 'Building Code', 'className' => 'column-building_code', 'visible' => FALSE),
+      array('id' => 2, 'column' => 'building_name', 'name' => 'Building Name', 'className' => 'column-building_name'),
+      array('id' => 3, 'column' => 'room_id', 'name' => 'Room ID', 'className' => 'column-room_id', 'sanitize' => FALSE, 'visible' => FALSE),
+      array('id' => 4, 'column' => 'room_number', 'name' => 'Room Number', 'className' => 'column-room_number'),
+      array('id' => 5, 'column' => 'room_name', 'name' => 'Room Name', 'className' => 'column-room_name'),
+      array('id' => 6, 'column' => NULL, 'name' => 'Operations', 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
     ),
     'displayStart' => 0,
     'pageLength' => 40,
@@ -569,54 +569,54 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
     $availability_list['caption'] = 'All ' . $year . ' Room Unavailabilities';
 
     $availability_list['header'] = array(
-      'id' => array('field' => 'id', 'data' => "ID", 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
-      'title' => array('field' => 'title', 'data' => "Title", 'align' => 'center'),
-      'type' => array('field' => 'type', 'data' => "Type", 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
-      'date' => array('field' => 'date', 'data' => "Date", 'align' => 'center'),
-      'enabled' => array('field' => 'enabled', 'data' => "Enabled", 'align' => 'center'),
-      'building_id' => array('field' => 'building_id', 'data' => "Building ID", 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
-      'building_code' => array('field' => 'building_code', 'data' => "Building Code", 'align' => 'center'),
-      'building_name' => array('field' => 'building_name', 'data' => "Building Name", 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
-      'room_id' => array('field' => 'room_id', 'data' => "Room ID", 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
-      'room_number' => array('field' => 'room_number', 'data' => "Room Number", 'align' => 'center'),
-      'room_name' => array('field' => 'room_name', 'data' => "Room Name", 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
-      'operations' => array('data' => "Operations", 'align' => 'center', 'class' => array('no-print')),
+      'id' => array('field' => 'id', 'data' => 'ID', 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
+      'title' => array('field' => 'title', 'data' => 'Title', 'align' => 'center'),
+      'type' => array('field' => 'type', 'data' => 'Type', 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
+      'date' => array('field' => 'date', 'data' => 'Date', 'align' => 'center'),
+      'enabled' => array('field' => 'enabled', 'data' => 'Enabled', 'align' => 'center'),
+      'building_id' => array('field' => 'building_id', 'data' => 'Building ID', 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
+      'building_code' => array('field' => 'building_code', 'data' => 'Building Code', 'align' => 'center'),
+      'building_name' => array('field' => 'building_name', 'data' => 'Building Name', 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
+      'room_id' => array('field' => 'room_id', 'data' => 'Room ID', 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
+      'room_number' => array('field' => 'room_number', 'data' => 'Room Number', 'align' => 'center'),
+      'room_name' => array('field' => 'room_name', 'data' => 'Room Name', 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
+      'operations' => array('data' => 'Operations', 'align' => 'center', 'class' => array('no-print')),
     );
 
     $columns = array(
-      array('id' => 0, 'column' => 'id', 'name' => "ID", 'className' => 'column-id', 'sanitize' => FALSE, 'visible' => FALSE),
-      array('id' => 1, 'column' => 'title', 'name' => "Title", 'className' => 'column-title'),
-      array('id' => 2, 'column' => 'type', 'name' => "Type", 'className' => 'column-type', 'visible' => FALSE),
-      array('id' => 3, 'column' => 'date', 'name' => "Date", 'className' => 'column-date'),
-      array('id' => 4, 'column' => 'enabled', 'name' => "Enabled", 'className' => 'column-enabled'),
-      array('id' => 5, 'column' => 'building_id', 'name' => "Building ID", 'className' => 'column-building_id', 'sanitize' => FALSE, 'visible' => FALSE),
-      array('id' => 6, 'column' => 'building_code', 'name' => "Building Code", 'className' => 'column-building_code'),
-      array('id' => 7, 'column' => 'building_name', 'name' => "Building Name", 'className' => 'column-building_name', 'visible' => FALSE),
-      array('id' => 8, 'column' => 'room_id', 'name' => "Room ID", 'className' => 'column-room_id', 'sanitize' => FALSE, 'visible' => FALSE),
-      array('id' => 9, 'column' => 'room_number', 'name' => "Room Number", 'className' => 'column-room_number'),
-      array('id' => 10, 'column' => 'room_name', 'name' => "Room Name", 'className' => 'column-room_name', 'visible' => FALSE),
-      array('id' => 11, 'column' => NULL, 'name' => "Operations", 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
+      array('id' => 0, 'column' => 'id', 'name' => 'ID', 'className' => 'column-id', 'sanitize' => FALSE, 'visible' => FALSE),
+      array('id' => 1, 'column' => 'title', 'name' => 'Title', 'className' => 'column-title'),
+      array('id' => 2, 'column' => 'type', 'name' => 'Type', 'className' => 'column-type', 'visible' => FALSE),
+      array('id' => 3, 'column' => 'date', 'name' => 'Date', 'className' => 'column-date'),
+      array('id' => 4, 'column' => 'enabled', 'name' => 'Enabled', 'className' => 'column-enabled'),
+      array('id' => 5, 'column' => 'building_id', 'name' => 'Building ID', 'className' => 'column-building_id', 'sanitize' => FALSE, 'visible' => FALSE),
+      array('id' => 6, 'column' => 'building_code', 'name' => 'Building Code', 'className' => 'column-building_code'),
+      array('id' => 7, 'column' => 'building_name', 'name' => 'Building Name', 'className' => 'column-building_name', 'visible' => FALSE),
+      array('id' => 8, 'column' => 'room_id', 'name' => 'Room ID', 'className' => 'column-room_id', 'sanitize' => FALSE, 'visible' => FALSE),
+      array('id' => 9, 'column' => 'room_number', 'name' => 'Room Number', 'className' => 'column-room_number'),
+      array('id' => 10, 'column' => 'room_name', 'name' => 'Room Name', 'className' => 'column-room_name', 'visible' => FALSE),
+      array('id' => 11, 'column' => NULL, 'name' => 'Operations', 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
     );
   }
   else {
     $availability_list['caption'] = '(' . check_plain($room->building_name) . ') ' . check_plain($room->room_name) . ' Unavailability';
 
     $availability_list['header'] = array(
-      'id' => array('field' => 'id', 'data' => "ID", 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
-      'title' => array('field' => 'title', 'data' => "Title", 'align' => 'center'),
-      'type' => array('field' => 'type', 'data' => "Type", 'align' => 'center'),
-      'date' => array('field' => 'date', 'data' => "Date", 'align' => 'center'),
-      'enabled' => array('field' => 'enabled', 'data' => "Enabled", 'align' => 'center'),
-      'operations' => array('data' => "Operations", 'align' => 'center', 'class' => array('no-print')),
+      'id' => array('field' => 'id', 'data' => 'ID', 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
+      'title' => array('field' => 'title', 'data' => 'Title', 'align' => 'center'),
+      'type' => array('field' => 'type', 'data' => 'Type', 'align' => 'center'),
+      'date' => array('field' => 'date', 'data' => 'Date', 'align' => 'center'),
+      'enabled' => array('field' => 'enabled', 'data' => 'Enabled', 'align' => 'center'),
+      'operations' => array('data' => 'Operations', 'align' => 'center', 'class' => array('no-print')),
     );
 
     $columns = array(
-      array('id' => 0, 'column' => 'id', 'name' => "ID", 'className' => 'column-id', 'sanitize' => FALSE, 'visible' => FALSE),
-      array('id' => 1, 'column' => 'title', 'name' => "Title", 'className' => 'column-title'),
-      array('id' => 2, 'column' => 'type', 'name' => "Type", 'className' => 'column-type'),
-      array('id' => 3, 'column' => 'date', 'name' => "Date", 'className' => 'column-date'),
-      array('id' => 4, 'column' => 'enabled', 'name' => "Enabled", 'className' => 'column-enabled'),
-      array('id' => 5, 'column' => NULL, 'name' => "Operations", 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
+      array('id' => 0, 'column' => 'id', 'name' => 'ID', 'className' => 'column-id', 'sanitize' => FALSE, 'visible' => FALSE),
+      array('id' => 1, 'column' => 'title', 'name' => 'Title', 'className' => 'column-title'),
+      array('id' => 2, 'column' => 'type', 'name' => 'Type', 'className' => 'column-type'),
+      array('id' => 3, 'column' => 'date', 'name' => 'Date', 'className' => 'column-date'),
+      array('id' => 4, 'column' => 'enabled', 'name' => 'Enabled', 'className' => 'column-enabled'),
+      array('id' => 5, 'column' => NULL, 'name' => 'Operations', 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
     );
   }
 
@@ -634,7 +634,7 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
   $availability_list['attributes']['summary'] = 'List of dates marked as unavailable for the specified room.';
 
   $availability_list['rows'] = $rows;
-  $availability_list['empty'] = t("There are no dates marked as unavailable for this room.");
+  $availability_list['empty'] = 'There are no dates marked as unavailable for this room.';
 
   $datatable_settings = array(
     'sort' => strtolower($sort),
@@ -835,7 +835,7 @@ function mfcs_request_unavailability_0_page($year, $room_id, $unavailability_id)
   $description = str_replace("\n", '<br>', check_plain($unavailable->description));
 
   mfcs_add_canonical_headers('requests/unavailable-0/view/' . $year . '/' . $unavailable->room_id . '/' . $unavailability_id);
-  drupal_set_title('' . $unavailable->year . " Room Unavailable: " . $unavailable->title);
+  drupal_set_title('' . $unavailable->year . ' Room Unavailable: ' . $unavailable->title);
 
   $can_troubleshoot = mfcs_page_generic_access('troubleshoot', NULL, $user);
 
@@ -999,7 +999,7 @@ function mfcs_request_unavailability_0_copy_form($form, &$form_state, $year, $ro
 
   mfcs_add_canonical_headers('requests/unavailable-0/copy/' . $year . '/' . $room_id);
 
-  $page_title = "Copy Unavailable for " . $room->building_code . ' ' . $room->room_number . " to " . $year;
+  $page_title = 'Copy Unavailable for ' . $room->building_code . ' ' . $room->room_number . ' to ' . $year;
   $form['#id'] = 'mfcs-unavailable_0-copy-page';
   drupal_set_title($page_title);
 
@@ -1079,26 +1079,26 @@ function mfcs_request_unavailability_0_copy_form($form, &$form_state, $year, $ro
   $form['unavailable']['year'] = array(
     '#id' => 'field-unavailable-year',
     '#type' => 'numberfield',
-    '#title' => "Year",
+    '#title' => 'Year',
     '#required' => TRUE,
-    '#description' => "Select a year to copy all unavailabilities of.",
+    '#description' => 'Select a year to copy all unavailabilities of.',
   );
 
   $form['unavailable']['include_disabled'] = array(
     '#id' => 'field-unavailable-include_disabled',
     '#type' => 'checkbox',
-    '#title' => "Include Disabled",
+    '#title' => 'Include Disabled',
     '#required' => FALSE,
-    '#description' => "When copying unavailabilities, include disabled unavailabilities.",
+    '#description' => 'When copying unavailabilities, include disabled unavailabilities.',
   );
 
   $form['unavailable']['as_disabled'] = array(
     '#id' => 'field-unavailable-as_disabled',
     '#type' => 'checkbox',
-    '#title' => "As Disabled",
+    '#title' => 'As Disabled',
     '#required' => FALSE,
     '#default_value' => TRUE,
-    '#description' => "When copying unavailabilities, set the copied unavailabilities to disabled.",
+    '#description' => 'When copying unavailabilities, set the copied unavailabilities to disabled.',
   );
 
   $form['unavailable']['submit'] = array(
@@ -1114,14 +1114,14 @@ function mfcs_request_unavailability_0_copy_form($form, &$form_state, $year, $ro
     '#id' => 'mfcs-unavailable-copy-submit-cancel',
     '#name' => 'mfcs-unavailable-copy-submit-cancel',
     '#type' => 'submit',
-    '#default_value' => t("Cancel"),
+    '#default_value' => 'Cancel',
   );
 
   $form['unavailable']['submit']['submit'] = array(
     '#id' => 'mfcs-unavailable-copy-submit-submit',
     '#name' => 'mfcs-unavailable-copy-submit-submit',
     '#type' => 'submit',
-    '#default_value' => t("Submit"),
+    '#default_value' => 'Submit',
   );
 
   return $form;
@@ -1168,7 +1168,7 @@ function mfcs_request_unavailability_0_copy_form_validate($form, &$form_state) {
     return;
   }
   elseif ($clicked_id != 'mfcs-unavailable-copy-submit-submit') {
-    form_set_error('', "Unknown submit process detected.");
+    form_set_error('', 'Unknown submit process detected.');
     return;
   }
 
@@ -1176,7 +1176,7 @@ function mfcs_request_unavailability_0_copy_form_validate($form, &$form_state) {
     $year = (int) $form_state['values']['unavailable']['year'];
   }
   else {
-    form_set_error('unavailable][year', "Please specify a valid year.");
+    form_set_error('unavailable][year', 'Please specify a valid year.');
     return;
   }
 
@@ -1190,13 +1190,13 @@ function mfcs_request_unavailability_0_copy_form_validate($form, &$form_state) {
   // check to see if there are any years to copy.
   $unavailabilities = mfcs_get_unavailabilities($year, $form['form']['room_id']['#value'], NULL, NULL, $enabled);
   if ($unavailabilities === FALSE) {
-    form_set_error('', "Internal Error. An unknown error has been detected while trying to process this request. Please contact the appropriate support staff.");
+    form_set_error('', 'Internal Error. An unknown error has been detected while trying to process this request. Please contact the appropriate support staff.');
 
     $user = cf_current_user();
-    watchdog(MFCS_WATCHDOG_ID, "Internal Error. Error while calling mfcs_get_unavailabilities() for the user %user_name [%user_id].", array('%user_name' => $user->name, '%user_id' => $user->uid), WATCHDOG_ERROR);
+    watchdog(MFCS_WATCHDOG_ID, 'Internal Error. Error while calling mfcs_get_unavailabilities() for the user %user_name [%user_id].', array('%user_name' => $user->name, '%user_id' => $user->uid), WATCHDOG_ERROR);
   }
   elseif (empty($unavailabilities)) {
-    form_set_error('unavailable][year', "No unavailabilities were found for the year " . $year . ". There is nothing to copy.");
+    form_set_error('unavailable][year', 'No unavailabilities were found for the year ' . $year . '. There is nothing to copy.');
   }
 }
 
@@ -1470,21 +1470,21 @@ function mfcs_request_unavailability_0_edit_form($form, &$form_state, $year, $ro
   if (is_null($unavailability_id)) {
     mfcs_add_canonical_headers('requests/unavailable-0/create/' . $year . '/' . $room_id);
 
-    $page_title = "Create " . $year . " Room Unavailable for " . $room->building_code . ' ' . $room->room_number;
+    $page_title = 'Create ' . $year . ' Room Unavailable for ' . $room->building_code . ' ' . $room->room_number;
 
     $form['#id'] = 'mfcs-unavailable_0-create-page';
   }
   elseif ($copy) {
     mfcs_add_canonical_headers('requests/unavailable-0/create/' . $year . '/' . $room_id . '/' . $unavailability_id);
 
-    $page_title = "Copy " . $year . " Room Unavailable: " . $unavailable->title;
+    $page_title = 'Copy ' . $year . ' Room Unavailable: ' . $unavailable->title;
 
     $form['#id'] = 'mfcs-unavailable_0-copy-page';
   }
   else {
     mfcs_add_canonical_headers('requests/unavailable-0/edit/' . $year . '/' . $room_id . '/' . $unavailability_id);
 
-    $page_title = "Edit " . $year . " Room Unavailable: " . $unavailable->title;
+    $page_title = 'Edit ' . $year . ' Room Unavailable: ' . $unavailable->title;
 
     $form['#id'] = 'mfcs-unavailable_0-edit-page';
   }
@@ -1584,7 +1584,7 @@ function mfcs_request_unavailability_0_edit_form($form, &$form_state, $year, $ro
   $form['unavailable']['title'] = array(
     '#id' => 'field-unavailable-title',
     '#type' => 'textfield',
-    '#title' => "Title",
+    '#title' => 'Title',
     '#required' => TRUE,
     '#default_value' => isset($unavailable->title) ? $unavailable->title : '',
   );
@@ -1592,7 +1592,7 @@ function mfcs_request_unavailability_0_edit_form($form, &$form_state, $year, $ro
   $form['unavailable']['type'] = array(
     '#id' => 'field-unavailable-type',
     '#type' => 'select',
-    '#title' => "Type",
+    '#title' => 'Type',
     '#options' => $unavailability_types,
     '#required' => TRUE,
     '#default_value' => (isset($unavailable->type) ? $unavailable->type : NULL),
@@ -1601,7 +1601,7 @@ function mfcs_request_unavailability_0_edit_form($form, &$form_state, $year, $ro
   $form['unavailable']['description'] = array(
     '#id' => 'field-unavailable-description',
     '#type' => 'textarea',
-    '#title' => "Description",
+    '#title' => 'Description',
     '#default_value' => isset($unavailable->description) ? $unavailable->description : '',
   );
 
@@ -1635,21 +1635,21 @@ function mfcs_request_unavailability_0_edit_form($form, &$form_state, $year, $ro
     '#tree' => TRUE,
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
-    '#title' => "Start Date and Time",
-    '#description' => "The start day and time is inclusive.",
+    '#title' => 'Start Date and Time',
+    '#description' => 'The start day and time is inclusive.',
   );
 
   $form['unavailable']['date_start']['day'] = array(
     '#id' => 'field-unavailable-date_start-day',
     '#type' => 'date_popup',
-    '#title' => "Start Day",
-    '#date_format' => "M d",
+    '#title' => 'Start Day',
+    '#date_format' => 'M d',
     '#date_label_position' => 'invisible',
     '#date_year_range' => '' . $year_offset . ':' . $year_offset,
     '#datepicker_options' => array(
       'changeYear' => FALSE,
     ),
-    '#expected_format' => array('date' => "M d"),
+    '#expected_format' => array('date' => 'M d'),
     '#required' => TRUE,
     '#default_value' => $date_start_day,
     '#wrapper_attributes' => array(
@@ -1663,10 +1663,10 @@ function mfcs_request_unavailability_0_edit_form($form, &$form_state, $year, $ro
   $form['unavailable']['date_start']['time'] = array(
     '#id' => 'field-unavailable-date_start-time',
     '#type' => 'textfield',
-    '#title' => "Start Time",
+    '#title' => 'Start Time',
     '#size' => 8,
     '#maxlength' => 8,
-    '#description' => "E.g, 12:31pm",
+    '#description' => 'E.g, 12:31pm',
     '#expected_format' => array('date' => MFCS_DATE_FORMAT_TIME),
     '#required' => FALSE,
     '#default_value' => $date_start_time,
@@ -1678,21 +1678,21 @@ function mfcs_request_unavailability_0_edit_form($form, &$form_state, $year, $ro
     '#tree' => TRUE,
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
-    '#title' => "Stop Date and Time",
-    '#description' => "The stop day and time is exclusive.",
+    '#title' => 'Stop Date and Time',
+    '#description' => 'The stop day and time is exclusive.',
   );
 
   $form['unavailable']['date_stop']['day'] = array(
     '#id' => 'field-unavailable-date_stop-day',
     '#type' => 'date_popup',
-    '#title' => "Stop Date",
-    '#date_format' => "M d",
+    '#title' => 'Stop Date',
+    '#date_format' => 'M d',
     '#date_label_position' => 'invisible',
     '#date_year_range' => '' . $year_offset . ':' . $year_offset,
     '#datepicker_options' => array(
       'changeYear' => FALSE,
     ),
-    '#expected_format' => array('date' => "M d"),
+    '#expected_format' => array('date' => 'M d'),
     '#required' => FALSE,
     '#default_value' => $date_stop_day,
     '#wrapper_attributes' => array(
@@ -1706,10 +1706,10 @@ function mfcs_request_unavailability_0_edit_form($form, &$form_state, $year, $ro
   $form['unavailable']['date_stop']['time'] = array(
     '#id' => 'field-unavailable-date_stop-time',
     '#type' => 'textfield',
-    '#title' => "Stop Time",
+    '#title' => 'Stop Time',
     '#size' => 8,
     '#maxlength' => 8,
-    '#description' => "E.g, 12:31pm",
+    '#description' => 'E.g, 12:31pm',
     '#expected_format' => array('date' => MFCS_DATE_FORMAT_TIME),
     '#required' => FALSE,
     '#default_value' => $date_stop_time,
@@ -1718,7 +1718,7 @@ function mfcs_request_unavailability_0_edit_form($form, &$form_state, $year, $ro
   $form['unavailable']['enabled'] = array(
     '#id' => 'field-unavailable-enabled',
     '#type' => 'select',
-    '#title' => "Enabled",
+    '#title' => 'Enabled',
     '#options' => array(0 => 'No', 1 => 'Yes'),
     '#default_value' => isset($unavailable->enabled) ? $unavailable->enabled : 1,
   );
@@ -1728,7 +1728,7 @@ function mfcs_request_unavailability_0_edit_form($form, &$form_state, $year, $ro
     '#type' => 'fieldset',
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
-    '#title' => "Help",
+    '#title' => 'Help',
   );
 
   $form['unavailable']['help']['inclusiveness'] = array(
@@ -1758,14 +1758,14 @@ function mfcs_request_unavailability_0_edit_form($form, &$form_state, $year, $ro
     '#id' => 'mfcs-unavailable-edit-submit-cancel',
     '#name' => 'mfcs-unavailable-edit-submit-cancel',
     '#type' => 'submit',
-    '#default_value' => t("Cancel"),
+    '#default_value' => 'Cancel',
   );
 
   $form['unavailable']['submit']['submit'] = array(
     '#id' => 'mfcs-unavailable-edit-submit-submit',
     '#name' => 'mfcs-unavailable-edit-submit-submit',
     '#type' => 'submit',
-    '#default_value' => t("Submit"),
+    '#default_value' => 'Submit',
   );
 
   return $form;
@@ -1825,12 +1825,12 @@ function mfcs_request_unavailability_0_edit_form_validate($form, &$form_state) {
   $date_start = strtotime('midnight today', $date_start);
 
   if ($date_start === FALSE || date('m-d', $date_start) != $form_state['values']['unavailable']['date_start']['day']) {
-    form_set_error('unavailable][date_start][day', "The specified start date day is not valid.");
+    form_set_error('unavailable][date_start][day', 'The specified start date day is not valid.');
   }
   elseif (isset($form_state['values']['unavailable']['date_start']['time']) && strlen($form_state['values']['unavailable']['date_start']['time']) > 0) {
     $date_start = strtotime($form['form']['year']['#value'] . '-' . $form_state['values']['unavailable']['date_start']['day'] . ' ' . $form_state['values']['unavailable']['date_start']['time']);
     if ($date_start === FALSE || !mfcs_validate_time_12hour($form_state['values']['unavailable']['date_start']['time'])) {
-      form_set_error('unavailable][date_start][time', "The specified start date time is not valid.");
+      form_set_error('unavailable][date_start][time', 'The specified start date time is not valid.');
     }
   }
 
@@ -1839,41 +1839,41 @@ function mfcs_request_unavailability_0_edit_form_validate($form, &$form_state) {
     $date_stop = strtotime('midnight today', $date_stop);
 
     if ($date_stop === FALSE || date('m-d', $date_stop) != $form_state['values']['unavailable']['date_stop']['day']) {
-      form_set_error('unavailable][date_stop][day', "The specified stop date day is not valid.");
+      form_set_error('unavailable][date_stop][day', 'The specified stop date day is not valid.');
     }
     elseif (isset($form_state['values']['unavailable']['date_stop']['time']) && strlen($form_state['values']['unavailable']['date_stop']['time']) > 0) {
       $date_stop = strtotime($form['form']['year']['#value'] . '-' . $form_state['values']['unavailable']['date_stop']['day'] . ' ' . $form_state['values']['unavailable']['date_stop']['time']);
       if ($date_stop === FALSE || !mfcs_validate_time_12hour($form_state['values']['unavailable']['date_stop']['time'])) {
-        form_set_error('unavailable][date_stop][time', "The specified stop date time is not valid.");
+        form_set_error('unavailable][date_stop][time', 'The specified stop date time is not valid.');
       }
     }
 
     if ($date_stop == $date_start) {
-        form_set_error('unavailable][date_stop][day', "The specified stop date day (and time) cannot be the same as the start date (and time).");
+        form_set_error('unavailable][date_stop][day', 'The specified stop date day (and time) cannot be the same as the start date (and time).');
     }
 
     if ($date_stop < $date_start) {
-      form_set_error('unavailable][date_stop][day', "The specified stop date day (and time) cannot be before the start date (and time).");
+      form_set_error('unavailable][date_stop][day', 'The specified stop date day (and time) cannot be before the start date (and time).');
     }
   }
   else {
     if (isset($form_state['values']['unavailable']['date_start']['time']) && strlen($form_state['values']['unavailable']['date_start']['time']) > 0) {
-      form_set_error('unavailable][date_start][time', "The start date time may only be specified if a stop date is specified.");
+      form_set_error('unavailable][date_start][time', 'The start date time may only be specified if a stop date is specified.');
     }
 
     if (isset($form_state['values']['unavailable']['date_stop']['time']) && strlen($form_state['values']['unavailable']['date_stop']['time']) > 0) {
-      form_set_error('unavailable][date_stop][day', "The stop date day must be specified when the stop time is specified.");
+      form_set_error('unavailable][date_stop][day', 'The stop date day must be specified when the stop time is specified.');
     }
   }
 
   $length = strlen($form_state['values']['unavailable']['title']);
   if ($length > 255) {
-    form_set_error('unavailable][title', "The title is " . $length . " characters long and cannot be longer than 255 characters.");
+    form_set_error('unavailable][title', 'The title is ' . $length . ' characters long and cannot be longer than 255 characters.');
   }
 
   $length = strlen($form_state['values']['unavailable']['description']);
   if ($length > 255) {
-    form_set_error('unavailable][description', "The description is " . $length . " characters long and cannot be longer than 255 characters.");
+    form_set_error('unavailable][description', 'The description is ' . $length . ' characters long and cannot be longer than 255 characters.');
   }
 }
 
@@ -2062,13 +2062,13 @@ function mfcs_request_unavailability_0_edit_form_submit($form, &$form_state) {
   }
 
   if (!$success) {
-    form_set_error('form', "An error occurred while trying to edit the unavailability. Please contact the support staff.");
+    form_set_error('form', 'An error occurred while trying to edit the unavailability. Please contact the support staff.');
 
     if (is_object($unavailable)) {
-      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to edit the unavailability: @unavailability_id.", array('@unavailability_id' => $unavailable->id), WATCHDOG_ERROR);
+      watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to edit the unavailability: @unavailability_id.', array('@unavailability_id' => $unavailable->id), WATCHDOG_ERROR);
     }
     else {
-      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to create an unavailability.", array(), WATCHDOG_ERROR);
+      watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to create an unavailability.', array(), WATCHDOG_ERROR);
     }
 
     $form_state['rebuild'] = TRUE;
@@ -2190,7 +2190,7 @@ function mfcs_request_unavailability_0_delete_form($form, &$form_state, $year, $
 
   $can_troubleshoot = mfcs_page_generic_access('troubleshoot', NULL, $user);
 
-  drupal_set_title("Delete " . $unavailable->year . " Unavailability: " . $unavailable->title);
+  drupal_set_title('Delete ' . $unavailable->year . ' Unavailability: ' . $unavailable->title);
 
   $form['#id'] = 'mfcs-unavailable_0-delete-page';
   $form['form'] = array(
@@ -2284,14 +2284,14 @@ function mfcs_request_unavailability_0_delete_form($form, &$form_state, $year, $
     '#id' => 'mfcs-unavailable-delete-submit-no',
     '#name' => 'mfcs-unavailable-delete-submit-no',
     '#type' => 'submit',
-    '#default_value' => t("No"),
+    '#default_value' => 'No',
   );
 
   $form['display']['submit']['yes'] = array(
     '#id' => 'mfcs-unavailable-delete-submit-yes',
     '#name' => 'mfcs-unavailable-delete-submit-yes',
     '#type' => 'submit',
-    '#default_value' => t("Yes"),
+    '#default_value' => 'Yes',
   );
 
   return $form;
@@ -2381,8 +2381,8 @@ function mfcs_request_unavailability_0_delete_form_submit($form, &$form_state) {
   }
 
   if (!$deleted) {
-    form_set_error('form', "An error occurred while trying to delete the unavailability. Please contact the support staff.");
-    watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to delete the unavailability: @id.", array('@id' => $id), WATCHDOG_ERROR);
+    form_set_error('form', 'An error occurred while trying to delete the unavailability. Please contact the support staff.');
+    watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to delete the unavailability: @id.', array('@id' => $id), WATCHDOG_ERROR);
 
     $form_state['rebuild'] = TRUE;
     $form_state['redirect'] = FALSE;

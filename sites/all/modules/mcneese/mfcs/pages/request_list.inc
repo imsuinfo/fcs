@@ -89,7 +89,7 @@ function mfcs_request_list_0_form($form, &$form_state, $page_number = NULL) {
     $show_my_request_only_default = TRUE;
   }
 
-  $page_title = "Facilities Use Requests";
+  $page_title = 'Facilities Use Requests';
   drupal_set_title($page_title);
 
   $form = array();
@@ -227,7 +227,7 @@ function mfcs_request_list_0_form($form, &$form_state, $page_number = NULL) {
   $options['columns'] = $columns;
   $options['columns_default'] = $columns_default;
 
-  $options['ajax_path'] = "'" . $base_path . 'requests/list-0/ajax' . $url_arguments . "'";
+  $options['ajax_path'] = '\'' . $base_path . 'requests/list-0/ajax' . $url_arguments . '\'';
 
   $table = mfcs_build_request_ajax_table($items_returned, $conditions, $options);
   $table['attributes']['class'][] = 'mfcs-table-requests';
@@ -260,7 +260,7 @@ function mfcs_request_list_0_form($form, &$form_state, $page_number = NULL) {
   }
 
   $navigation_bottom .= '<div class="table_listing-comment">';
-  $navigation_bottom .= "Showing " . $navigation_start . " to " . $navigation_total . " of " . $count . " entries.";
+  $navigation_bottom .= 'Showing ' . $navigation_start . ' to ' . $navigation_total . ' of ' . $count . ' entries.';
   $navigation_bottom .= '</div>';
 
   if ($count > ($options['start'] + $rows_per_page)) {
@@ -287,7 +287,7 @@ function mfcs_request_list_0_columns() {
     'id' => array(
       'id' => 0,
       'column' => 'id',
-      'name' => "ID",
+      'name' => 'ID',
       'class' => array('column-id'),
       'sanitize' => FALSE,
       'align' => 'center',
@@ -295,7 +295,7 @@ function mfcs_request_list_0_columns() {
     'type' => array(
       'id' => 1,
       'column' => 'type',
-      'name' => "Type",
+      'name' => 'Type',
       'class' => array('column-type', 'no-script-hidden'),
       'align' => 'center',
       'visible' => FALSE,
@@ -303,42 +303,42 @@ function mfcs_request_list_0_columns() {
     'title' => array(
       'id' => 2,
       'column' => 'title',
-      'name' => "Request Name",
+      'name' => 'Request Name',
       'class' => array('column-title'),
       'align' => 'center',
     ),
     'building' => array(
       'id' => 3,
       'column' => 'building',
-      'name' => "Building",
+      'name' => 'Building',
       'class' => array('column-building'),
       'align' => 'center',
     ),
     'room' => array(
       'id' => 4,
       'column' => 'room',
-      'name' => "Room",
+      'name' => 'Room',
       'class' => array('column-room'),
       'align' => 'center',
     ),
     'date' => array(
       'id' => 5,
       'column' => 'date',
-      'name' => "Date",
+      'name' => 'Date',
       'class' => array('column-date'),
       'align' => 'center',
     ),
     'status' => array(
       'id' => 6,
       'column' => 'status',
-      'name' => "Status",
+      'name' => 'Status',
       'class' => array('column-status'),
       'align' => 'center',
     ),
     'step' => array(
       'id' => 7,
       'column' => 'step',
-      'name' => "Step",
+      'name' => 'Step',
       'class' => array('column-step', 'no-script-hidden'),
       'align' => 'center',
       'visible' => FALSE,
@@ -346,7 +346,7 @@ function mfcs_request_list_0_columns() {
     'submitted_by_id' => array(
       'id' => 8,
       'column' => 'user_id',
-      'name' => "Submitted By ID",
+      'name' => 'Submitted By ID',
       'class' => array('column-submitted_by_id', 'no-script-hidden'),
       'sanitize' => FALSE,
       'visible' => FALSE,
@@ -355,21 +355,21 @@ function mfcs_request_list_0_columns() {
     'submitted_by' => array(
       'id' => 9,
       'column' => 'user_id',
-      'name' => "Submitted By",
+      'name' => 'Submitted By',
       'class' => array('column-submitted_by'),
       'align' => 'center',
     ),
     'submitted_on' => array(
       'id' => 10,
       'column' => 'created',
-      'name' => "Submitted On",
+      'name' => 'Submitted On',
       'class' => array('column-submitted_on'),
       'align' => 'center',
     ),
     'operations' => array(
       'id' => 11,
       'column' => NULL,
-      'name' => "Operations",
+      'name' => 'Operations',
       'class' => array('column-operations', 'no-print'),
       'align' => 'center',
       'searchable' => FALSE,
