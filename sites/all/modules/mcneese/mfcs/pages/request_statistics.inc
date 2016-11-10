@@ -363,7 +363,7 @@ function mfcs_request_statistics_0_page_markup($year = NULL, $month = NULL, $day
 
     $image_file_path = $base_path . $module_path . '/images/pdf/32.png';
 
-    $statistics['markup'] .= '<a href="' . $base_path . 'pdf-0/statistics/' . $path_dates . $url_arguments . '" title="Download as PDF" class="statistics-navigation-link link-pdf"><img src="' . $image_file_path . '" alt="PDF" width="32" height="32" class="help-navigation_image image-pdf"></a>';
+    $statistics['markup'] .= '<a href="' . $base_path . 'pdf-0/statistics/' . $path_dates . $url_arguments . '" title="Download as PDF" class="statistics-navigation-link link-pdf"><img src="' . $image_file_path . '" alt="PDF" width="32" height="32" class="statistics-navigation_image image-pdf"></a>';
 
     unset($image_file_path);
     unset($module_path);

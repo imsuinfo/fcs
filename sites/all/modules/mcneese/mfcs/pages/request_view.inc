@@ -447,6 +447,23 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
   if ($show_display) {
     mfcs_include(MFCS_INCLUDE_VIEW);
 
+    $form['navigation'] = array(
+      '#type' => 'markup',
+      '#markup' => '',
+    );
+
+    $form['navigation']['#markup'] = '<div class="request-navigation no-print">';
+    if (file_exists(DRUPAL_ROOT . '/sites/all/modules/mcneese/mfcs/images/pdf/32.png')) {
+      $module_path = drupal_get_path('module', 'mfcs');
+      $image_file_path = $base_path . $module_path . '/images/pdf/32.png';
+
+      $form['navigation']['#markup'] .= '<a href="' . $base_path . 'pdf-0/' . $request_id . $url_arguments . '" title="Download as PDF" class="request-navigation-link link-pdf"><img src="' . $image_file_path . '" alt="PDF" width="32" height="32" class="request-navigation_image image-pdf"></a>';
+
+      unset($image_file_path);
+      unset($module_path);
+    }
+    $form['navigation']['#markup'] .= '</div>';
+
     $form['display'] = array(
       '#id' => 'request-' . $request_id . '-section-display',
       '#type' => 'fieldset',
