@@ -894,6 +894,58 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
   );
+
+  $items['pdf-0/statistics/%/%'] = array(
+    'title' => 'PDF of Monthly Calendar',
+    'description' => 'PDF of monthly calendar.',
+    'page callback' => 'mfcs_request_calendar_month_0_page_pdf',
+    'page arguments' => array(2, 3),
+    'file' => 'request_calendar.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('list'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
+
+  $items['pdf-0/statistics/%'] = array(
+    'title' => 'Request Statistics',
+    'description' => 'Request Statistics',
+    'page callback' => 'mfcs_request_statistics_0_page_pdf',
+    'page arguments' => array(2),
+    'file' => 'request_statistics.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_generic_access',
+    'access arguments' => array('statistics'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
+
+  $items['pdf-0/statistics/%/%'] = array(
+    'title' => 'Request Statistics',
+    'description' => 'Request Statistics',
+    'page callback' => 'mfcs_request_statistics_0_page_pdf',
+    'page arguments' => array(2, 3),
+    'file' => 'request_statistics.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_generic_access',
+    'access arguments' => array('statistics'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
+
+  $items['pdf-0/statistics/%/%/%'] = array(
+    'title' => 'Request Statistics',
+    'description' => 'Request Statistics',
+    'page callback' => 'mfcs_request_statistics_0_page_pdf',
+    'page arguments' => array(2, 3, 4),
+    'file' => 'request_statistics.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_generic_access',
+    'access arguments' => array('statistics'),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
 }
 
 /**

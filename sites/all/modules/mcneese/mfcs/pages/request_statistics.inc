@@ -26,31 +26,187 @@
  *   The HTML output representing the page.
  */
 function mfcs_request_statistics_0_page($year = NULL, $month = NULL, $day = NULL) {
+  $statistics = mfcs_request_statistics_0_page_markup($year, $month, $day);
+  if ($statistics === FALSE) {
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  if (is_null($month)) {
+    if (is_null($year)) {
+      $year = date('Y', $statistics['year_start']);
+    }
+
+    mfcs_add_canonical_headers('requests/statistics-0/' . $year);
+
+    drupal_set_title('Request Statistics for the year ' . $year);
+  }
+  elseif (is_null($day)) {
+    $month = strtolower(date('F', $statistics['month_start']));
+    $year = date('Y', $statistics['month_start']);
+    mfcs_add_canonical_headers('requests/statistics-0/' . $year . '/' . $month);
+
+    drupal_set_title('Request Statistics for ' . $statistics['month_name'] . ' ' . $year);
+  }
+  else {
+    $month = strtolower(date('F', $statistics['day_start']));
+    $year = date('Y', $statistics['day_start']);
+    $day = date('d', $statistics['day_start']);
+
+    mfcs_add_canonical_headers('requests/statistics-0/' . $year . '/' . $month . '/' . $day);
+
+    drupal_set_title('Request Statistics for ' . $statistics['month_name'] . ' ' . $day . ', ' . $year);
+  }
+
+  return $statistics['markup'];
+}
+
+/**
+ * Provides the facilities use request statistics main page(s).
+ *
+ * @param int $year
+ *   (optional) When specified, represents the year.
+ * @param string $month
+ *   (optional) When specified, represents the month.
+ *   Causes $year to be required.
+ * @param string $day
+ *   (optional) When specified, represents the day.
+ *   Causes $year and $month to be required.
+ *
+ * @return string
+ *   The HTML output representing the page.
+ */
+function mfcs_request_statistics_0_page_pdf($year = NULL, $month = NULL, $day = NULL) {
+  $statistics = mfcs_request_statistics_0_page_markup($year, $month, $day);
+  if ($markup === FALSE) {
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  $statistics_name = '';
+  if (is_null($month)) {
+    if (is_null($year)) {
+      $year = date('Y', $statistics['year_start']);
+    }
+
+    mfcs_add_canonical_headers('pdf-0/statistics/' . $year);
+
+    $title = 'Request Statistics for the year ' . $year;
+    $statistics_name = $year;
+  }
+  elseif (is_null($day)) {
+    $month = strtolower(date('F', $statistics['month_start']));
+    $year = date('Y', $statistics['month_start']);
+
+    mfcs_add_canonical_headers('pdf-0/statistics/' . $year . '/' . $month);
+
+    $title = 'Request Statistics for ' . $statistics['month_name'] . ' ' . $year;
+    $statistics_name = $year . '_' . $month;
+  }
+  else {
+    $month = strtolower(date('F', $statistics['day_start']));
+    $year = date('Y', $statistics['day_start']);
+    $day = date('d', $statistics['day_start']);
+
+    mfcs_add_canonical_headers('pdf-0/statistics/' . $year . '/' . $month . '/' . $day);
+
+    $title = 'Request Statistics for ' . $statistics['month_name'] . ' ' . $day . ', ' . $year;
+    $statistics_name = $year . '_' . $month . '_' . $day;
+  }
+
+  drupal_set_title($title);
+
+  // turn off devel shutdown functionality.
+  $GLOBALS['devel_shutdown'] = FALSE;
+
+  $page['html']['content'] = array(
+    '#type' => 'markup',
+    '#markup' => $statistics['markup'],
+  );
+  unset($statistics);
+
+  $renderred = drupal_render($page);
+  $html = drupal_render_page($renderred);
+  unset($renderred);
+
+  mfcs_include(MFCS_INCLUDE_OUTPUT);
+
+  $parameters = array(
+    'page_title' => FALSE,
+    'title' => $title,
+  );
+
+  $contained = mfcs_output_print_page_view($html, $parameters);
+
+  if (!is_string($contained)) {
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  $result = mfcs_request_pdf_0_page_using_wkhtmltopdf_generic('fcs-statistics-' . $statistics_name . '.pdf', $contained, FALSE);
+  if ($result) {
+    exit();
+  }
+}
+
+/**
+ * Provides the facilities use request statistics main page(s) markup.
+ *
+ * @param int $year
+ *   (optional) When specified, represents the year.
+ * @param string $month
+ *   (optional) When specified, represents the month.
+ *   Causes $year to be required.
+ * @param string $day
+ *   (optional) When specified, represents the day.
+ *   Causes $year and $month to be required.
+ *
+ * @return array|false
+ *   An array of the following on success:
+ *   - markup: string of the generated markup.
+ *   - day_start: unix timestamp of midgnight of the day.
+ *   - day_stop: unix timestamp of midnight of the next day.
+ *   - month_start: unix timestamp of midnight first day of the month.
+ *   - month_stop: unix timestamp of midnight first day of the next month.
+ *   - month_name: string of the full name of the month.
+ *   - month_name_next: string of the full name of the next month.
+ *   - month_name_previous: string of the full name of the previous month.
+ *   - year_start: unix timestamp of midnight first day of the year.
+ *   - year_stop: unix timestamp of midnight first day of the next year.
+ *   - year_previous: unix timestamp of midnight first day of the previous year.
+ *   FALSE is returned on error.
+ */
+function mfcs_request_statistics_0_page_markup($year = NULL, $month = NULL, $day = NULL) {
   if (!is_null($year) && !cf_is_integer($year)) {
     cf_error::invalid_integer('year');
 
-    drupal_not_found();
-    drupal_exit();
+    return FALSE;
   }
 
   if (!is_null($month) && !is_string($month)) {
     cf_error::invalid_string('month');
 
-    drupal_not_found();
-    drupal_exit();
+    return FALSE;
   }
 
   if (!is_null($day) && !cf_is_integer($day)) {
     cf_error::invalid_integer('day');
 
-    drupal_not_found();
-    drupal_exit();
+    return FALSE;
   }
 
   if (is_null($year) && !is_null($month) || is_null($year) && is_null($month) && !is_null($day)) {
-    drupal_not_found();
-    drupal_exit();
+    return FALSE;
   }
+
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
 
   $valid_month_names = array(
     1 => 'january',
@@ -70,27 +226,23 @@ function mfcs_request_statistics_0_page($year = NULL, $month = NULL, $day = NULL
   if (!is_null($month)) {
     if (cf_is_integer($month)) {
       if (!array_key_exists($month, $valid_month_names)) {
-        drupal_not_found();
-        drupal_exit();
+        return FALSE;
       }
 
       $month = $valid_month_names[$month];
     }
     elseif (is_string($month)) {
       if (!in_array($month, $valid_month_names)) {
-        drupal_not_found();
-        drupal_exit();
+        return FALSE;
       }
     }
     else {
-      drupal_not_found();
-      drupal_exit();
+      return FALSE;
     }
   }
 
   if (!is_null($day) && (!cf_is_integer($day) || $day < 1 || $day > 31)) {
-    drupal_not_found();
-    drupal_exit();
+    return FALSE;
   }
 
   global $base_path;
@@ -100,45 +252,64 @@ function mfcs_request_statistics_0_page($year = NULL, $month = NULL, $day = NULL
   mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
-  $day_start = NULL;
-  $day_stop = NULL;
+  $statistics = array(
+    'markup' => NULL,
+    'day_start' => NULL,
+    'day_stop' => NULL,
+    'month_start' => NULL,
+    'month_stop' => NULL,
+    'month_name' => NULL,
+    'year_start' => NULL,
+    'year_stop' => NULL,
+    'year_previous' => NULL,
+  );
+
+  $path_dates = '';
+
   if (!is_null($year)) {
-    $year_start = strtotime('midnight january 1,  ' . $year);
-    $year_stop = strtotime('next year', $year_start);
-    $year_last = strtotime('previous year', $year_start);
+    $statistics['year_start'] = strtotime('midnight january 1,  ' . $year);
+    $statistics['year_stop'] = strtotime('next year', $statistics['year_start']);
+    $statistics['year_previous'] = strtotime('previous year', $statistics['year_start']);
+
+    $path_dates .= $year;
 
     if (is_null($month)) {
       // nothing to do.
     }
     elseif (is_null($day)) {
-      $month_start = strtotime('midnight ' . $month . ' 1,  ' . $year);
-      $month_stop = strtotime('next month', $month_start);
-      $month_name = date('F', $month_start);
+      $statistics['month_start'] = strtotime('midnight ' . $month . ' 1,  ' . $year);
+      $statistics['month_stop'] = strtotime('next month', $statistics['month_start']);
+      $statistics['month_name'] = date('F', $statistics['month_start']);
+
+      $path_dates = $year . '/' . $month;
     }
     else {
-      $month_start = strtotime('midnight ' . $month . ' 1,  ' . $year);
-      $month_stop = strtotime('next month', $month_start);
-      $month_name = date('F', $month_start);
+      $statistics['month_start'] = strtotime('midnight ' . $month . ' 1,  ' . $year);
+      $statistics['month_stop'] = strtotime('next month', $statistics['month_start']);
+      $statistics['month_name'] = date('F', $statistics['month_start']);
 
-      $day_start = strtotime('midnight ' . $month . ' ' . $day . ' ' . $year);
-      $day_stop = strtotime('midnight tomorrow', $day_start);
+      $statistics['day_start'] = strtotime('midnight ' . $month . ' ' . $day . ' ' . $year);
+      $statistics['day_stop'] = strtotime('midnight tomorrow', $statistics['day_start']);
+
+      $path_dates = $year . '/' . $month . '/' . $day;
     }
-
   }
   else {
     $instance = mfcs_instance();
     $year = date('Y', $instance);
-    $year_start = strtotime('midnight january 1, ' . $year);
-    $year_stop = strtotime('next year', $year_start);
-    $year_last = strtotime('previous year', $year_start);
+    $statistics['year_start'] = strtotime('midnight january 1, ' . $year);
+    $statistics['year_stop'] = strtotime('next year', $statistics['year_start']);
+    $statistics['year_previous'] = strtotime('previous year', $statistics['year_start']);
 
     $month = NULL;
     $day = NULL;
+
+    $path_dates .=  $year;
   }
 
   if (is_null($year) || is_null($month)) {
-    $previous = $year_last;
-    $next = $year_stop;
+    $previous = $statistics['year_previous'];
+    $next = $statistics['year_stop'];
 
     $path_previous = date('Y', $previous);
     $path_next = date('Y', $next);
@@ -147,30 +318,30 @@ function mfcs_request_statistics_0_page($year = NULL, $month = NULL, $day = NULL
     $string_next = date('Y', $next);
   }
   elseif (is_null($day)) {
-    $previous = strtotime('previous month', $month_start);
-    $next = $month_stop;
+    $previous = strtotime('previous month', $statistics['month_start']);
+    $next = $statistics['month_stop'];
 
-    $month_name_previous = date('F', $previous);
-    $month_name_next = date('F', $next);
+    $statistics['month_name_previous'] = date('F', $previous);
+    $statistics['month_name_next'] = date('F', $next);
 
-    $path_previous = date('Y', $previous) . '/' . strtolower($month_name_previous);
-    $path_next = date('Y', $next) . '/' . strtolower($month_name_next);
+    $path_previous = date('Y', $previous) . '/' . strtolower($statistics['month_name_previous']);
+    $path_next = date('Y', $next) . '/' . strtolower($statistics['month_name_next']);
 
-    $string_previous = $month_name_previous . ' ' . date('Y', $previous);
-    $string_next = $month_name_next . ' ' . date('Y', $next);
+    $string_previous = $statistics['month_name_previous'] . ' ' . date('Y', $previous);
+    $string_next = $statistics['month_name_next'] . ' ' . date('Y', $next);
   }
   else {
-    $previous = strtotime('previous day', $day_start);
-    $next = $day_stop;
+    $previous = strtotime('previous day', $statistics['day_start']);
+    $next = $statistics['day_stop'];
 
-    $month_name_previous = date('F', $previous);
-    $month_name_next = date('F', $next);
+    $statistics['month_name_previous'] = date('F', $previous);
+    $statistics['month_name_next'] = date('F', $next);
 
-    $path_previous = date('Y', $previous) . '/' . strtolower($month_name_previous) . '/' . date('d', $previous);
-    $path_next = date('Y', $next) . '/' . strtolower($month_name_next) . '/' . date('d', $next);
+    $path_previous = date('Y', $previous) . '/' . strtolower($statistics['month_name_previous']) . '/' . date('d', $previous);
+    $path_next = date('Y', $next) . '/' . strtolower($statistics['month_name_next']) . '/' . date('d', $next);
 
-    $string_previous = $month_name_previous . ' ' . date('d', $previous) . ', ' . date('Y', $previous);
-    $string_next = $month_name_next . ' ' . date('d', $next) . ', ' . date('Y', $next);
+    $string_previous = $statistics['month_name_previous'] . ' ' . date('d', $previous) . ', ' . date('Y', $previous);
+    $string_next = $statistics['month_name_next'] . ' ' . date('d', $next) . ', ' . date('Y', $next);
   }
 
   $status_options = mfcs_get_request_status_list_options();
@@ -180,52 +351,62 @@ function mfcs_request_statistics_0_page($year = NULL, $month = NULL, $day = NULL
 
   $now = date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS);
 
-  $markup = '<div id="mfcs-statistics-page" class="statistics-page">';
+  $statistics['markup'] = '<div id="mfcs-statistics-page" class="statistics-page">';
 
   // next/prev years
-  $markup .= '<div class="statistics-navigation position-relative no-print clear">';
-  $markup .= '  <a href="' . $base_path . 'requests/statistics-0/' . $path_previous . '" class="statistics-navigation-link link-previous inline-block" title="Statistics for ' . $string_previous . '">Prev</a>';
-  $markup .= '  <a href="' . $base_path . 'requests/statistics-0/' . $path_next . '" class="statistics-navigation-link link-previous inline-block float-right" title="Statistics for for ' . $string_next . '">Next</a>';
-  $markup .= '</div>';
+  $statistics['markup'] .= '<div class="statistics-navigation no-print">';
+  $statistics['markup'] .= '  <a href="' . $base_path . 'requests/statistics-0/' . $path_previous . $url_arguments . '" class="statistics-navigation-link link-previous" title="Statistics for ' . $string_previous . '">Prev</a>';
+  $statistics['markup'] .= '  <a href="' . $base_path . 'requests/statistics-0/' . $path_next . $url_arguments . '" class="statistics-navigation-link link-next" title="Statistics for for ' . $string_next . '">Next</a>';
 
-  $markup .= '<div class="statistics-title">';
+  if (file_exists(DRUPAL_ROOT . '/sites/all/modules/mcneese/mfcs/images/pdf/32.png')) {
+    $module_path = drupal_get_path('module', 'mfcs');
+
+    $image_file_path = $base_path . $module_path . '/images/pdf/32.png';
+
+    $statistics['markup'] .= '<a href="' . $base_path . 'pdf-0/statistics/' . $path_dates . $url_arguments . '" title="Download as PDF" class="statistics-navigation-link link-pdf"><img src="' . $image_file_path . '" alt="PDF" width="32" height="32" class="help-navigation_image image-pdf"></a>';
+
+    unset($image_file_path);
+    unset($module_path);
+  }
+
+  $statistics['markup'] .= '</div>';
+
+  $statistics['markup'] .= '<div class="statistics-title">';
   if (is_null($month)) {
-    mfcs_add_canonical_headers('requests/statistics-0/' . $year);
-    $markup .= '<h3 class="statistics-title-text">' . 'Request Statistics for the year ' . $year . ' <span class="statistics-title-text-note">(generated on ' . $now . ')</span></h3>';
+    $statistics['markup'] .= '<h3 class="statistics-title-text">Request Statistics for the year ' . $year . ' <span class="statistics-title-text-note">(generated on ' . $now . ')</span></h3>';
 
-    $counts = mfcs_request_statistics_load_counts($year_start, $year_stop);
+    $counts = mfcs_request_statistics_load_counts($statistics['year_start'], $statistics['year_stop']);
   }
   elseif (is_null($day)) {
-    $month = strtolower(date('F', $month_start));
-    $year = date('Y', $month_start);
-    mfcs_add_canonical_headers('requests/statistics-0/' . $year . '/' . $month);
-    $markup .= '<h3 class="statistics-title-text">' . 'Request Statistics for ' . $month_name . ' ' . $year . ' <span class="statistics-title-text-note">(generated on ' . $now . ')</span></h3>';
+    $month = strtolower(date('F', $statistics['month_start']));
+    $year = date('Y', $statistics['month_start']);
 
-    $counts = mfcs_request_statistics_load_counts($month_start, $month_stop);
+    $statistics['markup'] .= '<h3 class="statistics-title-text">Request Statistics for ' . $statistics['month_name'] . ' ' . $year . ' <span class="statistics-title-text-note">(generated on ' . $now . ')</span></h3>';
+
+    $counts = mfcs_request_statistics_load_counts($statistics['month_start'], $statistics['month_stop']);
   }
   else {
-    $month = strtolower(date('F', $day_start));
-    $year = date('Y', $day_start);
-    $day = date('d', $day_start);
+    $month = strtolower(date('F', $statistics['day_start']));
+    $year = date('Y', $statistics['day_start']);
+    $day = date('d', $statistics['day_start']);
 
-    mfcs_add_canonical_headers('requests/statistics-0/' . $year . '/' . $month . '/' . $day);
-    $markup .= '<h3 class="statistics-title-text">' . 'Request Statistics for ' . $month_name . ' ' . $day . ', ' . $year . ' <span class="statistics-title-text-note">(generated on ' . $now . ')</span></h3>';
+    $statistics['markup'] .= '<h3 class="statistics-title-text">Request Statistics for ' . $statistics['month_name'] . ' ' . $day . ', ' . $year . ' <span class="statistics-title-text-note">(generated on ' . $now . ')</span></h3>';
 
-    $counts = mfcs_request_statistics_load_counts($day_start, $day_stop);
+    $counts = mfcs_request_statistics_load_counts($statistics['day_start'], $statistics['day_stop']);
   }
-  $markup .= '</div>'; // statistics-title
+  $statistics['markup'] .= '</div>'; // statistics-title
 
-  $markup .= mfcs_request_statistics_render_request_classification($counts, $classification_options);
-  $markup .= '<hr>';
-  $markup .= mfcs_request_statistics_render_request_type($counts, $type_options);
-  $markup .= '<hr>';
-  $markup .= mfcs_request_statistics_render_request_step($counts, $steps_options);
-  $markup .= '<hr>';
-  $markup .= mfcs_request_statistics_render_request_status($counts, $status_options);
+  $statistics['markup'] .= mfcs_request_statistics_render_request_classification($counts, $classification_options);
+  $statistics['markup'] .= '<hr>';
+  $statistics['markup'] .= mfcs_request_statistics_render_request_type($counts, $type_options);
+  $statistics['markup'] .= '<hr>';
+  $statistics['markup'] .= mfcs_request_statistics_render_request_step($counts, $steps_options);
+  $statistics['markup'] .= '<hr>';
+  $statistics['markup'] .= mfcs_request_statistics_render_request_status($counts, $status_options);
 
-  $markup .= '</div>'; // mfcs-statistics-page
+  $statistics['markup'] .= '</div>'; // mfcs-statistics-page
 
-  return $markup;
+  return $statistics;
 }
 
 /**
@@ -576,10 +757,10 @@ function mfcs_request_statistics_render_request_classification($counts, $classif
   $options = array(
     'total' => $counts['main']['total'],
     'rows' => array(),
-    'text_title' => "Requests by Classification",
+    'text_title' => 'Requests by Classification',
     'text_description' => 'A bar chart representing the number of requests for each classification they belong to. There are a total of ' . $counts['main']['total'] . 'requests.',
-    'text_x' => "Requests",
-    'text_y' => "Classifications",
+    'text_x' => 'Requests',
+    'text_y' => 'Classifications',
     'chart_height' => 220,
     'line_start_x' => 75,
     'line_start_y' => 25,
@@ -589,15 +770,15 @@ function mfcs_request_statistics_render_request_classification($counts, $classif
   $options['rows']['student'] = array(
     'total' => $counts['classification']['student'],
     'text' => $classification_options[MFCS_REQUEST_CLASSIFICATION_STUDENT],
-    'label' => "Student Org.",
+    'label' => 'Student Org.',
     'color' => '#5f71a6',
   );
 
   $options['rows']['faculty'] = array(
     'total' => $counts['classification']['faculty'],
     'text' => $classification_options[MFCS_REQUEST_CLASSIFICATION_FACULTY],
-    'label' => "Faculty, Staff,",
-    'label_2' => "Athletics",
+    'label' => 'Faculty, Staff,',
+    'label_2' => 'Athletics',
     'color' => '#5d9ea3',
   );
 
@@ -632,14 +813,14 @@ function mfcs_request_statistics_render_request_classification($counts, $classif
 
   if (isset($counts['main']['total'])) {
     $markup .= '<div class="statistics-block-text-item statistics-block-text-item-created">';
-    $markup .= "There have been <em>" . $counts['main']['total'] . "</em> requests created.";
+    $markup .= 'There have been <em>' . $counts['main']['total'] . '</em> requests created.';
     $markup .= '</div>';
   }
 
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['classification']['student'] . '</em> <strong>' . $classification_options[MFCS_REQUEST_CLASSIFICATION_STUDENT] . "</strong> (<em>" . $options['rows']['student']['percent'] . '%</em> of requests). ' . '</div>';
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['classification']['faculty'] . '</em> <strong>' . $classification_options[MFCS_REQUEST_CLASSIFICATION_FACULTY] . "</strong> (<em>" . $options['rows']['faculty']['percent'] . '%</em> of requests). ' . '</div>';
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['classification']['camps'] . '</em> <strong>' . $classification_options[MFCS_REQUEST_CLASSIFICATION_CAMPS] . "</strong> (<em>" . $options['rows']['camps']['percent'] . '%</em> of requests). ' . '</div>';
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['classification']['external'] . '</em> <strong>' . $classification_options[MFCS_REQUEST_CLASSIFICATION_EXTERNAL] . "</strong> (<em>" . $options['rows']['external']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['classification']['student'] . '</em> <strong>' . $classification_options[MFCS_REQUEST_CLASSIFICATION_STUDENT] . '</strong> (<em>' . $options['rows']['student']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['classification']['faculty'] . '</em> <strong>' . $classification_options[MFCS_REQUEST_CLASSIFICATION_FACULTY] . '</strong> (<em>' . $options['rows']['faculty']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['classification']['camps'] . '</em> <strong>' . $classification_options[MFCS_REQUEST_CLASSIFICATION_CAMPS] . '</strong> (<em>' . $options['rows']['camps']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['classification']['external'] . '</em> <strong>' . $classification_options[MFCS_REQUEST_CLASSIFICATION_EXTERNAL] . '</strong> (<em>' . $options['rows']['external']['percent'] . '%</em> of requests). ' . '</div>';
 
   $markup .= '</div>'; // statistics-block-text
   $markup .= '</div>'; // statistics-block-main
@@ -882,7 +1063,7 @@ function mfcs_request_statistics_render_request_step($counts, $step_options) {
   $options['rows']['final_decision'] = array(
     'total' => $counts['step']['final_decision'],
     'text' => $step_options[MFCS_REVIEW_STEP_FINAL_DECISION],
-    'label' => "Final Decision",
+    'label' => 'Final Decision',
     'color' => '#6Ce94a',
   );
 
@@ -890,8 +1071,8 @@ function mfcs_request_statistics_render_request_step($counts, $step_options) {
   #$options['rows']['release_hold'] = array(
   #  'total' => $counts['step']['release_hold'],
   #  'text' => $step_options[MFCS_REVIEW_STEP_RELEASE_HOLD],
-  #  'label' => "Release Tentative",
-  #  'label_2' => "Hold",
+  #  'label' => 'Release Tentative',
+  #  'label_2' => 'Hold',
   #  'color' => '#cae94a',
   #);
 
@@ -980,10 +1161,10 @@ function mfcs_request_statistics_render_request_status($counts, $status_options)
   $options = array(
     'total' => $counts['main']['total'],
     'rows' => array(),
-    'text_title' => "Requests by Status",
+    'text_title' => 'Requests by Status',
     'text_description' => 'A bar chart representing the number of requests based on their current status.',
-    'text_x' => "Requests",
-    'text_y' => "Status",
+    'text_x' => 'Requests',
+    'text_y' => 'Status',
     'chart_height' => 220,
     'line_start_x' => 120,
     'line_start_y' => 25,
@@ -1029,7 +1210,7 @@ function mfcs_request_statistics_render_request_status($counts, $status_options)
     'total' => $counts['status']['due_to_lock'],
     'text' => $status_options[MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK],
     'label' => $status_options[MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE],
-    'label_2' => "(due to lock)",
+    'label_2' => '(due to lock)',
     'color' => '#081fc4',
   );
 
@@ -1058,14 +1239,14 @@ function mfcs_request_statistics_render_request_status($counts, $status_options)
   $markup = '<div class="statistics-block statistics-block-request_step">';
 
   $markup .= '<div class="statistics-block-text">';
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['locked'] . '</em> <strong>' . $status_options[MFCS_REQUEST_STATUS_LOCKED] . "</strong> (<em>" . $options['rows']['locked']['percent'] . '%</em> of requests). ' . '</div>';
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['unlocked'] . '</em> <strong>' . $status_options[MFCS_REQUEST_STATUS_UNLOCKED] . "</strong> (<em>" . $options['rows']['unlocked']['percent'] . '%</em> of requests). ' . '</div>';
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['accepted'] . '</em> <strong>' . $status_options[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED] . "</strong> (<em>" . $options['rows']['accepted']['percent'] . '%</em> of requests). ' . '</div>';
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['denied'] . '</em> <strong>' . $status_options[MFCS_REQUEST_STATUS_CLOSED_DENIED] . "</strong> (<em>" . $options['rows']['denied']['percent'] . '%</em> of requests). ' . '</div>';
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['unavailable'] . '</em> <strong>' . $status_options[MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE] . "</strong> (<em>" . $options['rows']['unavailable']['percent'] . '%</em> of requests). ' . '</div>';
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['due_to_lock'] . '</em> <strong>' . $status_options[MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK] . "</strong> (<em>" . $options['rows']['due_to_lock']['percent'] . '%</em> of requests). ' . '</div>';
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['cancelled'] . '</em> <strong>' . $status_options[MFCS_REQUEST_STATUS_CANCELLED] . "</strong> (<em>" . $options['rows']['cancelled']['percent'] . '%</em> of requests). ' . '</div>';
-  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['accepted_cancelled'] . '</em> <strong>' . $status_options[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED] . "</strong> (<em>" . $options['rows']['accepted_cancelled']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['locked'] . '</em> <strong>' . $status_options[MFCS_REQUEST_STATUS_LOCKED] . '</strong> (<em>' . $options['rows']['locked']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['unlocked'] . '</em> <strong>' . $status_options[MFCS_REQUEST_STATUS_UNLOCKED] . '</strong> (<em>' . $options['rows']['unlocked']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['accepted'] . '</em> <strong>' . $status_options[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED] . '</strong> (<em>' . $options['rows']['accepted']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['denied'] . '</em> <strong>' . $status_options[MFCS_REQUEST_STATUS_CLOSED_DENIED] . '</strong> (<em>' . $options['rows']['denied']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['unavailable'] . '</em> <strong>' . $status_options[MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE] . '</strong> (<em>' . $options['rows']['unavailable']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['due_to_lock'] . '</em> <strong>' . $status_options[MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK] . '</strong> (<em>' . $options['rows']['due_to_lock']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['cancelled'] . '</em> <strong>' . $status_options[MFCS_REQUEST_STATUS_CANCELLED] . '</strong> (<em>' . $options['rows']['cancelled']['percent'] . '%</em> of requests). ' . '</div>';
+  $markup .= '<div class="statistics-block-text-item"><em>' . $counts['status']['accepted_cancelled'] . '</em> <strong>' . $status_options[MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED] . '</strong> (<em>' . $options['rows']['accepted_cancelled']['percent'] . '%</em> of requests). ' . '</div>';
   $markup .= '</div>'; // statistics-block-text
 
   $markup .= '<div id="' . 'mfcs-statistics-' . $options['name'] . '-wrapper" class="statistics-block-chart">';
