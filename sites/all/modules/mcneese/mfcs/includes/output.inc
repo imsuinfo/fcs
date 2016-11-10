@@ -1490,7 +1490,7 @@ function mfcs_output_print_page_view($html, $parameters = array()) {
   $title_tags = $cf_dom->get_body()->getElementsByTagName('title');
   $main_tag = $cf_dom->get_dom()->getElementById('mcneese-content-main');
 
-  $head_markup = '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">';
+  $head_markup = '';
   $body_markup = '';
   $css_markup = '';
 
@@ -1500,7 +1500,6 @@ function mfcs_output_print_page_view($html, $parameters = array()) {
   }
 
   // style tags
-  $head_markup = '';
   foreach ($style_tags as $tag) {
     // drupal generates css styles using @import, remove all of these.
     $matched = array();
