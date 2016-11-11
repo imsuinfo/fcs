@@ -124,11 +124,6 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
-  $no_js_fallback = TRUE;
-  if (isset($conf['no_js_fallback']) && is_bool($conf['no_js_fallback'])) {
-    $no_js_fallback = $conf['no_js_fallback'];
-  }
-
   $auto_page_number = FALSE;
   if (is_null($page_number)) {
     $auto_page_number = TRUE;
@@ -141,7 +136,7 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
 
   mfcs_add_canonical_headers('requests/problems-0/users/' . $page_number);
 
-  $page_title = "Facilities Use Problems - Users";
+  $page_title = 'Facilities Use Problems - Users';
   drupal_set_title($page_title);
 
 
@@ -239,10 +234,10 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
     'include_disabled' => TRUE,
   );
 
-  // do not load listing on first pass (improves performance at cost of no support for no-js.).
-  if ($no_js_fallback === FALSE && $auto_page_number) {
-    $options['results'] = FALSE;
-  }
+  $count_options = $options;
+  $count_options['start'] = 0;
+  $count_options['results'] = FALSE;
+  unset($count_options['limit']);
 
   $conditions = array();
   $conditions['and_0']['value_only_problems'] = array(
@@ -251,28 +246,25 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
     'search' => MFCS_USER_PROBLEM_NONE,
   );
 
-  $problems_returned = mfcs_management_search_users($conditions, $options);
+  $items_returned = mfcs_management_search_users($conditions, $count_options);
 
-  $problems_total = 0;
-  if (is_array($problems_returned) && array_key_exists('count', $problems_returned)) {
-    $problems_total = $problems_returned['count'];
+  $items_total = 0;
+  if (is_array($items_returned) && array_key_exists('count', $items_returned)) {
+    $items_total = $items_returned['count'];
   }
 
-  $problems = array();
-  if (isset($problems_returned['results']) && is_array($problems_returned['results'])) {
-    $problems = $problems_returned['results'];
+  $items_returned = mfcs_management_search_users($conditions, $options);
+
+  $items = array();
+  if (isset($items_returned['results']) && is_array($items_returned['results'])) {
+    $items = $items_returned['results'];
   }
 
   // do not provide pages when the page number would bring the user beyond the available items.
-  if ($problems_total > 0 && $options['start'] >= $problems_total || $problems_total == 0 && $options['start'] > $problems_total) {
+  if ($items_total > 0 && $options['start'] >= $items_total || $items_total == 0 && $options['start'] > $items_total) {
     drupal_not_found();
     drupal_exit();
     return array();
-  }
-
-  // do not show count values when no fallback is available.
-  if ($no_js_fallback === FALSE && $auto_page_number) {
-    $count = 0;
   }
 
   // Results is needed and therefore must not be FALSE, unsetting it will default to TRUE.
@@ -282,19 +274,19 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
   $problems_mask = 0;
 
   $rows = array();
-  foreach ($problems as $user_id => $problem) {
+  foreach ($items as $user_id => $item) {
     $row = array();
     $additional_operations = '';
 
     $problem_account = NULL;
     foreach (array(MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_LOGIN_PROBLEMS_MULTIPLE, MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED, MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES, MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE, MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID, MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) as $taxonomy_id) {
-      if (($problem->problems & $taxonomy_id) > 0) {
+      if (($item->problems & $taxonomy_id) > 0) {
         if ($taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE || $taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE || $taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) {
-          $additional_operations .= ' <a href="' . $base_path . 'requests/problems-0/users/resynchronize/' . $problem->user_id . $url_arguments . '" class="operation-link operation-link-resynchronize" title="Re-Synchronize the user\'s settings.">Re-Sync</a>';
+          $additional_operations .= ' <a href="' . $base_path . 'requests/problems-0/users/resynchronize/' . $item->user_id . $url_arguments . '" class="operation-link operation-link-resynchronize" title="Re-Synchronize the user\'s settings.">Re-Sync</a>';
         }
 
         if ($taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE) {
-          $additional_operations .= ' <a href="' . $base_path . 'requests/problems-0/users/disabled_in_use/' . $problem->user_id . '">Requests</a>';
+          $additional_operations .= ' <a href="' . $base_path . 'requests/problems-0/users/disabled_in_use/' . $item->user_id . '">Requests</a>';
         }
 
         if (is_null($problem_account)) {
@@ -310,7 +302,7 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
 
     $problem_forms = NULL;
     foreach (array(MFCS_USER_PROBLEM_FORM_ERROR_USER, MFCS_USER_PROBLEM_FORM_ERROR_USER) as $taxonomy_id) {
-      if (($problem->problems & $taxonomy_id) > 0) {
+      if (($item->problems & $taxonomy_id) > 0) {
         if (is_null($problem_forms)) {
           $problem_forms = '';
         }
@@ -324,7 +316,7 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
 
     $problem_other = NULL;
     foreach (array(MFCS_USER_PROBLEM_SYSTEM, MFCS_USER_PROBLEM_MFCS) as $taxonomy_id) {
-      if (($problem->problems & $taxonomy_id) > 0) {
+      if (($item->problems & $taxonomy_id) > 0) {
         if (is_null($problem_other)) {
           $problem_other = '';
         }
@@ -337,22 +329,23 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
     }
 
     $row['account_id'] = array(
-      'data' => $problem->user_id,
+      'data' => $item->user_id,
       'class' => $class_user_id,
     );
 
+    // note: previously the id was added as a no-js failsafe, but it causes an annoying flicker on load (because the load speed is sufficiently fast enough to flicker but slow enough to see).
     $row['account'] = array(
-      'data' => '<a href="' . $base_path . 'requests/users-0/view/' . $problem->user_id . $url_arguments . '" class="user-link">' . check_plain($problem->name) . '</a>' . ' <span class="user-id script-hidden">[id: ' .  $problem->user_id . ']</span>',
+      'data' => '<a href="' . $base_path . 'requests/users-0/view/' . $item->user_id . $url_arguments . '" class="user-link">' . check_plain($item->name) . '</a>',
       'class' => $class_name,
     );
 
     $row['first_name'] = array(
-      'data' => check_plain($problem->first_name),
+      'data' => check_plain($item->first_name),
       'class' => $class_first_name,
     );
 
     $row['last_name'] = array(
-      'data' => check_plain($problem->last_name),
+      'data' => check_plain($item->last_name),
       'class' => $class_last_name,
     );
 
@@ -372,12 +365,12 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
     );
 
     $row['updated_problems'] = array(
-      'data' => check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS, $problem->updated_problems)),
+      'data' => check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS, $item->updated_problems)),
       'class' => $class_date,
     );
 
     $row['operations'] = array(
-      'data' => '<a href="' . $base_path . 'requests/problems-0/users/user/' . $problem->user_id . $url_arguments . '" class="operation-link operation-link-view">View</a>' . $additional_operations,
+      'data' => '<a href="' . $base_path . 'requests/problems-0/users/user/' . $item->user_id . $url_arguments . '" class="operation-link operation-link-view">View</a>' . $additional_operations,
       'class' => $class_operations,
     );
 
@@ -385,17 +378,17 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
   }
 
   $problem_list = array();
-  $problem_list['caption'] = t("User Problems");
+  $problem_list['caption'] = 'User Problems';
   $problem_list['header'] = array(
-    'account_id' => array('field' => 'user_id', 'data' => "Account ID", 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
-    'account' => array('field' => 'name', 'data' => "Account", 'align' => 'center'),
-    'first_name' => array('field' => 'first_name', 'data' => "First Name", 'align' => 'center'),
-    'last_name' => array('field' => 'last_name', 'data' => "Last Name", 'align' => 'center'),
-    'problems_account' => array('field' => 'problems', 'data' => "Problems Account", 'align' => 'center'),
-    'problems_form' => array('field' => 'problems', 'data' => "Problems Forms", 'align' => 'center'),
-    'problems_other' => array('field' => 'problems', 'data' => "Problems Other", 'align' => 'center'),
-    'updated_problems' => array('field' => 'updated_problems', 'data' => "Date", 'align' => 'center'),
-    'operations' => array('data' => "Operations", 'align' => 'center', 'class' => array('no-print')),
+    'account_id' => array('field' => 'user_id', 'data' => 'Account ID', 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
+    'account' => array('field' => 'name', 'data' => 'Account', 'align' => 'center'),
+    'first_name' => array('field' => 'first_name', 'data' => 'First Name', 'align' => 'center'),
+    'last_name' => array('field' => 'last_name', 'data' => 'Last Name', 'align' => 'center'),
+    'problems_account' => array('field' => 'problems', 'data' => 'Problems Account', 'align' => 'center'),
+    'problems_form' => array('field' => 'problems', 'data' => 'Problems Forms', 'align' => 'center'),
+    'problems_other' => array('field' => 'problems', 'data' => 'Problems Other', 'align' => 'center'),
+    'updated_problems' => array('field' => 'updated_problems', 'data' => 'Date', 'align' => 'center'),
+    'operations' => array('data' => 'Operations', 'align' => 'center', 'class' => array('no-print')),
   );
 
   $problem_list['attributes'] = array();
@@ -412,7 +405,7 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
   $problem_list['attributes']['summary'] = 'Collection of users in which the system has detected problems associated with.';
 
   $problem_list['rows'] = $rows;
-  $problem_list['empty'] = t("There are no users with system detected problems.");
+  $problem_list['empty'] = 'There are no users with system detected problems.';
 
   $datatable_settings = array(
     'sort' => strtolower($sort),
@@ -429,20 +422,21 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
     'processing' => TRUE,
     'serverSide' => TRUE,
     'ajax' => array(
-      'url' => "'" . $base_path . 'requests/problems-0/users/ajax' . $url_arguments . "'",
-      'type' => "'POST'",
+      'url' => '\'' . $base_path . 'requests/problems-0/users/ajax' . $url_arguments . '\'',
+      'type' => '\'POST\'',
     ),
     'deferRender' => TRUE,
+    'deferLoading' => (int) $items_total,
     'columns' => array(
-      array('id' => 0, 'column' => 'account_id', 'name' => "Account ID", 'className' => 'column-account_id', 'sanitize' => FALSE, 'visible' => FALSE),
-      array('id' => 1, 'column' => 'account', 'name' => "Account", 'className' => 'column-account'),
-      array('id' => 2, 'column' => 'first_name', 'name' => "First Name", 'className' => 'column-first_name'),
-      array('id' => 3, 'column' => 'last_name', 'name' => "Last Name", 'className' => 'column-last_name'),
-      array('id' => 4, 'column' => 'problem_account', 'name' => "Problems Account", 'className' => 'column-problem_account'),
-      array('id' => 5, 'column' => 'problem_forms', 'name' => "Problems Forms", 'className' => 'column-problem_forms'),
-      array('id' => 6, 'column' => 'problem_other', 'name' => "Problems Other", 'className' => 'column-problem_other'),
-      array('id' => 7, 'column' => 'updated_problems', 'name' => "Date", 'className' => 'column-updated_problems'),
-      array('id' => 8, 'column' => NULL, 'name' => "Operations", 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
+      array('id' => 0, 'column' => 'account_id', 'name' => 'Account ID', 'className' => 'column-account_id', 'sanitize' => FALSE, 'visible' => FALSE),
+      array('id' => 1, 'column' => 'account', 'name' => 'Account', 'className' => 'column-account'),
+      array('id' => 2, 'column' => 'first_name', 'name' => 'First Name', 'className' => 'column-first_name'),
+      array('id' => 3, 'column' => 'last_name', 'name' => 'Last Name', 'className' => 'column-last_name'),
+      array('id' => 4, 'column' => 'problem_account', 'name' => 'Problems Account', 'className' => 'column-problem_account'),
+      array('id' => 5, 'column' => 'problem_forms', 'name' => 'Problems Forms', 'className' => 'column-problem_forms'),
+      array('id' => 6, 'column' => 'problem_other', 'name' => 'Problems Other', 'className' => 'column-problem_other'),
+      array('id' => 7, 'column' => 'updated_problems', 'name' => 'Date', 'className' => 'column-updated_problems'),
+      array('id' => 8, 'column' => NULL, 'name' => 'Operations', 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
     ),
     'displayStart' => $options['start'],
     'pageLength' => $rows_per_page,
@@ -480,19 +474,19 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
   $navigation_start = $options['start'] + 1;
   $navigation_total = $options['start'] + $rows_per_page;
 
-  if ($problems_total == 0) {
+  if ($items_total == 0) {
     $navigation_start = 0;
   }
 
-  if ($navigation_total > $problems_total) {
-    $navigation_total = $problems_total;
+  if ($navigation_total > $items_total) {
+    $navigation_total = $items_total;
   }
 
   $navigation_bottom .= '<div class="table_listing-comment">';
-  $navigation_bottom .= "Showing " . $navigation_start . " to " . $navigation_total . " of " . $problems_total . " entries.";
+  $navigation_bottom .= 'Showing ' . $navigation_start . ' to ' . $navigation_total . ' of ' . $items_total . ' entries.';
   $navigation_bottom .= '</div>';
 
-  if ($problems_total > ($options['start'] + $rows_per_page)) {
+  if ($items_total > ($options['start'] + $rows_per_page)) {
     $next_page = $page_number + 1;
     $navigation_top .= '<a href="' . $base_path . 'requests/problems-0/users/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
     $navigation_bottom .= '<a href="' . $base_path . 'requests/problems-0/users/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
@@ -518,7 +512,7 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
  * @see: mfcs_request_problems_0_users_form()
  */
 function mfcs_request_problems_0_users_form_validate($form, &$form_state) {
-  form_set_error('', "Currently this form has nothing to submit.");
+  form_set_error('', 'Currently this form has nothing to submit.');
 }
 
 /**
@@ -1032,8 +1026,8 @@ function mfcs_request_problems_0_user_form_submit($form, &$form_state) {
     $results = mfcs_save_user($form['values']['problem_user']['#value']->uid, array('problems' => $problems));
 
     if ($results === FALSE) {
-      form_set_error('form', "An error occurred while trying to reset the user problem flags. Please contact the support staff.");
-      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to reset the user problem flags, user: @user_id, problems: @problems.", array('@user_id' => $form['values']['mfcs_user']['#value']['user_id'], '@problems' => print_r($problems, TRUE)), WATCHDOG_ERROR);
+      form_set_error('form', 'An error occurred while trying to reset the user problem flags. Please contact the support staff.');
+      watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to reset the user problem flags, user: @user_id, problems: @problems.', array('@user_id' => $form['values']['mfcs_user']['#value']['user_id'], '@problems' => print_r($problems, TRUE)), WATCHDOG_ERROR);
 
       $form_state['rebuild'] = TRUE;
       $form_state['redirect'] = FALSE;
@@ -1055,8 +1049,8 @@ function mfcs_request_problems_0_user_form_submit($form, &$form_state) {
             }
           }
           else {
-            form_set_error('form', "An error occurred while trying to synchronize the user settings. Please contact the support staff.");
-            watchdog(MFCS_WATCHDOG_ID, "An error occurred while trying to synchronize the user settings, user: @user_id, problems: @problems.", array('@user_id' => $form['values']['mfcs_user']['#value']['user_id'], '@problems' => print_r($problems, TRUE)), WATCHDOG_ERROR);
+            form_set_error('form', 'An error occurred while trying to synchronize the user settings. Please contact the support staff.');
+            watchdog(MFCS_WATCHDOG_ID, 'An error occurred while trying to synchronize the user settings, user: @user_id, problems: @problems.', array('@user_id' => $form['values']['mfcs_user']['#value']['user_id'], '@problems' => print_r($problems, TRUE)), WATCHDOG_ERROR);
 
             $form_state['rebuild'] = TRUE;
             $form_state['redirect'] = FALSE;
@@ -1246,11 +1240,6 @@ function mfcs_request_problems_0_users_disabled_in_use($user_id, $page_number = 
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
-  $no_js_fallback = TRUE;
-  if (isset($conf['no_js_fallback']) && is_bool($conf['no_js_fallback'])) {
-    $no_js_fallback = $conf['no_js_fallback'];
-  }
-
   $auto_page_number = FALSE;
   if (is_null($page_number)) {
     $auto_page_number = TRUE;
@@ -1263,7 +1252,7 @@ function mfcs_request_problems_0_users_disabled_in_use($user_id, $page_number = 
 
   mfcs_add_canonical_headers('requests/problems-0/users/disabled_in_use/' . $user_id);
 
-  $page_title = "Facilities Use Problems - Disabled Account In Use - " . $user->name;
+  $page_title = 'Facilities Use Problems - Disabled Account In Use - ' . $user->name;
   drupal_set_title($page_title);
 
 
@@ -1365,11 +1354,6 @@ function mfcs_request_problems_0_users_disabled_in_use($user_id, $page_number = 
     $options['sort'] = $sorting;
   }
 
-  // do not load listing on first pass (improves performance at cost of no support for no-js.).
-  if ($no_js_fallback === FALSE && $auto_page_number) {
-    $options['results'] = FALSE;
-  }
-
   $options['extra_fields']['users'] = array(
     'alias' => 'u',
     'join' => 'inner',
@@ -1378,6 +1362,11 @@ function mfcs_request_problems_0_users_disabled_in_use($user_id, $page_number = 
       'venue_coordinator_status' => 'status',
     ),
   );
+
+  $count_options = $options;
+  $count_options['start'] = 0;
+  $count_options['results'] = FALSE;
+  unset($count_options['limit']);
 
   $conditions['value_problem_status'] = array(
     'field' => 'mer.status',
@@ -1399,24 +1388,20 @@ function mfcs_request_problems_0_users_disabled_in_use($user_id, $page_number = 
 
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
-  $items_returned = mfcs_request_load_listing($conditions, $options);
-
-  $count = 0;
-  if (isset($items_returned['count'])) {
-    $count = $items_returned['count'];
+  $items_returned = mfcs_request_load_listing($conditions, $count_options);
+  $items_total = 0;
+  if (is_array($items_returned) && array_key_exists('count', $items_returned)) {
+    $items_total = $items_returned['count'];
   }
 
   // do not provide pages when the page number would bring the user beyond the available items.
-  if ($count > 0 && $options['start'] >= $count || $count == 0 && $options['start'] > $count) {
+  if ($items_total > 0 && $options['start'] >= $items_total || $items_total == 0 && $options['start'] > $items_total) {
     drupal_not_found();
     drupal_exit();
     return array();
   }
 
-  // do not show count values when no fallback is available.
-  if ($no_js_fallback === FALSE && $auto_page_number) {
-    $count = 0;
-  }
+  $items_returned = mfcs_request_load_listing($conditions, $options);
 
   // Results is needed and therefore must not be FALSE, unsetting it will default to TRUE.
   unset($options['results']);
@@ -1424,7 +1409,8 @@ function mfcs_request_problems_0_users_disabled_in_use($user_id, $page_number = 
   $options['columns'] = $columns;
   $options['columns_default'] = $columns_default;
 
-  $options['ajax_path'] = "'" . $base_path . 'requests/problems-0/users/disabled_in_use/ajax/' . $user_id . $url_arguments . "'";
+  $options['ajax_path'] = '\'' . $base_path . 'requests/problems-0/users/disabled_in_use/ajax/' . $user_id . $url_arguments . '\'';
+  $options['defer_loading'] = (int) $items_total;
 
   $table = mfcs_build_request_ajax_table($items_returned, $conditions, $options);
   $table['attributes']['class'][] = 'mfcs-table-requests';
@@ -1448,19 +1434,19 @@ function mfcs_request_problems_0_users_disabled_in_use($user_id, $page_number = 
   $navigation_start = $options['start'] + 1;
   $navigation_total = $options['start'] + $rows_per_page;
 
-  if ($count == 0) {
+  if ($items_total == 0) {
     $navigation_start = 0;
   }
 
-  if ($navigation_total > $count) {
-    $navigation_total = $count;
+  if ($navigation_total > $items_total) {
+    $navigation_total = $items_total;
   }
 
   $navigation_bottom .= '<div class="table_listing-comment">';
-  $navigation_bottom .= "Showing " . $navigation_start . " to " . $navigation_total . " of " . $count . " entries.";
+  $navigation_bottom .= 'Showing ' . $navigation_start . ' to ' . $navigation_total . ' of ' . $items_total . ' entries.';
   $navigation_bottom .= '</div>';
 
-  if ($count > ($options['start'] + $rows_per_page)) {
+  if ($items_total > ($options['start'] + $rows_per_page)) {
     $next_page = $page_number + 1;
     $navigation_top .= '<a href="' . $base_path . 'requests/problems-0/users/disabled_in_use/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
     $navigation_bottom .= '<a href="' . $base_path . 'requests/problems-0/users/disabled_in_use/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
@@ -1535,11 +1521,6 @@ function mfcs_request_problems_0_requests_form($form, &$form_state, $page_number
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
-  $no_js_fallback = TRUE;
-  if (isset($conf['no_js_fallback']) && is_bool($conf['no_js_fallback'])) {
-    $no_js_fallback = $conf['no_js_fallback'];
-  }
-
   $auto_page_number = FALSE;
   if (is_null($page_number)) {
     $auto_page_number = TRUE;
@@ -1552,7 +1533,7 @@ function mfcs_request_problems_0_requests_form($form, &$form_state, $page_number
 
   mfcs_add_canonical_headers('requests/problems-0/requests/' . $page_number);
 
-  $page_title = "Facilities Use Problems - Requests";
+  $page_title = 'Facilities Use Problems - Requests';
   drupal_set_title($page_title);
 
 
@@ -1639,47 +1620,44 @@ function mfcs_request_problems_0_requests_form($form, &$form_state, $page_number
     'include_ignored' => FALSE,
   );
 
-  // do not load listing on first pass (improves performance at cost of no support for no-js.).
-  if ($no_js_fallback === FALSE && $auto_page_number) {
-    $options['results'] = FALSE;
-  }
+  $count_options = $options;
+  $count_options['start'] = 0;
+  $count_options['results'] = FALSE;
+  unset($count_options['limit']);
 
   $conditions = array();
 
-  $problems_returned = mfcs_miscellaneous_problems_request_search($conditions, $options);
+  $items_returned = mfcs_miscellaneous_problems_request_search($conditions, $count_options);
 
-  $problems_total = 0;
-  if (is_array($problems_returned) && array_key_exists('count', $problems_returned)) {
-    $problems_total = $problems_returned['count'];
+  $items_total = 0;
+  if (is_array($items_returned) && array_key_exists('count', $items_returned)) {
+    $items_total = $items_returned['count'];
   }
 
-  $problems = array();
-  if (isset($problems_returned['results']) && is_array($problems_returned['results'])) {
-    $problems = $problems_returned['results'];
+  $items_returned = mfcs_miscellaneous_problems_request_search($conditions, $options);
+
+  $items = array();
+  if (isset($items_returned['results']) && is_array($items_returned['results'])) {
+    $items = $items_returned['results'];
   }
 
   // do not provide pages when the page number would bring the user beyond the available items.
-  if ($problems_total > 0 && $options['start'] >= $problems_total || $problems_total == 0 && $options['start'] > $problems_total) {
+  if ($items_total > 0 && $options['start'] >= $items_total || $items_total == 0 && $options['start'] > $items_total) {
     drupal_not_found();
     drupal_exit();
     return array();
-  }
-
-  // do not show count values when no fallback is available.
-  if ($no_js_fallback === FALSE && $auto_page_number) {
-    $count = 0;
   }
 
   // Results is needed and therefore must not be FALSE, unsetting it will default to TRUE.
   unset($options['results']);
 
   $rows = array();
-  foreach ($problems as $id => $problem) {
+  foreach ($items as $id => $item) {
     $row = array();
     $additional_operations = '';
 
     $row['id'] = array(
-      'data' => '' . (int) $problem->id,
+      'data' => '' . (int) $item->id,
       'class' => $class_id,
     );
 
@@ -1688,54 +1666,54 @@ function mfcs_request_problems_0_requests_form($form, &$form_state, $page_number
       'class' => $class_problem,
     );
 
-    if (array_key_exists($problem->problem,  $request_problems_by_id)) {
-      $row['problem']['data'] = $request_problems_by_id[$problem->problem];
+    if (array_key_exists($item->problem,  $request_problems_by_id)) {
+      $row['problem']['data'] = $request_problems_by_id[$item->problem];
     }
     else {
       $row['problem']['data'] = 'Unknown Code';
     }
 
     $row['request_id'] = array(
-      'data' => '' . (int) $problem->request_id,
+      'data' => '' . (int) $item->request_id,
       'class' => $class_request_id,
     );
 
     $row['date'] = array(
-      'data' => check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS, $problem->date)),
+      'data' => check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS, $item->date)),
       'class' => $class_date,
     );
 
     $row['reason'] = array(
-      'data' => (isset($problem->reason) ? check_plain($problem->reason) : ''),
+      'data' => (isset($item->reason) ? check_plain($item->reason) : ''),
       'class' => $class_reason,
     );
 
     $row['ignore'] = array(
-      'data' => (isset($problem->ignore) && $problem->ignore == 1 ? 'Yes' : 'No'),
+      'data' => (isset($item->ignore) && $item->ignore == 1 ? 'Yes' : 'No'),
       'class' => $class_ignore,
     );
 
     $row['operations'] = array(
-      'data' => '<a href="' . $base_path . 'requests/problems-0/requests/request/' . $problem->id . $url_arguments . '" class="operation-link operation-link-details">Details</a>',
+      'data' => '<a href="' . $base_path . 'requests/problems-0/requests/request/' . $item->id . $url_arguments . '" class="operation-link operation-link-details">Details</a>',
       'class' => $class_operations,
     );
 
-    $row['operations']['data'] .= ' <a href="' . $base_path . 'requests/view-0/' . $problem->request_id . $url_arguments . '" class="operation-link operation-link-request">Request</a>';
-    $row['operations']['data'] .= ' <a href="' . $base_path . 'requests/problems-0/requests/request/' . $problem->id . '/recheck' . $url_arguments . '" class="operation-link operation-link-recheck white-space-nowrap">Re-Check</a>';
+    $row['operations']['data'] .= ' <a href="' . $base_path . 'requests/view-0/' . $item->request_id . $url_arguments . '" class="operation-link operation-link-request">Request</a>';
+    $row['operations']['data'] .= ' <a href="' . $base_path . 'requests/problems-0/requests/request/' . $item->id . '/recheck' . $url_arguments . '" class="operation-link operation-link-recheck white-space-nowrap">Re-Check</a>';
 
     $rows[] = $row;
   }
 
   $problem_list = array();
-  $problem_list['caption'] = t("Request Problems");
+  $problem_list['caption'] = 'Request Problems';
   $problem_list['header'] = array(
-    'id' => array('field' => 'id', 'data' => "ID", 'align' => 'center'),
-    'problem' => array('field' => 'problem', 'data' => "Problem", 'align' => 'center'),
-    'request_id' => array('field' => 'request_id', 'data' => "Request ID", 'align' => 'center'),
-    'date' => array('field' => 'date', 'data' => "Date", 'align' => 'center'),
-    'reason' => array('field' => 'reason', 'data' => "Reason", 'align' => 'center'),
-    'ignore' => array('field' => 'ignore', 'data' => "Ignore", 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
-    'operations' => array('data' => "Operations", 'align' => 'center', 'class' => array('no-print')),
+    'id' => array('field' => 'id', 'data' => 'ID', 'align' => 'center'),
+    'problem' => array('field' => 'problem', 'data' => 'Problem', 'align' => 'center'),
+    'request_id' => array('field' => 'request_id', 'data' => 'Request ID', 'align' => 'center'),
+    'date' => array('field' => 'date', 'data' => 'Date', 'align' => 'center'),
+    'reason' => array('field' => 'reason', 'data' => 'Reason', 'align' => 'center'),
+    'ignore' => array('field' => 'ignore', 'data' => 'Ignore', 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
+    'operations' => array('data' => 'Operations', 'align' => 'center', 'class' => array('no-print')),
   );
 
   $problem_list['attributes'] = array();
@@ -1769,18 +1747,19 @@ function mfcs_request_problems_0_requests_form($form, &$form_state, $page_number
     'processing' => TRUE,
     'serverSide' => TRUE,
     'ajax' => array(
-      'url' => "'" . $base_path . 'requests/problems-0/requests/ajax' . $url_arguments . "'",
-      'type' => "'POST'",
+      'url' => '\'' . $base_path . 'requests/problems-0/requests/ajax' . $url_arguments . '\'',
+      'type' => '\'POST\'',
     ),
     'deferRender' => TRUE,
+    'deferLoading' => (int) $items_total,
     'columns' => array(
-      array('id' => 0, 'column' => 'id', 'name' => "ID", 'className' => 'column-id'),
-      array('id' => 1, 'column' => 'problem', 'name' => "Problem", 'className' => 'column-problem'),
-      array('id' => 2, 'column' => 'request_id', 'name' => "Request ID", 'className' => 'column-request_id'),
-      array('id' => 3, 'column' => 'date', 'name' => "Date", 'className' => 'column-date'),
-      array('id' => 4, 'column' => 'reason', 'name' => "Reason", 'className' => 'column-reason'),
-      array('id' => 5, 'column' => 'ignore', 'name' => "Ignore", 'className' => 'column-ignore', 'sanitize' => FALSE, 'visible' => FALSE),
-      array('id' => 6, 'column' => NULL, 'name' => "Operations", 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
+      array('id' => 0, 'column' => 'id', 'name' => 'ID', 'className' => 'column-id'),
+      array('id' => 1, 'column' => 'problem', 'name' => 'Problem', 'className' => 'column-problem'),
+      array('id' => 2, 'column' => 'request_id', 'name' => 'Request ID', 'className' => 'column-request_id'),
+      array('id' => 3, 'column' => 'date', 'name' => 'Date', 'className' => 'column-date'),
+      array('id' => 4, 'column' => 'reason', 'name' => 'Reason', 'className' => 'column-reason'),
+      array('id' => 5, 'column' => 'ignore', 'name' => 'Ignore', 'className' => 'column-ignore', 'sanitize' => FALSE, 'visible' => FALSE),
+      array('id' => 6, 'column' => NULL, 'name' => 'Operations', 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
     ),
     'displayStart' => $options['start'],
     'pageLength' => $rows_per_page,
@@ -1803,32 +1782,32 @@ function mfcs_request_problems_0_requests_form($form, &$form_state, $page_number
 
   $ajax_path = $base_path . 'requests/problems-0/requests/ajax';
 
-  $including_ignored = "function (e, dt, node, config) {" . "\n";
-  $including_ignored .= "  var data = dt.ajax.params();" . "\n";
-  $including_ignored .= "  var url = dt.ajax.url();" . "\n";
+  $including_ignored = 'function (e, dt, node, config) {' . "\n";
+  $including_ignored .= '  var data = dt.ajax.params();' . "\n";
+  $including_ignored .= '  var url = dt.ajax.url();' . "\n";
 
-  $including_ignored .= "  if (url == '" . $ajax_path . "/show_ignored' || url == '" . $ajax_path . "/show_ignored" . $url_arguments . "') {" . "\n";
-  $including_ignored .= "    dt.ajax.url('" . $ajax_path . "/hide_ignored" . $url_arguments . "');" . "\n";
-  $including_ignored .= "    dt.buttons('.datatable-including_ignored').text('Show Ignored Problems');" . "\n";
-  $including_ignored .= "  }" . "\n";
-  $including_ignored .= "  else if (url == '" . $ajax_path . "/hide_ignored' || url == '" . $ajax_path . "/hide_ignored" . $url_arguments . "') {" . "\n";
-  $including_ignored .= "    dt.ajax.url('" . $ajax_path . "/show_ignored" . $url_arguments . "');" . "\n";
-  $including_ignored .= "    dt.buttons('.datatable-including_ignored').text('Hide Ignored Problems');" . "\n";
-  $including_ignored .= "  }" . "\n";
-  $including_ignored .= "  else {" . "\n";
-  $including_ignored .= "    dt.ajax.url('" . $ajax_path . "/show_ignored" . $url_arguments . "');" . "\n";
-  $including_ignored .= "    dt.buttons('.datatable-including_ignored').text('Hide Ignored Problems');" . "\n";
-  $including_ignored .= "  }" . "\n";
+  $including_ignored .= '  if (url == \'' . $ajax_path . '/show_ignored\' || url == \'' . $ajax_path . '/show_ignored' . $url_arguments . '\') {' . "\n";
+  $including_ignored .= '    dt.ajax.url(\'' . $ajax_path . '/hide_ignored' . $url_arguments . '\');' . "\n";
+  $including_ignored .= '    dt.buttons(\'.datatable-including_ignored\').text(\'Show Ignored Problems\');' . "\n";
+  $including_ignored .= '  }' . "\n";
+  $including_ignored .= '  else if (url == \'' . $ajax_path . '/hide_ignored\' || url == \'' . $ajax_path . '/hide_ignored' . $url_arguments . '\') {' . "\n";
+  $including_ignored .= '    dt.ajax.url(\'' . $ajax_path . '/show_ignored' . $url_arguments . '\');' . "\n";
+  $including_ignored .= '    dt.buttons(\'.datatable-including_ignored\').text(\'Hide Ignored Problems\');' . "\n";
+  $including_ignored .= '  }' . "\n";
+  $including_ignored .= '  else {' . "\n";
+  $including_ignored .= '    dt.ajax.url(\'' . $ajax_path . '/show_ignored' . $url_arguments . '\');' . "\n";
+  $including_ignored .= '    dt.buttons(\'.datatable-including_ignored\').text(\'Hide Ignored Problems\');' . "\n";
+  $including_ignored .= '  }' . "\n";
 
-  $including_ignored .= "  dt.ajax.reload();" . "\n";
-  $including_ignored .= "}" . "\n";
+  $including_ignored .= '  dt.ajax.reload();' . "\n";
+  $including_ignored .= '}' . "\n";
 
   $datatable_settings['dom'] = 'lfCBrtip';
   $datatable_settings['buttons'] = array();
   $datatable_settings['buttons']['Include Ignored'] = array(
-    'text' => "'Show Ignored Problems'",
+    'text' => '\'Show Ignored Problems\'',
     'action' => $including_ignored,
-    'className' => "'datatable-including_ignored'",
+    'className' => '\'datatable-including_ignored\'',
   );
   unset($including_ignored);
 
@@ -1849,19 +1828,19 @@ function mfcs_request_problems_0_requests_form($form, &$form_state, $page_number
   $navigation_start = $options['start'] + 1;
   $navigation_total = $options['start'] + $rows_per_page;
 
-  if ($problems_total == 0) {
+  if ($items_total == 0) {
     $navigation_start = 0;
   }
 
-  if ($navigation_total > $problems_total) {
-    $navigation_total = $problems_total;
+  if ($navigation_total > $items_total) {
+    $navigation_total = $items_total;
   }
 
   $navigation_bottom .= '<div class="table_listing-comment">';
-  $navigation_bottom .= "Showing " . $navigation_start . " to " . $navigation_total . " of " . $problems_total . " entries.";
+  $navigation_bottom .= 'Showing ' . $navigation_start . ' to ' . $navigation_total . ' of ' . $items_total . ' entries.';
   $navigation_bottom .= '</div>';
 
-  if ($problems_total > ($options['start'] + $rows_per_page)) {
+  if ($items_total > ($options['start'] + $rows_per_page)) {
     $next_page = $page_number + 1;
     $navigation_top .= '<a href="' . $base_path . 'requests/problems-0/requests/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
     $navigation_bottom .= '<a href="' . $base_path . 'requests/problems-0/requests/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
@@ -1887,7 +1866,7 @@ function mfcs_request_problems_0_requests_form($form, &$form_state, $page_number
  * @see: mfcs_request_problems_0_requests_form()
  */
 function mfcs_request_problems_0_requests_form_validate($form, &$form_state) {
-  form_set_error('', "Currently this form has nothing to submit.");
+  form_set_error('', 'Currently this form has nothing to submit.');
 }
 
 /**
@@ -1980,7 +1959,7 @@ function mfcs_request_problems_0_request_form($form, &$form_state, $problem_id) 
     $problem_code_name = $request_problems_by_id[$problem->problem];
   }
 
-  $page_title = "Facilities Use Problems - Request Problem: " . $problem_id . " (" . $problem_code_name . " Problem)";
+  $page_title = 'Facilities Use Problems - Request Problem: ' . $problem_id . ' (' . $problem_code_name . ' Problem)';
   drupal_set_title($page_title);
 
   $user = cf_current_user();

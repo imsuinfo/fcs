@@ -56,11 +56,6 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = NUL
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
-  $no_js_fallback = TRUE;
-  if (isset($conf['no_js_fallback']) && is_bool($conf['no_js_fallback'])) {
-    $no_js_fallback = $conf['no_js_fallback'];
-  }
-
   $auto_page_number = FALSE;
   if (is_null($page_number)) {
     $auto_page_number = TRUE;
@@ -188,10 +183,10 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = NUL
     ),
   );
 
-  // do not load listing on first pass (improves performance at cost of no support for no-js.).
-  if ($no_js_fallback === FALSE && $auto_page_number) {
-    $options['results'] = FALSE;
-  }
+  $count_options = $options;
+  $count_options['start'] = 0;
+  $count_options['results'] = FALSE;
+  unset($count_options['limit']);
 
   $conditions = array();
 
@@ -199,28 +194,25 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = NUL
   $table_alias = 'ms';
   $primary_key = 'id';
 
-  $returned = mfcs_management_search_table($table_name, $table_alias, $primary_key, $conditions, $options);
+  $items_returned = mfcs_management_search_table($table_name, $table_alias, $primary_key, $conditions, $count_options);
 
-  $returned_total = 0;
-  if (is_array($returned) && array_key_exists('count', $returned)) {
-    $returned_total = $returned['count'];
+  $items_total = 0;
+  if (is_array($items_returned) && array_key_exists('count', $items_returned)) {
+    $items_total = $items_returned['count'];
   }
 
+  $items_returned = mfcs_management_search_table($table_name, $table_alias, $primary_key, $conditions, $options);
+
   $items = array();
-  if (isset($returned['results']) && is_array($returned['results'])) {
-    $items = $returned['results'];
+  if (isset($items_returned['results']) && is_array($items_returned['results'])) {
+    $items = $items_returned['results'];
   }
 
   // do not provide pages when the page number would bring the user beyond the available items.
-  if ($returned_total > 0 && $options['start'] >= $returned_total || $returned_total == 0 && $options['start'] > $returned_total) {
+  if ($items_total > 0 && $options['start'] >= $items_total || $items_total == 0 && $options['start'] > $items_total) {
     drupal_not_found();
     drupal_exit();
     return array();
-  }
-
-  // do not show count values when no fallback is available.
-  if ($no_js_fallback === FALSE && $auto_page_number) {
-    $returned_total = 0;
   }
 
   // Results is needed and therefore must not be FALSE, unsetting it will default to TRUE.
@@ -240,8 +232,9 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = NUL
       'class' => $class_user_id,
     );
 
+    // note: previously the id was added as a no-js failsafe, but it causes an annoying flicker on load (because the load speed is sufficiently fast enough to flicker but slow enough to see).
     $row['account'] = array(
-      'data' => '<a href="' . $base_path . 'requests/users-0/view/' . $item->user_id . $url_arguments . '" class="user-link">' . check_plain($item->name) . '</a>' . ' <span class="user-id script-hidden">(id: ' .  $item->user_id . ')</span>',
+      'data' => '<a href="' . $base_path . 'requests/users-0/view/' . $item->user_id . $url_arguments . '" class="user-link">' . check_plain($item->name) . '</a>',
       'class' => $class_name,
     );
 
@@ -261,7 +254,7 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = NUL
     );
 
     $row['type'] = array(
-      'data' => "Unknown",
+      'data' => 'Unknown',
       'class' => $class_type,
     );
 
@@ -333,6 +326,7 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = NUL
       'type' => '\'POST\'',
     ),
     'deferRender' => TRUE,
+    'deferLoading' => (int) $items_total,
     'columns' => array(
       array('id' => 0, 'column' => 'id', 'name' => 'ID', 'className' => 'column-id', 'sanitize' => FALSE),
       array('id' => 1, 'column' => 'account_id', 'name' => 'Account ID', 'className' => 'column-account_id', 'sanitize' => FALSE, 'visible' => FALSE),
@@ -379,19 +373,19 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = NUL
   $navigation_start = $options['start'] + 1;
   $navigation_total = $options['start'] + $rows_per_page;
 
-  if ($returned_total == 0) {
+  if ($items_total == 0) {
     $navigation_start = 0;
   }
 
-  if ($navigation_total > $returned_total) {
-    $navigation_total = $returned_total;
+  if ($navigation_total > $items_total) {
+    $navigation_total = $items_total;
   }
 
   $navigation_bottom .= '<div class="table_listing-comment">';
-  $navigation_bottom .= "Showing " . $navigation_start . " to " . $navigation_total . " of " . $returned_total . " entries.";
+  $navigation_bottom .= 'Showing ' . $navigation_start . ' to ' . $navigation_total . ' of ' . $items_total . ' entries.';
   $navigation_bottom .= '</div>';
 
-  if ($returned_total > ($options['start'] + $rows_per_page)) {
+  if ($items_total > ($options['start'] + $rows_per_page)) {
     $next_page = $page_number + 1;
     $navigation_top .= '<a href="' . $base_path . 'requests/synchronize-0/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
     $navigation_bottom .= '<a href="' . $base_path . 'requests/synchronize-0/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';

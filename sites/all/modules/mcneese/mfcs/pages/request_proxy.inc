@@ -50,11 +50,6 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = NULL) {
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
-  $no_js_fallback = TRUE;
-  if (isset($conf['no_js_fallback']) && is_bool($conf['no_js_fallback'])) {
-    $no_js_fallback = $conf['no_js_fallback'];
-  }
-
   $auto_page_number = FALSE;
   if (is_null($page_number)) {
     $auto_page_number = TRUE;
@@ -67,7 +62,7 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = NULL) {
 
   mfcs_add_canonical_headers('requests/proxy-0/' . $page_number);
 
-  $page_title = "Facilities Use Proxies";
+  $page_title = 'Facilities Use Proxies';
   drupal_set_title($page_title);
 
   $user = cf_current_user();
@@ -170,89 +165,87 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = NULL) {
     'count' => TRUE,
   );
 
-  // do not load listing on first pass (improves performance at cost of no support for no-js.).
-  if ($no_js_fallback === FALSE && $auto_page_number) {
-    $options['results'] = FALSE;
+  $count_options = $options;
+  $count_options['start'] = 0;
+  $count_options['results'] = FALSE;
+  unset($count_options['limit']);
+
+  $items_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.disabled' => 0), $count_options);
+
+  $items_total = 0;
+  if (is_array($items_returned) && array_key_exists('count', $items_returned)) {
+    $items_total = $items_returned['count'];
   }
 
-  $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.disabled' => 0), $options);
+  $items_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.disabled' => 0), $options);
 
-  $proxies_total = 0;
-  if (is_array($proxies_returned) && array_key_exists('count', $proxies_returned)) {
-    $proxies_total = $proxies_returned['count'];
-  }
-
-  $proxies = array();
-  if (isset($proxies_returned['results']) && is_array($proxies_returned['results'])) {
-    $proxies = $proxies_returned['results'];
+  $items = array();
+  if (isset($items_returned['results']) && is_array($items_returned['results'])) {
+    $items = $items_returned['results'];
   }
 
   // do not provide pages when the page number would bring the user beyond the available items.
-  if ($proxies_total > 0 && $options['start'] >= $proxies_total || $proxies_total == 0 && $options['start'] > $proxies_total) {
+  if ($items_total > 0 && $options['start'] >= $items_total || $items_total == 0 && $options['start'] > $items_total) {
     drupal_not_found();
     drupal_exit();
     return array();
-  }
-
-  // do not show count values when no fallback is available.
-  if ($no_js_fallback === FALSE && $auto_page_number) {
-    $count = 0;
   }
 
   // Results is needed and therefore must not be FALSE, unsetting it will default to TRUE.
   unset($options['results']);
 
   $rows = array();
-  foreach ($proxies as $proxy) {
+  foreach ($items as $item) {
     $row = array();
-
     $row['id'] = array(
-      'data' => $proxy->id,
+      'data' => $item->id,
       'class' => $class_id,
     );
 
     $row['proxy_account_id'] = array(
-      'data' => $proxy->proxy_id,
+      'data' => $item->proxy_id,
       'class' => $class_proxy_account_id,
     );
 
+    // note: previously the id was added as a no-js failsafe, but it causes an annoying flicker on load (because the load speed is sufficiently fast enough to flicker but slow enough to see).
     $row['proxy_account'] = array(
-      'data' => '<a href="' . $base_path . 'requests/users-0/view/' . $proxy->proxy_id . $url_arguments . '" class="user-link">' . check_plain($proxy->proxy_name) . '</a>' . ' <span class="user-id script-hidden">(id: ' .  $proxy->proxy_id . ')</span>',
+      'data' => '<a href="' . $base_path . 'requests/users-0/view/' . $item->proxy_id . $url_arguments . '" class="user-link">' . check_plain($item->proxy_name) . '</a>',
       'class' => $class_proxy_account,
     );
 
     $row['proxy_first_name'] = array(
-      'data' => check_plain($proxy->proxy_first_name),
+      'data' => check_plain($item->proxy_first_name),
       'class' => $class_proxy_first_name,
     );
 
     $row['proxy_last_name'] = array(
-      'data' => check_plain($proxy->proxy_last_name),
+      'data' => check_plain($item->proxy_last_name),
       'class' => $class_proxy_last_name,
     );
 
     $row['account_id'] = array(
-      'data' => $proxy->user_id,
+      'data' => $item->user_id,
       'class' => $class_account_id,
     );
 
+    // note: previously the id was added as a no-js failsafe, but it causes an annoying flicker on load (because the load speed is sufficiently fast enough to flicker but slow enough to see).
     $row['account'] = array(
-      'data' => '<a href="' . $base_path . 'requests/users-0/view/' . $proxy->user_id . $url_arguments . '" class="user-link">' . check_plain($proxy->name) . '</a>' . ' <span class="user-id script-hidden">(id: ' .  $proxy->user_id . ')</span>',
+      'data' => '<a href="' . $base_path . 'requests/users-0/view/' . $item->user_id . $url_arguments . '" class="user-link">' . check_plain($item->name) . '</a>',
       'class' => $class_account,
     );
 
     $row['first_name'] = array(
-      'data' => check_plain($proxy->first_name),
+      'data' => check_plain($item->first_name),
       'class' => $class_first_name,
     );
 
     $row['last_name'] = array(
-      'data' => check_plain($proxy->last_name),
+      'data' => check_plain($item->last_name),
       'class' => $class_last_name,
     );
 
     $row['operations'] = array(
-      'data' => '<a href="' . $base_path . 'requests/proxy-0/delete/' . $proxy->id . $url_arguments . '" class="operation-link operation-link-delete">Delete</a>',
+      'data' => '<a href="' . $base_path . 'requests/proxy-0/delete/' . $item->id . $url_arguments . '" class="operation-link operation-link-delete">Delete</a>',
       'class' => $class_operations,
     );
 
@@ -260,18 +253,18 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = NULL) {
   }
 
   $proxy_list = array();
-  $proxy_list['caption'] = t("Venue Coordinator Proxies");
+  $proxy_list['caption'] = 'Venue Coordinator Proxies';
   $proxy_list['header'] = array(
-    'id' => array('field' => 'id', 'data' => "ID", 'align' => 'center'),
-    'proxy_account_id' => array('field' => 'proxy_account_id', 'data' => "Proxy Account ID", 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
-    'proxy_account' => array('field' => 'proxy_account', 'data' => "Proxy Account", 'align' => 'center'),
-    'proxy_first_name' => array('field' => 'proxy_first_name', 'data' => "Proxy First Name", 'align' => 'center'),
-    'proxy_last_name' => array('field' => 'proxy_last_name', 'data' => "Proxy Last Name", 'align' => 'center'),
-    'account_id' => array('field' => 'account_id', 'data' => "Account ID", 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
-    'account' => array('field' => 'account', 'data' => "Account", 'align' => 'center'),
-    'first_name' => array('field' => 'first_name', 'data' => "First Name", 'align' => 'center'),
-    'last_name' => array('field' => 'last_name', 'data' => "Last Name", 'align' => 'center'),
-    'operations' => array('data' => "Operations", 'align' => 'center', 'class' => array('no-print')),
+    'id' => array('field' => 'id', 'data' => 'ID', 'align' => 'center'),
+    'proxy_account_id' => array('field' => 'proxy_account_id', 'data' => 'Proxy Account ID', 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
+    'proxy_account' => array('field' => 'proxy_account', 'data' => 'Proxy Account', 'align' => 'center'),
+    'proxy_first_name' => array('field' => 'proxy_first_name', 'data' => 'Proxy First Name', 'align' => 'center'),
+    'proxy_last_name' => array('field' => 'proxy_last_name', 'data' => 'Proxy Last Name', 'align' => 'center'),
+    'account_id' => array('field' => 'account_id', 'data' => 'Account ID', 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
+    'account' => array('field' => 'account', 'data' => 'Account', 'align' => 'center'),
+    'first_name' => array('field' => 'first_name', 'data' => 'First Name', 'align' => 'center'),
+    'last_name' => array('field' => 'last_name', 'data' => 'Last Name', 'align' => 'center'),
+    'operations' => array('data' => 'Operations', 'align' => 'center', 'class' => array('no-print')),
   );
 
   $proxy_list['attributes'] = array();
@@ -288,7 +281,7 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = NULL) {
   $proxy_list['attributes']['summary'] = 'Collection of users who are allowed to proxy as another user.';
 
   $proxy_list['rows'] = $rows;
-  $proxy_list['empty'] = t("There are no users assigned to proxy as a venue coordinator.");
+  $proxy_list['empty'] = 'There are no users assigned to proxy as a venue coordinator.';
 
   $datatable_settings = array(
     'sort' => strtolower($sort),
@@ -305,21 +298,22 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = NULL) {
     'processing' => TRUE,
     'serverSide' => TRUE,
     'ajax' => array(
-      'url' => "'" . $base_path . 'requests/proxy-0/ajax' . $url_arguments . "'",
-      'type' => "'POST'",
+      'url' => '\'' . $base_path . 'requests/proxy-0/ajax' . $url_arguments . '\'',
+      'type' => '\'POST\'',
     ),
     'deferRender' => TRUE,
+    'deferLoading' => (int) $items_total,
     'columns' => array(
-      array('id' => 0, 'column' => 'id', 'name' => "ID", 'className' => 'column-id', 'sanitize' => FALSE),
-      array('id' => 1, 'column' => 'proxy_account_id', 'name' => "Proxy Account ID", 'className' => 'column-proxy_account_id', 'sanitize' => FALSE, 'visible' => FALSE),
-      array('id' => 2, 'column' => 'proxy_account', 'name' => "Proxy Account", 'className' => 'column-proxy_account'),
-      array('id' => 3, 'column' => 'proxy_first_name', 'name' => "Proxy First Name", 'className' => 'column-proxy_first_name'),
-      array('id' => 4, 'column' => 'proxy_last_name', 'name' => "Proxy Last Name", 'className' => 'column-proxy_last_name'),
-      array('id' => 5, 'column' => 'account_id', 'name' => "Account ID", 'className' => 'column-account_id', 'sanitize' => FALSE, 'visible' => FALSE),
-      array('id' => 6, 'column' => 'account', 'name' => "Account", 'className' => 'column-account'),
-      array('id' => 7, 'column' => 'first_name', 'name' => "First Name", 'className' => 'column-first_name'),
-      array('id' => 8, 'column' => 'last_name', 'name' => "Last Name", 'className' => 'column-last_name'),
-      array('id' => 9, 'column' => NULL, 'name' => "Operations", 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
+      array('id' => 0, 'column' => 'id', 'name' => 'ID', 'className' => 'column-id', 'sanitize' => FALSE),
+      array('id' => 1, 'column' => 'proxy_account_id', 'name' => 'Proxy Account ID', 'className' => 'column-proxy_account_id', 'sanitize' => FALSE, 'visible' => FALSE),
+      array('id' => 2, 'column' => 'proxy_account', 'name' => 'Proxy Account', 'className' => 'column-proxy_account'),
+      array('id' => 3, 'column' => 'proxy_first_name', 'name' => 'Proxy First Name', 'className' => 'column-proxy_first_name'),
+      array('id' => 4, 'column' => 'proxy_last_name', 'name' => 'Proxy Last Name', 'className' => 'column-proxy_last_name'),
+      array('id' => 5, 'column' => 'account_id', 'name' => 'Account ID', 'className' => 'column-account_id', 'sanitize' => FALSE, 'visible' => FALSE),
+      array('id' => 6, 'column' => 'account', 'name' => 'Account', 'className' => 'column-account'),
+      array('id' => 7, 'column' => 'first_name', 'name' => 'First Name', 'className' => 'column-first_name'),
+      array('id' => 8, 'column' => 'last_name', 'name' => 'Last Name', 'className' => 'column-last_name'),
+      array('id' => 9, 'column' => NULL, 'name' => 'Operations', 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
     ),
     'displayStart' => $options['start'],
     'pageLength' => $rows_per_page,
@@ -356,19 +350,19 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = NULL) {
   $navigation_start = $options['start'] + 1;
   $navigation_total = $options['start'] + $rows_per_page;
 
-  if ($proxies_total == 0) {
+  if ($items_total == 0) {
     $navigation_start = 0;
   }
 
-  if ($navigation_total > $proxies_total) {
-    $navigation_total = $proxies_total;
+  if ($navigation_total > $items_total) {
+    $navigation_total = $items_total;
   }
 
   $navigation_bottom .= '<div class="table_listing-comment">';
-  $navigation_bottom .= "Showing " . $navigation_start . " to " . $navigation_total . " of " . $proxies_total . " entries.";
+  $navigation_bottom .= 'Showing ' . $navigation_start . ' to ' . $navigation_total . ' of ' . $items_total . ' entries.';
   $navigation_bottom .= '</div>';
 
-  if ($proxies_total > ($options['start'] + $rows_per_page)) {
+  if ($items_total > ($options['start'] + $rows_per_page)) {
     $next_page = $page_number + 1;
     $navigation_top .= '<a href="' . $base_path . 'requests/proxy-0/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
     $navigation_bottom .= '<a href="' . $base_path . 'requests/proxy-0/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
@@ -392,19 +386,18 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = NULL) {
     '#type' => 'textfield',
     '#default_value' => '',
     '#title' => 'User',
-    '#description' => t("This is the user who is going to be proxied as."),
+    '#description' => 'This is the user who is going to be proxied as.',
     '#size' => 72,
     '#autocomplete_path' => 'requests/proxy-0/autocomplete/user_id',
     '#required' => TRUE,
   );
-
 
   $form['proxy']['proxy_id'] = array(
     '#id' => 'proxy-proxy_id',
     '#type' => 'textfield',
     '#default_value' => '',
     '#title' => 'Proxy',
-    '#description' => t("This is the user who doing the proxying."),
+    '#description' => 'This is the user who doing the proxying.',
     '#size' => 72,
     '#autocomplete_path' => 'requests/proxy-0/autocomplete/user_id',
     '#required' => TRUE,
@@ -413,7 +406,7 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = NULL) {
   $form['proxy']['add'] = array(
     '#id' => 'submit-proxy-add',
     '#type' => 'submit',
-    '#default_value' => t("Add Proxy"),
+    '#default_value' => 'Add Proxy',
   );
 
   return $form;
@@ -450,13 +443,13 @@ function mfcs_request_proxy_0_form_validate($form, &$form_state) {
     }
 
     if (is_null($proxy_id)) {
-      form_set_error('proxy][proxy_id', "An invalid Proxy has been specified. Please select a valid user (this requires the user id).");
+      form_set_error('proxy][proxy_id', 'An invalid Proxy has been specified. Please select a valid user (this requires the user id).');
     }
     else {
       $proxy = user_load($proxy_id);
 
       if (!is_object($proxy)) {
-        form_set_error('proxy][proxy_id', "An invalid Proxy has been specified. Please select a valid user (this requires the user id).");
+        form_set_error('proxy][proxy_id', 'An invalid Proxy has been specified. Please select a valid user (this requires the user id).');
       }
     }
 
@@ -474,23 +467,23 @@ function mfcs_request_proxy_0_form_validate($form, &$form_state) {
     }
 
     if (is_null($user_id)) {
-      form_set_error('proxy][user_id', "An invalid User has been specified. Please select a valid user (this requires the user id).");
+      form_set_error('proxy][user_id', 'An invalid User has been specified. Please select a valid user (this requires the user id).');
     }
     else {
       $user = user_load($user_id);
 
       if (!is_object($user)) {
-        form_set_error('proxy][user_id', "An invalid User has been specified. Please select a valid user (this requires the user id).");
+        form_set_error('proxy][user_id', 'An invalid User has been specified. Please select a valid user (this requires the user id).');
       }
     }
 
-    $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.proxy_id' => $proxy_id, 'mpvc.user_id' => $user_id, 'mpvc.disabled' => 0));
-    if (!empty($proxies_returned['results'])) {
-      form_set_error('proxy][proxy_id', "This proxy is already assigned to the specified user.");
+    $items_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.proxy_id' => $proxy_id, 'mpvc.user_id' => $user_id, 'mpvc.disabled' => 0));
+    if (!empty($items_returned['results'])) {
+      form_set_error('proxy][proxy_id', 'This proxy is already assigned to the specified user.');
     }
   }
   else {
-    form_set_error('', "Unknown submit process detected.");
+    form_set_error('', 'Unknown submit process detected.');
   }
 }
 
@@ -574,8 +567,8 @@ function mfcs_request_proxy_0_form_submit($form, &$form_state) {
       $transaction->rollback();
       cf_error::on_query_execution($e);
 
-      form_set_error('form', "An error occurred while trying to add the proxy. Please contact the support staff.");
-      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to create the proxy '%proxy_id' to proxy as '%user_id'.", array('%proxy_id' => $values['proxy_id'], '%user_id' => $values['user_id']), WATCHDOG_ERROR);
+      form_set_error('form', 'An error occurred while trying to add the proxy. Please contact the support staff.');
+      watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to create the proxy \'%proxy_id\' to proxy as \'%user_id\'.', array('%proxy_id' => $values['proxy_id'], '%user_id' => $values['user_id']), WATCHDOG_ERROR);
 
       $form_state['rebuild'] = TRUE;
       $form_state['redirect'] = FALSE;
@@ -587,8 +580,8 @@ function mfcs_request_proxy_0_form_submit($form, &$form_state) {
       $transaction->rollback();
       cf_error::on_query_execution($e);
 
-      form_set_error('form', "An error occurred while trying to add the proxy. Please contact the support staff.");
-      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to create the proxy '%proxy_id' to proxy as '%user_id'.", array('%proxy_id' => $values['proxy_id'], '%user_id' => $values['user_id']), WATCHDOG_ERROR);
+      form_set_error('form', 'An error occurred while trying to add the proxy. Please contact the support staff.');
+      watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to create the proxy \'%proxy_id\' to proxy as \'%user_id\'.', array('%proxy_id' => $values['proxy_id'], '%user_id' => $values['user_id']), WATCHDOG_ERROR);
 
       $form_state['rebuild'] = TRUE;
       $form_state['redirect'] = FALSE;
@@ -644,10 +637,10 @@ function mfcs_request_proxy_0_delete_form($form, &$form_state, $id) {
     return array();
   }
 
-  $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.id' => $id));
+  $items_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.id' => $id));
   $proxy = NULL;
-  if (!empty($proxies_returned['results'])) {
-    $proxy = array_pop($proxies_returned['results']);
+  if (!empty($items_returned['results'])) {
+    $proxy = array_pop($items_returned['results']);
   }
 
   if (!is_object($proxy)) {
@@ -679,7 +672,7 @@ function mfcs_request_proxy_0_delete_form($form, &$form_state, $id) {
     $user_name = $user->name;
   }
 
-  $page_title = "Facilities Use Proxies Delete: " . $proxy_name . " (id: " . $proxy->proxy_id . ") proxied as " . $user_name . " (id: " . $proxy->user_id . ")";
+  $page_title = 'Facilities Use Proxies Delete: ' . $proxy_name . ' (id: ' . $proxy->proxy_id . ') proxied as ' . $user_name . ' (id: ' . $proxy->user_id . ')';
   drupal_set_title($page_title);
 
   $form['form'] = array(
@@ -699,11 +692,11 @@ function mfcs_request_proxy_0_delete_form($form, &$form_state, $id) {
   }
 
   return confirm_form($form,
-    t("Are you sure you want to delete the proxy %proxy_name (%proxy_id) from being a venue coordinator proxy for the user %user_name (%user_id)?", array('%proxy_name' => $proxy_name, '%proxy_id' => $proxy_user->uid, '%user_name' => $user_name, '%user_id' => $user->uid)),
+    'Are you sure you want to delete the proxy %proxy_name (%proxy_id) from being a venue coordinator proxy for the user %user_name (%user_id)?', array('%proxy_name' => $proxy_name, '%proxy_id' => $proxy_user->uid, '%user_name' => $user_name, '%user_id' => $user->uid),
     $destination,
-    t("This action cannot be undone."),
-    t("Delete"),
-    t("Cancel")
+    'This action cannot be undone.',
+    'Delete',
+    'Cancel'
   );
 }
 
@@ -718,15 +711,15 @@ function mfcs_request_proxy_0_delete_form($form, &$form_state, $id) {
  * @see: mfcs_request_proxy_0_delete_form()
  */
 function mfcs_request_proxy_0_delete_form_validate($form, &$form_state) {
-  $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.id' => $form['form']['id']['#value'], 'mpvc.disabled' => 0));
+  $items_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.id' => $form['form']['id']['#value'], 'mpvc.disabled' => 0));
 
   $proxy = NULL;
-  if (!empty($proxies_returned['results'])) {
-    $proxy = array_pop($proxies_returned['results']);
+  if (!empty($items_returned['results'])) {
+    $proxy = array_pop($items_returned['results']);
   }
 
   if (!is_object($proxy)) {
-    form_set_error('', "An invalid proxy id has been specified.");
+    form_set_error('', 'An invalid proxy id has been specified.');
   }
 }
 
@@ -759,8 +752,8 @@ function mfcs_request_proxy_0_delete_form_submit($form, &$form_state) {
     $transaction->rollback();
     cf_error::on_query_execution($e);
 
-    form_set_error('form', "An error occurred while trying to delete the proxy. Please contact the support staff.");
-    watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to delete the proxy '%proxy_id'.", array('%proxy_id' => $form['form']['id']['#value']), WATCHDOG_ERROR);
+    form_set_error('form', 'An error occurred while trying to delete the proxy. Please contact the support staff.');
+    watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to delete the proxy \'%proxy_id\'.', array('%proxy_id' => $form['form']['id']['#value']), WATCHDOG_ERROR);
 
     $form_state['rebuild'] = TRUE;
     $form_state['redirect'] = FALSE;
@@ -772,8 +765,8 @@ function mfcs_request_proxy_0_delete_form_submit($form, &$form_state) {
     $transaction->rollback();
     cf_error::on_query_execution($e);
 
-    form_set_error('form', "An error occurred while trying to delete the proxy. Please contact the support staff.");
-    watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to delete the proxy '%proxy_id'.", array('%proxy_id' => $form['form']['id']['#value']), WATCHDOG_ERROR);
+    form_set_error('form', 'An error occurred while trying to delete the proxy. Please contact the support staff.');
+    watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to delete the proxy \'%proxy_id\'.', array('%proxy_id' => $form['form']['id']['#value']), WATCHDOG_ERROR);
 
     $form_state['rebuild'] = TRUE;
     $form_state['redirect'] = FALSE;

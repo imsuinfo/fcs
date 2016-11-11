@@ -78,7 +78,7 @@ function mfcs_request_reviewers_0_page() {
     $item_list = theme('item_list', array('items' => $items, 'type' => 'ul'));
 
     $markup .= '<div id="mfcs-manage_reviewers-manage-' . $classification_id . '" class="mfcs-manage_reviewers-manage">';
-    $markup .= '<h3 class="mfcs-manage_reviewers-manage-header">' . "Manage " . $classification_label . " Reviewers" . '</h3>';
+    $markup .= '<h3 class="mfcs-manage_reviewers-manage-header">Manage ' . $classification_label . ' Reviewers</h3>';
     $markup .= $item_list;
     $markup .= '</div>';
   }
@@ -172,11 +172,6 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
-  $no_js_fallback = TRUE;
-  if (isset($conf['no_js_fallback']) && is_bool($conf['no_js_fallback'])) {
-    $no_js_fallback = $conf['no_js_fallback'];
-  }
-
   if (!cf_is_integer($page_number) || $page_number < 0) {
     $page_number = 0;
   }
@@ -198,7 +193,7 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
   $reviewer_classifications = mfcs_get_reviewer_classification_list_options();
   $reviewer_classifications_list = mfcs_get_reviewer_classification_list_options('select');
 
-  $page_title = "Reviewers for Step: " . $review_steps[$review_step];
+  $page_title = 'Reviewers for Step: ' . $review_steps[$review_step];
   drupal_set_title($page_title);
 
   if (!array_key_exists($classification, $request_classifications)) {
@@ -291,38 +286,39 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
     'count' => TRUE,
   );
 
-  // do not load listing on first pass (improves performance at cost of no support for no-js.).
-  if ($no_js_fallback === FALSE && $auto_page_number) {
-    $options['results'] = FALSE;
+  $count_options = $options;
+  $count_options['start'] = 0;
+  $count_options['results'] = FALSE;
+  unset($count_options['limit']);
+
+  $items_returned = mfcs_get_reviewers(array('mr.request_classification' => $classification, 'mr.review_step' => $review_step, 'mr.disabled' => 0), $count_options);
+  $items_total = 0;
+  if (is_array($items_returned) && array_key_exists('count', $items_returned)) {
+    $items_total = $items_returned['count'];
   }
 
-  $reviewers_returned = mfcs_get_reviewers(array('mr.request_classification' => $classification, 'mr.review_step' => $review_step, 'mr.disabled' => 0), $options);
-  $reviewers = array();
-  if (isset($reviewers_returned['results']) && is_array($reviewers_returned['results'])) {
-    $reviewers = $reviewers_returned['results'];
+  $items_returned = mfcs_get_reviewers(array('mr.request_classification' => $classification, 'mr.review_step' => $review_step, 'mr.disabled' => 0), $options);
+  $items = array();
+  if (isset($items_returned['results']) && is_array($items_returned['results'])) {
+    $items = $items_returned['results'];
   }
 
   // do not provide pages when the page number would bring the user beyond the available items.
-  if ($reviewers_returned['count'] > 0 && $options['start'] >= $reviewers_returned['count'] || $reviewers_returned['count'] == 0 && $options['start'] > $reviewers_returned['count']) {
+  if ($items_returned['count'] > 0 && $options['start'] >= $items_returned['count'] || $items_returned['count'] == 0 && $options['start'] > $items_returned['count']) {
     drupal_not_found();
     drupal_exit();
     return array();
-  }
-
-  // do not show count values when no fallback is available.
-  if ($no_js_fallback === FALSE && $auto_page_number) {
-    $count = 0;
   }
 
   // Results is needed and therefore must not be FALSE, unsetting it will default to TRUE.
   unset($options['results']);
 
   $rows = array();
-  foreach ($reviewers as $reviewer) {
+  foreach ($items as $item) {
     $row = array();
 
     $row['id'] = array(
-      'data' => $reviewer->id,
+      'data' => $item->id,
       'class' => $class_id,
     );
 
@@ -331,11 +327,11 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
       'class' => $class_classification,
     );
 
-    if (is_string($reviewer_classification = $reviewer->reviewer_classification)) {
-      $reviewer_classification = (int) $reviewer->reviewer_classification;
+    if (is_string($reviewer_classification = $item->reviewer_classification)) {
+      $reviewer_classification = (int) $item->reviewer_classification;
     }
     else {
-      $reviewer_classification = $reviewer->reviewer_classification;
+      $reviewer_classification = $item->reviewer_classification;
     }
 
     if (isset($reviewer_classifications[$reviewer_classification])) {
@@ -343,27 +339,28 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
     }
 
     $row['account_id'] = array(
-      'data' => $reviewer->user_id,
+      'data' => $item->user_id,
       'class' => $class_account_id,
     );
 
+    // note: previously the id was added as a no-js failsafe, but it causes an annoying flicker on load (because the load speed is sufficiently fast enough to flicker but slow enough to see).
     $row['account'] = array(
-      'data' => '<a href="' . $base_path . 'requests/users-0/view/' . $reviewer->user_id . $url_arguments . '" class="user-link">' . check_plain($reviewer->name) . '</a>' . ' <span class="user-id script-hidden">(id: ' .  $reviewer->user_id . ')</span>',
+      'data' => '<a href="' . $base_path . 'requests/users-0/view/' . $item->user_id . $url_arguments . '" class="user-link">' . check_plain($item->name) . '</a>',
       'class' => $class_account,
     );
 
     $row['first_name'] = array(
-      'data' => check_plain($reviewer->first_name),
+      'data' => check_plain($item->first_name),
       'class' => $class_first_name,
     );
 
     $row['last_name'] = array(
-      'data' => check_plain($reviewer->last_name),
+      'data' => check_plain($item->last_name),
       'class' => $class_last_name,
     );
 
     $row['operations'] = array(
-      'data' => '<a href="' . $base_path . 'requests/reviewers-0/delete/' . $reviewer->id . $url_arguments . '" class="operation-link operation-link-delete">Delete</a>',
+      'data' => '<a href="' . $base_path . 'requests/reviewers-0/delete/' . $item->id . $url_arguments . '" class="operation-link operation-link-delete">Delete</a>',
       'class' => $class_operations,
     );
 
@@ -382,15 +379,15 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
   );
 
   $reviewers_list = array();
-  $reviewers_list['caption'] = t("Reviewers Assigned to %request_classification for %step", array('%request_classification' => $request_classifications[$classification], '%step' => $review_steps[$review_step]));
+  $reviewers_list['caption'] = t('Reviewers Assigned to %request_classification for %step', array('%request_classification' => $request_classifications[$classification], '%step' => $review_steps[$review_step]));
   $reviewers_list['header'] = array(
-    'id' => array('field' => 'id', 'data' => "ID", 'align' => 'center'),
-    'reviewer_classification' => array('field' => 'reviewer_classification', 'data' => "Reviewer Classification", 'align' => 'center', 'sort' => 'asc'),
-    'account_id' => array('field' => 'account_id', 'data' => "Account ID", 'align' => 'center', 'class' => array('no-script-hidden')),
-    'account' => array('field' => 'account', 'data' => "Account", 'align' => 'center'),
-    'first_name' => array('field' => 'first_name', 'data' => "First Name", 'align' => 'center'),
-    'last_name' => array('field' => 'last_name', 'data' => "Last Name", 'align' => 'center'),
-    'operations' => array('data' => "Operations", 'align' => 'center', 'class' => array('no-print')),
+    'id' => array('field' => 'id', 'data' => 'ID', 'align' => 'center'),
+    'reviewer_classification' => array('field' => 'reviewer_classification', 'data' => 'Reviewer Classification', 'align' => 'center', 'sort' => 'asc'),
+    'account_id' => array('field' => 'account_id', 'data' => 'Account ID', 'align' => 'center', 'class' => array('no-script-hidden')),
+    'account' => array('field' => 'account', 'data' => 'Account', 'align' => 'center'),
+    'first_name' => array('field' => 'first_name', 'data' => 'First Name', 'align' => 'center'),
+    'last_name' => array('field' => 'last_name', 'data' => 'Last Name', 'align' => 'center'),
+    'operations' => array('data' => 'Operations', 'align' => 'center', 'class' => array('no-print')),
   );
 
   $reviewers_list['attributes'] = array();
@@ -407,7 +404,7 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
   $reviewers_list['attributes']['summary'] = 'All users who are considered reviewers for the given request classification.';
 
   $reviewers_list['rows'] = $rows;
-  $reviewers_list['empty'] = t("There are no users assigned to review this request classsification.");
+  $reviewers_list['empty'] = 'There are no users assigned to review this request classsification.';
 
   $datatable_settings = array(
     'sort' => strtolower($sort),
@@ -424,18 +421,19 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
     'processing' => TRUE,
     'serverSide' => TRUE,
     'ajax' => array(
-      'url' => "'" . $base_path . 'requests/reviewers-0/ajax/list/' . $classification . '/' . $review_step . $url_arguments . "'",
-      'type' => "'POST'",
+      'url' => '\'' . $base_path . 'requests/reviewers-0/ajax/list/' . $classification . '/' . $review_step . $url_arguments . '\'',
+      'type' => '\'POST\'',
     ),
     'deferRender' => TRUE,
+    'deferLoading' => (int) $items_total,
     'columns' => array(
-      array('id' => 0, 'column' => 'id', 'name' => "ID", 'className' => 'column-id', 'sanitize' => FALSE),
-      array('id' => 1, 'column' => 'review_classification', 'name' => "Review Classification", 'className' => 'column-review_classification'),
-      array('id' => 2, 'column' => 'account_id', 'name' => "Account ID", 'className' => 'column-account_id', 'sanitize' => FALSE, 'visible' => FALSE),
-      array('id' => 3, 'column' => 'account', 'name' => "Account", 'className' => 'column-account'),
-      array('id' => 4, 'column' => 'first_name', 'name' => "First Name", 'className' => 'column-first_name'),
-      array('id' => 5, 'column' => 'last_name', 'name' => "Last Name", 'className' => 'column-last_name'),
-      array('id' => 6, 'column' => NULL, 'name' => "Operations", 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
+      array('id' => 0, 'column' => 'id', 'name' => 'ID', 'className' => 'column-id', 'sanitize' => FALSE),
+      array('id' => 1, 'column' => 'review_classification', 'name' => 'Review Classification', 'className' => 'column-review_classification'),
+      array('id' => 2, 'column' => 'account_id', 'name' => 'Account ID', 'className' => 'column-account_id', 'sanitize' => FALSE, 'visible' => FALSE),
+      array('id' => 3, 'column' => 'account', 'name' => 'Account', 'className' => 'column-account'),
+      array('id' => 4, 'column' => 'first_name', 'name' => 'First Name', 'className' => 'column-first_name'),
+      array('id' => 5, 'column' => 'last_name', 'name' => 'Last Name', 'className' => 'column-last_name'),
+      array('id' => 6, 'column' => NULL, 'name' => 'Operations', 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
     ),
     'displayStart' => $options['start'],
     'pageLength' => $rows_per_page,
@@ -476,15 +474,15 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
     $navigation_start = 0;
   }
 
-  if ($navigation_total > $reviewers_returned['count']) {
-    $navigation_total = $reviewers_returned['count'];
+  if ($navigation_total > $items_returned['count']) {
+    $navigation_total = $items_returned['count'];
   }
 
   $navigation_bottom .= '<div class="table_listing-comment">';
-  $navigation_bottom .= "Showing " . $navigation_start . " to " . $navigation_total . " of " . $reviewers_returned['count'] . " entries.";
+  $navigation_bottom .= 'Showing ' . $navigation_start . ' to ' . $navigation_total . ' of ' . $items_returned['count'] . ' entries.';
   $navigation_bottom .= '</div>';
 
-  if ($reviewers_returned['count'] > ($options['start'] + $rows_per_page)) {
+  if ($items_returned['count'] > ($options['start'] + $rows_per_page)) {
     $next_page = $page_number + 1;
     $navigation_top .= '<a href="' . $base_path . 'requests/reviewers-0/list/' . $classification . "/" . $review_step . '/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
     $navigation_bottom .= '<a href="' . $base_path . 'requests/reviewers-0/list/' . $classification . "/" . $review_step . '/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
@@ -529,13 +527,13 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
   $form['reviewer']['add'] = array(
     '#id' => 'submit-reviewer-add',
     '#type' => 'submit',
-    '#default_value' => t("Add Reviewer"),
+    '#default_value' => 'Add Reviewer',
   );
 
   $form['reviewer']['recheck'] = array(
     '#id' => 'submit-reviewer-recheck',
     '#type' => 'submit',
-    '#default_value' => t("Recheck Requests"),
+    '#default_value' => 'Recheck Requests',
   );
 
   return $form;
@@ -646,12 +644,12 @@ function mfcs_request_reviewers_0_form_validate($form, &$form_state) {
         'mr.disabled' => 0,
       );
 
-      $reviewers_returned = mfcs_get_reviewers($conditions);
+      $items_returned = mfcs_get_reviewers($conditions);
       $reviewers = array();
-      if (isset($reviewers_returned['results']) && is_array($reviewers_returned['results'])) {
-        $reviewers = $reviewers_returned['results'];
+      if (isset($items_returned['results']) && is_array($items_returned['results'])) {
+        $reviewers = $items_returned['results'];
       }
-      unset($reviewers_returned);
+      unset($items_returned);
 
       if (count($reviewers) > 0) {
         form_set_error('reviewer][user_id', "The specified user already exists with the specified reviewer classification.");
@@ -883,12 +881,12 @@ function mfcs_request_reviewers_0_delete_form($form, &$form_state, $id) {
     return array();
   }
 
-  $reviewers_returned = mfcs_get_reviewers(array('mr.id' => $id));
+  $items_returned = mfcs_get_reviewers(array('mr.id' => $id));
   $reviewers = array();
-  if (isset($reviewers_returned['results']) && is_array($reviewers_returned['results'])) {
-    $reviewers = $reviewers_returned['results'];
+  if (isset($items_returned['results']) && is_array($items_returned['results'])) {
+    $reviewers = $items_returned['results'];
   }
-  unset($reviewers_returned);
+  unset($items_returned);
 
   $reviewer = NULL;
   if (!empty($reviewers)) {
@@ -992,12 +990,12 @@ function mfcs_request_reviewers_0_delete_form($form, &$form_state, $id) {
  * @see: mfcs_request_reviewers_0_delete_form()
  */
 function mfcs_request_reviewers_0_delete_form_validate($form, &$form_state) {
-  $reviewers_returned = mfcs_get_reviewers(array('mr.id' => $form['form']['id']['#value'], 'mr.disabled' => 0));
+  $items_returned = mfcs_get_reviewers(array('mr.id' => $form['form']['id']['#value'], 'mr.disabled' => 0));
   $reviewers = array();
-  if (isset($reviewers_returned['results']) && is_array($reviewers_returned['results'])) {
-    $reviewers = $reviewers_returned['results'];
+  if (isset($items_returned['results']) && is_array($items_returned['results'])) {
+    $reviewers = $items_returned['results'];
   }
-  unset($reviewers_returned);
+  unset($items_returned);
 
   $reviewer = NULL;
   if (!empty($reviewers)) {

@@ -50,11 +50,6 @@ function mfcs_request_users_0_form($form, &$form_state, $page_number = NULL) {
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
-  $no_js_fallback = TRUE;
-  if (isset($conf['no_js_fallback']) && is_bool($conf['no_js_fallback'])) {
-    $no_js_fallback = $conf['no_js_fallback'];
-  }
-
   $auto_page_number = FALSE;
   if (is_null($page_number)) {
     $auto_page_number = TRUE;
@@ -72,10 +67,10 @@ function mfcs_request_users_0_form($form, &$form_state, $page_number = NULL) {
   $is_administer = user_access('mfcs administer', $user);
 
   if ($is_manager || $is_administer) {
-    $page_title = "Manage Users";
+    $page_title = 'Manage Users';
   }
   else {
-    $page_title = "View Users";
+    $page_title = 'View Users';
   }
   drupal_set_title($page_title);
 
@@ -177,14 +172,15 @@ function mfcs_request_users_0_form($form, &$form_state, $page_number = NULL) {
   $items_start = $page_number * $rows_per_page;
   $locked = FALSE;
 
-  // do not load listing on first pass (improves performance at cost of no support for no-js.).
-  $load_results = NULL;
-  if ($no_js_fallback === FALSE && $auto_page_number) {
-    $load_results = FALSE;
-  }
-
   if ($is_manager || $is_administer) {
-    $items_returned = mfcs_request_users_get_users('', $sorting, $items_start, $rows_per_page, $locked, $load_results);
+    $items_returned = mfcs_request_users_get_users('', $sorting, $items_start, NULL, $locked, FALSE);
+
+    $items_total = 0;
+    if (is_array($items_returned) && array_key_exists('count', $items_returned)) {
+      $items_total = $items_returned['count'];
+    }
+
+    $items_returned = mfcs_request_users_get_users('', $sorting, $items_start, $rows_per_page, $locked, TRUE);
   }
   else {
     $user_ids = mfcs_get_related_user_ids_from_user_banner_id($user);
@@ -192,7 +188,14 @@ function mfcs_request_users_0_form($form, &$form_state, $page_number = NULL) {
       $user_ids = array($user->uid => $user->uid);
     }
 
-    $items_returned = mfcs_request_users_get_users('', $sorting, $items_start, $rows_per_page, $locked, $load_results, $user_ids);
+    $items_returned = mfcs_request_users_get_users('', $sorting, $items_start, NULL, $locked, FALSE, $user_ids);
+
+    $items_total = 0;
+    if (is_array($items_returned) && array_key_exists('count', $items_returned)) {
+      $items_total = $items_returned['count'];
+    }
+
+    $items_returned = mfcs_request_users_get_users('', $sorting, $items_start, $rows_per_page, $locked, TRUE, $user_ids);
     unset($user_ids);
   }
 
@@ -201,11 +204,6 @@ function mfcs_request_users_0_form($form, &$form_state, $page_number = NULL) {
     drupal_not_found();
     drupal_exit();
     return array();
-  }
-
-  $items_total = 0;
-  if (is_array($items_returned) && array_key_exists('count', $items_returned)) {
-    $items_total = $items_returned['count'];
   }
 
   $items = array();
@@ -310,24 +308,24 @@ function mfcs_request_users_0_form($form, &$form_state, $page_number = NULL) {
   $users_list = array();
 
   if ($is_manager || $is_administer) {
-    $users_list['caption'] = "Manage Users";
+    $users_list['caption'] = 'Manage Users';
   }
   else {
-    $users_list['caption'] = "View Users";
+    $users_list['caption'] = 'View Users';
   }
 
   $users_list['header'] = array(
-    'id' => array('field' => 'id', 'data' => "ID", 'align' => 'center'),
-    'name' => array('field' => 'name', 'data' => "Name", 'align' => 'center'),
-    'email' => array('field' => 'email', 'data' => "E-Mail", 'align' => 'center', 'class' => array('script-hidden')),
-    'first_name' => array('field' => 'first_name', 'data' => "First Name", 'align' => 'center'),
-    'last_name' => array('field' => 'last_name', 'data' => "Last Name", 'align' => 'center'),
-    'status' => array('field' => 'status', 'data' => "Status", 'align' => 'center', 'class' => array('script-hidden')),
-    'banner_id' => array('field' => 'banner_id', 'data' => "Banner ID", 'align' => 'center', 'class' => array('script-hidden')),
-    'ldap_duplicate' => array('field' => 'ldap_duplicate', 'data' => "LDAP Duplicate", 'align' => 'center', 'class' => array('script-hidden')),
-    'primary_account' => array('field' => 'primary_account', 'data' => "Primary Account", 'align' => 'center', 'class' => array('script-hidden')),
-    'roles' => array('field' => 'roles', 'data' => "Roles", 'align' => 'center'),
-    'operations' => array('data' => "Operations", 'align' => 'center', 'class' => array('no-print')),
+    'id' => array('field' => 'id', 'data' => 'ID', 'align' => 'center'),
+    'name' => array('field' => 'name', 'data' => 'Name', 'align' => 'center'),
+    'email' => array('field' => 'email', 'data' => 'E-Mail', 'align' => 'center', 'class' => array('script-hidden')),
+    'first_name' => array('field' => 'first_name', 'data' => 'First Name', 'align' => 'center'),
+    'last_name' => array('field' => 'last_name', 'data' => 'Last Name', 'align' => 'center'),
+    'status' => array('field' => 'status', 'data' => 'Status', 'align' => 'center', 'class' => array('script-hidden')),
+    'banner_id' => array('field' => 'banner_id', 'data' => 'Banner ID', 'align' => 'center', 'class' => array('script-hidden')),
+    'ldap_duplicate' => array('field' => 'ldap_duplicate', 'data' => 'LDAP Duplicate', 'align' => 'center', 'class' => array('script-hidden')),
+    'primary_account' => array('field' => 'primary_account', 'data' => 'Primary Account', 'align' => 'center', 'class' => array('script-hidden')),
+    'roles' => array('field' => 'roles', 'data' => 'Roles', 'align' => 'center'),
+    'operations' => array('data' => 'Operations', 'align' => 'center', 'class' => array('no-print')),
   );
 
   $users_list['attributes'] = array();
@@ -346,10 +344,10 @@ function mfcs_request_users_0_form($form, &$form_state, $page_number = NULL) {
   $users_list['rows'] = $rows;
 
   if ($is_manager || $is_administer) {
-    $users_list['empty'] = t("There are no user accounts available for you to manage.");
+    $users_list['empty'] = 'There are no user accounts available for you to manage.';
   }
   else {
-    $users_list['empty'] = t("There are no user accounts available for you to view.");
+    $users_list['empty'] = 'There are no user accounts available for you to view.';
   }
 
   $datatable_settings = array(
@@ -368,22 +366,23 @@ function mfcs_request_users_0_form($form, &$form_state, $page_number = NULL) {
     'processing' => TRUE,
     'serverSide' => TRUE,
     'ajax' => array(
-      'url' => "'" . $base_path . 'requests/users-0/list/ajax' . $url_arguments . "'",
-      'type' => "'POST'",
+      'url' => '\'' . $base_path . 'requests/users-0/list/ajax' . $url_arguments . '\'',
+      'type' => '\'POST\'',
     ),
     'deferRender' => TRUE,
+    'deferLoading' => (int) $items_total,
     'columns' => array(
-      array('id' => 0, 'column' => 'id', 'name' => "ID", 'className' => 'column-id', 'sanitize' => FALSE),
-      array('id' => 1, 'column' => 'name', 'name' => "Name", 'className' => 'column-name'),
-      array('id' => 2, 'column' => 'email', 'name' => "E-Mail", 'className' => 'column-email', 'visible' => FALSE),
-      array('id' => 3, 'column' => 'first_name', 'name' => "First Name", 'className' => 'column-first_name'),
-      array('id' => 4, 'column' => 'last_name', 'name' => "Last Name", 'className' => 'column-last_name'),
-      array('id' => 5, 'column' => 'status', 'name' => "Status", 'className' => 'column-status', 'visible' => FALSE),
-      array('id' => 6, 'column' => 'banner_id', 'name' => "Banner ID", 'className' => 'column-banner_id', 'visible' => FALSE),
-      array('id' => 7, 'column' => 'ldap_duplicate', 'name' => "LDAP Duplicate", 'className' => 'column-ldap_duplicate', 'visible' => FALSE),
-      array('id' => 8, 'column' => 'primary_account', 'name' => "Primary Account", 'className' => 'column-primary_account', 'visible' => FALSE),
-      array('id' => 9, 'column' => 'roles', 'name' => "Roles", 'className' => 'column-roles'),
-      array('id' => 10, 'column' => NULL, 'name' => "Operations", 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
+      array('id' => 0, 'column' => 'id', 'name' => 'ID', 'className' => 'column-id', 'sanitize' => FALSE),
+      array('id' => 1, 'column' => 'name', 'name' => 'Name', 'className' => 'column-name'),
+      array('id' => 2, 'column' => 'email', 'name' => 'E-Mail', 'className' => 'column-email', 'visible' => FALSE),
+      array('id' => 3, 'column' => 'first_name', 'name' => 'First Name', 'className' => 'column-first_name'),
+      array('id' => 4, 'column' => 'last_name', 'name' => 'Last Name', 'className' => 'column-last_name'),
+      array('id' => 5, 'column' => 'status', 'name' => 'Status', 'className' => 'column-status', 'visible' => FALSE),
+      array('id' => 6, 'column' => 'banner_id', 'name' => 'Banner ID', 'className' => 'column-banner_id', 'visible' => FALSE),
+      array('id' => 7, 'column' => 'ldap_duplicate', 'name' => 'LDAP Duplicate', 'className' => 'column-ldap_duplicate', 'visible' => FALSE),
+      array('id' => 8, 'column' => 'primary_account', 'name' => 'Primary Account', 'className' => 'column-primary_account', 'visible' => FALSE),
+      array('id' => 9, 'column' => 'roles', 'name' => 'Roles', 'className' => 'column-roles'),
+      array('id' => 10, 'column' => NULL, 'name' => 'Operations', 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
     ),
     'displayStart' => $items_start,
     'pageLength' => $rows_per_page,
@@ -431,7 +430,7 @@ function mfcs_request_users_0_form($form, &$form_state, $page_number = NULL) {
   }
 
   $navigation_bottom .= '<div class="table_listing-comment">';
-  $navigation_bottom .= "Showing " . $navigation_start . " to " . $navigation_total . " of " . $items_total . " entries.";
+  $navigation_bottom .= 'Showing ' . $navigation_start . ' to ' . $navigation_total . ' of ' . $items_total . ' entries.';
   $navigation_bottom .= '</div>';
 
   if ($items_total > ($items_start + $rows_per_page)) {

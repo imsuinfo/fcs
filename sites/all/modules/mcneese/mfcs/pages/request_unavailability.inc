@@ -109,6 +109,11 @@ function mfcs_request_unavailability_0_rooms_page() {
   $is_administer = user_access('mfcs administer', $user);
   $can_troubleshoot = mfcs_page_generic_access('troubleshoot', NULL, $user);
 
+  $items_total = mfcs_unavailability_rooms(NULL, TRUE);
+  if (!is_numeric($items_total)) {
+    $items_total = 0;
+  }
+
   $items = mfcs_unavailability_rooms();
   if ($items === FALSE) {
     $items = array();
@@ -224,6 +229,7 @@ function mfcs_request_unavailability_0_rooms_page() {
     'processing' => FALSE,
     'serverSide' => FALSE,
     'deferRender' => TRUE,
+    'deferLoading' => (int) $items_total,
     'columns' => array(
       array('id' => 0, 'column' => 'building_id', 'name' => 'Building ID', 'className' => 'column-building_id', 'sanitize' => FALSE, 'visible' => FALSE),
       array('id' => 1, 'column' => 'building_code', 'name' => 'Building Code', 'className' => 'column-building_code', 'visible' => FALSE),
@@ -454,6 +460,11 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
     $items_enabled = NULL;
   }
 
+  $items_total = mfcs_unavailability_rooms_room($room_id, $year, NULL, $items_enabled, TRUE);
+  if (!is_numeric($items_total)) {
+    $items_total = 0;
+  }
+
   $items = mfcs_unavailability_rooms_room($room_id, $year, NULL, $items_enabled);
   if ($items === FALSE) {
     $items = array();
@@ -651,6 +662,7 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
     'processing' => FALSE,
     'serverSide' => FALSE,
     'deferRender' => TRUE,
+    'deferLoading' => (int) $items_total,
     'columns' => $columns,
     'displayStart' => 0,
     'pageLength' => 40,
@@ -2415,12 +2427,16 @@ function mfcs_request_unavailability_0_delete_form_submit($form, &$form_state) {
  *   (optional) When TRUE, only load unavailabilities when the enabled column is 1.
  *   When FALSE, only load unavailabilities when the enabled column is 0.
  *   When NULL, ignore this column.
+ * @param bool $count
+ *   (optional) When TRUE, will return total number of rows.
+ *   When FALSE, will return list of room unavailabilities.
  *
- * @return array|bool
+ * @return array|bool|int
  *   An array containing the rooms that can be managed.
+ *   An integer is returned on count queries.
  *   FALSE is returned on error.
  */
-function mfcs_unavailability_rooms_room($room_id, $year, $user_id = NULL, $enabled = TRUE) {
+function mfcs_unavailability_rooms_room($room_id, $year, $user_id = NULL, $enabled = TRUE, $count = FALSE) {
   if (!cf_is_integer($room_id) && !is_null($room_id)) {
     cf_error::invalid_integer('room_id');
     return FALSE;
@@ -2447,6 +2463,12 @@ function mfcs_unavailability_rooms_room($room_id, $year, $user_id = NULL, $enabl
 
   if (!is_null($enabled) && !is_bool($enabled)) {
     cf_error::invalid_bool('enabled');
+    return FALSE;
+  }
+
+  if (!is_bool($count)) {
+    cf_error::invalid_bool('count');
+
     return FALSE;
   }
 
@@ -2478,6 +2500,11 @@ function mfcs_unavailability_rooms_room($room_id, $year, $user_id = NULL, $enabl
     $query->condition('mu.deleted', 0);
     $query->condition('mbr.disabled', 0);
     $query->condition('mbb.disabled', 0);
+
+    if ($count) {
+      $query->addExpression('count(mu.id)');
+      return $query->execute()->fetchField();
+    }
 
     $query->addField('mu', 'id', 'id');
     $query->addField('mu', 'type', 'type');
@@ -2524,14 +2551,24 @@ function mfcs_unavailability_rooms_room($room_id, $year, $user_id = NULL, $enabl
  * @param integer $user_id
  *   (optional) The user to load the room listing by.
  *   If not specified, then all possibly values are loaded.
+ * @param bool $count
+ *   (optional) When TRUE, will return total number of rows.
+ *   When FALSE, will return list of rooms.
  *
- * @return array|bool
+ * @return array|bool|int
  *   An array containing the rooms that can be managed.
+ *   An integer is returned on count queries.
  *   FALSE is returned on error.
  */
-function mfcs_unavailability_rooms($user_id = NULL) {
+function mfcs_unavailability_rooms($user_id = NULL, $count = FALSE) {
   if (!is_null($user_id) && !cf_is_integer($user_id)) {
     cf_error::invalid_integer('user_id');
+
+    return FALSE;
+  }
+
+  if (!is_bool($count)) {
+    cf_error::invalid_bool('count');
 
     return FALSE;
   }
@@ -2558,6 +2595,11 @@ function mfcs_unavailability_rooms($user_id = NULL) {
     }
 
     $query->condition('mbr.disabled', 0);
+
+    if ($count) {
+      $query->addExpression('count(mbr.id)');
+      return $query->execute()->fetchField();
+    }
 
     $query->addField('mbr', 'id', 'id');
     $query->addField('mbr', 'machine_name', 'room_number');

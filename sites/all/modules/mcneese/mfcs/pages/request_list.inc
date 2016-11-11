@@ -50,11 +50,6 @@ function mfcs_request_list_0_form($form, &$form_state, $page_number = NULL) {
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
-  $no_js_fallback = TRUE;
-  if (isset($conf['no_js_fallback']) && is_bool($conf['no_js_fallback'])) {
-    $no_js_fallback = $conf['no_js_fallback'];
-  }
-
   $auto_page_number = FALSE;
   if (is_null($page_number)) {
     $auto_page_number = TRUE;
@@ -194,32 +189,28 @@ function mfcs_request_list_0_form($form, &$form_state, $page_number = NULL) {
     $options['sort'] = $sorting;
   }
 
-  // do not load listing on first pass (improves performance at cost of no support for no-js.).
-  if ($no_js_fallback === FALSE && $auto_page_number) {
-    $options['results'] = FALSE;
-  }
-
 
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
-  $items_returned = mfcs_request_load_listing($conditions, $options);
+  $count_options = $options;
+  $count_options['start'] = 0;
+  $count_options['results'] = FALSE;
+  unset($count_options['limit']);
 
-  $count = 0;
-  if (isset($items_returned['count'])) {
-    $count = $items_returned['count'];
+  $items_returned = mfcs_request_load_listing(array(), $count_options);
+  $items_total = 0;
+  if (is_array($items_returned) && array_key_exists('count', $items_returned)) {
+    $items_total = $items_returned['count'];
   }
 
   // do not provide pages when the page number would bring the user beyond the available items.
-  if ($count > 0 && $options['start'] >= $count || $count == 0 && $options['start'] > $count) {
+  if ($items_total > 0 && $options['start'] >= $items_total || $items_total == 0 && $options['start'] > $items_total) {
     drupal_not_found();
     drupal_exit();
     return array();
   }
 
-  // do not show count values when no fallback is available.
-  if ($no_js_fallback === FALSE && $auto_page_number) {
-    $count = 0;
-  }
+  $items_returned = mfcs_request_load_listing($conditions, $options);
 
   // Results is needed and therefore must not be FALSE, unsetting it will default to TRUE.
   unset($options['results']);
@@ -228,6 +219,8 @@ function mfcs_request_list_0_form($form, &$form_state, $page_number = NULL) {
   $options['columns_default'] = $columns_default;
 
   $options['ajax_path'] = '\'' . $base_path . 'requests/list-0/ajax' . $url_arguments . '\'';
+  $options['defer_loading'] = $items_total;
+
 
   $table = mfcs_build_request_ajax_table($items_returned, $conditions, $options);
   $table['attributes']['class'][] = 'mfcs-table-requests';
@@ -251,19 +244,19 @@ function mfcs_request_list_0_form($form, &$form_state, $page_number = NULL) {
   $navigation_start = $options['start'] + 1;
   $navigation_total = $options['start'] + $rows_per_page;
 
-  if ($count == 0) {
+  if ($items_total == 0) {
     $navigation_start = 0;
   }
 
-  if ($navigation_total > $count) {
-    $navigation_total = $count;
+  if ($navigation_total > $items_total) {
+    $navigation_total = $items_total;
   }
 
   $navigation_bottom .= '<div class="table_listing-comment">';
-  $navigation_bottom .= 'Showing ' . $navigation_start . ' to ' . $navigation_total . ' of ' . $count . ' entries.';
+  $navigation_bottom .= 'Showing ' . $navigation_start . ' to ' . $navigation_total . ' of ' . $items_total . ' entries.';
   $navigation_bottom .= '</div>';
 
-  if ($count > ($options['start'] + $rows_per_page)) {
+  if ($items_total > ($options['start'] + $rows_per_page)) {
     $next_page = $page_number + 1;
     $navigation_top .= '<a href="' . $base_path . 'requests/list-0/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
     $navigation_bottom .= '<a href="' . $base_path . 'requests/list-0/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';

@@ -9960,6 +9960,8 @@ function mfcs_build_request_table($items, $max_rows, $columns = NULL, $user = NU
  *   'table_caption': Display the provided text as a caption instead of the default.
  *   'table_summary': Display the provided text as a summary instead of the default.
  *   'table_empty': Display the provided text on empty instead of the default.
+ *   'defer_loading': Integer to use for when using DeferLoading with ServerSide ajax.
+ *                    May be the boolean TRUE to auto-calculate DeferLoading.
  * @param object|null $user
  *   (optional) The user to populate access control based data.
  *
@@ -10010,6 +10012,16 @@ function mfcs_build_request_ajax_table($items_returned, $conditions, $options, $
   $table_empty = 'No requests were found.';
   if (array_key_exists('table_empty', $options) && is_string($options['table_empty'])) {
     $table_empty = $options['table_empty'];
+  }
+
+  $defer_loading = FALSE;
+  if (array_key_exists('defer_loading', $options)) {
+    if (is_numeric($options['defer_loading']) && $options['defer_loading'] >= 0) {
+      $defer_loading = (int) $options['defer_loading'];
+    }
+    elseif ($options['defer_loading'] === TRUE) {
+      $defer_loading = TRUE;
+    }
   }
 
   $table = array();
@@ -10128,6 +10140,9 @@ function mfcs_build_request_ajax_table($items_returned, $conditions, $options, $
 
   // populate the table rows.
   $table['rows'] = mfcs_build_request_ajax_table_process_rows($items, $columns, $user);
+  if ($defer_loading === TRUE) {
+    $defer_loading = count($table['rows']);
+  }
 
 
   // populate the datatable settings.
@@ -10164,6 +10179,10 @@ function mfcs_build_request_ajax_table($items_returned, $conditions, $options, $
     'searchDelay' => 1200,
     'pagingType' => 'input',
   );
+
+  if (is_int($defer_loading)) {
+    $table['datatable_settings']['deferLoading'] = $defer_loading;
+  }
 
   // see: //datatables.net/reference/option/rowId
   if (!is_null($rowId)) {
@@ -10212,32 +10231,32 @@ function mfcs_build_request_ajax_table($items_returned, $conditions, $options, $
         $url_options = '';
       }
 
-      $showing_my_requests = "function (e, dt, node, config) {" . "\n";
-      $showing_my_requests .= "  var data = dt.ajax.params();" . "\n";
-      $showing_my_requests .= "  var url = dt.ajax.url();" . "\n";
+      $showing_my_requests = 'function (e, dt, node, config) {' . "\n";
+      $showing_my_requests .= '  var data = dt.ajax.params();' . "\n";
+      $showing_my_requests .= '  var url = dt.ajax.url();' . "\n";
 
-      $showing_my_requests .= "  if (url == '" . $ajax_path . "/my_requests' || url == '" . $ajax_path . "/my_requests" . $url_options . "') {" . "\n";
-      $showing_my_requests .= "    dt.ajax.url('" . $ajax_path . "/all_requests" . $url_options . "');" . "\n";
-      $showing_my_requests .= "    dt.buttons('.datatable-showing_requests').text('Show My Requests');" . "\n";
-      $showing_my_requests .= "  }" . "\n";
-      $showing_my_requests .= "  else if (url == '" . $ajax_path . "/all_requests' || url == '" . $ajax_path . "/all_requests" . $url_options . "') {" . "\n";
-      $showing_my_requests .= "    dt.ajax.url('" . $ajax_path . "/my_requests" . $url_options . "');" . "\n";
-      $showing_my_requests .= "    dt.buttons('.datatable-showing_requests').text('Show All Requests');" . "\n";
-      $showing_my_requests .= "  }" . "\n";
-      $showing_my_requests .= "  else {" . "\n";
+      $showing_my_requests .= '  if (url == \'' . $ajax_path . '/my_requests\' || url == \'' . $ajax_path . '/my_requests' . $url_options . '\') {' . "\n";
+      $showing_my_requests .= '    dt.ajax.url(\'' . $ajax_path . '/all_requests' . $url_options . '\');' . "\n";
+      $showing_my_requests .= '    dt.buttons(\'.datatable-showing_requests\').text(\'Show My Requests\');' . "\n";
+      $showing_my_requests .= '  }' . "\n";
+      $showing_my_requests .= '  else if (url == \'' . $ajax_path . '/all_requests\' || url == \'' . $ajax_path . '/all_requests' . $url_options . '\') {' . "\n";
+      $showing_my_requests .= '    dt.ajax.url(\'' . $ajax_path . '/my_requests' . $url_options . '\');' . "\n";
+      $showing_my_requests .= '    dt.buttons(\'.datatable-showing_requests\').text(\'Show All Requests\');' . "\n";
+      $showing_my_requests .= '  }' . "\n";
+      $showing_my_requests .= '  else {' . "\n";
 
       if ($options['only_requester']) {
-        $showing_my_requests .= "    dt.ajax.url('" . $ajax_path . "/all_requests" . $url_options . "');" . "\n";
-        $showing_my_requests .= "    dt.buttons('.datatable-showing_requests').text('Show My Requests');" . "\n";
+        $showing_my_requests .= '    dt.ajax.url(\'' . $ajax_path . '/all_requests' . $url_options . '\');' . "\n";
+        $showing_my_requests .= '    dt.buttons(\'.datatable-showing_requests\').text(\'Show My Requests\');' . "\n";
       }
       else {
-        $showing_my_requests .= "    dt.ajax.url('" . $ajax_path . "/my_requests" . $url_options . "');" . "\n";
-        $showing_my_requests .= "    dt.buttons('.datatable-showing_requests').text('Show All Requests');" . "\n";
+        $showing_my_requests .= '    dt.ajax.url(\'' . $ajax_path . '/my_requests' . $url_options . '\');' . "\n";
+        $showing_my_requests .= '    dt.buttons(\'.datatable-showing_requests\').text(\'Show All Requests\');' . "\n";
       }
 
-      $showing_my_requests .= "  }" . "\n";
-      $showing_my_requests .= "  dt.ajax.reload();" . "\n";
-      $showing_my_requests .= "}" . "\n";
+      $showing_my_requests .= '  }' . "\n";
+      $showing_my_requests .= '  dt.ajax.reload();' . "\n";
+      $showing_my_requests .= '}' . "\n";
 
       $table['datatable_settings']['dom'] = 'lfCBrtip';
       $table['datatable_settings']['buttons'] = array();
@@ -10265,35 +10284,35 @@ function mfcs_build_request_ajax_table($items_returned, $conditions, $options, $
         $url_options = '';
       }
 
-      $showing_my_requests = "function (e, dt, node, config) {" . "\n";
-      $showing_my_requests .= "  var data = dt.ajax.params();" . "\n";
-      $showing_my_requests .= "  var url = dt.ajax.url();" . "\n";
+      $showing_my_requests = 'function (e, dt, node, config) {' . "\n";
+      $showing_my_requests .= '  var data = dt.ajax.params();' . "\n";
+      $showing_my_requests .= '  var url = dt.ajax.url();' . "\n";
 
-      $showing_my_requests .= "  if (url == '" . $ajax_path . "/as_reviewer' || url == '" . $ajax_path . "/as_reviewer" . $url_options . "') {" . "\n";
-      $showing_my_requests .= "    dt.ajax.url('" . $ajax_path . "/as_manager" . $url_options . "');" . "\n";
-      $showing_my_requests .= "    dt.buttons('.datatable-showing_requests').text('Show As Reviewer');" . "\n";
-      $showing_my_requests .= "    $($($(dt).context[0].nTable).children('caption')[0]).text('Requests (As Manager)');" . "\n";
-      $showing_my_requests .= "  }" . "\n";
-      $showing_my_requests .= "  else if (url == '" . $ajax_path . "/as_manager' || url == '" . $ajax_path . "/as_manager" . $url_options . "') {" . "\n";
-      $showing_my_requests .= "    dt.ajax.url('" . $ajax_path . "/as_reviewer" . $url_options . "');" . "\n";
-      $showing_my_requests .= "    dt.buttons('.datatable-showing_requests').text('Show As Manager');" . "\n";
-      $showing_my_requests .= "    $($($(dt).context[0].nTable).children('caption')[0]).text('Requests (As Reviewer)');" . "\n";
-      $showing_my_requests .= "  }" . "\n";
-      $showing_my_requests .= "  else {" . "\n";
+      $showing_my_requests .= '  if (url == \'' . $ajax_path . '/as_reviewer\' || url == \'' . $ajax_path . '/as_reviewer' . $url_options . '\') {' . "\n";
+      $showing_my_requests .= '    dt.ajax.url(\'' . $ajax_path . '/as_manager' . $url_options . '\');' . "\n";
+      $showing_my_requests .= '    dt.buttons(\'.datatable-showing_requests\').text(\'Show As Reviewer\');' . "\n";
+      $showing_my_requests .= '    $($($(dt).context[0].nTable).children(\'caption\')[0]).text(\'Requests (As Manager)\');' . "\n";
+      $showing_my_requests .= '  }' . "\n";
+      $showing_my_requests .= '  else if (url == \'' . $ajax_path . '/as_manager\' || url == \'' . $ajax_path . '/as_manager' . $url_options . '\') {' . "\n";
+      $showing_my_requests .= '    dt.ajax.url(\'' . $ajax_path . '/as_reviewer' . $url_options . '\');' . "\n";
+      $showing_my_requests .= '    dt.buttons(\'.datatable-showing_requests\').text(\'Show As Manager\');' . "\n";
+      $showing_my_requests .= '    $($($(dt).context[0].nTable).children(\'caption\')[0]).text(\'Requests (As Reviewer)\');' . "\n";
+      $showing_my_requests .= '  }' . "\n";
+      $showing_my_requests .= '  else {' . "\n";
 
       if ($options['only_reviewer']) {
-        $showing_my_requests .= "    dt.ajax.url('" . $ajax_path . "/as_manager" . $url_options . "');" . "\n";
-        $showing_my_requests .= "    dt.buttons('.datatable-showing_requests').text('Show As Reviewer');" . "\n";
-        $showing_my_requests .= "    $($($(dt).context[0].nTable).children('caption')[0]).text('Requests (As Manager)');" . "\n";
+        $showing_my_requests .= '    dt.ajax.url(\'' . $ajax_path . '/as_manager' . $url_options . '\');' . "\n";
+        $showing_my_requests .= '    dt.buttons(\'.datatable-showing_requests\').text(\'Show As Reviewer\');' . "\n";
+        $showing_my_requests .= '    $($($(dt).context[0].nTable).children(\'caption\')[0]).text(\'Requests (As Manager)\');' . "\n";
       }
       else {
-        $showing_my_requests .= "    dt.ajax.url('" . $ajax_path . "/as_reviewer" . $url_options . "');" . "\n";
-        $showing_my_requests .= "    $($($(dt).context[0].nTable).children('caption')[0]).text('Requests (As Reviewer)');" . "\n";
+        $showing_my_requests .= '    dt.ajax.url(\'' . $ajax_path . '/as_reviewer' . $url_options . '\');' . "\n";
+        $showing_my_requests .= '    $($($(dt).context[0].nTable).children(\'caption\')[0]).text(\'Requests (As Reviewer)\');' . "\n";
       }
 
-      $showing_my_requests .= "  }" . "\n";
-      $showing_my_requests .= "  dt.ajax.reload();" . "\n";
-      $showing_my_requests .= "}" . "\n";
+      $showing_my_requests .= '  }' . "\n";
+      $showing_my_requests .= '  dt.ajax.reload();' . "\n";
+      $showing_my_requests .= '}' . "\n";
 
       $table['datatable_settings']['dom'] = 'lfCBrtip';
       $table['datatable_settings']['buttons'] = array();
