@@ -3168,8 +3168,8 @@ function mfcs_request_view_0_form_submit_pdf($form, &$form_state) {
  *
  * @param int $request_id
  *   The unique identifier for a request.
- * @param int|null $mode
- *   Specifies the mode that alters how the form is rendered.
+ * @param int $mode
+ *   (optional) Specifies the mode that alters how the form is rendered.
  *   1: Render only the display part.
  * @param null|int $revision_id
  *   (optional) When not NULL, load the request based on the revision number
@@ -3178,7 +3178,7 @@ function mfcs_request_view_0_form_submit_pdf($form, &$form_state) {
  * @return exit
  *   This function should not return.
  */
-function mfcs_request_pdf_0_page($request_id, $mode, $revision_id = NULL) {
+function mfcs_request_pdf_0_page($request_id, $mode = MFCS_VIEW_MODE_NORMAL, $revision_id = NULL) {
   $page_title = 'Facilities Use Request';
   drupal_set_title($page_title);
 
