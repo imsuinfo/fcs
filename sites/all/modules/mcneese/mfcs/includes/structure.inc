@@ -139,6 +139,12 @@ function mfcs_get_request_fields($form, &$form_state) {
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
   global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
 
   $ps = NULL;
 
@@ -322,7 +328,7 @@ function mfcs_get_request_fields($form, &$form_state) {
 
     if (isset($form['form']['room_information']['#value']->room_id)) {
       $room_id = (int) $form['form']['room_information']['#value']->room_id;
-      $fields['dates']['markup']['#markup'] .= '<div class="dates-holiday_markup">You may want to <a href="' . $base_path . 'requests/holiday-0" target="_blank">view the holidays</a> or <a href="' . $base_path . 'requests/unavailable-0/' . $room_id . '" target="_blank">view the room unavailability</a> when selecting your dates.</div>';
+      $fields['dates']['markup']['#markup'] .= '<div class="dates-holiday_markup">You may want to <a href="' . $base_path . 'requests/holiday-0' . $url_arguments . '" target="_blank">view the holidays</a> or <a href="' . $base_path . 'requests/unavailable-0/' . $room_id . $url_arguments . '" target="_blank">view the room unavailability</a> when selecting your dates.</div>';
       unset($room_id);
     }
 
@@ -373,7 +379,6 @@ function mfcs_get_request_fields($form, &$form_state) {
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
       '#title' => 'Venue Coordinator Settings',
-      '#description' => 'The venue coordinator is either the room coordinator or if there is no room coordinator, then the venue coordinator.',
     );
   }
 
@@ -411,6 +416,11 @@ function mfcs_get_request_fields($form, &$form_state) {
   mfcs_get_request_field_request_coordinator_phone($form, $form_state, $fields, $request_state, $ps);
   mfcs_get_request_field_request_coordinator_email($form, $form_state, $fields, $request_state, $ps);
   mfcs_get_request_field_request_coordinator_classification($form, $form_state, $fields, $request_state, $ps);
+
+  // add venue coordinator for informative reasons for managers and administers.
+  if (!empty($request_state['venue_coordinator']['user_id'][0]) && is_numeric($request_state['venue_coordinator']['user_id'][0])) {
+    mfcs_get_request_field_venue_coordinator_name_note($form, $form_state, $fields, $request_state, $ps);
+  }
 
 
   // Fieldset: Information
@@ -1537,8 +1547,8 @@ function mfcs_get_request_field_venue_coordinator_user_id($form, &$form_state, &
   $values = array(0 => NULL);
 
   // never assign default here because the default is inforced only after the room is selected, not before.
-  if (!empty($request_state['venue_coordinator']['user_id'][0])) {
-    if (!empty($request_state['venue_coordinator']['user_id']) && array_key_exists(0, $request_state['venue_coordinator']['user_id'])) {
+  if (!empty($request_state['venue_coordinator']['user_id'])) {
+    if (is_array($request_state['venue_coordinator']['user_id']) && array_key_exists(0, $request_state['venue_coordinator']['user_id'])) {
       $values[0] = $request_state['venue_coordinator']['user_id'][0];
     }
   }
@@ -1554,6 +1564,53 @@ function mfcs_get_request_field_venue_coordinator_user_id($form, &$form_state, &
   );
 
   return $values;
+}
+
+/**
+ * Process and build a specific form field.
+ */
+function mfcs_get_request_field_venue_coordinator_name_note($form, &$form_state, &$fields, &$request_state, $ps) {
+  if (empty($fields['venue_coordinator']['user_id'][0]['#value'])) {
+    return FALSE;
+  }
+
+  $venue_coordinator = user_load($fields['venue_coordinator']['user_id'][0]['#value']);
+  if (!is_object($venue_coordinator)) {
+    return FALSE;
+  }
+
+  // for the time being, restrict the venue coordinator information to only managers and administers.
+  if (!isset($form['form']['user']['#value']) || !is_object($form['form']['user']['#value'])) {
+    return FALSE;
+  }
+
+  if (!user_access('mfcs manage', $form['form']['user']['#value']) && !user_access('mfcs administer', $form['form']['user']['#value'])) {
+    return FALSE;
+  }
+
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  $a_begin = '<a href="' . $base_path . 'requests/users-0/view/' . $form['form']['user']['#value']->uid . $url_arguments . '" class="field-request-item-venue_coordinator-name-link" target="_blank">';
+  $a_end = '</a>';
+
+  $name = mfcs_generate_form_user_name($venue_coordinator);
+
+  $fields['venue_coordinator']['name'] = array(
+    '#tree' => TRUE,
+  );
+
+  $fields['venue_coordinator']['name'][0] = array(
+    '#type' => 'markup',
+    '#markup' => '<div id="field-request-venue_coordinator-name-0" class="field-request-item field-request-item-venue_coordinator-name"><strong>Venue Coordinator</strong><br>' . $a_begin . $name . $a_end . '</div>',
+  );
+
+  return TRUE;
 }
 
 /**
