@@ -35,6 +35,7 @@
  * @see: mfcs_request_view_0_form()
  */
 function mfcs_view_setup_group_path(&$form, $request_id, $group, $presentation_tables, $show, $request) {
+  global $base_path;
   global $mfcs_determined;
 
   $url_arguments = '';
@@ -56,6 +57,12 @@ function mfcs_view_setup_group_path(&$form, $request_id, $group, $presentation_t
   if ($show['edit']) {
     if (array_key_exists('editable', $presentation_tables[$group])) {
       $show['edit'] = $presentation_tables[$group]['editable'];
+    }
+  }
+
+  if ($show['pdf']) {
+    if ($group != 'request') {
+      $show['pdf'] = FALSE;
     }
   }
 
@@ -135,29 +142,41 @@ function mfcs_view_setup_group_path(&$form, $request_id, $group, $presentation_t
       $group_path[$group]['#extra_prefix'] .= '<div class="section-request-' . $request_id . '-' . $group . '-label-wrapper section-request-label-wrapper">';
 
       if ($show_link) {
+        if ($show['pdf']) {
+          if (file_exists(DRUPAL_ROOT . '/sites/all/modules/mcneese/mfcs/images/pdf/32.png')) {
+            $module_path = drupal_get_path('module', 'mfcs');
+            $image_file_path = $base_path . $module_path . '/images/pdf/16.png';
+
+            $group_path[$group]['#extra_prefix'] .= '<a href="' . $base_path . 'pdf-0/' . $request_id . $url_arguments . '" title="Download as PDF" class="section-request-' . $request_id . '-' . $group . '-pdf section-request-pdf no-print"><img src="' . $image_file_path . '" alt="PDF" width="16" height="16" class="section-request-pdf-image image-pdf"></a>';
+
+            unset($image_file_path);
+            unset($module_path);
+          }
+        }
+
         if ($show['clone']) {
-          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/create-0/' . $request_id . $url_arguments . '" class="section-request-' . $request_id . '-' . $group . '-history section-request-clone no-print" title="Copy Request">Copy</a>';
+          $group_path[$group]['#extra_prefix'] .= '<a href="' . $base_path . 'requests/create-0/' . $request_id . $url_arguments . '" class="section-request-' . $request_id . '-' . $group . '-clone section-request-clone no-print" title="Copy Request">Copy</a>';
         }
 
         if ($show['edit']) {
-          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/edit-0/' . $request_id . '/' . $group . $url_arguments . '" class="section-request-' . $request_id . '-' . $group . '-edit section-request-edit no-print" title="Edit Request">Edit</a>';
+          $group_path[$group]['#extra_prefix'] .= '<a href="' . $base_path . 'requests/edit-0/' . $request_id . '/' . $group . $url_arguments . '" class="section-request-' . $request_id . '-' . $group . '-edit section-request-edit no-print" title="Edit Request">Edit</a>';
         }
 
         if ($show['history']) {
-          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/history-0/' . $request_id . $url_arguments . '" class="section-request-' . $request_id . '-' . $group . '-history section-request-history no-print" title="View History of Request">History</a>';
+          $group_path[$group]['#extra_prefix'] .= '<a href="' . $base_path . 'requests/history-0/' . $request_id . $url_arguments . '" class="section-request-' . $request_id . '-' . $group . '-history section-request-history no-print" title="View History of Request">History</a>';
         }
 
         if ($show['agreement']) {
-          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/agreement-0/' . $request_id . $url_arguments . '" class="section-request-' . $request_id . '-' . $group . '-agreement section-request-agreement no-print" title="View Request">Agreement</a>';
+          $group_path[$group]['#extra_prefix'] .= '<a href="' . $base_path . 'requests/agreement-0/' . $request_id . $url_arguments . '" class="section-request-' . $request_id . '-' . $group . '-agreement section-request-agreement no-print" title="View Request">Agreement</a>';
         }
 
         if ($show['ical']) {
-          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/ical-0/' . $request_id . $url_arguments . '" class="section-request-' . $request_id . '-' . $group . '-ical section-request-ical no-print" title="Download iCalendar of Request">iCalendar</a>';
+          $group_path[$group]['#extra_prefix'] .= '<a href="' . $base_path . 'requests/ical-0/' . $request_id . $url_arguments . '" class="section-request-' . $request_id . '-' . $group . '-ical section-request-ical no-print" title="Download iCalendar of Request">iCalendar</a>';
         }
 
         if ($show['cancelling']) {
           // this cancel is exclusively for cancelling individual dates.
-          $group_path[$group]['#extra_prefix'] .= '<a href="' . base_path() . 'requests/cancelling-0/' . $request_id . $url_arguments . '" class="section-request-' . $request_id . '-' . $group . '-cancel section-request-cancel no-print" title="Cancel or Uncancel Individual Dates">Cancelling</a>';
+          $group_path[$group]['#extra_prefix'] .= '<a href="' . $base_path . 'requests/cancelling-0/' . $request_id . $url_arguments . '" class="section-request-' . $request_id . '-' . $group . '-cancel section-request-cancel no-print" title="Cancel or Uncancel Individual Dates">Cancelling</a>';
         }
       }
 
