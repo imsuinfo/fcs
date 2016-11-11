@@ -384,6 +384,13 @@ function mfcs_get_request_fields($form, &$form_state) {
 
   mfcs_get_request_field_venue_coordinator_user_id($form, $form_state, $fields, $request_state, $ps);
 
+  // add venue coordinator for informative reasons for managers and administers.
+  if ($form['form']['step']['#value'] == 'standard' && array_key_exists('coordinator', $form['form']['sections']['#value'])) {
+    if (!empty($request_state['venue_coordinator']['user_id'][0]) && is_numeric($request_state['venue_coordinator']['user_id'][0])) {
+      mfcs_get_request_field_venue_coordinator_name_note($form, $form_state, $fields, $request_state, $ps);
+    }
+  }
+
 
   // Fieldset: Request Coordinator
   $ps = 'request_coordinator';
@@ -416,11 +423,6 @@ function mfcs_get_request_fields($form, &$form_state) {
   mfcs_get_request_field_request_coordinator_phone($form, $form_state, $fields, $request_state, $ps);
   mfcs_get_request_field_request_coordinator_email($form, $form_state, $fields, $request_state, $ps);
   mfcs_get_request_field_request_coordinator_classification($form, $form_state, $fields, $request_state, $ps);
-
-  // add venue coordinator for informative reasons for managers and administers.
-  if (!empty($request_state['venue_coordinator']['user_id'][0]) && is_numeric($request_state['venue_coordinator']['user_id'][0])) {
-    mfcs_get_request_field_venue_coordinator_name_note($form, $form_state, $fields, $request_state, $ps);
-  }
 
 
   // Fieldset: Information
