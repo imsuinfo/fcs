@@ -60,7 +60,7 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
 
   mfcs_add_canonical_headers('requests/holiday-0/' . $year);
 
-  drupal_set_title("Holidays for " . $year);
+  drupal_set_title('Holidays for ' . $year);
 
   $user = cf_current_user();
 
@@ -83,11 +83,11 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
     }
   }
 
-  $class_id = '';
-  $class_date = '';
-  $class_title = '';
-  $class_enabled = '';
-  $class_operations = 'no-print ';
+  $class_id = 'column-id ';
+  $class_date = 'column-date ';
+  $class_title = 'column-title ';
+  $class_enabled = 'column-enabled ';
+  $class_operations = 'column-operations no-print ';
 
   $sorting = array();
   if (is_null($order)) {
@@ -182,18 +182,18 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
 
 
   $holidays_list = array();
-  $holidays_list['caption'] = '' . $year . ' ' . "Holidays";
+  $holidays_list['caption'] = '' . $year . ' ' . 'Holidays';
   $holidays_list['header'] = array(
-    'id' => array('field' => 'id', 'data' => "ID", 'align' => 'center'),
-    'date' => array('field' => 'date', 'data' => "Date", 'align' => 'center'),
-    'title' => array('field' => 'title', 'data' => "Title", 'align' => 'center'),
+    'id' => array('field' => 'id', 'data' => 'ID', 'align' => 'center'),
+    'date' => array('field' => 'date', 'data' => 'Date', 'align' => 'center'),
+    'title' => array('field' => 'title', 'data' => 'Title', 'align' => 'center'),
   );
 
   if ($can_edit) {
-    $holidays_list['header']['enabled'] = array('field' => 'enabled', 'data' => "Enabled", 'align' => 'center');
+    $holidays_list['header']['enabled'] = array('field' => 'enabled', 'data' => 'Enabled', 'align' => 'center');
   }
 
-  $holidays_list['header']['operations'] = array('data' => "Operations", 'align' => 'center', 'class' => array('no-print'));
+  $holidays_list['header']['operations'] = array('data' => 'Operations', 'align' => 'center', 'class' => array('no-print'));
 
   $holidays_list['attributes'] = array();
   $holidays_list['attributes']['id'] = 'mfcs-holiday_form';
@@ -209,7 +209,7 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
   $holidays_list['attributes']['summary'] = 'List of holidays.';
 
   $holidays_list['rows'] = $rows;
-  $holidays_list['empty'] = "This system has no holidays defined for the specified year.";
+  $holidays_list['empty'] = 'This system has no holidays defined for the specified year.';
 
   $datatable_settings = array(
     'sort' => strtolower($sort),
@@ -227,9 +227,9 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
     'serverSide' => FALSE,
     'deferRender' => TRUE,
     'columns' => array(
-      array('id' => 0, 'column' => 'id', 'name' => "ID", 'className' => 'column-id', 'sanitize' => FALSE),
-      array('id' => 1, 'column' => 'date', 'name' => "Date", 'className' => 'column-date'),
-      array('id' => 2, 'column' => 'title', 'name' => "Title", 'className' => 'column-title'),
+      array('id' => 0, 'column' => 'id', 'name' => 'ID', 'className' => 'column-id', 'sanitize' => FALSE),
+      array('id' => 1, 'column' => 'date', 'name' => 'Date', 'className' => 'column-date'),
+      array('id' => 2, 'column' => 'title', 'name' => 'Title', 'className' => 'column-title'),
     ),
     'displayStart' => 0,
     'pageLength' => 40,
@@ -250,11 +250,11 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
   );
 
   if ($can_edit) {
-    $datatable_settings['columns'][] = array('id' => 3, 'column' => 'enabled', 'name' => "Enabled", 'className' => 'column-enabled');
-    $datatable_settings['columns'][] = array('id' => 4, 'column' => NULL, 'name' => "Operations", 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE);
+    $datatable_settings['columns'][] = array('id' => 3, 'column' => 'enabled', 'name' => 'Enabled', 'className' => 'column-enabled');
+    $datatable_settings['columns'][] = array('id' => 4, 'column' => NULL, 'name' => 'Operations', 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE);
   }
   else {
-    $datatable_settings['columns'][] = array('id' => 3, 'column' => NULL, 'name' => "Operations", 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE);
+    $datatable_settings['columns'][] = array('id' => 3, 'column' => NULL, 'name' => 'Operations', 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE);
   }
 
   $form = array();
@@ -348,7 +348,7 @@ function mfcs_request_holiday_0_page($year, $holiday_id) {
   $description = check_plain($holiday->description);
 
   mfcs_add_canonical_headers('requests/holiday-0/view/' . $year . '/' . $holiday_id);
-  drupal_set_title('' . $year . " Holiday: " . $holiday->title);
+  drupal_set_title('' . $year . ' Holiday: ' . $holiday->title);
 
   $markup = '<div id="mfcs-holiday_page-view" class="mfcs-holiday_page-view">';
   $markup .= '<div class="mfcs-holiday_page-title"><strong>' . $title . '</strong> is a holiday, break, or office closure for McNeese State University on: <strong>' . $formatted_date . '</strong>.</div>';
@@ -431,7 +431,7 @@ function mfcs_request_holiday_0_copy_form($form, &$form_state, $year) {
   $user = cf_current_user();
 
   mfcs_add_canonical_headers('requests/holiday-0/copy/' . $year);
-  drupal_set_title("Copy to " . $year . " Holidays");
+  drupal_set_title('Copy to ' . $year . ' Holidays');
 
   // a year offset is necessary to create the date field for a specific year.
   // the date field needs to be limited to a certain year and it works based off the offset to the current year.
@@ -471,26 +471,26 @@ function mfcs_request_holiday_0_copy_form($form, &$form_state, $year) {
   $form['holiday']['year'] = array(
     '#id' => 'field-holiday-year',
     '#type' => 'numberfield',
-    '#title' => "Year",
+    '#title' => 'Year',
     '#required' => TRUE,
-    '#description' => "Select a year to copy all holidays of.",
+    '#description' => 'Select a year to copy all holidays of.',
   );
 
   $form['holiday']['include_disabled'] = array(
     '#id' => 'field-holiday-include_disabled',
     '#type' => 'checkbox',
-    '#title' => "Include Disabled",
+    '#title' => 'Include Disabled',
     '#required' => FALSE,
-    '#description' => "When copying holidays, include disabled holidays.",
+    '#description' => 'When copying holidays, include disabled holidays.',
   );
 
   $form['holiday']['as_disabled'] = array(
     '#id' => 'field-holiday-as_disabled',
     '#type' => 'checkbox',
-    '#title' => "As Disabled",
+    '#title' => 'As Disabled',
     '#required' => FALSE,
     '#default_value' => TRUE,
-    '#description' => "When copying holidays, set the copied holidays to disabled.",
+    '#description' => 'When copying holidays, set the copied holidays to disabled.',
   );
 
   $form['holiday']['submit'] = array(
@@ -506,14 +506,14 @@ function mfcs_request_holiday_0_copy_form($form, &$form_state, $year) {
     '#id' => 'mfcs-holiday-copy-submit-cancel',
     '#name' => 'mfcs-holiday-copy-submit-cancel',
     '#type' => 'submit',
-    '#default_value' => t("Cancel"),
+    '#default_value' => 'Cancel',
   );
 
   $form['holiday']['submit']['submit'] = array(
     '#id' => 'mfcs-holiday-copy-submit-submit',
     '#name' => 'mfcs-holiday-copy-submit-submit',
     '#type' => 'submit',
-    '#default_value' => t("Submit"),
+    '#default_value' => 'Submit',
   );
 
   return $form;
@@ -560,7 +560,7 @@ function mfcs_request_holiday_0_copy_form_validate($form, &$form_state) {
     return;
   }
   elseif ($clicked_id != 'mfcs-holiday-copy-submit-submit') {
-    form_set_error('', "Unknown submit process detected.");
+    form_set_error('', 'Unknown submit process detected.');
     return;
   }
 
@@ -568,7 +568,7 @@ function mfcs_request_holiday_0_copy_form_validate($form, &$form_state) {
     $year = (int) $form_state['values']['holiday']['year'];
   }
   else {
-    form_set_error('holiday][year', "Please specify a valid year.");
+    form_set_error('holiday][year', 'Please specify a valid year.');
     return;
   }
 
@@ -582,13 +582,13 @@ function mfcs_request_holiday_0_copy_form_validate($form, &$form_state) {
   // check to see if there are any years to copy.
   $holidays = mfcs_get_holidays($year, NULL, NULL, $enabled);
   if ($holidays === FALSE) {
-    form_set_error('', "Internal Error. An unknown error has been detected while trying to process this request. Please contact the appropriate support staff.");
+    form_set_error('', 'Internal Error. An unknown error has been detected while trying to process this request. Please contact the appropriate support staff.');
 
     $user = cf_current_user();
-    watchdog(MFCS_WATCHDOG_ID, "Internal Error. Error while calling mfcs_get_holidays() for the user %user_name [%user_id].", array('%user_name' => $user->name, '%user_id' => $user->uid), WATCHDOG_ERROR);
+    watchdog(MFCS_WATCHDOG_ID, 'Internal Error. Error while calling mfcs_get_holidays() for the user %user_name [%user_id].', array('%user_name' => $user->name, '%user_id' => $user->uid), WATCHDOG_ERROR);
   }
   elseif (empty($holidays)) {
-    form_set_error('holiday][year', "No holidays were found for the year " . $year . ". There is nothing to copy.");
+    form_set_error('holiday][year', 'No holidays were found for the year ' . $year . '. There is nothing to copy.');
   }
 }
 
@@ -715,8 +715,8 @@ function mfcs_request_holiday_0_copy_form_submit($form, &$form_state) {
   }
 
   if (!$success) {
-    form_set_error('form', "An error occurred while trying to copy the holidays. Please contact the support staff.");
-    watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to copy a holiday.", array(), WATCHDOG_ERROR);
+    form_set_error('form', 'An error occurred while trying to copy the holidays. Please contact the support staff.');
+    watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to copy a holiday.', array(), WATCHDOG_ERROR);
 
     $form_state['rebuild'] = TRUE;
     $form_state['redirect'] = FALSE;
@@ -848,17 +848,17 @@ function mfcs_request_holiday_0_edit_form($form, &$form_state, $year, $holiday_i
   if (is_null($holiday)) {
     mfcs_add_canonical_headers('requests/holiday-0/create/' . $year);
 
-    $page_title = "Create " . $year . " Holiday";
+    $page_title = 'Create ' . $year . ' Holiday';
   }
   elseif ($copy) {
     mfcs_add_canonical_headers('requests/holiday-0/create/' . $year . '/' . $holiday_id);
 
-    $page_title = "Copy " . $year . " Holiday: " . $holiday->title;
+    $page_title = 'Copy ' . $year . ' Holiday: ' . $holiday->title;
   }
   else {
     mfcs_add_canonical_headers('requests/holiday-0/edit/' . $year . '/' . $holiday_id);
 
-    $page_title = "Edit " . $year . " Holiday: " . $holiday->title;
+    $page_title = 'Edit ' . $year . ' Holiday: ' . $holiday->title;
   }
 
   drupal_set_title($page_title);
@@ -913,27 +913,27 @@ function mfcs_request_holiday_0_edit_form($form, &$form_state, $year, $holiday_i
   $form['holiday']['title'] = array(
     '#id' => 'field-holiday-title',
     '#type' => 'textfield',
-    '#title' => "Title",
+    '#title' => 'Title',
     '#required' => TRUE,
   );
 
   $form['holiday']['description'] = array(
     '#id' => 'field-holiday-description',
     '#type' => 'textarea',
-    '#title' => "Description",
+    '#title' => 'Description',
   );
 
   $form['holiday']['date'] = array(
     '#id' => 'field-holiday-date',
     '#type' => 'date_popup',
-    '#title' => "Date",
-    '#date_format' => "M d",
+    '#title' => 'Date',
+    '#date_format' => 'M d',
     '#date_label_position' => 'invisible',
     '#date_year_range' => '' . $year_offset . ':' . $year_offset,
     '#datepicker_options' => array(
       'changeYear' => FALSE,
     ),
-    '#expected_format' => array('date' => "M d"),
+    '#expected_format' => array('date' => 'M d'),
     '#required' => TRUE,
   );
 
@@ -941,7 +941,7 @@ function mfcs_request_holiday_0_edit_form($form, &$form_state, $year, $holiday_i
     $form['holiday']['enabled'] = array(
       '#id' => 'field-holiday-enabled',
       '#type' => 'select',
-      '#title' => "Enabled",
+      '#title' => 'Enabled',
       '#options' => array(0 => 'No', 1 => 'Yes'),
     );
   }
@@ -969,14 +969,14 @@ function mfcs_request_holiday_0_edit_form($form, &$form_state, $year, $holiday_i
     '#id' => 'mfcs-holiday-edit-submit-cancel',
     '#name' => 'mfcs-holiday-edit-submit-cancel',
     '#type' => 'submit',
-    '#default_value' => t("Cancel"),
+    '#default_value' => 'Cancel',
   );
 
   $form['holiday']['submit']['submit'] = array(
     '#id' => 'mfcs-holiday-edit-submit-submit',
     '#name' => 'mfcs-holiday-edit-submit-submit',
     '#type' => 'submit',
-    '#default_value' => t("Submit"),
+    '#default_value' => 'Submit',
   );
 
   return $form;
@@ -1023,17 +1023,17 @@ function mfcs_request_holiday_0_edit_form_validate($form, &$form_state) {
   if ($clicked_id == 'mfcs-holiday-edit-submit-submit') {
     $date = strtotime($form['form']['year']['#value'] . '-' . $form_state['values']['holiday']['date']);
     if ($date === FALSE || date('m-d', $date) != $form_state['values']['holiday']['date']) {
-      form_set_error('holiday][date', "The specified date is not valid.");
+      form_set_error('holiday][date', 'The specified date is not valid.');
     }
 
     $length = strlen($form_state['values']['holiday']['title']);
     if ($length > 255) {
-      form_set_error('holiday][title', "The title is " . $length . " characters long and cannot be longer than 255 characters.");
+      form_set_error('holiday][title', 'The title is ' . $length . ' characters long and cannot be longer than 255 characters.');
     }
 
     $length = strlen($form_state['values']['holiday']['description']);
     if ($length > 255) {
-      form_set_error('holiday][description', "The description is " . $length . " characters long and cannot be longer than 255 characters.");
+      form_set_error('holiday][description', 'The description is ' . $length . ' characters long and cannot be longer than 255 characters.');
     }
   }
 }
@@ -1215,16 +1215,16 @@ function mfcs_request_holiday_0_edit_form_submit($form, &$form_state) {
   }
 
   if (!$success) {
-    form_set_error('form', "An error occurred while trying to edit the holiday. Please contact the support staff.");
+    form_set_error('form', 'An error occurred while trying to edit the holiday. Please contact the support staff.');
 
     if (null($holiday)) {
-      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to create a holiday.", array(), WATCHDOG_ERROR);
+      watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to create a holiday.', array(), WATCHDOG_ERROR);
     }
     elseif ($form['form']['copy']['#value']) {
-      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to copy the holiday: @holiday_id.", array('@holiday_id' => $holiday->id), WATCHDOG_ERROR);
+      watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to copy the holiday: @holiday_id.', array('@holiday_id' => $holiday->id), WATCHDOG_ERROR);
     }
     else {
-      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to edit the holiday: @holiday_id.", array('@holiday_id' => $holiday->id), WATCHDOG_ERROR);
+      watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to edit the holiday: @holiday_id.', array('@holiday_id' => $holiday->id), WATCHDOG_ERROR);
     }
 
     $form_state['rebuild'] = TRUE;
@@ -1350,7 +1350,7 @@ function mfcs_request_holiday_0_delete_form($form, &$form_state, $year, $holiday
   $year = date('Y', $holiday->date);
   mfcs_add_canonical_headers('requests/holiday-0/delete/' . $year . '/' . $holiday_id);
 
-  drupal_set_title("Delete " . $year . " Holiday: " . $holiday->title);
+  drupal_set_title('Delete ' . $year . ' Holiday: ' . $holiday->title);
 
   $form['form'] = array(
     '#tree' => TRUE,
@@ -1401,14 +1401,14 @@ function mfcs_request_holiday_0_delete_form($form, &$form_state, $year, $holiday
     '#id' => 'mfcs-holiday-delete-submit-no',
     '#name' => 'mfcs-holiday-delete-submit-no',
     '#type' => 'submit',
-    '#default_value' => t("No"),
+    '#default_value' => 'No',
   );
 
   $form['display']['submit']['yes'] = array(
     '#id' => 'mfcs-holiday-delete-submit-yes',
     '#name' => 'mfcs-holiday-delete-submit-yes',
     '#type' => 'submit',
-    '#default_value' => t("Yes"),
+    '#default_value' => 'Yes',
   );
 
   return $form;
@@ -1499,8 +1499,8 @@ function mfcs_request_holiday_0_delete_form_submit($form, &$form_state) {
   }
 
   if (!$deleted) {
-    form_set_error('form', "An error occurred while trying to delete the holiday. Please contact the support staff.");
-    watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to delete the holiday: @holiday_id.", array('@holiday_id' => $holiday_id), WATCHDOG_ERROR);
+    form_set_error('form', 'An error occurred while trying to delete the holiday. Please contact the support staff.');
+    watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to delete the holiday: @holiday_id.', array('@holiday_id' => $holiday_id), WATCHDOG_ERROR);
 
     $form_state['rebuild'] = TRUE;
     $form_state['redirect'] = FALSE;

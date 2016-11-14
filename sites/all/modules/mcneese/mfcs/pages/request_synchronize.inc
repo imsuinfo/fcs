@@ -90,16 +90,15 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = NUL
     }
   }
 
-  $class_id = '';
-  $class_user_id = 'no-script-hidden ';
-  $class_name = '';
-  $class_created = '';
-  $class_updated = '';
-  $class_password = '';
-  $class_type = '';
-  $class_address = '';
-  $class_operations = 'no-print ';
-
+  $class_id = 'column-id ';
+  $class_user_id = 'column-account_id no-script-hidden ';
+  $class_name = 'column-account ';
+  $class_created = 'column-created ';
+  $class_updated = 'column-updated ';
+  $class_password = 'column-password ';
+  $class_type = 'column-type ';
+  $class_address = 'column-address ';
+  $class_operations = 'column-operations no-print ';
 
   $sorting = array();
   if (is_null($order)) {

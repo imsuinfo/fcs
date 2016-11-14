@@ -92,17 +92,17 @@ function mfcs_request_users_0_form($form, &$form_state, $page_number = NULL) {
     }
   }
 
-  $class_id = '';
-  $class_name = '';
-  $class_email = '';
-  $class_first_name = '';
-  $class_last_name = '';
-  $class_status = 'no-script-hidden script-hidden ';
-  $class_banner_id = 'no-script-hidden script-hidden ';
-  $class_ldap_duplicate = 'no-script-hidden script-hidden ';
-  $class_primary_account = 'no-script-hidden script-hidden ';
-  $class_roles = ' ';
-  $class_operations = 'no-print ';
+  $class_id = 'column-id ';
+  $class_name = 'column-name ';
+  $class_email = 'column-email no-script-hidden ';
+  $class_first_name = 'column-first_name ';
+  $class_last_name = 'column-last_name ';
+  $class_status = 'column-status no-script-hidden ';
+  $class_banner_id = 'column-banner_id no-script-hidden ';
+  $class_ldap_duplicate = 'column-ldap_duplicate no-script-hidden ';
+  $class_primary_account = 'column-primary_account no-script-hidden ';
+  $class_roles = 'column-roles ';
+  $class_operations = 'column-operations no-print ';
 
   $sorting = array();
   if (is_null($order)) {
@@ -317,13 +317,13 @@ function mfcs_request_users_0_form($form, &$form_state, $page_number = NULL) {
   $users_list['header'] = array(
     'id' => array('field' => 'id', 'data' => 'ID', 'align' => 'center'),
     'name' => array('field' => 'name', 'data' => 'Name', 'align' => 'center'),
-    'email' => array('field' => 'email', 'data' => 'E-Mail', 'align' => 'center', 'class' => array('script-hidden')),
+    'email' => array('field' => 'email', 'data' => 'E-Mail', 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
     'first_name' => array('field' => 'first_name', 'data' => 'First Name', 'align' => 'center'),
     'last_name' => array('field' => 'last_name', 'data' => 'Last Name', 'align' => 'center'),
-    'status' => array('field' => 'status', 'data' => 'Status', 'align' => 'center', 'class' => array('script-hidden')),
-    'banner_id' => array('field' => 'banner_id', 'data' => 'Banner ID', 'align' => 'center', 'class' => array('script-hidden')),
-    'ldap_duplicate' => array('field' => 'ldap_duplicate', 'data' => 'LDAP Duplicate', 'align' => 'center', 'class' => array('script-hidden')),
-    'primary_account' => array('field' => 'primary_account', 'data' => 'Primary Account', 'align' => 'center', 'class' => array('script-hidden')),
+    'status' => array('field' => 'status', 'data' => 'Status', 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
+    'banner_id' => array('field' => 'banner_id', 'data' => 'Banner ID', 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
+    'ldap_duplicate' => array('field' => 'ldap_duplicate', 'data' => 'LDAP Duplicate', 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
+    'primary_account' => array('field' => 'primary_account', 'data' => 'Primary Account', 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
     'roles' => array('field' => 'roles', 'data' => 'Roles', 'align' => 'center'),
     'operations' => array('data' => 'Operations', 'align' => 'center', 'class' => array('no-print')),
   );

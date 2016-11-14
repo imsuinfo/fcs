@@ -84,16 +84,15 @@ function mfcs_request_email_log_0_form($form, &$form_state, $page_number = NULL)
     }
   }
 
-  $class_id = '';
-  $class_user_id = 'no-script-hidden ';
-  $class_name = '';
-  $class_date = '';
-  $class_destination = '';
-  $class_title = '';
-  $class_code = '';
-  $class_type = '';
-  $class_operations = 'no-print ';
-
+  $class_id = 'column-id ';
+  $class_user_id = 'column-user_id no-script-hidden ';
+  $class_name = 'column-name ';
+  $class_date = 'column-date ';
+  $class_destination = 'column-destination ';
+  $class_title = 'column-title ';
+  $class_code = 'column-code';
+  $class_type = 'column-type ';
+  $class_operations = 'column-operations no-print ';
 
   $sorting = array();
   if (is_null($order)) {
@@ -309,7 +308,7 @@ function mfcs_request_email_log_0_form($form, &$form_state, $page_number = NULL)
   $email_log_list['caption'] = 'E-mail Log';
   $email_log_list['header'] = array(
     'id' => array('field' => 'id', 'data' => 'ID', 'align' => 'center'),
-    'account_id' => array('field' => 'user_id', 'data' => 'Account ID', 'align' => 'center', 'class' => array('script-hidden')),
+    'account_id' => array('field' => 'user_id', 'data' => 'Account ID', 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
     'account' => array('field' => 'name', 'data' => 'Account', 'align' => 'center', 'class' => array('script-hidden')),
     'date' => array('field' => 'date', 'data' => 'Date', 'align' => 'center'),
     'destination' => array('field' => 'destination', 'data' => 'Destination', 'align' => 'center'),

@@ -231,8 +231,8 @@ function mfcs_request_unavailability_0_rooms_page() {
     'deferRender' => TRUE,
     'deferLoading' => (int) $items_total,
     'columns' => array(
-      array('id' => 0, 'column' => 'building_id', 'name' => 'Building ID', 'className' => 'column-building_id', 'sanitize' => FALSE, 'visible' => FALSE),
-      array('id' => 1, 'column' => 'building_code', 'name' => 'Building Code', 'className' => 'column-building_code', 'visible' => FALSE),
+      array('id' => 0, 'column' => 'building_id', 'name' => 'Building ID', 'className' => 'column-building_id no-script-hidden', 'sanitize' => FALSE, 'visible' => FALSE),
+      array('id' => 1, 'column' => 'building_code', 'name' => 'Building Code', 'className' => 'column-building_code no-script-hidden', 'visible' => FALSE),
       array('id' => 2, 'column' => 'building_name', 'name' => 'Building Name', 'className' => 'column-building_name'),
       array('id' => 3, 'column' => 'room_id', 'name' => 'Room ID', 'className' => 'column-room_id', 'sanitize' => FALSE, 'visible' => FALSE),
       array('id' => 4, 'column' => 'room_number', 'name' => 'Room Number', 'className' => 'column-room_number'),
@@ -350,18 +350,18 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
     }
   }
 
-  $class_id = '';
-  $class_date = '';
-  $class_title = '';
-  $class_type = '';
-  $class_enabled = '';
-  $class_building_id = '';
-  $class_building_code = '';
-  $class_building_name = '';
-  $class_room_id = '';
-  $class_room_number = '';
-  $class_room_name = '';
-  $class_operations = 'no-print ';
+  $class_id = 'column-id no-script-hidden ';
+  $class_title = 'column-title ';
+  $class_type = 'column-type no-script-hidden ';
+  $class_date = 'column-date ';
+  $class_enabled = 'column-enabled ';
+  $class_building_id = 'column-building_id no-script-hidden';
+  $class_building_code = 'column-building_code ';
+  $class_building_name = 'column-building_name no-script-hidden ';
+  $class_room_id = 'column-room_id no-script-hidden ';
+  $class_room_number = 'column-room_number ';
+  $class_room_name = 'column-room_name no-script-hidden ';
+  $class_operations = 'column-operations no-print ';
 
   $sorting = array();
   if (is_null($order)) {
@@ -595,18 +595,18 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
     );
 
     $columns = array(
-      array('id' => 0, 'column' => 'id', 'name' => 'ID', 'className' => 'column-id', 'sanitize' => FALSE, 'visible' => FALSE),
+      array('id' => 0, 'column' => 'id', 'name' => 'ID', 'className' => 'column-id no-script-hidden', 'sanitize' => FALSE, 'visible' => FALSE),
       array('id' => 1, 'column' => 'title', 'name' => 'Title', 'className' => 'column-title'),
-      array('id' => 2, 'column' => 'type', 'name' => 'Type', 'className' => 'column-type', 'visible' => FALSE),
+      array('id' => 2, 'column' => 'type', 'name' => 'Type', 'className' => 'column-type no-script-hidden', 'visible' => FALSE),
       array('id' => 3, 'column' => 'date', 'name' => 'Date', 'className' => 'column-date'),
       array('id' => 4, 'column' => 'enabled', 'name' => 'Enabled', 'className' => 'column-enabled'),
-      array('id' => 5, 'column' => 'building_id', 'name' => 'Building ID', 'className' => 'column-building_id', 'sanitize' => FALSE, 'visible' => FALSE),
+      array('id' => 5, 'column' => 'building_id', 'name' => 'Building ID', 'className' => 'column-building_id no-script-hidden', 'sanitize' => FALSE, 'visible' => FALSE),
       array('id' => 6, 'column' => 'building_code', 'name' => 'Building Code', 'className' => 'column-building_code'),
-      array('id' => 7, 'column' => 'building_name', 'name' => 'Building Name', 'className' => 'column-building_name', 'visible' => FALSE),
-      array('id' => 8, 'column' => 'room_id', 'name' => 'Room ID', 'className' => 'column-room_id', 'sanitize' => FALSE, 'visible' => FALSE),
+      array('id' => 7, 'column' => 'building_name', 'name' => 'Building Name', 'className' => 'column-building_name no-script-hidden', 'visible' => FALSE),
+      array('id' => 8, 'column' => 'room_id', 'name' => 'Room ID', 'className' => 'column-room_id no-script-hidden', 'sanitize' => FALSE, 'visible' => FALSE),
       array('id' => 9, 'column' => 'room_number', 'name' => 'Room Number', 'className' => 'column-room_number'),
-      array('id' => 10, 'column' => 'room_name', 'name' => 'Room Name', 'className' => 'column-room_name', 'visible' => FALSE),
-      array('id' => 11, 'column' => NULL, 'name' => 'Operations', 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
+      array('id' => 10, 'column' => 'room_name', 'name' => 'Room Name', 'className' => 'column-room_name no-script-hidden', 'visible' => FALSE),
+      array('id' => 11, 'column' => NULL, 'name' => 'Operations', 'className' => 'column-operations', 'searchable' => FALSE, 'orderable' => FALSE),
     );
   }
   else {
@@ -622,12 +622,12 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
     );
 
     $columns = array(
-      array('id' => 0, 'column' => 'id', 'name' => 'ID', 'className' => 'column-id', 'sanitize' => FALSE, 'visible' => FALSE),
+      array('id' => 0, 'column' => 'id', 'name' => 'ID', 'className' => 'column-id no-script-hidden', 'sanitize' => FALSE, 'visible' => FALSE),
       array('id' => 1, 'column' => 'title', 'name' => 'Title', 'className' => 'column-title'),
       array('id' => 2, 'column' => 'type', 'name' => 'Type', 'className' => 'column-type'),
       array('id' => 3, 'column' => 'date', 'name' => 'Date', 'className' => 'column-date'),
       array('id' => 4, 'column' => 'enabled', 'name' => 'Enabled', 'className' => 'column-enabled'),
-      array('id' => 5, 'column' => NULL, 'name' => 'Operations', 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
+      array('id' => 5, 'column' => NULL, 'name' => 'Operations', 'className' => 'column-name no-script-hidden', 'searchable' => FALSE, 'orderable' => FALSE),
     );
   }
 

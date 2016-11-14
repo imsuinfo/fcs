@@ -225,13 +225,13 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
     }
   }
 
-  $class_id = '';
-  $class_classification = '';
-  $class_account_id = 'no-script-hidden ';
-  $class_account = '';
-  $class_first_name = '';
-  $class_last_name = '';
-  $class_operations = 'no-print ';
+  $class_id = 'column-id ';
+  $class_classification = 'column-review_classification ';
+  $class_account_id = 'column-account_id no-script-hidden ';
+  $class_account = 'column-account ';
+  $class_first_name = 'column-first_name ';
+  $class_last_name = 'column-last_name ';
+  $class_operations = 'column-operations no-print ';
 
   $sorting = array();
   if (is_null($order)) {
