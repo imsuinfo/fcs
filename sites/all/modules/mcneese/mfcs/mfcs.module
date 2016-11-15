@@ -10624,9 +10624,10 @@ function mfcs_build_request_ajax_table_process_rows($items, $columns, $user = NU
             'class' => is_array($column['class']) ? $column['class'] : array(),
           );
 
-          if (array_key_exists('visible', $column) && $column['visible'] === FALSE) {
-            $row[$column_id]['class'][] = 'script-hidden';
-          }
+          // disabled: causing problems with colvis and showing/hiding columns.
+          #if (array_key_exists('visible', $column) && $column['visible'] === FALSE) {
+          #  $row[$column_id]['class'][] = 'script-hidden';
+          #}
         }
       }
     }
