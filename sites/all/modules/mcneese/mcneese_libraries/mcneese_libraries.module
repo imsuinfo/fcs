@@ -81,6 +81,7 @@ function mcneese_libraries_libraries_info() {
     'extensions/KeyTable/js/dataTables.keyTable.js',
     //'extensions/ColReorder/js/dataTables.colReorder.js', // @fixme: currently breaks colVis.
     'extensions/Pagination/js/pagination.input.js',
+    'extensions/Responsive/js/dataTables.responsive.js',
   );
   $libraries['datatables']['files']['css'] = array(
     'media/css/jquery.dataTables.css',
@@ -89,6 +90,7 @@ function mcneese_libraries_libraries_info() {
     'extensions/KeyTable/css/dataTables.KeyTable.css',
     //'extensions/ColReorder/css/dataTables.colReorder.css',
     'extensions/Pagination/css/pagination.input.css',
+    'extensions/Responsive/css/responsive.dataTables.css',
   );
 
   // fullcalendar
