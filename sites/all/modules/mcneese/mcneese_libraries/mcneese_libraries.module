@@ -188,6 +188,7 @@ function mcneese_libraries_theme_table($variables, $datatable_settings = array()
         'serverSide',
         'stateSave',
         'select',
+        'responsive',
       );
 
       $string_settings = array(
@@ -224,6 +225,15 @@ function mcneese_libraries_theme_table($variables, $datatable_settings = array()
         'oLanguage',
         'language',
         'select',
+        'responsive',
+        'responsive.orthogonal',
+        'responsive.details',
+        'responsive.details.type',
+        'responsive.details.target',
+        'responsive.details.renderer',
+        'responsive.details.display',
+        'responsive.breakpoints',
+        'columns.responsivePriority',
       );
 
       $datatable_js = '(function ($) {' . "\n";
