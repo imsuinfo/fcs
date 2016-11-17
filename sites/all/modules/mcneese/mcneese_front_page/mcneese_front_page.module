@@ -966,19 +966,34 @@ function mcneese_front_page_embed_spotlight() {
  *   TRUE on success, FALSE otherwise.
  */
 function mcneese_front_page_static_flush() {
+  $success = NULL;
+
+  $static_file_frontpage_https = variable_get('mcneese_static_file_frontpage-https', FALSE);
+  if (!is_string($static_file_frontpage_https) || empty($static_file_frontpage_https)) {
+    if ($static_file_frontpage_https === FALSE) {
+      $success = TRUE;
+    }
+
+    $success = FALSE;
+  }
+
+  if (is_null($success) && file_exists($static_file_frontpage_https)) {
+    $success = (bool) unlink($static_file_frontpage_https);
+  }
+
   $static_file_frontpage = variable_get('mcneese_static_file_frontpage', FALSE);
   if (!is_string($static_file_frontpage) || empty($static_file_frontpage)) {
     if ($static_file_frontpage === FALSE) {
-      return TRUE;
+      return $success && TRUE;
     }
     return FALSE;
   }
 
   if (file_exists($static_file_frontpage)) {
-    return (bool) unlink($static_file_frontpage);
+    return $success && (bool) unlink($static_file_frontpage);
   }
 
-  return TRUE;
+  return $success;
 }
 
 /**
