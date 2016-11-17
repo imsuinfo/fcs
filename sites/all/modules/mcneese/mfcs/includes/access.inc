@@ -1945,8 +1945,10 @@ function mfcs_page_request_access_operation_history(&$request_ids, &$processed, 
 
       $query->condition('mer.id', $request_ids, 'IN');
 
-      if (!is_null($venue_coordinator_ids)) {
-        $query->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
+      if (!$roles['administer'] && !$roles['manager']) {
+        if (!is_null($venue_coordinator_ids)) {
+          $query->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
+        }
       }
 
       if (!$roles['administer']) {
