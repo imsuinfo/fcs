@@ -284,6 +284,7 @@ function mfcs_request_list_0_columns() {
       'class' => array('column-id'),
       'sanitize' => FALSE,
       'align' => 'center',
+      'responsivePriority' => 1,
     ),
     'type' => array(
       'id' => 1,
@@ -292,6 +293,7 @@ function mfcs_request_list_0_columns() {
       'class' => array('column-type', 'no-script-hidden'),
       'align' => 'center',
       'visible' => FALSE,
+      'responsivePriority' => 6,
     ),
     'title' => array(
       'id' => 2,
@@ -299,6 +301,7 @@ function mfcs_request_list_0_columns() {
       'name' => 'Request Name',
       'class' => array('column-title'),
       'align' => 'center',
+      'responsivePriority' => 1,
     ),
     'building' => array(
       'id' => 3,
@@ -306,6 +309,7 @@ function mfcs_request_list_0_columns() {
       'name' => 'Building',
       'class' => array('column-building'),
       'align' => 'center',
+      'responsivePriority' => 5,
     ),
     'room' => array(
       'id' => 4,
@@ -313,6 +317,7 @@ function mfcs_request_list_0_columns() {
       'name' => 'Room',
       'class' => array('column-room'),
       'align' => 'center',
+      'responsivePriority' => 5,
     ),
     'date' => array(
       'id' => 5,
@@ -320,6 +325,7 @@ function mfcs_request_list_0_columns() {
       'name' => 'Date',
       'class' => array('column-date'),
       'align' => 'center',
+      'responsivePriority' => 4,
     ),
     'status' => array(
       'id' => 6,
@@ -327,6 +333,7 @@ function mfcs_request_list_0_columns() {
       'name' => 'Status',
       'class' => array('column-status'),
       'align' => 'center',
+      'responsivePriority' => 3,
     ),
     'step' => array(
       'id' => 7,
@@ -335,6 +342,7 @@ function mfcs_request_list_0_columns() {
       'class' => array('column-step', 'no-script-hidden'),
       'align' => 'center',
       'visible' => FALSE,
+      'responsivePriority' => 2,
     ),
     'submitted_by_id' => array(
       'id' => 8,
@@ -344,6 +352,7 @@ function mfcs_request_list_0_columns() {
       'sanitize' => FALSE,
       'visible' => FALSE,
       'align' => 'center',
+      'responsivePriority' => 1,
     ),
     'submitted_by' => array(
       'id' => 9,
@@ -351,6 +360,7 @@ function mfcs_request_list_0_columns() {
       'name' => 'Submitted By',
       'class' => array('column-submitted_by'),
       'align' => 'center',
+      'responsivePriority' => 6,
     ),
     'submitted_on' => array(
       'id' => 10,
@@ -358,6 +368,7 @@ function mfcs_request_list_0_columns() {
       'name' => 'Submitted On',
       'class' => array('column-submitted_on'),
       'align' => 'center',
+      'responsivePriority' => 6,
     ),
     'operations' => array(
       'id' => 11,
@@ -367,6 +378,7 @@ function mfcs_request_list_0_columns() {
       'align' => 'center',
       'searchable' => FALSE,
       'orderable' => FALSE,
+      'responsivePriority' => 7,
     ),
   );
 }

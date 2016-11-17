@@ -255,6 +255,7 @@ function mfcs_request_unavailability_0_rooms_page() {
     ),
     'searchDelay' => 1200,
     'pagingType' => 'input',
+    'responsive' => TRUE,
   );
 
   $markup = '<div id="mfcs-unavailable_0-manage_rooms-page">';
@@ -680,6 +681,7 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
     ),
     'searchDelay' => 1200,
     'pagingType' => 'input',
+    'responsive' => TRUE,
   );
 
   $markup = '<div id="mfcs-unavailable_0-manage_room-page">';

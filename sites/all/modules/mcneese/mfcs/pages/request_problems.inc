@@ -455,6 +455,7 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
     ),
     'searchDelay' => 1200,
     'pagingType' => 'input',
+    'responsive' => TRUE,
   );
 
   $navigation_top = '';
@@ -1778,6 +1779,7 @@ function mfcs_request_problems_0_requests_form($form, &$form_state, $page_number
     ),
     'searchDelay' => 1200,
     'pagingType' => 'input',
+    'responsive' => TRUE,
   );
 
   $ajax_path = $base_path . 'requests/problems-0/requests/ajax';

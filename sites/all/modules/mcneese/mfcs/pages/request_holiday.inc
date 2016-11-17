@@ -247,6 +247,7 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
     ),
     'searchDelay' => 1200,
     'pagingType' => 'input',
+    'responsive' => TRUE,
   );
 
   if ($can_edit) {
