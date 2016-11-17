@@ -389,6 +389,7 @@ function mfcs_init() {
   $module_path = drupal_get_path('module', 'mfcs');
 
   drupal_add_js($module_path . '/js/printing-fieldsets.js', array('type' => 'file', 'group' => JS_DEFAULT, 'preprocess' => TRUE));
+  #drupal_add_js($module_path . '/js/small_width-detection.js', array('type' => 'file', 'group' => JS_DEFAULT, 'preprocess' => TRUE));
 
   mfcs_determine_url_arguments();
 }

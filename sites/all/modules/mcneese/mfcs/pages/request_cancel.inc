@@ -657,7 +657,7 @@ function mfcs_request_cancelling_0_form($form, &$form_state, $request_id) {
     if (isset($request['dates']['time_start'][$key]) && !is_null($request['dates']['time_start'][$key]->value)) {
       $form['dates'][$key]['markup'] = array(
         '#type' => 'markup',
-        '#markup' => '<span id="request-cancelling-' . $key . '-markup" class="' . $extra_css . '">' . date(MFCS_DATE_FORMAT_DATE, $date->value) . " from " . date(MFCS_DATE_FORMAT_TIME_SECONDS, $request['dates']['time_start'][$key]->value) . " to " . date(MFCS_DATE_FORMAT_TIME_SECONDS, $request['dates']['time_stop'][$key]->value) . "</span>",
+        '#markup' => '<span id="request-cancelling-' . $key . '-markup" class="cancelling-item-message' . $extra_css . '">' . date(MFCS_DATE_FORMAT_DATE, $date->value) . " from " . date(MFCS_DATE_FORMAT_TIME_SECONDS, $request['dates']['time_start'][$key]->value) . " to " . date(MFCS_DATE_FORMAT_TIME_SECONDS, $request['dates']['time_stop'][$key]->value) . "</span>",
       );
     }
     else {

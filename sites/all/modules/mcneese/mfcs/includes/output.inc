@@ -341,27 +341,34 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
   // Set range at 1-hour intervals.
   $range_interval = 3600; // 3600 = 1 hour
   $range_height = 90; // 90px = 1 hour
+  $range_height_small = 144; // 144 = 1 hour
   $range_width_screen = 196;
   $range_width_portrait = 152;
   $range_width_landscape = 196;
+  $range_width_small = 96;
   $range_difference = 40; // 3600 / 90 = 40, unit of time per pixel.
+  $range_difference_small = 25; // 3600 / 144 = 40, unit of time per pixel.
   $range_height_constraint = 75; // minimum pixels needed to enforce height constraints.
 
   $range_height_link_screen_max = 32;
   $range_height_link_portrait_max = 28;
   $range_height_link_landscape_max = 28;
+  $range_height_link_small_max = 28;
 
   $range_height_time_screen_max = 16;
   $range_height_time_portrait_max = 14;
   $range_height_time_landscape_max = 14;
+  $range_height_time_small_max = 14;
 
   $range_height_type_screen_max = 16;
   $range_height_type_portrait_max = 14;
   $range_height_type_landscape_max = 14;
+  $range_height_type_small_max = 14;
 
   $range_height_non_location_screen = $range_height_link_screen_max + $range_height_time_screen_max + $range_height_type_screen_max;
   $range_height_non_location_portrait = $range_height_link_portrait_max + $range_height_time_portrait_max + $range_height_type_portrait_max;
   $range_height_non_location_landscape = $range_height_link_landscape_max + $range_height_time_landscape_max + $range_height_type_landscape_max;
+  $range_height_non_location_small = $range_height_link_small_max + $range_height_time_small_max + $range_height_type_small_max;
 
   $slots_per_page = 4;
   $slots_min = $slots_per_page * $page_number;
@@ -371,6 +378,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
   $css_screen = '';
   $css_portrait = '@media (orientation:portrait) {' . "\n";
   $css_landscape = '@media (orientation:landscape) {' . "\n";
+  $css_small = '@media screen and (max-width: 640px) {' . "\n";
 
   // begin wrappers (main)
   $markup = '<div' . $id_string . ' class="calendar-day-wrapper">';
@@ -479,16 +487,22 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
 
         $item_style = array(
           'box-sizing' => 'box-sizing: border-box;',
+          '-moz-box-sizing' => '-moz-box-sizing: border-box;',
+          '-webkit-box-sizing' => '-webkit-box-sizing: border-box;',
           'max-height' => 'max-height: ' . $range_height . 'px;',
           'margin-top' => 'margin-top: 0px;',
           'margin-bottom' => 'margin-bottom: 0px;',
           'margin-right' => 'margin-right: 3px;',
           'border' => 'border: 2px outset;',
+          'overflow' => 'overflow: hidden;',
         );
 
         $item_style_screen = $item_style;
         $item_style_portrait = $item_style;
         $item_style_landscape = $item_style;
+        $item_style_small = $item_style;
+
+        $item_style_small['max-height'] = 'max-height: ' . $range_height_small . 'px;';
 
         $item_style_screen['width'] = $range_width_screen . 'px;';
         $item_style_screen['min-width'] = $range_width_screen . 'px;';
@@ -502,9 +516,14 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
         $item_style_landscape['min-width'] = $range_width_landscape . 'px;';
         $item_style_landscape['max-width'] = $range_width_landscape . 'px;';
 
+        $item_style_small['width'] = $range_width_small . 'px;';
+        $item_style_small['min-width'] = $range_width_small . 'px;';
+        $item_style_small['max-width'] = $range_width_small . 'px;';
+
         $css_screen .= "\n" . $id_string_css_name . ' #' . $item_id_string . " {\n  " . implode("\n  ", $item_style_screen) . "\n}\n";
         $css_portrait .= "\n" . $id_string_css_name . ' #' . $item_id_string . " {\n  " . implode("\n  ", $item_style_portrait) . "\n}\n";
         $css_landscape .= "\n" . $id_string_css_name . ' #' . $item_id_string . " {\n  " . implode("\n  ", $item_style_landscape) . "\n}\n";
+        $css_small .= "\n" . $id_string_css_name . ' #' . $item_id_string . " {\n  " . implode("\n  ", $item_style_small) . "\n}\n";
 
         $markup .= '<div id="' . $item_id_string . '"  class="calendar-item-wrapper ' . $item_class . '"><div class="calendar-item">';
         if ($item['is'] == 'holiday') {
@@ -683,20 +702,27 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
 
         $item_style = array(
           'box-sizing' => 'box-sizing: border-box;',
+          '-moz-box-sizing' => '-moz-box-sizing: border-box;',
+          '-webkit-box-sizing' => '-webkit-box-sizing: border-box;',
           'max-height' => 'max-height: ' . $range_height . 'px;',
           'margin-top' => 'margin-top: 0px;',
           'margin-bottom' => 'margin-bottom: 0px;',
           'margin-right' => 'margin-right: 3px;',
           'z-index' => 'z-index: 2;',
+          'overflow' => 'overflow: hidden;',
         );
 
         $item_style_screen = $item_style;
         $item_style_portrait = $item_style;
         $item_style_landscape = $item_style;
+        $item_style_small = $item_style;
+
+        $item_style_small['max-height'] = 'max-height: ' . $range_height_small . 'px;';
 
         $location_style_screen = array();
         $location_style_portrait = array();
         $location_style_landscape = array();
+        $location_style_small = array();
 
         $item_style_screen['width'] = 'width: ' . $range_width_screen . 'px;';
         $item_style_screen['min-width'] = 'min-width: ' . $range_width_screen . 'px;';
@@ -710,9 +736,14 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
         $item_style_landscape['min-width'] = 'wmin-idth: ' . $range_width_landscape . 'px;';
         $item_style_landscape['max-width'] = 'max-width: ' . $range_width_landscape . 'px;';
 
+        $item_style_small['width'] = 'width: ' . $range_width_small . 'px;';
+        $item_style_small['min-width'] = 'min-width: ' . $range_width_small . 'px;';
+        $item_style_small['max-width'] = 'max-width: ' .  $range_width_small . 'px;';
+
         $margin_left_screen = 0;
         $margin_left_portrait = 0;
         $margin_left_landscape = 0;
+        $margin_left_small = 0;
         $slot_count = $slot - 1;
         while ($slot_count >= $slots_min) {
           if (empty($slots[$slot_count])) {
@@ -720,6 +751,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
             $margin_left_screen += $range_width_screen + 6;
             $margin_left_portrait += $range_width_portrait + 6;
             $margin_left_landscape += $range_width_landscape + 6;
+            $margin_left_small += $range_width_small + 6;
           }
           else {
             break;
@@ -733,14 +765,17 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
           $margin_left_screen += 3;
           $margin_left_portrait += 3;
           $margin_left_landscape += 3;
+          $margin_left_small += 3;
           $item_style_screen['margin-left'] = 'margin-left: ' . $margin_left_screen . 'px;';
           $item_style_portrait['margin-left'] = 'margin-left: ' . $margin_left_portrait . 'px;';
           $item_style_landscape['margin-left'] = 'margin-left: ' . $margin_left_landscape . 'px;';
+          $item_style_small['margin-left'] = 'margin-left: ' . $margin_left_small . 'px;';
         }
         else {
           $item_style_screen['margin-left'] = 'margin-left: 3px;';
           $item_style_portrait['margin-left'] = 'margin-left: 3px;';
           $item_style_landscape['margin-left'] = 'margin-left: 3px;';
+          $item_style_small['margin-left'] = 'margin-left: 3px;';
         }
 
         $item_text = '';
@@ -749,6 +784,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
           // turn the offset into a percentage to determine the item height.
           $item_height_stop_min = 21;
           $item_height_stop = $range_height;
+          $item_height_stop_small = $range_height_small;
 
           if ($item['offset_stop'] > 0) {
             $item_height_stop = floor($item['offset_stop'] / $range_difference);
@@ -758,11 +794,21 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
             $item_height_stop = $item_height_stop_min;
           }
 
+          if ($item['offset_stop'] > 0) {
+            $item_height_stop_small = floor($item['offset_stop'] / $range_difference_small);
+          }
+
+          if ($item_height_stop_small < $item_height_stop_min) {
+            $item_height_stop_small = $item_height_stop_min;
+          }
+
           $item_height_min = 69;
           $item_height_min_text_screen = 48;
           $item_height_min_text_portrait = 50;
           $item_height_min_text_landscape = 50;
+          $item_height_min_text_small = 48;
           $item_margin_top = floor($item['offset_start'] / $range_difference);
+          $item_margin_top_small = floor($item['offset_start'] / $range_difference_small);
 
           // minimum height is not as restrictive for non-slot_start item slots.
           if (!$item['slot_start']) {
@@ -773,17 +819,35 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
             $item_margin_top = $range_height - $item_height_min;
           }
 
+          if ($item_margin_top_small + $item_height_min > $range_height_small) {
+            $item_margin_top_small = $range_height_small - $item_height_min;
+          }
+
           $item_height = $range_height;
           if ($item['slot_start']) {
             $item_height -= $item_margin_top;
           }
 
           if ($item['slot_stop']) {
-            $item_height -= ($range_height - $item_height_stop);
+            $item_height -= ($range_height_small - $item_height_stop);
 
             if ($item_height < $item_height_min) {
               $item_height = $item_height_min;
               $item_height_stop = $range_height;
+            }
+          }
+
+          $item_height_small = $range_height_small;
+          if ($item['slot_start']) {
+            $item_height_small -= $item_margin_top_small;
+          }
+
+          if ($item['slot_stop']) {
+            $item_height_small -= ($range_height_small - $item_height_stop_small);
+
+            if ($item_height_small < $item_height_min) {
+              $item_height_small = $item_height_min;
+              $item_height_stop_small = $range_height_small;
             }
           }
 
@@ -799,11 +863,15 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
             $item_style_landscape['margin-top'] = $item_style_screen['margin-top'];
             $item_style_landscape['height'] = $item_style_screen['height'];
             $item_style_landscape['min-height'] = $item_style_screen['min-height'];
+            $item_style_small['margin-top'] = 'margin-top: ' . $item_margin_top_small . 'px;';
+            $item_style_small['height'] = 'height: ' . $item_height_small . 'px;';
+            $item_style_small['min-height'] = 'min-height: ' . $item_height_min . 'px;';
 
             if ($item['slot_start'] && !$item['slot_stop']) {
               $item_style_screen['z-index'] = 'z-index: 1;';
               $item_style_portrait['z-index'] = 'z-index: 1;';
               $item_style_landscape['z-index'] = 'z-index: 1;';
+              $item_style_small['z-index'] = 'z-index: 1;';
 
               // create a max-height in such a way that it will never go past the slot_stop block.
               $item_height_max = $range_height * floor(($item['time_ceiling'] - $item['time_floor']) / 3600);
@@ -830,6 +898,14 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
               }
               else {
                 $location_style_landscape['max-height'] = 'max-height: ' . $item_height_min_text_landscape . 'px';
+              }
+
+              $item_height_max_text_small = $item_height_max - $item_margin_top_small - $range_height_non_location_small - ($range_height_small - $item_height_stop_small);
+              if ($item_height_max_text_small > $item_height_min_text_small) {
+                $location_style_small['max-height'] = 'max-height: ' . $item_height_max_text_small . 'px';
+              }
+              else {
+                $location_style_small['max-height'] = 'max-height: ' . $item_height_min_text_small . 'px';
               }
             }
             elseif ($item['slot_start'] && $item['slot_stop']) {
@@ -864,6 +940,10 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
             $item_style_landscape['height'] = $item_style_screen['height'];
             $item_style_landscape['min-height'] = $item_style_screen['min-height'];
 
+            $item_style_small['margin-bottom'] = 'margin-bottom: ' . $item_margin_bottom . 'px;';
+            $item_style_small['height'] = 'height: ' . $item_height_small . 'px;';
+            $item_style_small['min-height'] = 'min-height: ' . $item_height_min . 'px;';
+
             $item_text .= '<div class="calendar-item-footer-wrapper">';
 
             if ($item['is'] == 'event') {
@@ -893,6 +973,10 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
           $item_style_landscape['height'] = $item_style_screen['height'];
           $item_style_landscape['min-height'] = $item_style_screen['min-height'];
           $item_style_landscape['z-index'] = $item_style_screen['z-index'];
+
+          $item_style_screen['height'] = 'height: ' . $range_height_small . 'px;';
+          $item_style_screen['min-height'] = 'min-height: ' . $range_height_small . 'px;';
+          $item_style_screen['z-index'] = 'z-index: 0;';
         }
 
         $markup .= '<div id="' . $item_id_string . '" class="calendar-item-wrapper ' . implode(' ', $item_class) . '"><div class="calendar-item">';
@@ -903,6 +987,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
       $css_screen .= "\n" . $id_string_css_name . ' #' . $row_id . ' #' . $item_id_string . " {\n  " . implode("\n  ", $item_style_screen) . "\n}\n";
       $css_portrait .= "\n" . $id_string_css_name . ' #' . $row_id . ' #' . $item_id_string . " {\n  " . implode("\n  ", $item_style_portrait) . "\n}\n";
       $css_landscape .= "\n" . $id_string_css_name . ' #' . $row_id . ' #' . $item_id_string . " {\n  " . implode("\n  ", $item_style_landscape) . "\n}\n";
+      $css_small .= "\n" . $id_string_css_name . ' #' . $row_id . ' #' . $item_id_string . " {\n  " . implode("\n  ", $item_style_small) . "\n}\n";
 
       if (!empty($location_style_screen)) {
         $css_screen .= "\n" . $id_string_css_name . ' #' . $row_id . ' #' . $item_id_string . ' > .calendar-item > .calendar-item-location-wrapper,' . "\n";
@@ -917,6 +1002,11 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
       if (!empty($location_style_landscape)) {
         $css_landscape .= "\n" . $id_string_css_name . ' #' . $row_id . ' #' . $item_id_string . ' > .calendar-item > .calendar-item-location-wrapper,' . "\n";
         $css_landscape .= "\n" . $id_string_css_name . ' #' . $row_id . ' #' . $item_id_string . ' > .calendar-item > .calendar-item-location-wrapper > .calendar-item-location {' . "\n  " . implode("\n  ", $location_style_landscape) . "\n}\n";
+      }
+
+      if (!empty($location_style_small)) {
+        $css_small .= "\n" . $id_string_css_name . ' #' . $row_id . ' #' . $item_id_string . ' > .calendar-item > .calendar-item-location-wrapper,' . "\n";
+        $css_small .= "\n" . $id_string_css_name . ' #' . $row_id . ' #' . $item_id_string . ' > .calendar-item > .calendar-item-location-wrapper > .calendar-item-location {' . "\n  " . implode("\n  ", $location_style_small) . "\n}\n";
       }
     }
 
@@ -952,10 +1042,12 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
   // add the inline css
   $css_portrait .= "}\n";
   $css_landscape .= "}\n";
+  $css_small .= "}\n";
 
   drupal_add_css($css_screen, array('type' => 'inline', 'group' => CSS_THEME, 'media' => 'screen,handheld,projection', 'preprocess' => FALSE));
   drupal_add_css($css_portrait, array('type' => 'inline', 'group' => CSS_THEME, 'media' => 'print,embossed,tv', 'preprocess' => FALSE));
   drupal_add_css($css_landscape, array('type' => 'inline', 'group' => CSS_THEME, 'media' => 'print,embossed,tv', 'preprocess' => FALSE));
+  drupal_add_css($css_small, array('type' => 'inline', 'group' => CSS_THEME, 'media' => 'screen,handheld,projection', 'preprocess' => FALSE));
 
   return $markup;
 }
