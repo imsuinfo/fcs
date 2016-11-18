@@ -365,9 +365,9 @@ function mfcs_request_holiday_0_page($year, $holiday_id) {
     if ($year >= $current_year) {
       $markup .= '<br class="no-print">';
       $markup .= '<div class="holiday_page-operations no-print">';
-      $markup .= '<a href="' . $base_path . 'requests/holiday-0/edit/' . $year . '/' . $holiday_id . $url_arguments . '" class="operation-edit inline-block margin-10 float-left">Edit this holiday</a> ';
-      $markup .= '<a href="' . $base_path . 'requests/holiday-0/create/' . $year . '/' . $holiday_id . $url_arguments . '" class="operation-copy inline-block margin-10 float-left">Copy this holiday</a> ';
-      $markup .= '<a href="' . $base_path . 'requests/holiday-0/delete/' . $year . '/' . $holiday_id . $url_arguments . '" class="operation-delete inline-block margin-10 float-right">Delete this holiday</a>';
+      $markup .= '<div class="operation-wrapper operation-wrapper-edit"><a href="' . $base_path . 'requests/holiday-0/edit/' . $year . '/' . $holiday_id . $url_arguments . '" class="operation-edit">Edit this holiday</a></div> ';
+      $markup .= '<div class="operation-wrapper operation-wrapper-create"><a href="' . $base_path . 'requests/holiday-0/create/' . $year . '/' . $holiday_id . $url_arguments . '" class="operation-copy">Copy this holiday</a></div> ';
+      $markup .= '<div class="operation-wrapper operation-wrapper-delete"><a href="' . $base_path . 'requests/holiday-0/delete/' . $year . '/' . $holiday_id . $url_arguments . '" class="operation-delete">Delete this holiday</a></div>';
       $markup .= '</div>';
     }
 

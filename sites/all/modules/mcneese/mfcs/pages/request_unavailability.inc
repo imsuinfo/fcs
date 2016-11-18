@@ -915,9 +915,9 @@ function mfcs_request_unavailability_0_page($year, $room_id, $unavailability_id)
       if ($year >= $current_year) {
         $markup .= '<br class="no-print">';
         $markup .= '<div class="unavailability_page-operations no-print">';
-        $markup .= '<a href="' . $base_path . 'requests/unavailable-0/edit/' . $year . '/' . $unavailable->room_id . '/' . $unavailability_id . $url_arguments . '" class="operation-edit inline-block margin-10 float-left">Edit this unavailability</a> ';
-        $markup .= '<a href="' . $base_path . 'requests/unavailable-0/create/' . $year . '/' . $unavailable->room_id . '/' . $unavailability_id . $url_arguments . '" class="operation-copy inline-block margin-10 float-left">Copy this unavailability</a> ';
-        $markup .= '<a href="' . $base_path . 'requests/unavailable-0/delete/' . $year . '/' . $unavailable->room_id . '/' . $unavailability_id . $url_arguments . '" class="operation-delete inline-block margin-10 float-right">Delete this unavailability</a>';
+        $markup .= '<div class="operation-wrapper operation-wrapper-edit"><a href="' . $base_path . 'requests/unavailable-0/edit/' . $year . '/' . $unavailable->room_id . '/' . $unavailability_id . $url_arguments . '" class="operation-edit">Edit this unavailability</a></div> ';
+        $markup .= '<div class="operation-wrapper operation-wrapper-create"><a href="' . $base_path . 'requests/unavailable-0/create/' . $year . '/' . $unavailable->room_id . '/' . $unavailability_id . $url_arguments . '" class="operation-copy">Copy this unavailability</a></div> ';
+        $markup .= '<div class="operation-wrapper operation-wrapper-delete"><a href="' . $base_path . 'requests/unavailable-0/delete/' . $year . '/' . $unavailable->room_id . '/' . $unavailability_id . $url_arguments . '" class="operation-delete">Delete this unavailability</a></div>';
         $markup .= '</div>';
       }
 
