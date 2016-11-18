@@ -143,23 +143,23 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
     $row = array();
 
     $row['id'] = array(
-      'data' => (int) $item->id,
+      'data' => '<div class="column-item item-id item-id-0">' . ((int) $item->id) . '</div>',
       'class' => $class_id,
     );
 
     $row['date'] = array(
-      'data' => check_plain(date(MFCS_DATE_FORMAT_DATE, $item->date)),
+      'data' => '<div class="column-item item-date item-date-0">' . check_plain(date(MFCS_DATE_FORMAT_DATE, $item->date)) . '</div>',
       'class' => $class_date,
     );
 
     $row['title'] = array(
-      'data' => check_plain($item->title),
+      'data' => '<div class="column-item item-title item-title-0">' . check_plain($item->title) . '</div>',
       'class' => $class_title,
     );
 
     if ($can_edit) {
       $row['enabled'] = array(
-        'data' => $item->enabled ? 'Yes' : 'No',
+        'data' => '<div class="column-item item-enabled item-enabled-0">' . ($item->enabled ? 'Yes' : 'No') . '</div>',
         'class' => $class_enabled,
       );
     }
@@ -169,12 +169,12 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
       'class' => $class_operations,
     );
 
-    $row['operations']['data'] .= '<a href="' . $base_path . 'requests/holiday-0/view/' . $year . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="View Holiday">View</a>';
+    $row['operations']['data'] .= '<div class="column-item item-operations item-operations-view"><a href="' . $base_path . 'requests/holiday-0/view/' . $year . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="View Holiday">View</a></div>';
 
     if ($can_edit) {
-      $row['operations']['data'] .= ' <a href="' . $base_path . 'requests/holiday-0/edit/' . $year . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-edit" title="Edit Holiday">Edit</a>';
-      $row['operations']['data'] .= ' <a href="' . $base_path . 'requests/holiday-0/create/' . $year . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-copy" title="Copy Holiday">Copy</a>';
-      $row['operations']['data'] .= ' <a href="' . $base_path . 'requests/holiday-0/delete/' . $year . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-delete" title="Delete Holiday">Delete</a>';
+      $row['operations']['data'] .= '<div class="column-item item-operations item-operations-edit"><a href="' . $base_path . 'requests/holiday-0/edit/' . $year . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-edit" title="Edit Holiday">Edit</a></div>';
+      $row['operations']['data'] .= '<div class="column-item item-operations item-operations-create"><a href="' . $base_path . 'requests/holiday-0/create/' . $year . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-copy" title="Copy Holiday">Copy</a></div>';
+      $row['operations']['data'] .= '<div class="column-item item-operations item-operations-delete"><a href="' . $base_path . 'requests/holiday-0/delete/' . $year . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-delete" title="Delete Holiday">Delete</a></div>';
     }
 
     $rows[] = $row;

@@ -236,41 +236,41 @@ function mfcs_request_email_log_0_form($form, &$form_state, $page_number = NULL)
     $row = array();
 
     $row['id'] = array(
-      'data' => (int) $email_log->id,
+      'data' => '<div class="column-item item-id item-id-0">' . ((int) $email_log->id) . '</div>',
       'class' => $class_id,
     );
 
     $row['account_id'] = array(
-      'data' => $email_log->user_id,
+      'data' => '<div class="column-item item-account_id item-account_id-0">' . ((int) $email_log->user_id) . '</div>',
       'class' => $class_user_id,
     );
 
     // note: previously the id was added as a no-js failsafe, but it causes an annoying flicker on load (because the load speed is sufficiently fast enough to flicker but slow enough to see).
     $row['account'] = array(
-      'data' => '<a href="' . $base_path . 'requests/users-0/view/' . $email_log->user_id . $url_arguments . '" class="user-link">' . check_plain($email_log->name) . '</a>',
+      'data' => '<div class="column-item item-account item-account-0"><a href="' . $base_path . 'requests/users-0/view/' . $email_log->user_id . $url_arguments . '" class="user-link">' . check_plain($email_log->name) . '</a></div>',
       'class' => $class_name,
     );
 
     $row['date'] = array(
-      'data' => check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS, $email_log->date)),
+      'data' => '<div class="column-item item-date item-date-0">' . check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS, $email_log->date)) . '</div>',
       'class' => $class_date,
     );
 
     if (empty($email_log->destination_user_id)) {
       $row['destination'] = array(
-        'data' => check_plain($email_log->destination),
+        'data' => '<div class="column-item item-destination item-destination-0">' . check_plain($email_log->destination) . '</div>',
         'class' => $class_destination,
       );
     }
     else {
       $row['destination'] = array(
-        'data' => '<a href="' . $base_path . 'requests/users-0/view/' . $email_log->destination_user_id . $url_arguments . '" class="user-link">' . check_plain($email_log->destination) . '</a>',
+        'data' => '<div class="column-item item-destination item-destination-0"><a href="' . $base_path . 'requests/users-0/view/' . $email_log->destination_user_id . $url_arguments . '" class="user-link">' . check_plain($email_log->destination) . '</a></div>',
         'class' => $class_destination,
       );
     }
 
     $row['title'] = array(
-      'data' => check_plain($email_log->title),
+      'data' => '<div class="column-item item-title item-title-0">' . check_plain($email_log->title) . '</div>',
       'class' => $class_title,
     );
 
@@ -286,18 +286,20 @@ function mfcs_request_email_log_0_form($form, &$form_state, $page_number = NULL)
       $row['code']['data'] = 'Forwarded';
     }
 
+    $row['code']['data'] = '<div class="column-item item-code item-code-0">' . $row['code']['data'] . '</div>';
+
     $row['type'] = array(
-      'data' => check_plain($email_log->type_name),
+      'data' => '<div class="column-item item-type item-type-0">' . check_plain($email_log->type_name) . '</div>',
       'class' => $class_type,
     );
 
     $row['operations'] = array(
-      'data' => '<a href="' . $base_path . 'requests/email_log-0/view/' . $email_log->id . $url_arguments . '" class="operation-link operation-link-view">View</a>',
+      'data' => '<div class="column-item item-operations item-operations-view"><a href="' . $base_path . 'requests/email_log-0/view/' . $email_log->id . $url_arguments . '" class="operation-link operation-link-view">View</a></div>',
       'class' => $class_operations,
     );
 
     if ($may_resend_log) {
-      $row['operations']['data'] .= ' <a href="' . $base_path . 'requests/email_log-0/resend/' . $email_log->id . $url_arguments . '/back_to_list" class="operation-link operation-link-resend">Re-send</a>';
+      $row['operations']['data'] .= '<div class="column-item item-operations item-operations-resend"><a href="' . $base_path . 'requests/email_log-0/resend/' . $email_log->id . $url_arguments . '/back_to_list" class="operation-link operation-link-resend">Re-send</a></div>';
     }
 
     $rows[] = $row;

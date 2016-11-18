@@ -10453,34 +10453,34 @@ function mfcs_build_request_ajax_table_process_rows($items, $columns, $user = NU
     foreach ($columns as $column_id => $column) {
       if (is_null($column['column'])) {
         if ($column_id == 'operations') {
-          $data = '<a href="' . $base_path . 'requests/view-0/' . $item->id . $url_arguments . '" class="operation-link operation-link-view">View</a> ';
+          $data = '<div class="column-item item-operations item-operations-view"><a href="' . $base_path . 'requests/view-0/' . $item->id . $url_arguments . '" class="operation-link operation-link-view">View</a></div>';
 
           if (array_key_exists($item->id, $can_edit_requests) && $can_edit_requests[$item->id]) {
-            $data .= '<a href="' . $base_path . 'requests/edit-0/' . $item->id . '/request' . $url_arguments . '" class="operation-link operation-link-edit">Edit</a> ';
+            $data .= '<div class="column-item item-operations item-operations-edit"><a href="' . $base_path . 'requests/edit-0/' . $item->id . '/request' . $url_arguments . '" class="operation-link operation-link-edit">Edit</a></div>';
           }
 
           if (array_key_exists($item->id, $can_review_requests) && $can_review_requests[$item->id]) {
-            $data .= '<a href="' . $base_path . 'requests/view-0/' . $item->id . '/' . MFCS_VIEW_MODE_OPERATIONS . $url_arguments . '" class="operation-link operation-link-review">Review</a> ';
+            $data .= '<div class="column-item item-operations item-operations-review"><a href="' . $base_path . 'requests/view-0/' . $item->id . '/' . MFCS_VIEW_MODE_OPERATIONS . $url_arguments . '" class="operation-link operation-link-review">Review</a></div>';
           }
 
           if (array_key_exists($item->id, $can_log_requests) && $can_log_requests[$item->id]) {
-            $data .= '<a href="' . $base_path . 'requests/view-0/' . $item->id . '/' . MFCS_VIEW_MODE_LOG . $url_arguments . '" class="operation-link operation-link-log">Log</a> ';
+            $data .= '<div class="column-item item-operations item-operations-log"><a href="' . $base_path . 'requests/view-0/' . $item->id . '/' . MFCS_VIEW_MODE_LOG . $url_arguments . '" class="operation-link operation-link-log">Log</a></div>';
           }
 
           if (array_key_exists($item->id, $can_manage_requests) && $can_manage_requests[$item->id]) {
-            $data .= '<a href="' . $base_path . 'requests/manage-0/' . $item->id . $url_arguments . '" class="operation-link operation-link-manage">Manage</a> ';
+            $data .= '<div class="column-item item-operations item-operations-manage"><a href="' . $base_path . 'requests/manage-0/' . $item->id . $url_arguments . '" class="operation-link operation-link-manage">Manage</a></div>';
           }
 
           if (array_key_exists($item->id, $can_history_requests) && $can_history_requests[$item->id]) {
-            $data .= '<a href="' . $base_path . 'requests/history-0/' . $item->id . $url_arguments . '" class="operation-link operation-link-history">History</a> ';
+            $data .= '<div class="column-item item-operations item-operations-history"><a href="' . $base_path . 'requests/history-0/' . $item->id . $url_arguments . '" class="operation-link operation-link-history">History</a></div>';
           }
 
           if (array_key_exists($item->id, $can_delete_requests) && $can_delete_requests[$item->id]) {
-            $data .= '<a href="' . $base_path . 'requests/delete-0/' . $item->id . $url_arguments . '" class="operation-link operation-link-delete">Delete</a> ';
+            $data .= '<div class="column-item item-operations item-operations-delete"><a href="' . $base_path . 'requests/delete-0/' . $item->id . $url_arguments . '" class="operation-link operation-link-delete">Delete</a></div>';
           }
 
           if (array_key_exists($item->id, $can_create_requests) && $can_create_requests[$item->id]) {
-            $data .= '<a href="' . $base_path . 'requests/create-0/' . $item->id . $url_arguments . '" class="operation-link operation-link-clone">Copy</a> ';
+            $data .= '<div class="column-item item-operations item-operations-create"><a href="' . $base_path . 'requests/create-0/' . $item->id . $url_arguments . '" class="operation-link operation-link-clone">Copy</a></div>';
           }
 
           if ($ajax) {
@@ -10502,21 +10502,21 @@ function mfcs_build_request_ajax_table_process_rows($items, $columns, $user = NU
         if ($column['column'] == 'location') {
           if (!empty($item->location)) {
             if (isset($location_options[$item->location])) {
-              $data = check_plain($location_options[$item->location]);
+              $data = '<div class="column-item item-location item-location-0">' . check_plain($location_options[$item->location]) . '</div>';
             }
           }
         }
         elseif ($column['column'] == 'building') {
           if (!empty($item->building)) {
             if (isset($building_options[$item->location][$item->building])) {
-              $data = check_plain($building_options[$item->location][$item->building]);
+              $data = '<div class="column-item item-building item-building-0">' . check_plain($building_options[$item->location][$item->building]) . '</div>';
             }
           }
         }
         elseif ($column['column'] == 'room') {
           if (!empty($item->room)) {
             if (isset($room_options[$item->room])) {
-              $data = check_plain($room_options[$item->room]);
+              $data = '<div class="column-item item-room item-room-0">' . check_plain($room_options[$item->room]) . '</div>';
             }
           }
         }
@@ -10524,13 +10524,9 @@ function mfcs_build_request_ajax_table_process_rows($items, $columns, $user = NU
           $data = NULL;
 
           if (isset($item->date) && is_array($item->date)) {
+            $data = '';
             foreach ($item->date as $delta => $date) {
-              if (is_null($data)) {
-                $data = '';
-              }
-              else {
-                $data .= '<br>';
-              }
+              $data .= '<div class="column-item item-date item-date-' . ((int) $delta) . '">';
 
               if (date('Y', $instance) == date('Y', $date)) {
                 $data .= check_plain(date(MFCS_DATE_FORMAT_DATE_SQUEEZE_NO_YEAR, $date));
@@ -10543,6 +10539,8 @@ function mfcs_build_request_ajax_table_process_rows($items, $columns, $user = NU
                 $data .= ' ' . check_plain(date(MFCS_DATE_FORMAT_TIME, $item->time_start[$delta]));
                 $data .= ' to ' . check_plain(date(MFCS_DATE_FORMAT_TIME, $item->time_stop[$delta]));
               }
+
+              $data .= '</div>';
             }
           }
           else {
@@ -10551,21 +10549,21 @@ function mfcs_build_request_ajax_table_process_rows($items, $columns, $user = NU
         }
         elseif ($column['column'] == 'type') {
           if (isset($type_options[$item->type])) {
-            $data = check_plain($type_options[$item->type]);
+            $data = '<div class="column-item item-type item-type-0">' . check_plain($type_options[$item->type]) . '</div>';
           }
         }
         elseif ($column['column'] == 'status') {
           if (isset($status_options[$item->status])) {
-            $data = check_plain($status_options[$item->status]);
+            $data = '<div class="column-item item-status item-status-0">' . check_plain($status_options[$item->status]) . '</div>';
           }
         }
         elseif ($column['column'] == 'step') {
           if (isset($step_options[$item->step])) {
-            $data = check_plain($step_options[$item->step]);
+            $data = '<div class="column-item item-step item-step-0">' . check_plain($step_options[$item->step]) . '</div>';
           }
         }
         elseif ($column_id == 'submitted_by') {
-          $data = '';
+          $data = '<div class="column-item item-submitted_by item-submitted_by-0">';
 
           if (empty($item->submitted_by_name)) {
             $submitter = user_load($item->user_id);
@@ -10596,22 +10594,23 @@ function mfcs_build_request_ajax_table_process_rows($items, $columns, $user = NU
               $name = $item->submitted_by_first_name . ' ' . $item->submitted_by_last_name . ' (' . $item->submitted_by_name . ')';
             }
           }
+          $data .= '</div>';
 
           if ($manager || $administer) {
-            $data = '<a href="' . $base_path . 'requests/users-0/view/' . $item->user_id . $url_arguments . '">' . $name . '</a>';
+            $data = '<div class="column-item item-submitted_by item-submitted_by-0"><a href="' . $base_path . 'requests/users-0/view/' . $item->user_id . $url_arguments . '">' . $name . '</a></div>';
           }
           else {
-            $data = $name;
+            $data = '<div class="column-item item-submitted_by item-submitted_by-0">' . $name . '</div>';
           }
         }
         elseif ($column['column'] == 'created') {
-          $data = check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SQUEEZE, $item->created));
+          $data = '<div class="column-item item-created item-created-0">' . check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SQUEEZE, $item->created)) . '</div>';
         }
         elseif ($column['column'] == 'updated') {
-          $data = check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SQUEEZE, $item->updated));
+          $data = '<div class="column-item item-updated item-updated-0">' . check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SQUEEZE, $item->updated)) . '</div>';
         }
         elseif (!array_key_exists('sanitize', $column) || $column['sanitize'] === FALSE) {
-          $data = property_exists($item, $column['column']) ? check_plain($item->{$column['column']}) : '';
+          $data = (property_exists($item, $column['column']) ? check_plain($item->{$column['column']}) : '');
         }
         else {
           continue;
