@@ -52,9 +52,9 @@ function mfcs_request_manage_0_locks_form($form, &$form_state, $request_id) {
 
   mfcs_add_canonical_headers('requests/manage-0/locks/' . $request_id);
 
-  $page_title = "Request Locks";
+  $page_title = 'Request Locks';
   if (!empty($request['information']['title'][0]->value)) {
-    $page_title = "Locks for Request: " . $request['information']['title'][0]->value;
+    $page_title = 'Locks for Request: ' . $request['information']['title'][0]->value;
   }
   drupal_set_title($page_title);
 
@@ -123,14 +123,14 @@ function mfcs_request_manage_0_locks_form($form, &$form_state, $request_id) {
     '#id' => 'request-lock-submit-cancel',
     '#name' => 'request-lock-submit-cancel',
     '#type' => 'submit',
-    '#default_value' => t("Cancel"),
+    '#default_value' => 'Cancel',
   );
 
   $form['display']['submit']['submit'] = array(
     '#id' => 'request-lock-submit-submit',
     '#name' => 'request-lock-submit-submit',
     '#type' => 'submit',
-    '#default_value' => t("Submit"),
+    '#default_value' => 'Submit',
   );
 
   return $form;
@@ -218,8 +218,8 @@ function mfcs_request_manage_0_locks_form_submit($form, &$form_state) {
 
   $result = mfcs_set_request_locks($request_id, array('auto_cancel' => $auto_cancel));
   if (!$result) {
-    form_set_error('form', "An error occurred while trying to update the request's locks. Please contact the support staff.");
-    watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to update the request's locks for the request: @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
+    form_set_error('form', 'An error occurred while trying to update the request\'s locks. Please contact the support staff.');
+    watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to update the request\'s locks for the request: @request_id.', array('@request_id' => $request_id), WATCHDOG_ERROR);
 
     $form_state['rebuild'] = TRUE;
     $form_state['redirect'] = FALSE;

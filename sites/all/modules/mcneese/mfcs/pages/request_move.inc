@@ -221,7 +221,7 @@ function mfcs_request_manage_0_move_form($form, &$form_state, $request_id) {
     $form['log']['message'] = array(
       '#id' => 'move-log-message',
       '#type' => 'textarea',
-      '#title' => "Message",
+      '#title' => 'Message',
       '#default_value' => NULL,
       '#rows' => 4,
       '#attributes' => array(
@@ -258,14 +258,14 @@ function mfcs_request_manage_0_move_form($form, &$form_state, $request_id) {
       '#id' => 'submit-request-cancel',
       '#name' => 'submit-request-cancel',
       '#type' => 'submit',
-      '#default_value' => t("Cancel"),
+      '#default_value' => 'Cancel',
     );
 
     $form['display']['submit']['next'] = array(
       '#id' => 'submit-request-next',
       '#name' => 'submit-request-next',
       '#type' => 'submit',
-      '#default_value' => t("Continue"),
+      '#default_value' => 'Continue',
     );
   }
   elseif ($step == 'rooms') {
@@ -273,14 +273,14 @@ function mfcs_request_manage_0_move_form($form, &$form_state, $request_id) {
       '#id' => 'submit-request-prev',
       '#name' => 'submit-request-prev',
       '#type' => 'submit',
-      '#default_value' => t("Back"),
+      '#default_value' => 'Back',
     );
 
     $form['display']['submit']['next'] = array(
       '#id' => 'submit-request-next',
       '#name' => 'submit-request-next',
       '#type' => 'submit',
-      '#default_value' => t("Continue"),
+      '#default_value' => 'Continue',
     );
   }
   elseif ($step == 'final') {
@@ -288,14 +288,14 @@ function mfcs_request_manage_0_move_form($form, &$form_state, $request_id) {
       '#id' => 'submit-request-prev',
       '#name' => 'submit-request-prev',
       '#type' => 'submit',
-      '#default_value' => t("Back"),
+      '#default_value' => 'Back',
     );
 
     $form['display']['submit']['submit'] = array(
       '#id' => 'submit-request-submit',
       '#name' => 'submit-request-submit',
       '#type' => 'submit',
-      '#default_value' => t("Submit"),
+      '#default_value' => 'Submit',
     );
   }
 
@@ -489,7 +489,7 @@ function mfcs_request_manage_0_move_form_validate($form, &$form_state) {
 
         $room_unavailability = mfcs_check_room_availability($room_id, $all_dates, $all_time_start, $all_time_stop, $form['form']['request_id']['#value']);
         if ($room_unavailability === FALSE) {
-          form_set_error('', "An internal error occurred while checking the room for availability. Please contact the support staff.");
+          form_set_error('', 'An internal error occurred while checking the room for availability. Please contact the support staff.');
         }
         elseif (!empty($room_unavailability['conflicts']) || !empty($room_unavailability['unavailable'])) {
           $unavailable_message = '<span class="uppercase">Warning</span>: The specified room is currently unavailable for the following dates: ';
@@ -587,7 +587,7 @@ function mfcs_request_manage_0_move_form_submit($form, &$form_state) {
 
   $prepared = mfcs_prepare_request_values($request, $changes);
   if ($prepared === FALSE) {
-    form_set_error('form', "An error occurred while trying to save the request. Please contact the support staff.");
+    form_set_error('form', 'An error occurred while trying to save the request. Please contact the support staff.');
     $form_state['rebuild'] = TRUE;
     $form_state['redirect'] = FALSE;
     $form_state['submitted'] = FALSE;

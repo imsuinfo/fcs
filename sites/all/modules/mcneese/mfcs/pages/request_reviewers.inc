@@ -27,7 +27,7 @@ function mfcs_request_reviewers_0_page() {
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
-  $page_title = "Manage Reviewers";
+  $page_title = 'Manage Reviewers';
   drupal_set_title($page_title);
 
   $user = cf_current_user();
@@ -653,14 +653,14 @@ function mfcs_request_reviewers_0_form_validate($form, &$form_state) {
       unset($items_returned);
 
       if (count($reviewers) > 0) {
-        form_set_error('reviewer][user_id', "The specified user already exists with the specified reviewer classification.");
+        form_set_error('reviewer][user_id', 'The specified user already exists with the specified reviewer classification.');
       }
     }
   }
   elseif ($clicked_id == 'submit-reviewer-recheck') {
   }
   else {
-    form_set_error('', "Unknown submit process detected.");
+    form_set_error('', 'Unknown submit process detected.');
   }
 }
 
@@ -784,7 +784,7 @@ function mfcs_request_reviewers_0_form_submit($form, &$form_state) {
       $request_ids = $query->execute()->fetchAllKeyed();
 
       if (!is_array($request_ids) || empty($request_ids)) {
-        drupal_set_message("Recheck process complete.");
+        drupal_set_message('Recheck process complete.');
         return TRUE;
       }
     }
@@ -807,8 +807,8 @@ function mfcs_request_reviewers_0_form_submit($form, &$form_state) {
     }
 
     if ($decisions === FALSE) {
-      form_set_error('form', "An error occurred while trying to recheck the requests. Please contact the support staff.");
-      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to recheck the requests.", array(), WATCHDOG_ERROR);
+      form_set_error('form', 'An error occurred while trying to recheck the requests. Please contact the support staff.');
+      watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to recheck the requests.', array(), WATCHDOG_ERROR);
 
       $form_state['rebuild'] = TRUE;
       $form_state['redirect'] = FALSE;
@@ -822,13 +822,13 @@ function mfcs_request_reviewers_0_form_submit($form, &$form_state) {
           continue;
         }
 
-        $message = "This request's workflow has changed as a result of a change in the reviewer management settings.";
+        $message = 'This request\'s workflow has changed as a result of a change in the reviewer management settings.';
 
         mfcs_workflow_next_step($request_id, $classification, $step, MFCS_REVIEW_DECISION_MANAGER_RECHECK, MFCS_REVIEW_RESTRICTIONS_NONE, $message, TRUE);
       }
     }
 
-    drupal_set_message("Recheck process complete.");
+    drupal_set_message('Recheck process complete.');
   }
 
   // redirect after submitting.
@@ -972,11 +972,11 @@ function mfcs_request_reviewers_0_delete_form($form, &$form_state, $id) {
   }
 
   return confirm_form($form,
-    t("Are you sure you want to delete the account %user (%id) from being a %request_classification_name reviewer?", array('%user' => $user_name, '%id' => $reviewer->user_id, '%request_classification_name' => $request_classification_name)),
+    t('Are you sure you want to delete the account %user (%id) from being a %request_classification_name reviewer?', array('%user' => $user_name, '%id' => $reviewer->user_id, '%request_classification_name' => $request_classification_name)),
     $destination,
-    t("This action cannot be undone."),
-    t("Delete"),
-    t("Cancel")
+    'This action cannot be undone.',
+    'Delete',
+    'Cancel'
   );
 }
 
@@ -1004,7 +1004,7 @@ function mfcs_request_reviewers_0_delete_form_validate($form, &$form_state) {
   }
 
   if (!is_object($reviewer)) {
-    form_set_error('', "An invalid reviewer id has been specified.");
+    form_set_error('', 'An invalid reviewer id has been specified.');
   }
 }
 
@@ -1037,8 +1037,8 @@ function mfcs_request_reviewers_0_delete_form_submit($form, &$form_state) {
     $transaction->rollback();
     cf_error::on_query_execution($e);
 
-    form_set_error('form', "An error occurred while trying to delete the reviewer. Please contact the support staff.");
-    watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to delete the reviewer '%reviewer_id'.", array('%reviewer_id' => $form['form']['id']['#value']), WATCHDOG_ERROR);
+    form_set_error('form', 'An error occurred while trying to delete the reviewer. Please contact the support staff.');
+    watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to delete the reviewer \'%reviewer_id\'.', array('%reviewer_id' => $form['form']['id']['#value']), WATCHDOG_ERROR);
 
     $form_state['rebuild'] = TRUE;
     $form_state['redirect'] = FALSE;
@@ -1049,8 +1049,8 @@ function mfcs_request_reviewers_0_delete_form_submit($form, &$form_state) {
     $transaction->rollback();
     cf_error::on_query_execution($e);
 
-    form_set_error('form', "An error occurred while trying to delete the reviewer. Please contact the support staff.");
-    watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to delete the reviewer '%reviewer_id'.", array('%reviewer_id' => $form['form']['id']['#value']), WATCHDOG_ERROR);
+    form_set_error('form', 'An error occurred while trying to delete the reviewer. Please contact the support staff.');
+    watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to delete the reviewer \'%reviewer_id\'.', array('%reviewer_id' => $form['form']['id']['#value']), WATCHDOG_ERROR);
 
     $form_state['rebuild'] = TRUE;
     $form_state['redirect'] = FALSE;

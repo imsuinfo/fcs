@@ -1057,7 +1057,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         '#type' => 'fieldset',
         '#collapsible' => TRUE,
         '#collapsed' => FALSE,
-        '#title' => "Review Log",
+        '#title' => 'Review Log',
         '#attributes' => array(
           'class' => array(
             'request-section-review-log',
@@ -2006,7 +2006,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
       $form['review']['operations']['message'] = array(
         '#id' => 'request-review-operations-message',
         '#type' => 'textarea',
-        '#title' => "Message",
+        '#title' => 'Message',
         '#default_value' => NULL,
         '#rows' => 4,
         '#attributes' => array(
@@ -2036,7 +2036,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         '#id' => 'request-review-operations-submit-submit',
         '#name' => 'request-review-operations-submit-submit',
         '#type' => 'submit',
-        '#default_value' => t("Submit"),
+        '#default_value' => 'Submit',
         '#attributes' => array(
           'class' => array(
             'no-print',

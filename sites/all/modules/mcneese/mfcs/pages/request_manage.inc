@@ -40,9 +40,9 @@ function mfcs_request_manage_0_page($request_id) {
 
   mfcs_add_canonical_headers('requests/manage-0/' . $request_id);
 
-  $page_title = "Manage Request";
+  $page_title = 'Manage Request';
   if (!empty($request['information']['title'][0]->value)) {
-    $page_title = "Manage Request: " . $request['information']['title'][0]->value;
+    $page_title = 'Manage Request: ' . $request['information']['title'][0]->value;
   }
   drupal_set_title($page_title);
 

@@ -966,7 +966,7 @@ function mfcs_request_problems_0_user_form_validate($form, &$form_state) {
   }
 
   if (!$do_something) {
-    form_set_error('', "You have not specified any action to perform.");
+    form_set_error('', 'You have not specified any action to perform.');
     return;
   }
 }
@@ -1731,7 +1731,7 @@ function mfcs_request_problems_0_requests_form($form, &$form_state, $page_number
   $problem_list['attributes']['summary'] = 'Collection of requests in which the system has detected problems with.';
 
   $problem_list['rows'] = $rows;
-  $problem_list['empty'] = t("There are no requests with problems detected by the system.");
+  $problem_list['empty'] = 'There are no requests with problems detected by the system.';
 
   $datatable_settings = array(
     'sort' => strtolower($sort),
@@ -2740,7 +2740,7 @@ function mfcs_request_problems_0_request_recheck($problem_id) {
 
   mfcs_add_canonical_headers('requests/problems-0/requests/request/' . $problem_id . '/recheck');
 
-  $page_title = "Facilities Use Problems - Re-Check Problem";
+  $page_title = 'Facilities Use Problems - Re-Check Problem';
   drupal_set_title($page_title);
 
   mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
@@ -2912,7 +2912,7 @@ function mfcs_request_problem_0_request_perform_recache($request_id) {
     $latest = $query->execute()->fetchObject();
 
     if (!is_object($latest)) {
-      watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to perform a recache on the request: @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
+      watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to perform a recache on the request: @request_id.', array('@request_id' => $request_id), WATCHDOG_ERROR);
       return FALSE;
     }
 

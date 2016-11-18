@@ -77,7 +77,7 @@ function mfcs_request_troubleshoot_0_form($form, &$form_state, $request_id = NUL
     mfcs_add_canonical_headers('requests/troubleshoot-0/' . $request_id);
   }
 
-  $page_title = "Facilities Use Troubleshooting Tools";
+  $page_title = 'Facilities Use Troubleshooting Tools';
   drupal_set_title($page_title);
 
   $module_path = drupal_get_path('module', 'mfcs');
@@ -122,7 +122,7 @@ function mfcs_request_troubleshoot_0_form($form, &$form_state, $request_id = NUL
     '#id' => 'troubleshoot-' . $code . '-submit',
     '#name' => 'troubleshoot-' . $code . '-submit',
     '#type' => 'submit',
-    '#default_value' => t("Re-check all Requests Reviews"),
+    '#default_value' => 'Re-check all Requests Reviews',
     '#attributes' => array(
       'class' => array(
         'no-print',
@@ -167,7 +167,7 @@ function mfcs_request_troubleshoot_0_form($form, &$form_state, $request_id = NUL
     '#id' => 'troubleshoot-' . $code . '-submit',
     '#name' => 'troubleshoot-' . $code . '-submit',
     '#type' => 'submit',
-    '#default_value' => t("Re-synchronize Requests Cache"),
+    '#default_value' => 'Re-synchronize Requests Cache',
     '#attributes' => array(
       'class' => array(
         'no-print',
@@ -213,7 +213,7 @@ function mfcs_request_troubleshoot_0_form($form, &$form_state, $request_id = NUL
     '#id' => 'troubleshoot-' . $code . '-submit',
     '#name' => 'troubleshoot-' . $code . '-submit',
     '#type' => 'submit',
-    '#default_value' => t("Re-synchronize Banner Cache"),
+    '#default_value' => 'Re-synchronize Banner Cache',
     '#attributes' => array(
       'class' => array(
         'no-print',
@@ -258,7 +258,7 @@ function mfcs_request_troubleshoot_0_form($form, &$form_state, $request_id = NUL
     '#id' => 'troubleshoot-' . $code . '-submit',
     '#name' => 'troubleshoot-' . $code . '-submit',
     '#type' => 'submit',
-    '#default_value' => t("Re-synchronize Banner Role Cache"),
+    '#default_value' => 'Re-synchronize Banner Role Cache',
     '#attributes' => array(
       'class' => array(
         'no-print',
@@ -639,8 +639,8 @@ function mfcs_request_troubleshoot_0_request_review_recheck($transaction, $user 
         if ($decisions === FALSE) {
           $transaction->rollback();
 
-          form_set_error('form', "An error occurred while trying to recheck the requests. Please contact the support staff.");
-          watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to recheck the requests.", array(), WATCHDOG_ERROR);
+          form_set_error('form', 'An error occurred while trying to recheck the requests. Please contact the support staff.');
+          watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to recheck the requests.', array(), WATCHDOG_ERROR);
 
           return FALSE;
         }
@@ -651,7 +651,7 @@ function mfcs_request_troubleshoot_0_request_review_recheck($transaction, $user 
               continue;
             }
 
-            $message = "This request's workflow has changed as a result of a change in the reviewer management settings.";
+            $message = 'This request\'s workflow has changed as a result of a change in the reviewer management settings.';
 
             mfcs_workflow_next_step($request_id, $classification, $step, MFCS_REVIEW_DECISION_MANAGER_RECHECK, MFCS_REVIEW_RESTRICTIONS_NONE, $message, TRUE);
           }
@@ -867,10 +867,10 @@ function mfcs_request_troubleshoot_0_mer_cache_synchronize($transaction, $user =
 
 
     // fix all out of sync requests.
-    drupal_set_message(t("A total of @total requests have been detected to be out of sync.", array('@total' => count($requests))));
-    watchdog(MFCS_WATCHDOG_ID, "The following requests have been detected to be out of sync during the re-sync process: @requests.", array('@requests' => print_r(array_keys($requests), TRUE)), WATCHDOG_NOTICE);
+    drupal_set_message(t('A total of @total requests have been detected to be out of sync.', array('@total' => count($requests))));
+    watchdog(MFCS_WATCHDOG_ID, 'The following requests have been detected to be out of sync during the re-sync process: @requests.', array('@requests' => print_r(array_keys($requests), TRUE)), WATCHDOG_NOTICE);
     foreach ($requests as $request_id => $request) {
-      drupal_set_message(t("Request @request_id is out of sync and is being corrected.", array('@request_id' => $request_id)));
+      drupal_set_message(t('Request @request_id is out of sync and is being corrected.', array('@request_id' => $request_id)));
 
       // make sure the updated date is the same as the new revision date.
       $request['updated'] = $instance;
@@ -885,7 +885,7 @@ function mfcs_request_troubleshoot_0_mer_cache_synchronize($transaction, $user =
         'request_id' => $request_id,
         'user_id' => $user->uid,
         'date' => $instance,
-        'message' => "Request cache has been detected to be out of sync and is now corrected.",
+        'message' => 'Request cache has been detected to be out of sync and is now corrected.',
       );
 
       $request_revision = mfcs_load_request_revision_number($request_id);
@@ -893,7 +893,7 @@ function mfcs_request_troubleshoot_0_mer_cache_synchronize($transaction, $user =
 
       if ($request_revision === FALSE) {
         $transaction->rollback();
-        watchdog(MFCS_WATCHDOG_ID, "Failed to load revision number for request %request_id.", array('%request_id' => $request_id), WATCHDOG_ERROR);
+        watchdog(MFCS_WATCHDOG_ID, 'Failed to load revision number for request %request_id.', array('%request_id' => $request_id), WATCHDOG_ERROR);
         return FALSE;
       }
       elseif (is_null($request_revision)) {
@@ -1115,7 +1115,7 @@ function mfcs_request_troubleshoot_0_locations_edit_name_form($form, &$form_stat
 
   mfcs_add_canonical_headers('requests/troubleshoot-0/locations/' . $location_id . '/edit');
 
-  $page_title = "Troubleshooting - Locations - Edit Name";
+  $page_title = 'Troubleshooting - Locations - Edit Name';
   drupal_set_title($page_title);
 
   $user = cf_current_user();
@@ -1145,7 +1145,7 @@ function mfcs_request_troubleshoot_0_locations_edit_name_form($form, &$form_stat
 
   $form['location']['name'] = array(
     '#type' => 'textfield',
-    '#title' => "Name",
+    '#title' => 'Name',
     '#default_value' => $location->location_name,
     '#required' => TRUE,
   );
@@ -1166,7 +1166,7 @@ function mfcs_request_troubleshoot_0_locations_edit_name_form($form, &$form_stat
     '#id' => 'locations-edit_name-submit-cancel',
     '#name' => 'locations-edit_name-submit-cancel',
     '#type' => 'submit',
-    '#default_value' => t("Cancel"),
+    '#default_value' => 'Cancel',
     '#attributes' => array(
       'class' => array(
         'no-print',
@@ -1179,7 +1179,7 @@ function mfcs_request_troubleshoot_0_locations_edit_name_form($form, &$form_stat
     '#id' => 'locations-edit_name-submit-submit',
     '#name' => 'locations-edit_name-submit-submit',
     '#type' => 'submit',
-    '#default_value' => t("Submit"),
+    '#default_value' => 'Submit',
     '#attributes' => array(
       'class' => array(
         'no-print',
@@ -1272,8 +1272,8 @@ function mfcs_request_troubleshoot_0_locations_edit_name_form_submit($form, &$fo
   }
 
   if ($failure) {
-    form_set_error('form', "An error occurred while trying to save the location name. Please contact the support staff.");
-    watchdog(MFCS_WATCHDOG_ID, "An error occurred while trying to save the location name.", array(), WATCHDOG_ERROR);
+    form_set_error('form', 'An error occurred while trying to save the location name. Please contact the support staff.');
+    watchdog(MFCS_WATCHDOG_ID, 'An error occurred while trying to save the location name.', array(), WATCHDOG_ERROR);
 
     $form_state['rebuild'] = TRUE;
     $form_state['redirect'] = FALSE;
@@ -1402,7 +1402,7 @@ function mfcs_request_troubleshoot_0_buildings_page($building_id = NULL) {
       $target_markup .= '    </li>';
       $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-location_disabled even">';
       $target_markup .= '      <div class="information_page-entry-list-item-name">Location Disabled / Deleted:</div> ';
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . ($entry->location_disabled == 0 ? "No" : "Yes") . '</div>';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . ($entry->location_disabled == 0 ? 'No' : 'Yes') . '</div>';
       $target_markup .= '    </li>';
       $target_markup .= '  </ul>';
       $target_markup .= '</div>';
@@ -1423,7 +1423,7 @@ function mfcs_request_troubleshoot_0_buildings_page($building_id = NULL) {
     return $markup;
   }
 
-  $markup .= '<h3 id="mfcs-troubleshoot_0-buildings-page-section-enabled" class="information_page-section-title information_page-section-title-enabled">' . "Enabled Buildings" . '</h3>';
+  $markup .= '<h3 id="mfcs-troubleshoot_0-buildings-page-section-enabled" class="information_page-section-title information_page-section-title-enabled">Enabled Buildings</h3>';
   $markup .= '<div class="information_page-section-content information_page-section-content-enabled">';
   if (empty($markup_enabled)) {
     $markup .= 'There are no entries in this section.';
@@ -1435,7 +1435,7 @@ function mfcs_request_troubleshoot_0_buildings_page($building_id = NULL) {
 
   $markup .= '<hr class="information_page-section-separator">';
 
-  $markup .= '<h3 id="mfcs-troubleshoot_0-buildings-page-section-disabled" class="information_page-section-title information_page-section-title-disabled">' . "Disabled / Deleted Buildings" . '</h3>';
+  $markup .= '<h3 id="mfcs-troubleshoot_0-buildings-page-section-disabled" class="information_page-section-title information_page-section-title-disabled">Disabled / Deleted Buildings</h3>';
   $markup .= '<div class="information_page-section-content information_page-section-content-disabled">';
   if (empty($markup_disabled)) {
     $markup .= 'There are no entries in this section.';
@@ -1555,7 +1555,7 @@ function mfcs_request_troubleshoot_0_rooms_page($room_id = NULL) {
       $target_markup .= '    </li>';
       $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-room_disabled odd">';
       $target_markup .= '      <div class="information_page-entry-list-item-name">Disabled / Deleted:</div> ';
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . ($entry->room_disabled == 0 ? "No" : "Yes") . '</div>';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . ($entry->room_disabled == 0 ? 'No' : 'Yes') . '</div>';
       $target_markup .= '    </li>';
       $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-room_coordinator even">';
       $target_markup .= '      <div class="information_page-entry-list-item-name">Room Coordinator:</div> ';
@@ -1591,7 +1591,7 @@ function mfcs_request_troubleshoot_0_rooms_page($room_id = NULL) {
       $target_markup .= '    </li>';
       $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-building_disabled even">';
       $target_markup .= '      <div class="information_page-entry-list-item-name">Building Disabled / Deleted:</div> ';
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . ($entry->building_disabled == 0 ? "No" : "Yes") . '</div>';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . ($entry->building_disabled == 0 ? 'No' : 'Yes') . '</div>';
       $target_markup .= '    </li>';
       $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-location_id odd">';
       $target_markup .= '      <div class="information_page-entry-list-item-name">Location ID:</div> ';
@@ -1611,7 +1611,7 @@ function mfcs_request_troubleshoot_0_rooms_page($room_id = NULL) {
       $target_markup .= '    </li>';
       $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-location_disabled odd">';
       $target_markup .= '      <div class="information_page-entry-list-item-name">Location Disabled / Deleted:</div> ';
-      $target_markup .= '      <div class="information_page-entry-list-item-value">' . ($entry->location_disabled == 0 ? "No" : "Yes") . '</div>';
+      $target_markup .= '      <div class="information_page-entry-list-item-value">' . ($entry->location_disabled == 0 ? 'No' : 'Yes') . '</div>';
       $target_markup .= '    </li>';
       $target_markup .= '  </ul>';
       $target_markup .= '</div>';
@@ -1632,7 +1632,7 @@ function mfcs_request_troubleshoot_0_rooms_page($room_id = NULL) {
     return $markup;
   }
 
-  $markup .= '<h3 id="mfcs-troubleshoot_0-rooms-page-section-enabled" class="information_page-section-title information_page-section-title-enabled">' . "Enabled Rooms" . '</h3>';
+  $markup .= '<h3 id="mfcs-troubleshoot_0-rooms-page-section-enabled" class="information_page-section-title information_page-section-title-enabled">"Enabled Rooms</h3>';
   $markup .= '<div class="information_page-section-content information_page-section-content-enabled">';
   if (empty($markup_enabled)) {
     $markup .= 'There are no entries in this section.';
@@ -1644,7 +1644,7 @@ function mfcs_request_troubleshoot_0_rooms_page($room_id = NULL) {
 
   $markup .= '<hr class="information_page-section-separator">';
 
-  $markup .= '<h3 id="mfcs-troubleshoot_0-rooms-page-section-disabled" class="information_page-section-title information_page-section-title-disabled">' . "Disabled / Deleted Rooms" . '</h3>';
+  $markup .= '<h3 id="mfcs-troubleshoot_0-rooms-page-section-disabled" class="information_page-section-title information_page-section-title-disabled">Disabled / Deleted Rooms</h3>';
   $markup .= '<div class="information_page-section-content information_page-section-content-disabled">';
   if (empty($markup_disabled)) {
     $markup .= 'There are no entries in this section.';

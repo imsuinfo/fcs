@@ -1143,7 +1143,7 @@ function mfcs_request_users_0_add_or_edit_form($form, &$form_state, $user_id = N
     '#type' => 'fieldset',
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
-    '#title' => "Personal Information",
+    '#title' => 'Personal Information',
     '#attributes' => array(
       'class' => array(
         'manage-users_0-add-fieldset-personal',
@@ -1154,17 +1154,17 @@ function mfcs_request_users_0_add_or_edit_form($form, &$form_state, $user_id = N
 
   $form['form']['personal']['account'] = array(
     '#type' => 'textfield',
-    '#title' => "Account Name",
+    '#title' => 'Account Name',
     '#default_value' => '',
-    '#description' => "This is normally identical to their LDAP/Portal name.",
+    '#description' => 'This is normally identical to their LDAP/Portal name.',
     '#required' => TRUE,
   );
 
   $form['form']['personal']['name_first'] = array(
     '#type' => 'textfield',
-    '#title' => "First Name",
+    '#title' => 'First Name',
     '#default_value' => '',
-    '#description' => "Unless bannerless exception is specified, this field is auto-populated and can be ignored (values will get overwritten).",
+    '#description' => 'Unless bannerless exception is specified, this field is auto-populated and can be ignored (values will get overwritten).',
     '#required' => FALSE,
     '#states' => array(
       'visible' => array(
@@ -1178,9 +1178,9 @@ function mfcs_request_users_0_add_or_edit_form($form, &$form_state, $user_id = N
 
   $form['form']['personal']['name_last'] = array(
     '#type' => 'textfield',
-    '#title' => "Last Name",
+    '#title' => 'Last Name',
     '#default_value' => '',
-    '#description' => "Unless bannerless exception is specified, this field is auto-populated and should be ignored (values will get overwritten).",
+    '#description' => 'Unless bannerless exception is specified, this field is auto-populated and should be ignored (values will get overwritten).',
     '#required' => FALSE,
     '#states' => array(
       'visible' => array(
@@ -1194,32 +1194,32 @@ function mfcs_request_users_0_add_or_edit_form($form, &$form_state, $user_id = N
 
   $form['form']['personal']['account'] = array(
     '#type' => 'textfield',
-    '#title' => "Account Name",
+    '#title' => 'Account Name',
     '#default_value' => '',
-    '#description' => "This is normally identical to their LDAP/Portal name. This cannot be changed once an account is created.",
+    '#description' => 'This is normally identical to their LDAP/Portal name. This cannot be changed once an account is created.',
     '#required' => TRUE,
   );
 
   $form['form']['personal']['email'] = array(
     '#type' => 'emailfield',
-    '#title' => "E-Mail Address",
+    '#title' => 'E-Mail Address',
     '#default_value' => '',
-    '#description' => "This must be a McNeese e-mail address. If not specified, then this is auto-populated from the account name.",
+    '#description' => 'This must be a McNeese e-mail address. If not specified, then this is auto-populated from the account name.',
     '#required' => FALSE,
   );
 
   $form['form']['personal']['banner_id'] = array(
     '#type' => 'numberfield',
-    '#title' => "Banner ID",
+    '#title' => 'Banner ID',
     '#default_value' => '',
     '#min' => 0,
-    '#description' => "The Banner ID will be auto-populated unless the user is assigned the <em>Bannerless Exception</em> role.",
+    '#description' => 'The Banner ID will be auto-populated unless the user is assigned the <em>Bannerless Exception</em> role.',
     '#required' => TRUE,
   );
 
   $form['form']['personal']['phone'] = array(
     '#type' => 'telfield',
-    '#title' => "Phone Number",
+    '#title' => 'Phone Number',
     '#default_value' => '',
     '#required' => FALSE,
   );
@@ -1229,7 +1229,7 @@ function mfcs_request_users_0_add_or_edit_form($form, &$form_state, $user_id = N
     '#type' => 'fieldset',
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
-    '#title' => "User Roles",
+    '#title' => 'User Roles',
     '#attributes' => array(
       'class' => array(
         'manage-users_0-add-fieldset-roles',
@@ -1240,34 +1240,34 @@ function mfcs_request_users_0_add_or_edit_form($form, &$form_state, $user_id = N
 
   $form['form']['roles']['basic'] = array(
     '#type' => 'checkboxes',
-    '#title' => "Basic Roles",
+    '#title' => 'Basic Roles',
     '#default_value' => array(10),
     '#options' => $roles_basic,
-    '#description' => "These roles are auto-populated from Banner unless either <em>Manager</em> or <em>Bannerless Exception</em> roles are assigned.",
+    '#description' => 'These roles are auto-populated from Banner unless either <em>Manager</em> or <em>Bannerless Exception</em> roles are assigned.',
   );
 
   $form['form']['roles']['venue'] = array(
     '#type' => 'checkboxes',
-    '#title' => "Venue-Specific Roles",
+    '#title' => 'Venue-Specific Roles',
     '#default_value' => array(),
     '#options' => $roles_venue,
-    '#description' => "These roles are auto-populated from Banner unless either <em>Manager</em> or <em>Bannerless Exception</em> roles are assigned.",
+    '#description' => 'These roles are auto-populated from Banner unless either <em>Manager</em> or <em>Bannerless Exception</em> roles are assigned.',
   );
 
   $form['form']['roles']['special'] = array(
     '#type' => 'checkboxes',
-    '#title' => "Special/Exceptional Roles",
+    '#title' => 'Special/Exceptional Roles',
     '#default_value' => array(),
     '#options' => $roles_special,
-    '#description' => "Special case roles. For example, if the <em>Bannerless Exception</em> role is specified, then the Venue-Specific Roles are not auto-enforced.",
+    '#description' => 'Special case roles. For example, if the <em>Bannerless Exception</em> role is specified, then the Venue-Specific Roles are not auto-enforced.',
   );
 
   $form['form']['roles']['administer'] = array(
     '#type' => 'checkboxes',
-    '#title' => "Administration Roles",
+    '#title' => 'Administration Roles',
     '#default_value' => array(),
     '#options' => $roles_administer,
-    '#description' => "These roles are related to administration and management tasks. These may only be applied to users with the <em>Manager</em> role.",
+    '#description' => 'These roles are related to administration and management tasks. These may only be applied to users with the <em>Manager</em> role.',
   );
 
   $form['form']['status'] = array(
@@ -1275,7 +1275,7 @@ function mfcs_request_users_0_add_or_edit_form($form, &$form_state, $user_id = N
     '#type' => 'fieldset',
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
-    '#title' => "User Status",
+    '#title' => 'User Status',
     '#attributes' => array(
       'class' => array(
         'manage-users_0-add-fieldset-status',
@@ -1287,16 +1287,16 @@ function mfcs_request_users_0_add_or_edit_form($form, &$form_state, $user_id = N
 
   $form['form']['status']['primary'] = array(
     '#type' => 'checkbox',
-    '#title' => "Primary Account",
+    '#title' => 'Primary Account',
     '#default_value' => TRUE,
-    '#description' => "When enabled, this user account is the preferred account that the user is expected to log in as. This only matters when dealing with users who have multiple ldap names (such as when they have name changes or they have both student and non-student accounts).",
+    '#description' => 'When enabled, this user account is the preferred account that the user is expected to log in as. This only matters when dealing with users who have multiple ldap names (such as when they have name changes or they have both student and non-student accounts).',
   );
 
   $form['form']['status']['locked'] = array(
     '#type' => 'checkbox',
-    '#title' => "Lock Account",
+    '#title' => 'Lock Account',
     '#default_value' => FALSE,
-    '#description' => "When enabled, the user account will be locked and the user is denied login access to the system.",
+    '#description' => 'When enabled, the user account will be locked and the user is denied login access to the system.',
   );
 
   $form['buttons'] = array(
@@ -1307,14 +1307,14 @@ function mfcs_request_users_0_add_or_edit_form($form, &$form_state, $user_id = N
     '#id' => 'submit-buttons-cancel',
     '#name' => 'submit-buttons-cancel',
     '#type' => 'submit',
-    '#default_value' => t("Cancel"),
+    '#default_value' => 'Cancel',
   );
 
   $form['buttons']['submit'] = array(
     '#id' => 'submit-buttons-submit',
     '#name' => 'submit-buttons-submit',
     '#type' => 'submit',
-    '#default_value' => t("Submit"),
+    '#default_value' => 'Submit',
   );
 
   if (is_object($account)) {
@@ -1438,7 +1438,7 @@ function mfcs_request_users_0_add_or_edit_form_pre_validate(&$form, &$form_state
       if (!$bannerless_exception) {
         $ldap_banner_id = (int) $ldap_user['attr']['employeenumber'][0];
         if ($banner_id != $ldap_banner_id) {
-          form_set_error('form][personal][banner_id', "The specified Banner ID (" . $banner_id . ") does not match the Banner ID associated with the account '" . $user_name . "' (" . $ldap_banner_id . ")");
+          form_set_error('form][personal][banner_id', 'The specified Banner ID (' . $banner_id . ') does not match the Banner ID associated with the account \'' . $user_name . '\' (' . $ldap_banner_id . ')');
         }
       }
     }
@@ -1466,7 +1466,7 @@ function mfcs_request_users_0_add_or_edit_form_pre_validate(&$form, &$form_state
     }
     else {
       if ($ldap_user === FALSE) {
-        form_set_error('form][personal][account', "Cannot " . ($edit ? "edit" : "create") . " the account '" . $user_name . "'. Only valid McNeese Portal or McNeese E-mail accounts may be specified.");
+        form_set_error('form][personal][account', 'Cannot ' . ($edit ? 'edit' : 'create') . ' the account \'' . $user_name . '\'. Only valid McNeese Portal or McNeese E-mail accounts may be specified.');
       }
     }
   }
@@ -1488,7 +1488,7 @@ function mfcs_request_users_0_add_or_edit_form_pre_validate(&$form, &$form_state
     if (isset($form['user']['#value']) && is_object($form['user']['#value']) && $form['user']['#value']->uid == $user->uid) {
       $administer_role_id = array_search('administrator', $form['roles']['administer']['#value']);
       if (!isset($form_state['values']['form']['roles']['administer'][$administer_role_id]) || $form_state['values']['form']['roles']['administer'][$administer_role_id] != $administer_role_id) {
-        form_set_error('form][roles][administer', "Will not remove administration role from your own account.");
+        form_set_error('form][roles][administer', 'Will not remove administration role from your own account.');
       }
     }
   }
@@ -1496,12 +1496,12 @@ function mfcs_request_users_0_add_or_edit_form_pre_validate(&$form, &$form_state
     $administer_role_id = array_search('administrator', $form['roles']['administer']['#value']);
     if (isset($form['form']['roles']['administer']['#default_value'][$administer_role_id])) {
       if (isset($form_state['values']['form']['roles']['administer'][$administer_role_id]) && $form['form']['roles']['administer']['#default_value'][$administer_role_id] != $form_state['values']['form']['roles']['administer'][$administer_role_id]) {
-        form_set_error('form][roles][administer', "Only a system administrator may add/remove the administration role from users.");
+        form_set_error('form][roles][administer', 'Only a system administrator may add/remove the administration role from users.');
       }
     }
     else {
       if (isset($form_state['values']['form']['roles']['administer'][$administer_role_id]) && $form_state['values']['form']['roles']['administer'][$administer_role_id] == $administer_role_id) {
-        form_set_error('form][roles][administer', "Only a system administrator may add/remove the administration role from users.");
+        form_set_error('form][roles][administer', 'Only a system administrator may add/remove the administration role from users.');
       }
     }
   }
@@ -1511,7 +1511,7 @@ function mfcs_request_users_0_add_or_edit_form_pre_validate(&$form, &$form_state
     if (!$is_administer && $is_manager) {
       $manager_role_id = array_search('manager', $form['roles']['basic']['#value']);
       if (!isset($form_state['values']['form']['roles']['basic'][$manager_role_id]) || $form_state['values']['form']['roles']['basic'][$manager_role_id] != $manager_role_id) {
-        form_set_error('form][roles][administer', "Will not remove manager role from your own account.");
+        form_set_error('form][roles][administer', 'Will not remove manager role from your own account.');
       }
     }
   }

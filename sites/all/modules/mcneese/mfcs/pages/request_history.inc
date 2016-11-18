@@ -61,9 +61,9 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
   mfcs_add_canonical_headers('requests/history-0/' . $request_id);
 
 
-  $page_title = "Request History";
+  $page_title = 'Request History';
   if (!empty($request['information']['title'][0]->value)) {
-    $page_title = "Request History: " . $request['information']['title'][0]->value;
+    $page_title = 'Request History: ' . $request['information']['title'][0]->value;
   }
   drupal_set_title($page_title);
 
@@ -174,7 +174,7 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
           $message_markup = '<div class="history_item-message">';
 
           if (!empty($revision->message)) {
-            $message_markup .= '<pre class="history_item-message-preserved">' . $revision->message . "</pre>";
+            $message_markup .= '<pre class="history_item-message-preserved">' . $revision->message . '</pre>';
           }
 
           $message_markup .= '</div>';
@@ -200,7 +200,7 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
             );
 
             $form['history'][$fieldset_name]['history_item-signature_fieldset']['signature'] = array(
-              '#markup' => '<pre class="history_item-signature-preserved">' . $revision->signature . "</pre>",
+              '#markup' => '<pre class="history_item-signature-preserved">' . $revision->signature . '</pre>',
             );
           }
         }
@@ -324,41 +324,41 @@ function mfcs_request_history_0_form($form, &$form_state, $request_id, $page_num
                       }
                       elseif ($decision === MFCS_REVIEW_DECISION_CANCEL) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
-                        $custom_message .= ' the request was <strong class="review-decision">' . "Cancelled" . '</strong>. ';
+                        $custom_message .= ' the request was <strong class="review-decision">Cancelled</strong>. ';
                       }
                       elseif ($decision === MFCS_REVIEW_DECISION_UNCANCEL) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
-                        $custom_message .= ' the request was <strong class="review-decision">' . "Uncancelled" . '</strong>. ';
+                        $custom_message .= ' the request was <strong class="review-decision">Uncancelled</strong>. ';
                       }
                       elseif ($decision === MFCS_REVIEW_DECISION_REASSIGN_COORDINATOR) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
-                        $custom_message .= ' the request\'s Venue Coordinator has been manually <strong class="review-decision">' . "Re-Assigned" . '</strong>. ';
+                        $custom_message .= ' the request\'s Venue Coordinator has been manually <strong class="review-decision">Re-Assigned</strong>. ';
                       }
                       elseif ($decision === MFCS_REVIEW_DECISION_REASSIGN_REQUESTER) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
-                        $custom_message .= ' the request\'s Requester has been manually <strong class="review-decision">' . "Re-Assigned" . '</strong>. ';
+                        $custom_message .= ' the request\'s Requester has been manually <strong class="review-decision">Re-Assigned</strong>. ';
                       }
                       elseif ($decision === MFCS_REVIEW_DECISION_OVERRIDE) {
-                        $custom_message = 'The request\'s step and/or status have been manually <strong class="review-decision">' . "Overridden" . '</strong>. ';
+                        $custom_message = 'The request\'s step and/or status have been manually <strong class="review-decision">Overridden</strong>. ';
                       }
                       elseif ($decision === MFCS_REVIEW_DECISION_CLOSE) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
-                        $custom_message .= ' the request was <strong class="review-decision">' . "Closed" . '</strong>. ';
+                        $custom_message .= ' the request was <strong class="review-decision">Closed</strong>. ';
                       }
                       elseif ($decision === MFCS_REVIEW_DECISION_AMENDMENT) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
-                        $custom_message .= ' the request was <strong class="review-decision">' . "Amended" . '</strong>. ';
+                        $custom_message .= ' the request was <strong class="review-decision">Amended</strong>. ';
                       }
                       elseif ($decision === MFCS_REVIEW_DECISION_ISSUES) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
-                        $custom_message .= ' the reviewer has reported that they have <strong class="review-decision">' . "Issues" . '</strong> with the request. ';
+                        $custom_message .= ' the reviewer has reported that they have <strong class="review-decision">Issues</strong> with the request. ';
                       }
                       elseif ($decision === MFCS_REVIEW_DECISION_ISSUES_NONE) {
                         $custom_message = 'During the <strong class="review-step">' . $step_options[$value->step] . ' Step</strong> ';
-                        $custom_message .= ' the reviewer has reported that they have <strong class="review-decision">' . "No Issues" . '</strong> with the request. ';
+                        $custom_message .= ' the reviewer has reported that they have <strong class="review-decision">No Issues</strong> with the request. ';
                       }
                       elseif ($decision === MFCS_REVIEW_DECISION_MOVE) {
-                        $custom_message = 'The request has been <strong class="review-decision">' . "Moved" . '</strong> to another location, building, or room. ';
+                        $custom_message = 'The request has been <strong class="review-decision">Moved</strong> to another location, building, or room. ';
                       }
 
                       $processed_values[$value->user_id]['fields'][$group_name][$field_name][$key] = array(
@@ -627,7 +627,7 @@ function mfcs_request_history_0_form_build_updater_name($user_id, &$processed_va
     }
 
     if (is_null($updater_name)) {
-      $updater_name = "Unknown User [id: " . check_plain($user_data->value) . "]";
+      $updater_name = 'Unknown User [id: ' . check_plain($user_data->value) . ']';
     }
 
     $processed_values[$user_id] = array(
