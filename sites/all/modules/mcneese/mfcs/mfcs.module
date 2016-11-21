@@ -10332,6 +10332,34 @@ function mfcs_build_request_ajax_table($items_returned, $conditions, $options, $
   }
 
 
+  // add custom date visibility toggle link for date row.
+  $table['datatable_settings']['createdRow'] = 'function(row, data, index) {' . "\n";
+  $table['datatable_settings']['createdRow'] .= '  $(\'td.column-date > div.item-date-visibility-toggle\', row).click(function(event) {' . "\n";
+  $table['datatable_settings']['createdRow'] .= '    event.preventDefault();' . "\n";
+  $table['datatable_settings']['createdRow'] .= '    if ($(this).hasClass(\'item-date-visibility-toggle-hidden\')) {' . "\n";
+  $table['datatable_settings']['createdRow'] .= '      $(this).removeClass(\'item-date-visibility-toggle-hidden\');' . "\n";
+  $table['datatable_settings']['createdRow'] .= '      $(this).addClass(\'item-date-visibility-toggle-visible\');' . "\n";
+  $table['datatable_settings']['createdRow'] .= '      $(this).text("Show fewer dates.");' . "\n";
+  $table['datatable_settings']['createdRow'] .= '    }' . "\n";
+  $table['datatable_settings']['createdRow'] .= '    else {' . "\n";
+  $table['datatable_settings']['createdRow'] .= '      $(this).removeClass(\'item-date-visibility-toggle-visible\');' . "\n";
+  $table['datatable_settings']['createdRow'] .= '      $(this).addClass(\'item-date-visibility-toggle-hidden\');' . "\n";
+  $table['datatable_settings']['createdRow'] .= '      $(this).text("Show all dates.");' . "\n";
+  $table['datatable_settings']['createdRow'] .= '    }' . "\n";
+  $table['datatable_settings']['createdRow'] .= '    $(this).parent().children(\'.item-date-visible-conditional\').each(function() {' . "\n";
+  $table['datatable_settings']['createdRow'] .= '      if ($(this).hasClass(\'item-date-visible\')) {' . "\n";
+  $table['datatable_settings']['createdRow'] .= '        $(this).removeClass(\'item-date-visible\');' . "\n";
+  $table['datatable_settings']['createdRow'] .= '        $(this).addClass(\'item-date-hidden\');' . "\n";
+  $table['datatable_settings']['createdRow'] .= '      }' . "\n";
+  $table['datatable_settings']['createdRow'] .= '      else {' . "\n";
+  $table['datatable_settings']['createdRow'] .= '        $(this).removeClass(\'item-date-hidden\');' . "\n";
+  $table['datatable_settings']['createdRow'] .= '        $(this).addClass(\'item-date-visible\');' . "\n";
+  $table['datatable_settings']['createdRow'] .= '      }' . "\n";
+  $table['datatable_settings']['createdRow'] .= '    });' . "\n";
+  $table['datatable_settings']['createdRow'] .= '  });' . "\n";
+  $table['datatable_settings']['createdRow'] .= '}' . "\n";
+
+
   $table['error'] = FALSE;
   return $table;
 }
@@ -10525,8 +10553,17 @@ function mfcs_build_request_ajax_table_process_rows($items, $columns, $user = NU
 
           if (isset($item->date) && is_array($item->date)) {
             $data = '';
+            $data_count = 0;
             foreach ($item->date as $delta => $date) {
-              $data .= '<div class="column-item item-date item-date-' . ((int) $delta) . '">';
+              $item_extra_class = '';
+              if ($data_count < 3) {
+                $item_extra_class = ' item-date-visible item-date-visible-always';
+              }
+              else {
+                $item_extra_class = ' item-date-hidden item-date-visible-conditional';
+              }
+
+              $data .= '<div class="column-item item-date item-date-' . ((int) $delta) . ' item-date-visible-group-' . ((int) $item->id) . $item_extra_class . '">';
 
               if (date('Y', $instance) == date('Y', $date)) {
                 $data .= check_plain(date(MFCS_DATE_FORMAT_DATE_SQUEEZE_NO_YEAR, $date));
@@ -10541,6 +10578,12 @@ function mfcs_build_request_ajax_table_process_rows($items, $columns, $user = NU
               }
 
               $data .= '</div>';
+
+              $data_count++;
+            }
+
+            if ($data_count > 3) {
+              $data .= '<div href="#" class="item-date-visibility-toggle item-date-visibility-toggle-hidden" title="Toggle visibility of all dates for this row.">Show all dates.</div>';
             }
           }
           else {
