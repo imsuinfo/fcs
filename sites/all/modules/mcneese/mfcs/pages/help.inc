@@ -5122,7 +5122,7 @@ function mfcs_help_topic_manage_section_logs($allowed_topics, $section_informati
   $markup .= '<div class="note"> ';
   $markup .= 'No links have been added for easily selecting the monthly or daily <dfn class="term">Request</dfn> statistics. ';
   $markup .= 'To view these statistics, go to the url bar while viewing the <dfn class="term">Request</dfn> statistics page and add in <strong class="bold">/month_name</strong> or <strong class="bold">/month_name/day_number</strong>. ';
-  $markup .= 'An example for <em class="emphasis">October 1, 2016</em> would be: <strong class="bold">' . $base_url . '/requests/statistics-0/2016/october/01</strong>. ';
+  $markup .= 'An example for <em class="emphasis">October 1, 2016</em> would be: <strong class="bold text-link">' . $base_url . '/requests/statistics-0/2016/october/01</strong>. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
@@ -7354,7 +7354,7 @@ function mfcs_help_topic_terminology_section_system($allowed_topics, $section_in
   $markup .= 'User and class related information provided by <dfn class="term">Banner</dfn> are directly used by this system. ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
-  $markup .= '<span class="see_also">See Also: <a href="//www.mcneese.edu/schedule/banner" class="definition_list-see_other" target="_blank">https://www.mcneese.edu/schedule/banner</a>. ';
+  $markup .= '<span class="see_also">See Also: <a href="//www.mcneese.edu/schedule/banner" class="definition_list-see_other text-link" target="_blank">https://www.mcneese.edu/schedule/banner</a>. ';
   $markup .= '</span>';
   $markup .= '</span>';
   $markup .= '</dd>';
@@ -7364,7 +7364,7 @@ function mfcs_help_topic_terminology_section_system($allowed_topics, $section_in
   $markup .= 'A unique ID assigned to each person involved with McNeese State University, generally as a student, faculty, or staff. ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
-  $markup .= '<span class="see_also">See Also: <a href="//www.mcneese.edu/schedule/banner" class="definition_list-see_other" target="_blank">https://www.mcneese.edu/schedule/banner</a>. ';
+  $markup .= '<span class="see_also">See Also: <a href="//www.mcneese.edu/schedule/banner" class="definition_list-see_other text-link" target="_blank">https://www.mcneese.edu/schedule/banner</a>. ';
   $markup .= '</span>';
   $markup .= '</span>';
   $markup .= '</dd>';
@@ -7374,7 +7374,7 @@ function mfcs_help_topic_terminology_section_system($allowed_topics, $section_in
   $markup .= '<dfn class="term">HTML5</dfn> is an internet standard that can very loosely be described as the <em class="emphasis">"web language"</em> or the <em class="emphasis">"internet"</em>. ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
-  $markup .= '<span class="see_also">See Also: <a href="//en.wikipedia.org/wiki/HTML5" class="definition_list-see_other" target="_blank">https://en.wikipedia.org/wiki/HTML5</a>. ';
+  $markup .= '<span class="see_also">See Also: <a href="//en.wikipedia.org/wiki/HTML5" class="definition_list-see_other text-link" target="_blank">https://en.wikipedia.org/wiki/HTML5</a>. ';
   $markup .= '</span>';
   $markup .= '</dd>';
 
@@ -7385,7 +7385,7 @@ function mfcs_help_topic_terminology_section_system($allowed_topics, $section_in
   $markup .= 'Files in this format (With a file extension of <em>.ics</em>) may be used to import an event or a set of events into your own personal calendar or even transfer the event details to a third party. ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
-  $markup .= '<span class="see_also">See Also: <a href="//en.wikipedia.org/wiki/ICalendar" class="definition_list-see_other" target="_blank"><span class="no_print_links_as_link"></span>https://en.wikipedia.org/wiki/ICalendar</a>. ';
+  $markup .= '<span class="see_also">See Also: <a href="//en.wikipedia.org/wiki/ICalendar" class="definition_list-see_other text-link" target="_blank">https://en.wikipedia.org/wiki/ICalendar</a>. ';
   $markup .= '</span>';
   $markup .= '</dd>';
 
@@ -7396,9 +7396,9 @@ function mfcs_help_topic_terminology_section_system($allowed_topics, $section_in
   $markup .= 'E-mails sent by this system are digitally signed using this standard to help ensure that the e-mails are not spam or otherwise falsified. ';
   $markup .= '<br>';
   $markup .= '<span class="see_section">';
-  $markup .= '<span class="see_also">See Also: <a href="//en.wikipedia.org/wiki/Pretty_Good_Privacy" class="definition_list-see_other" target="_blank">https://en.wikipedia.org/wiki/Pretty_Good_Privacy</a>. ';
+  $markup .= '<span class="see_also">See Also: <a href="//en.wikipedia.org/wiki/Pretty_Good_Privacy" class="definition_list-see_other text-link" target="_blank">https://en.wikipedia.org/wiki/Pretty_Good_Privacy</a>. ';
   $markup .= '<br>';
-  $markup .= '<span class="see_also">See Also: <a href="//en.wikipedia.org/wiki/Pretty_Good_Privacy#OpenPGP" class="definition_list-see_other" target="_blank">https://en.wikipedia.org/wiki/Pretty_Good_Privacy#OpenPGP</a>. ';
+  $markup .= '<span class="see_also">See Also: <a href="//en.wikipedia.org/wiki/Pretty_Good_Privacy#OpenPGP" class="definition_list-see_other text-link" target="_blank">https://en.wikipedia.org/wiki/Pretty_Good_Privacy#OpenPGP</a>. ';
   $markup .= '</span>';
   $markup .= '</dd>';
 
@@ -7617,12 +7617,12 @@ function mfcs_help_user_guide_navigate_the_system($as, $allowed_topics, $section
   $markup .= 'At the center of the dashboard are a few links for navigating the website and a calendar of the current month. ';
   $markup .= 'There should be links to common web pages, such as: Create Request, Lists, Requests, and Search Request. ';
   $markup .= 'More links may appear depending on what level of access your account has. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/navigate_the_system-1.png" alt="Screenshot of main dashboard links." class="image-user_guide" width="544" height="215"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-navigate_the_system-1" src="' . $base_path . $module_path . '/images/user_guide/navigate_the_system-1.png" alt="Screenshot of main dashboard links." class="image-user_guide" width="544" height="215"></div> ';
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph paragraph-clear">';
   $markup .= 'The very top of the screen has a <dfn class="term">Utility Panel</dfn> containing the <dfn class="term">Utility Navigation</dfn>. ';
-  $markup .= '<div class="image-wrapper image-wrapper-float-right"><img src="' . $base_path . $module_path . '/images/user_guide/navigate_the_system-2.png" alt="Screenshot of the utility navigation links." class="image-user_guide" width="395" height="65"></div>';
+  $markup .= '<div class="image-wrapper image-wrapper-float-right"><img id="image-navigate_the_system-2" src="' . $base_path . $module_path . '/images/user_guide/navigate_the_system-2.png" alt="Screenshot of the utility navigation links." class="image-user_guide" width="395" height="65"></div>';
   $markup .= 'This panel only appears when logged in, so if you do not see it then it is very likely that you are not logged in. ';
   $markup .= 'The <dfn class="term">Utility Navigation</dfn> contains some common links and includes an icon that looks like a house to represent a link back to the dashboard. ';
   $markup .= 'The links presented on the <dfn class="term">Utility Navigation</dfn> are different based on what level of access your account has. ';
@@ -7635,7 +7635,7 @@ function mfcs_help_user_guide_navigate_the_system($as, $allowed_topics, $section
   $markup .= 'This contains the most prominent links, such as Create Request, This Month, This Day, Facilities Use Information, MyMcNeese, and Help. ';
   $markup .= 'The This Month and This Day links to the current month or day, respectively. ';
   $markup .= 'The Facilities Use Information and MyMcneese are off-site links that go to the appropriate McNeese web page. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/navigate_the_system-3.png" alt="Screenshot of main primary navigation links." class="image-user_guide" width="600" height="81"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-navigate_the_system-3" src="' . $base_path . $module_path . '/images/user_guide/navigate_the_system-3.png" alt="Screenshot of main primary navigation links." class="image-user_guide" width="600" height="81"></div> ';
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph paragraph-clear">';
@@ -7647,10 +7647,10 @@ function mfcs_help_user_guide_navigate_the_system($as, $allowed_topics, $section
   if ($as['manager'] || $as['administer']) {
     $markup .= 'For <dfn class="term">Managers</dfn>, this is essentially your management dashboard. ';
     $markup .= 'This management dashboard contains links to most pages you need for performing your duties. ';
-    $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/navigate_the_system-4.png" alt="Screenshot of management links." class="image-user_guide" width="618" height="313"></div> ';
+    $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-navigate_the_system-4" src="' . $base_path . $module_path . '/images/user_guide/navigate_the_system-4.png" alt="Screenshot of management links." class="image-user_guide" width="618" height="313"></div> ';
   }
   else {
-    $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/navigate_the_system-5.png" alt="Screenshot of management links." class="image-user_guide" width="498" height="195"></div> ';
+    $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-navigate_the_system-5" src="' . $base_path . $module_path . '/images/user_guide/navigate_the_system-5.png" alt="Screenshot of management links." class="image-user_guide" width="498" height="195"></div> ';
   }
 
   $markup .= '<br>';
@@ -7661,7 +7661,7 @@ function mfcs_help_user_guide_navigate_the_system($as, $allowed_topics, $section
   $markup .= 'This display can be toggled by the selecting the <strong class="bold">Show My Requests</strong> or the <strong class="bold">Show All Requests</strong> link. ';
   $markup .= 'There is a <strong class="bold">filter</strong> on the top right side of the request listing for performing simple searches. ';
   $markup .= 'There is an <strong class="bold">operations</strong> column on the far right side of the list that presents different options your account is allowed to perform for each individual <dfn class="term">Request</dfn>. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/navigate_the_system-6.png" alt="Screenshot of main request list page." class="image-user_guide" width="639" height="168"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-navigate_the_system-6" src="' . $base_path . $module_path . '/images/user_guide/navigate_the_system-6.png" alt="Screenshot of main request list page." class="image-user_guide" width="639" height="168"></div> ';
   $markup .= '<br>';
   $markup .= '</div>';
 
@@ -7743,26 +7743,26 @@ function mfcs_help_user_guide_create_a_request($as, $allowed_topics, $section_in
 
   $markup .= '<div class="paragraph">';
   $markup .= 'To create a <dfn class="term">Request</dfn>, select the <em class="emphasis">Create Request</em> link on the <dfn class="term">Primary Navigation</dfn>. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/create_a_request-1.png" alt="Screenshot of create request link." class="image-user_guide" width="281" height="134"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-create_a_request-1" src="' . $base_path . $module_path . '/images/user_guide/create_a_request-1.png" alt="Screenshot of create request link." class="image-user_guide" width="281" height="134"></div> ';
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
   $markup .= 'The first step in creating any <dfn class="term">Request</dfn> is to read and agree to the terms of use. ';
   $markup .= 'You must select the checkbox stating that you have read the information and agree to all of the specified terms. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/create_a_request-2.png" alt="Screenshot of create a request agreement checkbox." class="image-user_guide" width="450" height="158"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-create_a_request-2" src="' . $base_path . $module_path . '/images/user_guide/create_a_request-2.png" alt="Screenshot of create a request agreement checkbox." class="image-user_guide" width="450" height="158"></div> ';
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
   $markup .= 'The second step is to select a <dfn class="term">Location</dfn> type to help find the <dfn class="term">Room</dfn> you are looking for. ';
   $markup .= 'Some <dfn class="term">Rooms</dfn> fall under multiple <dfn class="term">Locations</dfn>. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/create_a_request-3.png" alt="Screenshot of location choices." class="image-user_guide" width="327" height="307"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-create_a_request-3" src="' . $base_path . $module_path . '/images/user_guide/create_a_request-3.png" alt="Screenshot of location choices." class="image-user_guide" width="327" height="307"></div> ';
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
   $markup .= 'The third step is to select the specific <dfn class="term">Room</dfn> that you are looking for. ';
   $markup .= 'The <dfn class="term">Rooms</dfn> are associated with and grouped by their respective <dfn class="term">Buildings</dfn>. ';
   $markup .= 'Many of the <dfn class="term">Rooms</dfn> contain pictures of either the specific <dfn class="term">Room</dfn> or the <dfn class="term">Building</dfn>. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/create_a_request-4.png" alt="Screenshot of room choices." class="image-user_guide" width="645" height="247"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-create_a_request-4" src="' . $base_path . $module_path . '/images/user_guide/create_a_request-4.png" alt="Screenshot of room choices." class="image-user_guide" width="645" height="247"></div> ';
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
@@ -7771,7 +7771,7 @@ function mfcs_help_user_guide_create_a_request($as, $allowed_topics, $section_in
   $markup .= 'The date category must be selected for each date. ';
   $markup .= 'It is strongly encouraged to specify a <strong class="bold">Rehearsel / Setup</strong> and a <strong class="bold">Cleanup / Breakdown</strong>. ';
   $markup .= 'Multiple dates may be specified by selecting the <em class="emphasis">Add Date</em> button. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/create_a_request-5.png" alt="Screenshot of date settings." class="image-user_guide" width="530" height="228"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-create_a_request-5" src="' . $base_path . $module_path . '/images/user_guide/create_a_request-5.png" alt="Screenshot of date settings." class="image-user_guide" width="530" height="228"></div> ';
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
@@ -7779,7 +7779,7 @@ function mfcs_help_user_guide_create_a_request($as, $allowed_topics, $section_in
   $markup .= 'All of the <dfn class="term">Request Coordinator</dfn> related fields are auto-filled except for when the <dfn class="term">Request Coordinator</dfn> is associated with more than one <dfn class="term">Request Classification</dfn>. ';
   $markup .= 'The <em class="emphasis">Request Name</em> and the <em class="emphasis">Type of Request</em> fields must be filled out. ';
   $markup .= 'Make sure to select the most appropriate <dfn class="term">Request Type</dfn> for the <em class="emphasis">Tyoe of Request</em> field. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/create_a_request-6.png" alt="Screenshot of request coordinator settings and request information." class="image-user_guide" width="614" height="297"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-create_a_request-6" src="' . $base_path . $module_path . '/images/user_guide/create_a_request-6.png" alt="Screenshot of request coordinator settings and request information." class="image-user_guide" width="614" height="297"></div> ';
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
@@ -7787,7 +7787,7 @@ function mfcs_help_user_guide_create_a_request($as, $allowed_topics, $section_in
   $markup .= 'Each <dfn class="term">Request Classification</dfn> may require different fields. ';
   $markup .= 'In the case of the <dfn class="term">Student Organizations</dfn>, <em class="emphasis">adviser approval</em> and <em class="emphasis">Organization / Affiliation</em> fields are required. ';
   $markup .= 'The different <dfn class="term">Request Types</dfn> may also change what fields are available and required. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/create_a_request-7.png" alt="Screenshot of request information with adviser approval field." class="image-user_guide" width="659" height="136"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-create_a_request-7" src="' . $base_path . $module_path . '/images/user_guide/create_a_request-7.png" alt="Screenshot of request information with adviser approval field." class="image-user_guide" width="659" height="136"></div> ';
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
@@ -7797,7 +7797,7 @@ function mfcs_help_user_guide_create_a_request($as, $allowed_topics, $section_in
   $markup .= 'If more information needs to be provided or questions need to be asked, fill out the final text area at the bottom of the page labeled as <em class="emphasis">Please Provide any Other Information or Questions you may Have for Campus Officials</em>. ';
   $markup .= 'Once all of the appropriate fields have been filled out, select the <em class="emphasis">Submit</em> button to finalize the <dfn class="term">Request</dfn>. ';
   $markup .= 'You should receive an e-mail once the <dfn class="term">Request</dfn> is submitted. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/create_a_request-8.png" alt="Screenshot of final page submit buttons." class="image-user_guide" width="252" height="221"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-create_a_request-8" src="' . $base_path . $module_path . '/images/user_guide/create_a_request-8.png" alt="Screenshot of final page submit buttons." class="image-user_guide" width="252" height="221"></div> ';
   $markup .= '</div>';
 
   if ($closing_tag) {
@@ -7879,12 +7879,12 @@ function mfcs_help_user_guide_edit_a_request($as, $allowed_topics, $section_info
   $markup .= '<div class="paragraph">';
   $markup .= 'If you are allowed to make changes to a given <dfn class="term">Request</dfn>, each block of information should have an edit link on the top-right portion of that block. ';
   $markup .= 'The very first block (called <em class="emphasis">Request</em>) allows editing the entire <dfn class="term">Request</dfn>. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/edit_a_request-1.png" alt="Screenshot of request edit links on request view page." class="image-user_guide" width="676" height="365"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-edit_a_request-1" src="' . $base_path . $module_path . '/images/user_guide/edit_a_request-1.png" alt="Screenshot of request edit links on request view page." class="image-user_guide" width="676" height="365"></div> ';
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
   $markup .= 'With the exception of the first block, all other blocks display only the fields associated with their block name. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/edit_a_request-2.png" alt="Screenshot of request edit links on request view page." class="image-user_guide" width="437" height="163"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-edit_a_request-2" src="' . $base_path . $module_path . '/images/user_guide/edit_a_request-2.png" alt="Screenshot of request edit links on request view page." class="image-user_guide" width="437" height="163"></div> ';
   $markup .= '</div>';
 
   if ($closing_tag) {
@@ -7965,14 +7965,14 @@ function mfcs_help_user_guide_cancel_a_request($as, $allowed_topics, $section_in
 
   $markup .= '<div class="paragraph">';
   $markup .= 'A cancel button appears on the bottom left portion of the <dfn class="term">Request</dfn> view page for <dfn class="term">Requests</dfn> in which your account has access to cancel. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/cancel_a_request-1.png" alt="Screenshot of the request cancel button." class="image-user_guide" width="297" height="117"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-cancel_a_request-1" src="' . $base_path . $module_path . '/images/user_guide/cancel_a_request-1.png" alt="Screenshot of the request cancel button." class="image-user_guide" width="297" height="117"></div> ';
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
   $markup .= 'When cancelling a <dfn class="term">Request</dfn>, a confirmation page is presented. ';
   $markup .= 'It is strongly recommended to specify why the <dfn class="term">Request</dfn> is being cancelled in the <em class="emphasis">Log Message</em> text area. ';
   $markup .= 'The contents of the <em class="emphasis">Log Message</em> text area will be e-mail to all relevant parties once a <dfn class="term">Request</dfn> is cancelled. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/cancel_a_request-2.png" alt="Screenshot of the request cancel confirmation fields." class="image-user_guide" width="410" height="231"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-cancel_a_request-2" src="' . $base_path . $module_path . '/images/user_guide/cancel_a_request-2.png" alt="Screenshot of the request cancel confirmation fields." class="image-user_guide" width="410" height="231"></div> ';
   $markup .= '</div>';
 
   if ($closing_tag) {
@@ -8053,7 +8053,7 @@ function mfcs_help_user_guide_uncancel_a_request($as, $allowed_topics, $section_
 
   $markup .= '<div class="paragraph">';
   $markup .= 'An uncancel button appears on the bottom left portion of the <dfn class="term">Request</dfn> view page for <dfn class="term">Requests</dfn> in which your account has access to cancel (and are currently cancelled). ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/uncancel_a_request-1.png" alt="Screenshot of the request uncancel button." class="image-user_guide" width="233" height="96"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-uncancel_a_request-1" src="' . $base_path . $module_path . '/images/user_guide/uncancel_a_request-1.png" alt="Screenshot of the request uncancel button." class="image-user_guide" width="233" height="96"></div> ';
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
@@ -8061,7 +8061,7 @@ function mfcs_help_user_guide_uncancel_a_request($as, $allowed_topics, $section_
   $markup .= 'It is strongly recommended to specify why the <dfn class="term">Request</dfn> is being uncancelled in the <em class="emphasis">Log Message</em> text area. ';
   $markup .= 'The contents of the <em class="emphasis">Log Message</em> text area will be e-mail to all relevant parties once a <dfn class="term">Request</dfn> is uncancelled. ';
   $markup .= 'Please be aware that it may not be possible to uncancel a <dfn class="term">Request</dfn> because of potential conflicts. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/uncancel_a_request-2.png" alt="Screenshot of the request uncancel confirmation fields." class="image-user_guide" width="416" height="199"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-uncancel_a_request-2" src="' . $base_path . $module_path . '/images/user_guide/uncancel_a_request-2.png" alt="Screenshot of the request uncancel confirmation fields." class="image-user_guide" width="416" height="199"></div> ';
   $markup .= '</div>';
 
   if ($closing_tag) {
@@ -8144,7 +8144,7 @@ function mfcs_help_user_guide_copy_a_request($as, $allowed_topics, $section_info
   $markup .= 'You may at any time copy another <dfn class="term">Request</dfn>. ';
   $markup .= 'A copy link can be found on the top-right side of the top-left request block when viewing a <dfn class="term">Request</dfn>. ';
   $markup .= 'The copy <dfn class="term">Request</dfn> form is identical to the create <dfn class="term">Request</dfn> except that some of the fields may already be filled out. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/copy_a_request-1.png" alt="Screenshot pointing out the copy link." class="image-user_guide" width="466" height="203"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-copy_a_request-1" src="' . $base_path . $module_path . '/images/user_guide/copy_a_request-1.png" alt="Screenshot pointing out the copy link." class="image-user_guide" width="466" height="203"></div> ';
   $markup .= '</div>';
 
   if ($closing_tag) {
@@ -8226,25 +8226,25 @@ function mfcs_help_user_guide_find_a_request($as, $allowed_topics, $section_info
   $markup .= '<div class="paragraph">';
   $markup .= 'The main way to find a specific <dfn class="term">Request</dfn> is to use the search request page. ';
   $markup .= 'This may be found by navigating to the dashboard and selecting the search request link. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/find_a_request-1.png" alt="Screenshot pointing search requests link on the dashboard." class="image-user_guide" width="525" height="168"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-find_a_request-1" src="' . $base_path . $module_path . '/images/user_guide/find_a_request-1.png" alt="Screenshot pointing search requests link on the dashboard." class="image-user_guide" width="525" height="168"></div> ';
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
   $markup .= 'Once on the search page you should find 2 methods of searching: simple and advanced. ';
   $markup .= 'The simple search is by far the easiest to use. ';
   $markup .= 'Just fill out the field and select search to see the results. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/find_a_request-2.png" alt="Screenshot showing an example simple search." class="image-user_guide" width="308" height="217"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-find_a_request-2" src="' . $base_path . $module_path . '/images/user_guide/find_a_request-2.png" alt="Screenshot showing an example simple search." class="image-user_guide" width="308" height="217"></div> ';
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
   $markup .= 'On the other hand, the advanced search (while more complex) allows for better control over the search results and improved granularity. ';
   $markup .= 'To use the advanced search, select and add one or more search targets and then fill out their respective search fields. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/find_a_request-3.png" alt="Screenshot showing the advanced search targets." class="image-user_guide" width="451" height="205"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-find_a_request-3" src="' . $base_path . $module_path . '/images/user_guide/find_a_request-3.png" alt="Screenshot showing the advanced search targets." class="image-user_guide" width="451" height="205"></div> ';
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
   $markup .= 'Select a target, such as <em class="emphasis">Request Name</em>, select <strong class="bold">Add Target</strong>, and then fill out the search target value. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/find_a_request-4.png" alt="Screenshot showing the request name target." class="image-user_guide" width="459" height="427"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-find_a_request-4" src="' . $base_path . $module_path . '/images/user_guide/find_a_request-4.png" alt="Screenshot showing the request name target." class="image-user_guide" width="459" height="427"></div> ';
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
@@ -8256,7 +8256,7 @@ function mfcs_help_user_guide_find_a_request($as, $allowed_topics, $section_info
   $markup .= 'The <dfn class="term">Request Coordinator Classification</dfn> should have its value set to <dfn class="term">Student Orgnaization</dfn>. ';
   $markup .= 'Now that this work has been done, a <strong class="bold">Name</strong> should be given to it and then saved. ';
   $markup .= 'If the save option is not visible, be sure to expand the <em class="emphasis">Search Target Groupings</em> link. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/find_a_request-5.png" alt="Screenshot showing the request name target." class="image-user_guide" width="493" height="393"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-find_a_request-5" src="' . $base_path . $module_path . '/images/user_guide/find_a_request-5.png" alt="Screenshot showing the request name target." class="image-user_guide" width="493" height="393"></div> ';
   $markup .= '</div>';
 
   if ($closing_tag) {
@@ -8336,7 +8336,7 @@ function mfcs_help_user_guide_review_a_request($as, $allowed_topics, $section_in
   $markup .= mfcs_help_render_headers('topic-user_guide-review_a_request', $section_information['header_attributes'], $section_information['headers'], $start_count);
 
   $markup .= '<div class="paragraph">';
-  $markup .= '<div class="image-wrapper image-wrapper-float-right"><img src="' . $base_path . $module_path . '/images/user_guide/review_a_request-1.png" alt="Screenshot of Utility Navigation."" class="image-user_guide" width="289" height="28"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-float-right"><img id="image-review_a_request-1" src="' . $base_path . $module_path . '/images/user_guide/review_a_request-1.png" alt="Screenshot of Utility Navigation."" class="image-user_guide" width="289" height="28"></div> ';
   $markup .= 'You can access <dfn class="term">Requests</dfn> that you are allowed to <dfn class="term">Review</dfn> at any time by visiting the <dfn class="term">Review</dfn> listing page. ';
   $markup .= 'The link to this page is found on the <dfn class="term">Utility Navigation</dfn> on the top-left side of the web page. ';
   $markup .= 'If you are already viewing a <dfn class="term">Request</dfn>, then scroll to the bottom of the web page to find the <dfn class="term">Review</dfn> operations. ';
@@ -8348,20 +8348,20 @@ function mfcs_help_user_guide_review_a_request($as, $allowed_topics, $section_in
   $markup .= 'The options available in the <strong class="bold">Decision</strong> field is dependent on the current <dfn class="term">Review Step</dfn> as well as the access granted by your account. ';
   $markup .= 'There is a <strong class="bold">Message</strong> field for leaving messages. ';
   $markup .= 'Should you wish for your message to be more restrictive, select the checkbox on the top-right side of the <strong class="bold">Message</strong> field. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/review_a_request-2.png" alt="Screenshot of Request Review Operations during the Venue Available Step." class="image-user_guide" width="640" height="218"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-review_a_request-2" src="' . $base_path . $module_path . '/images/user_guide/review_a_request-2.png" alt="Screenshot of Request Review Operations during the Venue Available Step." class="image-user_guide" width="640" height="218"></div> ';
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
   $markup .= 'There will sometimes be warnings, such as holiday conflicts, displayed in the <dfn class="term">Review</dfn> operations area. ';
   $markup .= 'Should there be a <dfn class="term">Room</dfn> scheduling conflict, instead of a warning an error will be presented and some decisions may be prohibited. ';
   $markup .= 'Otherwise, you need only make your decision, add any messages, and submit the <dfn class="term">Review</dfn> decision. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/review_a_request-3.png" alt="Screenshot displaying a Review Operations with a holiday conflict warning." class="image-user_guide" width="631" height="292"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-review_a_request-3" src="' . $base_path . $module_path . '/images/user_guide/review_a_request-3.png" alt="Screenshot displaying a Review Operations with a holiday conflict warning." class="image-user_guide" width="631" height="292"></div> ';
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
   $markup .= 'If your account has the <dfn class="term">Financer</dfn> role, <dfn class="term">Insurer</dfn> role, or both roles, then you may also be able to specify the <dfn class="term">Requirements</dfn> decision. ';
   $markup .= 'Select the <dfn class="term">Requirement</dfn> decision and then fill out the extra fields as necessary. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/review_a_request-4.png" alt="Screenshot displaying Review Operations with usage fee and insurance fee fields." class="image-user_guide" width="512" height="649"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-review_a_request-4" src="' . $base_path . $module_path . '/images/user_guide/review_a_request-4.png" alt="Screenshot displaying Review Operations with usage fee and insurance fee fields." class="image-user_guide" width="512" height="649"></div> ';
   $markup .= '</div>';
 
   if ($closing_tag) {
@@ -8442,27 +8442,27 @@ function mfcs_help_user_guide_manage_a_request($as, $allowed_topics, $section_in
 
   $markup .= '<div class="paragraph">';
   $markup .= 'To <dfn class="term">Manage</dfn> a <dfn class="term">Request</dfn>, view the <dfn class="term">Request</dfn> and find the <dfn class="term">Manage</dfn> button on the bottom right side of the page (before the <dfn class="term">Review</dfn> log). ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/manage_a_request-1.png" alt="Screenshot displaying the Request Manage button." class="image-user_guide" width="572" height="137"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-manage_a_request-1" src="' . $base_path . $module_path . '/images/user_guide/manage_a_request-1.png" alt="Screenshot displaying the Request Manage button." class="image-user_guide" width="572" height="137"></div> ';
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
   $markup .= 'Once there you are presented with a summary of information related to the <dfn class="term">Request</dfn> and its relevant <dfn class="term">Coordinators</dfn>. ';
   $markup .= 'Additional operations as well is troubleshooting information is also provided. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/manage_a_request-2.png" alt="Screenshot displaying the Request Manage page." class="image-user_guide" width="564" height="399"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-manage_a_request-2" src="' . $base_path . $module_path . '/images/user_guide/manage_a_request-2.png" alt="Screenshot displaying the Request Manage page." class="image-user_guide" width="564" height="399"></div> ';
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
   $markup .= 'The override functionality allows for forcibly changing the <dfn class="term">Requester</dfn> to another user. ';
   $markup .= 'Adding a log message here is recommended. ';
   $markup .= 'There are still restrictions on what <dfn class="term">Step</dfn> and <dfn class="term">Status</dfn> may be re-assigned to, but for the most part <dfn class="term">Managers</dfn> are able to assign any <dfn class="term">Step</dfn> or <dfn class="term">Status</dfn> despite the normal workflow behavior. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/manage_a_request-3.png" alt="Screenshot displaying the override Request page." class="image-user_guide" width="257" height="264"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-manage_a_request-3" src="' . $base_path . $module_path . '/images/user_guide/manage_a_request-3.png" alt="Screenshot displaying the override Request page." class="image-user_guide" width="257" height="264"></div> ';
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
   $markup .= '<dfn class="term">Request Coordinators</dfn>, also known as <dfn class="term">Requesters</dfn>, may be re-assigned through the management interface. ';
   $markup .= 'This will change who recieves notifcation e-mails and may comment on the <dfn class="term">Request</dfn>. ';
   $markup .= 'A link is provided to a list of users available on the system to make searching for a given user easier. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/manage_a_request-4.png" alt="Screenshot displaying the override Request page." class="image-user_guide" width="436" height="178"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-manage_a_request-4" src="' . $base_path . $module_path . '/images/user_guide/manage_a_request-4.png" alt="Screenshot displaying the override Request page." class="image-user_guide" width="436" height="178"></div> ';
   $markup .= '</div>';
 
 
@@ -8546,7 +8546,7 @@ function mfcs_help_user_guide_manage_a_holiday($as, $allowed_topics, $section_in
   $markup .= 'To view, add, or remove holidays, <dfn class="term">Managers</dfn> may to the holidays web page using the <dfn class="term">Utility Navigation</dfn>. ';
   $markup .= 'Holidays are group in years and must be re-created for every new year. ';
   $markup .= 'You can either create a holiday for the current selected year or copy a holiday from a previous year. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/manage_a_holiday-1.png" alt="Screenshot displaying the holiday web page." class="image-user_guide" width="410" height="216"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-manage_a_holiday-1" src="' . $base_path . $module_path . '/images/user_guide/manage_a_holiday-1.png" alt="Screenshot displaying the holiday web page." class="image-user_guide" width="410" height="216"></div> ';
   $markup .= '</div>';
 
 
@@ -8630,17 +8630,17 @@ function mfcs_help_user_guide_manage_a_room_unavailability($as, $allowed_topics,
   $markup .= 'To manage <dfn class="term">Room</dfn> unavailabilities, go to the <dfn class="term">Room</dfn> unavailabilities web page using the <dfn class="term">Utility Navigation</dfn>. ';
   $markup .= '<dfn class="term">Room</dfn> unavailabilities are grouped by years and then grouped by <dfn class="term">Buildings</dfn>. ';
   $markup .= 'Select the <dfn class="term">Building</dfn> to manage by finding the <dfn class="term">Building</dfn> and then select the manage link on the right side of the table row. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/manage_a_room_unavailability-1.png" alt="Screenshot displaying the room unavailability listing web page." class="image-user_guide" width="551" height="152"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-manage_a_room_unavailability-1" src="' . $base_path . $module_path . '/images/user_guide/manage_a_room_unavailability-1.png" alt="Screenshot displaying the room unavailability listing web page." class="image-user_guide" width="551" height="152"></div> ';
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
   $markup .= 'On this <dfn class="term">Building</dfn> management page, unavailabilities for individual <dfn class="term">Rooms</dfn> may be added, edited, copied, or deleted. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/manage_a_room_unavailability-2.png" alt="Screenshot displaying a specific room unavailability web page." class="image-user_guide" width="693" height="198"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-manage_a_room_unavailability-2" src="' . $base_path . $module_path . '/images/user_guide/manage_a_room_unavailability-2.png" alt="Screenshot displaying a specific room unavailability web page." class="image-user_guide" width="693" height="198"></div> ';
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
   $markup .= 'You may edit any unavailability type except for classes (which are managed via <dfn class="term">Banner</dfn>). ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/manage_a_room_unavailability-3.png" alt="Screenshot of an edit unavailability web page." class="image-user_guide" width="377" height="530"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-manage_a_room_unavailability-3" src="' . $base_path . $module_path . '/images/user_guide/manage_a_room_unavailability-3.png" alt="Screenshot of an edit unavailability web page." class="image-user_guide" width="377" height="530"></div> ';
   $markup .= '</div>';
 
   if ($closing_tag) {
@@ -8721,17 +8721,17 @@ function mfcs_help_user_guide_troubleshoot_requests_and_users($as, $allowed_topi
 
   $markup .= '<div class="paragraph">';
   $markup .= 'If your account has the <dfn class="term">Manager</dfn> role, then you will have an expanded version of the <dfn class="term">Utility Navigation</dfn>. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/troubleshoot_requests_and_users-1.png" alt="Screenshot displaying a Manager\'s Utility Navigation." class="image-user_guide" width="466" height="31"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-troubleshoot_requests_and_users-1" src="' . $base_path . $module_path . '/images/user_guide/troubleshoot_requests_and_users-1.png" alt="Screenshot displaying a Manager\'s Utility Navigation." class="image-user_guide" width="466" height="31"></div> ';
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
-  $markup .= '<div class="image-wrapper image-wrapper-float-right"><img src="' . $base_path . $module_path . '/images/user_guide/troubleshoot_requests_and_users-2.png" alt="Screenshot displaying a troubleshooting options 6 and 7." class="image-user_guide" width="320" height="275"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-float-right"><img id="image-troubleshoot_requests_and_users-2" src="' . $base_path . $module_path . '/images/user_guide/troubleshoot_requests_and_users-2.png" alt="Screenshot displaying a troubleshooting options 6 and 7." class="image-user_guide" width="320" height="275"></div> ';
   $markup .= 'Generally speaking, it is a good idea to check if there are any problems on the system. ';
   $markup .= 'Go to the troubleshooting web page using the <dfn class="term">Utility Navigation</dfn>. ';
   $markup .= 'From there, <dfn class="term">Managers</dfn> can find options 6 and 7 to force scanning the system for problems. ';
   $markup .= 'You can view a listing of all problems by selecting the <strong class="bold">Manage Request Problems</strong> or <strong class="bold">Manage User Problems</strong> links. ';
   $markup .= 'From there <dfn class="term">Managers</dfn> may find a problem and view the problem details. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/troubleshoot_requests_and_users-3.png" alt="Screenshot displaying details of an example Request problem." class="image-user_guide" width="327" height="359"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-troubleshoot_requests_and_users-3" src="' . $base_path . $module_path . '/images/user_guide/troubleshoot_requests_and_users-3.png" alt="Screenshot displaying details of an example Request problem." class="image-user_guide" width="327" height="359"></div> ';
   $markup .= '</div>';
 
   if ($closing_tag) {
@@ -8812,21 +8812,21 @@ function mfcs_help_user_guide_using_the_calendar($as, $allowed_topics, $section_
 
   $markup .= '<div class="paragraph">';
   $markup .= 'You can access the monthly or daily calendars at any time by selecting either the <strong class="bold">This Month</strong> or <strong class="bold">This Day</strong> links found in the <dfn class="term">Utility Navigation</dfn>. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/using_the_calendar-1.png" alt="Screenshot pointing out the This Month and This Day links." class="image-user_guide" width="487" height="234"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-using_the_calendar-1" src="' . $base_path . $module_path . '/images/user_guide/using_the_calendar-1.png" alt="Screenshot pointing out the This Month and This Day links." class="image-user_guide" width="487" height="234"></div> ';
   $markup .= '<br>';
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
   $markup .= 'At the bottom of each calendar page is a set of filters (and other links) to sort and simplify what appears on the calendar. ';
   $markup .= 'Once you have selected your desired filters, try bookmarking the page to easily return to the specific set of filters. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/using_the_calendar-2.png" alt="Screenshot displaying some of the filters." class="image-user_guide" width="383" height="165"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-using_the_calendar-2" src="' . $base_path . $module_path . '/images/user_guide/using_the_calendar-2.png" alt="Screenshot displaying some of the filters." class="image-user_guide" width="383" height="165"></div> ';
   $markup .= '<br>';
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
   $markup .= 'On the day calendars, there may be multiple pages for displaying <dfn class="term">Requests</dfn> when there are more than 4 <dfn class="term">Requests</dfn> per hour slot per day. ';
   $markup .= 'You can find the links to these extra pages by selecting the page number on the top-left of each calendar day or by selecting the appropriate <strong class="bold">Next</strong> or <strong class="bold">Previous</strong> link found on each time slot with more than 4 <dfn class="term">Requests</dfn> per day. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/using_the_calendar-3.png" alt="Screenshot pointing out the page links." class="image-user_guide" width="251" height="189"><img src="' . $base_path . $module_path . '/images/user_guide/using_the_calendar-4.png" alt="Screenshot pointing out the Next page links." class="image-user_guide" width="523" height="251"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-using_the_calendar-3" src="' . $base_path . $module_path . '/images/user_guide/using_the_calendar-3.png" alt="Screenshot pointing out the page links." class="image-user_guide" width="251" height="189"><img id="image-using_the_calendar-4" src="' . $base_path . $module_path . '/images/user_guide/using_the_calendar-4.png" alt="Screenshot pointing out the Next page links." class="image-user_guide" width="523" height="251"></div> ';
   $markup .= '<br>';
   $markup .= '</div>';
 
@@ -8912,7 +8912,7 @@ function mfcs_help_user_guide_exporting_the_calendar($as, $allowed_topics, $sect
   $markup .= 'At the bottom-left side of the month or day calendar are a collection of links called <strong class="bold">iCalendar Download Options</strong>. ';
   $markup .= 'Select any one of these links to download the appropriate day, month, or year. ';
   $markup .= 'The download day link only appears on the day calendar. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/exporting_the_calendar-1.png" alt="Screenshot pointing out the download as iCalendar links." class="image-user_guide" width="275" height="162"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-exporting_the_calendar-1" src="' . $base_path . $module_path . '/images/user_guide/exporting_the_calendar-1.png" alt="Screenshot pointing out the download as iCalendar links." class="image-user_guide" width="275" height="162"></div> ';
   $markup .= '<br>';
   $markup .= '</div>';
 
@@ -8923,7 +8923,7 @@ function mfcs_help_user_guide_exporting_the_calendar($as, $allowed_topics, $sect
   $markup .= 'There you should select the <strong class="bold">Import / Export</strong> link on the left side of the page. ';
   $markup .= 'At the top of this Import / Export page is an <strong class="bold">Import</strong> section where you can select the file and then designate a calendar to import the file into. ';
   $markup .= 'The file can then be imported by clicking the import button on the right side of the <strong class="bold">Import</strong> section. ';
-  $markup .= '<div class="image-wrapper image-wrapper-center"><img src="' . $base_path . $module_path . '/images/user_guide/exporting_the_calendar-2.png" alt="Screenshot pointing out the download as iCalendar links." class="image-user_guide" width="452" height="225"></div> ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-exporting_the_calendar-2" src="' . $base_path . $module_path . '/images/user_guide/exporting_the_calendar-2.png" alt="Screenshot pointing out the download as iCalendar links." class="image-user_guide" width="452" height="225"></div> ';
   $markup .= '<br>';
   $markup .= '</div>';
 
