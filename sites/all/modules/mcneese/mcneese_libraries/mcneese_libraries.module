@@ -205,6 +205,7 @@ function mcneese_libraries_theme_table($variables, $datatable_settings = array()
       $direct_settings = array(
         'visible',
         'targets',
+        'createdRow',
       );
 
       $integer_settings = array(
