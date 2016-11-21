@@ -1284,7 +1284,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
       mfcs_view_build_reviews_log($form, $form_state, $request_id, $use_revision);
 
-      if (isset($form['review'])) {
+      if (isset($form['review']) && !empty($form['review']['log']['history'])) {
         $form['review']['log']['submit'] = array(
           '#id' => 'request-review-log-submit',
           '#type' => 'container',
