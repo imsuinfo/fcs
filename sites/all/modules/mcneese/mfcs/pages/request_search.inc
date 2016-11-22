@@ -50,6 +50,13 @@ function mfcs_request_search_0_form($form, &$form_state) {
   $requester = user_access('mfcs request', $user);
 
   $form = array();
+
+  // @fixme: it turns out that using #rebuild involves form cache, which should have some limit.
+  // the search settings should probably use a cookie or some other longer-term setting stored in the database.
+  // until that is implemented, just increase the cache from 6 hours to 70 hours.
+  // cache the page for 70-hours.
+  $form['#cache_expires'] = 252000;
+
   $form['form'] = array(
     '#tree' => TRUE,
   );
