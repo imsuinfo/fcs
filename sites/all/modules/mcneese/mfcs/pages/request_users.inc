@@ -492,7 +492,7 @@ function mfcs_request_users_0_view_page($user_id) {
   if (!empty($mfcs_determined['complete'])) {
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
-  mfcs_add_canonical_headers('users-0/view/' . $user_id);
+  mfcs_add_canonical_headers('users-0/view/' . ((int) $user_id));
 
 
   $name = $account->name;
@@ -1088,7 +1088,7 @@ function mfcs_request_users_0_add_or_edit_form($form, &$form_state, $user_id = N
   }
   else {
     $account = user_load($user_id);
-    mfcs_add_canonical_headers('users-0/add');
+    mfcs_add_canonical_headers('users-0/edit/' . ((int) $user_id));
 
     $user_name = $account->name;
     if (!empty($account->mfcs['first_name'])) {
