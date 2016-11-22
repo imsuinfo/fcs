@@ -249,7 +249,7 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
   // calendar links
   $markup .= '<div id="mfcs-links_and_filters" class="links_and_filters-wrapper no-print">';
 
-  $markup .= '<div class="links_and_filters links_and_filters-group group-1">';
+  $markup .= '<div class="links_and_filters-group group-1">';
   $markup .= mfcs_build_calendar_ical_links_markup($month_start, TRUE, TRUE, FALSE);
   $markup .= mfcs_build_calendar_openpgp_links_markup();
   $markup .= '</div>'; // filter-group-1
@@ -1027,7 +1027,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
 
   // calendar links
   $markup .= '<div id="mfcs-links_and_filters" class="links_and_filters-wrapper no-print">';
-  $markup .= '<div class="links_and_filters links_and_filters-group group-1">';
+  $markup .= '<div class="links_and_filters-group group-1">';
   $markup .= mfcs_build_calendar_ical_links_markup($day_start);
   $markup .= mfcs_build_calendar_openpgp_links_markup();
   $markup .= '</div>';
@@ -1240,7 +1240,7 @@ function mfcs_build_determined_filters_markup($id = NULL) {
 
 
   // classifications
-  $markup = '<div class="links_and_filters links_and_filters-group group-2">';
+  $markup = '<div class="links_and_filters-group group-2">';
   $markup .= '<div' . $id . ' class="links_and_filters filter_classifications">';
   $markup .= '<h3 class="links_and_filters-title filter_classifications">Filter by Classification</h3>';
   $markup .= '  <ul class="links_and_filters-list filter_classifications">';
@@ -1439,7 +1439,7 @@ function mfcs_build_determined_filters_markup($id = NULL) {
 
 
   // buildings
-  $markup .= '<div class="links_and_filters links_and_filters-group group-3">';
+  $markup .= '<div class="links_and_filters-group group-3">';
   $markup .= '<div' . $id . ' class="links_and_filters filter_buildings">';
   $markup .= '<h3 class="links_and_filters-title filter_buildings">Filter by Building</h3>';
   $markup .= '  <ul class="links_and_filters-list filter_buildings">';
