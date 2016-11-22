@@ -51,9 +51,9 @@ function mfcs_request_cancel_0_form($form, &$form_state, $request_id) {
 
   mfcs_add_canonical_headers('requests/cancel-0/' . $request_id);
 
-  $page_title = "Cancel Request";
+  $page_title = 'Cancel Request';
   if (!empty($request['information']['title'][0]->value)) {
-    $page_title = "Cancel Request: " . $request['information']['title'][0]->value;
+    $page_title = 'Cancel Request: ' . $request['information']['title'][0]->value;
   }
   drupal_set_title($page_title);
 
@@ -109,7 +109,7 @@ function mfcs_request_cancel_0_form($form, &$form_state, $request_id) {
     '#title' => 'Log Message',
     '#default_value' => NULL,
     '#required' => FALSE,
-    '#description' => "Optionally provide a message in the log."
+    '#description' => 'Optionally provide a message in the log.'
   );
 
   $form['display']['submit'] = array(
@@ -122,14 +122,14 @@ function mfcs_request_cancel_0_form($form, &$form_state, $request_id) {
     '#id' => 'request-cancel-submit-no',
     '#name' => 'request-cancel-submit-no',
     '#type' => 'submit',
-    '#default_value' => t("No"),
+    '#default_value' => 'No',
   );
 
   $form['display']['submit']['yes'] = array(
     '#id' => 'request-cancel-submit-yes',
     '#name' => 'request-cancel-submit-yes',
     '#type' => 'submit',
-    '#default_value' => t("Yes"),
+    '#default_value' => 'Yes',
   );
 
   return $form;
@@ -212,8 +212,8 @@ function mfcs_request_cancel_0_form_submit($form, &$form_state) {
     mfcs_miscellaneous_check_requests_for_problems($request_id);
   }
   else {
-    form_set_error('form', "An error occurred while trying to cancel the request. Please contact the support staff.");
-    watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to cancel the request: @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
+    form_set_error('form', 'An error occurred while trying to cancel the request. Please contact the support staff.');
+    watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to cancel the request: @request_id.', array('@request_id' => $request_id), WATCHDOG_ERROR);
 
     $form_state['rebuild'] = TRUE;
     $form_state['redirect'] = FALSE;
@@ -277,9 +277,9 @@ function mfcs_request_uncancel_0_form($form, &$form_state, $request_id) {
 
   mfcs_add_canonical_headers('requests/uncancel-0/' . $request_id);
 
-  $page_title = "Uncancel Request";
+  $page_title = 'Uncancel Request';
   if (!empty($request['information']['title'][0]->value)) {
-    $page_title = "Uncancel Request: " . $request['information']['title'][0]->value;
+    $page_title = 'Uncancel Request: ' . $request['information']['title'][0]->value;
   }
   drupal_set_title($page_title);
 
@@ -333,7 +333,7 @@ function mfcs_request_uncancel_0_form($form, &$form_state, $request_id) {
     '#title' => 'Log Message',
     '#default_value' => NULL,
     '#required' => FALSE,
-    '#description' => "Optionally provide a message in the log."
+    '#description' => 'Optionally provide a message in the log.'
   );
 
   $form['display']['submit'] = array(
@@ -346,14 +346,14 @@ function mfcs_request_uncancel_0_form($form, &$form_state, $request_id) {
     '#id' => 'request-uncancel-submit-no',
     '#name' => 'request-uncancel-submit-no',
     '#type' => 'submit',
-    '#default_value' => t("No"),
+    '#default_value' => 'No',
   );
 
   $form['display']['submit']['yes'] = array(
     '#id' => 'request-uncancel-submit-yes',
     '#name' => 'request-uncancel-submit-yes',
     '#type' => 'submit',
-    '#default_value' => t("Yes"),
+    '#default_value' => 'Yes',
   );
 
   return $form;
@@ -465,8 +465,8 @@ function mfcs_request_uncancel_0_form_submit($form, &$form_state) {
     mfcs_miscellaneous_check_requests_for_problems($request_id);
   }
   else {
-    form_set_error('form', "An error occurred while trying to uncancel the request. Please contact the support staff.");
-    watchdog(MFCS_WATCHDOG_ID, "An error occured while trying to uncancel the request: @request_id.", array('@request_id' => $request_id), WATCHDOG_ERROR);
+    form_set_error('form', 'An error occurred while trying to uncancel the request. Please contact the support staff.');
+    watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to uncancel the request: @request_id.', array('@request_id' => $request_id), WATCHDOG_ERROR);
 
     $form_state['rebuild'] = TRUE;
     $form_state['redirect'] = FALSE;
@@ -546,9 +546,9 @@ function mfcs_request_cancelling_0_form($form, &$form_state, $request_id) {
 
   mfcs_add_canonical_headers('requests/cancelling-0/' . $request_id);
 
-  $page_title = "Cancel or Uncancel Individual Dates for Request";
+  $page_title = 'Cancel or Uncancel Individual Dates for Request';
   if (!empty($request['information']['title'][0]->value)) {
-    $page_title = "Cancel or Uncancel Individual Dates for Request: " . $request['information']['title'][0]->value;
+    $page_title = 'Cancel or Uncancel Individual Dates for Request: ' . $request['information']['title'][0]->value;
   }
   drupal_set_title($page_title);
 
@@ -606,10 +606,10 @@ function mfcs_request_cancelling_0_form($form, &$form_state, $request_id) {
       '#type' => 'select',
       '#tree' => TRUE,
       '#options' => array(
-        MFCS_CANCELLING_NOTHING => "Do Nothing",
-        MFCS_CANCELLING_CANCEL => "Cancel Date",
-        MFCS_CANCELLING_UNCANCEL => "Uncancel Date",
-        MFCS_CANCELLING_UNAVAILABLE => "Unavailable",
+        MFCS_CANCELLING_NOTHING => 'Do Nothing',
+        MFCS_CANCELLING_CANCEL => 'Cancel Date',
+        MFCS_CANCELLING_UNCANCEL => 'Uncancel Date',
+        MFCS_CANCELLING_UNAVAILABLE => 'Unavailable',
       ),
       '#default' => MFCS_CANCELLING_NOTHING,
       '#attributes' => array(
@@ -657,13 +657,13 @@ function mfcs_request_cancelling_0_form($form, &$form_state, $request_id) {
     if (isset($request['dates']['time_start'][$key]) && !is_null($request['dates']['time_start'][$key]->value)) {
       $form['dates'][$key]['markup'] = array(
         '#type' => 'markup',
-        '#markup' => '<span id="request-cancelling-' . $key . '-markup" class="cancelling-item-message' . $extra_css . '">' . date(MFCS_DATE_FORMAT_DATE, $date->value) . " from " . date(MFCS_DATE_FORMAT_TIME_SECONDS, $request['dates']['time_start'][$key]->value) . " to " . date(MFCS_DATE_FORMAT_TIME_SECONDS, $request['dates']['time_stop'][$key]->value) . "</span>",
+        '#markup' => '<span id="request-cancelling-' . $key . '-markup" class="cancelling-item-message' . $extra_css . '">' . date(MFCS_DATE_FORMAT_DATE, $date->value) . ' from ' . date(MFCS_DATE_FORMAT_TIME_SECONDS, $request['dates']['time_start'][$key]->value) . ' to ' . date(MFCS_DATE_FORMAT_TIME_SECONDS, $request['dates']['time_stop'][$key]->value) . '</span>',
       );
     }
     else {
       $form['dates'][$key]['markup'] = array(
         '#type' => 'markup',
-        '#markup' => '<span id="request-cancelling-' . $key . '-markup" class="cancelling-item-message' . $extra_css . '">' . date(MFCS_DATE_FORMAT_DATE, $date->value) . " (all day)</span>",
+        '#markup' => '<span id="request-cancelling-' . $key . '-markup" class="cancelling-item-message' . $extra_css . '">' . date(MFCS_DATE_FORMAT_DATE, $date->value) . ' (all day)</span>',
       );
     }
   }
@@ -678,14 +678,14 @@ function mfcs_request_cancelling_0_form($form, &$form_state, $request_id) {
     '#id' => 'cancelling-cancel',
     '#name' => 'cancelling-cancel',
     '#type' => 'submit',
-    '#default_value' => t("Cancel"),
+    '#default_value' => 'Cancel',
   );
 
   $form['submit']['submit'] = array(
     '#id' => 'cancelling-submit',
     '#name' => 'cancelling-submit',
     '#type' => 'submit',
-    '#default_value' => t("Submit"),
+    '#default_value' => 'Submit',
   );
 
 
@@ -714,7 +714,7 @@ function mfcs_request_cancelling_0_form_validate($form, &$form_state) {
   }
 
   if (count($form['form']['request']['#value']['dates']['date']) == 1) {
-    form_set_error('form', "Individual dates may not be cancelled when a request only has a single date.");
+    form_set_error('form', 'Individual dates may not be cancelled when a request only has a single date.');
     return;
   }
 
@@ -766,7 +766,7 @@ function mfcs_request_cancelling_0_form_validate($form, &$form_state) {
       // check room unavailability.
       $room_unavailability = mfcs_check_room_availability($room, array($form['form']['request']['#value']['dates']['date'][$key]->value), array($form['form']['request']['#value']['dates']['time_start'][$key]->value), array($form['form']['request']['#value']['dates']['time_stop'][$key]->value));
       if ($room_unavailability === FALSE) {
-        form_set_error('dates][' . $key . '][select', "An internal error occurred while checking the room for availability. Please contact the support staff.");
+        form_set_error('dates][' . $key . '][select', 'An internal error occurred while checking the room for availability. Please contact the support staff.');
       }
       elseif (!empty($room_unavailability['conflicts']) || !empty($room_unavailability['unavailable'])) {
         $time = date(MFCS_DATE_FORMAT_DATE, $form['form']['request']['#value']['dates']['date'][$key]->value);
@@ -791,11 +791,11 @@ function mfcs_request_cancelling_0_form_validate($form, &$form_state) {
 
   if ($changes) {
     if (($cancelling_dates + $cancelled_dates) == $total_dates) {
-      form_set_error('form', "Cannot cancel all dates. If you want to cancel every date, then you must cancel the entire request and not any individual dates/times.");
+      form_set_error('form', 'Cannot cancel all dates. If you want to cancel every date, then you must cancel the entire request and not any individual dates/times.');
     }
   }
   else {
-    form_set_error('form', "Unable to submit, no changes have been designated.");
+    form_set_error('form', 'Unable to submit, no changes have been designated.');
   }
 }
 
@@ -830,8 +830,8 @@ function mfcs_request_cancelling_0_form_submit($form, &$form_state) {
     $processed_mfcs_request_revisions = &drupal_static('processed_mfcs_request_revisions_' . $instance . '_' . $user->uid . '_' . $request_id, FALSE);
 
     if ($request_revision === FALSE) {
-      form_set_error('form', "An error occurred while trying to save the request. Please contact the support staff.");
-      watchdog(MFCS_WATCHDOG_ID, "Failed to load revision number for request %request_id while trying to save the request.", array('%request_id' => $request_id), WATCHDOG_ERROR);
+      form_set_error('form', 'An error occurred while trying to save the request. Please contact the support staff.');
+      watchdog(MFCS_WATCHDOG_ID, 'Failed to load revision number for request %request_id while trying to save the request.', array('%request_id' => $request_id), WATCHDOG_ERROR);
 
       $form_state['rebuild'] = TRUE;
       $form_state['redirect'] = FALSE;
@@ -847,8 +847,8 @@ function mfcs_request_cancelling_0_form_submit($form, &$form_state) {
 
     $dates_date_revision = mfcs_load_request_revision_number($request_id, 'mfcs_field_dates_date');
     if ($dates_date_revision === FALSE) {
-      form_set_error('form', "An error occurred while trying to save the request. Please contact the support staff.");
-      watchdog(MFCS_WATCHDOG_ID, "Failed to load revision number for the dates date table of request %request_id while trying to save the request.", array('%request_id' => $request_id), WATCHDOG_ERROR);
+      form_set_error('form', 'An error occurred while trying to save the request. Please contact the support staff.');
+      watchdog(MFCS_WATCHDOG_ID, 'Failed to load revision number for the dates date table of request %request_id while trying to save the request.', array('%request_id' => $request_id), WATCHDOG_ERROR);
 
       $form_state['rebuild'] = TRUE;
       $form_state['redirect'] = FALSE;
@@ -875,7 +875,7 @@ function mfcs_request_cancelling_0_form_submit($form, &$form_state) {
       'revision' => $request_revision_next,
       'user_id' => $user->uid,
       'date' => $instance,
-      'message' => "Individual dates have been cancelled or uncancelled.",
+      'message' => 'Individual dates have been cancelled or uncancelled.',
     );
 
     $mfcs_current = array(
@@ -958,7 +958,7 @@ function mfcs_request_cancelling_0_form_submit($form, &$form_state) {
       catch (Error $e) {
         $transaction->rollback();
 
-        form_set_error('form', "An error occurred while trying to save the request. Please contact the support staff.");
+        form_set_error('form', 'An error occurred while trying to save the request. Please contact the support staff.');
 
         cf_error::on_query_execution($e);
 
@@ -970,7 +970,7 @@ function mfcs_request_cancelling_0_form_submit($form, &$form_state) {
       catch (Exception $e) {
         $transaction->rollback();
 
-        form_set_error('form', "An error occurred while trying to save the request. Please contact the support staff.");
+        form_set_error('form', 'An error occurred while trying to save the request. Please contact the support staff.');
 
         cf_error::on_query_execution($e);
 
@@ -992,39 +992,39 @@ function mfcs_request_cancelling_0_form_submit($form, &$form_state) {
         'markup' => '',
       );
 
-      $parameters['cancelling']['content'] .= "\nThe following dates have just been cancelled:\n";
-      $parameters['cancelling']['markup'] .= "<br>The following dates have just been <em>cancelled</em>:";
-      $parameters['cancelling']['markup'] .= "<ul>";
+      $parameters['cancelling']['content'] .= "\n" . 'The following dates have just been cancelled:' . "\n";
+      $parameters['cancelling']['markup'] .= '<br>The following dates have just been <em>cancelled</em>:';
+      $parameters['cancelling']['markup'] .= '<ul>';
 
       if (empty($do_cancel)) {
-        $parameters['cancelling']['content'] .= " - No dates have been cancelled.\n";
-        $parameters['cancelling']['markup'] .= "<li>No dates have been cancelled.</li>";
+        $parameters['cancelling']['content'] .= ' - No dates have been cancelled.' . "\n";
+        $parameters['cancelling']['markup'] .= '<li>No dates have been cancelled.</li>';
       }
       else {
         foreach ($do_cancel as $key => $content) {
           $parameters['cancelling']['content'] .= ' - ' . $content . "\n";
-          $parameters['cancelling']['markup'] .= "<li>" . $content . "</li>";
+          $parameters['cancelling']['markup'] .= '<li>' . $content . '</li>';
         }
       }
 
-      $parameters['cancelling']['markup'] .= "</ul>";
+      $parameters['cancelling']['markup'] .= '</ul>';
 
-      $parameters['cancelling']['content'] .= "\nThe following dates have just been uncancelled:\n";
-      $parameters['cancelling']['markup'] .= "<br>The following dates have just been <em>uncancelled</em>:";
-      $parameters['cancelling']['markup'] .= "<ul>";
+      $parameters['cancelling']['content'] .= "\n" . 'The following dates have just been uncancelled:' . "\n";
+      $parameters['cancelling']['markup'] .= '<br>The following dates have just been <em>uncancelled</em>:';
+      $parameters['cancelling']['markup'] .= '<ul>';
 
       if (empty($do_uncancel)) {
-        $parameters['cancelling']['content'] .= " - No dates have been uncancelled.\n";
-        $parameters['cancelling']['markup'] .= "<li>No dates have been uncancelled.</li>";
+        $parameters['cancelling']['content'] .= ' - No dates have been uncancelled.' . "\n";
+        $parameters['cancelling']['markup'] .= '<li>No dates have been uncancelled.</li>';
       }
       else {
         foreach ($do_uncancel as $key => $content) {
           $parameters['cancelling']['content'] .= ' - ' . $content . "\n";
-          $parameters['cancelling']['markup'] .= "<li>" . $content . "</li>";
+          $parameters['cancelling']['markup'] .= '<li>' . $content . '</li>';
         }
       }
 
-      $parameters['cancelling']['markup'] .= "</ul>";
+      $parameters['cancelling']['markup'] .= '</ul>';
 
       mfcs_send_workflow_emails($request_id, $parameters);
     }
