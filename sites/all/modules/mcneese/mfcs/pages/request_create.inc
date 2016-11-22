@@ -84,6 +84,9 @@ function mfcs_request_create_0_form($form, &$form_state, $copy_request = NULL) {
     $step = $form_state['values']['form']['step'];
   }
 
+  // cache the page for 70-hours.
+  $form['#cache_expires'] = 252000;
+
   $form['form'] = array(
     '#tree' => TRUE,
   );
