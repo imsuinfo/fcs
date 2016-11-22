@@ -62,6 +62,10 @@ function mfcs_request_manage_0_move_form($form, &$form_state, $request_id) {
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
   $form = array();
+
+  // cache the page for 70-hours.
+  $form['#cache_expires'] = 252000;
+
   $form['form'] = array(
     '#tree' => TRUE,
   );
