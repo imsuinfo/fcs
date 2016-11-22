@@ -164,7 +164,7 @@ function mfcs_request_manage_0_reassign_coordinator_form($form, &$form_state, $r
     $form['message']['#markup'] .= '<div>';
     $form['message']['#markup'] .= 'The new coordinator id would be the same as the old one. If you believe this to be incorrect, then either the Banner Database Cache is out of sync or the Venue Coordinator for this Room has not been updated in the Banner Database.' . '<br>';
     $form['message']['#markup'] .= '<br>';
-    $form['message']['#markup'] .= 'This request is currently assigned to <span><strong><a href="' . $base_path . 'requests/users-0/view/' . $old_coordinator_id . '">' . check_plain($old_coordinator_name) . '</a></strong> <sup>[id: ' . $old_coordinator_id . ']</sup></span>.' . '<br>';
+    $form['message']['#markup'] .= 'This request is currently assigned to <span><strong><a href="' . $base_path . 'users-0/view/' . $old_coordinator_id . '">' . check_plain($old_coordinator_name) . '</a></strong> <sup>[id: ' . $old_coordinator_id . ']</sup></span>.' . '<br>';
     $form['message']['#markup'] .= '<br>';
   }
   else {
@@ -172,7 +172,7 @@ function mfcs_request_manage_0_reassign_coordinator_form($form, &$form_state, $r
     $form['message']['#markup'] .= '<div>';
     $form['message']['#markup'] .= 'The currently assigned coordinator is out dated based on the currently cached Banner information. Re-assignment will update the Venue Coordinator to match the Venue Coordinator defined in the Banner cache. ' . '<br>';
     $form['message']['#markup'] .= '<br>';
-    $form['message']['#markup'] .= 'This request would be re-assigned from <span><strong><a href="' . $base_path . 'requests/users-0/view/' . $old_coordinator_id . '">' . check_plain($old_coordinator_name) . '</a></strong> <sup>[id: ' . $old_coordinator_id . ']</sup></span> to <span><strong><a href="' . $base_path . 'requests/users-0/view/' . $new_coordinator_id . '">' . check_plain($new_coordinator_name) . '</a></strong> <sup>[id: ' . $new_coordinator_id . ']</sup></span>.<br>';
+    $form['message']['#markup'] .= 'This request would be re-assigned from <span><strong><a href="' . $base_path . 'users-0/view/' . $old_coordinator_id . '">' . check_plain($old_coordinator_name) . '</a></strong> <sup>[id: ' . $old_coordinator_id . ']</sup></span> to <span><strong><a href="' . $base_path . 'users-0/view/' . $new_coordinator_id . '">' . check_plain($new_coordinator_name) . '</a></strong> <sup>[id: ' . $new_coordinator_id . ']</sup></span>.<br>';
     $form['message']['#markup'] .= '<br>';
 
     $form['message']['#markup'] .= 'Are you certain you want to re-assign? ';
@@ -449,9 +449,9 @@ function mfcs_request_manage_0_reassign_requester_form($form, &$form_state, $req
   $form['message']['#markup'] .= '<div class="reassign-requester-description">';
   $form['message']['#markup'] .= 'Assigning a new requester will change who recieves e-mails and who is allowed to perform edit operations as a normal requester (not as a reviewer or manager).';
   $form['message']['#markup'] .= '<br>';
-  $form['message']['#markup'] .= 'The current requester assign to request <strong>' . check_plain($request_title) . '</strong> <sup>[id: ' . $request_id . ']</sup> is <strong><a href="' . $base_path . 'requests/users-0/view/' . $old_requester_id . '">' . check_plain($old_requester_name) . '</a></strong> <sup>[id: ' . $old_requester_id . ']</sup>.<br>';
+  $form['message']['#markup'] .= 'The current requester assign to request <strong>' . check_plain($request_title) . '</strong> <sup>[id: ' . $request_id . ']</sup> is <strong><a href="' . $base_path . 'users-0/view/' . $old_requester_id . '">' . check_plain($old_requester_name) . '</a></strong> <sup>[id: ' . $old_requester_id . ']</sup>.<br>';
   $form['message']['#markup'] .= '<br>';
-  $form['message']['#markup'] .= 'You can <a href="' . $base_path . 'requests/users-0/list">search through a comprehensive list of system users</a> to find the username or id and specify it below.';
+  $form['message']['#markup'] .= 'You can <a href="' . $base_path . 'users-0/list">search through a comprehensive list of system users</a> to find the username or id and specify it below.';
   $form['message']['#markup'] .= '</div>';
 
   $form['requester'] = array(

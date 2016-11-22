@@ -1598,7 +1598,7 @@ function mfcs_get_request_field_venue_coordinator_name_note($form, &$form_state,
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
-  $a_begin = '<a href="' . $base_path . 'requests/users-0/view/' . $form['form']['user']['#value']->uid . $url_arguments . '" class="field-request-item-venue_coordinator-name-link" target="_blank">';
+  $a_begin = '<a href="' . $base_path . 'users-0/view/' . $form['form']['user']['#value']->uid . $url_arguments . '" class="field-request-item-venue_coordinator-name-link" target="_blank">';
   $a_end = '</a>';
 
   $name = mfcs_generate_form_user_name($venue_coordinator);

@@ -132,11 +132,11 @@ function mfcs_management_page() {
     }
 
     if ($manager || $administer) {
-      $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/users-0/list' . $url_arguments . '" class="item-link">Manage Users</a></h4>';
+      $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'users-0/list' . $url_arguments . '" class="item-link">Manage Users</a></h4>';
       $help = '<div class="item-description inline-block">View, add, delete, and otherwise manage users.</div>';
     }
     else {
-      $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/users-0/list' . $url_arguments . '" class="item-link">View Users</a></h4>';
+      $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'users-0/list' . $url_arguments . '" class="item-link">View Users</a></h4>';
       $help = '<div class="item-description inline-block">View your user accounts.</div>';
     }
 

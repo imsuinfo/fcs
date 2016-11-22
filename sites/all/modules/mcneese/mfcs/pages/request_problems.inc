@@ -335,7 +335,7 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
 
     // note: previously the id was added as a no-js failsafe, but it causes an annoying flicker on load (because the load speed is sufficiently fast enough to flicker but slow enough to see).
     $row['account'] = array(
-      'data' => '<a href="' . $base_path . 'requests/users-0/view/' . $item->user_id . $url_arguments . '" class="user-link">' . check_plain($item->name) . '</a>',
+      'data' => '<a href="' . $base_path . 'users-0/view/' . $item->user_id . $url_arguments . '" class="user-link">' . check_plain($item->name) . '</a>',
       'class' => $class_name,
     );
 
@@ -626,7 +626,7 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
   $message .= 'This page provides details of the problems and the ability to reset the problem flags for each of these problems.<br>';
   $message .= 'Some of these problems can be reset, others cannot.<br>';
   $message .= '<br>';
-  $message .= 'The <a href="' . $base_path . 'requests/users-0/view/' . $problem_user_id . '" title="View Profile for ' . $user_name . ' (id #' . $problem_user_id . ')">user\'s information</a> and problem flags were last updated on: <strong>' . date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS, $problem_user->mfcs['updated_problems']) . '</strong>.<br>';
+  $message .= 'The <a href="' . $base_path . 'users-0/view/' . $problem_user_id . '" title="View Profile for ' . $user_name . ' (id #' . $problem_user_id . ')">user\'s information</a> and problem flags were last updated on: <strong>' . date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS, $problem_user->mfcs['updated_problems']) . '</strong>.<br>';
   $message .= '<br>';
 
   $form['message'] = array(
@@ -904,7 +904,7 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
           $form['problems'][$problem_id]['explanation']['#markup'] .= ':<ul>';
 
           foreach ($all_accounts as $account_id => $account_name) {
-            $form['problems'][$problem_id]['explanation']['#markup'] .= '<li><a href="' . $base_path . 'requests/users-0/view/' . $account_id . $url_arguments . '">' . $account_name . '</a></li>';
+            $form['problems'][$problem_id]['explanation']['#markup'] .= '<li><a href="' . $base_path . 'users-0/view/' . $account_id . $url_arguments . '">' . $account_name . '</a></li>';
           }
           $form['problems'][$problem_id]['explanation']['#markup'] .= '</ul><br>';
         }
@@ -2113,20 +2113,20 @@ function mfcs_request_problems_0_request_form($form, &$form_state, $problem_id) 
 
     if (isset($details['coordinator'])) {
       $form['markup']['#markup'] .= '<strong>Coordinator ID:</strong> ' . (int) $details['coordinator']['id'] . '<br>';
-      $form['markup']['#markup'] .= '<strong>Coordinator Account:</strong> <a href="' . $base_path . 'requests/users-0/view/' . (int) $details['coordinator']['id'] . $url_arguments . '">' . check_plain($details['coordinator']['name']) . '</a><br>';
+      $form['markup']['#markup'] .= '<strong>Coordinator Account:</strong> <a href="' . $base_path . 'users-0/view/' . (int) $details['coordinator']['id'] . $url_arguments . '">' . check_plain($details['coordinator']['name']) . '</a><br>';
       $form['markup']['#markup'] .= '<strong>Coordinator First Name:</strong> ' . check_plain($details['coordinator']['first_name']) . '<br>';
       $form['markup']['#markup'] .= '<strong>Coordinator Last Name:</strong> ' . check_plain($details['coordinator']['last_name']) . '<br>';
     }
     elseif (isset($details['current_coordinator']) && isset($details['new_coordinator'])) {
       $form['markup']['#markup'] .= '<strong>Old Coordinator ID:</strong> ' . (int) $details['current_coordinator']['id'] . '<br>';
-      $form['markup']['#markup'] .= '<strong>Old Coordinator Account:</strong> <a href="' . $base_path . 'requests/users-0/view/' . (int) $details['current_coordinator']['id'] . $url_arguments . '">' . check_plain($details['current_coordinator']['name']) . '</a><br>';
+      $form['markup']['#markup'] .= '<strong>Old Coordinator Account:</strong> <a href="' . $base_path . 'users-0/view/' . (int) $details['current_coordinator']['id'] . $url_arguments . '">' . check_plain($details['current_coordinator']['name']) . '</a><br>';
       $form['markup']['#markup'] .= '<strong>Old Coordinator First Name:</strong> ' . check_plain($details['current_coordinator']['first_name']) . '<br>';
       $form['markup']['#markup'] .= '<strong>Old Coordinator Last Name:</strong> ' . check_plain($details['current_coordinator']['last_name']) . '<br>';
 
       $form['markup']['#markup'] .= '<br>';
 
       $form['markup']['#markup'] .= '<strong>New Coordinator ID:</strong> ' . (int) $details['new_coordinator']['id'] . '<br>';
-      $form['markup']['#markup'] .= '<strong>New Coordinator Account:</strong> <a href="' . $base_path . 'requests/users-0/view/' . (int) $details['new_coordinator']['id'] . $url_arguments . '">' . check_plain($details['new_coordinator']['name']) . '</a><br>';
+      $form['markup']['#markup'] .= '<strong>New Coordinator Account:</strong> <a href="' . $base_path . 'users-0/view/' . (int) $details['new_coordinator']['id'] . $url_arguments . '">' . check_plain($details['new_coordinator']['name']) . '</a><br>';
       $form['markup']['#markup'] .= '<strong>New Coordinator First Name:</strong> ' . check_plain($details['new_coordinator']['first_name']) . '<br>';
       $form['markup']['#markup'] .= '<strong>New Coordinator Last Name:</strong> ' . check_plain($details['new_coordinator']['last_name']) . '<br>';
     }
@@ -2142,7 +2142,7 @@ function mfcs_request_problems_0_request_form($form, &$form_state, $problem_id) 
 
     if (isset($details['requester'])) {
       $form['markup']['#markup'] .= '<strong>Requester ID:</strong> ' . (int) $details['requester']['user_id'] . '<br>';
-      $form['markup']['#markup'] .= '<strong>Requester Account:</strong> <a href="' . $base_path . 'requests/users-0/view/' . (int) $details['requester']['user_id'] . $url_arguments . '">' . check_plain($details['requester']['name']) . '</a><br>';
+      $form['markup']['#markup'] .= '<strong>Requester Account:</strong> <a href="' . $base_path . 'users-0/view/' . (int) $details['requester']['user_id'] . $url_arguments . '">' . check_plain($details['requester']['name']) . '</a><br>';
       $form['markup']['#markup'] .= '<strong>Requester First Name:</strong> ' . check_plain($details['requester']['first_name']) . '<br>';
       $form['markup']['#markup'] .= '<strong>Requester Last Name:</strong> ' . check_plain($details['requester']['last_name']) . '<br>';
     }
@@ -2325,7 +2325,7 @@ function mfcs_request_problems_0_request_form_validate($form, &$form_state) {
           }
 
           $coordinator = user_load($room_information->room_coordinator_id);
-          $extra_text .= ' Coordinator Information: <a href="' . $base_path . 'requests/users-0/view/' . $room_information->room_coordinator_id . '" title="View user account">' . check_plain($coordinator->mfcs['first_name']) . ' ' . check_plain($coordinator->mfcs['last_name']) . '</a>.';
+          $extra_text .= ' Coordinator Information: <a href="' . $base_path . 'users-0/view/' . $room_information->room_coordinator_id . '" title="View user account">' . check_plain($coordinator->mfcs['first_name']) . ' ' . check_plain($coordinator->mfcs['last_name']) . '</a>.';
 
           if ($new_coordinator_id == $request['venue_coordinator']['user_id'][0]->value) {
             form_set_error('actions][action', 'Unable to re-assign room/venue coordinator, the banner information remains the same.' . $extra_text);

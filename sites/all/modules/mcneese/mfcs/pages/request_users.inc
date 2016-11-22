@@ -60,7 +60,7 @@ function mfcs_request_users_0_form($form, &$form_state, $page_number = NULL) {
     $page_number = 0;
   }
 
-  mfcs_add_canonical_headers('requests/users-0/list/' . $page_number);
+  mfcs_add_canonical_headers('users-0/list/' . $page_number);
 
   $user = cf_current_user();
   $is_manager = user_access('mfcs manage', $user);
@@ -291,10 +291,10 @@ function mfcs_request_users_0_form($form, &$form_state, $page_number = NULL) {
       'class' => $class_operations,
     );
 
-    $row['operations']['data'] .= '<a href="' . $base_path . 'requests/users-0/view/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="View User">View</a>';
+    $row['operations']['data'] .= '<a href="' . $base_path . 'users-0/view/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="View User">View</a>';
 
     if ($is_manager || $is_administer) {
-      $row['operations']['data'] .= ' <a href="' . $base_path . 'requests/users-0/edit/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="Edit User">Edit</a>' ;
+      $row['operations']['data'] .= ' <a href="' . $base_path . 'users-0/edit/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="Edit User">Edit</a>' ;
 
       if ($item->problems != MFCS_USER_PROBLEM_NONE) {
         $row['operations']['data'] .= ' <a href="' . $base_path . 'requests/problems-0/users/user/' . $item->id . $url_arguments . '" class="operation-link operation-link-problems" title="View User Problems">Problems</a>' ;
@@ -366,7 +366,7 @@ function mfcs_request_users_0_form($form, &$form_state, $page_number = NULL) {
     'processing' => TRUE,
     'serverSide' => TRUE,
     'ajax' => array(
-      'url' => '\'' . $base_path . 'requests/users-0/list/ajax' . $url_arguments . '\'',
+      'url' => '\'' . $base_path . 'users-0/list/ajax' . $url_arguments . '\'',
       'type' => '\'POST\'',
     ),
     'deferRender' => TRUE,
@@ -409,13 +409,13 @@ function mfcs_request_users_0_form($form, &$form_state, $page_number = NULL) {
   $navigation_bottom = '';
   if ($page_number > 0) {
     if ($page_number == 1) {
-      $navigation_top .= '<a href="' . $base_path . 'requests/users-0/list' . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
-      $navigation_bottom .= '<a href="' . $base_path . 'requests/users-0/list' . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+      $navigation_top .= '<a href="' . $base_path . 'users-0/list' . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+      $navigation_bottom .= '<a href="' . $base_path . 'users-0/list' . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
     }
     else {
       $previous_page = $page_number - 1;
-      $navigation_top .= '<a href="' . $base_path . 'requests/users-0/list/' . $previous_page . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
-      $navigation_bottom .= '<a href="' . $base_path . 'requests/users-0/list/' . $previous_page . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+      $navigation_top .= '<a href="' . $base_path . 'users-0/list/' . $previous_page . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+      $navigation_bottom .= '<a href="' . $base_path . 'users-0/list/' . $previous_page . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
     }
   }
 
@@ -436,8 +436,8 @@ function mfcs_request_users_0_form($form, &$form_state, $page_number = NULL) {
 
   if ($items_total > ($items_start + $rows_per_page)) {
     $next_page = $page_number + 1;
-    $navigation_top .= '<a href="' . $base_path . 'requests/users-0/list/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a> ';
-    $navigation_bottom .= '<a href="' . $base_path . 'requests/users-0/list/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a> ';
+    $navigation_top .= '<a href="' . $base_path . 'users-0/list/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a> ';
+    $navigation_bottom .= '<a href="' . $base_path . 'users-0/list/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a> ';
   }
 
   $form = array();
@@ -448,7 +448,7 @@ function mfcs_request_users_0_form($form, &$form_state, $page_number = NULL) {
 
   if ($is_manager || $is_administer) {
     $form['manage_users_list']['#markup'] .= '<div class="mfcs-manage_users_form-add_user no-print">';
-    $form['manage_users_list']['#markup'] .= '<a href="' . $base_path . 'requests/users-0/add" title="Add new user">Add User</a>';
+    $form['manage_users_list']['#markup'] .= '<a href="' . $base_path . 'users-0/add" title="Add new user">Add User</a>';
     $form['manage_users_list']['#markup'] .= '</div>';
   }
 
@@ -492,7 +492,7 @@ function mfcs_request_users_0_view_page($user_id) {
   if (!empty($mfcs_determined['complete'])) {
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
-  mfcs_add_canonical_headers('requests/users-0/view/' . $user_id);
+  mfcs_add_canonical_headers('users-0/view/' . $user_id);
 
 
   $name = $account->name;
@@ -632,7 +632,7 @@ function mfcs_request_users_0_view_page($user_id) {
             $associated_name = $associated_user['first_name'] . ' ' . $associated_user['last_name'];
           }
 
-          $duplicate_accounts .= '<li class="item-information-list-item item-information-duplicate-list-item"><a href="' . $base_path . 'requests/users-0/view/' . $associated_user['user_id'] . $url_arguments . '" class="item-information-list-item-link item-information-duplicate-list-item-link">' . $associated_name . '</a> <sup>[id: ' . $associated_user['user_id'] . ']</sup></li>';
+          $duplicate_accounts .= '<li class="item-information-list-item item-information-duplicate-list-item"><a href="' . $base_path . 'users-0/view/' . $associated_user['user_id'] . $url_arguments . '" class="item-information-list-item-link item-information-duplicate-list-item-link">' . $associated_name . '</a> <sup>[id: ' . $associated_user['user_id'] . ']</sup></li>';
         }
         unset($associated_user);
       }
@@ -727,7 +727,7 @@ function mfcs_request_users_0_view_page($user_id) {
         $generated_name = mfcs_generate_form_user_name($proxy_user);
 
         if ($is_manager || $is_administer) {
-          $name_information .= '<div class="view_user-item-proxy-item view_user-item-proxy-as-item"><a href="' . $base_path . 'requests/users-0/view/' . $proxy_user->uid . $url_arguments . '" class="view_user-item-proxy-as-item no_print_links_as_link" title="View user information">' . $generated_name . '</a></div>';
+          $name_information .= '<div class="view_user-item-proxy-item view_user-item-proxy-as-item"><a href="' . $base_path . 'users-0/view/' . $proxy_user->uid . $url_arguments . '" class="view_user-item-proxy-as-item no_print_links_as_link" title="View user information">' . $generated_name . '</a></div>';
         }
         else {
           $name_information .= '<div class="view_user-item-proxy-item view_user-item-proxy-as-item">' . $generated_name . '</div>';
@@ -757,7 +757,7 @@ function mfcs_request_users_0_view_page($user_id) {
         $generated_name = mfcs_generate_form_user_name($proxy_user);
 
         if ($is_manager || $is_administer) {
-          $name_information .= '<div class="view_user-item-proxy-item view_user-item-proxy-by-item"><a href="' . $base_path . 'requests/users-0/view/' . $proxy_user->uid . $url_arguments . '" class="view_user-item-proxy-by-item no_print_links_as_link" title="View user information">' . $generated_name . '</a></div>';
+          $name_information .= '<div class="view_user-item-proxy-item view_user-item-proxy-by-item"><a href="' . $base_path . 'users-0/view/' . $proxy_user->uid . $url_arguments . '" class="view_user-item-proxy-by-item no_print_links_as_link" title="View user information">' . $generated_name . '</a></div>';
         }
         else {
           $name_information .= '<div class="view_user-item-proxy-item view_user-item-proxy-by-item">' . $generated_name . '</div>';
@@ -884,8 +884,8 @@ function mfcs_request_users_0_view_page($user_id) {
     unset($problems_detected);
 
     $markup .= '<div class="view_user-buttons">';
-    $markup .= '<a href="' . $base_path . 'requests/users-0/edit/' . $user_id . $url_arguments . '" class="view_user-button view_user-edit">Edit</a>' ;
-    $markup .= '<a href="' . $base_path . 'requests/users-0/check/' . $user_id . $url_arguments . '" class="view_user-button view_user-check">Check for Problems</a>' ;
+    $markup .= '<a href="' . $base_path . 'users-0/edit/' . $user_id . $url_arguments . '" class="view_user-button view_user-edit">Edit</a>' ;
+    $markup .= '<a href="' . $base_path . 'users-0/check/' . $user_id . $url_arguments . '" class="view_user-button view_user-check">Check for Problems</a>' ;
     $markup .= '</div>';
   }
 
@@ -1082,13 +1082,13 @@ function mfcs_request_users_0_add_or_edit_form($form, &$form_state, $user_id = N
 
   $account = NULL;
   if (is_null($user_id)) {
-    mfcs_add_canonical_headers('requests/users-0/add');
+    mfcs_add_canonical_headers('users-0/add');
 
     drupal_set_title('Add User');
   }
   else {
     $account = user_load($user_id);
-    mfcs_add_canonical_headers('requests/users-0/add');
+    mfcs_add_canonical_headers('users-0/add');
 
     $user_name = $account->name;
     if (!empty($account->mfcs['first_name'])) {
@@ -1787,10 +1787,10 @@ function mfcs_request_users_0_add_or_edit_form_submit($form, &$form_state, $edit
 
     if (is_object($saved_account)) {
       if ($edit) {
-        drupal_set_message('Successfully saved user <a href="' . $base_path . 'requests/users-0/view/' . $saved_account->uid . '">' . $saved_account->name . '</a>.');
+        drupal_set_message('Successfully saved user <a href="' . $base_path . 'users-0/view/' . $saved_account->uid . '">' . $saved_account->name . '</a>.');
       }
       else {
-        drupal_set_message('Successfully saved user <a href="' . $base_path . 'requests/users-0/view/' . $saved_account->uid . '">' . $saved_account->name . '</a>, generated user id is: ' . $saved_account->uid . '.');
+        drupal_set_message('Successfully saved user <a href="' . $base_path . 'users-0/view/' . $saved_account->uid . '">' . $saved_account->name . '</a>, generated user id is: ' . $saved_account->uid . '.');
       }
     }
     else {
@@ -1813,10 +1813,10 @@ function mfcs_request_users_0_add_or_edit_form_submit($form, &$form_state, $edit
   // redirect after submitting.
   if (empty($form_state['values']['redirect_to'])) {
     if (is_object($saved_account)) {
-      $form_state['redirect'] = mfcs_build_redirect_array('requests/users-0/view/' . $saved_account->uid);
+      $form_state['redirect'] = mfcs_build_redirect_array('users-0/view/' . $saved_account->uid);
     }
     else {
-      $form_state['redirect'] = mfcs_build_redirect_array('requests/users-0/list');
+      $form_state['redirect'] = mfcs_build_redirect_array('users-0/list');
     }
   }
   else {
@@ -2319,7 +2319,7 @@ function mfcs_request_users_0_check_page($user_id) {
 
   $redirect_array = mfcs_build_redirect_array('requests/problems-0/users');
 
-  drupal_goto('requests/users-0/view/' . $user_id, array('query' => drupal_get_query_parameters()));
+  drupal_goto('users-0/view/' . $user_id, array('query' => drupal_get_query_parameters()));
 }
 
 /**

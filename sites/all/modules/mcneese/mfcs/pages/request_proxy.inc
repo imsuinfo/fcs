@@ -209,7 +209,7 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = NULL) {
 
     // note: previously the id was added as a no-js failsafe, but it causes an annoying flicker on load (because the load speed is sufficiently fast enough to flicker but slow enough to see).
     $row['proxy_account'] = array(
-      'data' => '<a href="' . $base_path . 'requests/users-0/view/' . $item->proxy_id . $url_arguments . '" class="user-link">' . check_plain($item->proxy_name) . '</a>',
+      'data' => '<a href="' . $base_path . 'users-0/view/' . $item->proxy_id . $url_arguments . '" class="user-link">' . check_plain($item->proxy_name) . '</a>',
       'class' => $class_proxy_account,
     );
 
@@ -230,7 +230,7 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = NULL) {
 
     // note: previously the id was added as a no-js failsafe, but it causes an annoying flicker on load (because the load speed is sufficiently fast enough to flicker but slow enough to see).
     $row['account'] = array(
-      'data' => '<a href="' . $base_path . 'requests/users-0/view/' . $item->user_id . $url_arguments . '" class="user-link">' . check_plain($item->name) . '</a>',
+      'data' => '<a href="' . $base_path . 'users-0/view/' . $item->user_id . $url_arguments . '" class="user-link">' . check_plain($item->name) . '</a>',
       'class' => $class_account,
     );
 

@@ -313,7 +313,7 @@ function mfcs_ajax_reviewers_0_list($classification, $review_step) {
       }
 
       $row[2] = $reviewer->user_id;
-      $row[3] = '<a href="' . $base_path . 'requests/users-0/view/' . $reviewer->user_id . $url_arguments . '" class="user-link">' . check_plain($reviewer->name) . '</a>';
+      $row[3] = '<a href="' . $base_path . 'users-0/view/' . $reviewer->user_id . $url_arguments . '" class="user-link">' . check_plain($reviewer->name) . '</a>';
       $row[4] = check_plain($reviewer->first_name);
       $row[5] = check_plain($reviewer->last_name);
 
@@ -509,11 +509,11 @@ function mfcs_ajax_proxy_0_list() {
 
       $row[0] = $proxy->id;
       $row[1] = $proxy->proxy_id;
-      $row[2] = '<a href="' . $base_path . 'requests/users-0/view/' . $proxy->proxy_id . $url_arguments . '" class="user-link">' . check_plain($proxy->proxy_name) . '</a>';
+      $row[2] = '<a href="' . $base_path . 'users-0/view/' . $proxy->proxy_id . $url_arguments . '" class="user-link">' . check_plain($proxy->proxy_name) . '</a>';
       $row[3] = check_plain($proxy->proxy_first_name);
       $row[4] = check_plain($proxy->proxy_last_name);
       $row[5] = $proxy->user_id;
-      $row[6] = '<a href="' . $base_path . 'requests/users-0/view/' . $proxy->user_id . $url_arguments . '" class="user-link">' . check_plain($proxy->name) . '</a>';
+      $row[6] = '<a href="' . $base_path . 'users-0/view/' . $proxy->user_id . $url_arguments . '" class="user-link">' . check_plain($proxy->name) . '</a>';
       $row[7] = check_plain($proxy->first_name);
       $row[8] = check_plain($proxy->last_name);
 
@@ -1031,7 +1031,7 @@ function mfcs_ajax_problems_0_users_list() {
       $additional_operations = '';
 
       $row[0] = '' . $problem->user_id;
-      $row[1] = '<a href="' . $base_path . 'requests/users-0/view/' . $problem->user_id . $url_arguments . '" class="user-link">' . check_plain($problem->name) . '</a>';
+      $row[1] = '<a href="' . $base_path . 'users-0/view/' . $problem->user_id . $url_arguments . '" class="user-link">' . check_plain($problem->name) . '</a>';
       $row[2] = check_plain($problem->first_name);
       $row[3] = check_plain($problem->last_name);
 
@@ -1608,14 +1608,14 @@ function mfcs_ajax_email_log_0_list() {
 
       $row[0] = '' . $email_log->id;
       $row[1] = '' . $email_log->user_id;
-      $row[2] = '<a href="' . $base_path . 'requests/users-0/view/' . $email_log->user_id . $url_arguments . '" class="user-link">' . check_plain($email_log->name) . '</a>';
+      $row[2] = '<a href="' . $base_path . 'users-0/view/' . $email_log->user_id . $url_arguments . '" class="user-link">' . check_plain($email_log->name) . '</a>';
       $row[3] = check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SQUEEZE, $email_log->date));
 
       if (empty($email_log->destination_user_id)) {
         $row[4] = check_plain($email_log->destination);
       }
       else {
-        $row[4] = '<a href="' . $base_path . 'requests/users-0/view/' . $email_log->destination_user_id . $url_arguments . '" class="user-link">' . check_plain($email_log->destination) . '</a>';
+        $row[4] = '<a href="' . $base_path . 'users-0/view/' . $email_log->destination_user_id . $url_arguments . '" class="user-link">' . check_plain($email_log->destination) . '</a>';
       }
 
       $row[5] = check_plain($email_log->title);
@@ -1915,7 +1915,7 @@ function mfcs_ajax_synchronize_0_form() {
       $row = array();
       $row[0] = '' . $item->id;
       $row[1] = '' . $item->user_id;
-      $row[2] = '<a href="' . $base_path . 'requests/users-0/view/' . $item->user_id . $url_arguments . '" class="user-link">' . check_plain($item->name) . '</a>';
+      $row[2] = '<a href="' . $base_path . 'users-0/view/' . $item->user_id . $url_arguments . '" class="user-link">' . check_plain($item->name) . '</a>';
       $row[3] = check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SQUEEZE, $item->created));
       $row[4] = check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SQUEEZE, $item->updated));
       $row[5] = check_plain($item->password);
@@ -2193,10 +2193,10 @@ function mfcs_ajax_users_0_list($argument_1 = NULL) {
         }
       }
 
-      $row[10] = '<a href="' . $base_path . 'requests/users-0/view/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="View User">View</a>';
+      $row[10] = '<a href="' . $base_path . 'users-0/view/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="View User">View</a>';
 
       if ($is_manager || $is_administer) {
-        $row[10] .= ' <a href="' . $base_path . 'requests/users-0/edit/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="Edit User">Edit</a>';
+        $row[10] .= ' <a href="' . $base_path . 'users-0/edit/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="Edit User">Edit</a>';
 
         if ($item->problems != MFCS_USER_PROBLEM_NONE) {
           $row[10] .= ' <a href="' . $base_path . 'requests/problems-0/users/user/' . $item->id . $url_arguments . '" class="operation-link operation-link-problems" title="View User Problems">Problems</a>' ;

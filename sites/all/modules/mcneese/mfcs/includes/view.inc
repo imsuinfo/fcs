@@ -896,7 +896,7 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
 
             // only show link to user account for managers and administers.
             if ($is_manager || $is_administer) {
-              $markup .= '<a href="' . $base_path . 'requests/users-0/view/' . $users[$value->{$value_name}]['user_id'] . $url_arguments . '" class="item-link" title="' . $user_title . '">' . $user_name . '</a>';
+              $markup .= '<a href="' . $base_path . 'users-0/view/' . $users[$value->{$value_name}]['user_id'] . $url_arguments . '" class="item-link" title="' . $user_title . '">' . $user_name . '</a>';
             }
             else {
               $markup .= $user_name;
@@ -1073,7 +1073,7 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
 
           // only show link to user account for managers and administers.
           if ($is_manager || $is_administer) {
-            $markup .= '<a href="' . $base_path . 'requests/users-0/view/' . $users[$value->{$value_name}]['user_id'] . $url_arguments . '" class="item-link" title="' . $user_title . '">' . $user_name . '</a>';
+            $markup .= '<a href="' . $base_path . 'users-0/view/' . $users[$value->{$value_name}]['user_id'] . $url_arguments . '" class="item-link" title="' . $user_title . '">' . $user_name . '</a>';
           }
           else {
             $markup .= $user_name;
@@ -1135,7 +1135,7 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
         else {
           // only show link to user account for managers and administers.
           if ($is_manager || $is_administer) {
-            $markup .= '<a href="' . $base_path . 'requests/users-0/view/' . $request_coordinator_user_id . $url_arguments . '" class="item-link" title="' . $user_title . '">' . check_plain($value->{$value_name}) . '</a>';
+            $markup .= '<a href="' . $base_path . 'users-0/view/' . $request_coordinator_user_id . $url_arguments . '" class="item-link" title="' . $user_title . '">' . check_plain($value->{$value_name}) . '</a>';
           }
           else {
             $markup .= check_plain($value->{$value_name});

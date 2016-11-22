@@ -374,7 +374,7 @@ function mfcs_request_manage_0_page_create_item_user_name($label, $user, $sectio
     $string = '';
   }
   else {
-    $string = '<a href="' . $base_path . 'requests/users-0/view/' . $user['user_id'] . $url_arguments . '" title="View User Profile">' . $string . '</a> <span class="user_id">[id: ' . $user['user_id'] . ']</span>';
+    $string = '<a href="' . $base_path . 'users-0/view/' . $user['user_id'] . $url_arguments . '" title="View User Profile">' . $string . '</a> <span class="user_id">[id: ' . $user['user_id'] . ']</span>';
   }
 
   return mfcs_request_manage_0_page_create_item_and_value($label, $string, $section);

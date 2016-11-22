@@ -9873,7 +9873,7 @@ function mfcs_build_request_table($items, $max_rows, $columns = NULL, $user = NU
         }
 
         if ($manager || $administer) {
-          $row['submitted_by']['data'] = '<a href="' . $base_path . 'requests/users-0/view/' . $submitter->uid . $url_arguments . '">' . $name . '</a>';
+          $row['submitted_by']['data'] = '<a href="' . $base_path . 'users-0/view/' . $submitter->uid . $url_arguments . '">' . $name . '</a>';
         }
         else {
           $row['submitted_by']['data'] = $name;
@@ -10640,7 +10640,7 @@ function mfcs_build_request_ajax_table_process_rows($items, $columns, $user = NU
           $data .= '</div>';
 
           if ($manager || $administer) {
-            $data = '<div class="column-item item-submitted_by item-submitted_by-0"><a href="' . $base_path . 'requests/users-0/view/' . $item->user_id . $url_arguments . '">' . $name . '</a></div>';
+            $data = '<div class="column-item item-submitted_by item-submitted_by-0"><a href="' . $base_path . 'users-0/view/' . $item->user_id . $url_arguments . '">' . $name . '</a></div>';
           }
           else {
             $data = '<div class="column-item item-submitted_by item-submitted_by-0">' . $name . '</div>';

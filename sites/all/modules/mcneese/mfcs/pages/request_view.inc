@@ -239,7 +239,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
         if (!empty($coordinator_problems['disabled'])) {
           if (!empty($coordinator_problems['disabled']['current']['processed_name'])) {
-            $user_venue_coordinator_name = '<a href="' . $base_path . 'requests/users-0/view/' . $coordinator_problems['disabled']['current']['user_id'] . '" title="User ID: ' . $coordinator_problems['disabled']['current']['user_id'] .'">' . $coordinator_problems['disabled']['current']['processed_name'] . '</a> <sup>[id: ' . $coordinator_problems['disabled']['current']['id'] . ']</sup>';
+            $user_venue_coordinator_name = '<a href="' . $base_path . 'users-0/view/' . $coordinator_problems['disabled']['current']['user_id'] . '" title="User ID: ' . $coordinator_problems['disabled']['current']['user_id'] .'">' . $coordinator_problems['disabled']['current']['processed_name'] . '</a> <sup>[id: ' . $coordinator_problems['disabled']['current']['id'] . ']</sup>';
 
             drupal_set_message('Warning: The Venue Coordinator (' . $user_venue_coordinator_name . ') assigned to this request no longer has access to this system.', 'warning', FALSE);
           }
@@ -250,8 +250,8 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
         if (!empty($coordinator_problems['out_of_sync'])) {
           if (!empty($coordinator_problems['out_of_sync']['current']['processed_name']) && !empty($coordinator_problems['out_of_sync']['banner']['processed_name'])) {
-            $user_venue_coordinator_name = '<a href="' . $base_path . 'requests/users-0/view/' . $coordinator_problems['out_of_sync']['current']['user_id'] . '">' . $coordinator_problems['out_of_sync']['current']['processed_name'] . '</a> <sup>[id: ' . $coordinator_problems['out_of_sync']['current']['user_id'] . ']</sup>';
-            $user_banner_coordinator_name = '<a href="' . $base_path . 'requests/users-0/view/' . $coordinator_problems['out_of_sync']['banner']['banner_id'] . '" title="User ID: ' . $coordinator_problems['out_of_sync']['banner']['banner_id'] .'">' . $coordinator_problems['out_of_sync']['banner']['processed_name'] . '</a> <sup>[id: ' . $coordinator_problems['out_of_sync']['banner']['banner_id'] . ']</sup>';
+            $user_venue_coordinator_name = '<a href="' . $base_path . 'users-0/view/' . $coordinator_problems['out_of_sync']['current']['user_id'] . '">' . $coordinator_problems['out_of_sync']['current']['processed_name'] . '</a> <sup>[id: ' . $coordinator_problems['out_of_sync']['current']['user_id'] . ']</sup>';
+            $user_banner_coordinator_name = '<a href="' . $base_path . 'users-0/view/' . $coordinator_problems['out_of_sync']['banner']['banner_id'] . '" title="User ID: ' . $coordinator_problems['out_of_sync']['banner']['banner_id'] .'">' . $coordinator_problems['out_of_sync']['banner']['processed_name'] . '</a> <sup>[id: ' . $coordinator_problems['out_of_sync']['banner']['banner_id'] . ']</sup>';
 
             drupal_set_message('Warning: The Venue Coordinator (' . $user_venue_coordinator_name . ') assigned to this request no longer the same as the Venue Coordinator (' . $user_banner_coordinator_name . ') assigned via Banner.', 'warning', FALSE);
           }
@@ -1145,7 +1145,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
                   $yet_to_review_markup_prefix = '';
                   $yet_to_review_markup_suffix = '';
                   if ($is_manager || $is_administer) {
-                    $yet_to_review_markup_prefix = '<a href="' . $base_path . 'requests/users-0/view/' . $user_id . $url_arguments . '" class="details_list-user_name-link no_print_links_as_link">';
+                    $yet_to_review_markup_prefix = '<a href="' . $base_path . 'users-0/view/' . $user_id . $url_arguments . '" class="details_list-user_name-link no_print_links_as_link">';
                     $yet_to_review_markup_suffix = '</a>';
                   }
 
@@ -1178,7 +1178,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
             $yet_to_review_markup_prefix = '';
             $yet_to_review_markup_suffix = '';
             if ($is_manager || $is_administer) {
-              $yet_to_review_markup_prefix = '<a href="' . $base_path . 'requests/users-0/view/' . $request['venue_coordinator']['user_id'][0]->value . $url_arguments . '" class="details_list-user_name-link no_print_links_as_link">';
+              $yet_to_review_markup_prefix = '<a href="' . $base_path . 'users-0/view/' . $request['venue_coordinator']['user_id'][0]->value . $url_arguments . '" class="details_list-user_name-link no_print_links_as_link">';
               $yet_to_review_markup_suffix = '</a>';
             }
 
@@ -1239,7 +1239,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
                 $yet_to_review_markup_prefix = '';
                 $yet_to_review_markup_suffix = '';
                 if ($is_manager || $is_administer) {
-                  $yet_to_review_markup_prefix = '<a href="' . $base_path . 'requests/users-0/view/' . $proxy_id . $url_arguments . '" class="details_list-user_name-link no_print_links_as_link">';
+                  $yet_to_review_markup_prefix = '<a href="' . $base_path . 'users-0/view/' . $proxy_id . $url_arguments . '" class="details_list-user_name-link no_print_links_as_link">';
                   $yet_to_review_markup_suffix = '</a>';
                 }
 

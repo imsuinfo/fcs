@@ -247,7 +247,7 @@ function mfcs_request_email_log_0_form($form, &$form_state, $page_number = NULL)
 
     // note: previously the id was added as a no-js failsafe, but it causes an annoying flicker on load (because the load speed is sufficiently fast enough to flicker but slow enough to see).
     $row['account'] = array(
-      'data' => '<div class="column-item item-account item-account-0"><a href="' . $base_path . 'requests/users-0/view/' . $email_log->user_id . $url_arguments . '" class="user-link">' . check_plain($email_log->name) . '</a></div>',
+      'data' => '<div class="column-item item-account item-account-0"><a href="' . $base_path . 'users-0/view/' . $email_log->user_id . $url_arguments . '" class="user-link">' . check_plain($email_log->name) . '</a></div>',
       'class' => $class_name,
     );
 
@@ -264,7 +264,7 @@ function mfcs_request_email_log_0_form($form, &$form_state, $page_number = NULL)
     }
     else {
       $row['destination'] = array(
-        'data' => '<div class="column-item item-destination item-destination-0"><a href="' . $base_path . 'requests/users-0/view/' . $email_log->destination_user_id . $url_arguments . '" class="user-link">' . check_plain($email_log->destination) . '</a></div>',
+        'data' => '<div class="column-item item-destination item-destination-0"><a href="' . $base_path . 'users-0/view/' . $email_log->destination_user_id . $url_arguments . '" class="user-link">' . check_plain($email_log->destination) . '</a></div>',
         'class' => $class_destination,
       );
     }
@@ -550,7 +550,7 @@ function mfcs_request_email_log_0_view_page($id) {
       }
 
       $markup .= '<div class="email_log-destination_user-wrapper">';
-      $markup .= '<div class="email_log-destination_user"><strong>Sent To User</strong>: <a href="' . $base_path . 'requests/users-0/view/' . $log->destination_user_id . $url_arguments . '" class="email_log-destination_user-link">' . check_plain($user_name) . '</a> <sup class="email_log-destination_user-user_id">[id: ' . ((int) $log->destination_user_id) . ']</sup>.</div>';
+      $markup .= '<div class="email_log-destination_user"><strong>Sent To User</strong>: <a href="' . $base_path . 'users-0/view/' . $log->destination_user_id . $url_arguments . '" class="email_log-destination_user-link">' . check_plain($user_name) . '</a> <sup class="email_log-destination_user-user_id">[id: ' . ((int) $log->destination_user_id) . ']</sup>.</div>';
       $markup .= '</div>'; // email_log-destination_user-wrapper
 
       unset($user_name);

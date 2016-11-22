@@ -1809,7 +1809,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'tab_root' => 'requests',
   );
 
-  $items['requests/users-0/list'] = array(
+  $items['users-0/list'] = array(
     'title' => 'Users',
     'description' => 'View or manage users on the system.',
     'page callback' => 'drupal_get_form',
@@ -1822,11 +1822,11 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'tab_root' => 'requests',
   );
 
-  $items['requests/users-0/list/%'] = array(
+  $items['users-0/list/%'] = array(
     'title' => 'Manage Users',
     'description' => 'Manage Users',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_request_users_0_form', 3),
+    'page arguments' => array('mfcs_request_users_0_form', 2),
     'file' => 'request_users.inc',
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_page_generic_access',
@@ -1835,7 +1835,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'tab_root' => 'requests',
   );
 
-  $items['requests/users-0/list/ajax'] = array(
+  $items['users-0/list/ajax'] = array(
     'title' => 'Manage Users',
     'description' => 'Manage Users',
     'page callback' => 'mfcs_ajax_users_0_list',
@@ -1847,11 +1847,11 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'tab_root' => 'requests',
   );
 
-  $items['requests/users-0/list/ajax/%'] = array(
+  $items['users-0/list/ajax/%'] = array(
     'title' => 'Manage Users',
     'description' => 'Manage Users',
     'page callback' => 'mfcs_ajax_users_0_list',
-    'page arguments' => array(4),
+    'page arguments' => array(3),
     'file' => 'ajax-management.inc',
     'file path' => $module_path . '/includes',
     'access callback' => 'mfcs_page_generic_access',
@@ -1860,7 +1860,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'tab_root' => 'requests',
   );
 
-  $items['requests/users-0/add'] = array(
+  $items['users-0/add'] = array(
     'title' => 'Add User',
     'description' => 'Add User',
     'page callback' => 'drupal_get_form',
@@ -1873,37 +1873,37 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'tab_root' => 'requests',
   );
 
-  $items['requests/users-0/view/%'] = array(
+  $items['users-0/view/%'] = array(
     'title' => 'View User',
     'description' => 'View User',
     'page callback' => 'mfcs_request_users_0_view_page',
-    'page arguments' => array(3),
+    'page arguments' => array(2),
     'file' => 'request_users.inc',
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_page_generic_access',
-    'access arguments' => array('users-view', 3),
+    'access arguments' => array('users-view', 2),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
   );
 
-  $items['requests/users-0/edit/%'] = array(
+  $items['users-0/edit/%'] = array(
     'title' => 'Edit User',
     'description' => 'Edit User',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_request_users_0_edit_form', 3),
+    'page arguments' => array('mfcs_request_users_0_edit_form', 2),
     'file' => 'request_users.inc',
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_page_generic_access',
-    'access arguments' => array('users-edit', 3),
+    'access arguments' => array('users-edit', 2),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
   );
 
-  $items['requests/users-0/check/%'] = array(
+  $items['users-0/check/%'] = array(
     'title' => 'Check User for Problems',
     'description' => 'Check User for Problems',
     'page callback' => 'mfcs_request_users_0_check_page',
-    'page arguments' => array(3),
+    'page arguments' => array(2),
     'file' => 'request_users.inc',
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_page_generic_access',
