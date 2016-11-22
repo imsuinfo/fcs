@@ -64,6 +64,8 @@ function mfcs_hook_menu() {
 
   mfcs_hook_menu_management($items, $module_path);
 
+  mfcs_hook_menu_users($items, $module_path);
+
   mfcs_hook_menu_help($items, $module_path);
 
   return $items;
@@ -1808,7 +1810,17 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
   );
+}
 
+/**
+ * hook_menu() entries related to users.
+ *
+ * @param array $items
+ *   An array of menu items.
+ * @param string $module_path
+ *   The filesystem path to the module.
+ */
+function mfcs_hook_menu_users(&$items, $module_path) {
   $items['users-0/list'] = array(
     'title' => 'Users',
     'description' => 'View or manage users on the system.',
