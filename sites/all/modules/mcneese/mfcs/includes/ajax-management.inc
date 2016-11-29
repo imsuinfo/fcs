@@ -1977,6 +1977,8 @@ function mfcs_ajax_users_0_list($argument_1 = NULL) {
   }
 
   $user = cf_current_user();
+  $is_requester = user_access('mfcs request', $user);
+  $is_reviewer = user_access('mfcs review', $user);
   $is_manager = user_access('mfcs manage', $user);
   $is_administer = user_access('mfcs administer', $user);
 
@@ -2197,10 +2199,14 @@ function mfcs_ajax_users_0_list($argument_1 = NULL) {
 
       if ($is_manager || $is_administer) {
         $row[10] .= ' <a href="' . $base_path . 'users-0/edit/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="Edit User">Edit</a>';
+        $row[10] .= ' <a href="' . $base_path . 'users-0/customize/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="Customize User">Customize</a>' ;
 
         if ($item->problems != MFCS_USER_PROBLEM_NONE) {
           $row[10] .= ' <a href="' . $base_path . 'requests/problems-0/users/user/' . $item->id . $url_arguments . '" class="operation-link operation-link-problems" title="View User Problems">Problems</a>' ;
         }
+      }
+      elseif ($item->id == $user->uid && ($is_requester || $is_reviewer)) {
+        $row[10] .= ' <a href="' . $base_path . 'users-0/customize/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="Customize User">Customize</a>' ;
       }
 
       $response['data'][] = $row;

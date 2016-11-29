@@ -1923,6 +1923,19 @@ function mfcs_hook_menu_users(&$items, $module_path) {
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
   );
+
+  $items['users-0/customize/%'] = array(
+    'title' => 'Customize User',
+    'description' => 'Customize User Experience',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_users_0_customize_form', 2),
+    'file' => 'request_users.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_generic_access',
+    'access arguments' => array('users-customize', 2),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+  );
 }
 
 /**

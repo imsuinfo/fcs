@@ -1188,6 +1188,16 @@ function mfcs_page_generic_access($operation = NULL, $access_id = NULL, $user = 
       return TRUE;
     }
   }
+  elseif ($operation == 'users-customize') {
+    if ($roles['manager'] || $roles['administer']) {
+      $access[$access_id] = TRUE;
+      return TRUE;
+    }
+    elseif (!is_null($access_id) && $access_id == $user->uid) {
+      $access[$access_id] = TRUE;
+      return TRUE;
+    }
+  }
 
   if (is_array($access_id)) {
     foreach ($access_ids as $id) {

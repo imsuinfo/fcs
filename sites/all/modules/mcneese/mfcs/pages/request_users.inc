@@ -63,6 +63,8 @@ function mfcs_request_users_0_form($form, &$form_state, $page_number = NULL) {
   mfcs_add_canonical_headers('users-0/list/' . $page_number);
 
   $user = cf_current_user();
+  $is_requester = user_access('mfcs request', $user);
+  $is_reviewer = user_access('mfcs review', $user);
   $is_manager = user_access('mfcs manage', $user);
   $is_administer = user_access('mfcs administer', $user);
 
@@ -295,10 +297,14 @@ function mfcs_request_users_0_form($form, &$form_state, $page_number = NULL) {
 
     if ($is_manager || $is_administer) {
       $row['operations']['data'] .= ' <a href="' . $base_path . 'users-0/edit/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="Edit User">Edit</a>' ;
+      $row['operations']['data'] .= ' <a href="' . $base_path . 'users-0/customize/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="Customize User">Customize</a>' ;
 
       if ($item->problems != MFCS_USER_PROBLEM_NONE) {
         $row['operations']['data'] .= ' <a href="' . $base_path . 'requests/problems-0/users/user/' . $item->id . $url_arguments . '" class="operation-link operation-link-problems" title="View User Problems">Problems</a>' ;
       }
+    }
+    elseif ($item->id == $user->uid && ($is_requester || $is_reviewer)) {
+      $row['operations']['data'] .= ' <a href="' . $base_path . 'users-0/customize/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="Customize User">Customize</a>' ;
     }
 
     $rows[] = $row;
@@ -885,7 +891,13 @@ function mfcs_request_users_0_view_page($user_id) {
 
     $markup .= '<div class="view_user-buttons">';
     $markup .= '<a href="' . $base_path . 'users-0/edit/' . $user_id . $url_arguments . '" class="view_user-button view_user-edit">Edit</a>' ;
+    $markup .= '<a href="' . $base_path . 'users-0/customize/' . $user_id . $url_arguments . '" class="view_user-button view_user-customize">Customize</a>' ;
     $markup .= '<a href="' . $base_path . 'users-0/check/' . $user_id . $url_arguments . '" class="view_user-button view_user-check">Check for Problems</a>' ;
+    $markup .= '</div>';
+  }
+  elseif ($user->uid == $user_id && ($is_requester || $is_reviewer)) {
+    $markup .= '<div class="view_user-buttons">';
+    $markup .= '<a href="' . $base_path . 'users-0/customize/' . $user_id . $url_arguments . '" class="view_user-button view_user-customize">Customize</a>' ;
     $markup .= '</div>';
   }
 
@@ -1814,6 +1826,403 @@ function mfcs_request_users_0_add_or_edit_form_submit($form, &$form_state, $edit
   if (empty($form_state['values']['redirect_to'])) {
     if (is_object($saved_account)) {
       $form_state['redirect'] = mfcs_build_redirect_array('users-0/view/' . $saved_account->uid);
+    }
+    else {
+      $form_state['redirect'] = mfcs_build_redirect_array('users-0/list');
+    }
+  }
+  else {
+    $form_state['redirect'] = $form_state['values']['redirect_to'];
+  }
+}
+
+/**
+ * Provides the ability to manually add new users.
+ *
+ * @param array $form
+ *   The form array as defined by drupals form api.
+ * @param array $form_state
+ *   The form state array as defined by drupals form api
+ * @param int $user_id
+ *   When specified, this an edit form is created.
+ *   Otherwise, an add form is created.
+ *
+ * @return array
+ *   The form array.
+ */
+function mfcs_request_users_0_customize_form($form, &$form_state, $user_id) {
+  if (!is_array($form)) {
+    cf_error::invalid_array('form');
+
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  if (!is_array($form_state)) {
+    cf_error::invalid_array('form_state');
+
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  if (!cf_is_integer($user_id)) {
+    cf_error::invalid_integer('user_id');
+
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  global $conf;
+  global $base_path;
+  global $mfcs_determined;
+
+  $roles_basic = mfcs_request_users_get_roles(TRUE, FALSE, FALSE, FALSE);
+  $roles_venue = mfcs_request_users_get_roles(FALSE, TRUE, FALSE, FALSE);
+  $roles_special = mfcs_request_users_get_roles(FALSE, FALSE, TRUE, FALSE);
+  $roles_administer = mfcs_request_users_get_roles(FALSE, FALSE, FALSE, TRUE);
+
+  $bannerless_exception_role_id = array_search('bannerless exception', $roles_special);
+
+  asort($roles_basic);
+  asort($roles_venue);
+  asort($roles_special);
+  asort($roles_administer);
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  $account = user_load($user_id);
+  mfcs_add_canonical_headers('users-0/customize/' . ((int) $user_id));
+
+  $user_name = $account->name;
+  if (!empty($account->mfcs['first_name'])) {
+    $user_name = $account->mfcs['first_name'];
+
+    if (!empty($account->mfcs['last_name'])) {
+      $user_name .= ' ' . $account->mfcs['last_name'];
+    }
+
+    $user_name .= ' (' . $account->name . ')';
+  }
+
+  drupal_set_title('Customize User: ' . $user_name);
+
+
+  $toggle_options = array(
+    'always' => 'Enabled (always)',
+    'on' => 'Enabled (auto)',
+    'off' => 'Disabled (auto)',
+    'never' => 'Disabled (always)',
+  );
+
+
+  $form['user'] = array(
+    '#type' => 'value',
+    '#value' => $account,
+  );
+
+  $form['form'] = array(
+    '#tree' => TRUE,
+  );
+
+
+  // style settings
+  $form['form']['settings_style'] = array(
+    '#id' => 'manage-users_0-customize-settings_style',
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#title' => 'Style Settings',
+    '#attributes' => array(
+      'class' => array(
+        'manage-users_0-customize-settings_style',
+        'fieldset_print_as_div',
+      ),
+    ),
+    '#tree' => TRUE,
+  );
+
+  $form['form']['settings_style']['expand_to_fit_screen'] = array(
+    '#type' => 'checkbox',
+    '#title' => 'Expand the page width to fit the screen.',
+    '#default_value' => TRUE,
+    '#description' => 'Alters the page width to expand based on your browsers size. When off, this will force a fixed/preset width exactly as public user see.',
+  );
+
+  $form['form']['settings_style']['show_page_width_toggle'] = array(
+    '#type' => 'checkbox',
+    '#title' => 'Show page width toggle icon.',
+    '#default_value' => TRUE,
+    '#description' => 'When enabled, an icon appears that allows for temporarilly toggling the page width settings for the current page..',
+  );
+
+
+  // region settings
+  $form['form']['settings_region'] = array(
+    '#id' => 'manage-users_0-customize-settings_region',
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#title' => 'Region Settings',
+    '#attributes' => array(
+      'class' => array(
+        'manage-users_0-customize-settings_region',
+        'fieldset_print_as_div',
+      ),
+    ),
+    '#tree' => TRUE,
+  );
+
+  $form['form']['settings_region']['sticky_help_region'] = array(
+    '#type' => 'select',
+    '#title' => 'Enable a sticky help region.',
+    '#default_value' => 'off',
+    '#options' => $toggle_options,
+    '#description' => 'Normally the help will float on the right side of the page, enable this to make the help stick (embed) on the page, above the page title. (Non-HTML5 compliant browsers will always be sticky.)',
+  );
+
+  $form['form']['settings_region']['sticky_messages_region'] = array(
+    '#type' => 'select',
+    '#title' => 'Enable a sticky messages region.',
+    '#default_value' => 'off',
+    '#options' => $toggle_options,
+    '#description' => 'Normally the messages will float on the right side of the page, enable this to make the messages stick (embed) on the page, above the page title. (Non-HTML5 compliant browsers will always be sticky.)',
+  );
+
+  $form['form']['settings_region']['sticky_information_region'] = array(
+    '#type' => 'select',
+    '#title' => 'Enable a sticky information region.',
+    '#default_value' => 'off',
+    '#options' => $toggle_options,
+    '#description' => 'Normally the information region will float on the right side of the page, enable this to make the information region stick (embed) on the page, above the page title. (Non-HTML5 compliant browsers will always be sticky.)',
+  );
+
+  $form['form']['settings_region']['sticky_side_region'] = array(
+    '#type' => 'select',
+    '#title' => 'Enable a sticky side region.',
+    '#default_value' => 'on',
+    '#options' => $toggle_options,
+    '#description' => 'Normally the side region is on the left side of the page, disable this to make the side region float on the left side of the page, freeing up room for the main content. (Non-HTML5 compliant browsers will always be sticky.)',
+  );
+
+
+  // navigation settings
+  $form['form']['settings_navigation'] = array(
+    '#id' => 'manage-users_0-customize-settings_navigation',
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#title' => 'Navigation Settings',
+    '#attributes' => array(
+      'class' => array(
+        'manage-users_0-customize-settings_navigation',
+        'fieldset_print_as_div',
+      ),
+    ),
+    '#tree' => TRUE,
+  );
+
+  $form['form']['settings_navigation']['autohide_toolbar'] = array(
+    '#type' => 'checkbox',
+    '#title' => 'Auto-hide the toolbar.',
+    '#default_value' => FALSE,
+    '#description' => 'Normally the toolbar is always visible on the page, enable this to hide most of the toolbar when it is not active.',
+  );
+
+  $form['form']['settings_navigation']['sticky_toolbar'] = array(
+    '#type' => 'checkbox',
+    '#title' => 'Make the toolbar sticky.',
+    '#default_value' => FALSE,
+    '#description' => 'Normally the toolbar will float above the page, enable this to make the toolbar stick (embed) on page.',
+  );
+
+  $form['buttons']['cancel'] = array(
+    '#id' => 'submit-buttons-cancel',
+    '#name' => 'submit-buttons-cancel',
+    '#type' => 'submit',
+    '#default_value' => 'Cancel',
+  );
+
+  $form['buttons']['submit'] = array(
+    '#id' => 'submit-buttons-submit',
+    '#name' => 'submit-buttons-submit',
+    '#type' => 'submit',
+    '#default_value' => 'Submit',
+  );
+
+
+  // load and assign existing settings.
+  if (isset($account->data['mcneese_settings'])) {
+    // style settings
+    if (isset($account->data['mcneese_settings']['style']['work_area']['page_width']) && is_numeric($account->data['mcneese_settings']['style']['work_area']['page_width'])) {
+      $form['form']['settings_style']['expand_to_fit_screen']['#default_value'] = ($account->data['mcneese_settings']['style']['work_area']['page_width'] == 1);
+    }
+
+    if (isset($account->data['mcneese_settings']['style']['work_area']['page_width-toggle']) && is_numeric($account->data['mcneese_settings']['style']['work_area']['page_width-toggle'])) {
+      $form['form']['settings_style']['show_page_width_toggle']['#default_value'] = ($account->data['mcneese_settings']['style']['work_area']['page_width-toggle'] == 1);
+    }
+
+    // region settings
+    if (isset($account->data['mcneese_settings']['region']['help']['sticky']) && is_string($account->data['mcneese_settings']['region']['help']['sticky'])) {
+      $form['form']['settings_region']['sticky_help_region']['#default_value'] = $account->data['mcneese_settings']['region']['help']['sticky'];
+    }
+
+    if (isset($account->data['mcneese_settings']['region']['messages']['sticky']) && is_string($account->data['mcneese_settings']['region']['messages']['sticky'])) {
+      $form['form']['settings_region']['sticky_messages_region']['#default_value'] = $account->data['mcneese_settings']['region']['messages']['sticky'];
+    }
+
+    if (isset($account->data['mcneese_settings']['region']['information']['sticky']) && is_string($account->data['mcneese_settings']['region']['information']['sticky'])) {
+      $form['form']['settings_region']['sticky_information_region']['#default_value'] = $account->data['mcneese_settings']['region']['information']['sticky'];
+    }
+
+    if (isset($account->data['mcneese_settings']['region']['side']['sticky']) && is_string($account->data['mcneese_settings']['region']['side']['sticky'])) {
+      $form['form']['settings_region']['sticky_side_region']['#default_value'] = $account->data['mcneese_settings']['region']['side']['sticky'];
+    }
+
+    // navigation settings
+    if (isset($account->data['mcneese_settings']['navigation']['toolbar']['autohide']) && is_numeric($account->data['mcneese_settings']['navigation']['toolbar']['autohide'])) {
+      $form['form']['settings_navigation']['autohide_toolbar']['#default_value'] = ($account->data['mcneese_settings']['navigation']['toolbar']['autohide'] == 1);
+    }
+
+    if (isset($account->data['mcneese_settings']['navigation']['toolbar']['sticky']) && is_numeric($account->data['mcneese_settings']['navigation']['toolbar']['sticky'])) {
+      $form['form']['settings_navigation']['sticky_toolbar']['#default_value'] = ($account->data['mcneese_settings']['navigation']['toolbar']['sticky'] == 1);
+    }
+  }
+
+  return $form;
+}
+
+/**
+ * Validation for mfcs_request_users_0_customize_form().
+ *
+ * @param array $form
+ *   The form array as defined by drupals form api.
+ * @param array $form_state
+ *   The form state array as defined by drupals form api
+ *
+ * @see: mfcs_request_users_0_customize_form()
+ */
+function mfcs_request_users_0_customize_form_validate($form, &$form_state) {
+  $clicked_id = '';
+  if (isset($form_state['triggering_element']['#id'])) {
+    $clicked_id = $form_state['triggering_element']['#id'];
+  }
+
+  if ($clicked_id == 'submit-buttons-submit') {
+    // nothing to validate.
+  }
+  elseif ($clicked_id == 'submit-buttons-cancel') {
+    // nothing to do when cancelling.
+  }
+  else {
+    form_set_error('', 'Illegal operation detected. Cannot save user customization changes.');
+  }
+}
+
+/**
+ * Submit for mfcs_request_users_0_customize_form().
+ *
+ * @param array $form
+ *   The form array as defined by drupals form api.
+ * @param array $form_state
+ *   The form state array as defined by drupals form api
+ *
+ * @see: mfcs_request_users_0_customize_form()
+ */
+function mfcs_request_users_0_customize_form_submit($form, &$form_state) {
+  global $base_path;
+  global $mfcs_determined;
+  $user = cf_current_user();
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  $clicked_id = '';
+  if (isset($form_state['triggering_element']['#id'])) {
+    $clicked_id = $form_state['triggering_element']['#id'];
+  }
+
+  // don't redirect on error.
+  if ($form_state['submitted'] === FALSE) {
+    return;
+  }
+
+  $customized_account = NULL;
+  if (isset($form['user']['#value']) && is_object($form['user']['#value'])) {
+    $customized_account = $form['user']['#value'];
+  }
+
+  if (is_null($customized_account)) {
+    form_set_error('', 'Failed to customize settings for user due to internal error.');
+    watchdog(MFCS_WATCHDOG_ID, 'Unable to save user customization changes due to user object being undefined.', array(), WATCHDOG_ERROR);
+
+    $form_state['rebuild'] = TRUE;
+    $form_state['redirect'] = FALSE;
+    $form_state['submitted'] = FALSE;
+    return;
+  }
+
+  $saved_account = FALSE;
+  if ($clicked_id == 'submit-buttons-submit') {
+    $changes = array();
+
+    if (isset($form_state['values']['form']['settings_style']['expand_to_fit_screen'])) {
+      $changes['data']['mcneese_settings']['style']['work_area']['page_width'] = $form_state['values']['form']['settings_style']['expand_to_fit_screen'];
+    }
+
+    if (isset($form_state['values']['form']['settings_style']['show_page_width_toggle'])) {
+      $changes['data']['mcneese_settings']['style']['work_area']['page_width-toggle'] = $form_state['values']['form']['settings_style']['show_page_width_toggle'];
+    }
+
+    if (isset($form_state['values']['form']['settings_region']['sticky_help_region'])) {
+      $changes['data']['mcneese_settings']['region']['help']['sticky'] = $form_state['values']['form']['settings_region']['sticky_help_region'];
+    }
+
+    if (isset($form_state['values']['form']['settings_region']['sticky_messages_region'])) {
+      $changes['data']['mcneese_settings']['region']['messages']['sticky'] = $form_state['values']['form']['settings_region']['sticky_messages_region'];
+    }
+
+    if (isset($form_state['values']['form']['settings_region']['sticky_information_region'])) {
+      $changes['data']['mcneese_settings']['region']['information']['sticky'] = $form_state['values']['form']['settings_region']['sticky_information_region'];
+    }
+
+    if (isset($form_state['values']['form']['settings_region']['sticky_side_region'])) {
+      $changes['data']['mcneese_settings']['region']['side']['sticky'] = $form_state['values']['form']['settings_region']['sticky_side_region'];
+    }
+
+    if (isset($form_state['values']['form']['settings_navigation']['autohide_toolbar'])) {
+      $changes['data']['mcneese_settings']['navigation']['toolbar']['autohide'] = $form_state['values']['form']['settings_navigation']['autohide_toolbar'];
+    }
+
+    if (isset($form_state['values']['form']['settings_navigation']['sticky_toolbar'])) {
+      $changes['data']['mcneese_settings']['navigation']['toolbar']['sticky'] = $form_state['values']['form']['settings_navigation']['sticky_toolbar'];
+    }
+
+    $saved_account = user_save($form['user']['#value'], $changes);
+
+    if (is_object($saved_account)) {
+      drupal_set_message('Successfully customized settings for user <a href="' . $base_path . 'users-0/view/' . $saved_account->uid . '">' . $saved_account->name . '</a>.');
+    }
+    else {
+      form_set_error('', 'Failed to customize settings for user \'' . $customized_account->name . '\'.');
+      $form_state['rebuild'] = TRUE;
+      $form_state['redirect'] = FALSE;
+      $form_state['submitted'] = FALSE;
+      return;
+    }
+  }
+
+  // redirect after submitting.
+  if (empty($form_state['values']['redirect_to'])) {
+    if (is_object($customized_account)) {
+      $form_state['redirect'] = mfcs_build_redirect_array('users-0/view/' . $customized_account->uid);
     }
     else {
       $form_state['redirect'] = mfcs_build_redirect_array('users-0/list');

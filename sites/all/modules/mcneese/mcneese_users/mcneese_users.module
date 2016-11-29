@@ -397,9 +397,16 @@ function mcneese_users_user_presave(&$edit, $account, $category) {
   global $base_path;
 
   if (isset($edit['mcneese_settings'])) {
-    $edit['data']['mcneese_settings'] = $edit['mcneese_settings'];
+    if (isset($edit['data']['mcneese_settings'])) {
+      $edit['data']['mcneese_settings'] = array_merge($edit['data']['mcneese_settings'], $edit['mcneese_settings']);
+    }
+    else {
+      $edit['data']['mcneese_settings'] = $edit['mcneese_settings'];
+    }
 
-    setcookie('Drupal.toolbar.collapsed', !$edit['mcneese_settings']['navigation']['toolbar']['shortcuts'], NULL, $base_path);
+    if (isset($edit['mcneese_settings']['navigation']['toolbar']) && array_key_exists('shortcuts', $edit['mcneese_settings']['navigation']['toolbar'])) {
+      setcookie('Drupal.toolbar.collapsed', !$edit['mcneese_settings']['navigation']['toolbar']['shortcuts'], NULL, $base_path);
+    }
   }
 }
 

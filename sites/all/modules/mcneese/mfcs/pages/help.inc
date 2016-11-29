@@ -331,6 +331,16 @@ function mfcs_help_0_page($topic = NULL, $section = NULL, $sub_section = NULL) {
 
     $markup .= mfcs_help_user_guide_exporting_the_calendar($as, $allowed_topics, $section_information);
   }
+  elseif ($topic == 'customizing_a_user') {
+    $section_information['headers'][0] = array('markup' => 'Facilities Use User Guide', 'attributes' => array('class' => array('header-1', 'title')));
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'customizing_a_user';
+
+    $section_information['class'][] = 'section-help-user_guide-customizing_a_user';
+    $section_information['headers'][1] = array('markup' => 'Customizing a User', 'attributes' => array('class' => array('header-2', 'topic')));
+
+    $markup .= mfcs_help_user_guide_customizing_a_user($as, $allowed_topics, $section_information);
+  }
 
   // documentation
   elseif ($topic == 'introduction' && in_array('introduction', $allowed_topics)) {
@@ -1031,6 +1041,17 @@ function mfcs_help_0_page_presentation_single_user_guides($as, $allowed_topics) 
     $section_information['start_count'] = 1;
 
     $markup .= mfcs_help_user_guide_exporting_the_calendar($as, $allowed_topics, $section_information, TRUE);
+  }
+
+  // customizing_a_user
+  if (in_array('customizing_a_user', $allowed_topics)) {
+    $section_information['headers'][0]['markup'] = 'Customizing a User';
+    $section_information['id'] = $section_id . '-customizing_a_user';
+    $section_information['class'] = $base_class;
+    $section_information['class'][] = 'section-help-topic-customizing_a_user';
+    $section_information['start_count'] = 1;
+
+    $markup .= mfcs_help_user_guide_customizing_a_user($as, $allowed_topics, $section_information, TRUE);
   }
 
   // close the main section.
@@ -1904,8 +1925,18 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
     $determined['top'] = $base_path . 'help-0' . $url_arguments;
     $determined['tooltip-top'] = 'Glossary';
 
+    $determined['next'] = $base_path . 'help-0/customizing_a_user' . $url_arguments;
+    $determined['tooltip-next'] = 'User Guide: Customizing a User';
+
     $determined['previous'] = $base_path . 'help-0/using_the_calendar' . $url_arguments;
     $determined['tooltip-previous'] = 'User Guide: Using the Calendar';
+  }
+  elseif ($topic == 'customizing_a_user') {
+    $determined['top'] = $base_path . 'help-0' . $url_arguments;
+    $determined['tooltip-top'] = 'Glossary';
+
+    $determined['previous'] = $base_path . 'help-0/exporting_the_calendar' . $url_arguments;
+    $determined['tooltip-previous'] = 'User Guide: Exporting the Calendar';
   }
 
   // documentation
@@ -2487,6 +2518,7 @@ function mfcs_help_0_allowed_topics($as) {
   $topics[] = 'find_a_request';
   $topics[] = 'using_the_calendar';
   $topics[] = 'exporting_the_calendar';
+  $topics[] = 'customizing_a_user';
 
   // documentation
   $topics[] = 'introduction';
@@ -2690,6 +2722,12 @@ function mfcs_help_topic_glossary($allowed_topics, $section_information, $as_inl
       'url' => $base_path . 'help-0/exporting_the_calendar' . $url_arguments,
       'tooltip' => 'User Guide: Exporting the Calendar',
       'text' => 'Exporting the Calendar',
+      'class' => 'item-link no_print_links_as_link',
+    ),
+    'customizing_a_user' => array(
+      'url' => $base_path . 'help-0/customizing_a_user' . $url_arguments,
+      'tooltip' => 'User Guide: Customizing a User',
+      'text' => 'Customizing a User',
       'class' => 'item-link no_print_links_as_link',
     ),
 
@@ -2899,6 +2937,7 @@ function mfcs_help_topic_glossary($allowed_topics, $section_information, $as_inl
       $links['troubleshoot_requests_and_users']['url'] = '#help-user_guide-troubleshoot_requests_and_users' . $url_arguments;
       $links['using_the_calendar']['url'] = '#help-user_guide-using_the_calendar' . $url_arguments;
       $links['exporting_the_calendar']['url'] = '#help-user_guide-exporting_the_calendar' . $url_arguments;
+      $links['customizing_a_user']['url'] = '#help-user_guide-customizing_a_user' . $url_arguments;
     }
     else {
       $links['introduction']['url'] = '#help-documentation-topic-introduction' . $url_arguments;
@@ -2954,7 +2993,7 @@ function mfcs_help_topic_glossary($allowed_topics, $section_information, $as_inl
   $markup .= mfcs_help_render_headers('topic-glossary-user_guides', array('class' => $sub_section_class), $headers, 2);
   $markup .= '<ul class="navigation-list">';
 
-  foreach (array('navigate_the_system', 'create_a_request', 'edit_a_request', 'cancel_a_request', 'uncancel_a_request', 'copy_a_request', 'find_a_request', 'review_a_request', 'manage_a_request', 'manage_a_holiday', 'manage_a_room_unavailability', 'troubleshoot_requests_and_users', 'using_the_calendar', 'exporting_the_calendar') as $topic_name) {
+  foreach (array('navigate_the_system', 'create_a_request', 'edit_a_request', 'cancel_a_request', 'uncancel_a_request', 'copy_a_request', 'find_a_request', 'review_a_request', 'manage_a_request', 'manage_a_holiday', 'manage_a_room_unavailability', 'troubleshoot_requests_and_users', 'using_the_calendar', 'exporting_the_calendar', 'customizing_a_user') as $topic_name) {
     if (!in_array($topic_name, $allowed_topics) || !array_key_exists($topic_name, $links)) {
       continue;
     }
@@ -8925,6 +8964,128 @@ function mfcs_help_user_guide_exporting_the_calendar($as, $allowed_topics, $sect
   $markup .= 'The file can then be imported by clicking the import button on the right side of the <strong class="bold">Import</strong> section. ';
   $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-exporting_the_calendar-2" src="' . $base_path . $module_path . '/images/user_guide/exporting_the_calendar-2.png" alt="Screenshot pointing out the download as iCalendar links." class="image-user_guide" width="452" height="225"></div> ';
   $markup .= '<br>';
+  $markup .= '</div>';
+
+  if ($closing_tag) {
+    $markup .= '</section>';
+  }
+
+  return $markup;
+}
+
+/**
+ * Build the markup for the help topic: user guide - customizing a user.
+ *
+ * @param array $as
+ *   A collection of roles that the user is acting as.
+ * @param array $allowed_topics
+ *   An array of topics currently allowed based on the users access.
+ * @param array $section_information
+ *   Information needed for populating and customizing the generated section tag.
+ * @param bool $as_inline
+ *   (optional) When TRUE, certain links and formatting are omitted.
+ * @param bool $closing_tag
+ *   (optional) When TRUE, the closing section tag is appended.
+ *   When FALSE, no closing section tag is appended and the caller is expected to properly close.
+ *
+ * @return string
+ *   The generated HTML markup.
+ */
+function mfcs_help_user_guide_customizing_a_user($as, $allowed_topics, $section_information, $as_inline = FALSE, $closing_tag = TRUE) {
+  if (!is_array($as)) {
+    cf_error::invalid_array('as');
+    return '';
+  }
+
+  if (!is_array($allowed_topics)) {
+    cf_error::invalid_array('allowed_topics');
+    return '';
+  }
+
+  if (!is_array($section_information)) {
+    cf_error::invalid_array('section_information');
+    return '';
+  }
+
+  if (!is_bool($as_inline)) {
+    cf_error::invalid_bool('as_inline');
+    $as_inline = FALSE;
+  }
+
+  if (!is_bool($closing_tag)) {
+    cf_error::invalid_bool('closing_tag');
+    $closing_tag = TRUE;
+  }
+
+  global $base_url;
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  $module_path = drupal_get_path('module', 'mfcs');
+  $image_path = $base_path . $module_path . '/images';
+
+  if ($as_inline) {
+    $section_information['navigation'] = NULL;
+  }
+
+  $start_count = 0;
+  if (isset($section_information['start_count']) && is_numeric($section_information['start_count']) && $section_information['start_count'] >= 0) {
+    $start_count = (int) $section_information['start_count'];
+  }
+
+  $markup = '<section id="' . $section_information['id'] . '" class="' . implode(' ', $section_information['class']) . '">';
+  $markup .= $section_information['navigation'];
+  $markup .= mfcs_help_render_headers('topic-user_guide-customizing_a_user', $section_information['header_attributes'], $section_information['headers'], $start_count);
+
+  $markup .= '<div class="paragraph">';
+
+  $markup .= '<div class="image-wrapper image-wrapper-float-left"><img id="image-customizing_a_user-1" src="' . $base_path . $module_path . '/images/user_guide/customizing_a_user-1.png" alt="Screenshot pointing out the user page link." class="image-user_guide" width="147" height="51"></div> ';
+  $markup .= 'Custom options, like auto-expanding the web page or sticking the toolbar to the top of the screen instead of having a floating toolbar, are provided for each user account. ';
+
+  if ($as['manager'] || $as['administer']) {
+    $markup .= 'These options can be configured by going to the management page and looking for the <strong class="bold">Manage Users</strong> link. ';
+    $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-customizing_a_user-6" src="' . $base_path . $module_path . '/images/user_guide/customizing_a_user-6.png" alt="Screenshot pointing out the manage users link." class="image-user_guide" width="241" height="168"></div> ';
+  }
+  else {
+    $markup .= 'These options can be configured by going to the management page and looking for the <strong class="bold">View Users</strong> link. ';
+    $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-customizing_a_user-2" src="' . $base_path . $module_path . '/images/user_guide/customizing_a_user-2.png" alt="Screenshot pointing out the view users link." class="image-user_guide" width="281" height="115"></div> ';
+  }
+
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  if ($as['manager'] || $as['administer']) {
+    $markup .= 'The manage users page provides a list of all users your account is allowed view and manage. ';
+    $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-customizing_a_user-7" src="' . $base_path . $module_path . '/images/user_guide/customizing_a_user-7.png" alt="Screenshot pointing out the view user link." class="image-user_guide" width="654" height="146"></div> ';
+  }
+  else {
+    $markup .= 'The view users page provides a list of all users your account is allowed view, which is usually only your account. ';
+    $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-customizing_a_user-3" src="' . $base_path . $module_path . '/images/user_guide/customizing_a_user-3.png" alt="Screenshot pointing out the view user link." class="image-user_guide" width="657" height="138"></div> ';
+  }
+
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'Once viewing an individual user, select the <strong class="bold">Customize</strong> link on the bottom left side of this view user page. ';
+
+  if ($as['manager'] || $as['administer']) {
+    $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-customizing_a_user-8" src="' . $base_path . $module_path . '/images/user_guide/customizing_a_user-8.png" alt="Screenshot pointing out the customize link." class="image-user_guide" width="230" height="123"></div> ';
+  }
+  else {
+    $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-customizing_a_user-4" src="' . $base_path . $module_path . '/images/user_guide/customizing_a_user-4.png" alt="Screenshot pointing out the customize link." class="image-user_guide" width="220" height="107"></div> ';
+  }
+
+  $markup .= '</div>';
+
+  $markup .= '<div class="paragraph">';
+  $markup .= 'This brings you to the customize user page where all available customization options are presented. ';
+  $markup .= 'Make all changes as desired and select <strong class="bold">Submit</strong> to save and apply all changes. ';
+  $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-customizing_a_user-1" src="' . $base_path . $module_path . '/images/user_guide/customizing_a_user-5.png" alt="Screenshot pointing out the user page link." class="image-user_guide" width="275" height="234"></div> ';
   $markup .= '</div>';
 
   if ($closing_tag) {
