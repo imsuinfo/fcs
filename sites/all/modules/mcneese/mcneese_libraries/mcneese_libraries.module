@@ -100,16 +100,30 @@ function mcneese_libraries_libraries_info() {
   $libraries['fullcalendar']['download url'] = 'http://fullcalendar.io/download/';
 
   // hard-code the version number.
-  $libraries['fullcalendar']['version'] = 2;
+  $libraries['fullcalendar']['version'] = 3;
 
   $libraries['fullcalendar']['files'] = array();
   $libraries['fullcalendar']['files']['js'] = array(
-    'lib/moment.min.js',
     'fullcalendar.js',
   );
   $libraries['fullcalendar']['files']['css'] = array(
     'fullcalendar.css',
     'fullcalendar.print.css',
+  );
+
+  // moment
+  $libraries['moment'] = array();
+  $libraries['moment']['name'] = "Moment";
+  $libraries['moment']['vendor url '] = 'https://momentjs.com/';
+  $libraries['moment']['download url'] = 'https://momentjs.com/';
+
+  // hard-code the version number.
+  $libraries['moment']['version'] = 2;
+
+  $libraries['moment']['files'] = array();
+  $libraries['moment']['files']['js'] = array(
+    #'moment.js',
+    'moment-with-locales.js',
   );
 
   return $libraries;
