@@ -500,6 +500,11 @@ function mfcs_request_users_0_view_page($user_id) {
   }
   mfcs_add_canonical_headers('users-0/view/' . ((int) $user_id));
 
+  // load custom list options.
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+  $calendar_options = mfcs_get_user_calendar_list_options(NULL, TRUE);
+  $calendar_options[0] = 'Default'; // display 'default' instead of 'none'.
+
 
   $name = $account->name;
   if (!empty($account->mfcs['first_name'])) {
@@ -797,6 +802,11 @@ function mfcs_request_users_0_view_page($user_id) {
     $updated = $account->mfcs['updated'];
   }
 
+  $calendar_text = 'Unknown';
+  if (array_key_exists($account->mfcs['calendar'], $calendar_options)) {
+    $calendar_text = $calendar_options[$account->mfcs['calendar']];
+  }
+
 
   // build presentation.
   $markup = '<div id="mfcs-request-users-view-page" class="manage-users_0-view">';
@@ -809,6 +819,7 @@ function mfcs_request_users_0_view_page($user_id) {
   $markup .= '<div class="view_user-item view_user-item-email"><span class="item-label item-label-email strong">E-mail:</span> <span class="item-value item-value-email">' . $email . '</span></div>';
   $markup .= '<div class="view_user-item view_user-item-banner_id"><span class="item-label item-label-banner_id strong">Banner ID:</span> <span class="item-value item-value-banner_id">' . $account->mfcs['banner_id'] . '</span></div>';
   $markup .= '<div class="view_user-item view_user-item-phone"><span class="item-label item-label-phone strong">Phone:</span> <span class="item-value item-value-phone">' . $phone . '</span></div>';
+  $markup .= '<div class="view_user-item view_user-item-calendar"><span class="item-label item-label-calendar strong">Calendar:</span> <span class="item-value item-value-calendar">' . $calendar_text . '</span></div>';
   $markup .= '<div class="view_user-item view_user-item-updated_on"><span class="item-label item-label-updated_on strong">Updated On:</span> <span class="item-value item-value-updated_on">' . date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS_SQUEEZE, $updated) . '</span></div>';
   $markup .= '</div>';
 
@@ -878,7 +889,6 @@ function mfcs_request_users_0_view_page($user_id) {
       unset($problem_text);
       unset($problem_id);
     }
-    unset($mfcs_users);
 
     if (!is_null($problems_detected)) {
       $markup .= '<br>';
@@ -1912,6 +1922,21 @@ function mfcs_request_users_0_customize_form($form, &$form_state, $user_id) {
 
   drupal_set_title('Customize User: ' . $user_name);
 
+  // load custom list options.
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+  $calendar_options = mfcs_get_user_calendar_list_options(NULL, TRUE);
+
+  // display 'default' instead of 'none', and make it the first option.
+  unset($calendar_options[0]);
+  $calendar_options_temp = array(0 => 'Default');
+  foreach ($calendar_options as $calendar_options_key => $calendar_options_value) {
+    $calendar_options_temp[$calendar_options_key] = $calendar_options_value;
+  }
+  unset($calendar_options_key);
+  unset($calendar_options_value);
+  $calendar_options = $calendar_options_temp;
+  unset($calendar_options_temp);
+
 
   $toggle_options = array(
     'always' => 'Enabled (always)',
@@ -2056,6 +2081,31 @@ function mfcs_request_users_0_customize_form($form, &$form_state, $user_id) {
   );
 
 
+  // calendar settings
+  $form['form']['settings_calendar'] = array(
+    '#id' => 'manage-users_0-customize-settings_calendar',
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#title' => 'Calendar Settings',
+    '#attributes' => array(
+      'class' => array(
+        'manage-users_0-customize-settings_calendar',
+        'fieldset_print_as_div',
+      ),
+    ),
+    '#tree' => TRUE,
+  );
+
+  $form['form']['settings_calendar']['calendar_theme'] = array(
+    '#type' => 'select',
+    '#title' => 'Select a calendar theme to use.',
+    '#default_value' => MFCS_USER_CALENDAR_NONE,
+    '#options' => $calendar_options,
+    '#description' => 'Changes how the calendar is used. The original calendar is very printer-friendly but has limited space. The Full-IO calendar is more fluid and can show more events than the original. ',
+  );
+
+
   // load and assign existing settings.
   if (isset($account->data['mcneese_settings'])) {
     // style settings
@@ -2091,6 +2141,13 @@ function mfcs_request_users_0_customize_form($form, &$form_state, $user_id) {
 
     if (isset($account->data['mcneese_settings']['navigation']['toolbar']['sticky']) && is_numeric($account->data['mcneese_settings']['navigation']['toolbar']['sticky'])) {
       $form['form']['settings_navigation']['sticky_toolbar']['#default_value'] = ($account->data['mcneese_settings']['navigation']['toolbar']['sticky'] == 1);
+    }
+  }
+
+  if (isset($account->mfcs)) {
+    // calendar settings
+    if (isset($account->mfcs['calendar']) && is_numeric($account->mfcs['calendar'])) {
+      $form['form']['settings_calendar']['calendar_theme']['#default_value'] = (int) $account->mfcs['calendar'];
     }
   }
 
@@ -2205,17 +2262,40 @@ function mfcs_request_users_0_customize_form_submit($form, &$form_state) {
       $changes['data']['mcneese_settings']['navigation']['toolbar']['sticky'] = $form_state['values']['form']['settings_navigation']['sticky_toolbar'];
     }
 
-    $saved_account = user_save($form['user']['#value'], $changes);
-
-    if (is_object($saved_account)) {
-      drupal_set_message('Successfully customized settings for user <a href="' . $base_path . 'users-0/view/' . $saved_account->uid . '">' . $saved_account->name . '</a>.');
+    $success = NULL;
+    if (!empty($changes)) {
+      $saved_account = user_save($form['user']['#value'], $changes);
+      if (is_object($saved_account)) {
+        $saved_account = TRUE;
+      }
+      else {
+        $success = FALSE;
+      }
+      unset($saved_account);
     }
-    else {
+
+    if ($success !== FALSE) {
+      if (!empty($form_state['values']['form']['settings_calendar']['calendar_theme'])) {
+        $data = array('calendar' => (int) $form_state['values']['form']['settings_calendar']['calendar_theme']);
+        $saved = mfcs_save_user($customized_account->uid, $data);
+        unset($data);
+
+        if ($saved === FALSE) {
+          $success = FALSE;
+        }
+        unset($saved);
+      }
+    }
+
+    if ($success === FALSE) {
       form_set_error('', 'Failed to customize settings for user \'' . $customized_account->name . '\'.');
       $form_state['rebuild'] = TRUE;
       $form_state['redirect'] = FALSE;
       $form_state['submitted'] = FALSE;
       return;
+    }
+    else {
+      drupal_set_message('Successfully customized settings for user <a href="' . $base_path . 'users-0/view/' . $customized_account->uid . '">' . $customized_account->name . '</a>.');
     }
   }
 

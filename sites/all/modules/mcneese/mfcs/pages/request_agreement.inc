@@ -135,7 +135,14 @@ function mfcs_request_agreement_0_form($form, &$form_state, $request_id, $contai
 
   $requester = '';
   if (isset($request['mer']['user_id'][0]->value) && is_numeric($request['mer']['user_id'][0]->value)) {
-    $requester_user = mfcs_get_user_information((int) $request['mer']['user_id'][0]->value);
+    $requester_users = mfcs_load_users((int) $request['mer']['user_id'][0]->value, TRUE, TRUE);
+
+    $requester_user = NULL;
+    if (is_array($requester_users)) {
+      $requester_user = array_pop($requester_users);
+    }
+    unset($requester_users);
+
     if (is_object($requester_user)) {
       $requester_user_name = $requester_user->name;
       $requester_user_email = $requester_user->email;

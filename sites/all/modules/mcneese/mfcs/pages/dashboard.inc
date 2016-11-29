@@ -31,8 +31,7 @@ function mfcs_dashboard_page() {
   // access check is performed here instead of via the hook_menu() so that different responses may be provided based on access control situations.
   $user_account_new_banner_access_problem = FALSE;
   if (mfcs_dashboard_page_access() === FALSE) {
-    $mfcs_users = mfcs_load_users($user->uid);
-    if (is_array($mfcs_users) && !empty($mfcs_users[$user->uid]) && is_object($mfcs_users[$user->uid]) && property_exists($mfcs_users[$user->uid], 'problems') && ($mfcs_users[$user->uid]->problems & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) != 0) {
+    if (!empty($user->mfcs) && is_array($user->mfcs) && array_key_exists('problems', $user->mfcs) && ($user->mfcs['problems'] & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) != 0) {
       $user_account_new_banner_access_problem = TRUE;
     }
   }
@@ -142,7 +141,7 @@ function mfcs_dashboard_page() {
   $markup = '<div id="mfcs-dashboard_page-choices" class="mfcs-dashboard_page-choices">';
 
   if (!$can_create && !$can_list && !$can_search && !$can_review) {
-    watchdog('insufficient access', "The user :user_name (:user_id) does not have sufficient access to use the system.", array(':user_name' => $user->name, ':user_id' => $user->uid), WATCHDOG_NOTICE);
+    watchdog('insufficient access', 'The user :user_name (:user_id) does not have sufficient access to use the system.', array(':user_name' => $user->name, ':user_id' => $user->uid), WATCHDOG_NOTICE);
     $markup .= '<h3 class="mfcs-dashboard_page-choices-header">Insufficient Access</h3>';
 
     $markup .= '<div>';
@@ -167,17 +166,17 @@ function mfcs_dashboard_page() {
     $markup .= '</div>';
 
     if ($user->status != 0) {
-      $mfcs_users = mfcs_load_users($user->uid);
-      if (is_array($mfcs_users) && !empty($mfcs_users[$user->uid]) && is_object($mfcs_users[$user->uid]) && property_exists($mfcs_users[$user->uid], 'problems')) {
+      if (!empty($user->mfcs) && is_array($user->mfcs) && array_key_exists('problems', $user->mfcs)) {
 
         // only assign no access problem flag when the user account has not been flagged as unable to sync with banner.
-        if (($mfcs_users[$user->uid]->problems & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) == 0 && ($mfcs_users[$user->uid]->problems & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) == 0 && ($mfcs_users[$user->uid]->problems & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) == 0) {
-          $mfcs_users[$user->uid]->problems = $mfcs_users[$user->uid]->problems | MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS;
-          mfcs_save_user($user->uid, array('problems' => $mfcs_users[$user->uid]->problems));
+        if (($user->mfcs['problems'] & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) == 0 && ($user->mfcs['problems'] & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) == 0 && ($user->mfcs['problems'] & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) == 0) {
+          $user->mfcs['problems'] = $user->mfcs['problems'] | MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS;
+          mfcs_save_user($user->uid, array('problems' => $user->mfcs['problems']));
         }
       }
       else {
         mfcs_save_user($user->uid, array('problems' => MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS));
+        $user->mfcs['problems'] = MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS;
       }
     }
   }

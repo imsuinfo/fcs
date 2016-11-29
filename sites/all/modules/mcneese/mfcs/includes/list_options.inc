@@ -1388,6 +1388,41 @@ function mfcs_get_email_type_list_options($option = NULL, $hidden = FALSE, $disa
 
   return $options;
 }
+
+/**
+ * Returns an array of user calendars options.
+ *
+ * @param string|null $option
+ *   (optional) A string designating how the list will be populated.
+ * @param bool $hidden
+ *   (optional) When TRUE, will include hidden/special case types.
+ *   that are not normally exposed through the select list options.
+ * @param bool $disabled
+ *   (optional) When TRUE, load disabled options in addition to existing options.
+ *
+ * @return array
+ *   An array of options available.
+ */
+function mfcs_get_user_calendar_list_options($option = NULL, $hidden = FALSE, $disabled = FALSE) {
+  $options = array();
+  $options_all = array();
+
+  if ($hidden) {
+    $options_all[MFCS_USER_CALENDAR_NONE] = 'None';
+  }
+
+  $options_all[MFCS_USER_CALENDAR_ORIGINAL] = 'Original Calendar';
+  $options_all[MFCS_USER_CALENDAR_FULL_IO] = 'Full I/O Calendar';
+
+  foreach ($options_all as $option_id => $option_name) {
+    $options[$option_id] = $option_name;
+  }
+
+  asort($options);
+
+  return $options;
+}
+
 /**
  * @} End of '@addtogroup mfcs'.
  */

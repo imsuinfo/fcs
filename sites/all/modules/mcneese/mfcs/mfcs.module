@@ -382,6 +382,14 @@ define('MFCS_INSURANCE_PROVIDED', 3);
 define('MFCS_INSURANCE_PROVIDED_NOT', 4);
 
 /**
+ * Defines custom calendar settings.
+ * In this case, setting it to none is synonymous with default.
+ */
+define('MFCS_USER_CALENDAR_NONE', 0);
+define('MFCS_USER_CALENDAR_ORIGINAL', 1);
+define('MFCS_USER_CALENDAR_FULL_IO', 2);
+
+/**
  * Implements hook_init().
  */
 function mfcs_init() {
@@ -3359,6 +3367,7 @@ function mfcs_load_users($user_ids, $join = FALSE, $deleted = FALSE) {
     $query->addField('mu', 'phone_number', 'phone_number');
     $query->addField('mu', 'ldap_duplicate', 'ldap_duplicate');
     $query->addField('mu', 'primary_account', 'primary_account');
+    $query->addField('mu', 'calendar', 'calendar');
     $query->addField('mu', 'problems', 'problems');
     $query->addField('mu', 'updated', 'updated');
     $query->addField('mu', 'updated_problems', 'updated_problems');
@@ -3455,6 +3464,12 @@ function mfcs_save_user($user_id, $data) {
     }
     elseif ($data['ldap_duplicate'] === FALSE) {
       $data['ldap_duplicate'] = 'FALSE';
+    }
+  }
+
+  if (array_key_exists('calendar', $data)) {
+    if (!cf_is_integer($data['calendar'])) {
+      unset($data['calendar']);
     }
   }
 
@@ -3641,6 +3656,12 @@ function mfcs_search_users($search, $wildcard = TRUE, $sensitive = FALSE, $delet
  * - 'last_name': user's last name (custom field).
  * - 'banner_id': user's banner id (custom field).
  * - 'phone_number': user's phone number (custom field).
+ * - 'ldap_duplicate': user's ldap duplicate setting (custom field).
+ * - 'primary_account': user's primary account setting (custom field).
+ * - 'calendar': user's calendar setting (custom field).
+ * - 'problems': user's calendar setting (custom field).
+ * - 'updated': timestamp of when the user information was last updated (custom field).
+ * - 'updated_problems': timestamp of when the user problems flag was last updated (custom field).
  *
  * @param integer $user_id
  *   The user id number uniquely representing some user.
@@ -3680,6 +3701,7 @@ function mfcs_load_basic_user_settings_by_user_id($user_id) {
     $query->addField('mu', 'phone_number', 'phone_number');
     $query->addField('mu', 'ldap_duplicate', 'ldap_duplicate');
     $query->addField('mu', 'primary_account', 'primary_account');
+    $query->addField('mu', 'calendar', 'calendar');
     $query->addField('mu', 'problems', 'problems');
     $query->addField('mu', 'updated', 'updated');
     $query->addField('mu', 'updated_problems', 'updated_problems');
@@ -3702,6 +3724,7 @@ function mfcs_load_basic_user_settings_by_user_id($user_id) {
         'phone_number' => '',
         'ldap_duplicate' => FALSE,
         'primary_account' => TRUE,
+        'calendar' => MFCS_USER_CALENDAR_NONE,
         'problems' => MFCS_USER_PROBLEM_NONE,
         'updated' => NULL,
         'updated_problems' => NULL,
@@ -3742,6 +3765,10 @@ function mfcs_load_basic_user_settings_by_user_id($user_id) {
 
         if (property_exists($row, 'primary_account') && !is_null($row->primary_account)) {
           $user[$user_id]['primary_account'] = (bool) $row->primary_account;
+        }
+
+        if (property_exists($row, 'calendar') && !is_null($row->calendar)) {
+          $user[$user_id]['calendar'] = (int) $row->calendar;
         }
 
         if (property_exists($row, 'problems') && !is_null($row->problems)) {
@@ -6960,68 +6987,6 @@ function mfcs_load_request_revision_number($request_id, $table_field_name = NULL
 }
 
 /**
- * Loads a system user by its Banner ID.
- *
- * @param int $banner_id
- *   The numeric banner id.
- * @param bool $reset
- *   (optional) If TRUE, the cache for the specified user is reset.
- *
- * @return object|null|bool
- *   The
- *   FALSE is returned on error.
- *   An empty array is returned when there is no request by that id.
- */
-function mfcs_load_user_by_banner_id($banner_id, $reset = FALSE) {
-  if (!cf_is_integer($banner_id)) {
-    cf_error::invalid_integer('banner_id');
-    return FALSE;
-  }
-
-  $cache_id = __function__;
-  $cached_user = &drupal_static($cache_id, NULL);
-  if (!$reset && is_array($cached_user) && array_key_exists($banner_id, $cached_user)) {
-    return $cached_user[$banner_id];
-  }
-
-  try {
-    $query = db_select('users', 'u');
-
-    $query->innerJoin('mfcs_users', 'mu', 'u.uid = mu.user_id');
-
-    $query->addField('u', 'uid', 'user_id');
-    $query->addField('u', 'name', 'name');
-    $query->addField('u', 'created', 'created');
-    $query->addField('u', 'status', 'status');
-    $query->addField('u', 'mail', 'email');
-
-    $query->addField('mu', 'first_name', 'first_name');
-    $query->addField('mu', 'last_name', 'last_name');
-    $query->addField('mu', 'banner_id', 'banner_id');
-
-    $query->condition('mu.banner_id', $banner_id);
-
-    $results = $query->execute()->fetchAll();
-  }
-  catch (Error $e) {
-    cf_error::on_exception($e);
-    return FALSE;
-  }
-  catch (Exception $e) {
-    cf_error::on_exception($e);
-    return FALSE;
-  }
-
-  if (empty($results)) {
-    return NULL;
-  }
-
-  $cached_user[$banner_id] = array_pop($results);
-
-  return $cached_user[$banner_id];
-}
-
-/**
  * Returns the reviewers.
  *
  * @param array $conditions
@@ -7604,63 +7569,6 @@ function mfcs_get_venue_coordinator_proxy($venue_coordinator_id) {
   }
 
   return $proxies[$venue_coordinator_id];
-}
-
-/**
- * A simple user loading function that only loads specific database information.
- *
- * @param int $user_id
- *   The user id to load.
- *
- * @return object|bool
- *   A user object or FALSE on error.
- */
-function mfcs_get_user_information($user_id) {
-  if (!cf_is_integer($user_id)) {
-    cf_error::invalid_integer('user_id');
-    return FALSE;
-  }
-
-  $users = &drupal_static(__function__, array());
-  if (array_key_exists($user_id, $users)) {
-    return $users[$user_id];
-  }
-
-  try {
-    $query = db_select('users', 'u');
-    $query->leftJoin('mfcs_users', 'mu', 'u.uid = mu.user_id');
-
-    $query->addField('u', 'name', 'name');
-    $query->addField('u', 'created', 'created');
-    $query->addField('u', 'status', 'status');
-    $query->addField('u', 'mail', 'email');
-
-    $query->addField('mu', 'first_name', 'first_name');
-    $query->addField('mu', 'last_name', 'last_name');
-    $query->addField('mu', 'banner_id', 'banner_id');
-
-    $query->condition('u.uid', $user_id);
-
-    $result = $query->execute()->fetchObject();
-
-    if (is_object($result)) {
-      $users[$user_id] = $result;
-
-      return $result;
-    }
-  }
-  catch (Error $e) {
-    cf_error::on_query_execution($e);
-
-    return FALSE;
-  }
-  catch (Exception $e) {
-    cf_error::on_query_execution($e);
-
-    return FALSE;
-  }
-
-  return FALSE;
 }
 
 /**

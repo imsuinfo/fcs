@@ -2191,6 +2191,7 @@ function mfcs_install() {
     phone_number varchar(31),
     ldap_duplicate bool default false,
     primary_account bool default true,
+    calendar smallint not null default 0,
     problems bigint not null default 0,
     updated bigint not null,
     updated_problems bigint not null,
