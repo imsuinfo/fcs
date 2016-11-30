@@ -19,8 +19,6 @@
 --------------------------------------------------------------------------------------------------*/
 
 .fc-event {
-	background: #fff !important;
-	color: #000 !important;
 	page-break-inside: avoid;
 }
 
