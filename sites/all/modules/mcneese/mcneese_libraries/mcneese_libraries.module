@@ -108,7 +108,7 @@ function mcneese_libraries_libraries_info() {
   );
   $libraries['fullcalendar']['files']['css'] = array(
     'fullcalendar.css',
-    'fullcalendar.print.css',
+    #'fullcalendar.print.css',
   );
 
   // moment
