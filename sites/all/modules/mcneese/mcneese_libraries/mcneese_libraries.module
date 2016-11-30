@@ -126,6 +126,23 @@ function mcneese_libraries_libraries_info() {
     'moment-with-locales.js',
   );
 
+  // qtip
+  $libraries['qtip'] = array();
+  $libraries['qtip']['name'] = "QTip";
+  $libraries['qtip']['vendor url '] = 'https://qtip2.com/';
+  $libraries['qtip']['download url'] = 'https://qtip2.com/';
+
+  // hard-code the version number.
+  $libraries['qtip']['version'] = 3;
+
+  $libraries['qtip']['files'] = array();
+  $libraries['qtip']['files']['js'] = array(
+    'jquery.qtip.js',
+  );
+  $libraries['qtip']['files']['css'] = array(
+    'jquery.qtip.css',
+  );
+
   return $libraries;
 }
 
